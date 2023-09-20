@@ -17,23 +17,25 @@ import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeNorskTid
 import no.nav.etterlatte.libs.common.tidspunkt.utcKlokke
 import org.slf4j.LoggerFactory
 import java.time.Clock
-import java.util.*
+import java.util.UUID
 
 interface GyldighetsproevingService {
-
     fun lagreGyldighetsproeving(
         behandlingId: UUID,
         navIdent: String,
-        svar: JaNeiMedBegrunnelse
+        svar: JaNeiMedBegrunnelse,
     ): GyldighetsResultat?
 
-    fun lagreGyldighetsproeving(behandlingId: UUID, gyldighetsproeving: GyldighetsResultat)
+    fun lagreGyldighetsproeving(
+        behandlingId: UUID,
+        gyldighetsproeving: GyldighetsResultat,
+    )
 }
 
 class GyldighetsproevingServiceImpl(
     private val behandlingDao: BehandlingDao,
     private val featureToggleService: FeatureToggleService,
-    private val klokke: Clock = utcKlokke()
+    private val klokke: Clock = utcKlokke(),
 ) : GyldighetsproevingService {
     private val logger = LoggerFactory.getLogger(GyldighetsproevingServiceImpl::class.java)
 
@@ -43,29 +45,33 @@ class GyldighetsproevingServiceImpl(
     override fun lagreGyldighetsproeving(
         behandlingId: UUID,
         navIdent: String,
-        svar: JaNeiMedBegrunnelse
+        svar: JaNeiMedBegrunnelse,
     ): GyldighetsResultat? {
         return inTransaction {
             hentFoerstegangsbehandling(behandlingId)?.let { behandling ->
                 val resultat =
                     if (svar.erJa()) VurderingsResultat.OPPFYLT else VurderingsResultat.IKKE_OPPFYLT
-                val gyldighetsResultat = GyldighetsResultat(
-                    resultat = resultat,
-                    vurderinger = listOf(
-                        VurdertGyldighet(
-                            navn = GyldighetsTyper.INNSENDER_ER_GJENLEVENDE,
-                            resultat = resultat,
-                            basertPaaOpplysninger = ManuellVurdering(
-                                begrunnelse = svar.begrunnelse,
-                                kilde = Grunnlagsopplysning.Saksbehandler(
-                                    navIdent,
-                                    Tidspunkt.from(klokke.norskKlokke())
-                                )
-                            )
-                        )
-                    ),
-                    vurdertDato = Tidspunkt(klokke.instant()).toLocalDatetimeNorskTid()
-                )
+                val gyldighetsResultat =
+                    GyldighetsResultat(
+                        resultat = resultat,
+                        vurderinger =
+                            listOf(
+                                VurdertGyldighet(
+                                    navn = GyldighetsTyper.INNSENDER_ER_GJENLEVENDE,
+                                    resultat = resultat,
+                                    basertPaaOpplysninger =
+                                        ManuellVurdering(
+                                            begrunnelse = svar.begrunnelse,
+                                            kilde =
+                                                Grunnlagsopplysning.Saksbehandler(
+                                                    navIdent,
+                                                    Tidspunkt.from(klokke.norskKlokke()),
+                                                ),
+                                        ),
+                                ),
+                            ),
+                        vurdertDato = Tidspunkt(klokke.instant()).toLocalDatetimeNorskTid(),
+                    )
 
                 behandling.lagreGyldighetsproeving(gyldighetsResultat)
 
@@ -74,7 +80,10 @@ class GyldighetsproevingServiceImpl(
         }
     }
 
-    override fun lagreGyldighetsproeving(behandlingId: UUID, gyldighetsproeving: GyldighetsResultat) {
+    override fun lagreGyldighetsproeving(
+        behandlingId: UUID,
+        gyldighetsproeving: GyldighetsResultat,
+    ) {
         inTransaction {
             hentFoerstegangsbehandling(behandlingId)?.lagreGyldighetsproeving(gyldighetsproeving)
         }
@@ -88,10 +97,11 @@ class GyldighetsproevingServiceImpl(
             }
     }
 
-    private fun Foerstegangsbehandling?.sjekkEnhet() = this?.let { behandling ->
-        listOf(behandling).filterBehandlingerForEnheter(
-            featureToggleService,
-            Kontekst.get().AppUser
-        ).firstOrNull()
-    }
+    private fun Foerstegangsbehandling?.sjekkEnhet() =
+        this?.let { behandling ->
+            listOf(behandling).filterBehandlingerForEnheter(
+                featureToggleService,
+                Kontekst.get().AppUser,
+            ).firstOrNull()
+        }
 }

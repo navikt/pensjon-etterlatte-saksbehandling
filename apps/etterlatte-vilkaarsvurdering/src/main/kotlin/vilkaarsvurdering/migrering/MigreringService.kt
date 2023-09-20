@@ -1,11 +1,11 @@
 package no.nav.etterlatte.vilkaarsvurdering.migrering
 
 import no.nav.etterlatte.vilkaarsvurdering.VilkaarsvurderingRepository
-import java.util.*
+import java.util.UUID
 
 class MigreringService(
     private val migreringRepository: MigreringRepository,
-    private val vilkaarsvurderingRepository: VilkaarsvurderingRepository
+    private val vilkaarsvurderingRepository: VilkaarsvurderingRepository,
 ) {
     fun endreUtfallTilIkkeVurdertForAlleVilkaar(behandlingId: UUID) =
         vilkaarsvurderingRepository.hent(behandlingId)

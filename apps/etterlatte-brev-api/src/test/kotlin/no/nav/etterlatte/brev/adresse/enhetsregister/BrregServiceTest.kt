@@ -12,7 +12,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class BrregServiceTest {
-
     private val mockKlient = mockk<BrregKlient>()
     private val service = spyk(BrregService(mockKlient))
 
@@ -24,12 +23,13 @@ internal class BrregServiceTest {
 
     @Test
     fun `Henting av enheter fra brreg`() {
-        coEvery { mockKlient.hentEnheter() } returns listOf(
-            Enhet("921627009", "STATSFORVALTERENS FELLESTJENESTER"),
-            Enhet("974762994", "STATSFORVALTEREN I AGDER"),
-            Enhet("974761645", "STATSFORVALTEREN I INNLANDET"),
-            Enhet("974764687", "STATSFORVALTEREN I NORDLAND")
-        )
+        coEvery { mockKlient.hentEnheter() } returns
+            listOf(
+                Enhet("921627009", "STATSFORVALTERENS FELLESTJENESTER"),
+                Enhet("974762994", "STATSFORVALTEREN I AGDER"),
+                Enhet("974761645", "STATSFORVALTEREN I INNLANDET"),
+                Enhet("974764687", "STATSFORVALTEREN I NORDLAND"),
+            )
 
         val resultat = runBlocking { service.hentAlleStatsforvaltere() }
 
@@ -43,12 +43,13 @@ internal class BrregServiceTest {
 
     @Test
     fun `Hent cachet resultat`() {
-        coEvery { mockKlient.hentEnheter() } returns listOf(
-            Enhet("921627009", "STATSFORVALTERENS FELLESTJENESTER"),
-            Enhet("974762994", "STATSFORVALTEREN I AGDER"),
-            Enhet("974761645", "STATSFORVALTEREN I INNLANDET"),
-            Enhet("974764687", "STATSFORVALTEREN I NORDLAND")
-        )
+        coEvery { mockKlient.hentEnheter() } returns
+            listOf(
+                Enhet("921627009", "STATSFORVALTERENS FELLESTJENESTER"),
+                Enhet("974762994", "STATSFORVALTEREN I AGDER"),
+                Enhet("974761645", "STATSFORVALTEREN I INNLANDET"),
+                Enhet("974764687", "STATSFORVALTEREN I NORDLAND"),
+            )
 
         repeat(10) {
             runBlocking { service.hentAlleStatsforvaltere() }

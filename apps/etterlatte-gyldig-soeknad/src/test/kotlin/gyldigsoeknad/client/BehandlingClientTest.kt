@@ -26,50 +26,52 @@ import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.sak.Sak
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import java.util.*
+import java.util.UUID
 
 internal class BehandlingClientTest {
-
     @Test
     fun testInitierBehandling() {
         val randomUUID = UUID.randomUUID()
         val requestList = mutableListOf<HttpRequestData>()
-        val httpClient = HttpClient(
-            MockEngine { request ->
-                requestList.add(request)
-                respond(
-                    content = ByteReadChannel(randomUUID.toString()),
-                    status = HttpStatusCode.OK,
-                    headers = headersOf(HttpHeaders.ContentType, "text/plain")
-                )
+        val httpClient =
+            HttpClient(
+                MockEngine { request ->
+                    requestList.add(request)
+                    respond(
+                        content = ByteReadChannel(randomUUID.toString()),
+                        status = HttpStatusCode.OK,
+                        headers = headersOf(HttpHeaders.ContentType, "text/plain"),
+                    )
+                },
+            ) {
+                install(ContentNegotiation) { jackson {} }
             }
-        ) {
-            install(ContentNegotiation) { jackson {} }
-        }
         val persongalleri = mockk<GyldigSoeknadService>()
         val behandlingsservice = BehandlingClient(httpClient, "")
-        every { persongalleri.hentPersongalleriFraSoeknad(any()) } returns Persongalleri(
-            "",
-            "",
-            emptyList(),
-            emptyList(),
-            emptyList()
-        )
+        every { persongalleri.hentPersongalleriFraSoeknad(any()) } returns
+            Persongalleri(
+                "",
+                "",
+                emptyList(),
+                emptyList(),
+                emptyList(),
+            )
 
         val hendelseJson = objectMapper.readTree(javaClass.getResource("/fordeltmelding.json")!!.readText())
         val soeknad = objectMapper.treeToValue<Barnepensjon>(hendelseJson[FordelerFordelt.skjemaInfoKey])
-        val hentetSaksid = behandlingsservice.opprettBehandling(
-            1,
-            soeknad.mottattDato,
-            persongalleri.hentPersongalleriFraSoeknad(soeknad)
-        )
+        val hentetSaksid =
+            behandlingsservice.opprettBehandling(
+                1,
+                soeknad.mottattDato,
+                persongalleri.hentPersongalleriFraSoeknad(soeknad),
+            )
 
         assertEquals(randomUUID, hentetSaksid)
         assertEquals(
             1,
             objectMapper.readValue<BehandlingsBehov>(
-                (runBlocking { String(requestList[0].body.toByteArray()) })
-            ).sakId
+                (runBlocking { String(requestList[0].body.toByteArray()) }),
+            ).sakId,
         )
     }
 

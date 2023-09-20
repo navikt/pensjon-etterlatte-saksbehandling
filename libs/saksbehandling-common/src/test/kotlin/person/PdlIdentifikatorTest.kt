@@ -9,7 +9,6 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
 class PdlIdentifikatorTest {
-
     @Test
     fun `kan serialisere og deserialisere PdlIdentifikator som er Npid`() {
         val npid = PdlIdentifikator.Npid(NavPersonIdent("12314512345"))

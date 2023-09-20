@@ -16,18 +16,18 @@ import java.time.Month
 import java.time.YearMonth
 
 class MaanedligStatistikkJobTest {
-
     @Test
     fun `run stopper hvis den ikke er leader`() {
         val leaderElection: LeaderElection = mockk()
         every { leaderElection.isLeader() } returns false
         val statistikkService: StatistikkService = mockk()
 
-        val sut = MaanedligStatistikkJob.ProduserOgLagreMaanedligStatistikk(
-            leaderElection = leaderElection,
-            statistikkService = statistikkService,
-            clock = utcKlokke()
-        )
+        val sut =
+            MaanedligStatistikkJob.ProduserOgLagreMaanedligStatistikk(
+                leaderElection = leaderElection,
+                statistikkService = statistikkService,
+                clock = utcKlokke(),
+            )
 
         sut.run()
         verify(exactly = 0) { statistikkService.statistikkProdusertForMaaned(any()) }
@@ -51,11 +51,12 @@ class MaanedligStatistikkJobTest {
                 .toNorskTidspunkt()
                 .fixedNorskTid()
 
-        val sut = MaanedligStatistikkJob.ProduserOgLagreMaanedligStatistikk(
-            leaderElection = leaderElection,
-            statistikkService = statistikkService,
-            clock = clockMaanedEtterProdusert
-        )
+        val sut =
+            MaanedligStatistikkJob.ProduserOgLagreMaanedligStatistikk(
+                leaderElection = leaderElection,
+                statistikkService = statistikkService,
+                clock = clockMaanedEtterProdusert,
+            )
 
         sut.run()
         verify(exactly = 1) { statistikkService.statistikkProdusertForMaaned(any()) }
@@ -79,11 +80,12 @@ class MaanedligStatistikkJobTest {
                 .toNorskTidspunkt()
                 .fixedNorskTid()
 
-        val sut = MaanedligStatistikkJob.ProduserOgLagreMaanedligStatistikk(
-            leaderElection = leaderElection,
-            statistikkService = statistikkService,
-            clock = clockMaanedEtterProdusert
-        )
+        val sut =
+            MaanedligStatistikkJob.ProduserOgLagreMaanedligStatistikk(
+                leaderElection = leaderElection,
+                statistikkService = statistikkService,
+                clock = clockMaanedEtterProdusert,
+            )
 
         sut.run()
         verify(exactly = 1) { statistikkService.statistikkProdusertForMaaned(any()) }
@@ -110,11 +112,12 @@ class MaanedligStatistikkJobTest {
                 .toNorskTidspunkt()
                 .fixedNorskTid()
 
-        val sut = MaanedligStatistikkJob.ProduserOgLagreMaanedligStatistikk(
-            leaderElection = leaderElection,
-            statistikkService = statistikkService,
-            clock = clockMaanedEtterProdusert
-        )
+        val sut =
+            MaanedligStatistikkJob.ProduserOgLagreMaanedligStatistikk(
+                leaderElection = leaderElection,
+                statistikkService = statistikkService,
+                clock = clockMaanedEtterProdusert,
+            )
 
         sut.run()
         verify(exactly = 1) { statistikkService.statistikkProdusertForMaaned(any()) }

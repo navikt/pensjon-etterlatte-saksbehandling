@@ -26,11 +26,11 @@ class BehandlingKlient(val behandlingHttpClient: HttpClient, val resourceUrl: St
             "Behandler klage-record med id: {}, partition {}, offset: {}",
             record.key(),
             record.partition(),
-            record.offset()
+            record.offset(),
         )
         val klageHendelse = objectMapper.readValue<BehandlingEvent>(record.value())
         logger.info(
-            "Håndterer klagehendelse ${klageHendelse.eventId}"
+            "Håndterer klagehendelse ${klageHendelse.eventId}",
         )
 
         if (klageHendelse.kilde == Vedtaksloesning.GJENNY.name) {
@@ -45,39 +45,39 @@ class BehandlingKlient(val behandlingHttpClient: HttpClient, val resourceUrl: St
                     BehandlingEventType.KLAGEBEHANDLING_AVSLUTTET ->
                         Kabalrespons(
                             KabalStatus.FERDIGSTILT,
-                            requireNotNull(klageHendelse.detaljer.klagebehandlingAvsluttet).utfall.tilResultat()
+                            requireNotNull(klageHendelse.detaljer.klagebehandlingAvsluttet).utfall.tilResultat(),
                         )
 
                     BehandlingEventType.ANKEBEHANDLING_OPPRETTET ->
                         Kabalrespons(
                             KabalStatus.OPPRETTET,
-                            BehandlingResultat.IKKE_SATT
+                            BehandlingResultat.IKKE_SATT,
                         )
 
                     BehandlingEventType.ANKEBEHANDLING_AVSLUTTET ->
                         Kabalrespons(
                             KabalStatus.FERDIGSTILT,
-                            requireNotNull(klageHendelse.detaljer.ankebehandlingAvsluttet).utfall.tilResultat()
+                            requireNotNull(klageHendelse.detaljer.ankebehandlingAvsluttet).utfall.tilResultat(),
                         )
 
                     BehandlingEventType.ANKE_I_TRYGDERETTENBEHANDLING_OPPRETTET ->
                         Kabalrespons(
                             KabalStatus.OPPRETTET,
                             requireNotNull(
-                                klageHendelse.detaljer.ankeITrygderettenbehandlingOpprettet
+                                klageHendelse.detaljer.ankeITrygderettenbehandlingOpprettet,
                             ).utfall?.tilResultat()
-                                ?: BehandlingResultat.IKKE_SATT
+                                ?: BehandlingResultat.IKKE_SATT,
                         )
 
                     BehandlingEventType.BEHANDLING_FEILREGISTRERT ->
                         Kabalrespons(
                             KabalStatus.FERDIGSTILT,
-                            BehandlingResultat.HENLAGT
+                            BehandlingResultat.HENLAGT,
                         )
                 }
 
             behandlingHttpClient.patch(
-                "$resourceUrl/klage/${klageHendelse.kildeReferanse}/kabalstatus"
+                "$resourceUrl/klage/${klageHendelse.kildeReferanse}/kabalstatus",
             ) {
                 contentType(ContentType.Application.Json)
                 setBody(body)

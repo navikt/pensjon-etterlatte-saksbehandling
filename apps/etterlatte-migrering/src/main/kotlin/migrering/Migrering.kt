@@ -25,7 +25,10 @@ internal class Migrering(rapidsConnection: RapidsConnection, private val penKlie
         }.register(this)
     }
 
-    override fun haandterPakke(packet: JsonMessage, context: MessageContext) = runBlocking {
+    override fun haandterPakke(
+        packet: JsonMessage,
+        context: MessageContext,
+    ) = runBlocking {
         penKlient.hentAlleSaker()
     }.also { logger.info("Hentet ${it.size} saker") }
         .forEach {

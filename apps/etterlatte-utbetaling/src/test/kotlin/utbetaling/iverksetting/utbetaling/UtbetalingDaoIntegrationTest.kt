@@ -29,12 +29,11 @@ import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.YearMonth
 import java.time.temporal.ChronoUnit
-import java.util.*
+import java.util.UUID
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class UtbetalingDaoIntegrationTest {
-
     @Container
     private val postgreSQLContainer = TestContainers.postgreSQLContainer
 
@@ -45,11 +44,12 @@ internal class UtbetalingDaoIntegrationTest {
     fun beforeAll() {
         postgreSQLContainer.start()
 
-        dataSource = DataSourceBuilder.createDataSource(
-            jdbcUrl = postgreSQLContainer.jdbcUrl,
-            username = postgreSQLContainer.username,
-            password = postgreSQLContainer.password
-        )
+        dataSource =
+            DataSourceBuilder.createDataSource(
+                jdbcUrl = postgreSQLContainer.jdbcUrl,
+                username = postgreSQLContainer.username,
+                password = postgreSQLContainer.password,
+            )
 
         utbetalingDao = UtbetalingDao(dataSource)
         dataSource.migrate()
@@ -78,22 +78,22 @@ internal class UtbetalingDaoIntegrationTest {
             {
                 assertTrue(
                     opprettetUtbetaling?.opprettet!!.isAfter(
-                        Tidspunkt.now().minus(10, ChronoUnit.SECONDS)
-                    ) and opprettetUtbetaling.opprettet.isBefore(Tidspunkt.now())
+                        Tidspunkt.now().minus(10, ChronoUnit.SECONDS),
+                    ) and opprettetUtbetaling.opprettet.isBefore(Tidspunkt.now()),
                 )
             },
             {
                 assertTrue(
                     opprettetUtbetaling!!.endret.isAfter(
-                        Tidspunkt.now().minus(10, ChronoUnit.SECONDS)
-                    ) and opprettetUtbetaling.endret.isBefore(Tidspunkt.now())
+                        Tidspunkt.now().minus(10, ChronoUnit.SECONDS),
+                    ) and opprettetUtbetaling.endret.isBefore(Tidspunkt.now()),
                 )
             },
             {
                 assertTrue(
                     opprettetUtbetaling!!.avstemmingsnoekkel.isAfter(
-                        Tidspunkt.now().minus(10, ChronoUnit.SECONDS)
-                    ) and opprettetUtbetaling.avstemmingsnoekkel.isBefore(Tidspunkt.now())
+                        Tidspunkt.now().minus(10, ChronoUnit.SECONDS),
+                    ) and opprettetUtbetaling.avstemmingsnoekkel.isBefore(Tidspunkt.now()),
                 )
             },
             { assertEquals(utbetaling.stoenadsmottaker.value, opprettetUtbetaling?.stoenadsmottaker?.value) },
@@ -102,7 +102,7 @@ internal class UtbetalingDaoIntegrationTest {
             { assertNotNull(opprettetUtbetaling?.vedtak) },
             { assertNotNull(opprettetUtbetaling?.oppdrag) },
             { assertNull(opprettetUtbetaling?.kvittering) },
-            { assertEquals(UtbetalingStatus.MOTTATT, opprettetUtbetaling?.status()) }
+            { assertEquals(UtbetalingStatus.MOTTATT, opprettetUtbetaling?.status()) },
         )
     }
 
@@ -110,11 +110,12 @@ internal class UtbetalingDaoIntegrationTest {
     @Test
     fun `utbetalingslinjer opprettes korrekt i databasen fra utbetaling`() {
         val utbetalingId = UUID.randomUUID()
-        val utbetalingslinjer = listOf(
-            utbetalingslinje(utbetalingId, utbetalingslinjeId = 1),
-            utbetalingslinje(utbetalingId, utbetalingslinjeId = 2),
-            utbetalingslinje(utbetalingId, utbetalingslinjeId = 3)
-        )
+        val utbetalingslinjer =
+            listOf(
+                utbetalingslinje(utbetalingId, utbetalingslinjeId = 1),
+                utbetalingslinje(utbetalingId, utbetalingslinjeId = 2),
+                utbetalingslinje(utbetalingId, utbetalingslinjeId = 3),
+            )
         val utbetaling = utbetaling(utbetalingId, utbetalingslinjer = utbetalingslinjer)
         val oppdrag = oppdrag(utbetaling)
 
@@ -128,37 +129,37 @@ internal class UtbetalingDaoIntegrationTest {
             { assertTrue(utbetalingFraDatabase.utbetalingslinjer.any { it.id.value == 3L }) },
             {
                 assertTrue(
-                    utbetalingFraDatabase.utbetalingslinjer.all { it.type == utbetaling.utbetalingslinjer.first().type }
+                    utbetalingFraDatabase.utbetalingslinjer.all { it.type == utbetaling.utbetalingslinjer.first().type },
                 )
             },
             {
                 assertTrue(
                     utbetalingFraDatabase.utbetalingslinjer.all {
                         it.sakId == utbetaling.utbetalingslinjer.first().sakId
-                    }
+                    },
                 )
             },
             {
                 assertTrue(
                     utbetalingFraDatabase.utbetalingslinjer.all {
                         it.periode.fra == utbetaling.utbetalingslinjer.first().periode.fra
-                    }
+                    },
                 )
             },
             {
                 assertTrue(
                     utbetalingFraDatabase.utbetalingslinjer.all {
                         it.periode.til == utbetaling.utbetalingslinjer.first().periode.til
-                    }
+                    },
                 )
             },
             {
                 assertTrue(
                     utbetalingFraDatabase.utbetalingslinjer.all {
                         it.beloep == utbetaling.utbetalingslinjer.first().beloep
-                    }
+                    },
                 )
-            }
+            },
         )
     }
 
@@ -175,36 +176,36 @@ internal class UtbetalingDaoIntegrationTest {
             opprettUtbetaling(
                 avstemmingsnoekkel = jan1,
                 vedtakId = 1,
-                utbetalingslinjeId = 1
-            )
+                utbetalingslinjeId = 1,
+            ),
         )
         utbetalingDao.opprettUtbetaling(
             opprettUtbetaling(
                 avstemmingsnoekkel = jan2,
                 vedtakId = 2,
-                utbetalingslinjeId = 2
-            )
+                utbetalingslinjeId = 2,
+            ),
         )
         utbetalingDao.opprettUtbetaling(
             opprettUtbetaling(
                 avstemmingsnoekkel = jan3,
                 vedtakId = 3,
-                utbetalingslinjeId = 3
-            )
+                utbetalingslinjeId = 3,
+            ),
         )
         utbetalingDao.opprettUtbetaling(
             opprettUtbetaling(
                 avstemmingsnoekkel = jan4,
                 vedtakId = 4,
-                utbetalingslinjeId = 4
-            )
+                utbetalingslinjeId = 4,
+            ),
         )
         utbetalingDao.opprettUtbetaling(
             opprettUtbetaling(
                 avstemmingsnoekkel = jan6,
                 vedtakId = 6,
-                utbetalingslinjeId = 5
-            )
+                utbetalingslinjeId = 5,
+            ),
         )
 
         val utbetalinger = utbetalingDao.hentUtbetalingerForGrensesnittavstemming(jan2, jan5, Saktype.BARNEPENSJON)
@@ -214,7 +215,7 @@ internal class UtbetalingDaoIntegrationTest {
             { assertEquals(3, utbetalinger.size) },
             { assertTrue(utbetalinger.any { it.vedtak.vedtakId == 2L }) },
             { assertTrue(utbetalinger.any { it.vedtak.vedtakId == 3L }) },
-            { assertTrue(utbetalinger.any { it.vedtak.vedtakId == 4L }) }
+            { assertTrue(utbetalinger.any { it.vedtak.vedtakId == 4L }) },
         )
     }
 
@@ -226,11 +227,13 @@ internal class UtbetalingDaoIntegrationTest {
 
         utbetalingDao.opprettUtbetaling(utbetaling.copy(oppdrag = oppdrag))
 
-        val oppdragMedKvittering = oppdrag.apply {
-            oppdrag110.oppdragsId = 1
-            mmel = Mmel().also { it.alvorlighetsgrad = "08" }.also { it.beskrMelding = "beskrivende melding" }
-                .also { it.kodeMelding = "1234" }
-        }
+        val oppdragMedKvittering =
+            oppdrag.apply {
+                oppdrag110.oppdragsId = 1
+                mmel =
+                    Mmel().also { it.alvorlighetsgrad = "08" }.also { it.beskrMelding = "beskrivende melding" }
+                        .also { it.kodeMelding = "1234" }
+            }
 
         utbetalingDao.oppdaterKvittering(oppdragMedKvittering, Tidspunkt.now(), utbetaling.id)
         val utbetalingOppdatert = utbetalingDao.hentUtbetaling(oppdrag.vedtakId())
@@ -240,7 +243,7 @@ internal class UtbetalingDaoIntegrationTest {
             {
                 assertEquals(
                     UtbetalingStatus.AVVIST,
-                    utbetalingOppdatert?.status()
+                    utbetalingOppdatert?.status(),
                 )
             }, // SKAL VEL EGENTLIG VÆRE AVVIST HER??? MÅ GRAVE LITT
             { assertNotNull(utbetalingOppdatert?.kvittering) },
@@ -248,9 +251,9 @@ internal class UtbetalingDaoIntegrationTest {
             {
                 assertEquals(
                     oppdragMedKvittering.mmel?.alvorlighetsgrad,
-                    utbetalingOppdatert?.kvittering?.oppdrag?.mmel?.alvorlighetsgrad
+                    utbetalingOppdatert?.kvittering?.oppdrag?.mmel?.alvorlighetsgrad,
                 )
-            }
+            },
         )
     }
 
@@ -258,28 +261,32 @@ internal class UtbetalingDaoIntegrationTest {
     fun `skal hente liste med dupliserte utbetalingslinjer`() {
         val opprettetTidspunkt = Tidspunkt.now()
         val utbetalingId = UUID.randomUUID()
-        val utbetaling = utbetaling(
-            id = utbetalingId,
-            avstemmingsnoekkel = opprettetTidspunkt,
-            utbetalingslinjer = listOf(
-                utbetalingslinje(utbetalingId, SakId(1L), 1),
-                utbetalingslinje(utbetalingId, SakId(1L), 2),
-                utbetalingslinje(utbetalingId, SakId(1L), 3)
+        val utbetaling =
+            utbetaling(
+                id = utbetalingId,
+                avstemmingsnoekkel = opprettetTidspunkt,
+                utbetalingslinjer =
+                    listOf(
+                        utbetalingslinje(utbetalingId, SakId(1L), 1),
+                        utbetalingslinje(utbetalingId, SakId(1L), 2),
+                        utbetalingslinje(utbetalingId, SakId(1L), 3),
+                    ),
             )
-        )
         val oppdrag = oppdrag(utbetaling)
         utbetalingDao.opprettUtbetaling(utbetaling.copy(oppdrag = oppdrag))
 
         val periode = Periode(YearMonth.now(), null)
-        val utbetalingslinjeIder = listOf(
-            Utbetalingsperiode(1L, periode, BigDecimal(1000), UtbetalingsperiodeType.UTBETALING),
-            Utbetalingsperiode(2L, periode, BigDecimal(1000), UtbetalingsperiodeType.UTBETALING),
-            Utbetalingsperiode(3L, periode, BigDecimal(1000), UtbetalingsperiodeType.UTBETALING)
-        )
-        val utbetalingslinjer = utbetalingDao.hentDupliserteUtbetalingslinjer(
-            utbetalingslinjeIder,
-            utbetalingId = utbetaling.vedtakId.value + 1
-        )
+        val utbetalingslinjeIder =
+            listOf(
+                Utbetalingsperiode(1L, periode, BigDecimal(1000), UtbetalingsperiodeType.UTBETALING),
+                Utbetalingsperiode(2L, periode, BigDecimal(1000), UtbetalingsperiodeType.UTBETALING),
+                Utbetalingsperiode(3L, periode, BigDecimal(1000), UtbetalingsperiodeType.UTBETALING),
+            )
+        val utbetalingslinjer =
+            utbetalingDao.hentDupliserteUtbetalingslinjer(
+                utbetalingslinjeIder,
+                utbetalingId = utbetaling.vedtakId.value + 1,
+            )
         println(utbetalingslinjer)
 
         assertAll(
@@ -287,22 +294,24 @@ internal class UtbetalingDaoIntegrationTest {
             { assertEquals(3, utbetalingslinjer.size) },
             { assertTrue(utbetalingslinjer.any { it.id.value == 1L }) },
             { assertTrue(utbetalingslinjer.any { it.id.value == 2L }) },
-            { assertTrue(utbetalingslinjer.any { it.id.value == 3L }) }
+            { assertTrue(utbetalingslinjer.any { it.id.value == 3L }) },
         )
     }
 
     @Test
     fun `ny utbetalingshendelse lagres paa utbetaling`() {
         val utbetalingId = UUID.randomUUID()
-        val utbetaling = utbetaling(
-            id = utbetalingId,
-            avstemmingsnoekkel = Tidspunkt.now(),
-            utbetalingslinjer = listOf(
-                utbetalingslinje(utbetalingId, SakId(1L), 1),
-                utbetalingslinje(utbetalingId, SakId(1L), 2),
-                utbetalingslinje(utbetalingId, SakId(1L), 3)
+        val utbetaling =
+            utbetaling(
+                id = utbetalingId,
+                avstemmingsnoekkel = Tidspunkt.now(),
+                utbetalingslinjer =
+                    listOf(
+                        utbetalingslinje(utbetalingId, SakId(1L), 1),
+                        utbetalingslinje(utbetalingId, SakId(1L), 2),
+                        utbetalingslinje(utbetalingId, SakId(1L), 3),
+                    ),
             )
-        )
         val oppdrag = oppdrag(utbetaling)
         utbetalingDao.opprettUtbetaling(utbetaling.copy(oppdrag = oppdrag))
 
@@ -315,11 +324,11 @@ internal class UtbetalingDaoIntegrationTest {
             {
                 assertEquals(
                     utbetalingshendelse.utbetalingId,
-                    oppdatertUtbetaling.utbetalingshendelser.last().utbetalingId
+                    oppdatertUtbetaling.utbetalingshendelser.last().utbetalingId,
                 )
             },
             { assertEquals(utbetalingshendelse.status, oppdatertUtbetaling.utbetalingshendelser.last().status) },
-            { assertEquals(utbetalingshendelse.tidspunkt, oppdatertUtbetaling.utbetalingshendelser.last().tidspunkt) }
+            { assertEquals(utbetalingshendelse.tidspunkt, oppdatertUtbetaling.utbetalingshendelser.last().tidspunkt) },
         )
     }
 
@@ -332,7 +341,7 @@ internal class UtbetalingDaoIntegrationTest {
                 sakId = SakId(1L),
                 sakType = Saktype.BARNEPENSJON,
                 vedtakId = 1L,
-                utbetalingslinjeId = 1L
+                utbetalingslinjeId = 1L,
             )
         val oppdrag1 = oppdrag(utbetaling1)
         val utbetalingId2 = UUID.randomUUID()
@@ -342,7 +351,7 @@ internal class UtbetalingDaoIntegrationTest {
                 sakId = SakId(2L),
                 sakType = Saktype.BARNEPENSJON,
                 vedtakId = 2L,
-                utbetalingslinjeId = 2L
+                utbetalingslinjeId = 2L,
             )
         val oppdrag2 = oppdrag(utbetaling2)
         val utbetalingId3 = UUID.randomUUID()
@@ -352,7 +361,7 @@ internal class UtbetalingDaoIntegrationTest {
                 sakId = SakId(3L),
                 sakType = Saktype.BARNEPENSJON,
                 vedtakId = 3L,
-                utbetalingslinjeId = 3L
+                utbetalingslinjeId = 3L,
             )
         val oppdrag3 = oppdrag(utbetaling3)
 
@@ -362,18 +371,19 @@ internal class UtbetalingDaoIntegrationTest {
 
         utbetalingDao.nyUtbetalingshendelse(
             vedtakId = utbetaling1.vedtakId.value,
-            utbetalingshendelse = Utbetalingshendelse(utbetalingId = utbetalingId1, status = UtbetalingStatus.GODKJENT)
+            utbetalingshendelse = Utbetalingshendelse(utbetalingId = utbetalingId1, status = UtbetalingStatus.GODKJENT),
         )
         utbetalingDao.nyUtbetalingshendelse(
             vedtakId = utbetaling2.vedtakId.value,
-            utbetalingshendelse = Utbetalingshendelse(utbetalingId = utbetalingId2, status = UtbetalingStatus.GODKJENT)
+            utbetalingshendelse = Utbetalingshendelse(utbetalingId = utbetalingId2, status = UtbetalingStatus.GODKJENT),
         )
 
-        val utbetalingerFraDao = utbetalingDao.hentUtbetalingerForKonsistensavstemming(
-            aktivFraOgMed = LocalDateTime.of(LocalDate.now(), LocalTime.MIDNIGHT).toTidspunkt(),
-            opprettetFramTilOgMed = Tidspunkt.now(),
-            saktype = Saktype.BARNEPENSJON
-        )
+        val utbetalingerFraDao =
+            utbetalingDao.hentUtbetalingerForKonsistensavstemming(
+                aktivFraOgMed = LocalDateTime.of(LocalDate.now(), LocalTime.MIDNIGHT).toTidspunkt(),
+                opprettetFramTilOgMed = Tidspunkt.now(),
+                saktype = Saktype.BARNEPENSJON,
+            )
         assertTrue(utbetalingerFraDao.any { it.id == utbetalingId1 })
         assertTrue(utbetalingerFraDao.any { it.id == utbetalingId2 })
         assertFalse(utbetalingerFraDao.any { it.id == utbetalingId3 })
@@ -389,7 +399,7 @@ internal class UtbetalingDaoIntegrationTest {
                 sakType = Saktype.BARNEPENSJON,
                 vedtakId = 1L,
                 utbetalingslinjeId = 1L,
-                periodeFra = LocalDate.now().minusDays(1)
+                periodeFra = LocalDate.now().minusDays(1),
             )
         val oppdrag1 = oppdrag(utbetaling1)
         val utbetalingId2 = UUID.randomUUID()
@@ -401,7 +411,7 @@ internal class UtbetalingDaoIntegrationTest {
                 vedtakId = 2L,
                 utbetalingslinjeId = 2L,
                 periodeFra = LocalDate.now().plusDays(1),
-                opprettet = Tidspunkt.ofNorskTidssone(LocalDate.now().plusDays(1), LocalTime.MIDNIGHT)
+                opprettet = Tidspunkt.ofNorskTidssone(LocalDate.now().plusDays(1), LocalTime.MIDNIGHT),
             )
         val oppdrag2 = oppdrag(utbetaling2)
         val utbetalingId3 = UUID.randomUUID()
@@ -413,7 +423,7 @@ internal class UtbetalingDaoIntegrationTest {
                 vedtakId = 3L,
                 utbetalingslinjeId = 3L,
                 periodeFra = LocalDate.now().minusDays(300),
-                periodeTil = LocalDate.now().minusDays(1)
+                periodeTil = LocalDate.now().minusDays(1),
             )
         val oppdrag3 = oppdrag(utbetaling3)
 
@@ -423,22 +433,23 @@ internal class UtbetalingDaoIntegrationTest {
 
         utbetalingDao.nyUtbetalingshendelse(
             vedtakId = utbetaling1.vedtakId.value,
-            utbetalingshendelse = Utbetalingshendelse(utbetalingId = utbetalingId1, status = UtbetalingStatus.GODKJENT)
+            utbetalingshendelse = Utbetalingshendelse(utbetalingId = utbetalingId1, status = UtbetalingStatus.GODKJENT),
         )
         utbetalingDao.nyUtbetalingshendelse(
             vedtakId = utbetaling2.vedtakId.value,
-            utbetalingshendelse = Utbetalingshendelse(utbetalingId = utbetalingId2, status = UtbetalingStatus.GODKJENT)
+            utbetalingshendelse = Utbetalingshendelse(utbetalingId = utbetalingId2, status = UtbetalingStatus.GODKJENT),
         )
         utbetalingDao.nyUtbetalingshendelse(
             vedtakId = utbetaling3.vedtakId.value,
-            utbetalingshendelse = Utbetalingshendelse(utbetalingId = utbetalingId3, status = UtbetalingStatus.GODKJENT)
+            utbetalingshendelse = Utbetalingshendelse(utbetalingId = utbetalingId3, status = UtbetalingStatus.GODKJENT),
         )
 
-        val utbetalingerFraDao = utbetalingDao.hentUtbetalingerForKonsistensavstemming(
-            aktivFraOgMed = Tidspunkt.now(),
-            opprettetFramTilOgMed = Tidspunkt.now(),
-            saktype = Saktype.BARNEPENSJON
-        )
+        val utbetalingerFraDao =
+            utbetalingDao.hentUtbetalingerForKonsistensavstemming(
+                aktivFraOgMed = Tidspunkt.now(),
+                opprettetFramTilOgMed = Tidspunkt.now(),
+                saktype = Saktype.BARNEPENSJON,
+            )
         assertTrue(utbetalingerFraDao.any { it.id == utbetalingId1 }) // aktiv
         assertFalse(utbetalingerFraDao.any { it.id == utbetalingId2 }) // ikke aktiv
         assertFalse(utbetalingerFraDao.any { it.id == utbetalingId3 }) // ikke aktiv
@@ -457,13 +468,14 @@ internal class UtbetalingDaoIntegrationTest {
     private fun opprettUtbetaling(
         avstemmingsnoekkel: Tidspunkt = Tidspunkt.now(),
         vedtakId: Long = 1,
-        utbetalingslinjeId: Long
+        utbetalingslinjeId: Long,
     ): Utbetaling {
-        val utbetaling = utbetaling(
-            avstemmingsnoekkel = avstemmingsnoekkel,
-            vedtakId = vedtakId,
-            utbetalingslinjeId = utbetalingslinjeId
-        )
+        val utbetaling =
+            utbetaling(
+                avstemmingsnoekkel = avstemmingsnoekkel,
+                vedtakId = vedtakId,
+                utbetalingslinjeId = utbetalingslinjeId,
+            )
         val oppdrag = oppdrag(utbetaling)
         return utbetaling.copy(oppdrag = oppdrag)
     }

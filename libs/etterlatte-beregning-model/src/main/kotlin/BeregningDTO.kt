@@ -7,7 +7,7 @@ import no.nav.etterlatte.libs.common.grunnlag.Metadata
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import java.time.YearMonth
-import java.util.*
+import java.util.UUID
 
 data class BeregningDTO(
     val beregningId: UUID,
@@ -15,7 +15,7 @@ data class BeregningDTO(
     val type: Beregningstype,
     val beregningsperioder: List<Beregningsperiode>,
     val beregnetDato: Tidspunkt,
-    val grunnlagMetadata: Metadata
+    val grunnlagMetadata: Metadata,
 )
 
 data class Beregningsperiode(
@@ -29,13 +29,13 @@ data class Beregningsperiode(
     val trygdetid: Int,
     val regelResultat: JsonNode? = null,
     val regelVersjon: String? = null,
-    val kilde: Grunnlagsopplysning.RegelKilde? = null
+    val kilde: Grunnlagsopplysning.RegelKilde? = null,
 )
 
 data class AvkortingDto(
     val avkortingGrunnlag: List<AvkortingGrunnlagDto>,
     val avkortetYtelse: List<AvkortetYtelseDto>,
-    val tidligereAvkortetYtelse: List<AvkortetYtelseDto> = emptyList()
+    val tidligereAvkortetYtelse: List<AvkortetYtelseDto> = emptyList(),
 )
 
 data class AvkortingGrunnlagDto(
@@ -48,12 +48,12 @@ data class AvkortingGrunnlagDto(
     val inntektUtland: Int,
     val fratrekkInnAarUtland: Int,
     val spesifikasjon: String,
-    val kilde: AvkortingGrunnlagKildeDto?
+    val kilde: AvkortingGrunnlagKildeDto?,
 )
 
 data class AvkortingGrunnlagKildeDto(
     val tidspunkt: String,
-    val ident: String
+    val ident: String,
 )
 
 data class AvkortetYtelseDto(
@@ -64,16 +64,16 @@ data class AvkortetYtelseDto(
     val ytelseFoerAvkorting: Int,
     val avkortingsbeloep: Int,
     val ytelseEtterAvkorting: Int,
-    val restanse: Int
+    val restanse: Int,
 )
 
-data class ManuellRestanseDto (
+data class ManuellRestanseDto(
     val avkortetYtelseId: UUID,
-    val nyRestanse: Int
+    val nyRestanse: Int,
 )
 
 data class YtelseMedGrunnlagDto(
-    val perioder: List<YtelseMedGrunnlagPeriodisertDto>
+    val perioder: List<YtelseMedGrunnlagPeriodisertDto>,
 )
 
 data class YtelseMedGrunnlagPeriodisertDto(
@@ -85,5 +85,5 @@ data class YtelseMedGrunnlagPeriodisertDto(
     val fratrekkInnAar: Int,
     val trygdetid: Int,
     val grunnbelop: Int,
-    val grunnbelopMnd: Int
+    val grunnbelopMnd: Int,
 )

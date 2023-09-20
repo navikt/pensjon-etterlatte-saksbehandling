@@ -15,20 +15,22 @@ import org.junit.jupiter.api.assertDoesNotThrow
 internal class Norg2KlientIT {
     private val apiUrl = "https://norg2.dev-fss-pub.nais.io/norg2/api/v1"
 
-    private val httpClient = HttpClient(OkHttp) {
-        install(ContentNegotiation) {
-            jackson()
+    private val httpClient =
+        HttpClient(OkHttp) {
+            install(ContentNegotiation) {
+                jackson()
+            }
         }
-    }
 
     private val klient = Norg2Klient(apiUrl, httpClient)
 
     @Test
     fun `test diverse`() {
         assertDoesNotThrow {
-            val kontaktinfo = runBlocking {
-                klient.hentEnhet("4817")
-            }
+            val kontaktinfo =
+                runBlocking {
+                    klient.hentEnhet("4817")
+                }
 
             assertNotNull(kontaktinfo)
         }

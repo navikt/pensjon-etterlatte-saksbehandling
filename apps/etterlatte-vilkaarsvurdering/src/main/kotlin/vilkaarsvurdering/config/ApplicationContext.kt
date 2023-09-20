@@ -15,21 +15,24 @@ import no.nav.etterlatte.vilkaarsvurdering.migrering.MigreringService
 class ApplicationContext {
     val config: Config = ConfigFactory.load()
     val properties: ApplicationProperties = ApplicationProperties.fromEnv(System.getenv())
-    val dataSource = DataSourceBuilder.createDataSource(
-        jdbcUrl = properties.jdbcUrl,
-        username = properties.dbUsername,
-        password = properties.dbPassword
-    )
+    val dataSource =
+        DataSourceBuilder.createDataSource(
+            jdbcUrl = properties.jdbcUrl,
+            username = properties.dbUsername,
+            password = properties.dbPassword,
+        )
     val behandlingKlient = BehandlingKlientImpl(config, httpClient())
     private val delvilkaarRepository = DelvilkaarRepository()
     private val vilkaarsvurderingRepository = VilkaarsvurderingRepository(dataSource, delvilkaarRepository)
-    val vilkaarsvurderingService = VilkaarsvurderingService(
-        vilkaarsvurderingRepository = vilkaarsvurderingRepository,
-        behandlingKlient = behandlingKlient,
-        grunnlagKlient = GrunnlagKlientImpl(config, httpClient())
-    )
-    val migreringService = MigreringService(
-        MigreringRepository(delvilkaarRepository, dataSource),
-        vilkaarsvurderingRepository
-    )
+    val vilkaarsvurderingService =
+        VilkaarsvurderingService(
+            vilkaarsvurderingRepository = vilkaarsvurderingRepository,
+            behandlingKlient = behandlingKlient,
+            grunnlagKlient = GrunnlagKlientImpl(config, httpClient()),
+        )
+    val migreringService =
+        MigreringService(
+            MigreringRepository(delvilkaarRepository, dataSource),
+            vilkaarsvurderingRepository,
+        )
 }

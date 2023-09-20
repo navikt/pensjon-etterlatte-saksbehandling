@@ -16,10 +16,13 @@ import no.nav.etterlatte.libs.ktorobo.Resource
 import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.etterlatte.token.Saksbehandler
 import org.slf4j.LoggerFactory
-import java.util.*
+import java.util.UUID
 
 interface BehandlingKlient : BehandlingTilgangsSjekk, SakTilgangsSjekk, PersonTilgangsSjekk {
-    suspend fun hentBehandling(behandlingId: UUID, brukerTokenInfo: BrukerTokenInfo): DetaljertBehandling
+    suspend fun hentBehandling(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): DetaljertBehandling
 }
 
 class BehandlingKlientException(override val message: String, override val cause: Throwable) : Exception(message, cause)
@@ -33,61 +36,73 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
     private val clientId = config.getString("behandling.client.id")
     private val resourceUrl = config.getString("behandling.resource.url")
 
-    override suspend fun hentBehandling(behandlingId: UUID, brukerTokenInfo: BrukerTokenInfo): DetaljertBehandling {
+    override suspend fun hentBehandling(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): DetaljertBehandling {
         logger.info("Henter behandling med behandlingId=$behandlingId")
         try {
             return downstreamResourceClient
                 .get(
-                    resource = Resource(
-                        clientId = clientId,
-                        url = "$resourceUrl/behandlinger/$behandlingId"
-                    ),
-                    brukerTokenInfo = brukerTokenInfo
+                    resource =
+                        Resource(
+                            clientId = clientId,
+                            url = "$resourceUrl/behandlinger/$behandlingId",
+                        ),
+                    brukerTokenInfo = brukerTokenInfo,
                 )
                 .mapBoth(
                     success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
-                    failure = { throwableErrorMessage -> throw throwableErrorMessage }
+                    failure = { throwableErrorMessage -> throw throwableErrorMessage },
                 )
         } catch (e: Exception) {
             throw BehandlingKlientException(
                 "Henting av behandling med behandlingId=$behandlingId fra grunnlag feilet",
-                e
+                e,
             )
         }
     }
 
-    override suspend fun harTilgangTilBehandling(behandlingId: UUID, bruker: Saksbehandler): Boolean {
+    override suspend fun harTilgangTilBehandling(
+        behandlingId: UUID,
+        bruker: Saksbehandler,
+    ): Boolean {
         try {
             return downstreamResourceClient
                 .get(
-                    resource = Resource(
-                        clientId = clientId,
-                        url = "$resourceUrl/tilgang/behandling/$behandlingId"
-                    ),
-                    brukerTokenInfo = bruker
+                    resource =
+                        Resource(
+                            clientId = clientId,
+                            url = "$resourceUrl/tilgang/behandling/$behandlingId",
+                        ),
+                    brukerTokenInfo = bruker,
                 )
                 .mapBoth(
                     success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
-                    failure = { throwableErrorMessage -> throw throwableErrorMessage }
+                    failure = { throwableErrorMessage -> throw throwableErrorMessage },
                 )
         } catch (e: Exception) {
             throw BehandlingKlientException("Sjekking av tilgang for behandling feilet", e)
         }
     }
 
-    override suspend fun harTilgangTilSak(sakId: Long, bruker: Saksbehandler): Boolean {
+    override suspend fun harTilgangTilSak(
+        sakId: Long,
+        bruker: Saksbehandler,
+    ): Boolean {
         try {
             return downstreamResourceClient
                 .get(
-                    resource = Resource(
-                        clientId = clientId,
-                        url = "$resourceUrl/tilgang/sak/$sakId"
-                    ),
-                    brukerTokenInfo = bruker
+                    resource =
+                        Resource(
+                            clientId = clientId,
+                            url = "$resourceUrl/tilgang/sak/$sakId",
+                        ),
+                    brukerTokenInfo = bruker,
                 )
                 .mapBoth(
                     success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
-                    failure = { throwableErrorMessage -> throw throwableErrorMessage }
+                    failure = { throwableErrorMessage -> throw throwableErrorMessage },
                 )
         } catch (e: Exception) {
             throw BehandlingKlientException("Sjekking av tilgang for sak feilet", e)
@@ -96,21 +111,22 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
 
     override suspend fun harTilgangTilPerson(
         foedselsnummer: Folkeregisteridentifikator,
-        bruker: Saksbehandler
+        bruker: Saksbehandler,
     ): Boolean {
         try {
             return downstreamResourceClient
                 .post(
-                    resource = Resource(
-                        clientId = clientId,
-                        url = "$resourceUrl/tilgang/person"
-                    ),
+                    resource =
+                        Resource(
+                            clientId = clientId,
+                            url = "$resourceUrl/tilgang/person",
+                        ),
                     brukerTokenInfo = bruker,
-                    postBody = foedselsnummer.value
+                    postBody = foedselsnummer.value,
                 )
                 .mapBoth(
                     success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
-                    failure = { throwableErrorMessage -> throw throwableErrorMessage }
+                    failure = { throwableErrorMessage -> throw throwableErrorMessage },
                 )
         } catch (e: Exception) {
             throw BehandlingKlientException("Sjekking av tilgang for person feilet", e)

@@ -43,11 +43,10 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import testsupport.buildTestApplicationConfigurationForOauth
 import java.time.YearMonth
-import java.util.*
+import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class AvkortingRoutesTest {
-
     private val server = MockOAuth2Server()
     private val behandlingKlient = mockk<BehandlingKlient>()
     private val avkortingService = mockk<AvkortingService>()
@@ -68,10 +67,11 @@ class AvkortingRoutesTest {
         coEvery { avkortingService.hentAvkorting(any(), any()) } returns null
 
         testApplication(server.config.httpServer.port()) {
-            val response = client.get("/api/beregning/avkorting/${UUID.randomUUID()}") {
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                header(HttpHeaders.Authorization, "Bearer $token")
-            }
+            val response =
+                client.get("/api/beregning/avkorting/${UUID.randomUUID()}") {
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    header(HttpHeaders.Authorization, "Bearer $token")
+                }
 
             response.status shouldBe HttpStatusCode.NotFound
         }
@@ -83,82 +83,93 @@ class AvkortingRoutesTest {
         val avkortingsgrunnlagId = UUID.randomUUID()
         val dato = YearMonth.of(2023, 1)
         val tidspunkt = Tidspunkt.now()
-        val avkortingsgrunnlag = avkortinggrunnlag(
-            id = avkortingsgrunnlagId,
-            periode = Periode(fom = dato, tom = dato),
-            kilde = Grunnlagsopplysning.Saksbehandler("Saksbehandler01", tidspunkt)
-        )
+        val avkortingsgrunnlag =
+            avkortinggrunnlag(
+                id = avkortingsgrunnlagId,
+                periode = Periode(fom = dato, tom = dato),
+                kilde = Grunnlagsopplysning.Saksbehandler("Saksbehandler01", tidspunkt),
+            )
         val avkortetYtelseId = UUID.randomUUID()
-        val avkortetYtelse = listOf(
-            avkortetYtelse(
-                id = avkortetYtelseId,
-                type = AvkortetYtelseType.AARSOPPGJOER,
-                periode = Periode(fom = dato, tom = dato)
+        val avkortetYtelse =
+            listOf(
+                avkortetYtelse(
+                    id = avkortetYtelseId,
+                    type = AvkortetYtelseType.AARSOPPGJOER,
+                    periode = Periode(fom = dato, tom = dato),
+                ),
             )
-        )
-        val inntektsavkorting = listOf(
-            Inntektsavkorting(
-                grunnlag = avkortingsgrunnlag
+        val inntektsavkorting =
+            listOf(
+                Inntektsavkorting(
+                    grunnlag = avkortingsgrunnlag,
+                ),
             )
-        )
-        val avkorting = Avkorting(
-            aarsoppgjoer = aarsoppgjoer(
-                inntektsavkorting = inntektsavkorting
-            ),
-            avkortetYtelseFraVirkningstidspunkt = avkortetYtelse,
-            avkortetYtelseForrigeVedtak = avkortetYtelse,
-        )
-        val dto = AvkortingDto(
-            avkortingGrunnlag = listOf(
-                AvkortingGrunnlagDto(
-                    id = avkortingsgrunnlagId,
-                    fom = dato,
-                    tom = dato,
-                    aarsinntekt = 100000,
-                    fratrekkInnAar = 10000,
-                    relevanteMaanederInnAar = 12,
-                    spesifikasjon = "Spesifikasjon",
-                    inntektUtland = 0,
-                    fratrekkInnAarUtland = 0,
-                    kilde = AvkortingGrunnlagKildeDto(
-                        tidspunkt = tidspunkt.toString(),
-                        ident = "Saksbehandler01"
+        val avkorting =
+            Avkorting(
+                aarsoppgjoer =
+                    aarsoppgjoer(
+                        inntektsavkorting = inntektsavkorting,
                     ),
-                )
-            ),
-            avkortetYtelse = listOf(
-                AvkortetYtelseDto(
-                    id = avkortetYtelseId,
-                    type = AvkortetYtelseType.AARSOPPGJOER.name,
-                    fom = dato,
-                    tom = dato,
-                    ytelseFoerAvkorting = 300,
-                    avkortingsbeloep = 200,
-                    ytelseEtterAvkorting = 50,
-                    restanse = 50
-                )
-            ),
-            tidligereAvkortetYtelse = listOf(
-                AvkortetYtelseDto(
-                    id = avkortetYtelseId,
-                    type = AvkortetYtelseType.AARSOPPGJOER.name,
-                    fom = dato,
-                    tom = dato,
-                    ytelseFoerAvkorting = 300,
-                    avkortingsbeloep = 200,
-                    ytelseEtterAvkorting = 50,
-                    restanse = 50
-                )
+                avkortetYtelseFraVirkningstidspunkt = avkortetYtelse,
+                avkortetYtelseForrigeVedtak = avkortetYtelse,
             )
-        )
+        val dto =
+            AvkortingDto(
+                avkortingGrunnlag =
+                    listOf(
+                        AvkortingGrunnlagDto(
+                            id = avkortingsgrunnlagId,
+                            fom = dato,
+                            tom = dato,
+                            aarsinntekt = 100000,
+                            fratrekkInnAar = 10000,
+                            relevanteMaanederInnAar = 12,
+                            spesifikasjon = "Spesifikasjon",
+                            inntektUtland = 0,
+                            fratrekkInnAarUtland = 0,
+                            kilde =
+                                AvkortingGrunnlagKildeDto(
+                                    tidspunkt = tidspunkt.toString(),
+                                    ident = "Saksbehandler01",
+                                ),
+                        ),
+                    ),
+                avkortetYtelse =
+                    listOf(
+                        AvkortetYtelseDto(
+                            id = avkortetYtelseId,
+                            type = AvkortetYtelseType.AARSOPPGJOER.name,
+                            fom = dato,
+                            tom = dato,
+                            ytelseFoerAvkorting = 300,
+                            avkortingsbeloep = 200,
+                            ytelseEtterAvkorting = 50,
+                            restanse = 50,
+                        ),
+                    ),
+                tidligereAvkortetYtelse =
+                    listOf(
+                        AvkortetYtelseDto(
+                            id = avkortetYtelseId,
+                            type = AvkortetYtelseType.AARSOPPGJOER.name,
+                            fom = dato,
+                            tom = dato,
+                            ytelseFoerAvkorting = 300,
+                            avkortingsbeloep = 200,
+                            ytelseEtterAvkorting = 50,
+                            restanse = 50,
+                        ),
+                    ),
+            )
         coEvery { avkortingService.lagreAvkorting(any(), any(), any()) } returns avkorting
 
         testApplication(server.config.httpServer.port()) {
-            val response = client.post("/api/beregning/avkorting/$behandlingsId") {
-                setBody(dto.avkortingGrunnlag[0].toJson())
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                header(HttpHeaders.Authorization, "Bearer $token")
-            }
+            val response =
+                client.post("/api/beregning/avkorting/$behandlingsId") {
+                    setBody(dto.avkortingGrunnlag[0].toJson())
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    header(HttpHeaders.Authorization, "Bearer $token")
+                }
 
             response.status shouldBe HttpStatusCode.OK
             val result = objectMapper.readValue(response.bodyAsText(), AvkortingDto::class.java)
@@ -174,7 +185,7 @@ class AvkortingRoutesTest {
                         it.relevanteMaanederInnAar shouldBe 12
                         it.spesifikasjon shouldBe avkortingsgrunnlag.spesifikasjon
                         it.kilde.ident shouldBe avkortingsgrunnlag.kilde.ident
-                    }
+                    },
                 )
             }
         }
@@ -182,28 +193,33 @@ class AvkortingRoutesTest {
 
     @Test
     fun `skal regne ut relevant antall maaneder inkludert innevaerende hvis det ikke finnes fra foer`() {
-        val startenAvAaret = AvkortingGrunnlagDto(
-            relevanteMaanederInnAar = null,
-            id = UUID.randomUUID(),
-            fom = YearMonth.of(2023, 1),
-            tom = null,
-            aarsinntekt = 100000,
-            fratrekkInnAar = 10000,
-            inntektUtland = 0,
-            fratrekkInnAarUtland = 0,
-            spesifikasjon = "Spesifikasjon",
-            kilde = AvkortingGrunnlagKildeDto(
-                tidspunkt = Tidspunkt.now().toString(),
-                ident = "Saksbehandler01"
+        val startenAvAaret =
+            AvkortingGrunnlagDto(
+                relevanteMaanederInnAar = null,
+                id = UUID.randomUUID(),
+                fom = YearMonth.of(2023, 1),
+                tom = null,
+                aarsinntekt = 100000,
+                fratrekkInnAar = 10000,
+                inntektUtland = 0,
+                fratrekkInnAarUtland = 0,
+                spesifikasjon = "Spesifikasjon",
+                kilde =
+                    AvkortingGrunnlagKildeDto(
+                        tidspunkt = Tidspunkt.now().toString(),
+                        ident = "Saksbehandler01",
+                    ),
             )
-        )
         val sluttenavAaret = startenAvAaret.copy(fom = YearMonth.of(2023, 12))
 
         startenAvAaret.fromDto(bruker).relevanteMaanederInnAar shouldBe 12
         sluttenavAaret.fromDto(bruker).relevanteMaanederInnAar shouldBe 1
     }
 
-    private fun testApplication(port: Int, block: suspend ApplicationTestBuilder.() -> Unit) {
+    private fun testApplication(
+        port: Int,
+        block: suspend ApplicationTestBuilder.() -> Unit,
+    ) {
         io.ktor.server.testing.testApplication {
             environment {
                 config = buildTestApplicationConfigurationForOauth(port, AZURE_ISSUER, AZURE_CLIENT_ID)
@@ -218,7 +234,7 @@ class AvkortingRoutesTest {
         server.issueToken(
             issuerId = AZURE_ISSUER,
             audience = AZURE_CLIENT_ID,
-            claims = mapOf("navn" to "John Doe", "NAVident" to "Saksbehandler01")
+            claims = mapOf("navn" to "John Doe", "NAVident" to "Saksbehandler01"),
         ).serialize()
     }
 

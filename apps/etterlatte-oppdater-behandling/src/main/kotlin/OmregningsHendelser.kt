@@ -21,7 +21,6 @@ import rapidsandrivers.migrering.ListenerMedLoggingOgFeilhaandtering
 
 internal class OmregningsHendelser(rapidsConnection: RapidsConnection, private val behandlinger: BehandlingService) :
     ListenerMedLoggingOgFeilhaandtering(OMREGNINGSHENDELSE) {
-
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     init {
@@ -35,7 +34,10 @@ internal class OmregningsHendelser(rapidsConnection: RapidsConnection, private v
         }.register(this)
     }
 
-    override fun haandterPakke(packet: JsonMessage, context: MessageContext) {
+    override fun haandterPakke(
+        packet: JsonMessage,
+        context: MessageContext,
+    ) {
         logger.info("Mottatt omregningshendelse")
 
         val hendelse: Omregningshendelse = objectMapper.treeToValue(packet[HENDELSE_DATA_KEY])

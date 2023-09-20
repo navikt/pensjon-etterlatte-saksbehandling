@@ -28,58 +28,62 @@ import rapidsandrivers.BEREGNING_KEY
 import rapidsandrivers.HENDELSE_DATA_KEY
 import java.math.BigDecimal
 import java.time.YearMonth
-import java.util.*
+import java.util.UUID
 
 internal class MigreringHendelserTest {
-
     private val behandlingService = mockk<BeregningService>()
     private val inspector = TestRapid().apply { MigreringHendelser(this, behandlingService) }
 
     @Test
     fun `skal beregne for migrering`() {
         val behandlingId = slot<UUID>()
-        val beregningDTO = BeregningDTO(
-            beregningId = UUID.randomUUID(),
-            behandlingId = UUID.randomUUID(),
-            type = Beregningstype.BP,
-            beregningsperioder = listOf(),
-            beregnetDato = Tidspunkt.now(),
-            grunnlagMetadata = Metadata(1234, 1)
-        )
-        val returnValue = mockk<HttpResponse>().also {
-            every {
-                runBlocking { it.body<BeregningDTO>() }
-            } returns beregningDTO
-        }
+        val beregningDTO =
+            BeregningDTO(
+                beregningId = UUID.randomUUID(),
+                behandlingId = UUID.randomUUID(),
+                type = Beregningstype.BP,
+                beregningsperioder = listOf(),
+                beregnetDato = Tidspunkt.now(),
+                grunnlagMetadata = Metadata(1234, 1),
+            )
+        val returnValue =
+            mockk<HttpResponse>().also {
+                every {
+                    runBlocking { it.body<BeregningDTO>() }
+                } returns beregningDTO
+            }
 
         val fnr = Folkeregisteridentifikator.of("12101376212")
-        val request = MigreringRequest(
-            pesysId = PesysId(1),
-            enhet = Enhet("4817"),
-            soeker = fnr,
-            avdoedForelder = listOf(AvdoedForelder(fnr, Tidspunkt.now())),
-            gjenlevendeForelder = null,
-            virkningstidspunkt = YearMonth.now(),
-            foersteVirkningstidspunkt = YearMonth.now().minusYears(10),
-            beregning = Beregning(
-                brutto = BigDecimal(1000),
-                netto = BigDecimal(1000),
-                anvendtTrygdetid = BigDecimal(40),
-                datoVirkFom = Tidspunkt.now(),
-                g = BigDecimal(100000)
-            ),
-            trygdetid = Trygdetid(emptyList())
-        )
+        val request =
+            MigreringRequest(
+                pesysId = PesysId(1),
+                enhet = Enhet("4817"),
+                soeker = fnr,
+                avdoedForelder = listOf(AvdoedForelder(fnr, Tidspunkt.now())),
+                gjenlevendeForelder = null,
+                virkningstidspunkt = YearMonth.now(),
+                foersteVirkningstidspunkt = YearMonth.now().minusYears(10),
+                beregning =
+                    Beregning(
+                        brutto = BigDecimal(1000),
+                        netto = BigDecimal(1000),
+                        anvendtTrygdetid = BigDecimal(40),
+                        datoVirkFom = Tidspunkt.now(),
+                        g = BigDecimal(100000),
+                    ),
+                trygdetid = Trygdetid(emptyList()),
+            )
         every { behandlingService.opprettBeregningsgrunnlag(any(), any()) } returns mockk()
         every { behandlingService.beregn(capture(behandlingId)) } returns returnValue
 
-        val melding = JsonMessage.newMessage(
-            Migreringshendelser.BEREGN,
-            mapOf(
-                BEHANDLING_ID_KEY to "a9d42eb9-561f-4320-8bba-2ba600e66e21",
-                HENDELSE_DATA_KEY to request
+        val melding =
+            JsonMessage.newMessage(
+                Migreringshendelser.BEREGN,
+                mapOf(
+                    BEHANDLING_ID_KEY to "a9d42eb9-561f-4320-8bba-2ba600e66e21",
+                    HENDELSE_DATA_KEY to request,
+                ),
             )
-        )
 
         inspector.sendTestMessage(melding.toJson())
 
@@ -87,7 +91,7 @@ internal class MigreringHendelserTest {
         Assertions.assertEquals(1, inspector.inspektør.size)
         Assertions.assertEquals(
             beregningDTO.toJson(),
-            inspector.inspektør.message(0).get(BEREGNING_KEY).toJson()
+            inspector.inspektør.message(0).get(BEREGNING_KEY).toJson(),
         )
     }
 }

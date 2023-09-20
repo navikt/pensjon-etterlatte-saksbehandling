@@ -39,7 +39,6 @@ import java.time.LocalDateTime
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class OmregningIntegrationTest : BehandlingIntegrationTest() {
-
     @BeforeAll
     fun start() {
         startServer()
@@ -59,17 +58,19 @@ class OmregningIntegrationTest : BehandlingIntegrationTest() {
         private var sakId: Long = 0L
 
         fun opprettSakMedFoerstegangsbehandling(fnr: String): Pair<Sak, Foerstegangsbehandling?> {
-            val sak = inTransaction {
-                applicationContext.sakDao.opprettSak(fnr, SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr)
-            }
+            val sak =
+                inTransaction {
+                    applicationContext.sakDao.opprettSak(fnr, SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr)
+                }
 
-            val behandling = applicationContext.behandlingFactory
-                .opprettBehandling(
-                    sak.id,
-                    persongalleri(),
-                    LocalDateTime.now().toString(),
-                    Vedtaksloesning.GJENNY
-                )
+            val behandling =
+                applicationContext.behandlingFactory
+                    .opprettBehandling(
+                        sak.id,
+                        persongalleri(),
+                        LocalDateTime.now().toString(),
+                        Vedtaksloesning.GJENNY,
+                    )
 
             return Pair(sak, behandling as Foerstegangsbehandling)
         }
@@ -77,14 +78,15 @@ class OmregningIntegrationTest : BehandlingIntegrationTest() {
         @BeforeEach
         fun beforeEach() {
             val (sak, behandling) = opprettSakMedFoerstegangsbehandling("234")
-            val kommerBarnetTilgode = KommerBarnetTilgode(
-                JaNei.JA,
-                "",
-                Grunnlagsopplysning.Saksbehandler.create("A0"),
-                behandling!!.id
-            )
+            val kommerBarnetTilgode =
+                KommerBarnetTilgode(
+                    JaNei.JA,
+                    "",
+                    Grunnlagsopplysning.Saksbehandler.create("A0"),
+                    behandling!!.id,
+                )
             applicationContext.kommerBarnetTilGodeService.lagreKommerBarnetTilgode(
-                kommerBarnetTilgode
+                kommerBarnetTilgode,
             )
 
             sakId = sak.id
@@ -116,28 +118,30 @@ class OmregningIntegrationTest : BehandlingIntegrationTest() {
                 environment {
                     config = hoconApplicationConfig
                 }
-                val client = createClient {
-                    install(ContentNegotiation) {
-                        jackson { registerModule(JavaTimeModule()) }
+                val client =
+                    createClient {
+                        install(ContentNegotiation) {
+                            jackson { registerModule(JavaTimeModule()) }
+                        }
                     }
-                }
                 application { module(applicationContext) }
 
-                val (omregning) = client.post("/omregning") {
-                    addAuthToken(systemBruker)
-                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                    setBody(
-                        Omregningshendelse(
-                            sakId,
-                            LocalDate.now(),
-                            null,
-                            Prosesstype.AUTOMATISK
+                val (omregning) =
+                    client.post("/omregning") {
+                        addAuthToken(systemBruker)
+                        header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                        setBody(
+                            Omregningshendelse(
+                                sakId,
+                                LocalDate.now(),
+                                null,
+                                Prosesstype.AUTOMATISK,
+                            ),
                         )
-                    )
-                }.let {
-                    Assertions.assertEquals(HttpStatusCode.OK, it.status)
-                    it.body<OpprettOmregningResponse>()
-                }
+                    }.let {
+                        Assertions.assertEquals(HttpStatusCode.OK, it.status)
+                        it.body<OpprettOmregningResponse>()
+                    }
 
                 client.get("/behandlinger/$omregning") {
                     addAuthToken(tokenSaksbehandler)
@@ -159,11 +163,12 @@ class OmregningIntegrationTest : BehandlingIntegrationTest() {
             environment {
                 config = hoconApplicationConfig
             }
-            val client = createClient {
-                install(ContentNegotiation) {
-                    jackson { registerModule(JavaTimeModule()) }
+            val client =
+                createClient {
+                    install(ContentNegotiation) {
+                        jackson { registerModule(JavaTimeModule()) }
+                    }
                 }
-            }
             application { module(applicationContext) }
 
             client.post("/omregning") {

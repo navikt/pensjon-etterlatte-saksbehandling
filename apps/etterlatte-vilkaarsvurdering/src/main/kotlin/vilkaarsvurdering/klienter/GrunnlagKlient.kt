@@ -16,7 +16,10 @@ import no.nav.etterlatte.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
 
 interface GrunnlagKlient {
-    suspend fun hentGrunnlag(sakId: Long, brukerTokenInfo: BrukerTokenInfo): Grunnlag
+    suspend fun hentGrunnlag(
+        sakId: Long,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Grunnlag
 }
 
 class GrunnlagKlientException(override val message: String, override val cause: Throwable) : Exception(message, cause)
@@ -30,21 +33,25 @@ class GrunnlagKlientImpl(config: Config, httpClient: HttpClient) : GrunnlagKlien
     private val clientId = config.getString("grunnlag.client.id")
     private val resourceUrl = config.getString("grunnlag.resource.url")
 
-    override suspend fun hentGrunnlag(sakId: Long, brukerTokenInfo: BrukerTokenInfo): Grunnlag {
+    override suspend fun hentGrunnlag(
+        sakId: Long,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Grunnlag {
         logger.info("Henter grunnlag for sak med sakId=$sakId")
 
         return retry<Grunnlag> {
             downstreamResourceClient
                 .get(
-                    resource = Resource(
-                        clientId = clientId,
-                        url = "$resourceUrl/grunnlag/$sakId"
-                    ),
-                    brukerTokenInfo = brukerTokenInfo
+                    resource =
+                        Resource(
+                            clientId = clientId,
+                            url = "$resourceUrl/grunnlag/$sakId",
+                        ),
+                    brukerTokenInfo = brukerTokenInfo,
                 )
                 .mapBoth(
                     success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
-                    failure = { throwableErrorMessage -> throw throwableErrorMessage }
+                    failure = { throwableErrorMessage -> throw throwableErrorMessage },
                 )
         }.let {
             when (it) {
@@ -52,7 +59,7 @@ class GrunnlagKlientImpl(config: Config, httpClient: HttpClient) : GrunnlagKlien
                 is Failure -> {
                     throw GrunnlagKlientException(
                         "Klarte ikke hente grunnlag for sak med sakId=$sakId",
-                        it.samlaExceptions()
+                        it.samlaExceptions(),
                     )
                 }
             }

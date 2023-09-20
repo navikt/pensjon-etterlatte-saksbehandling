@@ -17,7 +17,10 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Utenlandsopphold 
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.UtenlandsoppholdOpplysninger as UtenlandsoppholdOpplysningerOld
 
 class Opplysningsuthenter {
-    fun lagOpplysningsListe(jsonNode: JsonNode, type: SoeknadType): List<Grunnlagsopplysning<out Any?>> {
+    fun lagOpplysningsListe(
+        jsonNode: JsonNode,
+        type: SoeknadType,
+    ): List<Grunnlagsopplysning<out Any?>> {
         return when (type) {
             SoeknadType.BARNEPENSJON -> BarnepensjonUthenter.lagOpplysningsListe(jsonNode)
             SoeknadType.OMSTILLINGSSTOENAD -> OmstillingsstoenadUthenter.lagOpplysningsListe(jsonNode)
@@ -34,25 +37,26 @@ internal fun avdoedOpplysning(avdoed: Avdoed): AvdoedSoeknad {
         foedselsnummer = avdoed.foedselsnummer.svar.toFolkeregisteridentifikator(),
         doedsdato = avdoed.datoForDoedsfallet.svar.innhold,
         statsborgerskap = avdoed.statsborgerskap.svar.innhold,
-        utenlandsopphold = UtenlandsoppholdOpplysningstype(
-            avdoed.utenlandsopphold.svar.verdi,
-            avdoed.utenlandsopphold.opplysning?.map { opphold ->
-                UtenlandsoppholdOpplysningerOld(
-                    opphold.land.svar.innhold,
-                    opphold.fraDato?.svar?.innhold,
-                    opphold.tilDato?.svar?.innhold,
-                    opphold.oppholdsType.svar.map { it.verdi },
-                    opphold.medlemFolketrygd.svar.verdi,
-                    opphold.pensjonsutbetaling?.svar?.innhold
-                )
-            }
-        ),
-        doedsaarsakSkyldesYrkesskadeEllerYrkessykdom = avdoed.doedsaarsakSkyldesYrkesskadeEllerYrkessykdom.svar.verdi
+        utenlandsopphold =
+            UtenlandsoppholdOpplysningstype(
+                avdoed.utenlandsopphold.svar.verdi,
+                avdoed.utenlandsopphold.opplysning?.map { opphold ->
+                    UtenlandsoppholdOpplysningerOld(
+                        opphold.land.svar.innhold,
+                        opphold.fraDato?.svar?.innhold,
+                        opphold.tilDato?.svar?.innhold,
+                        opphold.oppholdsType.svar.map { it.verdi },
+                        opphold.medlemFolketrygd.svar.verdi,
+                        opphold.pensjonsutbetaling?.svar?.innhold,
+                    )
+                },
+            ),
+        doedsaarsakSkyldesYrkesskadeEllerYrkessykdom = avdoed.doedsaarsakSkyldesYrkesskadeEllerYrkessykdom.svar.verdi,
     )
 }
 
 internal fun utbetalingsinformasjonOpplysning(
-    betalingsinformasjon: BetingetOpplysning<EnumSvar<BankkontoType>, UtbetalingsInformasjon>?
+    betalingsinformasjon: BetingetOpplysning<EnumSvar<BankkontoType>, UtbetalingsInformasjon>?,
 ): Utbetalingsinformasjon {
     return Utbetalingsinformasjon(
         betalingsinformasjon?.svar?.verdi,
@@ -62,7 +66,7 @@ internal fun utbetalingsinformasjonOpplysning(
         betalingsinformasjon?.opplysning?.iban?.svar?.innhold,
         betalingsinformasjon?.opplysning?.swift?.svar?.innhold,
         betalingsinformasjon?.opplysning?.skattetrekk?.svar?.verdi,
-        betalingsinformasjon?.opplysning?.skattetrekk?.opplysning?.svar?.innhold
+        betalingsinformasjon?.opplysning?.skattetrekk?.opplysning?.svar?.innhold,
     )
 }
 

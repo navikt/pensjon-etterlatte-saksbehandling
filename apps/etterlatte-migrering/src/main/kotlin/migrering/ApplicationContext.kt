@@ -13,11 +13,12 @@ import no.nav.etterlatte.migrering.pen.PenKlient
 
 internal class ApplicationContext {
     private val properties: ApplicationProperties = ApplicationProperties.fromEnv(System.getenv())
-    val dataSource = DataSourceBuilder.createDataSource(
-        jdbcUrl = properties.jdbcUrl,
-        username = properties.dbUsername,
-        password = properties.dbPassword
-    )
+    val dataSource =
+        DataSourceBuilder.createDataSource(
+            jdbcUrl = properties.jdbcUrl,
+            username = properties.dbUsername,
+            password = properties.dbPassword,
+        )
 
     private val config = ConfigFactory.load()
     val penklient = PenKlient(config, httpClient())
@@ -26,20 +27,22 @@ internal class ApplicationContext {
         FeatureToggleService.initialiser(featureToggleProperties(ConfigFactory.load()))
     val pesysRepository = PesysRepository(dataSource)
 
-    val pdlKlient = PDLKlient(
-        config,
-        httpClientClientCredentials(
-            azureAppClientId = config.getString("azure.app.client.id"),
-            azureAppJwk = config.getString("azure.app.jwk"),
-            azureAppWellKnownUrl = config.getString("azure.app.well.known.url"),
-            azureAppScope = config.getString("pdl.azure.scope")
+    val pdlKlient =
+        PDLKlient(
+            config,
+            httpClientClientCredentials(
+                azureAppClientId = config.getString("azure.app.client.id"),
+                azureAppJwk = config.getString("azure.app.jwk"),
+                azureAppWellKnownUrl = config.getString("azure.app.well.known.url"),
+                azureAppScope = config.getString("pdl.azure.scope"),
+            ),
         )
-    )
     val verifiserer = Verifiserer(pdlKlient = pdlKlient)
 }
 
-private fun featureToggleProperties(config: Config) = FeatureToggleProperties(
-    applicationName = config.getString("funksjonsbrytere.unleash.applicationName"),
-    host = config.getString("funksjonsbrytere.unleash.host"),
-    apiKey = config.getString("funksjonsbrytere.unleash.token")
-)
+private fun featureToggleProperties(config: Config) =
+    FeatureToggleProperties(
+        applicationName = config.getString("funksjonsbrytere.unleash.applicationName"),
+        host = config.getString("funksjonsbrytere.unleash.host"),
+        apiKey = config.getString("funksjonsbrytere.unleash.token"),
+    )

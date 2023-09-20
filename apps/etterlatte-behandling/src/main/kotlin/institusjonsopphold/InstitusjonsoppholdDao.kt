@@ -7,20 +7,21 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.database.singleOrNull
 import java.sql.Connection
-import java.util.*
+import java.util.UUID
 
 class InstitusjonsoppholdDao(private val connection: () -> Connection) {
     fun lagreInstitusjonsopphold(
         sakId: Long,
         saksbehandler: Grunnlagsopplysning.Saksbehandler,
-        institusjonoppholdBegrunnelse: InstitusjonsoppholdBegrunnelse
+        institusjonoppholdBegrunnelse: InstitusjonsoppholdBegrunnelse,
     ) {
         with(connection()) {
-            val statement = prepareStatement(
-                "INSERT INTO institusjonsoppholdhendelse(id, sak_id, kanGiReduksjon, kanGiReduksjonTekst," +
-                    "merEnnTreMaaneder, merEnnTreMaanederTekst, saksbehandler, grunnlagsendringshendelse_id) " +
-                    "VALUES(?::UUID, ?, ?, ?, ?, ?, ?, ?::UUID)"
-            )
+            val statement =
+                prepareStatement(
+                    "INSERT INTO institusjonsoppholdhendelse(id, sak_id, kanGiReduksjon, kanGiReduksjonTekst," +
+                        "merEnnTreMaaneder, merEnnTreMaanederTekst, saksbehandler, grunnlagsendringshendelse_id) " +
+                        "VALUES(?::UUID, ?, ?, ?, ?, ?, ?, ?::UUID)",
+                )
             statement.setString(1, UUID.randomUUID().toString())
             statement.setLong(2, sakId)
             statement.setString(3, institusjonoppholdBegrunnelse.kanGiReduksjonAvYtelse.svar.toString())
@@ -35,23 +36,26 @@ class InstitusjonsoppholdDao(private val connection: () -> Connection) {
 
     fun hentBegrunnelse(grunnlagsEndringshendelseId: String): InstitusjonsoppholdBegrunnelseMedSaksbehandler? {
         return with(connection()) {
-            val statement = prepareStatement(
-                "SELECT * from institusjonsoppholdhendelse" +
-                    " WHERE grunnlagsendringshendelse_id = ?::UUID"
-            )
+            val statement =
+                prepareStatement(
+                    "SELECT * from institusjonsoppholdhendelse" +
+                        " WHERE grunnlagsendringshendelse_id = ?::UUID",
+                )
             statement.setString(1, grunnlagsEndringshendelseId)
             statement.executeQuery().singleOrNull {
                 InstitusjonsoppholdBegrunnelseMedSaksbehandler(
-                    kanGiReduksjonAvYtelse = JaNeiMedBegrunnelse(
-                        svar = JaNei.valueOf(getString("kanGiReduksjon")),
-                        begrunnelse = getString("kanGiReduksjonTekst")
-                    ),
-                    forventetVarighetMerEnn3Maaneder = JaNeiMedBegrunnelse(
-                        svar = JaNei.valueOf(getString("merEnnTreMaaneder")),
-                        begrunnelse = getString("merEnnTreMaanederTekst")
-                    ),
+                    kanGiReduksjonAvYtelse =
+                        JaNeiMedBegrunnelse(
+                            svar = JaNei.valueOf(getString("kanGiReduksjon")),
+                            begrunnelse = getString("kanGiReduksjonTekst"),
+                        ),
+                    forventetVarighetMerEnn3Maaneder =
+                        JaNeiMedBegrunnelse(
+                            svar = JaNei.valueOf(getString("merEnnTreMaaneder")),
+                            begrunnelse = getString("merEnnTreMaanederTekst"),
+                        ),
                     grunnlagsEndringshendelseId = getString("grunnlagsendringshendelse_id"),
-                    saksbehandler = getString("saksbehandler").let { objectMapper.readValue(it) }
+                    saksbehandler = getString("saksbehandler").let { objectMapper.readValue(it) },
                 )
             }
         }

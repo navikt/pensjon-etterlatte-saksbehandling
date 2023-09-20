@@ -56,148 +56,166 @@ val ADRESSE_DEFAULT =
             land = null,
             kilde = "pdl",
             gyldigFraOgMed = LocalDateTime.parse("2012-02-16T00:00"),
-            gyldigTilOgMed = null
-        )
+            gyldigTilOgMed = null,
+        ),
     )
 
-internal val soekerTestopplysningerMap: Map<Opplysningstype, Opplysning<JsonNode>> = mapOf(
-    NAVN to Opplysning.Konstant(randomUUID(), kilde, Navn("Søker", "mellom", "Barn").toJsonNode()),
-    FOEDSELSNUMMER to Opplysning.Konstant(randomUUID(), kilde, SOEKER_FOEDSELSNUMMER.toJsonNode()),
-    FOEDSELSDATO to Opplysning.Konstant(randomUUID(), kilde, SOEKER_FOEDSELSNUMMER.getBirthDate().toJsonNode()),
-    FOEDSELSAAR to Opplysning.Konstant(randomUUID(), kilde, SOEKER_FOEDSELSNUMMER.getBirthDate().year.toJsonNode()),
-    FOEDELAND to Opplysning.Konstant(randomUUID(), kilde, "NOR".toJsonNode()),
-    ADRESSEBESKYTTELSE to Opplysning.Konstant(randomUUID(), kilde, AdressebeskyttelseGradering.UGRADERT.toJsonNode()),
-    BOSTEDSADRESSE to Opplysning.Konstant(
-        randomUUID(),
-        kilde = kilde,
-        verdi = ADRESSE_DEFAULT.toJsonNode()
-    ),
-    STATSBORGERSKAP to Opplysning.Konstant(randomUUID(), kilde, "NOR".toJsonNode()),
-    PERSONROLLE to Opplysning.Konstant(randomUUID(), kilde, PersonRolle.BARN.toJsonNode()),
-    FAMILIERELASJON to Opplysning.Konstant(
-        randomUUID(),
-        kilde,
-        FamilieRelasjon(
-            ansvarligeForeldre = listOf(AVDOED_FOEDSELSNUMMER, GJENLEVENDE_FOEDSELSNUMMER),
-            foreldre = listOf(AVDOED_FOEDSELSNUMMER, GJENLEVENDE_FOEDSELSNUMMER),
-            barn = null
-        ).toJsonNode()
+internal val soekerTestopplysningerMap: Map<Opplysningstype, Opplysning<JsonNode>> =
+    mapOf(
+        NAVN to Opplysning.Konstant(randomUUID(), kilde, Navn("Søker", "mellom", "Barn").toJsonNode()),
+        FOEDSELSNUMMER to Opplysning.Konstant(randomUUID(), kilde, SOEKER_FOEDSELSNUMMER.toJsonNode()),
+        FOEDSELSDATO to Opplysning.Konstant(randomUUID(), kilde, SOEKER_FOEDSELSNUMMER.getBirthDate().toJsonNode()),
+        FOEDSELSAAR to Opplysning.Konstant(randomUUID(), kilde, SOEKER_FOEDSELSNUMMER.getBirthDate().year.toJsonNode()),
+        FOEDELAND to Opplysning.Konstant(randomUUID(), kilde, "NOR".toJsonNode()),
+        ADRESSEBESKYTTELSE to Opplysning.Konstant(randomUUID(), kilde, AdressebeskyttelseGradering.UGRADERT.toJsonNode()),
+        BOSTEDSADRESSE to
+            Opplysning.Konstant(
+                randomUUID(),
+                kilde = kilde,
+                verdi = ADRESSE_DEFAULT.toJsonNode(),
+            ),
+        STATSBORGERSKAP to Opplysning.Konstant(randomUUID(), kilde, "NOR".toJsonNode()),
+        PERSONROLLE to Opplysning.Konstant(randomUUID(), kilde, PersonRolle.BARN.toJsonNode()),
+        FAMILIERELASJON to
+            Opplysning.Konstant(
+                randomUUID(),
+                kilde,
+                FamilieRelasjon(
+                    ansvarligeForeldre = listOf(AVDOED_FOEDSELSNUMMER, GJENLEVENDE_FOEDSELSNUMMER),
+                    foreldre = listOf(AVDOED_FOEDSELSNUMMER, GJENLEVENDE_FOEDSELSNUMMER),
+                    barn = null,
+                ).toJsonNode(),
+            ),
     )
-)
 
-internal val soeskenTestopplysningerMap: Map<Opplysningstype, Opplysning<JsonNode>> = mapOf(
-    NAVN to Opplysning.Konstant(randomUUID(), kilde, Navn("Hel", "mellom", "Søsken").toJsonNode()),
-    FOEDSELSNUMMER to Opplysning.Konstant(randomUUID(), kilde, HELSOESKEN_FOEDSELSNUMMER.toJsonNode()),
-    FOEDSELSDATO to Opplysning.Konstant(randomUUID(), kilde, HELSOESKEN_FOEDSELSNUMMER.getBirthDate().toJsonNode()),
-    FOEDSELSAAR to Opplysning.Konstant(randomUUID(), kilde, HELSOESKEN_FOEDSELSNUMMER.getBirthDate().year.toJsonNode()),
-    FOEDELAND to Opplysning.Konstant(randomUUID(), kilde, "NOR".toJsonNode()),
-    ADRESSEBESKYTTELSE to Opplysning.Konstant(randomUUID(), kilde, AdressebeskyttelseGradering.UGRADERT.toJsonNode()),
-    BOSTEDSADRESSE to Opplysning.Konstant(
-        randomUUID(),
-        kilde = kilde,
-        verdi = ADRESSE_DEFAULT.toJsonNode()
-    ),
-    STATSBORGERSKAP to Opplysning.Konstant(randomUUID(), kilde, "NOR".toJsonNode()),
-    PERSONROLLE to Opplysning.Konstant(randomUUID(), kilde, PersonRolle.BARN.toJsonNode()),
-    FAMILIERELASJON to Opplysning.Konstant(
-        randomUUID(),
-        kilde,
-        FamilieRelasjon(
-            ansvarligeForeldre = listOf(AVDOED_FOEDSELSNUMMER, GJENLEVENDE_FOEDSELSNUMMER),
-            foreldre = listOf(AVDOED_FOEDSELSNUMMER, GJENLEVENDE_FOEDSELSNUMMER),
-            barn = null
-        ).toJsonNode()
+internal val soeskenTestopplysningerMap: Map<Opplysningstype, Opplysning<JsonNode>> =
+    mapOf(
+        NAVN to Opplysning.Konstant(randomUUID(), kilde, Navn("Hel", "mellom", "Søsken").toJsonNode()),
+        FOEDSELSNUMMER to Opplysning.Konstant(randomUUID(), kilde, HELSOESKEN_FOEDSELSNUMMER.toJsonNode()),
+        FOEDSELSDATO to Opplysning.Konstant(randomUUID(), kilde, HELSOESKEN_FOEDSELSNUMMER.getBirthDate().toJsonNode()),
+        FOEDSELSAAR to Opplysning.Konstant(randomUUID(), kilde, HELSOESKEN_FOEDSELSNUMMER.getBirthDate().year.toJsonNode()),
+        FOEDELAND to Opplysning.Konstant(randomUUID(), kilde, "NOR".toJsonNode()),
+        ADRESSEBESKYTTELSE to Opplysning.Konstant(randomUUID(), kilde, AdressebeskyttelseGradering.UGRADERT.toJsonNode()),
+        BOSTEDSADRESSE to
+            Opplysning.Konstant(
+                randomUUID(),
+                kilde = kilde,
+                verdi = ADRESSE_DEFAULT.toJsonNode(),
+            ),
+        STATSBORGERSKAP to Opplysning.Konstant(randomUUID(), kilde, "NOR".toJsonNode()),
+        PERSONROLLE to Opplysning.Konstant(randomUUID(), kilde, PersonRolle.BARN.toJsonNode()),
+        FAMILIERELASJON to
+            Opplysning.Konstant(
+                randomUUID(),
+                kilde,
+                FamilieRelasjon(
+                    ansvarligeForeldre = listOf(AVDOED_FOEDSELSNUMMER, GJENLEVENDE_FOEDSELSNUMMER),
+                    foreldre = listOf(AVDOED_FOEDSELSNUMMER, GJENLEVENDE_FOEDSELSNUMMER),
+                    barn = null,
+                ).toJsonNode(),
+            ),
     )
-)
 
-internal val halvsoeskenTestopplysningerMap: Map<Opplysningstype, Opplysning<JsonNode>> = mapOf(
-    NAVN to Opplysning.Konstant(randomUUID(), kilde, Navn("Halv", "mellom", "Søsken").toJsonNode()),
-    FOEDSELSNUMMER to Opplysning.Konstant(randomUUID(), kilde, HALVSOESKEN_FOEDSELSNUMMER.toJsonNode()),
-    FOEDSELSDATO to Opplysning.Konstant(randomUUID(), kilde, HALVSOESKEN_FOEDSELSNUMMER.getBirthDate().toJsonNode()),
-    FOEDSELSAAR to Opplysning.Konstant(
-        randomUUID(),
-        kilde,
-        HALVSOESKEN_FOEDSELSNUMMER.getBirthDate().year.toJsonNode()
-    ),
-    FOEDELAND to Opplysning.Konstant(randomUUID(), kilde, "NOR".toJsonNode()),
-    ADRESSEBESKYTTELSE to Opplysning.Konstant(randomUUID(), kilde, AdressebeskyttelseGradering.UGRADERT.toJsonNode()),
-    BOSTEDSADRESSE to Opplysning.Konstant(
-        randomUUID(),
-        kilde = kilde,
-        verdi = ADRESSE_DEFAULT.toJsonNode()
-    ),
-    STATSBORGERSKAP to Opplysning.Konstant(randomUUID(), kilde, "NOR".toJsonNode()),
-    PERSONROLLE to Opplysning.Konstant(randomUUID(), kilde, PersonRolle.BARN.toJsonNode()),
-    FAMILIERELASJON to Opplysning.Konstant(
-        randomUUID(),
-        kilde,
-        FamilieRelasjon(
-            ansvarligeForeldre = listOf(AVDOED_FOEDSELSNUMMER, HALVSOESKEN_ANNEN_FORELDER),
-            foreldre = listOf(AVDOED_FOEDSELSNUMMER, HALVSOESKEN_ANNEN_FORELDER),
-            barn = null
-        ).toJsonNode()
+internal val halvsoeskenTestopplysningerMap: Map<Opplysningstype, Opplysning<JsonNode>> =
+    mapOf(
+        NAVN to Opplysning.Konstant(randomUUID(), kilde, Navn("Halv", "mellom", "Søsken").toJsonNode()),
+        FOEDSELSNUMMER to Opplysning.Konstant(randomUUID(), kilde, HALVSOESKEN_FOEDSELSNUMMER.toJsonNode()),
+        FOEDSELSDATO to Opplysning.Konstant(randomUUID(), kilde, HALVSOESKEN_FOEDSELSNUMMER.getBirthDate().toJsonNode()),
+        FOEDSELSAAR to
+            Opplysning.Konstant(
+                randomUUID(),
+                kilde,
+                HALVSOESKEN_FOEDSELSNUMMER.getBirthDate().year.toJsonNode(),
+            ),
+        FOEDELAND to Opplysning.Konstant(randomUUID(), kilde, "NOR".toJsonNode()),
+        ADRESSEBESKYTTELSE to Opplysning.Konstant(randomUUID(), kilde, AdressebeskyttelseGradering.UGRADERT.toJsonNode()),
+        BOSTEDSADRESSE to
+            Opplysning.Konstant(
+                randomUUID(),
+                kilde = kilde,
+                verdi = ADRESSE_DEFAULT.toJsonNode(),
+            ),
+        STATSBORGERSKAP to Opplysning.Konstant(randomUUID(), kilde, "NOR".toJsonNode()),
+        PERSONROLLE to Opplysning.Konstant(randomUUID(), kilde, PersonRolle.BARN.toJsonNode()),
+        FAMILIERELASJON to
+            Opplysning.Konstant(
+                randomUUID(),
+                kilde,
+                FamilieRelasjon(
+                    ansvarligeForeldre = listOf(AVDOED_FOEDSELSNUMMER, HALVSOESKEN_ANNEN_FORELDER),
+                    foreldre = listOf(AVDOED_FOEDSELSNUMMER, HALVSOESKEN_ANNEN_FORELDER),
+                    barn = null,
+                ).toJsonNode(),
+            ),
     )
-)
 
-internal val avdoedTestopplysningerMap: Map<Opplysningstype, Opplysning<JsonNode>> = mapOf(
-    NAVN to Opplysning.Konstant(randomUUID(), kilde, Navn("Død", "mellom", "Far").toJsonNode()),
-    FOEDSELSNUMMER to Opplysning.Konstant(randomUUID(), kilde, AVDOED_FOEDSELSNUMMER.toJsonNode()),
-    FOEDSELSDATO to Opplysning.Konstant(randomUUID(), kilde, AVDOED_FOEDSELSNUMMER.getBirthDate().toJsonNode()),
-    FOEDSELSAAR to Opplysning.Konstant(randomUUID(), kilde, AVDOED_FOEDSELSNUMMER.getBirthDate().year.toJsonNode()),
-    FOEDELAND to Opplysning.Konstant(randomUUID(), kilde, "NOR".toJsonNode()),
-    DOEDSDATO to Opplysning.Konstant(randomUUID(), kilde, LocalDateTime.parse("2022-08-17T00:00:00").toJsonNode()),
-    ADRESSEBESKYTTELSE to Opplysning.Konstant(randomUUID(), kilde, AdressebeskyttelseGradering.UGRADERT.toJsonNode()),
-    BOSTEDSADRESSE to Opplysning.Konstant(
-        randomUUID(),
-        kilde = kilde,
-        verdi = ADRESSE_DEFAULT.toJsonNode()
-    ),
-    SIVILSTATUS to Opplysning.Konstant(randomUUID(), kilde, Sivilstatus.GIFT.toJsonNode()),
-    STATSBORGERSKAP to Opplysning.Konstant(randomUUID(), kilde, "NOR".toJsonNode()),
-    PERSONROLLE to Opplysning.Konstant(randomUUID(), kilde, PersonRolle.AVDOED.toJsonNode()),
-    AVDOEDESBARN to Opplysning.Konstant(
-        randomUUID(),
-        kilde,
-        AvdoedesBarn(listOf(personTestData(soekerTestopplysningerMap), personTestData(soeskenTestopplysningerMap)))
-            .toJsonNode()
-    ),
-    FAMILIERELASJON to Opplysning.Konstant(
-        randomUUID(),
-        kilde,
-        FamilieRelasjon(
-            ansvarligeForeldre = emptyList(),
-            foreldre = emptyList(),
-            barn = listOf(SOEKER_FOEDSELSNUMMER, HELSOESKEN_FOEDSELSNUMMER)
-        ).toJsonNode()
+internal val avdoedTestopplysningerMap: Map<Opplysningstype, Opplysning<JsonNode>> =
+    mapOf(
+        NAVN to Opplysning.Konstant(randomUUID(), kilde, Navn("Død", "mellom", "Far").toJsonNode()),
+        FOEDSELSNUMMER to Opplysning.Konstant(randomUUID(), kilde, AVDOED_FOEDSELSNUMMER.toJsonNode()),
+        FOEDSELSDATO to Opplysning.Konstant(randomUUID(), kilde, AVDOED_FOEDSELSNUMMER.getBirthDate().toJsonNode()),
+        FOEDSELSAAR to Opplysning.Konstant(randomUUID(), kilde, AVDOED_FOEDSELSNUMMER.getBirthDate().year.toJsonNode()),
+        FOEDELAND to Opplysning.Konstant(randomUUID(), kilde, "NOR".toJsonNode()),
+        DOEDSDATO to Opplysning.Konstant(randomUUID(), kilde, LocalDateTime.parse("2022-08-17T00:00:00").toJsonNode()),
+        ADRESSEBESKYTTELSE to Opplysning.Konstant(randomUUID(), kilde, AdressebeskyttelseGradering.UGRADERT.toJsonNode()),
+        BOSTEDSADRESSE to
+            Opplysning.Konstant(
+                randomUUID(),
+                kilde = kilde,
+                verdi = ADRESSE_DEFAULT.toJsonNode(),
+            ),
+        SIVILSTATUS to Opplysning.Konstant(randomUUID(), kilde, Sivilstatus.GIFT.toJsonNode()),
+        STATSBORGERSKAP to Opplysning.Konstant(randomUUID(), kilde, "NOR".toJsonNode()),
+        PERSONROLLE to Opplysning.Konstant(randomUUID(), kilde, PersonRolle.AVDOED.toJsonNode()),
+        AVDOEDESBARN to
+            Opplysning.Konstant(
+                randomUUID(),
+                kilde,
+                AvdoedesBarn(listOf(personTestData(soekerTestopplysningerMap), personTestData(soeskenTestopplysningerMap)))
+                    .toJsonNode(),
+            ),
+        FAMILIERELASJON to
+            Opplysning.Konstant(
+                randomUUID(),
+                kilde,
+                FamilieRelasjon(
+                    ansvarligeForeldre = emptyList(),
+                    foreldre = emptyList(),
+                    barn = listOf(SOEKER_FOEDSELSNUMMER, HELSOESKEN_FOEDSELSNUMMER),
+                ).toJsonNode(),
+            ),
     )
-)
 
-internal val gjenlevendeTestopplysningerMap: Map<Opplysningstype, Opplysning<JsonNode>> = mapOf(
-    NAVN to Opplysning.Konstant(randomUUID(), kilde, Navn("Levende", "mellom", "Mor").toJsonNode()),
-    FOEDSELSNUMMER to Opplysning.Konstant(randomUUID(), kilde, GJENLEVENDE_FOEDSELSNUMMER.toJsonNode()),
-    FOEDSELSDATO to Opplysning.Konstant(randomUUID(), kilde, GJENLEVENDE_FOEDSELSNUMMER.getBirthDate().toJsonNode()),
-    FOEDSELSAAR to Opplysning.Konstant(
-        randomUUID(),
-        kilde,
-        GJENLEVENDE_FOEDSELSNUMMER.getBirthDate().year.toJsonNode()
-    ),
-    FOEDELAND to Opplysning.Konstant(randomUUID(), kilde, "NOR".toJsonNode()),
-    ADRESSEBESKYTTELSE to Opplysning.Konstant(randomUUID(), kilde, AdressebeskyttelseGradering.UGRADERT.toJsonNode()),
-    BOSTEDSADRESSE to Opplysning.Konstant(
-        randomUUID(),
-        kilde = kilde,
-        verdi = ADRESSE_DEFAULT.toJsonNode()
-    ),
-    SIVILSTATUS to Opplysning.Konstant(randomUUID(), kilde, Sivilstatus.GIFT.toJsonNode()),
-    STATSBORGERSKAP to Opplysning.Konstant(randomUUID(), kilde, "NOR".toJsonNode()),
-    PERSONROLLE to Opplysning.Konstant(randomUUID(), kilde, PersonRolle.GJENLEVENDE.toJsonNode()),
-    FAMILIERELASJON to Opplysning.Konstant(
-        randomUUID(),
-        kilde,
-        FamilieRelasjon(
-            ansvarligeForeldre = emptyList(),
-            foreldre = emptyList(),
-            barn = listOf(SOEKER_FOEDSELSNUMMER, HELSOESKEN_FOEDSELSNUMMER)
-        ).toJsonNode()
+internal val gjenlevendeTestopplysningerMap: Map<Opplysningstype, Opplysning<JsonNode>> =
+    mapOf(
+        NAVN to Opplysning.Konstant(randomUUID(), kilde, Navn("Levende", "mellom", "Mor").toJsonNode()),
+        FOEDSELSNUMMER to Opplysning.Konstant(randomUUID(), kilde, GJENLEVENDE_FOEDSELSNUMMER.toJsonNode()),
+        FOEDSELSDATO to Opplysning.Konstant(randomUUID(), kilde, GJENLEVENDE_FOEDSELSNUMMER.getBirthDate().toJsonNode()),
+        FOEDSELSAAR to
+            Opplysning.Konstant(
+                randomUUID(),
+                kilde,
+                GJENLEVENDE_FOEDSELSNUMMER.getBirthDate().year.toJsonNode(),
+            ),
+        FOEDELAND to Opplysning.Konstant(randomUUID(), kilde, "NOR".toJsonNode()),
+        ADRESSEBESKYTTELSE to Opplysning.Konstant(randomUUID(), kilde, AdressebeskyttelseGradering.UGRADERT.toJsonNode()),
+        BOSTEDSADRESSE to
+            Opplysning.Konstant(
+                randomUUID(),
+                kilde = kilde,
+                verdi = ADRESSE_DEFAULT.toJsonNode(),
+            ),
+        SIVILSTATUS to Opplysning.Konstant(randomUUID(), kilde, Sivilstatus.GIFT.toJsonNode()),
+        STATSBORGERSKAP to Opplysning.Konstant(randomUUID(), kilde, "NOR".toJsonNode()),
+        PERSONROLLE to Opplysning.Konstant(randomUUID(), kilde, PersonRolle.GJENLEVENDE.toJsonNode()),
+        FAMILIERELASJON to
+            Opplysning.Konstant(
+                randomUUID(),
+                kilde,
+                FamilieRelasjon(
+                    ansvarligeForeldre = emptyList(),
+                    foreldre = emptyList(),
+                    barn = listOf(SOEKER_FOEDSELSNUMMER, HELSOESKEN_FOEDSELSNUMMER),
+                ).toJsonNode(),
+            ),
     )
-)

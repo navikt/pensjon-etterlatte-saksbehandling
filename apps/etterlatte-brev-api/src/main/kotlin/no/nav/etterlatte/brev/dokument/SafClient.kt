@@ -30,7 +30,7 @@ import org.slf4j.LoggerFactory
 class SafClient(
     private val httpClient: HttpClient,
     private val baseUrl: String,
-    private val safScope: String
+    private val safScope: String,
 ) : SafService {
     private val logger = LoggerFactory.getLogger(SafService::class.java)
 
@@ -41,56 +41,63 @@ class SafClient(
     override suspend fun hentDokumentPDF(
         journalpostId: String,
         dokumentInfoId: String,
-        accessToken: String
-    ): ByteArray = try {
-        httpClient.get("$baseUrl/rest/hentdokument/$journalpostId/$dokumentInfoId/ARKIV") {
-            header("Authorization", "Bearer ${getToken(accessToken)}")
-            header("Content-Type", "application/json")
-        }.body()
-    } catch (ex: Exception) {
-        throw JournalpostException("Feil ved kall til hentdokument", ex)
-    }
+        accessToken: String,
+    ): ByteArray =
+        try {
+            httpClient.get("$baseUrl/rest/hentdokument/$journalpostId/$dokumentInfoId/ARKIV") {
+                header("Authorization", "Bearer ${getToken(accessToken)}")
+                header("Content-Type", "application/json")
+            }.body()
+        } catch (ex: Exception) {
+            throw JournalpostException("Feil ved kall til hentdokument", ex)
+        }
 
     override suspend fun hentDokumenter(
         fnr: String,
         idType: BrukerIdType,
-        brukerTokenInfo: BrukerTokenInfo
+        brukerTokenInfo: BrukerTokenInfo,
     ): HentJournalposterResult {
-        val request = GraphqlRequest(
-            query = getQuery("/graphql/journalpost.graphql"),
-            variables = DokumentOversiktBrukerVariables(
-                brukerId = BrukerId(
-                    id = fnr,
-                    type = idType
-                ),
-                10 // TODO: Finn en grense eller fiks paginering
+        val request =
+            GraphqlRequest(
+                query = getQuery("/graphql/journalpost.graphql"),
+                variables =
+                    DokumentOversiktBrukerVariables(
+                        brukerId =
+                            BrukerId(
+                                id = fnr,
+                                type = idType,
+                            ),
+                        10, // TODO: Finn en grense eller fiks paginering
+                    ),
             )
-        )
 
         return retry {
-            val res = httpClient.post("$baseUrl/graphql") {
-                header("Authorization", "Bearer ${getToken(brukerTokenInfo.accessToken())}")
-                accept(ContentType.Application.Json)
-                setBody(TextContent(request.toJson(), ContentType.Application.Json))
-            }
+            val res =
+                httpClient.post("$baseUrl/graphql") {
+                    header("Authorization", "Bearer ${getToken(brukerTokenInfo.accessToken())}")
+                    accept(ContentType.Application.Json)
+                    setBody(TextContent(request.toJson(), ContentType.Application.Json))
+                }
 
             if (res.status.isSuccess()) {
-                val journalposter: List<Journalpost> = res.body<JournalpostResponse>()
-                    .data?.dokumentoversiktBruker?.journalposter ?: emptyList()
+                val journalposter: List<Journalpost> =
+                    res.body<JournalpostResponse>()
+                        .data?.dokumentoversiktBruker?.journalposter ?: emptyList()
 
                 HentJournalposterResult(journalposter = journalposter)
             } else if (res.status == HttpStatusCode.Forbidden) {
                 val error = res.bodyAsText()
                 logger.warn(
                     "Saksbehandler ${brukerTokenInfo.ident()} " +
-                        "har ikke tilgang til å hente journalposter for bruker: $error"
+                        "har ikke tilgang til å hente journalposter for bruker: $error",
                 )
 
                 HentJournalposterResult(
-                    error = HentJournalposterResult.Error(
-                        HttpStatusCode.Forbidden,
-                        error
-                    )
+                    error =
+                        HentJournalposterResult.Error(
+                            HttpStatusCode.Forbidden,
+                            error,
+                        ),
                 )
             } else {
                 throw ResponseException(res, "Ukjent feil oppsto ved henting av journalposter")
@@ -110,10 +117,11 @@ class SafClient(
     }
 
     private suspend fun getToken(accessToken: String): String {
-        val token = azureAdClient.getOnBehalfOfAccessTokenForResource(
-            listOf(safScope),
-            accessToken
-        )
+        val token =
+            azureAdClient.getOnBehalfOfAccessTokenForResource(
+                listOf(safScope),
+                accessToken,
+            )
         return token.get()?.accessToken ?: ""
     }
 }

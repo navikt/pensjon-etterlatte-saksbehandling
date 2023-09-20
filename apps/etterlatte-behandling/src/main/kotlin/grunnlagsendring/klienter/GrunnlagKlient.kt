@@ -20,18 +20,25 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 
 interface GrunnlagKlient {
     suspend fun hentGrunnlag(sakId: Long): Grunnlag?
+
     suspend fun hentAlleSakIder(fnr: String): Set<Long>
+
     suspend fun hentPersonSakOgRolle(fnr: String): PersonMedSakerOgRoller
+
     suspend fun leggInnNyttGrunnlag(opplysningsbehov: Opplysningsbehov)
+
     suspend fun hentPersongalleri(sakId: Long): Grunnlagsopplysning<Persongalleri>?
-    suspend fun lagreNyeSaksopplysninger(sakId: Long, saksopplysninger: NyeSaksopplysninger)
+
+    suspend fun lagreNyeSaksopplysninger(
+        sakId: Long,
+        saksopplysninger: NyeSaksopplysninger,
+    )
 }
 
 class GrunnlagKlientImpl(
     config: Config,
-    private val grunnlagHttpClient: HttpClient
+    private val grunnlagHttpClient: HttpClient,
 ) : GrunnlagKlient {
-
     private val url = config.getString("grunnlag.resource.url")
 
     override suspend fun leggInnNyttGrunnlag(opplysningsbehov: Opplysningsbehov) {
@@ -43,7 +50,10 @@ class GrunnlagKlientImpl(
             }.body()
     }
 
-    override suspend fun lagreNyeSaksopplysninger(sakId: Long, saksopplysninger: NyeSaksopplysninger) {
+    override suspend fun lagreNyeSaksopplysninger(
+        sakId: Long,
+        saksopplysninger: NyeSaksopplysninger,
+    ) {
         return grunnlagHttpClient
             .post("$url/grunnlag/$sakId/nye-opplysninger") {
                 accept(ContentType.Application.Json)

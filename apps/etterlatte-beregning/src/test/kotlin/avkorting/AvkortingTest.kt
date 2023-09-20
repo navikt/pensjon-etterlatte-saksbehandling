@@ -24,28 +24,29 @@ import no.nav.etterlatte.libs.common.periode.Periode
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import java.time.YearMonth
-import java.util.*
+import java.util.UUID
 
 internal class AvkortingTest {
-
     @Nested
     inner class AvkortetYtelseFraVirkningstidspunkt {
-
-        val avkorting = Avkorting(
-            aarsoppgjoer = Aarsoppgjoer(
-                avkortetYtelseAar = listOf(
-                    avkortetYtelse(
-                        periode = Periode(fom = YearMonth.of(2023, 3), tom = YearMonth.of(2023, 4))
+        val avkorting =
+            Avkorting(
+                aarsoppgjoer =
+                    Aarsoppgjoer(
+                        avkortetYtelseAar =
+                            listOf(
+                                avkortetYtelse(
+                                    periode = Periode(fom = YearMonth.of(2023, 3), tom = YearMonth.of(2023, 4)),
+                                ),
+                                avkortetYtelse(
+                                    periode = Periode(fom = YearMonth.of(2023, 5), tom = YearMonth.of(2023, 7)),
+                                ),
+                                avkortetYtelse(
+                                    periode = Periode(fom = YearMonth.of(2023, 8), tom = null),
+                                ),
+                            ),
                     ),
-                    avkortetYtelse(
-                        periode = Periode(fom = YearMonth.of(2023, 5), tom = YearMonth.of(2023, 7))
-                    ),
-                    avkortetYtelse(
-                        periode = Periode(fom = YearMonth.of(2023, 8), tom = null)
-                    ),
-                )
             )
-        )
 
         @Test
         fun `fyller ut avkortet ytelse foer virkningstidspunkt ved aa kutte aarsoppgjoer fra virkningstidspunkt`() {
@@ -85,30 +86,32 @@ internal class AvkortingTest {
                 }
             }
         }
-
     }
 
     @Nested
     inner class KopierAvkorting {
-
         private val virkningstidspunkt = YearMonth.of(2023, 7)
         private val beregningId = UUID.randomUUID()
 
-        private val eksisterendeAvkorting = Avkorting(
-            aarsoppgjoer = Aarsoppgjoer(
-                ytelseFoerAvkorting = listOf(
-                    YtelseFoerAvkorting(
-                        beregning = 20902,
-                        periode = Periode(virkningstidspunkt, null),
-                        beregningsreferanse = beregningId
-                    )
-                ),
-                inntektsavkorting = listOf(
-                    Inntektsavkorting(avkortinggrunnlag()),
-                    Inntektsavkorting(avkortinggrunnlag())
-                )
+        private val eksisterendeAvkorting =
+            Avkorting(
+                aarsoppgjoer =
+                    Aarsoppgjoer(
+                        ytelseFoerAvkorting =
+                            listOf(
+                                YtelseFoerAvkorting(
+                                    beregning = 20902,
+                                    periode = Periode(virkningstidspunkt, null),
+                                    beregningsreferanse = beregningId,
+                                ),
+                            ),
+                        inntektsavkorting =
+                            listOf(
+                                Inntektsavkorting(avkortinggrunnlag()),
+                                Inntektsavkorting(avkortinggrunnlag()),
+                            ),
+                    ),
             )
-        )
 
         private val nyAvkorting = eksisterendeAvkorting.kopierAvkorting()
 
@@ -130,30 +133,32 @@ internal class AvkortingTest {
                     YtelseFoerAvkorting(
                         beregning = 20902,
                         periode = Periode(fom = virkningstidspunkt, tom = null),
-                        beregningsreferanse = beregningId
-                    )
+                        beregningsreferanse = beregningId,
+                    ),
                 )
             }
         }
-
     }
 
     @Nested
     inner class OppdaterMedInntektsgrunnlag {
-
-        private val foersteGrunnlag = avkortinggrunnlag(
-            periode = Periode(fom = YearMonth.of(2023, 1), tom = YearMonth.of(2023, 3))
-        )
-        private val andreGrunnlag = avkortinggrunnlag(
-            aarsinntekt = 1000000,
-            periode = Periode(fom = YearMonth.of(2023, 4), tom = null)
-        )
-        private val avkorting = avkorting(
-            inntektsavkorting = listOf(
-                Inntektsavkorting(foersteGrunnlag),
-                Inntektsavkorting(andreGrunnlag)
+        private val foersteGrunnlag =
+            avkortinggrunnlag(
+                periode = Periode(fom = YearMonth.of(2023, 1), tom = YearMonth.of(2023, 3)),
             )
-        )
+        private val andreGrunnlag =
+            avkortinggrunnlag(
+                aarsinntekt = 1000000,
+                periode = Periode(fom = YearMonth.of(2023, 4), tom = null),
+            )
+        private val avkorting =
+            avkorting(
+                inntektsavkorting =
+                    listOf(
+                        Inntektsavkorting(foersteGrunnlag),
+                        Inntektsavkorting(andreGrunnlag),
+                    ),
+            )
 
         @Test
         fun `Eksisterer det grunnlag med samme id skal eksisterende grunnlag oppdateres uten aa legge til nytt`() {
@@ -164,7 +169,7 @@ internal class AvkortingTest {
             oppdatertAvkorting.shouldBeEqualToIgnoringFields(avkorting, Avkorting::aarsoppgjoer)
             oppdatertAvkorting.aarsoppgjoer.shouldBeEqualToIgnoringFields(
                 avkorting.aarsoppgjoer,
-                Aarsoppgjoer::inntektsavkorting
+                Aarsoppgjoer::inntektsavkorting,
             )
             with(oppdatertAvkorting.aarsoppgjoer.inntektsavkorting) {
                 size shouldBe 2
@@ -182,7 +187,7 @@ internal class AvkortingTest {
             oppdatertAvkorting.shouldBeEqualToIgnoringFields(avkorting, Avkorting::aarsoppgjoer)
             oppdatertAvkorting.aarsoppgjoer.shouldBeEqualToIgnoringFields(
                 avkorting.aarsoppgjoer,
-                Aarsoppgjoer::inntektsavkorting
+                Aarsoppgjoer::inntektsavkorting,
             )
             with(oppdatertAvkorting.aarsoppgjoer.inntektsavkorting) {
                 size shouldBe 3
@@ -196,7 +201,6 @@ internal class AvkortingTest {
 
     @Nested
     inner class BeregnAvkorting {
-
         @Test
         fun `Beregner avkortet ytelse for foerstegangsbehandling`() {
             val avkorting = `Avkorting foerstegangsbehandling`()
@@ -211,12 +215,12 @@ internal class AvkortingTest {
                         avkortingsbeloep = 9160,
                         ytelseFoerAvkorting = 15676,
                         type = AvkortetYtelseType.AARSOPPGJOER,
-                        inntektsgrunnlag = null
+                        inntektsgrunnlag = null,
                     ),
                     AvkortetYtelse::id,
                     AvkortetYtelse::tidspunkt,
                     AvkortetYtelse::regelResultat,
-                    AvkortetYtelse::kilde
+                    AvkortetYtelse::kilde,
                 )
                 get(1).shouldBeEqualToIgnoringFields(
                     avkortetYtelse(
@@ -227,12 +231,12 @@ internal class AvkortingTest {
                         avkortingsbeloep = 9026,
                         ytelseFoerAvkorting = 16682,
                         type = AvkortetYtelseType.AARSOPPGJOER,
-                        inntektsgrunnlag = null
+                        inntektsgrunnlag = null,
                     ),
                     AvkortetYtelse::id,
                     AvkortetYtelse::tidspunkt,
                     AvkortetYtelse::regelResultat,
-                    AvkortetYtelse::kilde
+                    AvkortetYtelse::kilde,
                 )
             }
         }
@@ -251,13 +255,13 @@ internal class AvkortingTest {
                             ytelseEtterAvkortingFoerRestanse = 6516,
                             avkortingsbeloep = 9160,
                             ytelseFoerAvkorting = 15676,
-                            inntektsgrunnlag = null
+                            inntektsgrunnlag = null,
                         ),
                         AvkortetYtelse::id,
                         AvkortetYtelse::tidspunkt,
                         AvkortetYtelse::regelResultat,
                         AvkortetYtelse::kilde,
-                        AvkortetYtelse::restanse
+                        AvkortetYtelse::restanse,
                     )
                     it.restanse!!.shouldBeEqualToIgnoringFields(
                         restanse(
@@ -267,7 +271,7 @@ internal class AvkortingTest {
                         Restanse::id,
                         AvkortetYtelse::tidspunkt,
                         AvkortetYtelse::regelResultat,
-                        AvkortetYtelse::kilde
+                        AvkortetYtelse::kilde,
                     )
                 }
                 get(1).asClue {
@@ -279,13 +283,13 @@ internal class AvkortingTest {
                             ytelseEtterAvkortingFoerRestanse = 7656,
                             avkortingsbeloep = 9026,
                             ytelseFoerAvkorting = 16682,
-                            inntektsgrunnlag = null
+                            inntektsgrunnlag = null,
                         ),
                         AvkortetYtelse::id,
                         AvkortetYtelse::tidspunkt,
                         AvkortetYtelse::regelResultat,
                         AvkortetYtelse::kilde,
-                        AvkortetYtelse::restanse
+                        AvkortetYtelse::restanse,
                     )
                     it.restanse!!.shouldBeEqualToIgnoringFields(
                         restanse(
@@ -295,7 +299,7 @@ internal class AvkortingTest {
                         Restanse::id,
                         AvkortetYtelse::tidspunkt,
                         AvkortetYtelse::regelResultat,
-                        AvkortetYtelse::kilde
+                        AvkortetYtelse::kilde,
                     )
                 }
                 get(2).asClue {
@@ -307,13 +311,13 @@ internal class AvkortingTest {
                             ytelseEtterAvkortingFoerRestanse = 3156,
                             avkortingsbeloep = 13526,
                             ytelseFoerAvkorting = 16682,
-                            inntektsgrunnlag = null
+                            inntektsgrunnlag = null,
                         ),
                         AvkortetYtelse::id,
                         AvkortetYtelse::tidspunkt,
                         AvkortetYtelse::regelResultat,
                         AvkortetYtelse::kilde,
-                        AvkortetYtelse::restanse
+                        AvkortetYtelse::restanse,
                     )
                     it.restanse!!.shouldBeEqualToIgnoringFields(
                         restanse(
@@ -323,7 +327,7 @@ internal class AvkortingTest {
                         Restanse::id,
                         AvkortetYtelse::tidspunkt,
                         AvkortetYtelse::regelResultat,
-                        AvkortetYtelse::kilde
+                        AvkortetYtelse::kilde,
                     )
                 }
             }
@@ -343,13 +347,13 @@ internal class AvkortingTest {
                             ytelseEtterAvkortingFoerRestanse = 6516,
                             avkortingsbeloep = 9160,
                             ytelseFoerAvkorting = 15676,
-                            inntektsgrunnlag = null
+                            inntektsgrunnlag = null,
                         ),
                         AvkortetYtelse::id,
                         AvkortetYtelse::tidspunkt,
                         AvkortetYtelse::regelResultat,
                         AvkortetYtelse::kilde,
-                        AvkortetYtelse::restanse
+                        AvkortetYtelse::restanse,
                     )
                     it.restanse!!.shouldBeEqualToIgnoringFields(
                         restanse(
@@ -359,7 +363,7 @@ internal class AvkortingTest {
                         Restanse::id,
                         AvkortetYtelse::tidspunkt,
                         AvkortetYtelse::regelResultat,
-                        AvkortetYtelse::kilde
+                        AvkortetYtelse::kilde,
                     )
                 }
                 get(1).asClue {
@@ -371,13 +375,13 @@ internal class AvkortingTest {
                             ytelseEtterAvkortingFoerRestanse = 7656,
                             avkortingsbeloep = 9026,
                             ytelseFoerAvkorting = 16682,
-                            inntektsgrunnlag = null
+                            inntektsgrunnlag = null,
                         ),
                         AvkortetYtelse::id,
                         AvkortetYtelse::tidspunkt,
                         AvkortetYtelse::regelResultat,
                         AvkortetYtelse::kilde,
-                        AvkortetYtelse::restanse
+                        AvkortetYtelse::restanse,
                     )
                     it.restanse!!.shouldBeEqualToIgnoringFields(
                         restanse(
@@ -387,7 +391,7 @@ internal class AvkortingTest {
                         Restanse::id,
                         AvkortetYtelse::tidspunkt,
                         AvkortetYtelse::regelResultat,
-                        AvkortetYtelse::kilde
+                        AvkortetYtelse::kilde,
                     )
                 }
                 get(2).asClue {
@@ -399,13 +403,13 @@ internal class AvkortingTest {
                             ytelseEtterAvkortingFoerRestanse = 3156,
                             avkortingsbeloep = 13526,
                             ytelseFoerAvkorting = 16682,
-                            inntektsgrunnlag = null
+                            inntektsgrunnlag = null,
                         ),
                         AvkortetYtelse::id,
                         AvkortetYtelse::tidspunkt,
                         AvkortetYtelse::regelResultat,
                         AvkortetYtelse::kilde,
-                        AvkortetYtelse::restanse
+                        AvkortetYtelse::restanse,
                     )
                     it.restanse!!.shouldBeEqualToIgnoringFields(
                         restanse(
@@ -415,7 +419,7 @@ internal class AvkortingTest {
                         Restanse::id,
                         AvkortetYtelse::tidspunkt,
                         AvkortetYtelse::regelResultat,
-                        AvkortetYtelse::kilde
+                        AvkortetYtelse::kilde,
                     )
                 }
                 get(3).asClue {
@@ -427,13 +431,13 @@ internal class AvkortingTest {
                             ytelseEtterAvkortingFoerRestanse = 906,
                             avkortingsbeloep = 15776,
                             ytelseFoerAvkorting = 16682,
-                            inntektsgrunnlag = null
+                            inntektsgrunnlag = null,
                         ),
                         AvkortetYtelse::id,
                         AvkortetYtelse::tidspunkt,
                         AvkortetYtelse::regelResultat,
                         AvkortetYtelse::kilde,
-                        AvkortetYtelse::restanse
+                        AvkortetYtelse::restanse,
                     )
                     it.restanse!!.shouldBeEqualToIgnoringFields(
                         restanse(
@@ -443,7 +447,7 @@ internal class AvkortingTest {
                         Restanse::id,
                         AvkortetYtelse::tidspunkt,
                         AvkortetYtelse::regelResultat,
-                        AvkortetYtelse::kilde
+                        AvkortetYtelse::kilde,
                     )
                 }
             }
@@ -463,13 +467,13 @@ internal class AvkortingTest {
                             ytelseEtterAvkortingFoerRestanse = 11742,
                             avkortingsbeloep = 9160,
                             ytelseFoerAvkorting = 20902,
-                            inntektsgrunnlag = null
+                            inntektsgrunnlag = null,
                         ),
                         AvkortetYtelse::id,
                         AvkortetYtelse::tidspunkt,
                         AvkortetYtelse::regelResultat,
                         AvkortetYtelse::kilde,
-                        AvkortetYtelse::restanse
+                        AvkortetYtelse::restanse,
                     )
                     it.restanse!!.shouldBeEqualToIgnoringFields(
                         restanse(
@@ -479,7 +483,7 @@ internal class AvkortingTest {
                         Restanse::id,
                         AvkortetYtelse::tidspunkt,
                         AvkortetYtelse::regelResultat,
-                        AvkortetYtelse::kilde
+                        AvkortetYtelse::kilde,
                     )
                 }
                 get(1).asClue {
@@ -491,13 +495,13 @@ internal class AvkortingTest {
                             ytelseEtterAvkortingFoerRestanse = 13215,
                             avkortingsbeloep = 9026,
                             ytelseFoerAvkorting = 22241,
-                            inntektsgrunnlag = null
+                            inntektsgrunnlag = null,
                         ),
                         AvkortetYtelse::id,
                         AvkortetYtelse::tidspunkt,
                         AvkortetYtelse::regelResultat,
                         AvkortetYtelse::kilde,
-                        AvkortetYtelse::restanse
+                        AvkortetYtelse::restanse,
                     )
                     it.restanse!!.shouldBeEqualToIgnoringFields(
                         restanse(
@@ -507,7 +511,7 @@ internal class AvkortingTest {
                         Restanse::id,
                         AvkortetYtelse::tidspunkt,
                         AvkortetYtelse::regelResultat,
-                        AvkortetYtelse::kilde
+                        AvkortetYtelse::kilde,
                     )
                 }
                 get(2).asClue {
@@ -519,13 +523,13 @@ internal class AvkortingTest {
                             ytelseEtterAvkortingFoerRestanse = 8715,
                             avkortingsbeloep = 13526,
                             ytelseFoerAvkorting = 22241,
-                            inntektsgrunnlag = null
+                            inntektsgrunnlag = null,
                         ),
                         AvkortetYtelse::id,
                         AvkortetYtelse::tidspunkt,
                         AvkortetYtelse::regelResultat,
                         AvkortetYtelse::kilde,
-                        AvkortetYtelse::restanse
+                        AvkortetYtelse::restanse,
                     )
                     it.restanse!!.shouldBeEqualToIgnoringFields(
                         restanse(
@@ -535,7 +539,7 @@ internal class AvkortingTest {
                         Restanse::id,
                         AvkortetYtelse::tidspunkt,
                         AvkortetYtelse::regelResultat,
-                        AvkortetYtelse::kilde
+                        AvkortetYtelse::kilde,
                     )
                 }
                 get(3).asClue {
@@ -547,13 +551,13 @@ internal class AvkortingTest {
                             ytelseEtterAvkortingFoerRestanse = 6465,
                             avkortingsbeloep = 15776,
                             ytelseFoerAvkorting = 22241,
-                            inntektsgrunnlag = null
+                            inntektsgrunnlag = null,
                         ),
                         AvkortetYtelse::id,
                         AvkortetYtelse::tidspunkt,
                         AvkortetYtelse::regelResultat,
                         AvkortetYtelse::kilde,
-                        AvkortetYtelse::restanse
+                        AvkortetYtelse::restanse,
                     )
                     it.restanse!!.shouldBeEqualToIgnoringFields(
                         restanse(
@@ -563,7 +567,7 @@ internal class AvkortingTest {
                         Restanse::id,
                         AvkortetYtelse::tidspunkt,
                         AvkortetYtelse::regelResultat,
-                        AvkortetYtelse::kilde
+                        AvkortetYtelse::kilde,
                     )
                 }
             }
@@ -583,13 +587,13 @@ internal class AvkortingTest {
                             ytelseEtterAvkortingFoerRestanse = 11742,
                             avkortingsbeloep = 9160,
                             ytelseFoerAvkorting = 20902,
-                            inntektsgrunnlag = null
+                            inntektsgrunnlag = null,
                         ),
                         AvkortetYtelse::id,
                         AvkortetYtelse::tidspunkt,
                         AvkortetYtelse::regelResultat,
                         AvkortetYtelse::kilde,
-                        AvkortetYtelse::restanse
+                        AvkortetYtelse::restanse,
                     )
                     it.restanse!!.shouldBeEqualToIgnoringFields(
                         restanse(
@@ -599,7 +603,7 @@ internal class AvkortingTest {
                         Restanse::id,
                         AvkortetYtelse::tidspunkt,
                         AvkortetYtelse::regelResultat,
-                        AvkortetYtelse::kilde
+                        AvkortetYtelse::kilde,
                     )
                 }
                 get(1).asClue {
@@ -611,13 +615,13 @@ internal class AvkortingTest {
                             ytelseEtterAvkortingFoerRestanse = 13215,
                             avkortingsbeloep = 9026,
                             ytelseFoerAvkorting = 22241,
-                            inntektsgrunnlag = null
+                            inntektsgrunnlag = null,
                         ),
                         AvkortetYtelse::id,
                         AvkortetYtelse::tidspunkt,
                         AvkortetYtelse::regelResultat,
                         AvkortetYtelse::kilde,
-                        AvkortetYtelse::restanse
+                        AvkortetYtelse::restanse,
                     )
                     it.restanse!!.shouldBeEqualToIgnoringFields(
                         restanse(
@@ -627,7 +631,7 @@ internal class AvkortingTest {
                         Restanse::id,
                         AvkortetYtelse::tidspunkt,
                         AvkortetYtelse::regelResultat,
-                        AvkortetYtelse::kilde
+                        AvkortetYtelse::kilde,
                     )
                 }
                 get(2).asClue {
@@ -639,13 +643,13 @@ internal class AvkortingTest {
                             ytelseEtterAvkortingFoerRestanse = 8715,
                             avkortingsbeloep = 13526,
                             ytelseFoerAvkorting = 22241,
-                            inntektsgrunnlag = null
+                            inntektsgrunnlag = null,
                         ),
                         AvkortetYtelse::id,
                         AvkortetYtelse::tidspunkt,
                         AvkortetYtelse::regelResultat,
                         AvkortetYtelse::kilde,
-                        AvkortetYtelse::restanse
+                        AvkortetYtelse::restanse,
                     )
                     it.restanse!!.shouldBeEqualToIgnoringFields(
                         restanse(
@@ -655,7 +659,7 @@ internal class AvkortingTest {
                         Restanse::id,
                         AvkortetYtelse::tidspunkt,
                         AvkortetYtelse::regelResultat,
-                        AvkortetYtelse::kilde
+                        AvkortetYtelse::kilde,
                     )
                 }
                 get(3).asClue {
@@ -667,13 +671,13 @@ internal class AvkortingTest {
                             ytelseEtterAvkortingFoerRestanse = 7590,
                             avkortingsbeloep = 14651,
                             ytelseFoerAvkorting = 22241,
-                            inntektsgrunnlag = null
+                            inntektsgrunnlag = null,
                         ),
                         AvkortetYtelse::id,
                         AvkortetYtelse::tidspunkt,
                         AvkortetYtelse::regelResultat,
                         AvkortetYtelse::kilde,
-                        AvkortetYtelse::restanse
+                        AvkortetYtelse::restanse,
                     )
                     it.restanse!!.shouldBeEqualToIgnoringFields(
                         restanse(
@@ -683,7 +687,7 @@ internal class AvkortingTest {
                         Restanse::id,
                         AvkortetYtelse::tidspunkt,
                         AvkortetYtelse::regelResultat,
-                        AvkortetYtelse::kilde
+                        AvkortetYtelse::kilde,
                     )
                 }
             }
@@ -703,13 +707,13 @@ internal class AvkortingTest {
                             ytelseEtterAvkortingFoerRestanse = 11742,
                             avkortingsbeloep = 9160,
                             ytelseFoerAvkorting = 20902,
-                            inntektsgrunnlag = null
+                            inntektsgrunnlag = null,
                         ),
                         AvkortetYtelse::id,
                         AvkortetYtelse::tidspunkt,
                         AvkortetYtelse::regelResultat,
                         AvkortetYtelse::kilde,
-                        AvkortetYtelse::restanse
+                        AvkortetYtelse::restanse,
                     )
                     it.restanse!!.shouldBeEqualToIgnoringFields(
                         restanse(
@@ -719,7 +723,7 @@ internal class AvkortingTest {
                         Restanse::id,
                         AvkortetYtelse::tidspunkt,
                         AvkortetYtelse::regelResultat,
-                        AvkortetYtelse::kilde
+                        AvkortetYtelse::kilde,
                     )
                 }
                 get(1).asClue {
@@ -731,13 +735,13 @@ internal class AvkortingTest {
                             ytelseEtterAvkortingFoerRestanse = 11742,
                             avkortingsbeloep = 9160,
                             ytelseFoerAvkorting = 20902,
-                            inntektsgrunnlag = null
+                            inntektsgrunnlag = null,
                         ),
                         AvkortetYtelse::id,
                         AvkortetYtelse::tidspunkt,
                         AvkortetYtelse::regelResultat,
                         AvkortetYtelse::kilde,
-                        AvkortetYtelse::restanse
+                        AvkortetYtelse::restanse,
                     )
                     it.restanse!!.shouldBeEqualToIgnoringFields(
                         restanse(
@@ -747,7 +751,7 @@ internal class AvkortingTest {
                         Restanse::id,
                         AvkortetYtelse::tidspunkt,
                         AvkortetYtelse::regelResultat,
-                        AvkortetYtelse::kilde
+                        AvkortetYtelse::kilde,
                     )
                 }
                 get(2).asClue {
@@ -759,13 +763,13 @@ internal class AvkortingTest {
                             ytelseEtterAvkortingFoerRestanse = 13215,
                             avkortingsbeloep = 9026,
                             ytelseFoerAvkorting = 22241,
-                            inntektsgrunnlag = null
+                            inntektsgrunnlag = null,
                         ),
                         AvkortetYtelse::id,
                         AvkortetYtelse::tidspunkt,
                         AvkortetYtelse::regelResultat,
                         AvkortetYtelse::kilde,
-                        AvkortetYtelse::restanse
+                        AvkortetYtelse::restanse,
                     )
                     it.restanse!!.shouldBeEqualToIgnoringFields(
                         restanse(
@@ -775,7 +779,7 @@ internal class AvkortingTest {
                         Restanse::id,
                         AvkortetYtelse::tidspunkt,
                         AvkortetYtelse::regelResultat,
-                        AvkortetYtelse::kilde
+                        AvkortetYtelse::kilde,
                     )
                 }
                 get(3).asClue {
@@ -787,13 +791,13 @@ internal class AvkortingTest {
                             ytelseEtterAvkortingFoerRestanse = 8715,
                             avkortingsbeloep = 13526,
                             ytelseFoerAvkorting = 22241,
-                            inntektsgrunnlag = null
+                            inntektsgrunnlag = null,
                         ),
                         AvkortetYtelse::id,
                         AvkortetYtelse::tidspunkt,
                         AvkortetYtelse::regelResultat,
                         AvkortetYtelse::kilde,
-                        AvkortetYtelse::restanse
+                        AvkortetYtelse::restanse,
                     )
                     it.restanse!!.shouldBeEqualToIgnoringFields(
                         restanse(
@@ -803,7 +807,7 @@ internal class AvkortingTest {
                         Restanse::id,
                         AvkortetYtelse::tidspunkt,
                         AvkortetYtelse::regelResultat,
-                        AvkortetYtelse::kilde
+                        AvkortetYtelse::kilde,
                     )
                 }
                 get(4).asClue {
@@ -815,13 +819,13 @@ internal class AvkortingTest {
                             ytelseEtterAvkortingFoerRestanse = 7590,
                             avkortingsbeloep = 14651,
                             ytelseFoerAvkorting = 22241,
-                            inntektsgrunnlag = null
+                            inntektsgrunnlag = null,
                         ),
                         AvkortetYtelse::id,
                         AvkortetYtelse::tidspunkt,
                         AvkortetYtelse::regelResultat,
                         AvkortetYtelse::kilde,
-                        AvkortetYtelse::restanse
+                        AvkortetYtelse::restanse,
                     )
                     it.restanse!!.shouldBeEqualToIgnoringFields(
                         restanse(
@@ -831,136 +835,153 @@ internal class AvkortingTest {
                         Restanse::id,
                         AvkortetYtelse::tidspunkt,
                         AvkortetYtelse::regelResultat,
-                        AvkortetYtelse::kilde
+                        AvkortetYtelse::kilde,
                     )
                 }
             }
         }
 
-        private fun `Avkorting foerstegangsbehandling`() = Avkorting()
-            .beregnAvkortingMedNyttGrunnlag(
-                nyttGrunnlag = avkortinggrunnlag(
-                    periode = Periode(fom = YearMonth.of(2023, 3), tom = null),
-                    aarsinntekt = 300000,
-                    fratrekkInnAar = 50000,
-                    relevanteMaanederInnAar = 10
-                ),
-                behandlingstype = BehandlingType.FØRSTEGANGSBEHANDLING,
-                beregning = beregning(
-                    beregninger = listOf(
-                        beregningsperiode(
-                            datoFOM = YearMonth.of(2023, 3),
-                            datoTOM = YearMonth.of(2023, 4),
-                            utbetaltBeloep = 15676
+        private fun `Avkorting foerstegangsbehandling`() =
+            Avkorting()
+                .beregnAvkortingMedNyttGrunnlag(
+                    nyttGrunnlag =
+                        avkortinggrunnlag(
+                            periode = Periode(fom = YearMonth.of(2023, 3), tom = null),
+                            aarsinntekt = 300000,
+                            fratrekkInnAar = 50000,
+                            relevanteMaanederInnAar = 10,
                         ),
-                        beregningsperiode(
-                            datoFOM = YearMonth.of(2023, 5),
-                            utbetaltBeloep = 16682
-                        )
-                    )
-                )
-            )
-
-
-        private fun `Avkorting ny inntekt en`() = `Avkorting foerstegangsbehandling`()
-            .kopierAvkorting()
-            .beregnAvkortingMedNyttGrunnlag(
-                nyttGrunnlag = avkortinggrunnlag(
-                    id = UUID.randomUUID(),
-                    periode = Periode(fom = YearMonth.of(2023, 7), tom = null),
-                    aarsinntekt = 400000,
-                    fratrekkInnAar = 50000,
-                    relevanteMaanederInnAar = 10
-                ),
-                behandlingstype = BehandlingType.REVURDERING,
-                beregning = beregning(
-                    beregninger = listOf(
-                        beregningsperiode(
-                            datoFOM = YearMonth.of(2023, 7),
-                            utbetaltBeloep = 16682
-                        )
-                    )
-                )
-            )
-
-        private fun `Avkorting ny inntekt to`() = `Avkorting ny inntekt en`()
-            .kopierAvkorting()
-            .beregnAvkortingMedNyttGrunnlag(
-                nyttGrunnlag = avkortinggrunnlag(
-                    id = UUID.randomUUID(),
-                    periode = Periode(fom = YearMonth.of(2023, 9), tom = null),
-                    aarsinntekt = 450000,
-                    fratrekkInnAar = 50000,
-                    relevanteMaanederInnAar = 10
-                ),
-                behandlingstype = BehandlingType.REVURDERING,
-                beregning = beregning(
-                    beregninger = listOf(
-                        beregningsperiode(
-                            datoFOM = YearMonth.of(2023, 9),
-                            utbetaltBeloep = 16682
-                        )
-                    )
-                )
-            )
-
-        private fun `Avkorting revurdert beregning`() = `Avkorting ny inntekt to`()
-            .kopierAvkorting()
-            .beregnAvkortingRevurdering(
-                beregning(
-                    beregninger = listOf(
-                        beregningsperiode(
-                            datoFOM = YearMonth.of(2023, 3),
-                            datoTOM = YearMonth.of(2023, 4),
-                            utbetaltBeloep = 20902
+                    behandlingstype = BehandlingType.FØRSTEGANGSBEHANDLING,
+                    beregning =
+                        beregning(
+                            beregninger =
+                                listOf(
+                                    beregningsperiode(
+                                        datoFOM = YearMonth.of(2023, 3),
+                                        datoTOM = YearMonth.of(2023, 4),
+                                        utbetaltBeloep = 15676,
+                                    ),
+                                    beregningsperiode(
+                                        datoFOM = YearMonth.of(2023, 5),
+                                        utbetaltBeloep = 16682,
+                                    ),
+                                ),
                         ),
-                        beregningsperiode(
-                            datoFOM = YearMonth.of(2023, 5),
-                            utbetaltBeloep = 22241
-                        )
-                    )
                 )
-            )
 
-        private fun `Avkorting korrigere siste inntekt`() = `Avkorting revurdert beregning`()
-            .kopierAvkorting().let {
-                it.beregnAvkortingMedNyttGrunnlag(
-                    nyttGrunnlag = avkortinggrunnlag(
-                        id = it.aarsoppgjoer.inntektsavkorting.last().grunnlag.id,
-                        periode = Periode(fom = YearMonth.of(2023, 9), tom = null),
-                        aarsinntekt = 425000,
-                        fratrekkInnAar = 50000,
-                        relevanteMaanederInnAar = 10
-                    ),
-                    BehandlingType.REVURDERING,
+        private fun `Avkorting ny inntekt en`() =
+            `Avkorting foerstegangsbehandling`()
+                .kopierAvkorting()
+                .beregnAvkortingMedNyttGrunnlag(
+                    nyttGrunnlag =
+                        avkortinggrunnlag(
+                            id = UUID.randomUUID(),
+                            periode = Periode(fom = YearMonth.of(2023, 7), tom = null),
+                            aarsinntekt = 400000,
+                            fratrekkInnAar = 50000,
+                            relevanteMaanederInnAar = 10,
+                        ),
+                    behandlingstype = BehandlingType.REVURDERING,
+                    beregning =
+                        beregning(
+                            beregninger =
+                                listOf(
+                                    beregningsperiode(
+                                        datoFOM = YearMonth.of(2023, 7),
+                                        utbetaltBeloep = 16682,
+                                    ),
+                                ),
+                        ),
+                )
+
+        private fun `Avkorting ny inntekt to`() =
+            `Avkorting ny inntekt en`()
+                .kopierAvkorting()
+                .beregnAvkortingMedNyttGrunnlag(
+                    nyttGrunnlag =
+                        avkortinggrunnlag(
+                            id = UUID.randomUUID(),
+                            periode = Periode(fom = YearMonth.of(2023, 9), tom = null),
+                            aarsinntekt = 450000,
+                            fratrekkInnAar = 50000,
+                            relevanteMaanederInnAar = 10,
+                        ),
+                    behandlingstype = BehandlingType.REVURDERING,
+                    beregning =
+                        beregning(
+                            beregninger =
+                                listOf(
+                                    beregningsperiode(
+                                        datoFOM = YearMonth.of(2023, 9),
+                                        utbetaltBeloep = 16682,
+                                    ),
+                                ),
+                        ),
+                )
+
+        private fun `Avkorting revurdert beregning`() =
+            `Avkorting ny inntekt to`()
+                .kopierAvkorting()
+                .beregnAvkortingRevurdering(
                     beregning(
-                        beregninger = listOf(
-                            beregningsperiode(
-                                datoFOM = YearMonth.of(2023, 9),
-                                utbetaltBeloep = 22241
-                            )
-                        )
-                    )
+                        beregninger =
+                            listOf(
+                                beregningsperiode(
+                                    datoFOM = YearMonth.of(2023, 3),
+                                    datoTOM = YearMonth.of(2023, 4),
+                                    utbetaltBeloep = 20902,
+                                ),
+                                beregningsperiode(
+                                    datoFOM = YearMonth.of(2023, 5),
+                                    utbetaltBeloep = 22241,
+                                ),
+                            ),
+                    ),
                 )
-            }
 
-        private fun `Revurdering med virk mellom inntektsperioder`() = `Avkorting korrigere siste inntekt`()
-            .kopierAvkorting()
-            .beregnAvkortingRevurdering(
-                beregning(
-                    beregninger = listOf(
-                        beregningsperiode(
-                            datoFOM = YearMonth.of(2023, 4),
-                            datoTOM = YearMonth.of(2023, 4),
-                            utbetaltBeloep = 20902
+        private fun `Avkorting korrigere siste inntekt`() =
+            `Avkorting revurdert beregning`()
+                .kopierAvkorting().let {
+                    it.beregnAvkortingMedNyttGrunnlag(
+                        nyttGrunnlag =
+                            avkortinggrunnlag(
+                                id = it.aarsoppgjoer.inntektsavkorting.last().grunnlag.id,
+                                periode = Periode(fom = YearMonth.of(2023, 9), tom = null),
+                                aarsinntekt = 425000,
+                                fratrekkInnAar = 50000,
+                                relevanteMaanederInnAar = 10,
+                            ),
+                        BehandlingType.REVURDERING,
+                        beregning(
+                            beregninger =
+                                listOf(
+                                    beregningsperiode(
+                                        datoFOM = YearMonth.of(2023, 9),
+                                        utbetaltBeloep = 22241,
+                                    ),
+                                ),
                         ),
-                        beregningsperiode(
-                            datoFOM = YearMonth.of(2023, 5),
-                            utbetaltBeloep = 22241
-                        )
                     )
-                )
-            )
-    }
+                }
 
+        private fun `Revurdering med virk mellom inntektsperioder`() =
+            `Avkorting korrigere siste inntekt`()
+                .kopierAvkorting()
+                .beregnAvkortingRevurdering(
+                    beregning(
+                        beregninger =
+                            listOf(
+                                beregningsperiode(
+                                    datoFOM = YearMonth.of(2023, 4),
+                                    datoTOM = YearMonth.of(2023, 4),
+                                    utbetaltBeloep = 20902,
+                                ),
+                                beregningsperiode(
+                                    datoFOM = YearMonth.of(2023, 5),
+                                    utbetaltBeloep = 22241,
+                                ),
+                            ),
+                    ),
+                )
+    }
 }

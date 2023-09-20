@@ -19,7 +19,7 @@ import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.util.*
+import java.util.UUID
 
 internal class DistribuerBrevTest {
     private val brevService = mockk<VedtaksbrevService>()
@@ -29,14 +29,15 @@ internal class DistribuerBrevTest {
 
     private val brevId = 100L
     private val journalpostId = "11111"
-    private val adresse = Adresse(
-        adresseType = "Fornavn Etternavn",
-        adresselinje1 = "testveien 13",
-        postnummer = "0123",
-        poststed = "Oslo",
-        land = "Norge",
-        landkode = "NOR"
-    )
+    private val adresse =
+        Adresse(
+            adresseType = "Fornavn Etternavn",
+            adresselinje1 = "testveien 13",
+            postnummer = "0123",
+            poststed = "Oslo",
+            land = "Norge",
+            landkode = "NOR",
+        )
 
     @BeforeEach
     fun before() = clearAllMocks()
@@ -46,21 +47,23 @@ internal class DistribuerBrevTest {
 
     @Test
     fun `Gyldig melding skal sende journalpost til distribusjon`() {
-        every { brevService.hentBrev(any()) } returns mockk {
-            every { id } returns brevId
-            every { mottaker } returns Mottaker("navn", foedselsnummer = mockk(), adresse = adresse)
-        }
+        every { brevService.hentBrev(any()) } returns
+            mockk {
+                every { id } returns brevId
+                every { mottaker } returns Mottaker("navn", foedselsnummer = mockk(), adresse = adresse)
+            }
 
-        val melding = JsonMessage.newMessage(
-            mapOf(
-                EVENT_NAME_KEY to BrevEventTypes.JOURNALFOERT.toString(),
-                CORRELATION_ID_KEY to UUID.randomUUID().toString(),
-                "brevId" to brevId,
-                "journalpostId" to journalpostId,
-                "distribusjonType" to DistribusjonsType.VEDTAK.toString(),
-                "mottakerAdresse" to adresse
+        val melding =
+            JsonMessage.newMessage(
+                mapOf(
+                    EVENT_NAME_KEY to BrevEventTypes.JOURNALFOERT.toString(),
+                    CORRELATION_ID_KEY to UUID.randomUUID().toString(),
+                    "brevId" to brevId,
+                    "journalpostId" to journalpostId,
+                    "distribusjonType" to DistribusjonsType.VEDTAK.toString(),
+                    "mottakerAdresse" to adresse,
+                ),
             )
-        )
 
         inspector.apply { sendTestMessage(melding.toJson()) }.inspektør
 
@@ -72,7 +75,7 @@ internal class DistribuerBrevTest {
                 journalpostId,
                 DistribusjonsType.VEDTAK,
                 DistribusjonsTidspunktType.KJERNETID,
-                adresse
+                adresse,
             )
         }
     }

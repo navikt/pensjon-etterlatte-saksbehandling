@@ -33,40 +33,48 @@ class GyldigSoeknadService(private val pdlClient: PdlClient) {
             innsender = soeknad.innsender.foedselsnummer.svar.value,
             soesken = soeknad.soesken.map { it.foedselsnummer.svar.value },
             avdoed = soeknad.foreldre.filter { it.type == PersonType.AVDOED }.map { it.foedselsnummer.svar.value },
-            gjenlevende = soeknad.foreldre.filter { it.type == PersonType.GJENLEVENDE_FORELDER }
-                .map { it.foedselsnummer.svar.value }
+            gjenlevende =
+                soeknad.foreldre.filter { it.type == PersonType.GJENLEVENDE_FORELDER }
+                    .map { it.foedselsnummer.svar.value },
         )
     }
 
-    fun vurderGyldighet(persongalleri: Persongalleri, saktype: SakType): GyldighetsResultat {
+    fun vurderGyldighet(
+        persongalleri: Persongalleri,
+        saktype: SakType,
+    ): GyldighetsResultat {
         val soekerPdl = hentSoekerFraPdl(persongalleri.soeker, saktype)
         val familieRelasjonSoeker = soekerPdl?.familieRelasjon
         val personinfoInnsender = persongalleri.innsender?.let { hentNavnFraPdl(it, saktype) }
         val personinfoGjenlevende = persongalleri.gjenlevende.map { hentNavnFraPdl(it, saktype) }
 
-        val innsenderErForelder = innsenderErForelder(
-            GyldighetsTyper.INNSENDER_ER_FORELDER,
-            personinfoGjenlevende,
-            personinfoInnsender,
-            familieRelasjonSoeker
-        )
+        val innsenderErForelder =
+            innsenderErForelder(
+                GyldighetsTyper.INNSENDER_ER_FORELDER,
+                personinfoGjenlevende,
+                personinfoInnsender,
+                familieRelasjonSoeker,
+            )
 
-        val innsenderHarForeldreansvar = innsenderHarForeldreansvar(
-            GyldighetsTyper.HAR_FORELDREANSVAR_FOR_BARNET,
-            personinfoInnsender,
-            familieRelasjonSoeker
-        )
+        val innsenderHarForeldreansvar =
+            innsenderHarForeldreansvar(
+                GyldighetsTyper.HAR_FORELDREANSVAR_FOR_BARNET,
+                personinfoInnsender,
+                familieRelasjonSoeker,
+            )
 
-        val ingenAnnenVergeEnnForelder = ingenAnnenVergeEnnForelder(
-            GyldighetsTyper.INGEN_ANNEN_VERGE_ENN_FORELDER,
-            soekerPdl
-        )
+        val ingenAnnenVergeEnnForelder =
+            ingenAnnenVergeEnnForelder(
+                GyldighetsTyper.INGEN_ANNEN_VERGE_ENN_FORELDER,
+                soekerPdl,
+            )
 
-        val vurderingsliste = listOf(
-            innsenderErForelder,
-            innsenderHarForeldreansvar,
-            ingenAnnenVergeEnnForelder
-        )
+        val vurderingsliste =
+            listOf(
+                innsenderErForelder,
+                innsenderHarForeldreansvar,
+                ingenAnnenVergeEnnForelder,
+            )
 
         val gyldighetResultat = setVurdering(vurderingsliste)
         val vurdertDato = Tidspunkt.now().toLocalDatetimeUTC()
@@ -74,11 +82,17 @@ class GyldigSoeknadService(private val pdlClient: PdlClient) {
         return GyldighetsResultat(gyldighetResultat, vurderingsliste, vurdertDato)
     }
 
-    private fun hentSoekerFraPdl(fnrSoeker: String, saktype: SakType): Person? {
+    private fun hentSoekerFraPdl(
+        fnrSoeker: String,
+        saktype: SakType,
+    ): Person? {
         return pdlClient.hentPerson(fnrSoeker, PersonRolle.BARN, saktype)
     }
 
-    private fun hentNavnFraPdl(fnr: String, saktype: SakType): PersonInfoGyldighet? {
+    private fun hentNavnFraPdl(
+        fnr: String,
+        saktype: SakType,
+    ): PersonInfoGyldighet? {
         val person = pdlClient.hentPerson(fnr, PersonRolle.GJENLEVENDE, saktype)
         val navn = person.let { it.fornavn + " " + it.etternavn }
         return PersonInfoGyldighet(navn, fnr)
@@ -88,43 +102,48 @@ class GyldigSoeknadService(private val pdlClient: PdlClient) {
         gyldighetstype: GyldighetsTyper,
         gjenlevende: List<PersonInfoGyldighet?>,
         innsender: PersonInfoGyldighet?,
-        soekerFamilieRelasjonPdl: FamilieRelasjon?
+        soekerFamilieRelasjonPdl: FamilieRelasjon?,
     ): VurdertGyldighet {
-        val resultat = if (gjenlevende.isEmpty() || innsender == null || soekerFamilieRelasjonPdl == null) {
-            VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
-        } else {
-            vurderOpplysning {
-                gjenlevende.map { it?.fnr }.contains(innsender.fnr) &&
-                    hentFnrForeldre(soekerFamilieRelasjonPdl).contains(innsender.fnr)
+        val resultat =
+            if (gjenlevende.isEmpty() || innsender == null || soekerFamilieRelasjonPdl == null) {
+                VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
+            } else {
+                vurderOpplysning {
+                    gjenlevende.map { it?.fnr }.contains(innsender.fnr) &&
+                        hentFnrForeldre(soekerFamilieRelasjonPdl).contains(innsender.fnr)
+                }
             }
-        }
 
         return VurdertGyldighet(
             gyldighetstype,
             resultat,
-            InnsenderErForelderGrunnlag(soekerFamilieRelasjonPdl, innsender, gjenlevende)
+            InnsenderErForelderGrunnlag(soekerFamilieRelasjonPdl, innsender, gjenlevende),
         )
     }
 
     fun innsenderHarForeldreansvar(
         gyldighetstype: GyldighetsTyper,
         innsender: PersonInfoGyldighet?,
-        soekerPdlFamilieRelasjon: FamilieRelasjon?
+        soekerPdlFamilieRelasjon: FamilieRelasjon?,
     ): VurdertGyldighet {
-        val resultat = if (innsender == null || soekerPdlFamilieRelasjon == null) {
-            VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
-        } else {
-            vurderOpplysning { hentFnrForeldreAnsvar(soekerPdlFamilieRelasjon).contains(innsender.fnr) }
-        }
+        val resultat =
+            if (innsender == null || soekerPdlFamilieRelasjon == null) {
+                VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
+            } else {
+                vurderOpplysning { hentFnrForeldreAnsvar(soekerPdlFamilieRelasjon).contains(innsender.fnr) }
+            }
 
         return VurdertGyldighet(
             gyldighetstype,
             resultat,
-            InnsenderHarForeldreansvarGrunnlag(soekerPdlFamilieRelasjon, innsender)
+            InnsenderHarForeldreansvarGrunnlag(soekerPdlFamilieRelasjon, innsender),
         )
     }
 
-    fun ingenAnnenVergeEnnForelder(gyldighetstype: GyldighetsTyper, soekerPdl: Person?): VurdertGyldighet {
+    fun ingenAnnenVergeEnnForelder(
+        gyldighetstype: GyldighetsTyper,
+        soekerPdl: Person?,
+    ): VurdertGyldighet {
         fun harVergemaalPdl(barn: Person?): Boolean {
             return if (barn?.vergemaalEllerFremtidsfullmakt != null) {
                 barn.vergemaalEllerFremtidsfullmakt!!.isNotEmpty()
@@ -135,16 +154,17 @@ class GyldigSoeknadService(private val pdlClient: PdlClient) {
 
         val soekerHarVergemaal = harVergemaalPdl(soekerPdl)
 
-        val resultat = if (soekerHarVergemaal == true) {
-            VurderingsResultat.IKKE_OPPFYLT
-        } else {
-            VurderingsResultat.OPPFYLT
-        }
+        val resultat =
+            if (soekerHarVergemaal == true) {
+                VurderingsResultat.IKKE_OPPFYLT
+            } else {
+                VurderingsResultat.OPPFYLT
+            }
 
         return VurdertGyldighet(
             gyldighetstype,
             resultat,
-            IngenAnnenVergeEnnForelderGrunnlag(soekerPdl?.vergemaalEllerFremtidsfullmakt)
+            IngenAnnenVergeEnnForelderGrunnlag(soekerPdl?.vergemaalEllerFremtidsfullmakt),
         )
     }
 
@@ -158,11 +178,12 @@ class GyldigSoeknadService(private val pdlClient: PdlClient) {
             ?: throw OpplysningKanIkkeHentesUt()
     }
 
-    private fun vurderOpplysning(vurdering: () -> Boolean): VurderingsResultat = try {
-        if (vurdering()) VurderingsResultat.OPPFYLT else VurderingsResultat.IKKE_OPPFYLT
-    } catch (ex: OpplysningKanIkkeHentesUt) {
-        VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
-    }
+    private fun vurderOpplysning(vurdering: () -> Boolean): VurderingsResultat =
+        try {
+            if (vurdering()) VurderingsResultat.OPPFYLT else VurderingsResultat.IKKE_OPPFYLT
+        } catch (ex: OpplysningKanIkkeHentesUt) {
+            VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
+        }
 
     private fun setVurdering(liste: List<VurdertGyldighet>): VurderingsResultat {
         val resultat = liste.map { it.resultat }

@@ -19,7 +19,7 @@ import rapidsandrivers.migrering.ListenerMedLoggingOgFeilhaandtering
 
 internal class Vilkaarsvurder(
     rapidsConnection: RapidsConnection,
-    private val vilkaarsvurderingService: VilkaarsvurderingService
+    private val vilkaarsvurderingService: VilkaarsvurderingService,
 ) :
     ListenerMedLoggingOgFeilhaandtering(VILKAARSVURDER) {
     private val logger = LoggerFactory.getLogger(Vilkaarsvurder::class.java)
@@ -34,7 +34,10 @@ internal class Vilkaarsvurder(
         }.register(this)
     }
 
-    override fun haandterPakke(packet: JsonMessage, context: MessageContext) {
+    override fun haandterPakke(
+        packet: JsonMessage,
+        context: MessageContext,
+    ) {
         val behandlingId = packet.behandlingId
         val behandlingViOmregnerFra = packet[BEHANDLING_VI_OMREGNER_FRA_KEY].asText().toUUID()
 
@@ -42,7 +45,7 @@ internal class Vilkaarsvurder(
         packet.eventName = EventNames.BEREGN
         context.publish(packet.toJson())
         logger.info(
-            "Vilkaarsvurdert ferdig for behandling $behandlingId og melding beregningsmelding ble sendt."
+            "Vilkaarsvurdert ferdig for behandling $behandlingId og melding beregningsmelding ble sendt.",
         )
     }
 }

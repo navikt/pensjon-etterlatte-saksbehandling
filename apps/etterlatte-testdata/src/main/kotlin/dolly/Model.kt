@@ -13,7 +13,7 @@ data class HentGruppeResponse(
     val pageNo: Int,
     val pageSize: Int,
     val antallElementer: Int,
-    val contents: List<Gruppe>
+    val contents: List<Gruppe>,
 )
 
 data class OpprettGruppeRequest(val navn: String, val hensikt: String)
@@ -39,12 +39,12 @@ data class DollyPerson(
     val foedsel: List<Foedsel>,
     val navn: List<Navn>,
     val forelderBarnRelasjon: List<ForelderBarnRelasjon>,
-    val sivilstand: List<Sivilstand>
+    val sivilstand: List<Sivilstand>,
 )
 
 data class ForelderBarnRelasjon(
     val relatertPersonsIdent: String,
-    val relatertPersonsRolle: String
+    val relatertPersonsRolle: String,
 )
 
 data class Sivilstand(val type: String, val relatertVedSivilstand: String?)
@@ -62,12 +62,12 @@ data class ForenkletFamilieModell(
     val ibruk: Boolean,
     val avdoed: String,
     val gjenlevende: String,
-    val barn: List<String>
+    val barn: List<String>,
 )
 
 data class BestillingRequest(
     val helsoesken: Int,
     val halvsoeskenAvdoed: Int,
     val halvsoeskenGjenlevende: Int,
-    val gruppeId: Long
+    val gruppeId: Long,
 )

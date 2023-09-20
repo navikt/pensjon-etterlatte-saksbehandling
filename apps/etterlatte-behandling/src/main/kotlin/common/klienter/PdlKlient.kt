@@ -24,8 +24,17 @@ import org.slf4j.LoggerFactory
 import java.time.LocalDate
 
 interface PdlKlient {
-    fun hentPdlModell(foedselsnummer: String, rolle: PersonRolle, saktype: SakType): PersonDTO
-    fun hentGeografiskTilknytning(foedselsnummer: String, saktype: SakType): GeografiskTilknytning
+    fun hentPdlModell(
+        foedselsnummer: String,
+        rolle: PersonRolle,
+        saktype: SakType,
+    ): PersonDTO
+
+    fun hentGeografiskTilknytning(
+        foedselsnummer: String,
+        saktype: SakType,
+    ): GeografiskTilknytning
+
     fun hentFolkeregisterIdenterForAktoerIdBolk(aktoerIds: Set<String>): Map<String, String?>
 }
 
@@ -36,55 +45,66 @@ class PdlKlientImpl(config: Config, private val pdl_app: HttpClient) : PdlKlient
         val logger: Logger = LoggerFactory.getLogger(PdlKlientImpl::class.java)
     }
 
-    override fun hentPdlModell(foedselsnummer: String, rolle: PersonRolle, saktype: SakType): PersonDTO {
+    override fun hentPdlModell(
+        foedselsnummer: String,
+        rolle: PersonRolle,
+        saktype: SakType,
+    ): PersonDTO {
         logger.info("Henter Pdl-modell for ${rolle.name}")
         val personRequest = HentPersonRequest(Folkeregisteridentifikator.of(foedselsnummer), rolle, saktype)
-        val response = runBlocking {
-            pdl_app.post("$url/person/v2") {
-                contentType(ContentType.Application.Json)
-                setBody(personRequest)
-            }.body<PersonDTO>()
-        }
+        val response =
+            runBlocking {
+                pdl_app.post("$url/person/v2") {
+                    contentType(ContentType.Application.Json)
+                    setBody(personRequest)
+                }.body<PersonDTO>()
+            }
         return response
     }
 
-    override fun hentGeografiskTilknytning(foedselsnummer: String, saktype: SakType): GeografiskTilknytning {
+    override fun hentGeografiskTilknytning(
+        foedselsnummer: String,
+        saktype: SakType,
+    ): GeografiskTilknytning {
         val request = HentGeografiskTilknytningRequest(Folkeregisteridentifikator.of(foedselsnummer), saktype)
-        val response = runBlocking {
-            pdl_app.post("$url/geografisktilknytning") {
-                contentType(ContentType.Application.Json)
-                setBody(request)
-            }.body<GeografiskTilknytning>()
-        }
+        val response =
+            runBlocking {
+                pdl_app.post("$url/geografisktilknytning") {
+                    contentType(ContentType.Application.Json)
+                    setBody(request)
+                }.body<GeografiskTilknytning>()
+            }
 
         return response
     }
 
     override fun hentFolkeregisterIdenterForAktoerIdBolk(aktoerIds: Set<String>): Map<String, String?> {
         val request = HentFolkeregisterIdenterForAktoerIdBolkRequest(aktoerIds)
-        val response = runBlocking {
-            pdl_app.post("$url/folkeregisteridenter") {
-                contentType(ContentType.Application.Json)
-                setBody(request)
-            }.body<Map<String, String?>>()
-        }
+        val response =
+            runBlocking {
+                pdl_app.post("$url/folkeregisteridenter") {
+                    contentType(ContentType.Application.Json)
+                    setBody(request)
+                }.body<Map<String, String?>>()
+            }
         return response
     }
 }
 
 fun PersonDTO.hentDoedsdato(): LocalDate? = this.doedsdato?.verdi
 
-fun PersonDTO.hentAnsvarligeForeldre(): List<Folkeregisteridentifikator>? =
-    this.familieRelasjon?.verdi?.ansvarligeForeldre
+fun PersonDTO.hentAnsvarligeForeldre(): List<Folkeregisteridentifikator>? = this.familieRelasjon?.verdi?.ansvarligeForeldre
 
 fun PersonDTO.hentBarn(): List<Folkeregisteridentifikator>? = this.familieRelasjon?.verdi?.barn
 
-fun PersonDTO.hentVergemaal(): List<VergemaalEllerFremtidsfullmakt>? = this.vergemaalEllerFremtidsfullmakt?.map {
-    it.verdi
-}
+fun PersonDTO.hentVergemaal(): List<VergemaalEllerFremtidsfullmakt>? =
+    this.vergemaalEllerFremtidsfullmakt?.map {
+        it.verdi
+    }
 
-fun PersonDTO.hentSivilstand(): List<Sivilstand>? = this.sivilstand?.map {
-    it.verdi
-}
+fun PersonDTO.hentSivilstand(): List<Sivilstand>? =
+    this.sivilstand?.map {
+        it.verdi
+    }
 
 fun PersonDTO.hentUtland(): Utland? = this.utland?.verdi

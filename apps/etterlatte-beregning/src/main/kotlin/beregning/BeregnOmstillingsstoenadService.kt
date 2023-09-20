@@ -34,7 +34,7 @@ import no.nav.etterlatte.regler.Beregningstall
 import no.nav.etterlatte.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
 import java.time.YearMonth
-import java.util.*
+import java.util.UUID
 import java.util.UUID.randomUUID
 
 class BeregnOmstillingsstoenadService(
@@ -42,24 +42,24 @@ class BeregnOmstillingsstoenadService(
     private val vilkaarsvurderingKlient: VilkaarsvurderingKlient,
     private val trygdetidKlient: TrygdetidKlient,
     private val beregningsGrunnlagService: BeregningsGrunnlagService,
-    private val grunnbeloepRepository: GrunnbeloepRepository = GrunnbeloepRepository
+    private val grunnbeloepRepository: GrunnbeloepRepository = GrunnbeloepRepository,
 ) {
     private val logger = LoggerFactory.getLogger(BeregnOmstillingsstoenadService::class.java)
 
     suspend fun beregn(
         behandling: DetaljertBehandling,
-        brukerTokenInfo: BrukerTokenInfo
+        brukerTokenInfo: BrukerTokenInfo,
     ): Beregning {
         val grunnlag = grunnlagKlient.hentGrunnlag(behandling.sak, brukerTokenInfo)
         val trygdetid =
             trygdetidKlient.hentTrygdetid(behandling.id, brukerTokenInfo) ?: throw Exception(
-                "Forventa å ha trygdetid for behandlingId=${behandling.id}"
+                "Forventa å ha trygdetid for behandlingId=${behandling.id}",
             )
         val behandlingType = behandling.behandlingType
         val virkningstidspunkt = requireNotNull(behandling.virkningstidspunkt?.dato)
         val beregningsgrunnlag =
             requireNotNull(
-                beregningsGrunnlagService.hentOmstillingstoenadBeregningsGrunnlag(behandling.id, brukerTokenInfo)
+                beregningsGrunnlagService.hentOmstillingstoenadBeregningsGrunnlag(behandling.id, brukerTokenInfo),
             )
 
         logger.info("Beregner omstillingsstønad for behandlingId=${behandling.id} med behandlingType=$behandlingType")
@@ -67,7 +67,7 @@ class BeregnOmstillingsstoenadService(
         val omstillingstoenadGrunnlag =
             opprettBeregningsgrunnlagOmstillingsstoenad(
                 trygdetid,
-                beregningsgrunnlag
+                beregningsgrunnlag,
             )
         return when (behandlingType) {
             BehandlingType.FØRSTEGANGSBEHANDLING ->
@@ -77,7 +77,7 @@ class BeregnOmstillingsstoenadService(
                 val vilkaarsvurderingUtfall =
                     vilkaarsvurderingKlient.hentVilkaarsvurdering(
                         behandling.id,
-                        brukerTokenInfo
+                        brukerTokenInfo,
                     )
                         .resultat?.utfall
                         ?: throw Exception("Forventa å ha vilkårsvurderingsresultat for behandlingId=${behandling.id}")
@@ -99,12 +99,12 @@ class BeregnOmstillingsstoenadService(
         behandlingId: UUID,
         grunnlag: Grunnlag,
         beregningsgrunnlag: PeriodisertOmstillingstoenadGrunnlag,
-        virkningstidspunkt: YearMonth
+        virkningstidspunkt: YearMonth,
     ): Beregning {
         val resultat =
             kroneavrundetOmstillingstoenadRegelMedInstitusjon.eksekver(
                 grunnlag = beregningsgrunnlag,
-                periode = RegelPeriode(virkningstidspunkt.atDay(1))
+                periode = RegelPeriode(virkningstidspunkt.atDay(1)),
             )
 
         val beregnetDato = Tidspunkt.now()
@@ -124,7 +124,7 @@ class BeregnOmstillingsstoenadService(
                                 periodisertResultat.periode.tilDato,
                                 periodisertResultat.resultat.verdi,
                                 periodisertResultat.resultat.finnAnvendteRegler()
-                                    .map { "${it.regelReferanse.id} (${it.beskrivelse})" }.toSet()
+                                    .map { "${it.regelReferanse.id} (${it.beskrivelse})" }.toSet(),
                             )
 
                             val grunnbeloep =
@@ -138,13 +138,13 @@ class BeregnOmstillingsstoenadService(
                                 utbetaltBeloep = periodisertResultat.resultat.verdi,
                                 institusjonsopphold =
                                     beregningsgrunnlag.institusjonsopphold.finnGrunnlagForPeriode(
-                                        periodisertResultat.periode.fraDato
+                                        periodisertResultat.periode.fraDato,
                                     ).verdi,
                                 grunnbelopMnd = grunnbeloep.grunnbeloepPerMaaned,
                                 grunnbelop = grunnbeloep.grunnbeloep,
                                 trygdetid =
                                     beregningsgrunnlag.avdoed.finnGrunnlagForPeriode(
-                                        periodisertResultat.periode.fraDato
+                                        periodisertResultat.periode.fraDato,
                                     ).verdi.trygdetid.toInteger(),
                                 regelResultat = objectMapper.valueToTree(periodisertResultat),
                                 regelVersjon = periodisertResultat.reglerVersjon,
@@ -152,10 +152,10 @@ class BeregnOmstillingsstoenadService(
                                     Grunnlagsopplysning.RegelKilde(
                                         navn = kroneavrundetOmstillingstoenadRegel.regelReferanse.id,
                                         ts = beregnetDato,
-                                        versjon = periodisertResultat.reglerVersjon
-                                    )
+                                        versjon = periodisertResultat.reglerVersjon,
+                                    ),
                             )
-                        }
+                        },
                 )
 
             is RegelkjoeringResultat.UgyldigPeriode ->
@@ -166,7 +166,7 @@ class BeregnOmstillingsstoenadService(
     private fun opphoer(
         behandlingId: UUID,
         grunnlag: Grunnlag,
-        virkningstidspunkt: YearMonth
+        virkningstidspunkt: YearMonth,
     ): Beregning {
         val grunnbeloep = grunnbeloepRepository.hentGjeldendeGrunnbeloep(virkningstidspunkt)
 
@@ -185,15 +185,15 @@ class BeregnOmstillingsstoenadService(
                         soeskenFlokk = null,
                         grunnbelopMnd = grunnbeloep.grunnbeloepPerMaaned,
                         grunnbelop = grunnbeloep.grunnbeloep,
-                        trygdetid = 0
-                    )
-                )
+                        trygdetid = 0,
+                    ),
+                ),
         )
     }
 
     private fun opprettBeregningsgrunnlagOmstillingsstoenad(
         trygdetid: TrygdetidDto,
-        beregningsGrunnlagOMS: BeregningsGrunnlagOMS
+        beregningsGrunnlagOMS: BeregningsGrunnlagOMS,
     ): PeriodisertOmstillingstoenadGrunnlag {
         val totalTrygdetid =
             requireNotNull(trygdetid.beregnetTrygdetid?.resultat?.samletTrygdetidNorge) {
@@ -210,21 +210,21 @@ class BeregnOmstillingsstoenadService(
                                 "Trygdetid fastsatt av saksbehandler",
                                 trygdetid.beregnetTrygdetid?.tidspunkt
                                     ?: throw Exception("Trygdetid mangler tidspunkt på beregnet trygdetid"),
-                                "1"
+                                "1",
                             ),
-                        beskrivelse = "Trygdetid avdød ektefelle"
-                    )
+                        beskrivelse = "Trygdetid avdød ektefelle",
+                    ),
                 ),
             institusjonsopphold =
                 PeriodisertBeregningGrunnlag.lagPotensieltTomtGrunnlagMedDefaultUtenforPerioder(
-                    beregningsGrunnlagOMS.institusjonsoppholdBeregningsgrunnlag?.mapVerdier { institusjonsopphold ->
+                    beregningsGrunnlagOMS.institusjonsoppholdBeregningsgrunnlag.mapVerdier { institusjonsopphold ->
                         FaktumNode(
                             verdi = institusjonsopphold,
                             kilde = beregningsGrunnlagOMS.kilde,
-                            beskrivelse = "Institusjonsopphold"
+                            beskrivelse = "Institusjonsopphold",
                         )
-                    } ?: listOf()
-                ) { _, _, _ -> FaktumNode(null, beregningsGrunnlagOMS.kilde, "Institusjonsopphold") }
+                    },
+                ) { _, _, _ -> FaktumNode(null, beregningsGrunnlagOMS.kilde, "Institusjonsopphold") },
         )
     }
 }

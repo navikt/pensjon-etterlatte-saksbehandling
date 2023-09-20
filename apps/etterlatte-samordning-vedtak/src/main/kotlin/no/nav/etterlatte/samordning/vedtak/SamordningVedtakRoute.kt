@@ -19,25 +19,25 @@ data class SamordningVedtakDto(
     val type: SamordningVedtakType,
     val aarsak: String?,
     val anvendtTrygdetid: Int,
-    val perioder: List<SamordningVedtakPeriode> = listOf()
+    val perioder: List<SamordningVedtakPeriode> = listOf(),
 )
 
 data class SamordningVedtakPeriode(
     val fom: LocalDate,
     val tom: LocalDate? = null,
     val omstillingsstoenadBrutto: Int,
-    val omstillingsstoenadNetto: Int
+    val omstillingsstoenadNetto: Int,
 )
 
 enum class SamordningVedtakType {
     START,
     ENDRING,
-    OPPHOER
+    OPPHOER,
 }
 
 enum class SamordningVedtakAarsak {
     INNTEKT,
-    ANNET
+    ANNET,
 }
 
 fun Route.samordningVedtakRoute(samordningVedtakService: SamordningVedtakService) {
@@ -79,7 +79,7 @@ fun Route.samordningVedtakRoute(samordningVedtakService: SamordningVedtakService
 
 private fun dummySamordningVedtakDto(
     virkFom: LocalDate,
-    vedtakId: Long
+    vedtakId: Long,
 ) = SamordningVedtakDto(
     vedtakId = vedtakId,
     sakstype = "OMS",
@@ -89,13 +89,13 @@ private fun dummySamordningVedtakDto(
     aarsak = null,
     anvendtTrygdetid = 40,
     perioder =
-    listOf(
-        SamordningVedtakPeriode(
-            fom = virkFom,
-            omstillingsstoenadBrutto = 12000,
-            omstillingsstoenadNetto = 9500
-        )
-    )
+        listOf(
+            SamordningVedtakPeriode(
+                fom = virkFom,
+                omstillingsstoenadBrutto = 12000,
+                omstillingsstoenadNetto = 9500,
+            ),
+        ),
 )
 
 inline val ApplicationCall.orgNummer: String

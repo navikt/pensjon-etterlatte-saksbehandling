@@ -42,11 +42,10 @@ import rapidsandrivers.HENDELSE_DATA_KEY
 import rapidsandrivers.SAK_ID_KEY
 import java.time.Month
 import java.time.YearMonth
-import java.util.*
+import java.util.UUID
 import javax.sql.DataSource
 
 internal class MigreringIntegrationTest {
-
     @Container
     private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:$POSTGRES_VERSION")
 
@@ -64,40 +63,45 @@ internal class MigreringIntegrationTest {
     fun `kan ta imot og handtere respons fra PEN`() {
         testApplication {
             val repository = PesysRepository(datasource)
-            val featureToggleService = DummyFeatureToggleService().also {
-                it.settBryter(MigreringFeatureToggle.SendSakTilMigrering, true)
-            }
-            val responsFraPEN = objectMapper.readValue<BarnepensjonGrunnlagResponse>(
-                this::class.java.getResource("/penrespons.json")!!.readText()
-            )
-
-            val inspector = TestRapid()
-                .apply {
-                    MigrerSpesifikkSak(
-                        rapidsConnection = this,
-                        penKlient = mockk<PenKlient>()
-                            .also { every { runBlocking { it.hentSak(any()) } } returns responsFraPEN },
-                        pesysRepository = repository,
-                        featureToggleService = featureToggleService,
-                        verifiserer = Verifiserer(
-                            mockk<PDLKlient>().also {
-                                every {
-                                    it.hentPerson(
-                                        any(),
-                                        any()
-                                    )
-                                } returns mockk()
-                            }
-                        )
-                    )
+            val featureToggleService =
+                DummyFeatureToggleService().also {
+                    it.settBryter(MigreringFeatureToggle.SendSakTilMigrering, true)
                 }
+            val responsFraPEN =
+                objectMapper.readValue<BarnepensjonGrunnlagResponse>(
+                    this::class.java.getResource("/penrespons.json")!!.readText(),
+                )
+
+            val inspector =
+                TestRapid()
+                    .apply {
+                        MigrerSpesifikkSak(
+                            rapidsConnection = this,
+                            penKlient =
+                                mockk<PenKlient>()
+                                    .also { every { runBlocking { it.hentSak(any()) } } returns responsFraPEN },
+                            pesysRepository = repository,
+                            featureToggleService = featureToggleService,
+                            verifiserer =
+                                Verifiserer(
+                                    mockk<PDLKlient>().also {
+                                        every {
+                                            it.hentPerson(
+                                                any(),
+                                                any(),
+                                            )
+                                        } returns mockk()
+                                    },
+                                ),
+                        )
+                    }
             inspector.sendTestMessage(
                 JsonMessage.newMessage(
                     mapOf(
                         EVENT_NAME_KEY to Migreringshendelser.MIGRER_SPESIFIKK_SAK,
-                        SAK_ID_KEY to "22974139"
-                    )
-                ).toJson()
+                        SAK_ID_KEY to "22974139",
+                    ),
+                ).toJson(),
             )
             with(repository.hentSaker()) {
                 assertEquals(1, size)
@@ -118,44 +122,49 @@ internal class MigreringIntegrationTest {
         val pesysId = PesysId(22974139)
         testApplication {
             val repository = PesysRepository(datasource)
-            val featureToggleService = DummyFeatureToggleService().also {
-                it.settBryter(MigreringFeatureToggle.SendSakTilMigrering, true)
-            }
-            val responsFraPEN = objectMapper.readValue<BarnepensjonGrunnlagResponse>(
-                this::class.java.getResource("/penrespons.json")!!.readText()
-            )
-            val penKlient = mockk<PenKlient>()
-                .also { every { runBlocking { it.hentSak(any()) } } returns responsFraPEN }
-                .also { every { runBlocking { it.opphoerSak(any()) } } just runs }
-
-            val inspector = TestRapid()
-                .apply {
-                    MigrerSpesifikkSak(
-                        rapidsConnection = this,
-                        penKlient = penKlient,
-                        pesysRepository = repository,
-                        featureToggleService = featureToggleService,
-                        verifiserer = Verifiserer(
-                            mockk<PDLKlient>().also {
-                                every {
-                                    it.hentPerson(
-                                        any(),
-                                        any()
-                                    )
-                                } returns mockk()
-                            }
-                        )
-                    )
-                    LagreKopling(this, repository)
-                    LyttPaaIverksattVedtak(this, repository, penKlient)
+            val featureToggleService =
+                DummyFeatureToggleService().also {
+                    it.settBryter(MigreringFeatureToggle.SendSakTilMigrering, true)
                 }
+            val responsFraPEN =
+                objectMapper.readValue<BarnepensjonGrunnlagResponse>(
+                    this::class.java.getResource("/penrespons.json")!!.readText(),
+                )
+            val penKlient =
+                mockk<PenKlient>()
+                    .also { every { runBlocking { it.hentSak(any()) } } returns responsFraPEN }
+                    .also { every { runBlocking { it.opphoerSak(any()) } } just runs }
+
+            val inspector =
+                TestRapid()
+                    .apply {
+                        MigrerSpesifikkSak(
+                            rapidsConnection = this,
+                            penKlient = penKlient,
+                            pesysRepository = repository,
+                            featureToggleService = featureToggleService,
+                            verifiserer =
+                                Verifiserer(
+                                    mockk<PDLKlient>().also {
+                                        every {
+                                            it.hentPerson(
+                                                any(),
+                                                any(),
+                                            )
+                                        } returns mockk()
+                                    },
+                                ),
+                        )
+                        LagreKopling(this, repository)
+                        LyttPaaIverksattVedtak(this, repository, penKlient)
+                    }
             inspector.sendTestMessage(
                 JsonMessage.newMessage(
                     mapOf(
                         EVENT_NAME_KEY to Migreringshendelser.MIGRER_SPESIFIKK_SAK,
-                        SAK_ID_KEY to pesysId.id
-                    )
-                ).toJson()
+                        SAK_ID_KEY to pesysId.id,
+                    ),
+                ).toJson(),
             )
             with(repository.hentSaker()) {
                 assertEquals(1, size)
@@ -169,9 +178,9 @@ internal class MigreringIntegrationTest {
                     mapOf(
                         EVENT_NAME_KEY to Migreringshendelser.LAGRE_KOPLING,
                         BEHANDLING_ID_KEY to behandlingId,
-                        PESYS_ID to pesysId
-                    )
-                ).toJson()
+                        PESYS_ID to pesysId,
+                    ),
+                ).toJson(),
             )
             assertEquals(repository.hentPesysId(behandlingId)?.pesysId, pesysId)
 
@@ -179,14 +188,15 @@ internal class MigreringIntegrationTest {
                 JsonMessage.newMessage(
                     mapOf(
                         EVENT_NAME_KEY to EVENT_NAME_OPPDATERT,
-                        UTBETALING_RESPONSE to UtbetalingResponseDto(
-                            status = UtbetalingStatusDto.GODKJENT,
-                            vedtakId = 1L,
-                            behandlingId = behandlingId,
-                            feilmelding = null
-                        )
-                    )
-                ).toJson()
+                        UTBETALING_RESPONSE to
+                            UtbetalingResponseDto(
+                                status = UtbetalingStatusDto.GODKJENT,
+                                vedtakId = 1L,
+                                behandlingId = behandlingId,
+                                feilmelding = null,
+                            ),
+                    ),
+                ).toJson(),
             )
             verify { runBlocking { penKlient.opphoerSak(pesysId) } }
             assertEquals(repository.hentStatus(pesysId.id), Migreringsstatus.FERDIG)
@@ -198,40 +208,45 @@ internal class MigreringIntegrationTest {
         testApplication {
             val pesysid = 22974139L
             val repository = PesysRepository(datasource)
-            val featureToggleService = DummyFeatureToggleService().also {
-                it.settBryter(MigreringFeatureToggle.SendSakTilMigrering, true)
-            }
-            val responsFraPEN = objectMapper.readValue<BarnepensjonGrunnlagResponse>(
-                this::class.java.getResource("/penrespons.json")!!.readText()
-            )
-
-            val inspector = TestRapid()
-                .apply {
-                    MigrerSpesifikkSak(
-                        rapidsConnection = this,
-                        penKlient = mockk<PenKlient>()
-                            .also { every { runBlocking { it.hentSak(any()) } } returns responsFraPEN },
-                        pesysRepository = repository,
-                        featureToggleService = featureToggleService,
-                        verifiserer = Verifiserer(
-                            mockk<PDLKlient>().also {
-                                every {
-                                    it.hentPerson(
-                                        any(),
-                                        any()
-                                    )
-                                } throws IllegalStateException("")
-                            }
-                        )
-                    )
+            val featureToggleService =
+                DummyFeatureToggleService().also {
+                    it.settBryter(MigreringFeatureToggle.SendSakTilMigrering, true)
                 }
+            val responsFraPEN =
+                objectMapper.readValue<BarnepensjonGrunnlagResponse>(
+                    this::class.java.getResource("/penrespons.json")!!.readText(),
+                )
+
+            val inspector =
+                TestRapid()
+                    .apply {
+                        MigrerSpesifikkSak(
+                            rapidsConnection = this,
+                            penKlient =
+                                mockk<PenKlient>()
+                                    .also { every { runBlocking { it.hentSak(any()) } } returns responsFraPEN },
+                            pesysRepository = repository,
+                            featureToggleService = featureToggleService,
+                            verifiserer =
+                                Verifiserer(
+                                    mockk<PDLKlient>().also {
+                                        every {
+                                            it.hentPerson(
+                                                any(),
+                                                any(),
+                                            )
+                                        } throws IllegalStateException("")
+                                    },
+                                ),
+                        )
+                    }
             inspector.sendTestMessage(
                 JsonMessage.newMessage(
                     mapOf(
                         EVENT_NAME_KEY to Migreringshendelser.MIGRER_SPESIFIKK_SAK,
-                        SAK_ID_KEY to pesysid
-                    )
-                ).toJson()
+                        SAK_ID_KEY to pesysid,
+                    ),
+                ).toJson(),
             )
             with(inspector.inspektør.message(0)) {
                 assertEquals(Migreringsstatus.FEILA.name, get(EVENT_NAME_KEY).textValue())
@@ -241,10 +256,11 @@ internal class MigreringIntegrationTest {
     }
 }
 
-internal fun PesysRepository.hentSaker(tx: TransactionalSession? = null): List<Pesyssak> = tx.session {
-    hentListe(
-        "SELECT sak from pesyssak WHERE status = '${Migreringsstatus.UNDER_MIGRERING.name}'"
-    ) {
-        objectMapper.readValue(it.string("sak"), Pesyssak::class.java)
+internal fun PesysRepository.hentSaker(tx: TransactionalSession? = null): List<Pesyssak> =
+    tx.session {
+        hentListe(
+            "SELECT sak from pesyssak WHERE status = '${Migreringsstatus.UNDER_MIGRERING.name}'",
+        ) {
+            objectMapper.readValue(it.string("sak"), Pesyssak::class.java)
+        }
     }
-}

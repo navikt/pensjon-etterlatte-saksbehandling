@@ -27,10 +27,9 @@ import rapidsandrivers.sakId
 
 internal class MigrerEnEnkeltSak(
     rapidsConnection: RapidsConnection,
-    private val behandlinger: BehandlingService
+    private val behandlinger: BehandlingService,
 ) :
     ListenerMedLoggingOgFeilhaandtering(Migreringshendelser.MIGRER_SAK) {
-
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     init {
@@ -47,7 +46,10 @@ internal class MigrerEnEnkeltSak(
         }.register(this)
     }
 
-    override fun haandterPakke(packet: JsonMessage, context: MessageContext) {
+    override fun haandterPakke(
+        packet: JsonMessage,
+        context: MessageContext,
+    ) {
         logger.info("Mottatt migreringshendelse")
 
         val hendelse: MigreringRequest = objectMapper.treeToValue(packet[HENDELSE_DATA_KEY])
@@ -58,9 +60,10 @@ internal class MigrerEnEnkeltSak(
 
         packet[SAK_TYPE_KEY] = SakType.BARNEPENSJON
         packet[ROLLE_KEY] = PersonRolle.AVDOED
-        packet[MIGRERING_GRUNNLAG_KEY] = MigrerSoekerRequest(
-            soeker = hendelse.soeker.value
-        )
+        packet[MIGRERING_GRUNNLAG_KEY] =
+            MigrerSoekerRequest(
+                soeker = hendelse.soeker.value,
+            )
         packet[PERSONGALLERI] = hendelse.opprettPersongalleri()
         packet.eventName = Migreringshendelser.LAGRE_KOPLING
 

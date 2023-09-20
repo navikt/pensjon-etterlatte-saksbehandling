@@ -44,7 +44,7 @@ import org.junit.jupiter.api.assertThrows
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
 import java.sql.Connection
-import java.util.*
+import java.util.UUID
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -74,7 +74,7 @@ internal class OppgaveServiceNyTest {
             DataSourceBuilder.createDataSource(
                 jdbcUrl = postgreSQLContainer.jdbcUrl,
                 username = postgreSQLContainer.username,
-                password = postgreSQLContainer.password
+                password = postgreSQLContainer.password,
             ).apply { migrate() }
 
         val connection = dataSource.connection
@@ -93,7 +93,7 @@ internal class OppgaveServiceNyTest {
         mapOf(
             AzureGroup.SAKSBEHANDLER to saksbehandlerRolleDev,
             AzureGroup.ATTESTANT to attestantRolleDev,
-            AzureGroup.STRENGT_FORTROLIG to strengtfortroligDev
+            AzureGroup.STRENGT_FORTROLIG to strengtfortroligDev,
         )
 
     private fun generateSaksbehandlerMedRoller(azureGroup: AzureGroup): SaksbehandlerMedRoller {
@@ -101,7 +101,7 @@ internal class OppgaveServiceNyTest {
         val jwtclaimsSaksbehandler = JWTClaimsSet.Builder().claim("groups", groupId).build()
         return SaksbehandlerMedRoller(
             Saksbehandler("", azureGroup.name, JwtTokenClaims(jwtclaimsSaksbehandler)),
-            mapOf(azureGroup to groupId)
+            mapOf(azureGroup to groupId),
         )
     }
 
@@ -116,18 +116,18 @@ internal class OppgaveServiceNyTest {
 
                     override fun <T> inTransaction(
                         gjenbruk: Boolean,
-                        block: () -> T
+                        block: () -> T,
                     ): T {
                         return block()
                     }
-                }
-            )
+                },
+            ),
         )
     }
 
     private fun mockForSaksbehandlerMedRoller(
         userSaksbehandler: SaksbehandlerMedEnheterOgRoller,
-        saksbehandlerMedRoller: SaksbehandlerMedRoller
+        saksbehandlerMedRoller: SaksbehandlerMedRoller,
     ) {
         every { userSaksbehandler.saksbehandlerMedRoller } returns saksbehandlerMedRoller
     }
@@ -163,7 +163,7 @@ internal class OppgaveServiceNyTest {
                 opprettetSak.id,
                 OppgaveKilde.BEHANDLING,
                 OppgaveType.FOERSTEGANGSBEHANDLING,
-                null
+                null,
             )
         val nysaksbehandler = "nysaksbehandler"
         oppgaveServiceNy.tildelSaksbehandler(nyOppgave.id, nysaksbehandler)
@@ -185,7 +185,7 @@ internal class OppgaveServiceNyTest {
                 opprettetSak.id,
                 OppgaveKilde.BEHANDLING,
                 OppgaveType.FOERSTEGANGSBEHANDLING,
-                null
+                null,
             )
 
         val systembruker = "systembruker"
@@ -197,7 +197,7 @@ internal class OppgaveServiceNyTest {
                 VedtakOppgaveDTO(opprettetSak.id, referanse),
                 OppgaveType.ATTESTERING,
                 null,
-                systembrukerTokenInfo
+                systembrukerTokenInfo,
             )
 
         oppgaveServiceNy.tildelSaksbehandler(vedtakOppgaveDTO.id, systembruker)
@@ -215,7 +215,7 @@ internal class OppgaveServiceNyTest {
                 opprettetSak.id,
                 OppgaveKilde.BEHANDLING,
                 OppgaveType.FOERSTEGANGSBEHANDLING,
-                null
+                null,
             )
 
         val vanligSaksbehandler = saksbehandler.saksbehandlerMedRoller.saksbehandler
@@ -226,7 +226,7 @@ internal class OppgaveServiceNyTest {
                 VedtakOppgaveDTO(opprettetSak.id, referanse),
                 OppgaveType.ATTESTERING,
                 null,
-                vanligSaksbehandler
+                vanligSaksbehandler,
             )
 
         val attestantSaksbehandler = mockk<SaksbehandlerMedEnheterOgRoller>()
@@ -249,7 +249,7 @@ internal class OppgaveServiceNyTest {
                 opprettetSak.id,
                 OppgaveKilde.BEHANDLING,
                 OppgaveType.FOERSTEGANGSBEHANDLING,
-                null
+                null,
             )
 
         val vanligSaksbehandler = saksbehandler.saksbehandlerMedRoller.saksbehandler
@@ -260,7 +260,7 @@ internal class OppgaveServiceNyTest {
                 VedtakOppgaveDTO(opprettetSak.id, referanse),
                 OppgaveType.ATTESTERING,
                 null,
-                vanligSaksbehandler
+                vanligSaksbehandler,
             )
 
         val saksbehandlerto = mockk<SaksbehandlerMedEnheterOgRoller>()
@@ -282,7 +282,7 @@ internal class OppgaveServiceNyTest {
                 opprettetSak.id,
                 OppgaveKilde.BEHANDLING,
                 OppgaveType.FOERSTEGANGSBEHANDLING,
-                null
+                null,
             )
         val nysaksbehandler = "nysaksbehandler"
         oppgaveServiceNy.tildelSaksbehandler(nyOppgave.id, nysaksbehandler)
@@ -312,7 +312,7 @@ internal class OppgaveServiceNyTest {
                 opprettetSak.id,
                 OppgaveKilde.BEHANDLING,
                 OppgaveType.FOERSTEGANGSBEHANDLING,
-                null
+                null,
             )
         oppgaveDaoNy.endreStatusPaaOppgave(nyOppgave.id, Status.FERDIGSTILT)
         val nysaksbehandler = "nysaksbehandler"
@@ -331,7 +331,7 @@ internal class OppgaveServiceNyTest {
                 sakId = sak.id,
                 oppgaveKilde = OppgaveKilde.BEHANDLING,
                 oppgaveType = OppgaveType.FOERSTEGANGSBEHANDLING,
-                merknad = null
+                merknad = null,
             )
         val oppgaveAttestering =
             oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
@@ -339,7 +339,7 @@ internal class OppgaveServiceNyTest {
                 sakId = sak.id,
                 oppgaveKilde = OppgaveKilde.BEHANDLING,
                 oppgaveType = OppgaveType.ATTESTERING,
-                merknad = null
+                merknad = null,
             )
         oppgaveServiceNy.tildelSaksbehandler(oppgaveBehandling.id, "saksbehandler")
         oppgaveServiceNy.avbrytAapneOppgaverForBehandling(behandlingsId)
@@ -363,7 +363,7 @@ internal class OppgaveServiceNyTest {
                 sakId = sak.id,
                 oppgaveKilde = OppgaveKilde.BEHANDLING,
                 oppgaveType = OppgaveType.FOERSTEGANGSBEHANDLING,
-                merknad = null
+                merknad = null,
             )
         oppgaveServiceNy.tildelSaksbehandler(oppgaveFerdigstilt.id, saksbehandler.ident)
         oppgaveServiceNy.ferdigStillOppgaveUnderBehandling(behandlingId, saksbehandler)
@@ -374,7 +374,7 @@ internal class OppgaveServiceNyTest {
                 sakId = sak.id,
                 oppgaveKilde = OppgaveKilde.BEHANDLING,
                 oppgaveType = OppgaveType.FOERSTEGANGSBEHANDLING,
-                merknad = null
+                merknad = null,
             )
         val saksbehandlerforstegangs = Saksbehandler("", "forstegangssaksbehandler", null)
         oppgaveServiceNy.tildelSaksbehandler(annenbehandlingfoerstegangs.id, saksbehandlerforstegangs.ident)
@@ -385,7 +385,7 @@ internal class OppgaveServiceNyTest {
                 sakId = sak.id,
                 oppgaveKilde = OppgaveKilde.BEHANDLING,
                 oppgaveType = OppgaveType.ATTESTERING,
-                merknad = null
+                merknad = null,
             )
 
         val attestantmock = mockk<SaksbehandlerMedEnheterOgRoller>()
@@ -409,7 +409,7 @@ internal class OppgaveServiceNyTest {
                 opprettetSak.id,
                 OppgaveKilde.BEHANDLING,
                 OppgaveType.FOERSTEGANGSBEHANDLING,
-                null
+                null,
             )
         val nysaksbehandler = "nysaksbehandler"
         oppgaveServiceNy.byttSaksbehandler(nyOppgave.id, nysaksbehandler)
@@ -427,7 +427,7 @@ internal class OppgaveServiceNyTest {
                 opprettetSak.id,
                 OppgaveKilde.BEHANDLING,
                 OppgaveType.FOERSTEGANGSBEHANDLING,
-                null
+                null,
             )
         oppgaveDaoNy.endreStatusPaaOppgave(nyOppgave.id, Status.FERDIGSTILT)
         val nysaksbehandler = "nysaksbehandler"
@@ -457,7 +457,7 @@ internal class OppgaveServiceNyTest {
                 opprettetSak.id,
                 OppgaveKilde.BEHANDLING,
                 OppgaveType.FOERSTEGANGSBEHANDLING,
-                null
+                null,
             )
         val nysaksbehandler = "nysaksbehandler"
         oppgaveServiceNy.tildelSaksbehandler(nyOppgave.id, nysaksbehandler)
@@ -477,7 +477,7 @@ internal class OppgaveServiceNyTest {
                 opprettetSak.id,
                 OppgaveKilde.BEHANDLING,
                 OppgaveType.FOERSTEGANGSBEHANDLING,
-                null
+                null,
             )
         val err =
             assertThrows<BadRequestException> {
@@ -495,7 +495,7 @@ internal class OppgaveServiceNyTest {
                 opprettetSak.id,
                 OppgaveKilde.BEHANDLING,
                 OppgaveType.FOERSTEGANGSBEHANDLING,
-                null
+                null,
             )
         val saksbehandler = "saksbehandler"
         oppgaveServiceNy.tildelSaksbehandler(nyOppgave.id, saksbehandler)
@@ -517,7 +517,7 @@ internal class OppgaveServiceNyTest {
                 opprettetSak.id,
                 OppgaveKilde.BEHANDLING,
                 OppgaveType.FOERSTEGANGSBEHANDLING,
-                null
+                null,
             )
         oppgaveServiceNy.tildelSaksbehandler(nyOppgave.id, "nysaksbehandler")
         val nyFrist = Tidspunkt.now().toLocalDatetimeUTC().plusMonths(4L).toTidspunkt()
@@ -535,7 +535,7 @@ internal class OppgaveServiceNyTest {
                 opprettetSak.id,
                 OppgaveKilde.BEHANDLING,
                 OppgaveType.FOERSTEGANGSBEHANDLING,
-                null
+                null,
             )
         oppgaveServiceNy.tildelSaksbehandler(nyOppgave.id, "nysaksbehandler")
         val nyFrist = Tidspunkt.now().toLocalDatetimeUTC().minusMonths(1L).toTidspunkt()
@@ -557,14 +557,14 @@ internal class OppgaveServiceNyTest {
                 opprettetSak.id,
                 OppgaveKilde.BEHANDLING,
                 OppgaveType.FOERSTEGANGSBEHANDLING,
-                null
+                null,
             )
 
         oppgaveDaoNy.endreStatusPaaOppgave(nyOppgave.id, Status.FERDIGSTILT)
         assertThrows<IllegalStateException> {
             oppgaveServiceNy.redigerFrist(
                 oppgaveId = nyOppgave.id,
-                frist = Tidspunkt.now().toLocalDatetimeUTC().plusMonths(1L).toTidspunkt()
+                frist = Tidspunkt.now().toLocalDatetimeUTC().plusMonths(1L).toTidspunkt(),
             )
         }
         val lagretOppgave = oppgaveServiceNy.hentOppgave(nyOppgave.id)
@@ -581,7 +581,7 @@ internal class OppgaveServiceNyTest {
                 opprettetSak.id,
                 OppgaveKilde.BEHANDLING,
                 OppgaveType.FOERSTEGANGSBEHANDLING,
-                null
+                null,
             )
 
         val saksbehandler1 = Saksbehandler("", "saksbehandler", null)
@@ -592,7 +592,7 @@ internal class OppgaveServiceNyTest {
                 VedtakOppgaveDTO(opprettetSak.id, referanse),
                 OppgaveType.ATTESTERING,
                 null,
-                saksbehandler1
+                saksbehandler1,
             )
 
         val saksbehandlerOppgave = oppgaveServiceNy.hentOppgave(nyOppgave.id)
@@ -611,7 +611,7 @@ internal class OppgaveServiceNyTest {
                 opprettetSak.id,
                 OppgaveKilde.BEHANDLING,
                 OppgaveType.FOERSTEGANGSBEHANDLING,
-                null
+                null,
             )
 
         val saksbehandler1 = "saksbehandler"
@@ -621,7 +621,7 @@ internal class OppgaveServiceNyTest {
                 VedtakOppgaveDTO(opprettetSak.id, referanse),
                 OppgaveType.ATTESTERING,
                 null,
-                Saksbehandler("", "Feilsaksbehandler", null)
+                Saksbehandler("", "Feilsaksbehandler", null),
             )
         }
     }
@@ -635,7 +635,7 @@ internal class OppgaveServiceNyTest {
             opprettetSak.id,
             OppgaveKilde.BEHANDLING,
             OppgaveType.FOERSTEGANGSBEHANDLING,
-            null
+            null,
         )
 
         val err =
@@ -644,12 +644,12 @@ internal class OppgaveServiceNyTest {
                     VedtakOppgaveDTO(opprettetSak.id, referanse),
                     OppgaveType.ATTESTERING,
                     null,
-                    Saksbehandler("", "saksbehandler", null)
+                    Saksbehandler("", "saksbehandler", null),
                 )
             }
 
         Assertions.assertTrue(
-            err.message!!.startsWith("Det må finnes en oppgave under behandling, gjelder behandling:")
+            err.message!!.startsWith("Det må finnes en oppgave under behandling, gjelder behandling:"),
         )
     }
 
@@ -664,13 +664,13 @@ internal class OppgaveServiceNyTest {
                     VedtakOppgaveDTO(opprettetSak.id, referanse),
                     OppgaveType.ATTESTERING,
                     null,
-                    Saksbehandler("", "saksbehandler", null)
+                    Saksbehandler("", "saksbehandler", null),
                 )
             }
 
         Assertions.assertEquals(
             "Må ha en oppgave for å kunne lage attesteringsoppgave",
-            err.message!!
+            err.message!!,
         )
     }
 
@@ -684,7 +684,7 @@ internal class OppgaveServiceNyTest {
                 opprettetSak.id,
                 OppgaveKilde.BEHANDLING,
                 OppgaveType.FOERSTEGANGSBEHANDLING,
-                null
+                null,
             )
 
         val oppgaveTo =
@@ -693,7 +693,7 @@ internal class OppgaveServiceNyTest {
                 opprettetSak.id,
                 OppgaveKilde.BEHANDLING,
                 OppgaveType.FOERSTEGANGSBEHANDLING,
-                null
+                null,
             )
         val saksbehandler1 = Saksbehandler("", "saksbehandler", null)
         oppgaveServiceNy.tildelSaksbehandler(oppgaveEn.id, saksbehandler1.ident)
@@ -705,12 +705,12 @@ internal class OppgaveServiceNyTest {
                     VedtakOppgaveDTO(opprettetSak.id, referanse),
                     OppgaveType.ATTESTERING,
                     null,
-                    saksbehandler1
+                    saksbehandler1,
                 )
             }
 
         Assertions.assertTrue(
-            err.message!!.startsWith("Skal kun ha en oppgave under behandling, gjelder behandling:")
+            err.message!!.startsWith("Skal kun ha en oppgave under behandling, gjelder behandling:"),
         )
     }
 
@@ -732,7 +732,7 @@ internal class OppgaveServiceNyTest {
                 opprettetSak.id,
                 OppgaveKilde.BEHANDLING,
                 OppgaveType.FOERSTEGANGSBEHANDLING,
-                null
+                null,
             )
 
         val adressebeskyttetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
@@ -741,7 +741,7 @@ internal class OppgaveServiceNyTest {
             adressebeskyttetSak.id,
             OppgaveKilde.BEHANDLING,
             OppgaveType.FOERSTEGANGSBEHANDLING,
-            null
+            null,
         )
 
         saktilgangDao.oppdaterAdresseBeskyttelse(adressebeskyttetSak.id, AdressebeskyttelseGradering.STRENGT_FORTROLIG)
@@ -763,7 +763,7 @@ internal class OppgaveServiceNyTest {
             sakId = opprettetSak.id,
             oppgaveKilde = OppgaveKilde.BEHANDLING,
             oppgaveType = OppgaveType.FOERSTEGANGSBEHANDLING,
-            merknad = null
+            merknad = null,
         )
 
         val saksbehandlerMedRoller = generateSaksbehandlerMedRoller(AzureGroup.SAKSBEHANDLER)
@@ -785,7 +785,7 @@ internal class OppgaveServiceNyTest {
             opprettetSak.id,
             OppgaveKilde.BEHANDLING,
             OppgaveType.FOERSTEGANGSBEHANDLING,
-            null
+            null,
         )
 
         val adressebeskyttetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
@@ -795,7 +795,7 @@ internal class OppgaveServiceNyTest {
                 adressebeskyttetSak.id,
                 OppgaveKilde.BEHANDLING,
                 OppgaveType.FOERSTEGANGSBEHANDLING,
-                null
+                null,
             )
 
         saktilgangDao.oppdaterAdresseBeskyttelse(adressebeskyttetSak.id, AdressebeskyttelseGradering.STRENGT_FORTROLIG)
@@ -815,7 +815,7 @@ internal class OppgaveServiceNyTest {
             opprettetSak.id,
             OppgaveKilde.BEHANDLING,
             OppgaveType.FOERSTEGANGSBEHANDLING,
-            null
+            null,
         )
 
         val attestantSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
@@ -825,7 +825,7 @@ internal class OppgaveServiceNyTest {
                 attestantSak.id,
                 OppgaveKilde.BEHANDLING,
                 OppgaveType.ATTESTERING,
-                null
+                null,
             )
 
         val saksbehandlerMedRollerAttestant = generateSaksbehandlerMedRoller(AzureGroup.ATTESTANT)
@@ -845,7 +845,7 @@ internal class OppgaveServiceNyTest {
                 opprettetSak.id,
                 OppgaveKilde.BEHANDLING,
                 OppgaveType.FOERSTEGANGSBEHANDLING,
-                null
+                null,
             )
         val nysaksbehandler = "nysaksbehandler"
         oppgaveServiceNy.tildelSaksbehandler(nyOppgave.id, nysaksbehandler)
@@ -872,7 +872,7 @@ internal class OppgaveServiceNyTest {
                 opprettetSak.id,
                 OppgaveKilde.BEHANDLING,
                 OppgaveType.FOERSTEGANGSBEHANDLING,
-                null
+                null,
             )
 
         val saksbehandler1 = Saksbehandler("", "saksbehandler01", null)
@@ -892,7 +892,7 @@ internal class OppgaveServiceNyTest {
                 opprettetSak.id,
                 OppgaveKilde.BEHANDLING,
                 OppgaveType.FOERSTEGANGSBEHANDLING,
-                null
+                null,
             )
 
         val saksbehandler1 = "saksbehandler01"
@@ -900,7 +900,7 @@ internal class OppgaveServiceNyTest {
         assertThrows<OppgaveServiceNy.FeilSaksbehandlerPaaOppgaveException> {
             oppgaveServiceNy.ferdigStillOppgaveUnderBehandling(
                 behandlingsref,
-                Saksbehandler("", "feilSaksbehandler", null)
+                Saksbehandler("", "feilSaksbehandler", null),
             )
         }
     }
@@ -915,7 +915,7 @@ internal class OppgaveServiceNyTest {
                 opprettetSak.id,
                 OppgaveKilde.BEHANDLING,
                 OppgaveType.FOERSTEGANGSBEHANDLING,
-                null
+                null,
             )
         oppgaveServiceNy.tildelSaksbehandler(oppgaveSomSkalBliAvbrutt.id, "saksbehandler01")
 
@@ -940,12 +940,12 @@ internal class OppgaveServiceNyTest {
 
                     override fun <T> inTransaction(
                         gjenbruk: Boolean,
-                        block: () -> T
+                        block: () -> T,
                     ): T {
                         return block()
                     }
-                }
-            )
+                },
+            ),
         )
 
         val aalesundSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
@@ -956,7 +956,7 @@ internal class OppgaveServiceNyTest {
                 aalesundSak.id,
                 OppgaveKilde.BEHANDLING,
                 OppgaveType.FOERSTEGANGSBEHANDLING,
-                null
+                null,
             )
         val saksbehandlerid = "saksbehandler01"
         oppgaveServiceNy.tildelSaksbehandler(oppgaveAalesund.id, saksbehandlerid)
@@ -969,7 +969,7 @@ internal class OppgaveServiceNyTest {
                 saksteinskjer.id,
                 OppgaveKilde.BEHANDLING,
                 OppgaveType.FOERSTEGANGSBEHANDLING,
-                null
+                null,
             )
 
         oppgaveServiceNy.tildelSaksbehandler(oppgavesteinskjer.id, saksbehandlerid)
@@ -992,7 +992,7 @@ internal class OppgaveServiceNyTest {
                 opprettetSak.id,
                 OppgaveKilde.BEHANDLING,
                 OppgaveType.FOERSTEGANGSBEHANDLING,
-                null
+                null,
             )
         val saksbehandler = "saksbehandler"
 
@@ -1014,7 +1014,7 @@ internal class OppgaveServiceNyTest {
                 opprettetSak.id,
                 OppgaveKilde.BEHANDLING,
                 OppgaveType.REVURDERING,
-                null
+                null,
             )
         val saksbehandler = "saksbehandler"
 
@@ -1036,7 +1036,7 @@ internal class OppgaveServiceNyTest {
                 opprettetSak.id,
                 OppgaveKilde.BEHANDLING,
                 OppgaveType.FOERSTEGANGSBEHANDLING,
-                null
+                null,
             )
         val saksbehandler = Saksbehandler("", "saksbehandler", null)
 
@@ -1048,7 +1048,7 @@ internal class OppgaveServiceNyTest {
                 opprettetSak.id,
                 OppgaveKilde.BEHANDLING,
                 OppgaveType.ATTESTERING,
-                null
+                null,
             )
 
         val attestantmock = mockk<SaksbehandlerMedEnheterOgRoller>()
@@ -1072,7 +1072,7 @@ internal class OppgaveServiceNyTest {
                 opprettetSak.id,
                 OppgaveKilde.BEHANDLING,
                 OppgaveType.FOERSTEGANGSBEHANDLING,
-                null
+                null,
             )
         val saksbehandlerHentet =
             oppgaveServiceNy.hentSaksbehandlerForBehandling(UUID.fromString(behandlingId))

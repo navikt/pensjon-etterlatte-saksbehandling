@@ -9,26 +9,27 @@ import no.nav.person.pdl.leesah.Personhendelse
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.slf4j.LoggerFactory
 import java.time.Duration
-import java.util.*
+import java.util.Properties
 
 class PersonhendelseKonsument(
     topic: String,
     kafkaProperties: Properties,
-    private val personHendelseFordeler: PersonHendelseFordeler
+    private val personHendelseFordeler: PersonHendelseFordeler,
 ) : Kafkakonsument<Personhendelse>(
-    logger = LoggerFactory.getLogger(KafkaConsumer::class.java.name),
-    consumer = KafkaConsumer<String, Personhendelse>(kafkaProperties),
-    topic = topic,
-    pollTimeoutInSeconds = Duration.ofSeconds(10L)
-) {
+        logger = LoggerFactory.getLogger(KafkaConsumer::class.java.name),
+        consumer = KafkaConsumer<String, Personhendelse>(kafkaProperties),
+        topic = topic,
+        pollTimeoutInSeconds = Duration.ofSeconds(10L),
+    ) {
     override fun stream() {
         stream { hendelser ->
             runBlocking {
-                val ventbareHendelser = hendelser.map {
-                    async(context = Dispatchers.Default) {
-                        personHendelseFordeler.haandterHendelse(it.value())
+                val ventbareHendelser =
+                    hendelser.map {
+                        async(context = Dispatchers.Default) {
+                            personHendelseFordeler.haandterHendelse(it.value())
+                        }
                     }
-                }
                 ventbareHendelser.forEach { it.await() }
             }
         }

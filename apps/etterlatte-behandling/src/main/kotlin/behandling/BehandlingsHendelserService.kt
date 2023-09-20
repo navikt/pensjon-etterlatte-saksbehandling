@@ -10,19 +10,26 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 enum class BehandlingHendelseType {
-    OPPRETTET, AVBRUTT
+    OPPRETTET,
+    AVBRUTT,
 }
 
 interface BehandlingHendelserKafkaProducer {
-    fun sendMeldingForHendelse(behandling: Behandling, hendelseType: BehandlingHendelseType)
+    fun sendMeldingForHendelse(
+        behandling: Behandling,
+        hendelseType: BehandlingHendelseType,
+    )
 }
 
 class BehandlingsHendelserKafkaProducerImpl(
-    private val rapid: KafkaProdusent<String, String>
+    private val rapid: KafkaProdusent<String, String>,
 ) : BehandlingHendelserKafkaProducer {
     private val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
-    override fun sendMeldingForHendelse(behandling: Behandling, hendelseType: BehandlingHendelseType) {
+    override fun sendMeldingForHendelse(
+        behandling: Behandling,
+        hendelseType: BehandlingHendelseType,
+    ) {
         val correlationId = getCorrelationId()
 
         rapid.publiser(
@@ -31,13 +38,13 @@ class BehandlingsHendelserKafkaProducerImpl(
                 "BEHANDLING:${hendelseType.name}",
                 mapOf(
                     CORRELATION_ID_KEY to correlationId,
-                    BehandlingRiverKey.behandlingObjectKey to behandling
-                )
-            ).toJson()
+                    BehandlingRiverKey.behandlingObjectKey to behandling,
+                ),
+            ).toJson(),
         ).also { (partition, offset) ->
             logger.info(
                 "Posted event BEHANDLING:${hendelseType.name} for behandling ${behandling.id}" +
-                    " to partiton $partition, offset $offset correlationid: $correlationId"
+                    " to partiton $partition, offset $offset correlationid: $correlationId",
             )
         }
     }

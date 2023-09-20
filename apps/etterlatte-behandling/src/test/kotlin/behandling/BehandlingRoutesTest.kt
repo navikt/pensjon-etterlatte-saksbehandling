@@ -47,11 +47,10 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import testsupport.buildTestApplicationConfigurationForOauth
 import java.time.YearMonth
-import java.util.*
+import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class BehandlingRoutesTest {
-
     private val mockOAuth2Server = MockOAuth2Server()
     private lateinit var hoconApplicationConfig: HoconApplicationConfig
     private val sakService = mockk<SakService>(relaxUnitFun = true)
@@ -86,11 +85,12 @@ internal class BehandlingRoutesTest {
         } just runs
 
         withTestApplication { client ->
-            val response = client.post("/api/behandling/$behandlingId/utenlandstilsnitt") {
-                header(HttpHeaders.Authorization, "Bearer $token")
-                contentType(ContentType.Application.Json)
-                setBody(UtenlandstilsnittRequest(UtenlandstilsnittType.BOSATT_UTLAND, "Test"))
-            }
+            val response =
+                client.post("/api/behandling/$behandlingId/utenlandstilsnitt") {
+                    header(HttpHeaders.Authorization, "Bearer $token")
+                    contentType(ContentType.Application.Json)
+                    setBody(UtenlandstilsnittRequest(UtenlandstilsnittType.BOSATT_UTLAND, "Test"))
+                }
 
             assertEquals(200, response.status.value)
         }
@@ -103,11 +103,12 @@ internal class BehandlingRoutesTest {
         } just runs
 
         withTestApplication { client ->
-            val response = client.post("/api/behandling/$behandlingId/boddellerarbeidetutlandet") {
-                header(HttpHeaders.Authorization, "Bearer $token")
-                contentType(ContentType.Application.Json)
-                setBody(BoddEllerArbeidetUtlandetRequest(true, "Test"))
-            }
+            val response =
+                client.post("/api/behandling/$behandlingId/boddellerarbeidetutlandet") {
+                    header(HttpHeaders.Authorization, "Bearer $token")
+                    contentType(ContentType.Application.Json)
+                    setBody(BoddEllerArbeidetUtlandetRequest(true, "Test"))
+                }
 
             assertEquals(200, response.status.value)
         }
@@ -125,18 +126,19 @@ internal class BehandlingRoutesTest {
         } returns true
 
         withTestApplication { client ->
-            val response = client.post("/api/behandling/$behandlingId/virkningstidspunkt") {
-                header(HttpHeaders.Authorization, "Bearer $token")
-                contentType(ContentType.Application.Json)
-                setBody(
-                    """
-                    {
-                    "dato":"$bodyVirkningstidspunkt",
-                    "begrunnelse":"$bodyBegrunnelse"
-                    }
-                    """.trimIndent()
-                )
-            }
+            val response =
+                client.post("/api/behandling/$behandlingId/virkningstidspunkt") {
+                    header(HttpHeaders.Authorization, "Bearer $token")
+                    contentType(ContentType.Application.Json)
+                    setBody(
+                        """
+                        {
+                        "dato":"$bodyVirkningstidspunkt",
+                        "begrunnelse":"$bodyBegrunnelse"
+                        }
+                        """.trimIndent(),
+                    )
+                }
 
             assertEquals(200, response.status.value)
         }
@@ -145,9 +147,10 @@ internal class BehandlingRoutesTest {
     @Test
     fun `Avbryt behandling`() {
         withTestApplication { client ->
-            val response = client.post("/api/behandling/$behandlingId/avbryt") {
-                header(HttpHeaders.Authorization, "Bearer $token")
-            }
+            val response =
+                client.post("/api/behandling/$behandlingId/avbryt") {
+                    header(HttpHeaders.Authorization, "Bearer $token")
+                }
 
             assertEquals(200, response.status.value)
             verify(exactly = 1) { behandlingService.avbrytBehandling(behandlingId, any()) }
@@ -166,18 +169,19 @@ internal class BehandlingRoutesTest {
         } returns false
 
         withTestApplication { client ->
-            val response = client.post("/api/behandling/$behandlingId/virkningstidspunkt") {
-                header(HttpHeaders.Authorization, "Bearer $token")
-                contentType(ContentType.Application.Json)
-                setBody(
-                    """
-                    {
-                    "dato":"$bodyVirkningstidspunkt",
-                    "begrunnelse":"$bodyBegrunnelse"
-                    }
-                    """.trimIndent()
-                )
-            }
+            val response =
+                client.post("/api/behandling/$behandlingId/virkningstidspunkt") {
+                    header(HttpHeaders.Authorization, "Bearer $token")
+                    contentType(ContentType.Application.Json)
+                    setBody(
+                        """
+                        {
+                        "dato":"$bodyVirkningstidspunkt",
+                        "begrunnelse":"$bodyBegrunnelse"
+                        }
+                        """.trimIndent(),
+                    )
+                }
 
             assertEquals(400, response.status.value)
             assertEquals("Ugyldig virkningstidspunkt", response.bodyAsText())
@@ -197,39 +201,44 @@ internal class BehandlingRoutesTest {
                         kommerBarnetTilGodeService,
                         manueltOpphoerService,
                         aktivitetspliktService,
-                        behandlingFactory
+                        behandlingFactory,
                     )
                 }
             }
 
-            val client = createClient {
-                install(ContentNegotiation) {
-                    register(ContentType.Application.Json, JacksonConverter(objectMapper))
+            val client =
+                createClient {
+                    install(ContentNegotiation) {
+                        register(ContentType.Application.Json, JacksonConverter(objectMapper))
+                    }
                 }
-            }
 
             block(client)
         }
     }
 
-    private fun mockBehandlingService(bodyVirkningstidspunkt: Tidspunkt, bodyBegrunnelse: String) {
-        val parsetVirkningstidspunkt = YearMonth.from(
-            bodyVirkningstidspunkt.toNorskTid().let {
-                YearMonth.of(it.year, it.month)
-            }
-        )
-        val virkningstidspunkt = Virkningstidspunkt(
-            parsetVirkningstidspunkt,
-            Grunnlagsopplysning.Saksbehandler.create(NAVident),
-            bodyBegrunnelse
-        )
+    private fun mockBehandlingService(
+        bodyVirkningstidspunkt: Tidspunkt,
+        bodyBegrunnelse: String,
+    ) {
+        val parsetVirkningstidspunkt =
+            YearMonth.from(
+                bodyVirkningstidspunkt.toNorskTid().let {
+                    YearMonth.of(it.year, it.month)
+                },
+            )
+        val virkningstidspunkt =
+            Virkningstidspunkt(
+                parsetVirkningstidspunkt,
+                Grunnlagsopplysning.Saksbehandler.create(NAV_IDENT),
+                bodyBegrunnelse,
+            )
         every {
             behandlingService.oppdaterVirkningstidspunkt(
                 behandlingId,
                 parsetVirkningstidspunkt,
-                NAVident,
-                bodyBegrunnelse
-
+                NAV_IDENT,
+                bodyBegrunnelse,
             )
         } returns virkningstidspunkt
     }
@@ -238,16 +247,17 @@ internal class BehandlingRoutesTest {
         mockOAuth2Server.issueToken(
             issuerId = AZURE_ISSUER,
             audience = CLIENT_ID,
-            claims = mapOf(
-                "navn" to "John Doe",
-                "NAVident" to NAVident
-            )
+            claims =
+                mapOf(
+                    "navn" to "John Doe",
+                    "NAVident" to NAV_IDENT,
+                ),
         ).serialize()
     }
 
     private companion object {
         val behandlingId: UUID = UUID.randomUUID()
-        const val NAVident = "Saksbehandler01"
+        const val NAV_IDENT = "Saksbehandler01"
         const val CLIENT_ID = "mock-client-id"
     }
 }

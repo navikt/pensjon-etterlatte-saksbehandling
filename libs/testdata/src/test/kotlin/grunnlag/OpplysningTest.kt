@@ -8,7 +8,6 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
 internal class OpplysningTest {
-
     @Test
     fun `kan deserializere Opplysning Konstant`() {
         val opplysning = GrunnlagTestData().hentOpplysningsgrunnlag().hentAvdoed().hentDoedsdato()!!

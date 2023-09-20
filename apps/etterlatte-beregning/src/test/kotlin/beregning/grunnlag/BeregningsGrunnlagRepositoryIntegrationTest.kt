@@ -24,7 +24,7 @@ import org.junit.jupiter.api.TestInstance
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
 import java.time.LocalDate
-import java.util.*
+import java.util.UUID
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -43,11 +43,12 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest {
         postgreSQLContainer.withUrlParam("user", postgreSQLContainer.username)
         postgreSQLContainer.withUrlParam("password", postgreSQLContainer.password)
 
-        dataSource = DataSourceBuilder.createDataSource(
-            jdbcUrl = postgreSQLContainer.jdbcUrl,
-            username = postgreSQLContainer.username,
-            password = postgreSQLContainer.password
-        )
+        dataSource =
+            DataSourceBuilder.createDataSource(
+                jdbcUrl = postgreSQLContainer.jdbcUrl,
+                username = postgreSQLContainer.username,
+                password = postgreSQLContainer.password,
+            )
         dataSource.migrate()
 
         repository = BeregningsGrunnlagRepository(dataSource)
@@ -76,8 +77,8 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest {
                 GrunnlagMedPeriode(
                     fom = LocalDate.of(2022, 8, 1),
                     tom = null,
-                    data = InstitusjonsoppholdBeregningsgrunnlag(Reduksjon.NEI_KORT_OPPHOLD)
-                )
+                    data = InstitusjonsoppholdBeregningsgrunnlag(Reduksjon.NEI_KORT_OPPHOLD),
+                ),
             )
 
         repository.lagre(
@@ -85,11 +86,11 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest {
                 id,
                 Grunnlagsopplysning.Saksbehandler(
                     ident = "Z123456",
-                    Tidspunkt.now()
+                    Tidspunkt.now(),
                 ),
                 soeskenMedIBeregning,
-                institusjonsoppholdBeregningsgrunnlag
-            )
+                institusjonsoppholdBeregningsgrunnlag,
+            ),
         )
 
         val result = repository.finnBarnepensjonGrunnlagForBehandling(id)
@@ -109,8 +110,8 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest {
                 GrunnlagMedPeriode(
                     fom = LocalDate.of(2022, 8, 1),
                     tom = null,
-                    data = InstitusjonsoppholdBeregningsgrunnlag(Reduksjon.NEI_KORT_OPPHOLD)
-                )
+                    data = InstitusjonsoppholdBeregningsgrunnlag(Reduksjon.NEI_KORT_OPPHOLD),
+                ),
             )
 
         repository.lagreOMS(
@@ -118,10 +119,10 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest {
                 id,
                 Grunnlagsopplysning.Saksbehandler(
                     ident = "Z123456",
-                    Tidspunkt.now()
+                    Tidspunkt.now(),
                 ),
-                institusjonsoppholdBeregningsgrunnlag
-            )
+                institusjonsoppholdBeregningsgrunnlag,
+            ),
         )
 
         val result = repository.finnOmstillingstoenadGrunnlagForBehandling(id)
@@ -136,26 +137,27 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest {
         val id = UUID.randomUUID()
 
         val initialSoeskenMedIBeregning = listOf(SoeskenMedIBeregning(STOR_SNERK, true)).somPeriodisertGrunnlag()
-        val oppdatertSoeskenMedIBeregning = listOf(
-            SoeskenMedIBeregning(STOR_SNERK, true),
-            SoeskenMedIBeregning(TRIVIELL_MIDTPUNKT, true)
-        ).somPeriodisertGrunnlag()
+        val oppdatertSoeskenMedIBeregning =
+            listOf(
+                SoeskenMedIBeregning(STOR_SNERK, true),
+                SoeskenMedIBeregning(TRIVIELL_MIDTPUNKT, true),
+            ).somPeriodisertGrunnlag()
 
         val initialInstitusjonsoppholdBeregningsgrunnlag =
             listOf(
                 GrunnlagMedPeriode(
                     fom = LocalDate.of(2022, 8, 1),
                     tom = null,
-                    data = InstitusjonsoppholdBeregningsgrunnlag(Reduksjon.NEI_KORT_OPPHOLD)
-                )
+                    data = InstitusjonsoppholdBeregningsgrunnlag(Reduksjon.NEI_KORT_OPPHOLD),
+                ),
             )
         val oppdatertInstitusjonsoppholdBeregningsgrunnlag =
             listOf(
                 GrunnlagMedPeriode(
                     fom = LocalDate.of(2022, 8, 1),
                     tom = null,
-                    data = InstitusjonsoppholdBeregningsgrunnlag(Reduksjon.JA_VANLIG)
-                )
+                    data = InstitusjonsoppholdBeregningsgrunnlag(Reduksjon.JA_VANLIG),
+                ),
             )
 
         repository.lagre(
@@ -163,11 +165,11 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest {
                 id,
                 Grunnlagsopplysning.Saksbehandler(
                     ident = "Z123456",
-                    Tidspunkt.now()
+                    Tidspunkt.now(),
                 ),
                 initialSoeskenMedIBeregning,
-                initialInstitusjonsoppholdBeregningsgrunnlag
-            )
+                initialInstitusjonsoppholdBeregningsgrunnlag,
+            ),
         )
 
         repository.lagre(
@@ -175,11 +177,11 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest {
                 id,
                 Grunnlagsopplysning.Saksbehandler(
                     ident = "Z654321",
-                    Tidspunkt.now()
+                    Tidspunkt.now(),
                 ),
                 oppdatertSoeskenMedIBeregning,
-                oppdatertInstitusjonsoppholdBeregningsgrunnlag
-            )
+                oppdatertInstitusjonsoppholdBeregningsgrunnlag,
+            ),
         )
 
         val result = repository.finnBarnepensjonGrunnlagForBehandling(id)
@@ -200,16 +202,16 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest {
                 GrunnlagMedPeriode(
                     fom = LocalDate.of(2022, 8, 1),
                     tom = null,
-                    data = InstitusjonsoppholdBeregningsgrunnlag(Reduksjon.NEI_KORT_OPPHOLD)
-                )
+                    data = InstitusjonsoppholdBeregningsgrunnlag(Reduksjon.NEI_KORT_OPPHOLD),
+                ),
             )
         val oppdatertInstitusjonsoppholdBeregningsgrunnlag =
             listOf(
                 GrunnlagMedPeriode(
                     fom = LocalDate.of(2022, 8, 1),
                     tom = null,
-                    data = InstitusjonsoppholdBeregningsgrunnlag(Reduksjon.JA_VANLIG)
-                )
+                    data = InstitusjonsoppholdBeregningsgrunnlag(Reduksjon.JA_VANLIG),
+                ),
             )
 
         repository.lagreOMS(
@@ -217,10 +219,10 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest {
                 id,
                 Grunnlagsopplysning.Saksbehandler(
                     ident = "Z123456",
-                    Tidspunkt.now()
+                    Tidspunkt.now(),
                 ),
-                initialInstitusjonsoppholdBeregningsgrunnlag
-            )
+                initialInstitusjonsoppholdBeregningsgrunnlag,
+            ),
         )
 
         repository.lagreOMS(
@@ -228,10 +230,10 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest {
                 id,
                 Grunnlagsopplysning.Saksbehandler(
                     ident = "Z654321",
-                    Tidspunkt.now()
+                    Tidspunkt.now(),
                 ),
-                oppdatertInstitusjonsoppholdBeregningsgrunnlag
-            )
+                oppdatertInstitusjonsoppholdBeregningsgrunnlag,
+            ),
         )
 
         val result = repository.finnOmstillingstoenadGrunnlagForBehandling(id)
@@ -246,21 +248,22 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest {
     fun `skal håndtere at institusjonsopphold er null`() {
         val id = UUID.randomUUID()
 
-        val oppdatertSoeskenMedIBeregning = listOf(
-            SoeskenMedIBeregning(STOR_SNERK, true),
-            SoeskenMedIBeregning(TRIVIELL_MIDTPUNKT, true)
-        ).somPeriodisertGrunnlag()
+        val oppdatertSoeskenMedIBeregning =
+            listOf(
+                SoeskenMedIBeregning(STOR_SNERK, true),
+                SoeskenMedIBeregning(TRIVIELL_MIDTPUNKT, true),
+            ).somPeriodisertGrunnlag()
 
         repository.lagre(
             BeregningsGrunnlag(
                 id,
                 Grunnlagsopplysning.Saksbehandler(
                     ident = "Z654321",
-                    Tidspunkt.now()
+                    Tidspunkt.now(),
                 ),
                 oppdatertSoeskenMedIBeregning,
-                emptyList()
-            )
+                emptyList(),
+            ),
         )
 
         val result = repository.finnBarnepensjonGrunnlagForBehandling(id)
@@ -275,14 +278,14 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest {
 
     private fun List<SoeskenMedIBeregning>.somPeriodisertGrunnlag(
         periodeFra: LocalDate = foerstePeriodeFra,
-        periodeTil: LocalDate? = null
+        periodeTil: LocalDate? = null,
     ): List<GrunnlagMedPeriode<List<SoeskenMedIBeregning>>> {
         return listOf(
             GrunnlagMedPeriode(
                 fom = periodeFra,
                 tom = periodeTil,
-                data = this
-            )
+                data = this,
+            ),
         )
     }
 }

@@ -22,7 +22,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class PdlKlientTest {
-
     private lateinit var pdlKlient: PdlKlient
 
     @Test
@@ -30,9 +29,10 @@ internal class PdlKlientTest {
         mockEndpoint("/pdl/person.json")
 
         runBlocking {
-            val personResponse = pdlKlient.hentPerson(
-                HentPersonRequest(STOR_SNERK, PersonRolle.BARN, SakType.BARNEPENSJON)
-            )
+            val personResponse =
+                pdlKlient.hentPerson(
+                    HentPersonRequest(STOR_SNERK, PersonRolle.BARN, SakType.BARNEPENSJON),
+                )
             val hentPerson = personResponse.data?.hentPerson
 
             assertEquals("LITEN", hentPerson?.navn?.first()?.fornavn)
@@ -64,9 +64,10 @@ internal class PdlKlientTest {
         mockEndpoint("/pdl/person_ikke_funnet.json")
 
         runBlocking {
-            val personResponse = pdlKlient.hentPerson(
-                HentPersonRequest(STOR_SNERK, PersonRolle.BARN, SakType.BARNEPENSJON)
-            )
+            val personResponse =
+                pdlKlient.hentPerson(
+                    HentPersonRequest(STOR_SNERK, PersonRolle.BARN, SakType.BARNEPENSJON),
+                )
             val errors = personResponse.errors
 
             assertEquals("Fant ikke person", errors?.first()?.message)
@@ -78,9 +79,10 @@ internal class PdlKlientTest {
         mockEndpoint("/pdl/folkeregisterident.json")
 
         runBlocking {
-            val identResponse = pdlKlient.hentPdlIdentifikator(
-                HentPdlIdentRequest(PersonIdent("2305469522806"))
-            )
+            val identResponse =
+                pdlKlient.hentPdlIdentifikator(
+                    HentPdlIdentRequest(PersonIdent("2305469522806")),
+                )
             assertEquals("70078749472", identResponse.data?.hentIdenter?.identer?.first()?.ident)
             assertEquals(false, identResponse.data?.hentIdenter?.identer?.first()?.historisk)
             assertEquals("FOLKEREGISTERIDENT", identResponse.data?.hentIdenter?.identer?.first()?.gruppe)
@@ -92,9 +94,10 @@ internal class PdlKlientTest {
         mockEndpoint("/pdl/ident_ikke_funnet.json")
 
         runBlocking {
-            val personResponse = pdlKlient.hentPdlIdentifikator(
-                HentPdlIdentRequest(PersonIdent("1234"))
-            )
+            val personResponse =
+                pdlKlient.hentPdlIdentifikator(
+                    HentPdlIdentRequest(PersonIdent("1234")),
+                )
             val errors = personResponse.errors
 
             assertEquals("Fant ikke person", errors?.first()?.message)
@@ -106,9 +109,10 @@ internal class PdlKlientTest {
         mockEndpoint("/pdl/folkeregisteridentBolk.json")
 
         runBlocking {
-            val identResponse = pdlKlient.hentFolkeregisterIdenterForAktoerIdBolk(
-                HentFolkeregisterIdenterForAktoerIdBolkRequest(setOf("2082995739063"))
-            )
+            val identResponse =
+                pdlKlient.hentFolkeregisterIdenterForAktoerIdBolk(
+                    HentFolkeregisterIdenterForAktoerIdBolkRequest(setOf("2082995739063")),
+                )
             assertEquals("2082995739063", identResponse.first().ident)
             assertEquals("03486048831", identResponse.first().identer.first().ident)
             assertEquals(false, identResponse.first().identer.first().historisk)
@@ -121,9 +125,10 @@ internal class PdlKlientTest {
         mockEndpoint("/pdl/geografisk_tilknytning.json")
 
         runBlocking {
-            val personResponse = pdlKlient.hentGeografiskTilknytning(
-                HentGeografiskTilknytningRequest(STOR_SNERK, SakType.BARNEPENSJON)
-            )
+            val personResponse =
+                pdlKlient.hentGeografiskTilknytning(
+                    HentGeografiskTilknytningRequest(STOR_SNERK, SakType.BARNEPENSJON),
+                )
 
             assertEquals("0301", personResponse.data?.hentGeografiskTilknytning?.gtKommune)
             assertEquals(PdlGtType.KOMMUNE, personResponse.data?.hentGeografiskTilknytning?.gtType)
@@ -131,22 +136,23 @@ internal class PdlKlientTest {
     }
 
     private fun mockEndpoint(jsonUrl: String) {
-        val httpClient = HttpClient(MockEngine) {
-            expectSuccess = true
-            engine {
-                addHandler { request ->
-                    when (request.url.fullPath) {
-                        "" -> {
-                            val headers = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
-                            val json = javaClass.getResource(jsonUrl)!!.readText()
-                            respond(json, headers = headers)
+        val httpClient =
+            HttpClient(MockEngine) {
+                expectSuccess = true
+                engine {
+                    addHandler { request ->
+                        when (request.url.fullPath) {
+                            "" -> {
+                                val headers = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
+                                val json = javaClass.getResource(jsonUrl)!!.readText()
+                                respond(json, headers = headers)
+                            }
+                            else -> error(request.url.fullPath)
                         }
-                        else -> error(request.url.fullPath)
                     }
                 }
+                install(ContentNegotiation) { register(ContentType.Application.Json, JacksonConverter(objectMapper)) }
             }
-            install(ContentNegotiation) { register(ContentType.Application.Json, JacksonConverter(objectMapper)) }
-        }
 
         pdlKlient = PdlKlient(httpClient, "")
     }

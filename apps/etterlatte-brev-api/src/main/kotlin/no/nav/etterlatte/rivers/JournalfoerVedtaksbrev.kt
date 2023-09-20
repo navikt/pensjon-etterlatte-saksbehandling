@@ -21,11 +21,11 @@ import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import org.slf4j.LoggerFactory
 import rapidsandrivers.migrering.ListenerMedLogging
-import java.util.*
+import java.util.UUID
 
 internal class JournalfoerVedtaksbrev(
     private val rapidsConnection: RapidsConnection,
-    private val service: VedtaksbrevService
+    private val service: VedtaksbrevService,
 ) : ListenerMedLogging() {
     private val logger = LoggerFactory.getLogger(JournalfoerVedtaksbrev::class.java)
 
@@ -48,19 +48,24 @@ internal class JournalfoerVedtaksbrev(
         }.register(this)
     }
 
-    override fun haandterPakke(packet: JsonMessage, context: MessageContext) {
+    override fun haandterPakke(
+        packet: JsonMessage,
+        context: MessageContext,
+    ) {
         try {
-            val vedtak = VedtakTilJournalfoering(
-                vedtakId = packet["vedtak.vedtakId"].asLong(),
-                sak = deserialize(packet["vedtak.sak"].toJson()),
-                behandlingId = UUID.fromString(packet["vedtak.behandling.id"].asText()),
-                ansvarligEnhet = packet["vedtak.vedtakFattet.ansvarligEnhet"].asText()
-            )
+            val vedtak =
+                VedtakTilJournalfoering(
+                    vedtakId = packet["vedtak.vedtakId"].asLong(),
+                    sak = deserialize(packet["vedtak.sak"].toJson()),
+                    behandlingId = UUID.fromString(packet["vedtak.behandling.id"].asText()),
+                    ansvarligEnhet = packet["vedtak.vedtakFattet.ansvarligEnhet"].asText(),
+                )
             logger.info("Nytt vedtak med id ${vedtak.vedtakId} er attestert. Ferdigstiller vedtaksbrev.")
             val behandlingId = vedtak.behandlingId
 
-            val vedtaksbrev = service.hentVedtaksbrev(behandlingId)
-                ?: throw NoSuchElementException("Ingen vedtaksbrev funnet på behandlingId=$behandlingId")
+            val vedtaksbrev =
+                service.hentVedtaksbrev(behandlingId)
+                    ?: throw NoSuchElementException("Ingen vedtaksbrev funnet på behandlingId=$behandlingId")
 
             // TODO: Forbedre denne "fiksen". Gjøres nå for å lappe sammen
             if (vedtaksbrev.status == Status.JOURNALFOERT) {
@@ -75,7 +80,7 @@ internal class JournalfoerVedtaksbrev(
             rapidsConnection.svarSuksess(
                 packet,
                 vedtaksbrev.id,
-                response.journalpostId
+                response.journalpostId,
             )
         } catch (e: Exception) {
             logger.error("Feil ved ferdigstilling av vedtaksbrev: ", e)
@@ -86,7 +91,7 @@ internal class JournalfoerVedtaksbrev(
     private fun RapidsConnection.svarSuksess(
         packet: JsonMessage,
         brevId: BrevID,
-        journalpostId: String
+        journalpostId: String,
     ) {
         logger.info("Brev har blitt distribuert. Svarer tilbake med bekreftelse.")
 
@@ -104,5 +109,5 @@ data class VedtakTilJournalfoering(
     val vedtakId: Long,
     val sak: VedtakSak,
     val behandlingId: UUID,
-    val ansvarligEnhet: String
+    val ansvarligEnhet: String,
 )

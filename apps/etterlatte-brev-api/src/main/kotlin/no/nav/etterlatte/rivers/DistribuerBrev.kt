@@ -19,7 +19,7 @@ import rapidsandrivers.migrering.ListenerMedLogging
 internal class DistribuerBrev(
     private val rapidsConnection: RapidsConnection,
     private val vedtaksbrevService: VedtaksbrevService,
-    private val distribusjonService: DistribusjonService
+    private val distribusjonService: DistribusjonService,
 ) : ListenerMedLogging() {
     private val logger = LoggerFactory.getLogger(DistribuerBrev::class.java)
 
@@ -32,30 +32,38 @@ internal class DistribuerBrev(
         }.register(this)
     }
 
-    override fun haandterPakke(packet: JsonMessage, context: MessageContext) {
+    override fun haandterPakke(
+        packet: JsonMessage,
+        context: MessageContext,
+    ) {
         logger.info("Starter distribuering av brev.")
 
         val brev = vedtaksbrevService.hentBrev(packet["brevId"].asLong())
 
-        val bestillingsId = distribusjonService.distribuerJournalpost(
-            brevId = brev.id,
-            journalpostId = packet["journalpostId"].asText(),
-            type = packet.distribusjonType(),
-            tidspunkt = DistribusjonsTidspunktType.KJERNETID,
-            adresse = brev.mottaker.adresse
-        )
+        val bestillingsId =
+            distribusjonService.distribuerJournalpost(
+                brevId = brev.id,
+                journalpostId = packet["journalpostId"].asText(),
+                type = packet.distribusjonType(),
+                tidspunkt = DistribusjonsTidspunktType.KJERNETID,
+                adresse = brev.mottaker.adresse,
+            )
 
         rapidsConnection.svarSuksess(packet, bestillingsId)
     }
 
-    private fun JsonMessage.distribusjonType(): DistribusjonsType = try {
-        DistribusjonsType.valueOf(this["distribusjonType"].asText())
-    } catch (ex: Exception) {
-        logger.error("Klarte ikke hente ut distribusjonstype:", ex)
-        throw ex
-    }
+    private fun JsonMessage.distribusjonType(): DistribusjonsType =
+        try {
+            DistribusjonsType.valueOf(this["distribusjonType"].asText())
+        } catch (ex: Exception) {
+            logger.error("Klarte ikke hente ut distribusjonstype:", ex)
+            throw ex
+        }
 
-    private fun RapidsConnection.svarSuksess(packet: JsonMessage, bestillingsId: BestillingsID) {
+    private fun RapidsConnection.svarSuksess(
+        packet: JsonMessage,
+        bestillingsId: BestillingsID,
+    ) {
         logger.info("Brev har blitt distribuert. Svarer tilbake med bekreftelse.")
 
         packet[EVENT_NAME_KEY] = BrevEventTypes.DISTRIBUERT.toString()

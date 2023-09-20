@@ -22,7 +22,6 @@ import no.nav.etterlatte.behandling.klage.klageRoutes
 import no.nav.etterlatte.behandling.omregning.migreringRoutes
 import no.nav.etterlatte.behandling.omregning.omregningRoutes
 import no.nav.etterlatte.behandling.revurdering.revurderingRoutes
-import no.nav.etterlatte.behandling.tilbakekreving.TilbakekrevingService
 import no.nav.etterlatte.behandling.tilbakekreving.tilbakekrevingRoutes
 import no.nav.etterlatte.behandling.tilgang.tilgangRoutes
 import no.nav.etterlatte.common.DatabaseContext
@@ -65,7 +64,7 @@ class Server(private val context: ApplicationContext) {
                     config = HoconApplicationConfig(context.config)
                     module { module(context) }
                     connector { port = context.httpPort }
-                }
+                },
         )
 
     fun run() =
@@ -81,20 +80,20 @@ fun Application.module(context: ApplicationContext) {
         restModule(
             sikkerLogg,
             withMetrics = true,
-            additionalMetrics = listOf(oppgaveMetrikker)
+            additionalMetrics = listOf(oppgaveMetrikker),
         ) {
             attachContekst(dataSource, context)
             sakSystemRoutes(
                 tilgangService = tilgangService,
                 sakService = sakService,
-                behandlingService = behandlingService
+                behandlingService = behandlingService,
             )
             sakWebRoutes(
                 tilgangService = tilgangService,
                 sakService = sakService,
                 behandlingService = behandlingService,
                 grunnlagsendringshendelseService = grunnlagsendringshendelseService,
-                oppgaveServiceNy = oppgaveServiceNy
+                oppgaveServiceNy = oppgaveServiceNy,
             )
             klageRoutes(klageService = klageService, featureToggleService = featureToggleService)
             tilbakekrevingRoutes(service = tilbakekrevingService)
@@ -104,12 +103,12 @@ fun Application.module(context: ApplicationContext) {
                 manueltOpphoerService = manueltOpphoerService,
                 kommerBarnetTilGodeService = kommerBarnetTilGodeService,
                 aktivitetspliktService = aktivtetspliktService,
-                behandlingFactory = behandlingFactory
+                behandlingFactory = behandlingFactory,
             )
             generellbehandlingRoutes(
                 generellBehandlingService = generellBehandlingService,
                 sakService = sakService,
-                featureToggleService = featureToggleService
+                featureToggleService = featureToggleService,
             )
             revurderingRoutes(revurderingService = revurderingService)
             omregningRoutes(omregningService = omregningService)
@@ -118,11 +117,11 @@ fun Application.module(context: ApplicationContext) {
             behandlingVedtakRoute(
                 behandlingsstatusService = behandlingsStatusService,
                 oppgaveService = oppgaveServiceNy,
-                behandlingService = behandlingService
+                behandlingService = behandlingService,
             )
             oppgaveRoutesNy(
                 service = oppgaveServiceNy,
-                gosysOppgaveService = gosysOppgaveService
+                gosysOppgaveService = gosysOppgaveService,
             )
             grunnlagsendringshendelseRoute(grunnlagsendringshendelseService = grunnlagsendringshendelseService)
             egenAnsattRoute(egenAnsattService = EgenAnsattService(sakService, sikkerLogg))
@@ -140,13 +139,13 @@ fun Application.module(context: ApplicationContext) {
                 harTilgangTilOppgave = { oppgaveId, saksbehandlerMedRoller ->
                     tilgangService.harTilgangTilOppgave(
                         oppgaveId,
-                        saksbehandlerMedRoller
+                        saksbehandlerMedRoller,
                     )
                 }
                 harTilgangTilKlage = { klageId, saksbehandlerMedRoller ->
                     tilgangService.harTilgangTilKlage(
                         klageId,
-                        saksbehandlerMedRoller
+                        saksbehandlerMedRoller,
                     )
                 }
             }
@@ -156,7 +155,7 @@ fun Application.module(context: ApplicationContext) {
 
 private fun Route.attachContekst(
     ds: DataSource,
-    context: ApplicationContext
+    context: ApplicationContext,
 ) {
     intercept(ApplicationCallPipeline.Call) {
         val requestContekst =
@@ -166,16 +165,16 @@ private fun Route.attachContekst(
                         call.principal() ?: throw Exception("Ingen bruker funnet i jwt token"),
                         context.saksbehandlerGroupIdsByKey,
                         context.enhetService,
-                        brukerTokenInfo
+                        brukerTokenInfo,
                     ),
-                databasecontxt = DatabaseContext(ds)
+                databasecontxt = DatabaseContext(ds),
             )
 
         withContext(
             Dispatchers.Default +
                 Kontekst.asContextElement(
-                    value = requestContekst
-                )
+                    value = requestContekst,
+                ),
         ) {
             proceed()
         }

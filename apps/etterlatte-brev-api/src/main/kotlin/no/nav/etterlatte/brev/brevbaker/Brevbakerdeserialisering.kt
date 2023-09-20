@@ -8,12 +8,12 @@ import no.nav.pensjon.brevbaker.api.model.RenderedJsonLetter
     use = JsonTypeInfo.Id.NAME,
     include = JsonTypeInfo.As.EXTERNAL_PROPERTY,
     property = "type",
-    defaultImpl = Void::class
+    defaultImpl = Void::class,
 )
 @JsonSubTypes(
     JsonSubTypes.Type(value = RenderedJsonLetter.Block.Title1::class, name = "TITLE1"),
     JsonSubTypes.Type(value = RenderedJsonLetter.Block.Title2::class, name = "TITLE2"),
-    JsonSubTypes.Type(value = RenderedJsonLetter.Block.Paragraph::class, name = "PARAGRAPH")
+    JsonSubTypes.Type(value = RenderedJsonLetter.Block.Paragraph::class, name = "PARAGRAPH"),
 )
 interface BrevbakerJSONBlockMixIn
 
@@ -21,11 +21,11 @@ interface BrevbakerJSONBlockMixIn
     use = JsonTypeInfo.Id.NAME,
     include = JsonTypeInfo.As.EXTERNAL_PROPERTY,
     property = "type",
-    defaultImpl = Void::class
+    defaultImpl = Void::class,
 )
 @JsonSubTypes(
     JsonSubTypes.Type(value = RenderedJsonLetter.ParagraphContent.ItemList::class, name = "ITEM_LIST"),
     JsonSubTypes.Type(value = RenderedJsonLetter.ParagraphContent.Text.Literal::class, name = "LITERAL"),
-    JsonSubTypes.Type(value = RenderedJsonLetter.ParagraphContent.Text.Variable::class, name = "VARIABLE")
+    JsonSubTypes.Type(value = RenderedJsonLetter.ParagraphContent.Text.Variable::class, name = "VARIABLE"),
 )
 interface BrevbakerJSONParagraphMixIn

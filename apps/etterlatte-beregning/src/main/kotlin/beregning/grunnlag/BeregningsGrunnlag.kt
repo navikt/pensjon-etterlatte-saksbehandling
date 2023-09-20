@@ -9,5 +9,5 @@ data class BeregningsGrunnlag(
     val kilde: Grunnlagsopplysning.Saksbehandler,
     val soeskenMedIBeregning: List<GrunnlagMedPeriode<List<SoeskenMedIBeregning>>>,
     val institusjonsoppholdBeregningsgrunnlag: List<GrunnlagMedPeriode<InstitusjonsoppholdBeregningsgrunnlag>> =
-        emptyList()
+        emptyList(),
 )

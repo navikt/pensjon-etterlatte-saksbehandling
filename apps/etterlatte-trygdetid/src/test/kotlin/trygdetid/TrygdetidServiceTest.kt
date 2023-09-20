@@ -58,7 +58,7 @@ internal class TrygdetidServiceTest {
             behandlingKlient,
             grunnlagKlient,
             vilkaarsvurderingKlient,
-            beregningService
+            beregningService,
         )
 
     @BeforeEach
@@ -162,7 +162,7 @@ internal class TrygdetidServiceTest {
                             kilde shouldNotBe null
                         }
                     }
-                }
+                },
             )
             behandlingKlient.settBehandlingStatusTrygdetidOppdatert(behandlingId, saksbehandler)
         }
@@ -194,7 +194,7 @@ internal class TrygdetidServiceTest {
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
         coEvery { behandlingKlient.hentSisteIverksatteBehandling(any(), any()) } returns
             SisteIverksatteBehandling(
-                forrigebehandlingId
+                forrigebehandlingId,
             )
         every { repository.hentTrygdetid(forrigebehandlingId) } returns trygdetid
         every { repository.opprettTrygdetid(any()) } returns trygdetid
@@ -215,7 +215,7 @@ internal class TrygdetidServiceTest {
             repository.opprettTrygdetid(
                 withArg {
                     it.opplysninger shouldBe trygdetid.opplysninger
-                }
+                },
             )
             vilkaarsvurderingKlient.hentVilkaarsvurdering(any(), any())
         }
@@ -247,7 +247,7 @@ internal class TrygdetidServiceTest {
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
         coEvery { behandlingKlient.hentSisteIverksatteBehandling(any(), any()) } returns
             SisteIverksatteBehandling(
-                forrigeBehandlingId
+                forrigeBehandlingId,
             )
         every { repository.hentTrygdetid(forrigeBehandlingId) } returns null
         every { repository.opprettTrygdetid(any()) } returns trygdetid
@@ -269,7 +269,7 @@ internal class TrygdetidServiceTest {
             repository.opprettTrygdetid(
                 withArg {
                     it.trygdetidGrunnlag shouldBe emptyList()
-                }
+                },
             )
         }
         verify {
@@ -297,7 +297,7 @@ internal class TrygdetidServiceTest {
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
         coEvery { behandlingKlient.hentSisteIverksatteBehandling(any(), any()) } returns
             SisteIverksatteBehandling(
-                forrigeBehandlingId
+                forrigeBehandlingId,
             )
         every { repository.hentTrygdetid(forrigeBehandlingId) } returns null
 
@@ -347,7 +347,7 @@ internal class TrygdetidServiceTest {
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
         coEvery { behandlingKlient.hentSisteIverksatteBehandling(any(), any()) } returns
             SisteIverksatteBehandling(
-                forrigeBehandlingId
+                forrigeBehandlingId,
             )
         coEvery { behandlingKlient.settBehandlingStatusTrygdetidOppdatert(any(), any()) } returns true
         every { repository.hentTrygdetid(forrigeBehandlingId) } returns null
@@ -369,7 +369,7 @@ internal class TrygdetidServiceTest {
             repository.opprettTrygdetid(
                 withArg {
                     it.trygdetidGrunnlag shouldBe emptyList()
-                }
+                },
             )
         }
         verify {
@@ -434,14 +434,14 @@ internal class TrygdetidServiceTest {
             Opplysning.Konstant(
                 id = randomUUID(),
                 kilde = Grunnlagsopplysning.Saksbehandler("", Tidspunkt.now()),
-                verdi = LocalDate.now().toJsonNode()
+                verdi = LocalDate.now().toJsonNode(),
             )
         }
         every { avdoedGrunnlag[Opplysningstype.DOEDSDATO] } answers {
             Opplysning.Konstant(
                 id = randomUUID(),
                 kilde = Grunnlagsopplysning.Saksbehandler("", Tidspunkt.now()),
-                verdi = LocalDate.now().toJsonNode()
+                verdi = LocalDate.now().toJsonNode(),
             )
         }
 
@@ -450,7 +450,7 @@ internal class TrygdetidServiceTest {
                 service.lagreTrygdetidGrunnlag(
                     behandlingId,
                     saksbehandler,
-                    trygdetidGrunnlag
+                    trygdetidGrunnlag,
                 )
             }
 
@@ -466,7 +466,7 @@ internal class TrygdetidServiceTest {
             repository.oppdaterTrygdetid(
                 withArg {
                     it.trygdetidGrunnlag.first().let { tg -> tg.id shouldBe trygdetidGrunnlag.id }
-                }
+                },
             )
             behandlingKlient.settBehandlingStatusTrygdetidOppdatert(behandlingId, saksbehandler)
             beregningService.beregnTrygdetidGrunnlag(any())
@@ -507,14 +507,14 @@ internal class TrygdetidServiceTest {
             Opplysning.Konstant(
                 id = randomUUID(),
                 kilde = Grunnlagsopplysning.Saksbehandler("", Tidspunkt.now()),
-                verdi = LocalDate.now().toJsonNode()
+                verdi = LocalDate.now().toJsonNode(),
             )
         }
         every { avdoedGrunnlag[Opplysningstype.DOEDSDATO] } answers {
             Opplysning.Konstant(
                 id = randomUUID(),
                 kilde = Grunnlagsopplysning.Saksbehandler("", Tidspunkt.now()),
-                verdi = LocalDate.now().toJsonNode()
+                verdi = LocalDate.now().toJsonNode(),
             )
         }
 
@@ -523,7 +523,7 @@ internal class TrygdetidServiceTest {
                 service.lagreTrygdetidGrunnlag(
                     behandlingId,
                     saksbehandler,
-                    endretTrygdetidGrunnlag
+                    endretTrygdetidGrunnlag,
                 )
             }
 
@@ -542,7 +542,7 @@ internal class TrygdetidServiceTest {
                         tg.id shouldBe trygdetidGrunnlag.id
                         tg.bosted shouldBe LandNormalisert.NORGE.isoCode
                     }
-                }
+                },
             )
             beregningService.beregnTrygdetidGrunnlag(any())
             beregningService.beregnTrygdetid(any(), any(), any())
@@ -579,14 +579,14 @@ internal class TrygdetidServiceTest {
             Opplysning.Konstant(
                 id = randomUUID(),
                 kilde = Grunnlagsopplysning.Saksbehandler("", Tidspunkt.now()),
-                verdi = LocalDate.now().toJsonNode()
+                verdi = LocalDate.now().toJsonNode(),
             )
         }
         every { avdoedGrunnlag[Opplysningstype.DOEDSDATO] } answers {
             Opplysning.Konstant(
                 id = randomUUID(),
                 kilde = Grunnlagsopplysning.Saksbehandler("", Tidspunkt.now()),
-                verdi = LocalDate.now().toJsonNode()
+                verdi = LocalDate.now().toJsonNode(),
             )
         }
 
@@ -604,7 +604,7 @@ internal class TrygdetidServiceTest {
             repository.oppdaterTrygdetid(
                 withArg {
                     it.trygdetidGrunnlag shouldBe emptyList()
-                }
+                },
             )
             beregningService.beregnTrygdetid(any(), any(), any())
             behandlingKlient.settBehandlingStatusTrygdetidOppdatert(behandlingId, saksbehandler)
@@ -629,7 +629,7 @@ internal class TrygdetidServiceTest {
                 service.lagreTrygdetidGrunnlag(
                     behandlingId,
                     saksbehandler,
-                    trygdetidGrunnlag
+                    trygdetidGrunnlag,
                 )
             }
         }
@@ -648,7 +648,7 @@ internal class TrygdetidServiceTest {
             trygdetid(
                 behandlingId,
                 trygdetidGrunnlag = listOf(forrigeTrygdetidGrunnlag),
-                opplysninger = forrigeTrygdetidOpplysninger
+                opplysninger = forrigeTrygdetidOpplysninger,
             )
 
         val regulering =
@@ -810,7 +810,7 @@ internal class TrygdetidServiceTest {
             runBlocking {
                 service.lagreYrkesskadeTrygdetidGrunnlag(
                     behandlingId,
-                    saksbehandler
+                    saksbehandler,
                 )
             }
 
@@ -845,7 +845,7 @@ internal class TrygdetidServiceTest {
             runBlocking {
                 service.lagreYrkesskadeTrygdetidGrunnlag(
                     behandlingId,
-                    saksbehandler
+                    saksbehandler,
                 )
             }
 
@@ -880,7 +880,7 @@ internal class TrygdetidServiceTest {
             runBlocking {
                 service.lagreYrkesskadeTrygdetidGrunnlag(
                     behandlingId,
-                    saksbehandler
+                    saksbehandler,
                 )
             }
 

@@ -31,7 +31,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import java.sql.Connection
-import java.util.*
+import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class BehandlingStatusServiceTest {
@@ -47,11 +47,14 @@ internal class BehandlingStatusServiceTest {
                         throw IllegalArgumentException()
                     }
 
-                    override fun <T> inTransaction(gjenbruk: Boolean, block: () -> T): T {
+                    override fun <T> inTransaction(
+                        gjenbruk: Boolean,
+                        block: () -> T,
+                    ): T {
                         return block()
                     }
-                }
-            )
+                },
+            ),
         )
     }
 
@@ -62,13 +65,15 @@ internal class BehandlingStatusServiceTest {
         val behandlingId = behandling.id
         val iverksettVedtak = VedtakHendelse(1L, Tidspunkt.now(), "sbl")
 
-        val behandlingdao = mockk<BehandlingDao> {
-            every { lagreStatus(any(), any(), any()) } just runs
-        }
-        val behandlingService = mockk<BehandlingService> {
-            every { registrerVedtakHendelse(behandlingId, iverksettVedtak, HendelseType.IVERKSATT) } just runs
-            every { hentBehandling(behandlingId) } returns behandling
-        }
+        val behandlingdao =
+            mockk<BehandlingDao> {
+                every { lagreStatus(any(), any(), any()) } just runs
+            }
+        val behandlingService =
+            mockk<BehandlingService> {
+                every { registrerVedtakHendelse(behandlingId, iverksettVedtak, HendelseType.IVERKSATT) } just runs
+                every { hentBehandling(behandlingId) } returns behandling
+            }
         val grlService = mockk<GrunnlagsendringshendelseService>()
         val oppgaveService = mockk<OppgaveServiceNy>()
         val featureToggleService =
@@ -82,7 +87,7 @@ internal class BehandlingStatusServiceTest {
                 behandlingService,
                 grlService,
                 oppgaveService,
-                featureToggleService
+                featureToggleService,
             )
 
         sut.settIverksattVedtak(behandlingId, iverksettVedtak)
@@ -98,55 +103,61 @@ internal class BehandlingStatusServiceTest {
     @Test
     fun `iverksett utlandstilsnitt behandling`() {
         val sakId = 1L
-        val behandling = foerstegangsbehandling(
-            sakId = sakId,
-            status = BehandlingStatus.ATTESTERT,
-            utenlandstilsnitt = Utenlandstilsnitt(
-                UtenlandstilsnittType.UTLANDSTILSNITT,
-                Grunnlagsopplysning.Saksbehandler("ident", Tidspunkt.now()),
-                "begrunnelse"
+        val behandling =
+            foerstegangsbehandling(
+                sakId = sakId,
+                status = BehandlingStatus.ATTESTERT,
+                utenlandstilsnitt =
+                    Utenlandstilsnitt(
+                        UtenlandstilsnittType.UTLANDSTILSNITT,
+                        Grunnlagsopplysning.Saksbehandler("ident", Tidspunkt.now()),
+                        "begrunnelse",
+                    ),
             )
-        )
         val behandlingId = behandling.id
         val saksbehandler = "sbl"
         val iverksettVedtak = VedtakHendelse(1L, Tidspunkt.now(), saksbehandler)
 
-        val behandlingdao = mockk<BehandlingDao> {
-            every { lagreStatus(any(), any(), any()) } just runs
-        }
-        val behandlingService = mockk<BehandlingService> {
-            every { registrerVedtakHendelse(behandlingId, iverksettVedtak, HendelseType.IVERKSATT) } just runs
-            every { hentBehandling(behandlingId) } returns behandling
-        }
+        val behandlingdao =
+            mockk<BehandlingDao> {
+                every { lagreStatus(any(), any(), any()) } just runs
+            }
+        val behandlingService =
+            mockk<BehandlingService> {
+                every { registrerVedtakHendelse(behandlingId, iverksettVedtak, HendelseType.IVERKSATT) } just runs
+                every { hentBehandling(behandlingId) } returns behandling
+            }
         val grlService = mockk<GrunnlagsendringshendelseService>()
-        val oppgave = OppgaveNy(
-            id = UUID.randomUUID(),
-            status = Status.NY,
-            enhet = Enheter.defaultEnhet.enhetNr,
-            sakId = sakId,
-            kilde = OppgaveKilde.BEHANDLING,
-            type = OppgaveType.UTLAND,
-            saksbehandler = saksbehandler,
-            referanse = behandlingId.toString(),
-            merknad = null,
-            opprettet = Tidspunkt.now(),
-            sakType = SakType.BARNEPENSJON,
-            fnr = "123",
-            frist = Tidspunkt.now()
-        )
-        val oppgaveService = mockk<OppgaveServiceNy> {
-            every {
-                opprettNyOppgaveMedSakOgReferanse(
-                    behandlingId.toString(),
-                    sakId,
-                    OppgaveKilde.BEHANDLING,
-                    OppgaveType.UTLAND,
-                    null
-                )
-            } returns oppgave
-            every { tildelSaksbehandler(oppgave.id, saksbehandler) } just runs
-            every { hentSaksbehandlerFraFoerstegangsbehandling(behandlingId) } returns saksbehandler
-        }
+        val oppgave =
+            OppgaveNy(
+                id = UUID.randomUUID(),
+                status = Status.NY,
+                enhet = Enheter.defaultEnhet.enhetNr,
+                sakId = sakId,
+                kilde = OppgaveKilde.BEHANDLING,
+                type = OppgaveType.UTLAND,
+                saksbehandler = saksbehandler,
+                referanse = behandlingId.toString(),
+                merknad = null,
+                opprettet = Tidspunkt.now(),
+                sakType = SakType.BARNEPENSJON,
+                fnr = "123",
+                frist = Tidspunkt.now(),
+            )
+        val oppgaveService =
+            mockk<OppgaveServiceNy> {
+                every {
+                    opprettNyOppgaveMedSakOgReferanse(
+                        behandlingId.toString(),
+                        sakId,
+                        OppgaveKilde.BEHANDLING,
+                        OppgaveType.UTLAND,
+                        null,
+                    )
+                } returns oppgave
+                every { tildelSaksbehandler(oppgave.id, saksbehandler) } just runs
+                every { hentSaksbehandlerFraFoerstegangsbehandling(behandlingId) } returns saksbehandler
+            }
 
         val featureToggleService =
             mockk<FeatureToggleService> {
@@ -159,7 +170,7 @@ internal class BehandlingStatusServiceTest {
                 behandlingService,
                 grlService,
                 oppgaveService,
-                featureToggleService
+                featureToggleService,
             )
 
         sut.settIverksattVedtak(behandlingId, iverksettVedtak)
@@ -173,7 +184,7 @@ internal class BehandlingStatusServiceTest {
                 sakId,
                 OppgaveKilde.BEHANDLING,
                 OppgaveType.UTLAND,
-                null
+                null,
             )
             oppgaveService.hentSaksbehandlerFraFoerstegangsbehandling(behandlingId)
             oppgaveService.tildelSaksbehandler(oppgave.id, saksbehandler)

@@ -26,7 +26,7 @@ import no.nav.etterlatte.libs.common.sak.Sak
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 
 internal sealed class TilstandException : IllegalStateException() {
     internal object UgyldigTilstand : TilstandException()
@@ -52,46 +52,50 @@ sealed class Behandling {
     private val kanRedigeres: Boolean
         get() = this.status.kanEndres()
 
-    fun mottattDato(): LocalDateTime? = when (this) {
-        is Foerstegangsbehandling -> this.soeknadMottattDato
-        else -> this.behandlingOpprettet
-    }
+    fun mottattDato(): LocalDateTime? =
+        when (this) {
+            is Foerstegangsbehandling -> this.soeknadMottattDato
+            else -> this.behandlingOpprettet
+        }
 
-    fun gyldighetsproeving(): GyldighetsResultat? = when (this) {
-        is Foerstegangsbehandling -> this.gyldighetsproeving
-        else -> null
-    }
+    fun gyldighetsproeving(): GyldighetsResultat? =
+        when (this) {
+            is Foerstegangsbehandling -> this.gyldighetsproeving
+            else -> null
+        }
 
-    fun revurderingsaarsak(): RevurderingAarsak? = when (this) {
-        is Revurdering -> this.revurderingsaarsak
-        else -> null
-    }
+    fun revurderingsaarsak(): RevurderingAarsak? =
+        when (this) {
+            is Revurdering -> this.revurderingsaarsak
+            else -> null
+        }
 
-    fun revurderingInfo(): RevurderingMedBegrunnelse? = when (this) {
-        is Revurdering -> this.revurderingInfo
-        else -> null
-    }
+    fun revurderingInfo(): RevurderingMedBegrunnelse? =
+        when (this) {
+            is Revurdering -> this.revurderingInfo
+            else -> null
+        }
 
     open fun begrunnelse(): String? = null
 
     open fun oppdaterVirkningstidspunkt(virkningstidspunkt: Virkningstidspunkt): Behandling {
         throw NotImplementedError(
             "Kan ikke oppdatere virkningstidspunkt på behandling $id. " +
-                "Denne behandlingstypen støtter ikke oppdatering av virkningstidspunkt."
+                "Denne behandlingstypen støtter ikke oppdatering av virkningstidspunkt.",
         )
     }
 
     open fun oppdaterUtenlandstilsnitt(utenlandstilsnitt: Utenlandstilsnitt): Behandling {
         throw NotImplementedError(
             "Kan ikke oppdatere utenlandstilsnitt på behandling $id. " +
-                "Denne behandlingstypen støtter ikke oppdatering av utenlandstilsnitt."
+                "Denne behandlingstypen støtter ikke oppdatering av utenlandstilsnitt.",
         )
     }
 
     open fun oppdaterBoddEllerArbeidetUtlandnet(boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet): Behandling {
         throw NotImplementedError(
             "Kan ikke oppdatere bodd eller arbeidet utlandet på behandling $id. " +
-                "Denne behandlingstypen støtter ikke oppdatering av bodd eller arbeidet utlandet."
+                "Denne behandlingstypen støtter ikke oppdatering av bodd eller arbeidet utlandet.",
         )
     }
 
@@ -104,7 +108,10 @@ sealed class Behandling {
         }
     }
 
-    protected fun <T : Behandling> hvisTilstandEr(behandlingStatus: BehandlingStatus, block: () -> T): T {
+    protected fun <T : Behandling> hvisTilstandEr(
+        behandlingStatus: BehandlingStatus,
+        block: () -> T,
+    ): T {
         if (status == behandlingStatus) {
             return block()
         } else {
@@ -113,7 +120,10 @@ sealed class Behandling {
         }
     }
 
-    protected fun <T : Behandling> hvisTilstandEr(behandlingStatuser: List<BehandlingStatus>, block: () -> T): T {
+    protected fun <T : Behandling> hvisTilstandEr(
+        behandlingStatuser: List<BehandlingStatus>,
+        block: () -> T,
+    ): T {
         if (status in behandlingStatuser) {
             return block()
         } else {
@@ -160,7 +170,7 @@ sealed class Behandling {
 
     class BehandlingStoetterIkkeStatusEndringException(
         behandlingStatus: BehandlingStatus,
-        message: String = "Behandlingen støtter ikke statusendringen til status $behandlingStatus"
+        message: String = "Behandlingen støtter ikke statusendringen til status $behandlingStatus",
     ) : Exception(message)
 }
 
@@ -183,24 +193,26 @@ internal fun Behandling.toDetaljertBehandling(persongalleri: Persongalleri): Det
         revurderingsaarsak = revurderingsaarsak(),
         prosesstype = prosesstype,
         revurderingInfo = revurderingInfo()?.revurderingInfo,
-        enhet = sak.enhet
+        enhet = sak.enhet,
     )
 }
 
-fun Behandling.toBehandlingSammendrag() = BehandlingSammendrag(
-    id = this.id,
-    sak = this.sak.id,
-    sakType = this.sak.sakType,
-    status = this.status,
-    soeknadMottattDato = this.mottattDato(),
-    behandlingOpprettet = this.behandlingOpprettet,
-    behandlingType = this.type,
-    aarsak = when (this) {
-        is Foerstegangsbehandling -> "SOEKNAD"
-        is Revurdering -> this.revurderingsaarsak?.name ?: "REVURDERING"
-        is ManueltOpphoer -> "MANUELT_OPPHOER"
-    },
-    virkningstidspunkt = this.virkningstidspunkt,
-    utenlandstilsnitt = this.utenlandstilsnitt,
-    boddEllerArbeidetUtlandet = this.boddEllerArbeidetUtlandet
-)
+fun Behandling.toBehandlingSammendrag() =
+    BehandlingSammendrag(
+        id = this.id,
+        sak = this.sak.id,
+        sakType = this.sak.sakType,
+        status = this.status,
+        soeknadMottattDato = this.mottattDato(),
+        behandlingOpprettet = this.behandlingOpprettet,
+        behandlingType = this.type,
+        aarsak =
+            when (this) {
+                is Foerstegangsbehandling -> "SOEKNAD"
+                is Revurdering -> this.revurderingsaarsak?.name ?: "REVURDERING"
+                is ManueltOpphoer -> "MANUELT_OPPHOER"
+            },
+        virkningstidspunkt = this.virkningstidspunkt,
+        utenlandstilsnitt = this.utenlandstilsnitt,
+        boddEllerArbeidetUtlandet = this.boddEllerArbeidetUtlandet,
+    )

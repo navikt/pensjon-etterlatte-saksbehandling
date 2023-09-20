@@ -13,9 +13,13 @@ import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 
 class BehandlingKlient(
     private val httpClient: HttpClient,
-    private val url: String
+    private val url: String,
 ) {
-    suspend fun hentSak(fnr: String, sakType: SakType, gradering: AdressebeskyttelseGradering?): Long {
+    suspend fun hentSak(
+        fnr: String,
+        sakType: SakType,
+        gradering: AdressebeskyttelseGradering?,
+    ): Long {
         return httpClient.post("$url/personer/saker/$sakType") {
             contentType(ContentType.Application.Json)
             setBody(FoedselsNummerMedGraderingDTO(fnr, gradering))

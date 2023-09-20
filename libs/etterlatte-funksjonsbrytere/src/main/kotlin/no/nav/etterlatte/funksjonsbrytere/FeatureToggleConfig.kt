@@ -7,7 +7,8 @@ interface FeatureToggle {
 }
 
 enum class FellesFeatureToggle(private val key: String) : FeatureToggle {
-    NoOperationToggle("pensjon-etterlatte.no-operation-toggle");
+    NoOperationToggle("pensjon-etterlatte.no-operation-toggle"),
+    ;
 
     override fun key() = key
 }
@@ -15,7 +16,7 @@ enum class FellesFeatureToggle(private val key: String) : FeatureToggle {
 data class FeatureToggleProperties(
     val applicationName: String,
     val host: String,
-    val apiKey: String
+    val apiKey: String,
 ) {
     fun uri() = URI("$host/api")
 }

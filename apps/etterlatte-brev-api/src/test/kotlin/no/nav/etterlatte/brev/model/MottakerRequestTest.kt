@@ -7,25 +7,26 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 internal class MottakerRequestTest {
-
     @Nested
     inner class MappingFraRegoppslag {
         @Test
         fun `Person med vanlig adresse`() {
-            val regoppslagResponseDTO = RegoppslagResponseDTO(
-                "Test Testesen",
-                adresse = RegoppslagResponseDTO.Adresse(
-                    type = RegoppslagResponseDTO.AdresseType.NORSKPOSTADRESSE,
-                    adresseKilde = RegoppslagResponseDTO.AdresseKilde.BOSTEDSADRESSE,
-                    adresselinje1 = "Testveien 13A",
-                    adresselinje2 = null,
-                    adresselinje3 = null,
-                    postnummer = "0123",
-                    poststed = "Teststed",
-                    landkode = "NO",
-                    land = "NORGE"
+            val regoppslagResponseDTO =
+                RegoppslagResponseDTO(
+                    "Test Testesen",
+                    adresse =
+                        RegoppslagResponseDTO.Adresse(
+                            type = RegoppslagResponseDTO.AdresseType.NORSKPOSTADRESSE,
+                            adresseKilde = RegoppslagResponseDTO.AdresseKilde.BOSTEDSADRESSE,
+                            adresselinje1 = "Testveien 13A",
+                            adresselinje2 = null,
+                            adresselinje3 = null,
+                            postnummer = "0123",
+                            poststed = "Teststed",
+                            landkode = "NO",
+                            land = "NORGE",
+                        ),
                 )
-            )
 
             val mottaker = Mottaker.fra(STOR_SNERK, regoppslagResponseDTO)
 
@@ -41,20 +42,22 @@ internal class MottakerRequestTest {
 
         @Test
         fun `Person har co adresse`() {
-            val regoppslagResponseDTO = RegoppslagResponseDTO(
-                "Test Testesen",
-                adresse = RegoppslagResponseDTO.Adresse(
-                    type = RegoppslagResponseDTO.AdresseType.NORSKPOSTADRESSE,
-                    adresseKilde = RegoppslagResponseDTO.AdresseKilde.BOSTEDSADRESSE,
-                    adresselinje1 = "c/o STOR SNERK",
-                    adresselinje2 = "Testveien 13A",
-                    adresselinje3 = null,
-                    postnummer = "0123",
-                    poststed = "Teststed",
-                    landkode = "NO",
-                    land = "NORGE"
+            val regoppslagResponseDTO =
+                RegoppslagResponseDTO(
+                    "Test Testesen",
+                    adresse =
+                        RegoppslagResponseDTO.Adresse(
+                            type = RegoppslagResponseDTO.AdresseType.NORSKPOSTADRESSE,
+                            adresseKilde = RegoppslagResponseDTO.AdresseKilde.BOSTEDSADRESSE,
+                            adresselinje1 = "c/o STOR SNERK",
+                            adresselinje2 = "Testveien 13A",
+                            adresselinje3 = null,
+                            postnummer = "0123",
+                            poststed = "Teststed",
+                            landkode = "NO",
+                            land = "NORGE",
+                        ),
                 )
-            )
 
             val mottaker = Mottaker.fra(STOR_SNERK, regoppslagResponseDTO)
 

@@ -5,7 +5,7 @@ data class SaksbehandlerInfo(
     val navn: String, // active directory displayname
     val fornavn: String,
     val etternavn: String,
-    val epost: String
+    val epost: String,
 ) {
     val fornavnEtternavn get() = "$fornavn $etternavn"
 }

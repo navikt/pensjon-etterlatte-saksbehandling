@@ -14,7 +14,7 @@ import java.sql.Connection
 import java.sql.PreparedStatement
 import java.sql.ResultSet
 import java.sql.Types
-import java.util.*
+import java.util.UUID
 
 class HendelseDao(private val connection: () -> Connection) {
     companion object {
@@ -25,7 +25,7 @@ class HendelseDao(private val connection: () -> Connection) {
         behandling: Behandling,
         saksbehandler: String,
         kommentar: String? = null,
-        valgtBegrunnelse: String? = null
+        valgtBegrunnelse: String? = null,
     ) = lagreHendelse(
         UlagretHendelse(
             hendelse = "BEHANDLING:AVBRUTT",
@@ -36,23 +36,24 @@ class HendelseDao(private val connection: () -> Connection) {
             ident = saksbehandler,
             identType = "SAKSBEHANDLER",
             kommentar = kommentar,
-            valgtBegrunnelse = valgtBegrunnelse
-        )
+            valgtBegrunnelse = valgtBegrunnelse,
+        ),
     )
 
-    fun behandlingOpprettet(behandling: BehandlingOpprettet) = lagreHendelse(
-        UlagretHendelse(
-            "BEHANDLING:OPPRETTET",
-            behandling.timestamp,
-            null,
-            behandling.id,
-            behandling.sak,
-            null,
-            null,
-            null,
-            null
+    fun behandlingOpprettet(behandling: BehandlingOpprettet) =
+        lagreHendelse(
+            UlagretHendelse(
+                "BEHANDLING:OPPRETTET",
+                behandling.timestamp,
+                null,
+                behandling.id,
+                behandling.sak,
+                null,
+                null,
+                null,
+                null,
+            ),
         )
-    )
 
     fun klageHendelse(
         klageId: UUID,
@@ -61,7 +62,7 @@ class HendelseDao(private val connection: () -> Connection) {
         inntruffet: Tidspunkt,
         saksbehandler: String?,
         kommentar: String?,
-        begrunnelse: String?
+        begrunnelse: String?,
     ) = lagreHendelse(
         UlagretHendelse(
             hendelse = "KLAGE:${hendelse.name}",
@@ -72,8 +73,8 @@ class HendelseDao(private val connection: () -> Connection) {
             ident = saksbehandler,
             identType = "SAKSBEHANDLER".takeIf { saksbehandler != null },
             kommentar = kommentar,
-            valgtBegrunnelse = begrunnelse
-        )
+            valgtBegrunnelse = begrunnelse,
+        ),
     )
 
     fun vedtakHendelse(
@@ -84,7 +85,7 @@ class HendelseDao(private val connection: () -> Connection) {
         inntruffet: Tidspunkt,
         saksbehandler: String?,
         kommentar: String?,
-        begrunnelse: String?
+        begrunnelse: String?,
     ) = lagreHendelse(
         UlagretHendelse(
             "VEDTAK:${hendelse.name}",
@@ -95,18 +96,19 @@ class HendelseDao(private val connection: () -> Connection) {
             saksbehandler,
             "SAKSBEHANDLER".takeIf { saksbehandler != null },
             kommentar,
-            begrunnelse
-        )
+            begrunnelse,
+        ),
     )
 
     fun finnHendelserIBehandling(behandling: UUID): List<LagretHendelse> {
-        val stmt = connection().prepareStatement(
-            """
+        val stmt =
+            connection().prepareStatement(
+                """
                 |SELECT id, hendelse, opprettet, inntruffet, vedtakid, behandlingid, sakid, ident, identtype, kommentar, valgtbegrunnelse 
                 |FROM behandlinghendelse
                 |where behandlingid = ?
-            """.trimMargin()
-        )
+                """.trimMargin(),
+            )
         stmt.setObject(1, behandling)
         return stmt.executeQuery().toList {
             LagretHendelse(
@@ -120,18 +122,19 @@ class HendelseDao(private val connection: () -> Connection) {
                 getString("ident"),
                 getString("identType"),
                 getString("kommentar"),
-                getString("valgtBegrunnelse")
+                getString("valgtBegrunnelse"),
             )
         }
     }
 
     private fun lagreHendelse(hendelse: UlagretHendelse) {
-        val stmt = connection().prepareStatement(
-            """
+        val stmt =
+            connection().prepareStatement(
+                """
             |INSERT INTO behandlinghendelse(hendelse, inntruffet, vedtakid, behandlingid, sakid, ident, identtype, kommentar, valgtbegrunnelse) 
             |VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """.trimMargin()
-        )
+                """.trimMargin(),
+            )
         stmt.setString(1, hendelse.hendelse)
         stmt.setTidspunkt(2, hendelse.inntruffet)
         stmt.setLong(3, hendelse.vedtakId)
@@ -148,7 +151,11 @@ class HendelseDao(private val connection: () -> Connection) {
     }
 }
 
-fun PreparedStatement.setLong(index: Int, value: Long?) =
-    if (value == null) setNull(index, Types.BIGINT) else setLong(3, value)
+fun PreparedStatement.setLong(
+    index: Int,
+    value: Long?,
+) = if (value == null) setNull(index, Types.BIGINT) else setLong(3, value)
+
 fun ResultSet.getUUID(name: String) = getObject(name) as UUID
+
 fun ResultSet.getLongOrNull(name: String) = getLong(name).takeUnless { wasNull() }

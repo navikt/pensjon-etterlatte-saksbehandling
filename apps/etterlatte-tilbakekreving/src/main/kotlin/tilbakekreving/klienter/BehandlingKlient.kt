@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory
 
 class BehandlingKlient(
     private val url: String,
-    private val httpClient: HttpClient
+    private val httpClient: HttpClient,
 ) {
     private val logger = LoggerFactory.getLogger(BehandlingKlient::class.java)
 

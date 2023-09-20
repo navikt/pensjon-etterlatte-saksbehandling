@@ -17,7 +17,7 @@ import no.nav.etterlatte.libs.ktorobo.Resource
 import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.etterlatte.token.Saksbehandler
 import org.slf4j.LoggerFactory
-import java.util.*
+import java.util.UUID
 
 class BehandlingKlientException(override val message: String, override val cause: Throwable) : Exception(message, cause)
 
@@ -29,28 +29,35 @@ class BehandlingKlient(config: Config, httpClient: HttpClient) : BehandlingTilga
     private val clientId = config.getString("behandling.client.id")
     private val resourceUrl = config.getString("behandling.resource.url")
 
-    override suspend fun harTilgangTilBehandling(behandlingId: UUID, bruker: Saksbehandler): Boolean {
+    override suspend fun harTilgangTilBehandling(
+        behandlingId: UUID,
+        bruker: Saksbehandler,
+    ): Boolean {
         try {
             logger.info("Sjekker tilgang til behandling $behandlingId")
 
             return downstreamResourceClient
                 .get(
-                    resource = Resource(
-                        clientId = clientId,
-                        url = "$resourceUrl/tilgang/behandling/$behandlingId"
-                    ),
-                    brukerTokenInfo = bruker
+                    resource =
+                        Resource(
+                            clientId = clientId,
+                            url = "$resourceUrl/tilgang/behandling/$behandlingId",
+                        ),
+                    brukerTokenInfo = bruker,
                 )
                 .mapBoth(
                     success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
-                    failure = { throwableErrorMessage -> throw throwableErrorMessage }
+                    failure = { throwableErrorMessage -> throw throwableErrorMessage },
                 )
         } catch (e: Exception) {
             throw BehandlingKlientException("Sjekking av tilgang for behandling feilet", e)
         }
     }
 
-    suspend fun kanOppdatereTrygdetid(behandlingId: UUID, brukerTokenInfo: BrukerTokenInfo): Boolean {
+    suspend fun kanOppdatereTrygdetid(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Boolean {
         logger.info("Sjekker om behandling med behandlingId=$behandlingId kan oppdatere trygdetid")
         val resource = Resource(clientId = clientId, url = "$resourceUrl/behandlinger/$behandlingId/oppdaterTrygdetid")
 
@@ -60,65 +67,71 @@ class BehandlingKlient(config: Config, httpClient: HttpClient) : BehandlingTilga
                 failure = {
                     logger.info("Behandling med id $behandlingId kan ikke oppdatere trygdetid")
                     false
-                }
+                },
             )
     }
 
     suspend fun hentSisteIverksatteBehandling(
         sakId: Long,
-        brukerTokenInfo: BrukerTokenInfo
+        brukerTokenInfo: BrukerTokenInfo,
     ): SisteIverksatteBehandling {
         logger.info("Henter seneste iverksatte behandling for sak med id $sakId")
 
-        val response = downstreamResourceClient.get(
-            resource = Resource(clientId = clientId, url = "$resourceUrl/saker/$sakId/behandlinger/sisteIverksatte"),
-            brukerTokenInfo = brukerTokenInfo
-        )
+        val response =
+            downstreamResourceClient.get(
+                resource = Resource(clientId = clientId, url = "$resourceUrl/saker/$sakId/behandlinger/sisteIverksatte"),
+                brukerTokenInfo = brukerTokenInfo,
+            )
 
         return response.mapBoth(
             success = { deserialize(it.response.toString()) },
             failure = {
                 logger.error("Kunne ikke hente seneste iverksatte behandling for sak med id $sakId")
                 throw it.throwable
-            }
+            },
         )
     }
 
     suspend fun settBehandlingStatusTrygdetidOppdatert(
         behandlingId: UUID,
-        brukerTokenInfo: BrukerTokenInfo
+        brukerTokenInfo: BrukerTokenInfo,
     ): Boolean {
         logger.info("Committer vilkaarsvurdering på behandling med id $behandlingId")
-        val response = downstreamResourceClient.post(
-            resource = Resource(clientId = clientId, url = "$resourceUrl/behandlinger/$behandlingId/oppdaterTrygdetid"),
-            brukerTokenInfo = brukerTokenInfo,
-            postBody = "{}"
-        )
+        val response =
+            downstreamResourceClient.post(
+                resource = Resource(clientId = clientId, url = "$resourceUrl/behandlinger/$behandlingId/oppdaterTrygdetid"),
+                brukerTokenInfo = brukerTokenInfo,
+                postBody = "{}",
+            )
 
         return response.mapBoth(
             success = { true },
             failure = {
                 logger.info("Kunne ikke committe trygdetid oppdatert på behandling med id $behandlingId", it.throwable)
                 false
-            }
+            },
         )
     }
 
-    suspend fun hentBehandling(behandlingId: UUID, brukerTokenInfo: BrukerTokenInfo): DetaljertBehandling {
+    suspend fun hentBehandling(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): DetaljertBehandling {
         logger.info("Henter behandling med behandlingId=$behandlingId")
 
         return retry<DetaljertBehandling> {
             downstreamResourceClient
                 .get(
-                    resource = Resource(
-                        clientId = clientId,
-                        url = "$resourceUrl/behandlinger/$behandlingId"
-                    ),
-                    brukerTokenInfo = brukerTokenInfo
+                    resource =
+                        Resource(
+                            clientId = clientId,
+                            url = "$resourceUrl/behandlinger/$behandlingId",
+                        ),
+                    brukerTokenInfo = brukerTokenInfo,
                 )
                 .mapBoth(
                     success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
-                    failure = { throwableErrorMessage -> throw throwableErrorMessage }
+                    failure = { throwableErrorMessage -> throw throwableErrorMessage },
                 )
         }.let {
             when (it) {
@@ -126,7 +139,7 @@ class BehandlingKlient(config: Config, httpClient: HttpClient) : BehandlingTilga
                 is RetryResult.Failure -> {
                     throw BehandlingKlientException(
                         "Klarte ikke hente behandling med behandlingId=$behandlingId",
-                        it.samlaExceptions()
+                        it.samlaExceptions(),
                     )
                 }
             }

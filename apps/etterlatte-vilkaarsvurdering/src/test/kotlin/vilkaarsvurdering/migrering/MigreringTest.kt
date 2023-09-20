@@ -47,7 +47,7 @@ import org.junit.jupiter.api.TestInstance
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
 import testsupport.buildTestApplicationConfigurationForOauth
-import java.util.*
+import java.util.UUID
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -67,17 +67,19 @@ class MigreringTest {
     fun before() {
         server.start()
         val httpServer = server.config.httpServer
-        hoconApplicationConfig = buildTestApplicationConfigurationForOauth(
-            httpServer.port(),
-            AZURE_ISSUER,
-            CLIENT_ID
-        )
+        hoconApplicationConfig =
+            buildTestApplicationConfigurationForOauth(
+                httpServer.port(),
+                AZURE_ISSUER,
+                CLIENT_ID,
+            )
         postgreSQLContainer.start()
-        ds = DataSourceBuilder.createDataSource(
-            postgreSQLContainer.jdbcUrl,
-            postgreSQLContainer.username,
-            postgreSQLContainer.password
-        ).also { it.migrate() }
+        ds =
+            DataSourceBuilder.createDataSource(
+                postgreSQLContainer.jdbcUrl,
+                postgreSQLContainer.username,
+                postgreSQLContainer.password,
+            ).also { it.migrate() }
 
         val delvilkaarRepository = DelvilkaarRepository()
         vilkaarsvurderingRepository = VilkaarsvurderingRepository(ds, delvilkaarRepository)
@@ -87,13 +89,14 @@ class MigreringTest {
             VilkaarsvurderingService(
                 vilkaarsvurderingRepository,
                 behandlingKlient,
-                grunnlagKlient
+                grunnlagKlient,
             )
 
-        migreringService = MigreringService(
-            MigreringRepository(delvilkaarRepository, ds),
-            vilkaarsvurderingRepository
-        )
+        migreringService =
+            MigreringService(
+                MigreringRepository(delvilkaarRepository, ds),
+                vilkaarsvurderingRepository,
+            )
         coEvery { behandlingKlient.harTilgangTilBehandling(any(), any()) } returns true
         coEvery { behandlingKlient.kanSetteBehandlingStatusVilkaarsvurdert(any(), any()) } returns true
         coEvery { behandlingKlient.hentBehandling(behandlingId, any()) } returns detaljertBehandling()
@@ -101,15 +104,16 @@ class MigreringTest {
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns GrunnlagTestData().hentOpplysningsgrunnlag()
     }
 
-    private fun detaljertBehandling() = mockk<DetaljertBehandling>().apply {
-        every { id } returns behandlingId
-        every { sak } returns 1L
-        every { sakType } returns SakType.BARNEPENSJON
-        every { behandlingType } returns BehandlingType.FØRSTEGANGSBEHANDLING
-        every { soeker } returns "10095512345"
-        every { virkningstidspunkt } returns VirkningstidspunktTestData.virkningstidsunkt()
-        every { revurderingsaarsak } returns null
-    }
+    private fun detaljertBehandling() =
+        mockk<DetaljertBehandling>().apply {
+            every { id } returns behandlingId
+            every { sak } returns 1L
+            every { sakType } returns SakType.BARNEPENSJON
+            every { behandlingType } returns BehandlingType.FØRSTEGANGSBEHANDLING
+            every { soeker } returns "10095512345"
+            every { virkningstidspunkt } returns VirkningstidspunktTestData.virkningstidsunkt()
+            every { revurderingsaarsak } returns null
+        }
 
     @AfterEach
     fun afterEach() {
@@ -128,10 +132,11 @@ class MigreringTest {
         server.issueToken(
             issuerId = AZURE_ISSUER,
             audience = CLIENT_ID,
-            claims = mapOf(
-                "navn" to "John Doe",
-                "NAVident" to "Saksbehandler01"
-            )
+            claims =
+                mapOf(
+                    "navn" to "John Doe",
+                    "NAVident" to "Saksbehandler01",
+                ),
         ).serialize()
     }
 

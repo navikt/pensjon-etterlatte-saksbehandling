@@ -11,49 +11,48 @@ enum class BarnepensjonSoeskenjusteringGrunn {
     SOESKEN_INN_INSTITUSJON_ENDRING,
     SOESKEN_UT_INSTITUSJON,
     FORPLEID_ETTER_BARNEVERNSLOVEN,
-    SOESKEN_BLIR_ADOPTERT
+    SOESKEN_BLIR_ADOPTERT,
 }
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
 sealed class RevurderingInfo {
-
     @JsonTypeName("ANNEN")
     data class RevurderingAarsakAnnen(
-        val aarsak: String
+        val aarsak: String,
     ) : RevurderingInfo()
 
     @JsonTypeName("SOESKENJUSTERING")
     data class Soeskenjustering(
-        val grunnForSoeskenjustering: BarnepensjonSoeskenjusteringGrunn
+        val grunnForSoeskenjustering: BarnepensjonSoeskenjusteringGrunn,
     ) : RevurderingInfo()
 
     @JsonTypeName("ADOPSJON")
     data class Adopsjon(
         val adoptertAv1: Navn,
-        val adoptertAv2: Navn? = null
+        val adoptertAv2: Navn? = null,
     ) : RevurderingInfo()
 
     @JsonTypeName("OMGJOERING_AV_FARSKAP")
     data class OmgjoeringAvFarskap(
         val naavaerendeFar: Navn,
-        val forrigeFar: Navn
+        val forrigeFar: Navn,
     ) : RevurderingInfo()
 
     @JsonTypeName("FENGSELSOPPHOLD")
     data class Fengselsopphold(
         val fraDato: LocalDate,
-        val tilDato: LocalDate
+        val tilDato: LocalDate,
     ) : RevurderingInfo()
 
     @JsonTypeName("UT_AV_FENGSEL")
     data class UtAvFengsel(
-        val erEtterbetalingMerEnnTreeMaaneder: Boolean
+        val erEtterbetalingMerEnnTreeMaaneder: Boolean,
     ) : RevurderingInfo()
 
     @JsonTypeName("YRKESSKADE")
     data class Yrkesskade(
         val dinForelder: String,
-        val yrkesskadeEllerYrkessykdom: String
+        val yrkesskadeEllerYrkessykdom: String,
     ) : RevurderingInfo()
 
     @JsonTypeName("INSTITUSJONSOPPHOLD")
@@ -61,6 +60,6 @@ sealed class RevurderingInfo {
         val erEtterbetalingMerEnnTreMaaneder: Boolean,
         val prosent: Int?,
         val innlagtdato: LocalDate?,
-        val utskrevetdato: LocalDate?
+        val utskrevetdato: LocalDate?,
     ) : RevurderingInfo()
 }

@@ -20,21 +20,23 @@ import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.ytelseMedGrunnlag.YtelseMedGrunnlagService
 
-private fun featureToggleProperties(config: Config) = FeatureToggleProperties(
-    applicationName = config.getString("funksjonsbrytere.unleash.applicationName"),
-    host = config.getString("funksjonsbrytere.unleash.host"),
-    apiKey = config.getString("funksjonsbrytere.unleash.token")
-)
+private fun featureToggleProperties(config: Config) =
+    FeatureToggleProperties(
+        applicationName = config.getString("funksjonsbrytere.unleash.applicationName"),
+        host = config.getString("funksjonsbrytere.unleash.host"),
+        apiKey = config.getString("funksjonsbrytere.unleash.token"),
+    )
 
 class ApplicationContext {
     val config: Config = ConfigFactory.load()
     private val env = System.getenv()
     val properties: ApplicationProperties = ApplicationProperties.fromEnv(env)
-    val dataSource = DataSourceBuilder.createDataSource(
-        jdbcUrl = properties.jdbcUrl,
-        username = properties.dbUsername,
-        password = properties.dbPassword
-    )
+    val dataSource =
+        DataSourceBuilder.createDataSource(
+            jdbcUrl = properties.jdbcUrl,
+            username = properties.dbUsername,
+            password = properties.dbPassword,
+        )
 
     val featureToggleService: FeatureToggleService = FeatureToggleService.initialiser(featureToggleProperties(config))
 
@@ -44,42 +46,48 @@ class ApplicationContext {
     val behandlingKlient = BehandlingKlientImpl(config, httpClient())
 
     private val beregningsGrunnlagRepository = BeregningsGrunnlagRepository(dataSource)
-    val beregningsGrunnlagService = BeregningsGrunnlagService(
-        beregningsGrunnlagRepository = beregningsGrunnlagRepository,
-        behandlingKlient = behandlingKlient
-    )
+    val beregningsGrunnlagService =
+        BeregningsGrunnlagService(
+            beregningsGrunnlagRepository = beregningsGrunnlagRepository,
+            behandlingKlient = behandlingKlient,
+        )
 
-    val beregnBarnepensjonService = BeregnBarnepensjonService(
-        grunnlagKlient = grunnlagKlient,
-        vilkaarsvurderingKlient = vilkaarsvurderingKlient,
-        beregningsGrunnlagService = beregningsGrunnlagService,
-        trygdetidKlient = trygdetidKlient,
-        featureToggleService = featureToggleService
-    )
-    val beregnOmstillingsstoenadService = BeregnOmstillingsstoenadService(
-        vilkaarsvurderingKlient = vilkaarsvurderingKlient,
-        beregningsGrunnlagService = beregningsGrunnlagService,
-        grunnlagKlient = grunnlagKlient,
-        trygdetidKlient = trygdetidKlient
-    )
+    val beregnBarnepensjonService =
+        BeregnBarnepensjonService(
+            grunnlagKlient = grunnlagKlient,
+            vilkaarsvurderingKlient = vilkaarsvurderingKlient,
+            beregningsGrunnlagService = beregningsGrunnlagService,
+            trygdetidKlient = trygdetidKlient,
+            featureToggleService = featureToggleService,
+        )
+    val beregnOmstillingsstoenadService =
+        BeregnOmstillingsstoenadService(
+            vilkaarsvurderingKlient = vilkaarsvurderingKlient,
+            beregningsGrunnlagService = beregningsGrunnlagService,
+            grunnlagKlient = grunnlagKlient,
+            trygdetidKlient = trygdetidKlient,
+        )
     val beregningRepository = BeregningRepository(dataSource)
-    val beregningService = BeregningService(
-        beregningRepository = beregningRepository,
-        behandlingKlient = behandlingKlient,
-        beregnBarnepensjonService = beregnBarnepensjonService,
-        beregnOmstillingsstoenadService = beregnOmstillingsstoenadService,
-        beregningsGrunnlagService = beregningsGrunnlagService,
-        trygdetidKlient = trygdetidKlient
-    )
+    val beregningService =
+        BeregningService(
+            beregningRepository = beregningRepository,
+            behandlingKlient = behandlingKlient,
+            beregnBarnepensjonService = beregnBarnepensjonService,
+            beregnOmstillingsstoenadService = beregnOmstillingsstoenadService,
+            beregningsGrunnlagService = beregningsGrunnlagService,
+            trygdetidKlient = trygdetidKlient,
+        )
     val avkortingRepository = AvkortingRepository(dataSource)
-    val avkortingService = AvkortingService(
-        behandlingKlient = behandlingKlient,
-        avkortingRepository = avkortingRepository,
-        beregningService = beregningService
-    )
-    val ytelseMedGrunnlagService = YtelseMedGrunnlagService(
-        beregningRepository = beregningRepository,
-        avkortingRepository = avkortingRepository,
-        behandlingKlient = behandlingKlient
-    )
+    val avkortingService =
+        AvkortingService(
+            behandlingKlient = behandlingKlient,
+            avkortingRepository = avkortingRepository,
+            beregningService = beregningService,
+        )
+    val ytelseMedGrunnlagService =
+        YtelseMedGrunnlagService(
+            beregningRepository = beregningRepository,
+            avkortingRepository = avkortingRepository,
+            behandlingKlient = behandlingKlient,
+        )
 }

@@ -8,7 +8,7 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.girOpphoer
 import no.nav.etterlatte.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
-import java.util.*
+import java.util.UUID
 
 class BeregningService(
     private val beregningRepository: BeregningRepository,
@@ -16,7 +16,7 @@ class BeregningService(
     private val beregnBarnepensjonService: BeregnBarnepensjonService,
     private val beregnOmstillingsstoenadService: BeregnOmstillingsstoenadService,
     private val beregningsGrunnlagService: BeregningsGrunnlagService,
-    private val trygdetidKlient: TrygdetidKlient
+    private val trygdetidKlient: TrygdetidKlient,
 ) {
     private val logger = LoggerFactory.getLogger(BeregningService::class.java)
 
@@ -29,16 +29,20 @@ class BeregningService(
         return hentBeregning(behandlingId) ?: throw Exception("Mangler beregning for behandlingId=$behandlingId")
     }
 
-    suspend fun opprettBeregning(behandlingId: UUID, brukerTokenInfo: BrukerTokenInfo): Beregning {
+    suspend fun opprettBeregning(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Beregning {
         logger.info("Oppretter beregning for behandlingId=$behandlingId")
         val kanBeregneYtelse = behandlingKlient.beregn(behandlingId, brukerTokenInfo, commit = false)
         if (kanBeregneYtelse) {
             val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
 
-            val beregning = when (behandling.sakType) {
-                SakType.BARNEPENSJON -> beregnBarnepensjonService.beregn(behandling, brukerTokenInfo)
-                SakType.OMSTILLINGSSTOENAD -> beregnOmstillingsstoenadService.beregn(behandling, brukerTokenInfo)
-            }
+            val beregning =
+                when (behandling.sakType) {
+                    SakType.BARNEPENSJON -> beregnBarnepensjonService.beregn(behandling, brukerTokenInfo)
+                    SakType.OMSTILLINGSSTOENAD -> beregnOmstillingsstoenadService.beregn(behandling, brukerTokenInfo)
+                }
 
             val lagretBeregning = beregningRepository.lagreEllerOppdaterBeregning(beregning)
             behandlingKlient.beregn(behandlingId, brukerTokenInfo, commit = true)
@@ -48,7 +52,10 @@ class BeregningService(
         }
     }
 
-    suspend fun opprettForOpphoer(behandlingId: UUID, brukerTokenInfo: BrukerTokenInfo) {
+    suspend fun opprettForOpphoer(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {
         val kanBeregneYtelse = behandlingKlient.beregn(behandlingId, brukerTokenInfo, commit = false)
         if (kanBeregneYtelse) {
             val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
@@ -59,7 +66,7 @@ class BeregningService(
                     kopierTrygdetidOgOpprettBeregningOmstillingsstoenad(
                         behandling,
                         brukerTokenInfo,
-                        behandlingId
+                        behandlingId,
                     )
                 }
             }
@@ -69,7 +76,7 @@ class BeregningService(
     private suspend fun kopierBeregningsgrunnlagOgOpprettBeregningBarnepensjon(
         behandling: DetaljertBehandling,
         brukerTokenInfo: BrukerTokenInfo,
-        behandlingId: UUID
+        behandlingId: UUID,
     ) {
         val sisteIverksatteBehandling = behandlingKlient.hentSisteIverksatteBehandling(behandling.sak, brukerTokenInfo)
         val grunnlagDenneBehandlinga =
@@ -85,7 +92,7 @@ class BeregningService(
     private suspend fun kopierTrygdetidOgOpprettBeregningOmstillingsstoenad(
         behandling: DetaljertBehandling,
         brukerTokenInfo: BrukerTokenInfo,
-        behandlingId: UUID
+        behandlingId: UUID,
     ) {
         val sisteIverksatteBehandling = behandlingKlient.hentSisteIverksatteBehandling(behandling.sak, brukerTokenInfo)
         val trygdetidForBehandling = trygdetidKlient.hentTrygdetid(behandlingId, brukerTokenInfo)

@@ -15,27 +15,29 @@ import java.time.LocalTime
 import java.time.temporal.ChronoUnit
 
 internal class KonsistensavstemmingJobTest {
-
-    private val konsistensavstemmingService: KonsistensavstemmingService = mockk {
-    }
+    private val konsistensavstemmingService: KonsistensavstemmingService =
+        mockk {
+        }
     private val leaderElection: LeaderElection = mockk()
     private val datoEksekvering = 1.februar(2023)
-    private val konsistensavstemming = KonsistensavstemmingJob.Konsistensavstemming(
-        konsistensavstemmingService = konsistensavstemmingService,
-        kjoereplan = setOf(datoEksekvering),
-        leaderElection = leaderElection,
-        jobbNavn = "jobb",
-        clock = Tidspunkt.ofNorskTidssone(datoEksekvering, LocalTime.MIDNIGHT).fixedNorskTid(),
-        saktype = Saktype.BARNEPENSJON
-    )
-    private val OMSkonsistensavstemming = KonsistensavstemmingJob.Konsistensavstemming(
-        konsistensavstemmingService = konsistensavstemmingService,
-        kjoereplan = setOf(datoEksekvering),
-        leaderElection = leaderElection,
-        jobbNavn = "jobb",
-        clock = Tidspunkt.ofNorskTidssone(datoEksekvering, LocalTime.MIDNIGHT).fixedNorskTid(),
-        saktype = Saktype.OMSTILLINGSSTOENAD
-    )
+    private val konsistensavstemming =
+        KonsistensavstemmingJob.Konsistensavstemming(
+            konsistensavstemmingService = konsistensavstemmingService,
+            kjoereplan = setOf(datoEksekvering),
+            leaderElection = leaderElection,
+            jobbNavn = "jobb",
+            clock = Tidspunkt.ofNorskTidssone(datoEksekvering, LocalTime.MIDNIGHT).fixedNorskTid(),
+            saktype = Saktype.BARNEPENSJON,
+        )
+    private val omsKonsistensavstemming =
+        KonsistensavstemmingJob.Konsistensavstemming(
+            konsistensavstemmingService = konsistensavstemmingService,
+            kjoereplan = setOf(datoEksekvering),
+            leaderElection = leaderElection,
+            jobbNavn = "jobb",
+            clock = Tidspunkt.ofNorskTidssone(datoEksekvering, LocalTime.MIDNIGHT).fixedNorskTid(),
+            saktype = Saktype.OMSTILLINGSSTOENAD,
+        )
 
     @Test
     fun `skal ikke konsistensavstemme siden pod ikke er leader`() {
@@ -53,13 +55,13 @@ internal class KonsistensavstemmingJobTest {
         every {
             konsistensavstemmingService.konsistensavstemmingErKjoertIDag(
                 Saktype.BARNEPENSJON,
-                datoEksekvering
+                datoEksekvering,
             )
         } returns false
         every {
             konsistensavstemmingService.konsistensavstemmingErKjoertIDag(
                 Saktype.OMSTILLINGSSTOENAD,
-                datoEksekvering
+                datoEksekvering,
             )
         } returns false
         every { konsistensavstemmingService.startKonsistensavstemming(any(), any()) } returns emptyList()
@@ -77,49 +79,51 @@ internal class KonsistensavstemmingJobTest {
         val dagForTestMinusFemDager =
             Tidspunkt.ofNorskTidssone(datoEksekvering, LocalTime.MIDNIGHT).minus(5, ChronoUnit.DAYS)
 
-        val konsistensavstemming = KonsistensavstemmingJob.Konsistensavstemming(
-            konsistensavstemmingService = konsistensavstemmingService,
-            kjoereplan = setOf(datoEksekvering),
-            leaderElection = leaderElection,
-            jobbNavn = "jobb",
-            clock = dagForTestMinusFemDager.fixedNorskTid(),
-            saktype = Saktype.BARNEPENSJON
-        )
+        val konsistensavstemming =
+            KonsistensavstemmingJob.Konsistensavstemming(
+                konsistensavstemmingService = konsistensavstemmingService,
+                kjoereplan = setOf(datoEksekvering),
+                leaderElection = leaderElection,
+                jobbNavn = "jobb",
+                clock = dagForTestMinusFemDager.fixedNorskTid(),
+                saktype = Saktype.BARNEPENSJON,
+            )
 
-        val OMSkonsistensavstemming = KonsistensavstemmingJob.Konsistensavstemming(
-            konsistensavstemmingService = konsistensavstemmingService,
-            kjoereplan = setOf(datoEksekvering),
-            leaderElection = leaderElection,
-            jobbNavn = "jobb",
-            clock = dagForTestMinusFemDager.fixedNorskTid(),
-            saktype = Saktype.OMSTILLINGSSTOENAD
-        )
+        val oMSkonsistensavstemming =
+            KonsistensavstemmingJob.Konsistensavstemming(
+                konsistensavstemmingService = konsistensavstemmingService,
+                kjoereplan = setOf(datoEksekvering),
+                leaderElection = leaderElection,
+                jobbNavn = "jobb",
+                clock = dagForTestMinusFemDager.fixedNorskTid(),
+                saktype = Saktype.OMSTILLINGSSTOENAD,
+            )
 
         konsistensavstemming.run()
-        OMSkonsistensavstemming.run()
+        oMSkonsistensavstemming.run()
 
         verify(exactly = 0) {
             konsistensavstemmingService.konsistensavstemmingErKjoertIDag(
                 Saktype.BARNEPENSJON,
-                datoEksekvering
+                datoEksekvering,
             )
         }
         verify(exactly = 0) {
             konsistensavstemmingService.konsistensavstemmingErKjoertIDag(
                 Saktype.OMSTILLINGSSTOENAD,
-                datoEksekvering
+                datoEksekvering,
             )
         }
         verify(exactly = 0) {
             konsistensavstemmingService.startKonsistensavstemming(
                 datoEksekvering,
-                Saktype.BARNEPENSJON
+                Saktype.BARNEPENSJON,
             )
         }
         verify(exactly = 0) {
             konsistensavstemmingService.startKonsistensavstemming(
                 datoEksekvering,
-                Saktype.OMSTILLINGSSTOENAD
+                Saktype.OMSTILLINGSSTOENAD,
             )
         }
         confirmVerified(konsistensavstemmingService)
@@ -131,30 +135,30 @@ internal class KonsistensavstemmingJobTest {
         every {
             konsistensavstemmingService.konsistensavstemmingErKjoertIDag(
                 Saktype.BARNEPENSJON,
-                datoEksekvering
+                datoEksekvering,
             )
         } returns false
         every {
             konsistensavstemmingService.konsistensavstemmingErKjoertIDag(
                 Saktype.OMSTILLINGSSTOENAD,
-                datoEksekvering
+                datoEksekvering,
             )
         } returns false
         every { konsistensavstemmingService.startKonsistensavstemming(any(), Saktype.BARNEPENSJON) } returns emptyList()
         every { konsistensavstemmingService.startKonsistensavstemming(any(), Saktype.OMSTILLINGSSTOENAD) } returns emptyList()
         konsistensavstemming.run()
-        OMSkonsistensavstemming.run()
+        omsKonsistensavstemming.run()
 
         verify(exactly = 1) {
             konsistensavstemmingService.konsistensavstemmingErKjoertIDag(
                 Saktype.BARNEPENSJON,
-                any()
+                any(),
             )
         }
         verify(exactly = 1) {
             konsistensavstemmingService.konsistensavstemmingErKjoertIDag(
                 Saktype.OMSTILLINGSSTOENAD,
-                any()
+                any(),
             )
         }
         verify(exactly = 1) { konsistensavstemmingService.startKonsistensavstemming(any(), Saktype.BARNEPENSJON) }
@@ -168,41 +172,41 @@ internal class KonsistensavstemmingJobTest {
         every {
             konsistensavstemmingService.konsistensavstemmingErKjoertIDag(
                 Saktype.BARNEPENSJON,
-                datoEksekvering
+                datoEksekvering,
             )
         } returns false
         every {
             konsistensavstemmingService.konsistensavstemmingErKjoertIDag(
                 Saktype.OMSTILLINGSSTOENAD,
-                datoEksekvering
+                datoEksekvering,
             )
         } returns false
         every {
             konsistensavstemmingService.startKonsistensavstemming(
                 datoEksekvering,
-                Saktype.BARNEPENSJON
+                Saktype.BARNEPENSJON,
             )
         } returns emptyList()
         every {
             konsistensavstemmingService.startKonsistensavstemming(
                 datoEksekvering,
-                Saktype.OMSTILLINGSSTOENAD
+                Saktype.OMSTILLINGSSTOENAD,
             )
         } returns emptyList()
 
         konsistensavstemming.run()
-        OMSkonsistensavstemming.run()
+        omsKonsistensavstemming.run()
 
         verify(exactly = 1) {
             konsistensavstemmingService.startKonsistensavstemming(
                 datoEksekvering,
-                Saktype.BARNEPENSJON
+                Saktype.BARNEPENSJON,
             )
         }
         verify(exactly = 1) {
             konsistensavstemmingService.startKonsistensavstemming(
                 datoEksekvering,
-                Saktype.OMSTILLINGSSTOENAD
+                Saktype.OMSTILLINGSSTOENAD,
             )
         }
     }
@@ -213,13 +217,13 @@ internal class KonsistensavstemmingJobTest {
         every {
             konsistensavstemmingService.konsistensavstemmingErKjoertIDag(
                 any(),
-                datoEksekvering
+                datoEksekvering,
             )
         } returns true
         every {
             konsistensavstemmingService.startKonsistensavstemming(
                 datoEksekvering,
-                any()
+                any(),
             )
         } returns emptyList()
 
@@ -228,7 +232,7 @@ internal class KonsistensavstemmingJobTest {
         verify(exactly = 0) {
             konsistensavstemmingService.startKonsistensavstemming(
                 datoEksekvering,
-                Saktype.BARNEPENSJON
+                Saktype.BARNEPENSJON,
             )
         }
     }

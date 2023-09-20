@@ -4,5 +4,6 @@ import java.io.FileNotFoundException
 
 object TestHelper
 
-fun readFile(file: String) = TestHelper::class.java.getResource(file)?.readText()
-    ?: throw FileNotFoundException("Fant ikke filen $file")
+fun readFile(file: String) =
+    TestHelper::class.java.getResource(file)?.readText()
+        ?: throw FileNotFoundException("Fant ikke filen $file")

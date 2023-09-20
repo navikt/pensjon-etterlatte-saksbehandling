@@ -21,12 +21,11 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
-import java.util.*
+import java.util.UUID
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class OppgaveDaoNyTest {
-
     private lateinit var dataSource: DataSource
     private lateinit var oppgaveDaoNy: OppgaveDaoNy
     private lateinit var sakDao: SakDao
@@ -41,11 +40,12 @@ internal class OppgaveDaoNyTest {
         postgreSQLContainer.withUrlParam("user", postgreSQLContainer.username)
         postgreSQLContainer.withUrlParam("password", postgreSQLContainer.password)
 
-        dataSource = DataSourceBuilder.createDataSource(
-            jdbcUrl = postgreSQLContainer.jdbcUrl,
-            username = postgreSQLContainer.username,
-            password = postgreSQLContainer.password
-        ).apply { migrate() }
+        dataSource =
+            DataSourceBuilder.createDataSource(
+                jdbcUrl = postgreSQLContainer.jdbcUrl,
+                username = postgreSQLContainer.username,
+                password = postgreSQLContainer.password,
+            ).apply { migrate() }
 
         val connection = dataSource.connection
         oppgaveDaoNy = OppgaveDaoNyImpl { connection }
@@ -118,15 +118,16 @@ internal class OppgaveDaoNyTest {
         oppgaveDaoNy.lagreOppgave(oppgaveNy)
         saktilgangDao.oppdaterAdresseBeskyttelse(sakAalesund.id, AdressebeskyttelseGradering.STRENGT_FORTROLIG)
 
-        val hentetOppgave = oppgaveDaoNy
-            .finnOppgaverForStrengtFortroligOgStrengtFortroligUtland(OppgaveType.values().toList())
+        val hentetOppgave =
+            oppgaveDaoNy
+                .finnOppgaverForStrengtFortroligOgStrengtFortroligUtland(OppgaveType.values().toList())
         assertEquals(1, hentetOppgave.size)
     }
 
     fun lagNyOppgave(
         sak: Sak,
         oppgaveKilde: OppgaveKilde = OppgaveKilde.BEHANDLING,
-        oppgaveType: OppgaveType = OppgaveType.FOERSTEGANGSBEHANDLING
+        oppgaveType: OppgaveType = OppgaveType.FOERSTEGANGSBEHANDLING,
     ) = OppgaveNy(
         id = UUID.randomUUID(),
         status = Status.NY,
@@ -139,6 +140,6 @@ internal class OppgaveDaoNyTest {
         sakType = sak.sakType,
         fnr = sak.ident,
         frist = null,
-        type = oppgaveType
+        type = oppgaveType,
     )
 }

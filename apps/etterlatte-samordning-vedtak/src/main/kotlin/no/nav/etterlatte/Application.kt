@@ -36,13 +36,13 @@ class Server(applicationContext: ApplicationContext) {
                         restModule(
                             sikkerLogg,
                             withMetrics = true,
-                            additionalValidation = validateMaskinportenScope()
+                            additionalValidation = validateMaskinportenScope(),
                         ) {
                             samordningVedtakRoute(samordningVedtakService = applicationContext.samordningVedtakService)
                         }
                     }
                     connector { port = applicationContext.httpPort }
-                }
+                },
         )
 
     fun run() = setReady().also { engine.start(true) }

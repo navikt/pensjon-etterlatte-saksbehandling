@@ -22,19 +22,21 @@ fun main() {
 }
 
 class Server(private val context: ApplicationContext) {
-    private val engine = embeddedServer(
-        factory = CIO,
-        environment = applicationEngineEnvironment {
-            config = HoconApplicationConfig(ConfigFactory.load())
-            module {
-                routing {
-                    healthApi()
-                }
-                metricsModule()
-            }
-            connector { port = context.httpPort }
-        }
-    )
+    private val engine =
+        embeddedServer(
+            factory = CIO,
+            environment =
+                applicationEngineEnvironment {
+                    config = HoconApplicationConfig(ConfigFactory.load())
+                    module {
+                        routing {
+                            healthApi()
+                        }
+                        metricsModule()
+                    }
+                    connector { port = context.httpPort }
+                },
+        )
 
     fun run() {
         lesHendelserFraLeesah(context.leesahKonsument)

@@ -15,7 +15,6 @@ import java.io.FileNotFoundException
 import java.util.UUID
 
 internal class OmregningsHendelserTest {
-
     private val behandlingService = mockk<BehandlingServiceImpl>()
     private val inspector = TestRapid().apply { OmregningsHendelser(this, behandlingService) }
 
@@ -39,8 +38,8 @@ internal class OmregningsHendelserTest {
         Assertions.assertEquals(
             behandlingViOmregnerFra.toString(),
             inspector.inspektør.message(1).get(
-                BEHANDLING_VI_OMREGNER_FRA_KEY
-            ).asText()
+                BEHANDLING_VI_OMREGNER_FRA_KEY,
+            ).asText(),
         )
     }
 
@@ -49,5 +48,6 @@ internal class OmregningsHendelserTest {
     }
 }
 
-fun readFile(file: String) = OmregningsHendelserTest::class.java.getResource(file)?.readText()
-    ?: throw FileNotFoundException("Fant ikke filen $file")
+fun readFile(file: String) =
+    OmregningsHendelserTest::class.java.getResource(file)?.readText()
+        ?: throw FileNotFoundException("Fant ikke filen $file")

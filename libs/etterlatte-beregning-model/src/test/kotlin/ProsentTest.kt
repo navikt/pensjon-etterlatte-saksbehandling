@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
 class ProsentTest {
-
     @Test
     fun `foerti minus ti er tretti`() {
         Assertions.assertEquals(Prosent(40).minus(Prosent(10)), Prosent(30))

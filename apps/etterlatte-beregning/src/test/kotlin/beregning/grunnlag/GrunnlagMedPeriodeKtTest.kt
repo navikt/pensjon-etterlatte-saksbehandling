@@ -8,7 +8,6 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
 class GrunnlagMedPeriodeKtTest {
-
     @Test
     fun `erGrunnlagLiktFoerEnDato gir true hvis grunnlagene er de samme`() {
         val periode = GrunnlagMedPeriode(data = "verdi1", fom = LocalDate.of(2022, 8, 1), tom = null)

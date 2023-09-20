@@ -5,7 +5,6 @@ import no.nav.etterlatte.libs.common.deserialize
 import org.junit.jupiter.api.Test
 
 internal class SlateTest {
-
     @Test
     fun serde() {
         val originalJson = this.javaClass.getResource("/brev/oms/slate_serde.json")!!.readText()

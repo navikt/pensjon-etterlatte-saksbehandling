@@ -6,7 +6,8 @@ enum class KafkaHendelseType {
     FATTET,
     ATTESTERT,
     UNDERKJENT,
-    IVERKSATT;
+    IVERKSATT,
+    ;
 
     override fun toString(): String {
         return "VEDTAK:$name"

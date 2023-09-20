@@ -30,11 +30,9 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import java.math.BigDecimal
 import java.time.YearMonth
-import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class MigreringRoutesTest : BehandlingIntegrationTest() {
-
     @BeforeAll
     fun start() = startServer()
 
@@ -47,45 +45,50 @@ class MigreringRoutesTest : BehandlingIntegrationTest() {
             environment {
                 config = hoconApplicationConfig
             }
-            val client = createClient {
-                install(ContentNegotiation) {
-                    jackson { registerModule(JavaTimeModule()) }
+            val client =
+                createClient {
+                    install(ContentNegotiation) {
+                        jackson { registerModule(JavaTimeModule()) }
+                    }
                 }
-            }
             application { module(applicationContext) }
             val fnr = Folkeregisteridentifikator.of("08071272487")
-            val request = MigreringRequest(
-                pesysId = PesysId(1),
-                enhet = Enhet("4817"),
-                soeker = fnr,
-                avdoedForelder = listOf(AvdoedForelder(fnr, Tidspunkt.now())),
-                gjenlevendeForelder = null,
-                virkningstidspunkt = YearMonth.now(),
-                foersteVirkningstidspunkt = YearMonth.now().minusYears(10),
-                beregning = Beregning(
-                    brutto = BigDecimal(1000),
-                    netto = BigDecimal(1000),
-                    anvendtTrygdetid = BigDecimal(40),
-                    datoVirkFom = Tidspunkt.now(),
-                    g = BigDecimal(100000)
-                ),
-                trygdetid = Trygdetid(emptyList()),
-                flyktningStatus = false
-            )
+            val request =
+                MigreringRequest(
+                    pesysId = PesysId(1),
+                    enhet = Enhet("4817"),
+                    soeker = fnr,
+                    avdoedForelder = listOf(AvdoedForelder(fnr, Tidspunkt.now())),
+                    gjenlevendeForelder = null,
+                    virkningstidspunkt = YearMonth.now(),
+                    foersteVirkningstidspunkt = YearMonth.now().minusYears(10),
+                    beregning =
+                        Beregning(
+                            brutto = BigDecimal(1000),
+                            netto = BigDecimal(1000),
+                            anvendtTrygdetid = BigDecimal(40),
+                            datoVirkFom = Tidspunkt.now(),
+                            g = BigDecimal(100000),
+                        ),
+                    trygdetid = Trygdetid(emptyList()),
+                    flyktningStatus = false,
+                )
 
-            val response: BehandlingOgSak = client.post("/migrering") {
-                addAuthToken(tokenSaksbehandler)
-                contentType(ContentType.Application.Json)
-                setBody(request)
-            }.apply {
-                Assertions.assertEquals(HttpStatusCode.Created, status)
-            }.body()
+            val response: BehandlingOgSak =
+                client.post("/migrering") {
+                    addAuthToken(tokenSaksbehandler)
+                    contentType(ContentType.Application.Json)
+                    setBody(request)
+                }.apply {
+                    Assertions.assertEquals(HttpStatusCode.Created, status)
+                }.body()
 
-            val behandling = client.get("/behandlinger/${response.behandlingId}") {
-                addAuthToken(tokenSaksbehandler)
-            }.apply {
-                Assertions.assertEquals(HttpStatusCode.OK, status)
-            }.body<DetaljertBehandling>()
+            val behandling =
+                client.get("/behandlinger/${response.behandlingId}") {
+                    addAuthToken(tokenSaksbehandler)
+                }.apply {
+                    Assertions.assertEquals(HttpStatusCode.OK, status)
+                }.body<DetaljertBehandling>()
 
             Assertions.assertNotNull(behandling.virkningstidspunkt)
 

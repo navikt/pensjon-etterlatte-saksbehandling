@@ -20,37 +20,39 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import java.io.FileNotFoundException
-import java.util.*
+import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class FordeltSoeknadRiverTest {
-
     private val behandlingClientMock = mockk<BehandlingClient>()
     private val gyldigSoeknadServiceMock = mockk<GyldigSoeknadService>()
-    private val inspector = TestRapid().apply {
-        FordeltSoeknadRiver(this, gyldigSoeknadServiceMock, behandlingClientMock)
-    }
+    private val inspector =
+        TestRapid().apply {
+            FordeltSoeknadRiver(this, gyldigSoeknadServiceMock, behandlingClientMock)
+        }
 
     @Test
     fun `skal sjekke om søknad er gyldig fremsatt og returnere resultatet av dette`() {
-        val persongalleri = Persongalleri(
-            soeker = "soeker",
-            innsender = "innsender",
-            avdoed = listOf("avdoed"),
-            gjenlevende = listOf("gjenlevende")
-        )
+        val persongalleri =
+            Persongalleri(
+                soeker = "soeker",
+                innsender = "innsender",
+                avdoed = listOf("avdoed"),
+                gjenlevende = listOf("gjenlevende"),
+            )
 
-        val gyldighetsResultat = GyldighetsResultat(
-            VurderingsResultat.OPPFYLT,
-            listOf(
-                VurdertGyldighet(
-                    GyldighetsTyper.INNSENDER_ER_FORELDER,
-                    VurderingsResultat.OPPFYLT,
-                    "innsenderFnr"
-                )
-            ),
-            Tidspunkt.now().toLocalDatetimeUTC()
-        )
+        val gyldighetsResultat =
+            GyldighetsResultat(
+                VurderingsResultat.OPPFYLT,
+                listOf(
+                    VurdertGyldighet(
+                        GyldighetsTyper.INNSENDER_ER_FORELDER,
+                        VurderingsResultat.OPPFYLT,
+                        "innsenderFnr",
+                    ),
+                ),
+                Tidspunkt.now().toLocalDatetimeUTC(),
+            )
         val id = UUID.randomUUID()
         val sakId = 12345L
 
@@ -74,7 +76,8 @@ internal class FordeltSoeknadRiverTest {
     companion object {
         private val melding = readFile("/fordeltmelding.json")
 
-        fun readFile(file: String) = Companion::class.java.getResource(file)?.readText()
-            ?: throw FileNotFoundException("Fant ikke filen $file")
+        fun readFile(file: String) =
+            Companion::class.java.getResource(file)?.readText()
+                ?: throw FileNotFoundException("Fant ikke filen $file")
     }
 }

@@ -14,14 +14,20 @@ class GrunnlagService(private val grunnlagKlient: GrunnlagKlientImpl) {
      *  Når persongalleriet er fjernet helt fra etterlatte-behandling kan vi begynne arbeidet med å skrive om
      *  måten grunnlag håndterer data på og hvordan dataene oppdateres/behandles.
      */
-    fun leggInnNyttGrunnlag(behandling: Behandling, persongalleri: Persongalleri) {
+    fun leggInnNyttGrunnlag(
+        behandling: Behandling,
+        persongalleri: Persongalleri,
+    ) {
         runBlocking {
             val grunnlagsbehov = grunnlagsbehov(behandling, persongalleri)
             grunnlagKlient.leggInnNyttGrunnlag(grunnlagsbehov)
         }
     }
 
-    fun leggTilNyeOpplysninger(sakId: Long, opplysninger: NyeSaksopplysninger) = runBlocking {
+    fun leggTilNyeOpplysninger(
+        sakId: Long,
+        opplysninger: NyeSaksopplysninger,
+    ) = runBlocking {
         grunnlagKlient.lagreNyeSaksopplysninger(sakId, opplysninger)
     }
 
@@ -31,11 +37,14 @@ class GrunnlagService(private val grunnlagKlient: GrunnlagKlientImpl) {
             ?: throw NoSuchElementException("Persongalleri mangler for sak $sakId")
     }
 
-    private fun grunnlagsbehov(behandling: Behandling, persongalleri: Persongalleri): Opplysningsbehov {
+    private fun grunnlagsbehov(
+        behandling: Behandling,
+        persongalleri: Persongalleri,
+    ): Opplysningsbehov {
         return Opplysningsbehov(
             sakid = behandling.sak.id,
             sakType = behandling.sak.sakType,
-            persongalleri = persongalleri
+            persongalleri = persongalleri,
         )
     }
 }

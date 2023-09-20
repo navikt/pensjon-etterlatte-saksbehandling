@@ -12,27 +12,31 @@ import java.time.Month
 import java.time.YearMonth
 
 class PeriodisertBeregningGrunnlagTest {
+    private val perioderSomErKomplett =
+        listOf<Pair<LocalDate, LocalDate?>>(
+            YearMonth.of(2022, Month.AUGUST).atDay(1) to
+                YearMonth.of(
+                    2022,
+                    Month.DECEMBER,
+                ).atEndOfMonth(),
+            YearMonth.of(2023, Month.JANUARY).atDay(1) to null,
+        )
 
-    private val perioderSomErKomplett = listOf<Pair<LocalDate, LocalDate?>>(
-        YearMonth.of(2022, Month.AUGUST).atDay(1) to YearMonth.of(
-            2022,
-            Month.DECEMBER
-        ).atEndOfMonth(),
-        YearMonth.of(2023, Month.JANUARY).atDay(1) to null
-    )
+    private val perioderMedHull =
+        listOf<Pair<LocalDate, LocalDate?>>(
+            YearMonth.of(2022, Month.AUGUST).atDay(1) to
+                YearMonth.of(
+                    2022,
+                    Month.AUGUST,
+                ).atEndOfMonth(),
+            YearMonth.of(2022, Month.DECEMBER).atDay(1) to YearMonth.of(2022, Month.DECEMBER).atEndOfMonth(),
+        )
 
-    private val perioderMedHull = listOf<Pair<LocalDate, LocalDate?>>(
-        YearMonth.of(2022, Month.AUGUST).atDay(1) to YearMonth.of(
-            2022,
-            Month.AUGUST
-        ).atEndOfMonth(),
-        YearMonth.of(2022, Month.DECEMBER).atDay(1) to YearMonth.of(2022, Month.DECEMBER).atEndOfMonth()
-    )
-
-    private val perioderMedOverlapp = listOf<Pair<LocalDate, LocalDate?>>(
-        YearMonth.of(2022, Month.AUGUST).atDay(1) to null,
-        YearMonth.of(2023, Month.JANUARY).atDay(1) to null
-    )
+    private val perioderMedOverlapp =
+        listOf<Pair<LocalDate, LocalDate?>>(
+            YearMonth.of(2022, Month.AUGUST).atDay(1) to null,
+            YearMonth.of(2023, Month.JANUARY).atDay(1) to null,
+        )
 
     @Test
     fun `lagKomplettPeriodisertGrunnlag kaster feil hvis ingen perioder er gitt`() {
@@ -42,7 +46,7 @@ class PeriodisertBeregningGrunnlagTest {
             PeriodisertBeregningGrunnlag.lagKomplettPeriodisertGrunnlag(
                 listOf<GrunnlagMedPeriode<String>>(),
                 fom,
-                tom
+                tom,
             )
         }
     }
@@ -55,7 +59,7 @@ class PeriodisertBeregningGrunnlagTest {
             PeriodisertBeregningGrunnlag.lagKomplettPeriodisertGrunnlag(
                 perioderTilGrunnlagMedPerioder(perioderMedHull, null),
                 fom,
-                tom
+                tom,
             )
         }
     }
@@ -70,10 +74,10 @@ class PeriodisertBeregningGrunnlagTest {
             PeriodisertBeregningGrunnlag.lagKomplettPeriodisertGrunnlag(
                 perioderTilGrunnlagMedPerioder(
                     listOf(ekstraPeriodeFoerst) + perioderSomErKomplett,
-                    null
+                    null,
                 ),
                 fom,
-                tom
+                tom,
             )
         }
     }
@@ -86,7 +90,7 @@ class PeriodisertBeregningGrunnlagTest {
             PeriodisertBeregningGrunnlag.lagKomplettPeriodisertGrunnlag(
                 perioderTilGrunnlagMedPerioder(perioderSomErKomplett, null),
                 fom,
-                tom
+                tom,
             )
         }
     }
@@ -102,7 +106,7 @@ class PeriodisertBeregningGrunnlagTest {
     fun `lagGrunnlagMedDefault kaster ikke feil hvis maaneder har hull`() {
         assertDoesNotThrow {
             PeriodisertBeregningGrunnlag.lagGrunnlagMedDefaultUtenforPerioder(
-                perioderMedHull.somPeriodegrunnlag()
+                perioderMedHull.somPeriodegrunnlag(),
             ) { _, _, _ -> "" }
         }
     }
@@ -113,9 +117,9 @@ class PeriodisertBeregningGrunnlagTest {
         Assertions.assertEquals(
             default,
             PeriodisertBeregningGrunnlag.lagPotensieltTomtGrunnlagMedDefaultUtenforPerioder(
-                emptyList()
+                emptyList(),
             ) { _, _, _ -> default }
-                .finnGrunnlagForPeriode(perioderMedOverlapp.minBy { it.first }.first)
+                .finnGrunnlagForPeriode(perioderMedOverlapp.minBy { it.first }.first),
         )
     }
 
@@ -123,7 +127,7 @@ class PeriodisertBeregningGrunnlagTest {
     fun `lagPotensieltTomtGrunnlagMedDefaultUtenforPerioder returnerer  hvis ingen perioder er gitt`() {
         assertDoesNotThrow {
             PeriodisertBeregningGrunnlag.lagPotensieltTomtGrunnlagMedDefaultUtenforPerioder(
-                perioderTilGrunnlagMedPerioder(perioderSomErKomplett, null)
+                perioderTilGrunnlagMedPerioder(perioderSomErKomplett, null),
             ) { _, _, _ -> "konstant" }
                 .finnGrunnlagForPeriode(perioderSomErKomplett.minBy { it.first }.first)
         }
@@ -137,7 +141,7 @@ class PeriodisertBeregningGrunnlagTest {
             PeriodisertBeregningGrunnlag.lagKomplettPeriodisertGrunnlag(
                 perioderTilGrunnlagMedPerioder(perioderMedOverlapp, null),
                 fom,
-                tom
+                tom,
             )
         }
     }
@@ -146,7 +150,7 @@ class PeriodisertBeregningGrunnlagTest {
     fun `lagGrunnlagMedDefault kaster feil hvis perioder har overlapp`() {
         assertThrows<PeriodiseringAvGrunnlagFeil.PerioderOverlapper> {
             PeriodisertBeregningGrunnlag.lagGrunnlagMedDefaultUtenforPerioder(
-                perioderMedOverlapp.somPeriodegrunnlag()
+                perioderMedOverlapp.somPeriodegrunnlag(),
             ) { _, _, _ -> "" }
         }
     }
@@ -155,11 +159,11 @@ class PeriodisertBeregningGrunnlagTest {
     fun `Grunnlag gir alle forventede knekkpunkter`() {
         val grunnlagHull =
             PeriodisertBeregningGrunnlag.lagGrunnlagMedDefaultUtenforPerioder(
-                perioderMedHull.somPeriodegrunnlag()
+                perioderMedHull.somPeriodegrunnlag(),
             ) { _, _, _ -> "" }
         val grunnlagKomplett =
             PeriodisertBeregningGrunnlag.lagGrunnlagMedDefaultUtenforPerioder(
-                perioderSomErKomplett.somPeriodegrunnlag()
+                perioderSomErKomplett.somPeriodegrunnlag(),
             ) { _, _, _ -> "" }
         Assertions.assertEquals(
             grunnlagHull.finnAlleKnekkpunkter(),
@@ -167,12 +171,12 @@ class PeriodisertBeregningGrunnlagTest {
                 LocalDate.of(2022, 8, 1),
                 LocalDate.of(2022, 9, 1),
                 LocalDate.of(2022, 12, 1),
-                LocalDate.of(2023, 1, 1)
-            )
+                LocalDate.of(2023, 1, 1),
+            ),
         )
         Assertions.assertEquals(
             grunnlagKomplett.finnAlleKnekkpunkter(),
-            setOf(LocalDate.of(2022, 8, 1), LocalDate.of(2023, 1, 1))
+            setOf(LocalDate.of(2022, 8, 1), LocalDate.of(2023, 1, 1)),
         )
     }
 
@@ -182,7 +186,7 @@ class PeriodisertBeregningGrunnlagTest {
 
     private fun <T> perioderTilGrunnlagMedPerioder(
         perioder: List<Pair<LocalDate, LocalDate?>>,
-        opplysning: T
+        opplysning: T,
     ): List<GrunnlagMedPeriode<T>> {
         return perioder.map {
             GrunnlagMedPeriode(data = opplysning, fom = it.first, tom = it.second)

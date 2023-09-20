@@ -15,11 +15,11 @@ fun main() {
         FordeltSoeknadRiver(
             rapidsConnection,
             GyldigSoeknadService(ab.createPdlClient()),
-            ab.createBehandlingClient()
+            ab.createBehandlingClient(),
         )
         InnsendtSoeknadRiver(
             rapidsConnection,
-            ab.createBehandlingClient()
+            ab.createBehandlingClient(),
         )
     }.start()
 }

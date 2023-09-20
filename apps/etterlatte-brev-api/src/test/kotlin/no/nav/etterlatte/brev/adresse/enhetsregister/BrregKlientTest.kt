@@ -22,13 +22,14 @@ import org.junit.jupiter.api.Test
 internal class BrregKlientTest {
     @Test
     fun `Henting av enheter fra brreg`() {
-        val httpClient = createClient {
-            respond(
-                enheterResponse.toJson(),
-                HttpStatusCode.OK,
-                defaultHeaders
-            )
-        }
+        val httpClient =
+            createClient {
+                respond(
+                    enheterResponse.toJson(),
+                    HttpStatusCode.OK,
+                    defaultHeaders,
+                )
+            }
 
         val brregKlient = BrregKlient(httpClient, "")
 
@@ -40,9 +41,10 @@ internal class BrregKlientTest {
 
     @Test
     fun `Feil i respons fra brreg`() {
-        val httpClient = createClient {
-            respond(Feilmelding(400, "feilmelding", emptyList()).toJson(), HttpStatusCode.BadRequest, defaultHeaders)
-        }
+        val httpClient =
+            createClient {
+                respond(Feilmelding(400, "feilmelding", emptyList()).toJson(), HttpStatusCode.BadRequest, defaultHeaders)
+            }
 
         val brregKlient = BrregKlient(httpClient, "")
 
@@ -54,30 +56,32 @@ internal class BrregKlientTest {
         }
     }
 
-    private fun createClient(respond: MockRequestHandleScope.() -> HttpResponseData) = HttpClient(MockEngine) {
-        engine {
-            addHandler { request ->
-                if ("/enhetsregisteret/api/enheter" in request.url.fullPath) {
-                    respond()
-                } else {
-                    error("Unhandled ${request.url.fullPath}")
+    private fun createClient(respond: MockRequestHandleScope.() -> HttpResponseData) =
+        HttpClient(MockEngine) {
+            engine {
+                addHandler { request ->
+                    if ("/enhetsregisteret/api/enheter" in request.url.fullPath) {
+                        respond()
+                    } else {
+                        error("Unhandled ${request.url.fullPath}")
+                    }
                 }
             }
-        }
 //        expectSuccess = true
-        install(ContentNegotiation) { jackson() }
-    }
+            install(ContentNegotiation) { jackson() }
+        }
 
-    private val enheterResponse = ResponseWrapper(
-        ResponseWrapper.Embedded(
-            listOf(
-                Enhet("921627009", "STATSFORVALTERENS FELLESTJENESTER"),
-                Enhet("974762994", "STATSFORVALTEREN I AGDER"),
-                Enhet("974761645", "STATSFORVALTEREN I INNLANDET"),
-                Enhet("974764687", "STATSFORVALTEREN I NORDLAND")
-            )
+    private val enheterResponse =
+        ResponseWrapper(
+            ResponseWrapper.Embedded(
+                listOf(
+                    Enhet("921627009", "STATSFORVALTERENS FELLESTJENESTER"),
+                    Enhet("974762994", "STATSFORVALTEREN I AGDER"),
+                    Enhet("974761645", "STATSFORVALTEREN I INNLANDET"),
+                    Enhet("974764687", "STATSFORVALTEREN I NORDLAND"),
+                ),
+            ),
         )
-    )
 
     private val defaultHeaders = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
 }

@@ -10,7 +10,11 @@ import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 
 private val defaultLog = LoggerFactory.getLogger("parseTekniskTid")
-fun parseTekniskTid(packet: JsonMessage, logger: Logger = defaultLog): LocalDateTime {
+
+fun parseTekniskTid(
+    packet: JsonMessage,
+    logger: Logger = defaultLog,
+): LocalDateTime {
     val pakkeTid = packet[TEKNISK_TID_KEY].textValue()
     if (pakkeTid != null) {
         return LocalDateTime.parse(pakkeTid)

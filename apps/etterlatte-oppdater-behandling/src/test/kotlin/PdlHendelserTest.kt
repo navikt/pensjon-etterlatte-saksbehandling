@@ -13,7 +13,6 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
 class PdlHendelserTest {
-
     private val behandlingService = mockk<BehandlingServiceImpl>()
     private val inspector: TestRapid = TestRapid().apply { PdlHendelser(this, behandlingService) }
 

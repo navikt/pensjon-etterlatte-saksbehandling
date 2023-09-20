@@ -27,7 +27,6 @@ import rapidsandrivers.withFeilhaandtering
 
 internal class MigreringHendelser(rapidsConnection: RapidsConnection, private val trygdetidService: TrygdetidService) :
     ListenerMedLogging() {
-
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     init {
@@ -42,7 +41,10 @@ internal class MigreringHendelser(rapidsConnection: RapidsConnection, private va
         }.register(this)
     }
 
-    override fun haandterPakke(packet: JsonMessage, context: MessageContext) {
+    override fun haandterPakke(
+        packet: JsonMessage,
+        context: MessageContext,
+    ) {
         withFeilhaandtering(packet, context, Migreringshendelser.TRYGDETID) {
             val behandlingId = packet.behandlingId
             logger.info("Mottatt trygdetid-migreringshendelse for behandling $behandlingId")
@@ -57,34 +59,37 @@ internal class MigreringHendelser(rapidsConnection: RapidsConnection, private va
                     logger.info("Oppretter grunnlag for trygdetid for $behandlingId")
 
                     // Oppretter alle trygdetidsperioder og beholder siste beregnede trygdetid
-                    val beregnetTrygdetid = request.trygdetid.perioder.map { periode ->
-                        trygdetidService.beregnTrygdetidGrunnlag(behandlingId, tilGrunnlag(periode))
-                    }.lastOrNull() ?: it
+                    val beregnetTrygdetid =
+                        request.trygdetid.perioder.map { periode ->
+                            trygdetidService.beregnTrygdetidGrunnlag(behandlingId, tilGrunnlag(periode))
+                        }.lastOrNull() ?: it
 
                     packet[TRYGDETID_KEY] = beregnetTrygdetid.toJson()
                     packet.eventName = Migreringshendelser.BEREGN
                     context.publish(packet.toJson())
                     logger.info(
-                        "Publiserte oppdatert migreringshendelse fra trygdetid for behandling $behandlingId"
+                        "Publiserte oppdatert migreringshendelse fra trygdetid for behandling $behandlingId",
                     )
                 }
             }
     }
 
-    private fun tilGrunnlag(trygdetidsgrunnlag: Trygdetidsgrunnlag) = TrygdetidGrunnlagDto(
-        id = null,
-        type = TrygdetidType.FAKTISK.name,
-        bosted = trygdetidsgrunnlag.landTreBokstaver,
-        periodeFra = trygdetidsgrunnlag.datoFom.toLocalDate(),
-        periodeTil = trygdetidsgrunnlag.datoTom.toLocalDate(),
-        kilde = TrygdetidGrunnlagKildeDto(
-            tidspunkt = Tidspunkt.now().toString(),
-            ident = Vedtaksloesning.PESYS.name
-        ),
-        beregnet = null,
-        begrunnelse = "Migrert fra pesys",
-        poengInnAar = trygdetidsgrunnlag.poengIInnAar,
-        poengUtAar = trygdetidsgrunnlag.poengIUtAar,
-        prorata = !trygdetidsgrunnlag.ikkeIProrata
-    )
+    private fun tilGrunnlag(trygdetidsgrunnlag: Trygdetidsgrunnlag) =
+        TrygdetidGrunnlagDto(
+            id = null,
+            type = TrygdetidType.FAKTISK.name,
+            bosted = trygdetidsgrunnlag.landTreBokstaver,
+            periodeFra = trygdetidsgrunnlag.datoFom.toLocalDate(),
+            periodeTil = trygdetidsgrunnlag.datoTom.toLocalDate(),
+            kilde =
+                TrygdetidGrunnlagKildeDto(
+                    tidspunkt = Tidspunkt.now().toString(),
+                    ident = Vedtaksloesning.PESYS.name,
+                ),
+            beregnet = null,
+            begrunnelse = "Migrert fra pesys",
+            poengInnAar = trygdetidsgrunnlag.poengIInnAar,
+            poengUtAar = trygdetidsgrunnlag.poengIUtAar,
+            prorata = !trygdetidsgrunnlag.ikkeIProrata,
+        )
 }

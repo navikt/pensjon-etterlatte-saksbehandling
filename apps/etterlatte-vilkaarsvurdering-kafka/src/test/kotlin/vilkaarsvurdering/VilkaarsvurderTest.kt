@@ -9,12 +9,13 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
-import java.util.*
+import java.util.UUID
 
 internal class VilkaarsvurderTest {
-    private val vilkaarsvurderingServiceMock = mockk<VilkaarsvurderingService> {
-        coEvery { kopierForrigeVilkaarsvurdering(any(), any()) } returns mockk()
-    }
+    private val vilkaarsvurderingServiceMock =
+        mockk<VilkaarsvurderingService> {
+            coEvery { kopierForrigeVilkaarsvurdering(any(), any()) } returns mockk()
+        }
     private val testRapid = TestRapid().apply { Vilkaarsvurder(this, vilkaarsvurderingServiceMock) }
 
     @Test
@@ -22,20 +23,21 @@ internal class VilkaarsvurderTest {
         val behandlingId = UUID.randomUUID()
         val behandlingViOmregnerFra = UUID.randomUUID()
 
-        val melding = JsonMessage.newMessage(
-            mapOf(
-                "@event_name" to "VILKAARSVURDER",
-                "sakId" to 1,
-                "behandlingId" to behandlingId,
-                "behandling_vi_omregner_fra" to behandlingViOmregnerFra
-            )
-        ).toJson()
+        val melding =
+            JsonMessage.newMessage(
+                mapOf(
+                    "@event_name" to "VILKAARSVURDER",
+                    "sakId" to 1,
+                    "behandlingId" to behandlingId,
+                    "behandling_vi_omregner_fra" to behandlingViOmregnerFra,
+                ),
+            ).toJson()
         testRapid.sendTestMessage(melding)
 
         coVerify(exactly = 1) {
             vilkaarsvurderingServiceMock.kopierForrigeVilkaarsvurdering(
                 behandlingId,
-                behandlingViOmregnerFra
+                behandlingViOmregnerFra,
             )
         }
         with(testRapid.inspektør.message(0)) {

@@ -40,17 +40,16 @@ import no.nav.etterlatte.token.Saksbehandler
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 
 interface RevurderingService {
-
     fun opprettManuellRevurderingWrapper(
         sakId: Long,
         aarsak: RevurderingAarsak,
         paaGrunnAvHendelseId: String? = null,
         begrunnelse: String? = null,
         fritekstAarsak: String? = null,
-        saksbehandler: Saksbehandler
+        saksbehandler: Saksbehandler,
     ): Revurdering?
 
     fun opprettAutomatiskRevurdering(
@@ -62,18 +61,19 @@ interface RevurderingService {
         persongalleri: Persongalleri,
         mottattDato: String? = null,
         merknad: String? = null,
-        begrunnelse: String? = null
+        begrunnelse: String? = null,
     ): Revurdering?
 
     fun lagreRevurderingInfo(
         behandlingsId: UUID,
         revurderingMedBegrunnelse: RevurderingMedBegrunnelse,
-        navIdent: String
+        navIdent: String,
     ): Boolean
 }
 
 enum class RevurderingServiceFeatureToggle(private val key: String) : FeatureToggle {
-    OpprettManuellRevurdering("pensjon-etterlatte.opprett-manuell-revurdering");
+    OpprettManuellRevurdering("pensjon-etterlatte.opprett-manuell-revurdering"),
+    ;
 
     override fun key() = key
 }
@@ -94,24 +94,24 @@ class RevurderingServiceImpl(
     private val grunnlagsendringshendelseDao: GrunnlagsendringshendelseDao,
     private val kommerBarnetTilGodeService: KommerBarnetTilGodeService,
     private val revurderingDao: RevurderingDao,
-    private val behandlingService: BehandlingService
+    private val behandlingService: BehandlingService,
 ) : RevurderingService {
     private val logger = LoggerFactory.getLogger(RevurderingServiceImpl::class.java)
 
-    fun hentBehandling(id: UUID): Revurdering? =
-        (behandlingDao.hentBehandling(id) as? Revurdering)?.sjekkEnhet()
+    fun hentBehandling(id: UUID): Revurdering? = (behandlingDao.hentBehandling(id) as? Revurdering)?.sjekkEnhet()
 
     private fun kunEnBehandlingUnderBehandling(sakId: Long) {
         val oppgaverForSak = oppgaveService.hentOppgaverForSak(sakId)
-        val ingenBehandlingerUnderarbeid = oppgaverForSak.filter {
-            it.kilde == OppgaveKilde.BEHANDLING
-        }.none { it.status === Status.UNDER_BEHANDLING }
+        val ingenBehandlingerUnderarbeid =
+            oppgaverForSak.filter {
+                it.kilde == OppgaveKilde.BEHANDLING
+            }.none { it.status === Status.UNDER_BEHANDLING }
         if (ingenBehandlingerUnderarbeid) {
             return
         } else {
             throw MaksEnBehandlingsOppgaveUnderbehandlingException(
                 "Sak $sakId har allerede en" +
-                    " oppgave under behandling"
+                    " oppgave under behandling",
             )
         }
     }
@@ -122,22 +122,23 @@ class RevurderingServiceImpl(
         paaGrunnAvHendelseId: String?,
         begrunnelse: String?,
         fritekstAarsak: String?,
-        saksbehandler: Saksbehandler
+        saksbehandler: Saksbehandler,
     ): Revurdering? {
         if (!aarsak.kanBrukesIMiljo()) {
             throw RevurderingaarsakIkkeStoettetIMiljoeException(
-                "Feil revurderingsårsak $aarsak, foreløpig ikke støttet"
+                "Feil revurderingsårsak $aarsak, foreløpig ikke støttet",
             )
         }
-        val paaGrunnAvHendelseUuid = try {
-            paaGrunnAvHendelseId?.let { UUID.fromString(it) }
-        } catch (e: Exception) {
-            throw BadRequestException(
-                "$aarsak har en ugyldig hendelse id for sakid" +
-                    " $sakId. " +
-                    "Hendelsesid: $paaGrunnAvHendelseId"
-            )
-        }
+        val paaGrunnAvHendelseUuid =
+            try {
+                paaGrunnAvHendelseId?.let { UUID.fromString(it) }
+            } catch (e: Exception) {
+                throw BadRequestException(
+                    "$aarsak har en ugyldig hendelse id for sakid" +
+                        " $sakId. " +
+                        "Hendelsesid: $paaGrunnAvHendelseId",
+                )
+            }
 
         kunEnBehandlingUnderBehandling(sakId)
 
@@ -154,12 +155,12 @@ class RevurderingServiceImpl(
                 paaGrunnAvHendelse = paaGrunnAvHendelseUuid,
                 begrunnelse = begrunnelse,
                 fritekstAarsak = fritekstAarsak,
-                saksbehandler = saksbehandler
+                saksbehandler = saksbehandler,
             )
         } else {
             throw RevurderingManglerIverksattBehandlingException(
                 "Kan ikke revurdere en sak uten iverksatt behandling sakid:" +
-                    " $sakId"
+                    " $sakId",
             )
         }
     }
@@ -171,50 +172,51 @@ class RevurderingServiceImpl(
         paaGrunnAvHendelse: UUID?,
         begrunnelse: String?,
         fritekstAarsak: String?,
-        saksbehandler: Saksbehandler
-    ): Revurdering? = forrigeBehandling.sjekkEnhet()?.let {
-        return if (featureToggleService.isEnabled(RevurderingServiceFeatureToggle.OpprettManuellRevurdering, false)) {
-            val persongalleri = runBlocking { grunnlagService.hentPersongalleri(sakId) }
+        saksbehandler: Saksbehandler,
+    ): Revurdering? =
+        forrigeBehandling.sjekkEnhet()?.let {
+            return if (featureToggleService.isEnabled(RevurderingServiceFeatureToggle.OpprettManuellRevurdering, false)) {
+                val persongalleri = runBlocking { grunnlagService.hentPersongalleri(sakId) }
 
-            inTransaction {
-                opprettRevurdering(
-                    sakId,
-                    persongalleri,
-                    forrigeBehandling.id,
-                    Tidspunkt.now().toLocalDatetimeUTC().toString(),
-                    Prosesstype.MANUELL,
-                    Vedtaksloesning.GJENNY,
-                    null,
-                    revurderingAarsak,
-                    virkningstidspunkt = null,
-                    begrunnelse = begrunnelse,
-                    fritekstAarsak = fritekstAarsak,
-                    saksbehandlerIdent = saksbehandler.ident
-                ).also { revurdering ->
-                    if (paaGrunnAvHendelse != null) {
-                        grunnlagsendringshendelseDao.settBehandlingIdForTattMedIRevurdering(
-                            paaGrunnAvHendelse,
-                            revurdering.id
-                        )
-                        try {
-                            oppgaveService.ferdigStillOppgaveUnderBehandling(
-                                paaGrunnAvHendelse.toString(),
-                                saksbehandler
+                inTransaction {
+                    opprettRevurdering(
+                        sakId,
+                        persongalleri,
+                        forrigeBehandling.id,
+                        Tidspunkt.now().toLocalDatetimeUTC().toString(),
+                        Prosesstype.MANUELL,
+                        Vedtaksloesning.GJENNY,
+                        null,
+                        revurderingAarsak,
+                        virkningstidspunkt = null,
+                        begrunnelse = begrunnelse,
+                        fritekstAarsak = fritekstAarsak,
+                        saksbehandlerIdent = saksbehandler.ident,
+                    ).also { revurdering ->
+                        if (paaGrunnAvHendelse != null) {
+                            grunnlagsendringshendelseDao.settBehandlingIdForTattMedIRevurdering(
+                                paaGrunnAvHendelse,
+                                revurdering.id,
                             )
-                        } catch (e: Exception) {
-                            logger.error(
-                                "Kunne ikke ferdigstille oppgaven til hendelsen på grunn av feil, " +
-                                    "men oppgave er ikke i bruk i miljø så feilen svelges.",
-                                e
-                            )
+                            try {
+                                oppgaveService.ferdigStillOppgaveUnderBehandling(
+                                    paaGrunnAvHendelse.toString(),
+                                    saksbehandler,
+                                )
+                            } catch (e: Exception) {
+                                logger.error(
+                                    "Kunne ikke ferdigstille oppgaven til hendelsen på grunn av feil, " +
+                                        "men oppgave er ikke i bruk i miljø så feilen svelges.",
+                                    e,
+                                )
+                            }
                         }
                     }
                 }
+            } else {
+                null
             }
-        } else {
-            null
         }
-    }
 
     override fun opprettAutomatiskRevurdering(
         sakId: Long,
@@ -225,7 +227,7 @@ class RevurderingServiceImpl(
         persongalleri: Persongalleri,
         mottattDato: String?,
         merknad: String?,
-        begrunnelse: String?
+        begrunnelse: String?,
     ) = forrigeBehandling.sjekkEnhet()?.let {
         inTransaction {
             opprettRevurdering(
@@ -239,7 +241,7 @@ class RevurderingServiceImpl(
                 revurderingAarsak,
                 virkningstidspunkt?.tilVirkningstidspunkt("Opprettet automatisk"),
                 begrunnelse = begrunnelse ?: "Automatisk revurdering - ${revurderingAarsak.name.lowercase()}",
-                saksbehandlerIdent = Fagsaksystem.EY.navn
+                saksbehandlerIdent = Fagsaksystem.EY.navn,
             )
         }
     }
@@ -255,7 +257,7 @@ class RevurderingServiceImpl(
     override fun lagreRevurderingInfo(
         behandlingsId: UUID,
         revurderingMedBegrunnelse: RevurderingMedBegrunnelse,
-        navIdent: String
+        navIdent: String,
     ): Boolean {
         return inTransaction(true) {
             if (!kanLagreRevurderingInfo(behandlingsId)) {
@@ -279,63 +281,66 @@ class RevurderingServiceImpl(
         virkningstidspunkt: Virkningstidspunkt?,
         begrunnelse: String?,
         fritekstAarsak: String? = null,
-        saksbehandlerIdent: String
-    ): Revurdering = OpprettBehandling(
-        type = BehandlingType.REVURDERING,
-        sakId = sakId,
-        status = BehandlingStatus.OPPRETTET,
-        soeknadMottattDato = mottattDato?.let { LocalDateTime.parse(it) },
-        revurderingsAarsak = revurderingAarsak,
-        virkningstidspunkt = virkningstidspunkt,
-        kilde = kilde,
-        prosesstype = prosessType,
-        merknad = merknad,
-        begrunnelse = begrunnelse,
-        fritekstAarsak = fritekstAarsak
-    ).let { opprettBehandling ->
-        behandlingDao.opprettBehandling(opprettBehandling)
-
-        fritekstAarsak?.let {
-            lagreRevurderingsaarsakFritekst(fritekstAarsak, opprettBehandling.id, saksbehandlerIdent)
-        }
-
-        forrigeBehandling?.let {
-            kommerBarnetTilGodeService.hentKommerBarnetTilGode(it)
-                ?.copy(behandlingId = opprettBehandling.id)
-                ?.let { kopiert -> kommerBarnetTilGodeService.lagreKommerBarnetTilgode(kopiert) }
-        }
-        hendelseDao.behandlingOpprettet(opprettBehandling.toBehandlingOpprettet())
-
-        logger.info("Opprettet behandling ${opprettBehandling.id} i sak ${opprettBehandling.sakId}")
-
-        behandlingDao.hentBehandling(opprettBehandling.id)!! as Revurdering
-    }.also { revurdering ->
-        grunnlagService.leggInnNyttGrunnlag(revurdering, persongalleri)
-
-        val oppgave = oppgaveService.opprettNyOppgaveMedSakOgReferanse(
-            referanse = revurdering.id.toString(),
+        saksbehandlerIdent: String,
+    ): Revurdering =
+        OpprettBehandling(
+            type = BehandlingType.REVURDERING,
             sakId = sakId,
-            oppgaveKilde = OppgaveKilde.BEHANDLING,
-            oppgaveType = OppgaveType.REVURDERING,
-            merknad = begrunnelse
-        )
-        oppgaveService.tildelSaksbehandler(oppgave.id, saksbehandlerIdent)
-        behandlingHendelser.sendMeldingForHendelse(revurdering, BehandlingHendelseType.OPPRETTET)
-    }
+            status = BehandlingStatus.OPPRETTET,
+            soeknadMottattDato = mottattDato?.let { LocalDateTime.parse(it) },
+            revurderingsAarsak = revurderingAarsak,
+            virkningstidspunkt = virkningstidspunkt,
+            kilde = kilde,
+            prosesstype = prosessType,
+            merknad = merknad,
+            begrunnelse = begrunnelse,
+            fritekstAarsak = fritekstAarsak,
+        ).let { opprettBehandling ->
+            behandlingDao.opprettBehandling(opprettBehandling)
+
+            fritekstAarsak?.let {
+                lagreRevurderingsaarsakFritekst(fritekstAarsak, opprettBehandling.id, saksbehandlerIdent)
+            }
+
+            forrigeBehandling?.let {
+                kommerBarnetTilGodeService.hentKommerBarnetTilGode(it)
+                    ?.copy(behandlingId = opprettBehandling.id)
+                    ?.let { kopiert -> kommerBarnetTilGodeService.lagreKommerBarnetTilgode(kopiert) }
+            }
+            hendelseDao.behandlingOpprettet(opprettBehandling.toBehandlingOpprettet())
+
+            logger.info("Opprettet behandling ${opprettBehandling.id} i sak ${opprettBehandling.sakId}")
+
+            behandlingDao.hentBehandling(opprettBehandling.id)!! as Revurdering
+        }.also { revurdering ->
+            grunnlagService.leggInnNyttGrunnlag(revurdering, persongalleri)
+
+            val oppgave =
+                oppgaveService.opprettNyOppgaveMedSakOgReferanse(
+                    referanse = revurdering.id.toString(),
+                    sakId = sakId,
+                    oppgaveKilde = OppgaveKilde.BEHANDLING,
+                    oppgaveType = OppgaveType.REVURDERING,
+                    merknad = begrunnelse,
+                )
+            oppgaveService.tildelSaksbehandler(oppgave.id, saksbehandlerIdent)
+            behandlingHendelser.sendMeldingForHendelse(revurdering, BehandlingHendelseType.OPPRETTET)
+        }
 
     private fun lagreRevurderingsaarsakFritekst(
         fritekstAarsak: String,
         behandlingId: UUID,
-        saksbehandlerIdent: String
+        saksbehandlerIdent: String,
     ) {
         val revurderingInfo = RevurderingInfo.RevurderingAarsakAnnen(fritekstAarsak)
         lagreRevurderingInfo(behandlingId, RevurderingMedBegrunnelse(revurderingInfo, null), saksbehandlerIdent)
     }
 
-    private fun <T : Behandling> T?.sjekkEnhet() = this?.let { behandling ->
-        listOf(behandling).filterBehandlingerForEnheter(
-            featureToggleService,
-            Kontekst.get().AppUser
-        ).firstOrNull()
-    }
+    private fun <T : Behandling> T?.sjekkEnhet() =
+        this?.let { behandling ->
+            listOf(behandling).filterBehandlingerForEnheter(
+                featureToggleService,
+                Kontekst.get().AppUser,
+            ).firstOrNull()
+        }
 }

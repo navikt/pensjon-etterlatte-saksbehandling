@@ -39,11 +39,10 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
-import java.util.*
+import java.util.UUID
 import kotlin.random.Random
 
 internal class BrevServiceTest {
-
     private val db = mockk<BrevRepository>(relaxed = true)
     private val brevbaker = mockk<BrevbakerKlient>()
     private val sakOgBehandlingService = mockk<SakOgBehandlingService>()
@@ -59,7 +58,7 @@ internal class BrevServiceTest {
             adresseService,
             dokarkivService,
             distribusjonService,
-            BrevbakerService(brevbaker, adresseService, brevDataMapper)
+            BrevbakerService(brevbaker, adresseService, brevDataMapper),
         )
 
     private val bruker = BrukerTokenInfo.of(UUID.randomUUID().toString(), "Z123456", null, null, null)
@@ -91,11 +90,12 @@ internal class BrevServiceTest {
 
         @Test
         fun `Hent brev tilhoerende sak`() {
-            every { db.hentBrevForSak(any()) } returns listOf(
-                opprettBrev(Status.OPPRETTET, BrevProsessType.MANUELL),
-                opprettBrev(Status.OPPRETTET, BrevProsessType.MANUELL),
-                opprettBrev(Status.FERDIGSTILT, BrevProsessType.AUTOMATISK)
-            )
+            every { db.hentBrevForSak(any()) } returns
+                listOf(
+                    opprettBrev(Status.OPPRETTET, BrevProsessType.MANUELL),
+                    opprettBrev(Status.OPPRETTET, BrevProsessType.MANUELL),
+                    opprettBrev(Status.FERDIGSTILT, BrevProsessType.AUTOMATISK),
+                )
 
             val sakId = Random.nextLong()
             val brevListe = brevService.hentBrevForSak(sakId)
@@ -118,9 +118,10 @@ internal class BrevServiceTest {
             every { db.hentBrevPayload(any()) } returns payload
             every { db.hentBrevPayloadVedlegg(any()) } returns null
 
-            val faktiskPayload = runBlocking {
-                brevService.hentBrevPayload(brev.id)
-            }
+            val faktiskPayload =
+                runBlocking {
+                    brevService.hentBrevPayload(brev.id)
+                }
 
             faktiskPayload shouldBe BrevPayload(payload, null)
 
@@ -136,9 +137,10 @@ internal class BrevServiceTest {
             every { db.hentBrevPayload(any()) } returns null
             every { db.hentBrevPayloadVedlegg(any()) } returns null
 
-            val payload = runBlocking {
-                brevService.hentBrevPayload(brev.id)
-            }
+            val payload =
+                runBlocking {
+                    brevService.hentBrevPayload(brev.id)
+                }
 
             payload shouldBe BrevPayload(null, null)
 
@@ -162,9 +164,10 @@ internal class BrevServiceTest {
             every { db.hentBrev(any()) } returns brev
             every { db.settBrevJournalfoert(any(), any()) } returns true
 
-            val faktiskJournalpostId = runBlocking {
-                brevService.journalfoer(brev.id, bruker)
-            }
+            val faktiskJournalpostId =
+                runBlocking {
+                    brevService.journalfoer(brev.id, bruker)
+                }
 
             faktiskJournalpostId shouldBe journalpostResponse.journalpostId
 
@@ -182,7 +185,7 @@ internal class BrevServiceTest {
         @EnumSource(
             Status::class,
             mode = EnumSource.Mode.EXCLUDE,
-            names = ["FERDIGSTILT"]
+            names = ["FERDIGSTILT"],
         )
         fun `Journalfoering feiler hvis status er feil`(status: Status) {
             val brev = opprettBrev(status, BrevProsessType.MANUELL)
@@ -222,7 +225,7 @@ internal class BrevServiceTest {
                     journalpostId,
                     DistribusjonsType.ANNET,
                     DistribusjonsTidspunktType.KJERNETID,
-                    brev.mottaker.adresse
+                    brev.mottaker.adresse,
                 )
             }
         }
@@ -248,7 +251,7 @@ internal class BrevServiceTest {
         @EnumSource(
             Status::class,
             mode = EnumSource.Mode.EXCLUDE,
-            names = ["JOURNALFOERT"]
+            names = ["JOURNALFOERT"],
         )
         fun `Distribusjon avbrytes ved feil status`(status: Status) {
             val brev = opprettBrev(status, BrevProsessType.MANUELL)
@@ -267,7 +270,7 @@ internal class BrevServiceTest {
 
     private fun opprettBrev(
         status: Status,
-        prosessType: BrevProsessType
+        prosessType: BrevProsessType,
     ) = Brev(
         id = Random.nextLong(10000),
         sakId = Random.nextLong(10000),
@@ -275,20 +278,22 @@ internal class BrevServiceTest {
         prosessType = prosessType,
         soekerFnr = "fnr",
         status = status,
-        mottaker = opprettMottaker()
+        mottaker = opprettMottaker(),
     )
 
-    private fun opprettMottaker() = Mottaker(
-        "Stor Snerk",
-        foedselsnummer = Foedselsnummer("1234567890"),
-        orgnummer = null,
-        adresse = Adresse(
-            adresseType = "NORSKPOSTADRESSE",
-            adresselinje1 = "Testgaten 13",
-            postnummer = "1234",
-            poststed = "OSLO",
-            land = "Norge",
-            landkode = "NOR"
+    private fun opprettMottaker() =
+        Mottaker(
+            "Stor Snerk",
+            foedselsnummer = Foedselsnummer("1234567890"),
+            orgnummer = null,
+            adresse =
+                Adresse(
+                    adresseType = "NORSKPOSTADRESSE",
+                    adresselinje1 = "Testgaten 13",
+                    postnummer = "1234",
+                    poststed = "OSLO",
+                    land = "Norge",
+                    landkode = "NOR",
+                ),
         )
-    )
 }

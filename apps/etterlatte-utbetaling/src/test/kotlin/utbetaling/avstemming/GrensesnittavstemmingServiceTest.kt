@@ -18,35 +18,37 @@ import java.time.Clock
 import java.time.temporal.ChronoUnit
 
 internal class GrensesnittavstemmingServiceTest {
-
     private val avstemmingDao: AvstemmingDao = mockk()
     private val utbetalingDao: UtbetalingDao = mockk()
     private val avstemmingsdataSender: AvstemmingsdataSender = mockk()
     private val clock: Clock = utcKlokke()
 
-    private val grensesnittavstemmingService: GrensesnittsavstemmingService = GrensesnittsavstemmingService(
-        avstemmingsdataSender = avstemmingsdataSender,
-        avstemmingDao = avstemmingDao,
-        utbetalingDao = utbetalingDao,
-        clock = clock
-    )
+    private val grensesnittavstemmingService: GrensesnittsavstemmingService =
+        GrensesnittsavstemmingService(
+            avstemmingsdataSender = avstemmingsdataSender,
+            avstemmingDao = avstemmingDao,
+            utbetalingDao = utbetalingDao,
+            clock = clock,
+        )
 
     @Test
     fun `skal opprette avstemming og sende til oppdrag`() {
-        val periode = Avstemmingsperiode(
-            fraOgMed = Tidspunkt.now().minus(1, ChronoUnit.DAYS),
-            til = Tidspunkt.now()
-        )
+        val periode =
+            Avstemmingsperiode(
+                fraOgMed = Tidspunkt.now().minus(1, ChronoUnit.DAYS),
+                til = Tidspunkt.now(),
+            )
         val utbetaling =
             listOf(utbetaling(utbetalingshendelser = listOf(utbetalingshendelse(status = UtbetalingStatus.FEILET))))
 
-        val grensesnittavstemming = Grensesnittavstemming(
-            opprettet = Tidspunkt.now(),
-            periode = periode,
-            antallOppdrag = 10,
-            avstemmingsdata = "",
-            saktype = Saktype.BARNEPENSJON
-        )
+        val grensesnittavstemming =
+            Grensesnittavstemming(
+                opprettet = Tidspunkt.now(),
+                periode = periode,
+                antallOppdrag = 10,
+                avstemmingsdata = "",
+                saktype = Saktype.BARNEPENSJON,
+            )
 
         every {
             avstemmingDao.hentSisteGrensesnittavstemming(saktype = Saktype.BARNEPENSJON)
@@ -56,7 +58,7 @@ internal class GrensesnittavstemmingServiceTest {
             utbetalingDao.hentUtbetalingerForGrensesnittavstemming(
                 any(),
                 any(),
-                Saktype.BARNEPENSJON
+                Saktype.BARNEPENSJON,
             )
         } returns utbetaling
         every { avstemmingsdataSender.sendGrensesnittavstemming(any()) } returns "message"
@@ -69,7 +71,7 @@ internal class GrensesnittavstemmingServiceTest {
             avstemmingDao.opprettGrensesnittavstemming(
                 match {
                     it.antallOppdrag == 1 && it.periode.fraOgMed == periode.fraOgMed
-                }
+                },
             )
         }
     }
@@ -78,16 +80,18 @@ internal class GrensesnittavstemmingServiceTest {
     fun `skal kaste feil dersom fraOgMed tidspunkt ikke er stoerre enn til tidspunkt i avstemmingsperiode`() {
         val midnattIdag = tidspunktMidnattIdag(clock)
 
-        every { avstemmingDao.hentSisteGrensesnittavstemming(Saktype.BARNEPENSJON) } returns Grensesnittavstemming(
-            opprettet = Tidspunkt.now(),
-            periode = Avstemmingsperiode(
-                fraOgMed = midnattIdag.minus(1, ChronoUnit.DAYS),
-                til = midnattIdag
-            ),
-            antallOppdrag = 1,
-            avstemmingsdata = "",
-            saktype = Saktype.BARNEPENSJON
-        )
+        every { avstemmingDao.hentSisteGrensesnittavstemming(Saktype.BARNEPENSJON) } returns
+            Grensesnittavstemming(
+                opprettet = Tidspunkt.now(),
+                periode =
+                    Avstemmingsperiode(
+                        fraOgMed = midnattIdag.minus(1, ChronoUnit.DAYS),
+                        til = midnattIdag,
+                    ),
+                antallOppdrag = 1,
+                avstemmingsdata = "",
+                saktype = Saktype.BARNEPENSJON,
+            )
 
         assertThrows<IllegalArgumentException> {
             grensesnittavstemmingService.hentNestePeriode(Saktype.BARNEPENSJON)

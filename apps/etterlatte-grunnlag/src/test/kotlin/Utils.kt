@@ -6,18 +6,19 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import java.util.*
+import java.util.UUID
 
 internal fun lagGrunnlagsopplysning(
     opplysningstype: Opplysningstype,
-    kilde: Grunnlagsopplysning.Kilde = Grunnlagsopplysning.Pdl(
-        tidspunktForInnhenting = Tidspunkt.now(),
-        registersReferanse = null,
-        opplysningId = UUID.randomUUID().toString()
-    ),
+    kilde: Grunnlagsopplysning.Kilde =
+        Grunnlagsopplysning.Pdl(
+            tidspunktForInnhenting = Tidspunkt.now(),
+            registersReferanse = null,
+            opplysningId = UUID.randomUUID().toString(),
+        ),
     uuid: UUID = UUID.randomUUID(),
     verdi: JsonNode = objectMapper.createObjectNode(),
-    fnr: Folkeregisteridentifikator? = null
+    fnr: Folkeregisteridentifikator? = null,
 ) = Grunnlagsopplysning(
     uuid,
     kilde,
@@ -25,7 +26,7 @@ internal fun lagGrunnlagsopplysning(
     objectMapper.createObjectNode(),
     verdi,
     null,
-    fnr
+    fnr,
 )
 
 internal fun lagGrunnlagHendelse(
@@ -35,19 +36,21 @@ internal fun lagGrunnlagHendelse(
     id: UUID = UUID.randomUUID(),
     fnr: Folkeregisteridentifikator? = null,
     verdi: JsonNode = objectMapper.createObjectNode(),
-    kilde: Grunnlagsopplysning.Kilde = Grunnlagsopplysning.Pdl(
-        tidspunktForInnhenting = Tidspunkt.now(),
-        registersReferanse = null,
-        opplysningId = UUID.randomUUID().toString()
-    )
+    kilde: Grunnlagsopplysning.Kilde =
+        Grunnlagsopplysning.Pdl(
+            tidspunktForInnhenting = Tidspunkt.now(),
+            registersReferanse = null,
+            opplysningId = UUID.randomUUID().toString(),
+        ),
 ) = OpplysningDao.GrunnlagHendelse(
-    opplysning = lagGrunnlagsopplysning(
-        opplysningstype = opplysningType,
-        kilde = kilde,
-        uuid = id,
-        fnr = fnr,
-        verdi = verdi
-    ),
+    opplysning =
+        lagGrunnlagsopplysning(
+            opplysningstype = opplysningType,
+            kilde = kilde,
+            uuid = id,
+            fnr = fnr,
+            verdi = verdi,
+        ),
     sakId = sakId,
-    hendelseNummer = hendelseNummer
+    hendelseNummer = hendelseNummer,
 )

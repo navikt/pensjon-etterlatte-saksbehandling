@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory
 
 class SkjermingKlient(
     private val httpClient: HttpClient,
-    private val url: String
+    private val url: String,
 ) : Pingable {
     val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -29,11 +29,12 @@ class SkjermingKlient(
 
     override suspend fun ping(): PingResult {
         try {
-            val skjermetFalse: Boolean = httpClient.post("$url/skjermet") {
-                accept(ContentType.Application.Json)
-                contentType(ContentType.Application.Json)
-                setBody(SkjermetDataRequestDTO(personident = "dummy")) // Det er meningen å sende inn "dummy"
-            }.body()
+            val skjermetFalse: Boolean =
+                httpClient.post("$url/skjermet") {
+                    accept(ContentType.Application.Json)
+                    contentType(ContentType.Application.Json)
+                    setBody(SkjermetDataRequestDTO(personident = "dummy")) // Det er meningen å sende inn "dummy"
+                }.body()
         } catch (e: Exception) {
             return PingResultDown(serviceName, endpoint = endpoint, errorMessage = e.message, beskrivelse = beskrivelse)
                 .also {
@@ -53,5 +54,5 @@ class SkjermingKlient(
 }
 
 data class SkjermetDataRequestDTO(
-    val personident: String
+    val personident: String,
 )

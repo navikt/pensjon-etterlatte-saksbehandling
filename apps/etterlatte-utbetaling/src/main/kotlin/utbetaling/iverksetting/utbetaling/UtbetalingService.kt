@@ -21,7 +21,7 @@ class UtbetalingService(
     val oppdragSender: OppdragSender,
     val utbetalingDao: UtbetalingDao,
     val rapidsConnection: RapidsConnection,
-    val clock: Clock
+    val clock: Clock,
 ) {
     fun iverksettUtbetaling(vedtak: Utbetalingsvedtak): IverksettResultat {
         val utbetalingForVedtak = utbetalingDao.hentUtbetaling(vedtak.vedtakId)
@@ -30,27 +30,29 @@ class UtbetalingService(
 
         return when {
             utbetalingForVedtak.utbetalingEksisterer() -> UtbetalingForVedtakEksisterer(utbetalingForVedtak!!)
-            dupliserteUtbetalingslinjer.isNotEmpty() -> UtbetalingslinjerForVedtakEksisterer(
-                utbetalingForVedtak,
-                dupliserteUtbetalingslinjer
-            )
-            else -> {
-                val utbetalingMapper = UtbetalingMapper(
-                    tidligereUtbetalinger = utbetalingDao.hentUtbetalinger(vedtak.sak.id),
-                    vedtak = vedtak
+            dupliserteUtbetalingslinjer.isNotEmpty() ->
+                UtbetalingslinjerForVedtakEksisterer(
+                    utbetalingForVedtak,
+                    dupliserteUtbetalingslinjer,
                 )
+            else -> {
+                val utbetalingMapper =
+                    UtbetalingMapper(
+                        tidligereUtbetalinger = utbetalingDao.hentUtbetalinger(vedtak.sak.id),
+                        vedtak = vedtak,
+                    )
                 val utbetaling = utbetalingMapper.opprettUtbetaling()
 
                 oppdragMapper.oppdragFraUtbetaling(
                     utbetaling = utbetaling,
-                    erFoersteUtbetalingPaaSak = utbetalingMapper.tidligereUtbetalinger.isEmpty()
+                    erFoersteUtbetalingPaaSak = utbetalingMapper.tidligereUtbetalinger.isEmpty(),
                 ).also {
                     utbetalingDao.opprettUtbetaling(utbetaling.copy(oppdrag = it))
                     oppdragSender.sendOppdrag(it)
                 }.let {
                     utbetalingDao.nyUtbetalingshendelse(
                         utbetaling.vedtakId.value,
-                        utbetaling.sendtUtbetalingshendelse(clock)
+                        utbetaling.sendtUtbetalingshendelse(clock),
                     ).let { SendtTilOppdrag(it) }
                 }
             }
@@ -65,7 +67,7 @@ class UtbetalingService(
             utbetaling.ugyldigStatusForAaMottaNyKvittering() -> {
                 UgyldigStatus(
                     utbetaling.status(),
-                    utbetaling
+                    utbetaling,
                 )
             }
             else -> {
@@ -73,8 +75,8 @@ class UtbetalingService(
                     utbetalingDao.oppdaterKvittering(
                         oppdrag,
                         Tidspunkt.now(clock),
-                        utbetaling.id
-                    )
+                        utbetaling.id,
+                    ),
                 ).also {
                     logger.info("Kvittering for oppdrag med vedtakId=${oppdrag.vedtakId()} oppdatert")
                 }
@@ -82,20 +84,23 @@ class UtbetalingService(
         }
     }
 
-    fun settKvitteringManuelt(vedtakId: Long) = utbetalingDao.hentUtbetaling(vedtakId)?.let { utbetaling ->
-        utbetaling.oppdrag?.apply {
-            mmel = Mmel().apply {
-                systemId = "231-OPPD"
-                alvorlighetsgrad = "00"
-            }
-        }?.let { oppdrag -> utbetalingDao.oppdaterKvittering(oppdrag, Tidspunkt.now(clock), utbetaling.id) }
-    }
+    fun settKvitteringManuelt(vedtakId: Long) =
+        utbetalingDao.hentUtbetaling(vedtakId)?.let { utbetaling ->
+            utbetaling.oppdrag?.apply {
+                mmel =
+                    Mmel().apply {
+                        systemId = "231-OPPD"
+                        alvorlighetsgrad = "00"
+                    }
+            }?.let { oppdrag -> utbetalingDao.oppdaterKvittering(oppdrag, Tidspunkt.now(clock), utbetaling.id) }
+        }
 
-    fun Utbetaling.sendtUtbetalingshendelse(clock: Clock) = Utbetalingshendelse(
-        utbetalingId = this.id,
-        status = UtbetalingStatus.SENDT,
-        tidspunkt = Tidspunkt.now(clock)
-    )
+    fun Utbetaling.sendtUtbetalingshendelse(clock: Clock) =
+        Utbetalingshendelse(
+            utbetalingId = this.id,
+            status = UtbetalingStatus.SENDT,
+            tidspunkt = Tidspunkt.now(clock),
+        )
 
     /**
      * Hvis vi har en utbetaling og mottar en kvittering fra OS, er dette gyldig _hviss_
@@ -113,9 +118,10 @@ class UtbetalingService(
 
 sealed class IverksettResultat {
     class SendtTilOppdrag(val utbetaling: Utbetaling) : IverksettResultat()
+
     class UtbetalingslinjerForVedtakEksisterer(
         val utbetaling: Utbetaling?,
-        val utbetalingslinjer: List<Utbetalingslinje>
+        val utbetalingslinjer: List<Utbetalingslinje>,
     ) : IverksettResultat()
 
     class UtbetalingForVedtakEksisterer(val eksisterendeUtbetaling: Utbetaling) : IverksettResultat()
@@ -123,6 +129,8 @@ sealed class IverksettResultat {
 
 sealed class OppdaterKvitteringResultat {
     class KvitteringOppdatert(val utbetaling: Utbetaling) : OppdaterKvitteringResultat()
+
     class UtbetalingFinnesIkke(val vedtakId: Long) : OppdaterKvitteringResultat()
+
     class UgyldigStatus(val status: UtbetalingStatus, val utbetaling: Utbetaling) : OppdaterKvitteringResultat()
 }

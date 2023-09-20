@@ -5,7 +5,7 @@ import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.trygdetid.avtale.Trygdeavtale
 import no.nav.etterlatte.libs.common.trygdetid.avtale.TrygdetidAvtale
 import no.nav.etterlatte.libs.common.trygdetid.avtale.TrygdetidAvtaleKriteria
-import java.util.*
+import java.util.UUID
 
 class AvtaleService(val avtaleRepository: AvtaleRepository) {
     private var avtaler: List<TrygdetidAvtale>
@@ -25,6 +25,7 @@ class AvtaleService(val avtaleRepository: AvtaleRepository) {
     fun lagreAvtale(trygdeavtale: Trygdeavtale) {
         avtaleRepository.lagreAvtale(trygdeavtale)
     }
+
     fun opprettAvtale(trygdeavtale: Trygdeavtale) {
         avtaleRepository.opprettAvtale(trygdeavtale)
     }

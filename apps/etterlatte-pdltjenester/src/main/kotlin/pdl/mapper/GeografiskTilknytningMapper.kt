@@ -5,9 +5,7 @@ import no.nav.etterlatte.pdl.PdlGeografiskTilknytning
 import no.nav.etterlatte.pdl.PdlGtType
 
 object GeografiskTilknytningMapper {
-    fun mapGeografiskTilknytning(
-        geografiskTilknytning: PdlGeografiskTilknytning
-    ): GeografiskTilknytning =
+    fun mapGeografiskTilknytning(geografiskTilknytning: PdlGeografiskTilknytning): GeografiskTilknytning =
         when (geografiskTilknytning.gtType) {
             PdlGtType.KOMMUNE -> GeografiskTilknytning(kommune = geografiskTilknytning.gtKommune)
             PdlGtType.BYDEL -> GeografiskTilknytning(bydel = geografiskTilknytning.gtBydel)

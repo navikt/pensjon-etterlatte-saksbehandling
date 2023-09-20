@@ -10,10 +10,10 @@ data class VedtakData(
     val detaljertBehandling: DetaljertBehandling,
     val vilkaarsvurderingDto: VilkaarsvurderingDto? = null,
     val beregningOgAvkorting: BeregningOgAvkorting? = null,
-    val sak: Sak
+    val sak: Sak,
 )
 
 data class BeregningOgAvkorting(
     val beregning: BeregningDTO,
-    val avkorting: AvkortingDto? = null
+    val avkorting: AvkortingDto? = null,
 )

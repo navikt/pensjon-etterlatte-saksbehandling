@@ -32,15 +32,14 @@ import java.time.OffsetDateTime
 data class FordelerEvent(
     val soeknadId: Long,
     val soeknad: Barnepensjon,
-    val hendelseGyldigTil: OffsetDateTime
+    val hendelseGyldigTil: OffsetDateTime,
 )
 
 internal class Fordeler(
     rapidsConnection: RapidsConnection,
     private val fordelerService: FordelerService,
-    private val fordelerMetricLogger: FordelerMetricLogger = FordelerMetricLogger()
+    private val fordelerMetricLogger: FordelerMetricLogger = FordelerMetricLogger(),
 ) : ListenerMedLogging() {
-
     private val logger = LoggerFactory.getLogger(Fordeler::class.java)
 
     init {
@@ -61,7 +60,10 @@ internal class Fordeler(
         }.register(this)
     }
 
-    override fun haandterPakke(packet: JsonMessage, context: MessageContext) {
+    override fun haandterPakke(
+        packet: JsonMessage,
+        context: MessageContext,
+    ) {
         try {
             logger.info("Sjekker om soknad (${packet.soeknadId()}) er gyldig for fordeling")
 
@@ -73,7 +75,7 @@ internal class Fordeler(
                         fordelerService.hentSakId(
                             packet[SoeknadInnsendt.fnrSoekerKey].textValue(),
                             SakType.BARNEPENSJON,
-                            resultat.gradering
+                            resultat.gradering,
                         )
                     } catch (e: ResponseException) {
                         logger.error("Avbrutt fordeling - kunne ikke hente sakId: ${e.message}")
@@ -106,7 +108,7 @@ internal class Fordeler(
             sikkerLogg.error("Feil under deserialisering", e)
             logger.error(
                 "Feil under deserialisering av søknad, soeknadId: ${packet.soeknadId()}" +
-                    ". Sjekk sikkerlogg for detaljer."
+                    ". Sjekk sikkerlogg for detaljer.",
             )
             throw e
         } catch (e: Exception) {
@@ -119,29 +121,35 @@ internal class Fordeler(
         FordelerEvent(
             soeknadId = soeknadId(),
             soeknad = get(SoeknadInnsendt.skjemaInfoKey).toJson().let(objectMapper::readValue),
-            hendelseGyldigTil = get(SoeknadInnsendt.hendelseGyldigTilKey).textValue().let(OffsetDateTime::parse)
+            hendelseGyldigTil = get(SoeknadInnsendt.hendelseGyldigTilKey).textValue().let(OffsetDateTime::parse),
         )
 
-    fun lagStatistikkMelding(packet: JsonMessage, fordelerResultat: FordelerResultat, sakType: SakType): String? {
-        val (resultat, ikkeOppfylteKriterier) = when (fordelerResultat) {
-            is FordelerResultat.GyldigForBehandling -> true to null
-            is FordelerResultat.IkkeGyldigForBehandling ->
-                // Sjekker eksplisitt opp mot ikkeOppfylteKriterier for om det er gyldig for behandling,
-                // siden det er logikk for å begrense hvor mange saker vi tar inn i pilot
-                fordelerResultat.ikkeOppfylteKriterier.isEmpty() to fordelerResultat.ikkeOppfylteKriterier
+    fun lagStatistikkMelding(
+        packet: JsonMessage,
+        fordelerResultat: FordelerResultat,
+        sakType: SakType,
+    ): String? {
+        val (resultat, ikkeOppfylteKriterier) =
+            when (fordelerResultat) {
+                is FordelerResultat.GyldigForBehandling -> true to null
+                is FordelerResultat.IkkeGyldigForBehandling ->
+                    // Sjekker eksplisitt opp mot ikkeOppfylteKriterier for om det er gyldig for behandling,
+                    // siden det er logikk for å begrense hvor mange saker vi tar inn i pilot
+                    fordelerResultat.ikkeOppfylteKriterier.isEmpty() to fordelerResultat.ikkeOppfylteKriterier
 
-            is FordelerResultat.UgyldigHendelse -> {
-                logger.error("Kan ikke produsere statistikkmelding for fordelerResultat $fordelerResultat")
-                return null
+                is FordelerResultat.UgyldigHendelse -> {
+                    logger.error("Kan ikke produsere statistikkmelding for fordelerResultat $fordelerResultat")
+                    return null
+                }
             }
-        }
-        val meldingsinnhold: MutableMap<String, Any?> = mutableMapOf(
-            CORRELATION_ID_KEY to packet.correlationId,
-            EVENT_NAME_KEY to EventNames.FORDELER_STATISTIKK,
-            SAK_TYPE_KEY to sakType,
-            SOEKNAD_ID_KEY to packet.soeknadId(),
-            GYLDIG_FOR_BEHANDLING_KEY to resultat
-        )
+        val meldingsinnhold: MutableMap<String, Any?> =
+            mutableMapOf(
+                CORRELATION_ID_KEY to packet.correlationId,
+                EVENT_NAME_KEY to EventNames.FORDELER_STATISTIKK,
+                SAK_TYPE_KEY to sakType,
+                SOEKNAD_ID_KEY to packet.soeknadId(),
+                GYLDIG_FOR_BEHANDLING_KEY to resultat,
+            )
         ikkeOppfylteKriterier?.let {
             meldingsinnhold[FEILENDE_KRITERIER_KEY] = it
         }
@@ -154,9 +162,10 @@ internal class Fordeler(
         return this
     }
 
-    private fun JsonMessage.leggPaaSakId(sakId: Long): JsonMessage = this.apply {
-        this[GyldigSoeknadVurdert.sakIdKey] = sakId
-    }
+    private fun JsonMessage.leggPaaSakId(sakId: Long): JsonMessage =
+        this.apply {
+            this[GyldigSoeknadVurdert.sakIdKey] = sakId
+        }
 
     private fun JsonMessage.soeknadId(): Long = get(SoeknadInnsendt.lagretSoeknadIdKey).longValue()
 }

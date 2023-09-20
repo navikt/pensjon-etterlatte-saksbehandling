@@ -40,7 +40,7 @@ import org.testcontainers.junit.jupiter.Container
 import java.time.LocalDate
 import java.time.Month
 import java.time.YearMonth
-import java.util.*
+import java.util.UUID
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -57,11 +57,12 @@ internal class GrunnlagDaoIntegrationTest {
         postgreSQLContainer.withUrlParam("user", postgreSQLContainer.username)
         postgreSQLContainer.withUrlParam("password", postgreSQLContainer.password)
 
-        dataSource = DataSourceBuilder.createDataSource(
-            jdbcUrl = postgreSQLContainer.jdbcUrl,
-            username = postgreSQLContainer.username,
-            password = postgreSQLContainer.password
-        )
+        dataSource =
+            DataSourceBuilder.createDataSource(
+                jdbcUrl = postgreSQLContainer.jdbcUrl,
+                username = postgreSQLContainer.username,
+                password = postgreSQLContainer.password,
+            )
         dataSource.migrate()
 
         opplysningRepo = spyk(OpplysningDao(dataSource))
@@ -87,12 +88,12 @@ internal class GrunnlagDaoIntegrationTest {
 
         lagGrunnlagsopplysning(
             opplysningstype = SOEKNAD_MOTTATT_DATO,
-            verdi = objectMapper.valueToTree(SoeknadMottattDato(datoMottat)) as ObjectNode
+            verdi = objectMapper.valueToTree(SoeknadMottattDato(datoMottat)) as ObjectNode,
         ).also { opplysningRepo.leggOpplysningTilGrunnlag(1, it) }
         lagGrunnlagsopplysning(SOEKNAD_MOTTATT_DATO).also { opplysningRepo.leggOpplysningTilGrunnlag(2, it) }
         lagGrunnlagsopplysning(
             opplysningstype = SOEKNAD_MOTTATT_DATO,
-            uuid = uuid
+            uuid = uuid,
         ).also { opplysningRepo.leggOpplysningTilGrunnlag(2, it) }
 
         assertEquals(1, opplysningRepo.finnHendelserIGrunnlag(1).size)
@@ -101,7 +102,7 @@ internal class GrunnlagDaoIntegrationTest {
         assertEquals(
             datoMottat,
             opplysningRepo.finnHendelserIGrunnlag(1)
-                .first().opplysning.let { objectMapper.treeToValue<SoeknadMottattDato>(it.opplysning) }.mottattDato
+                .first().opplysning.let { objectMapper.treeToValue<SoeknadMottattDato>(it.opplysning) }.mottattDato,
         )
     }
 
@@ -114,14 +115,14 @@ internal class GrunnlagDaoIntegrationTest {
             uuid = uuid,
             opplysningstype = Opplysningstype.NAVN,
             verdi = objectMapper.valueToTree("Per"),
-            fnr = fnr
+            fnr = fnr,
         ).also { opplysningRepo.leggOpplysningTilGrunnlag(1, it, fnr) }
 
         assertEquals(1, opplysningRepo.finnHendelserIGrunnlag(1).size)
         assertEquals(uuid, opplysningRepo.finnHendelserIGrunnlag(1).first().opplysning.id)
         assertEquals(
             fnr,
-            opplysningRepo.finnHendelserIGrunnlag(1).first().opplysning.fnr
+            opplysningRepo.finnHendelserIGrunnlag(1).first().opplysning.fnr,
         )
     }
 
@@ -164,7 +165,7 @@ internal class GrunnlagDaoIntegrationTest {
         lagGrunnlagsopplysning(SOEKNAD_MOTTATT_DATO, uuid = uuid).also {
             opplysningRepo.leggOpplysningTilGrunnlag(
                 2,
-                it
+                it,
             )
         }
 
@@ -176,19 +177,21 @@ internal class GrunnlagDaoIntegrationTest {
 
     @Test
     fun `kan lage og hente periodiserte opplysninger`() {
-        val opplysning = Grunnlagsopplysning(
-            id = UUID.randomUUID(),
-            kilde = kilde,
-            opplysningType = BOSTEDSADRESSE,
-            meta = objectMapper.createObjectNode(),
-            opplysning = ADRESSE_DEFAULT.first().toJsonNode(),
-            attestering = null,
-            fnr = SOEKER_FOEDSELSNUMMER,
-            periode = Periode(
-                fom = YearMonth.of(2022, 1),
-                tom = YearMonth.of(2022, 12)
+        val opplysning =
+            Grunnlagsopplysning(
+                id = UUID.randomUUID(),
+                kilde = kilde,
+                opplysningType = BOSTEDSADRESSE,
+                meta = objectMapper.createObjectNode(),
+                opplysning = ADRESSE_DEFAULT.first().toJsonNode(),
+                attestering = null,
+                fnr = SOEKER_FOEDSELSNUMMER,
+                periode =
+                    Periode(
+                        fom = YearMonth.of(2022, 1),
+                        tom = YearMonth.of(2022, 12),
+                    ),
             )
-        )
 
         opplysningRepo.leggOpplysningTilGrunnlag(1, opplysning, SOEKER_FOEDSELSNUMMER)
         val expected = OpplysningDao.GrunnlagHendelse(opplysning, 1, 1).toJson()
@@ -202,42 +205,47 @@ internal class GrunnlagDaoIntegrationTest {
         val gjenlevendeFnr = TRIVIELL_MIDTPUNKT
 
         val barnepensjonSoeker1 = BLAAOEYD_SAKS
-        val persongalleri1 = Persongalleri(
-            soeker = barnepensjonSoeker1.value,
-            innsender = gjenlevendeFnr.value,
-            soesken = listOf(
-                GOEYAL_KRONJUVEL.value,
-                GROENN_STAUDE.value
-            ),
-            avdoed = listOf(STOR_SNERK.value),
-            gjenlevende = listOf(gjenlevendeFnr.value)
-        )
+        val persongalleri1 =
+            Persongalleri(
+                soeker = barnepensjonSoeker1.value,
+                innsender = gjenlevendeFnr.value,
+                soesken =
+                    listOf(
+                        GOEYAL_KRONJUVEL.value,
+                        GROENN_STAUDE.value,
+                    ),
+                avdoed = listOf(STOR_SNERK.value),
+                gjenlevende = listOf(gjenlevendeFnr.value),
+            )
 
         val opplysning1 =
             lagGrunnlagsopplysning(PERSONGALLERI_V1, verdi = persongalleri1.toJsonNode(), fnr = barnepensjonSoeker1)
         opplysningRepo.leggOpplysningTilGrunnlag(1, opplysning1, barnepensjonSoeker1)
 
         val barnepensjonSoeker2 = GOEYAL_KRONJUVEL
-        val persongalleri2 = Persongalleri(
-            soeker = barnepensjonSoeker2.value,
-            innsender = gjenlevendeFnr.value,
-            soesken = listOf(
-                BLAAOEYD_SAKS.value,
-                GROENN_STAUDE.value
-            ),
-            avdoed = listOf(STOR_SNERK.value),
-            gjenlevende = listOf(gjenlevendeFnr.value)
-        )
+        val persongalleri2 =
+            Persongalleri(
+                soeker = barnepensjonSoeker2.value,
+                innsender = gjenlevendeFnr.value,
+                soesken =
+                    listOf(
+                        BLAAOEYD_SAKS.value,
+                        GROENN_STAUDE.value,
+                    ),
+                avdoed = listOf(STOR_SNERK.value),
+                gjenlevende = listOf(gjenlevendeFnr.value),
+            )
 
         val opplysning2 =
             lagGrunnlagsopplysning(PERSONGALLERI_V1, verdi = persongalleri2.toJsonNode(), fnr = barnepensjonSoeker2)
         opplysningRepo.leggOpplysningTilGrunnlag(2, opplysning2, barnepensjonSoeker2)
 
-        val persongalleri3 = Persongalleri(
-            soeker = gjenlevendeFnr.value,
-            innsender = gjenlevendeFnr.value,
-            avdoed = listOf(STOR_SNERK.value)
-        )
+        val persongalleri3 =
+            Persongalleri(
+                soeker = gjenlevendeFnr.value,
+                innsender = gjenlevendeFnr.value,
+                avdoed = listOf(STOR_SNERK.value),
+            )
 
         val opplysning3 =
             lagGrunnlagsopplysning(PERSONGALLERI_V1, verdi = persongalleri3.toJsonNode(), fnr = gjenlevendeFnr)
@@ -265,24 +273,28 @@ internal class GrunnlagDaoIntegrationTest {
         val grunnlagsopplysning1 = lagGrunnlagsopplysning(AVDOED_PDL_V1, fnr = STOR_SNERK)
         opplysningRepo.leggOpplysningTilGrunnlag(1, grunnlagsopplysning1, STOR_SNERK)
 
-        val grunnlagsopplysning2 = lagGrunnlagsopplysning(
-            PERSONGALLERI_V1,
-            verdi = Persongalleri(
-                soeker = BLAAOEYD_SAKS.value,
-                gjenlevende = listOf(GROENN_KOPP.value),
-                avdoed = listOf(STOR_SNERK.value)
-            ).toJsonNode()
-        )
+        val grunnlagsopplysning2 =
+            lagGrunnlagsopplysning(
+                PERSONGALLERI_V1,
+                verdi =
+                    Persongalleri(
+                        soeker = BLAAOEYD_SAKS.value,
+                        gjenlevende = listOf(GROENN_KOPP.value),
+                        avdoed = listOf(STOR_SNERK.value),
+                    ).toJsonNode(),
+            )
         opplysningRepo.leggOpplysningTilGrunnlag(2, grunnlagsopplysning2)
 
-        val grunnlagsopplysning3 = lagGrunnlagsopplysning(
-            PERSONGALLERI_V1,
-            verdi = Persongalleri(
-                soeker = BLAAOEYD_SAKS.value,
-                gjenlevende = emptyList(),
-                avdoed = listOf(STOR_SNERK.value, GROENN_KOPP.value)
-            ).toJsonNode()
-        )
+        val grunnlagsopplysning3 =
+            lagGrunnlagsopplysning(
+                PERSONGALLERI_V1,
+                verdi =
+                    Persongalleri(
+                        soeker = BLAAOEYD_SAKS.value,
+                        gjenlevende = emptyList(),
+                        avdoed = listOf(STOR_SNERK.value, GROENN_KOPP.value),
+                    ).toJsonNode(),
+            )
         opplysningRepo.leggOpplysningTilGrunnlag(3, grunnlagsopplysning3)
 
         // mange dummy-opplysninger tilknyttet andre personer, skal ignoreres...

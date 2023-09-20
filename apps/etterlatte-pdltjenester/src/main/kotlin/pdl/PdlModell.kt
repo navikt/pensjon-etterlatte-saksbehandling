@@ -6,17 +6,17 @@ import java.time.LocalDateTime
 
 data class PdlGraphqlRequest(
     val query: String,
-    val variables: PdlVariables
+    val variables: PdlVariables,
 )
 
 data class PdlGraphqlBolkRequest(
     val query: String,
-    val variables: PdlBolkVariables
+    val variables: PdlBolkVariables,
 )
 
 data class PdlFolkeregisterIdentRequest(
     val query: String,
-    val variables: PdlFolkeregisterIdentVariables
+    val variables: PdlFolkeregisterIdentVariables,
 )
 
 data class PdlVariables(
@@ -31,7 +31,7 @@ data class PdlVariables(
     val utland: Boolean,
     val sivilstand: Boolean,
     val familieRelasjon: Boolean,
-    val vergemaal: Boolean
+    val vergemaal: Boolean,
 )
 
 data class PdlBolkVariables(
@@ -46,80 +46,80 @@ data class PdlBolkVariables(
     val utland: Boolean,
     val sivilstand: Boolean,
     val familieRelasjon: Boolean,
-    val vergemaal: Boolean
+    val vergemaal: Boolean,
 )
 
 data class PdlFolkeregisterIdentVariables(
     val ident: String,
     val grupper: List<String>,
-    val historikk: Boolean
+    val historikk: Boolean,
 )
 
 data class PdlPersonResponse(
     val data: PdlPersonResponseData? = null,
-    val errors: List<PdlResponseError>? = null
+    val errors: List<PdlResponseError>? = null,
 )
 
 data class PdlPersonResponseBolk(
     val data: PdlPersonResponseBulkData? = null,
-    val errors: List<PdlResponseError>? = null
+    val errors: List<PdlResponseError>? = null,
 )
 
 data class PdlIdentResponse(
     val data: PdlFolkegisterIdentData? = null,
-    val errors: List<PdlResponseError>? = null
+    val errors: List<PdlResponseError>? = null,
 )
 
 data class PdlFolkegisterIdentData(
-    val hentIdenter: PdlFolkeregisterIdentResult? = null
+    val hentIdenter: PdlFolkeregisterIdentResult? = null,
 )
 
 data class PdlFolkeregisterIdentResult(
-    val identer: List<PdlIdenter>
+    val identer: List<PdlIdenter>,
 )
 
 data class PdlIdenter(
     val ident: String,
     val historisk: Boolean,
-    val gruppe: String
+    val gruppe: String,
 )
 
 data class PdlResponseError(
     val message: String?,
     val locations: List<PdlErrorLocation>? = null,
     val path: List<String>? = null,
-    val extensions: PdlErrorExtension? = null
+    val extensions: PdlErrorExtension? = null,
 )
 
 data class PdlErrorLocation(
     val line: String?,
-    val column: String?
+    val column: String?,
 )
 
 data class PdlErrorExtension(
     val code: String?,
     val details: PdlErrorDetails?,
-    val classification: String?
+    val classification: String?,
 )
 
 data class PdlErrorDetails(
     val type: String? = null,
     val cause: String? = null,
-    val policy: String? = null
+    val policy: String? = null,
 )
 
 data class PdlPersonResponseData(
-    val hentPerson: PdlHentPerson? = null
+    val hentPerson: PdlHentPerson? = null,
 )
 
 data class PdlPersonResponseBulkData(
-    val hentPersonBolk: List<PdlHentPersonBolkResult>? = null
+    val hentPersonBolk: List<PdlHentPersonBolkResult>? = null,
 )
 
 data class PdlHentPersonBolkResult(
     val code: String,
     val ident: String,
-    val person: PdlHentPerson? = null
+    val person: PdlHentPerson? = null,
 )
 
 data class PdlHentPerson(
@@ -137,21 +137,20 @@ data class PdlHentPerson(
     val utflyttingFraNorge: List<PdlUtflyttingFraNorge>?,
     val foreldreansvar: List<PdlForelderAnsvar>?,
     val forelderBarnRelasjon: List<PdlForelderBarnRelasjon>?,
-    var vergemaalEllerFremtidsfullmakt: List<PdlVergemaalEllerFremtidsfullmakt>?
-
+    var vergemaalEllerFremtidsfullmakt: List<PdlVergemaalEllerFremtidsfullmakt>?,
 )
 
 data class PdlAdressebeskyttelse(
     val gradering: PdlGradering?,
     val folkeregistermetadata: PdlFolkeregistermetadata? = null,
-    val metadata: PdlMetadata
+    val metadata: PdlMetadata,
 )
 
 enum class PdlGradering {
     STRENGT_FORTROLIG_UTLAND,
     STRENGT_FORTROLIG,
     FORTROLIG,
-    UGRADERT
+    UGRADERT,
 }
 
 data class PdlNavn(
@@ -161,14 +160,14 @@ data class PdlNavn(
     val forkortetNavn: String? = null,
     val gyldigFraOgMed: LocalDate? = null,
     val folkeregistermetadata: PdlFolkeregistermetadata? = null,
-    val metadata: PdlMetadata
+    val metadata: PdlMetadata,
 )
 
 data class PdlStatsborgerskap(
     val land: String,
     val gyldigFraOgMed: LocalDate? = null,
     val gyldigTilOgMed: LocalDate? = null,
-    val metadata: PdlMetadata
+    val metadata: PdlMetadata,
 )
 
 data class PdlFoedsel(
@@ -177,19 +176,19 @@ data class PdlFoedsel(
     val foedested: String? = null,
     val foedselsaar: Int,
     val folkeregistermetadata: PdlFolkeregistermetadata? = null,
-    val metadata: PdlMetadata
+    val metadata: PdlMetadata,
 )
 
 data class PdlFolkeregistermetadata(
     val gyldighetstidspunkt: LocalDateTime? = null,
-    val opphoerstidspunkt: LocalDateTime? = null
+    val opphoerstidspunkt: LocalDateTime? = null,
 )
 
 data class PdlMetadata(
     val endringer: List<PdlEndring>,
     val historisk: Boolean,
     val master: String,
-    val opplysningsId: String
+    val opplysningsId: String,
 ) {
     fun sisteRegistrertDato(): LocalDateTime {
         return endringer.maxByOrNull { it.registrert }?.registrert!!
@@ -201,13 +200,13 @@ data class PdlEndring(
     val registrert: LocalDateTime,
     val registrertAv: String?,
     val systemkilde: String?,
-    val type: PdlEndringstype
+    val type: PdlEndringstype,
 )
 
 enum class PdlEndringstype {
     KORRIGER,
     OPPHOER,
-    OPPRETT
+    OPPRETT,
 }
 
 enum class PdlSivilstandstype {
@@ -220,7 +219,7 @@ enum class PdlSivilstandstype {
     REGISTRERT_PARTNER,
     SEPARERT_PARTNER,
     SKILT_PARTNER,
-    GJENLEVENDE_PARTNER
+    GJENLEVENDE_PARTNER,
 }
 
 data class PdlSivilstand(
@@ -228,20 +227,20 @@ data class PdlSivilstand(
     val gyldigFraOgMed: LocalDate? = null,
     val relatertVedSivilstand: String? = null,
     val bekreftelsesdato: LocalDate? = null,
-    val metadata: PdlMetadata
+    val metadata: PdlMetadata,
 )
 
 data class PdlDoedsfall(
     val doedsdato: LocalDate?,
     val folkeregistermetadata: PdlFolkeregistermetadata?,
-    val metadata: PdlMetadata
+    val metadata: PdlMetadata,
 )
 
 data class PdlInnflyttingTilNorge(
     val folkeregistermetadata: PdlFolkeregistermetadata?,
     val fraflyttingsland: String?,
     val fraflyttingsstedIUtlandet: String?,
-    val metadata: PdlMetadata
+    val metadata: PdlMetadata,
 )
 
 data class PdlUtflyttingFraNorge(
@@ -249,7 +248,7 @@ data class PdlUtflyttingFraNorge(
     val tilflyttingsland: String?,
     val tilflyttingsstedIUtlandet: String?,
     val utflyttingsdato: LocalDate?,
-    val metadata: PdlMetadata
+    val metadata: PdlMetadata,
 )
 
 data class PdlBostedsadresse(
@@ -261,7 +260,7 @@ data class PdlBostedsadresse(
     val folkeregistermetadata: PdlFolkeregistermetadata?,
     val ukjentBosted: PdlUkjentBosted?,
     val utenlandskAdresse: PdlUtenlandskAdresse?,
-    val vegadresse: PdlVegadresse?
+    val vegadresse: PdlVegadresse?,
 )
 
 data class PdlDeltBostedsadresse(
@@ -273,7 +272,7 @@ data class PdlDeltBostedsadresse(
     val folkeregistermetadata: PdlFolkeregistermetadata?,
     val ukjentBosted: PdlUkjentBosted?,
     val utenlandskAdresse: PdlUtenlandskAdresse?,
-    val vegadresse: PdlVegadresse?
+    val vegadresse: PdlVegadresse?,
 )
 
 data class PdlKontaktadresse(
@@ -287,7 +286,7 @@ data class PdlKontaktadresse(
     val type: String,
     val utenlandskAdresse: PdlUtenlandskAdresse?,
     val utenlandskAdresseIFrittFormat: PdlUtenlandskAdresseIFrittFormat?,
-    val vegadresse: PdlVegadresse?
+    val vegadresse: PdlVegadresse?,
 )
 
 data class PdlOppholdsadresse(
@@ -299,13 +298,13 @@ data class PdlOppholdsadresse(
     val metadata: PdlMetadata,
     val oppholdAnnetSted: String?,
     val utenlandskAdresse: PdlUtenlandskAdresse?,
-    val vegadresse: PdlVegadresse?
+    val vegadresse: PdlVegadresse?,
 )
 
 data class PdlPostboksadresse(
     val postboks: String,
     val postbokseier: String?,
-    val postnummer: String?
+    val postnummer: String?,
 )
 
 data class PdlUtenlandskAdresseIFrittFormat(
@@ -314,14 +313,14 @@ data class PdlUtenlandskAdresseIFrittFormat(
     val adresselinje3: String?,
     val byEllerStedsnavn: String?,
     val landkode: String,
-    val postkode: String?
+    val postkode: String?,
 )
 
 data class PdlPostadresseIFrittFormat(
     val adresselinje1: String?,
     val adresselinje2: String?,
     val adresselinje3: String?,
-    val postnummer: String?
+    val postnummer: String?,
 )
 
 data class PdlVegadresse(
@@ -334,11 +333,11 @@ data class PdlVegadresse(
     val koordinater: PdlKoordinater?,
     val matrikkelId: Long?,
     val postnummer: String?,
-    val tilleggsnavn: String?
+    val tilleggsnavn: String?,
 )
 
 data class PdlUkjentBosted(
-    val bostedskommune: String?
+    val bostedskommune: String?,
 )
 
 data class PdlMatrikkeladresse(
@@ -347,7 +346,7 @@ data class PdlMatrikkeladresse(
     val koordinater: PdlKoordinater?,
     val matrikkelId: Long?,
     val postnummer: String?,
-    val tilleggsnavn: String?
+    val tilleggsnavn: String?,
 )
 
 data class PdlUtenlandskAdresse(
@@ -357,14 +356,14 @@ data class PdlUtenlandskAdresse(
     val landkode: String,
     val postboksNummerNavn: String?,
     val postkode: String?,
-    val regionDistriktOmraade: String?
+    val regionDistriktOmraade: String?,
 )
 
 data class PdlKoordinater(
     val kvalitet: Int?,
     val x: Float?,
     val y: Float?,
-    val z: Float?
+    val z: Float?,
 )
 
 data class PdlForelderAnsvar(
@@ -373,20 +372,20 @@ data class PdlForelderAnsvar(
     val ansvarligUtenIdentifikator: PdlRelatertBiPerson? = null,
     val ansvarssubjekt: String? = null,
     val folkeregistermetadata: PdlFolkeregistermetadata? = null,
-    val metadata: PdlMetadata
+    val metadata: PdlMetadata,
 )
 
 data class PdlRelatertBiPerson(
     val foedselsdato: LocalDate? = null,
     val kjoenn: String? = null,
     val navn: PdlPersonnavn? = null,
-    val statsborgerskap: String? = null
+    val statsborgerskap: String? = null,
 )
 
 data class PdlPersonnavn(
     val etternavn: String,
     val fornavn: String,
-    val mellomnavn: String? = null
+    val mellomnavn: String? = null,
 )
 
 data class PdlForelderBarnRelasjon(
@@ -394,14 +393,14 @@ data class PdlForelderBarnRelasjon(
     val metadata: PdlMetadata,
     val minRolleForPerson: PdlForelderBarnRelasjonRolle? = null,
     val relatertPersonsIdent: String?,
-    val relatertPersonsRolle: PdlForelderBarnRelasjonRolle
+    val relatertPersonsRolle: PdlForelderBarnRelasjonRolle,
 )
 
 enum class PdlForelderBarnRelasjonRolle {
     BARN,
     FAR,
     MEDMOR,
-    MOR
+    MOR,
 }
 
 data class PdlVergemaalEllerFremtidsfullmakt(
@@ -409,97 +408,101 @@ data class PdlVergemaalEllerFremtidsfullmakt(
     val folkeregistermetadata: PdlFolkeregistermetadata? = null,
     val metadata: PdlMetadata,
     val type: String?,
-    val vergeEllerFullmektig: PdlVergeEllerFullmektig
+    val vergeEllerFullmektig: PdlVergeEllerFullmektig,
 )
 
 data class PdlVergeEllerFullmektig(
     val motpartsPersonident: Folkeregisteridentifikator?,
     val navn: PdlPersonnavn?,
     val omfang: String?,
-    val omfangetErInnenPersonligOmraade: Boolean
+    val omfangetErInnenPersonligOmraade: Boolean,
 )
 
 data class PdlGeografiskTilknytningIdentVariables(
-    val ident: String
+    val ident: String,
 )
+
 data class PdlGeografiskTilknytningRequest(
     val query: String,
-    val variables: PdlGeografiskTilknytningIdentVariables
+    val variables: PdlGeografiskTilknytningIdentVariables,
 )
 
 enum class PdlGtType {
-    KOMMUNE, BYDEL, UTLAND, UDEFINERT
+    KOMMUNE,
+    BYDEL,
+    UTLAND,
+    UDEFINERT,
 }
 
 data class PdlGeografiskTilknytning(
     val gtBydel: String?,
     val gtKommune: String?,
     val gtLand: String?,
-    val gtType: PdlGtType?
+    val gtType: PdlGtType?,
 )
 
 data class PdlGeografiskTilknytningData(
-    val hentGeografiskTilknytning: PdlGeografiskTilknytning? = null
+    val hentGeografiskTilknytning: PdlGeografiskTilknytning? = null,
 )
 
 data class PdlGeografiskTilknytningResponse(
     val data: PdlGeografiskTilknytningData? = null,
-    val errors: List<PdlResponseError>? = null
+    val errors: List<PdlResponseError>? = null,
 )
 
 data class PdlFoedselsnumreFraAktoerIdRequest(
     val query: String,
-    val variables: IdenterBolkVariables
+    val variables: IdenterBolkVariables,
 )
 
 data class IdenterBolkVariables(
     val identer: List<String>,
-    val grupper: Set<IdentGruppe>
+    val grupper: Set<IdentGruppe>,
 )
 
 data class PdlFoedselsnumreFraAktoerIdResponse(
-    val data: PdlFoedselsnumreFraAktoerIdData
+    val data: PdlFoedselsnumreFraAktoerIdData,
 )
 
 data class PdlFoedselsnumreFraAktoerIdData(
-    val hentIdenterBolk: Set<HentIdenterBolkResult>
+    val hentIdenterBolk: Set<HentIdenterBolkResult>,
 )
 
 data class HentIdenterBolkResult(
     val ident: String,
     val identer: Set<IdentInformasjon>,
-    val code: String
+    val code: String,
 )
 
 data class IdentInformasjon(
     val ident: String,
     val gruppe: IdentGruppe,
-    val historisk: Boolean
+    val historisk: Boolean,
 )
 
 enum class IdentGruppe {
     AKTORID,
     FOLKEREGISTERIDENT,
-    NPID
+    NPID,
 }
 
 data class PdlHentForelderansvarHistorikkVariables(
-    val ident: String
+    val ident: String,
 ) {
     val historikk: Boolean = true
 }
 
 data class PdlHentForeldreansvarHistorikkRequest(
     val query: String,
-    val variables: PdlHentForelderansvarHistorikkVariables
+    val variables: PdlHentForelderansvarHistorikkVariables,
 )
 
 data class PdlHentForeldreansvarHistorikkResponse(
     val data: PdlHistorikkForeldreansvar? = null,
-    val errors: List<PdlResponseError>? = null
+    val errors: List<PdlResponseError>? = null,
 )
 
 data class PdlHistorikkForeldreansvar(
     val foreldreansvar: List<PdlForelderAnsvar>,
-    val forelderBarnRelasjon: List<PdlForelderBarnRelasjon>
+    val forelderBarnRelasjon: List<PdlForelderBarnRelasjon>,
 )

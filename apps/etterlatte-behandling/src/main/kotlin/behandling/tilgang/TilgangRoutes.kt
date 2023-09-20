@@ -24,32 +24,35 @@ internal fun Route.tilgangRoutes(tilgangService: TilgangService) {
         post("/person") {
             val fnr = call.receive<String>()
 
-            val harTilgang = harTilgangBrukertypeSjekk(brukerTokenInfo) { _ ->
-                tilgangService.harTilgangTilPerson(
-                    fnr,
-                    Kontekst.get().appUserAsSaksbehandler().saksbehandlerMedRoller
-                )
-            }
+            val harTilgang =
+                harTilgangBrukertypeSjekk(brukerTokenInfo) { _ ->
+                    tilgangService.harTilgangTilPerson(
+                        fnr,
+                        Kontekst.get().appUserAsSaksbehandler().saksbehandlerMedRoller,
+                    )
+                }
             call.respond(harTilgang)
         }
 
         get("/behandling/{$BEHANDLINGSID_CALL_PARAMETER}") {
-            val harTilgang = harTilgangBrukertypeSjekk(brukerTokenInfo) { _ ->
-                tilgangService.harTilgangTilBehandling(
-                    behandlingsId.toString(),
-                    Kontekst.get().appUserAsSaksbehandler().saksbehandlerMedRoller
-                )
-            }
+            val harTilgang =
+                harTilgangBrukertypeSjekk(brukerTokenInfo) { _ ->
+                    tilgangService.harTilgangTilBehandling(
+                        behandlingsId.toString(),
+                        Kontekst.get().appUserAsSaksbehandler().saksbehandlerMedRoller,
+                    )
+                }
             call.respond(harTilgang)
         }
 
         get("/sak/{$SAKID_CALL_PARAMETER}") {
-            val harTilgang = harTilgangBrukertypeSjekk(brukerTokenInfo) { _ ->
-                tilgangService.harTilgangTilSak(
-                    sakId,
-                    Kontekst.get().appUserAsSaksbehandler().saksbehandlerMedRoller
-                )
-            }
+            val harTilgang =
+                harTilgangBrukertypeSjekk(brukerTokenInfo) { _ ->
+                    tilgangService.harTilgangTilSak(
+                        sakId,
+                        Kontekst.get().appUserAsSaksbehandler().saksbehandlerMedRoller,
+                    )
+                }
             call.respond(harTilgang)
         }
     }
@@ -57,7 +60,7 @@ internal fun Route.tilgangRoutes(tilgangService: TilgangService) {
 
 fun harTilgangBrukertypeSjekk(
     brukerTokenInfo: BrukerTokenInfo,
-    harTilgang: (saksbehandler: Saksbehandler) -> Boolean
+    harTilgang: (saksbehandler: Saksbehandler) -> Boolean,
 ): Boolean {
     return when (brukerTokenInfo) {
         is Saksbehandler -> {

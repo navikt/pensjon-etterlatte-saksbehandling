@@ -21,7 +21,7 @@ import rapidsandrivers.migrering.ListenerMedLogging
 internal class FordeltSoeknadRiver(
     rapidsConnection: RapidsConnection,
     private val gyldigSoeknadService: GyldigSoeknadService,
-    private val behandlingClient: BehandlingClient
+    private val behandlingClient: BehandlingClient,
 ) : ListenerMedLogging() {
     private val logger = LoggerFactory.getLogger(FordeltSoeknadRiver::class.java)
 
@@ -35,7 +35,10 @@ internal class FordeltSoeknadRiver(
         }.register(this)
     }
 
-    override fun haandterPakke(packet: JsonMessage, context: MessageContext) {
+    override fun haandterPakke(
+        packet: JsonMessage,
+        context: MessageContext,
+    ) {
         logger.info("Starter gyldighetsvurdering av mottatt søknad om barnepensjon")
 
         try {
@@ -53,7 +56,7 @@ internal class FordeltSoeknadRiver(
                 packet.apply {
                     set(GyldigSoeknadVurdert.sakIdKey, sak.id)
                     set(GyldigSoeknadVurdert.behandlingIdKey, behandlingId)
-                }.toJson()
+                }.toJson(),
             )
 
             logger.info("Vurdert gyldighet av søknad er fullført")
@@ -63,9 +66,10 @@ internal class FordeltSoeknadRiver(
         }
     }
 
-    private fun JsonMessage.soeknad() = this[FordelerFordelt.skjemaInfoKey].let {
-        objectMapper.treeToValue<Barnepensjon>(
-            it
-        )
-    }
+    private fun JsonMessage.soeknad() =
+        this[FordelerFordelt.skjemaInfoKey].let {
+            objectMapper.treeToValue<Barnepensjon>(
+                it,
+            )
+        }
 }

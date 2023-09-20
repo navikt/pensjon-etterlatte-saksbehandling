@@ -13,7 +13,10 @@ import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.withBehandlingId
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 
-fun Route.ytelseMedGrunnlag(ytelseMedGrunnlagService: YtelseMedGrunnlagService, behandlingKlient: BehandlingKlient) {
+fun Route.ytelseMedGrunnlag(
+    ytelseMedGrunnlagService: YtelseMedGrunnlagService,
+    behandlingKlient: BehandlingKlient,
+) {
     route("/api/beregning/ytelse-med-grunnlag/{$BEHANDLINGSID_CALL_PARAMETER}") {
         val logger = application.log
         get {

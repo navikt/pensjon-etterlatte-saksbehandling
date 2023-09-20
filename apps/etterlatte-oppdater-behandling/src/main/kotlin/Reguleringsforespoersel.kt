@@ -17,7 +17,7 @@ import rapidsandrivers.tilbakestilteBehandlinger
 
 internal class Reguleringsforespoersel(
     rapidsConnection: RapidsConnection,
-    private val behandlingService: BehandlingService
+    private val behandlingService: BehandlingService,
 ) : ListenerMedLoggingOgFeilhaandtering(REGULERING_EVENT_NAME) {
     private val logger = LoggerFactory.getLogger(Reguleringsforespoersel::class.java)
 
@@ -29,14 +29,17 @@ internal class Reguleringsforespoersel(
         }.register(this)
     }
 
-    override fun haandterPakke(packet: JsonMessage, context: MessageContext) {
+    override fun haandterPakke(
+        packet: JsonMessage,
+        context: MessageContext,
+    ) {
         logger.info("Leser reguleringsfoerespoersel for dato ${packet.dato}")
 
         val tilbakemigrerte =
             behandlingService.migrerAlleTempBehandlingerTilbakeTilVilkaarsvurdert().also { sakIdListe ->
                 logger.info(
                     "Tilbakemigrert ${sakIdListe.ider.size} behandlinger:\n" +
-                        sakIdListe.ider.joinToString("\n") { "Sak ${it.sakId} - ${it.behandlingId}" }
+                        sakIdListe.ider.joinToString("\n") { "Sak ${it.sakId} - ${it.behandlingId}" },
                 )
             }
         behandlingService.hentAlleSaker().saker.forEach {

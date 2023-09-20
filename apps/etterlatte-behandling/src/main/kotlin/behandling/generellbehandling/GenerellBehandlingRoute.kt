@@ -19,10 +19,11 @@ import no.nav.etterlatte.libs.common.generellbehandling.GenerellBehandling
 import no.nav.etterlatte.libs.common.kunSaksbehandler
 import no.nav.etterlatte.libs.common.sakId
 import no.nav.etterlatte.sak.SakService
-import java.util.*
+import java.util.UUID
 
 enum class GenerellBehandlingToggle(private val key: String) : FeatureToggle {
-    KanBrukeGenerellBehandlingToggle("pensjon-etterlatte.kan-bruke-generell-behandling");
+    KanBrukeGenerellBehandlingToggle("pensjon-etterlatte.kan-bruke-generell-behandling"),
+    ;
 
     override fun key(): String = key
 }
@@ -30,11 +31,11 @@ enum class GenerellBehandlingToggle(private val key: String) : FeatureToggle {
 internal fun Route.generellbehandlingRoutes(
     generellBehandlingService: GenerellBehandlingService,
     sakService: SakService,
-    featureToggleService: FeatureToggleService
+    featureToggleService: FeatureToggleService,
 ) {
     suspend fun PipelineContext<Unit, ApplicationCall>.hvisEnabled(
         toggle: FeatureToggle,
-        block: suspend PipelineContext<Unit, ApplicationCall>.() -> Unit
+        block: suspend PipelineContext<Unit, ApplicationCall>.() -> Unit,
     ) {
         if (!featureToggleService.isEnabled(toggle, false)) {
             call.respond(HttpStatusCode.NotFound)
@@ -54,11 +55,11 @@ internal fun Route.generellbehandlingRoutes(
                 }
                 inTransaction {
                     generellBehandlingService.opprettBehandling(
-                        GenerellBehandling.opprettFraType(request.type, sakId)
+                        GenerellBehandling.opprettFraType(request.type, sakId),
                     )
                 }
                 logger.info(
-                    "Opprettet generell behandling for sak $sakId av typen ${request.type}"
+                    "Opprettet generell behandling for sak $sakId av typen ${request.type}",
                 )
                 call.respond(HttpStatusCode.OK)
             }
@@ -86,5 +87,5 @@ internal fun Route.generellbehandlingRoutes(
 }
 
 data class OpprettGenerellBehandlingRequest(
-    val type: GenerellBehandling.GenerellBehandlingType
+    val type: GenerellBehandling.GenerellBehandlingType,
 )

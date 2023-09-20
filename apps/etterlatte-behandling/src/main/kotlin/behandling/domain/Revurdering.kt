@@ -12,7 +12,7 @@ import no.nav.etterlatte.libs.common.behandling.Utenlandstilsnitt
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.sak.Sak
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 
 sealed class Revurdering(
     override val id: UUID,
@@ -28,7 +28,7 @@ sealed class Revurdering(
     open val revurderingInfo: RevurderingMedBegrunnelse?,
     override val prosesstype: Prosesstype,
     override val kilde: Vedtaksloesning,
-    open val begrunnelse: String?
+    open val begrunnelse: String?,
 ) : Behandling() {
     override val type: BehandlingType = BehandlingType.REVURDERING
 
@@ -51,39 +51,41 @@ sealed class Revurdering(
             prosesstype: Prosesstype,
             kilde: Vedtaksloesning,
             revurderingInfo: RevurderingMedBegrunnelse?,
-            begrunnelse: String?
+            begrunnelse: String?,
         ) = when (prosesstype) {
-            Prosesstype.MANUELL -> ManuellRevurdering(
-                id = id,
-                sak = sak,
-                behandlingOpprettet = behandlingOpprettet,
-                sistEndret = sistEndret,
-                status = status,
-                kommerBarnetTilgode = kommerBarnetTilgode,
-                virkningstidspunkt = virkningstidspunkt,
-                utenlandstilsnitt = utenlandstilsnitt,
-                boddEllerArbeidetUtlandet = boddEllerArbeidetUtlandet,
-                revurderingsaarsak = revurderingsaarsak,
-                revurderingInfo = revurderingInfo,
-                kilde = kilde,
-                begrunnelse = begrunnelse
-            )
+            Prosesstype.MANUELL ->
+                ManuellRevurdering(
+                    id = id,
+                    sak = sak,
+                    behandlingOpprettet = behandlingOpprettet,
+                    sistEndret = sistEndret,
+                    status = status,
+                    kommerBarnetTilgode = kommerBarnetTilgode,
+                    virkningstidspunkt = virkningstidspunkt,
+                    utenlandstilsnitt = utenlandstilsnitt,
+                    boddEllerArbeidetUtlandet = boddEllerArbeidetUtlandet,
+                    revurderingsaarsak = revurderingsaarsak,
+                    revurderingInfo = revurderingInfo,
+                    kilde = kilde,
+                    begrunnelse = begrunnelse,
+                )
 
-            Prosesstype.AUTOMATISK -> AutomatiskRevurdering(
-                id = id,
-                sak = sak,
-                behandlingOpprettet = behandlingOpprettet,
-                sistEndret = sistEndret,
-                status = status,
-                kommerBarnetTilgode = kommerBarnetTilgode,
-                virkningstidspunkt = virkningstidspunkt,
-                utenlandstilsnitt = utenlandstilsnitt,
-                boddEllerArbeidetUtlandet = boddEllerArbeidetUtlandet,
-                revurderingsaarsak = revurderingsaarsak,
-                revurderingInfo = revurderingInfo,
-                kilde = kilde,
-                begrunnelse = begrunnelse
-            )
+            Prosesstype.AUTOMATISK ->
+                AutomatiskRevurdering(
+                    id = id,
+                    sak = sak,
+                    behandlingOpprettet = behandlingOpprettet,
+                    sistEndret = sistEndret,
+                    status = status,
+                    kommerBarnetTilgode = kommerBarnetTilgode,
+                    virkningstidspunkt = virkningstidspunkt,
+                    utenlandstilsnitt = utenlandstilsnitt,
+                    boddEllerArbeidetUtlandet = boddEllerArbeidetUtlandet,
+                    revurderingsaarsak = revurderingsaarsak,
+                    revurderingInfo = revurderingInfo,
+                    kilde = kilde,
+                    begrunnelse = begrunnelse,
+                )
         }
     }
 }

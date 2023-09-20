@@ -6,7 +6,7 @@ import no.nav.etterlatte.kafka.standardProducer
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
-import java.util.*
+import java.util.UUID
 import kotlin.system.exitProcess
 
 /** 1e mai 2023 */
@@ -24,7 +24,7 @@ fun main() {
 
     producer.publiser(
         noekkel = "StartReguleringJob-${UUID.randomUUID()}",
-        verdi = createRecord(GRUNNBELOEP_REGULERING_DATO)
+        verdi = createRecord(GRUNNBELOEP_REGULERING_DATO),
     )
     producer.close()
 
@@ -32,6 +32,7 @@ fun main() {
     exitProcess(0)
 }
 
-internal fun createRecord(dato: LocalDate) = JsonMessage.newMessage(
-    mapOf("@event_name" to "REGULERING", "dato" to dato.toString())
-).toJson()
+internal fun createRecord(dato: LocalDate) =
+    JsonMessage.newMessage(
+        mapOf("@event_name" to "REGULERING", "dato" to dato.toString()),
+    ).toJson()

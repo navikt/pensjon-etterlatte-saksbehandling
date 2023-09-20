@@ -45,9 +45,10 @@ class PluginConfiguration {
 private object AdressebeskyttelseHook : Hook<suspend (ApplicationCall) -> Unit> {
     private val AdressebeskyttelseHook: PipelinePhase = PipelinePhase("Adressebeskyttelse")
     private val AuthenticatePhase: PipelinePhase = PipelinePhase("Authenticate")
+
     override fun install(
         pipeline: ApplicationCallPipeline,
-        handler: suspend (ApplicationCall) -> Unit
+        handler: suspend (ApplicationCall) -> Unit,
     ) {
         // Inspirasjon AuthenticationChecked
         pipeline.insertPhaseAfter(ApplicationCallPipeline.Plugins, AuthenticatePhase)
@@ -59,88 +60,90 @@ private object AdressebeskyttelseHook : Hook<suspend (ApplicationCall) -> Unit> 
 
 const val TILGANG_ROUTE_PATH = "tilgang"
 
-val adressebeskyttelsePlugin: RouteScopedPlugin<PluginConfiguration> = createRouteScopedPlugin(
-    name = "Adressebeskyttelsesplugin",
-    createConfiguration = ::PluginConfiguration
-) {
-    on(AdressebeskyttelseHook) { call ->
-        val bruker = call.brukerTokenInfo
+val adressebeskyttelsePlugin: RouteScopedPlugin<PluginConfiguration> =
+    createRouteScopedPlugin(
+        name = "Adressebeskyttelsesplugin",
+        createConfiguration = ::PluginConfiguration,
+    ) {
+        on(AdressebeskyttelseHook) { call ->
+            val bruker = call.brukerTokenInfo
 
-        if (bruker is Systembruker) {
+            if (bruker is Systembruker) {
+                return@on
+            }
+            if (call.request.uri.contains(TILGANG_ROUTE_PATH)) {
+                return@on
+            }
+
+            if (bruker is Saksbehandler) {
+                val saksbehandlerGroupIdsByKey = pluginConfig.saksbehandlerGroupIdsByKey
+                val behandlingId = call.parameters[BEHANDLINGSID_CALL_PARAMETER]
+                if (!behandlingId.isNullOrEmpty()) {
+                    if (!pluginConfig.harTilgangBehandling(
+                            behandlingId,
+                            SaksbehandlerMedRoller(bruker, saksbehandlerGroupIdsByKey),
+                        )
+                    ) {
+                        call.respond(HttpStatusCode.NotFound)
+                    }
+                    return@on
+                }
+
+                val sakId = call.parameters[SAKID_CALL_PARAMETER]
+                if (!sakId.isNullOrEmpty()) {
+                    if (!pluginConfig.harTilgangTilSak(
+                            sakId.toLong(),
+                            SaksbehandlerMedRoller(bruker, saksbehandlerGroupIdsByKey),
+                        )
+                    ) {
+                        call.respond(HttpStatusCode.NotFound)
+                    }
+                    return@on
+                }
+
+                val oppgaveId = call.parameters[OPPGAVEID_CALL_PARAMETER]
+                if (!oppgaveId.isNullOrEmpty()) {
+                    if (!pluginConfig.harTilgangTilOppgave(
+                            oppgaveId,
+                            SaksbehandlerMedRoller(bruker, saksbehandlerGroupIdsByKey),
+                        )
+                    ) {
+                        call.respond(HttpStatusCode.NotFound)
+                    }
+                    return@on
+                }
+
+                val klageId = call.parameters[KLAGEID_CALL_PARAMETER]
+                if (!klageId.isNullOrEmpty()) {
+                    if (!pluginConfig.harTilgangTilKlage(
+                            klageId,
+                            SaksbehandlerMedRoller(bruker, saksbehandlerGroupIdsByKey),
+                        )
+                    ) {
+                        call.respond(HttpStatusCode.NotFound)
+                    }
+                    return@on
+                }
+            }
+
             return@on
         }
-        if (call.request.uri.contains(TILGANG_ROUTE_PATH)) {
-            return@on
-        }
-
-        if (bruker is Saksbehandler) {
-            val saksbehandlerGroupIdsByKey = pluginConfig.saksbehandlerGroupIdsByKey
-            val behandlingId = call.parameters[BEHANDLINGSID_CALL_PARAMETER]
-            if (!behandlingId.isNullOrEmpty()) {
-                if (!pluginConfig.harTilgangBehandling(
-                        behandlingId,
-                        SaksbehandlerMedRoller(bruker, saksbehandlerGroupIdsByKey)
-                    )
-                ) {
-                    call.respond(HttpStatusCode.NotFound)
-                }
-                return@on
-            }
-
-            val sakId = call.parameters[SAKID_CALL_PARAMETER]
-            if (!sakId.isNullOrEmpty()) {
-                if (!pluginConfig.harTilgangTilSak(
-                        sakId.toLong(),
-                        SaksbehandlerMedRoller(bruker, saksbehandlerGroupIdsByKey)
-                    )
-                ) {
-                    call.respond(HttpStatusCode.NotFound)
-                }
-                return@on
-            }
-
-            val oppgaveId = call.parameters[OPPGAVEID_CALL_PARAMETER]
-            if (!oppgaveId.isNullOrEmpty()) {
-                if (!pluginConfig.harTilgangTilOppgave(
-                        oppgaveId,
-                        SaksbehandlerMedRoller(bruker, saksbehandlerGroupIdsByKey)
-                    )
-                ) {
-                    call.respond(HttpStatusCode.NotFound)
-                }
-                return@on
-            }
-
-            val klageId = call.parameters[KLAGEID_CALL_PARAMETER]
-            if (!klageId.isNullOrEmpty()) {
-                if (!pluginConfig.harTilgangTilKlage(
-                        klageId,
-                        SaksbehandlerMedRoller(bruker, saksbehandlerGroupIdsByKey)
-                    )
-                ) {
-                    call.respond(HttpStatusCode.NotFound)
-                }
-                return@on
-            }
-        }
-
-        return@on
     }
-}
 
 // Disse extension funksjonene er ikke gjort i hooken ovenfor pga casting overhead
 suspend inline fun PipelineContext<*, ApplicationCall>.withFoedselsnummerInternal(
     tilgangService: TilgangService,
-    onSuccess: (fnr: Folkeregisteridentifikator) -> Unit
+    onSuccess: (fnr: Folkeregisteridentifikator) -> Unit,
 ) {
     val foedselsnummerDTO = call.receive<FoedselsnummerDTO>()
     val foedselsnummer = Folkeregisteridentifikator.of(foedselsnummerDTO.foedselsnummer)
     when (brukerTokenInfo) {
         is Saksbehandler -> {
-            val harTilgang = tilgangService.harTilgangTilPerson(
-                foedselsnummer.value,
-                Kontekst.get().appUserAsSaksbehandler().saksbehandlerMedRoller
-            )
+            val harTilgang =
+                tilgangService.harTilgangTilPerson(
+                    foedselsnummer.value,
+                    Kontekst.get().appUserAsSaksbehandler().saksbehandlerMedRoller,
+                )
             if (harTilgang) {
                 onSuccess(foedselsnummer)
             } else {
@@ -154,16 +157,17 @@ suspend inline fun PipelineContext<*, ApplicationCall>.withFoedselsnummerInterna
 
 suspend inline fun PipelineContext<*, ApplicationCall>.withFoedselsnummerAndGradering(
     tilgangService: TilgangService,
-    onSuccess: (fnr: Folkeregisteridentifikator, gradering: AdressebeskyttelseGradering?) -> Unit
+    onSuccess: (fnr: Folkeregisteridentifikator, gradering: AdressebeskyttelseGradering?) -> Unit,
 ) {
     val foedselsnummerDTOmedGradering = call.receive<FoedselsNummerMedGraderingDTO>()
     val foedselsnummer = Folkeregisteridentifikator.of(foedselsnummerDTOmedGradering.foedselsnummer)
     when (brukerTokenInfo) {
         is Saksbehandler -> {
-            val harTilgangTilPerson = tilgangService.harTilgangTilPerson(
-                foedselsnummer.value,
-                Kontekst.get().appUserAsSaksbehandler().saksbehandlerMedRoller
-            )
+            val harTilgangTilPerson =
+                tilgangService.harTilgangTilPerson(
+                    foedselsnummer.value,
+                    Kontekst.get().appUserAsSaksbehandler().saksbehandlerMedRoller,
+                )
             if (harTilgangTilPerson) {
                 onSuccess(foedselsnummer, foedselsnummerDTOmedGradering.gradering)
             } else {
@@ -175,9 +179,7 @@ suspend inline fun PipelineContext<*, ApplicationCall>.withFoedselsnummerAndGrad
     }
 }
 
-suspend inline fun PipelineContext<*, ApplicationCall>.kunAttestant(
-    onSuccess: () -> Unit
-) {
+suspend inline fun PipelineContext<*, ApplicationCall>.kunAttestant(onSuccess: () -> Unit) {
     when (brukerTokenInfo) {
         is Saksbehandler -> {
             val saksbehandlerMedRoller = Kontekst.get().appUserAsSaksbehandler().saksbehandlerMedRoller
@@ -197,17 +199,16 @@ fun <T> List<T>.filterForEnheter(
     featureToggleService: FeatureToggleService,
     toggle: FeatureToggle,
     user: User,
-    filter: (item: T, enheter: List<String>) -> Boolean
-) =
-    if (featureToggleService.isEnabled(toggle, false)) {
-        when (user) {
-            is SaksbehandlerMedEnheterOgRoller -> {
-                val enheter = user.enheter()
-                this.filter { filter(it, enheter) }
-            }
-
-            else -> this
+    filter: (item: T, enheter: List<String>) -> Boolean,
+) = if (featureToggleService.isEnabled(toggle, false)) {
+    when (user) {
+        is SaksbehandlerMedEnheterOgRoller -> {
+            val enheter = user.enheter()
+            this.filter { filter(it, enheter) }
         }
-    } else {
-        this
+
+        else -> this
     }
+} else {
+    this
+}

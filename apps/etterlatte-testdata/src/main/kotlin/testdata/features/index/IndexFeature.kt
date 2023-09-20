@@ -22,14 +22,15 @@ object IndexFeature : TestDataFeature {
                         "index.hbs",
                         mapOf(
                             "navIdent" to (navIdentFraToken() ?: "Anonym"),
-                            "features" to features.filter { it != IndexFeature }.map {
-                                mapOf(
-                                    "path" to it.path,
-                                    "beskrivelse" to it.beskrivelse
-                                )
-                            }
-                        )
-                    )
+                            "features" to
+                                features.filter { it != IndexFeature }.map {
+                                    mapOf(
+                                        "path" to it.path,
+                                        "beskrivelse" to it.beskrivelse,
+                                    )
+                                },
+                        ),
+                    ),
                 )
             }
         }

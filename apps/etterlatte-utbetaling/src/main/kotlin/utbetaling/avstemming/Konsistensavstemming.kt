@@ -18,14 +18,14 @@ data class Konsistensavstemming(
     val avstemmingsdata: String?,
     val loependeFraOgMed: Tidspunkt,
     val opprettetTilOgMed: Tidspunkt,
-    val loependeUtbetalinger: List<OppdragForKonsistensavstemming>
+    val loependeUtbetalinger: List<OppdragForKonsistensavstemming>,
 )
 
 data class OppdragForKonsistensavstemming(
     val sakId: SakId,
     val sakType: Saktype,
     val fnr: Foedselsnummer,
-    val utbetalingslinjer: List<OppdragslinjeForKonsistensavstemming>
+    val utbetalingslinjer: List<OppdragslinjeForKonsistensavstemming>,
 )
 
 data class OppdragslinjeForKonsistensavstemming(
@@ -36,5 +36,5 @@ data class OppdragslinjeForKonsistensavstemming(
     var forrigeUtbetalingslinjeId: UtbetalingslinjeId?,
     val beloep: BigDecimal?,
     val attestanter: List<NavIdent>,
-    val kjoereplan: Kjoereplan
+    val kjoereplan: Kjoereplan,
 )

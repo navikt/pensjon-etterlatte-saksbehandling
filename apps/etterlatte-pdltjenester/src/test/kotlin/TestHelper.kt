@@ -15,7 +15,7 @@ import no.nav.etterlatte.libs.common.person.VergemaalEllerFremtidsfullmakt
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import java.time.LocalDate
-import java.util.*
+import java.util.UUID
 
 object TestHelper
 
@@ -30,7 +30,7 @@ inline fun <reified T> mockResponse(fil: String): T {
 fun mockPerson(
     utland: Utland? = null,
     familieRelasjon: FamilieRelasjon? = null,
-    vergemaal: List<VergemaalEllerFremtidsfullmakt>? = null
+    vergemaal: List<VergemaalEllerFremtidsfullmakt>? = null,
 ) = PersonDTO(
     fornavn = OpplysningDTO(verdi = "Ola", opplysningsid = null),
     mellomnavn = OpplysningDTO(verdi = "Mellom", opplysningsid = null),
@@ -41,25 +41,26 @@ fun mockPerson(
     foedeland = OpplysningDTO("Norge", UUID.randomUUID().toString()),
     doedsdato = null,
     adressebeskyttelse = null,
-    bostedsadresse = listOf(
-        OpplysningDTO(
-            Adresse(
-                type = AdresseType.VEGADRESSE,
-                aktiv = true,
-                coAdresseNavn = "Hos Geir",
-                adresseLinje1 = "Testveien 4",
-                adresseLinje2 = null,
-                adresseLinje3 = null,
-                postnr = "1234",
-                poststed = null,
-                land = "NOR",
-                kilde = "FREG",
-                gyldigFraOgMed = Tidspunkt.now().toLocalDatetimeUTC().minusYears(1),
-                gyldigTilOgMed = null
+    bostedsadresse =
+        listOf(
+            OpplysningDTO(
+                Adresse(
+                    type = AdresseType.VEGADRESSE,
+                    aktiv = true,
+                    coAdresseNavn = "Hos Geir",
+                    adresseLinje1 = "Testveien 4",
+                    adresseLinje2 = null,
+                    adresseLinje3 = null,
+                    postnr = "1234",
+                    poststed = null,
+                    land = "NOR",
+                    kilde = "FREG",
+                    gyldigFraOgMed = Tidspunkt.now().toLocalDatetimeUTC().minusYears(1),
+                    gyldigTilOgMed = null,
+                ),
+                UUID.randomUUID().toString(),
             ),
-            UUID.randomUUID().toString()
-        )
-    ),
+        ),
     deltBostedsadresse = listOf(),
     kontaktadresse = listOf(),
     oppholdsadresse = listOf(),
@@ -69,7 +70,7 @@ fun mockPerson(
     utland = utland?.let { OpplysningDTO(utland, UUID.randomUUID().toString()) },
     familieRelasjon = familieRelasjon?.let { OpplysningDTO(it, UUID.randomUUID().toString()) },
     avdoedesBarn = null,
-    vergemaalEllerFremtidsfullmakt = vergemaal?.map { OpplysningDTO(it, UUID.randomUUID().toString()) }
+    vergemaalEllerFremtidsfullmakt = vergemaal?.map { OpplysningDTO(it, UUID.randomUUID().toString()) },
 )
 
 fun mockFolkeregisterident(fnr: String) = PdlIdentifikator.FolkeregisterIdent(Folkeregisteridentifikator.of(fnr))

@@ -9,11 +9,10 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import java.io.FileNotFoundException
-import java.util.*
+import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class LagreIverksattVedtakTest {
-
     companion object {
         val melding = readFile("/utbetalingsmelding.json")
 
@@ -30,11 +29,12 @@ internal class LagreIverksattVedtakTest {
         val sakIdVal = 1234L
         val vedtakIdVal = 1L
         val behandlingIdSlot = slot<UUID>()
-        every { vedtaksvurderingServiceMock.iverksattVedtak(capture(behandlingIdSlot)) } returns mockk {
-            every { sak } returns mockk { every { id } returns sakIdVal }
-            every { behandling } returns mockk { every { id } returns behandlingIdVal }
-            every { vedtakId } returns vedtakIdVal
-        }
+        every { vedtaksvurderingServiceMock.iverksattVedtak(capture(behandlingIdSlot)) } returns
+            mockk {
+                every { sak } returns mockk { every { id } returns sakIdVal }
+                every { behandling } returns mockk { every { id } returns behandlingIdVal }
+                every { vedtakId } returns vedtakIdVal
+            }
 
         inspector.apply { sendTestMessage(melding) }.inspektør
         Assertions.assertEquals(behandlingIdVal, behandlingIdSlot.captured)

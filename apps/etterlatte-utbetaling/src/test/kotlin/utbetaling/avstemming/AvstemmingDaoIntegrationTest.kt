@@ -22,7 +22,6 @@ import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class AvstemmingDaoIntegrationTest {
-
     @Container
     private val postgreSQLContainer = TestContainers.postgreSQLContainer
     private val dataSource: DataSource
@@ -31,11 +30,12 @@ internal class AvstemmingDaoIntegrationTest {
     init {
         postgreSQLContainer.start()
 
-        dataSource = DataSourceBuilder.createDataSource(
-            jdbcUrl = postgreSQLContainer.jdbcUrl,
-            username = postgreSQLContainer.username,
-            password = postgreSQLContainer.password
-        )
+        dataSource =
+            DataSourceBuilder.createDataSource(
+                jdbcUrl = postgreSQLContainer.jdbcUrl,
+                username = postgreSQLContainer.username,
+                password = postgreSQLContainer.password,
+            )
 
         avstemmingDao = AvstemmingDao(dataSource)
         dataSource.migrate()
@@ -87,16 +87,18 @@ internal class AvstemmingDaoIntegrationTest {
 
     @Test
     fun `skal opprette grensesnittavstemming for barnepensjon`() {
-        val grensesnittavstemming = Grensesnittavstemming(
-            periode = Avstemmingsperiode(
-                fraOgMed = Tidspunkt.now().minus(1, ChronoUnit.DAYS),
-                til = Tidspunkt.now()
-            ),
-            antallOppdrag = 1,
-            opprettet = Tidspunkt.now(),
-            avstemmingsdata = "",
-            saktype = Saktype.BARNEPENSJON
-        )
+        val grensesnittavstemming =
+            Grensesnittavstemming(
+                periode =
+                    Avstemmingsperiode(
+                        fraOgMed = Tidspunkt.now().minus(1, ChronoUnit.DAYS),
+                        til = Tidspunkt.now(),
+                    ),
+                antallOppdrag = 1,
+                opprettet = Tidspunkt.now(),
+                avstemmingsdata = "",
+                saktype = Saktype.BARNEPENSJON,
+            )
 
         val antallRaderOppdatert = avstemmingDao.opprettGrensesnittavstemming(grensesnittavstemming)
 
@@ -105,16 +107,18 @@ internal class AvstemmingDaoIntegrationTest {
 
     @Test
     fun `skal opprette grensesnittavstemming for OMS`() {
-        val grensesnittavstemming = Grensesnittavstemming(
-            periode = Avstemmingsperiode(
-                fraOgMed = Tidspunkt.now().minus(1, ChronoUnit.DAYS),
-                til = Tidspunkt.now()
-            ),
-            antallOppdrag = 1,
-            opprettet = Tidspunkt.now(),
-            avstemmingsdata = "",
-            saktype = Saktype.OMSTILLINGSSTOENAD
-        )
+        val grensesnittavstemming =
+            Grensesnittavstemming(
+                periode =
+                    Avstemmingsperiode(
+                        fraOgMed = Tidspunkt.now().minus(1, ChronoUnit.DAYS),
+                        til = Tidspunkt.now(),
+                    ),
+                antallOppdrag = 1,
+                opprettet = Tidspunkt.now(),
+                avstemmingsdata = "",
+                saktype = Saktype.OMSTILLINGSSTOENAD,
+            )
 
         val antallRaderOppdatert = avstemmingDao.opprettGrensesnittavstemming(grensesnittavstemming)
 
@@ -125,38 +129,44 @@ internal class AvstemmingDaoIntegrationTest {
     fun `skal hente nyeste grensesnittavstemming`() {
         val now = Tidspunkt.now()
 
-        val grensesnittavstemming1 = Grensesnittavstemming(
-            opprettet = now,
-            periode = Avstemmingsperiode(
-                fraOgMed = now.minus(1, ChronoUnit.DAYS),
-                til = now
-            ),
-            antallOppdrag = 1,
-            avstemmingsdata = "",
-            saktype = Saktype.BARNEPENSJON
-        )
+        val grensesnittavstemming1 =
+            Grensesnittavstemming(
+                opprettet = now,
+                periode =
+                    Avstemmingsperiode(
+                        fraOgMed = now.minus(1, ChronoUnit.DAYS),
+                        til = now,
+                    ),
+                antallOppdrag = 1,
+                avstemmingsdata = "",
+                saktype = Saktype.BARNEPENSJON,
+            )
 
-        val grensesnittavstemming2 = Grensesnittavstemming(
-            opprettet = now.minus(1, ChronoUnit.DAYS),
-            periode = Avstemmingsperiode(
-                fraOgMed = now.minus(2, ChronoUnit.DAYS),
-                til = now.minus(1, ChronoUnit.DAYS)
-            ),
-            antallOppdrag = 2,
-            avstemmingsdata = "",
-            saktype = Saktype.OMSTILLINGSSTOENAD
-        )
+        val grensesnittavstemming2 =
+            Grensesnittavstemming(
+                opprettet = now.minus(1, ChronoUnit.DAYS),
+                periode =
+                    Avstemmingsperiode(
+                        fraOgMed = now.minus(2, ChronoUnit.DAYS),
+                        til = now.minus(1, ChronoUnit.DAYS),
+                    ),
+                antallOppdrag = 2,
+                avstemmingsdata = "",
+                saktype = Saktype.OMSTILLINGSSTOENAD,
+            )
 
-        val grensesnittavstemming3 = Grensesnittavstemming(
-            opprettet = now.minus(2, ChronoUnit.DAYS),
-            periode = Avstemmingsperiode(
-                fraOgMed = now.minus(3, ChronoUnit.DAYS),
-                til = now.minus(2, ChronoUnit.DAYS)
-            ),
-            antallOppdrag = 3,
-            avstemmingsdata = "",
-            saktype = Saktype.BARNEPENSJON
-        )
+        val grensesnittavstemming3 =
+            Grensesnittavstemming(
+                opprettet = now.minus(2, ChronoUnit.DAYS),
+                periode =
+                    Avstemmingsperiode(
+                        fraOgMed = now.minus(3, ChronoUnit.DAYS),
+                        til = now.minus(2, ChronoUnit.DAYS),
+                    ),
+                antallOppdrag = 3,
+                avstemmingsdata = "",
+                saktype = Saktype.BARNEPENSJON,
+            )
 
         avstemmingDao.opprettGrensesnittavstemming(grensesnittavstemming1)
         avstemmingDao.opprettGrensesnittavstemming(grensesnittavstemming3)
@@ -195,16 +205,16 @@ internal class AvstemmingDaoIntegrationTest {
     fun opprettKonsistensavstemmingMedData(opprettetTilOgMed: Tidspunkt = Tidspunkt.now()): Konsistensavstemming {
         val oppdragslinjer = listOf(oppdragslinjeForKonsistensavstemming(fraOgMed = LocalDate.of(2022, 10, 7)))
         val oppdrag = oppdragForKonsistensavstemming(oppdragslinjeForKonsistensavstemming = oppdragslinjer)
-        val konsistensavstemmingUtenData = Konsistensavstemming(
-            id = UUIDBase64(),
-            sakType = Saktype.BARNEPENSJON,
-            opprettet = Tidspunkt.now(),
-            avstemmingsdata = null,
-            loependeFraOgMed = Tidspunkt.now(),
-            opprettetTilOgMed = opprettetTilOgMed,
-            loependeUtbetalinger = listOf(oppdrag)
-
-        )
+        val konsistensavstemmingUtenData =
+            Konsistensavstemming(
+                id = UUIDBase64(),
+                sakType = Saktype.BARNEPENSJON,
+                opprettet = Tidspunkt.now(),
+                avstemmingsdata = null,
+                loependeFraOgMed = Tidspunkt.now(),
+                opprettetTilOgMed = opprettetTilOgMed,
+                loependeUtbetalinger = listOf(oppdrag),
+            )
         val avstemmingsdata = KonsistensavstemmingDataMapper(konsistensavstemmingUtenData).opprettAvstemmingsmelding(Saktype.BARNEPENSJON)
         return konsistensavstemmingUtenData.copy(avstemmingsdata = avstemmingsdata.joinToString("\n"))
     }
@@ -212,16 +222,16 @@ internal class AvstemmingDaoIntegrationTest {
     fun opprettKonsistensavstemmingMedDataOMS(opprettetTilOgMed: Tidspunkt = Tidspunkt.now()): Konsistensavstemming {
         val oppdragslinjer = listOf(oppdragslinjeForKonsistensavstemming(fraOgMed = LocalDate.of(2022, 10, 7)))
         val oppdrag = oppdragForKonsistensavstemming(oppdragslinjeForKonsistensavstemming = oppdragslinjer)
-        val konsistensavstemmingUtenData = Konsistensavstemming(
-            id = UUIDBase64(),
-            sakType = Saktype.OMSTILLINGSSTOENAD,
-            opprettet = Tidspunkt.now(),
-            avstemmingsdata = null,
-            loependeFraOgMed = Tidspunkt.now(),
-            opprettetTilOgMed = opprettetTilOgMed,
-            loependeUtbetalinger = listOf(oppdrag)
-
-        )
+        val konsistensavstemmingUtenData =
+            Konsistensavstemming(
+                id = UUIDBase64(),
+                sakType = Saktype.OMSTILLINGSSTOENAD,
+                opprettet = Tidspunkt.now(),
+                avstemmingsdata = null,
+                loependeFraOgMed = Tidspunkt.now(),
+                opprettetTilOgMed = opprettetTilOgMed,
+                loependeUtbetalinger = listOf(oppdrag),
+            )
         val avstemmingsdata = KonsistensavstemmingDataMapper(konsistensavstemmingUtenData).opprettAvstemmingsmelding(Saktype.BARNEPENSJON)
         return konsistensavstemmingUtenData.copy(avstemmingsdata = avstemmingsdata.joinToString("\n"))
     }

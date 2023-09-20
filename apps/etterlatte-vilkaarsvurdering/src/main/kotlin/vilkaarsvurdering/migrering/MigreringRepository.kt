@@ -8,7 +8,7 @@ import javax.sql.DataSource
 
 class MigreringRepository(
     private val delvilkaarRepository: DelvilkaarRepository,
-    private val ds: DataSource
+    private val ds: DataSource,
 ) {
     fun endreUtfallTilIkkeVurdertForAlleVilkaar(vilkaar: List<Vilkaar>) =
         ds.transaction { tx ->
@@ -16,7 +16,7 @@ class MigreringRepository(
                 delvilkaarRepository.settResultatPaaAlleDelvilkaar(
                     it.id,
                     tx,
-                    Utfall.IKKE_VURDERT
+                    Utfall.IKKE_VURDERT,
                 )
             }
         }

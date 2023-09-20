@@ -24,7 +24,10 @@ import no.nav.etterlatte.libs.common.withBehandlingId
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.token.BrukerTokenInfo
 
-fun Route.avkorting(avkortingService: AvkortingService, behandlingKlient: BehandlingKlient) {
+fun Route.avkorting(
+    avkortingService: AvkortingService,
+    behandlingKlient: BehandlingKlient,
+) {
     route("/api/beregning/avkorting/{$BEHANDLINGSID_CALL_PARAMETER}") {
         val logger = application.log
 
@@ -43,11 +46,12 @@ fun Route.avkorting(avkortingService: AvkortingService, behandlingKlient: Behand
             withBehandlingId(behandlingKlient) {
                 logger.info("Lagre avkorting for behandlingId=$it")
                 val avkortingGrunnlag = call.receive<AvkortingGrunnlagDto>()
-                val avkorting = avkortingService.lagreAvkorting(
-                    it,
-                    brukerTokenInfo,
-                    avkortingGrunnlag.fromDto(brukerTokenInfo)
-                )
+                val avkorting =
+                    avkortingService.lagreAvkorting(
+                        it,
+                        brukerTokenInfo,
+                        avkortingGrunnlag.fromDto(brukerTokenInfo),
+                    )
                 call.respond(avkorting.toDto())
             }
         }
@@ -60,48 +64,51 @@ fun Route.avkorting(avkortingService: AvkortingService, behandlingKlient: Behand
                 call.respond(avkorting.toDto())
             }
         }
-
     }
 }
 
-fun Avkorting.toDto() = AvkortingDto(
-    avkortingGrunnlag = aarsoppgjoer.inntektsavkorting.map { it.grunnlag.toDto() },
-    avkortetYtelse = avkortetYtelseFraVirkningstidspunkt.map { it.toDto() },
-    tidligereAvkortetYtelse = avkortetYtelseForrigeVedtak.map { it.toDto() }
-)
+fun Avkorting.toDto() =
+    AvkortingDto(
+        avkortingGrunnlag = aarsoppgjoer.inntektsavkorting.map { it.grunnlag.toDto() },
+        avkortetYtelse = avkortetYtelseFraVirkningstidspunkt.map { it.toDto() },
+        tidligereAvkortetYtelse = avkortetYtelseForrigeVedtak.map { it.toDto() },
+    )
 
-fun AvkortingGrunnlag.toDto() = AvkortingGrunnlagDto(
-    id = id,
-    fom = periode.fom,
-    tom = periode.tom,
-    aarsinntekt = aarsinntekt,
-    fratrekkInnAar = fratrekkInnAar,
-    relevanteMaanederInnAar = relevanteMaanederInnAar,
-    inntektUtland = inntektUtland,
-    fratrekkInnAarUtland = fratrekkInnAarUtland,
-    spesifikasjon = spesifikasjon,
-    kilde = AvkortingGrunnlagKildeDto(kilde.tidspunkt.toString(), kilde.ident)
-)
+fun AvkortingGrunnlag.toDto() =
+    AvkortingGrunnlagDto(
+        id = id,
+        fom = periode.fom,
+        tom = periode.tom,
+        aarsinntekt = aarsinntekt,
+        fratrekkInnAar = fratrekkInnAar,
+        relevanteMaanederInnAar = relevanteMaanederInnAar,
+        inntektUtland = inntektUtland,
+        fratrekkInnAarUtland = fratrekkInnAarUtland,
+        spesifikasjon = spesifikasjon,
+        kilde = AvkortingGrunnlagKildeDto(kilde.tidspunkt.toString(), kilde.ident),
+    )
 
-fun AvkortetYtelse.toDto() = AvkortetYtelseDto(
-    id = id,
-    fom = periode.fom,
-    tom = periode.tom,
-    type = type.name,
-    ytelseFoerAvkorting = ytelseFoerAvkorting,
-    avkortingsbeloep = avkortingsbeloep,
-    restanse = restanse?.fordeltRestanse ?: 0,
-    ytelseEtterAvkorting = ytelseEtterAvkorting
-)
+fun AvkortetYtelse.toDto() =
+    AvkortetYtelseDto(
+        id = id,
+        fom = periode.fom,
+        tom = periode.tom,
+        type = type.name,
+        ytelseFoerAvkorting = ytelseFoerAvkorting,
+        avkortingsbeloep = avkortingsbeloep,
+        restanse = restanse?.fordeltRestanse ?: 0,
+        ytelseEtterAvkorting = ytelseEtterAvkorting,
+    )
 
-fun AvkortingGrunnlagDto.fromDto(brukerTokenInfo: BrukerTokenInfo) = AvkortingGrunnlag(
-    id = id,
-    periode = Periode(fom = fom, tom = tom),
-    aarsinntekt = aarsinntekt,
-    fratrekkInnAar = fratrekkInnAar,
-    relevanteMaanederInnAar = relevanteMaanederInnAar ?: (12 - fom.monthValue + 1),
-    inntektUtland = inntektUtland,
-    fratrekkInnAarUtland = fratrekkInnAarUtland,
-    spesifikasjon = spesifikasjon,
-    kilde = Grunnlagsopplysning.Saksbehandler(brukerTokenInfo.ident(), Tidspunkt.now())
-)
+fun AvkortingGrunnlagDto.fromDto(brukerTokenInfo: BrukerTokenInfo) =
+    AvkortingGrunnlag(
+        id = id,
+        periode = Periode(fom = fom, tom = tom),
+        aarsinntekt = aarsinntekt,
+        fratrekkInnAar = fratrekkInnAar,
+        relevanteMaanederInnAar = relevanteMaanederInnAar ?: (12 - fom.monthValue + 1),
+        inntektUtland = inntektUtland,
+        fratrekkInnAarUtland = fratrekkInnAarUtland,
+        spesifikasjon = spesifikasjon,
+        kilde = Grunnlagsopplysning.Saksbehandler(brukerTokenInfo.ident(), Tidspunkt.now()),
+    )

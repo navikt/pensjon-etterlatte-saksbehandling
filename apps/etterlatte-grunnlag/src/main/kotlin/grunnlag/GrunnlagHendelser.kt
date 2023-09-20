@@ -27,7 +27,7 @@ import rapidsandrivers.migrering.ListenerMedLogging
 
 class GrunnlagHendelser(
     rapidsConnection: RapidsConnection,
-    private val grunnlagService: GrunnlagService
+    private val grunnlagService: GrunnlagService,
 ) : ListenerMedLogging() {
     private val logger: Logger = LoggerFactory.getLogger(GrunnlagHendelser::class.java)
 
@@ -45,7 +45,10 @@ class GrunnlagHendelser(
         }.register(this)
     }
 
-    override fun haandterPakke(packet: JsonMessage, context: MessageContext) {
+    override fun haandterPakke(
+        packet: JsonMessage,
+        context: MessageContext,
+    ) {
         val eventName = packet[EVENT_NAME_KEY].asText()
         val opplysningType = packet[BEHOV_NAME_KEY].asText()
 
@@ -58,13 +61,13 @@ class GrunnlagHendelser(
             if (fnr == null) {
                 grunnlagService.lagreNyeSaksopplysninger(
                     sakId,
-                    opplysninger
+                    opplysninger,
                 )
             } else {
                 grunnlagService.lagreNyePersonopplysninger(
                     sakId,
                     Folkeregisteridentifikator.of(fnr),
-                    opplysninger
+                    opplysninger,
                 )
             }
             packet.eventName = GRUNNLAG_OPPDATERT

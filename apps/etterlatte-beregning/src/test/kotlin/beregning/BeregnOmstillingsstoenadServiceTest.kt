@@ -30,7 +30,7 @@ import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
 import java.time.Month
 import java.time.YearMonth
-import java.util.*
+import java.util.UUID
 import java.util.UUID.randomUUID
 
 internal class BeregnOmstillingsstoenadServiceTest {
@@ -47,7 +47,7 @@ internal class BeregnOmstillingsstoenadServiceTest {
                 grunnlagKlient = grunnlagKlient,
                 vilkaarsvurderingKlient = vilkaarsvurderingKlient,
                 trygdetidKlient = trygdetidKlient,
-                beregningsGrunnlagService = beregningsGrunnlagService
+                beregningsGrunnlagService = beregningsGrunnlagService,
             )
     }
 
@@ -62,7 +62,7 @@ internal class BeregnOmstillingsstoenadServiceTest {
         coEvery {
             beregningsGrunnlagService.hentOmstillingstoenadBeregningsGrunnlag(
                 any(),
-                any()
+                any(),
             )
         } returns omstillingstoenadBeregningsGrunnlag(behandling.id)
 
@@ -106,7 +106,7 @@ internal class BeregnOmstillingsstoenadServiceTest {
         coEvery {
             beregningsGrunnlagService.hentOmstillingstoenadBeregningsGrunnlag(
                 any(),
-                any()
+                any(),
             )
         } returns omstillingstoenadBeregningsGrunnlag(behandling.id)
 
@@ -146,7 +146,7 @@ internal class BeregnOmstillingsstoenadServiceTest {
         coEvery {
             beregningsGrunnlagService.hentOmstillingstoenadBeregningsGrunnlag(
                 any(),
-                any()
+                any(),
             )
         } returns omstillingstoenadBeregningsGrunnlag(behandling.id)
 
@@ -182,7 +182,7 @@ internal class BeregnOmstillingsstoenadServiceTest {
         coEvery {
             beregningsGrunnlagService.hentOmstillingstoenadBeregningsGrunnlag(
                 any(),
-                any()
+                any(),
             )
         } returns omstillingstoenadBeregningsGrunnlag(behandling.id)
 
@@ -219,7 +219,7 @@ internal class BeregnOmstillingsstoenadServiceTest {
         coEvery {
             beregningsGrunnlagService.hentOmstillingstoenadBeregningsGrunnlag(
                 any(),
-                any()
+                any(),
             )
         } returns omstillingstoenadBeregningsGrunnlag(behandling.id)
 
@@ -240,7 +240,7 @@ internal class BeregnOmstillingsstoenadServiceTest {
         coEvery {
             beregningsGrunnlagService.hentOmstillingstoenadBeregningsGrunnlag(
                 any(),
-                any()
+                any(),
             )
         } returns omstillingstoenadBeregningsGrunnlag(behandling.id)
 
@@ -253,7 +253,7 @@ internal class BeregnOmstillingsstoenadServiceTest {
 
     private fun mockBehandling(
         type: BehandlingType,
-        virk: YearMonth = VIRKNINGSTIDSPUNKT_JAN_23
+        virk: YearMonth = VIRKNINGSTIDSPUNKT_JAN_23,
     ): DetaljertBehandling =
         mockk<DetaljertBehandling>().apply {
             every { id } returns randomUUID()
@@ -303,8 +303,8 @@ internal class BeregnOmstillingsstoenadServiceTest {
                     GrunnlagMedPeriode(
                         fom = LocalDate.of(2022, 8, 1),
                         tom = null,
-                        data = InstitusjonsoppholdBeregningsgrunnlag(Reduksjon.NEI_KORT_OPPHOLD)
-                    )
-                )
+                        data = InstitusjonsoppholdBeregningsgrunnlag(Reduksjon.NEI_KORT_OPPHOLD),
+                    ),
+                ),
         )
 }

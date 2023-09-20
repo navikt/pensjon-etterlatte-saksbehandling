@@ -14,22 +14,23 @@ import org.slf4j.LoggerFactory
 class DistribusjonKlient(private val client: HttpClient, private val url: String) {
     private val logger = LoggerFactory.getLogger(DistribusjonKlient::class.java)
 
-    suspend fun distribuerJournalpost(request: DistribuerJournalpostRequest): DistribuerJournalpostResponse = try {
-        client.post("$url/distribuerjournalpost") {
-            accept(ContentType.Application.Json)
-            contentType(ContentType.Application.Json)
-            setBody(request)
-        }.let {
-            when (it.status) {
-                HttpStatusCode.OK -> it.body()
-                HttpStatusCode.Conflict -> it.body()
-                else -> throw ResponseException(it, "Ukjent respons fra dokumentdistribusjon")
+    suspend fun distribuerJournalpost(request: DistribuerJournalpostRequest): DistribuerJournalpostResponse =
+        try {
+            client.post("$url/distribuerjournalpost") {
+                accept(ContentType.Application.Json)
+                contentType(ContentType.Application.Json)
+                setBody(request)
+            }.let {
+                when (it.status) {
+                    HttpStatusCode.OK -> it.body()
+                    HttpStatusCode.Conflict -> it.body()
+                    else -> throw ResponseException(it, "Ukjent respons fra dokumentdistribusjon")
+                }
             }
+        } catch (exception: Exception) {
+            logger.error("Feil i kall mot dokumentdistribusjon: ", exception)
+            throw DistribusjonException("Feil i kall mot dokumentdistribusjon", exception)
         }
-    } catch (exception: Exception) {
-        logger.error("Feil i kall mot dokumentdistribusjon: ", exception)
-        throw DistribusjonException("Feil i kall mot dokumentdistribusjon", exception)
-    }
 }
 
 open class DistribusjonException(msg: String, cause: Throwable) : Exception(msg, cause)

@@ -14,7 +14,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
-import java.util.*
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -31,11 +30,12 @@ internal class FordelerRepositoryTest {
         postgreSQLContainer.withUrlParam("user", postgreSQLContainer.username)
         postgreSQLContainer.withUrlParam("password", postgreSQLContainer.password)
 
-        datasource = DataSourceBuilder.createDataSource(
-            postgreSQLContainer.jdbcUrl,
-            postgreSQLContainer.username,
-            postgreSQLContainer.password
-        )
+        datasource =
+            DataSourceBuilder.createDataSource(
+                postgreSQLContainer.jdbcUrl,
+                postgreSQLContainer.username,
+                postgreSQLContainer.password,
+            )
         datasource.migrate()
         fordelerRepo = FordelerRepository(datasource)
     }
@@ -64,9 +64,10 @@ internal class FordelerRepositoryTest {
 
         fordelerRepo.lagreFordeling(ulagretFordeling)
 
-        val lagretFordeling = fordelerRepo.finnFordeling(ulagretFordeling.soeknadId)?.also {
-            assertNotNull(it)
-        }!!
+        val lagretFordeling =
+            fordelerRepo.finnFordeling(ulagretFordeling.soeknadId)?.also {
+                assertNotNull(it)
+            }!!
 
         assertEquals(ulagretFordeling.soeknadId, lagretFordeling.soeknadId)
         assertEquals(ulagretFordeling.fordeling, lagretFordeling.fordeling)

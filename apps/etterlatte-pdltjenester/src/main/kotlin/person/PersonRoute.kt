@@ -71,7 +71,7 @@ fun Route.personRoute(service: PersonService) {
 
             try {
                 service.hentFolkeregisterIdenterForAktoerIdBolk(
-                    personIdenterForAktoerIdRequest
+                    personIdenterForAktoerIdRequest,
                 ).let { call.respond(it) }
             } catch (e: PdlFantIkkePerson) {
                 call.respond(HttpStatusCode.NotFound)
@@ -112,5 +112,5 @@ fun Route.personRoute(service: PersonService) {
 }
 
 fun PdlFantIkkePerson.tilPdlFeil(): PdlFeil = PdlFeil(aarsak = PdlFeilAarsak.FANT_IKKE_PERSON, detaljer = this.message)
-fun FamilieRelasjonManglerIdent.tilPdlFeil(): PdlFeil =
-    PdlFeil(aarsak = PdlFeilAarsak.INGEN_IDENT_FAMILIERELASJON, detaljer = this.message)
+
+fun FamilieRelasjonManglerIdent.tilPdlFeil(): PdlFeil = PdlFeil(aarsak = PdlFeilAarsak.INGEN_IDENT_FAMILIERELASJON, detaljer = this.message)

@@ -89,19 +89,22 @@ internal class SakServiceTest {
                     enhetService,
                     SaksbehandlerMedRoller(
                         Saksbehandler("", "Z123456", claims),
-                        groups
-                    )
+                        groups,
+                    ),
                 ),
                 object : DatabaseKontekst {
                     override fun activeTx(): Connection {
                         throw IllegalArgumentException()
                     }
 
-                    override fun <T> inTransaction(gjenbruk: Boolean, block: () -> T): T {
+                    override fun <T> inTransaction(
+                        gjenbruk: Boolean,
+                        block: () -> T,
+                    ): T {
                         return block()
                     }
-                }
-            )
+                },
+            ),
         )
     }
 
@@ -130,11 +133,14 @@ internal class SakServiceTest {
                         throw IllegalArgumentException()
                     }
 
-                    override fun <T> inTransaction(gjenbruk: Boolean, block: () -> T): T {
+                    override fun <T> inTransaction(
+                        gjenbruk: Boolean,
+                        block: () -> T,
+                    ): T {
                         return block()
                     }
-                }
-            )
+                },
+            ),
         )
     }
 
@@ -142,18 +148,20 @@ internal class SakServiceTest {
     fun `enhet filtrering skjer hvis vi har en saksbehandler`() {
         saksbehandlerKontekst()
 
-        coEvery { enhetService.enheterForIdent(any()) } returns listOf(
-            SaksbehandlerEnhet(id = Enheter.PORSGRUNN.enhetNr, navn = Enheter.PORSGRUNN.navn)
-        )
-
-        every { sakDao.finnSaker(TRIVIELL_MIDTPUNKT.value) } returns listOf(
-            Sak(
-                id = 1,
-                ident = TRIVIELL_MIDTPUNKT.value,
-                sakType = SakType.BARNEPENSJON,
-                enhet = Enheter.PORSGRUNN.enhetNr
+        coEvery { enhetService.enheterForIdent(any()) } returns
+            listOf(
+                SaksbehandlerEnhet(id = Enheter.PORSGRUNN.enhetNr, navn = Enheter.PORSGRUNN.navn),
             )
-        )
+
+        every { sakDao.finnSaker(TRIVIELL_MIDTPUNKT.value) } returns
+            listOf(
+                Sak(
+                    id = 1,
+                    ident = TRIVIELL_MIDTPUNKT.value,
+                    sakType = SakType.BARNEPENSJON,
+                    enhet = Enheter.PORSGRUNN.enhetNr,
+                ),
+            )
 
         every { featureToggleService.isEnabled(SakServiceFeatureToggle.FiltrerMedEnhetId, false) } returns true
 
@@ -172,18 +180,20 @@ internal class SakServiceTest {
     fun `enhet filtrering skjer hvis vi har en saksbehandler uten riktig enhet`() {
         saksbehandlerKontekst()
 
-        coEvery { enhetService.enheterForIdent(any()) } returns listOf(
-            SaksbehandlerEnhet(id = Enheter.PORSGRUNN.enhetNr, navn = Enheter.PORSGRUNN.navn)
-        )
-
-        every { sakDao.finnSaker(TRIVIELL_MIDTPUNKT.value) } returns listOf(
-            Sak(
-                id = 1,
-                ident = TRIVIELL_MIDTPUNKT.value,
-                sakType = SakType.BARNEPENSJON,
-                enhet = Enheter.STRENGT_FORTROLIG.enhetNr
+        coEvery { enhetService.enheterForIdent(any()) } returns
+            listOf(
+                SaksbehandlerEnhet(id = Enheter.PORSGRUNN.enhetNr, navn = Enheter.PORSGRUNN.navn),
             )
-        )
+
+        every { sakDao.finnSaker(TRIVIELL_MIDTPUNKT.value) } returns
+            listOf(
+                Sak(
+                    id = 1,
+                    ident = TRIVIELL_MIDTPUNKT.value,
+                    sakType = SakType.BARNEPENSJON,
+                    enhet = Enheter.STRENGT_FORTROLIG.enhetNr,
+                ),
+            )
 
         every { featureToggleService.isEnabled(SakServiceFeatureToggle.FiltrerMedEnhetId, false) } returns true
 
@@ -202,18 +212,20 @@ internal class SakServiceTest {
     fun `enhet filtrering skjer ikke hvis vi har en system bruker`() {
         systemBrukerKontekst()
 
-        coEvery { enhetService.enheterForIdent(any()) } returns listOf(
-            SaksbehandlerEnhet(id = Enheter.PORSGRUNN.enhetNr, navn = Enheter.PORSGRUNN.navn)
-        )
-
-        every { sakDao.finnSaker(TRIVIELL_MIDTPUNKT.value) } returns listOf(
-            Sak(
-                id = 1,
-                ident = TRIVIELL_MIDTPUNKT.value,
-                sakType = SakType.BARNEPENSJON,
-                enhet = Enheter.STRENGT_FORTROLIG.enhetNr
+        coEvery { enhetService.enheterForIdent(any()) } returns
+            listOf(
+                SaksbehandlerEnhet(id = Enheter.PORSGRUNN.enhetNr, navn = Enheter.PORSGRUNN.navn),
             )
-        )
+
+        every { sakDao.finnSaker(TRIVIELL_MIDTPUNKT.value) } returns
+            listOf(
+                Sak(
+                    id = 1,
+                    ident = TRIVIELL_MIDTPUNKT.value,
+                    sakType = SakType.BARNEPENSJON,
+                    enhet = Enheter.STRENGT_FORTROLIG.enhetNr,
+                ),
+            )
 
         every { featureToggleService.isEnabled(SakServiceFeatureToggle.FiltrerMedEnhetId, false) } returns true
 
@@ -240,12 +252,13 @@ internal class SakServiceTest {
         val service: SakService =
             RealSakService(sakDao, pdlKlient, norg2Klient, featureToggleService, tilgangService, skjermingKlient)
 
-        val thrown = assertThrows<ResponseException> {
-            service.finnEllerOpprettSak(
-                TRIVIELL_MIDTPUNKT.value,
-                SakType.BARNEPENSJON
-            )
-        }
+        val thrown =
+            assertThrows<ResponseException> {
+                service.finnEllerOpprettSak(
+                    TRIVIELL_MIDTPUNKT.value,
+                    SakType.BARNEPENSJON,
+                )
+            }
 
         thrown.message shouldContain "Oops"
 
@@ -267,9 +280,10 @@ internal class SakServiceTest {
         val service: SakService =
             RealSakService(sakDao, pdlKlient, norg2Klient, featureToggleService, tilgangService, skjermingKlient)
 
-        val thrown = assertThrows<IngenEnhetFunnetException> {
-            service.finnEllerOpprettSak(TRIVIELL_MIDTPUNKT.value, SakType.BARNEPENSJON)
-        }
+        val thrown =
+            assertThrows<IngenEnhetFunnetException> {
+                service.finnEllerOpprettSak(TRIVIELL_MIDTPUNKT.value, SakType.BARNEPENSJON)
+            }
 
         thrown.tema shouldBe SakType.BARNEPENSJON.tema
         thrown.omraade shouldBe "0301"
@@ -284,32 +298,35 @@ internal class SakServiceTest {
         every { sakDao.finnSaker(TRIVIELL_MIDTPUNKT.value) } returns emptyList()
         every {
             sakDao.opprettSak(TRIVIELL_MIDTPUNKT.value, SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
-        } returns Sak(
-            id = 1,
-            ident = TRIVIELL_MIDTPUNKT.value,
-            sakType = SakType.BARNEPENSJON,
-            enhet = Enheter.PORSGRUNN.enhetNr
-        )
+        } returns
+            Sak(
+                id = 1,
+                ident = TRIVIELL_MIDTPUNKT.value,
+                sakType = SakType.BARNEPENSJON,
+                enhet = Enheter.PORSGRUNN.enhetNr,
+            )
         coEvery { skjermingKlient.personErSkjermet(TRIVIELL_MIDTPUNKT.value) } returns false
         every { sakDao.markerSakerMedSkjerming(any(), any()) } returns 0
         every {
             pdlKlient.hentGeografiskTilknytning(TRIVIELL_MIDTPUNKT.value, SakType.BARNEPENSJON)
         } returns GeografiskTilknytning(kommune = "0301", ukjent = false)
-        every { norg2Klient.hentEnheterForOmraade(SakType.BARNEPENSJON.tema, "0301") } returns listOf(
-            ArbeidsFordelingEnhet(Enheter.PORSGRUNN.navn, Enheter.PORSGRUNN.enhetNr)
-        )
+        every { norg2Klient.hentEnheterForOmraade(SakType.BARNEPENSJON.tema, "0301") } returns
+            listOf(
+                ArbeidsFordelingEnhet(Enheter.PORSGRUNN.navn, Enheter.PORSGRUNN.enhetNr),
+            )
 
         val service: SakService =
             RealSakService(sakDao, pdlKlient, norg2Klient, featureToggleService, tilgangService, skjermingKlient)
 
         val sak = service.finnEllerOpprettSak(TRIVIELL_MIDTPUNKT.value, SakType.BARNEPENSJON)
 
-        sak shouldBe Sak(
-            ident = TRIVIELL_MIDTPUNKT.value,
-            sakType = SakType.BARNEPENSJON,
-            id = 1,
-            enhet = Enheter.PORSGRUNN.enhetNr
-        )
+        sak shouldBe
+            Sak(
+                ident = TRIVIELL_MIDTPUNKT.value,
+                sakType = SakType.BARNEPENSJON,
+                id = 1,
+                enhet = Enheter.PORSGRUNN.enhetNr,
+            )
 
         verify(exactly = 1) { sakDao.markerSakerMedSkjerming(any(), any()) }
         verify(exactly = 1) { sakDao.finnSaker(TRIVIELL_MIDTPUNKT.value) }
@@ -328,40 +345,44 @@ internal class SakServiceTest {
         every { sakDao.markerSakerMedSkjerming(any(), any()) } returns 0
         every {
             sakDao.opprettSak(TRIVIELL_MIDTPUNKT.value, SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
-        } returns Sak(
-            id = 1,
-            ident = TRIVIELL_MIDTPUNKT.value,
-            sakType = SakType.BARNEPENSJON,
-            enhet = Enheter.PORSGRUNN.enhetNr
-        )
+        } returns
+            Sak(
+                id = 1,
+                ident = TRIVIELL_MIDTPUNKT.value,
+                sakType = SakType.BARNEPENSJON,
+                enhet = Enheter.PORSGRUNN.enhetNr,
+            )
         every {
             pdlKlient.hentGeografiskTilknytning(TRIVIELL_MIDTPUNKT.value, SakType.BARNEPENSJON)
         } returns GeografiskTilknytning(kommune = "0301", ukjent = false)
-        every { norg2Klient.hentEnheterForOmraade(SakType.BARNEPENSJON.tema, "0301") } returns listOf(
-            ArbeidsFordelingEnhet(Enheter.PORSGRUNN.navn, Enheter.PORSGRUNN.enhetNr)
-        )
+        every { norg2Klient.hentEnheterForOmraade(SakType.BARNEPENSJON.tema, "0301") } returns
+            listOf(
+                ArbeidsFordelingEnhet(Enheter.PORSGRUNN.navn, Enheter.PORSGRUNN.enhetNr),
+            )
         every { tilgangService.oppdaterAdressebeskyttelse(any(), any()) } returns 1
 
         val service: SakService =
             RealSakService(sakDao, pdlKlient, norg2Klient, featureToggleService, tilgangService, skjermingKlient)
 
-        val sak = service.finnEllerOpprettSak(
-            TRIVIELL_MIDTPUNKT.value,
-            SakType.BARNEPENSJON,
-            gradering = AdressebeskyttelseGradering.STRENGT_FORTROLIG
-        )
+        val sak =
+            service.finnEllerOpprettSak(
+                TRIVIELL_MIDTPUNKT.value,
+                SakType.BARNEPENSJON,
+                gradering = AdressebeskyttelseGradering.STRENGT_FORTROLIG,
+            )
 
-        sak shouldBe Sak(
-            ident = TRIVIELL_MIDTPUNKT.value,
-            sakType = SakType.BARNEPENSJON,
-            id = 1,
-            enhet = Enheter.PORSGRUNN.enhetNr
-        )
+        sak shouldBe
+            Sak(
+                ident = TRIVIELL_MIDTPUNKT.value,
+                sakType = SakType.BARNEPENSJON,
+                id = 1,
+                enhet = Enheter.PORSGRUNN.enhetNr,
+            )
 
         verify(exactly = 1) {
             tilgangService.oppdaterAdressebeskyttelse(
                 sak.id,
-                AdressebeskyttelseGradering.STRENGT_FORTROLIG
+                AdressebeskyttelseGradering.STRENGT_FORTROLIG,
             )
         }
         verify(exactly = 1) { sakDao.markerSakerMedSkjerming(any(), any()) }
@@ -377,18 +398,20 @@ internal class SakServiceTest {
     fun `filtrerer for saksbehandler med nasjonal tilgang`() {
         saksbehandlerKontekst(nasjonalTilgang = true)
 
-        coEvery { enhetService.enheterForIdent(any()) } returns listOf(
-            SaksbehandlerEnhet(id = Enheter.PORSGRUNN.enhetNr, navn = Enheter.PORSGRUNN.navn)
-        )
-
-        every { sakDao.finnSaker(TRIVIELL_MIDTPUNKT.value) } returns listOf(
-            Sak(
-                id = 1,
-                ident = TRIVIELL_MIDTPUNKT.value,
-                sakType = SakType.BARNEPENSJON,
-                enhet = Enheter.STEINKJER.enhetNr
+        coEvery { enhetService.enheterForIdent(any()) } returns
+            listOf(
+                SaksbehandlerEnhet(id = Enheter.PORSGRUNN.enhetNr, navn = Enheter.PORSGRUNN.navn),
             )
-        )
+
+        every { sakDao.finnSaker(TRIVIELL_MIDTPUNKT.value) } returns
+            listOf(
+                Sak(
+                    id = 1,
+                    ident = TRIVIELL_MIDTPUNKT.value,
+                    sakType = SakType.BARNEPENSJON,
+                    enhet = Enheter.STEINKJER.enhetNr,
+                ),
+            )
 
         every { featureToggleService.isEnabled(SakServiceFeatureToggle.FiltrerMedEnhetId, false) } returns true
 
@@ -409,32 +432,35 @@ internal class SakServiceTest {
         every { sakDao.finnSaker(TRIVIELL_MIDTPUNKT.value) } returns emptyList()
         every {
             sakDao.opprettSak(TRIVIELL_MIDTPUNKT.value, SakType.BARNEPENSJON, Enheter.EGNE_ANSATTE.enhetNr)
-        } returns Sak(
-            id = 1,
-            ident = TRIVIELL_MIDTPUNKT.value,
-            sakType = SakType.BARNEPENSJON,
-            enhet = Enheter.EGNE_ANSATTE.enhetNr
-        )
+        } returns
+            Sak(
+                id = 1,
+                ident = TRIVIELL_MIDTPUNKT.value,
+                sakType = SakType.BARNEPENSJON,
+                enhet = Enheter.EGNE_ANSATTE.enhetNr,
+            )
         coEvery { skjermingKlient.personErSkjermet(TRIVIELL_MIDTPUNKT.value) } returns true
         every { sakDao.oppdaterEnheterPaaSaker(any()) } just runs
         every { sakDao.markerSakerMedSkjerming(any(), any()) } returns 1
         every {
             pdlKlient.hentGeografiskTilknytning(TRIVIELL_MIDTPUNKT.value, SakType.BARNEPENSJON)
         } returns GeografiskTilknytning(kommune = "0301", ukjent = false)
-        every { norg2Klient.hentEnheterForOmraade(SakType.BARNEPENSJON.tema, "0301") } returns listOf(
-            ArbeidsFordelingEnhet(Enheter.EGNE_ANSATTE.navn, Enheter.EGNE_ANSATTE.enhetNr)
-        )
+        every { norg2Klient.hentEnheterForOmraade(SakType.BARNEPENSJON.tema, "0301") } returns
+            listOf(
+                ArbeidsFordelingEnhet(Enheter.EGNE_ANSATTE.navn, Enheter.EGNE_ANSATTE.enhetNr),
+            )
 
         val service: SakService =
             RealSakService(sakDao, pdlKlient, norg2Klient, featureToggleService, tilgangService, skjermingKlient)
         val sak = service.finnEllerOpprettSak(TRIVIELL_MIDTPUNKT.value, SakType.BARNEPENSJON)
 
-        sak shouldBe Sak(
-            ident = TRIVIELL_MIDTPUNKT.value,
-            sakType = SakType.BARNEPENSJON,
-            id = 1,
-            enhet = Enheter.EGNE_ANSATTE.enhetNr
-        )
+        sak shouldBe
+            Sak(
+                ident = TRIVIELL_MIDTPUNKT.value,
+                sakType = SakType.BARNEPENSJON,
+                id = 1,
+                enhet = Enheter.EGNE_ANSATTE.enhetNr,
+            )
 
         verify(exactly = 1) { sakDao.markerSakerMedSkjerming(any(), any()) }
         verify(exactly = 1) { sakDao.finnSaker(TRIVIELL_MIDTPUNKT.value) }

@@ -1,4 +1,6 @@
-package no.nav.etterlatte.testdata.features.soeknad // ktlint-disable filename
+@file:Suppress("ktlint:standard:filename")
+
+package no.nav.etterlatte.testdata.features.soeknad
 
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.readValue
@@ -21,7 +23,7 @@ import no.nav.etterlatte.producer
 import no.nav.etterlatte.testdata.JsonMessage
 import java.time.LocalDateTime
 import java.time.OffsetDateTime
-import java.util.*
+import java.util.UUID
 
 object OpprettSoeknadFeature : TestDataFeature {
     override val beskrivelse: String
@@ -36,26 +38,27 @@ object OpprettSoeknadFeature : TestDataFeature {
                         "soeknad/ny-soeknad.hbs",
                         mapOf(
                             "beskrivelse" to beskrivelse,
-                            "path" to path
-                        )
-                    )
+                            "path" to path,
+                        ),
+                    ),
                 )
             }
 
             post {
                 try {
-                    val (partisjon, offset) = call.receiveParameters().let {
-                        producer.publiser(
-                            requireNotNull(it["key"]),
-                            opprettSoeknadJson(
-                                ytelse = it["ytelse"]!!,
-                                gjenlevendeFnr = it["fnrGjenlevende"]!!,
-                                avdoedFnr = it["fnrAvdoed"]!!,
-                                barnFnr = it["fnrBarn"]!!
-                            ),
-                            mapOf("NavIdent" to (navIdentFraToken()!!.toByteArray()))
-                        )
-                    }
+                    val (partisjon, offset) =
+                        call.receiveParameters().let {
+                            producer.publiser(
+                                requireNotNull(it["key"]),
+                                opprettSoeknadJson(
+                                    ytelse = it["ytelse"]!!,
+                                    gjenlevendeFnr = it["fnrGjenlevende"]!!,
+                                    avdoedFnr = it["fnrAvdoed"]!!,
+                                    barnFnr = it["fnrBarn"]!!,
+                                ),
+                                mapOf("NavIdent" to (navIdentFraToken()!!.toByteArray())),
+                            )
+                        }
                     logger.info("Publiserer melding med partisjon: $partisjon offset: $offset")
 
                     call.respondRedirect("/$path/sendt?partisjon=$partisjon&offset=$offset")
@@ -65,8 +68,8 @@ object OpprettSoeknadFeature : TestDataFeature {
                     call.respond(
                         MustacheContent(
                             "error.hbs",
-                            mapOf("errorMessage" to e.message, "stacktrace" to e.stackTraceToString())
-                        )
+                            mapOf("errorMessage" to e.message, "stacktrace" to e.stackTraceToString()),
+                        ),
                     )
                 }
             }
@@ -82,15 +85,20 @@ object OpprettSoeknadFeature : TestDataFeature {
                             "path" to path,
                             "beskrivelse" to beskrivelse,
                             "partisjon" to partisjon,
-                            "offset" to offset
-                        )
-                    )
+                            "offset" to offset,
+                        ),
+                    ),
                 )
             }
         }
 }
 
-private fun opprettSoeknadJson(ytelse: String, gjenlevendeFnr: String, avdoedFnr: String, barnFnr: String): String {
+private fun opprettSoeknadJson(
+    ytelse: String,
+    gjenlevendeFnr: String,
+    avdoedFnr: String,
+    barnFnr: String,
+): String {
     val erOmstilling = "Omstillingsstoenad" == ytelse
     val skjemaInfo: String
     val soeker: String
@@ -98,20 +106,22 @@ private fun opprettSoeknadJson(ytelse: String, gjenlevendeFnr: String, avdoedFnr
     if (erOmstilling) {
         eventName = "soeknad_innsendt"
         soeker = gjenlevendeFnr
-        skjemaInfo = opprettSkjemaInfoOmstillingsstoenad(
-            gjenlevendeFnr,
-            avdoedFnr,
-            Tidspunkt.now().toLocalDatetimeUTC()
-        )
+        skjemaInfo =
+            opprettSkjemaInfoOmstillingsstoenad(
+                gjenlevendeFnr,
+                avdoedFnr,
+                Tidspunkt.now().toLocalDatetimeUTC(),
+            )
     } else {
         eventName = SoeknadInnsendt.eventNameBehandlingBehov
         soeker = barnFnr
-        skjemaInfo = opprettSkjemaInfoBarnepensjon(
-            gjenlevendeFnr,
-            barnFnr,
-            avdoedFnr,
-            Tidspunkt.now().toLocalDatetimeUTC()
-        )
+        skjemaInfo =
+            opprettSkjemaInfoBarnepensjon(
+                gjenlevendeFnr,
+                barnFnr,
+                avdoedFnr,
+                Tidspunkt.now().toLocalDatetimeUTC(),
+            )
     }
     return JsonMessage.newMessage(
         mutableMapOf(
@@ -121,133 +131,107 @@ private fun opprettSoeknadJson(ytelse: String, gjenlevendeFnr: String, avdoedFnr
             "@template" to "soeknad",
             "@fnr_soeker" to soeker,
             "@hendelse_gyldig_til" to OffsetDateTime.now().plusMinutes(60L),
-            "@adressebeskyttelse" to "UGRADERT"
-        )
+            "@adressebeskyttelse" to "UGRADERT",
+        ),
     ).toJson()
 }
 
 fun opprettSkjemaInfoOmstillingsstoenad(
     gjenlevendeFnr: String,
     avdoedFnr: String,
-    mottatt: LocalDateTime?
+    mottatt: LocalDateTime?,
 ) = """
-       {
-    "imageTag": "9f1f95b2472742227b37d19dd2d735ac9001995e",
-    "spraak": "nb",
-    "innsender": {
-      "fornavn": {
-        "svar": "GØYAL",
-        "spoersmaal": "Fornavn"
-      },
-      "etternavn": {
-        "svar": "HØYSTAKK",
-        "spoersmaal": "Etternavn"
-      },
-      "foedselsnummer": {
-        "svar": "$gjenlevendeFnr",
-        "spoersmaal": "Fødselsnummer"
-      },
-      "type": "INNSENDER"
-    },
-    "harSamtykket": {
-      "svar": true,
-      "spoersmaal": ""
-    },
-    "utbetalingsInformasjon": {
-      "svar": {
-        "verdi": "NORSK",
-        "innhold": "Norsk"
-      },
-      "spoersmaal": "Ønsker du å motta utbetalingen på norsk eller utenlandsk bankkonto?",
-      "opplysning": {
-        "kontonummer": {
-          "svar": {
-            "innhold": "6848.64.44444"
-          },
-          "spoersmaal": "Oppgi norsk kontonummer for utbetaling"
+         {
+      "imageTag": "9f1f95b2472742227b37d19dd2d735ac9001995e",
+      "spraak": "nb",
+      "innsender": {
+        "fornavn": {
+          "svar": "GØYAL",
+          "spoersmaal": "Fornavn"
         },
-        "utenlandskBankNavn": null,
-        "utenlandskBankAdresse": null,
-        "iban": null,
-        "swift": null,
-        "skattetrekk": null
-      }
-    },
-    "soeker": {
-      "fornavn": {
-        "svar": "kirsten",
-        "spoersmaal": "Fornavn"
+        "etternavn": {
+          "svar": "HØYSTAKK",
+          "spoersmaal": "Etternavn"
+        },
+        "foedselsnummer": {
+          "svar": "$gjenlevendeFnr",
+          "spoersmaal": "Fødselsnummer"
+        },
+        "type": "INNSENDER"
       },
-      "etternavn": {
-        "svar": "jakobsen",
-        "spoersmaal": "Etternavn"
+      "harSamtykket": {
+        "svar": true,
+        "spoersmaal": ""
       },
-      "foedselsnummer": {
-        "svar": "$gjenlevendeFnr",
-        "spoersmaal": "Barnets fødselsnummer / d-nummer"
-      },
-      "statsborgerskap": {
-        "svar": "Norge",
-        "spoersmaal": "Statsborgerskap"
-      },
-      "sivilstatus": {
-        "svar": "Gift",
-        "spoersmaal": "sivilstatus"
-      },
-      "adresse": {
-        "svar": "Et sted 31",
-        "spoersmaal": "adresse"
-      },
-      "bostedsAdresse": {
+      "utbetalingsInformasjon": {
         "svar": {
-          "verdi": "NEI",
-          "innhold": "Nei"
+          "verdi": "NORSK",
+          "innhold": "Norsk"
         },
-        "spoersmaal": "Bor søker i et annet land enn Norge?",
-        "opplysning": null
-      },
-      "kontaktinfo": {
-        "telefonnummer": {
-          "svar": {
-            "innhold": "12345678"
+        "spoersmaal": "Ønsker du å motta utbetalingen på norsk eller utenlandsk bankkonto?",
+        "opplysning": {
+          "kontonummer": {
+            "svar": {
+              "innhold": "6848.64.44444"
+            },
+            "spoersmaal": "Oppgi norsk kontonummer for utbetaling"
           },
-          "spoersmaal": "telefonnummer"
+          "utenlandskBankNavn": null,
+          "utenlandskBankAdresse": null,
+          "iban": null,
+          "swift": null,
+          "skattetrekk": null
         }
       },
-      "flyktning": {
-        "svar": {
-          "verdi": "NEI",
-          "innhold": "Nei"
+      "soeker": {
+        "fornavn": {
+          "svar": "kirsten",
+          "spoersmaal": "Fornavn"
         },
-        "spoersmaal": "Flyktning?"
-      },
-      "oppholdUtland": {
-        "svar": {
-          "verdi": "NEI",
-          "innhold": "Nei"
+        "etternavn": {
+          "svar": "jakobsen",
+          "spoersmaal": "Etternavn"
         },
-        "spoersmaal": "Opphold utlandet?",
-        "opplysning": null
-      },
-      "nySivilstatus": {
-        "svar": {
-          "verdi": "EKTESKAP",
-          "innhold": "Nei"
+        "foedselsnummer": {
+          "svar": "$gjenlevendeFnr",
+          "spoersmaal": "Barnets fødselsnummer / d-nummer"
         },
-        "spoersmaal": "Opphold utlandet?",
-        "opplysning": null
-      },
-      "arbeidOgUtdanning": null,
-      "fullfoertUtdanning": {
-        "svar": {
-          "verdi": "FAGBREV",
-          "innhold": "Nei"
+        "statsborgerskap": {
+          "svar": "Norge",
+          "spoersmaal": "Statsborgerskap"
         },
-        "spoersmaal": "Opphold utlandet?",
-        "opplysning": null
-      },
-      "andreYtelser": {
-        "kravOmAnnenStonad": {
+        "sivilstatus": {
+          "svar": "Gift",
+          "spoersmaal": "sivilstatus"
+        },
+        "adresse": {
+          "svar": "Et sted 31",
+          "spoersmaal": "adresse"
+        },
+        "bostedsAdresse": {
+          "svar": {
+            "verdi": "NEI",
+            "innhold": "Nei"
+          },
+          "spoersmaal": "Bor søker i et annet land enn Norge?",
+          "opplysning": null
+        },
+        "kontaktinfo": {
+          "telefonnummer": {
+            "svar": {
+              "innhold": "12345678"
+            },
+            "spoersmaal": "telefonnummer"
+          }
+        },
+        "flyktning": {
+          "svar": {
+            "verdi": "NEI",
+            "innhold": "Nei"
+          },
+          "spoersmaal": "Flyktning?"
+        },
+        "oppholdUtland": {
           "svar": {
             "verdi": "NEI",
             "innhold": "Nei"
@@ -255,105 +239,131 @@ fun opprettSkjemaInfoOmstillingsstoenad(
           "spoersmaal": "Opphold utlandet?",
           "opplysning": null
         },
-        "annenPensjon": {
+        "nySivilstatus": {
           "svar": {
-            "verdi": "NEI",
+            "verdi": "EKTESKAP",
             "innhold": "Nei"
           },
           "spoersmaal": "Opphold utlandet?",
           "opplysning": null
         },
-        "pensjonUtland": {
+        "arbeidOgUtdanning": null,
+        "fullfoertUtdanning": {
           "svar": {
-            "verdi": "NEI",
+            "verdi": "FAGBREV",
             "innhold": "Nei"
           },
           "spoersmaal": "Opphold utlandet?",
           "opplysning": null
-        }
-      },
-      "uregistrertEllerVenterBarn": {
-        "svar": {
-          "verdi": "NEI",
-          "innhold": "Nei"
         },
-        "spoersmaal": "Uregistrert eller ventende barn?"
-      },
-      "forholdTilAvdoede": {
-        "relasjon": {
-          "svar": {
-            "verdi": "GIFT",
-            "innhold": "Gift"
+        "andreYtelser": {
+          "kravOmAnnenStonad": {
+            "svar": {
+              "verdi": "NEI",
+              "innhold": "Nei"
+            },
+            "spoersmaal": "Opphold utlandet?",
+            "opplysning": null
           },
-          "spoersmaal": "Relasjon?"
-        },
-        "fellesBarn": {
-          "svar": {
-            "verdi": "JA",
-            "innhold": "Ja"
+          "annenPensjon": {
+            "svar": {
+              "verdi": "NEI",
+              "innhold": "Nei"
+            },
+            "spoersmaal": "Opphold utlandet?",
+            "opplysning": null
           },
-          "spoersmaal": "Felles barn?"
-        }
-      },
-      "type": "GJENLEVENDE"
-    },
-    "avdoed": {
-      "fornavn": {
-        "svar": "kirsten",
-        "spoersmaal": "Fornavn"
-      },
-      "etternavn": {
-        "svar": "jakobsen",
-        "spoersmaal": "Etternavn"
-      },
-      "foedselsnummer": {
-        "svar": "$avdoedFnr",
-        "spoersmaal": "Barnets fødselsnummer / d-nummer"
-      },
-      "datoForDoedsfallet": {
-        "svar": {
-          "innhold": "2022-12-01T14:37:24.573612786"
+          "pensjonUtland": {
+            "svar": {
+              "verdi": "NEI",
+              "innhold": "Nei"
+            },
+            "spoersmaal": "Opphold utlandet?",
+            "opplysning": null
+          }
         },
-        "spoersmaal": "Statsborgerskap?"
-      },
-      "statsborgerskap": {
-        "svar": {
-          "innhold": "Norge"
+        "uregistrertEllerVenterBarn": {
+          "svar": {
+            "verdi": "NEI",
+            "innhold": "Nei"
+          },
+          "spoersmaal": "Uregistrert eller ventende barn?"
         },
-        "spoersmaal": "Statsborgerskap?"
-      },
-      "utenlandsopphold": {
-        "svar": {
-          "verdi": "NEI",
-          "innhold": "Nei"
+        "forholdTilAvdoede": {
+          "relasjon": {
+            "svar": {
+              "verdi": "GIFT",
+              "innhold": "Gift"
+            },
+            "spoersmaal": "Relasjon?"
+          },
+          "fellesBarn": {
+            "svar": {
+              "verdi": "JA",
+              "innhold": "Ja"
+            },
+            "spoersmaal": "Felles barn?"
+          }
         },
-        "spoersmaal": "Opphold i utlandet?",
-        "opplysning": []
+        "type": "GJENLEVENDE"
       },
-      "doedsaarsakSkyldesYrkesskadeEllerYrkessykdom": {
-        "svar": {
-          "verdi": "NEI",
-          "innhold": "Nei"
+      "avdoed": {
+        "fornavn": {
+          "svar": "kirsten",
+          "spoersmaal": "Fornavn"
         },
-        "spoersmaal": "Dødsårsak skyldes yrkesskade eller yrkessykdom?"
+        "etternavn": {
+          "svar": "jakobsen",
+          "spoersmaal": "Etternavn"
+        },
+        "foedselsnummer": {
+          "svar": "$avdoedFnr",
+          "spoersmaal": "Barnets fødselsnummer / d-nummer"
+        },
+        "datoForDoedsfallet": {
+          "svar": {
+            "innhold": "2022-12-01T14:37:24.573612786"
+          },
+          "spoersmaal": "Statsborgerskap?"
+        },
+        "statsborgerskap": {
+          "svar": {
+            "innhold": "Norge"
+          },
+          "spoersmaal": "Statsborgerskap?"
+        },
+        "utenlandsopphold": {
+          "svar": {
+            "verdi": "NEI",
+            "innhold": "Nei"
+          },
+          "spoersmaal": "Opphold i utlandet?",
+          "opplysning": []
+        },
+        "doedsaarsakSkyldesYrkesskadeEllerYrkessykdom": {
+          "svar": {
+            "verdi": "NEI",
+            "innhold": "Nei"
+          },
+          "spoersmaal": "Dødsårsak skyldes yrkesskade eller yrkessykdom?"
+        },
+        "naeringsInntekt": null,
+        "militaertjeneste": null,
+        "type": "AVDOED"
       },
-      "naeringsInntekt": null,
-      "militaertjeneste": null,
-      "type": "AVDOED"
-    },
-    "barn": [],
-    "versjon": "1",
-    "type": "OMSTILLINGSSTOENAD",
-    "mottattDato": "$mottatt",
-    "template": "omstillingsstoenad_v1"
-  } 
-""".trimIndent()
+      "barn": [],
+      "versjon": "1",
+      "type": "OMSTILLINGSSTOENAD",
+      "mottattDato": "$mottatt",
+      "template": "omstillingsstoenad_v1"
+    } 
+    """.trimIndent()
 
 private fun opprettSkjemaInfoBarnepensjon(
     gjenlevendeFnr: String,
     barnFnr: String,
     avdoedFnr: String,
-    mottattDato: LocalDateTime
+    mottattDato: LocalDateTime,
 ) = """
     {
       "imageTag": "ce3542f9645d280bfff9936bdd0e7efc32424de2",
@@ -593,4 +603,4 @@ private fun opprettSkjemaInfoBarnepensjon(
       "mottattDato": "$mottattDato",
       "template": "barnepensjon_v2"
     }
-""".trimIndent()
+    """.trimIndent()

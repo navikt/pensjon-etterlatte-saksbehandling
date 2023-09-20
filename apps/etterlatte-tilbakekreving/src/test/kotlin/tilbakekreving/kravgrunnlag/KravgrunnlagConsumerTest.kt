@@ -11,7 +11,6 @@ import org.junit.jupiter.api.Test
 import java.math.BigInteger
 
 class KravgrunnlagConsumerTest {
-
     private val connectionFactory: EtterlatteJmsConnectionFactory = DummyJmsConnectionFactory()
     private lateinit var kravgrunnlagConsumer: KravgrunnlagConsumer
     private lateinit var kravgrunnlagService: KravgrunnlagService

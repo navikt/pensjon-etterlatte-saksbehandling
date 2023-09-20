@@ -22,7 +22,7 @@ import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import rapidsandrivers.getRapidEnv
-import java.util.*
+import java.util.UUID
 
 val sikkerLogg: Logger = LoggerFactory.getLogger("sikkerLogg")
 
@@ -34,20 +34,22 @@ class ApplicationBuilder {
     private val env = System.getenv()
     private val config: Config = ConfigFactory.load()
     private val properties: ApplicationProperties = ApplicationProperties.fromEnv(env)
-    private val dataSource = DataSourceBuilder.createDataSource(
-        jdbcUrl = properties.jdbcUrl,
-        username = properties.dbUsername,
-        password = properties.dbPassword
-    )
+    private val dataSource =
+        DataSourceBuilder.createDataSource(
+            jdbcUrl = properties.jdbcUrl,
+            username = properties.dbUsername,
+            password = properties.dbPassword,
+        )
 
     private val behandlingKlient = BehandlingKlientImpl(config, httpClient())
-    private val vedtaksvurderingService = VedtaksvurderingService(
-        repository = VedtaksvurderingRepository.using(dataSource),
-        beregningKlient = BeregningKlientImpl(config, httpClient()),
-        vilkaarsvurderingKlient = VilkaarsvurderingKlientImpl(config, httpClient()),
-        behandlingKlient = behandlingKlient,
-        sendToRapid = ::publiser
-    )
+    private val vedtaksvurderingService =
+        VedtaksvurderingService(
+            repository = VedtaksvurderingRepository.using(dataSource),
+            beregningKlient = BeregningKlientImpl(config, httpClient()),
+            vilkaarsvurderingKlient = VilkaarsvurderingKlientImpl(config, httpClient()),
+            behandlingKlient = behandlingKlient,
+            sendToRapid = ::publiser,
+        )
 
     private val rapidsConnection =
         RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(getRapidEnv()))
@@ -60,16 +62,21 @@ class ApplicationBuilder {
             }
             .build()
             .apply {
-                register(object : RapidsConnection.StatusListener {
-                    override fun onStartup(rapidsConnection: RapidsConnection) {
-                        dataSource.migrate()
-                    }
-                })
+                register(
+                    object : RapidsConnection.StatusListener {
+                        override fun onStartup(rapidsConnection: RapidsConnection) {
+                            dataSource.migrate()
+                        }
+                    },
+                )
             }
 
     fun start() = setReady().also { rapidsConnection.start() }
 
-    private fun publiser(melding: String, key: UUID) {
+    private fun publiser(
+        melding: String,
+        key: UUID,
+    ) {
         rapidsConnection.publish(message = melding, key = key.toString())
     }
 }

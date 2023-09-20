@@ -67,11 +67,10 @@ import org.junit.jupiter.params.provider.CsvSource
 import org.junit.jupiter.params.provider.EnumSource
 import java.time.LocalDate
 import java.time.YearMonth
-import java.util.*
+import java.util.UUID
 import kotlin.random.Random
 
 internal class VedtaksbrevServiceTest {
-
     private val db = mockk<BrevRepository>(relaxed = true)
     private val brevbaker = mockk<BrevbakerKlient>()
     private val brevService = mockk<BrevService>()
@@ -91,7 +90,7 @@ internal class VedtaksbrevServiceTest {
             dokarkivService,
             BrevbakerService(brevbaker, adresseService, brevDataMapper),
             brevDataMapper,
-            brevProsessTypeFactory
+            brevProsessTypeFactory,
         )
 
     @BeforeEach
@@ -144,7 +143,6 @@ internal class VedtaksbrevServiceTest {
 
     @Nested
     inner class OpprettVedtaksbrevTest {
-
         @ParameterizedTest
         @CsvSource(
             value = [
@@ -154,13 +152,13 @@ internal class VedtaksbrevServiceTest {
                 "BARNEPENSJON,INNVILGELSE,AUTOMATISK",
                 "BARNEPENSJON,OPPHOER,MANUELL",
                 "BARNEPENSJON,AVSLAG,MANUELL",
-                "BARNEPENSJON,ENDRING,MANUELL"
-            ]
+                "BARNEPENSJON,ENDRING,MANUELL",
+            ],
         )
         fun `Vedtaksbrev finnes ikke - skal opprettes nytt`(
             sakType: SakType,
             vedtakType: VedtakType,
-            forventetProsessType: BrevProsessType
+            forventetProsessType: BrevProsessType,
         ) {
             val sakId = Random.nextLong()
             val behandling = opprettBehandling(sakType, vedtakType)
@@ -174,7 +172,7 @@ internal class VedtaksbrevServiceTest {
                 vedtaksbrevService.opprettVedtaksbrev(
                     sakId,
                     BEHANDLING_ID,
-                    ATTESTANT
+                    ATTESTANT,
                 )
             }
 
@@ -203,13 +201,13 @@ internal class VedtaksbrevServiceTest {
         @ParameterizedTest
         @CsvSource(
             value = [
-                "BARNEPENSJON,YRKESSKADE,REDIGERBAR"
-            ]
+                "BARNEPENSJON,YRKESSKADE,REDIGERBAR",
+            ],
         )
         fun `Vedtaksbrev finnes ikke - skal opprette nytt redigerbart brev`(
             sakType: SakType,
             revurderingsaarsak: RevurderingAarsak,
-            forventetProsessType: BrevProsessType
+            forventetProsessType: BrevProsessType,
         ) {
             val sakId = Random.nextLong()
             val behandling = opprettBehandling(sakType, VedtakType.ENDRING, revurderingsaarsak = revurderingsaarsak)
@@ -225,7 +223,7 @@ internal class VedtaksbrevServiceTest {
                 vedtaksbrevService.opprettVedtaksbrev(
                     sakId,
                     BEHANDLING_ID,
-                    ATTESTANT
+                    ATTESTANT,
                 )
             }
 
@@ -261,7 +259,7 @@ internal class VedtaksbrevServiceTest {
                     vedtaksbrevService.opprettVedtaksbrev(
                         SAK_ID,
                         BEHANDLING_ID,
-                        SAKSBEHANDLER
+                        SAKSBEHANDLER,
                     )
                 }
             }
@@ -456,9 +454,10 @@ internal class VedtaksbrevServiceTest {
                 db.oppdaterPayload(brev.id, tomPayload)
             }
 
-            val nyttInnhold = runBlocking {
-                vedtaksbrevService.hentNyttInnhold(brev.sakId, brev.id, brev.behandlingId!!, SAKSBEHANDLER)
-            }
+            val nyttInnhold =
+                runBlocking {
+                    vedtaksbrevService.hentNyttInnhold(brev.sakId, brev.id, brev.behandlingId!!, SAKSBEHANDLER)
+                }
 
             nyttInnhold shouldBe BrevService.BrevPayload(opphoerPayload, emptyList())
 
@@ -477,7 +476,7 @@ internal class VedtaksbrevServiceTest {
         @EnumSource(
             Status::class,
             mode = EnumSource.Mode.EXCLUDE,
-            names = ["OPPRETTET", "OPPDATERT"]
+            names = ["OPPRETTET", "OPPDATERT"],
         )
         fun `Brev innhold kan ikke endres`(status: Status) {
             val brev = opprettBrev(status, mockk())
@@ -513,9 +512,10 @@ internal class VedtaksbrevServiceTest {
 
             val vedtak = opprettVedtak()
 
-            val response = runBlocking {
-                vedtaksbrevService.journalfoerVedtaksbrev(forventetBrev, vedtak)
-            }
+            val response =
+                runBlocking {
+                    vedtaksbrevService.journalfoerVedtaksbrev(forventetBrev, vedtak)
+                }
 
             assertEquals(forventetResponse, response)
 
@@ -533,18 +533,19 @@ internal class VedtaksbrevServiceTest {
         @EnumSource(
             Status::class,
             mode = EnumSource.Mode.EXCLUDE,
-            names = ["FERDIGSTILT"]
+            names = ["FERDIGSTILT"],
         )
         fun `Journalfoering av brev med ugyldig status`(status: Status) {
-            val brev = Brev(
-                Random.nextLong(),
-                Random.nextLong(),
-                BEHANDLING_ID,
-                BrevProsessType.AUTOMATISK,
-                "fnr",
-                status,
-                opprettMottaker()
-            )
+            val brev =
+                Brev(
+                    Random.nextLong(),
+                    Random.nextLong(),
+                    BEHANDLING_ID,
+                    BrevProsessType.AUTOMATISK,
+                    "fnr",
+                    status,
+                    opprettMottaker(),
+                )
 
             runBlocking {
                 assertThrows<IllegalArgumentException> {
@@ -561,7 +562,7 @@ internal class VedtaksbrevServiceTest {
 
     private fun opprettBrev(
         status: Status,
-        prosessType: BrevProsessType
+        prosessType: BrevProsessType,
     ) = Brev(
         id = Random.nextLong(10000),
         sakId = Random.nextLong(10000),
@@ -569,21 +570,22 @@ internal class VedtaksbrevServiceTest {
         prosessType = prosessType,
         soekerFnr = "fnr",
         status = status,
-        mottaker = opprettMottaker()
+        mottaker = opprettMottaker(),
     )
 
-    private fun opprettVedtak() = VedtakTilJournalfoering(
-        vedtakId = 1234,
-        sak = VedtakSak("ident", SakType.BARNEPENSJON, 4),
-        behandlingId = BEHANDLING_ID,
-        ansvarligEnhet = "ansvarlig enhet"
-    )
+    private fun opprettVedtak() =
+        VedtakTilJournalfoering(
+            vedtakId = 1234,
+            sak = VedtakSak("ident", SakType.BARNEPENSJON, 4),
+            behandlingId = BEHANDLING_ID,
+            ansvarligEnhet = "ansvarlig enhet",
+        )
 
     private fun opprettBehandling(
         sakType: SakType,
         vedtakType: VedtakType,
         vedtakStatus: VedtakStatus = VedtakStatus.OPPRETTET,
-        revurderingsaarsak: RevurderingAarsak? = null
+        revurderingsaarsak: RevurderingAarsak? = null,
     ) = Behandling(
         SAK_ID,
         sakType,
@@ -593,7 +595,7 @@ internal class VedtaksbrevServiceTest {
             Innsender("STOR SNERK", Foedselsnummer("11057523044")),
             Soeker("GRØNN", "MELLOMNAVN", "KOPP", Foedselsnummer("12345612345")),
             Avdoed("DØD TESTPERSON", LocalDate.now().minusMonths(1)),
-            verge = null
+            verge = null,
         ),
         ForenkletVedtak(
             1,
@@ -601,7 +603,7 @@ internal class VedtaksbrevServiceTest {
             vedtakType,
             PORSGRUNN,
             SAKSBEHANDLER.ident(),
-            attestantIdent = null
+            attestantIdent = null,
         ),
         Utbetalingsinfo(
             1,
@@ -615,96 +617,106 @@ internal class VedtaksbrevServiceTest {
                     Kroner(120000),
                     1,
                     Kroner(5000),
-                    40
-                )
-            )
+                    40,
+                ),
+            ),
         ),
         revurderingsaarsak = revurderingsaarsak,
         virkningsdato = YearMonth.of(LocalDate.now().year, LocalDate.now().month),
         vilkaarsvurdering = VilkaarsvurderingDto(BEHANDLING_ID, emptyList(), YearMonth.now(), null),
-        forrigeUtbetalingsinfo = Utbetalingsinfo(
-            1,
-            Kroner(4320),
-            LocalDate.now(),
-            false,
-            listOf(
-                Beregningsperiode(
-                    LocalDate.now(),
-                    LocalDate.now().plusYears(4),
-                    Kroner(120000),
-                    1,
-                    Kroner(5000),
-                    40
-                )
-            )
-        )
-    )
-
-    private fun opprettMottaker() = Mottaker(
-        "Stor Snerk",
-        foedselsnummer = Foedselsnummer(STOR_SNERK),
-        orgnummer = null,
-        adresse = Adresse(
-            adresseType = "NORSKPOSTADRESSE",
-            adresselinje1 = "Testgaten 13",
-            postnummer = "1234",
-            poststed = "OSLO",
-            land = "Norge",
-            landkode = "NOR"
-        )
-    )
-
-    private fun opprettBrevbakerResponse() = BrevbakerPdfResponse(
-        "",
-        LetterMetadata(
-            "Testtitle",
-            isSensitiv = false,
-            LetterMetadata.Distribusjonstype.VEDTAK,
-            LetterMetadata.Brevtype.VEDTAKSBREV
-        )
-    )
-
-    private fun opprettAvsender() = Avsender(
-        kontor = "Nav Porsgrunn",
-        "Etterstad 1",
-        "0556",
-        Telefonnummer("55553333"),
-        "Sak Saksbehandler",
-        "Per Attestant"
-    )
-
-    private fun opprettRenderedJsonLetter() = RenderedJsonLetter(
-        "",
-        RenderedJsonLetter.Sakspart("", "", "", ""),
-        emptyList(),
-        RenderedJsonLetter.Signatur("", "", "", "", "")
-    )
-    private fun opprettOpphoerPayload() = Slate(
-        listOf(
-            Slate.Element(
-                type = Slate.ElementType.HEADING_TWO,
-                children = listOf(
-                    Slate.InnerElement(
-                        type = null,
-                        text = "Dette er en tom brevmal",
-                        children = null,
-                        placeholder = null
-                    )
-                )
+        forrigeUtbetalingsinfo =
+            Utbetalingsinfo(
+                1,
+                Kroner(4320),
+                LocalDate.now(),
+                false,
+                listOf(
+                    Beregningsperiode(
+                        LocalDate.now(),
+                        LocalDate.now().plusYears(4),
+                        Kroner(120000),
+                        1,
+                        Kroner(5000),
+                        40,
+                    ),
+                ),
             ),
-            Slate.Element(
-                type = Slate.ElementType.PARAGRAPH,
-                children = listOf(
-                    Slate.InnerElement(
-                        type = null,
-                        text = "Det finnes ingen brevmal for denne sak- eller vedtakstypen.",
-                        children = null,
-                        placeholder = null
-                    )
-                )
-            )
-        )
     )
+
+    private fun opprettMottaker() =
+        Mottaker(
+            "Stor Snerk",
+            foedselsnummer = Foedselsnummer(STOR_SNERK),
+            orgnummer = null,
+            adresse =
+                Adresse(
+                    adresseType = "NORSKPOSTADRESSE",
+                    adresselinje1 = "Testgaten 13",
+                    postnummer = "1234",
+                    poststed = "OSLO",
+                    land = "Norge",
+                    landkode = "NOR",
+                ),
+        )
+
+    private fun opprettBrevbakerResponse() =
+        BrevbakerPdfResponse(
+            "",
+            LetterMetadata(
+                "Testtitle",
+                isSensitiv = false,
+                LetterMetadata.Distribusjonstype.VEDTAK,
+                LetterMetadata.Brevtype.VEDTAKSBREV,
+            ),
+        )
+
+    private fun opprettAvsender() =
+        Avsender(
+            kontor = "Nav Porsgrunn",
+            "Etterstad 1",
+            "0556",
+            Telefonnummer("55553333"),
+            "Sak Saksbehandler",
+            "Per Attestant",
+        )
+
+    private fun opprettRenderedJsonLetter() =
+        RenderedJsonLetter(
+            "",
+            RenderedJsonLetter.Sakspart("", "", "", ""),
+            emptyList(),
+            RenderedJsonLetter.Signatur("", "", "", "", ""),
+        )
+
+    private fun opprettOpphoerPayload() =
+        Slate(
+            listOf(
+                Slate.Element(
+                    type = Slate.ElementType.HEADING_TWO,
+                    children =
+                        listOf(
+                            Slate.InnerElement(
+                                type = null,
+                                text = "Dette er en tom brevmal",
+                                children = null,
+                                placeholder = null,
+                            ),
+                        ),
+                ),
+                Slate.Element(
+                    type = Slate.ElementType.PARAGRAPH,
+                    children =
+                        listOf(
+                            Slate.InnerElement(
+                                type = null,
+                                text = "Det finnes ingen brevmal for denne sak- eller vedtakstypen.",
+                                children = null,
+                                placeholder = null,
+                            ),
+                        ),
+                ),
+            ),
+        )
 
     private companion object {
         private const val SAK_ID = 123L

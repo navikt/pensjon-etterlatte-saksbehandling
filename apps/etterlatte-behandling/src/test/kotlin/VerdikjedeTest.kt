@@ -62,7 +62,7 @@ import org.junit.jupiter.api.TestInstance
 import java.lang.Thread.sleep
 import java.time.LocalDate
 import java.time.YearMonth
-import java.util.*
+import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class VerdikjedeTest : BehandlingIntegrationTest() {
@@ -122,8 +122,8 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
                         BehandlingsBehov(
                             1,
                             Persongalleri("søker", "innsender", emptyList(), emptyList(), emptyList()),
-                            Tidspunkt.now().toLocalDatetimeUTC().toString()
-                        )
+                            Tidspunkt.now().toLocalDatetimeUTC().toString(),
+                        ),
                     )
                 }.let {
                     assertEquals(HttpStatusCode.OK, it.status)
@@ -165,11 +165,11 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
                             VurdertGyldighet(
                                 GyldighetsTyper.INNSENDER_ER_FORELDER,
                                 VurderingsResultat.OPPFYLT,
-                                "innsenderFnr"
-                            )
+                                "innsenderFnr",
+                            ),
                         ),
-                        Tidspunkt.now().toLocalDatetimeUTC()
-                    )
+                        Tidspunkt.now().toLocalDatetimeUTC(),
+                    ),
                 )
             }.also {
                 assertEquals(HttpStatusCode.OK, it.status)
@@ -189,7 +189,7 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
                 addAuthToken(tokenSaksbehandler)
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(
-                    mapOf("dato" to "2022-02-01T01:00:00.000Z", "begrunnelse" to "En begrunnelse")
+                    mapOf("dato" to "2022-02-01T01:00:00.000Z", "begrunnelse" to "En begrunnelse"),
                 )
             }.also {
                 assertEquals(HttpStatusCode.OK, it.status)
@@ -198,7 +198,7 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
                     FastsettVirkningstidspunktResponse(
                         YearMonth.of(2022, 2),
                         Grunnlagsopplysning.Saksbehandler.create("Saksbehandler01"),
-                        "En begrunnelse"
+                        "En begrunnelse",
                     )
                 assertEquals(expected.dato, it.body<FastsettVirkningstidspunktResponse>().dato)
                 assertEquals(expected.kilde.ident, it.body<FastsettVirkningstidspunktResponse>().kilde.ident)
@@ -220,7 +220,7 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
                     val actual =
                         BehandlingDao(
                             KommerBarnetTilGodeDao { it },
-                            RevurderingDao { it }
+                            RevurderingDao { it },
                         ) { it }.hentBehandling(behandlingId)!!
                     assertEquals(BehandlingStatus.OPPRETTET, actual.status)
                 }
@@ -237,7 +237,7 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
                     val actual =
                         BehandlingDao(
                             KommerBarnetTilGodeDao { it },
-                            RevurderingDao { it }
+                            RevurderingDao { it },
                         ) { it }.hentBehandling(behandlingId)!!
                     assertEquals(BehandlingStatus.VILKAARSVURDERT, actual.status)
                 }
@@ -254,7 +254,7 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
                     val actual =
                         BehandlingDao(
                             KommerBarnetTilGodeDao { it },
-                            RevurderingDao { it }
+                            RevurderingDao { it },
                         ) { it }.hentBehandling(behandlingId)!!
                     assertEquals(BehandlingStatus.TRYGDETID_OPPDATERT, actual.status)
                 }
@@ -269,7 +269,7 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
                     val actual =
                         BehandlingDao(
                             KommerBarnetTilGodeDao { it },
-                            RevurderingDao { it }
+                            RevurderingDao { it },
                         ) { it }.hentBehandling(behandlingId)!!
                     assertEquals(BehandlingStatus.BEREGNET, actual.status)
                 }
@@ -285,17 +285,17 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
                         vedtakOppgaveDTO =
                             VedtakOppgaveDTO(
                                 sakId = sak.id,
-                                referanse = behandlingId.toString()
+                                referanse = behandlingId.toString(),
                             ),
-                        vedtakHendelse = VedtakHendelse(123L, Tidspunkt.now(), "Saksbehandler01", null)
-                    )
+                        vedtakHendelse = VedtakHendelse(123L, Tidspunkt.now(), "Saksbehandler01", null),
+                    ),
                 )
             }.also {
                 applicationContext.dataSource.connection.use {
                     val actual =
                         BehandlingDao(
                             KommerBarnetTilGodeDao { it },
-                            RevurderingDao { it }
+                            RevurderingDao { it },
                         ) { it }.hentBehandling(behandlingId)!!
                     assertEquals(BehandlingStatus.FATTET_VEDTAK, actual.status)
                 }
@@ -328,17 +328,17 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
                         vedtakOppgaveDTO =
                             VedtakOppgaveDTO(
                                 sakId = sak.id,
-                                referanse = behandlingId.toString()
+                                referanse = behandlingId.toString(),
                             ),
-                        vedtakHendelse = VedtakHendelse(123L, Tidspunkt.now(), saksbehandler02, null, null)
-                    )
+                        vedtakHendelse = VedtakHendelse(123L, Tidspunkt.now(), saksbehandler02, null, null),
+                    ),
                 )
             }.also {
                 applicationContext.dataSource.connection.use {
                     val actual =
                         BehandlingDao(
                             KommerBarnetTilGodeDao { it },
-                            RevurderingDao { it }
+                            RevurderingDao { it },
                         ) { it }.hentBehandling(behandlingId)!!
                     assertEquals(BehandlingStatus.ATTESTERT, actual.status)
                 }
@@ -355,8 +355,8 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
                         Tidspunkt.now(),
                         null,
                         null,
-                        null
-                    )
+                        null,
+                    ),
                 )
             }.also {
                 assertEquals(HttpStatusCode.OK, it.status)
@@ -397,8 +397,8 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
                         fnr = fnr,
                         tilflyttingsLand = null,
                         tilflyttingsstedIUtlandet = null,
-                        utflyttingsdato = null
-                    )
+                        utflyttingsdato = null,
+                    ),
                 )
             }.also {
                 assertEquals(HttpStatusCode.OK, it.status)
@@ -415,8 +415,8 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
                         relatertPersonsIdent = null,
                         relatertPersonsRolle = "",
                         minRolleForPerson = "",
-                        relatertPersonUtenFolkeregisteridentifikator = null
-                    )
+                        relatertPersonUtenFolkeregisteridentifikator = null,
+                    ),
                 )
             }.also {
                 assertEquals(HttpStatusCode.OK, it.status)
@@ -430,8 +430,8 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
                         BehandlingsBehov(
                             1,
                             Persongalleri(fnr, "innsender", emptyList(), emptyList(), emptyList()),
-                            Tidspunkt.now().toLocalDatetimeUTC().toString()
-                        )
+                            Tidspunkt.now().toLocalDatetimeUTC().toString(),
+                        ),
                     )
                 }.let {
                     assertEquals(HttpStatusCode.OK, it.status)
@@ -453,10 +453,10 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
                         opphoerAarsaker =
                             listOf(
                                 ManueltOpphoerAarsak.SOESKEN_DOED,
-                                ManueltOpphoerAarsak.UTFLYTTING_FRA_NORGE
+                                ManueltOpphoerAarsak.UTFLYTTING_FRA_NORGE,
                             ),
-                        fritekstAarsak = "kunne ikke behandles manuelt"
-                    )
+                        fritekstAarsak = "kunne ikke behandles manuelt",
+                    ),
                 )
             }.also {
                 assertEquals(HttpStatusCode.OK, it.status)
@@ -471,8 +471,8 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
                         hendelseId = "1",
                         endringstype = Endringstype.OPPRETTET,
                         fnr = fnr,
-                        adressebeskyttelseGradering = AdressebeskyttelseGradering.STRENGT_FORTROLIG
-                    )
+                        adressebeskyttelseGradering = AdressebeskyttelseGradering.STRENGT_FORTROLIG,
+                    ),
                 )
             }.also {
                 assertEquals(HttpStatusCode.OK, it.status)
@@ -491,19 +491,19 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
         assertEquals(4, rapid.publiserteMeldinger.size)
         assertEquals(
             "BEHANDLING:OPPRETTET",
-            objectMapper.readTree(rapid.publiserteMeldinger.first().verdi)["@event_name"].textValue()
+            objectMapper.readTree(rapid.publiserteMeldinger.first().verdi)["@event_name"].textValue(),
         )
         assertEquals(
             "BEHANDLING:OPPRETTET",
-            objectMapper.readTree(rapid.publiserteMeldinger[1].verdi)["@event_name"].textValue()
+            objectMapper.readTree(rapid.publiserteMeldinger[1].verdi)["@event_name"].textValue(),
         )
         assertEquals(
             "BEHANDLING:AVBRUTT",
-            objectMapper.readTree(rapid.publiserteMeldinger[2].verdi)["@event_name"].textValue()
+            objectMapper.readTree(rapid.publiserteMeldinger[2].verdi)["@event_name"].textValue(),
         )
         assertEquals(
             "BEHANDLING:OPPRETTET",
-            objectMapper.readTree(rapid.publiserteMeldinger[3].verdi)["@event_name"].textValue()
+            objectMapper.readTree(rapid.publiserteMeldinger[3].verdi)["@event_name"].textValue(),
         )
         applicationContext.dataSource.connection.use {
             HendelseDao { it }.finnHendelserIBehandling(behandlingOpprettet!!).also { println(it) }

@@ -11,10 +11,13 @@ import no.nav.etterlatte.libs.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktorobo.Resource
 import no.nav.etterlatte.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
-import java.util.*
+import java.util.UUID
 
 interface VilkaarsvurderingKlient {
-    suspend fun hentVilkaarsvurdering(behandlingId: UUID, brukerTokenInfo: BrukerTokenInfo): VilkaarsvurderingDto?
+    suspend fun hentVilkaarsvurdering(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): VilkaarsvurderingDto?
 }
 
 class VilkaarsvurderingKlientException(override val message: String, override val cause: Throwable) :
@@ -30,26 +33,27 @@ class VilkaarsvurderingKlientImpl(config: Config, httpClient: HttpClient) : Vilk
 
     override suspend fun hentVilkaarsvurdering(
         behandlingId: UUID,
-        brukerTokenInfo: BrukerTokenInfo
+        brukerTokenInfo: BrukerTokenInfo,
     ): VilkaarsvurderingDto? {
         logger.info("Henter vilkaarsvurdering med behandlingid=$behandlingId")
         try {
             return downstreamResourceClient
                 .get(
-                    resource = Resource(
-                        clientId = clientId,
-                        url = "$resourceUrl/api/vilkaarsvurdering/$behandlingId"
-                    ),
-                    brukerTokenInfo = brukerTokenInfo
+                    resource =
+                        Resource(
+                            clientId = clientId,
+                            url = "$resourceUrl/api/vilkaarsvurdering/$behandlingId",
+                        ),
+                    brukerTokenInfo = brukerTokenInfo,
                 )
                 .mapBoth(
                     success = { json -> json.response?.let { objectMapper.readValue(it.toString()) } },
-                    failure = { throwableErrorMessage -> throw throwableErrorMessage }
+                    failure = { throwableErrorMessage -> throw throwableErrorMessage },
                 )
         } catch (e: Exception) {
             throw VilkaarsvurderingKlientException(
                 "Henting av vilkårsvurdering for behandling med behandlingId=$behandlingId fra vedtak feilet",
-                e
+                e,
             )
         }
     }

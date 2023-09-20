@@ -11,7 +11,7 @@ import io.ktor.server.response.respond
 val AuthorizationPlugin =
     createRouteScopedPlugin(
         name = "AuthorizationPlugin",
-        createConfiguration = ::PluginConfiguration
+        createConfiguration = ::PluginConfiguration,
     ) {
         val roles = pluginConfig.roles
         pluginConfig.apply {

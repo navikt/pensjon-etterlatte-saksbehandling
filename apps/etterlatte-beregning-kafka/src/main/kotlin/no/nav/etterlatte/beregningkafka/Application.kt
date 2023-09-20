@@ -14,7 +14,7 @@ fun main() {
         OmregningHendelser(
             rapidsConnection,
             beregningService,
-            AppBuilder(Miljoevariabler(rapidEnv)).createTrygdetidService()
+            AppBuilder(Miljoevariabler(rapidEnv)).createTrygdetidService(),
         )
         MigreringHendelser(rapidsConnection, beregningService)
     }.start()

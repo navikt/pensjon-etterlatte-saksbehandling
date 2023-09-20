@@ -15,14 +15,15 @@ class BrregKlient(private val httpClient: HttpClient, private val host: String) 
 
     suspend fun hentEnheter(): List<Enhet> {
         try {
-            val response = httpClient.get("$host/enhetsregisteret/api/enheter") {
-                accept(ContentType.Application.Json)
-                url {
-                    parameters.append("navn", "statsforvalteren")
-                    // kode 6100 = "Statsforvaltningen"
-                    parameters.append("institusjonellSektorkode", "6100")
+            val response =
+                httpClient.get("$host/enhetsregisteret/api/enheter") {
+                    accept(ContentType.Application.Json)
+                    url {
+                        parameters.append("navn", "statsforvalteren")
+                        // kode 6100 = "Statsforvaltningen"
+                        parameters.append("institusjonellSektorkode", "6100")
+                    }
                 }
-            }
 
             return if (response.status.isSuccess()) {
                 val wrapper = response.body<ResponseWrapper>()
@@ -46,17 +47,17 @@ class ResponseWrapper(val _embedded: Embedded?) {
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class Enhet(
     val organisasjonsnummer: String,
-    val navn: String
+    val navn: String,
 )
 
 data class Feilmelding(
     val status: Int,
     val feilmelding: String?,
-    val valideringsfeil: List<Feil>
+    val valideringsfeil: List<Feil>,
 ) {
     data class Feil(
         val feilmelding: String?,
         val parametere: List<String>,
-        val feilaktigVerdi: String?
+        val feilaktigVerdi: String?,
     )
 }

@@ -7,5 +7,5 @@ data class InnsenderSoeknad(
     val type: PersonType,
     val fornavn: String,
     val etternavn: String,
-    val foedselsnummer: Folkeregisteridentifikator
+    val foedselsnummer: Folkeregisteridentifikator,
 )

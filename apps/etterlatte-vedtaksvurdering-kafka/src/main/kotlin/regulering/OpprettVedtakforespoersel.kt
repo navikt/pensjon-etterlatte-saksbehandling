@@ -19,7 +19,7 @@ import rapidsandrivers.withFeilhaandtering
 
 internal class OpprettVedtakforespoersel(
     rapidsConnection: RapidsConnection,
-    private val vedtak: VedtakService
+    private val vedtak: VedtakService,
 ) : ListenerMedLogging() {
     private val logger = LoggerFactory.getLogger(OpprettVedtakforespoersel::class.java)
 
@@ -33,7 +33,10 @@ internal class OpprettVedtakforespoersel(
         }.register(this)
     }
 
-    override fun haandterPakke(packet: JsonMessage, context: MessageContext) {
+    override fun haandterPakke(
+        packet: JsonMessage,
+        context: MessageContext,
+    ) {
         val sakId = packet.sakId
         logger.info("Leser opprett-vedtak forespoersel for sak $sakId")
         val behandlingId = packet.behandlingId

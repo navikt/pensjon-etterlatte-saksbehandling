@@ -9,5 +9,5 @@ val FNR_2 = Folkeregisteridentifikator.of("07010776133")
 data class MeldingSendtPaaRapid<T>(
     @JsonProperty("@event_name") val eventName: String,
     val hendelse: LeesahOpplysningstype,
-    val hendelse_data: T
+    val hendelse_data: T,
 )

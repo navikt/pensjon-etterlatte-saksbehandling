@@ -15,21 +15,42 @@ import no.nav.etterlatte.libs.database.toList
 import org.slf4j.LoggerFactory
 import java.sql.Connection
 import java.sql.ResultSet
-import java.util.*
+import java.util.UUID
 
 interface OppgaveDaoNy {
-
     fun lagreOppgave(oppgaveNy: OppgaveNy)
+
     fun hentOppgave(oppgaveId: UUID): OppgaveNy?
+
     fun hentOppgaverForBehandling(behandlingid: String): List<OppgaveNy>
+
     fun hentOppgaverForSak(sakId: Long): List<OppgaveNy>
+
     fun hentOppgaver(oppgaveTypeTyper: List<OppgaveType>): List<OppgaveNy>
+
     fun finnOppgaverForStrengtFortroligOgStrengtFortroligUtland(oppgaveTypeTyper: List<OppgaveType>): List<OppgaveNy>
-    fun settNySaksbehandler(oppgaveId: UUID, saksbehandler: String)
-    fun endreStatusPaaOppgave(oppgaveId: UUID, oppgaveStatus: Status)
-    fun endreEnhetPaaOppgave(oppgaveId: UUID, enhet: String)
+
+    fun settNySaksbehandler(
+        oppgaveId: UUID,
+        saksbehandler: String,
+    )
+
+    fun endreStatusPaaOppgave(
+        oppgaveId: UUID,
+        oppgaveStatus: Status,
+    )
+
+    fun endreEnhetPaaOppgave(
+        oppgaveId: UUID,
+        enhet: String,
+    )
+
     fun fjernSaksbehandler(oppgaveId: UUID)
-    fun redigerFrist(oppgaveId: UUID, frist: Tidspunkt)
+
+    fun redigerFrist(
+        oppgaveId: UUID,
+        frist: Tidspunkt,
+    )
 }
 
 class OppgaveDaoNyImpl(private val connection: () -> Connection) : OppgaveDaoNy {
@@ -37,12 +58,13 @@ class OppgaveDaoNyImpl(private val connection: () -> Connection) : OppgaveDaoNy 
 
     override fun lagreOppgave(oppgaveNy: OppgaveNy) {
         with(connection()) {
-            val statement = prepareStatement(
-                """
-                INSERT INTO oppgave(id, status, enhet, sak_id, type, saksbehandler, referanse, merknad, opprettet, saktype, fnr, frist, kilde)
-                VALUES(?::UUID, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                """.trimIndent()
-            )
+            val statement =
+                prepareStatement(
+                    """
+                    INSERT INTO oppgave(id, status, enhet, sak_id, type, saksbehandler, referanse, merknad, opprettet, saktype, fnr, frist, kilde)
+                    VALUES(?::UUID, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    """.trimIndent(),
+                )
             statement.setObject(1, oppgaveNy.id)
             statement.setString(2, oppgaveNy.status.name)
             statement.setString(3, oppgaveNy.enhet)
@@ -63,13 +85,14 @@ class OppgaveDaoNyImpl(private val connection: () -> Connection) : OppgaveDaoNy 
 
     override fun hentOppgave(oppgaveId: UUID): OppgaveNy? {
         with(connection()) {
-            val statement = prepareStatement(
-                """
+            val statement =
+                prepareStatement(
+                    """
                     SELECT id, status, enhet, sak_id, type, saksbehandler, referanse, merknad, opprettet, saktype, fnr, frist, kilde
                     FROM oppgave
                     WHERE id = ?::UUID
-                """.trimIndent()
-            )
+                    """.trimIndent(),
+                )
             statement.setObject(1, oppgaveId)
             return statement.executeQuery().singleOrNull {
                 asOppgaveNy()
@@ -79,13 +102,14 @@ class OppgaveDaoNyImpl(private val connection: () -> Connection) : OppgaveDaoNy 
 
     override fun hentOppgaverForBehandling(behandlingid: String): List<OppgaveNy> {
         with(connection()) {
-            val statement = prepareStatement(
-                """
+            val statement =
+                prepareStatement(
+                    """
                     SELECT id, status, enhet, sak_id, type, saksbehandler, referanse, merknad, opprettet, saktype, fnr, frist, kilde
                     FROM oppgave
                     WHERE referanse = ?
-                """.trimIndent()
-            )
+                    """.trimIndent(),
+                )
             statement.setString(1, behandlingid)
             return statement.executeQuery().toList {
                 asOppgaveNy()
@@ -97,13 +121,14 @@ class OppgaveDaoNyImpl(private val connection: () -> Connection) : OppgaveDaoNy 
 
     override fun hentOppgaverForSak(sakId: Long): List<OppgaveNy> {
         with(connection()) {
-            val statement = prepareStatement(
-                """
+            val statement =
+                prepareStatement(
+                    """
                     SELECT id, status, enhet, sak_id, type, saksbehandler, referanse, merknad, opprettet, saktype, fnr, frist, kilde
                     FROM oppgave
                     WHERE sak_id = ?
-                """.trimIndent()
-            )
+                    """.trimIndent(),
+                )
             statement.setLong(1, sakId)
             return statement.executeQuery().toList {
                 asOppgaveNy()
@@ -117,15 +142,16 @@ class OppgaveDaoNyImpl(private val connection: () -> Connection) : OppgaveDaoNy 
         if (oppgaveTypeTyper.isEmpty()) return emptyList()
 
         with(connection()) {
-            val statement = prepareStatement(
-                """
+            val statement =
+                prepareStatement(
+                    """
                     SELECT o.id, o.status, o.enhet, o.sak_id, o.type, o.saksbehandler, o.referanse, o.merknad, o.opprettet, o.saktype, o.fnr, o.frist, o.kilde
                     FROM oppgave o INNER JOIN sak s ON o.sak_id = s.id
                     WHERE o.type = ANY(?)
                     AND s.adressebeskyttelse is null OR 
                     (s.adressebeskyttelse is NOT NULL AND (s.adressebeskyttelse != ? AND s.adressebeskyttelse != ?))
-                """.trimIndent()
-            )
+                    """.trimIndent(),
+                )
             statement.setArray(1, createArrayOf("text", oppgaveTypeTyper.toTypedArray()))
             statement.setString(2, AdressebeskyttelseGradering.STRENGT_FORTROLIG.name)
             statement.setString(3, AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND.name)
@@ -138,18 +164,17 @@ class OppgaveDaoNyImpl(private val connection: () -> Connection) : OppgaveDaoNy 
         }
     }
 
-    override fun finnOppgaverForStrengtFortroligOgStrengtFortroligUtland(
-        oppgaveTypeTyper: List<OppgaveType>
-    ): List<OppgaveNy> {
+    override fun finnOppgaverForStrengtFortroligOgStrengtFortroligUtland(oppgaveTypeTyper: List<OppgaveType>): List<OppgaveNy> {
         with(connection()) {
-            val statement = prepareStatement(
-                """
+            val statement =
+                prepareStatement(
+                    """
                     SELECT o.id, o.status, o.enhet, o.sak_id, o.type, o.saksbehandler, o.referanse, o.merknad, o.opprettet, o.saktype, o.fnr, o.frist, o.kilde
                     FROM oppgave o INNER JOIN sak s ON o.sak_id = s.id
                     WHERE ((s.adressebeskyttelse = ?) OR (s.adressebeskyttelse = ?))
                     AND o.type = ANY(?)
-                """.trimIndent()
-            )
+                    """.trimIndent(),
+                )
             statement.setString(1, AdressebeskyttelseGradering.STRENGT_FORTROLIG.name)
             statement.setString(2, AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND.name)
             statement.setArray(3, createArrayOf("text", oppgaveTypeTyper.toTypedArray()))
@@ -162,15 +187,19 @@ class OppgaveDaoNyImpl(private val connection: () -> Connection) : OppgaveDaoNy 
         }
     }
 
-    override fun settNySaksbehandler(oppgaveId: UUID, saksbehandler: String) {
+    override fun settNySaksbehandler(
+        oppgaveId: UUID,
+        saksbehandler: String,
+    ) {
         with(connection()) {
-            val statement = prepareStatement(
-                """
-                UPDATE oppgave
-                SET saksbehandler = ?, status = ?
-                where id = ?::UUID
-                """.trimIndent()
-            )
+            val statement =
+                prepareStatement(
+                    """
+                    UPDATE oppgave
+                    SET saksbehandler = ?, status = ?
+                    where id = ?::UUID
+                    """.trimIndent(),
+                )
 
             statement.setString(1, saksbehandler)
             statement.setString(2, Status.UNDER_BEHANDLING.name)
@@ -180,15 +209,19 @@ class OppgaveDaoNyImpl(private val connection: () -> Connection) : OppgaveDaoNy 
         }
     }
 
-    override fun endreStatusPaaOppgave(oppgaveId: UUID, oppgaveStatus: Status) {
+    override fun endreStatusPaaOppgave(
+        oppgaveId: UUID,
+        oppgaveStatus: Status,
+    ) {
         with(connection()) {
-            val statement = prepareStatement(
-                """
-                UPDATE oppgave
-                SET status = ?
-                where id = ?::UUID
-                """.trimIndent()
-            )
+            val statement =
+                prepareStatement(
+                    """
+                    UPDATE oppgave
+                    SET status = ?
+                    where id = ?::UUID
+                    """.trimIndent(),
+                )
 
             statement.setString(1, oppgaveStatus.toString())
             statement.setObject(2, oppgaveId)
@@ -197,15 +230,19 @@ class OppgaveDaoNyImpl(private val connection: () -> Connection) : OppgaveDaoNy 
         }
     }
 
-    override fun endreEnhetPaaOppgave(oppgaveId: UUID, enhet: String) {
+    override fun endreEnhetPaaOppgave(
+        oppgaveId: UUID,
+        enhet: String,
+    ) {
         with(connection()) {
-            val statement = prepareStatement(
-                """
-                UPDATE oppgave
-                SET enhet = ?
-                where id = ?::UUID
-                """.trimIndent()
-            )
+            val statement =
+                prepareStatement(
+                    """
+                    UPDATE oppgave
+                    SET enhet = ?
+                    where id = ?::UUID
+                    """.trimIndent(),
+                )
 
             statement.setString(1, enhet)
             statement.setObject(2, oppgaveId)
@@ -216,13 +253,14 @@ class OppgaveDaoNyImpl(private val connection: () -> Connection) : OppgaveDaoNy 
 
     override fun fjernSaksbehandler(oppgaveId: UUID) {
         with(connection()) {
-            val statement = prepareStatement(
-                """
-                UPDATE oppgave
-                SET saksbehandler = NULL, status = ?
-                where id = ?::UUID
-                """.trimIndent()
-            )
+            val statement =
+                prepareStatement(
+                    """
+                    UPDATE oppgave
+                    SET saksbehandler = NULL, status = ?
+                    where id = ?::UUID
+                    """.trimIndent(),
+                )
             statement.setString(1, Status.NY.name)
             statement.setObject(2, oppgaveId)
 
@@ -230,15 +268,19 @@ class OppgaveDaoNyImpl(private val connection: () -> Connection) : OppgaveDaoNy 
         }
     }
 
-    override fun redigerFrist(oppgaveId: UUID, frist: Tidspunkt) {
+    override fun redigerFrist(
+        oppgaveId: UUID,
+        frist: Tidspunkt,
+    ) {
         with(connection()) {
-            val statement = prepareStatement(
-                """
-                UPDATE oppgave
-                SET frist = ?
-                where id = ?::UUID
-                """.trimIndent()
-            )
+            val statement =
+                prepareStatement(
+                    """
+                    UPDATE oppgave
+                    SET frist = ?
+                    where id = ?::UUID
+                    """.trimIndent(),
+                )
             statement.setTidspunkt(1, frist)
             statement.setObject(2, oppgaveId)
 
@@ -260,7 +302,7 @@ class OppgaveDaoNyImpl(private val connection: () -> Connection) : OppgaveDaoNy 
             opprettet = getTidspunkt("opprettet"),
             sakType = SakType.valueOf(getString("saktype")),
             fnr = getString("fnr"),
-            frist = getTidspunktOrNull("frist")
+            frist = getTidspunktOrNull("frist"),
         )
     }
 }

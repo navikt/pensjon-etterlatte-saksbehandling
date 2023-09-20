@@ -38,7 +38,6 @@ import testsupport.buildTestApplicationConfigurationForOauth
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class PersonRouteTest {
-
     private val server = MockOAuth2Server()
     private lateinit var applicationConfig: ApplicationConfig
     private val personService: PersonService = mockk()
@@ -57,11 +56,12 @@ class PersonRouteTest {
 
     @Test
     fun `skal returnere person`() {
-        val hentPersonRequest = HentPersonRequest(
-            foedselsnummer = TRIVIELL_MIDTPUNKT,
-            rolle = PersonRolle.BARN,
-            saktype = SakType.BARNEPENSJON
-        )
+        val hentPersonRequest =
+            HentPersonRequest(
+                foedselsnummer = TRIVIELL_MIDTPUNKT,
+                rolle = PersonRolle.BARN,
+                saktype = SakType.BARNEPENSJON,
+            )
 
         coEvery { personService.hentPerson(hentPersonRequest) } returns GrunnlagTestData().soeker
 
@@ -73,11 +73,12 @@ class PersonRouteTest {
                 restModule(log) { personRoute(personService) }
             }
 
-            val response = client.post(PERSON_ENDEPUNKT) {
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                header(HttpHeaders.Authorization, "Bearer $token")
-                setBody(hentPersonRequest.toJson())
-            }
+            val response =
+                client.post(PERSON_ENDEPUNKT) {
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    header(HttpHeaders.Authorization, "Bearer $token")
+                    setBody(hentPersonRequest.toJson())
+                }
 
             assertEquals(HttpStatusCode.OK, response.status)
             coVerify { personService.hentPerson(any()) }
@@ -87,11 +88,12 @@ class PersonRouteTest {
 
     @Test
     fun `skal returnere personopplysninger paa version 2`() {
-        val hentPersonRequest = HentPersonRequest(
-            foedselsnummer = TRIVIELL_MIDTPUNKT,
-            rolle = PersonRolle.BARN,
-            saktype = SakType.BARNEPENSJON
-        )
+        val hentPersonRequest =
+            HentPersonRequest(
+                foedselsnummer = TRIVIELL_MIDTPUNKT,
+                rolle = PersonRolle.BARN,
+                saktype = SakType.BARNEPENSJON,
+            )
 
         coEvery { personService.hentOpplysningsperson(hentPersonRequest) } returns mockPerson()
 
@@ -103,11 +105,12 @@ class PersonRouteTest {
                 restModule(log) { personRoute(personService) }
             }
 
-            val response = client.post(PERSON_ENDEPUNKT_V2) {
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                header(HttpHeaders.Authorization, "Bearer $token")
-                setBody(hentPersonRequest.toJson())
-            }
+            val response =
+                client.post(PERSON_ENDEPUNKT_V2) {
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    header(HttpHeaders.Authorization, "Bearer $token")
+                    setBody(hentPersonRequest.toJson())
+                }
 
             assertEquals(HttpStatusCode.OK, response.status)
             coVerify { personService.hentOpplysningsperson(any()) }
@@ -120,9 +123,10 @@ class PersonRouteTest {
         val hentPdlIdentRequest = HentPdlIdentRequest(ident = PersonIdent("2305469522806"))
         coEvery {
             personService.hentPdlIdentifikator(hentPdlIdentRequest)
-        } returns mockFolkeregisterident(
-            "70078749472"
-        )
+        } returns
+            mockFolkeregisterident(
+                "70078749472",
+            )
 
         testApplication {
             environment {
@@ -132,11 +136,12 @@ class PersonRouteTest {
                 restModule(log) { personRoute(personService) }
             }
 
-            val response = client.post(PDLIDENT_ENDEPUNKT) {
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                header(HttpHeaders.Authorization, "Bearer $token")
-                setBody(hentPdlIdentRequest.toJson())
-            }
+            val response =
+                client.post(PDLIDENT_ENDEPUNKT) {
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    header(HttpHeaders.Authorization, "Bearer $token")
+                    setBody(hentPdlIdentRequest.toJson())
+                }
 
             assertEquals(HttpStatusCode.OK, response.status)
             coVerify { personService.hentPdlIdentifikator(any()) }
@@ -146,10 +151,11 @@ class PersonRouteTest {
 
     @Test
     fun `skal returnere geografisk tilknytning`() {
-        val hentGeografiskTilknytningRequest = HentGeografiskTilknytningRequest(
-            foedselsnummer = TRIVIELL_MIDTPUNKT,
-            saktype = SakType.BARNEPENSJON
-        )
+        val hentGeografiskTilknytningRequest =
+            HentGeografiskTilknytningRequest(
+                foedselsnummer = TRIVIELL_MIDTPUNKT,
+                saktype = SakType.BARNEPENSJON,
+            )
 
         coEvery {
             personService.hentGeografiskTilknytning(hentGeografiskTilknytningRequest)
@@ -163,11 +169,12 @@ class PersonRouteTest {
                 restModule(log) { personRoute(personService) }
             }
 
-            val response = client.post(GEOGRAFISKTILKNYTNING_ENDEPUNKT) {
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                header(HttpHeaders.Authorization, "Bearer $token")
-                setBody(hentGeografiskTilknytningRequest.toJson())
-            }
+            val response =
+                client.post(GEOGRAFISKTILKNYTNING_ENDEPUNKT) {
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    header(HttpHeaders.Authorization, "Bearer $token")
+                    setBody(hentGeografiskTilknytningRequest.toJson())
+                }
 
             assertEquals(HttpStatusCode.OK, response.status)
             coVerify { personService.hentGeografiskTilknytning(any()) }
@@ -177,11 +184,12 @@ class PersonRouteTest {
 
     @Test
     fun `skal returne 500 naar kall mot person feiler`() {
-        val hentPersonRequest = HentPersonRequest(
-            foedselsnummer = TRIVIELL_MIDTPUNKT,
-            rolle = PersonRolle.BARN,
-            saktype = SakType.BARNEPENSJON
-        )
+        val hentPersonRequest =
+            HentPersonRequest(
+                foedselsnummer = TRIVIELL_MIDTPUNKT,
+                rolle = PersonRolle.BARN,
+                saktype = SakType.BARNEPENSJON,
+            )
 
         coEvery {
             personService.hentPerson(hentPersonRequest)
@@ -195,11 +203,12 @@ class PersonRouteTest {
                 restModule(log) { personRoute(personService) }
             }
 
-            val response = client.post(PERSON_ENDEPUNKT) {
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                header(HttpHeaders.Authorization, "Bearer $token")
-                setBody(hentPersonRequest.toJson())
-            }
+            val response =
+                client.post(PERSON_ENDEPUNKT) {
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    header(HttpHeaders.Authorization, "Bearer $token")
+                    setBody(hentPersonRequest.toJson())
+                }
 
             assertEquals(HttpStatusCode.InternalServerError, response.status)
             assertEquals("En intern feil har oppstått", response.bodyAsText())
@@ -214,9 +223,10 @@ class PersonRouteTest {
 
         coEvery {
             personService.hentPdlIdentifikator(hentFolkeregisterIdentReq)
-        } throws PdlForesporselFeilet(
-            "Noe feilet"
-        )
+        } throws
+            PdlForesporselFeilet(
+                "Noe feilet",
+            )
 
         testApplication {
             environment {
@@ -226,11 +236,12 @@ class PersonRouteTest {
                 restModule(log) { personRoute(personService) }
             }
 
-            val response = client.post(PERSON_ENDEPUNKT) {
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                header(HttpHeaders.Authorization, "Bearer $token")
-                setBody(hentFolkeregisterIdentReq.toJson())
-            }
+            val response =
+                client.post(PERSON_ENDEPUNKT) {
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    header(HttpHeaders.Authorization, "Bearer $token")
+                    setBody(hentFolkeregisterIdentReq.toJson())
+                }
 
             assertEquals(HttpStatusCode.InternalServerError, response.status)
             assertEquals("En intern feil har oppstått", response.bodyAsText())
@@ -243,10 +254,11 @@ class PersonRouteTest {
         server.issueToken(
             issuerId = AZURE_ISSUER,
             audience = CLIENT_ID,
-            claims = mapOf(
-                "navn" to "John Doe",
-                "NAVident" to "Saksbehandler01"
-            )
+            claims =
+                mapOf(
+                    "navn" to "John Doe",
+                    "NAVident" to "Saksbehandler01",
+                ),
         ).serialize()
     }
 

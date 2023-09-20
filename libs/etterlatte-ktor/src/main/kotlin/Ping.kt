@@ -17,7 +17,7 @@ suspend fun HttpClient.ping(
     logger: Logger,
     serviceName: String,
     beskrivelse: String,
-    konsument: String
+    konsument: String,
 ): PingResult {
     return try {
         this.get(url) {
@@ -37,6 +37,7 @@ interface Pingable {
     val serviceName: String
     val beskrivelse: String
     val endpoint: String
+
     suspend fun ping(): PingResult
 
     @OptIn(DelicateCoroutinesApi::class)
@@ -58,7 +59,7 @@ class PingResultUp(
     override val serviceName: String,
     override val status: ServiceStatus = ServiceStatus.UP,
     override val endpoint: String,
-    override val beskrivelse: String
+    override val beskrivelse: String,
 ) : PingResult()
 
 class PingResultDown(
@@ -66,7 +67,7 @@ class PingResultDown(
     override val status: ServiceStatus = ServiceStatus.DOWN,
     override val endpoint: String,
     override val beskrivelse: String,
-    private val errorMessage: String?
+    private val errorMessage: String?,
 ) : PingResult() {
     fun toStringServiceDown(): String {
         return "Servicename: $serviceName endpoint: $endpoint beskrivelse $beskrivelse errorMessage: $errorMessage "
@@ -74,7 +75,9 @@ class PingResultDown(
 }
 
 enum class ServiceStatus(private val code: Int, private val color: String) {
-    DOWN(1, "red"), UP(0, "green");
+    DOWN(1, "red"),
+    UP(0, "green"),
+    ;
 
     /**
      * 0 = OK, 1 = ERROR, ref. https://confluence.adeo.no/display/AURA/Selftest

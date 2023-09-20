@@ -20,12 +20,10 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import testsupport.buildTestApplicationConfigurationForOauth
-import java.util.*
 import java.util.UUID.randomUUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class TrygdetidRoutesTest {
-
     private val server = MockOAuth2Server()
     private val behandlingKlient = mockk<BehandlingKlient>()
     private val trygdetidService = mockk<TrygdetidService>()
@@ -46,10 +44,11 @@ internal class TrygdetidRoutesTest {
         coEvery { trygdetidService.hentTrygdetid(any(), any()) } returns null
 
         testApplication(server.config.httpServer.port()) {
-            val response = client.get("/api/trygdetid/${randomUUID()}") {
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                header(HttpHeaders.Authorization, "Bearer $token")
-            }
+            val response =
+                client.get("/api/trygdetid/${randomUUID()}") {
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    header(HttpHeaders.Authorization, "Bearer $token")
+                }
 
             response.status shouldBe HttpStatusCode.NoContent
         }
@@ -60,7 +59,10 @@ internal class TrygdetidRoutesTest {
         }
     }
 
-    private fun testApplication(port: Int, block: suspend ApplicationTestBuilder.() -> Unit) {
+    private fun testApplication(
+        port: Int,
+        block: suspend ApplicationTestBuilder.() -> Unit,
+    ) {
         io.ktor.server.testing.testApplication {
             environment {
                 config = buildTestApplicationConfigurationForOauth(port, AZURE_ISSUER, AZURE_CLIENT_ID)
@@ -75,7 +77,7 @@ internal class TrygdetidRoutesTest {
         server.issueToken(
             issuerId = AZURE_ISSUER,
             audience = AZURE_CLIENT_ID,
-            claims = mapOf("navn" to "John Doe", "NAVident" to "Saksbehandler01")
+            claims = mapOf("navn" to "John Doe", "NAVident" to "Saksbehandler01"),
         ).serialize()
     }
 

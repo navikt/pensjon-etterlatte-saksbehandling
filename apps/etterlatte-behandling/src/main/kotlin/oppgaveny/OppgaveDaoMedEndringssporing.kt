@@ -12,7 +12,7 @@ import no.nav.etterlatte.libs.database.setJsonb
 import no.nav.etterlatte.libs.database.toList
 import java.sql.Connection
 import java.sql.ResultSet
-import java.util.*
+import java.util.UUID
 
 interface OppgaveDaoMedEndringssporing : OppgaveDaoNy {
     fun hentEndringerForOppgave(oppgaveId: UUID): List<OppgaveEndring>
@@ -20,11 +20,11 @@ interface OppgaveDaoMedEndringssporing : OppgaveDaoNy {
 
 class OppgaveDaoMedEndringssporingImpl(
     private val oppgaveDao: OppgaveDaoNy,
-    private val connection: () -> Connection
+    private val connection: () -> Connection,
 ) : OppgaveDaoMedEndringssporing {
     private fun lagreEndringerPaaOppgave(
         oppgaveId: UUID,
-        block: () -> Unit
+        block: () -> Unit,
     ) {
         val foer =
             requireNotNull(hentOppgave(oppgaveId)) {
@@ -40,7 +40,7 @@ class OppgaveDaoMedEndringssporingImpl(
 
     private fun lagreEndringerPaaOppgave(
         oppgaveFoer: OppgaveNy,
-        oppgaveEtter: OppgaveNy
+        oppgaveEtter: OppgaveNy,
     ) {
         with(connection()) {
             val statement =
@@ -48,7 +48,7 @@ class OppgaveDaoMedEndringssporingImpl(
                     """
                     INSERT INTO oppgaveendringer(id, oppgaveId, oppgaveFoer, oppgaveEtter, tidspunkt)
                     VALUES(?::UUID, ?::UUID, ?::JSONB, ?::JSONB, ?)
-                    """.trimIndent()
+                    """.trimIndent(),
                 )
             statement.setObject(1, UUID.randomUUID())
             statement.setObject(2, oppgaveEtter.id)
@@ -68,7 +68,7 @@ class OppgaveDaoMedEndringssporingImpl(
                     SELECT id, oppgaveId, oppgaveFoer, oppgaveEtter, tidspunkt
                     FROM oppgaveendringer
                     where oppgaveId = ?::UUID
-                    """.trimIndent()
+                    """.trimIndent(),
                 )
             statement.setObject(1, oppgaveId)
 
@@ -84,7 +84,7 @@ class OppgaveDaoMedEndringssporingImpl(
             oppgaveId = getObject("id") as UUID,
             oppgaveFoer = getString("oppgaveFoer").let { objectMapper.readValue(it) },
             oppgaveEtter = getString("oppgaveEtter").let { objectMapper.readValue(it) },
-            tidspunkt = getTidspunkt("tidspunkt")
+            tidspunkt = getTidspunkt("tidspunkt"),
         )
     }
 
@@ -108,15 +108,13 @@ class OppgaveDaoMedEndringssporingImpl(
         return oppgaveDao.hentOppgaver(oppgaveTypeTyper)
     }
 
-    override fun finnOppgaverForStrengtFortroligOgStrengtFortroligUtland(
-        oppgaveTypeTyper: List<OppgaveType>
-    ): List<OppgaveNy> {
+    override fun finnOppgaverForStrengtFortroligOgStrengtFortroligUtland(oppgaveTypeTyper: List<OppgaveType>): List<OppgaveNy> {
         return oppgaveDao.finnOppgaverForStrengtFortroligOgStrengtFortroligUtland(oppgaveTypeTyper)
     }
 
     override fun settNySaksbehandler(
         oppgaveId: UUID,
-        saksbehandler: String
+        saksbehandler: String,
     ) {
         lagreEndringerPaaOppgave(oppgaveId) {
             oppgaveDao.settNySaksbehandler(oppgaveId, saksbehandler)
@@ -125,7 +123,7 @@ class OppgaveDaoMedEndringssporingImpl(
 
     override fun endreStatusPaaOppgave(
         oppgaveId: UUID,
-        oppgaveStatus: Status
+        oppgaveStatus: Status,
     ) {
         lagreEndringerPaaOppgave(oppgaveId) {
             oppgaveDao.endreStatusPaaOppgave(oppgaveId, oppgaveStatus)
@@ -134,7 +132,7 @@ class OppgaveDaoMedEndringssporingImpl(
 
     override fun endreEnhetPaaOppgave(
         oppgaveId: UUID,
-        enhet: String
+        enhet: String,
     ) {
         lagreEndringerPaaOppgave(oppgaveId) {
             oppgaveDao.endreEnhetPaaOppgave(oppgaveId, enhet)
@@ -149,7 +147,7 @@ class OppgaveDaoMedEndringssporingImpl(
 
     override fun redigerFrist(
         oppgaveId: UUID,
-        frist: Tidspunkt
+        frist: Tidspunkt,
     ) {
         lagreEndringerPaaOppgave(oppgaveId) {
             oppgaveDao.redigerFrist(oppgaveId, frist)

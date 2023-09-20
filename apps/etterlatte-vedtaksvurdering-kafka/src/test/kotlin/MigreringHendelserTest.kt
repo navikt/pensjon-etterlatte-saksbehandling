@@ -19,19 +19,19 @@ import rapidsandrivers.SAK_ID_KEY
 import java.time.YearMonth
 
 class MigreringHendelserTest {
-
     private val vedtakService: VedtakService = mockk()
     private val inspector = TestRapid().apply { MigreringHendelser(this, vedtakService) }
 
     @Test
     fun `hvis opprett vedtak feila, legg meldinga rett paa feila-koea`() {
-        val melding = JsonMessage.newMessage(
-            Migreringshendelser.VEDTAK,
-            mapOf(
-                BEHANDLING_ID_KEY to "a9d42eb9-561f-4320-8bba-2ba600e66e21",
-                SAK_ID_KEY to "1"
+        val melding =
+            JsonMessage.newMessage(
+                Migreringshendelser.VEDTAK,
+                mapOf(
+                    BEHANDLING_ID_KEY to "a9d42eb9-561f-4320-8bba-2ba600e66e21",
+                    SAK_ID_KEY to "1",
+                ),
             )
-        )
         coEvery {
             vedtakService.opprettVedtakFattOgAttester(any(), any())
         } throws RuntimeException("Feila under opprett vedtak")
@@ -45,16 +45,18 @@ class MigreringHendelserTest {
 
     @Test
     fun `oppretter vedtak, fatter vedtak og attesterer`() {
-        val melding = JsonMessage.newMessage(
-            Migreringshendelser.VEDTAK,
-            mapOf(
-                BEHANDLING_ID_KEY to "a9d42eb9-561f-4320-8bba-2ba600e66e21",
-                SAK_ID_KEY to "1"
+        val melding =
+            JsonMessage.newMessage(
+                Migreringshendelser.VEDTAK,
+                mapOf(
+                    BEHANDLING_ID_KEY to "a9d42eb9-561f-4320-8bba-2ba600e66e21",
+                    SAK_ID_KEY to "1",
+                ),
             )
-        )
-        val vedtakDto = VedtakDto(
-            123, VedtakStatus.OPPRETTET, YearMonth.now(), mockk(), mockk(), VedtakType.INNVILGELSE, null, null, listOf()
-        )
+        val vedtakDto =
+            VedtakDto(
+                123, VedtakStatus.OPPRETTET, YearMonth.now(), mockk(), mockk(), VedtakType.INNVILGELSE, null, null, listOf(),
+            )
         coEvery { vedtakService.opprettVedtakFattOgAttester(any(), any()) } returns vedtakDto
 
         inspector.sendTestMessage(melding.toJson())

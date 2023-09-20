@@ -17,14 +17,15 @@ internal class Server(private val context: ApplicationContext) {
         sikkerLoggOppstartOgAvslutning("etterlatte-migrering")
     }
 
-    fun run() = with(context) {
-        dataSource.migrate()
-        val rapidEnv = getRapidEnv()
-        RapidApplication.create(rapidEnv).also { rapidsConnection ->
-            Migrering(rapidsConnection, penklient)
-            MigrerSpesifikkSak(rapidsConnection, penklient, pesysRepository, featureToggleService, verifiserer)
-            LagreKopling(rapidsConnection, pesysRepository)
-            LyttPaaIverksattVedtak(rapidsConnection, pesysRepository, penklient)
-        }.start()
-    }
+    fun run() =
+        with(context) {
+            dataSource.migrate()
+            val rapidEnv = getRapidEnv()
+            RapidApplication.create(rapidEnv).also { rapidsConnection ->
+                Migrering(rapidsConnection, penklient)
+                MigrerSpesifikkSak(rapidsConnection, penklient, pesysRepository, featureToggleService, verifiserer)
+                LagreKopling(rapidsConnection, pesysRepository)
+                LyttPaaIverksattVedtak(rapidsConnection, pesysRepository, penklient)
+            }.start()
+        }
 }

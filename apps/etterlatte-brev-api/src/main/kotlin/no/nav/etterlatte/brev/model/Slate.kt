@@ -9,12 +9,11 @@ import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 
 data class Slate(
-    @JsonValue val elements: List<Element> = emptyList()
+    @JsonValue val elements: List<Element> = emptyList(),
 ) {
-
     data class Element(
         val type: ElementType,
-        val children: List<InnerElement> = emptyList()
+        val children: List<InnerElement> = emptyList(),
     )
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -23,15 +22,17 @@ data class Slate(
         val text: String? = null,
         val children: List<InnerElement>? = null,
         // TODO: Sjekk på at denne ikke finnes ved ferdigstilling av PDF
-        val placeholder: Boolean? = null
+        val placeholder: Boolean? = null,
     )
 
-    enum class ElementType(@JsonValue val value: String) {
+    enum class ElementType(
+        @JsonValue val value: String,
+    ) {
         HEADING_TWO("heading-two"),
         HEADING_THREE("heading-three"),
         PARAGRAPH("paragraph"),
         BULLETED_LIST("bulleted-list"),
-        LIST_ITEM("list-item")
+        LIST_ITEM("list-item"),
     }
 }
 
@@ -62,7 +63,8 @@ object SlateHelper {
                     VedtakType.ENDRING -> {
                         when (behandling.revurderingsaarsak) {
                             RevurderingAarsak.INNTEKTSENDRING,
-                            RevurderingAarsak.ANNEN -> BrevInnholdVedlegg.inntektsendringOMS()
+                            RevurderingAarsak.ANNEN,
+                            -> BrevInnholdVedlegg.inntektsendringOMS()
                             else -> null
                         }
                     }

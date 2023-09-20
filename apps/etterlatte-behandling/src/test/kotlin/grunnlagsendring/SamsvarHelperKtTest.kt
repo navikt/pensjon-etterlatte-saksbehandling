@@ -13,7 +13,6 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
 internal class SamsvarHelperKtTest {
-
     @Test
     fun `samsvarDoedsdatoer med samsvar`() {
         val doedsdatoPdl = LocalDate.now()
@@ -64,10 +63,11 @@ internal class SamsvarHelperKtTest {
 
     @Test
     fun `samsvarUtflytting med samsvar`() {
-        val utland = Utland(
-            innflyttingTilNorge = listOf(InnflyttingTilNorge("Tyskland", LocalDate.of(2013, 7, 9))),
-            utflyttingFraNorge = listOf(UtflyttingFraNorge("Tyskland", LocalDate.of(2022, 1, 1)))
-        )
+        val utland =
+            Utland(
+                innflyttingTilNorge = listOf(InnflyttingTilNorge("Tyskland", LocalDate.of(2013, 7, 9))),
+                utflyttingFraNorge = listOf(UtflyttingFraNorge("Tyskland", LocalDate.of(2022, 1, 1))),
+            )
         val utflyttingPdl = utland
         val utflyttingGrunnlag = utland
         val resultat = samsvarUtflytting(utflyttingPdl, utflyttingGrunnlag)
@@ -76,29 +76,32 @@ internal class SamsvarHelperKtTest {
 
     @Test
     fun `samsvarUtflytting uten samsvar`() {
-        val utflyttingPdl = Utland(
-            innflyttingTilNorge = listOf(InnflyttingTilNorge("Tyskland", LocalDate.of(2013, 7, 9))),
-            utflyttingFraNorge = listOf(UtflyttingFraNorge("Tyskland", LocalDate.of(2022, 1, 1)))
-        )
-        val utflyttingGrunnlag = Utland(
-            innflyttingTilNorge = null,
-            utflyttingFraNorge = listOf(UtflyttingFraNorge("Tyskland", LocalDate.of(2022, 1, 1)))
-        )
+        val utflyttingPdl =
+            Utland(
+                innflyttingTilNorge = listOf(InnflyttingTilNorge("Tyskland", LocalDate.of(2013, 7, 9))),
+                utflyttingFraNorge = listOf(UtflyttingFraNorge("Tyskland", LocalDate.of(2022, 1, 1))),
+            )
+        val utflyttingGrunnlag =
+            Utland(
+                innflyttingTilNorge = null,
+                utflyttingFraNorge = listOf(UtflyttingFraNorge("Tyskland", LocalDate.of(2022, 1, 1))),
+            )
         val resultat = samsvarUtflytting(utflyttingPdl, utflyttingGrunnlag)
         assertFalse(resultat.samsvar)
     }
 
     @Test
     fun `samsvarSivilstand med samsvar`() {
-        val sivilstand = listOf(
-            Sivilstand(
-                sivilstatus = Sivilstatus.GIFT,
-                relatertVedSiviltilstand = null,
-                gyldigFraOgMed = LocalDate.now(),
-                bekreftelsesdato = LocalDate.now(),
-                kilde = "test"
+        val sivilstand =
+            listOf(
+                Sivilstand(
+                    sivilstatus = Sivilstatus.GIFT,
+                    relatertVedSiviltilstand = null,
+                    gyldigFraOgMed = LocalDate.now(),
+                    bekreftelsesdato = LocalDate.now(),
+                    kilde = "test",
+                ),
             )
-        )
 
         val resultat = samsvarSivilstand(sivilstand, sivilstand)
         assertTrue(resultat.samsvar)
@@ -106,25 +109,27 @@ internal class SamsvarHelperKtTest {
 
     @Test
     fun `samsvarSivilstand uten samsvar`() {
-        val sivilstand1 = listOf(
-            Sivilstand(
-                sivilstatus = Sivilstatus.GIFT,
-                relatertVedSiviltilstand = null,
-                gyldigFraOgMed = LocalDate.now(),
-                bekreftelsesdato = LocalDate.now(),
-                kilde = "test"
+        val sivilstand1 =
+            listOf(
+                Sivilstand(
+                    sivilstatus = Sivilstatus.GIFT,
+                    relatertVedSiviltilstand = null,
+                    gyldigFraOgMed = LocalDate.now(),
+                    bekreftelsesdato = LocalDate.now(),
+                    kilde = "test",
+                ),
             )
-        )
 
-        val sivilstand2 = listOf(
-            Sivilstand(
-                sivilstatus = Sivilstatus.UGIFT,
-                relatertVedSiviltilstand = null,
-                gyldigFraOgMed = LocalDate.now(),
-                bekreftelsesdato = LocalDate.now(),
-                kilde = "test"
+        val sivilstand2 =
+            listOf(
+                Sivilstand(
+                    sivilstatus = Sivilstatus.UGIFT,
+                    relatertVedSiviltilstand = null,
+                    gyldigFraOgMed = LocalDate.now(),
+                    bekreftelsesdato = LocalDate.now(),
+                    kilde = "test",
+                ),
             )
-        )
 
         val resultat = samsvarSivilstand(sivilstand1, sivilstand2)
         assertFalse(resultat.samsvar)

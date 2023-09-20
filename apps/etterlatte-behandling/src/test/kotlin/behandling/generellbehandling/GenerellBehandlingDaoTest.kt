@@ -15,7 +15,7 @@ import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.assertThrows
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
-import java.util.*
+import java.util.UUID
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -36,7 +36,7 @@ internal class GenerellBehandlingDaoTest {
             DataSourceBuilder.createDataSource(
                 jdbcUrl = postgreSQLContainer.jdbcUrl,
                 username = postgreSQLContainer.username,
-                password = postgreSQLContainer.password
+                password = postgreSQLContainer.password,
             ).apply { migrate() }
 
         val connection = dataSource.connection
@@ -63,7 +63,7 @@ internal class GenerellBehandlingDaoTest {
                 1L,
                 Tidspunkt.now(),
                 GenerellBehandling.GenerellBehandlingType.UTLAND,
-                null
+                null,
             )
         dao.opprettGenerellbehandling(generellBehandlingUtland)
         val hentetGenBehandling = dao.hentGenerellBehandlingMedId(generellBehandlingUtland.id)
@@ -80,7 +80,7 @@ internal class GenerellBehandlingDaoTest {
                 1L,
                 Tidspunkt.now(),
                 GenerellBehandling.GenerellBehandlingType.UTLAND,
-                Innhold.Annen("content")
+                Innhold.Annen("content"),
             )
         }
     }
@@ -93,7 +93,7 @@ internal class GenerellBehandlingDaoTest {
                 1L,
                 Tidspunkt.now(),
                 GenerellBehandling.GenerellBehandlingType.UTLAND,
-                Innhold.Utland("vlabla", UUID.randomUUID())
+                Innhold.Utland("vlabla", UUID.randomUUID()),
             )
         dao.opprettGenerellbehandling(generellBehandlingUtland)
         val hentetGenBehandling = dao.hentGenerellBehandlingMedId(generellBehandlingUtland.id)
@@ -111,7 +111,7 @@ internal class GenerellBehandlingDaoTest {
                 1L,
                 Tidspunkt.now(),
                 GenerellBehandling.GenerellBehandlingType.UTLAND,
-                Innhold.Utland("vlabla", UUID.randomUUID())
+                Innhold.Utland("vlabla", UUID.randomUUID()),
             )
         val annengenerebehandling =
             GenerellBehandling(
@@ -119,7 +119,7 @@ internal class GenerellBehandlingDaoTest {
                 1L,
                 Tidspunkt.now(),
                 GenerellBehandling.GenerellBehandlingType.ANNEN,
-                Innhold.Annen("vlabla")
+                Innhold.Annen("vlabla"),
             )
 
         dao.opprettGenerellbehandling(generellBehandlingUtland)

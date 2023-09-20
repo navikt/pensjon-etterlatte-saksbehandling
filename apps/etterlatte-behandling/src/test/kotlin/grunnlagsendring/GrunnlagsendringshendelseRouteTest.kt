@@ -31,16 +31,15 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import java.util.*
+import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_METHOD)
 class GrunnlagsendringshendelseRouteTest : BehandlingIntegrationTest() {
-
     @BeforeEach
     fun start() = startServer()
 
     @AfterEach
-    fun AfterEach() {
+    fun afterEach() {
         afterAll()
     }
 
@@ -52,40 +51,43 @@ class GrunnlagsendringshendelseRouteTest : BehandlingIntegrationTest() {
             environment {
                 config = hoconApplicationConfig
             }
-            val client = createClient {
-                install(ContentNegotiation) {
-                    jackson { registerModule(JavaTimeModule()) }
+            val client =
+                createClient {
+                    install(ContentNegotiation) {
+                        jackson { registerModule(JavaTimeModule()) }
+                    }
                 }
-            }
             application {
                 module(applicationContext)
             }
 
-            val sak: Sak = client.post("personer/saker/${SakType.BARNEPENSJON}") {
-                addAuthToken(tokenSaksbehandler)
-                contentType(ContentType.Application.Json)
-                setBody(FoedselsnummerDTO(fnr))
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-            }.let {
-                Assertions.assertEquals(HttpStatusCode.OK, it.status)
-                it.body()
-            }
+            val sak: Sak =
+                client.post("personer/saker/${SakType.BARNEPENSJON}") {
+                    addAuthToken(tokenSaksbehandler)
+                    contentType(ContentType.Application.Json)
+                    setBody(FoedselsnummerDTO(fnr))
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                }.let {
+                    Assertions.assertEquals(HttpStatusCode.OK, it.status)
+                    it.body()
+                }
             Assertions.assertNotNull(sak.id)
 
-            val behandlingId = client.post("/behandlinger/opprettbehandling") {
-                addAuthToken(tokenSaksbehandler)
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                setBody(
-                    BehandlingsBehov(
-                        sak.id,
-                        Persongalleri(fnr, "innsender", emptyList(), emptyList(), emptyList()),
-                        Tidspunkt.now().toLocalDatetimeUTC().toString()
+            val behandlingId =
+                client.post("/behandlinger/opprettbehandling") {
+                    addAuthToken(tokenSaksbehandler)
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    setBody(
+                        BehandlingsBehov(
+                            sak.id,
+                            Persongalleri(fnr, "innsender", emptyList(), emptyList(), emptyList()),
+                            Tidspunkt.now().toLocalDatetimeUTC().toString(),
+                        ),
                     )
-                )
-            }.let {
-                Assertions.assertEquals(HttpStatusCode.OK, it.status)
-                UUID.fromString(it.body())
-            }
+                }.let {
+                    Assertions.assertEquals(HttpStatusCode.OK, it.status)
+                    UUID.fromString(it.body())
+                }
 
             client.get("/behandlinger/$behandlingId") {
                 addAuthToken(systemBruker)
@@ -101,8 +103,8 @@ class GrunnlagsendringshendelseRouteTest : BehandlingIntegrationTest() {
                         hendelseId = "1",
                         fnr = fnr,
                         adressebeskyttelseGradering = AdressebeskyttelseGradering.STRENGT_FORTROLIG,
-                        endringstype = Endringstype.OPPRETTET
-                    )
+                        endringstype = Endringstype.OPPRETTET,
+                    ),
                 )
             }.also {
                 Assertions.assertEquals(HttpStatusCode.OK, it.status)
@@ -116,8 +118,8 @@ class GrunnlagsendringshendelseRouteTest : BehandlingIntegrationTest() {
                         hendelseId = "1",
                         fnr = fnr,
                         adressebeskyttelseGradering = AdressebeskyttelseGradering.FORTROLIG,
-                        endringstype = Endringstype.OPPRETTET
-                    )
+                        endringstype = Endringstype.OPPRETTET,
+                    ),
                 )
             }.also {
                 Assertions.assertEquals(HttpStatusCode.OK, it.status)
@@ -131,8 +133,8 @@ class GrunnlagsendringshendelseRouteTest : BehandlingIntegrationTest() {
                         hendelseId = "1",
                         fnr = fnr,
                         adressebeskyttelseGradering = AdressebeskyttelseGradering.UGRADERT,
-                        endringstype = Endringstype.OPPRETTET
-                    )
+                        endringstype = Endringstype.OPPRETTET,
+                    ),
                 )
             }.also {
                 Assertions.assertEquals(HttpStatusCode.OK, it.status)

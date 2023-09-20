@@ -17,13 +17,14 @@ fun main() {
         val ab = AppBuilder(Miljoevariabler(rapidEnv))
         Fordeler(
             rapidsConnection = rapidsConnection,
-            fordelerService = FordelerService(
-                fordelerKriterier = FordelerKriterier(),
-                pdlTjenesterKlient = ab.pdlTjenesterKlient(),
-                fordelerRepository = FordelerRepository(ab.createDataSource()),
-                behandlingKlient = ab.behandlingKlient(),
-                maxFordelingTilGjenny = ab.longFeature("FEATURE_MAX_FORDELING_TIL_GJENNY")
-            )
+            fordelerService =
+                FordelerService(
+                    fordelerKriterier = FordelerKriterier(),
+                    pdlTjenesterKlient = ab.pdlTjenesterKlient(),
+                    fordelerRepository = FordelerRepository(ab.createDataSource()),
+                    behandlingKlient = ab.behandlingKlient(),
+                    maxFordelingTilGjenny = ab.longFeature("FEATURE_MAX_FORDELING_TIL_GJENNY"),
+                ),
         )
     }.start()
 }

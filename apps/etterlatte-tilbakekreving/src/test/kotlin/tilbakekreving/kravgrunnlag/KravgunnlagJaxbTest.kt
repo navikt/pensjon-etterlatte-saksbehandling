@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Test
 import java.math.BigInteger
 
 internal class KravgunnlagJaxbTest {
-
     @Test
     fun `skal lese og mappe kravgrunnlag fra tilbakekrevingskomponenten`() {
         val kravgrunnlagXml = readFile("/kravgrunnlag.xml")

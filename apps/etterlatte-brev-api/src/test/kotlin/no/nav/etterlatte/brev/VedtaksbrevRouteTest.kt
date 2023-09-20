@@ -41,7 +41,7 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import testsupport.buildTestApplicationConfigurationForOauth
-import java.util.*
+import java.util.UUID
 import kotlin.random.Random
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -76,10 +76,11 @@ internal class VedtaksbrevRouteTest {
         testApplication {
             val client = httpClient()
 
-            val response = client.get("/api/brev/behandling/$BEHANDLING_ID/vedtak") {
-                header(HttpHeaders.Authorization, "Bearer $accessToken")
-                contentType(ContentType.Application.Json)
-            }
+            val response =
+                client.get("/api/brev/behandling/$BEHANDLING_ID/vedtak") {
+                    header(HttpHeaders.Authorization, "Bearer $accessToken")
+                    contentType(ContentType.Application.Json)
+                }
 
             assertEquals(HttpStatusCode.OK, response.status)
         }
@@ -95,10 +96,11 @@ internal class VedtaksbrevRouteTest {
         testApplication {
             val client = httpClient()
 
-            val response = client.get("/api/brev/behandling/$BEHANDLING_ID/vedtak") {
-                header(HttpHeaders.Authorization, "Bearer $accessToken")
-                contentType(ContentType.Application.Json)
-            }
+            val response =
+                client.get("/api/brev/behandling/$BEHANDLING_ID/vedtak") {
+                    header(HttpHeaders.Authorization, "Bearer $accessToken")
+                    contentType(ContentType.Application.Json)
+                }
 
             assertEquals(HttpStatusCode.NoContent, response.status)
         }
@@ -117,11 +119,12 @@ internal class VedtaksbrevRouteTest {
         testApplication {
             val client = httpClient()
 
-            val response = client.post("/api/brev/behandling/$BEHANDLING_ID/vedtak") {
-                parameter("sakId", SAK_ID)
-                header(HttpHeaders.Authorization, "Bearer $accessToken")
-                contentType(ContentType.Application.Json)
-            }
+            val response =
+                client.post("/api/brev/behandling/$BEHANDLING_ID/vedtak") {
+                    parameter("sakId", SAK_ID)
+                    header(HttpHeaders.Authorization, "Bearer $accessToken")
+                    contentType(ContentType.Application.Json)
+                }
 
             assertEquals(HttpStatusCode.Created, response.status)
         }
@@ -142,11 +145,12 @@ internal class VedtaksbrevRouteTest {
         testApplication {
             val client = httpClient()
 
-            val response = client.get("/api/brev/behandling/$BEHANDLING_ID/vedtak/pdf") {
-                parameter("brevId", brevId)
-                header(HttpHeaders.Authorization, "Bearer $accessToken")
-                contentType(ContentType.Application.Json)
-            }
+            val response =
+                client.get("/api/brev/behandling/$BEHANDLING_ID/vedtak/pdf") {
+                    parameter("brevId", brevId)
+                    header(HttpHeaders.Authorization, "Bearer $accessToken")
+                    contentType(ContentType.Application.Json)
+                }
 
             assertEquals(HttpStatusCode.OK, response.status)
             assertArrayEquals(pdf.bytes, response.body())
@@ -165,9 +169,10 @@ internal class VedtaksbrevRouteTest {
         testApplication {
             val client = httpClient()
 
-            val response = client.get("/api/brev/finnesikke") {
-                header(HttpHeaders.Authorization, "Bearer $accessToken")
-            }
+            val response =
+                client.get("/api/brev/finnesikke") {
+                    header(HttpHeaders.Authorization, "Bearer $accessToken")
+                }
 
             assertEquals(HttpStatusCode.NotFound, response.status)
         }
@@ -188,7 +193,7 @@ internal class VedtaksbrevRouteTest {
                 restModule(this.log, routePrefix = "api") {
                     vedtaksbrevRoute(
                         vedtaksbrevService,
-                        behandlingKlient
+                        behandlingKlient,
                     )
                 }
             }
@@ -208,27 +213,29 @@ internal class VedtaksbrevRouteTest {
         mockOAuth2Server.issueToken(
             issuerId = AZURE_ISSUER,
             audience = CLIENT_ID,
-            claims = mapOf(
-                "navn" to "Test Veiledersen",
-                "NAVident" to "S123456"
-            )
+            claims =
+                mapOf(
+                    "navn" to "Test Veiledersen",
+                    "NAVident" to "S123456",
+                ),
         ).serialize()
     }
 
-    private fun opprettBrev() = Brev(
-        1,
-        41,
-        BEHANDLING_ID,
-        BrevProsessType.AUTOMATISK,
-        "soeker_fnr",
-        Status.OPPRETTET,
-        Mottaker(
-            "Stor Snerk",
-            STOR_SNERK,
-            null,
-            Adresse(adresseType = "NORSKPOSTADRESSE", "Testgaten 13", "1234", "OSLO", land = "Norge", landkode = "NOR")
+    private fun opprettBrev() =
+        Brev(
+            1,
+            41,
+            BEHANDLING_ID,
+            BrevProsessType.AUTOMATISK,
+            "soeker_fnr",
+            Status.OPPRETTET,
+            Mottaker(
+                "Stor Snerk",
+                STOR_SNERK,
+                null,
+                Adresse(adresseType = "NORSKPOSTADRESSE", "Testgaten 13", "1234", "OSLO", land = "Norge", landkode = "NOR"),
+            ),
         )
-    )
 
     private fun ApplicationTestBuilder.httpClient(): HttpClient {
         environment {
@@ -238,7 +245,7 @@ internal class VedtaksbrevRouteTest {
             restModule(this.log, routePrefix = "api") {
                 vedtaksbrevRoute(
                     vedtaksbrevService,
-                    behandlingKlient
+                    behandlingKlient,
                 )
             }
         }

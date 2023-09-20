@@ -7,15 +7,15 @@ import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
 
 class KlageTest {
-
     @Test
     fun `oppdaterFormkrav sjekker at klagen har en status som kan oppdateres`() {
         val sak = Sak(ident = "bruker", sakType = SakType.BARNEPENSJON, id = 1, enhet = "1337")
         val klage = Klage.ny(sak)
 
-        val oppdatertKlage = assertDoesNotThrow {
-            klage.oppdaterFormkrav(alleFormkravOppfylt(), "en saksbehandler")
-        }
+        val oppdatertKlage =
+            assertDoesNotThrow {
+                klage.oppdaterFormkrav(alleFormkravOppfylt(), "en saksbehandler")
+            }
         Assertions.assertEquals(KlageStatus.FORMKRAV_OPPFYLT, oppdatertKlage.status)
         Assertions.assertEquals("en saksbehandler", oppdatertKlage.formkrav?.saksbehandler?.ident)
 
@@ -51,23 +51,24 @@ class KlageTest {
             erKlagenSignert = JaNei.NEI,
             gjelderKlagenNoeKonkretIVedtaket = JaNei.NEI,
             erKlagenFramsattInnenFrist = JaNei.NEI,
-            erFormkraveneOppfylt = JaNei.NEI
+            erFormkraveneOppfylt = JaNei.NEI,
         )
     }
 
     private fun alleFormkravOppfylt(): Formkrav {
         return Formkrav(
-            vedtaketKlagenGjelder = VedtaketKlagenGjelder(
-                id = "",
-                behandlingId = "",
-                datoAttestert = null,
-                vedtakType = null
-            ),
+            vedtaketKlagenGjelder =
+                VedtaketKlagenGjelder(
+                    id = "",
+                    behandlingId = "",
+                    datoAttestert = null,
+                    vedtakType = null,
+                ),
             erKlagerPartISaken = JaNei.JA,
             erKlagenSignert = JaNei.JA,
             gjelderKlagenNoeKonkretIVedtaket = JaNei.JA,
             erKlagenFramsattInnenFrist = JaNei.JA,
-            erFormkraveneOppfylt = JaNei.JA
+            erFormkraveneOppfylt = JaNei.JA,
         )
     }
 }

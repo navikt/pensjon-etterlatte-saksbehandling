@@ -27,7 +27,6 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
 internal class PdlKlientTest {
-
     private val defaultHeaders = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
 
     private val config: Config = mockk(relaxed = true)
@@ -89,15 +88,17 @@ internal class PdlKlientTest {
 
     @Test
     fun `skal hente utland`() {
-        val utland = Utland(
-            innflyttingTilNorge = null,
-            utflyttingFraNorge = listOf(
-                UtflyttingFraNorge(
-                    tilflyttingsland = "Sverige",
-                    dato = LocalDate.now()
-                )
+        val utland =
+            Utland(
+                innflyttingTilNorge = null,
+                utflyttingFraNorge =
+                    listOf(
+                        UtflyttingFraNorge(
+                            tilflyttingsland = "Sverige",
+                            dato = LocalDate.now(),
+                        ),
+                    ),
             )
-        )
         val mockperson = mockPerson(utland = utland)
         val klient = mockHttpClient(mockperson)
         val pdlService = PdlKlientImpl(config, klient)
@@ -108,23 +109,24 @@ internal class PdlKlientTest {
     }
 
     private fun mockHttpClient(respons: Any): HttpClient {
-        val httpClient = HttpClient(MockEngine) {
-            engine {
-                addHandler { request ->
-                    when (request.url.fullPath) {
-                        "/geografisktilknytning" -> respond(respons.toJson(), HttpStatusCode.OK, defaultHeaders)
-                        "/person/v2" -> respond(respons.toJson(), HttpStatusCode.OK, defaultHeaders)
-                        else -> error("Unhandled ${request.url.fullPath}")
+        val httpClient =
+            HttpClient(MockEngine) {
+                engine {
+                    addHandler { request ->
+                        when (request.url.fullPath) {
+                            "/geografisktilknytning" -> respond(respons.toJson(), HttpStatusCode.OK, defaultHeaders)
+                            "/person/v2" -> respond(respons.toJson(), HttpStatusCode.OK, defaultHeaders)
+                            else -> error("Unhandled ${request.url.fullPath}")
+                        }
+                    }
+                }
+                expectSuccess = true
+                install(ContentNegotiation) {
+                    jackson {
+                        registerModule(JavaTimeModule())
                     }
                 }
             }
-            expectSuccess = true
-            install(ContentNegotiation) {
-                jackson {
-                    registerModule(JavaTimeModule())
-                }
-            }
-        }
 
         return httpClient
     }

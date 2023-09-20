@@ -19,60 +19,60 @@ sealed class SamsvarMellomKildeOgGrunnlag {
     data class FeilRolle(
         val person: PersonDTO,
         val fraGrunnlag: Grunnlag?,
-        override val samsvar: Boolean
+        override val samsvar: Boolean,
     ) : SamsvarMellomKildeOgGrunnlag()
 
     @JsonTypeName("VERGEMAAL_ELLER_FREMTIDSFULLMAKT")
     data class VergemaalEllerFremtidsfullmaktForhold(
         val fraPdl: List<VergemaalEllerFremtidsfullmakt>?,
         val fraGrunnlag: List<VergemaalEllerFremtidsfullmakt>?,
-        override val samsvar: Boolean
+        override val samsvar: Boolean,
     ) : SamsvarMellomKildeOgGrunnlag()
 
     @JsonTypeName("DOEDSDATO")
     data class Doedsdatoforhold(
         val fraGrunnlag: LocalDate?,
         val fraPdl: LocalDate?,
-        override val samsvar: Boolean
+        override val samsvar: Boolean,
     ) : SamsvarMellomKildeOgGrunnlag()
 
     @JsonTypeName("UTLAND")
     data class Utlandsforhold(
         val fraPdl: Utland?,
         val fraGrunnlag: Utland?,
-        override val samsvar: Boolean
+        override val samsvar: Boolean,
     ) : SamsvarMellomKildeOgGrunnlag()
 
     @JsonTypeName("ANSVARLIGE_FORELDRE")
     data class AnsvarligeForeldre(
         val fraPdl: List<Folkeregisteridentifikator>?,
         val fraGrunnlag: List<Folkeregisteridentifikator>?,
-        override val samsvar: Boolean
+        override val samsvar: Boolean,
     ) : SamsvarMellomKildeOgGrunnlag()
 
     @JsonTypeName("BARN")
     data class Barn(
         val fraPdl: List<Folkeregisteridentifikator>?,
         val fraGrunnlag: List<Folkeregisteridentifikator>?,
-        override val samsvar: Boolean
+        override val samsvar: Boolean,
     ) : SamsvarMellomKildeOgGrunnlag()
 
     @JsonTypeName("SIVILSTAND")
     data class Sivilstand(
         val fraPdl: List<no.nav.etterlatte.libs.common.person.Sivilstand>?,
         val fraGrunnlag: List<no.nav.etterlatte.libs.common.person.Sivilstand>?,
-        override val samsvar: Boolean
+        override val samsvar: Boolean,
     ) : SamsvarMellomKildeOgGrunnlag()
 
     @JsonTypeName("GRUNNBELOEP")
     data class Grunnbeloep(
-        override val samsvar: Boolean
+        override val samsvar: Boolean,
     ) : SamsvarMellomKildeOgGrunnlag()
 
     @JsonTypeName("INSTITUSJONSOPPHOLD")
     data class INSTITUSJONSOPPHOLD(
         override val samsvar: Boolean,
         val oppholdstype: InstitusjonsoppholdsType,
-        val oppholdBeriket: InstitusjonsoppholdHendelseBeriket?
+        val oppholdBeriket: InstitusjonsoppholdHendelseBeriket?,
     ) : SamsvarMellomKildeOgGrunnlag()
 }

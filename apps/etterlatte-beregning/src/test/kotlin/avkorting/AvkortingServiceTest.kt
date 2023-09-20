@@ -27,18 +27,18 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.time.YearMonth
-import java.util.*
+import java.util.UUID
 
 internal class AvkortingServiceTest {
-
     private val behandlingKlient: BehandlingKlient = mockk()
     private val avkortingRepository: AvkortingRepository = mockk()
     private val beregningService: BeregningService = mockk()
-    private val service = AvkortingService(
-        behandlingKlient,
-        avkortingRepository,
-        beregningService
-    )
+    private val service =
+        AvkortingService(
+            behandlingKlient,
+            avkortingRepository,
+            beregningService,
+        )
 
     @BeforeEach
     fun beforeEach() {
@@ -53,14 +53,14 @@ internal class AvkortingServiceTest {
 
     @Nested
     inner class HentAvkorting {
-
         @Test
         fun `Skal hente avkorting med loepende ytelse`() {
             val behandlingId = UUID.randomUUID()
-            val behandling = behandling(
-                id = behandlingId,
-                behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING
-            )
+            val behandling =
+                behandling(
+                    id = behandlingId,
+                    behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+                )
             val avkorting = mockk<Avkorting>()
 
             coEvery { behandlingKlient.hentBehandling(behandlingId, bruker) } returns behandling
@@ -80,10 +80,11 @@ internal class AvkortingServiceTest {
         @Test
         fun `Skal returnere null hvis avkorting ikke finnes`() {
             val behandlingId = UUID.randomUUID()
-            val behandling = behandling(
-                id = behandlingId,
-                behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING
-            )
+            val behandling =
+                behandling(
+                    id = behandlingId,
+                    behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+                )
             every { avkortingRepository.hentAvkorting(behandlingId) } returns null
             coEvery { behandlingKlient.hentBehandling(behandlingId, bruker) } returns behandling
 
@@ -101,12 +102,13 @@ internal class AvkortingServiceTest {
         @Test
         fun `Revurdering skal opprette ny avkorting ved aa kopiere tidligere hvis avkorting ikke finnes fra foer`() {
             val behandlingId = UUID.randomUUID()
-            val behandling = behandling(
-                id = behandlingId,
-                behandlingType = BehandlingType.REVURDERING,
-                sak = 123L,
-                virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2023, 1))
-            )
+            val behandling =
+                behandling(
+                    id = behandlingId,
+                    behandlingType = BehandlingType.REVURDERING,
+                    sak = 123L,
+                    virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2023, 1)),
+                )
             val forrigeBehandlingId = UUID.randomUUID()
             val forrigeAvkorting = mockk<Avkorting>()
             val kopiertAvkorting = mockk<Avkorting>()
@@ -115,9 +117,10 @@ internal class AvkortingServiceTest {
             val lagretAvkorting = mockk<Avkorting>()
 
             coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
-            coEvery { behandlingKlient.hentSisteIverksatteBehandling(any(), any()) } returns SisteIverksatteBehandling(
-                forrigeBehandlingId
-            )
+            coEvery { behandlingKlient.hentSisteIverksatteBehandling(any(), any()) } returns
+                SisteIverksatteBehandling(
+                    forrigeBehandlingId,
+                )
             every { avkortingRepository.hentAvkorting(forrigeBehandlingId) } returns forrigeAvkorting
             every { avkortingRepository.hentAvkorting(behandlingId) } returns null andThen lagretAvkorting
             every { beregningService.hentBeregningNonnull(any()) } returns beregning
@@ -150,7 +153,6 @@ internal class AvkortingServiceTest {
 
     @Nested
     inner class LagreAvkorting {
-
         val endretGrunnlag = mockk<AvkortingGrunnlag>()
         val beregning = mockk<Beregning>()
 
@@ -161,11 +163,12 @@ internal class AvkortingServiceTest {
         @Test
         fun `Skal beregne og lagre avkorting for førstegangsbehandling`() {
             val behandlingId = UUID.randomUUID()
-            val behandling = behandling(
-                id = behandlingId,
-                behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-                virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2023, 1))
-            )
+            val behandling =
+                behandling(
+                    id = behandlingId,
+                    behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+                    virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2023, 1)),
+                )
 
             every { avkortingRepository.hentAvkorting(any()) } returns eksisterendeAvkorting andThen lagretAvkorting
             coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
@@ -188,7 +191,7 @@ internal class AvkortingServiceTest {
                 eksisterendeAvkorting.beregnAvkortingMedNyttGrunnlag(
                     endretGrunnlag,
                     behandling.behandlingType,
-                    beregning
+                    beregning,
                 )
                 avkortingRepository.lagreAvkorting(behandlingId, beregnetAvkorting)
                 lagretAvkorting.medYtelseFraOgMedVirkningstidspunkt(YearMonth.of(2023, 1))
@@ -203,12 +206,13 @@ internal class AvkortingServiceTest {
         fun `Lagre avkorting for revurdering henter og legger til avkorting fra forrige vedtak`() {
             val revurderingId = UUID.randomUUID()
             val sakId = 123L
-            val revurdering = behandling(
-                id = revurderingId,
-                behandlingType = BehandlingType.REVURDERING,
-                sak = sakId,
-                virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2023, 3))
-            )
+            val revurdering =
+                behandling(
+                    id = revurderingId,
+                    behandlingType = BehandlingType.REVURDERING,
+                    sak = sakId,
+                    virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2023, 3)),
+                )
             val forrigeBehandling = UUID.randomUUID()
             val forrigeAvkorting = mockk<Avkorting>()
 
@@ -219,9 +223,10 @@ internal class AvkortingServiceTest {
                 eksisterendeAvkorting.beregnAvkortingMedNyttGrunnlag(any(), any(), any())
             } returns beregnetAvkorting
             every { avkortingRepository.lagreAvkorting(any(), any()) } returns Unit
-            coEvery { behandlingKlient.hentSisteIverksatteBehandling(any(), any()) } returns SisteIverksatteBehandling(
-                forrigeBehandling
-            )
+            coEvery { behandlingKlient.hentSisteIverksatteBehandling(any(), any()) } returns
+                SisteIverksatteBehandling(
+                    forrigeBehandling,
+                )
             every { avkortingRepository.hentAvkorting(forrigeBehandling) } returns forrigeAvkorting
             every { lagretAvkorting.medYtelseFraOgMedVirkningstidspunkt(any(), any()) } returns lagretAvkorting
             coEvery { behandlingKlient.avkort(any(), any(), any()) } returns true
@@ -237,7 +242,7 @@ internal class AvkortingServiceTest {
                 eksisterendeAvkorting.beregnAvkortingMedNyttGrunnlag(
                     endretGrunnlag,
                     revurdering.behandlingType,
-                    beregning
+                    beregning,
                 )
                 avkortingRepository.lagreAvkorting(revurderingId, beregnetAvkorting)
                 behandlingKlient.hentSisteIverksatteBehandling(sakId, bruker)
@@ -266,5 +271,4 @@ internal class AvkortingServiceTest {
             }
         }
     }
-
 }

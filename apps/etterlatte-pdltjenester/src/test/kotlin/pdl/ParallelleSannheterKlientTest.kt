@@ -17,42 +17,47 @@ import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
 
 internal class ParallelleSannheterKlientTest {
+    private val parallelleSannheterKlient =
+        ParallelleSannheterKlient(
+            httpClient = setupHttpClient(),
+            apiUrl = "url",
+        )
 
-    private val parallelleSannheterKlient = ParallelleSannheterKlient(
-        httpClient = setupHttpClient(),
-        apiUrl = "url"
-    )
+    private fun setupHttpClient() =
+        HttpClient(MockEngine) {
+            expectSuccess = true
+            engine {
+                addHandler { request ->
+                    val headers = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
 
-    private fun setupHttpClient() = HttpClient(MockEngine) {
-        expectSuccess = true
-        engine {
-            addHandler { request ->
-                val headers = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
-
-                when (request.url.fullPath) {
-                    "/url/api/navn" -> {
-                        respond(mockResponse("navn", mockNavn(FREG)), headers = headers)
+                    when (request.url.fullPath) {
+                        "/url/api/navn" -> {
+                            respond(mockResponse("navn", mockNavn(FREG)), headers = headers)
+                        }
+                        else -> error(request.url.fullPath)
                     }
-                    else -> error(request.url.fullPath)
                 }
             }
+            install(ContentNegotiation) { register(ContentType.Application.Json, JacksonConverter(objectMapper)) }
         }
-        install(ContentNegotiation) { register(ContentType.Application.Json, JacksonConverter(objectMapper)) }
-    }
 
     @Test
     fun `skal returnere kun ett navn fra parallelle sannheter`() {
         val navn = listOf(mockNavn(FREG), mockNavn(PDL))
 
-        val avklartNavn = runBlocking {
-            parallelleSannheterKlient.avklarNavn(navn)
-        }
+        val avklartNavn =
+            runBlocking {
+                parallelleSannheterKlient.avklarNavn(navn)
+            }
 
         assertNotNull(avklartNavn)
         assertEquals(FREG, avklartNavn.metadata.master)
     }
 
-    private fun <T> mockResponse(feltnavn: String, verdi: T): String {
+    private fun <T> mockResponse(
+        feltnavn: String,
+        verdi: T,
+    ): String {
         return objectMapper.createObjectNode()
             .set<JsonNode?>(feltnavn, objectMapper.readValue(listOf(verdi).toJson(), JsonNode::class.java))
             .toJson()
@@ -62,12 +67,13 @@ internal class ParallelleSannheterKlientTest {
         return PdlNavn(
             fornavn = "Ola",
             etternavn = "Nordmann",
-            metadata = PdlMetadata(
-                endringer = emptyList(),
-                historisk = false,
-                master = master,
-                opplysningsId = "1"
-            )
+            metadata =
+                PdlMetadata(
+                    endringer = emptyList(),
+                    historisk = false,
+                    master = master,
+                    opplysningsId = "1",
+                ),
         )
     }
 

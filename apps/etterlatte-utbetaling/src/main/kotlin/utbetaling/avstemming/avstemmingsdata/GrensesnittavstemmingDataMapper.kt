@@ -28,7 +28,7 @@ class GrensesnittavstemmingDataMapper(
     private val periodeFraOgMed: Tidspunkt,
     private val periodeTil: Tidspunkt,
     private val avstemmingId: UUIDBase64,
-    private val detaljerPrMelding: Int = ANTALL_DETALJER_PER_AVSTEMMINGMELDING_OPPDRAG
+    private val detaljerPrMelding: Int = ANTALL_DETALJER_PER_AVSTEMMINGMELDING_OPPDRAG,
 ) {
     private val avstemmingsperiode = periode(utbetalinger)
 
@@ -49,13 +49,17 @@ class GrensesnittavstemmingDataMapper(
 
     private fun sluttmelding(saktype: Saktype) = listOf(avstemmingsdata(AksjonType.AVSL, saktype))
 
-    private fun avstemmingsdata(aksjonstype: AksjonType, saktype: Saktype) =
-        Avstemmingsdata().apply {
-            aksjon = Aksjonsdata().apply {
-                val fagomraade = when (saktype) {
-                    Saktype.BARNEPENSJON -> "BARNEPE"
-                    Saktype.OMSTILLINGSSTOENAD -> "OMSTILL"
-                }
+    private fun avstemmingsdata(
+        aksjonstype: AksjonType,
+        saktype: Saktype,
+    ) = Avstemmingsdata().apply {
+        aksjon =
+            Aksjonsdata().apply {
+                val fagomraade =
+                    when (saktype) {
+                        Saktype.BARNEPENSJON -> "BARNEPE"
+                        Saktype.OMSTILLINGSSTOENAD -> "OMSTILL"
+                    }
                 aksjonType = aksjonstype
                 kildeType = KildeType.AVLEV
                 avstemmingType = AvstemmingType.GRSN
@@ -69,7 +73,7 @@ class GrensesnittavstemmingDataMapper(
                 avleverendeAvstemmingId = avstemmingId.value
                 brukerId = fagomraade
             }
-        }
+    }
 
     private fun avstemmingsdataLister(saktype: Saktype): List<Avstemmingsdata> {
         return detaljdata(utbetalinger).chunked(detaljerPrMelding).map {
@@ -108,31 +112,34 @@ class GrensesnittavstemmingDataMapper(
             UtbetalingStatus.GODKJENT, UtbetalingStatus.MOTTATT -> null
         }
 
-    private fun grunnlagsdata() = Grunnlagsdata().apply {
-        val utbetalinger = utbetalinger.groupBy { it.status() }
+    private fun grunnlagsdata() =
+        Grunnlagsdata().apply {
+            val utbetalinger = utbetalinger.groupBy { it.status() }
 
-        godkjentAntall = getAntall(utbetalinger[UtbetalingStatus.GODKJENT])
-        godkjentBelop = getBelop(utbetalinger[UtbetalingStatus.GODKJENT])
-        godkjentFortegn = getFortegn(godkjentBelop)
+            godkjentAntall = getAntall(utbetalinger[UtbetalingStatus.GODKJENT])
+            godkjentBelop = getBelop(utbetalinger[UtbetalingStatus.GODKJENT])
+            godkjentFortegn = getFortegn(godkjentBelop)
 
-        varselAntall = getAntall(utbetalinger[UtbetalingStatus.GODKJENT_MED_FEIL])
-        varselBelop = getBelop(utbetalinger[UtbetalingStatus.GODKJENT_MED_FEIL])
-        varselFortegn = getFortegn(varselBelop)
+            varselAntall = getAntall(utbetalinger[UtbetalingStatus.GODKJENT_MED_FEIL])
+            varselBelop = getBelop(utbetalinger[UtbetalingStatus.GODKJENT_MED_FEIL])
+            varselFortegn = getFortegn(varselBelop)
 
-        avvistAntall = listOf(
-            getAntall(utbetalinger[UtbetalingStatus.FEILET]),
-            getAntall(utbetalinger[UtbetalingStatus.AVVIST])
-        ).sum()
-        avvistBelop = listOf(
-            getBelop(utbetalinger[UtbetalingStatus.FEILET]),
-            getBelop(utbetalinger[UtbetalingStatus.AVVIST])
-        ).reduce(BigDecimal::add)
-        avvistFortegn = getFortegn(avvistBelop)
+            avvistAntall =
+                listOf(
+                    getAntall(utbetalinger[UtbetalingStatus.FEILET]),
+                    getAntall(utbetalinger[UtbetalingStatus.AVVIST]),
+                ).sum()
+            avvistBelop =
+                listOf(
+                    getBelop(utbetalinger[UtbetalingStatus.FEILET]),
+                    getBelop(utbetalinger[UtbetalingStatus.AVVIST]),
+                ).reduce(BigDecimal::add)
+            avvistFortegn = getFortegn(avvistBelop)
 
-        manglerAntall = getAntall(utbetalinger[UtbetalingStatus.SENDT])
-        manglerBelop = getBelop(utbetalinger[UtbetalingStatus.SENDT])
-        manglerFortegn = getFortegn(manglerBelop)
-    }
+            manglerAntall = getAntall(utbetalinger[UtbetalingStatus.SENDT])
+            manglerBelop = getBelop(utbetalinger[UtbetalingStatus.SENDT])
+            manglerFortegn = getFortegn(manglerBelop)
+        }
 
     private fun getAntall(utbetalinger: List<Utbetaling>?) = utbetalinger?.count() ?: 0
 

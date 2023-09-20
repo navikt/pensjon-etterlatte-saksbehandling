@@ -14,7 +14,10 @@ import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.withBehandlingId
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 
-fun Route.beregning(beregningService: BeregningService, behandlingKlient: BehandlingKlient) {
+fun Route.beregning(
+    beregningService: BeregningService,
+    behandlingKlient: BehandlingKlient,
+) {
     route("/api/beregning") {
         val logger = application.log
 

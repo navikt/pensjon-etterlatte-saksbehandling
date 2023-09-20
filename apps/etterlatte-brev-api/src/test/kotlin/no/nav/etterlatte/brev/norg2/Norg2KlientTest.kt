@@ -18,7 +18,6 @@ import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.Test
 
 internal class Norg2KlientTest {
-
     private val porsgrunnEnhetJson = javaClass.getResource("/norg2/porsgrunn_enhet.json")!!.readText()
     private val porsgrunnKontaktinfoJson = javaClass.getResource("/norg2/porsgrunn_kontaktinfo.json")!!.readText()
     private val errorJson = "{\"field\": null, \"message\": \"Enheten med nummeret '1234' eksisterer ikke\"}"
@@ -33,9 +32,10 @@ internal class Norg2KlientTest {
 
     @Test
     fun `Uthenting av enhet OK`() {
-        val enhet = runBlocking {
-            klient.hentEnhet(PORSGRUNN)
-        }
+        val enhet =
+            runBlocking {
+                klient.hentEnhet(PORSGRUNN)
+            }
 
         assertEquals(PORSGRUNN, enhet.enhetNr)
         assertEquals("NAV Porsgrunn", enhet.navn)
@@ -62,24 +62,26 @@ internal class Norg2KlientTest {
     }
 
     private fun mockHttpClient(): Norg2Klient {
-        val httpClient = HttpClient(MockEngine) {
-            engine {
-                addHandler { request ->
-                    when (request.url.fullPath) {
-                        "/enhet/$PORSGRUNN" -> respond(porsgrunnEnhetJson, HttpStatusCode.OK, defaultHeaders)
-                        "/enhet/$PORSGRUNN/kontaktinformasjon" -> respond(
-                            porsgrunnKontaktinfoJson,
-                            HttpStatusCode.OK,
-                            defaultHeaders
-                        )
-                        "/enhet/$UKJENT" -> respond(errorJson, HttpStatusCode.NotFound, defaultHeaders)
-                        else -> error("Unhandled ${request.url.fullPath}")
+        val httpClient =
+            HttpClient(MockEngine) {
+                engine {
+                    addHandler { request ->
+                        when (request.url.fullPath) {
+                            "/enhet/$PORSGRUNN" -> respond(porsgrunnEnhetJson, HttpStatusCode.OK, defaultHeaders)
+                            "/enhet/$PORSGRUNN/kontaktinformasjon" ->
+                                respond(
+                                    porsgrunnKontaktinfoJson,
+                                    HttpStatusCode.OK,
+                                    defaultHeaders,
+                                )
+                            "/enhet/$UKJENT" -> respond(errorJson, HttpStatusCode.NotFound, defaultHeaders)
+                            else -> error("Unhandled ${request.url.fullPath}")
+                        }
                     }
                 }
+                expectSuccess = true
+                install(ContentNegotiation) { jackson { } }
             }
-            expectSuccess = true
-            install(ContentNegotiation) { jackson { } }
-        }
 
         return Norg2Klient("", httpClient)
     }

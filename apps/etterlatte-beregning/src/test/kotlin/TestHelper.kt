@@ -40,7 +40,7 @@ import java.math.RoundingMode
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
-import java.util.*
+import java.util.UUID
 
 val REGEL_PERIODE = RegelPeriode(LocalDate.of(2023, 1, 1))
 
@@ -54,22 +54,22 @@ fun barnepensjonGrunnlag(
     soeskenKull: List<String> = emptyList(),
     trygdeTid: Beregningstall = Beregningstall(MAKS_TRYGDETID),
     institusjonsopphold: InstitusjonsoppholdBeregningsgrunnlag? = null,
-    avdoedeForeldre: List<Folkeregisteridentifikator> = listOf(Folkeregisteridentifikator.of("11057523044"))
+    avdoedeForeldre: List<Folkeregisteridentifikator> = listOf(Folkeregisteridentifikator.of("11057523044")),
 ) = BarnepensjonGrunnlag(
     soeskenKull = FaktumNode(soeskenKull.map { Folkeregisteridentifikator.of(it) }, kilde, "søskenkull"),
     avdoedesTrygdetid = FaktumNode(trygdeTid, kilde, "trygdetid"),
     institusjonsopphold = FaktumNode(institusjonsopphold, kilde, "institusjonsopphold"),
-    avdoedeForeldre = FaktumNode(avdoedeForeldre, kilde, "avdøde")
+    avdoedeForeldre = FaktumNode(avdoedeForeldre, kilde, "avdøde"),
 )
 
 fun Double.toBeregningstall(
     decimals: Int = Beregningstall.DESIMALER_DELBEREGNING,
-    roundingMode: RoundingMode = RoundingMode.UNNECESSARY
+    roundingMode: RoundingMode = RoundingMode.UNNECESSARY,
 ) = Beregningstall(this).setScale(decimals, roundingMode)
 
 fun Int.toBeregningstall(
     decimals: Int = Beregningstall.DESIMALER_DELBEREGNING,
-    roundingMode: RoundingMode = RoundingMode.UNNECESSARY
+    roundingMode: RoundingMode = RoundingMode.UNNECESSARY,
 ) = Beregningstall(this).setScale(decimals, roundingMode)
 
 val bruker = Saksbehandler("token", "ident", null)
@@ -77,13 +77,14 @@ val bruker = Saksbehandler("token", "ident", null)
 fun avkorting(
     ytelseFoerAvkorting: List<YtelseFoerAvkorting> = emptyList(),
     inntektsavkorting: List<Inntektsavkorting> = emptyList(),
-    avkortetYtelseAar: List<AvkortetYtelse> = emptyList()
+    avkortetYtelseAar: List<AvkortetYtelse> = emptyList(),
 ) = Avkorting(
-    aarsoppgjoer = aarsoppgjoer(
-        ytelseFoerAvkorting,
-        inntektsavkorting,
-        avkortetYtelseAar
-    )
+    aarsoppgjoer =
+        aarsoppgjoer(
+            ytelseFoerAvkorting,
+            inntektsavkorting,
+            avkortetYtelseAar,
+        ),
 )
 
 fun avkortinggrunnlag(
@@ -92,7 +93,7 @@ fun avkortinggrunnlag(
     fratrekkInnAar: Int = 10000,
     relevanteMaanederInnAar: Int = 12,
     periode: Periode = Periode(fom = YearMonth.now(), tom = null),
-    kilde: Grunnlagsopplysning.Saksbehandler = Grunnlagsopplysning.Saksbehandler.create("Z123456")
+    kilde: Grunnlagsopplysning.Saksbehandler = Grunnlagsopplysning.Saksbehandler.create("Z123456"),
 ) = AvkortingGrunnlag(
     id = id,
     periode = periode,
@@ -102,54 +103,56 @@ fun avkortinggrunnlag(
     fratrekkInnAarUtland = 0,
     relevanteMaanederInnAar = relevanteMaanederInnAar,
     spesifikasjon = "Spesifikasjon",
-    kilde = kilde
+    kilde = kilde,
 )
 
 fun inntektAvkortingGrunnlag(
     inntekt: Int = 500000,
     fratrekkInnAar: Int = 0,
     inntektUtland: Int = 0,
-    relevanteMaaneder: Int = 12
+    relevanteMaaneder: Int = 12,
 ) = InntektAvkortingGrunnlagWrapper(
-    inntektAvkortingGrunnlag = FaktumNode(
-        verdi = InntektAvkortingGrunnlag(
-            inntekt = Beregningstall(inntekt),
-            fratrekkInnAar = Beregningstall(fratrekkInnAar),
-            inntektUtland = Beregningstall(inntektUtland),
-            fratrekkInnAarUtland = Beregningstall(0),
-            relevanteMaaneder = Beregningstall(relevanteMaaneder),
-            grunnlagId = UUID.randomUUID()
+    inntektAvkortingGrunnlag =
+        FaktumNode(
+            verdi =
+                InntektAvkortingGrunnlag(
+                    inntekt = Beregningstall(inntekt),
+                    fratrekkInnAar = Beregningstall(fratrekkInnAar),
+                    inntektUtland = Beregningstall(inntektUtland),
+                    fratrekkInnAarUtland = Beregningstall(0),
+                    relevanteMaaneder = Beregningstall(relevanteMaaneder),
+                    grunnlagId = UUID.randomUUID(),
+                ),
+            kilde = "",
+            beskrivelse = "",
         ),
-        kilde = "",
-        beskrivelse = ""
-    )
 )
 
 fun aarsoppgjoer(
     ytelseFoerAvkorting: List<YtelseFoerAvkorting> = emptyList(),
     inntektsavkorting: List<Inntektsavkorting> = emptyList(),
-    avkortetYtelseAar: List<AvkortetYtelse> = emptyList()
+    avkortetYtelseAar: List<AvkortetYtelse> = emptyList(),
 ) = Aarsoppgjoer(
     ytelseFoerAvkorting = ytelseFoerAvkorting,
     inntektsavkorting = inntektsavkorting,
-    avkortetYtelseAar = avkortetYtelseAar
+    avkortetYtelseAar = avkortetYtelseAar,
 )
 
 fun ytelseFoerAvkorting(
     beregning: Int = 100,
     periode: Periode = Periode(fom = YearMonth.of(2023, 1), tom = null),
-    beregningsreferanse: UUID = UUID.randomUUID()
+    beregningsreferanse: UUID = UUID.randomUUID(),
 ) = YtelseFoerAvkorting(
     beregning = beregning,
     periode = periode,
-    beregningsreferanse = beregningsreferanse
+    beregningsreferanse = beregningsreferanse,
 )
 
 fun avkortingsperiode(
     fom: YearMonth = YearMonth.now(),
     tom: YearMonth? = null,
     avkorting: Int = 10000,
-    inntektsgrunnlag: UUID = UUID.randomUUID()
+    inntektsgrunnlag: UUID = UUID.randomUUID(),
 ) = Avkortingsperiode(
     id = UUID.randomUUID(),
     Periode(fom = fom, tom = tom),
@@ -157,25 +160,29 @@ fun avkortingsperiode(
     tidspunkt = Tidspunkt.now(),
     regelResultat = "".toJsonNode(),
     kilde = Grunnlagsopplysning.RegelKilde("regelid", Tidspunkt.now(), "1"),
-    inntektsgrunnlag = inntektsgrunnlag
+    inntektsgrunnlag = inntektsgrunnlag,
 )
 
 fun restanse(
     totalRestanse: Int = 100,
-    fordeltRestanse: Int = 100
+    fordeltRestanse: Int = 100,
 ) = Restanse(
     id = UUID.randomUUID(),
     totalRestanse = totalRestanse,
     fordeltRestanse = fordeltRestanse,
     tidspunkt = Tidspunkt.now(),
     regelResultat = "".toJsonNode(),
-    kilde = Grunnlagsopplysning.RegelKilde("regelid", Tidspunkt.now(), "1")
+    kilde = Grunnlagsopplysning.RegelKilde("regelid", Tidspunkt.now(), "1"),
 )
 
-fun avkortetYtelseGrunnlag(beregning: Int, avkorting: Int, fordeltRestanse: Int = 0) = AvkortetYtelseGrunnlag(
+fun avkortetYtelseGrunnlag(
+    beregning: Int,
+    avkorting: Int,
+    fordeltRestanse: Int = 0,
+) = AvkortetYtelseGrunnlag(
     beregning = FaktumNode(verdi = beregning, "", ""),
     avkorting = FaktumNode(verdi = avkorting, "", ""),
-    fordeltRestanse = FaktumNode(verdi = fordeltRestanse, "", "")
+    fordeltRestanse = FaktumNode(verdi = fordeltRestanse, "", ""),
 )
 
 fun avkortetYtelse(
@@ -186,40 +193,42 @@ fun avkortetYtelse(
     ytelseEtterAvkortingFoerRestanse: Int = 100,
     avkortingsbeloep: Int = 200,
     ytelseFoerAvkorting: Int = 300,
-    periode: Periode = Periode(
-        fom = YearMonth.now(),
-        tom = null
-    ),
-    inntektsgrunnlag: UUID? = UUID.randomUUID()
+    periode: Periode =
+        Periode(
+            fom = YearMonth.now(),
+            tom = null,
+        ),
+    inntektsgrunnlag: UUID? = UUID.randomUUID(),
 ) = AvkortetYtelse(
     id = id,
     type = type,
     periode = periode,
     ytelseEtterAvkorting = ytelseEtterAvkorting,
-    restanse = restanse?.let {
-        restanse(
-            fordeltRestanse = restanse
-        )
-    },
+    restanse =
+        restanse?.let {
+            restanse(
+                fordeltRestanse = restanse,
+            )
+        },
     ytelseEtterAvkortingFoerRestanse = ytelseEtterAvkortingFoerRestanse,
     avkortingsbeloep = avkortingsbeloep,
     ytelseFoerAvkorting = ytelseFoerAvkorting,
     tidspunkt = Tidspunkt.now(),
     regelResultat = "".toJsonNode(),
     kilde = Grunnlagsopplysning.RegelKilde("regelid", Tidspunkt.now(), "1"),
-    inntektsgrunnlag = inntektsgrunnlag
+    inntektsgrunnlag = inntektsgrunnlag,
 )
 
 fun beregning(
     beregningId: UUID = UUID.randomUUID(),
-    beregninger: List<Beregningsperiode> = listOf(beregningsperiode())
+    beregninger: List<Beregningsperiode> = listOf(beregningsperiode()),
 ) = Beregning(
     beregningId = beregningId,
     behandlingId = UUID.randomUUID(),
     type = Beregningstype.OMS,
     beregningsperioder = beregninger,
     beregnetDato = Tidspunkt.now(),
-    grunnlagMetadata = Metadata(sakId = 123L, versjon = 1L)
+    grunnlagMetadata = Metadata(sakId = 123L, versjon = 1L),
 )
 
 fun beregningsperiode(
@@ -228,7 +237,7 @@ fun beregningsperiode(
     utbetaltBeloep: Int = 3000,
     trygdetid: Int = 40,
     grunnbeloep: Int = 100_000,
-    grunnbeloepMnd: Int = 10_000
+    grunnbeloepMnd: Int = 10_000,
 ) = Beregningsperiode(
     datoFOM = datoFOM,
     datoTOM = datoTOM,
@@ -239,7 +248,7 @@ fun beregningsperiode(
     trygdetid = trygdetid,
     regelResultat = mapOf("regel" to "resultat").toObjectNode(),
     regelVersjon = "1",
-    kilde = Grunnlagsopplysning.RegelKilde("regelid", Tidspunkt.now(), "1")
+    kilde = Grunnlagsopplysning.RegelKilde("regelid", Tidspunkt.now(), "1"),
 )
 
 fun behandling(
@@ -247,7 +256,7 @@ fun behandling(
     sak: Long = 123,
     sakType: SakType = SakType.OMSTILLINGSSTOENAD,
     behandlingType: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-    virkningstidspunkt: Virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2023, 1))
+    virkningstidspunkt: Virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2023, 1)),
 ) = DetaljertBehandling(
     id = id,
     sak = sak,
@@ -266,5 +275,5 @@ fun behandling(
     prosesstype = Prosesstype.MANUELL,
     boddEllerArbeidetUtlandet = null,
     revurderingInfo = null,
-    enhet = "1111"
+    enhet = "1111",
 )

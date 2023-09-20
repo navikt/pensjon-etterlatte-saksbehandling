@@ -45,17 +45,19 @@ internal class KodeverkServiceTest {
 
     @Test
     fun `Sjekk at mapping blir riktig`() {
-        val betydning = Betydning(
-            gyldigTil = "1900-01-01",
-            gyldigFra = "9999-12-31",
-            beskrivelser = mapOf(Pair("nb", Beskrivelse("term", "tekst")))
-        )
-        val testdatasandwich = mapOf(
-            Pair(
-                LandNormalisert.SOR_GEORGIA_OG_SOR_SANDWICHOYENE.isoCode,
-                listOf<Betydning>(betydning)
+        val betydning =
+            Betydning(
+                gyldigTil = "1900-01-01",
+                gyldigFra = "9999-12-31",
+                beskrivelser = mapOf(Pair("nb", Beskrivelse("term", "tekst"))),
             )
-        )
+        val testdatasandwich =
+            mapOf(
+                Pair(
+                    LandNormalisert.SOR_GEORGIA_OG_SOR_SANDWICHOYENE.isoCode,
+                    listOf<Betydning>(betydning),
+                ),
+            )
 
         coEvery { mockKlient.hentLandkoder() } returns KodeverkResponse(testdatasandwich)
 

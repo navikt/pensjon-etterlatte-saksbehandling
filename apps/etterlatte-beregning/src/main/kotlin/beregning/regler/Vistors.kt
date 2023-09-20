@@ -8,7 +8,9 @@ import no.nav.etterlatte.libs.regler.Visitor
 
 class FinnAnvendtGrunnbeloepVisitor(val grunnbeloepRegel: Regel<*, *>) : Visitor {
     var anvendtGrunnbeloep: Grunnbeloep? = null
+
     override fun visit(node: Node<*>) {}
+
     override fun visit(node: SubsumsjonsNode<*>) {
         if (node.regel === grunnbeloepRegel && node.verdi is Grunnbeloep) {
             anvendtGrunnbeloep = (node.verdi as Grunnbeloep)

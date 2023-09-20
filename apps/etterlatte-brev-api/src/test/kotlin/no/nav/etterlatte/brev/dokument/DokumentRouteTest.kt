@@ -80,20 +80,22 @@ internal class DokumentRouteTest {
                     dokumentRoute(
                         journalpostService,
                         dokarkivService,
-                        behandlingKlient
+                        behandlingKlient,
                     )
                 }
             }
-            val httpClient = createClient {
-                install(ContentNegotiation) {
-                    jackson { registerModule(JavaTimeModule()) }
+            val httpClient =
+                createClient {
+                    install(ContentNegotiation) {
+                        jackson { registerModule(JavaTimeModule()) }
+                    }
                 }
-            }
-            val response = httpClient.post("/api/dokumenter") {
-                contentType(ContentType.Application.Json)
-                setBody(FoedselsnummerDTO(fnr))
-                header(HttpHeaders.Authorization, "Bearer $token")
-            }
+            val response =
+                httpClient.post("/api/dokumenter") {
+                    contentType(ContentType.Application.Json)
+                    setBody(FoedselsnummerDTO(fnr))
+                    header(HttpHeaders.Authorization, "Bearer $token")
+                }
 
             assertEquals(HttpStatusCode.OK, response.status)
         }
@@ -117,14 +119,15 @@ internal class DokumentRouteTest {
                     dokumentRoute(
                         journalpostService,
                         dokarkivService,
-                        behandlingKlient
+                        behandlingKlient,
                     )
                 }
             }
 
-            val response = client.get("/api/dokumenter/$journalpostId/$dokumentInfoId") {
-                header(HttpHeaders.Authorization, "Bearer $accessToken")
-            }
+            val response =
+                client.get("/api/dokumenter/$journalpostId/$dokumentInfoId") {
+                    header(HttpHeaders.Authorization, "Bearer $accessToken")
+                }
 
             assertEquals(HttpStatusCode.OK, response.status)
         }
@@ -147,22 +150,24 @@ internal class DokumentRouteTest {
                     dokumentRoute(
                         journalpostService,
                         dokarkivService,
-                        behandlingKlient
+                        behandlingKlient,
                     )
                 }
             }
 
-            val client = createClient {
-                install(ContentNegotiation) {
-                    jackson()
+            val client =
+                createClient {
+                    install(ContentNegotiation) {
+                        jackson()
+                    }
                 }
-            }
 
-            val response = client.post("/api/dokumenter/$journalpostId/ferdigstill") {
-                header(HttpHeaders.Authorization, "Bearer $accessToken")
-                contentType(ContentType.Application.Json)
-                setBody(FerdigstillJournalpostRequest("4808"))
-            }
+            val response =
+                client.post("/api/dokumenter/$journalpostId/ferdigstill") {
+                    header(HttpHeaders.Authorization, "Bearer $accessToken")
+                    contentType(ContentType.Application.Json)
+                    setBody(FerdigstillJournalpostRequest("4808"))
+                }
 
             assertEquals(HttpStatusCode.OK, response.status)
         }
@@ -181,14 +186,15 @@ internal class DokumentRouteTest {
                     dokumentRoute(
                         journalpostService,
                         dokarkivService,
-                        behandlingKlient
+                        behandlingKlient,
                     )
                 }
             }
 
-            val response = client.get("/api/dokument/finnesikke") {
-                header(HttpHeaders.Authorization, "Bearer $accessToken")
-            }
+            val response =
+                client.get("/api/dokument/finnesikke") {
+                    header(HttpHeaders.Authorization, "Bearer $accessToken")
+                }
 
             assertEquals(HttpStatusCode.NotFound, response.status)
         }
@@ -200,10 +206,11 @@ internal class DokumentRouteTest {
         mockOAuth2Server.issueToken(
             issuerId = AZURE_ISSUER,
             audience = CLIENT_ID,
-            claims = mapOf(
-                "navn" to "Test Veiledersen",
-                "NAVident" to "S123456"
-            )
+            claims =
+                mapOf(
+                    "navn" to "Test Veiledersen",
+                    "NAVident" to "S123456",
+                ),
         ).serialize()
     }
 

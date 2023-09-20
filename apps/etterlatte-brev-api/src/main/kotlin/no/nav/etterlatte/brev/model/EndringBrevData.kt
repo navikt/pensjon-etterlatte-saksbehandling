@@ -15,7 +15,7 @@ abstract class EndringBrevData : BrevData()
 data class EtterbetalingDTO(
     val fraDato: LocalDate,
     val tilDato: LocalDate,
-    val beregningsperioder: List<Etterbetalingsperiode>
+    val beregningsperioder: List<Etterbetalingsperiode>,
 )
 
 data class Etterbetalingsperiode(
@@ -23,52 +23,58 @@ data class Etterbetalingsperiode(
     val datoTOM: LocalDate?,
     val grunnbeloep: Kroner,
     val stoenadFoerReduksjon: Kroner,
-    var utbetaltBeloep: Kroner
+    var utbetaltBeloep: Kroner,
 )
+
 data class EndringHovedmalBrevData(
     val erEndret: Boolean,
     val etterbetaling: EtterbetalingDTO,
     val utbetalingsinfo: Utbetalingsinfo,
-    val innhold: List<Slate.Element>
+    val innhold: List<Slate.Element>,
 ) : EndringBrevData() {
-
     companion object {
-        fun fra(behandling: Behandling, innhold: List<Slate.Element>): BrevData = EndringHovedmalBrevData(
-            erEndret = true, // TODO når resten av fengselsopphold implementerast
-            etterbetaling = EtterbetalingDTO(
-                fraDato = LocalDate.now(), // TODO når resten av fengselsopphold implementerast
-                tilDato = LocalDate.now(), // TODO når resten av fengselsopphold implementerast
-                beregningsperioder = behandling.utbetalingsinfo.beregningsperioder.map {
-                    Etterbetalingsperiode(
-                        datoFOM = it.datoFOM,
-                        datoTOM = it.datoTOM,
-                        grunnbeloep = it.grunnbeloep,
-                        stoenadFoerReduksjon = it.utbetaltBeloep, // TODO når resten av fengselsopphold implementerast
-                        utbetaltBeloep = it.utbetaltBeloep
-                    )
-                }
-            ),
-            utbetalingsinfo = behandling.utbetalingsinfo,
-            innhold = innhold
-        )
+        fun fra(
+            behandling: Behandling,
+            innhold: List<Slate.Element>,
+        ): BrevData =
+            EndringHovedmalBrevData(
+                erEndret = true, // TODO når resten av fengselsopphold implementerast
+                etterbetaling =
+                    EtterbetalingDTO(
+                        fraDato = LocalDate.now(), // TODO når resten av fengselsopphold implementerast
+                        tilDato = LocalDate.now(), // TODO når resten av fengselsopphold implementerast
+                        beregningsperioder =
+                            behandling.utbetalingsinfo.beregningsperioder.map {
+                                Etterbetalingsperiode(
+                                    datoFOM = it.datoFOM,
+                                    datoTOM = it.datoTOM,
+                                    grunnbeloep = it.grunnbeloep,
+                                    stoenadFoerReduksjon = it.utbetaltBeloep, // TODO når resten av fengselsopphold implementerast
+                                    utbetaltBeloep = it.utbetaltBeloep,
+                                )
+                            },
+                    ),
+                utbetalingsinfo = behandling.utbetalingsinfo,
+                innhold = innhold,
+            )
     }
 }
 
 data class SoeskenjusteringRevurderingBrevdata(
     val utbetalingsinfo: Utbetalingsinfo,
-    val grunnForJustering: BarnepensjonSoeskenjusteringGrunn
+    val grunnForJustering: BarnepensjonSoeskenjusteringGrunn,
 ) : EndringBrevData() {
-
     companion object {
         fun fra(behandling: Behandling): SoeskenjusteringRevurderingBrevdata {
-            val revurderingsinfo = valider<RevurderingInfo.Soeskenjustering>(
-                behandling,
-                RevurderingAarsak.SOESKENJUSTERING
-            )
+            val revurderingsinfo =
+                valider<RevurderingInfo.Soeskenjustering>(
+                    behandling,
+                    RevurderingAarsak.SOESKENJUSTERING,
+                )
 
             return SoeskenjusteringRevurderingBrevdata(
                 utbetalingsinfo = behandling.utbetalingsinfo,
-                grunnForJustering = revurderingsinfo.grunnForSoeskenjustering
+                grunnForJustering = revurderingsinfo.grunnForSoeskenjustering,
             )
         }
     }
@@ -77,19 +83,19 @@ data class SoeskenjusteringRevurderingBrevdata(
 data class FengselsoppholdBrevdata(
     val virkningsdato: LocalDate,
     val fraDato: LocalDate,
-    val tilDato: LocalDate
+    val tilDato: LocalDate,
 ) : EndringBrevData() {
-
     companion object {
         fun fra(behandling: Behandling): FengselsoppholdBrevdata {
-            val revurderingInfo = valider<RevurderingInfo.Fengselsopphold>(
-                behandling,
-                RevurderingAarsak.FENGSELSOPPHOLD
-            )
+            val revurderingInfo =
+                valider<RevurderingInfo.Fengselsopphold>(
+                    behandling,
+                    RevurderingAarsak.FENGSELSOPPHOLD,
+                )
             return FengselsoppholdBrevdata(
                 virkningsdato = behandling.virkningsdato!!.atDay(1),
                 fraDato = revurderingInfo.fraDato,
-                tilDato = revurderingInfo.tilDato
+                tilDato = revurderingInfo.tilDato,
             )
         }
     }
@@ -98,19 +104,19 @@ data class FengselsoppholdBrevdata(
 data class UtAvFengselBrevdata(
     val utbetalingsinfo: Utbetalingsinfo,
     val erEtterbetalingMerEnnTreeMaaneder: Boolean,
-    val virkningsdato: LocalDate
+    val virkningsdato: LocalDate,
 ) : EndringBrevData() {
-
     companion object {
         fun fra(behandling: Behandling): UtAvFengselBrevdata {
-            val revurderingInfo = valider<RevurderingInfo.UtAvFengsel>(
-                behandling,
-                RevurderingAarsak.UT_AV_FENGSEL
-            )
+            val revurderingInfo =
+                valider<RevurderingInfo.UtAvFengsel>(
+                    behandling,
+                    RevurderingAarsak.UT_AV_FENGSEL,
+                )
             return UtAvFengselBrevdata(
                 utbetalingsinfo = behandling.utbetalingsinfo,
                 erEtterbetalingMerEnnTreeMaaneder = revurderingInfo.erEtterbetalingMerEnnTreeMaaneder,
-                virkningsdato = behandling.virkningsdato!!.atDay(1)
+                virkningsdato = behandling.virkningsdato!!.atDay(1),
             )
         }
     }
@@ -121,23 +127,22 @@ data class YrkesskadeRevurderingBrevdata(
     val utbetalingsinfo: Utbetalingsinfo,
     val stoenadHarOekt: Boolean,
     val yrkesskadeErDokumentert: Boolean,
-    val virkningsdato: LocalDate
+    val virkningsdato: LocalDate,
 ) : EndringBrevData() {
-
     companion object {
         fun fra(behandling: Behandling): YrkesskadeRevurderingBrevdata {
             return YrkesskadeRevurderingBrevdata(
                 utbetalingsinfo = behandling.utbetalingsinfo,
                 virkningsdato = behandling.virkningsdato!!.atDay(1),
                 yrkesskadeErDokumentert = behandling.vilkaarsvurdering.isYrkesskade(),
-                stoenadHarOekt = trygdetid(behandling.utbetalingsinfo) >
-                    trygdetid(behandling.forrigeUtbetalingsinfo!!),
-                dinForelder = "din forelder"
+                stoenadHarOekt =
+                    trygdetid(behandling.utbetalingsinfo) >
+                        trygdetid(behandling.forrigeUtbetalingsinfo!!),
+                dinForelder = "din forelder",
             )
         }
 
-        private fun trygdetid(utbetalingsinfo: Utbetalingsinfo) =
-            utbetalingsinfo.beregningsperioder.first().trygdetid
+        private fun trygdetid(utbetalingsinfo: Utbetalingsinfo) = utbetalingsinfo.beregningsperioder.first().trygdetid
     }
 }
 
@@ -147,22 +152,22 @@ data class InstitusjonsoppholdRevurderingBrevdata(
     val virkningsdato: LocalDate,
     val prosent: Int?,
     val innlagtdato: LocalDate?,
-    val utskrevetdato: LocalDate?
+    val utskrevetdato: LocalDate?,
 ) : EndringBrevData() {
-
     companion object {
         fun fra(behandling: Behandling): InstitusjonsoppholdRevurderingBrevdata {
-            val revurderingInfo = valider<RevurderingInfo.Institusjonsopphold>(
-                behandling,
-                RevurderingAarsak.INSTITUSJONSOPPHOLD
-            )
+            val revurderingInfo =
+                valider<RevurderingInfo.Institusjonsopphold>(
+                    behandling,
+                    RevurderingAarsak.INSTITUSJONSOPPHOLD,
+                )
             return InstitusjonsoppholdRevurderingBrevdata(
                 utbetalingsinfo = behandling.utbetalingsinfo,
                 erEtterbetalingMerEnnTreMaaneder = revurderingInfo.erEtterbetalingMerEnnTreMaaneder,
                 virkningsdato = behandling.virkningsdato!!.atDay(1),
                 prosent = revurderingInfo.prosent,
                 innlagtdato = revurderingInfo.innlagtdato,
-                utskrevetdato = revurderingInfo.utskrevetdato
+                utskrevetdato = revurderingInfo.utskrevetdato,
             )
         }
     }
@@ -173,36 +178,38 @@ data class InntektsendringRevurderingOMS(
     val avkortingsinfo: Avkortingsinfo? = null,
     val etterbetalinginfo: EtterbetalingDTO? = null,
     val beregningsinfo: Beregningsinfo? = null,
-    val innhold: List<Slate.Element>
+    val innhold: List<Slate.Element>,
 ) : BrevData() {
-
     companion object {
         fun fra(
             behandling: Behandling,
             innhold: List<Slate.Element>,
-            innholdVedlegg: List<BrevInnholdVedlegg>
+            innholdVedlegg: List<BrevInnholdVedlegg>,
         ): InntektsendringRevurderingOMS =
             InntektsendringRevurderingOMS(
                 erEndret = true,
                 avkortingsinfo = behandling.avkortingsinfo,
                 etterbetalinginfo = null,
-                beregningsinfo = Beregningsinfo(
-                    innhold = innholdVedlegg.find {
-                            vedlegg ->
-                        vedlegg.key == BrevVedleggKey.BEREGNING_INNHOLD
-                    }?.payload!!.elements,
-                    grunnbeloep = behandling.avkortingsinfo!!.grunnbeloep,
-                    beregningsperioder = behandling.avkortingsinfo.beregningsperioder.map {
-                        NyBeregningsperiode(
-                            inntekt = it.inntekt,
-                            trygdetid = it.trygdetid,
-                            stoenadFoerReduksjon = it.ytelseFoerAvkorting,
-                            utbetaltBeloep = it.utbetaltBeloep
-                        )
-                    },
-                    trygdetidsperioder = behandling.trygdetid!!
-                ),
-                innhold = innhold
+                beregningsinfo =
+                    Beregningsinfo(
+                        innhold =
+                            innholdVedlegg.find {
+                                    vedlegg ->
+                                vedlegg.key == BrevVedleggKey.BEREGNING_INNHOLD
+                            }?.payload!!.elements,
+                        grunnbeloep = behandling.avkortingsinfo!!.grunnbeloep,
+                        beregningsperioder =
+                            behandling.avkortingsinfo.beregningsperioder.map {
+                                NyBeregningsperiode(
+                                    inntekt = it.inntekt,
+                                    trygdetid = it.trygdetid,
+                                    stoenadFoerReduksjon = it.ytelseFoerAvkorting,
+                                    utbetaltBeloep = it.utbetaltBeloep,
+                                )
+                            },
+                        trygdetidsperioder = behandling.trygdetid!!,
+                    ),
+                innhold = innhold,
             )
     }
 }

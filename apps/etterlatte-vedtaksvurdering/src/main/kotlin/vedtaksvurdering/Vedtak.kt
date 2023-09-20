@@ -16,7 +16,7 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import java.time.LocalDate
 import java.time.YearMonth
-import java.util.*
+import java.util.UUID
 
 data class OpprettVedtak(
     val soeker: Folkeregisteridentifikator,
@@ -32,7 +32,7 @@ data class OpprettVedtak(
     val vilkaarsvurdering: ObjectNode?,
     val utbetalingsperioder: List<Utbetalingsperiode>,
     val revurderingsaarsak: RevurderingAarsak?,
-    val revurderingInfo: RevurderingInfo?
+    val revurderingInfo: RevurderingInfo?,
 )
 
 data class Vedtak(
@@ -52,19 +52,20 @@ data class Vedtak(
     val utbetalingsperioder: List<Utbetalingsperiode>,
     val vedtakFattet: VedtakFattet? = null,
     val attestasjon: Attestasjon? = null,
-    val revurderingInfo: RevurderingInfo? = null
+    val revurderingInfo: RevurderingInfo? = null,
 ) {
-    fun toDto() = VedtakDto(
-        vedtakId = id,
-        status = status,
-        virkningstidspunkt = virkningstidspunkt,
-        sak = VedtakSak(soeker.value, sakType, sakId),
-        behandling = Behandling(behandlingType, behandlingId, revurderingAarsak, revurderingInfo),
-        type = type,
-        utbetalingsperioder = utbetalingsperioder,
-        vedtakFattet = vedtakFattet,
-        attestasjon = attestasjon
-    )
+    fun toDto() =
+        VedtakDto(
+            vedtakId = id,
+            status = status,
+            virkningstidspunkt = virkningstidspunkt,
+            sak = VedtakSak(soeker.value, sakType, sakId),
+            behandling = Behandling(behandlingType, behandlingId, revurderingAarsak, revurderingInfo),
+            type = type,
+            utbetalingsperioder = utbetalingsperioder,
+            vedtakFattet = vedtakFattet,
+            attestasjon = attestasjon,
+        )
 }
 
 data class LoependeYtelse(val erLoepende: Boolean, val dato: LocalDate)

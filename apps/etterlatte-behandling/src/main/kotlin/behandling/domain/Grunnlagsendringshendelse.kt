@@ -2,7 +2,7 @@ package no.nav.etterlatte.behandling.domain
 
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 
 data class Grunnlagsendringshendelse(
     val id: UUID,
@@ -14,7 +14,7 @@ data class Grunnlagsendringshendelse(
     val hendelseGjelderRolle: Saksrolle,
     val gjelderPerson: String,
     val samsvarMellomKildeOgGrunnlag: SamsvarMellomKildeOgGrunnlag? = null,
-    val kommentar: String? = null
+    val kommentar: String? = null,
 ) {
     fun beskrivelse(): String {
         return listOfNotNull(type.beskrivelse(), kommentar).joinToString(separator = ": ")
@@ -28,7 +28,8 @@ enum class GrunnlagsendringsType {
     VERGEMAAL_ELLER_FREMTIDSFULLMAKT,
     SIVILSTAND,
     GRUNNBELOEP,
-    INSTITUSJONSOPPHOLD;
+    INSTITUSJONSOPPHOLD,
+    ;
 
     fun beskrivelse(): String {
         return when (this) {
@@ -49,7 +50,8 @@ enum class GrunnlagsendringStatus {
     TATT_MED_I_BEHANDLING, // tatt med i behandling av saksbehandler
     FORKASTET,
     VURDERT_SOM_IKKE_RELEVANT,
-    HISTORISK;
+    HISTORISK,
+    ;
 
     companion object {
         fun relevantForSaksbehandler() = listOf(SJEKKET_AV_JOBB, TATT_MED_I_BEHANDLING, VURDERT_SOM_IKKE_RELEVANT)

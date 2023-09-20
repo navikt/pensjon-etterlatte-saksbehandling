@@ -18,18 +18,21 @@ import java.time.Duration
 interface Norg2Klient {
     fun hentEnheterForOmraade(
         tema: String,
-        omraade: String
+        omraade: String,
     ): List<ArbeidsFordelingEnhet>
 }
 
 class Norg2KlientImpl(private val client: HttpClient, private val url: String) : Norg2Klient {
     private val logger = LoggerFactory.getLogger(Norg2KlientImpl::class.java)
 
-    private val cache = Caffeine.newBuilder().expireAfterWrite(Duration.ofMinutes(15))
-        .build<ArbeidsFordelingRequest, List<ArbeidsFordelingEnhet>>()
+    private val cache =
+        Caffeine.newBuilder().expireAfterWrite(Duration.ofMinutes(15))
+            .build<ArbeidsFordelingRequest, List<ArbeidsFordelingEnhet>>()
 
-    override fun hentEnheterForOmraade(tema: String, omraade: String): List<ArbeidsFordelingEnhet> =
-        hentArbeidsfordelingForOmraadeOgTema(ArbeidsFordelingRequest(tema, omraade))
+    override fun hentEnheterForOmraade(
+        tema: String,
+        omraade: String,
+    ): List<ArbeidsFordelingEnhet> = hentArbeidsfordelingForOmraadeOgTema(ArbeidsFordelingRequest(tema, omraade))
 
     private fun hentArbeidsfordelingForOmraadeOgTema(request: ArbeidsFordelingRequest): List<ArbeidsFordelingEnhet> =
         try {
@@ -42,10 +45,11 @@ class Norg2KlientImpl(private val client: HttpClient, private val url: String) :
                 logger.info("Henter enheter for tema og omraade $request")
 
                 runBlocking {
-                    val response = client.post("$url/arbeidsfordeling/enheter/bestmatch") {
-                        contentType(ContentType.Application.Json)
-                        setBody(request)
-                    }
+                    val response =
+                        client.post("$url/arbeidsfordeling/enheter/bestmatch") {
+                            contentType(ContentType.Application.Json)
+                            setBody(request)
+                        }
 
                     if (response.status.isSuccess()) {
                         response.body<List<ArbeidsFordelingEnhet>>().also { cache.put(request, it) }

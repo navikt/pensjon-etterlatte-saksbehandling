@@ -51,7 +51,7 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
-import java.util.*
+import java.util.UUID
 
 fun opprettBehandling(
     type: BehandlingType,
@@ -63,7 +63,7 @@ fun opprettBehandling(
     opphoerAarsaker: List<ManueltOpphoerAarsak>? = null,
     fritekstAarsak: String? = null,
     prosesstype: Prosesstype = Prosesstype.MANUELL,
-    kilde: Vedtaksloesning = Vedtaksloesning.GJENNY
+    kilde: Vedtaksloesning = Vedtaksloesning.GJENNY,
 ) = OpprettBehandling(
     type = type,
     sakId = sakId,
@@ -74,7 +74,7 @@ fun opprettBehandling(
     opphoerAarsaker = opphoerAarsaker,
     fritekstAarsak = fritekstAarsak,
     prosesstype = prosesstype,
-    kilde = kilde
+    kilde = kilde,
 )
 
 fun foerstegangsbehandling(
@@ -91,15 +91,16 @@ fun foerstegangsbehandling(
     boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet? = null,
     kommerBarnetTilgode: KommerBarnetTilgode? = null,
     kilde: Vedtaksloesning = Vedtaksloesning.GJENNY,
-    enhet: String = Enheter.defaultEnhet.enhetNr
+    enhet: String = Enheter.defaultEnhet.enhetNr,
 ) = Foerstegangsbehandling(
     id = id,
-    sak = Sak(
-        ident = persongalleri.soeker,
-        sakType = SakType.BARNEPENSJON,
-        id = sakId,
-        enhet = enhet
-    ),
+    sak =
+        Sak(
+            ident = persongalleri.soeker,
+            sakType = SakType.BARNEPENSJON,
+            id = sakId,
+            enhet = enhet,
+        ),
     behandlingOpprettet = behandlingOpprettet,
     sistEndret = sistEndret,
     status = status,
@@ -109,7 +110,7 @@ fun foerstegangsbehandling(
     utenlandstilsnitt = utenlandstilsnitt,
     boddEllerArbeidetUtlandet = boddEllerArbeidetUtlandet,
     kommerBarnetTilgode = kommerBarnetTilgode,
-    kilde = kilde
+    kilde = kilde,
 )
 
 fun revurdering(
@@ -128,15 +129,16 @@ fun revurdering(
     kilde: Vedtaksloesning = Vedtaksloesning.GJENNY,
     enhet: String = Enheter.defaultEnhet.enhetNr,
     revurderingInfo: RevurderingMedBegrunnelse? = null,
-    begrunnelse: String? = null
+    begrunnelse: String? = null,
 ) = Revurdering.opprett(
     id = id,
-    sak = Sak(
-        ident = persongalleri.soeker,
-        sakType = SakType.BARNEPENSJON,
-        id = sakId,
-        enhet = enhet
-    ),
+    sak =
+        Sak(
+            ident = persongalleri.soeker,
+            sakType = SakType.BARNEPENSJON,
+            id = sakId,
+            enhet = enhet,
+        ),
     behandlingOpprettet = behandlingOpprettet,
     sistEndret = sistEndret,
     status = status,
@@ -148,30 +150,32 @@ fun revurdering(
     prosesstype = prosesstype,
     kilde = kilde,
     revurderingInfo = revurderingInfo,
-    begrunnelse = begrunnelse
+    begrunnelse = begrunnelse,
 )
 
 fun manueltOpphoer(
     sakId: Long = 1,
     behandlingId: UUID = UUID.randomUUID(),
     persongalleri: Persongalleri = persongalleri(),
-    opphoerAarsaker: List<ManueltOpphoerAarsak> = listOf(
-        ManueltOpphoerAarsak.SOESKEN_DOED,
-        ManueltOpphoerAarsak.GJENLEVENDE_FORELDER_DOED
-    ),
+    opphoerAarsaker: List<ManueltOpphoerAarsak> =
+        listOf(
+            ManueltOpphoerAarsak.SOESKEN_DOED,
+            ManueltOpphoerAarsak.GJENLEVENDE_FORELDER_DOED,
+        ),
     fritekstAarsak: String? = "Umulig å revurdere i nytt saksbehandlingssystem",
     virkningstidspunkt: Virkningstidspunkt? = null,
     utenlandstilsnitt: Utenlandstilsnitt? = null,
     boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet? = null,
-    enhet: String = Enheter.defaultEnhet.enhetNr
+    enhet: String = Enheter.defaultEnhet.enhetNr,
 ) = ManueltOpphoer(
     id = behandlingId,
-    sak = Sak(
-        ident = persongalleri.soeker,
-        sakType = SakType.BARNEPENSJON,
-        id = sakId,
-        enhet = enhet
-    ),
+    sak =
+        Sak(
+            ident = persongalleri.soeker,
+            sakType = SakType.BARNEPENSJON,
+            id = sakId,
+            enhet = enhet,
+        ),
     behandlingOpprettet = Tidspunkt.now().toLocalDatetimeUTC(),
     sistEndret = Tidspunkt.now().toLocalDatetimeUTC(),
     status = BehandlingStatus.OPPRETTET,
@@ -179,7 +183,7 @@ fun manueltOpphoer(
     fritekstAarsak = fritekstAarsak,
     virkningstidspunkt = virkningstidspunkt,
     utenlandstilsnitt = utenlandstilsnitt,
-    boddEllerArbeidetUtlandet = boddEllerArbeidetUtlandet
+    boddEllerArbeidetUtlandet = boddEllerArbeidetUtlandet,
 )
 
 fun persongalleri(
@@ -187,22 +191,18 @@ fun persongalleri(
     innsender: String = "Innsender",
     soesken: List<String> = listOf("Soester", "Bror"),
     avdoed: List<String> = listOf("Avdoed"),
-    gjenlevende: List<String> = listOf("Gjenlevende")
+    gjenlevende: List<String> = listOf("Gjenlevende"),
 ) = Persongalleri(
     soeker = soeker,
     innsender = innsender,
     soesken = soesken,
     avdoed = avdoed,
-    gjenlevende = gjenlevende
+    gjenlevende = gjenlevende,
 )
 
-fun samsvarMellomPdlOgGrunnlagDoed(
-    doedsdato: LocalDate?
-) = samsvarDoedsdatoer(doedsdato, doedsdato)
+fun samsvarMellomPdlOgGrunnlagDoed(doedsdato: LocalDate?) = samsvarDoedsdatoer(doedsdato, doedsdato)
 
-fun ikkeSamsvarMellomPdlOgGrunnlagDoed(
-    doedsdato: LocalDate?
-) = samsvarDoedsdatoer(doedsdato, null)
+fun ikkeSamsvarMellomPdlOgGrunnlagDoed(doedsdato: LocalDate?) = samsvarDoedsdatoer(doedsdato, null)
 
 fun grunnlagsendringshendelseMedSamsvar(
     id: UUID = UUID.randomUUID(),
@@ -213,7 +213,7 @@ fun grunnlagsendringshendelseMedSamsvar(
     status: GrunnlagsendringStatus = GrunnlagsendringStatus.VENTER_PAA_JOBB,
     behandlingId: UUID? = null,
     hendelseGjelderRolle: Saksrolle = Saksrolle.SOEKER,
-    samsvarMellomKildeOgGrunnlag: SamsvarMellomKildeOgGrunnlag?
+    samsvarMellomKildeOgGrunnlag: SamsvarMellomKildeOgGrunnlag?,
 ) = Grunnlagsendringshendelse(
     id = id,
     sakId = sakId,
@@ -223,33 +223,33 @@ fun grunnlagsendringshendelseMedSamsvar(
     behandlingId = behandlingId,
     hendelseGjelderRolle = hendelseGjelderRolle,
     samsvarMellomKildeOgGrunnlag = samsvarMellomKildeOgGrunnlag,
-    gjelderPerson = fnr
+    gjelderPerson = fnr,
 )
 
 fun grunnlagsinformasjonDoedshendelse(
     avdoedFnr: String = "12345678911",
     doedsdato: LocalDate = LocalDate.of(2022, 1, 1),
-    endringstype: Endringstype = Endringstype.OPPRETTET
+    endringstype: Endringstype = Endringstype.OPPRETTET,
 ) = Doedshendelse(hendelseId = "1", fnr = avdoedFnr, doedsdato = doedsdato, endringstype = endringstype)
 
 fun grunnlagsinformasjonUtflyttingshendelse(
     fnr: String = "12345678911",
     tilflyttingsLand: String = "Sverige",
-    utflyttingsdato: LocalDate = LocalDate.of(2022, 8, 8)
+    utflyttingsdato: LocalDate = LocalDate.of(2022, 8, 8),
 ) = UtflyttingsHendelse(
     hendelseId = "1",
     endringstype = Endringstype.OPPRETTET,
     fnr = fnr,
     tilflyttingsLand = tilflyttingsLand,
     tilflyttingsstedIUtlandet = null,
-    utflyttingsdato = utflyttingsdato
+    utflyttingsdato = utflyttingsdato,
 )
 
 fun grunnlagsinformasjonForelderBarnRelasjonHendelse(
     fnr: String = "12345678911",
     relatertPersonsIdent: String = "98765432198",
     relatertPersonsRolle: String = "MOR",
-    minRolleForPerson: String = "BARN"
+    minRolleForPerson: String = "BARN",
 ) = ForelderBarnRelasjonHendelse(
     hendelseId = "1",
     endringstype = Endringstype.OPPRETTET,
@@ -257,59 +257,58 @@ fun grunnlagsinformasjonForelderBarnRelasjonHendelse(
     relatertPersonsIdent = relatertPersonsIdent,
     relatertPersonsRolle = relatertPersonsRolle,
     minRolleForPerson = minRolleForPerson,
-    relatertPersonUtenFolkeregisteridentifikator = null
+    relatertPersonUtenFolkeregisteridentifikator = null,
 )
 
-fun grunnlagsOpplysningMedPersonopplysning(
-    personopplysning: Person
-) = Grunnlagsopplysning(
-    id = UUID.randomUUID(),
-    kilde = Grunnlagsopplysning.Pdl(Tidspunkt.now(), null, "opplysningsId1"),
-    opplysningType = Opplysningstype.DOEDSDATO,
-    meta = ObjectMapper().createObjectNode(),
-    opplysning = personopplysning,
-    attestering = null,
-    fnr = null,
-    periode = null
-)
+fun grunnlagsOpplysningMedPersonopplysning(personopplysning: Person) =
+    Grunnlagsopplysning(
+        id = UUID.randomUUID(),
+        kilde = Grunnlagsopplysning.Pdl(Tidspunkt.now(), null, "opplysningsId1"),
+        opplysningType = Opplysningstype.DOEDSDATO,
+        meta = ObjectMapper().createObjectNode(),
+        opplysning = personopplysning,
+        attestering = null,
+        fnr = null,
+        periode = null,
+    )
 
-fun personOpplysning(
-    doedsdato: LocalDate? = null
-) = Person(
-    fornavn = "Test",
-    etternavn = "Testulfsen",
-    foedselsnummer = Folkeregisteridentifikator.of("19078504903"),
-    foedselsdato = LocalDate.parse("2020-06-10"),
-    foedselsaar = 1985,
-    foedeland = null,
-    doedsdato = doedsdato,
-    adressebeskyttelse = AdressebeskyttelseGradering.UGRADERT,
-    bostedsadresse = null,
-    deltBostedsadresse = null,
-    kontaktadresse = null,
-    oppholdsadresse = null,
-    sivilstatus = null,
-    sivilstand = null,
-    statsborgerskap = null,
-    utland = null,
-    familieRelasjon = FamilieRelasjon(null, null, null),
-    avdoedesBarn = null,
-    vergemaalEllerFremtidsfullmakt = null
-)
+fun personOpplysning(doedsdato: LocalDate? = null) =
+    Person(
+        fornavn = "Test",
+        etternavn = "Testulfsen",
+        foedselsnummer = Folkeregisteridentifikator.of("19078504903"),
+        foedselsdato = LocalDate.parse("2020-06-10"),
+        foedselsaar = 1985,
+        foedeland = null,
+        doedsdato = doedsdato,
+        adressebeskyttelse = AdressebeskyttelseGradering.UGRADERT,
+        bostedsadresse = null,
+        deltBostedsadresse = null,
+        kontaktadresse = null,
+        oppholdsadresse = null,
+        sivilstatus = null,
+        sivilstand = null,
+        statsborgerskap = null,
+        utland = null,
+        familieRelasjon = FamilieRelasjon(null, null, null),
+        avdoedesBarn = null,
+        vergemaalEllerFremtidsfullmakt = null,
+    )
 
 fun kommerBarnetTilgode(
     behandlingId: UUID,
     svar: JaNei = JaNei.JA,
     begrunnelse: String = "En begrunnelse",
-    kilde: Grunnlagsopplysning.Saksbehandler = Grunnlagsopplysning.Saksbehandler.create("S01")
+    kilde: Grunnlagsopplysning.Saksbehandler = Grunnlagsopplysning.Saksbehandler.create("S01"),
 ) = KommerBarnetTilgode(svar, begrunnelse, kilde, behandlingId)
 
 val TRIVIELL_MIDTPUNKT = Folkeregisteridentifikator.of("19040550081")
 val STOR_SNERK = Folkeregisteridentifikator.of("11057523044")
+
 fun mockPerson(
     utland: Utland? = null,
     familieRelasjon: FamilieRelasjon? = null,
-    vergemaal: List<VergemaalEllerFremtidsfullmakt>? = null
+    vergemaal: List<VergemaalEllerFremtidsfullmakt>? = null,
 ) = PersonDTO(
     fornavn = OpplysningDTO(verdi = "Ola", opplysningsid = null),
     mellomnavn = OpplysningDTO(verdi = "Mellom", opplysningsid = null),
@@ -320,25 +319,26 @@ fun mockPerson(
     foedeland = OpplysningDTO("Norge", UUID.randomUUID().toString()),
     doedsdato = null,
     adressebeskyttelse = null,
-    bostedsadresse = listOf(
-        OpplysningDTO(
-            Adresse(
-                type = AdresseType.VEGADRESSE,
-                aktiv = true,
-                coAdresseNavn = "Hos Geir",
-                adresseLinje1 = "Testveien 4",
-                adresseLinje2 = null,
-                adresseLinje3 = null,
-                postnr = "1234",
-                poststed = null,
-                land = "NOR",
-                kilde = "FREG",
-                gyldigFraOgMed = Tidspunkt.now().toLocalDatetimeUTC().minusYears(1),
-                gyldigTilOgMed = null
+    bostedsadresse =
+        listOf(
+            OpplysningDTO(
+                Adresse(
+                    type = AdresseType.VEGADRESSE,
+                    aktiv = true,
+                    coAdresseNavn = "Hos Geir",
+                    adresseLinje1 = "Testveien 4",
+                    adresseLinje2 = null,
+                    adresseLinje3 = null,
+                    postnr = "1234",
+                    poststed = null,
+                    land = "NOR",
+                    kilde = "FREG",
+                    gyldigFraOgMed = Tidspunkt.now().toLocalDatetimeUTC().minusYears(1),
+                    gyldigTilOgMed = null,
+                ),
+                UUID.randomUUID().toString(),
             ),
-            UUID.randomUUID().toString()
-        )
-    ),
+        ),
     deltBostedsadresse = listOf(),
     kontaktadresse = listOf(),
     oppholdsadresse = listOf(),
@@ -348,30 +348,33 @@ fun mockPerson(
     utland = utland?.let { OpplysningDTO(utland, UUID.randomUUID().toString()) },
     familieRelasjon = familieRelasjon?.let { OpplysningDTO(it, UUID.randomUUID().toString()) },
     avdoedesBarn = null,
-    vergemaalEllerFremtidsfullmakt = vergemaal?.map { OpplysningDTO(it, UUID.randomUUID().toString()) }
+    vergemaalEllerFremtidsfullmakt = vergemaal?.map { OpplysningDTO(it, UUID.randomUUID().toString()) },
 )
 
-fun kommerBarnetTilGodeVurdering(behandlingId: UUID) = KommerBarnetTilgode(
-    svar = JaNei.JA,
-    begrunnelse = "begrunnelse",
-    kilde = Grunnlagsopplysning.Saksbehandler(ident = "ident", tidspunkt = Tidspunkt(instant = Instant.now())),
-    behandlingId = behandlingId
-)
+fun kommerBarnetTilGodeVurdering(behandlingId: UUID) =
+    KommerBarnetTilgode(
+        svar = JaNei.JA,
+        begrunnelse = "begrunnelse",
+        kilde = Grunnlagsopplysning.Saksbehandler(ident = "ident", tidspunkt = Tidspunkt(instant = Instant.now())),
+        behandlingId = behandlingId,
+    )
 
-fun virkningstidspunktVurdering() = Virkningstidspunkt(
-    YearMonth.of(2023, 1),
-    Grunnlagsopplysning.Saksbehandler(
-        "ident",
-        Tidspunkt.now()
-    ),
-    "begrunnelse"
-)
+fun virkningstidspunktVurdering() =
+    Virkningstidspunkt(
+        YearMonth.of(2023, 1),
+        Grunnlagsopplysning.Saksbehandler(
+            "ident",
+            Tidspunkt.now(),
+        ),
+        "begrunnelse",
+    )
 
-fun gyldighetsresultatVurdering() = GyldighetsResultat(
-    VurderingsResultat.OPPFYLT,
-    vurderinger = listOf(),
-    vurdertDato = Tidspunkt.now().toLocalDatetimeUTC()
-)
+fun gyldighetsresultatVurdering() =
+    GyldighetsResultat(
+        VurderingsResultat.OPPFYLT,
+        vurderinger = listOf(),
+        vurdertDato = Tidspunkt.now().toLocalDatetimeUTC(),
+    )
 
 @Suppress("ktlint:standard:max-line-length")
 val saksbehandlerToken =

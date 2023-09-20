@@ -25,22 +25,25 @@ class Server(private val context: ApplicationContext) {
         sikkerLoggOppstartOgAvslutning("etterlatte-tilbakekreving")
     }
 
-    private val engine = embeddedServer(
-        factory = CIO,
-        environment = applicationEngineEnvironment {
-            config = HoconApplicationConfig(ConfigFactory.load())
-            module {
-                routing { healthApi() }
-                metricsModule()
-            }
-            connector { port = 8080 }
+    private val engine =
+        embeddedServer(
+            factory = CIO,
+            environment =
+                applicationEngineEnvironment {
+                    config = HoconApplicationConfig(ConfigFactory.load())
+                    module {
+                        routing { healthApi() }
+                        metricsModule()
+                    }
+                    connector { port = 8080 }
+                },
+        )
+
+    fun run() =
+        with(context) {
+            // kravgrunnlagConsumer.start() TODO - må få økonomi til å gjøre oppsett for kø
+
+            setReady()
+            engine.start(true)
         }
-    )
-
-    fun run() = with(context) {
-        // kravgrunnlagConsumer.start() TODO - må få økonomi til å gjøre oppsett for kø
-
-        setReady()
-        engine.start(true)
-    }
 }

@@ -7,7 +7,6 @@ import org.junit.jupiter.api.assertThrows
 import java.lang.IllegalArgumentException
 
 class KjoereplanTest {
-
     @Test
     fun `kjoereplan toString mapper til riktig oppdragverdi`() {
         assertEquals("J", Kjoereplan.NESTE_PLANLAGTE_UTBETALING.toString())

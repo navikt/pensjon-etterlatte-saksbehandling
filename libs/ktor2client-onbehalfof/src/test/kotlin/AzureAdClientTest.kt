@@ -23,11 +23,12 @@ import java.util.concurrent.TimeUnit
 
 @OptIn(ExperimentalCoroutinesApi::class)
 internal class AzureAdClientTest {
-    private val configMap = mapOf(
-        "azure.app.well.known.url" to "wellKnownUrl",
-        "azure.app.client.id" to "clientId",
-        "azure.app.client.secret" to "secret"
-    )
+    private val configMap =
+        mapOf(
+            "azure.app.well.known.url" to "wellKnownUrl",
+            "azure.app.client.id" to "clientId",
+            "azure.app.client.secret" to "secret",
+        )
     private val config = ConfigFactory.parseMap(configMap)
     private val mockHttpClient = WireMockBase.mockHttpClient
 
@@ -36,11 +37,11 @@ internal class AzureAdClientTest {
         mockServer.resetAll()
         mockServer.stubFor(
             WireMock.get(WireMock.urlPathMatching("/wellKnownUrl"))
-                .willReturn(WireMock.okJson(openIdConfigurationMockResponse()))
+                .willReturn(WireMock.okJson(openIdConfigurationMockResponse())),
         )
         mockServer.stubFor(
             WireMock.post(WireMock.urlPathMatching("/token_endpoint"))
-                .willReturn(WireMock.okJson(accessTokenMockResponse()))
+                .willReturn(WireMock.okJson(accessTokenMockResponse())),
         )
     }
 
@@ -52,9 +53,10 @@ internal class AzureAdClientTest {
 
     @Test
     fun `henter OBO access token hvis det ikke finnes noe i cache`() {
-        val response = runBlocking {
-            AzureAdClient(config, mockHttpClient).getOnBehalfOfAccessTokenForResource(listOf(), "")
-        }
+        val response =
+            runBlocking {
+                AzureAdClient(config, mockHttpClient).getOnBehalfOfAccessTokenForResource(listOf(), "")
+            }
 
         response shouldBe Ok(AccessToken("token", 60, "testToken"))
         mockServer.verify(postRequestedFor(urlEqualTo("/token_endpoint")))
@@ -62,15 +64,16 @@ internal class AzureAdClientTest {
 
     @Test
     fun `lagrer OBO access token i cache ved api-kall`() {
-        val cache: AsyncCache<OboTokenRequest, AccessToken> = Caffeine
-            .newBuilder()
-            .expireAfterAccess(5, TimeUnit.SECONDS)
-            .buildAsync()
+        val cache: AsyncCache<OboTokenRequest, AccessToken> =
+            Caffeine
+                .newBuilder()
+                .expireAfterAccess(5, TimeUnit.SECONDS)
+                .buildAsync()
 
         runBlocking {
             AzureAdClient(config, mockHttpClient, cache).getOnBehalfOfAccessTokenForResource(
                 listOf("testScope"),
-                "saksbehandlerToken"
+                "saksbehandlerToken",
             )
         }
 
@@ -83,10 +86,11 @@ internal class AzureAdClientTest {
 
     @Test
     fun `bruker OBO cachet access token ved påfølgende kall`() {
-        val cache: AsyncCache<OboTokenRequest, AccessToken> = Caffeine
-            .newBuilder()
-            .expireAfterAccess(5, TimeUnit.SECONDS)
-            .buildAsync()
+        val cache: AsyncCache<OboTokenRequest, AccessToken> =
+            Caffeine
+                .newBuilder()
+                .expireAfterAccess(5, TimeUnit.SECONDS)
+                .buildAsync()
 
         runBlocking {
             AzureAdClient(config, mockHttpClient, cache).run {
@@ -102,10 +106,11 @@ internal class AzureAdClientTest {
     @Test
     fun `bruker OBO cachet access token ved parallele kall`() {
         return runTest {
-            val cache: AsyncCache<OboTokenRequest, AccessToken> = Caffeine
-                .newBuilder()
-                .expireAfterAccess(5, TimeUnit.SECONDS)
-                .buildAsync()
+            val cache: AsyncCache<OboTokenRequest, AccessToken> =
+                Caffeine
+                    .newBuilder()
+                    .expireAfterAccess(5, TimeUnit.SECONDS)
+                    .buildAsync()
 
             val client = AzureAdClient(config, mockHttpClient, cache)
             generateSequence {
@@ -118,9 +123,10 @@ internal class AzureAdClientTest {
 
     @Test
     fun `henter client credentials access token hvis det ikke finnes noe i cache`() {
-        val response = runBlocking {
-            AzureAdClient(config, mockHttpClient).getAccessTokenForResource(listOf())
-        }
+        val response =
+            runBlocking {
+                AzureAdClient(config, mockHttpClient).getAccessTokenForResource(listOf())
+            }
 
         response shouldBe Ok(AccessToken("token", 60, "testToken"))
         mockServer.verify(postRequestedFor(urlEqualTo("/token_endpoint")))
@@ -128,14 +134,15 @@ internal class AzureAdClientTest {
 
     @Test
     fun `lagrer client credentials access token i cache ved api-kall`() {
-        val cache: AsyncCache<ClientCredentialsTokenRequest, AccessToken> = Caffeine
-            .newBuilder()
-            .expireAfterAccess(5, TimeUnit.SECONDS)
-            .buildAsync()
+        val cache: AsyncCache<ClientCredentialsTokenRequest, AccessToken> =
+            Caffeine
+                .newBuilder()
+                .expireAfterAccess(5, TimeUnit.SECONDS)
+                .buildAsync()
 
         runBlocking {
             AzureAdClient(config, mockHttpClient, clientCredentialsCache = cache).getAccessTokenForResource(
-                listOf("testScope")
+                listOf("testScope"),
             )
         }
 
@@ -148,10 +155,11 @@ internal class AzureAdClientTest {
 
     @Test
     fun `bruker client credentials cachet access token ved påfølgende kall`() {
-        val cache: AsyncCache<ClientCredentialsTokenRequest, AccessToken> = Caffeine
-            .newBuilder()
-            .expireAfterAccess(5, TimeUnit.SECONDS)
-            .buildAsync()
+        val cache: AsyncCache<ClientCredentialsTokenRequest, AccessToken> =
+            Caffeine
+                .newBuilder()
+                .expireAfterAccess(5, TimeUnit.SECONDS)
+                .buildAsync()
 
         runBlocking {
             AzureAdClient(config, mockHttpClient, clientCredentialsCache = cache).run {
@@ -167,10 +175,11 @@ internal class AzureAdClientTest {
     @Test
     fun `bruker client credentials cachet access token ved parallele kall`() {
         return runTest {
-            val cache: AsyncCache<ClientCredentialsTokenRequest, AccessToken> = Caffeine
-                .newBuilder()
-                .expireAfterAccess(5, TimeUnit.SECONDS)
-                .buildAsync()
+            val cache: AsyncCache<ClientCredentialsTokenRequest, AccessToken> =
+                Caffeine
+                    .newBuilder()
+                    .expireAfterAccess(5, TimeUnit.SECONDS)
+                    .buildAsync()
 
             val client = AzureAdClient(config, mockHttpClient, clientCredentialsCache = cache)
             generateSequence {
@@ -182,19 +191,21 @@ internal class AzureAdClientTest {
     }
 }
 
-private fun openIdConfigurationMockResponse() = """
+private fun openIdConfigurationMockResponse() =
+    """
     {
         "jwks_uri": "jwks_uri",
         "issuer": "issuer",
         "token_endpoint": "token_endpoint",
         "authorization_endpoint": "authorization_endpoint"
     }
-""".trimIndent()
+    """.trimIndent()
 
-private fun accessTokenMockResponse() = """
+private fun accessTokenMockResponse() =
+    """
        {
         "access_token": "token",
         "expires_in": "60",
         "token_type": "testToken"
     } 
-""".trimIndent()
+    """.trimIndent()

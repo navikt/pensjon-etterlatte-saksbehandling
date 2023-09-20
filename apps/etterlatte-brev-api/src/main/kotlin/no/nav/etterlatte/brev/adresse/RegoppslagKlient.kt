@@ -13,44 +13,46 @@ import java.time.Duration
 
 class RegoppslagKlient(
     private val client: HttpClient,
-    private val url: String
+    private val url: String,
 ) {
     private val logger = LoggerFactory.getLogger(RegoppslagKlient::class.java)
 
-    private val cache = Caffeine.newBuilder()
-        .expireAfterWrite(Duration.ofMinutes(15))
-        .build<String, RegoppslagResponseDTO>()
+    private val cache =
+        Caffeine.newBuilder()
+            .expireAfterWrite(Duration.ofMinutes(15))
+            .build<String, RegoppslagResponseDTO>()
 
-    suspend fun hentMottakerAdresse(ident: String): RegoppslagResponseDTO = try {
-        val regoppslagCache = cache.getIfPresent(ident)
+    suspend fun hentMottakerAdresse(ident: String): RegoppslagResponseDTO =
+        try {
+            val regoppslagCache = cache.getIfPresent(ident)
 
-        if (regoppslagCache != null) {
-            logger.info("Fant cachet mottakeradresse")
-            regoppslagCache
-        } else {
-            logger.info("Ingen cachet mottakeradresse funnet. Henter fra regoppslag")
-
-            val response = client.get("$url/regoppslag/$ident")
-
-            if (response.status.isSuccess()) {
-                response.body<RegoppslagResponseDTO>()
-                    .also {
-                        sikkerLogg.info("Respons fra regoppslag: $it")
-                        cache.put(ident, it)
-                    }
+            if (regoppslagCache != null) {
+                logger.info("Fant cachet mottakeradresse")
+                regoppslagCache
             } else {
-                throw ResponseException(response, "Ukjent feil fra navansatt api")
+                logger.info("Ingen cachet mottakeradresse funnet. Henter fra regoppslag")
+
+                val response = client.get("$url/regoppslag/$ident")
+
+                if (response.status.isSuccess()) {
+                    response.body<RegoppslagResponseDTO>()
+                        .also {
+                            sikkerLogg.info("Respons fra regoppslag: $it")
+                            cache.put(ident, it)
+                        }
+                } else {
+                    throw ResponseException(response, "Ukjent feil fra navansatt api")
+                }
             }
+        } catch (exception: Exception) {
+            throw AdresseException("Feil i kall mot Regoppslag", exception)
         }
-    } catch (exception: Exception) {
-        throw AdresseException("Feil i kall mot Regoppslag", exception)
-    }
 }
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class RegoppslagResponseDTO(
     val navn: String,
-    val adresse: Adresse
+    val adresse: Adresse,
 ) {
     data class Adresse(
         val type: AdresseType,
@@ -61,16 +63,22 @@ data class RegoppslagResponseDTO(
         val postnummer: String?,
         val poststed: String?,
         val landkode: String,
-        val land: String
+        val land: String,
     )
 
     enum class AdresseType {
-        NORSKPOSTADRESSE, UTENLANDSKPOSTADRESSE
+        NORSKPOSTADRESSE,
+        UTENLANDSKPOSTADRESSE,
     }
 
     enum class AdresseKilde {
-        BOSTEDSADRESSE, OPPHOLDSADRESSE, KONTAKTADRESSE, DELTBOSTED,
-        KONTAKTINFORMASJONFORDØDSBO, ENHETPOSTADRESSE, ENHETFORRETNINGSADRESSE
+        BOSTEDSADRESSE,
+        OPPHOLDSADRESSE,
+        KONTAKTADRESSE,
+        DELTBOSTED,
+        KONTAKTINFORMASJONFORDØDSBO,
+        ENHETPOSTADRESSE,
+        ENHETFORRETNINGSADRESSE,
     }
 }
 

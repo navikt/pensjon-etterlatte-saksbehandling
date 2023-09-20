@@ -54,5 +54,5 @@ include(
     "libs:etterlatte-vilkaarsvurdering-model",
     "libs:etterlatte-tilbakekreving-model",
     "jobs:test-fordeler",
-    "jobs:start-regulering"
+    "jobs:start-regulering",
 )

@@ -35,7 +35,7 @@ class BrevService(
     private val adresseService: AdresseService,
     private val dokarkivService: DokarkivService,
     private val distribusjonService: DistribusjonService,
-    private val brevbakerService: BrevbakerService
+    private val brevbakerService: BrevbakerService,
 ) {
     private val logger = LoggerFactory.getLogger(BrevService::class.java)
 
@@ -47,54 +47,66 @@ class BrevService(
         return db.hentBrevForSak(sakId)
     }
 
-    suspend fun opprettBrev(sakId: Long, bruker: BrukerTokenInfo): Brev {
+    suspend fun opprettBrev(
+        sakId: Long,
+        bruker: BrukerTokenInfo,
+    ): Brev {
         val sak = sakOgBehandlingService.hentSak(sakId, bruker)
 
         val mottaker = adresseService.hentMottakerAdresse(sak.ident)
 
-        val nyttBrev = OpprettNyttBrev(
-            sakId = sakId,
-            behandlingId = null,
-            soekerFnr = sak.ident,
-            prosessType = BrevProsessType.MANUELL,
-            mottaker = mottaker,
-            innhold = BrevInnhold("Nytt brev", Spraak.NB, SlateHelper.opprettTomBrevmal()),
-            innholdVedlegg = null
-        )
+        val nyttBrev =
+            OpprettNyttBrev(
+                sakId = sakId,
+                behandlingId = null,
+                soekerFnr = sak.ident,
+                prosessType = BrevProsessType.MANUELL,
+                mottaker = mottaker,
+                innhold = BrevInnhold("Nytt brev", Spraak.NB, SlateHelper.opprettTomBrevmal()),
+                innholdVedlegg = null,
+            )
 
         return db.opprettBrev(nyttBrev)
     }
 
     data class BrevPayload(
         val hoveddel: Slate?,
-        val vedlegg: List<BrevInnholdVedlegg>?
+        val vedlegg: List<BrevInnholdVedlegg>?,
     )
 
     fun hentBrevPayload(id: BrevID): BrevPayload {
-        val hoveddel = db.hentBrevPayload(id)
-            .also { logger.info("Hentet payload for brev (id=$id)") }
+        val hoveddel =
+            db.hentBrevPayload(id)
+                .also { logger.info("Hentet payload for brev (id=$id)") }
 
-        val vedlegg = db.hentBrevPayloadVedlegg(id)
-            .also { logger.info("Hentet payload til vedlegg for brev (id=$id)") }
+        val vedlegg =
+            db.hentBrevPayloadVedlegg(id)
+                .also { logger.info("Hentet payload til vedlegg for brev (id=$id)") }
 
         return BrevPayload(hoveddel, vedlegg)
     }
 
-    fun lagreBrevPayload(id: BrevID, payload: Slate) =
-        db.oppdaterPayload(id, payload)
-            .also { logger.info("Payload for brev (id=$id) oppdatert") }
+    fun lagreBrevPayload(
+        id: BrevID,
+        payload: Slate,
+    ) = db.oppdaterPayload(id, payload)
+        .also { logger.info("Payload for brev (id=$id) oppdatert") }
 
-    fun lagreBrevPayloadVedlegg(id: BrevID, payload: List<BrevInnholdVedlegg>) =
-        db.oppdaterPayloadVedlegg(id, payload)
-            .also { logger.info("Vedlegg payload for brev (id=$id) oppdatert") }
+    fun lagreBrevPayloadVedlegg(
+        id: BrevID,
+        payload: List<BrevInnholdVedlegg>,
+    ) = db.oppdaterPayloadVedlegg(id, payload)
+        .also { logger.info("Vedlegg payload for brev (id=$id) oppdatert") }
 
-    fun oppdaterMottaker(id: BrevID, mottaker: Mottaker) =
-        db.oppdaterMottaker(id, mottaker)
-            .also { logger.info("Mottaker på brev (id=$id) oppdatert") }
+    fun oppdaterMottaker(
+        id: BrevID,
+        mottaker: Mottaker,
+    ) = db.oppdaterMottaker(id, mottaker)
+        .also { logger.info("Mottaker på brev (id=$id) oppdatert") }
 
     suspend fun genererPdf(
         id: BrevID,
-        bruker: BrukerTokenInfo
+        bruker: BrukerTokenInfo,
     ): Pdf {
         val brev = hentBrev(id)
 
@@ -108,21 +120,26 @@ class BrevService(
         val avsender = adresseService.hentAvsender(sak, bruker.ident())
 
         val (brevKode, brevData) = opprettBrevData(brev)
-        val brevRequest = BrevbakerRequest(
-            kode = brevKode,
-            letterData = brevData,
-            felles = BrevbakerHelpers.mapFelles(
-                sakId = brev.sakId,
-                soeker = soeker,
-                avsender = avsender
-            ),
-            language = LanguageCode.spraakToLanguageCode(Spraak.NB) // TODO: fikse spraak
-        )
+        val brevRequest =
+            BrevbakerRequest(
+                kode = brevKode,
+                letterData = brevData,
+                felles =
+                    BrevbakerHelpers.mapFelles(
+                        sakId = brev.sakId,
+                        soeker = soeker,
+                        avsender = avsender,
+                    ),
+                language = LanguageCode.spraakToLanguageCode(Spraak.NB), // TODO: fikse spraak
+            )
 
         return brevbakerService.genererPdf(brev.id, brevRequest)
     }
 
-    suspend fun ferdigstill(id: BrevID, bruker: BrukerTokenInfo) {
+    suspend fun ferdigstill(
+        id: BrevID,
+        bruker: BrukerTokenInfo,
+    ) {
         val brev = hentBrev(id)
 
         if (brev.status in listOf(Status.OPPRETTET, Status.OPPDATERT)) {
@@ -134,7 +151,10 @@ class BrevService(
         }
     }
 
-    suspend fun journalfoer(id: BrevID, bruker: BrukerTokenInfo): String {
+    suspend fun journalfoer(
+        id: BrevID,
+        bruker: BrukerTokenInfo,
+    ): String {
         val brev = hentBrev(id)
 
         if (brev.status != Status.FERDIGSTILT) {
@@ -156,20 +176,21 @@ class BrevService(
 
         if (brev.status != Status.JOURNALFOERT) {
             throw IllegalStateException(
-                "Forventet status ${Status.JOURNALFOERT} på brev (id=${brev.id}), men fikk ${brev.status}"
+                "Forventet status ${Status.JOURNALFOERT} på brev (id=${brev.id}), men fikk ${brev.status}",
             )
         }
 
-        val journalpostId = requireNotNull(db.hentJournalpostId(id)) {
-            "JournalpostID mangler på brev (id=${brev.id}, status=${brev.status})"
-        }
+        val journalpostId =
+            requireNotNull(db.hentJournalpostId(id)) {
+                "JournalpostID mangler på brev (id=${brev.id}, status=${brev.status})"
+            }
 
         return distribusjonService.distribuerJournalpost(
             brevId = brev.id,
             journalpostId = journalpostId,
             type = DistribusjonsType.ANNET,
             tidspunkt = DistribusjonsTidspunktType.KJERNETID,
-            adresse = brev.mottaker.adresse
+            adresse = brev.mottaker.adresse,
         )
     }
 

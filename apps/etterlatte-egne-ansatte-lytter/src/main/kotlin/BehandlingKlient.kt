@@ -20,7 +20,7 @@ class BehandlingKlient(val behandlingHttpClient: HttpClient, val url: String) {
             "Behandler skjermet record med id: {}, partition {}, offset: {}",
             record.key(),
             record.partition(),
-            record.offset()
+            record.offset(),
         )
         val skjermet = record.value().toBoolean()
         val fnr = record.key()
@@ -30,18 +30,18 @@ class BehandlingKlient(val behandlingHttpClient: HttpClient, val url: String) {
 
     fun postTilBehandling(
         fnr: String,
-        skjermet: Boolean
+        skjermet: Boolean,
     ) = runBlocking {
         behandlingHttpClient.post(
-            "$url/egenansatt"
+            "$url/egenansatt",
         ) {
             contentType(ContentType.Application.Json)
             setBody(
                 EgenAnsattSkjermet(
                     fnr = fnr,
                     inntruffet = Tidspunkt.now(),
-                    skjermet = skjermet
-                )
+                    skjermet = skjermet,
+                ),
             )
         }
     }

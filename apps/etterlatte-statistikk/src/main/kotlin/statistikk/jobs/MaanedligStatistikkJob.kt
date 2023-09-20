@@ -11,13 +11,13 @@ import org.slf4j.LoggerFactory
 import java.time.Clock
 import java.time.Duration
 import java.time.YearMonth
-import java.util.*
+import java.util.Timer
 
 class MaanedligStatistikkJob(
     private val statistikkService: StatistikkService,
     private val leaderElection: LeaderElection,
     private val initialDelay: Long,
-    private val periode: Duration
+    private val periode: Duration,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
     private val jobbNavn = this::class.simpleName
@@ -29,12 +29,12 @@ class MaanedligStatistikkJob(
             name = jobbNavn,
             initialDelay = initialDelay,
             loggerInfo = LoggerInfo(logger = logger, loggTilSikkerLogg = false),
-            period = periode.toMillis()
+            period = periode.toMillis(),
         ) {
             ProduserOgLagreMaanedligStatistikk(
                 leaderElection = leaderElection,
                 statistikkService = statistikkService,
-                clock = utcKlokke().norskKlokke()
+                clock = utcKlokke().norskKlokke(),
             ).run()
         }
     }
@@ -42,7 +42,7 @@ class MaanedligStatistikkJob(
     class ProduserOgLagreMaanedligStatistikk(
         private val leaderElection: LeaderElection,
         private val statistikkService: StatistikkService,
-        private val clock: Clock
+        private val clock: Clock,
     ) {
         private val logger = LoggerFactory.getLogger(this::class.java)
 

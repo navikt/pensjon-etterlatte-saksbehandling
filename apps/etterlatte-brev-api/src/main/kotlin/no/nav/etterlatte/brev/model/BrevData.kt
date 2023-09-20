@@ -8,19 +8,19 @@ import no.nav.pensjon.brevbaker.api.model.Telefonnummer
 abstract class BrevData {
     protected inline fun <reified T : RevurderingInfo> valider(
         behandling: Behandling,
-        revurderingAarsak: RevurderingAarsak
+        revurderingAarsak: RevurderingAarsak,
     ): T {
         val lesbartnavn = revurderingAarsak.name.lowercase()
         if (behandling.revurderingsaarsak != revurderingAarsak) {
             throw IllegalArgumentException(
                 "Kan ikke opprette et revurderingsbrev for $lesbartnavn når " +
-                    "revurderingsårsak er ${behandling.revurderingsaarsak}"
+                    "revurderingsårsak er ${behandling.revurderingsaarsak}",
             )
         }
         if (behandling.revurderingInfo !is T) {
             throw IllegalArgumentException(
                 "Kan ikke opprette et revurderingsbrev for $lesbartnavn når " +
-                    "revurderingsinfo ikke er $lesbartnavn"
+                    "revurderingsinfo ikke er $lesbartnavn",
             )
         }
         return behandling.revurderingInfo
@@ -33,5 +33,5 @@ data class Avsender(
     val postnummer: String,
     val telefonnummer: Telefonnummer,
     val saksbehandler: String,
-    val attestant: String?
+    val attestant: String?,
 )

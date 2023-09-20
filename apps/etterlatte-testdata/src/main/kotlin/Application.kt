@@ -60,9 +60,10 @@ import org.slf4j.LoggerFactory
 
 private val env = System.getenv()
 
-val objectMapper: ObjectMapper = jacksonObjectMapper()
-    .registerModule(JavaTimeModule())
-    .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+val objectMapper: ObjectMapper =
+    jacksonObjectMapper()
+        .registerModule(JavaTimeModule())
+        .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
 val logger: Logger = LoggerFactory.getLogger("testdata")
 val localDevelopment = env["DEV"].toBoolean()
@@ -70,11 +71,12 @@ val httpClient = httpClient(forventSuksess = true)
 val config: Config = ConfigFactory.load()
 val azureAdClient = AzureAdClient(config, httpClient)
 
-val producer = if (localDevelopment) {
-    LocalKafkaConfig(env["KAFKA_BROKERS"]!!).standardProducer(env["KAFKA_TARGET_TOPIC"]!!)
-} else {
-    GcpKafkaConfig.fromEnv(System.getenv()).standardProducer(System.getenv().getValue("KAFKA_TARGET_TOPIC"))
-}
+val producer =
+    if (localDevelopment) {
+        LocalKafkaConfig(env["KAFKA_BROKERS"]!!).standardProducer(env["KAFKA_TARGET_TOPIC"]!!)
+    } else {
+        GcpKafkaConfig.fromEnv(System.getenv()).standardProducer(System.getenv().getValue("KAFKA_TARGET_TOPIC"))
+    }
 
 interface TestDataFeature {
     val beskrivelse: String
@@ -82,14 +84,15 @@ interface TestDataFeature {
     val routes: Route.() -> Unit
 }
 
-val features: List<TestDataFeature> = listOf(
-    IndexFeature,
-    EgendefinertMeldingFeature,
-    StandardMeldingFeature,
-    SlettsakFeature,
-    OpprettSoeknadFeature,
-    DollyFeature(DollyService(DollyClientImpl(config, httpClient)))
-)
+val features: List<TestDataFeature> =
+    listOf(
+        IndexFeature,
+        EgendefinertMeldingFeature,
+        StandardMeldingFeature,
+        SlettsakFeature,
+        OpprettSoeknadFeature,
+        DollyFeature(DollyService(DollyClientImpl(config, httpClient))),
+    )
 
 fun main() {
     embeddedServer(
@@ -130,7 +133,7 @@ fun main() {
                 }
             }
             connector { port = 8080 }
-        }
+        },
     ).start(true)
 }
 
@@ -156,13 +159,12 @@ private fun Route.api() {
     }
 }
 
-fun PipelineContext<Unit, ApplicationCall>.navIdentFraToken() =
-    call.firstValidTokenClaims()?.get("NAVident")?.toString()
+fun PipelineContext<Unit, ApplicationCall>.navIdentFraToken() = call.firstValidTokenClaims()?.get("NAVident")?.toString()
 
-fun PipelineContext<Unit, ApplicationCall>.usernameFraToken() =
-    call.firstValidTokenClaims()?.get("preferred_username")?.toString()
+fun PipelineContext<Unit, ApplicationCall>.usernameFraToken() = call.firstValidTokenClaims()?.get("preferred_username")?.toString()
 
-fun getClientAccessToken(): String = runBlocking {
-    azureAdClient.getAccessTokenForResource(listOf("api://${config.getString("dolly.client.id")}/.default"))
-        .get()!!.accessToken
-}
+fun getClientAccessToken(): String =
+    runBlocking {
+        azureAdClient.getAccessTokenForResource(listOf("api://${config.getString("dolly.client.id")}/.default"))
+            .get()!!.accessToken
+    }

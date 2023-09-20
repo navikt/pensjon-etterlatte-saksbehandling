@@ -14,25 +14,25 @@ data class SoekerBarnSoeknad(
     val utenlandsadresse: UtenlandsadresseBarn,
     val foreldre: List<Forelder>,
     val verge: Verge,
-    val omsorgPerson: OmsorgspersonType?
+    val omsorgPerson: OmsorgspersonType?,
 )
 
 data class UtenlandsadresseBarn(
     val adresseIUtlandet: JaNeiVetIkke?,
     val land: String?,
-    val adresse: String?
+    val adresse: String?,
 )
 
 data class Forelder(
     val type: PersonType,
     val fornavn: String,
     val etternavn: String,
-    val foedselsnummer: Folkeregisteridentifikator
+    val foedselsnummer: Folkeregisteridentifikator,
 )
 
 data class Verge(
     val barnHarVerge: JaNeiVetIkke?,
     val fornavn: String?,
     val etternavn: String?,
-    val foedselsnummer: Folkeregisteridentifikator?
+    val foedselsnummer: Folkeregisteridentifikator?,
 )

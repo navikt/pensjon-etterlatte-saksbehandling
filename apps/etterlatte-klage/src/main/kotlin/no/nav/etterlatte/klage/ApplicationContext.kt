@@ -34,7 +34,7 @@ internal class ApplicationContext {
                         metricsModule()
                     }
                     connector { port = httpPort }
-                }
+                },
         )
 
     fun run() {
@@ -45,14 +45,14 @@ internal class ApplicationContext {
 
 private fun startKafkalytter(
     config: Config,
-    env: Map<String, String>
+    env: Map<String, String>,
 ) {
     val behandlingHttpClient =
         httpClientClientCredentials(
             azureAppClientId = config.getString("azure.app.client.id"),
             azureAppJwk = config.getString("azure.app.jwk"),
             azureAppWellKnownUrl = config.getString("azure.app.well.known.url"),
-            azureAppScope = config.getString("behandling.azure.scope")
+            azureAppScope = config.getString("behandling.azure.scope"),
         )
 
     startLytting(
@@ -63,9 +63,9 @@ private fun startKafkalytter(
                 behandlingKlient =
                     BehandlingKlient(
                         behandlingHttpClient = behandlingHttpClient,
-                        resourceUrl = config.getString("behandling.resource.url")
-                    )
+                        resourceUrl = config.getString("behandling.resource.url"),
+                    ),
             ),
-        logger = LoggerFactory.getLogger(Application::class.java)
+        logger = LoggerFactory.getLogger(Application::class.java),
     )
 }

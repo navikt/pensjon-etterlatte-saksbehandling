@@ -6,17 +6,17 @@ data class TrygdetidAvtale(
     val kode: String,
     val beskrivelse: String,
     val fraDato: LocalDate,
-    val datoer: List<TrygdetidAvtaleDato>
+    val datoer: List<TrygdetidAvtaleDato>,
 )
 
 data class TrygdetidAvtaleDato(
     val kode: String,
     val beskrivelse: String,
-    val fraDato: LocalDate
+    val fraDato: LocalDate,
 )
 
 data class TrygdetidAvtaleKriteria(
     val kode: String,
     val beskrivelse: String,
-    val fraDato: LocalDate
+    val fraDato: LocalDate,
 )

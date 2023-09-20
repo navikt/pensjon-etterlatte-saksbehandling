@@ -27,11 +27,11 @@ import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlient
 import java.time.LocalDate
 import java.time.ZonedDateTime
-import java.util.*
+import java.util.UUID
 
 fun Route.vedtaksvurderingRoute(
     service: VedtaksvurderingService,
-    behandlingKlient: BehandlingKlient
+    behandlingKlient: BehandlingKlient,
 ) {
     route("/api/vedtak") {
         val logger = application.log
@@ -99,11 +99,12 @@ fun Route.vedtaksvurderingRoute(
             withBehandlingId(behandlingKlient) { behandlingId ->
                 logger.info("Underkjenner vedtak for behandling $behandlingId")
                 val begrunnelse = call.receive<UnderkjennVedtakDto>()
-                val underkjentVedtak = service.underkjennVedtak(
-                    behandlingId,
-                    brukerTokenInfo,
-                    begrunnelse
-                )
+                val underkjentVedtak =
+                    service.underkjennVedtak(
+                        behandlingId,
+                        brukerTokenInfo,
+                        begrunnelse,
+                    )
 
                 call.respond(underkjentVedtak.toDto())
             }
@@ -120,8 +121,9 @@ fun Route.vedtaksvurderingRoute(
 
         get("/loepende/{$SAKID_CALL_PARAMETER}") {
             withSakId(behandlingKlient) { sakId ->
-                val dato = call.request.queryParameters["dato"]?.let { LocalDate.parse(it) }
-                    ?: throw Exception("dato er påkrevet på formatet YYYY-MM-DD")
+                val dato =
+                    call.request.queryParameters["dato"]?.let { LocalDate.parse(it) }
+                        ?: throw Exception("dato er påkrevet på formatet YYYY-MM-DD")
 
                 logger.info("Sjekker om vedtak er løpende for sak $sakId på dato $dato")
                 val loependeYtelse = service.sjekkOmVedtakErLoependePaaDato(sakId, dato)
@@ -186,20 +188,22 @@ fun Route.samordningsvedtakRoute(service: VedtaksvurderingService) {
     }
 }
 
-private fun Vedtak.toVedtakSammendragDto() = VedtakSammendragDto(
-    id = id.toString(),
-    behandlingId = behandlingId,
-    vedtakType = type,
-    saksbehandlerId = vedtakFattet?.ansvarligSaksbehandler,
-    datoFattet = vedtakFattet?.tidspunkt?.toNorskTid(),
-    attestant = attestasjon?.attestant,
-    datoAttestert = attestasjon?.tidspunkt?.toNorskTid()
-)
+private fun Vedtak.toVedtakSammendragDto() =
+    VedtakSammendragDto(
+        id = id.toString(),
+        behandlingId = behandlingId,
+        vedtakType = type,
+        saksbehandlerId = vedtakFattet?.ansvarligSaksbehandler,
+        datoFattet = vedtakFattet?.tidspunkt?.toNorskTid(),
+        attestant = attestasjon?.attestant,
+        datoAttestert = attestasjon?.tidspunkt?.toNorskTid(),
+    )
 
-private fun LoependeYtelse.toDto() = LoependeYtelseDTO(
-    erLoepende = erLoepende,
-    dato = dato
-)
+private fun LoependeYtelse.toDto() =
+    LoependeYtelseDTO(
+        erLoepende = erLoepende,
+        dato = dato,
+    )
 
 data class UnderkjennVedtakDto(val kommentar: String, val valgtBegrunnelse: String)
 
@@ -210,5 +214,5 @@ data class VedtakSammendragDto(
     val saksbehandlerId: String?,
     val datoFattet: ZonedDateTime?,
     val attestant: String?,
-    val datoAttestert: ZonedDateTime?
+    val datoAttestert: ZonedDateTime?,
 )

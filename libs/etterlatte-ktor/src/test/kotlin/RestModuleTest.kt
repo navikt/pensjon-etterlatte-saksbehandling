@@ -45,7 +45,7 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import testsupport.buildTestApplicationConfigurationForOauth
-import java.util.*
+import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class RestModuleTest {
@@ -59,10 +59,11 @@ class RestModuleTest {
         server.issueToken(
             issuerId = AZURE_ISSUER,
             audience = CLIENT_ID,
-            claims = mapOf(
-                "navn" to "John Doe",
-                "NAVident" to "Saksbehandler01"
-            )
+            claims =
+                mapOf(
+                    "navn" to "John Doe",
+                    "NAVident" to "Saksbehandler01",
+                ),
         ).serialize()
     }
 
@@ -91,13 +92,15 @@ class RestModuleTest {
                 }
             }
 
-            val response1 = client.get("/test") {
-                header(HttpHeaders.Authorization, "Bearer $token")
-            }
+            val response1 =
+                client.get("/test") {
+                    header(HttpHeaders.Authorization, "Bearer $token")
+                }
 
-            val response2 = client.get("/test2") {
-                header(HttpHeaders.Authorization, "Bearer $token")
-            }
+            val response2 =
+                client.get("/test2") {
+                    header(HttpHeaders.Authorization, "Bearer $token")
+                }
 
             assertEquals(OK, response1.status)
             assertEquals(OK, response2.status)
@@ -158,11 +161,12 @@ class RestModuleTest {
 
             val testObjekt = TestObjektDto("test", 1)
 
-            val response = client.post("/test") {
-                setBody(testObjekt.toJson())
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                header(HttpHeaders.Authorization, "Bearer $token")
-            }
+            val response =
+                client.post("/test") {
+                    setBody(testObjekt.toJson())
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    header(HttpHeaders.Authorization, "Bearer $token")
+                }
 
             val testObjektSvar = objectMapper.readValue(response.bodyAsText(), TestObjektDto::class.java)
 
@@ -179,9 +183,10 @@ class RestModuleTest {
             }
             application { restModule(this.log) { route1() } }
 
-            val response = client.get("/test/fails") {
-                header(HttpHeaders.Authorization, "Bearer $token")
-            }
+            val response =
+                client.get("/test/fails") {
+                    header(HttpHeaders.Authorization, "Bearer $token")
+                }
 
             assertEquals(HttpStatusCode.InternalServerError, response.status)
         }

@@ -13,21 +13,21 @@ import rapidsandrivers.BEHANDLING_ID_KEY
 import rapidsandrivers.DATO_KEY
 import rapidsandrivers.SAK_ID_KEY
 import java.time.LocalDate
-import java.util.*
+import java.util.UUID
 
 internal class OpprettVedtakforespoerselTest {
-
-    private val `1_mai_2023` = LocalDate.of(2023, 5, 1)
+    private val foersteMai2023 = LocalDate.of(2023, 5, 1)
     private val sakId = 1L
 
-    private fun genererOpprettVedtakforespoersel(behandlingId: UUID) = JsonMessage.newMessage(
-        mapOf(
-            EVENT_NAME_KEY to OPPRETT_VEDTAK,
-            SAK_ID_KEY to sakId,
-            DATO_KEY to `1_mai_2023`,
-            BEHANDLING_ID_KEY to behandlingId
+    private fun genererOpprettVedtakforespoersel(behandlingId: UUID) =
+        JsonMessage.newMessage(
+            mapOf(
+                EVENT_NAME_KEY to OPPRETT_VEDTAK,
+                SAK_ID_KEY to sakId,
+                DATO_KEY to foersteMai2023,
+                BEHANDLING_ID_KEY to behandlingId,
+            ),
         )
-    )
 
     @Test
     fun `skal baade opprette vedtak og fatte det samt attestere`() {

@@ -35,7 +35,6 @@ import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.fail
 
 internal class PersonServiceTest {
-
     private val pdlKlient = mockk<PdlKlient>()
     private val ppsKlient = mockk<ParallelleSannheterKlient>()
     private val personService = PersonService(pdlKlient, ppsKlient)
@@ -50,34 +49,36 @@ internal class PersonServiceTest {
         val personIdentResponse: PdlIdentResponse = mockResponse("/pdl/folkeregisterident.json")
         val personNpidResponse: PdlIdentResponse = mockResponse("/pdl/npid.json")
         val hentPerson: PdlHentPerson = personResponse.data?.hentPerson!!
-        val geografiskTilknytning = PdlGeografiskTilknytningResponse(
-            data = PdlGeografiskTilknytningData(
-                PdlGeografiskTilknytning(
-                    gtKommune = "0301",
-                    gtBydel = null,
-                    gtLand = null,
-                    gtType = PdlGtType.KOMMUNE
-                )
+        val geografiskTilknytning =
+            PdlGeografiskTilknytningResponse(
+                data =
+                    PdlGeografiskTilknytningData(
+                        PdlGeografiskTilknytning(
+                            gtKommune = "0301",
+                            gtBydel = null,
+                            gtLand = null,
+                            gtType = PdlGtType.KOMMUNE,
+                        ),
+                    ),
             )
-        )
 
         coEvery { pdlKlient.hentPerson(any()) } returns personResponse
         coEvery { pdlKlient.hentPersonBolk(any(), any()) } returns personBolkResponse
         coEvery {
             pdlKlient.hentPdlIdentifikator(
-                HentPdlIdentRequest(PersonIdent(aktorIdMedFolkeregisterIdent))
+                HentPdlIdentRequest(PersonIdent(aktorIdMedFolkeregisterIdent)),
             )
         } returns personIdentResponse
         coEvery {
             pdlKlient.hentPdlIdentifikator(
-                HentPdlIdentRequest(PersonIdent(aktorIdMedFolkeregisterIdent))
+                HentPdlIdentRequest(PersonIdent(aktorIdMedFolkeregisterIdent)),
             )
         } returns personIdentResponse
         coEvery {
             pdlKlient.hentPdlIdentifikator(
                 HentPdlIdentRequest(
-                    PersonIdent(aktorIdMedNpid)
-                )
+                    PersonIdent(aktorIdMedNpid),
+                ),
             )
         } returns personNpidResponse
         coEvery { ppsKlient.avklarNavn(any()) } returns hentPerson.navn.first()
@@ -99,11 +100,12 @@ internal class PersonServiceTest {
 
     @Test
     fun `skal mappe avdoed med barnekull`() {
-        val person = runBlocking {
-            personService.hentPerson(
-                HentPersonRequest(TRIVIELL_MIDTPUNKT, rolle = PersonRolle.AVDOED, SakType.BARNEPENSJON)
-            )
-        }
+        val person =
+            runBlocking {
+                personService.hentPerson(
+                    HentPersonRequest(TRIVIELL_MIDTPUNKT, rolle = PersonRolle.AVDOED, SakType.BARNEPENSJON),
+                )
+            }
 
         val expectedBarnFnr = listOf("70078749472", "06067018735")
 
@@ -115,11 +117,12 @@ internal class PersonServiceTest {
 
     @Test
     fun `skal mappe person som inkluderer familierelasjon (foreldre)`() {
-        val person = runBlocking {
-            personService.hentOpplysningsperson(
-                HentPersonRequest(TRIVIELL_MIDTPUNKT, rolle = PersonRolle.BARN, SakType.BARNEPENSJON)
-            )
-        }
+        val person =
+            runBlocking {
+                personService.hentOpplysningsperson(
+                    HentPersonRequest(TRIVIELL_MIDTPUNKT, rolle = PersonRolle.BARN, SakType.BARNEPENSJON),
+                )
+            }
 
         val expectedForeldreFnr = listOf("26117512737", "14097030880")
 
@@ -131,11 +134,12 @@ internal class PersonServiceTest {
 
     @Test
     fun `skal mappe person som inkluderer familierelasjon (ansvarlige foreldre)`() {
-        val person = runBlocking {
-            personService.hentOpplysningsperson(
-                HentPersonRequest(TRIVIELL_MIDTPUNKT, rolle = PersonRolle.BARN, SakType.BARNEPENSJON)
-            )
-        }
+        val person =
+            runBlocking {
+                personService.hentOpplysningsperson(
+                    HentPersonRequest(TRIVIELL_MIDTPUNKT, rolle = PersonRolle.BARN, SakType.BARNEPENSJON),
+                )
+            }
 
         val expectedForeldreFnr = listOf("26117512737", "14097030880")
 
@@ -148,11 +152,12 @@ internal class PersonServiceTest {
     @Test
     @Disabled("TODO - få inn datagrunnlag for denne")
     fun `skal mappe person som inkluderer familierelasjon (barn)`() {
-        val person = runBlocking {
-            personService.hentOpplysningsperson(
-                HentPersonRequest(TRIVIELL_MIDTPUNKT, rolle = PersonRolle.BARN, SakType.BARNEPENSJON)
-            )
-        }
+        val person =
+            runBlocking {
+                personService.hentOpplysningsperson(
+                    HentPersonRequest(TRIVIELL_MIDTPUNKT, rolle = PersonRolle.BARN, SakType.BARNEPENSJON),
+                )
+            }
 
         val foreldreFnr = listOf("26117512737", "14097030880")
 
@@ -164,11 +169,12 @@ internal class PersonServiceTest {
 
     @Test
     fun `Hent utland med innflytting mappes korrekt`() {
-        val person = runBlocking {
-            personService.hentOpplysningsperson(
-                HentPersonRequest(TRIVIELL_MIDTPUNKT, rolle = PersonRolle.BARN, SakType.BARNEPENSJON)
-            )
-        }
+        val person =
+            runBlocking {
+                personService.hentOpplysningsperson(
+                    HentPersonRequest(TRIVIELL_MIDTPUNKT, rolle = PersonRolle.BARN, SakType.BARNEPENSJON),
+                )
+            }
 
         assertEquals(2, person.utland?.verdi?.innflyttingTilNorge?.size)
         assertEquals("NIC", person.utland?.verdi?.innflyttingTilNorge?.get(0)?.fraflyttingsland)
@@ -177,11 +183,12 @@ internal class PersonServiceTest {
 
     @Test
     fun `Hent utland med utflytting mappes korrekt`() {
-        val person = runBlocking {
-            personService.hentOpplysningsperson(
-                HentPersonRequest(TRIVIELL_MIDTPUNKT, rolle = PersonRolle.BARN, SakType.BARNEPENSJON)
-            )
-        }
+        val person =
+            runBlocking {
+                personService.hentOpplysningsperson(
+                    HentPersonRequest(TRIVIELL_MIDTPUNKT, rolle = PersonRolle.BARN, SakType.BARNEPENSJON),
+                )
+            }
 
         assertEquals(1, person.utland?.verdi?.utflyttingFraNorge?.size)
         assertEquals("FRA", person.utland?.verdi?.utflyttingFraNorge?.get(0)?.tilflyttingsland)
@@ -195,7 +202,7 @@ internal class PersonServiceTest {
         assertThrows<PdlForesporselFeilet> {
             runBlocking {
                 personService.hentPerson(
-                    HentPersonRequest(TRIVIELL_MIDTPUNKT, rolle = PersonRolle.BARN, SakType.BARNEPENSJON)
+                    HentPersonRequest(TRIVIELL_MIDTPUNKT, rolle = PersonRolle.BARN, SakType.BARNEPENSJON),
                 )
             }
         }
@@ -214,11 +221,12 @@ internal class PersonServiceTest {
 
     @Test
     fun `Skal hente folkeregisterident for aktoerid`() {
-        val personIdentResponse = runBlocking {
-            personService.hentPdlIdentifikator(
-                HentPdlIdentRequest(PersonIdent(aktorIdMedFolkeregisterIdent))
-            )
-        }
+        val personIdentResponse =
+            runBlocking {
+                personService.hentPdlIdentifikator(
+                    HentPdlIdentRequest(PersonIdent(aktorIdMedFolkeregisterIdent)),
+                )
+            }
 
         if (personIdentResponse !is PdlIdentifikator.FolkeregisterIdent) {
             fail("Fikk ikke folkeregisteridentifikator")
@@ -229,11 +237,12 @@ internal class PersonServiceTest {
 
     @Test
     fun `Skal hente npid for aktoerid som ikke har folkeregisteridentifikator`() {
-        val personIdentResponse = runBlocking {
-            personService.hentPdlIdentifikator(
-                HentPdlIdentRequest(PersonIdent(aktorIdMedNpid))
-            )
-        }
+        val personIdentResponse =
+            runBlocking {
+                personService.hentPdlIdentifikator(
+                    HentPdlIdentRequest(PersonIdent(aktorIdMedNpid)),
+                )
+            }
 
         if (personIdentResponse !is PdlIdentifikator.Npid) {
             fail("Fikk ikke Npid")
@@ -254,11 +263,12 @@ internal class PersonServiceTest {
 
     @Test
     fun `skal mappe geografisk tilknytning`() {
-        val tilknytning = runBlocking {
-            personService.hentGeografiskTilknytning(
-                HentGeografiskTilknytningRequest(TRIVIELL_MIDTPUNKT, SakType.BARNEPENSJON)
-            )
-        }
+        val tilknytning =
+            runBlocking {
+                personService.hentGeografiskTilknytning(
+                    HentGeografiskTilknytningRequest(TRIVIELL_MIDTPUNKT, SakType.BARNEPENSJON),
+                )
+            }
 
         assertEquals(tilknytning.ukjent, false)
         assertEquals(tilknytning.geografiskTilknytning(), "0301")

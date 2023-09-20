@@ -6,7 +6,6 @@ import io.micrometer.core.instrument.binder.MeterBinder
 import org.slf4j.LoggerFactory
 
 class OppgaveMetrics(private val metrikkerDao: OppgaveMetrikkerDao) : MeterBinder {
-
     private val logger = LoggerFactory.getLogger(this::class.java)
     private var antallOppgaver = -1.0
     private var antallAktiveOppgaver = -1.0
@@ -39,5 +38,4 @@ class OppgaveMetrics(private val metrikkerDao: OppgaveMetrikkerDao) : MeterBinde
         }.description("Antall avslutta oppgaver")
             .register(registry)
     }
-
 }

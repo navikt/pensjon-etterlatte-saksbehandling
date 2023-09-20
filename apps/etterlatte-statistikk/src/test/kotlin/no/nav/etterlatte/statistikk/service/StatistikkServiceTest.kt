@@ -47,20 +47,20 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.YearMonth
-import java.util.*
+import java.util.UUID
 
 class StatistikkServiceTest {
-
     private val stoenadRepo = mockk<StoenadRepository>()
     private val sakRepo = mockk<SakRepository>()
     private val behandlingKlient = mockk<BehandlingKlient>()
     private val beregningKlient = mockk<BeregningKlient>()
-    private val service = StatistikkService(
-        stoenadRepository = stoenadRepo,
-        sakRepository = sakRepo,
-        behandlingKlient = behandlingKlient,
-        beregningKlient = beregningKlient
-    )
+    private val service =
+        StatistikkService(
+            stoenadRepository = stoenadRepo,
+            sakRepository = sakRepo,
+            behandlingKlient = behandlingKlient,
+            beregningKlient = beregningKlient,
+        )
 
     @Test
     fun `mapper vedtakhendelse til baade sakRad og stoenadRad riktig`() {
@@ -70,53 +70,58 @@ class StatistikkServiceTest {
 
         every { stoenadRepo.lagreStoenadsrad(any()) } returnsArgument 0
         every { sakRepo.lagreRad(any()) } returnsArgument 0
-        coEvery { behandlingKlient.hentDetaljertBehandling(behandlingId) } returns DetaljertBehandling(
-            id = behandlingId,
-            sak = sakId,
-            sakType = SakType.BARNEPENSJON,
-            behandlingOpprettet = Tidspunkt.now().toLocalDatetimeUTC(),
-            soeknadMottattDato = null,
-            innsender = null,
-            soeker = "12312312312",
-            gjenlevende = listOf(),
-            avdoed = listOf(),
-            soesken = listOf(),
-            status = BehandlingStatus.FATTET_VEDTAK,
-            behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-            virkningstidspunkt = null,
-            boddEllerArbeidetUtlandet = null,
-            revurderingsaarsak = null,
-            revurderingInfo = null,
-            prosesstype = Prosesstype.MANUELL,
-            enhet = "1111"
-        )
-        coEvery { behandlingKlient.hentPersongalleri(behandlingId) } returns Persongalleri(
-            "12312312312"
-        )
-        val mockBeregning = Beregning(
-            beregningId = UUID.randomUUID(),
-            behandlingId = behandlingId,
-            type = Beregningstype.BP,
-            beregnetDato = Tidspunkt.now(),
-            beregningsperioder = listOf()
-        )
+        coEvery { behandlingKlient.hentDetaljertBehandling(behandlingId) } returns
+            DetaljertBehandling(
+                id = behandlingId,
+                sak = sakId,
+                sakType = SakType.BARNEPENSJON,
+                behandlingOpprettet = Tidspunkt.now().toLocalDatetimeUTC(),
+                soeknadMottattDato = null,
+                innsender = null,
+                soeker = "12312312312",
+                gjenlevende = listOf(),
+                avdoed = listOf(),
+                soesken = listOf(),
+                status = BehandlingStatus.FATTET_VEDTAK,
+                behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+                virkningstidspunkt = null,
+                boddEllerArbeidetUtlandet = null,
+                revurderingsaarsak = null,
+                revurderingInfo = null,
+                prosesstype = Prosesstype.MANUELL,
+                enhet = "1111",
+            )
+        coEvery { behandlingKlient.hentPersongalleri(behandlingId) } returns
+            Persongalleri(
+                "12312312312",
+            )
+        val mockBeregning =
+            Beregning(
+                beregningId = UUID.randomUUID(),
+                behandlingId = behandlingId,
+                type = Beregningstype.BP,
+                beregnetDato = Tidspunkt.now(),
+                beregningsperioder = listOf(),
+            )
         coEvery { beregningKlient.hentBeregningForBehandling(behandlingId) } returns mockBeregning
 
         val tekniskTidForHendelse = LocalDateTime.of(2023, 2, 1, 8, 30)
 
         val fattetVedtakMaaned = LocalDate.of(2023, 7, 1)
         val fattetTidspunkt = Tidspunkt.ofNorskTidssone(fattetVedtakMaaned, LocalTime.NOON)
-        val (registrertSakRad, registrertStoenadRad) = service.registrerStatistikkForVedtak(
-            vedtak = vedtak(
-                sakId = sakId,
-                behandlingId = behandlingId,
-                vedtakFattet = VedtakFattet("Saksbehandler", "saksbehandlerEnhet", fattetTidspunkt),
-                attestasjon = Attestasjon("Attestant", "attestantEnhet", fattetTidspunkt),
-                virk = virkningstidspunkt
-            ),
-            vedtakHendelse = VedtakHendelse.IVERKSATT,
-            tekniskTid = tekniskTidForHendelse
-        )
+        val (registrertSakRad, registrertStoenadRad) =
+            service.registrerStatistikkForVedtak(
+                vedtak =
+                    vedtak(
+                        sakId = sakId,
+                        behandlingId = behandlingId,
+                        vedtakFattet = VedtakFattet("Saksbehandler", "saksbehandlerEnhet", fattetTidspunkt),
+                        attestasjon = Attestasjon("Attestant", "attestantEnhet", fattetTidspunkt),
+                        virk = virkningstidspunkt,
+                    ),
+                vedtakHendelse = VedtakHendelse.IVERKSATT,
+                tekniskTid = tekniskTidForHendelse,
+            )
 
         registrertSakRad shouldNotBe null
         registrertSakRad?.asClue { registrertSak ->
@@ -156,74 +161,80 @@ class StatistikkServiceTest {
 
         every { stoenadRepo.lagreStoenadsrad(any()) } returnsArgument 0
         every { sakRepo.lagreRad(any()) } returnsArgument 0
-        coEvery { behandlingKlient.hentDetaljertBehandling(behandlingId) } returns DetaljertBehandling(
-            id = behandlingId,
-            sak = sakId,
-            sakType = SakType.OMSTILLINGSSTOENAD,
-            behandlingOpprettet = Tidspunkt.now().toLocalDatetimeUTC(),
-            soeknadMottattDato = null,
-            innsender = null,
-            soeker = "12312312312",
-            gjenlevende = listOf(),
-            avdoed = listOf(),
-            soesken = listOf(),
-            status = BehandlingStatus.FATTET_VEDTAK,
-            behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-            virkningstidspunkt = null,
-            boddEllerArbeidetUtlandet = null,
-            revurderingsaarsak = null,
-            revurderingInfo = null,
-            prosesstype = Prosesstype.MANUELL,
-            enhet = "1111"
-        )
-        coEvery { behandlingKlient.hentPersongalleri(behandlingId) } returns Persongalleri(
-            "12312312312"
-        )
-        val mockBeregning = Beregning(
-            beregningId = UUID.randomUUID(),
-            behandlingId = behandlingId,
-            type = Beregningstype.OMS,
-            beregnetDato = Tidspunkt.now(),
-            beregningsperioder = listOf()
-        )
-        coEvery { beregningKlient.hentBeregningForBehandling(behandlingId) } returns mockBeregning
-        val mockAvkorting = Avkorting(
-            listOf(
-                AvkortingGrunnlag(
-                    fom = YearMonth.now(),
-                    tom = null,
-                    aarsinntekt = 100,
-                    fratrekkInnAar = 40,
-                    relevanteMaanederInnAar = 2,
-                    spesifikasjon = ""
-                )
-            ),
-            listOf(
-                AvkortetYtelse(
-                    fom = YearMonth.now(),
-                    tom = null,
-                    ytelseFoerAvkorting = 200,
-                    avkortingsbeloep = 50,
-                    ytelseEtterAvkorting = 150,
-                    restanse = 0
-                )
+        coEvery { behandlingKlient.hentDetaljertBehandling(behandlingId) } returns
+            DetaljertBehandling(
+                id = behandlingId,
+                sak = sakId,
+                sakType = SakType.OMSTILLINGSSTOENAD,
+                behandlingOpprettet = Tidspunkt.now().toLocalDatetimeUTC(),
+                soeknadMottattDato = null,
+                innsender = null,
+                soeker = "12312312312",
+                gjenlevende = listOf(),
+                avdoed = listOf(),
+                soesken = listOf(),
+                status = BehandlingStatus.FATTET_VEDTAK,
+                behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+                virkningstidspunkt = null,
+                boddEllerArbeidetUtlandet = null,
+                revurderingsaarsak = null,
+                revurderingInfo = null,
+                prosesstype = Prosesstype.MANUELL,
+                enhet = "1111",
             )
-        )
+        coEvery { behandlingKlient.hentPersongalleri(behandlingId) } returns
+            Persongalleri(
+                "12312312312",
+            )
+        val mockBeregning =
+            Beregning(
+                beregningId = UUID.randomUUID(),
+                behandlingId = behandlingId,
+                type = Beregningstype.OMS,
+                beregnetDato = Tidspunkt.now(),
+                beregningsperioder = listOf(),
+            )
+        coEvery { beregningKlient.hentBeregningForBehandling(behandlingId) } returns mockBeregning
+        val mockAvkorting =
+            Avkorting(
+                listOf(
+                    AvkortingGrunnlag(
+                        fom = YearMonth.now(),
+                        tom = null,
+                        aarsinntekt = 100,
+                        fratrekkInnAar = 40,
+                        relevanteMaanederInnAar = 2,
+                        spesifikasjon = "",
+                    ),
+                ),
+                listOf(
+                    AvkortetYtelse(
+                        fom = YearMonth.now(),
+                        tom = null,
+                        ytelseFoerAvkorting = 200,
+                        avkortingsbeloep = 50,
+                        ytelseEtterAvkorting = 150,
+                        restanse = 0,
+                    ),
+                ),
+            )
         coEvery { beregningKlient.hentAvkortingForBehandling(behandlingId) } returns mockAvkorting
 
         val fattetTidspunkt = Tidspunkt.ofNorskTidssone(LocalDate.of(2023, 7, 1), LocalTime.NOON)
-        val (registrertSakRad, registrertStoenadRad) = service.registrerStatistikkForVedtak(
-            vedtak = vedtak(
-                sakId = sakId,
-                sakType = SakType.OMSTILLINGSSTOENAD,
-                behandlingId = behandlingId,
-                vedtakFattet = VedtakFattet("Saksbehandler", "saksbehandlerEnhet", fattetTidspunkt),
-                attestasjon = Attestasjon("Attestant", "attestantEnhet", fattetTidspunkt),
-                virk = virkningstidspunkt
-            ),
-            vedtakHendelse = VedtakHendelse.IVERKSATT,
-            tekniskTid = LocalDateTime.of(2023, 2, 1, 8, 30)
-        )
+        val (registrertSakRad, registrertStoenadRad) =
+            service.registrerStatistikkForVedtak(
+                vedtak =
+                    vedtak(
+                        sakId = sakId,
+                        sakType = SakType.OMSTILLINGSSTOENAD,
+                        behandlingId = behandlingId,
+                        vedtakFattet = VedtakFattet("Saksbehandler", "saksbehandlerEnhet", fattetTidspunkt),
+                        attestasjon = Attestasjon("Attestant", "attestantEnhet", fattetTidspunkt),
+                        virk = virkningstidspunkt,
+                    ),
+                vedtakHendelse = VedtakHendelse.IVERKSATT,
+                tekniskTid = LocalDateTime.of(2023, 2, 1, 8, 30),
+            )
 
         registrertSakRad shouldNotBe null
         registrertSakRad?.asClue { registrertSak ->
@@ -246,33 +257,35 @@ class StatistikkServiceTest {
         every { stoenadRepo.lagreStoenadsrad(any()) } returnsArgument 0
         every { sakRepo.lagreRad(any()) } returnsArgument 0
 
-        coEvery { behandlingKlient.hentDetaljertBehandling(behandlingId) } returns DetaljertBehandling(
-            id = behandlingId,
-            sak = sakId,
-            sakType = SakType.BARNEPENSJON,
-            behandlingOpprettet = Tidspunkt.now().toLocalDatetimeUTC(),
-            soeknadMottattDato = null,
-            innsender = null,
-            soeker = "12312312312",
-            gjenlevende = listOf(),
-            avdoed = listOf("32132132132"),
-            soesken = listOf(),
-            status = BehandlingStatus.OPPRETTET,
-            behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-            virkningstidspunkt = null,
-            boddEllerArbeidetUtlandet = null,
-            revurderingsaarsak = null,
-            prosesstype = Prosesstype.MANUELL,
-            revurderingInfo = null,
-            enhet = "1111"
-        )
+        coEvery { behandlingKlient.hentDetaljertBehandling(behandlingId) } returns
+            DetaljertBehandling(
+                id = behandlingId,
+                sak = sakId,
+                sakType = SakType.BARNEPENSJON,
+                behandlingOpprettet = Tidspunkt.now().toLocalDatetimeUTC(),
+                soeknadMottattDato = null,
+                innsender = null,
+                soeker = "12312312312",
+                gjenlevende = listOf(),
+                avdoed = listOf("32132132132"),
+                soesken = listOf(),
+                status = BehandlingStatus.OPPRETTET,
+                behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+                virkningstidspunkt = null,
+                boddEllerArbeidetUtlandet = null,
+                revurderingsaarsak = null,
+                prosesstype = Prosesstype.MANUELL,
+                revurderingInfo = null,
+                enhet = "1111",
+            )
 
         val tekniskTidForHendelse = LocalDateTime.of(2023, 2, 1, 8, 30)
-        val registrertStatistikk = service.registrerStatistikkForBehandlinghendelse(
-            behandlingIntern = behandling(id = behandlingId, sakId = sakId),
-            hendelse = BehandlingHendelse.OPPRETTET,
-            tekniskTid = tekniskTidForHendelse
-        ) ?: throw NullPointerException("Fikk ikke registrert statistikk")
+        val registrertStatistikk =
+            service.registrerStatistikkForBehandlinghendelse(
+                behandlingIntern = behandling(id = behandlingId, sakId = sakId),
+                hendelse = BehandlingHendelse.OPPRETTET,
+                tekniskTid = tekniskTidForHendelse,
+            ) ?: throw NullPointerException("Fikk ikke registrert statistikk")
 
         assertEquals(registrertStatistikk.sakId, sakId)
         assertEquals(registrertStatistikk.sakYtelse, "BARNEPENSJON")
@@ -289,12 +302,13 @@ class StatistikkServiceTest {
     @Test
     fun `lagreMaanedligStoenadstatistikk lagrer ting riktig`() {
         val stoenadRepository: StoenadRepository = mockk(relaxed = true)
-        val service = StatistikkService(
-            stoenadRepository = stoenadRepository,
-            sakRepository = sakRepo,
-            behandlingKlient = behandlingKlient,
-            beregningKlient = beregningKlient
-        )
+        val service =
+            StatistikkService(
+                stoenadRepository = stoenadRepository,
+                sakRepository = sakRepo,
+                behandlingKlient = behandlingKlient,
+                beregningKlient = beregningKlient,
+            )
         service.lagreMaanedsstatistikk(MaanedStatistikk(YearMonth.of(2022, 8), emptyList()))
         verify {
             stoenadRepository.lagreMaanedJobUtfoert(YearMonth.of(2022, 8), 0, 0)
@@ -313,18 +327,19 @@ fun vedtak(
     type: VedtakType = VedtakType.INNVILGELSE,
     pensjonTilUtbetaling: List<Utbetalingsperiode>? = null,
     vedtakFattet: VedtakFattet? = null,
-    attestasjon: Attestasjon? = null
-): VedtakDto = VedtakDto(
-    vedtakId = vedtakId,
-    status = VedtakStatus.ATTESTERT,
-    virkningstidspunkt = virk,
-    sak = VedtakSak(ident = ident, sakType = sakType, id = sakId),
-    behandling = Behandling(type = behandlingType, id = behandlingId),
-    type = type,
-    utbetalingsperioder = pensjonTilUtbetaling ?: emptyList(),
-    vedtakFattet = vedtakFattet,
-    attestasjon = attestasjon
-)
+    attestasjon: Attestasjon? = null,
+): VedtakDto =
+    VedtakDto(
+        vedtakId = vedtakId,
+        status = VedtakStatus.ATTESTERT,
+        virkningstidspunkt = virk,
+        sak = VedtakSak(ident = ident, sakType = sakType, id = sakId),
+        behandling = Behandling(type = behandlingType, id = behandlingId),
+        type = type,
+        utbetalingsperioder = pensjonTilUtbetaling ?: emptyList(),
+        vedtakFattet = vedtakFattet,
+        attestasjon = attestasjon,
+    )
 
 fun behandling(
     id: UUID = UUID.randomUUID(),
@@ -334,12 +349,12 @@ fun behandling(
     sistEndret: LocalDateTime = Tidspunkt.now().toLocalDatetimeUTC(),
     status: BehandlingStatus = BehandlingStatus.OPPRETTET,
     type: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-    soeker: String = "12312312312"
+    soeker: String = "12312312312",
 ) = BehandlingIntern(
     id = id,
     sak = Sak(soeker, sakType, sakId, "4808"),
     behandlingOpprettet = behandlingOpprettet,
     sistEndret = sistEndret,
     status = status,
-    type = type
+    type = type,
 )

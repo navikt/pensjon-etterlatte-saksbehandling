@@ -4,5 +4,5 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 
 data class VurdertVilkaarsvurderingResultatDto(
     val resultat: VilkaarsvurderingUtfall,
-    val kommentar: String?
+    val kommentar: String?,
 )

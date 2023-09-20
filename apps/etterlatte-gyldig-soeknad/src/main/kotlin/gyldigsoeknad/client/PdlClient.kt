@@ -14,14 +14,19 @@ import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.PersonRolle
 
 class PdlClient(private val pdl: HttpClient, private val url: String) {
-    fun hentPerson(foedselsnummer: String, rolle: PersonRolle, saktype: SakType): Person {
+    fun hentPerson(
+        foedselsnummer: String,
+        rolle: PersonRolle,
+        saktype: SakType,
+    ): Person {
         val personRequest = HentPersonRequest(Folkeregisteridentifikator.of(foedselsnummer), rolle, saktype)
-        val response = runBlocking {
-            pdl.post("$url/person") {
-                contentType(ContentType.Application.Json)
-                setBody(personRequest)
-            }.body<Person>()
-        }
+        val response =
+            runBlocking {
+                pdl.post("$url/person") {
+                    contentType(ContentType.Application.Json)
+                    setBody(personRequest)
+                }.body<Person>()
+            }
         return response
     }
 }

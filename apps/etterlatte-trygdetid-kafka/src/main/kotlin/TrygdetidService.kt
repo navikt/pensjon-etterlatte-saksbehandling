@@ -9,23 +9,27 @@ import io.ktor.http.contentType
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidGrunnlagDto
-import java.util.*
+import java.util.UUID
 
 class TrygdetidService(
     private val trygdetidApp: HttpClient,
-    private val url: String
+    private val url: String,
 ) {
+    fun beregnTrygdetid(behandlingId: UUID): TrygdetidDto =
+        runBlocking {
+            trygdetidApp.post("$url/api/trygdetid/$behandlingId") {
+                contentType(ContentType.Application.Json)
+            }.body()
+        }
 
-    fun beregnTrygdetid(behandlingId: UUID): TrygdetidDto = runBlocking {
-        trygdetidApp.post("$url/api/trygdetid/$behandlingId") {
-            contentType(ContentType.Application.Json)
-        }.body()
-    }
-
-    fun beregnTrygdetidGrunnlag(behandlingId: UUID, grunnlag: TrygdetidGrunnlagDto): TrygdetidDto = runBlocking {
-        trygdetidApp.post("$url/api/trygdetid/$behandlingId/grunnlag") {
-            contentType(ContentType.Application.Json)
-            setBody(grunnlag)
-        }.body()
-    }
+    fun beregnTrygdetidGrunnlag(
+        behandlingId: UUID,
+        grunnlag: TrygdetidGrunnlagDto,
+    ): TrygdetidDto =
+        runBlocking {
+            trygdetidApp.post("$url/api/trygdetid/$behandlingId/grunnlag") {
+                contentType(ContentType.Application.Json)
+                setBody(grunnlag)
+            }.body()
+        }
 }

@@ -29,7 +29,7 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.YearMonth
-import java.util.*
+import java.util.UUID
 
 internal class VedtaksbrevUnderkjentTest {
     private val vedtaksbrevService = mockk<VedtaksbrevService>()
@@ -93,8 +93,8 @@ internal class VedtaksbrevUnderkjentTest {
             mapOf(
                 CORRELATION_ID_KEY to UUID.randomUUID().toString(),
                 EVENT_NAME_KEY to KafkaHendelseType.UNDERKJENT.toString(),
-                "vedtak" to vedtak
-            )
+                "vedtak" to vedtak,
+            ),
         )
     }
 
@@ -108,17 +108,18 @@ internal class VedtaksbrevUnderkjentTest {
             type = VedtakType.INNVILGELSE,
             utbetalingsperioder = emptyList(),
             vedtakFattet = VedtakFattet("Z00000", "1234", Tidspunkt.now()),
-            attestasjon = Attestasjon("Z00000", "1234", Tidspunkt.now())
+            attestasjon = Attestasjon("Z00000", "1234", Tidspunkt.now()),
         )
     }
 
-    private fun opprettBrev() = Brev(
-        1,
-        41,
-        UUID.randomUUID(),
-        BrevProsessType.AUTOMATISK,
-        "fnr",
-        Status.JOURNALFOERT,
-        mottaker = mockk()
-    )
+    private fun opprettBrev() =
+        Brev(
+            1,
+            41,
+            UUID.randomUUID(),
+            BrevProsessType.AUTOMATISK,
+            "fnr",
+            Status.JOURNALFOERT,
+            mottaker = mockk(),
+        )
 }

@@ -13,16 +13,19 @@ data class InstitusjonsoppholdHendelseBeriket(
     val faktiskSluttdato: LocalDate? = null,
     val forventetSluttdato: LocalDate? = null,
     val institusjonsnavn: String? = null,
-    val organisasjonsnummer: String? = null
+    val organisasjonsnummer: String? = null,
 )
 
 enum class InstitusjonsoppholdsType {
     INNMELDING,
     OPPDATERING,
     UTMELDING,
-    ANNULERING
+    ANNULERING,
 }
 
 enum class InstitusjonsoppholdKilde {
-    APPBRK, KDI, IT, INST
+    APPBRK,
+    KDI,
+    IT,
+    INST,
 }

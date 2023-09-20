@@ -12,19 +12,17 @@ import org.slf4j.LoggerFactory
 class TilbakekrevingService(
     private val sakDao: SakDao,
     private val hendelseDao: HendelseDao,
-    private val oppgaveServiceNy: OppgaveServiceNy
+    private val oppgaveServiceNy: OppgaveServiceNy,
 ) {
-
     private val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
     fun opprettTilbakekreving(kravgrunnlag: Kravgrunnlag) {
         oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
-            referanse =  kravgrunnlag.kravgrunnlagId.value.toString(),
+            referanse = kravgrunnlag.kravgrunnlagId.value.toString(),
             sakId = kravgrunnlag.sakId.value,
             oppgaveKilde = OppgaveKilde.EKSTERN,
             oppgaveType = OppgaveType.TILBAKEKREVING,
-            merknad = null
+            merknad = null,
         )
     }
-
 }

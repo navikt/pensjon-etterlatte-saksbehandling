@@ -5,11 +5,11 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 data class Utenlandstilsnitt(
     val type: UtenlandstilsnittType,
     val kilde: Grunnlagsopplysning.Saksbehandler,
-    val begrunnelse: String
+    val begrunnelse: String,
 )
 
 enum class UtenlandstilsnittType {
     NASJONAL,
     UTLANDSTILSNITT,
-    BOSATT_UTLAND
+    BOSATT_UTLAND,
 }

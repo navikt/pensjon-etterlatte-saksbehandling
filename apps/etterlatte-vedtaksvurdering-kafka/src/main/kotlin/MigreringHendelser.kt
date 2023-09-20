@@ -17,7 +17,7 @@ import rapidsandrivers.withFeilhaandtering
 
 internal class MigreringHendelser(
     rapidsConnection: RapidsConnection,
-    private val vedtak: VedtakService
+    private val vedtak: VedtakService,
 ) : ListenerMedLogging() {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -30,7 +30,10 @@ internal class MigreringHendelser(
         }.register(this)
     }
 
-    override fun haandterPakke(packet: JsonMessage, context: MessageContext) {
+    override fun haandterPakke(
+        packet: JsonMessage,
+        context: MessageContext,
+    ) {
         val behandlingId = packet.behandlingId
         logger.info("Oppretter, fatter og attesterer vedtak for migrer behandling $behandlingId")
 

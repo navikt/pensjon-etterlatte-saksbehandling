@@ -43,7 +43,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.toNorskTid
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import java.time.YearMonth
-import java.util.*
+import java.util.UUID
 
 internal fun Route.behandlingRoutes(
     behandlingService: BehandlingService,
@@ -51,7 +51,7 @@ internal fun Route.behandlingRoutes(
     kommerBarnetTilGodeService: KommerBarnetTilGodeService,
     manueltOpphoerService: ManueltOpphoerService,
     aktivitetspliktService: AktivitetspliktService,
-    behandlingFactory: BehandlingFactory
+    behandlingFactory: BehandlingFactory,
 ) {
     val logger = application.log
 
@@ -74,11 +74,12 @@ internal fun Route.behandlingRoutes(
             hentNavidentFraToken { navIdent ->
                 val body = call.receive<JaNeiMedBegrunnelse>()
                 when (
-                    val lagretGyldighetsResultat = gyldighetsproevingService.lagreGyldighetsproeving(
-                        behandlingsId,
-                        navIdent,
-                        body
-                    )
+                    val lagretGyldighetsResultat =
+                        gyldighetsproevingService.lagreGyldighetsproeving(
+                            behandlingsId,
+                            navIdent,
+                            body,
+                        )
                 ) {
                     null -> call.respond(HttpStatusCode.NotFound)
                     else -> call.respond(HttpStatusCode.OK, lagretGyldighetsResultat)
@@ -89,12 +90,13 @@ internal fun Route.behandlingRoutes(
         post("/kommerbarnettilgode") {
             hentNavidentFraToken { navIdent ->
                 val body = call.receive<JaNeiMedBegrunnelse>()
-                val kommerBarnetTilgode = KommerBarnetTilgode(
-                    body.svar,
-                    body.begrunnelse,
-                    Grunnlagsopplysning.Saksbehandler.create(navIdent),
-                    behandlingsId
-                )
+                val kommerBarnetTilgode =
+                    KommerBarnetTilgode(
+                        body.svar,
+                        body.begrunnelse,
+                        Grunnlagsopplysning.Saksbehandler.create(navIdent),
+                        behandlingsId,
+                    )
 
                 try {
                     kommerBarnetTilGodeService.lagreKommerBarnetTilgode(kommerBarnetTilgode)
@@ -112,15 +114,16 @@ internal fun Route.behandlingRoutes(
                     val opphoerOgBehandlinger =
                         manueltOpphoerService.hentManueltOpphoerOgAlleIverksatteBehandlingerISak(behandlingsId)
                 ) {
-                    null -> call.respond(
-                        HttpStatusCode.NotFound,
-                        "Fant ikke manuelt opphør med id=$behandlingsId"
-                    )
+                    null ->
+                        call.respond(
+                            HttpStatusCode.NotFound,
+                            "Fant ikke manuelt opphør med id=$behandlingsId",
+                        )
 
                     else -> {
                         val (opphoer, andre) = opphoerOgBehandlinger
                         call.respond(
-                            opphoer.toManueltOpphoerOppsummmering(andre.map { it.toBehandlingSammendrag() })
+                            opphoer.toManueltOpphoerOppsummmering(andre.map { it.toBehandlingSammendrag() }),
                         )
                     }
                 }
@@ -137,27 +140,29 @@ internal fun Route.behandlingRoutes(
                 logger.debug("Prøver å fastsette virkningstidspunkt")
                 val body = call.receive<VirkningstidspunktRequest>()
 
-                val erGyldigVirkningstidspunkt = behandlingService.erGyldigVirkningstidspunkt(
-                    behandlingsId,
-                    brukerTokenInfo,
-                    body
-                )
+                val erGyldigVirkningstidspunkt =
+                    behandlingService.erGyldigVirkningstidspunkt(
+                        behandlingsId,
+                        brukerTokenInfo,
+                        body,
+                    )
                 if (!erGyldigVirkningstidspunkt) {
                     return@post call.respond(HttpStatusCode.BadRequest, "Ugyldig virkningstidspunkt")
                 }
 
                 try {
-                    val virkningstidspunkt = behandlingService.oppdaterVirkningstidspunkt(
-                        behandlingsId,
-                        body.dato,
-                        navIdent,
-                        body.begrunnelse!!
-                    )
+                    val virkningstidspunkt =
+                        behandlingService.oppdaterVirkningstidspunkt(
+                            behandlingsId,
+                            body.dato,
+                            navIdent,
+                            body.begrunnelse!!,
+                        )
 
                     call.respondText(
                         contentType = ContentType.Application.Json,
                         status = HttpStatusCode.OK,
-                        text = FastsettVirkningstidspunktResponse.from(virkningstidspunkt).toJson()
+                        text = FastsettVirkningstidspunktResponse.from(virkningstidspunkt).toJson(),
                     )
                 } catch (e: TilstandException.UgyldigTilstand) {
                     call.respond(HttpStatusCode.BadRequest, "Kan ikke endre feltet")
@@ -171,19 +176,19 @@ internal fun Route.behandlingRoutes(
                 val body = call.receive<UtenlandstilsnittRequest>()
 
                 try {
-                    val utenlandstilsnitt = Utenlandstilsnitt(
-                        type = body.utenlandstilsnittType,
-                        kilde = Grunnlagsopplysning.Saksbehandler.create(navIdent),
-                        begrunnelse = body.begrunnelse
-                    )
+                    val utenlandstilsnitt =
+                        Utenlandstilsnitt(
+                            type = body.utenlandstilsnittType,
+                            kilde = Grunnlagsopplysning.Saksbehandler.create(navIdent),
+                            begrunnelse = body.begrunnelse,
+                        )
 
                     behandlingService.oppdaterUtenlandstilsnitt(behandlingsId, utenlandstilsnitt)
 
                     call.respondText(
                         contentType = ContentType.Application.Json,
                         status = HttpStatusCode.OK,
-                        text = utenlandstilsnitt.toJson()
-
+                        text = utenlandstilsnitt.toJson(),
                     )
                 } catch (e: TilstandException.UgyldigTilstand) {
                     call.respond(HttpStatusCode.BadRequest, "Kan ikke endre feltet")
@@ -197,22 +202,22 @@ internal fun Route.behandlingRoutes(
                 val body = call.receive<BoddEllerArbeidetUtlandetRequest>()
 
                 try {
-                    val boddEllerArbeidetUtlandet = BoddEllerArbeidetUtlandet(
-                        boddEllerArbeidetUtlandet = body.boddEllerArbeidetUtlandet,
-                        kilde = Grunnlagsopplysning.Saksbehandler.create(navIdent),
-                        begrunnelse = body.begrunnelse
-                    )
+                    val boddEllerArbeidetUtlandet =
+                        BoddEllerArbeidetUtlandet(
+                            boddEllerArbeidetUtlandet = body.boddEllerArbeidetUtlandet,
+                            kilde = Grunnlagsopplysning.Saksbehandler.create(navIdent),
+                            begrunnelse = body.begrunnelse,
+                        )
 
                     behandlingService.oppdaterBoddEllerArbeidetUtlandet(
                         behandlingsId,
-                        boddEllerArbeidetUtlandet
+                        boddEllerArbeidetUtlandet,
                     )
 
                     call.respondText(
                         contentType = ContentType.Application.Json,
                         status = HttpStatusCode.OK,
-                        text = boddEllerArbeidetUtlandet.toJson()
-
+                        text = boddEllerArbeidetUtlandet.toJson(),
                     )
                 } catch (e: TilstandException.UgyldigTilstand) {
                     call.respond(HttpStatusCode.BadRequest, "Kan ikke endre feltet")
@@ -231,11 +236,12 @@ internal fun Route.behandlingRoutes(
                     val oppfolging = call.receive<OpprettAktivitetspliktOppfolging>()
 
                     try {
-                        val result = aktivitetspliktService.lagreAktivitetspliktOppfolging(
-                            behandlingsId,
-                            oppfolging,
-                            navIdent
-                        )
+                        val result =
+                            aktivitetspliktService.lagreAktivitetspliktOppfolging(
+                                behandlingsId,
+                                oppfolging,
+                                navIdent,
+                            )
                         call.respond(result)
                     } catch (e: TilstandException.UgyldigTilstand) {
                         call.respond(HttpStatusCode.BadRequest, "Kunne ikke endre på feltet")
@@ -267,12 +273,13 @@ internal fun Route.behandlingRoutes(
                 val behandlingsBehov = call.receive<BehandlingsBehov>()
 
                 when (
-                    val behandling = behandlingFactory.opprettBehandling(
-                        behandlingsBehov.sakId,
-                        behandlingsBehov.persongalleri,
-                        behandlingsBehov.mottattDato,
-                        Vedtaksloesning.GJENNY
-                    )
+                    val behandling =
+                        behandlingFactory.opprettBehandling(
+                            behandlingsBehov.sakId,
+                            behandlingsBehov.persongalleri,
+                            behandlingsBehov.mottattDato,
+                            Vedtaksloesning.GJENNY,
+                        )
                 ) {
                     null -> call.respond(HttpStatusCode.NotFound)
                     else -> call.respondText(behandling.id.toString())
@@ -289,7 +296,7 @@ internal fun Route.behandlingRoutes(
                 is ManueltOpphoer -> {
                     logger.info(
                         "Manuelt opphør for sak ${manueltOpphoerRequest.sakId} er opprettet med behandlingId " +
-                            "${manueltOpphoer.id}"
+                            "${manueltOpphoer.id}",
                     )
                     call.respond(ManueltOpphoerResponse(behandlingId = manueltOpphoer.id.toString()))
                 }
@@ -297,7 +304,7 @@ internal fun Route.behandlingRoutes(
                 else -> {
                     logger.info(
                         "Sak ${manueltOpphoerRequest.sakId} hadde ikke gyldig status for manuelt opphør, så" +
-                            "ingen manuelt opphør blir opprettet"
+                            "ingen manuelt opphør blir opprettet",
                     )
                     call.respond(HttpStatusCode.Forbidden)
                 }
@@ -308,12 +315,12 @@ internal fun Route.behandlingRoutes(
 
 data class UtenlandstilsnittRequest(
     val utenlandstilsnittType: UtenlandstilsnittType,
-    val begrunnelse: String
+    val begrunnelse: String,
 )
 
 data class BoddEllerArbeidetUtlandetRequest(
     val boddEllerArbeidetUtlandet: Boolean,
-    val begrunnelse: String
+    val begrunnelse: String,
 )
 
 data class ManueltOpphoerOppsummeringDto(
@@ -321,42 +328,45 @@ data class ManueltOpphoerOppsummeringDto(
     val virkningstidspunkt: Virkningstidspunkt?,
     val opphoerAarsaker: List<ManueltOpphoerAarsak>,
     val fritekstAarsak: String?,
-    val andreBehandlinger: List<BehandlingSammendrag>
+    val andreBehandlinger: List<BehandlingSammendrag>,
 )
 
-private fun ManueltOpphoer.toManueltOpphoerOppsummmering(
-    andreBehandlinger: List<BehandlingSammendrag>
-): ManueltOpphoerOppsummeringDto =
+private fun ManueltOpphoer.toManueltOpphoerOppsummmering(andreBehandlinger: List<BehandlingSammendrag>): ManueltOpphoerOppsummeringDto =
     ManueltOpphoerOppsummeringDto(
         id = this.id,
         virkningstidspunkt = this.virkningstidspunkt,
         opphoerAarsaker = this.opphoerAarsaker,
         fritekstAarsak = this.fritekstAarsak,
-        andreBehandlinger = andreBehandlinger
+        andreBehandlinger = andreBehandlinger,
     )
 
 data class ManueltOpphoerResponse(val behandlingId: String)
 
-data class VirkningstidspunktRequest(@JsonProperty("dato") private val _dato: String, val begrunnelse: String?) {
-    val dato: YearMonth = try {
-        Tidspunkt.parse(_dato).toNorskTid().let {
-            YearMonth.of(it.year, it.month)
-        } ?: throw IllegalArgumentException("Dato $_dato må være definert")
-    } catch (e: Exception) {
-        throw RuntimeException("Kunne ikke lese dato for virkningstidspunkt: $_dato", e)
-    }
+data class VirkningstidspunktRequest(
+    @JsonProperty("dato") private val _dato: String,
+    val begrunnelse: String?,
+) {
+    val dato: YearMonth =
+        try {
+            Tidspunkt.parse(_dato).toNorskTid().let {
+                YearMonth.of(it.year, it.month)
+            } ?: throw IllegalArgumentException("Dato $_dato må være definert")
+        } catch (e: Exception) {
+            throw RuntimeException("Kunne ikke lese dato for virkningstidspunkt: $_dato", e)
+        }
 }
 
 internal data class FastsettVirkningstidspunktResponse(
     val dato: YearMonth,
     val kilde: Grunnlagsopplysning.Saksbehandler,
-    val begrunnelse: String
+    val begrunnelse: String,
 ) {
     companion object {
-        fun from(virkningstidspunkt: Virkningstidspunkt) = FastsettVirkningstidspunktResponse(
-            virkningstidspunkt.dato,
-            virkningstidspunkt.kilde,
-            virkningstidspunkt.begrunnelse
-        )
+        fun from(virkningstidspunkt: Virkningstidspunkt) =
+            FastsettVirkningstidspunktResponse(
+                virkningstidspunkt.dato,
+                virkningstidspunkt.kilde,
+                virkningstidspunkt.begrunnelse,
+            )
     }
 }

@@ -15,7 +15,7 @@ import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 
 data class ManuellRevurdering(
     override val id: UUID,
@@ -30,24 +30,23 @@ data class ManuellRevurdering(
     override val revurderingsaarsak: RevurderingAarsak,
     override val revurderingInfo: RevurderingMedBegrunnelse?,
     override val kilde: Vedtaksloesning,
-    override val begrunnelse: String?
+    override val begrunnelse: String?,
 ) : Revurdering(
-    id = id,
-    sak = sak,
-    behandlingOpprettet = behandlingOpprettet,
-    sistEndret = sistEndret,
-    status = status,
-    kommerBarnetTilgode = kommerBarnetTilgode,
-    virkningstidspunkt = virkningstidspunkt,
-    utenlandstilsnitt = utenlandstilsnitt,
-    boddEllerArbeidetUtlandet = boddEllerArbeidetUtlandet,
-    revurderingsaarsak = revurderingsaarsak,
-    revurderingInfo = revurderingInfo,
-    prosesstype = Prosesstype.MANUELL,
-    kilde = kilde,
-    begrunnelse = begrunnelse
-) {
-
+        id = id,
+        sak = sak,
+        behandlingOpprettet = behandlingOpprettet,
+        sistEndret = sistEndret,
+        status = status,
+        kommerBarnetTilgode = kommerBarnetTilgode,
+        virkningstidspunkt = virkningstidspunkt,
+        utenlandstilsnitt = utenlandstilsnitt,
+        boddEllerArbeidetUtlandet = boddEllerArbeidetUtlandet,
+        revurderingsaarsak = revurderingsaarsak,
+        revurderingInfo = revurderingInfo,
+        prosesstype = Prosesstype.MANUELL,
+        kilde = kilde,
+        begrunnelse = begrunnelse,
+    ) {
     private fun erFyltUt(): Boolean =
         when (sak.sakType) {
             SakType.BARNEPENSJON -> (virkningstidspunkt != null)
@@ -67,8 +66,7 @@ data class ManuellRevurdering(
             endreTilStatus(BehandlingStatus.OPPRETTET).copy(boddEllerArbeidetUtlandet = boddEllerArbeidetUtlandet)
         }
 
-    override fun tilOpprettet() =
-        hvisRedigerbar { endreTilStatus(BehandlingStatus.OPPRETTET) }
+    override fun tilOpprettet() = hvisRedigerbar { endreTilStatus(BehandlingStatus.OPPRETTET) }
 
     override fun tilVilkaarsvurdert(): Revurdering {
         if (!erFyltUt()) {
@@ -79,15 +77,16 @@ data class ManuellRevurdering(
         return hvisRedigerbar { endreTilStatus(BehandlingStatus.VILKAARSVURDERT) }
     }
 
-    override fun tilTrygdetidOppdatert(): Revurdering = hvisTilstandEr(
-        listOf(
-            BehandlingStatus.VILKAARSVURDERT,
-            BehandlingStatus.TRYGDETID_OPPDATERT,
-            BehandlingStatus.BEREGNET,
-            BehandlingStatus.AVKORTET,
-            BehandlingStatus.RETURNERT
-        )
-    ) { endreTilStatus(BehandlingStatus.TRYGDETID_OPPDATERT) }
+    override fun tilTrygdetidOppdatert(): Revurdering =
+        hvisTilstandEr(
+            listOf(
+                BehandlingStatus.VILKAARSVURDERT,
+                BehandlingStatus.TRYGDETID_OPPDATERT,
+                BehandlingStatus.BEREGNET,
+                BehandlingStatus.AVKORTET,
+                BehandlingStatus.RETURNERT,
+            ),
+        ) { endreTilStatus(BehandlingStatus.TRYGDETID_OPPDATERT) }
 
     override fun tilBeregnet(fastTrygdetid: Boolean) =
         hvisTilstandEr(
@@ -95,24 +94,25 @@ data class ManuellRevurdering(
                 listOf(
                     BehandlingStatus.VILKAARSVURDERT,
                     BehandlingStatus.BEREGNET,
-                    BehandlingStatus.RETURNERT
+                    BehandlingStatus.RETURNERT,
                 )
             } else {
                 listOf(
                     BehandlingStatus.TRYGDETID_OPPDATERT,
                     BehandlingStatus.BEREGNET,
-                    BehandlingStatus.RETURNERT
+                    BehandlingStatus.RETURNERT,
                 )
-            }
+            },
         ) { endreTilStatus(BehandlingStatus.BEREGNET) }
 
-    override fun tilAvkortet() = hvisTilstandEr(
-        listOf(
-            BehandlingStatus.BEREGNET,
-            BehandlingStatus.AVKORTET,
-            BehandlingStatus.RETURNERT
-        )
-    ) { endreTilStatus(BehandlingStatus.AVKORTET) }
+    override fun tilAvkortet() =
+        hvisTilstandEr(
+            listOf(
+                BehandlingStatus.BEREGNET,
+                BehandlingStatus.AVKORTET,
+                BehandlingStatus.RETURNERT,
+            ),
+        ) { endreTilStatus(BehandlingStatus.AVKORTET) }
 
     override fun tilFattetVedtak(): Revurdering {
         if (!erFyltUt()) {
@@ -124,25 +124,27 @@ data class ManuellRevurdering(
             listOf(
                 BehandlingStatus.BEREGNET,
                 BehandlingStatus.AVKORTET,
-                BehandlingStatus.RETURNERT
-            )
+                BehandlingStatus.RETURNERT,
+            ),
         ) {
             endreTilStatus(BehandlingStatus.FATTET_VEDTAK)
         }
     }
 
-    override fun tilAttestert() = hvisTilstandEr(BehandlingStatus.FATTET_VEDTAK) {
-        endreTilStatus(BehandlingStatus.ATTESTERT)
-    }
+    override fun tilAttestert() =
+        hvisTilstandEr(BehandlingStatus.FATTET_VEDTAK) {
+            endreTilStatus(BehandlingStatus.ATTESTERT)
+        }
 
-    override fun tilReturnert() = hvisTilstandEr(BehandlingStatus.FATTET_VEDTAK) {
-        endreTilStatus(BehandlingStatus.RETURNERT)
-    }
+    override fun tilReturnert() =
+        hvisTilstandEr(BehandlingStatus.FATTET_VEDTAK) {
+            endreTilStatus(BehandlingStatus.RETURNERT)
+        }
 
-    override fun tilIverksatt() = hvisTilstandEr(BehandlingStatus.ATTESTERT) {
-        endreTilStatus(BehandlingStatus.IVERKSATT)
-    }
+    override fun tilIverksatt() =
+        hvisTilstandEr(BehandlingStatus.ATTESTERT) {
+            endreTilStatus(BehandlingStatus.IVERKSATT)
+        }
 
-    private fun endreTilStatus(status: BehandlingStatus) =
-        this.copy(status = status, sistEndret = Tidspunkt.now().toLocalDatetimeUTC())
+    private fun endreTilStatus(status: BehandlingStatus) = this.copy(status = status, sistEndret = Tidspunkt.now().toLocalDatetimeUTC())
 }

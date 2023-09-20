@@ -9,18 +9,19 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 
 internal class UtlandMapperTest {
-
     @Test
     fun `skal mappe utflytting fra Norge`() {
-        val hentPerson = mockk<PdlHentPerson> {
-            every { utflyttingFraNorge } returns listOf(
-                mockk {
-                    every { tilflyttingsland } returns "FRA"
-                    every { utflyttingsdato } returns LocalDate.parse("2021-07-01")
-                }
-            )
-            every { innflyttingTilNorge } returns null
-        }
+        val hentPerson =
+            mockk<PdlHentPerson> {
+                every { utflyttingFraNorge } returns
+                    listOf(
+                        mockk {
+                            every { tilflyttingsland } returns "FRA"
+                            every { utflyttingsdato } returns LocalDate.parse("2021-07-01")
+                        },
+                    )
+                every { innflyttingTilNorge } returns null
+            }
 
         val utland = UtlandMapper.mapUtland(hentPerson)
 
@@ -30,17 +31,20 @@ internal class UtlandMapperTest {
 
     @Test
     fun `skal mappe innflytting til Norge`() {
-        val hentPerson = mockk<PdlHentPerson> {
-            every { innflyttingTilNorge } returns listOf(
-                mockk {
-                    every { fraflyttingsland } returns "FRA"
-                    every { folkeregistermetadata } returns mockk {
-                        every { gyldighetstidspunkt } returns LocalDateTime.parse("2021-07-01T00:00:00")
-                    }
-                }
-            )
-            every { utflyttingFraNorge } returns null
-        }
+        val hentPerson =
+            mockk<PdlHentPerson> {
+                every { innflyttingTilNorge } returns
+                    listOf(
+                        mockk {
+                            every { fraflyttingsland } returns "FRA"
+                            every { folkeregistermetadata } returns
+                                mockk {
+                                    every { gyldighetstidspunkt } returns LocalDateTime.parse("2021-07-01T00:00:00")
+                                }
+                        },
+                    )
+                every { utflyttingFraNorge } returns null
+            }
 
         val utland = UtlandMapper.mapUtland(hentPerson)
 

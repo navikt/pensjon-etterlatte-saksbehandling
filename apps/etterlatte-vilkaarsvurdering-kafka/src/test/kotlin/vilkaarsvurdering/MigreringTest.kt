@@ -13,33 +13,36 @@ import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import rapidsandrivers.BEHANDLING_ID_KEY
-import java.util.*
+import java.util.UUID
 
 internal class MigreringTest {
-    private val vilkaarsvurderingServiceMock = mockk<VilkaarsvurderingService> {
-        coEvery { migrer(any()) } returns mockk()
-    }
-    private val testRapid = TestRapid()
-        .apply { Migrering(this, vilkaarsvurderingServiceMock) }
+    private val vilkaarsvurderingServiceMock =
+        mockk<VilkaarsvurderingService> {
+            coEvery { migrer(any()) } returns mockk()
+        }
+    private val testRapid =
+        TestRapid()
+            .apply { Migrering(this, vilkaarsvurderingServiceMock) }
 
     @Test
     fun `tar opp migrer vilkaarsvurdering-event, kopierer vilkaarsvurdering og poster ny BEREGN-melding`() {
         val behandlingId = UUID.randomUUID()
 
-        val melding = JsonMessage.newMessage(
-            mapOf(
-                "@event_name" to Migreringshendelser.VILKAARSVURDER,
-                BEHOV_NAME_KEY to Opplysningstype.AVDOED_PDL_V1.name,
-                "sakId" to 1,
-                BEHANDLING_ID_KEY to behandlingId,
-                "fullstendig" to true
-            )
-        ).toJson()
+        val melding =
+            JsonMessage.newMessage(
+                mapOf(
+                    "@event_name" to Migreringshendelser.VILKAARSVURDER,
+                    BEHOV_NAME_KEY to Opplysningstype.AVDOED_PDL_V1.name,
+                    "sakId" to 1,
+                    BEHANDLING_ID_KEY to behandlingId,
+                    "fullstendig" to true,
+                ),
+            ).toJson()
         testRapid.sendTestMessage(melding)
 
         coVerify(exactly = 1) {
             vilkaarsvurderingServiceMock.migrer(
-                behandlingId
+                behandlingId,
             )
         }
         with(testRapid.inspektør.message(0)) {

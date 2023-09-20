@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory
 
 class AvstemmingsdataSender(
     private val jmsConnectionFactory: EtterlatteJmsConnectionFactory,
-    private val queue: String
+    private val queue: String,
 ) {
     fun sendGrensesnittavstemming(avstemmingsdata: Avstemmingsdata): String {
         logger.info("Sender avstemmingsdata til Oppdrag")

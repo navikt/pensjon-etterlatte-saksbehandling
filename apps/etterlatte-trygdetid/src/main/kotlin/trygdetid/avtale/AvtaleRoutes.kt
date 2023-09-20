@@ -19,9 +19,12 @@ import no.nav.etterlatte.libs.common.withBehandlingId
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.etterlatte.trygdetid.klienter.BehandlingKlient
-import java.util.*
+import java.util.UUID
 
-fun Route.avtale(avtaleService: AvtaleService, behandlingKlient: BehandlingKlient) {
+fun Route.avtale(
+    avtaleService: AvtaleService,
+    behandlingKlient: BehandlingKlient,
+) {
     route("/api/trygdetid/avtaler") {
         val logger = application.log
 
@@ -67,11 +70,14 @@ fun Route.avtale(avtaleService: AvtaleService, behandlingKlient: BehandlingKlien
     }
 }
 
-private fun TrygdeavtaleRequest.toTrygdeavtale(behandlingId: UUID, brukerTokenInfo: BrukerTokenInfo) = Trygdeavtale(
+private fun TrygdeavtaleRequest.toTrygdeavtale(
+    behandlingId: UUID,
+    brukerTokenInfo: BrukerTokenInfo,
+) = Trygdeavtale(
     id = id ?: UUID.randomUUID(),
     behandlingId = behandlingId,
     avtaleKode = avtaleKode,
     avtaleDatoKode = avtaleDatoKode,
     avtaleKriteriaKode = avtaleKriteriaKode,
-    kilde = Grunnlagsopplysning.Saksbehandler(brukerTokenInfo.ident(), Tidspunkt.now())
+    kilde = Grunnlagsopplysning.Saksbehandler(brukerTokenInfo.ident(), Tidspunkt.now()),
 )

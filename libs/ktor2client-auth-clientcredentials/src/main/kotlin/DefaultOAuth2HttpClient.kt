@@ -15,27 +15,28 @@ import no.nav.security.token.support.client.core.http.OAuth2HttpRequest
 import no.nav.security.token.support.client.core.oauth2.OAuth2AccessTokenResponse
 
 class DefaultOAuth2HttpClient : OAuth2HttpClient {
-
-    private val defaultHttpClient = HttpClient(OkHttp) {
-        install(ContentNegotiation) {
-            expectSuccess = true
-            jackson {
-                configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-                setSerializationInclusion(JsonInclude.Include.NON_NULL)
+    private val defaultHttpClient =
+        HttpClient(OkHttp) {
+            install(ContentNegotiation) {
+                expectSuccess = true
+                jackson {
+                    configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+                    setSerializationInclusion(JsonInclude.Include.NON_NULL)
+                }
             }
         }
-    }
 
     // Override default POST with other form parameters specified for Idp request
     override fun post(oAuth2HttpRequest: OAuth2HttpRequest): OAuth2AccessTokenResponse {
         return runBlocking {
             defaultHttpClient.submitForm(
                 url = oAuth2HttpRequest.tokenEndpointUrl.toString(),
-                formParameters = Parameters.build {
-                    oAuth2HttpRequest.formParameters.forEach {
-                        append(it.key, it.value)
-                    }
-                }
+                formParameters =
+                    Parameters.build {
+                        oAuth2HttpRequest.formParameters.forEach {
+                            append(it.key, it.value)
+                        }
+                    },
             ).body()
         }
     }

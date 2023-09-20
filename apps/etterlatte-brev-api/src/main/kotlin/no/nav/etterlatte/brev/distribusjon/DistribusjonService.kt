@@ -11,40 +11,43 @@ interface DistribusjonService {
         journalpostId: String,
         type: DistribusjonsType,
         tidspunkt: DistribusjonsTidspunktType,
-        adresse: Adresse
+        adresse: Adresse,
     ): BestillingsID
 }
 
 class DistribusjonServiceImpl(
     private val klient: DistribusjonKlient,
-    private val db: BrevRepository
+    private val db: BrevRepository,
 ) : DistribusjonService {
     override fun distribuerJournalpost(
         brevId: Long,
         journalpostId: String,
         type: DistribusjonsType,
         tidspunkt: DistribusjonsTidspunktType,
-        adresse: Adresse
-    ): BestillingsID = runBlocking {
-        val request = DistribuerJournalpostRequest(
-            journalpostId = journalpostId,
-            bestillendeFagsystem = "EY",
-            distribusjonstype = type,
-            adresse = DistAdresse(
-                AdresseType.fra(adresse.adresseType),
-                adresse.adresselinje1,
-                adresse.adresselinje2,
-                adresse.adresselinje3,
-                adresse.postnummer,
-                adresse.poststed,
-                adresse.landkode
-            ),
-            distribusjonstidspunkt = tidspunkt,
-            dokumentProdApp = "etterlatte-brev-api"
-        )
+        adresse: Adresse,
+    ): BestillingsID =
+        runBlocking {
+            val request =
+                DistribuerJournalpostRequest(
+                    journalpostId = journalpostId,
+                    bestillendeFagsystem = "EY",
+                    distribusjonstype = type,
+                    adresse =
+                        DistAdresse(
+                            AdresseType.fra(adresse.adresseType),
+                            adresse.adresselinje1,
+                            adresse.adresselinje2,
+                            adresse.adresselinje3,
+                            adresse.postnummer,
+                            adresse.poststed,
+                            adresse.landkode,
+                        ),
+                    distribusjonstidspunkt = tidspunkt,
+                    dokumentProdApp = "etterlatte-brev-api",
+                )
 
-        klient.distribuerJournalpost(request)
-            .also { db.settBrevDistribuert(brevId, it) }
-            .bestillingsId
-    }
+            klient.distribuerJournalpost(request)
+                .also { db.settBrevDistribuert(brevId, it) }
+                .bestillingsId
+        }
 }

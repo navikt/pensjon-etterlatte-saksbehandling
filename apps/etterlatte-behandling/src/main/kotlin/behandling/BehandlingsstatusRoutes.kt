@@ -14,18 +14,16 @@ import no.nav.etterlatte.libs.common.behandlingsId
 import no.nav.etterlatte.tilgangsstyring.kunAttestant
 import no.nav.etterlatte.vedtaksvurdering.VedtakHendelse
 
-internal fun Route.behandlingsstatusRoutes(
-    behandlingsstatusService: BehandlingStatusService
-) {
+internal fun Route.behandlingsstatusRoutes(behandlingsstatusService: BehandlingStatusService) {
     route("/behandlinger/{$BEHANDLINGSID_CALL_PARAMETER}") {
         get("/opprett") {
-            /* Kalles kun av vilkårsvurdering når total-vurdering slettes */
+            // Kalles kun av vilkårsvurdering når total-vurdering slettes
             haandterStatusEndring(call) {
                 behandlingsstatusService.settOpprettet(behandlingsId)
             }
         }
         post("/opprett") {
-            /* Kalles kun av vilkårsvurdering når total-vurdering slettes */
+            // Kalles kun av vilkårsvurdering når total-vurdering slettes
             haandterStatusEndring(call) {
                 behandlingsstatusService.settOpprettet(behandlingsId, false)
             }
@@ -115,10 +113,13 @@ internal fun Route.behandlingsstatusRoutes(
 
 data class OperasjonGyldig(val gyldig: Boolean)
 
-private suspend fun haandterStatusEndring(call: ApplicationCall, proevStatusEndring: () -> Unit) {
+private suspend fun haandterStatusEndring(
+    call: ApplicationCall,
+    proevStatusEndring: () -> Unit,
+) {
     runCatching(proevStatusEndring)
         .fold(
             onSuccess = { call.respond(HttpStatusCode.OK, OperasjonGyldig(true)) },
-            onFailure = { call.respond(HttpStatusCode.Conflict, it.message ?: "Statussjekk feilet") }
+            onFailure = { call.respond(HttpStatusCode.Conflict, it.message ?: "Statussjekk feilet") },
         )
 }

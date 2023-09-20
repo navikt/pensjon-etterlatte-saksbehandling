@@ -9,7 +9,6 @@ import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
 
 class NavPersonIdentTest {
-
     @Test
     fun `NPID sjekker om den er 11 siffer lang`() {
         assertThrows<IllegalArgumentException> { NavPersonIdent("1234567890") }

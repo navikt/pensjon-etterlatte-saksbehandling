@@ -23,11 +23,12 @@ import no.nav.etterlatte.pdl.mapper.PersonMapper
 import org.slf4j.LoggerFactory
 
 class PdlForesporselFeilet(message: String) : RuntimeException(message)
+
 class PdlFantIkkePerson(message: String) : RuntimeException(message)
 
 class PersonService(
     private val pdlKlient: PdlKlient,
-    private val ppsKlient: ParallelleSannheterKlient
+    private val ppsKlient: ParallelleSannheterKlient,
 ) {
     private val logger = LoggerFactory.getLogger(PersonService::class.java)
 
@@ -41,7 +42,7 @@ class PersonService(
                     throw PdlFantIkkePerson("Fant ikke personen ${request.foedselsnummer}")
                 } else {
                     throw PdlForesporselFeilet(
-                        "Kunne ikke hente person med fnr=${request.foedselsnummer} fra PDL: $pdlFeil"
+                        "Kunne ikke hente person med fnr=${request.foedselsnummer} fra PDL: $pdlFeil",
                     )
                 }
             } else {
@@ -51,15 +52,13 @@ class PersonService(
                     fnr = request.foedselsnummer,
                     personRolle = request.rolle,
                     hentPerson = it.data.hentPerson,
-                    saktype = request.saktype
+                    saktype = request.saktype,
                 )
             }
         }
     }
 
-    suspend fun hentHistorikkForeldreansvar(
-        hentPersonRequest: HentPersonRequest
-    ): HistorikkForeldreansvar {
+    suspend fun hentHistorikkForeldreansvar(hentPersonRequest: HentPersonRequest): HistorikkForeldreansvar {
         if (hentPersonRequest.saktype != SakType.BARNEPENSJON) {
             throw IllegalArgumentException("Kan kun hente historikk i foreldreansvar for barnepensjonssaker")
         }
@@ -76,7 +75,7 @@ class PersonService(
                         throw PdlFantIkkePerson("Fant ikke personen $fnr")
                     } else {
                         throw PdlForesporselFeilet(
-                            "Kunne ikke hente person med fnr=$fnr fra PDL: $pdlFeil"
+                            "Kunne ikke hente person med fnr=$fnr fra PDL: $pdlFeil",
                         )
                     }
                 } else {
@@ -95,7 +94,7 @@ class PersonService(
                     throw PdlFantIkkePerson("Fant ikke personen ${request.foedselsnummer}")
                 } else {
                     throw PdlForesporselFeilet(
-                        "Kunne ikke hente opplysninger for ${request.foedselsnummer} fra PDL: $pdlFeil"
+                        "Kunne ikke hente opplysninger for ${request.foedselsnummer} fra PDL: $pdlFeil",
                     )
                 }
             } else {
@@ -103,7 +102,7 @@ class PersonService(
                     ppsKlient = ppsKlient,
                     pdlKlient = pdlKlient,
                     request = request,
-                    hentPerson = it.data.hentPerson
+                    hentPerson = it.data.hentPerson,
                 )
             }
         }
@@ -120,38 +119,39 @@ class PersonService(
                 } else {
                     throw PdlForesporselFeilet(
                         "Kunne ikke hente pdlidentifkator " +
-                            "for ${request.ident} fra PDL: $pdlFeil"
+                            "for ${request.ident} fra PDL: $pdlFeil",
                     )
                 }
             } else {
                 try {
-                    val folkeregisterIdent: String? = identResponse.data.hentIdenter.identer
-                        .filter { it.gruppe == PDLIdentGruppeTyper.FOLKEREGISTERIDENT.navn }
-                        .firstOrNull { !it.historisk }?.ident
+                    val folkeregisterIdent: String? =
+                        identResponse.data.hentIdenter.identer
+                            .filter { it.gruppe == PDLIdentGruppeTyper.FOLKEREGISTERIDENT.navn }
+                            .firstOrNull { !it.historisk }?.ident
                     if (folkeregisterIdent != null) {
                         PdlIdentifikator.FolkeregisterIdent(
-                            folkeregisterident = Folkeregisteridentifikator.of(
-                                folkeregisterIdent
-                            )
+                            folkeregisterident =
+                                Folkeregisteridentifikator.of(
+                                    folkeregisterIdent,
+                                ),
                         )
                     } else {
-                        val npid: String = identResponse.data.hentIdenter.identer
-                            .filter { it.gruppe == PDLIdentGruppeTyper.NPID.navn }
-                            .first { !it.historisk }.ident
+                        val npid: String =
+                            identResponse.data.hentIdenter.identer
+                                .filter { it.gruppe == PDLIdentGruppeTyper.NPID.navn }
+                                .first { !it.historisk }.ident
                         PdlIdentifikator.Npid(NavPersonIdent(npid))
                     }
                 } catch (e: Exception) {
                     throw PdlForesporselFeilet(
-                        "Fant ingen pdlidentifikator for ${request.ident} fra PDL"
+                        "Fant ingen pdlidentifikator for ${request.ident} fra PDL",
                     )
                 }
             }
         }
     }
 
-    suspend fun hentFolkeregisterIdenterForAktoerIdBolk(
-        request: HentFolkeregisterIdenterForAktoerIdBolkRequest
-    ): Map<String, String?> {
+    suspend fun hentFolkeregisterIdenterForAktoerIdBolk(request: HentFolkeregisterIdenterForAktoerIdBolkRequest): Map<String, String?> {
         logger.info("Henter folkeregisteridenter for aktørIds=${request.aktoerIds}")
 
         val response = pdlKlient.hentFolkeregisterIdenterForAktoerIdBolk(request)
@@ -168,7 +168,7 @@ class PersonService(
                     throw PdlFantIkkePerson("Fant ikke personen ${request.foedselsnummer}")
                 } else {
                     throw PdlForesporselFeilet(
-                        "Kunne ikke hente fnr=${request.foedselsnummer} fra PDL: $pdlFeil"
+                        "Kunne ikke hente fnr=${request.foedselsnummer} fra PDL: $pdlFeil",
                     )
                 }
             } else {
@@ -178,5 +178,6 @@ class PersonService(
     }
 
     fun List<PdlResponseError>.asFormatertFeil() = this.joinToString(", ")
+
     fun List<PdlResponseError>.personIkkeFunnet() = any { it.extensions?.code == "not_found" }
 }

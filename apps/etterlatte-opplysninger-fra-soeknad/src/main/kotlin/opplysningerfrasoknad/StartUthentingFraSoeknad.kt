@@ -17,7 +17,7 @@ import rapidsandrivers.migrering.ListenerMedLogging
 
 internal class StartUthentingFraSoeknad(
     rapidsConnection: RapidsConnection,
-    private val opplysningsuthenter: Opplysningsuthenter
+    private val opplysningsuthenter: Opplysningsuthenter,
 ) : ListenerMedLogging() {
     private val logger: Logger = LoggerFactory.getLogger(StartUthentingFraSoeknad::class.java)
     private val rapid = rapidsConnection
@@ -27,7 +27,7 @@ internal class StartUthentingFraSoeknad(
             validate {
                 it.demandAny(
                     EVENT_NAME_KEY,
-                    listOf(SoeknadInnsendt.eventNameInnsendt, SoeknadInnsendt.eventNameBehandlingBehov)
+                    listOf(SoeknadInnsendt.eventNameInnsendt, SoeknadInnsendt.eventNameBehandlingBehov),
                 )
             }
             correlationId()
@@ -38,11 +38,15 @@ internal class StartUthentingFraSoeknad(
         }.register(this)
     }
 
-    override fun haandterPakke(packet: JsonMessage, context: MessageContext) {
-        val opplysninger = opplysningsuthenter.lagOpplysningsListe(
-            packet[GyldigSoeknadVurdert.skjemaInfoKey],
-            SoeknadType.valueOf(packet[GyldigSoeknadVurdert.skjemaInfoTypeKey].textValue())
-        )
+    override fun haandterPakke(
+        packet: JsonMessage,
+        context: MessageContext,
+    ) {
+        val opplysninger =
+            opplysningsuthenter.lagOpplysningsListe(
+                packet[GyldigSoeknadVurdert.skjemaInfoKey],
+                SoeknadType.valueOf(packet[GyldigSoeknadVurdert.skjemaInfoTypeKey].textValue()),
+            )
 
         JsonMessage.newMessage(
             "OPPLYSNING:NY",
@@ -50,8 +54,8 @@ internal class StartUthentingFraSoeknad(
                 "sakId" to packet[GyldigSoeknadVurdert.sakIdKey],
                 "behandlingId" to packet[GyldigSoeknadVurdert.behandlingIdKey],
                 CORRELATION_ID_KEY to packet[CORRELATION_ID_KEY],
-                "opplysning" to opplysninger
-            )
+                "opplysning" to opplysninger,
+            ),
         ).apply {
             try {
                 rapid.publish(packet["behandlingId"].toString(), toJson())

@@ -30,7 +30,6 @@ import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.POSTGRES_VERSION
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.opprettBehandling
-import no.nav.etterlatte.persongalleri
 import no.nav.etterlatte.sak.SakDao
 import no.nav.etterlatte.saksbehandlerToken
 import org.junit.Ignore
@@ -64,22 +63,24 @@ internal class BehandlingDaoIntegrationTest {
         postgreSQLContainer.withUrlParam("user", postgreSQLContainer.username)
         postgreSQLContainer.withUrlParam("password", postgreSQLContainer.password)
 
-        dataSource = DataSourceBuilder.createDataSource(
-            jdbcUrl = postgreSQLContainer.jdbcUrl,
-            username = postgreSQLContainer.username,
-            password = postgreSQLContainer.password
-        ).apply { migrate() }
+        dataSource =
+            DataSourceBuilder.createDataSource(
+                jdbcUrl = postgreSQLContainer.jdbcUrl,
+                username = postgreSQLContainer.username,
+                password = postgreSQLContainer.password,
+            ).apply { migrate() }
 
         val connection = dataSource.connection
         sakRepo = SakDao { connection }
         kommerBarnetTilGodeDao = KommerBarnetTilGodeDao { connection }
-        behandlingRepo = BehandlingDao(
-            kommerBarnetTilGodeDao = kommerBarnetTilGodeDao,
-            RevurderingDao {
-                connection
-            },
-            connection = { connection }
-        )
+        behandlingRepo =
+            BehandlingDao(
+                kommerBarnetTilGodeDao = kommerBarnetTilGodeDao,
+                RevurderingDao {
+                    connection
+                },
+                connection = { connection },
+            )
     }
 
     @AfterEach
@@ -99,19 +100,21 @@ internal class BehandlingDaoIntegrationTest {
     fun `skal opprette foerstegangsbehandling med persongalleri`() {
         val sak1 = sakRepo.opprettSak("123", SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr).id
 
-        val opprettBehandlingMedPersongalleri = opprettBehandling(
-            type = BehandlingType.FØRSTEGANGSBEHANDLING,
-            sakId = sak1
-        )
+        val opprettBehandlingMedPersongalleri =
+            opprettBehandling(
+                type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                sakId = sak1,
+            )
 
         behandlingRepo.opprettBehandling(opprettBehandlingMedPersongalleri)
-        val opprettetBehandling = requireNotNull(
-            behandlingRepo.hentBehandling(opprettBehandlingMedPersongalleri.id)
-        ) as Foerstegangsbehandling
+        val opprettetBehandling =
+            requireNotNull(
+                behandlingRepo.hentBehandling(opprettBehandlingMedPersongalleri.id),
+            ) as Foerstegangsbehandling
         assertEquals(opprettBehandlingMedPersongalleri.id, opprettetBehandling.id)
         assertEquals(
             opprettBehandlingMedPersongalleri.opprettet,
-            opprettetBehandling.behandlingOpprettet.toTidspunkt()
+            opprettetBehandling.behandlingOpprettet.toTidspunkt(),
         )
     }
 
@@ -119,12 +122,13 @@ internal class BehandlingDaoIntegrationTest {
     fun `skal opprette revurdering`() {
         val sak1 = sakRepo.opprettSak("123", SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr).id
 
-        val opprettBehandling = opprettBehandling(
-            type = BehandlingType.REVURDERING,
-            sakId = sak1,
-            revurderingAarsak = RevurderingAarsak.REGULERING,
-            prosesstype = Prosesstype.MANUELL
-        )
+        val opprettBehandling =
+            opprettBehandling(
+                type = BehandlingType.REVURDERING,
+                sakId = sak1,
+                revurderingAarsak = RevurderingAarsak.REGULERING,
+                prosesstype = Prosesstype.MANUELL,
+            )
 
         behandlingRepo.opprettBehandling(opprettBehandling)
         val opprettetBehandling = requireNotNull(behandlingRepo.hentBehandling(opprettBehandling.id)) as Revurdering
@@ -138,22 +142,25 @@ internal class BehandlingDaoIntegrationTest {
         val sakId = sakRepo.opprettSak("123", SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr).id
         val virkDato = YearMonth.of(2022, 8)
 
-        val opprettBehandling = opprettBehandling(
-            type = BehandlingType.MANUELT_OPPHOER,
-            sakId = sakId,
-            virkningstidspunkt = Virkningstidspunkt(
-                virkDato,
-                Grunnlagsopplysning.Saksbehandler.create(
-                    saksbehandlerToken
-                ),
-                "begrunnelse"
-            ),
-            opphoerAarsaker = listOf(
-                ManueltOpphoerAarsak.SOESKEN_DOED,
-                ManueltOpphoerAarsak.GJENLEVENDE_FORELDER_DOED
-            ),
-            fritekstAarsak = "Umulig å revurdere i nytt saksbehandlingssystem"
-        )
+        val opprettBehandling =
+            opprettBehandling(
+                type = BehandlingType.MANUELT_OPPHOER,
+                sakId = sakId,
+                virkningstidspunkt =
+                    Virkningstidspunkt(
+                        virkDato,
+                        Grunnlagsopplysning.Saksbehandler.create(
+                            saksbehandlerToken,
+                        ),
+                        "begrunnelse",
+                    ),
+                opphoerAarsaker =
+                    listOf(
+                        ManueltOpphoerAarsak.SOESKEN_DOED,
+                        ManueltOpphoerAarsak.GJENLEVENDE_FORELDER_DOED,
+                    ),
+                fritekstAarsak = "Umulig å revurdere i nytt saksbehandlingssystem",
+            )
 
         behandlingRepo.opprettBehandling(opprettBehandling)
         val opprettetBehandling = requireNotNull(behandlingRepo.hentBehandling(opprettBehandling.id)) as ManueltOpphoer
@@ -169,30 +176,34 @@ internal class BehandlingDaoIntegrationTest {
     fun `Skal legge til gyldighetsproeving til en opprettet behandling`() {
         val sak1 = sakRepo.opprettSak("123", SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr).id
 
-        val opprettBehandling = opprettBehandling(
-            type = BehandlingType.FØRSTEGANGSBEHANDLING,
-            sakId = sak1
-        )
+        val opprettBehandling =
+            opprettBehandling(
+                type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                sakId = sak1,
+            )
 
         behandlingRepo.opprettBehandling(opprettBehandling)
 
         val lagretPersongalleriBehandling =
             requireNotNull(behandlingRepo.hentBehandling(opprettBehandling.id)) as Foerstegangsbehandling
 
-        val gyldighetsproevingBehanding = lagretPersongalleriBehandling.copy(
-            gyldighetsproeving = GyldighetsResultat(
-                resultat = VurderingsResultat.OPPFYLT,
-                vurderinger = listOf(
-                    VurdertGyldighet(
-                        navn = GyldighetsTyper.INNSENDER_ER_FORELDER,
+        val gyldighetsproevingBehanding =
+            lagretPersongalleriBehandling.copy(
+                gyldighetsproeving =
+                    GyldighetsResultat(
                         resultat = VurderingsResultat.OPPFYLT,
-                        basertPaaOpplysninger = "innsenderfnr"
-                    )
-                ),
-                vurdertDato = Tidspunkt.now().toLocalDatetimeUTC()
-            ),
-            status = BehandlingStatus.OPPRETTET
-        )
+                        vurderinger =
+                            listOf(
+                                VurdertGyldighet(
+                                    navn = GyldighetsTyper.INNSENDER_ER_FORELDER,
+                                    resultat = VurderingsResultat.OPPFYLT,
+                                    basertPaaOpplysninger = "innsenderfnr",
+                                ),
+                            ),
+                        vurdertDato = Tidspunkt.now().toLocalDatetimeUTC(),
+                    ),
+                status = BehandlingStatus.OPPRETTET,
+            )
 
         behandlingRepo.lagreGyldighetsproving(gyldighetsproevingBehanding)
         val lagretGyldighetsproving =
@@ -200,7 +211,7 @@ internal class BehandlingDaoIntegrationTest {
 
         assertEquals(
             gyldighetsproevingBehanding.gyldighetsproeving,
-            lagretGyldighetsproving.gyldighetsproeving
+            lagretGyldighetsproving.gyldighetsproeving,
         )
     }
 
@@ -208,10 +219,11 @@ internal class BehandlingDaoIntegrationTest {
     fun `Skal legge til utenlandstilsnitt til en opprettet behandling`() {
         val sak1 = sakRepo.opprettSak("123", SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr).id
 
-        val opprettBehandling = opprettBehandling(
-            type = BehandlingType.FØRSTEGANGSBEHANDLING,
-            sakId = sak1
-        )
+        val opprettBehandling =
+            opprettBehandling(
+                type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                sakId = sak1,
+            )
 
         behandlingRepo.opprettBehandling(opprettBehandling)
 
@@ -223,8 +235,8 @@ internal class BehandlingDaoIntegrationTest {
             Utenlandstilsnitt(
                 UtenlandstilsnittType.BOSATT_UTLAND,
                 Grunnlagsopplysning.Saksbehandler.create("navIdent"),
-                "Test"
-            )
+                "Test",
+            ),
         )
 
         val lagretBehandling =
@@ -239,10 +251,11 @@ internal class BehandlingDaoIntegrationTest {
     fun `Skal legge til bodd eller arbeidet utlandet til en opprettet behandling`() {
         val sak1 = sakRepo.opprettSak("123", SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr).id
 
-        val opprettBehandling = opprettBehandling(
-            type = BehandlingType.FØRSTEGANGSBEHANDLING,
-            sakId = sak1
-        )
+        val opprettBehandling =
+            opprettBehandling(
+                type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                sakId = sak1,
+            )
 
         behandlingRepo.opprettBehandling(opprettBehandling)
 
@@ -254,8 +267,8 @@ internal class BehandlingDaoIntegrationTest {
             BoddEllerArbeidetUtlandet(
                 true,
                 Grunnlagsopplysning.Saksbehandler.create("navIdent"),
-                "Test"
-            )
+                "Test",
+            ),
         )
 
         val lagretBehandling =
@@ -270,7 +283,7 @@ internal class BehandlingDaoIntegrationTest {
     fun `avbryte sak`() {
         val sak1 = sakRepo.opprettSak("123", SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr).id
         listOf(
-            opprettBehandling(type = BehandlingType.FØRSTEGANGSBEHANDLING, sakId = sak1)
+            opprettBehandling(type = BehandlingType.FØRSTEGANGSBEHANDLING, sakId = sak1),
         ).forEach { b ->
             behandlingRepo.opprettBehandling(b)
         }
@@ -290,9 +303,10 @@ internal class BehandlingDaoIntegrationTest {
     fun `skal hente behandling av type Foerstegangsbehandling`() {
         val sak1 = sakRepo.opprettSak("123", SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr).id
 
-        val opprettBehandling = opprettBehandling(type = BehandlingType.FØRSTEGANGSBEHANDLING, sakId = sak1).also {
-            behandlingRepo.opprettBehandling(it)
-        }
+        val opprettBehandling =
+            opprettBehandling(type = BehandlingType.FØRSTEGANGSBEHANDLING, sakId = sak1).also {
+                behandlingRepo.opprettBehandling(it)
+            }
 
         val behandling = behandlingRepo.hentBehandling(opprettBehandling.id)
         assertTrue(behandling is Foerstegangsbehandling)
@@ -302,14 +316,15 @@ internal class BehandlingDaoIntegrationTest {
     fun `skal returnere behandling av type Revurdering`() {
         val sak1 = sakRepo.opprettSak("123", SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr).id
 
-        val opprettBehandling = opprettBehandling(
-            type = BehandlingType.REVURDERING,
-            sakId = sak1,
-            revurderingAarsak = RevurderingAarsak.REGULERING,
-            prosesstype = Prosesstype.AUTOMATISK
-        ).also {
-            behandlingRepo.opprettBehandling(it)
-        }
+        val opprettBehandling =
+            opprettBehandling(
+                type = BehandlingType.REVURDERING,
+                sakId = sak1,
+                revurderingAarsak = RevurderingAarsak.REGULERING,
+                prosesstype = Prosesstype.AUTOMATISK,
+            ).also {
+                behandlingRepo.opprettBehandling(it)
+            }
 
         val behandling = behandlingRepo.hentBehandling(id = opprettBehandling.id)
         assertTrue(behandling is Revurdering)
@@ -318,16 +333,18 @@ internal class BehandlingDaoIntegrationTest {
     @Test
     fun `skal returnere behandling av type ManueltOpphoer`() {
         val sak1 = sakRepo.opprettSak("123", SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr).id
-        val opprettBehandling = opprettBehandling(
-            type = BehandlingType.MANUELT_OPPHOER,
-            sakId = sak1,
-            opphoerAarsaker = listOf(
-                ManueltOpphoerAarsak.SOESKEN_DOED,
-                ManueltOpphoerAarsak.GJENLEVENDE_FORELDER_DOED
-            )
-        ).also {
-            behandlingRepo.opprettBehandling(it)
-        }
+        val opprettBehandling =
+            opprettBehandling(
+                type = BehandlingType.MANUELT_OPPHOER,
+                sakId = sak1,
+                opphoerAarsaker =
+                    listOf(
+                        ManueltOpphoerAarsak.SOESKEN_DOED,
+                        ManueltOpphoerAarsak.GJENLEVENDE_FORELDER_DOED,
+                    ),
+            ).also {
+                behandlingRepo.opprettBehandling(it)
+            }
         val behandling = behandlingRepo.hentBehandling(opprettBehandling.id)
         assertTrue(behandling is ManueltOpphoer)
     }
@@ -342,16 +359,16 @@ internal class BehandlingDaoIntegrationTest {
                     type = BehandlingType.REVURDERING,
                     sakId = sak1,
                     revurderingAarsak = RevurderingAarsak.REGULERING,
-                    prosesstype = Prosesstype.AUTOMATISK
-                )
+                    prosesstype = Prosesstype.AUTOMATISK,
+                ),
             )
         }
         repeat(2) {
             behandlingRepo.opprettBehandling(
                 opprettBehandling(
                     type = BehandlingType.FØRSTEGANGSBEHANDLING,
-                    sakId = sak1
-                )
+                    sakId = sak1,
+                ),
             )
         }
 
@@ -360,7 +377,7 @@ internal class BehandlingDaoIntegrationTest {
             "Skal hente ut to foerstegangsbehandlinger og to revurderinger",
             { assertEquals(4, behandlinger.size) },
             { assertEquals(2, behandlinger.filterIsInstance<Revurdering>().size) },
-            { assertEquals(2, behandlinger.filterIsInstance<Foerstegangsbehandling>().size) }
+            { assertEquals(2, behandlinger.filterIsInstance<Foerstegangsbehandling>().size) },
         )
     }
 
@@ -374,22 +391,23 @@ internal class BehandlingDaoIntegrationTest {
                     type = BehandlingType.REVURDERING,
                     sakId = sak1,
                     revurderingAarsak = RevurderingAarsak.REGULERING,
-                    prosesstype = Prosesstype.MANUELL
-                )
+                    prosesstype = Prosesstype.MANUELL,
+                ),
             )
         }
         repeat(2) {
             behandlingRepo.opprettBehandling(
                 opprettBehandling(
                     type = BehandlingType.FØRSTEGANGSBEHANDLING,
-                    sakId = sak1
-                )
+                    sakId = sak1,
+                ),
             )
         }
 
-        val foerstegangsbehandlinger = behandlingRepo.alleBehandlingerISak(sak1).filter {
-            it.type == BehandlingType.FØRSTEGANGSBEHANDLING
-        }
+        val foerstegangsbehandlinger =
+            behandlingRepo.alleBehandlingerISak(sak1).filter {
+                it.type == BehandlingType.FØRSTEGANGSBEHANDLING
+            }
         val revurderinger = behandlingRepo.alleBehandlingerISak(sak1).filter { it.type == BehandlingType.REVURDERING }
         assertAll(
             "Skal hente ut to foerstegangsbehandlinger og to revurderinger",
@@ -398,7 +416,7 @@ internal class BehandlingDaoIntegrationTest {
             { assertEquals(2, revurderinger.size) },
             {
                 assertTrue(revurderinger.all { it is Revurdering })
-            }
+            },
         )
     }
 
@@ -406,9 +424,10 @@ internal class BehandlingDaoIntegrationTest {
     fun `skal lagre status og sette sistEndret for en behandling`() {
         val sak1 = sakRepo.opprettSak("123", SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr).id
 
-        val opprettBehandling = opprettBehandling(type = BehandlingType.FØRSTEGANGSBEHANDLING, sakId = sak1).also {
-            behandlingRepo.opprettBehandling(it)
-        }
+        val opprettBehandling =
+            opprettBehandling(type = BehandlingType.FØRSTEGANGSBEHANDLING, sakId = sak1).also {
+                behandlingRepo.opprettBehandling(it)
+            }
 
         val behandlingFoerStatusendring = behandlingRepo.hentBehandling(opprettBehandling.id) as? Foerstegangsbehandling
         assertNotNull(behandlingFoerStatusendring)
@@ -433,14 +452,14 @@ internal class BehandlingDaoIntegrationTest {
             BehandlingStatus.OPPRETTET,
             BehandlingStatus.RETURNERT,
             BehandlingStatus.IVERKSATT,
-            BehandlingStatus.AVBRUTT
+            BehandlingStatus.AVBRUTT,
         ).forEach {
             behandlingRepo.opprettBehandling(
                 opprettBehandling(
                     type = BehandlingType.FØRSTEGANGSBEHANDLING,
                     sakId = sak1,
-                    status = it
-                )
+                    status = it,
+                ),
             )
         }
 
@@ -454,11 +473,12 @@ internal class BehandlingDaoIntegrationTest {
     @Test
     fun `skal lagre virkningstidspunkt for en behandling`() {
         val sak = sakRepo.opprettSak("123", SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr).id
-        val opprettBehandling = opprettBehandling(
-            type = BehandlingType.FØRSTEGANGSBEHANDLING,
-            sakId = sak,
-            status = BehandlingStatus.OPPRETTET
-        )
+        val opprettBehandling =
+            opprettBehandling(
+                type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                sakId = sak,
+                status = BehandlingStatus.OPPRETTET,
+            )
 
         behandlingRepo.opprettBehandling(opprettBehandling)
 
@@ -482,20 +502,22 @@ internal class BehandlingDaoIntegrationTest {
     @Test
     fun `skal lagre kommer barnet til gode for en behandling`() {
         val sak = sakRepo.opprettSak("123", SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr).id
-        val opprettBehandling = opprettBehandling(
-            type = BehandlingType.FØRSTEGANGSBEHANDLING,
-            sakId = sak,
-            status = BehandlingStatus.OPPRETTET
-        )
+        val opprettBehandling =
+            opprettBehandling(
+                type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                sakId = sak,
+                status = BehandlingStatus.OPPRETTET,
+            )
 
         behandlingRepo.opprettBehandling(opprettBehandling)
 
-        val kommerBarnetTilgode = KommerBarnetTilgode(
-            JaNei.JA,
-            "begrunnelse",
-            Grunnlagsopplysning.Saksbehandler.create("navIdent"),
-            opprettBehandling.id
-        )
+        val kommerBarnetTilgode =
+            KommerBarnetTilgode(
+                JaNei.JA,
+                "begrunnelse",
+                Grunnlagsopplysning.Saksbehandler.create("navIdent"),
+                opprettBehandling.id,
+            )
         kommerBarnetTilGodeDao.lagreKommerBarnetTilGode(kommerBarnetTilgode)
 
         with(behandlingRepo.hentBehandling(opprettBehandling.id)) {
@@ -509,10 +531,11 @@ internal class BehandlingDaoIntegrationTest {
     @Test
     fun `kan oppdatere og lagre ny status for behandling`() {
         val sak = sakRepo.opprettSak("123", SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr).id
-        val opprettBehandling = opprettBehandling(
-            type = BehandlingType.FØRSTEGANGSBEHANDLING,
-            sakId = sak
-        )
+        val opprettBehandling =
+            opprettBehandling(
+                type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                sakId = sak,
+            )
         behandlingRepo.opprettBehandling(opprettBehandling)
         val saksbehandler = Grunnlagsopplysning.Saksbehandler.create("saksbehandler01")
         val kommerBarnetTilgode = KommerBarnetTilgode(JaNei.JA, "", saksbehandler, opprettBehandling.id)
@@ -523,11 +546,12 @@ internal class BehandlingDaoIntegrationTest {
         assertNotNull(foerstegangsbehandling)
 
         val virkningstidspunkt = Virkningstidspunkt(YearMonth.of(2021, 1), saksbehandler, "")
-        val gyldighetsResultat = GyldighetsResultat(
-            VurderingsResultat.OPPFYLT,
-            listOf(),
-            Tidspunkt.now().toLocalDatetimeUTC()
-        )
+        val gyldighetsResultat =
+            GyldighetsResultat(
+                VurderingsResultat.OPPFYLT,
+                listOf(),
+                Tidspunkt.now().toLocalDatetimeUTC(),
+            )
 
         foerstegangsbehandling!!
             .oppdaterVirkningstidspunkt(virkningstidspunkt)

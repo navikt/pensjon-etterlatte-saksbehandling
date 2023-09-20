@@ -15,11 +15,14 @@ import no.nav.etterlatte.libs.common.behandlingsId
 import no.nav.etterlatte.libs.common.withBehandlingId
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import org.slf4j.LoggerFactory
-import java.util.*
+import java.util.UUID
 
 private val logger = LoggerFactory.getLogger("BeregningsGrunnlag Route")
 
-fun Route.beregningsGrunnlag(beregningsGrunnlagService: BeregningsGrunnlagService, behandlingKlient: BehandlingKlient) {
+fun Route.beregningsGrunnlag(
+    beregningsGrunnlagService: BeregningsGrunnlagService,
+    behandlingKlient: BehandlingKlient,
+) {
     route("/api/beregning/beregningsgrunnlag") {
         post("/{$BEHANDLINGSID_CALL_PARAMETER}/fra/{forrigeBehandlingId}") {
             val behandlingId = behandlingsId
@@ -38,7 +41,7 @@ fun Route.beregningsGrunnlag(beregningsGrunnlagService: BeregningsGrunnlagServic
                     beregningsGrunnlagService.lagreBarnepensjonBeregningsGrunnlag(
                         behandlingId,
                         body,
-                        brukerTokenInfo
+                        brukerTokenInfo,
                     ) -> call.respond(HttpStatusCode.NoContent)
 
                     else -> call.respond(HttpStatusCode.Conflict)
@@ -54,7 +57,7 @@ fun Route.beregningsGrunnlag(beregningsGrunnlagService: BeregningsGrunnlagServic
                     beregningsGrunnlagService.lagreOMSBeregningsGrunnlag(
                         behandlingId,
                         body,
-                        brukerTokenInfo
+                        brukerTokenInfo,
                     ) -> call.respond(HttpStatusCode.NoContent)
 
                     else -> call.respond(HttpStatusCode.Conflict)
@@ -65,10 +68,11 @@ fun Route.beregningsGrunnlag(beregningsGrunnlagService: BeregningsGrunnlagServic
         get("/{$BEHANDLINGSID_CALL_PARAMETER}/barnepensjon") {
             withBehandlingId(behandlingKlient) { behandlingId ->
                 logger.info("Henter grunnlag for behandling $behandlingId")
-                val grunnlag = beregningsGrunnlagService.hentBarnepensjonBeregningsGrunnlag(
-                    behandlingId,
-                    brukerTokenInfo
-                )
+                val grunnlag =
+                    beregningsGrunnlagService.hentBarnepensjonBeregningsGrunnlag(
+                        behandlingId,
+                        brukerTokenInfo,
+                    )
                 call.respond(HttpStatusCode.OK, grunnlag ?: HttpStatusCode.NoContent)
             }
         }
@@ -76,18 +80,20 @@ fun Route.beregningsGrunnlag(beregningsGrunnlagService: BeregningsGrunnlagServic
         get("/{$BEHANDLINGSID_CALL_PARAMETER}/omstillingstoenad") {
             withBehandlingId(behandlingKlient) { behandlingId ->
                 logger.info("Henter grunnlag for behandling $behandlingId")
-                val grunnlag = beregningsGrunnlagService.hentOmstillingstoenadBeregningsGrunnlag(
-                    behandlingId,
-                    brukerTokenInfo
-                )
+                val grunnlag =
+                    beregningsGrunnlagService.hentOmstillingstoenadBeregningsGrunnlag(
+                        behandlingId,
+                        brukerTokenInfo,
+                    )
                 call.respond(HttpStatusCode.OK, grunnlag ?: HttpStatusCode.NoContent)
             }
         }
     }
 }
 
-private fun ApplicationCall.uuid(param: String) = this.parameters[param]?.let {
-    UUID.fromString(it)
-} ?: throw NullPointerException(
-    "$param er ikke i path params"
-)
+private fun ApplicationCall.uuid(param: String) =
+    this.parameters[param]?.let {
+        UUID.fromString(it)
+    } ?: throw NullPointerException(
+        "$param er ikke i path params",
+    )

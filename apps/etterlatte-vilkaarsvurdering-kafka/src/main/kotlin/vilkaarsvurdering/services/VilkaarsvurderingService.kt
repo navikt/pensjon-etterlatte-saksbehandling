@@ -8,33 +8,42 @@ import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.vilkaarsvurdering.OpprettVilkaarsvurderingFraBehandling
-import java.util.*
+import java.util.UUID
 
 interface VilkaarsvurderingService {
-    fun kopierForrigeVilkaarsvurdering(behandlingId: UUID, behandlingViOmregnerFra: UUID): HttpResponse
+    fun kopierForrigeVilkaarsvurdering(
+        behandlingId: UUID,
+        behandlingViOmregnerFra: UUID,
+    ): HttpResponse
+
     fun opprettVilkaarsvurdering(behandlingId: UUID): HttpResponse
+
     fun migrer(behandlingId: UUID): HttpResponse
 }
 
 class VilkaarsvurderingServiceImpl(private val vilkaarsvurderingKlient: HttpClient, private val url: String) :
     VilkaarsvurderingService {
-    override fun kopierForrigeVilkaarsvurdering(behandlingId: UUID, behandlingViOmregnerFra: UUID) =
+    override fun kopierForrigeVilkaarsvurdering(
+        behandlingId: UUID,
+        behandlingViOmregnerFra: UUID,
+    ) = runBlocking {
+        vilkaarsvurderingKlient.post("$url/api/vilkaarsvurdering/$behandlingId/kopier") {
+            contentType(ContentType.Application.Json)
+            setBody(OpprettVilkaarsvurderingFraBehandling(behandlingViOmregnerFra))
+        }
+    }
+
+    override fun opprettVilkaarsvurdering(behandlingId: UUID) =
         runBlocking {
-            vilkaarsvurderingKlient.post("$url/api/vilkaarsvurdering/$behandlingId/kopier") {
+            vilkaarsvurderingKlient.post("$url/api/vilkaarsvurdering/$behandlingId/opprett") {
                 contentType(ContentType.Application.Json)
-                setBody(OpprettVilkaarsvurderingFraBehandling(behandlingViOmregnerFra))
             }
         }
 
-    override fun opprettVilkaarsvurdering(behandlingId: UUID) = runBlocking {
-        vilkaarsvurderingKlient.post("$url/api/vilkaarsvurdering/$behandlingId/opprett") {
-            contentType(ContentType.Application.Json)
+    override fun migrer(behandlingId: UUID) =
+        runBlocking {
+            vilkaarsvurderingKlient.post(
+                "$url/api/vilkaarsvurdering/migrering/$behandlingId",
+            )
         }
-    }
-
-    override fun migrer(behandlingId: UUID) = runBlocking {
-        vilkaarsvurderingKlient.post(
-            "$url/api/vilkaarsvurdering/migrering/$behandlingId"
-        )
-    }
 }

@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
 class ExceptionLoggingUtilsTest {
-
     @Test
     fun `exceptions blir lagt til i lista som suppressed, den nyeste foerst`() {
         val e1 = RuntimeException("e1")

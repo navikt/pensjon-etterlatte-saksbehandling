@@ -12,7 +12,7 @@ import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import java.time.YearMonth
-import java.util.*
+import java.util.UUID
 
 open class Grunnlagsopplysning<T>(
     val id: UUID,
@@ -22,7 +22,7 @@ open class Grunnlagsopplysning<T>(
     val opplysning: T,
     val attestering: Kilde? = null,
     val fnr: Folkeregisteridentifikator? = null,
-    val periode: Periode? = null
+    val periode: Periode? = null,
 ) {
     companion object {
         fun empty(
@@ -30,7 +30,7 @@ open class Grunnlagsopplysning<T>(
             kilde: Kilde,
             fnr: Folkeregisteridentifikator,
             fom: YearMonth?,
-            tom: YearMonth? = null
+            tom: YearMonth? = null,
         ): Grunnlagsopplysning<out Any?> {
             return Grunnlagsopplysning(
                 id = UUID.randomUUID(),
@@ -40,7 +40,7 @@ open class Grunnlagsopplysning<T>(
                 opplysning = null,
                 attestering = null,
                 fnr = fnr,
-                periode = fom?.let { Periode(it, tom) }
+                periode = fom?.let { Periode(it, tom) },
             )
         }
 
@@ -54,14 +54,14 @@ open class Grunnlagsopplysning<T>(
     @JsonTypeInfo(
         use = JsonTypeInfo.Id.NAME,
         include = JsonTypeInfo.As.EXISTING_PROPERTY,
-        property = "type"
+        property = "type",
     )
     @JsonSubTypes(
         JsonSubTypes.Type(value = Saksbehandler::class, name = "saksbehandler"),
         JsonSubTypes.Type(value = Privatperson::class, name = "privatperson"),
         JsonSubTypes.Type(value = Pdl::class, name = "pdl"),
         JsonSubTypes.Type(value = RegelKilde::class, name = "regel"),
-        JsonSubTypes.Type(value = Pesys::class, name = "pesys")
+        JsonSubTypes.Type(value = Pesys::class, name = "pesys"),
     )
     sealed class Kilde(val type: String) {
         fun toJson() = objectMapperKilde.writeValueAsString(this)
@@ -92,9 +92,10 @@ open class Grunnlagsopplysning<T>(
     data class Pdl(
         val tidspunktForInnhenting: Tidspunkt,
         val registersReferanse: String?,
-        val opplysningId: String?
+        val opplysningId: String?,
     ) : Kilde("pdl") {
         val navn = "pdl"
+
         override fun toString(): String {
             return navn
         }
@@ -107,15 +108,16 @@ open class Grunnlagsopplysning<T>(
     }
 }
 
-val objectMapperKilde = jacksonObjectMapper().registerModule(JavaTimeModule()).disable(
-    SerializationFeature.WRITE_DATES_AS_TIMESTAMPS
-)
+val objectMapperKilde =
+    jacksonObjectMapper().registerModule(JavaTimeModule()).disable(
+        SerializationFeature.WRITE_DATES_AS_TIMESTAMPS,
+    )
 
 fun <T : Any> lagOpplysning(
     opplysningsType: Opplysningstype,
     kilde: Grunnlagsopplysning.Kilde,
     opplysning: T,
-    periode: Periode? = null
+    periode: Periode? = null,
 ): Grunnlagsopplysning<T> {
     return Grunnlagsopplysning(
         id = UUID.randomUUID(),
@@ -123,6 +125,6 @@ fun <T : Any> lagOpplysning(
         opplysningType = opplysningsType,
         meta = objectMapper.createObjectNode(),
         opplysning = opplysning,
-        periode = periode
+        periode = periode,
     )
 }

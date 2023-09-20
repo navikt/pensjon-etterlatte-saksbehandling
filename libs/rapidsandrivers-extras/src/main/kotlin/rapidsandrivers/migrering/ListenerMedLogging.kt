@@ -7,10 +7,15 @@ import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.River
 
 abstract class ListenerMedLogging : River.PacketListener {
+    abstract fun haandterPakke(
+        packet: JsonMessage,
+        context: MessageContext,
+    ): Any
 
-    abstract fun haandterPakke(packet: JsonMessage, context: MessageContext): Any
-    override fun onPacket(packet: JsonMessage, context: MessageContext) =
-        withLogContext(packet.correlationId) {
-            haandterPakke(packet, context)
-        }
+    override fun onPacket(
+        packet: JsonMessage,
+        context: MessageContext,
+    ) = withLogContext(packet.correlationId) {
+        haandterPakke(packet, context)
+    }
 }

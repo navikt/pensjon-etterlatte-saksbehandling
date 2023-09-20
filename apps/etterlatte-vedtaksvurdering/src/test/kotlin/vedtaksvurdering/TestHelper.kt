@@ -17,7 +17,7 @@ import no.nav.etterlatte.vedtaksvurdering.Vedtak
 import java.math.BigDecimal
 import java.time.Month
 import java.time.YearMonth
-import java.util.*
+import java.util.UUID
 
 const val FNR_1 = "11057523044"
 const val FNR_2 = "04417103428"
@@ -37,7 +37,7 @@ fun opprettVedtak(
     behandlingId: UUID = UUID.randomUUID(),
     vilkaarsvurdering: ObjectNode? = objectMapper.createObjectNode(),
     beregning: ObjectNode? = objectMapper.createObjectNode(),
-    avkorting: ObjectNode? = objectMapper.createObjectNode()
+    avkorting: ObjectNode? = objectMapper.createObjectNode(),
 ) = OpprettVedtak(
     soeker = soeker,
     sakId = sakId,
@@ -51,14 +51,15 @@ fun opprettVedtak(
     avkorting = avkorting,
     vilkaarsvurdering = vilkaarsvurdering,
     revurderingInfo = null,
-    utbetalingsperioder = listOf(
-        Utbetalingsperiode(
-            id = 0,
-            periode = Periode(virkningstidspunkt, null),
-            beloep = BigDecimal.valueOf(100),
-            type = UtbetalingsperiodeType.UTBETALING
-        )
-    )
+    utbetalingsperioder =
+        listOf(
+            Utbetalingsperiode(
+                id = 0,
+                periode = Periode(virkningstidspunkt, null),
+                beloep = BigDecimal.valueOf(100),
+                type = UtbetalingsperiodeType.UTBETALING,
+            ),
+        ),
 )
 
 fun vedtak(
@@ -68,7 +69,7 @@ fun vedtak(
     vilkaarsvurdering: ObjectNode? = objectMapper.createObjectNode(),
     beregning: ObjectNode? = objectMapper.createObjectNode(),
     avkorting: ObjectNode? = objectMapper.createObjectNode(),
-    revurderingAarsak: RevurderingAarsak? = null
+    revurderingAarsak: RevurderingAarsak? = null,
 ) = Vedtak(
     id = 1L,
     status = VedtakStatus.OPPRETTET,
@@ -88,8 +89,8 @@ fun vedtak(
                 id = 1,
                 periode = Periode(virkningstidspunkt, null),
                 beloep = BigDecimal.valueOf(100),
-                type = UtbetalingsperiodeType.UTBETALING
-            )
+                type = UtbetalingsperiodeType.UTBETALING,
+            ),
         ),
-    revurderingAarsak = revurderingAarsak
+    revurderingAarsak = revurderingAarsak,
 )

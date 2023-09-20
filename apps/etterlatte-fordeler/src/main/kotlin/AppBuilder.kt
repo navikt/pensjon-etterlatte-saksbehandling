@@ -9,23 +9,24 @@ import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.pdltjenester.PdlTjenesterKlient
 
 class AppBuilder(private val env: Miljoevariabler) {
+    internal fun pdlTjenesterKlient() =
+        PdlTjenesterKlient(
+            client = pdlTjenesterHttpClient,
+            apiUrl = env.requireEnvValue("PDL_URL"),
+        )
 
-    internal fun pdlTjenesterKlient() = PdlTjenesterKlient(
-        client = pdlTjenesterHttpClient,
-        apiUrl = env.requireEnvValue("PDL_URL")
-    )
-
-    internal fun behandlingKlient() = BehandlingKlient(
-        httpClient = behandlingHttpClient,
-        url = env.requireEnvValue("BEHANDLING_URL")
-    )
+    internal fun behandlingKlient() =
+        BehandlingKlient(
+            httpClient = behandlingHttpClient,
+            url = env.requireEnvValue("BEHANDLING_URL"),
+        )
 
     private val behandlingHttpClient: HttpClient by lazy {
         httpClientClientCredentials(
             azureAppClientId = env.requireEnvValue("AZURE_APP_CLIENT_ID"),
             azureAppJwk = env.requireEnvValue("AZURE_APP_JWK"),
             azureAppWellKnownUrl = env.requireEnvValue("AZURE_APP_WELL_KNOWN_URL"),
-            azureAppScope = env.requireEnvValue("BEHANDLING_AZURE_SCOPE")
+            azureAppScope = env.requireEnvValue("BEHANDLING_AZURE_SCOPE"),
         )
     }
 
@@ -34,11 +35,14 @@ class AppBuilder(private val env: Miljoevariabler) {
             azureAppClientId = env.requireEnvValue("AZURE_APP_CLIENT_ID"),
             azureAppJwk = env.requireEnvValue("AZURE_APP_JWK"),
             azureAppWellKnownUrl = env.requireEnvValue("AZURE_APP_WELL_KNOWN_URL"),
-            azureAppScope = env.requireEnvValue("PDL_AZURE_SCOPE")
+            azureAppScope = env.requireEnvValue("PDL_AZURE_SCOPE"),
         )
     }
 
-    fun longFeature(featureName: String, default: Long = 0): Long {
+    fun longFeature(
+        featureName: String,
+        default: Long = 0,
+    ): Long {
         return (env[featureName]?.toLong() ?: default).takeIf { it > -1 } ?: Long.MAX_VALUE
     }
 

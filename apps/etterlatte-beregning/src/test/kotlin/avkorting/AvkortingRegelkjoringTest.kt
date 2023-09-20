@@ -16,29 +16,30 @@ import java.time.YearMonth
 import java.util.UUID
 
 class AvkortingRegelkjoringTest {
-
     @Test
     fun `skal beregne avkorting for inntekt til en foerstegangsbehandling`() {
         val virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2023, 6))
-        val avkortingGrunnlag = listOf(
-            avkortinggrunnlag(
-                aarsinntekt = 300000,
-                fratrekkInnAar = 50000,
-                relevanteMaanederInnAar = 10,
-                periode = Periode(fom = YearMonth.of(2023, 6), tom = YearMonth.of(2023, 8))
-            ),
-            avkortinggrunnlag(
-                aarsinntekt = 600000,
-                fratrekkInnAar = 100000,
-                relevanteMaanederInnAar = 10,
-                periode = Periode(fom = YearMonth.of(2023, 9), tom = null)
+        val avkortingGrunnlag =
+            listOf(
+                avkortinggrunnlag(
+                    aarsinntekt = 300000,
+                    fratrekkInnAar = 50000,
+                    relevanteMaanederInnAar = 10,
+                    periode = Periode(fom = YearMonth.of(2023, 6), tom = YearMonth.of(2023, 8)),
+                ),
+                avkortinggrunnlag(
+                    aarsinntekt = 600000,
+                    fratrekkInnAar = 100000,
+                    relevanteMaanederInnAar = 10,
+                    periode = Periode(fom = YearMonth.of(2023, 9), tom = null),
+                ),
             )
-        )
 
-        val avkortingsperioder = AvkortingRegelkjoring.beregnInntektsavkorting(
-            Periode(fom = virkningstidspunkt.dato, tom = null),
-            avkortingGrunnlag
-        )
+        val avkortingsperioder =
+            AvkortingRegelkjoring.beregnInntektsavkorting(
+                Periode(fom = virkningstidspunkt.dato, tom = null),
+                avkortingGrunnlag,
+            )
 
         with(avkortingsperioder[0]) {
             regelResultat shouldNotBe null
@@ -59,21 +60,22 @@ class AvkortingRegelkjoringTest {
     @Test
     fun `skal ikke tillate aa beregne avkorting for inntekt med feil perioder`() {
         val virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2023, 1))
-        val avkortingGrunnlag = listOf(
-            avkortinggrunnlag(
-                aarsinntekt = 300000,
-                periode = Periode(fom = YearMonth.of(2023, 1), tom = null)
-            ),
-            avkortinggrunnlag(
-                aarsinntekt = 500000,
-                periode = Periode(fom = YearMonth.of(2023, 4), tom = null)
+        val avkortingGrunnlag =
+            listOf(
+                avkortinggrunnlag(
+                    aarsinntekt = 300000,
+                    periode = Periode(fom = YearMonth.of(2023, 1), tom = null),
+                ),
+                avkortinggrunnlag(
+                    aarsinntekt = 500000,
+                    periode = Periode(fom = YearMonth.of(2023, 4), tom = null),
+                ),
             )
-        )
 
         assertThrows<PeriodiseringAvGrunnlagFeil> {
             AvkortingRegelkjoring.beregnInntektsavkorting(
                 Periode(fom = virkningstidspunkt.dato, tom = null),
-                avkortingGrunnlag
+                avkortingGrunnlag,
             )
         }
     }
@@ -82,47 +84,50 @@ class AvkortingRegelkjoringTest {
     fun `skal beregne endelig avkortet ytelse`() {
         val virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2023, 1))
         val beregningsId = UUID.randomUUID()
-        val beregninger = listOf(
-            YtelseFoerAvkorting(
-                beregning = 5000,
-                Periode(
+        val beregninger =
+            listOf(
+                YtelseFoerAvkorting(
+                    beregning = 5000,
+                    Periode(
+                        fom = YearMonth.of(2023, 1),
+                        tom = YearMonth.of(2023, 3),
+                    ),
+                    beregningsreferanse = beregningsId,
+                ),
+                YtelseFoerAvkorting(
+                    beregning = 10000,
+                    Periode(
+                        fom = YearMonth.of(2023, 4),
+                        tom = null,
+                    ),
+                    beregningsreferanse = beregningsId,
+                ),
+            )
+        val avkortingsperioder =
+            listOf(
+                avkortingsperiode(
+                    avkorting = 1000,
                     fom = YearMonth.of(2023, 1),
-                    tom = YearMonth.of(2023, 3)
+                    tom = YearMonth.of(2023, 1),
                 ),
-                beregningsreferanse = beregningsId
-            ),
-            YtelseFoerAvkorting(
-                beregning = 10000,
-                Periode(
-                    fom = YearMonth.of(2023, 4),
-                    tom = null
+                avkortingsperiode(
+                    avkorting = 2000,
+                    fom = YearMonth.of(2023, 2),
+                    tom = YearMonth.of(2023, 2),
                 ),
-                beregningsreferanse = beregningsId
+                avkortingsperiode(
+                    avkorting = 3000,
+                    fom = YearMonth.of(2023, 3),
+                ),
             )
-        )
-        val avkortingsperioder = listOf(
-            avkortingsperiode(
-                avkorting = 1000,
-                fom = YearMonth.of(2023, 1),
-                tom = YearMonth.of(2023, 1)
-            ),
-            avkortingsperiode(
-                avkorting = 2000,
-                fom = YearMonth.of(2023, 2),
-                tom = YearMonth.of(2023, 2)
-            ),
-            avkortingsperiode(
-                avkorting = 3000,
-                fom = YearMonth.of(2023, 3)
-            )
-        )
 
-        val avkortetYtelse = AvkortingRegelkjoring.beregnAvkortetYtelse(
-            Periode(fom = virkningstidspunkt.dato, tom = null),
-            beregninger,
-            avkortingsperioder,
-            AvkortetYtelseType.FORVENTET_INNTEKT
-        )
+        val avkortetYtelse =
+            AvkortingRegelkjoring.beregnAvkortetYtelse(
+                Periode(fom = virkningstidspunkt.dato, tom = null),
+                beregninger,
+                avkortingsperioder,
+                AvkortetYtelseType.FORVENTET_INNTEKT,
+            )
 
         avkortetYtelse.size shouldBe 4
         with(avkortetYtelse[0]) {
@@ -156,5 +161,4 @@ class AvkortingRegelkjoringTest {
             ytelseFoerAvkorting shouldBe 10000
         }
     }
-
 }

@@ -23,25 +23,25 @@ import rapidsandrivers.HENDELSE_DATA_KEY
 import rapidsandrivers.SAK_ID_KEY
 import rapidsandrivers.TILBAKESTILTE_BEHANDLINGER_KEY
 import java.time.LocalDate
-import java.util.*
+import java.util.UUID
 
 internal class LoependeYtelserforespoerselTest {
-
-    private val `1_mai_2023` = LocalDate.of(2023, 5, 1)
+    private val foersteMai2023 = LocalDate.of(2023, 5, 1)
     private val sakId = 1L
 
-    private fun genererReguleringMelding(dato: LocalDate) = JsonMessage.newMessage(
-        mapOf(
-            EVENT_NAME_KEY to FINN_LOEPENDE_YTELSER,
-            SAK_ID_KEY to 1,
-            DATO_KEY to dato,
-            TILBAKESTILTE_BEHANDLINGER_KEY to ""
+    private fun genererReguleringMelding(dato: LocalDate) =
+        JsonMessage.newMessage(
+            mapOf(
+                EVENT_NAME_KEY to FINN_LOEPENDE_YTELSER,
+                SAK_ID_KEY to 1,
+                DATO_KEY to dato,
+                TILBAKESTILTE_BEHANDLINGER_KEY to "",
+            ),
         )
-    )
 
     @Test
     fun `kan ta imot reguleringsmelding og kalle paa vedtakservice med riktige verdier`() {
-        val melding = genererReguleringMelding(`1_mai_2023`)
+        val melding = genererReguleringMelding(foersteMai2023)
         val vedtakServiceMock = mockk<VedtakService>(relaxed = true)
         val inspector = TestRapid().apply { LoependeYtelserforespoersel(this, vedtakServiceMock) }
 
@@ -54,10 +54,10 @@ internal class LoependeYtelserforespoerselTest {
     @Test
     fun `skal lage ny melding med dato basert paa hva ytelsen har som foerste mulige dato`() {
         val fraDato = LocalDate.of(2023, 8, 1)
-        val melding = genererReguleringMelding(`1_mai_2023`)
+        val melding = genererReguleringMelding(foersteMai2023)
         val vedtakServiceMock = mockk<VedtakService>(relaxed = true)
         every { vedtakServiceMock.tilbakestillVedtak(any()) } just runs
-        every { vedtakServiceMock.harLoependeYtelserFra(sakId, `1_mai_2023`) } returns LoependeYtelseDTO(true, fraDato)
+        every { vedtakServiceMock.harLoependeYtelserFra(sakId, foersteMai2023) } returns LoependeYtelseDTO(true, fraDato)
         val inspector = TestRapid().apply { LoependeYtelserforespoersel(this, vedtakServiceMock) }
 
         inspector.sendTestMessage(melding.toJson())
@@ -67,20 +67,21 @@ internal class LoependeYtelserforespoerselTest {
             Omregningshendelse(
                 sakId = sakId,
                 fradato = fraDato,
-                prosesstype = Prosesstype.AUTOMATISK
+                prosesstype = Prosesstype.AUTOMATISK,
             ),
-            objectMapper.readValue(sendtMelding.get(HENDELSE_DATA_KEY).toString(), Omregningshendelse::class.java)
+            objectMapper.readValue(sendtMelding.get(HENDELSE_DATA_KEY).toString(), Omregningshendelse::class.java),
         )
     }
 
     @Test
     fun `sender ikke ny melding dersom det ikke er en loepende ytelse`() {
-        val melding = genererReguleringMelding(`1_mai_2023`)
+        val melding = genererReguleringMelding(foersteMai2023)
         val vedtakServiceMock = mockk<VedtakService>(relaxed = true)
-        every { vedtakServiceMock.harLoependeYtelserFra(sakId, `1_mai_2023`) } returns LoependeYtelseDTO(
-            false,
-            `1_mai_2023`
-        )
+        every { vedtakServiceMock.harLoependeYtelserFra(sakId, foersteMai2023) } returns
+            LoependeYtelseDTO(
+                false,
+                foersteMai2023,
+            )
         val inspector = TestRapid().apply { LoependeYtelserforespoersel(this, vedtakServiceMock) }
 
         inspector.sendTestMessage(melding.toJson())
@@ -90,18 +91,20 @@ internal class LoependeYtelserforespoerselTest {
     @Test
     fun `tilbakestiller alle vedtak for behandlinger som blitt tilbakestillt allerede`() {
         val behandlinger = listOf(UUID.randomUUID(), UUID.randomUUID())
-        val melding = mapOf(
-            EVENT_NAME_KEY to FINN_LOEPENDE_YTELSER,
-            SAK_ID_KEY to 1,
-            DATO_KEY to `1_mai_2023`,
-            TILBAKESTILTE_BEHANDLINGER_KEY to "${behandlinger[0]};${behandlinger[1]}"
-        ).let { JsonMessage.newMessage(it) }
+        val melding =
+            mapOf(
+                EVENT_NAME_KEY to FINN_LOEPENDE_YTELSER,
+                SAK_ID_KEY to 1,
+                DATO_KEY to foersteMai2023,
+                TILBAKESTILTE_BEHANDLINGER_KEY to "${behandlinger[0]};${behandlinger[1]}",
+            ).let { JsonMessage.newMessage(it) }
 
         val vedtakServiceMock = mockk<VedtakService>(relaxed = true)
-        every { vedtakServiceMock.harLoependeYtelserFra(sakId, `1_mai_2023`) } returns LoependeYtelseDTO(
-            true,
-            `1_mai_2023`
-        )
+        every { vedtakServiceMock.harLoependeYtelserFra(sakId, foersteMai2023) } returns
+            LoependeYtelseDTO(
+                true,
+                foersteMai2023,
+            )
         val inspector = TestRapid().apply { LoependeYtelserforespoersel(this, vedtakServiceMock) }
 
         inspector.sendTestMessage(melding.toJson())

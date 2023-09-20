@@ -6,12 +6,12 @@ import org.slf4j.LoggerFactory
 
 data class PersonMedSakerOgRoller(
     val fnr: String,
-    val sakerOgRoller: List<SakOgRolle>
+    val sakerOgRoller: List<SakOgRolle>,
 )
 
 data class SakOgRolle(
     val sakId: Long,
-    val rolle: Saksrolle
+    val rolle: Saksrolle,
 )
 
 enum class Saksrolle {
@@ -19,14 +19,16 @@ enum class Saksrolle {
     SOESKEN,
     AVDOED,
     GJENLEVENDE,
-    UKJENT;
+    UKJENT,
+    ;
 
     fun toPersonrolle(sakType: SakType): PersonRolle =
         when (this) {
-            SOEKER -> when (sakType) {
-                SakType.BARNEPENSJON -> PersonRolle.BARN
-                SakType.OMSTILLINGSSTOENAD -> PersonRolle.GJENLEVENDE
-            }
+            SOEKER ->
+                when (sakType) {
+                    SakType.BARNEPENSJON -> PersonRolle.BARN
+                    SakType.OMSTILLINGSSTOENAD -> PersonRolle.GJENLEVENDE
+                }
             SOESKEN -> PersonRolle.BARN
             AVDOED -> PersonRolle.AVDOED
             GJENLEVENDE -> PersonRolle.GJENLEVENDE
@@ -35,6 +37,7 @@ enum class Saksrolle {
 
     companion object {
         val log: Logger = LoggerFactory.getLogger(Saksrolle::class.java)
+
         fun enumVedNavnEllerUkjent(rolle: String) =
             try {
                 Saksrolle.valueOf(rolle.uppercase())
@@ -42,7 +45,7 @@ enum class Saksrolle {
                 log.error(
                     "Kunne ikke bestemme rolle fra kolonnen $rolle i databasen. Dette betyr at kolonne-navnet i " +
                         "databasen verdien er hentet fra ikke samsvarer med noen av enum-verdiene til Saksrolle. " +
-                        "Setter rolle som ukjent"
+                        "Setter rolle som ukjent",
                 )
                 UKJENT
             }

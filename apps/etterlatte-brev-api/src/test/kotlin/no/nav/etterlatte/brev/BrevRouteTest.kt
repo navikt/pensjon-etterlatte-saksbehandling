@@ -45,7 +45,6 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import testsupport.buildTestApplicationConfigurationForOauth
-import java.util.*
 import kotlin.random.Random
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -82,11 +81,12 @@ internal class BrevRouteTest {
         testApplication {
             val client = httpClient()
 
-            val response = client.get("/api/brev/$brevId") {
-                parameter("sakId", SAK_ID)
-                header(HttpHeaders.Authorization, "Bearer $accessToken")
-                contentType(ContentType.Application.Json)
-            }
+            val response =
+                client.get("/api/brev/$brevId") {
+                    parameter("sakId", SAK_ID)
+                    header(HttpHeaders.Authorization, "Bearer $accessToken")
+                    contentType(ContentType.Application.Json)
+                }
 
             assertEquals(HttpStatusCode.OK, response.status)
         }
@@ -105,11 +105,12 @@ internal class BrevRouteTest {
         testApplication {
             val client = httpClient()
 
-            val response = client.get("/api/brev/$brevId/pdf") {
-                parameter("sakId", SAK_ID)
-                header(HttpHeaders.Authorization, "Bearer $accessToken")
-                contentType(ContentType.Application.Json)
-            }
+            val response =
+                client.get("/api/brev/$brevId/pdf") {
+                    parameter("sakId", SAK_ID)
+                    header(HttpHeaders.Authorization, "Bearer $accessToken")
+                    contentType(ContentType.Application.Json)
+                }
 
             assertEquals(HttpStatusCode.OK, response.status)
             assertArrayEquals(pdf.bytes, response.body())
@@ -131,11 +132,12 @@ internal class BrevRouteTest {
         testApplication {
             val client = httpClient()
 
-            val response = client.get("/api/brev/$brevId/payload") {
-                parameter("sakId", SAK_ID)
-                header(HttpHeaders.Authorization, "Bearer $accessToken")
-                contentType(ContentType.Application.Json)
-            }
+            val response =
+                client.get("/api/brev/$brevId/payload") {
+                    parameter("sakId", SAK_ID)
+                    header(HttpHeaders.Authorization, "Bearer $accessToken")
+                    contentType(ContentType.Application.Json)
+                }
 
             assertEquals(HttpStatusCode.OK, response.status)
         }
@@ -156,12 +158,13 @@ internal class BrevRouteTest {
         testApplication {
             val client = httpClient()
 
-            val response = client.post("/api/brev/$brevId/payload") {
-                parameter("sakId", SAK_ID)
-                header(HttpHeaders.Authorization, "Bearer $accessToken")
-                contentType(ContentType.Application.Json)
-                setBody(OppdaterPayloadRequest(Slate(), listOf()))
-            }
+            val response =
+                client.post("/api/brev/$brevId/payload") {
+                    parameter("sakId", SAK_ID)
+                    header(HttpHeaders.Authorization, "Bearer $accessToken")
+                    contentType(ContentType.Application.Json)
+                    setBody(OppdaterPayloadRequest(Slate(), listOf()))
+                }
 
             assertEquals(HttpStatusCode.OK, response.status)
         }
@@ -179,9 +182,10 @@ internal class BrevRouteTest {
         testApplication {
             val client = httpClient()
 
-            val response = client.get("/api/brev/123/baretull") {
-                header(HttpHeaders.Authorization, "Bearer $accessToken")
-            }
+            val response =
+                client.get("/api/brev/123/baretull") {
+                    header(HttpHeaders.Authorization, "Bearer $accessToken")
+                }
 
             assertEquals(HttpStatusCode.NotFound, response.status)
         }
@@ -212,27 +216,30 @@ internal class BrevRouteTest {
         mockOAuth2Server.issueToken(
             issuerId = AZURE_ISSUER,
             audience = CLIENT_ID,
-            claims = mapOf(
-                "navn" to "Test Veiledersen",
-                "NAVident" to "S123456"
-            )
+            claims =
+                mapOf(
+                    "navn" to "Test Veiledersen",
+                    "NAVident" to "S123456",
+                ),
         ).serialize()
     }
 
-    private fun opprettBrev(id: BrevID) = Brev(
-        id = id,
-        sakId = 41,
-        behandlingId = null,
-        prosessType = BrevProsessType.AUTOMATISK,
-        soekerFnr = "soeker_fnr",
-        status = Status.OPPRETTET,
-        mottaker = Mottaker(
-            "Stor Snerk",
-            STOR_SNERK,
-            null,
-            Adresse(adresseType = "NORSKPOSTADRESSE", "Testgaten 13", "1234", "OSLO", land = "Norge", landkode = "NOR")
+    private fun opprettBrev(id: BrevID) =
+        Brev(
+            id = id,
+            sakId = 41,
+            behandlingId = null,
+            prosessType = BrevProsessType.AUTOMATISK,
+            soekerFnr = "soeker_fnr",
+            status = Status.OPPRETTET,
+            mottaker =
+                Mottaker(
+                    "Stor Snerk",
+                    STOR_SNERK,
+                    null,
+                    Adresse(adresseType = "NORSKPOSTADRESSE", "Testgaten 13", "1234", "OSLO", land = "Norge", landkode = "NOR"),
+                ),
         )
-    )
 
     private fun ApplicationTestBuilder.httpClient(): HttpClient {
         environment {
@@ -242,7 +249,7 @@ internal class BrevRouteTest {
             restModule(this.log, routePrefix = "api") {
                 brevRoute(
                     brevService,
-                    behandlingKlient
+                    behandlingKlient,
                 )
             }
         }

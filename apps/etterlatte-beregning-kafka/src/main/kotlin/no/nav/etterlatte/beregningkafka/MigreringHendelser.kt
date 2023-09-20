@@ -23,7 +23,6 @@ import rapidsandrivers.migrering.ListenerMedLoggingOgFeilhaandtering
 
 internal class MigreringHendelser(rapidsConnection: RapidsConnection, private val beregningService: BeregningService) :
     ListenerMedLoggingOgFeilhaandtering(Migreringshendelser.BEREGN) {
-
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     init {
@@ -35,7 +34,10 @@ internal class MigreringHendelser(rapidsConnection: RapidsConnection, private va
         }.register(this)
     }
 
-    override fun haandterPakke(packet: JsonMessage, context: MessageContext) {
+    override fun haandterPakke(
+        packet: JsonMessage,
+        context: MessageContext,
+    ) {
         val behandlingId = packet.behandlingId
         logger.info("Mottatt beregnings-migreringshendelse for $BEHANDLING_ID_KEY $behandlingId")
 
@@ -52,13 +54,14 @@ internal class MigreringHendelser(rapidsConnection: RapidsConnection, private va
 
     private fun tilGrunnlagDTO(request: MigreringRequest): BarnepensjonBeregningsGrunnlag =
         BarnepensjonBeregningsGrunnlag(
-            soeskenMedIBeregning = listOf(
-                GrunnlagMedPeriode(
-                    fom = request.virkningstidspunkt.atDay(1),
-                    tom = null,
-                    data = emptyList()
-                )
-            ),
-            institusjonsopphold = emptyList()
+            soeskenMedIBeregning =
+                listOf(
+                    GrunnlagMedPeriode(
+                        fom = request.virkningstidspunkt.atDay(1),
+                        tom = null,
+                        data = emptyList(),
+                    ),
+                ),
+            institusjonsopphold = emptyList(),
         )
 }

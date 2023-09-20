@@ -39,12 +39,11 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import testsupport.buildTestApplicationConfigurationForOauth
 import java.time.YearMonth
-import java.util.*
+import java.util.UUID
 import java.util.UUID.randomUUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class BeregningRoutesTest {
-
     private val server = MockOAuth2Server()
     private lateinit var applicationConfig: HoconApplicationConfig
     private val beregningRepository = mockk<BeregningRepository>()
@@ -53,14 +52,15 @@ internal class BeregningRoutesTest {
     private val beregnOmstillingsstoenadService = mockk<BeregnOmstillingsstoenadService>()
     private val beregningsGrunnlagService = mockk<BeregningsGrunnlagService>()
     private val trygdetidKlient = mockk<TrygdetidKlient>()
-    private val beregningService = BeregningService(
-        beregningRepository = beregningRepository,
-        behandlingKlient = behandlingKlient,
-        beregnBarnepensjonService = beregnBarnepensjonService,
-        beregnOmstillingsstoenadService = beregnOmstillingsstoenadService,
-        beregningsGrunnlagService = beregningsGrunnlagService,
-        trygdetidKlient = trygdetidKlient
-    )
+    private val beregningService =
+        BeregningService(
+            beregningRepository = beregningRepository,
+            behandlingKlient = behandlingKlient,
+            beregnBarnepensjonService = beregnBarnepensjonService,
+            beregnOmstillingsstoenadService = beregnOmstillingsstoenadService,
+            beregningsGrunnlagService = beregningsGrunnlagService,
+            trygdetidKlient = trygdetidKlient,
+        )
 
     @BeforeAll
     fun before() {
@@ -84,10 +84,11 @@ internal class BeregningRoutesTest {
             environment { config = applicationConfig }
             application { restModule(log) { beregning(beregningService, behandlingKlient) } }
 
-            val response = client.get("/api/beregning/${randomUUID()}") {
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                header(HttpHeaders.Authorization, "Bearer $token")
-            }
+            val response =
+                client.get("/api/beregning/${randomUUID()}") {
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    header(HttpHeaders.Authorization, "Bearer $token")
+                }
 
             response.status shouldBe HttpStatusCode.NotFound
         }
@@ -104,10 +105,11 @@ internal class BeregningRoutesTest {
             environment { config = applicationConfig }
             application { restModule(log) { beregning(beregningService, behandlingKlient) } }
 
-            val response = client.get("/api/beregning/${beregning.behandlingId}") {
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                header(HttpHeaders.Authorization, "Bearer $token")
-            }
+            val response =
+                client.get("/api/beregning/${beregning.behandlingId}") {
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    header(HttpHeaders.Authorization, "Bearer $token")
+                }
 
             val hentetBeregning = objectMapper.readValue(response.bodyAsText(), BeregningDTO::class.java)
 
@@ -150,10 +152,11 @@ internal class BeregningRoutesTest {
             environment { config = applicationConfig }
             application { restModule(log) { beregning(beregningService, behandlingKlient) } }
 
-            val response = client.post("/api/beregning/${behandling.id}") {
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                header(HttpHeaders.Authorization, "Bearer $token")
-            }
+            val response =
+                client.post("/api/beregning/${behandling.id}") {
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    header(HttpHeaders.Authorization, "Bearer $token")
+                }
 
             val opprettetBeregning = objectMapper.readValue(response.bodyAsText(), BeregningDTO::class.java)
 
@@ -169,15 +172,15 @@ internal class BeregningRoutesTest {
 
     private fun beregning(
         behandlingId: UUID = randomUUID(),
-        datoFOM: YearMonth = YearMonth.of(2021, 2)
-    ) =
-        Beregning(
-            beregningId = randomUUID(),
-            behandlingId = behandlingId,
-            type = Beregningstype.BP,
-            beregnetDato = Tidspunkt.now(),
-            grunnlagMetadata = no.nav.etterlatte.libs.common.grunnlag.Metadata(1, 1),
-            beregningsperioder = listOf(
+        datoFOM: YearMonth = YearMonth.of(2021, 2),
+    ) = Beregning(
+        beregningId = randomUUID(),
+        behandlingId = behandlingId,
+        type = Beregningstype.BP,
+        beregnetDato = Tidspunkt.now(),
+        grunnlagMetadata = no.nav.etterlatte.libs.common.grunnlag.Metadata(1, 1),
+        beregningsperioder =
+            listOf(
                 Beregningsperiode(
                     datoFOM = datoFOM,
                     datoTOM = null,
@@ -186,10 +189,10 @@ internal class BeregningRoutesTest {
                     grunnbelopMnd = 10_000,
                     grunnbelop = 100_000,
                     trygdetid = 40,
-                    kilde = Grunnlagsopplysning.RegelKilde("regelid", Tidspunkt.now(), "1")
-                )
-            )
-        )
+                    kilde = Grunnlagsopplysning.RegelKilde("regelid", Tidspunkt.now(), "1"),
+                ),
+            ),
+    )
 
     private fun mockBehandling(): DetaljertBehandling =
         mockk<DetaljertBehandling>().apply {
@@ -204,7 +207,7 @@ internal class BeregningRoutesTest {
         server.issueToken(
             issuerId = AZURE_ISSUER,
             audience = CLIENT_ID,
-            claims = mapOf("navn" to "John Doe", "NAVident" to "Saksbehandler01")
+            claims = mapOf("navn" to "John Doe", "NAVident" to "Saksbehandler01"),
         ).serialize()
     }
 

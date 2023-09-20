@@ -19,24 +19,27 @@ class PenKlient(config: Config, pen: HttpClient) {
 
     private val clientId = config.getString("pen.client.id")
     private val resourceUrl = config.getString("pen.client.url")
+
     fun hentAlleSaker(): List<PesysId> {
         // TODO i EY-2599: Kople opp mot PEN/Pesys her
         return listOf()
     }
+
     suspend fun hentSak(sakid: Long): BarnepensjonGrunnlagResponse {
         logger.info("Henter sak $sakid fra PEN")
 
         return downstreamResourceClient
             .get(
-                resource = Resource(
-                    clientId = clientId,
-                    url = "$resourceUrl/barnepensjon-migrering/grunnlag?sakId=$sakid"
-                ),
-                brukerTokenInfo = migreringssystembruker
+                resource =
+                    Resource(
+                        clientId = clientId,
+                        url = "$resourceUrl/barnepensjon-migrering/grunnlag?sakId=$sakid",
+                    ),
+                brukerTokenInfo = migreringssystembruker,
             )
             .mapBoth(
                 success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
-                failure = { errorResponse -> throw errorResponse }
+                failure = { errorResponse -> throw errorResponse },
             )
     }
 
@@ -44,16 +47,17 @@ class PenKlient(config: Config, pen: HttpClient) {
         logger.info("Opphører sak $pesysId i PEN")
         downstreamResourceClient
             .post(
-                resource = Resource(
-                    clientId = clientId,
-                    url = "$resourceUrl/barnepensjon-migrering/opphoer?sakId=${pesysId.id}"
-                ),
+                resource =
+                    Resource(
+                        clientId = clientId,
+                        url = "$resourceUrl/barnepensjon-migrering/opphoer?sakId=${pesysId.id}",
+                    ),
                 brukerTokenInfo = migreringssystembruker,
-                postBody = {}
+                postBody = {},
             )
             .mapBoth(
                 success = { logger.info("Opphørte sak $pesysId mot PEN") },
-                failure = { errorResponse -> throw errorResponse }
+                failure = { errorResponse -> throw errorResponse },
             )
     }
 }

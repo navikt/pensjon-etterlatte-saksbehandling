@@ -28,11 +28,10 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
-import java.util.*
+import java.util.UUID
 import kotlin.random.Random
 
 internal class DokarkivServiceTest {
-
     private val mockKlient = mockk<DokarkivKlient>()
     private val mockDb = mockk<BrevRepository>()
 
@@ -61,12 +60,13 @@ internal class DokarkivServiceTest {
 
         val brevId = Random.nextLong()
 
-        val vedtak = VedtakTilJournalfoering(
-            1,
-            VedtakSak("ident", type, Random.nextLong()),
-            UUID.randomUUID(),
-            "ansvarligEnhet"
-        )
+        val vedtak =
+            VedtakTilJournalfoering(
+                1,
+                VedtakSak("ident", type, Random.nextLong()),
+                UUID.randomUUID(),
+                "ansvarligEnhet",
+            )
 
         val response = service.journalfoer(brevId, vedtak)
         response shouldBe forventetResponse

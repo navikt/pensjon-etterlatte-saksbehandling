@@ -22,28 +22,29 @@ import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
 
 class PdlTjenesterKlientTest {
-
     private lateinit var pdlTjenesterKlient: PdlTjenesterKlient
 
     private fun mockEndpoint(file: String) {
-        val httpClient = HttpClient(MockEngine) {
-            expectSuccess = true
-            engine {
-                addHandler { request ->
-                    if (request.url.fullPath == "/person" && request.method == HttpMethod.Post) {
-                        val headers = headersOf(
-                            "Content-Type" to listOf(ContentType.Application.Json.toString())
-                        )
-                        respond(content = readFile(file), headers = headers)
-                    } else {
-                        error(request.url.fullPath)
+        val httpClient =
+            HttpClient(MockEngine) {
+                expectSuccess = true
+                engine {
+                    addHandler { request ->
+                        if (request.url.fullPath == "/person" && request.method == HttpMethod.Post) {
+                            val headers =
+                                headersOf(
+                                    "Content-Type" to listOf(ContentType.Application.Json.toString()),
+                                )
+                            respond(content = readFile(file), headers = headers)
+                        } else {
+                            error(request.url.fullPath)
+                        }
                     }
                 }
+                install(ContentNegotiation) {
+                    register(ContentType.Application.Json, JacksonConverter(objectMapper))
+                }
             }
-            install(ContentNegotiation) {
-                register(ContentType.Application.Json, JacksonConverter(objectMapper))
-            }
-        }
 
         pdlTjenesterKlient = PdlTjenesterKlient(httpClient, "/person")
     }
@@ -52,15 +53,16 @@ class PdlTjenesterKlientTest {
     fun `skal hente person og mappe riktig til datamodell`() {
         mockEndpoint("/pdltjenester/person.json")
 
-        val person = runBlocking {
-            pdlTjenesterKlient.hentPerson(
-                HentPersonRequest(
-                    foedselsnummer = Folkeregisteridentifikator.of(FNR_1),
-                    rolle = PersonRolle.BARN,
-                    saktype = SakType.BARNEPENSJON
+        val person =
+            runBlocking {
+                pdlTjenesterKlient.hentPerson(
+                    HentPersonRequest(
+                        foedselsnummer = Folkeregisteridentifikator.of(FNR_1),
+                        rolle = PersonRolle.BARN,
+                        saktype = SakType.BARNEPENSJON,
+                    ),
                 )
-            )
-        }
+            }
 
         assertNotNull(person)
         assertEquals(person.fornavn, "Jens")

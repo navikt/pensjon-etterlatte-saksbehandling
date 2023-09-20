@@ -21,24 +21,25 @@ import no.nav.etterlatte.libs.common.toJson
 import org.junit.jupiter.api.Test
 
 class EnhetServiceTest {
-
     private val defaultHeaders = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
 
-    private val saksbehandlerEnheter = listOf(
-        SaksbehandlerEnhet("id1", "navn1"),
-        SaksbehandlerEnhet("id2", "navn2"),
-        SaksbehandlerEnhet("id3", "navn3")
-    )
+    private val saksbehandlerEnheter =
+        listOf(
+            SaksbehandlerEnhet("id1", "navn1"),
+            SaksbehandlerEnhet("id2", "navn2"),
+            SaksbehandlerEnhet("id3", "navn3"),
+        )
 
     private val testNavIdent = "ident1"
 
-    private fun klient(): NavAnsattKlient = NavAnsattKlientImpl(
-        mockHttpClient(
-            saksbehandlerEnheter,
-            testNavIdent
-        ),
-        ""
-    )
+    private fun klient(): NavAnsattKlient =
+        NavAnsattKlientImpl(
+            mockHttpClient(
+                saksbehandlerEnheter,
+                testNavIdent,
+            ),
+            "",
+        )
 
     @Test
     fun `hent enheter skal returnere en liste av enheter`() {
@@ -75,28 +76,33 @@ class EnhetServiceTest {
         }
     }
 
-    private fun mockHttpClient(respons: Any, ident: String): HttpClient {
-        val httpClient = HttpClient(MockEngine) {
-            engine {
-                addHandler { request ->
-                    when (request.url.fullPath) {
-                        "/navansatt/$ident/enheter" -> respond(
-                            respons.toJson(),
-                            HttpStatusCode.OK,
-                            defaultHeaders
-                        )
+    private fun mockHttpClient(
+        respons: Any,
+        ident: String,
+    ): HttpClient {
+        val httpClient =
+            HttpClient(MockEngine) {
+                engine {
+                    addHandler { request ->
+                        when (request.url.fullPath) {
+                            "/navansatt/$ident/enheter" ->
+                                respond(
+                                    respons.toJson(),
+                                    HttpStatusCode.OK,
+                                    defaultHeaders,
+                                )
 
-                        else -> error("Unhandled ${request.url.fullPath}")
+                            else -> error("Unhandled ${request.url.fullPath}")
+                        }
+                    }
+                }
+                expectSuccess = true
+                install(ContentNegotiation) {
+                    jackson {
+                        registerModule(JavaTimeModule())
                     }
                 }
             }
-            expectSuccess = true
-            install(ContentNegotiation) {
-                jackson {
-                    registerModule(JavaTimeModule())
-                }
-            }
-        }
 
         return httpClient
     }

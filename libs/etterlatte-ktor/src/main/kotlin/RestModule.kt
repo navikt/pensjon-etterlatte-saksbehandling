@@ -31,7 +31,7 @@ import no.nav.security.token.support.core.context.TokenValidationContext
 import no.nav.security.token.support.v2.tokenValidationSupport
 import org.slf4j.Logger
 import org.slf4j.event.Level
-import java.util.*
+import java.util.UUID
 
 fun Application.restModule(
     sikkerLogg: Logger,
@@ -40,7 +40,7 @@ fun Application.restModule(
     additionalMetrics: List<MeterBinder> = emptyList(),
     config: ApplicationConfig = environment.config,
     additionalValidation: ((TokenValidationContext) -> Boolean)? = null,
-    routes: Route.() -> Unit
+    routes: Route.() -> Unit,
 ) {
     sikkerLogg.info("Sikkerlogg logger fra restModule")
 
@@ -55,7 +55,7 @@ fun Application.restModule(
         filter { call -> !call.request.path().matches(Regex(".*/isready|.*/isalive|.*/metrics")) }
         format { call ->
             skjulAllePotensielleFnr(
-                "<- ${call.response.status()?.value} ${call.request.httpMethod.value} ${call.request.path()}"
+                "<- ${call.response.status()?.value} ${call.request.httpMethod.value} ${call.request.path()}",
             )
         }
         callIdMdc(CORRELATION_ID)
@@ -81,7 +81,7 @@ fun Application.restModule(
     install(Authentication) {
         tokenValidationSupport(
             config = config,
-            additionalValidation = additionalValidation
+            additionalValidation = additionalValidation,
         )
     }
 

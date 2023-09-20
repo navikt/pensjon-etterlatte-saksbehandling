@@ -5,5 +5,5 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 data class EgenAnsattSkjermet(
     val fnr: String,
     val inntruffet: Tidspunkt,
-    val skjermet: Boolean
+    val skjermet: Boolean,
 )

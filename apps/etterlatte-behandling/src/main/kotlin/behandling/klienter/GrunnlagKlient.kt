@@ -19,10 +19,13 @@ interface GrunnlagKlient {
     suspend fun finnPersonOpplysning(
         sakId: Long,
         opplysningsType: Opplysningstype,
-        brukerTokenInfo: BrukerTokenInfo
+        brukerTokenInfo: BrukerTokenInfo,
     ): Grunnlagsopplysning<Person>?
 
-    suspend fun hentPersongalleri(sakId: Long, brukerTokenInfo: BrukerTokenInfo): Grunnlagsopplysning<Persongalleri>?
+    suspend fun hentPersongalleri(
+        sakId: Long,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Grunnlagsopplysning<Persongalleri>?
 }
 
 class GrunnlagKlientException(override val message: String, override val cause: Throwable) : Exception(message, cause)
@@ -39,49 +42,51 @@ class GrunnlagKlientObo(config: Config, httpClient: HttpClient) : GrunnlagKlient
     override suspend fun finnPersonOpplysning(
         sakId: Long,
         opplysningsType: Opplysningstype,
-        brukerTokenInfo: BrukerTokenInfo
+        brukerTokenInfo: BrukerTokenInfo,
     ): Grunnlagsopplysning<Person>? {
         try {
             logger.info("Henter opplysning ($opplysningsType) fra grunnlag for sak med sakId=$sakId")
 
             return downstreamResourceClient
                 .get(
-                    resource = Resource(
-                        clientId = clientId,
-                        url = "$resourceUrl/grunnlag/$sakId/$opplysningsType"
-                    ),
-                    brukerTokenInfo = brukerTokenInfo
+                    resource =
+                        Resource(
+                            clientId = clientId,
+                            url = "$resourceUrl/grunnlag/$sakId/$opplysningsType",
+                        ),
+                    brukerTokenInfo = brukerTokenInfo,
                 )
                 .mapBoth(
                     success = { resource -> resource.response?.let { objectMapper.readValue(it.toString()) } },
-                    failure = { errorResponse -> throw errorResponse }
+                    failure = { errorResponse -> throw errorResponse },
                 )
         } catch (e: Exception) {
             throw GrunnlagKlientException(
                 "Henting av opplysning ($opplysningsType) fra grunnlag for sak med sakId=$sakId feilet",
-                e
+                e,
             )
         }
     }
 
     override suspend fun hentPersongalleri(
         sakId: Long,
-        brukerTokenInfo: BrukerTokenInfo
+        brukerTokenInfo: BrukerTokenInfo,
     ): Grunnlagsopplysning<Persongalleri>? {
         try {
             logger.info("Henter persongalleri fra grunnlag for sak med sakId=$sakId")
 
             return downstreamResourceClient
                 .get(
-                    resource = Resource(
-                        clientId = clientId,
-                        url = "$resourceUrl/grunnlag/$sakId/${Opplysningstype.PERSONGALLERI_V1}"
-                    ),
-                    brukerTokenInfo = brukerTokenInfo
+                    resource =
+                        Resource(
+                            clientId = clientId,
+                            url = "$resourceUrl/grunnlag/$sakId/${Opplysningstype.PERSONGALLERI_V1}",
+                        ),
+                    brukerTokenInfo = brukerTokenInfo,
                 )
                 .mapBoth(
                     success = { resource -> resource.response?.let { objectMapper.readValue(it.toString()) } },
-                    failure = { errorResponse -> throw errorResponse }
+                    failure = { errorResponse -> throw errorResponse },
                 )
         } catch (e: Exception) {
             throw GrunnlagKlientException("Henting av persongalleri fra grunnlag for sak med sakId=$sakId feilet", e)

@@ -22,19 +22,20 @@ import java.time.LocalDate
 
 internal class KonsistensavstemmingDataMapper(
     private val avstemming: Konsistensavstemming,
-    private val detaljerPrMelding: Int = ANTALL_DETALJER_PER_AVSTEMMINGMELDING_OPPDRAG
+    private val detaljerPrMelding: Int = ANTALL_DETALJER_PER_AVSTEMMINGMELDING_OPPDRAG,
 ) {
-
     fun opprettAvstemmingsmelding(saktype: Saktype): List<Konsistensavstemmingsdata> =
         listOf(startmelding(saktype)) + datameldinger(saktype) + listOf(sluttmelding(saktype))
 
-    private fun startmelding(saktype: Saktype) = Konsistensavstemmingsdata().apply {
-        aksjonsdata = avstemmingsdata(KodeAksjon.START, saktype)
-    }
+    private fun startmelding(saktype: Saktype) =
+        Konsistensavstemmingsdata().apply {
+            aksjonsdata = avstemmingsdata(KodeAksjon.START, saktype)
+        }
 
-    private fun sluttmelding(saktype: Saktype) = Konsistensavstemmingsdata().apply {
-        aksjonsdata = avstemmingsdata(KodeAksjon.AVSL, saktype)
-    }
+    private fun sluttmelding(saktype: Saktype) =
+        Konsistensavstemmingsdata().apply {
+            aksjonsdata = avstemmingsdata(KodeAksjon.AVSL, saktype)
+        }
 
     private fun datameldinger(saktype: Saktype): List<Konsistensavstemmingsdata> {
         return avstemming.loependeUtbetalinger
@@ -48,7 +49,7 @@ internal class KonsistensavstemmingDataMapper(
                 listOf(
                     Konsistensavstemmingsdata().apply {
                         aksjonsdata = avstemmingsdata(KodeAksjon.DATA, saktype)
-                    }
+                    },
                 )
             }.leggPaaTotaldata()
     }
@@ -63,18 +64,23 @@ internal class KonsistensavstemmingDataMapper(
     private fun totaldata(): Totaldata =
         Totaldata().apply {
             totalAntall = avstemming.loependeUtbetalinger.count().toBigInteger()
-            totalBelop = avstemming.loependeUtbetalinger
-                .flatMap { it.utbetalingslinjer }
-                .sumOf { it.beloep ?: BigDecimal.ZERO }
+            totalBelop =
+                avstemming.loependeUtbetalinger
+                    .flatMap { it.utbetalingslinjer }
+                    .sumOf { it.beloep ?: BigDecimal.ZERO }
             fortegn = OppdragDefaults.TILLEGG.value()
         }
 
-    private fun avstemmingsdata(kodeAksjon: KodeAksjon, saktype: Saktype): Aksjonsdata =
+    private fun avstemmingsdata(
+        kodeAksjon: KodeAksjon,
+        saktype: Saktype,
+    ): Aksjonsdata =
         Aksjonsdata().apply {
-            val fagomraade = when (saktype) {
-                Saktype.BARNEPENSJON -> "BARNEPE"
-                Saktype.OMSTILLINGSSTOENAD -> "OMSTILL"
-            }
+            val fagomraade =
+                when (saktype) {
+                    Saktype.BARNEPENSJON -> "BARNEPE"
+                    Saktype.OMSTILLINGSSTOENAD -> "OMSTILL"
+                }
             aksjonsType = kodeAksjon.name
             kildeType = KildeType.AVLEV.name
             avstemmingType = KONSAVSTEMMING
@@ -89,10 +95,11 @@ internal class KonsistensavstemmingDataMapper(
 
 internal fun OppdragForKonsistensavstemming.toOppdragdata(): Oppdragsdata {
     return Oppdragsdata().apply {
-        fagomradeKode = when (sakType) {
-            Saktype.BARNEPENSJON -> "BARNEPE"
-            Saktype.OMSTILLINGSSTOENAD -> "OMSTILL"
-        }
+        fagomradeKode =
+            when (sakType) {
+                Saktype.BARNEPENSJON -> "BARNEPE"
+                Saktype.OMSTILLINGSSTOENAD -> "OMSTILL"
+            }
         fagsystemId = sakId.value.toString()
         utbetalingsfrekvens = OppdragDefaults.UTBETALINGSFREKVENS
         oppdragGjelderId = fnr.value
@@ -105,17 +112,18 @@ internal fun OppdragForKonsistensavstemming.toOppdragdata(): Oppdragsdata {
                     this.enhetType = it.typeEnhet
                     this.enhetFom = it.datoEnhetFom.toXMLFormat()
                 }
-            }
+            },
         )
         oppdragslinjeListe.addAll(
             utbetalingslinjer.map {
                 Oppdragslinje().apply {
                     delytelseId = it.id.value.toString()
                     klassifikasjonKode = OppdragDefaults.KODEKOMPONENT.toString()
-                    vedtakPeriode = Periode().apply {
-                        fom = it.fraOgMed.format(tidsstempelDatoOppdrag)
-                        tom = it.tilOgMed?.format(tidsstempelDatoOppdrag)
-                    }
+                    vedtakPeriode =
+                        Periode().apply {
+                            fom = it.fraOgMed.format(tidsstempelDatoOppdrag)
+                            tom = it.tilOgMed?.format(tidsstempelDatoOppdrag)
+                        }
                     sats = it.beloep
                     satstypeKode = OppdragslinjeDefaults.UTBETALINGSFREKVENS
                     fradragTillegg = OppdragslinjeDefaults.FRADRAG_ELLER_TILLEGG.value()
@@ -126,20 +134,24 @@ internal fun OppdragForKonsistensavstemming.toOppdragdata(): Oppdragsdata {
                             Attestant().apply {
                                 this.attestantId = it.value
                             }
-                        }
+                        },
                     )
                 }
-            }
+            },
         )
     }
 }
 
 enum class KodeAksjon {
-    START, DATA, AVSL, HENT
+    START,
+    DATA,
+    AVSL,
+    HENT,
 }
 
 enum class KildeType {
-    AVLEV, MOTT
+    AVLEV,
+    MOTT,
 }
 
 const val KONSAVSTEMMING = "KONS"

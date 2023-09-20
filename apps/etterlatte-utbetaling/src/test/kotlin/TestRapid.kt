@@ -13,9 +13,10 @@ import no.nav.helse.rapids_rivers.isMissingOrNull
 
 class TestRapid : RapidsConnection() {
     private companion object {
-        private val objectMapper = jacksonObjectMapper()
-            .registerModule(JavaTimeModule())
-            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+        private val objectMapper =
+            jacksonObjectMapper()
+                .registerModule(JavaTimeModule())
+                .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
     }
 
     private val messages = mutableListOf<Pair<String?, String>>()
@@ -33,7 +34,10 @@ class TestRapid : RapidsConnection() {
         messages.add(null to message)
     }
 
-    override fun publish(key: String, message: String) {
+    override fun publish(
+        key: String,
+        message: String,
+    ) {
         messages.add(key to message)
     }
 
@@ -54,9 +58,14 @@ class TestRapid : RapidsConnection() {
         val size get() = messages.size
 
         fun key(index: Int) = messages[index].first
+
         fun message(index: Int) = jsonMessages.getOrPut(index) { objectMapper.readTree(messages[index].second) }
-        fun field(index: Int, field: String) = requireNotNull(
-            message(index).path(field).takeUnless(JsonNode::isMissingOrNull)
+
+        fun field(
+            index: Int,
+            field: String,
+        ) = requireNotNull(
+            message(index).path(field).takeUnless(JsonNode::isMissingOrNull),
         ) {
             "Message does not contain field '$field'"
         }

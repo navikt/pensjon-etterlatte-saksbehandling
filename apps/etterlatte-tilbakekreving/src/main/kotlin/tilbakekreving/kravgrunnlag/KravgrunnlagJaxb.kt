@@ -14,10 +14,11 @@ object KravgrunnlagJaxb {
     private val xmlInputFactory = XMLInputFactory.newInstance()
 
     fun toDetaljertKravgrunnlagDto(kravgrunnlagXml: String): DetaljertKravgrunnlagDto {
-        val kravgrunnlag = jaxbContext.createUnmarshaller().unmarshal(
-            xmlInputFactory.createXMLStreamReader(StringReader(kravgrunnlagXml)),
-            DetaljertKravgrunnlagMelding::class.java
-        )
+        val kravgrunnlag =
+            jaxbContext.createUnmarshaller().unmarshal(
+                xmlInputFactory.createXMLStreamReader(StringReader(kravgrunnlagXml)),
+                DetaljertKravgrunnlagMelding::class.java,
+            )
         return kravgrunnlag.value.detaljertKravgrunnlag!!
     }
 }
@@ -26,5 +27,5 @@ object KravgrunnlagJaxb {
 @XmlRootElement(name = "detaljertKravgrunnlagMelding")
 data class DetaljertKravgrunnlagMelding(
     @field:XmlElement(required = true, namespace = "urn:no:nav:tilbakekreving:kravgrunnlag:detalj:v1")
-    val detaljertKravgrunnlag: DetaljertKravgrunnlagDto? = null
+    val detaljertKravgrunnlag: DetaljertKravgrunnlagDto? = null,
 )

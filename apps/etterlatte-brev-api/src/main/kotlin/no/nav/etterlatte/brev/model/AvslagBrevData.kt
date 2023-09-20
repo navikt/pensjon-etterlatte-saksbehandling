@@ -13,18 +13,19 @@ object AvslagBrevData : BrevData() {
 data class AvslagYrkesskadeBrevData(
     val dinForelder: String,
     val doedsdato: LocalDate,
-    val yrkesskadeEllerYrkessykdom: String
+    val yrkesskadeEllerYrkessykdom: String,
 ) : BrevData() {
     companion object {
-        fun fra(behandling: Behandling): AvslagYrkesskadeBrevData = valider<RevurderingInfo.Yrkesskade>(
-            behandling,
-            RevurderingAarsak.YRKESSKADE
-        ).let {
-            AvslagYrkesskadeBrevData(
-                it.dinForelder,
-                behandling.persongalleri.avdoed.doedsdato,
-                it.yrkesskadeEllerYrkessykdom
-            )
-        }
+        fun fra(behandling: Behandling): AvslagYrkesskadeBrevData =
+            valider<RevurderingInfo.Yrkesskade>(
+                behandling,
+                RevurderingAarsak.YRKESSKADE,
+            ).let {
+                AvslagYrkesskadeBrevData(
+                    it.dinForelder,
+                    behandling.persongalleri.avdoed.doedsdato,
+                    it.yrkesskadeEllerYrkessykdom,
+                )
+            }
     }
 }

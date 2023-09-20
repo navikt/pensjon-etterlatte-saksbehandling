@@ -15,7 +15,7 @@ interface PeriodisertGrunnlag<G> {
 }
 
 class KonstantGrunnlag<G>(private val konstantGrunnlag: G) : PeriodisertGrunnlag<G> {
-
     override fun finnAlleKnekkpunkter(): Set<LocalDate> = emptySet()
+
     override fun finnGrunnlagForPeriode(datoIPeriode: LocalDate): G = konstantGrunnlag
 }

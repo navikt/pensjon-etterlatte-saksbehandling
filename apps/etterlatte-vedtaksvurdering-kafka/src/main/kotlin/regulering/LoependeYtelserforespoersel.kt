@@ -23,7 +23,7 @@ import rapidsandrivers.tilbakestilteBehandlinger
 
 internal class LoependeYtelserforespoersel(
     rapidsConnection: RapidsConnection,
-    private val vedtak: VedtakService
+    private val vedtak: VedtakService,
 ) : ListenerMedLoggingOgFeilhaandtering(FINN_LOEPENDE_YTELSER) {
     private val logger = LoggerFactory.getLogger(LoependeYtelserforespoersel::class.java)
 
@@ -37,7 +37,10 @@ internal class LoependeYtelserforespoersel(
         }.register(this)
     }
 
-    override fun haandterPakke(packet: JsonMessage, context: MessageContext) {
+    override fun haandterPakke(
+        packet: JsonMessage,
+        context: MessageContext,
+    ) {
         val sakId = packet.sakId
         logger.info("Leser reguleringsfoerespoersel for sak $sakId")
 
@@ -56,11 +59,12 @@ internal class LoependeYtelserforespoersel(
         val respons = vedtak.harLoependeYtelserFra(sakId, reguleringsdato)
         respons.takeIf { it.erLoepende }?.let {
             packet.eventName = OMREGNINGSHENDELSE
-            packet[HENDELSE_DATA_KEY] = Omregningshendelse(
-                sakId = sakId,
-                fradato = it.dato,
-                prosesstype = Prosesstype.AUTOMATISK
-            )
+            packet[HENDELSE_DATA_KEY] =
+                Omregningshendelse(
+                    sakId = sakId,
+                    fradato = it.dato,
+                    prosesstype = Prosesstype.AUTOMATISK,
+                )
             context.publish(packet.toJson())
             logger.info("Grunnlopesreguleringmelding ble sendt for sak $sakId. Dato=${respons.dato}")
         } ?: logger.info("Grunnlopesreguleringmelding ble ikke sendt for sak $sakId. Dato=${respons.dato}")

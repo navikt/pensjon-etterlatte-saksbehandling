@@ -14,20 +14,22 @@ internal class VisitorTest {
     private val regel3 = definerKonstant<TestGrunnlag, Long>(GJELDER_FRA_2, "Tallet 3", regelReferanse, 3)
     private val regel4 = definerKonstant<TestGrunnlag, Int>(GJELDER_FRA_3, "Tallet 4", regelReferanse, 4)
 
-    private val regelSomBrukerVerdienFraTreAndreRegler = RegelMeta(
-        gjelderFra = GJELDER_FRA_3,
-        beskrivelse = "Regel som bruker resultatet av tre andre regler",
-        regelReferanse = regelReferanse
-    ) benytter regel1 og regel2 og regel3 med { verdi1, verdi2, verdi3 ->
-        verdi1 + verdi2 + verdi3
-    }
-    private val regelSomKombinererToRegler = RegelMeta(
-        gjelderFra = GJELDER_FRA_3,
-        beskrivelse = "Regel som kombinerer to regler",
-        regelReferanse = regelReferanse
-    ) benytter regelSomBrukerVerdienFraTreAndreRegler og regel4 med { verdi1, verdi2 ->
-        verdi1 + verdi2
-    }
+    private val regelSomBrukerVerdienFraTreAndreRegler =
+        RegelMeta(
+            gjelderFra = GJELDER_FRA_3,
+            beskrivelse = "Regel som bruker resultatet av tre andre regler",
+            regelReferanse = regelReferanse,
+        ) benytter regel1 og regel2 og regel3 med { verdi1, verdi2, verdi3 ->
+            verdi1 + verdi2 + verdi3
+        }
+    private val regelSomKombinererToRegler =
+        RegelMeta(
+            gjelderFra = GJELDER_FRA_3,
+            beskrivelse = "Regel som kombinerer to regler",
+            regelReferanse = regelReferanse,
+        ) benytter regelSomBrukerVerdienFraTreAndreRegler og regel4 med { verdi1, verdi2 ->
+            verdi1 + verdi2
+        }
 
     @Test
     fun `Skal finne alle unike knekkpunkter i grafen`() {
@@ -44,11 +46,12 @@ internal class VisitorTest {
         val ugyldigeReglerForPeriode = regelSomKombinererToRegler.finnUgyldigePerioder(ugyldigPeriode)
 
         ugyldigeReglerForPeriode.size shouldBe 3
-        ugyldigeReglerForPeriode shouldContainExactlyInAnyOrder listOf(
-            regel4,
-            regelSomKombinererToRegler,
-            regelSomBrukerVerdienFraTreAndreRegler
-        )
+        ugyldigeReglerForPeriode shouldContainExactlyInAnyOrder
+            listOf(
+                regel4,
+                regelSomKombinererToRegler,
+                regelSomBrukerVerdienFraTreAndreRegler,
+            )
     }
 
     @Test
@@ -62,11 +65,12 @@ internal class VisitorTest {
 
     @Test
     fun `Skal finne ugyldige periode i VelgNyesteGyldigeRegel kun dersom ingen perioder matcher`() {
-        val velgNyesteGyldigeRegler = RegelMeta(
-            gjelderFra = GJELDER_FRA_3,
-            beskrivelse = "Regel som velger nyeste regel",
-            regelReferanse = regelReferanse
-        ) velgNyesteGyldige (regel1 og regel2)
+        val velgNyesteGyldigeRegler =
+            RegelMeta(
+                gjelderFra = GJELDER_FRA_3,
+                beskrivelse = "Regel som velger nyeste regel",
+                regelReferanse = regelReferanse,
+            ) velgNyesteGyldige (regel1 og regel2)
 
         velgNyesteGyldigeRegler.finnUgyldigePerioder(RegelPeriode(GJELDER_FRA_1.minusMonths(1))) shouldHaveSize 1
         velgNyesteGyldigeRegler.finnUgyldigePerioder(RegelPeriode(GJELDER_FRA_1)) shouldHaveSize 0

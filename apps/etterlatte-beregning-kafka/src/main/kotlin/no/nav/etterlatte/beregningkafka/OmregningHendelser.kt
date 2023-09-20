@@ -30,10 +30,9 @@ import rapidsandrivers.migrering.ListenerMedLoggingOgFeilhaandtering
 internal class OmregningHendelser(
     rapidsConnection: RapidsConnection,
     private val beregningService: BeregningService,
-    private val trygdetidService: TrygdetidService
+    private val trygdetidService: TrygdetidService,
 ) :
     ListenerMedLoggingOgFeilhaandtering(BEREGN) {
-
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     init {
@@ -50,7 +49,10 @@ internal class OmregningHendelser(
         }.register(this)
     }
 
-    override fun haandterPakke(packet: JsonMessage, context: MessageContext) {
+    override fun haandterPakke(
+        packet: JsonMessage,
+        context: MessageContext,
+    ) {
         logger.info("Mottatt omregninghendelse")
         val behandlingId = packet.behandlingId
         val behandlingViOmregnerFra = packet[BEHANDLING_VI_OMREGNER_FRA_KEY].asText().toUUID()
@@ -64,8 +66,9 @@ internal class OmregningHendelser(
                 trygdetidService.kopierTrygdetidFraForrigeBehandling(behandlingId, behandlingViOmregnerFra)
                 val beregning = beregningService.beregn(behandlingId).body<BeregningDTO>()
                 packet[BEREGNING_KEY] = beregning
-                val avkorting = beregningService.regulerAvkorting(behandlingId, behandlingViOmregnerFra)
-                    .body<AvkortingDto>()
+                val avkorting =
+                    beregningService.regulerAvkorting(behandlingId, behandlingViOmregnerFra)
+                        .body<AvkortingDto>()
                 packet[AVKORTING_KEY] = avkorting
             }
             packet[EVENT_NAME_KEY] = OPPRETT_VEDTAK

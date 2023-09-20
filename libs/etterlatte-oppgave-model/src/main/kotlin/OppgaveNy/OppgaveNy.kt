@@ -4,7 +4,7 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.vedtaksvurdering.VedtakHendelse
-import java.util.*
+import java.util.UUID
 
 abstract class Oppgave {
     abstract val status: Status
@@ -30,7 +30,7 @@ data class OppgaveNy(
     override val opprettet: Tidspunkt,
     override val sakType: SakType,
     override val fnr: String? = null,
-    override val frist: Tidspunkt?
+    override val frist: Tidspunkt?,
 ) : Oppgave() {
     fun erAvsluttet(): Boolean {
         return Status.erAvsluttet(this.status)
@@ -54,7 +54,7 @@ data class GosysOppgave(
     override val sakType: SakType,
     override val fnr: String,
     val gjelder: String,
-    val beskrivelse: String
+    val beskrivelse: String,
 ) : Oppgave() {
     override val type: OppgaveType
         get() = OppgaveType.GOSYS
@@ -65,16 +65,19 @@ enum class Status {
     UNDER_BEHANDLING,
     FERDIGSTILT,
     FEILREGISTRERT,
-    AVBRUTT;
+    AVBRUTT,
+    ;
 
     companion object {
         fun erAvsluttet(status: Status): Boolean {
             return when (status) {
                 NY,
-                UNDER_BEHANDLING -> false
+                UNDER_BEHANDLING,
+                -> false
                 FERDIGSTILT,
                 FEILREGISTRERT,
-                AVBRUTT -> true
+                AVBRUTT,
+                -> true
             }
         }
     }
@@ -83,7 +86,7 @@ enum class Status {
 enum class OppgaveKilde {
     HENDELSE,
     BEHANDLING,
-    EKSTERN
+    EKSTERN,
 }
 
 enum class OppgaveType {
@@ -96,35 +99,35 @@ enum class OppgaveType {
     GOSYS,
     UTLAND,
     KLAGE,
-    TILBAKEKREVING
+    TILBAKEKREVING,
 }
 
 data class SaksbehandlerEndringDto(
-    val saksbehandler: String
+    val saksbehandler: String,
 )
 
 data class SaksbehandlerEndringGosysDto(
     val saksbehandler: String,
-    val versjon: Long
+    val versjon: Long,
 )
 
 data class RedigerFristRequest(
-    val frist: Tidspunkt
+    val frist: Tidspunkt,
 )
 
 data class RedigerFristGosysRequest(
     val frist: Tidspunkt,
-    val versjon: Long
+    val versjon: Long,
 )
 
 data class VedtakOppgaveDTO(
     val sakId: Long,
-    val referanse: String
+    val referanse: String,
 )
 
 data class VedtakEndringDTO(
     val vedtakOppgaveDTO: VedtakOppgaveDTO,
-    val vedtakHendelse: VedtakHendelse
+    val vedtakHendelse: VedtakHendelse,
 )
 
 fun opprettNyOppgaveMedReferanseOgSak(
@@ -132,7 +135,7 @@ fun opprettNyOppgaveMedReferanseOgSak(
     sak: Sak,
     oppgaveKilde: OppgaveKilde?,
     oppgaveType: OppgaveType,
-    merknad: String?
+    merknad: String?,
 ): OppgaveNy {
     return OppgaveNy(
         id = UUID.randomUUID(),
@@ -147,6 +150,6 @@ fun opprettNyOppgaveMedReferanseOgSak(
         sakType = sak.sakType,
         fnr = sak.ident,
         frist = null,
-        type = oppgaveType
+        type = oppgaveType,
     )
 }

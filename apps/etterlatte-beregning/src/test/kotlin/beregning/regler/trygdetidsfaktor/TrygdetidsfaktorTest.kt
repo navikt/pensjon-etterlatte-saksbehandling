@@ -11,7 +11,6 @@ import no.nav.etterlatte.regler.Beregningstall
 import org.junit.jupiter.api.Test
 
 internal class TrygdetidsfaktorTest {
-
     @Test
     fun `trygdetidRegel skal returnere 40 aars trygdetid`() {
         val resultat = trygdetidRegel.anvend(barnepensjonGrunnlag(trygdeTid = Beregningstall(40.0)), REGEL_PERIODE)

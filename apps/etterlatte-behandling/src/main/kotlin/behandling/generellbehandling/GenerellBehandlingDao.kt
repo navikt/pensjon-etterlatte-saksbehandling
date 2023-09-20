@@ -11,7 +11,7 @@ import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.libs.database.toList
 import java.sql.Connection
 import java.sql.ResultSet
-import java.util.*
+import java.util.UUID
 
 class GenerellBehandlingDao(private val connection: () -> Connection) {
     fun opprettGenerellbehandling(generellBehandling: GenerellBehandling) {
@@ -21,7 +21,7 @@ class GenerellBehandlingDao(private val connection: () -> Connection) {
                     """
                     INSERT INTO generellbehandling(id, innhold, sak_id, opprettet, type)
                     VALUES(?::UUID, ?, ?, ?, ?)
-                    """.trimIndent()
+                    """.trimIndent(),
                 )
             statement.setObject(1, generellBehandling.id)
             statement.setJsonb(2, generellBehandling.innhold)
@@ -40,7 +40,7 @@ class GenerellBehandlingDao(private val connection: () -> Connection) {
                     """
                     SELECT * FROM generellbehandling
                     WHERE id = ?
-                    """.trimIndent()
+                    """.trimIndent(),
                 )
             statement.setObject(1, id)
             statement.executeQuery().singleOrNull {
@@ -56,7 +56,7 @@ class GenerellBehandlingDao(private val connection: () -> Connection) {
                     """
                     SELECT * FROM generellbehandling
                     WHERE sak_id = ?
-                    """.trimIndent()
+                    """.trimIndent(),
                 )
             statement.setLong(1, sakId)
             statement.executeQuery().toList {
@@ -71,7 +71,7 @@ class GenerellBehandlingDao(private val connection: () -> Connection) {
             sakId = getLong("sak_id"),
             type = GenerellBehandling.GenerellBehandlingType.valueOf(getString("type")),
             innhold = getString("innhold").let { objectMapper.readValue(it) },
-            opprettet = getTidspunkt("opprettet")
+            opprettet = getTidspunkt("opprettet"),
         )
     }
 }

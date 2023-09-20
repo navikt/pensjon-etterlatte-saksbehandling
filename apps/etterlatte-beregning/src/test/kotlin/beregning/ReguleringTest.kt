@@ -41,7 +41,7 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.Month
 import java.time.YearMonth
-import java.util.*
+import java.util.UUID
 import kotlin.math.abs
 
 class ReguleringTest {
@@ -57,33 +57,36 @@ class ReguleringTest {
         every {
             featureToggleService.isEnabled(BeregnBarnepensjonServiceFeatureToggle.BrukNyttRegelverkIBeregning, false)
         } returns true
-        beregnBarnepensjonService = BeregnBarnepensjonService(
-            grunnlagKlient = grunnlagKlient,
-            vilkaarsvurderingKlient = vilkaarsvurderingKlient,
-            beregningsGrunnlagService = beregningsGrunnlagService,
-            trygdetidKlient = trygdetidKlient,
-            featureToggleService = featureToggleService
-        )
+        beregnBarnepensjonService =
+            BeregnBarnepensjonService(
+                grunnlagKlient = grunnlagKlient,
+                vilkaarsvurderingKlient = vilkaarsvurderingKlient,
+                beregningsGrunnlagService = beregningsGrunnlagService,
+                trygdetidKlient = trygdetidKlient,
+                featureToggleService = featureToggleService,
+            )
     }
 
     @Test
     fun `skal regulere barnepensjon foerstegangsbehandling - ingen soesken`() {
         val virk = BeregnBarnepensjonServiceTest.VIRKNINGSTIDSPUNKT_JAN_23.minusYears(1)
         val behandling = mockBehandling(virk)
-        val grunnlag = GrunnlagTestData(opplysningsmapAvdoedOverrides = avdoedOverrides(virk.atDay(1).minusDays(20)))
-            .hentOpplysningsgrunnlag()
+        val grunnlag =
+            GrunnlagTestData(opplysningsmapAvdoedOverrides = avdoedOverrides(virk.atDay(1).minusDays(20)))
+                .hentOpplysningsgrunnlag()
 
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
         coEvery {
             beregningsGrunnlagService.hentBarnepensjonBeregningsGrunnlag(
                 any(),
-                any()
+                any(),
             )
-        } returns barnepensjonBeregningsGrunnlag(
-            behandling.id,
-            emptyList(),
-            BeregnBarnepensjonServiceTest.VIRKNINGSTIDSPUNKT_JAN_23.minusYears(1)
-        )
+        } returns
+            barnepensjonBeregningsGrunnlag(
+                behandling.id,
+                emptyList(),
+                BeregnBarnepensjonServiceTest.VIRKNINGSTIDSPUNKT_JAN_23.minusYears(1),
+            )
 
         coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns null
         every {
@@ -92,7 +95,7 @@ class ReguleringTest {
         every {
             featureToggleService.isEnabled(
                 BeregnBarnepensjonServiceFeatureToggle.BrukInstitusjonsoppholdIBeregning,
-                false
+                false,
             )
         } returns false
 
@@ -110,9 +113,10 @@ class ReguleringTest {
                     utbetaltBeloep shouldBe 3547
                     datoFOM shouldBe behandling.virkningstidspunkt?.dato
                     datoTOM shouldBe YearMonth.of(2022, Month.APRIL)
-                    grunnbelopMnd shouldBe hentGjeldendeGrunnbeloep(
-                        this.datoFOM
-                    ).grunnbeloepPerMaaned
+                    grunnbelopMnd shouldBe
+                        hentGjeldendeGrunnbeloep(
+                            this.datoFOM,
+                        ).grunnbeloepPerMaaned
                     soeskenFlokk shouldBe emptyList()
                     trygdetid shouldBe MAKS_TRYGDETID
                     regelResultat shouldNotBe null
@@ -134,23 +138,24 @@ class ReguleringTest {
                 """Utbetalt 22: $utbetaltBeloep22, utbetalt 23: $utbetaltBeloep23,
                     faktor utbetalt: $faktorUtbetalt,
                     grunnbeløp 22: $grunnbeloep22, grunnbeløp 23: $grunnbeloep23,
-                    faktor grunnbeløp: $faktorGrunnbeloep"""
+                    faktor grunnbeløp: $faktorGrunnbeloep""",
             )
         }
     }
 
     private fun avdoedOverrides(doedsdato: LocalDate): Map<Opplysningstype, Opplysning<JsonNode>> {
         val kilde = Grunnlagsopplysning.Pdl(Tidspunkt.now(), null, "opplysningsId1")
-        val avdoedOverrides = doedsdato.toJsonNode().let {
-            mapOf(Opplysningstype.DOEDSDATO to Opplysning.Konstant(UUID.randomUUID(), kilde, it))
-        }
+        val avdoedOverrides =
+            doedsdato.toJsonNode().let {
+                mapOf(Opplysningstype.DOEDSDATO to Opplysning.Konstant(UUID.randomUUID(), kilde, it))
+            }
         return avdoedOverrides
     }
 
     private fun barnepensjonBeregningsGrunnlag(
         behandlingId: UUID,
         soesken: List<String>,
-        virkningstidspunkt: YearMonth = BeregnBarnepensjonServiceTest.VIRKNINGSTIDSPUNKT_JAN_23
+        virkningstidspunkt: YearMonth = BeregnBarnepensjonServiceTest.VIRKNINGSTIDSPUNKT_JAN_23,
     ) = BeregningsGrunnlag(
         behandlingId,
         mockk {
@@ -158,26 +163,28 @@ class ReguleringTest {
             every { tidspunkt } returns Tidspunkt.now()
             every { type } returns ""
         },
-        soeskenMedIBeregning = listOf(
-            GrunnlagMedPeriode(
-                fom = virkningstidspunkt.minusMonths(1).atDay(1),
-                tom = null,
-                data = soesken.map {
-                    SoeskenMedIBeregning(
-                        Folkeregisteridentifikator.of(it),
-                        skalBrukes = true
-                    )
-                }
-            )
-        ),
-        institusjonsoppholdBeregningsgrunnlag = listOf(
-            GrunnlagMedPeriode(
-                fom = LocalDate.of(2022, 8, 1),
-                tom = null,
-                data = InstitusjonsoppholdBeregningsgrunnlag(Reduksjon.NEI_KORT_OPPHOLD)
-            )
-        )
-
+        soeskenMedIBeregning =
+            listOf(
+                GrunnlagMedPeriode(
+                    fom = virkningstidspunkt.minusMonths(1).atDay(1),
+                    tom = null,
+                    data =
+                        soesken.map {
+                            SoeskenMedIBeregning(
+                                Folkeregisteridentifikator.of(it),
+                                skalBrukes = true,
+                            )
+                        },
+                ),
+            ),
+        institusjonsoppholdBeregningsgrunnlag =
+            listOf(
+                GrunnlagMedPeriode(
+                    fom = LocalDate.of(2022, 8, 1),
+                    tom = null,
+                    data = InstitusjonsoppholdBeregningsgrunnlag(Reduksjon.NEI_KORT_OPPHOLD),
+                ),
+            ),
     )
 
     private fun mockBehandling(virk: YearMonth = BeregnBarnepensjonServiceTest.VIRKNINGSTIDSPUNKT_JAN_23) =

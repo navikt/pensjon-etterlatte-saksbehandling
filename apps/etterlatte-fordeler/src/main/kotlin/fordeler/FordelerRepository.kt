@@ -7,32 +7,36 @@ import no.nav.etterlatte.libs.database.toList
 import javax.sql.DataSource
 
 class FordelerRepository(private val ds: DataSource) {
-
-    private val opprettFordeling = """  
+    private val opprettFordeling =
+        """  
         insert into fordelinger (soeknad_id, fordeling) values (?,?)
-    """.trimIndent()
+        """.trimIndent()
 
-    private val opprettKriterier = """
+    private val opprettKriterier =
+        """
         insert into kriterietreff(soeknad_id, kriterie) values (?, ?)
-    """.trimIndent()
+        """.trimIndent()
 
-    private val finnFordeling = """
+    private val finnFordeling =
+        """
         select soeknad_id, fordeling, opprettet_ts
         from fordelinger
         where soeknad_id = ?
-    """.trimIndent()
+        """.trimIndent()
 
-    private val tellFordelinger = """
+    private val tellFordelinger =
+        """
         select count(1)
         from fordelinger
         where fordeling = ?
-    """.trimIndent()
+        """.trimIndent()
 
-    private val finnKriterier = """
+    private val finnKriterier =
+        """
         select kriterie
         from kriterietreff
         where soeknad_id = ?
-    """.trimIndent()
+        """.trimIndent()
 
     fun finnFordeling(id: Long): FordeltRecord? {
         return ds.connection.use {
@@ -86,11 +90,11 @@ class FordelerRepository(private val ds: DataSource) {
 data class FordeltTransient(
     val soeknadId: Long,
     val fordeling: String,
-    val kriterier: List<String>
+    val kriterier: List<String>,
 )
 
 data class FordeltRecord(
     val soeknadId: Long,
     val fordeling: String,
-    val tidspunkt: Tidspunkt
+    val tidspunkt: Tidspunkt,
 )

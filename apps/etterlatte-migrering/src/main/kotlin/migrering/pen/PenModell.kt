@@ -11,12 +11,12 @@ data class BarnepensjonGrunnlagResponse(
     val virkningsdato: LocalDate,
     val beregning: BeregningBP,
     val trygdetidsgrunnlagListe: List<TrygdetidsgrunnlagBP>,
-    val trygdetidListe: List<TrygdetidBP>
+    val trygdetidListe: List<TrygdetidBP>,
 )
 
 data class AvdoedForelderBP(
     val ident: String,
-    val doedsdato: LocalDate
+    val doedsdato: LocalDate,
 )
 
 data class BeregningBP(
@@ -25,14 +25,14 @@ data class BeregningBP(
     val anvendtTrygdetid: Int,
     val datoVirkFom: LocalDate,
     val g: Int,
-    val meta: BeregningMetaBP
+    val meta: BeregningMetaBP,
 )
 
 data class BeregningMetaBP(
     val resultatType: String,
     val beregningsMetodeType: String?,
     val resultatKilde: String,
-    val kravVelgType: String
+    val kravVelgType: String,
 )
 
 data class TrygdetidsgrunnlagBP(
@@ -43,7 +43,7 @@ data class TrygdetidsgrunnlagBP(
     val datoTom: LocalDate,
     val poengIInnAar: Boolean,
     val poengIUtAar: Boolean,
-    val ikkeIProrata: Boolean
+    val ikkeIProrata: Boolean,
 )
 
 data class TrygdetidBP(
@@ -51,5 +51,5 @@ data class TrygdetidBP(
     val fremtidigTrygdetid: Int,
     val anvendtTrygdetid: Int,
     val virkFom: LocalDate,
-    val virkTom: LocalDate?
+    val virkTom: LocalDate?,
 )

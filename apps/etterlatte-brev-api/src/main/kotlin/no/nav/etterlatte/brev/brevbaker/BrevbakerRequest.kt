@@ -10,32 +10,36 @@ data class BrevbakerRequest(
     val kode: EtterlatteBrevKode,
     val letterData: Any,
     val felles: Felles,
-    val language: LanguageCode
+    val language: LanguageCode,
 ) {
     companion object {
         fun fra(
             brevKode: EtterlatteBrevKode,
             letterData: Any,
             behandling: Behandling,
-            avsender: Avsender
+            avsender: Avsender,
         ): BrevbakerRequest {
             return BrevbakerRequest(
                 kode = brevKode,
                 letterData = letterData,
-                felles = mapFelles(
-                    sakId = behandling.sakId,
-                    soeker = behandling.persongalleri.soeker,
-                    avsender = avsender,
-                    vergeNavn = behandling.persongalleri.verge?.navn
-                ),
-                language = LanguageCode.spraakToLanguageCode(behandling.spraak)
+                felles =
+                    mapFelles(
+                        sakId = behandling.sakId,
+                        soeker = behandling.persongalleri.soeker,
+                        avsender = avsender,
+                        vergeNavn = behandling.persongalleri.verge?.navn,
+                    ),
+                language = LanguageCode.spraakToLanguageCode(behandling.spraak),
             )
         }
     }
 }
 
 enum class LanguageCode {
-    BOKMAL, NYNORSK, ENGLISH;
+    BOKMAL,
+    NYNORSK,
+    ENGLISH,
+    ;
 
     companion object {
         fun spraakToLanguageCode(spraak: Spraak): LanguageCode {
@@ -71,5 +75,5 @@ enum class EtterlatteBrevKode {
     BARNEPENSJON_REVURDERING_SOESKENJUSTERING,
     BARNEPENSJON_REVURDERING_YRKESSKADE,
     BARNEPENSJON_REVURDERING_UT_AV_FENGSEL,
-    TOM_MAL
+    TOM_MAL,
 }

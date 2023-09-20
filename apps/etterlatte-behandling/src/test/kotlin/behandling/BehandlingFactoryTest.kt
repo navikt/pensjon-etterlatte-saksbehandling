@@ -58,10 +58,9 @@ import org.junit.jupiter.api.Test
 import java.sql.Connection
 import java.time.LocalDateTime
 import java.time.YearMonth
-import java.util.*
+import java.util.UUID
 
 class BehandlingFactoryTest {
-
     private val user = mockk<SaksbehandlerMedEnheterOgRoller>()
     private val behandlingDaoMock = mockk<BehandlingDao>(relaxUnitFun = true)
     private val hendelseDaoMock = mockk<HendelseDao>(relaxUnitFun = true)
@@ -73,40 +72,44 @@ class BehandlingFactoryTest {
     private val behandlingService = mockk<BehandlingService>()
     private val sakServiceMock = mockk<SakService>()
     private val gyldighetsproevingService = mockk<GyldighetsproevingService>(relaxUnitFun = true)
-    private val mockOppgave = opprettNyOppgaveMedReferanseOgSak(
-        "behandling",
-        Sak("ident", SakType.BARNEPENSJON, 1L, Enheter.AALESUND.enhetNr),
-        OppgaveKilde.BEHANDLING,
-        OppgaveType.FOERSTEGANGSBEHANDLING,
-        null
-    )
-    private val kommerBarnetTilGodeService = mockk<KommerBarnetTilGodeService>().also {
-        every { it.hentKommerBarnetTilGode(any()) } returns null
-    }
+    private val mockOppgave =
+        opprettNyOppgaveMedReferanseOgSak(
+            "behandling",
+            Sak("ident", SakType.BARNEPENSJON, 1L, Enheter.AALESUND.enhetNr),
+            OppgaveKilde.BEHANDLING,
+            OppgaveType.FOERSTEGANGSBEHANDLING,
+            null,
+        )
+    private val kommerBarnetTilGodeService =
+        mockk<KommerBarnetTilGodeService>().also {
+            every { it.hentKommerBarnetTilGode(any()) } returns null
+        }
     private val revurderingDao = mockk<RevurderingDao>()
-    private val revurderingService = RevurderingServiceImpl(
-        oppgaveService,
-        grunnlagService,
-        behandlingHendelserKafkaProducerMock,
-        featureToggleService,
-        behandlingDaoMock,
-        hendelseDaoMock,
-        grunnlagsendringshendelseDao,
-        kommerBarnetTilGodeService,
-        revurderingDao,
-        behandlingService
-    )
-    private val behandlingFactory = BehandlingFactory(
-        oppgaveService,
-        grunnlagService,
-        revurderingService,
-        gyldighetsproevingService,
-        sakServiceMock,
-        behandlingDaoMock,
-        hendelseDaoMock,
-        behandlingHendelserKafkaProducerMock,
-        featureToggleService
-    )
+    private val revurderingService =
+        RevurderingServiceImpl(
+            oppgaveService,
+            grunnlagService,
+            behandlingHendelserKafkaProducerMock,
+            featureToggleService,
+            behandlingDaoMock,
+            hendelseDaoMock,
+            grunnlagsendringshendelseDao,
+            kommerBarnetTilGodeService,
+            revurderingDao,
+            behandlingService,
+        )
+    private val behandlingFactory =
+        BehandlingFactory(
+            oppgaveService,
+            grunnlagService,
+            revurderingService,
+            gyldighetsproevingService,
+            sakServiceMock,
+            behandlingDaoMock,
+            hendelseDaoMock,
+            behandlingHendelserKafkaProducerMock,
+            featureToggleService,
+        )
 
     @BeforeEach
     fun before() {
@@ -118,11 +121,14 @@ class BehandlingFactoryTest {
                         throw IllegalArgumentException()
                     }
 
-                    override fun <T> inTransaction(gjenbruk: Boolean, block: () -> T): T {
+                    override fun <T> inTransaction(
+                        gjenbruk: Boolean,
+                        block: () -> T,
+                    ): T {
                         return block()
                     }
-                }
-            )
+                },
+            ),
         )
     }
 
@@ -133,7 +139,7 @@ class BehandlingFactoryTest {
             behandlingDaoMock,
             hendelseDaoMock,
             behandlingHendelserKafkaProducerMock,
-            grunnlagService
+            grunnlagService,
         )
         clearAllMocks()
     }
@@ -147,37 +153,41 @@ class BehandlingFactoryTest {
         every { featureToggleService.isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false) } returns false
         every { featureToggleService.isEnabled(SakServiceFeatureToggle.FiltrerMedEnhetId, false) } returns false
 
-        val opprettetBehandling = Foerstegangsbehandling(
-            id = UUID.randomUUID(),
-            sak = Sak(
-                ident = "Soeker",
-                sakType = SakType.BARNEPENSJON,
-                id = 1,
-                enhet = Enheter.defaultEnhet.enhetNr
-            ),
-            behandlingOpprettet = datoNaa,
-            sistEndret = datoNaa,
-            status = BehandlingStatus.OPPRETTET,
-            soeknadMottattDato = Tidspunkt.now().toLocalDatetimeUTC(),
-            gyldighetsproeving = null,
-            virkningstidspunkt = Virkningstidspunkt(
-                YearMonth.of(2022, 1),
-                Grunnlagsopplysning.Saksbehandler.create("ident"),
-                "begrunnelse"
-            ),
-            utenlandstilsnitt = null,
-            boddEllerArbeidetUtlandet = null,
-            kommerBarnetTilgode = null,
-            kilde = Vedtaksloesning.GJENNY
-        )
+        val opprettetBehandling =
+            Foerstegangsbehandling(
+                id = UUID.randomUUID(),
+                sak =
+                    Sak(
+                        ident = "Soeker",
+                        sakType = SakType.BARNEPENSJON,
+                        id = 1,
+                        enhet = Enheter.defaultEnhet.enhetNr,
+                    ),
+                behandlingOpprettet = datoNaa,
+                sistEndret = datoNaa,
+                status = BehandlingStatus.OPPRETTET,
+                soeknadMottattDato = Tidspunkt.now().toLocalDatetimeUTC(),
+                gyldighetsproeving = null,
+                virkningstidspunkt =
+                    Virkningstidspunkt(
+                        YearMonth.of(2022, 1),
+                        Grunnlagsopplysning.Saksbehandler.create("ident"),
+                        "begrunnelse",
+                    ),
+                utenlandstilsnitt = null,
+                boddEllerArbeidetUtlandet = null,
+                kommerBarnetTilgode = null,
+                kilde = Vedtaksloesning.GJENNY,
+            )
 
-        val persongalleri = Persongalleri(
-            "Soeker",
-            "Innsender",
-            emptyList(),
-            listOf("Avdoed"),
-            listOf("Gjenlevende")
-        )
+        val persongalleri =
+            Persongalleri(
+                "Soeker",
+                "Innsender",
+                emptyList(),
+                listOf("Avdoed"),
+                listOf("Gjenlevende"),
+            )
 
         every { sakServiceMock.finnSak(any()) } returns opprettetBehandling.sak
         every { behandlingDaoMock.opprettBehandling(capture(behandlingOpprettes)) } returns Unit
@@ -192,12 +202,13 @@ class BehandlingFactoryTest {
             oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(any(), any())
         } returns mockOppgave
 
-        val resultat = behandlingFactory.opprettBehandling(
-            1,
-            persongalleri,
-            datoNaa.toString(),
-            Vedtaksloesning.GJENNY
-        )!!
+        val resultat =
+            behandlingFactory.opprettBehandling(
+                1,
+                persongalleri,
+                datoNaa.toString(),
+                Vedtaksloesning.GJENNY,
+            )!!
 
         Assertions.assertEquals(opprettetBehandling, resultat)
         Assertions.assertEquals(opprettetBehandling.sak, resultat.sak)
@@ -228,37 +239,41 @@ class BehandlingFactoryTest {
         every { featureToggleService.isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false) } returns false
         every { featureToggleService.isEnabled(SakServiceFeatureToggle.FiltrerMedEnhetId, false) } returns false
 
-        val opprettetBehandling = Foerstegangsbehandling(
-            id = UUID.randomUUID(),
-            sak = Sak(
-                ident = "Soeker",
-                sakType = SakType.BARNEPENSJON,
-                id = 1,
-                enhet = Enheter.defaultEnhet.enhetNr
-            ),
-            behandlingOpprettet = datoNaa,
-            sistEndret = datoNaa,
-            status = BehandlingStatus.OPPRETTET,
-            soeknadMottattDato = Tidspunkt.now().toLocalDatetimeUTC(),
-            gyldighetsproeving = null,
-            virkningstidspunkt = Virkningstidspunkt(
-                YearMonth.of(2022, 1),
-                Grunnlagsopplysning.Saksbehandler.create("ident"),
-                "begrunnelse"
-            ),
-            utenlandstilsnitt = null,
-            boddEllerArbeidetUtlandet = null,
-            kommerBarnetTilgode = null,
-            kilde = Vedtaksloesning.GJENNY
-        )
+        val opprettetBehandling =
+            Foerstegangsbehandling(
+                id = UUID.randomUUID(),
+                sak =
+                    Sak(
+                        ident = "Soeker",
+                        sakType = SakType.BARNEPENSJON,
+                        id = 1,
+                        enhet = Enheter.defaultEnhet.enhetNr,
+                    ),
+                behandlingOpprettet = datoNaa,
+                sistEndret = datoNaa,
+                status = BehandlingStatus.OPPRETTET,
+                soeknadMottattDato = Tidspunkt.now().toLocalDatetimeUTC(),
+                gyldighetsproeving = null,
+                virkningstidspunkt =
+                    Virkningstidspunkt(
+                        YearMonth.of(2022, 1),
+                        Grunnlagsopplysning.Saksbehandler.create("ident"),
+                        "begrunnelse",
+                    ),
+                utenlandstilsnitt = null,
+                boddEllerArbeidetUtlandet = null,
+                kommerBarnetTilgode = null,
+                kilde = Vedtaksloesning.GJENNY,
+            )
 
-        val persongalleri = Persongalleri(
-            "Soeker",
-            "Innsender",
-            emptyList(),
-            listOf("Avdoed"),
-            listOf("Gjenlevende")
-        )
+        val persongalleri =
+            Persongalleri(
+                "Soeker",
+                "Innsender",
+                emptyList(),
+                listOf("Avdoed"),
+                listOf("Gjenlevende"),
+            )
 
         every { sakServiceMock.finnSak(any()) } returns opprettetBehandling.sak
         every { behandlingDaoMock.opprettBehandling(capture(behandlingOpprettes)) } returns Unit
@@ -271,12 +286,13 @@ class BehandlingFactoryTest {
             oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(any(), any())
         } returns mockOppgave
 
-        val foerstegangsbehandling = behandlingFactory.opprettBehandling(
-            1,
-            persongalleri,
-            datoNaa.toString(),
-            Vedtaksloesning.GJENNY
-        )!!
+        val foerstegangsbehandling =
+            behandlingFactory.opprettBehandling(
+                1,
+                persongalleri,
+                datoNaa.toString(),
+                Vedtaksloesning.GJENNY,
+            )!!
 
         Assertions.assertTrue(foerstegangsbehandling is Foerstegangsbehandling)
 
@@ -304,37 +320,41 @@ class BehandlingFactoryTest {
         } returns false
         every { featureToggleService.isEnabled(SakServiceFeatureToggle.FiltrerMedEnhetId, false) } returns false
 
-        val underArbeidBehandling = Foerstegangsbehandling(
-            id = UUID.randomUUID(),
-            sak = Sak(
-                ident = "Soeker",
-                sakType = SakType.BARNEPENSJON,
-                id = 1,
-                enhet = Enheter.defaultEnhet.enhetNr
-            ),
-            behandlingOpprettet = datoNaa,
-            sistEndret = datoNaa,
-            status = BehandlingStatus.OPPRETTET,
-            soeknadMottattDato = Tidspunkt.now().toLocalDatetimeUTC(),
-            gyldighetsproeving = null,
-            virkningstidspunkt = Virkningstidspunkt(
-                YearMonth.of(2022, 1),
-                Grunnlagsopplysning.Saksbehandler.create("ident"),
-                "begrunnelse"
-            ),
-            utenlandstilsnitt = null,
-            boddEllerArbeidetUtlandet = null,
-            kommerBarnetTilgode = null,
-            kilde = Vedtaksloesning.GJENNY
-        )
+        val underArbeidBehandling =
+            Foerstegangsbehandling(
+                id = UUID.randomUUID(),
+                sak =
+                    Sak(
+                        ident = "Soeker",
+                        sakType = SakType.BARNEPENSJON,
+                        id = 1,
+                        enhet = Enheter.defaultEnhet.enhetNr,
+                    ),
+                behandlingOpprettet = datoNaa,
+                sistEndret = datoNaa,
+                status = BehandlingStatus.OPPRETTET,
+                soeknadMottattDato = Tidspunkt.now().toLocalDatetimeUTC(),
+                gyldighetsproeving = null,
+                virkningstidspunkt =
+                    Virkningstidspunkt(
+                        YearMonth.of(2022, 1),
+                        Grunnlagsopplysning.Saksbehandler.create("ident"),
+                        "begrunnelse",
+                    ),
+                utenlandstilsnitt = null,
+                boddEllerArbeidetUtlandet = null,
+                kommerBarnetTilgode = null,
+                kilde = Vedtaksloesning.GJENNY,
+            )
 
-        val persongalleri = Persongalleri(
-            "Soeker",
-            "Innsender",
-            emptyList(),
-            listOf("Avdoed"),
-            listOf("Gjenlevende")
-        )
+        val persongalleri =
+            Persongalleri(
+                "Soeker",
+                "Innsender",
+                emptyList(),
+                listOf("Avdoed"),
+                listOf("Gjenlevende"),
+            )
 
         every { sakServiceMock.finnSak(any()) } returns underArbeidBehandling.sak
         every { behandlingDaoMock.opprettBehandling(capture(behandlingOpprettes)) } returns Unit
@@ -353,12 +373,13 @@ class BehandlingFactoryTest {
             oppgaveService.avbrytAapneOppgaverForBehandling(any())
         } just runs
 
-        val foerstegangsbehandling = behandlingFactory.opprettBehandling(
-            1,
-            persongalleri,
-            datoNaa.toString(),
-            Vedtaksloesning.GJENNY
-        )!!
+        val foerstegangsbehandling =
+            behandlingFactory.opprettBehandling(
+                1,
+                persongalleri,
+                datoNaa.toString(),
+                Vedtaksloesning.GJENNY,
+            )!!
 
         Assertions.assertTrue(foerstegangsbehandling is Foerstegangsbehandling)
 
@@ -366,12 +387,13 @@ class BehandlingFactoryTest {
             behandlingDaoMock.alleBehandlingerISak(any())
         } returns listOf(underArbeidBehandling)
 
-        val nyfoerstegangsbehandling = behandlingFactory.opprettBehandling(
-            1,
-            persongalleri,
-            datoNaa.toString(),
-            Vedtaksloesning.GJENNY
-        )
+        val nyfoerstegangsbehandling =
+            behandlingFactory.opprettBehandling(
+                1,
+                persongalleri,
+                datoNaa.toString(),
+                Vedtaksloesning.GJENNY,
+            )
         Assertions.assertTrue(nyfoerstegangsbehandling is Foerstegangsbehandling)
 
         verify(exactly = 2) {
@@ -402,37 +424,41 @@ class BehandlingFactoryTest {
         } returns false
         every { featureToggleService.isEnabled(SakServiceFeatureToggle.FiltrerMedEnhetId, false) } returns false
 
-        val nyBehandling = Foerstegangsbehandling(
-            id = UUID.randomUUID(),
-            sak = Sak(
-                ident = "Soeker",
-                sakType = SakType.BARNEPENSJON,
-                id = 1,
-                enhet = Enheter.defaultEnhet.enhetNr
-            ),
-            behandlingOpprettet = datoNaa,
-            sistEndret = datoNaa,
-            status = BehandlingStatus.OPPRETTET,
-            soeknadMottattDato = Tidspunkt.now().toLocalDatetimeUTC(),
-            gyldighetsproeving = null,
-            virkningstidspunkt = Virkningstidspunkt(
-                YearMonth.of(2022, 1),
-                Grunnlagsopplysning.Saksbehandler.create("ident"),
-                "begrunnelse"
-            ),
-            utenlandstilsnitt = null,
-            boddEllerArbeidetUtlandet = null,
-            kommerBarnetTilgode = null,
-            kilde = Vedtaksloesning.GJENNY
-        )
+        val nyBehandling =
+            Foerstegangsbehandling(
+                id = UUID.randomUUID(),
+                sak =
+                    Sak(
+                        ident = "Soeker",
+                        sakType = SakType.BARNEPENSJON,
+                        id = 1,
+                        enhet = Enheter.defaultEnhet.enhetNr,
+                    ),
+                behandlingOpprettet = datoNaa,
+                sistEndret = datoNaa,
+                status = BehandlingStatus.OPPRETTET,
+                soeknadMottattDato = Tidspunkt.now().toLocalDatetimeUTC(),
+                gyldighetsproeving = null,
+                virkningstidspunkt =
+                    Virkningstidspunkt(
+                        YearMonth.of(2022, 1),
+                        Grunnlagsopplysning.Saksbehandler.create("ident"),
+                        "begrunnelse",
+                    ),
+                utenlandstilsnitt = null,
+                boddEllerArbeidetUtlandet = null,
+                kommerBarnetTilgode = null,
+                kilde = Vedtaksloesning.GJENNY,
+            )
 
-        val persongalleri = Persongalleri(
-            "Soeker",
-            "Innsender",
-            emptyList(),
-            listOf("Avdoed"),
-            listOf("Gjenlevende")
-        )
+        val persongalleri =
+            Persongalleri(
+                "Soeker",
+                "Innsender",
+                emptyList(),
+                listOf("Avdoed"),
+                listOf("Gjenlevende"),
+            )
 
         every { sakServiceMock.finnSak(any()) } returns nyBehandling.sak
         every { behandlingDaoMock.opprettBehandling(capture(behandlingOpprettes)) } returns Unit
@@ -454,61 +480,68 @@ class BehandlingFactoryTest {
             oppgaveService.tildelSaksbehandler(any(), any())
         } just runs
 
-        val foerstegangsbehandling = behandlingFactory.opprettBehandling(
-            1,
-            persongalleri,
-            datoNaa.toString(),
-            Vedtaksloesning.GJENNY
-        )!!
+        val foerstegangsbehandling =
+            behandlingFactory.opprettBehandling(
+                1,
+                persongalleri,
+                datoNaa.toString(),
+                Vedtaksloesning.GJENNY,
+            )!!
 
         Assertions.assertTrue(foerstegangsbehandling is Foerstegangsbehandling)
 
         val iverksattBehandlingId = UUID.randomUUID()
-        val iverksattBehandling = Foerstegangsbehandling(
-            id = iverksattBehandlingId,
-            sak = Sak(
-                ident = "Soeker",
-                sakType = SakType.BARNEPENSJON,
-                id = 1,
-                enhet = Enheter.defaultEnhet.enhetNr
-            ),
-            behandlingOpprettet = datoNaa,
-            sistEndret = datoNaa,
-            status = BehandlingStatus.IVERKSATT,
-            soeknadMottattDato = Tidspunkt.now().toLocalDatetimeUTC(),
-            gyldighetsproeving = null,
-            virkningstidspunkt = Virkningstidspunkt(
-                YearMonth.of(2022, 1),
-                Grunnlagsopplysning.Saksbehandler.create("ident"),
-                "begrunnelse"
-            ),
-            utenlandstilsnitt = null,
-            boddEllerArbeidetUtlandet = null,
-            kommerBarnetTilgode = KommerBarnetTilgode(
-                JaNei.JA,
-                "",
-                Grunnlagsopplysning.Saksbehandler.create("saksbehandler"),
-                iverksattBehandlingId
-            ),
-            kilde = Vedtaksloesning.GJENNY
-        )
+        val iverksattBehandling =
+            Foerstegangsbehandling(
+                id = iverksattBehandlingId,
+                sak =
+                    Sak(
+                        ident = "Soeker",
+                        sakType = SakType.BARNEPENSJON,
+                        id = 1,
+                        enhet = Enheter.defaultEnhet.enhetNr,
+                    ),
+                behandlingOpprettet = datoNaa,
+                sistEndret = datoNaa,
+                status = BehandlingStatus.IVERKSATT,
+                soeknadMottattDato = Tidspunkt.now().toLocalDatetimeUTC(),
+                gyldighetsproeving = null,
+                virkningstidspunkt =
+                    Virkningstidspunkt(
+                        YearMonth.of(2022, 1),
+                        Grunnlagsopplysning.Saksbehandler.create("ident"),
+                        "begrunnelse",
+                    ),
+                utenlandstilsnitt = null,
+                boddEllerArbeidetUtlandet = null,
+                kommerBarnetTilgode =
+                    KommerBarnetTilgode(
+                        JaNei.JA,
+                        "",
+                        Grunnlagsopplysning.Saksbehandler.create("saksbehandler"),
+                        iverksattBehandlingId,
+                    ),
+                kilde = Vedtaksloesning.GJENNY,
+            )
 
         every {
             behandlingDaoMock.alleBehandlingerISak(any())
         } returns listOf(iverksattBehandling)
 
-        every { behandlingDaoMock.hentBehandling(any()) } returns revurdering(
-            sakId = 1,
-            revurderingAarsak = RevurderingAarsak.NY_SOEKNAD,
-            enhet = Enheter.defaultEnhet.enhetNr
-        )
+        every { behandlingDaoMock.hentBehandling(any()) } returns
+            revurdering(
+                sakId = 1,
+                revurderingAarsak = RevurderingAarsak.NY_SOEKNAD,
+                enhet = Enheter.defaultEnhet.enhetNr,
+            )
 
-        val revurderingsBehandling = behandlingFactory.opprettBehandling(
-            1,
-            persongalleri,
-            datoNaa.toString(),
-            Vedtaksloesning.GJENNY
-        )
+        val revurderingsBehandling =
+            behandlingFactory.opprettBehandling(
+                1,
+                persongalleri,
+                datoNaa.toString(),
+                Vedtaksloesning.GJENNY,
+            )
         Assertions.assertTrue(revurderingsBehandling is Revurdering)
         verify {
             grunnlagService.leggInnNyttGrunnlag(any(), any())
@@ -534,34 +567,37 @@ class BehandlingFactoryTest {
         every { featureToggleService.isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false) } returns false
         every { featureToggleService.isEnabled(SakServiceFeatureToggle.FiltrerMedEnhetId, false) } returns false
 
-        val persongalleri = Persongalleri(
-            "11057523044",
-            "Innsender",
-            emptyList(),
-            listOf("Avdoed"),
-            listOf("Gjenlevende")
-        )
+        val persongalleri =
+            Persongalleri(
+                "11057523044",
+                "Innsender",
+                emptyList(),
+                listOf("Avdoed"),
+                listOf("Gjenlevende"),
+            )
 
         val sak = Sak(persongalleri.soeker, SakType.BARNEPENSJON, 1, Enheter.defaultEnhet.enhetNr)
 
-        val opprettetBehandling = Foerstegangsbehandling(
-            id = UUID.randomUUID(),
-            sak = sak,
-            behandlingOpprettet = datoNaa,
-            sistEndret = datoNaa,
-            status = BehandlingStatus.OPPRETTET,
-            soeknadMottattDato = Tidspunkt.now().toLocalDatetimeUTC(),
-            gyldighetsproeving = null,
-            virkningstidspunkt = Virkningstidspunkt(
-                YearMonth.of(2022, 1),
-                Grunnlagsopplysning.Saksbehandler.create("ident"),
-                "begrunnelse"
-            ),
-            utenlandstilsnitt = null,
-            boddEllerArbeidetUtlandet = null,
-            kommerBarnetTilgode = null,
-            kilde = Vedtaksloesning.GJENNY
-        )
+        val opprettetBehandling =
+            Foerstegangsbehandling(
+                id = UUID.randomUUID(),
+                sak = sak,
+                behandlingOpprettet = datoNaa,
+                sistEndret = datoNaa,
+                status = BehandlingStatus.OPPRETTET,
+                soeknadMottattDato = Tidspunkt.now().toLocalDatetimeUTC(),
+                gyldighetsproeving = null,
+                virkningstidspunkt =
+                    Virkningstidspunkt(
+                        YearMonth.of(2022, 1),
+                        Grunnlagsopplysning.Saksbehandler.create("ident"),
+                        "begrunnelse",
+                    ),
+                utenlandstilsnitt = null,
+                boddEllerArbeidetUtlandet = null,
+                kommerBarnetTilgode = null,
+                kilde = Vedtaksloesning.GJENNY,
+            )
 
         every { sakServiceMock.finnEllerOpprettSak(any(), any()) } returns sak
         every { sakServiceMock.finnSak(any<Long>()) } returns sak
@@ -572,9 +608,10 @@ class BehandlingFactoryTest {
             oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(any(), any())
         } returns mockOppgave
 
-        val resultat = behandlingFactory.opprettSakOgBehandlingForOppgave(
-            NyBehandlingRequest(sak.sakType, persongalleri, LocalDateTime.now().toString(), "nb")
-        )
+        val resultat =
+            behandlingFactory.opprettSakOgBehandlingForOppgave(
+                NyBehandlingRequest(sak.sakType, persongalleri, LocalDateTime.now().toString(), "nb"),
+            )
 
         Assertions.assertEquals(opprettetBehandling, resultat)
         Assertions.assertEquals(opprettetBehandling.sak, resultat.sak)

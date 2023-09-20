@@ -20,7 +20,8 @@ class Norg2KlientTest {
 
     @Test
     fun `hent best skal returnere en liste av enheter`() {
-        val forventet = """
+        val forventet =
+            """
             [
                 {
                   "enhetId": 100000589,
@@ -42,7 +43,7 @@ class Norg2KlientTest {
                   "orgNrTilKommunaltNavKontor": null
                 }
             ]
-        """.trimIndent()
+            """.trimIndent()
 
         val klient = mockHttpClient(forventet)
 
@@ -56,27 +57,29 @@ class Norg2KlientTest {
     }
 
     private fun mockHttpClient(jsonRespons: String): HttpClient {
-        val httpClient = HttpClient(MockEngine) {
-            engine {
-                addHandler { request ->
-                    when (request.url.fullPath) {
-                        "/arbeidsfordeling/enheter/bestmatch" -> respond(
-                            jsonRespons,
-                            HttpStatusCode.OK,
-                            defaultHeaders
-                        )
+        val httpClient =
+            HttpClient(MockEngine) {
+                engine {
+                    addHandler { request ->
+                        when (request.url.fullPath) {
+                            "/arbeidsfordeling/enheter/bestmatch" ->
+                                respond(
+                                    jsonRespons,
+                                    HttpStatusCode.OK,
+                                    defaultHeaders,
+                                )
 
-                        else -> error("Unhandled ${request.url.fullPath}")
+                            else -> error("Unhandled ${request.url.fullPath}")
+                        }
+                    }
+                }
+                expectSuccess = true
+                install(ContentNegotiation) {
+                    jackson {
+                        registerModule(JavaTimeModule())
                     }
                 }
             }
-            expectSuccess = true
-            install(ContentNegotiation) {
-                jackson {
-                    registerModule(JavaTimeModule())
-                }
-            }
-        }
 
         return httpClient
     }

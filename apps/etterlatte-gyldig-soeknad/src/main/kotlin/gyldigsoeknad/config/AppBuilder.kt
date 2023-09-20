@@ -22,7 +22,7 @@ class AppBuilder(props: Miljoevariabler) {
             azureAppJwk = props.requireEnvValue("AZURE_APP_JWK"),
             azureAppWellKnownUrl = props.requireEnvValue("AZURE_APP_WELL_KNOWN_URL"),
             azureAppScope = props.requireEnvValue("PDLTJENESTER_AZURE_SCOPE"),
-            ekstraJacksoninnstillinger = { it.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS) }
+            ekstraJacksoninnstillinger = { it.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS) },
         )
     }
 
@@ -32,7 +32,7 @@ class AppBuilder(props: Miljoevariabler) {
             azureAppJwk = props.requireEnvValue("AZURE_APP_JWK"),
             azureAppWellKnownUrl = props.requireEnvValue("AZURE_APP_WELL_KNOWN_URL"),
             azureAppScope = props.requireEnvValue("BEHANDLING_AZURE_SCOPE"),
-            ekstraJacksoninnstillinger = { it.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS) }
+            ekstraJacksoninnstillinger = { it.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS) },
         )
     }
 }

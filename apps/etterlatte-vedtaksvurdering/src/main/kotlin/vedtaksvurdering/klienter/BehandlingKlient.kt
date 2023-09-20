@@ -25,47 +25,66 @@ import no.nav.etterlatte.token.Fagsaksystem
 import no.nav.etterlatte.token.Saksbehandler
 import no.nav.etterlatte.vedtaksvurdering.VedtakHendelse
 import org.slf4j.LoggerFactory
-import java.util.*
+import java.util.UUID
 
 interface BehandlingKlient : BehandlingTilgangsSjekk, SakTilgangsSjekk {
-    suspend fun hentBehandling(behandlingId: UUID, brukerTokenInfo: BrukerTokenInfo): DetaljertBehandling
-    suspend fun hentSak(sakId: Long, brukerTokenInfo: BrukerTokenInfo): Sak
+    suspend fun hentBehandling(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): DetaljertBehandling
+
+    suspend fun hentSak(
+        sakId: Long,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Sak
+
     suspend fun fattVedtakBehandling(
         brukerTokenInfo: BrukerTokenInfo,
-        vedtakEndringDTO: VedtakEndringDTO
+        vedtakEndringDTO: VedtakEndringDTO,
     ): Boolean
 
     suspend fun underkjennVedtak(
         brukerTokenInfo: BrukerTokenInfo,
-        vedtakEndringDTO: VedtakEndringDTO
+        vedtakEndringDTO: VedtakEndringDTO,
     ): Boolean
 
     suspend fun attesterVedtak(
         brukerTokenInfo: BrukerTokenInfo,
-        vedtakEndringDTO: VedtakEndringDTO
+        vedtakEndringDTO: VedtakEndringDTO,
     ): Boolean
 
     suspend fun kanFatteVedtak(
         behandlingId: UUID,
-        brukerTokenInfo: BrukerTokenInfo
+        brukerTokenInfo: BrukerTokenInfo,
     ): Boolean
 
     suspend fun kanAttestereVedtak(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-        vedtakHendelse: VedtakHendelse? = null
+        vedtakHendelse: VedtakHendelse? = null,
     ): Boolean
 
     suspend fun kanUnderkjenneVedtak(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-        vedtakHendelse: VedtakHendelse? = null
+        vedtakHendelse: VedtakHendelse? = null,
     ): Boolean
 
-    suspend fun iverksett(behandlingId: UUID, brukerTokenInfo: BrukerTokenInfo, vedtakId: Long): Boolean
+    suspend fun iverksett(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+        vedtakId: Long,
+    ): Boolean
 
-    suspend fun hentOppgaverForSak(sakId: Long, brukerTokenInfo: BrukerTokenInfo): OppgaveListe
-    suspend fun tildelSaksbehandler(oppgaveTilAttestering: OppgaveNy, brukerTokenInfo: BrukerTokenInfo): Boolean
+    suspend fun hentOppgaverForSak(
+        sakId: Long,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): OppgaveListe
+
+    suspend fun tildelSaksbehandler(
+        oppgaveTilAttestering: OppgaveNy,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Boolean
 }
 
 class BehandlingKlientException(override val message: String, override val cause: Throwable? = null) :
@@ -80,60 +99,72 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
     private val clientId = config.getString("behandling.client.id")
     private val resourceUrl = config.getString("behandling.resource.url")
 
-    override suspend fun hentBehandling(behandlingId: UUID, brukerTokenInfo: BrukerTokenInfo): DetaljertBehandling {
+    override suspend fun hentBehandling(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): DetaljertBehandling {
         logger.info("Henter behandling med behandlingId=$behandlingId")
         try {
             return downstreamResourceClient
                 .get(
-                    resource = Resource(
-                        clientId = clientId,
-                        url = "$resourceUrl/behandlinger/$behandlingId"
-                    ),
-                    brukerTokenInfo = brukerTokenInfo
+                    resource =
+                        Resource(
+                            clientId = clientId,
+                            url = "$resourceUrl/behandlinger/$behandlingId",
+                        ),
+                    brukerTokenInfo = brukerTokenInfo,
                 )
                 .mapBoth(
                     success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
-                    failure = { throwableErrorMessage -> throw throwableErrorMessage }
+                    failure = { throwableErrorMessage -> throw throwableErrorMessage },
                 )
         } catch (e: Exception) {
             throw BehandlingKlientException("Henting av behandling med behandlingId=$behandlingId feilet", e)
         }
     }
 
-    override suspend fun hentSak(sakId: Long, brukerTokenInfo: BrukerTokenInfo): Sak {
+    override suspend fun hentSak(
+        sakId: Long,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Sak {
         logger.info("Henter sak med id $sakId")
         try {
             return downstreamResourceClient
                 .get(
-                    resource = Resource(
-                        clientId = clientId,
-                        url = "$resourceUrl/saker/$sakId"
-                    ),
-                    brukerTokenInfo = brukerTokenInfo
+                    resource =
+                        Resource(
+                            clientId = clientId,
+                            url = "$resourceUrl/saker/$sakId",
+                        ),
+                    brukerTokenInfo = brukerTokenInfo,
                 )
                 .mapBoth(
                     success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
-                    failure = { throwableErrorMessage -> throw throwableErrorMessage }
+                    failure = { throwableErrorMessage -> throw throwableErrorMessage },
                 )
         } catch (e: Exception) {
             throw BehandlingKlientException("Henting av sak med id=$sakId feilet", e)
         }
     }
 
-    override suspend fun hentOppgaverForSak(sakId: Long, brukerTokenInfo: BrukerTokenInfo): OppgaveListe {
+    override suspend fun hentOppgaverForSak(
+        sakId: Long,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): OppgaveListe {
         logger.info("Henter oppgaver for sak med id $sakId")
         try {
             return downstreamResourceClient
                 .get(
-                    resource = Resource(
-                        clientId = clientId,
-                        url = "$resourceUrl/api/nyeoppgaver/sak/$sakId/oppgaver"
-                    ),
-                    brukerTokenInfo = brukerTokenInfo
+                    resource =
+                        Resource(
+                            clientId = clientId,
+                            url = "$resourceUrl/api/nyeoppgaver/sak/$sakId/oppgaver",
+                        ),
+                    brukerTokenInfo = brukerTokenInfo,
                 )
                 .mapBoth(
                     success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
-                    failure = { throwableErrorMessage -> throw throwableErrorMessage }
+                    failure = { throwableErrorMessage -> throw throwableErrorMessage },
                 )
         } catch (e: Exception) {
             throw BehandlingKlientException("Henting av sak med id=$sakId feilet", e)
@@ -142,25 +173,27 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
 
     override suspend fun tildelSaksbehandler(
         oppgaveTilAttestering: OppgaveNy,
-        brukerTokenInfo: BrukerTokenInfo
+        brukerTokenInfo: BrukerTokenInfo,
     ): Boolean {
         logger.info("Tildeler oppgave $oppgaveTilAttestering til systembruker")
-        val response = downstreamResourceClient
-            .post(
-                resource = Resource(
-                    clientId = clientId,
-                    url = "$resourceUrl/api/nyeoppgaver/${oppgaveTilAttestering.id}/tildel-saksbehandler"
-                ),
-                brukerTokenInfo = brukerTokenInfo,
-                postBody = SaksbehandlerEndringDto(saksbehandler = Fagsaksystem.EY.navn)
-            )
+        val response =
+            downstreamResourceClient
+                .post(
+                    resource =
+                        Resource(
+                            clientId = clientId,
+                            url = "$resourceUrl/api/nyeoppgaver/${oppgaveTilAttestering.id}/tildel-saksbehandler",
+                        ),
+                    brukerTokenInfo = brukerTokenInfo,
+                    postBody = SaksbehandlerEndringDto(saksbehandler = Fagsaksystem.EY.navn),
+                )
 
         return when (response) {
             is Ok -> true
             is Err -> {
                 logger.error(
                     "Tildeling av $oppgaveTilAttestering til systembruker for attestering feilet",
-                    response.error
+                    response.error,
                 )
                 throw response.error
             }
@@ -169,25 +202,26 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
 
     override suspend fun fattVedtakBehandling(
         brukerTokenInfo: BrukerTokenInfo,
-        vedtakEndringDTO: VedtakEndringDTO
+        vedtakEndringDTO: VedtakEndringDTO,
     ): Boolean {
         logger.info(
             "Fatter oppgave og commiter sak for behandling" +
                 " ${vedtakEndringDTO.vedtakOppgaveDTO.referanse} " +
-                "sakId=${vedtakEndringDTO.vedtakOppgaveDTO.sakId}"
+                "sakId=${vedtakEndringDTO.vedtakOppgaveDTO.sakId}",
         )
         val resource = Resource(clientId = clientId, url = "$resourceUrl/fattvedtak")
-        val response = downstreamResourceClient.post(
-            resource = resource,
-            brukerTokenInfo = brukerTokenInfo,
-            postBody = vedtakEndringDTO
-        )
+        val response =
+            downstreamResourceClient.post(
+                resource = resource,
+                brukerTokenInfo = brukerTokenInfo,
+                postBody = vedtakEndringDTO,
+            )
         return when (response) {
             is Ok -> true
             is Err -> {
                 logger.error(
                     "Kan ikke fatte oppgaver og commite vedtak av type for behandling " +
-                        vedtakEndringDTO.vedtakOppgaveDTO.referanse
+                        vedtakEndringDTO.vedtakOppgaveDTO.referanse,
                 )
                 throw response.error
             }
@@ -196,25 +230,26 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
 
     override suspend fun underkjennVedtak(
         brukerTokenInfo: BrukerTokenInfo,
-        vedtakEndringDTO: VedtakEndringDTO
+        vedtakEndringDTO: VedtakEndringDTO,
     ): Boolean {
         logger.info(
             "Underkjenn oppgave og commiter sak for behandling" +
                 " ${vedtakEndringDTO.vedtakOppgaveDTO.referanse} " +
-                "sakId=${vedtakEndringDTO.vedtakOppgaveDTO.sakId}"
+                "sakId=${vedtakEndringDTO.vedtakOppgaveDTO.sakId}",
         )
         val resource = Resource(clientId = clientId, url = "$resourceUrl/underkjennvedtak")
-        val response = downstreamResourceClient.post(
-            resource = resource,
-            brukerTokenInfo = brukerTokenInfo,
-            postBody = vedtakEndringDTO
-        )
+        val response =
+            downstreamResourceClient.post(
+                resource = resource,
+                brukerTokenInfo = brukerTokenInfo,
+                postBody = vedtakEndringDTO,
+            )
         return when (response) {
             is Ok -> true
             is Err -> {
                 logger.error(
                     "Kan ikke underkjenne oppgaver og commite vedtak av type for behandling " +
-                        vedtakEndringDTO.vedtakOppgaveDTO.referanse
+                        vedtakEndringDTO.vedtakOppgaveDTO.referanse,
                 )
                 throw response.error
             }
@@ -223,25 +258,26 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
 
     override suspend fun attesterVedtak(
         brukerTokenInfo: BrukerTokenInfo,
-        vedtakEndringDTO: VedtakEndringDTO
+        vedtakEndringDTO: VedtakEndringDTO,
     ): Boolean {
         logger.info(
             "Attesterer oppgave og commiter sak for behandling" +
                 " ${vedtakEndringDTO.vedtakOppgaveDTO.referanse} " +
-                "sakId=${vedtakEndringDTO.vedtakOppgaveDTO.sakId}"
+                "sakId=${vedtakEndringDTO.vedtakOppgaveDTO.sakId}",
         )
         val resource = Resource(clientId = clientId, url = "$resourceUrl/attestervedtak")
-        val response = downstreamResourceClient.post(
-            resource = resource,
-            brukerTokenInfo = brukerTokenInfo,
-            postBody = vedtakEndringDTO
-        )
+        val response =
+            downstreamResourceClient.post(
+                resource = resource,
+                brukerTokenInfo = brukerTokenInfo,
+                postBody = vedtakEndringDTO,
+            )
         return when (response) {
             is Ok -> true
             is Err -> {
                 logger.error(
                     "Kan ikke attestere oppgaver og commite vedtak av type for behandling " +
-                        vedtakEndringDTO.vedtakOppgaveDTO.referanse
+                        vedtakEndringDTO.vedtakOppgaveDTO.referanse,
                 )
                 throw response.error
             }
@@ -250,7 +286,7 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
 
     override suspend fun kanFatteVedtak(
         behandlingId: UUID,
-        brukerTokenInfo: BrukerTokenInfo
+        brukerTokenInfo: BrukerTokenInfo,
     ): Boolean {
         return statussjekkForBehandling(behandlingId, brukerTokenInfo, BehandlingStatus.FATTET_VEDTAK)
     }
@@ -258,7 +294,7 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
     override suspend fun kanAttestereVedtak(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-        vedtakHendelse: VedtakHendelse?
+        vedtakHendelse: VedtakHendelse?,
     ): Boolean {
         return statussjekkForBehandling(behandlingId, brukerTokenInfo, BehandlingStatus.ATTESTERT)
     }
@@ -266,53 +302,64 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
     override suspend fun kanUnderkjenneVedtak(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-        vedtakHendelse: VedtakHendelse?
+        vedtakHendelse: VedtakHendelse?,
     ): Boolean {
         return statussjekkForBehandling(behandlingId, brukerTokenInfo, BehandlingStatus.RETURNERT)
     }
 
-    override suspend fun iverksett(behandlingId: UUID, brukerTokenInfo: BrukerTokenInfo, vedtakId: Long) =
-        downstreamResourceClient.post(
-            Resource(clientId = clientId, url = "$resourceUrl/behandlinger/$behandlingId/iverksett"),
-            brukerTokenInfo,
-            VedtakHendelse(
-                vedtakId = vedtakId,
-                inntruffet = Tidspunkt.now()
-            )
-        ).mapBoth({ true }, { false })
+    override suspend fun iverksett(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+        vedtakId: Long,
+    ) = downstreamResourceClient.post(
+        Resource(clientId = clientId, url = "$resourceUrl/behandlinger/$behandlingId/iverksett"),
+        brukerTokenInfo,
+        VedtakHendelse(
+            vedtakId = vedtakId,
+            inntruffet = Tidspunkt.now(),
+        ),
+    ).mapBoth({ true }, { false })
 
-    override suspend fun harTilgangTilBehandling(behandlingId: UUID, bruker: Saksbehandler): Boolean {
+    override suspend fun harTilgangTilBehandling(
+        behandlingId: UUID,
+        bruker: Saksbehandler,
+    ): Boolean {
         try {
             return downstreamResourceClient
                 .get(
-                    resource = Resource(
-                        clientId = clientId,
-                        url = "$resourceUrl/tilgang/behandling/$behandlingId"
-                    ),
-                    brukerTokenInfo = bruker
+                    resource =
+                        Resource(
+                            clientId = clientId,
+                            url = "$resourceUrl/tilgang/behandling/$behandlingId",
+                        ),
+                    brukerTokenInfo = bruker,
                 )
                 .mapBoth(
                     success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
-                    failure = { throwableErrorMessage -> throw throwableErrorMessage }
+                    failure = { throwableErrorMessage -> throw throwableErrorMessage },
                 )
         } catch (e: Exception) {
             throw BehandlingKlientException("Sjekking av tilgang for behandling feilet", e)
         }
     }
 
-    override suspend fun harTilgangTilSak(sakId: Long, bruker: Saksbehandler): Boolean {
+    override suspend fun harTilgangTilSak(
+        sakId: Long,
+        bruker: Saksbehandler,
+    ): Boolean {
         try {
             return downstreamResourceClient
                 .get(
-                    resource = Resource(
-                        clientId = clientId,
-                        url = "$resourceUrl/tilgang/sak/$sakId"
-                    ),
-                    brukerTokenInfo = bruker
+                    resource =
+                        Resource(
+                            clientId = clientId,
+                            url = "$resourceUrl/tilgang/sak/$sakId",
+                        ),
+                    brukerTokenInfo = bruker,
                 )
                 .mapBoth(
                     success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
-                    failure = { throwableErrorMessage -> throw throwableErrorMessage }
+                    failure = { throwableErrorMessage -> throw throwableErrorMessage },
                 )
         } catch (e: Exception) {
             throw BehandlingKlientException("Sjekking av tilgang for sak feilet", e)
@@ -322,7 +369,7 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
     private suspend fun statussjekkForBehandling(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-        status: BehandlingStatus
+        status: BehandlingStatus,
     ): Boolean {
         logger.info("Sjekker behandling med behandlingId=$behandlingId til status ${status.name} (commit=false)")
 
@@ -336,10 +383,10 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
             failure = {
                 logger.info(
                     "Kan ikke sjekke status=$status i behandling med behandlingId=$behandlingId (commit=false)",
-                    it.throwable
+                    it.throwable,
                 )
                 false
-            }
+            },
         )
     }
 

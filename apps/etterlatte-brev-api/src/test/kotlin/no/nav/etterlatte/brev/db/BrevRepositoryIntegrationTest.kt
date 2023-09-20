@@ -36,7 +36,7 @@ import org.junit.jupiter.api.TestInstance
 import org.postgresql.util.PSQLException
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
-import java.util.*
+import java.util.UUID
 import javax.sql.DataSource
 import kotlin.random.Random
 
@@ -54,11 +54,12 @@ internal class BrevRepositoryIntegrationTest {
         postgreSQLContainer.withUrlParam("user", postgreSQLContainer.username)
         postgreSQLContainer.withUrlParam("password", postgreSQLContainer.password)
 
-        dataSource = DataSourceBuilder.createDataSource(
-            jdbcUrl = postgreSQLContainer.jdbcUrl,
-            username = postgreSQLContainer.username,
-            password = postgreSQLContainer.password
-        )
+        dataSource =
+            DataSourceBuilder.createDataSource(
+                jdbcUrl = postgreSQLContainer.jdbcUrl,
+                username = postgreSQLContainer.username,
+                password = postgreSQLContainer.password,
+            )
         dataSource.migrate()
 
         db = BrevRepository(dataSource)
@@ -80,9 +81,10 @@ internal class BrevRepositoryIntegrationTest {
     fun `Henting av brev med ID fungerer`() {
         val antall = 10
 
-        val brevListe = (1..antall).map {
-            db.opprettBrev(ulagretBrev(behandlingId = UUID.randomUUID()))
-        }
+        val brevListe =
+            (1..antall).map {
+                db.opprettBrev(ulagretBrev(behandlingId = UUID.randomUUID()))
+            }
 
         brevListe.size shouldBeExactly 10
 
@@ -204,8 +206,8 @@ internal class BrevRepositoryIntegrationTest {
                 it.run(
                     queryOf(
                         "SELECT COUNT(*) FROM hendelse WHERE brev_id = ?",
-                        opprettetBrev.id
-                    ).map { row -> row.int("count") }.asSingle
+                        opprettetBrev.id,
+                    ).map { row -> row.int("count") }.asSingle,
                 )
             }
 
@@ -228,10 +230,11 @@ internal class BrevRepositoryIntegrationTest {
     inner class TestInnholdPayload {
         @Test
         fun `Opprett og hent brev payload`() {
-            val ulagretBrevUtenPayload = ulagretBrev(
-                behandlingId = UUID.randomUUID(),
-                innhold = BrevInnhold("tittel", Spraak.NB, payload = null)
-            )
+            val ulagretBrevUtenPayload =
+                ulagretBrev(
+                    behandlingId = UUID.randomUUID(),
+                    innhold = BrevInnhold("tittel", Spraak.NB, payload = null),
+                )
             val brevUtenPayload = db.opprettBrev(ulagretBrevUtenPayload)
 
             brevUtenPayload.status shouldBe Status.OPPRETTET
@@ -239,14 +242,16 @@ internal class BrevRepositoryIntegrationTest {
             db.hentBrevInnhold(brevUtenPayload.id) shouldBe ulagretBrevUtenPayload.innhold
             db.hentBrevPayload(brevUtenPayload.id) shouldBe null // Automatisk brev skal IKKE ha payload
 
-            val ulagretBrevMedPayload = ulagretBrev(
-                behandlingId = UUID.randomUUID(),
-                innhold = BrevInnhold(
-                    "tittel",
-                    Spraak.NB,
-                    payload = Slate(listOf(Slate.Element(Slate.ElementType.PARAGRAPH)))
+            val ulagretBrevMedPayload =
+                ulagretBrev(
+                    behandlingId = UUID.randomUUID(),
+                    innhold =
+                        BrevInnhold(
+                            "tittel",
+                            Spraak.NB,
+                            payload = Slate(listOf(Slate.Element(Slate.ElementType.PARAGRAPH))),
+                        ),
                 )
-            )
             val brevMedPayload = db.opprettBrev(ulagretBrevMedPayload)
 
             brevMedPayload.status shouldBe Status.OPPRETTET
@@ -274,10 +279,10 @@ internal class BrevRepositoryIntegrationTest {
                     listOf(
                         Slate.Element(
                             Slate.ElementType.HEADING_TWO,
-                            listOf(Slate.InnerElement(text = "Hello world!"))
-                        )
-                    )
-                )
+                            listOf(Slate.InnerElement(text = "Hello world!")),
+                        ),
+                    ),
+                ),
             )
 
             val payload = db.hentBrevPayload(opprettetBrev.id)!!
@@ -287,11 +292,12 @@ internal class BrevRepositoryIntegrationTest {
 
         @Test
         fun `Opprett og hent vedlegg payload`() {
-            val ulagretBrevUtenPayload = ulagretBrev(
-                behandlingId = UUID.randomUUID(),
-                innhold = BrevInnhold("tittel", Spraak.NB, payload = null),
-                innhold_vedlegg = null
-            )
+            val ulagretBrevUtenPayload =
+                ulagretBrev(
+                    behandlingId = UUID.randomUUID(),
+                    innhold = BrevInnhold("tittel", Spraak.NB, payload = null),
+                    innhold_vedlegg = null,
+                )
             val brevUtenPayload = db.opprettBrev(ulagretBrevUtenPayload)
 
             brevUtenPayload.status shouldBe Status.OPPRETTET
@@ -299,16 +305,18 @@ internal class BrevRepositoryIntegrationTest {
             db.hentBrevInnhold(brevUtenPayload.id) shouldBe ulagretBrevUtenPayload.innhold
             db.hentBrevPayloadVedlegg(brevUtenPayload.id) shouldBe null // Automatisk brev skal IKKE ha payload
 
-            val ulagretBrevMedPayload = ulagretBrev(
-                behandlingId = UUID.randomUUID(),
-                innhold_vedlegg = listOf(
-                    BrevInnholdVedlegg(
-                        tittel = "Tittel",
-                        key = BrevVedleggKey.BEREGNING_INNHOLD,
-                        payload = Slate(listOf(Slate.Element(Slate.ElementType.PARAGRAPH)))
-                    )
+            val ulagretBrevMedPayload =
+                ulagretBrev(
+                    behandlingId = UUID.randomUUID(),
+                    innhold_vedlegg =
+                        listOf(
+                            BrevInnholdVedlegg(
+                                tittel = "Tittel",
+                                key = BrevVedleggKey.BEREGNING_INNHOLD,
+                                payload = Slate(listOf(Slate.Element(Slate.ElementType.PARAGRAPH))),
+                            ),
+                        ),
                 )
-            )
             val brevMedPayload = db.opprettBrev(ulagretBrevMedPayload)
 
             brevMedPayload.status shouldBe Status.OPPRETTET
@@ -319,16 +327,18 @@ internal class BrevRepositoryIntegrationTest {
 
         @Test
         fun `Oppdatering av vedlegg payload`() {
-            val ulagretBrev = ulagretBrev(
-                behandlingId = UUID.randomUUID(),
-                innhold_vedlegg = listOf(
-                    BrevInnholdVedlegg(
-                        tittel = "tittel",
-                        key = BrevVedleggKey.BEREGNING_INNHOLD,
-                        payload = null
-                    )
+            val ulagretBrev =
+                ulagretBrev(
+                    behandlingId = UUID.randomUUID(),
+                    innhold_vedlegg =
+                        listOf(
+                            BrevInnholdVedlegg(
+                                tittel = "tittel",
+                                key = BrevVedleggKey.BEREGNING_INNHOLD,
+                                payload = null,
+                            ),
+                        ),
                 )
-            )
             val opprettetBrev = db.opprettBrev(ulagretBrev)
 
             db.oppdaterPayload(opprettetBrev.id, Slate(emptyList()))
@@ -345,16 +355,17 @@ internal class BrevRepositoryIntegrationTest {
                     BrevInnholdVedlegg(
                         tittel = "tittel",
                         key = BrevVedleggKey.BEREGNING_INNHOLD,
-                        payload = Slate(
-                            listOf(
-                                Slate.Element(
-                                    Slate.ElementType.HEADING_TWO,
-                                    listOf(Slate.InnerElement(text = "Hello world!"))
-                                )
-                            )
-                        )
-                    )
-                )
+                        payload =
+                            Slate(
+                                listOf(
+                                    Slate.Element(
+                                        Slate.ElementType.HEADING_TWO,
+                                        listOf(Slate.InnerElement(text = "Hello world!")),
+                                    ),
+                                ),
+                            ),
+                    ),
+                ),
             )
 
             val vedleggPayload = db.hentBrevPayloadVedlegg(opprettetBrev.id)!!
@@ -367,7 +378,7 @@ internal class BrevRepositoryIntegrationTest {
         sakId: Long = Random.nextLong(),
         behandlingId: UUID? = null,
         innhold: BrevInnhold? = null,
-        innhold_vedlegg: List<BrevInnholdVedlegg>? = null
+        innhold_vedlegg: List<BrevInnholdVedlegg>? = null,
     ) = OpprettNyttBrev(
         sakId = sakId,
         behandlingId = behandlingId,
@@ -375,21 +386,23 @@ internal class BrevRepositoryIntegrationTest {
         soekerFnr = "00000012345",
         mottaker = opprettMottaker(),
         innhold = innhold ?: BrevInnhold("tittel", Spraak.NB),
-        innholdVedlegg = innhold_vedlegg ?: null
+        innholdVedlegg = innhold_vedlegg ?: null,
     )
 
-    private fun opprettMottaker() = Mottaker(
-        navn = "Test Testesen",
-        foedselsnummer = STOR_SNERK,
-        adresse = Adresse(
-            adresseType = "NORSKPOSTADRESSE",
-            adresselinje1 = "Fyrstikkaleen 1",
-            postnummer = "1234",
-            poststed = "Oslo",
-            land = "Norge",
-            landkode = "NOR"
+    private fun opprettMottaker() =
+        Mottaker(
+            navn = "Test Testesen",
+            foedselsnummer = STOR_SNERK,
+            adresse =
+                Adresse(
+                    adresseType = "NORSKPOSTADRESSE",
+                    adresselinje1 = "Fyrstikkaleen 1",
+                    postnummer = "1234",
+                    poststed = "Oslo",
+                    land = "Norge",
+                    landkode = "NOR",
+                ),
         )
-    )
 
     companion object {
         private val PDF_BYTES = "Hello world!".toByteArray()

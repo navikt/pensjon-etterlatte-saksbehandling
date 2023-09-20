@@ -22,9 +22,7 @@ import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.VergeMaalEllerFremtidsfullmakt
 import no.nav.etterlatte.libs.common.sakId
 
-internal fun Route.grunnlagsendringshendelseRoute(
-    grunnlagsendringshendelseService: GrunnlagsendringshendelseService
-) {
+internal fun Route.grunnlagsendringshendelseRoute(grunnlagsendringshendelseService: GrunnlagsendringshendelseService) {
     val logger = application.log
 
     route("/grunnlagsendringshendelse") {
@@ -99,12 +97,13 @@ internal fun Route.grunnlagsendringshendelseRoute(
             call.respond(
                 GrunnlagsendringsListe(
                     grunnlagsendringshendelseService
-                        .hentAlleHendelserForSakAvType(sakId, GrunnlagsendringsType.INSTITUSJONSOPPHOLD)
-                )
+                        .hentAlleHendelserForSakAvType(sakId, GrunnlagsendringsType.INSTITUSJONSOPPHOLD),
+                ),
             )
         }
     }
 }
 
 data class GrunnlagsendringsListe(val hendelser: List<Grunnlagsendringshendelse>)
+
 data class ReguleringFeiletHendelse(val sakId: Long)

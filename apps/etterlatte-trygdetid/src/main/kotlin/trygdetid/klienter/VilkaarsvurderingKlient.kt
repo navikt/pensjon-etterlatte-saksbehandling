@@ -17,7 +17,7 @@ import java.util.UUID
 
 class VilkaarsvuderingKlientException(override val message: String, override val cause: Throwable) : Exception(
     message,
-    cause
+    cause,
 )
 
 class VilkaarsvuderingKlient(config: Config, httpClient: HttpClient) {
@@ -29,21 +29,25 @@ class VilkaarsvuderingKlient(config: Config, httpClient: HttpClient) {
     private val clientId = config.getString("vilkaarsvurdering.client.id")
     private val resourceUrl = config.getString("vilkaarsvurdering.resource.url")
 
-    suspend fun hentVilkaarsvurdering(behandlingId: UUID, brukerTokenInfo: BrukerTokenInfo): VilkaarsvurderingDto {
+    suspend fun hentVilkaarsvurdering(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): VilkaarsvurderingDto {
         logger.info("Henter vilkaarsvurdering for behandling med id = $behandlingId")
 
         return retry<VilkaarsvurderingDto> {
             downstreamResourceClient
                 .get(
-                    resource = Resource(
-                        clientId = clientId,
-                        url = "$resourceUrl/api/vilkaarsvurdering/$behandlingId"
-                    ),
-                    brukerTokenInfo = brukerTokenInfo
+                    resource =
+                        Resource(
+                            clientId = clientId,
+                            url = "$resourceUrl/api/vilkaarsvurdering/$behandlingId",
+                        ),
+                    brukerTokenInfo = brukerTokenInfo,
                 )
                 .mapBoth(
                     success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
-                    failure = { throwableErrorMessage -> throw throwableErrorMessage }
+                    failure = { throwableErrorMessage -> throw throwableErrorMessage },
                 )
         }.let {
             when (it) {
@@ -51,7 +55,7 @@ class VilkaarsvuderingKlient(config: Config, httpClient: HttpClient) {
                 is RetryResult.Failure -> {
                     throw VilkaarsvuderingKlientException(
                         "Klarte ikke hente vilkaarsvurdering for behandling med sakId=$behandlingId",
-                        it.samlaExceptions()
+                        it.samlaExceptions(),
                     )
                 }
             }

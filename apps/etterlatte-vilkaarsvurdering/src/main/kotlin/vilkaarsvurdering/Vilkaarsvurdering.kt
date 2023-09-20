@@ -7,7 +7,7 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarVurderingData
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
 import java.time.YearMonth
-import java.util.*
+import java.util.UUID
 
 data class Vilkaarsvurdering(
     val id: UUID = UUID.randomUUID(),
@@ -15,27 +15,27 @@ data class Vilkaarsvurdering(
     val grunnlagVersjon: Long,
     val virkningstidspunkt: YearMonth,
     val vilkaar: List<Vilkaar>,
-    val resultat: VilkaarsvurderingResultat? = null
+    val resultat: VilkaarsvurderingResultat? = null,
 ) {
-    fun toDto() = VilkaarsvurderingDto(
-        behandlingId = this.behandlingId,
-        virkningstidspunkt = this.virkningstidspunkt,
-        vilkaar = this.vilkaar,
-        resultat = this.resultat
-    )
+    fun toDto() =
+        VilkaarsvurderingDto(
+            behandlingId = this.behandlingId,
+            virkningstidspunkt = this.virkningstidspunkt,
+            vilkaar = this.vilkaar,
+            resultat = this.resultat,
+        )
 }
 
 data class VilkaarTypeOgUtfall(
     val type: VilkaarType,
-    val resultat: Utfall
+    val resultat: Utfall,
 )
 
 data class VurdertVilkaar(
     val vilkaarId: UUID,
     val hovedvilkaar: VilkaarTypeOgUtfall,
     val unntaksvilkaar: VilkaarTypeOgUtfall? = null,
-    val vurdering: VilkaarVurderingData
+    val vurdering: VilkaarVurderingData,
 ) {
-    fun hovedvilkaarOgUnntaksvilkaarIkkeOppfylt() =
-        hovedvilkaar.resultat == Utfall.IKKE_OPPFYLT && unntaksvilkaar == null
+    fun hovedvilkaarOgUnntaksvilkaarIkkeOppfylt() = hovedvilkaar.resultat == Utfall.IKKE_OPPFYLT && unntaksvilkaar == null
 }

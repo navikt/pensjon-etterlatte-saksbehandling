@@ -23,12 +23,11 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
-import java.util.*
+import java.util.UUID
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class VilkaarsvurderingRepositoryTest {
-
     @Container
     private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:$POSTGRES_VERSION")
 
@@ -39,11 +38,12 @@ internal class VilkaarsvurderingRepositoryTest {
     fun beforeAll() {
         postgreSQLContainer.start()
 
-        ds = DataSourceBuilder.createDataSource(
-            postgreSQLContainer.jdbcUrl,
-            postgreSQLContainer.username,
-            postgreSQLContainer.password
-        ).also { it.migrate() }
+        ds =
+            DataSourceBuilder.createDataSource(
+                postgreSQLContainer.jdbcUrl,
+                postgreSQLContainer.username,
+                postgreSQLContainer.password,
+            ).also { it.migrate() }
 
         vilkaarsvurderingRepository = VilkaarsvurderingRepository(ds, DelvilkaarRepository())
     }
@@ -89,7 +89,7 @@ internal class VilkaarsvurderingRepositoryTest {
             vilkaarsvurderingRepository.lagreVilkaarsvurderingResultat(
                 opprettetVilkaarsvurdering.behandlingId,
                 nyttVirkningstidspunkt.atDay(1),
-                vilkaarsvurderingResultat
+                vilkaarsvurderingResultat,
             )
 
         oppdatertVilkaarsvurdering.virkningstidspunkt shouldBe nyttVirkningstidspunkt
@@ -108,7 +108,7 @@ internal class VilkaarsvurderingRepositoryTest {
         vilkaarsvurderingRepository.lagreVilkaarsvurderingResultat(
             opprettetVilkaarsvurdering.behandlingId,
             vilkaarsvurdering.virkningstidspunkt.atDay(1),
-            vilkaarsvurderingResultat
+            vilkaarsvurderingResultat,
         )
         val oppdatertVilkaarsvurdering =
             vilkaarsvurderingRepository.slettVilkaarsvurderingResultat(opprettetVilkaarsvurdering.behandlingId)
@@ -120,25 +120,28 @@ internal class VilkaarsvurderingRepositoryTest {
     fun `skal sette resultat paa vilkaar`() {
         val opprettetVilkaarsvurdering = vilkaarsvurderingRepository.opprettVilkaarsvurdering(vilkaarsvurdering)
         val vilkaar = opprettetVilkaarsvurdering.hentVilkaarMedHovedvilkaarType(VilkaarType.BP_ALDER_BARN)
-        val vurdertVilkaar = VurdertVilkaar(
-            vilkaarId = vilkaar?.id!!,
-            vurdering = VilkaarVurderingData(
-                kommentar = "En test",
-                tidspunkt = Tidspunkt.now().toLocalDatetimeUTC(),
-                saksbehandler = "saksbehandler1"
-            ),
-            hovedvilkaar = VilkaarTypeOgUtfall(vilkaar.hovedvilkaar.type, Utfall.IKKE_VURDERT),
-            unntaksvilkaar = vilkaar.unntaksvilkaar.let {
-                val unntaksvilkaar =
-                    it.first { delvilkaar -> delvilkaar.type == VilkaarType.BP_ALDER_BARN_UNNTAK_UTDANNING }
-                VilkaarTypeOgUtfall(unntaksvilkaar.type, Utfall.IKKE_VURDERT)
-            }
-        )
+        val vurdertVilkaar =
+            VurdertVilkaar(
+                vilkaarId = vilkaar?.id!!,
+                vurdering =
+                    VilkaarVurderingData(
+                        kommentar = "En test",
+                        tidspunkt = Tidspunkt.now().toLocalDatetimeUTC(),
+                        saksbehandler = "saksbehandler1",
+                    ),
+                hovedvilkaar = VilkaarTypeOgUtfall(vilkaar.hovedvilkaar.type, Utfall.IKKE_VURDERT),
+                unntaksvilkaar =
+                    vilkaar.unntaksvilkaar.let {
+                        val unntaksvilkaar =
+                            it.first { delvilkaar -> delvilkaar.type == VilkaarType.BP_ALDER_BARN_UNNTAK_UTDANNING }
+                        VilkaarTypeOgUtfall(unntaksvilkaar.type, Utfall.IKKE_VURDERT)
+                    },
+            )
 
         val oppdatertVilkaarsvurdering =
             vilkaarsvurderingRepository.lagreVilkaarResultat(
                 opprettetVilkaarsvurdering.behandlingId,
-                vurdertVilkaar
+                vurdertVilkaar,
             )
 
         oppdatertVilkaarsvurdering.vilkaar.first { it.id == vilkaar.id }.let {
@@ -157,30 +160,33 @@ internal class VilkaarsvurderingRepositoryTest {
     fun `skal slette resultat paa vilkaar`() {
         val opprettetVilkaarsvurdering = vilkaarsvurderingRepository.opprettVilkaarsvurdering(vilkaarsvurdering)
         val vilkaar = opprettetVilkaarsvurdering.hentVilkaarMedHovedvilkaarType(VilkaarType.BP_ALDER_BARN)
-        val vurdertVilkaar = VurdertVilkaar(
-            vilkaarId = vilkaar?.id!!,
-            vurdering = VilkaarVurderingData(
-                kommentar = "En test",
-                tidspunkt = Tidspunkt.now().toLocalDatetimeUTC(),
-                saksbehandler = "saksbehandler1"
-            ),
-            hovedvilkaar = VilkaarTypeOgUtfall(vilkaar.hovedvilkaar.type, Utfall.IKKE_VURDERT),
-            unntaksvilkaar = vilkaar.unntaksvilkaar.let {
-                val unntaksvilkaar =
-                    it.first { delvilkaar -> delvilkaar.type == VilkaarType.BP_ALDER_BARN_UNNTAK_UTDANNING }
-                VilkaarTypeOgUtfall(unntaksvilkaar.type, Utfall.IKKE_VURDERT)
-            }
-        )
+        val vurdertVilkaar =
+            VurdertVilkaar(
+                vilkaarId = vilkaar?.id!!,
+                vurdering =
+                    VilkaarVurderingData(
+                        kommentar = "En test",
+                        tidspunkt = Tidspunkt.now().toLocalDatetimeUTC(),
+                        saksbehandler = "saksbehandler1",
+                    ),
+                hovedvilkaar = VilkaarTypeOgUtfall(vilkaar.hovedvilkaar.type, Utfall.IKKE_VURDERT),
+                unntaksvilkaar =
+                    vilkaar.unntaksvilkaar.let {
+                        val unntaksvilkaar =
+                            it.first { delvilkaar -> delvilkaar.type == VilkaarType.BP_ALDER_BARN_UNNTAK_UTDANNING }
+                        VilkaarTypeOgUtfall(unntaksvilkaar.type, Utfall.IKKE_VURDERT)
+                    },
+            )
 
         vilkaarsvurderingRepository.lagreVilkaarResultat(
             opprettetVilkaarsvurdering.behandlingId,
-            vurdertVilkaar
+            vurdertVilkaar,
         )
 
         val oppdatertVilkaarsvurdering =
             vilkaarsvurderingRepository.slettVilkaarResultat(
                 opprettetVilkaarsvurdering.behandlingId,
-                requireNotNull(vilkaar.id)
+                requireNotNull(vilkaar.id),
             )
 
         oppdatertVilkaarsvurdering.vilkaar.first { it.id == vilkaar.id }.let {
@@ -195,42 +201,48 @@ internal class VilkaarsvurderingRepositoryTest {
     fun `naar vi setter et ikke-oppfylt vilkaar oppfylt, skal resultatet fjernes fra alle unntakene`() {
         val opprettetVilkaarsvurdering = vilkaarsvurderingRepository.opprettVilkaarsvurdering(vilkaarsvurdering)
         val vilkaar = opprettetVilkaarsvurdering.hentVilkaarMedHovedvilkaarType(VilkaarType.BP_FORUTGAAENDE_MEDLEMSKAP)
-        val vurdertVilkaarIkkeOppfylt = VurdertVilkaar(
-            vilkaarId = vilkaar?.id!!,
-            vurdering = VilkaarVurderingData(
-                kommentar = "En test",
-                tidspunkt = Tidspunkt.now().toLocalDatetimeUTC(),
-                saksbehandler = "saksbehandler1"
-            ),
-            hovedvilkaar = VilkaarTypeOgUtfall(vilkaar.hovedvilkaar.type, Utfall.IKKE_OPPFYLT),
-            unntaksvilkaar = VilkaarTypeOgUtfall(
-                VilkaarType.BP_FORUTGAAENDE_MEDLEMSKAP_UNNTAK_AVDOED_MEDLEM_ETTER_16_AAR,
-                Utfall.OPPFYLT
+        val vurdertVilkaarIkkeOppfylt =
+            VurdertVilkaar(
+                vilkaarId = vilkaar?.id!!,
+                vurdering =
+                    VilkaarVurderingData(
+                        kommentar = "En test",
+                        tidspunkt = Tidspunkt.now().toLocalDatetimeUTC(),
+                        saksbehandler = "saksbehandler1",
+                    ),
+                hovedvilkaar = VilkaarTypeOgUtfall(vilkaar.hovedvilkaar.type, Utfall.IKKE_OPPFYLT),
+                unntaksvilkaar =
+                    VilkaarTypeOgUtfall(
+                        VilkaarType.BP_FORUTGAAENDE_MEDLEMSKAP_UNNTAK_AVDOED_MEDLEM_ETTER_16_AAR,
+                        Utfall.OPPFYLT,
+                    ),
             )
-        )
         vilkaarsvurderingRepository.lagreVilkaarResultat(
             opprettetVilkaarsvurdering.behandlingId,
-            vurdertVilkaarIkkeOppfylt
+            vurdertVilkaarIkkeOppfylt,
         )
 
-        val vurdertVilkaarOppfylt = VurdertVilkaar(
-            vilkaarId = vilkaar.id,
-            vurdering = VilkaarVurderingData(
-                kommentar = "En test",
-                tidspunkt = Tidspunkt.now().toLocalDatetimeUTC(),
-                saksbehandler = "saksbehandler1"
-            ),
-            hovedvilkaar = VilkaarTypeOgUtfall(vilkaar.hovedvilkaar.type, Utfall.OPPFYLT),
-            unntaksvilkaar = null
-        )
+        val vurdertVilkaarOppfylt =
+            VurdertVilkaar(
+                vilkaarId = vilkaar.id,
+                vurdering =
+                    VilkaarVurderingData(
+                        kommentar = "En test",
+                        tidspunkt = Tidspunkt.now().toLocalDatetimeUTC(),
+                        saksbehandler = "saksbehandler1",
+                    ),
+                hovedvilkaar = VilkaarTypeOgUtfall(vilkaar.hovedvilkaar.type, Utfall.OPPFYLT),
+                unntaksvilkaar = null,
+            )
         vilkaarsvurderingRepository.lagreVilkaarResultat(
             opprettetVilkaarsvurdering.behandlingId,
-            vurdertVilkaarOppfylt
+            vurdertVilkaarOppfylt,
         )
 
-        val resultatVilkaar = vilkaarsvurderingRepository.hent(behandlingId = opprettetVilkaarsvurdering.behandlingId)!!
-            .vilkaar
-            .first { it.hovedvilkaar.type == VilkaarType.BP_FORUTGAAENDE_MEDLEMSKAP }
+        val resultatVilkaar =
+            vilkaarsvurderingRepository.hent(behandlingId = opprettetVilkaarsvurdering.behandlingId)!!
+                .vilkaar
+                .first { it.hovedvilkaar.type == VilkaarType.BP_FORUTGAAENDE_MEDLEMSKAP }
 
         resultatVilkaar.hovedvilkaar.resultat shouldBe Utfall.OPPFYLT
         resultatVilkaar.unntaksvilkaar.forEach { it.resultat shouldBe null }
@@ -240,46 +252,52 @@ internal class VilkaarsvurderingRepositoryTest {
     fun `naar vi setter et vilkaar til ikke oppfylt, og ingen unntak treffer, setter alle unntak til ikke oppfylt`() {
         val opprettetVilkaarsvurdering = vilkaarsvurderingRepository.opprettVilkaarsvurdering(vilkaarsvurdering)
         val vilkaar = opprettetVilkaarsvurdering.hentVilkaarMedHovedvilkaarType(VilkaarType.BP_FORUTGAAENDE_MEDLEMSKAP)
-        val vurdertVilkaarIkkeOppfylt = VurdertVilkaar(
-            vilkaarId = vilkaar?.id!!,
-            vurdering = VilkaarVurderingData(
-                kommentar = "En test",
-                tidspunkt = Tidspunkt.now().toLocalDatetimeUTC(),
-                saksbehandler = "saksbehandler1"
-            ),
-            hovedvilkaar = VilkaarTypeOgUtfall(vilkaar.hovedvilkaar.type, Utfall.IKKE_OPPFYLT),
-            unntaksvilkaar = null
-        )
+        val vurdertVilkaarIkkeOppfylt =
+            VurdertVilkaar(
+                vilkaarId = vilkaar?.id!!,
+                vurdering =
+                    VilkaarVurderingData(
+                        kommentar = "En test",
+                        tidspunkt = Tidspunkt.now().toLocalDatetimeUTC(),
+                        saksbehandler = "saksbehandler1",
+                    ),
+                hovedvilkaar = VilkaarTypeOgUtfall(vilkaar.hovedvilkaar.type, Utfall.IKKE_OPPFYLT),
+                unntaksvilkaar = null,
+            )
         vilkaarsvurderingRepository.lagreVilkaarResultat(
             opprettetVilkaarsvurdering.behandlingId,
-            vurdertVilkaarIkkeOppfylt
+            vurdertVilkaarIkkeOppfylt,
         )
 
-        val resultatVilkaar = vilkaarsvurderingRepository.hent(behandlingId = opprettetVilkaarsvurdering.behandlingId)!!
-            .vilkaar
-            .first { it.hovedvilkaar.type == VilkaarType.BP_FORUTGAAENDE_MEDLEMSKAP }
+        val resultatVilkaar =
+            vilkaarsvurderingRepository.hent(behandlingId = opprettetVilkaarsvurdering.behandlingId)!!
+                .vilkaar
+                .first { it.hovedvilkaar.type == VilkaarType.BP_FORUTGAAENDE_MEDLEMSKAP }
 
         resultatVilkaar.hovedvilkaar.resultat shouldBe Utfall.IKKE_OPPFYLT
         resultatVilkaar.unntaksvilkaar.forEach { it.resultat shouldBe Utfall.IKKE_OPPFYLT }
     }
 
     companion object {
-        val vilkaarsvurdering = Vilkaarsvurdering(
-            behandlingId = UUID.randomUUID(),
-            grunnlagVersjon = 1L,
-            virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt().dato,
-            vilkaar = BarnepensjonVilkaar.inngangsvilkaar(
-                grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag(),
-                virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt()
+        val vilkaarsvurdering =
+            Vilkaarsvurdering(
+                behandlingId = UUID.randomUUID(),
+                grunnlagVersjon = 1L,
+                virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt().dato,
+                vilkaar =
+                    BarnepensjonVilkaar.inngangsvilkaar(
+                        grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag(),
+                        virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(),
+                    ),
             )
-        )
 
-        val vilkaarsvurderingResultat = VilkaarsvurderingResultat(
-            utfall = VilkaarsvurderingUtfall.OPPFYLT,
-            kommentar = "Alt ser bra ut",
-            tidspunkt = Tidspunkt.now().toLocalDatetimeUTC(),
-            saksbehandler = "saksbehandler1"
-        )
+        val vilkaarsvurderingResultat =
+            VilkaarsvurderingResultat(
+                utfall = VilkaarsvurderingUtfall.OPPFYLT,
+                kommentar = "Alt ser bra ut",
+                tidspunkt = Tidspunkt.now().toLocalDatetimeUTC(),
+                saksbehandler = "saksbehandler1",
+            )
     }
 }
 

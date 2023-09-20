@@ -18,7 +18,7 @@ import kotlin.math.max
 data class PeriodisertAvkortetYtelseGrunnlag(
     val beregningsperioder: PeriodisertGrunnlag<FaktumNode<Int>>,
     val avkortingsperioder: PeriodisertGrunnlag<FaktumNode<Int>>,
-    val fordeltRestanse: KonstantGrunnlag<FaktumNode<Int>>
+    val fordeltRestanse: KonstantGrunnlag<FaktumNode<Int>>,
 ) : PeriodisertGrunnlag<AvkortetYtelseGrunnlag> {
     override fun finnAlleKnekkpunkter(): Set<LocalDate> {
         return beregningsperioder.finnAlleKnekkpunkter() + avkortingsperioder.finnAlleKnekkpunkter()
@@ -28,7 +28,7 @@ data class PeriodisertAvkortetYtelseGrunnlag(
         return AvkortetYtelseGrunnlag(
             beregning = beregningsperioder.finnGrunnlagForPeriode(datoIPeriode),
             avkorting = avkortingsperioder.finnGrunnlagForPeriode(datoIPeriode),
-            fordeltRestanse = fordeltRestanse.finnGrunnlagForPeriode(datoIPeriode)
+            fordeltRestanse = fordeltRestanse.finnGrunnlagForPeriode(datoIPeriode),
         )
     }
 }
@@ -36,44 +36,49 @@ data class PeriodisertAvkortetYtelseGrunnlag(
 data class AvkortetYtelseGrunnlag(
     val beregning: FaktumNode<Int>,
     val avkorting: FaktumNode<Int>,
-    val fordeltRestanse: FaktumNode<Int>
+    val fordeltRestanse: FaktumNode<Int>,
 )
 
-val beregningsbeloep: Regel<AvkortetYtelseGrunnlag, Int> = finnFaktumIGrunnlag(
-    gjelderFra = OMS_GYLDIG_FROM_TEST,
-    beskrivelse = "Finner beregnet ytelse før avkorting",
-    finnFaktum = AvkortetYtelseGrunnlag::beregning,
-    finnFelt = { it }
-)
+val beregningsbeloep: Regel<AvkortetYtelseGrunnlag, Int> =
+    finnFaktumIGrunnlag(
+        gjelderFra = OMS_GYLDIG_FROM_TEST,
+        beskrivelse = "Finner beregnet ytelse før avkorting",
+        finnFaktum = AvkortetYtelseGrunnlag::beregning,
+        finnFelt = { it },
+    )
 
-val avkortingsbeloep: Regel<AvkortetYtelseGrunnlag, Int> = finnFaktumIGrunnlag(
-    gjelderFra = OMS_GYLDIG_FROM_TEST,
-    beskrivelse = "Finner avkortignsbeløp",
-    finnFaktum = AvkortetYtelseGrunnlag::avkorting,
-    finnFelt = { it }
-)
+val avkortingsbeloep: Regel<AvkortetYtelseGrunnlag, Int> =
+    finnFaktumIGrunnlag(
+        gjelderFra = OMS_GYLDIG_FROM_TEST,
+        beskrivelse = "Finner avkortignsbeløp",
+        finnFaktum = AvkortetYtelseGrunnlag::avkorting,
+        finnFelt = { it },
+    )
 
-val fordeltRestanseGrunnlag: Regel<AvkortetYtelseGrunnlag, Int> = finnFaktumIGrunnlag(
-    gjelderFra = OMS_GYLDIG_FROM_TEST,
-    beskrivelse = "Restanse fordelt over gjenværende måneder for gjeldende år",
-    finnFaktum = AvkortetYtelseGrunnlag::fordeltRestanse,
-    finnFelt = { it }
-)
+val fordeltRestanseGrunnlag: Regel<AvkortetYtelseGrunnlag, Int> =
+    finnFaktumIGrunnlag(
+        gjelderFra = OMS_GYLDIG_FROM_TEST,
+        beskrivelse = "Restanse fordelt over gjenværende måneder for gjeldende år",
+        finnFaktum = AvkortetYtelseGrunnlag::fordeltRestanse,
+        finnFelt = { it },
+    )
 
-val avkorteYtelse = RegelMeta(
-    gjelderFra = OMS_GYLDIG_FROM_TEST,
-    beskrivelse = "Finner endelig ytelse ved å trekke avkortingsbeløp fra beregnet ytelse",
-    regelReferanse = RegelReferanse(id = "REGEL-AVKORTET-YTELSE")
-) benytter beregningsbeloep og avkortingsbeloep med { beregningsbeloep, avkortingsbeloep ->
-    Beregningstall(beregningsbeloep).minus(Beregningstall(avkortingsbeloep))
-}
+val avkorteYtelse =
+    RegelMeta(
+        gjelderFra = OMS_GYLDIG_FROM_TEST,
+        beskrivelse = "Finner endelig ytelse ved å trekke avkortingsbeløp fra beregnet ytelse",
+        regelReferanse = RegelReferanse(id = "REGEL-AVKORTET-YTELSE"),
+    ) benytter beregningsbeloep og avkortingsbeloep med { beregningsbeloep, avkortingsbeloep ->
+        Beregningstall(beregningsbeloep).minus(Beregningstall(avkortingsbeloep))
+    }
 
-val avkortetYtelseMedRestanse = RegelMeta(
-    gjelderFra = OMS_GYLDIG_FROM_TEST,
-    beskrivelse = "Legger til restanse fra endret avkorting til tidligere måneder",
-    regelReferanse = RegelReferanse(id = "REGEL-AVKORTET-YTELSE-MED-RESTANSE")
-) benytter avkorteYtelse og fordeltRestanseGrunnlag med { avkorteYtelse, fordeltRestanse ->
-    avkorteYtelse.minus(Beregningstall(fordeltRestanse))
-        .toInteger()
-        .let { max(it, 0) }
-}
+val avkortetYtelseMedRestanse =
+    RegelMeta(
+        gjelderFra = OMS_GYLDIG_FROM_TEST,
+        beskrivelse = "Legger til restanse fra endret avkorting til tidligere måneder",
+        regelReferanse = RegelReferanse(id = "REGEL-AVKORTET-YTELSE-MED-RESTANSE"),
+    ) benytter avkorteYtelse og fordeltRestanseGrunnlag med { avkorteYtelse, fordeltRestanse ->
+        avkorteYtelse.minus(Beregningstall(fordeltRestanse))
+            .toInteger()
+            .let { max(it, 0) }
+    }

@@ -42,7 +42,7 @@ class BehandlingFactory(
     private val behandlingDao: BehandlingDao,
     private val hendelseDao: HendelseDao,
     private val behandlingHendelser: BehandlingHendelserKafkaProducer,
-    private val featureToggleService: FeatureToggleService
+    private val featureToggleService: FeatureToggleService,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -54,25 +54,28 @@ class BehandlingFactory(
 
         val sak = sakService.finnEllerOpprettSak(soeker, request.sakType)
 
-        val behandling = opprettBehandling(
-            sak.id, request.persongalleri, request.mottattDato, Vedtaksloesning.GJENNY
-        ) ?: throw IllegalStateException("Kunne ikke opprette behandling")
+        val behandling =
+            opprettBehandling(
+                sak.id, request.persongalleri, request.mottattDato, Vedtaksloesning.GJENNY,
+            ) ?: throw IllegalStateException("Kunne ikke opprette behandling")
 
-        val gyldighetsvurdering = GyldighetsResultat(
-            VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING,
-            emptyList(),
-            Tidspunkt.now().toLocalDatetimeUTC()
-        )
+        val gyldighetsvurdering =
+            GyldighetsResultat(
+                VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING,
+                emptyList(),
+                Tidspunkt.now().toLocalDatetimeUTC(),
+            )
 
         gyldighetsproevingService.lagreGyldighetsproeving(behandling.id, gyldighetsvurdering)
 
         val mottattDato = LocalDateTime.parse(request.mottattDato)
         val kilde = Grunnlagsopplysning.Privatperson(soeker, mottattDato.toTidspunkt())
 
-        val opplysninger = listOf(
-            lagOpplysning(Opplysningstype.SPRAAK, kilde, request.spraak.toJsonNode()),
-            lagOpplysning(Opplysningstype.SOEKNAD_MOTTATT_DATO, kilde, SoeknadMottattDato(mottattDato).toJsonNode())
-        )
+        val opplysninger =
+            listOf(
+                lagOpplysning(Opplysningstype.SPRAAK, kilde, request.spraak.toJsonNode()),
+                lagOpplysning(Opplysningstype.SOEKNAD_MOTTATT_DATO, kilde, SoeknadMottattDato(mottattDato).toJsonNode()),
+            )
 
         grunnlagService.leggTilNyeOpplysninger(sak.id, NyeSaksopplysninger(opplysninger))
 
@@ -83,19 +86,22 @@ class BehandlingFactory(
         sakId: Long,
         persongalleri: Persongalleri,
         mottattDato: String?,
-        kilde: Vedtaksloesning
+        kilde: Vedtaksloesning,
     ): Behandling? {
         logger.info("Starter behandling i sak $sakId")
-        val sak = inTransaction { sakService.finnSak(sakId) }.let {
-            requireNotNull(it) { "Fant ingen sak med id=$sakId!" }
-        }
-        val harBehandlingerForSak = inTransaction {
-            behandlingDao.alleBehandlingerISak(sak.id)
-        }
+        val sak =
+            inTransaction { sakService.finnSak(sakId) }.let {
+                requireNotNull(it) { "Fant ingen sak med id=$sakId!" }
+            }
+        val harBehandlingerForSak =
+            inTransaction {
+                behandlingDao.alleBehandlingerISak(sak.id)
+            }
 
-        val harIverksattEllerAttestertBehandling = harBehandlingerForSak.filter { behandling ->
-            BehandlingStatus.iverksattEllerAttestert().find { it == behandling.status } != null
-        }
+        val harIverksattEllerAttestertBehandling =
+            harBehandlingerForSak.filter { behandling ->
+                BehandlingStatus.iverksattEllerAttestert().find { it == behandling.status } != null
+            }
         return if (harIverksattEllerAttestertBehandling.isNotEmpty()) {
             val forrigeBehandling = harIverksattEllerAttestertBehandling.maxBy { it.behandlingOpprettet }
             revurderingService.opprettAutomatiskRevurdering(
@@ -105,12 +111,13 @@ class BehandlingFactory(
                 mottattDato = mottattDato,
                 kilde = kilde,
                 merknad = "Oppdatert søknad",
-                revurderingAarsak = RevurderingAarsak.NY_SOEKNAD
+                revurderingAarsak = RevurderingAarsak.NY_SOEKNAD,
             )
         } else {
-            val harBehandlingUnderbehandling = harBehandlingerForSak.filter { behandling ->
-                BehandlingStatus.underBehandling().find { it == behandling.status } != null
-            }
+            val harBehandlingUnderbehandling =
+                harBehandlingerForSak.filter { behandling ->
+                    BehandlingStatus.underBehandling().find { it == behandling.status } != null
+                }
             opprettFoerstegangsbehandling(harBehandlingUnderbehandling, sak, persongalleri, mottattDato, kilde)
         }
     }
@@ -120,7 +127,7 @@ class BehandlingFactory(
         sak: Sak,
         persongalleri: Persongalleri,
         mottattDato: String?,
-        kilde: Vedtaksloesning
+        kilde: Vedtaksloesning,
     ): Behandling? {
         return inTransaction {
             harBehandlingUnderbehandling.forEach {
@@ -134,7 +141,7 @@ class BehandlingFactory(
                 status = BehandlingStatus.OPPRETTET,
                 soeknadMottattDato = mottattDato?.let { LocalDateTime.parse(it) },
                 kilde = kilde,
-                merknad = opprettMerknad(sak, persongalleri)
+                merknad = opprettMerknad(sak, persongalleri),
             ).let { opprettBehandling ->
                 behandlingDao.opprettBehandling(opprettBehandling)
                 hendelseDao.behandlingOpprettet(opprettBehandling.toBehandlingOpprettet())
@@ -147,7 +154,7 @@ class BehandlingFactory(
                     grunnlagService.leggInnNyttGrunnlag(it, persongalleri)
                     oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(
                         referanse = behandling.id.toString(),
-                        sakId = sak.id
+                        sakId = sak.id,
                     )
                     behandlingHendelser.sendMeldingForHendelse(it, BehandlingHendelseType.OPPRETTET)
                 }
@@ -155,7 +162,10 @@ class BehandlingFactory(
         }
     }
 
-    private fun opprettMerknad(sak: Sak, persongalleri: Persongalleri): String? {
+    private fun opprettMerknad(
+        sak: Sak,
+        persongalleri: Persongalleri,
+    ): String? {
         return if (persongalleri.soesken.isEmpty()) {
             null
         } else if (sak.sakType == SakType.BARNEPENSJON) {
@@ -168,10 +178,12 @@ class BehandlingFactory(
             null
         }
     }
-    private fun Behandling?.sjekkEnhet() = this?.let { behandling ->
-        listOf(behandling).filterBehandlingerForEnheter(
-            featureToggleService,
-            Kontekst.get().AppUser
-        ).firstOrNull()
-    }
+
+    private fun Behandling?.sjekkEnhet() =
+        this?.let { behandling ->
+            listOf(behandling).filterBehandlingerForEnheter(
+                featureToggleService,
+                Kontekst.get().AppUser,
+            ).firstOrNull()
+        }
 }

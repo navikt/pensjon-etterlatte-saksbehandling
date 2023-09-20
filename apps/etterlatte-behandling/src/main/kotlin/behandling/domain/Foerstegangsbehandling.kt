@@ -14,7 +14,7 @@ import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 
 data class Foerstegangsbehandling(
     override val id: UUID,
@@ -29,7 +29,7 @@ data class Foerstegangsbehandling(
     val soeknadMottattDato: LocalDateTime?,
     val gyldighetsproeving: GyldighetsResultat?,
     override val prosesstype: Prosesstype = Prosesstype.MANUELL,
-    override val kilde: Vedtaksloesning
+    override val kilde: Vedtaksloesning,
 ) : Behandling() {
     override val type: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING
 
@@ -42,9 +42,10 @@ data class Foerstegangsbehandling(
                 (virkningstidspunkt != null) && (gyldighetsproeving != null)
         }
 
-    fun oppdaterGyldighetsproeving(gyldighetsResultat: GyldighetsResultat): Foerstegangsbehandling = hvisRedigerbar {
-        endreTilStatus(BehandlingStatus.OPPRETTET).copy(gyldighetsproeving = gyldighetsResultat)
-    }
+    fun oppdaterGyldighetsproeving(gyldighetsResultat: GyldighetsResultat): Foerstegangsbehandling =
+        hvisRedigerbar {
+            endreTilStatus(BehandlingStatus.OPPRETTET).copy(gyldighetsproeving = gyldighetsResultat)
+        }
 
     override fun oppdaterVirkningstidspunkt(virkningstidspunkt: Virkningstidspunkt) =
         hvisRedigerbar { endreTilStatus(BehandlingStatus.OPPRETTET).copy(virkningstidspunkt = virkningstidspunkt) }
@@ -70,15 +71,16 @@ data class Foerstegangsbehandling(
         return hvisRedigerbar { endreTilStatus(BehandlingStatus.VILKAARSVURDERT) }
     }
 
-    override fun tilTrygdetidOppdatert(): Foerstegangsbehandling = hvisTilstandEr(
-        listOf(
-            BehandlingStatus.VILKAARSVURDERT,
-            BehandlingStatus.TRYGDETID_OPPDATERT,
-            BehandlingStatus.BEREGNET,
-            BehandlingStatus.AVKORTET,
-            BehandlingStatus.RETURNERT
-        )
-    ) { endreTilStatus(BehandlingStatus.TRYGDETID_OPPDATERT) }
+    override fun tilTrygdetidOppdatert(): Foerstegangsbehandling =
+        hvisTilstandEr(
+            listOf(
+                BehandlingStatus.VILKAARSVURDERT,
+                BehandlingStatus.TRYGDETID_OPPDATERT,
+                BehandlingStatus.BEREGNET,
+                BehandlingStatus.AVKORTET,
+                BehandlingStatus.RETURNERT,
+            ),
+        ) { endreTilStatus(BehandlingStatus.TRYGDETID_OPPDATERT) }
 
     override fun tilBeregnet(fastTrygdetid: Boolean): Foerstegangsbehandling =
         hvisTilstandEr(
@@ -87,16 +89,16 @@ data class Foerstegangsbehandling(
                     BehandlingStatus.VILKAARSVURDERT,
                     BehandlingStatus.BEREGNET,
                     BehandlingStatus.AVKORTET,
-                    BehandlingStatus.RETURNERT
+                    BehandlingStatus.RETURNERT,
                 )
             } else {
                 listOf(
                     BehandlingStatus.TRYGDETID_OPPDATERT,
                     BehandlingStatus.BEREGNET,
                     BehandlingStatus.AVKORTET,
-                    BehandlingStatus.RETURNERT
+                    BehandlingStatus.RETURNERT,
                 )
-            }
+            },
         ) { endreTilStatus(BehandlingStatus.BEREGNET) }
 
     override fun tilAvkortet(): Foerstegangsbehandling =
@@ -104,8 +106,8 @@ data class Foerstegangsbehandling(
             listOf(
                 BehandlingStatus.BEREGNET,
                 BehandlingStatus.AVKORTET,
-                BehandlingStatus.RETURNERT
-            )
+                BehandlingStatus.RETURNERT,
+            ),
         ) { endreTilStatus(BehandlingStatus.AVKORTET) }
 
     override fun tilFattetVedtak(): Foerstegangsbehandling {
@@ -118,25 +120,27 @@ data class Foerstegangsbehandling(
             listOf(
                 BehandlingStatus.BEREGNET,
                 BehandlingStatus.AVKORTET,
-                BehandlingStatus.RETURNERT
-            )
+                BehandlingStatus.RETURNERT,
+            ),
         ) {
             endreTilStatus(BehandlingStatus.FATTET_VEDTAK)
         }
     }
 
-    override fun tilAttestert() = hvisTilstandEr(BehandlingStatus.FATTET_VEDTAK) {
-        endreTilStatus(BehandlingStatus.ATTESTERT)
-    }
+    override fun tilAttestert() =
+        hvisTilstandEr(BehandlingStatus.FATTET_VEDTAK) {
+            endreTilStatus(BehandlingStatus.ATTESTERT)
+        }
 
-    override fun tilReturnert() = hvisTilstandEr(BehandlingStatus.FATTET_VEDTAK) {
-        endreTilStatus(BehandlingStatus.RETURNERT)
-    }
+    override fun tilReturnert() =
+        hvisTilstandEr(BehandlingStatus.FATTET_VEDTAK) {
+            endreTilStatus(BehandlingStatus.RETURNERT)
+        }
 
-    override fun tilIverksatt() = hvisTilstandEr(BehandlingStatus.ATTESTERT) {
-        endreTilStatus(BehandlingStatus.IVERKSATT)
-    }
+    override fun tilIverksatt() =
+        hvisTilstandEr(BehandlingStatus.ATTESTERT) {
+            endreTilStatus(BehandlingStatus.IVERKSATT)
+        }
 
-    private fun endreTilStatus(status: BehandlingStatus) =
-        this.copy(status = status, sistEndret = Tidspunkt.now().toLocalDatetimeUTC())
+    private fun endreTilStatus(status: BehandlingStatus) = this.copy(status = status, sistEndret = Tidspunkt.now().toLocalDatetimeUTC())
 }

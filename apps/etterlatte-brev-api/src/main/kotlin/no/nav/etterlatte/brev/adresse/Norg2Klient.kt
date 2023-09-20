@@ -12,14 +12,14 @@ import java.time.Duration
 
 class Norg2Klient(
     private val apiUrl: String,
-    private val klient: HttpClient
+    private val klient: HttpClient,
 ) {
-
     private val logger = LoggerFactory.getLogger(Norg2Klient::class.java)
 
-    private val cache = Caffeine.newBuilder()
-        .expireAfterWrite(Duration.ofDays(1))
-        .build<String, Norg2Enhet>()
+    private val cache =
+        Caffeine.newBuilder()
+            .expireAfterWrite(Duration.ofDays(1))
+            .build<String, Norg2Enhet>()
 
     suspend fun hentEnhet(enhet: String): Norg2Enhet {
         return try {
@@ -67,7 +67,7 @@ data class Norg2Enhet(
     val enhetNr: String? = null,
     val status: String? = null,
     val type: String? = null,
-    var kontaktinfo: Norg2Kontaktinfo? = null
+    var kontaktinfo: Norg2Kontaktinfo? = null,
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -76,7 +76,7 @@ data class Norg2Kontaktinfo(
     val telefonnummerKommentar: String? = null,
     val faksnummer: String? = null,
     val epost: String? = null,
-    val postadresse: Postadresse? = null
+    val postadresse: Postadresse? = null,
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -89,11 +89,11 @@ data class Postadresse(
     val gatenavn: String? = null,
     val husnummer: String? = null,
     val husbokstav: String? = null,
-    val adresseTilleggsnavn: String? = null
+    val adresseTilleggsnavn: String? = null,
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class Norg2Error(
     val field: String? = null,
-    val message: String? = null
+    val message: String? = null,
 )

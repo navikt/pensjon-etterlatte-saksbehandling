@@ -21,11 +21,10 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
-import java.util.*
+import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class AvkortingRepositoryTest {
-
     @Container
     private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:$POSTGRES_VERSION")
     private lateinit var avkortingRepository: AvkortingRepository
@@ -34,11 +33,12 @@ internal class AvkortingRepositoryTest {
     fun beforeAll() {
         postgreSQLContainer.start()
 
-        val ds = DataSourceBuilder.createDataSource(
-            postgreSQLContainer.jdbcUrl,
-            postgreSQLContainer.username,
-            postgreSQLContainer.password
-        ).also { it.migrate() }
+        val ds =
+            DataSourceBuilder.createDataSource(
+                postgreSQLContainer.jdbcUrl,
+                postgreSQLContainer.username,
+                postgreSQLContainer.password,
+            ).also { it.migrate() }
 
         avkortingRepository = AvkortingRepository(ds)
     }
@@ -57,28 +57,31 @@ internal class AvkortingRepositoryTest {
     fun `Skal lagre og oppdatere avkorting`() {
         val behandlingId: UUID = UUID.randomUUID()
         val grunnlag = avkortinggrunnlag()
-        val aarsoppgjoer = Aarsoppgjoer(
-            ytelseFoerAvkorting = listOf(ytelseFoerAvkorting()),
-            inntektsavkorting = listOf(
-                Inntektsavkorting(
-                    grunnlag = grunnlag,
-                    avkortingsperioder = listOf(avkortingsperiode(inntektsgrunnlag = grunnlag.id)),
-                    avkortetYtelseForventetInntekt = listOf(
-                        avkortetYtelse(
-                            type = AvkortetYtelseType.FORVENTET_INNTEKT,
-                            inntektsgrunnlag = grunnlag.id
-                        )
+        val aarsoppgjoer =
+            Aarsoppgjoer(
+                ytelseFoerAvkorting = listOf(ytelseFoerAvkorting()),
+                inntektsavkorting =
+                    listOf(
+                        Inntektsavkorting(
+                            grunnlag = grunnlag,
+                            avkortingsperioder = listOf(avkortingsperiode(inntektsgrunnlag = grunnlag.id)),
+                            avkortetYtelseForventetInntekt =
+                                listOf(
+                                    avkortetYtelse(
+                                        type = AvkortetYtelseType.FORVENTET_INNTEKT,
+                                        inntektsgrunnlag = grunnlag.id,
+                                    ),
+                                ),
+                        ),
                     ),
-                )
-            ),
-            avkortetYtelseAar = listOf(avkortetYtelse(type = AvkortetYtelseType.AARSOPPGJOER)),
-        )
+                avkortetYtelseAar = listOf(avkortetYtelse(type = AvkortetYtelseType.AARSOPPGJOER)),
+            )
 
         avkortingRepository.lagreAvkorting(
             behandlingId,
             Avkorting(
                 aarsoppgjoer = aarsoppgjoer,
-            )
+            ),
         )
         val endretGrunnlag = aarsoppgjoer.inntektsavkorting[0].grunnlag.copy(spesifikasjon = "Endret")
         val endretAvkortingsperioder =
@@ -87,24 +90,26 @@ internal class AvkortingRepositoryTest {
             aarsoppgjoer.inntektsavkorting[0].avkortetYtelseForventetInntekt.map { it.copy(avkortingsbeloep = 444) }
 
         val endretYtelseFoerAvkorting = listOf(aarsoppgjoer.ytelseFoerAvkorting[0].copy(beregning = 333))
-        val endretInntektsavkorting = listOf(
-            Inntektsavkorting(
-                grunnlag = endretGrunnlag,
-                avkortingsperioder = endretAvkortingsperioder,
-                avkortetYtelseForventetInntekt = endretAvkortetYtelse
+        val endretInntektsavkorting =
+            listOf(
+                Inntektsavkorting(
+                    grunnlag = endretGrunnlag,
+                    avkortingsperioder = endretAvkortingsperioder,
+                    avkortetYtelseForventetInntekt = endretAvkortetYtelse,
+                ),
             )
-        )
         val endretAvkortetYtelseAar = aarsoppgjoer.avkortetYtelseAar.map { it.copy(avkortingsbeloep = 444) }
 
         avkortingRepository.lagreAvkorting(
             behandlingId,
             Avkorting(
-                aarsoppgjoer = aarsoppgjoer(
-                    ytelseFoerAvkorting = endretYtelseFoerAvkorting,
-                    inntektsavkorting = endretInntektsavkorting,
-                    avkortetYtelseAar = endretAvkortetYtelseAar,
-                ),
-            )
+                aarsoppgjoer =
+                    aarsoppgjoer(
+                        ytelseFoerAvkorting = endretYtelseFoerAvkorting,
+                        inntektsavkorting = endretInntektsavkorting,
+                        avkortetYtelseAar = endretAvkortetYtelseAar,
+                    ),
+            ),
         )
         val avkorting = avkortingRepository.hentAvkorting(behandlingId)
 
@@ -127,5 +132,4 @@ internal class AvkortingRepositoryTest {
             }
         }
     }
-
 }

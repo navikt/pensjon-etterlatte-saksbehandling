@@ -3,26 +3,32 @@ package no.nav.etterlatte.statistikk.domain
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import java.time.LocalDate
-import java.util.*
+import java.util.UUID
 
 enum class BehandlingMetode {
-    MANUELL, TOTRINN, AUTOMATISK, AUTOMATISK_REGULERING
+    MANUELL,
+    TOTRINN,
+    AUTOMATISK,
+    AUTOMATISK_REGULERING,
 }
 
 enum class SakUtland {
-    NASJONAL
+    NASJONAL,
 }
 
 enum class SoeknadFormat {
-    DIGITAL
+    DIGITAL,
 }
 
 enum class BehandlingResultat {
-    INNVILGELSE, AVBRUTT, OPPHOER
+    INNVILGELSE,
+    AVBRUTT,
+    OPPHOER,
 }
 
 enum class SakYtelsesgruppe {
-    EN_AVDOED_FORELDER, FORELDRELOES
+    EN_AVDOED_FORELDER,
+    FORELDRELOES,
 }
 
 data class SakRad(
@@ -54,5 +60,5 @@ data class SakRad(
     val vedtakLoependeFom: LocalDate?,
     val vedtakLoependeTom: LocalDate?,
     val beregning: Beregning?,
-    val avkorting: Avkorting?
+    val avkorting: Avkorting?,
 )

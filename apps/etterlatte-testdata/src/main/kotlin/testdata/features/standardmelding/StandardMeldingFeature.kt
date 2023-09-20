@@ -17,9 +17,9 @@ import no.nav.etterlatte.objectMapper
 import no.nav.etterlatte.producer
 import no.nav.etterlatte.testdata.JsonMessage
 import java.time.OffsetDateTime
-import java.util.*
+import java.util.UUID
 
-const val aremark_person = "12101376212"
+const val AREMARK_PERSON = "12101376212"
 
 object StandardMeldingFeature : TestDataFeature {
     override val beskrivelse: String
@@ -30,8 +30,8 @@ object StandardMeldingFeature : TestDataFeature {
         get() = {
             get {
                 sendMelding(
-                    payload(aremark_person, Tidspunkt.now().toLocalDatetimeUTC()),
-                    producer
+                    payload(AREMARK_PERSON, Tidspunkt.now().toLocalDatetimeUTC()),
+                    producer,
                 )
 
                 call.respond(
@@ -39,9 +39,9 @@ object StandardMeldingFeature : TestDataFeature {
                         "ny-standardmelding.hbs",
                         mapOf(
                             "beskrivelse" to beskrivelse,
-                            "path" to path
-                        )
-                    )
+                            "path" to path,
+                        ),
+                    ),
                 )
             }
         }
@@ -49,7 +49,7 @@ object StandardMeldingFeature : TestDataFeature {
 
 internal fun sendMelding(
     melding: String,
-    producer: KafkaProdusent<String, String>
+    producer: KafkaProdusent<String, String>,
 ) {
     val startMillis = System.currentTimeMillis()
     logger.info("Publiserer melding")
@@ -60,15 +60,16 @@ internal fun sendMelding(
 }
 
 private fun createRecord(input: String): Pair<String, String> {
-    val message = JsonMessage.newMessage(
-        mapOf(
-            "@event_name" to "trenger_behandling",
-            "@skjema_info" to objectMapper.readValue<ObjectNode>(input),
-            "@lagret_soeknad_id" to "TEST-${UUID.randomUUID()}",
-            "@template" to "soeknad",
-            "@fnr_soeker" to aremark_person,
-            "@hendelse_gyldig_til" to OffsetDateTime.now().plusMinutes(60L).toString()
+    val message =
+        JsonMessage.newMessage(
+            mapOf(
+                "@event_name" to "trenger_behandling",
+                "@skjema_info" to objectMapper.readValue<ObjectNode>(input),
+                "@lagret_soeknad_id" to "TEST-${UUID.randomUUID()}",
+                "@template" to "soeknad",
+                "@fnr_soeker" to AREMARK_PERSON,
+                "@hendelse_gyldig_til" to OffsetDateTime.now().plusMinutes(60L).toString(),
+            ),
         )
-    )
     return "0" to message.toJson()
 }

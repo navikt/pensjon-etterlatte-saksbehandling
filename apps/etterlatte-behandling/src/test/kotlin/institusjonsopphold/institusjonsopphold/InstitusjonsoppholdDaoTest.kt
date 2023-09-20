@@ -15,7 +15,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
-import java.util.*
+import java.util.UUID
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -31,11 +31,12 @@ internal class InstitusjonsoppholdDaoTest {
         postgreSQLContainer.withUrlParam("user", postgreSQLContainer.username)
         postgreSQLContainer.withUrlParam("password", postgreSQLContainer.password)
 
-        dataSource = DataSourceBuilder.createDataSource(
-            jdbcUrl = postgreSQLContainer.jdbcUrl,
-            username = postgreSQLContainer.username,
-            password = postgreSQLContainer.password
-        ).apply { migrate() }
+        dataSource =
+            DataSourceBuilder.createDataSource(
+                jdbcUrl = postgreSQLContainer.jdbcUrl,
+                username = postgreSQLContainer.username,
+                password = postgreSQLContainer.password,
+            ).apply { migrate() }
         val connection = dataSource.connection
         institusjonsoppholdDao = InstitusjonsoppholdDao { connection }
     }
@@ -50,11 +51,12 @@ internal class InstitusjonsoppholdDaoTest {
         val sakId = 1L
         val saksbehandler = Grunnlagsopplysning.Saksbehandler.create("Z123123")
         val grunnlagshendelseId = UUID.randomUUID().toString()
-        val institusjonsoppholdBegrunnelse = InstitusjonsoppholdBegrunnelse(
-            JaNeiMedBegrunnelse(JaNei.JA, "kommentaren"),
-            JaNeiMedBegrunnelse(JaNei.NEI, "kommentarto"),
-            grunnlagshendelseId
-        )
+        val institusjonsoppholdBegrunnelse =
+            InstitusjonsoppholdBegrunnelse(
+                JaNeiMedBegrunnelse(JaNei.JA, "kommentaren"),
+                JaNeiMedBegrunnelse(JaNei.NEI, "kommentarto"),
+                grunnlagshendelseId,
+            )
         institusjonsoppholdDao.lagreInstitusjonsopphold(sakId, saksbehandler, institusjonsoppholdBegrunnelse)
         val hentBegrunnelse = institusjonsoppholdDao.hentBegrunnelse(grunnlagshendelseId)
         Assertions.assertEquals(saksbehandler.ident, hentBegrunnelse?.saksbehandler?.ident)
@@ -62,11 +64,12 @@ internal class InstitusjonsoppholdDaoTest {
         Assertions.assertEquals(JaNei.JA, hentBegrunnelse?.kanGiReduksjonAvYtelse?.svar)
 
         val grunnlagshendelseIdTo = UUID.randomUUID().toString()
-        val institusjonsoppholdBegrunnelseNummerTo = InstitusjonsoppholdBegrunnelse(
-            JaNeiMedBegrunnelse(JaNei.JA, "kommentaren"),
-            JaNeiMedBegrunnelse(JaNei.NEI, "kommentarto"),
-            grunnlagshendelseIdTo
-        )
+        val institusjonsoppholdBegrunnelseNummerTo =
+            InstitusjonsoppholdBegrunnelse(
+                JaNeiMedBegrunnelse(JaNei.JA, "kommentaren"),
+                JaNeiMedBegrunnelse(JaNei.NEI, "kommentarto"),
+                grunnlagshendelseIdTo,
+            )
         institusjonsoppholdDao.lagreInstitusjonsopphold(sakId, saksbehandler, institusjonsoppholdBegrunnelseNummerTo)
         val hentetBegrunnelseTo = institusjonsoppholdDao.hentBegrunnelse(grunnlagshendelseIdTo)
         Assertions.assertNotNull(hentetBegrunnelseTo)

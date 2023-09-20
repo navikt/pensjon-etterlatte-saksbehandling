@@ -24,7 +24,6 @@ import java.time.LocalTime
 import java.time.temporal.ChronoUnit
 
 internal class KonsistensavstemmingServiceKtTest {
-
     private val avstemmingDao: AvstemmingDao = mockk()
     private val utbetalingDao: UtbetalingDao = mockk()
     private val avstemmingsdataSender: AvstemmingsdataSender = mockk()
@@ -36,18 +35,19 @@ internal class KonsistensavstemmingServiceKtTest {
             utbetalingDao.hentUtbetalingerForKonsistensavstemming(
                 any(),
                 any(),
-                Saktype.BARNEPENSJON
+                Saktype.BARNEPENSJON,
             )
         } returns listOf(utbetaling)
         every { avstemmingDao.opprettKonsistensavstemming(any()) } returns 1
 
         every { avstemmingsdataSender.sendKonsistensavstemming(any()) } returns "<xml>data</xml>"
 
-        val service = KonsistensavstemmingService(
-            utbetalingDao = utbetalingDao,
-            avstemmingDao = avstemmingDao,
-            avstemmingsdataSender = avstemmingsdataSender
-        )
+        val service =
+            KonsistensavstemmingService(
+                utbetalingDao = utbetalingDao,
+                avstemmingDao = avstemmingDao,
+                avstemmingsdataSender = avstemmingsdataSender,
+            )
 
         val dag = LocalDate.of(2022, 10, 10)
         val saktype = Saktype.BARNEPENSJON
@@ -65,11 +65,12 @@ internal class KonsistensavstemmingServiceKtTest {
         } returns null
 
         val idag = LocalDate.now()
-        val service = KonsistensavstemmingService(
-            utbetalingDao = utbetalingDao,
-            avstemmingDao = avstemmingDao,
-            avstemmingsdataSender = avstemmingsdataSender
-        )
+        val service =
+            KonsistensavstemmingService(
+                utbetalingDao = utbetalingDao,
+                avstemmingDao = avstemmingDao,
+                avstemmingsdataSender = avstemmingsdataSender,
+            )
 
         val resultat = service.konsistensavstemmingErKjoertIDag(Saktype.BARNEPENSJON, idag)
         assertFalse(resultat)
@@ -81,15 +82,17 @@ internal class KonsistensavstemmingServiceKtTest {
         val igaar = Tidspunkt.now().minus(1, ChronoUnit.DAYS)
         every {
             avstemmingDao.hentSisteKonsistensavsvemming(Saktype.BARNEPENSJON)
-        } returns mockk() {
-            every { opprettet } returns igaar
-        }
+        } returns
+            mockk {
+                every { opprettet } returns igaar
+            }
 
-        val service = KonsistensavstemmingService(
-            utbetalingDao = utbetalingDao,
-            avstemmingDao = avstemmingDao,
-            avstemmingsdataSender = avstemmingsdataSender
-        )
+        val service =
+            KonsistensavstemmingService(
+                utbetalingDao = utbetalingDao,
+                avstemmingDao = avstemmingDao,
+                avstemmingsdataSender = avstemmingsdataSender,
+            )
 
         val resultat = service.konsistensavstemmingErKjoertIDag(Saktype.BARNEPENSJON, idag)
         assertFalse(resultat)
@@ -101,15 +104,17 @@ internal class KonsistensavstemmingServiceKtTest {
         val idagTidspunkt = Tidspunkt.now()
         every {
             avstemmingDao.hentSisteKonsistensavsvemming(Saktype.BARNEPENSJON)
-        } returns mockk() {
-            every { opprettet } returns idagTidspunkt
-        }
+        } returns
+            mockk {
+                every { opprettet } returns idagTidspunkt
+            }
 
-        val service = KonsistensavstemmingService(
-            utbetalingDao = utbetalingDao,
-            avstemmingDao = avstemmingDao,
-            avstemmingsdataSender = avstemmingsdataSender
-        )
+        val service =
+            KonsistensavstemmingService(
+                utbetalingDao = utbetalingDao,
+                avstemmingDao = avstemmingDao,
+                avstemmingsdataSender = avstemmingsdataSender,
+            )
 
         val resultat = service.konsistensavstemmingErKjoertIDag(Saktype.BARNEPENSJON, idagDato)
         assertTrue(resultat)
@@ -122,17 +127,18 @@ internal class KonsistensavstemmingServiceKtTest {
             utbetalingDao.hentUtbetalingerForKonsistensavstemming(
                 idag.atStartOfDay().toNorskTidspunkt(),
                 idag.minusDays(1).atTime(
-                    LocalTime.MAX
+                    LocalTime.MAX,
                 ).toNorskTidspunkt(),
-                Saktype.BARNEPENSJON
+                Saktype.BARNEPENSJON,
             )
         } returns emptyList()
 
-        val service = KonsistensavstemmingService(
-            utbetalingDao = utbetalingDao,
-            avstemmingDao = avstemmingDao,
-            avstemmingsdataSender = avstemmingsdataSender
-        )
+        val service =
+            KonsistensavstemmingService(
+                utbetalingDao = utbetalingDao,
+                avstemmingDao = avstemmingDao,
+                avstemmingsdataSender = avstemmingsdataSender,
+            )
 
         val konsistensavstemming = service.lagKonsistensavstemming(LocalDate.now(), Saktype.BARNEPENSJON)
         assertEquals(emptyList<OppdragForKonsistensavstemming>(), konsistensavstemming.loependeUtbetalinger)
@@ -145,28 +151,31 @@ internal class KonsistensavstemmingServiceKtTest {
             utbetalingDao.hentUtbetalingerForKonsistensavstemming(
                 idag.atStartOfDay().toNorskTidspunkt(),
                 idag.minusDays(1).atTime(
-                    LocalTime.MAX
+                    LocalTime.MAX,
                 ).toNorskTidspunkt(),
-                Saktype.BARNEPENSJON
+                Saktype.BARNEPENSJON,
             )
-        } returns listOf(
-            utbetaling(
-                periodeFra = idag.minusDays(200),
-                periodeTil = idag.minusDays(50)
-            ),
-            utbetaling(
-                utbetalingslinjer = listOf(
-                    utbetalingslinje(periodeFra = idag.minusDays(300)),
-                    utbetalingslinje(type = Utbetalingslinjetype.OPPHOER, periodeFra = idag.minusDays(2))
-                )
+        } returns
+            listOf(
+                utbetaling(
+                    periodeFra = idag.minusDays(200),
+                    periodeTil = idag.minusDays(50),
+                ),
+                utbetaling(
+                    utbetalingslinjer =
+                        listOf(
+                            utbetalingslinje(periodeFra = idag.minusDays(300)),
+                            utbetalingslinje(type = Utbetalingslinjetype.OPPHOER, periodeFra = idag.minusDays(2)),
+                        ),
+                ),
             )
-        )
 
-        val service = KonsistensavstemmingService(
-            utbetalingDao = utbetalingDao,
-            avstemmingDao = avstemmingDao,
-            avstemmingsdataSender = avstemmingsdataSender
-        )
+        val service =
+            KonsistensavstemmingService(
+                utbetalingDao = utbetalingDao,
+                avstemmingDao = avstemmingDao,
+                avstemmingsdataSender = avstemmingsdataSender,
+            )
 
         val konsistensavstemming = service.lagKonsistensavstemming(LocalDate.now(), Saktype.BARNEPENSJON)
         assertEquals(emptyList<OppdragForKonsistensavstemming>(), konsistensavstemming.loependeUtbetalinger)
@@ -180,24 +189,26 @@ internal class KonsistensavstemmingServiceKtTest {
      */
     @Test
     fun `lagKonsistensavstemming tar med linjer som er relevante for en gitt dato`() {
-        val linje1 = utbetalingslinje(
-            utbetalingslinjeId = 1,
-            periodeFra = LocalDate.of(1998, 1, 1),
-            opprettet = LocalDate.of(1998, 1, 1).minusDays(16).toTidspunkt()
-        )
-        val linje2 = utbetalingslinje(
-            utbetalingslinjeId = 2,
-            erstatter = 1,
-            periodeFra = LocalDate.of(1998, 6, 1),
-            opprettet = LocalDate.of(1998, 2, 1).minusDays(16).toTidspunkt()
-
-        )
-        val linje3 = utbetalingslinje(
-            utbetalingslinjeId = 3,
-            erstatter = 2,
-            periodeFra = LocalDate.of(1997, 11, 1),
-            opprettet = LocalDate.of(1998, 9, 1).toTidspunkt()
-        )
+        val linje1 =
+            utbetalingslinje(
+                utbetalingslinjeId = 1,
+                periodeFra = LocalDate.of(1998, 1, 1),
+                opprettet = LocalDate.of(1998, 1, 1).minusDays(16).toTidspunkt(),
+            )
+        val linje2 =
+            utbetalingslinje(
+                utbetalingslinjeId = 2,
+                erstatter = 1,
+                periodeFra = LocalDate.of(1998, 6, 1),
+                opprettet = LocalDate.of(1998, 2, 1).minusDays(16).toTidspunkt(),
+            )
+        val linje3 =
+            utbetalingslinje(
+                utbetalingslinjeId = 3,
+                erstatter = 2,
+                periodeFra = LocalDate.of(1997, 11, 1),
+                opprettet = LocalDate.of(1998, 9, 1).toTidspunkt(),
+            )
 
         val opprettet = LocalDateTime.of(1997, 12, 1, 0, 0).toNorskTidspunkt()
 
@@ -208,38 +219,43 @@ internal class KonsistensavstemmingServiceKtTest {
 
         every { utbetalingDao.hentUtbetalingerForKonsistensavstemming(any(), any(), any()) } returns utbetalingsliste
 
-        val service = KonsistensavstemmingService(
-            utbetalingDao = utbetalingDao,
-            avstemmingDao = avstemmingDao,
-            avstemmingsdataSender = avstemmingsdataSender
-        )
+        val service =
+            KonsistensavstemmingService(
+                utbetalingDao = utbetalingDao,
+                avstemmingDao = avstemmingDao,
+                avstemmingsdataSender = avstemmingsdataSender,
+            )
 
-        /* Case 1: Naa: linje 3 er eneste gjeldende */
-        val linjerCase1 = service.lagKonsistensavstemming(
-            dag = LocalDate.now(),
-            saktype = Saktype.BARNEPENSJON
-        ).loependeUtbetalinger.map { it.utbetalingslinjer }.flatten().map { it.id }
+        // Case 1: Naa: linje 3 er eneste gjeldende
+        val linjerCase1 =
+            service.lagKonsistensavstemming(
+                dag = LocalDate.now(),
+                saktype = Saktype.BARNEPENSJON,
+            ).loependeUtbetalinger.map { it.utbetalingslinjer }.flatten().map { it.id }
         assertEquals(listOf(linje3.id), linjerCase1)
 
-        /* Case 2: Foer linje 3 er aktiv -> linje 1 og 2 er aktive */
-        val linjerCase2 = service.lagKonsistensavstemming(
-            dag = LocalDate.of(1998, 2, 25),
-            saktype = Saktype.BARNEPENSJON
-        ).loependeUtbetalinger.map { it.utbetalingslinjer }.flatten().map { it.id }
+        // Case 2: Foer linje 3 er aktiv -> linje 1 og 2 er aktive
+        val linjerCase2 =
+            service.lagKonsistensavstemming(
+                dag = LocalDate.of(1998, 2, 25),
+                saktype = Saktype.BARNEPENSJON,
+            ).loependeUtbetalinger.map { it.utbetalingslinjer }.flatten().map { it.id }
         assertEquals(listOf(linje1.id, linje2.id), linjerCase2)
 
-        /* Case 3: Etter linje 2 har tatt over for linje 1, men foer linje 3 er aktiv -> Linje 2 er aktiv */
-        val linjerCase3 = service.lagKonsistensavstemming(
-            dag = LocalDate.of(1998, 7, 25),
-            saktype = Saktype.BARNEPENSJON
-        ).loependeUtbetalinger.map { it.utbetalingslinjer }.flatten().map { it.id }
+        // Case 3: Etter linje 2 har tatt over for linje 1, men foer linje 3 er aktiv -> Linje 2 er aktiv
+        val linjerCase3 =
+            service.lagKonsistensavstemming(
+                dag = LocalDate.of(1998, 7, 25),
+                saktype = Saktype.BARNEPENSJON,
+            ).loependeUtbetalinger.map { it.utbetalingslinjer }.flatten().map { it.id }
         assertEquals(listOf(linje2.id), linjerCase3)
 
-        /* Case 4: Foer linje 2 og 3 er aktive opprettet -> linje 1 er aktiv */
-        val linjerCase4 = service.lagKonsistensavstemming(
-            dag = LocalDate.of(1998, 1, 2),
-            saktype = Saktype.BARNEPENSJON
-        ).loependeUtbetalinger.map { it.utbetalingslinjer }.flatten().map { it.id }
+        // Case 4: Foer linje 2 og 3 er aktive opprettet -> linje 1 er aktiv
+        val linjerCase4 =
+            service.lagKonsistensavstemming(
+                dag = LocalDate.of(1998, 1, 2),
+                saktype = Saktype.BARNEPENSJON,
+            ).loependeUtbetalinger.map { it.utbetalingslinjer }.flatten().map { it.id }
         assertEquals(listOf(linje1.id), linjerCase4)
     }
 
@@ -251,25 +267,27 @@ internal class KonsistensavstemmingServiceKtTest {
      */
     @Test
     fun `lagKonsistensavstemming haandterer opphoer korrekt`() {
-        val linje1 = utbetalingslinje(
-            utbetalingslinjeId = 1,
-            periodeFra = LocalDate.of(1998, 1, 1),
-            opprettet = LocalDate.of(1998, 1, 1).minusDays(16).toTidspunkt()
-        )
-        val linje2 = utbetalingslinje(
-            utbetalingslinjeId = 2,
-            erstatter = 1,
-            periodeFra = LocalDate.of(1998, 6, 1),
-            opprettet = LocalDate.of(1998, 2, 1).minusDays(16).toTidspunkt()
-
-        )
-        val linje3 = utbetalingslinje(
-            utbetalingslinjeId = 3,
-            erstatter = 2,
-            periodeFra = LocalDate.of(2000, 11, 1),
-            opprettet = LocalDate.of(1998, 9, 1).toTidspunkt(),
-            type = Utbetalingslinjetype.OPPHOER
-        )
+        val linje1 =
+            utbetalingslinje(
+                utbetalingslinjeId = 1,
+                periodeFra = LocalDate.of(1998, 1, 1),
+                opprettet = LocalDate.of(1998, 1, 1).minusDays(16).toTidspunkt(),
+            )
+        val linje2 =
+            utbetalingslinje(
+                utbetalingslinjeId = 2,
+                erstatter = 1,
+                periodeFra = LocalDate.of(1998, 6, 1),
+                opprettet = LocalDate.of(1998, 2, 1).minusDays(16).toTidspunkt(),
+            )
+        val linje3 =
+            utbetalingslinje(
+                utbetalingslinjeId = 3,
+                erstatter = 2,
+                periodeFra = LocalDate.of(2000, 11, 1),
+                opprettet = LocalDate.of(1998, 9, 1).toTidspunkt(),
+                type = Utbetalingslinjetype.OPPHOER,
+            )
 
         val opprettet = LocalDateTime.of(1997, 12, 1, 0, 0).toNorskTidspunkt()
 
@@ -280,31 +298,35 @@ internal class KonsistensavstemmingServiceKtTest {
 
         every { utbetalingDao.hentUtbetalingerForKonsistensavstemming(any(), any(), any()) } returns utbetalingsliste
 
-        val service = KonsistensavstemmingService(
-            utbetalingDao = utbetalingDao,
-            avstemmingDao = avstemmingDao,
-            avstemmingsdataSender = avstemmingsdataSender
-        )
+        val service =
+            KonsistensavstemmingService(
+                utbetalingDao = utbetalingDao,
+                avstemmingDao = avstemmingDao,
+                avstemmingsdataSender = avstemmingsdataSender,
+            )
 
-        /* Case 1: Naa: linje 3 har foert til opphoer -> ingen aktive utbetalingslinjer */
-        val linjerCase1 = service.lagKonsistensavstemming(
-            dag = LocalDate.now(),
-            saktype = Saktype.BARNEPENSJON
-        ).loependeUtbetalinger.map { it.utbetalingslinjer }.flatten().map { it.id }
+        // Case 1: Naa: linje 3 har foert til opphoer -> ingen aktive utbetalingslinjer
+        val linjerCase1 =
+            service.lagKonsistensavstemming(
+                dag = LocalDate.now(),
+                saktype = Saktype.BARNEPENSJON,
+            ).loependeUtbetalinger.map { it.utbetalingslinjer }.flatten().map { it.id }
         assertEquals(emptyList<UtbetalingslinjeId>(), linjerCase1)
 
-        /* Case 2: Foer linje 2 er aktiv, og foer linje 3 er opprettet -> linje 1 og 2 er aktive */
-        val linjerCase2 = service.lagKonsistensavstemming(
-            dag = LocalDate.of(1998, 2, 25),
-            saktype = Saktype.BARNEPENSJON
-        ).loependeUtbetalinger.map { it.utbetalingslinjer }.flatten().map { it.id }
+        // Case 2: Foer linje 2 er aktiv, og foer linje 3 er opprettet -> linje 1 og 2 er aktive
+        val linjerCase2 =
+            service.lagKonsistensavstemming(
+                dag = LocalDate.of(1998, 2, 25),
+                saktype = Saktype.BARNEPENSJON,
+            ).loependeUtbetalinger.map { it.utbetalingslinjer }.flatten().map { it.id }
         assertEquals(listOf(linje1.id, linje2.id), linjerCase2)
 
-        /* Case 3: Etter linje 1 er aktiv, kun linje 2 er aktiv, foer linje 3 er opprettet -> linje 2 er aktiv */
-        val linjerCase3 = service.lagKonsistensavstemming(
-            dag = LocalDate.of(1998, 7, 25),
-            saktype = Saktype.BARNEPENSJON
-        ).loependeUtbetalinger.map { it.utbetalingslinjer }.flatten().map { it.id }
+        // Case 3: Etter linje 1 er aktiv, kun linje 2 er aktiv, foer linje 3 er opprettet -> linje 2 er aktiv
+        val linjerCase3 =
+            service.lagKonsistensavstemming(
+                dag = LocalDate.of(1998, 7, 25),
+                saktype = Saktype.BARNEPENSJON,
+            ).loependeUtbetalinger.map { it.utbetalingslinjer }.flatten().map { it.id }
         assertEquals(listOf(linje2.id), linjerCase3)
     }
 
@@ -318,34 +340,38 @@ internal class KonsistensavstemmingServiceKtTest {
     @Test
     fun `lagKonsistensavstemming haandterer utbetaling etterfulgt av opphoer, med ny utbetaling etter opphoer`() {
         val opprettet1 = LocalDate.of(1998, 1, 1).minusDays(16).toTidspunkt()
-        val linje1 = utbetalingslinje(
-            utbetalingslinjeId = 1,
-            periodeFra = opprettet1.toNorskLocalDate(),
-            opprettet = opprettet1
-        )
+        val linje1 =
+            utbetalingslinje(
+                utbetalingslinjeId = 1,
+                periodeFra = opprettet1.toNorskLocalDate(),
+                opprettet = opprettet1,
+            )
         val opprettet2 = LocalDate.of(1999, 12, 1).toTidspunkt()
-        val linje2 = utbetalingslinje(
-            utbetalingslinjeId = 2,
-            erstatter = 1,
-            periodeFra = opprettet2.toNorskLocalDate(),
-            opprettet = opprettet2,
-            type = Utbetalingslinjetype.OPPHOER
-        )
+        val linje2 =
+            utbetalingslinje(
+                utbetalingslinjeId = 2,
+                erstatter = 1,
+                periodeFra = opprettet2.toNorskLocalDate(),
+                opprettet = opprettet2,
+                type = Utbetalingslinjetype.OPPHOER,
+            )
         val opprettet3 = LocalDate.of(2001, 1, 1).minusDays(16).toTidspunkt()
-        val linje3 = utbetalingslinje(
-            utbetalingslinjeId = 3,
-            erstatter = 2,
-            periodeFra = opprettet3.toNorskLocalDate(),
-            opprettet = opprettet3
-        )
+        val linje3 =
+            utbetalingslinje(
+                utbetalingslinjeId = 3,
+                erstatter = 2,
+                periodeFra = opprettet3.toNorskLocalDate(),
+                opprettet = opprettet3,
+            )
         val opprettet4 = LocalDate.of(2002, 1, 1).minusDays(15).toTidspunkt()
-        val linje4 = utbetalingslinje(
-            utbetalingslinjeId = 4,
-            erstatter = 3,
-            periodeFra = opprettet4.toNorskLocalDate(),
-            opprettet = opprettet4,
-            type = Utbetalingslinjetype.OPPHOER
-        )
+        val linje4 =
+            utbetalingslinje(
+                utbetalingslinjeId = 4,
+                erstatter = 3,
+                periodeFra = opprettet4.toNorskLocalDate(),
+                opprettet = opprettet4,
+                type = Utbetalingslinjetype.OPPHOER,
+            )
 
         val utbetaling1 = utbetaling(opprettet = opprettet1, utbetalingslinjer = listOf(linje1))
         val utbetaling2 = utbetaling(opprettet = opprettet2, utbetalingslinjer = listOf(linje2))
@@ -355,38 +381,43 @@ internal class KonsistensavstemmingServiceKtTest {
 
         every { utbetalingDao.hentUtbetalingerForKonsistensavstemming(any(), any(), any()) } returns utbetalingsliste
 
-        val service = KonsistensavstemmingService(
-            utbetalingDao = utbetalingDao,
-            avstemmingDao = avstemmingDao,
-            avstemmingsdataSender = avstemmingsdataSender
-        )
+        val service =
+            KonsistensavstemmingService(
+                utbetalingDao = utbetalingDao,
+                avstemmingDao = avstemmingDao,
+                avstemmingsdataSender = avstemmingsdataSender,
+            )
 
-        /* Case 1: kun linje 1 er opprettet og gjeldende -> kun linje 1 er aktiv */
-        val linjerCase1 = service.lagKonsistensavstemming(
-            dag = opprettet1.toNorskLocalDate().plusDays(1),
-            saktype = Saktype.BARNEPENSJON
-        ).loependeUtbetalinger.map { it.utbetalingslinjer }.flatten().map { it.id }
+        // Case 1: kun linje 1 er opprettet og gjeldende -> kun linje 1 er aktiv
+        val linjerCase1 =
+            service.lagKonsistensavstemming(
+                dag = opprettet1.toNorskLocalDate().plusDays(1),
+                saktype = Saktype.BARNEPENSJON,
+            ).loependeUtbetalinger.map { it.utbetalingslinjer }.flatten().map { it.id }
         assertEquals(listOf(linje1.id), linjerCase1)
 
-        /* Case 2: opphoer i linje 2 er gjeldende -> ingen aktive linjer */
-        val linjerCase2 = service.lagKonsistensavstemming(
-            dag = opprettet2.toNorskLocalDate().plusDays(1),
-            saktype = Saktype.BARNEPENSJON
-        ).loependeUtbetalinger.map { it.utbetalingslinjer }.flatten().map { it.id }
+        // Case 2: opphoer i linje 2 er gjeldende -> ingen aktive linjer
+        val linjerCase2 =
+            service.lagKonsistensavstemming(
+                dag = opprettet2.toNorskLocalDate().plusDays(1),
+                saktype = Saktype.BARNEPENSJON,
+            ).loependeUtbetalinger.map { it.utbetalingslinjer }.flatten().map { it.id }
         assertEquals(emptyList<UtbetalingslinjeId>(), linjerCase2)
 
-        /* Case 3: linje 3 er opprettet og gjeldende -> kun linje 3 er aktiv */
-        val linjerCase3 = service.lagKonsistensavstemming(
-            dag = opprettet3.toNorskLocalDate().plusDays(1),
-            saktype = Saktype.BARNEPENSJON
-        ).loependeUtbetalinger.map { it.utbetalingslinjer }.flatten().map { it.id }
+        // Case 3: linje 3 er opprettet og gjeldende -> kun linje 3 er aktiv
+        val linjerCase3 =
+            service.lagKonsistensavstemming(
+                dag = opprettet3.toNorskLocalDate().plusDays(1),
+                saktype = Saktype.BARNEPENSJON,
+            ).loependeUtbetalinger.map { it.utbetalingslinjer }.flatten().map { it.id }
         assertEquals(listOf(linje3.id), linjerCase3)
 
-        /* Case 4: opphoer i linje 4 er gjeldende -> ingen aktive linjer */
-        val linjerCase4 = service.lagKonsistensavstemming(
-            dag = opprettet4.toNorskLocalDate().plusDays(1),
-            saktype = Saktype.BARNEPENSJON
-        ).loependeUtbetalinger.map { it.utbetalingslinjer }.flatten().map { it.id }
+        // Case 4: opphoer i linje 4 er gjeldende -> ingen aktive linjer
+        val linjerCase4 =
+            service.lagKonsistensavstemming(
+                dag = opprettet4.toNorskLocalDate().plusDays(1),
+                saktype = Saktype.BARNEPENSJON,
+            ).loependeUtbetalinger.map { it.utbetalingslinjer }.flatten().map { it.id }
         assertEquals(emptyList<UtbetalingslinjeId>(), linjerCase4)
     }
 
@@ -401,34 +432,38 @@ internal class KonsistensavstemmingServiceKtTest {
     fun `lagKonsistensavstemming haandterer aktive utbetalinger paa begge sider av opphoer`() {
         val opprettet = LocalDate.of(1998, 1, 1).minusDays(16).toTidspunkt()
         val periodeFra1 = LocalDate.of(1998, 1, 1).minusDays(16)
-        val linje1 = utbetalingslinje(
-            utbetalingslinjeId = 1,
-            periodeFra = periodeFra1,
-            opprettet = opprettet
-        )
+        val linje1 =
+            utbetalingslinje(
+                utbetalingslinjeId = 1,
+                periodeFra = periodeFra1,
+                opprettet = opprettet,
+            )
         val periodeFra2 = LocalDate.of(1999, 12, 1)
-        val linje2 = utbetalingslinje(
-            utbetalingslinjeId = 2,
-            erstatter = 1,
-            periodeFra = periodeFra2,
-            opprettet = opprettet,
-            type = Utbetalingslinjetype.OPPHOER
-        )
+        val linje2 =
+            utbetalingslinje(
+                utbetalingslinjeId = 2,
+                erstatter = 1,
+                periodeFra = periodeFra2,
+                opprettet = opprettet,
+                type = Utbetalingslinjetype.OPPHOER,
+            )
         val periodeFra3 = LocalDate.of(2001, 1, 1).minusDays(16)
-        val linje3 = utbetalingslinje(
-            utbetalingslinjeId = 3,
-            erstatter = 2,
-            periodeFra = periodeFra3,
-            opprettet = opprettet
-        )
+        val linje3 =
+            utbetalingslinje(
+                utbetalingslinjeId = 3,
+                erstatter = 2,
+                periodeFra = periodeFra3,
+                opprettet = opprettet,
+            )
         val periodeFra4 = LocalDate.of(2002, 1, 1).minusDays(15)
-        val linje4 = utbetalingslinje(
-            utbetalingslinjeId = 4,
-            erstatter = 3,
-            periodeFra = periodeFra4,
-            opprettet = opprettet,
-            type = Utbetalingslinjetype.OPPHOER
-        )
+        val linje4 =
+            utbetalingslinje(
+                utbetalingslinjeId = 4,
+                erstatter = 3,
+                periodeFra = periodeFra4,
+                opprettet = opprettet,
+                type = Utbetalingslinjetype.OPPHOER,
+            )
 
         val utbetaling1 = utbetaling(opprettet = opprettet, utbetalingslinjer = listOf(linje1))
         val utbetaling2 = utbetaling(opprettet = opprettet, utbetalingslinjer = listOf(linje2))
@@ -438,38 +473,43 @@ internal class KonsistensavstemmingServiceKtTest {
 
         every { utbetalingDao.hentUtbetalingerForKonsistensavstemming(any(), any(), any()) } returns utbetalingsliste
 
-        val service = KonsistensavstemmingService(
-            utbetalingDao = utbetalingDao,
-            avstemmingDao = avstemmingDao,
-            avstemmingsdataSender = avstemmingsdataSender
-        )
+        val service =
+            KonsistensavstemmingService(
+                utbetalingDao = utbetalingDao,
+                avstemmingDao = avstemmingDao,
+                avstemmingsdataSender = avstemmingsdataSender,
+            )
 
-        /* Case 1: linje 1 og 3 er opprettet og gjeldende -> kun linje 1 og 3 er aktive */
-        val linjerCase1 = service.lagKonsistensavstemming(
-            dag = periodeFra1.plusDays(1),
-            saktype = Saktype.BARNEPENSJON
-        ).loependeUtbetalinger.map { it.utbetalingslinjer }.flatten().map { it.id }
+        // Case 1: linje 1 og 3 er opprettet og gjeldende -> kun linje 1 og 3 er aktive
+        val linjerCase1 =
+            service.lagKonsistensavstemming(
+                dag = periodeFra1.plusDays(1),
+                saktype = Saktype.BARNEPENSJON,
+            ).loependeUtbetalinger.map { it.utbetalingslinjer }.flatten().map { it.id }
         assertEquals(listOf(linje1.id, linje3.id), linjerCase1)
 
-        /* Case 2: opphoer i linje 2 er gjeldende -> kun linje 3 er aktiv */
-        val linjerCase2 = service.lagKonsistensavstemming(
-            dag = periodeFra2.plusDays(1),
-            saktype = Saktype.BARNEPENSJON
-        ).loependeUtbetalinger.map { it.utbetalingslinjer }.flatten().map { it.id }
+        // Case 2: opphoer i linje 2 er gjeldende -> kun linje 3 er aktiv
+        val linjerCase2 =
+            service.lagKonsistensavstemming(
+                dag = periodeFra2.plusDays(1),
+                saktype = Saktype.BARNEPENSJON,
+            ).loependeUtbetalinger.map { it.utbetalingslinjer }.flatten().map { it.id }
         assertEquals(listOf(linje3.id), linjerCase2)
 
-        /* Case 3: linje 3 er opprettet og gjeldende -> kun linje 3 er aktiv */
-        val linjerCase3 = service.lagKonsistensavstemming(
-            dag = periodeFra3.plusDays(1),
-            saktype = Saktype.BARNEPENSJON
-        ).loependeUtbetalinger.map { it.utbetalingslinjer }.flatten().map { it.id }
+        // Case 3: linje 3 er opprettet og gjeldende -> kun linje 3 er aktiv
+        val linjerCase3 =
+            service.lagKonsistensavstemming(
+                dag = periodeFra3.plusDays(1),
+                saktype = Saktype.BARNEPENSJON,
+            ).loependeUtbetalinger.map { it.utbetalingslinjer }.flatten().map { it.id }
         assertEquals(listOf(linje3.id), linjerCase3)
 
-        /* Case 4: opphoer i linje 4 er gjeldende -> ingen aktive linjer */
-        val linjerCase4 = service.lagKonsistensavstemming(
-            dag = periodeFra4.plusDays(1),
-            saktype = Saktype.BARNEPENSJON
-        ).loependeUtbetalinger.map { it.utbetalingslinjer }.flatten().map { it.id }
+        // Case 4: opphoer i linje 4 er gjeldende -> ingen aktive linjer
+        val linjerCase4 =
+            service.lagKonsistensavstemming(
+                dag = periodeFra4.plusDays(1),
+                saktype = Saktype.BARNEPENSJON,
+            ).loependeUtbetalinger.map { it.utbetalingslinjer }.flatten().map { it.id }
         assertEquals(emptyList<UtbetalingslinjeId>(), linjerCase4)
     }
 
@@ -481,19 +521,21 @@ internal class KonsistensavstemmingServiceKtTest {
     @Test
     fun `lagKonsistensavstemming haandterer overgangen til opphoer`() {
         val opprettet = LocalDate.of(1998, 1, 1).minusDays(16).toTidspunkt()
-        val linje1 = utbetalingslinje(
-            utbetalingslinjeId = 1,
-            periodeFra = opprettet.toNorskLocalDate(),
-            opprettet = opprettet
-        )
+        val linje1 =
+            utbetalingslinje(
+                utbetalingslinjeId = 1,
+                periodeFra = opprettet.toNorskLocalDate(),
+                opprettet = opprettet,
+            )
         val opphoerFra = LocalDate.of(1999, 12, 1)
-        val linje2 = utbetalingslinje(
-            utbetalingslinjeId = 2,
-            erstatter = 1,
-            periodeFra = opphoerFra,
-            opprettet = opprettet,
-            type = Utbetalingslinjetype.OPPHOER
-        )
+        val linje2 =
+            utbetalingslinje(
+                utbetalingslinjeId = 2,
+                erstatter = 1,
+                periodeFra = opphoerFra,
+                opprettet = opprettet,
+                type = Utbetalingslinjetype.OPPHOER,
+            )
 
         val utbetaling1 = utbetaling(opprettet = opprettet, utbetalingslinjer = listOf(linje1))
         val utbetaling2 = utbetaling(opprettet = opprettet, utbetalingslinjer = listOf(linje2))
@@ -501,23 +543,26 @@ internal class KonsistensavstemmingServiceKtTest {
 
         every { utbetalingDao.hentUtbetalingerForKonsistensavstemming(any(), any(), any()) } returns utbetalingsliste
 
-        val service = KonsistensavstemmingService(
-            utbetalingDao = utbetalingDao,
-            avstemmingDao = avstemmingDao,
-            avstemmingsdataSender = avstemmingsdataSender
-        )
+        val service =
+            KonsistensavstemmingService(
+                utbetalingDao = utbetalingDao,
+                avstemmingDao = avstemmingDao,
+                avstemmingsdataSender = avstemmingsdataSender,
+            )
 
-        /* Case 1: dagen foer opphoer av linje 1 -> linje 1 er aktiv */
-        val linjerCase1 = service.lagKonsistensavstemming(
-            dag = opphoerFra.minusDays(1),
-            saktype = Saktype.BARNEPENSJON
-        ).loependeUtbetalinger.map { it.utbetalingslinjer }.flatten().map { it.id }
+        // Case 1: dagen foer opphoer av linje 1 -> linje 1 er aktiv
+        val linjerCase1 =
+            service.lagKonsistensavstemming(
+                dag = opphoerFra.minusDays(1),
+                saktype = Saktype.BARNEPENSJON,
+            ).loependeUtbetalinger.map { it.utbetalingslinjer }.flatten().map { it.id }
         assertEquals(listOf(linje1.id), linjerCase1)
-        /* Case 2: samme dag som linje 1 opphoerer -> ingen aktive linjer */
-        val linjerCase2 = service.lagKonsistensavstemming(
-            dag = opphoerFra,
-            saktype = Saktype.BARNEPENSJON
-        ).loependeUtbetalinger.map { it.utbetalingslinjer }.flatten().map { it.id }
+        // Case 2: samme dag som linje 1 opphoerer -> ingen aktive linjer
+        val linjerCase2 =
+            service.lagKonsistensavstemming(
+                dag = opphoerFra,
+                saktype = Saktype.BARNEPENSJON,
+            ).loependeUtbetalinger.map { it.utbetalingslinjer }.flatten().map { it.id }
         assertEquals(emptyList<UtbetalingslinjeId>(), linjerCase2)
     }
 
@@ -534,31 +579,35 @@ internal class KonsistensavstemmingServiceKtTest {
     @Test
     fun `lagKonsistensavstemming haandterer flere utbetalinger med flere linjer`() {
         val opprettet1 = LocalDate.of(2020, 1, 1).minusDays(16).toTidspunkt()
-        val linje1Sak1 = utbetalingslinje(
-            utbetalingslinjeId = 1,
-            periodeFra = opprettet1.toNorskLocalDate(),
-            opprettet = opprettet1
-        )
+        val linje1Sak1 =
+            utbetalingslinje(
+                utbetalingslinjeId = 1,
+                periodeFra = opprettet1.toNorskLocalDate(),
+                opprettet = opprettet1,
+            )
         val opprettet2 = LocalDate.of(2021, 12, 1).toTidspunkt()
-        val linje2Sak1 = utbetalingslinje(
-            utbetalingslinjeId = 2,
-            erstatter = 1,
-            periodeFra = opprettet2.toNorskLocalDate(),
-            opprettet = opprettet2
-        )
+        val linje2Sak1 =
+            utbetalingslinje(
+                utbetalingslinjeId = 2,
+                erstatter = 1,
+                periodeFra = opprettet2.toNorskLocalDate(),
+                opprettet = opprettet2,
+            )
         val opprettet3 = LocalDate.of(2020, 6, 1).minusDays(16).toTidspunkt()
-        val linje1Sak2 = utbetalingslinje(
-            utbetalingslinjeId = 3,
-            periodeFra = opprettet3.toNorskLocalDate(),
-            opprettet = opprettet3
-        )
-        val linje2Sak2 = utbetalingslinje(
-            utbetalingslinjeId = 4,
-            erstatter = 3,
-            periodeFra = opprettet2.toNorskLocalDate(),
-            opprettet = opprettet2,
-            type = Utbetalingslinjetype.OPPHOER
-        )
+        val linje1Sak2 =
+            utbetalingslinje(
+                utbetalingslinjeId = 3,
+                periodeFra = opprettet3.toNorskLocalDate(),
+                opprettet = opprettet3,
+            )
+        val linje2Sak2 =
+            utbetalingslinje(
+                utbetalingslinjeId = 4,
+                erstatter = 3,
+                periodeFra = opprettet2.toNorskLocalDate(),
+                opprettet = opprettet2,
+                type = Utbetalingslinjetype.OPPHOER,
+            )
 
         val sak1 = SakId(1L)
         val sak2 = SakId(2L)
@@ -574,38 +623,43 @@ internal class KonsistensavstemmingServiceKtTest {
 
         every { utbetalingDao.hentUtbetalingerForKonsistensavstemming(any(), any(), any()) } returns utbetalingsliste
 
-        val service = KonsistensavstemmingService(
-            utbetalingDao = utbetalingDao,
-            avstemmingDao = avstemmingDao,
-            avstemmingsdataSender = avstemmingsdataSender
-        )
+        val service =
+            KonsistensavstemmingService(
+                utbetalingDao = utbetalingDao,
+                avstemmingDao = avstemmingDao,
+                avstemmingsdataSender = avstemmingsdataSender,
+            )
 
-        /* Case 1: Foer noen utbetalinger er opprettet -> ingen aktive linjer */
-        val linjerCase1 = service.lagKonsistensavstemming(
-            dag = opprettet1.toNorskLocalDate().minusDays(1),
-            saktype = Saktype.BARNEPENSJON
-        ).loependeUtbetalinger.map { it.utbetalingslinjer }.flatten().map { it.id }
+        // Case 1: Foer noen utbetalinger er opprettet -> ingen aktive linjer
+        val linjerCase1 =
+            service.lagKonsistensavstemming(
+                dag = opprettet1.toNorskLocalDate().minusDays(1),
+                saktype = Saktype.BARNEPENSJON,
+            ).loependeUtbetalinger.map { it.utbetalingslinjer }.flatten().map { it.id }
         assertEquals(emptyList<UtbetalingslinjeId>(), linjerCase1)
 
-        /* Case 2: Kun linje1Sak1 er opprettet -> linje1Sak1 er aktiv */
-        val linjerCase2 = service.lagKonsistensavstemming(
-            dag = opprettet1.toNorskLocalDate().plusDays(1),
-            saktype = Saktype.BARNEPENSJON
-        ).loependeUtbetalinger.map { it.utbetalingslinjer }.flatten().map { it.id }
+        // Case 2: Kun linje1Sak1 er opprettet -> linje1Sak1 er aktiv
+        val linjerCase2 =
+            service.lagKonsistensavstemming(
+                dag = opprettet1.toNorskLocalDate().plusDays(1),
+                saktype = Saktype.BARNEPENSJON,
+            ).loependeUtbetalinger.map { it.utbetalingslinjer }.flatten().map { it.id }
         assertEquals(listOf(linje1Sak1.id), linjerCase2)
 
-        /* Case 3: linje1Sak1 og linje1Sak2 er opprettet -> linje1Sak1 og linje1Sak2 er aktive */
-        val linjerCase3 = service.lagKonsistensavstemming(
-            dag = opprettet3.toNorskLocalDate().plusDays(1),
-            saktype = Saktype.BARNEPENSJON
-        ).loependeUtbetalinger.map { it.utbetalingslinjer }.flatten().map { it.id }
+        // Case 3: linje1Sak1 og linje1Sak2 er opprettet -> linje1Sak1 og linje1Sak2 er aktive
+        val linjerCase3 =
+            service.lagKonsistensavstemming(
+                dag = opprettet3.toNorskLocalDate().plusDays(1),
+                saktype = Saktype.BARNEPENSJON,
+            ).loependeUtbetalinger.map { it.utbetalingslinjer }.flatten().map { it.id }
         assertEquals(listOf(linje1Sak1.id, linje1Sak2.id), linjerCase3)
 
-        /* Case 4: alle linjer opprettet, men linje1Sak2 er opphoert og linje1Sak1 erstattet -> linje2Sak1 er aktiv */
-        val linjerCase4 = service.lagKonsistensavstemming(
-            dag = opprettet2.toNorskLocalDate().plusDays(1),
-            saktype = Saktype.BARNEPENSJON
-        ).loependeUtbetalinger.map { it.utbetalingslinjer }.flatten().map { it.id }
+        // Case 4: alle linjer opprettet, men linje1Sak2 er opphoert og linje1Sak1 erstattet -> linje2Sak1 er aktiv
+        val linjerCase4 =
+            service.lagKonsistensavstemming(
+                dag = opprettet2.toNorskLocalDate().plusDays(1),
+                saktype = Saktype.BARNEPENSJON,
+            ).loependeUtbetalinger.map { it.utbetalingslinjer }.flatten().map { it.id }
         assertEquals(listOf(linje2Sak1.id), linjerCase4)
     }
 

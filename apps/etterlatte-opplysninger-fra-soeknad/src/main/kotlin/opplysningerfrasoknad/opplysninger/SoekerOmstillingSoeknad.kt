@@ -11,5 +11,5 @@ data class SoekerOmstillingSoeknad(
     val adresse: String?,
     val statsborgerskap: String,
     val telefonnummer: String?,
-    val sivilstatus: String
+    val sivilstatus: String,
 )

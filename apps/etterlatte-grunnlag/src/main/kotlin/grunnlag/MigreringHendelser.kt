@@ -23,11 +23,11 @@ import org.slf4j.LoggerFactory
 import rapidsandrivers.SAK_ID_KEY
 import rapidsandrivers.migrering.ListenerMedLoggingOgFeilhaandtering
 import rapidsandrivers.sakId
-import java.util.*
+import java.util.UUID
 
 class MigreringHendelser(
     rapidsConnection: RapidsConnection,
-    private val grunnlagService: GrunnlagService
+    private val grunnlagService: GrunnlagService,
 ) : ListenerMedLoggingOgFeilhaandtering(LAGRE_GRUNNLAG) {
     private val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
@@ -41,7 +41,10 @@ class MigreringHendelser(
         }.register(this)
     }
 
-    override fun haandterPakke(packet: JsonMessage, context: MessageContext) {
+    override fun haandterPakke(
+        packet: JsonMessage,
+        context: MessageContext,
+    ) {
         logger.info("Mottok grunnlagshendelser for migrering")
         val sakId = packet.sakId
         val request =
@@ -55,10 +58,10 @@ class MigreringHendelser(
                     Grunnlagsopplysning.Pesys.create(),
                     Opplysningstype.PERSONGALLERI_V1,
                     objectMapper.createObjectNode(),
-                    packet.persongalleri.toJsonNode()
-                )
+                    packet.persongalleri.toJsonNode(),
+                ),
             ),
-            request.soeker
+            request.soeker,
         )
 
         packet.eventName = Migreringshendelser.VILKAARSVURDER
@@ -70,11 +73,10 @@ class MigreringHendelser(
     private fun lagreEnkeltgrunnlag(
         sakId: Long,
         opplysninger: List<Grunnlagsopplysning<JsonNode>>,
-        fnr: String
-    ) =
-        grunnlagService.lagreNyePersonopplysninger(
-            sakId,
-            Folkeregisteridentifikator.of(fnr),
-            opplysninger
-        )
+        fnr: String,
+    ) = grunnlagService.lagreNyePersonopplysninger(
+        sakId,
+        Folkeregisteridentifikator.of(fnr),
+        opplysninger,
+    )
 }

@@ -11,23 +11,37 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.vedtak.LoependeYtelseDTO
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import java.time.LocalDate
-import java.util.*
+import java.util.UUID
 
 interface VedtakService {
-    fun harLoependeYtelserFra(sakId: Long, dato: LocalDate): LoependeYtelseDTO
+    fun harLoependeYtelserFra(
+        sakId: Long,
+        dato: LocalDate,
+    ): LoependeYtelseDTO
 
-    fun opprettVedtakFattOgAttester(sakId: Long, behandlingId: UUID): VedtakDto
+    fun opprettVedtakFattOgAttester(
+        sakId: Long,
+        behandlingId: UUID,
+    ): VedtakDto
+
     fun tilbakestillVedtak(behandlingId: UUID)
+
     fun iverksattVedtak(behandlingId: UUID): VedtakDto
 }
 
 class VedtakServiceImpl(private val vedtakKlient: HttpClient, private val url: String) : VedtakService {
-    override fun harLoependeYtelserFra(sakId: Long, dato: LocalDate): LoependeYtelseDTO =
+    override fun harLoependeYtelserFra(
+        sakId: Long,
+        dato: LocalDate,
+    ): LoependeYtelseDTO =
         runBlocking {
             vedtakKlient.get("$url/api/vedtak/loepende/$sakId?dato=$dato").body()
         }
 
-    override fun opprettVedtakFattOgAttester(sakId: Long, behandlingId: UUID): VedtakDto =
+    override fun opprettVedtakFattOgAttester(
+        sakId: Long,
+        behandlingId: UUID,
+    ): VedtakDto =
         runBlocking {
             vedtakKlient.post("$url/api/vedtak/$sakId/$behandlingId/automatisk").body()
         }
@@ -38,9 +52,10 @@ class VedtakServiceImpl(private val vedtakKlient: HttpClient, private val url: S
         }
     }
 
-    override fun iverksattVedtak(behandlingId: UUID): VedtakDto = runBlocking {
-        vedtakKlient.post("$url/api/vedtak/$behandlingId/iverksett") {
-            contentType(ContentType.Application.Json)
-        }.body()
-    }
+    override fun iverksattVedtak(behandlingId: UUID): VedtakDto =
+        runBlocking {
+            vedtakKlient.post("$url/api/vedtak/$behandlingId/iverksett") {
+                contentType(ContentType.Application.Json)
+            }.body()
+        }
 }

@@ -16,28 +16,30 @@ import java.io.FileNotFoundException
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class StartUthentingFraSoeknadTest {
-
     companion object {
         val melding = readFile("/melding.json")
         val opplysningsuthenterMock = mockk<Opplysningsuthenter>()
 
-        fun readFile(file: String) = Companion::class.java.getResource(file)?.readText()
-            ?: throw FileNotFoundException("Fant ikke filen $file")
+        fun readFile(file: String) =
+            Companion::class.java.getResource(file)?.readText()
+                ?: throw FileNotFoundException("Fant ikke filen $file")
     }
 
     private val inspector = TestRapid().apply { StartUthentingFraSoeknad(this, opplysningsuthenterMock) }
 
     @Test
     fun `skal lese inn melding og lage message med opplysninger`() {
-        val soknad: JsonNode = objectMapper.treeToValue(
-            objectMapper.readTree(
-                javaClass.getResource("/melding.json")!!.readText()
-            )!!["@skjema_info"]
-        )
-        val opplysninger = Opplysningsuthenter().lagOpplysningsListe(
-            soknad,
-            SoeknadType.BARNEPENSJON
-        )
+        val soknad: JsonNode =
+            objectMapper.treeToValue(
+                objectMapper.readTree(
+                    javaClass.getResource("/melding.json")!!.readText(),
+                )!!["@skjema_info"],
+            )
+        val opplysninger =
+            Opplysningsuthenter().lagOpplysningsListe(
+                soknad,
+                SoeknadType.BARNEPENSJON,
+            )
         every { opplysningsuthenterMock.lagOpplysningsListe(soknad, SoeknadType.BARNEPENSJON) } returns opplysninger
         val inspector = inspector.apply { sendTestMessage(melding) }.inspektør
 

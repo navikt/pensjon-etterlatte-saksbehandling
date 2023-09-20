@@ -25,11 +25,11 @@ private val logger = LoggerFactory.getLogger(DownstreamResourceClient::class.jav
 
 class DownstreamResourceClient(
     private val azureAdClient: AzureAdClient,
-    private val httpClient: HttpClient = defaultHttpClient
+    private val httpClient: HttpClient = defaultHttpClient,
 ) {
     suspend fun get(
         resource: Resource,
-        brukerTokenInfo: BrukerTokenInfo
+        brukerTokenInfo: BrukerTokenInfo,
     ): Result<Resource, ThrowableErrorMessage> {
         val scopes = listOf("api://${resource.clientId}/.default")
         return hentTokenFraAD(brukerTokenInfo, scopes)
@@ -46,18 +46,19 @@ class DownstreamResourceClient(
 
     private suspend fun hentTokenFraAD(
         brukerTokenInfo: BrukerTokenInfo,
-        scopes: List<String>
-    ): Result<AccessToken, ThrowableErrorMessage> = if (brukerTokenInfo is Systembruker) {
-        azureAdClient.getAccessTokenForResource(scopes)
-    } else {
-        azureAdClient
-            .getOnBehalfOfAccessTokenForResource(scopes, brukerTokenInfo.accessToken())
-    }
+        scopes: List<String>,
+    ): Result<AccessToken, ThrowableErrorMessage> =
+        if (brukerTokenInfo is Systembruker) {
+            azureAdClient.getAccessTokenForResource(scopes)
+        } else {
+            azureAdClient
+                .getOnBehalfOfAccessTokenForResource(scopes, brukerTokenInfo.accessToken())
+        }
 
     suspend fun post(
         resource: Resource,
         brukerTokenInfo: BrukerTokenInfo,
-        postBody: Any
+        postBody: Any,
     ): Result<Resource, ThrowableErrorMessage> {
         val scopes = listOf("api://${resource.clientId}/.default")
         return hentTokenFraAD(brukerTokenInfo, scopes)
@@ -72,7 +73,7 @@ class DownstreamResourceClient(
     suspend fun delete(
         resource: Resource,
         brukerTokenInfo: BrukerTokenInfo,
-        postBody: String
+        postBody: String,
     ): Result<Resource, ThrowableErrorMessage> {
         val scopes = listOf("api://${resource.clientId}/.default")
         return hentTokenFraAD(brukerTokenInfo, scopes)
@@ -87,7 +88,7 @@ class DownstreamResourceClient(
     suspend fun patch(
         resource: Resource,
         brukerTokenInfo: BrukerTokenInfo,
-        patchBody: String
+        patchBody: String,
     ): Result<Resource, ThrowableErrorMessage> {
         val scopes = listOf("api://${resource.clientId}/.default")
         return hentTokenFraAD(brukerTokenInfo, scopes)
@@ -101,7 +102,7 @@ class DownstreamResourceClient(
 
     private suspend fun fetchFromDownstreamApi(
         resource: Resource,
-        oboAccessToken: AccessToken
+        oboAccessToken: AccessToken,
     ): Result<JsonNode?, ThrowableErrorMessage> =
 
         runCatching {
@@ -121,13 +122,13 @@ class DownstreamResourceClient(
                 },
                 onFailure = { error ->
                     error.toErr(resource.url)
-                }
+                },
             )
 
     private suspend fun postToDownstreamApi(
         resource: Resource,
         oboAccessToken: AccessToken,
-        postBody: Any
+        postBody: Any,
     ): Result<Any, ThrowableErrorMessage> =
 
         runCatching {
@@ -151,13 +152,13 @@ class DownstreamResourceClient(
                 },
                 onFailure = { error ->
                     error.toErr(resource.url)
-                }
+                },
             )
 
     private suspend fun deleteToDownstreamApi(
         resource: Resource,
         oboAccessToken: AccessToken,
-        postBody: String
+        postBody: String,
     ): Result<JsonNode, ThrowableErrorMessage> =
 
         runCatching {
@@ -176,13 +177,13 @@ class DownstreamResourceClient(
                 },
                 onFailure = { error ->
                     error.toErr(resource.url)
-                }
+                },
             )
 
     private suspend fun patchToDownstreamApi(
         resource: Resource,
         oboAccessToken: AccessToken,
-        patchBody: String
+        patchBody: String,
     ): Result<JsonNode, ThrowableErrorMessage> =
         runCatching {
             httpClient.patch(resource.url) {
@@ -200,7 +201,7 @@ class DownstreamResourceClient(
                 },
                 onFailure = { error ->
                     error.toErr(resource.url)
-                }
+                },
             )
 }
 
@@ -212,6 +213,9 @@ private fun HttpMessage?.harContentType(contentType: ContentType): Boolean {
     return contentTypeErLik(this?.contentType(), contentType)
 }
 
-fun contentTypeErLik(contentEn: ContentType?, contentTo: ContentType?): Boolean {
+fun contentTypeErLik(
+    contentEn: ContentType?,
+    contentTo: ContentType?,
+): Boolean {
     return contentEn?.withoutParameters() == contentTo?.withoutParameters()
 }

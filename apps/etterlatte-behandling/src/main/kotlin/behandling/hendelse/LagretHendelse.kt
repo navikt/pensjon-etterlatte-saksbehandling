@@ -1,7 +1,7 @@
 package no.nav.etterlatte.behandling.hendelse
 
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import java.util.*
+import java.util.UUID
 
 data class LagretHendelse(
     val id: Long,
@@ -14,5 +14,5 @@ data class LagretHendelse(
     val ident: String?,
     val identType: String?,
     val kommentar: String?,
-    val valgtBegrunnelse: String?
+    val valgtBegrunnelse: String?,
 )

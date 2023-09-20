@@ -14,13 +14,13 @@ import no.nav.etterlatte.libs.ktorobo.Resource
 import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.etterlatte.vedtaksvurdering.BeregningOgAvkorting
 import org.slf4j.LoggerFactory
-import java.util.*
+import java.util.UUID
 
 interface BeregningKlient {
     suspend fun hentBeregningOgAvkorting(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-        saktype: SakType
+        saktype: SakType,
     ): BeregningOgAvkorting
 }
 
@@ -39,60 +39,69 @@ class BeregningKlientImpl(config: Config, httpClient: HttpClient) : BeregningKli
     override suspend fun hentBeregningOgAvkorting(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-        saktype: SakType
+        saktype: SakType,
     ): BeregningOgAvkorting {
         return BeregningOgAvkorting(
             beregning = hentBeregning(behandlingId, brukerTokenInfo),
-            avkorting = if (saktype == SakType.OMSTILLINGSSTOENAD) {
-                hentAvkorting(behandlingId, brukerTokenInfo)
-            } else {
-                null
-            }
+            avkorting =
+                if (saktype == SakType.OMSTILLINGSSTOENAD) {
+                    hentAvkorting(behandlingId, brukerTokenInfo)
+                } else {
+                    null
+                },
         )
     }
 
-    private suspend fun hentBeregning(behandlingId: UUID, brukerTokenInfo: BrukerTokenInfo): BeregningDTO {
+    private suspend fun hentBeregning(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): BeregningDTO {
         logger.info("Henter beregning for behandling med behandlingId=$behandlingId")
         try {
             return downstreamResourceClient
                 .get(
-                    resource = Resource(
-                        clientId = clientId,
-                        url = "$resourceUrl/api/beregning/$behandlingId"
-                    ),
-                    brukerTokenInfo = brukerTokenInfo
+                    resource =
+                        Resource(
+                            clientId = clientId,
+                            url = "$resourceUrl/api/beregning/$behandlingId",
+                        ),
+                    brukerTokenInfo = brukerTokenInfo,
                 )
                 .mapBoth(
                     success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
-                    failure = { throwableErrorMessage -> throw throwableErrorMessage }
+                    failure = { throwableErrorMessage -> throw throwableErrorMessage },
                 )
         } catch (e: Exception) {
             throw BeregningKlientException(
                 "Henting av beregning for behandling med behandlingId=$behandlingId feilet",
-                e
+                e,
             )
         }
     }
 
-    private suspend fun hentAvkorting(behandlingId: UUID, brukerTokenInfo: BrukerTokenInfo): AvkortingDto {
+    private suspend fun hentAvkorting(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): AvkortingDto {
         logger.info("Henter avkorting for behandling med behandlingId=$behandlingId")
         try {
             return downstreamResourceClient
                 .get(
-                    resource = Resource(
-                        clientId = clientId,
-                        url = "$resourceUrl/api/beregning/avkorting/$behandlingId"
-                    ),
-                    brukerTokenInfo = brukerTokenInfo
+                    resource =
+                        Resource(
+                            clientId = clientId,
+                            url = "$resourceUrl/api/beregning/avkorting/$behandlingId",
+                        ),
+                    brukerTokenInfo = brukerTokenInfo,
                 )
                 .mapBoth(
                     success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
-                    failure = { throwableErrorMessage -> throw throwableErrorMessage }
+                    failure = { throwableErrorMessage -> throw throwableErrorMessage },
                 )
         } catch (e: Exception) {
             throw BeregningKlientException(
                 "Henting av avkorting for behandling med behandlingId=$behandlingId feilet",
-                e
+                e,
             )
         }
     }

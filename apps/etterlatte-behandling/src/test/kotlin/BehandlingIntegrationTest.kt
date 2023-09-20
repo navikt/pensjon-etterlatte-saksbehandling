@@ -55,7 +55,7 @@ import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
 import testsupport.buildTestApplicationConfigurationForOauth
 import java.time.LocalDate
-import java.util.*
+import java.util.UUID
 
 abstract class BehandlingIntegrationTest {
     @Container
@@ -74,7 +74,7 @@ abstract class BehandlingIntegrationTest {
 
     protected fun startServer(
         norg2Klient: Norg2Klient? = null,
-        featureToggleService: FeatureToggleService = konfigurertFeatureToggleService()
+        featureToggleService: FeatureToggleService = konfigurertFeatureToggleService(),
     ) {
         server.start()
 
@@ -84,160 +84,170 @@ abstract class BehandlingIntegrationTest {
         postgreSQLContainer.withUrlParam("user", postgreSQLContainer.username)
         postgreSQLContainer.withUrlParam("password", postgreSQLContainer.password)
 
-        applicationContext = ApplicationContext(
-            env = System.getenv().toMutableMap().apply {
-                put("KAFKA_RAPID_TOPIC", "test")
-                put("DB_HOST", postgreSQLContainer.host)
-                put("DB_USERNAME", postgreSQLContainer.username)
-                put("DB_PASSWORD", postgreSQLContainer.password)
-                put("DB_PORT", postgreSQLContainer.firstMappedPort.toString())
-                put("DB_DATABASE", postgreSQLContainer.databaseName)
-                put("AZUREAD_ATTESTANT_GROUPID", azureAdAttestantClaim)
-                put("AZUREAD_SAKSBEHANDLER_GROUPID", azureAdSaksbehandlerClaim)
-                put("AZUREAD_STRENGT_FORTROLIG_GROUPID", azureAdStrengtFortroligClaim)
-                put("AZUREAD_EGEN_ANSATT_GROUPID", azureAdEgenAnsattClaim)
-                put("AZUREAD_FORTROLIG_GROUPID", "ea930b6b-9397-44d9-b9e6-f4cf527a632a")
-                put("AZUREAD_NASJONAL_TILGANG_UTEN_LOGG_GROUPID", "753805ea-65a7-4855-bdc3-e6130348df9f")
-                put("AZUREAD_NASJONAL_TILGANG_MED_LOGG_GROUPID", "ea7411eb-8b48-41a0-bc56-7b521fbf0c25")
-                put("HENDELSE_JOB_FREKVENS", "1")
-                put("HENDELSE_MINUTTER_GAMLE_HENDELSER", "1")
-                put("NORG2_URL", "http://localhost")
-                put("ELECTOR_PATH", "http://localhost")
-                put("NAVANSATT_URL", "http://localhost")
-                put("SKJERMING_URL", "http://localhost")
-                put("OPPGAVE_URL", "http://localhost")
-                put("OPPGAVE_SCOPE", "scope")
-            }.let { Miljoevariabler(it) },
-            config = ConfigFactory.parseMap(
-                hoconApplicationConfig.toMap() + mapOf(
-                    "pdltjenester.url" to "http://localhost",
-                    "grunnlag.resource.url" to "http://localhost"
+        applicationContext =
+            ApplicationContext(
+                env =
+                    System.getenv().toMutableMap().apply {
+                        put("KAFKA_RAPID_TOPIC", "test")
+                        put("DB_HOST", postgreSQLContainer.host)
+                        put("DB_USERNAME", postgreSQLContainer.username)
+                        put("DB_PASSWORD", postgreSQLContainer.password)
+                        put("DB_PORT", postgreSQLContainer.firstMappedPort.toString())
+                        put("DB_DATABASE", postgreSQLContainer.databaseName)
+                        put("AZUREAD_ATTESTANT_GROUPID", azureAdAttestantClaim)
+                        put("AZUREAD_SAKSBEHANDLER_GROUPID", azureAdSaksbehandlerClaim)
+                        put("AZUREAD_STRENGT_FORTROLIG_GROUPID", azureAdStrengtFortroligClaim)
+                        put("AZUREAD_EGEN_ANSATT_GROUPID", azureAdEgenAnsattClaim)
+                        put("AZUREAD_FORTROLIG_GROUPID", "ea930b6b-9397-44d9-b9e6-f4cf527a632a")
+                        put("AZUREAD_NASJONAL_TILGANG_UTEN_LOGG_GROUPID", "753805ea-65a7-4855-bdc3-e6130348df9f")
+                        put("AZUREAD_NASJONAL_TILGANG_MED_LOGG_GROUPID", "ea7411eb-8b48-41a0-bc56-7b521fbf0c25")
+                        put("HENDELSE_JOB_FREKVENS", "1")
+                        put("HENDELSE_MINUTTER_GAMLE_HENDELSER", "1")
+                        put("NORG2_URL", "http://localhost")
+                        put("ELECTOR_PATH", "http://localhost")
+                        put("NAVANSATT_URL", "http://localhost")
+                        put("SKJERMING_URL", "http://localhost")
+                        put("OPPGAVE_URL", "http://localhost")
+                        put("OPPGAVE_SCOPE", "scope")
+                    }.let { Miljoevariabler(it) },
+                config =
+                    ConfigFactory.parseMap(
+                        hoconApplicationConfig.toMap() +
+                            mapOf(
+                                "pdltjenester.url" to "http://localhost",
+                                "grunnlag.resource.url" to "http://localhost",
+                            ),
+                    ),
+                rapid = TestProdusent(),
+                featureToggleService = featureToggleService,
+                pdlHttpClient = pdlHttpClient(),
+                skjermingHttpKlient = skjermingHttpClient(),
+                grunnlagHttpClient = grunnlagHttpClient(),
+                leaderElectionHttpClient = leaderElection(),
+                navAnsattKlient = NavAnsattKlientTest(),
+                norg2Klient = norg2Klient ?: Norg2KlientTest(),
+                grunnlagKlientObo = GrunnlagKlientTest(),
+                gosysOppgaveKlient = GosysOppgaveKlientTest(),
+            ).also {
+                it.dataSource.migrate()
+            }
+    }
+
+    fun skjermingHttpClient(): HttpClient =
+        HttpClient(MockEngine) {
+            engine {
+                addHandler { request ->
+                    if (request.url.fullPath.contains("skjermet")) {
+                        val headers = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
+                        respond(false.toJson(), headers = headers)
+                    } else {
+                        error(request.url.fullPath)
+                    }
+                }
+            }
+            install(ContentNegotiation) {
+                register(
+                    ContentType.Application.Json,
+                    JacksonConverter(objectMapper),
                 )
-            ),
-            rapid = TestProdusent(),
-            featureToggleService = featureToggleService,
-            pdlHttpClient = pdlHttpClient(),
-            skjermingHttpKlient = skjermingHttpClient(),
-            grunnlagHttpClient = grunnlagHttpClient(),
-            leaderElectionHttpClient = leaderElection(),
-            navAnsattKlient = NavAnsattKlientTest(),
-            norg2Klient = norg2Klient ?: Norg2KlientTest(),
-            grunnlagKlientObo = GrunnlagKlientTest(),
-            gosysOppgaveKlient = GosysOppgaveKlientTest()
-        ).also {
-            it.dataSource.migrate()
+            }
         }
-    }
 
-    fun skjermingHttpClient(): HttpClient = HttpClient(MockEngine) {
-        engine {
-            addHandler { request ->
-                if (request.url.fullPath.contains("skjermet")) {
-                    val headers = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
-                    respond(false.toJson(), headers = headers)
-                } else {
-                    error(request.url.fullPath)
+    fun pdlHttpClient(): HttpClient =
+        HttpClient(MockEngine) {
+            engine {
+                addHandler { request ->
+                    if (request.url.fullPath.contains("geografisktilknytning")) {
+                        val headers = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
+                        val json = GeografiskTilknytning(kommune = "0301").toJson()
+                        respond(json, headers = headers)
+                    } else if (request.url.fullPath.contains("folkeregisteridenter")) {
+                        val headers = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
+                        val json = emptyMap<String, String>().toJson()
+                        respond(json, headers = headers)
+                    } else if (request.url.fullPath.startsWith("/")) {
+                        val headers = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
+                        val json = javaClass.getResource("")!!.readText() // TODO: endre name
+                        respond(json, headers = headers)
+                    } else {
+                        error(request.url.fullPath)
+                    }
+                }
+            }
+            install(ContentNegotiation) {
+                register(
+                    ContentType.Application.Json,
+                    JacksonConverter(objectMapper),
+                )
+            }
+        }
+
+    fun grunnlagHttpClient(): HttpClient =
+        HttpClient(MockEngine) {
+            engine {
+                addHandler { request ->
+                    if (request.url.fullPath.matches(Regex("api/grunnlag/[0-9]{11}"))) {
+                        val headers = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
+                        respond(Grunnlag.empty().toJson(), headers = headers)
+                    } else if (request.url.fullPath.endsWith("/PERSONGALLERI_V1")) {
+                        val headers = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
+                        respond(
+                            content =
+                                Grunnlagsopplysning(
+                                    id = UUID.randomUUID(),
+                                    kilde = Grunnlagsopplysning.Privatperson("fnr", Tidspunkt.now()),
+                                    meta = emptyMap<String, String>().toObjectNode(),
+                                    opplysningType = Opplysningstype.PERSONGALLERI_V1,
+                                    opplysning =
+                                        Persongalleri(
+                                            "soeker",
+                                            "innsender",
+                                            listOf("soesken"),
+                                            listOf("avdoed"),
+                                            listOf("gjenlevende"),
+                                        ),
+                                ).toJson(),
+                            headers = headers,
+                        )
+                    } else if (request.url.fullPath.endsWith("/roller")) {
+                        val headers = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
+                        respond(
+                            PersonMedSakerOgRoller("08071272487", listOf(SakOgRolle(1, Saksrolle.SOEKER))).toJson(),
+                            headers = headers,
+                        )
+                    } else if (request.url.fullPath.endsWith("/saker")) {
+                        val headers = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
+                        respond(
+                            setOf(1).toJson(),
+                            headers = headers,
+                        )
+                    } else if (request.url.fullPath.endsWith("/oppdater-grunnlag")) {
+                        respondOk()
+                    } else {
+                        error(request.url.fullPath)
+                    }
+                }
+            }
+            install(ContentNegotiation) {
+                register(
+                    ContentType.Application.Json,
+                    JacksonConverter(objectMapper),
+                )
+            }
+        }
+
+    fun leaderElection() =
+        HttpClient(MockEngine) {
+            engine {
+                addHandler { req ->
+                    if (req.url.fullPath == "electorPath") {
+                        respond("me")
+                    } else {
+                        error(req.url.fullPath)
+                    }
                 }
             }
         }
-        install(ContentNegotiation) {
-            register(
-                ContentType.Application.Json,
-                JacksonConverter(objectMapper)
-            )
-        }
-    }
-
-    fun pdlHttpClient(): HttpClient = HttpClient(MockEngine) {
-        engine {
-            addHandler { request ->
-                if (request.url.fullPath.contains("geografisktilknytning")) {
-                    val headers = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
-                    val json = GeografiskTilknytning(kommune = "0301").toJson()
-                    respond(json, headers = headers)
-                } else if (request.url.fullPath.contains("folkeregisteridenter")) {
-                    val headers = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
-                    val json = emptyMap<String, String>().toJson()
-                    respond(json, headers = headers)
-                } else if (request.url.fullPath.startsWith("/")) {
-                    val headers = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
-                    val json = javaClass.getResource("")!!.readText() // TODO: endre name
-                    respond(json, headers = headers)
-                } else {
-                    error(request.url.fullPath)
-                }
-            }
-        }
-        install(ContentNegotiation) {
-            register(
-                ContentType.Application.Json,
-                JacksonConverter(objectMapper)
-            )
-        }
-    }
-
-    fun grunnlagHttpClient(): HttpClient = HttpClient(MockEngine) {
-        engine {
-            addHandler { request ->
-                if (request.url.fullPath.matches(Regex("api/grunnlag/[0-9]{11}"))) {
-                    val headers = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
-                    respond(Grunnlag.empty().toJson(), headers = headers)
-                } else if (request.url.fullPath.endsWith("/PERSONGALLERI_V1")) {
-                    val headers = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
-                    respond(
-                        content = Grunnlagsopplysning(
-                            id = UUID.randomUUID(),
-                            kilde = Grunnlagsopplysning.Privatperson("fnr", Tidspunkt.now()),
-                            meta = emptyMap<String, String>().toObjectNode(),
-                            opplysningType = Opplysningstype.PERSONGALLERI_V1,
-                            opplysning = Persongalleri(
-                                "soeker",
-                                "innsender",
-                                listOf("soesken"),
-                                listOf("avdoed"),
-                                listOf("gjenlevende")
-                            )
-                        ).toJson(),
-                        headers = headers
-                    )
-                } else if (request.url.fullPath.endsWith("/roller")) {
-                    val headers = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
-                    respond(
-                        PersonMedSakerOgRoller("08071272487", listOf(SakOgRolle(1, Saksrolle.SOEKER))).toJson(),
-                        headers = headers
-                    )
-                } else if (request.url.fullPath.endsWith("/saker")) {
-                    val headers = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
-                    respond(
-                        setOf(1).toJson(),
-                        headers = headers
-                    )
-                } else if (request.url.fullPath.endsWith("/oppdater-grunnlag")) {
-                    respondOk()
-                } else {
-                    error(request.url.fullPath)
-                }
-            }
-        }
-        install(ContentNegotiation) {
-            register(
-                ContentType.Application.Json,
-                JacksonConverter(objectMapper)
-            )
-        }
-    }
-
-    fun leaderElection() = HttpClient(MockEngine) {
-        engine {
-            addHandler { req ->
-                if (req.url.fullPath == "electorPath") {
-                    respond("me")
-                } else {
-                    error(req.url.fullPath)
-                }
-            }
-        }
-    }
 
     fun resetDatabase() {
         applicationContext.dataSource.connection.use {
@@ -251,7 +261,7 @@ abstract class BehandlingIntegrationTest {
                 
                 ALTER SEQUENCE behandlinghendelse_id_seq RESTART WITH 1;
                 ALTER SEQUENCE sak_id_seq RESTART WITH 1;
-                """.trimIndent()
+                """.trimIndent(),
             ).execute()
         }
     }
@@ -286,8 +296,8 @@ abstract class BehandlingIntegrationTest {
             mapOf(
                 "navn" to "John Doe",
                 Claims.NAVident.toString() to "Saksbehandler01",
-                "groups" to listOf(azureAdSaksbehandlerClaim)
-            )
+                "groups" to listOf(azureAdSaksbehandlerClaim),
+            ),
         )
     }
 
@@ -296,8 +306,8 @@ abstract class BehandlingIntegrationTest {
             mapOf(
                 "navn" to "Jane Doe",
                 Claims.NAVident.toString() to "Saksbehandler02",
-                "groups" to listOf(azureAdSaksbehandlerClaim)
-            )
+                "groups" to listOf(azureAdSaksbehandlerClaim),
+            ),
         )
     }
 
@@ -306,8 +316,8 @@ abstract class BehandlingIntegrationTest {
             mapOf(
                 "navn" to "fagsystem",
                 Claims.NAVident.toString() to Fagsaksystem.EY.navn,
-                "groups" to listOf(azureAdSaksbehandlerClaim, azureAdAttestantClaim)
-            )
+                "groups" to listOf(azureAdSaksbehandlerClaim, azureAdAttestantClaim),
+            ),
         )
     }
 
@@ -316,11 +326,12 @@ abstract class BehandlingIntegrationTest {
             mapOf(
                 "navn" to "John Doe",
                 Claims.NAVident.toString() to "Saksbehandler02",
-                "groups" to listOf(
-                    azureAdAttestantClaim,
-                    azureAdSaksbehandlerClaim
-                )
-            )
+                "groups" to
+                    listOf(
+                        azureAdAttestantClaim,
+                        azureAdSaksbehandlerClaim,
+                    ),
+            ),
         )
     }
 
@@ -329,12 +340,13 @@ abstract class BehandlingIntegrationTest {
             mapOf(
                 "navn" to "John Doe",
                 Claims.NAVident.toString() to "saksebehandlerstrengtfortrolig",
-                "groups" to listOf(
-                    azureAdAttestantClaim,
-                    azureAdSaksbehandlerClaim,
-                    azureAdStrengtFortroligClaim
-                )
-            )
+                "groups" to
+                    listOf(
+                        azureAdAttestantClaim,
+                        azureAdSaksbehandlerClaim,
+                        azureAdStrengtFortroligClaim,
+                    ),
+            ),
         )
     }
 
@@ -343,12 +355,13 @@ abstract class BehandlingIntegrationTest {
             mapOf(
                 "navn" to "John Doe",
                 Claims.NAVident.toString() to "saksbehandlerskjermet",
-                "groups" to listOf(
-                    azureAdSaksbehandlerClaim,
-                    azureAdEgenAnsattClaim,
-                    azureAdAttestantClaim
-                )
-            )
+                "groups" to
+                    listOf(
+                        azureAdSaksbehandlerClaim,
+                        azureAdEgenAnsattClaim,
+                        azureAdAttestantClaim,
+                    ),
+            ),
         )
     }
 
@@ -357,8 +370,8 @@ abstract class BehandlingIntegrationTest {
         issueToken(
             mapOf(
                 "sub" to mittsystem,
-                "oid" to mittsystem
-            )
+                "oid" to mittsystem,
+            ),
         )
     }
 
@@ -366,7 +379,7 @@ abstract class BehandlingIntegrationTest {
         server.issueToken(
             issuerId = AZURE_ISSUER,
             audience = CLIENT_ID,
-            claims = claims
+            claims = claims,
         ).serialize()
 
     private companion object {
@@ -378,7 +391,7 @@ class GrunnlagKlientTest : GrunnlagKlient {
     override suspend fun finnPersonOpplysning(
         sakId: Long,
         opplysningsType: Opplysningstype,
-        brukerTokenInfo: BrukerTokenInfo
+        brukerTokenInfo: BrukerTokenInfo,
     ): Grunnlagsopplysning<Person> {
         val personopplysning = personOpplysning(doedsdato = LocalDate.parse("2022-01-01"))
         return grunnlagsOpplysningMedPersonopplysning(personopplysning)
@@ -386,20 +399,21 @@ class GrunnlagKlientTest : GrunnlagKlient {
 
     override suspend fun hentPersongalleri(
         sakId: Long,
-        brukerTokenInfo: BrukerTokenInfo
+        brukerTokenInfo: BrukerTokenInfo,
     ): Grunnlagsopplysning<Persongalleri> {
         return Grunnlagsopplysning(
             id = UUID.randomUUID(),
             kilde = Grunnlagsopplysning.Privatperson("fnr", Tidspunkt.now()),
             meta = emptyMap<String, String>().toObjectNode(),
             opplysningType = Opplysningstype.PERSONGALLERI_V1,
-            opplysning = Persongalleri(
-                "soeker",
-                "innsender",
-                listOf("soesken"),
-                listOf("avdoed"),
-                listOf("gjenlevende")
-            )
+            opplysning =
+                Persongalleri(
+                    "soeker",
+                    "innsender",
+                    listOf("soesken"),
+                    listOf("avdoed"),
+                    listOf("gjenlevende"),
+                ),
         )
     }
 }
@@ -407,12 +421,15 @@ class GrunnlagKlientTest : GrunnlagKlient {
 class GosysOppgaveKlientTest : GosysOppgaveKlient {
     override suspend fun hentOppgaver(
         enhetsnr: String?,
-        brukerTokenInfo: BrukerTokenInfo
+        brukerTokenInfo: BrukerTokenInfo,
     ): GosysOppgaver {
         return GosysOppgaver(0, emptyList())
     }
 
-    override suspend fun hentOppgave(id: Long, brukerTokenInfo: BrukerTokenInfo): GosysApiOppgave {
+    override suspend fun hentOppgave(
+        id: Long,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): GosysApiOppgave {
         return GosysApiOppgave(
             1,
             2,
@@ -425,7 +442,7 @@ class GosysOppgaveKlientTest : GosysOppgaveKlient {
             "aktoerId",
             "beskrivelse",
             "NY",
-            LocalDate.now()
+            LocalDate.now(),
         )
     }
 
@@ -433,7 +450,7 @@ class GosysOppgaveKlientTest : GosysOppgaveKlient {
         oppgaveId: String,
         oppgaveVersjon: Long,
         tildeles: String,
-        brukerTokenInfo: BrukerTokenInfo
+        brukerTokenInfo: BrukerTokenInfo,
     ) {
         // NO-OP
     }
@@ -442,14 +459,17 @@ class GosysOppgaveKlientTest : GosysOppgaveKlient {
         oppgaveId: String,
         oppgaveVersjon: Long,
         nyFrist: LocalDate,
-        brukerTokenInfo: BrukerTokenInfo
+        brukerTokenInfo: BrukerTokenInfo,
     ) {
         // NO-OP
     }
 }
 
 class Norg2KlientTest : Norg2Klient {
-    override fun hentEnheterForOmraade(tema: String, omraade: String): List<ArbeidsFordelingEnhet> {
+    override fun hentEnheterForOmraade(
+        tema: String,
+        omraade: String,
+    ): List<ArbeidsFordelingEnhet> {
         return listOf(ArbeidsFordelingEnhet("NAV Familie- og pensjonsytelser Steinkjer", "4817"))
     }
 }
@@ -458,7 +478,7 @@ class NavAnsattKlientTest : NavAnsattKlient {
     override suspend fun hentSaksbehandlerEnhet(ident: String): List<SaksbehandlerEnhet> {
         return listOf(
             SaksbehandlerEnhet(Enheter.defaultEnhet.enhetNr, Enheter.defaultEnhet.navn),
-            SaksbehandlerEnhet(Enheter.STEINKJER.enhetNr, Enheter.STEINKJER.navn)
+            SaksbehandlerEnhet(Enheter.STEINKJER.enhetNr, Enheter.STEINKJER.navn),
         )
     }
 

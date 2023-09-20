@@ -4,13 +4,12 @@ import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerAarsak
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
-import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 
 data class OpprettBehandling(
     val type: BehandlingType,
@@ -24,7 +23,7 @@ data class OpprettBehandling(
     val prosesstype: Prosesstype = Prosesstype.MANUELL,
     val kilde: Vedtaksloesning,
     val merknad: String? = null,
-    val begrunnelse: String? = null
+    val begrunnelse: String? = null,
 ) {
     val id: UUID = UUID.randomUUID()
     val opprettet: Tidspunkt = Tidspunkt.now()
@@ -33,7 +32,7 @@ data class OpprettBehandling(
 data class BehandlingOpprettet(
     val timestamp: Tidspunkt,
     val id: UUID,
-    val sak: Long
+    val sak: Long,
 )
 
 fun OpprettBehandling.toBehandlingOpprettet() = BehandlingOpprettet(opprettet, id, sakId)

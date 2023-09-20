@@ -16,7 +16,6 @@ import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class SoeknadStatistikkRepositoryTest {
-
     @Container
     private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:$POSTGRES_VERSION")
 
@@ -28,11 +27,12 @@ class SoeknadStatistikkRepositoryTest {
         postgreSQLContainer.withUrlParam("user", postgreSQLContainer.username)
         postgreSQLContainer.withUrlParam("password", postgreSQLContainer.password)
 
-        dataSource = DataSourceBuilder.createDataSource(
-            jdbcUrl = postgreSQLContainer.jdbcUrl,
-            username = postgreSQLContainer.username,
-            password = postgreSQLContainer.password
-        )
+        dataSource =
+            DataSourceBuilder.createDataSource(
+                jdbcUrl = postgreSQLContainer.jdbcUrl,
+                username = postgreSQLContainer.username,
+                password = postgreSQLContainer.password,
+            )
 
         dataSource.migrate(gcp = false)
     }
@@ -50,12 +50,13 @@ class SoeknadStatistikkRepositoryTest {
         Assertions.assertEquals(0L, repo.hentAntallSoeknader())
 
         repo.lagreNedSoeknadStatistikk(
-            soeknadStatistikk = SoeknadStatistikk(
-                soeknadId = 1337,
-                gyldigForBehandling = true,
-                sakType = SakType.BARNEPENSJON,
-                kriterierForIngenBehandling = listOf()
-            )
+            soeknadStatistikk =
+                SoeknadStatistikk(
+                    soeknadId = 1337,
+                    gyldigForBehandling = true,
+                    sakType = SakType.BARNEPENSJON,
+                    kriterierForIngenBehandling = listOf(),
+                ),
         )
 
         Assertions.assertEquals(1L, repo.hentAntallSoeknader())
@@ -67,23 +68,25 @@ class SoeknadStatistikkRepositoryTest {
 
         Assertions.assertEquals(0L, repo.hentAntallSoeknader())
         repo.lagreNedSoeknadStatistikk(
-            soeknadStatistikk = SoeknadStatistikk(
-                soeknadId = 2,
-                gyldigForBehandling = false,
-                sakType = SakType.OMSTILLINGSSTOENAD,
-                kriterierForIngenBehandling = listOf("Jo")
-            )
+            soeknadStatistikk =
+                SoeknadStatistikk(
+                    soeknadId = 2,
+                    gyldigForBehandling = false,
+                    sakType = SakType.OMSTILLINGSSTOENAD,
+                    kriterierForIngenBehandling = listOf("Jo"),
+                ),
         )
         Assertions.assertEquals(0, repo.hentAntallSoeknaderGyldigForBehandling())
         Assertions.assertEquals(1L, repo.hentAntallSoeknaderIkkeGyldigForBehandling())
         Assertions.assertEquals(1L, repo.hentAntallSoeknader())
         repo.lagreNedSoeknadStatistikk(
-            soeknadStatistikk = SoeknadStatistikk(
-                soeknadId = 2,
-                gyldigForBehandling = true,
-                sakType = SakType.BARNEPENSJON,
-                kriterierForIngenBehandling = listOf()
-            )
+            soeknadStatistikk =
+                SoeknadStatistikk(
+                    soeknadId = 2,
+                    gyldigForBehandling = true,
+                    sakType = SakType.BARNEPENSJON,
+                    kriterierForIngenBehandling = listOf(),
+                ),
         )
         Assertions.assertEquals(1L, repo.hentAntallSoeknaderGyldigForBehandling())
         Assertions.assertEquals(0, repo.hentAntallSoeknaderIkkeGyldigForBehandling())

@@ -233,7 +233,7 @@ const TilbakestillOgLagreRad = ({
       </ButtonRow>
       <GeneriskModal
         tittel="Tilbakestill brevet"
-        beskrivelse="Har du gjort en endring tidligere i behandlingen og ønsker å hente oppdatert informasjon til brevet? Dette vil slette alt som er gjort med brevet til nå."
+        beskrivelse="Ønsker du å tilbakestille brevet og hente inn ny informasjon? Dette vil slette tidligere endringer, så husk å kopiere tekst du vil beholde først."
         tekstKnappJa="Ja, hent alt innhold på nytt"
         tekstKnappNei="Nei"
         onYesClick={tilbakestill}

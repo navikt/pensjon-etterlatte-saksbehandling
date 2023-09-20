@@ -95,7 +95,8 @@ class BrevDataMapper(private val featureToggleService: FeatureToggleService) {
                 )
                 VedtakType.AVSLAG -> TODO("Vedtakstype er ikke støttet: $vedtakType")
                 VedtakType.ENDRING -> when (behandling.revurderingsaarsak) {
-                    RevurderingAarsak.INNTEKTSENDRING -> BrevkodePar(
+                    RevurderingAarsak.INNTEKTSENDRING,
+                    RevurderingAarsak.ANNEN -> BrevkodePar(
                         TOM_MAL,
                         OMS_REVURDERING_ENDRING
                     )
@@ -145,7 +146,8 @@ class BrevDataMapper(private val featureToggleService: FeatureToggleService) {
                 VedtakType.INNVILGELSE -> FoerstegangsvedtakUtfallDTO.fra(behandling)
                 VedtakType.AVSLAG -> TODO("Vedtakstype er ikke støttet: $vedtakType")
                 VedtakType.ENDRING -> when (behandling.revurderingsaarsak) {
-                    RevurderingAarsak.INNTEKTSENDRING -> ManueltBrevData(emptyList())
+                    RevurderingAarsak.INNTEKTSENDRING,
+                    RevurderingAarsak.ANNEN -> ManueltBrevData(emptyList())
                     else -> TODO("Revurderingsbrev for ${behandling.revurderingsaarsak} er ikke støttet")
                 }
                 VedtakType.OPPHOER -> when (behandling.revurderingsaarsak) {

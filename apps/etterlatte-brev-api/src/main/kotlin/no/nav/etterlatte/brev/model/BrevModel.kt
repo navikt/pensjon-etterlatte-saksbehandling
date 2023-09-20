@@ -166,7 +166,8 @@ class BrevProsessTypeFactory(private val featureToggleService: FeatureToggleServ
             }
             VedtakType.AVSLAG,
             VedtakType.ENDRING -> when (behandling.revurderingsaarsak) {
-                RevurderingAarsak.INNTEKTSENDRING -> BrevProsessType.REDIGERBAR
+                RevurderingAarsak.INNTEKTSENDRING,
+                RevurderingAarsak.ANNEN -> BrevProsessType.REDIGERBAR
                 else -> BrevProsessType.MANUELL
             }
         }

@@ -13,16 +13,22 @@ export interface Kravgrunnlag {
 }
 
 export interface KravgrunnlagPeriode {
-  fra: string
-  til: string
-  beskrivelse: string
+  periode: {
+    fra: string
+    til: string
+  }
+  skatt: number
+  grunnlagsbeloep: Grunnlagsbeloep[]
+}
+
+export interface Grunnlagsbeloep {
+  type: string
   bruttoUtbetaling: number
   beregnetNyBrutto: number
-  beregnetFeilutbetaling: number
-  skatteprosent: number
   buttoTilbakekreving: number
   nettoTilbakekreving: number
-  skatt: number
+  beregnetFeilutbetaling: number
+  skatteprosent: number
   resultat: string | null
   skyld: string | null
   aarsak: string | null

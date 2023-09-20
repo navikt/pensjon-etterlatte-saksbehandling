@@ -1,12 +1,12 @@
 package no.nav.etterlatte.tilbakekreving.kravgrunnlag
 
 import no.nav.etterlatte.libs.common.tilbakekreving.Grunnlagsbeloep
-import no.nav.etterlatte.libs.common.tilbakekreving.Grunnlagsperiode
 import no.nav.etterlatte.libs.common.tilbakekreving.KlasseKode
 import no.nav.etterlatte.libs.common.tilbakekreving.KlasseType
 import no.nav.etterlatte.libs.common.tilbakekreving.Kontrollfelt
 import no.nav.etterlatte.libs.common.tilbakekreving.Kravgrunnlag
 import no.nav.etterlatte.libs.common.tilbakekreving.KravgrunnlagId
+import no.nav.etterlatte.libs.common.tilbakekreving.KravgrunnlagPeriode
 import no.nav.etterlatte.libs.common.tilbakekreving.KravgrunnlagStatus
 import no.nav.etterlatte.libs.common.tilbakekreving.NavIdent
 import no.nav.etterlatte.libs.common.tilbakekreving.Periode
@@ -16,7 +16,9 @@ import no.nav.etterlatte.libs.common.tilbakekreving.VedtakId
 import no.nav.tilbakekreving.kravgrunnlag.detalj.v1.DetaljertKravgrunnlagBelopDto
 import no.nav.tilbakekreving.kravgrunnlag.detalj.v1.DetaljertKravgrunnlagDto
 import no.nav.tilbakekreving.kravgrunnlag.detalj.v1.DetaljertKravgrunnlagPeriodeDto
+import java.math.BigDecimal
 import java.time.LocalDate
+import java.time.YearMonth
 import javax.xml.datatype.XMLGregorianCalendar
 
 object KravgrunnlagMapper {
@@ -29,19 +31,19 @@ object KravgrunnlagMapper {
             status = KravgrunnlagStatus.valueOf(grunnlag.kodeStatusKrav),
             saksbehandler = NavIdent(grunnlag.saksbehId),
             sisteUtbetalingslinjeId = UUID30(grunnlag.referanse),
-            grunnlagsperioder =
+            perioder =
                 grunnlag.tilbakekrevingsPeriode.map { periode ->
                     toGrunnlagsperiode(periode)
                 },
         )
 
     private fun toGrunnlagsperiode(periode: DetaljertKravgrunnlagPeriodeDto) =
-        Grunnlagsperiode(
+        KravgrunnlagPeriode(
             Periode(
-                fraOgMed = periode.periode.fom.toLocalDate(),
-                tilOgMed = periode.periode.tom.toLocalDate(),
+                fraOgMed = YearMonth.from(periode.periode.fom.toLocalDate()),
+                tilOgMed = YearMonth.from(periode.periode.tom.toLocalDate()),
             ),
-            beloepSkattMnd = periode.belopSkattMnd,
+            skatt = periode.belopSkattMnd,
             grunnlagsbeloep =
                 periode.tilbakekrevingsBelop.map { beloep ->
                     toGrunnlagsbeloep(beloep)
@@ -52,11 +54,15 @@ object KravgrunnlagMapper {
         Grunnlagsbeloep(
             kode = KlasseKode(beloep.kodeKlasse),
             type = KlasseType.valueOf(beloep.typeKlasse.value()),
-            beloepTidligereUtbetaling = beloep.belopOpprUtbet,
-            beloepNyUtbetaling = beloep.belopNy,
-            beloepSkalTilbakekreves = beloep.belopTilbakekreves,
+            bruttoUtbetaling = beloep.belopOpprUtbet,
+            beregnetNyBrutto = beloep.belopNy,
+            bruttoTilbakekreving = beloep.belopTilbakekreves,
+            nettoTilbakekreving = BigDecimal(0),
             beloepSkalIkkeTilbakekreves = beloep.belopUinnkrevd,
             skatteProsent = beloep.skattProsent,
+            resultat = null,
+            skyld = null,
+            aarsak = null,
         )
 }
 

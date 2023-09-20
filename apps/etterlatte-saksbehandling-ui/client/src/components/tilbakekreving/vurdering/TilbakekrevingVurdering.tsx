@@ -9,6 +9,8 @@ export function TilbakekrevingVurdering() {
   const tilbakekreving = useTilbakekreving()
   const navigate = useNavigate()
 
+  const grunnlagsperiode = tilbakekreving!!.kravgrunnlag.perioder[0]
+
   return (
     <Content>
       <ContentHeader>
@@ -35,18 +37,18 @@ export function TilbakekrevingVurdering() {
             <Table.HeaderCell>Årsak</Table.HeaderCell>
           </Table.Header>
           <Table.Body>
-            {tilbakekreving?.kravgrunnlag.perioder.map((periode) => {
+            {grunnlagsperiode.grunnlagsbeloep.map((periode) => {
               return (
                 <Table.Row key="test">
-                  <Table.DataCell key="test">{periode.fra}</Table.DataCell>
-                  <Table.DataCell key="test">{periode.beskrivelse}</Table.DataCell>
+                  <Table.DataCell key="test">{grunnlagsperiode.periode.fra}</Table.DataCell>
+                  <Table.DataCell key="test">{periode.type}</Table.DataCell>
                   <Table.DataCell key="test">{periode.bruttoUtbetaling}</Table.DataCell>
                   <Table.DataCell key="test">{periode.beregnetNyBrutto}</Table.DataCell>
                   <Table.DataCell key="test">{periode.beregnetFeilutbetaling}</Table.DataCell>
                   <Table.DataCell key="test">{periode.skatteprosent}</Table.DataCell>
                   <Table.DataCell key="test">{periode.nettoTilbakekreving}</Table.DataCell>
                   <Table.DataCell key="test">{periode.nettoTilbakekreving}</Table.DataCell>
-                  <Table.DataCell key="test">{periode.skatt}</Table.DataCell>
+                  <Table.DataCell key="test">{grunnlagsperiode.skatt}</Table.DataCell>
                   <Table.DataCell key="test">
                     <Select
                       label="Resultat"

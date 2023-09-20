@@ -1,7 +1,7 @@
 package no.nav.etterlatte.libs.common.tilbakekreving
 
 import java.math.BigDecimal
-import java.time.LocalDate
+import java.time.YearMonth
 
 data class KravgrunnlagId(val value: Long)
 
@@ -17,7 +17,7 @@ data class UUID30(val value: String)
 
 data class KlasseKode(val value: String)
 
-data class Periode(val fraOgMed: LocalDate, val tilOgMed: LocalDate)
+data class Periode(val fraOgMed: YearMonth, val tilOgMed: YearMonth)
 
 enum class KravgrunnlagStatus { ANNU, ANOM, AVSL, BEHA, ENDR, FEIL, MANU, NY, SPER }
 
@@ -31,21 +31,25 @@ data class Kravgrunnlag(
     val status: KravgrunnlagStatus,
     val saksbehandler: NavIdent,
     val sisteUtbetalingslinjeId: UUID30,
-    val grunnlagsperioder: List<Grunnlagsperiode>,
+    val perioder: List<KravgrunnlagPeriode>,
 )
 
-data class Grunnlagsperiode(
-    val periode: Periode,
-    val beloepSkattMnd: BigDecimal,
+data class KravgrunnlagPeriode(
+    val periode: Periode, // TODO EY-2661 endre til kun en yearmonth?
+    val skatt: BigDecimal,
     val grunnlagsbeloep: List<Grunnlagsbeloep>,
 )
 
 data class Grunnlagsbeloep(
     val kode: KlasseKode,
     val type: KlasseType,
-    val beloepTidligereUtbetaling: BigDecimal,
-    val beloepNyUtbetaling: BigDecimal,
-    val beloepSkalTilbakekreves: BigDecimal,
-    val beloepSkalIkkeTilbakekreves: BigDecimal,
+    val bruttoUtbetaling: BigDecimal,
+    val beregnetNyBrutto: BigDecimal,
+    val bruttoTilbakekreving: BigDecimal,
+    val nettoTilbakekreving: BigDecimal, // TODO EY-2661 hvordan fylles denne ??
+    val beloepSkalIkkeTilbakekreves: BigDecimal, // TODO EY-2661 samme som beregnetFeilutbetaling i frontend ??
     val skatteProsent: BigDecimal,
+    val resultat: String?,
+    val skyld: String?,
+    val aarsak: String?,
 )

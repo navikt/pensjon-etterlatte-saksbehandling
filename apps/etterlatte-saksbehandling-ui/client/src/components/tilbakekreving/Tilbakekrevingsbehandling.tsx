@@ -23,7 +23,7 @@ export function Tilbakekrevingsbehandling() {
   const { tilbakekrevingId } = useParams()
   const [fetchTilbakekrevingStatus, fetchTilbakekreving] = useApiCall(hentTilbakekreving)
   const [personStatus, hentPerson] = useApiCall(getPerson)
-  const viHarLastetRiktigTilbakekreving = tilbakekrevingId === tilbakekreving?.id
+  const viHarLastetRiktigTilbakekreving = tilbakekrevingId === tilbakekreving?.id.toString()
 
   useEffect(() => {
     if (!tilbakekrevingId) return

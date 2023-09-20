@@ -75,6 +75,7 @@ if (isDev) {
       '/api/institusjonsoppholdbegrunnelse/:sakid',
       '/api/nyeoppgaver',
       '/api/klage',
+      '/api/tilbakekreving',
       '/api/generellbehandling',
     ],
     tokenMiddleware(ApiConfig.behandling.scope),

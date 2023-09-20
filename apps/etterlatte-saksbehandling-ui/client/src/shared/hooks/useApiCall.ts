@@ -6,7 +6,7 @@ export function useApiCall<T, U>(
 ): [
   Result<U>,
   (args: T, onSuccess?: (result: U, statusCode: number) => void, onError?: (error: ApiError) => void) => void,
-  () => void
+  () => void,
 ] {
   const [apiResult, setApiResult] = useState<Result<U>>(initial)
 
@@ -50,6 +50,9 @@ export const isConflict = (result: Result<unknown>): result is Error<ApiError> =
 export const isInitial = (result: Result<unknown>): result is Initial => result.status === 'initial'
 export const isPendingOrInitial = (result: Result<unknown>): result is Initial | Pending =>
   isPending(result) || isInitial(result)
+
+export const isSuccessOrInitial = (result: Result<unknown>): result is Initial | Success<unknown> =>
+  isSuccess(result) || isInitial(result)
 
 const initial = <A = never>(): Result<A> => ({ status: 'initial' })
 const pending = <A = never>(): Result<A> => ({ status: 'pending' })

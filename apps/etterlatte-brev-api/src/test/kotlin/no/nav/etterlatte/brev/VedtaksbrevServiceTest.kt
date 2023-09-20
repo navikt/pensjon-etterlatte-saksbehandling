@@ -38,6 +38,7 @@ import no.nav.etterlatte.brev.model.BrevProsessTypeFactory
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.OpprettNyttBrev
 import no.nav.etterlatte.brev.model.Pdf
+import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
@@ -73,6 +74,7 @@ internal class VedtaksbrevServiceTest {
 
     private val db = mockk<BrevRepository>(relaxed = true)
     private val brevbaker = mockk<BrevbakerKlient>()
+    private val brevService = mockk<BrevService>()
     private val sakOgBehandlingService = mockk<SakOgBehandlingService>()
     private val adresseService = mockk<AdresseService>()
     private val dokarkivService = mockk<DokarkivServiceImpl>()
@@ -439,6 +441,38 @@ internal class VedtaksbrevServiceTest {
             }
         }
 
+        @Test
+        fun `REDIGERBAR - Nytt innhold genereres og erstatter gammelt innhold`() {
+            val behandling =
+                opprettBehandling(SakType.OMSTILLINGSSTOENAD, VedtakType.OPPHOER, VedtakStatus.FATTET_VEDTAK)
+
+            val brev = opprettBrev(Status.OPPRETTET, BrevProsessType.REDIGERBAR)
+            val opphoerPayload = opprettOpphoerPayload()
+            val tomPayload = Slate(listOf(Slate.Element(Slate.ElementType.PARAGRAPH)))
+            every { db.hentBrev(any()) } returns brev
+            coEvery { sakOgBehandlingService.hentBehandling(any(), any(), any()) } returns behandling
+
+            runBlocking {
+                db.oppdaterPayload(brev.id, tomPayload)
+            }
+
+            val nyttInnhold = runBlocking {
+                vedtaksbrevService.hentNyttInnhold(brev.sakId, brev.id, brev.behandlingId!!, SAKSBEHANDLER)
+            }
+
+            nyttInnhold shouldBe BrevService.BrevPayload(opphoerPayload, emptyList())
+
+            verify {
+                db.oppdaterPayload(brev.id, opphoerPayload)
+                db.oppdaterPayload(brev.id, tomPayload)
+                db.hentBrevPayloadVedlegg(brev.id)
+            }
+
+            coVerify {
+                sakOgBehandlingService.hentBehandling(brev.sakId, brev.behandlingId!!, SAKSBEHANDLER)
+            }
+        }
+
         @ParameterizedTest
         @EnumSource(
             Status::class,
@@ -644,6 +678,32 @@ internal class VedtaksbrevServiceTest {
         RenderedJsonLetter.Sakspart("", "", "", ""),
         emptyList(),
         RenderedJsonLetter.Signatur("", "", "", "", "")
+    )
+    private fun opprettOpphoerPayload() = Slate(
+        listOf(
+            Slate.Element(
+                type = Slate.ElementType.HEADING_TWO,
+                children = listOf(
+                    Slate.InnerElement(
+                        type = null,
+                        text = "Dette er en tom brevmal",
+                        children = null,
+                        placeholder = null
+                    )
+                )
+            ),
+            Slate.Element(
+                type = Slate.ElementType.PARAGRAPH,
+                children = listOf(
+                    Slate.InnerElement(
+                        type = null,
+                        text = "Det finnes ingen brevmal for denne sak- eller vedtakstypen.",
+                        children = null,
+                        placeholder = null
+                    )
+                )
+            )
+        )
     )
 
     private companion object {

@@ -103,6 +103,31 @@ class VedtaksbrevService(
             .also { pdf -> ferdigstillHvisVedtakFattet(brev, behandling, pdf, brukerTokenInfo) }
     }
 
+    suspend fun hentNyttInnhold(
+        sakId: Long,
+        brevId: Long,
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo
+    ): BrevService.BrevPayload {
+        val behandling = sakOgBehandlingService.hentBehandling(sakId, behandlingId, brukerTokenInfo)
+        val prosessType = brevProsessTypeFactory.fra(behandling)
+        val innhold = opprettInnhold(behandling, prosessType)
+        val innholdVedlegg = opprettInnholdVedlegg(behandling, prosessType)
+
+        if (innhold.payload != null) {
+            db.oppdaterPayload(brevId, innhold.payload)
+        }
+
+        if (innholdVedlegg != null) {
+            db.oppdaterPayloadVedlegg(brevId, innholdVedlegg)
+        }
+
+        return BrevService.BrevPayload(
+            innhold.payload ?: db.hentBrevPayload(brevId),
+            innholdVedlegg ?: db.hentBrevPayloadVedlegg(brevId)
+        )
+    }
+
     private fun opprettBrevData(brev: Brev, behandling: Behandling, brevkode: BrevDataMapper.BrevkodePar): BrevData =
         when (brev.prosessType) {
             REDIGERBAR -> brevDataMapper.brevDataFerdigstilling(behandling, {

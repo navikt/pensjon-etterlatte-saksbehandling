@@ -4,6 +4,7 @@ import jakarta.jms.ExceptionListener
 import jakarta.jms.Message
 import jakarta.jms.MessageListener
 import net.logstash.logback.argument.StructuredArguments.kv
+import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.mq.EtterlatteJmsConnectionFactory
 import no.nav.etterlatte.tilbakekreving.kravgrunnlag.KravgrunnlagJaxb.toDetaljertKravgrunnlagDto
@@ -48,6 +49,6 @@ class KravgrunnlagConsumer(
 
     companion object {
         private val logger = LoggerFactory.getLogger(KravgrunnlagConsumer::class.java)
-        private val sikkerLogg: Logger = LoggerFactory.getLogger("sikkerLogg")
+        private val sikkerLogg: Logger = sikkerlogger()
     }
 }

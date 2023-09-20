@@ -5,11 +5,11 @@ import no.nav.etterlatte.fordeler.FordelerKriterier
 import no.nav.etterlatte.fordeler.FordelerRepository
 import no.nav.etterlatte.fordeler.FordelerService
 import no.nav.etterlatte.libs.common.Miljoevariabler
+import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.helse.rapids_rivers.RapidApplication
-import org.slf4j.LoggerFactory
 import rapidsandrivers.getRapidEnv
 
-val sikkerLogg = LoggerFactory.getLogger("sikkerLogg")
+val sikkerLogg = sikkerlogger()
 
 fun main() {
     val rapidEnv = getRapidEnv()

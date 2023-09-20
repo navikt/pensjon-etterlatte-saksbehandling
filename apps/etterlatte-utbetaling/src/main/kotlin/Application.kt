@@ -1,14 +1,14 @@
 package no.nav.etterlatte
 
 import no.nav.etterlatte.jobs.addShutdownHook
+import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.utbetaling.config.ApplicationContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import java.util.Timer
 
-val sikkerLogg: Logger = LoggerFactory.getLogger("sikkerLogg")
+val sikkerLogg: Logger = sikkerlogger()
 
 fun main() {
     ApplicationContext().also {

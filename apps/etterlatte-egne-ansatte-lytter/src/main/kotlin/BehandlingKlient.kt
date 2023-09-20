@@ -33,7 +33,7 @@ class BehandlingKlient(val behandlingHttpClient: HttpClient, val url: String) {
         skjermet: Boolean
     ) = runBlocking {
         behandlingHttpClient.post(
-            url.plus("/egenansatt")
+            "$url/egenansatt"
         ) {
             contentType(ContentType.Application.Json)
             setBody(

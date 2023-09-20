@@ -55,7 +55,7 @@ class BehandlingKlient(
     fun postTilBehandling(oppholdHendelse: InstitusjonsoppholdHendelseBeriket) =
         runBlocking {
             behandlingHttpClient.post(
-                resourceUrl.plus("/grunnlagsendringshendelse/institusjonsopphold")
+                "$resourceUrl/grunnlagsendringshendelse/institusjonsopphold"
             ) {
                 contentType(ContentType.Application.Json)
                 setBody(oppholdHendelse)

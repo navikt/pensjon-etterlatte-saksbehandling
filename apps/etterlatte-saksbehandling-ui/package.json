@@ -8,5 +8,6 @@
     "husky": "^8.0.1",
     "lint-staged": "^14.0.1",
     "prettier": "^3.0.3"
-  }
+  },
+  "pre-commit": "lint-staged"
 }

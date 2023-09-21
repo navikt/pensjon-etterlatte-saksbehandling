@@ -1,5 +1,6 @@
 package no.nav.etterlatte.behandling.klienter
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.michaelbull.result.mapBoth
 import com.typesafe.config.Config
@@ -50,4 +51,5 @@ class BrevApiKlientObo(config: Config, client: HttpClient) : BrevApiKlient {
     }
 }
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 data class OpprettetBrevDto(val id: Long)

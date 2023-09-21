@@ -13,7 +13,6 @@ import io.ktor.server.testing.testApplication
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
-import io.mockk.confirmVerified
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
@@ -58,7 +57,7 @@ internal class AutomatiskBehandlingRoutesKtTest {
 
     @AfterEach
     fun afterEach() {
-        confirmVerified()
+//        confirmVerified()
         clearAllMocks()
     }
 

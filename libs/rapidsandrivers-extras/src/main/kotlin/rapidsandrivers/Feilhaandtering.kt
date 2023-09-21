@@ -20,10 +20,14 @@ fun <T> withFeilhaandtering(
     try {
         Result.success(block())
     } catch (e: Exception) {
-        feilhaandteringLogger.info("Håndtering av melding ${packet.id} feila på steg $feilendeSteg.", e)
-        packet.eventName = EventNames.FEILA
-        packet.feilendeSteg = feilendeSteg
-        packet.feilmelding = e.toJson()
-        context.publish(packet.toJson())
+        feilhaandteringLogger.warn("Håndtering av melding ${packet.id} feila på steg $feilendeSteg.", e)
+        try {
+            packet.eventName = EventNames.FEILA
+            packet.feilendeSteg = feilendeSteg
+            packet.feilmelding = e.toJson()
+            context.publish(packet.toJson())
+        } catch (e2: Exception) {
+            feilhaandteringLogger.warn("Feil under feilhåndtering for ${packet.id}", e)
+        }
         Result.failure(e)
     }

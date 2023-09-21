@@ -1,0 +1,21 @@
+
+on:
+  workflow_dispatch: # Allow manually triggered workflow run
+  push:
+    branches:
+      - main
+    paths:
+      - '**/**'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - '**/**'
+
+jobs:
+  test:
+    name: Run ktlint on files
+    runs-on: ubuntu-latest-4-cores
+    steps:
+      - name: Ktlint
+        run: ktlint '**/*.kt' '**/*.kts' '!**/build/**'

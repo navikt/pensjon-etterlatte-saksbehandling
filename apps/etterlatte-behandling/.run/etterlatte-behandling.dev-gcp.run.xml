@@ -33,6 +33,8 @@
       <env name="ETTERLATTE_PDLTJENESTER_URL" value="https://etterlatte-pdltjenester.intern.dev.nav.no" />
       <env name="SKJERMING_URL" value="https://skjermede-personer-pip.intern.dev.nav.no" />
       <env name="OPPGAVE_CLIENT_ID" value="dev-fss.oppgavehandtering.oppgave" />
+      <env name="ETTERLATTE_BREV_API_CLIENT_ID" value="dev-gcp.etterlatte.etterlatte-brev-api"/>
+      <env name="ETTERLATTE_BREV_API_URL" value="https://etterlatte-brev-api.intern.dev.no"/>
       <env name="OPPGAVE_URL" value="https://oppgave.dev.intern.nav.no" />
     </envs>
     <option name="MAIN_CLASS_NAME" value="no.nav.etterlatte.ApplicationKt" />

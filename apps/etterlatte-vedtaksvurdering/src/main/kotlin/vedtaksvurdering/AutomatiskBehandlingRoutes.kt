@@ -7,7 +7,6 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.application
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
-import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
@@ -35,14 +34,12 @@ fun Route.automatiskBehandlingRoutes(
                 logger.info("Tildeler attesteringsoppgave til systembruker")
                 val oppgaveTilAttestering =
                     behandlingKlient.hentOppgaverForSak(sakId, brukerTokenInfo)
-                        .also { logger.info("Hentet oppgaver $it") }
                         .oppgaver
                         .filter { it.referanse == behandlingId.toString() }
                         .filter { it.type == OppgaveType.ATTESTERING }
                         .filterNot { it.erAvsluttet() }
                         .first()
-                        .also { logger.info("Hentet attesteringsoppgave $it") }
-                runBlocking { behandlingKlient.tildelSaksbehandler(oppgaveTilAttestering, brukerTokenInfo) }
+                behandlingKlient.tildelSaksbehandler(oppgaveTilAttestering, brukerTokenInfo)
 
                 logger.info("Attesterer vedtak for behandling $behandlingId")
                 service.attesterVedtak(

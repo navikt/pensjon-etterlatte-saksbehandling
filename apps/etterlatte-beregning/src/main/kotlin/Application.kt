@@ -10,14 +10,14 @@ import no.nav.etterlatte.beregning.beregning
 import no.nav.etterlatte.beregning.grunnlag.beregningsGrunnlag
 import no.nav.etterlatte.config.ApplicationContext
 import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstartOgAvslutning
+import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.libs.ktor.setReady
 import no.nav.etterlatte.ytelseMedGrunnlag.ytelseMedGrunnlag
 import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 
-val sikkerLogg: Logger = LoggerFactory.getLogger("sikkerLogg")
+val sikkerLogg: Logger = sikkerlogger()
 
 fun main() {
     ApplicationContext().let { Server(it).run() }

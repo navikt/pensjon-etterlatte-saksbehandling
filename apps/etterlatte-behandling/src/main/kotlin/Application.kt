@@ -33,6 +33,7 @@ import no.nav.etterlatte.institusjonsopphold.InstitusjonsoppholdService
 import no.nav.etterlatte.institusjonsopphold.institusjonsoppholdRoute
 import no.nav.etterlatte.jobs.addShutdownHook
 import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstartOgAvslutning
+import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.libs.ktor.restModule
@@ -42,10 +43,9 @@ import no.nav.etterlatte.sak.sakSystemRoutes
 import no.nav.etterlatte.sak.sakWebRoutes
 import no.nav.etterlatte.tilgangsstyring.adressebeskyttelsePlugin
 import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import javax.sql.DataSource
 
-val sikkerLogg: Logger = LoggerFactory.getLogger("sikkerLogg")
+val sikkerLogg: Logger = sikkerlogger()
 
 fun main() {
     Server(ApplicationContext()).run()

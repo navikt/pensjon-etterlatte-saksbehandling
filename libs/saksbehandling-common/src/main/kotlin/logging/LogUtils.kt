@@ -1,8 +1,9 @@
 package no.nav.etterlatte.libs.common.logging
 
+import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.slf4j.MDC
-import java.util.UUID
+import java.util.*
 
 const val CORRELATION_ID: String = "correlation_id"
 const val NAV_CONSUMER_ID: String = "Nav-Consumer-Id"
@@ -51,7 +52,7 @@ private fun generateCorrelationId() = UUID.randomUUID().toString()
 fun getCorrelationId(): String = MDC.get(CORRELATION_ID) ?: generateCorrelationId()
 
 fun sikkerLoggOppstartOgAvslutning(applikasjonsnavn: String) {
-    val sikkerLogg = LoggerFactory.getLogger("sikkerLogg")
+    val sikkerLogg = sikkerlogger()
     sikkerLogg.info("SikkerLogg: $applikasjonsnavn oppstart")
     Runtime.getRuntime().addShutdownHook(
         Thread {
@@ -59,3 +60,5 @@ fun sikkerLoggOppstartOgAvslutning(applikasjonsnavn: String) {
         },
     )
 }
+
+fun sikkerlogger(): Logger = LoggerFactory.getLogger("sikkerLogg")

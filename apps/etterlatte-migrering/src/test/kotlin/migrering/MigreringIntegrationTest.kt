@@ -9,8 +9,6 @@ import io.mockk.runs
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import kotliquery.TransactionalSession
-import migrering.verifisering.PDLKlient
-import migrering.verifisering.Verifiserer
 import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
@@ -22,7 +20,10 @@ import no.nav.etterlatte.libs.database.POSTGRES_VERSION
 import no.nav.etterlatte.libs.database.hentListe
 import no.nav.etterlatte.migrering.pen.BarnepensjonGrunnlagResponse
 import no.nav.etterlatte.migrering.pen.PenKlient
+import no.nav.etterlatte.migrering.verifisering.PDLKlient
+import no.nav.etterlatte.migrering.verifisering.Verifiserer
 import no.nav.etterlatte.opprettInMemoryDatabase
+import no.nav.etterlatte.rapidsandrivers.EventNames
 import no.nav.etterlatte.rapidsandrivers.migrering.MigreringRequest
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser
 import no.nav.etterlatte.rapidsandrivers.migrering.PESYS_ID
@@ -92,6 +93,7 @@ internal class MigreringIntegrationTest {
                                             )
                                         } returns mockk()
                                     },
+                                    repository,
                                 ),
                         )
                     }
@@ -153,6 +155,7 @@ internal class MigreringIntegrationTest {
                                             )
                                         } returns mockk()
                                     },
+                                    repository,
                                 ),
                         )
                         LagreKopling(this, repository)
@@ -237,6 +240,7 @@ internal class MigreringIntegrationTest {
                                             )
                                         } throws IllegalStateException("")
                                     },
+                                    repository,
                                 ),
                         )
                     }
@@ -249,9 +253,9 @@ internal class MigreringIntegrationTest {
                 ).toJson(),
             )
             with(inspector.inspektør.message(0)) {
-                assertEquals(Migreringsstatus.FEILA.name, get(EVENT_NAME_KEY).textValue())
+                assertEquals(EventNames.FEILA, get(EVENT_NAME_KEY).textValue())
             }
-            assertEquals(Migreringsstatus.FEILA, repository.hentStatus(pesysid))
+            assertEquals(Migreringsstatus.VERIFISERING_FEILA, repository.hentStatus(pesysid))
         }
     }
 }

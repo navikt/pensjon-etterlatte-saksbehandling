@@ -2,14 +2,14 @@ package no.nav.etterlatte.migrering
 
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
-import migrering.verifisering.PDLKlient
-import migrering.verifisering.Verifiserer
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleProperties
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.migrering.pen.PenKlient
+import no.nav.etterlatte.migrering.verifisering.PDLKlient
+import no.nav.etterlatte.migrering.verifisering.Verifiserer
 
 internal class ApplicationContext {
     private val properties: ApplicationProperties = ApplicationProperties.fromEnv(System.getenv())
@@ -37,7 +37,7 @@ internal class ApplicationContext {
                 azureAppScope = config.getString("pdl.azure.scope"),
             ),
         )
-    val verifiserer = Verifiserer(pdlKlient = pdlKlient)
+    val verifiserer = Verifiserer(pdlKlient = pdlKlient, repository = pesysRepository)
 }
 
 private fun featureToggleProperties(config: Config) =

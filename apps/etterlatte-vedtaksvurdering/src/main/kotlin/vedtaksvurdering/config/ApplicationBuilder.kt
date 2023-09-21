@@ -4,6 +4,7 @@ import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 import io.ktor.server.config.HoconApplicationConfig
 import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstartOgAvslutning
+import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.ktor.httpClient
@@ -20,11 +21,10 @@ import no.nav.etterlatte.vedtaksvurdering.vedtaksvurderingRoute
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import rapidsandrivers.getRapidEnv
 import java.util.UUID
 
-val sikkerLogg: Logger = LoggerFactory.getLogger("sikkerLogg")
+val sikkerLogg: Logger = sikkerlogger()
 
 class ApplicationBuilder {
     init {

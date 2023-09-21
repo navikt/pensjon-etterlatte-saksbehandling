@@ -1,4 +1,4 @@
-package migrering
+package no.nav.etterlatte.migrering
 
 import io.ktor.server.testing.testApplication
 import io.mockk.every
@@ -12,9 +12,6 @@ import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.utbetaling.UtbetalingResponseDto
 import no.nav.etterlatte.libs.common.utbetaling.UtbetalingStatusDto
 import no.nav.etterlatte.libs.database.POSTGRES_VERSION
-import no.nav.etterlatte.migrering.LyttPaaIverksattVedtak
-import no.nav.etterlatte.migrering.PesysRepository
-import no.nav.etterlatte.migrering.Pesyskopling
 import no.nav.etterlatte.migrering.pen.PenKlient
 import no.nav.etterlatte.opprettInMemoryDatabase
 import no.nav.etterlatte.rapidsandrivers.migrering.PesysId

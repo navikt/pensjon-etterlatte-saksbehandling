@@ -1,4 +1,4 @@
-package migrering.verifisering
+package no.nav.etterlatte.migrering.verifisering
 
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient

@@ -6,6 +6,7 @@ import io.ktor.server.engine.applicationEngineEnvironment
 import io.ktor.server.engine.connector
 import io.ktor.server.engine.embeddedServer
 import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstartOgAvslutning
+import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.libs.ktor.setReady
@@ -13,9 +14,8 @@ import no.nav.etterlatte.vilkaarsvurdering.config.ApplicationContext
 import no.nav.etterlatte.vilkaarsvurdering.migrering.migrering
 import no.nav.etterlatte.vilkaarsvurdering.vilkaarsvurdering
 import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 
-val sikkerLogg: Logger = LoggerFactory.getLogger("sikkerLogg")
+val sikkerLogg: Logger = sikkerlogger()
 
 fun main() {
     ApplicationContext().let { Server(it).run() }

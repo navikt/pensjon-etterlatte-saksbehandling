@@ -9,6 +9,7 @@ import no.nav.etterlatte.hendelserpdl.LeesahOpplysningstype.VERGEMAAL_ELLER_FREM
 import no.nav.etterlatte.hendelserpdl.pdl.PdlKlient
 import no.nav.etterlatte.kafka.JsonMessage
 import no.nav.etterlatte.kafka.KafkaProdusent
+import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.pdlhendelse.Adressebeskyttelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
@@ -40,7 +41,7 @@ class PersonHendelseFordeler(
     private val pdlKlient: PdlKlient,
 ) {
     private val logger: Logger = LoggerFactory.getLogger(PersonHendelseFordeler::class.java)
-    private val sikkerLogg: Logger = LoggerFactory.getLogger("sikkerLogg")
+    private val sikkerLogg: Logger = sikkerlogger()
 
     suspend fun haandterHendelse(hendelse: Personhendelse) {
         if (hendelse.opplysningstype !in opplysningstyperSomHaandteres()) {

@@ -1,9 +1,9 @@
 package no.nav.etterlatte.migrering
 
 import kotlinx.coroutines.runBlocking
-import migrering.verifisering.Verifiserer
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
+import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.rapidsandrivers.BEHOV_NAME_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
@@ -11,12 +11,14 @@ import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.etterlatte.migrering.pen.BarnepensjonGrunnlagResponse
 import no.nav.etterlatte.migrering.pen.PenKlient
 import no.nav.etterlatte.migrering.pen.tilVaarModell
+import no.nav.etterlatte.migrering.verifisering.Verifiserer
 import no.nav.etterlatte.rapidsandrivers.migrering.FNR_KEY
 import no.nav.etterlatte.rapidsandrivers.migrering.MigreringRequest
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser.MIGRER_SPESIFIKK_SAK
 import no.nav.etterlatte.rapidsandrivers.migrering.PesysId
 import no.nav.etterlatte.rapidsandrivers.migrering.hendelseData
+import no.nav.etterlatte.rapidsandrivers.migrering.kilde
 import no.nav.etterlatte.rapidsandrivers.migrering.pesysId
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -61,13 +63,7 @@ internal class MigrerSpesifikkSak(
         packet.eventName = Migreringshendelser.MIGRER_SAK
         val request = pesyssak.tilMigreringsrequest()
         packet.hendelseData = request
-        try {
-            verifiserer.verifiserRequest(request)
-        } catch (e: Exception) {
-            logger.warn("Sak ${request.pesysId} har ufullstendige data i PDL, kan ikke migrere")
-            pesysRepository.oppdaterStatus(request.pesysId, Migreringsstatus.FEILA)
-            throw e
-        }
+        verifiserer.verifiserRequest(request)
 
         if (featureToggleService.isEnabled(MigreringFeatureToggle.SendSakTilMigrering, false)) {
             sendSakTilMigrering(packet, request, context, pesyssak)
@@ -92,6 +88,7 @@ internal class MigrerSpesifikkSak(
         packet[FNR_KEY] = request.soeker.value
         packet[BEHOV_NAME_KEY] = Opplysningstype.AVDOED_PDL_V1
         packet.pesysId = PesysId(sak.id)
+        packet.kilde = Vedtaksloesning.PESYS
         context.publish(packet.toJson())
         logger.info(
             "Migrering starta for pesys-sak ${sak.id} og melding om behandling ble sendt.",

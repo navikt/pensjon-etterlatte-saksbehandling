@@ -1,5 +1,6 @@
 package no.nav.etterlatte.libs.common.rapidsandrivers
 
+import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.River
 
@@ -14,6 +15,7 @@ const val FEILENDE_KRITERIER_KEY = "feilende_kriterier"
 const val GYLDIG_FOR_BEHANDLING_KEY = "gyldig_for_behandling"
 const val SKAL_SENDE_BREV = "skal_sende_brev"
 const val REVURDERING_AARSAK = "revurdering_aarsak"
+const val FEILMELDING = "feilmelding"
 
 fun River.eventName(eventName: String) {
     validate { it.demandValue(EVENT_NAME_KEY, eventName) }
@@ -29,6 +31,12 @@ var JsonMessage.feilendeSteg: String
     get() = this[FEILENDE_STEG].textValue()
     set(name) {
         this[FEILENDE_STEG] = name
+    }
+
+var JsonMessage.feilmelding: Exception
+    get() = objectMapper.treeToValue(this[FEILMELDING], Exception::class.java)
+    set(name) {
+        this[FEILMELDING] = name
     }
 
 fun River.correlationId() {

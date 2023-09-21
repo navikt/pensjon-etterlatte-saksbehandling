@@ -16,6 +16,9 @@ class KravgrunnlagConsumer(
     private val queue: String,
     private val kravgrunnlagService: KravgrunnlagService,
 ) : MessageListener {
+    private val logger = LoggerFactory.getLogger(javaClass)
+    private val sikkerLogg: Logger = sikkerlogger()
+
     fun start() =
         connectionFactory.start(
             listener = exceptionListener(),
@@ -46,9 +49,4 @@ class KravgrunnlagConsumer(
         }
 
     private fun Message.deliveryCount() = this.getLongProperty("JMSXDeliveryCount")
-
-    companion object {
-        private val logger = LoggerFactory.getLogger(KravgrunnlagConsumer::class.java)
-        private val sikkerLogg: Logger = sikkerlogger()
-    }
 }

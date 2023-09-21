@@ -6,10 +6,11 @@ import no.nav.etterlatte.mq.JmsConnectionFactory
 import no.nav.etterlatte.tilbakekreving.klienter.BehandlingKlient
 import no.nav.etterlatte.tilbakekreving.kravgrunnlag.KravgrunnlagConsumer
 import no.nav.etterlatte.tilbakekreving.kravgrunnlag.KravgrunnlagService
+import no.nav.etterlatte.tilbakekreving.vedtak.TilbakekrevingKlient
 
-class ApplicationContext {
-    val properties = ApplicationProperties.fromEnv(System.getenv())
-
+class ApplicationContext(
+    val properties: ApplicationProperties = ApplicationProperties.fromEnv(System.getenv()),
+) {
     var jmsConnectionFactory =
         JmsConnectionFactory(
             hostname = properties.mqHost,
@@ -33,9 +34,21 @@ class ApplicationContext {
                 ),
         )
 
+    val tilbakekrevingKlient =
+        TilbakekrevingKlient(
+            url = properties.proxyUrl,
+            httpClient =
+                httpClientClientCredentials(
+                    azureAppClientId = properties.azureAppClientId,
+                    azureAppJwk = properties.azureAppJwk,
+                    azureAppWellKnownUrl = properties.azureAppWellKnownUrl,
+                    azureAppScope = properties.behandlingScope,
+                ),
+        )
+
     val service = KravgrunnlagService(behandlingKlient)
 
-    var kravgrunnlagConsumer =
+    val kravgrunnlagConsumer =
         KravgrunnlagConsumer(
             connectionFactory = jmsConnectionFactory,
             queue = properties.mqKravgrunnlagQueue,

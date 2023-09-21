@@ -1,5 +1,6 @@
 package no.nav.etterlatte.tilbakekreving.kravgrunnlag
 
+import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.testsupport.readFile
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -10,7 +11,11 @@ internal class KravgunnlagJaxbTest {
     @Test
     fun `skal lese og mappe kravgrunnlag fra tilbakekrevingskomponenten`() {
         val kravgrunnlagXml = readFile("/kravgrunnlag.xml")
+
         val kravgrunnlag = KravgrunnlagJaxb.toDetaljertKravgrunnlagDto(kravgrunnlagXml)
+
+        val json = kravgrunnlag.toJson()
+        println(json)
 
         assertNotNull(kravgrunnlag)
         assertEquals(BigInteger.valueOf(302004), kravgrunnlag.kravgrunnlagId)

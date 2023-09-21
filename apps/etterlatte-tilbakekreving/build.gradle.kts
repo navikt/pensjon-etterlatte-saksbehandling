@@ -5,6 +5,8 @@ plugins {
     alias(libs.plugins.analyze)
 }
 
+val cxfVersion = "4.0.3"
+
 dependencies {
     implementation(project(":libs:saksbehandling-common"))
     implementation(project(":libs:etterlatte-tilbakekreving-model"))
@@ -47,6 +49,7 @@ dependencies {
         exclude("org.slf4j", "slf4j-api")
     }
     testImplementation(libs.test.wiremock)
+    testImplementation(libs.test.kotest.assertionscore)
     testImplementation(project(":libs:testdata"))
     testImplementation(testFixtures(project(":libs:etterlatte-mq")))
 }

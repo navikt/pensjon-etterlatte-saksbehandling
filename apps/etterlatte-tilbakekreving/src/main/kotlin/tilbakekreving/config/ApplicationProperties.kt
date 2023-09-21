@@ -14,6 +14,8 @@ data class ApplicationProperties(
     val azureAppWellKnownUrl: String,
     val behandlingUrl: String,
     val behandlingScope: String,
+    val proxyUrl: String,
+    val proxyScope: String,
 ) {
     companion object {
         fun fromEnv(env: Map<String, String>) =
@@ -32,6 +34,8 @@ data class ApplicationProperties(
                     azureAppWellKnownUrl = value("AZURE_APP_WELL_KNOWN_URL"),
                     behandlingUrl = value("ETTERLATTE_BEHANDLING_URL"),
                     behandlingScope = value("ETTERLATTE_BEHANDLING_SCOPE"),
+                    proxyUrl = value("ETTERLATTE_PROXY_URL"),
+                    proxyScope = value("ETTERLATTE_PROXY_OUTBOUND_SCOPE"),
                 )
             }
 

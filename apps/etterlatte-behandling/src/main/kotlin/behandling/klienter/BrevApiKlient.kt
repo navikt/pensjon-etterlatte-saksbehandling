@@ -50,4 +50,4 @@ class BrevApiKlientObo(config: Config, client: HttpClient) : BrevApiKlient {
     }
 }
 
-data class OpprettetBrevDto(val brevId: Long)
+data class OpprettetBrevDto(val id: Long)

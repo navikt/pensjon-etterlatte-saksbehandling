@@ -171,7 +171,7 @@ class KlageServiceImpl(
             is KlageUtfall.StadfesteVedtak -> utfall.innstilling.brev
             else -> {
                 val brev = runBlocking { brevApiKlient.opprettKlageInnstillingsbrevISak(klage.sak.id, saksbehandler) }
-                KlageBrevInnstilling(brev.brevId)
+                KlageBrevInnstilling(brev.id)
             }
         }
     }

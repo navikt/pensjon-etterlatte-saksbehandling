@@ -268,6 +268,8 @@ internal class BehandlingDaoIntegrationTest {
                 true,
                 Grunnlagsopplysning.Saksbehandler.create("navIdent"),
                 "Test",
+                true,
+                skalSendeKravpakke = true,
             ),
         )
 

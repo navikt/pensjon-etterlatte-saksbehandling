@@ -1,6 +1,6 @@
 import { IBehandlingStatus, IBoddEllerArbeidetUtlandet } from '~shared/types/IDetaljertBehandling'
 import { VurderingsboksWrapper } from '~components/vurderingsboks/VurderingsboksWrapper'
-import { BodyShort, Checkbox, CheckboxGroup, HelpText, Label, Radio, RadioGroup } from '@navikt/ds-react'
+import { Checkbox, CheckboxGroup, HelpText, Radio, RadioGroup } from '@navikt/ds-react'
 import { RadioGroupWrapper } from '~components/behandling/vilkaarsvurdering/Vurdering'
 import { VurderingsTitle } from '../../styled'
 import { SoeknadsoversiktTextArea } from '../SoeknadsoversiktTextArea'
@@ -10,7 +10,8 @@ import { useApiCall, isFailure } from '~shared/hooks/useApiCall'
 import { lagreBoddEllerArbeidetUtlandet } from '~shared/api/behandling'
 import { oppdaterBehandlingsstatus, oppdaterBoddEllerArbeidetUtlandet } from '~store/reducers/BehandlingReducer'
 import { ApiErrorAlert } from '~ErrorBoundary'
-import { JaNei, JaNeiRec } from '~shared/types/ISvar'
+import { JaNei } from '~shared/types/ISvar'
+import BoddEllerArbeidetIUtlandetVisning from '~components/behandling/soeknadsoversikt/soeknadoversikt/boddEllerArbeidetUtlandet/BoddEllerArbeidetIUtlandetVisning'
 
 export const BoddEllerArbeidetUtlandetVurdering = ({
   boddEllerArbeidetUtlandet,
@@ -86,20 +87,7 @@ export const BoddEllerArbeidetUtlandetVurdering = ({
   return (
     <VurderingsboksWrapper
       tittel=""
-      subtittelKomponent={
-        <>
-          <BodyShort spacing>Har avdøde bodd eller arbeidet i utlandet?</BodyShort>
-          {boddEllerArbeidetUtlandet ? (
-            <Label as="p" size="small" style={{ marginBottom: '32px' }}>
-              {JaNeiRec[boddEllerArbeidetUtlandet.boddEllerArbeidetUtlandet ? JaNei.JA : JaNei.NEI]}
-            </Label>
-          ) : (
-            <Label as="p" size="small" style={{ marginBottom: '32px' }}>
-              Ikke vurdert
-            </Label>
-          )}
-        </>
-      }
+      subtittelKomponent={<BoddEllerArbeidetIUtlandetVisning boddEllerArbeidetUtlandet={boddEllerArbeidetUtlandet} />}
       redigerbar={redigerbar}
       vurdering={
         boddEllerArbeidetUtlandet?.kilde

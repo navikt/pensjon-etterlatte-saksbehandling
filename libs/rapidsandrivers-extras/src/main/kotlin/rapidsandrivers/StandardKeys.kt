@@ -1,6 +1,6 @@
 package no.nav.etterlatte.libs.common.rapidsandrivers
 
-import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.toJson
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.River
 
@@ -33,8 +33,8 @@ var JsonMessage.feilendeSteg: String
         this[FEILENDE_STEG] = name
     }
 
-var JsonMessage.feilmelding: Exception
-    get() = objectMapper.treeToValue(this[FEILMELDING], Exception::class.java)
+var JsonMessage.feilmelding: String
+    get() = this[FEILMELDING].toJson()
     set(name) {
         this[FEILMELDING] = name
     }

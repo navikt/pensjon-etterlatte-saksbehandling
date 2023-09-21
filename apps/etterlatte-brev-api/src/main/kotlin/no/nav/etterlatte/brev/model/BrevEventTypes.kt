@@ -1,6 +1,7 @@
 package no.nav.etterlatte.brev.model
 
 enum class BrevEventTypes {
+    OPPRETTET,
     FERDIGSTILT,
     JOURNALFOERT,
     DISTRIBUERT,

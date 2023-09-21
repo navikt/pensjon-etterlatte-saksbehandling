@@ -184,7 +184,7 @@ class VedtaksbrevService(
             return
         }
 
-        if (behandling.vedtak.saksbehandlerIdent != brukerTokenInfo.ident()) {
+        if (!brukerTokenInfo.erSammePerson(behandling.vedtak.saksbehandlerIdent)) {
             logger.info("Ferdigstiller brev med id=${brev.id}")
 
             db.lagrePdfOgFerdigstillBrev(brev.id, pdf)

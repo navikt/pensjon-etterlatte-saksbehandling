@@ -23,7 +23,6 @@ import no.nav.etterlatte.libs.common.sak.VedtakSak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
 import no.nav.etterlatte.libs.common.vedtak.Behandling
-import no.nav.etterlatte.libs.common.vedtak.KafkaHendelseType
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
@@ -122,7 +121,7 @@ internal class JournalfoerVedtaksbrevTest {
         val melding =
             JsonMessage.newMessage(
                 mapOf(
-                    EVENT_NAME_KEY to KafkaHendelseType.ATTESTERT.toString(),
+                    EVENT_NAME_KEY to BrevEventTypes.FERDIGSTILT.toString(),
                     "vedtak" to vedtak,
                 ),
             )
@@ -139,7 +138,7 @@ internal class JournalfoerVedtaksbrevTest {
         val melding =
             JsonMessage.newMessage(
                 mapOf(
-                    EVENT_NAME_KEY to KafkaHendelseType.ATTESTERT.toString(),
+                    EVENT_NAME_KEY to BrevEventTypes.FERDIGSTILT.toString(),
                     "vedtak" to vedtak,
                     SKAL_SENDE_BREV to false,
                 ),
@@ -168,7 +167,7 @@ internal class JournalfoerVedtaksbrevTest {
         return JsonMessage.newMessage(
             mapOf(
                 CORRELATION_ID_KEY to UUID.randomUUID().toString(),
-                EVENT_NAME_KEY to KafkaHendelseType.ATTESTERT.toString(),
+                EVENT_NAME_KEY to BrevEventTypes.FERDIGSTILT.toString(),
                 "vedtak" to vedtak,
             ),
         )

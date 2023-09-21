@@ -11,17 +11,18 @@ import java.net.InetAddress
 open class LeaderElection(
     private val electorPath: String,
     private val httpClient: HttpClient = HttpClient(),
-    private val me: String? = InetAddress.getLocalHost().hostName,
 ) {
     private val objectMapper = jacksonObjectMapper()
+
+    open fun me(): String? = InetAddress.getLocalHost().hostName
 
     open fun isLeader(): Boolean {
         val leader =
             runBlocking {
                 httpClient.get("http://$electorPath/").bodyAsText().let(objectMapper::readTree).get("name").asText()
             }
-        val amLeader = leader == me
-        logger.info("Current pod: $me. Leader: $leader. Current pod is leader: $amLeader")
+        val amLeader = leader == me()
+        logger.info("Current pod: ${me()}. Leader: $leader. Current pod is leader: $amLeader")
         return amLeader
     }
     companion object {

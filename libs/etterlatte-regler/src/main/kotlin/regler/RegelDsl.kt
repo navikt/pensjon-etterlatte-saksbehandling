@@ -69,10 +69,10 @@ private fun <G, S> velgNyesteRegel(
         regler = regler,
     )
 
-fun <G, T, F : FaktumNode<T>, S> finnFaktumIGrunnlag(
+fun <G, T, S> finnFaktumIGrunnlag(
     gjelderFra: LocalDate,
     beskrivelse: String,
-    finnFaktum: (G) -> F,
+    finnFaktum: (G) -> FaktumNode<T>,
     finnFelt: (T) -> S,
 ): Regel<G, S> =
     FinnFaktumIGrunnlagRegel(

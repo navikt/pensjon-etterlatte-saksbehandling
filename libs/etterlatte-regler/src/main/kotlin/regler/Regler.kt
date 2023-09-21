@@ -182,11 +182,11 @@ open class VelgNyesteGyldigRegel<G, S>(
             .maxByOrNull { it.gjelderFra }
 }
 
-open class FinnFaktumIGrunnlagRegel<G, T, F : FaktumNode<T>, S>(
+open class FinnFaktumIGrunnlagRegel<G, T, S>(
     override val gjelderFra: LocalDate,
     override val beskrivelse: String,
     @JsonIgnore
-    val finnFaktum: (G) -> F,
+    val finnFaktum: (G) -> FaktumNode<T>,
     @JsonIgnore
     val finnFelt: (T) -> S,
 ) : Regel<G, S>(

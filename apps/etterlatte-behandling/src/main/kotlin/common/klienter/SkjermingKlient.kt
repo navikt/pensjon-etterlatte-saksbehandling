@@ -29,12 +29,11 @@ class SkjermingKlient(
 
     override suspend fun ping(): PingResult {
         try {
-            val skjermetFalse: Boolean =
-                httpClient.post("$url/skjermet") {
-                    accept(ContentType.Application.Json)
-                    contentType(ContentType.Application.Json)
-                    setBody(SkjermetDataRequestDTO(personident = "dummy")) // Det er meningen å sende inn "dummy"
-                }.body()
+            httpClient.post("$url/skjermet") {
+                accept(ContentType.Application.Json)
+                contentType(ContentType.Application.Json)
+                setBody(SkjermetDataRequestDTO(personident = "dummy")) // Det er meningen å sende inn "dummy"
+            }.body<Boolean>()
         } catch (e: Exception) {
             return PingResultDown(serviceName, endpoint = endpoint, errorMessage = e.message, beskrivelse = beskrivelse)
                 .also {

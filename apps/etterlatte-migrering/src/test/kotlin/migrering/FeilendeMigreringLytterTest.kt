@@ -18,9 +18,9 @@ import no.nav.etterlatte.opprettInMemoryDatabase
 import no.nav.etterlatte.rapidsandrivers.EventNames
 import no.nav.etterlatte.rapidsandrivers.migrering.Beregning
 import no.nav.etterlatte.rapidsandrivers.migrering.Enhet
-import no.nav.etterlatte.rapidsandrivers.migrering.KILDE
+import no.nav.etterlatte.rapidsandrivers.migrering.KILDE_KEY
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser
-import no.nav.etterlatte.rapidsandrivers.migrering.PESYS_ID
+import no.nav.etterlatte.rapidsandrivers.migrering.PESYS_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.migrering.PesysId
 import no.nav.etterlatte.rapidsandrivers.migrering.Trygdetid
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -93,8 +93,8 @@ class FeilendeMigreringLytterTest {
                     JsonMessage.newMessage(
                         mapOf(
                             EVENT_NAME_KEY to EventNames.FEILA,
-                            KILDE to Vedtaksloesning.PESYS,
-                            PESYS_ID to pesysid,
+                            KILDE_KEY to Vedtaksloesning.PESYS,
+                            PESYS_ID_KEY to pesysid,
                             HENDELSE_DATA_KEY to pesyssak.tilMigreringsrequest(),
                             FEILMELDING to IllegalStateException(),
                             FEILENDE_STEG to Migreringshendelser.TRYGDETID,

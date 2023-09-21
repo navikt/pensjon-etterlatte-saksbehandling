@@ -11,9 +11,9 @@ import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.migrering.Migreringsstatus
 import no.nav.etterlatte.migrering.PesysRepository
 import no.nav.etterlatte.rapidsandrivers.EventNames
-import no.nav.etterlatte.rapidsandrivers.migrering.KILDE
+import no.nav.etterlatte.rapidsandrivers.migrering.KILDE_KEY
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser
-import no.nav.etterlatte.rapidsandrivers.migrering.PESYS_ID
+import no.nav.etterlatte.rapidsandrivers.migrering.PESYS_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.migrering.hendelseData
 import no.nav.etterlatte.rapidsandrivers.migrering.pesysId
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -32,9 +32,9 @@ internal class FeilendeMigreringLytter(rapidsConnection: RapidsConnection, priva
         River(rapidsConnection).apply {
             eventName(EventNames.FEILA)
             validate { it.requireKey(FEILENDE_STEG) }
-            validate { it.requireKey(KILDE) }
-            validate { it.requireValue(KILDE, Vedtaksloesning.PESYS.name) }
-            validate { it.requireKey(PESYS_ID) }
+            validate { it.requireKey(KILDE_KEY) }
+            validate { it.requireValue(KILDE_KEY, Vedtaksloesning.PESYS.name) }
+            validate { it.requireKey(PESYS_ID_KEY) }
             validate { it.requireKey(HENDELSE_DATA_KEY) }
             validate { it.requireKey(FEILMELDING) }
             validate { it.rejectValue(FEILENDE_STEG, Migreringshendelser.VERIFISER) }

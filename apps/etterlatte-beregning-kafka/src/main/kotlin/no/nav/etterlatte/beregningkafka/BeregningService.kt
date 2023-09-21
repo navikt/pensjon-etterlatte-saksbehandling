@@ -19,7 +19,7 @@ class BeregningService(
             beregningApp.post("$url/api/beregning/$behandlingId")
         }
 
-    fun opprettBeregningsGrunnlag(
+    fun opprettBeregningsgrunnlagFraForrigeBehandling(
         omregningsId: UUID,
         forrigeBehandlingsId: UUID,
     ): HttpResponse =

@@ -3,7 +3,7 @@ package no.nav.etterlatte.migrering
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser
-import no.nav.etterlatte.rapidsandrivers.migrering.PESYS_ID
+import no.nav.etterlatte.rapidsandrivers.migrering.PESYS_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.migrering.pesysId
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -22,7 +22,7 @@ internal class LagreKopling(rapidsConnection: RapidsConnection, private val pesy
         River(rapidsConnection).apply {
             eventName(hendelsestype)
             correlationId()
-            validate { it.requireKey(PESYS_ID) }
+            validate { it.requireKey(PESYS_ID_KEY) }
             validate { it.requireKey(BEHANDLING_ID_KEY) }
         }.register(this)
     }

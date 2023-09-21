@@ -19,7 +19,7 @@ fun <T> withFeilhaandtering(
     try {
         Result.success(block())
     } catch (e: Exception) {
-        feilhaandteringLogger.error("Håndtering av melding ${packet.id} feila på steg $feilendeSteg.", e)
+        feilhaandteringLogger.warn("Håndtering av melding ${packet.id} feila på steg $feilendeSteg.", e)
         packet.eventName = EventNames.FEILA
         packet.feilendeSteg = feilendeSteg
         packet.feilmelding = e

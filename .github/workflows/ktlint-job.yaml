@@ -5,14 +5,12 @@ on:
     branches:
       - main
     paths:
-      - '**/*.kt'
-      - '**/*.kts'
+      - '**/**'
   pull_request:
     branches:
       - main
     paths:
-      - '**/*.kt'
-      - '**/*.kts'
+      - '**/**'
 
 jobs:
   test:

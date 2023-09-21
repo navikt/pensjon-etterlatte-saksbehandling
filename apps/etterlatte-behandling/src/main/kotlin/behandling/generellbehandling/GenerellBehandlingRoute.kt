@@ -66,6 +66,21 @@ internal fun Route.generellbehandlingRoutes(
         }
     }
 
+    post("/api/generellbehandling/{generellbehandlingId}") {
+        hvisEnabled(GenerellBehandlingToggle.KanBrukeGenerellBehandlingToggle) {
+            kunSaksbehandler {
+                val request = call.receive<GenerellBehandling>()
+                inTransaction {
+                    generellBehandlingService.oppdaterBehandling(request)
+                }
+                logger.info(
+                    "Oppdatert generell behandling for sak $sakId av typen ${request.type}",
+                )
+                call.respond(HttpStatusCode.OK)
+            }
+        }
+    }
+
     get("/api/generellbehandling/{generellbehandlingId}") {
         hvisEnabled(GenerellBehandlingToggle.KanBrukeGenerellBehandlingToggle) {
             kunSaksbehandler {

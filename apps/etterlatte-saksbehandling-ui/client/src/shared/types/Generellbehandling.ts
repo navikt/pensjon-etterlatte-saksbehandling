@@ -20,8 +20,8 @@ export type Innhold = Utland | Annen
 
 export interface Utland {
   type: GenerellBehandlingUtlandType
-  sed: string
-  tilknyttetBehandling: string
+  sed?: string
+  tilknyttetBehandling?: string
 }
 
 export interface Annen {

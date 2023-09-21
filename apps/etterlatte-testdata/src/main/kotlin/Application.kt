@@ -23,6 +23,7 @@ import io.ktor.server.config.HoconApplicationConfig
 import io.ktor.server.engine.applicationEngineEnvironment
 import io.ktor.server.engine.connector
 import io.ktor.server.engine.embeddedServer
+import io.ktor.server.http.content.staticResources
 import io.ktor.server.mustache.Mustache
 import io.ktor.server.plugins.callloging.CallLogging
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
@@ -125,6 +126,7 @@ fun main() {
                     routing {
                         get("/isalive") { call.respondText("ALIVE", ContentType.Text.Plain) }
                         get("/isready") { call.respondText("READY", ContentType.Text.Plain) }
+                        staticResources("/static", "static")
                         authenticate {
                             api()
                         }

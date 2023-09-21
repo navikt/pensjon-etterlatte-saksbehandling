@@ -5,7 +5,7 @@ import { FristHandlinger } from '~components/nyoppgavebenk/minoppgaveliste/Frist
 import React, { useState } from 'react'
 import { HandlingerForOppgave } from '~components/nyoppgavebenk/HandlingerForOppgave'
 import { OppgavetypeTag, SaktypeTag } from '~components/nyoppgavebenk/Tags'
-import { PaginationWrapper } from '~components/nyoppgavebenk/Oppgavelista'
+import { formaterOppgavestatus, PaginationWrapper } from '~components/nyoppgavebenk/Oppgavelista'
 import {
   filtrerOppgaveStatus,
   OPPGAVESTATUSFILTER,
@@ -17,7 +17,7 @@ import styled from 'styled-components'
 import { RedigerSaksbehandler } from '../tildeling/RedigerSaksbehandler'
 
 const SelectWrapper = styled.div`
-  margin: 2rem 2rem 2rem 0rem;
+  margin: 2rem 2rem 2rem 0;
   max-width: 20rem;
 `
 
@@ -98,9 +98,7 @@ export const MinOppgaveliste = ({ oppgaver, hentOppgaver, oppdaterTildeling }: P
                       </Table.DataCell>
                       <Table.DataCell>{oppgave.sakType && <SaktypeTag sakType={oppgave.sakType} />}</Table.DataCell>
                       <Table.DataCell>{oppgave.merknad}</Table.DataCell>
-                      <Table.DataCell>
-                        {oppgave.status ? OPPGAVESTATUSFILTER[oppgave.status] ?? oppgave.status : 'Ukjent'}
-                      </Table.DataCell>
+                      <Table.DataCell>{formaterOppgavestatus(oppgave)}</Table.DataCell>
                       <Table.DataCell>{oppgave.enhet}</Table.DataCell>
                       <Table.DataCell>
                         <RedigerSaksbehandler

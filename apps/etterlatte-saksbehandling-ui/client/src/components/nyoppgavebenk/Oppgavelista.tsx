@@ -30,6 +30,21 @@ export const HeaderPadding = styled.span`
   padding-left: 20px;
 `
 
+// Spesiell håndtering for ferdigstilt status for oppgaver som medfører en ny oppgave til attestant
+export function formaterOppgavestatus(oppgave: OppgaveDTOny): string {
+  if (
+    oppgave.status === 'FERDIGSTILT' &&
+    (oppgave.type === 'FOERSTEGANGSBEHANDLING' ||
+      oppgave.type === 'REVURDERING' ||
+      oppgave.type === 'MANUELT_OPPHOER' ||
+      oppgave.type === 'UNDERKJENT')
+  ) {
+    return 'Til attestering'
+  }
+
+  return oppgave.status ? OPPGAVESTATUSFILTER[oppgave.status] ?? oppgave.status : 'Ukjent'
+}
+
 export const Oppgavelista = (props: {
   oppgaver: ReadonlyArray<OppgaveDTOny>
   oppdaterTildeling: (id: string, saksbehandler: string | null) => void
@@ -95,9 +110,7 @@ export const Oppgavelista = (props: {
                       </Table.DataCell>
                       <Table.DataCell>{oppgave.sakType && <SaktypeTag sakType={oppgave.sakType} />}</Table.DataCell>
                       <Table.DataCell>{oppgave.merknad}</Table.DataCell>
-                      <Table.DataCell>
-                        {oppgave.status ? OPPGAVESTATUSFILTER[oppgave.status] ?? oppgave.status : 'Ukjent'}
-                      </Table.DataCell>
+                      <Table.DataCell>{formaterOppgavestatus(oppgave)}</Table.DataCell>
                       <Table.DataCell>{oppgave.enhet}</Table.DataCell>
                       <Table.DataCell>
                         <RedigerSaksbehandler

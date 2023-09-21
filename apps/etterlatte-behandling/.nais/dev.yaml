@@ -144,3 +144,4 @@ spec:
         - application: etterlatte-trygdetid
         - application: etterlatte-institusjonsopphold
         - application: etterlatte-klage
+        - application: etterlatte-tilbakekreving

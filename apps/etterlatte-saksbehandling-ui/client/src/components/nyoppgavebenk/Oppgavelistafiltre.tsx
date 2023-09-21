@@ -95,6 +95,7 @@ const OPPGAVETYPEFILTER: Record<OppgavetypeFilterKeys, string> = {
   GOSYS: 'Gosys',
   UTLAND: 'Utland',
   KLAGE: 'Klage',
+  TILBAKEKREVING: 'Tilbakekreving',
 } as const
 
 export const oppgavetypefilter = (kanBrukeKlage: boolean): Array<[OppgavetypeFilterKeys, string]> => {

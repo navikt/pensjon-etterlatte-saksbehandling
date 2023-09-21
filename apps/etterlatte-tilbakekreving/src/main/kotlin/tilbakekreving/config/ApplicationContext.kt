@@ -33,10 +33,12 @@ class ApplicationContext(
                 ),
         )
 
+    val service = KravgrunnlagService(behandlingKlient)
+
     var kravgrunnlagConsumer =
         KravgrunnlagConsumer(
             connectionFactory = jmsConnectionFactory,
             queue = properties.mqKravgrunnlagQueue,
-            kravgrunnlagService = KravgrunnlagService(behandlingKlient),
+            kravgrunnlagService = service
         )
 }

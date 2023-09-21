@@ -1,10 +1,10 @@
-package no.nav.etterlatte.oppgaveny
+package no.nav.etterlatte.oppgave
 
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveKilde
-import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveNy
-import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveType
-import no.nav.etterlatte.libs.common.oppgaveNy.Status
+import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
+import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
+import no.nav.etterlatte.libs.common.oppgave.OppgaveType
+import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunkt
@@ -17,18 +17,18 @@ import java.sql.Connection
 import java.sql.ResultSet
 import java.util.UUID
 
-interface OppgaveDaoNy {
-    fun lagreOppgave(oppgaveNy: OppgaveNy)
+interface OppgaveDao {
+    fun lagreOppgave(oppgaveIntern: OppgaveIntern)
 
-    fun hentOppgave(oppgaveId: UUID): OppgaveNy?
+    fun hentOppgave(oppgaveId: UUID): OppgaveIntern?
 
-    fun hentOppgaverForBehandling(behandlingid: String): List<OppgaveNy>
+    fun hentOppgaverForBehandling(behandlingid: String): List<OppgaveIntern>
 
-    fun hentOppgaverForSak(sakId: Long): List<OppgaveNy>
+    fun hentOppgaverForSak(sakId: Long): List<OppgaveIntern>
 
-    fun hentOppgaver(oppgaveTypeTyper: List<OppgaveType>): List<OppgaveNy>
+    fun hentOppgaver(oppgaveTypeTyper: List<OppgaveType>): List<OppgaveIntern>
 
-    fun finnOppgaverForStrengtFortroligOgStrengtFortroligUtland(oppgaveTypeTyper: List<OppgaveType>): List<OppgaveNy>
+    fun finnOppgaverForStrengtFortroligOgStrengtFortroligUtland(oppgaveTypeTyper: List<OppgaveType>): List<OppgaveIntern>
 
     fun settNySaksbehandler(
         oppgaveId: UUID,
@@ -53,10 +53,10 @@ interface OppgaveDaoNy {
     )
 }
 
-class OppgaveDaoNyImpl(private val connection: () -> Connection) : OppgaveDaoNy {
+class OppgaveDaoImpl(private val connection: () -> Connection) : OppgaveDao {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    override fun lagreOppgave(oppgaveNy: OppgaveNy) {
+    override fun lagreOppgave(oppgaveIntern: OppgaveIntern) {
         with(connection()) {
             val statement =
                 prepareStatement(
@@ -65,25 +65,25 @@ class OppgaveDaoNyImpl(private val connection: () -> Connection) : OppgaveDaoNy 
                     VALUES(?::UUID, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     """.trimIndent(),
                 )
-            statement.setObject(1, oppgaveNy.id)
-            statement.setString(2, oppgaveNy.status.name)
-            statement.setString(3, oppgaveNy.enhet)
-            statement.setLong(4, oppgaveNy.sakId)
-            statement.setString(5, oppgaveNy.type.name)
-            statement.setString(6, oppgaveNy.saksbehandler)
-            statement.setString(7, oppgaveNy.referanse)
-            statement.setString(8, oppgaveNy.merknad)
-            statement.setTidspunkt(9, oppgaveNy.opprettet)
-            statement.setString(10, oppgaveNy.sakType.name)
-            statement.setString(11, oppgaveNy.fnr)
-            statement.setTidspunkt(12, oppgaveNy.frist)
-            statement.setString(13, oppgaveNy.kilde?.name)
+            statement.setObject(1, oppgaveIntern.id)
+            statement.setString(2, oppgaveIntern.status.name)
+            statement.setString(3, oppgaveIntern.enhet)
+            statement.setLong(4, oppgaveIntern.sakId)
+            statement.setString(5, oppgaveIntern.type.name)
+            statement.setString(6, oppgaveIntern.saksbehandler)
+            statement.setString(7, oppgaveIntern.referanse)
+            statement.setString(8, oppgaveIntern.merknad)
+            statement.setTidspunkt(9, oppgaveIntern.opprettet)
+            statement.setString(10, oppgaveIntern.sakType.name)
+            statement.setString(11, oppgaveIntern.fnr)
+            statement.setTidspunkt(12, oppgaveIntern.frist)
+            statement.setString(13, oppgaveIntern.kilde?.name)
             statement.executeUpdate()
-            logger.info("lagret oppgave for ${oppgaveNy.id} for sakid ${oppgaveNy.sakId}")
+            logger.info("lagret oppgave for ${oppgaveIntern.id} for sakid ${oppgaveIntern.sakId}")
         }
     }
 
-    override fun hentOppgave(oppgaveId: UUID): OppgaveNy? {
+    override fun hentOppgave(oppgaveId: UUID): OppgaveIntern? {
         with(connection()) {
             val statement =
                 prepareStatement(
@@ -95,12 +95,12 @@ class OppgaveDaoNyImpl(private val connection: () -> Connection) : OppgaveDaoNy 
                 )
             statement.setObject(1, oppgaveId)
             return statement.executeQuery().singleOrNull {
-                asOppgaveNy()
+                asOppgave()
             }
         }
     }
 
-    override fun hentOppgaverForBehandling(behandlingid: String): List<OppgaveNy> {
+    override fun hentOppgaverForBehandling(behandlingid: String): List<OppgaveIntern> {
         with(connection()) {
             val statement =
                 prepareStatement(
@@ -112,14 +112,14 @@ class OppgaveDaoNyImpl(private val connection: () -> Connection) : OppgaveDaoNy 
                 )
             statement.setString(1, behandlingid)
             return statement.executeQuery().toList {
-                asOppgaveNy()
+                asOppgave()
             }.also {
                 logger.info("Hentet antall nye oppgaver for behandling: ${it.size} behandling: $behandlingid")
             }
         }
     }
 
-    override fun hentOppgaverForSak(sakId: Long): List<OppgaveNy> {
+    override fun hentOppgaverForSak(sakId: Long): List<OppgaveIntern> {
         with(connection()) {
             val statement =
                 prepareStatement(
@@ -131,14 +131,14 @@ class OppgaveDaoNyImpl(private val connection: () -> Connection) : OppgaveDaoNy 
                 )
             statement.setLong(1, sakId)
             return statement.executeQuery().toList {
-                asOppgaveNy()
+                asOppgave()
             }.also {
                 logger.info("Hentet antall nye oppgaver for sak: ${it.size} sak: $sakId")
             }
         }
     }
 
-    override fun hentOppgaver(oppgaveTypeTyper: List<OppgaveType>): List<OppgaveNy> {
+    override fun hentOppgaver(oppgaveTypeTyper: List<OppgaveType>): List<OppgaveIntern> {
         if (oppgaveTypeTyper.isEmpty()) return emptyList()
 
         with(connection()) {
@@ -157,14 +157,14 @@ class OppgaveDaoNyImpl(private val connection: () -> Connection) : OppgaveDaoNy 
             statement.setString(3, AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND.name)
 
             return statement.executeQuery().toList {
-                asOppgaveNy()
+                asOppgave()
             }.also {
                 logger.info("Hentet antall nye oppgaver: ${it.size}")
             }
         }
     }
 
-    override fun finnOppgaverForStrengtFortroligOgStrengtFortroligUtland(oppgaveTypeTyper: List<OppgaveType>): List<OppgaveNy> {
+    override fun finnOppgaverForStrengtFortroligOgStrengtFortroligUtland(oppgaveTypeTyper: List<OppgaveType>): List<OppgaveIntern> {
         with(connection()) {
             val statement =
                 prepareStatement(
@@ -180,7 +180,7 @@ class OppgaveDaoNyImpl(private val connection: () -> Connection) : OppgaveDaoNy 
             statement.setArray(3, createArrayOf("text", oppgaveTypeTyper.toTypedArray()))
 
             return statement.executeQuery().toList {
-                asOppgaveNy()
+                asOppgave()
             }.also {
                 logger.info("Hentet antall nye oppgaver: ${it.size}")
             }
@@ -288,8 +288,8 @@ class OppgaveDaoNyImpl(private val connection: () -> Connection) : OppgaveDaoNy 
         }
     }
 
-    private fun ResultSet.asOppgaveNy(): OppgaveNy {
-        return OppgaveNy(
+    private fun ResultSet.asOppgave(): OppgaveIntern {
+        return OppgaveIntern(
             id = getObject("id") as UUID,
             status = Status.valueOf(getString("status")),
             enhet = getString("enhet"),

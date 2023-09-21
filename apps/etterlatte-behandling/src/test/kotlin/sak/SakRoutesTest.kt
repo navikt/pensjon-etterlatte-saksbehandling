@@ -18,7 +18,7 @@ import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
 import no.nav.etterlatte.libs.ktor.restModule
-import no.nav.etterlatte.oppgaveny.OppgaveServiceNy
+import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.sak.SakService
 import no.nav.etterlatte.sak.TilgangService
 import no.nav.etterlatte.sak.sakSystemRoutes
@@ -40,7 +40,7 @@ internal class SakRoutesTest {
     private val sakService = mockk<SakService>(relaxUnitFun = true)
     private val grunnlagsendringshendelseService = mockk<GrunnlagsendringshendelseService>(relaxUnitFun = true)
     private val tilgangService = mockk<TilgangService>(relaxUnitFun = true)
-    private val oppgaveServiceNy = mockk<OppgaveServiceNy>(relaxUnitFun = true)
+    private val oppgaveService = mockk<OppgaveService>(relaxUnitFun = true)
 
     @BeforeAll
     fun before() {
@@ -106,7 +106,7 @@ internal class SakRoutesTest {
                         sakService,
                         behandlingService,
                         grunnlagsendringshendelseService,
-                        oppgaveServiceNy,
+                        oppgaveService,
                     )
                 }
             }

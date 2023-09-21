@@ -26,15 +26,15 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Utenlandstilsnitt
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
-import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveKilde
-import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveType
+import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
+import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.sporingslogg.Decision
 import no.nav.etterlatte.libs.sporingslogg.HttpMethod
 import no.nav.etterlatte.libs.sporingslogg.Sporingslogg
 import no.nav.etterlatte.libs.sporingslogg.Sporingsrequest
-import no.nav.etterlatte.oppgaveny.OppgaveServiceNy
+import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.tilgangsstyring.filterForEnheter
 import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.etterlatte.vedtaksvurdering.VedtakHendelse
@@ -114,7 +114,7 @@ class BehandlingServiceImpl(
     private val sporingslogg: Sporingslogg,
     private val featureToggleService: FeatureToggleService,
     private val kommerBarnetTilGodeDao: KommerBarnetTilGodeDao,
-    private val oppgaveServiceNy: OppgaveServiceNy,
+    private val oppgaveService: OppgaveService,
 ) : BehandlingService {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -158,10 +158,10 @@ class BehandlingServiceImpl(
             behandlingDao.avbrytBehandling(behandlingId).also {
                 val hendelserKnyttetTilBehandling =
                     grunnlagsendringshendelseDao.hentGrunnlagsendringshendelseSomErTattMedIBehandling(behandlingId)
-                oppgaveServiceNy.avbrytOppgaveUnderBehandling(behandlingId.toString(), saksbehandler)
+                oppgaveService.avbrytOppgaveUnderBehandling(behandlingId.toString(), saksbehandler)
 
                 hendelserKnyttetTilBehandling.forEach { hendelse ->
-                    oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
+                    oppgaveService.opprettNyOppgaveMedSakOgReferanse(
                         referanse = hendelse.id.toString(),
                         sakId = behandling.sak.id,
                         oppgaveKilde = OppgaveKilde.HENDELSE,

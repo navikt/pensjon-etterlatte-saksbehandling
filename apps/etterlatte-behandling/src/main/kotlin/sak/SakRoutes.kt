@@ -20,10 +20,10 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.SisteIverksatteBehandling
 import no.nav.etterlatte.libs.common.kunSaksbehandler
 import no.nav.etterlatte.libs.common.kunSystembruker
-import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveListe
+import no.nav.etterlatte.libs.common.oppgave.OppgaveListe
 import no.nav.etterlatte.libs.common.sak.Saker
 import no.nav.etterlatte.libs.common.sakId
-import no.nav.etterlatte.oppgaveny.OppgaveServiceNy
+import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.tilgangsstyring.withFoedselsnummerAndGradering
 import no.nav.etterlatte.tilgangsstyring.withFoedselsnummerInternal
 import org.slf4j.LoggerFactory
@@ -85,7 +85,7 @@ internal fun Route.sakWebRoutes(
     sakService: SakService,
     behandlingService: BehandlingService,
     grunnlagsendringshendelseService: GrunnlagsendringshendelseService,
-    oppgaveServiceNy: OppgaveServiceNy,
+    oppgaveService: OppgaveService,
 ) {
     val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -139,7 +139,7 @@ internal fun Route.sakWebRoutes(
                     val oppgaver =
                         sakService.finnSaker(fnr.value)
                             .map { sak ->
-                                OppgaveListe(sak, oppgaveServiceNy.hentOppgaverForSak(sak.id))
+                                OppgaveListe(sak, oppgaveService.hentOppgaverForSak(sak.id))
                             }
                     call.respond(oppgaver)
                 }

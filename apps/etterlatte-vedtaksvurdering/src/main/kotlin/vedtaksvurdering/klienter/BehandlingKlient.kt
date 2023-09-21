@@ -11,10 +11,10 @@ import no.nav.etterlatte.libs.common.SakTilgangsSjekk
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveListe
-import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveNy
-import no.nav.etterlatte.libs.common.oppgaveNy.SaksbehandlerEndringDto
-import no.nav.etterlatte.libs.common.oppgaveNy.VedtakEndringDTO
+import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
+import no.nav.etterlatte.libs.common.oppgave.OppgaveListe
+import no.nav.etterlatte.libs.common.oppgave.SaksbehandlerEndringDto
+import no.nav.etterlatte.libs.common.oppgave.VedtakEndringDTO
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
@@ -82,7 +82,7 @@ interface BehandlingKlient : BehandlingTilgangsSjekk, SakTilgangsSjekk {
     ): OppgaveListe
 
     suspend fun tildelSaksbehandler(
-        oppgaveTilAttestering: OppgaveNy,
+        oppgaveTilAttestering: OppgaveIntern,
         brukerTokenInfo: BrukerTokenInfo,
     ): Boolean
 }
@@ -172,7 +172,7 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
     }
 
     override suspend fun tildelSaksbehandler(
-        oppgaveTilAttestering: OppgaveNy,
+        oppgaveTilAttestering: OppgaveIntern,
         brukerTokenInfo: BrukerTokenInfo,
     ): Boolean {
         logger.info("Tildeler oppgave $oppgaveTilAttestering til systembruker")

@@ -1,4 +1,4 @@
-package no.nav.etterlatte.oppgave
+package no.nav.etterlatte.oppgaveGosys
 
 import io.kotest.matchers.collections.shouldHaveSize
 import io.mockk.coEvery

@@ -12,12 +12,12 @@ import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.UtenlandstilsnittType
 import no.nav.etterlatte.libs.common.generellbehandling.GenerellBehandling
-import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveKilde
-import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveType
+import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
+import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.sak.SakIDListe
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
-import no.nav.etterlatte.oppgaveny.OppgaveServiceNy
+import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.vedtaksvurdering.VedtakHendelse
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
@@ -89,7 +89,7 @@ class BehandlingStatusServiceImpl(
     private val behandlingDao: BehandlingDao,
     private val behandlingService: BehandlingService,
     private val grunnlagsendringshendelseService: GrunnlagsendringshendelseService,
-    private val oppgaveServiceNy: OppgaveServiceNy,
+    private val oppgaveService: OppgaveService,
     private val featureToggleService: FeatureToggleService,
     private val generellBehandlingService: GenerellBehandlingService,
 ) : BehandlingStatusService {
@@ -203,7 +203,7 @@ class BehandlingStatusServiceImpl(
             if (behandling.type == BehandlingType.FØRSTEGANGSBEHANDLING) {
                 if (behandling.utenlandstilsnitt?.type == UtenlandstilsnittType.UTLANDSTILSNITT) {
                     val oppgaveUtland =
-                        oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
+                        oppgaveService.opprettNyOppgaveMedSakOgReferanse(
                             behandling.id.toString(),
                             behandling.sak.id,
                             OppgaveKilde.BEHANDLING,
@@ -211,9 +211,9 @@ class BehandlingStatusServiceImpl(
                             null,
                         )
                     val saksbehandlerFoerstegangsbehandling =
-                        oppgaveServiceNy.hentSaksbehandlerFraFoerstegangsbehandling(behandlingsId = behandling.id)
+                        oppgaveService.hentSaksbehandlerFraFoerstegangsbehandling(behandlingsId = behandling.id)
                     if (saksbehandlerFoerstegangsbehandling != null) {
-                        oppgaveServiceNy.tildelSaksbehandler(oppgaveUtland.id, saksbehandlerFoerstegangsbehandling)
+                        oppgaveService.tildelSaksbehandler(oppgaveUtland.id, saksbehandlerFoerstegangsbehandling)
                         generellBehandlingService.opprettBehandling(
                             GenerellBehandling.opprettFraType(
                                 GenerellBehandling.GenerellBehandlingType.UTLAND,

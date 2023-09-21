@@ -8,10 +8,10 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.inTransaction
-import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveType
-import no.nav.etterlatte.libs.common.oppgaveNy.VedtakEndringDTO
+import no.nav.etterlatte.libs.common.oppgave.OppgaveType
+import no.nav.etterlatte.libs.common.oppgave.VedtakEndringDTO
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
-import no.nav.etterlatte.oppgaveny.OppgaveServiceNy
+import no.nav.etterlatte.oppgave.OppgaveService
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
@@ -19,7 +19,7 @@ private val logger = LoggerFactory.getLogger("behandlingVedtakRoute")
 
 internal fun Route.behandlingVedtakRoute(
     behandlingsstatusService: BehandlingStatusService,
-    oppgaveService: OppgaveServiceNy,
+    oppgaveService: OppgaveService,
     behandlingService: BehandlingService,
 ) {
     fun haandterFeilIOppgaveService(e: Exception) {

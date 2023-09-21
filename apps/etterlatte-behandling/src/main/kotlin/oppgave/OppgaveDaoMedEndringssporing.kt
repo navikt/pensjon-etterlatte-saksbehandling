@@ -1,10 +1,10 @@
-package no.nav.etterlatte.oppgaveny
+package no.nav.etterlatte.oppgave
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.behandling.objectMapper
-import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveNy
-import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveType
-import no.nav.etterlatte.libs.common.oppgaveNy.Status
+import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
+import no.nav.etterlatte.libs.common.oppgave.OppgaveType
+import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.setTidspunkt
@@ -14,12 +14,12 @@ import java.sql.Connection
 import java.sql.ResultSet
 import java.util.UUID
 
-interface OppgaveDaoMedEndringssporing : OppgaveDaoNy {
+interface OppgaveDaoMedEndringssporing : OppgaveDao {
     fun hentEndringerForOppgave(oppgaveId: UUID): List<OppgaveEndring>
 }
 
 class OppgaveDaoMedEndringssporingImpl(
-    private val oppgaveDao: OppgaveDaoNy,
+    private val oppgaveDao: OppgaveDao,
     private val connection: () -> Connection,
 ) : OppgaveDaoMedEndringssporing {
     private fun lagreEndringerPaaOppgave(
@@ -39,8 +39,8 @@ class OppgaveDaoMedEndringssporingImpl(
     }
 
     private fun lagreEndringerPaaOppgave(
-        oppgaveFoer: OppgaveNy,
-        oppgaveEtter: OppgaveNy,
+        oppgaveFoer: OppgaveIntern,
+        oppgaveEtter: OppgaveIntern,
     ) {
         with(connection()) {
             val statement =
@@ -88,27 +88,27 @@ class OppgaveDaoMedEndringssporingImpl(
         )
     }
 
-    override fun lagreOppgave(oppgaveNy: OppgaveNy) {
-        oppgaveDao.lagreOppgave(oppgaveNy)
+    override fun lagreOppgave(oppgaveIntern: OppgaveIntern) {
+        oppgaveDao.lagreOppgave(oppgaveIntern)
     }
 
-    override fun hentOppgave(oppgaveId: UUID): OppgaveNy? {
+    override fun hentOppgave(oppgaveId: UUID): OppgaveIntern? {
         return oppgaveDao.hentOppgave(oppgaveId)
     }
 
-    override fun hentOppgaverForBehandling(behandlingid: String): List<OppgaveNy> {
+    override fun hentOppgaverForBehandling(behandlingid: String): List<OppgaveIntern> {
         return oppgaveDao.hentOppgaverForBehandling(behandlingid)
     }
 
-    override fun hentOppgaverForSak(sakId: Long): List<OppgaveNy> {
+    override fun hentOppgaverForSak(sakId: Long): List<OppgaveIntern> {
         return oppgaveDao.hentOppgaverForSak(sakId)
     }
 
-    override fun hentOppgaver(oppgaveTypeTyper: List<OppgaveType>): List<OppgaveNy> {
+    override fun hentOppgaver(oppgaveTypeTyper: List<OppgaveType>): List<OppgaveIntern> {
         return oppgaveDao.hentOppgaver(oppgaveTypeTyper)
     }
 
-    override fun finnOppgaverForStrengtFortroligOgStrengtFortroligUtland(oppgaveTypeTyper: List<OppgaveType>): List<OppgaveNy> {
+    override fun finnOppgaverForStrengtFortroligOgStrengtFortroligUtland(oppgaveTypeTyper: List<OppgaveType>): List<OppgaveIntern> {
         return oppgaveDao.finnOppgaverForStrengtFortroligOgStrengtFortroligUtland(oppgaveTypeTyper)
     }
 

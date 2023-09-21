@@ -4,17 +4,17 @@ import io.kotest.assertions.asClue
 import io.kotest.matchers.shouldBe
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveKilde
-import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveNy
-import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveType
-import no.nav.etterlatte.libs.common.oppgaveNy.Status
+import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
+import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
+import no.nav.etterlatte.libs.common.oppgave.OppgaveType
+import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.POSTGRES_VERSION
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.metrics.OppgaveMetrikkerDao
-import no.nav.etterlatte.oppgaveny.OppgaveDaoNy
-import no.nav.etterlatte.oppgaveny.OppgaveDaoNyImpl
+import no.nav.etterlatte.oppgave.OppgaveDao
+import no.nav.etterlatte.oppgave.OppgaveDaoImpl
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
@@ -28,7 +28,7 @@ import javax.sql.DataSource
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class MetrikkerDaoTest {
     private lateinit var dataSource: DataSource
-    private lateinit var oppgaveDaoNy: OppgaveDaoNy
+    private lateinit var oppgaveDao: OppgaveDao
     private lateinit var metrikkerDao: OppgaveMetrikkerDao
 
     @Container
@@ -48,7 +48,7 @@ internal class MetrikkerDaoTest {
             ).apply { migrate() }
 
         val connection = dataSource.connection
-        oppgaveDaoNy = OppgaveDaoNyImpl { connection }
+        oppgaveDao = OppgaveDaoImpl { connection }
         metrikkerDao = OppgaveMetrikkerDao(dataSource)
     }
 
@@ -75,7 +75,7 @@ internal class MetrikkerDaoTest {
                 lagNyOppgave(status = Status.FEILREGISTRERT),
             )
         oppgaver.forEach {
-            oppgaveDaoNy.lagreOppgave(it)
+            oppgaveDao.lagreOppgave(it)
         }
 
         metrikkerDao.hentOppgaveAntall().asClue {
@@ -91,7 +91,7 @@ internal class MetrikkerDaoTest {
         oppgaveKilde: OppgaveKilde = OppgaveKilde.BEHANDLING,
         oppgaveType: OppgaveType = OppgaveType.FOERSTEGANGSBEHANDLING,
         status: Status = Status.NY,
-    ) = OppgaveNy(
+    ) = OppgaveIntern(
         id = UUID.randomUUID(),
         status = status,
         enhet = Enheter.AALESUND.enhetNr,

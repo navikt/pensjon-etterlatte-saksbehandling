@@ -5,17 +5,21 @@ on:
     branches:
       - main
     paths:
-      - '**/**'
+      - '**/*.kt'
+      - '**/*.kts'
   pull_request:
     branches:
       - main
     paths:
-      - '**/**'
+      - '**/*.kt'
+      - '**/*.kts'
 
 jobs:
   test:
     name: Run ktlint on files
     runs-on: ubuntu-latest-4-cores
     steps:
+      - uses: actions/checkout@v4
+        run: curl -sSLO https://github.com/pinterest/ktlint/releases/latest/download/ktlint
       - name: Ktlint
-        run: ktlint '**/*.kt' '**/*.kts' '!**/build/**'
+        run: ktlint '**/*.kt' '**/*.kts' '!**/build/*.kt' '!**/build/*.kts'

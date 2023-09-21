@@ -27,7 +27,7 @@ fun <T> withFeilhaandtering(
             packet.feilmelding = e.toJson()
             context.publish(packet.toJson())
         } catch (e2: Exception) {
-            feilhaandteringLogger.warn("Feil under feilhåndtering for ${packet.id}", e)
+            feilhaandteringLogger.warn("Feil under feilhåndtering for ${packet.id}", e2)
         }
         Result.failure(e)
     }

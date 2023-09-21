@@ -33,7 +33,7 @@ export function KlageBrev() {
   const navigate = useNavigate()
   const klage = useKlage()
 
-  const brevId = hentBrevIdForInnstilling(klage) ?? 695
+  const brevId = hentBrevIdForInnstilling(klage)
   const sakId = klage?.sak?.id
   const [hentetBrev, apiHentBrev] = useApiCall(hentBrev)
 
@@ -64,7 +64,7 @@ export function KlageBrev() {
               <BodyShort>Skriv innstillingsbrevet til KA, som også sendes til mottakeren</BodyShort>
             </Innhold>
           ) : (
-            <BodyShort>Skriv avslagsbrevet ditt monster</BodyShort>
+            <BodyShort>TODO håndter avslagsbrev her</BodyShort>
           )}
 
           {isSuccess(hentetBrev) && <NyttBrevMottaker brev={hentetBrev.data} />}

@@ -178,7 +178,7 @@ class BehandlingServiceImplTest {
     }
 
     @Test
-    fun `avbrytBehandling registrer en avbruddshendelse`() {
+    fun `avbrytBehandling registrerer en avbruddshendelse`() {
         val sakId = 1L
         val nyFoerstegangsbehandling = foerstegangsbehandling(sakId = sakId)
 
@@ -223,6 +223,79 @@ class BehandlingServiceImplTest {
         verify {
             hendelserMock.behandlingAvbrutt(any(), any())
         }
+    }
+
+    @Test
+    fun `avbrytBehandling ruller tilbake alt ved exception i intransaction`() {
+        var didRollback = false
+        Kontekst.set(
+            Context(
+                user,
+                object : DatabaseKontekst {
+                    override fun activeTx(): Connection {
+                        throw IllegalArgumentException()
+                    }
+
+                    override fun <T> inTransaction(
+                        gjenbruk: Boolean,
+                        block: () -> T,
+                    ): T {
+                        try {
+                            return block()
+                        } catch (ex: Throwable) {
+                            didRollback = true
+                            throw ex
+                        }
+                    }
+                },
+            ),
+        )
+        val sakId = 1L
+        val nyFoerstegangsbehandling = foerstegangsbehandling(sakId = sakId)
+
+        val behandlingDaoMock =
+            mockk<BehandlingDao> {
+                every { hentBehandling(nyFoerstegangsbehandling.id) } returns nyFoerstegangsbehandling
+                every { avbrytBehandling(nyFoerstegangsbehandling.id) } just runs
+            }
+        val hendelserMock =
+            mockk<HendelseDao> {
+                every { behandlingAvbrutt(any(), any()) } returns Unit
+            }
+        val behandlingHendelserKafkaProducer =
+            mockk<BehandlingHendelserKafkaProducer> {
+                every { sendMeldingForHendelse(any(), any()) } returns Unit
+            }
+        val grunnlagsendringshendelseDaoMock =
+            mockk<GrunnlagsendringshendelseDao> {
+                every { kobleGrunnlagsendringshendelserFraBehandlingId(any()) } throws RuntimeException("Alt må rulles tilbake")
+                every { hentGrunnlagsendringshendelseSomErTattMedIBehandling(any()) } returns emptyList()
+            }
+
+        val featureToggleService = mockk<FeatureToggleService>()
+        every { featureToggleService.isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false) } returns false
+
+        val oppgaveServiceNyMock: OppgaveServiceNy =
+            mockk {
+                every { avbrytOppgaveUnderBehandling(any(), any()) } returns mockk<OppgaveNy>()
+            }
+
+        val behandlingService =
+            lagRealGenerellBehandlingService(
+                behandlingDao = behandlingDaoMock,
+                behandlingHendelserKafkaProducer = behandlingHendelserKafkaProducer,
+                grunnlagsendringshendelseDao = grunnlagsendringshendelseDaoMock,
+                hendelseDao = hendelserMock,
+                featureToggleService = featureToggleService,
+                oppgaveServiceNy = oppgaveServiceNyMock,
+            )
+
+        assertFalse(didRollback)
+        assertThrows<RuntimeException> {
+            behandlingService.avbrytBehandling(nyFoerstegangsbehandling.id, Saksbehandler("", "saksbehandler", null))
+        }
+
+        assertTrue(didRollback)
     }
 
     @Test

@@ -40,6 +40,8 @@ spec:
   env:
     - name: KRAVGRUNNLAG_MQ_NAME
       value: QA.Q1_ETTERLATTE.KRAVGRUNNLAG
+    - name: TILBAKEKREVING_URL
+      value: https://cics-q1.adeo.no/oppdrag/K231CW80
     - name: MQ_HOSTNAME
       value: b27apvl222.preprod.local
     - name: MQ_PORT

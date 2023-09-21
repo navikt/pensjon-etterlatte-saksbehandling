@@ -10,6 +10,7 @@ import no.nav.etterlatte.Context
 import no.nav.etterlatte.DatabaseKontekst
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
+import no.nav.etterlatte.behandling.generellbehandling.GenerellBehandlingService
 import no.nav.etterlatte.behandling.hendelse.HendelseType
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.foerstegangsbehandling
@@ -80,6 +81,7 @@ internal class BehandlingStatusServiceTest {
             mockk<FeatureToggleService> {
                 every { isEnabled(any(), any()) } returns true
             }
+        val generellBehandlingService = mockk<GenerellBehandlingService>()
 
         val sut =
             BehandlingStatusServiceImpl(
@@ -88,6 +90,7 @@ internal class BehandlingStatusServiceTest {
                 grlService,
                 oppgaveService,
                 featureToggleService,
+                generellBehandlingService,
             )
 
         sut.settIverksattVedtak(behandlingId, iverksettVedtak)
@@ -163,6 +166,10 @@ internal class BehandlingStatusServiceTest {
             mockk<FeatureToggleService> {
                 every { isEnabled(any(), any()) } returns true
             }
+        val generellBehandlingService =
+            mockk<GenerellBehandlingService> {
+                every { opprettBehandling(any()) } just runs
+            }
 
         val sut =
             BehandlingStatusServiceImpl(
@@ -171,6 +178,7 @@ internal class BehandlingStatusServiceTest {
                 grlService,
                 oppgaveService,
                 featureToggleService,
+                generellBehandlingService,
             )
 
         sut.settIverksattVedtak(behandlingId, iverksettVedtak)
@@ -188,7 +196,8 @@ internal class BehandlingStatusServiceTest {
             )
             oppgaveService.hentSaksbehandlerFraFoerstegangsbehandling(behandlingId)
             oppgaveService.tildelSaksbehandler(oppgave.id, saksbehandler)
+            generellBehandlingService.opprettBehandling(any())
         }
-        confirmVerified(behandlingdao, behandlingService, grlService, oppgaveService)
+        confirmVerified(behandlingdao, behandlingService, grlService, oppgaveService, generellBehandlingService)
     }
 }

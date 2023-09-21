@@ -2,6 +2,8 @@ package no.nav.etterlatte.behandling
 
 import io.ktor.server.plugins.NotFoundException
 import no.nav.etterlatte.behandling.domain.Behandling
+import no.nav.etterlatte.behandling.generellbehandling.GenerellBehandlingService
+import no.nav.etterlatte.behandling.generellbehandling.GenerellBehandlingToggle
 import no.nav.etterlatte.behandling.hendelse.HendelseType
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
@@ -9,6 +11,7 @@ import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.UtenlandstilsnittType
+import no.nav.etterlatte.libs.common.generellbehandling.GenerellBehandling
 import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveType
 import no.nav.etterlatte.libs.common.sak.SakIDListe
@@ -88,6 +91,7 @@ class BehandlingStatusServiceImpl(
     private val grunnlagsendringshendelseService: GrunnlagsendringshendelseService,
     private val oppgaveServiceNy: OppgaveServiceNy,
     private val featureToggleService: FeatureToggleService,
+    private val generellBehandlingService: GenerellBehandlingService,
 ) : BehandlingStatusService {
     private val logger = LoggerFactory.getLogger(BehandlingStatusServiceImpl::class.java)
 
@@ -195,22 +199,34 @@ class BehandlingStatusServiceImpl(
     }
 
     private fun haandterUtland(behandling: Behandling) {
-        if (behandling.type == BehandlingType.FØRSTEGANGSBEHANDLING) {
-            if (behandling.utenlandstilsnitt?.type == UtenlandstilsnittType.UTLANDSTILSNITT) {
-                val oppgaveUtland =
-                    oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
-                        behandling.id.toString(),
-                        behandling.sak.id,
-                        OppgaveKilde.BEHANDLING,
-                        OppgaveType.UTLAND,
-                        null,
-                    )
-                val saksbehandlerFoerstegangsbehandling =
-                    oppgaveServiceNy.hentSaksbehandlerFraFoerstegangsbehandling(behandlingsId = behandling.id)
-                if (saksbehandlerFoerstegangsbehandling != null) {
-                    oppgaveServiceNy.tildelSaksbehandler(oppgaveUtland.id, saksbehandlerFoerstegangsbehandling)
-                } else {
-                    logger.error("Fant ingen saksbehandler for behandling oppgave fatting, id: ${behandling.id}")
+        if (featureToggleService.isEnabled(GenerellBehandlingToggle.KanBrukeGenerellBehandlingToggle, false)) {
+            if (behandling.type == BehandlingType.FØRSTEGANGSBEHANDLING) {
+                if (behandling.utenlandstilsnitt?.type == UtenlandstilsnittType.UTLANDSTILSNITT) {
+                    val oppgaveUtland =
+                        oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
+                            behandling.id.toString(),
+                            behandling.sak.id,
+                            OppgaveKilde.BEHANDLING,
+                            OppgaveType.UTLAND,
+                            null,
+                        )
+                    val saksbehandlerFoerstegangsbehandling =
+                        oppgaveServiceNy.hentSaksbehandlerFraFoerstegangsbehandling(behandlingsId = behandling.id)
+                    if (saksbehandlerFoerstegangsbehandling != null) {
+                        oppgaveServiceNy.tildelSaksbehandler(oppgaveUtland.id, saksbehandlerFoerstegangsbehandling)
+                        generellBehandlingService.opprettBehandling(
+                            GenerellBehandling.opprettFraType(
+                                GenerellBehandling.GenerellBehandlingType.UTLAND,
+                                behandling.sak.id,
+                            ),
+                        )
+                        logger.info(
+                            "Opprettet generell behandling for utland for sak: ${behandling.sak.id} " +
+                                "og behandling: ${behandling.id}. Gjelder oppgave: ${oppgaveUtland.id}",
+                        )
+                    } else {
+                        logger.error("Fant ingen saksbehandler for behandling oppgave fatting, id: ${behandling.id}")
+                    }
                 }
             }
         }

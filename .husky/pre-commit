@@ -6,20 +6,11 @@ changedFrontendFiles=$(git diff --name-only --cached | grep '\.\(ts\|js\)[x"]\?$
 if [ -n "${changedFrontendFiles-unset}" ]; then
   echo "🛠 Running lint-staged"
 
-  #store the result of the commit in a variable and split into array items with newline
-  committedFrontendFiles=$(git diff --name-only --cached --diff-filter=d | grep '\.\(ts\|js\)[x"]\?$')
-  frontendFiles=$(echo $committedFrontendFiles | tr ";" "\\n")
-
   cd ./apps/etterlatte-saksbehandling-ui
   yarn lint-staged
   cd ../../ # Tilbake til prosjektrot
-  echo "✍️ Linted frontend files (.js, .jsx, .ts, .tsx)"
 
-  #replay items in the commits array and add only those files
-  for file in $frontendFiles
-  do
-      git add $file
-  done
+  echo "✍️ Linted frontend files *.{js,ts,tsx}"
 fi
 
 

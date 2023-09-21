@@ -10,11 +10,11 @@ export const StatusIcon = (props: { status: StatusIconProps }) => {
   function hentSymbol() {
     switch (props.status) {
       case 'success':
-        return <CheckmarkCircleIcon color={AGreen500} stroke={AGreen500} aria-hidden={'true'} />
+        return <CheckmarkCircleIcon color={AGreen500} stroke={AGreen500} aria-hidden="true" />
       case 'error':
-        return <XMarkOctagonIcon color={ANavRed} stroke={ANavRed} fill={ANavRed} aria-hidden={'true'} />
+        return <XMarkOctagonIcon color={ANavRed} stroke={ANavRed} fill={ANavRed} aria-hidden="true" />
       case 'warning':
-        return <ExclamationmarkTriangleIcon color={AOrange600} stroke={AOrange600} aria-hidden={'true'} />
+        return <ExclamationmarkTriangleIcon color={AOrange600} stroke={AOrange600} aria-hidden="true" />
     }
   }
 

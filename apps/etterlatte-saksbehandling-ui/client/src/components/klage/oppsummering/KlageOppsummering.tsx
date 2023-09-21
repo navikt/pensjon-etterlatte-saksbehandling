@@ -30,7 +30,7 @@ export function KlageOppsummering() {
         <BodyShort>Hvis stadfestelse / delvis omgjøring, vis brevet til KA / bruker med innstilling</BodyShort>
       </Innhold>
 
-      <FlexRow justify={'center'} $spacing>
+      <FlexRow justify="center" $spacing>
         <Button variant="secondary" onClick={() => navigate(`/klage/${klage?.id}/vurdering`)}>
           Gå tilbake
         </Button>

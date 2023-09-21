@@ -39,7 +39,7 @@ export const Avkorting = (props: { behandling: IBehandlingReducer }) => {
         />
       )}
 
-      {isPending(avkortingStatus) && <Spinner visible={true} label={'Henter avkorting'} />}
+      {isPending(avkortingStatus) && <Spinner visible={true} label="Henter avkorting" />}
       {isFailure(avkortingStatus) && avkortingStatus.error.statusCode !== 404 && (
         <ApiErrorAlert>En feil har oppstått</ApiErrorAlert>
       )}

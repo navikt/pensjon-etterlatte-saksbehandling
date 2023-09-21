@@ -54,9 +54,9 @@ const VurderHendelseModal = (props: Props) => {
             <Heading spacing size="large">
               Vurder hendelse
             </Heading>
-            <Alert variant={'warning'}>{valgtHendelse ? tekster.get(valgtHendelse.type)!.tittel : ''}</Alert>
+            <Alert variant="warning">{valgtHendelse ? tekster.get(valgtHendelse.type)!.tittel : ''}</Alert>
             <BodyShort>
-              <HjemmelLenke tittel={'§18-8 Lovparagraf'} lenke={''} />
+              <HjemmelLenke tittel="§18-8 Lovparagraf" lenke="" />
             </BodyShort>
             <BodyShort spacing style={{ marginBottom: '2em' }}>
               {valgtHendelse ? tekster.get(valgtHendelse.type)!.beskrivelse : ''}
@@ -68,7 +68,7 @@ const VurderHendelseModal = (props: Props) => {
                 onChange={(e) => setValgtAarsak(e.target.value as Revurderingsaarsak)}
                 error={error}
               >
-                <option value={''}>Velg en årsak</option>
+                <option value="">Velg en årsak</option>
                 {revurderinger.map((aarsak) => (
                   <option value={aarsak} key={aarsak}>
                     {tekstRevurderingsaarsak[aarsak]}
@@ -99,7 +99,7 @@ const VurderHendelseModal = (props: Props) => {
           </ModalContentWrapper>
 
           <ButtonContainer>
-            <Button variant={'secondary'} onClick={() => props.setOpen(false)}>
+            <Button variant="secondary" onClick={() => props.setOpen(false)}>
               Avbryt
             </Button>
             <Button loading={isPending(opprettRevurderingStatus)} onClick={onSubmit}>

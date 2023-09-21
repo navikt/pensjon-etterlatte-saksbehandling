@@ -33,18 +33,18 @@ export const SakOversikt = ({ fnr }: { fnr: string }) => {
   return (
     <GridContainer>
       <MainContent>
-        {isPending(behandlingerStatus) && <Spinner visible label={'Laster behandlinger ...'} />}
+        {isPending(behandlingerStatus) && <Spinner visible label="Laster behandlinger ..." />}
 
-        {isFailure(behandlingerStatus) && <Alert variant={'error'}>{JSON.stringify(behandlingerStatus.error)}</Alert>}
+        {isFailure(behandlingerStatus) && <Alert variant="error">{JSON.stringify(behandlingerStatus.error)}</Alert>}
 
         {isSuccess(behandlingerStatus) && (
           <>
-            <Heading size={'medium'} spacing>
+            <Heading size="medium" spacing>
               Saknummer {sak!!.id}{' '}
-              <Tag variant={'success'} size={'medium'}>
+              <Tag variant="success" size="medium">
                 {formaterSakstype(sak!!.sakType)}
               </Tag>
-              <FlexRow justify={'right'}>
+              <FlexRow justify="right">
                 <OpprettKlage sakId={sak!!.id} />
                 <ManueltOpphoerModal sakId={sak!!.id} behandlingliste={behandlingerStatus.data[0].behandlinger} />
                 {kanBrukeGenerllBehandling && <OpprettGenerellBehandling sakId={sak!!.id} />}
@@ -67,7 +67,7 @@ export const SakOversikt = ({ fnr }: { fnr: string }) => {
       </MainContent>
 
       <HendelseSidebar>
-        {isPending(behandlingerStatus) && <Spinner visible label={'Forbereder hendelser ...'} />}
+        {isPending(behandlingerStatus) && <Spinner visible label="Forbereder hendelser ..." />}
 
         {isSuccess(behandlingerStatus) && sak?.id && (
           <RelevanteHendelser sak={sak} fnr={fnr} behandlingliste={behandlingerStatus.data[0].behandlinger} />

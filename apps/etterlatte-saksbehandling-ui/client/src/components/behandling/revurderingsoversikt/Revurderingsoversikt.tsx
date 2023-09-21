@@ -102,7 +102,7 @@ export const Revurderingsoversikt = (props: { behandling: IDetaljertBehandling }
       <Innhold>
         {behandling.begrunnelse !== null && (
           <>
-            <Heading size={'small'}>Begrunnelse</Heading>
+            <Heading size="small">Begrunnelse</Heading>
             <BodyShort>{behandling.begrunnelse}</BodyShort>
           </>
         )}
@@ -130,7 +130,7 @@ export const Revurderingsoversikt = (props: { behandling: IDetaljertBehandling }
       <Border />
       {behandles ? (
         <BehandlingHandlingKnapper>
-          {<Start disabled={behandling.virkningstidspunkt === null} />}
+          <Start disabled={behandling.virkningstidspunkt === null} />
         </BehandlingHandlingKnapper>
       ) : (
         <NesteOgTilbake />

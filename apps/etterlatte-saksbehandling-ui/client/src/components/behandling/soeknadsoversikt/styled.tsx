@@ -62,7 +62,7 @@ export const VurderingsContainer = styled.div`
 
 export const VurderingsTitle = ({ title }: { title: string }) => {
   return (
-    <Heading level={'3'} size={'small'}>
+    <Heading level="3" size="small">
       {title}
     </Heading>
   )

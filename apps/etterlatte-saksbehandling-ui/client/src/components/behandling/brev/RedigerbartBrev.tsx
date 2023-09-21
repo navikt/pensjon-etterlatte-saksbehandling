@@ -111,14 +111,14 @@ export default function RedigerbartBrev({ brev, kanRedigeres }: RedigerbartBrevP
           )}
           <Tabs.Tab
             value={ManueltBrevFane.FORHAANDSVIS}
-            label={'Forhåndsvisning'}
+            label="Forhåndsvisning"
             icon={<FilePdfIcon title="a11y-title" fontSize="1.5rem" />}
           />
         </Tabs.List>
 
         <Tabs.Panel value={ManueltBrevFane.REDIGER}>
           {(isPendingOrInitial(hentManuellPayloadStatus) || isPending(tilbakestillManuellPayloadStatus)) && (
-            <Spinner visible label={'Henter brevinnhold ...'} />
+            <Spinner visible label="Henter brevinnhold ..." />
           )}
           {isSuccess(hentManuellPayloadStatus) && isSuccessOrInitial(tilbakestillManuellPayloadStatus) && (
             <PanelWrapper>
@@ -142,7 +142,7 @@ export default function RedigerbartBrev({ brev, kanRedigeres }: RedigerbartBrevP
 
         <Tabs.Panel value={ManueltBrevFane.REDIGER_VEDLEGG}>
           {isPendingOrInitial(hentManuellPayloadStatus) ||
-            (isPending(tilbakestillManuellPayloadStatus) && <Spinner visible label={'Henter brevinnhold ...'} />)}
+            (isPending(tilbakestillManuellPayloadStatus) && <Spinner visible label="Henter brevinnhold ..." />)}
           {isSuccess(hentManuellPayloadStatus) && isSuccessOrInitial(tilbakestillManuellPayloadStatus) && (
             <>
               <PanelWrapper>
@@ -211,7 +211,7 @@ const TilbakestillOgLagreRad = ({
       <ButtonRow>
         <Button
           icon={<FileResetIcon title="a11y-title" />}
-          variant={'secondary'}
+          variant="secondary"
           onClick={() => setIsOpen(true)}
           disabled={!lagretStatus}
           loading={tilbakestillManuellPayloadStatus}
@@ -222,7 +222,7 @@ const TilbakestillOgLagreRad = ({
           {lagretStatus.beskrivelse && <Detail as="span">{lagretStatus.beskrivelse}</Detail>}
           <Button
             icon={<FloppydiskIcon title="a11y-title" />}
-            variant={'primary'}
+            variant="primary"
             onClick={lagre}
             disabled={!lagretStatus}
             loading={lagreManuellPayloadStatus}

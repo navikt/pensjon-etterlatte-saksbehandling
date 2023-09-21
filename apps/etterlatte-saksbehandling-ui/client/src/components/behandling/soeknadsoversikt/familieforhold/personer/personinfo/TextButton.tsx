@@ -8,7 +8,7 @@ type Props = {
 
 export const TextButton: React.FC<Props> = ({ isOpen, setIsOpen }) => {
   return (
-    <Button variant={'tertiary'} onClick={() => setIsOpen(!isOpen)}>
+    <Button variant="tertiary" onClick={() => setIsOpen(!isOpen)}>
       Historikk {isOpen ? <ChevronUpIcon className="dropdownIcon" /> : <ChevronDownIcon className="dropdownIcon" />}
     </Button>
   )

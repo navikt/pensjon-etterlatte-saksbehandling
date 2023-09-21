@@ -118,7 +118,7 @@ const Virkningstidspunkt = (props: Props) => {
             <LeggTilVurderingButton onClick={() => setVurdert(true)}>Legg til vurdering</LeggTilVurderingButton>
           ) : (
             <VurderingsboksWrapper
-              tittel={''}
+              tittel=""
               vurdering={
                 props.virkningstidspunkt
                   ? {

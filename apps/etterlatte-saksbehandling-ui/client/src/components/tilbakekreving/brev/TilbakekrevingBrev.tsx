@@ -20,7 +20,7 @@ export function TilbakekrevingBrev() {
       <Innhold>
         <BodyShort>Relevante ting for brev her</BodyShort>
       </Innhold>
-      <FlexRow justify={'center'}>
+      <FlexRow justify="center">
         <Button variant="primary" onClick={() => navigate(`/tilbakekreving/${tilbakekreving?.id}/brev`)}>
           Send brev
         </Button>

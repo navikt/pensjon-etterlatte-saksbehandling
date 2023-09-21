@@ -80,7 +80,7 @@ export const GyldigFramsattVurdering = ({
         <>
           <BodyShort spacing>Er innsender den gjenlevende?</BodyShort>
           {gyldigFramsatt?.resultat && (
-            <Label as={'p'} size="small" style={{ marginBottom: '32px' }}>
+            <Label as="p" size="small" style={{ marginBottom: '32px' }}>
               {JaNeiRec[gyldigFramsatt.resultat === VurderingsResultat.OPPFYLT ? JaNei.JA : JaNei.NEI]}
             </Label>
           )}
@@ -104,7 +104,7 @@ export const GyldigFramsattVurdering = ({
       }
     >
       <div>
-        <VurderingsTitle title={'Trenger avklaring'} />
+        <VurderingsTitle title="Trenger avklaring" />
         <Undertekst $gray={false}>Innsender er den gjenlevende?</Undertekst>
         <RadioGroupWrapper>
           <RadioGroup

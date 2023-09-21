@@ -95,7 +95,7 @@ const InstitusjonsoppholdBegrunnelse = ({ id }: { id: string }) => {
         <div>
           <Heading spacing size="small" level="3">
             Institusjonsoppholdshendelsen er vurdert
-            <CheckmarkCircleIcon color={AGreen500} aria-hidden={'true'} />
+            <CheckmarkCircleIcon color={AGreen500} aria-hidden="true" />
           </Heading>
           <p>
             Er dette en institusjon som kan gi reduksjon av ytelsen? - <b>{begrunnelse.data.kanGiReduksjonAvYtelse}</b>

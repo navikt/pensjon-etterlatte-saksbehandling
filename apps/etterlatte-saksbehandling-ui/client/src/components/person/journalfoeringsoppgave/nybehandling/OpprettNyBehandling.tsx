@@ -16,7 +16,7 @@ export default function OpprettNyBehandling() {
   const navigate = useNavigate()
 
   if (!oppgave) {
-    return <Navigate to={'../kontroll'} relative={'path'} />
+    return <Navigate to="../kontroll" relative="path" />
   }
 
   const { sakType } = oppgave!!
@@ -26,9 +26,9 @@ export default function OpprettNyBehandling() {
 
   return (
     <FormWrapper column>
-      <Heading size={'medium'} spacing>
+      <Heading size="medium" spacing>
         Opprett behandling{' '}
-        <Tag variant={'success'} size={'medium'}>
+        <Tag variant="success" size="medium">
           {formaterSakstype(sakType)}
         </Tag>
       </Heading>
@@ -37,7 +37,7 @@ export default function OpprettNyBehandling() {
       {sakType === SakType.BARNEPENSJON && <PersongalleriBarnepensjon />}
 
       <div>
-        <FlexRow justify={'center'} $spacing>
+        <FlexRow justify="center" $spacing>
           <Button variant="secondary" onClick={tilbake}>
             Tilbake
           </Button>
@@ -50,7 +50,7 @@ export default function OpprettNyBehandling() {
             Neste
           </Button>
         </FlexRow>
-        <FlexRow justify={'center'}>
+        <FlexRow justify="center">
           <AvbrytBehandleJournalfoeringOppgave />
         </FlexRow>
       </div>

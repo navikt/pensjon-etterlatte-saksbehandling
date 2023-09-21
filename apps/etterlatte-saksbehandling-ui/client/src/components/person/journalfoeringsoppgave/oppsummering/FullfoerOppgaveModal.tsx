@@ -54,12 +54,12 @@ export default function FullfoerOppgaveModal({ oppgave, behandlingBehov }: Modal
           </BodyLong>
 
           {isSuccess(status) ? (
-            <Alert variant={'success'}>
+            <Alert variant="success">
               Behandling opprettet for bruker med fødselsnummer {oppgave.fnr}. Du blir straks sendt til saksoversikten
               for denne brukeren.
             </Alert>
           ) : (
-            <FlexRow justify={'center'}>
+            <FlexRow justify="center">
               <Button variant="secondary" onClick={() => setOpen(false)} disabled={isPending(status)}>
                 Avbryt
               </Button>

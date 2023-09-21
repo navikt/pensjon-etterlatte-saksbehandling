@@ -11,18 +11,18 @@ export default function AvbrytBehandling() {
   const [isOpen, setIsOpen] = useState(false)
 
   return behandling?.status && erFerdigBehandlet(behandling.status) ? (
-    <Button variant={'tertiary'} onClick={() => navigate('/')}>
+    <Button variant="tertiary" onClick={() => navigate('/')}>
       Tilbake til oppgavelisten
     </Button>
   ) : (
     <>
-      <Button variant={'tertiary'} onClick={() => setIsOpen(true)}>
+      <Button variant="tertiary" onClick={() => setIsOpen(true)}>
         Avbryt
       </Button>
 
-      <Modal open={isOpen} onClose={() => setIsOpen(false)} aria-labelledby="modal-heading" className={'padding-modal'}>
+      <Modal open={isOpen} onClose={() => setIsOpen(false)} aria-labelledby="modal-heading" className="padding-modal">
         <Modal.Body style={{ textAlign: 'center' }}>
-          <Heading level={'1'} spacing size={'medium'} id="modal-heading">
+          <Heading level="1" spacing size="medium" id="modal-heading">
             Er du sikker på at du vil avbryte behandlingen?
           </Heading>
 
@@ -31,7 +31,7 @@ export default function AvbrytBehandling() {
             Endringene dine er lagret og du kan fortsette der du slapp når du går tilbake til saken.
           </BodyLong>
 
-          <FlexRow justify={'center'}>
+          <FlexRow justify="center">
             <Button variant="secondary" onClick={() => setIsOpen(false)}>
               Nei, fortsett behandling
             </Button>

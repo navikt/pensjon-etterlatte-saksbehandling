@@ -62,12 +62,8 @@ export const BarnepensjonSammendrag = ({ behandling, beregning }: Props) => {
               <Table.DataCell>{beregningsperiode.trygdetid} år</Table.DataCell>
               <Table.DataCell>{beregningsperiode.grunnbelop} kr</Table.DataCell>
               <Table.DataCell>
-                {
-                  <>
-                    {beregningsperiode.soeskenFlokk && `${beregningsperiode.soeskenFlokk.length + 1} barn`}{' '}
-                    {beregningsperiode.institusjonsopphold && ' institusjonsopphold'}
-                  </>
-                }
+                {beregningsperiode.soeskenFlokk && `${beregningsperiode.soeskenFlokk.length + 1} barn`}{' '}
+                {beregningsperiode.institusjonsopphold && ' institusjonsopphold'}
               </Table.DataCell>
               <Table.DataCell>{beregningsperiode.utbetaltBeloep} kr</Table.DataCell>
             </Table.ExpandableRow>

@@ -8,7 +8,7 @@ type Props = {
 }
 export const BeregnetSamletTrygdetid: React.FC<Props> = ({ beregnetTrygdetid }) => (
   <TrygdetidTabell>
-    <Table size={'small'}>
+    <Table size="small">
       <Table.Header>
         <Table.Row>
           <Table.HeaderCell>Samlet trygdetid</Table.HeaderCell>

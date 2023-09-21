@@ -49,29 +49,29 @@ export default function PersongalleriBarnepensjon() {
     <FormWrapper column>
       <InputRow>
         <TextField
-          label={'Søker (barnet)'}
-          placeholder={'Fødselsnummer'}
+          label="Søker (barnet)"
+          placeholder="Fødselsnummer"
           value={persongalleri?.soeker || ''}
-          pattern={'[0-9]{11}'}
+          pattern="[0-9]{11}"
           maxLength={11}
           onChange={(e) => oppdaterPersongalleri({ ...persongalleri, soeker: e.target.value })}
-          description={'Automatisk valgt utifra bruker på oppgaven.'}
+          description="Automatisk valgt utifra bruker på oppgaven."
         />
       </InputRow>
 
       <InputRow>
         <TextField
-          label={'Innsender'}
-          placeholder={'Fødselsnummer'}
+          label="Innsender"
+          placeholder="Fødselsnummer"
           value={persongalleri?.innsender || ''}
-          pattern={'[0-9]{11}'}
+          pattern="[0-9]{11}"
           maxLength={11}
           onChange={(e) => oppdaterPersongalleri({ ...persongalleri, innsender: e.target.value })}
         />
       </InputRow>
 
       <Panel border>
-        <Heading size={'small'} spacing>
+        <Heading size="small" spacing>
           Gjenlevende forelder
         </Heading>
 
@@ -80,13 +80,13 @@ export default function PersongalleriBarnepensjon() {
             <InputRow key={index}>
               <TextField
                 label={`Gjenlevende ${persongalleri!!.gjenlevende!!.length > 1 ? index + 1 : ''}`}
-                placeholder={'Fødselsnummer'}
+                placeholder="Fødselsnummer"
                 value={gjenlevende}
-                pattern={'[0-9]{11}'}
+                pattern="[0-9]{11}"
                 maxLength={11}
                 onChange={(e) => oppdater('gjenlevende', e.target.value, index)}
               />
-              <Button icon={<XMarkIcon />} variant={'tertiary'} onClick={() => fjern('gjenlevende', index)} />
+              <Button icon={<XMarkIcon />} variant="tertiary" onClick={() => fjern('gjenlevende', index)} />
             </InputRow>
           ))}
           <Button icon={<PlusIcon />} onClick={() => leggTil('gjenlevende')} disabled={!kanLeggeTil()}>
@@ -96,7 +96,7 @@ export default function PersongalleriBarnepensjon() {
       </Panel>
 
       <Panel border>
-        <Heading size={'small'} spacing>
+        <Heading size="small" spacing>
           Avdød forelder
         </Heading>
 
@@ -105,13 +105,13 @@ export default function PersongalleriBarnepensjon() {
             <InputRow key={index}>
               <TextField
                 label={`Avdød ${persongalleri!!.avdoed!!.length > 1 ? index + 1 : ''}`}
-                placeholder={'Fødselsnummer'}
+                placeholder="Fødselsnummer"
                 value={avdoed}
-                pattern={'[0-9]{11}'}
+                pattern="[0-9]{11}"
                 maxLength={11}
                 onChange={(e) => oppdater('avdoed', e.target.value, index)}
               />
-              <Button icon={<XMarkIcon />} variant={'tertiary'} onClick={() => fjern('avdoed', index)} />
+              <Button icon={<XMarkIcon />} variant="tertiary" onClick={() => fjern('avdoed', index)} />
             </InputRow>
           ))}
           <Button icon={<PlusIcon />} onClick={() => leggTil('avdoed')} disabled={!kanLeggeTil()}>
@@ -121,7 +121,7 @@ export default function PersongalleriBarnepensjon() {
       </Panel>
 
       <Panel border>
-        <Heading size={'small'} spacing>
+        <Heading size="small" spacing>
           Søsken
         </Heading>
 
@@ -130,13 +130,13 @@ export default function PersongalleriBarnepensjon() {
             <InputRow key={index}>
               <TextField
                 label={`Søsken ${persongalleri!!.soesken!!.length > 1 ? index + 1 : ''}`}
-                placeholder={'Fødselsnummer'}
+                placeholder="Fødselsnummer"
                 value={soesken}
-                pattern={'[0-9]{11}'}
+                pattern="[0-9]{11}"
                 maxLength={11}
                 onChange={(e) => oppdater('soesken', e.target.value, index)}
               />
-              <Button icon={<XMarkIcon />} variant={'tertiary'} onClick={() => fjern('soesken', index)} />
+              <Button icon={<XMarkIcon />} variant="tertiary" onClick={() => fjern('soesken', index)} />
             </InputRow>
           ))}
           <Button icon={<PlusIcon />} onClick={() => leggTil('soesken')}>

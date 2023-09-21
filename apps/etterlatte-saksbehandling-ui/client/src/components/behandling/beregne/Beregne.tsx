@@ -72,7 +72,7 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
     <Content>
       <ContentHeader>
         <HeadingWrapper>
-          <Heading size={'large'} level={'1'}>
+          <Heading size="large" level="1">
             Beregning og vedtak
           </Heading>
         </HeadingWrapper>

@@ -8,7 +8,7 @@ type Props = {
 }
 export const BeregnetFaktiskTrygdetid: React.FC<Props> = ({ beregnetTrygdetid }) => (
   <TrygdetidTabell>
-    <Table size={'small'}>
+    <Table size="small">
       <Table.Header>
         <Table.Row>
           <Table.HeaderCell>Faktisk trygdetid</Table.HeaderCell>

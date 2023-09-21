@@ -46,7 +46,7 @@ const OpprettGenerellBehandling = (props: { sakId: number }) => {
             value={generellBehandlingType}
             onChange={(e) => setGenerellBehandlingType(e.target.value as GenerellBehandlingType)}
           >
-            <option value={'VELG'} disabled={true}>
+            <option value="VELG" disabled={true}>
               Velg behandlingstype
             </option>
             {Object.entries(Innholdstyper).map(([type, text]) => (
@@ -61,7 +61,7 @@ const OpprettGenerellBehandling = (props: { sakId: number }) => {
           {isSuccess(opprettGenBehandlingStatus) && (
             <AlertWrapper variant="success">Behandlingen er opprettet</AlertWrapper>
           )}
-          <FlexRow justify={'center'}>
+          <FlexRow justify="center">
             <Button
               onClick={() => opprettGenBehandlingKallWrapper()}
               loading={isPending(opprettGenBehandlingStatus)}

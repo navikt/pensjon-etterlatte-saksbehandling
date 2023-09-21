@@ -61,7 +61,7 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
         <Sidebar>
           <ContentHeader>
             <HeadingWrapper>
-              <Heading spacing size={'large'} level={'1'}>
+              <Heading spacing size="large" level="1">
                 Vedtaksbrev
               </Heading>
             </HeadingWrapper>
@@ -69,7 +69,7 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
 
             <br />
             {vedtaksbrev?.prosessType !== BrevProsessType.AUTOMATISK && (
-              <Alert variant={'warning'}>
+              <Alert variant="warning">
                 {manueltBrevKanRedigeres(status)
                   ? 'Kan ikke generere brev automatisk. Du må selv redigere innholdet.'
                   : 'Dette er et manuelt opprettet brev. Kontroller innholdet nøye før attestering.'}
@@ -82,7 +82,7 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
 
         {loading ? (
           <SpinnerContainer>
-            <Spinner visible={true} label={'Henter brev ...'} />
+            <Spinner visible={true} label="Henter brev ..." />
           </SpinnerContainer>
         ) : error ? (
           <ErrorMessage>{error}</ErrorMessage>

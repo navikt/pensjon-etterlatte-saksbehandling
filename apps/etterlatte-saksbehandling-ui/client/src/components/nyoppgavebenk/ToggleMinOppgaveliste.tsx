@@ -81,7 +81,7 @@ export const ToggleMinOppgaveliste = () => {
         </Tabs.List>
       </TabsWidth>
 
-      {isPending(oppgaver) && <Spinner visible={true} label={'Henter nye oppgaver'} />}
+      {isPending(oppgaver) && <Spinner visible={true} label="Henter nye oppgaver" />}
       {isFailure(oppgaver) && <ApiErrorAlert>Kunne ikke hente oppgaver</ApiErrorAlert>}
       {isFailure(gosysOppgaver) && <ApiErrorAlert>Kunne ikke hente gosys oppgaver</ApiErrorAlert>}
       {isSuccess(oppgaver) && (

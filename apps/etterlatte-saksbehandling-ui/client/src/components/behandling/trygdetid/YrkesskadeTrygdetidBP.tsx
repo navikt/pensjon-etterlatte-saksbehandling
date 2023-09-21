@@ -36,7 +36,7 @@ const YrkesskadeTrygdetidBP = () => {
   return (
     <TrygdetidWrapper>
       <LovtekstMedLenke
-        tittel={'Trygdetid'}
+        tittel="Trygdetid"
         hjemler={[
           {
             tittel: '§ 18-11.Barnepensjon etter dødsfall som skyldes yrkesskade',
@@ -53,10 +53,10 @@ const YrkesskadeTrygdetidBP = () => {
         </TrygdetidInfo>
       </LovtekstMedLenke>
 
-      {isPending(hentTrygdetidRequest) && <Spinner visible={true} label={'Henter trygdetid'} />}
-      {isPending(opprettTrygdetidRequest) && <Spinner visible={true} label={'Oppretter trygdetid'} />}
+      {isPending(hentTrygdetidRequest) && <Spinner visible={true} label="Henter trygdetid" />}
+      {isPending(opprettTrygdetidRequest) && <Spinner visible={true} label="Oppretter trygdetid" />}
       {isPending(opprettYrkesskadeTrygdetidGrunnlag) && (
-        <Spinner visible={true} label={'Oppretter trygdetid grunnlag for yrkesskade'} />
+        <Spinner visible={true} label="Oppretter trygdetid grunnlag for yrkesskade" />
       )}
       {isFailure(hentTrygdetidRequest) && <ApiErrorAlert>En feil har oppstått ved henting av trygdetid</ApiErrorAlert>}
       {isFailure(opprettTrygdetidRequest) && (

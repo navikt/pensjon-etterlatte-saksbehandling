@@ -24,7 +24,7 @@ export const Barn = ({ person, doedsdato }: Props) => {
           <ChildEyesIcon />
         </span>
         {`${person.fornavn} ${person.etternavn}`}{' '}
-        <span className={'personRolle'}>({differenceInYears(new Date(), new Date(person.foedselsdato))} år)</span>
+        <span className="personRolle">({differenceInYears(new Date(), new Date(person.foedselsdato))} år)</span>
       </PersonHeader>
       <PersonInfoWrapper>
         <PersonInfoFnr fnr={person.foedselsnummer} />

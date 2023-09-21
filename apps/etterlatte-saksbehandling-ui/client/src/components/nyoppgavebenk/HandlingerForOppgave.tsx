@@ -15,7 +15,7 @@ export const HandlingerForOppgave = ({ oppgave }: { oppgave: OppgaveDTOny }) => 
       case 'VURDER_KONSEKVENS':
         return (
           <>
-            <Button size="small" icon={<EyeIcon />} href={`/person/${fnr}`} as={'a'}>
+            <Button size="small" icon={<EyeIcon />} href={`/person/${fnr}`} as="a">
               Se hendelse
             </Button>
           </>
@@ -25,7 +25,7 @@ export const HandlingerForOppgave = ({ oppgave }: { oppgave: OppgaveDTOny }) => 
         return (
           <>
             {erInnloggetSaksbehandlerOppgave && (
-              <Button size="small" as={'a'} href={`/behandling/${referanse}`}>
+              <Button size="small" as="a" href={`/behandling/${referanse}`}>
                 Gå til behandling
               </Button>
             )}
@@ -35,7 +35,7 @@ export const HandlingerForOppgave = ({ oppgave }: { oppgave: OppgaveDTOny }) => 
         return (
           <>
             {erInnloggetSaksbehandlerOppgave && (
-              <Button size="small" href={`/behandling/${referanse}`} as={'a'}>
+              <Button size="small" href={`/behandling/${referanse}`} as="a">
                 Gå til revurdering
               </Button>
             )}
@@ -45,7 +45,7 @@ export const HandlingerForOppgave = ({ oppgave }: { oppgave: OppgaveDTOny }) => 
         return (
           <>
             {erInnloggetSaksbehandlerOppgave && (
-              <Button size="small" href={`/behandling/${referanse}`} as={'a'}>
+              <Button size="small" href={`/behandling/${referanse}`} as="a">
                 Gå til opphør
               </Button>
             )}
@@ -55,7 +55,7 @@ export const HandlingerForOppgave = ({ oppgave }: { oppgave: OppgaveDTOny }) => 
         return (
           <>
             {erInnloggetSaksbehandlerOppgave && (
-              <Button size="small" href={`/behandling/${referanse}`} as={'a'}>
+              <Button size="small" href={`/behandling/${referanse}`} as="a">
                 Gå til attestering
               </Button>
             )}

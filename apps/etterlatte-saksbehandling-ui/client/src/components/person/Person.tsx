@@ -40,9 +40,9 @@ export const Person = () => {
   return (
     <>
       <StatusBar result={personStatus} />
-      <NavigerTilbakeMeny label={'Tilbake til oppgavebenken'} path={'/'} />
+      <NavigerTilbakeMeny label="Tilbake til oppgavebenken" path="/" />
 
-      {isPending(personStatus) && <Spinner visible label={'Laster personinfo ...'} />}
+      {isPending(personStatus) && <Spinner visible label="Laster personinfo ..." />}
       {isSuccess(personStatus) && (
         <Tabs value={fane} onChange={(val) => setFane(val as Fane)}>
           <Tabs.List>

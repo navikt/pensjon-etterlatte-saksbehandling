@@ -7,17 +7,17 @@ import { Journalpost } from '~shared/types/Journalpost'
 
 export const DokumentlisteLiten = ({ dokumenter }: { dokumenter: Result<Journalpost[]> }) => (
   <>
-    <Heading size={'small'} spacing>
+    <Heading size="small" spacing>
       Dokumenter
     </Heading>
 
-    {isPending(dokumenter) && <Spinner label={'Henter dokumenter'} visible />}
+    {isPending(dokumenter) && <Spinner label="Henter dokumenter" visible />}
 
     {isSuccess(dokumenter) &&
       (dokumenter.data.length ? (
         dokumenter.data.map((dokument) => (
           <div key={`${dokument.journalpostId}/${dokument.dokumenter[0].dokumentInfoId}`}>
-            <BodyShort size={'small'} spacing>
+            <BodyShort size="small" spacing>
               <Link
                 href={`/api/dokumenter/${dokument.journalpostId}/${dokument.dokumenter[0].dokumentInfoId}`}
                 target="_blank"
@@ -40,7 +40,7 @@ export const DokumentlisteLiten = ({ dokumenter }: { dokumenter: Result<Journalp
       ))}
 
     {isFailure(dokumenter) && (
-      <Alert variant={'error'} style={{ marginTop: '10px' }}>
+      <Alert variant="error" style={{ marginTop: '10px' }}>
         Det har oppstått en feil ved henting av dokumenter.
       </Alert>
     )}

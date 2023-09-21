@@ -18,7 +18,7 @@ const Insthendelser = (props: { sakid: number }) => {
 
   return (
     <>
-      {isPending(hendelser) && <Spinner visible label={'Henter institusjonshendelser for søsken'} />}
+      {isPending(hendelser) && <Spinner visible label="Henter institusjonshendelser for søsken" />}
       {isFailure(hendelser) && <ApiErrorAlert>Institusjonshendelser kan ikke hentes</ApiErrorAlert>}
       {isSuccess(hendelser) && hendelser.data.length > 0 && (
         <Table>

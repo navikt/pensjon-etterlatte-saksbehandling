@@ -26,18 +26,18 @@ export const Sivilstand = ({ familieforhold, avdoed }: Props) => {
         <IconWrapper>
           <HeartIcon fontSize={IconSize.DEFAULT} />
         </IconWrapper>
-        <Heading size={'small'} level={'3'}>
+        <Heading size="small" level="3">
           Sivilstand (gjenlevende)
         </Heading>
       </FlexHeader>
       <TableWrapper>
-        <Table size={'small'}>
+        <Table size="small">
           <Table.Header>
             <Table.Row>
-              <Table.HeaderCell scope={'col'}>Status</Table.HeaderCell>
-              <Table.HeaderCell scope={'col'}>Dato</Table.HeaderCell>
-              <Table.HeaderCell scope={'col'}>Partner</Table.HeaderCell>
-              <Table.HeaderCell scope={'col'}>Dødsdato</Table.HeaderCell>
+              <Table.HeaderCell scope="col">Status</Table.HeaderCell>
+              <Table.HeaderCell scope="col">Dato</Table.HeaderCell>
+              <Table.HeaderCell scope="col">Partner</Table.HeaderCell>
+              <Table.HeaderCell scope="col">Dødsdato</Table.HeaderCell>
             </Table.Row>
           </Table.Header>
           <Table.Body>
@@ -64,7 +64,7 @@ export const Sivilstand = ({ familieforhold, avdoed }: Props) => {
               ))
             ) : (
               <Table.Row>
-                <Table.DataCell aria-colspan={4} colSpan={4} align={'center'}>
+                <Table.DataCell aria-colspan={4} colSpan={4} align="center">
                   Mangler data om sivilstand
                 </Table.DataCell>
               </Table.Row>

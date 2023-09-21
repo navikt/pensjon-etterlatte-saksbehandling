@@ -135,7 +135,7 @@ export const TrygdeAvtale = ({ redigerbar }: Props) => {
         <IconWrapper>
           <HandshakeIcon fontSize={IconSize.DEFAULT} />
         </IconWrapper>
-        <Heading size={'small'} level={'3'}>
+        <Heading size="small" level="3">
           Vurdering av trygdeavtale
         </Heading>
       </FlexHeader>
@@ -222,7 +222,7 @@ export const TrygdeAvtale = ({ redigerbar }: Props) => {
       )}
       {(isPending(hentAlleTrygdetidAvtalerRequest) ||
         isPending(hentAlleTrygdetidAvtalerKriterierRequest) ||
-        isPending(hentTrygdeavtaleRequest)) && <Spinner visible={true} label={'Henter trgydeavtaler'} />}
+        isPending(hentTrygdeavtaleRequest)) && <Spinner visible={true} label="Henter trgydeavtaler" />}
       {isFailure(hentAlleTrygdetidAvtalerRequest) && (
         <ApiErrorAlert>En feil har oppstått ved henting av trygdeavtaler</ApiErrorAlert>
       )}

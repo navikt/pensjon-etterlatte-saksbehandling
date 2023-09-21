@@ -32,7 +32,7 @@ export const FilterRad = (props: { hentOppgaver: () => void; filter: Filter; set
           label="Fødselsnummer"
           value={filter.fnrFilter}
           onChange={(e) => setFilter({ ...filter, fnrFilter: e.target.value })}
-          placeholder={'Søk'}
+          placeholder="Søk"
           autoComplete="off"
         />
         <Select

@@ -25,7 +25,7 @@ export const PersonInfoAdresse = (props: Props) => {
 
   return (
     <PersonDetailWrapper adresse={true}>
-      <Label as={'p'}>{props.adresseDoedstidspunkt ? 'Bostedadresse dødsfallstidspunkt' : 'Bostedadresse'}</Label>
+      <Label as="p">{props.adresseDoedstidspunkt ? 'Bostedadresse dødsfallstidspunkt' : 'Bostedadresse'}</Label>
       {sisteEllerAktivAdresse ? (
         <span>
           {sisteEllerAktivAdresse.adresseLinje1}, {sisteEllerAktivAdresse.postnr} {sisteEllerAktivAdresse.poststed}
@@ -36,7 +36,7 @@ export const PersonInfoAdresse = (props: Props) => {
 
       {adresser && props.visHistorikk && (
         <Historikk>
-          <ReadMore header={'Historikk'}>
+          <ReadMore header="Historikk">
             <Adressevisning adresser={adresser} soeknadsoversikt={true} />
           </ReadMore>
         </Historikk>

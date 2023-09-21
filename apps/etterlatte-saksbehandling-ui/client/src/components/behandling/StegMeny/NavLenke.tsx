@@ -36,7 +36,7 @@ export const NavLenke = (props: { pathInfo: BehandlingRouteTypes; behandling: IB
       <li className={classNames({ disabled: routeErDisabled })}>
         <NavLink to={pathInfo.path}>{pathInfo.description}</NavLink>
       </li>
-      <Separator aria-hidden={'true'} />
+      <Separator aria-hidden="true" />
     </>
   )
 }

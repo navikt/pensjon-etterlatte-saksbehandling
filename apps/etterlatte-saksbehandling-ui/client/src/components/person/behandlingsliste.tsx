@@ -32,7 +32,7 @@ const VedtakKolonner = (props: { behandlingsId: string }) => {
     <>
       {isPending(vedtak) && (
         <Table.DataCell>
-          <Spinner visible label={''} margin={'0'} />
+          <Spinner visible label="" margin="0" />
         </Table.DataCell>
       )}
       {isSuccess(vedtak) && (
@@ -74,7 +74,7 @@ export const Behandlingsliste = ({ behandlinger }: { behandlinger: IBehandlingsa
    */
   return (
     <BehandlingPanel>
-      <Heading size={'medium'}>Behandlinger</Heading>
+      <Heading size="medium">Behandlinger</Heading>
 
       <Table zebraStripes>
         <Table.Header>
@@ -100,7 +100,7 @@ export const Behandlingsliste = ({ behandlinger }: { behandlinger: IBehandlingsa
               <Table.DataCell>
                 <Tag
                   variant={tagColors[behandling.utenlandstilsnitt?.type || IUtenlandstilsnittType.NASJONAL]}
-                  size={'small'}
+                  size="small"
                 >
                   {formaterEnumTilLesbarString(behandling.utenlandstilsnitt?.type || IUtenlandstilsnittType.NASJONAL)}
                 </Tag>

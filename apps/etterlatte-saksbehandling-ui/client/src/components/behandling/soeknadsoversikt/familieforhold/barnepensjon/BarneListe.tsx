@@ -37,11 +37,11 @@ export const BarneListe = ({ familieforhold, soekerFnr }: Props) => {
         <Table size="small">
           <Table.Header>
             <Table.Row>
-              <Table.HeaderCell scope={'col'}>Navn</Table.HeaderCell>
-              <Table.HeaderCell scope={'col'}>Fødselsnummer</Table.HeaderCell>
-              <Table.HeaderCell scope={'col'}>Bostedsadresse</Table.HeaderCell>
-              <Table.HeaderCell scope={'col'}>Periode</Table.HeaderCell>
-              <Table.HeaderCell scope={'col'}>Foreldre</Table.HeaderCell>
+              <Table.HeaderCell scope="col">Navn</Table.HeaderCell>
+              <Table.HeaderCell scope="col">Fødselsnummer</Table.HeaderCell>
+              <Table.HeaderCell scope="col">Bostedsadresse</Table.HeaderCell>
+              <Table.HeaderCell scope="col">Periode</Table.HeaderCell>
+              <Table.HeaderCell scope="col">Foreldre</Table.HeaderCell>
             </Table.Row>
           </Table.Header>
           <Table.Body>
@@ -51,7 +51,7 @@ export const BarneListe = ({ familieforhold, soekerFnr }: Props) => {
               })
             ) : (
               <Table.Row>
-                <Table.DataCell colSpan={5} aria-colspan={5} align={'center'}>
+                <Table.DataCell colSpan={5} aria-colspan={5} align="center">
                   Avdøde har ingen andre barn enn søker
                 </Table.DataCell>
               </Table.Row>
@@ -90,7 +90,7 @@ const BarnRow = ({ barn, familieforhold }: { barn: IPdlPerson; familieforhold: I
           <Link href={`/person/${barn.foedselsnummer}`} target="_blank" rel="noreferrer noopener">
             {formaterFnr(barn.foedselsnummer)}
           </Link>
-          <CopyButton copyText={barn.foedselsnummer} size={'small'} />
+          <CopyButton copyText={barn.foedselsnummer} size="small" />
         </FnrWrapper>
       </Table.DataCell>
       <Table.DataCell>{adresse}</Table.DataCell>

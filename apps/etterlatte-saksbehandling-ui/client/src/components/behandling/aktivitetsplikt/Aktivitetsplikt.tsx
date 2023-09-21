@@ -66,7 +66,7 @@ export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => 
           ikke er oppfylt.
         </BodyLong>
 
-        <Heading size={'small'} spacing>
+        <Heading size="small" spacing>
           Beskriv etterlatte sin aktivitet idag
         </Heading>
 
@@ -110,7 +110,7 @@ export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => 
           </>
         )}
 
-        <Heading size={'small'} spacing>
+        <Heading size="small" spacing>
           Lag intern oppfølgingsoppgave med riktig frist
         </Heading>
         <BodyLong spacing>
@@ -130,7 +130,7 @@ export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => 
           </Button>
         </SpacingWrapper>
 
-        <Heading size={'small'} spacing>
+        <Heading size="small" spacing>
           Er oppfølging av lokalkontor nødvendig?
         </Heading>
         <BodyLong spacing>

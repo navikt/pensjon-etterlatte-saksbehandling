@@ -147,7 +147,7 @@ export const Vurdering = ({
       {!vilkaar.vurdering && !aktivVurdering ? (
         <IkkeVurdert>
           <Heading size="small">Vilkåret er ikke vurdert</Heading>
-          <Button variant={'secondary'} size={'small'} onClick={() => setAktivVurdering(true)}>
+          <Button variant="secondary" size="small" onClick={() => setAktivVurdering(true)}>
             Vurder vilkår
           </Button>
         </IkkeVurdert>
@@ -158,14 +158,14 @@ export const Vurdering = ({
             <>
               {!!oppfyltUnntaksvilkaar ? (
                 <VilkaarVurdertInformasjon>
-                  <Heading size="xsmall" level={'3'}>
+                  <Heading size="xsmall" level="3">
                     Er unntak fra hovedvilkåret oppfylt?
                   </Heading>
                   <BodyShort size="small">{oppfyltUnntaksvilkaar?.tittel}</BodyShort>
                 </VilkaarVurdertInformasjon>
               ) : (
                 <VilkaarVurdertInformasjon>
-                  <Heading size="xsmall" level={'3'}>
+                  <Heading size="xsmall" level="3">
                     {vilkaarSpoersmaal}
                   </Heading>
                   <BodyShort size="small">{formaterVurderingsResultat(vilkaar.hovedvilkaar.resultat)}</BodyShort>

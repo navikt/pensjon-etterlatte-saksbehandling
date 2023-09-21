@@ -60,7 +60,7 @@ export const Vilkaarsvurdering = (props: { behandling: IBehandlingReducer }) => 
     <Content>
       <ContentHeader>
         <HeadingWrapper>
-          <Heading size={'large'} level={'1'}>
+          <Heading size="large" level="1">
             Vilkårsvurdering
           </Heading>
         </HeadingWrapper>
@@ -92,8 +92,8 @@ export const Vilkaarsvurdering = (props: { behandling: IBehandlingReducer }) => 
           />
         </>
       )}
-      {isPending(vilkaarsvurderingStatus) && <Spinner visible={true} label={'Henter vilkårsvurdering'} />}
-      {isPending(opprettNyVilkaarsvurderingStatus) && <Spinner visible={true} label={'Oppretter vilkårsvurdering'} />}
+      {isPending(vilkaarsvurderingStatus) && <Spinner visible={true} label="Henter vilkårsvurdering" />}
+      {isPending(opprettNyVilkaarsvurderingStatus) && <Spinner visible={true} label="Oppretter vilkårsvurdering" />}
       {isFailure(vilkaarsvurderingStatus) && isInitial(opprettNyVilkaarsvurderingStatus) && (
         <ApiErrorAlert>En feil har oppstått</ApiErrorAlert>
       )}

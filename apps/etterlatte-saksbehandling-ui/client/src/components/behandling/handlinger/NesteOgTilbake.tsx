@@ -9,7 +9,7 @@ export const NesteOgTilbake = () => {
 
   return (
     <div>
-      <FlexRow justify={'center'} $spacing>
+      <FlexRow justify="center" $spacing>
         {!firstPage && (
           <Button variant="secondary" onClick={back}>
             {handlinger.TILBAKE.navn}
@@ -21,7 +21,7 @@ export const NesteOgTilbake = () => {
           </Button>
         )}
       </FlexRow>
-      <FlexRow justify={'center'}>
+      <FlexRow justify="center">
         <AvbrytBehandling />
       </FlexRow>
     </div>

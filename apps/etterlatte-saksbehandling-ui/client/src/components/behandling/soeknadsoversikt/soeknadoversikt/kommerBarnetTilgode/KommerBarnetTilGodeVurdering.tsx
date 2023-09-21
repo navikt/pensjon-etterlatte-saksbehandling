@@ -55,12 +55,12 @@ export const KommerBarnetTilGodeVurdering = ({
 
   return (
     <VurderingsboksWrapper
-      tittel={''}
+      tittel=""
       subtittelKomponent={
         <>
           <BodyShort spacing>Vurderer du det som sannsynlig at pensjonen kommer barnet tilgode?</BodyShort>
           {kommerBarnetTilgode?.svar && (
-            <Label as={'p'} size="small" style={{ marginBottom: '32px' }}>
+            <Label as="p" size="small" style={{ marginBottom: '32px' }}>
               {JaNeiRec[kommerBarnetTilgode.svar]}
             </Label>
           )}
@@ -81,7 +81,7 @@ export const KommerBarnetTilGodeVurdering = ({
       defaultRediger={kommerBarnetTilgode === null}
     >
       <div>
-        <VurderingsTitle title={'Trenger avklaring'} />
+        <VurderingsTitle title="Trenger avklaring" />
         <Undertekst $gray={false}>
           Boforholdet er avklart og sannsynliggjort at pensjonen kommer barnet til gode?
         </Undertekst>

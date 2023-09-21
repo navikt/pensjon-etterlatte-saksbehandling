@@ -57,17 +57,17 @@ export const UtenlandstilsnittVurdering = ({
 
   return (
     <VurderingsboksWrapper
-      tittel={''}
+      tittel=""
       subtittelKomponent={
         <>
           <BodyShort spacing>Hvilken type sak er dette?</BodyShort>
           {utenlandstilsnitt?.type ? (
-            <Label as={'p'} size="small" style={{ marginBottom: '32px' }}>
+            <Label as="p" size="small" style={{ marginBottom: '32px' }}>
               {UtenlandstilsnittTypeTittel[utenlandstilsnitt.type]}
             </Label>
           ) : (
-            <Label as={'p'} size="small" style={{ marginBottom: '32px' }}>
-              {'Ikke vurdert'}
+            <Label as="p" size="small" style={{ marginBottom: '32px' }}>
+              Ikke vurdert
             </Label>
           )}
         </>
@@ -87,7 +87,7 @@ export const UtenlandstilsnittVurdering = ({
       defaultRediger={utenlandstilsnitt === null}
     >
       <>
-        <VurderingsTitle title={'Utlandstilknytning'} />
+        <VurderingsTitle title="Utlandstilknytning" />
         <Undertekst $gray={false}>Hvilken type sak er dette?</Undertekst>
         <RadioGroupWrapper>
           <RadioGroup

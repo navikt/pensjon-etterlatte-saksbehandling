@@ -49,7 +49,7 @@ export const AttesterVedtak = ({ behandling, kommentar }: { behandling: IDetalje
   return (
     <BeslutningWrapper>
       {error && (
-        <Alert variant={'error'} style={{ marginTop: '1rem' }}>
+        <Alert variant="error" style={{ marginTop: '1rem' }}>
           {error}
         </Alert>
       )}

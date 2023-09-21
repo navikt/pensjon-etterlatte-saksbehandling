@@ -35,7 +35,7 @@ export const Person = ({ person, kilde, avdoed = false }: Props) => {
         <PersonIcon fontSize={IconSize.DEFAULT} />
       </IconWrapper>
       <PersonInfoWrapper>
-        <Heading size={'small'} level={'3'}>
+        <Heading size="small" level="3">
           {avdoed ? 'Avdød' : 'Gjenlevende'}
         </Heading>
         <BodyShort>

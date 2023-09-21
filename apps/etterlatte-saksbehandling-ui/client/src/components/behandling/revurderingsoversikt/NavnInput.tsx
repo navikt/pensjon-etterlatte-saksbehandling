@@ -16,9 +16,9 @@ export const NavnInput = (props: { navn: Navn; update: (n: Navn) => void }) => {
   return (
     <NavnWrapper>
       <TextField
-        label={'Fornavn'}
+        label="Fornavn"
         value={navn?.fornavn}
-        key={`fornavn-input-label`}
+        key="fornavn-input-label"
         onChange={(e) => {
           update({
             ...navn,
@@ -27,9 +27,9 @@ export const NavnInput = (props: { navn: Navn; update: (n: Navn) => void }) => {
         }}
       />
       <TextField
-        label={'Mellomnavn'}
+        label="Mellomnavn"
         value={navn?.mellomnavn}
-        key={`mellomnavn-input-label`}
+        key="mellomnavn-input-label"
         onChange={(e) => {
           update({
             ...navn,
@@ -38,9 +38,9 @@ export const NavnInput = (props: { navn: Navn; update: (n: Navn) => void }) => {
         }}
       />
       <TextField
-        label={'Etternavn'}
+        label="Etternavn"
         value={navn?.etternavn}
-        key={`etternavn-input-label`}
+        key="etternavn-input-label"
         onChange={(e) => {
           update({
             ...navn,

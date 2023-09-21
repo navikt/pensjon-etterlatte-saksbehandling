@@ -42,22 +42,22 @@ export default function PersongalleriOmstillingsstoenad() {
     <FormWrapper column>
       <InputRow>
         <TextField
-          label={'Søker (gjenlevende)'}
-          placeholder={'Fødselsnummer'}
+          label="Søker (gjenlevende)"
+          placeholder="Fødselsnummer"
           value={persongalleri?.soeker || ''}
-          pattern={'[0-9]{11}'}
+          pattern="[0-9]{11}"
           maxLength={11}
           onChange={(e) => oppdaterPersongalleri({ ...persongalleri, soeker: e.target.value })}
-          description={'Automatisk valgt utifra bruker på oppgaven.'}
+          description="Automatisk valgt utifra bruker på oppgaven."
         />
       </InputRow>
 
       <InputRow>
         <TextField
-          label={'Innsender'}
-          placeholder={'Fødselsnummer'}
+          label="Innsender"
+          placeholder="Fødselsnummer"
           value={persongalleri?.innsender || ''}
-          pattern={'[0-9]{11}'}
+          pattern="[0-9]{11}"
           maxLength={11}
           onChange={(e) => oppdaterPersongalleri({ ...persongalleri, innsender: e.target.value })}
         />
@@ -65,17 +65,17 @@ export default function PersongalleriOmstillingsstoenad() {
 
       <InputRow>
         <TextField
-          label={`Avdød`}
-          placeholder={'Avdød sitt fødselsnummer'}
+          label="Avdød"
+          placeholder="Avdød sitt fødselsnummer"
           value={persongalleri?.avdoed ? persongalleri?.avdoed[0] : ''}
-          pattern={'[0-9]{11}'}
+          pattern="[0-9]{11}"
           maxLength={11}
           onChange={(e) => oppdaterPersongalleri({ ...persongalleri, avdoed: [e.target.value] })}
         />
       </InputRow>
 
       <Panel border>
-        <Heading size={'small'} spacing>
+        <Heading size="small" spacing>
           Barn
         </Heading>
 
@@ -84,13 +84,13 @@ export default function PersongalleriOmstillingsstoenad() {
             <InputRow key={index}>
               <TextField
                 label={`Barn ${persongalleri!!.soesken!!.length > 1 ? index + 1 : ''}`}
-                placeholder={'Fødselsnummer'}
+                placeholder="Fødselsnummer"
                 value={barn}
-                pattern={'[0-9]{11}'}
+                pattern="[0-9]{11}"
                 maxLength={11}
                 onChange={(e) => oppdater(e.target.value, index)}
               />
-              <Button icon={<XMarkIcon />} variant={'tertiary'} onClick={() => fjern(index)} />
+              <Button icon={<XMarkIcon />} variant="tertiary" onClick={() => fjern(index)} />
             </InputRow>
           ))}
           <Button icon={<PlusIcon />} onClick={leggTil}>

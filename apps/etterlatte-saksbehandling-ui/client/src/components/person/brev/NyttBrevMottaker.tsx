@@ -11,19 +11,19 @@ export default function NyttBrevMottaker({ brev }: { brev: IBrev }) {
   return (
     <div style={{ margin: '1rem' }}>
       <Panel border>
-        <Heading spacing level="2" size={'medium'}>
+        <Heading spacing level="2" size="medium">
           Mottaker
           <RedigerMottakerModal brev={brev} oppdater={(val) => setMottaker(val)} />
         </Heading>
 
         <>
-          <BodyShort spacing size={'small'}>
+          <BodyShort spacing size="small">
             <Label>Navn</Label>
             <br />
             {mottaker?.navn}
           </BodyShort>
 
-          <BodyShort size={'small'}>
+          <BodyShort size="small">
             <Label>Adresse</Label>
             <br />
             {[adresse?.adresselinje1, adresse?.adresselinje2, adresse?.adresselinje3].join('\n')}

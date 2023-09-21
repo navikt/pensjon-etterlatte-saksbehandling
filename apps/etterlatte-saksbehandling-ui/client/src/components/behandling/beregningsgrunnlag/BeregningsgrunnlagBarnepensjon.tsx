@@ -116,7 +116,7 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
             onSubmit={(institusjonsoppholdGrunnlag) => setInstitusjonsoppholdsGrunnlagData(institusjonsoppholdGrunnlag)}
           />
         )}
-        <Spinner visible={isPending(beregningsgrunnlag)} label={'Henter beregningsgrunnlag'} />
+        <Spinner visible={isPending(beregningsgrunnlag)} label="Henter beregningsgrunnlag" />
         {isFailure(beregningsgrunnlag) && <ApiErrorAlert>Beregningsgrunnlag kan ikke hentes</ApiErrorAlert>}
       </>
       {manglerSoeskenJustering && <ApiErrorAlert>Søskenjustering er ikke fylt ut </ApiErrorAlert>}

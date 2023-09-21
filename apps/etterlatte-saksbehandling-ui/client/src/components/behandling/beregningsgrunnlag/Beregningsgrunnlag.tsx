@@ -20,7 +20,7 @@ const Beregningsgrunnlag = (props: { behandling: IDetaljertBehandling }) => {
     <Content>
       <ContentHeader>
         <HeadingWrapper>
-          <Heading spacing size={'large'} level={'1'}>
+          <Heading spacing size="large" level="1">
             Beregningsgrunnlag
           </Heading>
           <BodyShort spacing>

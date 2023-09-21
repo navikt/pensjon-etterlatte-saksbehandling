@@ -131,3 +131,4 @@ spec:
       rules:
         - application: etterlatte-saksbehandling-ui-lokal
         - application: etterlatte-saksbehandling-ui
+        - application: etterlatte-behandling

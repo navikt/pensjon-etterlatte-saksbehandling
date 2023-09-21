@@ -37,6 +37,10 @@ export enum BrevStatus {
   SLETTET = 'SLETTET',
 }
 
+export function kanBrevRedigeres(status: BrevStatus): boolean {
+  return [BrevStatus.OPPRETTET, BrevStatus.OPPDATERT].includes(status)
+}
+
 export enum BrevProsessType {
   AUTOMATISK = 'AUTOMATISK',
   REDIGERBAR = 'REDIGERBAR',

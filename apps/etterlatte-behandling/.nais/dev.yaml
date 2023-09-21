@@ -64,6 +64,8 @@ spec:
       value: api://dev-gcp.etterlatte.etterlatte-pdltjenester/.default
     - name: ETTERLATTE_PDLTJENESTER_URL
       value: http://etterlatte-pdltjenester
+    - name: ETTERLATTE_BREV_API_URL
+      value: http://etterlatte-brev-api
     - name: HENDELSE_JOB_FREKVENS
       value: "1"
     - name: HENDELSE_MINUTTER_GAMLE_HENDELSER
@@ -72,6 +74,8 @@ spec:
       value: ce96a301-13db-4409-b277-5b27f464d08b
     - name: ETTERLATTE_GRUNNLAG_URL
       value: http://etterlatte-grunnlag/api
+    - name: ETTERLATTE_BREV_API_CLIENT_ID
+      value: dev-gcp.etterlatte.etterlatte-brev-api
     - name: AZUREAD_ATTESTANT_GROUPID
       value: 63f46f74-84a8-4d1c-87a8-78532ab3ae60
     - name: AZUREAD_FORTROLIG_GROUPID
@@ -105,6 +109,7 @@ spec:
   accessPolicy:
     outbound:
       rules:
+        - application: etterlatte-brev-api
         - application: etterlatte-vilkaar
         - application: etterlatte-pdltjenester
         - application: etterlatte-grunnlag

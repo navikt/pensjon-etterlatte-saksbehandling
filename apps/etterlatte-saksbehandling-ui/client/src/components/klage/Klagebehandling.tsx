@@ -15,6 +15,7 @@ import { KlageFormkrav } from '~components/klage/formkrav/KlageFormkrav'
 import { KlageVurdering } from '~components/klage/vurdering/KlageVurdering'
 import { KlageOppsummering } from '~components/klage/oppsummering/KlageOppsummering'
 import { KlageSidemeny } from '~components/klage/sidemeny/KlageSidemeny'
+import { KlageBrev } from '~components/klage/brev/KlageBrev'
 
 export function Klagebehandling() {
   const klage = useKlage()
@@ -59,6 +60,7 @@ export function Klagebehandling() {
             <Routes>
               <Route path="formkrav" element={<KlageFormkrav />} />
               <Route path="vurdering" element={<KlageVurdering />} />
+              <Route path="brev" element={<KlageBrev />} />
               <Route path="oppsummering" element={<KlageOppsummering />} />
               <Route path="*" element={<Navigate to="formkrav" replace />} />
             </Routes>

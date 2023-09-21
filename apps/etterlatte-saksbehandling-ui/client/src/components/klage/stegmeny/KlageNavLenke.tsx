@@ -3,7 +3,7 @@ import { Separator } from '~components/behandling/StegMeny/NavLenke'
 import React from 'react'
 import classNames from 'classnames'
 
-export const KLAGESTEG = ['formkrav', 'vurdering', 'oppsummering'] as const
+export const KLAGESTEG = ['formkrav', 'vurdering', 'brev', 'oppsummering'] as const
 
 export type Klagesteg = (typeof KLAGESTEG)[number]
 

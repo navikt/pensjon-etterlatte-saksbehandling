@@ -3,8 +3,8 @@ import { useState } from 'react'
 import { BodyShort, Button } from '@navikt/ds-react'
 import { ChevronLeftDoubleIcon, ChevronRightDoubleIcon } from '@navikt/aksel-icons'
 import { useTilbakekreving } from '~components/tilbakekreving/useTilbakekreving'
-import { SidebarPanel } from "~shared/components/Sidebar";
-import { Dokumentoversikt } from "~components/person/dokumenter/dokumentoversikt";
+import { SidebarPanel } from '~shared/components/Sidebar'
+import { Dokumentoversikt } from '~components/person/dokumenter/dokumentoversikt'
 
 export function TilbakekrevingSidemeny() {
   const tilbakekreving = useTilbakekreving()

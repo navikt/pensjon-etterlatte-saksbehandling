@@ -18,9 +18,11 @@ import no.nav.etterlatte.behandling.BehandlingStatusServiceFeatureToggle
 import no.nav.etterlatte.behandling.domain.ArbeidsFordelingEnhet
 import no.nav.etterlatte.behandling.domain.SaksbehandlerEnhet
 import no.nav.etterlatte.behandling.domain.SaksbehandlerTema
+import no.nav.etterlatte.behandling.klienter.BrevApiKlient
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
 import no.nav.etterlatte.behandling.klienter.NavAnsattKlient
 import no.nav.etterlatte.behandling.klienter.Norg2Klient
+import no.nav.etterlatte.behandling.klienter.OpprettetBrevDto
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.config.ApplicationContext
 import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
@@ -128,6 +130,7 @@ abstract class BehandlingIntegrationTest {
                 norg2Klient = norg2Klient ?: Norg2KlientTest(),
                 grunnlagKlientObo = GrunnlagKlientTest(),
                 gosysOppgaveKlient = GosysOppgaveKlientTest(),
+                brevApiHttpClient = BrevApiKlientTest(),
             ).also {
                 it.dataSource.migrate()
             }
@@ -415,6 +418,17 @@ class GrunnlagKlientTest : GrunnlagKlient {
                     listOf("gjenlevende"),
                 ),
         )
+    }
+}
+
+class BrevApiKlientTest : BrevApiKlient {
+    private var brevId = 1L
+
+    override suspend fun opprettKlageInnstillingsbrevISak(
+        sakId: Long,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): OpprettetBrevDto {
+        return OpprettetBrevDto(brevId++)
     }
 }
 

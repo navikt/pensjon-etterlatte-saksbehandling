@@ -21,6 +21,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
+import java.time.temporal.ChronoUnit
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -69,6 +70,9 @@ internal class KlageDaoImplTest {
         val klage = Klage.ny(sak)
         klageDao.lagreKlage(klage)
 
+        val foersteHentedeKlage = klageDao.hentKlage(klage.id)
+        Assertions.assertEquals(klage, foersteHentedeKlage)
+
         val formkrav =
             FormkravMedBeslutter(
                 Formkrav(
@@ -99,5 +103,24 @@ internal class KlageDaoImplTest {
 
         Assertions.assertEquals(KlageStatus.FORMKRAV_OPPFYLT, hentetKlage?.status)
         Assertions.assertEquals(formkrav, hentetKlage?.formkrav)
+    }
+
+    @Test
+    fun `lagreKlage oppdaterer ikke opprettet tidspunkt eller saken hvis klagen allerede eksisterer`() {
+        val sak = sakRepo.opprettSak(fnr = "en bruker", type = SakType.BARNEPENSJON, enhet = "1337")
+        val sak2 = sakRepo.opprettSak(fnr = "en annen bruker", type = SakType.OMSTILLINGSSTOENAD, enhet = "3137")
+        val klage = Klage.ny(sak)
+        klageDao.lagreKlage(klage)
+
+        val foersteHentedeKlage = klageDao.hentKlage(klage.id)
+        Assertions.assertEquals(klage, foersteHentedeKlage)
+
+        val klageMedEndretSakOgOpprettet = klage.copy(sak = sak2, opprettet = klage.opprettet.plus(2, ChronoUnit.HOURS))
+        klageDao.lagreKlage(klageMedEndretSakOgOpprettet)
+
+        val andreHentedeKlage = klageDao.hentKlage(klageMedEndretSakOgOpprettet.id)
+        Assertions.assertEquals(foersteHentedeKlage, andreHentedeKlage)
+        Assertions.assertNotEquals(foersteHentedeKlage?.sak, klageMedEndretSakOgOpprettet.sak)
+        Assertions.assertNotEquals(foersteHentedeKlage?.opprettet, klageMedEndretSakOgOpprettet.opprettet)
     }
 }

@@ -97,7 +97,9 @@ export type KlageUtfallUtenBrev =
       innstilling: InnstillingTilKabalUtenBrev
     }
 
-interface KlageBrevInnstilling {}
+interface KlageBrevInnstilling {
+  brevId: number
+}
 
 interface InnstillingTilKabal {
   lovhjemmel: string

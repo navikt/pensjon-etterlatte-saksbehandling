@@ -29,14 +29,25 @@ export function kanSeOppsummering(klage: Klage | null): boolean {
   return false
 }
 
+export function kanSeBrev(klage: Klage | null): boolean {
+  const utfall = klage?.utfall?.utfall
+  switch (utfall) {
+    case 'DELVIS_OMGJOERING':
+    case 'STADFESTE_VEDTAK':
+      return true
+  }
+  return false
+}
+
 export function KlageStegmeny() {
   const klage = useKlage()
 
   return (
     <StegMenyWrapper>
       <KlageNavLenke path="formkrav" description="Vurder formkrav" enabled={true} />
-      <KlageNavLenke path="vurdering" description="Vurder klagen" enabled={kanVurdereUtfall(klage) || true} />
-      <KlageNavLenke path="oppsummering" description="Oppsummering" enabled={kanSeOppsummering(klage) || true} />
+      <KlageNavLenke path="vurdering" description="Vurder klagen" enabled={kanVurdereUtfall(klage)} />
+      <KlageNavLenke path="brev" description="Brev" enabled={kanSeBrev(klage)} />
+      <KlageNavLenke path="oppsummering" description="Oppsummering" enabled={kanSeOppsummering(klage)} />
     </StegMenyWrapper>
   )
 }

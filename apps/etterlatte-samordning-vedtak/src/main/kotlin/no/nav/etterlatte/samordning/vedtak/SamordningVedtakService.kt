@@ -46,7 +46,7 @@ class SamordningVedtakService(
             vedtakId = vedtakId,
             sakstype = "OMS",
             virkningsdato = virkningstidspunkt.atStartOfMonth(),
-            opphoersdato = null,
+            opphoersdato = virkningstidspunkt.takeIf { type == VedtakType.OPPHOER }?.atStartOfMonth(),
             type = type.toSamordningsvedtakType(),
             aarsak = null,
             anvendtTrygdetid = beregning.beregningsperioder.first().trygdetid,

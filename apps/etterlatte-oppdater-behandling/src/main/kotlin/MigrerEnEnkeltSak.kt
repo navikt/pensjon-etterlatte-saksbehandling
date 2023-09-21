@@ -11,7 +11,7 @@ import no.nav.etterlatte.rapidsandrivers.migrering.FNR_KEY
 import no.nav.etterlatte.rapidsandrivers.migrering.MIGRERING_GRUNNLAG_KEY
 import no.nav.etterlatte.rapidsandrivers.migrering.MigreringRequest
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser
-import no.nav.etterlatte.rapidsandrivers.migrering.PERSONGALLERI
+import no.nav.etterlatte.rapidsandrivers.migrering.PERSONGALLERI_KEY
 import no.nav.etterlatte.rapidsandrivers.migrering.ROLLE_KEY
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -64,7 +64,7 @@ internal class MigrerEnEnkeltSak(
             MigrerSoekerRequest(
                 soeker = hendelse.soeker.value,
             )
-        packet[PERSONGALLERI] = hendelse.opprettPersongalleri()
+        packet[PERSONGALLERI_KEY] = hendelse.opprettPersongalleri()
         packet.eventName = Migreringshendelser.LAGRE_KOPLING
 
         context.publish(packet.toJson())

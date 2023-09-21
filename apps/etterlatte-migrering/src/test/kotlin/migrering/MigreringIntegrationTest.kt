@@ -26,7 +26,7 @@ import no.nav.etterlatte.opprettInMemoryDatabase
 import no.nav.etterlatte.rapidsandrivers.EventNames
 import no.nav.etterlatte.rapidsandrivers.migrering.MigreringRequest
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser
-import no.nav.etterlatte.rapidsandrivers.migrering.PESYS_ID
+import no.nav.etterlatte.rapidsandrivers.migrering.PESYS_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.migrering.PesysId
 import no.nav.etterlatte.utbetaling.common.EVENT_NAME_OPPDATERT
 import no.nav.etterlatte.utbetaling.common.UTBETALING_RESPONSE
@@ -181,7 +181,7 @@ internal class MigreringIntegrationTest {
                     mapOf(
                         EVENT_NAME_KEY to Migreringshendelser.LAGRE_KOPLING,
                         BEHANDLING_ID_KEY to behandlingId,
-                        PESYS_ID to pesysId,
+                        PESYS_ID_KEY to pesysId,
                     ),
                 ).toJson(),
             )

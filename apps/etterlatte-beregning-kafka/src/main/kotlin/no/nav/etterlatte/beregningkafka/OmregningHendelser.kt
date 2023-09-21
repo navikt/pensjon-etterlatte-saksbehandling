@@ -59,7 +59,7 @@ internal class OmregningHendelser(
         val sakType = objectMapper.treeToValue<SakType>(packet[SAK_TYPE])
         runBlocking {
             if (sakType == SakType.BARNEPENSJON) {
-                beregningService.opprettBeregningsGrunnlag(behandlingId, behandlingViOmregnerFra)
+                beregningService.opprettBeregningsgrunnlagFreaForrigeBehandling(behandlingId, behandlingViOmregnerFra)
                 val beregning = beregningService.beregn(behandlingId).body<BeregningDTO>()
                 packet[BEREGNING_KEY] = beregning
             } else {

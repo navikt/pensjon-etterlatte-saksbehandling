@@ -12,7 +12,7 @@ import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.rapidsandrivers.migrering.MIGRERING_GRUNNLAG_KEY
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser.LAGRE_GRUNNLAG
-import no.nav.etterlatte.rapidsandrivers.migrering.PERSONGALLERI
+import no.nav.etterlatte.rapidsandrivers.migrering.PERSONGALLERI_KEY
 import no.nav.etterlatte.rapidsandrivers.migrering.persongalleri
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -37,7 +37,7 @@ class MigreringHendelser(
             eventName(hendelsestype)
             validate { it.requireKey(SAK_ID_KEY) }
             validate { it.requireKey(MIGRERING_GRUNNLAG_KEY) }
-            validate { it.requireKey(PERSONGALLERI) }
+            validate { it.requireKey(PERSONGALLERI_KEY) }
         }.register(this)
     }
 

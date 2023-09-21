@@ -41,7 +41,7 @@ internal class LeaderElectionTest {
             httpClient(
                 response,
             )
-        val leaderElection = LeaderElection(localHostName, httpClient, "localhost")
+        val leaderElection = LeaderElectionLocalhost(localHostName, httpClient)
         assertTrue(leaderElection.isLeader())
     }
 
@@ -49,7 +49,11 @@ internal class LeaderElectionTest {
     fun `sier nei når leader elector-pod svarer at noen andre er leader`() {
         val response = """{"name":"NOT_LEADER"}""".trimIndent()
         val httpClient = httpClient(response)
-        val leaderElection = LeaderElection(localHostName, httpClient, "localhost")
+        val leaderElection = LeaderElectionLocalhost(localHostName, httpClient)
         assertFalse(leaderElection.isLeader())
     }
+}
+
+class LeaderElectionLocalhost(electorPath: String, httpClient: HttpClient) : LeaderElection(electorPath, httpClient) {
+    override fun me() = "localhost"
 }

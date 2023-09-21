@@ -22,6 +22,7 @@ import { oppdaterUtfallForKlage } from '~shared/api/klage'
 import { useAppDispatch } from '~store/Store'
 import { addKlage } from '~store/reducers/KlageReducer'
 import { ApiErrorAlert } from '~ErrorBoundary'
+import { kanSeBrev } from '~components/klage/stegmeny/KlageStegmeny'
 
 type FilledFormDataVurdering = {
   utfall: Utfall
@@ -103,13 +104,21 @@ export function KlageVurdering() {
     }
     if (!isDirty) {
       // Skjema er fylt ut men med samme innhold som starten => skip lagring og gå videre
-      navigate(`/klage/${klage.id}/oppsummering`)
+      if (kanSeBrev(klage)) {
+        navigate(`/klage/${klage.id}/brev`)
+      } else {
+        navigate(`/klage/${klage.id}/oppsummering`)
+      }
     }
 
     const utfall = mapFraFormdataTilKlageUtfall(skjema)
     lagreUtfall({ klageId: klage.id, utfall }, (oppdatertKlage) => {
       dispatch(addKlage(oppdatertKlage))
-      navigate(`/klage/${klage.id}/oppsummering`)
+      if (kanSeBrev(oppdatertKlage)) {
+        navigate(`/klage/${klage.id}/brev`)
+      } else {
+        navigate(`/klage/${klage.id}/oppsummering`)
+      }
     })
   }
 

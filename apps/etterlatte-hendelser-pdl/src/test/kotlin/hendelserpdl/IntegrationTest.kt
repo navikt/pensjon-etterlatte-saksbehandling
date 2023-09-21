@@ -39,6 +39,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import java.time.Instant
 import java.time.LocalDate
+import java.util.Properties
 
 @TestInstance(TestInstance.Lifecycle.PER_METHOD)
 class IntegrationTest {

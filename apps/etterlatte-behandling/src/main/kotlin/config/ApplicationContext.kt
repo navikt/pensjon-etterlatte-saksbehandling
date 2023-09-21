@@ -18,6 +18,8 @@ import no.nav.etterlatte.behandling.generellbehandling.GenerellBehandlingService
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.klage.KlageDaoImpl
 import no.nav.etterlatte.behandling.klage.KlageServiceImpl
+import no.nav.etterlatte.behandling.klienter.BrevApiKlient
+import no.nav.etterlatte.behandling.klienter.BrevApiKlientObo
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlientObo
 import no.nav.etterlatte.behandling.klienter.NavAnsattKlient
@@ -131,6 +133,7 @@ class ApplicationContext(
     val leaderElectionHttpClient: HttpClient = httpClient(),
     val grunnlagKlientObo: GrunnlagKlient = GrunnlagKlientObo(config, httpClient()),
     val gosysOppgaveKlient: GosysOppgaveKlient = GosysOppgaveKlientImpl(config, httpClient()),
+    val brevApiHttpClient: BrevApiKlient = BrevApiKlientObo(config, httpClient()),
 ) {
     val httpPort = env.getOrDefault("HTTP_PORT", "8080").toInt()
     val saksbehandlerGroupIdsByKey = AzureGroup.values().associateWith { env.requireEnvValue(it.envKey) }
@@ -157,7 +160,6 @@ class ApplicationContext(
     val skjermingKlient = SkjermingKlient(skjermingHttpKlient, env.getValue("SKJERMING_URL"))
     val grunnlagKlient = GrunnlagKlientImpl(config, grunnlagHttpClient)
     val leaderElectionKlient = LeaderElection(env.getValue("ELECTOR_PATH"), leaderElectionHttpClient)
-
     val behandlingsHendelser = BehandlingsHendelserKafkaProducerImpl(rapid)
 
     // Metrikker
@@ -282,6 +284,7 @@ class ApplicationContext(
             sakDao = sakDao,
             hendelseDao = hendelseDao,
             oppgaveServiceNy = oppgaveServiceNy,
+            brevApiKlient = brevApiHttpClient,
         )
 
     val tilbakekrevingService =

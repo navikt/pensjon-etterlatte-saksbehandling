@@ -29,6 +29,10 @@ export function kanSeOppsummering(klage: Klage | null): boolean {
   return false
 }
 
+export function kanSeBrev(klage: Klage | null): boolean {
+  return klage !== null
+}
+
 export function KlageStegmeny() {
   const klage = useKlage()
 
@@ -36,6 +40,7 @@ export function KlageStegmeny() {
     <StegMenyWrapper>
       <KlageNavLenke path="formkrav" description="Vurder formkrav" enabled={true} />
       <KlageNavLenke path="vurdering" description="Vurder klagen" enabled={kanVurdereUtfall(klage) || true} />
+      <KlageNavLenke path="brev" description="Brev" enabled={kanSeBrev(klage) || true} />
       <KlageNavLenke path="oppsummering" description="Oppsummering" enabled={kanSeOppsummering(klage) || true} />
     </StegMenyWrapper>
   )

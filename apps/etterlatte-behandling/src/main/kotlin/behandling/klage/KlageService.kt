@@ -1,10 +1,14 @@
 package no.nav.etterlatte.behandling.klage
 
 import io.ktor.server.plugins.NotFoundException
+import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
+import no.nav.etterlatte.behandling.klienter.BrevApiKlient
 import no.nav.etterlatte.libs.common.behandling.Formkrav
+import no.nav.etterlatte.libs.common.behandling.InnstillingTilKabal
 import no.nav.etterlatte.libs.common.behandling.Kabalrespons
 import no.nav.etterlatte.libs.common.behandling.Klage
+import no.nav.etterlatte.libs.common.behandling.KlageBrevInnstilling
 import no.nav.etterlatte.libs.common.behandling.KlageHendelseType
 import no.nav.etterlatte.libs.common.behandling.KlageUtfall
 import no.nav.etterlatte.libs.common.behandling.KlageUtfallUtenBrev
@@ -49,6 +53,7 @@ class KlageServiceImpl(
     private val sakDao: SakDao,
     private val hendelseDao: HendelseDao,
     private val oppgaveServiceNy: OppgaveServiceNy,
+    private val brevApiKlient: BrevApiKlient,
 ) : KlageService {
     private val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
@@ -120,20 +125,55 @@ class KlageServiceImpl(
 
         val utfallMedBrev =
             when (utfall) {
+                // Vurder å slette brev hvis det finnes her? Så vi ikke polluter med hengende brev
                 is KlageUtfallUtenBrev.Omgjoering ->
                     KlageUtfall.Omgjoering(
                         omgjoering = utfall.omgjoering,
                         saksbehandler = Grunnlagsopplysning.Saksbehandler.create(saksbehandler.ident),
                     )
 
-                is KlageUtfallUtenBrev.DelvisOmgjoering -> TODO("Mangler riktig håndtering av brev")
-                is KlageUtfallUtenBrev.StadfesteVedtak -> TODO("Mangler riktig håndtering av brev")
+                is KlageUtfallUtenBrev.DelvisOmgjoering ->
+                    KlageUtfall.DelvisOmgjoering(
+                        omgjoering = utfall.omgjoering,
+                        innstilling =
+                            InnstillingTilKabal(
+                                lovhjemmel = utfall.innstilling.lovhjemmel,
+                                tekst = utfall.innstilling.tekst,
+                                brev = brevForInnstilling(klage, saksbehandler),
+                            ),
+                        saksbehandler = Grunnlagsopplysning.Saksbehandler.create(saksbehandler.ident),
+                    )
+
+                is KlageUtfallUtenBrev.StadfesteVedtak ->
+                    KlageUtfall.StadfesteVedtak(
+                        innstilling =
+                            InnstillingTilKabal(
+                                lovhjemmel = utfall.innstilling.lovhjemmel,
+                                tekst = utfall.innstilling.tekst,
+                                brev = brevForInnstilling(klage, saksbehandler),
+                            ),
+                        saksbehandler = Grunnlagsopplysning.Saksbehandler.create(saksbehandler.ident),
+                    )
             }
 
         val klageMedOppdatertUtfall = klage.oppdaterUtfall(utfallMedBrev)
         klageDao.lagreKlage(klageMedOppdatertUtfall)
 
         return klageMedOppdatertUtfall
+    }
+
+    private fun brevForInnstilling(
+        klage: Klage,
+        saksbehandler: Saksbehandler,
+    ): KlageBrevInnstilling {
+        return when (val utfall = klage.utfall) {
+            is KlageUtfall.DelvisOmgjoering -> utfall.innstilling.brev
+            is KlageUtfall.StadfesteVedtak -> utfall.innstilling.brev
+            else -> {
+                val brev = runBlocking { brevApiKlient.opprettKlageInnstillingsbrevISak(klage.sak.id, saksbehandler) }
+                KlageBrevInnstilling(brev.brevId)
+            }
+        }
     }
 
     override fun oppdaterKabalStatus(

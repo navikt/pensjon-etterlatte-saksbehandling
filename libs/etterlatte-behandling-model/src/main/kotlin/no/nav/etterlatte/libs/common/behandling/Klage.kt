@@ -173,7 +173,7 @@ class InnstillingTilKabal(val lovhjemmel: String, val tekst: String, val brev: K
 data class InnstillingTilKabalUtenBrev(val lovhjemmel: String, val tekst: String)
 
 // Placeholder for å holde på referansen til klagebrevet
-class KlageBrevInnstilling
+data class KlageBrevInnstilling(val brevId: Long)
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "utfall")
 sealed class KlageUtfallUtenBrev {

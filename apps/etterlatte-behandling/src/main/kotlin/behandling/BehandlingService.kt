@@ -158,23 +158,15 @@ class BehandlingServiceImpl(
             behandlingDao.avbrytBehandling(behandlingId).also {
                 val hendelserKnyttetTilBehandling =
                     grunnlagsendringshendelseDao.hentGrunnlagsendringshendelseSomErTattMedIBehandling(behandlingId)
-                try {
-                    oppgaveServiceNy.avbrytOppgaveUnderBehandling(behandlingId.toString(), saksbehandler)
+                oppgaveServiceNy.avbrytOppgaveUnderBehandling(behandlingId.toString(), saksbehandler)
 
-                    hendelserKnyttetTilBehandling.forEach { hendelse ->
-                        oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
-                            referanse = hendelse.id.toString(),
-                            sakId = behandling.sak.id,
-                            oppgaveKilde = OppgaveKilde.HENDELSE,
-                            oppgaveType = OppgaveType.VURDER_KONSEKVENS,
-                            merknad = hendelse.beskrivelse(),
-                        )
-                    }
-                } catch (e: Exception) {
-                    logger.error(
-                        "En feil oppstod under ryddingen i oppgavene til behandling / hendelse når" +
-                            "vi avbrøt en behandling, men ny oppgaveliste er ikke i bruk og feilen ignorerers",
-                        e,
+                hendelserKnyttetTilBehandling.forEach { hendelse ->
+                    oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
+                        referanse = hendelse.id.toString(),
+                        sakId = behandling.sak.id,
+                        oppgaveKilde = OppgaveKilde.HENDELSE,
+                        oppgaveType = OppgaveType.VURDER_KONSEKVENS,
+                        merknad = hendelse.beskrivelse(),
                     )
                 }
 

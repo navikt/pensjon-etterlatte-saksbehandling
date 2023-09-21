@@ -1,0 +1,1 @@
+ALTER TABLE oppgave ADD CONSTRAINT oppgave_sak_id_fkey FOREIGN KEY (sak_id) REFERENCES sak (id);

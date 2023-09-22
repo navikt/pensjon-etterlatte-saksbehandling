@@ -50,7 +50,7 @@ class TilbakekrevingDao(private val connection: () -> Connection) {
             statement.setJsonb(5, tilbakekreving.kravgrunnlag.toJsonNode())
             statement.executeUpdate()
         }
-        return hentTilbakekrevingNonNull(tilbakekreving.id)
+        return hentTilbakekrevingNonNull(tilbakekreving.id).also { require(it == tilbakekreving) }
     }
 
     private fun ResultSet.toTilbakekreving() =

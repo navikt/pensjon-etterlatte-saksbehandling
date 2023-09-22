@@ -28,10 +28,7 @@ class TilbakekrevingService(
         inTransaction {
             logger.info("Oppretter tilbakekreving=${kravgrunnlag.kravgrunnlagId} på sak=${kravgrunnlag.sakId}")
 
-            val sak =
-                sakDao.hentSak(kravgrunnlag.sakId.value) ?: throw Exception(
-                    "Eksisterer ikke sak=${kravgrunnlag.sakId.value} for kravgrunnlag=${kravgrunnlag.kravgrunnlagId}",
-                )
+            val sak = sakDao.hentSak(kravgrunnlag.sakId.value) ?: throw KravgrunnlagHarIkkeEksisterendeSak()
 
             val tilbakekreving =
                 tilbakekrevingDao.lagreTilbakekreving(

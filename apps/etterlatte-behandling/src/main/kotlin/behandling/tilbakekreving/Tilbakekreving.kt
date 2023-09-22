@@ -30,3 +30,5 @@ enum class TilbakekrevingStatus {
     OPPRETTET,
     UNDER_ARBEID,
 }
+
+class KravgrunnlagHarIkkeEksisterendeSak() : RuntimeException()

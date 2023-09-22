@@ -26,8 +26,15 @@ internal fun Route.tilbakekrevingRoutes(service: TilbakekrevingService) {
     route("/tilbakekreving") {
         post {
             medBody<Kravgrunnlag> {
-                service.opprettTilbakekreving(it)
-                call.respond(HttpStatusCode.OK)
+                try {
+                    service.opprettTilbakekreving(it)
+                    call.respond(HttpStatusCode.OK)
+                } catch (e: KravgrunnlagHarIkkeEksisterendeSak) {
+                    call.respond(
+                        HttpStatusCode.NotFound,
+                        "Eksisterer ikke sak=${it.sakId.value} for kravgrunnlag=${it.kravgrunnlagId}",
+                    )
+                }
             }
         }
     }

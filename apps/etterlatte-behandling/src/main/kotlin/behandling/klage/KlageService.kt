@@ -43,7 +43,7 @@ interface KlageService {
     ): Klage
 
     fun oppdaterKabalStatus(
-        sakId: Long,
+        klageId: UUID,
         kabalrespons: Kabalrespons,
     )
 }
@@ -177,7 +177,7 @@ class KlageServiceImpl(
     }
 
     override fun oppdaterKabalStatus(
-        sakId: Long,
+        klageId: UUID,
         kabalrespons: Kabalrespons,
-    ) = klageDao.oppdaterKabalStatus(sakId, kabalrespons)
+    ) = klageDao.oppdaterKabalStatus(klageId, kabalrespons)
 }

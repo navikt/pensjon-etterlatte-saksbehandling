@@ -16,7 +16,10 @@ internal fun Route.tilbakekrevingRoutes(service: TilbakekrevingService) {
     route("/api/tilbakekreving/{$TILBAKEKREVINGID_CALL_PARAMETER}") {
         get {
             val tilbakekreving = service.hentTilbakekreving(tilbakekrevingId)
-            call.respond(tilbakekreving)
+            when (tilbakekreving) {
+                null -> call.respond(HttpStatusCode.NotFound)
+                else -> call.respond(tilbakekreving)
+            }
         }
     }
 

@@ -51,10 +51,11 @@ inline val PipelineContext<*, ApplicationCall>.klageId: UUID
             "KlageId er ikke i path params"
         }
 
-inline val PipelineContext<*, ApplicationCall>.tilbakekrevingId: String
-    get() = requireNotNull(call.parameters[TILBAKEKREVINGID_CALL_PARAMETER]) {
-        "TilbakekrevingId er ikke i path params"
-    }
+inline val PipelineContext<*, ApplicationCall>.tilbakekrevingId: UUID
+    get() =
+        requireNotNull(call.parameters[TILBAKEKREVINGID_CALL_PARAMETER]?.let { UUID.fromString(it) }) {
+            "TilbakekrevingId er ikke i path params"
+        }
 
 suspend inline fun PipelineContext<*, ApplicationCall>.withBehandlingId(
     behandlingTilgangsSjekk: BehandlingTilgangsSjekk,

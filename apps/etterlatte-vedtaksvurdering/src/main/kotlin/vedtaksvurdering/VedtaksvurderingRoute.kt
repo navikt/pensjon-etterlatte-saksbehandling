@@ -15,10 +15,13 @@ import io.ktor.server.routing.route
 import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.sak.VedtakSak
 import no.nav.etterlatte.libs.common.sakId
 import no.nav.etterlatte.libs.common.tidspunkt.toNorskTid
 import no.nav.etterlatte.libs.common.vedtak.AttesterVedtakDto
+import no.nav.etterlatte.libs.common.vedtak.Behandling
 import no.nav.etterlatte.libs.common.vedtak.LoependeYtelseDTO
+import no.nav.etterlatte.libs.common.vedtak.VedtakSamordningDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.common.withBehandlingId
 import no.nav.etterlatte.libs.common.withSakId
@@ -172,7 +175,7 @@ fun Route.samordningsvedtakRoute(service: VedtaksvurderingService) {
                     ?: return@get call.respond(HttpStatusCode.BadRequest, "fnr ikke angitt")
 
             val vedtaksliste = service.finnFerdigstilteVedtak(fnr, virkFom)
-            call.respond(vedtaksliste.map { it.toDto() })
+            call.respond(vedtaksliste.map { it.toSamordningsvedtakDto() })
         }
 
         get("/{vedtakId}") {
@@ -180,7 +183,7 @@ fun Route.samordningsvedtakRoute(service: VedtaksvurderingService) {
 
             val vedtak = service.hentVedtak(vedtakId)
             if (vedtak != null) {
-                call.respond(vedtak.toDto())
+                call.respond(vedtak.toSamordningsvedtakDto())
             } else {
                 call.respond(HttpStatusCode.NoContent)
             }
@@ -215,4 +218,17 @@ data class VedtakSammendragDto(
     val datoFattet: ZonedDateTime?,
     val attestant: String?,
     val datoAttestert: ZonedDateTime?,
+)
+
+private fun Vedtak.toSamordningsvedtakDto() = VedtakSamordningDto(
+    vedtakId = id,
+    status = status,
+    virkningstidspunkt = virkningstidspunkt,
+    sak = VedtakSak(soeker.value, sakType, sakId),
+    behandling = Behandling(behandlingType, behandlingId, revurderingAarsak, revurderingInfo),
+    type = type,
+    vedtakFattet = vedtakFattet,
+    attestasjon = attestasjon,
+    beregning = beregning,
+    avkorting = avkorting
 )

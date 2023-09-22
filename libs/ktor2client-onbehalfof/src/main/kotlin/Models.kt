@@ -10,6 +10,7 @@ import io.ktor.http.isSuccess
 data class Resource(
     val clientId: String,
     val url: String,
+    val additionalHeaders: Map<String, String>? = null,
     val response: Any? = null,
 ) {
     fun addResponse(response: Any?): Resource = this.copy(response = response)

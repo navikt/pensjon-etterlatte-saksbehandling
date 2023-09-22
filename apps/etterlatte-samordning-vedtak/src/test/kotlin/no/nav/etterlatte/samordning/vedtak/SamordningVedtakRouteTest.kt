@@ -4,6 +4,7 @@ import com.typesafe.config.ConfigFactory
 import io.kotest.matchers.shouldBe
 import io.ktor.client.request.get
 import io.ktor.client.request.header
+import io.ktor.client.request.parameter
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
@@ -24,6 +25,7 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import java.time.LocalDate
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class SamordningVedtakRouteTest {
@@ -73,7 +75,7 @@ class SamordningVedtakRouteTest {
     @Test
     fun `skal gi 200 med gyldig token inkl scope`() {
         coEvery { samordningVedtakService.hentVedtak(any<Long>(), any<String>()) } returns
-            mockk<SamordningVedtakDto>()
+            opprettSamordningVedtakDto()
 
         testApplication {
             environment { config = applicationConfig }
@@ -93,6 +95,46 @@ class SamordningVedtakRouteTest {
         }
     }
 
+    @Test
+    fun `skal gi 200 med gyldig token inkl scope - hent vedtaksliste med virkfom og fnr`() {
+        val virkFom = LocalDate.now()
+        val fnr = "01015012345"
+
+        coEvery {
+            samordningVedtakService.hentVedtaksliste(
+                virkFom = virkFom,
+                fnr = fnr,
+                organisasjonsnummer = any<String>(),
+            )
+        } returns
+            listOf(opprettSamordningVedtakDto())
+
+        testApplication {
+            environment { config = applicationConfig }
+            application { samordningVedtakApi() }
+
+            val response =
+                client.get("/api/vedtak") {
+                    parameter("virkFom", virkFom)
+                    header("fnr", fnr)
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    header(
+                        HttpHeaders.Authorization,
+                        "Bearer ${token("nav:etterlatteytelser:vedtaksinformasjon.read")}",
+                    )
+                }
+
+            response.status shouldBe HttpStatusCode.OK
+            coVerify {
+                samordningVedtakService.hentVedtaksliste(
+                    virkFom = virkFom,
+                    fnr = fnr,
+                    organisasjonsnummer = any<String>(),
+                )
+            }
+        }
+    }
+
     private fun Application.samordningVedtakApi() {
         restModule(
             log,
@@ -102,8 +144,8 @@ class SamordningVedtakRouteTest {
 
     private fun token(maskinportenScope: String? = null): String {
         val claims = mutableMapOf<String, Any>()
-        claims.put("consumer", mapOf("ID" to "0192:0123456789"))
-        maskinportenScope?.let { claims.put("scope", maskinportenScope) }
+        claims["consumer"] = mapOf("ID" to "0192:0123456789")
+        maskinportenScope?.let { claims["scope"] = it }
 
         return server.issueToken(
             issuerId = ISSUER_ID,
@@ -144,3 +186,15 @@ fun buildTestApplicationConfigurationForOauth(
         ),
     ),
 )
+
+fun opprettSamordningVedtakDto() =
+    SamordningVedtakDto(
+        vedtakId = 1L,
+        sakstype = "OMS",
+        virkningsdato = LocalDate.now().withDayOfMonth(1),
+        opphoersdato = null,
+        type = SamordningVedtakType.START,
+        anvendtTrygdetid = 40,
+        aarsak = null,
+        perioder = emptyList(),
+    )

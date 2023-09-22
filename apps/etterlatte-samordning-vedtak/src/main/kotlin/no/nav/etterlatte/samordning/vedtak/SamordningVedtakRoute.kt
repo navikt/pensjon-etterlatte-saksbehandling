@@ -4,41 +4,12 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.call
 import io.ktor.server.response.respond
+import io.ktor.server.response.respondNullable
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.route
 import no.nav.etterlatte.libs.ktor.hentTokenClaims
 import java.time.LocalDate
-import kotlin.random.Random
-
-data class SamordningVedtakDto(
-    val vedtakId: Long,
-    val sakstype: String,
-    val virkningsdato: LocalDate,
-    val opphoersdato: LocalDate?,
-    val type: SamordningVedtakType,
-    val aarsak: String?,
-    val anvendtTrygdetid: Int,
-    val perioder: List<SamordningVedtakPeriode> = listOf(),
-)
-
-data class SamordningVedtakPeriode(
-    val fom: LocalDate,
-    val tom: LocalDate? = null,
-    val omstillingsstoenadBrutto: Int,
-    val omstillingsstoenadNetto: Int,
-)
-
-enum class SamordningVedtakType {
-    START,
-    ENDRING,
-    OPPHOER,
-}
-
-enum class SamordningVedtakAarsak {
-    INNTEKT,
-    ANNET,
-}
 
 fun Route.samordningVedtakRoute(samordningVedtakService: SamordningVedtakService) {
     route("ping") {
@@ -50,15 +21,20 @@ fun Route.samordningVedtakRoute(samordningVedtakService: SamordningVedtakService
     route("api/vedtak") {
         get("{vedtakId}") {
             val vedtakId = requireNotNull(call.parameters["vedtakId"]).toLong()
-            val organisasjonsnr = call.orgNummer
 
-            // Fjern catch sammen med dummy data
-            val dto = runCatching { samordningVedtakService.hentVedtak(vedtakId, organisasjonsnr) }
+            val samordningVedtakDto =
+                try {
+                    samordningVedtakService.hentVedtak(
+                        vedtakId = vedtakId,
+                        organisasjonsnummer = call.orgNummer,
+                    )
+                } catch (e: VedtakFeilSakstypeException) {
+                    call.respond(HttpStatusCode.Unauthorized, "Ikke tilgang til sakstype")
+                } catch (e: IllegalArgumentException) {
+                    call.respondNullable(HttpStatusCode.BadRequest, e.message)
+                }
 
-            val dummystart = LocalDate.now().withDayOfMonth(1)
-            val vedtaksinfo = dummySamordningVedtakDto(dummystart, vedtakId)
-
-            call.respond(vedtaksinfo)
+            call.respond(samordningVedtakDto)
         }
 
         get {
@@ -70,33 +46,21 @@ fun Route.samordningVedtakRoute(samordningVedtakService: SamordningVedtakService
                 call.request.headers["fnr"]
                     ?: return@get call.respond(HttpStatusCode.BadRequest, "fnr ikke angitt")
 
-            val vedtaksinfo = dummySamordningVedtakDto(virkFom, Random.nextLong())
+            val samordningVedtakDtos =
+                try {
+                    samordningVedtakService.hentVedtaksliste(
+                        virkFom = virkFom,
+                        fnr = fnr,
+                        organisasjonsnummer = call.orgNummer,
+                    )
+                } catch (e: IllegalArgumentException) {
+                    call.respondNullable(HttpStatusCode.BadRequest, e.message)
+                }
 
-            call.respond(listOf(vedtaksinfo))
+            call.respond(samordningVedtakDtos)
         }
     }
 }
-
-private fun dummySamordningVedtakDto(
-    virkFom: LocalDate,
-    vedtakId: Long,
-) = SamordningVedtakDto(
-    vedtakId = vedtakId,
-    sakstype = "OMS",
-    virkningsdato = virkFom,
-    opphoersdato = null,
-    type = SamordningVedtakType.START,
-    aarsak = null,
-    anvendtTrygdetid = 40,
-    perioder =
-        listOf(
-            SamordningVedtakPeriode(
-                fom = virkFom,
-                omstillingsstoenadBrutto = 12000,
-                omstillingsstoenadNetto = 9500,
-            ),
-        ),
-)
 
 inline val ApplicationCall.orgNummer: String
     get() {

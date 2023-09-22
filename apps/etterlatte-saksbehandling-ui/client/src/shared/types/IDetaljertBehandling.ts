@@ -69,6 +69,12 @@ export interface IBoddEllerArbeidetUtlandet {
   boddEllerArbeidetUtlandet: boolean
   kilde: KildeSaksbehandler
   begrunnelse: string
+  boddArbeidetIkkeEosEllerAvtaleland?: boolean
+  boddArbeidetEosNordiskKonvensjon?: boolean
+  boddArbeidetAvtaleland?: boolean
+  vurdereAvoededsTrygdeavtale?: boolean
+  norgeErBehandlendeland?: boolean
+  skalSendeKravpakke?: boolean
 }
 
 export interface IGyldighetResultat {

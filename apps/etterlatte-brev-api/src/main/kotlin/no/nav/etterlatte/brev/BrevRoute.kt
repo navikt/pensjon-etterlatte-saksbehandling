@@ -25,7 +25,7 @@ fun Route.brevRoute(
     service: BrevService,
     behandlingKlient: BehandlingKlient,
 ) {
-    val logger = LoggerFactory.getLogger("no.nav.etterlatte.brev.VedaksbrevRoute")
+    val logger = LoggerFactory.getLogger("no.nav.etterlatte.brev.BrevRoute")
 
     route("brev/{id}") {
         get {

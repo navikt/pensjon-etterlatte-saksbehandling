@@ -16,6 +16,30 @@ interface BrevApiKlient {
         sakId: Long,
         brukerTokenInfo: BrukerTokenInfo,
     ): OpprettetBrevDto
+
+    suspend fun ferdigstillBrev(
+        sakId: Long,
+        brevId: Long,
+        brukerTokenInfo: BrukerTokenInfo,
+    )
+
+    /**
+     * @return journalpostId til brevets journalpost
+     */
+    suspend fun journalfoerBrev(
+        sakId: Long,
+        brevId: Long,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): String
+
+    /**
+     * @return bestillingsId for distribusjonen
+     */
+    suspend fun distribuerBrev(
+        sakId: Long,
+        brevId: Long,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): String
 }
 
 class BrevApiKlientObo(config: Config, client: HttpClient) : BrevApiKlient {
@@ -42,6 +66,79 @@ class BrevApiKlientObo(config: Config, client: HttpClient) : BrevApiKlient {
                 success = { resource ->
                     resource.response?.let { objectMapper.readValue(it.toString()) }
                         ?: throw RuntimeException("Fikk ikke en riktig respons fra oppretting av brev")
+                },
+                failure = { errorResponse -> throw errorResponse },
+            )
+        } catch (e: Exception) {
+            throw e
+        }
+    }
+
+    override suspend fun ferdigstillBrev(
+        sakId: Long,
+        brevId: Long,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {
+        try {
+            downstreamResourceClient.post(
+                resource =
+                    Resource(
+                        clientId = clientId,
+                        url = "$resourceUrl/api/brev/$brevId/ferdigstill?sakId=$sakId",
+                    ),
+                brukerTokenInfo = brukerTokenInfo,
+                postBody = Unit,
+            ).mapBoth(
+                success = { resource -> resource },
+                failure = { errorResponse -> throw errorResponse },
+            )
+        } catch (e: Exception) {
+            throw e
+        }
+    }
+
+    override suspend fun journalfoerBrev(
+        sakId: Long,
+        brevId: Long,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): String {
+        try {
+            return downstreamResourceClient.post(
+                resource =
+                    Resource(
+                        clientId = clientId,
+                        url = "$resourceUrl/api/brev/$brevId/journalfoer?sakId=$sakId",
+                    ),
+                brukerTokenInfo = brukerTokenInfo,
+                postBody = Unit,
+            ).mapBoth(
+                success = { resource ->
+                    resource.response!!.toString()
+                },
+                failure = { errorResponse -> throw errorResponse },
+            )
+        } catch (e: Exception) {
+            throw e
+        }
+    }
+
+    override suspend fun distribuerBrev(
+        sakId: Long,
+        brevId: Long,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): String {
+        try {
+            return downstreamResourceClient.post(
+                resource =
+                    Resource(
+                        clientId = clientId,
+                        url = "$resourceUrl/api/brev/$brevId/distribuer?sakId=$sakId",
+                    ),
+                brukerTokenInfo = brukerTokenInfo,
+                postBody = Unit,
+            ).mapBoth(
+                success = { resource ->
+                    resource.response!!.toString()
                 },
                 failure = { errorResponse -> throw errorResponse },
             )

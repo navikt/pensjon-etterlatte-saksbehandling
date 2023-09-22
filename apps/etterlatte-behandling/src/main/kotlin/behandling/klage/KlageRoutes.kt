@@ -99,6 +99,18 @@ internal fun Route.klageRoutes(
                     }
                 }
             }
+
+            post("ferdigstill") {
+                hvisEnabled(KlageFeatureToggle.KanBrukeKlageToggle) {
+                    kunSaksbehandler { saksbehandler ->
+                        val ferdigstiltKlage =
+                            inTransaction {
+                                klageService.ferdigstillKlage(klageId, saksbehandler)
+                            }
+                        call.respond(ferdigstiltKlage)
+                    }
+                }
+            }
         }
 
         get("sak/{$SAKID_CALL_PARAMETER}") {

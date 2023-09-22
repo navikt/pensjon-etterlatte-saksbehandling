@@ -64,6 +64,18 @@ data class Kabalrespons(
     val resultat: BehandlingResultat,
 )
 
+data class SendtInnstillingsbrev(
+    val journalfoerTidspunkt: Tidspunkt,
+    val sendtKabalTidspunkt: Tidspunkt,
+    val brevId: Long,
+    val journalpostId: String,
+)
+
+data class KlageResultat(
+    val opprettetRevurderingId: UUID?,
+    val sendtInnstillingsbrev: SendtInnstillingsbrev?,
+)
+
 data class Klage(
     val id: UUID,
     val sak: Sak,
@@ -72,6 +84,7 @@ data class Klage(
     val kabalStatus: KabalStatus?,
     val formkrav: FormkravMedBeslutter?,
     val utfall: KlageUtfall?,
+    val resultat: KlageResultat?,
 ) {
     fun oppdaterFormkrav(
         formkrav: Formkrav,
@@ -110,6 +123,19 @@ data class Klage(
         )
     }
 
+    fun ferdigstill(resultat: KlageResultat): Klage {
+        if (!kanFerdigstille(this)) {
+            throw IllegalStateException(
+                "Kan ikke ferdigstille klagen med id=${this.id} med resultatet $resultat " +
+                    "på grunn av status til klagen (${this.status})",
+            )
+        }
+        return this.copy(
+            resultat = resultat,
+            status = KlageStatus.FERDIGSTILT,
+        )
+    }
+
     companion object {
         fun ny(sak: Sak): Klage {
             return Klage(
@@ -120,6 +146,7 @@ data class Klage(
                 kabalStatus = null,
                 formkrav = null,
                 utfall = null,
+                resultat = null,
             )
         }
 
@@ -129,6 +156,19 @@ data class Klage(
 
         fun kanOppdatereUtfall(klage: Klage): Boolean {
             return KlageStatus.kanOppdatereUtfall(klage.status)
+        }
+
+        fun kanFerdigstille(klage: Klage): Boolean {
+            return when (klage.status) {
+                KlageStatus.UTFALL_VURDERT -> {
+                    klage.utfall != null
+                }
+                KlageStatus.FORMKRAV_IKKE_OPPFYLT -> {
+                    // TODO("Støtt avslag på formkrav på klage")
+                    false
+                }
+                else -> false
+            }
         }
     }
 }
@@ -172,7 +212,6 @@ class InnstillingTilKabal(val lovhjemmel: String, val tekst: String, val brev: K
 
 data class InnstillingTilKabalUtenBrev(val lovhjemmel: String, val tekst: String)
 
-// Placeholder for å holde på referansen til klagebrevet
 data class KlageBrevInnstilling(val brevId: Long)
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "utfall")
@@ -235,4 +274,5 @@ data class FormkravMedBeslutter(
 
 enum class KlageHendelseType {
     OPPRETTET,
+    FERDIGSTILT,
 }

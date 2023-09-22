@@ -37,10 +37,10 @@ import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsTyper
 import no.nav.etterlatte.libs.common.gyldigSoeknad.VurderingsResultat
 import no.nav.etterlatte.libs.common.gyldigSoeknad.VurdertGyldighet
-import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveNy
-import no.nav.etterlatte.libs.common.oppgaveNy.SaksbehandlerEndringDto
-import no.nav.etterlatte.libs.common.oppgaveNy.VedtakEndringDTO
-import no.nav.etterlatte.libs.common.oppgaveNy.VedtakOppgaveDTO
+import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
+import no.nav.etterlatte.libs.common.oppgave.SaksbehandlerEndringDto
+import no.nav.etterlatte.libs.common.oppgave.VedtakEndringDTO
+import no.nav.etterlatte.libs.common.oppgave.VedtakOppgaveDTO
 import no.nav.etterlatte.libs.common.pdlhendelse.Adressebeskyttelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
@@ -139,7 +139,7 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
                 it.body<DetaljertBehandling>()
             }
 
-            val oppgaver: List<OppgaveNy> =
+            val oppgaver: List<OppgaveIntern> =
                 client.get("/api/nyeoppgaver") {
                     addAuthToken(tokenSaksbehandler)
                     header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
@@ -303,7 +303,7 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
                 assertEquals(HttpStatusCode.OK, it.status)
             }
 
-            val oppgaveroppgaveliste: List<OppgaveNy> =
+            val oppgaveroppgaveliste: List<OppgaveIntern> =
                 client.get("/api/nyeoppgaver") {
                     addAuthToken(tokenAttestant)
                     header(HttpHeaders.ContentType, ContentType.Application.Json.toString())

@@ -1,4 +1,4 @@
-package no.nav.etterlatte.oppgave
+package no.nav.etterlatte.oppgaveGosys
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.michaelbull.result.mapBoth

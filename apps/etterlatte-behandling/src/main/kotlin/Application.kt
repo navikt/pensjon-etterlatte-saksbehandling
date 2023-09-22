@@ -38,7 +38,7 @@ import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.libs.ktor.setReady
-import no.nav.etterlatte.oppgaveny.oppgaveRoutesNy
+import no.nav.etterlatte.oppgave.oppgaveRoutes
 import no.nav.etterlatte.sak.sakSystemRoutes
 import no.nav.etterlatte.sak.sakWebRoutes
 import no.nav.etterlatte.tilgangsstyring.adressebeskyttelsePlugin
@@ -93,7 +93,7 @@ fun Application.module(context: ApplicationContext) {
                 sakService = sakService,
                 behandlingService = behandlingService,
                 grunnlagsendringshendelseService = grunnlagsendringshendelseService,
-                oppgaveServiceNy = oppgaveServiceNy,
+                oppgaveService = oppgaveService,
             )
             klageRoutes(klageService = klageService, featureToggleService = featureToggleService)
             tilbakekrevingRoutes(service = tilbakekrevingService)
@@ -116,11 +116,11 @@ fun Application.module(context: ApplicationContext) {
             behandlingsstatusRoutes(behandlingsstatusService = behandlingsStatusService)
             behandlingVedtakRoute(
                 behandlingsstatusService = behandlingsStatusService,
-                oppgaveService = oppgaveServiceNy,
+                oppgaveService = oppgaveService,
                 behandlingService = behandlingService,
             )
-            oppgaveRoutesNy(
-                service = oppgaveServiceNy,
+            oppgaveRoutes(
+                service = oppgaveService,
                 gosysOppgaveService = gosysOppgaveService,
             )
             grunnlagsendringshendelseRoute(grunnlagsendringshendelseService = grunnlagsendringshendelseService)

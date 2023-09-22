@@ -3,8 +3,8 @@ package no.nav.etterlatte.behandling.tilbakekreving
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveKilde
-import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveType
+import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
+import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tilbakekreving.Grunnlagsbeloep
@@ -20,7 +20,7 @@ import no.nav.etterlatte.libs.common.tilbakekreving.Periode
 import no.nav.etterlatte.libs.common.tilbakekreving.SakId
 import no.nav.etterlatte.libs.common.tilbakekreving.UUID30
 import no.nav.etterlatte.libs.common.tilbakekreving.VedtakId
-import no.nav.etterlatte.oppgaveny.OppgaveServiceNy
+import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.sak.SakDao
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -30,7 +30,7 @@ import java.time.YearMonth
 class TilbakekrevingService(
     private val sakDao: SakDao,
     private val hendelseDao: HendelseDao,
-    private val oppgaveServiceNy: OppgaveServiceNy,
+    private val oppgaveService: OppgaveService,
 ) {
     private val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
@@ -95,7 +95,7 @@ class TilbakekrevingService(
 
     fun opprettTilbakekreving(kravgrunnlag: Kravgrunnlag) =
         inTransaction {
-            oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
+            oppgaveService.opprettNyOppgaveMedSakOgReferanse(
                 referanse = kravgrunnlag.kravgrunnlagId.value.toString(),
                 sakId = kravgrunnlag.sakId.value,
                 oppgaveKilde = OppgaveKilde.EKSTERN,

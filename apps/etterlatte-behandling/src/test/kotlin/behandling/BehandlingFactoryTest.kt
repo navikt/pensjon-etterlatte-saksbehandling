@@ -41,13 +41,13 @@ import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
-import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveKilde
-import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveType
-import no.nav.etterlatte.libs.common.oppgaveNy.opprettNyOppgaveMedReferanseOgSak
+import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
+import no.nav.etterlatte.libs.common.oppgave.OppgaveType
+import no.nav.etterlatte.libs.common.oppgave.opprettNyOppgaveMedReferanseOgSak
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
-import no.nav.etterlatte.oppgaveny.OppgaveServiceNy
+import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.revurdering
 import no.nav.etterlatte.sak.SakService
 import no.nav.etterlatte.sak.SakServiceFeatureToggle
@@ -68,7 +68,7 @@ class BehandlingFactoryTest {
     private val featureToggleService = mockk<FeatureToggleService>()
     private val grunnlagsendringshendelseDao = mockk<GrunnlagsendringshendelseDao>()
     private val grunnlagService = mockk<GrunnlagService>(relaxUnitFun = true)
-    private val oppgaveService = mockk<OppgaveServiceNy>()
+    private val oppgaveService = mockk<OppgaveService>()
     private val behandlingService = mockk<BehandlingService>()
     private val sakServiceMock = mockk<SakService>()
     private val gyldighetsproevingService = mockk<GyldighetsproevingService>(relaxUnitFun = true)

@@ -46,9 +46,9 @@ import no.nav.etterlatte.libs.common.toObjectNode
 import no.nav.etterlatte.libs.database.POSTGRES_VERSION
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
-import no.nav.etterlatte.oppgave.GosysApiOppgave
-import no.nav.etterlatte.oppgave.GosysOppgaveKlient
-import no.nav.etterlatte.oppgave.GosysOppgaver
+import no.nav.etterlatte.oppgaveGosys.GosysApiOppgave
+import no.nav.etterlatte.oppgaveGosys.GosysOppgaveKlient
+import no.nav.etterlatte.oppgaveGosys.GosysOppgaver
 import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.etterlatte.token.Claims
 import no.nav.etterlatte.token.Fagsaksystem

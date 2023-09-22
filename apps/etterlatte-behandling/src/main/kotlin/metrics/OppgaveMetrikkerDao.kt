@@ -1,6 +1,6 @@
 package no.nav.etterlatte.metrics
 
-import no.nav.etterlatte.libs.common.oppgaveNy.Status
+import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.database.toList
 import org.slf4j.LoggerFactory
 import java.sql.ResultSet

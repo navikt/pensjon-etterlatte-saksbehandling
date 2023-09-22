@@ -21,10 +21,10 @@ import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
-import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveKilde
-import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveType
+import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
+import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.oppgaveny.OppgaveServiceNy
+import no.nav.etterlatte.oppgave.OppgaveService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.util.UUID
@@ -50,7 +50,7 @@ interface ManueltOpphoerService {
 }
 
 class RealManueltOpphoerService(
-    private val oppgaveService: OppgaveServiceNy,
+    private val oppgaveService: OppgaveService,
     private val behandlingDao: BehandlingDao,
     private val behandlingHendelser: BehandlingHendelserKafkaProducer,
     private val hendelseDao: HendelseDao,

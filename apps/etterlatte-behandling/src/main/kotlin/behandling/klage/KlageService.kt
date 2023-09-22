@@ -13,10 +13,10 @@ import no.nav.etterlatte.libs.common.behandling.KlageHendelseType
 import no.nav.etterlatte.libs.common.behandling.KlageUtfall
 import no.nav.etterlatte.libs.common.behandling.KlageUtfallUtenBrev
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
-import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveKilde
-import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveType
+import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
+import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.oppgaveny.OppgaveServiceNy
+import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.sak.SakDao
 import no.nav.etterlatte.token.Saksbehandler
 import org.slf4j.Logger
@@ -52,7 +52,7 @@ class KlageServiceImpl(
     private val klageDao: KlageDao,
     private val sakDao: SakDao,
     private val hendelseDao: HendelseDao,
-    private val oppgaveServiceNy: OppgaveServiceNy,
+    private val oppgaveService: OppgaveService,
     private val brevApiKlient: BrevApiKlient,
 ) : KlageService {
     private val logger: Logger = LoggerFactory.getLogger(this::class.java)
@@ -65,7 +65,7 @@ class KlageServiceImpl(
 
         klageDao.lagreKlage(klage)
 
-        oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
+        oppgaveService.opprettNyOppgaveMedSakOgReferanse(
             referanse = klage.id.toString(),
             sakId = sakId,
             oppgaveKilde = OppgaveKilde.EKSTERN,

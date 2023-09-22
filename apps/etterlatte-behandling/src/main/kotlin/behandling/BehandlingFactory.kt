@@ -28,13 +28,13 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
-import no.nav.etterlatte.oppgaveny.OppgaveServiceNy
+import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.sak.SakService
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 
 class BehandlingFactory(
-    private val oppgaveService: OppgaveServiceNy,
+    private val oppgaveService: OppgaveService,
     private val grunnlagService: GrunnlagService,
     private val revurderingService: RevurderingService,
     private val gyldighetsproevingService: GyldighetsproevingService,

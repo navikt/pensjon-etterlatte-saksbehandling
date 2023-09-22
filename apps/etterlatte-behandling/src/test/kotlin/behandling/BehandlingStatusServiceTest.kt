@@ -21,12 +21,12 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Utenlandstilsnitt
 import no.nav.etterlatte.libs.common.behandling.UtenlandstilsnittType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
-import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveKilde
-import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveNy
-import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveType
-import no.nav.etterlatte.libs.common.oppgaveNy.Status
+import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
+import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
+import no.nav.etterlatte.libs.common.oppgave.OppgaveType
+import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.oppgaveny.OppgaveServiceNy
+import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.vedtaksvurdering.VedtakHendelse
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -76,7 +76,7 @@ internal class BehandlingStatusServiceTest {
                 every { hentBehandling(behandlingId) } returns behandling
             }
         val grlService = mockk<GrunnlagsendringshendelseService>()
-        val oppgaveService = mockk<OppgaveServiceNy>()
+        val oppgaveService = mockk<OppgaveService>()
         val featureToggleService =
             mockk<FeatureToggleService> {
                 every { isEnabled(any(), any()) } returns true
@@ -132,7 +132,7 @@ internal class BehandlingStatusServiceTest {
             }
         val grlService = mockk<GrunnlagsendringshendelseService>()
         val oppgave =
-            OppgaveNy(
+            OppgaveIntern(
                 id = UUID.randomUUID(),
                 status = Status.NY,
                 enhet = Enheter.defaultEnhet.enhetNr,
@@ -148,7 +148,7 @@ internal class BehandlingStatusServiceTest {
                 frist = Tidspunkt.now(),
             )
         val oppgaveService =
-            mockk<OppgaveServiceNy> {
+            mockk<OppgaveService> {
                 every {
                     opprettNyOppgaveMedSakOgReferanse(
                         behandlingId.toString(),

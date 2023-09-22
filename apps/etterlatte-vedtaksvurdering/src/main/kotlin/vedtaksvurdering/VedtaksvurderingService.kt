@@ -6,8 +6,8 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.oppgaveNy.VedtakEndringDTO
-import no.nav.etterlatte.libs.common.oppgaveNy.VedtakOppgaveDTO
+import no.nav.etterlatte.libs.common.oppgave.VedtakEndringDTO
+import no.nav.etterlatte.libs.common.oppgave.VedtakOppgaveDTO
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.REVURDERING_AARSAK

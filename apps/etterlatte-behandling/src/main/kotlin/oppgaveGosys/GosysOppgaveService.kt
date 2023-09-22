@@ -1,12 +1,12 @@
-package no.nav.etterlatte.oppgave
+package no.nav.etterlatte.oppgaveGosys
 
 import com.github.benmanes.caffeine.cache.Caffeine
 import no.nav.etterlatte.common.klienter.PdlKlient
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.oppgaveNy.GosysOppgave
-import no.nav.etterlatte.libs.common.oppgaveNy.Status
+import no.nav.etterlatte.libs.common.oppgave.GosysOppgave
+import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.token.BrukerTokenInfo
 import java.time.Duration

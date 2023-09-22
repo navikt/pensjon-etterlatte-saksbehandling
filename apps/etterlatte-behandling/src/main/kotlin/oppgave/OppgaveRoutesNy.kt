@@ -1,4 +1,4 @@
-package no.nav.etterlatte.oppgaveny
+package no.nav.etterlatte.oppgave
 
 import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
@@ -20,17 +20,17 @@ import no.nav.etterlatte.libs.common.behandlingsId
 import no.nav.etterlatte.libs.common.gosysOppgaveId
 import no.nav.etterlatte.libs.common.kunSaksbehandler
 import no.nav.etterlatte.libs.common.kunSystembruker
+import no.nav.etterlatte.libs.common.oppgave.RedigerFristGosysRequest
+import no.nav.etterlatte.libs.common.oppgave.RedigerFristRequest
+import no.nav.etterlatte.libs.common.oppgave.SaksbehandlerEndringDto
+import no.nav.etterlatte.libs.common.oppgave.SaksbehandlerEndringGosysDto
 import no.nav.etterlatte.libs.common.oppgaveId
-import no.nav.etterlatte.libs.common.oppgaveNy.RedigerFristGosysRequest
-import no.nav.etterlatte.libs.common.oppgaveNy.RedigerFristRequest
-import no.nav.etterlatte.libs.common.oppgaveNy.SaksbehandlerEndringDto
-import no.nav.etterlatte.libs.common.oppgaveNy.SaksbehandlerEndringGosysDto
 import no.nav.etterlatte.libs.common.sakId
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
-import no.nav.etterlatte.oppgave.GosysOppgaveService
+import no.nav.etterlatte.oppgaveGosys.GosysOppgaveService
 
-internal fun Route.oppgaveRoutesNy(
-    service: OppgaveServiceNy,
+internal fun Route.oppgaveRoutes(
+    service: OppgaveService,
     gosysOppgaveService: GosysOppgaveService,
 ) {
     route("/api/nyeoppgaver") {

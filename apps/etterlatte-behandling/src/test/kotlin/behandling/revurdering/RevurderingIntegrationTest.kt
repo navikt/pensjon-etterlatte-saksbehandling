@@ -31,9 +31,9 @@ import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
-import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveKilde
-import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveType
-import no.nav.etterlatte.libs.common.oppgaveNy.Status
+import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
+import no.nav.etterlatte.libs.common.oppgave.OppgaveType
+import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
@@ -97,7 +97,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
         val hendelser = spyk(applicationContext.behandlingsHendelser)
         val featureToggleService = mockk<FeatureToggleService>()
         val grunnlagService = spyk(applicationContext.grunnlagsService)
-        val oppgaveService = spyk(applicationContext.oppgaveServiceNy)
+        val oppgaveService = spyk(applicationContext.oppgaveService)
 
         every {
             featureToggleService.isEnabled(
@@ -170,7 +170,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
         val hendelser = spyk(applicationContext.behandlingsHendelser)
         val featureToggleService = mockk<FeatureToggleService>()
         val grunnlagService = spyk(applicationContext.grunnlagsService)
-        val oppgaveService = spyk(applicationContext.oppgaveServiceNy)
+        val oppgaveService = spyk(applicationContext.oppgaveService)
 
         every {
             featureToggleService.isEnabled(
@@ -317,7 +317,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
 
         assertNull(
             RevurderingServiceImpl(
-                applicationContext.oppgaveServiceNy,
+                applicationContext.oppgaveService,
                 applicationContext.grunnlagsService,
                 hendelser,
                 featureToggleService,
@@ -344,7 +344,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
         val hendelser = spyk(applicationContext.behandlingsHendelser)
         val featureToggleService = mockk<FeatureToggleService>()
         val grunnlagService = spyk(applicationContext.grunnlagsService)
-        val oppgaveService = spyk(applicationContext.oppgaveServiceNy)
+        val oppgaveService = spyk(applicationContext.oppgaveService)
         val saksbehandler = Saksbehandler("", "saksbehandler", null)
 
         every {
@@ -425,7 +425,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
 
         val oppgave =
             inTransaction {
-                applicationContext.oppgaveServiceNy.opprettNyOppgaveMedSakOgReferanse(
+                applicationContext.oppgaveService.opprettNyOppgaveMedSakOgReferanse(
                     referanse = hendelse.id.toString(),
                     sakId = sak.id,
                     oppgaveKilde = OppgaveKilde.HENDELSE,
@@ -434,7 +434,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
                 )
             }
 
-        applicationContext.oppgaveServiceNy.tildelSaksbehandler(
+        applicationContext.oppgaveService.tildelSaksbehandler(
             oppgaveId = oppgave.id,
             saksbehandler = saksbehandler.ident,
         )
@@ -495,7 +495,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
     fun `Skal få bad request hvis man mangler hendelsesid`() {
         val revurderingService =
             RevurderingServiceImpl(
-                applicationContext.oppgaveServiceNy,
+                applicationContext.oppgaveService,
                 applicationContext.grunnlagsService,
                 applicationContext.behandlingsHendelser,
                 applicationContext.featureToggleService,
@@ -508,7 +508,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
             )
         val behandlingFactory =
             BehandlingFactory(
-                oppgaveService = applicationContext.oppgaveServiceNy,
+                oppgaveService = applicationContext.oppgaveService,
                 grunnlagService = applicationContext.grunnlagsService,
                 revurderingService = applicationContext.revurderingService,
                 gyldighetsproevingService = applicationContext.gyldighetsproevingService,
@@ -540,7 +540,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
     fun `Skal få bad request hvis man mangler forrige iverksattebehandling`() {
         val revurderingService =
             RevurderingServiceImpl(
-                applicationContext.oppgaveServiceNy,
+                applicationContext.oppgaveService,
                 applicationContext.grunnlagsService,
                 applicationContext.behandlingsHendelser,
                 applicationContext.featureToggleService,
@@ -553,7 +553,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
             )
         val behandlingFactory =
             BehandlingFactory(
-                oppgaveService = applicationContext.oppgaveServiceNy,
+                oppgaveService = applicationContext.oppgaveService,
                 grunnlagService = applicationContext.grunnlagsService,
                 revurderingService = applicationContext.revurderingService,
                 gyldighetsproevingService = applicationContext.gyldighetsproevingService,
@@ -581,7 +581,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
     fun `Kaster egen exception hvis revurderingaarsak ikke er stoettet for miljoe`() {
         val revurderingService =
             RevurderingServiceImpl(
-                applicationContext.oppgaveServiceNy,
+                applicationContext.oppgaveService,
                 applicationContext.grunnlagsService,
                 applicationContext.behandlingsHendelser,
                 applicationContext.featureToggleService,
@@ -594,7 +594,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
             )
         val behandlingFactory =
             BehandlingFactory(
-                oppgaveService = applicationContext.oppgaveServiceNy,
+                oppgaveService = applicationContext.oppgaveService,
                 grunnlagService = applicationContext.grunnlagsService,
                 revurderingService = applicationContext.revurderingService,
                 gyldighetsproevingService = applicationContext.gyldighetsproevingService,
@@ -626,7 +626,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
     fun `Kan ikke opprette ny manuell revurdering hvis det finnes en oppgave under behandling for sak`() {
         val revurderingService =
             RevurderingServiceImpl(
-                applicationContext.oppgaveServiceNy,
+                applicationContext.oppgaveService,
                 applicationContext.grunnlagsService,
                 applicationContext.behandlingsHendelser,
                 applicationContext.featureToggleService,
@@ -639,7 +639,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
             )
         val behandlingFactory =
             BehandlingFactory(
-                oppgaveService = applicationContext.oppgaveServiceNy,
+                oppgaveService = applicationContext.oppgaveService,
                 grunnlagService = applicationContext.grunnlagsService,
                 revurderingService = applicationContext.revurderingService,
                 gyldighetsproevingService = applicationContext.gyldighetsproevingService,
@@ -651,9 +651,9 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
             )
 
         val (sak, _) = opprettSakMedFoerstegangsbehandling(fnr, behandlingFactory)
-        val hentOppgaverForSak = applicationContext.oppgaveServiceNy.hentOppgaverForSak(sak.id)
+        val hentOppgaverForSak = applicationContext.oppgaveService.hentOppgaverForSak(sak.id)
         val oppgaveForFoerstegangsbehandling = hentOppgaverForSak.single { it.status == Status.NY }
-        applicationContext.oppgaveServiceNy.tildelSaksbehandler(oppgaveForFoerstegangsbehandling.id, "sakbeahndler")
+        applicationContext.oppgaveService.tildelSaksbehandler(oppgaveForFoerstegangsbehandling.id, "sakbeahndler")
         assertThrows<MaksEnBehandlingsOppgaveUnderbehandlingException> {
             revurderingService.opprettManuellRevurderingWrapper(
                 sakId = sak.id,

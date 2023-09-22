@@ -1,4 +1,4 @@
-package no.nav.etterlatte.libs.common.oppgaveNy
+package no.nav.etterlatte.libs.common.oppgave
 
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.Sak
@@ -17,7 +17,7 @@ abstract class Oppgave {
     abstract val frist: Tidspunkt?
 }
 
-data class OppgaveNy(
+data class OppgaveIntern(
     val id: UUID,
     override val status: Status,
     override val enhet: String,
@@ -41,7 +41,7 @@ data class OppgaveNy(
     }
 }
 
-data class OppgaveListe(val sak: Sak, val oppgaver: List<OppgaveNy>)
+data class OppgaveListe(val sak: Sak, val oppgaver: List<OppgaveIntern>)
 
 data class GosysOppgave(
     val id: Long,
@@ -136,8 +136,8 @@ fun opprettNyOppgaveMedReferanseOgSak(
     oppgaveKilde: OppgaveKilde?,
     oppgaveType: OppgaveType,
     merknad: String?,
-): OppgaveNy {
-    return OppgaveNy(
+): OppgaveIntern {
+    return OppgaveIntern(
         id = UUID.randomUUID(),
         status = Status.NY,
         enhet = sak.enhet,

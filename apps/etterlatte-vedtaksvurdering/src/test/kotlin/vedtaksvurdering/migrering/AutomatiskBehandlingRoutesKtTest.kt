@@ -19,10 +19,10 @@ import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.deserialize
-import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveListe
-import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveNy
-import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveType
-import no.nav.etterlatte.libs.common.oppgaveNy.Status
+import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
+import no.nav.etterlatte.libs.common.oppgave.OppgaveListe
+import no.nav.etterlatte.libs.common.oppgave.OppgaveType
+import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
@@ -136,7 +136,7 @@ internal class AutomatiskBehandlingRoutesKtTest {
     }
 
     fun lagOppgave(referanse: UUID) =
-        OppgaveNy(
+        OppgaveIntern(
             id = UUID.randomUUID(),
             status = Status.UNDER_BEHANDLING,
             enhet = "",

@@ -56,12 +56,12 @@ import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.libs.sporingslogg.Sporingslogg
 import no.nav.etterlatte.metrics.OppgaveMetrics
 import no.nav.etterlatte.metrics.OppgaveMetrikkerDao
-import no.nav.etterlatte.oppgave.GosysOppgaveKlient
-import no.nav.etterlatte.oppgave.GosysOppgaveKlientImpl
-import no.nav.etterlatte.oppgave.GosysOppgaveServiceImpl
-import no.nav.etterlatte.oppgaveny.OppgaveDaoMedEndringssporingImpl
-import no.nav.etterlatte.oppgaveny.OppgaveDaoNyImpl
-import no.nav.etterlatte.oppgaveny.OppgaveServiceNy
+import no.nav.etterlatte.oppgave.OppgaveDaoImpl
+import no.nav.etterlatte.oppgave.OppgaveDaoMedEndringssporingImpl
+import no.nav.etterlatte.oppgave.OppgaveService
+import no.nav.etterlatte.oppgaveGosys.GosysOppgaveKlient
+import no.nav.etterlatte.oppgaveGosys.GosysOppgaveKlientImpl
+import no.nav.etterlatte.oppgaveGosys.GosysOppgaveServiceImpl
 import no.nav.etterlatte.sak.RealSakService
 import no.nav.etterlatte.sak.SakDao
 import no.nav.etterlatte.sak.SakTilgangDao
@@ -147,7 +147,7 @@ class ApplicationContext(
     val revurderingDao = RevurderingDao { databaseContext().activeTx() }
     val behandlingDao = BehandlingDao(kommerBarnetTilGodeDao, revurderingDao) { databaseContext().activeTx() }
     val generellbehandlingDao = GenerellBehandlingDao { databaseContext().activeTx() }
-    val oppgaveDaoNy = OppgaveDaoNyImpl { databaseContext().activeTx() }
+    val oppgaveDaoNy = OppgaveDaoImpl { databaseContext().activeTx() }
     val oppgaveDaoEndringer = OppgaveDaoMedEndringssporingImpl(oppgaveDaoNy) { databaseContext().activeTx() }
     val sakDao = SakDao { databaseContext().activeTx() }
     val grunnlagsendringshendelseDao = GrunnlagsendringshendelseDao { databaseContext().activeTx() }
@@ -167,7 +167,7 @@ class ApplicationContext(
 
     // Service
     val generellBehandlingService = GenerellBehandlingService(generellbehandlingDao)
-    val oppgaveServiceNy = OppgaveServiceNy(oppgaveDaoEndringer, sakDao, featureToggleService)
+    val oppgaveService = OppgaveService(oppgaveDaoEndringer, sakDao, featureToggleService)
     val gosysOppgaveService = GosysOppgaveServiceImpl(gosysOppgaveKlient, pdlKlient, featureToggleService)
     val behandlingService =
         BehandlingServiceImpl(
@@ -179,7 +179,7 @@ class ApplicationContext(
             sporingslogg = sporingslogg,
             featureToggleService = featureToggleService,
             kommerBarnetTilGodeDao = kommerBarnetTilGodeDao,
-            oppgaveServiceNy = oppgaveServiceNy,
+            oppgaveService = oppgaveService,
         )
 
     val kommerBarnetTilGodeService =
@@ -188,7 +188,7 @@ class ApplicationContext(
     val grunnlagsService = GrunnlagService(grunnlagKlient = grunnlagKlient)
     val revurderingService =
         RevurderingServiceImpl(
-            oppgaveService = oppgaveServiceNy,
+            oppgaveService = oppgaveService,
             grunnlagService = grunnlagsService,
             behandlingHendelser = behandlingsHendelser,
             featureToggleService = featureToggleService,
@@ -208,7 +208,7 @@ class ApplicationContext(
 
     val manueltOpphoerService =
         RealManueltOpphoerService(
-            oppgaveService = oppgaveServiceNy,
+            oppgaveService = oppgaveService,
             behandlingDao = behandlingDao,
             behandlingHendelser = behandlingsHendelser,
             hendelseDao = hendelseDao,
@@ -236,7 +236,7 @@ class ApplicationContext(
     val enhetService = EnhetServiceImpl(navAnsattKlient)
     val grunnlagsendringshendelseService =
         GrunnlagsendringshendelseService(
-            oppgaveService = oppgaveServiceNy,
+            oppgaveService = oppgaveService,
             grunnlagsendringshendelseDao = grunnlagsendringshendelseDao,
             behandlingService = behandlingService,
             pdlKlient = pdlKlient,
@@ -250,14 +250,14 @@ class ApplicationContext(
             behandlingDao,
             behandlingService,
             grunnlagsendringshendelseService,
-            oppgaveServiceNy,
+            oppgaveService,
             featureToggleService,
             generellBehandlingService,
         )
 
     val behandlingFactory =
         BehandlingFactory(
-            oppgaveService = oppgaveServiceNy,
+            oppgaveService = oppgaveService,
             grunnlagService = grunnlagsService,
             revurderingService = revurderingService,
             gyldighetsproevingService = gyldighetsproevingService,
@@ -276,7 +276,7 @@ class ApplicationContext(
             kommerBarnetTilGodeService = kommerBarnetTilGodeService,
             behandlingsHendelser = behandlingsHendelser,
             behandlingService = behandlingService,
-            oppgaveServiceNy = oppgaveServiceNy,
+            oppgaveService = oppgaveService,
         )
 
     val klageService =
@@ -284,7 +284,7 @@ class ApplicationContext(
             klageDao = klageDao,
             sakDao = sakDao,
             hendelseDao = hendelseDao,
-            oppgaveServiceNy = oppgaveServiceNy,
+            oppgaveService = oppgaveService,
             brevApiKlient = brevApiHttpClient,
         )
 
@@ -292,7 +292,7 @@ class ApplicationContext(
         TilbakekrevingService(
             sakDao = sakDao,
             hendelseDao = hendelseDao,
-            oppgaveServiceNy = oppgaveServiceNy,
+            oppgaveService = oppgaveService,
         )
 
     // Job

@@ -25,12 +25,12 @@ import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
-import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveKilde
-import no.nav.etterlatte.libs.common.oppgaveNy.OppgaveType
-import no.nav.etterlatte.libs.common.oppgaveNy.opprettNyOppgaveMedReferanseOgSak
+import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
+import no.nav.etterlatte.libs.common.oppgave.OppgaveType
+import no.nav.etterlatte.libs.common.oppgave.opprettNyOppgaveMedReferanseOgSak
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.manueltOpphoer
-import no.nav.etterlatte.oppgaveny.OppgaveServiceNy
+import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.revurdering
 import no.nav.etterlatte.saksbehandlerToken
 import org.junit.jupiter.api.Assertions.assertAll
@@ -45,7 +45,7 @@ import java.util.UUID
 
 internal class RealManueltOpphoerServiceTest {
     private val user = mockk<SaksbehandlerMedEnheterOgRoller>()
-    private val oppgaveService = mockk<OppgaveServiceNy>()
+    private val oppgaveService = mockk<OppgaveService>()
     private val grunnlagServiceMock = mockk<GrunnlagService>(relaxed = true)
 
     private val mockOppgave =

@@ -241,11 +241,7 @@ class TrygdetidService(
         brukerTokenInfo: BrukerTokenInfo,
     ): Trygdetid {
         val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
-        return kopierSisteTrygdetidberegning(behandling, forrigeBehandlingId, brukerTokenInfo).also {
-            if (!behandling.revurderingsaarsak.girOpphoer()) {
-                behandlingKlient.settBehandlingStatusTrygdetidOppdatert(behandlingId, brukerTokenInfo)
-            }
-        }
+        return kopierSisteTrygdetidberegning(behandling, forrigeBehandlingId, brukerTokenInfo)
     }
 
     private suspend fun kopierSisteTrygdetidberegning(

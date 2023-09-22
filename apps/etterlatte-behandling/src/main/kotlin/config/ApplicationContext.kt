@@ -33,6 +33,7 @@ import no.nav.etterlatte.behandling.omregning.MigreringService
 import no.nav.etterlatte.behandling.omregning.OmregningService
 import no.nav.etterlatte.behandling.revurdering.RevurderingDao
 import no.nav.etterlatte.behandling.revurdering.RevurderingServiceImpl
+import no.nav.etterlatte.behandling.tilbakekreving.TilbakekrevingDao
 import no.nav.etterlatte.behandling.tilbakekreving.TilbakekrevingService
 import no.nav.etterlatte.common.klienter.PdlKlientImpl
 import no.nav.etterlatte.common.klienter.SkjermingKlient
@@ -154,6 +155,7 @@ class ApplicationContext(
     val institusjonsoppholdDao = InstitusjonsoppholdDao { databaseContext().activeTx() }
     val metrikkerDao = OppgaveMetrikkerDao(dataSource)
     val klageDao = KlageDaoImpl { databaseContext().activeTx() }
+    val tilbakekrevingDao = TilbakekrevingDao { databaseContext().activeTx() }
 
     // Klient
     val pdlKlient = PdlKlientImpl(config, pdlHttpClient)
@@ -290,6 +292,7 @@ class ApplicationContext(
 
     val tilbakekrevingService =
         TilbakekrevingService(
+            tilbakekrevingDao = tilbakekrevingDao,
             sakDao = sakDao,
             hendelseDao = hendelseDao,
             oppgaveService = oppgaveService,

@@ -41,19 +41,27 @@ class HendelseDao(private val connection: () -> Connection) {
     )
 
     fun behandlingOpprettet(behandling: BehandlingOpprettet) =
-        lagreHendelse(
-            UlagretHendelse(
-                "BEHANDLING:OPPRETTET",
-                behandling.timestamp,
-                null,
-                behandling.id,
-                behandling.sak,
-                null,
-                null,
-                null,
-                null,
-            ),
+        behandlingOpprettet(
+            behandling,
+            "BEHANDLING:OPPRETTET",
         )
+
+    fun behandlingOpprettet(
+        behandling: BehandlingOpprettet,
+        hendelseType: String,
+    ) = lagreHendelse(
+        UlagretHendelse(
+            hendelseType,
+            behandling.timestamp,
+            null,
+            behandling.id,
+            behandling.sak,
+            null,
+            null,
+            null,
+            null,
+        ),
+    )
 
     fun klageHendelse(
         klageId: UUID,
@@ -75,6 +83,19 @@ class HendelseDao(private val connection: () -> Connection) {
             kommentar = kommentar,
             valgtBegrunnelse = begrunnelse,
         ),
+    )
+
+    fun tilbakekrevingOpprettet(
+        tilbakekrevingId: UUID,
+        sakId: Long,
+    ) = behandlingOpprettet(
+        hendelseType = "TILBAKEKREVING:OPPRETTET",
+        behandling =
+            BehandlingOpprettet(
+                Tidspunkt.now(),
+                tilbakekrevingId,
+                sakId,
+            ),
     )
 
     fun vedtakHendelse(

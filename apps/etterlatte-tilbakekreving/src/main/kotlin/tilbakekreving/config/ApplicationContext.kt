@@ -7,9 +7,9 @@ import no.nav.etterlatte.tilbakekreving.klienter.BehandlingKlient
 import no.nav.etterlatte.tilbakekreving.kravgrunnlag.KravgrunnlagConsumer
 import no.nav.etterlatte.tilbakekreving.kravgrunnlag.KravgrunnlagService
 
-class ApplicationContext(
-    properties: ApplicationProperties = ApplicationProperties.fromEnv(System.getenv()),
-) {
+class ApplicationContext {
+    val properties = ApplicationProperties.fromEnv(System.getenv())
+
     var jmsConnectionFactory =
         JmsConnectionFactory(
             hostname = properties.mqHost,
@@ -39,6 +39,6 @@ class ApplicationContext(
         KravgrunnlagConsumer(
             connectionFactory = jmsConnectionFactory,
             queue = properties.mqKravgrunnlagQueue,
-            kravgrunnlagService = service
+            kravgrunnlagService = service,
         )
 }

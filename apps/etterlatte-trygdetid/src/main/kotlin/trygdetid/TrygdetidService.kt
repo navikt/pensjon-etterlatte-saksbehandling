@@ -5,7 +5,6 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
-import no.nav.etterlatte.libs.common.behandling.girOpphoer
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsdata
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning.RegelKilde

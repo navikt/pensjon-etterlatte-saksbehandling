@@ -3,9 +3,9 @@ import { IDetaljertBeregnetTrygdetidResultat } from '~shared/api/trygdetid'
 import { BeregnetFaktiskTrygdetid } from '~components/behandling/trygdetid/detaljer/BeregnetFaktiskTrygdetid'
 import { BeregnetFremtidigTrygdetid } from '~components/behandling/trygdetid/detaljer/BeregnetFremtidigTrygdetid'
 import { FlexHeader, IconWrapper } from '~components/behandling/soeknadsoversikt/familieforhold/styled'
-import { CalendarIcon } from '@navikt/aksel-icons'
+import { CalendarIcon, ExclamationmarkTriangleIcon } from '@navikt/aksel-icons'
 import { IconSize } from '~shared/types/Icon'
-import { Heading } from '@navikt/ds-react'
+import { BodyShort, Heading } from '@navikt/ds-react'
 import styled from 'styled-components'
 import { BeregnetSamletTrygdetid } from '~components/behandling/trygdetid/detaljer/BeregnetSamletTrygdetid'
 
@@ -24,6 +24,17 @@ export const TrygdetidDetaljer: React.FC<Props> = ({ beregnetTrygdetid }) => {
           Beregnet trygdetid
         </Heading>
       </FlexHeader>
+      {beregnetTrygdetid.overstyrt && (
+        <FlexHeader>
+          <IconWrapper>
+            <ExclamationmarkTriangleIcon fontSize={IconSize.DEFAULT} />
+          </IconWrapper>
+          <BodyShort>
+            Beregnet trygdetid har blitt overstyrt ved migrering på grunn av manglende eller inkonsistent grunnlag i
+            Pesys. Slå opp saken i Pesys for å se grunnlaget til tidligere vedtak.
+          </BodyShort>
+        </FlexHeader>
+      )}
       <BeregnetFaktiskTrygdetid beregnetTrygdetid={beregnetTrygdetid} />
       <BeregnetFremtidigTrygdetid beregnetTrygdetid={beregnetTrygdetid} />
       <BeregnetSamletTrygdetid beregnetTrygdetid={beregnetTrygdetid} />

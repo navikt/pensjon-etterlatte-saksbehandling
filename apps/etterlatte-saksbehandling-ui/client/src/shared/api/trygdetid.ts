@@ -118,6 +118,7 @@ export interface IDetaljertBeregnetTrygdetidResultat {
   samletTrygdetidNorge?: number
   samletTrygdetidTeoretisk?: number
   prorataBroek?: IProrataBroek
+  overstyrt: boolean
 }
 
 export interface IFaktiskTrygdetid {

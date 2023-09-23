@@ -321,6 +321,12 @@ data class UtenlandstilsnittRequest(
 data class BoddEllerArbeidetUtlandetRequest(
     val boddEllerArbeidetUtlandet: Boolean,
     val begrunnelse: String,
+    val boddArbeidetIkkeEosEllerAvtaleland: Boolean? = false,
+    val boddArbeidetEosNordiskKonvensjon: Boolean? = false,
+    val boddArbeidetAvtaleland: Boolean? = false,
+    val vurdereAvoededsTrygdeavtale: Boolean? = false,
+    val norgeErBehandlendeland: Boolean? = false,
+    val skalSendeKravpakke: Boolean? = false,
 )
 
 data class ManueltOpphoerOppsummeringDto(

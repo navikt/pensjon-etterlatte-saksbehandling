@@ -207,6 +207,12 @@ internal fun Route.behandlingRoutes(
                             boddEllerArbeidetUtlandet = body.boddEllerArbeidetUtlandet,
                             kilde = Grunnlagsopplysning.Saksbehandler.create(navIdent),
                             begrunnelse = body.begrunnelse,
+                            boddArbeidetIkkeEosEllerAvtaleland = body.boddArbeidetIkkeEosEllerAvtaleland,
+                            boddArbeidetEosNordiskKonvensjon = body.boddArbeidetEosNordiskKonvensjon,
+                            boddArbeidetAvtaleland = body.boddArbeidetAvtaleland,
+                            vurdereAvoededsTrygdeavtale = body.vurdereAvoededsTrygdeavtale,
+                            norgeErBehandlendeland = body.norgeErBehandlendeland,
+                            skalSendeKravpakke = body.skalSendeKravpakke,
                         )
 
                     behandlingService.oppdaterBoddEllerArbeidetUtlandet(

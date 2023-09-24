@@ -107,10 +107,11 @@ data class InnvilgetBrevDataEnkel(
                 utbetalingsinfo = behandling.utbetalingsinfo,
                 avdoed = behandling.persongalleri.avdoed,
                 erEtterbetalingMerEnnTreMaaneder = false, // TODO utled
-            erInstitusjonsopphold = behandling.utbetalingsinfo.beregningsperioder
-                .filter { it.datoFOM.isBefore(LocalDate.now().plusDays(1)) }
-                .firstOrNull { it.datoTOM.erIkkeFoer(LocalDate.now()) }
-                ?.institusjon ?: false,
+                erInstitusjonsopphold =
+                    behandling.utbetalingsinfo.beregningsperioder
+                        .filter { it.datoFOM.isBefore(LocalDate.now().plusDays(1)) }
+                        .firstOrNull { it.datoTOM.erIkkeFoer(LocalDate.now()) }
+                        ?.institusjon ?: false,
             )
     }
 }
@@ -135,6 +136,8 @@ data class InnvilgetHovedmalBrevData(
 }
 
 private fun LocalDate?.erIkkeFoer(dato: LocalDate): Boolean {
-    if (this == null) { return true }
+    if (this == null) {
+        return true
+    }
     return this.isAfter(dato.minusDays(1))
 }

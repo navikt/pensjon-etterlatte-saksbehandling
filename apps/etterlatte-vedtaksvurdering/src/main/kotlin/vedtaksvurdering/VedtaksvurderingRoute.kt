@@ -220,15 +220,16 @@ data class VedtakSammendragDto(
     val datoAttestert: ZonedDateTime?,
 )
 
-private fun Vedtak.toSamordningsvedtakDto() = VedtakSamordningDto(
-    vedtakId = id,
-    status = status,
-    virkningstidspunkt = virkningstidspunkt,
-    sak = VedtakSak(soeker.value, sakType, sakId),
-    behandling = Behandling(behandlingType, behandlingId, revurderingAarsak, revurderingInfo),
-    type = type,
-    vedtakFattet = vedtakFattet,
-    attestasjon = attestasjon,
-    beregning = beregning,
-    avkorting = avkorting
-)
+private fun Vedtak.toSamordningsvedtakDto() =
+    VedtakSamordningDto(
+        vedtakId = id,
+        status = status,
+        virkningstidspunkt = virkningstidspunkt,
+        sak = VedtakSak(soeker.value, sakType, sakId),
+        behandling = Behandling(behandlingType, behandlingId, revurderingAarsak, revurderingInfo),
+        type = type,
+        vedtakFattet = vedtakFattet,
+        attestasjon = attestasjon,
+        beregning = beregning,
+        avkorting = avkorting,
+    )

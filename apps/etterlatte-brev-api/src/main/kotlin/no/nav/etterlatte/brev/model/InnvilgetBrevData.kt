@@ -7,6 +7,7 @@ import no.nav.etterlatte.brev.behandling.Trygdetidsperiode
 import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
 import no.nav.pensjon.brevbaker.api.model.Kroner
 import java.time.LocalDate
+import java.time.YearMonth
 
 data class InnvilgetBrevData(
     val utbetalingsinfo: Utbetalingsinfo,
@@ -107,7 +108,7 @@ data class InnvilgetBrevDataEnkel(
             InnvilgetBrevDataEnkel(
                 utbetalingsinfo = behandling.utbetalingsinfo,
                 avdoed = behandling.persongalleri.avdoed,
-                erEtterbetalingMerEnnTreMaaneder = false, // TODO utled
+                erEtterbetalingMerEnnTreMaaneder = behandling.erEtterbetaling(),
                 vedtaksdato =
                     behandling.vedtak.vedtaksdato
                         ?: throw IllegalStateException("Trenger vedtaksdato, men var null"),
@@ -130,14 +131,41 @@ data class InnvilgetHovedmalBrevData(
         fun fra(
             behandling: Behandling,
             innhold: List<Slate.Element>,
-        ) = InnvilgetHovedmalBrevData(
-            utbetalingsinfo = behandling.utbetalingsinfo,
-            avkortingsinfo = behandling.avkortingsinfo,
-            etterbetalingDTO = null,
-            innhold = innhold,
-        )
+        ): InnvilgetHovedmalBrevData {
+            val etterbetalingDTO =
+                if (behandling.erEtterbetaling()) {
+                    val beregningsperioder =
+                        behandling.utbetalingsinfo.beregningsperioder
+                            .filter { it.datoFOM.isBefore(behandling.utbetalingsinfo.virkningsdato) }
+                            .map {
+                                Etterbetalingsperiode(
+                                    datoFOM = it.datoFOM, // TODO: Desse datoane er litt shady
+                                    datoTOM = it.datoTOM,
+                                    grunnbeloep = it.grunnbeloep,
+                                    stoenadFoerReduksjon = it.utbetaltBeloep,
+                                    // TODO: Trur stoenadFoerReduksjon skal bort frå brevmalen, slett da også herifrå
+                                    utbetaltBeloep = it.utbetaltBeloep,
+                                )
+                            }
+                    EtterbetalingDTO(
+                        fraDato = behandling.utbetalingsinfo.beregningsperioder.map { it.datoFOM }.minOf { it },
+                        tilDato = LocalDate.now(),
+                        beregningsperioder = beregningsperioder,
+                    )
+                } else {
+                    null
+                }
+            return InnvilgetHovedmalBrevData(
+                utbetalingsinfo = behandling.utbetalingsinfo,
+                avkortingsinfo = behandling.avkortingsinfo,
+                etterbetalingDTO = etterbetalingDTO,
+                innhold = innhold,
+            )
+        }
     }
 }
+
+private fun Behandling.erEtterbetaling() = utbetalingsinfo.virkningsdato.isBefore(YearMonth.now().atDay(1))
 
 private fun LocalDate?.erIkkeFoer(dato: LocalDate): Boolean {
     if (this == null) {

@@ -104,6 +104,7 @@ class SakOgBehandlingService(
                     ansvarligEnhet,
                     saksbehandlerIdent,
                     attestantIdent,
+                    vedtak.vedtakFattet?.tidspunkt?.toNorskLocalDate(),
                 ),
             utbetalingsinfo = finnUtbetalingsinfo(vedtak.behandling.id, vedtak.virkningstidspunkt, brukerTokenInfo),
             forrigeUtbetalingsinfo = finnForrigeUbetalingsinfo(vedtak, sak, brukerTokenInfo),

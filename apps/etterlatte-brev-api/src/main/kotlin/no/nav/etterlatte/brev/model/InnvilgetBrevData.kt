@@ -99,6 +99,7 @@ data class InnvilgetBrevDataEnkel(
     val utbetalingsinfo: Utbetalingsinfo,
     val avdoed: Avdoed,
     val erEtterbetalingMerEnnTreMaaneder: Boolean,
+    val vedtaksdato: LocalDate,
     val erInstitusjonsopphold: Boolean,
 ) : BrevData() {
     companion object {
@@ -107,6 +108,9 @@ data class InnvilgetBrevDataEnkel(
                 utbetalingsinfo = behandling.utbetalingsinfo,
                 avdoed = behandling.persongalleri.avdoed,
                 erEtterbetalingMerEnnTreMaaneder = false, // TODO utled
+                vedtaksdato =
+                    behandling.vedtak.vedtaksdato
+                        ?: throw IllegalStateException("Trenger vedtaksdato, men var null"),
                 erInstitusjonsopphold =
                     behandling.utbetalingsinfo.beregningsperioder
                         .filter { it.datoFOM.isBefore(LocalDate.now().plusDays(1)) }

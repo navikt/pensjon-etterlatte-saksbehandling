@@ -96,7 +96,7 @@ class FeilendeMigreringLytterTest {
                             KILDE_KEY to Vedtaksloesning.PESYS,
                             PESYS_ID_KEY to pesysid,
                             HENDELSE_DATA_KEY to pesyssak.tilMigreringsrequest(),
-                            FEILMELDING to IllegalStateException(),
+                            FEILMELDING to IllegalStateException("her feiler det"),
                             FEILENDE_STEG to Migreringshendelser.TRYGDETID,
                         ),
                     ).toJson(),

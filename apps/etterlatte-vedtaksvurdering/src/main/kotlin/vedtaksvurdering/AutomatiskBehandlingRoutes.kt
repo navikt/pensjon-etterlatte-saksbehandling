@@ -38,7 +38,8 @@ fun Route.automatiskBehandlingRoutes(
                         .filter { it.referanse == behandlingId.toString() }
                         .filter { it.type == OppgaveType.ATTESTERING }
                         .filterNot { it.erAvsluttet() }
-                behandlingKlient.tildelSaksbehandler(oppgaveTilAttestering.first(), brukerTokenInfo)
+                        .first()
+                behandlingKlient.tildelSaksbehandler(oppgaveTilAttestering, brukerTokenInfo)
 
                 logger.info("Attesterer vedtak for behandling $behandlingId")
                 service.attesterVedtak(

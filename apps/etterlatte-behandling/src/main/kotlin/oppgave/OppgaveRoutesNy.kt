@@ -44,7 +44,7 @@ internal fun Route.oppgaveRoutes(
             }
         }
 
-        route("/sak/$SAKID_CALL_PARAMETER") {
+        route("/sak/{$SAKID_CALL_PARAMETER}") {
             get("oppgaver") {
                 kunSystembruker {
                     call.respond(service.hentSakOgOppgaverForSak(sakId))

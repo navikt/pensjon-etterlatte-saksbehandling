@@ -47,6 +47,9 @@ data class AutomatiskRevurdering(
     ) {
     override fun kopier() = this.copy()
 
+    override fun oppdaterVirkningstidspunkt(virkningstidspunkt: Virkningstidspunkt) =
+        hvisRedigerbar { endreTilStatus(BehandlingStatus.OPPRETTET).copy(virkningstidspunkt = virkningstidspunkt) }
+
     override fun tilOpprettet() = endreTilStatus(BehandlingStatus.OPPRETTET)
 
     override fun tilVilkaarsvurdert() = endreTilStatus(BehandlingStatus.VILKAARSVURDERT)

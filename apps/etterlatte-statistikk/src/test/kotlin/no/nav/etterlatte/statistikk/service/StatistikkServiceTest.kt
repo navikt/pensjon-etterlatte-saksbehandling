@@ -7,9 +7,9 @@ import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.etterlatte.libs.common.behandling.BehandlingForStatistikk
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
-import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -71,7 +71,7 @@ class StatistikkServiceTest {
         every { stoenadRepo.lagreStoenadsrad(any()) } returnsArgument 0
         every { sakRepo.lagreRad(any()) } returnsArgument 0
         coEvery { behandlingKlient.hentDetaljertBehandling(behandlingId) } returns
-            DetaljertBehandling(
+            BehandlingForStatistikk(
                 id = behandlingId,
                 sak = sakId,
                 sakType = SakType.BARNEPENSJON,
@@ -162,7 +162,7 @@ class StatistikkServiceTest {
         every { stoenadRepo.lagreStoenadsrad(any()) } returnsArgument 0
         every { sakRepo.lagreRad(any()) } returnsArgument 0
         coEvery { behandlingKlient.hentDetaljertBehandling(behandlingId) } returns
-            DetaljertBehandling(
+            BehandlingForStatistikk(
                 id = behandlingId,
                 sak = sakId,
                 sakType = SakType.OMSTILLINGSSTOENAD,
@@ -258,7 +258,7 @@ class StatistikkServiceTest {
         every { sakRepo.lagreRad(any()) } returnsArgument 0
 
         coEvery { behandlingKlient.hentDetaljertBehandling(behandlingId) } returns
-            DetaljertBehandling(
+            BehandlingForStatistikk(
                 id = behandlingId,
                 sak = sakId,
                 sakType = SakType.BARNEPENSJON,

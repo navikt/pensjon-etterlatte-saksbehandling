@@ -1,8 +1,8 @@
 package no.nav.etterlatte.statistikk.service
 
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.libs.common.behandling.BehandlingForStatistikk
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
-import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
@@ -158,7 +158,7 @@ class StatistikkService(
     private fun behandlingResultatFraVedtak(
         vedtak: VedtakDto,
         vedtakHendelse: VedtakHendelse,
-        detaljertBehandling: DetaljertBehandling,
+        detaljertBehandling: BehandlingForStatistikk,
     ): BehandlingResultat? {
         if (detaljertBehandling.status == BehandlingStatus.AVBRUTT) {
             return BehandlingResultat.AVBRUTT
@@ -315,14 +315,14 @@ enum class VedtakHendelse {
     IVERKSATT,
 }
 
-internal fun DetaljertBehandling.sakYtelsesgruppe(): SakYtelsesgruppe? =
+internal fun BehandlingForStatistikk.sakYtelsesgruppe(): SakYtelsesgruppe? =
     when (this.sakType to this.avdoed?.size) {
         SakType.BARNEPENSJON to 1 -> SakYtelsesgruppe.EN_AVDOED_FORELDER
         SakType.BARNEPENSJON to 2 -> SakYtelsesgruppe.FORELDRELOES
         else -> null
     }
 
-internal fun DetaljertBehandling.behandlingMetode(attestasjon: Attestasjon?): BehandlingMetode =
+internal fun BehandlingForStatistikk.behandlingMetode(attestasjon: Attestasjon?): BehandlingMetode =
     when (this.prosesstype) {
         Prosesstype.MANUELL ->
             if (attestasjon != null) {

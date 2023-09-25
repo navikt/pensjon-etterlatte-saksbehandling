@@ -3,14 +3,14 @@ package no.nav.etterlatte.statistikk.clients
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
-import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
+import no.nav.etterlatte.libs.common.behandling.BehandlingForStatistikk
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import java.util.UUID
 
 interface BehandlingKlient {
     suspend fun hentPersongalleri(behandlingId: UUID): Persongalleri
 
-    suspend fun hentDetaljertBehandling(behandlingId: UUID): DetaljertBehandling
+    suspend fun hentDetaljertBehandling(behandlingId: UUID): BehandlingForStatistikk
 }
 
 class BehandlingKlientImpl(
@@ -21,9 +21,9 @@ class BehandlingKlientImpl(
         return hentDetaljertBehandling(behandlingId).toPersongalleri()
     }
 
-    override suspend fun hentDetaljertBehandling(behandlingId: UUID): DetaljertBehandling {
+    override suspend fun hentDetaljertBehandling(behandlingId: UUID): BehandlingForStatistikk {
         return try {
-            behandlingHttpClient.get("$behandlingUrl/behandlinger/$behandlingId")
+            behandlingHttpClient.get("$behandlingUrl/behandlinger/statistikk/$behandlingId")
                 .body()
         } catch (e: Exception) {
             throw KunneIkkeHenteFraBehandling("Kunne ikke hente behandling med id $behandlingId fra Behandling", e)
@@ -33,7 +33,7 @@ class BehandlingKlientImpl(
 
 class KunneIkkeHenteFraBehandling(message: String, cause: Exception) : Exception(message, cause)
 
-fun DetaljertBehandling.toPersongalleri() =
+fun BehandlingForStatistikk.toPersongalleri() =
     Persongalleri(
         soeker = this.soeker,
         innsender = this.innsender,

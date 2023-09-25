@@ -350,7 +350,7 @@ class OppgaveService(
 
     fun hentSaksbehandlerFraFoerstegangsbehandling(behandlingsId: UUID): String? {
         val oppgaverForBehandlingFoerstegangs =
-            inTransaction {
+            inTransaction(gjenbruk = true) {
                 oppgaveDao.hentOppgaverForBehandling(behandlingsId.toString())
             }.filter {
                 it.type == OppgaveType.FOERSTEGANGSBEHANDLING

@@ -128,7 +128,7 @@ private fun soeskenTemplate(helsoesken: Boolean) =
   "borIkkeSammen": null,
   "nyRelatertPerson": {
     "identtype": "FNR",
-    "kjoenn": "KVINNE",
+    "kjoenn": "MANN",
     "foedtEtter": null,
     "foedtFoer": null,
     "alder": 10,

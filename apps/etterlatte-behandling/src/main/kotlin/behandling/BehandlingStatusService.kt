@@ -209,16 +209,16 @@ class BehandlingStatusServiceImpl(
                             OppgaveType.UTLAND,
                             null,
                         )
+                    generellBehandlingService.opprettBehandling(
+                        GenerellBehandling.opprettFraType(
+                            GenerellBehandling.GenerellBehandlingType.UTLAND,
+                            behandling.sak.id,
+                        ),
+                    )
                     val saksbehandlerFoerstegangsbehandling =
                         oppgaveService.hentSaksbehandlerFraFoerstegangsbehandling(behandlingsId = behandling.id)
                     if (saksbehandlerFoerstegangsbehandling != null) {
                         oppgaveService.tildelSaksbehandler(oppgaveUtland.id, saksbehandlerFoerstegangsbehandling)
-                        generellBehandlingService.opprettBehandling(
-                            GenerellBehandling.opprettFraType(
-                                GenerellBehandling.GenerellBehandlingType.UTLAND,
-                                behandling.sak.id,
-                            ),
-                        )
                         logger.info(
                             "Opprettet generell behandling for utland for sak: ${behandling.sak.id} " +
                                 "og behandling: ${behandling.id}. Gjelder oppgave: ${oppgaveUtland.id}",
@@ -226,8 +226,14 @@ class BehandlingStatusServiceImpl(
                     } else {
                         logger.error("Fant ingen saksbehandler for behandling oppgave fatting, id: ${behandling.id}")
                     }
+                } else {
+                    logger.info("behandling ${behandling.id} har ikke satt skalSendeKravpakke=true")
                 }
+            } else {
+                logger.info("Behandlingtype: ${behandling.type} får ikke utlandsoppgave")
             }
+        } else {
+            logger.info("Håndterer ikke utland for behandling ${behandling.id}")
         }
     }
 

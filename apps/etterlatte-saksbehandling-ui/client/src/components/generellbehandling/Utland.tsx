@@ -3,13 +3,15 @@ import { Content, ContentHeader, GridContainer, MainContent } from '~shared/styl
 import { HeadingWrapper, InnholdPadding } from '~components/behandling/soeknadsoversikt/styled'
 import { Alert, Button, Checkbox, Heading, Link, ReadMore, Select, Table, Textarea, TextField } from '@navikt/ds-react'
 import React, { useEffect, useState } from 'react'
-import { mapApiResult, mapAllApiResult, useApiCall } from '~shared/hooks/useApiCall'
+import { mapApiResult, mapAllApiResult, useApiCall, isPending } from '~shared/hooks/useApiCall'
 import { oppdaterGenerellBehandling } from '~shared/api/generellbehandling'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { hentAlleLand, ILand } from '~shared/api/trygdetid'
 import styled from 'styled-components'
 import { PencilWritingIcon } from '@navikt/aksel-icons'
+import { opprettBrevForSak } from '~shared/api/brev'
+import { useNavigate } from 'react-router-dom'
 
 const TextFieldBegrunnelse = styled(Textarea).attrs({ size: 'medium' })`
   max-width: 50rem;
@@ -34,6 +36,7 @@ function isUtland(
 
 const Utland = (props: { utlandsBehandling: Generellbehandling }) => {
   const { utlandsBehandling } = props
+  const navigate = useNavigate()
 
   if (isUtland(utlandsBehandling)) {
     const innhold = utlandsBehandling.innhold
@@ -43,9 +46,17 @@ const Utland = (props: { utlandsBehandling: Generellbehandling }) => {
     const [rinanummer, setRinanummer] = useState<string>(innhold?.rinanummer ?? '')
     const [notater, setNotater] = useState<string>(innhold?.begrunnelse ?? '')
     const [valgtLandIsoKode, setValgtLandIsoKode] = useState<string>(innhold?.landIsoKode ?? '')
-    const defaultDokumentState: Dokumenter = { p2100: false, p3000: false, p5000: false }
 
+    const defaultDokumentState: Dokumenter = { p2100: false, p3000: false, p5000: false }
     const [dokumenter, setDokumenter] = useState<Dokumenter>(innhold?.dokumenter ?? defaultDokumentState)
+
+    const [errorLand, setErrLand] = useState<boolean>(false)
+    const [nyttBrevStatus, opprettBrev] = useApiCall(opprettBrevForSak)
+    const opprettNyttBrevOgRedirect = () => {
+      opprettBrev(Number(utlandsBehandling.sakId), (brev) => {
+        navigate(`/person/${brev.soekerFnr}/sak/${brev.sakId}/brev/${brev.id}`)
+      })
+    }
 
     useEffect(() => {
       fetchAlleLand(null)
@@ -62,6 +73,7 @@ const Utland = (props: { utlandsBehandling: Generellbehandling }) => {
     }
     const oppaterGenerellbehandlingUtland = () => {
       if (valgtLandIsoKode !== undefined) {
+        setErrLand(false)
         const generellBehandling: Generellbehandling = {
           ...utlandsBehandling,
           innhold: {
@@ -75,7 +87,7 @@ const Utland = (props: { utlandsBehandling: Generellbehandling }) => {
         }
         putOppdaterGenerellBehandling(generellBehandling)
       } else {
-        //TODO: du må velge land...
+        setErrLand(true)
       }
     }
     return (
@@ -110,7 +122,10 @@ const Utland = (props: { utlandsBehandling: Generellbehandling }) => {
                       <Select
                         label="Land"
                         value={valgtLandIsoKode || ''}
-                        onChange={(e) => setValgtLandIsoKode(e.target.value)}
+                        onChange={(e) => {
+                          setValgtLandIsoKode(e.target.value)
+                          setErrLand(false)
+                        }}
                       >
                         <option value="" disabled={true}>
                           Velg land
@@ -121,6 +136,7 @@ const Utland = (props: { utlandsBehandling: Generellbehandling }) => {
                           </option>
                         ))}
                       </Select>
+                      {errorLand && <Alert variant="error">Du må velge land</Alert>}
                     </>
                   )
                 )}
@@ -168,7 +184,14 @@ const Utland = (props: { utlandsBehandling: Generellbehandling }) => {
                 <ReadMore defaultOpen={true} header="Sende brev til RINA">
                   Når SED er sendt i RINA skal det sendes varling til bruker
                   <div>
-                    <Button icon={<PencilWritingIcon />}>Opprett nytt brev</Button>
+                    <Button
+                      icon={<PencilWritingIcon />}
+                      onClick={opprettNyttBrevOgRedirect}
+                      loading={isPending(nyttBrevStatus)}
+                      iconPosition="right"
+                    >
+                      Opprett nytt brev
+                    </Button>
                   </div>
                 </ReadMore>
               </DokumenterBrevFlex>

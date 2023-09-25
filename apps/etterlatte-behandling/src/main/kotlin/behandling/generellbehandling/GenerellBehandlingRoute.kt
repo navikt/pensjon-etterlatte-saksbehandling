@@ -72,7 +72,7 @@ internal fun Route.generellbehandlingRoutes(
                 val id =
                     call.parameters["generellbehandlingId"]
                         ?: return@hvisEnabled call.respond(HttpStatusCode.NotFound, "Saken finnes ikke")
-                val hentetBehandling = generellBehandlingService.hentBehandlingMedId(UUID.fromString(id))
+                val hentetBehandling = inTransaction { generellBehandlingService.hentBehandlingMedId(UUID.fromString(id)) }
                 call.respond(hentetBehandling ?: HttpStatusCode.NotFound)
             }
         }
@@ -80,7 +80,7 @@ internal fun Route.generellbehandlingRoutes(
     get("/api/generellbehandlingForSak/{$SAKID_CALL_PARAMETER}") {
         hvisEnabled(GenerellBehandlingToggle.KanBrukeGenerellBehandlingToggle) {
             kunSaksbehandler {
-                call.respond(generellBehandlingService.hentBehandlingForSak(sakId))
+                call.respond(inTransaction { generellBehandlingService.hentBehandlingForSak(sakId) })
             }
         }
     }

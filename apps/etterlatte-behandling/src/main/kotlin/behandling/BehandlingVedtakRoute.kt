@@ -12,6 +12,8 @@ import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.VedtakEndringDTO
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.oppgave.OppgaveService
+import no.nav.etterlatte.token.Saksbehandler
+import no.nav.etterlatte.token.Systembruker
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
@@ -23,7 +25,7 @@ internal fun Route.behandlingVedtakRoute(
     behandlingService: BehandlingService,
 ) {
     fun haandterFeilIOppgaveService(e: Exception) {
-        logger.error("Fikk en feil i ferdigstilling av oppgave som stopper ferdigstilling.", e)
+        logger.error("Fikk en feil i ferdigstilling av oppgave.", e)
         throw e
     }
 
@@ -38,13 +40,23 @@ internal fun Route.behandlingVedtakRoute(
                 call.respond(HttpStatusCode.NotFound, "Fant ingen behandling")
             } else {
                 inTransaction {
+                    val merknadBehandling =
+                        when (val bruker = brukerTokenInfo) {
+                            is Saksbehandler -> "Behandlet av ${bruker.ident}"
+                            is Systembruker -> "Behandlet av systemet"
+                        }
+
                     behandlingsstatusService.settFattetVedtak(behandling, fattVedtak.vedtakHendelse)
                     try {
                         oppgaveService.ferdigstillOppgaveUnderbehandlingOgLagNyMedType(
                             fattetoppgave = fattVedtak.vedtakOppgaveDTO,
                             oppgaveType = OppgaveType.ATTESTERING,
                             saksbehandler = brukerTokenInfo,
-                            merknad = fattVedtak.vedtakHendelse.kommentar,
+                            merknad =
+                                listOfNotNull(
+                                    merknadBehandling,
+                                    fattVedtak.vedtakHendelse.kommentar,
+                                ).joinToString(separator = ": "),
                         )
                     } catch (e: Exception) {
                         haandterFeilIOppgaveService(e)

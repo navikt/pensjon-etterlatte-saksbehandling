@@ -9,12 +9,12 @@ export interface IBrev {
 }
 
 export interface Mottaker {
-  navn?: string
+  navn: string
   foedselsnummer?: {
     value: string
   }
   orgnummer?: string
-  adresse?: Adresse
+  adresse: Adresse
 }
 
 export interface Adresse {

@@ -217,6 +217,21 @@ class PdlKlient(private val httpClient: HttpClient, private val apiUrl: String) 
         fnr: Folkeregisteridentifikator,
         rolle: PersonRolle,
     ) = when (rolle) {
+        PersonRolle.INNSENDER ->
+            PdlVariables(
+                ident = fnr.value,
+                bostedsadresse = true,
+                bostedsadresseHistorikk = false,
+                deltBostedsadresse = false,
+                kontaktadresse = false,
+                kontaktadresseHistorikk = false,
+                oppholdsadresse = false,
+                oppholdsadresseHistorikk = false,
+                utland = false,
+                sivilstand = false,
+                familieRelasjon = false,
+                vergemaal = false,
+            )
         PersonRolle.BARN ->
             PdlVariables(
                 ident = fnr.value,

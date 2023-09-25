@@ -225,7 +225,7 @@ internal class BrevServiceTest {
                     journalpostId,
                     DistribusjonsType.ANNET,
                     DistribusjonsTidspunktType.KJERNETID,
-                    brev.mottaker.adresse,
+                    brev.mottaker!!.adresse,
                 )
             }
         }

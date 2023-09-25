@@ -45,8 +45,11 @@ data class Mottaker(
     val adresse: Adresse,
 ) {
     init {
-        if (foedselsnummer == null && orgnummer == null) {
-            throw IllegalArgumentException("Enten fødselsnummer, orgnummer eller adresse må være spesifisert")
+        require(foedselsnummer != null || orgnummer != null) {
+            "Fødselsnummer eller orgnummer må være spesifisert"
+        }
+        require(navn.isNotBlank()) {
+            "Navn på mottaker må være satt"
         }
     }
 

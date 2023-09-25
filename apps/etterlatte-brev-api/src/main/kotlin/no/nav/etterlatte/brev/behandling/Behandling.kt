@@ -1,6 +1,7 @@
 package no.nav.etterlatte.brev.behandling
 
 import no.nav.etterlatte.brev.model.Spraak
+import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -10,7 +11,6 @@ import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsnummer
 import no.nav.etterlatte.libs.common.grunnlag.hentKonstantOpplysning
 import no.nav.etterlatte.libs.common.grunnlag.hentNavn
 import no.nav.etterlatte.libs.common.grunnlag.hentVergemaalellerfremtidsfullmakt
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.InnsenderSoeknad
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Navn
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
@@ -27,7 +27,7 @@ data class Behandling(
     val sakType: SakType,
     val behandlingId: UUID,
     val spraak: Spraak,
-    val persongalleri: Persongalleri,
+    val personerISak: PersonerISak,
     val vedtak: ForenkletVedtak,
     val utbetalingsinfo: Utbetalingsinfo,
     val vilkaarsvurdering: VilkaarsvurderingDto,
@@ -96,13 +96,6 @@ data class Beregningsperiode(
     val trygdetid: Int,
 )
 
-data class Persongalleri(
-    val innsender: Innsender,
-    val soeker: Soeker,
-    val avdoed: Avdoed,
-    val verge: Verge?,
-)
-
 fun Grunnlag.mapSoeker(): Soeker =
     with(this.soeker) {
         val navn = hentNavn()!!.verdi
@@ -125,19 +118,18 @@ fun Grunnlag.mapAvdoed(): Avdoed =
         )
     }
 
-fun Grunnlag.mapInnsender(): Innsender =
+fun Grunnlag.mapInnsender(): Innsender? =
     with(this.sak) {
-        val opplysning = hentKonstantOpplysning<InnsenderSoeknad>(Opplysningstype.INNSENDER_SOEKNAD_V1)
+        val opplysning = hentKonstantOpplysning<Persongalleri>(Opplysningstype.PERSONGALLERI_V1)
 
-        val innsender =
+        val persongalleri =
             requireNotNull(opplysning?.verdi) {
                 "Sak (id=${metadata.sakId}) mangler opplysningstype INNSENDER_SOEKNAD_V1"
             }
 
-        Innsender(
-            navn = innsender.let { "${it.fornavn.storForbokstav()} ${it.etternavn.storForbokstav()}" },
-            fnr = Foedselsnummer(innsender.foedselsnummer.value),
-        )
+        persongalleri.innsender?.let {
+            Innsender(fnr = Foedselsnummer(it))
+        }
     }
 
 fun Grunnlag.mapSpraak(): Spraak =

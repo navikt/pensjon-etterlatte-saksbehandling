@@ -101,8 +101,16 @@ class BrevService(
     fun oppdaterMottaker(
         id: BrevID,
         mottaker: Mottaker,
-    ) = db.oppdaterMottaker(id, mottaker)
-        .also { logger.info("Mottaker på brev (id=$id) oppdatert") }
+    ) {
+        val brev = hentBrev(id)
+
+        if (brev.kanEndres()) {
+            db.oppdaterMottaker(id, mottaker)
+            logger.info("Mottaker på brev (id=$id) oppdatert")
+        } else {
+            throw IllegalStateException("Kan ikke endre mottaker på brev (id=$id) med status=${brev.status}")
+        }
+    }
 
     suspend fun genererPdf(
         id: BrevID,
@@ -185,12 +193,17 @@ class BrevService(
                 "JournalpostID mangler på brev (id=${brev.id}, status=${brev.status})"
             }
 
+        val mottaker =
+            requireNotNull(brev.mottaker) {
+                "Mottaker må være satt for å kunne distribuere brevet (id: $id)"
+            }
+
         return distribusjonService.distribuerJournalpost(
             brevId = brev.id,
             journalpostId = journalpostId,
             type = DistribusjonsType.ANNET,
             tidspunkt = DistribusjonsTidspunktType.KJERNETID,
-            adresse = brev.mottaker.adresse,
+            adresse = mottaker.adresse,
         )
     }
 

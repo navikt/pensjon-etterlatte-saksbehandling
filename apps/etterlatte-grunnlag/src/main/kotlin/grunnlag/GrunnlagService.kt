@@ -198,6 +198,30 @@ class RealGrunnlagService(
                                 .hentOpplysningsperson(persongalleri.soeker, soekerRolle, opplysningsbehov.sakType)
                         },
                     )
+                val innsender =
+                    persongalleri.innsender?.let { innsenderFnr ->
+                        Pair(
+                            async {
+                                pdltjenesterKlient.hentPerson(innsenderFnr, PersonRolle.INNSENDER, opplysningsbehov.sakType)
+                            },
+                            async {
+                                pdltjenesterKlient.hentOpplysningsperson(
+                                    innsenderFnr,
+                                    PersonRolle.INNSENDER,
+                                    opplysningsbehov.sakType,
+                                )
+                            },
+                        )
+                    }
+                val innsenderPersonInfo =
+                    innsender?.let { (person, personDTO) ->
+                        GrunnlagsopplysningerPersonPdl(
+                            person.await(),
+                            personDTO.await(),
+                            Opplysningstype.INNSENDER_PDL_V1,
+                            PersonRolle.INNSENDER,
+                        )
+                    }
                 val soekerPersonInfo =
                     GrunnlagsopplysningerPersonPdl(
                         soeker.first.await(),
@@ -223,7 +247,10 @@ class RealGrunnlagService(
                             PersonRolle.GJENLEVENDE,
                         )
                     }
-                avdoedePersonInfo + gjenlevendePersonInfo.plus(soekerPersonInfo)
+
+                listOfNotNull(soekerPersonInfo, innsenderPersonInfo)
+                    .plus(avdoedePersonInfo)
+                    .plus(gjenlevendePersonInfo)
             }
 
         pdlPersondatasGrunnlag.forEach {
@@ -249,7 +276,7 @@ class RealGrunnlagService(
         return Grunnlagsopplysning(
             id = UUID.randomUUID(),
             kilde =
-                if (this.innsender!! == Vedtaksloesning.PESYS.name) {
+                if (this.innsender == Vedtaksloesning.PESYS.name) {
                     Grunnlagsopplysning.Pesys.create()
                 } else {
                     Grunnlagsopplysning.Privatperson(this.innsender!!, Tidspunkt.now())

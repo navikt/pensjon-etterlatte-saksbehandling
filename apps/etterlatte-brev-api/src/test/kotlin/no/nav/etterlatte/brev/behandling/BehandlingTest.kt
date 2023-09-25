@@ -97,7 +97,7 @@ internal class BehandlingTest {
     fun `MapInnsender mapper til Innsender`() {
         val grunnlag = opprettGrunnlag()
 
-        assertEquals(Innsender("Pratsom Trafikkork", Foedselsnummer("11057523044")), grunnlag.mapInnsender())
+        assertEquals(Innsender(Foedselsnummer("11057523044")), grunnlag.mapInnsender())
     }
 
     @Test

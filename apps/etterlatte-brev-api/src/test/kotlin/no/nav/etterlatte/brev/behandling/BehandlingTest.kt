@@ -3,13 +3,13 @@ package no.nav.etterlatte.brev.behandling
 import com.fasterxml.jackson.databind.JsonNode
 import io.mockk.mockk
 import no.nav.etterlatte.brev.model.Spraak
+import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.Opplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Navn
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
-import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.person.VergeEllerFullmektig
@@ -28,9 +28,6 @@ import java.time.YearMonth
 import java.util.UUID
 
 internal class BehandlingTest {
-    private val innsenderJson =
-        """{"type":"INNSENDER","fornavn":"PRATSOM","etternavn":"TRAFIKKORK","foedselsnummer":"11057523044"}"""
-
     @Test
     fun `MapSoeker mapper til Soeker`() {
         val grunnlag = opprettGrunnlag()
@@ -232,9 +229,9 @@ internal class BehandlingTest {
         opplysningsmapSakOverrides =
             mapOf(
                 Opplysningstype.SPRAAK to opprettOpplysning(Spraak.NB.toJsonNode()),
-                Opplysningstype.INNSENDER_SOEKNAD_V1 to
+                Opplysningstype.PERSONGALLERI_V1 to
                     opprettOpplysning(
-                        objectMapper.readTree(innsenderJson),
+                        Persongalleri("", innsender = "11057523044").toJsonNode(),
                     ),
             ),
         opplysningsmapSoekerOverrides =

@@ -3,7 +3,7 @@ import { Content, ContentHeader, GridContainer, MainContent } from '~shared/styl
 import { HeadingWrapper, InnholdPadding } from '~components/behandling/soeknadsoversikt/styled'
 import { Alert, Button, Checkbox, Heading, Link, Select, Table, Textarea, TextField } from '@navikt/ds-react'
 import { useEffect, useState } from 'react'
-import { mapApiResult, mapAllApiResult, useApiCall, isPending } from '~shared/hooks/useApiCall'
+import { mapApiResult, useApiCall, isPending, isFailure, isSuccess } from '~shared/hooks/useApiCall'
 import { oppdaterGenerellBehandling } from '~shared/api/generellbehandling'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
@@ -49,7 +49,7 @@ const Utland = (props: { utlandsBehandling: Generellbehandling }) => {
 
     const defaultDokumentState: Dokumenter = { p2100: false, p3000: false, p5000: false }
     const [dokumenter, setDokumenter] = useState<Dokumenter>(innhold?.dokumenter ?? defaultDokumentState)
-
+    console.log('dokumenter: ', dokumenter, '\n innhold?.dokumenter: ', innhold?.dokumenter)
     const [errorLand, setErrLand] = useState<boolean>(false)
     const [nyttBrevStatus, opprettBrev] = useApiCall(opprettBrevForSak)
     const opprettNyttBrevOgRedirect = () => {
@@ -159,8 +159,8 @@ const Utland = (props: { utlandsBehandling: Generellbehandling }) => {
                     <Table.HeaderCell scope="row">P2100</Table.HeaderCell>
                     <Table.DataCell>
                       <Checkbox
-                        value={dokumenter.p2100}
-                        onChange={(e) => setDokumenter({ ...dokumenter, p2100: !!e.target.value })}
+                        checked={dokumenter.p2100}
+                        onChange={(e) => setDokumenter({ ...dokumenter, p2100: !!e.target.checked })}
                       >
                         <></>
                       </Checkbox>
@@ -170,8 +170,8 @@ const Utland = (props: { utlandsBehandling: Generellbehandling }) => {
                     <Table.HeaderCell scope="row">P5000</Table.HeaderCell>
                     <Table.DataCell>
                       <Checkbox
-                        value={dokumenter.p5000}
-                        onChange={(e) => setDokumenter({ ...dokumenter, p5000: !!e.target.value })}
+                        checked={dokumenter.p5000}
+                        onChange={(e) => setDokumenter({ ...dokumenter, p5000: !!e.target.checked })}
                       >
                         <></>
                       </Checkbox>
@@ -181,8 +181,8 @@ const Utland = (props: { utlandsBehandling: Generellbehandling }) => {
                     <Table.HeaderCell scope="row">P3000</Table.HeaderCell>
                     <Table.DataCell>
                       <Checkbox
-                        value={dokumenter.p3000}
-                        onChange={(e) => setDokumenter({ ...dokumenter, p3000: !!e.target.value })}
+                        checked={dokumenter.p3000}
+                        onChange={(e) => setDokumenter({ ...dokumenter, p3000: !!e.target.checked })}
                       >
                         <></>
                       </Checkbox>
@@ -214,20 +214,20 @@ const Utland = (props: { utlandsBehandling: Generellbehandling }) => {
                 value={notater}
                 onChange={(e) => setNotater(e.target.value)}
               />
-              <Button onClick={() => oppaterGenerellbehandlingUtland()}>Lagre opplysninger</Button>
-              {mapAllApiResult(
-                putOppdaterGenerellBehandlingStatus,
-                <Spinner visible={true} label="Oppdaterer generell behandling utland" />,
-                null,
-                () => (
-                  <ApiErrorAlert>Kunne ikke oppdatere generell behandling utland</ApiErrorAlert>
-                ),
-                () => (
-                  <Alert style={{ margin: '1rem', width: '20rem' }} variant="success">
-                    Behandlingen er oppdatert
-                  </Alert>
-                )
+              {isFailure(putOppdaterGenerellBehandlingStatus) && (
+                <ApiErrorAlert>Kunne ikke oppdatere generell behandling utland</ApiErrorAlert>
               )}
+              {isSuccess(putOppdaterGenerellBehandlingStatus) && (
+                <Alert style={{ margin: '1rem', width: '20rem' }} variant="success">
+                  Behandlingen er oppdatert
+                </Alert>
+              )}
+              <Button
+                onClick={() => oppaterGenerellbehandlingUtland()}
+                loading={isPending(putOppdaterGenerellBehandlingStatus)}
+              >
+                Lagre opplysninger
+              </Button>
             </InnholdPadding>
           </Content>
         </MainContent>

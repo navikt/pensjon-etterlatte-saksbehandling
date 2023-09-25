@@ -6,8 +6,10 @@ import no.nav.etterlatte.kafka.KafkaProdusent
 import no.nav.etterlatte.libs.common.event.BehandlingRiverKey
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.CORRELATION_ID_KEY
+import no.nav.etterlatte.libs.common.rapidsandrivers.TEKNISK_TID_KEY
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.time.LocalDateTime
 
 enum class BehandlingHendelseType {
     OPPRETTET,
@@ -38,6 +40,7 @@ class BehandlingsHendelserKafkaProducerImpl(
                 "BEHANDLING:${hendelseType.name}",
                 mapOf(
                     CORRELATION_ID_KEY to correlationId,
+                    TEKNISK_TID_KEY to LocalDateTime.now(),
                     BehandlingRiverKey.behandlingObjectKey to behandling,
                 ),
             ).toJson(),

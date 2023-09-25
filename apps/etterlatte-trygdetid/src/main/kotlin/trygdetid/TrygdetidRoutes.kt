@@ -126,9 +126,7 @@ fun Route.trygdetid(
 
                 val beregnetTrygdetid = call.receive<DetaljertBeregnetTrygdetidResultat>()
 
-                trygdetidService.overstyrBeregnetTrygdetid(behandlingsId, beregnetTrygdetid)
-
-                call.respond(HttpStatusCode.NoContent)
+                call.respond(trygdetidService.overstyrBeregnetTrygdetid(behandlingsId, beregnetTrygdetid).toDto())
             }
         }
     }

@@ -160,8 +160,7 @@ class VedtaksvurderingRepository(private val datasource: DataSource) : Transacti
             """,
                 params = mapOf("vedtakId" to vedtakId),
             ) {
-                val utbetalingsperioder = hentUtbetalingsPerioder(it.long("id"), this)
-                it.toVedtak(utbetalingsperioder)
+                it.toVedtak(emptyList())
             }
         }
 
@@ -206,8 +205,7 @@ class VedtaksvurderingRepository(private val datasource: DataSource) : Transacti
                 queryString = hentVedtak,
                 params = { mapOf("sakId" to sakId) },
             ) {
-                val utbetalingsperioder = hentUtbetalingsPerioder(it.long("id"), this)
-                it.toVedtak(utbetalingsperioder)
+                it.toVedtak(emptyList())
             }
         }
     }

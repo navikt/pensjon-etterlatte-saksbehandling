@@ -240,9 +240,7 @@ class TrygdetidService(
         brukerTokenInfo: BrukerTokenInfo,
     ): Trygdetid {
         val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
-        return kopierSisteTrygdetidberegning(behandling, forrigeBehandlingId, brukerTokenInfo).also {
-            behandlingKlient.settBehandlingStatusTrygdetidOppdatert(behandlingId, brukerTokenInfo)
-        }
+        return kopierSisteTrygdetidberegning(behandling, forrigeBehandlingId, brukerTokenInfo)
     }
 
     private suspend fun kopierSisteTrygdetidberegning(
@@ -329,12 +327,12 @@ class TrygdetidService(
     fun overstyrBeregnetTrygdetid(
         behandlingsId: UUID,
         beregnetTrygdetid: DetaljertBeregnetTrygdetidResultat,
-    ) {
+    ): Trygdetid {
         val trygdetid =
             trygdetidRepository.hentTrygdetid(behandlingsId)
                 ?: throw Exception("Fant ikke gjeldende trygdetid for behandlingId=$behandlingsId")
 
-        trygdetid.oppdaterBeregnetTrygdetid(
+        return trygdetid.oppdaterBeregnetTrygdetid(
             DetaljertBeregnetTrygdetid(
                 resultat = beregnetTrygdetid,
                 tidspunkt = Tidspunkt.now(),

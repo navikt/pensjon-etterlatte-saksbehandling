@@ -1,6 +1,7 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="etterlatte-tilbakekreving.dev-gcp" type="JetRunConfigurationType">
     <envs>
+      <env name="HTTP_PORT" value="8099" />
       <env name="LOGBACK_APPENDER" value="STDOUT" />
       <env name="NAIS_APP_NAME" value="etterlatte-tilbakekreving" />
       <env name="KAFKA_RAPID_TOPIC" value="etterlatte" />

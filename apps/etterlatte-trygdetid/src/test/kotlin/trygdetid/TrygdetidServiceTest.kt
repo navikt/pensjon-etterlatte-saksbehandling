@@ -662,7 +662,6 @@ internal class TrygdetidServiceTest {
         every { vilkaarsvurderingDto.isYrkesskade() } returns false
         coEvery { vilkaarsvurderingKlient.hentVilkaarsvurdering(any(), any()) } returns vilkaarsvurderingDto
         coEvery { behandlingKlient.hentBehandling(behandlingId, saksbehandler) } returns regulering
-        coEvery { behandlingKlient.settBehandlingStatusTrygdetidOppdatert(any(), any()) } returns true
         every { repository.hentTrygdetid(forrigeBehandlingId) } returns forrigeTrygdetid
         every { repository.opprettTrygdetid(any()) } answers { firstArg() }
 
@@ -674,7 +673,6 @@ internal class TrygdetidServiceTest {
             repository.hentTrygdetid(forrigeBehandlingId)
             behandlingKlient.hentBehandling(behandlingId, saksbehandler)
             repository.opprettTrygdetid(match { it.behandlingId == behandlingId })
-            behandlingKlient.settBehandlingStatusTrygdetidOppdatert(behandlingId, saksbehandler)
             vilkaarsvurderingKlient.hentVilkaarsvurdering(any(), any())
         }
         verify {

@@ -10,7 +10,6 @@ import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
-import no.nav.etterlatte.libs.common.behandling.UtenlandstilsnittType
 import no.nav.etterlatte.libs.common.generellbehandling.GenerellBehandling
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
@@ -201,7 +200,7 @@ class BehandlingStatusServiceImpl(
     private fun haandterUtland(behandling: Behandling) {
         if (featureToggleService.isEnabled(GenerellBehandlingToggle.KanBrukeGenerellBehandlingToggle, false)) {
             if (behandling.type == BehandlingType.FØRSTEGANGSBEHANDLING) {
-                if (behandling.utenlandstilsnitt?.type == UtenlandstilsnittType.UTLANDSTILSNITT) {
+                if (behandling.boddEllerArbeidetUtlandet?.skalSendeKravpakke == true) {
                     val oppgaveUtland =
                         oppgaveService.opprettNyOppgaveMedSakOgReferanse(
                             behandling.id.toString(),

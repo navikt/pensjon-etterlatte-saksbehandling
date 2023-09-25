@@ -17,9 +17,8 @@ import no.nav.etterlatte.foerstegangsbehandling
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
+import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.behandling.Utenlandstilsnitt
-import no.nav.etterlatte.libs.common.behandling.UtenlandstilsnittType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
@@ -110,11 +109,12 @@ internal class BehandlingStatusServiceTest {
             foerstegangsbehandling(
                 sakId = sakId,
                 status = BehandlingStatus.ATTESTERT,
-                utenlandstilsnitt =
-                    Utenlandstilsnitt(
-                        UtenlandstilsnittType.UTLANDSTILSNITT,
-                        Grunnlagsopplysning.Saksbehandler("ident", Tidspunkt.now()),
-                        "begrunnelse",
+                boddEllerArbeidetUtlandet =
+                    BoddEllerArbeidetUtlandet(
+                        boddEllerArbeidetUtlandet = true,
+                        skalSendeKravpakke = true,
+                        begrunnelse = "beg",
+                        kilde = Grunnlagsopplysning.Saksbehandler.create("navIdent"),
                     ),
             )
         val behandlingId = behandling.id

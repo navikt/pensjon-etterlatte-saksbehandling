@@ -15,6 +15,7 @@ import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.metrics.OppgaveMetrikkerDao
 import no.nav.etterlatte.oppgave.OppgaveDao
 import no.nav.etterlatte.oppgave.OppgaveDaoImpl
+import no.nav.etterlatte.sak.SakDao
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
@@ -30,6 +31,7 @@ internal class MetrikkerDaoTest {
     private lateinit var dataSource: DataSource
     private lateinit var oppgaveDao: OppgaveDao
     private lateinit var metrikkerDao: OppgaveMetrikkerDao
+    private var sakId: Long = 0
 
     @Container
     private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:$POSTGRES_VERSION")
@@ -50,6 +52,7 @@ internal class MetrikkerDaoTest {
         val connection = dataSource.connection
         oppgaveDao = OppgaveDaoImpl { connection }
         metrikkerDao = OppgaveMetrikkerDao(dataSource)
+        sakId = SakDao { connection }.opprettSak(fnr = "", type = SakType.BARNEPENSJON, enhet = "").id
     }
 
     @AfterEach
@@ -86,7 +89,6 @@ internal class MetrikkerDaoTest {
     }
 
     fun lagNyOppgave(
-        sakId: Long = 123L,
         sakType: SakType = SakType.BARNEPENSJON,
         oppgaveKilde: OppgaveKilde = OppgaveKilde.BEHANDLING,
         oppgaveType: OppgaveType = OppgaveType.FOERSTEGANGSBEHANDLING,

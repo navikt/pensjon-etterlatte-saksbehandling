@@ -108,6 +108,7 @@ class DownstreamResourceClient(
         runCatching {
             httpClient.get(resource.url) {
                 header(HttpHeaders.Authorization, "Bearer ${oboAccessToken.accessToken}")
+                resource.additionalHeaders?.forEach { headers.append(it.key, it.value) }
             }
         }
             .mapCatching { response ->

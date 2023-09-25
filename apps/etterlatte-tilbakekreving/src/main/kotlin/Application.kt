@@ -13,7 +13,6 @@ import no.nav.etterlatte.libs.ktor.metricsModule
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.libs.ktor.setReady
 import no.nav.etterlatte.tilbakekreving.config.ApplicationContext
-import no.nav.etterlatte.tilbakekreving.config.ApplicationProperties
 import no.nav.etterlatte.tilbakekreving.kravgrunnlag.testKravgrunnlagRoutes
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -21,9 +20,7 @@ import org.slf4j.LoggerFactory
 val sikkerLogg: Logger = LoggerFactory.getLogger("sikkerLogg")
 
 fun main() {
-    val applicationProperties = ApplicationProperties.fromEnv(System.getenv())
-    val context = ApplicationContext(applicationProperties)
-    Server(context).run()
+    ApplicationContext().let { Server(it).run() }
 }
 
 class Server(private val context: ApplicationContext) {
@@ -44,7 +41,7 @@ class Server(private val context: ApplicationContext) {
                             testKravgrunnlagRoutes(service = context.service)
                         }
                     }
-                    connector { port = 8080 }
+                    connector { port = context.properties.httpPort }
                 },
         )
 

@@ -1,6 +1,6 @@
 import { IBehandlingStatus, IBoddEllerArbeidetUtlandet } from '~shared/types/IDetaljertBehandling'
 import { VurderingsboksWrapper } from '~components/vurderingsboks/VurderingsboksWrapper'
-import { BodyShort, Label, Radio, RadioGroup } from '@navikt/ds-react'
+import { Checkbox, CheckboxGroup, HelpText, Radio, RadioGroup } from '@navikt/ds-react'
 import { RadioGroupWrapper } from '~components/behandling/vilkaarsvurdering/Vurdering'
 import { VurderingsTitle } from '../../styled'
 import { SoeknadsoversiktTextArea } from '../SoeknadsoversiktTextArea'
@@ -10,7 +10,8 @@ import { useApiCall, isFailure } from '~shared/hooks/useApiCall'
 import { lagreBoddEllerArbeidetUtlandet } from '~shared/api/behandling'
 import { oppdaterBehandlingsstatus, oppdaterBoddEllerArbeidetUtlandet } from '~store/reducers/BehandlingReducer'
 import { ApiErrorAlert } from '~ErrorBoundary'
-import { JaNei, JaNeiRec } from '~shared/types/ISvar'
+import { JaNei } from '~shared/types/ISvar'
+import BoddEllerArbeidetIUtlandetVisning from '~components/behandling/soeknadsoversikt/soeknadoversikt/boddEllerArbeidetUtlandet/BoddEllerArbeidetIUtlandetVisning'
 
 export const BoddEllerArbeidetUtlandetVurdering = ({
   boddEllerArbeidetUtlandet,
@@ -26,6 +27,25 @@ export const BoddEllerArbeidetUtlandetVurdering = ({
   const dispatch = useAppDispatch()
 
   const [svar, setSvar] = useState<JaNei | null>(finnSvar(boddEllerArbeidetUtlandet))
+  const [boddArbeidetIkkeEosEllerAvtaleland, setBoddArbeidetIkkeEosEllerAvtaleland] = useState<boolean>(
+    boddEllerArbeidetUtlandet?.boddArbeidetIkkeEosEllerAvtaleland ?? false
+  )
+  const [boddArbeidetEosNordiskKonvensjon, setBoddArbeidetEosNordiskKonvensjon] = useState<boolean>(
+    boddEllerArbeidetUtlandet?.boddArbeidetEosNordiskKonvensjon ?? false
+  )
+  const [boddArbeidetAvtaleland, setBoddArbeidetAvtaleland] = useState<boolean>(
+    boddEllerArbeidetUtlandet?.boddArbeidetAvtaleland ?? false
+  )
+  const [vurdereAvoededsTrygdeavtale, setVurdereAvoededsTrygdeavtale] = useState<boolean>(
+    boddEllerArbeidetUtlandet?.vurdereAvoededsTrygdeavtale ?? false
+  )
+  const [norgeErBehandlendeland, setNorgeErBehandlendeland] = useState<boolean>(
+    boddEllerArbeidetUtlandet?.norgeErBehandlendeland ?? false
+  )
+  const [skalSendeKravpakke, setSkalSendeKravpakke] = useState<boolean>(
+    boddEllerArbeidetUtlandet?.skalSendeKravpakke ?? false
+  )
+
   const [radioError, setRadioError] = useState<string>('')
   const [begrunnelse, setBegrunnelse] = useState<string>(boddEllerArbeidetUtlandet?.begrunnelse || '')
   const [setBoddEllerArbeidetUtlandetStatus, setBoddEllerArbeidetUtlandet, resetToInitial] =
@@ -35,11 +55,24 @@ export const BoddEllerArbeidetUtlandetVurdering = ({
     svar ? setRadioError('') : setRadioError('Du må velge et svar')
 
     if (svar)
-      return setBoddEllerArbeidetUtlandet({ behandlingId, begrunnelse, svar: svar === JaNei.JA }, (response) => {
-        dispatch(oppdaterBoddEllerArbeidetUtlandet(response))
-        dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.OPPRETTET))
-        onSuccess?.()
-      })
+      return setBoddEllerArbeidetUtlandet(
+        {
+          behandlingId,
+          begrunnelse,
+          svar: svar === JaNei.JA,
+          boddArbeidetIkkeEosEllerAvtaleland,
+          boddArbeidetEosNordiskKonvensjon,
+          boddArbeidetAvtaleland,
+          vurdereAvoededsTrygdeavtale,
+          norgeErBehandlendeland,
+          skalSendeKravpakke,
+        },
+        (response) => {
+          dispatch(oppdaterBoddEllerArbeidetUtlandet(response))
+          dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.OPPRETTET))
+          onSuccess?.()
+        }
+      )
   }
 
   const reset = (onSuccess?: () => void) => {
@@ -54,20 +87,7 @@ export const BoddEllerArbeidetUtlandetVurdering = ({
   return (
     <VurderingsboksWrapper
       tittel=""
-      subtittelKomponent={
-        <>
-          <BodyShort spacing>Har avdøde bodd eller arbeidet i utlandet?</BodyShort>
-          {boddEllerArbeidetUtlandet ? (
-            <Label as="p" size="small" style={{ marginBottom: '32px' }}>
-              {JaNeiRec[boddEllerArbeidetUtlandet.boddEllerArbeidetUtlandet ? JaNei.JA : JaNei.NEI]}
-            </Label>
-          ) : (
-            <Label as="p" size="small" style={{ marginBottom: '32px' }}>
-              Ikke vurdert
-            </Label>
-          )}
-        </>
-      }
+      subtittelKomponent={<BoddEllerArbeidetIUtlandetVisning boddEllerArbeidetUtlandet={boddEllerArbeidetUtlandet} />}
       redigerbar={redigerbar}
       vurdering={
         boddEllerArbeidetUtlandet?.kilde
@@ -102,6 +122,67 @@ export const BoddEllerArbeidetUtlandetVurdering = ({
             </div>
           </RadioGroup>
         </RadioGroupWrapper>
+        {svar === JaNei.JA && (
+          <>
+            <CheckboxGroup legend="Vurdering av utlandsopphold">
+              <Checkbox
+                value={boddArbeidetIkkeEosEllerAvtaleland}
+                onChange={() => {
+                  setBoddArbeidetIkkeEosEllerAvtaleland(!boddArbeidetIkkeEosEllerAvtaleland)
+                }}
+              >
+                Avdøde har bodd/arbeidet i utlandet (Ikke EØS/avtaleland)
+              </Checkbox>
+              <Checkbox
+                value={boddArbeidetEosNordiskKonvensjon}
+                onChange={() => {
+                  setBoddArbeidetEosNordiskKonvensjon(!boddArbeidetEosNordiskKonvensjon)
+                }}
+              >
+                Avdøde har bodd/arbeidet i utlandet (EØS/nordisk konvensjon)
+              </Checkbox>
+              <Checkbox
+                value={boddArbeidetAvtaleland}
+                onChange={() => {
+                  setBoddArbeidetAvtaleland(!boddArbeidetAvtaleland)
+                }}
+              >
+                Avdøde har bodd/arbeidet i utlandet (Avtaleland)
+              </Checkbox>
+            </CheckboxGroup>
+            <CheckboxGroup legend="Vurdering av utlandsopphold m.m.">
+              <Checkbox
+                value={vurdereAvoededsTrygdeavtale}
+                onChange={() => {
+                  setVurdereAvoededsTrygdeavtale(!vurdereAvoededsTrygdeavtale)
+                }}
+              >
+                Vurdere avdødes trygdeavtale
+              </Checkbox>
+              <Checkbox
+                value={norgeErBehandlendeland}
+                onChange={() => {
+                  setNorgeErBehandlendeland(!norgeErBehandlendeland)
+                }}
+              >
+                Norge er behandlende land
+              </Checkbox>
+              <Checkbox
+                value={skalSendeKravpakke}
+                onChange={() => {
+                  setSkalSendeKravpakke(!skalSendeKravpakke)
+                }}
+              >
+                Det skal sendes kravpakke
+                <HelpText>
+                  Hvis avdøde har hatt AP/UT og kravpakke er sendt med svar om ingen rett fra utland, skal det ikke
+                  sendes kravpakke. Hvis du krysser av vil det automatisk bli opprettet “kravpakke til utland” etter
+                  attestering.
+                </HelpText>
+              </Checkbox>
+            </CheckboxGroup>
+          </>
+        )}
         <SoeknadsoversiktTextArea
           value={begrunnelse}
           onChange={(e) => {

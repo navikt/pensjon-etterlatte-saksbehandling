@@ -51,6 +51,7 @@ export const ToggleMinOppgaveliste = () => {
     const oppdatertOppgaveState = [...hentedeOppgaver]
     const index = oppdatertOppgaveState.findIndex((o) => o.id === id)
     oppdatertOppgaveState[index].saksbehandler = saksbehandler
+    oppdatertOppgaveState[index].status = 'UNDER_BEHANDLING'
     setHentedeOppgaver(oppdatertOppgaveState)
   }
 

@@ -7,7 +7,6 @@ import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.etterlatte.libs.common.rapidsandrivers.feilendeSteg
 import no.nav.etterlatte.libs.common.rapidsandrivers.feilmelding
-import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.migrering.Migreringsstatus
 import no.nav.etterlatte.migrering.PesysRepository
 import no.nav.etterlatte.rapidsandrivers.EventNames
@@ -47,9 +46,7 @@ internal class FeilendeMigreringLytter(rapidsConnection: RapidsConnection, priva
         context: MessageContext,
     ) {
         logger.warn("Migrering av pesyssak ${packet.pesysId} feila")
-
-        val feil = packet.feilmelding
-        repository.lagreFeilkjoering(packet.hendelseData, feil = feil.toJson(), feilendeSteg = packet.feilendeSteg)
+        repository.lagreFeilkjoering(packet.hendelseData, feil = packet.feilmelding, feilendeSteg = packet.feilendeSteg)
         repository.oppdaterStatus(packet.pesysId, Migreringsstatus.MIGRERING_FEILA)
     }
 }

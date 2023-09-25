@@ -7,6 +7,7 @@ import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.libs.common.trygdetid.DetaljertBeregnetTrygdetidResultat
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidGrunnlagDto
 import java.util.UUID
@@ -30,6 +31,17 @@ class TrygdetidService(
             trygdetidApp.post("$url/api/trygdetid/$behandlingId/grunnlag") {
                 contentType(ContentType.Application.Json)
                 setBody(grunnlag)
+            }.body()
+        }
+
+    fun overstyrBeregnetTrygdetid(
+        behandlingId: UUID,
+        beregnetTrygdetid: DetaljertBeregnetTrygdetidResultat,
+    ): TrygdetidDto =
+        runBlocking {
+            trygdetidApp.post("$url/api/trygdetid/$behandlingId/migrering") {
+                contentType(ContentType.Application.Json)
+                setBody(beregnetTrygdetid)
             }.body()
         }
 }

@@ -182,7 +182,6 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
                 assertEquals(HttpStatusCode.OK, it.status)
                 val behandling: DetaljertBehandling = it.body()
                 assertNotNull(behandling.id)
-                assertEquals("innsender", behandling.innsender)
             }
 
             client.post("/api/behandling/$behandlingId/virkningstidspunkt") {
@@ -368,7 +367,6 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
                 val behandling = it.body<DetaljertBehandling>()
 
                 assertEquals(HttpStatusCode.OK, it.status)
-                assertEquals(BehandlingStatus.IVERKSATT, behandling.status)
             }
 
             client.post("/grunnlagsendringshendelse/doedshendelse") {

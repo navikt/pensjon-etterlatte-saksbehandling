@@ -15,7 +15,6 @@ import no.nav.etterlatte.avkorting.regler.InntektAvkortingGrunnlagWrapper
 import no.nav.etterlatte.beregning.Beregning
 import no.nav.etterlatte.beregning.grunnlag.InstitusjonsoppholdBeregningsgrunnlag
 import no.nav.etterlatte.beregning.regler.barnepensjon.BarnepensjonGrunnlag
-import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
@@ -38,7 +37,6 @@ import no.nav.etterlatte.regler.Beregningstall
 import no.nav.etterlatte.token.Saksbehandler
 import java.math.RoundingMode
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
 
@@ -261,19 +259,11 @@ fun behandling(
     id = id,
     sak = sak,
     sakType = sakType,
-    behandlingOpprettet = LocalDateTime.now(),
-    soeknadMottattDato = null,
-    innsender = null,
     soeker = "12312312321",
-    gjenlevende = listOf(),
-    avdoed = listOf(),
-    soesken = listOf(),
-    status = BehandlingStatus.TRYGDETID_OPPDATERT,
     behandlingType = behandlingType,
     virkningstidspunkt = virkningstidspunkt,
     revurderingsaarsak = null,
     prosesstype = Prosesstype.MANUELL,
     boddEllerArbeidetUtlandet = null,
     revurderingInfo = null,
-    enhet = "1111",
 )

@@ -179,21 +179,13 @@ internal fun Behandling.toDetaljertBehandling(persongalleri: Persongalleri): Det
         id = id,
         sak = sak.id,
         sakType = sak.sakType,
-        behandlingOpprettet = behandlingOpprettet,
-        soeknadMottattDato = mottattDato(),
-        innsender = persongalleri.innsender,
         soeker = persongalleri.soeker,
-        gjenlevende = persongalleri.gjenlevende,
-        avdoed = persongalleri.avdoed,
-        soesken = persongalleri.soesken,
-        status = status,
         behandlingType = type,
         virkningstidspunkt = virkningstidspunkt,
         boddEllerArbeidetUtlandet = boddEllerArbeidetUtlandet,
         revurderingsaarsak = revurderingsaarsak(),
         prosesstype = prosesstype,
         revurderingInfo = revurderingInfo()?.revurderingInfo,
-        enhet = sak.enhet,
     )
 }
 

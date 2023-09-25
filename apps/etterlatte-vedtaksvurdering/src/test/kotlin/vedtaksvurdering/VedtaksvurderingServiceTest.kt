@@ -13,7 +13,6 @@ import io.mockk.spyk
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import kotliquery.queryOf
-import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
@@ -33,7 +32,6 @@ import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.SKAL_SENDE_BREV
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.vedtak.KafkaHendelseType
 import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
@@ -64,9 +62,7 @@ import vedtaksvurdering.SAKSBEHANDLER_1
 import vedtaksvurdering.attestant
 import vedtaksvurdering.opprettVedtak
 import vedtaksvurdering.saksbehandler
-import java.lang.RuntimeException
 import java.math.BigDecimal
-import java.time.LocalDateTime
 import java.time.Month
 import java.time.YearMonth
 import java.util.UUID
@@ -605,19 +601,11 @@ internal class VedtaksvurderingServiceTest {
                 sakType = SakType.BARNEPENSJON,
                 behandlingType = BehandlingType.REVURDERING,
                 revurderingsaarsak = RevurderingAarsak.REGULERING,
-                behandlingOpprettet = Tidspunkt.now().toLocalDatetimeUTC(),
-                soeknadMottattDato = null,
-                innsender = null,
                 soeker = FNR_1,
-                gjenlevende = listOf(),
-                avdoed = listOf(),
-                soesken = listOf(),
-                status = BehandlingStatus.VILKAARSVURDERT,
                 virkningstidspunkt = null,
                 boddEllerArbeidetUtlandet = null,
                 prosesstype = Prosesstype.MANUELL,
                 revurderingInfo = null,
-                enhet = "1111",
             )
         coEvery { behandlingKlientMock.hentSak(any(), any()) } returns
             Sak(
@@ -1125,14 +1113,7 @@ internal class VedtaksvurderingServiceTest {
             id = behandlingId,
             sak = sakId,
             sakType = saktype,
-            behandlingOpprettet = LocalDateTime.now(),
-            soeknadMottattDato = LocalDateTime.now(),
-            innsender = null,
             soeker = FNR_1,
-            gjenlevende = listOf(),
-            avdoed = listOf(),
-            soesken = listOf(),
-            status = BehandlingStatus.OPPRETTET,
             behandlingType =
                 if (revurderingAarsak == null) {
                     BehandlingType.FØRSTEGANGSBEHANDLING
@@ -1149,7 +1130,6 @@ internal class VedtaksvurderingServiceTest {
             revurderingsaarsak = revurderingAarsak,
             revurderingInfo = revurderingInfo,
             prosesstype = Prosesstype.MANUELL,
-            enhet = "1111",
         )
 
     private companion object {

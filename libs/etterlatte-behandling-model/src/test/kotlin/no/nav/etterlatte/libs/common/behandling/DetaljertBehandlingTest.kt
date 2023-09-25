@@ -3,7 +3,6 @@ package no.nav.etterlatte.libs.common.behandling
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
-import java.time.LocalDateTime
 import java.util.UUID
 
 class DetaljertBehandlingTest {
@@ -32,20 +31,12 @@ class DetaljertBehandlingTest {
             id = UUID.randomUUID(),
             sak = 1L,
             sakType = SakType.BARNEPENSJON,
-            behandlingOpprettet = LocalDateTime.now(),
-            soeknadMottattDato = LocalDateTime.now(),
-            innsender = null,
             soeker = "123",
-            gjenlevende = listOf(),
-            avdoed = listOf(),
-            soesken = listOf(),
-            status = BehandlingStatus.OPPRETTET,
             behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
             virkningstidspunkt = null,
             boddEllerArbeidetUtlandet = null,
             revurderingsaarsak = revurderingsaarsak,
             prosesstype = Prosesstype.MANUELL,
             revurderingInfo = null,
-            enhet = "1111",
         )
 }

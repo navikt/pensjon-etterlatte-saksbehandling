@@ -5,9 +5,9 @@ import no.nav.etterlatte.brev.behandling.Avkortingsinfo
 import no.nav.etterlatte.brev.behandling.Behandling
 import no.nav.etterlatte.brev.behandling.Trygdetidsperiode
 import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
+import no.nav.etterlatte.libs.common.behandling.erEtterbetaling
 import no.nav.pensjon.brevbaker.api.model.Kroner
 import java.time.LocalDate
-import java.time.YearMonth
 
 data class InnvilgetBrevData(
     val utbetalingsinfo: Utbetalingsinfo,
@@ -108,7 +108,7 @@ data class InnvilgetBrevDataEnkel(
             InnvilgetBrevDataEnkel(
                 utbetalingsinfo = behandling.utbetalingsinfo,
                 avdoed = behandling.persongalleri.avdoed,
-                erEtterbetalingMerEnnTreMaaneder = behandling.erEtterbetaling(),
+                erEtterbetalingMerEnnTreMaaneder = erEtterbetaling(behandling.utbetalingsinfo.virkningsdato),
                 vedtaksdato =
                     behandling.vedtak.vedtaksdato
                         ?: throw IllegalStateException("Trenger vedtaksdato, men var null"),
@@ -133,7 +133,7 @@ data class InnvilgetHovedmalBrevData(
             innhold: List<Slate.Element>,
         ): InnvilgetHovedmalBrevData {
             val etterbetalingDTO =
-                if (behandling.erEtterbetaling()) {
+                if (erEtterbetaling(behandling.utbetalingsinfo.virkningsdato)) {
                     val beregningsperioder =
                         behandling.utbetalingsinfo.beregningsperioder
                             .filter { it.datoFOM.isBefore(behandling.utbetalingsinfo.virkningsdato) }
@@ -164,8 +164,6 @@ data class InnvilgetHovedmalBrevData(
         }
     }
 }
-
-private fun Behandling.erEtterbetaling() = utbetalingsinfo.virkningsdato.isBefore(YearMonth.now().atDay(1))
 
 private fun LocalDate?.erIkkeFoer(dato: LocalDate): Boolean {
     if (this == null) {

@@ -34,6 +34,7 @@ import no.nav.etterlatte.behandling.omregning.MigreringService
 import no.nav.etterlatte.behandling.omregning.OmregningService
 import no.nav.etterlatte.behandling.revurdering.RevurderingDao
 import no.nav.etterlatte.behandling.revurdering.RevurderingServiceImpl
+import no.nav.etterlatte.behandling.statistikk.StatistikkService
 import no.nav.etterlatte.behandling.tilbakekreving.TilbakekrevingDao
 import no.nav.etterlatte.behandling.tilbakekreving.TilbakekrevingService
 import no.nav.etterlatte.common.klienter.PdlKlientImpl
@@ -183,6 +184,11 @@ class ApplicationContext(
             sporingslogg = sporingslogg,
             kommerBarnetTilGodeDao = kommerBarnetTilGodeDao,
             oppgaveService = oppgaveService,
+            behandlingHenter = behandlingHenter,
+        )
+    internal val statistikkService =
+        StatistikkService(
+            grunnlagKlient = grunnlagKlientObo,
             behandlingHenter = behandlingHenter,
         )
 

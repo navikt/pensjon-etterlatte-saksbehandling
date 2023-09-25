@@ -22,6 +22,7 @@ import no.nav.etterlatte.behandling.klage.klageRoutes
 import no.nav.etterlatte.behandling.omregning.migreringRoutes
 import no.nav.etterlatte.behandling.omregning.omregningRoutes
 import no.nav.etterlatte.behandling.revurdering.revurderingRoutes
+import no.nav.etterlatte.behandling.statistikk.statistikkRoutes
 import no.nav.etterlatte.behandling.tilbakekreving.tilbakekrevingRoutes
 import no.nav.etterlatte.behandling.tilgang.tilgangRoutes
 import no.nav.etterlatte.common.DatabaseContext
@@ -119,6 +120,7 @@ fun Application.module(context: ApplicationContext) {
                 oppgaveService = oppgaveService,
                 behandlingService = behandlingService,
             )
+            statistikkRoutes(statistikkService)
             oppgaveRoutes(
                 service = oppgaveService,
                 gosysOppgaveService = gosysOppgaveService,

@@ -124,7 +124,7 @@ fun Grunnlag.mapInnsender(): Innsender? =
 
         val persongalleri =
             requireNotNull(opplysning?.verdi) {
-                "Sak (id=${metadata.sakId}) mangler opplysningstype INNSENDER_SOEKNAD_V1"
+                "Sak (id=${metadata.sakId}) mangler opplysningstype PERSONGALLERI_V1"
             }
 
         persongalleri.innsender?.let {

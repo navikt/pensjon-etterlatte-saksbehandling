@@ -12,7 +12,7 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.AVDOED_PDL_V1
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.BOSTEDSADRESSE
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.INNSENDER_SOEKNAD_V1
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.INNSENDER_PDL_V1
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.PERSONGALLERI_V1
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.SOEKER_PDL_V1
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.SOEKER_SOEKNAD_V1
@@ -303,7 +303,7 @@ internal class GrunnlagDaoIntegrationTest {
         // mange dummy-opplysninger tilknyttet andre personer, skal ignoreres...
         listOf(BLAAOEYD_SAKS, GROENN_KOPP, TRIVIELL_MIDTPUNKT, SMEKKER_GYNGEHEST).forEachIndexed { i, fnr ->
             opplysningRepo.leggOpplysningTilGrunnlag(i.toLong(), lagGrunnlagsopplysning(SOEKER_SOEKNAD_V1, fnr = fnr))
-            opplysningRepo.leggOpplysningTilGrunnlag(i.toLong(), lagGrunnlagsopplysning(INNSENDER_SOEKNAD_V1, fnr = fnr))
+            opplysningRepo.leggOpplysningTilGrunnlag(i.toLong(), lagGrunnlagsopplysning(INNSENDER_PDL_V1, fnr = fnr))
             opplysningRepo.leggOpplysningTilGrunnlag(i.toLong(), lagGrunnlagsopplysning(AVDOED_PDL_V1, fnr = fnr))
             opplysningRepo.leggOpplysningTilGrunnlag(i.toLong(), lagGrunnlagsopplysning(PERSONGALLERI_V1, fnr = fnr))
         }
@@ -311,7 +311,7 @@ internal class GrunnlagDaoIntegrationTest {
         val result = opplysningRepo.finnAlleSakerForPerson(STOR_SNERK)
         assertEquals(3, result.size)
 
-        verify(exactly = 15) { opplysningRepo.leggOpplysningTilGrunnlag(any(), any(), any()) }
+        verify(exactly = 19) { opplysningRepo.leggOpplysningTilGrunnlag(any(), any(), any()) }
     }
 
     private companion object {

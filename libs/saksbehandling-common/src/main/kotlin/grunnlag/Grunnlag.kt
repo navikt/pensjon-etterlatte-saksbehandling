@@ -19,6 +19,8 @@ class Grunnlag(
             )
     }
 
+    fun hentInnsender(): Grunnlagsdata<JsonNode> = hentFamiliemedlem(PersonRolle.INNSENDER)
+
     fun hentAvdoed(): Grunnlagsdata<JsonNode> = hentFamiliemedlem(PersonRolle.AVDOED)
 
     fun hentGjenlevende(): Grunnlagsdata<JsonNode> = hentFamiliemedlem(PersonRolle.GJENLEVENDE)

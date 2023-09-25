@@ -35,7 +35,6 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import org.slf4j.LoggerFactory
 import java.time.Clock
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
 
@@ -44,7 +43,7 @@ class VedtaksvurderingService(
     private val beregningKlient: BeregningKlient,
     private val vilkaarsvurderingKlient: VilkaarsvurderingKlient,
     private val behandlingKlient: BehandlingKlient,
-    private val sendToRapid: (String, UUID) -> Unit,
+    private val publiser: (String, UUID) -> Unit,
     private val clock: Clock = utcKlokke(),
 ) {
     private val logger = LoggerFactory.getLogger(VedtaksvurderingService::class.java)
@@ -150,12 +149,10 @@ class VedtaksvurderingService(
                 }
             }
         sendToRapid(
-            lagRiverMelding(
-                vedtakhendelse = KafkaHendelseType.FATTET,
-                vedtak = fattetVedtak,
-                tekniskTid = fattetVedtak.vedtakFattet!!.tidspunkt.toLocalDatetimeUTC(),
-            ),
-            behandlingId,
+            vedtakhendelse = KafkaHendelseType.FATTET,
+            vedtak = fattetVedtak,
+            tekniskTid = fattetVedtak.vedtakFattet!!.tidspunkt,
+            behandlingId = behandlingId,
         )
         return fattetVedtak
     }
@@ -210,10 +207,11 @@ class VedtaksvurderingService(
             }
 
         sendToRapid(
-            lagRiverMelding(
-                vedtakhendelse = KafkaHendelseType.ATTESTERT,
-                vedtak = attestertVedtak,
-                tekniskTid = attestertVedtak.attestasjon!!.tidspunkt.toLocalDatetimeUTC(),
+            vedtakhendelse = KafkaHendelseType.ATTESTERT,
+            vedtak = attestertVedtak,
+            tekniskTid = attestertVedtak.attestasjon!!.tidspunkt,
+            behandlingId = behandlingId,
+            extraParams =
                 mapOf(
                     SKAL_SENDE_BREV to
                         when {
@@ -222,8 +220,6 @@ class VedtaksvurderingService(
                         },
                     REVURDERING_AARSAK to behandling.revurderingsaarsak.toString(),
                 ),
-            ),
-            behandlingId,
         )
 
         return attestertVedtak
@@ -266,12 +262,10 @@ class VedtaksvurderingService(
             }
 
         sendToRapid(
-            lagRiverMelding(
-                KafkaHendelseType.UNDERKJENT,
-                underkjentVedtak,
-                underkjentTid.toLocalDatetimeUTC(),
-            ),
-            behandlingId,
+            vedtakhendelse = KafkaHendelseType.UNDERKJENT,
+            vedtak = underkjentVedtak,
+            tekniskTid = underkjentTid,
+            behandlingId = behandlingId,
         )
 
         return repository.hentVedtak(behandlingId)!!
@@ -297,12 +291,10 @@ class VedtaksvurderingService(
             }
 
         sendToRapid(
-            lagRiverMelding(
-                vedtakhendelse = KafkaHendelseType.IVERKSATT,
-                vedtak = iverksattVedtak,
-                tekniskTid = Tidspunkt.now(clock).toLocalDatetimeUTC(),
-            ),
-            behandlingId,
+            vedtakhendelse = KafkaHendelseType.IVERKSATT,
+            vedtak = iverksattVedtak,
+            tekniskTid = Tidspunkt.now(clock),
+            behandlingId = behandlingId,
         )
 
         return iverksattVedtak
@@ -505,18 +497,22 @@ class VedtaksvurderingService(
     private fun vilkaarsvurderingUtfallNonNull(vilkaarsvurderingUtfall: VilkaarsvurderingUtfall?) =
         requireNotNull(vilkaarsvurderingUtfall) { "Behandling mangler utfall på vilkårsvurdering" }
 
-    private fun lagRiverMelding(
+    private fun sendToRapid(
         vedtakhendelse: KafkaHendelseType,
         vedtak: Vedtak,
-        tekniskTid: LocalDateTime,
+        tekniskTid: Tidspunkt,
+        behandlingId: UUID,
         extraParams: Map<String, Any> = emptyMap(),
-    ) = JsonMessage.newMessage(
-        mapOf(
-            EVENT_NAME_KEY to vedtakhendelse.toString(),
-            "vedtak" to vedtak.toDto(),
-            TEKNISK_TID_KEY to tekniskTid,
-        ) + extraParams,
-    ).toJson()
+    ) = publiser(
+        JsonMessage.newMessage(
+            mapOf(
+                EVENT_NAME_KEY to vedtakhendelse.toString(),
+                "vedtak" to vedtak.toDto(),
+                TEKNISK_TID_KEY to tekniskTid.toLocalDatetimeUTC(),
+            ) + extraParams,
+        ).toJson(),
+        behandlingId,
+    )
 
     fun tilbakestillIkkeIverksatteVedtak(behandlingId: UUID): Vedtak? = repository.tilbakestillIkkeIverksatteVedtak(behandlingId)
 

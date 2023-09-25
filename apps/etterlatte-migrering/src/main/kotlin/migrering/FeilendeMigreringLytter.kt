@@ -2,7 +2,7 @@ package migrering
 
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.rapidsandrivers.FEILENDE_STEG
-import no.nav.etterlatte.libs.common.rapidsandrivers.FEILMELDING
+import no.nav.etterlatte.libs.common.rapidsandrivers.FEILMELDING_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.etterlatte.libs.common.rapidsandrivers.feilendeSteg
@@ -35,7 +35,7 @@ internal class FeilendeMigreringLytter(rapidsConnection: RapidsConnection, priva
             validate { it.requireValue(KILDE_KEY, Vedtaksloesning.PESYS.name) }
             validate { it.requireKey(PESYS_ID_KEY) }
             validate { it.requireKey(HENDELSE_DATA_KEY) }
-            validate { it.requireKey(FEILMELDING) }
+            validate { it.requireKey(FEILMELDING_KEY) }
             validate { it.rejectValue(FEILENDE_STEG, Migreringshendelser.VERIFISER) }
             correlationId()
         }.register(this)

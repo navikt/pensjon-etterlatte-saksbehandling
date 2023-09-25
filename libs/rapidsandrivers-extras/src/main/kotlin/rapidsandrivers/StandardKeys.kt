@@ -15,7 +15,7 @@ const val FEILENDE_KRITERIER_KEY = "feilende_kriterier"
 const val GYLDIG_FOR_BEHANDLING_KEY = "gyldig_for_behandling"
 const val SKAL_SENDE_BREV = "skal_sende_brev"
 const val REVURDERING_AARSAK = "revurdering_aarsak"
-const val FEILMELDING = "feilmelding"
+const val FEILMELDING_KEY = "feilmelding"
 
 fun River.eventName(eventName: String) {
     validate { it.demandValue(EVENT_NAME_KEY, eventName) }
@@ -34,9 +34,9 @@ var JsonMessage.feilendeSteg: String
     }
 
 var JsonMessage.feilmelding: String
-    get() = this[FEILMELDING].toJson()
+    get() = this[FEILMELDING_KEY].toJson()
     set(name) {
-        this[FEILMELDING] = name
+        this[FEILMELDING_KEY] = name
     }
 
 fun River.correlationId() {

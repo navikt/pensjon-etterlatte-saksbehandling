@@ -7,7 +7,7 @@ import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.FEILENDE_STEG
-import no.nav.etterlatte.libs.common.rapidsandrivers.FEILMELDING
+import no.nav.etterlatte.libs.common.rapidsandrivers.FEILMELDING_KEY
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.database.POSTGRES_VERSION
 import no.nav.etterlatte.migrering.Migreringsstatus
@@ -96,7 +96,7 @@ class FeilendeMigreringLytterTest {
                             KILDE_KEY to Vedtaksloesning.PESYS,
                             PESYS_ID_KEY to pesysid,
                             HENDELSE_DATA_KEY to pesyssak.tilMigreringsrequest(),
-                            FEILMELDING to IllegalStateException("her feiler det"),
+                            FEILMELDING_KEY to IllegalStateException("her feiler det"),
                             FEILENDE_STEG to Migreringshendelser.TRYGDETID,
                         ),
                     ).toJson(),

@@ -14,7 +14,7 @@ class AvstemmingsdataSender(
         logger.info("Sender avstemmingsdata til Oppdrag")
         val xml = GrensesnittavstemmingsdataJaxb.toXml(avstemmingsdata)
         sendAvstemmingsdata(xml)
-        logger.info("Grensesnittavstemmingsdata overført til Oppdrag", kv("avstemmingsdata", xml))
+        logger.info("Grensesnittavstemmingsdata overført til Oppdrag: ${kv("avstemmingsdata", xml)}")
         return xml
     }
 
@@ -22,7 +22,7 @@ class AvstemmingsdataSender(
         logger.info("Sender konsistensavstemmingsdata til Oppdrag")
         val xml = KonsistensavstemmingsdataJaxb.toXml(avstemmingsdata)
         sendAvstemmingsdata(xml)
-        logger.info("Konsistensavstemmingsdata overført til Oppdrag", kv("avstemmingsdata", xml))
+        logger.info("Konsistensavstemmingsdata overført til Oppdrag: ${kv("avstemmingsdata", xml)}")
         return xml
     }
 

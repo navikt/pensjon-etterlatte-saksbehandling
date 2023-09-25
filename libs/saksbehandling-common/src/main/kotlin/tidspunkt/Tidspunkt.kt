@@ -25,6 +25,10 @@ abstract class TruncatedInstant(
 
     override fun compareTo(other: TruncatedInstant) = this.instant.compareTo(other.instant)
 
+    abstract override fun equals(other: Any?): Boolean
+
+    abstract override fun hashCode(): Int
+
     fun isBefore(other: TruncatedInstant) = this.instant.isBefore(other.instant)
 
     fun isAfter(other: TruncatedInstant) = this.instant.isAfter(other.instant)

@@ -287,10 +287,12 @@ class VedtaksvurderingService(
         verifiserGyldigVedtakStatus(vedtak.status, listOf(VedtakStatus.ATTESTERT))
         val iverksattVedtak =
             repository.inTransaction { tx ->
-                val iverksattVedtakLocal = repository.iverksattVedtak(behandlingId, tx = tx)
-                runBlocking {
-                    settBehandlingTilIverksatt(behandlingId, brukerTokenInfo, iverksattVedtakLocal.id)
-                }
+                val iverksattVedtakLocal =
+                    repository.iverksattVedtak(behandlingId, tx = tx).also {
+                        runBlocking {
+                            behandlingKlient.iverksett(behandlingId, brukerTokenInfo, it.id)
+                        }
+                    }
                 iverksattVedtakLocal
             }
 
@@ -517,12 +519,6 @@ class VedtaksvurderingService(
     ).toJson()
 
     fun tilbakestillIkkeIverksatteVedtak(behandlingId: UUID): Vedtak? = repository.tilbakestillIkkeIverksatteVedtak(behandlingId)
-
-    suspend fun settBehandlingTilIverksatt(
-        behandlingId: UUID,
-        brukerTokenInfo: BrukerTokenInfo,
-        vedtakId: Long,
-    ) = behandlingKlient.iverksett(behandlingId, brukerTokenInfo, vedtakId)
 
     fun hentNyesteBehandlingMedResultat(
         sakId: Long,

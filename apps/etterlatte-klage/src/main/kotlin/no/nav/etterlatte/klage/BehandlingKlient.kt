@@ -48,6 +48,8 @@ class BehandlingKlient(val behandlingHttpClient: HttpClient, val resourceUrl: St
                             requireNotNull(klageHendelse.detaljer.klagebehandlingAvsluttet).utfall.tilResultat(),
                         )
 
+                    // TODO: Se på hvordan vi håndterer anke -- det burde nok sette et eget flagg
+                    //  og ikke overstyre første status
                     BehandlingEventType.ANKEBEHANDLING_OPPRETTET ->
                         Kabalrespons(
                             KabalStatus.OPPRETTET,
@@ -77,7 +79,7 @@ class BehandlingKlient(val behandlingHttpClient: HttpClient, val resourceUrl: St
                 }
 
             behandlingHttpClient.patch(
-                "$resourceUrl/klage/${klageHendelse.kildeReferanse}/kabalstatus",
+                "$resourceUrl/api/klage/${klageHendelse.kildeReferanse}/kabalstatus",
             ) {
                 contentType(ContentType.Application.Json)
                 setBody(body)

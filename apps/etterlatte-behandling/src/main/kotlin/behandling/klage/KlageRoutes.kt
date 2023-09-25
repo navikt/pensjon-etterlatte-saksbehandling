@@ -21,6 +21,7 @@ import no.nav.etterlatte.libs.common.behandling.Kabalrespons
 import no.nav.etterlatte.libs.common.behandling.KlageUtfallUtenBrev
 import no.nav.etterlatte.libs.common.klageId
 import no.nav.etterlatte.libs.common.kunSaksbehandler
+import no.nav.etterlatte.libs.common.kunSystembruker
 import no.nav.etterlatte.libs.common.medBody
 import no.nav.etterlatte.libs.common.sakId
 
@@ -99,6 +100,19 @@ internal fun Route.klageRoutes(
                     }
                 }
             }
+
+            patch("kabalstatus") {
+                hvisEnabled(KlageFeatureToggle.KanBrukeKlageToggle) {
+                    kunSystembruker {
+                        medBody<Kabalrespons> {
+                            inTransaction {
+                                klageService.oppdaterKabalStatus(klageId, it)
+                            }
+                            call.respond(HttpStatusCode.OK)
+                        }
+                    }
+                }
+            }
         }
 
         get("sak/{$SAKID_CALL_PARAMETER}") {
@@ -108,17 +122,6 @@ internal fun Route.klageRoutes(
                         klageService.hentKlagerISak(sakId)
                     }
                 call.respond(klager)
-            }
-        }
-
-        patch("{$KLAGEID_CALL_PARAMETER}/kabalstatus") {
-            hvisEnabled(KlageFeatureToggle.KanBrukeKlageToggle) {
-                medBody<Kabalrespons> {
-                    inTransaction {
-                        klageService.oppdaterKabalStatus(sakId, it)
-                    }
-                    call.respond(HttpStatusCode.OK)
-                }
             }
         }
     }

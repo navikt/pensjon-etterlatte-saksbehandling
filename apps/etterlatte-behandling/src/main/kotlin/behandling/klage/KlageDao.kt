@@ -23,7 +23,7 @@ interface KlageDao {
     fun hentKlagerISak(sakId: Long): List<Klage>
 
     fun oppdaterKabalStatus(
-        sakId: Long,
+        klageId: UUID,
         kabalrespons: Kabalrespons,
     )
 }
@@ -90,7 +90,7 @@ class KlageDaoImpl(private val connection: () -> Connection) : KlageDao {
     }
 
     override fun oppdaterKabalStatus(
-        sakId: Long,
+        klageId: UUID,
         kabalrespons: Kabalrespons,
     ) {
         with(connection()) {
@@ -99,12 +99,12 @@ class KlageDaoImpl(private val connection: () -> Connection) : KlageDao {
                     """
                     UPDATE klage
                     SET kabalstatus = ?, kabalresultat = ?
-                    WHERE sak_id = ?
+                    WHERE id = ?
                     """.trimIndent(),
                 )
             statement.setString(1, kabalrespons.kabalStatus.name)
             statement.setString(2, kabalrespons.resultat.name)
-            statement.setObject(3, sakId)
+            statement.setObject(3, klageId)
             statement.executeUpdate()
         }
     }

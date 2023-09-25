@@ -14,6 +14,7 @@ import io.ktor.server.testing.testApplication
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -57,7 +58,6 @@ class MigreringTest {
     private val server = MockOAuth2Server()
     private lateinit var hoconApplicationConfig: HoconApplicationConfig
     private val behandlingKlient = mockk<BehandlingKlient>()
-
     private lateinit var ds: DataSource
     private lateinit var migreringService: MigreringService
     private lateinit var vilkaarsvurderingRepository: VilkaarsvurderingRepository
@@ -90,6 +90,7 @@ class MigreringTest {
                 vilkaarsvurderingRepository,
                 behandlingKlient,
                 grunnlagKlient,
+                DummyFeatureToggleService(),
             )
 
         migreringService =

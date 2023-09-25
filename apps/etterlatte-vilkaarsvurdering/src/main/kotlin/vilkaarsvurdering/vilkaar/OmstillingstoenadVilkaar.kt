@@ -1,5 +1,6 @@
 package no.nav.etterlatte.vilkaarsvurdering.vilkaar
 
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
 import no.nav.etterlatte.libs.common.grunnlag.hentSoeknadMottattDato
@@ -8,21 +9,32 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.Lovreferanse
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaar
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarOpplysningType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
+import no.nav.etterlatte.vilkaarsvurdering.VilkaarFeatureToggle
 import no.nav.etterlatte.vilkaarsvurdering.vilkaar.BarnepensjonVilkaar.toVilkaarsgrunnlag
 
 object OmstillingstoenadVilkaar {
-    fun inngangsvilkaar(grunnlag: Grunnlag) =
-        listOf(
-            etterlatteLever(),
-            doedsfall(),
-            overlappendeYtelser(),
-            sivilstand(),
-            yrkesskade(),
-            avdoedesMedlemskap(),
-            gjenlevendesMedlemskap(),
-            aktivitetEtter6Maaneder(grunnlag),
-            oevrigeVilkaar(),
-        )
+    fun inngangsvilkaar(
+        grunnlag: Grunnlag,
+        featureToggleService: FeatureToggleService,
+    ) = listOf(
+        etterlatteLever(),
+        doedsfall(),
+        overlappendeYtelser(),
+        sivilstand(),
+        yrkesskade(),
+        avdoedesMedlemskap(),
+        gjenlevendesMedlemskap(),
+        aktivitetEtter6Maaneder(grunnlag),
+        oevrigeVilkaar(),
+    ).let { vilkaarListe ->
+        val skalOppretteEoesVilkaar =
+            featureToggleService.isEnabled(
+                VilkaarFeatureToggle.OpprettAvdoedesForutgaaendeMedlemskapEoesVilkaar,
+                defaultValue = false,
+            )
+
+        if (skalOppretteEoesVilkaar) vilkaarListe.plus(avdoedesMedlemskapEoes()) else vilkaarListe
+    }
 
     private fun etterlatteLever() =
         Vilkaar(
@@ -130,7 +142,7 @@ object OmstillingstoenadVilkaar {
             hovedvilkaar =
                 Delvilkaar(
                     type = VilkaarType.OMS_AVDOEDES_MEDLEMSKAP,
-                    tittel = "Avdødes forutgående medlemskap",
+                    tittel = "Avdødes forutgående medlemskap - Folketrygden",
                     beskrivelse =
                         """
                         For at dette vilkåret skal være oppfylt, og gjenlevende ektefelle har rett til ytelser etter dette kapitlet, må den avdøde:
@@ -151,6 +163,28 @@ object OmstillingstoenadVilkaar {
                     avdoedesMedlemskapPensjon(),
                     avdoedesMedlemskapYrkesskade(),
                     avdoedesMedlemskapOpptjening(),
+                ),
+        )
+
+    private fun avdoedesMedlemskapEoes() =
+        Vilkaar(
+            hovedvilkaar =
+                Delvilkaar(
+                    type = VilkaarType.OMS_AVDOEDES_MEDLEMSKAP_EOES,
+                    tittel = "Avdødes forutgående medlemskap - EØS/avtaleland",
+                    beskrivelse =
+                        """
+                        Forutgående medlemskap kan være oppfylt ved sammenlegging av norsk trygdetid og trygdetid avdøde har opptjent fra EØS-land. Dette forutsetter at samlet trygdetid i Norge er minst ett år uten avrunding. Det er bare de avtalelandene der det er opparbeidet minst ett års trygdetid som skal tas med i sammenleggingen.
+
+                        Medlemskap i såkalte tredjeland som det er inngått bilaterale avtaler med kan også legges sammen med norsk trygdetid, forutsatt at avtalen omfatter pensjonsfordeler.
+                         
+                        Hjemler:
+                        EØS - rådsforordning 883/2004 artikkel 6 og 57
+                        EØS - rådsforordning 1408/1971 artikkel 45 (gjelder perioder før 2004)
+                        EØF - traktaten 1408/71 artikkel 39 (fra 2003) (gjelder bilaterale avtaler)
+                        """.trimIndent(),
+                    spoersmaal = "Er vilkåret oppfylt?",
+                    lovreferanse = Lovreferanse(paragraf = "EØS/EØF"),
                 ),
         )
 

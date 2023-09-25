@@ -158,7 +158,9 @@ const Utland = (props: { utlandsBehandling: Generellbehandling }) => {
                         <Checkbox
                           value={dokumenter.p2100}
                           onChange={(e) => setDokumenter({ ...dokumenter, p2100: !!e.target.value })}
-                        ></Checkbox>
+                        >
+                          <></>
+                        </Checkbox>
                       </Table.DataCell>
                     </Table.Row>
                     <Table.Row>
@@ -167,7 +169,9 @@ const Utland = (props: { utlandsBehandling: Generellbehandling }) => {
                         <Checkbox
                           value={dokumenter.p5000}
                           onChange={(e) => setDokumenter({ ...dokumenter, p5000: !!e.target.value })}
-                        ></Checkbox>
+                        >
+                          <></>
+                        </Checkbox>
                       </Table.DataCell>
                     </Table.Row>
                     <Table.Row>
@@ -176,7 +180,9 @@ const Utland = (props: { utlandsBehandling: Generellbehandling }) => {
                         <Checkbox
                           value={dokumenter.p3000}
                           onChange={(e) => setDokumenter({ ...dokumenter, p3000: !!e.target.value })}
-                        ></Checkbox>
+                        >
+                          <></>
+                        </Checkbox>
                       </Table.DataCell>
                     </Table.Row>
                   </Table.Body>

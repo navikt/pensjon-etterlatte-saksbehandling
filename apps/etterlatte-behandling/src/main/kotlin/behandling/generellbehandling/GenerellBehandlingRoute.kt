@@ -69,10 +69,10 @@ internal fun Route.generellbehandlingRoutes(
 
     post("/api/generellbehandling/attester/{generellbehandlingId}") {
         hvisEnabled(GenerellBehandlingToggle.KanBrukeGenerellBehandlingToggle) {
-            kunSaksbehandler {
+            kunSaksbehandler { saksbehandler ->
                 val request = call.receive<GenerellBehandling>()
                 inTransaction {
-                    generellBehandlingService.attesterBehandling(request)
+                    generellBehandlingService.attesterBehandling(request, saksbehandler)
                 }
                 logger.info(
                     "Opprettet generell behandling for sak $sakId av typen ${request.type}",

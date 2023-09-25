@@ -1,7 +1,7 @@
 import { Dokumenter, Generellbehandling, Utland } from '~shared/types/Generellbehandling'
 import { Content, ContentHeader, GridContainer, MainContent } from '~shared/styled'
-import { HeadingWrapper, InnholdPadding } from '~components/behandling/soeknadsoversikt/styled'
-import { Alert, Button, Checkbox, Heading, Link, Select, Table, Textarea, TextField } from '@navikt/ds-react'
+import { HeadingWrapper } from '~components/behandling/soeknadsoversikt/styled'
+import { Alert, Button, Checkbox, Heading, Link, Panel, Select, Table, Textarea, TextField } from '@navikt/ds-react'
 import { useEffect, useState } from 'react'
 import { mapApiResult, useApiCall, isPending, isFailure, isSuccess } from '~shared/hooks/useApiCall'
 import { oppdaterGenerellBehandling } from '~shared/api/generellbehandling'
@@ -123,7 +123,7 @@ const Utland = (props: { utlandsBehandling: Generellbehandling }) => {
                 </p>
               </HeadingWrapper>
             </ContentHeader>
-            <InnholdPadding>
+            <Panel>
               <div>
                 {mapApiResult(
                   hentAlleLandRequest,
@@ -177,7 +177,7 @@ const Utland = (props: { utlandsBehandling: Generellbehandling }) => {
                     <Table.DataCell>
                       <Checkbox
                         checked={dokumenter.p2100}
-                        onChange={(e) => setDokumenter({ ...dokumenter, p2100: !!e.target.checked })}
+                        onChange={(e) => setDokumenter({ ...dokumenter, p2100: e.target.checked })}
                       >
                         <></>
                       </Checkbox>
@@ -188,7 +188,7 @@ const Utland = (props: { utlandsBehandling: Generellbehandling }) => {
                     <Table.DataCell>
                       <Checkbox
                         checked={dokumenter.p5000}
-                        onChange={(e) => setDokumenter({ ...dokumenter, p5000: !!e.target.checked })}
+                        onChange={(e) => setDokumenter({ ...dokumenter, p5000: e.target.checked })}
                       >
                         <></>
                       </Checkbox>
@@ -199,7 +199,7 @@ const Utland = (props: { utlandsBehandling: Generellbehandling }) => {
                     <Table.DataCell>
                       <Checkbox
                         checked={dokumenter.p3000}
-                        onChange={(e) => setDokumenter({ ...dokumenter, p3000: !!e.target.checked })}
+                        onChange={(e) => setDokumenter({ ...dokumenter, p3000: e.target.checked })}
                       >
                         <></>
                       </Checkbox>
@@ -250,7 +250,7 @@ const Utland = (props: { utlandsBehandling: Generellbehandling }) => {
                   Send til attestering
                 </Button>
               </ButtonGroup>
-            </InnholdPadding>
+            </Panel>
           </Content>
         </MainContent>
       </GridContainer>

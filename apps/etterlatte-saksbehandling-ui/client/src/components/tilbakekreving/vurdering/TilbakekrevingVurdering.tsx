@@ -1,6 +1,6 @@
 import { Button, Heading, Select, Table } from '@navikt/ds-react'
 import { Content, ContentHeader, FlexRow } from '~shared/styled'
-import { HeadingWrapper, Innhold } from '~components/behandling/soeknadsoversikt/styled'
+import { HeadingWrapper, InnholdPadding } from '~components/behandling/soeknadsoversikt/styled'
 import { useNavigate } from 'react-router-dom'
 import { useTilbakekreving } from '~components/tilbakekreving/useTilbakekreving'
 import React from 'react'
@@ -20,7 +20,7 @@ export function TilbakekrevingVurdering() {
           </Heading>
         </HeadingWrapper>
       </ContentHeader>
-      <Innhold>
+      <InnholdPadding>
         <Table className="table" zebraStripes>
           <Table.Header>
             <Table.HeaderCell>Måned</Table.HeaderCell>
@@ -94,7 +94,7 @@ export function TilbakekrevingVurdering() {
             })}
           </Table.Body>
         </Table>
-      </Innhold>
+      </InnholdPadding>
       <FlexRow justify="center">
         <Button variant="primary" onClick={() => navigate(`/tilbakekreving/${tilbakekreving?.id}/vedtak`)}>
           Gå til vedtak

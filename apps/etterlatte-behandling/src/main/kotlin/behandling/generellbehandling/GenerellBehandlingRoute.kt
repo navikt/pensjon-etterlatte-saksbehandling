@@ -10,6 +10,7 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.application
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
+import io.ktor.server.routing.put
 import io.ktor.util.pipeline.PipelineContext
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
@@ -66,15 +67,17 @@ internal fun Route.generellbehandlingRoutes(
         }
     }
 
-    post("/api/generellbehandling/{generellbehandlingId}") {
+    put("/api/generellbehandling/{generellbehandlingId}") {
         hvisEnabled(GenerellBehandlingToggle.KanBrukeGenerellBehandlingToggle) {
             kunSaksbehandler {
                 val request = call.receive<GenerellBehandling>()
                 inTransaction {
-                    generellBehandlingService.oppdaterBehandling(request)
+                    generellBehandlingService.oppdaterBehandling(
+                        request,
+                    )
                 }
                 logger.info(
-                    "Oppdatert generell behandling for sak $sakId av typen ${request.type}",
+                    "Oppdatert generell behandling for sak ${request.sakId} av typen ${request.type}",
                 )
                 call.respond(HttpStatusCode.OK)
             }

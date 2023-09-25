@@ -14,5 +14,5 @@ export function hentGenerellBehandling(generellbehandlingId: string): Promise<Ap
 }
 
 export function oppdaterGenerellBehandling(generellbehandling: Generellbehandling): Promise<ApiResponse<void>> {
-  return apiClient.put(`/generellbehandling/${generellbehandling.id}`, { generellbehandling })
+  return apiClient.put(`/generellbehandling/${generellbehandling.id}`, { ...generellbehandling })
 }

@@ -20,8 +20,16 @@ export type Innhold = Utland | Annen
 
 export interface Utland {
   type: GenerellBehandlingUtlandType
-  sed?: string
+  landIsoKode: string
+  dokumenter: Dokumenter
+  begrunnelse: string
   tilknyttetBehandling?: string
+}
+
+export interface Dokumenter {
+  P2100: boolean
+  P5000: boolean
+  P3000: boolean
 }
 
 export interface Annen {

@@ -1,8 +1,8 @@
 import { Dokumenter, Generellbehandling, Utland } from '~shared/types/Generellbehandling'
 import { Content, ContentHeader, GridContainer, MainContent } from '~shared/styled'
 import { HeadingWrapper, InnholdPadding } from '~components/behandling/soeknadsoversikt/styled'
-import { Alert, Button, Checkbox, Heading, Link, ReadMore, Select, Table, Textarea, TextField } from '@navikt/ds-react'
-import React, { useEffect, useState } from 'react'
+import { Alert, Button, Checkbox, Heading, Link, Select, Table, Textarea, TextField } from '@navikt/ds-react'
+import { useEffect, useState } from 'react'
 import { mapApiResult, mapAllApiResult, useApiCall, isPending } from '~shared/hooks/useApiCall'
 import { oppdaterGenerellBehandling } from '~shared/api/generellbehandling'
 import Spinner from '~shared/Spinner'
@@ -12,22 +12,22 @@ import styled from 'styled-components'
 import { PencilWritingIcon } from '@navikt/aksel-icons'
 import { opprettBrevForSak } from '~shared/api/brev'
 import { useNavigate } from 'react-router-dom'
+import { ExternalLinkIcon } from '@navikt/aksel-icons'
+import { ABlue500 } from '@navikt/ds-tokens/dist/tokens'
 
 const TextFieldBegrunnelse = styled(Textarea).attrs({ size: 'medium' })`
-  max-width: 50rem;
+  max-width: 40rem;
   margin: 2rem 0rem;
 `
 
-const DokumenterBrevFlex = styled.div`
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-`
-
-const TableWidth = styled(Table)`
+const StandardBreddeTabell = styled(Table)`
   max-width: 30rem;
+  margin-top: 2rem;
 `
 
+const LenkeMargin = styled(Link)`
+  margin: 2rem 0rem 0.5rem 0;
+`
 function isUtland(
   utlandsBehandling: Generellbehandling
 ): utlandsBehandling is Generellbehandling & { innhold: Utland } {
@@ -91,26 +91,23 @@ const Utland = (props: { utlandsBehandling: Generellbehandling }) => {
       }
     }
     return (
-      <GridContainer>
-        <MainContent>
+      <GridContainer style={{ maxWidth: '90rem' }}>
+        <MainContent style={{ whiteSpace: 'pre-wrap' }}>
           <Content>
             <ContentHeader>
               <HeadingWrapper>
                 <Heading spacing size="large" level="1">
                   Kravpakke til utland
                 </Heading>
-                <p>
+                <p style={{ maxWidth: '40rem' }}>
                   Det skal opprettes P_BUC_02 og sendes kravpakke som inneholder ulike SED`er til utland i RINA.
                   Dokumenter her for hvilke SED`er som blir sendt, og fyll inn nødvendig informasjon. Bruk notatfeltet
                   ved behov for utfyllende informasjon.
                 </p>
               </HeadingWrapper>
-              <Link href="http://www.rina.com" target="_blank" rel="noopener noreferrer">
-                Gå til RINA for å opprette kravpakke til utlandet
-              </Link>
             </ContentHeader>
             <InnholdPadding>
-              <div style={{ maxWidth: '20rem' }}>
+              <div style={{ maxWidth: '25rem' }}>
                 {mapApiResult(
                   hentAlleLandRequest,
                   <Spinner visible={true} label="Laster landliste" />,
@@ -119,6 +116,9 @@ const Utland = (props: { utlandsBehandling: Generellbehandling }) => {
                   ),
                   (landListe: ILand[]) => (
                     <>
+                      <Heading size="medium" level="3">
+                        Kravpakke sendes til
+                      </Heading>
                       <Select
                         label="Land"
                         value={valgtLandIsoKode || ''}
@@ -140,73 +140,80 @@ const Utland = (props: { utlandsBehandling: Generellbehandling }) => {
                     </>
                   )
                 )}
-                <p>Utsendelse av SED</p>
+
+                <LenkeMargin href="http://www.rina.com" target="_blank" rel="noopener noreferrer">
+                  Gå til RINA for å opprette kravpakke til utlandet
+                  <ExternalLinkIcon fill={ABlue500} />
+                </LenkeMargin>
                 <TextField label="Saksnummer RINA" value={rinanummer} onChange={(e) => setRinanummer(e.target.value)} />
               </div>
-              <DokumenterBrevFlex>
-                <TableWidth>
-                  <Table.Header>
-                    <Table.Row>
-                      <Table.HeaderCell scope="col">Dokumenter fra RINA</Table.HeaderCell>
-                      <Table.HeaderCell scope="col">Sendt</Table.HeaderCell>
-                    </Table.Row>
-                  </Table.Header>
-                  <Table.Body>
-                    <Table.Row>
-                      <Table.HeaderCell scope="row">P2100</Table.HeaderCell>
-                      <Table.DataCell>
-                        <Checkbox
-                          value={dokumenter.p2100}
-                          onChange={(e) => setDokumenter({ ...dokumenter, p2100: !!e.target.value })}
-                        >
-                          <></>
-                        </Checkbox>
-                      </Table.DataCell>
-                    </Table.Row>
-                    <Table.Row>
-                      <Table.HeaderCell scope="row">P5000</Table.HeaderCell>
-                      <Table.DataCell>
-                        <Checkbox
-                          value={dokumenter.p5000}
-                          onChange={(e) => setDokumenter({ ...dokumenter, p5000: !!e.target.value })}
-                        >
-                          <></>
-                        </Checkbox>
-                      </Table.DataCell>
-                    </Table.Row>
-                    <Table.Row>
-                      <Table.HeaderCell scope="row">P3000</Table.HeaderCell>
-                      <Table.DataCell>
-                        <Checkbox
-                          value={dokumenter.p3000}
-                          onChange={(e) => setDokumenter({ ...dokumenter, p3000: !!e.target.value })}
-                        >
-                          <></>
-                        </Checkbox>
-                      </Table.DataCell>
-                    </Table.Row>
-                  </Table.Body>
-                </TableWidth>
-                <ReadMore defaultOpen={true} header="Sende brev til RINA">
-                  Når SED er sendt i RINA skal det sendes varling til bruker
-                  <div>
-                    <Button
-                      icon={<PencilWritingIcon />}
-                      onClick={opprettNyttBrevOgRedirect}
-                      loading={isPending(nyttBrevStatus)}
-                      iconPosition="right"
-                    >
-                      Opprett nytt brev
-                    </Button>
-                  </div>
-                </ReadMore>
-              </DokumenterBrevFlex>
+              <StandardBreddeTabell>
+                <Table.Header>
+                  <Table.Row>
+                    <Table.HeaderCell scope="col">Dokumenter fra RINA</Table.HeaderCell>
+                    <Table.HeaderCell scope="col">Sendt</Table.HeaderCell>
+                  </Table.Row>
+                </Table.Header>
+                <Table.Body>
+                  <Table.Row>
+                    <Table.HeaderCell scope="row">P2100</Table.HeaderCell>
+                    <Table.DataCell>
+                      <Checkbox
+                        value={dokumenter.p2100}
+                        onChange={(e) => setDokumenter({ ...dokumenter, p2100: !!e.target.value })}
+                      >
+                        <></>
+                      </Checkbox>
+                    </Table.DataCell>
+                  </Table.Row>
+                  <Table.Row>
+                    <Table.HeaderCell scope="row">P5000</Table.HeaderCell>
+                    <Table.DataCell>
+                      <Checkbox
+                        value={dokumenter.p5000}
+                        onChange={(e) => setDokumenter({ ...dokumenter, p5000: !!e.target.value })}
+                      >
+                        <></>
+                      </Checkbox>
+                    </Table.DataCell>
+                  </Table.Row>
+                  <Table.Row>
+                    <Table.HeaderCell scope="row">P3000</Table.HeaderCell>
+                    <Table.DataCell>
+                      <Checkbox
+                        value={dokumenter.p3000}
+                        onChange={(e) => setDokumenter({ ...dokumenter, p3000: !!e.target.value })}
+                      >
+                        <></>
+                      </Checkbox>
+                    </Table.DataCell>
+                  </Table.Row>
+                </Table.Body>
+              </StandardBreddeTabell>
+              <div style={{ marginTop: '3.5rem', marginBottom: '3rem' }}>
+                <Heading size="medium" level="3">
+                  Varsling til bruker
+                </Heading>
+                <p style={{ maxWidth: '40rem' }}>
+                  Når nødvendige SED`er er sendt i RINA skal bruker varsles(om at krav er sendt). Opprett brev til
+                  bruker her. Tekstmal finner du her i tekstbiblioteket.
+                </p>
+                <div>
+                  <Button
+                    icon={<PencilWritingIcon />}
+                    onClick={opprettNyttBrevOgRedirect}
+                    loading={isPending(nyttBrevStatus)}
+                    iconPosition="right"
+                  >
+                    Opprett nytt brev
+                  </Button>
+                </div>
+              </div>
               <TextFieldBegrunnelse
                 label="Notater(valgfri)"
                 value={notater}
                 onChange={(e) => setNotater(e.target.value)}
               />
-
               <Button onClick={() => oppaterGenerellbehandlingUtland()}>Lagre opplysninger</Button>
               {mapAllApiResult(
                 putOppdaterGenerellBehandlingStatus,
@@ -216,7 +223,9 @@ const Utland = (props: { utlandsBehandling: Generellbehandling }) => {
                   <ApiErrorAlert>Kunne ikke oppdatere generell behandling utland</ApiErrorAlert>
                 ),
                 () => (
-                  <Alert variant="success">Behandlingen er oppdatert</Alert>
+                  <Alert style={{ margin: '1rem', width: '20rem' }} variant="success">
+                    Behandlingen er oppdatert
+                  </Alert>
                 )
               )}
             </InnholdPadding>

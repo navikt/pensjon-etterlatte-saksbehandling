@@ -20,16 +20,17 @@ export type Innhold = Utland | Annen
 
 export interface Utland {
   type: GenerellBehandlingUtlandType
-  landIsoKode: string
-  dokumenter: Dokumenter
-  begrunnelse: string
+  landIsoKode?: string
+  dokumenter?: Dokumenter
+  rinanummer?: string
+  begrunnelse?: string
   tilknyttetBehandling?: string
 }
 
 export interface Dokumenter {
-  P2100: boolean
-  P5000: boolean
-  P3000: boolean
+  p2100: boolean
+  p5000: boolean
+  p3000: boolean
 }
 
 export interface Annen {

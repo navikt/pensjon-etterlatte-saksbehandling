@@ -45,6 +45,7 @@ class GenerellBehandlingDao(private val connection: () -> Connection) {
                 )
             statement.setJsonb(1, generellBehandling.innhold)
             statement.setObject(2, generellBehandling.id)
+            statement.executeUpdate()
         }
     }
 

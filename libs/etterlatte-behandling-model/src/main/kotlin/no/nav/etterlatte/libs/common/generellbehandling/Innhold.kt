@@ -10,6 +10,7 @@ sealed class Innhold {
         val landIsoKode: String,
         val dokumenter: Dokumenter,
         val begrunnelse: String,
+        val rinanummer: String,
         val tilknyttetBehandling: String? = null,
     ) : Innhold()
 
@@ -20,7 +21,7 @@ sealed class Innhold {
 }
 
 data class Dokumenter(
-    val P2100: Boolean,
-    val P5000: Boolean,
-    val P3000: Boolean,
+    val p2100: Boolean,
+    val p5000: Boolean,
+    val p3000: Boolean,
 )

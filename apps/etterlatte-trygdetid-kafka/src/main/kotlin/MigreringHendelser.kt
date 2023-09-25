@@ -6,6 +6,8 @@ import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJson
+import no.nav.etterlatte.libs.common.trygdetid.DetaljertBeregnetTrygdetidResultat
+import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidGrunnlagDto
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidGrunnlagKildeDto
 import no.nav.etterlatte.rapidsandrivers.migrering.MigreringRequest
@@ -24,6 +26,7 @@ import rapidsandrivers.HENDELSE_DATA_KEY
 import rapidsandrivers.behandlingId
 import rapidsandrivers.migrering.ListenerMedLogging
 import rapidsandrivers.withFeilhaandtering
+import java.util.UUID
 
 internal class MigreringHendelser(rapidsConnection: RapidsConnection, private val trygdetidService: TrygdetidService) :
     ListenerMedLogging() {
@@ -58,20 +61,50 @@ internal class MigreringHendelser(rapidsConnection: RapidsConnection, private va
                     val request = objectMapper.treeToValue(packet[HENDELSE_DATA_KEY], MigreringRequest::class.java)
                     logger.info("Oppretter grunnlag for trygdetid for $behandlingId")
 
-                    // Oppretter alle trygdetidsperioder og beholder siste beregnede trygdetid
-                    val beregnetTrygdetid =
-                        request.trygdetid.perioder.map { periode ->
-                            trygdetidService.beregnTrygdetidGrunnlag(behandlingId, tilGrunnlag(periode))
-                        }.lastOrNull() ?: it
+                    try {
+                        // Oppretter alle trygdetidsperioder og beholder siste beregnede trygdetid
+                        val beregnetTrygdetid =
+                            request.trygdetid.perioder.map { periode ->
+                                trygdetidService.beregnTrygdetidGrunnlag(behandlingId, tilGrunnlag(periode))
+                            }.lastOrNull() ?: it.getOrThrow()
 
-                    packet[TRYGDETID_KEY] = beregnetTrygdetid.toJson()
-                    packet.eventName = Migreringshendelser.BEREGN
-                    context.publish(packet.toJson())
-                    logger.info(
-                        "Publiserte oppdatert migreringshendelse fra trygdetid for behandling $behandlingId",
-                    )
+                        sendBeregnetTrygdetid(packet, beregnetTrygdetid, context, behandlingId)
+                    } catch (e: Exception) {
+                        logger.warn(
+                            "Problem ved opprettelse av trygdetidsperioder for behandling $behandlingId - overstyrer beregnet trygdetid",
+                            e,
+                        )
+
+                        // TODO - EY-2602 - flere felter trengs - feks utland
+                        val detaljertBeregnetTrygdetid =
+                            DetaljertBeregnetTrygdetidResultat.fraSamletTrygdetidNorge(
+                                request.beregning.anvendtTrygdetid.toInt(),
+                            )
+
+                        val beregnetTrygdetid =
+                            trygdetidService.overstyrBeregnetTrygdetid(
+                                behandlingId,
+                                detaljertBeregnetTrygdetid,
+                            )
+
+                        sendBeregnetTrygdetid(packet, beregnetTrygdetid, context, behandlingId)
+                    }
                 }
             }
+    }
+
+    private fun sendBeregnetTrygdetid(
+        packet: JsonMessage,
+        beregnetTrygdetid: TrygdetidDto,
+        context: MessageContext,
+        behandlingId: UUID,
+    ) {
+        packet[TRYGDETID_KEY] = beregnetTrygdetid.toJson()
+        packet.eventName = Migreringshendelser.BEREGN
+        context.publish(packet.toJson())
+        logger.info(
+            "Publiserte oppdatert migreringshendelse fra trygdetid for behandling $behandlingId",
+        )
     }
 
     private fun tilGrunnlag(trygdetidsgrunnlag: Trygdetidsgrunnlag) =

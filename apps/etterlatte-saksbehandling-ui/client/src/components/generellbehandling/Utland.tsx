@@ -14,6 +14,7 @@ import { opprettBrevForSak } from '~shared/api/brev'
 import { useNavigate } from 'react-router-dom'
 import { ExternalLinkIcon } from '@navikt/aksel-icons'
 import { ABlue500 } from '@navikt/ds-tokens/dist/tokens'
+import { ButtonGroup } from '~components/person/VurderHendelseModal'
 
 const TextFieldBegrunnelse = styled(Textarea).attrs({ size: 'medium' })`
   max-width: 40rem;
@@ -21,7 +22,6 @@ const TextFieldBegrunnelse = styled(Textarea).attrs({ size: 'medium' })`
 `
 
 const StandardBreddeTabell = styled(Table)`
-  max-width: 30rem;
   margin-top: 2rem;
 `
 
@@ -41,6 +41,7 @@ const Utland = (props: { utlandsBehandling: Generellbehandling }) => {
   if (isUtland(utlandsBehandling)) {
     const innhold = utlandsBehandling.innhold
     const [putOppdaterGenerellBehandlingStatus, putOppdaterGenerellBehandling] = useApiCall(oppdaterGenerellBehandling)
+    const [sendTilAttesteringStatus, sendTilAttestering] = useApiCall(oppdaterGenerellBehandling)
 
     const [hentAlleLandRequest, fetchAlleLand] = useApiCall(hentAlleLand)
     const [rinanummer, setRinanummer] = useState<string>(innhold?.rinanummer ?? '')
@@ -90,16 +91,32 @@ const Utland = (props: { utlandsBehandling: Generellbehandling }) => {
         setErrLand(true)
       }
     }
+
+    const sendTilAttesteringWrapper = () => {
+      const generellBehandling: Generellbehandling = {
+        ...utlandsBehandling,
+        innhold: {
+          type: 'UTLAND',
+          dokumenter: dokumenter,
+          landIsoKode: valgtLandIsoKode,
+          begrunnelse: notater,
+          rinanummer: rinanummer,
+          tilknyttetBehandling: notater,
+        },
+      }
+      sendTilAttestering(generellBehandling)
+    }
+
     return (
-      <GridContainer style={{ maxWidth: '90rem' }}>
+      <GridContainer>
         <MainContent style={{ whiteSpace: 'pre-wrap' }}>
-          <Content>
+          <Content style={{ maxWidth: '40rem' }}>
             <ContentHeader>
               <HeadingWrapper>
                 <Heading spacing size="large" level="1">
                   Kravpakke til utland
                 </Heading>
-                <p style={{ maxWidth: '40rem' }}>
+                <p>
                   Det skal opprettes P_BUC_02 og sendes kravpakke som inneholder ulike SED`er til utland i RINA.
                   Dokumenter her for hvilke SED`er som blir sendt, og fyll inn nødvendig informasjon. Bruk notatfeltet
                   ved behov for utfyllende informasjon.
@@ -107,7 +124,7 @@ const Utland = (props: { utlandsBehandling: Generellbehandling }) => {
               </HeadingWrapper>
             </ContentHeader>
             <InnholdPadding>
-              <div style={{ maxWidth: '25rem' }}>
+              <div>
                 {mapApiResult(
                   hentAlleLandRequest,
                   <Spinner visible={true} label="Laster landliste" />,
@@ -194,7 +211,7 @@ const Utland = (props: { utlandsBehandling: Generellbehandling }) => {
                 <Heading size="medium" level="3">
                   Varsling til bruker
                 </Heading>
-                <p style={{ maxWidth: '40rem' }}>
+                <p>
                   Når nødvendige SED`er er sendt i RINA skal bruker varsles(om at krav er sendt). Opprett brev til
                   bruker her. Tekstmal finner du her i tekstbiblioteket.
                 </p>
@@ -222,12 +239,17 @@ const Utland = (props: { utlandsBehandling: Generellbehandling }) => {
                   Behandlingen er oppdatert
                 </Alert>
               )}
-              <Button
-                onClick={() => oppaterGenerellbehandlingUtland()}
-                loading={isPending(putOppdaterGenerellBehandlingStatus)}
-              >
-                Lagre opplysninger
-              </Button>
+              <ButtonGroup>
+                <Button
+                  onClick={() => oppaterGenerellbehandlingUtland()}
+                  loading={isPending(putOppdaterGenerellBehandlingStatus)}
+                >
+                  Lagre opplysninger
+                </Button>
+                <Button onClick={() => sendTilAttesteringWrapper()} loading={isPending(sendTilAttesteringStatus)}>
+                  Send til attestering
+                </Button>
+              </ButtonGroup>
             </InnholdPadding>
           </Content>
         </MainContent>

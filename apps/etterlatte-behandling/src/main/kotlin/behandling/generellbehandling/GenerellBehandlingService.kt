@@ -8,6 +8,12 @@ class GenerellBehandlingService(private val generellBehandlingDao: GenerellBehan
         generellBehandlingDao.opprettGenerellbehandling(generellBehandling)
     }
 
+    fun attesterBehandling(generellBehandling: GenerellBehandling) {
+        oppdaterBehandling(generellBehandling)
+        // TODO: valider at den er ferdig utfylt
+        // opprett oppfølgingsoppgave med referanse til denne
+    }
+
     fun oppdaterBehandling(generellBehandling: GenerellBehandling) {
         generellBehandlingDao.oppdaterGenerellBehandling(generellBehandling)
     }

@@ -201,7 +201,7 @@ class KlageServiceImpl(
     ): Klage {
         val klage = klageDao.hentKlage(klageId) ?: throw NotFoundException("Kunne ikke finne klage med id=$klageId")
 
-        if (!Klage.kanFerdigstille(klage)) {
+        if (!klage.kanFerdigstille()) {
             throw IllegalStateException("Klagen med id=$klageId kan ikke ferdigstilles siden den har feil status / tilstand")
         }
 

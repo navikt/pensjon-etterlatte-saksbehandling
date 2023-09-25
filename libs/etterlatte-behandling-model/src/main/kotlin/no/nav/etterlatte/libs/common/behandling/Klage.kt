@@ -90,7 +90,7 @@ data class Klage(
         formkrav: Formkrav,
         saksbehandlerIdent: String,
     ): Klage {
-        if (!kanOppdatereFormkrav(this)) {
+        if (!this.kanOppdatereFormkrav()) {
             throw IllegalStateException(
                 "Kan ikke oppdatere formkrav i klagen med id=${this.id}, på grunn av " +
                     "tilstanden til klagen: ${this.status}",
@@ -111,7 +111,7 @@ data class Klage(
     }
 
     fun oppdaterUtfall(utfallMedBrev: KlageUtfall): Klage {
-        if (!kanOppdatereUtfall(this)) {
+        if (!this.kanOppdatereUtfall()) {
             throw IllegalStateException(
                 "Kan ikke oppdatere utfallet i klagen med id=${this.id} på grunn av statusen" +
                     "til klagen (${this.status})",
@@ -124,7 +124,7 @@ data class Klage(
     }
 
     fun ferdigstill(resultat: KlageResultat): Klage {
-        if (!kanFerdigstille(this)) {
+        if (!this.kanFerdigstille()) {
             throw IllegalStateException(
                 "Kan ikke ferdigstille klagen med id=${this.id} med resultatet $resultat " +
                     "på grunn av status til klagen (${this.status})",
@@ -134,6 +134,27 @@ data class Klage(
             resultat = resultat,
             status = KlageStatus.FERDIGSTILT,
         )
+    }
+
+    fun kanOppdatereFormkrav(): Boolean {
+        return KlageStatus.kanOppdatereFormkrav(this.status)
+    }
+
+    fun kanOppdatereUtfall(): Boolean {
+        return KlageStatus.kanOppdatereUtfall(this.status)
+    }
+
+    fun kanFerdigstille(): Boolean {
+        return when (this.status) {
+            KlageStatus.UTFALL_VURDERT -> {
+                this.utfall != null
+            }
+            KlageStatus.FORMKRAV_IKKE_OPPFYLT -> {
+                // TODO("Støtt avslag på formkrav på klage")
+                false
+            }
+            else -> false
+        }
     }
 
     companion object {
@@ -148,27 +169,6 @@ data class Klage(
                 utfall = null,
                 resultat = null,
             )
-        }
-
-        fun kanOppdatereFormkrav(klage: Klage): Boolean {
-            return KlageStatus.kanOppdatereFormkrav(klage.status)
-        }
-
-        fun kanOppdatereUtfall(klage: Klage): Boolean {
-            return KlageStatus.kanOppdatereUtfall(klage.status)
-        }
-
-        fun kanFerdigstille(klage: Klage): Boolean {
-            return when (klage.status) {
-                KlageStatus.UTFALL_VURDERT -> {
-                    klage.utfall != null
-                }
-                KlageStatus.FORMKRAV_IKKE_OPPFYLT -> {
-                    // TODO("Støtt avslag på formkrav på klage")
-                    false
-                }
-                else -> false
-            }
         }
     }
 }

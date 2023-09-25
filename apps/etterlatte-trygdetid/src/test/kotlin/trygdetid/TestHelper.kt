@@ -1,5 +1,6 @@
 package trygdetid
 
+import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
@@ -52,6 +53,7 @@ fun behandling(
     revurderingInfo = null,
     prosesstype = Prosesstype.AUTOMATISK,
     enhet = "",
+    kilde = Vedtaksloesning.GJENNY,
 )
 
 fun trygdetid(

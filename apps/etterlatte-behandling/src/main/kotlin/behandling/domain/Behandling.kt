@@ -194,6 +194,7 @@ internal fun Behandling.toDetaljertBehandling(persongalleri: Persongalleri): Det
         prosesstype = prosesstype,
         revurderingInfo = revurderingInfo()?.revurderingInfo,
         enhet = sak.enhet,
+        kilde = kilde,
     )
 }
 

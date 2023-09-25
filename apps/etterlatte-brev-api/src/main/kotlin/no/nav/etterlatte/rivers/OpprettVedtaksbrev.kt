@@ -9,6 +9,7 @@ import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.etterlatte.libs.common.vedtak.KafkaHendelseType
+import no.nav.etterlatte.rapidsandrivers.migrering.KILDE_KEY
 import no.nav.etterlatte.rapidsandrivers.migrering.kilde
 import no.nav.etterlatte.token.Systembruker
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -30,6 +31,7 @@ internal class OpprettVedtaksbrev(
             eventName(KafkaHendelseType.ATTESTERT.toString())
             validate { it.requireKey("vedtak.behandling.id") }
             validate { it.requireKey("vedtak.sak.id") }
+            validate { it.interestedIn(KILDE_KEY) }
             correlationId()
         }.register(this)
     }

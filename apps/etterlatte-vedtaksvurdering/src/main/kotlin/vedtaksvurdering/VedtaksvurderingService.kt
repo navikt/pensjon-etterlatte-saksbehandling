@@ -27,6 +27,7 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
+import no.nav.etterlatte.rapidsandrivers.migrering.KILDE_KEY
 import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlient
 import no.nav.etterlatte.vedtaksvurdering.klienter.BeregningKlient
@@ -218,6 +219,7 @@ class VedtaksvurderingService(
                             behandling.revurderingsaarsak.skalIkkeSendeBrev() -> false
                             else -> true
                         },
+                    KILDE_KEY to behandling.kilde,
                     REVURDERING_AARSAK to behandling.revurderingsaarsak.toString(),
                 ),
         )

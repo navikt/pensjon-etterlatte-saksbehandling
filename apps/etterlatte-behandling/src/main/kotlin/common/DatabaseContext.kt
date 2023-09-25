@@ -41,7 +41,7 @@ class DatabaseContext(private val ds: DataSource) : DatabaseKontekst {
             retur
         } catch (ex: Throwable) {
             c.rollback()
-            logger.warn("Reason for rollback", ex)
+            logger.error("Reason for rollback", ex)
             throw ex
         } finally {
             transactionalConnection = null

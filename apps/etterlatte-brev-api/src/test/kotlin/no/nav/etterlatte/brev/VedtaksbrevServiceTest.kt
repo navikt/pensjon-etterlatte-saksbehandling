@@ -142,7 +142,7 @@ internal class VedtaksbrevServiceTest {
     }
 
     @Nested
-    inner class OpprettVedtaksbrevTest {
+    inner class OpprettVedtaksbrevForMigreringTest {
         @ParameterizedTest
         @CsvSource(
             value = [

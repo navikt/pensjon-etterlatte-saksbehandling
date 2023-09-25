@@ -20,7 +20,7 @@ import org.slf4j.LoggerFactory
 import rapidsandrivers.migrering.ListenerMedLoggingOgFeilhaandtering
 import java.util.UUID
 
-internal class OpprettVedtaksbrev(
+internal class OpprettVedtaksbrevForMigrering(
     rapidsConnection: RapidsConnection,
     private val service: VedtaksbrevService,
 ) : ListenerMedLoggingOgFeilhaandtering(BrevEventTypes.OPPRETTET.name) {
@@ -41,7 +41,7 @@ internal class OpprettVedtaksbrev(
         context: MessageContext,
     ) {
         packet.eventName = BrevEventTypes.FERDIGSTILT.name
-        if (packet.kilde == Vedtaksloesning.PESYS) {
+        if (packet.erMigrering()) {
             val sakId = packet["vedtak.sak.id"].asLong()
             logger.info("Oppretter vedtaksbrev i sak $sakId")
             val behandlingId = packet["vedtak.behandling.id"].asUUID()
@@ -55,5 +55,7 @@ internal class OpprettVedtaksbrev(
         context.publish(packet.toJson())
     }
 }
+
+private fun JsonMessage.erMigrering(): Boolean = kilde == Vedtaksloesning.PESYS
 
 fun JsonNode.asUUID(): UUID = UUID.fromString(this.asText())

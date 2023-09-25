@@ -2,7 +2,6 @@ package no.nav.etterlatte.behandling
 
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
-import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.User
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.BehandlingMedGrunnlagsopplysninger
@@ -105,40 +104,25 @@ interface BehandlingService {
     fun hentFoersteVirk(sakId: Long): YearMonth?
 }
 
-class BehandlingServiceImpl(
+internal class BehandlingServiceImpl(
     private val behandlingDao: BehandlingDao,
     private val behandlingHendelser: BehandlingHendelserKafkaProducer,
     private val grunnlagsendringshendelseDao: GrunnlagsendringshendelseDao,
     private val hendelseDao: HendelseDao,
     private val grunnlagKlient: GrunnlagKlient,
     private val sporingslogg: Sporingslogg,
-    private val featureToggleService: FeatureToggleService,
     private val kommerBarnetTilGodeDao: KommerBarnetTilGodeDao,
     private val oppgaveService: OppgaveService,
+    private val behandlingHenter: BehandlingHenter,
 ) : BehandlingService {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    private fun hentBehandlingForId(id: UUID) =
-        behandlingDao.hentBehandling(id)?.let { behandling ->
-            listOf(behandling).filterForEnheter().firstOrNull()
-        }
+    override fun hentBehandling(behandlingId: UUID): Behandling? = behandlingHenter.hentBehandling(behandlingId)
 
-    private fun hentBehandlingerForSakId(sakId: Long) = behandlingDao.alleBehandlingerISak(sakId).filterForEnheter()
-
-    override fun hentBehandling(behandlingId: UUID): Behandling? {
-        return inTransaction {
-            hentBehandlingForId(behandlingId)
-        }
-    }
-
-    override fun hentBehandlingerISak(sakId: Long): List<Behandling> {
-        return inTransaction {
-            hentBehandlingerForSakId(sakId)
-        }
-    }
+    override fun hentBehandlingerISak(sakId: Long): List<Behandling> = behandlingHenter.hentBehandlingerISak(sakId)
 
     override fun hentSisteIverksatte(sakId: Long): Behandling? {
-        return inTransaction { hentBehandlingerForSakId(sakId) }
+        return inTransaction { behandlingHenter.hentBehandlingerForSakId(sakId) }
             .filter { BehandlingStatus.iverksattEllerAttestert().contains(it.status) }
             .maxByOrNull { it.behandlingOpprettet }
     }
@@ -149,7 +133,7 @@ class BehandlingServiceImpl(
     ) {
         inTransaction {
             val behandling =
-                hentBehandlingForId(behandlingId)
+                behandlingHenter.hentBehandlingForId(behandlingId)
                     ?: throw BehandlingNotFoundException("Fant ikke behandling med id=$behandlingId som skulle avbrytes")
             if (!behandling.status.kanAvbrytes()) {
                 throw IllegalStateException("Kan ikke avbryte en behandling med status ${behandling.status}")
@@ -334,7 +318,7 @@ class BehandlingServiceImpl(
         vedtakHendelse: VedtakHendelse,
         hendelseType: HendelseType,
     ) {
-        hentBehandlingForId(behandlingId)?.let {
+        behandlingHenter.hentBehandlingForId(behandlingId)?.let {
             registrerVedtakHendelseFelles(
                 vedtakHendelse.vedtakId,
                 hendelseType,
@@ -441,12 +425,6 @@ class BehandlingServiceImpl(
             hendelseDao.finnHendelserIBehandling(behandlingId)
         }
     }
-
-    private fun List<Behandling>.filterForEnheter() =
-        this.filterBehandlingerForEnheter(
-            featureToggleService = featureToggleService,
-            user = Kontekst.get().AppUser,
-        )
 }
 
 fun <T : Behandling> List<T>.filterBehandlingerForEnheter(

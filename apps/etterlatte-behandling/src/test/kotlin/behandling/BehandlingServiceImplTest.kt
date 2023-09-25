@@ -97,9 +97,9 @@ class BehandlingServiceImplTest {
                 hendelseDao = hendelserMock,
                 grunnlagKlient = mockk(),
                 sporingslogg = mockk(),
-                featureToggleService = featureToggleService,
                 kommerBarnetTilGodeDao = mockk(),
                 oppgaveService = mockk(),
+                behandlingHenter = BehandlingHenter(behandlingDaoMock, featureToggleService),
             )
 
         val behandlinger = sut.hentBehandlingerISak(1)
@@ -578,9 +578,9 @@ class BehandlingServiceImplTest {
                 hendelseDao = hendelserMock,
                 grunnlagKlient = mockk(),
                 sporingslogg = mockk(),
-                featureToggleService = featureToggleService,
                 kommerBarnetTilGodeDao = mockk(),
                 oppgaveService = mockk(),
+                behandlingHenter = BehandlingHenter(behandlingDaoMock, featureToggleService),
             )
 
         val behandlinger = sut.hentBehandlingerISak(1)
@@ -625,9 +625,9 @@ class BehandlingServiceImplTest {
                 hendelseDao = hendelserMock,
                 grunnlagKlient = mockk(),
                 sporingslogg = mockk(),
-                featureToggleService = featureToggleService,
                 kommerBarnetTilGodeDao = mockk(),
                 oppgaveService = mockk(),
+                behandlingHenter = BehandlingHenter(behandlingDaoMock, featureToggleService),
             )
 
         val behandlinger = sut.hentBehandlingerISak(1)
@@ -670,9 +670,9 @@ class BehandlingServiceImplTest {
                 hendelseDao = mockk(),
                 grunnlagKlient = mockk(),
                 sporingslogg = mockk(),
-                featureToggleService = featureToggleService,
                 kommerBarnetTilGodeDao = mockk(),
                 oppgaveService = mockk(),
+                behandlingHenter = BehandlingHenter(behandlingDaoMock, featureToggleService),
             )
 
         sut.oppdaterUtenlandstilsnitt(
@@ -724,9 +724,9 @@ class BehandlingServiceImplTest {
                 mockk(),
                 mockk(),
                 mockk(),
-                featureToggleService,
                 kommerBarnetTilGodeDao = mockk(),
                 oppgaveService = mockk(),
+                behandlingHenter = BehandlingHenter(behandlingDaoMock, featureToggleService),
             )
 
         sut.oppdaterBoddEllerArbeidetUtlandet(
@@ -792,9 +792,9 @@ class BehandlingServiceImplTest {
             hendelseDao = hendelseDao ?: mockk(),
             grunnlagKlient = grunnlagKlient ?: mockk(),
             sporingslogg = mockk(),
-            featureToggleService = featureToggleService,
             kommerBarnetTilGodeDao = mockk(),
             oppgaveService = oppgaveService,
+            behandlingHenter = BehandlingHenter(behandlingDao ?: mockk(), featureToggleService),
         )
 
     companion object {

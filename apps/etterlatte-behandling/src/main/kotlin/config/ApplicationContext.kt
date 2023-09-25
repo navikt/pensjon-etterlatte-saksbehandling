@@ -5,6 +5,7 @@ import com.typesafe.config.ConfigFactory
 import io.ktor.client.HttpClient
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.BehandlingFactory
+import no.nav.etterlatte.behandling.BehandlingHenter
 import no.nav.etterlatte.behandling.BehandlingServiceImpl
 import no.nav.etterlatte.behandling.BehandlingStatusServiceImpl
 import no.nav.etterlatte.behandling.BehandlingsHendelserKafkaProducerImpl
@@ -171,7 +172,8 @@ class ApplicationContext(
     val generellBehandlingService = GenerellBehandlingService(generellbehandlingDao)
     val oppgaveService = OppgaveService(oppgaveDaoEndringer, sakDao, featureToggleService)
     val gosysOppgaveService = GosysOppgaveServiceImpl(gosysOppgaveKlient, pdlKlient, featureToggleService)
-    val behandlingService =
+    internal val behandlingHenter = BehandlingHenter(behandlingDao, featureToggleService)
+    internal val behandlingService =
         BehandlingServiceImpl(
             behandlingDao = behandlingDao,
             behandlingHendelser = behandlingsHendelser,
@@ -179,9 +181,9 @@ class ApplicationContext(
             grunnlagsendringshendelseDao = grunnlagsendringshendelseDao,
             grunnlagKlient = grunnlagKlientObo,
             sporingslogg = sporingslogg,
-            featureToggleService = featureToggleService,
             kommerBarnetTilGodeDao = kommerBarnetTilGodeDao,
             oppgaveService = oppgaveService,
+            behandlingHenter = behandlingHenter,
         )
 
     val kommerBarnetTilGodeService =

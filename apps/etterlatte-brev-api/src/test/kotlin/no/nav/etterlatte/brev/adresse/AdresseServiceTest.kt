@@ -52,6 +52,7 @@ internal class AdresseServiceTest {
                 ANSVARLIG_ENHET,
                 SAKSBEHANDLER,
                 ATTESTANT,
+                vedtaksdato = null,
             )
 
         val faktiskAvsender =

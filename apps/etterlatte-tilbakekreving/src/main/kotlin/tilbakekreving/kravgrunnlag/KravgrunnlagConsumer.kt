@@ -33,7 +33,7 @@ class KravgrunnlagConsumer(
                 kravgrunnlagService.opprettTilbakekreving(detaljertKravgrunnlag)
             } catch (t: Throwable) {
                 logger.error("Feilet under mottak av kravgrunnlag (Sjekk sikkerlogg for payload", t)
-                sikkerLogg.error("Feilet under mottak av kravgrunnlag", kv("kravgrunnlag", kravgrunnlagPayload), t)
+                sikkerLogg.error("Feilet under mottak av kravgrunnlag: ${kv("kravgrunnlag", kravgrunnlagPayload)}", t)
 
                 // Exception trigger retry - etter x forsøk vil meldingen legges på backout kø
                 throw t

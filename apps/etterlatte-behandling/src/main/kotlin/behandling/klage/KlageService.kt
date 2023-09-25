@@ -257,7 +257,8 @@ class KlageServiceImpl(
                 ferdigstillOgDistribuerBrev(klage.sak.id, innstillingsbrev.brevId, saksbehandler)
             }
 
-        // TODO: send avgårde til kabal. Vi trenger nok å bygge requesten litt mer opp med f.eks. brevene. Se
+        // TODO: send avgårde til kabal - se EY-2593.
+        //  Vi trenger nok å bygge requesten litt mer opp med f.eks. brevene. Se
         //  på hvordan vi vil ivareta flyt her
         return SendtInnstillingsbrev(
             journalfoerTidspunkt = tidJournalfoert,

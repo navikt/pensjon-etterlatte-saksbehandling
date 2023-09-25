@@ -119,7 +119,6 @@ export function KlageOppsummering() {
 
   useEffect(() => {
     if (klage !== null && !kanSeOppsummering(klage)) {
-      // Get out
       navigate(`/klage/${klage.id}/`)
     }
   }, [klage])

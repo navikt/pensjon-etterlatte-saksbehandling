@@ -644,6 +644,7 @@ internal class VedtaksbrevServiceTest {
                     ),
                 ),
             ),
+        etterbetalingDTO = null,
     )
 
     private fun opprettMottaker() =

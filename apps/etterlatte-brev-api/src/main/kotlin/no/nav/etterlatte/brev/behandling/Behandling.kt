@@ -40,15 +40,13 @@ data class Behandling(
     val innvilgelsesdato: LocalDate? = null,
     val adopsjonsdato: LocalDate? = null,
     val trygdetid: List<Trygdetidsperiode>? = null,
-    val etterbetalingDTO: EtterbetalingDTO? = null, // TODO: Hent frå brukar-input
+    val etterbetalingDTO: EtterbetalingDTO?,
 ) {
     init {
         if (vedtak.type == VedtakType.INNVILGELSE) {
             requireNotNull(utbetalingsinfo) { "Utbetalingsinformasjon mangler på behandling (id=$behandlingId" }
         }
     }
-
-    fun erEtterbetaling() = etterbetalingDTO != null
 }
 
 data class Trygdetidsperiode(

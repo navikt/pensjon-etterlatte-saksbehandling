@@ -6,6 +6,7 @@ import { ApiErrorAlert } from '~ErrorBoundary'
 import Spinner from '~shared/Spinner'
 import Utland from '~components/generellbehandling/Utland'
 import { Alert } from '@navikt/ds-react'
+import { Generellbehandling } from '~shared/types/Generellbehandling'
 
 const GenerellBehandling = () => {
   const { generellbehandlingId } = useParams()
@@ -23,7 +24,7 @@ const GenerellBehandling = () => {
     (generellBehandling) => {
       switch (generellBehandling.type) {
         case 'UTLAND':
-          return <Utland utlandsBehandling={generellBehandling} />
+          return <Utland utlandsBehandling={generellBehandling as Generellbehandling & { innhold: Utland }} />
         case 'ANNEN':
           return <Alert variant="error">Annen er ikke støttet enda</Alert>
         default:

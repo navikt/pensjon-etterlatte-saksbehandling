@@ -1,6 +1,6 @@
 import { Content, ContentHeader } from '~shared/styled'
 import { Familieforhold } from './familieforhold/Familieforhold'
-import { Border, HeadingWrapper, Innhold } from './styled'
+import { Border, HeadingWrapper, InnholdPadding } from './styled'
 import { Heading } from '@navikt/ds-react'
 import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapper'
 import { Soeknadsdato } from './soeknadoversikt/Soeknadsdato'
@@ -43,7 +43,7 @@ export const Soeknadsoversikt = (props: { behandling: IDetaljertBehandling }) =>
         </HeadingWrapper>
         <Soeknadsdato mottattDato={behandling.soeknadMottattDato} />
       </ContentHeader>
-      <Innhold>
+      <InnholdPadding>
         <OversiktGyldigFramsatt behandling={behandling} />
         {behandling.gyldighetsprøving?.resultat === VurderingsResultat.OPPFYLT && (
           <>
@@ -87,7 +87,7 @@ export const Soeknadsoversikt = (props: { behandling: IDetaljertBehandling }) =>
             <BoddEllerArbeidetUtlandet behandling={behandling} redigerbar={behandles} />
           </>
         )}
-      </Innhold>
+      </InnholdPadding>
       <Border />
       <Familieforhold behandling={behandling} />
       {behandles ? (

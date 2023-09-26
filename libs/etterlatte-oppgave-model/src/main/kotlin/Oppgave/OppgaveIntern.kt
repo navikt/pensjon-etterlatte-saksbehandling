@@ -86,6 +86,7 @@ enum class Status {
 enum class OppgaveKilde {
     HENDELSE,
     BEHANDLING,
+    GENERELL_BEHANDLING,
     EKSTERN,
 }
 

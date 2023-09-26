@@ -1,5 +1,6 @@
 package no.nav.etterlatte.behandling.generellbehandling
 
+import no.nav.etterlatte.libs.common.generellbehandling.Dokumenter
 import no.nav.etterlatte.libs.common.generellbehandling.GenerellBehandling
 import no.nav.etterlatte.libs.common.generellbehandling.Innhold
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -93,7 +94,7 @@ internal class GenerellBehandlingDaoTest {
                 1L,
                 Tidspunkt.now(),
                 GenerellBehandling.GenerellBehandlingType.UTLAND,
-                Innhold.Utland("vlabla", UUID.randomUUID()),
+                Innhold.Utland(listOf("AFG"), Dokumenter(true, false, true, true, true), "2grwg2", "rita"),
             )
         dao.opprettGenerellbehandling(generellBehandlingUtland)
         val hentetGenBehandling = dao.hentGenerellBehandlingMedId(generellBehandlingUtland.id)
@@ -111,7 +112,7 @@ internal class GenerellBehandlingDaoTest {
                 1L,
                 Tidspunkt.now(),
                 GenerellBehandling.GenerellBehandlingType.UTLAND,
-                Innhold.Utland("vlabla", UUID.randomUUID()),
+                Innhold.Utland(listOf("AFG"), Dokumenter(true, false, true, false, false), "2grwg2", "rita"),
             )
         val annengenerebehandling =
             GenerellBehandling(

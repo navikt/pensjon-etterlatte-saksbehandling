@@ -20,7 +20,7 @@ object OmstillingstoenadVilkaar {
             yrkesskade(),
             avdoedesMedlemskap(),
             gjenlevendesMedlemskap(),
-            // aktivitetEtter6Maaneder(grunnlag),
+            aktivitetEtter6Maaneder(grunnlag),
             oevrigeVilkaar(),
         )
 

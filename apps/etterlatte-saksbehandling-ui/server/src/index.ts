@@ -11,6 +11,7 @@ import { proxy } from './middleware/proxy'
 import { loggerRouter } from './routers/loggerRouter'
 import { unleash } from './utils/unleash'
 import prometheus from './monitoring/prometheus'
+import { sanitize } from './utils/sanitize'
 
 logger.info(`environment: ${process.env.NODE_ENV}`)
 
@@ -44,7 +45,7 @@ if (isDev) {
       toggles.map((toggle) => {
         const enabled = unleash ? unleash.isEnabled(toggle, undefined, false) : false
 
-        logger.info(`${toggle} enabled: ${enabled}`)
+        logger.info(`${sanitize(toggle)} enabled: ${enabled}`)
 
         return {
           toggle: toggle,

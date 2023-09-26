@@ -12,7 +12,6 @@ import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_REVURDER
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_REVURDERING_OMGJOERING_AV_FARSKAP
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_REVURDERING_OPPHOER
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_REVURDERING_SOESKENJUSTERING
-import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_REVURDERING_YRKESSKADE
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMS_FOERSTEGANGSVEDTAK_INNVILGELSE
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMS_FOERSTEGANGSVEDTAK_INNVILGELSE_UTFALL
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMS_OPPHOER_MANUELL
@@ -65,7 +64,7 @@ class BrevDataMapper(private val featureToggleService: FeatureToggleService) {
                             RevurderingAarsak.INSTITUSJONSOPPHOLD ->
                                 BrevkodePar(TOM_MAL, BARNEPENSJON_REVURDERING_ENDRING)
                             RevurderingAarsak.YRKESSKADE ->
-                                BrevkodePar(BARNEPENSJON_REVURDERING_YRKESSKADE, BARNEPENSJON_REVURDERING_ENDRING)
+                                BrevkodePar(TOM_MAL, BARNEPENSJON_REVURDERING_ENDRING)
                             RevurderingAarsak.ANNEN -> BrevkodePar(TOM_MAL, BARNEPENSJON_REVURDERING_ENDRING)
 
                             else -> TODO("Revurderingsbrev for ${behandling.revurderingsaarsak} er ikke støttet")
@@ -142,7 +141,7 @@ class BrevDataMapper(private val featureToggleService: FeatureToggleService) {
                             RevurderingAarsak.UT_AV_FENGSEL,
                             RevurderingAarsak.INSTITUSJONSOPPHOLD,
                             -> ManueltBrevData(emptyList())
-                            RevurderingAarsak.YRKESSKADE -> YrkesskadeRevurderingBrevdata.fra(behandling)
+                            RevurderingAarsak.YRKESSKADE -> ManueltBrevData(emptyList())
                             RevurderingAarsak.ANNEN -> ManueltBrevData(emptyList())
                             else -> TODO("Revurderingsbrev for ${behandling.revurderingsaarsak} er ikke støttet")
                         }

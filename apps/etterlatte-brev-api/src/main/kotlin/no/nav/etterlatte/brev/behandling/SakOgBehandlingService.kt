@@ -127,6 +127,7 @@ class SakOgBehandlingService(
                     brukerTokenInfo,
                 ),
             vilkaarsvurdering = vilkaarsvurdering,
+            etterbetalingDTO = null, // TODO: Hent frå brukar-input
         )
     }
 

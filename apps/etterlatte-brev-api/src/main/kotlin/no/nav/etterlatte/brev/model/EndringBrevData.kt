@@ -7,7 +7,6 @@ import no.nav.etterlatte.brev.model.AvslagBrevData.valider
 import no.nav.etterlatte.libs.common.behandling.BarnepensjonSoeskenjusteringGrunn
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
-import no.nav.pensjon.brevbaker.api.model.Kroner
 import java.time.LocalDate
 
 abstract class EndringBrevData : BrevData()
@@ -15,20 +14,11 @@ abstract class EndringBrevData : BrevData()
 data class EtterbetalingDTO(
     val fraDato: LocalDate,
     val tilDato: LocalDate,
-    val beregningsperioder: List<Etterbetalingsperiode>,
-)
-
-data class Etterbetalingsperiode(
-    val datoFOM: LocalDate,
-    val datoTOM: LocalDate?,
-    val grunnbeloep: Kroner,
-    val stoenadFoerReduksjon: Kroner,
-    var utbetaltBeloep: Kroner,
 )
 
 data class EndringHovedmalBrevData(
     val erEndret: Boolean,
-    val etterbetaling: EtterbetalingDTO,
+    val etterbetaling: EtterbetalingDTO?,
     val utbetalingsinfo: Utbetalingsinfo,
     val innhold: List<Slate.Element>,
 ) : EndringBrevData() {
@@ -39,21 +29,7 @@ data class EndringHovedmalBrevData(
         ): BrevData =
             EndringHovedmalBrevData(
                 erEndret = true, // TODO når resten av fengselsopphold implementerast
-                etterbetaling =
-                    EtterbetalingDTO(
-                        fraDato = LocalDate.now(), // TODO når resten av fengselsopphold implementerast
-                        tilDato = LocalDate.now(), // TODO når resten av fengselsopphold implementerast
-                        beregningsperioder =
-                            behandling.utbetalingsinfo.beregningsperioder.map {
-                                Etterbetalingsperiode(
-                                    datoFOM = it.datoFOM,
-                                    datoTOM = it.datoTOM,
-                                    grunnbeloep = it.grunnbeloep,
-                                    stoenadFoerReduksjon = it.utbetaltBeloep, // TODO når resten av fengselsopphold implementerast
-                                    utbetaltBeloep = it.utbetaltBeloep,
-                                )
-                            },
-                    ),
+                etterbetaling = behandling.etterbetalingDTO,
                 utbetalingsinfo = behandling.utbetalingsinfo,
                 innhold = innhold,
             )
@@ -96,7 +72,7 @@ data class InntektsendringRevurderingOMS(
             InntektsendringRevurderingOMS(
                 erEndret = true,
                 avkortingsinfo = behandling.avkortingsinfo,
-                etterbetalinginfo = null,
+                etterbetalinginfo = behandling.etterbetalingDTO,
                 beregningsinfo =
                     Beregningsinfo(
                         innhold =

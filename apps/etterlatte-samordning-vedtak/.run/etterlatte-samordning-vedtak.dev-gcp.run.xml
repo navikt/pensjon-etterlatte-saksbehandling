@@ -3,6 +3,8 @@
     <envs>
       <env name="ETTERLATTE_VEDTAKSVURDERING_URL" value="https://etterlatte-vedtaksvurdering.intern.dev.nav.no" />
       <env name="ETTERLATTE_VEDTAKSVURDERING_SCOPE" value="api://dev-gcp.etterlatte.etterlatte-vedtaksvurdering/.default" />
+      <env name="TJENESTEPENSJON_URL" value="https://tp-api-q2.dev-fss-pub.nais.io" />
+      <env name="TJENESTEPENSJON_SCOPE" value="api://dev-fss.samhandling.tp/.default" />
       <env name="HTTP_PORT" value="8094" />
     </envs>
     <option name="MAIN_CLASS_NAME" value="no.nav.etterlatte.ApplicationKt" />

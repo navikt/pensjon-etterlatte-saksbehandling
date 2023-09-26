@@ -69,6 +69,10 @@ spec:
       value: http://etterlatte-vedtaksvurdering
     - name: ETTERLATTE_VEDTAKSVURDERING_SCOPE
       value: api://prod-gcp.etterlatte.etterlatte-vedtaksvurdering/.default
+    - name: TJENESTEPENSJON_URL
+      value: https://tp-api.prod-fss-pub.nais.io
+    - name: TJENESTEPENSJON_SCOPE
+      value: api://prod-fss.samhandler.tp/.default
   accessPolicy:
     outbound:
       rules:

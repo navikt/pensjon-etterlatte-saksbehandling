@@ -8,7 +8,6 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakSamordningDto
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktorobo.Resource
-import no.nav.etterlatte.token.Systembruker
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 
@@ -37,7 +36,7 @@ class VedtaksvurderingKlient(config: Config, httpClient: HttpClient, azureAdClie
                             url = "$vedtaksvurderingUrl/$vedtakId",
                             additionalHeaders = mapOf("orgnr" to organisasjonsnummer),
                         ),
-                    brukerTokenInfo = Systembruker(oid = "etterlatte-samordning", sub = "etterlatte-samordning"),
+                    brukerTokenInfo = SamordningSystembruker,
                 )
                 .mapBoth(
                     success = { deserialize(it.response.toString()) },
@@ -67,7 +66,7 @@ class VedtaksvurderingKlient(config: Config, httpClient: HttpClient, azureAdClie
                             url = "$vedtaksvurderingUrl?virkFom=$virkFom",
                             additionalHeaders = mapOf("fnr" to fnr, "orgnr" to organisasjonsnummer),
                         ),
-                    brukerTokenInfo = Systembruker(oid = "etterlatte-samordning", sub = "etterlatte-samordning"),
+                    brukerTokenInfo = SamordningSystembruker,
                 )
                 .mapBoth(
                     success = { deserialize(it.response.toString()) },

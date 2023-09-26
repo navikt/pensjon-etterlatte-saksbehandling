@@ -30,6 +30,7 @@ fun Route.samordningVedtakRoute(samordningVedtakService: SamordningVedtakService
                 try {
                     samordningVedtakService.hentVedtak(
                         vedtakId = vedtakId,
+                        tpnr = tpnummer,
                         organisasjonsnummer = call.orgNummer,
                     )
                 } catch (e: VedtakFeilSakstypeException) {
@@ -59,6 +60,7 @@ fun Route.samordningVedtakRoute(samordningVedtakService: SamordningVedtakService
                     samordningVedtakService.hentVedtaksliste(
                         virkFom = virkFom,
                         fnr = fnr,
+                        tpnr = tpnummer,
                         organisasjonsnummer = call.orgNummer,
                     )
                 } catch (e: IllegalArgumentException) {

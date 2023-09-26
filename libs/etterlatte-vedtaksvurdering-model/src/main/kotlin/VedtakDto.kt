@@ -75,6 +75,7 @@ enum class UtbetalingsperiodeType {
 
 data class VedtakSamordningDto(
     val vedtakId: Long,
+    val fnr: String,
     val status: VedtakStatus,
     val virkningstidspunkt: YearMonth,
     val sak: VedtakSak,

@@ -92,7 +92,7 @@ class SamordningVedtakRouteTest {
 
     @Test
     fun `skal gi 200 med gyldig token inkl scope`() {
-        coEvery { samordningVedtakService.hentVedtak(any<Long>(), any<String>()) } returns
+        coEvery { samordningVedtakService.hentVedtak(vedtakId = any<Long>(), tpnr = "3010", any<String>()) } returns
             opprettSamordningVedtakDto()
 
         testApplication {
@@ -110,7 +110,7 @@ class SamordningVedtakRouteTest {
                 }
 
             response.status shouldBe HttpStatusCode.OK
-            coVerify { samordningVedtakService.hentVedtak(any<Long>(), any<String>()) }
+            coVerify { samordningVedtakService.hentVedtak(vedtakId = any<Long>(), tpnr = "3010", any<String>()) }
         }
     }
 
@@ -123,6 +123,7 @@ class SamordningVedtakRouteTest {
             samordningVedtakService.hentVedtaksliste(
                 virkFom = virkFom,
                 fnr = fnr,
+                tpnr = "3010",
                 organisasjonsnummer = any<String>(),
             )
         } returns
@@ -149,6 +150,7 @@ class SamordningVedtakRouteTest {
                 samordningVedtakService.hentVedtaksliste(
                     virkFom = virkFom,
                     fnr = fnr,
+                    tpnr = "3010",
                     organisasjonsnummer = any<String>(),
                 )
             }

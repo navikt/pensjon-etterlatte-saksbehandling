@@ -12,12 +12,23 @@ import java.time.LocalDate
 
 class SamordningVedtakService(
     private val vedtaksvurderingKlient: VedtaksvurderingKlient,
+    private val tjenestepensjonKlient: TjenestepensjonKlient,
 ) {
     suspend fun hentVedtak(
         vedtakId: Long,
+        tpnr: String,
         organisasjonsnummer: String,
     ): SamordningVedtakDto {
         val vedtak = vedtaksvurderingKlient.hentVedtak(vedtakId, organisasjonsnummer)
+
+        if (!tjenestepensjonKlient.harTpYtelseOnDate(
+                fnr = vedtak.fnr,
+                tpnr = tpnr,
+                onDate = vedtak.virkningstidspunkt.atStartOfMonth(),
+            )
+        ) {
+            throw TjenestepensjonManglendeTilgangException("Ikke gyldig tpYtelse")
+        }
 
         if (vedtak.sak.sakType != SakType.OMSTILLINGSSTOENAD) {
             throw VedtakFeilSakstypeException()
@@ -29,8 +40,13 @@ class SamordningVedtakService(
     suspend fun hentVedtaksliste(
         virkFom: LocalDate,
         fnr: String,
+        tpnr: String,
         organisasjonsnummer: String,
     ): List<SamordningVedtakDto> {
+        if (!tjenestepensjonKlient.harTpForholdByDate(fnr, tpnr, virkFom)) {
+            throw TjenestepensjonManglendeTilgangException("Ikke gyldig tpforhold")
+        }
+
         return vedtaksvurderingKlient.hentVedtaksliste(
             virkFom = virkFom,
             fnr = fnr,

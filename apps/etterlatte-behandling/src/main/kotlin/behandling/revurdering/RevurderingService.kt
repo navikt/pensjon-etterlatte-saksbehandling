@@ -178,16 +178,16 @@ class RevurderingServiceImpl(
             return if (featureToggleService.isEnabled(RevurderingServiceFeatureToggle.OpprettManuellRevurdering, false)) {
                 val persongalleri = runBlocking { grunnlagService.hentPersongalleri(sakId) }
 
-                inTransaction {
+                inTransaction(gjenbruk = true) {
                     opprettRevurdering(
-                        sakId,
-                        persongalleri,
-                        forrigeBehandling.id,
-                        Tidspunkt.now().toLocalDatetimeUTC().toString(),
-                        Prosesstype.MANUELL,
-                        Vedtaksloesning.GJENNY,
-                        null,
-                        revurderingAarsak,
+                        sakId = sakId,
+                        persongalleri = persongalleri,
+                        forrigeBehandling = forrigeBehandling.id,
+                        mottattDato = Tidspunkt.now().toLocalDatetimeUTC().toString(),
+                        prosessType = Prosesstype.MANUELL,
+                        kilde = Vedtaksloesning.GJENNY,
+                        merknad = null,
+                        revurderingAarsak = revurderingAarsak,
                         virkningstidspunkt = null,
                         begrunnelse = begrunnelse,
                         fritekstAarsak = fritekstAarsak,
@@ -231,15 +231,15 @@ class RevurderingServiceImpl(
     ) = forrigeBehandling.sjekkEnhet()?.let {
         inTransaction {
             opprettRevurdering(
-                sakId,
-                persongalleri,
-                forrigeBehandling.id,
-                mottattDato,
-                Prosesstype.AUTOMATISK,
-                kilde,
-                merknad,
-                revurderingAarsak,
-                virkningstidspunkt?.tilVirkningstidspunkt("Opprettet automatisk"),
+                sakId = sakId,
+                persongalleri = persongalleri,
+                forrigeBehandling = forrigeBehandling.id,
+                mottattDato = mottattDato,
+                prosessType = Prosesstype.AUTOMATISK,
+                kilde = kilde,
+                merknad = merknad,
+                revurderingAarsak = revurderingAarsak,
+                virkningstidspunkt = virkningstidspunkt?.tilVirkningstidspunkt("Opprettet automatisk"),
                 begrunnelse = begrunnelse ?: "Automatisk revurdering - ${revurderingAarsak.name.lowercase()}",
                 saksbehandlerIdent = Fagsaksystem.EY.navn,
             )

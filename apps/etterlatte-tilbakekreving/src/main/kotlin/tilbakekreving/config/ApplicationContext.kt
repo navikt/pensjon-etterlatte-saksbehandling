@@ -42,7 +42,7 @@ class ApplicationContext(
                     azureAppClientId = properties.azureAppClientId,
                     azureAppJwk = properties.azureAppJwk,
                     azureAppWellKnownUrl = properties.azureAppWellKnownUrl,
-                    azureAppScope = properties.behandlingScope,
+                    azureAppScope = properties.proxyScope,
                 ),
         )
 

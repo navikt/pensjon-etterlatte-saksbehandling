@@ -1,5 +1,6 @@
 package no.nav.etterlatte.brev.behandling
 
+import no.nav.etterlatte.brev.model.EtterbetalingDTO
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
@@ -39,12 +40,15 @@ data class Behandling(
     val innvilgelsesdato: LocalDate? = null,
     val adopsjonsdato: LocalDate? = null,
     val trygdetid: List<Trygdetidsperiode>? = null,
+    val etterbetalingDTO: EtterbetalingDTO? = null, // TODO: Hent frå brukar-input
 ) {
     init {
         if (vedtak.type == VedtakType.INNVILGELSE) {
             requireNotNull(utbetalingsinfo) { "Utbetalingsinformasjon mangler på behandling (id=$behandlingId" }
         }
     }
+
+    fun erEtterbetaling() = etterbetalingDTO != null
 }
 
 data class Trygdetidsperiode(

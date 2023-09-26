@@ -71,7 +71,7 @@ data class InnvilgetBrevDataOMS(
                 utbetalingsinfo = behandling.utbetalingsinfo,
                 avkortingsinfo = behandling.avkortingsinfo,
                 avdoed = behandling.persongalleri.avdoed,
-                etterbetalinginfo = null,
+                etterbetalinginfo = behandling.etterbetalingDTO,
                 beregningsinfo =
                     Beregningsinfo(
                         innhold =
@@ -131,37 +131,13 @@ data class InnvilgetHovedmalBrevData(
         fun fra(
             behandling: Behandling,
             innhold: List<Slate.Element>,
-        ): InnvilgetHovedmalBrevData {
-            val etterbetalingDTO =
-                if (erEtterbetaling(behandling.utbetalingsinfo.virkningsdato)) {
-                    val beregningsperioder =
-                        behandling.utbetalingsinfo.beregningsperioder
-                            .filter { it.datoFOM.isBefore(behandling.utbetalingsinfo.virkningsdato) }
-                            .map {
-                                Etterbetalingsperiode(
-                                    datoFOM = it.datoFOM, // TODO: Desse datoane er litt shady
-                                    datoTOM = it.datoTOM,
-                                    grunnbeloep = it.grunnbeloep,
-                                    stoenadFoerReduksjon = it.utbetaltBeloep,
-                                    // TODO: Trur stoenadFoerReduksjon skal bort frå brevmalen, slett da også herifrå
-                                    utbetaltBeloep = it.utbetaltBeloep,
-                                )
-                            }
-                    EtterbetalingDTO(
-                        fraDato = behandling.utbetalingsinfo.beregningsperioder.map { it.datoFOM }.minOf { it },
-                        tilDato = LocalDate.now(),
-                        beregningsperioder = beregningsperioder,
-                    )
-                } else {
-                    null
-                }
-            return InnvilgetHovedmalBrevData(
+        ): InnvilgetHovedmalBrevData =
+            InnvilgetHovedmalBrevData(
                 utbetalingsinfo = behandling.utbetalingsinfo,
                 avkortingsinfo = behandling.avkortingsinfo,
-                etterbetalingDTO = etterbetalingDTO,
+                etterbetalingDTO = behandling.etterbetalingDTO,
                 innhold = innhold,
             )
-        }
     }
 }
 

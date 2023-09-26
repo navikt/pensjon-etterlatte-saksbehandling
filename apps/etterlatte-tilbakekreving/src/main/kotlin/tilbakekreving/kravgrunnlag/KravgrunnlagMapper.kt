@@ -16,7 +16,6 @@ import no.nav.etterlatte.libs.common.tilbakekreving.VedtakId
 import no.nav.tilbakekreving.kravgrunnlag.detalj.v1.DetaljertKravgrunnlagBelopDto
 import no.nav.tilbakekreving.kravgrunnlag.detalj.v1.DetaljertKravgrunnlagDto
 import no.nav.tilbakekreving.kravgrunnlag.detalj.v1.DetaljertKravgrunnlagPeriodeDto
-import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
 import javax.xml.datatype.XMLGregorianCalendar
@@ -52,12 +51,11 @@ object KravgrunnlagMapper {
 
     private fun toGrunnlagsbeloep(beloep: DetaljertKravgrunnlagBelopDto) =
         Grunnlagsbeloep(
-            kode = KlasseKode(beloep.kodeKlasse),
-            type = KlasseType.valueOf(beloep.typeKlasse.value()),
+            klasseKode = KlasseKode(beloep.kodeKlasse),
+            klasseType = KlasseType.valueOf(beloep.typeKlasse.value()),
             bruttoUtbetaling = beloep.belopOpprUtbet,
-            beregnetNyBrutto = beloep.belopNy,
+            nyBruttoUtbetaling = beloep.belopNy,
             bruttoTilbakekreving = beloep.belopTilbakekreves,
-            nettoTilbakekreving = BigDecimal(0),
             beloepSkalIkkeTilbakekreves = beloep.belopUinnkrevd,
             skatteProsent = beloep.skattProsent,
             resultat = null,

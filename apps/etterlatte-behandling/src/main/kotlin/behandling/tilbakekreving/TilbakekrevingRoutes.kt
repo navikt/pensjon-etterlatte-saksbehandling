@@ -29,7 +29,7 @@ internal fun Route.tilbakekrevingRoutes(service: TilbakekrevingService) {
                 try {
                     service.opprettTilbakekreving(it)
                     call.respond(HttpStatusCode.OK)
-                } catch (e: KravgrunnlagHarIkkeEksisterendeSak) {
+                } catch (e: KravgrunnlagHarIkkeEksisterendeSakException) {
                     call.respond(
                         HttpStatusCode.NotFound,
                         "Eksisterer ikke sak=${it.sakId.value} for kravgrunnlag=${it.kravgrunnlagId}",

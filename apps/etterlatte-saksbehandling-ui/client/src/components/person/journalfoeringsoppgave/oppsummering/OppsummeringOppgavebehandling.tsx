@@ -34,16 +34,16 @@ export default function OppsummeringOppgavebehandling() {
           </Tag>
         </div>
 
-        <Info label="Søker" tekst={behandlingBehov?.persongalleri?.soeker || '-'} />
-        <Info label="Innsender" tekst={behandlingBehov?.persongalleri?.innsender || '-'} />
+        <Info label="Søker" tekst={behandlingBehov!!.persongalleri!!.soeker} />
+        <Info label="Innsender" tekst={behandlingBehov?.persongalleri?.innsender || <i>Ikke oppgitt</i>} />
 
         {oppgave!!.sakType === SakType.BARNEPENSJON &&
-          behandlingBehov?.persongalleri?.gjenlevende?.map((gjenlevende) => (
+          behandlingBehov!!.persongalleri!!.gjenlevende!!.map((gjenlevende) => (
             <Info key={gjenlevende} label="Gjenlevende" tekst={gjenlevende || ''} />
           ))}
 
-        {behandlingBehov?.persongalleri?.avdoed?.map((avdoed) => (
-          <Info key={avdoed} label="Avdød" tekst={avdoed || ''} />
+        {behandlingBehov!!.persongalleri!!.avdoed!!.map((avdoed) => (
+          <Info key={avdoed} label="Avdød" tekst={avdoed} />
         ))}
 
         {!behandlingBehov?.persongalleri?.soesken?.length && <Detail>Ingen barn/søsken oppgitt</Detail>}

@@ -1,5 +1,17 @@
-import React, { useEffect } from 'react'
-import { Alert, BodyShort, Button, Heading, Label, Panel, Radio, RadioGroup, Select, Tag } from '@navikt/ds-react'
+import React, { useEffect, useState } from 'react'
+import {
+  Alert,
+  BodyShort,
+  Button,
+  ErrorMessage,
+  Heading,
+  Label,
+  Panel,
+  Radio,
+  RadioGroup,
+  Select,
+  Tag,
+} from '@navikt/ds-react'
 import { useJournalfoeringOppgave } from '~components/person/journalfoeringsoppgave/useJournalfoeringOppgave'
 import { useAppDispatch } from '~store/Store'
 import { useNavigate, useParams } from 'react-router-dom'
@@ -17,18 +29,34 @@ import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import { hentSakForPerson } from '~shared/api/behandling'
 import { FormWrapper } from '~components/person/journalfoeringsoppgave/BehandleJournalfoeringOppgave'
 import { FlexRow } from '~shared/styled'
+import { FristWrapper } from '~components/nyoppgavebenk/Oppgavelista'
 
 export default function KontrollerOppgave() {
-  const { bruker, oppgave, samsvar, journalpost, behandlingBehov } = useJournalfoeringOppgave()
+  const state = useJournalfoeringOppgave()
+  const { bruker, oppgave, samsvar, journalpost, behandlingBehov } = state
   const dispatch = useAppDispatch()
   const navigate = useNavigate()
+
+  const [error, setError] = useState<string | undefined>()
 
   const [oppgaveStatus, hentOppgave] = useApiCall(hentGosysOppgave)
   const [sakStatus, hentSak] = useApiCall(hentSakForPerson)
 
   const { id: oppgaveId } = useParams()
 
-  const neste = () => navigate('../nybehandling', { relative: 'path' })
+  const neste = () => {
+    if (!journalpost) {
+      setError('Journalpost må være valgt')
+    } else if (samsvar !== JaNei.JA) {
+      setError('Samsvar er påkrevd')
+    } else if (!behandlingBehov?.mottattDato) {
+      setError('Mottatt dato må være satt')
+    } else if (!behandlingBehov?.spraak) {
+      setError('Språk for søknaden må være valgt')
+    } else {
+      navigate('../nybehandling', { relative: 'path' })
+    }
+  }
 
   useEffect(() => {
     if (!oppgave) {
@@ -52,21 +80,19 @@ export default function KontrollerOppgave() {
     }
   }, [bruker, oppgave])
 
-  const kanGaaVidere = samsvar === JaNei.JA && !!journalpost
-
   if (isPending(oppgaveStatus)) {
     return <Spinner visible label="Henter oppgave" />
   }
 
   return (
     <FormWrapper column>
-      <h1>Kontroll</h1>
+      <Heading size="large">Kontroll</Heading>
 
       {oppgave && (
         <>
           <Panel border>
             <Heading size="medium" spacing>
-              Oppgave
+              Gosysoppgave
               <br />
               <Tag variant="success" size="small">
                 {formaterSakstype(oppgave.sakType)}
@@ -79,7 +105,7 @@ export default function KontrollerOppgave() {
               <Info label="Type" tekst={oppgave.type} />
               <Info label="Bruker" tekst={formaterFnr(oppgave.fnr)} />
               <Info label="Opprettet" tekst={formaterStringDato(oppgave.opprettet)} />
-              <Info label="Frist" tekst={formaterStringDato(oppgave.frist)} />
+              <Info label="Frist" tekst={<FristWrapper dato={oppgave.frist} />} />
             </InfoWrapper>
             <hr />
             <div>
@@ -111,7 +137,6 @@ export default function KontrollerOppgave() {
             size="small"
             onChange={(value) => dispatch(settSamsvar(value))}
             value={samsvar || null}
-            error={undefined}
           >
             <div className="flex">
               <Radio value={JaNei.JA}>Ja</Radio>
@@ -124,9 +149,9 @@ export default function KontrollerOppgave() {
           )}
 
           {samsvar === JaNei.JA && (
-            <div>
+            <>
               <Select
-                label="Hvilket språk/målform er søknaden?"
+                label="Hva skal språket/målform være?"
                 value={behandlingBehov?.spraak || ''}
                 onChange={(e) => dispatch(settBehandlingBehov({ ...behandlingBehov, spraak: e.target.value }))}
               >
@@ -149,14 +174,16 @@ export default function KontrollerOppgave() {
                   )
                 }
               />
-            </div>
+            </>
           )}
         </>
       )}
 
+      {error && <ErrorMessage>{error}</ErrorMessage>}
+
       <div>
         <FlexRow justify="center" $spacing>
-          <Button variant="primary" onClick={neste} disabled={!kanGaaVidere}>
+          <Button variant="primary" onClick={neste} disabled={samsvar === JaNei.NEI}>
             Neste
           </Button>
         </FlexRow>

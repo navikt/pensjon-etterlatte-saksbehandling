@@ -73,6 +73,7 @@ class BrevDataMapper(private val featureToggleService: FeatureToggleService) {
                                 )
                             RevurderingAarsak.YRKESSKADE ->
                                 BrevkodePar(BARNEPENSJON_REVURDERING_YRKESSKADE, BARNEPENSJON_REVURDERING_ENDRING)
+                            RevurderingAarsak.ANNEN -> BrevkodePar(TOM_MAL, BARNEPENSJON_REVURDERING_ENDRING)
 
                             else -> TODO("Revurderingsbrev for ${behandling.revurderingsaarsak} er ikke støttet")
                         }
@@ -148,6 +149,7 @@ class BrevDataMapper(private val featureToggleService: FeatureToggleService) {
                             RevurderingAarsak.UT_AV_FENGSEL -> UtAvFengselBrevdata.fra(behandling)
                             RevurderingAarsak.INSTITUSJONSOPPHOLD -> InstitusjonsoppholdRevurderingBrevdata.fra(behandling)
                             RevurderingAarsak.YRKESSKADE -> YrkesskadeRevurderingBrevdata.fra(behandling)
+                            RevurderingAarsak.ANNEN -> ManueltBrevData(emptyList())
                             else -> TODO("Revurderingsbrev for ${behandling.revurderingsaarsak} er ikke støttet")
                         }
 

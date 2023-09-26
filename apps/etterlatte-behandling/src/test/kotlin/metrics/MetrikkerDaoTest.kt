@@ -12,6 +12,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.POSTGRES_VERSION
 import no.nav.etterlatte.libs.database.migrate
+import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
 import no.nav.etterlatte.metrics.OppgaveMetrikkerDao
 import no.nav.etterlatte.oppgave.OppgaveDao
 import no.nav.etterlatte.oppgave.OppgaveDaoImpl
@@ -52,7 +53,12 @@ internal class MetrikkerDaoTest {
         val connection = dataSource.connection
         oppgaveDao = OppgaveDaoImpl { connection }
         metrikkerDao = OppgaveMetrikkerDao(dataSource)
-        sakId = SakDao { connection }.opprettSak(fnr = "", type = SakType.BARNEPENSJON, enhet = "").id
+        sakId =
+            SakDao { connection }.opprettSak(
+                fnr = AVDOED_FOEDSELSNUMMER.value,
+                type = SakType.BARNEPENSJON,
+                enhet = "",
+            ).id
     }
 
     @AfterEach

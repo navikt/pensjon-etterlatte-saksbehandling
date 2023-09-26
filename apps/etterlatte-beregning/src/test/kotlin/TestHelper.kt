@@ -15,6 +15,7 @@ import no.nav.etterlatte.avkorting.regler.InntektAvkortingGrunnlagWrapper
 import no.nav.etterlatte.beregning.Beregning
 import no.nav.etterlatte.beregning.grunnlag.InstitusjonsoppholdBeregningsgrunnlag
 import no.nav.etterlatte.beregning.regler.barnepensjon.BarnepensjonGrunnlag
+import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
@@ -276,4 +277,5 @@ fun behandling(
     boddEllerArbeidetUtlandet = null,
     revurderingInfo = null,
     enhet = "1111",
+    kilde = Vedtaksloesning.GJENNY,
 )

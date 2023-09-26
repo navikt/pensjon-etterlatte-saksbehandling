@@ -23,7 +23,6 @@ import { hentAlleLand, ILand } from '~shared/api/trygdetid'
 import styled from 'styled-components'
 import { PencilWritingIcon } from '@navikt/aksel-icons'
 import { opprettBrevForSak } from '~shared/api/brev'
-import { useNavigate } from 'react-router-dom'
 import { ExternalLinkIcon } from '@navikt/aksel-icons'
 import { ABlue500, AGray400 } from '@navikt/ds-tokens/dist/tokens'
 import { ButtonGroup } from '~components/person/VurderHendelseModal'
@@ -51,7 +50,6 @@ const FlexOrder = styled.div`
 
 const Utland = (props: { utlandsBehandling: Generellbehandling & { innhold: Utland } }) => {
   const { utlandsBehandling } = props
-  const navigate = useNavigate()
   const innhold = utlandsBehandling.innhold
   const [putOppdaterGenerellBehandlingStatus, putOppdaterGenerellBehandling] = useApiCall(oppdaterGenerellBehandling)
   const [sendTilAttesteringStatus, sendTilAttestering] = useApiCall(oppdaterGenerellBehandling)
@@ -68,9 +66,9 @@ const Utland = (props: { utlandsBehandling: Generellbehandling & { innhold: Utla
   const [errorLand, setErrLand] = useState<boolean>(false)
   const [nyttBrevStatus, opprettBrev] = useApiCall(opprettBrevForSak)
 
-  const opprettNyttBrevOgRedirect = () => {
+  const opprettNyttBrevINyFane = () => {
     opprettBrev(Number(utlandsBehandling.sakId), (brev) => {
-      navigate(`/person/${brev.soekerFnr}/sak/${brev.sakId}/brev/${brev.id}`)
+      window.open(`/person/${brev.soekerFnr}/sak/${brev.sakId}/brev/${brev.id}`, '_blank', 'noopener noreferrer')
     })
   }
 
@@ -259,7 +257,7 @@ const Utland = (props: { utlandsBehandling: Generellbehandling & { innhold: Utla
                       <></>
                     </Checkbox>
                   </Table.DataCell>
-                </Table.Row>{' '}
+                </Table.Row>
                 <Table.Row>
                   <Table.HeaderCell scope="row">P4000</Table.HeaderCell>
                   <Table.DataCell>
@@ -306,7 +304,7 @@ const Utland = (props: { utlandsBehandling: Generellbehandling & { innhold: Utla
               <div>
                 <Button
                   icon={<PencilWritingIcon />}
-                  onClick={opprettNyttBrevOgRedirect}
+                  onClick={opprettNyttBrevINyFane}
                   loading={isPending(nyttBrevStatus)}
                   iconPosition="right"
                 >

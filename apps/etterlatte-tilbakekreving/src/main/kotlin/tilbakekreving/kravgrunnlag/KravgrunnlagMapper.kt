@@ -51,8 +51,8 @@ object KravgrunnlagMapper {
 
     private fun toGrunnlagsbeloep(beloep: DetaljertKravgrunnlagBelopDto) =
         Grunnlagsbeloep(
-            kode = KlasseKode(beloep.kodeKlasse),
-            type = KlasseType.valueOf(beloep.typeKlasse.value()),
+            klasseKode = KlasseKode(beloep.kodeKlasse),
+            klasseType = KlasseType.valueOf(beloep.typeKlasse.value()),
             bruttoUtbetaling = beloep.belopOpprUtbet,
             nyBruttoUtbetaling = beloep.belopNy,
             bruttoTilbakekreving = beloep.belopTilbakekreves,

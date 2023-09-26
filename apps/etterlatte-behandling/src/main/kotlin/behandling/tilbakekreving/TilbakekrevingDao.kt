@@ -1,7 +1,6 @@
 package no.nav.etterlatte.behandling.tilbakekreving
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunkt
@@ -55,24 +54,22 @@ class TilbakekrevingDao(private val connection: () -> Connection) {
         return hentTilbakekrevingNonNull(tilbakekreving.id).also { require(it == tilbakekreving) }
     }
 
-    private fun ResultSet.toTilbakekreving(): Tilbakekreving {
-        val saktype: SakType = enumValueOf(getString("saktype"))
-        val kravgrunnlag = getString("kravgrunnlag").let { objectMapper.readValue<Kravgrunnlag>(it) }
-        // TODO EY-2723 Midlertidig frem til utbetalinger persisteres
-        val utbetalinger = kravgrunnlag.perioder.tilUtbetalinger(saktype)
-        return Tilbakekreving(
+    private fun ResultSet.toTilbakekreving(): Tilbakekreving =
+        Tilbakekreving(
             id = getString("id").let { UUID.fromString(it) },
             sak =
                 Sak(
                     id = getLong("sak_id"),
-                    sakType = saktype,
+                    sakType = enumValueOf(getString("saktype")),
                     ident = getString("fnr"),
                     enhet = getString("enhet"),
                 ),
             opprettet = getTidspunkt("opprettet"),
             status = enumValueOf(getString("status")),
-            utbetalinger = utbetalinger,
-            kravgrunnlag = kravgrunnlag,
+            // TODO EY-2723 Midlertidig frem til utbetalinger persisteres
+            perioder =
+                getString("kravgrunnlag")
+                    .let { objectMapper.readValue<Kravgrunnlag>(it) }.perioder.tilTilbakekrevingPerioder(),
+            kravgrunnlag = getString("kravgrunnlag").let { objectMapper.readValue(it) },
         )
-    }
 }

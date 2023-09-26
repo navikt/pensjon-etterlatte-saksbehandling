@@ -41,8 +41,8 @@ data class KravgrunnlagPeriode(
 )
 
 data class Grunnlagsbeloep(
-    val kode: KlasseKode,
-    val type: KlasseType,
+    val klasseKode: KlasseKode,
+    val klasseType: KlasseType,
     val bruttoUtbetaling: BigDecimal,
     val nyBruttoUtbetaling: BigDecimal,
     val bruttoTilbakekreving: BigDecimal,

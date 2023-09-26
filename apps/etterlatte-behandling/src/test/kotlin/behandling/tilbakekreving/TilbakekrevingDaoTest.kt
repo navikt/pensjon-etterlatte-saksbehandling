@@ -115,8 +115,8 @@ class TilbakekrevingDaoTest {
                                     grunnlagsbeloep =
                                         listOf(
                                             Grunnlagsbeloep(
-                                                kode = KlasseKode(""),
-                                                type = KlasseType.YTEL,
+                                                klasseKode = KlasseKode(""),
+                                                klasseType = KlasseType.YTEL,
                                                 bruttoUtbetaling = BigDecimal(1000),
                                                 nyBruttoUtbetaling = BigDecimal(1200),
                                                 bruttoTilbakekreving = BigDecimal(200),
@@ -127,8 +127,8 @@ class TilbakekrevingDaoTest {
                                                 aarsak = null,
                                             ),
                                             Grunnlagsbeloep(
-                                                kode = KlasseKode(""),
-                                                type = KlasseType.FEIL,
+                                                klasseKode = KlasseKode(""),
+                                                klasseType = KlasseType.FEIL,
                                                 bruttoUtbetaling = BigDecimal(0),
                                                 nyBruttoUtbetaling = BigDecimal(0),
                                                 bruttoTilbakekreving = BigDecimal(0),

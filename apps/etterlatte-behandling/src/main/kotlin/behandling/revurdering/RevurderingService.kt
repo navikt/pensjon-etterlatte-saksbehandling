@@ -12,6 +12,7 @@ import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.OpprettBehandling
 import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.behandling.domain.toBehandlingOpprettet
+import no.nav.etterlatte.behandling.domain.toStatistikkBehandling
 import no.nav.etterlatte.behandling.filterBehandlingerForEnheter
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeService
@@ -324,7 +325,10 @@ class RevurderingServiceImpl(
                     merknad = begrunnelse,
                 )
             oppgaveService.tildelSaksbehandler(oppgave.id, saksbehandlerIdent)
-            behandlingHendelser.sendMeldingForHendelse(revurdering, BehandlingHendelseType.OPPRETTET)
+            behandlingHendelser.sendMeldingForHendelseMedDetaljertBehandling(
+                revurdering.toStatistikkBehandling(persongalleri),
+                BehandlingHendelseType.OPPRETTET,
+            )
         }
 
     private fun lagreRevurderingsaarsakFritekst(

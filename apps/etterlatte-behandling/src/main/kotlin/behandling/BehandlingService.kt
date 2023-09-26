@@ -2,11 +2,13 @@ package no.nav.etterlatte.behandling
 
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.User
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.BehandlingMedGrunnlagsopplysninger
-import no.nav.etterlatte.behandling.domain.toDetaljertBehandling
+import no.nav.etterlatte.behandling.domain.toDetaljertBehandlingFromPersongalleri
+import no.nav.etterlatte.behandling.domain.toStatistikkBehandling
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.hendelse.HendelseType
 import no.nav.etterlatte.behandling.hendelse.LagretHendelse
@@ -173,7 +175,11 @@ class BehandlingServiceImpl(
                 hendelseDao.behandlingAvbrutt(behandling, saksbehandler.ident())
                 grunnlagsendringshendelseDao.kobleGrunnlagsendringshendelserFraBehandlingId(behandlingId)
             }
-            behandlingHendelser.sendMeldingForHendelse(behandling, BehandlingHendelseType.AVBRUTT)
+            val persongalleri = runBlocking { grunnlagKlient.hentPersongalleri(behandling.sak.id, saksbehandler) }
+            behandlingHendelser.sendMeldingForHendelseMedDetaljertBehandling(
+                behandling.toStatistikkBehandling(persongalleri = persongalleri!!.opplysning),
+                BehandlingHendelseType.AVBRUTT,
+            )
         }
     }
 
@@ -187,7 +193,7 @@ class BehandlingServiceImpl(
                     ?.opplysning
                     ?: throw NoSuchElementException("Persongalleri mangler for sak ${it.sak.id}")
 
-            it.toDetaljertBehandling(persongalleri)
+            it.toDetaljertBehandlingFromPersongalleri(persongalleri)
         }
     }
 

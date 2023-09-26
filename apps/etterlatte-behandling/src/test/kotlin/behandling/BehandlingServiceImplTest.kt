@@ -134,7 +134,7 @@ class BehandlingServiceImplTest {
             }
         val hendelseskanalMock =
             mockk<BehandlingHendelserKafkaProducer> {
-                every { sendMeldingForHendelse(any(), any()) } returns Unit
+                every { this@mockk.sendMeldingForHendelseMedDetaljertBehandling(any(), any()) } returns Unit
             }
         val grunnlagsendringshendelseDaoMock =
             mockk<GrunnlagsendringshendelseDao> {
@@ -193,7 +193,7 @@ class BehandlingServiceImplTest {
             }
         val behandlingHendelserKafkaProducer =
             mockk<BehandlingHendelserKafkaProducer> {
-                every { sendMeldingForHendelse(any(), any()) } returns Unit
+                every { this@mockk.sendMeldingForHendelseMedDetaljertBehandling(any(), any()) } returns Unit
             }
         val grunnlagsendringshendelseDaoMock =
             mockk<GrunnlagsendringshendelseDao> {
@@ -264,7 +264,7 @@ class BehandlingServiceImplTest {
             }
         val behandlingHendelserKafkaProducer =
             mockk<BehandlingHendelserKafkaProducer> {
-                every { sendMeldingForHendelse(any(), any()) } returns Unit
+                every { this@mockk.sendMeldingForHendelseMedDetaljertBehandling(any(), any()) } returns Unit
             }
         val grunnlagsendringshendelseDaoMock =
             mockk<GrunnlagsendringshendelseDao> {
@@ -315,8 +315,8 @@ class BehandlingServiceImplTest {
         val behandlingHendelserKafkaProducerMock =
             mockk<BehandlingHendelserKafkaProducer> {
                 every {
-                    sendMeldingForHendelse(
-                        nyFoerstegangsbehandling,
+                    sendMeldingForHendelseMedDetaljertBehandling(
+                        any(),
                         BehandlingHendelseType.AVBRUTT,
                     )
                 } returns Unit
@@ -347,8 +347,8 @@ class BehandlingServiceImplTest {
 
         behandlingService.avbrytBehandling(nyFoerstegangsbehandling.id, Saksbehandler("", "saksbehandler", null))
         verify {
-            behandlingHendelserKafkaProducerMock.sendMeldingForHendelse(
-                nyFoerstegangsbehandling,
+            behandlingHendelserKafkaProducerMock.sendMeldingForHendelseMedDetaljertBehandling(
+                any(),
                 BehandlingHendelseType.AVBRUTT,
             )
         }
@@ -371,8 +371,8 @@ class BehandlingServiceImplTest {
         val behandlingHendelserKafkaProducer =
             mockk<BehandlingHendelserKafkaProducer> {
                 every {
-                    sendMeldingForHendelse(
-                        nyFoerstegangsbehandling,
+                    sendMeldingForHendelseMedDetaljertBehandling(
+                        any(),
                         BehandlingHendelseType.AVBRUTT,
                     )
                 } returns Unit

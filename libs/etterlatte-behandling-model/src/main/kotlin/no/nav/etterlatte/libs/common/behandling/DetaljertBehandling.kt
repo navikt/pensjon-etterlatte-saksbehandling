@@ -33,10 +33,7 @@ data class DetaljertBehandling(
     val kilde: Vedtaksloesning,
 ) {
     fun kanVedta(type: VedtakType): Boolean {
-        if (revurderingsaarsak.girOpphoer() && type != VedtakType.OPPHOER) {
-            return false
-        }
-        return true
+        return !(revurderingsaarsak.girOpphoer() && type != VedtakType.OPPHOER)
     }
 }
 

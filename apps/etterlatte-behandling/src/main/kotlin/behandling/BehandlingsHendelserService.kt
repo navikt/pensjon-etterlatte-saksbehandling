@@ -1,8 +1,8 @@
 package no.nav.etterlatte.behandling
 
-import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.kafka.JsonMessage
 import no.nav.etterlatte.kafka.KafkaProdusent
+import no.nav.etterlatte.libs.common.behandling.StatistikkBehandling
 import no.nav.etterlatte.libs.common.event.BehandlingRiverKey
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.CORRELATION_ID_KEY
@@ -17,8 +17,8 @@ enum class BehandlingHendelseType {
 }
 
 interface BehandlingHendelserKafkaProducer {
-    fun sendMeldingForHendelse(
-        behandling: Behandling,
+    fun sendMeldingForHendelseMedDetaljertBehandling(
+        statistikkBehandling: StatistikkBehandling,
         hendelseType: BehandlingHendelseType,
     )
 }
@@ -28,25 +28,25 @@ class BehandlingsHendelserKafkaProducerImpl(
 ) : BehandlingHendelserKafkaProducer {
     private val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
-    override fun sendMeldingForHendelse(
-        behandling: Behandling,
+    override fun sendMeldingForHendelseMedDetaljertBehandling(
+        statistikkBehandling: StatistikkBehandling,
         hendelseType: BehandlingHendelseType,
     ) {
         val correlationId = getCorrelationId()
 
         rapid.publiser(
-            behandling.id.toString(),
+            statistikkBehandling.id.toString(),
             JsonMessage.newMessage(
                 "BEHANDLING:${hendelseType.name}",
                 mapOf(
                     CORRELATION_ID_KEY to correlationId,
                     TEKNISK_TID_KEY to LocalDateTime.now(),
-                    BehandlingRiverKey.behandlingObjectKey to behandling,
+                    BehandlingRiverKey.behandlingObjectKey to statistikkBehandling,
                 ),
             ).toJson(),
         ).also { (partition, offset) ->
             logger.info(
-                "Posted event BEHANDLING:${hendelseType.name} for behandling ${behandling.id}" +
+                "Posted event BEHANDLING:${hendelseType.name} for behandling ${statistikkBehandling.id}" +
                     " to partiton $partition, offset $offset correlationid: $correlationId",
             )
         }

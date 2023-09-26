@@ -161,7 +161,7 @@ internal class RealManueltOpphoerServiceTest {
 
         val behandlingHendelserKafkaProducer =
             mockk<BehandlingHendelserKafkaProducer> {
-                every { sendMeldingForHendelse(any(), any()) } returns Unit
+                every { this@mockk.sendMeldingForHendelseMedDetaljertBehandling(any(), any()) } returns Unit
             }
         val hendelseDaoMock =
             mockk<HendelseDao> {
@@ -196,7 +196,7 @@ internal class RealManueltOpphoerServiceTest {
             { assertEquals(opprettBehandlingSlot.captured.id, returnertManueltOpphoer?.id) },
         )
         verify {
-            behandlingHendelserKafkaProducer.sendMeldingForHendelse(
+            behandlingHendelserKafkaProducer.sendMeldingForHendelseMedDetaljertBehandling(
                 any(),
                 BehandlingHendelseType.OPPRETTET,
             )
@@ -279,7 +279,7 @@ internal class RealManueltOpphoerServiceTest {
 
         val behandlingHendelserKafkaProducer =
             mockk<BehandlingHendelserKafkaProducer> {
-                every { sendMeldingForHendelse(any(), any()) } returns Unit
+                every { this@mockk.sendMeldingForHendelseMedDetaljertBehandling(any(), any()) } returns Unit
             }
         val hendelseDaoMock =
             mockk<HendelseDao> {

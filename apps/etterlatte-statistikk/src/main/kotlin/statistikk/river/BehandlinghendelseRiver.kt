@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.module.kotlin.treeToValue
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
+import no.nav.etterlatte.libs.common.behandling.StatistikkBehandling
 import no.nav.etterlatte.libs.common.event.BehandlingRiverKey
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
@@ -53,7 +54,7 @@ class BehandlinghendelseRiver(
         packet: JsonMessage,
         context: MessageContext,
     ) = try {
-        val behandling: BehandlingIntern =
+        val behandling: StatistikkBehandling =
             objectMapper.treeToValue(packet[BehandlingRiverKey.behandlingObjectKey])
         val hendelse: BehandlingHendelse = enumValueOf(packet[EVENT_NAME_KEY].textValue().split(":")[1])
         val tekniskTid = parseTekniskTid(packet, logger)

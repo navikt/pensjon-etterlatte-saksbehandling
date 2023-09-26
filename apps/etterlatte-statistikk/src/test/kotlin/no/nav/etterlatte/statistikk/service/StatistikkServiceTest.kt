@@ -286,7 +286,7 @@ class StatistikkServiceTest {
         val tekniskTidForHendelse = LocalDateTime.of(2023, 2, 1, 8, 30)
         val registrertStatistikk =
             service.registrerStatistikkForBehandlinghendelse(
-                behandlingIntern = behandling(id = behandlingId, sakId = sakId),
+                statistikkBehandling = behandling(id = behandlingId, sakId = sakId),
                 hendelse = BehandlingHendelse.OPPRETTET,
                 tekniskTid = tekniskTidForHendelse,
             ) ?: throw NullPointerException("Fikk ikke registrert statistikk")

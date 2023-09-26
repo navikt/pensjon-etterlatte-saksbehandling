@@ -19,6 +19,7 @@ import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
+import no.nav.etterlatte.libs.common.behandling.StatistikkBehandling
 import no.nav.etterlatte.libs.common.behandling.Utenlandstilsnitt
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
@@ -174,7 +175,31 @@ sealed class Behandling {
     ) : Exception(message)
 }
 
-internal fun Behandling.toDetaljertBehandling(persongalleri: Persongalleri): DetaljertBehandling {
+internal fun Behandling.toStatistikkBehandling(persongalleri: Persongalleri): StatistikkBehandling {
+    return StatistikkBehandling(
+        id = id,
+        sak = sak,
+        sistEndret = sistEndret,
+        behandlingOpprettet = behandlingOpprettet,
+        soeknadMottattDato = mottattDato(),
+        innsender = persongalleri.innsender,
+        soeker = persongalleri.soeker,
+        gjenlevende = persongalleri.gjenlevende,
+        avdoed = persongalleri.avdoed,
+        soesken = persongalleri.soesken,
+        status = status,
+        behandlingType = type,
+        virkningstidspunkt = virkningstidspunkt,
+        boddEllerArbeidetUtlandet = boddEllerArbeidetUtlandet,
+        revurderingsaarsak = revurderingsaarsak(),
+        prosesstype = prosesstype,
+        revurderingInfo = revurderingInfo()?.revurderingInfo,
+        enhet = sak.enhet,
+        kilde = kilde,
+    )
+}
+
+internal fun Behandling.toDetaljertBehandlingFromPersongalleri(persongalleri: Persongalleri): DetaljertBehandling {
     return DetaljertBehandling(
         id = id,
         sak = sak.id,

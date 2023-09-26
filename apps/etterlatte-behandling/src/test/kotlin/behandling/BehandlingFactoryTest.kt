@@ -196,7 +196,7 @@ class BehandlingFactoryTest {
         every { behandlingDaoMock.lagreGyldighetsproving(any()) } returns Unit
         every { behandlingDaoMock.alleBehandlingerISak(any()) } returns emptyList()
         every { behandlingDaoMock.lagreStatus(any(), any(), any()) } returns Unit
-        every { behandlingHendelserKafkaProducerMock.sendMeldingForHendelse(any(), any()) } returns Unit
+        every { behandlingHendelserKafkaProducerMock.sendMeldingForHendelseMedDetaljertBehandling(any(), any()) } returns Unit
         every { grunnlagService.leggInnNyttGrunnlag(any(), any()) } returns Unit
         every {
             oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(any(), any())
@@ -223,7 +223,7 @@ class BehandlingFactoryTest {
             behandlingDaoMock.opprettBehandling(any())
             hendelseDaoMock.behandlingOpprettet(any())
             behandlingDaoMock.alleBehandlingerISak(any())
-            behandlingHendelserKafkaProducerMock.sendMeldingForHendelse(any(), BehandlingHendelseType.OPPRETTET)
+            behandlingHendelserKafkaProducerMock.sendMeldingForHendelseMedDetaljertBehandling(any(), BehandlingHendelseType.OPPRETTET)
             grunnlagService.leggInnNyttGrunnlag(any(), any())
             oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(any(), any())
             oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(any(), any())
@@ -280,7 +280,7 @@ class BehandlingFactoryTest {
         every { behandlingDaoMock.hentBehandling(capture(behandlingHentes)) } returns opprettetBehandling
         every { behandlingDaoMock.alleBehandlingerISak(any()) } returns emptyList()
         every { hendelseDaoMock.behandlingOpprettet(any()) } returns Unit
-        every { behandlingHendelserKafkaProducerMock.sendMeldingForHendelse(any(), any()) } returns Unit
+        every { behandlingHendelserKafkaProducerMock.sendMeldingForHendelseMedDetaljertBehandling(any(), any()) } returns Unit
         every { grunnlagService.leggInnNyttGrunnlag(any(), any()) } returns Unit
         every {
             oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(any(), any())
@@ -302,7 +302,7 @@ class BehandlingFactoryTest {
             behandlingDaoMock.opprettBehandling(any())
             hendelseDaoMock.behandlingOpprettet(any())
             behandlingDaoMock.alleBehandlingerISak(any())
-            behandlingHendelserKafkaProducerMock.sendMeldingForHendelse(any(), any())
+            behandlingHendelserKafkaProducerMock.sendMeldingForHendelseMedDetaljertBehandling(any(), any())
             grunnlagService.leggInnNyttGrunnlag(any(), any())
             oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(any(), any())
             oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(any(), any())
@@ -364,7 +364,7 @@ class BehandlingFactoryTest {
         } returns emptyList()
         every { behandlingDaoMock.lagreStatus(any(), any(), any()) } returns Unit
         every { hendelseDaoMock.behandlingOpprettet(any()) } returns Unit
-        every { behandlingHendelserKafkaProducerMock.sendMeldingForHendelse(any(), any()) } returns Unit
+        every { behandlingHendelserKafkaProducerMock.sendMeldingForHendelseMedDetaljertBehandling(any(), any()) } returns Unit
         every { grunnlagService.leggInnNyttGrunnlag(any(), any()) } returns Unit
         every {
             oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(any(), any())
@@ -402,7 +402,7 @@ class BehandlingFactoryTest {
             behandlingDaoMock.opprettBehandling(any())
             hendelseDaoMock.behandlingOpprettet(any())
             behandlingDaoMock.alleBehandlingerISak(any())
-            behandlingHendelserKafkaProducerMock.sendMeldingForHendelse(any(), any())
+            behandlingHendelserKafkaProducerMock.sendMeldingForHendelseMedDetaljertBehandling(any(), any())
             grunnlagService.leggInnNyttGrunnlag(any(), any())
             oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(any(), any())
             oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(any(), any())
@@ -468,7 +468,7 @@ class BehandlingFactoryTest {
         } returns emptyList()
         every { behandlingDaoMock.lagreStatus(any(), any(), any()) } returns Unit
         every { hendelseDaoMock.behandlingOpprettet(any()) } returns Unit
-        every { behandlingHendelserKafkaProducerMock.sendMeldingForHendelse(any(), any()) } returns Unit
+        every { behandlingHendelserKafkaProducerMock.sendMeldingForHendelseMedDetaljertBehandling(any(), any()) } returns Unit
         every { grunnlagService.leggInnNyttGrunnlag(any(), any()) } returns Unit
         every {
             oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(any(), any())
@@ -554,7 +554,7 @@ class BehandlingFactoryTest {
             behandlingDaoMock.opprettBehandling(any())
             hendelseDaoMock.behandlingOpprettet(any())
             behandlingDaoMock.alleBehandlingerISak(any())
-            behandlingHendelserKafkaProducerMock.sendMeldingForHendelse(any(), any())
+            behandlingHendelserKafkaProducerMock.sendMeldingForHendelseMedDetaljertBehandling(any(), any())
         }
     }
 
@@ -627,7 +627,7 @@ class BehandlingFactoryTest {
             hendelseDaoMock.behandlingOpprettet(any())
             behandlingDaoMock.hentBehandling(any())
             behandlingDaoMock.alleBehandlingerISak(any())
-            behandlingHendelserKafkaProducerMock.sendMeldingForHendelse(any(), BehandlingHendelseType.OPPRETTET)
+            behandlingHendelserKafkaProducerMock.sendMeldingForHendelseMedDetaljertBehandling(any(), BehandlingHendelseType.OPPRETTET)
             grunnlagService.leggInnNyttGrunnlag(any(), any())
             grunnlagService.leggTilNyeOpplysninger(sak.id, any())
             grunnlagService.leggTilNyeOpplysninger(sak.id, any())

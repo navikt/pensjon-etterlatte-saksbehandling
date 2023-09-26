@@ -22,6 +22,10 @@ fun Route.samordningVedtakRoute(samordningVedtakService: SamordningVedtakService
         get("{vedtakId}") {
             val vedtakId = requireNotNull(call.parameters["vedtakId"]).toLong()
 
+            val tpnummer =
+                call.request.headers["tpnr"]
+                    ?: return@get call.respond(HttpStatusCode.BadRequest, "tpnr ikke angitt")
+
             val samordningVedtakDto =
                 try {
                     samordningVedtakService.hentVedtak(
@@ -45,6 +49,10 @@ fun Route.samordningVedtakRoute(samordningVedtakService: SamordningVedtakService
             val fnr =
                 call.request.headers["fnr"]
                     ?: return@get call.respond(HttpStatusCode.BadRequest, "fnr ikke angitt")
+
+            val tpnummer =
+                call.request.headers["tpnr"]
+                    ?: return@get call.respond(HttpStatusCode.BadRequest, "tpnr ikke angitt")
 
             val samordningVedtakDtos =
                 try {

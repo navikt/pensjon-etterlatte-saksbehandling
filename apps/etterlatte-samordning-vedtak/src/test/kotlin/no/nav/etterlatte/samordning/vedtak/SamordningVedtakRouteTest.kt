@@ -50,6 +50,7 @@ class SamordningVedtakRouteTest {
             val response =
                 client.get("/api/vedtak/123") {
                     header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    header("tpnr", "3010")
                 }
 
             response.status shouldBe HttpStatusCode.Unauthorized
@@ -66,9 +67,26 @@ class SamordningVedtakRouteTest {
                 client.get("/api/vedtak/123") {
                     header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                     header(HttpHeaders.Authorization, "Bearer ${token()}")
+                    header("tpnr", "3010")
                 }
 
             response.status shouldBe HttpStatusCode.Unauthorized
+        }
+    }
+
+    @Test
+    fun `skal gi 400 dersom tpnr-header mangler`() {
+        testApplication {
+            environment { config = applicationConfig }
+            application { samordningVedtakApi() }
+
+            val response =
+                client.get("/api/vedtak/123") {
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    header(HttpHeaders.Authorization, "Bearer ${token("nav:etterlatteytelser:vedtaksinformasjon.read")}")
+                }
+
+            response.status shouldBe HttpStatusCode.BadRequest
         }
     }
 
@@ -88,6 +106,7 @@ class SamordningVedtakRouteTest {
                         HttpHeaders.Authorization,
                         "Bearer ${token("nav:etterlatteytelser:vedtaksinformasjon.read")}",
                     )
+                    header("tpnr", "3010")
                 }
 
             response.status shouldBe HttpStatusCode.OK
@@ -117,6 +136,7 @@ class SamordningVedtakRouteTest {
                 client.get("/api/vedtak") {
                     parameter("virkFom", virkFom)
                     header("fnr", fnr)
+                    header("tpnr", "3010")
                     header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                     header(
                         HttpHeaders.Authorization,

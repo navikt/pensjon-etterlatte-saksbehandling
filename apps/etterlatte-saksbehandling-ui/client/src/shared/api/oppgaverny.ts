@@ -23,7 +23,7 @@ export interface OppgaveDTOny {
 }
 
 export type Oppgavestatus = 'NY' | 'UNDER_BEHANDLING' | 'FERDIGSTILT' | 'FEILREGISTRERT' | 'AVBRUTT'
-export type OppgaveKilde = 'HENDELSE' | 'BEHANDLING' | 'EKSTERN'
+export type OppgaveKilde = 'HENDELSE' | 'BEHANDLING' | 'EKSTERN' | 'GENERELL_BEHANDLING'
 export type Oppgavetype =
   | 'FOERSTEGANGSBEHANDLING'
   | 'REVURDERING'

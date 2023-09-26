@@ -30,8 +30,8 @@ class GenerellBehandlingService(
         oppgaveService.opprettNyOppgaveMedSakOgReferanse(
             generellBehandling.id.toString(),
             generellBehandling.sakId,
-            OppgaveKilde.BEHANDLING,
-            OppgaveType.ATTESTERING, // TODO: dette blir feil da man går til "vanlig" behandling. Hvordan best skille de?
+            OppgaveKilde.GENERELL_BEHANDLING,
+            OppgaveType.ATTESTERING,
             merknad = "Attestering av utlandsbehandling",
         )
     }

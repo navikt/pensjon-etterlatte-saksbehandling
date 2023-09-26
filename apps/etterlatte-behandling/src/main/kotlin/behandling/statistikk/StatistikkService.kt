@@ -29,7 +29,6 @@ internal class StatistikkService(
 private fun Behandling.toBehandlingForStatistikk(persongalleri: Persongalleri) =
     BehandlingForStatistikk(
         id = id,
-        sak = sak.id,
         sakType = sak.sakType,
         behandlingOpprettet = behandlingOpprettet,
         soeknadMottattDato = mottattDato(),
@@ -39,11 +38,7 @@ private fun Behandling.toBehandlingForStatistikk(persongalleri: Persongalleri) =
         avdoed = persongalleri.avdoed,
         soesken = persongalleri.soesken,
         status = status,
-        behandlingType = type,
-        virkningstidspunkt = virkningstidspunkt,
-        boddEllerArbeidetUtlandet = boddEllerArbeidetUtlandet,
         revurderingsaarsak = revurderingsaarsak(),
         prosesstype = prosesstype,
-        revurderingInfo = revurderingInfo()?.revurderingInfo,
         enhet = sak.enhet,
     )

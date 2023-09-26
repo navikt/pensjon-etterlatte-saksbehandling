@@ -73,7 +73,6 @@ class StatistikkServiceTest {
         coEvery { behandlingKlient.hentDetaljertBehandling(behandlingId) } returns
             BehandlingForStatistikk(
                 id = behandlingId,
-                sak = sakId,
                 sakType = SakType.BARNEPENSJON,
                 behandlingOpprettet = Tidspunkt.now().toLocalDatetimeUTC(),
                 soeknadMottattDato = null,
@@ -83,11 +82,7 @@ class StatistikkServiceTest {
                 avdoed = listOf(),
                 soesken = listOf(),
                 status = BehandlingStatus.FATTET_VEDTAK,
-                behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-                virkningstidspunkt = null,
-                boddEllerArbeidetUtlandet = null,
                 revurderingsaarsak = null,
-                revurderingInfo = null,
                 prosesstype = Prosesstype.MANUELL,
                 enhet = "1111",
             )
@@ -164,7 +159,6 @@ class StatistikkServiceTest {
         coEvery { behandlingKlient.hentDetaljertBehandling(behandlingId) } returns
             BehandlingForStatistikk(
                 id = behandlingId,
-                sak = sakId,
                 sakType = SakType.OMSTILLINGSSTOENAD,
                 behandlingOpprettet = Tidspunkt.now().toLocalDatetimeUTC(),
                 soeknadMottattDato = null,
@@ -174,11 +168,7 @@ class StatistikkServiceTest {
                 avdoed = listOf(),
                 soesken = listOf(),
                 status = BehandlingStatus.FATTET_VEDTAK,
-                behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-                virkningstidspunkt = null,
-                boddEllerArbeidetUtlandet = null,
                 revurderingsaarsak = null,
-                revurderingInfo = null,
                 prosesstype = Prosesstype.MANUELL,
                 enhet = "1111",
             )
@@ -260,7 +250,6 @@ class StatistikkServiceTest {
         coEvery { behandlingKlient.hentDetaljertBehandling(behandlingId) } returns
             BehandlingForStatistikk(
                 id = behandlingId,
-                sak = sakId,
                 sakType = SakType.BARNEPENSJON,
                 behandlingOpprettet = Tidspunkt.now().toLocalDatetimeUTC(),
                 soeknadMottattDato = null,
@@ -270,12 +259,8 @@ class StatistikkServiceTest {
                 avdoed = listOf("32132132132"),
                 soesken = listOf(),
                 status = BehandlingStatus.OPPRETTET,
-                behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-                virkningstidspunkt = null,
-                boddEllerArbeidetUtlandet = null,
                 revurderingsaarsak = null,
                 prosesstype = Prosesstype.MANUELL,
-                revurderingInfo = null,
                 enhet = "1111",
             )
 

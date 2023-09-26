@@ -89,20 +89,29 @@ class BrevService(
     fun lagreBrevPayload(
         id: BrevID,
         payload: Slate,
-    ) = db.oppdaterPayload(id, payload)
-        .also { logger.info("Payload for brev (id=$id) oppdatert") }
+    ): Int {
+        sjekkOmBrevKanEndres(id)
+        return db.oppdaterPayload(id, payload)
+            .also { logger.info("Payload for brev (id=$id) oppdatert") }
+    }
 
     fun lagreBrevPayloadVedlegg(
         id: BrevID,
         payload: List<BrevInnholdVedlegg>,
-    ) = db.oppdaterPayloadVedlegg(id, payload)
-        .also { logger.info("Vedlegg payload for brev (id=$id) oppdatert") }
+    ): Int {
+        sjekkOmBrevKanEndres(id)
+        return db.oppdaterPayloadVedlegg(id, payload)
+            .also { logger.info("Vedlegg payload for brev (id=$id) oppdatert") }
+    }
 
     fun oppdaterMottaker(
         id: BrevID,
         mottaker: Mottaker,
-    ) = db.oppdaterMottaker(id, mottaker)
-        .also { logger.info("Mottaker på brev (id=$id) oppdatert") }
+    ): Int {
+        sjekkOmBrevKanEndres(id)
+        return db.oppdaterMottaker(id, mottaker)
+            .also { logger.info("Mottaker på brev (id=$id) oppdatert") }
+    }
 
     suspend fun genererPdf(
         id: BrevID,
@@ -140,15 +149,9 @@ class BrevService(
         id: BrevID,
         bruker: BrukerTokenInfo,
     ) {
-        val brev = hentBrev(id)
-
-        if (brev.status in listOf(Status.OPPRETTET, Status.OPPDATERT)) {
-            val pdf = genererPdf(id, bruker)
-
-            db.lagrePdfOgFerdigstillBrev(id, pdf)
-        } else {
-            throw IllegalStateException("Kan ikke ferdigstille brev (id=$id) med status ${brev.status}")
-        }
+        sjekkOmBrevKanEndres(id)
+        val pdf = genererPdf(id, bruker)
+        db.lagrePdfOgFerdigstillBrev(id, pdf)
     }
 
     suspend fun journalfoer(
@@ -192,6 +195,13 @@ class BrevService(
             tidspunkt = DistribusjonsTidspunktType.KJERNETID,
             adresse = brev.mottaker.adresse,
         )
+    }
+
+    private fun sjekkOmBrevKanEndres(brevID: BrevID) {
+        val brev = db.hentBrev(brevID)
+        if (!brev.kanEndres()) {
+            throw IllegalStateException("Brev med id=$brevID kan ikke endres, siden det har status ${brev.status}")
+        }
     }
 
     private fun opprettBrevData(brev: Brev): Pair<EtterlatteBrevKode, BrevData> {

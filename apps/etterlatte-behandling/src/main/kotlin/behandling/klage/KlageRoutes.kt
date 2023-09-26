@@ -101,6 +101,18 @@ internal fun Route.klageRoutes(
                 }
             }
 
+            post("ferdigstill") {
+                hvisEnabled(KlageFeatureToggle.KanBrukeKlageToggle) {
+                    kunSaksbehandler { saksbehandler ->
+                        val ferdigstiltKlage =
+                            inTransaction {
+                                klageService.ferdigstillKlage(klageId, saksbehandler)
+                            }
+                        call.respond(ferdigstiltKlage)
+                    }
+                }
+            }
+
             patch("kabalstatus") {
                 hvisEnabled(KlageFeatureToggle.KanBrukeKlageToggle) {
                     kunSystembruker {

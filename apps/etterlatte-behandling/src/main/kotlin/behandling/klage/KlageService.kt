@@ -2,16 +2,24 @@ package no.nav.etterlatte.behandling.klage
 
 import io.ktor.server.plugins.NotFoundException
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.klienter.BrevApiKlient
+import no.nav.etterlatte.behandling.revurdering.RevurderingMedBegrunnelse
+import no.nav.etterlatte.behandling.revurdering.RevurderingService
 import no.nav.etterlatte.libs.common.behandling.Formkrav
 import no.nav.etterlatte.libs.common.behandling.InnstillingTilKabal
 import no.nav.etterlatte.libs.common.behandling.Kabalrespons
 import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.behandling.KlageBrevInnstilling
 import no.nav.etterlatte.libs.common.behandling.KlageHendelseType
+import no.nav.etterlatte.libs.common.behandling.KlageOmgjoering
+import no.nav.etterlatte.libs.common.behandling.KlageResultat
 import no.nav.etterlatte.libs.common.behandling.KlageUtfall
 import no.nav.etterlatte.libs.common.behandling.KlageUtfallUtenBrev
+import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
+import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
+import no.nav.etterlatte.libs.common.behandling.SendtInnstillingsbrev
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
@@ -46,6 +54,11 @@ interface KlageService {
         klageId: UUID,
         kabalrespons: Kabalrespons,
     )
+
+    fun ferdigstillKlage(
+        klageId: UUID,
+        saksbehandler: Saksbehandler,
+    ): Klage
 }
 
 class KlageServiceImpl(
@@ -54,6 +67,7 @@ class KlageServiceImpl(
     private val hendelseDao: HendelseDao,
     private val oppgaveService: OppgaveService,
     private val brevApiKlient: BrevApiKlient,
+    private val revurderingService: RevurderingService,
 ) : KlageService {
     private val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
@@ -180,4 +194,124 @@ class KlageServiceImpl(
         klageId: UUID,
         kabalrespons: Kabalrespons,
     ) = klageDao.oppdaterKabalStatus(klageId, kabalrespons)
+
+    override fun ferdigstillKlage(
+        klageId: UUID,
+        saksbehandler: Saksbehandler,
+    ): Klage {
+        val klage = klageDao.hentKlage(klageId) ?: throw NotFoundException("Kunne ikke finne klage med id=$klageId")
+
+        if (!klage.kanFerdigstille()) {
+            throw IllegalStateException("Klagen med id=$klageId kan ikke ferdigstilles siden den har feil status / tilstand")
+        }
+
+        val saksbehandlerForKlageOppgave = oppgaveService.hentSaksbehandlerForOppgaveUnderArbeid(klageId)
+        if (saksbehandlerForKlageOppgave != saksbehandler.ident) {
+            throw IllegalArgumentException(
+                "Saksbehandler er ikke ansvarlig på oppgaven til klagen med id=$klageId, " +
+                    "og kan derfor ikke ferdigstille behandlingen",
+            )
+        }
+
+        val (innstilling, omgjoering) =
+            when (val utfall = klage.utfall) {
+                is KlageUtfall.StadfesteVedtak -> utfall.innstilling to null
+                is KlageUtfall.DelvisOmgjoering -> utfall.innstilling to utfall.omgjoering
+                is KlageUtfall.Omgjoering -> null to utfall.omgjoering
+                null -> null to null
+            }
+
+        val sendtInnstillingsbrev = innstilling?.let { ferdigstillInnstilling(it, klage, saksbehandler) }
+        val revurderingOmgjoering = omgjoering?.let { ferdigstillOmgjoering(it, klage, saksbehandler) }
+
+        val resultat =
+            KlageResultat(
+                opprettetRevurderingId = revurderingOmgjoering?.id,
+                sendtInnstillingsbrev = sendtInnstillingsbrev,
+            )
+        val klageMedOppdatertResultat = klage.ferdigstill(resultat)
+        klageDao.lagreKlage(klageMedOppdatertResultat)
+
+        oppgaveService.ferdigStillOppgaveUnderBehandling(klage.id.toString(), saksbehandler)
+        hendelseDao.klageHendelse(
+            klageId = klageId,
+            sakId = klage.sak.id,
+            hendelse = KlageHendelseType.FERDIGSTILT,
+            inntruffet = Tidspunkt.now(),
+            saksbehandler = saksbehandler.ident,
+            kommentar = null,
+            begrunnelse = null,
+        )
+
+        return klageMedOppdatertResultat
+    }
+
+    private fun ferdigstillInnstilling(
+        innstilling: InnstillingTilKabal,
+        klage: Klage,
+        saksbehandler: Saksbehandler,
+    ): SendtInnstillingsbrev {
+        val innstillingsbrev = innstilling.brev
+        val (tidJournalfoert, journalpostId) =
+            runBlocking {
+                ferdigstillOgDistribuerBrev(klage.sak.id, innstillingsbrev.brevId, saksbehandler)
+            }
+
+        // TODO: send avgårde til kabal - se EY-2593.
+        //  Vi trenger nok å bygge requesten litt mer opp med f.eks. brevene. Se
+        //  på hvordan vi vil ivareta flyt her
+        return SendtInnstillingsbrev(
+            journalfoerTidspunkt = tidJournalfoert,
+            sendtKabalTidspunkt = Tidspunkt.now(),
+            brevId = innstillingsbrev.brevId,
+            journalpostId = journalpostId,
+        )
+    }
+
+    private fun ferdigstillOmgjoering(
+        omgjoering: KlageOmgjoering,
+        klage: Klage,
+        saksbehandler: Saksbehandler,
+    ): Revurdering {
+        val opprettetRevurdering =
+            revurderingService.opprettManuellRevurderingWrapper(
+                sakId = klage.sak.id,
+                aarsak = RevurderingAarsak.OMGJOERING_ETTER_KLAGE,
+                paaGrunnAvHendelseId = null,
+                begrunnelse = omgjoering.grunnForOmgjoering.name,
+                fritekstAarsak = omgjoering.begrunnelse,
+                saksbehandler = saksbehandler,
+            ) ?: throw IllegalStateException(
+                "Klarte ikke å opprette en revurdering for omgjøringen som " +
+                    "følge av klagen med id=${klage.id}",
+            )
+
+        revurderingService.lagreRevurderingInfo(
+            behandlingsId = opprettetRevurdering.id,
+            revurderingMedBegrunnelse =
+                RevurderingMedBegrunnelse(
+                    revurderingInfo = RevurderingInfo.OmgjoeringEtterKlage(klage.id),
+                    begrunnelse = "Informasjon om klagen",
+                ),
+            navIdent = saksbehandler.ident,
+        )
+        return opprettetRevurdering
+    }
+
+    private suspend fun ferdigstillOgDistribuerBrev(
+        sakId: Long,
+        brevId: Long,
+        saksbehandler: Saksbehandler,
+    ): Pair<Tidspunkt, String> {
+        // TODO: Her bør vi ha noe error recovery: Hent status på brevet, og forsøk en resume fra der.
+        brevApiKlient.ferdigstillBrev(sakId, brevId, saksbehandler)
+        val journalpostIdJournalfoering = brevApiKlient.journalfoerBrev(sakId, brevId, saksbehandler)
+        val tidspunktJournalfoert = Tidspunkt.now()
+        val bestillingsIdDistribuering = brevApiKlient.distribuerBrev(sakId, brevId, saksbehandler)
+        logger.info(
+            "Distribusjon av innstillingsbrevet med id=$brevId bestilt til klagen i sak med sakId=$sakId, " +
+                "med bestillingsId $bestillingsIdDistribuering",
+        )
+        return tidspunktJournalfoert to journalpostIdJournalfoering
+    }
 }

@@ -144,9 +144,10 @@ class BrevDataMapper(private val featureToggleService: FeatureToggleService) {
                     VedtakType.ENDRING ->
                         when (behandling.revurderingsaarsak) {
                             RevurderingAarsak.SOESKENJUSTERING -> SoeskenjusteringRevurderingBrevdata.fra(behandling)
-                            RevurderingAarsak.FENGSELSOPPHOLD -> FengselsoppholdBrevdata.fra(behandling)
-                            RevurderingAarsak.UT_AV_FENGSEL -> UtAvFengselBrevdata.fra(behandling)
-                            RevurderingAarsak.INSTITUSJONSOPPHOLD -> InstitusjonsoppholdRevurderingBrevdata.fra(behandling)
+                            RevurderingAarsak.FENGSELSOPPHOLD,
+                            RevurderingAarsak.UT_AV_FENGSEL,
+                            RevurderingAarsak.INSTITUSJONSOPPHOLD,
+                            -> ManueltBrevData(emptyList())
                             RevurderingAarsak.YRKESSKADE -> YrkesskadeRevurderingBrevdata.fra(behandling)
                             else -> TODO("Revurderingsbrev for ${behandling.revurderingsaarsak} er ikke støttet")
                         }

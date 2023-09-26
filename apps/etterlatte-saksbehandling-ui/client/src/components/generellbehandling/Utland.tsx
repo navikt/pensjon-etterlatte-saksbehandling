@@ -1,7 +1,19 @@
 import { Dokumenter, Generellbehandling, Utland } from '~shared/types/Generellbehandling'
 import { Content, ContentHeader, GridContainer, MainContent } from '~shared/styled'
 import { HeadingWrapper } from '~components/behandling/soeknadsoversikt/styled'
-import { Alert, Button, Checkbox, Heading, Link, Panel, Select, Table, Textarea, TextField } from '@navikt/ds-react'
+import {
+  Alert,
+  BodyShort,
+  Button,
+  Checkbox,
+  Heading,
+  Link,
+  Panel,
+  Select,
+  Table,
+  Textarea,
+  TextField,
+} from '@navikt/ds-react'
 import { useEffect, useState } from 'react'
 import { mapApiResult, useApiCall, isPending, isFailure, isSuccess } from '~shared/hooks/useApiCall'
 import { oppdaterGenerellBehandling } from '~shared/api/generellbehandling'
@@ -13,8 +25,9 @@ import { PencilWritingIcon } from '@navikt/aksel-icons'
 import { opprettBrevForSak } from '~shared/api/brev'
 import { useNavigate } from 'react-router-dom'
 import { ExternalLinkIcon } from '@navikt/aksel-icons'
-import { ABlue500 } from '@navikt/ds-tokens/dist/tokens'
+import { ABlue500, AGray400 } from '@navikt/ds-tokens/dist/tokens'
 import { ButtonGroup } from '~components/person/VurderHendelseModal'
+import { XMarkIcon } from '@navikt/aksel-icons'
 
 const TextFieldBegrunnelse = styled(Textarea).attrs({ size: 'medium' })`
   max-width: 40rem;
@@ -29,6 +42,13 @@ const LenkeMargin = styled(Link)`
   margin: 2rem 0rem 0.5rem 0;
 `
 
+const FlexOrder = styled.div`
+  display: flex;
+  max-width: 55rem;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+`
+
 const Utland = (props: { utlandsBehandling: Generellbehandling & { innhold: Utland } }) => {
   const { utlandsBehandling } = props
   const navigate = useNavigate()
@@ -37,15 +57,17 @@ const Utland = (props: { utlandsBehandling: Generellbehandling & { innhold: Utla
   const [sendTilAttesteringStatus, sendTilAttestering] = useApiCall(oppdaterGenerellBehandling)
 
   const [hentAlleLandRequest, fetchAlleLand] = useApiCall(hentAlleLand)
+  const [alleLandKodeverk, setAlleLandKodeverk] = useState<ILand[] | null>(null)
   const [rinanummer, setRinanummer] = useState<string>(innhold?.rinanummer ?? '')
   const [notater, setNotater] = useState<string>(innhold?.begrunnelse ?? '')
-  const [valgtLandIsoKode, setValgtLandIsoKode] = useState<string>(innhold?.landIsoKode ?? '')
-
+  const [valgtLandIsoKode, setValgtLandIsoKode] = useState<string>('')
+  const [valgteLandIsoKode, setvalgteLandIsoKode] = useState<string[]>(innhold?.landIsoKode ?? [])
   const defaultDokumentState: Dokumenter = { p2100: false, p3000: false, p5000: false }
   const [dokumenter, setDokumenter] = useState<Dokumenter>(innhold?.dokumenter ?? defaultDokumentState)
 
   const [errorLand, setErrLand] = useState<boolean>(false)
   const [nyttBrevStatus, opprettBrev] = useApiCall(opprettBrevForSak)
+
   const opprettNyttBrevOgRedirect = () => {
     opprettBrev(Number(utlandsBehandling.sakId), (brev) => {
       navigate(`/person/${brev.soekerFnr}/sak/${brev.sakId}/brev/${brev.id}`)
@@ -53,7 +75,9 @@ const Utland = (props: { utlandsBehandling: Generellbehandling & { innhold: Utla
   }
 
   useEffect(() => {
-    fetchAlleLand(null)
+    fetchAlleLand(null, (landliste) => {
+      setAlleLandKodeverk(landliste)
+    })
   }, [])
 
   const sorterLand = (landListe: ILand[]): ILand[] => {
@@ -73,7 +97,7 @@ const Utland = (props: { utlandsBehandling: Generellbehandling & { innhold: Utla
         innhold: {
           type: 'UTLAND',
           dokumenter: dokumenter,
-          landIsoKode: valgtLandIsoKode,
+          landIsoKode: valgteLandIsoKode,
           begrunnelse: notater,
           rinanummer: rinanummer,
           tilknyttetBehandling: notater,
@@ -91,7 +115,7 @@ const Utland = (props: { utlandsBehandling: Generellbehandling & { innhold: Utla
       innhold: {
         type: 'UTLAND',
         dokumenter: dokumenter,
-        landIsoKode: valgtLandIsoKode,
+        landIsoKode: valgteLandIsoKode,
         begrunnelse: notater,
         rinanummer: rinanummer,
         tilknyttetBehandling: notater,
@@ -103,7 +127,7 @@ const Utland = (props: { utlandsBehandling: Generellbehandling & { innhold: Utla
   return (
     <GridContainer>
       <MainContent style={{ whiteSpace: 'pre-wrap' }}>
-        <Content style={{ maxWidth: '40rem' }}>
+        <Content style={{ maxWidth: '55rem', margin: 'auto' }}>
           <ContentHeader>
             <HeadingWrapper>
               <Heading spacing size="large" level="1">
@@ -147,6 +171,55 @@ const Utland = (props: { utlandsBehandling: Generellbehandling & { innhold: Utla
                       ))}
                     </Select>
                     {errorLand && <Alert variant="error">Du må velge land</Alert>}
+                    <div style={{ margin: '1rem 0rem' }}>
+                      <Button
+                        onClick={() => {
+                          if (valgtLandIsoKode) {
+                            const finnesAllerede = valgteLandIsoKode.includes(valgtLandIsoKode)
+                            if (!finnesAllerede) {
+                              const nyLandListe = valgteLandIsoKode.concat([valgtLandIsoKode])
+                              setvalgteLandIsoKode(nyLandListe)
+                            }
+                          }
+                        }}
+                      >
+                        Legg til land
+                      </Button>
+                    </div>
+                    {valgteLandIsoKode.length ? (
+                      <Heading size="medium" level="3">
+                        Valgte land
+                      </Heading>
+                    ) : null}
+                    {isSuccess(hentAlleLandRequest) && valgteLandIsoKode && (
+                      <FlexOrder>
+                        {valgteLandIsoKode.map((landIsoKode) => {
+                          const kodeverkLandMatch = alleLandKodeverk?.find(
+                            (kodeverkLand) => kodeverkLand.isoLandkode === landIsoKode
+                          )
+                          return (
+                            <BodyShort
+                              style={{
+                                borderRadius: '10px',
+                                border: `2px solid ${AGray400}`,
+                                cursor: 'pointer',
+                                marginRight: '0.6rem',
+                              }}
+                              key={landIsoKode}
+                              onClick={() => {
+                                const nyLandliste = valgteLandIsoKode.filter(
+                                  (isolandkode) => isolandkode !== landIsoKode
+                                )
+                                setvalgteLandIsoKode(nyLandliste)
+                              }}
+                            >
+                              {kodeverkLandMatch?.beskrivelse.tekst ?? landIsoKode}
+                              <XMarkIcon />
+                            </BodyShort>
+                          )
+                        })}
+                      </FlexOrder>
+                    )}
                   </>
                 )
               )}

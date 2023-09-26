@@ -94,7 +94,7 @@ internal class GenerellBehandlingDaoTest {
                 1L,
                 Tidspunkt.now(),
                 GenerellBehandling.GenerellBehandlingType.UTLAND,
-                Innhold.Utland("vlabla", Dokumenter(true, false, true), "2grwg2", "rita"),
+                Innhold.Utland(listOf("AFG"), Dokumenter(true, false, true), "2grwg2", "rita"),
             )
         dao.opprettGenerellbehandling(generellBehandlingUtland)
         val hentetGenBehandling = dao.hentGenerellBehandlingMedId(generellBehandlingUtland.id)
@@ -112,7 +112,7 @@ internal class GenerellBehandlingDaoTest {
                 1L,
                 Tidspunkt.now(),
                 GenerellBehandling.GenerellBehandlingType.UTLAND,
-                Innhold.Utland("vlabla", Dokumenter(true, false, true), "2grwg2", "rita"),
+                Innhold.Utland(listOf("AFG"), Dokumenter(true, false, true), "2grwg2", "rita"),
             )
         val annengenerebehandling =
             GenerellBehandling(

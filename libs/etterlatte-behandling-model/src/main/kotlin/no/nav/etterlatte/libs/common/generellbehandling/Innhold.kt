@@ -7,7 +7,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName
 sealed class Innhold {
     @JsonTypeName("UTLAND")
     data class Utland(
-        val landIsoKode: String,
+        val landIsoKode: List<String>,
         val dokumenter: Dokumenter,
         val begrunnelse: String,
         val rinanummer: String,

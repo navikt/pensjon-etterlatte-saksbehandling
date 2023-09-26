@@ -37,7 +37,7 @@ class GenerellBehandlingService(
     }
 
     private fun validerUtland(innhold: Innhold.Utland) {
-        if (innhold.landIsoKode.isEmpty() || innhold.landIsoKode.length != 3) {
+        if (innhold.landIsoKode.isEmpty() || innhold.landIsoKode.all { it.length == 3 }) {
             // TODO: slå opp mot kodeverk og validere her?
             throw IllegalArgumentException("Mangler land eller feil lengde på landisokode")
         }

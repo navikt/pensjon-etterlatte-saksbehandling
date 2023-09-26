@@ -20,7 +20,7 @@ export type Innhold = Utland | Annen
 
 export interface Utland {
   type: GenerellBehandlingUtlandType
-  landIsoKode?: string
+  landIsoKode?: string[]
   dokumenter?: Dokumenter
   rinanummer?: string
   begrunnelse?: string

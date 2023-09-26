@@ -62,7 +62,7 @@ const Utland = (props: { utlandsBehandling: Generellbehandling & { innhold: Utla
   const [notater, setNotater] = useState<string>(innhold?.begrunnelse ?? '')
   const [valgtLandIsoKode, setValgtLandIsoKode] = useState<string>('')
   const [valgteLandIsoKode, setvalgteLandIsoKode] = useState<string[]>(innhold?.landIsoKode ?? [])
-  const defaultDokumentState: Dokumenter = { p2100: false, p3000: false, p5000: false }
+  const defaultDokumentState: Dokumenter = { p2100: false, p3000: false, p5000: false, p4000: false, p6000: false }
   const [dokumenter, setDokumenter] = useState<Dokumenter>(innhold?.dokumenter ?? defaultDokumentState)
 
   const [errorLand, setErrLand] = useState<boolean>(false)
@@ -255,6 +255,28 @@ const Utland = (props: { utlandsBehandling: Generellbehandling & { innhold: Utla
                     <Checkbox
                       checked={dokumenter.p5000}
                       onChange={(e) => setDokumenter({ ...dokumenter, p5000: e.target.checked })}
+                    >
+                      <></>
+                    </Checkbox>
+                  </Table.DataCell>
+                </Table.Row>{' '}
+                <Table.Row>
+                  <Table.HeaderCell scope="row">P4000</Table.HeaderCell>
+                  <Table.DataCell>
+                    <Checkbox
+                      checked={dokumenter.p4000}
+                      onChange={(e) => setDokumenter({ ...dokumenter, p4000: e.target.checked })}
+                    >
+                      <></>
+                    </Checkbox>
+                  </Table.DataCell>
+                </Table.Row>
+                <Table.Row>
+                  <Table.HeaderCell scope="row">P6000</Table.HeaderCell>
+                  <Table.DataCell>
+                    <Checkbox
+                      checked={dokumenter.p6000}
+                      onChange={(e) => setDokumenter({ ...dokumenter, p6000: e.target.checked })}
                     >
                       <></>
                     </Checkbox>

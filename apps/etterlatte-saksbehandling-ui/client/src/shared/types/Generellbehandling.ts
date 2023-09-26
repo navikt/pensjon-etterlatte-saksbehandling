@@ -31,6 +31,8 @@ export interface Dokumenter {
   p2100: boolean
   p5000: boolean
   p3000: boolean
+  p6000: boolean
+  p4000: boolean
 }
 
 export interface Annen {

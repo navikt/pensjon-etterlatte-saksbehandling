@@ -24,4 +24,6 @@ data class Dokumenter(
     val p2100: Boolean,
     val p5000: Boolean,
     val p3000: Boolean,
+    val p4000: Boolean,
+    val p6000: Boolean,
 )

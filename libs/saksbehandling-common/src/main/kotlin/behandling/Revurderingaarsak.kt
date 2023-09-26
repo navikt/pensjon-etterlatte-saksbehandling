@@ -79,7 +79,7 @@ enum class Revurderingaarsak(
     FENGSELSOPPHOLD(SAKTYPE_BP, KunIDev, IkkeOpphoerSkalSendeBrev, redigerbartBrev = true),
     UT_AV_FENGSEL(SAKTYPE_BP, KunIDev, IkkeOpphoerSkalSendeBrev, redigerbartBrev = true),
     NY_SOEKNAD(SAKTYPE_BP_OMS, DevOgProd, IkkeOpphoerSkalSendeBrev),
-    ANNEN(SAKTYPE_BP_OMS, KunIDev, IkkeOpphoerSkalSendeBrev),
+    ANNEN(SAKTYPE_BP_OMS, DevOgProd, IkkeOpphoerSkalSendeBrev),
     INSTITUSJONSOPPHOLD(SAKTYPE_BP_OMS, KunIDev, IkkeOpphoerSkalSendeBrev, redigerbartBrev = true),
     YRKESSKADE(SAKTYPE_BP_OMS, KunIDev, IkkeOpphoerSkalSendeBrev, redigerbartBrev = true),
     OMGJOERING_ETTER_KLAGE(SAKTYPE_BP_OMS, KunIDev, IkkeOpphoerSkalSendeBrev, redigerbartBrev = true),

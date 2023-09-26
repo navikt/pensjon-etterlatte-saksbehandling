@@ -604,6 +604,7 @@ internal class VedtaksbrevServiceTest {
             PORSGRUNN,
             SAKSBEHANDLER.ident(),
             attestantIdent = null,
+            vedtaksdato = null,
         ),
         Utbetalingsinfo(
             1,
@@ -618,6 +619,7 @@ internal class VedtaksbrevServiceTest {
                     1,
                     Kroner(5000),
                     40,
+                    false,
                 ),
             ),
         ),
@@ -638,6 +640,7 @@ internal class VedtaksbrevServiceTest {
                         1,
                         Kroner(5000),
                         40,
+                        false,
                     ),
                 ),
             ),

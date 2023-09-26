@@ -269,6 +269,6 @@ internal class SakOgBehandlingServiceTest {
         private const val ATTESTANT_IDENT = "Z54321"
         private const val SAK_ID = 123L
         private val BREV_BEREGNINGSPERIODE =
-            BrevBeregningsperiode(YearMonth.now().atDay(1), null, Kroner(10000), 1, Kroner(3063), 10)
+            BrevBeregningsperiode(YearMonth.now().atDay(1), null, Kroner(10000), 1, Kroner(3063), 10, false)
     }
 }

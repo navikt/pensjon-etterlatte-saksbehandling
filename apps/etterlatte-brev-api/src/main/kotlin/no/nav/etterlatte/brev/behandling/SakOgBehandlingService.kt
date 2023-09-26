@@ -104,6 +104,7 @@ class SakOgBehandlingService(
                     ansvarligEnhet,
                     saksbehandlerIdent,
                     attestantIdent,
+                    vedtak.vedtakFattet?.tidspunkt?.toNorskLocalDate(),
                 ),
             utbetalingsinfo = finnUtbetalingsinfo(vedtak.behandling.id, vedtak.virkningstidspunkt, brukerTokenInfo),
             forrigeUtbetalingsinfo = finnForrigeUbetalingsinfo(vedtak, sak, brukerTokenInfo),
@@ -165,6 +166,7 @@ class SakOgBehandlingService(
                     antallBarn = (it.soeskenFlokk?.size ?: 0) + 1, // Legger til 1 pga at beregning fjerner soeker
                     utbetaltBeloep = Kroner(it.utbetaltBeloep),
                     trygdetid = it.trygdetid,
+                    institusjon = it.institusjonsopphold != null,
                 )
             }
 

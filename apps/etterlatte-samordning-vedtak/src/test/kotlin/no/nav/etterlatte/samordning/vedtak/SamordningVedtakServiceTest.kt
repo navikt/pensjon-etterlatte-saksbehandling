@@ -9,6 +9,7 @@ import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.beregning.AvkortetYtelseDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingDto
@@ -138,7 +139,7 @@ fun vedtak(
         status = VedtakStatus.ATTESTERT,
         virkningstidspunkt = now(),
         sak = VedtakSak(ident = "123", sakstype, id = 1234L),
-        behandling = mockk<Behandling>(),
+        behandling = Behandling(id = UUID.randomUUID(), type = BehandlingType.FØRSTEGANGSBEHANDLING),
         type = VedtakType.INNVILGELSE,
         vedtakFattet = null,
         attestasjon = null,

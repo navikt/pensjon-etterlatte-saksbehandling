@@ -360,7 +360,7 @@ class OppgaveService(
 
     fun hentSaksbehandlerForOppgaveUnderArbeid(behandlingsId: UUID): String? {
         val oppgaverforBehandling =
-            inTransaction {
+            inTransaction(gjenbruk = true) {
                 oppgaveDao.hentOppgaverForBehandling(behandlingsId.toString())
             }
         return try {

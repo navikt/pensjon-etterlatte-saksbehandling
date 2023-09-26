@@ -51,6 +51,8 @@ internal class OpprettVedtaksbrevForMigrering(
                 service.genererPdf(vedtaksbrev.id, brukerTokenInfo)
             }
             logger.info("Har oppretta vedtaksbrev i sak $sakId")
+        } else {
+            logger.info("Er ikke migrering, så brevet fins allerede. Sender til journalføring.")
         }
         context.publish(packet.toJson())
     }

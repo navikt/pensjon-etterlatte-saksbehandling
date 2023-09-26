@@ -19,7 +19,6 @@ import { Revurderingsbegrunnelse } from '~components/behandling/revurderingsover
 
 export const GrunnForSoeskenjustering = (props: { behandling: IDetaljertBehandling }) => {
   const { behandling } = props
-  behandling.revurderinginfo
   const soeskenjusteringInfo = hentUndertypeFraBehandling<SoeskenjusteringInfo>('SOESKENJUSTERING', behandling)
   const [valgtSoeskenjustering, setValgtSoeskenjustering] = useState<BarnepensjonSoeskenjusteringGrunn | undefined>(
     soeskenjusteringInfo?.grunnForSoeskenjustering

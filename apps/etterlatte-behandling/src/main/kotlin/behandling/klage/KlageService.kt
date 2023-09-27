@@ -1,26 +1,22 @@
 package no.nav.etterlatte.behandling.klage
 
 import io.ktor.server.plugins.NotFoundException
+import io.ktor.util.toLowerCasePreservingASCIIRules
 import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.klienter.BrevApiKlient
-import no.nav.etterlatte.behandling.revurdering.RevurderingMedBegrunnelse
-import no.nav.etterlatte.behandling.revurdering.RevurderingService
 import no.nav.etterlatte.libs.common.behandling.Formkrav
 import no.nav.etterlatte.libs.common.behandling.InnstillingTilKabal
 import no.nav.etterlatte.libs.common.behandling.Kabalrespons
 import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.behandling.KlageBrevInnstilling
 import no.nav.etterlatte.libs.common.behandling.KlageHendelseType
-import no.nav.etterlatte.libs.common.behandling.KlageOmgjoering
 import no.nav.etterlatte.libs.common.behandling.KlageResultat
 import no.nav.etterlatte.libs.common.behandling.KlageUtfall
 import no.nav.etterlatte.libs.common.behandling.KlageUtfallUtenBrev
-import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
-import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
 import no.nav.etterlatte.libs.common.behandling.SendtInnstillingsbrev
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -29,6 +25,7 @@ import no.nav.etterlatte.sak.SakDao
 import no.nav.etterlatte.token.Saksbehandler
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.time.format.DateTimeFormatter
 import java.util.UUID
 
 interface KlageService {
@@ -67,7 +64,6 @@ class KlageServiceImpl(
     private val hendelseDao: HendelseDao,
     private val oppgaveService: OppgaveService,
     private val brevApiKlient: BrevApiKlient,
-    private val revurderingService: RevurderingService,
 ) : KlageService {
     private val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
@@ -221,12 +217,12 @@ class KlageServiceImpl(
                 null -> null to null
             }
 
+        val oppgaveOmgjoering = omgjoering?.let { ferdigstillOmgjoering(klage) }
         val sendtInnstillingsbrev = innstilling?.let { ferdigstillInnstilling(it, klage, saksbehandler) }
-        val revurderingOmgjoering = omgjoering?.let { ferdigstillOmgjoering(it, klage, saksbehandler) }
 
         val resultat =
             KlageResultat(
-                opprettetRevurderingId = revurderingOmgjoering?.id,
+                opprettetOppgaveOmgjoeringId = oppgaveOmgjoering?.id,
                 sendtInnstillingsbrev = sendtInnstillingsbrev,
             )
         val klageMedOppdatertResultat = klage.ferdigstill(resultat)
@@ -268,34 +264,21 @@ class KlageServiceImpl(
         )
     }
 
-    private fun ferdigstillOmgjoering(
-        omgjoering: KlageOmgjoering,
-        klage: Klage,
-        saksbehandler: Saksbehandler,
-    ): Revurdering {
-        val opprettetRevurdering =
-            revurderingService.opprettManuellRevurderingWrapper(
-                sakId = klage.sak.id,
-                aarsak = RevurderingAarsak.OMGJOERING_ETTER_KLAGE,
-                paaGrunnAvHendelseId = null,
-                begrunnelse = omgjoering.grunnForOmgjoering.name,
-                fritekstAarsak = omgjoering.begrunnelse,
-                saksbehandler = saksbehandler,
-            ) ?: throw IllegalStateException(
-                "Klarte ikke å opprette en revurdering for omgjøringen som " +
-                    "følge av klagen med id=${klage.id}",
-            )
+    private fun ferdigstillOmgjoering(klage: Klage): OppgaveIntern {
+        val vedtaketKlagenGjelder =
+            klage.formkrav?.formkrav?.vedtaketKlagenGjelder ?: throw OmgjoeringMaaGjeldeEtVedtakException(klage)
 
-        revurderingService.lagreRevurderingInfo(
-            behandlingsId = opprettetRevurdering.id,
-            revurderingMedBegrunnelse =
-                RevurderingMedBegrunnelse(
-                    revurderingInfo = RevurderingInfo.OmgjoeringEtterKlage(klage.id),
-                    begrunnelse = "Informasjon om klagen",
-                ),
-            navIdent = saksbehandler.ident,
+        return oppgaveService.opprettNyOppgaveMedSakOgReferanse(
+            referanse = klage.id.toString(),
+            sakId = klage.sak.id,
+            oppgaveKilde = OppgaveKilde.BEHANDLING,
+            oppgaveType = OppgaveType.OMGJOERING,
+            merknad = "Vedtak om ${vedtaketKlagenGjelder.vedtakType?.toString()?.toLowerCasePreservingASCIIRules()} (${
+                vedtaketKlagenGjelder.datoAttestert?.format(
+                    DateTimeFormatter.ISO_LOCAL_DATE,
+                )
+            }) skal omgjøres",
         )
-        return opprettetRevurdering
     }
 
     private suspend fun ferdigstillOgDistribuerBrev(
@@ -315,3 +298,6 @@ class KlageServiceImpl(
         return tidspunktJournalfoert to journalpostIdJournalfoering
     }
 }
+
+class OmgjoeringMaaGjeldeEtVedtakException(klage: Klage) :
+    Exception("Klagen med id=${klage.id} skal resultere i en omgjøring, men mangler et vedtak som klagen gjelder")

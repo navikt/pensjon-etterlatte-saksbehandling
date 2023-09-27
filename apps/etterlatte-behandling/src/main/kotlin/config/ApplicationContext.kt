@@ -288,7 +288,6 @@ class ApplicationContext(
             hendelseDao = hendelseDao,
             oppgaveService = oppgaveService,
             brevApiKlient = brevApiHttpClient,
-            revurderingService = revurderingService,
         )
 
     val tilbakekrevingService =

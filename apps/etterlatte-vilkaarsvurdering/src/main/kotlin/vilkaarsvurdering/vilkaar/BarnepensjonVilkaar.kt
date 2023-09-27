@@ -141,7 +141,7 @@ object BarnepensjonVilkaar {
             hovedvilkaar =
                 Delvilkaar(
                     type = VilkaarType.BP_FORUTGAAENDE_MEDLEMSKAP,
-                    tittel = "Avdødes forutgående medlemskap",
+                    tittel = "Avdødes forutgående medlemskap - Folketrygden",
                     beskrivelse =
                         """
                         For å ha rett på ytelsen må avdøde:

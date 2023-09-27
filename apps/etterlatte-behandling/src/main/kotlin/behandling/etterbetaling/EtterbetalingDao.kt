@@ -12,9 +12,9 @@ class EtterbetalingDao(private val connection: () -> Connection) {
             val statement =
                 prepareStatement(
                     """
-                    INSERT INTO etterbetaling(behandlingId, fraDato, tilDato)
+                    INSERT INTO etterbetaling(behandlings_id, fra_dato, til_dato)
                     VALUES (?, ?, ?)
-                    ON CONFLICT (behandlingId) DO UPDATE SET fraDato = excluded.fraDato, tilDato = excluded.tilDato
+                    ON CONFLICT (behandlings_id) DO UPDATE SET fra_dato = excluded.fra_dato, til_dato = excluded.til_dato
                     """.trimIndent(),
                 )
             statement.setObject(1, etterbetaling.behandlingsId)

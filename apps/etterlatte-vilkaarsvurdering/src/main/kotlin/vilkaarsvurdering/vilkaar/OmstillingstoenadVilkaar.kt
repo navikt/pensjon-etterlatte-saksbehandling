@@ -137,6 +137,12 @@ object OmstillingstoenadVilkaar {
 
                         a) ha vært medlem i trygden siste fem årene før dødsfallet, eller
                         b) ha mottatt pensjon eller uføretrygd siste fem årene før dødsfallet
+                        
+                        Ved vurderingen av om a) er oppfylt, ses det bort fra perioder med tjeneste i internasjonale organisasjoner eller organer som staten Norge er medlem av, yter økonomisk bidrag til eller har ansvar for å bidra til bemanningen av.
+
+                        Der er unntak som gjør at vilkårene over ikke gjelder. Se hvilke når du krysser "Nei" til spørsmålet om et av vilkårene er oppfylt.
+
+                        Vilkåret er ikke oppfylt dersom den avdøde var arbeidsufør, men ikke hadde rett til uføretrygd fordi vilkåret om forutgående medlemskap i § 12-2 første ledd ikke var oppfylt.
                         """.trimIndent(),
                     spoersmaal = "Er et av vilkårene oppfylt?",
                     lovreferanse =
@@ -157,7 +163,10 @@ object OmstillingstoenadVilkaar {
     private fun avdoedesMedlemskapOpptjening() =
         Delvilkaar(
             type = VilkaarType.OMS_AVDOEDES_MEDLEMSKAP_UNNTAK_OPPTJENING,
-            tittel = "Ja, avdøde kunne tilstås en ytelse på grunnlag av tidligere opptjening",
+            tittel =
+                """
+                Ja, avdøde kunne tilstås en ytelse på grunnlag av tidligere opptjening minst svarende til grunnbeløpet
+                """.trimIndent(),
             lovreferanse =
                 Lovreferanse(
                     paragraf = "§ 17-2", // TODO
@@ -167,7 +176,10 @@ object OmstillingstoenadVilkaar {
     private fun avdoedesMedlemskapPensjon() =
         Delvilkaar(
             type = VilkaarType.OMS_AVDOEDES_MEDLEMSKAP_UNNTAK_PENSJON,
-            tittel = "Ja, avdøde hadde avtalefestet pensjon, se femte ledd",
+            tittel =
+                """
+                Ja, avdøde hadde avtalefestet pensjon, eller pensjon fra en lovfestet pensjonsordning som er tilpasset folketrygden ved at det ikke gis ordinær pensjon til gjenlevende ektefelle
+                """.trimIndent(),
             lovreferanse =
                 Lovreferanse(
                     paragraf = "§ 17-2", // TODO

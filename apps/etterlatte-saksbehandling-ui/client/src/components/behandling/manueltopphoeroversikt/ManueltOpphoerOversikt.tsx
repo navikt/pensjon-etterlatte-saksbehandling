@@ -17,6 +17,7 @@ import differenceInYears from 'date-fns/differenceInYears'
 import { IBehandlingsammendrag } from '~components/person/typer'
 import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
 import { ChildEyesIcon } from '@navikt/aksel-icons'
+import { BeregningsMetode } from '~shared/types/Beregning'
 
 export interface ManueltOpphoerDetaljer {
   id: string
@@ -57,6 +58,9 @@ export const ManueltOpphoerOversikt = (props: { behandling: IBehandlingReducer }
         grunnlag: {
           soeskenMedIBeregning: [],
           institusjonsopphold: [],
+          beregningsMetode: {
+            beregningsMetode: BeregningsMetode.NASJONAL,
+          },
         },
       })
       await opprettEllerEndreBeregning(behandling.id)

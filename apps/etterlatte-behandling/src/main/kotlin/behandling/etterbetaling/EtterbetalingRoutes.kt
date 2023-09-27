@@ -31,7 +31,11 @@ internal fun Route.etterbetalingRoutes(service: EtterbetalingService) {
         get {
             when (val etterbetaling = service.hentEtterbetaling(behandlingsId)) {
                 null -> call.respond(HttpStatusCode.NoContent)
-                else -> call.respond(etterbetaling)
+                else ->
+                    call.respond(
+                        HttpStatusCode.OK,
+                        EtterbetalingDTO(fraDato = etterbetaling.fraDato, tilDato = etterbetaling.tilDato),
+                    )
             }
         }
     }

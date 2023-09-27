@@ -23,6 +23,7 @@ import { OmstillingsstoenadSammendrag } from '~components/behandling/beregne/Oms
 import { Avkorting } from '~components/behandling/avkorting/Avkorting'
 import { SakType } from '~shared/types/sak'
 import { erOpphoer } from '~shared/types/Revurderingsaarsak'
+import Etterbetaling from '~components/behandling/beregningsgrunnlag/Etterbetaling'
 
 export const Beregne = (props: { behandling: IBehandlingReducer }) => {
   const { behandling } = props
@@ -99,6 +100,13 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
             Det sendes ikke vedtaksbrev for denne behandlingen.
           </InfoAlert>
         )}
+        <InfoWrapper>
+          <Etterbetaling
+            behandlingId={behandling.id}
+            etterbetalingInit={behandling.etterbetaling}
+            redigerbar={behandles}
+          />
+        </InfoWrapper>
       </ContentHeader>
       {behandles ? (
         <BehandlingHandlingKnapper>

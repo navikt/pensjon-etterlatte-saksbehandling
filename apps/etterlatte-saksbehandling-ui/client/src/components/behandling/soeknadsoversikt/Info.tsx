@@ -1,7 +1,14 @@
 import { BodyShort, Detail, Label } from '@navikt/ds-react'
 import { InfoElement } from './styled'
+import { ReactNode } from 'react'
 
-export const Info = ({ tekst, label, undertekst }: { tekst: string; label: string; undertekst?: string }) => {
+interface InfoProps {
+  label: string
+  tekst: ReactNode
+  undertekst?: string
+}
+
+export const Info = ({ label, tekst, undertekst }: InfoProps) => {
   return (
     <InfoElement>
       <Label size="small" as="p">

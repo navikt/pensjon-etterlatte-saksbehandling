@@ -206,6 +206,7 @@ class BrevProsessTypeFactory(private val featureToggleService: FeatureToggleServ
                     RevurderingAarsak.FENGSELSOPPHOLD -> BrevProsessType.REDIGERBAR
                     RevurderingAarsak.UT_AV_FENGSEL -> BrevProsessType.REDIGERBAR
                     RevurderingAarsak.YRKESSKADE -> BrevProsessType.REDIGERBAR
+                    RevurderingAarsak.ANNEN -> BrevProsessType.REDIGERBAR
                     else -> BrevProsessType.MANUELL
                 }
 

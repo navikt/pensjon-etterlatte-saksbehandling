@@ -13,6 +13,7 @@ import io.mockk.spyk
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import kotliquery.queryOf
+import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
@@ -64,7 +65,6 @@ import vedtaksvurdering.SAKSBEHANDLER_1
 import vedtaksvurdering.attestant
 import vedtaksvurdering.opprettVedtak
 import vedtaksvurdering.saksbehandler
-import java.lang.RuntimeException
 import java.math.BigDecimal
 import java.time.LocalDateTime
 import java.time.Month
@@ -105,7 +105,7 @@ internal class VedtaksvurderingServiceTest {
                 beregningKlient = beregningKlientMock,
                 vilkaarsvurderingKlient = vilkaarsvurderingKlientMock,
                 behandlingKlient = behandlingKlientMock,
-                sendToRapid = sendToRapidMock,
+                publiser = sendToRapidMock,
             )
     }
 
@@ -618,6 +618,7 @@ internal class VedtaksvurderingServiceTest {
                 prosesstype = Prosesstype.MANUELL,
                 revurderingInfo = null,
                 enhet = "1111",
+                kilde = Vedtaksloesning.GJENNY,
             )
         coEvery { behandlingKlientMock.hentSak(any(), any()) } returns
             Sak(
@@ -1150,6 +1151,7 @@ internal class VedtaksvurderingServiceTest {
             revurderingInfo = revurderingInfo,
             prosesstype = Prosesstype.MANUELL,
             enhet = "1111",
+            kilde = Vedtaksloesning.GJENNY,
         )
 
     private companion object {

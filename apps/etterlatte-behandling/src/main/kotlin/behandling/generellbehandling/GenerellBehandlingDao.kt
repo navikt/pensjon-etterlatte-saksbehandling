@@ -33,6 +33,22 @@ class GenerellBehandlingDao(private val connection: () -> Connection) {
         }
     }
 
+    fun oppdaterGenerellBehandling(generellBehandling: GenerellBehandling) {
+        with(connection()) {
+            val statement =
+                prepareStatement(
+                    """
+                    UPDATE generellbehandling
+                    SET innhold = ?
+                    where id = ?
+                    """.trimIndent(),
+                )
+            statement.setJsonb(1, generellBehandling.innhold)
+            statement.setObject(2, generellBehandling.id)
+            statement.executeUpdate()
+        }
+    }
+
     fun hentGenerellBehandlingMedId(id: UUID): GenerellBehandling? {
         return with(connection()) {
             val statement =

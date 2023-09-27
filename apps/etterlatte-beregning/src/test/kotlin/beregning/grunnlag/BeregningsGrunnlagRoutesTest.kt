@@ -20,6 +20,7 @@ import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.etterlatte.klienter.BehandlingKlient
+import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
@@ -87,6 +88,7 @@ internal class BeregningsGrunnlagRoutesTest {
                 boddEllerArbeidetUtlandet = null,
                 revurderingInfo = null,
                 enhet = "1111",
+                kilde = Vedtaksloesning.GJENNY,
             )
 
         every { repository.finnBarnepensjonGrunnlagForBehandling(any()) } returns null
@@ -141,6 +143,7 @@ internal class BeregningsGrunnlagRoutesTest {
                 boddEllerArbeidetUtlandet = null,
                 revurderingInfo = null,
                 enhet = "1111",
+                kilde = Vedtaksloesning.GJENNY,
             )
         coEvery {
             behandlingKlient.hentSisteIverksatteBehandling(sakId, any())
@@ -290,6 +293,7 @@ internal class BeregningsGrunnlagRoutesTest {
                 boddEllerArbeidetUtlandet = null,
                 revurderingInfo = null,
                 enhet = "1111",
+                kilde = Vedtaksloesning.GJENNY,
             )
 
         testApplication {
@@ -353,6 +357,7 @@ internal class BeregningsGrunnlagRoutesTest {
                 boddEllerArbeidetUtlandet = null,
                 revurderingInfo = null,
                 enhet = "1111",
+                kilde = Vedtaksloesning.GJENNY,
             )
 
         testApplication {

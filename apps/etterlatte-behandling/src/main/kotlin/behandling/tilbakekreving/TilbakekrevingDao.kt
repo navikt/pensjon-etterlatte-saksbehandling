@@ -5,6 +5,7 @@ import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.setTidspunkt
+import no.nav.etterlatte.libs.common.tilbakekreving.Kravgrunnlag
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.database.setJsonb
 import no.nav.etterlatte.libs.database.singleOrNull
@@ -53,7 +54,7 @@ class TilbakekrevingDao(private val connection: () -> Connection) {
         return hentTilbakekrevingNonNull(tilbakekreving.id).also { require(it == tilbakekreving) }
     }
 
-    private fun ResultSet.toTilbakekreving() =
+    private fun ResultSet.toTilbakekreving(): Tilbakekreving =
         Tilbakekreving(
             id = getString("id").let { UUID.fromString(it) },
             sak =
@@ -65,6 +66,10 @@ class TilbakekrevingDao(private val connection: () -> Connection) {
                 ),
             opprettet = getTidspunkt("opprettet"),
             status = enumValueOf(getString("status")),
+            // TODO EY-2723 Midlertidig frem til utbetalinger persisteres
+            perioder =
+                getString("kravgrunnlag")
+                    .let { objectMapper.readValue<Kravgrunnlag>(it) }.perioder.tilTilbakekrevingPerioder(),
             kravgrunnlag = getString("kravgrunnlag").let { objectMapper.readValue(it) },
         )
 }

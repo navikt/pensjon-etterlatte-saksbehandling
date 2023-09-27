@@ -46,6 +46,7 @@ import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.libs.ktor.setReady
 import no.nav.etterlatte.rivers.DistribuerBrev
 import no.nav.etterlatte.rivers.JournalfoerVedtaksbrev
+import no.nav.etterlatte.rivers.OpprettVedtaksbrevForMigrering
 import no.nav.etterlatte.rivers.VedtaksbrevUnderkjent
 import no.nav.etterlatte.security.ktor.clientCredential
 import no.nav.helse.rapids_rivers.RapidApplication
@@ -164,6 +165,7 @@ class ApplicationBuilder {
                         }
                     },
                 )
+                OpprettVedtaksbrevForMigrering(this, vedtaksbrevService)
                 JournalfoerVedtaksbrev(this, vedtaksbrevService)
                 VedtaksbrevUnderkjent(this, vedtaksbrevService)
                 DistribuerBrev(this, vedtaksbrevService, distribusjonService)

@@ -1,0 +1,1 @@
+alter table klage add column resultat JSONB;

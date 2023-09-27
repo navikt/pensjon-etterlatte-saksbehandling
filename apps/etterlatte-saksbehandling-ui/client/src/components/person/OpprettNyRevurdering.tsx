@@ -5,7 +5,7 @@ import { isPending, useApiCall } from '~shared/hooks/useApiCall'
 import { opprettRevurdering as opprettRevurderingApi } from '~shared/api/behandling'
 import { Revurderingsaarsak, tekstRevurderingsaarsak } from '~shared/types/Revurderingsaarsak'
 import { useNavigate } from 'react-router-dom'
-import { ButtonContainer } from '~components/person/VurderHendelseModal'
+import { ButtonGroup } from '~components/person/VurderHendelseModal'
 
 export const OpprettNyRevurdering = ({
   sakId,
@@ -81,14 +81,14 @@ export const OpprettNyRevurdering = ({
                 />
               </AnnenRevurderingWrapper>
             )}
-            <ButtonContainer>
+            <ButtonGroup>
               <Button variant="secondary" onClick={closeAndReset}>
                 Avbryt
               </Button>
               <Button loading={isPending(opprettRevurderingStatus)} onClick={opprettBehandling}>
                 Opprett
               </Button>
-            </ButtonContainer>
+            </ButtonGroup>
           </Modal.Body>
         </Modal>
       </>

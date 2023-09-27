@@ -29,6 +29,10 @@ export const teksterKlagestatus: Record<KlageStatus, string> = {
   FERDIGSTILT: 'Klagen ferdigstilt i Gjenny',
 }
 
+export const erKlageRedigerbar = (klage: Klage) => {
+  return klage.status !== KlageStatus.FERDIGSTILT
+}
+
 export const enum KabalStatus {}
 
 export interface VedtaketKlagenGjelder {
@@ -101,7 +105,7 @@ interface KlageBrevInnstilling {
   brevId: number
 }
 
-interface InnstillingTilKabal {
+export interface InnstillingTilKabal {
   lovhjemmel: string
   tekst: string
   brev: KlageBrevInnstilling

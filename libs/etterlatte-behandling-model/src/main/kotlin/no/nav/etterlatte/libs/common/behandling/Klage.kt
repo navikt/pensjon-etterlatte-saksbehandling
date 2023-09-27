@@ -64,6 +64,18 @@ data class Kabalrespons(
     val resultat: BehandlingResultat,
 )
 
+data class SendtInnstillingsbrev(
+    val journalfoerTidspunkt: Tidspunkt,
+    val sendtKabalTidspunkt: Tidspunkt,
+    val brevId: Long,
+    val journalpostId: String,
+)
+
+data class KlageResultat(
+    val opprettetRevurderingId: UUID?,
+    val sendtInnstillingsbrev: SendtInnstillingsbrev?,
+)
+
 data class Klage(
     val id: UUID,
     val sak: Sak,
@@ -72,12 +84,13 @@ data class Klage(
     val kabalStatus: KabalStatus?,
     val formkrav: FormkravMedBeslutter?,
     val utfall: KlageUtfall?,
+    val resultat: KlageResultat?,
 ) {
     fun oppdaterFormkrav(
         formkrav: Formkrav,
         saksbehandlerIdent: String,
     ): Klage {
-        if (!kanOppdatereFormkrav(this)) {
+        if (!this.kanOppdatereFormkrav()) {
             throw IllegalStateException(
                 "Kan ikke oppdatere formkrav i klagen med id=${this.id}, på grunn av " +
                     "tilstanden til klagen: ${this.status}",
@@ -98,7 +111,7 @@ data class Klage(
     }
 
     fun oppdaterUtfall(utfallMedBrev: KlageUtfall): Klage {
-        if (!kanOppdatereUtfall(this)) {
+        if (!this.kanOppdatereUtfall()) {
             throw IllegalStateException(
                 "Kan ikke oppdatere utfallet i klagen med id=${this.id} på grunn av statusen" +
                     "til klagen (${this.status})",
@@ -108,6 +121,40 @@ data class Klage(
             utfall = utfallMedBrev,
             status = KlageStatus.UTFALL_VURDERT,
         )
+    }
+
+    fun ferdigstill(resultat: KlageResultat): Klage {
+        if (!this.kanFerdigstille()) {
+            throw IllegalStateException(
+                "Kan ikke ferdigstille klagen med id=${this.id} med resultatet $resultat " +
+                    "på grunn av status til klagen (${this.status})",
+            )
+        }
+        return this.copy(
+            resultat = resultat,
+            status = KlageStatus.FERDIGSTILT,
+        )
+    }
+
+    fun kanOppdatereFormkrav(): Boolean {
+        return KlageStatus.kanOppdatereFormkrav(this.status)
+    }
+
+    fun kanOppdatereUtfall(): Boolean {
+        return KlageStatus.kanOppdatereUtfall(this.status)
+    }
+
+    fun kanFerdigstille(): Boolean {
+        return when (this.status) {
+            KlageStatus.UTFALL_VURDERT -> {
+                this.utfall != null
+            }
+            KlageStatus.FORMKRAV_IKKE_OPPFYLT -> {
+                // TODO("Støtt avslag på formkrav på klage")
+                false
+            }
+            else -> false
+        }
     }
 
     companion object {
@@ -120,15 +167,8 @@ data class Klage(
                 kabalStatus = null,
                 formkrav = null,
                 utfall = null,
+                resultat = null,
             )
-        }
-
-        fun kanOppdatereFormkrav(klage: Klage): Boolean {
-            return KlageStatus.kanOppdatereFormkrav(klage.status)
-        }
-
-        fun kanOppdatereUtfall(klage: Klage): Boolean {
-            return KlageStatus.kanOppdatereUtfall(klage.status)
         }
     }
 }
@@ -172,7 +212,6 @@ class InnstillingTilKabal(val lovhjemmel: String, val tekst: String, val brev: K
 
 data class InnstillingTilKabalUtenBrev(val lovhjemmel: String, val tekst: String)
 
-// Placeholder for å holde på referansen til klagebrevet
 data class KlageBrevInnstilling(val brevId: Long)
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "utfall")
@@ -235,4 +274,5 @@ data class FormkravMedBeslutter(
 
 enum class KlageHendelseType {
     OPPRETTET,
+    FERDIGSTILT,
 }

@@ -61,6 +61,7 @@ data class ForenkletVedtak(
     val ansvarligEnhet: String,
     val saksbehandlerIdent: String,
     val attestantIdent: String?,
+    val vedtaksdato: LocalDate?,
 )
 
 data class Utbetalingsinfo(
@@ -94,6 +95,7 @@ data class Beregningsperiode(
     val antallBarn: Int,
     val utbetaltBeloep: Kroner,
     val trygdetid: Int,
+    val institusjon: Boolean,
 )
 
 fun Grunnlag.mapSoeker(): Soeker =

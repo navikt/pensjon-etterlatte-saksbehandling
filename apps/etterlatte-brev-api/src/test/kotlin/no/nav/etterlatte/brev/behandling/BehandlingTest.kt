@@ -220,6 +220,7 @@ internal class BehandlingTest {
         0,
         Kroner(beloep),
         10000,
+        false,
     )
 
     private fun opprettGrunnlag(

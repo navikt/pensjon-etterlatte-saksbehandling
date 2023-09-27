@@ -115,12 +115,11 @@ class TilbakekrevingDaoTest {
                                     grunnlagsbeloep =
                                         listOf(
                                             Grunnlagsbeloep(
-                                                kode = KlasseKode(""),
-                                                type = KlasseType.YTEL,
+                                                klasseKode = KlasseKode(""),
+                                                klasseType = KlasseType.YTEL,
                                                 bruttoUtbetaling = BigDecimal(1000),
-                                                beregnetNyBrutto = BigDecimal(1200),
+                                                nyBruttoUtbetaling = BigDecimal(1200),
                                                 bruttoTilbakekreving = BigDecimal(200),
-                                                nettoTilbakekreving = BigDecimal(200),
                                                 beloepSkalIkkeTilbakekreves = BigDecimal(200),
                                                 skatteProsent = BigDecimal(20),
                                                 resultat = null,
@@ -128,12 +127,11 @@ class TilbakekrevingDaoTest {
                                                 aarsak = null,
                                             ),
                                             Grunnlagsbeloep(
-                                                kode = KlasseKode(""),
-                                                type = KlasseType.FEIL,
+                                                klasseKode = KlasseKode(""),
+                                                klasseType = KlasseType.FEIL,
                                                 bruttoUtbetaling = BigDecimal(0),
-                                                beregnetNyBrutto = BigDecimal(0),
+                                                nyBruttoUtbetaling = BigDecimal(0),
                                                 bruttoTilbakekreving = BigDecimal(0),
-                                                nettoTilbakekreving = BigDecimal(0),
                                                 beloepSkalIkkeTilbakekreves = BigDecimal(0),
                                                 skatteProsent = BigDecimal(0),
                                                 resultat = null,

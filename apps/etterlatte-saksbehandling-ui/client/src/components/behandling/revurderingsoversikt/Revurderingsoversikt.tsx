@@ -8,7 +8,7 @@ import Virkningstidspunkt, {
 } from '~components/behandling/soeknadsoversikt/soeknadoversikt/virkningstidspunkt/Virkningstidspunkt'
 import { Start } from '~components/behandling/handlinger/start'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
-import { Border, Innhold } from '~components/behandling/soeknadsoversikt/styled'
+import { Border, InnholdPadding } from '~components/behandling/soeknadsoversikt/styled'
 import { HeadingWrapper } from '~components/person/SakOversikt'
 import {
   BP_OPPHOER_BESKRIVELSE,
@@ -99,7 +99,7 @@ export const Revurderingsoversikt = (props: { behandling: IDetaljertBehandling }
           </Alert>
         )}
       </ContentHeader>
-      <Innhold>
+      <InnholdPadding>
         {behandling.begrunnelse !== null && (
           <>
             <Heading size="small">Begrunnelse</Heading>
@@ -126,7 +126,7 @@ export const Revurderingsoversikt = (props: { behandling: IDetaljertBehandling }
         >
           {{ info: <GrunnlagForVirkningstidspunkt /> }}
         </Virkningstidspunkt>
-      </Innhold>
+      </InnholdPadding>
       <Border />
       {behandles ? (
         <BehandlingHandlingKnapper>

@@ -7,6 +7,7 @@ import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
@@ -90,6 +91,7 @@ class StatistikkServiceTest {
                 revurderingInfo = null,
                 prosesstype = Prosesstype.MANUELL,
                 enhet = "1111",
+                kilde = Vedtaksloesning.GJENNY,
             )
         coEvery { behandlingKlient.hentPersongalleri(behandlingId) } returns
             Persongalleri(
@@ -181,6 +183,7 @@ class StatistikkServiceTest {
                 revurderingInfo = null,
                 prosesstype = Prosesstype.MANUELL,
                 enhet = "1111",
+                kilde = Vedtaksloesning.GJENNY,
             )
         coEvery { behandlingKlient.hentPersongalleri(behandlingId) } returns
             Persongalleri(
@@ -277,6 +280,7 @@ class StatistikkServiceTest {
                 prosesstype = Prosesstype.MANUELL,
                 revurderingInfo = null,
                 enhet = "1111",
+                kilde = Vedtaksloesning.GJENNY,
             )
 
         val tekniskTidForHendelse = LocalDateTime.of(2023, 2, 1, 8, 30)

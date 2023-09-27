@@ -48,7 +48,7 @@ class ApplicationBuilder {
             beregningKlient = BeregningKlientImpl(config, httpClient()),
             vilkaarsvurderingKlient = VilkaarsvurderingKlientImpl(config, httpClient()),
             behandlingKlient = behandlingKlient,
-            sendToRapid = ::publiser,
+            publiser = ::publiser,
         )
 
     private val rapidsConnection =

@@ -1,6 +1,6 @@
-import { Button, Heading, Select, Table } from '@navikt/ds-react'
+import { Button, Heading, Select, Table, TextField } from '@navikt/ds-react'
 import { Content, ContentHeader, FlexRow } from '~shared/styled'
-import { HeadingWrapper, Innhold } from '~components/behandling/soeknadsoversikt/styled'
+import { HeadingWrapper, InnholdPadding } from '~components/behandling/soeknadsoversikt/styled'
 import { useNavigate } from 'react-router-dom'
 import { useTilbakekreving } from '~components/tilbakekreving/useTilbakekreving'
 import React from 'react'
@@ -8,8 +8,6 @@ import React from 'react'
 export function TilbakekrevingVurdering() {
   const tilbakekreving = useTilbakekreving()
   const navigate = useNavigate()
-
-  const grunnlagsperiode = tilbakekreving!!.kravgrunnlag.perioder[0]
 
   return (
     <Content>
@@ -20,50 +18,37 @@ export function TilbakekrevingVurdering() {
           </Heading>
         </HeadingWrapper>
       </ContentHeader>
-      <Innhold>
+      <InnholdPadding>
         <Table className="table" zebraStripes>
           <Table.Header>
             <Table.HeaderCell>Måned</Table.HeaderCell>
             <Table.HeaderCell>Beskrivelse</Table.HeaderCell>
             <Table.HeaderCell>Brutto utbetaling</Table.HeaderCell>
-            <Table.HeaderCell>Beregnet ny brutto</Table.HeaderCell>
+            <Table.HeaderCell>Ny brutto utbetaling</Table.HeaderCell>
             <Table.HeaderCell>Beregnet feilutbetaling</Table.HeaderCell>
             <Table.HeaderCell>Skatteprosent</Table.HeaderCell>
             <Table.HeaderCell>Brutto tilbakekreving</Table.HeaderCell>
             <Table.HeaderCell>Netto tilbakekreving</Table.HeaderCell>
             <Table.HeaderCell>Skatt</Table.HeaderCell>
-            <Table.HeaderCell>Resultat</Table.HeaderCell>
             <Table.HeaderCell>Skyld</Table.HeaderCell>
-            <Table.HeaderCell>Årsak</Table.HeaderCell>
+            <Table.HeaderCell>Resultat</Table.HeaderCell>
+            <Table.HeaderCell>Tilbakekrevingsprosent</Table.HeaderCell>
+            <Table.HeaderCell>Rentetillegg</Table.HeaderCell>
           </Table.Header>
           <Table.Body>
-            {grunnlagsperiode.grunnlagsbeloep.map((periode) => {
+            {tilbakekreving?.utbetalinger.map((utbetaling) => {
               return (
                 <Table.Row key="test">
-                  <Table.DataCell key="test">{grunnlagsperiode.periode.fra}</Table.DataCell>
-                  <Table.DataCell key="test">{periode.type}</Table.DataCell>
-                  <Table.DataCell key="test">{periode.bruttoUtbetaling}</Table.DataCell>
-                  <Table.DataCell key="test">{periode.beregnetNyBrutto}</Table.DataCell>
-                  <Table.DataCell key="test">{periode.beregnetFeilutbetaling}</Table.DataCell>
-                  <Table.DataCell key="test">{periode.skatteprosent}</Table.DataCell>
-                  <Table.DataCell key="test">{periode.nettoTilbakekreving}</Table.DataCell>
-                  <Table.DataCell key="test">{periode.nettoTilbakekreving}</Table.DataCell>
-                  <Table.DataCell key="test">{grunnlagsperiode.skatt}</Table.DataCell>
-                  <Table.DataCell key="test">
-                    <Select
-                      label="Resultat"
-                      hideLabel={true}
-                      value=""
-                      //onChange={(e) => {}}
-                    >
-                      <option key="test">Velg..</option>
-                      <option key="test">Foreldet</option>
-                      <option key="test">Ingen tilbakekreving</option>
-                      <option key="test">Delvis tilbakekreving</option>
-                      <option key="test">Full tilbakekreving</option>
-                    </Select>
-                  </Table.DataCell>
-                  <Table.DataCell key="test">
+                  <Table.DataCell key="maaned">{utbetaling.maaned.toString()}</Table.DataCell>
+                  <Table.DataCell key="beskrivelse">{utbetaling.type}</Table.DataCell>
+                  <Table.DataCell key="bruttoUtbetaling">{utbetaling.bruttoUtbetaling}</Table.DataCell>
+                  <Table.DataCell key="nyBruttoUtbetaling">{utbetaling.nyBruttoUtbetaling}</Table.DataCell>
+                  <Table.DataCell key="beregnetFeilutbetaling">{utbetaling.beregnetFeilutbetaling}</Table.DataCell>
+                  <Table.DataCell key="skatteprosent">{utbetaling.skatteprosent}</Table.DataCell>
+                  <Table.DataCell key="bruttoTilbakekreving">{utbetaling.bruttoTilbakekreving}</Table.DataCell>
+                  <Table.DataCell key="nettoTilbakekreving">{utbetaling.nettoTilbakekreving}</Table.DataCell>
+                  <Table.DataCell key="skatt">{utbetaling.skatt}</Table.DataCell>
+                  <Table.DataCell key="skyld">
                     <Select
                       label="Skyld"
                       hideLabel={true}
@@ -77,24 +62,46 @@ export function TilbakekrevingVurdering() {
                       <option key="test">Skylddeling</option>
                     </Select>
                   </Table.DataCell>
-                  <Table.DataCell key="test">
+                  <Table.DataCell key="resultat">
                     <Select
-                      label="Årsak"
+                      label="Resultat"
                       hideLabel={true}
                       value=""
                       //onChange={(e) => {}}
                     >
                       <option key="test">Velg..</option>
-                      <option key="test">Annet</option>
-                      <option key="test">Feil regelbruk</option>
+                      <option key="test">Foreldet</option>
+                      <option key="test">Ingen tilbakekreving</option>
+                      <option key="test">Delvis tilbakekreving</option>
+                      <option key="test">Full tilbakekreving</option>
                     </Select>
+                  </Table.DataCell>
+                  <Table.DataCell key="tilbakekrevingsprosent">
+                    <TextField
+                      label=""
+                      placeholder="Tilbakekrevingsprosent"
+                      value={0}
+                      pattern="[0-9]{11}"
+                      maxLength={3}
+                      onChange={() => console.log('TODO')}
+                    />
+                  </Table.DataCell>
+                  <Table.DataCell key="rentetillegg">
+                    <TextField
+                      label=""
+                      placeholder="Rentetillegg"
+                      value={0}
+                      pattern="[0-9]{11}"
+                      maxLength={3}
+                      onChange={() => console.log('TODO')}
+                    />
                   </Table.DataCell>
                 </Table.Row>
               )
             })}
           </Table.Body>
         </Table>
-      </Innhold>
+      </InnholdPadding>
       <FlexRow justify="center">
         <Button variant="primary" onClick={() => navigate(`/tilbakekreving/${tilbakekreving?.id}/vedtak`)}>
           Gå til vedtak

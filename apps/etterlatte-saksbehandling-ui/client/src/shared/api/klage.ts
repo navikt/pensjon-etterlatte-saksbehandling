@@ -25,3 +25,7 @@ export function oppdaterUtfallForKlage(args: {
   const { klageId, utfall } = args
   return apiClient.put(`/klage/${klageId}/utfall`, { utfall })
 }
+
+export function ferdigstillKlagebehandling(klageId: string): Promise<ApiResponse<Klage>> {
+  return apiClient.post(`/klage/${klageId}/ferdigstill`, {})
+}

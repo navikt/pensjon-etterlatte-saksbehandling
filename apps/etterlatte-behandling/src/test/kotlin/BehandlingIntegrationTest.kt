@@ -430,6 +430,28 @@ class BrevApiKlientTest : BrevApiKlient {
     ): OpprettetBrevDto {
         return OpprettetBrevDto(brevId++)
     }
+
+    override suspend fun ferdigstillBrev(
+        sakId: Long,
+        brevId: Long,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {}
+
+    override suspend fun journalfoerBrev(
+        sakId: Long,
+        brevId: Long,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): String {
+        return UUID.randomUUID().toString()
+    }
+
+    override suspend fun distribuerBrev(
+        sakId: Long,
+        brevId: Long,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): String {
+        return UUID.randomUUID().toString()
+    }
 }
 
 class GosysOppgaveKlientTest : GosysOppgaveKlient {

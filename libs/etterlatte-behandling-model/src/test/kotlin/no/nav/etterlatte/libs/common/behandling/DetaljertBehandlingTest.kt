@@ -1,5 +1,6 @@
 package no.nav.etterlatte.libs.common.behandling
 
+import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
@@ -47,5 +48,6 @@ class DetaljertBehandlingTest {
             prosesstype = Prosesstype.MANUELL,
             revurderingInfo = null,
             enhet = "1111",
+            kilde = Vedtaksloesning.GJENNY,
         )
 }

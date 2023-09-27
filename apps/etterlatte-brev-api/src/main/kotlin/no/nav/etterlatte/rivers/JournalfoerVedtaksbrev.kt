@@ -14,7 +14,6 @@ import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.etterlatte.libs.common.sak.VedtakSak
 import no.nav.etterlatte.libs.common.toJson
-import no.nav.etterlatte.libs.common.vedtak.KafkaHendelseType
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -31,7 +30,7 @@ internal class JournalfoerVedtaksbrev(
 
     init {
         River(rapidsConnection).apply {
-            eventName(KafkaHendelseType.ATTESTERT.toString())
+            eventName(BrevEventTypes.FERDIGSTILT.toString())
             validate { it.requireKey("vedtak") }
             validate { it.requireKey("vedtak.vedtakId") }
             validate { it.requireKey("vedtak.behandling.id") }

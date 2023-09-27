@@ -35,19 +35,18 @@ data class Kravgrunnlag(
 )
 
 data class KravgrunnlagPeriode(
-    val periode: Periode, // TODO EY-2661 endre til kun en yearmonth?
+    val periode: Periode,
     val skatt: BigDecimal,
     val grunnlagsbeloep: List<Grunnlagsbeloep>,
 )
 
 data class Grunnlagsbeloep(
-    val kode: KlasseKode,
-    val type: KlasseType,
+    val klasseKode: KlasseKode,
+    val klasseType: KlasseType,
     val bruttoUtbetaling: BigDecimal,
-    val beregnetNyBrutto: BigDecimal,
+    val nyBruttoUtbetaling: BigDecimal,
     val bruttoTilbakekreving: BigDecimal,
-    val nettoTilbakekreving: BigDecimal, // TODO EY-2661 hvordan fylles denne ??
-    val beloepSkalIkkeTilbakekreves: BigDecimal, // TODO EY-2661 samme som beregnetFeilutbetaling i frontend ??
+    val beloepSkalIkkeTilbakekreves: BigDecimal,
     val skatteProsent: BigDecimal,
     val resultat: String?,
     val skyld: String?,

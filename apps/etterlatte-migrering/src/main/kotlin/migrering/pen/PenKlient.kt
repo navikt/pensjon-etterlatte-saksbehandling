@@ -62,4 +62,4 @@ class PenKlient(config: Config, pen: HttpClient) {
     }
 }
 
-val migreringssystembruker = Systembruker(oid = "TODO", sub = "TODO")
+val migreringssystembruker = Systembruker(oid = "migrering", sub = "migrering")

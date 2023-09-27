@@ -5,33 +5,23 @@ export interface Tilbakekreving {
   status: TilbakekrevingStatus
   sak: ISak
   opprettet: string
-  kravgrunnlag: Kravgrunnlag
+  utbetalinger: Utbetalinger[]
 }
 
-export interface Kravgrunnlag {
-  perioder: KravgrunnlagPeriode[]
-}
-
-export interface KravgrunnlagPeriode {
-  periode: {
-    fra: string
-    til: string
-  }
-  skatt: number
-  grunnlagsbeloep: Grunnlagsbeloep[]
-}
-
-export interface Grunnlagsbeloep {
+export interface Utbetalinger {
+  maaned: Date
   type: string
   bruttoUtbetaling: number
-  beregnetNyBrutto: number
-  buttoTilbakekreving: number
-  nettoTilbakekreving: number
-  beregnetFeilutbetaling: number
+  nyBruttoUtbetaling: number
   skatteprosent: number
-  resultat: string | null
+  skatt: number
+  beregnetFeilutbetaling: number | null
+  bruttoTilbakekreving: number | null
+  nettoTilbakekreving: number | null
   skyld: string | null
-  aarsak: string | null
+  resultat: string | null
+  tilbakekrevingsprosent: number | null
+  rentetillegg: number | null
 }
 
 export enum TilbakekrevingStatus {

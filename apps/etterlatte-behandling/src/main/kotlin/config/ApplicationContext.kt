@@ -134,7 +134,7 @@ class ApplicationContext(
     val leaderElectionHttpClient: HttpClient = httpClient(),
     val grunnlagKlientObo: GrunnlagKlient = GrunnlagKlientObo(config, httpClient()),
     val gosysOppgaveKlient: GosysOppgaveKlient = GosysOppgaveKlientImpl(config, httpClient()),
-    val brevApiHttpClient: BrevApiKlient = BrevApiKlientObo(config, httpClient()),
+    val brevApiHttpClient: BrevApiKlient = BrevApiKlientObo(config, httpClient(forventSuksess = true)),
 ) {
     val httpPort = env.getOrDefault("HTTP_PORT", "8080").toInt()
     val saksbehandlerGroupIdsByKey = AzureGroup.values().associateWith { env.requireEnvValue(it.envKey) }
@@ -168,8 +168,8 @@ class ApplicationContext(
     val oppgaveMetrikker = OppgaveMetrics(metrikkerDao)
 
     // Service
-    val generellBehandlingService = GenerellBehandlingService(generellbehandlingDao)
     val oppgaveService = OppgaveService(oppgaveDaoEndringer, sakDao, featureToggleService)
+    val generellBehandlingService = GenerellBehandlingService(generellbehandlingDao, oppgaveService)
     val gosysOppgaveService = GosysOppgaveServiceImpl(gosysOppgaveKlient, pdlKlient, featureToggleService)
     val behandlingService =
         BehandlingServiceImpl(
@@ -288,6 +288,7 @@ class ApplicationContext(
             hendelseDao = hendelseDao,
             oppgaveService = oppgaveService,
             brevApiKlient = brevApiHttpClient,
+            revurderingService = revurderingService,
         )
 
     val tilbakekrevingService =

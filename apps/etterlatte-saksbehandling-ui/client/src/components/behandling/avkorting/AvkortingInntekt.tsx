@@ -43,12 +43,12 @@ export const AvkortingInntekt = (props: {
       return {
         fom: virkningstidspunkt(),
         fratrekkInnAar: nyligste.fratrekkInnAar,
+        fratrekkInnAarUtland: nyligste.fratrekkInnAarUtland,
         relevanteMaanederInnAar: nyligste.relevanteMaanederInnAar,
       }
     }
     return {
       fom: virkningstidspunkt(),
-      fratrekkInnAar: 0,
     }
   }
 
@@ -69,6 +69,9 @@ export const AvkortingInntekt = (props: {
 
     setErrorTekst('')
     if (inntektGrunnlagForm.aarsinntekt == null) return setErrorTekst('Årsinntekt må fylles ut')
+    if (inntektGrunnlagForm.fratrekkInnAar == null) return setErrorTekst('Fratrekk inn-år må fylles ut')
+    if (inntektGrunnlagForm.inntektUtland == null) return setErrorTekst('Årsinntekt utland må fylles ut')
+    if (inntektGrunnlagForm.fratrekkInnAarUtland == null) return setErrorTekst('Fratrekk inn-år utland må fylles ut')
     if (inntektGrunnlagForm.fom !== virkningstidspunkt())
       return setErrorTekst('Fra og med for forventet årsinntekt må være fra virkningstidspunkt')
 

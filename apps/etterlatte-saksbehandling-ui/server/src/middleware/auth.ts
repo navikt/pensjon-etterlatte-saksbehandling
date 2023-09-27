@@ -3,6 +3,7 @@ import { AdConfig } from '../config/config'
 import { utcSecondsSinceEpoch } from '../utils/date'
 import { logger } from '../monitoring/logger'
 import { parseJwt } from '../utils/parsejwt'
+import { sanitize } from '../utils/sanitize'
 
 export const hasBeenIssued = (issuedAtTime: number) => issuedAtTime < utcSecondsSinceEpoch() // sjekker at issued-date har vært
 export const hasExpired = (expires: number) => expires < utcSecondsSinceEpoch()
@@ -42,7 +43,7 @@ export const authenticateUser = (req: Request, res: Response, next: NextFunction
 
   const NAVident = parsedToken.NAVident
   const cluster = process.env.NAIS_CLUSTER_NAME
-  logger.info(`Navident logger på ${NAVident} cluster-name ${cluster}`)
+  logger.info(`Navident logger på ${sanitize(NAVident)} cluster-name ${sanitize(cluster)}`)
 
   return next()
 }

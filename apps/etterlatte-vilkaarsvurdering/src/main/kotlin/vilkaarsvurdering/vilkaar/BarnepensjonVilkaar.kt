@@ -184,7 +184,7 @@ object BarnepensjonVilkaar {
                         EØS - rådsforordning 1408/1971 artikkel 45 (gjelder perioder før 2004)
                         EØF - traktaten 1408/71 artikkel 39 (fra 2003) (gjelder bilaterale avtaler)
                         """.trimIndent(),
-                    spoersmaal = "Er vilkåret oppfylt?",
+                    spoersmaal = "Er forutgående medlemskap oppfylt ved sammenlegging?",
                     lovreferanse = Lovreferanse(paragraf = "EØS/EØF"),
                 ),
         )

@@ -100,13 +100,13 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
             Det sendes ikke vedtaksbrev for denne behandlingen.
           </InfoAlert>
         )}
-        <InfoWrapper>
+        <EtterbetalingWrapper>
           <Etterbetaling
             behandlingId={behandling.id}
             etterbetalingInit={behandling.etterbetaling}
             redigerbar={behandles}
           />
-        </InfoWrapper>
+        </EtterbetalingWrapper>
       </ContentHeader>
       {behandles ? (
         <BehandlingHandlingKnapper>
@@ -128,6 +128,14 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
 
 const InfoWrapper = styled.div`
   margin-top: 1em;
+  max-width: 500px;
+
+  .text {
+    margin: 1em 0 5em 0;
+  }
+`
+const EtterbetalingWrapper = styled.div`
+  margin-top: 3rem;
   max-width: 500px;
 
   .text {

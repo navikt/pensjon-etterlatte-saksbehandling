@@ -22,13 +22,13 @@ const EtterbetalingWrapper = styled.div`
 
 const Etterbetaling = (props: {
   behandlingId: string
-  etterbetaling: IEtterbetaling | null
-  update: (e: IEtterbetaling) => void
+  etterbetalingInit: IEtterbetaling | null
   redigerbar: boolean
 }) => {
-  const { etterbetaling, update, redigerbar, behandlingId } = props
-  const [erEtterbetaling, setErEtterbetaling] = useState<boolean>(!!etterbetaling)
+  const { etterbetalingInit, redigerbar, behandlingId } = props
   const [status, apiLagreEtterbetaling] = useApiCall(lagreEtterbetaling)
+  const [etterbetaling, setEtterbetaling] = useState(etterbetalingInit)
+  const [erEtterbetaling, setErEtterbetaling] = useState<boolean>(!!etterbetaling)
 
   const lagre = () => {
     apiLagreEtterbetaling({ behandlingId, etterbetaling: etterbetaling!! }, () => {})
@@ -60,7 +60,7 @@ const Etterbetaling = (props: {
             {redigerbar ? (
               <DatoVelger
                 value={etterbetaling?.fraDato == null ? null : new Date(etterbetaling?.fraDato)}
-                onChange={(e) => update({ ...etterbetaling, fraDato: e })}
+                onChange={(e) => setEtterbetaling({ ...etterbetaling, fraDato: e })}
                 label="Fra dato"
               />
             ) : (
@@ -71,7 +71,7 @@ const Etterbetaling = (props: {
             {redigerbar ? (
               <DatoVelger
                 value={etterbetaling?.tilDato == null ? null : new Date(etterbetaling?.tilDato)}
-                onChange={(e) => update({ ...etterbetaling, tilDato: e })}
+                onChange={(e) => setEtterbetaling({ ...etterbetaling, tilDato: e })}
                 label="Til dato"
               />
             ) : (

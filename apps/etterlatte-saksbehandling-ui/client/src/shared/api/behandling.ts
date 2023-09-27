@@ -6,6 +6,7 @@ import {
   IKommerBarnetTilgode,
   IUtenlandstilsnitt,
   Virkningstidspunkt,
+  IEtterbetaling,
 } from '~shared/types/IDetaljertBehandling'
 import { apiClient, ApiResponse } from './apiClient'
 import { ManueltOpphoerDetaljer } from '~components/behandling/manueltopphoeroversikt/ManueltOpphoerOversikt'
@@ -189,3 +190,12 @@ export const hentSak = async (sakId: string): Promise<ApiResponse<ISak>> => {
 
 export const hentFoersteVirk = async (args: { sakId: number }) =>
   apiClient.get<FoersteVirk>(`/sak/${args.sakId}/behandlinger/foerstevirk`)
+
+export const lagreEtterbetaling = async (args: {
+  behandlingId: string
+  etterbetaling: IEtterbetaling
+}): Promise<ApiResponse<IKommerBarnetTilgode>> => {
+  return apiClient.post(`/behandling/${args.behandlingId}/etterbetaling `, {
+    etterbetaling: args.etterbetaling,
+  })
+}

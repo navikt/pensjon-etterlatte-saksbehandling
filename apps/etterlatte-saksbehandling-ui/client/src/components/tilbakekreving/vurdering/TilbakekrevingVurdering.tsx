@@ -24,12 +24,10 @@ export function TilbakekrevingVurdering() {
   const [perioder, setPerioder] = useState<TilbakekrevingPeriode[]>(tilbakekreving.perioder)
 
   const updateBeloeper = (index: number, oppdatertBeloep: TilbakekrevingBeloep) => {
-    const newArray = [...perioder]
-    newArray[index] = {
-      ...newArray[index],
-      ytelsebeloeper: oppdatertBeloep,
-    }
-    setPerioder(newArray)
+    const oppdatert = perioder.map((periode, i) =>
+      i === index ? { ...periode, ytelsebeloeper: oppdatertBeloep } : periode
+    )
+    setPerioder(oppdatert)
   }
 
   const lagrePerioder = () => {

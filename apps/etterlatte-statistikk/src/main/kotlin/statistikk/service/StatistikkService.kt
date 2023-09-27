@@ -150,7 +150,7 @@ class StatistikkService(
             sakUtland = SakUtland.NASJONAL,
             beregning = beregning,
             avkorting = avkorting,
-            sakYtelsesgruppe = detaljertBehandling.sakYtelsesgruppe(),
+            sakYtelsesgruppe = hentSakYtelsesgruppe(detaljertBehandling.sakType, detaljertBehandling.avdoed ?: emptyList()),
             avdoedeForeldre = detaljertBehandling.avdoed,
             revurderingAarsak = detaljertBehandling.revurderingsaarsak?.name,
         )
@@ -257,7 +257,7 @@ class StatistikkService(
                 sakUtland = SakUtland.NASJONAL,
                 beregning = null,
                 avkorting = null,
-                sakYtelsesgruppe = statistikkBehandling.sakYtelsesgruppe(),
+                sakYtelsesgruppe = hentSakYtelsesgruppe(statistikkBehandling.sak.sakType, statistikkBehandling.avdoed ?: emptyList()),
                 avdoedeForeldre =
                     if (statistikkBehandling.sak.sakType == SakType.BARNEPENSJON) {
                         statistikkBehandling.avdoed
@@ -314,15 +314,11 @@ enum class VedtakHendelse {
     IVERKSATT,
 }
 
-internal fun StatistikkBehandling.sakYtelsesgruppe(): SakYtelsesgruppe? =
-    when (this.sak.sakType to this.avdoed?.size) {
-        SakType.BARNEPENSJON to 1 -> SakYtelsesgruppe.EN_AVDOED_FORELDER
-        SakType.BARNEPENSJON to 2 -> SakYtelsesgruppe.FORELDRELOES
-        else -> null
-    }
-
-internal fun DetaljertBehandling.sakYtelsesgruppe(): SakYtelsesgruppe? =
-    when (this.sakType to this.avdoed?.size) {
+internal fun hentSakYtelsesgruppe(
+    sakType: SakType,
+    avdoede: List<String>,
+): SakYtelsesgruppe? =
+    when (sakType to avdoede.size) {
         SakType.BARNEPENSJON to 1 -> SakYtelsesgruppe.EN_AVDOED_FORELDER
         SakType.BARNEPENSJON to 2 -> SakYtelsesgruppe.FORELDRELOES
         else -> null

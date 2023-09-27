@@ -7,12 +7,12 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
 import no.nav.etterlatte.libs.common.vedtak.Behandling
-import no.nav.etterlatte.libs.common.vedtak.KafkaHendelseType
 import no.nav.etterlatte.libs.common.vedtak.Periode
 import no.nav.etterlatte.libs.common.vedtak.Utbetalingsperiode
 import no.nav.etterlatte.libs.common.vedtak.UtbetalingsperiodeType
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
+import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseType
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import java.math.BigDecimal
@@ -215,7 +215,7 @@ fun genererEtterfolgendeUtbetalingsperioder(
 fun vedtakEvent(vedtakDto: VedtakDto) =
     """
     {
-      "@event_name": "${KafkaHendelseType.ATTESTERT}",
+      "@event_name": "${VedtakKafkaHendelseType.ATTESTERT}",
       "vedtak": ${vedtakDto.toJson()}
     }
 """

@@ -1,6 +1,6 @@
 package no.nav.etterlatte.libs.common.vedtak
 
-enum class KafkaHendelseType {
+enum class VedtakKafkaHendelseType {
     VILKAARSVURDERT,
     BEREGNET,
     FATTET,

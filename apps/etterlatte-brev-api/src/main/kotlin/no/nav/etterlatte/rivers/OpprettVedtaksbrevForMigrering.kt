@@ -8,7 +8,7 @@ import no.nav.etterlatte.brev.model.BrevEventTypes
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
-import no.nav.etterlatte.libs.common.vedtak.KafkaHendelseType
+import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseType
 import no.nav.etterlatte.rapidsandrivers.migrering.KILDE_KEY
 import no.nav.etterlatte.rapidsandrivers.migrering.kilde
 import no.nav.etterlatte.token.Systembruker
@@ -28,7 +28,7 @@ internal class OpprettVedtaksbrevForMigrering(
 
     init {
         River(rapidsConnection).apply {
-            eventName(KafkaHendelseType.ATTESTERT.toString())
+            eventName(VedtakKafkaHendelseType.ATTESTERT.toString())
             validate { it.requireKey("vedtak.behandling.id") }
             validate { it.requireKey("vedtak.sak.id") }
             validate { it.interestedIn(KILDE_KEY) }

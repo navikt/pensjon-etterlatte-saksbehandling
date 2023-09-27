@@ -18,11 +18,11 @@ import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.tidspunkt.utcKlokke
 import no.nav.etterlatte.libs.common.toObjectNode
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
-import no.nav.etterlatte.libs.common.vedtak.KafkaHendelseType
 import no.nav.etterlatte.libs.common.vedtak.Periode
 import no.nav.etterlatte.libs.common.vedtak.Utbetalingsperiode
 import no.nav.etterlatte.libs.common.vedtak.UtbetalingsperiodeType
 import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
+import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseType
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
@@ -150,7 +150,7 @@ class VedtaksvurderingService(
                 }
             }
         sendToRapid(
-            vedtakhendelse = KafkaHendelseType.FATTET,
+            vedtakhendelse = VedtakKafkaHendelseType.FATTET,
             vedtak = fattetVedtak,
             tekniskTid = fattetVedtak.vedtakFattet!!.tidspunkt,
             behandlingId = behandlingId,
@@ -208,7 +208,7 @@ class VedtaksvurderingService(
             }
 
         sendToRapid(
-            vedtakhendelse = KafkaHendelseType.ATTESTERT,
+            vedtakhendelse = VedtakKafkaHendelseType.ATTESTERT,
             vedtak = attestertVedtak,
             tekniskTid = attestertVedtak.attestasjon!!.tidspunkt,
             behandlingId = behandlingId,
@@ -264,7 +264,7 @@ class VedtaksvurderingService(
             }
 
         sendToRapid(
-            vedtakhendelse = KafkaHendelseType.UNDERKJENT,
+            vedtakhendelse = VedtakKafkaHendelseType.UNDERKJENT,
             vedtak = underkjentVedtak,
             tekniskTid = underkjentTid,
             behandlingId = behandlingId,
@@ -293,7 +293,7 @@ class VedtaksvurderingService(
             }
 
         sendToRapid(
-            vedtakhendelse = KafkaHendelseType.IVERKSATT,
+            vedtakhendelse = VedtakKafkaHendelseType.IVERKSATT,
             vedtak = iverksattVedtak,
             tekniskTid = Tidspunkt.now(clock),
             behandlingId = behandlingId,
@@ -500,7 +500,7 @@ class VedtaksvurderingService(
         requireNotNull(vilkaarsvurderingUtfall) { "Behandling mangler utfall på vilkårsvurdering" }
 
     private fun sendToRapid(
-        vedtakhendelse: KafkaHendelseType,
+        vedtakhendelse: VedtakKafkaHendelseType,
         vedtak: Vedtak,
         tekniskTid: Tidspunkt,
         behandlingId: UUID,

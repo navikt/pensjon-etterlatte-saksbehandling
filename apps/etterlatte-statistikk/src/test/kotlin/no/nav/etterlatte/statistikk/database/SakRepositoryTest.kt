@@ -5,6 +5,7 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseType
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.POSTGRES_VERSION
 import no.nav.etterlatte.libs.database.migrate
@@ -17,7 +18,6 @@ import no.nav.etterlatte.statistikk.domain.Beregningstype
 import no.nav.etterlatte.statistikk.domain.SakRad
 import no.nav.etterlatte.statistikk.domain.SakUtland
 import no.nav.etterlatte.statistikk.domain.SakYtelsesgruppe
-import no.nav.etterlatte.statistikk.service.VedtakHendelse
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
@@ -113,7 +113,7 @@ class SakRepositoryTest {
                     ferdigbehandletTidspunkt = null,
                     vedtakTidspunkt = null,
                     behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-                    behandlingStatus = VedtakHendelse.IVERKSATT.name,
+                    behandlingStatus = VedtakKafkaHendelseType.IVERKSATT.name,
                     behandlingResultat = null,
                     resultatBegrunnelse = "for en begrunnelse",
                     behandlingMetode = BehandlingMetode.MANUELL,
@@ -159,7 +159,7 @@ class SakRepositoryTest {
                     ferdigbehandletTidspunkt = null,
                     vedtakTidspunkt = null,
                     behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-                    behandlingStatus = VedtakHendelse.IVERKSATT.name,
+                    behandlingStatus = VedtakKafkaHendelseType.IVERKSATT.name,
                     behandlingResultat = null,
                     resultatBegrunnelse = "for en begrunnelse",
                     behandlingMetode = BehandlingMetode.MANUELL,

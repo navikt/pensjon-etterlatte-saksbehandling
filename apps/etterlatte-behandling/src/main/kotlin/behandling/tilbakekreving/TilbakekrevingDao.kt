@@ -14,7 +14,7 @@ import java.sql.ResultSet
 import java.util.UUID
 
 class TilbakekrevingDao(private val connection: () -> Connection) {
-    fun hentTilbakekreving(tilbakekrevingId: UUID): Tilbakekreving? {
+    fun hentTilbakekreving(tilbakekrevingId: UUID): Tilbakekreving {
         with(connection()) {
             val statement =
                 prepareStatement(
@@ -27,12 +27,9 @@ class TilbakekrevingDao(private val connection: () -> Connection) {
             statement.setObject(1, tilbakekrevingId)
             return statement.executeQuery().singleOrNull {
                 toTilbakekreving()
-            }
+            } ?: throw TilbakekrevingFinnesIkkeException("Tilbakekreving med id=$tilbakekrevingId finnes ikke")
         }
     }
-
-    fun hentTilbakekrevingNonNull(tilbakekrevingId: UUID): Tilbakekreving =
-        hentTilbakekreving(tilbakekrevingId) ?: throw Exception("Tilbakekreving med id=$tilbakekrevingId finnes ikke")
 
     fun lagreTilbakekreving(tilbakekreving: Tilbakekreving): Tilbakekreving {
         with(connection()) {
@@ -50,8 +47,10 @@ class TilbakekrevingDao(private val connection: () -> Connection) {
             statement.setTidspunkt(4, tilbakekreving.opprettet)
             statement.setJsonb(5, tilbakekreving.kravgrunnlag.toJsonNode())
             statement.executeUpdate()
+        }.also {
+            require(it == 1)
+            return hentTilbakekreving(tilbakekreving.id)
         }
-        return hentTilbakekrevingNonNull(tilbakekreving.id).also { require(it == tilbakekreving) }
     }
 
     private fun ResultSet.toTilbakekreving(): Tilbakekreving =

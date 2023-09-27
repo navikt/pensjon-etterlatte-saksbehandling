@@ -54,7 +54,7 @@ export function Tilbakekrevingsbehandling() {
             <TilbakekrevingStegmeny />
             <Routes>
               <Route path="oversikt" element={<TilbakekrevingOversikt />} />
-              <Route path="vurdering" element={<TilbakekrevingVurdering />} />
+              <Route path="vurdering" element={<TilbakekrevingVurdering tilbakekreving={tilbakekreving} />} />
               <Route path="vedtak" element={<TilbakekrevingVedtak />} />
               <Route path="brev" element={<TilbakekrevingBrev />} />
               <Route path="*" element={<Navigate to="oversikt" replace />} />

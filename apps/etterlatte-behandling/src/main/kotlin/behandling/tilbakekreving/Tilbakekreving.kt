@@ -125,4 +125,6 @@ enum class TilbakekrevingResultat {
     INGEN_TILBAKEKREV,
 }
 
+class TilbakekrevingFinnesIkkeException(message: String?) : RuntimeException(message)
+
 class KravgrunnlagHarIkkeEksisterendeSakException : RuntimeException()

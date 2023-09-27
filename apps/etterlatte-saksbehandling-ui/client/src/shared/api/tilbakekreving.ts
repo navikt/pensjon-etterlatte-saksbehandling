@@ -9,5 +9,5 @@ export function lagreTilbakekrevingsperioder(args: {
   tilbakekrevingsId: string
   perioder: TilbakekrevingPeriode[]
 }): Promise<ApiResponse<Tilbakekreving>> {
-  return apiClient.post(`/tilbakekreving/${args.tilbakekrevingsId}/lagre`, { perioder: args.perioder })
+  return apiClient.put(`/tilbakekreving/${args.tilbakekrevingsId}/lagre`, { perioder: args.perioder })
 }

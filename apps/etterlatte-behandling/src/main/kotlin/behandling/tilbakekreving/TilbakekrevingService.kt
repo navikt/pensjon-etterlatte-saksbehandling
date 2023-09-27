@@ -19,9 +19,20 @@ class TilbakekrevingService(
 ) {
     private val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
-    fun hentTilbakekreving(tilbakerevingId: UUID): Tilbakekreving? =
+    fun hentTilbakekreving(tilbakekrevingId: UUID): Tilbakekreving =
         inTransaction {
-            tilbakekrevingDao.hentTilbakekreving(tilbakerevingId)
+            logger.info("Henter tilbakekreving med id=$tilbakekrevingId")
+            tilbakekrevingDao.hentTilbakekreving(tilbakekrevingId)
+        }
+
+    fun lagrePerioder(
+        tilbakekrevingId: UUID,
+        perioder: List<TilbakekrevingPeriode>,
+    ): Tilbakekreving =
+        inTransaction {
+            logger.info("Lagrer perioder for tilbakekreving=$tilbakekrevingId")
+            val oppdatertTilbakekreving = tilbakekrevingDao.hentTilbakekreving(tilbakekrevingId).copy(perioder = perioder)
+            tilbakekrevingDao.lagreTilbakekreving(oppdatertTilbakekreving)
         }
 
     fun opprettTilbakekreving(kravgrunnlag: Kravgrunnlag) =

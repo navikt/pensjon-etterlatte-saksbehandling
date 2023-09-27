@@ -36,47 +36,48 @@ const Etterbetaling = (props: {
 
   const avbryt = () => {}
 
-  return (
-    <>
-      {redigerbar ? (
-        <Checkbox
-          value={erEtterbetaling}
-          onChange={() => {
-            setErEtterbetaling(!erEtterbetaling)
-          }}
-        >
-          <Heading size="small" level="3">
-            Innebærer etterbetaling?
-          </Heading>
-        </Checkbox>
-      ) : erEtterbetaling ? (
+  if (!redigerbar) {
+    if (!erEtterbetaling) {
+      return <></>
+    }
+    return (
+      <>
         <Heading size="small" level="3">
           Er etterbetaling
         </Heading>
-      ) : null}
+        Fra dato: {etterbetaling?.fraDato}
+        Til dato: {etterbetaling?.tilDato}
+      </>
+    )
+  }
+
+  return (
+    <>
+      <Checkbox
+        value={erEtterbetaling}
+        onChange={() => {
+          setErEtterbetaling(!erEtterbetaling)
+        }}
+      >
+        <Heading size="small" level="3">
+          Innebærer etterbetaling?
+        </Heading>
+      </Checkbox>
       {erEtterbetaling ? (
         <EtterbetalingWrapper>
           <DatoSection>
-            {redigerbar ? (
-              <DatoVelger
-                value={etterbetaling?.fraDato == null ? null : new Date(etterbetaling?.fraDato)}
-                onChange={(e) => setEtterbetaling({ ...etterbetaling, fraDato: e })}
-                label="Fra dato"
-              />
-            ) : (
-              <>Fra dato: {etterbetaling?.fraDato}</>
-            )}
+            <DatoVelger
+              value={etterbetaling?.fraDato == null ? null : new Date(etterbetaling?.fraDato)}
+              onChange={(e) => setEtterbetaling({ ...etterbetaling, fraDato: e })}
+              label="Fra dato"
+            />
           </DatoSection>
           <DatoSection>
-            {redigerbar ? (
-              <DatoVelger
-                value={etterbetaling?.tilDato == null ? null : new Date(etterbetaling?.tilDato)}
-                onChange={(e) => setEtterbetaling({ ...etterbetaling, tilDato: e })}
-                label="Til dato"
-              />
-            ) : (
-              <>Til dato: {etterbetaling?.tilDato}</>
-            )}
+            <DatoVelger
+              value={etterbetaling?.tilDato == null ? null : new Date(etterbetaling?.tilDato)}
+              onChange={(e) => setEtterbetaling({ ...etterbetaling, tilDato: e })}
+              label="Til dato"
+            />
           </DatoSection>
         </EtterbetalingWrapper>
       ) : null}

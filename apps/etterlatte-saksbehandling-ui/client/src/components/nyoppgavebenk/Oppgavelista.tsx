@@ -9,10 +9,17 @@ import { OppgavetypeTag, SaktypeTag } from '~components/nyoppgavebenk/Tags'
 import { isBefore } from 'date-fns'
 import SaksoversiktLenke from '~components/nyoppgavebenk/SaksoversiktLenke'
 import { RedigerSaksbehandler } from './tildeling/RedigerSaksbehandler'
+import classnames from 'classnames'
 
-export const FristWrapper = styled.span<{ fristHarPassert: boolean }>`
-  color: ${(p) => p.fristHarPassert && 'var(--a-text-danger)'};
-`
+export const FristWrapper = ({ dato }: { dato?: string }) => {
+  const fristHarPassert = !!dato && isBefore(new Date(dato), new Date())
+
+  return (
+    <span className={classnames({ 'navds-error-message': fristHarPassert })}>
+      {dato ? formaterStringDato(dato) : 'Ingen frist'}
+    </span>
+  )
+}
 
 export const PaginationWrapper = styled.div`
   display: flex;
@@ -77,11 +84,7 @@ export const Oppgavelista = (props: {
                     <Table.Row key={oppgave.id}>
                       <Table.HeaderCell>{formaterStringDato(oppgave.opprettet)}</Table.HeaderCell>
                       <Table.DataCell>
-                        <FristWrapper
-                          fristHarPassert={!!oppgave.frist && isBefore(new Date(oppgave.frist), new Date())}
-                        >
-                          {oppgave.frist ? formaterStringDato(oppgave.frist) : 'Ingen frist'}
-                        </FristWrapper>
+                        <FristWrapper dato={oppgave.frist} />
                       </Table.DataCell>
                       <Table.DataCell>
                         <SaksoversiktLenke fnr={oppgave.fnr} />

@@ -5,7 +5,6 @@ import { useContext, useState } from 'react'
 import { OppgavetypeTag, SaktypeTag } from '~components/nyoppgavebenk/Tags'
 import { formaterFnr, formaterStringDato } from '~utils/formattering'
 import { FristWrapper } from '~components/nyoppgavebenk/Oppgavelista'
-import { isBefore } from 'date-fns'
 import { OppgaveDTOny } from '~shared/api/oppgaverny'
 import { ConfigContext } from '~clientConfig'
 import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
@@ -61,9 +60,7 @@ export const GosysOppgaveModal = ({ oppgave }: { oppgave: OppgaveDTOny }) => {
             <div>
               <Label>Frist</Label>
               <BodyShort>
-                <FristWrapper fristHarPassert={!!frist && isBefore(new Date(frist), new Date())}>
-                  {frist ? formaterStringDato(frist) : 'Ingen frist'}
-                </FristWrapper>
+                <FristWrapper dato={frist} />
               </BodyShort>
             </div>
             <div>

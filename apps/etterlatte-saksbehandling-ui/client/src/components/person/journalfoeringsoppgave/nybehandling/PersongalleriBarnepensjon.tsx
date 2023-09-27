@@ -2,7 +2,6 @@ import { Button, Heading, Panel, TextField } from '@navikt/ds-react'
 import { Persongalleri } from '~shared/types/Person'
 import { PlusIcon, XMarkIcon } from '@navikt/aksel-icons'
 import React from 'react'
-import { FormWrapper } from '~components/person/journalfoeringsoppgave/BehandleJournalfoeringOppgave'
 import { InputList, InputRow } from './OpprettNyBehandling'
 import { useJournalfoeringOppgave } from '~components/person/journalfoeringsoppgave/useJournalfoeringOppgave'
 import { useAppDispatch } from '~store/Store'
@@ -46,7 +45,7 @@ export default function PersongalleriBarnepensjon() {
   }
 
   return (
-    <FormWrapper column>
+    <>
       <InputRow>
         <TextField
           label="Søker (barnet)"
@@ -63,6 +62,7 @@ export default function PersongalleriBarnepensjon() {
         <TextField
           label="Innsender"
           placeholder="Fødselsnummer"
+          description="Oppgi innsenderen sitt f.nr. dersom det er tilgjengelig"
           value={persongalleri?.innsender || ''}
           pattern="[0-9]{11}"
           maxLength={11}
@@ -144,6 +144,6 @@ export default function PersongalleriBarnepensjon() {
           </Button>
         </InputList>
       </Panel>
-    </FormWrapper>
+    </>
   )
 }

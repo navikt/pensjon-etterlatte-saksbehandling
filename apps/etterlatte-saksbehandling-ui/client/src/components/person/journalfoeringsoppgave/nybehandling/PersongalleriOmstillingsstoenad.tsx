@@ -2,7 +2,6 @@ import { Button, Heading, Panel, TextField } from '@navikt/ds-react'
 import { PlusIcon, XMarkIcon } from '@navikt/aksel-icons'
 import { Persongalleri } from '~shared/types/Person'
 import { InputList, InputRow } from '~components/person/journalfoeringsoppgave/nybehandling/OpprettNyBehandling'
-import { FormWrapper } from '~components/person/journalfoeringsoppgave/BehandleJournalfoeringOppgave'
 import { settBehandlingBehov } from '~store/reducers/JournalfoeringOppgaveReducer'
 import { useAppDispatch } from '~store/Store'
 import { useJournalfoeringOppgave } from '~components/person/journalfoeringsoppgave/useJournalfoeringOppgave'
@@ -39,7 +38,7 @@ export default function PersongalleriOmstillingsstoenad() {
   }
 
   return (
-    <FormWrapper column>
+    <>
       <InputRow>
         <TextField
           label="Søker (gjenlevende)"
@@ -56,6 +55,7 @@ export default function PersongalleriOmstillingsstoenad() {
         <TextField
           label="Innsender"
           placeholder="Fødselsnummer"
+          description="Oppgi innsenderen sitt f.nr. dersom det er tilgjengelig"
           value={persongalleri?.innsender || ''}
           pattern="[0-9]{11}"
           maxLength={11}
@@ -98,6 +98,6 @@ export default function PersongalleriOmstillingsstoenad() {
           </Button>
         </InputList>
       </Panel>
-    </FormWrapper>
+    </>
   )
 }

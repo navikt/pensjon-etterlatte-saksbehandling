@@ -24,7 +24,7 @@ export const VilkaarsVurderingKnapper = () => {
     setVentNavn(navn)
   }
 
-  const fiksVedtakVedAvslag = () => {
+  const oppdaterVedtakAvslag = () => {
     if (!behandlingId) throw new Error('Mangler behandlingsid')
 
     oppdaterVedtakRequest(behandlingId, () => {
@@ -37,9 +37,8 @@ export const VilkaarsVurderingKnapper = () => {
         switch (vedtaksresultat) {
           case 'avslag':
             return (
-              //TODO - Done
               <>
-                <Button variant="primary" loading={isPending(vedtak)} onClick={() => fiksVedtakVedAvslag()}>
+                <Button variant="primary" loading={isPending(vedtak)} onClick={() => oppdaterVedtakAvslag()}>
                   {handlinger.VILKAARSVURDERING.AVSLAG.navn}
                 </Button>
                 {isFailure(vedtak) && (

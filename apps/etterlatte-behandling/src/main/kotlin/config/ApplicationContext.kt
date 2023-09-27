@@ -144,7 +144,7 @@ class ApplicationContext(
     // Dao
     val hendelseDao = HendelseDao { databaseContext().activeTx() }
     val kommerBarnetTilGodeDao = KommerBarnetTilGodeDao { databaseContext().activeTx() }
-    private val aktivitetspliktDao = AktivitetspliktDao { databaseContext().activeTx() }
+    val aktivitetspliktDao = AktivitetspliktDao { databaseContext().activeTx() }
     val revurderingDao = RevurderingDao { databaseContext().activeTx() }
     val behandlingDao = BehandlingDao(kommerBarnetTilGodeDao, revurderingDao) { databaseContext().activeTx() }
     val generellbehandlingDao = GenerellBehandlingDao { databaseContext().activeTx() }

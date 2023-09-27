@@ -181,7 +181,7 @@ class StatistikkService(
 
     private fun hentDetaljertBehandling(behandlingId: UUID) =
         runBlocking {
-            behandlingKlient.hentDetaljertBehandling(behandlingId)
+            behandlingKlient.hentStatistikkBehandling(behandlingId)
         }
 
     private fun hentPersongalleri(behandlingId: UUID): Persongalleri =

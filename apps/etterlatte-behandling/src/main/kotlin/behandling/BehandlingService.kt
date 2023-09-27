@@ -25,6 +25,7 @@ import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.behandling.StatistikkBehandling
 import no.nav.etterlatte.libs.common.behandling.Utenlandstilsnitt
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
@@ -92,6 +93,11 @@ interface BehandlingService {
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): DetaljertBehandling?
+
+    suspend fun hentStatistikkBehandling(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): StatistikkBehandling?
 
     suspend fun hentDetaljertBehandlingMedTilbehoer(
         behandlingId: UUID,
@@ -180,6 +186,20 @@ class BehandlingServiceImpl(
                 behandling.toStatistikkBehandling(persongalleri = persongalleri!!.opplysning),
                 BehandlingHendelseType.AVBRUTT,
             )
+        }
+    }
+
+    override suspend fun hentStatistikkBehandling(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): StatistikkBehandling? {
+        return hentBehandling(behandlingId)?.let {
+            val persongalleri: Persongalleri =
+                grunnlagKlient.hentPersongalleri(it.sak.id, brukerTokenInfo)
+                    ?.opplysning
+                    ?: throw NoSuchElementException("Persongalleri mangler for sak ${it.sak.id}")
+
+            it.toStatistikkBehandling(persongalleri)
         }
     }
 

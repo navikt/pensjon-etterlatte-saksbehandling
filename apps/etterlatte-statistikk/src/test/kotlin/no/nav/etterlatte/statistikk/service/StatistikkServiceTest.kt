@@ -70,7 +70,7 @@ class StatistikkServiceTest {
         val behandlingId = UUID.randomUUID()
         val sakId = 1L
         val virkningstidspunkt = YearMonth.of(2023, 6)
-        coEvery { behandlingKlient.hentDetaljertBehandling(behandlingId) } returns
+        coEvery { behandlingKlient.hentStatistikkBehandling(behandlingId) } returns
             DetaljertBehandling(
                 id = behandlingId,
                 sak = sakId,
@@ -94,7 +94,7 @@ class StatistikkServiceTest {
             )
         every { stoenadRepo.lagreStoenadsrad(any()) } returnsArgument 0
         every { sakRepo.lagreRad(any()) } returnsArgument 0
-        coEvery { behandlingKlient.hentDetaljertBehandling(behandlingId) } returns
+        coEvery { behandlingKlient.hentStatistikkBehandling(behandlingId) } returns
             DetaljertBehandling(
                 id = behandlingId,
                 sak = sakId,
@@ -225,7 +225,7 @@ class StatistikkServiceTest {
         coEvery { beregningKlient.hentAvkortingForBehandling(behandlingId) } returns mockAvkorting
 
         val fattetTidspunkt = Tidspunkt.ofNorskTidssone(LocalDate.of(2023, 7, 1), LocalTime.NOON)
-        coEvery { behandlingKlient.hentDetaljertBehandling(behandlingId) } returns
+        coEvery { behandlingKlient.hentStatistikkBehandling(behandlingId) } returns
             DetaljertBehandling(
                 id = behandlingId,
                 sak = sakId,

@@ -119,42 +119,45 @@ class VedtaksvurderingService(
 
         val fattetVedtak =
             repository.inTransaction { tx ->
-                fattVedtak(
-                    behandlingId,
-                    VedtakFattet(
-                        brukerTokenInfo.ident(),
-                        sak.enhet,
-                        Tidspunkt.now(clock),
-                    ),
-                    tx,
-                ).also { fattetVedtak ->
-                    runBlocking {
-                        behandlingKlient.fattVedtakBehandling(
-                            brukerTokenInfo = brukerTokenInfo,
-                            vedtakEndringDTO =
-                                VedtakEndringDTO(
-                                    vedtakOppgaveDTO =
-                                        VedtakOppgaveDTO(
-                                            sakId = sak.id,
-                                            referanse = behandlingId.toString(),
-                                        ),
-                                    vedtakHendelse =
-                                        VedtakHendelse(
-                                            vedtakId = fattetVedtak.id,
-                                            inntruffet = fattetVedtak.vedtakFattet?.tidspunkt!!,
-                                            saksbehandler = fattetVedtak.vedtakFattet.ansvarligSaksbehandler,
-                                        ),
-                                ),
-                        )
+                val fattetVedtakIntern =
+                    fattVedtak(
+                        behandlingId,
+                        VedtakFattet(
+                            brukerTokenInfo.ident(),
+                            sak.enhet,
+                            Tidspunkt.now(clock),
+                        ),
+                        tx,
+                    ).also { fattetVedtak ->
+                        runBlocking {
+                            behandlingKlient.fattVedtakBehandling(
+                                brukerTokenInfo = brukerTokenInfo,
+                                vedtakEndringDTO =
+                                    VedtakEndringDTO(
+                                        vedtakOppgaveDTO =
+                                            VedtakOppgaveDTO(
+                                                sakId = sak.id,
+                                                referanse = behandlingId.toString(),
+                                            ),
+                                        vedtakHendelse =
+                                            VedtakHendelse(
+                                                vedtakId = fattetVedtak.id,
+                                                inntruffet = fattetVedtak.vedtakFattet?.tidspunkt!!,
+                                                saksbehandler = fattetVedtak.vedtakFattet.ansvarligSaksbehandler,
+                                            ),
+                                    ),
+                            )
+                        }
                     }
-                }
+                sendToRapid(
+                    vedtakhendelse = VedtakKafkaHendelseType.FATTET,
+                    vedtak = fattetVedtakIntern,
+                    tekniskTid = fattetVedtakIntern.vedtakFattet!!.tidspunkt,
+                    behandlingId = behandlingId,
+                )
+                fattetVedtakIntern
             }
-        sendToRapid(
-            vedtakhendelse = VedtakKafkaHendelseType.FATTET,
-            vedtak = fattetVedtak,
-            tekniskTid = fattetVedtak.vedtakFattet!!.tidspunkt,
-            behandlingId = behandlingId,
-        )
+
         return fattetVedtak
     }
 
@@ -207,22 +210,32 @@ class VedtaksvurderingService(
                 attestertVedtak
             }
 
-        sendToRapid(
-            vedtakhendelse = VedtakKafkaHendelseType.ATTESTERT,
-            vedtak = attestertVedtak,
-            tekniskTid = attestertVedtak.attestasjon!!.tidspunkt,
-            behandlingId = behandlingId,
-            extraParams =
-                mapOf(
-                    SKAL_SENDE_BREV to
-                        when {
-                            behandling.revurderingsaarsak.skalIkkeSendeBrev() -> false
-                            else -> true
-                        },
-                    KILDE_KEY to behandling.kilde,
-                    REVURDERING_AARSAK to behandling.revurderingsaarsak.toString(),
-                ),
-        )
+        try {
+            sendToRapid(
+                vedtakhendelse = VedtakKafkaHendelseType.ATTESTERT,
+                vedtak = attestertVedtak,
+                tekniskTid = attestertVedtak.attestasjon!!.tidspunkt,
+                behandlingId = behandlingId,
+                extraParams =
+                    mapOf(
+                        SKAL_SENDE_BREV to
+                            when {
+                                behandling.revurderingsaarsak.skalIkkeSendeBrev() -> false
+                                else -> true
+                            },
+                        KILDE_KEY to behandling.kilde,
+                        REVURDERING_AARSAK to behandling.revurderingsaarsak.toString(),
+                    ),
+            )
+        } catch (e: Exception) {
+            logger.error(
+                "Kan ikke sende attestert vedtak på kafka for behandling id: $behandlingId, vedtak: ${vedtak.id} " +
+                    "Saknr: ${sak.id}. Det betyr at vi ikke sender ut brev for vedtaket eller at en utbetaling går til oppdrag. " +
+                    "Denne hendelsen må sendes ut manuelt straks.",
+                e,
+            )
+            throw e
+        }
 
         return attestertVedtak
     }

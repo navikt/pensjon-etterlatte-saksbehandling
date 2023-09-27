@@ -1,11 +1,13 @@
 import { IEtterbetaling } from '~shared/types/IDetaljertBehandling'
-import { Button, Checkbox, Heading } from '@navikt/ds-react'
-import React, { useState } from 'react'
+import { BodyShort, Button, Checkbox, Heading } from '@navikt/ds-react'
+import React, { useEffect, useState } from 'react'
 import { DatoVelger } from '~shared/DatoVelger'
 import styled from 'styled-components'
 import { FlexRow } from '~shared/styled'
-import { isPending, useApiCall } from '~shared/hooks/useApiCall'
+import { isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
 import { lagreEtterbetaling } from '~shared/api/behandling'
+import { hentFunksjonsbrytere } from '~shared/api/feature'
+import { formaterKanskjeStringDato } from '~utils/formattering'
 
 const DatoSection = styled.section`
   display: grid;
@@ -29,6 +31,19 @@ const Etterbetaling = (props: {
   const [status, apiLagreEtterbetaling] = useApiCall(lagreEtterbetaling)
   const [etterbetaling, setEtterbetaling] = useState(etterbetalingInit)
   const [erEtterbetaling, setErEtterbetaling] = useState<boolean>(!!etterbetaling)
+  const [vis, setVis] = useState(false)
+
+  const [funksjonsbrytere, postHentFunksjonsbrytere] = useApiCall(hentFunksjonsbrytere)
+  const featureToggleNameEtterbetaling = 'registrer-etterbetaling'
+
+  useEffect(() => {
+    postHentFunksjonsbrytere([featureToggleNameEtterbetaling], (brytere) => {
+      const etterbetalingBryter = brytere.find((bryter) => bryter.toggle === featureToggleNameEtterbetaling)
+      if (etterbetalingBryter) {
+        setVis(etterbetalingBryter.enabled)
+      }
+    })
+  })
 
   const lagre = () => {
     apiLagreEtterbetaling({ behandlingId, etterbetaling: etterbetaling!! }, () => {})
@@ -36,17 +51,21 @@ const Etterbetaling = (props: {
 
   const avbryt = () => {}
 
+  if (!vis || !isSuccess(funksjonsbrytere)) {
+    return <></>
+  }
   if (!redigerbar) {
     if (!erEtterbetaling) {
       return <></>
     }
+
     return (
       <>
         <Heading size="small" level="3">
           Er etterbetaling
         </Heading>
-        Fra dato: {etterbetaling?.fraDato}
-        Til dato: {etterbetaling?.tilDato}
+        <BodyShort>Fra dato: {formaterKanskjeStringDato(etterbetaling?.fraDato?.toString())}</BodyShort>
+        <BodyShort>Til dato: {formaterKanskjeStringDato(etterbetaling?.tilDato?.toString())}</BodyShort>
       </>
     )
   }

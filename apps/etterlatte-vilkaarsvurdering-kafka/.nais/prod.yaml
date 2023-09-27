@@ -41,5 +41,5 @@ spec:
     outbound:
       rules:
         - application: etterlatte-vilkaarsvurdering
-    external:
-      - host: etterlatte-unleash-api.nav.cloud.nais.io
+      external:
+        - host: etterlatte-unleash-api.nav.cloud.nais.io

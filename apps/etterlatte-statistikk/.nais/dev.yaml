@@ -48,5 +48,5 @@ spec:
       rules:
         - application: etterlatte-behandling
         - application: etterlatte-beregning
-    external:
-      - host: etterlatte-unleash-api.nav.cloud.nais.io
+      external:
+        - host: etterlatte-unleash-api.nav.cloud.nais.io

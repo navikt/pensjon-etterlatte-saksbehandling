@@ -5,3 +5,14 @@ enum class Beregningstype {
     BP,
     OMS,
 }
+
+enum class BeregningsMetode {
+    BEST,
+    NASJONAL,
+    PRORATA,
+}
+
+data class BeregningsMetodeBeregningsgrunnlag(
+    val beregningsMetode: BeregningsMetode,
+    val begrunnelse: String? = null,
+)

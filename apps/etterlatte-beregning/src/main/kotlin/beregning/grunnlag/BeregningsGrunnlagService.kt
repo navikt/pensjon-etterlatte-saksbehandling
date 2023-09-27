@@ -48,6 +48,7 @@ class BeregningsGrunnlagService(
                             soeskenMedIBeregning = soeskenMedIBeregning,
                             institusjonsoppholdBeregningsgrunnlag =
                                 barnepensjonBeregningsGrunnlag.institusjonsopphold ?: emptyList(),
+                            beregningsMetode = barnepensjonBeregningsGrunnlag.beregningsMetode,
                         ),
                     )
             }
@@ -84,6 +85,7 @@ class BeregningsGrunnlagService(
                             kilde = Grunnlagsopplysning.Saksbehandler.create(brukerTokenInfo.ident()),
                             institusjonsoppholdBeregningsgrunnlag =
                                 omstillingstoenadBeregningsGrunnlag.institusjonsopphold ?: emptyList(),
+                            beregningsMetode = omstillingstoenadBeregningsGrunnlag.beregningsMetode,
                         ),
                     )
             }

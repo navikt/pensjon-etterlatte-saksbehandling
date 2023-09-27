@@ -19,6 +19,7 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.etterlatte.beregning.regler.toGrunnlag
 import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
@@ -28,6 +29,7 @@ import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.SisteIverksatteBehandling
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
+import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -159,6 +161,7 @@ internal class BeregningsGrunnlagRoutesTest {
                     ),
                 soeskenMedIBeregning = listOf(),
                 institusjonsoppholdBeregningsgrunnlag = emptyList(),
+                beregningsMetode = BeregningsMetode.NASJONAL.toGrunnlag(),
             )
 
         testApplication {
@@ -189,10 +192,11 @@ internal class BeregningsGrunnlagRoutesTest {
 
         every { repository.finnBarnepensjonGrunnlagForBehandling(any()) } returns
             BeregningsGrunnlag(
-                id,
-                Grunnlagsopplysning.Saksbehandler("Z123456", Tidspunkt.now()),
-                emptyList(),
-                emptyList(),
+                behandlingId = id,
+                kilde = Grunnlagsopplysning.Saksbehandler("Z123456", Tidspunkt.now()),
+                soeskenMedIBeregning = emptyList(),
+                institusjonsoppholdBeregningsgrunnlag = emptyList(),
+                beregningsMetode = BeregningsMetode.BEST.toGrunnlag(),
             )
 
         testApplication {
@@ -395,10 +399,11 @@ internal class BeregningsGrunnlagRoutesTest {
         coEvery { behandlingKlient.beregn(any(), any(), any()) } returns true
         every { repository.finnBarnepensjonGrunnlagForBehandling(forrige) } returns
             BeregningsGrunnlag(
-                forrige,
-                Grunnlagsopplysning.Saksbehandler("Z123456", Tidspunkt.now()),
-                emptyList(),
-                emptyList(),
+                behandlingId = forrige,
+                kilde = Grunnlagsopplysning.Saksbehandler("Z123456", Tidspunkt.now()),
+                soeskenMedIBeregning = emptyList(),
+                institusjonsoppholdBeregningsgrunnlag = emptyList(),
+                beregningsMetode = BeregningsMetode.BEST.toGrunnlag(),
             )
         every { repository.finnBarnepensjonGrunnlagForBehandling(nye) } returns null
         every { repository.lagre(any()) } returns true
@@ -425,10 +430,11 @@ internal class BeregningsGrunnlagRoutesTest {
         coEvery { behandlingKlient.beregn(any(), any(), any()) } returns true
         every { repository.finnBarnepensjonGrunnlagForBehandling(forrige) } returns
             BeregningsGrunnlag(
-                forrige,
-                Grunnlagsopplysning.Saksbehandler("Z123456", Tidspunkt.now()),
-                emptyList(),
-                emptyList(),
+                behandlingId = forrige,
+                kilde = Grunnlagsopplysning.Saksbehandler("Z123456", Tidspunkt.now()),
+                soeskenMedIBeregning = emptyList(),
+                institusjonsoppholdBeregningsgrunnlag = emptyList(),
+                beregningsMetode = BeregningsMetode.BEST.toGrunnlag(),
             )
         every { repository.finnBarnepensjonGrunnlagForBehandling(nye) } returns null
         every { repository.lagre(any()) } returns true
@@ -478,17 +484,19 @@ internal class BeregningsGrunnlagRoutesTest {
         coEvery { behandlingKlient.beregn(any(), any(), any()) } returns true
         every { repository.finnBarnepensjonGrunnlagForBehandling(forrige) } returns
             BeregningsGrunnlag(
-                forrige,
-                Grunnlagsopplysning.Saksbehandler("Z123456", Tidspunkt.now()),
-                emptyList(),
-                emptyList(),
+                behandlingId = forrige,
+                kilde = Grunnlagsopplysning.Saksbehandler("Z123456", Tidspunkt.now()),
+                soeskenMedIBeregning = emptyList(),
+                institusjonsoppholdBeregningsgrunnlag = emptyList(),
+                beregningsMetode = BeregningsMetode.BEST.toGrunnlag(),
             )
         every { repository.finnBarnepensjonGrunnlagForBehandling(nye) } returns
             BeregningsGrunnlag(
-                nye,
-                Grunnlagsopplysning.Saksbehandler("Z123456", Tidspunkt.now()),
-                emptyList(),
-                emptyList(),
+                behandlingId = nye,
+                kilde = Grunnlagsopplysning.Saksbehandler("Z123456", Tidspunkt.now()),
+                soeskenMedIBeregning = emptyList(),
+                institusjonsoppholdBeregningsgrunnlag = emptyList(),
+                beregningsMetode = BeregningsMetode.BEST.toGrunnlag(),
             )
         every { repository.lagre(any()) } returns true
 

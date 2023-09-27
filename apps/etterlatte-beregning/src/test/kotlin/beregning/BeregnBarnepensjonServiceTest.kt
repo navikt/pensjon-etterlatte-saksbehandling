@@ -21,12 +21,14 @@ import no.nav.etterlatte.beregning.regler.FNR_2
 import no.nav.etterlatte.beregning.regler.MAKS_TRYGDETID
 import no.nav.etterlatte.beregning.regler.barnepensjon.BP_2024_DATO
 import no.nav.etterlatte.beregning.regler.bruker
+import no.nav.etterlatte.beregning.regler.toGrunnlag
 import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.klienter.GrunnlagKlientImpl
 import no.nav.etterlatte.klienter.TrygdetidKlient
 import no.nav.etterlatte.klienter.VilkaarsvurderingKlient
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
+import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
 import no.nav.etterlatte.libs.common.beregning.Beregningstype
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsdata
@@ -674,6 +676,7 @@ internal class BeregnBarnepensjonServiceTest {
                 ),
             ),
         institusjonsoppholdBeregningsgrunnlag = defaultInstitusjonsopphold(),
+        beregningsMetode = BeregningsMetode.NASJONAL.toGrunnlag(),
     )
 
     private fun beregningsGrunnlagMedSoesken(
@@ -697,6 +700,7 @@ internal class BeregnBarnepensjonServiceTest {
                 )
             },
         institusjonsoppholdBeregningsgrunnlag = defaultInstitusjonsopphold(),
+        beregningsMetode = BeregningsMetode.NASJONAL.toGrunnlag(),
     )
 
     private fun defaultKilde(): Grunnlagsopplysning.Saksbehandler =

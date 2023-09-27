@@ -14,12 +14,14 @@ import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlagService
 import no.nav.etterlatte.beregning.grunnlag.GrunnlagMedPeriode
 import no.nav.etterlatte.beregning.grunnlag.InstitusjonsoppholdBeregningsgrunnlag
 import no.nav.etterlatte.beregning.grunnlag.Reduksjon
+import no.nav.etterlatte.beregning.regler.toGrunnlag
 import no.nav.etterlatte.klienter.BehandlingKlientImpl
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.SisteIverksatteBehandling
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
+import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeskenMedIBeregning
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
@@ -264,6 +266,7 @@ internal class BeregningsGrunnlagServiceTest {
                 Grunnlagsopplysning.Saksbehandler("Z123456", Tidspunkt.now()),
                 emptyList(),
                 emptyList(),
+                BeregningsMetode.BEST.toGrunnlag(),
             )
 
         every { beregningsGrunnlagRepository.lagre(any()) } returns true
@@ -305,10 +308,11 @@ internal class BeregningsGrunnlagServiceTest {
         coEvery { behandlingKlient.beregn(any(), any(), any()) } returns true
         every { beregningsGrunnlagRepository.finnBarnepensjonGrunnlagForBehandling(any()) } returns
             BeregningsGrunnlag(
-                behandlingsId,
-                Grunnlagsopplysning.Saksbehandler("Z123456", Tidspunkt.now()),
-                emptyList(),
-                emptyList(),
+                behandlingId = behandlingsId,
+                kilde = Grunnlagsopplysning.Saksbehandler("Z123456", Tidspunkt.now()),
+                soeskenMedIBeregning = emptyList(),
+                institusjonsoppholdBeregningsgrunnlag = emptyList(),
+                beregningsMetode = BeregningsMetode.BEST.toGrunnlag(),
             )
 
         runBlocking {
@@ -396,6 +400,7 @@ internal class BeregningsGrunnlagServiceTest {
             kilde = kilde,
             soeskenMedIBeregning = soeskenMedIBeregning,
             institusjonsoppholdBeregningsgrunnlag = institusjonsoppholdBeregningsgrunnlag,
+            beregningsMetode = BeregningsMetode.NASJONAL.toGrunnlag(),
         )
     }
 }

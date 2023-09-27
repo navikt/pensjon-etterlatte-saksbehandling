@@ -49,7 +49,9 @@ const Etterbetaling = (props: {
     apiLagreEtterbetaling({ behandlingId, etterbetaling: etterbetaling!! }, () => {})
   }
 
-  const avbryt = () => {}
+  const avbryt = () => {
+    setEtterbetaling(etterbetalingInit)
+  }
 
   if (!vis || !isSuccess(funksjonsbrytere)) {
     return <></>
@@ -105,7 +107,7 @@ const Etterbetaling = (props: {
           Avbryt
         </Button>
         <Button variant="primary" loading={isPending(status)} onClick={lagre}>
-          Lagre
+          Lagre etterbetaling
         </Button>
       </FlexRow>
     </>

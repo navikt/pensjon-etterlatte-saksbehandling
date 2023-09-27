@@ -43,7 +43,7 @@ const Etterbetaling = (props: {
         setVis(etterbetalingBryter.enabled)
       }
     })
-  })
+  }, [])
 
   const lagre = () => {
     apiLagreEtterbetaling({ behandlingId, etterbetaling: etterbetaling!! }, () => {})

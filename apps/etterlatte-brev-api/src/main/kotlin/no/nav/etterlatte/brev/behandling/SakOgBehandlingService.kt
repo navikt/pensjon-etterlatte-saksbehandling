@@ -6,6 +6,7 @@ import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.brev.behandlingklient.BehandlingKlient
 import no.nav.etterlatte.brev.beregning.BeregningKlient
 import no.nav.etterlatte.brev.grunnlag.GrunnlagKlient
+import no.nav.etterlatte.brev.model.EtterbetalingDTO
 import no.nav.etterlatte.brev.trygdetid.TrygdetidKlient
 import no.nav.etterlatte.brev.vedtak.VedtaksvurderingKlient
 import no.nav.etterlatte.brev.vilkaarsvurdering.VilkaarsvurderingKlient
@@ -53,6 +54,7 @@ class SakOgBehandlingService(
             val sak = async { behandlingKlient.hentSak(sakId, brukerTokenInfo) }
             val innvilgelsesdato = { async { vedtaksvurderingKlient.hentInnvilgelsesdato(sakId, brukerTokenInfo) } }
             val vilkaarsvurdering = async { vilkaarsvurderingKlient.hentVilkaarsvurdering(behandlingId, brukerTokenInfo) }
+            val etterbetaling = async { behandlingKlient.hentEtterbetaling(behandlingId, brukerTokenInfo) }
 
             mapBehandling(
                 vedtak.await(),
@@ -60,6 +62,7 @@ class SakOgBehandlingService(
                 sak.await(),
                 innvilgelsesdato,
                 vilkaarsvurdering.await(),
+                etterbetaling.await(),
                 brukerTokenInfo,
             )
         }
@@ -70,6 +73,7 @@ class SakOgBehandlingService(
         sak: Sak,
         innvilgelsesdato: () -> Deferred<LocalDate?>,
         vilkaarsvurdering: VilkaarsvurderingDto,
+        etterbetaling: EtterbetalingDTO?,
         brukerTokenInfo: BrukerTokenInfo,
     ): Behandling {
         val innloggetSaksbehandlerIdent = brukerTokenInfo.ident()
@@ -127,7 +131,7 @@ class SakOgBehandlingService(
                     brukerTokenInfo,
                 ),
             vilkaarsvurdering = vilkaarsvurdering,
-            etterbetalingDTO = null, // TODO: Hent frå brukar-input
+            etterbetalingDTO = etterbetaling,
         )
     }
 

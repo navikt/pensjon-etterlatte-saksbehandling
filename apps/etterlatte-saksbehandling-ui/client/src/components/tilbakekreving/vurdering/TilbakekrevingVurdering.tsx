@@ -2,9 +2,9 @@ import { Button, Heading, Select, Table, TextField } from '@navikt/ds-react'
 import { Content, ContentHeader, FlexRow } from '~shared/styled'
 import { HeadingWrapper, InnholdPadding } from '~components/behandling/soeknadsoversikt/styled'
 import { useNavigate } from 'react-router-dom'
-import { useTilbakekreving } from '~components/tilbakekreving/useTilbakekreving'
 import React, { useState } from 'react'
 import {
+  Tilbakekreving,
   TilbakekrevingBeloep,
   TilbakekrevingPeriode,
   TilbakekrevingResultat,
@@ -15,10 +15,8 @@ import { lagreTilbakekrevingsperioder } from '~shared/api/tilbakekreving'
 import { addTilbakekreving } from '~store/reducers/TilbakekrevingReducer'
 import { useAppDispatch } from '~store/Store'
 
-export function TilbakekrevingVurdering() {
+export function TilbakekrevingVurdering({ tilbakekreving }: { tilbakekreving: Tilbakekreving }) {
   const navigate = useNavigate()
-  const tilbakekreving = useTilbakekreving()
-  if (!tilbakekreving) throw new Error('Tilbakekreving finnes ikke i state!')
   const dispatch = useAppDispatch()
   const [lagreStatus, lagre] = useApiCall(lagreTilbakekrevingsperioder)
   const [perioder, setPerioder] = useState<TilbakekrevingPeriode[]>(tilbakekreving.perioder)
@@ -88,9 +86,11 @@ export function TilbakekrevingVurdering() {
                       pattern="[0-9]{11}"
                       maxLength={10}
                       onChange={(e) =>
-                        updateBeloeper(index, {
-                          ...beloeper,
-                          beregnetFeilutbetaling: parseInt(e.target.value),
+                        onChangeNumber(e, (value) => {
+                          updateBeloeper(index, {
+                            ...beloeper,
+                            beregnetFeilutbetaling: value,
+                          })
                         })
                       }
                     />
@@ -101,12 +101,13 @@ export function TilbakekrevingVurdering() {
                       label=""
                       placeholder="Brutto tilbakekreving"
                       value={beloeper.bruttoTilbakekreving ?? ''}
-                      pattern="[0-9]{11}"
-                      maxLength={10}
+                      pattern="[0-9]"
                       onChange={(e) =>
-                        updateBeloeper(index, {
-                          ...beloeper,
-                          bruttoTilbakekreving: parseInt(e.target.value),
+                        onChangeNumber(e, (value) => {
+                          updateBeloeper(index, {
+                            ...beloeper,
+                            bruttoTilbakekreving: value,
+                          })
                         })
                       }
                     />
@@ -116,12 +117,13 @@ export function TilbakekrevingVurdering() {
                       label=""
                       placeholder="Netto tilbakekreving"
                       value={beloeper.nettoTilbakekreving ?? ''}
-                      pattern="[0-9]{11}"
-                      maxLength={10}
+                      pattern="[0-9]"
                       onChange={(e) =>
-                        updateBeloeper(index, {
-                          ...beloeper,
-                          nettoTilbakekreving: parseInt(e.target.value),
+                        onChangeNumber(e, (value) => {
+                          updateBeloeper(index, {
+                            ...beloeper,
+                            nettoTilbakekreving: value,
+                          })
                         })
                       }
                     />
@@ -131,12 +133,13 @@ export function TilbakekrevingVurdering() {
                       label=""
                       placeholder="Skatt"
                       value={beloeper.skatt ?? ''}
-                      pattern="[0-9]{11}"
-                      maxLength={10}
+                      pattern="[0-9]"
                       onChange={(e) =>
-                        updateBeloeper(index, {
-                          ...beloeper,
-                          skatt: parseInt(e.target.value),
+                        onChangeNumber(e, (value) => {
+                          updateBeloeper(index, {
+                            ...beloeper,
+                            skatt: value,
+                          })
                         })
                       }
                     />
@@ -186,12 +189,14 @@ export function TilbakekrevingVurdering() {
                       label=""
                       placeholder="Tilbakekrevingsprosent"
                       value={beloeper.tilbakekrevingsprosent ?? ''}
-                      pattern="[0-9]{11}"
+                      pattern="[0-9]"
                       maxLength={3}
                       onChange={(e) =>
-                        updateBeloeper(index, {
-                          ...beloeper,
-                          tilbakekrevingsprosent: parseInt(e.target.value),
+                        onChangeNumber(e, (value) => {
+                          updateBeloeper(index, {
+                            ...beloeper,
+                            tilbakekrevingsprosent: value,
+                          })
                         })
                       }
                     />
@@ -201,12 +206,13 @@ export function TilbakekrevingVurdering() {
                       label=""
                       placeholder="Rentetillegg"
                       value={beloeper.rentetillegg ?? ''}
-                      pattern="[0-9]{11}"
-                      maxLength={10}
+                      pattern="[0-9]"
                       onChange={(e) =>
-                        updateBeloeper(index, {
-                          ...beloeper,
-                          rentetillegg: parseInt(e.target.value),
+                        onChangeNumber(e, (value) => {
+                          updateBeloeper(index, {
+                            ...beloeper,
+                            rentetillegg: value,
+                          })
                         })
                       }
                     />
@@ -227,4 +233,8 @@ export function TilbakekrevingVurdering() {
       </FlexRow>
     </Content>
   )
+}
+
+const onChangeNumber = (e: React.ChangeEvent<HTMLInputElement>, onChange: (value: number | null) => void) => {
+  onChange(isNaN(parseInt(e.target.value)) ? null : parseInt(e.target.value))
 }

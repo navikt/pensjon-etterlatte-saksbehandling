@@ -5,8 +5,6 @@ plugins {
     alias(libs.plugins.analyze)
 }
 
-val cxfVersion = "4.0.3"
-
 dependencies {
     implementation(project(":libs:saksbehandling-common"))
     implementation(project(":libs:etterlatte-tilbakekreving-model"))

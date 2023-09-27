@@ -35,7 +35,7 @@ data class ApplicationProperties(
                     behandlingUrl = value("ETTERLATTE_BEHANDLING_URL"),
                     behandlingScope = value("ETTERLATTE_BEHANDLING_SCOPE"),
                     proxyUrl = value("ETTERLATTE_PROXY_URL"),
-                    proxyScope = value("ETTERLATTE_PROXY_OUTBOUND_SCOPE"),
+                    proxyScope = value("ETTERLATTE_PROXY_SCOPE"),
                 )
             }
 

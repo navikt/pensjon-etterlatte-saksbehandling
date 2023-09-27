@@ -16,6 +16,7 @@ import no.nav.okonomi.tilbakekrevingservice.TilbakekrevingsvedtakResponse
 import no.nav.tilbakekreving.tilbakekrevingsvedtak.vedtak.v1.TilbakekrevingsvedtakDto
 import org.slf4j.LoggerFactory
 
+// TODO Modellen her utvides når vi kommer så langt
 data class Tilbakekrevingsvedtak(val vedtakId: VedtakId)
 
 class TilbakekrevingKlient(private val url: String, private val httpClient: HttpClient) {

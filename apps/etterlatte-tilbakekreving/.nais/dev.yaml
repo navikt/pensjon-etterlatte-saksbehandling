@@ -54,7 +54,7 @@ spec:
       value: api://dev-gcp.etterlatte.etterlatte-behandling/.default
     - name: ETTERLATTE_PROXY_URL
       value: https://etterlatte-proxy.dev-fss-pub.nais.io/aad
-    - name: ETTERLATTE_PROXY_OUTBOUND_SCOPE
+    - name: ETTERLATTE_PROXY_SCOPE
       value: api://dev-fss.etterlatte.etterlatte-proxy/.default
   accessPolicy:
     outbound:

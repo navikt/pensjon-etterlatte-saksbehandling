@@ -11,6 +11,7 @@ export enum Variants {
   ALT1_FILLED = 'alt1-filled',
   ALT2 = 'alt2',
   ALT2_FILLED = 'alt2-filled',
+  ALT2_MODERATE = 'alt2-moderate',
   ALT3 = 'alt3',
   ALT3_FILLED = 'alt3-filled',
 }

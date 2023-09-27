@@ -24,7 +24,7 @@ const OPPGAVETYPE_TIL_TAGDATA: Record<Oppgavetype, { variant: Variants; text: st
   GOSYS: { variant: Variants.INFO_FILLED, text: 'Gosys-oppgave' },
   UTLAND: { variant: Variants.ALT2_FILLED, text: 'Utlandsoppgave' },
   KLAGE: { variant: Variants.ALT2, text: 'Klage' },
-  OMGJOERING: { variant: Variants.ALT2, text: 'Omgjøring' },
+  OMGJOERING: { variant: Variants.ALT2_MODERATE, text: 'Omgjøring' },
   TILBAKEKREVING: { variant: Variants.ALT2, text: 'Tilbakekreving' },
 } as const
 

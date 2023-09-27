@@ -89,8 +89,7 @@ export const Soeknadsoversikt = (props: { behandling: IDetaljertBehandling }) =>
             <BoddEllerArbeidetUtlandet behandling={behandling} redigerbar={behandles} />
             <Etterbetaling
               behandlingId={behandling.id}
-              etterbetaling={behandling.etterbetaling}
-              update={(e) => ({ ...behandling, etterbetaling: e })} // TODO: Dette blir ikkje brukt
+              etterbetalingInit={behandling.etterbetaling}
               redigerbar={behandles}
             />
           </>

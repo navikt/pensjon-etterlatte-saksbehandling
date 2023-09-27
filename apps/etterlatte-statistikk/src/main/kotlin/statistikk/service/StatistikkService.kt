@@ -135,7 +135,12 @@ class StatistikkService(
             behandlingStatus = hendelse.name,
             behandlingResultat = behandlingResultatFraVedtak(vedtak, hendelse, detaljertBehandling),
             resultatBegrunnelse = null,
-            behandlingMetode = detaljertBehandling.behandlingMetode(vedtak.attestasjon),
+            behandlingMetode =
+                hentBehandlingMetode(
+                    vedtak.attestasjon,
+                    detaljertBehandling.prosesstype,
+                    detaljertBehandling.revurderingsaarsak,
+                ),
             soeknadFormat = SoeknadFormat.DIGITAL,
             opprettetAv = "GJENNY",
             ansvarligBeslutter = vedtak.attestasjon?.attestant,
@@ -242,7 +247,7 @@ class StatistikkService(
                 behandlingStatus = behandlingHendelse.name,
                 behandlingResultat = null,
                 resultatBegrunnelse = null,
-                behandlingMetode = statistikkBehandling.behandlingMetode(null),
+                behandlingMetode = hentBehandlingMetode(null, statistikkBehandling.prosesstype, statistikkBehandling.revurderingsaarsak),
                 opprettetAv = "GJENNY",
                 ansvarligBeslutter = null,
                 aktorId = statistikkBehandling.sak.ident,
@@ -324,8 +329,12 @@ internal fun hentSakYtelsesgruppe(
         else -> null
     }
 
-internal fun StatistikkBehandling.behandlingMetode(attestasjon: Attestasjon?): BehandlingMetode =
-    when (this.prosesstype) {
+internal fun hentBehandlingMetode(
+    attestasjon: Attestasjon?,
+    prosesstype: Prosesstype,
+    revurderingAarsak: RevurderingAarsak?,
+): BehandlingMetode =
+    when (prosesstype) {
         Prosesstype.MANUELL ->
             if (attestasjon != null) {
                 BehandlingMetode.TOTRINN
@@ -334,24 +343,7 @@ internal fun StatistikkBehandling.behandlingMetode(attestasjon: Attestasjon?): B
             }
 
         Prosesstype.AUTOMATISK ->
-            if (this.revurderingsaarsak == RevurderingAarsak.REGULERING) {
-                BehandlingMetode.AUTOMATISK_REGULERING
-            } else {
-                BehandlingMetode.AUTOMATISK
-            }
-    }
-
-internal fun DetaljertBehandling.behandlingMetode(attestasjon: Attestasjon?): BehandlingMetode =
-    when (this.prosesstype) {
-        Prosesstype.MANUELL ->
-            if (attestasjon != null) {
-                BehandlingMetode.TOTRINN
-            } else {
-                BehandlingMetode.MANUELL
-            }
-
-        Prosesstype.AUTOMATISK ->
-            if (this.revurderingsaarsak == RevurderingAarsak.REGULERING) {
+            if (revurderingAarsak == RevurderingAarsak.REGULERING) {
                 BehandlingMetode.AUTOMATISK_REGULERING
             } else {
                 BehandlingMetode.AUTOMATISK

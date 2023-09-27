@@ -1,5 +1,6 @@
 package no.nav.etterlatte.samordning.vedtak
 
+import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.beregning.AvkortetYtelseDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingDto
@@ -48,7 +49,7 @@ class SamordningVedtakService(
             virkningsdato = virkningstidspunkt.atStartOfMonth(),
             opphoersdato = virkningstidspunkt.takeIf { type == VedtakType.OPPHOER }?.atStartOfMonth(),
             type = type.toSamordningsvedtakType(),
-            aarsak = null,
+            aarsak = behandling.revurderingsaarsak?.toSamordningsvedtakAarsak(),
             anvendtTrygdetid = beregning.beregningsperioder.first().trygdetid,
             perioder =
                 avkorting.avkortetYtelse
@@ -64,6 +65,13 @@ class SamordningVedtakService(
             VedtakType.ENDRING -> SamordningVedtakType.ENDRING
             VedtakType.AVSLAG -> throw IllegalArgumentException("Vedtak om avslag støttes ikke")
         }
+    }
+
+    private fun RevurderingAarsak.toSamordningsvedtakAarsak(): String {
+        return when (this) {
+            RevurderingAarsak.INNTEKTSENDRING -> SamordningVedtakAarsak.INNTEKT
+            else -> SamordningVedtakAarsak.ANNET
+        }.name
     }
 
     private fun AvkortetYtelseDto.toSamordningVedtakPeriode(): SamordningVedtakPeriode {

@@ -10,6 +10,7 @@ internal class KravgunnlagJaxbTest {
     @Test
     fun `skal lese og mappe kravgrunnlag fra tilbakekrevingskomponenten`() {
         val kravgrunnlagXml = readFile("/kravgrunnlag.xml")
+
         val kravgrunnlag = KravgrunnlagJaxb.toDetaljertKravgrunnlagDto(kravgrunnlagXml)
 
         assertNotNull(kravgrunnlag)

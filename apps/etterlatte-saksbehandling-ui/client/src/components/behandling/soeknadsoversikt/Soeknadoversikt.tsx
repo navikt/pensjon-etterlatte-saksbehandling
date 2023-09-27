@@ -23,7 +23,6 @@ import { formaterKildePdl } from '~components/behandling/soeknadsoversikt/utils'
 import { formaterStringDato } from '~utils/formattering'
 import Virkningstidspunkt from '~components/behandling/soeknadsoversikt/soeknadoversikt/virkningstidspunkt/Virkningstidspunkt'
 import { BoddEllerArbeidetUtlandet } from './soeknadoversikt/boddEllerArbeidetUtlandet/BoddEllerArbeidetUtlandet'
-import React from 'react'
 
 export const Soeknadsoversikt = (props: { behandling: IDetaljertBehandling }) => {
   const { behandling } = props

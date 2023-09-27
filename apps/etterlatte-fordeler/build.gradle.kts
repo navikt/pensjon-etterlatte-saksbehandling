@@ -10,6 +10,7 @@ dependencies {
     implementation(project(":libs:etterlatte-database"))
     implementation(project(":libs:etterlatte-ktor"))
     implementation(project(":libs:etterlatte-pdl-model"))
+    implementation(project(":libs:etterlatte-funksjonsbrytere"))
     implementation(libs.etterlatte.common)
 
     implementation(libs.ktor2.okhttp)
@@ -22,4 +23,5 @@ dependencies {
 
     testImplementation(libs.ktor2.clientmock)
     testImplementation(libs.kotlinx.coroutinescore)
+    testImplementation(project(":libs:testdata"))
 }

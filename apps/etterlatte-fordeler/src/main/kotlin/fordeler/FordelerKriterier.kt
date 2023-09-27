@@ -1,5 +1,7 @@
 package no.nav.etterlatte.fordeler
 
+import fordeler.FordelerFeatureToggle
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.innsendtsoeknad.Spraak
 import no.nav.etterlatte.libs.common.innsendtsoeknad.barnepensjon.Barnepensjon
 import no.nav.etterlatte.libs.common.innsendtsoeknad.common.Avdoed
@@ -53,14 +55,18 @@ enum class FordelerKriterie(val forklaring: String) {
     FAMILIERELASJON_MANGLER_IDENT("En person tilknyttet søknaden mangler en ident i PDL"),
 }
 
-class FordelerKriterier {
+class FordelerKriterier(private val featureToggleService: FeatureToggleService) {
     fun sjekkMotKriterier(
         barn: Person,
         avdoed: Person,
         gjenlevende: Person?,
         soeknad: Barnepensjon,
     ): FordelerKriterierResultat {
-        return fordelerKriterier(barn, avdoed, gjenlevende)
+        val kriterier = when (tillatAlleAktivert(featureToggleService)) {
+            true -> emptyList()
+            false -> fordelerKriterier(barn, avdoed, gjenlevende)
+        }
+        return kriterier
             .filter { it.blirOppfyltAv(soeknad) }
             .map { it.fordelerKriterie }
             .let { FordelerKriterierResultat(it.isEmpty(), it) }
@@ -112,6 +118,9 @@ class FordelerKriterier {
         },
     )
 
+    private fun tillatAlleAktivert(featureToggleService: FeatureToggleService) =
+        featureToggleService.isEnabled(FordelerFeatureToggle.TillatAlleScenarier, false)
+
     private fun ikkeForelderTilBarn(
         avdoed: Person,
         barn: Person,
@@ -131,7 +140,7 @@ class FordelerKriterier {
         return (
             person.utland?.innflyttingTilNorge?.isNotEmpty() == true ||
                 person.utland?.utflyttingFraNorge?.isNotEmpty() == true
-        )
+            )
     }
 
     private fun personErIkkeRegistrertDoed(person: Person): Boolean {

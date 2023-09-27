@@ -136,7 +136,7 @@ class BehandlingServiceImplTest {
             }
         val hendelseskanalMock =
             mockk<BehandlingHendelserKafkaProducer> {
-                every { this@mockk.sendMeldingForHendelseMedDetaljertBehandling(any(), any()) } returns Unit
+                every { sendMeldingForHendelseMedDetaljertBehandling(any(), any()) } returns Unit
             }
         val grunnlagsendringshendelseDaoMock =
             mockk<GrunnlagsendringshendelseDao> {
@@ -196,7 +196,7 @@ class BehandlingServiceImplTest {
             }
         val behandlingHendelserKafkaProducer =
             mockk<BehandlingHendelserKafkaProducer> {
-                every { this@mockk.sendMeldingForHendelseMedDetaljertBehandling(any(), any()) } returns Unit
+                every { sendMeldingForHendelseMedDetaljertBehandling(any(), any()) } returns Unit
             }
         val grunnlagsendringshendelseDaoMock =
             mockk<GrunnlagsendringshendelseDao> {
@@ -268,7 +268,7 @@ class BehandlingServiceImplTest {
             }
         val behandlingHendelserKafkaProducer =
             mockk<BehandlingHendelserKafkaProducer> {
-                every { this@mockk.sendMeldingForHendelseMedDetaljertBehandling(any(), any()) } returns Unit
+                every { sendMeldingForHendelseMedDetaljertBehandling(any(), any()) } returns Unit
             }
         val grunnlagsendringshendelseDaoMock =
             mockk<GrunnlagsendringshendelseDao> {

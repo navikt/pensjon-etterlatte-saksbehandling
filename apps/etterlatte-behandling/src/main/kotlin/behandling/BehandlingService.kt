@@ -7,7 +7,7 @@ import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.User
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.BehandlingMedGrunnlagsopplysninger
-import no.nav.etterlatte.behandling.domain.toDetaljertBehandlingFromPersongalleri
+import no.nav.etterlatte.behandling.domain.toDetaljertBehandlingWithPersongalleri
 import no.nav.etterlatte.behandling.domain.toStatistikkBehandling
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.hendelse.HendelseType
@@ -193,7 +193,7 @@ class BehandlingServiceImpl(
                     ?.opplysning
                     ?: throw NoSuchElementException("Persongalleri mangler for sak ${it.sak.id}")
 
-            it.toDetaljertBehandlingFromPersongalleri(persongalleri)
+            it.toDetaljertBehandlingWithPersongalleri(persongalleri)
         }
     }
 

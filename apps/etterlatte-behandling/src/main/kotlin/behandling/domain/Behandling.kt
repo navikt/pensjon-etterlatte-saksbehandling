@@ -199,7 +199,7 @@ internal fun Behandling.toStatistikkBehandling(persongalleri: Persongalleri): St
     )
 }
 
-internal fun Behandling.toDetaljertBehandlingFromPersongalleri(persongalleri: Persongalleri): DetaljertBehandling {
+internal fun Behandling.toDetaljertBehandlingWithPersongalleri(persongalleri: Persongalleri): DetaljertBehandling {
     return DetaljertBehandling(
         id = id,
         sak = sak.id,

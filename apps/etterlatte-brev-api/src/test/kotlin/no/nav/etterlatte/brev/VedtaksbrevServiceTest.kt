@@ -17,7 +17,7 @@ import no.nav.etterlatte.brev.behandling.Behandling
 import no.nav.etterlatte.brev.behandling.Beregningsperiode
 import no.nav.etterlatte.brev.behandling.ForenkletVedtak
 import no.nav.etterlatte.brev.behandling.Innsender
-import no.nav.etterlatte.brev.behandling.Persongalleri
+import no.nav.etterlatte.brev.behandling.PersonerISak
 import no.nav.etterlatte.brev.behandling.SakOgBehandlingService
 import no.nav.etterlatte.brev.behandling.Soeker
 import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
@@ -181,7 +181,7 @@ internal class VedtaksbrevServiceTest {
             coVerify {
                 db.hentBrevForBehandling(BEHANDLING_ID)
                 sakOgBehandlingService.hentBehandling(sakId, BEHANDLING_ID, any())
-                adresseService.hentMottakerAdresse(behandling.persongalleri.innsender.fnr.value)
+                adresseService.hentMottakerAdresse(behandling.personerISak.innsender!!.fnr.value)
             }
 
             verify {
@@ -193,7 +193,7 @@ internal class VedtaksbrevServiceTest {
             val brev = brevSlot.captured
             brev.sakId shouldBe sakId
             brev.behandlingId shouldBe behandling.behandlingId
-            brev.soekerFnr shouldBe behandling.persongalleri.soeker.fnr.value
+            brev.soekerFnr shouldBe behandling.personerISak.soeker.fnr.value
             brev.mottaker shouldBe mottaker
             brev.prosessType shouldBe forventetProsessType
         }
@@ -232,7 +232,7 @@ internal class VedtaksbrevServiceTest {
             coVerify {
                 db.hentBrevForBehandling(BEHANDLING_ID)
                 sakOgBehandlingService.hentBehandling(sakId, BEHANDLING_ID, any())
-                adresseService.hentMottakerAdresse(behandling.persongalleri.innsender.fnr.value)
+                adresseService.hentMottakerAdresse(behandling.personerISak.innsender!!.fnr.value)
                 brevbaker.genererJSON(any())
                 adresseService.hentAvsender(any())
             }
@@ -245,7 +245,7 @@ internal class VedtaksbrevServiceTest {
             val brev = brevSlot.captured
             brev.sakId shouldBe sakId
             brev.behandlingId shouldBe behandling.behandlingId
-            brev.soekerFnr shouldBe behandling.persongalleri.soeker.fnr.value
+            brev.soekerFnr shouldBe behandling.personerISak.soeker.fnr.value
             brev.mottaker shouldBe mottaker
             brev.prosessType shouldBe forventetProsessType
         }
@@ -591,8 +591,8 @@ internal class VedtaksbrevServiceTest {
         sakType,
         BEHANDLING_ID,
         Spraak.NB,
-        Persongalleri(
-            Innsender("STOR SNERK", Foedselsnummer("11057523044")),
+        PersonerISak(
+            Innsender(Foedselsnummer("11057523044")),
             Soeker("GRØNN", "MELLOMNAVN", "KOPP", Foedselsnummer("12345612345")),
             Avdoed("DØD TESTPERSON", LocalDate.now().minusMonths(1)),
             verge = null,

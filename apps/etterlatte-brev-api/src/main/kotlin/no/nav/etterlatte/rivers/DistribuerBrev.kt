@@ -40,13 +40,18 @@ internal class DistribuerBrev(
 
         val brev = vedtaksbrevService.hentBrev(packet["brevId"].asLong())
 
+        val mottaker =
+            requireNotNull(brev.mottaker) {
+                "Kan ikke distribuere brev når mottaker er 'null' i brev med id=${brev.id}"
+            }
+
         val bestillingsId =
             distribusjonService.distribuerJournalpost(
                 brevId = brev.id,
                 journalpostId = packet["journalpostId"].asText(),
                 type = packet.distribusjonType(),
                 tidspunkt = DistribusjonsTidspunktType.KJERNETID,
-                adresse = brev.mottaker.adresse,
+                adresse = mottaker.adresse,
             )
 
         rapidsConnection.svarSuksess(packet, bestillingsId)

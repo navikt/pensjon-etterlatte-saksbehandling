@@ -1,7 +1,6 @@
 package no.nav.etterlatte.brev.behandling
 
 import com.fasterxml.jackson.databind.JsonNode
-import grunnlag.innsenderSoeknad
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -18,6 +17,7 @@ import no.nav.etterlatte.brev.trygdetid.TrygdetidKlient
 import no.nav.etterlatte.brev.vedtak.VedtaksvurderingKlient
 import no.nav.etterlatte.brev.vilkaarsvurdering.VilkaarsvurderingKlient
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
+import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.SisteIverksatteBehandling
 import no.nav.etterlatte.libs.common.beregning.BeregningDTO
@@ -98,13 +98,12 @@ internal class SakOgBehandlingServiceTest {
         assertEquals(SAK_ID, behandling.sakId)
         assertEquals(BEHANDLING_ID, behandling.behandlingId)
         assertEquals(Spraak.NB, behandling.spraak)
-        assertEquals("Innsend Innsender", behandling.persongalleri.innsender.navn)
-        with(behandling.persongalleri.soeker) {
+        with(behandling.personerISak.soeker) {
             assertEquals("Søker", fornavn)
             assertEquals("Mellom", mellomnavn)
             assertEquals("Barn", etternavn)
         }
-        assertEquals("Død Mellom Far", behandling.persongalleri.avdoed.navn)
+        assertEquals("Død Mellom Far", behandling.personerISak.avdoed.navn)
         assertEquals(VedtakType.INNVILGELSE, behandling.vedtak.type)
         assertEquals(123L, behandling.vedtak.id)
         assertEquals(ENHET, behandling.vedtak.ansvarligEnhet)
@@ -224,9 +223,9 @@ internal class SakOgBehandlingServiceTest {
             opplysningsmapSakOverrides =
                 mapOf(
                     Opplysningstype.SPRAAK to opprettOpplysning(Spraak.NB.toJsonNode()),
-                    Opplysningstype.INNSENDER_SOEKNAD_V1 to
+                    Opplysningstype.PERSONGALLERI_V1 to
                         opprettOpplysning(
-                            innsenderSoeknad(FNR.value).toJsonNode(),
+                            Persongalleri(soeker = FNR.value, innsender = "innsender").toJsonNode(),
                         ),
                 ),
         ).hentOpplysningsgrunnlag()

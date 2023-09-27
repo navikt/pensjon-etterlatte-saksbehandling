@@ -1,5 +1,6 @@
 package no.nav.etterlatte.behandling
 
+import io.kotest.assertions.any
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.just
@@ -10,6 +11,7 @@ import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.Context
 import no.nav.etterlatte.DatabaseKontekst
+import no.nav.etterlatte.GrunnlagKlientTest
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
@@ -134,7 +136,7 @@ class BehandlingServiceImplTest {
             }
         val hendelseskanalMock =
             mockk<BehandlingHendelserKafkaProducer> {
-                every { sendMeldingForHendelse(any(), any()) } returns Unit
+                every { sendMeldingForHendelseMedDetaljertBehandling(any(), any()) } returns Unit
             }
         val grunnlagsendringshendelseDaoMock =
             mockk<GrunnlagsendringshendelseDao> {
@@ -158,6 +160,7 @@ class BehandlingServiceImplTest {
                 grunnlagsendringshendelseDao = grunnlagsendringshendelseDaoMock,
                 featureToggleService = featureToggleService,
                 oppgaveService = oppgaveServiceMock,
+                grunnlagKlient = GrunnlagKlientTest(),
             )
 
         val saksbehandler = Saksbehandler("", "saksbehandler", null)
@@ -193,7 +196,7 @@ class BehandlingServiceImplTest {
             }
         val behandlingHendelserKafkaProducer =
             mockk<BehandlingHendelserKafkaProducer> {
-                every { sendMeldingForHendelse(any(), any()) } returns Unit
+                every { sendMeldingForHendelseMedDetaljertBehandling(any(), any()) } returns Unit
             }
         val grunnlagsendringshendelseDaoMock =
             mockk<GrunnlagsendringshendelseDao> {
@@ -217,6 +220,7 @@ class BehandlingServiceImplTest {
                 hendelseDao = hendelserMock,
                 featureToggleService = featureToggleService,
                 oppgaveService = oppgaveServiceMock,
+                grunnlagKlient = GrunnlagKlientTest(),
             )
 
         behandlingService.avbrytBehandling(nyFoerstegangsbehandling.id, Saksbehandler("", "saksbehandler", null))
@@ -264,7 +268,7 @@ class BehandlingServiceImplTest {
             }
         val behandlingHendelserKafkaProducer =
             mockk<BehandlingHendelserKafkaProducer> {
-                every { sendMeldingForHendelse(any(), any()) } returns Unit
+                every { sendMeldingForHendelseMedDetaljertBehandling(any(), any()) } returns Unit
             }
         val grunnlagsendringshendelseDaoMock =
             mockk<GrunnlagsendringshendelseDao> {
@@ -315,8 +319,8 @@ class BehandlingServiceImplTest {
         val behandlingHendelserKafkaProducerMock =
             mockk<BehandlingHendelserKafkaProducer> {
                 every {
-                    sendMeldingForHendelse(
-                        nyFoerstegangsbehandling,
+                    sendMeldingForHendelseMedDetaljertBehandling(
+                        any(),
                         BehandlingHendelseType.AVBRUTT,
                     )
                 } returns Unit
@@ -343,12 +347,13 @@ class BehandlingServiceImplTest {
                 hendelseDao = hendelserMock,
                 featureToggleService = featureToggleService,
                 oppgaveService = oppgaveServiceMock,
+                grunnlagKlient = GrunnlagKlientTest(),
             )
 
         behandlingService.avbrytBehandling(nyFoerstegangsbehandling.id, Saksbehandler("", "saksbehandler", null))
         verify {
-            behandlingHendelserKafkaProducerMock.sendMeldingForHendelse(
-                nyFoerstegangsbehandling,
+            behandlingHendelserKafkaProducerMock.sendMeldingForHendelseMedDetaljertBehandling(
+                any(),
                 BehandlingHendelseType.AVBRUTT,
             )
         }
@@ -371,8 +376,8 @@ class BehandlingServiceImplTest {
         val behandlingHendelserKafkaProducer =
             mockk<BehandlingHendelserKafkaProducer> {
                 every {
-                    sendMeldingForHendelse(
-                        nyFoerstegangsbehandling,
+                    sendMeldingForHendelseMedDetaljertBehandling(
+                        any(),
                         BehandlingHendelseType.AVBRUTT,
                     )
                 } returns Unit
@@ -398,6 +403,7 @@ class BehandlingServiceImplTest {
                 hendelseDao = hendelserMock,
                 featureToggleService = featureToggleService,
                 oppgaveService = oppgaveServiceMock,
+                grunnlagKlient = GrunnlagKlientTest(),
             )
 
         behandlingService.avbrytBehandling(nyFoerstegangsbehandling.id, Saksbehandler("", "saksbehandler", null))
@@ -433,18 +439,21 @@ class BehandlingServiceImplTest {
         val personopplysning = personOpplysning(doedsdato = doedsdato)
         val grunnlagsopplysningMedPersonopplysning = grunnlagsOpplysningMedPersonopplysning(personopplysning)
 
+        val grunnlagKlient =
+            mockk<GrunnlagKlientTest> {
+                coEvery {
+                    finnPersonOpplysning(SAK_ID, opplysningstype, TOKEN)
+                } returns grunnlagsopplysningMedPersonopplysning
+                coEvery { hentPersongalleri(any(), any()) } answers { callOriginal() }
+            }
+
         val service =
             lagRealGenerellBehandlingService(
                 behandlingDao =
                     mockk {
                         every { hentBehandling(BEHANDLINGS_ID) } returns behandling
                     },
-                grunnlagKlient =
-                    mockk {
-                        coEvery {
-                            finnPersonOpplysning(SAK_ID, opplysningstype, TOKEN)
-                        } returns grunnlagsopplysningMedPersonopplysning
-                    },
+                grunnlagKlient = grunnlagKlient,
                 featureToggleService =
                     mockk {
                         every { isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false) } returns false
@@ -755,7 +764,13 @@ class BehandlingServiceImplTest {
             )
         val personopplysning = personOpplysning(doedsdato = doedsdato)
         val grunnlagsopplysningMedPersonopplysning = grunnlagsOpplysningMedPersonopplysning(personopplysning)
-
+        val grunnlagKlient =
+            mockk<GrunnlagKlientTest> {
+                coEvery {
+                    finnPersonOpplysning(SAK_ID, Opplysningstype.AVDOED_PDL_V1, TOKEN)
+                } returns grunnlagsopplysningMedPersonopplysning
+                coEvery { hentPersongalleri(any(), any()) } answers { callOriginal() }
+            }
         return lagRealGenerellBehandlingService(
             behandlingDao =
                 mockk {
@@ -763,12 +778,7 @@ class BehandlingServiceImplTest {
                         hentBehandling(BEHANDLINGS_ID)
                     } returns behandling
                 },
-            grunnlagKlient =
-                mockk {
-                    coEvery {
-                        finnPersonOpplysning(SAK_ID, Opplysningstype.AVDOED_PDL_V1, TOKEN)
-                    } returns grunnlagsopplysningMedPersonopplysning
-                },
+            grunnlagKlient = grunnlagKlient,
             featureToggleService =
                 mockk {
                     every { isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false) } returns false

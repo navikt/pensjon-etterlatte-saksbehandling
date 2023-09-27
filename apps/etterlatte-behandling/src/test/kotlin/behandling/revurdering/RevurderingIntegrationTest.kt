@@ -20,6 +20,7 @@ import no.nav.etterlatte.behandling.domain.GrunnlagsendringsType
 import no.nav.etterlatte.behandling.domain.Grunnlagsendringshendelse
 import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.behandling.domain.SamsvarMellomKildeOgGrunnlag
+import no.nav.etterlatte.behandling.domain.toStatistikkBehandling
 import no.nav.etterlatte.common.DatabaseContext
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
@@ -160,7 +161,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
         }
         inTransaction {
             assertEquals(revurdering, applicationContext.behandlingDao.hentBehandling(revurdering!!.id))
-            verify { hendelser.sendMeldingForHendelse(revurdering, BehandlingHendelseType.OPPRETTET) }
+            verify { hendelser.sendMeldingForHendelseMedDetaljertBehandling(any(), BehandlingHendelseType.OPPRETTET) }
         }
         confirmVerified(hendelser, grunnlagService, oppgaveService)
     }
@@ -266,7 +267,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
         inTransaction {
             val ferdigRevurdering = applicationContext.behandlingDao.hentBehandling(revurdering.id) as Revurdering
             assertEquals(nyRevurderingInfo, ferdigRevurdering.revurderingInfo?.revurderingInfo)
-            verify { hendelser.sendMeldingForHendelse(revurdering, BehandlingHendelseType.OPPRETTET) }
+            verify { hendelser.sendMeldingForHendelseMedDetaljertBehandling(any(), BehandlingHendelseType.OPPRETTET) }
             verify { grunnlagService.leggInnNyttGrunnlag(revurdering, any()) }
             verify { oppgaveService.hentOppgaverForSak(sak.id) }
             coVerify { grunnlagService.hentPersongalleri(any()) }
@@ -459,7 +460,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
             verify { grunnlagService.leggInnNyttGrunnlag(behandling as Behandling, any()) }
             verify { grunnlagService.leggInnNyttGrunnlag(revurdering, any()) }
             verify { oppgaveService.hentOppgaverForSak(sak.id) }
-            verify { hendelser.sendMeldingForHendelse(revurdering, BehandlingHendelseType.OPPRETTET) }
+            verify { hendelser.sendMeldingForHendelseMedDetaljertBehandling(any(), BehandlingHendelseType.OPPRETTET) }
             verify {
                 oppgaveService.opprettNyOppgaveMedSakOgReferanse(
                     behandling!!.id.toString(),
@@ -486,7 +487,14 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
                 )
             }
             verify { oppgaveService.ferdigStillOppgaveUnderBehandling(any(), any()) }
-            verify { hendelser.sendMeldingForHendelse(behandling as Behandling, BehandlingHendelseType.OPPRETTET) }
+            verify {
+                hendelser.sendMeldingForHendelseMedDetaljertBehandling(
+                    behandling!!.toStatistikkBehandling(
+                        persongalleri(),
+                    ),
+                    BehandlingHendelseType.OPPRETTET,
+                )
+            }
             confirmVerified(hendelser, grunnlagService, oppgaveService)
         }
     }

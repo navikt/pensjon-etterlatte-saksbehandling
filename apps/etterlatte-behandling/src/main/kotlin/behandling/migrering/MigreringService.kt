@@ -6,6 +6,7 @@ import no.nav.etterlatte.behandling.BehandlingHendelserKafkaProducer
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.GyldighetsproevingService
 import no.nav.etterlatte.behandling.domain.Behandling
+import no.nav.etterlatte.behandling.domain.toStatistikkBehandling
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeService
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.JaNei
@@ -52,7 +53,10 @@ class MigreringService(
                 oppgaveService.hentOppgaverForSak(it.sak.id).first { o -> o.referanse == it.id.toString() }
             oppgaveService.tildelSaksbehandler(nyopprettaOppgave.id, pesys)
 
-            behandlingsHendelser.sendMeldingForHendelse(it, BehandlingHendelseType.OPPRETTET)
+            behandlingsHendelser.sendMeldingForHendelseMedDetaljertBehandling(
+                it.toStatistikkBehandling(request.opprettPersongalleri()),
+                BehandlingHendelseType.OPPRETTET,
+            )
             it
         }
 

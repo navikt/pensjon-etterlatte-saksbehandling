@@ -1,5 +1,6 @@
 package no.nav.etterlatte.behandling.manueltopphoer
 
+import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.BehandlingHendelseType
@@ -11,6 +12,7 @@ import no.nav.etterlatte.behandling.domain.ManueltOpphoer
 import no.nav.etterlatte.behandling.domain.OpprettBehandling
 import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.behandling.domain.toBehandlingOpprettet
+import no.nav.etterlatte.behandling.domain.toStatistikkBehandling
 import no.nav.etterlatte.behandling.filterBehandlingerForEnheter
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.hendelse.HendelseType
@@ -124,8 +126,9 @@ class RealManueltOpphoerService(
                 (behandlingDao.hentBehandling(id) as ManueltOpphoer).sjekkEnhet()
             }
         }?.also { lagretManueltOpphoer ->
-            behandlingHendelser.sendMeldingForHendelse(
-                lagretManueltOpphoer,
+            val persongalleri = runBlocking { grunnlagService.hentPersongalleri(opphoerRequest.sakId) }
+            behandlingHendelser.sendMeldingForHendelseMedDetaljertBehandling(
+                lagretManueltOpphoer.toStatistikkBehandling(persongalleri = persongalleri),
                 BehandlingHendelseType.OPPRETTET,
             )
             logger.info("Manuelt opphør med id=${lagretManueltOpphoer.id} er opprettet.")

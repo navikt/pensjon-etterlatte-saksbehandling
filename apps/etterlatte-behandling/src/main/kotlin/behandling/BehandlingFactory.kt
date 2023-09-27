@@ -4,6 +4,7 @@ import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.OpprettBehandling
 import no.nav.etterlatte.behandling.domain.toBehandlingOpprettet
+import no.nav.etterlatte.behandling.domain.toStatistikkBehandling
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.revurdering.RevurderingService
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
@@ -156,7 +157,10 @@ class BehandlingFactory(
                         referanse = behandling.id.toString(),
                         sakId = sak.id,
                     )
-                    behandlingHendelser.sendMeldingForHendelse(it, BehandlingHendelseType.OPPRETTET)
+                    behandlingHendelser.sendMeldingForHendelseMedDetaljertBehandling(
+                        it.toStatistikkBehandling(persongalleri),
+                        BehandlingHendelseType.OPPRETTET,
+                    )
                 }
             }
         }

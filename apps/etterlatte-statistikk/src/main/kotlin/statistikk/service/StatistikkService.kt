@@ -7,6 +7,7 @@ import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.behandling.StatistikkBehandling
 import no.nav.etterlatte.libs.common.behandling.UTBETALINGSDAG
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
@@ -29,7 +30,6 @@ import no.nav.etterlatte.statistikk.domain.SakYtelsesgruppe
 import no.nav.etterlatte.statistikk.domain.SoeknadFormat
 import no.nav.etterlatte.statistikk.domain.StoenadRad
 import no.nav.etterlatte.statistikk.river.BehandlingHendelse
-import no.nav.etterlatte.statistikk.river.BehandlingIntern
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.time.YearMonth
@@ -135,7 +135,12 @@ class StatistikkService(
             behandlingStatus = hendelse.name,
             behandlingResultat = behandlingResultatFraVedtak(vedtak, hendelse, detaljertBehandling),
             resultatBegrunnelse = null,
-            behandlingMetode = detaljertBehandling.behandlingMetode(vedtak.attestasjon),
+            behandlingMetode =
+                hentBehandlingMetode(
+                    vedtak.attestasjon,
+                    detaljertBehandling.prosesstype,
+                    detaljertBehandling.revurderingsaarsak,
+                ),
             soeknadFormat = SoeknadFormat.DIGITAL,
             opprettetAv = "GJENNY",
             ansvarligBeslutter = vedtak.attestasjon?.attestant,
@@ -150,7 +155,7 @@ class StatistikkService(
             sakUtland = SakUtland.NASJONAL,
             beregning = beregning,
             avkorting = avkorting,
-            sakYtelsesgruppe = detaljertBehandling.sakYtelsesgruppe(),
+            sakYtelsesgruppe = hentSakYtelsesgruppe(detaljertBehandling.sakType, detaljertBehandling.avdoed ?: emptyList()),
             avdoedeForeldre = detaljertBehandling.avdoed,
             revurderingAarsak = detaljertBehandling.revurderingsaarsak?.name,
         )
@@ -225,52 +230,50 @@ class StatistikkService(
     }
 
     private fun behandlingTilSakRad(
-        behandlingIntern: BehandlingIntern,
+        statistikkBehandling: StatistikkBehandling,
         behandlingHendelse: BehandlingHendelse,
         tekniskTid: LocalDateTime,
     ): SakRad {
-        val detaljertBehandling = hentDetaljertBehandling(behandlingId = behandlingIntern.id)
-
         val fellesRad =
             SakRad(
                 id = -1,
-                behandlingId = behandlingIntern.id,
-                sakId = behandlingIntern.sak.id,
-                mottattTidspunkt = behandlingIntern.behandlingOpprettet.toTidspunkt(),
-                registrertTidspunkt = behandlingIntern.behandlingOpprettet.toTidspunkt(),
+                behandlingId = statistikkBehandling.id,
+                sakId = statistikkBehandling.sak.id,
+                mottattTidspunkt = statistikkBehandling.behandlingOpprettet.toTidspunkt(),
+                registrertTidspunkt = statistikkBehandling.behandlingOpprettet.toTidspunkt(),
                 ferdigbehandletTidspunkt = null,
                 vedtakTidspunkt = null,
-                behandlingType = behandlingIntern.type,
+                behandlingType = statistikkBehandling.behandlingType,
                 behandlingStatus = behandlingHendelse.name,
                 behandlingResultat = null,
                 resultatBegrunnelse = null,
-                behandlingMetode = detaljertBehandling.behandlingMetode(null),
+                behandlingMetode = hentBehandlingMetode(null, statistikkBehandling.prosesstype, statistikkBehandling.revurderingsaarsak),
                 opprettetAv = "GJENNY",
                 ansvarligBeslutter = null,
-                aktorId = behandlingIntern.sak.ident,
+                aktorId = statistikkBehandling.sak.ident,
                 datoFoersteUtbetaling = null,
                 tekniskTid = tekniskTid.toTidspunkt(),
-                sakYtelse = behandlingIntern.sak.sakType.name,
+                sakYtelse = statistikkBehandling.sak.sakType.name,
                 vedtakLoependeFom = null,
                 vedtakLoependeTom = null,
                 saksbehandler = null,
-                ansvarligEnhet = detaljertBehandling.enhet,
+                ansvarligEnhet = statistikkBehandling.enhet,
                 soeknadFormat = SoeknadFormat.DIGITAL,
                 sakUtland = SakUtland.NASJONAL,
                 beregning = null,
                 avkorting = null,
-                sakYtelsesgruppe = detaljertBehandling.sakYtelsesgruppe(),
+                sakYtelsesgruppe = hentSakYtelsesgruppe(statistikkBehandling.sak.sakType, statistikkBehandling.avdoed ?: emptyList()),
                 avdoedeForeldre =
-                    if (detaljertBehandling.sakType == SakType.BARNEPENSJON) {
-                        detaljertBehandling.avdoed
+                    if (statistikkBehandling.sak.sakType == SakType.BARNEPENSJON) {
+                        statistikkBehandling.avdoed
                     } else {
                         null
                     },
-                revurderingAarsak = detaljertBehandling.revurderingsaarsak?.name,
+                revurderingAarsak = statistikkBehandling.revurderingsaarsak?.name,
             )
         if (behandlingHendelse == BehandlingHendelse.AVBRUTT) {
             return fellesRad.copy(
-                ferdigbehandletTidspunkt = behandlingIntern.sistEndret.toTidspunkt(),
+                ferdigbehandletTidspunkt = statistikkBehandling.sistEndret.toTidspunkt(),
                 behandlingResultat = BehandlingResultat.AVBRUTT,
             )
         }
@@ -278,11 +281,11 @@ class StatistikkService(
     }
 
     fun registrerStatistikkForBehandlinghendelse(
-        behandlingIntern: BehandlingIntern,
+        statistikkBehandling: StatistikkBehandling,
         hendelse: BehandlingHendelse,
         tekniskTid: LocalDateTime,
     ): SakRad? {
-        return sakRepository.lagreRad(behandlingTilSakRad(behandlingIntern, hendelse, tekniskTid))
+        return sakRepository.lagreRad(behandlingTilSakRad(statistikkBehandling, hendelse, tekniskTid))
     }
 
     fun statistikkProdusertForMaaned(maaned: YearMonth): KjoertStatus {
@@ -316,15 +319,22 @@ enum class VedtakHendelse {
     IVERKSATT,
 }
 
-internal fun DetaljertBehandling.sakYtelsesgruppe(): SakYtelsesgruppe? =
-    when (this.sakType to this.avdoed?.size) {
+internal fun hentSakYtelsesgruppe(
+    sakType: SakType,
+    avdoede: List<String>,
+): SakYtelsesgruppe? =
+    when (sakType to avdoede.size) {
         SakType.BARNEPENSJON to 1 -> SakYtelsesgruppe.EN_AVDOED_FORELDER
         SakType.BARNEPENSJON to 2 -> SakYtelsesgruppe.FORELDRELOES
         else -> null
     }
 
-internal fun DetaljertBehandling.behandlingMetode(attestasjon: Attestasjon?): BehandlingMetode =
-    when (this.prosesstype) {
+internal fun hentBehandlingMetode(
+    attestasjon: Attestasjon?,
+    prosesstype: Prosesstype,
+    revurderingAarsak: RevurderingAarsak?,
+): BehandlingMetode =
+    when (prosesstype) {
         Prosesstype.MANUELL ->
             if (attestasjon != null) {
                 BehandlingMetode.TOTRINN
@@ -333,7 +343,7 @@ internal fun DetaljertBehandling.behandlingMetode(attestasjon: Attestasjon?): Be
             }
 
         Prosesstype.AUTOMATISK ->
-            if (this.revurderingsaarsak == RevurderingAarsak.REGULERING) {
+            if (revurderingAarsak == RevurderingAarsak.REGULERING) {
                 BehandlingMetode.AUTOMATISK_REGULERING
             } else {
                 BehandlingMetode.AUTOMATISK

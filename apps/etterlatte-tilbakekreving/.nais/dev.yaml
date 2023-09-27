@@ -53,8 +53,8 @@ spec:
     - name: ETTERLATTE_BEHANDLING_SCOPE
       value: api://dev-gcp.etterlatte.etterlatte-behandling/.default
   accessPolicy:
-    external:
-      - host: etterlatte-unleash-api.nav.cloud.nais.io
     outbound:
       rules:
         - application: etterlatte-behandling
+      external:
+        - host: etterlatte-unleash-api.nav.cloud.nais.io

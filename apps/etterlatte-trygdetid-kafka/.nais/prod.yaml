@@ -40,5 +40,5 @@ spec:
     outbound:
       rules:
         - application: etterlatte-trygdetid
-    external:
-      - host: etterlatte-unleash-api.nav.cloud.nais.io
+      external:
+        - host: etterlatte-unleash-api.nav.cloud.nais.io

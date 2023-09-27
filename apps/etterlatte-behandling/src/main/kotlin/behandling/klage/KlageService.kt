@@ -1,7 +1,6 @@
 package no.nav.etterlatte.behandling.klage
 
 import io.ktor.server.plugins.NotFoundException
-import io.ktor.util.toLowerCasePreservingASCIIRules
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.klienter.BrevApiKlient
@@ -273,7 +272,7 @@ class KlageServiceImpl(
             sakId = klage.sak.id,
             oppgaveKilde = OppgaveKilde.BEHANDLING,
             oppgaveType = OppgaveType.OMGJOERING,
-            merknad = "Vedtak om ${vedtaketKlagenGjelder.vedtakType?.toString()?.toLowerCasePreservingASCIIRules()} (${
+            merknad = "Vedtak om ${vedtaketKlagenGjelder.vedtakType?.toString()?.lowercase()} (${
                 vedtaketKlagenGjelder.datoAttestert?.format(
                     DateTimeFormatter.ISO_LOCAL_DATE,
                 )

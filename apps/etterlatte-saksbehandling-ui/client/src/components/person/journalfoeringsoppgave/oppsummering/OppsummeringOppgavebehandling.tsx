@@ -17,7 +17,8 @@ export default function OppsummeringOppgavebehandling() {
 
   const tilbake = () => navigate('../nybehandling', { relative: 'path' })
 
-  if (!behandlingBehov || !oppgave) {
+  const persongalleri = behandlingBehov?.persongalleri
+  if (!behandlingBehov || !oppgave || !persongalleri) {
     return <Navigate to="../nybehandling" relative="path" />
   }
 
@@ -30,24 +31,24 @@ export default function OppsummeringOppgavebehandling() {
       <InfoList>
         <div>
           <Tag variant="success" size="medium">
-            {formaterSakstype(oppgave!!.sakType)}
+            {formaterSakstype(oppgave.sakType)}
           </Tag>
         </div>
 
-        <Info label="Søker" tekst={behandlingBehov!!.persongalleri!!.soeker} />
-        <Info label="Innsender" tekst={behandlingBehov?.persongalleri?.innsender || <i>Ikke oppgitt</i>} />
+        <Info label="Søker" tekst={persongalleri.soeker} />
+        <Info label="Innsender" tekst={persongalleri.innsender || <i>Ikke oppgitt</i>} />
 
-        {oppgave!!.sakType === SakType.BARNEPENSJON &&
-          behandlingBehov!!.persongalleri!!.gjenlevende!!.map((gjenlevende) => (
+        {oppgave.sakType === SakType.BARNEPENSJON &&
+          persongalleri.gjenlevende!!.map((gjenlevende) => (
             <Info key={gjenlevende} label="Gjenlevende" tekst={gjenlevende || ''} />
           ))}
 
-        {behandlingBehov!!.persongalleri!!.avdoed!!.map((avdoed) => (
+        {persongalleri.avdoed!!.map((avdoed) => (
           <Info key={avdoed} label="Avdød" tekst={avdoed} />
         ))}
 
-        {!behandlingBehov?.persongalleri?.soesken?.length && <Detail>Ingen barn/søsken oppgitt</Detail>}
-        {behandlingBehov?.persongalleri?.soesken?.map((soeskenEllerBarn) =>
+        {!persongalleri.soesken?.length && <Detail>Ingen barn/søsken oppgitt</Detail>}
+        {persongalleri.soesken?.map((soeskenEllerBarn) =>
           oppgave!!.sakType === SakType.BARNEPENSJON ? (
             <Info key={soeskenEllerBarn} label="Søsken" tekst={soeskenEllerBarn || ''} />
           ) : (
@@ -62,7 +63,7 @@ export default function OppsummeringOppgavebehandling() {
             Tilbake
           </Button>
 
-          <FullfoerOppgaveModal oppgave={oppgave!!} behandlingBehov={behandlingBehov!!} />
+          <FullfoerOppgaveModal oppgave={oppgave} behandlingBehov={behandlingBehov} />
         </FlexRow>
         <FlexRow justify="center">
           <AvbrytBehandleJournalfoeringOppgave />

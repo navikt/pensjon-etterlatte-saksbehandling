@@ -243,7 +243,7 @@ internal class VilkaarsvurderingServiceTest {
                 service.opprettVilkaarsvurdering(uuid, brukerTokenInfo)
             }
 
-        vilkaarsvurdering.vilkaar shouldHaveSize 9
+        vilkaarsvurdering.vilkaar shouldHaveSize 10
         vilkaarsvurdering.vilkaar.any { it.hovedvilkaar.type === VilkaarType.OMS_AVDOEDES_MEDLEMSKAP_EOES } shouldBe true
     }
 

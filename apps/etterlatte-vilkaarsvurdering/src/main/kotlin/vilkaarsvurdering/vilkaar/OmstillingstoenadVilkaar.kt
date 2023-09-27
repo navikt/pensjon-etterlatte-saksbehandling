@@ -272,11 +272,11 @@ object OmstillingstoenadVilkaar {
                     tittel = "Øvrige vilkår for ytelser",
                     beskrivelse =
                         """
-                        For at dette vilkåret skal være oppfylt, og gjenlevende ektefelle ha rett til ytelser etter dette kapitlet, må ett av disse vilkårene være oppfylt på tidspunktet for dødsfallet:
+                        For at dette vilkåret skal være oppfylt, og gjenlevende ektefelle (§1-5 samboer likestilles) ha rett til ytelser etter dette kapitlet, må ett av disse vilkårene være oppfylt på tidspunktet for dødsfallet:
                         
                         a) var gift med den avdøde og ekteskapet hadde vart i minst fem år,
-                        b) har eller har hatt barn med den avdøde eller
-                        c) har omsorg for barn under 18 år med minst halvparten av full tid.
+                        b) har eller har hatt barn med den avdøde, eller
+                        c) har omsorg for barn under 18 år med minst halvparten av full tid (bestemmelsen gjelder også for barn som gjenlevende har med andre enn avdøde).
                         
                         Til en fraskilt person som helt eller i det vesentlige har vært forsørget av bidrag fra den avdøde, kan det ytes stønad etter dette kapitlet dersom ekteskapet varte i minst 25 år, eller minst 15 år hvis ektefellene hadde barn sammen.
                         """.trimIndent(),

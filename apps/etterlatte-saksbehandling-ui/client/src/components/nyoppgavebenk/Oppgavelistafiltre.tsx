@@ -96,12 +96,13 @@ const OPPGAVETYPEFILTER: Record<OppgavetypeFilterKeys, string> = {
   UTLAND: 'Utland',
   KLAGE: 'Klage',
   TILBAKEKREVING: 'Tilbakekreving',
+  OMGJOERING: 'Omgjøring',
 } as const
 
 export const oppgavetypefilter = (kanBrukeKlage: boolean): Array<[OppgavetypeFilterKeys, string]> => {
   const entries = Object.entries(OPPGAVETYPEFILTER) as Array<[OppgavetypeFilterKeys, string]>
   if (!kanBrukeKlage) {
-    return entries.filter(([key]) => key !== 'KLAGE')
+    return entries.filter(([key]) => key !== 'KLAGE' && key !== 'OMGJOERING')
   }
   return entries
 }

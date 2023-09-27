@@ -6,6 +6,7 @@ import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.request.post
+import io.ktor.client.request.put
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
@@ -13,25 +14,37 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import io.ktor.serialization.jackson.jackson
 import io.ktor.server.testing.testApplication
+import io.mockk.every
+import io.mockk.mockk
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.FastsettVirkningstidspunktResponse
 import no.nav.etterlatte.behandling.ManueltOpphoerResponse
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
+import no.nav.etterlatte.behandling.klage.VurdereFormkravDto
+import no.nav.etterlatte.behandling.klage.VurdertUtfallDto
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
 import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerAarsak
 import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerRequest
 import no.nav.etterlatte.behandling.objectMapper
 import no.nav.etterlatte.behandling.revurdering.RevurderingDao
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.funksjonsbrytere.FellesFeatureToggle
 import no.nav.etterlatte.kafka.TestProdusent
 import no.nav.etterlatte.libs.common.FoedselsnummerDTO
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingsBehov
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
+import no.nav.etterlatte.libs.common.behandling.Formkrav
+import no.nav.etterlatte.libs.common.behandling.GrunnForOmgjoering
+import no.nav.etterlatte.libs.common.behandling.InnstillingTilKabalUtenBrev
 import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.JaNeiMedBegrunnelse
+import no.nav.etterlatte.libs.common.behandling.Klage
+import no.nav.etterlatte.libs.common.behandling.KlageOmgjoering
+import no.nav.etterlatte.libs.common.behandling.KlageUtfallUtenBrev
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.behandling.VedtaketKlagenGjelder
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsTyper
@@ -51,6 +64,7 @@ import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
+import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.vedtaksvurdering.VedtakHendelse
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -67,7 +81,15 @@ import java.util.UUID
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class VerdikjedeTest : BehandlingIntegrationTest() {
     @BeforeAll
-    fun start() = startServer()
+    fun start() =
+        startServer(
+            // En enkel mock som skrur på alle toggles for verdikjedetesten
+            // overstyr egne ønskede toggles her om behovet oppstår
+            featureToggleService =
+                mockk<FeatureToggleService> {
+                    every { isEnabled(any(), any()) } returns true
+                },
+        )
 
     @AfterAll
     fun shutdown() = afterAll()
@@ -370,6 +392,77 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
                 assertEquals(HttpStatusCode.OK, it.status)
                 assertEquals(BehandlingStatus.IVERKSATT, behandling.status)
             }
+
+            // KLAGE
+            // Sniker seg inn her siden vi trenger en sak med en iverksatt behandling
+            val klage: Klage =
+                client.post("/api/klage/opprett/${sak.id}") {
+                    addAuthToken(tokenSaksbehandler)
+                }.body()
+            val medOppdatertFormkrav: Klage =
+                client.put("/api/klage/${klage.id}/formkrav") {
+                    addAuthToken(tokenSaksbehandler)
+                    contentType(ContentType.Application.Json)
+                    setBody(
+                        VurdereFormkravDto(
+                            Formkrav(
+                                vedtaketKlagenGjelder =
+                                    VedtaketKlagenGjelder(
+                                        123L.toString(),
+                                        UUID.randomUUID().toString(),
+                                        datoAttestert = null,
+                                        vedtakType = VedtakType.INNVILGELSE,
+                                    ),
+                                erKlagerPartISaken = JaNei.JA,
+                                erKlagenSignert = JaNei.JA,
+                                gjelderKlagenNoeKonkretIVedtaket = JaNei.JA,
+                                erKlagenFramsattInnenFrist = JaNei.JA,
+                                erFormkraveneOppfylt = JaNei.JA,
+                            ),
+                        ),
+                    )
+                }.body()
+            val medUtfall =
+                client.put("/api/klage/${medOppdatertFormkrav.id}/utfall") {
+                    addAuthToken(tokenSaksbehandler)
+                    contentType(ContentType.Application.Json)
+                    setBody(
+                        VurdertUtfallDto(
+                            KlageUtfallUtenBrev.DelvisOmgjoering(
+                                omgjoering =
+                                    KlageOmgjoering(
+                                        grunnForOmgjoering = GrunnForOmgjoering.FEIL_LOVANVENDELSE,
+                                        begrunnelse = "Vi skjønte ikke",
+                                    ),
+                                innstilling = InnstillingTilKabalUtenBrev(lovhjemmel = "En hjemmel", tekst = "En tekst"),
+                            ),
+                        ),
+                    )
+                }.body<Klage>()
+
+            val oppgaverKlage: List<OppgaveIntern> =
+                client.get("/api/nyeoppgaver") {
+                    addAuthToken(tokenSaksbehandler)
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                }.also {
+                    assertEquals(HttpStatusCode.OK, it.status)
+                }.body()
+            val oppgaverforbehandlingKlage = oppgaverKlage.filter { it.referanse == klage.id.toString() }
+            client.post("/api/nyeoppgaver/${oppgaverforbehandlingKlage[0].id}/tildel-saksbehandler/") {
+                addAuthToken(tokenSaksbehandler)
+                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                setBody(SaksbehandlerEndringDto("Saksbehandler01"))
+            }.also {
+                assertEquals(HttpStatusCode.OK, it.status)
+            }
+
+            val ferdigstiltKlage =
+                client.post("/api/klage/${medUtfall.id}/ferdigstill") {
+                    addAuthToken(tokenSaksbehandler)
+                }.body<Klage>()
+
+            assertNotNull(ferdigstiltKlage.resultat?.opprettetOppgaveOmgjoeringId)
+            assertNotNull(ferdigstiltKlage.resultat?.sendtInnstillingsbrev)
 
             client.post("/grunnlagsendringshendelse/doedshendelse") {
                 addAuthToken(systemBruker)

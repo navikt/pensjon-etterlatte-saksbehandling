@@ -101,6 +101,7 @@ enum class OppgaveType {
     UTLAND,
     KLAGE,
     TILBAKEKREVING,
+    OMGJOERING,
 }
 
 data class SaksbehandlerEndringDto(

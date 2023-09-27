@@ -72,7 +72,7 @@ data class SendtInnstillingsbrev(
 )
 
 data class KlageResultat(
-    val opprettetRevurderingId: UUID?,
+    val opprettetOppgaveOmgjoeringId: UUID?,
     val sendtInnstillingsbrev: SendtInnstillingsbrev?,
 )
 

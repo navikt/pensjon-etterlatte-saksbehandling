@@ -7,8 +7,8 @@ import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.utbetaling.UtbetalingResponseDto
 import no.nav.etterlatte.libs.common.utbetaling.UtbetalingStatusDto
-import no.nav.etterlatte.libs.common.vedtak.KafkaHendelseType
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
+import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseType
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.sikkerLogg
 import no.nav.etterlatte.utbetaling.common.UtbetalingEventDto
@@ -35,7 +35,7 @@ class VedtakMottaker(
 ) : ListenerMedLogging() {
     init {
         River(rapidsConnection).apply {
-            eventName(KafkaHendelseType.ATTESTERT.toString())
+            eventName(VedtakKafkaHendelseType.ATTESTERT.toString())
             validate { it.requireKey("vedtak") }
             validate {
                 it.requireAny(

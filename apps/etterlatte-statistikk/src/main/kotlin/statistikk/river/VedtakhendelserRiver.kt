@@ -6,9 +6,8 @@ import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.TEKNISK_TID_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.toJson
-import no.nav.etterlatte.libs.common.vedtak.KafkaHendelseType
+import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseType
 import no.nav.etterlatte.statistikk.service.StatistikkService
-import no.nav.etterlatte.statistikk.service.VedtakHendelse
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -23,10 +22,10 @@ class VedtakhendelserRiver(
 ) : ListenerMedLogging() {
     private val vedtakshendelser =
         listOf(
-            KafkaHendelseType.FATTET.toString(),
-            KafkaHendelseType.ATTESTERT.toString(),
-            KafkaHendelseType.UNDERKJENT.toString(),
-            KafkaHendelseType.IVERKSATT.toString(),
+            VedtakKafkaHendelseType.FATTET.toString(),
+            VedtakKafkaHendelseType.ATTESTERT.toString(),
+            VedtakKafkaHendelseType.UNDERKJENT.toString(),
+            VedtakKafkaHendelseType.IVERKSATT.toString(),
         )
 
     val logger: Logger = LoggerFactory.getLogger(this::class.java)
@@ -44,7 +43,7 @@ class VedtakhendelserRiver(
         packet: JsonMessage,
         context: MessageContext,
     ) = try {
-        val vedtakshendelse = enumValueOf<VedtakHendelse>(packet[EVENT_NAME_KEY].textValue().split(":")[1])
+        val vedtakshendelse = enumValueOf<VedtakKafkaHendelseType>(packet[EVENT_NAME_KEY].textValue().split(":")[1])
         val tekniskTid = parseTekniskTid(packet, logger)
         service.registrerStatistikkForVedtak(
             objectMapper.treeToValue(packet["vedtak"]),

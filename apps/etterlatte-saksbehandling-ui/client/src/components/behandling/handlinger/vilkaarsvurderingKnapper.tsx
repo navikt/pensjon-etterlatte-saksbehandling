@@ -3,10 +3,17 @@ import { Button } from '@navikt/ds-react'
 import { useBehandlingRoutes } from '../BehandlingRoutes'
 import { useState } from 'react'
 import { useVedtaksResultat } from '../useVedtaksResultat'
+import { isFailure, isPending, useApiCall } from '~shared/hooks/useApiCall'
+import { upsertVedtak } from '~shared/api/behandling'
+import { useParams } from 'react-router-dom'
+import { ApiErrorAlert } from '~ErrorBoundary'
 
 export const VilkaarsVurderingKnapper = () => {
   const { next, goto } = useBehandlingRoutes()
   const [ventNavn, setVentNavn] = useState<string>(handlinger.VILKAARSVURDERING.VENT.navn)
+  const [vedtak, oppdaterVedtakRequest] = useApiCall(upsertVedtak)
+  const { behandlingId } = useParams()
+
   const vedtaksresultat = useVedtaksResultat()
 
   function toggleVentNavn() {
@@ -17,16 +24,28 @@ export const VilkaarsVurderingKnapper = () => {
     setVentNavn(navn)
   }
 
+  const fiksVedtakVedAvslag = () => {
+    if (!behandlingId) throw new Error('Mangler behandlingsid')
+
+    oppdaterVedtakRequest(behandlingId, () => {
+      goto('brev')
+    })
+  }
   return (
     <>
       {(() => {
         switch (vedtaksresultat) {
           case 'avslag':
             return (
-              //TODO - Avslag
-              <Button variant="primary" onClick={() => goto('brev')}>
-                {handlinger.VILKAARSVURDERING.AVSLAG.navn}
-              </Button>
+              //TODO - Done
+              <>
+                <Button variant="primary" loading={isPending(vedtak)} onClick={() => fiksVedtakVedAvslag()}>
+                  {handlinger.VILKAARSVURDERING.AVSLAG.navn}
+                </Button>
+                {isFailure(vedtak) && (
+                  <ApiErrorAlert>Kunne ikke opprette eller oppdatere vedtak, prøv igjen senere</ApiErrorAlert>
+                )}
+              </>
             )
           case 'uavklart':
             return (

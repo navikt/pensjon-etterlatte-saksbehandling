@@ -3,11 +3,41 @@ import { Content, ContentHeader, FlexRow } from '~shared/styled'
 import { HeadingWrapper, InnholdPadding } from '~components/behandling/soeknadsoversikt/styled'
 import { useNavigate } from 'react-router-dom'
 import { useTilbakekreving } from '~components/tilbakekreving/useTilbakekreving'
-import React from 'react'
+import React, { useState } from 'react'
+import {
+  TilbakekrevingBeloep,
+  TilbakekrevingPeriode,
+  TilbakekrevingResultat,
+  TilbakekrevingSkyld,
+} from '~shared/types/Tilbakekreving'
+import { isPending, useApiCall } from '~shared/hooks/useApiCall'
+import { lagreTilbakekrevingsperioder } from '~shared/api/tilbakekreving'
+import { addTilbakekreving } from '~store/reducers/TilbakekrevingReducer'
+import { useAppDispatch } from '~store/Store'
 
 export function TilbakekrevingVurdering() {
-  const tilbakekreving = useTilbakekreving()
   const navigate = useNavigate()
+  const tilbakekreving = useTilbakekreving()
+  if (!tilbakekreving) throw new Error('Tilbakekreving finnes ikke i state!')
+  const dispatch = useAppDispatch()
+  const [lagreStatus, lagre] = useApiCall(lagreTilbakekrevingsperioder)
+  const [perioder, setPerioder] = useState<TilbakekrevingPeriode[]>(tilbakekreving.perioder)
+
+  const updateBeloeper = (index: number, oppdatertBeloep: TilbakekrevingBeloep) => {
+    const newArray = [...perioder]
+    newArray[index] = {
+      ...newArray[index],
+      ytelsebeloeper: oppdatertBeloep,
+    }
+    setPerioder(newArray)
+  }
+
+  const lagrePerioder = () => {
+    // TODO validering?
+    lagre({ tilbakekrevingsId: tilbakekreving.id, perioder }, (lagretTilbakekreving) => {
+      dispatch(addTilbakekreving(lagretTilbakekreving))
+    })
+  }
 
   return (
     <Content>
@@ -18,82 +48,169 @@ export function TilbakekrevingVurdering() {
           </Heading>
         </HeadingWrapper>
       </ContentHeader>
+      <InnholdPadding>Kommer</InnholdPadding>
+      <ContentHeader>
+        <HeadingWrapper>
+          <Heading level="2" size="medium">
+            Utbetalinger
+          </Heading>
+        </HeadingWrapper>
+      </ContentHeader>
       <InnholdPadding>
         <Table className="table" zebraStripes>
           <Table.Header>
-            <Table.HeaderCell>Måned</Table.HeaderCell>
-            <Table.HeaderCell>Beskrivelse</Table.HeaderCell>
-            <Table.HeaderCell>Brutto utbetaling</Table.HeaderCell>
-            <Table.HeaderCell>Ny brutto utbetaling</Table.HeaderCell>
-            <Table.HeaderCell>Beregnet feilutbetaling</Table.HeaderCell>
-            <Table.HeaderCell>Skatteprosent</Table.HeaderCell>
-            <Table.HeaderCell>Brutto tilbakekreving</Table.HeaderCell>
-            <Table.HeaderCell>Netto tilbakekreving</Table.HeaderCell>
-            <Table.HeaderCell>Skatt</Table.HeaderCell>
-            <Table.HeaderCell>Skyld</Table.HeaderCell>
-            <Table.HeaderCell>Resultat</Table.HeaderCell>
-            <Table.HeaderCell>Tilbakekrevingsprosent</Table.HeaderCell>
-            <Table.HeaderCell>Rentetillegg</Table.HeaderCell>
+            <Table.Row>
+              <Table.HeaderCell>Måned</Table.HeaderCell>
+              <Table.HeaderCell>Brutto utbetaling</Table.HeaderCell>
+              <Table.HeaderCell>Ny brutto utbetaling</Table.HeaderCell>
+              <Table.HeaderCell>Beregnet feilutbetaling</Table.HeaderCell>
+              <Table.HeaderCell>Skatteprosent</Table.HeaderCell>
+              <Table.HeaderCell>Brutto tilbakekreving</Table.HeaderCell>
+              <Table.HeaderCell>Netto tilbakekreving</Table.HeaderCell>
+              <Table.HeaderCell>Skatt</Table.HeaderCell>
+              <Table.HeaderCell>Skyld</Table.HeaderCell>
+              <Table.HeaderCell>Resultat</Table.HeaderCell>
+              <Table.HeaderCell>Tilbakekrevingsprosent</Table.HeaderCell>
+              <Table.HeaderCell>Rentetillegg</Table.HeaderCell>
+            </Table.Row>
           </Table.Header>
           <Table.Body>
-            {tilbakekreving?.utbetalinger.map((utbetaling) => {
+            {perioder.map((periode, index) => {
+              const beloeper = periode.ytelsebeloeper
               return (
-                <Table.Row key="test">
-                  <Table.DataCell key="maaned">{utbetaling.maaned.toString()}</Table.DataCell>
-                  <Table.DataCell key="beskrivelse">{utbetaling.type}</Table.DataCell>
-                  <Table.DataCell key="bruttoUtbetaling">{utbetaling.bruttoUtbetaling}</Table.DataCell>
-                  <Table.DataCell key="nyBruttoUtbetaling">{utbetaling.nyBruttoUtbetaling}</Table.DataCell>
-                  <Table.DataCell key="beregnetFeilutbetaling">{utbetaling.beregnetFeilutbetaling}</Table.DataCell>
-                  <Table.DataCell key="skatteprosent">{utbetaling.skatteprosent}</Table.DataCell>
-                  <Table.DataCell key="bruttoTilbakekreving">{utbetaling.bruttoTilbakekreving}</Table.DataCell>
-                  <Table.DataCell key="nettoTilbakekreving">{utbetaling.nettoTilbakekreving}</Table.DataCell>
-                  <Table.DataCell key="skatt">{utbetaling.skatt}</Table.DataCell>
+                <Table.Row key={'beloeperRad' + index}>
+                  <Table.DataCell key="maaned">{periode.maaned.toString()}</Table.DataCell>
+                  <Table.DataCell key="bruttoUtbetaling">{beloeper.bruttoUtbetaling}</Table.DataCell>
+                  <Table.DataCell key="nyBruttoUtbetaling">{beloeper.nyBruttoUtbetaling}</Table.DataCell>
+                  <Table.DataCell key="beregnetFeilutbetaling">
+                    <TextField
+                      label=""
+                      placeholder="Beregnet feilutbetaling"
+                      value={beloeper.beregnetFeilutbetaling ?? ''}
+                      pattern="[0-9]{11}"
+                      maxLength={10}
+                      onChange={(e) =>
+                        updateBeloeper(index, {
+                          ...beloeper,
+                          beregnetFeilutbetaling: parseInt(e.target.value),
+                        })
+                      }
+                    />
+                  </Table.DataCell>
+                  <Table.DataCell key="skatteprosent">{beloeper.skatteprosent}</Table.DataCell>
+                  <Table.DataCell key="bruttoTilbakekreving">
+                    <TextField
+                      label=""
+                      placeholder="Brutto tilbakekreving"
+                      value={beloeper.bruttoTilbakekreving ?? ''}
+                      pattern="[0-9]{11}"
+                      maxLength={10}
+                      onChange={(e) =>
+                        updateBeloeper(index, {
+                          ...beloeper,
+                          bruttoTilbakekreving: parseInt(e.target.value),
+                        })
+                      }
+                    />
+                  </Table.DataCell>
+                  <Table.DataCell key="nettoTilbakekreving">
+                    <TextField
+                      label=""
+                      placeholder="Netto tilbakekreving"
+                      value={beloeper.nettoTilbakekreving ?? ''}
+                      pattern="[0-9]{11}"
+                      maxLength={10}
+                      onChange={(e) =>
+                        updateBeloeper(index, {
+                          ...beloeper,
+                          nettoTilbakekreving: parseInt(e.target.value),
+                        })
+                      }
+                    />
+                  </Table.DataCell>
+                  <Table.DataCell key="skatt">
+                    <TextField
+                      label=""
+                      placeholder="Skatt"
+                      value={beloeper.skatt ?? ''}
+                      pattern="[0-9]{11}"
+                      maxLength={10}
+                      onChange={(e) =>
+                        updateBeloeper(index, {
+                          ...beloeper,
+                          skatt: parseInt(e.target.value),
+                        })
+                      }
+                    />
+                  </Table.DataCell>
                   <Table.DataCell key="skyld">
                     <Select
                       label="Skyld"
                       hideLabel={true}
-                      value=""
-                      //onChange={(e) => {}}
+                      value={beloeper.skyld ?? ''}
+                      onChange={(e) => {
+                        if (e.target.value === '') return
+                        updateBeloeper(index, {
+                          ...beloeper,
+                          skyld: TilbakekrevingSkyld[e.target.value as TilbakekrevingSkyld],
+                        })
+                      }}
                     >
-                      <option key="test">Velg..</option>
-                      <option key="test">Ikke fordelt</option>
-                      <option key="test">Bruker</option>
-                      <option key="test">Nav</option>
-                      <option key="test">Skylddeling</option>
+                      <option value="">Velg..</option>
+                      <option value={TilbakekrevingSkyld.IKKE_FORDELT}>Ikke fordelt</option>
+                      <option value={TilbakekrevingSkyld.BRUKER}>Bruker</option>
+                      <option value={TilbakekrevingSkyld.NAV}>Nav</option>
+                      <option value={TilbakekrevingSkyld.SKYLDDELING}>Skylddeling</option>
                     </Select>
                   </Table.DataCell>
                   <Table.DataCell key="resultat">
                     <Select
                       label="Resultat"
                       hideLabel={true}
-                      value=""
-                      //onChange={(e) => {}}
+                      value={beloeper.resultat ?? ''}
+                      onChange={(e) => {
+                        if (e.target.value === '') return
+                        updateBeloeper(index, {
+                          ...beloeper,
+                          resultat: TilbakekrevingResultat[e.target.value as TilbakekrevingResultat],
+                        })
+                      }}
                     >
-                      <option key="test">Velg..</option>
-                      <option key="test">Foreldet</option>
-                      <option key="test">Ingen tilbakekreving</option>
-                      <option key="test">Delvis tilbakekreving</option>
-                      <option key="test">Full tilbakekreving</option>
+                      <option value="">Velg..</option>
+                      <option value={TilbakekrevingResultat.FORELDET}>Foreldet</option>
+                      <option value={TilbakekrevingResultat.INGEN_TILBAKEKREV}>Ingen tilbakekreving</option>
+                      <option value={TilbakekrevingResultat.DELVIS_TILBAKEKREV}>Delvis tilbakekreving</option>
+                      <option value={TilbakekrevingResultat.FULL_TILBAKEKREV}>Full tilbakekreving</option>
                     </Select>
                   </Table.DataCell>
                   <Table.DataCell key="tilbakekrevingsprosent">
                     <TextField
                       label=""
                       placeholder="Tilbakekrevingsprosent"
-                      value={0}
+                      value={beloeper.tilbakekrevingsprosent ?? ''}
                       pattern="[0-9]{11}"
                       maxLength={3}
-                      onChange={() => console.log('TODO')}
+                      onChange={(e) =>
+                        updateBeloeper(index, {
+                          ...beloeper,
+                          tilbakekrevingsprosent: parseInt(e.target.value),
+                        })
+                      }
                     />
                   </Table.DataCell>
                   <Table.DataCell key="rentetillegg">
                     <TextField
                       label=""
                       placeholder="Rentetillegg"
-                      value={0}
+                      value={beloeper.rentetillegg ?? ''}
                       pattern="[0-9]{11}"
-                      maxLength={3}
-                      onChange={() => console.log('TODO')}
+                      maxLength={10}
+                      onChange={(e) =>
+                        updateBeloeper(index, {
+                          ...beloeper,
+                          rentetillegg: parseInt(e.target.value),
+                        })
+                      }
                     />
                   </Table.DataCell>
                 </Table.Row>
@@ -101,6 +218,9 @@ export function TilbakekrevingVurdering() {
             })}
           </Table.Body>
         </Table>
+        <Button variant="primary" onClick={lagrePerioder} loading={isPending(lagreStatus)}>
+          Lagre
+        </Button>
       </InnholdPadding>
       <FlexRow justify="center">
         <Button variant="primary" onClick={() => navigate(`/tilbakekreving/${tilbakekreving?.id}/vedtak`)}>

@@ -7,7 +7,7 @@ import { isFailure, isPending, useApiCall } from '~shared/hooks/useApiCall'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { FlexRow } from '~shared/styled'
 
-export const SendTilAttesteringModal: React.FC = () => {
+export const SendTilAttesteringModal = () => {
   const navigate = useNavigate()
 
   const [isOpen, setIsOpen] = useState(false)

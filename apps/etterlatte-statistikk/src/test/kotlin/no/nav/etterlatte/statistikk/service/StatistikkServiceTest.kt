@@ -10,7 +10,6 @@ import io.mockk.verify
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
-import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -70,11 +69,11 @@ class StatistikkServiceTest {
         val behandlingId = UUID.randomUUID()
         val sakId = 1L
         val virkningstidspunkt = YearMonth.of(2023, 6)
+        val enhet = "1111"
         coEvery { behandlingKlient.hentStatistikkBehandling(behandlingId) } returns
-            DetaljertBehandling(
+            StatistikkBehandling(
                 id = behandlingId,
-                sak = sakId,
-                sakType = SakType.OMSTILLINGSSTOENAD,
+                sak = Sak(id = sakId, sakType = SakType.OMSTILLINGSSTOENAD, enhet = enhet, ident = "ident"),
                 behandlingOpprettet = Tidspunkt.now().toLocalDatetimeUTC(),
                 soeknadMottattDato = null,
                 innsender = null,
@@ -89,33 +88,12 @@ class StatistikkServiceTest {
                 revurderingsaarsak = null,
                 revurderingInfo = null,
                 prosesstype = Prosesstype.MANUELL,
-                enhet = "1111",
+                enhet = enhet,
                 kilde = Vedtaksloesning.GJENNY,
+                sistEndret = LocalDateTime.now(),
             )
         every { stoenadRepo.lagreStoenadsrad(any()) } returnsArgument 0
         every { sakRepo.lagreRad(any()) } returnsArgument 0
-        coEvery { behandlingKlient.hentStatistikkBehandling(behandlingId) } returns
-            DetaljertBehandling(
-                id = behandlingId,
-                sak = sakId,
-                sakType = SakType.OMSTILLINGSSTOENAD,
-                behandlingOpprettet = Tidspunkt.now().toLocalDatetimeUTC(),
-                soeknadMottattDato = null,
-                innsender = null,
-                soeker = "12312312312",
-                gjenlevende = listOf(),
-                avdoed = listOf(),
-                soesken = listOf(),
-                status = BehandlingStatus.FATTET_VEDTAK,
-                behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-                virkningstidspunkt = null,
-                boddEllerArbeidetUtlandet = null,
-                revurderingsaarsak = null,
-                revurderingInfo = null,
-                prosesstype = Prosesstype.MANUELL,
-                enhet = "1111",
-                kilde = Vedtaksloesning.GJENNY,
-            )
         coEvery { behandlingKlient.hentPersongalleri(behandlingId) } returns
             Persongalleri(
                 "12312312312",
@@ -225,11 +203,11 @@ class StatistikkServiceTest {
         coEvery { beregningKlient.hentAvkortingForBehandling(behandlingId) } returns mockAvkorting
 
         val fattetTidspunkt = Tidspunkt.ofNorskTidssone(LocalDate.of(2023, 7, 1), LocalTime.NOON)
+        val enhet = "1111"
         coEvery { behandlingKlient.hentStatistikkBehandling(behandlingId) } returns
-            DetaljertBehandling(
+            StatistikkBehandling(
                 id = behandlingId,
-                sak = sakId,
-                sakType = SakType.OMSTILLINGSSTOENAD,
+                sak = Sak(id = sakId, sakType = SakType.OMSTILLINGSSTOENAD, enhet = enhet, ident = "ident"),
                 behandlingOpprettet = Tidspunkt.now().toLocalDatetimeUTC(),
                 soeknadMottattDato = null,
                 innsender = null,
@@ -244,9 +222,11 @@ class StatistikkServiceTest {
                 revurderingsaarsak = null,
                 revurderingInfo = null,
                 prosesstype = Prosesstype.MANUELL,
-                enhet = "1111",
+                enhet = enhet,
                 kilde = Vedtaksloesning.GJENNY,
+                sistEndret = LocalDateTime.now(),
             )
+
         val (registrertSakRad, registrertStoenadRad) =
             service.registrerStatistikkForVedtak(
                 vedtak =

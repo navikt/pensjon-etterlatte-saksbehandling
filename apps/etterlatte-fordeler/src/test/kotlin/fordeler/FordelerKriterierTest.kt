@@ -4,6 +4,7 @@ import no.nav.etterlatte.FNR_1
 import no.nav.etterlatte.FNR_2
 import no.nav.etterlatte.FNR_5
 import no.nav.etterlatte.SVERIGE
+import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.libs.common.innsendtsoeknad.Spraak
 import no.nav.etterlatte.libs.common.person.AdresseType
 import no.nav.etterlatte.libs.common.person.FamilieRelasjon
@@ -27,7 +28,7 @@ import java.time.LocalDate.of
 import java.time.LocalDateTime
 
 internal class FordelerKriterierTest {
-    private val fordelerKriterier = FordelerKriterier()
+    private val fordelerKriterier = FordelerKriterier(DummyFeatureToggleService())
 
     @Test
     fun `soeknad er en gyldig kandidat for fordeling`() {

@@ -8,6 +8,7 @@ import no.nav.etterlatte.FNR_2
 import no.nav.etterlatte.FNR_3
 import no.nav.etterlatte.behandling.BehandlingKlient
 import no.nav.etterlatte.fordeler.FordelerKriterie.AVDOED_ER_IKKE_REGISTRERT_SOM_DOED
+import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.libs.common.person.FamilieRelasjon
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -28,7 +29,7 @@ internal class FordelerServiceTest {
     private val behandlingKlient = mockk<BehandlingKlient>()
     private val fordelerService =
         FordelerService(
-            FordelerKriterier(),
+            FordelerKriterier(DummyFeatureToggleService()),
             pdlTjenesterKlient,
             fordelerRepo,
             maxFordelingTilGjenny = Long.MAX_VALUE,
@@ -165,7 +166,7 @@ internal class FordelerServiceTest {
     fun `Skal ikke fordele søknader til GJENNY utover et maksimum antall`() {
         val fordelerService =
             FordelerService(
-                FordelerKriterier(),
+                FordelerKriterier(DummyFeatureToggleService()),
                 pdlTjenesterKlient,
                 fordelerRepo,
                 maxFordelingTilGjenny = 10,
@@ -216,7 +217,7 @@ internal class FordelerServiceTest {
     fun `returnerer UgyldigHendelse hvis en av barn, avdød, gjenlevende ikke finnes i PDL`() {
         val fordelerService =
             FordelerService(
-                FordelerKriterier(),
+                FordelerKriterier(DummyFeatureToggleService()),
                 pdlTjenesterKlient,
                 fordelerRepo,
                 maxFordelingTilGjenny = 10,
@@ -265,7 +266,7 @@ internal class FordelerServiceTest {
     fun `kaster feil hvis en av barn, avdød, gjenlevende gir en feilmedling som ikke er PersonFinnesIkkeException`() {
         val fordelerService =
             FordelerService(
-                FordelerKriterier(),
+                FordelerKriterier(DummyFeatureToggleService()),
                 pdlTjenesterKlient,
                 fordelerRepo,
                 maxFordelingTilGjenny = 10,

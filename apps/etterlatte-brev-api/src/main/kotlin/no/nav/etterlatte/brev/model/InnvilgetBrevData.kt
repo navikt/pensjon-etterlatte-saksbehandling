@@ -111,7 +111,7 @@ data class InnvilgetBrevDataEnkel(
                 erEtterbetalingMerEnnTreMaaneder = erEtterbetaling(behandling.utbetalingsinfo.virkningsdato),
                 vedtaksdato =
                     behandling.vedtak.vedtaksdato
-                        ?: throw IllegalStateException("Trenger vedtaksdato, men var null"),
+                        ?: LocalDate.now(),
                 erInstitusjonsopphold =
                     behandling.utbetalingsinfo.beregningsperioder
                         .filter { it.datoFOM.isBefore(LocalDate.now().plusDays(1)) }

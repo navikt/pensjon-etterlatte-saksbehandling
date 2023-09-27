@@ -168,8 +168,8 @@ class ApplicationContext(
     val oppgaveMetrikker = OppgaveMetrics(metrikkerDao)
 
     // Service
-    val generellBehandlingService = GenerellBehandlingService(generellbehandlingDao)
     val oppgaveService = OppgaveService(oppgaveDaoEndringer, sakDao, featureToggleService)
+    val generellBehandlingService = GenerellBehandlingService(generellbehandlingDao, oppgaveService)
     val gosysOppgaveService = GosysOppgaveServiceImpl(gosysOppgaveKlient, pdlKlient, featureToggleService)
     val behandlingService =
         BehandlingServiceImpl(

@@ -98,14 +98,14 @@ const VurderHendelseModal = (props: Props) => {
             </div>
           </ModalContentWrapper>
 
-          <ButtonContainer>
+          <ButtonGroup>
             <Button variant="secondary" onClick={() => props.setOpen(false)}>
               Avbryt
             </Button>
             <Button loading={isPending(opprettRevurderingStatus)} onClick={onSubmit}>
               Start revurdering
             </Button>
-          </ButtonContainer>
+          </ButtonGroup>
         </Modal.Body>
       </Modal>
     </>
@@ -116,7 +116,7 @@ const ModalContentWrapper = styled.div`
   padding: 0 1em;
 `
 
-export const ButtonContainer = styled.div`
+export const ButtonGroup = styled.div`
   display: flex;
   justify-content: flex-end;
   gap: 0.5em;

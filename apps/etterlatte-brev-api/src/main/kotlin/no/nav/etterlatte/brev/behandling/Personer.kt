@@ -3,7 +3,14 @@ package no.nav.etterlatte.brev.behandling
 import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
 import java.time.LocalDate
 
-data class Innsender(val navn: String, val fnr: Foedselsnummer)
+data class PersonerISak(
+    val innsender: Innsender?,
+    val soeker: Soeker,
+    val avdoed: Avdoed,
+    val verge: Verge?,
+)
+
+data class Innsender(val fnr: Foedselsnummer)
 
 data class Verge(val navn: String)
 

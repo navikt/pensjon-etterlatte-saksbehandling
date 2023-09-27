@@ -111,9 +111,13 @@ class DokarkivServiceImpl(
         val innhold = requireNotNull(db.hentBrevInnhold(brev.id))
         val pdf = requireNotNull(db.hentPdf(brev.id))
 
+        val mottaker =
+            requireNotNull(brev.mottaker) {
+                "Mottaker er 'null' i brev med id=${brev.id}"
+            }
         val ident =
-            brev.mottaker.let {
-                it.foedselsnummer?.value ?: (it.orgnummer ?: throw IllegalStateException(""))
+            requireNotNull(mottaker.foedselsnummer?.value ?: mottaker.orgnummer) {
+                "Mottaker mangler både fnr. og orgnr. i brev med id=${brev.id}"
             }
 
         return JournalpostRequest(

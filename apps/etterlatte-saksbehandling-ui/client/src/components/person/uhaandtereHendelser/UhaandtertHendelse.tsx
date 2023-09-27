@@ -11,7 +11,7 @@ import { ApiErrorAlert } from '~ErrorBoundary'
 import styled from 'styled-components'
 import InstitusjonsoppholdVurderingBegrunnelse from '~components/person/uhaandtereHendelser/InstitusjonsoppholdVurderingBegrunnelse'
 import { ArrowsCirclepathIcon, XMarkIcon } from '@navikt/aksel-icons'
-import { ButtonContainer } from '~components/person/VurderHendelseModal'
+import { ButtonGroup } from '~components/person/VurderHendelseModal'
 
 const UhaandtertHendelse = (props: {
   hendelse: Grunnlagsendringshendelse
@@ -130,7 +130,7 @@ const UhaandtertHendelse = (props: {
                           value={hendelsekommentar}
                           onChange={(e) => oppdaterKommentar(e.target.value)}
                         />
-                        <ButtonContainer>
+                        <ButtonGroup>
                           <Button
                             variant="secondary"
                             onClick={() => {
@@ -142,7 +142,7 @@ const UhaandtertHendelse = (props: {
                             Avbryt
                           </Button>
                           <Button onClick={lukkGrunnlagshendelseWrapper}>Lagre</Button>
-                        </ButtonContainer>
+                        </ButtonGroup>
                       </>
                     )}
                     {isPending(res) && <Loader />}

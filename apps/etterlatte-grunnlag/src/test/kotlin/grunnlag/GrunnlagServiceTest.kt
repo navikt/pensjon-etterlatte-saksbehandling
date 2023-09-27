@@ -459,6 +459,55 @@ internal class GrunnlagServiceTest {
 
             verify(exactly = 1) { opplysningerMock.finnAllePersongalleriHvorPersonFinnes(soeskenFnr) }
         }
+
+        @Test
+        fun `Kan mappe og hente innsender`() {
+            every { opplysningerMock.finnNyesteGrunnlag(1, PERSONGALLERI_V1) } returns
+                lagGrunnlagHendelse(
+                    1,
+                    1,
+                    PERSONGALLERI_V1,
+                    id = statiskUuid,
+                    verdi = testData.hentPersonGalleri().toJsonNode(),
+                    kilde = kilde,
+                )
+
+            every { opplysningerMock.hentAlleGrunnlagForSak(1) } returns
+                listOf(
+                    lagGrunnlagHendelse(
+                        1,
+                        2,
+                        NAVN,
+                        id = statiskUuid,
+                        fnr = BLAAOEYD_SAKS,
+                        verdi = Navn("Per", "Kalle", "Persson").toJsonNode(),
+                        kilde = kilde,
+                    ),
+                    lagGrunnlagHendelse(
+                        1,
+                        2,
+                        PERSONROLLE,
+                        id = statiskUuid,
+                        fnr = BLAAOEYD_SAKS,
+                        verdi = PersonRolle.INNSENDER.toJsonNode(),
+                        kilde = kilde,
+                    ),
+                    lagGrunnlagHendelse(
+                        1,
+                        3,
+                        PERSONGALLERI_V1,
+                        id = statiskUuid,
+                        verdi = testData.hentPersonGalleri().toJsonNode(),
+                        kilde = kilde,
+                    ),
+                )
+
+            val opplysningsgrunnlag = grunnlagService.hentOpplysningsgrunnlag(1)!!
+
+            Assertions.assertEquals(1, opplysningsgrunnlag.sak.size)
+            Assertions.assertEquals(1, opplysningsgrunnlag.familie.size)
+            Assertions.assertEquals(2, opplysningsgrunnlag.hentInnsender().size)
+        }
     }
 
     companion object {

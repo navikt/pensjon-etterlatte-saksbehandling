@@ -64,7 +64,12 @@ class VedtaksbrevService(
 
         val behandling = sakOgBehandlingService.hentBehandling(sakId, behandlingId, brukerTokenInfo)
 
-        val mottaker = adresseService.hentMottakerAdresse(behandling.persongalleri.innsender.fnr.value)
+        val mottaker =
+            if (behandling.personerISak.innsender != null) {
+                adresseService.hentMottakerAdresse(behandling.personerISak.innsender.fnr.value)
+            } else {
+                adresseService.hentMottakerAdresse(behandling.personerISak.soeker.fnr.value)
+            }
 
         val prosessType = brevProsessTypeFactory.fra(behandling)
 
@@ -73,7 +78,7 @@ class VedtaksbrevService(
                 sakId = sakId,
                 behandlingId = behandling.behandlingId,
                 prosessType = prosessType,
-                soekerFnr = behandling.persongalleri.soeker.fnr.value,
+                soekerFnr = behandling.personerISak.soeker.fnr.value,
                 mottaker = mottaker,
                 innhold = opprettInnhold(behandling, prosessType),
                 innholdVedlegg = opprettInnholdVedlegg(behandling, prosessType),

@@ -3,10 +3,11 @@ import { Heading, Table } from '@navikt/ds-react'
 import React from 'react'
 import styled from 'styled-components'
 import { ManglerRegelspesifikasjon } from '~components/behandling/felles/ManglerRegelspesifikasjon'
-import { formaterStringDato, NOK } from '~utils/formattering'
+import { formaterDato, formaterStringDato, NOK } from '~utils/formattering'
 import { YtelseEtterAvkortingDetaljer } from '~components/behandling/avkorting/YtelseEtterAvkortingDetaljer'
 import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
+import { lastDayOfMonth } from 'date-fns'
 
 const sorterNyligsteFoerstOgBakover = (a: IAvkortetYtelse, b: IAvkortetYtelse) =>
   new Date(b.fom).getTime() - new Date(a.fom).getTime()
@@ -57,7 +58,8 @@ export const YtelseEtterAvkorting = (props: {
                   >
                     <Table.DataCell>
                       <BredCelle>
-                        {formaterStringDato(ytelse.fom)} - {ytelse.tom ? formaterStringDato(ytelse.tom) : ''}
+                        {formaterStringDato(ytelse.fom)} -{' '}
+                        {ytelse.tom ? formaterDato(lastDayOfMonth(new Date(ytelse.tom))) : ''}
                       </BredCelle>
                     </Table.DataCell>
                     <Table.DataCell>

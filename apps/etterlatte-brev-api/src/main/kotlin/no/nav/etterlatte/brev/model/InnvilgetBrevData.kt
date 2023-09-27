@@ -18,7 +18,7 @@ data class InnvilgetBrevData(
         fun fra(behandling: Behandling): InnvilgetBrevData =
             InnvilgetBrevData(
                 utbetalingsinfo = behandling.utbetalingsinfo,
-                avdoed = behandling.persongalleri.avdoed,
+                avdoed = behandling.personerISak.avdoed,
                 avkortingsinfo = behandling.avkortingsinfo,
             )
     }
@@ -33,7 +33,7 @@ data class FoerstegangsvedtakUtfallDTO(
         fun fra(behandling: Behandling): FoerstegangsvedtakUtfallDTO =
             FoerstegangsvedtakUtfallDTO(
                 virkningsdato = behandling.utbetalingsinfo!!.virkningsdato,
-                avdoed = behandling.persongalleri.avdoed,
+                avdoed = behandling.personerISak.avdoed,
                 utbetalingsbeloep = behandling.avkortingsinfo!!.beregningsperioder.first().utbetaltBeloep,
             )
     }
@@ -70,7 +70,7 @@ data class InnvilgetBrevDataOMS(
             InnvilgetBrevDataOMS(
                 utbetalingsinfo = behandling.utbetalingsinfo,
                 avkortingsinfo = behandling.avkortingsinfo,
-                avdoed = behandling.persongalleri.avdoed,
+                avdoed = behandling.personerISak.avdoed,
                 etterbetalinginfo = null,
                 beregningsinfo =
                     Beregningsinfo(
@@ -107,11 +107,11 @@ data class InnvilgetBrevDataEnkel(
         fun fra(behandling: Behandling) =
             InnvilgetBrevDataEnkel(
                 utbetalingsinfo = behandling.utbetalingsinfo,
-                avdoed = behandling.persongalleri.avdoed,
+                avdoed = behandling.personerISak.avdoed,
                 erEtterbetalingMerEnnTreMaaneder = erEtterbetaling(behandling.utbetalingsinfo.virkningsdato),
                 vedtaksdato =
                     behandling.vedtak.vedtaksdato
-                        ?: throw IllegalStateException("Trenger vedtaksdato, men var null"),
+                        ?: LocalDate.now(),
                 erInstitusjonsopphold =
                     behandling.utbetalingsinfo.beregningsperioder
                         .filter { it.datoFOM.isBefore(LocalDate.now().plusDays(1)) }

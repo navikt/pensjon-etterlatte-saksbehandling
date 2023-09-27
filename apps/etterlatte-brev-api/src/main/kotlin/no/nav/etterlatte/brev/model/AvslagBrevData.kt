@@ -23,7 +23,7 @@ data class AvslagYrkesskadeBrevData(
             ).let {
                 AvslagYrkesskadeBrevData(
                     it.dinForelder,
-                    behandling.persongalleri.avdoed.doedsdato,
+                    behandling.personerISak.avdoed.doedsdato,
                     it.yrkesskadeEllerYrkessykdom,
                 )
             }

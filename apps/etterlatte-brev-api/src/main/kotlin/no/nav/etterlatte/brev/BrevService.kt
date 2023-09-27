@@ -188,12 +188,17 @@ class BrevService(
                 "JournalpostID mangler på brev (id=${brev.id}, status=${brev.status})"
             }
 
+        val mottaker =
+            requireNotNull(brev.mottaker) {
+                "Mottaker må være satt for å kunne distribuere brevet (id: $id)"
+            }
+
         return distribusjonService.distribuerJournalpost(
             brevId = brev.id,
             journalpostId = journalpostId,
             type = DistribusjonsType.ANNET,
             tidspunkt = DistribusjonsTidspunktType.KJERNETID,
-            adresse = brev.mottaker.adresse,
+            adresse = mottaker.adresse,
         )
     }
 

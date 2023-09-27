@@ -83,6 +83,28 @@ export const mapApiResult = <T>(
   throw new Error(`Unknown state of result: ${JSON.stringify(result)}`)
 }
 
+export const mapAllApiResult = <T>(
+  result: Result<T>,
+  mapPending: ReactElement,
+  mapInitial: ReactElement | null,
+  mapError: (_: ApiError) => ReactElement,
+  mapSuccess: (_: T) => ReactElement
+): ReactElement | null => {
+  if (isPending(result)) {
+    return mapPending
+  }
+  if (isInitial(result)) {
+    return mapInitial
+  }
+  if (isFailure(result)) {
+    return mapError(result.error)
+  }
+  if (isSuccess(result)) {
+    return mapSuccess(result.data)
+  }
+  throw new Error(`Unknown state of result: ${JSON.stringify(result)}`)
+}
+
 export const mapSuccess = <T, R>(result: Result<T>, mapSuccess: (success: T) => R): R | null => {
   if (isSuccess(result)) {
     return mapSuccess(result.data)

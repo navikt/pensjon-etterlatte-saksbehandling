@@ -1,7 +1,7 @@
 import { BodyShort, Heading } from '@navikt/ds-react'
 import styled from 'styled-components'
 
-export const Innhold = styled.div`
+export const InnholdPadding = styled.div`
   padding: 2em 2em 2em 4em;
 `
 
@@ -46,8 +46,8 @@ export const InfoList = styled.div`
   gap: 1rem;
 `
 
-export const InfoElement = styled.div`
-  width: 15em;
+export const InfoElement = styled.div<{ $wide?: boolean }>`
+  width: ${(props) => (props.$wide ? '100%' : '15em')};
 `
 
 export const Undertekst = styled(BodyShort)<{ $gray: boolean }>`

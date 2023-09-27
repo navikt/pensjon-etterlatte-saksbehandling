@@ -1,6 +1,6 @@
 import { Button, Heading, Radio, RadioGroup, Select } from '@navikt/ds-react'
 import { Content, ContentHeader, FlexRow } from '~shared/styled'
-import { HeadingWrapper, Innhold } from '~components/behandling/soeknadsoversikt/styled'
+import { HeadingWrapper, InnholdPadding } from '~components/behandling/soeknadsoversikt/styled'
 import { useKlage } from '~components/klage/useKlage'
 import { useNavigate } from 'react-router-dom'
 import { isFailure, isPending, isPendingOrInitial, mapSuccess, useApiCall } from '~shared/hooks/useApiCall'
@@ -153,7 +153,7 @@ export function KlageFormkrav() {
         </HeadingWrapper>
       </ContentHeader>
       <form onSubmit={handleSubmit(sendInnFormkrav)}>
-        <Innhold>
+        <InnholdPadding>
           {/* Det er litt spesiell håndtering av akkurat hvilket vedtak klagen ligger på, relatert til hvordan React
             tolker controlled vs uncontrolled components. For å kunne håndtere både 1. Ikke valgt vedtak og 2. Valgt
             at det ikke er noe vedtak, tolkes null | undefined som ""), og vedtakId === "-1" som 2). Alle andre vedtakId
@@ -208,7 +208,7 @@ export function KlageFormkrav() {
           />
 
           <JaNeiRadiogruppe name="erFormkraveneOppfylt" control={control} legend="Er formkravene til klagen oppfylt?" />
-        </Innhold>
+        </InnholdPadding>
         <FlexRow justify="center">
           <Button type="submit" loading={isPending(lagreFormkravStatus)}>
             Lagre vurdering av formkrav

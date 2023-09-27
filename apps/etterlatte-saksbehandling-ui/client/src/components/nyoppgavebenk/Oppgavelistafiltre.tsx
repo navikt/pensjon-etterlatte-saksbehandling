@@ -123,6 +123,7 @@ export const OPPGAVEKILDEFILTER: Record<OppgaveKildeFilterKeys, string> = {
   HENDELSE: 'Hendelse',
   BEHANDLING: 'Behandling',
   EKSTERN: 'Ekstern',
+  GENERELL_BEHANDLING: 'Generell behandling',
 }
 
 function filtrerOppgavekilde(oppgaveKildeFilterKeys: OppgaveKildeFilterKeys, oppgaver: OppgaveDTOny[]): OppgaveDTOny[] {

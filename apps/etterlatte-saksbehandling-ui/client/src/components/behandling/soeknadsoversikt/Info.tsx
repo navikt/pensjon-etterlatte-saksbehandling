@@ -6,11 +6,12 @@ interface InfoProps {
   label: string
   tekst: ReactNode
   undertekst?: string
+  wide?: boolean
 }
 
-export const Info = ({ label, tekst, undertekst }: InfoProps) => {
+export const Info = ({ label, tekst, undertekst, wide }: InfoProps) => {
   return (
-    <InfoElement>
+    <InfoElement $wide={wide ?? false}>
       <Label size="small" as="p">
         {label}
       </Label>

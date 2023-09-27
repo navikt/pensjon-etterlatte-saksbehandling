@@ -1,6 +1,6 @@
 import { BodyShort, Button, Heading } from '@navikt/ds-react'
 import { Content, ContentHeader, FlexRow } from '~shared/styled'
-import { HeadingWrapper, Innhold } from '~components/behandling/soeknadsoversikt/styled'
+import { HeadingWrapper, InnholdPadding } from '~components/behandling/soeknadsoversikt/styled'
 import { useNavigate } from 'react-router-dom'
 import { useTilbakekreving } from '~components/tilbakekreving/useTilbakekreving'
 
@@ -17,9 +17,9 @@ export function TilbakekrevingVedtak() {
           </Heading>
         </HeadingWrapper>
       </ContentHeader>
-      <Innhold>
+      <InnholdPadding>
         <BodyShort>Relevante ting for vedtak her</BodyShort>
-      </Innhold>
+      </InnholdPadding>
       <FlexRow justify="center">
         <Button variant="primary" onClick={() => navigate(`/tilbakekreving/${tilbakekreving?.id}/vedtak`)}>
           Fatt vedtak

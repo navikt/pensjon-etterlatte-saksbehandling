@@ -100,6 +100,7 @@ class BehandlingServiceImplTest {
                 featureToggleService = featureToggleService,
                 kommerBarnetTilGodeDao = mockk(),
                 oppgaveService = mockk(),
+                etterbetalingService = mockk(),
             )
 
         val behandlinger = sut.hentBehandlingerISak(1)
@@ -581,6 +582,7 @@ class BehandlingServiceImplTest {
                 featureToggleService = featureToggleService,
                 kommerBarnetTilGodeDao = mockk(),
                 oppgaveService = mockk(),
+                etterbetalingService = mockk(),
             )
 
         val behandlinger = sut.hentBehandlingerISak(1)
@@ -628,6 +630,7 @@ class BehandlingServiceImplTest {
                 featureToggleService = featureToggleService,
                 kommerBarnetTilGodeDao = mockk(),
                 oppgaveService = mockk(),
+                etterbetalingService = mockk(),
             )
 
         val behandlinger = sut.hentBehandlingerISak(1)
@@ -673,6 +676,7 @@ class BehandlingServiceImplTest {
                 featureToggleService = featureToggleService,
                 kommerBarnetTilGodeDao = mockk(),
                 oppgaveService = mockk(),
+                etterbetalingService = mockk(),
             )
 
         sut.oppdaterUtenlandstilsnitt(
@@ -727,6 +731,7 @@ class BehandlingServiceImplTest {
                 featureToggleService,
                 kommerBarnetTilGodeDao = mockk(),
                 oppgaveService = mockk(),
+                etterbetalingService = mockk(),
             )
 
         sut.oppdaterBoddEllerArbeidetUtlandet(
@@ -795,6 +800,7 @@ class BehandlingServiceImplTest {
             featureToggleService = featureToggleService,
             kommerBarnetTilGodeDao = mockk(),
             oppgaveService = oppgaveService,
+            etterbetalingService = mockk(),
         )
 
     companion object {

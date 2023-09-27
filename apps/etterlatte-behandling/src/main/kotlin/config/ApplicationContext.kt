@@ -13,6 +13,8 @@ import no.nav.etterlatte.behandling.GrunnlagService
 import no.nav.etterlatte.behandling.GyldighetsproevingServiceImpl
 import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktDao
 import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktService
+import no.nav.etterlatte.behandling.etterbetaling.EtterbetalingDao
+import no.nav.etterlatte.behandling.etterbetaling.EtterbetalingService
 import no.nav.etterlatte.behandling.generellbehandling.GenerellBehandlingDao
 import no.nav.etterlatte.behandling.generellbehandling.GenerellBehandlingService
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
@@ -110,7 +112,7 @@ private fun featureToggleProperties(config: Config) =
         apiKey = config.getString("funksjonsbrytere.unleash.token"),
     )
 
-class ApplicationContext(
+internal class ApplicationContext(
     val env: Miljoevariabler = Miljoevariabler(System.getenv()),
     val config: Config = ConfigFactory.load(),
     val rapid: KafkaProdusent<String, String> =
@@ -156,6 +158,7 @@ class ApplicationContext(
     val metrikkerDao = OppgaveMetrikkerDao(dataSource)
     val klageDao = KlageDaoImpl { databaseContext().activeTx() }
     val tilbakekrevingDao = TilbakekrevingDao { databaseContext().activeTx() }
+    val etterbetalingDao = EtterbetalingDao { databaseContext().activeTx() }
 
     // Klient
     val pdlKlient = PdlKlientImpl(config, pdlHttpClient)
@@ -171,6 +174,7 @@ class ApplicationContext(
     val generellBehandlingService = GenerellBehandlingService(generellbehandlingDao)
     val oppgaveService = OppgaveService(oppgaveDaoEndringer, sakDao, featureToggleService)
     val gosysOppgaveService = GosysOppgaveServiceImpl(gosysOppgaveKlient, pdlKlient, featureToggleService)
+    val etterbetalingService = EtterbetalingService(etterbetalingDao)
     val behandlingService =
         BehandlingServiceImpl(
             behandlingDao = behandlingDao,
@@ -182,6 +186,7 @@ class ApplicationContext(
             featureToggleService = featureToggleService,
             kommerBarnetTilGodeDao = kommerBarnetTilGodeDao,
             oppgaveService = oppgaveService,
+            etterbetalingService = etterbetalingService,
         )
 
     val kommerBarnetTilGodeService =

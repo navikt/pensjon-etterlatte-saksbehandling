@@ -31,8 +31,9 @@ class TilbakekrevingService(
     ): Tilbakekreving =
         inTransaction {
             logger.info("Lagrer perioder for tilbakekreving=$tilbakekrevingId")
-            val oppdatertTilbakekreving = tilbakekrevingDao.hentTilbakekreving(tilbakekrevingId).copy(perioder = perioder)
-            tilbakekrevingDao.lagreTilbakekreving(oppdatertTilbakekreving)
+            val eksisterende = tilbakekrevingDao.hentTilbakekreving(tilbakekrevingId)
+            if (!eksisterende.underBehandling()) throw TilbakekrevingErIkkeUnderBehandlingException()
+            tilbakekrevingDao.lagreTilbakekreving(eksisterende.copy(perioder = perioder))
         }
 
     fun opprettTilbakekreving(kravgrunnlag: Kravgrunnlag) =

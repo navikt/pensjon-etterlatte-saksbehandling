@@ -17,6 +17,12 @@ data class Tilbakekreving(
     val perioder: List<TilbakekrevingPeriode>,
     val kravgrunnlag: Kravgrunnlag,
 ) {
+    fun underBehandling() =
+        when (status) {
+            TilbakekrevingStatus.UNDER_ARBEID, TilbakekrevingStatus.OPPRETTET -> true
+            else -> false
+        }
+
     companion object {
         fun ny(
             kravgrunnlag: Kravgrunnlag,
@@ -108,6 +114,7 @@ fun List<KravgrunnlagPeriode>.tilTilbakekrevingPerioder(): List<TilbakekrevingPe
 enum class TilbakekrevingStatus {
     OPPRETTET,
     UNDER_ARBEID,
+    VEDTATT,
 }
 
 enum class TilbakekrevingSkyld {
@@ -126,5 +133,7 @@ enum class TilbakekrevingResultat {
 }
 
 class TilbakekrevingFinnesIkkeException(message: String?) : RuntimeException(message)
+
+class TilbakekrevingErIkkeUnderBehandlingException() : RuntimeException()
 
 class KravgrunnlagHarIkkeEksisterendeSakException : RuntimeException()

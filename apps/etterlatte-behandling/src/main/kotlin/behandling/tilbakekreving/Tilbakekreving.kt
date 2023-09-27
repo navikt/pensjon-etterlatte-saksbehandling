@@ -45,6 +45,7 @@ data class TilbakekrevingPeriode(
 )
 
 data class Tilbakekrevingsbelop(
+    val id: UUID,
     val klasseKode: String,
     val klasseType: String,
     val bruttoUtbetaling: Int,
@@ -62,6 +63,7 @@ data class Tilbakekrevingsbelop(
     companion object {
         fun ny(grunnlagsbeloep: Grunnlagsbeloep) =
             Tilbakekrevingsbelop(
+                id = UUID.randomUUID(),
                 klasseKode = grunnlagsbeloep.klasseKode.value,
                 klasseType = grunnlagsbeloep.klasseType.name,
                 bruttoUtbetaling = grunnlagsbeloep.bruttoUtbetaling.toInt(),
@@ -79,6 +81,7 @@ data class Tilbakekrevingsbelop(
 
         fun feilkonto(grunnlagsbeloep: Grunnlagsbeloep) =
             Tilbakekrevingsbelop(
+                id = UUID.randomUUID(),
                 klasseKode = grunnlagsbeloep.klasseKode.value,
                 klasseType = grunnlagsbeloep.klasseType.name,
                 bruttoUtbetaling = 0,
@@ -131,6 +134,8 @@ enum class TilbakekrevingResultat {
     FULL_TILBAKEKREV,
     INGEN_TILBAKEKREV,
 }
+
+class TilbakekrevingHarMangelException(message: String?) : RuntimeException(message)
 
 class TilbakekrevingFinnesIkkeException(message: String?) : RuntimeException(message)
 

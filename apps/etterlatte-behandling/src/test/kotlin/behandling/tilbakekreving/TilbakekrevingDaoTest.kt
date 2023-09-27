@@ -62,7 +62,9 @@ class TilbakekrevingDaoTest {
 
     @BeforeEach
     fun resetTabell() {
-        dataSource.connection.prepareStatement("""TRUNCATE TABLE tilbakekreving""")
+        dataSource.connection.prepareStatement("""TRUNCATE TABLE tilbakekrevingsperiode""")
+            .executeUpdate()
+        dataSource.connection.prepareStatement("""TRUNCATE TABLE tilbakekreving CASCADE""")
             .executeUpdate()
         dataSource.connection.prepareStatement("""TRUNCATE TABLE sak CASCADE """)
             .executeUpdate()
@@ -85,7 +87,16 @@ class TilbakekrevingDaoTest {
     fun `Lagre eksisterende tilbakekreving`() {
         val ny = tilbakekreving(sak)
         val lagret = tilbakekrevingDao.lagreTilbakekreving(ny)
-        val oppdatert = lagret.copy(status = TilbakekrevingStatus.UNDER_ARBEID)
+        val oppdatert =
+            lagret.copy(
+                status = TilbakekrevingStatus.UNDER_ARBEID,
+                perioder =
+                    lagret.perioder.map {
+                        it.copy(
+                            ytelsebeloeper = it.ytelsebeloeper.copy(beregnetFeilutbetaling = 123),
+                        )
+                    },
+            )
         val lagretOppdatert = tilbakekrevingDao.lagreTilbakekreving(oppdatert)
         lagretOppdatert shouldBe oppdatert
     }

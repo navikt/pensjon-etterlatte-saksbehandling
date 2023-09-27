@@ -50,7 +50,7 @@ spec:
     min: 1
   env:
     - name: KRAVGRUNNLAG_MQ_NAME
-      value: TODO
+      value: QA.P_ETTERLATTE.KRAVGRUNNLAG
     - name: MQ_HOSTNAME
       value: mpls04.adeo.no
     - name: MQ_PORT

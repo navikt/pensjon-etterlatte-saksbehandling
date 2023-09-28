@@ -105,8 +105,6 @@ class EtterbetalingTest : BehandlingIntegrationTest() {
                 Assertions.assertEquals(fraDato, dto.fraDato)
                 Assertions.assertEquals(tilDato, dto.tilDato)
             }
-
-            client.get("behandling/")
         }
     }
 }

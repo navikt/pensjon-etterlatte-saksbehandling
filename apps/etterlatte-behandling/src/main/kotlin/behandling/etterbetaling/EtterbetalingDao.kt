@@ -27,7 +27,7 @@ class EtterbetalingDao(private val connection: () -> Connection) {
     fun hentEtterbetaling(behandlingId: UUID): Etterbetalingmodell? =
         with(connection()) {
             val statement =
-                connection().prepareStatement(
+                prepareStatement(
                     "SELECT fra_dato, til_dato FROM etterbetaling WHERE behandling_id = ?::UUID",
                 )
             statement.setObject(1, behandlingId)

@@ -175,16 +175,20 @@ object OmstillingstoenadVilkaar {
                     beskrivelse =
                         """
                         Forutgående medlemskap kan være oppfylt ved sammenlegging av norsk trygdetid og trygdetid avdøde har opptjent fra EØS-land. Dette forutsetter at samlet trygdetid i Norge er minst ett år uten avrunding. Det er bare de avtalelandene der det er opparbeidet minst ett års trygdetid som skal tas med i sammenleggingen.
-
+                        
                         Medlemskap i såkalte tredjeland som det er inngått bilaterale avtaler med kan også legges sammen med norsk trygdetid, forutsatt at avtalen omfatter pensjonsfordeler.
                          
-                        Hjemler:
-                        EØS - rådsforordning 883/2004 artikkel 6 og 57
+                        Andre hjemler:
                         EØS - rådsforordning 1408/1971 artikkel 45 (gjelder perioder før 2004)
-                        EØF - traktaten 1408/71 artikkel 39 (fra 2003) (gjelder bilaterale avtaler)
+                        EØF - traktaten 1408/71 artikkel 39 (gjelder bilaterale avtaler)
+                        Lenke: https://lovdata.no/pro/#document/DLX3/eu/31971r1408
                         """.trimIndent(),
                     spoersmaal = "Er forutgående medlemskap oppfylt ved sammenlegging?",
-                    lovreferanse = Lovreferanse(paragraf = "EØS/EØF"),
+                    lovreferanse =
+                        Lovreferanse(
+                            paragraf = "EØS - rådsforordning 883/2004 artikkel 6 og 57",
+                            lenke = "https://lovdata.no/pro/#document/NLX3/eu/32004r0883/ARTIKKEL_6",
+                        ),
                 ),
         )
 

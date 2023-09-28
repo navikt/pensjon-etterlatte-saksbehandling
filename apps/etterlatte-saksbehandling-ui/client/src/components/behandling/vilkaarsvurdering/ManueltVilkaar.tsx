@@ -45,6 +45,14 @@ export const ManueltVilkaar = (props: VilkaarProps) => {
     return 'warning'
   }
 
+  const paragrafType = (vilkaar: Vilkaar) => {
+    if (vilkaar.hovedvilkaar.lovreferanse.paragraf.startsWith('$')) {
+      return 'Folketrygden'
+    }
+
+    return ''
+  }
+
   return (
     <>
       <Innhold>
@@ -57,7 +65,7 @@ export const ManueltVilkaar = (props: VilkaarProps) => {
               </Title>
               {vilkaar.hovedvilkaar.lovreferanse.lenke && (
                 <Link href={vilkaar.hovedvilkaar.lovreferanse.lenke} target="_blank" rel="noopener noreferrer">
-                  {`Folketrygden ${vilkaar.hovedvilkaar.lovreferanse.paragraf}`}
+                  {`${paragrafType(vilkaar)} ${vilkaar.hovedvilkaar.lovreferanse.paragraf}`}
                   <ExternalLinkIcon title={vilkaar.hovedvilkaar.tittel} />
                 </Link>
               )}

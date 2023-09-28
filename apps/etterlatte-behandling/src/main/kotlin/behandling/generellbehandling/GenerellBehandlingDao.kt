@@ -16,7 +16,7 @@ import java.util.UUID
 
 class GenerellBehandlingDao(private val connection: () -> Connection) {
     companion object {
-        const val DATABASE_FELTER = "id, innhold, sak_id, opprettet, type, tilknyttetBehandling"
+        const val DATABASE_FELTER = "id, innhold, sak_id, opprettet, type, tilknyttet_behandling"
     }
 
     fun opprettGenerellbehandling(generellBehandling: GenerellBehandling): GenerellBehandling {
@@ -96,7 +96,7 @@ class GenerellBehandlingDao(private val connection: () -> Connection) {
             type = GenerellBehandling.GenerellBehandlingType.valueOf(getString("type")),
             innhold = getString("innhold").let { objectMapper.readValue(it) },
             opprettet = getTidspunkt("opprettet"),
-            tilknyttetBehandling = getObject("tilknyttetBehandling") as UUID?,
+            tilknyttetBehandling = getObject("tilknyttet_behandling") as UUID?,
         )
     }
 }

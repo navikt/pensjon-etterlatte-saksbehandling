@@ -5,7 +5,6 @@ import no.nav.etterlatte.brev.behandling.Avkortingsinfo
 import no.nav.etterlatte.brev.behandling.Behandling
 import no.nav.etterlatte.brev.behandling.Trygdetidsperiode
 import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
-import no.nav.etterlatte.libs.common.behandling.erEtterbetaling
 import no.nav.pensjon.brevbaker.api.model.Kroner
 import java.time.LocalDate
 
@@ -108,7 +107,7 @@ data class InnvilgetBrevDataEnkel(
             InnvilgetBrevDataEnkel(
                 utbetalingsinfo = behandling.utbetalingsinfo,
                 avdoed = behandling.personerISak.avdoed,
-                erEtterbetalingMerEnnTreMaaneder = erEtterbetaling(behandling.utbetalingsinfo.virkningsdato),
+                erEtterbetalingMerEnnTreMaaneder = behandling.etterbetalingDTO != null,
                 vedtaksdato =
                     behandling.vedtak.vedtaksdato
                         ?: LocalDate.now(),

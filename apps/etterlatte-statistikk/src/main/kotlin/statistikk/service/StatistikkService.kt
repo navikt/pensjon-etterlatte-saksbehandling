@@ -7,7 +7,6 @@ import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.StatistikkBehandling
-import no.nav.etterlatte.libs.common.behandling.UTBETALINGSDAG
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
 import no.nav.etterlatte.libs.common.vedtak.UtbetalingsperiodeType
@@ -199,7 +198,7 @@ class StatistikkService(
         val utbetalingsdato =
             vedtak.vedtakFattet?.tidspunkt?.let {
                 val vedtattDato = it.toLocalDate()
-                YearMonth.of(vedtattDato.year, vedtattDato.monthValue).plusMonths(1).atDay(UTBETALINGSDAG)
+                YearMonth.of(vedtattDato.year, vedtattDato.monthValue).plusMonths(1).atDay(20)
             }
         return StoenadRad(
             id = -1,

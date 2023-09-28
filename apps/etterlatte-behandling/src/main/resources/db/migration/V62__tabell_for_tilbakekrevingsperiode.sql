@@ -9,7 +9,7 @@ create table tilbakekrevingsperiode
     klasse_type             TEXT,
     brutto_utbetaling       BIGINT,
     ny_brutto_utbetaling    BIGINT,
-    skatteprosent           BIGINT,
+    skatteprosent           NUMERIC,
     beregnet_feilutbetaling BIGINT,
     brutto_tilbakekreving   BIGINT,
     netto_tilbakekreving    BIGINT,

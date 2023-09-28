@@ -6,6 +6,7 @@ import no.nav.etterlatte.libs.common.tilbakekreving.Grunnlagsbeloep
 import no.nav.etterlatte.libs.common.tilbakekreving.KlasseType
 import no.nav.etterlatte.libs.common.tilbakekreving.Kravgrunnlag
 import no.nav.etterlatte.libs.common.tilbakekreving.KravgrunnlagPeriode
+import java.math.BigDecimal
 import java.time.YearMonth
 import java.util.UUID
 
@@ -50,7 +51,7 @@ data class Tilbakekrevingsbelop(
     val klasseType: String,
     val bruttoUtbetaling: Int,
     val nyBruttoUtbetaling: Int,
-    val skatteprosent: Double,
+    val skatteprosent: BigDecimal,
     val beregnetFeilutbetaling: Int?,
     val bruttoTilbakekreving: Int?,
     val nettoTilbakekreving: Int?,
@@ -68,7 +69,7 @@ data class Tilbakekrevingsbelop(
                 klasseType = grunnlagsbeloep.klasseType.name,
                 bruttoUtbetaling = grunnlagsbeloep.bruttoUtbetaling.toInt(),
                 nyBruttoUtbetaling = grunnlagsbeloep.nyBruttoUtbetaling.toInt(),
-                skatteprosent = grunnlagsbeloep.skatteProsent.toDouble(),
+                skatteprosent = grunnlagsbeloep.skatteProsent,
                 beregnetFeilutbetaling = null,
                 bruttoTilbakekreving = null,
                 nettoTilbakekreving = null,
@@ -86,7 +87,7 @@ data class Tilbakekrevingsbelop(
                 klasseType = grunnlagsbeloep.klasseType.name,
                 bruttoUtbetaling = 0,
                 nyBruttoUtbetaling = 0,
-                skatteprosent = 0.0,
+                skatteprosent = BigDecimal(0.0),
                 beregnetFeilutbetaling = null,
                 bruttoTilbakekreving = null,
                 nettoTilbakekreving = null,

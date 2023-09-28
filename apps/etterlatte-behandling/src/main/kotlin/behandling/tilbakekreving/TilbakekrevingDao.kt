@@ -147,7 +147,7 @@ class TilbakekrevingDao(private val connection: () -> Connection) {
             statement.setString(4, beloeper.klasseType)
             statement.setInt(5, beloeper.bruttoUtbetaling)
             statement.setInt(6, beloeper.nyBruttoUtbetaling)
-            statement.setDouble(7, beloeper.skatteprosent)
+            statement.setBigDecimal(7, beloeper.skatteprosent)
             statement.setInt(8, beloeper.beregnetFeilutbetaling)
             statement.setInt(9, beloeper.bruttoTilbakekreving)
             statement.setInt(10, beloeper.nettoTilbakekreving)
@@ -191,7 +191,7 @@ class TilbakekrevingDao(private val connection: () -> Connection) {
                 klasseType = getString("klasse_type"),
                 bruttoUtbetaling = getInt("brutto_utbetaling"),
                 nyBruttoUtbetaling = getInt("ny_brutto_utbetaling"),
-                skatteprosent = getDouble("skatteprosent"),
+                skatteprosent = getBigDecimal("skatteprosent"),
                 beregnetFeilutbetaling = getIntOrNull("beregnet_feilutbetaling"),
                 bruttoTilbakekreving = getIntOrNull("brutto_tilbakekreving"),
                 nettoTilbakekreving = getIntOrNull("netto_tilbakekreving"),

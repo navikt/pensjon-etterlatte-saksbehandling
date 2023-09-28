@@ -46,7 +46,7 @@ export const ManueltVilkaar = (props: VilkaarProps) => {
   }
 
   const paragrafType = (vilkaar: Vilkaar) => {
-    if (vilkaar.hovedvilkaar.lovreferanse.paragraf.startsWith('$')) {
+    if (vilkaar.hovedvilkaar.lovreferanse.paragraf.startsWith('§')) {
       return 'Folketrygden'
     }
 

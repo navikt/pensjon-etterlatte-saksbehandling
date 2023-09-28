@@ -16,7 +16,7 @@ import java.util.UUID
 
 class GenerellBehandlingDao(private val connection: () -> Connection) {
     companion object {
-        const val DATABASE_FELTER = "id, innhold, sak_id, opprettet, type"
+        const val DATABASE_FELTER = "id, innhold, sak_id, opprettet, type, tilknyttetBehandling"
     }
 
     fun opprettGenerellbehandling(generellBehandling: GenerellBehandling): GenerellBehandling {
@@ -25,7 +25,7 @@ class GenerellBehandlingDao(private val connection: () -> Connection) {
                 prepareStatement(
                     """
                     INSERT INTO generellbehandling($DATABASE_FELTER)
-                    VALUES(?::UUID, ?, ?, ?, ?)
+                    VALUES(?::UUID, ?, ?, ?, ?, ?)
                     RETURNING $DATABASE_FELTER
                     """.trimIndent(),
                 )
@@ -34,6 +34,7 @@ class GenerellBehandlingDao(private val connection: () -> Connection) {
             statement.setLong(3, generellBehandling.sakId)
             statement.setTidspunkt(4, generellBehandling.opprettet)
             statement.setString(5, generellBehandling.type.name)
+            statement.setObject(6, generellBehandling.tilknyttetBehandling)
 
             statement.executeQuery().single { toGenerellBehandling() }
         }
@@ -95,6 +96,7 @@ class GenerellBehandlingDao(private val connection: () -> Connection) {
             type = GenerellBehandling.GenerellBehandlingType.valueOf(getString("type")),
             innhold = getString("innhold").let { objectMapper.readValue(it) },
             opprettet = getTidspunkt("opprettet"),
+            tilknyttetBehandling = getObject("tilknyttetBehandling") as UUID?,
         )
     }
 }

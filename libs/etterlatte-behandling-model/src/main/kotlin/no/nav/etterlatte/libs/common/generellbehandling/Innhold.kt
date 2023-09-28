@@ -11,7 +11,6 @@ sealed class Innhold {
         val dokumenter: Dokumenter,
         val begrunnelse: String,
         val rinanummer: String,
-        val tilknyttetBehandling: String? = null,
     ) : Innhold()
 
     @JsonTypeName("ANNEN")

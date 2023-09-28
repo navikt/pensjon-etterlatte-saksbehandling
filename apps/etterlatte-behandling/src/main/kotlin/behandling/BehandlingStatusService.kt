@@ -203,9 +203,10 @@ class BehandlingStatusServiceImpl(
                 if (behandling.boddEllerArbeidetUtlandet?.skalSendeKravpakke == true) {
                     val opprettetBehandling =
                         generellBehandlingService.opprettBehandling(
-                            GenerellBehandling.opprettFraType(
+                            GenerellBehandling.opprettUtland(
                                 GenerellBehandling.GenerellBehandlingType.UTLAND,
                                 behandling.sak.id,
+                                behandling.id,
                             ),
                         )
                     val oppgaveUtland =

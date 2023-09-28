@@ -149,7 +149,12 @@ internal class BehandlingStatusServiceTest {
                 frist = Tidspunkt.now(),
             )
 
-        val generellBehandlingUtland = GenerellBehandling.opprettFraType(GenerellBehandling.GenerellBehandlingType.UTLAND, sakId)
+        val generellBehandlingUtland =
+            GenerellBehandling.opprettUtland(
+                GenerellBehandling.GenerellBehandlingType.UTLAND,
+                sakId,
+                behandlingId,
+            )
         val generellBehandlingService =
             mockk<GenerellBehandlingService> {
                 every { opprettBehandling(any()) } returns generellBehandlingUtland

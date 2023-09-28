@@ -212,7 +212,7 @@ class BehandlingStatusServiceImpl(
                         oppgaveService.opprettNyOppgaveMedSakOgReferanse(
                             opprettetBehandling.id.toString(),
                             behandling.sak.id,
-                            OppgaveKilde.BEHANDLING,
+                            OppgaveKilde.GENERELL_BEHANDLING,
                             OppgaveType.UTLAND,
                             null,
                         )

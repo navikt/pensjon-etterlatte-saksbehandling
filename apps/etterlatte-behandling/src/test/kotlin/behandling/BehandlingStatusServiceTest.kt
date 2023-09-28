@@ -160,7 +160,7 @@ internal class BehandlingStatusServiceTest {
                     opprettNyOppgaveMedSakOgReferanse(
                         generellBehandlingUtland.id.toString(),
                         sakId,
-                        OppgaveKilde.BEHANDLING,
+                        OppgaveKilde.GENERELL_BEHANDLING,
                         OppgaveType.UTLAND,
                         null,
                     )
@@ -193,7 +193,7 @@ internal class BehandlingStatusServiceTest {
             oppgaveService.opprettNyOppgaveMedSakOgReferanse(
                 generellBehandlingUtland.id.toString(),
                 sakId,
-                OppgaveKilde.BEHANDLING,
+                OppgaveKilde.GENERELL_BEHANDLING,
                 OppgaveType.UTLAND,
                 null,
             )

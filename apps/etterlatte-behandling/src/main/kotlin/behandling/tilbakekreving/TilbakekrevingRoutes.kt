@@ -23,7 +23,15 @@ internal fun Route.tilbakekrevingRoutes(service: TilbakekrevingService) {
                 call.respond(HttpStatusCode.NotFound)
             }
         }
-        put("/lagre") {
+        put("/vurdering") {
+            val vurdering = call.receive<TilbakekrevingVurdering>()
+            try {
+                call.respond(service.lagreVurdering(tilbakekrevingId, vurdering))
+            } catch (e: TilbakekrevingFinnesIkkeException) {
+                call.respond(HttpStatusCode.NotFound)
+            }
+        }
+        put("/perioder") {
             val request = call.receive<TilbakekrevingLagreRequest>()
             try {
                 call.respond(service.lagrePerioder(tilbakekrevingId, request.perioder))

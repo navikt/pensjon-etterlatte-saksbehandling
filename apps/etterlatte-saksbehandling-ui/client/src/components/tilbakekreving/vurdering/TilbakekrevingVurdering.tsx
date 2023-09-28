@@ -11,9 +11,10 @@ import {
   TilbakekrevingPeriode,
   TilbakekrevingResultat,
   TilbakekrevingSkyld,
+  TilbakekrevingVurdering,
 } from '~shared/types/Tilbakekreving'
 import { isPending, useApiCall } from '~shared/hooks/useApiCall'
-import { lagreTilbakekrevingsperioder } from '~shared/api/tilbakekreving'
+import { lagreTilbakekrevingsperioder, lagreTilbakekrevingsvurdering } from '~shared/api/tilbakekreving'
 import { addTilbakekreving } from '~store/reducers/TilbakekrevingReducer'
 import { useAppDispatch } from '~store/Store'
 import styled from 'styled-components'
@@ -21,7 +22,9 @@ import styled from 'styled-components'
 export function TilbakekrevingVurdering({ tilbakekreving }: { tilbakekreving: Tilbakekreving }) {
   const navigate = useNavigate()
   const dispatch = useAppDispatch()
-  const [lagreStatus, lagre] = useApiCall(lagreTilbakekrevingsperioder)
+  const [lagreVurderingStatus, lagreVurderingRequest] = useApiCall(lagreTilbakekrevingsvurdering)
+  const [vurdering, setVurdering] = useState<TilbakekrevingVurdering>(tilbakekreving.vurdering)
+  const [lagrePerioderStatus, lagrePerioderRequest] = useApiCall(lagreTilbakekrevingsperioder)
   const [perioder, setPerioder] = useState<TilbakekrevingPeriode[]>(tilbakekreving.perioder)
 
   const updateBeloeper = (index: number, oppdatertBeloep: TilbakekrevingBeloep) => {
@@ -31,9 +34,16 @@ export function TilbakekrevingVurdering({ tilbakekreving }: { tilbakekreving: Ti
     setPerioder(oppdatert)
   }
 
+  const lagreVurdering = () => {
+    // TODO validering?
+    lagreVurderingRequest({ tilbakekrevingsId: tilbakekreving.id, vurdering }, (lagretTilbakekreving) => {
+      dispatch(addTilbakekreving(lagretTilbakekreving))
+    })
+  }
+
   const lagrePerioder = () => {
     // TODO validering?
-    lagre({ tilbakekrevingsId: tilbakekreving.id, perioder }, (lagretTilbakekreving) => {
+    lagrePerioderRequest({ tilbakekrevingsId: tilbakekreving.id, perioder }, (lagretTilbakekreving) => {
       dispatch(addTilbakekreving(lagretTilbakekreving))
     })
   }
@@ -50,11 +60,31 @@ export function TilbakekrevingVurdering({ tilbakekreving }: { tilbakekreving: Ti
       <InnholdForm>
         <>
           <Label>Årsak</Label>
-          <Select label="Skyld" hideLabel={true} value="" onChange={() => {}}>
+          <Select
+            label="Aarsak"
+            hideLabel={true}
+            value={vurdering.aarsak ?? ''}
+            onChange={(e) => {
+              if (e.target.value == '') return
+              setVurdering({
+                ...vurdering,
+                aarsak: TilbakekrevingAarsak[e.target.value as TilbakekrevingAarsak],
+              })
+            }}
+          >
             <option value="">Velg..</option>
             <option value={TilbakekrevingAarsak.ANNET}>Annet</option>
             <option value={TilbakekrevingAarsak.ARBHOYINNT}>Inntekt</option>
             <option value={TilbakekrevingAarsak.BEREGNFEIL}>Beregningsfeil</option>
+            <option value={TilbakekrevingAarsak.DODSFALL}>Dødsfall</option>
+            <option value={TilbakekrevingAarsak.EKTESKAP}>Eksteskap/Samboer med felles barn</option>
+            <option value={TilbakekrevingAarsak.FEILREGEL}>Feil regelbruk</option>
+            <option value={TilbakekrevingAarsak.FEILUFOREG}>TODO - Sanksjoner/opphør</option>
+            <option value={TilbakekrevingAarsak.FLYTTUTLAND}>Flyttet utland</option>
+            <option value={TilbakekrevingAarsak.IKKESJEKKYTELSE}>Ikke sjekket mot andre ytelse</option>
+            <option value={TilbakekrevingAarsak.OVERSETTMLD}>Oversett melding fra bruker</option>
+            <option value={TilbakekrevingAarsak.SAMLIV}>TODO - Samliv</option>
+            <option value={TilbakekrevingAarsak.UTBFEILMOT}>Utbetaling til feil mottaker</option>
           </Select>
         </>
         <TextAreaWrapper>
@@ -64,11 +94,30 @@ export function TilbakekrevingVurdering({ tilbakekreving }: { tilbakekreving: Ti
               Gi en kort beskrivelse av bakgrunnen for feilutbetalingen og når ble den oppdaget.
             </Beskrivelse>
           </>
-          <textarea value="" onChange={() => {}} />
+          <textarea
+            value={vurdering.beskrivelse ?? ''}
+            onChange={(e) =>
+              setVurdering({
+                ...vurdering,
+                beskrivelse: e.target.value,
+              })
+            }
+          />
         </TextAreaWrapper>
         <>
           <Label>Vurder uaktsomhet</Label>
-          <RadioGroup legend="" size="small" className="radioGroup" onChange={() => {}} value="">
+          <RadioGroup
+            legend=""
+            size="small"
+            className="radioGroup"
+            value={vurdering.aktsomhet ?? ''}
+            onChange={(e) =>
+              setVurdering({
+                ...vurdering,
+                aktsomhet: TilbakekrevingAktsomhet[e as TilbakekrevingAktsomhet],
+              })
+            }
+          >
             <div className="flex">
               <Radio value={TilbakekrevingAktsomhet.GOD_TRO}>God tro</Radio>
               <Radio value={TilbakekrevingAktsomhet.SIMPEL_UAKTSOMHET}>Simpel uaktsomhet</Radio>
@@ -78,9 +127,19 @@ export function TilbakekrevingVurdering({ tilbakekreving }: { tilbakekreving: Ti
         </>
         <TextAreaWrapper>
           <Label>Konklusjon</Label>
-          <textarea value="" onChange={() => {}} />
+          <textarea
+            value={vurdering.konklusjon ?? ''}
+            onChange={(e) =>
+              setVurdering({
+                ...vurdering,
+                konklusjon: e.target.value,
+              })
+            }
+          />
         </TextAreaWrapper>
-        <Button>Lagre vurdering</Button>
+        <Button variant="primary" onClick={lagreVurdering} loading={isPending(lagreVurderingStatus)}>
+          Lagre vurdering
+        </Button>
       </InnholdForm>
       <ContentHeader>
         <HeadingWrapper>
@@ -259,7 +318,7 @@ export function TilbakekrevingVurdering({ tilbakekreving }: { tilbakekreving: Ti
             })}
           </Table.Body>
         </Table>
-        <Button variant="primary" onClick={lagrePerioder} loading={isPending(lagreStatus)}>
+        <Button variant="primary" onClick={lagrePerioder} loading={isPending(lagrePerioderStatus)}>
           Lagre
         </Button>
       </InnholdPadding>

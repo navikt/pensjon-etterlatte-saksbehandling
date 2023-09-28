@@ -921,7 +921,7 @@ internal class OppgaveServiceTest {
 
         oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(behandlingsref, opprettetSak.id)
 
-        val alleOppgaver = oppgaveDao.hentOppgaverForBehandling(behandlingsref)
+        val alleOppgaver = oppgaveDao.hentOppgaverForReferanse(behandlingsref)
         Assertions.assertEquals(2, alleOppgaver.size)
         val avbruttOppgave = oppgaveDao.hentOppgave(oppgaveSomSkalBliAvbrutt.id)!!
         Assertions.assertEquals(avbruttOppgave.status, Status.AVBRUTT)

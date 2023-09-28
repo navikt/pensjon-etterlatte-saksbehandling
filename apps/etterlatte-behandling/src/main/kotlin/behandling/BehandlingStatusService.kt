@@ -11,12 +11,9 @@ import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.generellbehandling.GenerellBehandling
-import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
-import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.sak.SakIDListe
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
-import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.vedtaksvurdering.VedtakHendelse
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
@@ -88,7 +85,6 @@ class BehandlingStatusServiceImpl(
     private val behandlingDao: BehandlingDao,
     private val behandlingService: BehandlingService,
     private val grunnlagsendringshendelseService: GrunnlagsendringshendelseService,
-    private val oppgaveService: OppgaveService,
     private val featureToggleService: FeatureToggleService,
     private val generellBehandlingService: GenerellBehandlingService,
 ) : BehandlingStatusService {
@@ -201,33 +197,13 @@ class BehandlingStatusServiceImpl(
         if (featureToggleService.isEnabled(GenerellBehandlingToggle.KanBrukeGenerellBehandlingToggle, false)) {
             if (behandling.type == BehandlingType.FØRSTEGANGSBEHANDLING) {
                 if (behandling.boddEllerArbeidetUtlandet?.skalSendeKravpakke == true) {
-                    val opprettetBehandling =
-                        generellBehandlingService.opprettBehandling(
-                            GenerellBehandling.opprettUtland(
-                                GenerellBehandling.GenerellBehandlingType.UTLAND,
-                                behandling.sak.id,
-                                behandling.id,
-                            ),
-                        )
-                    val oppgaveUtland =
-                        oppgaveService.opprettNyOppgaveMedSakOgReferanse(
-                            opprettetBehandling.id.toString(),
+                    generellBehandlingService.opprettBehandling(
+                        GenerellBehandling.opprettUtland(
+                            GenerellBehandling.GenerellBehandlingType.UTLAND,
                             behandling.sak.id,
-                            OppgaveKilde.GENERELL_BEHANDLING,
-                            OppgaveType.UTLAND,
-                            null,
-                        )
-                    val saksbehandlerFoerstegangsbehandling =
-                        oppgaveService.hentSaksbehandlerFraFoerstegangsbehandling(behandlingsId = behandling.id)
-                    if (saksbehandlerFoerstegangsbehandling != null) {
-                        oppgaveService.tildelSaksbehandler(oppgaveUtland.id, saksbehandlerFoerstegangsbehandling)
-                        logger.info(
-                            "Opprettet generell behandling for utland for sak: ${behandling.sak.id} " +
-                                "og behandling: ${behandling.id}. Gjelder oppgave: ${oppgaveUtland.id}",
-                        )
-                    } else {
-                        logger.error("Fant ingen saksbehandler for behandling oppgave fatting, id: ${behandling.id}")
-                    }
+                            behandling.id,
+                        ),
+                    )
                 } else {
                     logger.info("behandling ${behandling.id} har ikke satt skalSendeKravpakke=true")
                 }

@@ -18,10 +18,7 @@ import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.generellbehandling.GenerellBehandling
 import no.nav.etterlatte.libs.common.kunSaksbehandler
-import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
-import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.sakId
-import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.sak.SakService
 import java.util.UUID
 
@@ -36,7 +33,6 @@ internal fun Route.generellbehandlingRoutes(
     generellBehandlingService: GenerellBehandlingService,
     sakService: SakService,
     featureToggleService: FeatureToggleService,
-    oppgaveService: OppgaveService,
 ) {
     suspend fun PipelineContext<Unit, ApplicationCall>.hvisEnabled(
         toggle: FeatureToggle,
@@ -59,16 +55,8 @@ internal fun Route.generellbehandlingRoutes(
                     call.respond(HttpStatusCode.NotFound, "Saken finnes ikke")
                 }
                 inTransaction {
-                    val opprettetBehandling =
-                        generellBehandlingService.opprettBehandling(
-                            GenerellBehandling.opprettFraType(request.type, sakId),
-                        )
-                    oppgaveService.opprettNyOppgaveMedSakOgReferanse(
-                        opprettetBehandling.id.toString(),
-                        sakId,
-                        OppgaveKilde.GENERELL_BEHANDLING,
-                        OppgaveType.UTLAND,
-                        null,
+                    generellBehandlingService.opprettBehandling(
+                        GenerellBehandling.opprettFraType(request.type, sakId),
                     )
                 }
                 logger.info(

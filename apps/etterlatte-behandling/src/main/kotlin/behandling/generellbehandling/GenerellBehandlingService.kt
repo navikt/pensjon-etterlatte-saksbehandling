@@ -2,18 +2,54 @@ package no.nav.etterlatte.behandling.generellbehandling
 
 import no.nav.etterlatte.libs.common.generellbehandling.GenerellBehandling
 import no.nav.etterlatte.libs.common.generellbehandling.Innhold
+import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.token.Saksbehandler
+import org.slf4j.LoggerFactory
 import java.util.UUID
 
 class GenerellBehandlingService(
     private val generellBehandlingDao: GenerellBehandlingDao,
     private val oppgaveService: OppgaveService,
 ) {
+    private val logger = LoggerFactory.getLogger(GenerellBehandlingService::class.java)
+
     fun opprettBehandling(generellBehandling: GenerellBehandling): GenerellBehandling {
-        return generellBehandlingDao.opprettGenerellbehandling(generellBehandling)
+        val opprettetbehandling = generellBehandlingDao.opprettGenerellbehandling(generellBehandling)
+        val oppgaveForGenerellBehandling =
+            oppgaveService.opprettNyOppgaveMedSakOgReferanse(
+                opprettetbehandling.id.toString(),
+                opprettetbehandling.sakId,
+                OppgaveKilde.GENERELL_BEHANDLING,
+                OppgaveType.UTLAND,
+                null,
+            )
+        tildelSaksbehandlerTilNyOppgaveHvisFinnes(oppgaveForGenerellBehandling, opprettetbehandling)
+        return opprettetbehandling
+    }
+
+    private fun tildelSaksbehandlerTilNyOppgaveHvisFinnes(
+        oppgave: OppgaveIntern,
+        generellBehandling: GenerellBehandling,
+    ) {
+        if (generellBehandling.tilknyttetBehandling !== null) {
+            val kanskjeOppgaveMedSaksbehandler =
+                oppgaveService.hentOppgaveForSaksbehandlerFraFoerstegangsbehandling(
+                    behandlingId = generellBehandling.tilknyttetBehandling!!,
+                )
+            if (kanskjeOppgaveMedSaksbehandler != null) {
+                val saksbehandler = kanskjeOppgaveMedSaksbehandler.saksbehandler
+                if (saksbehandler != null) {
+                    oppgaveService.tildelSaksbehandler(oppgave.id, saksbehandler)
+                    logger.info(
+                        "Opprettet generell behandling for utland for sak: ${generellBehandling.sakId} " +
+                            "og behandling: ${generellBehandling.tilknyttetBehandling}. Gjelder oppgave: ${oppgave.id}",
+                    )
+                }
+            }
+        }
     }
 
     fun attesterBehandling(

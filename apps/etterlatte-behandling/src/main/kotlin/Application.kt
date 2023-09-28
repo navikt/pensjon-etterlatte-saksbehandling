@@ -111,7 +111,6 @@ fun Application.module(context: ApplicationContext) {
                 generellBehandlingService = generellBehandlingService,
                 sakService = sakService,
                 featureToggleService = featureToggleService,
-                oppgaveService = oppgaveService,
             )
             revurderingRoutes(revurderingService = revurderingService)
             omregningRoutes(omregningService = omregningService)

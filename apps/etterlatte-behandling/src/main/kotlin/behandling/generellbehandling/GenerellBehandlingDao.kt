@@ -15,18 +15,14 @@ import java.sql.ResultSet
 import java.util.UUID
 
 class GenerellBehandlingDao(private val connection: () -> Connection) {
-    companion object {
-        const val DATABASE_FELTER = "id, innhold, sak_id, opprettet, type, tilknyttet_behandling"
-    }
-
     fun opprettGenerellbehandling(generellBehandling: GenerellBehandling): GenerellBehandling {
         return with(connection()) {
             val statement =
                 prepareStatement(
                     """
-                    INSERT INTO generellbehandling($DATABASE_FELTER)
+                    INSERT INTO generellbehandling(id, innhold, sak_id, opprettet, type, tilknyttet_behandling)
                     VALUES(?::UUID, ?, ?, ?, ?, ?)
-                    RETURNING $DATABASE_FELTER
+                    RETURNING id, innhold, sak_id, opprettet, type, tilknyttet_behandling
                     """.trimIndent(),
                 )
             statement.setObject(1, generellBehandling.id)
@@ -48,7 +44,7 @@ class GenerellBehandlingDao(private val connection: () -> Connection) {
                     UPDATE generellbehandling
                     SET innhold = ?
                     where id = ?
-                    RETURNING $DATABASE_FELTER
+                    RETURNING id, innhold, sak_id, opprettet, type, tilknyttet_behandling
                     """.trimIndent(),
                 )
             statement.setJsonb(1, generellBehandling.innhold)
@@ -62,7 +58,7 @@ class GenerellBehandlingDao(private val connection: () -> Connection) {
             val statement =
                 prepareStatement(
                     """
-                    SELECT $DATABASE_FELTER FROM generellbehandling
+                    SELECT id, innhold, sak_id, opprettet, type, tilknyttet_behandling FROM generellbehandling
                     WHERE id = ?
                     """.trimIndent(),
                 )
@@ -78,7 +74,7 @@ class GenerellBehandlingDao(private val connection: () -> Connection) {
             val statement =
                 prepareStatement(
                     """
-                    SELECT $DATABASE_FELTER FROM generellbehandling
+                    SELECT id, innhold, sak_id, opprettet, type, tilknyttet_behandling FROM generellbehandling
                     WHERE sak_id = ?
                     """.trimIndent(),
                 )

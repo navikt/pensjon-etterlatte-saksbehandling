@@ -12,29 +12,29 @@ class EtterbetalingDao(private val connection: () -> Connection) {
             val statement =
                 prepareStatement(
                     """
-                    INSERT INTO etterbetaling(behandlings_id, fra_dato, til_dato)
+                    INSERT INTO etterbetaling(behandling_id, fra_dato, til_dato)
                     VALUES (?, ?, ?)
-                    ON CONFLICT (behandlings_id) DO UPDATE SET fra_dato = excluded.fra_dato, til_dato = excluded.til_dato
+                    ON CONFLICT (behandling_id) DO UPDATE SET fra_dato = excluded.fra_dato, til_dato = excluded.til_dato
                     """.trimIndent(),
                 )
-            statement.setObject(1, etterbetaling.behandlingsId)
+            statement.setObject(1, etterbetaling.behandlingId)
             statement.setDate(2, etterbetaling.fraDato.let { Date.valueOf(it) })
             statement.setDate(3, etterbetaling.tilDato.let { Date.valueOf(it) })
             statement.executeUpdate()
         }
     }
 
-    fun hentEtterbetaling(behandlingsId: UUID): Etterbetalingmodell? =
+    fun hentEtterbetaling(behandlingId: UUID): Etterbetalingmodell? =
         with(connection()) {
             val statement =
                 connection().prepareStatement(
-                    "SELECT fra_dato, til_dato FROM etterbetaling WHERE behandlings_id = ?::UUID",
+                    "SELECT fra_dato, til_dato FROM etterbetaling WHERE behandling_id = ?::UUID",
                 )
-            statement.setObject(1, behandlingsId)
+            statement.setObject(1, behandlingId)
 
             return statement.executeQuery().singleOrNull {
                 Etterbetalingmodell(
-                    behandlingsId = behandlingsId,
+                    behandlingId = behandlingId,
                     fraDato = getDate("fra_dato").toLocalDate(),
                     tilDato = getDate("til_dato").toLocalDate(),
                 )

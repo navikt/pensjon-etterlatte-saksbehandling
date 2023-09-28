@@ -19,7 +19,7 @@ internal fun Route.etterbetalingRoutes(service: EtterbetalingService) {
             medBody<EtterbetalingDTO> { request ->
                 service.lagreEtterbetaling(
                     Etterbetalingmodell(
-                        behandlingsId = behandlingsId,
+                        behandlingId = behandlingsId,
                         fraDato = requireNotNull(request.fraDato),
                         tilDato = requireNotNull(request.tilDato),
                     ),

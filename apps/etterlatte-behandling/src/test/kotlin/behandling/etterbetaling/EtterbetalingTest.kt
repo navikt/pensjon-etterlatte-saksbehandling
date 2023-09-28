@@ -40,7 +40,7 @@ class EtterbetalingTest : BehandlingIntegrationTest() {
     }
 
     @Test
-    fun etterbetaling() {
+    fun `kan registrere etterbetaling og saa hente den ut igjen`() {
         testApplication {
             environment {
                 config = hoconApplicationConfig

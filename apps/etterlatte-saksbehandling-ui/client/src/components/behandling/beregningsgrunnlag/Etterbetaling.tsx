@@ -31,7 +31,7 @@ const Etterbetaling = (props: {
   const [status, apiLagreEtterbetaling] = useApiCall(lagreEtterbetaling)
   const [etterbetaling, setEtterbetaling] = useState(etterbetalingInit)
   const [erEtterbetaling, setErEtterbetaling] = useState<boolean>(!!etterbetaling)
-  const [vis, setVis] = useState(false)
+  const [vis, setVis] = useState<boolean>(false)
 
   const [funksjonsbrytere, postHentFunksjonsbrytere] = useApiCall(hentFunksjonsbrytere)
   const featureToggleNameEtterbetaling = 'registrer-etterbetaling'
@@ -54,11 +54,11 @@ const Etterbetaling = (props: {
   }
 
   if (!vis || !isSuccess(funksjonsbrytere)) {
-    return <></>
+    return null
   }
   if (!redigerbar) {
     if (!erEtterbetaling) {
-      return <></>
+      return null
     }
 
     return (
@@ -88,14 +88,14 @@ const Etterbetaling = (props: {
         <EtterbetalingWrapper>
           <DatoSection>
             <DatoVelger
-              value={etterbetaling?.fraDato == null ? null : new Date(etterbetaling?.fraDato)}
+              value={!etterbetaling?.fraDato ? null : new Date(etterbetaling?.fraDato)}
               onChange={(e) => setEtterbetaling({ ...etterbetaling, fraDato: e })}
               label="Fra dato"
             />
           </DatoSection>
           <DatoSection>
             <DatoVelger
-              value={etterbetaling?.tilDato == null ? null : new Date(etterbetaling?.tilDato)}
+              value={!etterbetaling?.tilDato ? null : new Date(etterbetaling?.tilDato)}
               onChange={(e) => setEtterbetaling({ ...etterbetaling, tilDato: e })}
               label="Til dato"
             />

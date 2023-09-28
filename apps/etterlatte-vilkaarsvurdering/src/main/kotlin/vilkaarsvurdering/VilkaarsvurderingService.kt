@@ -3,6 +3,8 @@ package no.nav.etterlatte.vilkaarsvurdering
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -22,10 +24,18 @@ import java.util.UUID
 class VirkningstidspunktIkkeSattException(behandlingId: UUID) :
     RuntimeException("Virkningstidspunkt ikke satt for behandling $behandlingId")
 
+enum class VilkaarFeatureToggle(private val key: String) : FeatureToggle {
+    OpprettAvdoedesForutgaaendeMedlemskapEoesVilkaar("pensjon-etterlatte.opprett-eoes-vilkaar"),
+    ;
+
+    override fun key() = key
+}
+
 class VilkaarsvurderingService(
     private val vilkaarsvurderingRepository: VilkaarsvurderingRepository,
     private val behandlingKlient: BehandlingKlient,
     private val grunnlagKlient: GrunnlagKlient,
+    private val featureToggleService: FeatureToggleService,
 ) {
     private val logger = LoggerFactory.getLogger(VilkaarsvurderingService::class.java)
 
@@ -191,7 +201,7 @@ class VilkaarsvurderingService(
                 when (behandlingType) {
                     BehandlingType.FØRSTEGANGSBEHANDLING,
                     BehandlingType.REVURDERING,
-                    -> BarnepensjonVilkaar.inngangsvilkaar(grunnlag, virkningstidspunkt)
+                    -> BarnepensjonVilkaar.inngangsvilkaar(grunnlag, virkningstidspunkt, featureToggleService)
 
                     BehandlingType.MANUELT_OPPHOER -> throw IllegalArgumentException(
                         "Støtter ikke vilkårsvurdering for behandlingType=$behandlingType",
@@ -201,7 +211,7 @@ class VilkaarsvurderingService(
             SakType.OMSTILLINGSSTOENAD ->
                 when (behandlingType) {
                     BehandlingType.FØRSTEGANGSBEHANDLING ->
-                        OmstillingstoenadVilkaar.inngangsvilkaar(grunnlag)
+                        OmstillingstoenadVilkaar.inngangsvilkaar(grunnlag, featureToggleService)
 
                     BehandlingType.REVURDERING,
                     BehandlingType.MANUELT_OPPHOER,

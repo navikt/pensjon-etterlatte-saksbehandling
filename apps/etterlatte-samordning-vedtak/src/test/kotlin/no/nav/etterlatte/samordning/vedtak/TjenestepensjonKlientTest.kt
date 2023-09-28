@@ -45,14 +45,13 @@ class TjenestepensjonKlientTest {
                 engine {
                     addHandler { request ->
                         request.headers["fnr"] shouldBe "01018012345"
-                        request.headers["tpnr"] shouldBe "3010"
 
                         when (request.url.fullPath) {
-                            "/api/tjenestepensjon/haveYtelse?date=2024-03-01" -> {
-                                respond("true", headers = headers)
+                            "/api/tjenestepensjon/tpNrWithYtelse?fomDate=2024-03-01" -> {
+                                respond("[ \"3010\", \"4100\" ]", headers = headers)
                             }
-                            "/api/tjenestepensjon/haveYtelse?date=2024-02-01" -> {
-                                respond("false", headers = headers)
+                            "/api/tjenestepensjon/tpNrWithYtelse?fomDate=2024-02-01" -> {
+                                respond("[]", headers = headers)
                             }
                             else -> error(request.url.fullPath)
                         }

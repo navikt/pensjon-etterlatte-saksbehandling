@@ -7,6 +7,7 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldHave
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -103,6 +104,8 @@ class SamordningVedtakServiceTest {
                     ),
                 ),
             )
+
+        coVerify { tpKlient.harTpYtelseOnDate(FNR, tpnr = TPNR_SPK, now().atStartOfMonth()) }
     }
 
     @Test

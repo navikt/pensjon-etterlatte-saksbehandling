@@ -24,7 +24,7 @@ class SamordningVedtakService(
         if (!tjenestepensjonKlient.harTpYtelseOnDate(
                 fnr = vedtak.fnr,
                 tpnr = tpnr,
-                onDate = vedtak.virkningstidspunkt.atStartOfMonth(),
+                fomDato = vedtak.virkningstidspunkt.atStartOfMonth(),
             )
         ) {
             throw TjenestepensjonManglendeTilgangException("Ikke gyldig tpYtelse")

@@ -54,9 +54,9 @@ class TjenestepensjonKlient(config: Config, httpClient: HttpClient, azureAdClien
     suspend fun harTpYtelseOnDate(
         fnr: String,
         tpnr: String,
-        onDate: LocalDate,
+        fomDato: LocalDate,
     ): Boolean {
-        logger.info("Sjekk om det finnes tjenestepensjonsytelse pr $onDate for ordning '$tpnr'")
+        logger.info("Sjekk om det finnes tjenestepensjonsytelse pr $fomDato for ordning '$tpnr'")
 
         return try {
             downstreamResourceClient
@@ -64,19 +64,18 @@ class TjenestepensjonKlient(config: Config, httpClient: HttpClient, azureAdClien
                     resource =
                         Resource(
                             clientId = clientId,
-                            url = "$tjenestepensjonUrl/haveYtelse?date=$onDate",
+                            url = "$tjenestepensjonUrl/tpNrWithYtelse?fomDate=$fomDato",
                             additionalHeaders =
                                 mapOf(
                                     "fnr" to fnr,
-                                    "tpnr" to tpnr,
                                 ),
                         ),
                     brukerTokenInfo = SamordningSystembruker,
                 )
                 .mapBoth(
-                    success = { deserialize(it.response.toString()) },
+                    success = { deserialize<List<String>>(it.response.toString()) },
                     failure = { throw it },
-                )
+                ).contains(tpnr)
         } catch (e: Exception) {
             throw TjenestepensjonKlientException(
                 "Henting av tjenestepensjonsforhold feilet",

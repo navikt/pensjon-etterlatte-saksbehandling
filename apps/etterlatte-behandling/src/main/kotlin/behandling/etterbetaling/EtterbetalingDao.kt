@@ -1,13 +1,13 @@
 package no.nav.etterlatte.behandling.etterbetaling
 
-import no.nav.etterlatte.libs.common.behandling.Etterbetalingmodell
+import no.nav.etterlatte.libs.common.behandling.Etterbetaling
 import no.nav.etterlatte.libs.database.singleOrNull
 import java.sql.Connection
 import java.sql.Date
 import java.util.UUID
 
 class EtterbetalingDao(private val connection: () -> Connection) {
-    fun lagreEtterbetaling(etterbetaling: Etterbetalingmodell) {
+    fun lagreEtterbetaling(etterbetaling: Etterbetaling) {
         with(connection()) {
             val statement =
                 prepareStatement(
@@ -24,7 +24,7 @@ class EtterbetalingDao(private val connection: () -> Connection) {
         }
     }
 
-    fun hentEtterbetaling(behandlingId: UUID): Etterbetalingmodell? =
+    fun hentEtterbetaling(behandlingId: UUID): Etterbetaling? =
         with(connection()) {
             val statement =
                 prepareStatement(
@@ -33,7 +33,7 @@ class EtterbetalingDao(private val connection: () -> Connection) {
             statement.setObject(1, behandlingId)
 
             return statement.executeQuery().singleOrNull {
-                Etterbetalingmodell(
+                Etterbetaling(
                     behandlingId = behandlingId,
                     fraDato = getDate("fra_dato").toLocalDate(),
                     tilDato = getDate("til_dato").toLocalDate(),

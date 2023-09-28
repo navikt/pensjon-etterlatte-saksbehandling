@@ -5,7 +5,7 @@ import no.nav.etterlatte.behandling.revurdering.RevurderingMedBegrunnelse
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
-import no.nav.etterlatte.libs.common.behandling.Etterbetalingmodell
+import no.nav.etterlatte.libs.common.behandling.Etterbetaling
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -38,7 +38,7 @@ data class DetaljertBehandlingDto(
     val revurderingsaarsak: RevurderingAarsak?,
     val revurderinginfo: RevurderingMedBegrunnelse?,
     val begrunnelse: String?,
-    val etterbetaling: Etterbetalingmodell?,
+    val etterbetaling: Etterbetaling?,
 )
 
 data class Familieforhold(

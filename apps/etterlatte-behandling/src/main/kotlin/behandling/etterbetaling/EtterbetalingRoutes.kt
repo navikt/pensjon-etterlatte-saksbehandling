@@ -8,7 +8,7 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
-import no.nav.etterlatte.libs.common.behandling.Etterbetalingmodell
+import no.nav.etterlatte.libs.common.behandling.Etterbetaling
 import no.nav.etterlatte.libs.common.behandlingsId
 import no.nav.etterlatte.libs.common.medBody
 import java.time.LocalDate
@@ -18,7 +18,7 @@ internal fun Route.etterbetalingRoutes(service: EtterbetalingService) {
         post {
             medBody<EtterbetalingDTO> { request ->
                 service.lagreEtterbetaling(
-                    Etterbetalingmodell(
+                    Etterbetaling(
                         behandlingId = behandlingsId,
                         fraDato = requireNotNull(request.fraDato),
                         tilDato = requireNotNull(request.tilDato),

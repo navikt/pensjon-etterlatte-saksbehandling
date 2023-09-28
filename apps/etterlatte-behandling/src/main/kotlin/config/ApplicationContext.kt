@@ -252,7 +252,6 @@ class ApplicationContext(
             behandlingDao,
             behandlingService,
             grunnlagsendringshendelseService,
-            oppgaveService,
             featureToggleService,
             generellBehandlingService,
         )

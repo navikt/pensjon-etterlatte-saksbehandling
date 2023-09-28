@@ -66,10 +66,9 @@ internal class GenerellBehandlingDaoTest {
                 GenerellBehandling.GenerellBehandlingType.UTLAND,
                 null,
             )
-        dao.opprettGenerellbehandling(generellBehandlingUtland)
-        val hentetGenBehandling = dao.hentGenerellBehandlingMedId(generellBehandlingUtland.id)
+        val hentetGenBehandling = dao.opprettGenerellbehandling(generellBehandlingUtland)
 
-        Assertions.assertEquals(generellBehandlingUtland.id, hentetGenBehandling!!.id)
+        Assertions.assertEquals(generellBehandlingUtland.id, hentetGenBehandling.id)
         Assertions.assertEquals(generellBehandlingUtland.innhold, hentetGenBehandling.innhold)
     }
 
@@ -96,10 +95,9 @@ internal class GenerellBehandlingDaoTest {
                 GenerellBehandling.GenerellBehandlingType.UTLAND,
                 Innhold.Utland(listOf("AFG"), Dokumenter(true, false, true, true, true), "2grwg2", "rita"),
             )
-        dao.opprettGenerellbehandling(generellBehandlingUtland)
-        val hentetGenBehandling = dao.hentGenerellBehandlingMedId(generellBehandlingUtland.id)
+        val hentetGenBehandling = dao.opprettGenerellbehandling(generellBehandlingUtland)
 
-        Assertions.assertEquals(generellBehandlingUtland.id, hentetGenBehandling!!.id)
+        Assertions.assertEquals(generellBehandlingUtland.id, hentetGenBehandling.id)
         Assertions.assertEquals(generellBehandlingUtland.innhold, hentetGenBehandling.innhold)
     }
 

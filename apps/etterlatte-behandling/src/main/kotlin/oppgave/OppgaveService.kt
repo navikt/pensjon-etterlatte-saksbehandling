@@ -182,7 +182,7 @@ class OppgaveService(
         merknad: String?,
         saksbehandler: BrukerTokenInfo,
     ): OppgaveIntern {
-        val behandlingsoppgaver = oppgaveDao.hentOppgaverForBehandling(fattetoppgave.referanse)
+        val behandlingsoppgaver = oppgaveDao.hentOppgaverForReferanse(fattetoppgave.referanse)
         if (behandlingsoppgaver.isEmpty()) {
             throw BadRequestException("Må ha en oppgave for å kunne lage attesteringsoppgave")
         }
@@ -242,13 +242,17 @@ class OppgaveService(
         return inTransaction { oppgaveDao.hentOppgaverForSak(sakId) }
     }
 
+    fun hentOppgaverForReferanse(referanse: String): List<OppgaveIntern> {
+        return oppgaveDao.hentOppgaverForReferanse(referanse)
+    }
+
     fun avbrytOppgaveUnderBehandling(
         behandlingEllerHendelseId: String,
         saksbehandler: BrukerTokenInfo,
     ): OppgaveIntern {
         try {
             val oppgaveUnderbehandling =
-                oppgaveDao.hentOppgaverForBehandling(behandlingEllerHendelseId)
+                oppgaveDao.hentOppgaverForReferanse(behandlingEllerHendelseId)
                     .single { it.status == Status.UNDER_BEHANDLING }
             sikreAtSaksbehandlerSomLukkerOppgaveEierOppgaven(oppgaveUnderbehandling, saksbehandler)
             oppgaveDao.endreStatusPaaOppgave(oppgaveUnderbehandling.id, Status.AVBRUTT)
@@ -274,7 +278,7 @@ class OppgaveService(
         behandlingEllerHendelseId: String,
         saksbehandler: BrukerTokenInfo,
     ): OppgaveIntern {
-        val behandlingsoppgaver = oppgaveDao.hentOppgaverForBehandling(behandlingEllerHendelseId)
+        val behandlingsoppgaver = oppgaveDao.hentOppgaverForReferanse(behandlingEllerHendelseId)
         if (behandlingsoppgaver.isEmpty()) {
             throw BadRequestException("Må ha en oppgave for å ferdigstille oppgave")
         }
@@ -304,7 +308,7 @@ class OppgaveService(
         referanse: String,
         sakId: Long,
     ): OppgaveIntern {
-        val oppgaverForBehandling = oppgaveDao.hentOppgaverForBehandling(referanse)
+        val oppgaverForBehandling = oppgaveDao.hentOppgaverForReferanse(referanse)
         val oppgaverSomKanLukkes = oppgaverForBehandling.filter { !it.erAvsluttet() }
         oppgaverSomKanLukkes.forEach {
             oppgaveDao.endreStatusPaaOppgave(it.id, Status.AVBRUTT)
@@ -341,27 +345,27 @@ class OppgaveService(
     fun hentSaksbehandlerForBehandling(behandlingsId: UUID): String? {
         val oppgaverForBehandlingUtenAttesterting =
             inTransaction {
-                oppgaveDao.hentOppgaverForBehandling(behandlingsId.toString())
+                oppgaveDao.hentOppgaverForReferanse(behandlingsId.toString())
             }.filter {
                 it.type !== OppgaveType.ATTESTERING
             }
         return oppgaverForBehandlingUtenAttesterting.sortedByDescending { it.opprettet }[0].saksbehandler
     }
 
-    fun hentSaksbehandlerFraFoerstegangsbehandling(behandlingsId: UUID): String? {
+    fun hentOppgaveForSaksbehandlerFraFoerstegangsbehandling(behandlingId: UUID): OppgaveIntern? {
         val oppgaverForBehandlingFoerstegangs =
             inTransaction(gjenbruk = true) {
-                oppgaveDao.hentOppgaverForBehandling(behandlingsId.toString())
+                oppgaveDao.hentOppgaverForReferanse(behandlingId.toString())
             }.filter {
                 it.type == OppgaveType.FOERSTEGANGSBEHANDLING
             }
-        return oppgaverForBehandlingFoerstegangs.sortedByDescending { it.opprettet }[0].saksbehandler
+        return oppgaverForBehandlingFoerstegangs.sortedByDescending { it.opprettet }.firstOrNull()
     }
 
     fun hentSaksbehandlerForOppgaveUnderArbeid(behandlingsId: UUID): String? {
         val oppgaverforBehandling =
             inTransaction(gjenbruk = true) {
-                oppgaveDao.hentOppgaverForBehandling(behandlingsId.toString())
+                oppgaveDao.hentOppgaverForReferanse(behandlingsId.toString())
             }
         return try {
             val oppgaveUnderbehandling = oppgaverforBehandling.single { it.status == Status.UNDER_BEHANDLING }
@@ -393,7 +397,7 @@ class OppgaveService(
      * Skal kun brukes for automatisk avbrudd når vi får erstattende førstegangsbehandling i saken
      */
     fun avbrytAapneOppgaverForBehandling(behandlingId: String) {
-        oppgaveDao.hentOppgaverForBehandling(behandlingId)
+        oppgaveDao.hentOppgaverForReferanse(behandlingId)
             .filter { !it.erAvsluttet() }
             .forEach {
                 oppgaveDao.endreStatusPaaOppgave(it.id, Status.AVBRUTT)

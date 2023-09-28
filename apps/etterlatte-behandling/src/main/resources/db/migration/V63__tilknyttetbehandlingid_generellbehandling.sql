@@ -1,0 +1,1 @@
+ALTER TABLE generellbehandling ADD COLUMN tilknyttet_behandling UUID;

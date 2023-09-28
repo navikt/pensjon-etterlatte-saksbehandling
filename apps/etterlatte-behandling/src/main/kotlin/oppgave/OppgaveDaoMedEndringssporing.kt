@@ -96,8 +96,8 @@ class OppgaveDaoMedEndringssporingImpl(
         return oppgaveDao.hentOppgave(oppgaveId)
     }
 
-    override fun hentOppgaverForBehandling(behandlingid: String): List<OppgaveIntern> {
-        return oppgaveDao.hentOppgaverForBehandling(behandlingid)
+    override fun hentOppgaverForReferanse(referanse: String): List<OppgaveIntern> {
+        return oppgaveDao.hentOppgaverForReferanse(referanse)
     }
 
     override fun hentOppgaverForSak(sakId: Long): List<OppgaveIntern> {

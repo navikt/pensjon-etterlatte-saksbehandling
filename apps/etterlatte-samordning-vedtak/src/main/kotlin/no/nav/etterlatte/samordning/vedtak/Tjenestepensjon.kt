@@ -1,14 +1,17 @@
 package no.nav.etterlatte.samordning.vedtak
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import java.time.LocalDate
 import java.time.LocalDateTime
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 data class SamhandlerPersonDto(
     val fnr: String,
     val forhold: List<TjenestepensjonForhold> = emptyList(),
-    val changeStamp: ChangeStampDateDto? = null,
+//    val changeStamp: ChangeStampDateDto? = null,
 )
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 class TjenestepensjonForhold(
     val tpNr: String,
     val tpOrdningNavn: String,
@@ -16,8 +19,8 @@ class TjenestepensjonForhold(
     val datoSistOpptjening: LocalDate? = null,
     val sistEndretDatoSistOpptjening: LocalDateTime? = null,
     val harGjenlevendeYtelse: Boolean? = null,
-    val kilde: KildeTypeCode,
-    val changeStamp: ChangeStampDateDto? = null,
+//    val kilde: KildeTypeCode,
+//    val changeStamp: ChangeStampDateDto? = null,
 )
 
 data class SamhandlerYtelseDto(
@@ -28,13 +31,13 @@ data class SamhandlerYtelseDto(
     val changeStamp: ChangeStampDateDto? = null,
 )
 
-enum class KildeTypeCode(
-    val decode: String,
-    val createdBy: String,
-    val createdDate: LocalDate,
-    val updatedBy: String,
-    val updatedDate: LocalDate,
-)
+// enum class KildeTypeCode(
+//    val decode: String,
+//    val createdBy: String,
+//    val createdDate: LocalDate,
+//    val updatedBy: String,
+//    val updatedDate: LocalDate,
+// )
 
 enum class YtelseTypeCode(
     val createdBy: String,

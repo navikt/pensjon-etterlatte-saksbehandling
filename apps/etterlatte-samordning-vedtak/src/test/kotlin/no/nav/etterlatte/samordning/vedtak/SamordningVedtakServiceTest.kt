@@ -134,6 +134,8 @@ class SamordningVedtakServiceTest {
             }
 
         vedtaksliste shouldHaveSize 2
+
+        coVerify { tpKlient.harTpForholdByDate(FNR, tpnr = TPNR_SPK, fomDato = virkFom) }
     }
 }
 

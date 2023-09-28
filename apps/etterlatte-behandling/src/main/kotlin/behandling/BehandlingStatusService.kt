@@ -201,20 +201,21 @@ class BehandlingStatusServiceImpl(
         if (featureToggleService.isEnabled(GenerellBehandlingToggle.KanBrukeGenerellBehandlingToggle, false)) {
             if (behandling.type == BehandlingType.FØRSTEGANGSBEHANDLING) {
                 if (behandling.boddEllerArbeidetUtlandet?.skalSendeKravpakke == true) {
+                    val opprettetBehandling =
+                        generellBehandlingService.opprettBehandling(
+                            GenerellBehandling.opprettFraType(
+                                GenerellBehandling.GenerellBehandlingType.UTLAND,
+                                behandling.sak.id,
+                            ),
+                        )
                     val oppgaveUtland =
                         oppgaveService.opprettNyOppgaveMedSakOgReferanse(
-                            behandling.id.toString(),
+                            opprettetBehandling.id.toString(),
                             behandling.sak.id,
                             OppgaveKilde.BEHANDLING,
                             OppgaveType.UTLAND,
                             null,
                         )
-                    generellBehandlingService.opprettBehandling(
-                        GenerellBehandling.opprettFraType(
-                            GenerellBehandling.GenerellBehandlingType.UTLAND,
-                            behandling.sak.id,
-                        ),
-                    )
                     val saksbehandlerFoerstegangsbehandling =
                         oppgaveService.hentSaksbehandlerFraFoerstegangsbehandling(behandlingsId = behandling.id)
                     if (saksbehandlerFoerstegangsbehandling != null) {

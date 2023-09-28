@@ -12,8 +12,8 @@ class GenerellBehandlingService(
     private val generellBehandlingDao: GenerellBehandlingDao,
     private val oppgaveService: OppgaveService,
 ) {
-    fun opprettBehandling(generellBehandling: GenerellBehandling) {
-        generellBehandlingDao.opprettGenerellbehandling(generellBehandling)
+    fun opprettBehandling(generellBehandling: GenerellBehandling): GenerellBehandling {
+        return generellBehandlingDao.opprettGenerellbehandling(generellBehandling)
     }
 
     fun attesterBehandling(
@@ -46,8 +46,8 @@ class GenerellBehandlingService(
         }
     }
 
-    fun oppdaterBehandling(generellBehandling: GenerellBehandling) {
-        generellBehandlingDao.oppdaterGenerellBehandling(generellBehandling)
+    fun oppdaterBehandling(generellBehandling: GenerellBehandling): GenerellBehandling {
+        return generellBehandlingDao.oppdaterGenerellBehandling(generellBehandling)
     }
 
     fun hentBehandlingMedId(id: UUID): GenerellBehandling? {

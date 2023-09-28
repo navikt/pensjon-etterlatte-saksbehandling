@@ -19,6 +19,7 @@ import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.generellbehandling.GenerellBehandling
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
@@ -168,7 +169,8 @@ internal class BehandlingStatusServiceTest {
             }
         val generellBehandlingService =
             mockk<GenerellBehandlingService> {
-                every { opprettBehandling(any()) } just runs
+                every { opprettBehandling(any()) } returns
+                    GenerellBehandling.opprettFraType(GenerellBehandling.GenerellBehandlingType.UTLAND, sakId)
             }
 
         val sut =

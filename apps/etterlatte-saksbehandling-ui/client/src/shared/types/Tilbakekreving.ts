@@ -5,7 +5,15 @@ export interface Tilbakekreving {
   status: TilbakekrevingStatus
   sak: ISak
   opprettet: string
+  vurdering: TilbakekrevingVurdering
   perioder: TilbakekrevingPeriode[]
+}
+
+export interface TilbakekrevingVurdering {
+  beskrivelse: string | null
+  konklusjon: string | null
+  aarsak: TilbakekrevingAarsak | null
+  aktsomhet: TilbakekrevingAktsomhet | null
 }
 
 export interface TilbakekrevingPeriode {
@@ -25,6 +33,27 @@ export interface TilbakekrevingBeloep {
   resultat: TilbakekrevingResultat | null
   tilbakekrevingsprosent: number | null
   rentetillegg: number | null
+}
+
+export enum TilbakekrevingAarsak {
+  ANNET = 'ANNET',
+  ARBHOYINNT = 'ARBHOYINNT',
+  BEREGNFEIL = 'BEREGNFEIL',
+  DODSFALL = 'DODSFALL',
+  EKTESKAP = 'EKTESKAP',
+  FEILREGEL = ' FEILREGEL',
+  FEILUFOREG = 'FEILUFOREG',
+  FLYTTUTLAND = 'FLYTTUTLAND',
+  IKKESJEKKYTELSE = 'IKKESJEKKYTELSE',
+  OVERSETTMLD = 'OVERSETTMLD',
+  SAMLIV = 'SAMLIV',
+  UTBFEILMOT = 'UTBFEILMOT',
+}
+
+export enum TilbakekrevingAktsomhet {
+  GOD_TRO = 'GOD_TRO',
+  SIMPEL_UAKTSOMHET = 'SIMPEL_UAKTSOMHET',
+  GROV_UAKTSOMHET = 'GROV_UAKTSOMHET',
 }
 
 export enum TilbakekrevingStatus {

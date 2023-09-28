@@ -1,10 +1,12 @@
-import { Button, Heading, Select, Table, TextField } from '@navikt/ds-react'
+import { Button, Heading, Label, Radio, RadioGroup, Select, Table, TextField } from '@navikt/ds-react'
 import { Content, ContentHeader, FlexRow } from '~shared/styled'
 import { HeadingWrapper, InnholdPadding } from '~components/behandling/soeknadsoversikt/styled'
 import { useNavigate } from 'react-router-dom'
 import React, { useState } from 'react'
 import {
   Tilbakekreving,
+  TilbakekrevingAarsak,
+  TilbakekrevingAktsomhet,
   TilbakekrevingBeloep,
   TilbakekrevingPeriode,
   TilbakekrevingResultat,
@@ -14,6 +16,7 @@ import { isPending, useApiCall } from '~shared/hooks/useApiCall'
 import { lagreTilbakekrevingsperioder } from '~shared/api/tilbakekreving'
 import { addTilbakekreving } from '~store/reducers/TilbakekrevingReducer'
 import { useAppDispatch } from '~store/Store'
+import styled from 'styled-components'
 
 export function TilbakekrevingVurdering({ tilbakekreving }: { tilbakekreving: Tilbakekreving }) {
   const navigate = useNavigate()
@@ -44,7 +47,41 @@ export function TilbakekrevingVurdering({ tilbakekreving }: { tilbakekreving: Ti
           </Heading>
         </HeadingWrapper>
       </ContentHeader>
-      <InnholdPadding>Kommer</InnholdPadding>
+      <InnholdForm>
+        <>
+          <Label>Årsak</Label>
+          <Select label="Skyld" hideLabel={true} value="" onChange={() => {}}>
+            <option value="">Velg..</option>
+            <option value={TilbakekrevingAarsak.ANNET}>Annet</option>
+            <option value={TilbakekrevingAarsak.ARBHOYINNT}>Inntekt</option>
+            <option value={TilbakekrevingAarsak.BEREGNFEIL}>Beregningsfeil</option>
+          </Select>
+        </>
+        <TextAreaWrapper>
+          <>
+            <Label>Beskriv feilutbetalingen</Label>
+            <Beskrivelse>
+              Gi en kort beskrivelse av bakgrunnen for feilutbetalingen og når ble den oppdaget.
+            </Beskrivelse>
+          </>
+          <textarea value="" onChange={() => {}} />
+        </TextAreaWrapper>
+        <>
+          <Label>Vurder uaktsomhet</Label>
+          <RadioGroup legend="" size="small" className="radioGroup" onChange={() => {}} value="">
+            <div className="flex">
+              <Radio value={TilbakekrevingAktsomhet.GOD_TRO}>God tro</Radio>
+              <Radio value={TilbakekrevingAktsomhet.SIMPEL_UAKTSOMHET}>Simpel uaktsomhet</Radio>
+              <Radio value={TilbakekrevingAktsomhet.GROV_UAKTSOMHET}>Grov uaktsomhet</Radio>
+            </div>
+          </RadioGroup>
+        </>
+        <TextAreaWrapper>
+          <Label>Konklusjon</Label>
+          <textarea value="" onChange={() => {}} />
+        </TextAreaWrapper>
+        <Button>Lagre vurdering</Button>
+      </InnholdForm>
       <ContentHeader>
         <HeadingWrapper>
           <Heading level="2" size="medium">
@@ -238,3 +275,25 @@ export function TilbakekrevingVurdering({ tilbakekreving }: { tilbakekreving: Ti
 const onChangeNumber = (e: React.ChangeEvent<HTMLInputElement>, onChange: (value: number | null) => void) => {
   onChange(isNaN(parseInt(e.target.value)) ? null : parseInt(e.target.value))
 }
+const InnholdForm = styled.div`
+  padding: 2em 2em 2em 4em;
+  width: 25em;
+`
+const TextAreaWrapper = styled.div`
+  display: grid;
+  align-items: flex-end;
+  margin-top: 1em;
+  margin-bottom: 1em;
+
+  textArea {
+    margin-top: 1em;
+    border-width: 1px;
+    border-radius: 4px 4px 0 4px;
+    height: 98px;
+    text-indent: 4px;
+    resize: none;
+  }
+`
+const Beskrivelse = styled.div`
+  margin: 10px 0;
+`

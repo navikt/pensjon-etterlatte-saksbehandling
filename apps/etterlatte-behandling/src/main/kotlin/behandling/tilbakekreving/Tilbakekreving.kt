@@ -15,6 +15,7 @@ data class Tilbakekreving(
     val status: TilbakekrevingStatus,
     val sak: Sak,
     val opprettet: Tidspunkt,
+    val vurdering: TilbakekrevingVurdering,
     val perioder: List<TilbakekrevingPeriode>,
     val kravgrunnlag: Kravgrunnlag,
 ) {
@@ -33,11 +34,25 @@ data class Tilbakekreving(
             status = TilbakekrevingStatus.OPPRETTET,
             sak = sak,
             opprettet = Tidspunkt.now(),
+            vurdering =
+                TilbakekrevingVurdering(
+                    beskrivelse = null,
+                    konklusjon = null,
+                    aarsak = null,
+                    aktsomhet = null,
+                ),
             perioder = kravgrunnlag.perioder.tilTilbakekrevingPerioder(),
             kravgrunnlag = kravgrunnlag,
         )
     }
 }
+
+data class TilbakekrevingVurdering(
+    val beskrivelse: String?,
+    val konklusjon: String?,
+    val aarsak: TilbakekrevingAarsak?,
+    val aktsomhet: TilbakekrevingAktsomhet?,
+)
 
 data class TilbakekrevingPeriode(
     val maaned: YearMonth,
@@ -119,6 +134,27 @@ enum class TilbakekrevingStatus {
     OPPRETTET,
     UNDER_ARBEID,
     VEDTATT,
+}
+
+enum class TilbakekrevingAarsak {
+    ANNET,
+    ARBHOYINNT,
+    BEREGNFEIL,
+    DODSFALL,
+    EKTESKAP,
+    FEILREGEL,
+    FEILUFOREG,
+    FLYTTUTLAND,
+    IKKESJEKKYTELSE,
+    OVERSETTMLD,
+    SAMLIV,
+    UTBFEILMOT,
+}
+
+enum class TilbakekrevingAktsomhet {
+    GOD_TRO,
+    SIMPEL_UAKTSOMHET,
+    GROV_UAKTSOMHET,
 }
 
 enum class TilbakekrevingSkyld {

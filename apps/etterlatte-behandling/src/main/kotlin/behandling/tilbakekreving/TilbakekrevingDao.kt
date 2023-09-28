@@ -178,6 +178,14 @@ class TilbakekrevingDao(private val connection: () -> Connection) {
                 ),
             opprettet = getTidspunkt("opprettet"),
             status = enumValueOf(getString("status")),
+            // TODO midlertidig
+            vurdering =
+                TilbakekrevingVurdering(
+                    beskrivelse = "Jau",
+                    konklusjon = "Niet",
+                    aarsak = TilbakekrevingAarsak.OVERSETTMLD,
+                    aktsomhet = TilbakekrevingAktsomhet.SIMPEL_UAKTSOMHET,
+                ),
             perioder = perioder,
             kravgrunnlag = getString("kravgrunnlag").let { objectMapper.readValue(it) },
         )

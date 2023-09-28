@@ -36,7 +36,8 @@ class TilbakekrevingDao(private val connection: () -> Connection) {
             val statement =
                 prepareStatement(
                     """
-                    SELECT t.id, t.sak_id, saktype, fnr, enhet, opprettet, status, kravgrunnlag 
+                    SELECT t.id, t.sak_id, saktype, fnr, enhet, opprettet, status, kravgrunnlag,
+                            vurdering_beskrivelse, vurdering_konklusjon, vurdering_aarsak, vurdering_aktsomhet
                     FROM tilbakekreving t INNER JOIN sak s on t.sak_id = s.id
                     WHERE t.id = ?
                     """.trimIndent(),
@@ -86,9 +87,18 @@ class TilbakekrevingDao(private val connection: () -> Connection) {
         val statement =
             prepareStatement(
                 """
-                INSERT INTO tilbakekreving(id, status, sak_id, opprettet, kravgrunnlag)
-                VALUES (?, ?, ?, ?, ?)
-                ON CONFLICT (id) DO UPDATE SET status = excluded.status, kravgrunnlag = excluded.kravgrunnlag
+                INSERT INTO tilbakekreving(
+                    id, status, sak_id, opprettet, kravgrunnlag,
+                     vurdering_beskrivelse, vurdering_konklusjon, vurdering_aarsak, vurdering_aktsomhet
+                )
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ON CONFLICT (id) DO UPDATE SET
+                    status = excluded.status,
+                    kravgrunnlag = excluded.kravgrunnlag,
+                    vurdering_beskrivelse = excluded.vurdering_beskrivelse,
+                    vurdering_konklusjon = excluded.vurdering_konklusjon,
+                    vurdering_aarsak = excluded.vurdering_aarsak ,
+                    vurdering_aktsomhet = excluded.vurdering_aktsomhet 
                 """.trimIndent(),
             )
         statement.setObject(1, tilbakekreving.id)
@@ -96,6 +106,10 @@ class TilbakekrevingDao(private val connection: () -> Connection) {
         statement.setLong(3, tilbakekreving.sak.id)
         statement.setTidspunkt(4, tilbakekreving.opprettet)
         statement.setJsonb(5, tilbakekreving.kravgrunnlag.toJsonNode())
+        statement.setString(6, tilbakekreving.vurdering.beskrivelse)
+        statement.setString(7, tilbakekreving.vurdering.konklusjon)
+        statement.setString(8, tilbakekreving.vurdering.aarsak?.name)
+        statement.setString(9, tilbakekreving.vurdering.aktsomhet?.name)
         statement.executeUpdate().also { require(it == 1) }
     }
 
@@ -178,13 +192,12 @@ class TilbakekrevingDao(private val connection: () -> Connection) {
                 ),
             opprettet = getTidspunkt("opprettet"),
             status = enumValueOf(getString("status")),
-            // TODO midlertidig
             vurdering =
                 TilbakekrevingVurdering(
-                    beskrivelse = "Jau",
-                    konklusjon = "Niet",
-                    aarsak = TilbakekrevingAarsak.OVERSETTMLD,
-                    aktsomhet = TilbakekrevingAktsomhet.SIMPEL_UAKTSOMHET,
+                    beskrivelse = getString("vurdering_beskrivelse"),
+                    konklusjon = getString("vurdering_konklusjon"),
+                    aarsak = getString("vurdering_aarsak")?.let { TilbakekrevingAarsak.valueOf(it) },
+                    aktsomhet = getString("vurdering_aktsomhet")?.let { TilbakekrevingAktsomhet.valueOf(it) },
                 ),
             perioder = perioder,
             kravgrunnlag = getString("kravgrunnlag").let { objectMapper.readValue(it) },

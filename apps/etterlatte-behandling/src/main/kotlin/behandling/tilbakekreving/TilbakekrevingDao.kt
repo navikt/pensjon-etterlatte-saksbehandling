@@ -74,10 +74,7 @@ class TilbakekrevingDao(private val connection: () -> Connection) {
     fun lagreTilbakekreving(tilbakekreving: Tilbakekreving): Tilbakekreving {
         with(connection()) {
             insertTilbakekreving(this, tilbakekreving)
-            tilbakekreving.perioder.forEach {
-                insertTilbakekrevingsperiode(this, tilbakekreving.id, it.maaned, it.ytelsebeloeper)
-                insertTilbakekrevingsperiode(this, tilbakekreving.id, it.maaned, it.feilkonto)
-            }
+            insertTilbakekrevingsperioder(this, tilbakekreving)
         }
         return hentTilbakekreving(tilbakekreving.id)
     }
@@ -102,11 +99,9 @@ class TilbakekrevingDao(private val connection: () -> Connection) {
         statement.executeUpdate().also { require(it == 1) }
     }
 
-    private fun insertTilbakekrevingsperiode(
+    private fun insertTilbakekrevingsperioder(
         connection: Connection,
-        tilbakekrevingId: UUID,
-        maaned: YearMonth,
-        beloeper: Tilbakekrevingsbelop,
+        tilbakekreving: Tilbakekreving,
     ) = with(connection) {
         val statement =
             prepareStatement(
@@ -141,23 +136,34 @@ class TilbakekrevingDao(private val connection: () -> Connection) {
                  rentetillegg = excluded.rentetillegg
                 """.trimIndent(),
             )
-        statement.setObject(1, beloeper.id)
-        statement.setString(2, maaned.toString())
-        statement.setString(3, beloeper.klasseKode)
-        statement.setString(4, beloeper.klasseType)
-        statement.setInt(5, beloeper.bruttoUtbetaling)
-        statement.setInt(6, beloeper.nyBruttoUtbetaling)
-        statement.setDouble(7, beloeper.skatteprosent)
-        statement.setInt(8, beloeper.beregnetFeilutbetaling)
-        statement.setInt(9, beloeper.bruttoTilbakekreving)
-        statement.setInt(10, beloeper.nettoTilbakekreving)
-        statement.setInt(11, beloeper.skatt)
-        statement.setString(12, beloeper.skyld?.name)
-        statement.setString(13, beloeper.resultat?.name)
-        statement.setInt(14, beloeper.tilbakekrevingsprosent)
-        statement.setInt(15, beloeper.rentetillegg)
-        statement.setObject(16, tilbakekrevingId)
-        statement.executeUpdate().also { require(it == 1) }
+
+        fun addArgumentsAndBatch(
+            maaned: YearMonth,
+            beloeper: Tilbakekrevingsbelop,
+        ) {
+            statement.setObject(1, beloeper.id)
+            statement.setString(2, maaned.toString())
+            statement.setString(3, beloeper.klasseKode)
+            statement.setString(4, beloeper.klasseType)
+            statement.setInt(5, beloeper.bruttoUtbetaling)
+            statement.setInt(6, beloeper.nyBruttoUtbetaling)
+            statement.setDouble(7, beloeper.skatteprosent)
+            statement.setInt(8, beloeper.beregnetFeilutbetaling)
+            statement.setInt(9, beloeper.bruttoTilbakekreving)
+            statement.setInt(10, beloeper.nettoTilbakekreving)
+            statement.setInt(11, beloeper.skatt)
+            statement.setString(12, beloeper.skyld?.name)
+            statement.setString(13, beloeper.resultat?.name)
+            statement.setInt(14, beloeper.tilbakekrevingsprosent)
+            statement.setInt(15, beloeper.rentetillegg)
+            statement.setObject(16, tilbakekreving.id)
+            statement.addBatch()
+        }
+        tilbakekreving.perioder.forEach {
+            addArgumentsAndBatch(it.maaned, it.ytelsebeloeper)
+            addArgumentsAndBatch(it.maaned, it.feilkonto)
+        }
+        statement.executeBatch()
     }
 
     private fun ResultSet.toTilbakekreving(perioder: List<TilbakekrevingPeriode>) =

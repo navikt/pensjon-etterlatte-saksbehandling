@@ -148,11 +148,17 @@ internal class BehandlingStatusServiceTest {
                 fnr = "123",
                 frist = Tidspunkt.now(),
             )
+
+        val generellBehandlingUtland = GenerellBehandling.opprettFraType(GenerellBehandling.GenerellBehandlingType.UTLAND, sakId)
+        val generellBehandlingService =
+            mockk<GenerellBehandlingService> {
+                every { opprettBehandling(any()) } returns generellBehandlingUtland
+            }
         val oppgaveService =
             mockk<OppgaveService> {
                 every {
                     opprettNyOppgaveMedSakOgReferanse(
-                        behandlingId.toString(),
+                        generellBehandlingUtland.id.toString(),
                         sakId,
                         OppgaveKilde.BEHANDLING,
                         OppgaveType.UTLAND,
@@ -166,11 +172,6 @@ internal class BehandlingStatusServiceTest {
         val featureToggleService =
             mockk<FeatureToggleService> {
                 every { isEnabled(any(), any()) } returns true
-            }
-        val generellBehandlingService =
-            mockk<GenerellBehandlingService> {
-                every { opprettBehandling(any()) } returns
-                    GenerellBehandling.opprettFraType(GenerellBehandling.GenerellBehandlingType.UTLAND, sakId)
             }
 
         val sut =
@@ -190,7 +191,7 @@ internal class BehandlingStatusServiceTest {
             behandlingService.hentBehandling(behandlingId)
             behandlingService.registrerVedtakHendelse(behandlingId, iverksettVedtak, HendelseType.IVERKSATT)
             oppgaveService.opprettNyOppgaveMedSakOgReferanse(
-                behandlingId.toString(),
+                generellBehandlingUtland.id.toString(),
                 sakId,
                 OppgaveKilde.BEHANDLING,
                 OppgaveType.UTLAND,

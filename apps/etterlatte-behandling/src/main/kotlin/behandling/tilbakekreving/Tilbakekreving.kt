@@ -6,6 +6,7 @@ import no.nav.etterlatte.libs.common.tilbakekreving.Grunnlagsbeloep
 import no.nav.etterlatte.libs.common.tilbakekreving.KlasseType
 import no.nav.etterlatte.libs.common.tilbakekreving.Kravgrunnlag
 import no.nav.etterlatte.libs.common.tilbakekreving.KravgrunnlagPeriode
+import java.math.BigDecimal
 import java.time.YearMonth
 import java.util.UUID
 
@@ -45,11 +46,12 @@ data class TilbakekrevingPeriode(
 )
 
 data class Tilbakekrevingsbelop(
+    val id: UUID,
     val klasseKode: String,
     val klasseType: String,
     val bruttoUtbetaling: Int,
     val nyBruttoUtbetaling: Int,
-    val skatteprosent: Double,
+    val skatteprosent: BigDecimal,
     val beregnetFeilutbetaling: Int?,
     val bruttoTilbakekreving: Int?,
     val nettoTilbakekreving: Int?,
@@ -62,11 +64,12 @@ data class Tilbakekrevingsbelop(
     companion object {
         fun ny(grunnlagsbeloep: Grunnlagsbeloep) =
             Tilbakekrevingsbelop(
+                id = UUID.randomUUID(),
                 klasseKode = grunnlagsbeloep.klasseKode.value,
                 klasseType = grunnlagsbeloep.klasseType.name,
                 bruttoUtbetaling = grunnlagsbeloep.bruttoUtbetaling.toInt(),
                 nyBruttoUtbetaling = grunnlagsbeloep.nyBruttoUtbetaling.toInt(),
-                skatteprosent = grunnlagsbeloep.skatteProsent.toDouble(),
+                skatteprosent = grunnlagsbeloep.skatteProsent,
                 beregnetFeilutbetaling = null,
                 bruttoTilbakekreving = null,
                 nettoTilbakekreving = null,
@@ -79,11 +82,12 @@ data class Tilbakekrevingsbelop(
 
         fun feilkonto(grunnlagsbeloep: Grunnlagsbeloep) =
             Tilbakekrevingsbelop(
+                id = UUID.randomUUID(),
                 klasseKode = grunnlagsbeloep.klasseKode.value,
                 klasseType = grunnlagsbeloep.klasseType.name,
                 bruttoUtbetaling = 0,
                 nyBruttoUtbetaling = 0,
-                skatteprosent = 0.0,
+                skatteprosent = BigDecimal(0.0),
                 beregnetFeilutbetaling = null,
                 bruttoTilbakekreving = null,
                 nettoTilbakekreving = null,
@@ -131,6 +135,8 @@ enum class TilbakekrevingResultat {
     FULL_TILBAKEKREV,
     INGEN_TILBAKEKREV,
 }
+
+class TilbakekrevingHarMangelException(message: String?) : RuntimeException(message)
 
 class TilbakekrevingFinnesIkkeException(message: String?) : RuntimeException(message)
 

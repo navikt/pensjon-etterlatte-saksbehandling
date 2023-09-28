@@ -20,7 +20,7 @@ data class GosysApiOppgave(
     val id: Long,
     val versjon: Long,
     val tema: String,
-    val behandlingstema: String,
+    val behandlingstema: String? = null,
     val oppgavetype: String,
     val opprettetTidspunkt: Tidspunkt,
     val tildeltEnhetsnr: String,

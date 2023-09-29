@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react'
 import { DatoVelger } from '~shared/DatoVelger'
 import styled from 'styled-components'
 import { FlexRow } from '~shared/styled'
-import { isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
+import { isPending, useApiCall } from '~shared/hooks/useApiCall'
 import { lagreEtterbetaling } from '~shared/api/behandling'
 import { hentFunksjonsbrytere } from '~shared/api/feature'
 import { formaterKanskjeStringDato } from '~utils/formattering'
@@ -24,16 +24,16 @@ const EtterbetalingWrapper = styled.div`
 
 const Etterbetaling = (props: {
   behandlingId: string
-  etterbetalingInit: IEtterbetaling | null
+  lagraEtterbetaling: IEtterbetaling | null
   redigerbar: boolean
 }) => {
-  const { etterbetalingInit, redigerbar, behandlingId } = props
+  const { lagraEtterbetaling, redigerbar, behandlingId } = props
   const [status, apiLagreEtterbetaling] = useApiCall(lagreEtterbetaling)
-  const [etterbetaling, setEtterbetaling] = useState(etterbetalingInit)
+  const [etterbetaling, setEtterbetaling] = useState(lagraEtterbetaling)
   const [erEtterbetaling, setErEtterbetaling] = useState<boolean>(!!etterbetaling)
   const [vis, setVis] = useState<boolean>(false)
 
-  const [funksjonsbrytere, postHentFunksjonsbrytere] = useApiCall(hentFunksjonsbrytere)
+  const [, postHentFunksjonsbrytere] = useApiCall(hentFunksjonsbrytere)
   const featureToggleNameEtterbetaling = 'registrer-etterbetaling'
 
   useEffect(() => {
@@ -50,10 +50,10 @@ const Etterbetaling = (props: {
   }
 
   const avbryt = () => {
-    setEtterbetaling(etterbetalingInit)
+    setEtterbetaling(lagraEtterbetaling)
   }
 
-  if (!vis || !isSuccess(funksjonsbrytere)) {
+  if (!vis) {
     return null
   }
   if (!redigerbar) {

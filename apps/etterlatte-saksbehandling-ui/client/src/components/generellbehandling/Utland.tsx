@@ -14,7 +14,7 @@ import {
   Textarea,
   TextField,
 } from '@navikt/ds-react'
-import { useEffect, useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import { mapApiResult, useApiCall, isPending, isFailure, isSuccess } from '~shared/hooks/useApiCall'
 import { oppdaterGenerellBehandling } from '~shared/api/generellbehandling'
 import Spinner from '~shared/Spinner'
@@ -27,6 +27,7 @@ import { ExternalLinkIcon } from '@navikt/aksel-icons'
 import { ABlue500, AGray400 } from '@navikt/ds-tokens/dist/tokens'
 import { ButtonGroup } from '~components/person/VurderHendelseModal'
 import { XMarkIcon } from '@navikt/aksel-icons'
+import { ConfigContext } from '~clientConfig'
 
 const TextFieldBegrunnelse = styled(Textarea).attrs({ size: 'medium' })`
   max-width: 40rem;
@@ -65,6 +66,8 @@ const Utland = (props: { utlandsBehandling: Generellbehandling & { innhold: Utla
 
   const [errorLand, setErrLand] = useState<boolean>(false)
   const [nyttBrevStatus, opprettBrev] = useApiCall(opprettBrevForSak)
+
+  const configContext = useContext(ConfigContext)
 
   const opprettNyttBrevINyFane = () => {
     opprettBrev(Number(utlandsBehandling.sakId), (brev) => {
@@ -222,7 +225,7 @@ const Utland = (props: { utlandsBehandling: Generellbehandling & { innhold: Utla
                 )
               )}
 
-              <LenkeMargin href="http://www.rina.com" target="_blank" rel="noopener noreferrer">
+              <LenkeMargin href={configContext['rinaUrl']} target="_blank" rel="noopener noreferrer">
                 Gå til RINA for å opprette kravpakke til utlandet
                 <ExternalLinkIcon fill={ABlue500} />
               </LenkeMargin>

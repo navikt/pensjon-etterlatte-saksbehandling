@@ -109,4 +109,5 @@ export const ApiConfig = hentApiConfigFraEnv()
 export const ClientConfig = {
   gosysUrl: requireEnvValue('GOSYS_URL'),
   cachebuster: requireEnvValue('APP_VERSION'),
+  rinaUrl: requireEnvValue('RINA_URL'),
 }

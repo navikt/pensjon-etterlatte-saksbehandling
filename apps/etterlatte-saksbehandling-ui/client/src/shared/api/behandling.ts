@@ -195,7 +195,7 @@ export const lagreEtterbetaling = async (args: {
   behandlingId: string
   etterbetaling: IEtterbetaling
 }): Promise<ApiResponse<IKommerBarnetTilgode>> => {
-  return apiClient.post(`/behandling/${args.behandlingId}/etterbetaling `, {
+  return apiClient.put(`/behandling/${args.behandlingId}/etterbetaling `, {
     etterbetaling: args.etterbetaling,
   })
 }

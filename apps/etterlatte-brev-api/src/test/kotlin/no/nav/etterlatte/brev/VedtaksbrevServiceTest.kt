@@ -35,6 +35,7 @@ import no.nav.etterlatte.brev.model.BrevDataMapper
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.BrevProsessType
 import no.nav.etterlatte.brev.model.BrevProsessTypeFactory
+import no.nav.etterlatte.brev.model.EtterbetalingDTO
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.OpprettNyttBrev
 import no.nav.etterlatte.brev.model.Pdf
@@ -644,7 +645,7 @@ internal class VedtaksbrevServiceTest {
                     ),
                 ),
             ),
-        etterbetalingDTO = null,
+        etterbetalingDTO = EtterbetalingDTO(LocalDate.now().minusMonths(1), LocalDate.now()),
     )
 
     private fun opprettMottaker() =

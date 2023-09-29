@@ -14,7 +14,7 @@ import no.nav.etterlatte.libs.common.medBody
 import java.time.LocalDate
 
 internal fun Route.etterbetalingRoutes(service: EtterbetalingService) {
-    route("/api/behandling/etterbetaling/{$BEHANDLINGSID_CALL_PARAMETER}") {
+    route("/api/behandling/{$BEHANDLINGSID_CALL_PARAMETER}/etterbetaling") {
         put {
             medBody<EtterbetalingDTO> { request ->
                 service.lagreEtterbetaling(

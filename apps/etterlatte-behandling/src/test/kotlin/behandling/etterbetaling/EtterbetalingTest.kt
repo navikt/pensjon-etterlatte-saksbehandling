@@ -87,7 +87,7 @@ class EtterbetalingTest : BehandlingIntegrationTest() {
 
             val fraDato = LocalDate.now().minusMonths(3)
             val tilDato = LocalDate.now()
-            client.put("/api/behandling/etterbetaling/$behandlingId") {
+            client.put("/api/behandling/$behandlingId/etterbetaling") {
                 addAuthToken(tokenSaksbehandler)
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(
@@ -98,7 +98,7 @@ class EtterbetalingTest : BehandlingIntegrationTest() {
                 )
             }
 
-            client.get("/api/behandling/etterbetaling/$behandlingId") {
+            client.get("/api/behandling/$behandlingId/etterbetaling") {
                 addAuthToken(tokenSaksbehandler)
             }.let {
                 Assertions.assertEquals(HttpStatusCode.OK, it.status)

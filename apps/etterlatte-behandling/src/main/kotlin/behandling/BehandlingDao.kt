@@ -165,7 +165,7 @@ class BehandlingDao(
             stmt.setString(11, fritekstAarsak)
             stmt.setString(12, prosesstype.toString())
             stmt.setString(13, kilde.toString())
-            stmt.setString(15, begrunnelse)
+            stmt.setString(14, begrunnelse)
         }
         require(stmt.executeUpdate() == 1)
     }

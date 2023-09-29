@@ -1,15 +1,11 @@
-FROM eclipse-temurin:17-jre-alpine
-
-RUN addgroup -S apprunner && adduser -S apprunner -G apprunner
+FROM gcr.io/distroless/java17
 
 ENV TZ="Europe/Oslo"
 
-COPY build/libs/app.jar /app/app.jar
 WORKDIR /app
-RUN chown -R apprunner /app
-USER apprunner
+COPY build/libs/app.jar app.jar
 
 EXPOSE 8080
-
+USER nonroot
 CMD ["app.jar"]
 

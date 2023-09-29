@@ -1,7 +1,8 @@
 FROM gcr.io/distroless/java17
 ENV TZ="Europe/Oslo"
-COPY build/libs/app.jar /app/app.jar
+WORKDIR /app
+COPY build/libs/*.jar ./
+ENV CLASSPATH="/app/WEB-INF/classes:/app/WEB-INF/lib/*"
 EXPOSE 8080
 USER nonroot
-WORKDIR /app
 CMD ["app.jar"]

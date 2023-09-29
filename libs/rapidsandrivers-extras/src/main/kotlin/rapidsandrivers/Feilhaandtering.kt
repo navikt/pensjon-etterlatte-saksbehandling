@@ -28,5 +28,6 @@ fun <T> withFeilhaandtering(
         } catch (e2: Exception) {
             feilhaandteringLogger.warn("Feil under feilhåndtering for ${packet.id}", e2)
         }
+        feilhaandteringLogger.warn("Fikk feil, sendte ut på feilkø, returnerer nå failure-result")
         Result.failure(e)
     }

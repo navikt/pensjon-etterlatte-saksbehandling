@@ -231,8 +231,8 @@ class OppgaveService(
         enhetsID: String,
     ) {
         inTransaction {
-            val oppgaverForbehandling = oppgaveDao.hentOppgaverForSak(sakId)
-            oppgaverForbehandling.forEach {
+            val oppgaverForSak = oppgaveDao.hentOppgaverForSak(sakId)
+            oppgaverForSak.forEach {
                 oppgaveDao.endreEnhetPaaOppgave(it.id, enhetsID)
             }
         }

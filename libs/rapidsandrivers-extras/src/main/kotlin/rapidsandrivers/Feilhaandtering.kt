@@ -25,6 +25,7 @@ fun <T> withFeilhaandtering(
             packet.feilendeSteg = feilendeSteg
             packet.feilmelding = e.stackTraceToString()
             context.publish(packet.toJson())
+            feilhaandteringLogger.info("Publiserte feila-melding")
         } catch (e2: Exception) {
             feilhaandteringLogger.warn("Feil under feilhåndtering for ${packet.id}", e2)
         }

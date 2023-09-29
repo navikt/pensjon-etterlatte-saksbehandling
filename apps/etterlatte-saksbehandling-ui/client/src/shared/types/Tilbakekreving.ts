@@ -18,7 +18,7 @@ export interface TilbakekrevingVurdering {
 
 export interface TilbakekrevingPeriode {
   maaned: Date
-  ytelsebeloeper: TilbakekrevingBeloep
+  ytelse: TilbakekrevingBeloep
 }
 
 export interface TilbakekrevingBeloep {

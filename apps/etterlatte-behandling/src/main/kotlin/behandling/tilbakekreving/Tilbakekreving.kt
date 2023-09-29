@@ -56,7 +56,7 @@ data class TilbakekrevingVurdering(
 
 data class TilbakekrevingPeriode(
     val maaned: YearMonth,
-    val ytelsebeloeper: Tilbakekrevingsbelop,
+    val ytelse: Tilbakekrevingsbelop,
     val feilkonto: Tilbakekrevingsbelop,
 )
 
@@ -124,7 +124,7 @@ fun List<KravgrunnlagPeriode>.tilTilbakekrevingPerioder(): List<TilbakekrevingPe
 
         TilbakekrevingPeriode(
             maaned = periode.periode.fraOgMed,
-            ytelsebeloeper = Tilbakekrevingsbelop.ny(ytelse),
+            ytelse = Tilbakekrevingsbelop.ny(ytelse),
             feilkonto = Tilbakekrevingsbelop.feilkonto(feilkonto),
         )
     }

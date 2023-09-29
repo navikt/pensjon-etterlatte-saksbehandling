@@ -100,7 +100,7 @@ class TilbakekrevingDaoTest {
                 perioder =
                     lagret.perioder.map {
                         it.copy(
-                            ytelsebeloeper = it.ytelsebeloeper.copy(beregnetFeilutbetaling = 123),
+                            ytelse = it.ytelse.copy(beregnetFeilutbetaling = 123),
                         )
                     },
             )

@@ -58,13 +58,13 @@ class TilbakekrevingDao(private val connection: () -> Connection) {
                     """.trimIndent(),
                 )
             statement.setObject(1, tilbakekrevingId)
-            val alle = statement.executeQuery().toList { toTilbakekrevingsperiode() }
-            val ytelsebeloeper = alle.filter { it.second.klasseType == KlasseType.YTEL.name }
-            val feilkonto = alle.filter { it.second.klasseType == KlasseType.FEIL.name }
-            return ytelsebeloeper.map { (maaned, ytelsebeloeper) ->
+            val allePerioderOgTyper = statement.executeQuery().toList { toTilbakekrevingsperiode() }
+            val ytelseperioder = allePerioderOgTyper.filter { it.second.klasseType == KlasseType.YTEL.name }
+            val feilkonto = allePerioderOgTyper.filter { it.second.klasseType == KlasseType.FEIL.name }
+            return ytelseperioder.map { (maaned, ytelse) ->
                 TilbakekrevingPeriode(
                     maaned = maaned,
-                    ytelsebeloeper = ytelsebeloeper,
+                    ytelse = ytelse,
                     feilkonto =
                         feilkonto.find { it.first == maaned }?.second
                             ?: throw TilbakekrevingHarMangelException("Mangler feilkonto for tilbakekrevingsperiode"),
@@ -97,7 +97,7 @@ class TilbakekrevingDao(private val connection: () -> Connection) {
                     kravgrunnlag = excluded.kravgrunnlag,
                     vurdering_beskrivelse = excluded.vurdering_beskrivelse,
                     vurdering_konklusjon = excluded.vurdering_konklusjon,
-                    vurdering_aarsak = excluded.vurdering_aarsak ,
+                    vurdering_aarsak = excluded.vurdering_aarsak,
                     vurdering_aktsomhet = excluded.vurdering_aktsomhet 
                 """.trimIndent(),
             )
@@ -174,7 +174,7 @@ class TilbakekrevingDao(private val connection: () -> Connection) {
             statement.addBatch()
         }
         tilbakekreving.perioder.forEach {
-            addArgumentsAndBatch(it.maaned, it.ytelsebeloeper)
+            addArgumentsAndBatch(it.maaned, it.ytelse)
             addArgumentsAndBatch(it.maaned, it.feilkonto)
         }
         statement.executeBatch()

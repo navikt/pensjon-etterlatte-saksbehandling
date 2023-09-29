@@ -11,7 +11,7 @@ export default function BrevModal({ brev }: { brev: IBrev }) {
     <>
       <Button variant="secondary" title="Vis PDF" icon={<FilePdfIcon />} onClick={() => setOpen(true)} />
 
-      <Modal open={open} onClose={() => setOpen(false)}>
+      <Modal open={open} onClose={() => setOpen(false)} style={{ maxWidth: '100%' }}>
         <Modal.Body style={{ minWidth: '60rem', paddingTop: '3rem' }}>
           <ForhaandsvisningBrev brev={brev} />
         </Modal.Body>

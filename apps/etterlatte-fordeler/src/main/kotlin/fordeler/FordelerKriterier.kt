@@ -41,7 +41,6 @@ enum class FordelerKriterie(val forklaring: String) {
     AVDOED_HAR_HATT_UTLANDSOPPHOLD("Det er huket av for utenlandsopphold for avdøde i søknaden"),
     AVDOED_VAR_IKKE_BOSATT_I_NORGE("Avdød var ikke bosatt i Norge"),
     AVDOED_ER_IKKE_FORELDER_TIL_BARN("Avdød er ikke forelder til barnet"),
-    AVDOED_HAR_DOEDSDATO_FOR_LANGT_TILBAKE_I_TID("Avdød har dødsdato for langt tilbake i tid"),
 
     GJENLEVENDE_MANGLER("Søknaden har ingen gjenlevende forelder"),
     GJENLEVENDE_ER_IKKE_BOSATT_I_NORGE("Gjenlevende er ikke bosatt i Norge"),
@@ -97,9 +96,6 @@ class FordelerKriterier(private val featureToggleService: FeatureToggleService) 
         Kriterie(FordelerKriterie.AVDOED_HAR_UTVANDRING) { harUtvandring(avdoed) },
         Kriterie(FordelerKriterie.AVDOED_HAR_HATT_UTLANDSOPPHOLD) { harHuketAvForUtenlandsopphold(it) },
         Kriterie(FordelerKriterie.AVDOED_HAR_YRKESSKADE) { harHuketAvForYrkesskade(it) },
-        Kriterie(FordelerKriterie.AVDOED_HAR_DOEDSDATO_FOR_LANGT_TILBAKE_I_TID) {
-            harDoedsdatoForLangtTilbakeITid(avdoed)
-        },
         // Gjenlevende
         Kriterie(FordelerKriterie.GJENLEVENDE_MANGLER) { gjenlevende == null },
         Kriterie(FordelerKriterie.GJENLEVENDE_ER_IKKE_BOSATT_I_NORGE) {
@@ -146,8 +142,6 @@ class FordelerKriterier(private val featureToggleService: FeatureToggleService) 
     private fun personErIkkeRegistrertDoed(person: Person): Boolean {
         return person.doedsdato == null
     }
-
-    private fun harDoedsdatoForLangtTilbakeITid(avdoed: Person): Boolean = avdoed.doedsdato?.isBefore(LocalDate.of(2022, 6, 1)) ?: false
 
     private fun gjenlevendeHarIkkeForeldreansvar(
         barn: Person,

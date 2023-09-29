@@ -36,7 +36,6 @@ class OmregningService(
                         virkningstidspunkt = fraDato,
                         kilde = Vedtaksloesning.GJENNY,
                         persongalleri = persongalleri,
-                        merknad = null,
                     )
 
                 Prosesstype.MANUELL -> throw Exception("Støtter ikke prosesstype MANUELL")

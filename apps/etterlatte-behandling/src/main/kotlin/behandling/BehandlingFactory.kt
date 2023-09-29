@@ -15,6 +15,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.NyBehandlingRequest
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.NyeSaksopplysninger
 import no.nav.etterlatte.libs.common.grunnlag.lagOpplysning
@@ -22,6 +23,7 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeknadMottattDato
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.gyldigSoeknad.VurderingsResultat
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
@@ -109,6 +111,7 @@ class BehandlingFactory(
                 forrigeBehandling = forrigeBehandling,
                 mottattDato = mottattDato,
                 kilde = kilde,
+                merknad = "Oppdatert søknad",
                 revurderingAarsak = RevurderingAarsak.NY_SOEKNAD,
             )
         } else {
@@ -139,6 +142,7 @@ class BehandlingFactory(
                 status = BehandlingStatus.OPPRETTET,
                 soeknadMottattDato = mottattDato?.let { LocalDateTime.parse(it) },
                 kilde = kilde,
+                merknad = opprettMerknad(sak, persongalleri),
             ).let { opprettBehandling ->
                 behandlingDao.opprettBehandling(opprettBehandling)
                 hendelseDao.behandlingOpprettet(opprettBehandling.toBehandlingOpprettet())
@@ -159,6 +163,23 @@ class BehandlingFactory(
                     )
                 }
             }
+        }
+    }
+
+    private fun opprettMerknad(
+        sak: Sak,
+        persongalleri: Persongalleri,
+    ): String? {
+        return if (persongalleri.soesken.isEmpty()) {
+            null
+        } else if (sak.sakType == SakType.BARNEPENSJON) {
+            "${persongalleri.soesken.size} søsken"
+        } else if (sak.sakType == SakType.OMSTILLINGSSTOENAD) {
+            val barnUnder20 = persongalleri.soesken.count { Folkeregisteridentifikator.of(it).getAge() < 20 }
+
+            "$barnUnder20 barn u/20år"
+        } else {
+            null
         }
     }
 

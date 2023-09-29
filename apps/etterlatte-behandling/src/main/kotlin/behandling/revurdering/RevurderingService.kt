@@ -61,6 +61,7 @@ interface RevurderingService {
         kilde: Vedtaksloesning,
         persongalleri: Persongalleri,
         mottattDato: String? = null,
+        merknad: String? = null,
         begrunnelse: String? = null,
     ): Revurdering?
 
@@ -186,6 +187,7 @@ class RevurderingServiceImpl(
                         mottattDato = Tidspunkt.now().toLocalDatetimeUTC().toString(),
                         prosessType = Prosesstype.MANUELL,
                         kilde = Vedtaksloesning.GJENNY,
+                        merknad = null,
                         revurderingAarsak = revurderingAarsak,
                         virkningstidspunkt = null,
                         begrunnelse = begrunnelse,
@@ -225,6 +227,7 @@ class RevurderingServiceImpl(
         kilde: Vedtaksloesning,
         persongalleri: Persongalleri,
         mottattDato: String?,
+        merknad: String?,
         begrunnelse: String?,
     ) = forrigeBehandling.sjekkEnhet()?.let {
         inTransaction {
@@ -235,6 +238,7 @@ class RevurderingServiceImpl(
                 mottattDato = mottattDato,
                 prosessType = Prosesstype.AUTOMATISK,
                 kilde = kilde,
+                merknad = merknad,
                 revurderingAarsak = revurderingAarsak,
                 virkningstidspunkt = virkningstidspunkt?.tilVirkningstidspunkt("Opprettet automatisk"),
                 begrunnelse = begrunnelse ?: "Automatisk revurdering - ${revurderingAarsak.name.lowercase()}",
@@ -273,6 +277,7 @@ class RevurderingServiceImpl(
         mottattDato: String?,
         prosessType: Prosesstype,
         kilde: Vedtaksloesning,
+        merknad: String?,
         revurderingAarsak: RevurderingAarsak,
         virkningstidspunkt: Virkningstidspunkt?,
         begrunnelse: String?,
@@ -288,6 +293,7 @@ class RevurderingServiceImpl(
             virkningstidspunkt = virkningstidspunkt,
             kilde = kilde,
             prosesstype = prosessType,
+            merknad = merknad,
             begrunnelse = begrunnelse,
             fritekstAarsak = fritekstAarsak,
         ).let { opprettBehandling ->

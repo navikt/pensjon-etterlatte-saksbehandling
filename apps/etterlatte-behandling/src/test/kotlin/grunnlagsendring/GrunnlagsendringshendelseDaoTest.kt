@@ -406,6 +406,7 @@ internal class GrunnlagsendringshendelseDaoTest {
                 fritekstAarsak = null,
                 prosesstype = Prosesstype.MANUELL,
                 kilde = Vedtaksloesning.GJENNY,
+                merknad = null,
             )
         val behandling2 = behandling1.copy(sakId = sak2)
         assertNotEquals(behandling1.id, behandling2.id)

@@ -165,7 +165,7 @@ class BehandlingKlient(
                 resource =
                     Resource(
                         clientId = clientId,
-                        url = "$resourceUrl/api/behandling/etterbetaling/$behandlingId",
+                        url = "$resourceUrl/api/behandling/$behandlingId/etterbetaling",
                     ),
                 brukerTokenInfo = brukerTokenInfo,
             ).mapBoth(

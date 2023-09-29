@@ -40,13 +40,19 @@ internal class LyttPaaIverksattVedtak(
         context: MessageContext,
     ) {
         val respons = objectMapper.readValue<UtbetalingResponseDto>(packet[UTBETALING_RESPONSE].toString())
-        val behandling = respons.behandlingId?.let { pesysRepository.hentPesysId(it) }
 
-        if (behandling == null) {
+        val behandlingId = respons.behandlingId
+
+        if (behandlingId == null) {
             logger.error(
                 "Utbetaling mangler behandlingId. " +
                     "Kan derfor ikke lagre at vedtaket er iverksatt. Utbetaling: $respons",
             )
+            return
+        }
+        val behandling = pesysRepository.hentPesysId(behandlingId)
+        if (behandling == null) {
+            logger.debug("Saka er ikke ei migrert sak. Gjør ingenting.")
             return
         }
 

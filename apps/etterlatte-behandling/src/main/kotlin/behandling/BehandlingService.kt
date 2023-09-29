@@ -9,6 +9,7 @@ import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.BehandlingMedGrunnlagsopplysninger
 import no.nav.etterlatte.behandling.domain.toDetaljertBehandlingWithPersongalleri
 import no.nav.etterlatte.behandling.domain.toStatistikkBehandling
+import no.nav.etterlatte.behandling.etterbetaling.EtterbetalingService
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.hendelse.HendelseType
 import no.nav.etterlatte.behandling.hendelse.LagretHendelse
@@ -113,7 +114,7 @@ interface BehandlingService {
     fun hentFoersteVirk(sakId: Long): YearMonth?
 }
 
-class BehandlingServiceImpl(
+internal class BehandlingServiceImpl(
     private val behandlingDao: BehandlingDao,
     private val behandlingHendelser: BehandlingHendelserKafkaProducer,
     private val grunnlagsendringshendelseDao: GrunnlagsendringshendelseDao,
@@ -123,6 +124,7 @@ class BehandlingServiceImpl(
     private val featureToggleService: FeatureToggleService,
     private val kommerBarnetTilGodeDao: KommerBarnetTilGodeDao,
     private val oppgaveService: OppgaveService,
+    private val etterbetalingService: EtterbetalingService,
 ) : BehandlingService {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -333,6 +335,7 @@ class BehandlingServiceImpl(
                 revurderingsaarsak = behandling.revurderingsaarsak(),
                 revurderinginfo = behandling.revurderingInfo(),
                 begrunnelse = behandling.begrunnelse(),
+                etterbetaling = etterbetalingService.hentEtterbetaling(behandlingId),
             ).also {
                 gjenlevende.await()?.fnr?.let { loggRequest(brukerTokenInfo, it) }
                 soeker.await()?.fnr?.let { loggRequest(brukerTokenInfo, it) }

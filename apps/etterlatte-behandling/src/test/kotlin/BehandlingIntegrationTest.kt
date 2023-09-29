@@ -63,7 +63,7 @@ abstract class BehandlingIntegrationTest {
     @Container
     private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:$POSTGRES_VERSION")
     private val server: MockOAuth2Server = MockOAuth2Server()
-    protected lateinit var applicationContext: ApplicationContext
+    internal lateinit var applicationContext: ApplicationContext
     protected lateinit var hoconApplicationConfig: HoconApplicationConfig
 
     private fun konfigurertFeatureToggleService(): FeatureToggleService {

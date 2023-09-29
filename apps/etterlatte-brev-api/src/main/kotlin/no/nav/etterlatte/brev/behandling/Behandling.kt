@@ -1,5 +1,6 @@
 package no.nav.etterlatte.brev.behandling
 
+import no.nav.etterlatte.brev.model.EtterbetalingDTO
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
@@ -39,6 +40,7 @@ data class Behandling(
     val innvilgelsesdato: LocalDate? = null,
     val adopsjonsdato: LocalDate? = null,
     val trygdetid: List<Trygdetidsperiode>? = null,
+    val etterbetalingDTO: EtterbetalingDTO?,
 ) {
     init {
         if (vedtak.type == VedtakType.INNVILGELSE) {

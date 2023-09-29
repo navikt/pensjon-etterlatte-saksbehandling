@@ -164,7 +164,7 @@ export default function KontrollerOppgave() {
               <DatoVelger
                 label="Mottatt dato"
                 description="Datoen søknaden ble mottatt"
-                value={behandlingBehov?.mottattDato ? new Date(behandlingBehov?.mottattDato) : null}
+                value={behandlingBehov?.mottattDato ? new Date(behandlingBehov?.mottattDato) : undefined}
                 onChange={(mottattDato) =>
                   dispatch(
                     settBehandlingBehov({

@@ -28,11 +28,16 @@ export interface Utland {
 }
 
 export interface Dokumenter {
-  p2100: boolean
-  p5000: boolean
-  p3000: boolean
-  p6000: boolean
-  p4000: boolean
+  p2100: DokumentSendtMedDato
+  p5000: DokumentSendtMedDato
+  p3000: DokumentSendtMedDato
+  p6000: DokumentSendtMedDato
+  p4000: DokumentSendtMedDato
+}
+
+export interface DokumentSendtMedDato {
+  sendt: boolean
+  dato?: Date
 }
 
 export interface Annen {

@@ -25,6 +25,17 @@ class TilbakekrevingService(
             tilbakekrevingDao.hentTilbakekreving(tilbakekrevingId)
         }
 
+    fun lagreVurdering(
+        tilbakekrevingId: UUID,
+        vurdering: TilbakekrevingVurdering,
+    ): Tilbakekreving =
+        inTransaction {
+            logger.info("Lagrer vurdering for tilbakekreving=$tilbakekrevingId")
+            val eksisterende = tilbakekrevingDao.hentTilbakekreving(tilbakekrevingId)
+            if (!eksisterende.underBehandling()) throw TilbakekrevingErIkkeUnderBehandlingException()
+            tilbakekrevingDao.lagreTilbakekreving(eksisterende.copy(vurdering = vurdering))
+        }
+
     fun lagrePerioder(
         tilbakekrevingId: UUID,
         perioder: List<TilbakekrevingPeriode>,

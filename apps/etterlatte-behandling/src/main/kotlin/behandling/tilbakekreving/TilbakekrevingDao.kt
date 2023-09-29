@@ -36,7 +36,8 @@ class TilbakekrevingDao(private val connection: () -> Connection) {
             val statement =
                 prepareStatement(
                     """
-                    SELECT t.id, t.sak_id, saktype, fnr, enhet, opprettet, status, kravgrunnlag 
+                    SELECT t.id, t.sak_id, saktype, fnr, enhet, opprettet, status, kravgrunnlag,
+                            vurdering_beskrivelse, vurdering_konklusjon, vurdering_aarsak, vurdering_aktsomhet
                     FROM tilbakekreving t INNER JOIN sak s on t.sak_id = s.id
                     WHERE t.id = ?
                     """.trimIndent(),
@@ -57,13 +58,13 @@ class TilbakekrevingDao(private val connection: () -> Connection) {
                     """.trimIndent(),
                 )
             statement.setObject(1, tilbakekrevingId)
-            val alle = statement.executeQuery().toList { toTilbakekrevingsperiode() }
-            val ytelsebeloeper = alle.filter { it.second.klasseType == KlasseType.YTEL.name }
-            val feilkonto = alle.filter { it.second.klasseType == KlasseType.FEIL.name }
-            return ytelsebeloeper.map { (maaned, ytelsebeloeper) ->
+            val allePerioderOgTyper = statement.executeQuery().toList { toTilbakekrevingsperiode() }
+            val ytelseperioder = allePerioderOgTyper.filter { it.second.klasseType == KlasseType.YTEL.name }
+            val feilkonto = allePerioderOgTyper.filter { it.second.klasseType == KlasseType.FEIL.name }
+            return ytelseperioder.map { (maaned, ytelse) ->
                 TilbakekrevingPeriode(
                     maaned = maaned,
-                    ytelsebeloeper = ytelsebeloeper,
+                    ytelse = ytelse,
                     feilkonto =
                         feilkonto.find { it.first == maaned }?.second
                             ?: throw TilbakekrevingHarMangelException("Mangler feilkonto for tilbakekrevingsperiode"),
@@ -86,9 +87,18 @@ class TilbakekrevingDao(private val connection: () -> Connection) {
         val statement =
             prepareStatement(
                 """
-                INSERT INTO tilbakekreving(id, status, sak_id, opprettet, kravgrunnlag)
-                VALUES (?, ?, ?, ?, ?)
-                ON CONFLICT (id) DO UPDATE SET status = excluded.status, kravgrunnlag = excluded.kravgrunnlag
+                INSERT INTO tilbakekreving(
+                    id, status, sak_id, opprettet, kravgrunnlag,
+                     vurdering_beskrivelse, vurdering_konklusjon, vurdering_aarsak, vurdering_aktsomhet
+                )
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ON CONFLICT (id) DO UPDATE SET
+                    status = excluded.status,
+                    kravgrunnlag = excluded.kravgrunnlag,
+                    vurdering_beskrivelse = excluded.vurdering_beskrivelse,
+                    vurdering_konklusjon = excluded.vurdering_konklusjon,
+                    vurdering_aarsak = excluded.vurdering_aarsak,
+                    vurdering_aktsomhet = excluded.vurdering_aktsomhet 
                 """.trimIndent(),
             )
         statement.setObject(1, tilbakekreving.id)
@@ -96,6 +106,10 @@ class TilbakekrevingDao(private val connection: () -> Connection) {
         statement.setLong(3, tilbakekreving.sak.id)
         statement.setTidspunkt(4, tilbakekreving.opprettet)
         statement.setJsonb(5, tilbakekreving.kravgrunnlag.toJsonNode())
+        statement.setString(6, tilbakekreving.vurdering.beskrivelse)
+        statement.setString(7, tilbakekreving.vurdering.konklusjon)
+        statement.setString(8, tilbakekreving.vurdering.aarsak?.name)
+        statement.setString(9, tilbakekreving.vurdering.aktsomhet?.name)
         statement.executeUpdate().also { require(it == 1) }
     }
 
@@ -160,7 +174,7 @@ class TilbakekrevingDao(private val connection: () -> Connection) {
             statement.addBatch()
         }
         tilbakekreving.perioder.forEach {
-            addArgumentsAndBatch(it.maaned, it.ytelsebeloeper)
+            addArgumentsAndBatch(it.maaned, it.ytelse)
             addArgumentsAndBatch(it.maaned, it.feilkonto)
         }
         statement.executeBatch()
@@ -178,6 +192,13 @@ class TilbakekrevingDao(private val connection: () -> Connection) {
                 ),
             opprettet = getTidspunkt("opprettet"),
             status = enumValueOf(getString("status")),
+            vurdering =
+                TilbakekrevingVurdering(
+                    beskrivelse = getString("vurdering_beskrivelse"),
+                    konklusjon = getString("vurdering_konklusjon"),
+                    aarsak = getString("vurdering_aarsak")?.let { TilbakekrevingAarsak.valueOf(it) },
+                    aktsomhet = getString("vurdering_aktsomhet")?.let { TilbakekrevingAktsomhet.valueOf(it) },
+                ),
             perioder = perioder,
             kravgrunnlag = getString("kravgrunnlag").let { objectMapper.readValue(it) },
         )

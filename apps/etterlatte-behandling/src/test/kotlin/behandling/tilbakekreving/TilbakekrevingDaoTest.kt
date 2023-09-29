@@ -90,10 +90,17 @@ class TilbakekrevingDaoTest {
         val oppdatert =
             lagret.copy(
                 status = TilbakekrevingStatus.UNDER_ARBEID,
+                vurdering =
+                    TilbakekrevingVurdering(
+                        beskrivelse = "beskrivelse",
+                        konklusjon = "konklusjon",
+                        aarsak = TilbakekrevingAarsak.ANNET,
+                        aktsomhet = TilbakekrevingAktsomhet.GOD_TRO,
+                    ),
                 perioder =
                     lagret.perioder.map {
                         it.copy(
-                            ytelsebeloeper = it.ytelsebeloeper.copy(beregnetFeilutbetaling = 123),
+                            ytelse = it.ytelse.copy(beregnetFeilutbetaling = 123),
                         )
                     },
             )

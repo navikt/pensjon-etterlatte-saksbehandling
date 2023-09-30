@@ -21,6 +21,7 @@ import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeServi
 import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerAarsak
 import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerRequest
 import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerService
+import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingsBehov
@@ -152,12 +153,14 @@ internal fun Route.behandlingRoutes(
 
                 try {
                     val virkningstidspunkt =
-                        behandlingService.oppdaterVirkningstidspunkt(
-                            behandlingsId,
-                            body.dato,
-                            navIdent,
-                            body.begrunnelse!!,
-                        )
+                        inTransaction {
+                            behandlingService.oppdaterVirkningstidspunkt(
+                                behandlingsId,
+                                body.dato,
+                                navIdent,
+                                body.begrunnelse!!,
+                            )
+                        }
 
                     call.respondText(
                         contentType = ContentType.Application.Json,
@@ -183,7 +186,9 @@ internal fun Route.behandlingRoutes(
                             begrunnelse = body.begrunnelse,
                         )
 
-                    behandlingService.oppdaterUtenlandstilsnitt(behandlingsId, utenlandstilsnitt)
+                    inTransaction {
+                        behandlingService.oppdaterUtenlandstilsnitt(behandlingsId, utenlandstilsnitt)
+                    }
 
                     call.respondText(
                         contentType = ContentType.Application.Json,
@@ -215,10 +220,12 @@ internal fun Route.behandlingRoutes(
                             skalSendeKravpakke = body.skalSendeKravpakke,
                         )
 
-                    behandlingService.oppdaterBoddEllerArbeidetUtlandet(
-                        behandlingsId,
-                        boddEllerArbeidetUtlandet,
-                    )
+                    inTransaction {
+                        behandlingService.oppdaterBoddEllerArbeidetUtlandet(
+                            behandlingsId,
+                            boddEllerArbeidetUtlandet,
+                        )
+                    }
 
                     call.respondText(
                         contentType = ContentType.Application.Json,

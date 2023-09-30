@@ -8,6 +8,7 @@ import no.nav.etterlatte.behandling.GyldighetsproevingService
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.toStatistikkBehandling
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeService
+import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.JaNeiMedBegrunnelse
@@ -43,12 +44,14 @@ class MigreringService(
                 pesys,
                 JaNeiMedBegrunnelse(JaNei.JA, "Automatisk importert fra Pesys"),
             )
-            behandlingService.oppdaterVirkningstidspunkt(
-                it.id,
-                request.virkningstidspunkt,
-                pesys,
-                "Automatisk importert fra Pesys",
-            )
+            inTransaction {
+                behandlingService.oppdaterVirkningstidspunkt(
+                    it.id,
+                    request.virkningstidspunkt,
+                    pesys,
+                    "Automatisk importert fra Pesys",
+                )
+            }
             val nyopprettaOppgave =
                 oppgaveService.hentOppgaverForSak(it.sak.id).first { o -> o.referanse == it.id.toString() }
             oppgaveService.tildelSaksbehandler(nyopprettaOppgave.id, pesys)

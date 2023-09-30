@@ -1,14 +1,24 @@
 package no.nav.etterlatte.behandling.generellbehandling
 
+import no.nav.etterlatte.libs.common.generellbehandling.DokumentMedSendtDato
 import no.nav.etterlatte.libs.common.generellbehandling.GenerellBehandling
 import no.nav.etterlatte.libs.common.generellbehandling.Innhold
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
+import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.token.Saksbehandler
 import org.slf4j.LoggerFactory
 import java.util.UUID
+
+class DokumentManglerDatoException(message: String) : Exception(message)
+
+class LandFeilIsokodeException(message: String) : Exception(message)
+
+class ManglerLandkodeException(message: String) : Exception(message)
+
+class ManglerRinanummerException(message: String) : Exception(message)
 
 class GenerellBehandlingService(
     private val generellBehandlingDao: GenerellBehandlingDao,
@@ -52,7 +62,7 @@ class GenerellBehandlingService(
         }
     }
 
-    fun attesterBehandling(
+    fun sendTilAttestering(
         generellBehandling: GenerellBehandling,
         saksbehandler: Saksbehandler,
     ) {
@@ -73,12 +83,25 @@ class GenerellBehandlingService(
     }
 
     private fun validerUtland(innhold: Innhold.Utland) {
-        if (innhold.landIsoKode.isEmpty() || innhold.landIsoKode.all { it.length == 3 }) {
-            // TODO: slå opp mot kodeverk og validere her?
-            throw IllegalArgumentException("Mangler land eller feil lengde på landisokode")
+        if (innhold.landIsoKode.isEmpty()) {
+            throw ManglerLandkodeException("Mangler landkode")
+        }
+        if (innhold.landIsoKode.any { it.length != 3 }) {
+            throw LandFeilIsokodeException("Landkoden er feil ${innhold.landIsoKode.toJson()}")
         }
         if (innhold.rinanummer.isEmpty()) {
-            throw IllegalArgumentException("Må ha rinanummer")
+            throw ManglerRinanummerException("Må ha rinanummer")
+        }
+        validerHvisAvhuketSaaHarDato(innhold.dokumenter.p2100)
+        validerHvisAvhuketSaaHarDato(innhold.dokumenter.p3000)
+        validerHvisAvhuketSaaHarDato(innhold.dokumenter.p4000)
+        validerHvisAvhuketSaaHarDato(innhold.dokumenter.p5000)
+        validerHvisAvhuketSaaHarDato(innhold.dokumenter.p6000)
+    }
+
+    private fun validerHvisAvhuketSaaHarDato(dokumentMedSendtDato: DokumentMedSendtDato) {
+        if (dokumentMedSendtDato.sendt) {
+            dokumentMedSendtDato.dato ?: throw DokumentManglerDatoException("Sendt dokument mangler dato")
         }
     }
 

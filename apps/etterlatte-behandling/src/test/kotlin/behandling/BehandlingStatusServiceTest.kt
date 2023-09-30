@@ -125,7 +125,6 @@ internal class BehandlingStatusServiceTest {
 
         val generellBehandlingUtland =
             GenerellBehandling.opprettUtland(
-                GenerellBehandling.GenerellBehandlingType.UTLAND,
                 sakId,
                 behandlingId,
             )

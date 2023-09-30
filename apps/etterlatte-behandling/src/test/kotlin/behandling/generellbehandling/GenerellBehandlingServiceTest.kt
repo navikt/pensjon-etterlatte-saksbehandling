@@ -1,5 +1,7 @@
 package no.nav.etterlatte.behandling.generellbehandling
 
+import io.kotest.inspectors.forExactly
+import io.kotest.matchers.shouldBe
 import io.mockk.mockk
 import no.nav.etterlatte.Context
 import no.nav.etterlatte.DatabaseKontekst
@@ -8,9 +10,13 @@ import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.generellbehandling.DokumentMedSendtDato
+import no.nav.etterlatte.libs.common.generellbehandling.Dokumenter
 import no.nav.etterlatte.libs.common.generellbehandling.GenerellBehandling
+import no.nav.etterlatte.libs.common.generellbehandling.Innhold
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
+import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.POSTGRES_VERSION
 import no.nav.etterlatte.libs.database.migrate
@@ -20,6 +26,7 @@ import no.nav.etterlatte.oppgave.OppgaveDaoMedEndringssporingImpl
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.sak.SakDao
 import no.nav.etterlatte.token.BrukerTokenInfo
+import no.nav.etterlatte.token.Saksbehandler
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
@@ -27,9 +34,11 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.assertThrows
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
 import java.sql.Connection
+import java.time.LocalDate
 import java.util.UUID
 import javax.sql.DataSource
 
@@ -128,7 +137,6 @@ class GenerellBehandlingServiceTest {
         val behandlingId = UUID.randomUUID()
         val manueltOpprettetBehandling =
             GenerellBehandling.opprettUtland(
-                GenerellBehandling.GenerellBehandlingType.UTLAND,
                 sak.id,
                 behandlingId,
             )
@@ -154,5 +162,197 @@ class GenerellBehandlingServiceTest {
         Assertions.assertEquals(OppgaveType.UTLAND, manuellBehandlingOppgave.type)
         Assertions.assertEquals(sak.id, manuellBehandlingOppgave.sakId)
         Assertions.assertNull(manuellBehandlingOppgave.saksbehandler)
+    }
+
+    @Test
+    fun `Kan sende til attestering`() {
+        val saksbehandler = Saksbehandler("token", "saksbehandler", null)
+
+        val sak = sakRepo.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val behandlingId = UUID.randomUUID()
+        val manueltOpprettetBehandling =
+            GenerellBehandling.opprettUtland(
+                sak.id,
+                behandlingId,
+            )
+        val opprettBehandling = service.opprettBehandling(manueltOpprettetBehandling)
+        val hentOppgaverForReferanse = oppgaveService.hentOppgaverForReferanse(opprettBehandling.id.toString())
+        Assertions.assertEquals(1, hentOppgaverForReferanse.size)
+        val utlandsOppgave = hentOppgaverForReferanse[0]
+
+        oppgaveService.tildelSaksbehandler(utlandsOppgave.id, saksbehandler.ident)
+        val utlandInnhold =
+            Innhold.Utland(
+                listOf("AFG"),
+                Dokumenter(
+                    DokumentMedSendtDato(true, LocalDate.now()),
+                    DokumentMedSendtDato(true, LocalDate.now()),
+                    DokumentMedSendtDato(true, LocalDate.now()),
+                    DokumentMedSendtDato(true, LocalDate.now()),
+                    DokumentMedSendtDato(true, LocalDate.now()),
+                ),
+                "2grwg2",
+                "124124124",
+            )
+        val behandlingUtfylt = opprettBehandling.copy(innhold = utlandInnhold)
+        val oppdaterBehandling = service.oppdaterBehandling(behandlingUtfylt)
+        service.sendTilAttestering(oppdaterBehandling, saksbehandler)
+        val behandlingsOppgaverFattetOgAttestering = oppgaveService.hentOppgaverForReferanse(opprettBehandling.id.toString())
+        Assertions.assertEquals(2, behandlingsOppgaverFattetOgAttestering.size)
+
+        behandlingsOppgaverFattetOgAttestering.forExactly(1) { oppgave ->
+            oppgave.type.shouldBe(OppgaveType.ATTESTERING)
+        }
+        behandlingsOppgaverFattetOgAttestering.forExactly(1) { oppgave ->
+            oppgave.status.shouldBe(Status.FERDIGSTILT)
+        }
+    }
+
+    @Test
+    fun `Skal feile når dato sendt mangler på dokument`() {
+        val saksbehandler = Saksbehandler("token", "saksbehandler", null)
+
+        val sak = sakRepo.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val behandlingId = UUID.randomUUID()
+        val manueltOpprettetBehandling =
+            GenerellBehandling.opprettUtland(
+                sak.id,
+                behandlingId,
+            )
+        val opprettBehandling = service.opprettBehandling(manueltOpprettetBehandling)
+        val hentOppgaverForReferanse = oppgaveService.hentOppgaverForReferanse(opprettBehandling.id.toString())
+        Assertions.assertEquals(1, hentOppgaverForReferanse.size)
+        val utlandsOppgave = hentOppgaverForReferanse[0]
+
+        oppgaveService.tildelSaksbehandler(utlandsOppgave.id, saksbehandler.ident)
+        val utlandInnhold =
+            Innhold.Utland(
+                listOf("AFG"),
+                Dokumenter(
+                    DokumentMedSendtDato(true, LocalDate.now()),
+                    DokumentMedSendtDato(true, LocalDate.now()),
+                    DokumentMedSendtDato(true, LocalDate.now()),
+                    DokumentMedSendtDato(true, LocalDate.now()),
+                    DokumentMedSendtDato(true, null),
+                ),
+                "2grwg2",
+                "124124124",
+            )
+        val behandlingUtfylt = opprettBehandling.copy(innhold = utlandInnhold)
+        val oppdaterBehandling = service.oppdaterBehandling(behandlingUtfylt)
+        assertThrows<DokumentManglerDatoException> {
+            service.sendTilAttestering(oppdaterBehandling, saksbehandler)
+        }
+    }
+
+    @Test
+    fun `Skal feile når rina nummer er tomt`() {
+        val saksbehandler = Saksbehandler("token", "saksbehandler", null)
+
+        val sak = sakRepo.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val behandlingId = UUID.randomUUID()
+        val manueltOpprettetBehandling =
+            GenerellBehandling.opprettUtland(
+                sak.id,
+                behandlingId,
+            )
+        val opprettBehandling = service.opprettBehandling(manueltOpprettetBehandling)
+        val hentOppgaverForReferanse = oppgaveService.hentOppgaverForReferanse(opprettBehandling.id.toString())
+        Assertions.assertEquals(1, hentOppgaverForReferanse.size)
+        val utlandsOppgave = hentOppgaverForReferanse[0]
+
+        oppgaveService.tildelSaksbehandler(utlandsOppgave.id, saksbehandler.ident)
+        val utlandInnhold =
+            Innhold.Utland(
+                listOf("AFG"),
+                Dokumenter(
+                    DokumentMedSendtDato(true, LocalDate.now()),
+                    DokumentMedSendtDato(true, LocalDate.now()),
+                    DokumentMedSendtDato(true, LocalDate.now()),
+                    DokumentMedSendtDato(true, LocalDate.now()),
+                    DokumentMedSendtDato(true, LocalDate.now()),
+                ),
+                "2grwg2",
+                "",
+            )
+        val behandlingUtfylt = opprettBehandling.copy(innhold = utlandInnhold)
+        val oppdaterBehandling = service.oppdaterBehandling(behandlingUtfylt)
+        assertThrows<ManglerRinanummerException> {
+            service.sendTilAttestering(oppdaterBehandling, saksbehandler)
+        }
+    }
+
+    @Test
+    fun `Skal feile landkodelisten er tom`() {
+        val saksbehandler = Saksbehandler("token", "saksbehandler", null)
+
+        val sak = sakRepo.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val behandlingId = UUID.randomUUID()
+        val manueltOpprettetBehandling =
+            GenerellBehandling.opprettUtland(
+                sak.id,
+                behandlingId,
+            )
+        val opprettBehandling = service.opprettBehandling(manueltOpprettetBehandling)
+        val hentOppgaverForReferanse = oppgaveService.hentOppgaverForReferanse(opprettBehandling.id.toString())
+        Assertions.assertEquals(1, hentOppgaverForReferanse.size)
+        val utlandsOppgave = hentOppgaverForReferanse[0]
+
+        oppgaveService.tildelSaksbehandler(utlandsOppgave.id, saksbehandler.ident)
+        val utlandInnhold =
+            Innhold.Utland(
+                emptyList(),
+                Dokumenter(
+                    DokumentMedSendtDato(true, LocalDate.now()),
+                    DokumentMedSendtDato(true, LocalDate.now()),
+                    DokumentMedSendtDato(true, LocalDate.now()),
+                    DokumentMedSendtDato(true, LocalDate.now()),
+                    DokumentMedSendtDato(true, LocalDate.now()),
+                ),
+                "2grwg2",
+                "rinanummer",
+            )
+        val behandlingUtfylt = opprettBehandling.copy(innhold = utlandInnhold)
+        val oppdaterBehandling = service.oppdaterBehandling(behandlingUtfylt)
+        assertThrows<ManglerLandkodeException> {
+            service.sendTilAttestering(oppdaterBehandling, saksbehandler)
+        }
+    }
+
+    @Test
+    fun `Skal feile når isokode 3 er feil lengde`() {
+        val saksbehandler = Saksbehandler("token", "saksbehandler", null)
+
+        val sak = sakRepo.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val behandlingId = UUID.randomUUID()
+        val manueltOpprettetBehandling =
+            GenerellBehandling.opprettUtland(
+                sak.id,
+                behandlingId,
+            )
+        val opprettBehandling = service.opprettBehandling(manueltOpprettetBehandling)
+        val hentOppgaverForReferanse = oppgaveService.hentOppgaverForReferanse(opprettBehandling.id.toString())
+        Assertions.assertEquals(1, hentOppgaverForReferanse.size)
+        val utlandsOppgave = hentOppgaverForReferanse[0]
+
+        oppgaveService.tildelSaksbehandler(utlandsOppgave.id, saksbehandler.ident)
+        val utlandInnhold =
+            Innhold.Utland(
+                listOf("AFG", "ABDEF"),
+                Dokumenter(
+                    DokumentMedSendtDato(true, LocalDate.now()),
+                    DokumentMedSendtDato(true, LocalDate.now()),
+                    DokumentMedSendtDato(true, LocalDate.now()),
+                    DokumentMedSendtDato(true, LocalDate.now()),
+                    DokumentMedSendtDato(true, LocalDate.now()),
+                ),
+                "2grwg2",
+                "rinanummer",
+            )
+        val behandlingUtfylt = opprettBehandling.copy(innhold = utlandInnhold)
+        val oppdaterBehandling = service.oppdaterBehandling(behandlingUtfylt)
+        assertThrows<LandFeilIsokodeException> {
+            service.sendTilAttestering(oppdaterBehandling, saksbehandler)
+        }
     }
 }

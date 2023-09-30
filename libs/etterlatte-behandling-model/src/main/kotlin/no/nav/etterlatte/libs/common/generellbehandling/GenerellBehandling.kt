@@ -38,10 +38,16 @@ data class GenerellBehandling(
         ) = GenerellBehandling(UUID.randomUUID(), sakId, Tidspunkt.now(), type, null)
 
         fun opprettUtland(
-            type: GenerellBehandlingType,
             sakId: Long,
             behandlingreferanse: UUID,
-        ) = GenerellBehandling(UUID.randomUUID(), sakId, Tidspunkt.now(), type, null, tilknyttetBehandling = behandlingreferanse)
+        ) = GenerellBehandling(
+            UUID.randomUUID(),
+            sakId,
+            Tidspunkt.now(),
+            GenerellBehandlingType.UTLAND,
+            null,
+            tilknyttetBehandling = behandlingreferanse,
+        )
     }
 
     enum class GenerellBehandlingType {

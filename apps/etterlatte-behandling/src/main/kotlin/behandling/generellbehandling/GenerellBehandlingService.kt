@@ -56,19 +56,19 @@ class GenerellBehandlingService(
         generellBehandling: GenerellBehandling,
         saksbehandler: Saksbehandler,
     ) {
-        oppdaterBehandling(generellBehandling)
         when (generellBehandling.innhold) {
             is Innhold.Utland -> validerUtland(generellBehandling.innhold as Innhold.Utland)
             is Innhold.Annen -> throw NotImplementedError("Ikke implementert")
             null -> throw NotImplementedError("Ikke implementert")
         }
+        oppdaterBehandling(generellBehandling)
         oppgaveService.ferdigStillOppgaveUnderBehandling(generellBehandling.id.toString(), saksbehandler)
         oppgaveService.opprettNyOppgaveMedSakOgReferanse(
             generellBehandling.id.toString(),
             generellBehandling.sakId,
             OppgaveKilde.GENERELL_BEHANDLING,
             OppgaveType.ATTESTERING,
-            merknad = "Attestering av utlandsbehandling",
+            merknad = "Attestering av generell behandling type ${generellBehandling.type.name}",
         )
     }
 

@@ -28,7 +28,7 @@ import { ABlue500, AGray400 } from '@navikt/ds-tokens/dist/tokens'
 import { ButtonGroup } from '~components/person/VurderHendelseModal'
 import { XMarkIcon } from '@navikt/aksel-icons'
 import { ConfigContext } from '~clientConfig'
-import { DatoVelger } from '~shared/DatoVelger'
+import { DatoVelger, formatDateToLocaleDateOrEmptyString } from '~shared/DatoVelger'
 
 const TextFieldBegrunnelse = styled(Textarea).attrs({ size: 'medium' })`
   max-width: 40rem;
@@ -70,7 +70,6 @@ const Utland = (props: { utlandsBehandling: Generellbehandling & { innhold: Utla
     p6000: { sendt: false },
   }
   const [dokumenter, setDokumenter] = useState<Dokumenter>(innhold?.dokumenter ?? defaultDokumentState)
-  console.log(dokumenter)
   const [errorLand, setErrLand] = useState<boolean>(false)
   const [nyttBrevStatus, opprettBrev] = useApiCall(opprettBrevForSak)
 
@@ -262,8 +261,13 @@ const Utland = (props: { utlandsBehandling: Generellbehandling & { innhold: Utla
                   <Table.DataCell>
                     <DatoVelger
                       label=""
-                      value={dokumenter.p2100.dato}
-                      onChange={(date) => setDokumenter({ ...dokumenter, p2100: { ...dokumenter.p2100, dato: date } })}
+                      value={dokumenter.p2100.dato ? new Date(dokumenter.p2100.dato) : undefined}
+                      onChange={(date) =>
+                        setDokumenter({
+                          ...dokumenter,
+                          p2100: { ...dokumenter.p2100, dato: formatDateToLocaleDateOrEmptyString(date) },
+                        })
+                      }
                     />
                   </Table.DataCell>
                 </Table.Row>
@@ -282,8 +286,13 @@ const Utland = (props: { utlandsBehandling: Generellbehandling & { innhold: Utla
                   <Table.DataCell>
                     <DatoVelger
                       label=""
-                      value={dokumenter.p5000.dato}
-                      onChange={(date) => setDokumenter({ ...dokumenter, p5000: { ...dokumenter.p5000, dato: date } })}
+                      value={dokumenter.p5000.dato ? new Date(dokumenter.p5000.dato) : undefined}
+                      onChange={(date) =>
+                        setDokumenter({
+                          ...dokumenter,
+                          p5000: { ...dokumenter.p5000, dato: formatDateToLocaleDateOrEmptyString(date) },
+                        })
+                      }
                     />
                   </Table.DataCell>
                 </Table.Row>
@@ -302,8 +311,13 @@ const Utland = (props: { utlandsBehandling: Generellbehandling & { innhold: Utla
                   <Table.DataCell>
                     <DatoVelger
                       label=""
-                      value={dokumenter.p4000.dato}
-                      onChange={(date) => setDokumenter({ ...dokumenter, p4000: { ...dokumenter.p4000, dato: date } })}
+                      value={dokumenter.p4000.dato ? new Date(dokumenter.p4000.dato) : undefined}
+                      onChange={(date) =>
+                        setDokumenter({
+                          ...dokumenter,
+                          p4000: { ...dokumenter.p4000, dato: formatDateToLocaleDateOrEmptyString(date) },
+                        })
+                      }
                     />
                   </Table.DataCell>
                 </Table.Row>
@@ -322,8 +336,13 @@ const Utland = (props: { utlandsBehandling: Generellbehandling & { innhold: Utla
                   <Table.DataCell>
                     <DatoVelger
                       label=""
-                      value={dokumenter.p6000.dato}
-                      onChange={(date) => setDokumenter({ ...dokumenter, p6000: { ...dokumenter.p6000, dato: date } })}
+                      value={dokumenter.p6000.dato ? new Date(dokumenter.p6000.dato) : undefined}
+                      onChange={(date) =>
+                        setDokumenter({
+                          ...dokumenter,
+                          p6000: { ...dokumenter.p6000, dato: formatDateToLocaleDateOrEmptyString(date) },
+                        })
+                      }
                     />
                   </Table.DataCell>
                 </Table.Row>
@@ -342,8 +361,13 @@ const Utland = (props: { utlandsBehandling: Generellbehandling & { innhold: Utla
                   <Table.DataCell>
                     <DatoVelger
                       label=""
-                      value={dokumenter.p3000.dato}
-                      onChange={(date) => setDokumenter({ ...dokumenter, p3000: { ...dokumenter.p3000, dato: date } })}
+                      value={dokumenter.p3000.dato ? new Date(dokumenter.p3000.dato) : undefined}
+                      onChange={(date) =>
+                        setDokumenter({
+                          ...dokumenter,
+                          p3000: { ...dokumenter.p3000, dato: formatDateToLocaleDateOrEmptyString(date) },
+                        })
+                      }
                     />
                   </Table.DataCell>
                 </Table.Row>

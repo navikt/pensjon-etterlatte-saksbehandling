@@ -37,7 +37,7 @@ export interface Dokumenter {
 
 export interface DokumentSendtMedDato {
   sendt: boolean
-  dato?: Date
+  dato?: string
 }
 
 export interface Annen {

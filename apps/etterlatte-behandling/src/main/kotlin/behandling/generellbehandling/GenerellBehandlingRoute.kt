@@ -104,7 +104,7 @@ internal fun Route.generellbehandlingRoutes(
             kunSaksbehandler {
                 val id =
                     call.parameters["generellbehandlingId"]
-                        ?: return@hvisEnabled call.respond(HttpStatusCode.NotFound, "Saken finnes ikke")
+                        ?: return@hvisEnabled call.respond(HttpStatusCode.NotFound, "Generell behandling finnes ikke")
                 val hentetBehandling = inTransaction { generellBehandlingService.hentBehandlingMedId(UUID.fromString(id)) }
                 call.respond(hentetBehandling ?: HttpStatusCode.NotFound)
             }

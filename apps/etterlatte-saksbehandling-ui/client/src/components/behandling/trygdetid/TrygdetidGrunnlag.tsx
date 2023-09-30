@@ -13,7 +13,7 @@ import React, { FormEvent, useState } from 'react'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import styled from 'styled-components'
 import { useParams } from 'react-router-dom'
-import { DatoVelger, formatDateOrEmptyString } from '~shared/DatoVelger'
+import { DatoVelger, formatDateToLocaleDateOrEmptyString } from '~shared/DatoVelger'
 
 type Props = {
   eksisterendeGrunnlag: ITrygdetidGrunnlag | undefined
@@ -92,7 +92,7 @@ export const TrygdetidGrunnlag: React.FC<Props> = ({
                   onChange={(date) =>
                     setTrygdetidgrunnlag({
                       ...trygdetidgrunnlag,
-                      periodeFra: formatDateOrEmptyString(date),
+                      periodeFra: formatDateToLocaleDateOrEmptyString(date),
                     })
                   }
                   label="Fra dato"
@@ -106,7 +106,7 @@ export const TrygdetidGrunnlag: React.FC<Props> = ({
                   onChange={(date) =>
                     setTrygdetidgrunnlag({
                       ...trygdetidgrunnlag,
-                      periodeTil: formatDateOrEmptyString(date),
+                      periodeTil: formatDateToLocaleDateOrEmptyString(date),
                     })
                   }
                   label="Til dato"

@@ -30,5 +30,5 @@ export const DatoVelger = ({
   )
 }
 
-export const formatDateOrEmptyString = (date: Date | undefined) =>
+export const formatDateToLocaleDateOrEmptyString = (date: Date | undefined) =>
   date === undefined ? '' : format(date, 'yyyy-MM-dd')

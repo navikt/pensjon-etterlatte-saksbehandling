@@ -88,14 +88,14 @@ const Etterbetaling = (props: {
         <EtterbetalingWrapper>
           <DatoSection>
             <DatoVelger
-              value={!etterbetaling?.fraDato ? undefined : new Date(etterbetaling?.fraDato)}
+              value={etterbetaling?.fraDato ? new Date(etterbetaling?.fraDato) : undefined}
               onChange={(e) => setEtterbetaling({ ...etterbetaling, fraDato: e })}
               label="Fra dato"
             />
           </DatoSection>
           <DatoSection>
             <DatoVelger
-              value={!etterbetaling?.tilDato ? undefined : new Date(etterbetaling?.tilDato)}
+              value={etterbetaling?.tilDato ? new Date(etterbetaling?.tilDato) : undefined}
               onChange={(e) => setEtterbetaling({ ...etterbetaling, tilDato: e })}
               label="Til dato"
             />

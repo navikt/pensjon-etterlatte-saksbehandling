@@ -76,11 +76,13 @@ internal fun Route.behandlingRoutes(
                 val body = call.receive<JaNeiMedBegrunnelse>()
                 when (
                     val lagretGyldighetsResultat =
-                        gyldighetsproevingService.lagreGyldighetsproeving(
-                            behandlingsId,
-                            navIdent,
-                            body,
-                        )
+                        inTransaction {
+                            gyldighetsproevingService.lagreGyldighetsproeving(
+                                behandlingsId,
+                                navIdent,
+                                body,
+                            )
+                        }
                 ) {
                     null -> call.respond(HttpStatusCode.NotFound)
                     else -> call.respond(HttpStatusCode.OK, lagretGyldighetsResultat)

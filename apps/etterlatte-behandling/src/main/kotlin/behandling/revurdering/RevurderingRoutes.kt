@@ -9,6 +9,7 @@ import io.ktor.server.routing.application
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
+import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
@@ -54,14 +55,16 @@ internal fun Route.revurderingRoutes(revurderingService: RevurderingService) {
                     medBody<OpprettRevurderingRequest> { opprettRevurderingRequest ->
 
                         val revurdering =
-                            revurderingService.opprettManuellRevurderingWrapper(
-                                sakId,
-                                opprettRevurderingRequest.aarsak,
-                                opprettRevurderingRequest.paaGrunnAvHendelseId,
-                                opprettRevurderingRequest.begrunnelse,
-                                opprettRevurderingRequest.fritekstAarsak,
-                                saksbehandler,
-                            )
+                            inTransaction {
+                                revurderingService.opprettManuellRevurderingWrapper(
+                                    sakId,
+                                    opprettRevurderingRequest.aarsak,
+                                    opprettRevurderingRequest.paaGrunnAvHendelseId,
+                                    opprettRevurderingRequest.begrunnelse,
+                                    opprettRevurderingRequest.fritekstAarsak,
+                                    saksbehandler,
+                                )
+                            }
 
                         when (revurdering) {
                             null -> call.respond(HttpStatusCode.NotFound)

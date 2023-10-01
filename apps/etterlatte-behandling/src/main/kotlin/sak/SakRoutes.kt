@@ -56,8 +56,10 @@ internal fun Route.sakSystemRoutes(
                 logger.info("Henter siste iverksatte behandling for $sakId")
 
                 val sisteIverksatteBehandling =
-                    behandlingService.hentSisteIverksatte(sakId)
-                        ?.let { SisteIverksatteBehandling(it.id) }
+                    inTransaction {
+                        behandlingService.hentSisteIverksatte(sakId)
+                            ?.let { SisteIverksatteBehandling(it.id) }
+                    }
 
                 call.respond(sisteIverksatteBehandling ?: HttpStatusCode.NotFound)
             }
@@ -67,7 +69,7 @@ internal fun Route.sakSystemRoutes(
     post("personer/saker/{type}") {
         withFoedselsnummerAndGradering(tilgangService) { fnr, gradering ->
             val type: SakType = enumValueOf(requireNotNull(call.parameters["type"]))
-            call.respond(sakService.finnEllerOpprettSak(fnr = fnr.value, type, gradering = gradering))
+            call.respond(inTransaction { sakService.finnEllerOpprettSak(fnr = fnr.value, type, gradering = gradering) })
         }
     }
 
@@ -139,7 +141,7 @@ internal fun Route.sakWebRoutes(
                     val oppgaver =
                         sakService.finnSaker(fnr.value)
                             .map { sak ->
-                                OppgaveListe(sak, oppgaveService.hentOppgaverForSak(sak.id))
+                                OppgaveListe(sak, inTransaction { oppgaveService.hentOppgaverForSak(sak.id) })
                             }
                     call.respond(oppgaver)
                 }

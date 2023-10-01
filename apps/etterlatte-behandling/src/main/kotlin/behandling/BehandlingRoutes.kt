@@ -100,7 +100,7 @@ internal fun Route.behandlingRoutes(
                     )
 
                 try {
-                    kommerBarnetTilGodeService.lagreKommerBarnetTilgode(kommerBarnetTilgode)
+                    inTransaction { kommerBarnetTilGodeService.lagreKommerBarnetTilgode(kommerBarnetTilgode) }
                     call.respond(HttpStatusCode.OK, kommerBarnetTilgode)
                 } catch (e: TilstandException.UgyldigTilstand) {
                     call.respond(HttpStatusCode.BadRequest, "Kunne ikke endre på feltet")
@@ -287,12 +287,14 @@ internal fun Route.behandlingRoutes(
 
                 when (
                     val behandling =
-                        behandlingFactory.opprettBehandling(
-                            behandlingsBehov.sakId,
-                            behandlingsBehov.persongalleri,
-                            behandlingsBehov.mottattDato,
-                            Vedtaksloesning.GJENNY,
-                        )
+                        inTransaction {
+                            behandlingFactory.opprettBehandling(
+                                behandlingsBehov.sakId,
+                                behandlingsBehov.persongalleri,
+                                behandlingsBehov.mottattDato,
+                                Vedtaksloesning.GJENNY,
+                            )
+                        }
                 ) {
                     null -> call.respond(HttpStatusCode.NotFound)
                     else -> call.respondText(behandling.id.toString())

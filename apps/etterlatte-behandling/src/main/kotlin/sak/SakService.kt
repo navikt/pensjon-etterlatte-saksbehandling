@@ -114,13 +114,11 @@ class RealSakService(
         gradering: AdressebeskyttelseGradering?,
     ): Sak {
         val sak =
-            inTransaction {
-                finnSakerForPersonOgType(fnr, type) ?: dao.opprettSak(
-                    fnr,
-                    type,
-                    enhet ?: finnEnhetForPersonOgTema(fnr, type.tema, type).enhetNr,
-                )
-            }
+            finnSakerForPersonOgType(fnr, type) ?: dao.opprettSak(
+                fnr,
+                type,
+                enhet ?: finnEnhetForPersonOgTema(fnr, type.tema, type).enhetNr,
+            )
         this.sjekkSkjerming(fnr = fnr, sakId = sak.id)
         gradering?.let {
             tilgangService.oppdaterAdressebeskyttelse(sak.id, it)

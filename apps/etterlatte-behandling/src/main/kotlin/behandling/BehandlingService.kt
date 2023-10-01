@@ -139,6 +139,7 @@ internal class BehandlingServiceImpl(
         return hentBehandlingForId(behandlingId)
     }
 
+    // Sjekk om intransaction kan flyttes ut
     override fun hentBehandlingerISak(sakId: Long): List<Behandling> {
         return inTransaction {
             hentBehandlingerForSakId(sakId)
@@ -146,7 +147,7 @@ internal class BehandlingServiceImpl(
     }
 
     override fun hentSisteIverksatte(sakId: Long): Behandling? {
-        return inTransaction { hentBehandlingerForSakId(sakId) }
+        return hentBehandlingerForSakId(sakId)
             .filter { BehandlingStatus.iverksattEllerAttestert().contains(it.status) }
             .maxByOrNull { it.behandlingOpprettet }
     }

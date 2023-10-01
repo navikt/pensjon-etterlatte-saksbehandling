@@ -230,7 +230,7 @@ internal class ApplicationContext(
             revurderingService = revurderingService,
         )
 
-    val tilgangService = TilgangServiceImpl(SakTilgangDao(dataSource))
+    val tilgangService = TilgangServiceImpl(SakTilgangDao { databaseContext().activeTx() })
     val sakService =
         RealSakService(
             sakDao,

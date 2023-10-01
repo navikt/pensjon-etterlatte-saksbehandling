@@ -35,6 +35,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import java.util.UUID
 
+// TODO: kan denne endres til per class hvis man har med truncate aftereach?
 @TestInstance(TestInstance.Lifecycle.PER_METHOD)
 class AdressebeskyttelseTest : BehandlingIntegrationTest() {
     @BeforeEach
@@ -375,13 +376,16 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
                 module(applicationContext)
             }
 
-            httpClient.post("/personer/saker/${SakType.BARNEPENSJON}") {
-                addAuthToken(tokenSaksbehandler)
-                contentType(ContentType.Application.Json)
-                setBody(FoedselsNummerMedGraderingDTO(fnr, AdressebeskyttelseGradering.STRENGT_FORTROLIG))
-            }.apply {
-                Assertions.assertEquals(HttpStatusCode.OK, status)
-            }.body<Sak>()
+            val sak =
+                httpClient.post("/personer/saker/${SakType.BARNEPENSJON}") {
+                    addAuthToken(tokenSaksbehandler)
+                    contentType(ContentType.Application.Json)
+                    setBody(FoedselsNummerMedGraderingDTO(fnr, AdressebeskyttelseGradering.STRENGT_FORTROLIG))
+                }.apply {
+                    Assertions.assertEquals(HttpStatusCode.OK, status)
+                }.body<Sak>()
+
+            // Assertions.assertEquals(sak.)
 
             httpClient.post("/personer/saker/${SakType.BARNEPENSJON}") {
                 addAuthToken(tokenSaksbehandler)

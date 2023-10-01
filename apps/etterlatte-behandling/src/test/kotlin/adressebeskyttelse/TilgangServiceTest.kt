@@ -57,7 +57,7 @@ internal class TilgangServiceTest {
                 password = postgreSQLContainer.password,
             ).apply { migrate() }
 
-        tilgangService = TilgangServiceImpl(SakTilgangDao(dataSource))
+        tilgangService = TilgangServiceImpl(SakTilgangDao { dataSource.connection })
         sakRepo = SakDao { dataSource.connection }
         behandlingRepo =
             BehandlingDao(

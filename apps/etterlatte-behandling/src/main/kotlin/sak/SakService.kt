@@ -116,7 +116,8 @@ class RealSakService(
             )
         this.sjekkSkjerming(fnr = fnr, sakId = sak.id)
         gradering?.let {
-            tilgangService.oppdaterAdressebeskyttelse(sak.id, it)
+            val updated = tilgangService.oppdaterAdressebeskyttelse(sak.id, it)
+            println(updated)
         }
         return sak
     }

@@ -50,7 +50,7 @@ internal class OppgaveDaoTest {
         val connection = dataSource.connection
         oppgaveDao = OppgaveDaoImpl { connection }
         sakDao = SakDao { connection }
-        saktilgangDao = SakTilgangDao(dataSource)
+        saktilgangDao = SakTilgangDao { dataSource.connection }
     }
 
     @AfterEach

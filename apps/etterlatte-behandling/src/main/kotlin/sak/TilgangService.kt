@@ -131,6 +131,7 @@ class TilgangServiceImpl(
         id: Long,
         adressebeskyttelseGradering: AdressebeskyttelseGradering,
     ): Int {
+        // TODO: denne fungerer ikke lenger? Tipper alle som har signatur  datasource.connection.use må byttes ut
         return dao.oppdaterAdresseBeskyttelse(id, adressebeskyttelseGradering)
     }
 }

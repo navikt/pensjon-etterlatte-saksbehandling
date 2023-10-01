@@ -86,7 +86,7 @@ internal class OppgaveServiceTest {
         oppgaveDao = OppgaveDaoImpl { connection }
         oppgaveDaoMedEndringssporing = OppgaveDaoMedEndringssporingImpl(oppgaveDao) { connection }
         oppgaveService = OppgaveService(oppgaveDaoMedEndringssporing, sakDao, featureToggleService)
-        saktilgangDao = SakTilgangDao(dataSource)
+        saktilgangDao = SakTilgangDao { dataSource.connection }
     }
 
     val azureGroupToGroupIDMap =

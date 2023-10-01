@@ -228,11 +228,9 @@ class OppgaveService(
         sakId: Long,
         enhetsID: String,
     ) {
-        inTransaction {
-            val oppgaverForSak = oppgaveDao.hentOppgaverForSak(sakId)
-            oppgaverForSak.forEach {
-                oppgaveDao.endreEnhetPaaOppgave(it.id, enhetsID)
-            }
+        val oppgaverForSak = oppgaveDao.hentOppgaverForSak(sakId)
+        oppgaverForSak.forEach {
+            oppgaveDao.endreEnhetPaaOppgave(it.id, enhetsID)
         }
     }
 

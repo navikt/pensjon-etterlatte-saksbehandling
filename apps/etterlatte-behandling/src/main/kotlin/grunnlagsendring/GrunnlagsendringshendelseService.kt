@@ -171,7 +171,7 @@ class GrunnlagsendringshendelseService(
         val gradering = adressebeskyttelse.adressebeskyttelseGradering
         val sakIder = grunnlagKlient.hentAlleSakIder(adressebeskyttelse.fnr)
 
-        oppdaterEnheterForsaker(fnr = adressebeskyttelse.fnr, gradering = gradering)
+        inTransaction { oppdaterEnheterForsaker(fnr = adressebeskyttelse.fnr, gradering = gradering) }
 
         sakIder.forEach { sakId ->
             tilgangService.oppdaterAdressebeskyttelse(
@@ -365,7 +365,7 @@ class GrunnlagsendringshendelseService(
         try {
             val samsvarMellomPdlOgGrunnlag = finnSamsvarForHendelse(hendelse, pdlData, grunnlag, personRolle)
             if (!samsvarMellomPdlOgGrunnlag.samsvar) {
-                oppdaterHendelseSjekket(hendelse, samsvarMellomPdlOgGrunnlag)
+                inTransaction { oppdaterHendelseSjekket(hendelse, samsvarMellomPdlOgGrunnlag) }
             } else {
                 forkastHendelse(hendelse.id, samsvarMellomPdlOgGrunnlag)
             }
@@ -380,27 +380,25 @@ class GrunnlagsendringshendelseService(
     ) {
         sisteIkkeAvbrutteBehandlingUtenManueltOpphoer(hendelse.sakId, samsvarMellomKildeOgGrunnlag, hendelse.id)
             ?: return
-        inTransaction {
-            logger.info(
-                "Grunnlagsendringshendelse for ${hendelse.type} med id ${hendelse.id} er naa sjekket av jobb " +
-                    "naa sjekket av jobb, og informasjonen i pdl og grunnlag samsvarer ikke. " +
-                    "Hendelsen forkastes derfor ikke.",
-            )
-            grunnlagsendringshendelseDao.oppdaterGrunnlagsendringStatusOgSamsvar(
-                hendelseId = hendelse.id,
-                foerStatus = GrunnlagsendringStatus.VENTER_PAA_JOBB,
-                etterStatus = GrunnlagsendringStatus.SJEKKET_AV_JOBB,
-                samsvarMellomKildeOgGrunnlag = samsvarMellomKildeOgGrunnlag,
-            )
-            oppgaveService.opprettNyOppgaveMedSakOgReferanse(
-                referanse = hendelse.id.toString(),
-                sakId = hendelse.sakId,
-                oppgaveKilde = OppgaveKilde.HENDELSE,
-                oppgaveType = OppgaveType.VURDER_KONSEKVENS,
-                merknad = hendelse.beskrivelse(),
-            ).also {
-                logger.info("Oppgave for hendelsen med id=${hendelse.id} er opprettet med id=${it.id}")
-            }
+        logger.info(
+            "Grunnlagsendringshendelse for ${hendelse.type} med id ${hendelse.id} er naa sjekket av jobb " +
+                "naa sjekket av jobb, og informasjonen i pdl og grunnlag samsvarer ikke. " +
+                "Hendelsen forkastes derfor ikke.",
+        )
+        grunnlagsendringshendelseDao.oppdaterGrunnlagsendringStatusOgSamsvar(
+            hendelseId = hendelse.id,
+            foerStatus = GrunnlagsendringStatus.VENTER_PAA_JOBB,
+            etterStatus = GrunnlagsendringStatus.SJEKKET_AV_JOBB,
+            samsvarMellomKildeOgGrunnlag = samsvarMellomKildeOgGrunnlag,
+        )
+        oppgaveService.opprettNyOppgaveMedSakOgReferanse(
+            referanse = hendelse.id.toString(),
+            sakId = hendelse.sakId,
+            oppgaveKilde = OppgaveKilde.HENDELSE,
+            oppgaveType = OppgaveType.VURDER_KONSEKVENS,
+            merknad = hendelse.beskrivelse(),
+        ).also {
+            logger.info("Oppgave for hendelsen med id=${hendelse.id} er opprettet med id=${it.id}")
         }
     }
 

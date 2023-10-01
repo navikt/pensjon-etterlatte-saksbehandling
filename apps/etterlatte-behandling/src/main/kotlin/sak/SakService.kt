@@ -13,7 +13,6 @@ import no.nav.etterlatte.common.klienter.SkjermingKlient
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
-import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
@@ -89,9 +88,7 @@ class RealSakService(
     }
 
     override fun finnSaker(person: String): List<Sak> {
-        return inTransaction {
-            finnSakerForPerson(person).filterForEnheter()
-        }
+        return finnSakerForPerson(person).filterForEnheter()
     }
 
     override fun slettSak(id: Long) {
@@ -102,9 +99,7 @@ class RealSakService(
         sakIder: List<Long>,
         skjermet: Boolean,
     ) {
-        inTransaction {
-            dao.markerSakerMedSkjerming(sakIder, skjermet)
-        }
+        dao.markerSakerMedSkjerming(sakIder, skjermet)
     }
 
     override fun finnEllerOpprettSak(
@@ -135,27 +130,19 @@ class RealSakService(
                 skjermingKlient.personErSkjermet(fnr)
             }
         if (erSkjermet) {
-            inTransaction {
-                dao.oppdaterEnheterPaaSaker(
-                    listOf(GrunnlagsendringshendelseService.SakMedEnhet(sakId, Enheter.EGNE_ANSATTE.enhetNr)),
-                )
-            }
+            dao.oppdaterEnheterPaaSaker(
+                listOf(GrunnlagsendringshendelseService.SakMedEnhet(sakId, Enheter.EGNE_ANSATTE.enhetNr)),
+            )
         }
-        inTransaction {
-            dao.markerSakerMedSkjerming(sakIder = listOf(sakId), skjermet = erSkjermet)
-        }
+        dao.markerSakerMedSkjerming(sakIder = listOf(sakId), skjermet = erSkjermet)
     }
 
     override fun oppdaterEnhetForSaker(saker: List<GrunnlagsendringshendelseService.SakMedEnhet>) {
-        inTransaction {
-            dao.oppdaterEnheterPaaSaker(saker)
-        }
+        dao.oppdaterEnheterPaaSaker(saker)
     }
 
     override fun sjekkOmSakerErGradert(sakIder: List<Long>): List<SakMedGradering> {
-        return inTransaction {
-            dao.finnSakerMedGraderingOgSkjerming(sakIder)
-        }
+        return dao.finnSakerMedGraderingOgSkjerming(sakIder)
     }
 
     override fun finnSak(

@@ -134,16 +134,12 @@ internal class BehandlingServiceImpl(
 
     private fun hentBehandlingerForSakId(sakId: Long) = behandlingDao.alleBehandlingerISak(sakId).filterForEnheter()
 
-    // alle som bruker denne må ha en transaction
     override fun hentBehandling(behandlingId: UUID): Behandling? {
         return hentBehandlingForId(behandlingId)
     }
 
-    // Sjekk om intransaction kan flyttes ut
     override fun hentBehandlingerISak(sakId: Long): List<Behandling> {
-        return inTransaction {
-            hentBehandlingerForSakId(sakId)
-        }
+        return hentBehandlingerForSakId(sakId)
     }
 
     override fun hentSisteIverksatte(sakId: Long): Behandling? {

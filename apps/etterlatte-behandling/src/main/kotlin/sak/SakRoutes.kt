@@ -103,7 +103,7 @@ internal fun Route.sakWebRoutes(
 
             get("/behandlinger/foerstevirk") {
                 logger.info("Henter første virkningstidspunkt på en iverksatt behandling i sak med id $sakId")
-                when (val foersteVirk = behandlingService.hentFoersteVirk(sakId)) {
+                when (val foersteVirk = inTransaction { behandlingService.hentFoersteVirk(sakId) }) {
                     null -> call.respond(HttpStatusCode.NotFound)
                     else -> call.respond(FoersteVirkDto(foersteVirk.atDay(1), sakId))
                 }
@@ -126,12 +126,14 @@ internal fun Route.sakWebRoutes(
             post("behandlinger") {
                 withFoedselsnummerInternal(tilgangService) { fnr ->
                     val behandlinger =
-                        sakService.finnSaker(fnr.value)
-                            .map { sak ->
-                                behandlingService.hentBehandlingerISak(sak.id)
-                                    .map { it.toBehandlingSammendrag() }
-                                    .let { BehandlingListe(sak, it) }
-                            }
+                        inTransaction {
+                            sakService.finnSaker(fnr.value)
+                                .map { sak ->
+                                    behandlingService.hentBehandlingerISak(sak.id)
+                                        .map { it.toBehandlingSammendrag() }
+                                        .let { BehandlingListe(sak, it) }
+                                }
+                        }
                     call.respond(behandlinger)
                 }
             }
@@ -139,10 +141,12 @@ internal fun Route.sakWebRoutes(
             post("oppgaver") {
                 withFoedselsnummerInternal(tilgangService) { fnr ->
                     val oppgaver =
-                        sakService.finnSaker(fnr.value)
-                            .map { sak ->
-                                OppgaveListe(sak, inTransaction { oppgaveService.hentOppgaverForSak(sak.id) })
-                            }
+                        inTransaction {
+                            sakService.finnSaker(fnr.value)
+                                .map { sak ->
+                                    OppgaveListe(sak, inTransaction { oppgaveService.hentOppgaverForSak(sak.id) })
+                                }
+                        }
                     call.respond(oppgaver)
                 }
             }
@@ -150,8 +154,10 @@ internal fun Route.sakWebRoutes(
             post("grunnlagsendringshendelser") {
                 withFoedselsnummerInternal(tilgangService) { fnr ->
                     call.respond(
-                        sakService.finnSaker(fnr.value).map { sak ->
-                            GrunnlagsendringsListe(grunnlagsendringshendelseService.hentAlleHendelserForSak(sak.id))
+                        inTransaction {
+                            sakService.finnSaker(fnr.value).map { sak ->
+                                GrunnlagsendringsListe(grunnlagsendringshendelseService.hentAlleHendelserForSak(sak.id))
+                            }
                         },
                     )
                 }

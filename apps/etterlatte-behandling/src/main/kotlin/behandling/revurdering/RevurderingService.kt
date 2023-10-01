@@ -248,6 +248,7 @@ class RevurderingServiceImpl(
         return behandling.status.kanEndres()
     }
 
+    // TODO flytte ut intrans her?
     override fun lagreRevurderingInfo(
         behandlingsId: UUID,
         revurderingMedBegrunnelse: RevurderingMedBegrunnelse,

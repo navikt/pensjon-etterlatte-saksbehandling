@@ -85,13 +85,15 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
                 applicationContext.sakDao.opprettSak(fnr, SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr)
             }
         val behandling =
-            (behandlingFactory ?: applicationContext.behandlingFactory)
-                .opprettBehandling(
-                    sak.id,
-                    persongalleri(),
-                    LocalDateTime.now().toString(),
-                    Vedtaksloesning.GJENNY,
-                )
+            inTransaction {
+                (behandlingFactory ?: applicationContext.behandlingFactory)
+                    .opprettBehandling(
+                        sak.id,
+                        persongalleri(),
+                        LocalDateTime.now().toString(),
+                        Vedtaksloesning.GJENNY,
+                    )
+            }
 
         return Pair(sak, behandling as Foerstegangsbehandling)
     }
@@ -130,24 +132,26 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
         }
 
         val revurdering =
-            RevurderingServiceImpl(
-                oppgaveService,
-                grunnlagService,
-                hendelser,
-                featureToggleService,
-                applicationContext.behandlingDao,
-                applicationContext.hendelseDao,
-                applicationContext.grunnlagsendringshendelseDao,
-                applicationContext.kommerBarnetTilGodeService,
-                applicationContext.revurderingDao,
-                applicationContext.behandlingService,
-            ).opprettManuellRevurderingWrapper(
-                sakId = sak.id,
-                aarsak = RevurderingAarsak.REGULERING,
-                paaGrunnAvHendelseId = null,
-                begrunnelse = null,
-                saksbehandler = Saksbehandler("", "saksbehandler", null),
-            )
+            inTransaction {
+                RevurderingServiceImpl(
+                    oppgaveService,
+                    grunnlagService,
+                    hendelser,
+                    featureToggleService,
+                    applicationContext.behandlingDao,
+                    applicationContext.hendelseDao,
+                    applicationContext.grunnlagsendringshendelseDao,
+                    applicationContext.kommerBarnetTilGodeService,
+                    applicationContext.revurderingDao,
+                    applicationContext.behandlingService,
+                ).opprettManuellRevurderingWrapper(
+                    sakId = sak.id,
+                    aarsak = RevurderingAarsak.REGULERING,
+                    paaGrunnAvHendelseId = null,
+                    begrunnelse = null,
+                    saksbehandler = Saksbehandler("", "saksbehandler", null),
+                )
+            }
 
         verify { grunnlagService.leggInnNyttGrunnlag(revurdering!!, any()) }
         coVerify { grunnlagService.hentPersongalleri(any()) }
@@ -215,13 +219,16 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
                 applicationContext.behandlingService,
             )
         val revurdering =
-            revurderingService.opprettManuellRevurderingWrapper(
-                sakId = sak.id,
-                aarsak = RevurderingAarsak.SOESKENJUSTERING,
-                paaGrunnAvHendelseId = null,
-                begrunnelse = null,
-                saksbehandler = Saksbehandler("", "saksbehandler", null),
-            )
+            inTransaction {
+                revurderingService.opprettManuellRevurderingWrapper(
+                    sakId = sak.id,
+                    aarsak = RevurderingAarsak.SOESKENJUSTERING,
+                    paaGrunnAvHendelseId = null,
+                    begrunnelse = null,
+                    saksbehandler = Saksbehandler("", "saksbehandler", null),
+                )
+            }
+
         val revurderingInfo = RevurderingInfo.Soeskenjustering(BarnepensjonSoeskenjusteringGrunn.SOESKEN_DOER)
         val fikkLagret =
             revurderingService.lagreRevurderingInfo(
@@ -320,24 +327,26 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
         }
 
         assertNull(
-            RevurderingServiceImpl(
-                applicationContext.oppgaveService,
-                applicationContext.grunnlagsService,
-                hendelser,
-                featureToggleService,
-                applicationContext.behandlingDao,
-                applicationContext.hendelseDao,
-                applicationContext.grunnlagsendringshendelseDao,
-                applicationContext.kommerBarnetTilGodeService,
-                applicationContext.revurderingDao,
-                applicationContext.behandlingService,
-            ).opprettManuellRevurderingWrapper(
-                sakId = sak.id,
-                aarsak = RevurderingAarsak.REGULERING,
-                paaGrunnAvHendelseId = null,
-                begrunnelse = null,
-                saksbehandler = Saksbehandler("", "Jenny", null),
-            ),
+            inTransaction {
+                RevurderingServiceImpl(
+                    applicationContext.oppgaveService,
+                    applicationContext.grunnlagsService,
+                    hendelser,
+                    featureToggleService,
+                    applicationContext.behandlingDao,
+                    applicationContext.hendelseDao,
+                    applicationContext.grunnlagsendringshendelseDao,
+                    applicationContext.kommerBarnetTilGodeService,
+                    applicationContext.revurderingDao,
+                    applicationContext.behandlingService,
+                ).opprettManuellRevurderingWrapper(
+                    sakId = sak.id,
+                    aarsak = RevurderingAarsak.REGULERING,
+                    paaGrunnAvHendelseId = null,
+                    begrunnelse = null,
+                    saksbehandler = Saksbehandler("", "Jenny", null),
+                )
+            },
         )
 
         confirmVerified(hendelser)
@@ -437,20 +446,23 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
                     merknad = null,
                 )
             }
-
-        applicationContext.oppgaveService.tildelSaksbehandler(
-            oppgaveId = oppgave.id,
-            saksbehandler = saksbehandler.ident,
-        )
+        inTransaction {
+            applicationContext.oppgaveService.tildelSaksbehandler(
+                oppgaveId = oppgave.id,
+                saksbehandler = saksbehandler.ident,
+            )
+        }
 
         val revurdering =
-            revurderingService.opprettManuellRevurderingWrapper(
-                sakId = sak.id,
-                aarsak = RevurderingAarsak.REGULERING,
-                paaGrunnAvHendelseId = hendelse.id.toString(),
-                begrunnelse = null,
-                saksbehandler = saksbehandler,
-            )
+            inTransaction {
+                revurderingService.opprettManuellRevurderingWrapper(
+                    sakId = sak.id,
+                    aarsak = RevurderingAarsak.REGULERING,
+                    paaGrunnAvHendelseId = hendelse.id.toString(),
+                    begrunnelse = null,
+                    saksbehandler = saksbehandler,
+                )
+            }
 
         inTransaction {
             assertEquals(revurdering, applicationContext.behandlingDao.hentBehandling(revurdering!!.id))
@@ -578,13 +590,15 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
         val (sak, _) = opprettSakMedFoerstegangsbehandling(fnr, behandlingFactory)
 
         assertThrows<RevurderingManglerIverksattBehandlingException> {
-            revurderingService.opprettManuellRevurderingWrapper(
-                sakId = sak.id,
-                aarsak = RevurderingAarsak.REGULERING,
-                paaGrunnAvHendelseId = UUID.randomUUID().toString(),
-                begrunnelse = null,
-                saksbehandler = Saksbehandler("", "saksbehandler", null),
-            )
+            inTransaction {
+                revurderingService.opprettManuellRevurderingWrapper(
+                    sakId = sak.id,
+                    aarsak = RevurderingAarsak.REGULERING,
+                    paaGrunnAvHendelseId = UUID.randomUUID().toString(),
+                    begrunnelse = null,
+                    saksbehandler = Saksbehandler("", "saksbehandler", null),
+                )
+            }
         }
     }
 
@@ -662,17 +676,21 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
             )
 
         val (sak, _) = opprettSakMedFoerstegangsbehandling(fnr, behandlingFactory)
-        val hentOppgaverForSak = applicationContext.oppgaveService.hentOppgaverForSak(sak.id)
+        val hentOppgaverForSak = inTransaction { applicationContext.oppgaveService.hentOppgaverForSak(sak.id) }
         val oppgaveForFoerstegangsbehandling = hentOppgaverForSak.single { it.status == Status.NY }
-        applicationContext.oppgaveService.tildelSaksbehandler(oppgaveForFoerstegangsbehandling.id, "sakbeahndler")
+        inTransaction {
+            applicationContext.oppgaveService.tildelSaksbehandler(oppgaveForFoerstegangsbehandling.id, "sakbeahndler")
+        }
         assertThrows<MaksEnBehandlingsOppgaveUnderbehandlingException> {
-            revurderingService.opprettManuellRevurderingWrapper(
-                sakId = sak.id,
-                aarsak = RevurderingAarsak.REGULERING,
-                paaGrunnAvHendelseId = UUID.randomUUID().toString(),
-                begrunnelse = null,
-                saksbehandler = Saksbehandler("", "saksbehandler", null),
-            )
+            inTransaction {
+                revurderingService.opprettManuellRevurderingWrapper(
+                    sakId = sak.id,
+                    aarsak = RevurderingAarsak.REGULERING,
+                    paaGrunnAvHendelseId = UUID.randomUUID().toString(),
+                    begrunnelse = null,
+                    saksbehandler = Saksbehandler("", "saksbehandler", null),
+                )
+            }
         }
     }
 

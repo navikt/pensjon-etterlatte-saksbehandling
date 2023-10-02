@@ -19,6 +19,7 @@ import ForhaandsvisningBrev from '~components/behandling/brev/ForhaandsvisningBr
 import Spinner from '~shared/Spinner'
 import { BrevProsessType } from '~shared/types/Brev'
 import RedigerbartBrev from '~components/behandling/brev/RedigerbartBrev'
+import { fattVedtak } from '~shared/api/behandling'
 
 export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
   const { behandlingId } = useParams()
@@ -97,7 +98,9 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
       <Border />
 
       <BehandlingHandlingKnapper>
-        {hentBehandlesFraStatus(status) && <SendTilAttesteringModal />}
+        {hentBehandlesFraStatus(status) && (
+          <SendTilAttesteringModal behandlingId={props.behandling.id} fattVedtakApi={fattVedtak} />
+        )}
       </BehandlingHandlingKnapper>
     </Content>
   )

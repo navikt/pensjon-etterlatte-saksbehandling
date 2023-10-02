@@ -18,3 +18,7 @@ export function lagreTilbakekrevingsperioder(args: {
 }): Promise<ApiResponse<Tilbakekreving>> {
   return apiClient.put(`/tilbakekreving/${args.tilbakekrevingsId}/perioder`, { perioder: args.perioder })
 }
+
+export const fattVedtak = async (tilbakekrevingsId: string): Promise<ApiResponse<unknown>> => {
+  return apiClient.post(`/tilbakekreving/${tilbakekrevingsId}/vedtak/fatt`, {})
+}

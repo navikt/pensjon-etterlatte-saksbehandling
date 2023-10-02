@@ -12,7 +12,7 @@ import Spinner from '~shared/Spinner'
 import { BehandlingHandlingKnapper } from '~components/behandling/handlinger/BehandlingHandlingKnapper'
 import { Alert, Button, ErrorMessage, Heading } from '@navikt/ds-react'
 import { isFailure, isPending, useApiCall } from '~shared/hooks/useApiCall'
-import { upsertVedtak } from '~shared/api/behandling'
+import { fattVedtak, upsertVedtak } from '~shared/api/behandling'
 import { IBehandlingStatus, IBehandlingsType } from '~shared/types/IDetaljertBehandling'
 import styled from 'styled-components'
 import { NesteOgTilbake } from '../handlinger/NesteOgTilbake'
@@ -112,7 +112,7 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
         <BehandlingHandlingKnapper>
           {isFailure(vedtak) && <ErrorMessage>Vedtaksoppdatering feilet</ErrorMessage>}
           {visAttesteringsmodal ? (
-            <SendTilAttesteringModal />
+            <SendTilAttesteringModal behandlingId={behandling.id} fattVedtakApi={fattVedtak} />
           ) : (
             <Button loading={isPending(vedtak)} variant="primary" onClick={opprettEllerOppdaterVedtak}>
               {behandlingSkalSendeBrev(behandling) ? 'Gå videre til brev' : 'Fatt vedtak'}

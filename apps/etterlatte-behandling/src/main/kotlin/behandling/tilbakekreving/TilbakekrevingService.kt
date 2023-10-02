@@ -7,6 +7,7 @@ import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.tilbakekreving.Kravgrunnlag
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.sak.SakDao
+import no.nav.etterlatte.token.BrukerTokenInfo
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.util.UUID
@@ -71,4 +72,15 @@ class TilbakekrevingService(
                 sakId = tilbakekreving.sak.id,
             )
         }
+
+    fun fattVedtak(
+        tilbakekrevingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {
+        logger.info("Fatter vedtak for tilbakekreving=$tilbakekrevingId")
+        // TODO sjekk og oppdater status
+        // TODO send til vedtak
+        // TODO hendelse
+        // TODO opprett oppgave
+    }
 }

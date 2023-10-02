@@ -199,7 +199,6 @@ class BehandlingStatusServiceImpl(
                 if (behandling.boddEllerArbeidetUtlandet?.skalSendeKravpakke == true) {
                     generellBehandlingService.opprettBehandling(
                         GenerellBehandling.opprettUtland(
-                            GenerellBehandling.GenerellBehandlingType.UTLAND,
                             behandling.sak.id,
                             behandling.id,
                         ),

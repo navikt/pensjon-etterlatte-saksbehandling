@@ -17,6 +17,12 @@ export function oppdaterGenerellBehandling(generellbehandling: Generellbehandlin
   return apiClient.put(`/generellbehandling/${generellbehandling.sakId}`, { ...generellbehandling })
 }
 
+export function sendTilAttesteringGenerellBehandling(
+  generellbehandling: Generellbehandling
+): Promise<ApiResponse<void>> {
+  return apiClient.put(`/generellbehandling/sendtilattestering/${generellbehandling.sakId}`, { ...generellbehandling })
+}
+
 export function attesterGenerellbehandling(generellbehandling: Generellbehandling): Promise<ApiResponse<void>> {
   return apiClient.post(`/generellbehandling/attester/${generellbehandling.sakId}`, { ...generellbehandling })
 }

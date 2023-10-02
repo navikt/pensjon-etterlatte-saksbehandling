@@ -111,7 +111,7 @@ internal fun Route.behandlingVedtakRoute(
                     behandlingsstatusService.settAttestertVedtak(behandling, attesterVedtakOppgave.vedtakHendelse)
                     try {
                         oppgaveService.ferdigStillOppgaveUnderBehandling(
-                            behandlingEllerHendelseId = attesterVedtakOppgave.vedtakOppgaveDTO.referanse,
+                            referanse = attesterVedtakOppgave.vedtakOppgaveDTO.referanse,
                             saksbehandler = brukerTokenInfo,
                         )
                     } catch (e: Exception) {

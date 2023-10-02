@@ -13,8 +13,7 @@ import React, { FormEvent, useState } from 'react'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import styled from 'styled-components'
 import { useParams } from 'react-router-dom'
-import { format } from 'date-fns'
-import { DatoVelger } from '~shared/DatoVelger'
+import { DatoVelger, formatDateToLocaleDateOrEmptyString } from '~shared/DatoVelger'
 
 type Props = {
   eksisterendeGrunnlag: ITrygdetidGrunnlag | undefined
@@ -89,11 +88,11 @@ export const TrygdetidGrunnlag: React.FC<Props> = ({
 
               <DatoSection>
                 <DatoVelger
-                  value={trygdetidgrunnlag.periodeFra == null ? null : new Date(trygdetidgrunnlag.periodeFra)}
-                  onChange={(date: Date | null) =>
+                  value={trygdetidgrunnlag.periodeFra == null ? undefined : new Date(trygdetidgrunnlag.periodeFra)}
+                  onChange={(date) =>
                     setTrygdetidgrunnlag({
                       ...trygdetidgrunnlag,
-                      periodeFra: date == null ? '' : format(date, 'yyyy-MM-dd'),
+                      periodeFra: formatDateToLocaleDateOrEmptyString(date),
                     })
                   }
                   label="Fra dato"
@@ -101,11 +100,13 @@ export const TrygdetidGrunnlag: React.FC<Props> = ({
               </DatoSection>
               <DatoSection>
                 <DatoVelger
-                  value={trygdetidgrunnlag.periodeTil == null ? null : new Date(trygdetidgrunnlag.periodeTil)}
-                  onChange={(date: Date | null) =>
+                  value={
+                    trygdetidgrunnlag.periodeTil === undefined ? undefined : new Date(trygdetidgrunnlag.periodeTil)
+                  }
+                  onChange={(date) =>
                     setTrygdetidgrunnlag({
                       ...trygdetidgrunnlag,
-                      periodeTil: date == null ? '' : format(date, 'yyyy-MM-dd'),
+                      periodeTil: formatDateToLocaleDateOrEmptyString(date),
                     })
                   }
                   label="Til dato"

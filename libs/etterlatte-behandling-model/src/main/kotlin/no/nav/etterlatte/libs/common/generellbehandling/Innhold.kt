@@ -2,6 +2,7 @@ package no.nav.etterlatte.libs.common.generellbehandling
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.fasterxml.jackson.annotation.JsonTypeName
+import java.time.LocalDate
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
 sealed class Innhold {
@@ -20,9 +21,14 @@ sealed class Innhold {
 }
 
 data class Dokumenter(
-    val p2100: Boolean,
-    val p5000: Boolean,
-    val p3000: Boolean,
-    val p4000: Boolean,
-    val p6000: Boolean,
+    val p2100: DokumentMedSendtDato,
+    val p5000: DokumentMedSendtDato,
+    val p3000: DokumentMedSendtDato,
+    val p4000: DokumentMedSendtDato,
+    val p6000: DokumentMedSendtDato,
+)
+
+data class DokumentMedSendtDato(
+    val sendt: Boolean,
+    val dato: LocalDate?,
 )

@@ -1,5 +1,6 @@
 package no.nav.etterlatte.behandling.generellbehandling
 
+import no.nav.etterlatte.libs.common.generellbehandling.DokumentMedSendtDato
 import no.nav.etterlatte.libs.common.generellbehandling.Dokumenter
 import no.nav.etterlatte.libs.common.generellbehandling.GenerellBehandling
 import no.nav.etterlatte.libs.common.generellbehandling.Innhold
@@ -16,6 +17,7 @@ import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.assertThrows
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
+import java.time.LocalDate
 import java.util.UUID
 import javax.sql.DataSource
 
@@ -93,7 +95,18 @@ internal class GenerellBehandlingDaoTest {
                 1L,
                 Tidspunkt.now(),
                 GenerellBehandling.GenerellBehandlingType.UTLAND,
-                Innhold.Utland(listOf("AFG"), Dokumenter(true, false, true, true, true), "2grwg2", "rita"),
+                Innhold.Utland(
+                    listOf("AFG"),
+                    Dokumenter(
+                        DokumentMedSendtDato(true, LocalDate.now()),
+                        DokumentMedSendtDato(true, LocalDate.now()),
+                        DokumentMedSendtDato(true, LocalDate.now()),
+                        DokumentMedSendtDato(true, LocalDate.now()),
+                        DokumentMedSendtDato(true, LocalDate.now()),
+                    ),
+                    "2grwg2",
+                    "rita",
+                ),
             )
         val hentetGenBehandling = dao.opprettGenerellbehandling(generellBehandlingUtland)
 
@@ -110,7 +123,18 @@ internal class GenerellBehandlingDaoTest {
                 1L,
                 Tidspunkt.now(),
                 GenerellBehandling.GenerellBehandlingType.UTLAND,
-                Innhold.Utland(listOf("AFG"), Dokumenter(true, false, true, false, false), "2grwg2", "rita"),
+                Innhold.Utland(
+                    listOf("AFG"),
+                    Dokumenter(
+                        DokumentMedSendtDato(true, LocalDate.now()),
+                        DokumentMedSendtDato(true, LocalDate.now()),
+                        DokumentMedSendtDato(true, LocalDate.now()),
+                        DokumentMedSendtDato(true, LocalDate.now()),
+                        DokumentMedSendtDato(true, LocalDate.now()),
+                    ),
+                    "2grwg2",
+                    "rita",
+                ),
             )
         val annengenerebehandling =
             GenerellBehandling(

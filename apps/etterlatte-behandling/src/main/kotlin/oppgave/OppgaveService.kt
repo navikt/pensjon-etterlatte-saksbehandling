@@ -275,10 +275,10 @@ class OppgaveService(
     }
 
     fun ferdigStillOppgaveUnderBehandling(
-        behandlingEllerHendelseId: String,
+        referanse: String,
         saksbehandler: BrukerTokenInfo,
     ): OppgaveIntern {
-        val behandlingsoppgaver = oppgaveDao.hentOppgaverForReferanse(behandlingEllerHendelseId)
+        val behandlingsoppgaver = oppgaveDao.hentOppgaverForReferanse(referanse)
         if (behandlingsoppgaver.isEmpty()) {
             throw BadRequestException("Må ha en oppgave for å ferdigstille oppgave")
         }
@@ -292,13 +292,13 @@ class OppgaveService(
         } catch (e: NoSuchElementException) {
             throw BadRequestException(
                 "Det må finnes en oppgave under behandling, gjelder behandling / hendelse med ID:" +
-                    " $behandlingEllerHendelseId}",
+                    " $referanse}",
                 e,
             )
         } catch (e: IllegalArgumentException) {
             throw BadRequestException(
                 "Skal kun ha en oppgave under behandling, gjelder behandling / hendelse med ID:" +
-                    " $behandlingEllerHendelseId",
+                    " $referanse",
                 e,
             )
         }

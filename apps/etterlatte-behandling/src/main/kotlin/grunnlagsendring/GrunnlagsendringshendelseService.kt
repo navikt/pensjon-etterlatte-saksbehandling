@@ -38,7 +38,6 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.sak.SakService
-import no.nav.etterlatte.sak.TilgangService
 import no.nav.etterlatte.sikkerLogg
 import no.nav.etterlatte.token.Saksbehandler
 import org.slf4j.LoggerFactory
@@ -50,7 +49,6 @@ class GrunnlagsendringshendelseService(
     private val behandlingService: BehandlingService,
     private val pdlKlient: PdlKlient,
     private val grunnlagKlient: GrunnlagKlient,
-    private val tilgangService: TilgangService,
     private val sakService: SakService,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
@@ -171,14 +169,16 @@ class GrunnlagsendringshendelseService(
         val gradering = adressebeskyttelse.adressebeskyttelseGradering
         val sakIder = grunnlagKlient.hentAlleSakIder(adressebeskyttelse.fnr)
 
-        inTransaction { oppdaterEnheterForsaker(fnr = adressebeskyttelse.fnr, gradering = gradering) }
+        inTransaction {
+            oppdaterEnheterForsaker(fnr = adressebeskyttelse.fnr, gradering = gradering)
 
-        sakIder.forEach { sakId ->
-            tilgangService.oppdaterAdressebeskyttelse(
-                sakId,
-                gradering,
-            )
-            sikkerLogg.info("Oppdaterte adressebeskyttelse for sakId=$sakId med gradering=$gradering")
+            sakIder.forEach { sakId ->
+                sakService.oppdaterAdressebeskyttelse(
+                    sakId,
+                    gradering,
+                )
+                sikkerLogg.info("Oppdaterte adressebeskyttelse for sakId=$sakId med gradering=$gradering")
+            }
         }
 
         if (sakIder.isNotEmpty() && gradering != AdressebeskyttelseGradering.UGRADERT) {

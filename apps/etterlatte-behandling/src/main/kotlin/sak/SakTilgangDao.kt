@@ -3,12 +3,12 @@ package no.nav.etterlatte.sak
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.libs.database.toList
-import java.sql.Connection
+import javax.sql.DataSource
 
-class SakTilgangDao(private val connection: () -> Connection) {
+class SakTilgangDao(private val datasource: DataSource) {
     fun finnSakerMedGraderingOgSkjerming(fnr: String): List<SakMedGraderingOgSkjermet> {
-        with(connection()) {
-            val statement = prepareStatement("SELECT id, adressebeskyttelse, erSkjermet from sak where fnr = ?")
+        datasource.connection.use { connection ->
+            val statement = connection.prepareStatement("SELECT id, adressebeskyttelse, erSkjermet from sak where fnr = ?")
             statement.setString(1, fnr)
             return statement.executeQuery().toList {
                 SakMedGraderingOgSkjermet(
@@ -21,8 +21,8 @@ class SakTilgangDao(private val connection: () -> Connection) {
     }
 
     fun hentSakMedGraderingOgSkjerming(id: Long): SakMedGraderingOgSkjermet? {
-        with(connection()) {
-            val statement = prepareStatement("SELECT id, adressebeskyttelse, erSkjermet from sak where id = ?")
+        datasource.connection.use {
+            val statement = it.prepareStatement("SELECT id, adressebeskyttelse, erSkjermet from sak where id = ?")
             statement.setLong(1, id)
             return statement.executeQuery().singleOrNull {
                 SakMedGraderingOgSkjermet(
@@ -34,22 +34,10 @@ class SakTilgangDao(private val connection: () -> Connection) {
         }
     }
 
-    fun oppdaterAdresseBeskyttelse(
-        id: Long,
-        adressebeskyttelseGradering: AdressebeskyttelseGradering,
-    ): Int {
-        with(connection()) {
-            val statement = prepareStatement("UPDATE sak SET adressebeskyttelse = ? where id = ?")
-            statement.setString(1, adressebeskyttelseGradering.toString())
-            statement.setLong(2, id)
-            return statement.executeUpdate()
-        }
-    }
-
     fun hentSakMedGarderingOgSkjermingPaaBehandling(behandlingId: String): SakMedGraderingOgSkjermet? {
-        with(connection()) {
+        datasource.connection.use {
             val statement =
-                prepareStatement(
+                it.prepareStatement(
                     "SELECT s.id, adressebeskyttelse, erSkjermet FROM behandling b" +
                         " INNER JOIN sak s ON b.sak_id = s.id WHERE b.id = ?::uuid",
                 )
@@ -65,9 +53,9 @@ class SakTilgangDao(private val connection: () -> Connection) {
     }
 
     fun hentSakMedGraderingOgSkjermingPaaOppgave(oppgaveId: String): SakMedGraderingOgSkjermet? {
-        with(connection()) {
+        datasource.connection.use {
             val statement =
-                prepareStatement(
+                it.prepareStatement(
                     """
                     SELECT s.id as sak_id, adressebeskyttelse, erskjermet 
                     FROM oppgave o
@@ -90,9 +78,9 @@ class SakTilgangDao(private val connection: () -> Connection) {
     }
 
     fun hentSakMedGraderingOgSkjermingPaaKlage(klageId: String): SakMedGraderingOgSkjermet? {
-        with(connection()) {
+        datasource.connection.use {
             val statement =
-                prepareStatement(
+                it.prepareStatement(
                     """
                     SELECT s.id as sak_id, adressebeskyttelse, erskjermet 
                     FROM klage k

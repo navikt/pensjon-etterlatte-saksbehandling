@@ -38,7 +38,7 @@ internal class SakDaoTest {
             ).apply { migrate() }
         val connection = dataSource.connection
         sakRepo = SakDao { connection }
-        tilgangService = TilgangServiceImpl(SakTilgangDao { dataSource.connection })
+        tilgangService = TilgangServiceImpl(SakTilgangDao(dataSource))
     }
 
     @AfterAll

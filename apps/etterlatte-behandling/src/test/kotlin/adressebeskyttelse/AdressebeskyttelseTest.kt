@@ -28,6 +28,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.module
 import no.nav.etterlatte.tilgangsstyring.TILGANG_ROUTE_PATH
+import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
@@ -43,6 +44,11 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
 
     @AfterEach
     fun afterEach() {
+        resetDatabase()
+    }
+
+    @AfterAll
+    fun afterAllTests() {
         afterAll()
     }
 

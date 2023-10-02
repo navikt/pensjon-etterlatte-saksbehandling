@@ -9,11 +9,6 @@ interface TilgangService {
         saksbehandlerMedRoller: SaksbehandlerMedRoller,
     ): Boolean
 
-    fun oppdaterAdressebeskyttelse(
-        id: Long,
-        adressebeskyttelseGradering: AdressebeskyttelseGradering,
-    ): Int
-
     fun harTilgangTilSak(
         sakId: Long,
         saksbehandlerMedRoller: SaksbehandlerMedRoller,
@@ -125,13 +120,5 @@ class TilgangServiceImpl(
             AdressebeskyttelseGradering.UGRADERT -> true
             else -> true
         }
-    }
-
-    override fun oppdaterAdressebeskyttelse(
-        id: Long,
-        adressebeskyttelseGradering: AdressebeskyttelseGradering,
-    ): Int {
-        // TODO: denne fungerer ikke lenger? Tipper alle som har signatur  datasource.connection.use må byttes ut
-        return dao.oppdaterAdresseBeskyttelse(id, adressebeskyttelseGradering)
     }
 }

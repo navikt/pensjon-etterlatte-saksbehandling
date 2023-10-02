@@ -214,6 +214,7 @@ internal class BehandlingRoutesTest {
 
     private val user = mockk<SaksbehandlerMedEnheterOgRoller>()
 
+    // Felles sted for denne?
     private fun Route.attachMockContext() {
         intercept(ApplicationCallPipeline.Call) {
             val context1 =

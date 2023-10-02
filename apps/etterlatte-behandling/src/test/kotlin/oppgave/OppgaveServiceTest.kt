@@ -86,7 +86,7 @@ internal class OppgaveServiceTest {
         oppgaveDao = OppgaveDaoImpl { connection }
         oppgaveDaoMedEndringssporing = OppgaveDaoMedEndringssporingImpl(oppgaveDao) { connection }
         oppgaveService = OppgaveService(oppgaveDaoMedEndringssporing, sakDao, featureToggleService)
-        saktilgangDao = SakTilgangDao { dataSource.connection }
+        saktilgangDao = SakTilgangDao(dataSource)
     }
 
     val azureGroupToGroupIDMap =
@@ -744,7 +744,7 @@ internal class OppgaveServiceTest {
             null,
         )
 
-        saktilgangDao.oppdaterAdresseBeskyttelse(adressebeskyttetSak.id, AdressebeskyttelseGradering.STRENGT_FORTROLIG)
+        sakDao.oppdaterAdresseBeskyttelse(adressebeskyttetSak.id, AdressebeskyttelseGradering.STRENGT_FORTROLIG)
 
         val saksbehandlerRoller = generateSaksbehandlerMedRoller(AzureGroup.SAKSBEHANDLER)
 
@@ -798,7 +798,7 @@ internal class OppgaveServiceTest {
                 null,
             )
 
-        saktilgangDao.oppdaterAdresseBeskyttelse(adressebeskyttetSak.id, AdressebeskyttelseGradering.STRENGT_FORTROLIG)
+        sakDao.oppdaterAdresseBeskyttelse(adressebeskyttetSak.id, AdressebeskyttelseGradering.STRENGT_FORTROLIG)
         val saksbehandlerMedRollerStrengtFortrolig = generateSaksbehandlerMedRoller(AzureGroup.STRENGT_FORTROLIG)
         val oppgaver = oppgaveService.finnOppgaverForBruker(saksbehandlerMedRollerStrengtFortrolig)
         Assertions.assertEquals(1, oppgaver.size)

@@ -23,9 +23,9 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.POSTGRES_VERSION
 import no.nav.etterlatte.libs.database.migrate
-import no.nav.etterlatte.sak.RealSakService
 import no.nav.etterlatte.sak.SakDao
 import no.nav.etterlatte.sak.SakService
+import no.nav.etterlatte.sak.SakServiceImpl
 import no.nav.etterlatte.sak.TilgangService
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -73,7 +73,7 @@ internal class EgenAnsattServiceTest {
         sakRepo = SakDao { connection }
         sakService =
             spyk(
-                RealSakService(sakRepo, pdlKlient, norg2Klient, featureToggleService, tilgangService, skjermingKlient),
+                SakServiceImpl(sakRepo, pdlKlient, norg2Klient, featureToggleService, skjermingKlient),
             )
         egenAnsattService = EgenAnsattService(sakService, sikkerLogg)
 

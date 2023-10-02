@@ -62,14 +62,18 @@ interface SakService {
     fun oppdaterEnhetForSaker(saker: List<GrunnlagsendringshendelseService.SakMedEnhet>)
 
     fun sjekkOmSakerErGradert(sakIder: List<Long>): List<SakMedGradering>
+
+    fun oppdaterAdressebeskyttelse(
+        id: Long,
+        adressebeskyttelseGradering: AdressebeskyttelseGradering,
+    ): Int
 }
 
-class RealSakService(
+class SakServiceImpl(
     private val dao: SakDao,
     private val pdlKlient: PdlKlient,
     private val norg2Klient: Norg2Klient,
     private val featureToggleService: FeatureToggleService,
-    private val tilgangService: TilgangService,
     private val skjermingKlient: SkjermingKlient,
 ) : SakService {
     private val logger = LoggerFactory.getLogger(this::class.java)
@@ -116,10 +120,16 @@ class RealSakService(
             )
         this.sjekkSkjerming(fnr = fnr, sakId = sak.id)
         gradering?.let {
-            val updated = tilgangService.oppdaterAdressebeskyttelse(sak.id, it)
-            println(updated)
+            oppdaterAdressebeskyttelse(sak.id, it)
         }
         return sak
+    }
+
+    override fun oppdaterAdressebeskyttelse(
+        id: Long,
+        adressebeskyttelseGradering: AdressebeskyttelseGradering,
+    ): Int {
+        return dao.oppdaterAdresseBeskyttelse(id, adressebeskyttelseGradering)
     }
 
     private fun sjekkSkjerming(

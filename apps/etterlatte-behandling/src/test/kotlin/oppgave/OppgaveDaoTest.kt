@@ -50,7 +50,7 @@ internal class OppgaveDaoTest {
         val connection = dataSource.connection
         oppgaveDao = OppgaveDaoImpl { connection }
         sakDao = SakDao { connection }
-        saktilgangDao = SakTilgangDao { dataSource.connection }
+        saktilgangDao = SakTilgangDao(dataSource)
     }
 
     @AfterEach
@@ -101,7 +101,7 @@ internal class OppgaveDaoTest {
         val sakAalesund = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         val oppgaveNy = lagNyOppgave(sakAalesund)
         oppgaveDao.lagreOppgave(oppgaveNy)
-        saktilgangDao.oppdaterAdresseBeskyttelse(sakAalesund.id, AdressebeskyttelseGradering.STRENGT_FORTROLIG)
+        sakDao.oppdaterAdresseBeskyttelse(sakAalesund.id, AdressebeskyttelseGradering.STRENGT_FORTROLIG)
 
         val sakutenbeskyttelse = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         val oppgaveUtenbeskyttelse = lagNyOppgave(sakutenbeskyttelse)
@@ -116,7 +116,7 @@ internal class OppgaveDaoTest {
         val sakAalesund = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         val oppgaveNy = lagNyOppgave(sakAalesund)
         oppgaveDao.lagreOppgave(oppgaveNy)
-        saktilgangDao.oppdaterAdresseBeskyttelse(sakAalesund.id, AdressebeskyttelseGradering.STRENGT_FORTROLIG)
+        sakDao.oppdaterAdresseBeskyttelse(sakAalesund.id, AdressebeskyttelseGradering.STRENGT_FORTROLIG)
 
         val hentetOppgave =
             oppgaveDao

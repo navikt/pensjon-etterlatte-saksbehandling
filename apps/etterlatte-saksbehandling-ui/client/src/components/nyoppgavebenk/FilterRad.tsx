@@ -24,7 +24,7 @@ import { FlexRow } from '~shared/styled'
 
 export const FilterRad = (props: { hentOppgaver: () => void; filter: Filter; setFilter: (filter: Filter) => void }) => {
   const { hentOppgaver, filter, setFilter } = props
-  const kanBrukeKlage = useFeatureEnabledMedDefault(FEATURE_TOGGLE_KAN_BRUKE_KLAGE)
+  const kanBrukeKlage = useFeatureEnabledMedDefault(FEATURE_TOGGLE_KAN_BRUKE_KLAGE, false)
   return (
     <>
       <FlexRow $spacing>

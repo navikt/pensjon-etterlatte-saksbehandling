@@ -30,8 +30,8 @@ function App() {
   const innloggetbrukerHentet = useInnloggetSaksbehandler()
   registerLocale('nb', nb)
   const dispatch = useAppDispatch()
-  const kanBrukeKlage = useFeatureEnabledMedDefault(FEATURE_TOGGLE_KAN_BRUKE_KLAGE)
-  const kanBrukeOppgavebehandling = useFeatureEnabledMedDefault(FEATURE_TOGGLE_KAN_BRUKE_OPPGAVEBEHANDLING)
+  const kanBrukeKlage = useFeatureEnabledMedDefault(FEATURE_TOGGLE_KAN_BRUKE_KLAGE, false)
+  const kanBrukeOppgavebehandling = useFeatureEnabledMedDefault(FEATURE_TOGGLE_KAN_BRUKE_OPPGAVEBEHANDLING, false)
   const [hentConfigStatus, hentConfig] = useApiCall(hentClientConfig)
 
   useEffect(() => {

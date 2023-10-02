@@ -34,7 +34,7 @@ const BeskrivelseWrapper = styled.div`
 export const GosysOppgaveModal = ({ oppgave }: { oppgave: OppgaveDTOny }) => {
   const [open, setOpen] = useState(false)
   const { opprettet, frist, status, fnr, gjelder, enhet, saksbehandler, beskrivelse, sakType } = oppgave
-  const kanBrukeOppgavebehandling = useFeatureEnabledMedDefault(FEATURE_TOGGLE_KAN_BRUKE_OPPGAVEBEHANDLING)
+  const kanBrukeOppgavebehandling = useFeatureEnabledMedDefault(FEATURE_TOGGLE_KAN_BRUKE_OPPGAVEBEHANDLING, false)
 
   const configContext = useContext(ConfigContext)
 

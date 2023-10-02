@@ -2,7 +2,7 @@ import { mapSuccess, useApiCall } from '~shared/hooks/useApiCall'
 import { hentFunksjonsbrytere } from '~shared/api/feature'
 import { useEffect } from 'react'
 
-export const useFeatureEnabledMedDefault = (toggle: string, defaultValue: boolean = false): boolean => {
+export const useFeatureEnabledMedDefault = (toggle: string, defaultValue: boolean): boolean => {
   const [feature, fetchFeature] = useApiCall(hentFunksjonsbrytere)
 
   useEffect(() => {

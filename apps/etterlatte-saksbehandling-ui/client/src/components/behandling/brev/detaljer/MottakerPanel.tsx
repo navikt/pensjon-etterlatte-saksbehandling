@@ -1,4 +1,4 @@
-import { Alert, BodyShort, Heading, Panel } from '@navikt/ds-react'
+import { Alert, Heading, Panel } from '@navikt/ds-react'
 import { IBrev } from '~shared/types/Brev'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import { InfoWrapper } from '~components/behandling/soeknadsoversikt/styled'
@@ -31,13 +31,13 @@ export default function MottakerPanel({ vedtaksbrev }: { vedtaksbrev: IBrev }) {
           wide
           label="Adresse"
           tekst={
-            <BodyShort>
+            <div>
               {[adresse?.adresselinje1, adresse?.adresselinje2, adresse?.adresselinje3].join('\n')}
               <br />
               {adresse?.postnummer} {adresse?.poststed}
               <br />
               {adresse?.land} ({adresse?.landkode})
-            </BodyShort>
+            </div>
           }
         />
       </InfoWrapper>

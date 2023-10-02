@@ -271,10 +271,10 @@
   resolved "https://registry.yarnpkg.com/@types/range-parser/-/range-parser-1.2.4.tgz#cd667bcfdd025213aafb7ca5915a932590acdcdc"
   integrity sha512-EEhsLsD6UsDM1yFhAvy0Cjr6VwmpMWqFBCb9w07wVugF7w9nfajxLuVmngTIpgS6svCnm6Vaw+MZhoDCKnOfsw==
 
-"@types/request@^2.48.8":
-  version "2.48.8"
-  resolved "https://registry.yarnpkg.com/@types/request/-/request-2.48.8.tgz#0b90fde3b655ab50976cb8c5ac00faca22f5a82c"
-  integrity sha512-whjk1EDJPcAR2kYHRbFl/lKeeKYTi05A15K9bnLInCVroNDCtXce57xKdI0/rQaA3K+6q0eFyUBPmqfSndUZdQ==
+"@types/request@^2.48.9":
+  version "2.48.9"
+  resolved "https://registry.yarnpkg.com/@types/request/-/request-2.48.9.tgz#43e123e93b10bd740a298e25430de6fab7e726c2"
+  integrity sha512-4mi2hYsvPAhe8RXjk5DKB09sAUzbK68T2XjORehHdWyxFoX2zUnfi1VQ5wU4Md28H/5+uB4DkxY9BS4B87N/0A==
   dependencies:
     "@types/caseless" "*"
     "@types/node" "*"

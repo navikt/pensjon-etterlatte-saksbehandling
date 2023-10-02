@@ -277,10 +277,8 @@ internal class BehandlingServiceImpl(
 
                 val hendelserIBehandling = hendelseDao.finnHendelserIBehandling(behandlingId)
                 val kommerBarnetTilgode =
-                    inTransaction {
-                        kommerBarnetTilGodeDao.hentKommerBarnetTilGode(behandlingId)
-                            .takeIf { behandling.sak.sakType == SakType.BARNEPENSJON }
-                    }
+                    kommerBarnetTilGodeDao.hentKommerBarnetTilGode(behandlingId)
+                        .takeIf { behandling.sak.sakType == SakType.BARNEPENSJON }
                 Triple(behandling, kommerBarnetTilgode, hendelserIBehandling)
             }
 

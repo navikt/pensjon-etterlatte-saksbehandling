@@ -53,19 +53,15 @@ class GrunnlagsendringshendelseService(
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    fun hentGyldigeHendelserForSak(sakId: Long) =
-        inTransaction {
-            grunnlagsendringshendelseDao.hentGrunnlagsendringshendelserSomErSjekketAvJobb(sakId)
-        }
+    fun hentGyldigeHendelserForSak(sakId: Long) = grunnlagsendringshendelseDao.hentGrunnlagsendringshendelserSomErSjekketAvJobb(sakId)
 
-    fun hentAlleHendelserForSak(sakId: Long) =
-        inTransaction {
-            logger.info("Henter alle relevante hendelser for sak $sakId")
-            grunnlagsendringshendelseDao.hentGrunnlagsendringshendelserMedStatuserISak(
-                sakId,
-                GrunnlagsendringStatus.relevantForSaksbehandler().toList(),
-            )
-        }
+    fun hentAlleHendelserForSak(sakId: Long): List<Grunnlagsendringshendelse> {
+        logger.info("Henter alle relevante hendelser for sak $sakId")
+        return grunnlagsendringshendelseDao.hentGrunnlagsendringshendelserMedStatuserISak(
+            sakId,
+            GrunnlagsendringStatus.relevantForSaksbehandler().toList(),
+        )
+    }
 
     fun hentAlleHendelserForSakAvType(
         sakId: Long,

@@ -22,7 +22,6 @@ data class OpprettBehandling(
     val fritekstAarsak: String? = null,
     val prosesstype: Prosesstype = Prosesstype.MANUELL,
     val kilde: Vedtaksloesning,
-    val merknad: String? = null,
     val begrunnelse: String? = null,
 ) {
     val id: UUID = UUID.randomUUID()

@@ -38,12 +38,27 @@ if (isDev) {
 } else {
   app.use('/api/logg', loggerRouter)
 
+  const isEnabled = (toggle: string) => {
+    if (!unleash) {
+      return false
+    }
+    try {
+      return unleash.isEnabled(toggle, undefined, false)
+    } catch (e) {
+      logger.error({
+        message: `Fikk feilmelding fra Unleash for toggle ${toggle}, bruker defaultverdi false`,
+        error: JSON.stringify(e),
+      })
+      return false
+    }
+  }
+
   app.post('/api/feature', express.json(), (req: Request, res: Response) => {
     const toggles: string[] = req.body.features
 
     res.json(
       toggles.map((toggle) => {
-        const enabled = unleash ? unleash.isEnabled(toggle, undefined, false) : false
+        const enabled = isEnabled(toggle)
 
         logger.info(`${sanitize(toggle)} enabled: ${enabled}`)
 

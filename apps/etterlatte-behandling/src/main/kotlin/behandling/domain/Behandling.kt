@@ -153,12 +153,10 @@ sealed class Behandling {
         throw BehandlingStoetterIkkeStatusEndringException(AVKORTET)
     }
 
-    // unødvendig?
     open fun tilFattetVedtak(): Behandling {
         throw BehandlingStoetterIkkeStatusEndringException(FATTET_VEDTAK)
     }
 
-    // unødvendig?
     open fun tilAttestert(): Behandling {
         throw BehandlingStoetterIkkeStatusEndringException(ATTESTERT)
     }

@@ -32,11 +32,13 @@ internal fun Route.revurderingRoutes(revurderingService: RevurderingService) {
                         logger.info("Lagrer revurderinginfo på behandling $behandlingsId")
                         medBody<RevurderingInfoDto> {
                             val fikkLagret =
-                                revurderingService.lagreRevurderingInfo(
-                                    behandlingsId,
-                                    RevurderingMedBegrunnelse(it.info, it.begrunnelse),
-                                    navIdent,
-                                )
+                                inTransaction {
+                                    revurderingService.lagreRevurderingInfo(
+                                        behandlingsId,
+                                        RevurderingMedBegrunnelse(it.info, it.begrunnelse),
+                                        navIdent,
+                                    )
+                                }
                             if (fikkLagret) {
                                 call.respond(HttpStatusCode.NoContent)
                             } else {

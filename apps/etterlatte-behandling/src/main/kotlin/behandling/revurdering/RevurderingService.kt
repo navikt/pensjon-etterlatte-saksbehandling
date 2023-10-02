@@ -19,7 +19,6 @@ import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeServi
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseDao
-import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -184,7 +183,6 @@ class RevurderingServiceImpl(
                     mottattDato = Tidspunkt.now().toLocalDatetimeUTC().toString(),
                     prosessType = Prosesstype.MANUELL,
                     kilde = Vedtaksloesning.GJENNY,
-
                     revurderingAarsak = revurderingAarsak,
                     virkningstidspunkt = null,
                     begrunnelse = begrunnelse,
@@ -232,7 +230,6 @@ class RevurderingServiceImpl(
             mottattDato = mottattDato,
             prosessType = Prosesstype.AUTOMATISK,
             kilde = kilde,
-
             revurderingAarsak = revurderingAarsak,
             virkningstidspunkt = virkningstidspunkt?.tilVirkningstidspunkt("Opprettet automatisk"),
             begrunnelse = begrunnelse ?: "Automatisk revurdering - ${revurderingAarsak.name.lowercase()}",
@@ -248,20 +245,17 @@ class RevurderingServiceImpl(
         return behandling.status.kanEndres()
     }
 
-    // TODO flytte ut intrans her?
     override fun lagreRevurderingInfo(
         behandlingsId: UUID,
         revurderingMedBegrunnelse: RevurderingMedBegrunnelse,
         navIdent: String,
     ): Boolean {
-        return inTransaction(true) {
-            if (!kanLagreRevurderingInfo(behandlingsId)) {
-                return@inTransaction false
-            }
-            val kilde = Grunnlagsopplysning.Saksbehandler.create(navIdent)
-            revurderingDao.lagreRevurderingInfo(behandlingsId, revurderingMedBegrunnelse, kilde)
-            return@inTransaction true
+        if (!kanLagreRevurderingInfo(behandlingsId)) {
+            return false
         }
+        val kilde = Grunnlagsopplysning.Saksbehandler.create(navIdent)
+        revurderingDao.lagreRevurderingInfo(behandlingsId, revurderingMedBegrunnelse, kilde)
+        return true
     }
 
     private fun opprettRevurdering(

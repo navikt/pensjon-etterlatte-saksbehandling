@@ -390,8 +390,6 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
                     Assertions.assertEquals(HttpStatusCode.OK, status)
                 }.body<Sak>()
 
-            // Assertions.assertEquals(sak.)
-
             httpClient.post("/personer/saker/${SakType.BARNEPENSJON}") {
                 addAuthToken(tokenSaksbehandler)
                 contentType(ContentType.Application.Json)

@@ -126,10 +126,10 @@ class SakServiceImpl(
     }
 
     override fun oppdaterAdressebeskyttelse(
-        id: Long,
+        sakId: Long,
         adressebeskyttelseGradering: AdressebeskyttelseGradering,
     ): Int {
-        return dao.oppdaterAdresseBeskyttelse(id, adressebeskyttelseGradering)
+        return dao.oppdaterAdresseBeskyttelse(sakId, adressebeskyttelseGradering)
     }
 
     private fun sjekkSkjerming(

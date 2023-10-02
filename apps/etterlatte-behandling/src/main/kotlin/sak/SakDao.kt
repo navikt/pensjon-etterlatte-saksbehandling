@@ -27,14 +27,14 @@ class SakDao(private val connection: () -> Connection) {
     }
 
     fun oppdaterAdresseBeskyttelse(
-        id: Long,
+        sakId: Long,
         adressebeskyttelseGradering: AdressebeskyttelseGradering,
     ): Int {
         with(connection()) {
             val statement = prepareStatement("UPDATE sak SET adressebeskyttelse = ? where id = ?")
             statement.setString(1, adressebeskyttelseGradering.toString())
-            statement.setLong(2, id)
-            return statement.executeUpdate()
+            statement.setLong(2, sakId)
+            return statement.executeUpdate().also { require(it == 1) }
         }
     }
 

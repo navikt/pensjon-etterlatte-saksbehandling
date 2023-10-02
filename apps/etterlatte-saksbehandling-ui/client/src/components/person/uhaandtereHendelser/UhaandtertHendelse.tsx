@@ -46,7 +46,7 @@ const UhaandtertHendelse = (props: {
       <Table.ExpandableRow
         content={
           <>
-            <BodyShort spacing>
+            <BodyShort as="div" spacing>
               <HendelseBeskrivelse hendelse={hendelse} />
             </BodyShort>
 

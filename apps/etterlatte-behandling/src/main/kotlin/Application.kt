@@ -134,8 +134,7 @@ internal fun Application.module(context: ApplicationContext) {
 
             install(adressebeskyttelsePlugin) {
                 saksbehandlerGroupIdsByKey = context.saksbehandlerGroupIdsByKey
-                // TODO: hvordan få en intransaction på denne tjenesten her? call vs steget før dene må skjer før så enten en egen tjeneste for hooks eller noe annet smart
-                // problemet her er at sakdao tilgang markerer adressebeskyttelse i en intransaction etter finnelelropprettsak så den må være optiona
+
                 harTilgangBehandling = { behandlingId, saksbehandlerMedRoller ->
                     tilgangService.harTilgangTilBehandling(behandlingId, saksbehandlerMedRoller)
                 }

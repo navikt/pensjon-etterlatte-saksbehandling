@@ -85,6 +85,7 @@ class GosysOppgaveKlientImpl(config: Config, httpClient: HttpClient) : GosysOppg
 
             val filters =
                 "statuskategori=AAPEN"
+                    .plus("&limit=1000")
                     .plus("&tema=EYB")
                     .plus("&tema=EYO")
                     .plus(enhetsnr?.let { "&tildeltEnhetsnr=$it" } ?: "")

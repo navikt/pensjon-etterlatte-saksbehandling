@@ -7,12 +7,21 @@ import io.ktor.client.request.header
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.serialization.jackson.JacksonConverter
+import io.ktor.server.application.ApplicationCallPipeline
 import io.ktor.server.application.log
 import io.ktor.server.config.HoconApplicationConfig
+import io.ktor.server.routing.Route
 import io.ktor.server.testing.testApplication
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.mockk
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.asContextElement
+import kotlinx.coroutines.withContext
+import no.nav.etterlatte.Context
+import no.nav.etterlatte.DatabaseKontekst
+import no.nav.etterlatte.Kontekst
+import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.libs.common.objectMapper
@@ -31,6 +40,7 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import testsupport.buildTestApplicationConfigurationForOauth
+import java.sql.Connection
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class SakRoutesTest {
@@ -89,6 +99,39 @@ internal class SakRoutesTest {
         }
     }
 
+    private val user = mockk<SaksbehandlerMedEnheterOgRoller>()
+
+    private fun Route.attachMockContext() {
+        intercept(ApplicationCallPipeline.Call) {
+            val context1 =
+                Context(
+                    user,
+                    object : DatabaseKontekst {
+                        override fun activeTx(): Connection {
+                            throw IllegalArgumentException()
+                        }
+
+                        override fun <T> inTransaction(
+                            gjenbruk: Boolean,
+                            block: () -> T,
+                        ): T {
+                            return block()
+                        }
+                    },
+                )
+
+            withContext(
+                Dispatchers.Default +
+                    Kontekst.asContextElement(
+                        value = context1,
+                    ),
+            ) {
+                proceed()
+            }
+            Kontekst.remove()
+        }
+    }
+
     private fun withTestApplication(block: suspend (client: HttpClient) -> Unit) {
         testApplication {
             environment {
@@ -96,6 +139,7 @@ internal class SakRoutesTest {
             }
             application {
                 restModule(this.log) {
+                    attachMockContext()
                     sakSystemRoutes(
                         tilgangService,
                         sakService,

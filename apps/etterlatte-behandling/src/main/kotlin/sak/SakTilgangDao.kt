@@ -5,10 +5,13 @@ import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.libs.database.toList
 import javax.sql.DataSource
 
+/*
+    Hvis denne skal gjøre skriveoperasjoner MÅ ingen av metodene her være wrappet i en intransaction, da vil skriveoperasjonen bli overskridet av transaksjonen til intransaction
+ */
 class SakTilgangDao(private val datasource: DataSource) {
     fun finnSakerMedGraderingOgSkjerming(fnr: String): List<SakMedGraderingOgSkjermet> {
-        datasource.connection.use {
-            val statement = it.prepareStatement("SELECT id, adressebeskyttelse, erSkjermet from sak where fnr = ?")
+        datasource.connection.use { connection ->
+            val statement = connection.prepareStatement("SELECT id, adressebeskyttelse, erSkjermet from sak where fnr = ?")
             statement.setString(1, fnr)
             return statement.executeQuery().toList {
                 SakMedGraderingOgSkjermet(
@@ -31,18 +34,6 @@ class SakTilgangDao(private val datasource: DataSource) {
                     erSkjermet = getBoolean(3),
                 )
             }
-        }
-    }
-
-    fun oppdaterAdresseBeskyttelse(
-        id: Long,
-        adressebeskyttelseGradering: AdressebeskyttelseGradering,
-    ): Int {
-        datasource.connection.use {
-            val statement = it.prepareStatement("UPDATE sak SET adressebeskyttelse = ? where id = ?")
-            statement.setString(1, adressebeskyttelseGradering.toString())
-            statement.setLong(2, id)
-            return statement.executeUpdate()
         }
     }
 

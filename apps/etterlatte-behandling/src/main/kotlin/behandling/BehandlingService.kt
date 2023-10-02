@@ -12,7 +12,6 @@ import no.nav.etterlatte.behandling.domain.toStatistikkBehandling
 import no.nav.etterlatte.behandling.etterbetaling.EtterbetalingService
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.hendelse.HendelseType
-import no.nav.etterlatte.behandling.hendelse.LagretHendelse
 import no.nav.etterlatte.behandling.hendelse.registrerVedtakHendelseFelles
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
@@ -136,19 +135,15 @@ internal class BehandlingServiceImpl(
     private fun hentBehandlingerForSakId(sakId: Long) = behandlingDao.alleBehandlingerISak(sakId).filterForEnheter()
 
     override fun hentBehandling(behandlingId: UUID): Behandling? {
-        return inTransaction {
-            hentBehandlingForId(behandlingId)
-        }
+        return hentBehandlingForId(behandlingId)
     }
 
     override fun hentBehandlingerISak(sakId: Long): List<Behandling> {
-        return inTransaction {
-            hentBehandlingerForSakId(sakId)
-        }
+        return hentBehandlingerForSakId(sakId)
     }
 
     override fun hentSisteIverksatte(sakId: Long): Behandling? {
-        return inTransaction { hentBehandlingerForSakId(sakId) }
+        return hentBehandlingerForSakId(sakId)
             .filter { BehandlingStatus.iverksattEllerAttestert().contains(it.status) }
             .maxByOrNull { it.behandlingOpprettet }
     }
@@ -195,7 +190,7 @@ internal class BehandlingServiceImpl(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): StatistikkBehandling? {
-        return hentBehandling(behandlingId)?.let {
+        return inTransaction { hentBehandling(behandlingId) }?.let {
             val persongalleri: Persongalleri =
                 grunnlagKlient.hentPersongalleri(it.sak.id, brukerTokenInfo)
                     ?.opplysning
@@ -209,7 +204,7 @@ internal class BehandlingServiceImpl(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): DetaljertBehandling? {
-        return hentBehandling(behandlingId)?.let {
+        return inTransaction { hentBehandling(behandlingId) }?.let {
             val persongalleri: Persongalleri =
                 grunnlagKlient.hentPersongalleri(it.sak.id, brukerTokenInfo)
                     ?.opplysning
@@ -224,7 +219,7 @@ internal class BehandlingServiceImpl(
         brukerTokenInfo: BrukerTokenInfo,
         opplysningstype: Opplysningstype,
     ): BehandlingMedGrunnlagsopplysninger<Person> {
-        val behandling = requireNotNull(hentBehandling(behandlingId))
+        val behandling = requireNotNull(inTransaction { hentBehandling(behandlingId) })
         val personopplysning = grunnlagKlient.finnPersonOpplysning(behandling.sak.id, opplysningstype, brukerTokenInfo)
 
         return BehandlingMedGrunnlagsopplysninger(
@@ -274,15 +269,17 @@ internal class BehandlingServiceImpl(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): DetaljertBehandlingDto {
-        val behandling =
-            hentBehandling(behandlingId)
-                ?: throw BehandlingFinnesIkkeException("Vi kan ikke hente behandling $behandlingId, sjekk enhet")
-
-        val hendelserIBehandling = hentHendelserIBehandling(behandlingId)
-        val kommerBarnetTilgode =
+        val (behandling, kommerBarnetTilgode, hendelserIBehandling) =
             inTransaction {
-                kommerBarnetTilGodeDao.hentKommerBarnetTilGode(behandlingId)
-                    .takeIf { behandling.sak.sakType == SakType.BARNEPENSJON }
+                val behandling =
+                    hentBehandling(behandlingId)
+                        ?: throw BehandlingFinnesIkkeException("Vi kan ikke hente behandling $behandlingId, sjekk enhet")
+
+                val hendelserIBehandling = hendelseDao.finnHendelserIBehandling(behandlingId)
+                val kommerBarnetTilgode =
+                    kommerBarnetTilGodeDao.hentKommerBarnetTilGode(behandlingId)
+                        .takeIf { behandling.sak.sakType == SakType.BARNEPENSJON }
+                Triple(behandling, kommerBarnetTilgode, hendelserIBehandling)
             }
 
         val sakId = behandling.sak.id
@@ -393,10 +390,8 @@ internal class BehandlingServiceImpl(
         try {
             behandling.oppdaterVirkningstidspunkt(virkningstidspunkt)
                 .also {
-                    inTransaction {
-                        behandlingDao.lagreNyttVirkningstidspunkt(behandlingId, virkningstidspunkt)
-                        behandlingDao.lagreStatus(it)
-                    }
+                    behandlingDao.lagreNyttVirkningstidspunkt(behandlingId, virkningstidspunkt)
+                    behandlingDao.lagreStatus(it)
                 }
         } catch (e: NotImplementedError) {
             logger.error(
@@ -422,10 +417,8 @@ internal class BehandlingServiceImpl(
         try {
             behandling.oppdaterUtenlandstilsnitt(utenlandstilsnitt)
                 .also {
-                    inTransaction {
-                        behandlingDao.lagreUtenlandstilsnitt(behandlingId, utenlandstilsnitt)
-                        behandlingDao.lagreStatus(it)
-                    }
+                    behandlingDao.lagreUtenlandstilsnitt(behandlingId, utenlandstilsnitt)
+                    behandlingDao.lagreStatus(it)
                 }
         } catch (e: NotImplementedError) {
             logger.error(
@@ -451,10 +444,8 @@ internal class BehandlingServiceImpl(
         try {
             behandling.oppdaterBoddEllerArbeidetUtlandnet(boddEllerArbeidetUtlandet)
                 .also {
-                    inTransaction {
-                        behandlingDao.lagreBoddEllerArbeidetUtlandet(behandlingId, boddEllerArbeidetUtlandet)
-                        behandlingDao.lagreStatus(it)
-                    }
+                    behandlingDao.lagreBoddEllerArbeidetUtlandet(behandlingId, boddEllerArbeidetUtlandet)
+                    behandlingDao.lagreStatus(it)
                 }
         } catch (e: NotImplementedError) {
             logger.error(
@@ -462,12 +453,6 @@ internal class BehandlingServiceImpl(
                 e,
             )
             throw e
-        }
-    }
-
-    private fun hentHendelserIBehandling(behandlingId: UUID): List<LagretHendelse> {
-        return inTransaction {
-            hendelseDao.finnHendelserIBehandling(behandlingId)
         }
     }
 

@@ -23,6 +23,7 @@ import no.nav.etterlatte.foerstegangsbehandling
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlagsOpplysningMedPersonopplysning
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseDao
+import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
@@ -688,14 +689,16 @@ class BehandlingServiceImplTest {
                 etterbetalingService = mockk(),
             )
 
-        sut.oppdaterUtenlandstilsnitt(
-            uuid,
-            Utenlandstilsnitt(
-                UtenlandstilsnittType.BOSATT_UTLAND,
-                Grunnlagsopplysning.Saksbehandler.create("ident"),
-                "Test",
-            ),
-        )
+        inTransaction {
+            sut.oppdaterUtenlandstilsnitt(
+                uuid,
+                Utenlandstilsnitt(
+                    UtenlandstilsnittType.BOSATT_UTLAND,
+                    Grunnlagsopplysning.Saksbehandler.create("ident"),
+                    "Test",
+                ),
+            )
+        }
 
         assertEquals(UtenlandstilsnittType.BOSATT_UTLAND, slot.captured.type)
         assertEquals("Test", slot.captured.begrunnelse)
@@ -743,14 +746,16 @@ class BehandlingServiceImplTest {
                 etterbetalingService = mockk(),
             )
 
-        sut.oppdaterBoddEllerArbeidetUtlandet(
-            uuid,
-            BoddEllerArbeidetUtlandet(
-                true,
-                Grunnlagsopplysning.Saksbehandler.create("ident"),
-                "Test",
-            ),
-        )
+        inTransaction {
+            sut.oppdaterBoddEllerArbeidetUtlandet(
+                uuid,
+                BoddEllerArbeidetUtlandet(
+                    true,
+                    Grunnlagsopplysning.Saksbehandler.create("ident"),
+                    "Test",
+                ),
+            )
+        }
 
         assertEquals(true, slot.captured.boddEllerArbeidetUtlandet)
         assertEquals("Test", slot.captured.begrunnelse)

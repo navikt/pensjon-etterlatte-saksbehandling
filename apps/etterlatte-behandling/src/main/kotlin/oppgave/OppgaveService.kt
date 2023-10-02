@@ -98,20 +98,18 @@ class OppgaveService(
         oppgaveId: UUID,
         saksbehandler: String,
     ) {
-        inTransaction(gjenbruk = true) {
-            val hentetOppgave =
-                oppgaveDao.hentOppgave(oppgaveId)
-                    ?: throw NotFoundException("Oppgaven finnes ikke, id: $oppgaveId")
+        val hentetOppgave =
+            oppgaveDao.hentOppgave(oppgaveId)
+                ?: throw NotFoundException("Oppgaven finnes ikke, id: $oppgaveId")
 
-            sikreAtOppgaveIkkeErAvsluttet(hentetOppgave)
-            hentetOppgave.erAttestering() && sjekkOmkanTildeleAttestantOppgave()
-            if (hentetOppgave.saksbehandler.isNullOrEmpty()) {
-                oppgaveDao.settNySaksbehandler(oppgaveId, saksbehandler)
-            } else {
-                throw BadRequestException(
-                    "Oppgaven har allerede en saksbehandler, id: $oppgaveId",
-                )
-            }
+        sikreAtOppgaveIkkeErAvsluttet(hentetOppgave)
+        hentetOppgave.erAttestering() && sjekkOmkanTildeleAttestantOppgave()
+        if (hentetOppgave.saksbehandler.isNullOrEmpty()) {
+            oppgaveDao.settNySaksbehandler(oppgaveId, saksbehandler)
+        } else {
+            throw BadRequestException(
+                "Oppgaven har allerede en saksbehandler, id: $oppgaveId",
+            )
         }
     }
 
@@ -230,16 +228,14 @@ class OppgaveService(
         sakId: Long,
         enhetsID: String,
     ) {
-        inTransaction {
-            val oppgaverForSak = oppgaveDao.hentOppgaverForSak(sakId)
-            oppgaverForSak.forEach {
-                oppgaveDao.endreEnhetPaaOppgave(it.id, enhetsID)
-            }
+        val oppgaverForSak = oppgaveDao.hentOppgaverForSak(sakId)
+        oppgaverForSak.forEach {
+            oppgaveDao.endreEnhetPaaOppgave(it.id, enhetsID)
         }
     }
 
     fun hentOppgaverForSak(sakId: Long): List<OppgaveIntern> {
-        return inTransaction { oppgaveDao.hentOppgaverForSak(sakId) }
+        return oppgaveDao.hentOppgaverForSak(sakId)
     }
 
     fun hentOppgaverForReferanse(referanse: String): List<OppgaveIntern> {
@@ -404,10 +400,17 @@ class OppgaveService(
             }
     }
 
-    fun hentSakOgOppgaverForSak(sakId: Long) =
-        inTransaction { sakDao.hentSak(sakId)!! }
-            .let { OppgaveListe(it, hentOppgaverForSak(it.id)) }
+    fun hentSakOgOppgaverForSak(sakId: Long): OppgaveListe {
+        val sak = sakDao.hentSak(sakId)
+        if (sak != null) {
+            return OppgaveListe(sak, hentOppgaverForSak(sak.id))
+        } else {
+            throw FantIkkeSakException("Fant ikke sakid $sakId")
+        }
+    }
 }
+
+class FantIkkeSakException(msg: String) : Exception(msg)
 
 fun List<OppgaveIntern>.filterOppgaverForEnheter(
     featureToggleService: FeatureToggleService,

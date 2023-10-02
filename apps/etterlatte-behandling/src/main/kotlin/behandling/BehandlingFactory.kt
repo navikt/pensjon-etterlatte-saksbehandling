@@ -51,12 +51,14 @@ class BehandlingFactory(
     fun opprettSakOgBehandlingForOppgave(request: NyBehandlingRequest): Behandling {
         val soeker = request.persongalleri.soeker
 
-        val sak = sakService.finnEllerOpprettSak(soeker, request.sakType)
+        val sak = inTransaction { sakService.finnEllerOpprettSak(soeker, request.sakType) }
 
         val behandling =
-            opprettBehandling(
-                sak.id, request.persongalleri, request.mottattDato, Vedtaksloesning.GJENNY,
-            ) ?: throw IllegalStateException("Kunne ikke opprette behandling")
+            inTransaction {
+                opprettBehandling(
+                    sak.id, request.persongalleri, request.mottattDato, Vedtaksloesning.GJENNY,
+                ) ?: throw IllegalStateException("Kunne ikke opprette behandling")
+            }
 
         val gyldighetsvurdering =
             GyldighetsResultat(
@@ -88,19 +90,19 @@ class BehandlingFactory(
         kilde: Vedtaksloesning,
     ): Behandling? {
         logger.info("Starter behandling i sak $sakId")
+
         val sak =
-            inTransaction { sakService.finnSak(sakId) }.let {
+            sakService.finnSak(sakId).let {
                 requireNotNull(it) { "Fant ingen sak med id=$sakId!" }
             }
         val harBehandlingerForSak =
-            inTransaction {
-                behandlingDao.alleBehandlingerISak(sak.id)
-            }
+            behandlingDao.alleBehandlingerISak(sak.id)
 
         val harIverksattEllerAttestertBehandling =
             harBehandlingerForSak.filter { behandling ->
                 BehandlingStatus.iverksattEllerAttestert().find { it == behandling.status } != null
             }
+
         return if (harIverksattEllerAttestertBehandling.isNotEmpty()) {
             val forrigeBehandling = harIverksattEllerAttestertBehandling.maxBy { it.behandlingOpprettet }
             revurderingService.opprettAutomatiskRevurdering(
@@ -127,37 +129,36 @@ class BehandlingFactory(
         mottattDato: String?,
         kilde: Vedtaksloesning,
     ): Behandling? {
-        return inTransaction {
-            harBehandlingUnderbehandling.forEach {
-                behandlingDao.lagreStatus(it.id, BehandlingStatus.AVBRUTT, LocalDateTime.now())
-                oppgaveService.avbrytAapneOppgaverForBehandling(it.id.toString())
-            }
+        harBehandlingUnderbehandling.forEach {
+            behandlingDao.lagreStatus(it.id, BehandlingStatus.AVBRUTT, LocalDateTime.now())
+            oppgaveService.avbrytAapneOppgaverForBehandling(it.id.toString())
+        }
 
-            OpprettBehandling(
-                type = BehandlingType.FØRSTEGANGSBEHANDLING,
-                sakId = sak.id,
-                status = BehandlingStatus.OPPRETTET,
-                soeknadMottattDato = mottattDato?.let { LocalDateTime.parse(it) },
-                kilde = kilde,
-            ).let { opprettBehandling ->
-                behandlingDao.opprettBehandling(opprettBehandling)
-                hendelseDao.behandlingOpprettet(opprettBehandling.toBehandlingOpprettet())
+        return OpprettBehandling(
+            type = BehandlingType.FØRSTEGANGSBEHANDLING,
+            sakId = sak.id,
+            status = BehandlingStatus.OPPRETTET,
+            soeknadMottattDato = mottattDato?.let { LocalDateTime.parse(it) },
+            kilde = kilde,
 
-                logger.info("Opprettet behandling ${opprettBehandling.id} i sak ${opprettBehandling.sakId}")
+        ).let { opprettBehandling ->
+            behandlingDao.opprettBehandling(opprettBehandling)
+            hendelseDao.behandlingOpprettet(opprettBehandling.toBehandlingOpprettet())
 
-                behandlingDao.hentBehandling(opprettBehandling.id)?.sjekkEnhet()
-            }.also { behandling ->
-                behandling?.let {
-                    grunnlagService.leggInnNyttGrunnlag(it, persongalleri)
-                    oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(
-                        referanse = behandling.id.toString(),
-                        sakId = sak.id,
-                    )
-                    behandlingHendelser.sendMeldingForHendelseMedDetaljertBehandling(
-                        it.toStatistikkBehandling(persongalleri),
-                        BehandlingHendelseType.OPPRETTET,
-                    )
-                }
+            logger.info("Opprettet behandling ${opprettBehandling.id} i sak ${opprettBehandling.sakId}")
+
+            behandlingDao.hentBehandling(opprettBehandling.id)?.sjekkEnhet()
+        }.also { behandling ->
+            behandling?.let {
+                grunnlagService.leggInnNyttGrunnlag(it, persongalleri)
+                oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(
+                    referanse = behandling.id.toString(),
+                    sakId = sak.id,
+                )
+                behandlingHendelser.sendMeldingForHendelseMedDetaljertBehandling(
+                    it.toStatistikkBehandling(persongalleri),
+                    BehandlingHendelseType.OPPRETTET,
+                )
             }
         }
     }

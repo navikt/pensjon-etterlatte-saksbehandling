@@ -21,6 +21,7 @@ import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeServi
 import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerAarsak
 import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerRequest
 import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerService
+import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingsBehov
@@ -75,11 +76,13 @@ internal fun Route.behandlingRoutes(
                 val body = call.receive<JaNeiMedBegrunnelse>()
                 when (
                     val lagretGyldighetsResultat =
-                        gyldighetsproevingService.lagreGyldighetsproeving(
-                            behandlingsId,
-                            navIdent,
-                            body,
-                        )
+                        inTransaction {
+                            gyldighetsproevingService.lagreGyldighetsproeving(
+                                behandlingsId,
+                                navIdent,
+                                body,
+                            )
+                        }
                 ) {
                     null -> call.respond(HttpStatusCode.NotFound)
                     else -> call.respond(HttpStatusCode.OK, lagretGyldighetsResultat)
@@ -99,7 +102,7 @@ internal fun Route.behandlingRoutes(
                     )
 
                 try {
-                    kommerBarnetTilGodeService.lagreKommerBarnetTilgode(kommerBarnetTilgode)
+                    inTransaction { kommerBarnetTilGodeService.lagreKommerBarnetTilgode(kommerBarnetTilgode) }
                     call.respond(HttpStatusCode.OK, kommerBarnetTilgode)
                 } catch (e: TilstandException.UgyldigTilstand) {
                     call.respond(HttpStatusCode.BadRequest, "Kunne ikke endre på feltet")
@@ -152,12 +155,14 @@ internal fun Route.behandlingRoutes(
 
                 try {
                     val virkningstidspunkt =
-                        behandlingService.oppdaterVirkningstidspunkt(
-                            behandlingsId,
-                            body.dato,
-                            navIdent,
-                            body.begrunnelse!!,
-                        )
+                        inTransaction {
+                            behandlingService.oppdaterVirkningstidspunkt(
+                                behandlingsId,
+                                body.dato,
+                                navIdent,
+                                body.begrunnelse!!,
+                            )
+                        }
 
                     call.respondText(
                         contentType = ContentType.Application.Json,
@@ -183,7 +188,9 @@ internal fun Route.behandlingRoutes(
                             begrunnelse = body.begrunnelse,
                         )
 
-                    behandlingService.oppdaterUtenlandstilsnitt(behandlingsId, utenlandstilsnitt)
+                    inTransaction {
+                        behandlingService.oppdaterUtenlandstilsnitt(behandlingsId, utenlandstilsnitt)
+                    }
 
                     call.respondText(
                         contentType = ContentType.Application.Json,
@@ -215,10 +222,12 @@ internal fun Route.behandlingRoutes(
                             skalSendeKravpakke = body.skalSendeKravpakke,
                         )
 
-                    behandlingService.oppdaterBoddEllerArbeidetUtlandet(
-                        behandlingsId,
-                        boddEllerArbeidetUtlandet,
-                    )
+                    inTransaction {
+                        behandlingService.oppdaterBoddEllerArbeidetUtlandet(
+                            behandlingsId,
+                            boddEllerArbeidetUtlandet,
+                        )
+                    }
 
                     call.respondText(
                         contentType = ContentType.Application.Json,
@@ -280,12 +289,14 @@ internal fun Route.behandlingRoutes(
 
                 when (
                     val behandling =
-                        behandlingFactory.opprettBehandling(
-                            behandlingsBehov.sakId,
-                            behandlingsBehov.persongalleri,
-                            behandlingsBehov.mottattDato,
-                            Vedtaksloesning.GJENNY,
-                        )
+                        inTransaction {
+                            behandlingFactory.opprettBehandling(
+                                behandlingsBehov.sakId,
+                                behandlingsBehov.persongalleri,
+                                behandlingsBehov.mottattDato,
+                                Vedtaksloesning.GJENNY,
+                            )
+                        }
                 ) {
                     null -> call.respond(HttpStatusCode.NotFound)
                     else -> call.respondText(behandling.id.toString())

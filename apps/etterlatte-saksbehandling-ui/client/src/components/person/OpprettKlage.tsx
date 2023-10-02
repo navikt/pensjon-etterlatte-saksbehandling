@@ -18,7 +18,7 @@ export function OpprettKlage(props: { sakId: number }) {
     })
   }
 
-  const kanBrukeKlage = useFeatureEnabledMedDefault(FEATURE_TOGGLE_KAN_BRUKE_KLAGE)
+  const kanBrukeKlage = useFeatureEnabledMedDefault(FEATURE_TOGGLE_KAN_BRUKE_KLAGE, false)
 
   if (!kanBrukeKlage) {
     return null

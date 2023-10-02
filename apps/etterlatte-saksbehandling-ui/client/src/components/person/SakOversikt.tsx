@@ -20,7 +20,7 @@ import { KlageListe } from '~components/person/KlageListe'
 export const FEATURE_TOGGLE_KAN_BRUKE_GENERELL_BEHANDLING = 'pensjon-etterlatte.kan-bruke-generell-behandling'
 export const SakOversikt = ({ fnr }: { fnr: string }) => {
   const [sak, setSak] = useState<ISak>()
-  const skalBrukeKlage = useFeatureEnabledMedDefault(FEATURE_TOGGLE_KAN_BRUKE_KLAGE)
+  const skalBrukeKlage = useFeatureEnabledMedDefault(FEATURE_TOGGLE_KAN_BRUKE_KLAGE, false)
   const [behandlingerStatus, hentBehandlinger] = useApiCall(hentBehandlingerForPerson)
   const kanBrukeGenerllBehandling = useFeatureEnabledMedDefault(FEATURE_TOGGLE_KAN_BRUKE_GENERELL_BEHANDLING, false)
 

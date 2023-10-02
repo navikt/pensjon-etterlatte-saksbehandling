@@ -10,7 +10,6 @@ import { NesteOgTilbake } from '~components/behandling/handlinger/NesteOgTilbake
 import { hentBehandlesFraStatus } from '~components/behandling/felles/utils'
 import { useBehandlingRoutes } from '~components/behandling/BehandlingRoutes'
 import { isFailure, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
-import { hentFunksjonsbrytere } from '~shared/api/feature'
 import { hentVilkaarsvurdering } from '~shared/api/vilkaarsvurdering'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { useEffect, useState } from 'react'
@@ -18,18 +17,18 @@ import FastTrygdetid from '~components/behandling/trygdetid/FastTrygdetid'
 import YrkesskadeTrygdetidBP from '~components/behandling/trygdetid/YrkesskadeTrygdetidBP'
 import YrkesskadeTrygdetidOMS from '~components/behandling/trygdetid/YrkesskadeTrygdetidOMS'
 import { Trygdetid } from '~components/behandling/trygdetid/Trygdetid'
+import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
+
+const featureToggleNameTrygdetid = 'pensjon-etterlatte.bp-bruk-faktisk-trygdetid' as const
 
 const TrygdetidVisning = (props: { behandling: IDetaljertBehandling }) => {
   const { behandling } = props
   const behandles = hentBehandlesFraStatus(behandling.status)
   const { next } = useBehandlingRoutes()
-  const [funksjonsbrytere, postHentFunksjonsbrytere] = useApiCall(hentFunksjonsbrytere)
-  const [beregnTrygdetid, setBeregnTrygdetid] = useState<boolean>(false)
   const [vilkaarsvurdering, getVilkaarsvurdering] = useApiCall(hentVilkaarsvurdering)
   const [yrkesskadeTrygdetid, setYrkesskadeTrygdetid] = useState<boolean>(false)
 
-  const featureToggleNameTrygdetid = 'pensjon-etterlatte.bp-bruk-faktisk-trygdetid'
-
+  const beregnTrygdetid = useFeatureEnabledMedDefault(featureToggleNameTrygdetid, false)
   const vedtaksresultat =
     behandling.behandlingType !== IBehandlingsType.MANUELT_OPPHOER ? useVedtaksResultat() : 'opphoer'
   const virkningstidspunkt = behandling.virkningstidspunkt?.dato
@@ -37,16 +36,8 @@ const TrygdetidVisning = (props: { behandling: IDetaljertBehandling }) => {
     : undefined
 
   useEffect(() => {
-    postHentFunksjonsbrytere([featureToggleNameTrygdetid], (brytere) => {
-      const trygdetidBryter = brytere.find((bryter) => bryter.toggle === featureToggleNameTrygdetid)
-
-      if (trygdetidBryter) {
-        setBeregnTrygdetid(trygdetidBryter.enabled)
-
-        getVilkaarsvurdering(behandling.id, (vurdering) => {
-          setYrkesskadeTrygdetid(vurdering.isYrkesskade)
-        })
-      }
+    getVilkaarsvurdering(behandling.id, (vurdering) => {
+      setYrkesskadeTrygdetid(vurdering.isYrkesskade)
     })
   }, [])
 
@@ -62,8 +53,7 @@ const TrygdetidVisning = (props: { behandling: IDetaljertBehandling }) => {
           </BodyShort>
         </HeadingWrapper>
       </ContentHeader>
-      {isSuccess(funksjonsbrytere) &&
-        isSuccess(vilkaarsvurdering) &&
+      {isSuccess(vilkaarsvurdering) &&
         (yrkesskadeTrygdetid ? (
           {
             [SakType.BARNEPENSJON]: <YrkesskadeTrygdetidBP />,
@@ -76,7 +66,6 @@ const TrygdetidVisning = (props: { behandling: IDetaljertBehandling }) => {
         ))}
 
       {isFailure(vilkaarsvurdering) && <ApiErrorAlert>Kunne ikke hente vilkaarsvurdering</ApiErrorAlert>}
-      {isFailure(funksjonsbrytere) && <ApiErrorAlert>Kunne ikke hente funksjonsbrytere</ApiErrorAlert>}
 
       {behandles ? (
         <BehandlingHandlingKnapper>

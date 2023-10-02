@@ -199,20 +199,22 @@ class RealGrunnlagService(
                         },
                     )
                 val innsender =
-                    persongalleri.innsender?.let { innsenderFnr ->
-                        Pair(
-                            async {
-                                pdltjenesterKlient.hentPerson(innsenderFnr, PersonRolle.INNSENDER, opplysningsbehov.sakType)
-                            },
-                            async {
-                                pdltjenesterKlient.hentOpplysningsperson(
-                                    innsenderFnr,
-                                    PersonRolle.INNSENDER,
-                                    opplysningsbehov.sakType,
-                                )
-                            },
-                        )
-                    }
+                    persongalleri.innsender
+                        ?.takeIf { it != Vedtaksloesning.PESYS.name }
+                        ?.let { innsenderFnr ->
+                            Pair(
+                                async {
+                                    pdltjenesterKlient.hentPerson(innsenderFnr, PersonRolle.INNSENDER, opplysningsbehov.sakType)
+                                },
+                                async {
+                                    pdltjenesterKlient.hentOpplysningsperson(
+                                        innsenderFnr,
+                                        PersonRolle.INNSENDER,
+                                        opplysningsbehov.sakType,
+                                    )
+                                },
+                            )
+                        }
                 val innsenderPersonInfo =
                     innsender?.let { (person, personDTO) ->
                         GrunnlagsopplysningerPersonPdl(

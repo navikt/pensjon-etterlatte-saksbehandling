@@ -98,7 +98,7 @@ data class InnvilgetBrevDataOMS(
 data class InnvilgetBrevDataEnkel(
     val utbetalingsinfo: Utbetalingsinfo,
     val avdoed: Avdoed,
-    val erEtterbetalingMerEnnTreMaaneder: Boolean,
+    val erEtterbetaling: Boolean,
     val vedtaksdato: LocalDate,
     val erInstitusjonsopphold: Boolean,
 ) : BrevData() {
@@ -107,7 +107,7 @@ data class InnvilgetBrevDataEnkel(
             InnvilgetBrevDataEnkel(
                 utbetalingsinfo = behandling.utbetalingsinfo,
                 avdoed = behandling.personerISak.avdoed,
-                erEtterbetalingMerEnnTreMaaneder = behandling.etterbetalingDTO != null,
+                erEtterbetaling = behandling.etterbetalingDTO != null,
                 vedtaksdato =
                     behandling.vedtak.vedtaksdato
                         ?: LocalDate.now(),

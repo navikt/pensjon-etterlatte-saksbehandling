@@ -13,8 +13,11 @@ export const opprettBrevForSak = async (sakId: number): Promise<ApiResponse<IBre
 export const hentVedtaksbrev = async (behandlingId: string): Promise<ApiResponse<IBrev>> =>
   apiClient.get(`/brev/behandling/${behandlingId}/vedtak`)
 
-export const opprettVedtaksbrev = async (sakId: number, behandlingId: string): Promise<ApiResponse<IBrev>> =>
-  apiClient.post(`/brev/behandling/${behandlingId}/vedtak?sakId=${sakId}`, {})
+export const ferdigstillVedtaksbrev = async (behandlingId: string): Promise<ApiResponse<IBrev>> =>
+  apiClient.post(`/brev/behandling/${behandlingId}/vedtak/ferdigstill`, {})
+
+export const opprettVedtaksbrev = async (args: { sakId: number; behandlingId: string }): Promise<ApiResponse<IBrev>> =>
+  apiClient.post(`/brev/behandling/${args.behandlingId}/vedtak?sakId=${args.sakId}`, {})
 
 export const oppdaterMottaker = async (props: {
   brevId: number

@@ -1,9 +1,11 @@
 package no.nav.etterlatte.rivers
 
+import io.mockk.Runs
 import io.mockk.clearMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.confirmVerified
+import io.mockk.just
 import io.mockk.mockk
 import no.nav.etterlatte.brev.VedtaksbrevService
 import no.nav.etterlatte.brev.model.Brev
@@ -56,11 +58,13 @@ internal class OpprettVedtaksbrevForMigreringTest {
 
         coEvery { vedtaksbrevService.opprettVedtaksbrev(any(), behandlingId, any()) } returns brev
         coEvery { vedtaksbrevService.genererPdf(brev.id, any()) } returns mockk<Pdf>()
+        coEvery { vedtaksbrevService.ferdigstillVedtaksbrev(brev.behandlingId!!, any()) } just Runs
 
         val inspektoer = testRapid.apply { sendTestMessage(melding.toJson()) }.inspektør
 
         coVerify(exactly = 1) { vedtaksbrevService.opprettVedtaksbrev(any(), behandlingId, any()) }
         coVerify(exactly = 1) { vedtaksbrevService.genererPdf(brev.id, any()) }
+        coVerify(exactly = 1) { vedtaksbrevService.ferdigstillVedtaksbrev(brev.behandlingId!!, any()) }
 
         val meldingSendt = inspektoer.message(0)
         assertEquals(BrevEventTypes.FERDIGSTILT.name, meldingSendt.get(EVENT_NAME_KEY).asText())

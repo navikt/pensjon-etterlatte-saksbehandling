@@ -49,6 +49,7 @@ internal class OpprettVedtaksbrevForMigrering(
             runBlocking {
                 val vedtaksbrev: Brev = service.opprettVedtaksbrev(sakId, behandlingId, brukerTokenInfo)
                 service.genererPdf(vedtaksbrev.id, brukerTokenInfo)
+                service.ferdigstillVedtaksbrev(vedtaksbrev.behandlingId!!, brukerTokenInfo)
             }
             logger.info("Har oppretta vedtaksbrev i sak $sakId")
         } else {

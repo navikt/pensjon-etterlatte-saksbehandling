@@ -158,6 +158,29 @@ class BrevRepository(private val ds: DataSource) {
         }
     }
 
+    fun lagrePdf(
+        id: BrevID,
+        pdf: Pdf,
+    ) {
+        using(sessionOf(ds)) {
+            it.run(
+                queryOf(
+                    OPPRETT_PDF_QUERY,
+                    mapOf(
+                        "brev_id" to id,
+                        "bytes" to pdf.bytes,
+                    ),
+                ).asUpdate,
+            ).also { oppdatert -> require(oppdatert == 1) }
+        }
+    }
+
+    fun settBrevFerdigstilt(id: BrevID) {
+        using(sessionOf(ds)) {
+            it.lagreHendelse(id, Status.FERDIGSTILT)
+        }
+    }
+
     fun opprettBrev(ulagretBrev: OpprettNyttBrev): Brev =
         ds.transaction(true) { tx ->
             val id =
@@ -403,6 +426,7 @@ class BrevRepository(private val ds: DataSource) {
         const val OPPRETT_PDF_QUERY = """
             INSERT INTO pdf (brev_id, bytes) 
             VALUES (:brev_id, :bytes)
+            ON CONFLICT (brev_id) DO UPDATE SET bytes = :bytes
         """
 
         const val OPPDATER_INNHOLD_PAYLOAD = """

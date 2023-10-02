@@ -17,9 +17,11 @@ import io.ktor.server.config.HoconApplicationConfig
 import io.ktor.server.testing.ApplicationTestBuilder
 import io.ktor.server.testing.testApplication
 import io.mockk.Called
+import io.mockk.Runs
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
+import io.mockk.just
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.etterlatte.brev.behandlingklient.BehandlingKlient
@@ -139,6 +141,7 @@ internal class VedtaksbrevRouteTest {
     fun `Endepunkt for generering av pdf`() {
         val brevId = Random.nextLong()
         val pdf = Pdf("Hello world".toByteArray())
+
         coEvery { vedtaksbrevService.genererPdf(any(), any()) } returns pdf
         coEvery { behandlingKlient.harTilgangTilBehandling(any(), any()) } returns true
 
@@ -158,6 +161,29 @@ internal class VedtaksbrevRouteTest {
 
         coVerify(exactly = 1) {
             vedtaksbrevService.genererPdf(brevId, any())
+            behandlingKlient.harTilgangTilBehandling(any(), any())
+        }
+    }
+
+    @Test
+    fun `Endepunkt for ferdigstilling av vedtaksbrev`() {
+        coEvery { vedtaksbrevService.ferdigstillVedtaksbrev(any(), any()) } just Runs
+        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any()) } returns true
+
+        testApplication {
+            val client = httpClient()
+
+            val response =
+                client.post("/api/brev/behandling/$BEHANDLING_ID/vedtak/ferdigstill") {
+                    header(HttpHeaders.Authorization, "Bearer $accessToken")
+                    contentType(ContentType.Application.Json)
+                }
+
+            assertEquals(HttpStatusCode.OK, response.status)
+        }
+
+        coVerify(exactly = 1) {
+            vedtaksbrevService.ferdigstillVedtaksbrev(BEHANDLING_ID, any())
             behandlingKlient.harTilgangTilBehandling(any(), any())
         }
     }

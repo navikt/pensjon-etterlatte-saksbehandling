@@ -28,13 +28,16 @@ import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BarnepensjonSoeskenjusteringGrunn
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
+import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.Status
+import no.nav.etterlatte.libs.common.oppgave.VedtakOppgaveDTO
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
@@ -631,7 +634,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
     }
 
     @Test
-    fun `Kan ikke opprette ny manuell revurdering hvis det finnes en oppgave under behandling for sak`() {
+    fun `Kan ikke opprette ny manuell revurdering hvis det finnes en oppgave under behandling for sak med oppgavekilde behandling`() {
         val revurderingService =
             RevurderingServiceImpl(
                 applicationContext.oppgaveService,
@@ -671,5 +674,98 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
                 saksbehandler = Saksbehandler("", "saksbehandler", null),
             )
         }
+    }
+
+    @Test
+    fun `Kan opprette revurdering hvis en oppgave er under behandling med en annen oppgavekilde enn BEHANDLING`() {
+        val revurderingService =
+            RevurderingServiceImpl(
+                applicationContext.oppgaveService,
+                applicationContext.grunnlagsService,
+                applicationContext.behandlingsHendelser,
+                applicationContext.featureToggleService,
+                applicationContext.behandlingDao,
+                applicationContext.hendelseDao,
+                applicationContext.grunnlagsendringshendelseDao,
+                applicationContext.kommerBarnetTilGodeService,
+                applicationContext.revurderingDao,
+                applicationContext.behandlingService,
+            )
+        val behandlingFactory =
+            BehandlingFactory(
+                oppgaveService = applicationContext.oppgaveService,
+                grunnlagService = applicationContext.grunnlagsService,
+                revurderingService = applicationContext.revurderingService,
+                gyldighetsproevingService = applicationContext.gyldighetsproevingService,
+                sakService = applicationContext.sakService,
+                behandlingDao = applicationContext.behandlingDao,
+                hendelseDao = applicationContext.hendelseDao,
+                behandlingHendelser = applicationContext.behandlingsHendelser,
+                featureToggleService = applicationContext.featureToggleService,
+            )
+
+        val (sak, behandling) = opprettSakMedFoerstegangsbehandling(fnr, behandlingFactory)
+        val nonNullBehandling = behandling!!
+        val hentOppgaverForSak = applicationContext.oppgaveService.hentOppgaverForSak(sak.id)
+        val oppgaveForFoerstegangsbehandling = hentOppgaverForSak.single { it.status == Status.NY }
+
+        val saksbehandler = "saksbehandler"
+        applicationContext.oppgaveService.tildelSaksbehandler(oppgaveForFoerstegangsbehandling.id, saksbehandler)
+        inTransaction {
+            applicationContext.behandlingDao.lagreBoddEllerArbeidetUtlandet(
+                nonNullBehandling.id,
+                BoddEllerArbeidetUtlandet(
+                    boddEllerArbeidetUtlandet = true,
+                    skalSendeKravpakke = true,
+                    begrunnelse = "enbegrunnelse",
+                    kilde = Grunnlagsopplysning.Saksbehandler.create("saksbehandler"),
+                ),
+            )
+        }
+        val attesteringsoppgave =
+            inTransaction {
+                applicationContext.oppgaveService.ferdigstillOppgaveUnderbehandlingOgLagNyMedType(
+                    VedtakOppgaveDTO(
+                        sakId = sak.id,
+                        referanse = nonNullBehandling.id.toString(),
+                    ),
+                    oppgaveType = OppgaveType.ATTESTERING,
+                    saksbehandler = Saksbehandler("", saksbehandler, null),
+                    merknad = null,
+                )
+            }
+
+        inTransaction {
+            applicationContext.behandlingDao.lagreStatus(
+                nonNullBehandling.id,
+                BehandlingStatus.IVERKSATT,
+                Tidspunkt.now().toLocalDatetimeUTC(),
+            )
+        }
+
+        val utlandsoppgaveref =
+            inTransaction {
+                applicationContext.oppgaveService.opprettNyOppgaveMedSakOgReferanse(
+                    nonNullBehandling.id.toString(),
+                    sak.id,
+                    OppgaveKilde.GENERELL_BEHANDLING,
+                    OppgaveType.UTLAND,
+                    merknad = null,
+                )
+            }
+        inTransaction {
+            applicationContext.oppgaveService.tildelSaksbehandler(utlandsoppgaveref.id, "utlandssaksbehandler")
+        }
+        revurderingService.opprettManuellRevurderingWrapper(
+            sakId = sak.id,
+            aarsak = RevurderingAarsak.REGULERING,
+            paaGrunnAvHendelseId = UUID.randomUUID().toString(),
+            begrunnelse = null,
+            saksbehandler = Saksbehandler("", "saksbehandler", null),
+        )
+
+        val oppgaverForSak = applicationContext.oppgaveService.hentOppgaverForSak(sak.id)
+        val oppgaverUnderBehandling = oppgaverForSak.filter { it.status == Status.UNDER_BEHANDLING }
+        oppgaverUnderBehandling.single { it.kilde == OppgaveKilde.GENERELL_BEHANDLING }
     }
 }

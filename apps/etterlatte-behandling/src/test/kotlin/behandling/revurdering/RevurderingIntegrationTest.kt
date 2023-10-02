@@ -164,7 +164,9 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
                 null,
             )
             oppgaveService.tildelSaksbehandler(any(), "saksbehandler")
-            oppgaveService.hentOppgaverForSak(sak.id)
+            inTransaction {
+                oppgaveService.hentOppgaverForSak(sak.id)
+            }
         }
         inTransaction {
             assertEquals(revurdering, applicationContext.behandlingDao.hentBehandling(revurdering!!.id))
@@ -730,11 +732,13 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
 
         val (sak, behandling) = opprettSakMedFoerstegangsbehandling(fnr, behandlingFactory)
         val nonNullBehandling = behandling!!
-        val hentOppgaverForSak = applicationContext.oppgaveService.hentOppgaverForSak(sak.id)
+        val hentOppgaverForSak = inTransaction { applicationContext.oppgaveService.hentOppgaverForSak(sak.id) }
         val oppgaveForFoerstegangsbehandling = hentOppgaverForSak.single { it.status == Status.NY }
 
         val saksbehandler = "saksbehandler"
-        applicationContext.oppgaveService.tildelSaksbehandler(oppgaveForFoerstegangsbehandling.id, saksbehandler)
+        inTransaction {
+            applicationContext.oppgaveService.tildelSaksbehandler(oppgaveForFoerstegangsbehandling.id, saksbehandler)
+        }
         inTransaction {
             applicationContext.behandlingDao.lagreBoddEllerArbeidetUtlandet(
                 nonNullBehandling.id,
@@ -780,15 +784,17 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
         inTransaction {
             applicationContext.oppgaveService.tildelSaksbehandler(utlandsoppgaveref.id, "utlandssaksbehandler")
         }
-        revurderingService.opprettManuellRevurderingWrapper(
-            sakId = sak.id,
-            aarsak = RevurderingAarsak.REGULERING,
-            paaGrunnAvHendelseId = UUID.randomUUID().toString(),
-            begrunnelse = null,
-            saksbehandler = Saksbehandler("", "saksbehandler", null),
-        )
+        inTransaction {
+            revurderingService.opprettManuellRevurderingWrapper(
+                sakId = sak.id,
+                aarsak = RevurderingAarsak.REGULERING,
+                paaGrunnAvHendelseId = UUID.randomUUID().toString(),
+                begrunnelse = null,
+                saksbehandler = Saksbehandler("", "saksbehandler", null),
+            )
+        }
 
-        val oppgaverForSak = applicationContext.oppgaveService.hentOppgaverForSak(sak.id)
+        val oppgaverForSak = inTransaction { applicationContext.oppgaveService.hentOppgaverForSak(sak.id) }
         val oppgaverUnderBehandling = oppgaverForSak.filter { it.status == Status.UNDER_BEHANDLING }
         oppgaverUnderBehandling.single { it.kilde == OppgaveKilde.GENERELL_BEHANDLING }
     }

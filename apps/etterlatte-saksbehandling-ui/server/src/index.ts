@@ -46,7 +46,7 @@ if (isDev) {
       return unleash.isEnabled(toggle, undefined, false)
     } catch (e) {
       logger.error({
-        message: `Fikk feilmelding fra Unleash for toggle ${toggle}, bruker defaultverdi false`,
+        message: `Fikk feilmelding fra Unleash for toggle ${sanitize(toggle)}, bruker defaultverdi false`,
         error: JSON.stringify(e),
       })
       return false

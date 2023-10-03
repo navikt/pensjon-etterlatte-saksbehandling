@@ -1,15 +1,15 @@
 import { IEtterbetaling } from '~shared/types/IDetaljertBehandling'
 import { BodyShort, Button, Checkbox, Heading } from '@navikt/ds-react'
 import React, { useState } from 'react'
-import { DatoVelger } from '~shared/DatoVelger'
 import styled from 'styled-components'
 import { FlexRow } from '~shared/styled'
 import { isPending, useApiCall } from '~shared/hooks/useApiCall'
 import { lagreEtterbetaling } from '~shared/api/behandling'
 import { formaterKanskjeStringDato } from '~utils/formattering'
 import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
+import MaanedVelger from '~components/behandling/beregningsgrunnlag/MaanedVelger'
 
-const DatoSection = styled.section`
+const MaanedSection = styled.section`
   display: grid;
   gap: 0.5em;
 `
@@ -56,8 +56,8 @@ const Etterbetaling = (props: {
         <Heading size="small" level="3">
           Er etterbetaling
         </Heading>
-        <BodyShort>Fra dato: {formaterKanskjeStringDato(etterbetaling?.fraDato?.toString())}</BodyShort>
-        <BodyShort>Til dato: {formaterKanskjeStringDato(etterbetaling?.tilDato?.toString())}</BodyShort>
+        <BodyShort>Fra og med måned: {formaterKanskjeStringDato(etterbetaling?.fraDato?.toString())}</BodyShort>
+        <BodyShort>Til og med måned: {formaterKanskjeStringDato(etterbetaling?.tilDato?.toString())}</BodyShort>
       </>
     )
   }
@@ -76,20 +76,20 @@ const Etterbetaling = (props: {
       </Checkbox>
       {erEtterbetaling ? (
         <EtterbetalingWrapper>
-          <DatoSection>
-            <DatoVelger
+          <MaanedSection>
+            <MaanedVelger
               value={etterbetaling?.fraDato ? new Date(etterbetaling?.fraDato) : undefined}
               onChange={(e) => setEtterbetaling({ ...etterbetaling, fraDato: e })}
-              label="Fra dato"
+              label="Fra og med måned"
             />
-          </DatoSection>
-          <DatoSection>
-            <DatoVelger
+          </MaanedSection>
+          <MaanedSection>
+            <MaanedVelger
               value={etterbetaling?.tilDato ? new Date(etterbetaling?.tilDato) : undefined}
               onChange={(e) => setEtterbetaling({ ...etterbetaling, tilDato: e })}
-              label="Til dato"
+              label="Til og med måned"
             />
-          </DatoSection>
+          </MaanedSection>
         </EtterbetalingWrapper>
       ) : null}
       <FlexRow justify="left">

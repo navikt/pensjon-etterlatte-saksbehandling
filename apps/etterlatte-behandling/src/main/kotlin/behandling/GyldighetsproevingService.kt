@@ -47,36 +47,34 @@ class GyldighetsproevingServiceImpl(
         navIdent: String,
         svar: JaNeiMedBegrunnelse,
     ): GyldighetsResultat? {
-        return inTransaction {
-            hentFoerstegangsbehandling(behandlingId)?.let { behandling ->
-                val resultat =
-                    if (svar.erJa()) VurderingsResultat.OPPFYLT else VurderingsResultat.IKKE_OPPFYLT
-                val gyldighetsResultat =
-                    GyldighetsResultat(
-                        resultat = resultat,
-                        vurderinger =
-                            listOf(
-                                VurdertGyldighet(
-                                    navn = GyldighetsTyper.INNSENDER_ER_GJENLEVENDE,
-                                    resultat = resultat,
-                                    basertPaaOpplysninger =
-                                        ManuellVurdering(
-                                            begrunnelse = svar.begrunnelse,
-                                            kilde =
-                                                Grunnlagsopplysning.Saksbehandler(
-                                                    navIdent,
-                                                    Tidspunkt.from(klokke.norskKlokke()),
-                                                ),
-                                        ),
-                                ),
+        return hentFoerstegangsbehandling(behandlingId)?.let { behandling ->
+            val resultat =
+                if (svar.erJa()) VurderingsResultat.OPPFYLT else VurderingsResultat.IKKE_OPPFYLT
+            val gyldighetsResultat =
+                GyldighetsResultat(
+                    resultat = resultat,
+                    vurderinger =
+                        listOf(
+                            VurdertGyldighet(
+                                navn = GyldighetsTyper.INNSENDER_ER_GJENLEVENDE,
+                                resultat = resultat,
+                                basertPaaOpplysninger =
+                                    ManuellVurdering(
+                                        begrunnelse = svar.begrunnelse,
+                                        kilde =
+                                            Grunnlagsopplysning.Saksbehandler(
+                                                navIdent,
+                                                Tidspunkt.from(klokke.norskKlokke()),
+                                            ),
+                                    ),
                             ),
-                        vurdertDato = Tidspunkt(klokke.instant()).toLocalDatetimeNorskTid(),
-                    )
+                        ),
+                    vurdertDato = Tidspunkt(klokke.instant()).toLocalDatetimeNorskTid(),
+                )
 
-                behandling.lagreGyldighetsproeving(gyldighetsResultat)
+            behandling.lagreGyldighetsproeving(gyldighetsResultat)
 
-                gyldighetsResultat
-            }
+            gyldighetsResultat
         }
     }
 

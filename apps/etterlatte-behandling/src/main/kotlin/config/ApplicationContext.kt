@@ -65,8 +65,8 @@ import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.oppgaveGosys.GosysOppgaveKlient
 import no.nav.etterlatte.oppgaveGosys.GosysOppgaveKlientImpl
 import no.nav.etterlatte.oppgaveGosys.GosysOppgaveServiceImpl
-import no.nav.etterlatte.sak.RealSakService
 import no.nav.etterlatte.sak.SakDao
+import no.nav.etterlatte.sak.SakServiceImpl
 import no.nav.etterlatte.sak.SakTilgangDao
 import no.nav.etterlatte.sak.TilgangServiceImpl
 import no.nav.etterlatte.tilgangsstyring.AzureGroup
@@ -232,12 +232,11 @@ internal class ApplicationContext(
 
     val tilgangService = TilgangServiceImpl(SakTilgangDao(dataSource))
     val sakService =
-        RealSakService(
+        SakServiceImpl(
             sakDao,
             pdlKlient,
             norg2Klient,
             featureToggleService,
-            tilgangService,
             skjermingKlient,
         )
     val enhetService = EnhetServiceImpl(navAnsattKlient)
@@ -248,7 +247,6 @@ internal class ApplicationContext(
             behandlingService = behandlingService,
             pdlKlient = pdlKlient,
             grunnlagKlient = grunnlagKlient,
-            tilgangService = tilgangService,
             sakService = sakService,
         )
 

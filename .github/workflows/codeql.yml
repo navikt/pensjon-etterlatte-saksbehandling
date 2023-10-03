@@ -1,6 +1,7 @@
 name: "CodeQL"
 
 on:
+  workflow_dispatch: # Allow manually triggered workflow run
   schedule:
     # At 05:30 on every day-of-week from Monday through Friday.
     - cron: "30 5 * * 1-5"
@@ -9,7 +10,7 @@ jobs:
   analyze-java:
     name: Analyze Java (Kotlin)
     runs-on:
-      labels: ubuntu-latest-8-cores
+      labels: ubuntu-latest
     timeout-minutes: 360
     permissions:
       actions: read

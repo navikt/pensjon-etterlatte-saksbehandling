@@ -9,6 +9,7 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.application
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
+import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.skjermet.EgenAnsattSkjermet
 
 internal fun Route.egenAnsattRoute(egenAnsattService: EgenAnsattService) {
@@ -18,7 +19,9 @@ internal fun Route.egenAnsattRoute(egenAnsattService: EgenAnsattService) {
         post {
             val skjermetHendelse = call.receive<EgenAnsattSkjermet>()
             logger.info("Mottar en egen ansatt hendelse fra skjermingsløsningen")
-            egenAnsattService.haandterSkjerming(skjermetHendelse)
+            inTransaction {
+                egenAnsattService.haandterSkjerming(skjermetHendelse)
+            }
             call.respond(HttpStatusCode.OK)
         }
     }

@@ -15,6 +15,7 @@ import no.nav.etterlatte.behandling.hendelse.HendelseType
 import no.nav.etterlatte.foerstegangsbehandling
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
+import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
 import no.nav.etterlatte.libs.common.generellbehandling.GenerellBehandling
@@ -83,7 +84,9 @@ internal class BehandlingStatusServiceTest {
                 generellBehandlingService,
             )
 
-        sut.settIverksattVedtak(behandlingId, iverksettVedtak)
+        inTransaction {
+            sut.settIverksattVedtak(behandlingId, iverksettVedtak)
+        }
 
         verify {
             behandlingdao.lagreStatus(behandlingId, BehandlingStatus.IVERKSATT, any())
@@ -147,7 +150,9 @@ internal class BehandlingStatusServiceTest {
                 generellBehandlingService,
             )
 
-        sut.settIverksattVedtak(behandlingId, iverksettVedtak)
+        inTransaction {
+            sut.settIverksattVedtak(behandlingId, iverksettVedtak)
+        }
 
         verify {
             behandlingdao.lagreStatus(behandlingId, BehandlingStatus.IVERKSATT, any())

@@ -134,6 +134,7 @@ internal fun Application.module(context: ApplicationContext) {
 
             install(adressebeskyttelsePlugin) {
                 saksbehandlerGroupIdsByKey = context.saksbehandlerGroupIdsByKey
+
                 harTilgangBehandling = { behandlingId, saksbehandlerMedRoller ->
                     tilgangService.harTilgangTilBehandling(behandlingId, saksbehandlerMedRoller)
                 }

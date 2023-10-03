@@ -17,6 +17,7 @@ import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.User
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
+import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.FoedselsNummerMedGraderingDTO
 import no.nav.etterlatte.libs.common.FoedselsnummerDTO
@@ -140,10 +141,12 @@ suspend inline fun PipelineContext<*, ApplicationCall>.withFoedselsnummerInterna
     when (brukerTokenInfo) {
         is Saksbehandler -> {
             val harTilgang =
-                tilgangService.harTilgangTilPerson(
-                    foedselsnummer.value,
-                    Kontekst.get().appUserAsSaksbehandler().saksbehandlerMedRoller,
-                )
+                inTransaction {
+                    tilgangService.harTilgangTilPerson(
+                        foedselsnummer.value,
+                        Kontekst.get().appUserAsSaksbehandler().saksbehandlerMedRoller,
+                    )
+                }
             if (harTilgang) {
                 onSuccess(foedselsnummer)
             } else {
@@ -164,10 +167,12 @@ suspend inline fun PipelineContext<*, ApplicationCall>.withFoedselsnummerAndGrad
     when (brukerTokenInfo) {
         is Saksbehandler -> {
             val harTilgangTilPerson =
-                tilgangService.harTilgangTilPerson(
-                    foedselsnummer.value,
-                    Kontekst.get().appUserAsSaksbehandler().saksbehandlerMedRoller,
-                )
+                inTransaction {
+                    tilgangService.harTilgangTilPerson(
+                        foedselsnummer.value,
+                        Kontekst.get().appUserAsSaksbehandler().saksbehandlerMedRoller,
+                    )
+                }
             if (harTilgangTilPerson) {
                 onSuccess(foedselsnummer, foedselsnummerDTOmedGradering.gradering)
             } else {

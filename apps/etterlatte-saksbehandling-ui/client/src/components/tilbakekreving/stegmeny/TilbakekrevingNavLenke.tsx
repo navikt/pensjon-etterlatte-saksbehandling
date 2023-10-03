@@ -3,7 +3,7 @@ import { Separator } from '~components/behandling/StegMeny/NavLenke'
 import React from 'react'
 import classNames from 'classnames'
 
-export const TILBAKEKREVINGSTEG = ['oversikt', 'vurdering', 'vedtak', 'brev'] as const
+export const TILBAKEKREVINGSTEG = ['oversikt', 'vurdering', 'oppsummering', 'brev'] as const
 
 export type Tilbakekrevingsteg = (typeof TILBAKEKREVINGSTEG)[number]
 

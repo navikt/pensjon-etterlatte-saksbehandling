@@ -97,9 +97,7 @@ class BehandlingStatusServiceImpl(
         val behandling = hentBehandling(behandlingId).tilOpprettet()
 
         if (!dryRun) {
-            inTransaction {
-                behandlingDao.lagreStatus(behandling.id, behandling.status, behandling.sistEndret)
-            }
+            behandlingDao.lagreStatus(behandling.id, behandling.status, behandling.sistEndret)
         }
     }
 
@@ -110,9 +108,7 @@ class BehandlingStatusServiceImpl(
         val behandling = hentBehandling(behandlingId).tilVilkaarsvurdert()
 
         if (!dryRun) {
-            inTransaction {
-                behandlingDao.lagreStatus(behandling.id, behandling.status, behandling.sistEndret)
-            }
+            behandlingDao.lagreStatus(behandling.id, behandling.status, behandling.sistEndret)
         }
     }
 
@@ -183,11 +179,9 @@ class BehandlingStatusServiceImpl(
         vedtakHendelse: VedtakHendelse,
     ) {
         val behandling = hentBehandling(behandlingId)
-        inTransaction {
-            lagreNyBehandlingStatus(behandling.tilIverksatt(), Tidspunkt.now().toLocalDatetimeUTC())
-            registrerVedtakHendelse(behandlingId, vedtakHendelse, HendelseType.IVERKSATT)
-            haandterUtland(behandling)
-        }
+        lagreNyBehandlingStatus(behandling.tilIverksatt(), Tidspunkt.now().toLocalDatetimeUTC())
+        registrerVedtakHendelse(behandlingId, vedtakHendelse, HendelseType.IVERKSATT)
+        haandterUtland(behandling)
         if (behandling.type == BehandlingType.REVURDERING) {
             grunnlagsendringshendelseService.settHendelseTilHistorisk(behandlingId)
         }
@@ -233,9 +227,7 @@ class BehandlingStatusServiceImpl(
 
     private fun Behandling.lagreEndring(dryRun: Boolean) {
         if (dryRun) return
-        inTransaction {
-            lagreNyBehandlingStatus(this)
-        }
+        lagreNyBehandlingStatus(this)
     }
 
     private fun lagreNyBehandlingStatus(

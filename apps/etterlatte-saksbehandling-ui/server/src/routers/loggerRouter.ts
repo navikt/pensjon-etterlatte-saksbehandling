@@ -17,7 +17,7 @@ loggerRouter.post('/', express.json(), (req, res) => {
   if (!process.env.NAIS_CLUSTER_NAME) {
     frontendLogger.info(`Nais cluster unavailable: ${JSON.stringify(body)}`)
   } else if (body.type && body.type === 'info') {
-    frontendLogger.info('Frontendlogging: ', body)
+    frontendLogger.info('Frontendlogging: ', JSON.stringify(body))
   } else {
     if (body.stackInfo) {
       if (stackInfoIsInvalid(body.stackInfo)) {

@@ -2,10 +2,9 @@ import { BodyShort, Button, Heading } from '@navikt/ds-react'
 import { Content, ContentHeader, FlexRow } from '~shared/styled'
 import { HeadingWrapper, InnholdPadding } from '~components/behandling/soeknadsoversikt/styled'
 import { useNavigate } from 'react-router-dom'
-import { useTilbakekreving } from '~components/tilbakekreving/useTilbakekreving'
+import { Tilbakekreving } from '~shared/types/Tilbakekreving'
 
-export function TilbakekrevingVedtak() {
-  const tilbakekreving = useTilbakekreving()
+export function TilbakerevingsOppsummering({ tilbakekreving }: { tilbakekreving: Tilbakekreving }) {
   const navigate = useNavigate()
 
   return (
@@ -13,16 +12,16 @@ export function TilbakekrevingVedtak() {
       <ContentHeader>
         <HeadingWrapper>
           <Heading level="1" size="large">
-            Vedtak
+            Oppsummering
           </Heading>
         </HeadingWrapper>
       </ContentHeader>
       <InnholdPadding>
-        <BodyShort>Relevante ting for vedtak her</BodyShort>
+        <BodyShort>Relevante ting for oppsummering her</BodyShort>
       </InnholdPadding>
       <FlexRow justify="center">
-        <Button variant="primary" onClick={() => navigate(`/tilbakekreving/${tilbakekreving?.id}/vedtak`)}>
-          Fatt vedtak
+        <Button variant="primary" onClick={() => navigate(`/tilbakekreving/${tilbakekreving?.id}/brev`)}>
+          Gå videre til brev
         </Button>
       </FlexRow>
     </Content>

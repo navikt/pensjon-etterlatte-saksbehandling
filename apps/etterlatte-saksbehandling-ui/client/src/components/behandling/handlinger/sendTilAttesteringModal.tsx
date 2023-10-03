@@ -1,18 +1,21 @@
 import { BodyShort, Button, Heading, Modal } from '@navikt/ds-react'
 import { useState } from 'react'
 import { handlinger } from './typer'
-import { fattVedtak as fattVedtakApi } from '~shared/api/behandling'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { isFailure, isPending, useApiCall } from '~shared/hooks/useApiCall'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { FlexRow } from '~shared/styled'
+import { ApiResponse } from '~shared/api/apiClient'
 
-export const SendTilAttesteringModal = () => {
+export const SendTilAttesteringModal = ({
+  behandlingId,
+  fattVedtakApi,
+}: {
+  behandlingId: string
+  fattVedtakApi: (id: string) => Promise<ApiResponse<unknown>>
+}) => {
   const navigate = useNavigate()
-
   const [isOpen, setIsOpen] = useState(false)
-  const { behandlingId } = useParams()
-
   const [fattVedtakStatus, fattVedtak] = useApiCall(fattVedtakApi)
 
   const goToOppgavebenken = () => {
@@ -20,8 +23,6 @@ export const SendTilAttesteringModal = () => {
   }
 
   const send = () => {
-    if (!behandlingId) throw new Error('Mangler behandlingsid')
-
     fattVedtak(behandlingId, () => {
       setIsOpen(false)
       goToOppgavebenken()

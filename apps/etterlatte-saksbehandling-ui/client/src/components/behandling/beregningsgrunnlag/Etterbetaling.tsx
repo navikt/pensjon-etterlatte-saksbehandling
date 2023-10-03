@@ -1,13 +1,13 @@
 import { IEtterbetaling } from '~shared/types/IDetaljertBehandling'
 import { BodyShort, Button, Checkbox, Heading } from '@navikt/ds-react'
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { DatoVelger } from '~shared/DatoVelger'
 import styled from 'styled-components'
 import { FlexRow } from '~shared/styled'
 import { isPending, useApiCall } from '~shared/hooks/useApiCall'
 import { lagreEtterbetaling } from '~shared/api/behandling'
-import { hentFunksjonsbrytere } from '~shared/api/feature'
 import { formaterKanskjeStringDato } from '~utils/formattering'
+import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 
 const DatoSection = styled.section`
   display: grid;
@@ -31,19 +31,9 @@ const Etterbetaling = (props: {
   const [status, apiLagreEtterbetaling] = useApiCall(lagreEtterbetaling)
   const [etterbetaling, setEtterbetaling] = useState(lagraEtterbetaling)
   const [erEtterbetaling, setErEtterbetaling] = useState<boolean>(!!etterbetaling)
-  const [vis, setVis] = useState<boolean>(false)
 
-  const [, postHentFunksjonsbrytere] = useApiCall(hentFunksjonsbrytere)
   const featureToggleNameEtterbetaling = 'registrer-etterbetaling'
-
-  useEffect(() => {
-    postHentFunksjonsbrytere([featureToggleNameEtterbetaling], (brytere) => {
-      const etterbetalingBryter = brytere.find((bryter) => bryter.toggle === featureToggleNameEtterbetaling)
-      if (etterbetalingBryter) {
-        setVis(etterbetalingBryter.enabled)
-      }
-    })
-  }, [])
+  const vis = useFeatureEnabledMedDefault(featureToggleNameEtterbetaling, false)
 
   const lagre = () => {
     apiLagreEtterbetaling({ behandlingId, etterbetaling: etterbetaling!! }, () => {})

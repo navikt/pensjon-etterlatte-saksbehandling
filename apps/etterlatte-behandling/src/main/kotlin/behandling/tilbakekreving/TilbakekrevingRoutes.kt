@@ -13,6 +13,7 @@ import no.nav.etterlatte.libs.common.TILBAKEKREVINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.medBody
 import no.nav.etterlatte.libs.common.tilbakekreving.Kravgrunnlag
 import no.nav.etterlatte.libs.common.tilbakekrevingId
+import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 
 internal fun Route.tilbakekrevingRoutes(service: TilbakekrevingService) {
     route("/api/tilbakekreving/{$TILBAKEKREVINGID_CALL_PARAMETER}") {
@@ -37,6 +38,14 @@ internal fun Route.tilbakekrevingRoutes(service: TilbakekrevingService) {
                 call.respond(service.lagrePerioder(tilbakekrevingId, request.perioder))
             } catch (e: TilbakekrevingFinnesIkkeException) {
                 call.respond(HttpStatusCode.NotFound)
+            }
+        }
+
+        route("vedtak") {
+            post("fatt") {
+                // TODO tilgangsjekk
+                service.fattVedtak(tilbakekrevingId, brukerTokenInfo)
+                call.respond(HttpStatusCode.OK)
             }
         }
     }

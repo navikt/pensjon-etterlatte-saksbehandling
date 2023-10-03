@@ -7,7 +7,7 @@ export function TilbakekrevingStegmeny() {
     <StegMenyWrapper>
       <TilbakekrevingNavLenke path="oversikt" description="Oversikt" enabled separator />
       <TilbakekrevingNavLenke path="vurdering" description="Vurdering" enabled separator />
-      <TilbakekrevingNavLenke path="vedtak" description="Vedtak" enabled separator />
+      <TilbakekrevingNavLenke path="oppsummering" description="Oppsummering" enabled separator />
       <TilbakekrevingNavLenke path="brev" description="Brev" enabled separator={false} />
     </StegMenyWrapper>
   )

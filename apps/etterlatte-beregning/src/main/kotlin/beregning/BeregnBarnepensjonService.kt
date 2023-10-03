@@ -85,12 +85,13 @@ class BeregnBarnepensjonService(
     ): Beregning {
         val grunnlag = grunnlagKlient.hentGrunnlag(behandling.sak, brukerTokenInfo)
         val behandlingType = behandling.behandlingType
-        val virkningstidspunkt = requireNotNull(behandling.virkningstidspunkt?.dato)
+        val virkningstidspunkt =
+            requireNotNull(behandling.virkningstidspunkt?.dato) { "Behandling ${behandling.id} mangler virkningstidspunkt" }
 
         val beregningsGrunnlag =
             requireNotNull(
                 beregningsGrunnlagService.hentBarnepensjonBeregningsGrunnlag(behandling.id, brukerTokenInfo),
-            )
+            ) { "Behandling ${behandling.id} mangler beregningsgrunnlag" }
 
         val trygdetid =
             if (featureToggleService.isEnabled(BeregnBarnepensjonServiceFeatureToggle.BrukFaktiskTrygdetid, false)) {

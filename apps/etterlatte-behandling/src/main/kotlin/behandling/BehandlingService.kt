@@ -219,7 +219,7 @@ internal class BehandlingServiceImpl(
         brukerTokenInfo: BrukerTokenInfo,
         opplysningstype: Opplysningstype,
     ): BehandlingMedGrunnlagsopplysninger<Person> {
-        val behandling = requireNotNull(inTransaction { hentBehandling(behandlingId) })
+        val behandling = requireNotNull(inTransaction { hentBehandling(behandlingId) }) { "Fant ikke behandling $behandlingId" }
         val personopplysning = grunnlagKlient.finnPersonOpplysning(behandling.sak.id, opplysningstype, brukerTokenInfo)
 
         return BehandlingMedGrunnlagsopplysninger(

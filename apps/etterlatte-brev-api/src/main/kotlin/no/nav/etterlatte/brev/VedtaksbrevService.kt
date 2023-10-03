@@ -95,7 +95,7 @@ class VedtaksbrevService(
 
         if (!brev.kanEndres()) {
             logger.info("Brev har status ${brev.status} - returnerer lagret innhold")
-            return requireNotNull(db.hentPdf(brev.id))
+            return requireNotNull(db.hentPdf(brev.id)) { "Fant ikke brev med if ${brev.id}" }
         }
 
         val behandling = sakOgBehandlingService.hentBehandling(brev.sakId, brev.behandlingId!!, brukerTokenInfo)
@@ -148,9 +148,15 @@ class VedtaksbrevService(
             MANUELL -> ManueltBrevData(hentLagretInnhold(brev))
         }
 
-    private fun hentLagretInnhold(brev: Brev) = requireNotNull(db.hentBrevPayload(brev.id)).elements
+    private fun hentLagretInnhold(brev: Brev) =
+        requireNotNull(
+            db.hentBrevPayload(brev.id),
+        ) { "Fant ikke payload for brev ${brev.id}" }.elements
 
-    private fun hentLagretInnholdVedlegg(brev: Brev) = requireNotNull(db.hentBrevPayloadVedlegg(brev.id))
+    private fun hentLagretInnholdVedlegg(brev: Brev) =
+        requireNotNull(db.hentBrevPayloadVedlegg(brev.id)) {
+            "Fant ikke payloadvedlegg for brev ${brev.id}"
+        }
 
     private suspend fun opprettInnhold(
         behandling: Behandling,

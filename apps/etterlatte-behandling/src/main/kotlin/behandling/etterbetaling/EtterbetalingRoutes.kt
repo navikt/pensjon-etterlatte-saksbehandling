@@ -21,7 +21,7 @@ internal fun Route.etterbetalingRoutes(service: EtterbetalingService) {
                     Etterbetaling(
                         behandlingId = behandlingsId,
                         fraDato = requireNotNull(request.fraDato) { "Mangler fradato etterbetaling" },
-                        tilDato = requireNotNull(request.tilDato) { "Mangler tildato etterbetaling " },
+                        tilDato = requireNotNull(request.tilDato) { "Mangler tildato etterbetaling" },
                     ),
                 )
             }

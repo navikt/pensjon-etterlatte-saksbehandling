@@ -200,3 +200,8 @@ export const lagreEtterbetaling = async (args: {
     tilDato: args.etterbetaling.tilDato,
   })
 }
+export const slettEtterbetaling = async (args: {
+  behandlingId: string
+}): Promise<ApiResponse<IKommerBarnetTilgode>> => {
+  return apiClient.delete(`/behandling/${args.behandlingId}/etterbetaling`)
+}

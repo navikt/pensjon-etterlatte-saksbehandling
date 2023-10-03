@@ -4,7 +4,7 @@ import React, { useState } from 'react'
 import styled from 'styled-components'
 import { FlexRow } from '~shared/styled'
 import { isPending, useApiCall } from '~shared/hooks/useApiCall'
-import { lagreEtterbetaling } from '~shared/api/behandling'
+import { lagreEtterbetaling, slettEtterbetaling } from '~shared/api/behandling'
 import { formaterKanskjeStringDato } from '~utils/formattering'
 import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 import MaanedVelger from '~components/behandling/beregningsgrunnlag/MaanedVelger'
@@ -29,6 +29,7 @@ const Etterbetaling = (props: {
 }) => {
   const { lagraEtterbetaling, redigerbar, behandlingId } = props
   const [status, apiLagreEtterbetaling] = useApiCall(lagreEtterbetaling)
+  const [, apiSlettEtterbetaling] = useApiCall(slettEtterbetaling)
   const [etterbetaling, setEtterbetaling] = useState(lagraEtterbetaling)
   const [erEtterbetaling, setErEtterbetaling] = useState<boolean>(!!etterbetaling)
 
@@ -36,7 +37,11 @@ const Etterbetaling = (props: {
   const vis = useFeatureEnabledMedDefault(featureToggleNameEtterbetaling, false)
 
   const lagre = () => {
-    apiLagreEtterbetaling({ behandlingId, etterbetaling: etterbetaling!! }, () => {})
+    if (erEtterbetaling) {
+      apiLagreEtterbetaling({ behandlingId, etterbetaling: etterbetaling!! }, () => {})
+    } else {
+      apiSlettEtterbetaling({ behandlingId }, () => {})
+    }
   }
 
   const avbryt = () => {

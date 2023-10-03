@@ -12,6 +12,7 @@ import io.ktor.http.contentType
 import io.ktor.serialization.jackson.jackson
 import io.ktor.server.testing.testApplication
 import no.nav.etterlatte.BehandlingIntegrationTest
+import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.BehandlingOgSak
@@ -72,6 +73,7 @@ class MigreringRoutesTest : BehandlingIntegrationTest() {
                         ),
                     trygdetid = Trygdetid(emptyList()),
                     flyktningStatus = false,
+                    spraak = Spraak.NN,
                 )
 
             val response: BehandlingOgSak =

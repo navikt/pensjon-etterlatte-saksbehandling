@@ -3,6 +3,7 @@ package no.nav.etterlatte.migrering
 import io.ktor.server.testing.testApplication
 import io.mockk.every
 import io.mockk.spyk
+import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
@@ -79,6 +80,7 @@ class FeilendeMigreringLytterTest {
                         ),
                     trygdetid = Trygdetid(perioder = listOf()),
                     flyktningStatus = false,
+                    spraak = Spraak.NN,
                 )
             repository.lagrePesyssak(pesyssak)
 
@@ -135,6 +137,7 @@ class FeilendeMigreringLytterTest {
                         ),
                     trygdetid = Trygdetid(perioder = listOf()),
                     flyktningStatus = false,
+                    spraak = Spraak.NN,
                 )
             repository.lagrePesyssak(pesyssak)
             repository.lagreKoplingTilBehandling(behandlingId, pesysid)

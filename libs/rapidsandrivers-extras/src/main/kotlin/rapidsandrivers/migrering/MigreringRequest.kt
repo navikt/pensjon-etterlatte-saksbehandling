@@ -1,5 +1,6 @@
 package no.nav.etterlatte.rapidsandrivers.migrering
 
+import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
@@ -18,6 +19,7 @@ data class MigreringRequest(
     val beregning: Beregning,
     val trygdetid: Trygdetid,
     val flyktningStatus: Boolean = false,
+    val spraak: Spraak,
 ) {
     fun opprettPersongalleri() =
         Persongalleri(

@@ -1,5 +1,6 @@
 package no.nav.etterlatte.migrering.pen
 
+import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.migrering.Pesyssak
@@ -52,6 +53,7 @@ fun BarnepensjonGrunnlagResponse.tilVaarModell(): Pesyssak {
                     listOf(), // TODO: Parse ordentleg
                 ),
             flyktningStatus = false, // TODO
+            spraak = Spraak.NB, // TODO
         )
     return pesyssak
 }

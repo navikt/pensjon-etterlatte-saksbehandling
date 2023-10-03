@@ -56,11 +56,12 @@ class BeregnOmstillingsstoenadService(
                 "Forventa å ha trygdetid for behandlingId=${behandling.id}",
             )
         val behandlingType = behandling.behandlingType
-        val virkningstidspunkt = requireNotNull(behandling.virkningstidspunkt?.dato)
+        val virkningstidspunkt =
+            requireNotNull(behandling.virkningstidspunkt?.dato) { "Behandling med id: ${behandling.id} mangler virkningstidspunkt" }
         val beregningsgrunnlag =
             requireNotNull(
                 beregningsGrunnlagService.hentOmstillingstoenadBeregningsGrunnlag(behandling.id, brukerTokenInfo),
-            )
+            ) { "Behandling med id: ${behandling.id} mangler beregningsgrunnlag oms" }
 
         logger.info("Beregner omstillingsstønad for behandlingId=${behandling.id} med behandlingType=$behandlingType")
 

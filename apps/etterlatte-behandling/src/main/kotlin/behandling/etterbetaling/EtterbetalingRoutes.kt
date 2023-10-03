@@ -20,8 +20,8 @@ internal fun Route.etterbetalingRoutes(service: EtterbetalingService) {
                 service.lagreEtterbetaling(
                     Etterbetaling(
                         behandlingId = behandlingsId,
-                        fraDato = requireNotNull(request.fraDato),
-                        tilDato = requireNotNull(request.tilDato),
+                        fraDato = requireNotNull(request.fraDato) { "Mangler fradato etterbetaling" },
+                        tilDato = requireNotNull(request.tilDato) { "Mangler tildato etterbetaling" },
                     ),
                 )
             }

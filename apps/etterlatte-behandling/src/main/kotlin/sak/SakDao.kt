@@ -63,7 +63,7 @@ class SakDao(private val connection: () -> Connection) {
         statement.setString(3, enhet)
         return requireNotNull(
             statement.executeQuery().singleOrNull { this.toSak() },
-        )
+        ) { "Kunne ikke opprette sak for fnr: $fnr" }
     }
 
     fun oppdaterEnheterPaaSaker(saker: List<GrunnlagsendringshendelseService.SakMedEnhet>) {

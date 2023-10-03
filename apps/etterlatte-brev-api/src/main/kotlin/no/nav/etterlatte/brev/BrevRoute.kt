@@ -1,6 +1,7 @@
 package no.nav.etterlatte.brev
 
 import io.ktor.http.HttpStatusCode
+import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.call
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
@@ -8,6 +9,7 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
+import io.ktor.util.pipeline.PipelineContext
 import no.nav.etterlatte.brev.behandlingklient.BehandlingKlient
 import no.nav.etterlatte.brev.model.BrevInnholdVedlegg
 import no.nav.etterlatte.brev.model.Mottaker
@@ -20,6 +22,13 @@ import kotlin.time.DurationUnit
 import kotlin.time.ExperimentalTime
 import kotlin.time.measureTimedValue
 
+const val BREV_ID_CALL_PARAMETER = "id"
+inline val PipelineContext<*, ApplicationCall>.brevId: Long
+    get() =
+        call.parameters[BREV_ID_CALL_PARAMETER]?.toLong() ?: throw NullPointerException(
+            "Brev id er ikke i path params",
+        )
+
 @OptIn(ExperimentalTime::class)
 fun Route.brevRoute(
     service: BrevService,
@@ -27,18 +36,16 @@ fun Route.brevRoute(
 ) {
     val logger = LoggerFactory.getLogger("no.nav.etterlatte.brev.BrevRoute")
 
-    route("brev/{id}") {
+    route("brev/{$BREV_ID_CALL_PARAMETER}") {
         get {
             withSakId(behandlingKlient) {
-                val id = requireNotNull(call.parameters["id"]).toLong()
-
-                call.respond(service.hentBrev(id))
+                call.respond(service.hentBrev(brevId))
             }
         }
 
         get("pdf") {
             withSakId(behandlingKlient) {
-                val brevId = requireNotNull(call.parameters["id"]).toLong()
+                val brevId = brevId
 
                 logger.info("Genererer PDF for brev (id=$brevId)")
 
@@ -53,7 +60,6 @@ fun Route.brevRoute(
 
         post("mottaker") {
             withSakId(behandlingKlient) {
-                val brevId = requireNotNull(call.parameters["id"]).toLong()
                 val body = call.receive<OppdaterMottakerRequest>()
 
                 val mottaker = service.oppdaterMottaker(brevId, body.mottaker)
@@ -65,15 +71,13 @@ fun Route.brevRoute(
         route("payload") {
             get {
                 withSakId(behandlingKlient) {
-                    val brevId = requireNotNull(call.parameters["id"]).toLong()
-
                     call.respond(service.hentBrevPayload(brevId))
                 }
             }
 
             post {
                 withSakId(behandlingKlient) {
-                    val brevId = requireNotNull(call.parameters["id"]).toLong()
+                    val brevId = brevId
                     val body = call.receive<OppdaterPayloadRequest>()
 
                     service.lagreBrevPayload(brevId, body.payload)
@@ -85,8 +89,6 @@ fun Route.brevRoute(
 
         post("ferdigstill") {
             withSakId(behandlingKlient) {
-                val brevId = requireNotNull(call.parameters["id"]).toLong()
-
                 service.ferdigstill(brevId, brukerTokenInfo)
 
                 call.respond(HttpStatusCode.OK)
@@ -95,8 +97,6 @@ fun Route.brevRoute(
 
         post("journalfoer") {
             withSakId(behandlingKlient) {
-                val brevId = requireNotNull(call.parameters["id"]).toLong()
-
                 val journalpostId = service.journalfoer(brevId, brukerTokenInfo)
 
                 call.respond(journalpostId)
@@ -105,8 +105,6 @@ fun Route.brevRoute(
 
         post("distribuer") {
             withSakId(behandlingKlient) {
-                val brevId = requireNotNull(call.parameters["id"]).toLong()
-
                 val journalpostId = service.distribuer(brevId)
 
                 call.respond(journalpostId)

@@ -12,6 +12,7 @@ import io.ktor.server.routing.route
 import no.nav.etterlatte.brev.behandlingklient.BehandlingKlient
 import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.behandlingsId
+import no.nav.etterlatte.libs.common.sakId
 import no.nav.etterlatte.libs.common.withBehandlingId
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import org.slf4j.LoggerFactory
@@ -42,7 +43,7 @@ fun Route.vedtaksbrevRoute(
 
         post("vedtak") {
             withBehandlingId(behandlingKlient) { behandlingId ->
-                val sakId = requireNotNull(call.parameters["sakId"]).toLong()
+                val sakId = sakId
 
                 logger.info("Oppretter vedtaksbrev for behandling (sakId=$sakId, behandlingId=$behandlingId)")
 

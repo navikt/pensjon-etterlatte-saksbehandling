@@ -8,7 +8,7 @@ import no.nav.etterlatte.libs.common.requireEnvValue
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 
 class AppBuilder(props: Miljoevariabler) {
-    private val vedtakUrl = requireNotNull(props["ETTERLATTE_VEDTAK_URL"])
+    private val vedtakUrl = requireNotNull(props["ETTERLATTE_VEDTAK_URL"]) { "Mangler vedtak url " }
     private val env = System.getenv()
 
     fun lagVedtakKlient(): VedtakServiceImpl {

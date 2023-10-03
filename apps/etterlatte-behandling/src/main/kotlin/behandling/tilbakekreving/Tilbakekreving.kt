@@ -117,10 +117,9 @@ data class Tilbakekrevingsbelop(
 
 fun List<KravgrunnlagPeriode>.tilTilbakekrevingPerioder(): List<TilbakekrevingPeriode> {
     return map { periode ->
-        val ytelse = periode.grunnlagsbeloep.find { it.klasseType == KlasseType.YTEL }
-        requireNotNull(ytelse)
-        val feilkonto = periode.grunnlagsbeloep.find { it.klasseType == KlasseType.FEIL }
-        requireNotNull(feilkonto)
+        val ytelse = requireNotNull(periode.grunnlagsbeloep.find { it.klasseType == KlasseType.YTEL }) { "Fant ingen ytelse" }
+
+        val feilkonto = requireNotNull(periode.grunnlagsbeloep.find { it.klasseType == KlasseType.FEIL }) { "Fant ikke feilkonto" }
 
         TilbakekrevingPeriode(
             maaned = periode.periode.fraOgMed,

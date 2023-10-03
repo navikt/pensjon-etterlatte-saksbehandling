@@ -68,14 +68,14 @@ internal fun Route.sakSystemRoutes(
 
     post("personer/saker/{type}") {
         withFoedselsnummerAndGradering(tilgangService) { fnr, gradering ->
-            val type: SakType = enumValueOf(requireNotNull(call.parameters["type"]))
+            val type: SakType = enumValueOf(requireNotNull(call.parameters["type"]) { "Må ha en Saktype for å finne eller opprette sak" })
             call.respond(inTransaction { sakService.finnEllerOpprettSak(fnr = fnr.value, type, gradering = gradering) })
         }
     }
 
     post("personer/getsak/{type}") {
         withFoedselsnummerInternal(tilgangService) { fnr ->
-            val type: SakType = enumValueOf(requireNotNull(call.parameters["type"]))
+            val type: SakType = enumValueOf(requireNotNull(call.parameters["type"]) { "Må ha en Saktype for å finne sak" })
             val sak = inTransaction { sakService.finnSak(fnr.value, type) }
             call.respond(sak ?: HttpStatusCode.NotFound)
         }

@@ -32,7 +32,6 @@ import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.opprettBehandling
 import no.nav.etterlatte.sak.SakDao
 import no.nav.etterlatte.saksbehandlerToken
-import org.junit.Ignore
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -96,7 +95,6 @@ internal class BehandlingDaoIntegrationTest {
     }
 
     @Test
-    @Ignore("Ignoreres inntil persongalleriet er 100% fjernet fra behandling")
     fun `skal opprette foerstegangsbehandling med persongalleri`() {
         val sak1 = sakRepo.opprettSak("123", SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr).id
 

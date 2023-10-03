@@ -102,8 +102,11 @@ internal class Fordeler(
 
                 is FordelerResultat.TrengerManuellJournalfoering -> {
                     logger.warn("Trenger manuell journalføring: ${resultat.melding}")
-                    context.publish(packet.leggPaaFordeltStatus(true).toJson())
-                    context.publish(packet.leggPaaTrengerManuellJournalfoering(true).toJson())
+                    context.publish(
+                        packet.leggPaaFordeltStatus(true)
+                            .leggPaaTrengerManuellJournalfoering(true).toJson(),
+                    )
+                    fordelerMetricLogger.logMetricFordelt()
                     lagStatistikkMelding(packet, resultat, SakType.BARNEPENSJON)
                         ?.let { context.publish(it) }
                 }

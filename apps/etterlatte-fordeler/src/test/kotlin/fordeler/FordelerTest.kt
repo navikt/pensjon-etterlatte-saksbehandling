@@ -19,6 +19,7 @@ import no.nav.etterlatte.readFile
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
@@ -88,6 +89,21 @@ internal class FordelerTest {
                 },
             )
         }
+    }
+
+    @Test
+    fun `skal fordele med trengerManuellJournalfoering hvis feil ved henting av personer fra pdl`() {
+        every { fordelerService.sjekkGyldighetForBehandling(any()) } returns
+            FordelerResultat.TrengerManuellJournalfoering("foo")
+        every { fordelerMetricLogger.logMetricFordelt() } just runs
+        val inspector = inspector.apply { sendTestMessage(BARNEPENSJON_SOKNAD) }.inspektør
+
+        assertEquals("soeknad_innsendt", inspector.message(0).get(EVENT_NAME_KEY).asText())
+        assertNull(inspector.message(0).get(GyldigSoeknadVurdert.sakIdKey))
+        assertEquals("true", inspector.message(0).get(FordelerFordelt.soeknadFordeltKey).asText())
+        assertEquals("true", inspector.message(0).get(FordelerFordelt.soeknadTrengerManuellJournalfoering).asText())
+
+        verify { fordelerMetricLogger.logMetricFordelt() }
     }
 
     @Test

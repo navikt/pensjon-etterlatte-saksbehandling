@@ -13,7 +13,10 @@ const MaanedVelger = (props: MaanedVelgerProps) => {
   const { value, onChange, label } = props
 
   const { monthpickerProps, inputProps } = useMonthpicker({
-    onMonthChange: (date: Date) => onChange(date),
+    onMonthChange: (date: Date) => {
+      date?.setDate(15) // Litt vilkårlig valgt dato midt i måneden for å slippe tidssone-problematikk
+      onChange(date)
+    },
     defaultSelected: value ?? undefined,
     locale: 'nb',
   } as UseMonthPickerOptions)

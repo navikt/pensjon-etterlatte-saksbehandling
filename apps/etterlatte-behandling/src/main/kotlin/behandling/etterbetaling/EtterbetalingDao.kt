@@ -41,4 +41,15 @@ class EtterbetalingDao(private val connection: () -> Connection) {
                 )
             }
         }
+
+    fun slettEtterbetaling(behandlingsId: UUID) {
+        with(connection()) {
+            val statement =
+                prepareStatement(
+                    "DELETE FROM etterbetaling WHERE behandling_id = ?::UUID".trimIndent(),
+                )
+            statement.setObject(1, behandlingsId)
+            statement.executeUpdate()
+        }
+    }
 }

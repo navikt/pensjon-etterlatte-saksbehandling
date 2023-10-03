@@ -1,6 +1,12 @@
 package no.nav.etterlatte
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import io.ktor.server.application.ApplicationCallPipeline
+import io.ktor.server.routing.Route
+import io.mockk.mockk
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.asContextElement
+import kotlinx.coroutines.withContext
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringStatus
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringsType
@@ -47,11 +53,45 @@ import no.nav.etterlatte.libs.common.person.VergemaalEllerFremtidsfullmakt
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
+import java.sql.Connection
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
+
+private val user = mockk<SaksbehandlerMedEnheterOgRoller>()
+
+fun Route.attachMockContext() {
+    intercept(ApplicationCallPipeline.Call) {
+        val context1 =
+            Context(
+                user,
+                object : DatabaseKontekst {
+                    override fun activeTx(): Connection {
+                        throw IllegalArgumentException()
+                    }
+
+                    override fun <T> inTransaction(
+                        gjenbruk: Boolean,
+                        block: () -> T,
+                    ): T {
+                        return block()
+                    }
+                },
+            )
+
+        withContext(
+            Dispatchers.Default +
+                Kontekst.asContextElement(
+                    value = context1,
+                ),
+        ) {
+            proceed()
+        }
+        Kontekst.remove()
+    }
+}
 
 fun opprettBehandling(
     type: BehandlingType,

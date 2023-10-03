@@ -1,7 +1,6 @@
 package no.nav.etterlatte.brev.model
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
-import com.fasterxml.jackson.annotation.JsonValue
 import no.nav.etterlatte.brev.adresse.RegoppslagResponseDTO
 import no.nav.etterlatte.brev.behandling.Behandling
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
@@ -11,7 +10,6 @@ import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
-import java.util.Locale
 import java.util.UUID
 
 typealias BrevID = Long
@@ -175,6 +173,7 @@ class BrevProsessTypeFactory(private val featureToggleService: FeatureToggleServ
                     true -> BrevProsessType.REDIGERBAR
                     else -> BrevProsessType.MANUELL
                 }
+
             VedtakType.AVSLAG,
             VedtakType.ENDRING,
             ->
@@ -182,6 +181,7 @@ class BrevProsessTypeFactory(private val featureToggleService: FeatureToggleServ
                     RevurderingAarsak.INNTEKTSENDRING,
                     RevurderingAarsak.ANNEN,
                     -> BrevProsessType.REDIGERBAR
+
                     else -> BrevProsessType.MANUELL
                 }
         }
@@ -219,20 +219,4 @@ class BrevProsessTypeFactory(private val featureToggleService: FeatureToggleServ
             VedtakType.AVSLAG -> BrevProsessType.MANUELL
         }
     }
-}
-
-enum class Spraak(
-    @get:JsonValue val verdi: String,
-) {
-    NB("nb"),
-    NN("nn"),
-    EN("en"),
-    ;
-
-    fun locale(): Locale =
-        when (this) {
-            NB -> Locale.forLanguageTag("no")
-            NN -> Locale.forLanguageTag("no")
-            EN -> Locale.UK
-        }
 }

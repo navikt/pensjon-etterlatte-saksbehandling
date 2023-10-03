@@ -12,6 +12,7 @@ import no.nav.etterlatte.brev.db.BrevRepository.Queries.OPPDATER_INNHOLD_PAYLOAD
 import no.nav.etterlatte.brev.db.BrevRepository.Queries.OPPDATER_INNHOLD_PAYLOAD_VEDLEGG
 import no.nav.etterlatte.brev.db.BrevRepository.Queries.OPPDATER_MOTTAKER_QUERY
 import no.nav.etterlatte.brev.db.BrevRepository.Queries.OPPRETT_BREV_QUERY
+import no.nav.etterlatte.brev.db.BrevRepository.Queries.OPPRETT_ELLER_OPPDATER_PDF_QUERY
 import no.nav.etterlatte.brev.db.BrevRepository.Queries.OPPRETT_HENDELSE_QUERY
 import no.nav.etterlatte.brev.db.BrevRepository.Queries.OPPRETT_INNHOLD_QUERY
 import no.nav.etterlatte.brev.db.BrevRepository.Queries.OPPRETT_MOTTAKER_QUERY
@@ -155,6 +156,29 @@ class BrevRepository(private val ds: DataSource) {
             ).also { oppdatert -> require(oppdatert == 1) }
 
             tx.lagreHendelse(id, Status.FERDIGSTILT)
+        }
+    }
+
+    fun lagrePdf(
+        id: BrevID,
+        pdf: Pdf,
+    ) {
+        using(sessionOf(ds)) {
+            it.run(
+                queryOf(
+                    OPPRETT_ELLER_OPPDATER_PDF_QUERY,
+                    mapOf(
+                        "brev_id" to id,
+                        "bytes" to pdf.bytes,
+                    ),
+                ).asUpdate,
+            ).also { oppdatert -> require(oppdatert == 1) }
+        }
+    }
+
+    fun settBrevFerdigstilt(id: BrevID) {
+        using(sessionOf(ds)) {
+            it.lagreHendelse(id, Status.FERDIGSTILT)
         }
     }
 
@@ -403,6 +427,12 @@ class BrevRepository(private val ds: DataSource) {
         const val OPPRETT_PDF_QUERY = """
             INSERT INTO pdf (brev_id, bytes) 
             VALUES (:brev_id, :bytes)
+        """
+
+        const val OPPRETT_ELLER_OPPDATER_PDF_QUERY = """
+            INSERT INTO pdf (brev_id, bytes) 
+            VALUES (:brev_id, :bytes)
+            ON CONFLICT (brev_id) DO UPDATE SET bytes = :bytes
         """
 
         const val OPPDATER_INNHOLD_PAYLOAD = """

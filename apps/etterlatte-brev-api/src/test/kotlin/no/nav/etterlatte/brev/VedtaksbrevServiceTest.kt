@@ -308,7 +308,7 @@ internal class VedtaksbrevServiceTest {
         }
 
         @Test
-        fun `PDF genereres, lagres, og ferdigstilles hvis vedtak er fattet`() {
+        fun `PDF genereres og lagres hvis vedtak er fattet`() {
             val brev = opprettBrev(Status.OPPRETTET, BrevProsessType.AUTOMATISK)
             val behandling = opprettBehandling(SakType.BARNEPENSJON, VedtakType.INNVILGELSE, VedtakStatus.FATTET_VEDTAK)
 
@@ -323,7 +323,37 @@ internal class VedtaksbrevServiceTest {
 
             verify {
                 db.hentBrev(brev.id)
-                db.lagrePdfOgFerdigstillBrev(brev.id, any())
+                db.lagrePdf(brev.id, any())
+            }
+
+            coVerify {
+                sakOgBehandlingService.hentBehandling(brev.sakId, brev.behandlingId!!, ATTESTANT)
+                adresseService.hentAvsender(any())
+                brevbaker.genererPdf(any())
+            }
+        }
+
+        @ParameterizedTest
+        @EnumSource(
+            VedtakStatus::class,
+            mode = EnumSource.Mode.EXCLUDE,
+            names = ["FATTET_VEDTAK"],
+        )
+        fun `PDF genereres, men lagres ikke på andre vedtaksstatuser enn fattet_vedtak`(vedtakStatus: VedtakStatus) {
+            val brev = opprettBrev(Status.OPPRETTET, BrevProsessType.AUTOMATISK)
+            val behandling = opprettBehandling(SakType.BARNEPENSJON, VedtakType.INNVILGELSE, vedtakStatus)
+
+            every { db.hentBrev(any()) } returns brev
+            coEvery { sakOgBehandlingService.hentBehandling(any(), any(), any()) } returns behandling
+            coEvery { adresseService.hentAvsender(any()) } returns opprettAvsender()
+            coEvery { brevbaker.genererPdf(any()) } returns opprettBrevbakerResponse()
+
+            runBlocking {
+                vedtaksbrevService.genererPdf(brev.id, brukerTokenInfo = ATTESTANT)
+            }
+
+            verify {
+                db.hentBrev(brev.id)
             }
 
             coVerify {
@@ -334,7 +364,71 @@ internal class VedtaksbrevServiceTest {
         }
 
         @Test
-        fun `AUTOMATISK - PDF genereres, men lagres ikke hvis saksbehandler sjekker sin egen sak med FATTET_VEDTAK`() {
+        fun `Ferdigstille vedtaksbrev som ATTESTANT - status vedtak fattet - ferdigstilles OK`() {
+            val brev = opprettBrev(Status.OPPRETTET, mockk())
+
+            every { db.hentBrevForBehandling(any()) } returns brev
+            coEvery { sakOgBehandlingService.hentVedtakSaksbehandlerOgStatus(any(), any()) } returns
+                Pair(
+                    SAKSBEHANDLER.ident(),
+                    VedtakStatus.FATTET_VEDTAK,
+                )
+
+            runBlocking {
+                vedtaksbrevService.ferdigstillVedtaksbrev(brev.behandlingId!!, brukerTokenInfo = ATTESTANT)
+            }
+
+            verify {
+                db.hentBrevForBehandling(brev.behandlingId!!)
+                db.settBrevFerdigstilt(brev.id)
+            }
+
+            coVerify {
+                sakOgBehandlingService.hentVedtakSaksbehandlerOgStatus(brev.behandlingId!!, any())
+            }
+        }
+
+        @Test
+        fun `Ferdigstille vedtaksbrev som SAKSBEHANDLER - vedtak fattet - skal kaste feil`() {
+            val brev = opprettBrev(Status.OPPRETTET, mockk())
+
+            every { db.hentBrevForBehandling(any()) } returns brev
+            coEvery { sakOgBehandlingService.hentVedtakSaksbehandlerOgStatus(any(), any()) } returns
+                Pair(
+                    SAKSBEHANDLER.ident(),
+                    VedtakStatus.FATTET_VEDTAK,
+                )
+
+            runBlocking {
+                assertThrows<IllegalStateException> {
+                    vedtaksbrevService.ferdigstillVedtaksbrev(brev.behandlingId!!, brukerTokenInfo = SAKSBEHANDLER)
+                }
+            }
+
+            verify {
+                db.hentBrevForBehandling(brev.behandlingId!!)
+            }
+
+            coVerify {
+                sakOgBehandlingService.hentVedtakSaksbehandlerOgStatus(brev.behandlingId!!, any())
+            }
+        }
+
+        @Test
+        fun `Ferdigstille allerede ferdigstilt brev`() {
+            val brev = opprettBrev(Status.FERDIGSTILT, mockk())
+
+            every { db.hentBrevForBehandling(any()) } returns brev
+
+            runBlocking {
+                vedtaksbrevService.ferdigstillVedtaksbrev(brev.behandlingId!!, brukerTokenInfo = SAKSBEHANDLER)
+            }
+
+            verify { db.hentBrevForBehandling(brev.behandlingId!!) }
+        }
+
+        @Test
+        fun `AUTOMATISK - PDF genereres, men kaster feil hvis saksbehandler prøver å ferdigstille egen sak`() {
             val brev = opprettBrev(Status.OPPRETTET, BrevProsessType.AUTOMATISK)
             val behandling = opprettBehandling(SakType.BARNEPENSJON, VedtakType.INNVILGELSE, VedtakStatus.FATTET_VEDTAK)
 
@@ -386,7 +480,7 @@ internal class VedtaksbrevServiceTest {
         }
 
         @Test
-        fun `MANUELL - PDF genereres, lagres, og ferdigstilles hvis vedtak er fattet`() {
+        fun `MANUELL - PDF genereres og lagres hvis vedtak er fattet`() {
             val behandling =
                 opprettBehandling(SakType.OMSTILLINGSSTOENAD, VedtakType.INNVILGELSE, VedtakStatus.FATTET_VEDTAK)
 
@@ -403,7 +497,7 @@ internal class VedtaksbrevServiceTest {
             verify {
                 db.hentBrev(brev.id)
                 db.hentBrevPayload(brev.id)
-                db.lagrePdfOgFerdigstillBrev(brev.id, any())
+                db.lagrePdf(brev.id, any())
             }
 
             coVerify {

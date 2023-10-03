@@ -1,7 +1,5 @@
 package no.nav.etterlatte.fordeler
 
-import fordeler.FordelerFeatureToggle
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.innsendtsoeknad.Spraak
 import no.nav.etterlatte.libs.common.innsendtsoeknad.barnepensjon.Barnepensjon
 import no.nav.etterlatte.libs.common.innsendtsoeknad.common.Avdoed
@@ -54,22 +52,17 @@ enum class FordelerKriterie(val forklaring: String) {
     FAMILIERELASJON_MANGLER_IDENT("En person tilknyttet søknaden mangler en ident i PDL"),
 }
 
-class FordelerKriterier(private val featureToggleService: FeatureToggleService) {
+class FordelerKriterier {
     fun sjekkMotKriterier(
         barn: Person,
         avdoed: Person,
         gjenlevende: Person?,
         soeknad: Barnepensjon,
-    ): FordelerKriterierResultat {
-        val kriterier = when (tillatAlleAktivert(featureToggleService)) {
-            true -> emptyList()
-            false -> fordelerKriterier(barn, avdoed, gjenlevende)
-        }
-        return kriterier
+    ): FordelerKriterierResultat =
+        fordelerKriterier(barn, avdoed, gjenlevende)
             .filter { it.blirOppfyltAv(soeknad) }
             .map { it.fordelerKriterie }
             .let { FordelerKriterierResultat(it.isEmpty(), it) }
-    }
 
     /**
      * Grunnlag for regler er også dokumenter på Confluence: https://confluence.adeo.no/display/TE/Fordelingsapp
@@ -113,9 +106,6 @@ class FordelerKriterier(private val featureToggleService: FeatureToggleService) 
             it.spraak != Spraak.NB
         },
     )
-
-    private fun tillatAlleAktivert(featureToggleService: FeatureToggleService) =
-        featureToggleService.isEnabled(FordelerFeatureToggle.TillatAlleScenarier, false)
 
     private fun ikkeForelderTilBarn(
         avdoed: Person,

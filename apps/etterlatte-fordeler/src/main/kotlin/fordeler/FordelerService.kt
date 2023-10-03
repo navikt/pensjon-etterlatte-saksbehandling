@@ -1,10 +1,12 @@
 package no.nav.etterlatte.fordeler
 
+import fordeler.FordelerFeatureToggle
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingKlient
 import no.nav.etterlatte.fordeler.FordelerResultat.GyldigForBehandling
 import no.nav.etterlatte.fordeler.FordelerResultat.IkkeGyldigForBehandling
 import no.nav.etterlatte.fordeler.FordelerResultat.UgyldigHendelse
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.innsendtsoeknad.barnepensjon.Barnepensjon
@@ -38,6 +40,8 @@ sealed class FordelerResultat {
     class UgyldigHendelse(val message: String) : FordelerResultat()
 
     class IkkeGyldigForBehandling(val ikkeOppfylteKriterier: List<FordelerKriterie>) : FordelerResultat()
+
+    class TrengerManuellJournalfoering(val melding: String) : FordelerResultat()
 }
 
 class FordelerService(
@@ -47,6 +51,7 @@ class FordelerService(
     private val behandlingKlient: BehandlingKlient,
     private val klokke: Clock = utcKlokke(),
     private val maxFordelingTilGjenny: Long,
+    private val featureToggleService: FeatureToggleService,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -56,8 +61,10 @@ class FordelerService(
                 "Hendelsen er ikke lenger gyldig (${hendelseGyldigTil(event)})",
             )
         }
+        val alleScenarierTillates = alleScenarierTillates(featureToggleService)
+
         return try {
-            fordelSoeknad(event).let {
+            fordelSoeknad(event, alleScenarierTillates).let {
                 when (it.fordeltTil) {
                     Vedtaksloesning.GJENNY -> GyldigForBehandling(it.gradering)
                     Vedtaksloesning.PESYS -> IkkeGyldigForBehandling(it.kriterier)
@@ -69,14 +76,15 @@ class FordelerService(
                     " Se sikkerlogg for detaljer",
             )
             sikkerLogg.info("Fikk en søknad med en familierelasjon som manglet ident", e)
-            IkkeGyldigForBehandling(listOf(FordelerKriterie.FAMILIERELASJON_MANGLER_IDENT))
+            FordelerResultat.TrengerManuellJournalfoering(e.message)
         } catch (e: PersonFinnesIkkeException) {
             UgyldigHendelse("Person fra søknaden med fnr=${e.fnr} finnes ikke i PDL")
         }
     }
 
-    private fun fordelSoeknad(event: FordelerEvent): Fordeling {
-        return finnEksisterendeFordeling(event.soeknadId) ?: nyFordeling(event).apply { lagre() }
+    private fun fordelSoeknad(event: FordelerEvent, tillatAlleScenarier: Boolean): Fordeling {
+        return finnEksisterendeFordeling(event.soeknadId)
+            ?: nyFordeling(event, tillatAlleScenarier).apply { lagre() }
     }
 
     private fun finnEksisterendeFordeling(soeknadId: Long): Fordeling? =
@@ -94,10 +102,9 @@ class FordelerService(
         fordelerRepository.lagreFordeling(FordeltTransient(soeknadId, fordeltTil.name, kriterier.map { it.name }))
     }
 
-    private fun nyFordeling(event: FordelerEvent): Fordeling =
+    private fun nyFordeling(event: FordelerEvent, tillatAlleScenarier: Boolean): Fordeling =
         runBlocking {
             val soeknad: Barnepensjon = event.soeknad
-
             val barn = pdlTjenesterKlient.hentPerson(hentBarnRequest(soeknad))
             val avdoed = pdlTjenesterKlient.hentPerson(hentAvdoedRequest(soeknad))
             val gjenlevende =
@@ -108,12 +115,12 @@ class FordelerService(
                 }
 
             fordelerKriterier.sjekkMotKriterier(barn, avdoed, gjenlevende, soeknad).let {
-                if (it.kandidat &&
+                if ((it.kandidat || tillatAlleScenarier) &&
                     fordelerRepository.antallFordeltTil(Vedtaksloesning.GJENNY.name) < maxFordelingTilGjenny
                 ) {
                     val adressebeskyttetPerson =
                         finnAdressebeskyttetPerson(
-                            mutableListOf(barn, avdoed, gjenlevende).filterNotNull(),
+                            listOf(barn, avdoed, gjenlevende).filterNotNull(),
                         )
                     Fordeling(
                         event.soeknadId,
@@ -126,6 +133,9 @@ class FordelerService(
                 }
             }
         }
+
+    private fun alleScenarierTillates(featureToggleService: FeatureToggleService) =
+        featureToggleService.isEnabled(FordelerFeatureToggle.TillatAlleScenarier, false)
 
     private fun finnAdressebeskyttetPerson(personer: List<Person>): Person? {
         return personer.firstOrNull {

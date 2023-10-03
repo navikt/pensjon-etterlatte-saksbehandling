@@ -29,11 +29,12 @@ internal class FordelerServiceTest {
     private val behandlingKlient = mockk<BehandlingKlient>()
     private val fordelerService =
         FordelerService(
-            FordelerKriterier(DummyFeatureToggleService()),
+            FordelerKriterier(),
             pdlTjenesterKlient,
             fordelerRepo,
             maxFordelingTilGjenny = Long.MAX_VALUE,
             behandlingKlient = behandlingKlient,
+            featureToggleService = DummyFeatureToggleService(),
         )
 
     @Test
@@ -166,11 +167,12 @@ internal class FordelerServiceTest {
     fun `Skal ikke fordele søknader til GJENNY utover et maksimum antall`() {
         val fordelerService =
             FordelerService(
-                FordelerKriterier(DummyFeatureToggleService()),
+                FordelerKriterier(),
                 pdlTjenesterKlient,
                 fordelerRepo,
                 maxFordelingTilGjenny = 10,
                 behandlingKlient = behandlingKlient,
+                featureToggleService = DummyFeatureToggleService(),
             )
 
         val barnFnr = Folkeregisteridentifikator.of(FNR_1)
@@ -217,11 +219,12 @@ internal class FordelerServiceTest {
     fun `returnerer UgyldigHendelse hvis en av barn, avdød, gjenlevende ikke finnes i PDL`() {
         val fordelerService =
             FordelerService(
-                FordelerKriterier(DummyFeatureToggleService()),
+                FordelerKriterier(),
                 pdlTjenesterKlient,
                 fordelerRepo,
                 maxFordelingTilGjenny = 10,
                 behandlingKlient = behandlingKlient,
+                featureToggleService = DummyFeatureToggleService(),
             )
         every { fordelerRepo.finnFordeling(any()) } returns null
         every { fordelerRepo.lagreFordeling(any()) } returns Unit
@@ -266,11 +269,12 @@ internal class FordelerServiceTest {
     fun `kaster feil hvis en av barn, avdød, gjenlevende gir en feilmedling som ikke er PersonFinnesIkkeException`() {
         val fordelerService =
             FordelerService(
-                FordelerKriterier(DummyFeatureToggleService()),
+                FordelerKriterier(),
                 pdlTjenesterKlient,
                 fordelerRepo,
                 maxFordelingTilGjenny = 10,
                 behandlingKlient = behandlingKlient,
+                featureToggleService = DummyFeatureToggleService(),
             )
         every { fordelerRepo.finnFordeling(any()) } returns null
         every { fordelerRepo.lagreFordeling(any()) } returns Unit

@@ -1,29 +1,23 @@
 package sak
 
 import io.ktor.client.HttpClient
-import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.get
 import io.ktor.client.request.header
-import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
-import io.ktor.serialization.jackson.JacksonConverter
-import io.ktor.server.application.log
 import io.ktor.server.config.HoconApplicationConfig
-import io.ktor.server.testing.testApplication
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.mockk
 import no.nav.etterlatte.attachMockContext
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
-import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
-import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.sak.SakService
 import no.nav.etterlatte.sak.TilgangService
 import no.nav.etterlatte.sak.sakSystemRoutes
 import no.nav.etterlatte.sak.sakWebRoutes
+import no.nav.etterlatte.withTestApplicationBuilder
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
@@ -91,36 +85,20 @@ internal class SakRoutesTest {
     }
 
     private fun withTestApplication(block: suspend (client: HttpClient) -> Unit) {
-        testApplication {
-            environment {
-                config = hoconApplicationConfig
-            }
-            application {
-                restModule(this.log) {
-                    attachMockContext()
-                    sakSystemRoutes(
-                        tilgangService,
-                        sakService,
-                        behandlingService,
-                    )
-                    sakWebRoutes(
-                        tilgangService,
-                        sakService,
-                        behandlingService,
-                        grunnlagsendringshendelseService,
-                        oppgaveService,
-                    )
-                }
-            }
-
-            val client =
-                createClient {
-                    install(ContentNegotiation) {
-                        register(ContentType.Application.Json, JacksonConverter(objectMapper))
-                    }
-                }
-
-            block(client)
+        withTestApplicationBuilder(block, hoconApplicationConfig) {
+            attachMockContext()
+            sakSystemRoutes(
+                tilgangService,
+                sakService,
+                behandlingService,
+            )
+            sakWebRoutes(
+                tilgangService,
+                sakService,
+                behandlingService,
+                grunnlagsendringshendelseService,
+                oppgaveService,
+            )
         }
     }
 

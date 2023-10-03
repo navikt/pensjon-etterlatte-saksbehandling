@@ -38,9 +38,9 @@ class SakTilgangDao(private val datasource: DataSource) {
     }
 
     fun hentSakMedGarderingOgSkjermingPaaBehandling(behandlingId: String): SakMedGraderingOgSkjermet? {
-        datasource.connection.use { it ->
+        datasource.connection.use { connection ->
             val statement =
-                it.prepareStatement(
+                connection.prepareStatement(
                     "SELECT s.id, adressebeskyttelse, erSkjermet FROM behandling b" +
                         " INNER JOIN sak s ON b.sak_id = s.id WHERE b.id = ?::uuid",
                 )

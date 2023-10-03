@@ -24,6 +24,7 @@ import no.nav.etterlatte.libs.common.FoedselsnummerDTO
 import no.nav.etterlatte.libs.common.KLAGEID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.OPPGAVEID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
+import no.nav.etterlatte.libs.common.TILBAKEKREVINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
@@ -39,6 +40,8 @@ class PluginConfiguration {
     var harTilgangTilOppgave: (oppgaveId: String, saksbehandlerMedRoller: SaksbehandlerMedRoller)
     -> Boolean = { _, _ -> false }
     var harTilgangTilKlage: (klageId: String, saksbehandlerMedRoller: SaksbehandlerMedRoller)
+    -> Boolean = { _, _ -> false }
+    var harTilgangTilTilbakekreving: (tilbakekrevingId: String, saksbehandlerMedRoller: SaksbehandlerMedRoller)
     -> Boolean = { _, _ -> false }
     var saksbehandlerGroupIdsByKey: Map<AzureGroup, String> = emptyMap()
 }
@@ -118,6 +121,17 @@ val adressebeskyttelsePlugin: RouteScopedPlugin<PluginConfiguration> =
                 if (!klageId.isNullOrEmpty()) {
                     if (!pluginConfig.harTilgangTilKlage(
                             klageId,
+                            SaksbehandlerMedRoller(bruker, saksbehandlerGroupIdsByKey),
+                        )
+                    ) {
+                        call.respond(HttpStatusCode.NotFound)
+                    }
+                    return@on
+                }
+                val tilbakekrevingId = call.parameters[TILBAKEKREVINGID_CALL_PARAMETER]
+                if (!tilbakekrevingId.isNullOrEmpty()) {
+                    if (!pluginConfig.harTilgangTilTilbakekreving(
+                            tilbakekrevingId,
                             SaksbehandlerMedRoller(bruker, saksbehandlerGroupIdsByKey),
                         )
                     ) {

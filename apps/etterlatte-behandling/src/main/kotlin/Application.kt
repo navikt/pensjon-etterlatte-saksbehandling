@@ -153,6 +153,9 @@ internal fun Application.module(context: ApplicationContext) {
                         saksbehandlerMedRoller,
                     )
                 }
+                harTilgangTilTilbakekreving = { tilbakekrevingId, saksbehandlerMedRoller ->
+                    tilgangService.harTilgangTilTilbakekreving(tilbakekrevingId, saksbehandlerMedRoller)
+                }
             }
         }
     }

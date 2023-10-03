@@ -69,6 +69,7 @@ import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
 
+// Fin å bruke der servicer er mocket, ellers kan man bruke application { module(applicationContext) }
 fun withTestApplicationBuilder(
     block: suspend (client: HttpClient) -> Unit,
     hoconApplicationConfig: HoconApplicationConfig,

@@ -10,10 +10,8 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.contentType
 import io.ktor.serialization.jackson.JacksonConverter
-import io.ktor.server.application.ApplicationCallPipeline
 import io.ktor.server.application.log
 import io.ktor.server.config.HoconApplicationConfig
-import io.ktor.server.routing.Route
 import io.ktor.server.testing.testApplication
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
@@ -22,13 +20,7 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
 import io.mockk.verify
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.asContextElement
-import kotlinx.coroutines.withContext
-import no.nav.etterlatte.Context
-import no.nav.etterlatte.DatabaseKontekst
-import no.nav.etterlatte.Kontekst
-import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
+import no.nav.etterlatte.attachMockContext
 import no.nav.etterlatte.behandling.BehandlingFactory
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.BoddEllerArbeidetUtlandetRequest
@@ -57,7 +49,6 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import testsupport.buildTestApplicationConfigurationForOauth
-import java.sql.Connection
 import java.time.YearMonth
 import java.util.UUID
 
@@ -209,40 +200,6 @@ internal class BehandlingRoutesTest {
             enhetId: String,
         ): Boolean {
             return true
-        }
-    }
-
-    private val user = mockk<SaksbehandlerMedEnheterOgRoller>()
-
-    // Felles sted for denne?
-    private fun Route.attachMockContext() {
-        intercept(ApplicationCallPipeline.Call) {
-            val context1 =
-                Context(
-                    user,
-                    object : DatabaseKontekst {
-                        override fun activeTx(): Connection {
-                            throw IllegalArgumentException()
-                        }
-
-                        override fun <T> inTransaction(
-                            gjenbruk: Boolean,
-                            block: () -> T,
-                        ): T {
-                            return block()
-                        }
-                    },
-                )
-
-            withContext(
-                Dispatchers.Default +
-                    Kontekst.asContextElement(
-                        value = context1,
-                    ),
-            ) {
-                proceed()
-            }
-            Kontekst.remove()
         }
     }
 

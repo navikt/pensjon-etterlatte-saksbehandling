@@ -13,6 +13,7 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.event.FordelerFordelt
 import no.nav.etterlatte.libs.common.event.GyldigSoeknadVurdert
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.rapidsandrivers.CORRELATION_ID_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.readFile
@@ -88,6 +89,22 @@ internal class FordelerTest {
                 },
             )
         }
+    }
+
+    @Test
+    fun `skal fordele med trengerManuellJournalfoering hvis feil ved henting av personer fra pdl`() {
+        every { fordelerService.sjekkGyldighetForBehandling(any()) } returns
+            FordelerResultat.TrengerManuellJournalfoering("foo")
+        every { fordelerMetricLogger.logMetricFordelt() } just runs
+        every { fordelerService.hentSakId(any(), any<SakType>(), any<AdressebeskyttelseGradering>()) } returns 1L
+        val inspector = inspector.apply { sendTestMessage(BARNEPENSJON_SOKNAD) }.inspektør
+
+        assertEquals("soeknad_innsendt", inspector.message(0).get(EVENT_NAME_KEY).asText())
+        assertEquals(1, inspector.message(0).get(GyldigSoeknadVurdert.sakIdKey).intValue())
+        assertEquals("true", inspector.message(0).get(FordelerFordelt.soeknadFordeltKey).asText())
+        assertEquals("true", inspector.message(0).get(FordelerFordelt.soeknadTrengerManuellJournalfoering).asText())
+
+        verify { fordelerMetricLogger.logMetricFordelt() }
     }
 
     @Test

@@ -10,6 +10,7 @@ import no.nav.etterlatte.libs.common.event.SoeknadInnsendt
 import no.nav.etterlatte.libs.common.innsendtsoeknad.barnepensjon.Barnepensjon
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.rapidsandrivers.CORRELATION_ID_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.FEILENDE_KRITERIER_KEY
@@ -70,19 +71,7 @@ internal class Fordeler(
             when (val resultat = fordelerService.sjekkGyldighetForBehandling(packet.toFordelerEvent())) {
                 is FordelerResultat.GyldigForBehandling -> {
                     logger.info("Soknad ${packet.soeknadId()} er gyldig for fordeling, henter sakId for Gjenny")
-                    try {
-                        // Denne har ansvaret for å sette gradering
-                        fordelerService.hentSakId(
-                            packet[SoeknadInnsendt.fnrSoekerKey].textValue(),
-                            SakType.BARNEPENSJON,
-                            resultat.gradering,
-                        )
-                    } catch (e: ResponseException) {
-                        logger.error("Avbrutt fordeling - kunne ikke hente sakId: ${e.message}")
-
-                        // Svelg slik at Innsendt søknad vil retry
-                        null
-                    }?.let { sakIdForSoeknad ->
+                    hentSakId(packet, resultat.gradering)?.let { sakIdForSoeknad ->
                         packet.leggPaaSakId(sakIdForSoeknad)
                         context.publish(packet.leggPaaFordeltStatus(true).toJson())
 
@@ -96,6 +85,22 @@ internal class Fordeler(
                     logger.info("Avbrutt fordeling: ${resultat.ikkeOppfylteKriterier}")
                     context.publish(packet.leggPaaFordeltStatus(false).toJson())
                     fordelerMetricLogger.logMetricIkkeFordelt(resultat)
+                    lagStatistikkMelding(packet, resultat, SakType.BARNEPENSJON)
+                        ?.let { context.publish(it) }
+                }
+
+                is FordelerResultat.TrengerManuellJournalfoering -> {
+                    logger.warn("Trenger manuell journalføring: ${resultat.melding}")
+                    hentSakId(packet, AdressebeskyttelseGradering.UGRADERT)?.let { sakIdForSoeknad ->
+                        context.publish(
+                            packet
+                                .leggPaaSakId(sakIdForSoeknad)
+                                .leggPaaFordeltStatus(true)
+                                .leggPaaTrengerManuellJournalfoering(true).toJson(),
+                        )
+                    }
+
+                    fordelerMetricLogger.logMetricFordelt()
                     lagStatistikkMelding(packet, resultat, SakType.BARNEPENSJON)
                         ?.let { context.publish(it) }
                 }
@@ -117,6 +122,23 @@ internal class Fordeler(
         }
     }
 
+    private fun hentSakId(
+        packet: JsonMessage,
+        gradering: AdressebeskyttelseGradering?,
+    ): Long? = try {
+        // Denne har ansvaret for å sette gradering
+        fordelerService.hentSakId(
+            packet[SoeknadInnsendt.fnrSoekerKey].textValue(),
+            SakType.BARNEPENSJON,
+            gradering,
+        )
+    } catch (e: ResponseException) {
+        logger.error("Avbrutt fordeling - kunne ikke hente sakId: ${e.message}")
+
+        // Svelg slik at Innsendt søknad vil retry
+        null
+    }
+
     private fun JsonMessage.toFordelerEvent() =
         FordelerEvent(
             soeknadId = soeknadId(),
@@ -132,6 +154,7 @@ internal class Fordeler(
         val (resultat, ikkeOppfylteKriterier) =
             when (fordelerResultat) {
                 is FordelerResultat.GyldigForBehandling -> true to null
+                is FordelerResultat.TrengerManuellJournalfoering -> true to null
                 is FordelerResultat.IkkeGyldigForBehandling ->
                     // Sjekker eksplisitt opp mot ikkeOppfylteKriterier for om det er gyldig for behandling,
                     // siden det er logikk for å begrense hvor mange saker vi tar inn i pilot
@@ -162,10 +185,23 @@ internal class Fordeler(
         return this
     }
 
+    private fun JsonMessage.leggPaaTrengerManuellJournalfoering(value: Boolean): JsonMessage {
+        this[FordelerFordelt.soeknadTrengerManuellJournalfoering] = value
+        correlationId = getCorrelationId()
+        return this
+    }
+
     private fun JsonMessage.leggPaaSakId(sakId: Long): JsonMessage =
         this.apply {
             this[GyldigSoeknadVurdert.sakIdKey] = sakId
         }
 
-    private fun JsonMessage.soeknadId(): Long = get(SoeknadInnsendt.lagretSoeknadIdKey).longValue()
+    private fun JsonMessage.soeknadId(): Long {
+        val longValue = get(SoeknadInnsendt.lagretSoeknadIdKey).longValue()
+        return if (longValue != 0L) {
+            longValue
+        } else {
+            System.currentTimeMillis() // Slik at det gjøres en ny fordeling for testdata-søknader
+        }
+    }
 }

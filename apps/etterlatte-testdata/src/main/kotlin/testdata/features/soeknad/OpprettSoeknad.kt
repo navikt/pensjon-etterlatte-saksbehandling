@@ -104,7 +104,7 @@ private fun opprettSoeknadJson(
     val soeker: String
     val eventName: String
     if (erOmstilling) {
-        eventName = "soeknad_innsendt"
+        eventName = SoeknadInnsendt.eventNameInnsendt
         soeker = gjenlevendeFnr
         skjemaInfo =
             opprettSkjemaInfoOmstillingsstoenad(
@@ -113,7 +113,7 @@ private fun opprettSoeknadJson(
                 Tidspunkt.now().toLocalDatetimeUTC(),
             )
     } else {
-        eventName = SoeknadInnsendt.eventNameBehandlingBehov
+        eventName = SoeknadInnsendt.eventNameInnsendt
         soeker = barnFnr
         skjemaInfo =
             opprettSkjemaInfoBarnepensjon(

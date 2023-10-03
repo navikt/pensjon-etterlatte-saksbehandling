@@ -17,6 +17,7 @@ import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlientImpl
 import no.nav.etterlatte.vedtaksvurdering.klienter.BeregningKlientImpl
 import no.nav.etterlatte.vedtaksvurdering.klienter.VilkaarsvurderingKlientImpl
 import no.nav.etterlatte.vedtaksvurdering.samordningsvedtakRoute
+import no.nav.etterlatte.vedtaksvurdering.tilbakekrevingvedtakRoute
 import no.nav.etterlatte.vedtaksvurdering.vedtaksvurderingRoute
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -58,6 +59,7 @@ class ApplicationBuilder {
                     vedtaksvurderingRoute(vedtaksvurderingService, behandlingKlient)
                     automatiskBehandlingRoutes(vedtaksvurderingService, behandlingKlient)
                     samordningsvedtakRoute(vedtaksvurderingService)
+                    tilbakekrevingvedtakRoute()
                 }
             }
             .build()

@@ -23,6 +23,8 @@ import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
 import no.nav.etterlatte.behandling.klienter.NavAnsattKlient
 import no.nav.etterlatte.behandling.klienter.Norg2Klient
 import no.nav.etterlatte.behandling.klienter.OpprettetBrevDto
+import no.nav.etterlatte.behandling.klienter.VedtakKlient
+import no.nav.etterlatte.behandling.tilbakekreving.Tilbakekreving
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.config.ApplicationContext
 import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
@@ -43,6 +45,7 @@ import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.toObjectNode
+import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
 import no.nav.etterlatte.libs.database.POSTGRES_VERSION
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
@@ -118,6 +121,7 @@ abstract class BehandlingIntegrationTest {
                             mapOf(
                                 "pdltjenester.url" to "http://localhost",
                                 "grunnlag.resource.url" to "http://localhost",
+                                "vedtak.resource.url" to "http://localhost",
                             ),
                     ),
                 rapid = TestProdusent(),
@@ -129,6 +133,7 @@ abstract class BehandlingIntegrationTest {
                 navAnsattKlient = NavAnsattKlientTest(),
                 norg2Klient = norg2Klient ?: Norg2KlientTest(),
                 grunnlagKlientObo = GrunnlagKlientTest(),
+                vedtakKlient = VedtakKlientTest(),
                 gosysOppgaveKlient = GosysOppgaveKlientTest(),
                 brevApiHttpClient = BrevApiKlientTest(),
             ).also {
@@ -418,6 +423,16 @@ class GrunnlagKlientTest : GrunnlagKlient {
                     listOf("gjenlevende"),
                 ),
         )
+    }
+}
+
+class VedtakKlientTest : VedtakKlient {
+    override suspend fun fattVedtakTilbakekreving(
+        tilbakekreving: Tilbakekreving,
+        HvedtakFattet: VedtakFattet,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Long {
+        return 123L
     }
 }
 

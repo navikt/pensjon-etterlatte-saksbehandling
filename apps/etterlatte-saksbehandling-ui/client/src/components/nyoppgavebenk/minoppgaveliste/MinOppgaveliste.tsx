@@ -1,4 +1,4 @@
-import { erOppgaveRedigerbar, OppgaveDTOny } from '~shared/api/oppgaverny'
+import { erOppgaveRedigerbar, OppgaveDTO } from '~shared/api/oppgaver'
 import { Pagination, Select, Table } from '@navikt/ds-react'
 import { formaterStringDato } from '~utils/formattering'
 import { FristHandlinger } from '~components/nyoppgavebenk/minoppgaveliste/FristHandlinger'
@@ -22,7 +22,7 @@ const SelectWrapper = styled.div`
 `
 
 interface Props {
-  oppgaver: OppgaveDTOny[]
+  oppgaver: OppgaveDTO[]
   hentOppgaver: () => void
   oppdaterTildeling: (id: string, saksbehandler: string | null) => void
 }

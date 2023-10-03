@@ -1,4 +1,4 @@
-import { OppgaveDTOny, OppgaveKilde, Oppgavestatus, Oppgavetype } from '~shared/api/oppgaverny'
+import { OppgaveDTO, OppgaveKilde, Oppgavestatus, Oppgavetype } from '~shared/api/oppgaver'
 import { isBefore } from 'date-fns'
 
 export const SAKSBEHANDLERFILTER = {
@@ -8,7 +8,7 @@ export const SAKSBEHANDLERFILTER = {
 }
 export type SaksbehandlerFilterKeys = keyof typeof SAKSBEHANDLERFILTER
 
-function filtrerSaksbehandler(saksbehandlerFilter: SaksbehandlerFilterKeys, oppgaver: OppgaveDTOny[]): OppgaveDTOny[] {
+function filtrerSaksbehandler(saksbehandlerFilter: SaksbehandlerFilterKeys, oppgaver: OppgaveDTO[]): OppgaveDTO[] {
   if (saksbehandlerFilter === 'visAlle') {
     return oppgaver
   } else {
@@ -35,7 +35,7 @@ export const ENHETFILTER = {
 
 export type EnhetFilterKeys = keyof typeof ENHETFILTER
 
-function filtrerEnhet(enhetsFilter: EnhetFilterKeys, oppgaver: OppgaveDTOny[]): OppgaveDTOny[] {
+function filtrerEnhet(enhetsFilter: EnhetFilterKeys, oppgaver: OppgaveDTO[]): OppgaveDTO[] {
   if (enhetsFilter === 'visAlle') {
     return oppgaver
   } else {
@@ -52,7 +52,7 @@ export const YTELSEFILTER = {
 
 export type YtelseFilterKeys = keyof typeof YTELSEFILTER
 
-function filtrerYtelse(ytelseFilter: YtelseFilterKeys, oppgaver: OppgaveDTOny[]): OppgaveDTOny[] {
+function filtrerYtelse(ytelseFilter: YtelseFilterKeys, oppgaver: OppgaveDTO[]): OppgaveDTO[] {
   if (ytelseFilter === 'visAlle') {
     return oppgaver
   } else {
@@ -74,8 +74,8 @@ export const OPPGAVESTATUSFILTER: Record<OppgavestatusFilterKeys, string> = {
 
 export function filtrerOppgaveStatus(
   oppgavestatusFilterKeys: OppgavestatusFilterKeys,
-  oppgaver: OppgaveDTOny[]
-): OppgaveDTOny[] {
+  oppgaver: OppgaveDTO[]
+): OppgaveDTO[] {
   if (oppgavestatusFilterKeys === 'visAlle') {
     return oppgaver
   } else {
@@ -107,10 +107,7 @@ export const oppgavetypefilter = (kanBrukeKlage: boolean): Array<[OppgavetypeFil
   return entries
 }
 
-export function filtrerOppgaveType(
-  oppgavetypeFilterKeys: OppgavetypeFilterKeys,
-  oppgaver: OppgaveDTOny[]
-): OppgaveDTOny[] {
+export function filtrerOppgaveType(oppgavetypeFilterKeys: OppgavetypeFilterKeys, oppgaver: OppgaveDTO[]): OppgaveDTO[] {
   if (oppgavetypeFilterKeys === 'visAlle') {
     return oppgaver
   } else {
@@ -127,7 +124,7 @@ export const OPPGAVEKILDEFILTER: Record<OppgaveKildeFilterKeys, string> = {
   GENERELL_BEHANDLING: 'Generell behandling',
 }
 
-function filtrerOppgavekilde(oppgaveKildeFilterKeys: OppgaveKildeFilterKeys, oppgaver: OppgaveDTOny[]): OppgaveDTOny[] {
+function filtrerOppgavekilde(oppgaveKildeFilterKeys: OppgaveKildeFilterKeys, oppgaver: OppgaveDTO[]): OppgaveDTO[] {
   if (oppgaveKildeFilterKeys === 'visAlle') {
     return oppgaver
   } else {
@@ -135,7 +132,7 @@ function filtrerOppgavekilde(oppgaveKildeFilterKeys: OppgaveKildeFilterKeys, opp
   }
 }
 
-function finnFnrIOppgaver(fnr: string, oppgaver: OppgaveDTOny[]): OppgaveDTOny[] {
+function finnFnrIOppgaver(fnr: string, oppgaver: OppgaveDTO[]): OppgaveDTO[] {
   if (fnr && fnr.length > 0) {
     return oppgaver.filter((o) => o.fnr.includes(fnr))
   } else {
@@ -151,7 +148,7 @@ export const FRISTFILTER = {
   manglerFrist: 'Mangler frist',
 }
 
-export function filtrerFrist(fristFilterKeys: FristFilterKeys, oppgaver: OppgaveDTOny[]) {
+export function filtrerFrist(fristFilterKeys: FristFilterKeys, oppgaver: OppgaveDTO[]) {
   if (fristFilterKeys === 'visAlle') return oppgaver
   else if (fristFilterKeys === 'manglerFrist') {
     const oppgaverUtenFrist = oppgaver.filter((o) => !o.frist)
@@ -173,9 +170,9 @@ export function filtrerOppgaver(
   oppgavestatusFilter: OppgavestatusFilterKeys,
   oppgavetypeFilter: OppgavetypeFilterKeys,
   oppgaveKildeFilterKeys: OppgaveKildeFilterKeys,
-  oppgaver: OppgaveDTOny[],
+  oppgaver: OppgaveDTO[],
   fnr: string
-): OppgaveDTOny[] {
+): OppgaveDTO[] {
   const enhetFiltrert = filtrerEnhet(enhetsFilter, oppgaver)
   const saksbehandlerFiltrert = filtrerSaksbehandler(saksbehandlerFilter, enhetFiltrert)
   const ytelseFiltrert = filtrerYtelse(ytelseFilter, saksbehandlerFiltrert)

@@ -1,7 +1,7 @@
 import { apiClient, ApiResponse } from '~shared/api/apiClient'
 import { SakType } from '~shared/types/sak'
 
-export interface OppgaveDTOny {
+export interface OppgaveDTO {
   id: string
   status: Oppgavestatus
   enhet: string
@@ -39,10 +39,10 @@ export type Oppgavetype =
 
 export const erOppgaveRedigerbar = (status: Oppgavestatus): boolean => ['NY', 'UNDER_BEHANDLING'].includes(status)
 
-export const hentNyeOppgaver = async (): Promise<ApiResponse<OppgaveDTOny[]>> => apiClient.get('/nyeoppgaver')
-export const hentGosysOppgaver = async (): Promise<ApiResponse<OppgaveDTOny[]>> => apiClient.get('/nyeoppgaver/gosys')
-export const hentGosysOppgave = async (id: number): Promise<ApiResponse<OppgaveDTOny>> =>
-  apiClient.get(`/nyeoppgaver/gosys/${id}`)
+export const hentOppgaver = async (): Promise<ApiResponse<OppgaveDTO[]>> => apiClient.get('/oppgaver')
+export const hentGosysOppgaver = async (): Promise<ApiResponse<OppgaveDTO[]>> => apiClient.get('/oppgaver/gosys')
+export const hentGosysOppgave = async (id: number): Promise<ApiResponse<OppgaveDTO>> =>
+  apiClient.get(`/oppgaver/gosys/${id}`)
 
 export interface SaksbehandlerEndringDto {
   saksbehandler: string
@@ -55,9 +55,9 @@ export const tildelSaksbehandlerApi = async (args: {
   nysaksbehandler: SaksbehandlerEndringDto
 }): Promise<ApiResponse<void>> => {
   if (args.type == 'GOSYS') {
-    return apiClient.post(`/nyeoppgaver/gosys/${args.oppgaveId}/tildel-saksbehandler`, { ...args.nysaksbehandler })
+    return apiClient.post(`/oppgaver/gosys/${args.oppgaveId}/tildel-saksbehandler`, { ...args.nysaksbehandler })
   } else {
-    return apiClient.post(`/nyeoppgaver/${args.oppgaveId}/tildel-saksbehandler`, { ...args.nysaksbehandler })
+    return apiClient.post(`/oppgaver/${args.oppgaveId}/tildel-saksbehandler`, { ...args.nysaksbehandler })
   }
 }
 
@@ -67,9 +67,9 @@ export const byttSaksbehandlerApi = async (args: {
   nysaksbehandler: SaksbehandlerEndringDto
 }): Promise<ApiResponse<void>> => {
   if (args.type == 'GOSYS') {
-    return apiClient.post(`/nyeoppgaver/gosys/${args.oppgaveId}/tildel-saksbehandler`, { ...args.nysaksbehandler })
+    return apiClient.post(`/oppgaver/gosys/${args.oppgaveId}/tildel-saksbehandler`, { ...args.nysaksbehandler })
   } else {
-    return apiClient.post(`/nyeoppgaver/${args.oppgaveId}/bytt-saksbehandler`, { ...args.nysaksbehandler })
+    return apiClient.post(`/oppgaver/${args.oppgaveId}/bytt-saksbehandler`, { ...args.nysaksbehandler })
   }
 }
 
@@ -80,12 +80,12 @@ export const fjernSaksbehandlerApi = async (args: {
   versjon: string | null
 }): Promise<ApiResponse<void>> => {
   if (args.type == 'GOSYS') {
-    return apiClient.post(`/nyeoppgaver/gosys/${args.oppgaveId}/tildel-saksbehandler`, {
+    return apiClient.post(`/oppgaver/gosys/${args.oppgaveId}/tildel-saksbehandler`, {
       saksbehandler: '',
       versjon: args.versjon,
     })
   } else {
-    return apiClient.delete(`/nyeoppgaver/${args.oppgaveId}/saksbehandler`)
+    return apiClient.delete(`/oppgaver/${args.oppgaveId}/saksbehandler`)
   }
 }
 
@@ -99,17 +99,16 @@ export const redigerFristApi = async (args: {
   redigerFristRequest: RedigerFristRequest
 }): Promise<ApiResponse<void>> => {
   if (args.type == 'GOSYS') {
-    return apiClient.post(`/nyeoppgaver/gosys/${args.oppgaveId}/endre-frist`, { ...args.redigerFristRequest })
+    return apiClient.post(`/oppgaver/gosys/${args.oppgaveId}/endre-frist`, { ...args.redigerFristRequest })
   } else {
-    return apiClient.put(`/nyeoppgaver/${args.oppgaveId}/frist`, { ...args.redigerFristRequest })
+    return apiClient.put(`/oppgaver/${args.oppgaveId}/frist`, { ...args.redigerFristRequest })
   }
 }
 
 export const hentOppgaveForBehandlingUnderBehandlingIkkeattestert = async (args: {
   behandlingId: string
-}): Promise<ApiResponse<string>> => apiClient.get(`/nyeoppgaver/behandling/${args.behandlingId}/hentsaksbehandler`)
+}): Promise<ApiResponse<string>> => apiClient.get(`/oppgaver/behandling/${args.behandlingId}/hentsaksbehandler`)
 
 export const hentSaksbehandlerForOppgaveUnderArbeid = async (args: {
   behandlingId: string
-}): Promise<ApiResponse<string | null>> =>
-  apiClient.get(`/nyeoppgaver/behandling/${args.behandlingId}/oppgaveunderarbeid`)
+}): Promise<ApiResponse<string | null>> => apiClient.get(`/oppgaver/behandling/${args.behandlingId}/oppgaveunderarbeid`)

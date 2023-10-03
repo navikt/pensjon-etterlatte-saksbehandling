@@ -1,10 +1,10 @@
-import { OppgaveDTOny } from '~shared/api/oppgaverny'
+import { OppgaveDTO } from '~shared/api/oppgaver'
 import { Button } from '@navikt/ds-react'
 import { EyeIcon } from '@navikt/aksel-icons'
 import { useAppSelector } from '~store/Store'
 import { GosysOppgaveModal } from '~components/nyoppgavebenk/GosysOppgaveModal'
 
-export const HandlingerForOppgave = ({ oppgave }: { oppgave: OppgaveDTOny }) => {
+export const HandlingerForOppgave = ({ oppgave }: { oppgave: OppgaveDTO }) => {
   const user = useAppSelector((state) => state.saksbehandlerReducer.saksbehandler)
 
   const { type, kilde, fnr, saksbehandler, referanse } = oppgave

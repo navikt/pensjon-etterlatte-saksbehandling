@@ -162,14 +162,14 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
             }
 
             val oppgaver: List<OppgaveIntern> =
-                client.get("/api/nyeoppgaver") {
+                client.get("/api/oppgaver") {
                     addAuthToken(tokenSaksbehandler)
                     header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 }.also {
                     assertEquals(HttpStatusCode.OK, it.status)
                 }.body()
             val oppgaverforbehandling = oppgaver.filter { it.referanse == behandlingId.toString() }
-            client.post("/api/nyeoppgaver/${oppgaverforbehandling[0].id}/tildel-saksbehandler/") {
+            client.post("/api/oppgaver/${oppgaverforbehandling[0].id}/tildel-saksbehandler/") {
                 addAuthToken(tokenSaksbehandler)
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(SaksbehandlerEndringDto("Saksbehandler01"))
@@ -326,7 +326,7 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
             }
 
             val oppgaveroppgaveliste: List<OppgaveIntern> =
-                client.get("/api/nyeoppgaver") {
+                client.get("/api/oppgaver") {
                     addAuthToken(tokenAttestant)
                     header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 }.also {
@@ -334,7 +334,7 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
                 }.body()
             val oppgaverforattestant = oppgaveroppgaveliste.filter { it.referanse == behandlingId.toString() }
             val saksbehandler02 = "Saksbehandler02"
-            client.post("/api/nyeoppgaver/${oppgaverforattestant[0].id}/tildel-saksbehandler") {
+            client.post("/api/oppgaver/${oppgaverforattestant[0].id}/tildel-saksbehandler") {
                 addAuthToken(tokenAttestant)
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(SaksbehandlerEndringDto(saksbehandler02))
@@ -441,14 +441,14 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
                 }.body<Klage>()
 
             val oppgaverKlage: List<OppgaveIntern> =
-                client.get("/api/nyeoppgaver") {
+                client.get("/api/oppgaver") {
                     addAuthToken(tokenSaksbehandler)
                     header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 }.also {
                     assertEquals(HttpStatusCode.OK, it.status)
                 }.body()
             val oppgaverforbehandlingKlage = oppgaverKlage.filter { it.referanse == klage.id.toString() }
-            client.post("/api/nyeoppgaver/${oppgaverforbehandlingKlage[0].id}/tildel-saksbehandler/") {
+            client.post("/api/oppgaver/${oppgaverforbehandlingKlage[0].id}/tildel-saksbehandler/") {
                 addAuthToken(tokenSaksbehandler)
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(SaksbehandlerEndringDto("Saksbehandler01"))

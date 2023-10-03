@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Alert, BodyLong, BodyShort, Button, Heading, Modal } from '@navikt/ds-react'
 import { SaktypeTag } from '~components/nyoppgavebenk/Tags'
-import { OppgaveDTOny } from '~shared/api/oppgaverny'
+import { OppgaveDTO } from '~shared/api/oppgaver'
 import { isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
 import { opprettBehandling } from '~shared/api/behandling'
 import { NyBehandlingRequest } from '~shared/types/IDetaljertBehandling'
@@ -9,7 +9,7 @@ import { useNavigate } from 'react-router-dom'
 import { FlexRow } from '~shared/styled'
 
 interface ModalProps {
-  oppgave: OppgaveDTOny
+  oppgave: OppgaveDTO
   behandlingBehov: NyBehandlingRequest
 }
 

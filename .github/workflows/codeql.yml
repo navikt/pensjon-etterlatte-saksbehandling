@@ -10,7 +10,7 @@ jobs:
   analyze-java:
     name: Analyze Java (Kotlin)
     runs-on:
-      labels: ubuntu-latest-8-cores
+      labels: ubuntu-latest
     timeout-minutes: 360
     permissions:
       actions: read

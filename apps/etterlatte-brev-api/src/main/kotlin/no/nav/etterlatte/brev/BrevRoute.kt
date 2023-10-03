@@ -22,10 +22,10 @@ import kotlin.time.DurationUnit
 import kotlin.time.ExperimentalTime
 import kotlin.time.measureTimedValue
 
-const val BREV_ID = "id"
+const val BREV_ID_CALL_PARAMETER = "id"
 inline val PipelineContext<*, ApplicationCall>.brevId: Long
     get() =
-        call.parameters[BREV_ID]?.toLong() ?: throw NullPointerException(
+        call.parameters[BREV_ID_CALL_PARAMETER]?.toLong() ?: throw NullPointerException(
             "Brev id er ikke i path params",
         )
 
@@ -36,7 +36,7 @@ fun Route.brevRoute(
 ) {
     val logger = LoggerFactory.getLogger("no.nav.etterlatte.brev.BrevRoute")
 
-    route("brev/{id}") {
+    route("brev/{$BREV_ID_CALL_PARAMETER}") {
         get {
             withSakId(behandlingKlient) {
                 call.respond(service.hentBrev(brevId))

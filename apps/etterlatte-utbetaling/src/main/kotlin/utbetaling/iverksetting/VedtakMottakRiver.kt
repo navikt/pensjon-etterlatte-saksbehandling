@@ -1,6 +1,7 @@
 package no.nav.etterlatte.utbetaling.iverksetting
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.utbetaling.UtbetalingResponseDto
@@ -30,8 +31,22 @@ class VedtakMottakRiver(
     private val utbetalingService: UtbetalingService,
 ) : ListenerMedLogging() {
     init {
+        // Barnepensjon
         initialiserRiver(rapidsConnection, VedtakKafkaHendelseType.ATTESTERT.toString()) {
             validate { it.requireKey("vedtak") }
+            validate { it.requireValue("vedtak.sak.sakType", SakType.BARNEPENSJON.name) }
+            validate {
+                it.requireAny(
+                    "vedtak.type",
+                    listOf(VedtakType.INNVILGELSE.name, VedtakType.OPPHOER.name, VedtakType.ENDRING.name),
+                )
+            }
+        }
+
+        // Omstillingsstønad
+        initialiserRiver(rapidsConnection, VedtakKafkaHendelseType.SAMORDNET.toString()) {
+            validate { it.requireKey("vedtak") }
+            validate { it.requireValue("vedtak.sak.sakType", SakType.OMSTILLINGSSTOENAD.name) }
             validate {
                 it.requireAny(
                     "vedtak.type",

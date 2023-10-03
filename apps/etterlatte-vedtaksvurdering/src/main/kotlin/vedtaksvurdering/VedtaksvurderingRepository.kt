@@ -346,6 +346,34 @@ class VedtaksvurderingRepository(private val datasource: DataSource) : Transacti
             return@session hentVedtakNonNull(behandlingId, this)
         }
 
+    fun tilSamordningVedtak(
+        behandlingId: UUID,
+        tx: TransactionalSession? = null,
+    ): Vedtak =
+        tx.session {
+            oppdater(
+                query = "UPDATE vedtak SET vedtakstatus = :vedtakstatus WHERE behandlingId = :behandlingId",
+                params = mapOf("vedtakstatus" to VedtakStatus.TIL_SAMORDNING.name, "behandlingId" to behandlingId),
+                loggtekst = "Lagrer til_samordning vedtak",
+            )
+                .also { require(it == 1) }
+            return@session hentVedtakNonNull(behandlingId, this)
+        }
+
+    fun samordnetVedtak(
+        behandlingId: UUID,
+        tx: TransactionalSession? = null,
+    ): Vedtak =
+        tx.session {
+            oppdater(
+                query = "UPDATE vedtak SET vedtakstatus = :vedtakstatus WHERE behandlingId = :behandlingId",
+                params = mapOf("vedtakstatus" to VedtakStatus.SAMORDNET.name, "behandlingId" to behandlingId),
+                loggtekst = "Lagrer samordnet vedtak",
+            )
+                .also { require(it == 1) }
+            return@session hentVedtakNonNull(behandlingId, this)
+        }
+
     fun iverksattVedtak(
         behandlingId: UUID,
         tx: TransactionalSession? = null,

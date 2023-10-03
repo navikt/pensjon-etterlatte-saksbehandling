@@ -1,8 +1,12 @@
 # Vedtaksvurdering-Kafka
 
-Vedtaksvurdering-Kafka er en Rapid app.
+Vedtaksvurdering-Kafka er en [Rapid app](https://github.com/navikt/rapids-and-rivers).
 
-Appen har ansvar for å lytte etter saker som skal reguleres. Den sjekker opp mot vedtaksappen om en sak har en løpende
+Appen har ansvar for å lytte etter:
+
+1. Vedtak som er blitt oversendt _Oppdrag/Utbetaling_ og skal iverksettes i Gjenny
+2. Omregningsvedtak som er attestert, og skal vurderes for samordning
+3. Saker som skal reguleres. Den sjekker opp mot vedtaksappen om en sak har en løpende
 ytelse. Dersom den har det, så sendes meldingen videre til Omregning
 
 ## Konsepter

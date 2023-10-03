@@ -4,6 +4,7 @@ import no.nav.etterlatte.libs.common.behandling.Etterbetaling
 import no.nav.etterlatte.libs.database.singleOrNull
 import java.sql.Connection
 import java.sql.Date
+import java.time.YearMonth
 import java.util.UUID
 
 class EtterbetalingDao(private val connection: () -> Connection) {
@@ -18,8 +19,8 @@ class EtterbetalingDao(private val connection: () -> Connection) {
                     """.trimIndent(),
                 )
             statement.setObject(1, etterbetaling.behandlingId)
-            statement.setDate(2, etterbetaling.fraDato.let { Date.valueOf(it) })
-            statement.setDate(3, etterbetaling.tilDato.let { Date.valueOf(it) })
+            statement.setDate(2, etterbetaling.fra.atDay(1).let { Date.valueOf(it) })
+            statement.setDate(3, etterbetaling.til.atEndOfMonth().let { Date.valueOf(it) })
             statement.executeUpdate()
         }
     }
@@ -35,8 +36,8 @@ class EtterbetalingDao(private val connection: () -> Connection) {
             return statement.executeQuery().singleOrNull {
                 Etterbetaling(
                     behandlingId = behandlingId,
-                    fraDato = getDate("fra_dato").toLocalDate(),
-                    tilDato = getDate("til_dato").toLocalDate(),
+                    fra = getDate("fra_dato").toLocalDate().let { YearMonth.from(it) },
+                    til = getDate("til_dato").toLocalDate().let { YearMonth.from(it) },
                 )
             }
         }

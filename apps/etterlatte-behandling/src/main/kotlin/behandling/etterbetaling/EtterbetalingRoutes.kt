@@ -12,6 +12,7 @@ import no.nav.etterlatte.libs.common.behandling.Etterbetaling
 import no.nav.etterlatte.libs.common.behandlingsId
 import no.nav.etterlatte.libs.common.medBody
 import java.time.LocalDate
+import java.time.YearMonth
 
 internal fun Route.etterbetalingRoutes(service: EtterbetalingService) {
     route("/api/behandling/{$BEHANDLINGSID_CALL_PARAMETER}/etterbetaling") {
@@ -20,8 +21,16 @@ internal fun Route.etterbetalingRoutes(service: EtterbetalingService) {
                 service.lagreEtterbetaling(
                     Etterbetaling(
                         behandlingId = behandlingsId,
-                        fraDato = requireNotNull(request.fraDato) { "Mangler fradato etterbetaling" },
-                        tilDato = requireNotNull(request.tilDato) { "Mangler tildato etterbetaling" },
+                        fra = requireNotNull(request.fraDato) { "Mangler fradato etterbetaling" }.let {
+                            YearMonth.from(
+                                it
+                            )
+                        },
+                        til = requireNotNull(request.tilDato) { "Mangler tildato etterbetaling" }.let {
+                            YearMonth.from(
+                                it
+                            )
+                        },
                     ),
                 )
             }
@@ -34,7 +43,10 @@ internal fun Route.etterbetalingRoutes(service: EtterbetalingService) {
                 else ->
                     call.respond(
                         HttpStatusCode.OK,
-                        EtterbetalingDTO(fraDato = etterbetaling.fraDato, tilDato = etterbetaling.tilDato),
+                        EtterbetalingDTO(
+                            fraDato = etterbetaling.fra.atDay(1),
+                            tilDato = etterbetaling.til.atEndOfMonth(),
+                        ),
                     )
             }
         }

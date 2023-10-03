@@ -1,4 +1,4 @@
-package migrering
+package no.nav.etterlatte.migrering
 
 import io.ktor.server.testing.testApplication
 import io.mockk.every
@@ -10,10 +10,6 @@ import no.nav.etterlatte.libs.common.rapidsandrivers.FEILENDE_STEG
 import no.nav.etterlatte.libs.common.rapidsandrivers.FEILMELDING_KEY
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.database.POSTGRES_VERSION
-import no.nav.etterlatte.migrering.Migreringsstatus
-import no.nav.etterlatte.migrering.PesysRepository
-import no.nav.etterlatte.migrering.Pesyskopling
-import no.nav.etterlatte.migrering.Pesyssak
 import no.nav.etterlatte.opprettInMemoryDatabase
 import no.nav.etterlatte.rapidsandrivers.EventNames
 import no.nav.etterlatte.rapidsandrivers.migrering.Beregning

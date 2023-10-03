@@ -1,4 +1,4 @@
-package migrering
+package no.nav.etterlatte.migrering
 
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.rapidsandrivers.FEILENDE_STEG
@@ -8,8 +8,6 @@ import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.etterlatte.libs.common.rapidsandrivers.feilendeSteg
 import no.nav.etterlatte.libs.common.rapidsandrivers.feilmelding
 import no.nav.etterlatte.libs.common.toJson
-import no.nav.etterlatte.migrering.Migreringsstatus
-import no.nav.etterlatte.migrering.PesysRepository
 import no.nav.etterlatte.rapidsandrivers.EventNames
 import no.nav.etterlatte.rapidsandrivers.migrering.KILDE_KEY
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser

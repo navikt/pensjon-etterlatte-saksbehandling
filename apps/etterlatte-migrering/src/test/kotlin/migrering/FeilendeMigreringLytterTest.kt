@@ -104,4 +104,49 @@ class FeilendeMigreringLytterTest {
             Assertions.assertEquals(Migreringsstatus.MIGRERING_FEILA, repository.hentStatus(pesysid.id))
         }
     }
+
+    @Test
+    fun `logger og lagrer feilmelding for feil fra attestering`() {
+        testApplication {
+            val fil = this::class.java.getResource("/attesteringsfeil.json")!!.readText()
+
+            val behandlingId = UUID.fromString("bd8e7578-01fe-4e3e-b560-daf859c45c5f")
+            val pesysid = PesysId(1L)
+            val repository =
+                spyk(PesysRepository(datasource)).also {
+                    every { it.hentPesysId(behandlingId) } returns
+                        Pesyskopling(
+                            behandlingId = behandlingId,
+                            pesysId = pesysid,
+                        )
+                }
+            val pesyssak =
+                Pesyssak(
+                    id = pesysid.id,
+                    enhet = Enhet("1"),
+                    soeker = Folkeregisteridentifikator.of("08071272487"),
+                    gjenlevendeForelder = null,
+                    avdoedForelder = listOf(),
+                    virkningstidspunkt = YearMonth.now(),
+                    foersteVirkningstidspunkt = YearMonth.now(),
+                    beregning =
+                        Beregning(
+                            brutto = BigDecimal.ZERO,
+                            netto = BigDecimal.ZERO,
+                            anvendtTrygdetid = BigDecimal.ZERO,
+                            datoVirkFom = Tidspunkt.now(),
+                            g = BigDecimal.ZERO,
+                        ),
+                    trygdetid = Trygdetid(perioder = listOf()),
+                    flyktningStatus = false,
+                )
+            repository.lagrePesyssak(pesyssak)
+            repository.lagreKoplingTilBehandling(behandlingId, pesysid)
+
+            TestRapid().apply {
+                FeilendeMigreringLytter(rapidsConnection = this, repository = repository)
+            }.sendTestMessage(fil)
+            Assertions.assertEquals(Migreringsstatus.MIGRERING_FEILA, repository.hentStatus(pesysid.id))
+        }
+    }
 }

@@ -23,9 +23,10 @@ internal class Verifiserer(private val pdlKlient: PDLKlient, private val reposit
                 "Sak ${request.pesysId} har ufullstendige data i PDL, kan ikke migrere. Se sikkerlogg for detaljer",
             )
             repository.lagreFeilkjoering(
-                request,
-                feil = feil.map { it.message }.toJson(),
+                request.toJson(),
                 feilendeSteg = Migreringshendelser.VERIFISER,
+                feil = feil.map { it.message }.toJson(),
+                pesysId = request.pesysId,
             )
             repository.oppdaterStatus(request.pesysId, Migreringsstatus.VERIFISERING_FEILA)
             throw samleExceptions(feil)

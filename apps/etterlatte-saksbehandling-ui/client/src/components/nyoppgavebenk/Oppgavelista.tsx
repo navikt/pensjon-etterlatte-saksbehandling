@@ -1,6 +1,6 @@
 import { Pagination, Table } from '@navikt/ds-react'
 import { formaterStringDato } from '~utils/formattering'
-import { erOppgaveRedigerbar, OppgaveDTOny } from '~shared/api/oppgaverny'
+import { erOppgaveRedigerbar, OppgaveDTO } from '~shared/api/oppgaver'
 import React, { useEffect, useState } from 'react'
 import styled from 'styled-components'
 import { OPPGAVESTATUSFILTER } from '~components/nyoppgavebenk/Oppgavelistafiltre'
@@ -38,9 +38,9 @@ export const HeaderPadding = styled.span`
 `
 
 export const Oppgavelista = (props: {
-  oppgaver: ReadonlyArray<OppgaveDTOny>
+  oppgaver: ReadonlyArray<OppgaveDTO>
   oppdaterTildeling: (id: string, saksbehandler: string | null) => void
-  filtrerteOppgaver: ReadonlyArray<OppgaveDTOny>
+  filtrerteOppgaver: ReadonlyArray<OppgaveDTO>
 }) => {
   const { oppgaver, oppdaterTildeling, filtrerteOppgaver } = props
 

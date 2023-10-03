@@ -1,5 +1,5 @@
 import { isFailure, isInitial, isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
-import { fjernSaksbehandlerApi } from '~shared/api/oppgaverny'
+import { fjernSaksbehandlerApi } from '~shared/api/oppgaver'
 import { Alert, Button, Label, Loader } from '@navikt/ds-react'
 import { PencilIcon } from '@navikt/aksel-icons'
 import React, { useEffect, useState } from 'react'

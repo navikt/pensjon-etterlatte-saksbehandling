@@ -158,7 +158,7 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
                     resource =
                         Resource(
                             clientId = clientId,
-                            url = "$resourceUrl/api/nyeoppgaver/sak/$sakId/oppgaver",
+                            url = "$resourceUrl/api/oppgaver/sak/$sakId/oppgaver",
                         ),
                     brukerTokenInfo = brukerTokenInfo,
                 )
@@ -182,7 +182,7 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
                     resource =
                         Resource(
                             clientId = clientId,
-                            url = "$resourceUrl/api/nyeoppgaver/${oppgaveTilAttestering.id}/tildel-saksbehandler",
+                            url = "$resourceUrl/api/oppgaver/${oppgaveTilAttestering.id}/tildel-saksbehandler",
                         ),
                     brukerTokenInfo = brukerTokenInfo,
                     postBody = SaksbehandlerEndringDto(saksbehandler = Fagsaksystem.EY.navn),

@@ -33,7 +33,7 @@ internal fun Route.oppgaveRoutes(
     service: OppgaveService,
     gosysOppgaveService: GosysOppgaveService,
 ) {
-    route("/api/nyeoppgaver") {
+    route("/api/oppgaver") {
         get {
             kunSaksbehandler {
                 call.respond(

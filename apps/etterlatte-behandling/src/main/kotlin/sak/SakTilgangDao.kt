@@ -24,8 +24,8 @@ class SakTilgangDao(private val datasource: DataSource) {
     }
 
     fun hentSakMedGraderingOgSkjerming(id: Long): SakMedGraderingOgSkjermet? {
-        datasource.connection.use {
-            val statement = it.prepareStatement("SELECT id, adressebeskyttelse, erSkjermet from sak where id = ?")
+        datasource.connection.use { connection ->
+            val statement = connection.prepareStatement("SELECT id, adressebeskyttelse, erSkjermet from sak where id = ?")
             statement.setLong(1, id)
             return statement.executeQuery().singleOrNull {
                 SakMedGraderingOgSkjermet(
@@ -38,7 +38,7 @@ class SakTilgangDao(private val datasource: DataSource) {
     }
 
     fun hentSakMedGarderingOgSkjermingPaaBehandling(behandlingId: String): SakMedGraderingOgSkjermet? {
-        datasource.connection.use {
+        datasource.connection.use { it ->
             val statement =
                 it.prepareStatement(
                     "SELECT s.id, adressebeskyttelse, erSkjermet FROM behandling b" +
@@ -56,13 +56,13 @@ class SakTilgangDao(private val datasource: DataSource) {
     }
 
     fun hentSakMedGraderingOgSkjermingPaaOppgave(oppgaveId: String): SakMedGraderingOgSkjermet? {
-        datasource.connection.use {
+        datasource.connection.use { connection ->
             val statement =
-                it.prepareStatement(
+                connection.prepareStatement(
                     """
                     SELECT s.id as sak_id, adressebeskyttelse, erskjermet 
                     FROM oppgave o
-                    INNER JOIN Sak s on o.sak_id = s.id
+                    INNER JOIN sak s on o.sak_id = s.id
                     WHERE o.id = ?::uuid
                     """.trimIndent(),
                 )
@@ -81,13 +81,13 @@ class SakTilgangDao(private val datasource: DataSource) {
     }
 
     fun hentSakMedGraderingOgSkjermingPaaKlage(klageId: String): SakMedGraderingOgSkjermet? {
-        datasource.connection.use {
+        datasource.connection.use { connection ->
             val statement =
-                it.prepareStatement(
+                connection.prepareStatement(
                     """
                     SELECT s.id as sak_id, adressebeskyttelse, erskjermet 
                     FROM klage k
-                    INNER JOIN Sak s on k.sak_id = s.id
+                    INNER JOIN sak s on k.sak_id = s.id
                     WHERE k.id = ?::uuid
                     """.trimIndent(),
                 )

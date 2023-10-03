@@ -1,4 +1,4 @@
-import { Oppgavetype } from '~shared/api/oppgaverny'
+import { Oppgavetype } from '~shared/api/oppgaver'
 import { Tag } from '@navikt/ds-react'
 import { Variants } from '~shared/Tags'
 import { SakType } from '~shared/types/sak'

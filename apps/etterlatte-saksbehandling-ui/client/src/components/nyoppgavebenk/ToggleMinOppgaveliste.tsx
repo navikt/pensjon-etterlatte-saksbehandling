@@ -4,7 +4,7 @@ import { InboxIcon, PersonIcon } from '@navikt/aksel-icons'
 import { Oppgavelista } from '~components/nyoppgavebenk/Oppgavelista'
 import { MinOppgaveliste } from '~components/nyoppgavebenk/minoppgaveliste/MinOppgaveliste'
 import { isFailure, isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
-import { hentGosysOppgaver, hentNyeOppgaver, OppgaveDTOny } from '~shared/api/oppgaverny'
+import { hentGosysOppgaver, hentOppgaver, OppgaveDTO } from '~shared/api/oppgaver'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import styled from 'styled-components'
@@ -24,10 +24,10 @@ export const ToggleMinOppgaveliste = () => {
 
   const [filter, setFilter] = useState<Filter>(initialFilter())
   const [oppgaveListeValg, setOppgaveListeValg] = useState<OppgavelisteToggle>('Oppgavelista')
-  const [oppgaver, hentOppgaver] = useApiCall(hentNyeOppgaver)
+  const [oppgaver, hentOppgaverFetch] = useApiCall(hentOppgaver)
   const [gosysOppgaver, hentGosysOppgaverFunc] = useApiCall(hentGosysOppgaver)
 
-  const [hentedeOppgaver, setHentedeOppgaver] = useState<OppgaveDTOny[]>([])
+  const [hentedeOppgaver, setHentedeOppgaver] = useState<OppgaveDTO[]>([])
 
   useEffect(() => {
     if (isSuccess(oppgaver) && isSuccess(gosysOppgaver)) {
@@ -41,7 +41,7 @@ export const ToggleMinOppgaveliste = () => {
   }, [oppgaver, gosysOppgaver])
 
   const hentAlleOppgaver = () => {
-    hentOppgaver({})
+    hentOppgaverFetch({})
     hentGosysOppgaverFunc({})
   }
 

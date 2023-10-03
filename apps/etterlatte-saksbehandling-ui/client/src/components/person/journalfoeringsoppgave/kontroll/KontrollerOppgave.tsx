@@ -22,7 +22,7 @@ import { settBehandlingBehov, settBruker, settOppgave, settSamsvar } from '~stor
 import { isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
 import { GYLDIG_FNR } from '~utils/fnr'
 import Spinner from '~shared/Spinner'
-import { hentGosysOppgave } from '~shared/api/oppgaverny'
+import { hentGosysOppgave } from '~shared/api/oppgaver'
 import { DatoVelger } from '~shared/DatoVelger'
 import { InfoWrapper } from '~components/behandling/soeknadsoversikt/styled'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'

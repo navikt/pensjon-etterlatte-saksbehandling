@@ -65,10 +65,10 @@ const Etterbetaling = (props: {
   return (
     <>
       <Checkbox
-        value={erEtterbetaling}
         onChange={() => {
           setErEtterbetaling(!erEtterbetaling)
         }}
+        checked={erEtterbetaling}
       >
         <Heading size="small" level="3">
           Innebærer etterbetaling?

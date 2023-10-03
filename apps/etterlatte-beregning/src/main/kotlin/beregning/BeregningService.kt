@@ -100,7 +100,7 @@ class BeregningService(
 
         if (grunnlagDenneBehandlinga == null || grunnlagDenneBehandlinga.behandlingId != behandlingId) {
             logger.info("Kopierer beregningsgrunnlag og oppretter beregning for $behandlingId")
-            beregningsGrunnlagService.dupliserBeregningsGrunnlagBP(behandlingId, sisteIverksatteBehandling.id)
+            beregningsGrunnlagService.dupliserBeregningsGrunnlagOMS(behandlingId, sisteIverksatteBehandling.id)
             opprettBeregning(behandlingId, brukerTokenInfo)
         }
         val trygdetidForBehandling = trygdetidKlient.hentTrygdetid(behandlingId, brukerTokenInfo)

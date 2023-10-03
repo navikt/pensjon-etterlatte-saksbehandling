@@ -201,4 +201,21 @@ class BeregningsGrunnlagService(
 
         beregningsGrunnlagRepository.lagre(forrigeGrunnlagBP.copy(behandlingId = behandlingId))
     }
+
+    fun dupliserBeregningsGrunnlagOMS(
+        behandlingId: UUID,
+        forrigeBehandlingId: UUID,
+    ) {
+        logger.info("Dupliser grunnlag for $behandlingId fra $forrigeBehandlingId")
+
+        val forrigeGrunnlagOMS =
+            beregningsGrunnlagRepository.finnOmstillingstoenadGrunnlagForBehandling(forrigeBehandlingId)
+                ?: throw RuntimeException("Ingen grunnlag funnet for $forrigeBehandlingId")
+
+        if (beregningsGrunnlagRepository.finnOmstillingstoenadGrunnlagForBehandling(behandlingId) != null) {
+            throw RuntimeException("Eksisterende grunnlag funnet for $behandlingId")
+        }
+
+        beregningsGrunnlagRepository.lagreOMS(forrigeGrunnlagOMS.copy(behandlingId = behandlingId))
+    }
 }

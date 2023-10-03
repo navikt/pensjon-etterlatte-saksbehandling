@@ -63,7 +63,7 @@ class BeregningService(
                 if (behandling.sakType == SakType.BARNEPENSJON) {
                     kopierBeregningsgrunnlagOgOpprettBeregningBarnepensjon(behandling, brukerTokenInfo, behandlingId)
                 } else {
-                    kopierTrygdetidOgOpprettBeregningOmstillingsstoenad(
+                    kopierBeregningsgrunnlagOgTrygdetidOgOpprettBeregningOmstillingsstoenad(
                         behandling,
                         brukerTokenInfo,
                         behandlingId,
@@ -89,16 +89,23 @@ class BeregningService(
         }
     }
 
-    private suspend fun kopierTrygdetidOgOpprettBeregningOmstillingsstoenad(
+    private suspend fun kopierBeregningsgrunnlagOgTrygdetidOgOpprettBeregningOmstillingsstoenad(
         behandling: DetaljertBehandling,
         brukerTokenInfo: BrukerTokenInfo,
         behandlingId: UUID,
     ) {
         val sisteIverksatteBehandling = behandlingKlient.hentSisteIverksatteBehandling(behandling.sak, brukerTokenInfo)
+        val grunnlagDenneBehandlinga =
+            beregningsGrunnlagService.hentOmstillingstoenadBeregningsGrunnlag(behandlingId, brukerTokenInfo)
+
+        if (grunnlagDenneBehandlinga == null || grunnlagDenneBehandlinga.behandlingId != behandlingId) {
+            logger.info("Kopierer beregningsgrunnlag og oppretter beregning for $behandlingId")
+            beregningsGrunnlagService.dupliserBeregningsGrunnlagBP(behandlingId, sisteIverksatteBehandling.id)
+            opprettBeregning(behandlingId, brukerTokenInfo)
+        }
         val trygdetidForBehandling = trygdetidKlient.hentTrygdetid(behandlingId, brukerTokenInfo)
         if (trygdetidForBehandling == null) {
             trygdetidKlient.kopierTrygdetid(behandlingId, sisteIverksatteBehandling.id, brukerTokenInfo)
         }
-        opprettBeregning(behandlingId, brukerTokenInfo)
     }
 }

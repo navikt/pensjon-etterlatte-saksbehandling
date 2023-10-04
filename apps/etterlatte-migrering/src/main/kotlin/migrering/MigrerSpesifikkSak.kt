@@ -51,7 +51,7 @@ internal class MigrerSpesifikkSak(
         context: MessageContext,
     ) {
         val sakId = packet.sakId
-        if (pesysRepository.hentStatus(sakId) == Migreringsstatus.FERDIG) {
+        if (pesysRepository.hentStatus(sakId) in setOf(Migreringsstatus.UNDER_MIGRERING, Migreringsstatus.FERDIG)) {
             logger.info("Har allerede migrert sak $sakId. Avbryter.")
             return
         }

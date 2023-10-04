@@ -120,6 +120,25 @@ internal class PesysRepository(private val dataSource: DataSource) : Transaction
             "Lagra feilkjøringsdata for $request.pesysId.id",
         )
     }
+
+    fun hentKoplingTilBehandling(
+        pesysId: PesysId,
+        tx: TransactionalSession? = null,
+    ) = tx.session {
+        hent(
+            "SELECT ${Pesyskoplingtabell.BEHANDLING_ID} FROM ${Pesyskoplingtabell.TABELLNAVN} " +
+                "WHERE ${Pesyskoplingtabell.PESYS_ID} = :${Pesyskoplingtabell.PESYS_ID}",
+            mapOf(Pesyskoplingtabell.PESYS_ID to pesysId.id),
+        ) {
+            Pesyskopling(pesysId, it.uuid(Pesyskoplingtabell.BEHANDLING_ID))
+        }
+    }
+}
+
+private object Pesyskoplingtabell {
+    const val TABELLNAVN = "pesyskopling"
+    const val PESYS_ID = "pesys_id"
+    const val BEHANDLING_ID = "behandling_id"
 }
 
 private object Feilkjoering {

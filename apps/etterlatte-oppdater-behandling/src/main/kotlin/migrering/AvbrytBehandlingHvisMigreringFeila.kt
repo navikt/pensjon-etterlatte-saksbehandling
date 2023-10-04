@@ -1,0 +1,38 @@
+package no.nav.etterlatte.migrering
+
+import no.nav.etterlatte.BehandlingService
+import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
+import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser
+import no.nav.helse.rapids_rivers.JsonMessage
+import no.nav.helse.rapids_rivers.MessageContext
+import no.nav.helse.rapids_rivers.RapidsConnection
+import no.nav.helse.rapids_rivers.River
+import org.slf4j.LoggerFactory
+import rapidsandrivers.BEHANDLING_ID_KEY
+import rapidsandrivers.behandlingId
+import rapidsandrivers.migrering.ListenerMedLoggingOgFeilhaandtering
+
+internal class AvbrytBehandlingHvisMigreringFeila(
+    rapidsConnection: RapidsConnection,
+    private val behandlingService: BehandlingService,
+) :
+    ListenerMedLoggingOgFeilhaandtering(Migreringshendelser.AVBRYT_BEHANDLING) {
+    private val logger = LoggerFactory.getLogger(this::class.java)
+
+    init {
+        logger.info("initierer rapid for ${this.javaClass.name}")
+        River(rapidsConnection).apply {
+            eventName(hendelsestype)
+            validate { it.requireKey(BEHANDLING_ID_KEY) }
+        }.register(this)
+    }
+
+    override fun haandterPakke(
+        packet: JsonMessage,
+        context: MessageContext,
+    ) {
+        logger.info("Avbryter behandling ${packet.behandlingId} fordi den feila under migrering")
+        behandlingService.avbryt(packet.behandlingId)
+        logger.info("Har avbrutt behandling ${packet.behandlingId} fordi den feila under migrering")
+    }
+}

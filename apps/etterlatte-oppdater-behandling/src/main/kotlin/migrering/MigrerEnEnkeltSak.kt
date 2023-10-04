@@ -1,6 +1,8 @@
-package no.nav.etterlatte
+package no.nav.etterlatte.migrering
 
 import com.fasterxml.jackson.module.kotlin.treeToValue
+import no.nav.etterlatte.BehandlingService
+import no.nav.etterlatte.MigrerSoekerRequest
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.PersonRolle

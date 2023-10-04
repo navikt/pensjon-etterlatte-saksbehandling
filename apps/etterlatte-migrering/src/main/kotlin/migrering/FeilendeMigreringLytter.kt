@@ -12,7 +12,6 @@ import no.nav.etterlatte.rapidsandrivers.EventNames
 import no.nav.etterlatte.rapidsandrivers.migrering.KILDE_KEY
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser
 import no.nav.etterlatte.rapidsandrivers.migrering.PESYS_ID_KEY
-import no.nav.etterlatte.rapidsandrivers.migrering.PesysId
 import no.nav.etterlatte.rapidsandrivers.migrering.hendelseData
 import no.nav.etterlatte.rapidsandrivers.migrering.pesysId
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -41,7 +40,12 @@ internal class FeilendeMigreringLytter(rapidsConnection: RapidsConnection, priva
             validate { it.interestedIn(PESYS_ID_KEY) }
             validate { it.interestedIn(HENDELSE_DATA_KEY) }
             validate { it.requireKey(FEILMELDING_KEY) }
-            validate { it.rejectValue(FEILENDE_STEG, Migreringshendelser.VERIFISER) }
+            validate {
+                it.rejectValues(
+                    FEILENDE_STEG,
+                    listOf(Migreringshendelser.VERIFISER, Migreringshendelser.AVBRYT_BEHANDLING),
+                )
+            }
             correlationId()
         }.register(this)
     }
@@ -50,27 +54,30 @@ internal class FeilendeMigreringLytter(rapidsConnection: RapidsConnection, priva
         packet: JsonMessage,
         context: MessageContext,
     ) {
-        val pesysId = finnPesysId(packet)
+        val pesyskopling = finnPesysId(packet)
 
-        logger.warn("Migrering av pesyssak $pesysId feila")
+        logger.warn("Migrering av pesyssak $pesyskopling feila")
         repository.lagreFeilkjoering(
             request =
                 packet.takeIf { it.harVerdi(HENDELSE_DATA_KEY) }?.hendelseData?.toJson()
                     ?: "Har ikke requestobjektet tilgjengelig for logging",
             feilendeSteg = packet.feilendeSteg,
             feil = packet.feilmelding,
-            pesysId = pesysId,
+            pesysId = pesyskopling.pesysId,
         )
-        repository.oppdaterStatus(pesysId, Migreringsstatus.MIGRERING_FEILA)
+        repository.oppdaterStatus(pesyskopling.pesysId, Migreringsstatus.MIGRERING_FEILA)
+        packet.eventName = Migreringshendelser.AVBRYT_BEHANDLING
+        packet.behandlingId = pesyskopling.behandlingId
+        context.publish(packet.toJson())
     }
 
-    private fun finnPesysId(packet: JsonMessage): PesysId =
+    private fun finnPesysId(packet: JsonMessage): Pesyskopling =
         if (packet.harVerdi(PESYS_ID_KEY)) {
-            packet.pesysId
+            repository.hentKoplingTilBehandling(packet.pesysId)!!
         } else if (packet.harVerdi(BEHANDLING_ID_KEY)) {
-            repository.hentPesysId(packet.behandlingId)!!.pesysId
+            repository.hentPesysId(packet.behandlingId)!!
         } else if (packet.harVerdi("vedtak.behandling.id")) {
-            repository.hentPesysId(packet["vedtak.behandling.id"].asText().toUUID())!!.pesysId
+            repository.hentPesysId(packet["vedtak.behandling.id"].asText().toUUID())!!
         } else {
             throw IllegalArgumentException("Manglar pesys-identifikator, kan ikke kjøre feilhåndtering")
         }

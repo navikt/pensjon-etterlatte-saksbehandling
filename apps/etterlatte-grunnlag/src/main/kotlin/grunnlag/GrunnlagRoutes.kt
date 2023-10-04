@@ -13,20 +13,17 @@ import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.grunnlag.NyeSaksopplysninger
 import no.nav.etterlatte.libs.common.grunnlag.Opplysningsbehov
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
-import no.nav.etterlatte.libs.common.hentNavidentFraToken
 import no.nav.etterlatte.libs.common.kunSystembruker
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
-import no.nav.etterlatte.libs.common.person.InvalidFoedselsnummerException
 import no.nav.etterlatte.libs.common.sakId
-import no.nav.etterlatte.libs.common.withFoedselsnummer
 import no.nav.etterlatte.libs.common.withSakId
 
 fun Route.grunnlagRoute(
     grunnlagService: GrunnlagService,
     behandlingKlient: BehandlingKlient,
 ) {
-    route("grunnlag") {
-        get("{$SAKID_CALL_PARAMETER}") {
+    route("sak/{$SAKID_CALL_PARAMETER}") {
+        get {
             withSakId(behandlingKlient) { sakId ->
                 when (val opplysningsgrunnlag = grunnlagService.hentOpplysningsgrunnlag(sakId)) {
                     null -> call.respond(HttpStatusCode.NotFound)
@@ -35,7 +32,7 @@ fun Route.grunnlagRoute(
             }
         }
 
-        get("{$SAKID_CALL_PARAMETER}/personer/alle") {
+        get("personer/alle") {
             withSakId(behandlingKlient) { sakId ->
                 when (val personerISak = grunnlagService.hentPersonerISak(sakId)) {
                     null -> call.respond(HttpStatusCode.NotFound)
@@ -44,17 +41,7 @@ fun Route.grunnlagRoute(
             }
         }
 
-        get("{$SAKID_CALL_PARAMETER}/versjon/{versjon}") {
-            withSakId(behandlingKlient) { sakId ->
-                val versjon = call.parameters["versjon"]!!.toLong()
-                when (val opplysningsgrunnlag = grunnlagService.hentOpplysningsgrunnlagMedVersjon(sakId, versjon)) {
-                    null -> call.respond(HttpStatusCode.NotFound)
-                    else -> call.respond(opplysningsgrunnlag)
-                }
-            }
-        }
-
-        get("{$SAKID_CALL_PARAMETER}/{opplysningType}") {
+        get("{opplysningType}") {
             withSakId(behandlingKlient) { sakId ->
                 val opplysningstype = Opplysningstype.valueOf(call.parameters["opplysningType"].toString())
                 val grunnlag = grunnlagService.hentGrunnlagAvType(sakId, opplysningstype)
@@ -69,7 +56,7 @@ fun Route.grunnlagRoute(
             }
         }
 
-        get("{$SAKID_CALL_PARAMETER}/revurdering/${Opplysningstype.HISTORISK_FORELDREANSVAR.name}") {
+        get("revurdering/${Opplysningstype.HISTORISK_FORELDREANSVAR.name}") {
             withSakId(behandlingKlient) { sakId ->
                 when (val historisk = grunnlagService.hentHistoriskForeldreansvar(sakId)) {
                     null -> call.respond(HttpStatusCode.NotFound)
@@ -78,7 +65,7 @@ fun Route.grunnlagRoute(
             }
         }
 
-        post("{$SAKID_CALL_PARAMETER}/nye-opplysninger") {
+        post("nye-opplysninger") {
             withSakId(behandlingKlient) {
                 val opplysningsbehov = call.receive<NyeSaksopplysninger>()
                 grunnlagService.lagreNyeSaksopplysninger(sakId, opplysningsbehov.opplysninger)
@@ -86,57 +73,12 @@ fun Route.grunnlagRoute(
             }
         }
 
-        post("/person/oppdater-grunnlag") {
+        post("oppdater-grunnlag") {
             kunSystembruker {
-                val opplysningsbehov = call.receive<Opplysningsbehov>()
-                grunnlagService.oppdaterGrunnlag(opplysningsbehov)
-                call.respond(HttpStatusCode.OK)
-            }
-        }
-
-        post("/person/saker") {
-            withFoedselsnummer(behandlingKlient) { fnr ->
-                val saksliste = grunnlagService.hentAlleSakerForFnr(fnr)
-                call.respond(saksliste)
-            }
-        }
-
-        post("/person/roller") {
-            withFoedselsnummer(behandlingKlient) { fnr ->
-                val personMedSakOgRoller = grunnlagService.hentSakerOgRoller(fnr)
-                call.respond(personMedSakOgRoller)
-            }
-        }
-
-        post("/person") {
-            hentNavidentFraToken { navIdent ->
-                try {
-                    withFoedselsnummer(behandlingKlient) { foedselsnummer ->
-                        val opplysning =
-                            grunnlagService.hentOpplysningstypeNavnFraFnr(
-                                foedselsnummer,
-                                navIdent,
-                            )
-
-                        if (opplysning != null) {
-                            call.respond(opplysning)
-                        } else {
-                            call.respond(
-                                HttpStatusCode.NotFound,
-                                "Gjenny har ingen navnedata på fødselsnummeret som ble etterspurt",
-                            )
-                        }
-                    }
-                } catch (ex: InvalidFoedselsnummerException) {
-                    call.respond(
-                        HttpStatusCode.BadRequest,
-                        "Gjenny har ingen navnedata på fødselsnummeret som ble etterspurt",
-                    )
-                } catch (ex: Exception) {
-                    call.respond(
-                        HttpStatusCode.NotFound,
-                        "Gjenny har ingen navnedata på fødselsnummeret som ble etterspurt",
-                    )
+                withSakId(behandlingKlient) {
+                    val opplysningsbehov = call.receive<Opplysningsbehov>()
+                    grunnlagService.oppdaterGrunnlag(opplysningsbehov)
+                    call.respond(HttpStatusCode.OK)
                 }
             }
         }

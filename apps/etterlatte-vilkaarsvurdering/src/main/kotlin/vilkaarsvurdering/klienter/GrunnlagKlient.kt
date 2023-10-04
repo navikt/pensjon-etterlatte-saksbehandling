@@ -45,7 +45,7 @@ class GrunnlagKlientImpl(config: Config, httpClient: HttpClient) : GrunnlagKlien
                     resource =
                         Resource(
                             clientId = clientId,
-                            url = "$resourceUrl/grunnlag/$sakId",
+                            url = "$resourceUrl/grunnlag/sak/$sakId",
                         ),
                     brukerTokenInfo = brukerTokenInfo,
                 )

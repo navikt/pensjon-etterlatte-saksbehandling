@@ -105,6 +105,7 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
             behandlingId={behandling.id}
             lagraEtterbetaling={behandling.etterbetaling}
             redigerbar={behandles}
+            virkningstidspunkt={virkningstidspunkt}
           />
         </EtterbetalingWrapper>
       </ContentHeader>

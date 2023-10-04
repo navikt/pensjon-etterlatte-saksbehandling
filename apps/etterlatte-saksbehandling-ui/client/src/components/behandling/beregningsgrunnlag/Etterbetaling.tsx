@@ -1,5 +1,5 @@
 import { IEtterbetaling } from '~shared/types/IDetaljertBehandling'
-import { BodyShort, Button, Checkbox, Heading } from '@navikt/ds-react'
+import { BodyShort, Button, Checkbox, ErrorMessage, Heading } from '@navikt/ds-react'
 import React, { useState } from 'react'
 import styled from 'styled-components'
 import { FlexRow } from '~shared/styled'
@@ -22,22 +22,69 @@ const EtterbetalingWrapper = styled.div`
   padding-bottom: 2rem;
 `
 
+const dato = (str: string | undefined) => {
+  if (!str) {
+    return undefined
+  }
+  const splitted = str.split('.')
+  const dato = new Date()
+  dato.setDate(Number(splitted[0]))
+  dato.setMonth(Number(splitted[1]) - 2)
+  dato.setFullYear(Number(splitted[2]))
+  dato.setHours(12)
+  dato.setMinutes(0)
+  dato.setSeconds(0)
+  dato.setMilliseconds(0)
+  return dato
+}
+
 const Etterbetaling = (props: {
   behandlingId: string
   lagraEtterbetaling: IEtterbetaling | null
   redigerbar: boolean
+  virkningstidspunkt: string | undefined
 }) => {
-  const { lagraEtterbetaling, redigerbar, behandlingId } = props
+  const { lagraEtterbetaling, redigerbar, behandlingId, virkningstidspunkt } = props
+
   const [status, apiLagreEtterbetaling] = useApiCall(lagreEtterbetaling)
   const [, apiSlettEtterbetaling] = useApiCall(slettEtterbetaling)
   const [etterbetaling, setEtterbetaling] = useState(lagraEtterbetaling)
   const [erEtterbetaling, setErEtterbetaling] = useState<boolean>(!!etterbetaling)
 
   const featureToggleNameEtterbetaling = 'registrer-etterbetaling'
-  const vis = useFeatureEnabledMedDefault(featureToggleNameEtterbetaling, false)
+  const vis = !useFeatureEnabledMedDefault(featureToggleNameEtterbetaling, false)
+  const [errorTekst, setErrorTekst] = useState('')
+
+  const valider = () => {
+    if (!erEtterbetaling) {
+      return ''
+    }
+    const fraDato = etterbetaling?.fraDato
+    const tilDato = etterbetaling?.tilDato
+    if (!fraDato || !tilDato) {
+      return 'Både fra- og til-måned for etterbetaling må fylles ut.'
+    }
+    const fra = new Date(fraDato!!)
+    const til = new Date(tilDato!!)
+    if (fra > til) {
+      return 'Fra-måned kan ikke være etter til-måned.'
+    }
+    if (virkningstidspunkt && fra < dato(virkningstidspunkt)!!) {
+      return 'Fra-måned kan ikke være før virkningstidspunkt.'
+    }
+    if (til > new Date()) {
+      return 'Til-måned kan ikke være i framtida.'
+    }
+    return ''
+  }
 
   const lagre = () => {
     if (erEtterbetaling) {
+      const feil = valider()
+      setErrorTekst(feil)
+      if (feil !== '') {
+        return
+      }
       apiLagreEtterbetaling({ behandlingId, etterbetaling: etterbetaling!! }, () => {})
     } else {
       apiSlettEtterbetaling({ behandlingId }, () => {})
@@ -105,6 +152,7 @@ const Etterbetaling = (props: {
           Lagre etterbetaling
         </Button>
       </FlexRow>
+      {errorTekst !== '' ? <ErrorMessage>{errorTekst}</ErrorMessage> : null}
     </>
   )
 }

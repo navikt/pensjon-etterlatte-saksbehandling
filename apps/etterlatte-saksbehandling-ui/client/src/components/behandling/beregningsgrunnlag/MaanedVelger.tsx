@@ -1,4 +1,3 @@
-import React from 'react'
 import styled from 'styled-components'
 import { MonthPicker, useMonthpicker } from '@navikt/ds-react'
 import { UseMonthPickerOptions } from '@navikt/ds-react/esm/date/hooks/useMonthPicker'
@@ -14,7 +13,7 @@ const MaanedVelger = (props: MaanedVelgerProps) => {
 
   const { monthpickerProps, inputProps } = useMonthpicker({
     onMonthChange: (date: Date) => {
-      date?.setDate(15) // Litt vilkårlig valgt dato midt i måneden for å slippe tidssone-problematikk
+      date?.setHours(12)
       onChange(date)
     },
     defaultSelected: value ?? undefined,

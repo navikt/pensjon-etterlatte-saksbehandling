@@ -3,6 +3,7 @@ import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
+import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -124,6 +125,7 @@ internal class MigreringHendelserTest {
                             ),
                         ),
                     ),
+                spraak = Spraak.NN,
             )
         every { trygdetidService.beregnTrygdetid(capture(behandlingId)) } returns mockk()
         every {
@@ -195,6 +197,7 @@ internal class MigreringHendelserTest {
                         g = BigDecimal(100000),
                     ),
                 trygdetid = Trygdetid(emptyList()),
+                spraak = Spraak.NN,
             )
         every { trygdetidService.beregnTrygdetid(capture(behandlingId)) } returns trygdetidDto
         every { trygdetidService.beregnTrygdetidGrunnlag(any(), any()) } returns trygdetidDto

@@ -6,6 +6,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.libs.common.beregning.BeregningDTO
 import no.nav.etterlatte.libs.common.beregning.Beregningstype
 import no.nav.etterlatte.libs.common.grunnlag.Metadata
@@ -72,6 +73,7 @@ internal class MigreringHendelserTest {
                         g = BigDecimal(100000),
                     ),
                 trygdetid = Trygdetid(emptyList()),
+                spraak = Spraak.NN,
             )
         every { behandlingService.opprettBeregningsgrunnlag(any(), any()) } returns mockk()
         every { behandlingService.beregn(capture(behandlingId)) } returns returnValue

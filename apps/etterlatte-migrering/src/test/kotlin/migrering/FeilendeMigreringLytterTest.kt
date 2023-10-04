@@ -1,8 +1,9 @@
-package migrering
+package no.nav.etterlatte.migrering
 
 import io.ktor.server.testing.testApplication
 import io.mockk.every
 import io.mockk.spyk
+import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
@@ -10,10 +11,6 @@ import no.nav.etterlatte.libs.common.rapidsandrivers.FEILENDE_STEG
 import no.nav.etterlatte.libs.common.rapidsandrivers.FEILMELDING_KEY
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.database.POSTGRES_VERSION
-import no.nav.etterlatte.migrering.Migreringsstatus
-import no.nav.etterlatte.migrering.PesysRepository
-import no.nav.etterlatte.migrering.Pesyskopling
-import no.nav.etterlatte.migrering.Pesyssak
 import no.nav.etterlatte.opprettInMemoryDatabase
 import no.nav.etterlatte.rapidsandrivers.EventNames
 import no.nav.etterlatte.rapidsandrivers.migrering.Beregning
@@ -83,6 +80,7 @@ class FeilendeMigreringLytterTest {
                         ),
                     trygdetid = Trygdetid(perioder = listOf()),
                     flyktningStatus = false,
+                    spraak = Spraak.NN,
                 )
             repository.lagrePesyssak(pesyssak)
 
@@ -101,6 +99,52 @@ class FeilendeMigreringLytterTest {
                         ),
                     ).toJson(),
                 )
+            Assertions.assertEquals(Migreringsstatus.MIGRERING_FEILA, repository.hentStatus(pesysid.id))
+        }
+    }
+
+    @Test
+    fun `logger og lagrer feilmelding for feil fra attestering`() {
+        testApplication {
+            val fil = this::class.java.getResource("/attesteringsfeil.json")!!.readText()
+
+            val behandlingId = UUID.fromString("bd8e7578-01fe-4e3e-b560-daf859c45c5f")
+            val pesysid = PesysId(1L)
+            val repository =
+                spyk(PesysRepository(datasource)).also {
+                    every { it.hentPesysId(behandlingId) } returns
+                        Pesyskopling(
+                            behandlingId = behandlingId,
+                            pesysId = pesysid,
+                        )
+                }
+            val pesyssak =
+                Pesyssak(
+                    id = pesysid.id,
+                    enhet = Enhet("1"),
+                    soeker = Folkeregisteridentifikator.of("08071272487"),
+                    gjenlevendeForelder = null,
+                    avdoedForelder = listOf(),
+                    virkningstidspunkt = YearMonth.now(),
+                    foersteVirkningstidspunkt = YearMonth.now(),
+                    beregning =
+                        Beregning(
+                            brutto = BigDecimal.ZERO,
+                            netto = BigDecimal.ZERO,
+                            anvendtTrygdetid = BigDecimal.ZERO,
+                            datoVirkFom = Tidspunkt.now(),
+                            g = BigDecimal.ZERO,
+                        ),
+                    trygdetid = Trygdetid(perioder = listOf()),
+                    flyktningStatus = false,
+                    spraak = Spraak.NN,
+                )
+            repository.lagrePesyssak(pesyssak)
+            repository.lagreKoplingTilBehandling(behandlingId, pesysid)
+
+            TestRapid().apply {
+                FeilendeMigreringLytter(rapidsConnection = this, repository = repository)
+            }.sendTestMessage(fil)
             Assertions.assertEquals(Migreringsstatus.MIGRERING_FEILA, repository.hentStatus(pesysid.id))
         }
     }

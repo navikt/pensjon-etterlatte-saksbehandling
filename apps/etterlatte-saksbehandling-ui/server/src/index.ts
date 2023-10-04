@@ -9,9 +9,9 @@ import { requestLogger } from './middleware/logging'
 import { tokenMiddleware } from './middleware/getOboToken'
 import { proxy } from './middleware/proxy'
 import { loggerRouter } from './routers/loggerRouter'
-import { unleash } from './utils/unleash'
 import prometheus from './monitoring/prometheus'
 import { sanitize } from './utils/sanitize'
+import { unleash } from './utils/unleash'
 
 logger.info(`environment: ${process.env.NODE_ENV}`)
 
@@ -38,23 +38,32 @@ if (isDev) {
 } else {
   app.use('/api/logg', loggerRouter)
 
-  const isEnabled = (toggle: string) => {
-    if (!unleash) {
-      return false
-    }
-    try {
-      return unleash.isEnabled(toggle, undefined, false)
-    } catch (e) {
-      logger.error({
-        message: `Fikk feilmelding fra Unleash for toggle ${sanitize(toggle)}, bruker defaultverdi false`,
-        error: JSON.stringify(e),
-      })
-      return false
-    }
-  }
-
   app.post('/api/feature', express.json(), (req: Request, res: Response) => {
     const toggles: string[] = req.body.features
+
+    const PAA = 'PAA'
+    const AV = 'AV'
+    const UDEFINERT = 'UDEFINERT'
+    const HENTING_FEILA = 'HENTING_FEILA'
+
+    const isEnabled = (toggle: string): String => {
+      if (!unleash) {
+        return UDEFINERT
+      }
+      try {
+        if (unleash.isEnabled(toggle, undefined)) {
+          return PAA
+        } else {
+          return AV
+        }
+      } catch (e) {
+        logger.error({
+          message: `Fikk feilmelding fra Unleash for toggle ${sanitize(toggle)}, bruker defaultverdi false`,
+          error: JSON.stringify(e),
+        })
+        return HENTING_FEILA
+      }
+    }
 
     res.json(
       toggles.map((toggle) => {

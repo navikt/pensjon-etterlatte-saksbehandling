@@ -29,7 +29,7 @@ const dato = (str: string | undefined) => {
   const splitted = str.split('.')
   const dato = new Date()
   dato.setDate(Number(splitted[0]))
-  dato.setMonth(Number(splitted[1]) - 2)
+  dato.setMonth(Number(splitted[1]) - 1) // -1 for å justere for at Date-objektet bruker 0-indeksering
   dato.setFullYear(Number(splitted[2]))
   dato.setHours(12)
   dato.setMinutes(0)

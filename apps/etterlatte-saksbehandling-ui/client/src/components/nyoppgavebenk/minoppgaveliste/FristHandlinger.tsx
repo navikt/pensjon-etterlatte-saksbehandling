@@ -60,7 +60,7 @@ export const FristHandlinger = (props: {
     <>
       {frist ? (
         <>
-          <Modal open={open} onClose={() => setOpen((x) => !x)} aria-labelledby="modal-heading">
+          <Modal open={open} onClose={() => setOpen(false)} aria-labelledby="modal-heading">
             <Modal.Body>
               <Modal.Header closeButton={false}>
                 <Heading spacing level="2" size="medium" id="modal-heading">

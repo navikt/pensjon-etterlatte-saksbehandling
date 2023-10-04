@@ -56,7 +56,9 @@ class StatistikkService(
                     VedtakType.OPPHOER,
                     -> stoenadRepository.lagreStoenadsrad(vedtakTilStoenadsrad(vedtak, tekniskTid))
 
-                    VedtakType.AVSLAG -> null
+                    VedtakType.TILBAKEKREVING,
+                    VedtakType.AVSLAG,
+                    -> null
                 }
             return sakRad to stoenadRad
         }

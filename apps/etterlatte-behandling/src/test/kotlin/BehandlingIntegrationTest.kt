@@ -45,7 +45,6 @@ import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.toObjectNode
-import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
 import no.nav.etterlatte.libs.database.POSTGRES_VERSION
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
@@ -429,7 +428,8 @@ class GrunnlagKlientTest : GrunnlagKlient {
 class VedtakKlientTest : VedtakKlient {
     override suspend fun fattVedtakTilbakekreving(
         tilbakekreving: Tilbakekreving,
-        HvedtakFattet: VedtakFattet,
+        saksbehandler: String,
+        enhet: String,
         brukerTokenInfo: BrukerTokenInfo,
     ): Long {
         return 123L

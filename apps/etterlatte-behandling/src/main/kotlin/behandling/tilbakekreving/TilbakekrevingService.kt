@@ -10,7 +10,6 @@ import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.VedtakOppgaveDTO
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tilbakekreving.Kravgrunnlag
-import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.sak.SakDao
 import no.nav.etterlatte.token.BrukerTokenInfo
@@ -89,18 +88,12 @@ class TilbakekrevingService(
 
         if (!tilbakekreving.underBehandling()) throw TilbakekrevingErIkkeUnderBehandlingException()
 
-        val tidspunkt = Tidspunkt.now()
-
         val vedtakId =
             runBlocking {
                 vedtakKlient.fattVedtakTilbakekreving(
                     tilbakekreving = tilbakekreving,
-                    vedtakFattet =
-                        VedtakFattet(
-                            ansvarligSaksbehandler = brukerTokenInfo.ident(),
-                            ansvarligEnhet = tilbakekreving.sak.enhet,
-                            tidspunkt = tidspunkt,
-                        ),
+                    saksbehandler = brukerTokenInfo.ident(),
+                    enhet = tilbakekreving.sak.enhet,
                     brukerTokenInfo = brukerTokenInfo,
                 )
             }
@@ -111,7 +104,7 @@ class TilbakekrevingService(
             sakId = tilbakekreving.sak.id,
             vedtakId = vedtakId,
             hendelse = HendelseType.FATTET,
-            inntruffet = tidspunkt,
+            inntruffet = Tidspunkt.now(),
             saksbehandler = brukerTokenInfo.ident(),
             kommentar = null,
             begrunnelse = null,

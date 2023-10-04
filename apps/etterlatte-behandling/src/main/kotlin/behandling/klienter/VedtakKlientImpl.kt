@@ -8,8 +8,7 @@ import no.nav.etterlatte.behandling.tilbakekreving.Tilbakekreving
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.toObjectNode
-import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingVedtakDto
-import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
+import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingFattetVedtakDto
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktorobo.Resource
@@ -19,7 +18,8 @@ import org.slf4j.LoggerFactory
 interface VedtakKlient {
     suspend fun fattVedtakTilbakekreving(
         tilbakekreving: Tilbakekreving,
-        vedtakFattet: VedtakFattet,
+        saksbehandler: String,
+        enhet: String,
         brukerTokenInfo: BrukerTokenInfo,
     ): Long
 }
@@ -37,7 +37,8 @@ class VedtakKlientImpl(config: Config, httpClient: HttpClient) : VedtakKlient {
 
     override suspend fun fattVedtakTilbakekreving(
         tilbakekreving: Tilbakekreving,
-        vedtakFattet: VedtakFattet,
+        saksbehandler: String,
+        enhet: String,
         brukerTokenInfo: BrukerTokenInfo,
     ): Long {
         try {
@@ -52,12 +53,13 @@ class VedtakKlientImpl(config: Config, httpClient: HttpClient) : VedtakKlient {
                         ),
                     brukerTokenInfo = brukerTokenInfo,
                     postBody =
-                        TilbakekrevingVedtakDto(
+                        TilbakekrevingFattetVedtakDto(
                             tilbakekrevingId = tilbakekreving.id,
                             sakId = tilbakekreving.sak.id,
                             sakType = tilbakekreving.sak.sakType,
                             soeker = Folkeregisteridentifikator.of(tilbakekreving.sak.ident),
-                            fattet = vedtakFattet,
+                            ansvarligSaksbehandler = saksbehandler,
+                            ansvarligEnhet = enhet,
                             tilbakekreving = tilbakekreving.toObjectNode(),
                         ),
                 )

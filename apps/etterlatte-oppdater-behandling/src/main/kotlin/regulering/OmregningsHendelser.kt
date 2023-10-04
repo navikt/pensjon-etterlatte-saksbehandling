@@ -1,12 +1,12 @@
-package no.nav.etterlatte
+package no.nav.etterlatte.regulering
 
 import com.fasterxml.jackson.module.kotlin.treeToValue
+import no.nav.etterlatte.BehandlingService
 import no.nav.etterlatte.libs.common.behandling.Omregningshendelse
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
-import no.nav.etterlatte.rapidsandrivers.EventNames.OMREGNINGSHENDELSE
-import no.nav.etterlatte.rapidsandrivers.EventNames.VILKAARSVURDER
+import no.nav.etterlatte.rapidsandrivers.EventNames
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -20,7 +20,7 @@ import rapidsandrivers.behandlingId
 import rapidsandrivers.migrering.ListenerMedLoggingOgFeilhaandtering
 
 internal class OmregningsHendelser(rapidsConnection: RapidsConnection, private val behandlinger: BehandlingService) :
-    ListenerMedLoggingOgFeilhaandtering(OMREGNINGSHENDELSE) {
+    ListenerMedLoggingOgFeilhaandtering(EventNames.OMREGNINGSHENDELSE) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     init {
@@ -45,7 +45,7 @@ internal class OmregningsHendelser(rapidsConnection: RapidsConnection, private v
         packet.behandlingId = behandlingId
         packet[BEHANDLING_VI_OMREGNER_FRA_KEY] = behandlingViOmregnerFra
         packet[SAK_TYPE] = sakType
-        packet.eventName = VILKAARSVURDER
+        packet.eventName = EventNames.VILKAARSVURDER
         context.publish(packet.toJson())
         logger.info("Publiserte oppdatert omregningshendelse")
     }

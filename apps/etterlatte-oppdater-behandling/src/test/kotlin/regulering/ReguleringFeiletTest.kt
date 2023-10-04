@@ -1,3 +1,5 @@
+package no.nav.etterlatte.regulering
+
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
@@ -5,7 +7,6 @@ import no.nav.etterlatte.BehandlingService
 import no.nav.etterlatte.ReguleringFeiletHendelse
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.rapidsandrivers.EventNames.FEILA
-import no.nav.etterlatte.regulering.ReguleringFeilet
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions

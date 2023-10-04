@@ -52,7 +52,7 @@ class GrunnlagKlientObo(config: Config, httpClient: HttpClient) : GrunnlagKlient
                     resource =
                         Resource(
                             clientId = clientId,
-                            url = "$resourceUrl/grunnlag/$sakId/$opplysningsType",
+                            url = "$resourceUrl/grunnlag/sak/$sakId/$opplysningsType",
                         ),
                     brukerTokenInfo = brukerTokenInfo,
                 )
@@ -80,7 +80,7 @@ class GrunnlagKlientObo(config: Config, httpClient: HttpClient) : GrunnlagKlient
                     resource =
                         Resource(
                             clientId = clientId,
-                            url = "$resourceUrl/grunnlag/$sakId/${Opplysningstype.PERSONGALLERI_V1}",
+                            url = "$resourceUrl/grunnlag/sak/$sakId/${Opplysningstype.PERSONGALLERI_V1}",
                         ),
                     brukerTokenInfo = brukerTokenInfo,
                 )

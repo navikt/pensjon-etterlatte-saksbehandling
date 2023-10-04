@@ -58,16 +58,6 @@ interface GrunnlagService {
 
     fun hentOpplysningsgrunnlag(sak: Long): Grunnlag?
 
-    fun hentOpplysningsgrunnlagMedVersjon(
-        sak: Long,
-        versjon: Long,
-    ): Grunnlag?
-
-    fun hentOpplysningsgrunnlag(
-        sak: Long,
-        persongalleri: Persongalleri,
-    ): Grunnlag // TODO ai: Kan fjernes når kafka flyten fjernes
-
     fun hentSakerOgRoller(fnr: Folkeregisteridentifikator): PersonMedSakerOgRoller
 
     fun hentAlleSakerForFnr(fnr: Folkeregisteridentifikator): Set<Long>
@@ -97,35 +87,6 @@ class RealGrunnlagService(
         val grunnlag = opplysningDao.hentAlleGrunnlagForSak(sak)
 
         return OpplysningsgrunnlagMapper(grunnlag, sak, persongalleri).hentGrunnlag()
-    }
-
-    override fun hentOpplysningsgrunnlag(
-        sak: Long,
-        persongalleri: Persongalleri,
-    ): Grunnlag {
-        val grunnlag = opplysningDao.hentAlleGrunnlagForSak(sak)
-
-        return OpplysningsgrunnlagMapper(grunnlag, sak, persongalleri).hentGrunnlag()
-    }
-
-    override fun hentOpplysningsgrunnlagMedVersjon(
-        sak: Long,
-        versjon: Long,
-    ): Grunnlag? {
-        val grunnlag = opplysningDao.finnGrunnlagOpptilVersjon(sak, versjon)
-
-        val personGalleri =
-            grunnlag.find { it.opplysning.opplysningType === Opplysningstype.PERSONGALLERI_V1 }
-                ?.let { objectMapper.readValue(it.opplysning.opplysning.toJson(), Persongalleri::class.java) }
-                ?: run {
-                    logger.info(
-                        "Klarte ikke å hente ut grunnlag for sak $sak med versjon $versjon. " +
-                            "Fant ikke persongalleri",
-                    )
-                    return null
-                }
-
-        return OpplysningsgrunnlagMapper(grunnlag, sak, personGalleri).hentGrunnlag()
     }
 
     override fun hentSakerOgRoller(fnr: Folkeregisteridentifikator): PersonMedSakerOgRoller {

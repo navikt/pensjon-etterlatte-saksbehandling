@@ -37,7 +37,7 @@ class GrunnlagKlient(config: Config, httpClient: HttpClient) {
                     resource =
                         Resource(
                             clientId = clientId,
-                            url = "$resourceUrl/api/grunnlag/$sakId",
+                            url = "$resourceUrl/api/grunnlag/sak/$sakId",
                         ),
                     brukerTokenInfo = brukerTokenInfo,
                 )

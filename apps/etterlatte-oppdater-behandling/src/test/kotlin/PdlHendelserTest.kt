@@ -1,8 +1,8 @@
+package no.nav.etterlatte
+
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
-import no.nav.etterlatte.BehandlingServiceImpl
-import no.nav.etterlatte.PdlHendelser
 import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
 import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse

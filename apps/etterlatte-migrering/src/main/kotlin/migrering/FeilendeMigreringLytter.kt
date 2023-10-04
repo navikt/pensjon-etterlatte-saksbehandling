@@ -40,7 +40,12 @@ internal class FeilendeMigreringLytter(rapidsConnection: RapidsConnection, priva
             validate { it.interestedIn(PESYS_ID_KEY) }
             validate { it.interestedIn(HENDELSE_DATA_KEY) }
             validate { it.requireKey(FEILMELDING_KEY) }
-            validate { it.rejectValue(FEILENDE_STEG, Migreringshendelser.VERIFISER) }
+            validate {
+                it.rejectValues(
+                    FEILENDE_STEG,
+                    listOf(Migreringshendelser.VERIFISER, Migreringshendelser.AVBRYT_BEHANDLING),
+                )
+            }
             correlationId()
         }.register(this)
     }

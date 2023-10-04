@@ -83,6 +83,7 @@ class FeilendeMigreringLytterTest {
                     spraak = Spraak.NN,
                 )
             repository.lagrePesyssak(pesyssak)
+            repository.lagreKoplingTilBehandling(behandlingId, pesysid)
 
             TestRapid()
                 .apply {

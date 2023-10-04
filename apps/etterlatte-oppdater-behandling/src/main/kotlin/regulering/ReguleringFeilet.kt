@@ -1,8 +1,10 @@
-package no.nav.etterlatte
+package no.nav.etterlatte.regulering
 
+import no.nav.etterlatte.BehandlingService
+import no.nav.etterlatte.ReguleringFeiletHendelse
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
-import no.nav.etterlatte.rapidsandrivers.EventNames.FEILA
+import no.nav.etterlatte.rapidsandrivers.EventNames
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -20,7 +22,7 @@ internal class ReguleringFeilet(
 
     init {
         River(rapidsConnection).apply {
-            eventName(FEILA)
+            eventName(EventNames.FEILA)
             validate { it.requireKey(SAK_ID_KEY) }
             validate { it.requireValue("aarsak", "REGULERING") }
             correlationId()

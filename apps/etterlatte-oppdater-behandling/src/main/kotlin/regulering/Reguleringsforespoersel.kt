@@ -1,9 +1,9 @@
-package no.nav.etterlatte
+package no.nav.etterlatte.regulering
 
+import no.nav.etterlatte.BehandlingService
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
-import no.nav.etterlatte.rapidsandrivers.EventNames.FINN_LOEPENDE_YTELSER
-import no.nav.etterlatte.rapidsandrivers.EventNames.REGULERING_EVENT_NAME
+import no.nav.etterlatte.rapidsandrivers.EventNames
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -18,7 +18,7 @@ import rapidsandrivers.tilbakestilteBehandlinger
 internal class Reguleringsforespoersel(
     rapidsConnection: RapidsConnection,
     private val behandlingService: BehandlingService,
-) : ListenerMedLoggingOgFeilhaandtering(REGULERING_EVENT_NAME) {
+) : ListenerMedLoggingOgFeilhaandtering(EventNames.REGULERING_EVENT_NAME) {
     private val logger = LoggerFactory.getLogger(Reguleringsforespoersel::class.java)
 
     init {
@@ -43,7 +43,7 @@ internal class Reguleringsforespoersel(
                 )
             }
         behandlingService.hentAlleSaker().saker.forEach {
-            packet.eventName = FINN_LOEPENDE_YTELSER
+            packet.eventName = EventNames.FINN_LOEPENDE_YTELSER
             packet.tilbakestilteBehandlinger = tilbakemigrerte.behandlingerForSak(it.id)
             packet.sakId = it.id
             context.publish(packet.toJson())

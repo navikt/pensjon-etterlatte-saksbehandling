@@ -29,6 +29,7 @@ import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.kafka.TestProdusent
 import no.nav.etterlatte.libs.common.Miljoevariabler
+import no.nav.etterlatte.libs.common.behandling.Mottaker
 import no.nav.etterlatte.libs.common.behandling.PersonMedSakerOgRoller
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakOgRolle
@@ -428,14 +429,23 @@ class BrevApiKlientTest : BrevApiKlient {
         sakId: Long,
         brukerTokenInfo: BrukerTokenInfo,
     ): OpprettetBrevDto {
-        return OpprettetBrevDto(brevId++)
+        return OpprettetBrevDto(
+            brevId++,
+            mottaker =
+                Mottaker(
+                    navn = "Mottaker mottakersen",
+                    foedselsnummer = "12312312312",
+                    orgnummer = null,
+                ),
+        )
     }
 
     override suspend fun ferdigstillBrev(
         sakId: Long,
         brevId: Long,
         brukerTokenInfo: BrukerTokenInfo,
-    ) {}
+    ) {
+    }
 
     override suspend fun journalfoerBrev(
         sakId: Long,
@@ -451,6 +461,22 @@ class BrevApiKlientTest : BrevApiKlient {
         brukerTokenInfo: BrukerTokenInfo,
     ): String {
         return UUID.randomUUID().toString()
+    }
+
+    override suspend fun hentBrev(
+        sakId: Long,
+        brevId: Long,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): OpprettetBrevDto {
+        return OpprettetBrevDto(
+            id = brevId,
+            mottaker =
+                Mottaker(
+                    navn = "Mottaker mottakersen",
+                    foedselsnummer = "12312312312",
+                    orgnummer = null,
+                ),
+        )
     }
 }
 

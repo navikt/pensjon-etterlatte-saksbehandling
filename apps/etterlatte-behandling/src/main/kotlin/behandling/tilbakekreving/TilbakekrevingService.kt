@@ -1,6 +1,5 @@
 package no.nav.etterlatte.behandling.tilbakekreving
 
-import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.hendelse.HendelseType
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
@@ -79,46 +78,46 @@ class TilbakekrevingService(
             )
         }
 
-    fun fattVedtak(
+    suspend fun fattVedtak(
         tilbakekrevingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ) = inTransaction {
-        logger.info("Fatter vedtak for tilbakekreving=$tilbakekrevingId")
+    ) {
         val tilbakekreving = tilbakekrevingDao.hentTilbakekreving(tilbakekrevingId)
-
         if (!tilbakekreving.underBehandling()) throw TilbakekrevingErIkkeUnderBehandlingException()
 
         val vedtakId =
-            runBlocking {
-                vedtakKlient.fattVedtakTilbakekreving(
-                    tilbakekreving = tilbakekreving,
-                    saksbehandler = brukerTokenInfo.ident(),
-                    enhet = tilbakekreving.sak.enhet,
-                    brukerTokenInfo = brukerTokenInfo,
-                )
-            }
-        tilbakekrevingDao.lagreTilbakekreving(tilbakekreving.copy(status = TilbakekrevingStatus.VEDTATT))
+            vedtakKlient.fattVedtakTilbakekreving(
+                tilbakekreving = tilbakekreving,
+                brukerTokenInfo = brukerTokenInfo,
+                enhet = tilbakekreving.sak.enhet,
+            )
 
-        hendelseDao.vedtakHendelse(
-            behandlingId = tilbakekreving.id,
-            sakId = tilbakekreving.sak.id,
-            vedtakId = vedtakId,
-            hendelse = HendelseType.FATTET,
-            inntruffet = Tidspunkt.now(),
-            saksbehandler = brukerTokenInfo.ident(),
-            kommentar = null,
-            begrunnelse = null,
-        )
+        inTransaction {
+            logger.info("Fatter vedtak for tilbakekreving=$tilbakekrevingId")
 
-        oppgaveService.ferdigstillOppgaveUnderbehandlingOgLagNyMedType(
-            fattetoppgave =
-                VedtakOppgaveDTO(
-                    sakId = tilbakekreving.sak.id,
-                    referanse = tilbakekreving.id.toString(),
-                ),
-            oppgaveType = OppgaveType.ATTESTERING,
-            merknad = null,
-            saksbehandler = brukerTokenInfo,
-        )
+            tilbakekrevingDao.lagreTilbakekreving(tilbakekreving.copy(status = TilbakekrevingStatus.VEDTATT))
+
+            hendelseDao.vedtakHendelse(
+                behandlingId = tilbakekreving.id,
+                sakId = tilbakekreving.sak.id,
+                vedtakId = vedtakId,
+                hendelse = HendelseType.FATTET,
+                inntruffet = Tidspunkt.now(),
+                saksbehandler = brukerTokenInfo.ident(),
+                kommentar = null,
+                begrunnelse = null,
+            )
+
+            oppgaveService.ferdigstillOppgaveUnderbehandlingOgLagNyMedType(
+                fattetoppgave =
+                    VedtakOppgaveDTO(
+                        sakId = tilbakekreving.sak.id,
+                        referanse = tilbakekreving.id.toString(),
+                    ),
+                oppgaveType = OppgaveType.ATTESTERING,
+                merknad = null,
+                saksbehandler = brukerTokenInfo,
+            )
+        }
     }
 }

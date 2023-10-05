@@ -18,9 +18,8 @@ import org.slf4j.LoggerFactory
 interface VedtakKlient {
     suspend fun fattVedtakTilbakekreving(
         tilbakekreving: Tilbakekreving,
-        saksbehandler: String,
-        enhet: String,
         brukerTokenInfo: BrukerTokenInfo,
+        enhet: String,
     ): Long
 }
 
@@ -37,9 +36,8 @@ class VedtakKlientImpl(config: Config, httpClient: HttpClient) : VedtakKlient {
 
     override suspend fun fattVedtakTilbakekreving(
         tilbakekreving: Tilbakekreving,
-        saksbehandler: String,
-        enhet: String,
         brukerTokenInfo: BrukerTokenInfo,
+        enhet: String,
     ): Long {
         try {
             logger.info("Sender tilbakekreving som skal fatte vedtak for tilbakekreving=${tilbakekreving.id} til vedtak")
@@ -58,7 +56,7 @@ class VedtakKlientImpl(config: Config, httpClient: HttpClient) : VedtakKlient {
                             sakId = tilbakekreving.sak.id,
                             sakType = tilbakekreving.sak.sakType,
                             soeker = Folkeregisteridentifikator.of(tilbakekreving.sak.ident),
-                            ansvarligSaksbehandler = saksbehandler,
+                            ansvarligSaksbehandler = brukerTokenInfo.ident(),
                             ansvarligEnhet = enhet,
                             tilbakekreving = tilbakekreving.toObjectNode(),
                         ),

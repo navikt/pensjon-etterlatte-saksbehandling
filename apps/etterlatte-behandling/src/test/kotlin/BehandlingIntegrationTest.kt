@@ -428,9 +428,8 @@ class GrunnlagKlientTest : GrunnlagKlient {
 class VedtakKlientTest : VedtakKlient {
     override suspend fun fattVedtakTilbakekreving(
         tilbakekreving: Tilbakekreving,
-        saksbehandler: String,
-        enhet: String,
         brukerTokenInfo: BrukerTokenInfo,
+        enhet: String,
     ): Long {
         return 123L
     }

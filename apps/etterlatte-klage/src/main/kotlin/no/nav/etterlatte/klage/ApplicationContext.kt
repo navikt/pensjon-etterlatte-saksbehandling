@@ -3,51 +3,43 @@ package no.nav.etterlatte.klage
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 import io.ktor.server.application.Application
-import io.ktor.server.cio.CIO
-import io.ktor.server.config.HoconApplicationConfig
-import io.ktor.server.engine.applicationEngineEnvironment
-import io.ktor.server.engine.connector
-import io.ktor.server.engine.embeddedServer
-import io.ktor.server.routing.routing
-import no.nav.etterlatte.kafka.startLytting
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleProperties
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
+import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.requireEnvValue
-import no.nav.etterlatte.libs.ktor.healthApi
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
-import no.nav.etterlatte.libs.ktor.metricsModule
-import no.nav.etterlatte.libs.ktor.setReady
-import org.slf4j.LoggerFactory
+import no.nav.etterlatte.libs.ktor.restModule
 
-internal class ApplicationContext {
-    private val defaultConfig: Config = ConfigFactory.load()
+val sikkerLogg = sikkerlogger()
+
+class ApplicationContext {
+    val config: Config = ConfigFactory.load()
     private val env = System.getenv()
-    private val httpPort = env.getOrDefault("HTTP_PORT", "8080").toInt()
-    private val engine =
-        embeddedServer(
-            factory = CIO,
-            environment =
-                applicationEngineEnvironment {
-                    config = HoconApplicationConfig(defaultConfig)
-                    module {
-                        routing {
-                            healthApi()
-                        }
-                        metricsModule()
-                    }
-                    connector { port = httpPort }
-                },
+    val httpPort = env.getOrDefault("HTTP_PORT", "8080").toInt()
+
+    val featureToggleService =
+        FeatureToggleService.initialiser(
+            properties =
+                FeatureToggleProperties(
+                    applicationName = "",
+                    host = "",
+                    apiKey = "",
+                ),
         )
 
-    fun run() {
-        startKafkalytter(defaultConfig, env)
-        setReady().also { engine.start(true) }
-    }
-}
+    private val kabalHttpClient =
+        httpClientClientCredentials(
+            azureAppClientId = config.getString("azure.app.client.id"),
+            azureAppJwk = config.getString("azure.app.jwk"),
+            azureAppWellKnownUrl = config.getString("azure.app.well.known.url"),
+            azureAppScope = config.getString("klage.azure.scope"),
+        )
 
-private fun startKafkalytter(
-    config: Config,
-    env: Map<String, String>,
-) {
-    val behandlingHttpClient =
+    private val kabalKlient = KabalKlientImpl(client = kabalHttpClient, kabalUrl = config.getString("kabal.resource.url"))
+
+    val kabalOversendelseService: KabalOversendelseService = KabalOversendelseServiceImpl(kabalKlient = kabalKlient)
+
+    private val behandlingHttpClient =
         httpClientClientCredentials(
             azureAppClientId = config.getString("azure.app.client.id"),
             azureAppJwk = config.getString("azure.app.jwk"),
@@ -55,17 +47,25 @@ private fun startKafkalytter(
             azureAppScope = config.getString("behandling.azure.scope"),
         )
 
-    startLytting(
-        konsument =
-            KlageKafkakonsument(
-                env = env,
-                topic = env.requireEnvValue("KLAGE_TOPIC"),
-                behandlingKlient =
-                    BehandlingKlient(
-                        behandlingHttpClient = behandlingHttpClient,
-                        resourceUrl = config.getString("behandling.resource.url"),
-                    ),
-            ),
-        logger = LoggerFactory.getLogger(Application::class.java),
-    )
+    private val behandlingKlient: BehandlingKlient = BehandlingKlient(behandlingHttpClient, "")
+
+    val kabalKafkakonsument: KlageKafkakonsument =
+        KlageKafkakonsument(
+            env = env,
+            topic = env.requireEnvValue("KLAGE_TOPIC"),
+            behandlingKlient = behandlingKlient,
+        )
+}
+
+fun Application.module(context: ApplicationContext) {
+    with(context) {
+        restModule(
+            sikkerLogg = sikkerLogg,
+        ) {
+            kabalOvesendelseRoute(
+                kabalOversendelseService = kabalOversendelseService,
+                featureToggleService = featureToggleService,
+            )
+        }
+    }
 }

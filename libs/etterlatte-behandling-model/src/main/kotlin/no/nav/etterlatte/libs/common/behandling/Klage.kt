@@ -1,8 +1,10 @@
 package no.nav.etterlatte.libs.common.behandling
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.fasterxml.jackson.annotation.JsonTypeName
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.person.VergeEllerFullmektig
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
@@ -157,6 +159,9 @@ data class Klage(
         }
     }
 
+    fun tilKabalForsendelse() {
+    }
+
     companion object {
         fun ny(sak: Sak): Klage {
             return Klage(
@@ -276,3 +281,21 @@ enum class KlageHendelseType {
     OPPRETTET,
     FERDIGSTILT,
 }
+
+data class KlageOversendelseDto(val klage: Klage, val ekstraData: EkstradataInnstilling)
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+data class Mottaker(
+    val navn: String,
+    val foedselsnummer: String?,
+    val orgnummer: String? = null,
+)
+
+data class EkstradataInnstilling(
+    val mottakerInnstilling: Mottaker,
+    val vergeEllerFullmektig: VergeEllerFullmektig?,
+    val journalpostInnstillingsbrev: String,
+    val journalpostKlage: String?,
+    val journalpostSoeknad: String?,
+    val journalpostVedtak: String?,
+)

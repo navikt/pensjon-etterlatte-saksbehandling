@@ -4,6 +4,8 @@ import io.ktor.server.plugins.NotFoundException
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.klienter.BrevApiKlient
+import no.nav.etterlatte.behandling.klienter.KlageKlient
+import no.nav.etterlatte.libs.common.behandling.EkstradataInnstilling
 import no.nav.etterlatte.libs.common.behandling.Formkrav
 import no.nav.etterlatte.libs.common.behandling.InnstillingTilKabal
 import no.nav.etterlatte.libs.common.behandling.Kabalrespons
@@ -63,6 +65,7 @@ class KlageServiceImpl(
     private val hendelseDao: HendelseDao,
     private val oppgaveService: OppgaveService,
     private val brevApiKlient: BrevApiKlient,
+    private val klageKlient: KlageKlient,
 ) : KlageService {
     private val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
@@ -249,12 +252,31 @@ class KlageServiceImpl(
         val innstillingsbrev = innstilling.brev
         val (tidJournalfoert, journalpostId) =
             runBlocking {
-                ferdigstillOgDistribuerBrev(klage.sak.id, innstillingsbrev.brevId, saksbehandler)
+                ferdigstillOgDistribuerBrev(
+                    sakId = klage.sak.id,
+                    brevId = innstillingsbrev.brevId,
+                    saksbehandler = saksbehandler,
+                )
             }
+        val brev =
+            runBlocking {
+                brevApiKlient.hentBrev(sakId = klage.sak.id, brevId = innstillingsbrev.brevId, brukerTokenInfo = saksbehandler)
+            }
+        runBlocking {
+            klageKlient.sendKlageTilKabal(
+                klage = klage,
+                ekstradataInnstilling =
+                    EkstradataInnstilling(
+                        mottakerInnstilling = brev.mottaker,
+                        vergeEllerFullmektig = null, // TODO: Håndter verge
+                        journalpostInnstillingsbrev = journalpostId,
+                        journalpostKlage = null, // TODO: koble på når vi har inngang til klage
+                        journalpostSoeknad = null, // TODO: koble på når vi har journalpost soeknad inn
+                        journalpostVedtak = null, // TODO: hent ut vedtaksbrev for vedtaket
+                    ),
+            )
+        }
 
-        // TODO: send avgårde til kabal - se EY-2593.
-        //  Vi trenger nok å bygge requesten litt mer opp med f.eks. brevene. Se
-        //  på hvordan vi vil ivareta flyt her
         return SendtInnstillingsbrev(
             journalfoerTidspunkt = tidJournalfoert,
             sendtKabalTidspunkt = Tidspunkt.now(),

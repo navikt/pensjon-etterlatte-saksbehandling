@@ -100,6 +100,10 @@ spec:
       value: https://skjermede-personer-pip.intern.dev.nav.no
     - name: AZURE_SCOPE_SKJERMEDE_PIP
       value: api://dev-gcp.nom.skjermede-personer-pip/.default
+    - name: AZURE_SCOPE_ETTERLATTE_KLAGE
+      value: api://dev-gcp.etterlatte.etterlatte-klage/.default
+    - name: ETTERLATTE_KLAGE_API_URL
+      value: http://etterlatte-klage
     - name: OPPGAVE_CLIENT_ID
       value: dev-fss.oppgavehandtering.oppgave
     - name: OPPGAVE_URL

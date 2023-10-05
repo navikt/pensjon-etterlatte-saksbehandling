@@ -37,7 +37,7 @@ export const Behandling = () => {
   return mapAllApiResult(
     fetchBehandlingStatus,
     <Spinner label="Henter behandling ..." visible />,
-    <Spinner label="Henter behandling ..." visible />,
+    null,
     () => <ApiErrorAlert>Kunne ikke hente behandling</ApiErrorAlert>,
     (behandling) => (
       <>

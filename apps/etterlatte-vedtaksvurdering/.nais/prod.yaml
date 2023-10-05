@@ -85,8 +85,8 @@ spec:
         - application: etterlatte-brev-api-lokal
         - application: etterlatte-saksbehandling-ui
         - application: etterlatte-saksbehandling-ui-lokal
-        - application: etterlatte-samordning-vedtak
         - application: etterlatte-behandling
+        - application: etterlatte-samordning-vedtak
           permissions:
             roles:
               - samordning-read

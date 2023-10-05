@@ -51,7 +51,7 @@ data class OmgjoeringAvFarskapRevurderingBrevdata(
                 virkningsdato = behandling.virkningsdato!!.atDay(1),
                 naavaerendeFar = revurderingInfo.naavaerendeFar,
                 forrigeFar = revurderingInfo.forrigeFar,
-                opprinneligInnvilgelsesdato = behandling.innvilgelsesdato!!,
+                opprinneligInnvilgelsesdato = behandling.opprinneligInnvilgelsesdato!!,
             )
         }
     }

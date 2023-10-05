@@ -27,7 +27,7 @@ data class Behandling(
     val revurderingsaarsak: RevurderingAarsak? = null,
     val revurderingInfo: RevurderingInfo? = null,
     val virkningsdato: YearMonth? = null,
-    val innvilgelsesdato: LocalDate? = null,
+    val opprinneligInnvilgelsesdato: LocalDate? = null, // Kun revurdering
     val adopsjonsdato: LocalDate? = null,
     val trygdetid: List<Trygdetidsperiode>? = null,
     val etterbetalingDTO: EtterbetalingDTO?,

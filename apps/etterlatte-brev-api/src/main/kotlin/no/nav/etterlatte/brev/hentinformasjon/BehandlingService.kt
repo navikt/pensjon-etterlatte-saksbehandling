@@ -57,7 +57,6 @@ class BehandlingService(
             val vedtak = async { vedtaksvurderingKlient.hentVedtak(behandlingId, brukerTokenInfo) }
             val grunnlag = async { grunnlagKlient.hentGrunnlag(sakId, brukerTokenInfo) }
             val sak = async { behandlingKlient.hentSak(sakId, brukerTokenInfo) }
-            val innvilgelsesdato = async { vedtaksvurderingKlient.hentInnvilgelsesdato(sakId, brukerTokenInfo) }
             val vilkaarsvurdering =
                 async { vilkaarsvurderingKlient.hentVilkaarsvurdering(behandlingId, brukerTokenInfo) }
             val etterbetaling = async { behandlingKlient.hentEtterbetaling(behandlingId, brukerTokenInfo) }
@@ -66,7 +65,6 @@ class BehandlingService(
                 vedtak.await(),
                 grunnlag.await(),
                 sak.await(),
-                innvilgelsesdato.await(),
                 vilkaarsvurdering.await(),
                 etterbetaling.await(),
                 brukerTokenInfo,
@@ -77,7 +75,6 @@ class BehandlingService(
         vedtak: VedtakDto,
         grunnlag: Grunnlag,
         sak: Sak,
-        innvilgelsesdato: LocalDate?,
         vilkaarsvurdering: VilkaarsvurderingDto,
         etterbetaling: EtterbetalingDTO?,
         brukerTokenInfo: BrukerTokenInfo,
@@ -87,9 +84,9 @@ class BehandlingService(
         val saksbehandlerIdent = vedtak.vedtakFattet?.ansvarligSaksbehandler ?: innloggetSaksbehandlerIdent
         val attestantIdent = vedtak.vedtakFattet?.let { vedtak.attestasjon?.attestant ?: innloggetSaksbehandlerIdent }
 
-        val datoInnvilgelse =
+        val opprinneligInnvilgelsesdato =
             if (vedtak.behandling.revurderingInfo != null) {
-                innvilgelsesdato
+                vedtaksvurderingKlient.hentInnvilgelsesdato(sak.id, brukerTokenInfo)
             } else {
                 null
             }
@@ -138,7 +135,7 @@ class BehandlingService(
             revurderingsaarsak = vedtak.behandling.revurderingsaarsak,
             revurderingInfo = vedtak.behandling.revurderingInfo,
             virkningsdato = vedtak.virkningstidspunkt,
-            innvilgelsesdato = datoInnvilgelse,
+            opprinneligInnvilgelsesdato = opprinneligInnvilgelsesdato,
             adopsjonsdato = LocalDate.now(), // TODO: Denne må vi hente anten frå PDL eller brukarinput
             trygdetid =
                 finnTrygdetid(

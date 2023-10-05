@@ -5,7 +5,6 @@ import no.nav.etterlatte.brev.distribusjon.BestillingsID
 import no.nav.etterlatte.brev.distribusjon.DistribusjonService
 import no.nav.etterlatte.brev.distribusjon.DistribusjonsTidspunktType
 import no.nav.etterlatte.brev.distribusjon.DistribusjonsType
-import no.nav.etterlatte.brev.model.BrevEventTypes
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName

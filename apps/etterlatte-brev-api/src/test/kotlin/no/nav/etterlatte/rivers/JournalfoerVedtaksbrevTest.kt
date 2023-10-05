@@ -11,7 +11,6 @@ import no.nav.etterlatte.brev.VedtaksbrevService
 import no.nav.etterlatte.brev.distribusjon.DistribusjonsType
 import no.nav.etterlatte.brev.journalpost.JournalpostResponse
 import no.nav.etterlatte.brev.model.Brev
-import no.nav.etterlatte.brev.model.BrevEventTypes
 import no.nav.etterlatte.brev.model.BrevProsessType
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.libs.common.behandling.BehandlingType

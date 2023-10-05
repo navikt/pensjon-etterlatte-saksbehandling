@@ -58,7 +58,6 @@ export const TrygdeAvtale = ({ redigerbar }: Props) => {
   const [trygdeavtale, setTrygdeavtale] = useState<Trygdeavtale>({} as Trygdeavtale)
   const [valgtAvtale, setValgtAvtale] = useState<TrygdetidAvtale>()
   const [redigering, setRedigering] = useState<Boolean>(true)
-  const [harLagretVerdi, setHarLagretVerdi] = useState<Boolean>(false)
 
   useEffect(() => {
     fetchTrygdetidAvtaler(null, (avtaler: TrygdetidAvtale[]) => {
@@ -76,7 +75,6 @@ export const TrygdeAvtale = ({ redigerbar }: Props) => {
         if (avtale.avtaleKode) {
           setTrygdeavtale(avtale)
           setRedigering(false)
-          setHarLagretVerdi(true)
         }
       })
     }
@@ -209,7 +207,7 @@ export const TrygdeAvtale = ({ redigerbar }: Props) => {
                   <Button size="small" loading={isPending(lagreTrygdeavtaleRequest)} type="button" onClick={lagre}>
                     Lagre
                   </Button>
-                  {harLagretVerdi && (
+                  {trygdeavtale && (
                     <Button size="small" onClick={avbryt} type="button">
                       Avbryt
                     </Button>

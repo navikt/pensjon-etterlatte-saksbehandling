@@ -44,7 +44,7 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
     }
 
     if (!beregningFraState) {
-      hentBeregning()
+      void hentBeregning()
     }
   }, [])
 

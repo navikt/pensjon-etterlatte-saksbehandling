@@ -19,7 +19,7 @@ import { mapApiResult, useApiCall, isPending, isFailure, isSuccess } from '~shar
 import { sendTilAttesteringGenerellBehandling, oppdaterGenerellBehandling } from '~shared/api/generellbehandling'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
-import { hentAlleLand, ILand } from '~shared/api/trygdetid'
+import { hentAlleLand, ILand, sorterLand } from '~shared/api/trygdetid'
 import styled from 'styled-components'
 import { PencilWritingIcon } from '@navikt/aksel-icons'
 import { opprettBrevForSak } from '~shared/api/brev'
@@ -83,19 +83,10 @@ const Utland = (props: { utlandsBehandling: Generellbehandling & { innhold: Utla
 
   useEffect(() => {
     fetchAlleLand(null, (landliste) => {
-      setAlleLandKodeverk(landliste)
+      setAlleLandKodeverk(sorterLand(landliste))
     })
   }, [])
 
-  const sorterLand = (landListe: ILand[]): ILand[] => {
-    landListe.sort((a: ILand, b: ILand) => {
-      if (a.beskrivelse.tekst > b.beskrivelse.tekst) {
-        return 1
-      }
-      return -1
-    })
-    return landListe
-  }
   const oppaterGenerellbehandlingUtland = () => {
     if (valgtLandIsoKode !== undefined) {
       setErrLand(false)
@@ -171,7 +162,7 @@ const Utland = (props: { utlandsBehandling: Generellbehandling & { innhold: Utla
                       <option value="" disabled={true}>
                         Velg land
                       </option>
-                      {sorterLand(landListe).map((land) => (
+                      {landListe.map((land) => (
                         <option key={land.isoLandkode} value={land.isoLandkode}>
                           {land.beskrivelse.tekst}
                         </option>

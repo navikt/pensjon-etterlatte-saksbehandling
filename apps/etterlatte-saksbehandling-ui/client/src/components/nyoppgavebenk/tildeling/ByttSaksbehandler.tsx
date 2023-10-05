@@ -21,9 +21,7 @@ export const ByttSaksbehandler = (props: RedigerSaksbehandlerProps) => {
 
   useEffect(() => {
     if (isSuccess(byttSaksbehandlerSvar)) {
-      setTimeout(() => {
-        oppdaterTildeling(oppgaveId, user.ident)
-      }, 3000)
+      oppdaterTildeling(oppgaveId, user.ident)
     }
   }, [byttSaksbehandlerSvar])
 

@@ -23,9 +23,9 @@ import no.nav.etterlatte.brev.dokarkiv.DokarkivKlient
 import no.nav.etterlatte.brev.dokarkiv.DokarkivServiceImpl
 import no.nav.etterlatte.brev.dokument.SafClient
 import no.nav.etterlatte.brev.dokument.dokumentRoute
+import no.nav.etterlatte.brev.hentinformasjon.BehandlingService
 import no.nav.etterlatte.brev.hentinformasjon.BeregningKlient
 import no.nav.etterlatte.brev.hentinformasjon.GrunnlagKlient
-import no.nav.etterlatte.brev.hentinformasjon.SakOgBehandlingService
 import no.nav.etterlatte.brev.hentinformasjon.SakService
 import no.nav.etterlatte.brev.hentinformasjon.SoekerService
 import no.nav.etterlatte.brev.hentinformasjon.TrygdetidKlient
@@ -103,8 +103,8 @@ class ApplicationBuilder {
     private val behandlingKlient = BehandlingKlient(config, httpClient())
     private val trygdetidKlient = TrygdetidKlient(config, httpClient())
     private val vilkaarsvurderingKlient = VilkaarsvurderingKlient(config, httpClient())
-    private val sakOgBehandlingService =
-        SakOgBehandlingService(
+    private val behandlingService =
+        BehandlingService(
             vedtakKlient,
             grunnlagKlient,
             beregningKlient,
@@ -153,7 +153,7 @@ class ApplicationBuilder {
     private val vedtaksbrevService =
         VedtaksbrevService(
             db,
-            sakOgBehandlingService,
+            behandlingService,
             vedtaksvurderingService,
             adresseService,
             dokarkivService,

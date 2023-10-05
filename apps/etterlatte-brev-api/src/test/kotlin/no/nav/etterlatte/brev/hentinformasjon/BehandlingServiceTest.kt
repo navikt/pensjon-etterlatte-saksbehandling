@@ -41,7 +41,7 @@ import org.junit.jupiter.api.Test
 import java.time.YearMonth
 import java.util.UUID
 
-internal class SakOgBehandlingServiceTest {
+internal class BehandlingServiceTest {
     private val vedtaksvurderingKlient = mockk<VedtaksvurderingKlient>()
     private val grunnlagKlient = mockk<GrunnlagKlient>()
     private val beregningKlient = mockk<BeregningKlient>()
@@ -50,7 +50,7 @@ internal class SakOgBehandlingServiceTest {
     private val vilkaarsvurderingKlient = mockk<VilkaarsvurderingKlient>()
 
     private val service =
-        SakOgBehandlingService(
+        BehandlingService(
             vedtaksvurderingKlient,
             grunnlagKlient,
             beregningKlient,

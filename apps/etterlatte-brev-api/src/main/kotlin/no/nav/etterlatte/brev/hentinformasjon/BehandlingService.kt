@@ -32,7 +32,7 @@ import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
 
-interface ISakOgBehandlingService {
+interface IBehandlingService {
     suspend fun hentBehandling(
         sakId: Long,
         behandlingId: UUID,
@@ -40,14 +40,14 @@ interface ISakOgBehandlingService {
     ): Behandling
 }
 
-class SakOgBehandlingService(
+class BehandlingService(
     private val vedtaksvurderingKlient: VedtaksvurderingKlient,
     private val grunnlagKlient: GrunnlagKlient,
     private val beregningKlient: BeregningKlient,
     private val behandlingKlient: BehandlingKlient,
     private val trygdetidKlient: TrygdetidKlient,
     private val vilkaarsvurderingKlient: VilkaarsvurderingKlient,
-) : ISakOgBehandlingService {
+) : IBehandlingService {
     override suspend fun hentBehandling(
         sakId: Long,
         behandlingId: UUID,

@@ -21,9 +21,9 @@ class ApplicationContext {
         FeatureToggleService.initialiser(
             properties =
                 FeatureToggleProperties(
-                    applicationName = "",
-                    host = "",
-                    apiKey = "",
+                    applicationName = config.getString("funksjonsbrytere.unleash.applicationName"),
+                    host = config.getString("funksjonsbrytere.unleash.host"),
+                    apiKey = config.getString("funksjonsbrytere.unleash.token"),
                 ),
         )
 

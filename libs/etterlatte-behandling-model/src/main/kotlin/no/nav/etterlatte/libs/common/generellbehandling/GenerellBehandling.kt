@@ -15,17 +15,13 @@ data class GenerellBehandling(
         if (innhold !== null) {
             when (type) {
                 GenerellBehandlingType.ANNEN ->
-                    assert(innhold is Innhold.Annen) {
-                        throw IllegalArgumentException(
-                            "Type $type matcher " +
-                                "ikke innhold navn: ${innhold.javaClass.simpleName}",
-                        )
+                    require(innhold is Innhold.Annen) {
+                        "Type $type matcher " +
+                            "ikke innhold navn: ${innhold.javaClass.simpleName}"
                     }
                 GenerellBehandlingType.UTLAND ->
-                    assert(innhold is Innhold.Utland) {
-                        throw IllegalArgumentException(
-                            "Type $type matcher ikke innhold navn: ${innhold.javaClass.simpleName}",
-                        )
+                    require(innhold is Innhold.Utland) {
+                        "Type $type matcher ikke innhold navn: ${innhold.javaClass.simpleName}"
                     }
             }
         }

@@ -32,15 +32,16 @@ type Props = {
   behandlingstype: IBehandlingsType
 }
 
-export const Resultat: React.FC<Props> = ({
-  virkningstidspunktDato,
-  sakstype,
-  vilkaarsvurdering,
-  oppdaterVilkaar,
-  behandlingId,
-  redigerbar,
-  behandlingstype,
-}) => {
+export const Resultat = (props: Props) => {
+  const {
+    virkningstidspunktDato,
+    sakstype,
+    vilkaarsvurdering,
+    oppdaterVilkaar,
+    behandlingId,
+    redigerbar,
+    behandlingstype,
+  } = props
   const [svar, setSvar] = useState<ISvar>()
   const [radioError, setRadioError] = useState<string>()
   const [kommentar, setKommentar] = useState<string>('')

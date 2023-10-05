@@ -50,7 +50,7 @@ class VilkaarsvurderingKlient(config: Config, httpClient: HttpClient) {
                 is RetryResult.Success -> it.content
                 is RetryResult.Failure -> {
                     throw VilkaarsvurderingKlientException(
-                        "Klarte ikke hente vilkåårsvurdering for behandling med behandlingId=$behandlingId",
+                        "Klarte ikke hente vilkårsvurdering for behandling med behandlingId=$behandlingId",
                         it.samlaExceptions(),
                     )
                 }

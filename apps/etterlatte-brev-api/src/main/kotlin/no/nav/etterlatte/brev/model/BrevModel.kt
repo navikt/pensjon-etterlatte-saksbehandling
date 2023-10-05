@@ -131,7 +131,7 @@ data class BrevInnholdVedlegg(
                 payload = getJsonFile("/maler/vedlegg/oms_utfall_beregning.json").let { deserialize<Slate>(it) },
             )
 
-        private fun getJsonFile(url: String) = javaClass.getResource(url)!!.readText()
+        private fun getJsonFile(url: String) = this::class.java.getResource(url)!!.readText()
     }
 }
 

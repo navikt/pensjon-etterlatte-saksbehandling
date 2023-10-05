@@ -1,6 +1,5 @@
 package no.nav.etterlatte.brev.hentinformasjon
 
-import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.brev.behandling.AvkortetBeregningsperiode
@@ -26,6 +25,7 @@ import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.pensjon.brevbaker.api.model.Kroner
 import java.time.LocalDate
@@ -57,7 +57,6 @@ class BehandlingService(
             val vedtak = async { vedtaksvurderingKlient.hentVedtak(behandlingId, brukerTokenInfo) }
             val grunnlag = async { grunnlagKlient.hentGrunnlag(sakId, brukerTokenInfo) }
             val sak = async { behandlingKlient.hentSak(sakId, brukerTokenInfo) }
-            val innvilgelsesdato = { async { vedtaksvurderingKlient.hentInnvilgelsesdato(sakId, brukerTokenInfo) } }
             val vilkaarsvurdering =
                 async { vilkaarsvurderingKlient.hentVilkaarsvurdering(behandlingId, brukerTokenInfo) }
             val etterbetaling = async { behandlingKlient.hentEtterbetaling(behandlingId, brukerTokenInfo) }
@@ -66,7 +65,6 @@ class BehandlingService(
                 vedtak.await(),
                 grunnlag.await(),
                 sak.await(),
-                innvilgelsesdato,
                 vilkaarsvurdering.await(),
                 etterbetaling.await(),
                 brukerTokenInfo,
@@ -77,7 +75,6 @@ class BehandlingService(
         vedtak: VedtakDto,
         grunnlag: Grunnlag,
         sak: Sak,
-        innvilgelsesdato: () -> Deferred<LocalDate?>,
         vilkaarsvurdering: VilkaarsvurderingDto,
         etterbetaling: EtterbetalingDTO?,
         brukerTokenInfo: BrukerTokenInfo,
@@ -87,9 +84,9 @@ class BehandlingService(
         val saksbehandlerIdent = vedtak.vedtakFattet?.ansvarligSaksbehandler ?: innloggetSaksbehandlerIdent
         val attestantIdent = vedtak.vedtakFattet?.let { vedtak.attestasjon?.attestant ?: innloggetSaksbehandlerIdent }
 
-        val datoInnvilgelse =
+        val opprinneligInnvilgelsesdato =
             if (vedtak.behandling.revurderingInfo != null) {
-                innvilgelsesdato().await()
+                vedtaksvurderingKlient.hentInnvilgelsesdato(sak.id, brukerTokenInfo)
             } else {
                 null
             }
@@ -116,7 +113,16 @@ class BehandlingService(
                     attestantIdent,
                     vedtak.vedtakFattet?.tidspunkt?.toNorskLocalDate(),
                 ),
-            utbetalingsinfo = finnUtbetalingsinfo(vedtak.behandling.id, vedtak.virkningstidspunkt, brukerTokenInfo),
+            utbetalingsinfo =
+                if (vilkaarsvurdering.resultat?.utfall == VilkaarsvurderingUtfall.OPPFYLT) {
+                    finnUtbetalingsinfo(
+                        vedtak.behandling.id,
+                        vedtak.virkningstidspunkt,
+                        brukerTokenInfo,
+                    )
+                } else {
+                    null
+                },
             forrigeUtbetalingsinfo = finnForrigeUbetalingsinfo(vedtak, sak, brukerTokenInfo),
             avkortingsinfo =
                 finnYtelseMedGrunnlag(
@@ -129,7 +135,7 @@ class BehandlingService(
             revurderingsaarsak = vedtak.behandling.revurderingsaarsak,
             revurderingInfo = vedtak.behandling.revurderingInfo,
             virkningsdato = vedtak.virkningstidspunkt,
-            innvilgelsesdato = datoInnvilgelse,
+            opprinneligInnvilgelsesdato = opprinneligInnvilgelsesdato,
             adopsjonsdato = LocalDate.now(), // TODO: Denne må vi hente anten frå PDL eller brukarinput
             trygdetid =
                 finnTrygdetid(

@@ -86,6 +86,7 @@ class BrevDataMapper(private val featureToggleService: FeatureToggleService) {
 
                             else -> TODO("Vedtakstype er ikke støttet: $vedtakType")
                         }
+                    VedtakType.TILBAKEKREVING -> TODO("EY-2806")
                 }
             }
 
@@ -114,6 +115,7 @@ class BrevDataMapper(private val featureToggleService: FeatureToggleService) {
                                 BrevkodePar(OMS_REVURDERING_OPPHOER_GENERELL, OMS_REVURDERING_OPPHOER)
                             else -> TODO("Vedtakstype er ikke støttet: $vedtakType")
                         }
+                    VedtakType.TILBAKEKREVING -> TODO("EY-2806")
                 }
             }
         }
@@ -152,6 +154,7 @@ class BrevDataMapper(private val featureToggleService: FeatureToggleService) {
                             RevurderingAarsak.OMGJOERING_AV_FARSKAP -> OmgjoeringAvFarskapRevurderingBrevdata.fra(behandling)
                             else -> TODO("Vedtakstype er ikke støttet: $vedtakType")
                         }
+                    VedtakType.TILBAKEKREVING -> TODO("EY-2806")
                 }
             }
 
@@ -171,6 +174,7 @@ class BrevDataMapper(private val featureToggleService: FeatureToggleService) {
                             RevurderingAarsak.SIVILSTAND -> ManueltBrevData(emptyList())
                             else -> TODO("Revurderingsbrev for ${behandling.revurderingsaarsak} er ikke støttet")
                         }
+                    VedtakType.TILBAKEKREVING -> TODO("EY-2806")
                 }
             }
         }

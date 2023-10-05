@@ -10,6 +10,8 @@ import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.libs.ktor.setReady
+import no.nav.etterlatte.vedtaksvurdering.VedtakTilbakekrevingRepository
+import no.nav.etterlatte.vedtaksvurdering.VedtakTilbakekrevingService
 import no.nav.etterlatte.vedtaksvurdering.VedtaksvurderingRepository
 import no.nav.etterlatte.vedtaksvurdering.VedtaksvurderingService
 import no.nav.etterlatte.vedtaksvurdering.automatiskBehandlingRoutes
@@ -17,6 +19,7 @@ import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlientImpl
 import no.nav.etterlatte.vedtaksvurdering.klienter.BeregningKlientImpl
 import no.nav.etterlatte.vedtaksvurdering.klienter.VilkaarsvurderingKlientImpl
 import no.nav.etterlatte.vedtaksvurdering.samordningsvedtakRoute
+import no.nav.etterlatte.vedtaksvurdering.tilbakekrevingvedtakRoute
 import no.nav.etterlatte.vedtaksvurdering.vedtaksvurderingRoute
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -50,6 +53,10 @@ class ApplicationBuilder {
             behandlingKlient = behandlingKlient,
             publiser = ::publiser,
         )
+    private val vedtakTilbakekrevingService =
+        VedtakTilbakekrevingService(
+            repository = VedtakTilbakekrevingRepository(dataSource),
+        )
 
     private val rapidsConnection =
         RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(getRapidEnv()))
@@ -58,6 +65,7 @@ class ApplicationBuilder {
                     vedtaksvurderingRoute(vedtaksvurderingService, behandlingKlient)
                     automatiskBehandlingRoutes(vedtaksvurderingService, behandlingKlient)
                     samordningsvedtakRoute(vedtaksvurderingService)
+                    tilbakekrevingvedtakRoute(vedtakTilbakekrevingService)
                 }
             }
             .build()

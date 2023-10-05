@@ -35,25 +35,47 @@ data class OpprettVedtak(
     val revurderingInfo: RevurderingInfo?,
 )
 
+sealed class VedtakFelles(
+    open val id: Long,
+    open val soeker: Folkeregisteridentifikator,
+    open val sakId: Long,
+    open val sakType: SakType,
+    open val behandlingId: UUID,
+    open val status: VedtakStatus,
+    open val type: VedtakType,
+    open val vedtakFattet: VedtakFattet? = null,
+    open val attestasjon: Attestasjon? = null,
+)
+
 data class Vedtak(
-    val id: Long,
-    val soeker: Folkeregisteridentifikator,
-    val sakId: Long,
-    val sakType: SakType,
-    val behandlingId: UUID,
+    override val id: Long,
+    override val soeker: Folkeregisteridentifikator,
+    override val sakId: Long,
+    override val sakType: SakType,
+    override val behandlingId: UUID,
     val behandlingType: BehandlingType,
     val revurderingAarsak: RevurderingAarsak?,
     val virkningstidspunkt: YearMonth,
-    val status: VedtakStatus,
-    val type: VedtakType,
+    override val status: VedtakStatus,
+    override val type: VedtakType,
     val beregning: ObjectNode?,
     val avkorting: ObjectNode?,
     val vilkaarsvurdering: ObjectNode?,
     val utbetalingsperioder: List<Utbetalingsperiode>,
-    val vedtakFattet: VedtakFattet? = null,
-    val attestasjon: Attestasjon? = null,
+    override val vedtakFattet: VedtakFattet? = null,
+    override val attestasjon: Attestasjon? = null,
     val revurderingInfo: RevurderingInfo? = null,
-) {
+) : VedtakFelles(
+        id = id,
+        soeker = soeker,
+        sakId = sakId,
+        sakType = sakType,
+        behandlingId = behandlingId,
+        status = status,
+        type = type,
+        vedtakFattet = vedtakFattet,
+        attestasjon = attestasjon,
+    ) {
     fun toDto() =
         VedtakDto(
             vedtakId = id,
@@ -67,5 +89,28 @@ data class Vedtak(
             attestasjon = attestasjon,
         )
 }
+
+data class TilbakekrevingsVedtak(
+    override val id: Long,
+    override val soeker: Folkeregisteridentifikator,
+    override val sakId: Long,
+    override val sakType: SakType,
+    override val behandlingId: UUID,
+    override val status: VedtakStatus,
+    override val type: VedtakType,
+    override val vedtakFattet: VedtakFattet? = null,
+    override val attestasjon: Attestasjon? = null,
+    val tilbakekreving: ObjectNode,
+) : VedtakFelles(
+        id = id,
+        soeker = soeker,
+        sakId = sakId,
+        sakType = sakType,
+        behandlingId = behandlingId,
+        status = status,
+        type = type,
+        vedtakFattet = vedtakFattet,
+        attestasjon = attestasjon,
+    )
 
 data class LoependeYtelse(val erLoepende: Boolean, val dato: LocalDate)

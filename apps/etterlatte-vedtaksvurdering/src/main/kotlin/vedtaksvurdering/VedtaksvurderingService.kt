@@ -474,7 +474,9 @@ class VedtaksvurderingService(
                     ),
                 )
 
-            VedtakType.AVSLAG -> emptyList()
+            VedtakType.TILBAKEKREVING,
+            VedtakType.AVSLAG,
+            -> emptyList()
         }
     }
 

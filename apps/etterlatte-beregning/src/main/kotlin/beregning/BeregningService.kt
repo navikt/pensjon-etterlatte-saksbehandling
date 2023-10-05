@@ -108,7 +108,7 @@ class BeregningService(
             beregningsGrunnlagService.dupliserBeregningsGrunnlagOMS(behandlingId, sisteIverksatteBehandling.id)
             opprettBeregning(behandlingId, brukerTokenInfo)
         } else if (trygdetidForBehandling == null) {
-            logger.info("Kopierer beregningsgrunnlag og oppretter beregning for $behandlingId")
+            logger.info("Kopierer trygdetid og oppretter beregning for $behandlingId")
             trygdetidKlient.kopierTrygdetid(behandlingId, sisteIverksatteBehandling.id, brukerTokenInfo)
             opprettBeregning(behandlingId, brukerTokenInfo)
         }

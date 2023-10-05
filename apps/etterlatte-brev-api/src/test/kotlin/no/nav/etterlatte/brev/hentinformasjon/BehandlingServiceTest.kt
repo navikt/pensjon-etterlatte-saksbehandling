@@ -31,6 +31,8 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.pensjon.brevbaker.api.model.Kroner
@@ -38,6 +40,7 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
 
@@ -103,7 +106,7 @@ internal class BehandlingServiceTest {
         Assertions.assertEquals(ENHET, behandling.vedtak.ansvarligEnhet)
         Assertions.assertEquals(SAKSBEHANDLER_IDENT, behandling.vedtak.saksbehandlerIdent)
         Assertions.assertEquals(ATTESTANT_IDENT, behandling.vedtak.attestantIdent)
-        Assertions.assertEquals(YearMonth.now().atDay(1), behandling.utbetalingsinfo.virkningsdato)
+        Assertions.assertEquals(YearMonth.now().atDay(1), behandling.utbetalingsinfo!!.virkningsdato)
 
         coVerify(exactly = 1) {
             vedtaksvurderingKlient.hentVedtak(BEHANDLING_ID, any())
@@ -132,13 +135,13 @@ internal class BehandlingServiceTest {
                 service.hentBehandling(SAK_ID, BEHANDLING_ID, BRUKERTokenInfo)
             }
 
-        Assertions.assertEquals(1, behandling.utbetalingsinfo.antallBarn)
-        Assertions.assertEquals(Kroner(3063), behandling.utbetalingsinfo.beloep)
-        Assertions.assertEquals(YearMonth.now().atDay(1), behandling.utbetalingsinfo.virkningsdato)
-        Assertions.assertEquals(false, behandling.utbetalingsinfo.soeskenjustering)
+        Assertions.assertEquals(1, behandling.utbetalingsinfo!!.antallBarn)
+        Assertions.assertEquals(Kroner(3063), behandling.utbetalingsinfo!!.beloep)
+        Assertions.assertEquals(YearMonth.now().atDay(1), behandling.utbetalingsinfo!!.virkningsdato)
+        Assertions.assertEquals(false, behandling.utbetalingsinfo!!.soeskenjustering)
         Assertions.assertEquals(
             listOf(BREV_BEREGNINGSPERIODE),
-            behandling.utbetalingsinfo.beregningsperioder,
+            behandling.utbetalingsinfo!!.beregningsperioder,
         )
 
         coVerify(exactly = 1) {
@@ -168,8 +171,8 @@ internal class BehandlingServiceTest {
                 service.hentBehandling(SAK_ID, BEHANDLING_ID, BRUKERTokenInfo)
             }
 
-        Assertions.assertEquals(2, behandling.utbetalingsinfo.antallBarn)
-        Assertions.assertTrue(behandling.utbetalingsinfo.soeskenjustering)
+        Assertions.assertEquals(2, behandling.utbetalingsinfo!!.antallBarn)
+        Assertions.assertTrue(behandling.utbetalingsinfo!!.soeskenjustering)
 
         coVerify(exactly = 1) { vedtaksvurderingKlient.hentVedtak(any(), any()) }
         coVerify(exactly = 1) { grunnlagKlient.hentGrunnlag(any(), any()) }
@@ -251,7 +254,11 @@ internal class BehandlingServiceTest {
 
     private fun opprettTrygdetid() = null
 
-    private fun opprettVilkaarsvurdering(): VilkaarsvurderingDto = mockk<VilkaarsvurderingDto>()
+    private fun opprettVilkaarsvurdering(): VilkaarsvurderingDto {
+        val mock = mockk<VilkaarsvurderingDto>()
+        every { mock.resultat } returns VilkaarsvurderingResultat(VilkaarsvurderingUtfall.OPPFYLT, "", LocalDateTime.now(), "saksbehandler")
+        return mock
+    }
 
     private companion object {
         private val FNR = Folkeregisteridentifikator.of("11057523044")

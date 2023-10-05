@@ -5,6 +5,7 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.beregning.grunnlag.BarnepensjonBeregningsGrunnlag
 import no.nav.etterlatte.beregning.grunnlag.GrunnlagMedPeriode
 import no.nav.etterlatte.libs.common.beregning.BeregningDTO
+import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.etterlatte.rapidsandrivers.migrering.MigreringRequest
@@ -43,25 +44,56 @@ internal class MigreringHendelser(rapidsConnection: RapidsConnection, private va
 
         beregningService.opprettBeregningsgrunnlag(behandlingId, tilGrunnlagDTO(packet.hendelseData))
 
-        runBlocking {
-            val beregning = beregningService.beregn(behandlingId).body<BeregningDTO>()
-            packet[BEREGNING_KEY] = beregning
-        }
+        val beregning =
+            runBlocking {
+                beregningService.beregn(behandlingId).body<BeregningDTO>()
+            }
+
+        val migreringRequest = objectMapper.treeToValue(packet[HENDELSE_DATA_KEY], MigreringRequest::class.java)
+        verifiserNyBeregning(beregning, migreringRequest)
+
         packet.eventName = Migreringshendelser.VEDTAK
+        packet[BEREGNING_KEY] = beregning
         context.publish(packet.toJson())
         logger.info("Publiserte oppdatert migreringshendelse fra beregning for behandling $behandlingId")
     }
-
-    private fun tilGrunnlagDTO(request: MigreringRequest): BarnepensjonBeregningsGrunnlag =
-        BarnepensjonBeregningsGrunnlag(
-            soeskenMedIBeregning =
-                listOf(
-                    GrunnlagMedPeriode(
-                        fom = request.virkningstidspunkt.atDay(1),
-                        tom = null,
-                        data = emptyList(),
-                    ),
-                ),
-            institusjonsopphold = emptyList(),
-        )
 }
+
+private fun verifiserNyBeregning(
+    beregning: BeregningDTO,
+    migreringRequest: MigreringRequest,
+) {
+    assert(beregning.beregningsperioder.size == 1) {
+        throw IllegalStateException("Migrerte saker skal kun opprette en beregningperiode")
+    }
+
+    with(beregning.beregningsperioder.first()) {
+        assert(trygdetid == migreringRequest.beregning.anvendtTrygdetid.toInt()) {
+            throw IllegalStateException("Beregning må være basert på samme trygdetid som i Pesys")
+        }
+        assert(grunnbelop == migreringRequest.beregning.g.toInt()) {
+            throw IllegalStateException("Beregning må være basert på samme G som i Pesys")
+        }
+        assert(utbetaltBeloep > migreringRequest.beregning.brutto.toInt()) {
+            throw IllegalStateException(
+                "Man skal ikke kunne komme dårligere ut på nytt regelverk. " +
+                    "Beregnet beløp i Gjenny er lavere enn dagens beløp i Pesys.",
+            )
+        }
+        // todo: Vi må også verifisere at samme beregningsmetode har blitt benyttet,
+        //  f. eks nasjonal, prorata og evt. avkorting (uføre, inst. opphold, fengsel)
+    }
+}
+
+private fun tilGrunnlagDTO(request: MigreringRequest): BarnepensjonBeregningsGrunnlag =
+    BarnepensjonBeregningsGrunnlag(
+        soeskenMedIBeregning =
+            listOf(
+                GrunnlagMedPeriode(
+                    fom = request.virkningstidspunkt.atDay(1),
+                    tom = null,
+                    data = emptyList(),
+                ),
+            ),
+        institusjonsopphold = emptyList(),
+    )

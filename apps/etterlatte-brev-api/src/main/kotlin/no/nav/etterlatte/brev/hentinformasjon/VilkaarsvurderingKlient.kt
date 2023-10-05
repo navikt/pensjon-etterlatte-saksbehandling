@@ -1,4 +1,4 @@
-package no.nav.etterlatte.brev.vilkaarsvurdering
+package no.nav.etterlatte.brev.hentinformasjon
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.michaelbull.result.mapBoth

@@ -1,4 +1,4 @@
-package no.nav.etterlatte.brev.beregning
+package no.nav.etterlatte.brev.hentinformasjon
 
 import com.github.michaelbull.result.mapBoth
 import com.typesafe.config.Config

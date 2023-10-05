@@ -1,15 +1,25 @@
-package no.nav.etterlatte.brev.behandling
+package no.nav.etterlatte.brev.hentinformasjon
 
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
+import no.nav.etterlatte.brev.behandling.AvkortetBeregningsperiode
+import no.nav.etterlatte.brev.behandling.Avkortingsinfo
+import no.nav.etterlatte.brev.behandling.Behandling
+import no.nav.etterlatte.brev.behandling.Beregningsperiode
+import no.nav.etterlatte.brev.behandling.ForenkletVedtak
+import no.nav.etterlatte.brev.behandling.PersonerISak
+import no.nav.etterlatte.brev.behandling.Soeker
+import no.nav.etterlatte.brev.behandling.Trygdetidsperiode
+import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
+import no.nav.etterlatte.brev.behandling.hentUtbetaltBeloep
+import no.nav.etterlatte.brev.behandling.mapAvdoed
+import no.nav.etterlatte.brev.behandling.mapInnsender
+import no.nav.etterlatte.brev.behandling.mapSoeker
+import no.nav.etterlatte.brev.behandling.mapSpraak
+import no.nav.etterlatte.brev.behandling.mapVerge
 import no.nav.etterlatte.brev.behandlingklient.BehandlingKlient
-import no.nav.etterlatte.brev.beregning.BeregningKlient
-import no.nav.etterlatte.brev.grunnlag.GrunnlagKlient
 import no.nav.etterlatte.brev.model.EtterbetalingDTO
-import no.nav.etterlatte.brev.trygdetid.TrygdetidKlient
-import no.nav.etterlatte.brev.vedtak.VedtaksvurderingKlient
-import no.nav.etterlatte.brev.vilkaarsvurdering.VilkaarsvurderingKlient
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
@@ -54,7 +64,8 @@ class SakOgBehandlingService(
             val grunnlag = async { grunnlagKlient.hentGrunnlag(sakId, brukerTokenInfo) }
             val sak = async { behandlingKlient.hentSak(sakId, brukerTokenInfo) }
             val innvilgelsesdato = { async { vedtaksvurderingKlient.hentInnvilgelsesdato(sakId, brukerTokenInfo) } }
-            val vilkaarsvurdering = async { vilkaarsvurderingKlient.hentVilkaarsvurdering(behandlingId, brukerTokenInfo) }
+            val vilkaarsvurdering =
+                async { vilkaarsvurderingKlient.hentVilkaarsvurdering(behandlingId, brukerTokenInfo) }
             val etterbetaling = async { behandlingKlient.hentEtterbetaling(behandlingId, brukerTokenInfo) }
 
             mapBehandling(

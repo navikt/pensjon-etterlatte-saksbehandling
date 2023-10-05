@@ -29,6 +29,7 @@ import no.nav.etterlatte.brev.hentinformasjon.BeregningKlient
 import no.nav.etterlatte.brev.hentinformasjon.GrunnlagKlient
 import no.nav.etterlatte.brev.hentinformasjon.SakService
 import no.nav.etterlatte.brev.hentinformasjon.SoekerService
+import no.nav.etterlatte.brev.hentinformasjon.Tilgangssjekker
 import no.nav.etterlatte.brev.hentinformasjon.TrygdetidKlient
 import no.nav.etterlatte.brev.hentinformasjon.VedtaksvurderingKlient
 import no.nav.etterlatte.brev.hentinformasjon.VedtaksvurderingService
@@ -165,13 +166,15 @@ class ApplicationBuilder {
     private val journalpostService =
         SafClient(httpClient(), env.requireEnvValue("SAF_BASE_URL"), env.requireEnvValue("SAF_SCOPE"))
 
+    private val tilgangssjekker = Tilgangssjekker(config, httpClient())
+
     private val rapidsConnection: RapidsConnection =
         RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(env))
             .withKtorModule {
                 restModule(sikkerLogg, routePrefix = "api", config = HoconApplicationConfig(config)) {
-                    brevRoute(brevService, behandlingKlient)
-                    vedtaksbrevRoute(vedtaksbrevService, behandlingKlient)
-                    dokumentRoute(journalpostService, dokarkivService, behandlingKlient)
+                    brevRoute(brevService, tilgangssjekker)
+                    vedtaksbrevRoute(vedtaksbrevService, tilgangssjekker)
+                    dokumentRoute(journalpostService, dokarkivService, tilgangssjekker)
                 }
             }
             .build()

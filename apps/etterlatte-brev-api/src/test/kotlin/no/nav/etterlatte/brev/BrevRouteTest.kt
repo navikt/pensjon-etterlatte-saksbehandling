@@ -24,7 +24,7 @@ import io.mockk.coVerify
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.etterlatte.brev.BrevService.BrevPayload
-import no.nav.etterlatte.brev.behandlingklient.BehandlingKlient
+import no.nav.etterlatte.brev.hentinformasjon.Tilgangssjekker
 import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevID
@@ -52,7 +52,7 @@ internal class BrevRouteTest {
     private val mockOAuth2Server = MockOAuth2Server()
     private lateinit var hoconApplicationConfig: HoconApplicationConfig
     private val brevService = mockk<BrevService>()
-    private val behandlingKlient = mockk<BehandlingKlient>()
+    private val tilgangssjekker = mockk<Tilgangssjekker>()
 
     @BeforeAll
     fun before() {
@@ -76,7 +76,7 @@ internal class BrevRouteTest {
         val brevId = Random.nextLong()
 
         coEvery { brevService.hentBrev(any()) } returns opprettBrev(brevId)
-        coEvery { behandlingKlient.harTilgangTilSak(any(), any()) } returns true
+        coEvery { tilgangssjekker.harTilgangTilSak(any(), any()) } returns true
 
         testApplication {
             val client = httpClient()
@@ -100,7 +100,7 @@ internal class BrevRouteTest {
         val pdf = Pdf("Hello world".toByteArray())
 
         coEvery { brevService.genererPdf(any(), any()) } returns pdf
-        coEvery { behandlingKlient.harTilgangTilSak(any(), any()) } returns true
+        coEvery { tilgangssjekker.harTilgangTilSak(any(), any()) } returns true
 
         testApplication {
             val client = httpClient()
@@ -118,7 +118,7 @@ internal class BrevRouteTest {
 
         coVerify(exactly = 1) {
             brevService.genererPdf(brevId, any())
-            behandlingKlient.harTilgangTilSak(any(), any())
+            tilgangssjekker.harTilgangTilSak(any(), any())
         }
     }
 
@@ -127,7 +127,7 @@ internal class BrevRouteTest {
         val brevId = Random.nextLong()
 
         coEvery { brevService.hentBrevPayload(any()) } returns BrevPayload(Slate(), null)
-        coEvery { behandlingKlient.harTilgangTilSak(any(), any()) } returns true
+        coEvery { tilgangssjekker.harTilgangTilSak(any(), any()) } returns true
 
         testApplication {
             val client = httpClient()
@@ -144,7 +144,7 @@ internal class BrevRouteTest {
 
         coVerify(exactly = 1) {
             brevService.hentBrevPayload(brevId)
-            behandlingKlient.harTilgangTilSak(any(), any())
+            tilgangssjekker.harTilgangTilSak(any(), any())
         }
     }
 
@@ -153,7 +153,7 @@ internal class BrevRouteTest {
         val brevId = Random.nextLong()
         coEvery { brevService.lagreBrevPayload(any(), any()) } returns 1
         coEvery { brevService.lagreBrevPayloadVedlegg(any(), any()) } returns 1
-        coEvery { behandlingKlient.harTilgangTilSak(any(), any()) } returns true
+        coEvery { tilgangssjekker.harTilgangTilSak(any(), any()) } returns true
 
         testApplication {
             val client = httpClient()
@@ -171,13 +171,13 @@ internal class BrevRouteTest {
 
         coVerify(exactly = 1) {
             brevService.lagreBrevPayload(brevId, any())
-            behandlingKlient.harTilgangTilSak(any(), any())
+            tilgangssjekker.harTilgangTilSak(any(), any())
         }
     }
 
     @Test
     fun `Endepunkt som ikke finnes`() {
-        coEvery { behandlingKlient.harTilgangTilSak(any(), any()) } returns true
+        coEvery { tilgangssjekker.harTilgangTilSak(any(), any()) } returns true
 
         testApplication {
             val client = httpClient()
@@ -192,7 +192,7 @@ internal class BrevRouteTest {
 
         verify {
             brevService wasNot Called
-            behandlingKlient wasNot Called
+            tilgangssjekker wasNot Called
         }
     }
 
@@ -208,7 +208,7 @@ internal class BrevRouteTest {
 
         verify {
             brevService wasNot Called
-            behandlingKlient wasNot Called
+            tilgangssjekker wasNot Called
         }
     }
 
@@ -249,7 +249,7 @@ internal class BrevRouteTest {
             restModule(this.log, routePrefix = "api") {
                 brevRoute(
                     brevService,
-                    behandlingKlient,
+                    tilgangssjekker,
                 )
             }
         }

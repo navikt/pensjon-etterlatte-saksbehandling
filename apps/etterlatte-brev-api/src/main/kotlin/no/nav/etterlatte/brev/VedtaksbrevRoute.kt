@@ -9,7 +9,7 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.put
 import io.ktor.server.routing.route
-import no.nav.etterlatte.brev.behandlingklient.BehandlingKlient
+import no.nav.etterlatte.brev.hentinformasjon.Tilgangssjekker
 import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.behandlingsId
 import no.nav.etterlatte.libs.common.sakId
@@ -23,13 +23,13 @@ import kotlin.time.measureTimedValue
 @OptIn(ExperimentalTime::class)
 fun Route.vedtaksbrevRoute(
     service: VedtaksbrevService,
-    behandlingKlient: BehandlingKlient,
+    tilgangssjekker: Tilgangssjekker,
 ) {
     val logger = LoggerFactory.getLogger("no.nav.etterlatte.brev.VedaksbrevRoute")
 
     route("brev/behandling/{$BEHANDLINGSID_CALL_PARAMETER}") {
         get("vedtak") {
-            withBehandlingId(behandlingKlient) { behandlingId ->
+            withBehandlingId(tilgangssjekker) { behandlingId ->
                 logger.info("Henter vedtaksbrev for behandling (behandlingId=$behandlingId)")
 
                 measureTimedValue {
@@ -42,7 +42,7 @@ fun Route.vedtaksbrevRoute(
         }
 
         post("vedtak") {
-            withBehandlingId(behandlingKlient) { behandlingId ->
+            withBehandlingId(tilgangssjekker) { behandlingId ->
                 val sakId = sakId
 
                 logger.info("Oppretter vedtaksbrev for behandling (sakId=$sakId, behandlingId=$behandlingId)")
@@ -57,7 +57,7 @@ fun Route.vedtaksbrevRoute(
         }
 
         get("vedtak/pdf") {
-            withBehandlingId(behandlingKlient) {
+            withBehandlingId(tilgangssjekker) {
                 val brevId = requireNotNull(call.parameters["brevId"]).toLong()
 
                 logger.info("Genererer PDF for vedtaksbrev (id=$brevId)")
@@ -72,7 +72,7 @@ fun Route.vedtaksbrevRoute(
         }
 
         post("vedtak/ferdigstill") {
-            withBehandlingId(behandlingKlient) { behandlingId ->
+            withBehandlingId(tilgangssjekker) { behandlingId ->
                 logger.info("Ferdigstiller vedtaksbrev for behandling (id=$behandlingId)")
 
                 measureTimedValue {
@@ -85,7 +85,7 @@ fun Route.vedtaksbrevRoute(
         }
 
         put("payload/tilbakestill") {
-            withBehandlingId(behandlingKlient) {
+            withBehandlingId(tilgangssjekker) {
                 val body = call.receive<ResetPayloadRequest>()
                 val brevId = body.brevId
                 val sakId = body.sakId

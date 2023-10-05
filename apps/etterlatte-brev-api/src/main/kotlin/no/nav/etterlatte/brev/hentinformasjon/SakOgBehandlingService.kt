@@ -33,11 +33,6 @@ import java.time.YearMonth
 import java.util.UUID
 
 interface ISakOgBehandlingService {
-    suspend fun hentSak(
-        sakId: Long,
-        bruker: BrukerTokenInfo,
-    ): Sak
-
     suspend fun hentBehandling(
         sakId: Long,
         behandlingId: UUID,
@@ -53,11 +48,6 @@ class SakOgBehandlingService(
     private val trygdetidKlient: TrygdetidKlient,
     private val vilkaarsvurderingKlient: VilkaarsvurderingKlient,
 ) : ISakOgBehandlingService {
-    override suspend fun hentSak(
-        sakId: Long,
-        bruker: BrukerTokenInfo,
-    ) = behandlingKlient.hentSak(sakId, bruker)
-
     override suspend fun hentBehandling(
         sakId: Long,
         behandlingId: UUID,

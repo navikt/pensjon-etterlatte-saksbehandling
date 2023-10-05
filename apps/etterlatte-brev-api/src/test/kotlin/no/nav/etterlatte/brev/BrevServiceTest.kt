@@ -20,6 +20,7 @@ import no.nav.etterlatte.brev.distribusjon.DistribusjonsTidspunktType
 import no.nav.etterlatte.brev.distribusjon.DistribusjonsType
 import no.nav.etterlatte.brev.dokarkiv.DokarkivServiceImpl
 import no.nav.etterlatte.brev.hentinformasjon.ISakOgBehandlingService
+import no.nav.etterlatte.brev.hentinformasjon.SakService
 import no.nav.etterlatte.brev.hentinformasjon.SoekerService
 import no.nav.etterlatte.brev.journalpost.JournalpostResponse
 import no.nav.etterlatte.brev.model.Adresse
@@ -47,6 +48,7 @@ internal class BrevServiceTest {
     private val db = mockk<BrevRepository>(relaxed = true)
     private val brevbaker = mockk<BrevbakerKlient>()
     private val sakOgBehandlingService = mockk<ISakOgBehandlingService>()
+    private val sakService = mockk<SakService>()
     private val soekerService = mockk<SoekerService>()
     private val adresseService = mockk<AdresseService>()
     private val dokarkivService = mockk<DokarkivServiceImpl>()
@@ -56,7 +58,7 @@ internal class BrevServiceTest {
     private val brevService =
         BrevService(
             db,
-            sakOgBehandlingService,
+            sakService,
             soekerService,
             adresseService,
             dokarkivService,
@@ -162,7 +164,7 @@ internal class BrevServiceTest {
             val sak = Sak("ident", SakType.BARNEPENSJON, brev.sakId, "1234")
             val journalpostResponse = JournalpostResponse("444", journalpostferdigstilt = true)
 
-            coEvery { sakOgBehandlingService.hentSak(any(), any()) } returns sak
+            coEvery { sakService.hentSak(any(), any()) } returns sak
             coEvery { dokarkivService.journalfoer(any<Brev>(), any()) } returns journalpostResponse
             every { db.hentBrev(any()) } returns brev
             every { db.settBrevJournalfoert(any(), any()) } returns true
@@ -179,7 +181,7 @@ internal class BrevServiceTest {
                 db.settBrevJournalfoert(brev.id, journalpostResponse)
             }
             coVerify {
-                sakOgBehandlingService.hentSak(sak.id, bruker)
+                sakService.hentSak(sak.id, bruker)
                 dokarkivService.journalfoer(brev, sak)
             }
         }

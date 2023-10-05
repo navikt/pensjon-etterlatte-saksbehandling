@@ -26,6 +26,7 @@ import no.nav.etterlatte.brev.dokument.dokumentRoute
 import no.nav.etterlatte.brev.hentinformasjon.BeregningKlient
 import no.nav.etterlatte.brev.hentinformasjon.GrunnlagKlient
 import no.nav.etterlatte.brev.hentinformasjon.SakOgBehandlingService
+import no.nav.etterlatte.brev.hentinformasjon.SakService
 import no.nav.etterlatte.brev.hentinformasjon.SoekerService
 import no.nav.etterlatte.brev.hentinformasjon.TrygdetidKlient
 import no.nav.etterlatte.brev.hentinformasjon.VedtaksvurderingKlient
@@ -136,10 +137,12 @@ class ApplicationBuilder {
 
     private val vedtaksvurderingService = VedtaksvurderingService(vedtakKlient)
 
+    private val sakService = SakService(behandlingKlient)
+
     private val brevService =
         BrevService(
             db,
-            sakOgBehandlingService,
+            sakService,
             soekerService,
             adresseService,
             dokarkivService,

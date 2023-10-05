@@ -11,7 +11,7 @@ import no.nav.etterlatte.brev.distribusjon.DistribusjonService
 import no.nav.etterlatte.brev.distribusjon.DistribusjonsTidspunktType
 import no.nav.etterlatte.brev.distribusjon.DistribusjonsType
 import no.nav.etterlatte.brev.dokarkiv.DokarkivService
-import no.nav.etterlatte.brev.hentinformasjon.ISakOgBehandlingService
+import no.nav.etterlatte.brev.hentinformasjon.SakService
 import no.nav.etterlatte.brev.hentinformasjon.SoekerService
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevData
@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory
 
 class BrevService(
     private val db: BrevRepository,
-    private val sakOgBehandlingService: ISakOgBehandlingService,
+    private val sakService: SakService,
     private val soekerService: SoekerService,
     private val adresseService: AdresseService,
     private val dokarkivService: DokarkivService,
@@ -53,7 +53,7 @@ class BrevService(
         sakId: Long,
         bruker: BrukerTokenInfo,
     ): Brev {
-        val sak = sakOgBehandlingService.hentSak(sakId, bruker)
+        val sak = sakService.hentSak(sakId, bruker)
 
         val mottaker = adresseService.hentMottakerAdresse(sak.ident)
 
@@ -126,7 +126,7 @@ class BrevService(
             return requireNotNull(db.hentPdf(brev.id))
         }
 
-        val sak = sakOgBehandlingService.hentSak(brev.sakId, bruker)
+        val sak = sakService.hentSak(brev.sakId, bruker)
         val soeker = soekerService.hentSoeker(brev.sakId, bruker)
         val avsender = adresseService.hentAvsender(sak, bruker.ident())
 
@@ -166,7 +166,7 @@ class BrevService(
             throw IllegalStateException("Ugyldig status ${brev.status} på brev (id=${brev.id})")
         }
 
-        val sak = sakOgBehandlingService.hentSak(brev.sakId, bruker)
+        val sak = sakService.hentSak(brev.sakId, bruker)
 
         val response = dokarkivService.journalfoer(brev, sak)
 

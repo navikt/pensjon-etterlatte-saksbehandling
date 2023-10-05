@@ -332,7 +332,7 @@ internal class BehandlingServiceImpl(
                 revurderingsaarsak = behandling.revurderingsaarsak(),
                 revurderinginfo = behandling.revurderingInfo(),
                 begrunnelse = behandling.begrunnelse(),
-                etterbetaling = etterbetalingService.hentEtterbetaling(behandlingId),
+                etterbetaling = inTransaction { etterbetalingService.hentEtterbetaling(behandlingId) },
             ).also {
                 gjenlevende.await()?.fnr?.let { loggRequest(brukerTokenInfo, it) }
                 soeker.await()?.fnr?.let { loggRequest(brukerTokenInfo, it) }

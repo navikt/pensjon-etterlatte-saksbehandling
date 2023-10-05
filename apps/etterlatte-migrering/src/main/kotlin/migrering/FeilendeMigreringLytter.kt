@@ -12,6 +12,7 @@ import no.nav.etterlatte.rapidsandrivers.EventNames
 import no.nav.etterlatte.rapidsandrivers.migrering.KILDE_KEY
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser
 import no.nav.etterlatte.rapidsandrivers.migrering.PESYS_ID_KEY
+import no.nav.etterlatte.rapidsandrivers.migrering.PesysId
 import no.nav.etterlatte.rapidsandrivers.migrering.hendelseData
 import no.nav.etterlatte.rapidsandrivers.migrering.pesysId
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -24,6 +25,7 @@ import rapidsandrivers.BEHANDLING_ID_KEY
 import rapidsandrivers.HENDELSE_DATA_KEY
 import rapidsandrivers.behandlingId
 import rapidsandrivers.migrering.ListenerMedLogging
+import java.util.UUID
 
 internal class FeilendeMigreringLytter(rapidsConnection: RapidsConnection, private val repository: PesysRepository) :
     ListenerMedLogging() {
@@ -63,21 +65,27 @@ internal class FeilendeMigreringLytter(rapidsConnection: RapidsConnection, priva
                     ?: "Har ikke requestobjektet tilgjengelig for logging",
             feilendeSteg = packet.feilendeSteg,
             feil = packet.feilmelding,
-            pesysId = pesyskopling.pesysId,
+            pesysId = pesyskopling.first,
         )
-        repository.oppdaterStatus(pesyskopling.pesysId, Migreringsstatus.MIGRERING_FEILA)
+        repository.oppdaterStatus(pesyskopling.first, Migreringsstatus.MIGRERING_FEILA)
         packet.eventName = Migreringshendelser.AVBRYT_BEHANDLING
-        packet.behandlingId = pesyskopling.behandlingId
-        context.publish(packet.toJson())
+        pesyskopling.second?.let {
+            packet.behandlingId = it
+            context.publish(packet.toJson())
+        }
     }
 
-    private fun finnPesysId(packet: JsonMessage): Pesyskopling =
+    private fun finnPesysId(packet: JsonMessage): Pair<PesysId, UUID?> =
         if (packet.harVerdi(PESYS_ID_KEY)) {
-            repository.hentKoplingTilBehandling(packet.pesysId)!!
+            repository.hentKoplingTilBehandling(packet.pesysId)?.let { Pair(it.pesysId, it.behandlingId) } ?: Pair(
+                packet.pesysId,
+                null,
+            )
         } else if (packet.harVerdi(BEHANDLING_ID_KEY)) {
-            repository.hentPesysId(packet.behandlingId)!!
+            repository.hentPesysId(packet.behandlingId)!!.let { Pair(it.pesysId, it.behandlingId) }
         } else if (packet.harVerdi("vedtak.behandling.id")) {
             repository.hentPesysId(packet["vedtak.behandling.id"].asText().toUUID())!!
+                .let { Pair(it.pesysId, it.behandlingId) }
         } else {
             throw IllegalArgumentException("Manglar pesys-identifikator, kan ikke kjøre feilhåndtering")
         }

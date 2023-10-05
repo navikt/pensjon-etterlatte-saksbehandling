@@ -83,7 +83,7 @@ const Utland = (props: { utlandsBehandling: Generellbehandling & { innhold: Utla
 
   useEffect(() => {
     fetchAlleLand(null, (landliste) => {
-      setAlleLandKodeverk(landliste)
+      setAlleLandKodeverk(sorterLand(landliste))
     })
   }, [])
 
@@ -171,7 +171,7 @@ const Utland = (props: { utlandsBehandling: Generellbehandling & { innhold: Utla
                       <option value="" disabled={true}>
                         Velg land
                       </option>
-                      {sorterLand(landListe).map((land) => (
+                      {landListe.map((land) => (
                         <option key={land.isoLandkode} value={land.isoLandkode}>
                           {land.beskrivelse.tekst}
                         </option>

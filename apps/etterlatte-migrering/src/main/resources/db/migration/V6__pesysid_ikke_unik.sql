@@ -2,9 +2,7 @@ DROP TABLE feilkjoering;
 CREATE TABLE feilkjoering
 (
     id UUID UNIQUE NOT NULL,
-    pesys_id BIGINT NOT NULL
-        CONSTRAINT pesys_sak_id_fk
-            REFERENCES pesyssak (id),
+    pesys_id BIGINT NOT NULL,
     request JSONB,
     feilmelding JSONB,
     feilendeSteg TEXT,

@@ -132,6 +132,7 @@ object BarnepensjonVilkaar {
                 listOf(
                     enForelderMinst20AarsSamletBotid(),
                     avdoedMindreEnn20AarsSamletBotidRettTilTilleggspensjon(),
+                    barnetsMedlemskapYrkesskade(),
                     minstEttBarnForedreloestBarnekullMedlemTrygden(),
                 ),
         )
@@ -163,6 +164,7 @@ object BarnepensjonVilkaar {
                     avdoedMedlemEtter16AarMedUnntakAvMaksimum5Aar(),
                     avdoedMedlemVedDoedsfallKanTilstaaesHalvMinstepensjon(),
                     avdoedHaddeTidsromMedAvtalefestetPensjon(),
+                    avdoedMedlemskapYrkesskade(),
                     avdoedHaddeTidsromMedPensjonFraLovfestetPensjonsordning(),
                 ),
         )
@@ -252,6 +254,18 @@ object BarnepensjonVilkaar {
                     paragraf = "§ 18-3",
                     ledd = 2,
                     bokstav = "c",
+                ),
+        )
+
+    private fun barnetsMedlemskapYrkesskade() =
+        Delvilkaar(
+            type = VilkaarType.BP_FORTSATT_MEDLEMSKAP_UNNTAK_YRKESSKADE,
+            tittel = "Ja. Dødsfallet skyldes en godkjent yrkes-skade/sykdom",
+            lovreferanse =
+                Lovreferanse(
+                    paragraf = "§ 18-11",
+                    ledd = 1,
+                    bokstav = "b",
                 ),
         )
 
@@ -348,6 +362,18 @@ object BarnepensjonVilkaar {
                 Lovreferanse(
                     paragraf = "§ 18-2",
                     ledd = 5,
+                ),
+        )
+
+    private fun avdoedMedlemskapYrkesskade() =
+        Delvilkaar(
+            type = VilkaarType.BP_FORUTGAAENDE_MEDLEMSKAP_UNNTAK_AVDOED_YRKESSKADE,
+            tittel = "Ja. Dødsfallet skyldes en godkjent yrkes-skade/sykdom",
+            lovreferanse =
+                Lovreferanse(
+                    paragraf = "§ 18-11",
+                    ledd = 1,
+                    bokstav = "a",
                 ),
         )
 

@@ -63,22 +63,20 @@ private fun verifiserNyBeregning(
     beregning: BeregningDTO,
     migreringRequest: MigreringRequest,
 ) {
-    assert(beregning.beregningsperioder.size == 1) {
-        throw IllegalStateException("Migrerte saker skal kun opprette en beregningperiode")
+    check(beregning.beregningsperioder.size == 1) {
+        "Migrerte saker skal kun opprette en beregningperiode"
     }
 
     with(beregning.beregningsperioder.first()) {
-        assert(trygdetid == migreringRequest.beregning.anvendtTrygdetid.toInt()) {
-            throw IllegalStateException("Beregning må være basert på samme trygdetid som i Pesys")
+        check(trygdetid == migreringRequest.beregning.anvendtTrygdetid.toInt()) {
+            "Beregning må være basert på samme trygdetid som i Pesys"
         }
-        assert(grunnbelop == migreringRequest.beregning.g.toInt()) {
-            throw IllegalStateException("Beregning må være basert på samme G som i Pesys")
+        check(grunnbelop == migreringRequest.beregning.g.toInt()) {
+            "Beregning må være basert på samme G som i Pesys"
         }
-        assert(utbetaltBeloep > migreringRequest.beregning.brutto.toInt()) {
-            throw IllegalStateException(
-                "Man skal ikke kunne komme dårligere ut på nytt regelverk. " +
-                    "Beregnet beløp i Gjenny er lavere enn dagens beløp i Pesys.",
-            )
+        check(utbetaltBeloep > migreringRequest.beregning.brutto.toInt()) {
+            "Man skal ikke kunne komme dårligere ut på nytt regelverk. " +
+                "Beregnet beløp i Gjenny er lavere enn dagens beløp i Pesys."
         }
         // todo: Vi må også verifisere at samme beregningsmetode har blitt benyttet,
         //  f. eks nasjonal, prorata og evt. avkorting (uføre, inst. opphold, fengsel)

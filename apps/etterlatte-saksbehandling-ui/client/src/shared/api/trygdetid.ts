@@ -25,6 +25,16 @@ export const slettTrygdetidsgrunnlag = async (args: {
 export const hentAlleLand = async (): Promise<ApiResponse<ILand[]>> =>
   apiClient.get<ILand[]>('/trygdetid/kodeverk/land')
 
+export const sorterLand = (landListe: ILand[]): ILand[] => {
+  landListe.sort((a: ILand, b: ILand) => {
+    if (a.beskrivelse.tekst > b.beskrivelse.tekst) {
+      return 1
+    }
+    return -1
+  })
+  return landListe
+}
+
 export interface TrygdetidAvtaleOptions {
   kode: string
   beskrivelse: string

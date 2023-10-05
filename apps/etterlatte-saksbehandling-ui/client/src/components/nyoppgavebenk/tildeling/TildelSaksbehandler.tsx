@@ -23,9 +23,7 @@ export const TildelSaksbehandler = (props: {
     const nysaksbehandler = { saksbehandler: user.ident, versjon }
 
     tildelSaksbehandler({ oppgaveId, type, nysaksbehandler }, () => {
-      setTimeout(() => {
-        oppdaterTildeling(oppgaveId, user.ident)
-      }, 3000)
+      oppdaterTildeling(oppgaveId, user.ident)
     })
   }
 

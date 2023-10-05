@@ -7,6 +7,7 @@ import {
   ITrygdetid,
   ITrygdetidGrunnlagType,
   opprettTrygdetid,
+  sorterLand,
 } from '~shared/api/trygdetid'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
@@ -60,14 +61,7 @@ export const Trygdetid = ({ redigerbar, utenlandstilsnitt }: Props) => {
 
   useEffect(() => {
     fetchAlleLand(null, (landListe: ILand[]) => {
-      setLandListe(
-        landListe.sort((a: ILand, b: ILand) => {
-          if (a.beskrivelse.tekst > b.beskrivelse.tekst) {
-            return 1
-          }
-          return -1
-        })
-      )
+      setLandListe(sorterLand(landListe))
     })
   }, [])
 

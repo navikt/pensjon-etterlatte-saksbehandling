@@ -30,14 +30,17 @@ export const ToggleMinOppgaveliste = () => {
 
   const [hentedeOppgaver, setHentedeOppgaver] = useState<OppgaveDTO[]>([])
 
+  const sorterOppgaverEtterOpprettet = (oppgaver: OppgaveDTO[]) => {
+    return oppgaver.sort((a, b) => new Date(b.opprettet).getTime() - new Date(a.opprettet).getTime())
+  }
   useEffect(() => {
     if (isSuccess(oppgaver) && isSuccess(gosysOppgaver)) {
-      const alleOppgaver = [...oppgaver.data, ...gosysOppgaver.data].sort(
-        (a, b) => new Date(b.opprettet).getTime() - new Date(a.opprettet).getTime()
-      )
+      const alleOppgaver = sorterOppgaverEtterOpprettet([...oppgaver.data, ...gosysOppgaver.data])
       setHentedeOppgaver(alleOppgaver)
-    } else if (isSuccess(oppgaver) && isFailure(gosysOppgaver)) {
-      setHentedeOppgaver(oppgaver.data)
+    } else if (isSuccess(oppgaver) && !isSuccess(gosysOppgaver)) {
+      setHentedeOppgaver(sorterOppgaverEtterOpprettet(oppgaver.data))
+    } else if (!isSuccess(oppgaver) && isSuccess(gosysOppgaver)) {
+      setHentedeOppgaver(sorterOppgaverEtterOpprettet(gosysOppgaver.data))
     }
   }, [oppgaver, gosysOppgaver])
 
@@ -49,11 +52,13 @@ export const ToggleMinOppgaveliste = () => {
   useEffect(() => hentAlleOppgaver(), [])
 
   const oppdaterTildeling = (id: string, saksbehandler: string | null) => {
-    const oppdatertOppgaveState = [...hentedeOppgaver]
-    const index = oppdatertOppgaveState.findIndex((o) => o.id === id)
-    oppdatertOppgaveState[index].saksbehandler = saksbehandler
-    oppdatertOppgaveState[index].status = 'UNDER_BEHANDLING'
-    setHentedeOppgaver(oppdatertOppgaveState)
+    setTimeout(() => {
+      const oppdatertOppgaveState = [...hentedeOppgaver]
+      const index = oppdatertOppgaveState.findIndex((o) => o.id === id)
+      oppdatertOppgaveState[index].saksbehandler = saksbehandler
+      oppdatertOppgaveState[index].status = 'UNDER_BEHANDLING'
+      setHentedeOppgaver(oppdatertOppgaveState)
+    }, 2000)
   }
 
   const mutableOppgaver = hentedeOppgaver.concat()

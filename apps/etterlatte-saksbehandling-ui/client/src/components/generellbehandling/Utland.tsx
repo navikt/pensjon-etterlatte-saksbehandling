@@ -19,7 +19,7 @@ import { mapApiResult, useApiCall, isPending, isFailure, isSuccess } from '~shar
 import { sendTilAttesteringGenerellBehandling, oppdaterGenerellBehandling } from '~shared/api/generellbehandling'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
-import { hentAlleLand, ILand } from '~shared/api/trygdetid'
+import { hentAlleLand, ILand, sorterLand } from '~shared/api/trygdetid'
 import styled from 'styled-components'
 import { PencilWritingIcon } from '@navikt/aksel-icons'
 import { opprettBrevForSak } from '~shared/api/brev'
@@ -87,15 +87,6 @@ const Utland = (props: { utlandsBehandling: Generellbehandling & { innhold: Utla
     })
   }, [])
 
-  const sorterLand = (landListe: ILand[]): ILand[] => {
-    landListe.sort((a: ILand, b: ILand) => {
-      if (a.beskrivelse.tekst > b.beskrivelse.tekst) {
-        return 1
-      }
-      return -1
-    })
-    return landListe
-  }
   const oppaterGenerellbehandlingUtland = () => {
     if (valgtLandIsoKode !== undefined) {
       setErrLand(false)

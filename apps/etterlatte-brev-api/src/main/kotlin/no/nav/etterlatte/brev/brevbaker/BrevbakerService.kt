@@ -1,6 +1,5 @@
 package no.nav.etterlatte.brev.brevbaker
 
-import no.nav.etterlatte.brev.BlockTilSlateKonverterer
 import no.nav.etterlatte.brev.adresse.AdresseService
 import no.nav.etterlatte.brev.behandling.Behandling
 import no.nav.etterlatte.brev.model.BrevDataMapper

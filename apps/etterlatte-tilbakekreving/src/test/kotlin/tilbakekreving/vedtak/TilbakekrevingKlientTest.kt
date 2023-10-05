@@ -11,10 +11,9 @@ import io.ktor.http.fullPath
 import io.ktor.http.headersOf
 import io.ktor.serialization.jackson.JacksonConverter
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.tilbakekreving.VedtakId
 import no.nav.etterlatte.libs.common.toJson
+import no.nav.etterlatte.tilbakekreving.tilbakekrevingsvedtak
 import no.nav.etterlatte.tilbakekreving.vedtak.TilbakekrevingKlient
-import no.nav.etterlatte.tilbakekreving.vedtak.Tilbakekrevingsvedtak
 import no.nav.okonomi.tilbakekrevingservice.TilbakekrevingsvedtakResponse
 import no.nav.tilbakekreving.typer.v1.MmelDto
 import org.junit.jupiter.api.Test
@@ -31,7 +30,7 @@ internal class TilbakekrevingKlientTest {
         val httpClient = mockedHttpClient("/tilbakekreving/tilbakekrevingsvedtak", HttpMethod.Post, response)
         val tilbakekrevingKlient = TilbakekrevingKlient("", httpClient)
 
-        val tilbakekrevingsvedtak = Tilbakekrevingsvedtak(vedtakId = VedtakId(1))
+        val tilbakekrevingsvedtak = tilbakekrevingsvedtak()
         tilbakekrevingKlient.sendTilbakekrevingsvedtak(tilbakekrevingsvedtak)
     }
 
@@ -45,7 +44,7 @@ internal class TilbakekrevingKlientTest {
         val httpClient = mockedHttpClient("/tilbakekreving/tilbakekrevingsvedtak", HttpMethod.Post, response)
         val tilbakekrevingKlient = TilbakekrevingKlient("", httpClient)
 
-        val tilbakekrevingsvedtak = Tilbakekrevingsvedtak(vedtakId = VedtakId(1))
+        val tilbakekrevingsvedtak = tilbakekrevingsvedtak()
 
         assertThrows<Exception>("Tilbakekrevingsvedtak feilet med alvorlighetsgrad 08") {
             tilbakekrevingKlient.sendTilbakekrevingsvedtak(tilbakekrevingsvedtak)

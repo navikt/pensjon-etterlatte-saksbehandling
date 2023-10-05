@@ -28,7 +28,8 @@ internal class PesysRepository(private val dataSource: DataSource) : Transaction
         tx: TransactionalSession? = null,
     ) = tx.session {
         opprett(
-            "INSERT INTO pesyssak(id,sak,status) VALUES(:id,:sak::jsonb,:status)",
+            "INSERT INTO pesyssak(id,sak,status) VALUES(:id,:sak::jsonb,:status)" +
+                " ON CONFLICT(id) DO UPDATE SET sak=excluded.sak, status=excluded.status",
             mapOf("id" to pesyssak.id, "sak" to pesyssak.toJson(), "status" to Migreringsstatus.HENTA.name),
             "Lagra pesyssak ${pesyssak.id} i migreringsbasen",
         )

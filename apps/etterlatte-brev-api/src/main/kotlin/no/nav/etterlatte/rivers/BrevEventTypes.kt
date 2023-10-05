@@ -1,4 +1,4 @@
-package no.nav.etterlatte.brev.model
+package no.nav.etterlatte.rivers
 
 enum class BrevEventTypes {
     OPPRETTET,

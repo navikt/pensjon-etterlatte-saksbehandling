@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory
 class DistribusjonKlient(private val client: HttpClient, private val url: String) {
     private val logger = LoggerFactory.getLogger(DistribusjonKlient::class.java)
 
-    suspend fun distribuerJournalpost(request: DistribuerJournalpostRequest): DistribuerJournalpostResponse =
+    internal suspend fun distribuerJournalpost(request: DistribuerJournalpostRequest): DistribuerJournalpostResponse =
         try {
             client.post("$url/distribuerjournalpost") {
                 accept(ContentType.Application.Json)

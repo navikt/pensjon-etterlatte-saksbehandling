@@ -1,4 +1,4 @@
-package no.nav.etterlatte.brev.navansatt
+package no.nav.etterlatte.brev.adresse.navansatt
 
 import com.github.benmanes.caffeine.cache.Caffeine
 import io.ktor.client.HttpClient

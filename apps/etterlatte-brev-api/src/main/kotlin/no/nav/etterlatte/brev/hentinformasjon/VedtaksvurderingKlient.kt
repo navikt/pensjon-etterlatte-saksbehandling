@@ -1,4 +1,4 @@
-package no.nav.etterlatte.brev.vedtak
+package no.nav.etterlatte.brev.hentinformasjon
 
 import com.github.michaelbull.result.mapBoth
 import com.typesafe.config.Config
@@ -26,7 +26,7 @@ class VedtaksvurderingKlient(config: Config, httpClient: HttpClient) {
     private val clientId = config.getString("vedtak.client.id")
     private val resourceUrl = config.getString("vedtak.resource.url")
 
-    suspend fun hentVedtak(
+    internal suspend fun hentVedtak(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): VedtakDto {
@@ -48,7 +48,7 @@ class VedtaksvurderingKlient(config: Config, httpClient: HttpClient) {
         }
     }
 
-    suspend fun hentInnvilgelsesdato(
+    internal suspend fun hentInnvilgelsesdato(
         sakId: Long,
         brukerTokenInfo: BrukerTokenInfo,
     ): LocalDate? {

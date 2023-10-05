@@ -2,10 +2,10 @@ package no.nav.etterlatte.brev.adresse
 
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
+import no.nav.etterlatte.brev.adresse.navansatt.NavansattKlient
 import no.nav.etterlatte.brev.behandling.ForenkletVedtak
 import no.nav.etterlatte.brev.model.Avsender
 import no.nav.etterlatte.brev.model.Mottaker
-import no.nav.etterlatte.brev.navansatt.NavansattKlient
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.pensjon.brevbaker.api.model.Telefonnummer

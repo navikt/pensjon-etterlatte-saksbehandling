@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory
 class DokarkivKlient(private val client: HttpClient, private val url: String) {
     private val logger = LoggerFactory.getLogger(DokarkivKlient::class.java)
 
-    suspend fun opprettJournalpost(
+    internal suspend fun opprettJournalpost(
         request: JournalpostRequest,
         ferdigstill: Boolean,
     ): JournalpostResponse =
@@ -37,7 +37,7 @@ class DokarkivKlient(private val client: HttpClient, private val url: String) {
             throw JournalpostException("Feil i kall mot Dokarkiv", exception)
         }
 
-    suspend fun ferdigstillJournalpost(
+    internal suspend fun ferdigstillJournalpost(
         journalpostId: String,
         request: FerdigstillJournalpostRequest,
     ): String =

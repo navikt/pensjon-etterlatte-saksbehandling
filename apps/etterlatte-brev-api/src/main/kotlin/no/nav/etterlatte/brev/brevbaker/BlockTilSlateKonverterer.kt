@@ -1,10 +1,10 @@
-package no.nav.etterlatte.brev
+package no.nav.etterlatte.brev.brevbaker
 
 import no.nav.etterlatte.brev.model.Slate
 import no.nav.pensjon.brevbaker.api.model.RenderedJsonLetter
 
 object BlockTilSlateKonverterer {
-    fun konverter(it: RenderedJsonLetter) =
+    internal fun konverter(it: RenderedJsonLetter) =
         Slate(
             it
                 .blocks

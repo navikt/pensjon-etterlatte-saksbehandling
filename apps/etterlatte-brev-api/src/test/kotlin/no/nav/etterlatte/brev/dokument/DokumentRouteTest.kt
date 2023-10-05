@@ -22,8 +22,8 @@ import io.mockk.coVerify
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.etterlatte.brev.behandlingklient.BehandlingKlient
 import no.nav.etterlatte.brev.dokarkiv.DokarkivService
+import no.nav.etterlatte.brev.hentinformasjon.Tilgangssjekker
 import no.nav.etterlatte.brev.journalpost.BrukerIdType
 import no.nav.etterlatte.brev.journalpost.FerdigstillJournalpostRequest
 import no.nav.etterlatte.libs.common.FoedselsnummerDTO
@@ -41,7 +41,7 @@ import testsupport.buildTestApplicationConfigurationForOauth
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class DokumentRouteTest {
     private val mockOAuth2Server = MockOAuth2Server()
-    private val behandlingKlient = mockk<BehandlingKlient>()
+    private val tilgangssjekker = mockk<Tilgangssjekker>()
     private lateinit var hoconApplicationConfig: HoconApplicationConfig
     private val journalpostService = mockk<SafClient>()
     private val dokarkivService = mockk<DokarkivService>()
@@ -66,7 +66,7 @@ internal class DokumentRouteTest {
     @Test
     fun `Endepunkt for uthenting av alle dokumenter tilknyttet brukeren`() {
         coEvery { journalpostService.hentDokumenter(any(), any(), any()) } returns HentJournalposterResult()
-        coEvery { behandlingKlient.harTilgangTilPerson(any(), any()) } returns true
+        coEvery { tilgangssjekker.harTilgangTilPerson(any(), any()) } returns true
 
         val token = accessToken
         val fnr = "26117512737"
@@ -80,7 +80,7 @@ internal class DokumentRouteTest {
                     dokumentRoute(
                         journalpostService,
                         dokarkivService,
-                        behandlingKlient,
+                        tilgangssjekker,
                     )
                 }
             }
@@ -119,7 +119,7 @@ internal class DokumentRouteTest {
                     dokumentRoute(
                         journalpostService,
                         dokarkivService,
-                        behandlingKlient,
+                        tilgangssjekker,
                     )
                 }
             }
@@ -150,7 +150,7 @@ internal class DokumentRouteTest {
                     dokumentRoute(
                         journalpostService,
                         dokarkivService,
-                        behandlingKlient,
+                        tilgangssjekker,
                     )
                 }
             }
@@ -186,7 +186,7 @@ internal class DokumentRouteTest {
                     dokumentRoute(
                         journalpostService,
                         dokarkivService,
-                        behandlingKlient,
+                        tilgangssjekker,
                     )
                 }
             }

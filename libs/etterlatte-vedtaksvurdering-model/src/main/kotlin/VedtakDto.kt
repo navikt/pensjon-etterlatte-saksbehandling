@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
+import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.VedtakSak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import java.math.BigDecimal
@@ -84,4 +86,14 @@ data class VedtakSamordningDto(
     val attestasjon: Attestasjon?,
     val beregning: ObjectNode?,
     val avkorting: ObjectNode?,
+)
+
+data class TilbakekrevingFattetVedtakDto(
+    val tilbakekrevingId: UUID,
+    val sakId: Long,
+    val sakType: SakType,
+    val soeker: Folkeregisteridentifikator,
+    val ansvarligSaksbehandler: String,
+    val ansvarligEnhet: String,
+    val tilbakekreving: ObjectNode,
 )

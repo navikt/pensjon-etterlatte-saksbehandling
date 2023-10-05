@@ -28,6 +28,8 @@ import no.nav.etterlatte.behandling.klienter.NavAnsattKlient
 import no.nav.etterlatte.behandling.klienter.NavAnsattKlientImpl
 import no.nav.etterlatte.behandling.klienter.Norg2Klient
 import no.nav.etterlatte.behandling.klienter.Norg2KlientImpl
+import no.nav.etterlatte.behandling.klienter.VedtakKlient
+import no.nav.etterlatte.behandling.klienter.VedtakKlientImpl
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeService
 import no.nav.etterlatte.behandling.manueltopphoer.RealManueltOpphoerService
@@ -136,6 +138,7 @@ internal class ApplicationContext(
     val leaderElectionHttpClient: HttpClient = httpClient(),
     val grunnlagKlientObo: GrunnlagKlient = GrunnlagKlientObo(config, httpClient()),
     val gosysOppgaveKlient: GosysOppgaveKlient = GosysOppgaveKlientImpl(config, httpClient()),
+    val vedtakKlient: VedtakKlient = VedtakKlientImpl(config, httpClient()),
     val brevApiHttpClient: BrevApiKlient = BrevApiKlientObo(config, httpClient(forventSuksess = true)),
 ) {
     val httpPort = env.getOrDefault("HTTP_PORT", "8080").toInt()
@@ -298,6 +301,7 @@ internal class ApplicationContext(
             sakDao = sakDao,
             hendelseDao = hendelseDao,
             oppgaveService = oppgaveService,
+            vedtakKlient = vedtakKlient,
         )
 
     // Job

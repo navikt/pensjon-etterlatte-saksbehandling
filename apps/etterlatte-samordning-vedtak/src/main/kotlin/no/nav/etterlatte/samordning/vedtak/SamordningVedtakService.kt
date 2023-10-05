@@ -64,6 +64,7 @@ class SamordningVedtakService(
             VedtakType.OPPHOER -> SamordningVedtakType.OPPHOER
             VedtakType.ENDRING -> SamordningVedtakType.ENDRING
             VedtakType.AVSLAG -> throw IllegalArgumentException("Vedtak om avslag støttes ikke")
+            VedtakType.TILBAKEKREVING -> throw IllegalArgumentException("Ikke relevant")
         }
     }
 

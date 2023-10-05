@@ -5,4 +5,5 @@ enum class VedtakType {
     OPPHOER,
     AVSLAG,
     ENDRING,
+    TILBAKEKREVING,
 }

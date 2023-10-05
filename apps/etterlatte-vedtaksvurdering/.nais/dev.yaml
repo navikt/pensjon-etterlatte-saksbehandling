@@ -76,6 +76,7 @@ spec:
         - application: etterlatte-saksbehandling-ui
         - application: etterlatte-saksbehandling-ui-lokal
         - application: etterlatte-samordning-vedtak
+        - application: etterlatte-behandling
           permissions:
             roles:
               - samordning-read

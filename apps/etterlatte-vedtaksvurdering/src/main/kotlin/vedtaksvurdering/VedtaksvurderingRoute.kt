@@ -21,6 +21,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.toNorskTid
 import no.nav.etterlatte.libs.common.vedtak.AttesterVedtakDto
 import no.nav.etterlatte.libs.common.vedtak.Behandling
 import no.nav.etterlatte.libs.common.vedtak.LoependeYtelseDTO
+import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingFattetVedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakSamordningDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.common.withBehandlingId
@@ -187,6 +188,18 @@ fun Route.samordningsvedtakRoute(service: VedtaksvurderingService) {
             } else {
                 call.respond(HttpStatusCode.NoContent)
             }
+        }
+    }
+}
+
+fun Route.tilbakekrevingvedtakRoute(service: VedtakTilbakekrevingService) {
+    val logger = application.log
+
+    route("/tilbakekreving") {
+        post("/fattvedtak") {
+            val dto = call.receive<TilbakekrevingFattetVedtakDto>()
+            logger.info("Fatter vedtak for tilbakekreving=${dto.tilbakekrevingId}")
+            call.respond(service.lagreVedtak(dto))
         }
     }
 }

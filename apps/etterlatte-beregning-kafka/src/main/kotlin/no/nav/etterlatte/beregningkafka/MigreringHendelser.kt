@@ -5,7 +5,6 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.beregning.grunnlag.BarnepensjonBeregningsGrunnlag
 import no.nav.etterlatte.beregning.grunnlag.GrunnlagMedPeriode
 import no.nav.etterlatte.libs.common.beregning.BeregningDTO
-import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.etterlatte.rapidsandrivers.migrering.MigreringRequest
@@ -49,8 +48,7 @@ internal class MigreringHendelser(rapidsConnection: RapidsConnection, private va
                 beregningService.beregn(behandlingId).body<BeregningDTO>()
             }
 
-        val migreringRequest = objectMapper.treeToValue(packet[HENDELSE_DATA_KEY], MigreringRequest::class.java)
-        verifiserNyBeregning(beregning, migreringRequest)
+        verifiserNyBeregning(beregning, packet.hendelseData)
 
         packet.eventName = Migreringshendelser.VEDTAK
         packet[BEREGNING_KEY] = beregning

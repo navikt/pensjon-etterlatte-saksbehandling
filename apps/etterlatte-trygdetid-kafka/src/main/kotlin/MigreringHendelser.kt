@@ -1,7 +1,6 @@
 package no.nav.etterlatte.trygdetid.kafka
 
 import no.nav.etterlatte.libs.common.Vedtaksloesning
-import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -10,11 +9,11 @@ import no.nav.etterlatte.libs.common.trygdetid.DetaljertBeregnetTrygdetidResulta
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidGrunnlagDto
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidGrunnlagKildeDto
-import no.nav.etterlatte.rapidsandrivers.migrering.MigreringRequest
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser
 import no.nav.etterlatte.rapidsandrivers.migrering.TRYGDETID_KEY
 import no.nav.etterlatte.rapidsandrivers.migrering.Trygdetidsgrunnlag
 import no.nav.etterlatte.rapidsandrivers.migrering.VILKAARSVURDERT_KEY
+import no.nav.etterlatte.rapidsandrivers.migrering.hendelseData
 import no.nav.etterlatte.trygdetid.TrygdetidType
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -58,7 +57,7 @@ internal class MigreringHendelser(rapidsConnection: RapidsConnection, private va
             ?.let {
                 withFeilhaandtering(packet, context, Migreringshendelser.TRYGDETID_GRUNNLAG) {
                     val behandlingId = packet.behandlingId
-                    val request = objectMapper.treeToValue(packet[HENDELSE_DATA_KEY], MigreringRequest::class.java)
+                    val request = packet.hendelseData
                     logger.info("Oppretter grunnlag for trygdetid for $behandlingId")
 
                     try {

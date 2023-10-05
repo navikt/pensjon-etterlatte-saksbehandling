@@ -72,7 +72,7 @@ private fun verifiserNyBeregning(
         check(grunnbelop == migreringRequest.beregning.g.toInt()) {
             "Beregning må være basert på samme G som i Pesys"
         }
-        check(utbetaltBeloep > migreringRequest.beregning.brutto.toInt()) {
+        check(utbetaltBeloep >= migreringRequest.beregning.brutto.toInt()) {
             "Man skal ikke kunne komme dårligere ut på nytt regelverk. " +
                 "Beregnet beløp i Gjenny er lavere enn dagens beløp i Pesys."
         }

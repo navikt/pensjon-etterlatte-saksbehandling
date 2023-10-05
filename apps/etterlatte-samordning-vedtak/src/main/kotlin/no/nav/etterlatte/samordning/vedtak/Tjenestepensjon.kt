@@ -1,56 +1,27 @@
 package no.nav.etterlatte.samordning.vedtak
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import java.time.LocalDate
-import java.time.LocalDateTime
 
-@JsonIgnoreProperties(ignoreUnknown = true)
 data class SamhandlerPersonDto(
     val fnr: String,
     val forhold: List<TjenestepensjonForhold> = emptyList(),
-//    val changeStamp: ChangeStampDateDto? = null,
 )
 
-@JsonIgnoreProperties(ignoreUnknown = true)
 class TjenestepensjonForhold(
     val tpNr: String,
-    val tpOrdningNavn: String,
+    val kilde: String,
     val ytelser: List<SamhandlerYtelseDto> = emptyList(),
-    val datoSistOpptjening: LocalDate? = null,
-    val sistEndretDatoSistOpptjening: LocalDateTime? = null,
-    val harGjenlevendeYtelse: Boolean? = null,
-//    val kilde: KildeTypeCode,
-//    val changeStamp: ChangeStampDateDto? = null,
 )
 
 data class SamhandlerYtelseDto(
+    val ytelseType: String,
     val datoInnmeldtYtelseFom: LocalDate? = null,
-    val ytelseType: YtelseTypeCode,
     val datoYtelseIverksattFom: LocalDate? = null,
     val datoYtelseIverksattTom: LocalDate? = null,
-    val changeStamp: ChangeStampDateDto? = null,
 )
 
-// enum class KildeTypeCode(
-//    val decode: String,
-//    val createdBy: String,
-//    val createdDate: LocalDate,
-//    val updatedBy: String,
-//    val updatedDate: LocalDate,
-// )
+class TjenestepensjonManglendeTilgangException(override val message: String, cause: Throwable? = null) : Exception(message, cause)
 
-enum class YtelseTypeCode(
-    val createdBy: String,
-    val createdDate: LocalDate,
-    val updatedBy: String,
-    val updatedDate: LocalDate,
-)
+class TjenestepensjonUgyldigForesporselException(override val message: String, cause: Throwable?) : Exception(message, cause)
 
-data class ChangeStampDateDto(
-    val createdBy: String,
-    val createdDate: LocalDateTime,
-    val updatedBy: String,
-    val updatedDate: LocalDateTime,
-)
-
-class TjenestepensjonManglendeTilgangException(override val message: String) : Exception(message)
+class TjenestepensjonIkkeFunnetException(override val message: String, cause: Throwable?) : Exception(message, cause)

@@ -1,52 +1,43 @@
 package no.nav.etterlatte.samordning.vedtak
 
-import com.github.michaelbull.result.mapBoth
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
-import no.nav.etterlatte.libs.common.deserialize
+import io.ktor.client.call.body
+import io.ktor.client.plugins.ClientRequestException
+import io.ktor.client.request.get
+import io.ktor.client.request.header
+import io.ktor.client.request.url
+import io.ktor.http.HttpStatusCode
 import no.nav.etterlatte.libs.common.vedtak.VedtakSamordningDto
-import no.nav.etterlatte.libs.ktorobo.AzureAdClient
-import no.nav.etterlatte.libs.ktorobo.DownstreamResourceClient
-import no.nav.etterlatte.libs.ktorobo.Resource
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 
-class VedtakvurderingKlientException(override val message: String, override val cause: Throwable) :
+class VedtakvurderingKlientException(message: String, cause: Throwable) :
     Exception(message, cause)
 
-class VedtaksvurderingKlient(config: Config, httpClient: HttpClient, azureAdClient: AzureAdClient) {
-    private val downstreamResourceClient = DownstreamResourceClient(azureAdClient, httpClient)
+class VedtaksvurderingKlient(config: Config, private val httpClient: HttpClient) {
     private val logger = LoggerFactory.getLogger(VedtaksvurderingKlient::class.java)
 
-    private val clientId = config.getString("vedtak.client_id")
     private val vedtaksvurderingUrl = "${config.getString("vedtak.url")}/api/samordning/vedtak"
 
     suspend fun hentVedtak(
         vedtakId: Long,
         organisasjonsnummer: String,
     ): VedtakSamordningDto {
-        try {
-            logger.info("Henter vedtaksvurdering med vedtakId=$vedtakId")
+        logger.info("Henter vedtaksvurdering med vedtakId=$vedtakId")
 
-            return downstreamResourceClient
-                .get(
-                    resource =
-                        Resource(
-                            clientId = clientId,
-                            url = "$vedtaksvurderingUrl/$vedtakId",
-                            additionalHeaders = mapOf("orgnr" to organisasjonsnummer),
-                        ),
-                    brukerTokenInfo = SamordningSystembruker,
-                )
-                .mapBoth(
-                    success = { deserialize(it.response.toString()) },
-                    failure = { throwableErrorMessage -> throw throwableErrorMessage },
-                )
-        } catch (e: Exception) {
-            throw VedtakvurderingKlientException(
-                "Henting av vedtak med id=$vedtakId feilet",
-                e,
-            )
+        return try {
+            httpClient.get {
+                url("$vedtaksvurderingUrl/$vedtakId")
+                header("orgnr", organisasjonsnummer)
+            }.body()
+        } catch (e: ClientRequestException) {
+            when (e.response.status) {
+                HttpStatusCode.Unauthorized -> throw VedtakvurderingKlientException("Vedtak: Ikke tilgang", e)
+                HttpStatusCode.BadRequest -> throw VedtakvurderingKlientException("Vedtak: Ugyldig forespørsel", e)
+                HttpStatusCode.NotFound -> throw VedtakvurderingKlientException("Vedtak: Ressurs ikke funnet", e)
+                else -> throw e
+            }
         }
     }
 
@@ -55,28 +46,21 @@ class VedtaksvurderingKlient(config: Config, httpClient: HttpClient, azureAdClie
         fnr: String,
         organisasjonsnummer: String,
     ): List<VedtakSamordningDto> {
-        try {
-            logger.info("Henter vedtaksliste, virkFom=$virkFom")
+        logger.info("Henter vedtaksliste, virkFom=$virkFom")
 
-            return downstreamResourceClient
-                .get(
-                    resource =
-                        Resource(
-                            clientId = clientId,
-                            url = "$vedtaksvurderingUrl?virkFom=$virkFom",
-                            additionalHeaders = mapOf("fnr" to fnr, "orgnr" to organisasjonsnummer),
-                        ),
-                    brukerTokenInfo = SamordningSystembruker,
-                )
-                .mapBoth(
-                    success = { deserialize(it.response.toString()) },
-                    failure = { throwableErrorMessage -> throw throwableErrorMessage },
-                )
-        } catch (e: Exception) {
-            throw VedtakvurderingKlientException(
-                "Henting av vedtakslisten feilet",
-                e,
-            )
+        return try {
+            httpClient.get {
+                url("$vedtaksvurderingUrl?virkFom=$virkFom")
+                header("fnr", fnr)
+                header("orgnr", organisasjonsnummer)
+            }.body()
+        } catch (e: ClientRequestException) {
+            when (e.response.status) {
+                HttpStatusCode.Unauthorized -> throw VedtakvurderingKlientException("Vedtak: Ikke tilgang", e)
+                HttpStatusCode.BadRequest -> throw VedtakvurderingKlientException("Vedtak: Ugyldig forespørsel", e)
+                HttpStatusCode.NotFound -> throw VedtakvurderingKlientException("Vedtak: Ressurs ikke funnet", e)
+                else -> throw e
+            }
         }
     }
 }

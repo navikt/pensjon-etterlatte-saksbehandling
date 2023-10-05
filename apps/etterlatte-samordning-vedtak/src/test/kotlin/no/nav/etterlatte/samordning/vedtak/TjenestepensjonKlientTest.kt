@@ -1,6 +1,5 @@
 package no.nav.etterlatte.samordning.vedtak
 
-import com.github.michaelbull.result.Ok
 import com.typesafe.config.Config
 import io.kotest.matchers.shouldBe
 import io.ktor.client.HttpClient
@@ -13,13 +12,10 @@ import io.ktor.http.fullPath
 import io.ktor.http.headersOf
 import io.ktor.serialization.jackson.JacksonConverter
 import io.mockk.clearAllMocks
-import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
-import no.nav.etterlatte.libs.ktorobo.AccessToken
-import no.nav.etterlatte.libs.ktorobo.AzureAdClient
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.Month
@@ -27,8 +23,6 @@ import java.time.YearMonth
 
 class TjenestepensjonKlientTest {
     private val config: Config = mockk(relaxed = true)
-    private val azureAdClient: AzureAdClient = mockk<AzureAdClient>()
-    private val accessToken: AccessToken = mockk<AccessToken>(relaxed = true)
     private val headers = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
     private val datoHarTpYtelse = YearMonth.of(2024, Month.MARCH).atStartOfMonth()
     private val datoHarIkkeTpYtelse = YearMonth.of(2024, Month.FEBRUARY).atStartOfMonth()
@@ -36,7 +30,6 @@ class TjenestepensjonKlientTest {
     @BeforeEach
     fun setupDefaults() {
         clearAllMocks()
-        coEvery { azureAdClient.getAccessTokenForResource(scopes = any<List<String>>()) } returns Ok(accessToken)
     }
 
     @Test
@@ -55,7 +48,7 @@ class TjenestepensjonKlientTest {
                                     listOf(
                                         TjenestepensjonForhold(
                                             tpNr = "3010",
-                                            tpOrdningNavn = "SPK",
+                                            kilde = "PP01",
                                         ),
                                     ),
                             ).toJson(),
@@ -66,7 +59,7 @@ class TjenestepensjonKlientTest {
                 }
             }
 
-        val tpKlient = TjenestepensjonKlient(config, httpClient, azureAdClient)
+        val tpKlient = TjenestepensjonKlient(config, httpClient)
 
         runBlocking {
             tpKlient.harTpForholdByDate("17057554321", "3010", datoHarTpYtelse)
@@ -95,7 +88,7 @@ class TjenestepensjonKlientTest {
                 }
             }
 
-        val tpKlient = TjenestepensjonKlient(config, httpClient, azureAdClient)
+        val tpKlient = TjenestepensjonKlient(config, httpClient)
 
         runBlocking {
             tpKlient.harTpForholdByDate("17057554321", "4100", datoHarIkkeTpYtelse)
@@ -103,25 +96,25 @@ class TjenestepensjonKlientTest {
     }
 
     @Test
-    fun `har TP-ytelse - verifisere api path, param og headers`() {
+    fun `har ikke TP-ytelse - verifisere api path, param og headers`() {
         val httpClient =
             createHttpClient { request ->
                 request.headers["fnr"] shouldBe "01018012345"
 
                 when (request.url.fullPath) {
                     "/api/tjenestepensjon/tpNrWithYtelse?fomDate=2024-03-01" -> {
-                        respond("[ \"3010\", \"4100\" ]", headers = headers)
+                        respond("{\"tpNr\": [ \"3010\", \"4100\" ]}", headers = headers)
                     }
 
                     "/api/tjenestepensjon/tpNrWithYtelse?fomDate=2024-02-01" -> {
-                        respond("[]", headers = headers)
+                        respond("{\"tpNr\": []}", headers = headers)
                     }
 
                     else -> error(request.url.fullPath)
                 }
             }
 
-        val tpKlient = TjenestepensjonKlient(config, httpClient, azureAdClient)
+        val tpKlient = TjenestepensjonKlient(config, httpClient)
 
         runBlocking {
             tpKlient.harTpYtelseOnDate("01018012345", "3010", datoHarIkkeTpYtelse)

@@ -76,7 +76,7 @@ spec:
     - name: TJENESTEPENSJON_URL
       value: https://tp-api-q2.dev-fss-pub.nais.io
     - name: TJENESTEPENSJON_SCOPE
-      value: api://dev-fss.samhandler.tp/.default
+      value: api://dev-fss.pensjonsamhandler.tp-q2/.default
   accessPolicy:
     outbound:
       rules:

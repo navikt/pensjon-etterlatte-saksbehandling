@@ -1,20 +1,22 @@
 package no.nav.etterlatte.samordning.vedtak
 
-import com.github.michaelbull.result.mapBoth
+import com.fasterxml.jackson.annotation.JsonSetter
+import com.fasterxml.jackson.annotation.Nulls
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
+import io.ktor.client.call.body
+import io.ktor.client.plugins.ClientRequestException
+import io.ktor.client.request.get
+import io.ktor.client.request.header
+import io.ktor.client.request.url
+import io.ktor.http.HttpStatusCode
 import no.nav.etterlatte.libs.common.deserialize
-import no.nav.etterlatte.libs.ktorobo.AzureAdClient
-import no.nav.etterlatte.libs.ktorobo.DownstreamResourceClient
-import no.nav.etterlatte.libs.ktorobo.Resource
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 
-class TjenestepensjonKlient(config: Config, httpClient: HttpClient, azureAdClient: AzureAdClient) {
-    private val downstreamResourceClient = DownstreamResourceClient(azureAdClient, httpClient)
-    private val logger = LoggerFactory.getLogger(VedtaksvurderingKlient::class.java)
+class TjenestepensjonKlient(config: Config, private val httpClient: HttpClient) {
+    private val logger = LoggerFactory.getLogger(TjenestepensjonKlient::class.java)
 
-    private val clientId = config.getString("tjenestepensjon.client_id")
     private val tjenestepensjonUrl = "${config.getString("tjenestepensjon.url")}/api/tjenestepensjon"
 
     suspend fun harTpForholdByDate(
@@ -22,33 +24,25 @@ class TjenestepensjonKlient(config: Config, httpClient: HttpClient, azureAdClien
         tpnr: String,
         fomDato: LocalDate,
     ): Boolean {
-        logger.info("Sjekk om det finnes tjenestepensjonssforhold pr $fomDato for ordning '$tpnr'")
+        logger.info("Sjekk om det finnes tjenestepensjonsforhold pr $fomDato for ordning '$tpnr'")
 
-        return try {
-            downstreamResourceClient
-                .get(
-                    resource =
-                        Resource(
-                            clientId = clientId,
-                            url = "$tjenestepensjonUrl/finnForholdForBruker?datoFom=$fomDato",
-                            additionalHeaders =
-                                mapOf(
-                                    "fnr" to fnr,
-                                    "tpnr" to tpnr,
-                                ),
-                        ),
-                    brukerTokenInfo = SamordningSystembruker,
-                )
-                .mapBoth(
-                    success = { deserialize<SamhandlerPersonDto>(it.response.toString()) },
-                    failure = { throw it },
-                ).forhold.isNotEmpty()
-        } catch (e: Exception) {
-            throw TjenestepensjonKlientException(
-                "Henting av tjenestepensjonsforhold feilet",
-                e,
-            )
-        }
+        val tp: SamhandlerPersonDto =
+            try {
+                httpClient.get {
+                    url("$tjenestepensjonUrl/finnForholdForBruker?datoFom=$fomDato")
+                    header("fnr", fnr)
+                    header("tpnr", tpnr)
+                }.body()
+            } catch (e: ClientRequestException) {
+                when (e.response.status) {
+                    HttpStatusCode.Unauthorized -> throw TjenestepensjonManglendeTilgangException("TP: Ikke tilgang", e)
+                    HttpStatusCode.BadRequest -> throw TjenestepensjonUgyldigForesporselException("TP: Ugyldig forespørsel", e)
+                    HttpStatusCode.NotFound -> throw TjenestepensjonIkkeFunnetException("TP: Ressurs ikke funnet", e)
+                    else -> throw e
+                }
+            }
+
+        return tp.forhold.isNotEmpty()
     }
 
     suspend fun harTpYtelseOnDate(
@@ -58,32 +52,26 @@ class TjenestepensjonKlient(config: Config, httpClient: HttpClient, azureAdClien
     ): Boolean {
         logger.info("Sjekk om det finnes tjenestepensjonsytelse pr $fomDato for ordning '$tpnr'")
 
-        return try {
-            downstreamResourceClient
-                .get(
-                    resource =
-                        Resource(
-                            clientId = clientId,
-                            url = "$tjenestepensjonUrl/tpNrWithYtelse?fomDate=$fomDato",
-                            additionalHeaders =
-                                mapOf(
-                                    "fnr" to fnr,
-                                ),
-                        ),
-                    brukerTokenInfo = SamordningSystembruker,
-                )
-                .mapBoth(
-                    success = { deserialize<List<String>>(it.response.toString()) },
-                    failure = { throw it },
-                ).contains(tpnr)
-        } catch (e: Exception) {
-            throw TjenestepensjonKlientException(
-                "Henting av tjenestepensjonsforhold feilet",
-                e,
-            )
-        }
+        val tpNumre: TpNumre =
+            try {
+                httpClient.get {
+                    url("$tjenestepensjonUrl/tpNrWithYtelse?fomDate=$fomDato")
+                    header("fnr", fnr)
+                }.let { deserialize<TpNumre>(it.body()) }
+            } catch (e: ClientRequestException) {
+                when (e.response.status) {
+                    HttpStatusCode.Unauthorized -> throw TjenestepensjonManglendeTilgangException("TP: Ikke tilgang", e)
+                    HttpStatusCode.BadRequest -> throw TjenestepensjonUgyldigForesporselException("TP: Ugyldig forespørsel", e)
+                    HttpStatusCode.NotFound -> throw TjenestepensjonIkkeFunnetException("TP: Ressurs ikke funnet", e)
+                    else -> throw e
+                }
+            }
+
+        return tpNumre.tpNr.contains(tpnr)
     }
 }
 
-class TjenestepensjonKlientException(override val message: String, override val cause: Throwable) :
-    Exception(message, cause)
+internal data class TpNumre(
+    @field:JsonSetter(nulls = Nulls.AS_EMPTY)
+    val tpNr: List<String> = emptyList(),
+)

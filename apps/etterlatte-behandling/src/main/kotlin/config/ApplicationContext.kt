@@ -146,6 +146,7 @@ internal class ApplicationContext(
     val grunnlagKlientObo: GrunnlagKlient = GrunnlagKlientObo(config, httpClient()),
     val gosysOppgaveKlient: GosysOppgaveKlient = GosysOppgaveKlientImpl(config, httpClient()),
     val brevApiHttpClient: BrevApiKlient = BrevApiKlientObo(config, httpClient(forventSuksess = true)),
+    val klageHttpClient: HttpClient = klageHttpClient(config),
 ) {
     val httpPort = env.getOrDefault("HTTP_PORT", "8080").toInt()
     val saksbehandlerGroupIdsByKey = AzureGroup.values().associateWith { env.requireEnvValue(it.envKey) }
@@ -175,7 +176,7 @@ internal class ApplicationContext(
     val grunnlagKlient = GrunnlagKlientImpl(config, grunnlagHttpClient)
     val leaderElectionKlient = LeaderElection(env.getValue("ELECTOR_PATH"), leaderElectionHttpClient)
     val behandlingsHendelser = BehandlingsHendelserKafkaProducerImpl(rapid)
-    val klageKlient = KlageKlientImpl(klageHttpClient(config), resourceUrl = env.getValue("KLAGE_URL"))
+    val klageKlient = KlageKlientImpl(klageHttpClient, resourceUrl = env.getValue("KLAGE_URL"))
 
     // Metrikker
     val oppgaveMetrikker = OppgaveMetrics(metrikkerDao)

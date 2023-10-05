@@ -111,6 +111,7 @@ abstract class BehandlingIntegrationTest {
                         put("NAVANSATT_URL", "http://localhost")
                         put("SKJERMING_URL", "http://localhost")
                         put("OPPGAVE_URL", "http://localhost")
+                        put("KLAGE_URL", "http://localhost")
                         put("OPPGAVE_SCOPE", "scope")
                     }.let { Miljoevariabler(it) },
                 config =
@@ -132,6 +133,7 @@ abstract class BehandlingIntegrationTest {
                 grunnlagKlientObo = GrunnlagKlientTest(),
                 gosysOppgaveKlient = GosysOppgaveKlientTest(),
                 brevApiHttpClient = BrevApiKlientTest(),
+                klageHttpClient = klageHttpClientTest(),
             ).also {
                 it.dataSource.migrate()
             }
@@ -230,6 +232,21 @@ abstract class BehandlingIntegrationTest {
                     } else {
                         error(request.url.fullPath)
                     }
+                }
+            }
+            install(ContentNegotiation) {
+                register(
+                    ContentType.Application.Json,
+                    JacksonConverter(objectMapper),
+                )
+            }
+        }
+
+    fun klageHttpClientTest() =
+        HttpClient(MockEngine) {
+            engine {
+                addHandler {
+                    respondOk()
                 }
             }
             install(ContentNegotiation) {

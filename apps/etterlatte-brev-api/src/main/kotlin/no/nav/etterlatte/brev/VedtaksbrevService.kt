@@ -7,7 +7,7 @@ import no.nav.etterlatte.brev.brevbaker.BrevbakerRequest
 import no.nav.etterlatte.brev.brevbaker.BrevbakerService
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.dokarkiv.DokarkivServiceImpl
-import no.nav.etterlatte.brev.hentinformasjon.SakOgBehandlingService
+import no.nav.etterlatte.brev.hentinformasjon.ISakOgBehandlingService
 import no.nav.etterlatte.brev.journalpost.JournalpostResponse
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevData
@@ -33,7 +33,7 @@ import java.util.UUID
 
 class VedtaksbrevService(
     private val db: BrevRepository,
-    private val sakOgBehandlingService: SakOgBehandlingService,
+    private val sakOgBehandlingService: ISakOgBehandlingService,
     private val adresseService: AdresseService,
     private val dokarkivService: DokarkivServiceImpl,
     private val brevbaker: BrevbakerService,

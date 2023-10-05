@@ -25,7 +25,7 @@ import no.nav.etterlatte.brev.brevbaker.BrevbakerPdfResponse
 import no.nav.etterlatte.brev.brevbaker.BrevbakerService
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.dokarkiv.DokarkivServiceImpl
-import no.nav.etterlatte.brev.hentinformasjon.SakOgBehandlingService
+import no.nav.etterlatte.brev.hentinformasjon.ISakOgBehandlingService
 import no.nav.etterlatte.brev.journalpost.JournalpostResponse
 import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Avsender
@@ -75,7 +75,7 @@ internal class VedtaksbrevServiceTest {
     private val db = mockk<BrevRepository>(relaxed = true)
     private val brevbaker = mockk<BrevbakerKlient>()
     private val brevService = mockk<BrevService>()
-    private val sakOgBehandlingService = mockk<SakOgBehandlingService>()
+    private val sakOgBehandlingService = mockk<ISakOgBehandlingService>()
     private val adresseService = mockk<AdresseService>()
     private val dokarkivService = mockk<DokarkivServiceImpl>()
     private val featureToggleService =

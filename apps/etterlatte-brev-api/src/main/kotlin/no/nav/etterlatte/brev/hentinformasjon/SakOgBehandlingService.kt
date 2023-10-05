@@ -34,6 +34,29 @@ import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
 
+interface ISakOgBehandlingService {
+    suspend fun hentSak(
+        sakId: Long,
+        bruker: BrukerTokenInfo,
+    ): Sak
+
+    suspend fun hentSoeker(
+        sakId: Long,
+        bruker: BrukerTokenInfo,
+    ): Soeker
+
+    suspend fun hentBehandling(
+        sakId: Long,
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Behandling
+
+    suspend fun hentVedtakSaksbehandlerOgStatus(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Pair<String, VedtakStatus>
+}
+
 class SakOgBehandlingService(
     private val vedtaksvurderingKlient: VedtaksvurderingKlient,
     private val grunnlagKlient: GrunnlagKlient,
@@ -41,20 +64,20 @@ class SakOgBehandlingService(
     private val behandlingKlient: BehandlingKlient,
     private val trygdetidKlient: TrygdetidKlient,
     private val vilkaarsvurderingKlient: VilkaarsvurderingKlient,
-) {
-    suspend fun hentSak(
+) : ISakOgBehandlingService {
+    override suspend fun hentSak(
         sakId: Long,
         bruker: BrukerTokenInfo,
     ) = behandlingKlient.hentSak(sakId, bruker)
 
-    suspend fun hentSoeker(
+    override suspend fun hentSoeker(
         sakId: Long,
         bruker: BrukerTokenInfo,
     ): Soeker =
         grunnlagKlient.hentGrunnlag(sakId, bruker)
             .mapSoeker()
 
-    suspend fun hentBehandling(
+    override suspend fun hentBehandling(
         sakId: Long,
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
@@ -79,7 +102,7 @@ class SakOgBehandlingService(
             )
         }
 
-    suspend fun hentVedtakSaksbehandlerOgStatus(
+    override suspend fun hentVedtakSaksbehandlerOgStatus(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): Pair<String, VedtakStatus> {
@@ -157,7 +180,7 @@ class SakOgBehandlingService(
         )
     }
 
-    private suspend fun SakOgBehandlingService.finnForrigeUbetalingsinfo(
+    private suspend fun finnForrigeUbetalingsinfo(
         vedtak: VedtakDto,
         sak: Sak,
         brukerTokenInfo: BrukerTokenInfo,

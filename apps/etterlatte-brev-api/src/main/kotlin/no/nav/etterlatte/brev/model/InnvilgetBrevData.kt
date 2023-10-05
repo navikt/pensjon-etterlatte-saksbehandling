@@ -16,7 +16,7 @@ data class InnvilgetBrevData(
     companion object {
         fun fra(behandling: Behandling): InnvilgetBrevData =
             InnvilgetBrevData(
-                utbetalingsinfo = behandling.utbetalingsinfo,
+                utbetalingsinfo = behandling.utbetalingsinfo!!,
                 avdoed = behandling.personerISak.avdoed,
                 avkortingsinfo = behandling.avkortingsinfo,
             )
@@ -67,7 +67,7 @@ data class InnvilgetBrevDataOMS(
             innholdVedlegg: List<BrevInnholdVedlegg>,
         ): InnvilgetBrevDataOMS =
             InnvilgetBrevDataOMS(
-                utbetalingsinfo = behandling.utbetalingsinfo,
+                utbetalingsinfo = behandling.utbetalingsinfo!!,
                 avkortingsinfo = behandling.avkortingsinfo,
                 avdoed = behandling.personerISak.avdoed,
                 etterbetalinginfo = behandling.etterbetalingDTO,
@@ -105,7 +105,7 @@ data class InnvilgetBrevDataEnkel(
     companion object {
         fun fra(behandling: Behandling) =
             InnvilgetBrevDataEnkel(
-                utbetalingsinfo = behandling.utbetalingsinfo,
+                utbetalingsinfo = behandling.utbetalingsinfo!!,
                 avdoed = behandling.personerISak.avdoed,
                 erEtterbetaling = behandling.etterbetalingDTO != null,
                 vedtaksdato =
@@ -132,7 +132,7 @@ data class InnvilgetHovedmalBrevData(
             innhold: List<Slate.Element>,
         ): InnvilgetHovedmalBrevData =
             InnvilgetHovedmalBrevData(
-                utbetalingsinfo = behandling.utbetalingsinfo,
+                utbetalingsinfo = behandling.utbetalingsinfo!!,
                 avkortingsinfo = behandling.avkortingsinfo,
                 etterbetalingDTO = behandling.etterbetalingDTO,
                 innhold = innhold,

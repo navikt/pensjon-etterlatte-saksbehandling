@@ -30,7 +30,7 @@ data class EndringHovedmalBrevData(
             EndringHovedmalBrevData(
                 erEndret = true, // TODO når resten av fengselsopphold implementerast
                 etterbetaling = behandling.etterbetalingDTO,
-                utbetalingsinfo = behandling.utbetalingsinfo,
+                utbetalingsinfo = behandling.utbetalingsinfo!!,
                 innhold = innhold,
             )
     }
@@ -49,7 +49,7 @@ data class SoeskenjusteringRevurderingBrevdata(
                 )
 
             return SoeskenjusteringRevurderingBrevdata(
-                utbetalingsinfo = behandling.utbetalingsinfo,
+                utbetalingsinfo = behandling.utbetalingsinfo!!,
                 grunnForJustering = revurderingsinfo.grunnForSoeskenjustering,
             )
         }

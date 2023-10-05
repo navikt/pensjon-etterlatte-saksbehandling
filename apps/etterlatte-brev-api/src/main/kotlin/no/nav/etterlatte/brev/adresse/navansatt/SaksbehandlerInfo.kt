@@ -1,4 +1,4 @@
-package no.nav.etterlatte.brev.navansatt
+package no.nav.etterlatte.brev.adresse.navansatt
 
 data class SaksbehandlerInfo(
     val ident: String,

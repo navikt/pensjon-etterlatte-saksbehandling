@@ -7,9 +7,9 @@ import io.mockk.coVerify
 import io.mockk.confirmVerified
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.brev.adresse.navansatt.NavansattKlient
+import no.nav.etterlatte.brev.adresse.navansatt.SaksbehandlerInfo
 import no.nav.etterlatte.brev.behandling.ForenkletVedtak
-import no.nav.etterlatte.brev.navansatt.NavansattKlient
-import no.nav.etterlatte.brev.navansatt.SaksbehandlerInfo
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus

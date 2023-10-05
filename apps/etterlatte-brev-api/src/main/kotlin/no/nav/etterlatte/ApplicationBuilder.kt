@@ -10,6 +10,7 @@ import no.nav.etterlatte.brev.VedtaksbrevService
 import no.nav.etterlatte.brev.adresse.AdresseService
 import no.nav.etterlatte.brev.adresse.Norg2Klient
 import no.nav.etterlatte.brev.adresse.RegoppslagKlient
+import no.nav.etterlatte.brev.adresse.navansatt.NavansattKlient
 import no.nav.etterlatte.brev.behandlingklient.BehandlingKlient
 import no.nav.etterlatte.brev.brevRoute
 import no.nav.etterlatte.brev.brevbaker.BrevbakerJSONBlockMixIn
@@ -34,7 +35,6 @@ import no.nav.etterlatte.brev.hentinformasjon.VedtaksvurderingService
 import no.nav.etterlatte.brev.hentinformasjon.VilkaarsvurderingKlient
 import no.nav.etterlatte.brev.model.BrevDataMapper
 import no.nav.etterlatte.brev.model.BrevProsessTypeFactory
-import no.nav.etterlatte.brev.navansatt.NavansattKlient
 import no.nav.etterlatte.brev.vedtaksbrevRoute
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleProperties
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService

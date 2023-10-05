@@ -5,6 +5,7 @@ import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
+import io.ktor.client.statement.HttpResponse
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import kotlinx.coroutines.runBlocking
@@ -44,6 +45,8 @@ interface BehandlingService {
     fun migrerAlleTempBehandlingerTilbakeTilVilkaarsvurdert(): SakIDListe
 
     fun migrer(hendelse: MigreringRequest): BehandlingOgSak
+
+    fun avbryt(behandlingId: UUID): HttpResponse
 }
 
 data class ReguleringFeiletHendelse(val sakId: Long)
@@ -143,6 +146,13 @@ class BehandlingServiceImpl(
     override fun hentAlleSaker(): Saker =
         runBlocking {
             behandlingKlient.get("$url/saker").body()
+        }
+
+    override fun avbryt(behandlingId: UUID) =
+        runBlocking {
+            behandlingKlient.post("$url/avbryt") {
+                contentType(ContentType.Application.Json)
+            }
         }
 }
 

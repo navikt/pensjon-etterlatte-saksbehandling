@@ -5,7 +5,6 @@ import no.nav.etterlatte.brev.behandling.Avkortingsinfo
 import no.nav.etterlatte.brev.behandling.Behandling
 import no.nav.etterlatte.brev.behandling.Trygdetidsperiode
 import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
-import no.nav.etterlatte.libs.common.behandling.erEtterbetaling
 import no.nav.pensjon.brevbaker.api.model.Kroner
 import java.time.LocalDate
 
@@ -71,7 +70,7 @@ data class InnvilgetBrevDataOMS(
                 utbetalingsinfo = behandling.utbetalingsinfo,
                 avkortingsinfo = behandling.avkortingsinfo,
                 avdoed = behandling.personerISak.avdoed,
-                etterbetalinginfo = null,
+                etterbetalinginfo = behandling.etterbetalingDTO,
                 beregningsinfo =
                     Beregningsinfo(
                         innhold =
@@ -99,7 +98,7 @@ data class InnvilgetBrevDataOMS(
 data class InnvilgetBrevDataEnkel(
     val utbetalingsinfo: Utbetalingsinfo,
     val avdoed: Avdoed,
-    val erEtterbetalingMerEnnTreMaaneder: Boolean,
+    val erEtterbetaling: Boolean,
     val vedtaksdato: LocalDate,
     val erInstitusjonsopphold: Boolean,
 ) : BrevData() {
@@ -108,7 +107,7 @@ data class InnvilgetBrevDataEnkel(
             InnvilgetBrevDataEnkel(
                 utbetalingsinfo = behandling.utbetalingsinfo,
                 avdoed = behandling.personerISak.avdoed,
-                erEtterbetalingMerEnnTreMaaneder = erEtterbetaling(behandling.utbetalingsinfo.virkningsdato),
+                erEtterbetaling = behandling.etterbetalingDTO != null,
                 vedtaksdato =
                     behandling.vedtak.vedtaksdato
                         ?: LocalDate.now(),
@@ -131,37 +130,13 @@ data class InnvilgetHovedmalBrevData(
         fun fra(
             behandling: Behandling,
             innhold: List<Slate.Element>,
-        ): InnvilgetHovedmalBrevData {
-            val etterbetalingDTO =
-                if (erEtterbetaling(behandling.utbetalingsinfo.virkningsdato)) {
-                    val beregningsperioder =
-                        behandling.utbetalingsinfo.beregningsperioder
-                            .filter { it.datoFOM.isBefore(behandling.utbetalingsinfo.virkningsdato) }
-                            .map {
-                                Etterbetalingsperiode(
-                                    datoFOM = it.datoFOM, // TODO: Desse datoane er litt shady
-                                    datoTOM = it.datoTOM,
-                                    grunnbeloep = it.grunnbeloep,
-                                    stoenadFoerReduksjon = it.utbetaltBeloep,
-                                    // TODO: Trur stoenadFoerReduksjon skal bort frå brevmalen, slett da også herifrå
-                                    utbetaltBeloep = it.utbetaltBeloep,
-                                )
-                            }
-                    EtterbetalingDTO(
-                        fraDato = behandling.utbetalingsinfo.beregningsperioder.map { it.datoFOM }.minOf { it },
-                        tilDato = LocalDate.now(),
-                        beregningsperioder = beregningsperioder,
-                    )
-                } else {
-                    null
-                }
-            return InnvilgetHovedmalBrevData(
+        ): InnvilgetHovedmalBrevData =
+            InnvilgetHovedmalBrevData(
                 utbetalingsinfo = behandling.utbetalingsinfo,
                 avkortingsinfo = behandling.avkortingsinfo,
-                etterbetalingDTO = etterbetalingDTO,
+                etterbetalingDTO = behandling.etterbetalingDTO,
                 innhold = innhold,
             )
-        }
     }
 }
 

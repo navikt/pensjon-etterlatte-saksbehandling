@@ -10,13 +10,11 @@ class KommerBarnetTilGodeService(
     private val behandlingDao: BehandlingDao,
 ) {
     fun lagreKommerBarnetTilgode(kommerBarnetTilgode: KommerBarnetTilgode) {
-        inTransaction(true) {
-            kommerBarnetTilgode.behandlingId?.let {
-                behandlingDao.hentBehandling(it)
-                    ?.tilOpprettet()
-                    ?.also { kommerBarnetTilGodeDao.lagreKommerBarnetTilGode(kommerBarnetTilgode) }
-                    ?.also { behandling -> behandlingDao.lagreStatus(behandling) }
-            }
+        kommerBarnetTilgode.behandlingId?.let {
+            behandlingDao.hentBehandling(it)
+                ?.tilOpprettet()
+                ?.also { kommerBarnetTilGodeDao.lagreKommerBarnetTilGode(kommerBarnetTilgode) }
+                ?.also { behandling -> behandlingDao.lagreStatus(behandling) }
         }
     }
 

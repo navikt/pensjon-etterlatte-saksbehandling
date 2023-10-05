@@ -22,7 +22,7 @@ interface OppgaveDao {
 
     fun hentOppgave(oppgaveId: UUID): OppgaveIntern?
 
-    fun hentOppgaverForBehandling(behandlingid: String): List<OppgaveIntern>
+    fun hentOppgaverForReferanse(referanse: String): List<OppgaveIntern>
 
     fun hentOppgaverForSak(sakId: Long): List<OppgaveIntern>
 
@@ -100,7 +100,7 @@ class OppgaveDaoImpl(private val connection: () -> Connection) : OppgaveDao {
         }
     }
 
-    override fun hentOppgaverForBehandling(behandlingid: String): List<OppgaveIntern> {
+    override fun hentOppgaverForReferanse(referanse: String): List<OppgaveIntern> {
         with(connection()) {
             val statement =
                 prepareStatement(
@@ -110,11 +110,11 @@ class OppgaveDaoImpl(private val connection: () -> Connection) : OppgaveDao {
                     WHERE referanse = ?
                     """.trimIndent(),
                 )
-            statement.setString(1, behandlingid)
+            statement.setString(1, referanse)
             return statement.executeQuery().toList {
                 asOppgave()
             }.also {
-                logger.info("Hentet antall nye oppgaver for behandling: ${it.size} behandling: $behandlingid")
+                logger.info("Hentet antall nye oppgaver for referanse: ${it.size} referanse: $referanse")
             }
         }
     }

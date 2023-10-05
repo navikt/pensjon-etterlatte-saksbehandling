@@ -84,6 +84,7 @@ internal class SakOgBehandlingServiceTest {
         coEvery {
             behandlingKlient.hentSisteIverksatteBehandling(any(), any())
         } throws BehandlingKlientException("har ikke tidligere behandling")
+        coEvery { behandlingKlient.hentEtterbetaling(any(), any()) } returns null
         coEvery { vedtaksvurderingKlient.hentVedtak(any(), any()) } returns opprettVedtak()
         coEvery { grunnlagKlient.hentGrunnlag(SAK_ID, BRUKERTokenInfo) } returns opprettGrunnlag()
         coEvery { beregningKlient.hentBeregning(any(), any()) } returns opprettBeregning()
@@ -126,6 +127,7 @@ internal class SakOgBehandlingServiceTest {
         coEvery {
             behandlingKlient.hentSisteIverksatteBehandling(any(), any())
         } returns SisteIverksatteBehandling(UUID.randomUUID())
+        coEvery { behandlingKlient.hentEtterbetaling(any(), any()) } returns null
         coEvery { vedtaksvurderingKlient.hentVedtak(any(), any()) } returns opprettVedtak()
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns opprettGrunnlag()
         coEvery { beregningKlient.hentBeregning(any(), any()) } returns opprettBeregning()
@@ -161,6 +163,7 @@ internal class SakOgBehandlingServiceTest {
         coEvery {
             behandlingKlient.hentSisteIverksatteBehandling(any(), any())
         } returns SisteIverksatteBehandling(UUID.randomUUID())
+        coEvery { behandlingKlient.hentEtterbetaling(any(), any()) } returns null
         coEvery { vedtaksvurderingKlient.hentVedtak(any(), any()) } returns opprettVedtak()
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns opprettGrunnlag()
         coEvery { beregningKlient.hentBeregning(any(), any()) } returns opprettBeregningSoeskenjustering()

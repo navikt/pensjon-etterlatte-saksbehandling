@@ -13,6 +13,8 @@ import no.nav.etterlatte.behandling.GrunnlagService
 import no.nav.etterlatte.behandling.GyldighetsproevingServiceImpl
 import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktDao
 import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktService
+import no.nav.etterlatte.behandling.etterbetaling.EtterbetalingDao
+import no.nav.etterlatte.behandling.etterbetaling.EtterbetalingService
 import no.nav.etterlatte.behandling.generellbehandling.GenerellBehandlingDao
 import no.nav.etterlatte.behandling.generellbehandling.GenerellBehandlingService
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
@@ -64,8 +66,8 @@ import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.oppgaveGosys.GosysOppgaveKlient
 import no.nav.etterlatte.oppgaveGosys.GosysOppgaveKlientImpl
 import no.nav.etterlatte.oppgaveGosys.GosysOppgaveServiceImpl
-import no.nav.etterlatte.sak.RealSakService
 import no.nav.etterlatte.sak.SakDao
+import no.nav.etterlatte.sak.SakServiceImpl
 import no.nav.etterlatte.sak.SakTilgangDao
 import no.nav.etterlatte.sak.TilgangServiceImpl
 import no.nav.etterlatte.tilgangsstyring.AzureGroup
@@ -119,7 +121,7 @@ private fun klageHttpClient(config: Config) =
         azureAppScope = config.getString("klage.azure.scope"),
     )
 
-class ApplicationContext(
+internal class ApplicationContext(
     val env: Miljoevariabler = Miljoevariabler(System.getenv()),
     val config: Config = ConfigFactory.load(),
     val rapid: KafkaProdusent<String, String> =
@@ -153,7 +155,7 @@ class ApplicationContext(
     // Dao
     val hendelseDao = HendelseDao { databaseContext().activeTx() }
     val kommerBarnetTilGodeDao = KommerBarnetTilGodeDao { databaseContext().activeTx() }
-    private val aktivitetspliktDao = AktivitetspliktDao { databaseContext().activeTx() }
+    val aktivitetspliktDao = AktivitetspliktDao { databaseContext().activeTx() }
     val revurderingDao = RevurderingDao { databaseContext().activeTx() }
     val behandlingDao = BehandlingDao(kommerBarnetTilGodeDao, revurderingDao) { databaseContext().activeTx() }
     val generellbehandlingDao = GenerellBehandlingDao { databaseContext().activeTx() }
@@ -165,6 +167,7 @@ class ApplicationContext(
     val metrikkerDao = OppgaveMetrikkerDao(dataSource)
     val klageDao = KlageDaoImpl { databaseContext().activeTx() }
     val tilbakekrevingDao = TilbakekrevingDao { databaseContext().activeTx() }
+    val etterbetalingDao = EtterbetalingDao { databaseContext().activeTx() }
 
     // Klient
     val pdlKlient = PdlKlientImpl(config, pdlHttpClient)
@@ -181,6 +184,7 @@ class ApplicationContext(
     val oppgaveService = OppgaveService(oppgaveDaoEndringer, sakDao, featureToggleService)
     val generellBehandlingService = GenerellBehandlingService(generellbehandlingDao, oppgaveService)
     val gosysOppgaveService = GosysOppgaveServiceImpl(gosysOppgaveKlient, pdlKlient, featureToggleService)
+    val etterbetalingService = EtterbetalingService(etterbetalingDao)
     val behandlingService =
         BehandlingServiceImpl(
             behandlingDao = behandlingDao,
@@ -192,6 +196,7 @@ class ApplicationContext(
             featureToggleService = featureToggleService,
             kommerBarnetTilGodeDao = kommerBarnetTilGodeDao,
             oppgaveService = oppgaveService,
+            etterbetalingService = etterbetalingService,
         )
 
     val kommerBarnetTilGodeService =
@@ -237,12 +242,11 @@ class ApplicationContext(
 
     val tilgangService = TilgangServiceImpl(SakTilgangDao(dataSource))
     val sakService =
-        RealSakService(
+        SakServiceImpl(
             sakDao,
             pdlKlient,
             norg2Klient,
             featureToggleService,
-            tilgangService,
             skjermingKlient,
         )
     val enhetService = EnhetServiceImpl(navAnsattKlient)
@@ -253,7 +257,6 @@ class ApplicationContext(
             behandlingService = behandlingService,
             pdlKlient = pdlKlient,
             grunnlagKlient = grunnlagKlient,
-            tilgangService = tilgangService,
             sakService = sakService,
         )
 
@@ -262,7 +265,6 @@ class ApplicationContext(
             behandlingDao,
             behandlingService,
             grunnlagsendringshendelseService,
-            oppgaveService,
             featureToggleService,
             generellBehandlingService,
         )

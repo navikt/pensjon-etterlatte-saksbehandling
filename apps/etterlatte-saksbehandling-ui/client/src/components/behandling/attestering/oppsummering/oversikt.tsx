@@ -14,7 +14,7 @@ import { INasjonalitetsType } from '~components/behandling/fargetags/nasjonalite
 import { SidebarPanel } from '~shared/components/Sidebar'
 import { useEffect, useState } from 'react'
 import { isFailure, isInitial, isPending, isPendingOrInitial, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
-import { hentOppgaveForBehandlingUnderBehandlingIkkeattestert } from '~shared/api/oppgaverny'
+import { hentOppgaveForBehandlingUnderBehandlingIkkeattestert } from '~shared/api/oppgaver'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 

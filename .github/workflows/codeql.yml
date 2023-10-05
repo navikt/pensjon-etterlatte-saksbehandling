@@ -1,6 +1,7 @@
 name: "CodeQL"
 
 on:
+  workflow_dispatch: # Allow manually triggered workflow run
   schedule:
     # At 05:30 on every day-of-week from Monday through Friday.
     - cron: "30 5 * * 1-5"
@@ -26,8 +27,14 @@ jobs:
           languages: java
           queries: security-and-quality
 
-      - name: Setup backend
-        uses: ./.github/actions/setup-backend
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Setup Gradle
+        uses: gradle/gradle-build-action@v2
 
       - name: Assemble
         run: ./gradlew assemble --no-build-cache --no-configuration-cache

@@ -1,5 +1,6 @@
 package no.nav.etterlatte.migrering
 
+import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.rapidsandrivers.migrering.AvdoedForelder
 import no.nav.etterlatte.rapidsandrivers.migrering.Beregning
@@ -20,6 +21,7 @@ data class Pesyssak(
     val beregning: Beregning,
     val trygdetid: Trygdetid,
     val flyktningStatus: Boolean,
+    val spraak: Spraak,
 ) {
     fun tilMigreringsrequest() =
         MigreringRequest(
@@ -33,5 +35,6 @@ data class Pesyssak(
             beregning = beregning,
             trygdetid = trygdetid,
             flyktningStatus = flyktningStatus,
+            spraak = spraak,
         )
 }

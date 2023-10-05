@@ -1,5 +1,6 @@
 package no.nav.etterlatte.vilkaarsvurdering.vilkaar
 
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
 import no.nav.etterlatte.libs.common.grunnlag.hentSoeknadMottattDato
@@ -8,21 +9,32 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.Lovreferanse
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaar
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarOpplysningType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
+import no.nav.etterlatte.vilkaarsvurdering.VilkaarFeatureToggle
 import no.nav.etterlatte.vilkaarsvurdering.vilkaar.BarnepensjonVilkaar.toVilkaarsgrunnlag
 
 object OmstillingstoenadVilkaar {
-    fun inngangsvilkaar(grunnlag: Grunnlag) =
-        listOf(
-            etterlatteLever(),
-            doedsfall(),
-            overlappendeYtelser(),
-            sivilstand(),
-            yrkesskade(),
-            avdoedesMedlemskap(),
-            gjenlevendesMedlemskap(),
-            aktivitetEtter6Maaneder(grunnlag),
-            oevrigeVilkaar(),
-        )
+    fun inngangsvilkaar(
+        grunnlag: Grunnlag,
+        featureToggleService: FeatureToggleService,
+    ) = listOf(
+        etterlatteLever(),
+        doedsfall(),
+        overlappendeYtelser(),
+        sivilstand(),
+        yrkesskade(),
+        avdoedesMedlemskap(),
+        gjenlevendesMedlemskap(),
+        aktivitetEtter6Maaneder(grunnlag),
+        oevrigeVilkaar(),
+    ).let { vilkaarListe ->
+        val skalOppretteEoesVilkaar =
+            featureToggleService.isEnabled(
+                VilkaarFeatureToggle.OpprettAvdoedesForutgaaendeMedlemskapEoesVilkaar,
+                defaultValue = false,
+            )
+
+        if (skalOppretteEoesVilkaar) vilkaarListe.plus(avdoedesMedlemskapEoes()) else vilkaarListe
+    }
 
     private fun etterlatteLever() =
         Vilkaar(
@@ -130,13 +142,19 @@ object OmstillingstoenadVilkaar {
             hovedvilkaar =
                 Delvilkaar(
                     type = VilkaarType.OMS_AVDOEDES_MEDLEMSKAP,
-                    tittel = "Avdødes forutgående medlemskap",
+                    tittel = "Avdødes forutgående medlemskap - Folketrygden",
                     beskrivelse =
                         """
                         For at dette vilkåret skal være oppfylt, og gjenlevende ektefelle har rett til ytelser etter dette kapitlet, må den avdøde:
 
                         a) ha vært medlem i trygden siste fem årene før dødsfallet, eller
                         b) ha mottatt pensjon eller uføretrygd siste fem årene før dødsfallet
+                        
+                        Ved vurderingen av om a) er oppfylt, ses det bort fra perioder med tjeneste i internasjonale organisasjoner eller organer som staten Norge er medlem av, yter økonomisk bidrag til eller har ansvar for å bidra til bemanningen av.
+
+                        Der er unntak som gjør at vilkårene over ikke gjelder. Se hvilke når du krysser "Nei" til spørsmålet om et av vilkårene er oppfylt.
+
+                        Vilkåret er ikke oppfylt dersom den avdøde var arbeidsufør, men ikke hadde rett til uføretrygd fordi vilkåret om forutgående medlemskap i § 12-2 første ledd ikke var oppfylt.
                         """.trimIndent(),
                     spoersmaal = "Er et av vilkårene oppfylt?",
                     lovreferanse =
@@ -154,10 +172,39 @@ object OmstillingstoenadVilkaar {
                 ),
         )
 
+    private fun avdoedesMedlemskapEoes() =
+        Vilkaar(
+            hovedvilkaar =
+                Delvilkaar(
+                    type = VilkaarType.OMS_AVDOEDES_MEDLEMSKAP_EOES,
+                    tittel = "Avdødes forutgående medlemskap - EØS/avtaleland",
+                    beskrivelse =
+                        """
+                        Forutgående medlemskap kan være oppfylt ved sammenlegging av norsk trygdetid og trygdetid avdøde har opptjent fra EØS-land. Dette forutsetter at samlet trygdetid i Norge er minst ett år uten avrunding. Det er bare de avtalelandene der det er opparbeidet minst ett års trygdetid som skal tas med i sammenleggingen.
+                        
+                        Medlemskap i såkalte tredjeland som det er inngått bilaterale avtaler med kan også legges sammen med norsk trygdetid, forutsatt at avtalen omfatter pensjonsfordeler.
+                         
+                        Andre hjemler:
+                        EØS - rådsforordning 1408/1971 artikkel 45 (gjelder perioder før 2004)
+                        EØF - traktaten 1408/71 artikkel 39 (gjelder bilaterale avtaler)
+                        Lenke: https://lovdata.no/pro/#document/DLX3/eu/31971r1408
+                        """.trimIndent(),
+                    spoersmaal = "Er forutgående medlemskap oppfylt ved sammenlegging?",
+                    lovreferanse =
+                        Lovreferanse(
+                            paragraf = "EØS - rådsforordning 883/2004 artikkel 6 og 57",
+                            lenke = "https://lovdata.no/pro/#document/NLX3/eu/32004r0883/ARTIKKEL_6",
+                        ),
+                ),
+        )
+
     private fun avdoedesMedlemskapOpptjening() =
         Delvilkaar(
             type = VilkaarType.OMS_AVDOEDES_MEDLEMSKAP_UNNTAK_OPPTJENING,
-            tittel = "Ja, avdøde kunne tilstås en ytelse på grunnlag av tidligere opptjening",
+            tittel =
+                """
+                Ja, avdøde kunne tilstås en ytelse på grunnlag av tidligere opptjening minst svarende til grunnbeløpet
+                """.trimIndent(),
             lovreferanse =
                 Lovreferanse(
                     paragraf = "§ 17-2", // TODO
@@ -167,7 +214,10 @@ object OmstillingstoenadVilkaar {
     private fun avdoedesMedlemskapPensjon() =
         Delvilkaar(
             type = VilkaarType.OMS_AVDOEDES_MEDLEMSKAP_UNNTAK_PENSJON,
-            tittel = "Ja, avdøde hadde avtalefestet pensjon, se femte ledd",
+            tittel =
+                """
+                Ja, avdøde hadde avtalefestet pensjon, eller pensjon fra en lovfestet pensjonsordning som er tilpasset folketrygden ved at det ikke gis ordinær pensjon til gjenlevende ektefelle
+                """.trimIndent(),
             lovreferanse =
                 Lovreferanse(
                     paragraf = "§ 17-2", // TODO
@@ -272,11 +322,11 @@ object OmstillingstoenadVilkaar {
                     tittel = "Øvrige vilkår for ytelser",
                     beskrivelse =
                         """
-                        For at dette vilkåret skal være oppfylt, og gjenlevende ektefelle ha rett til ytelser etter dette kapitlet, må ett av disse vilkårene være oppfylt på tidspunktet for dødsfallet:
+                        For at dette vilkåret skal være oppfylt, og gjenlevende ektefelle (§1-5 samboer likestilles) ha rett til ytelser etter dette kapitlet, må ett av disse vilkårene være oppfylt på tidspunktet for dødsfallet:
                         
                         a) var gift med den avdøde og ekteskapet hadde vart i minst fem år,
-                        b) har eller har hatt barn med den avdøde eller
-                        c) har omsorg for barn under 18 år med minst halvparten av full tid.
+                        b) har eller har hatt barn med den avdøde, eller
+                        c) har omsorg for barn under 18 år med minst halvparten av full tid (gjelder også barn der avdøde eller gjenlevende ikke er forelder).
                         
                         Til en fraskilt person som helt eller i det vesentlige har vært forsørget av bidrag fra den avdøde, kan det ytes stønad etter dette kapitlet dersom ekteskapet varte i minst 25 år, eller minst 15 år hvis ektefellene hadde barn sammen.
                         """.trimIndent(),

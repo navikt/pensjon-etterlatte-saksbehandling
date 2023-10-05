@@ -16,7 +16,6 @@ import {
 import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { mapListeTilDto } from '~components/behandling/beregningsgrunnlag/PeriodisertBeregningsgrunnlag'
-import { hentFunksjonsbrytere } from '~shared/api/feature'
 import React, { useEffect, useState } from 'react'
 import InstitusjonsoppholdBP from '~components/behandling/beregningsgrunnlag/InstitusjonsoppholdBP'
 import Soeskenjustering, {
@@ -26,6 +25,9 @@ import Spinner from '~shared/Spinner'
 import { IPdlPerson } from '~shared/types/Person'
 import { InstitusjonsoppholdGrunnlagData } from '~shared/types/Beregning'
 import { Border } from '~components/behandling/soeknadsoversikt/styled'
+import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
+
+const featureToggleNameInstitusjonsopphold = 'pensjon-etterlatte.bp-bruk-institusjonsopphold' as const
 
 const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer }) => {
   const { behandling } = props
@@ -35,23 +37,14 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
   const [lagreBeregningsgrunnlag, postBeregningsgrunnlag] = useApiCall(lagreBeregningsGrunnlag)
   const [beregningsgrunnlag, fetchBeregningsgrunnlag] = useApiCall(hentBeregningsGrunnlag)
   const [endreBeregning, postOpprettEllerEndreBeregning] = useApiCall(opprettEllerEndreBeregning)
-  const [funksjonsbrytere, postHentFunksjonsbrytere] = useApiCall(hentFunksjonsbrytere)
-  const [visInstitusjonsopphold, setVisInstitusjonsopphold] = useState<boolean>(false)
+  const visInstitusjonsopphold = useFeatureEnabledMedDefault(featureToggleNameInstitusjonsopphold, false)
   const [soeskenGrunnlagsData, setSoeskenGrunnlagsData] = useState<Soeskengrunnlag | null>(null)
   const [institusjonsoppholdsGrunnlagData, setInstitusjonsoppholdsGrunnlagData] =
     useState<InstitusjonsoppholdGrunnlagData | null>(null)
 
   const [manglerSoeskenJustering, setSoeskenJusteringMangler] = useState<boolean>(false)
-  const featureToggleNameInstitusjonsopphold = 'pensjon-etterlatte.bp-bruk-institusjonsopphold'
 
   useEffect(() => {
-    postHentFunksjonsbrytere([featureToggleNameInstitusjonsopphold], (brytere) => {
-      const institusjonsoppholdBryter = brytere.find((bryter) => bryter.toggle === featureToggleNameInstitusjonsopphold)
-      if (institusjonsoppholdBryter) {
-        setVisInstitusjonsopphold(institusjonsoppholdBryter.enabled)
-      }
-    })
-
     fetchBeregningsgrunnlag(behandling.id, (result) => {
       if (result) {
         dispatch(
@@ -110,7 +103,7 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
             setSoeskenJusteringManglerIkke={() => setSoeskenJusteringMangler(false)}
           />
         )}
-        {isSuccess(funksjonsbrytere) && visInstitusjonsopphold && isSuccess(beregningsgrunnlag) && (
+        {visInstitusjonsopphold && isSuccess(beregningsgrunnlag) && (
           <InstitusjonsoppholdBP
             behandling={behandling}
             onSubmit={(institusjonsoppholdGrunnlag) => setInstitusjonsoppholdsGrunnlagData(institusjonsoppholdGrunnlag)}

@@ -12,7 +12,7 @@ import Spinner from '~shared/Spinner'
 import { BehandlingHandlingKnapper } from '~components/behandling/handlinger/BehandlingHandlingKnapper'
 import { Alert, Button, ErrorMessage, Heading } from '@navikt/ds-react'
 import { isFailure, isPending, useApiCall } from '~shared/hooks/useApiCall'
-import { upsertVedtak } from '~shared/api/behandling'
+import { fattVedtak, upsertVedtak } from '~shared/api/behandling'
 import { IBehandlingStatus, IBehandlingsType } from '~shared/types/IDetaljertBehandling'
 import styled from 'styled-components'
 import { NesteOgTilbake } from '../handlinger/NesteOgTilbake'
@@ -23,6 +23,7 @@ import { OmstillingsstoenadSammendrag } from '~components/behandling/beregne/Oms
 import { Avkorting } from '~components/behandling/avkorting/Avkorting'
 import { SakType } from '~shared/types/sak'
 import { erOpphoer } from '~shared/types/Revurderingsaarsak'
+import Etterbetaling from '~components/behandling/beregningsgrunnlag/Etterbetaling'
 
 export const Beregne = (props: { behandling: IBehandlingReducer }) => {
   const { behandling } = props
@@ -99,12 +100,20 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
             Det sendes ikke vedtaksbrev for denne behandlingen.
           </InfoAlert>
         )}
+        <EtterbetalingWrapper>
+          <Etterbetaling
+            behandlingId={behandling.id}
+            lagraEtterbetaling={behandling.etterbetaling}
+            redigerbar={behandles}
+            virkningstidspunkt={virkningstidspunkt}
+          />
+        </EtterbetalingWrapper>
       </ContentHeader>
       {behandles ? (
         <BehandlingHandlingKnapper>
           {isFailure(vedtak) && <ErrorMessage>Vedtaksoppdatering feilet</ErrorMessage>}
           {visAttesteringsmodal ? (
-            <SendTilAttesteringModal />
+            <SendTilAttesteringModal behandlingId={behandling.id} fattVedtakApi={fattVedtak} />
           ) : (
             <Button loading={isPending(vedtak)} variant="primary" onClick={opprettEllerOppdaterVedtak}>
               {behandlingSkalSendeBrev(behandling) ? 'Gå videre til brev' : 'Fatt vedtak'}
@@ -120,6 +129,14 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
 
 const InfoWrapper = styled.div`
   margin-top: 1em;
+  max-width: 500px;
+
+  .text {
+    margin: 1em 0 5em 0;
+  }
+`
+const EtterbetalingWrapper = styled.div`
+  margin-top: 3rem;
   max-width: 500px;
 
   .text {

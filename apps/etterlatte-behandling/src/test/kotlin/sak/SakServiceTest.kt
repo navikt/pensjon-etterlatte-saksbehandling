@@ -49,7 +49,6 @@ internal class SakServiceTest {
     private val norg2Klient = mockk<Norg2Klient>()
     private val featureToggleService = mockk<FeatureToggleService>()
     private val enhetService = mockk<EnhetService>()
-    private val tilgangService = mockk<TilgangService>()
     private val skjermingKlient = mockk<SkjermingKlient>()
 
     @BeforeEach
@@ -166,7 +165,7 @@ internal class SakServiceTest {
         every { featureToggleService.isEnabled(SakServiceFeatureToggle.FiltrerMedEnhetId, false) } returns true
 
         val service: SakService =
-            RealSakService(sakDao, pdlKlient, norg2Klient, featureToggleService, tilgangService, skjermingKlient)
+            SakServiceImpl(sakDao, pdlKlient, norg2Klient, featureToggleService, skjermingKlient)
 
         val saker = service.finnSaker(TRIVIELL_MIDTPUNKT.value)
 
@@ -198,7 +197,7 @@ internal class SakServiceTest {
         every { featureToggleService.isEnabled(SakServiceFeatureToggle.FiltrerMedEnhetId, false) } returns true
 
         val service: SakService =
-            RealSakService(sakDao, pdlKlient, norg2Klient, featureToggleService, tilgangService, skjermingKlient)
+            SakServiceImpl(sakDao, pdlKlient, norg2Klient, featureToggleService, skjermingKlient)
 
         val saker = service.finnSaker(TRIVIELL_MIDTPUNKT.value)
 
@@ -230,7 +229,7 @@ internal class SakServiceTest {
         every { featureToggleService.isEnabled(SakServiceFeatureToggle.FiltrerMedEnhetId, false) } returns true
 
         val service: SakService =
-            RealSakService(sakDao, pdlKlient, norg2Klient, featureToggleService, tilgangService, skjermingKlient)
+            SakServiceImpl(sakDao, pdlKlient, norg2Klient, featureToggleService, skjermingKlient)
 
         val saker = service.finnSaker(TRIVIELL_MIDTPUNKT.value)
 
@@ -250,7 +249,7 @@ internal class SakServiceTest {
         } throws responseException
 
         val service: SakService =
-            RealSakService(sakDao, pdlKlient, norg2Klient, featureToggleService, tilgangService, skjermingKlient)
+            SakServiceImpl(sakDao, pdlKlient, norg2Klient, featureToggleService, skjermingKlient)
 
         val thrown =
             assertThrows<ResponseException> {
@@ -278,7 +277,7 @@ internal class SakServiceTest {
         every { norg2Klient.hentEnheterForOmraade(SakType.BARNEPENSJON.tema, "0301") } returns emptyList()
 
         val service: SakService =
-            RealSakService(sakDao, pdlKlient, norg2Klient, featureToggleService, tilgangService, skjermingKlient)
+            SakServiceImpl(sakDao, pdlKlient, norg2Klient, featureToggleService, skjermingKlient)
 
         val thrown =
             assertThrows<IngenEnhetFunnetException> {
@@ -316,7 +315,7 @@ internal class SakServiceTest {
             )
 
         val service: SakService =
-            RealSakService(sakDao, pdlKlient, norg2Klient, featureToggleService, tilgangService, skjermingKlient)
+            SakServiceImpl(sakDao, pdlKlient, norg2Klient, featureToggleService, skjermingKlient)
 
         val sak = service.finnEllerOpprettSak(TRIVIELL_MIDTPUNKT.value, SakType.BARNEPENSJON)
 
@@ -359,10 +358,10 @@ internal class SakServiceTest {
             listOf(
                 ArbeidsFordelingEnhet(Enheter.PORSGRUNN.navn, Enheter.PORSGRUNN.enhetNr),
             )
-        every { tilgangService.oppdaterAdressebeskyttelse(any(), any()) } returns 1
+        every { sakDao.oppdaterAdresseBeskyttelse(any(), any()) } returns 1
 
         val service: SakService =
-            RealSakService(sakDao, pdlKlient, norg2Klient, featureToggleService, tilgangService, skjermingKlient)
+            SakServiceImpl(sakDao, pdlKlient, norg2Klient, featureToggleService, skjermingKlient)
 
         val sak =
             service.finnEllerOpprettSak(
@@ -380,7 +379,7 @@ internal class SakServiceTest {
             )
 
         verify(exactly = 1) {
-            tilgangService.oppdaterAdressebeskyttelse(
+            service.oppdaterAdressebeskyttelse(
                 sak.id,
                 AdressebeskyttelseGradering.STRENGT_FORTROLIG,
             )
@@ -416,7 +415,7 @@ internal class SakServiceTest {
         every { featureToggleService.isEnabled(SakServiceFeatureToggle.FiltrerMedEnhetId, false) } returns true
 
         val service: SakService =
-            RealSakService(sakDao, pdlKlient, norg2Klient, featureToggleService, tilgangService, skjermingKlient)
+            SakServiceImpl(sakDao, pdlKlient, norg2Klient, featureToggleService, skjermingKlient)
 
         val saker = service.finnSaker(TRIVIELL_MIDTPUNKT.value)
 
@@ -451,7 +450,7 @@ internal class SakServiceTest {
             )
 
         val service: SakService =
-            RealSakService(sakDao, pdlKlient, norg2Klient, featureToggleService, tilgangService, skjermingKlient)
+            SakServiceImpl(sakDao, pdlKlient, norg2Klient, featureToggleService, skjermingKlient)
         val sak = service.finnEllerOpprettSak(TRIVIELL_MIDTPUNKT.value, SakType.BARNEPENSJON)
 
         sak shouldBe

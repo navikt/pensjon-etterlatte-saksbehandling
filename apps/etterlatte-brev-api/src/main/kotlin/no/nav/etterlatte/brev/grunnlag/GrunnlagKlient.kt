@@ -30,7 +30,7 @@ class GrunnlagKlient(config: Config, httpClient: HttpClient) {
             logger.info("Henter grunnlag for sak med sakId=$sakid")
 
             return downstreamResourceClient.get(
-                Resource(clientId, "$baseUrl/api/grunnlag/$sakid"),
+                Resource(clientId, "$baseUrl/api/grunnlag/sak/$sakid"),
                 brukerTokenInfo,
             ).mapBoth(
                 success = { resource -> resource.response.let { deserialize(it.toString()) } },

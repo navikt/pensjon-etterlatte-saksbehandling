@@ -175,7 +175,7 @@ class HendelseDao(private val connection: () -> Connection) {
 fun PreparedStatement.setLong(
     index: Int,
     value: Long?,
-) = if (value == null) setNull(index, Types.BIGINT) else setLong(3, value)
+) = if (value == null) setNull(index, Types.BIGINT) else setLong(index, value)
 
 fun ResultSet.getUUID(name: String) = getObject(name) as UUID
 

@@ -1,6 +1,19 @@
 package no.nav.etterlatte
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import io.ktor.client.HttpClient
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.http.ContentType
+import io.ktor.serialization.jackson.JacksonConverter
+import io.ktor.server.application.ApplicationCallPipeline
+import io.ktor.server.application.log
+import io.ktor.server.config.HoconApplicationConfig
+import io.ktor.server.routing.Route
+import io.ktor.server.testing.testApplication
+import io.mockk.mockk
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.asContextElement
+import kotlinx.coroutines.withContext
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringStatus
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringsType
@@ -10,6 +23,7 @@ import no.nav.etterlatte.behandling.domain.OpprettBehandling
 import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.behandling.domain.SamsvarMellomKildeOgGrunnlag
 import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerAarsak
+import no.nav.etterlatte.behandling.objectMapper
 import no.nav.etterlatte.behandling.revurdering.RevurderingMedBegrunnelse
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.grunnlagsendring.samsvarDoedsdatoer
@@ -47,11 +61,72 @@ import no.nav.etterlatte.libs.common.person.VergemaalEllerFremtidsfullmakt
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
+import no.nav.etterlatte.libs.ktor.restModule
+import java.sql.Connection
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
+
+// Fin å bruke der servicer er mocket, ellers kan man bruke application { module(applicationContext) }
+fun withTestApplicationBuilder(
+    block: suspend (client: HttpClient) -> Unit,
+    hoconApplicationConfig: HoconApplicationConfig,
+    routes: Route.() -> Unit,
+) {
+    testApplication {
+        environment {
+            config = hoconApplicationConfig
+        }
+        application {
+            restModule(this.log) {
+                routes()
+            }
+        }
+        val client =
+            createClient {
+                install(ContentNegotiation) {
+                    register(ContentType.Application.Json, JacksonConverter(objectMapper = objectMapper))
+                }
+            }
+
+        block(client)
+    }
+}
+
+private val user = mockk<SaksbehandlerMedEnheterOgRoller>()
+
+fun Route.attachMockContext() {
+    intercept(ApplicationCallPipeline.Call) {
+        val context1 =
+            Context(
+                user,
+                object : DatabaseKontekst {
+                    override fun activeTx(): Connection {
+                        throw IllegalArgumentException()
+                    }
+
+                    override fun <T> inTransaction(
+                        gjenbruk: Boolean,
+                        block: () -> T,
+                    ): T {
+                        return block()
+                    }
+                },
+            )
+
+        withContext(
+            Dispatchers.Default +
+                Kontekst.asContextElement(
+                    value = context1,
+                ),
+        ) {
+            proceed()
+        }
+        Kontekst.remove()
+    }
+}
 
 fun opprettBehandling(
     type: BehandlingType,

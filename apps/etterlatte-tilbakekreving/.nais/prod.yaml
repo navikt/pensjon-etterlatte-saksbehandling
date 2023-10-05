@@ -1,0 +1,82 @@
+apiVersion: "nais.io/v1alpha1"
+kind: "Application"
+metadata:
+  name: etterlatte-tilbakekreving
+  namespace: etterlatte
+  labels:
+    team: etterlatte
+spec:
+  image: {{image}}
+  port: 8080
+  liveness:
+    initialDelay: 5
+    path: /health/isalive
+  readiness:
+    initialDelay: 5
+    path: /health/isready
+  prometheus:
+    enabled: true
+    path: /metrics
+  secureLogs:
+    enabled: true
+# TODO Legg til hvis vi skal ha db
+#  gcp:
+#    sqlInstances:
+#      - type: POSTGRES_14
+#        tier: db-custom-1-3840
+#        collation: nb_NO.UTF8
+#        cascadingDelete: false
+#        name: etterlatte-tilbakekreving
+#        diskAutoresize: true
+#        diskSize: 30
+#        diskType: SSD
+#        highAvailability: true
+#        pointInTimeRecovery: true
+#        autoBackupHour: 1
+#        maintenance:
+#          day: 7
+#          hour: 2
+#        databases:
+#          - name: tilbakekreving
+#            envVarPrefix: DB
+  azure:
+    application:
+      enabled: true
+  envFrom:
+    - secret: etterlatte-secrets
+    - secret: my-application-unleash-api-token
+  replicas:
+    cpuThresholdPercentage: 90
+    max: 1
+    min: 1
+  env:
+    - name: KRAVGRUNNLAG_MQ_NAME
+      value: QA.P_ETTERLATTE.KRAVGRUNNLAG
+    - name: MQ_HOSTNAME
+      value: mpls04.adeo.no
+    - name: MQ_PORT
+      value: "1414"
+    - name: MQ_CHANNEL
+      value: P_ETTERLATTE
+    - name: MQ_MANAGER
+      value: MPLS04
+    - name: ETTERLATTE_BEHANDLING_URL
+      value: http://etterlatte-behandling
+    - name: ETTERLATTE_BEHANDLING_SCOPE
+      value: api://prod-gcp.etterlatte.etterlatte-behandling/.default
+    - name: ETTERLATTE_PROXY_URL
+      value: https://etterlatte-proxy.prod-fss-pub.nais.io/aad
+    - name: ETTERLATTE_PROXY_SCOPE
+      value: api://prod-fss.etterlatte.etterlatte-proxy/.default
+  accessPolicy:
+    outbound:
+      rules:
+        - application: etterlatte-behandling
+      external:
+        - host: mpls04.adeo.no
+          ports:
+            - name: mq
+              port: 1414
+              protocol: TCP
+        - host: etterlatte-unleash-api.nav.cloud.nais.io
+        - host: etterlatte-proxy.prod-fss-pub.nais.io

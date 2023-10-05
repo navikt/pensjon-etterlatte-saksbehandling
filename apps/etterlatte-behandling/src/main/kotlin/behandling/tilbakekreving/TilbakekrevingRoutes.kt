@@ -2,23 +2,50 @@ package no.nav.etterlatte.behandling.tilbakekreving
 
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
+import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
+import io.ktor.server.routing.put
 import io.ktor.server.routing.route
 import no.nav.etterlatte.libs.common.TILBAKEKREVINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.medBody
 import no.nav.etterlatte.libs.common.tilbakekreving.Kravgrunnlag
 import no.nav.etterlatte.libs.common.tilbakekrevingId
+import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 
 internal fun Route.tilbakekrevingRoutes(service: TilbakekrevingService) {
     route("/api/tilbakekreving/{$TILBAKEKREVINGID_CALL_PARAMETER}") {
         get {
-            val tilbakekreving = service.hentTilbakekreving(tilbakekrevingId)
-            when (tilbakekreving) {
-                null -> call.respond(HttpStatusCode.NotFound)
-                else -> call.respond(tilbakekreving)
+            try {
+                call.respond(service.hentTilbakekreving(tilbakekrevingId))
+            } catch (e: TilbakekrevingFinnesIkkeException) {
+                call.respond(HttpStatusCode.NotFound)
+            }
+        }
+        put("/vurdering") {
+            val vurdering = call.receive<TilbakekrevingVurdering>()
+            try {
+                call.respond(service.lagreVurdering(tilbakekrevingId, vurdering))
+            } catch (e: TilbakekrevingFinnesIkkeException) {
+                call.respond(HttpStatusCode.NotFound)
+            }
+        }
+        put("/perioder") {
+            val request = call.receive<TilbakekrevingLagreRequest>()
+            try {
+                call.respond(service.lagrePerioder(tilbakekrevingId, request.perioder))
+            } catch (e: TilbakekrevingFinnesIkkeException) {
+                call.respond(HttpStatusCode.NotFound)
+            }
+        }
+
+        route("vedtak") {
+            post("fatt") {
+                // TODO tilgangsjekk
+                service.fattVedtak(tilbakekrevingId, brukerTokenInfo)
+                call.respond(HttpStatusCode.OK)
             }
         }
     }
@@ -39,3 +66,7 @@ internal fun Route.tilbakekrevingRoutes(service: TilbakekrevingService) {
         }
     }
 }
+
+data class TilbakekrevingLagreRequest(
+    val perioder: List<TilbakekrevingPeriode>,
+)

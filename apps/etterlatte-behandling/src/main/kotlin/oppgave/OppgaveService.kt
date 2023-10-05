@@ -98,20 +98,18 @@ class OppgaveService(
         oppgaveId: UUID,
         saksbehandler: String,
     ) {
-        inTransaction(gjenbruk = true) {
-            val hentetOppgave =
-                oppgaveDao.hentOppgave(oppgaveId)
-                    ?: throw NotFoundException("Oppgaven finnes ikke, id: $oppgaveId")
+        val hentetOppgave =
+            oppgaveDao.hentOppgave(oppgaveId)
+                ?: throw NotFoundException("Oppgaven finnes ikke, id: $oppgaveId")
 
-            sikreAtOppgaveIkkeErAvsluttet(hentetOppgave)
-            hentetOppgave.erAttestering() && sjekkOmkanTildeleAttestantOppgave()
-            if (hentetOppgave.saksbehandler.isNullOrEmpty()) {
-                oppgaveDao.settNySaksbehandler(oppgaveId, saksbehandler)
-            } else {
-                throw BadRequestException(
-                    "Oppgaven har allerede en saksbehandler, id: $oppgaveId",
-                )
-            }
+        sikreAtOppgaveIkkeErAvsluttet(hentetOppgave)
+        hentetOppgave.erAttestering() && sjekkOmkanTildeleAttestantOppgave()
+        if (hentetOppgave.saksbehandler.isNullOrEmpty()) {
+            oppgaveDao.settNySaksbehandler(oppgaveId, saksbehandler)
+        } else {
+            throw BadRequestException(
+                "Oppgaven har allerede en saksbehandler, id: $oppgaveId",
+            )
         }
     }
 
@@ -182,7 +180,7 @@ class OppgaveService(
         merknad: String?,
         saksbehandler: BrukerTokenInfo,
     ): OppgaveIntern {
-        val behandlingsoppgaver = oppgaveDao.hentOppgaverForBehandling(fattetoppgave.referanse)
+        val behandlingsoppgaver = oppgaveDao.hentOppgaverForReferanse(fattetoppgave.referanse)
         if (behandlingsoppgaver.isEmpty()) {
             throw BadRequestException("Må ha en oppgave for å kunne lage attesteringsoppgave")
         }
@@ -230,16 +228,18 @@ class OppgaveService(
         sakId: Long,
         enhetsID: String,
     ) {
-        inTransaction {
-            val oppgaverForbehandling = oppgaveDao.hentOppgaverForSak(sakId)
-            oppgaverForbehandling.forEach {
-                oppgaveDao.endreEnhetPaaOppgave(it.id, enhetsID)
-            }
+        val oppgaverForSak = oppgaveDao.hentOppgaverForSak(sakId)
+        oppgaverForSak.forEach {
+            oppgaveDao.endreEnhetPaaOppgave(it.id, enhetsID)
         }
     }
 
     fun hentOppgaverForSak(sakId: Long): List<OppgaveIntern> {
-        return inTransaction { oppgaveDao.hentOppgaverForSak(sakId) }
+        return oppgaveDao.hentOppgaverForSak(sakId)
+    }
+
+    fun hentOppgaverForReferanse(referanse: String): List<OppgaveIntern> {
+        return oppgaveDao.hentOppgaverForReferanse(referanse)
     }
 
     fun avbrytOppgaveUnderBehandling(
@@ -248,7 +248,7 @@ class OppgaveService(
     ): OppgaveIntern {
         try {
             val oppgaveUnderbehandling =
-                oppgaveDao.hentOppgaverForBehandling(behandlingEllerHendelseId)
+                oppgaveDao.hentOppgaverForReferanse(behandlingEllerHendelseId)
                     .single { it.status == Status.UNDER_BEHANDLING }
             sikreAtSaksbehandlerSomLukkerOppgaveEierOppgaven(oppgaveUnderbehandling, saksbehandler)
             oppgaveDao.endreStatusPaaOppgave(oppgaveUnderbehandling.id, Status.AVBRUTT)
@@ -271,10 +271,10 @@ class OppgaveService(
     }
 
     fun ferdigStillOppgaveUnderBehandling(
-        behandlingEllerHendelseId: String,
+        referanse: String,
         saksbehandler: BrukerTokenInfo,
     ): OppgaveIntern {
-        val behandlingsoppgaver = oppgaveDao.hentOppgaverForBehandling(behandlingEllerHendelseId)
+        val behandlingsoppgaver = oppgaveDao.hentOppgaverForReferanse(referanse)
         if (behandlingsoppgaver.isEmpty()) {
             throw BadRequestException("Må ha en oppgave for å ferdigstille oppgave")
         }
@@ -288,13 +288,13 @@ class OppgaveService(
         } catch (e: NoSuchElementException) {
             throw BadRequestException(
                 "Det må finnes en oppgave under behandling, gjelder behandling / hendelse med ID:" +
-                    " $behandlingEllerHendelseId}",
+                    " $referanse}",
                 e,
             )
         } catch (e: IllegalArgumentException) {
             throw BadRequestException(
                 "Skal kun ha en oppgave under behandling, gjelder behandling / hendelse med ID:" +
-                    " $behandlingEllerHendelseId",
+                    " $referanse",
                 e,
             )
         }
@@ -304,7 +304,7 @@ class OppgaveService(
         referanse: String,
         sakId: Long,
     ): OppgaveIntern {
-        val oppgaverForBehandling = oppgaveDao.hentOppgaverForBehandling(referanse)
+        val oppgaverForBehandling = oppgaveDao.hentOppgaverForReferanse(referanse)
         val oppgaverSomKanLukkes = oppgaverForBehandling.filter { !it.erAvsluttet() }
         oppgaverSomKanLukkes.forEach {
             oppgaveDao.endreStatusPaaOppgave(it.id, Status.AVBRUTT)
@@ -341,27 +341,27 @@ class OppgaveService(
     fun hentSaksbehandlerForBehandling(behandlingsId: UUID): String? {
         val oppgaverForBehandlingUtenAttesterting =
             inTransaction {
-                oppgaveDao.hentOppgaverForBehandling(behandlingsId.toString())
+                oppgaveDao.hentOppgaverForReferanse(behandlingsId.toString())
             }.filter {
                 it.type !== OppgaveType.ATTESTERING
             }
         return oppgaverForBehandlingUtenAttesterting.sortedByDescending { it.opprettet }[0].saksbehandler
     }
 
-    fun hentSaksbehandlerFraFoerstegangsbehandling(behandlingsId: UUID): String? {
+    fun hentOppgaveForSaksbehandlerFraFoerstegangsbehandling(behandlingId: UUID): OppgaveIntern? {
         val oppgaverForBehandlingFoerstegangs =
             inTransaction(gjenbruk = true) {
-                oppgaveDao.hentOppgaverForBehandling(behandlingsId.toString())
+                oppgaveDao.hentOppgaverForReferanse(behandlingId.toString())
             }.filter {
                 it.type == OppgaveType.FOERSTEGANGSBEHANDLING
             }
-        return oppgaverForBehandlingFoerstegangs.sortedByDescending { it.opprettet }[0].saksbehandler
+        return oppgaverForBehandlingFoerstegangs.sortedByDescending { it.opprettet }.firstOrNull()
     }
 
     fun hentSaksbehandlerForOppgaveUnderArbeid(behandlingsId: UUID): String? {
         val oppgaverforBehandling =
             inTransaction(gjenbruk = true) {
-                oppgaveDao.hentOppgaverForBehandling(behandlingsId.toString())
+                oppgaveDao.hentOppgaverForReferanse(behandlingsId.toString())
             }
         return try {
             val oppgaveUnderbehandling = oppgaverforBehandling.single { it.status == Status.UNDER_BEHANDLING }
@@ -393,17 +393,24 @@ class OppgaveService(
      * Skal kun brukes for automatisk avbrudd når vi får erstattende førstegangsbehandling i saken
      */
     fun avbrytAapneOppgaverForBehandling(behandlingId: String) {
-        oppgaveDao.hentOppgaverForBehandling(behandlingId)
+        oppgaveDao.hentOppgaverForReferanse(behandlingId)
             .filter { !it.erAvsluttet() }
             .forEach {
                 oppgaveDao.endreStatusPaaOppgave(it.id, Status.AVBRUTT)
             }
     }
 
-    fun hentSakOgOppgaverForSak(sakId: Long) =
-        inTransaction { sakDao.hentSak(sakId)!! }
-            .let { OppgaveListe(it, hentOppgaverForSak(it.id)) }
+    fun hentSakOgOppgaverForSak(sakId: Long): OppgaveListe {
+        val sak = sakDao.hentSak(sakId)
+        if (sak != null) {
+            return OppgaveListe(sak, hentOppgaverForSak(sak.id))
+        } else {
+            throw FantIkkeSakException("Fant ikke sakid $sakId")
+        }
+    }
 }
+
+class FantIkkeSakException(msg: String) : Exception(msg)
 
 fun List<OppgaveIntern>.filterOppgaverForEnheter(
     featureToggleService: FeatureToggleService,

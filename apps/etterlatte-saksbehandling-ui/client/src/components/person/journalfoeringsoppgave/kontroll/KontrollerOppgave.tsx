@@ -22,7 +22,7 @@ import { settBehandlingBehov, settBruker, settOppgave, settSamsvar } from '~stor
 import { isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
 import { GYLDIG_FNR } from '~utils/fnr'
 import Spinner from '~shared/Spinner'
-import { hentGosysOppgave } from '~shared/api/oppgaverny'
+import { hentGosysOppgave } from '~shared/api/oppgaver'
 import { DatoVelger } from '~shared/DatoVelger'
 import { InfoWrapper } from '~components/behandling/soeknadsoversikt/styled'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
@@ -164,7 +164,7 @@ export default function KontrollerOppgave() {
               <DatoVelger
                 label="Mottatt dato"
                 description="Datoen søknaden ble mottatt"
-                value={behandlingBehov?.mottattDato ? new Date(behandlingBehov?.mottattDato) : null}
+                value={behandlingBehov?.mottattDato ? new Date(behandlingBehov?.mottattDato) : undefined}
                 onChange={(mottattDato) =>
                   dispatch(
                     settBehandlingBehov({

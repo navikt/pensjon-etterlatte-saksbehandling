@@ -1,12 +1,12 @@
-import { BodyShort, Button, Heading } from '@navikt/ds-react'
+import { BodyShort, Heading } from '@navikt/ds-react'
 import { Content, ContentHeader, FlexRow } from '~shared/styled'
 import { HeadingWrapper, InnholdPadding } from '~components/behandling/soeknadsoversikt/styled'
-import { useNavigate } from 'react-router-dom'
-import { useTilbakekreving } from '~components/tilbakekreving/useTilbakekreving'
+import { SendTilAttesteringModal } from '~components/behandling/handlinger/sendTilAttesteringModal'
+import { Tilbakekreving } from '~shared/types/Tilbakekreving'
+import { fattVedtak } from '~shared/api/tilbakekreving'
 
-export function TilbakekrevingBrev() {
-  const tilbakekreving = useTilbakekreving()
-  const navigate = useNavigate()
+export function TilbakekrevingBrev({ tilbakekreving }: { tilbakekreving: Tilbakekreving }) {
+  const kanAttesteres = true
 
   return (
     <Content>
@@ -21,9 +21,7 @@ export function TilbakekrevingBrev() {
         <BodyShort>Relevante ting for brev her</BodyShort>
       </InnholdPadding>
       <FlexRow justify="center">
-        <Button variant="primary" onClick={() => navigate(`/tilbakekreving/${tilbakekreving?.id}/brev`)}>
-          Send brev
-        </Button>
+        {kanAttesteres && <SendTilAttesteringModal behandlingId={tilbakekreving.id} fattVedtakApi={fattVedtak} />}
       </FlexRow>
     </Content>
   )

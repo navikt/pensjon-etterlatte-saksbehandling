@@ -3,7 +3,6 @@ package rapidsandrivers
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.etterlatte.libs.common.rapidsandrivers.feilendeSteg
 import no.nav.etterlatte.libs.common.rapidsandrivers.feilmelding
-import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.rapidsandrivers.EventNames
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -24,10 +23,12 @@ fun <T> withFeilhaandtering(
         try {
             packet.eventName = EventNames.FEILA
             packet.feilendeSteg = feilendeSteg
-            packet.feilmelding = e.toJson()
+            packet.feilmelding = e.stackTraceToString()
             context.publish(packet.toJson())
+            feilhaandteringLogger.info("Publiserte feila-melding")
         } catch (e2: Exception) {
             feilhaandteringLogger.warn("Feil under feilhåndtering for ${packet.id}", e2)
         }
+        feilhaandteringLogger.warn("Fikk feil, sendte ut på feilkø, returnerer nå failure-result")
         Result.failure(e)
     }

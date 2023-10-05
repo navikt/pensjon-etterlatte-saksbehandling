@@ -1,6 +1,6 @@
 import { useAppSelector } from '~store/Store'
 import { isFailure, isInitial, isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
-import { Oppgavetype, tildelSaksbehandlerApi } from '~shared/api/oppgaverny'
+import { Oppgavetype, tildelSaksbehandlerApi } from '~shared/api/oppgaver'
 import { Alert, Button, Loader } from '@navikt/ds-react'
 import { PersonIcon } from '@navikt/aksel-icons'
 

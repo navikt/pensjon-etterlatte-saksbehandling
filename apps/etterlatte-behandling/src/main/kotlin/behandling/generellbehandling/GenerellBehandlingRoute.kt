@@ -67,12 +67,12 @@ internal fun Route.generellbehandlingRoutes(
         }
     }
 
-    post("/api/generellbehandling/attester/{generellbehandlingId}") {
+    post("/api/generellbehandling/sendtilattestering/{generellbehandlingId}") {
         hvisEnabled(GenerellBehandlingToggle.KanBrukeGenerellBehandlingToggle) {
             kunSaksbehandler { saksbehandler ->
                 val request = call.receive<GenerellBehandling>()
                 inTransaction {
-                    generellBehandlingService.attesterBehandling(request, saksbehandler)
+                    generellBehandlingService.sendTilAttestering(request, saksbehandler)
                 }
                 logger.info(
                     "Opprettet generell behandling for sak $sakId av typen ${request.type}",
@@ -104,7 +104,7 @@ internal fun Route.generellbehandlingRoutes(
             kunSaksbehandler {
                 val id =
                     call.parameters["generellbehandlingId"]
-                        ?: return@hvisEnabled call.respond(HttpStatusCode.NotFound, "Saken finnes ikke")
+                        ?: return@hvisEnabled call.respond(HttpStatusCode.NotFound, "Generell behandling finnes ikke")
                 val hentetBehandling = inTransaction { generellBehandlingService.hentBehandlingMedId(UUID.fromString(id)) }
                 call.respond(hentetBehandling ?: HttpStatusCode.NotFound)
             }

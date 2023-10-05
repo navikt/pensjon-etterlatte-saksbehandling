@@ -17,6 +17,7 @@ import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -60,6 +61,7 @@ internal class VilkaarsvurderingRoutesTest {
     private lateinit var hoconApplicationConfig: HoconApplicationConfig
     private val behandlingKlient = mockk<BehandlingKlient>()
     private val grunnlagKlient = mockk<GrunnlagKlient>()
+    private val featureToggleService = DummyFeatureToggleService()
 
     private lateinit var vilkaarsvurderingServiceImpl: VilkaarsvurderingService
     private lateinit var ds: DataSource
@@ -82,6 +84,7 @@ internal class VilkaarsvurderingRoutesTest {
                 VilkaarsvurderingRepository(ds, DelvilkaarRepository()),
                 behandlingKlient,
                 grunnlagKlient,
+                featureToggleService,
             )
 
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns detaljertBehandling()
@@ -520,6 +523,7 @@ internal class VilkaarsvurderingRoutesTest {
                 VilkaarsvurderingRepository(ds, DelvilkaarRepository()),
                 behandlingKlient,
                 grunnlagKlient,
+                featureToggleService,
             )
 
         testApplication {
@@ -547,6 +551,7 @@ internal class VilkaarsvurderingRoutesTest {
                 VilkaarsvurderingRepository(ds, DelvilkaarRepository()),
                 behandlingKlient,
                 grunnlagKlient,
+                featureToggleService,
             )
 
         testApplication {
@@ -577,6 +582,7 @@ internal class VilkaarsvurderingRoutesTest {
                 VilkaarsvurderingRepository(ds, DelvilkaarRepository()),
                 behandlingKlient,
                 grunnlagKlient,
+                featureToggleService,
             )
 
         testApplication {
@@ -609,6 +615,7 @@ internal class VilkaarsvurderingRoutesTest {
                 VilkaarsvurderingRepository(ds, DelvilkaarRepository()),
                 behandlingKlient,
                 grunnlagKlient,
+                featureToggleService,
             )
 
         testApplication {

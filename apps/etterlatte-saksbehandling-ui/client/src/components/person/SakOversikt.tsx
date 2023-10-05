@@ -20,7 +20,7 @@ import { KlageListe } from '~components/person/KlageListe'
 export const FEATURE_TOGGLE_KAN_BRUKE_GENERELL_BEHANDLING = 'pensjon-etterlatte.kan-bruke-generell-behandling'
 export const SakOversikt = ({ fnr }: { fnr: string }) => {
   const [sak, setSak] = useState<ISak>()
-  const skalBrukeKlage = useFeatureEnabledMedDefault(FEATURE_TOGGLE_KAN_BRUKE_KLAGE)
+  const skalBrukeKlage = useFeatureEnabledMedDefault(FEATURE_TOGGLE_KAN_BRUKE_KLAGE, false)
   const [behandlingerStatus, hentBehandlinger] = useApiCall(hentBehandlingerForPerson)
   const kanBrukeGenerllBehandling = useFeatureEnabledMedDefault(FEATURE_TOGGLE_KAN_BRUKE_GENERELL_BEHANDLING, false)
 
@@ -37,17 +37,17 @@ export const SakOversikt = ({ fnr }: { fnr: string }) => {
 
         {isFailure(behandlingerStatus) && <Alert variant="error">{JSON.stringify(behandlingerStatus.error)}</Alert>}
 
-        {isSuccess(behandlingerStatus) && (
+        {isSuccess(behandlingerStatus) && sak && (
           <>
             <Heading size="medium" spacing>
-              Saknummer {sak!!.id}{' '}
+              Saknummer {sak.id}{' '}
               <Tag variant="success" size="medium">
-                {formaterSakstype(sak!!.sakType)}
+                {formaterSakstype(sak.sakType)}
               </Tag>
               <FlexRow justify="right">
-                <OpprettKlage sakId={sak!!.id} />
-                <ManueltOpphoerModal sakId={sak!!.id} behandlingliste={behandlingerStatus.data[0].behandlinger} />
-                {kanBrukeGenerllBehandling && <OpprettGenerellBehandling sakId={sak!!.id} />}
+                <OpprettKlage sakId={sak.id} />
+                <ManueltOpphoerModal sakId={sak.id} behandlingliste={behandlingerStatus.data[0].behandlinger} />
+                {kanBrukeGenerllBehandling && <OpprettGenerellBehandling sakId={sak.id} />}
               </FlexRow>
             </Heading>
 
@@ -61,7 +61,7 @@ export const SakOversikt = ({ fnr }: { fnr: string }) => {
             <hr />
 
             <Behandlingsliste behandlinger={behandlingerStatus.data[0].behandlinger} />
-            {sak && skalBrukeKlage ? <KlageListe sakId={sak.id} /> : null}
+            {skalBrukeKlage ? <KlageListe sakId={sak.id} /> : null}
           </>
         )}
       </MainContent>

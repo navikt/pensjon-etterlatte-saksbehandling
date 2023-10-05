@@ -40,13 +40,19 @@ internal class LyttPaaIverksattVedtak(
         context: MessageContext,
     ) {
         val respons = objectMapper.readValue<UtbetalingResponseDto>(packet[UTBETALING_RESPONSE].toString())
-        val behandling = respons.behandlingId?.let { pesysRepository.hentPesysId(it) }
 
-        if (behandling == null) {
+        val behandlingId = respons.behandlingId
+
+        if (behandlingId == null) {
             logger.error(
                 "Utbetaling mangler behandlingId. " +
                     "Kan derfor ikke lagre at vedtaket er iverksatt. Utbetaling: $respons",
             )
+            return
+        }
+        val behandling = pesysRepository.hentPesysId(behandlingId)
+        if (behandling == null) {
+            logger.debug("Saka er ikke ei migrert sak. Gjør ingenting.")
             return
         }
 
@@ -55,9 +61,11 @@ internal class LyttPaaIverksattVedtak(
                 pesysRepository.oppdaterStatus(behandling.pesysId, Migreringsstatus.FERDIG)
                 runBlocking { penKlient.opphoerSak(behandling.pesysId) }
             }
-
-            else -> {
-                logger.warn("Fikk respons med status ${respons.status} for ${respons.behandlingId}")
+            UtbetalingStatusDto.MOTTATT, UtbetalingStatusDto.SENDT -> {
+                logger.info("Fikk respons fra utbetaling med status ${respons.status} for ${respons.behandlingId}")
+            }
+            UtbetalingStatusDto.AVVIST, UtbetalingStatusDto.FEILET -> {
+                logger.warn("Fikk respons fra utbetaling med status ${respons.status} for ${respons.behandlingId}")
                 pesysRepository.oppdaterStatus(behandling.pesysId, Migreringsstatus.UTBETALING_FEILA)
             }
         }

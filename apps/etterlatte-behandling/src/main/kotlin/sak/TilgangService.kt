@@ -9,11 +9,6 @@ interface TilgangService {
         saksbehandlerMedRoller: SaksbehandlerMedRoller,
     ): Boolean
 
-    fun oppdaterAdressebeskyttelse(
-        id: Long,
-        adressebeskyttelseGradering: AdressebeskyttelseGradering,
-    ): Int
-
     fun harTilgangTilSak(
         sakId: Long,
         saksbehandlerMedRoller: SaksbehandlerMedRoller,
@@ -31,6 +26,11 @@ interface TilgangService {
 
     fun harTilgangTilKlage(
         klageId: String,
+        saksbehandlerMedRoller: SaksbehandlerMedRoller,
+    ): Boolean
+
+    fun harTilgangTilTilbakekreving(
+        tilbakekrevingId: String,
         saksbehandlerMedRoller: SaksbehandlerMedRoller,
     ): Boolean
 }
@@ -60,6 +60,14 @@ class TilgangServiceImpl(
         return finnSakerMedGradering.map {
             harTilgangSjekker(it, saksbehandlerMedRoller)
         }.all { it }
+    }
+
+    override fun harTilgangTilTilbakekreving(
+        tilbakekrevingId: String,
+        saksbehandlerMedRoller: SaksbehandlerMedRoller,
+    ): Boolean {
+        val sakMedGraderingOgSkjermet = dao.hentSakMedGraderingOgSkjermingPaaTilbakekreving(tilbakekrevingId) ?: return true
+        return harTilgangSjekker(sakMedGraderingOgSkjermet, saksbehandlerMedRoller)
     }
 
     override fun harTilgangTilOppgave(
@@ -125,12 +133,5 @@ class TilgangServiceImpl(
             AdressebeskyttelseGradering.UGRADERT -> true
             else -> true
         }
-    }
-
-    override fun oppdaterAdressebeskyttelse(
-        id: Long,
-        adressebeskyttelseGradering: AdressebeskyttelseGradering,
-    ): Int {
-        return dao.oppdaterAdresseBeskyttelse(id, adressebeskyttelseGradering)
     }
 }

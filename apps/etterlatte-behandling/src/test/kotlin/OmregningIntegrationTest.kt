@@ -58,21 +58,20 @@ class OmregningIntegrationTest : BehandlingIntegrationTest() {
         private var sakId: Long = 0L
 
         fun opprettSakMedFoerstegangsbehandling(fnr: String): Pair<Sak, Foerstegangsbehandling?> {
-            val sak =
-                inTransaction {
+            return inTransaction {
+                val sak =
                     applicationContext.sakDao.opprettSak(fnr, SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr)
-                }
 
-            val behandling =
-                applicationContext.behandlingFactory
-                    .opprettBehandling(
-                        sak.id,
-                        persongalleri(),
-                        LocalDateTime.now().toString(),
-                        Vedtaksloesning.GJENNY,
-                    )
-
-            return Pair(sak, behandling as Foerstegangsbehandling)
+                val behandling =
+                    applicationContext.behandlingFactory
+                        .opprettBehandling(
+                            sak.id,
+                            persongalleri(),
+                            LocalDateTime.now().toString(),
+                            Vedtaksloesning.GJENNY,
+                        )
+                Pair(sak, behandling as Foerstegangsbehandling)
+            }
         }
 
         @BeforeEach
@@ -85,9 +84,11 @@ class OmregningIntegrationTest : BehandlingIntegrationTest() {
                     Grunnlagsopplysning.Saksbehandler.create("A0"),
                     behandling!!.id,
                 )
-            applicationContext.kommerBarnetTilGodeService.lagreKommerBarnetTilgode(
-                kommerBarnetTilgode,
-            )
+            inTransaction {
+                applicationContext.kommerBarnetTilGodeService.lagreKommerBarnetTilgode(
+                    kommerBarnetTilgode,
+                )
+            }
 
             sakId = sak.id
 

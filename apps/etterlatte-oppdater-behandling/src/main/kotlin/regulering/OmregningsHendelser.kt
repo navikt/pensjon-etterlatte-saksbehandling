@@ -1,6 +1,7 @@
-package no.nav.etterlatte
+package no.nav.etterlatte.regulering
 
 import com.fasterxml.jackson.module.kotlin.treeToValue
+import no.nav.etterlatte.BehandlingService
 import no.nav.etterlatte.libs.common.behandling.Omregningshendelse
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId

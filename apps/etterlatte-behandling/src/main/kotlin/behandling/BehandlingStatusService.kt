@@ -11,12 +11,9 @@ import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.generellbehandling.GenerellBehandling
-import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
-import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.sak.SakIDListe
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
-import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.vedtaksvurdering.VedtakHendelse
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
@@ -88,7 +85,6 @@ class BehandlingStatusServiceImpl(
     private val behandlingDao: BehandlingDao,
     private val behandlingService: BehandlingService,
     private val grunnlagsendringshendelseService: GrunnlagsendringshendelseService,
-    private val oppgaveService: OppgaveService,
     private val featureToggleService: FeatureToggleService,
     private val generellBehandlingService: GenerellBehandlingService,
 ) : BehandlingStatusService {
@@ -101,9 +97,7 @@ class BehandlingStatusServiceImpl(
         val behandling = hentBehandling(behandlingId).tilOpprettet()
 
         if (!dryRun) {
-            inTransaction {
-                behandlingDao.lagreStatus(behandling.id, behandling.status, behandling.sistEndret)
-            }
+            behandlingDao.lagreStatus(behandling.id, behandling.status, behandling.sistEndret)
         }
     }
 
@@ -114,9 +108,7 @@ class BehandlingStatusServiceImpl(
         val behandling = hentBehandling(behandlingId).tilVilkaarsvurdert()
 
         if (!dryRun) {
-            inTransaction {
-                behandlingDao.lagreStatus(behandling.id, behandling.status, behandling.sistEndret)
-            }
+            behandlingDao.lagreStatus(behandling.id, behandling.status, behandling.sistEndret)
         }
     }
 
@@ -187,11 +179,9 @@ class BehandlingStatusServiceImpl(
         vedtakHendelse: VedtakHendelse,
     ) {
         val behandling = hentBehandling(behandlingId)
-        inTransaction {
-            lagreNyBehandlingStatus(behandling.tilIverksatt(), Tidspunkt.now().toLocalDatetimeUTC())
-            registrerVedtakHendelse(behandlingId, vedtakHendelse, HendelseType.IVERKSATT)
-            haandterUtland(behandling)
-        }
+        lagreNyBehandlingStatus(behandling.tilIverksatt(), Tidspunkt.now().toLocalDatetimeUTC())
+        registrerVedtakHendelse(behandlingId, vedtakHendelse, HendelseType.IVERKSATT)
+        haandterUtland(behandling)
         if (behandling.type == BehandlingType.REVURDERING) {
             grunnlagsendringshendelseService.settHendelseTilHistorisk(behandlingId)
         }
@@ -201,31 +191,12 @@ class BehandlingStatusServiceImpl(
         if (featureToggleService.isEnabled(GenerellBehandlingToggle.KanBrukeGenerellBehandlingToggle, false)) {
             if (behandling.type == BehandlingType.FØRSTEGANGSBEHANDLING) {
                 if (behandling.boddEllerArbeidetUtlandet?.skalSendeKravpakke == true) {
-                    val oppgaveUtland =
-                        oppgaveService.opprettNyOppgaveMedSakOgReferanse(
-                            behandling.id.toString(),
-                            behandling.sak.id,
-                            OppgaveKilde.BEHANDLING,
-                            OppgaveType.UTLAND,
-                            null,
-                        )
                     generellBehandlingService.opprettBehandling(
-                        GenerellBehandling.opprettFraType(
-                            GenerellBehandling.GenerellBehandlingType.UTLAND,
+                        GenerellBehandling.opprettUtland(
                             behandling.sak.id,
+                            behandling.id,
                         ),
                     )
-                    val saksbehandlerFoerstegangsbehandling =
-                        oppgaveService.hentSaksbehandlerFraFoerstegangsbehandling(behandlingsId = behandling.id)
-                    if (saksbehandlerFoerstegangsbehandling != null) {
-                        oppgaveService.tildelSaksbehandler(oppgaveUtland.id, saksbehandlerFoerstegangsbehandling)
-                        logger.info(
-                            "Opprettet generell behandling for utland for sak: ${behandling.sak.id} " +
-                                "og behandling: ${behandling.id}. Gjelder oppgave: ${oppgaveUtland.id}",
-                        )
-                    } else {
-                        logger.error("Fant ingen saksbehandler for behandling oppgave fatting, id: ${behandling.id}")
-                    }
                 } else {
                     logger.info("behandling ${behandling.id} har ikke satt skalSendeKravpakke=true")
                 }
@@ -256,9 +227,7 @@ class BehandlingStatusServiceImpl(
 
     private fun Behandling.lagreEndring(dryRun: Boolean) {
         if (dryRun) return
-        inTransaction {
-            lagreNyBehandlingStatus(this)
-        }
+        lagreNyBehandlingStatus(this)
     }
 
     private fun lagreNyBehandlingStatus(

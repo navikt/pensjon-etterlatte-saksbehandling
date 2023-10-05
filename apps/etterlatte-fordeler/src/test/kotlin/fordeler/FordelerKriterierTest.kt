@@ -413,17 +413,6 @@ internal class FordelerKriterierTest {
     }
 
     @Test
-    fun `avdoed med doedsdato foer juni 2022 er ikke en gyldig kandidat`() {
-        val barn = mockPerson()
-        val avdoed = mockPerson(doedsdato = of(2022, 5, 15))
-        val gjenlevende = mockPerson()
-
-        val fordelerResultat = fordelerKriterier.sjekkMotKriterier(barn, avdoed, gjenlevende, BARNEPENSJON_SOKNAD)
-
-        assertTrue(fordelerResultat.forklaring.contains(FordelerKriterie.AVDOED_HAR_DOEDSDATO_FOR_LANGT_TILBAKE_I_TID))
-    }
-
-    @Test
     fun `avdod hvor det er huket av for utlandsopphold er ikke en gyldig kandidat`() {
         val barn = mockPerson()
         val avdoed = mockPerson()

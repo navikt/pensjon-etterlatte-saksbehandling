@@ -43,7 +43,7 @@ class GrunnlagKlientImpl(
 
     override suspend fun leggInnNyttGrunnlag(opplysningsbehov: Opplysningsbehov) {
         return grunnlagHttpClient
-            .post("$url/grunnlag/person/oppdater-grunnlag") {
+            .post("$url/grunnlag/sak/${opplysningsbehov.sakid}/oppdater-grunnlag") {
                 accept(ContentType.Application.Json)
                 contentType(ContentType.Application.Json)
                 setBody(opplysningsbehov)
@@ -55,7 +55,7 @@ class GrunnlagKlientImpl(
         saksopplysninger: NyeSaksopplysninger,
     ) {
         return grunnlagHttpClient
-            .post("$url/grunnlag/$sakId/nye-opplysninger") {
+            .post("$url/grunnlag/sak/$sakId/nye-opplysninger") {
                 accept(ContentType.Application.Json)
                 contentType(ContentType.Application.Json)
                 setBody(saksopplysninger)
@@ -63,13 +63,13 @@ class GrunnlagKlientImpl(
     }
 
     override suspend fun hentGrunnlag(sakId: Long): Grunnlag? {
-        return grunnlagHttpClient.get("$url/grunnlag/$sakId") {
+        return grunnlagHttpClient.get("$url/grunnlag/sak/$sakId") {
             accept(ContentType.Application.Json)
         }.body()
     }
 
     override suspend fun hentPersongalleri(sakId: Long): Grunnlagsopplysning<Persongalleri>? {
-        return grunnlagHttpClient.get("$url/grunnlag/$sakId/${Opplysningstype.PERSONGALLERI_V1}") {
+        return grunnlagHttpClient.get("$url/grunnlag/sak/$sakId/${Opplysningstype.PERSONGALLERI_V1}") {
             accept(ContentType.Application.Json)
         }.body()
     }

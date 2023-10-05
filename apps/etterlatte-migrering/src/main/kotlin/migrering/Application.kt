@@ -1,9 +1,9 @@
 package no.nav.etterlatte
 
-import migrering.FeilendeMigreringLytter
 import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstartOgAvslutning
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.migrering.ApplicationContext
+import no.nav.etterlatte.migrering.FeilendeMigreringLytter
 import no.nav.etterlatte.migrering.LagreKopling
 import no.nav.etterlatte.migrering.LyttPaaIverksattVedtak
 import no.nav.etterlatte.migrering.MigrerSpesifikkSak

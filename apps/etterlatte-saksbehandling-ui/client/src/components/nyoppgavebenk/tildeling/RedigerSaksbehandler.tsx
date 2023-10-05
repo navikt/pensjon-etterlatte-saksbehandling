@@ -1,4 +1,4 @@
-import { Oppgavetype } from '~shared/api/oppgaverny'
+import { Oppgavetype } from '~shared/api/oppgaver'
 import React from 'react'
 import { useAppSelector } from '~store/Store'
 import { FjernSaksbehandler } from '~components/nyoppgavebenk/tildeling/FjernSaksbehandler'

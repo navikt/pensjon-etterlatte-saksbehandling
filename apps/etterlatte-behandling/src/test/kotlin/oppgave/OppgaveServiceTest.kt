@@ -744,7 +744,7 @@ internal class OppgaveServiceTest {
             null,
         )
 
-        saktilgangDao.oppdaterAdresseBeskyttelse(adressebeskyttetSak.id, AdressebeskyttelseGradering.STRENGT_FORTROLIG)
+        sakDao.oppdaterAdresseBeskyttelse(adressebeskyttetSak.id, AdressebeskyttelseGradering.STRENGT_FORTROLIG)
 
         val saksbehandlerRoller = generateSaksbehandlerMedRoller(AzureGroup.SAKSBEHANDLER)
 
@@ -798,7 +798,7 @@ internal class OppgaveServiceTest {
                 null,
             )
 
-        saktilgangDao.oppdaterAdresseBeskyttelse(adressebeskyttetSak.id, AdressebeskyttelseGradering.STRENGT_FORTROLIG)
+        sakDao.oppdaterAdresseBeskyttelse(adressebeskyttetSak.id, AdressebeskyttelseGradering.STRENGT_FORTROLIG)
         val saksbehandlerMedRollerStrengtFortrolig = generateSaksbehandlerMedRoller(AzureGroup.STRENGT_FORTROLIG)
         val oppgaver = oppgaveService.finnOppgaverForBruker(saksbehandlerMedRollerStrengtFortrolig)
         Assertions.assertEquals(1, oppgaver.size)
@@ -921,7 +921,7 @@ internal class OppgaveServiceTest {
 
         oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(behandlingsref, opprettetSak.id)
 
-        val alleOppgaver = oppgaveDao.hentOppgaverForBehandling(behandlingsref)
+        val alleOppgaver = oppgaveDao.hentOppgaverForReferanse(behandlingsref)
         Assertions.assertEquals(2, alleOppgaver.size)
         val avbruttOppgave = oppgaveDao.hentOppgave(oppgaveSomSkalBliAvbrutt.id)!!
         Assertions.assertEquals(avbruttOppgave.status, Status.AVBRUTT)

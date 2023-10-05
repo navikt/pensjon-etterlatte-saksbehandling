@@ -6,6 +6,7 @@ import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.brev.behandlingklient.BehandlingKlient
 import no.nav.etterlatte.brev.beregning.BeregningKlient
 import no.nav.etterlatte.brev.grunnlag.GrunnlagKlient
+import no.nav.etterlatte.brev.model.EtterbetalingDTO
 import no.nav.etterlatte.brev.trygdetid.TrygdetidKlient
 import no.nav.etterlatte.brev.vedtak.VedtaksvurderingKlient
 import no.nav.etterlatte.brev.vilkaarsvurdering.VilkaarsvurderingKlient
@@ -14,6 +15,7 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
+import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
 import no.nav.etterlatte.token.BrukerTokenInfo
@@ -53,6 +55,7 @@ class SakOgBehandlingService(
             val sak = async { behandlingKlient.hentSak(sakId, brukerTokenInfo) }
             val innvilgelsesdato = { async { vedtaksvurderingKlient.hentInnvilgelsesdato(sakId, brukerTokenInfo) } }
             val vilkaarsvurdering = async { vilkaarsvurderingKlient.hentVilkaarsvurdering(behandlingId, brukerTokenInfo) }
+            val etterbetaling = async { behandlingKlient.hentEtterbetaling(behandlingId, brukerTokenInfo) }
 
             mapBehandling(
                 vedtak.await(),
@@ -60,9 +63,20 @@ class SakOgBehandlingService(
                 sak.await(),
                 innvilgelsesdato,
                 vilkaarsvurdering.await(),
+                etterbetaling.await(),
                 brukerTokenInfo,
             )
         }
+
+    suspend fun hentVedtakSaksbehandlerOgStatus(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Pair<String, VedtakStatus> {
+        val vedtakDto = vedtaksvurderingKlient.hentVedtak(behandlingId, brukerTokenInfo)
+        val saksbehandlerIdent = vedtakDto.vedtakFattet?.ansvarligSaksbehandler ?: brukerTokenInfo.ident()
+
+        return Pair(saksbehandlerIdent, vedtakDto.status)
+    }
 
     private suspend fun mapBehandling(
         vedtak: VedtakDto,
@@ -70,6 +84,7 @@ class SakOgBehandlingService(
         sak: Sak,
         innvilgelsesdato: () -> Deferred<LocalDate?>,
         vilkaarsvurdering: VilkaarsvurderingDto,
+        etterbetaling: EtterbetalingDTO?,
         brukerTokenInfo: BrukerTokenInfo,
     ): Behandling {
         val innloggetSaksbehandlerIdent = brukerTokenInfo.ident()
@@ -127,6 +142,7 @@ class SakOgBehandlingService(
                     brukerTokenInfo,
                 ),
             vilkaarsvurdering = vilkaarsvurdering,
+            etterbetalingDTO = etterbetaling,
         )
     }
 

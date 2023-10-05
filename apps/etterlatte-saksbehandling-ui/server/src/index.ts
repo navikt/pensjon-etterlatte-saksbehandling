@@ -74,7 +74,7 @@ if (isDev) {
       '/api/grunnlagsendringshendelse/:sakid/institusjon',
       '/api/sak/:sakid',
       '/api/institusjonsoppholdbegrunnelse/:sakid',
-      '/api/nyeoppgaver',
+      '/api/oppgaver',
       '/api/klage',
       '/api/tilbakekreving',
       '/api/generellbehandling',

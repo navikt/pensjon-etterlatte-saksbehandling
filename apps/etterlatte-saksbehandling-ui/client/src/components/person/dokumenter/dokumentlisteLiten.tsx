@@ -17,7 +17,7 @@ export const DokumentlisteLiten = ({ dokumenter }: { dokumenter: Result<Journalp
       (dokumenter.data.length ? (
         dokumenter.data.map((dokument) => (
           <div key={`${dokument.journalpostId}/${dokument.dokumenter[0].dokumentInfoId}`}>
-            <BodyShort size="small" spacing>
+            <BodyShort as="div" size="small" spacing>
               <Link
                 href={`/api/dokumenter/${dokument.journalpostId}/${dokument.dokumenter[0].dokumentInfoId}`}
                 target="_blank"

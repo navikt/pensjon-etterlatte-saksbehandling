@@ -6,6 +6,7 @@ import no.nav.etterlatte.libs.common.tilbakekreving.Grunnlagsbeloep
 import no.nav.etterlatte.libs.common.tilbakekreving.KlasseType
 import no.nav.etterlatte.libs.common.tilbakekreving.Kravgrunnlag
 import no.nav.etterlatte.libs.common.tilbakekreving.KravgrunnlagPeriode
+import java.math.BigDecimal
 import java.time.YearMonth
 import java.util.UUID
 
@@ -14,9 +15,16 @@ data class Tilbakekreving(
     val status: TilbakekrevingStatus,
     val sak: Sak,
     val opprettet: Tidspunkt,
+    val vurdering: TilbakekrevingVurdering,
     val perioder: List<TilbakekrevingPeriode>,
     val kravgrunnlag: Kravgrunnlag,
 ) {
+    fun underBehandling() =
+        when (status) {
+            TilbakekrevingStatus.UNDER_ARBEID, TilbakekrevingStatus.OPPRETTET -> true
+            else -> false
+        }
+
     companion object {
         fun ny(
             kravgrunnlag: Kravgrunnlag,
@@ -26,24 +34,39 @@ data class Tilbakekreving(
             status = TilbakekrevingStatus.OPPRETTET,
             sak = sak,
             opprettet = Tidspunkt.now(),
+            vurdering =
+                TilbakekrevingVurdering(
+                    beskrivelse = null,
+                    konklusjon = null,
+                    aarsak = null,
+                    aktsomhet = null,
+                ),
             perioder = kravgrunnlag.perioder.tilTilbakekrevingPerioder(),
             kravgrunnlag = kravgrunnlag,
         )
     }
 }
 
+data class TilbakekrevingVurdering(
+    val beskrivelse: String?,
+    val konklusjon: String?,
+    val aarsak: TilbakekrevingAarsak?,
+    val aktsomhet: TilbakekrevingAktsomhet?,
+)
+
 data class TilbakekrevingPeriode(
     val maaned: YearMonth,
-    val ytelsebeloeper: Tilbakekrevingsbelop,
+    val ytelse: Tilbakekrevingsbelop,
     val feilkonto: Tilbakekrevingsbelop,
 )
 
 data class Tilbakekrevingsbelop(
+    val id: UUID,
     val klasseKode: String,
     val klasseType: String,
     val bruttoUtbetaling: Int,
     val nyBruttoUtbetaling: Int,
-    val skatteprosent: Double,
+    val skatteprosent: BigDecimal,
     val beregnetFeilutbetaling: Int?,
     val bruttoTilbakekreving: Int?,
     val nettoTilbakekreving: Int?,
@@ -56,11 +79,12 @@ data class Tilbakekrevingsbelop(
     companion object {
         fun ny(grunnlagsbeloep: Grunnlagsbeloep) =
             Tilbakekrevingsbelop(
+                id = UUID.randomUUID(),
                 klasseKode = grunnlagsbeloep.klasseKode.value,
                 klasseType = grunnlagsbeloep.klasseType.name,
                 bruttoUtbetaling = grunnlagsbeloep.bruttoUtbetaling.toInt(),
                 nyBruttoUtbetaling = grunnlagsbeloep.nyBruttoUtbetaling.toInt(),
-                skatteprosent = grunnlagsbeloep.skatteProsent.toDouble(),
+                skatteprosent = grunnlagsbeloep.skatteProsent,
                 beregnetFeilutbetaling = null,
                 bruttoTilbakekreving = null,
                 nettoTilbakekreving = null,
@@ -73,11 +97,12 @@ data class Tilbakekrevingsbelop(
 
         fun feilkonto(grunnlagsbeloep: Grunnlagsbeloep) =
             Tilbakekrevingsbelop(
+                id = UUID.randomUUID(),
                 klasseKode = grunnlagsbeloep.klasseKode.value,
                 klasseType = grunnlagsbeloep.klasseType.name,
                 bruttoUtbetaling = 0,
                 nyBruttoUtbetaling = 0,
-                skatteprosent = 0.0,
+                skatteprosent = BigDecimal(0.0),
                 beregnetFeilutbetaling = null,
                 bruttoTilbakekreving = null,
                 nettoTilbakekreving = null,
@@ -92,14 +117,13 @@ data class Tilbakekrevingsbelop(
 
 fun List<KravgrunnlagPeriode>.tilTilbakekrevingPerioder(): List<TilbakekrevingPeriode> {
     return map { periode ->
-        val ytelse = periode.grunnlagsbeloep.find { it.klasseType == KlasseType.YTEL }
-        requireNotNull(ytelse)
-        val feilkonto = periode.grunnlagsbeloep.find { it.klasseType == KlasseType.FEIL }
-        requireNotNull(feilkonto)
+        val ytelse = requireNotNull(periode.grunnlagsbeloep.find { it.klasseType == KlasseType.YTEL }) { "Fant ingen ytelse" }
+
+        val feilkonto = requireNotNull(periode.grunnlagsbeloep.find { it.klasseType == KlasseType.FEIL }) { "Fant ikke feilkonto" }
 
         TilbakekrevingPeriode(
             maaned = periode.periode.fraOgMed,
-            ytelsebeloeper = Tilbakekrevingsbelop.ny(ytelse),
+            ytelse = Tilbakekrevingsbelop.ny(ytelse),
             feilkonto = Tilbakekrevingsbelop.feilkonto(feilkonto),
         )
     }
@@ -108,6 +132,28 @@ fun List<KravgrunnlagPeriode>.tilTilbakekrevingPerioder(): List<TilbakekrevingPe
 enum class TilbakekrevingStatus {
     OPPRETTET,
     UNDER_ARBEID,
+    VEDTATT,
+}
+
+enum class TilbakekrevingAarsak {
+    ANNET,
+    ARBHOYINNT,
+    BEREGNFEIL,
+    DODSFALL,
+    EKTESKAP,
+    FEILREGEL,
+    FEILUFOREG,
+    FLYTTUTLAND,
+    IKKESJEKKYTELSE,
+    OVERSETTMLD,
+    SAMLIV,
+    UTBFEILMOT,
+}
+
+enum class TilbakekrevingAktsomhet {
+    GOD_TRO,
+    SIMPEL_UAKTSOMHET,
+    GROV_UAKTSOMHET,
 }
 
 enum class TilbakekrevingSkyld {
@@ -124,5 +170,11 @@ enum class TilbakekrevingResultat {
     FULL_TILBAKEKREV,
     INGEN_TILBAKEKREV,
 }
+
+class TilbakekrevingHarMangelException(message: String?) : RuntimeException(message)
+
+class TilbakekrevingFinnesIkkeException(message: String?) : RuntimeException(message)
+
+class TilbakekrevingErIkkeUnderBehandlingException() : RuntimeException()
 
 class KravgrunnlagHarIkkeEksisterendeSakException : RuntimeException()

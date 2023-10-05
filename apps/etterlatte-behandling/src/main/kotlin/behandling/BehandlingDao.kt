@@ -147,8 +147,8 @@ class BehandlingDao(
                 """
                 INSERT INTO behandling(id, sak_id, behandling_opprettet, sist_endret, status, behandlingstype, 
                 soeknad_mottatt_dato, virkningstidspunkt, revurdering_aarsak, opphoer_aarsaker, fritekst_aarsak, 
-                prosesstype, kilde, merknad, begrunnelse)
-                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                prosesstype, kilde, begrunnelse)
+                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """.trimIndent(),
             )
         with(behandling) {
@@ -165,8 +165,7 @@ class BehandlingDao(
             stmt.setString(11, fritekstAarsak)
             stmt.setString(12, prosesstype.toString())
             stmt.setString(13, kilde.toString())
-            stmt.setString(14, merknad)
-            stmt.setString(15, begrunnelse)
+            stmt.setString(14, begrunnelse)
         }
         require(stmt.executeUpdate() == 1)
     }

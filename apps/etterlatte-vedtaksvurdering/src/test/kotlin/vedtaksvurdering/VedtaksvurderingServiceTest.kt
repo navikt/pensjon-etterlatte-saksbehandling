@@ -35,8 +35,8 @@ import no.nav.etterlatte.libs.common.rapidsandrivers.SKAL_SENDE_BREV
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
-import no.nav.etterlatte.libs.common.vedtak.KafkaHendelseType
 import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
+import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseType
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
@@ -778,7 +778,7 @@ internal class VedtaksvurderingServiceTest {
         iverksattVedtak shouldNotBe null
         iverksattVedtak.status shouldBe VedtakStatus.IVERKSATT
 
-        verify(exactly = 1) { sendToRapidMock(match { it.contains(KafkaHendelseType.IVERKSATT.name) }, any()) }
+        verify(exactly = 1) { sendToRapidMock(match { it.contains(VedtakKafkaHendelseType.IVERKSATT.name) }, any()) }
     }
 
     @Test
@@ -831,7 +831,7 @@ internal class VedtaksvurderingServiceTest {
         ikkeIverksattVedtak.status shouldNotBe VedtakStatus.IVERKSATT
         ikkeIverksattVedtak.status shouldBe VedtakStatus.ATTESTERT
 
-        verify(exactly = 0) { sendToRapidMock(match { it.contains(KafkaHendelseType.IVERKSATT.name) }, any()) }
+        verify(exactly = 0) { sendToRapidMock(match { it.contains(VedtakKafkaHendelseType.IVERKSATT.name) }, any()) }
     }
 
     @Test
@@ -929,7 +929,7 @@ internal class VedtaksvurderingServiceTest {
         underkjentVedtak shouldNotBe null
         underkjentVedtak.status shouldBe VedtakStatus.RETURNERT
 
-        verify(exactly = 1) { sendToRapidMock(match { it.contains(KafkaHendelseType.UNDERKJENT.name) }, any()) }
+        verify(exactly = 1) { sendToRapidMock(match { it.contains(VedtakKafkaHendelseType.UNDERKJENT.name) }, any()) }
     }
 
     @Test

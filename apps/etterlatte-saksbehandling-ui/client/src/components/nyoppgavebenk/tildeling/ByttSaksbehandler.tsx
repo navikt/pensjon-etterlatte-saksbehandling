@@ -1,6 +1,6 @@
 import { useAppSelector } from '~store/Store'
 import { isFailure, isInitial, isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
-import { byttSaksbehandlerApi } from '~shared/api/oppgaverny'
+import { byttSaksbehandlerApi } from '~shared/api/oppgaver'
 import { Alert, Button, Label, Loader } from '@navikt/ds-react'
 import { PencilIcon } from '@navikt/aksel-icons'
 import React, { useEffect, useState } from 'react'

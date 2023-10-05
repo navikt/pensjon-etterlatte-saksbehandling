@@ -15,7 +15,6 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.NyBehandlingRequest
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
-import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.NyeSaksopplysninger
 import no.nav.etterlatte.libs.common.grunnlag.lagOpplysning
@@ -23,7 +22,6 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeknadMottattDato
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.gyldigSoeknad.VurderingsResultat
-import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
@@ -53,12 +51,14 @@ class BehandlingFactory(
     fun opprettSakOgBehandlingForOppgave(request: NyBehandlingRequest): Behandling {
         val soeker = request.persongalleri.soeker
 
-        val sak = sakService.finnEllerOpprettSak(soeker, request.sakType)
+        val sak = inTransaction { sakService.finnEllerOpprettSak(soeker, request.sakType) }
 
         val behandling =
-            opprettBehandling(
-                sak.id, request.persongalleri, request.mottattDato, Vedtaksloesning.GJENNY,
-            ) ?: throw IllegalStateException("Kunne ikke opprette behandling")
+            inTransaction {
+                opprettBehandling(
+                    sak.id, request.persongalleri, request.mottattDato, Vedtaksloesning.GJENNY,
+                ) ?: throw IllegalStateException("Kunne ikke opprette behandling")
+            }
 
         val gyldighetsvurdering =
             GyldighetsResultat(
@@ -90,19 +90,19 @@ class BehandlingFactory(
         kilde: Vedtaksloesning,
     ): Behandling? {
         logger.info("Starter behandling i sak $sakId")
+
         val sak =
-            inTransaction { sakService.finnSak(sakId) }.let {
+            sakService.finnSak(sakId).let {
                 requireNotNull(it) { "Fant ingen sak med id=$sakId!" }
             }
         val harBehandlingerForSak =
-            inTransaction {
-                behandlingDao.alleBehandlingerISak(sak.id)
-            }
+            behandlingDao.alleBehandlingerISak(sak.id)
 
         val harIverksattEllerAttestertBehandling =
             harBehandlingerForSak.filter { behandling ->
                 BehandlingStatus.iverksattEllerAttestert().find { it == behandling.status } != null
             }
+
         return if (harIverksattEllerAttestertBehandling.isNotEmpty()) {
             val forrigeBehandling = harIverksattEllerAttestertBehandling.maxBy { it.behandlingOpprettet }
             revurderingService.opprettAutomatiskRevurdering(
@@ -111,7 +111,6 @@ class BehandlingFactory(
                 forrigeBehandling = forrigeBehandling,
                 mottattDato = mottattDato,
                 kilde = kilde,
-                merknad = "Oppdatert søknad",
                 revurderingAarsak = RevurderingAarsak.NY_SOEKNAD,
             )
         } else {
@@ -130,56 +129,36 @@ class BehandlingFactory(
         mottattDato: String?,
         kilde: Vedtaksloesning,
     ): Behandling? {
-        return inTransaction {
-            harBehandlingUnderbehandling.forEach {
-                behandlingDao.lagreStatus(it.id, BehandlingStatus.AVBRUTT, LocalDateTime.now())
-                oppgaveService.avbrytAapneOppgaverForBehandling(it.id.toString())
-            }
-
-            OpprettBehandling(
-                type = BehandlingType.FØRSTEGANGSBEHANDLING,
-                sakId = sak.id,
-                status = BehandlingStatus.OPPRETTET,
-                soeknadMottattDato = mottattDato?.let { LocalDateTime.parse(it) },
-                kilde = kilde,
-                merknad = opprettMerknad(sak, persongalleri),
-            ).let { opprettBehandling ->
-                behandlingDao.opprettBehandling(opprettBehandling)
-                hendelseDao.behandlingOpprettet(opprettBehandling.toBehandlingOpprettet())
-
-                logger.info("Opprettet behandling ${opprettBehandling.id} i sak ${opprettBehandling.sakId}")
-
-                behandlingDao.hentBehandling(opprettBehandling.id)?.sjekkEnhet()
-            }.also { behandling ->
-                behandling?.let {
-                    grunnlagService.leggInnNyttGrunnlag(it, persongalleri)
-                    oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(
-                        referanse = behandling.id.toString(),
-                        sakId = sak.id,
-                    )
-                    behandlingHendelser.sendMeldingForHendelseMedDetaljertBehandling(
-                        it.toStatistikkBehandling(persongalleri),
-                        BehandlingHendelseType.OPPRETTET,
-                    )
-                }
-            }
+        harBehandlingUnderbehandling.forEach {
+            behandlingDao.lagreStatus(it.id, BehandlingStatus.AVBRUTT, LocalDateTime.now())
+            oppgaveService.avbrytAapneOppgaverForBehandling(it.id.toString())
         }
-    }
 
-    private fun opprettMerknad(
-        sak: Sak,
-        persongalleri: Persongalleri,
-    ): String? {
-        return if (persongalleri.soesken.isEmpty()) {
-            null
-        } else if (sak.sakType == SakType.BARNEPENSJON) {
-            "${persongalleri.soesken.size} søsken"
-        } else if (sak.sakType == SakType.OMSTILLINGSSTOENAD) {
-            val barnUnder20 = persongalleri.soesken.count { Folkeregisteridentifikator.of(it).getAge() < 20 }
+        return OpprettBehandling(
+            type = BehandlingType.FØRSTEGANGSBEHANDLING,
+            sakId = sak.id,
+            status = BehandlingStatus.OPPRETTET,
+            soeknadMottattDato = mottattDato?.let { LocalDateTime.parse(it) },
+            kilde = kilde,
+        ).let { opprettBehandling ->
+            behandlingDao.opprettBehandling(opprettBehandling)
+            hendelseDao.behandlingOpprettet(opprettBehandling.toBehandlingOpprettet())
 
-            "$barnUnder20 barn u/20år"
-        } else {
-            null
+            logger.info("Opprettet behandling ${opprettBehandling.id} i sak ${opprettBehandling.sakId}")
+
+            behandlingDao.hentBehandling(opprettBehandling.id)?.sjekkEnhet()
+        }.also { behandling ->
+            behandling?.let {
+                grunnlagService.leggInnNyttGrunnlag(it, persongalleri)
+                oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(
+                    referanse = behandling.id.toString(),
+                    sakId = sak.id,
+                )
+                behandlingHendelser.sendMeldingForHendelseMedDetaljertBehandling(
+                    it.toStatistikkBehandling(persongalleri),
+                    BehandlingHendelseType.OPPRETTET,
+                )
+            }
         }
     }
 

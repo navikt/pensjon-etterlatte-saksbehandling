@@ -1,5 +1,6 @@
 package no.nav.etterlatte.vilkaarsvurdering.vilkaar
 
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Opplysning
@@ -13,12 +14,14 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarOpplysningType.AVD
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarOpplysningType.SOEKER_FOEDSELSDATO
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaarsgrunnlag
+import no.nav.etterlatte.vilkaarsvurdering.VilkaarFeatureToggle
 import java.util.UUID
 
 object BarnepensjonVilkaar {
     fun inngangsvilkaar(
         grunnlag: Grunnlag,
         virkningstidspunkt: Virkningstidspunkt,
+        featureToggleService: FeatureToggleService,
     ) = listOf(
         formaal(),
         doedsfallForelder(),
@@ -26,7 +29,15 @@ object BarnepensjonVilkaar {
         alderBarn(virkningstidspunkt, grunnlag),
         barnetsMedlemskap(),
         avdoedesForutgaaendeMedlemskap(),
-    )
+    ).let { vilkaarListe ->
+        val skalOppretteEoesVilkaar =
+            featureToggleService.isEnabled(
+                toggleId = VilkaarFeatureToggle.OpprettAvdoedesForutgaaendeMedlemskapEoesVilkaar,
+                defaultValue = false,
+            )
+
+        if (skalOppretteEoesVilkaar) vilkaarListe.plus(avdoedesForutgaaendeMedlemskapEoes()) else vilkaarListe
+    }
 
     private fun formaal() =
         Vilkaar(
@@ -130,7 +141,7 @@ object BarnepensjonVilkaar {
             hovedvilkaar =
                 Delvilkaar(
                     type = VilkaarType.BP_FORUTGAAENDE_MEDLEMSKAP,
-                    tittel = "Avdødes forutgående medlemskap",
+                    tittel = "Avdødes forutgående medlemskap - Folketrygden",
                     beskrivelse =
                         """
                         For å ha rett på ytelsen må avdøde:
@@ -153,6 +164,32 @@ object BarnepensjonVilkaar {
                     avdoedMedlemVedDoedsfallKanTilstaaesHalvMinstepensjon(),
                     avdoedHaddeTidsromMedAvtalefestetPensjon(),
                     avdoedHaddeTidsromMedPensjonFraLovfestetPensjonsordning(),
+                ),
+        )
+
+    private fun avdoedesForutgaaendeMedlemskapEoes() =
+        Vilkaar(
+            hovedvilkaar =
+                Delvilkaar(
+                    type = VilkaarType.BP_FORUTGAAENDE_MEDLEMSKAP_EOES,
+                    tittel = "Avdødes forutgående medlemskap - EØS/avtaleland",
+                    beskrivelse =
+                        """
+                        Forutgående medlemskap kan være oppfylt ved sammenlegging av norsk trygdetid og trygdetid avdøde har opptjent fra EØS-land. Dette forutsetter at samlet trygdetid i Norge er minst ett år uten avrunding. Det er bare de avtalelandene der det er opparbeidet minst ett års trygdetid som skal tas med i sammenleggingen.
+                        
+                        Medlemskap i såkalte tredjeland som det er inngått bilaterale avtaler med kan også legges sammen med norsk trygdetid, forutsatt at avtalen omfatter pensjonsfordeler.
+                         
+                        Andre hjemler:
+                        EØS - rådsforordning 1408/1971 artikkel 45 (gjelder perioder før 2004)
+                        EØF - traktaten 1408/71 artikkel 39 (gjelder bilaterale avtaler)
+                        Lenke: https://lovdata.no/pro/#document/DLX3/eu/31971r1408
+                        """.trimIndent(),
+                    spoersmaal = "Er forutgående medlemskap oppfylt ved sammenlegging?",
+                    lovreferanse =
+                        Lovreferanse(
+                            paragraf = "EØS - rådsforordning 883/2004 artikkel 6 og 57",
+                            lenke = "https://lovdata.no/pro/#document/NLX3/eu/32004r0883/ARTIKKEL_6",
+                        ),
                 ),
         )
 

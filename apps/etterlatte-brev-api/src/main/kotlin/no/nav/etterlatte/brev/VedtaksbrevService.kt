@@ -2,6 +2,7 @@ package no.nav.etterlatte.brev
 
 import no.nav.etterlatte.brev.adresse.AdresseService
 import no.nav.etterlatte.brev.behandling.Behandling
+import no.nav.etterlatte.brev.behandling.ForenkletVedtak
 import no.nav.etterlatte.brev.behandling.SakOgBehandlingService
 import no.nav.etterlatte.brev.brevbaker.BrevbakerRequest
 import no.nav.etterlatte.brev.brevbaker.BrevbakerService
@@ -95,7 +96,7 @@ class VedtaksbrevService(
 
         if (!brev.kanEndres()) {
             logger.info("Brev har status ${brev.status} - returnerer lagret innhold")
-            return requireNotNull(db.hentPdf(brev.id))
+            return requireNotNull(db.hentPdf(brev.id)) { "Fant ikke brev med if ${brev.id}" }
         }
 
         val behandling = sakOgBehandlingService.hentBehandling(brev.sakId, brev.behandlingId!!, brukerTokenInfo)
@@ -106,7 +107,47 @@ class VedtaksbrevService(
         val brevRequest = BrevbakerRequest.fra(kode.ferdigstilling, brevData, behandling, avsender)
 
         return brevbaker.genererPdf(brev.id, brevRequest)
-            .also { pdf -> ferdigstillHvisVedtakFattet(brev, behandling, pdf, brukerTokenInfo) }
+            .also { pdf -> lagrePdfHvisVedtakFattet(brev.id, behandling.vedtak, pdf, brukerTokenInfo) }
+    }
+
+    suspend fun ferdigstillVedtaksbrev(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {
+        val brev =
+            requireNotNull(hentVedtaksbrev(behandlingId)) {
+                "Fant ingen brev for behandling (id=$behandlingId)"
+            }
+
+        if (brev.status == Status.FERDIGSTILT) {
+            logger.warn("Brev (id=${brev.id}) er allerede ferdigstilt. Avbryter ferdigstilling...")
+            return
+        } else if (!brev.kanEndres()) {
+            throw IllegalStateException("Brev med id=${brev.id} kan ikke ferdigstilles, siden det har status ${brev.status}")
+        }
+
+        val (saksbehandlerIdent, vedtakStatus) =
+            sakOgBehandlingService.hentVedtakSaksbehandlerOgStatus(
+                brev.behandlingId!!,
+                brukerTokenInfo,
+            )
+
+        if (vedtakStatus != VedtakStatus.FATTET_VEDTAK) {
+            throw IllegalStateException(
+                "Vedtak status er $vedtakStatus. Avventer ferdigstilling av brev (id=${brev.id})",
+            )
+        }
+
+        if (!brukerTokenInfo.erSammePerson(saksbehandlerIdent)) {
+            logger.info("Ferdigstiller brev med id=${brev.id}")
+
+            db.settBrevFerdigstilt(brev.id)
+        } else {
+            throw IllegalStateException(
+                "Kan ikke ferdigstille/låse brev når saksbehandler ($saksbehandlerIdent)" +
+                    " og attestant (${brukerTokenInfo.ident()}) er samme person.",
+            )
+        }
     }
 
     suspend fun hentNyttInnhold(
@@ -148,9 +189,15 @@ class VedtaksbrevService(
             MANUELL -> ManueltBrevData(hentLagretInnhold(brev))
         }
 
-    private fun hentLagretInnhold(brev: Brev) = requireNotNull(db.hentBrevPayload(brev.id)).elements
+    private fun hentLagretInnhold(brev: Brev) =
+        requireNotNull(
+            db.hentBrevPayload(brev.id),
+        ) { "Fant ikke payload for brev ${brev.id}" }.elements
 
-    private fun hentLagretInnholdVedlegg(brev: Brev) = requireNotNull(db.hentBrevPayloadVedlegg(brev.id))
+    private fun hentLagretInnholdVedlegg(brev: Brev) =
+        requireNotNull(db.hentBrevPayloadVedlegg(brev.id)) {
+            "Fant ikke payloadvedlegg for brev ${brev.id}"
+        }
 
     private suspend fun opprettInnhold(
         behandling: Behandling,
@@ -178,24 +225,24 @@ class VedtaksbrevService(
             MANUELL -> null
         }
 
-    private fun ferdigstillHvisVedtakFattet(
-        brev: Brev,
-        behandling: Behandling,
+    private fun lagrePdfHvisVedtakFattet(
+        brevId: BrevID,
+        vedtak: ForenkletVedtak,
         pdf: Pdf,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
-        if (behandling.vedtak.status != VedtakStatus.FATTET_VEDTAK) {
-            logger.info("Vedtak status er ${behandling.vedtak.status}. Avventer ferdigstilling av brev (id=${brev.id})")
+        if (vedtak.status != VedtakStatus.FATTET_VEDTAK) {
+            logger.info("Vedtak status er ${vedtak.status}. Avventer ferdigstilling av brev (id=$brevId)")
             return
         }
 
-        if (!brukerTokenInfo.erSammePerson(behandling.vedtak.saksbehandlerIdent)) {
-            logger.info("Ferdigstiller brev med id=${brev.id}")
+        if (!brukerTokenInfo.erSammePerson(vedtak.saksbehandlerIdent)) {
+            logger.info("Lagrer PDF for brev med id=$brevId")
 
-            db.lagrePdfOgFerdigstillBrev(brev.id, pdf)
+            db.lagrePdf(brevId, pdf)
         } else {
             logger.warn(
-                "Kan ikke ferdigstille/låse brev når saksbehandler (${behandling.vedtak.saksbehandlerIdent})" +
+                "Kan ikke ferdigstille/låse brev når saksbehandler (${vedtak.saksbehandlerIdent})" +
                     " og attestant (${brukerTokenInfo.ident()}) er samme person.",
             )
         }

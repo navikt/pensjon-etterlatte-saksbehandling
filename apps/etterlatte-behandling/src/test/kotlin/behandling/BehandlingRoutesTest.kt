@@ -1,7 +1,6 @@
 package behandling
 
 import io.ktor.client.HttpClient
-import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.header
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
@@ -9,10 +8,7 @@ import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.contentType
-import io.ktor.serialization.jackson.JacksonConverter
-import io.ktor.server.application.log
 import io.ktor.server.config.HoconApplicationConfig
-import io.ktor.server.testing.testApplication
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.every
@@ -20,6 +16,7 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
 import io.mockk.verify
+import no.nav.etterlatte.attachMockContext
 import no.nav.etterlatte.behandling.BehandlingFactory
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.BoddEllerArbeidetUtlandetRequest
@@ -32,12 +29,10 @@ import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerService
 import no.nav.etterlatte.libs.common.behandling.UtenlandstilsnittType
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
-import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toNorskTid
 import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
-import no.nav.etterlatte.libs.ktor.restModule
-import no.nav.etterlatte.sak.SakService
+import no.nav.etterlatte.withTestApplicationBuilder
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
@@ -53,7 +48,6 @@ import java.util.UUID
 internal class BehandlingRoutesTest {
     private val mockOAuth2Server = MockOAuth2Server()
     private lateinit var hoconApplicationConfig: HoconApplicationConfig
-    private val sakService = mockk<SakService>(relaxUnitFun = true)
     private val behandlingService = mockk<BehandlingService>(relaxUnitFun = true)
     private val gyldighetsproevingService = mockk<GyldighetsproevingService>()
     private val kommerBarnetTilGodeService = mockk<KommerBarnetTilGodeService>()
@@ -63,7 +57,7 @@ internal class BehandlingRoutesTest {
 
     @BeforeAll
     fun before() {
-        mockOAuth2Server.start(1234)
+        mockOAuth2Server.start()
         val httpServer = mockOAuth2Server.config.httpServer
         hoconApplicationConfig = buildTestApplicationConfigurationForOauth(httpServer.port(), AZURE_ISSUER, CLIENT_ID)
     }
@@ -158,7 +152,7 @@ internal class BehandlingRoutesTest {
     }
 
     @Test
-    fun `faar bad request hvis virkningstidspunkt ikke er gyldig`() {
+    fun `Får bad request hvis virkningstidspunkt ikke er gyldig`() {
         val bodyVirkningstidspunkt = Tidspunkt.parse("2017-02-01T00:00:00Z")
         val bodyBegrunnelse = "begrunnelse"
 
@@ -189,31 +183,16 @@ internal class BehandlingRoutesTest {
     }
 
     private fun withTestApplication(block: suspend (client: HttpClient) -> Unit) {
-        testApplication {
-            environment {
-                config = hoconApplicationConfig
-            }
-            application {
-                restModule(this.log) {
-                    behandlingRoutes(
-                        behandlingService,
-                        gyldighetsproevingService,
-                        kommerBarnetTilGodeService,
-                        manueltOpphoerService,
-                        aktivitetspliktService,
-                        behandlingFactory,
-                    )
-                }
-            }
-
-            val client =
-                createClient {
-                    install(ContentNegotiation) {
-                        register(ContentType.Application.Json, JacksonConverter(objectMapper))
-                    }
-                }
-
-            block(client)
+        withTestApplicationBuilder(block, hoconApplicationConfig) {
+            attachMockContext()
+            behandlingRoutes(
+                behandlingService,
+                gyldighetsproevingService,
+                kommerBarnetTilGodeService,
+                manueltOpphoerService,
+                aktivitetspliktService,
+                behandlingFactory,
+            )
         }
     }
 

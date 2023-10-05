@@ -26,6 +26,18 @@ class SakDao(private val connection: () -> Connection) {
         }
     }
 
+    fun oppdaterAdresseBeskyttelse(
+        sakId: Long,
+        adressebeskyttelseGradering: AdressebeskyttelseGradering,
+    ): Int {
+        with(connection()) {
+            val statement = prepareStatement("UPDATE sak SET adressebeskyttelse = ? where id = ?")
+            statement.setString(1, adressebeskyttelseGradering.toString())
+            statement.setLong(2, sakId)
+            return statement.executeUpdate().also { require(it == 1) }
+        }
+    }
+
     fun hentSaker(): List<Sak> {
         val statement = connection().prepareStatement("SELECT id, sakType, fnr, enhet from sak")
         return statement.executeQuery().toList { this.toSak() }
@@ -51,7 +63,7 @@ class SakDao(private val connection: () -> Connection) {
         statement.setString(3, enhet)
         return requireNotNull(
             statement.executeQuery().singleOrNull { this.toSak() },
-        )
+        ) { "Kunne ikke opprette sak for fnr: $fnr" }
     }
 
     fun oppdaterEnheterPaaSaker(saker: List<GrunnlagsendringshendelseService.SakMedEnhet>) {

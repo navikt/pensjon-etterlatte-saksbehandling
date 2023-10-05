@@ -1,5 +1,7 @@
 package no.nav.etterlatte
 
+import com.typesafe.config.Config
+import com.typesafe.config.ConfigFactory
 import no.nav.etterlatte.fordeler.Fordeler
 import no.nav.etterlatte.fordeler.FordelerKriterier
 import no.nav.etterlatte.fordeler.FordelerRepository
@@ -8,7 +10,6 @@ import no.nav.etterlatte.funksjonsbrytere.FeatureToggleProperties
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
-import no.nav.etterlatte.libs.common.requireEnvValue
 import no.nav.helse.rapids_rivers.RapidApplication
 import rapidsandrivers.getRapidEnv
 
@@ -16,7 +17,7 @@ val sikkerLogg = sikkerlogger()
 
 fun main() {
     val rapidEnv = getRapidEnv()
-    val featureToggleService = FeatureToggleService.initialiser(featureToggleProperties(rapidEnv))
+    val featureToggleService = FeatureToggleService.initialiser(featureToggleProperties(ConfigFactory.load()))
 
     RapidApplication.create(rapidEnv).also { rapidsConnection ->
         val ab = AppBuilder(Miljoevariabler(rapidEnv))
@@ -34,9 +35,9 @@ fun main() {
     }.start()
 }
 
-private fun featureToggleProperties(env: Map<String, String>) =
+private fun featureToggleProperties(config: Config) =
     FeatureToggleProperties(
-        applicationName = env.requireEnvValue("NAIS_APP_NAME"),
-        host = env.requireEnvValue("UNLEASH_SERVER_API_URL"),
-        apiKey = env.requireEnvValue("UNLEASH_SERVER_API_TOKEN"),
+        applicationName = config.getString("funksjonsbrytere.unleash.applicationName"),
+        host = config.getString("funksjonsbrytere.unleash.host"),
+        apiKey = config.getString("funksjonsbrytere.unleash.token"),
     )

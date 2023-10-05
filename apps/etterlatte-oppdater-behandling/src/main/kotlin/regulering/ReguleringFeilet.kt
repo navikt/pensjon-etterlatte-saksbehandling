@@ -1,5 +1,7 @@
-package no.nav.etterlatte
+package no.nav.etterlatte.regulering
 
+import no.nav.etterlatte.BehandlingService
+import no.nav.etterlatte.ReguleringFeiletHendelse
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.etterlatte.rapidsandrivers.EventNames.FEILA

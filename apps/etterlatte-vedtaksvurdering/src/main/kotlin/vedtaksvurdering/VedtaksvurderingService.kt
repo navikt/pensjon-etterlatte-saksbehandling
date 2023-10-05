@@ -18,11 +18,11 @@ import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.tidspunkt.utcKlokke
 import no.nav.etterlatte.libs.common.toObjectNode
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
-import no.nav.etterlatte.libs.common.vedtak.KafkaHendelseType
 import no.nav.etterlatte.libs.common.vedtak.Periode
 import no.nav.etterlatte.libs.common.vedtak.Utbetalingsperiode
 import no.nav.etterlatte.libs.common.vedtak.UtbetalingsperiodeType
 import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
+import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseType
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
@@ -119,42 +119,45 @@ class VedtaksvurderingService(
 
         val fattetVedtak =
             repository.inTransaction { tx ->
-                fattVedtak(
-                    behandlingId,
-                    VedtakFattet(
-                        brukerTokenInfo.ident(),
-                        sak.enhet,
-                        Tidspunkt.now(clock),
-                    ),
-                    tx,
-                ).also { fattetVedtak ->
-                    runBlocking {
-                        behandlingKlient.fattVedtakBehandling(
-                            brukerTokenInfo = brukerTokenInfo,
-                            vedtakEndringDTO =
-                                VedtakEndringDTO(
-                                    vedtakOppgaveDTO =
-                                        VedtakOppgaveDTO(
-                                            sakId = sak.id,
-                                            referanse = behandlingId.toString(),
-                                        ),
-                                    vedtakHendelse =
-                                        VedtakHendelse(
-                                            vedtakId = fattetVedtak.id,
-                                            inntruffet = fattetVedtak.vedtakFattet?.tidspunkt!!,
-                                            saksbehandler = fattetVedtak.vedtakFattet.ansvarligSaksbehandler,
-                                        ),
-                                ),
-                        )
+                val fattetVedtakIntern =
+                    fattVedtak(
+                        behandlingId,
+                        VedtakFattet(
+                            brukerTokenInfo.ident(),
+                            sak.enhet,
+                            Tidspunkt.now(clock),
+                        ),
+                        tx,
+                    ).also { fattetVedtak ->
+                        runBlocking {
+                            behandlingKlient.fattVedtakBehandling(
+                                brukerTokenInfo = brukerTokenInfo,
+                                vedtakEndringDTO =
+                                    VedtakEndringDTO(
+                                        vedtakOppgaveDTO =
+                                            VedtakOppgaveDTO(
+                                                sakId = sak.id,
+                                                referanse = behandlingId.toString(),
+                                            ),
+                                        vedtakHendelse =
+                                            VedtakHendelse(
+                                                vedtakId = fattetVedtak.id,
+                                                inntruffet = fattetVedtak.vedtakFattet?.tidspunkt!!,
+                                                saksbehandler = fattetVedtak.vedtakFattet.ansvarligSaksbehandler,
+                                            ),
+                                    ),
+                            )
+                        }
                     }
-                }
+                sendToRapid(
+                    vedtakhendelse = VedtakKafkaHendelseType.FATTET,
+                    vedtak = fattetVedtakIntern,
+                    tekniskTid = fattetVedtakIntern.vedtakFattet!!.tidspunkt,
+                    behandlingId = behandlingId,
+                )
+                fattetVedtakIntern
             }
-        sendToRapid(
-            vedtakhendelse = KafkaHendelseType.FATTET,
-            vedtak = fattetVedtak,
-            tekniskTid = fattetVedtak.vedtakFattet!!.tidspunkt,
-            behandlingId = behandlingId,
-        )
+
         return fattetVedtak
     }
 
@@ -207,22 +210,32 @@ class VedtaksvurderingService(
                 attestertVedtak
             }
 
-        sendToRapid(
-            vedtakhendelse = KafkaHendelseType.ATTESTERT,
-            vedtak = attestertVedtak,
-            tekniskTid = attestertVedtak.attestasjon!!.tidspunkt,
-            behandlingId = behandlingId,
-            extraParams =
-                mapOf(
-                    SKAL_SENDE_BREV to
-                        when {
-                            behandling.revurderingsaarsak.skalIkkeSendeBrev() -> false
-                            else -> true
-                        },
-                    KILDE_KEY to behandling.kilde,
-                    REVURDERING_AARSAK to behandling.revurderingsaarsak.toString(),
-                ),
-        )
+        try {
+            sendToRapid(
+                vedtakhendelse = VedtakKafkaHendelseType.ATTESTERT,
+                vedtak = attestertVedtak,
+                tekniskTid = attestertVedtak.attestasjon!!.tidspunkt,
+                behandlingId = behandlingId,
+                extraParams =
+                    mapOf(
+                        SKAL_SENDE_BREV to
+                            when {
+                                behandling.revurderingsaarsak.skalIkkeSendeBrev() -> false
+                                else -> true
+                            },
+                        KILDE_KEY to behandling.kilde,
+                        REVURDERING_AARSAK to behandling.revurderingsaarsak.toString(),
+                    ),
+            )
+        } catch (e: Exception) {
+            logger.error(
+                "Kan ikke sende attestert vedtak på kafka for behandling id: $behandlingId, vedtak: ${vedtak.id} " +
+                    "Saknr: ${sak.id}. Det betyr at vi ikke sender ut brev for vedtaket eller at en utbetaling går til oppdrag. " +
+                    "Denne hendelsen må sendes ut manuelt straks.",
+                e,
+            )
+            throw e
+        }
 
         return attestertVedtak
     }
@@ -264,7 +277,7 @@ class VedtaksvurderingService(
             }
 
         sendToRapid(
-            vedtakhendelse = KafkaHendelseType.UNDERKJENT,
+            vedtakhendelse = VedtakKafkaHendelseType.UNDERKJENT,
             vedtak = underkjentVedtak,
             tekniskTid = underkjentTid,
             behandlingId = behandlingId,
@@ -293,7 +306,7 @@ class VedtaksvurderingService(
             }
 
         sendToRapid(
-            vedtakhendelse = KafkaHendelseType.IVERKSATT,
+            vedtakhendelse = VedtakKafkaHendelseType.IVERKSATT,
             vedtak = iverksattVedtak,
             tekniskTid = Tidspunkt.now(clock),
             behandlingId = behandlingId,
@@ -500,7 +513,7 @@ class VedtaksvurderingService(
         requireNotNull(vilkaarsvurderingUtfall) { "Behandling mangler utfall på vilkårsvurdering" }
 
     private fun sendToRapid(
-        vedtakhendelse: KafkaHendelseType,
+        vedtakhendelse: VedtakKafkaHendelseType,
         vedtak: Vedtak,
         tekniskTid: Tidspunkt,
         behandlingId: UUID,

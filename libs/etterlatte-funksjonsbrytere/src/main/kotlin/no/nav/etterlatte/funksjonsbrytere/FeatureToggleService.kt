@@ -5,6 +5,7 @@ import io.getunleash.UnleashContext
 import io.getunleash.UnleashContextProvider
 import io.getunleash.strategy.GradualRolloutRandomStrategy
 import io.getunleash.util.UnleashConfig
+import org.slf4j.LoggerFactory
 
 interface FeatureToggleService {
     fun isEnabled(
@@ -18,6 +19,8 @@ interface FeatureToggleService {
 }
 
 class UnleashFeatureToggleService(private val properties: FeatureToggleProperties) : FeatureToggleService {
+    private val logger = LoggerFactory.getLogger(this::class.java)
+
     private val defaultUnleash =
         DefaultUnleash(
             UnleashConfig.builder()
@@ -39,5 +42,10 @@ class UnleashFeatureToggleService(private val properties: FeatureTogglePropertie
     override fun isEnabled(
         toggleId: FeatureToggle,
         defaultValue: Boolean,
-    ) = defaultUnleash.isEnabled(toggleId.key(), defaultValue)
+    ) = try {
+        defaultUnleash.isEnabled(toggleId.key(), defaultValue)
+    } catch (e: Exception) {
+        logger.warn("Fikk feilmelding fra Unleash for toggle $toggleId, bruker defaultverdi $defaultValue", e)
+        defaultValue
+    }
 }

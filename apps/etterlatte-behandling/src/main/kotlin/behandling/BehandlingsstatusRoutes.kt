@@ -9,6 +9,7 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
+import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.behandlingsId
 import no.nav.etterlatte.tilgangsstyring.kunAttestant
@@ -19,77 +20,103 @@ internal fun Route.behandlingsstatusRoutes(behandlingsstatusService: BehandlingS
         get("/opprett") {
             // Kalles kun av vilkårsvurdering når total-vurdering slettes
             haandterStatusEndring(call) {
-                behandlingsstatusService.settOpprettet(behandlingsId)
+                inTransaction {
+                    behandlingsstatusService.settOpprettet(behandlingsId)
+                }
             }
         }
         post("/opprett") {
             // Kalles kun av vilkårsvurdering når total-vurdering slettes
             haandterStatusEndring(call) {
-                behandlingsstatusService.settOpprettet(behandlingsId, false)
+                inTransaction {
+                    behandlingsstatusService.settOpprettet(behandlingsId, false)
+                }
             }
         }
 
         get("/vilkaarsvurder") {
             haandterStatusEndring(call) {
-                behandlingsstatusService.settVilkaarsvurdert(behandlingsId, true)
+                inTransaction {
+                    behandlingsstatusService.settVilkaarsvurdert(behandlingsId, true)
+                }
             }
         }
         post("/vilkaarsvurder") {
             haandterStatusEndring(call) {
-                behandlingsstatusService.settVilkaarsvurdert(behandlingsId, false)
+                inTransaction {
+                    behandlingsstatusService.settVilkaarsvurdert(behandlingsId, false)
+                }
             }
         }
 
         get("/oppdaterTrygdetid") {
             haandterStatusEndring(call) {
-                behandlingsstatusService.settTrygdetidOppdatert(behandlingsId, true)
+                inTransaction {
+                    behandlingsstatusService.settTrygdetidOppdatert(behandlingsId, true)
+                }
             }
         }
         post("/oppdaterTrygdetid") {
             haandterStatusEndring(call) {
-                behandlingsstatusService.settTrygdetidOppdatert(behandlingsId, false)
+                inTransaction {
+                    behandlingsstatusService.settTrygdetidOppdatert(behandlingsId, false)
+                }
             }
         }
 
         get("/beregn") {
             haandterStatusEndring(call) {
-                behandlingsstatusService.settBeregnet(behandlingsId)
+                inTransaction {
+                    behandlingsstatusService.settBeregnet(behandlingsId)
+                }
             }
         }
 
         post("/beregn") {
             haandterStatusEndring(call) {
-                behandlingsstatusService.settBeregnet(behandlingsId, false)
+                inTransaction {
+                    behandlingsstatusService.settBeregnet(behandlingsId, false)
+                }
             }
         }
 
         get("/avkort") {
             haandterStatusEndring(call) {
-                behandlingsstatusService.settAvkortet(behandlingsId)
+                inTransaction {
+                    behandlingsstatusService.settAvkortet(behandlingsId)
+                }
             }
         }
 
         post("/avkort") {
             haandterStatusEndring(call) {
-                behandlingsstatusService.settAvkortet(behandlingsId, false)
+                inTransaction {
+                    behandlingsstatusService.settAvkortet(behandlingsId, false)
+                }
             }
         }
 
         get("/fatteVedtak") {
             haandterStatusEndring(call) {
-                behandlingsstatusService.sjekkOmKanFatteVedtak(behandlingsId)
+                inTransaction {
+                    behandlingsstatusService.sjekkOmKanFatteVedtak(behandlingsId)
+                }
             }
         }
         get("/returner") {
             haandterStatusEndring(call) {
-                behandlingsstatusService.sjekkOmKanReturnereVedtak(behandlingsId)
+                inTransaction {
+                    behandlingsstatusService.sjekkOmKanReturnereVedtak(behandlingsId)
+                }
             }
         }
 
         get("/attester") {
             kunAttestant {
                 haandterStatusEndring(call) {
-                    behandlingsstatusService.sjekkOmKanAttestere(behandlingsId)
+                    inTransaction {
+                        behandlingsstatusService.sjekkOmKanAttestere(behandlingsId)
+                    }
                 }
             }
         }
@@ -97,7 +124,9 @@ internal fun Route.behandlingsstatusRoutes(behandlingsstatusService: BehandlingS
         post("/iverksett") {
             val vedtakHendelse = call.receive<VedtakHendelse>()
             haandterStatusEndring(call) {
-                behandlingsstatusService.settIverksattVedtak(behandlingsId, vedtakHendelse)
+                inTransaction {
+                    behandlingsstatusService.settIverksattVedtak(behandlingsId, vedtakHendelse)
+                }
             }
         }
     }

@@ -27,19 +27,36 @@ import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import no.nav.etterlatte.libs.testdata.grunnlag.kilde
 import no.nav.etterlatte.libs.testdata.grunnlag.statiskUuid
 import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Month
 import java.util.UUID
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class GrunnlagServiceTest {
     private val opplysningerMock = mockk<OpplysningDao>()
     private val pdlTjenesterKlientImpl = mockk<PdlTjenesterKlientImpl>()
     private val grunnlagService = RealGrunnlagService(pdlTjenesterKlientImpl, opplysningerMock, mockk())
 
     private val testData = GrunnlagTestData()
+
+    @BeforeAll
+    fun beforeAll() {
+        every { opplysningerMock.finnNyesteGrunnlag(1, PERSONGALLERI_V1) } returns
+            lagGrunnlagHendelse(
+                1,
+                4,
+                PERSONGALLERI_V1,
+                id = statiskUuid,
+                fnr = testData.soeker.foedselsnummer,
+                verdi = testData.hentPersonGalleri().toJsonNode(),
+                kilde = kilde,
+            )
+    }
 
     @Nested
     inner class MapperTilRiktigKategoriTest {
@@ -89,29 +106,12 @@ internal class GrunnlagServiceTest {
         )
 
         @Test
-        fun `skal hente opptil versjon av grunnlag`() {
-            val grunnlagshendelser = lagGrunnlagForPerson(testData.soeker.foedselsnummer, PersonRolle.BARN)
-
-            every { opplysningerMock.finnGrunnlagOpptilVersjon(1, 4) } returns grunnlagshendelser
-
-            val actual = grunnlagService.hentOpplysningsgrunnlagMedVersjon(1, 4)
-            val expected =
-                mapOf(
-                    NAVN to Opplysning.Konstant(statiskUuid, kilde, nyttNavn.toJsonNode()),
-                    FOEDSELSDATO to Opplysning.Konstant(statiskUuid, kilde, nyFødselsdag.toJsonNode()),
-                )
-
-            Assertions.assertEquals(expected[NAVN], actual?.soeker?.get(NAVN))
-            Assertions.assertEquals(expected[FOEDSELSDATO], actual?.soeker?.get(FOEDSELSDATO))
-        }
-
-        @Test
         fun `skal mappe om dataen fra DB til søker`() {
             val grunnlagshendelser = lagGrunnlagForPerson(testData.soeker.foedselsnummer, PersonRolle.BARN)
 
             every { opplysningerMock.hentAlleGrunnlagForSak(1) } returns grunnlagshendelser
 
-            val actual = grunnlagService.hentOpplysningsgrunnlag(1, testData.hentPersonGalleri())
+            val actual = grunnlagService.hentOpplysningsgrunnlag(1)!!
             val expected =
                 mapOf(
                     NAVN to Opplysning.Konstant(statiskUuid, kilde, nyttNavn.toJsonNode()),
@@ -128,7 +128,7 @@ internal class GrunnlagServiceTest {
 
             every { opplysningerMock.hentAlleGrunnlagForSak(1) } returns grunnlagshendelser
 
-            val actual = grunnlagService.hentOpplysningsgrunnlag(1, testData.hentPersonGalleri())
+            val actual = grunnlagService.hentOpplysningsgrunnlag(1)!!
             val expected =
                 mapOf(
                     NAVN to Opplysning.Konstant(statiskUuid, kilde, nyttNavn.toJsonNode()),
@@ -146,7 +146,7 @@ internal class GrunnlagServiceTest {
 
             every { opplysningerMock.hentAlleGrunnlagForSak(1) } returns grunnlagshendelser
 
-            val actual = grunnlagService.hentOpplysningsgrunnlag(1, testData.hentPersonGalleri())
+            val actual = grunnlagService.hentOpplysningsgrunnlag(1)!!
             val expected =
                 mapOf(
                     NAVN to Opplysning.Konstant(statiskUuid, kilde, nyttNavn.toJsonNode()),
@@ -164,7 +164,7 @@ internal class GrunnlagServiceTest {
 
             every { opplysningerMock.hentAlleGrunnlagForSak(1) } returns grunnlagshendelser
 
-            val actual = grunnlagService.hentOpplysningsgrunnlag(1, testData.hentPersonGalleri())
+            val actual = grunnlagService.hentOpplysningsgrunnlag(1)!!
             val expected =
                 mapOf(
                     NAVN to Opplysning.Konstant(statiskUuid, kilde, nyttNavn.toJsonNode()),
@@ -207,14 +207,14 @@ internal class GrunnlagServiceTest {
 
             Assertions.assertEquals(
                 1,
-                grunnlagService.hentOpplysningsgrunnlag(1, testData.hentPersonGalleri()).soeker.values.size,
+                grunnlagService.hentOpplysningsgrunnlag(1)!!.soeker.values.size,
             )
         }
 
         @Test
         fun `tar alltid seneste versjon av samme opplysning`() {
             every { opplysningerMock.hentAlleGrunnlagForSak(1) } returns grunnlagshendelser
-            val opplysningsgrunnlag = grunnlagService.hentOpplysningsgrunnlag(1, testData.hentPersonGalleri())
+            val opplysningsgrunnlag = grunnlagService.hentOpplysningsgrunnlag(1)!!
 
             Assertions.assertEquals(
                 2,
@@ -262,7 +262,7 @@ internal class GrunnlagServiceTest {
 
         every { opplysningerMock.hentAlleGrunnlagForSak(1) } returns grunnlagshendelser
 
-        val actual = grunnlagService.hentOpplysningsgrunnlag(1, testData.hentPersonGalleri())
+        val actual = grunnlagService.hentOpplysningsgrunnlag(1)!!
         val expected =
             Opplysning.Konstant(
                 uuid1,

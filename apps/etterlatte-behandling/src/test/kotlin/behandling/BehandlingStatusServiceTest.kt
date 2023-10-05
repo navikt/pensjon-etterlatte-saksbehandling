@@ -12,26 +12,20 @@ import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.behandling.generellbehandling.GenerellBehandlingService
 import no.nav.etterlatte.behandling.hendelse.HendelseType
-import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.foerstegangsbehandling
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
+import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
-import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.generellbehandling.GenerellBehandling
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
-import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
-import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
-import no.nav.etterlatte.libs.common.oppgave.OppgaveType
-import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.vedtaksvurdering.VedtakHendelse
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import java.sql.Connection
-import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class BehandlingStatusServiceTest {
@@ -75,7 +69,6 @@ internal class BehandlingStatusServiceTest {
                 every { hentBehandling(behandlingId) } returns behandling
             }
         val grlService = mockk<GrunnlagsendringshendelseService>()
-        val oppgaveService = mockk<OppgaveService>()
         val featureToggleService =
             mockk<FeatureToggleService> {
                 every { isEnabled(any(), any()) } returns true
@@ -87,19 +80,20 @@ internal class BehandlingStatusServiceTest {
                 behandlingdao,
                 behandlingService,
                 grlService,
-                oppgaveService,
                 featureToggleService,
                 generellBehandlingService,
             )
 
-        sut.settIverksattVedtak(behandlingId, iverksettVedtak)
+        inTransaction {
+            sut.settIverksattVedtak(behandlingId, iverksettVedtak)
+        }
 
         verify {
             behandlingdao.lagreStatus(behandlingId, BehandlingStatus.IVERKSATT, any())
             behandlingService.hentBehandling(behandlingId)
             behandlingService.registrerVedtakHendelse(behandlingId, iverksettVedtak, HendelseType.IVERKSATT)
         }
-        confirmVerified(behandlingdao, behandlingService, grlService, oppgaveService)
+        confirmVerified(behandlingdao, behandlingService, grlService)
     }
 
     @Test
@@ -131,44 +125,20 @@ internal class BehandlingStatusServiceTest {
                 every { hentBehandling(behandlingId) } returns behandling
             }
         val grlService = mockk<GrunnlagsendringshendelseService>()
-        val oppgave =
-            OppgaveIntern(
-                id = UUID.randomUUID(),
-                status = Status.NY,
-                enhet = Enheter.defaultEnhet.enhetNr,
-                sakId = sakId,
-                kilde = OppgaveKilde.BEHANDLING,
-                type = OppgaveType.UTLAND,
-                saksbehandler = saksbehandler,
-                referanse = behandlingId.toString(),
-                merknad = null,
-                opprettet = Tidspunkt.now(),
-                sakType = SakType.BARNEPENSJON,
-                fnr = "123",
-                frist = Tidspunkt.now(),
+
+        val generellBehandlingUtland =
+            GenerellBehandling.opprettUtland(
+                sakId,
+                behandlingId,
             )
-        val oppgaveService =
-            mockk<OppgaveService> {
-                every {
-                    opprettNyOppgaveMedSakOgReferanse(
-                        behandlingId.toString(),
-                        sakId,
-                        OppgaveKilde.BEHANDLING,
-                        OppgaveType.UTLAND,
-                        null,
-                    )
-                } returns oppgave
-                every { tildelSaksbehandler(oppgave.id, saksbehandler) } just runs
-                every { hentSaksbehandlerFraFoerstegangsbehandling(behandlingId) } returns saksbehandler
+        val generellBehandlingService =
+            mockk<GenerellBehandlingService> {
+                every { opprettBehandling(any()) } returns generellBehandlingUtland
             }
 
         val featureToggleService =
             mockk<FeatureToggleService> {
                 every { isEnabled(any(), any()) } returns true
-            }
-        val generellBehandlingService =
-            mockk<GenerellBehandlingService> {
-                every { opprettBehandling(any()) } just runs
             }
 
         val sut =
@@ -176,28 +146,20 @@ internal class BehandlingStatusServiceTest {
                 behandlingdao,
                 behandlingService,
                 grlService,
-                oppgaveService,
                 featureToggleService,
                 generellBehandlingService,
             )
 
-        sut.settIverksattVedtak(behandlingId, iverksettVedtak)
+        inTransaction {
+            sut.settIverksattVedtak(behandlingId, iverksettVedtak)
+        }
 
         verify {
             behandlingdao.lagreStatus(behandlingId, BehandlingStatus.IVERKSATT, any())
             behandlingService.hentBehandling(behandlingId)
             behandlingService.registrerVedtakHendelse(behandlingId, iverksettVedtak, HendelseType.IVERKSATT)
-            oppgaveService.opprettNyOppgaveMedSakOgReferanse(
-                behandlingId.toString(),
-                sakId,
-                OppgaveKilde.BEHANDLING,
-                OppgaveType.UTLAND,
-                null,
-            )
-            oppgaveService.hentSaksbehandlerFraFoerstegangsbehandling(behandlingId)
-            oppgaveService.tildelSaksbehandler(oppgave.id, saksbehandler)
             generellBehandlingService.opprettBehandling(any())
         }
-        confirmVerified(behandlingdao, behandlingService, grlService, oppgaveService, generellBehandlingService)
+        confirmVerified(behandlingdao, behandlingService, grlService, generellBehandlingService)
     }
 }

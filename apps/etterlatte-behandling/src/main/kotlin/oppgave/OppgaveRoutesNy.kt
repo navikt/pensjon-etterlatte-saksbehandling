@@ -33,7 +33,7 @@ internal fun Route.oppgaveRoutes(
     service: OppgaveService,
     gosysOppgaveService: GosysOppgaveService,
 ) {
-    route("/api/nyeoppgaver") {
+    route("/api/oppgaver") {
         get {
             kunSaksbehandler {
                 call.respond(
@@ -47,7 +47,7 @@ internal fun Route.oppgaveRoutes(
         route("/sak/{$SAKID_CALL_PARAMETER}") {
             get("oppgaver") {
                 kunSystembruker {
-                    call.respond(service.hentSakOgOppgaverForSak(sakId))
+                    call.respond(inTransaction { service.hentSakOgOppgaverForSak(sakId) })
                 }
             }
         }
@@ -71,10 +71,12 @@ internal fun Route.oppgaveRoutes(
         route("{$OPPGAVEID_CALL_PARAMETER}") {
             post("tildel-saksbehandler") {
                 val saksbehandlerEndringDto = call.receive<SaksbehandlerEndringDto>()
-                service.tildelSaksbehandler(
-                    oppgaveId,
-                    saksbehandlerEndringDto.saksbehandler,
-                )
+                inTransaction {
+                    service.tildelSaksbehandler(
+                        oppgaveId,
+                        saksbehandlerEndringDto.saksbehandler,
+                    )
+                }
                 call.respond(HttpStatusCode.OK)
             }
             post("bytt-saksbehandler") {

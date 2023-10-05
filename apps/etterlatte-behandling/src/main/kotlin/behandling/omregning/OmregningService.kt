@@ -1,5 +1,6 @@
 package no.nav.etterlatte.behandling.omregning
 
+import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.GrunnlagService
 import no.nav.etterlatte.behandling.revurdering.RevurderingService
@@ -15,7 +16,7 @@ class OmregningService(
     private val grunnlagService: GrunnlagService,
     private val revurderingService: RevurderingService,
 ) {
-    suspend fun opprettOmregning(
+    fun opprettOmregning(
         sakId: Long,
         fraDato: LocalDate,
         prosessType: Prosesstype,
@@ -23,9 +24,7 @@ class OmregningService(
         val forrigeBehandling =
             behandlingService.hentSisteIverksatte(sakId)
                 ?: throw IllegalArgumentException("Fant ikke forrige behandling i sak $sakId")
-
-        val persongalleri = grunnlagService.hentPersongalleri(sakId)
-
+        val persongalleri = runBlocking { grunnlagService.hentPersongalleri(sakId) }
         val behandling =
             when (prosessType) {
                 Prosesstype.AUTOMATISK ->
@@ -36,7 +35,6 @@ class OmregningService(
                         virkningstidspunkt = fraDato,
                         kilde = Vedtaksloesning.GJENNY,
                         persongalleri = persongalleri,
-                        merknad = null,
                     )
 
                 Prosesstype.MANUELL -> throw Exception("Støtter ikke prosesstype MANUELL")

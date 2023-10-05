@@ -7,7 +7,6 @@ import no.nav.etterlatte.libs.database.hent
 import no.nav.etterlatte.libs.database.oppdater
 import no.nav.etterlatte.libs.database.opprett
 import no.nav.etterlatte.libs.database.transaction
-import no.nav.etterlatte.rapidsandrivers.migrering.MigreringRequest
 import no.nav.etterlatte.rapidsandrivers.migrering.PesysId
 import java.util.UUID
 import javax.sql.DataSource
@@ -89,10 +88,11 @@ internal class PesysRepository(private val dataSource: DataSource) : Transaction
     }
 
     fun lagreFeilkjoering(
-        request: MigreringRequest,
+        request: String,
         tx: TransactionalSession? = null,
         feilendeSteg: String,
         feil: String,
+        pesysId: PesysId,
     ) = tx.session {
         opprett(
             """
@@ -112,7 +112,7 @@ internal class PesysRepository(private val dataSource: DataSource) : Transaction
                 )""",
             mapOf(
                 Feilkjoering.ID to UUID.randomUUID(),
-                Feilkjoering.PESYS_ID to request.pesysId.id,
+                Feilkjoering.PESYS_ID to pesysId.id,
                 Feilkjoering.REQUEST to request.toJson(),
                 Feilkjoering.FEILMELDING to feil,
                 Feilkjoering.FEILENDE_STEG to feilendeSteg,
@@ -120,6 +120,25 @@ internal class PesysRepository(private val dataSource: DataSource) : Transaction
             "Lagra feilkjøringsdata for $request.pesysId.id",
         )
     }
+
+    fun hentKoplingTilBehandling(
+        pesysId: PesysId,
+        tx: TransactionalSession? = null,
+    ) = tx.session {
+        hent(
+            "SELECT ${Pesyskoplingtabell.BEHANDLING_ID} FROM ${Pesyskoplingtabell.TABELLNAVN} " +
+                "WHERE ${Pesyskoplingtabell.PESYS_ID} = :${Pesyskoplingtabell.PESYS_ID}",
+            mapOf(Pesyskoplingtabell.PESYS_ID to pesysId.id),
+        ) {
+            Pesyskopling(pesysId, it.uuid(Pesyskoplingtabell.BEHANDLING_ID))
+        }
+    }
+}
+
+private object Pesyskoplingtabell {
+    const val TABELLNAVN = "pesyskopling"
+    const val PESYS_ID = "pesys_id"
+    const val BEHANDLING_ID = "behandling_id"
 }
 
 private object Feilkjoering {

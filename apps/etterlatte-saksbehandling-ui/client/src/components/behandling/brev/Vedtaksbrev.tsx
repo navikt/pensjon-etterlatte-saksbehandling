@@ -17,43 +17,39 @@ import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import MottakerPanel from '~components/behandling/brev/detaljer/MottakerPanel'
 import ForhaandsvisningBrev from '~components/behandling/brev/ForhaandsvisningBrev'
 import Spinner from '~shared/Spinner'
-import { BrevProsessType } from '~shared/types/Brev'
+import { BrevProsessType, IBrev } from '~shared/types/Brev'
 import RedigerbartBrev from '~components/behandling/brev/RedigerbartBrev'
+import { isFailure, isPending, isPendingOrInitial, useApiCall } from '~shared/hooks/useApiCall'
+import { fattVedtak } from '~shared/api/behandling'
 
 export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
   const { behandlingId } = useParams()
   const { sakId, soeknadMottattDato, status } = props.behandling
 
-  const [vedtaksbrev, setVedtaksbrev] = useState<any>(undefined)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string>()
+  const [vedtaksbrev, setVedtaksbrev] = useState<IBrev | undefined>(undefined)
+
+  const [hentBrevStatus, hentBrev] = useApiCall(hentVedtaksbrev)
+  const [opprettBrevStatus, opprettNyttVedtaksbrev] = useApiCall(opprettVedtaksbrev)
 
   useEffect(() => {
-    if (!behandlingId || !sakId) return
+    if (!behandlingId || !sakId || !behandlingSkalSendeBrev(props.behandling)) return
 
-    const fetchVedtaksbrev = async () => {
-      if (!behandlingSkalSendeBrev(props.behandling)) {
-        return
+    hentBrev(behandlingId, (brev, statusCode) => {
+      if (statusCode === 200) {
+        setVedtaksbrev(brev)
+      } else if (statusCode === 204) {
+        opprettNyttVedtaksbrev({ sakId, behandlingId }, (nyttBrev) => {
+          setVedtaksbrev(nyttBrev)
+        })
       }
-
-      const brevResponse = await hentVedtaksbrev(behandlingId!!)
-      if (brevResponse.status === 'ok' && brevResponse.statusCode === 200) {
-        setVedtaksbrev(brevResponse.data)
-      } else if (brevResponse.statusCode === 204) {
-        const brevOpprettetResponse = await opprettVedtaksbrev(sakId, behandlingId!!)
-
-        if (brevOpprettetResponse.status === 'ok' && brevOpprettetResponse.statusCode === 201) {
-          setVedtaksbrev(brevOpprettetResponse.data)
-        } else {
-          setError('Oppretting av vedtaksbrev feilet...')
-        }
-      } else {
-        setError('Feil ved henting av brev...')
-      }
-      setLoading(false)
-    }
-    fetchVedtaksbrev()
+    })
   }, [behandlingId, sakId])
+
+  if (isPendingOrInitial(hentBrevStatus)) {
+    return <Spinner visible label="Henter brev ..." />
+  } else if (isPending(opprettBrevStatus)) {
+    return <Spinner visible label="Ingen brev funnet. Oppretter brev ..." />
+  }
 
   return (
     <Content>
@@ -81,33 +77,27 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
           </ContentHeader>
         </Sidebar>
 
-        {loading ? (
-          <SpinnerContainer>
-            <Spinner visible={true} label="Henter brev ..." />
-          </SpinnerContainer>
-        ) : error ? (
-          <ErrorMessage>{error}</ErrorMessage>
-        ) : vedtaksbrev.prosessType === BrevProsessType.AUTOMATISK ? (
-          <ForhaandsvisningBrev brev={vedtaksbrev} />
-        ) : (
-          <RedigerbartBrev brev={vedtaksbrev} kanRedigeres={manueltBrevKanRedigeres(status)} />
-        )}
+        {!!vedtaksbrev &&
+          (vedtaksbrev?.prosessType === BrevProsessType.AUTOMATISK ? (
+            <ForhaandsvisningBrev brev={vedtaksbrev} />
+          ) : (
+            <RedigerbartBrev brev={vedtaksbrev!!} kanRedigeres={manueltBrevKanRedigeres(status)} />
+          ))}
+
+        {isFailure(hentBrevStatus) && <ErrorMessage>Feil ved henting av brev</ErrorMessage>}
+        {isFailure(opprettBrevStatus) && <ErrorMessage>Kunne ikke opprette brev</ErrorMessage>}
       </BrevContent>
 
       <Border />
 
       <BehandlingHandlingKnapper>
-        {hentBehandlesFraStatus(status) && <SendTilAttesteringModal />}
+        {hentBehandlesFraStatus(status) && (
+          <SendTilAttesteringModal behandlingId={props.behandling.id} fattVedtakApi={fattVedtak} />
+        )}
       </BehandlingHandlingKnapper>
     </Content>
   )
 }
-
-const SpinnerContainer = styled.div`
-  height: 100%;
-  width: 100%;
-  text-align: center;
-`
 
 const BrevContent = styled.div`
   display: flex;

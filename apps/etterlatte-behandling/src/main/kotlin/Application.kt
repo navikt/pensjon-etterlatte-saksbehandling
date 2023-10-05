@@ -17,11 +17,13 @@ import kotlinx.coroutines.withContext
 import no.nav.etterlatte.behandling.behandlingRoutes
 import no.nav.etterlatte.behandling.behandlingVedtakRoute
 import no.nav.etterlatte.behandling.behandlingsstatusRoutes
+import no.nav.etterlatte.behandling.etterbetaling.etterbetalingRoutes
 import no.nav.etterlatte.behandling.generellbehandling.generellbehandlingRoutes
 import no.nav.etterlatte.behandling.klage.klageRoutes
 import no.nav.etterlatte.behandling.omregning.migreringRoutes
 import no.nav.etterlatte.behandling.omregning.omregningRoutes
 import no.nav.etterlatte.behandling.revurdering.revurderingRoutes
+import no.nav.etterlatte.behandling.statistikk.statistikkRoutes
 import no.nav.etterlatte.behandling.tilbakekreving.tilbakekrevingRoutes
 import no.nav.etterlatte.behandling.tilgang.tilgangRoutes
 import no.nav.etterlatte.common.DatabaseContext
@@ -51,7 +53,7 @@ fun main() {
     Server(ApplicationContext()).run()
 }
 
-class Server(private val context: ApplicationContext) {
+private class Server(private val context: ApplicationContext) {
     init {
         sikkerLoggOppstartOgAvslutning("etterlatte-behandling")
     }
@@ -75,7 +77,7 @@ class Server(private val context: ApplicationContext) {
         }
 }
 
-fun Application.module(context: ApplicationContext) {
+internal fun Application.module(context: ApplicationContext) {
     with(context) {
         restModule(
             sikkerLogg,
@@ -105,6 +107,7 @@ fun Application.module(context: ApplicationContext) {
                 aktivitetspliktService = aktivtetspliktService,
                 behandlingFactory = behandlingFactory,
             )
+            statistikkRoutes(behandlingService = behandlingService)
             generellbehandlingRoutes(
                 generellBehandlingService = generellBehandlingService,
                 sakService = sakService,
@@ -119,6 +122,7 @@ fun Application.module(context: ApplicationContext) {
                 oppgaveService = oppgaveService,
                 behandlingService = behandlingService,
             )
+            etterbetalingRoutes(etterbetalingService)
             oppgaveRoutes(
                 service = oppgaveService,
                 gosysOppgaveService = gosysOppgaveService,
@@ -130,6 +134,7 @@ fun Application.module(context: ApplicationContext) {
 
             install(adressebeskyttelsePlugin) {
                 saksbehandlerGroupIdsByKey = context.saksbehandlerGroupIdsByKey
+
                 harTilgangBehandling = { behandlingId, saksbehandlerMedRoller ->
                     tilgangService.harTilgangTilBehandling(behandlingId, saksbehandlerMedRoller)
                 }
@@ -147,6 +152,9 @@ fun Application.module(context: ApplicationContext) {
                         klageId,
                         saksbehandlerMedRoller,
                     )
+                }
+                harTilgangTilTilbakekreving = { tilbakekrevingId, saksbehandlerMedRoller ->
+                    tilgangService.harTilgangTilTilbakekreving(tilbakekrevingId, saksbehandlerMedRoller)
                 }
             }
         }

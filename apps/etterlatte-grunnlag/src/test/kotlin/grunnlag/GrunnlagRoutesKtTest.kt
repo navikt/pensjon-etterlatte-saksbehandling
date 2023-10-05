@@ -2,6 +2,7 @@ package no.nav.etterlatte.grunnlag
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.get
@@ -15,6 +16,7 @@ import io.ktor.http.contentType
 import io.ktor.serialization.jackson.jackson
 import io.ktor.server.application.log
 import io.ktor.server.config.HoconApplicationConfig
+import io.ktor.server.testing.ApplicationTestBuilder
 import io.ktor.server.testing.testApplication
 import io.mockk.Called
 import io.mockk.Runs
@@ -29,12 +31,10 @@ import io.mockk.slot
 import io.mockk.verify
 import lagGrunnlagsopplysning
 import no.nav.etterlatte.klienter.BehandlingKlient
-import no.nav.etterlatte.libs.common.FoedselsnummerDTO
-import no.nav.etterlatte.libs.common.behandling.PersonMedSakerOgRoller
-import no.nav.etterlatte.libs.common.behandling.SakOgRolle
-import no.nav.etterlatte.libs.common.behandling.Saksrolle
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.NyeSaksopplysninger
+import no.nav.etterlatte.libs.common.grunnlag.Opplysningsbehov
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.serialize
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -42,13 +42,11 @@ import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
-import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeAll
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import testsupport.buildTestApplicationConfigurationForOauth
@@ -70,11 +68,6 @@ internal class GrunnlagRoutesKtTest {
         server.start()
         val httpServer = server.config.httpServer
         hoconApplicationConfig = buildTestApplicationConfigurationForOauth(httpServer.port(), AZURE_ISSUER, CLIENT_ID)
-    }
-
-    @BeforeEach
-    fun beforeEach() {
-        coEvery { behandlingKlient.harTilgangTilSak(any(), any()) } returns true
     }
 
     @AfterEach
@@ -120,9 +113,9 @@ internal class GrunnlagRoutesKtTest {
                 config = hoconApplicationConfig
             }
             application {
-                restModule(this.log, routePrefix = "api") { grunnlagRoute(grunnlagService, behandlingKlient) }
+                restModule(this.log, routePrefix = "api/grunnlag") { grunnlagRoute(grunnlagService, behandlingKlient) }
             }
-            val response = client.get("api/grunnlag/1")
+            val response = client.get("api/grunnlag/sak/1")
 
             assertEquals(HttpStatusCode.Unauthorized, response.status)
         }
@@ -133,16 +126,17 @@ internal class GrunnlagRoutesKtTest {
     @Test
     fun `returnerer 404 hvis grunnlag ikke finnes`() {
         every { grunnlagService.hentOpplysningsgrunnlag(any()) } returns null
+        coEvery { behandlingKlient.harTilgangTilSak(any(), any()) } returns true
 
         testApplication {
             environment {
                 config = hoconApplicationConfig
             }
             application {
-                restModule(this.log, routePrefix = "api") { grunnlagRoute(grunnlagService, behandlingKlient) }
+                restModule(this.log, routePrefix = "api/grunnlag") { grunnlagRoute(grunnlagService, behandlingKlient) }
             }
             val response =
-                client.get("api/grunnlag/1") {
+                client.get("api/grunnlag/sak/1") {
                     headers {
                         append(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                         append(HttpHeaders.Authorization, "Bearer $token")
@@ -160,16 +154,17 @@ internal class GrunnlagRoutesKtTest {
     fun `200 ok gir mapped data`() {
         val testData = GrunnlagTestData().hentOpplysningsgrunnlag()
         every { grunnlagService.hentOpplysningsgrunnlag(1) } returns testData
+        coEvery { behandlingKlient.harTilgangTilSak(any(), any()) } returns true
 
         testApplication {
             environment {
                 config = hoconApplicationConfig
             }
             application {
-                restModule(this.log, routePrefix = "api") { grunnlagRoute(grunnlagService, behandlingKlient) }
+                restModule(this.log, routePrefix = "api/grunnlag") { grunnlagRoute(grunnlagService, behandlingKlient) }
             }
             val response =
-                client.get("api/grunnlag/1") {
+                client.get("api/grunnlag/sak/1") {
                     headers {
                         append(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                         append(HttpHeaders.Authorization, "Bearer $token")
@@ -185,82 +180,6 @@ internal class GrunnlagRoutesKtTest {
     }
 
     @Test
-    fun `roller tilknyttet person`() {
-        val response =
-            PersonMedSakerOgRoller(
-                SOEKER_FOEDSELSNUMMER.value,
-                listOf(
-                    SakOgRolle(1, Saksrolle.SOEKER),
-                ),
-            )
-        every { grunnlagService.hentSakerOgRoller(any()) } returns response
-
-        testApplication {
-            environment {
-                config = hoconApplicationConfig
-            }
-            application {
-                restModule(this.log, routePrefix = "api") { grunnlagRoute(grunnlagService, behandlingKlient) }
-            }
-            val httpClient =
-                createClient {
-                    install(ContentNegotiation) {
-                        jackson { registerModule(JavaTimeModule()) }
-                    }
-                }
-            val actualResponse =
-                httpClient.post("api/grunnlag/person/roller") {
-                    setBody(FoedselsnummerDTO(SOEKER_FOEDSELSNUMMER.value))
-                    headers {
-                        append(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                        append(HttpHeaders.Authorization, "Bearer $systemBruker")
-                    }
-                }
-
-            assertEquals(HttpStatusCode.OK, actualResponse.status)
-            assertEquals(serialize(response), actualResponse.body<String>())
-        }
-
-        verify(exactly = 1) { grunnlagService.hentSakerOgRoller(any()) }
-        coVerify { behandlingKlient wasNot Called }
-    }
-
-    @Test
-    fun `saker tilknyttet person`() {
-        val response: Set<Long> = setOf(1, 2, 3)
-        every { grunnlagService.hentAlleSakerForFnr(any()) } returns response
-
-        testApplication {
-            environment {
-                config = hoconApplicationConfig
-            }
-            application {
-                restModule(this.log, routePrefix = "api") { grunnlagRoute(grunnlagService, behandlingKlient) }
-            }
-            val httpClient =
-                createClient {
-                    install(ContentNegotiation) {
-                        jackson { registerModule(JavaTimeModule()) }
-                    }
-                }
-            val actualResponse =
-                httpClient.post("api/grunnlag/person/saker") {
-                    contentType(ContentType.Application.Json)
-                    setBody(FoedselsnummerDTO(SOEKER_FOEDSELSNUMMER.value))
-                    headers {
-                        append(HttpHeaders.Authorization, "Bearer $systemBruker")
-                    }
-                }
-
-            assertEquals(HttpStatusCode.OK, actualResponse.status)
-            assertEquals(serialize(response), actualResponse.body<String>())
-        }
-
-        verify(exactly = 1) { grunnlagService.hentAlleSakerForFnr(any()) }
-        coVerify { behandlingKlient wasNot Called }
-    }
-
-    @Test
     fun `Teste endepunkt for lagring av nye saksopplysninger`() {
         val sakId = 12345L
         val opplysninger =
@@ -273,26 +192,19 @@ internal class GrunnlagRoutesKtTest {
             )
 
         every { grunnlagService.lagreNyeSaksopplysninger(any(), any()) } just Runs
+        coEvery { behandlingKlient.harTilgangTilSak(any(), any()) } returns true
 
         testApplication {
             environment {
                 config = hoconApplicationConfig
             }
-            application {
-                restModule(this.log, routePrefix = "api") { grunnlagRoute(grunnlagService, behandlingKlient) }
-            }
-            val httpClient =
-                createClient {
-                    install(ContentNegotiation) {
-                        jackson { registerModule(JavaTimeModule()) }
-                    }
-                }
+            val httpClient = createHttpClient()
             val actualResponse =
-                httpClient.post("api/grunnlag/$sakId/nye-opplysninger") {
+                httpClient.post("api/grunnlag/sak/$sakId/nye-opplysninger") {
                     contentType(ContentType.Application.Json)
                     setBody(NyeSaksopplysninger(opplysninger))
                     headers {
-                        append(HttpHeaders.Authorization, "Bearer $systemBruker")
+                        append(HttpHeaders.Authorization, "Bearer $token")
                     }
                 }
 
@@ -302,10 +214,56 @@ internal class GrunnlagRoutesKtTest {
         val opplysningerSlot = slot<List<Grunnlagsopplysning<JsonNode>>>()
 
         verify(exactly = 1) { grunnlagService.lagreNyeSaksopplysninger(sakId, capture(opplysningerSlot)) }
-        coVerify { behandlingKlient wasNot Called }
+        coVerify(exactly = 1) { behandlingKlient.harTilgangTilSak(sakId, any()) }
 
         val faktiskOpplysning = opplysningerSlot.captured.single()
 
         assertEquals(serialize(opplysninger.single()), serialize(faktiskOpplysning))
+    }
+
+    @Test
+    fun `Teste endepunkt for oppdatering av grunnlag`() {
+        val sakId = 12345L
+        val persongalleri = GrunnlagTestData().hentPersonGalleri()
+        val opplysningsbehov = Opplysningsbehov(sakId, SakType.BARNEPENSJON, persongalleri)
+
+        coEvery { grunnlagService.oppdaterGrunnlag(any()) } just Runs
+
+        testApplication {
+            environment {
+                config = hoconApplicationConfig
+            }
+            val httpClient = createHttpClient()
+            val actualResponse =
+                httpClient.post("api/grunnlag/sak/$sakId/oppdater-grunnlag") {
+                    contentType(ContentType.Application.Json)
+                    setBody(opplysningsbehov)
+                    headers {
+                        append(HttpHeaders.Authorization, "Bearer $systemBruker")
+                    }
+                }
+
+            assertEquals(HttpStatusCode.OK, actualResponse.status)
+        }
+
+        val behovSlot = slot<Opplysningsbehov>()
+        coVerify(exactly = 1) { grunnlagService.oppdaterGrunnlag(capture(behovSlot)) }
+        coVerify { behandlingKlient wasNot Called }
+
+        assertEquals(opplysningsbehov, behovSlot.captured)
+    }
+
+    private fun ApplicationTestBuilder.createHttpClient(): HttpClient {
+        application {
+            restModule(this.log, routePrefix = "api/grunnlag") {
+                grunnlagRoute(grunnlagService, behandlingKlient)
+            }
+        }
+
+        return createClient {
+            install(ContentNegotiation) {
+                jackson { registerModule(JavaTimeModule()) }
+            }
+        }
     }
 }

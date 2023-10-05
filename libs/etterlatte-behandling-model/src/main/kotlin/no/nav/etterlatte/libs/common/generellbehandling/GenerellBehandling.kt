@@ -9,6 +9,7 @@ data class GenerellBehandling(
     val opprettet: Tidspunkt,
     val type: GenerellBehandlingType,
     val innhold: Innhold?,
+    val tilknyttetBehandling: UUID? = null,
 ) {
     init {
         if (innhold !== null) {
@@ -35,6 +36,18 @@ data class GenerellBehandling(
             type: GenerellBehandlingType,
             sakId: Long,
         ) = GenerellBehandling(UUID.randomUUID(), sakId, Tidspunkt.now(), type, null)
+
+        fun opprettUtland(
+            sakId: Long,
+            behandlingreferanse: UUID,
+        ) = GenerellBehandling(
+            UUID.randomUUID(),
+            sakId,
+            Tidspunkt.now(),
+            GenerellBehandlingType.UTLAND,
+            null,
+            tilknyttetBehandling = behandlingreferanse,
+        )
     }
 
     enum class GenerellBehandlingType {

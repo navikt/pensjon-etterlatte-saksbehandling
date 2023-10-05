@@ -20,7 +20,7 @@ data class GosysApiOppgave(
     val id: Long,
     val versjon: Long,
     val tema: String,
-    val behandlingstema: String,
+    val behandlingstema: String? = null,
     val oppgavetype: String,
     val opprettetTidspunkt: Tidspunkt,
     val tildeltEnhetsnr: String,
@@ -87,6 +87,7 @@ class GosysOppgaveKlientImpl(config: Config, httpClient: HttpClient) : GosysOppg
                 "statuskategori=AAPEN"
                     .plus("&tema=EYB")
                     .plus("&tema=EYO")
+                    .plus("&limit=1000")
                     .plus(enhetsnr?.let { "&tildeltEnhetsnr=$it" } ?: "")
 //                .plus("&tilordnetRessurs=${brukerTokenInfo.ident()}")
 

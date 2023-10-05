@@ -63,7 +63,7 @@ abstract class BehandlingIntegrationTest {
     @Container
     private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:$POSTGRES_VERSION")
     private val server: MockOAuth2Server = MockOAuth2Server()
-    protected lateinit var applicationContext: ApplicationContext
+    internal lateinit var applicationContext: ApplicationContext
     protected lateinit var hoconApplicationConfig: HoconApplicationConfig
 
     private fun konfigurertFeatureToggleService(): FeatureToggleService {
@@ -189,7 +189,7 @@ abstract class BehandlingIntegrationTest {
         HttpClient(MockEngine) {
             engine {
                 addHandler { request ->
-                    if (request.url.fullPath.matches(Regex("api/grunnlag/[0-9]{11}"))) {
+                    if (request.url.fullPath.matches(Regex("api/grunnlag/sak/[0-9]+"))) {
                         val headers = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
                         respond(Grunnlag.empty().toJson(), headers = headers)
                     } else if (request.url.fullPath.endsWith("/PERSONGALLERI_V1")) {

@@ -25,6 +25,7 @@ export interface IDetaljertBehandling {
   revurderingsaarsak: Revurderingsaarsak | null
   revurderinginfo: RevurderingMedBegrunnelse | null
   begrunnelse: string | null
+  etterbetaling: IEtterbetaling | null
 }
 
 export interface NyBehandlingRequest {
@@ -109,4 +110,9 @@ export interface Virkningstidspunkt {
   dato: string
   kilde: KildeSaksbehandler
   begrunnelse: string
+}
+
+export interface IEtterbetaling {
+  fraDato?: Date | null
+  tilDato?: Date | null
 }

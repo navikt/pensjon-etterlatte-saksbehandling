@@ -6,6 +6,7 @@ import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
+import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.Omregningshendelse
 import no.nav.etterlatte.libs.common.behandling.SakType
 import java.util.UUID
@@ -15,11 +16,13 @@ fun Route.omregningRoutes(omregningService: OmregningService) {
         post {
             val request = call.receive<Omregningshendelse>()
             val (behandlingId, forrigeBehandlingId, sakType) =
-                omregningService.opprettOmregning(
-                    sakId = request.sakId,
-                    fraDato = request.fradato,
-                    prosessType = request.prosesstype,
-                )
+                inTransaction {
+                    omregningService.opprettOmregning(
+                        sakId = request.sakId,
+                        fraDato = request.fradato,
+                        prosessType = request.prosesstype,
+                    )
+                }
             call.respond(OpprettOmregningResponse(behandlingId, forrigeBehandlingId, sakType))
         }
     }

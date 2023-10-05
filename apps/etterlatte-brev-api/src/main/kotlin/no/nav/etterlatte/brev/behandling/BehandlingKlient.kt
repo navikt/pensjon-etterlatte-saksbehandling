@@ -4,6 +4,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.michaelbull.result.mapBoth
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
+import no.nav.etterlatte.brev.model.EtterbetalingDTO
 import no.nav.etterlatte.libs.common.BehandlingTilgangsSjekk
 import no.nav.etterlatte.libs.common.PersonTilgangsSjekk
 import no.nav.etterlatte.libs.common.RetryResult
@@ -152,6 +153,27 @@ class BehandlingKlient(
                 )
         } catch (e: Exception) {
             throw BehandlingKlientException("Sjekking av tilgang for sak feilet", e)
+        }
+    }
+
+    suspend fun hentEtterbetaling(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): EtterbetalingDTO? {
+        try {
+            return downstreamResourceClient.get(
+                resource =
+                    Resource(
+                        clientId = clientId,
+                        url = "$resourceUrl/api/behandling/$behandlingId/etterbetaling",
+                    ),
+                brukerTokenInfo = brukerTokenInfo,
+            ).mapBoth(
+                success = { resource -> resource.response?.let { objectMapper.readValue(it.toString()) } },
+                failure = { throwableErrorMessage -> throw throwableErrorMessage },
+            )
+        } catch (e: Exception) {
+            throw BehandlingKlientException("Henting av etterbetaling feilet", e)
         }
     }
 }

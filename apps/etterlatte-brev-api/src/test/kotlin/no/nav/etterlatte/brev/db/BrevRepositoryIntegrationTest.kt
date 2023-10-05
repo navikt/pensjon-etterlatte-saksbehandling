@@ -156,6 +156,38 @@ internal class BrevRepositoryIntegrationTest {
     }
 
     @Test
+    fun `Lagring av pdf separat`() {
+        val ulagretBrev = ulagretBrev(behandlingId = UUID.randomUUID())
+        val brev = db.opprettBrev(ulagretBrev)
+
+        brev.status shouldBe Status.OPPRETTET
+
+        db.hentBrevInnhold(brev.id) shouldBe ulagretBrev.innhold
+        db.lagrePdf(brev.id, Pdf(PDF_BYTES))
+
+        val pdf = db.hentPdf(brev.id)!!
+        pdf.bytes.contentEquals(PDF_BYTES) shouldBe true
+
+        val hentetBrev = db.hentBrev(brev.id)
+
+        hentetBrev.status shouldBe Status.OPPRETTET
+    }
+
+    @Test
+    fun `Sette status ferdigstilt`() {
+        val ulagretBrev = ulagretBrev(behandlingId = UUID.randomUUID())
+        val brev = db.opprettBrev(ulagretBrev)
+
+        brev.status shouldBe Status.OPPRETTET
+
+        db.oppdaterPayload(brev.id, Slate())
+        db.settBrevFerdigstilt(brev.id)
+
+        val hentetBrev = db.hentBrev(brev.id)
+        hentetBrev.status shouldBe Status.FERDIGSTILT
+    }
+
+    @Test
     fun `Slett brev`() {
         val behandlingId = UUID.randomUUID()
 

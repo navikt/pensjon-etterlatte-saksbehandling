@@ -33,9 +33,11 @@ internal fun Route.behandlingVedtakRoute(
         post {
             val fattVedtak = call.receive<VedtakEndringDTO>()
             val behandling =
-                behandlingService.hentBehandling(
-                    UUID.fromString(fattVedtak.vedtakOppgaveDTO.referanse),
-                )
+                inTransaction {
+                    behandlingService.hentBehandling(
+                        UUID.fromString(fattVedtak.vedtakOppgaveDTO.referanse),
+                    )
+                }
             if (behandling == null) {
                 call.respond(HttpStatusCode.NotFound, "Fant ingen behandling")
             } else {
@@ -70,9 +72,11 @@ internal fun Route.behandlingVedtakRoute(
         post {
             val underkjennVedtakOppgave = call.receive<VedtakEndringDTO>()
             val behandling =
-                behandlingService.hentBehandling(
-                    UUID.fromString(underkjennVedtakOppgave.vedtakOppgaveDTO.referanse),
-                )
+                inTransaction {
+                    behandlingService.hentBehandling(
+                        UUID.fromString(underkjennVedtakOppgave.vedtakOppgaveDTO.referanse),
+                    )
+                }
             if (behandling == null) {
                 call.respond(HttpStatusCode.NotFound, "Fant ingen behandling")
             } else {
@@ -101,9 +105,11 @@ internal fun Route.behandlingVedtakRoute(
         post {
             val attesterVedtakOppgave = call.receive<VedtakEndringDTO>()
             val behandling =
-                behandlingService.hentBehandling(
-                    UUID.fromString(attesterVedtakOppgave.vedtakOppgaveDTO.referanse),
-                )
+                inTransaction {
+                    behandlingService.hentBehandling(
+                        UUID.fromString(attesterVedtakOppgave.vedtakOppgaveDTO.referanse),
+                    )
+                }
             if (behandling == null) {
                 call.respond(HttpStatusCode.NotFound, "Fant ingen behandling")
             } else {
@@ -111,7 +117,7 @@ internal fun Route.behandlingVedtakRoute(
                     behandlingsstatusService.settAttestertVedtak(behandling, attesterVedtakOppgave.vedtakHendelse)
                     try {
                         oppgaveService.ferdigStillOppgaveUnderBehandling(
-                            behandlingEllerHendelseId = attesterVedtakOppgave.vedtakOppgaveDTO.referanse,
+                            referanse = attesterVedtakOppgave.vedtakOppgaveDTO.referanse,
                             saksbehandler = brukerTokenInfo,
                         )
                     } catch (e: Exception) {

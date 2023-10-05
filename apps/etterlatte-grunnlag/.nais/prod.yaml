@@ -97,6 +97,6 @@ spec:
       rules:
         - application: etterlatte-behandling
         - application: etterlatte-pdltjenester
-    external:
-      - host: etterlatte-unleash-api.nav.cloud.nais.io
+      external:
+        - host: etterlatte-unleash-api.nav.cloud.nais.io
 

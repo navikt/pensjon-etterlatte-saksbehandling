@@ -47,8 +47,6 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.sak.SakService
-import no.nav.etterlatte.sak.SakTilgangDao
-import no.nav.etterlatte.sak.TilgangServiceImpl
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertAll
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -64,8 +62,6 @@ internal class GrunnlagsendringshendelseServiceTest {
     private val grunnlagshendelsesDao = mockk<GrunnlagsendringshendelseDao>()
     private val pdlService = mockk<PdlKlientImpl>()
     private val grunnlagClient = mockk<GrunnlagKlient>(relaxed = true, relaxUnitFun = true)
-    private val adressebeskyttelseDaoMock = mockk<SakTilgangDao>()
-    private val tilgangServiceImpl = TilgangServiceImpl(adressebeskyttelseDaoMock)
     private val sakService = mockk<SakService>()
     private val oppgaveService = mockk<OppgaveService>()
     private val mockOppgave =
@@ -84,7 +80,6 @@ internal class GrunnlagsendringshendelseServiceTest {
             behandlingService,
             pdlService,
             grunnlagClient,
-            tilgangServiceImpl,
             sakService,
         )
 
@@ -646,7 +641,7 @@ internal class GrunnlagsendringshendelseServiceTest {
             Adressebeskyttelse("1", Endringstype.OPPRETTET, fnr, AdressebeskyttelseGradering.STRENGT_FORTROLIG)
 
         coEvery { grunnlagClient.hentAlleSakIder(any()) } returns sakIder
-        every { adressebeskyttelseDaoMock.oppdaterAdresseBeskyttelse(any(), any()) } returns 1
+        every { sakService.oppdaterAdressebeskyttelse(any(), any()) } returns 1
         every { sakService.finnSaker(fnr) } returns saker
         every { oppgaveService.endreEnhetForOppgaverTilknyttetSak(any(), any()) } returns Unit
         every {
@@ -661,7 +656,7 @@ internal class GrunnlagsendringshendelseServiceTest {
 
         sakIder.forEach {
             verify(exactly = 1) {
-                adressebeskyttelseDaoMock.oppdaterAdresseBeskyttelse(
+                sakService.oppdaterAdressebeskyttelse(
                     it,
                     adressebeskyttelse.adressebeskyttelseGradering,
                 )
@@ -689,7 +684,7 @@ internal class GrunnlagsendringshendelseServiceTest {
             Adressebeskyttelse("1", Endringstype.OPPRETTET, fnr, AdressebeskyttelseGradering.FORTROLIG)
 
         coEvery { grunnlagClient.hentAlleSakIder(any()) } returns sakIder
-        every { adressebeskyttelseDaoMock.oppdaterAdresseBeskyttelse(any(), any()) } returns 1
+        every { sakService.oppdaterAdressebeskyttelse(any(), any()) } returns 1
         every { sakService.finnSaker(fnr) } returns saker
         every { oppgaveService.endreEnhetForOppgaverTilknyttetSak(any(), any()) } returns Unit
         every {
@@ -704,7 +699,7 @@ internal class GrunnlagsendringshendelseServiceTest {
 
         sakIder.forEach {
             verify(exactly = 1) {
-                adressebeskyttelseDaoMock.oppdaterAdresseBeskyttelse(
+                sakService.oppdaterAdressebeskyttelse(
                     it,
                     adressebeskyttelse.adressebeskyttelseGradering,
                 )

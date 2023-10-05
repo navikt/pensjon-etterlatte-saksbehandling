@@ -17,12 +17,14 @@ import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.User
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
+import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.FoedselsNummerMedGraderingDTO
 import no.nav.etterlatte.libs.common.FoedselsnummerDTO
 import no.nav.etterlatte.libs.common.KLAGEID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.OPPGAVEID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
+import no.nav.etterlatte.libs.common.TILBAKEKREVINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
@@ -38,6 +40,8 @@ class PluginConfiguration {
     var harTilgangTilOppgave: (oppgaveId: String, saksbehandlerMedRoller: SaksbehandlerMedRoller)
     -> Boolean = { _, _ -> false }
     var harTilgangTilKlage: (klageId: String, saksbehandlerMedRoller: SaksbehandlerMedRoller)
+    -> Boolean = { _, _ -> false }
+    var harTilgangTilTilbakekreving: (tilbakekrevingId: String, saksbehandlerMedRoller: SaksbehandlerMedRoller)
     -> Boolean = { _, _ -> false }
     var saksbehandlerGroupIdsByKey: Map<AzureGroup, String> = emptyMap()
 }
@@ -124,6 +128,17 @@ val adressebeskyttelsePlugin: RouteScopedPlugin<PluginConfiguration> =
                     }
                     return@on
                 }
+                val tilbakekrevingId = call.parameters[TILBAKEKREVINGID_CALL_PARAMETER]
+                if (!tilbakekrevingId.isNullOrEmpty()) {
+                    if (!pluginConfig.harTilgangTilTilbakekreving(
+                            tilbakekrevingId,
+                            SaksbehandlerMedRoller(bruker, saksbehandlerGroupIdsByKey),
+                        )
+                    ) {
+                        call.respond(HttpStatusCode.NotFound)
+                    }
+                    return@on
+                }
             }
 
             return@on
@@ -140,10 +155,12 @@ suspend inline fun PipelineContext<*, ApplicationCall>.withFoedselsnummerInterna
     when (brukerTokenInfo) {
         is Saksbehandler -> {
             val harTilgang =
-                tilgangService.harTilgangTilPerson(
-                    foedselsnummer.value,
-                    Kontekst.get().appUserAsSaksbehandler().saksbehandlerMedRoller,
-                )
+                inTransaction {
+                    tilgangService.harTilgangTilPerson(
+                        foedselsnummer.value,
+                        Kontekst.get().appUserAsSaksbehandler().saksbehandlerMedRoller,
+                    )
+                }
             if (harTilgang) {
                 onSuccess(foedselsnummer)
             } else {
@@ -164,10 +181,12 @@ suspend inline fun PipelineContext<*, ApplicationCall>.withFoedselsnummerAndGrad
     when (brukerTokenInfo) {
         is Saksbehandler -> {
             val harTilgangTilPerson =
-                tilgangService.harTilgangTilPerson(
-                    foedselsnummer.value,
-                    Kontekst.get().appUserAsSaksbehandler().saksbehandlerMedRoller,
-                )
+                inTransaction {
+                    tilgangService.harTilgangTilPerson(
+                        foedselsnummer.value,
+                        Kontekst.get().appUserAsSaksbehandler().saksbehandlerMedRoller,
+                    )
+                }
             if (harTilgangTilPerson) {
                 onSuccess(foedselsnummer, foedselsnummerDTOmedGradering.gradering)
             } else {

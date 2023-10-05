@@ -10,7 +10,6 @@ import io.mockk.verify
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
-import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -26,6 +25,7 @@ import no.nav.etterlatte.libs.common.vedtak.Behandling
 import no.nav.etterlatte.libs.common.vedtak.Utbetalingsperiode
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
+import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseType
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.statistikk.clients.BehandlingKlient
@@ -69,11 +69,11 @@ class StatistikkServiceTest {
         val behandlingId = UUID.randomUUID()
         val sakId = 1L
         val virkningstidspunkt = YearMonth.of(2023, 6)
-        coEvery { behandlingKlient.hentDetaljertBehandling(behandlingId) } returns
-            DetaljertBehandling(
+        val enhet = "1111"
+        coEvery { behandlingKlient.hentStatistikkBehandling(behandlingId) } returns
+            StatistikkBehandling(
                 id = behandlingId,
-                sak = sakId,
-                sakType = SakType.OMSTILLINGSSTOENAD,
+                sak = Sak(id = sakId, sakType = SakType.OMSTILLINGSSTOENAD, enhet = enhet, ident = "ident"),
                 behandlingOpprettet = Tidspunkt.now().toLocalDatetimeUTC(),
                 soeknadMottattDato = null,
                 innsender = null,
@@ -88,33 +88,12 @@ class StatistikkServiceTest {
                 revurderingsaarsak = null,
                 revurderingInfo = null,
                 prosesstype = Prosesstype.MANUELL,
-                enhet = "1111",
+                enhet = enhet,
                 kilde = Vedtaksloesning.GJENNY,
+                sistEndret = LocalDateTime.now(),
             )
         every { stoenadRepo.lagreStoenadsrad(any()) } returnsArgument 0
         every { sakRepo.lagreRad(any()) } returnsArgument 0
-        coEvery { behandlingKlient.hentDetaljertBehandling(behandlingId) } returns
-            DetaljertBehandling(
-                id = behandlingId,
-                sak = sakId,
-                sakType = SakType.OMSTILLINGSSTOENAD,
-                behandlingOpprettet = Tidspunkt.now().toLocalDatetimeUTC(),
-                soeknadMottattDato = null,
-                innsender = null,
-                soeker = "12312312312",
-                gjenlevende = listOf(),
-                avdoed = listOf(),
-                soesken = listOf(),
-                status = BehandlingStatus.FATTET_VEDTAK,
-                behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-                virkningstidspunkt = null,
-                boddEllerArbeidetUtlandet = null,
-                revurderingsaarsak = null,
-                revurderingInfo = null,
-                prosesstype = Prosesstype.MANUELL,
-                enhet = "1111",
-                kilde = Vedtaksloesning.GJENNY,
-            )
         coEvery { behandlingKlient.hentPersongalleri(behandlingId) } returns
             Persongalleri(
                 "12312312312",
@@ -143,7 +122,7 @@ class StatistikkServiceTest {
                         attestasjon = Attestasjon("Attestant", "attestantEnhet", fattetTidspunkt),
                         virk = virkningstidspunkt,
                     ),
-                vedtakHendelse = VedtakHendelse.IVERKSATT,
+                vedtakKafkaHendelseType = VedtakKafkaHendelseType.IVERKSATT,
                 tekniskTid = tekniskTidForHendelse,
             )
 
@@ -224,11 +203,11 @@ class StatistikkServiceTest {
         coEvery { beregningKlient.hentAvkortingForBehandling(behandlingId) } returns mockAvkorting
 
         val fattetTidspunkt = Tidspunkt.ofNorskTidssone(LocalDate.of(2023, 7, 1), LocalTime.NOON)
-        coEvery { behandlingKlient.hentDetaljertBehandling(behandlingId) } returns
-            DetaljertBehandling(
+        val enhet = "1111"
+        coEvery { behandlingKlient.hentStatistikkBehandling(behandlingId) } returns
+            StatistikkBehandling(
                 id = behandlingId,
-                sak = sakId,
-                sakType = SakType.OMSTILLINGSSTOENAD,
+                sak = Sak(id = sakId, sakType = SakType.OMSTILLINGSSTOENAD, enhet = enhet, ident = "ident"),
                 behandlingOpprettet = Tidspunkt.now().toLocalDatetimeUTC(),
                 soeknadMottattDato = null,
                 innsender = null,
@@ -243,9 +222,11 @@ class StatistikkServiceTest {
                 revurderingsaarsak = null,
                 revurderingInfo = null,
                 prosesstype = Prosesstype.MANUELL,
-                enhet = "1111",
+                enhet = enhet,
                 kilde = Vedtaksloesning.GJENNY,
+                sistEndret = LocalDateTime.now(),
             )
+
         val (registrertSakRad, registrertStoenadRad) =
             service.registrerStatistikkForVedtak(
                 vedtak =
@@ -257,7 +238,7 @@ class StatistikkServiceTest {
                         attestasjon = Attestasjon("Attestant", "attestantEnhet", fattetTidspunkt),
                         virk = virkningstidspunkt,
                     ),
-                vedtakHendelse = VedtakHendelse.IVERKSATT,
+                vedtakKafkaHendelseType = VedtakKafkaHendelseType.IVERKSATT,
                 tekniskTid = LocalDateTime.of(2023, 2, 1, 8, 30),
             )
 

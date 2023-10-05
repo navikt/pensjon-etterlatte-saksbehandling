@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { isFailure, isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
-import { Oppgavetype, redigerFristApi } from '~shared/api/oppgaverny'
+import { Oppgavetype, redigerFristApi } from '~shared/api/oppgaver'
 import { Alert, Button, Heading, Modal, DatePicker, Label } from '@navikt/ds-react'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { formaterStringDato } from '~utils/formattering'
@@ -60,7 +60,7 @@ export const FristHandlinger = (props: {
     <>
       {frist ? (
         <>
-          <Modal open={open} onClose={() => setOpen((x) => !x)} aria-labelledby="modal-heading">
+          <Modal open={open} onClose={() => setOpen(false)} aria-labelledby="modal-heading">
             <Modal.Body>
               <Modal.Header closeButton={false}>
                 <Heading spacing level="2" size="medium" id="modal-heading">

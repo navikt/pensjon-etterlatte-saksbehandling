@@ -1,10 +1,15 @@
 package no.nav.etterlatte.adressebeskyttelse
 
 import com.nimbusds.jwt.JWTClaimsSet
+import io.mockk.mockk
 import no.nav.etterlatte.behandling.BehandlingDao
+import no.nav.etterlatte.behandling.klienter.Norg2Klient
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
 import no.nav.etterlatte.behandling.revurdering.RevurderingDao
 import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.common.klienter.PdlKlient
+import no.nav.etterlatte.common.klienter.SkjermingKlient
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
@@ -14,6 +19,8 @@ import no.nav.etterlatte.libs.database.POSTGRES_VERSION
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.opprettBehandling
 import no.nav.etterlatte.sak.SakDao
+import no.nav.etterlatte.sak.SakService
+import no.nav.etterlatte.sak.SakServiceImpl
 import no.nav.etterlatte.sak.SakTilgangDao
 import no.nav.etterlatte.sak.TilgangService
 import no.nav.etterlatte.sak.TilgangServiceImpl
@@ -38,11 +45,16 @@ internal class TilgangServiceTest {
 
     private lateinit var dataSource: DataSource
     private lateinit var tilgangService: TilgangService
+    private lateinit var sakService: SakService
     private lateinit var sakRepo: SakDao
     private lateinit var behandlingRepo: BehandlingDao
     private val strengtfortroligDev = "5ef775f2-61f8-4283-bf3d-8d03f428aa14"
     private val fortroligDev = "ea930b6b-9397-44d9-b9e6-f4cf527a632a"
     private val egenAnsattDev = "dbe4ad45-320b-4e9a-aaa1-73cca4ee124d"
+    private val pdlKlient = mockk<PdlKlient>()
+    private val norg2Klient = mockk<Norg2Klient>()
+    private val featureToggleService = mockk<FeatureToggleService>()
+    private val skjermingKlient = mockk<SkjermingKlient>()
 
     @BeforeAll
     fun beforeAll() {
@@ -59,6 +71,8 @@ internal class TilgangServiceTest {
 
         tilgangService = TilgangServiceImpl(SakTilgangDao(dataSource))
         sakRepo = SakDao { dataSource.connection }
+
+        sakService = SakServiceImpl(sakRepo, pdlKlient, norg2Klient, featureToggleService, skjermingKlient)
         behandlingRepo =
             BehandlingDao(
                 KommerBarnetTilGodeDao {
@@ -82,8 +96,8 @@ internal class TilgangServiceTest {
                 Saksbehandler("", "ident", null),
                 emptyMap(),
             )
+        sakService.oppdaterAdressebeskyttelse(sakId, AdressebeskyttelseGradering.STRENGT_FORTROLIG)
 
-        tilgangService.oppdaterAdressebeskyttelse(sakId, AdressebeskyttelseGradering.STRENGT_FORTROLIG)
         val opprettBehandling =
             opprettBehandling(
                 type = BehandlingType.FØRSTEGANGSBEHANDLING,
@@ -115,8 +129,8 @@ internal class TilgangServiceTest {
                 Saksbehandler("", "ident", JwtTokenClaims(jwtclaims)),
                 mapOf(AzureGroup.STRENGT_FORTROLIG to strengtfortroligDev),
             )
+        sakService.oppdaterAdressebeskyttelse(sakId, AdressebeskyttelseGradering.STRENGT_FORTROLIG)
 
-        tilgangService.oppdaterAdressebeskyttelse(sakId, AdressebeskyttelseGradering.STRENGT_FORTROLIG)
         val opprettBehandling =
             opprettBehandling(
                 type = BehandlingType.FØRSTEGANGSBEHANDLING,

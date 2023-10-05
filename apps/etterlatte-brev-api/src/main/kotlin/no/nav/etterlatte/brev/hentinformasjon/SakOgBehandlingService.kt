@@ -9,7 +9,6 @@ import no.nav.etterlatte.brev.behandling.Behandling
 import no.nav.etterlatte.brev.behandling.Beregningsperiode
 import no.nav.etterlatte.brev.behandling.ForenkletVedtak
 import no.nav.etterlatte.brev.behandling.PersonerISak
-import no.nav.etterlatte.brev.behandling.Soeker
 import no.nav.etterlatte.brev.behandling.Trygdetidsperiode
 import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
 import no.nav.etterlatte.brev.behandling.hentUtbetaltBeloep
@@ -40,11 +39,6 @@ interface ISakOgBehandlingService {
         bruker: BrukerTokenInfo,
     ): Sak
 
-    suspend fun hentSoeker(
-        sakId: Long,
-        bruker: BrukerTokenInfo,
-    ): Soeker
-
     suspend fun hentBehandling(
         sakId: Long,
         behandlingId: UUID,
@@ -69,13 +63,6 @@ class SakOgBehandlingService(
         sakId: Long,
         bruker: BrukerTokenInfo,
     ) = behandlingKlient.hentSak(sakId, bruker)
-
-    override suspend fun hentSoeker(
-        sakId: Long,
-        bruker: BrukerTokenInfo,
-    ): Soeker =
-        grunnlagKlient.hentGrunnlag(sakId, bruker)
-            .mapSoeker()
 
     override suspend fun hentBehandling(
         sakId: Long,

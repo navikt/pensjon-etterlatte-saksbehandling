@@ -20,6 +20,7 @@ import no.nav.etterlatte.brev.distribusjon.DistribusjonsTidspunktType
 import no.nav.etterlatte.brev.distribusjon.DistribusjonsType
 import no.nav.etterlatte.brev.dokarkiv.DokarkivServiceImpl
 import no.nav.etterlatte.brev.hentinformasjon.ISakOgBehandlingService
+import no.nav.etterlatte.brev.hentinformasjon.SoekerService
 import no.nav.etterlatte.brev.journalpost.JournalpostResponse
 import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Brev
@@ -46,6 +47,7 @@ internal class BrevServiceTest {
     private val db = mockk<BrevRepository>(relaxed = true)
     private val brevbaker = mockk<BrevbakerKlient>()
     private val sakOgBehandlingService = mockk<ISakOgBehandlingService>()
+    private val soekerService = mockk<SoekerService>()
     private val adresseService = mockk<AdresseService>()
     private val dokarkivService = mockk<DokarkivServiceImpl>()
     private val distribusjonService = mockk<DistribusjonServiceImpl>()
@@ -55,6 +57,7 @@ internal class BrevServiceTest {
         BrevService(
             db,
             sakOgBehandlingService,
+            soekerService,
             adresseService,
             dokarkivService,
             distribusjonService,

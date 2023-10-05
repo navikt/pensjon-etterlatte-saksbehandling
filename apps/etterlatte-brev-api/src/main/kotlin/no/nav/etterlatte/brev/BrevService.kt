@@ -12,6 +12,7 @@ import no.nav.etterlatte.brev.distribusjon.DistribusjonsTidspunktType
 import no.nav.etterlatte.brev.distribusjon.DistribusjonsType
 import no.nav.etterlatte.brev.dokarkiv.DokarkivService
 import no.nav.etterlatte.brev.hentinformasjon.ISakOgBehandlingService
+import no.nav.etterlatte.brev.hentinformasjon.SoekerService
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevData
 import no.nav.etterlatte.brev.model.BrevID
@@ -32,6 +33,7 @@ import org.slf4j.LoggerFactory
 class BrevService(
     private val db: BrevRepository,
     private val sakOgBehandlingService: ISakOgBehandlingService,
+    private val soekerService: SoekerService,
     private val adresseService: AdresseService,
     private val dokarkivService: DokarkivService,
     private val distribusjonService: DistribusjonService,
@@ -125,7 +127,7 @@ class BrevService(
         }
 
         val sak = sakOgBehandlingService.hentSak(brev.sakId, bruker)
-        val soeker = sakOgBehandlingService.hentSoeker(brev.sakId, bruker)
+        val soeker = soekerService.hentSoeker(brev.sakId, bruker)
         val avsender = adresseService.hentAvsender(sak, bruker.ident())
 
         val (brevKode, brevData) = opprettBrevData(brev)

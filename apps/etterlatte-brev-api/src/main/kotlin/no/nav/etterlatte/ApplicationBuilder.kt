@@ -26,6 +26,7 @@ import no.nav.etterlatte.brev.dokument.dokumentRoute
 import no.nav.etterlatte.brev.hentinformasjon.BeregningKlient
 import no.nav.etterlatte.brev.hentinformasjon.GrunnlagKlient
 import no.nav.etterlatte.brev.hentinformasjon.SakOgBehandlingService
+import no.nav.etterlatte.brev.hentinformasjon.SoekerService
 import no.nav.etterlatte.brev.hentinformasjon.TrygdetidKlient
 import no.nav.etterlatte.brev.hentinformasjon.VedtaksvurderingKlient
 import no.nav.etterlatte.brev.hentinformasjon.VilkaarsvurderingKlient
@@ -130,8 +131,18 @@ class ApplicationBuilder {
 
     private val brevProsessTypeFactory = BrevProsessTypeFactory(featureToggleService)
 
+    private val soekerService = SoekerService(grunnlagKlient)
+
     private val brevService =
-        BrevService(db, sakOgBehandlingService, adresseService, dokarkivService, distribusjonService, brevbakerService)
+        BrevService(
+            db,
+            sakOgBehandlingService,
+            soekerService,
+            adresseService,
+            dokarkivService,
+            distribusjonService,
+            brevbakerService,
+        )
 
     private val vedtaksbrevService =
         VedtaksbrevService(

@@ -32,7 +32,7 @@ class ApplicationContext {
             azureAppClientId = config.getString("azure.app.client.id"),
             azureAppJwk = config.getString("azure.app.jwk"),
             azureAppWellKnownUrl = config.getString("azure.app.well.known.url"),
-            azureAppScope = config.getString("klage.azure.scope"),
+            azureAppScope = config.getString("kabal.azure.scope"),
         )
 
     private val kabalKlient = KabalKlientImpl(client = kabalHttpClient, kabalUrl = config.getString("kabal.resource.url"))

@@ -52,7 +52,7 @@ const Etterbetaling = (props: {
   const [erEtterbetaling, setErEtterbetaling] = useState<boolean>(!!etterbetaling)
 
   const featureToggleNameEtterbetaling = 'registrer-etterbetaling'
-  const vis = !useFeatureEnabledMedDefault(featureToggleNameEtterbetaling, false)
+  const vis = useFeatureEnabledMedDefault(featureToggleNameEtterbetaling, false)
   const [errorTekst, setErrorTekst] = useState('')
 
   const valider = () => {

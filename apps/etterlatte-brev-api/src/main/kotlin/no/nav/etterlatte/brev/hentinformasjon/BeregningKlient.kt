@@ -24,7 +24,7 @@ class BeregningKlient(config: Config, httpClient: HttpClient) {
     private val clientId = config.getString("beregning.client.id")
     private val resourceUrl = config.getString("beregning.resource.url")
 
-    suspend fun hentBeregning(
+    internal suspend fun hentBeregning(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): BeregningDTO {

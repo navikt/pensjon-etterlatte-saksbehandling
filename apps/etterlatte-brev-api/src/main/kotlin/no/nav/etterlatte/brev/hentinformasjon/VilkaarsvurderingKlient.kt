@@ -26,7 +26,7 @@ class VilkaarsvurderingKlient(config: Config, httpClient: HttpClient) {
     private val clientId = config.getString("vilkaarsvurdering.client.id")
     private val resourceUrl = config.getString("vilkaarsvurdering.resource.url")
 
-    suspend fun hentVilkaarsvurdering(
+    internal suspend fun hentVilkaarsvurdering(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): VilkaarsvurderingDto {

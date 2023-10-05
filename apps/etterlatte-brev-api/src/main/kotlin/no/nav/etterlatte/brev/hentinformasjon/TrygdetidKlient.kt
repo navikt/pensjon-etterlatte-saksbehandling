@@ -23,7 +23,7 @@ class TrygdetidKlient(config: Config, httpClient: HttpClient) {
     private val clientId = config.getString("trygdetid.client.id")
     private val resourceUrl = config.getString("trygdetid.resource.url")
 
-    suspend fun hentTrygdetid(
+    internal suspend fun hentTrygdetid(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): TrygdetidDto? {

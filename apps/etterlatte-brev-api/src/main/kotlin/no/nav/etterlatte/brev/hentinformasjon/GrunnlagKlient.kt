@@ -22,7 +22,7 @@ class GrunnlagKlient(config: Config, httpClient: HttpClient) {
     private val clientId = config.getString("grunnlag.client.id")
     private val baseUrl = config.getString("grunnlag.resource.url")
 
-    suspend fun hentGrunnlag(
+    internal suspend fun hentGrunnlag(
         sakid: Long,
         brukerTokenInfo: BrukerTokenInfo,
     ): Grunnlag {

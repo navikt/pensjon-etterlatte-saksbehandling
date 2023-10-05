@@ -21,14 +21,15 @@ import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.Sak
-import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.module
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.LocalTime
+import java.time.Month
 import java.util.UUID
 
 class EtterbetalingTest : BehandlingIntegrationTest() {
@@ -69,6 +70,7 @@ class EtterbetalingTest : BehandlingIntegrationTest() {
                     it.body()
                 }
 
+            val utgangspunkt = LocalDate.of(2023, Month.OCTOBER, 1)
             val behandlingId =
                 client.post("/behandlinger/opprettbehandling") {
                     addAuthToken(tokenSaksbehandler)
@@ -77,7 +79,7 @@ class EtterbetalingTest : BehandlingIntegrationTest() {
                         BehandlingsBehov(
                             sak.id,
                             Persongalleri(fnr, "innsender", emptyList(), emptyList(), emptyList()),
-                            Tidspunkt.now().toLocalDatetimeUTC().toString(),
+                            LocalDateTime.of(utgangspunkt, LocalTime.NOON).toString(),
                         ),
                     )
                 }.let {
@@ -85,8 +87,8 @@ class EtterbetalingTest : BehandlingIntegrationTest() {
                     UUID.fromString(it.body())
                 }
 
-            val fraDato = LocalDate.now().minusMonths(3)
-            val tilDato = LocalDate.now()
+            val fraDato = utgangspunkt.minusMonths(3)
+            val tilDato = utgangspunkt
             client.put("/api/behandling/$behandlingId/etterbetaling") {
                 addAuthToken(tokenSaksbehandler)
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
@@ -103,8 +105,8 @@ class EtterbetalingTest : BehandlingIntegrationTest() {
             }.let {
                 Assertions.assertEquals(HttpStatusCode.OK, it.status)
                 val dto = it.body<EtterbetalingDTO>()
-                Assertions.assertEquals(fraDato, dto.fraDato)
-                Assertions.assertEquals(tilDato, dto.tilDato)
+                Assertions.assertEquals(LocalDate.of(2023, Month.JULY, 1), dto.fraDato)
+                Assertions.assertEquals(LocalDate.of(2023, Month.OCTOBER, 31), dto.tilDato)
             }
         }
     }

@@ -24,7 +24,6 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
-import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
 import no.nav.etterlatte.token.BrukerTokenInfo
@@ -44,11 +43,6 @@ interface ISakOgBehandlingService {
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): Behandling
-
-    suspend fun hentVedtakSaksbehandlerOgStatus(
-        behandlingId: UUID,
-        brukerTokenInfo: BrukerTokenInfo,
-    ): Pair<String, VedtakStatus>
 }
 
 class SakOgBehandlingService(
@@ -88,16 +82,6 @@ class SakOgBehandlingService(
                 brukerTokenInfo,
             )
         }
-
-    override suspend fun hentVedtakSaksbehandlerOgStatus(
-        behandlingId: UUID,
-        brukerTokenInfo: BrukerTokenInfo,
-    ): Pair<String, VedtakStatus> {
-        val vedtakDto = vedtaksvurderingKlient.hentVedtak(behandlingId, brukerTokenInfo)
-        val saksbehandlerIdent = vedtakDto.vedtakFattet?.ansvarligSaksbehandler ?: brukerTokenInfo.ident()
-
-        return Pair(saksbehandlerIdent, vedtakDto.status)
-    }
 
     private suspend fun mapBehandling(
         vedtak: VedtakDto,

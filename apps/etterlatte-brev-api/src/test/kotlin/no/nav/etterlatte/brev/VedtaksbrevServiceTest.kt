@@ -26,6 +26,7 @@ import no.nav.etterlatte.brev.brevbaker.BrevbakerService
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.dokarkiv.DokarkivServiceImpl
 import no.nav.etterlatte.brev.hentinformasjon.ISakOgBehandlingService
+import no.nav.etterlatte.brev.hentinformasjon.VedtaksvurderingService
 import no.nav.etterlatte.brev.journalpost.JournalpostResponse
 import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Avsender
@@ -76,6 +77,7 @@ internal class VedtaksbrevServiceTest {
     private val brevbaker = mockk<BrevbakerKlient>()
     private val brevService = mockk<BrevService>()
     private val sakOgBehandlingService = mockk<ISakOgBehandlingService>()
+    private val vedtaksvurderingService = mockk<VedtaksvurderingService>()
     private val adresseService = mockk<AdresseService>()
     private val dokarkivService = mockk<DokarkivServiceImpl>()
     private val featureToggleService =
@@ -87,6 +89,7 @@ internal class VedtaksbrevServiceTest {
         VedtaksbrevService(
             db,
             sakOgBehandlingService,
+            vedtaksvurderingService,
             adresseService,
             dokarkivService,
             BrevbakerService(brevbaker, adresseService, brevDataMapper),
@@ -368,7 +371,7 @@ internal class VedtaksbrevServiceTest {
             val brev = opprettBrev(Status.OPPRETTET, mockk())
 
             every { db.hentBrevForBehandling(any()) } returns brev
-            coEvery { sakOgBehandlingService.hentVedtakSaksbehandlerOgStatus(any(), any()) } returns
+            coEvery { vedtaksvurderingService.hentVedtakSaksbehandlerOgStatus(any(), any()) } returns
                 Pair(
                     SAKSBEHANDLER.ident(),
                     VedtakStatus.FATTET_VEDTAK,
@@ -384,7 +387,7 @@ internal class VedtaksbrevServiceTest {
             }
 
             coVerify {
-                sakOgBehandlingService.hentVedtakSaksbehandlerOgStatus(brev.behandlingId!!, any())
+                vedtaksvurderingService.hentVedtakSaksbehandlerOgStatus(brev.behandlingId!!, any())
             }
         }
 
@@ -393,7 +396,7 @@ internal class VedtaksbrevServiceTest {
             val brev = opprettBrev(Status.OPPRETTET, mockk())
 
             every { db.hentBrevForBehandling(any()) } returns brev
-            coEvery { sakOgBehandlingService.hentVedtakSaksbehandlerOgStatus(any(), any()) } returns
+            coEvery { vedtaksvurderingService.hentVedtakSaksbehandlerOgStatus(any(), any()) } returns
                 Pair(
                     SAKSBEHANDLER.ident(),
                     VedtakStatus.FATTET_VEDTAK,
@@ -410,7 +413,7 @@ internal class VedtaksbrevServiceTest {
             }
 
             coVerify {
-                sakOgBehandlingService.hentVedtakSaksbehandlerOgStatus(brev.behandlingId!!, any())
+                vedtaksvurderingService.hentVedtakSaksbehandlerOgStatus(brev.behandlingId!!, any())
             }
         }
 

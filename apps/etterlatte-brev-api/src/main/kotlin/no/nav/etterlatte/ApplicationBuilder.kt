@@ -29,6 +29,7 @@ import no.nav.etterlatte.brev.hentinformasjon.SakOgBehandlingService
 import no.nav.etterlatte.brev.hentinformasjon.SoekerService
 import no.nav.etterlatte.brev.hentinformasjon.TrygdetidKlient
 import no.nav.etterlatte.brev.hentinformasjon.VedtaksvurderingKlient
+import no.nav.etterlatte.brev.hentinformasjon.VedtaksvurderingService
 import no.nav.etterlatte.brev.hentinformasjon.VilkaarsvurderingKlient
 import no.nav.etterlatte.brev.model.BrevDataMapper
 import no.nav.etterlatte.brev.model.BrevProsessTypeFactory
@@ -133,6 +134,8 @@ class ApplicationBuilder {
 
     private val soekerService = SoekerService(grunnlagKlient)
 
+    private val vedtaksvurderingService = VedtaksvurderingService(vedtakKlient)
+
     private val brevService =
         BrevService(
             db,
@@ -148,6 +151,7 @@ class ApplicationBuilder {
         VedtaksbrevService(
             db,
             sakOgBehandlingService,
+            vedtaksvurderingService,
             adresseService,
             dokarkivService,
             brevbakerService,

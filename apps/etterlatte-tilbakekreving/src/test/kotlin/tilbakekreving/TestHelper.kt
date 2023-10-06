@@ -67,5 +67,6 @@ fun tilbakekrevingsvedtak(vedtakId: Long = 1) =
                 aarsak = TilbakekrevingAarsak.DODSFALL,
                 hjemmel = "hjemmel",
             ),
+        kravgrunnlagId = "1",
         kontrollfelt = "2023-09-19-10.01.03.842916",
     )

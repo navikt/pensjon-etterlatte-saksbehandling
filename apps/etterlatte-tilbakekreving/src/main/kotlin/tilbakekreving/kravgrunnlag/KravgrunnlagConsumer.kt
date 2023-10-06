@@ -8,6 +8,7 @@ import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.mq.EtterlatteJmsConnectionFactory
 import no.nav.etterlatte.tilbakekreving.kravgrunnlag.KravgrunnlagJaxb.toDetaljertKravgrunnlagDto
+import no.nav.etterlatte.tilbakekreving.sporing.TilbakekrevingSporingRepository
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -15,6 +16,7 @@ class KravgrunnlagConsumer(
     private val connectionFactory: EtterlatteJmsConnectionFactory,
     private val queue: String,
     private val kravgrunnlagService: KravgrunnlagService,
+    private val sporingRepository: TilbakekrevingSporingRepository,
 ) : MessageListener {
     private val logger = LoggerFactory.getLogger(javaClass)
     private val sikkerLogg: Logger = sikkerlogger()
@@ -32,7 +34,14 @@ class KravgrunnlagConsumer(
             try {
                 logger.info("Kravgrunnlag (id=${message.jmsMessageID}) mottatt ${message.deliveryCount()} gang(er)")
                 kravgrunnlagPayload = message.getBody(String::class.java)
+
                 val detaljertKravgrunnlag = toDetaljertKravgrunnlagDto(kravgrunnlagPayload)
+                sporingRepository.lagreMottattKravgrunnlag(
+                    detaljertKravgrunnlag.kravgrunnlagId.toString(),
+                    detaljertKravgrunnlag.fagsystemId,
+                    kravgrunnlagPayload,
+                )
+
                 kravgrunnlagService.opprettTilbakekreving(detaljertKravgrunnlag)
             } catch (t: Throwable) {
                 logger.error("Feilet under mottak av kravgrunnlag (Sjekk sikkerlogg for payload", t)

@@ -1,5 +1,7 @@
 package no.nav.etterlatte.tilbakekreving.config
 
+import no.nav.etterlatte.libs.database.jdbcUrl
+
 data class ApplicationProperties(
     val httpPort: Int,
     val mqHost: String,
@@ -9,6 +11,9 @@ data class ApplicationProperties(
     val mqKravgrunnlagQueue: String,
     val serviceUserUsername: String,
     val serviceUserPassword: String,
+    val jdbcUrl: String,
+    val dbUsername: String,
+    val dbPassword: String,
     val azureAppClientId: String,
     val azureAppJwk: String,
     val azureAppWellKnownUrl: String,
@@ -29,6 +34,14 @@ data class ApplicationProperties(
                     mqKravgrunnlagQueue = value("KRAVGRUNNLAG_MQ_NAME"),
                     serviceUserUsername = value("srvuser"),
                     serviceUserPassword = value("srvpwd"),
+                    jdbcUrl =
+                        env["DB_JDBC_URL"] ?: jdbcUrl(
+                            value("DB_HOST"),
+                            value("DB_PORT").toInt(),
+                            value("DB_DATABASE"),
+                        ),
+                    dbUsername = value("DB_USERNAME"),
+                    dbPassword = value("DB_PASSWORD"),
                     azureAppClientId = value("AZURE_APP_CLIENT_ID"),
                     azureAppJwk = value("AZURE_APP_JWK"),
                     azureAppWellKnownUrl = value("AZURE_APP_WELL_KNOWN_URL"),

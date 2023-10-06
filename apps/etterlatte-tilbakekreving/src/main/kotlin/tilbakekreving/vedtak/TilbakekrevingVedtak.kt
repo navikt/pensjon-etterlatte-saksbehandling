@@ -11,6 +11,7 @@ data class TilbakekrevingVedtak(
     val fattetVedtak: FattetVedtak,
     val perioder: List<TilbakekrevingPeriode>,
     val vurdering: TilbakekrevingVurdering,
+    val kravgrunnlagId: String,
     val kontrollfelt: String,
 )
 

@@ -1,10 +1,11 @@
-CREATE TABLE tilbakekreving
+CREATE TABLE tilbakekreving_sporing
 (
-    kravgrunnlag_id BIGINT PRIMARY KEY,
-    sak_id          BIGINT                   NOT NULL,
-    behandling_id   UUID                     NOT NULL,
-    opprettet       TIMESTAMP WITH TIME ZONE NOT NULL,
-    kravgrunnlag    JSONB                    NOT NULL,
-    vedtak          JSONB,
-    attestasjon     JSONB
+    id                             UUID PRIMARY KEY,
+    opprettet                      TIMESTAMP WITH TIME ZONE NOT NULL,
+    endret                         TIMESTAMP WITH TIME ZONE,
+    fagsystem_id                   TEXT                     NOT NULL,
+    kravgrunnlag_id                TEXT                     NOT NULL,
+    kravgrunnlag_payload           TEXT                     NOT NULL,
+    tilbakekrevingsvedtak_request  TEXT,
+    tilbakekrevingsvedtak_response TEXT
 );

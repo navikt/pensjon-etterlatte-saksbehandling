@@ -6,6 +6,7 @@ import io.mockk.verify
 import no.nav.etterlatte.mq.DummyJmsConnectionFactory
 import no.nav.etterlatte.mq.EtterlatteJmsConnectionFactory
 import no.nav.etterlatte.tilbakekreving.readFile
+import no.nav.etterlatte.tilbakekreving.sporing.TilbakekrevingSporingRepository
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.math.BigInteger
@@ -14,11 +15,19 @@ class KravgrunnlagConsumerTest {
     private val connectionFactory: EtterlatteJmsConnectionFactory = DummyJmsConnectionFactory()
     private lateinit var kravgrunnlagConsumer: KravgrunnlagConsumer
     private lateinit var kravgrunnlagService: KravgrunnlagService
+    private lateinit var tilbakekrevingSporingRepository: TilbakekrevingSporingRepository
 
     @BeforeEach
     fun beforeEach() {
         kravgrunnlagService = mockk(relaxed = true)
-        kravgrunnlagConsumer = KravgrunnlagConsumer(connectionFactory, QUEUE, kravgrunnlagService).also { it.start() }
+        tilbakekrevingSporingRepository = mockk(relaxed = true)
+        kravgrunnlagConsumer =
+            KravgrunnlagConsumer(
+                connectionFactory = connectionFactory,
+                queue = QUEUE,
+                kravgrunnlagService = kravgrunnlagService,
+                sporingRepository = tilbakekrevingSporingRepository,
+            ).also { it.start() }
     }
 
     @Test

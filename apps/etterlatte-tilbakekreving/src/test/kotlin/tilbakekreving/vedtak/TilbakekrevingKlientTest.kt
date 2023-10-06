@@ -10,8 +10,10 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.http.fullPath
 import io.ktor.http.headersOf
 import io.ktor.serialization.jackson.JacksonConverter
+import io.mockk.mockk
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
+import no.nav.etterlatte.tilbakekreving.sporing.TilbakekrevingSporingRepository
 import no.nav.etterlatte.tilbakekreving.tilbakekrevingsvedtak
 import no.nav.etterlatte.tilbakekreving.vedtak.TilbakekrevingKlient
 import no.nav.okonomi.tilbakekrevingservice.TilbakekrevingsvedtakResponse
@@ -20,6 +22,8 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
 internal class TilbakekrevingKlientTest {
+    private val tilbakekrevingSporingRepository = mockk<TilbakekrevingSporingRepository>(relaxed = true)
+
     @Test
     fun `skal kunne sende tilbakekrevingvedtak og haandtere ok fra tilbakekrevingskomponenten`() {
         val response =
@@ -28,7 +32,7 @@ internal class TilbakekrevingKlientTest {
             }
 
         val httpClient = mockedHttpClient("/tilbakekreving/tilbakekrevingsvedtak", HttpMethod.Post, response)
-        val tilbakekrevingKlient = TilbakekrevingKlient("", httpClient)
+        val tilbakekrevingKlient = TilbakekrevingKlient("", httpClient, tilbakekrevingSporingRepository)
 
         val tilbakekrevingsvedtak = tilbakekrevingsvedtak()
         tilbakekrevingKlient.sendTilbakekrevingsvedtak(tilbakekrevingsvedtak)
@@ -42,7 +46,7 @@ internal class TilbakekrevingKlientTest {
             }
 
         val httpClient = mockedHttpClient("/tilbakekreving/tilbakekrevingsvedtak", HttpMethod.Post, response)
-        val tilbakekrevingKlient = TilbakekrevingKlient("", httpClient)
+        val tilbakekrevingKlient = TilbakekrevingKlient("", httpClient, tilbakekrevingSporingRepository)
 
         val tilbakekrevingsvedtak = tilbakekrevingsvedtak()
 

@@ -10,6 +10,7 @@ import kotlinx.coroutines.runBlocking
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.toJson
+import no.nav.etterlatte.tilbakekreving.sporing.TilbakekrevingSporingRepository
 import no.nav.okonomi.tilbakekrevingservice.TilbakekrevingsvedtakRequest
 import no.nav.okonomi.tilbakekrevingservice.TilbakekrevingsvedtakResponse
 import no.nav.tilbakekreving.tilbakekrevingsvedtak.vedtak.v1.TilbakekrevingsbelopDto
@@ -25,24 +26,33 @@ import javax.xml.datatype.DatatypeConstants
 import javax.xml.datatype.DatatypeFactory
 import javax.xml.datatype.XMLGregorianCalendar
 
-class TilbakekrevingKlient(private val url: String, private val httpClient: HttpClient) {
+class TilbakekrevingKlient(
+    private val url: String,
+    private val httpClient: HttpClient,
+    private val sporingRepository: TilbakekrevingSporingRepository,
+) {
     private val logger = LoggerFactory.getLogger(javaClass)
     private val sikkerLogg = sikkerlogger()
 
-    fun sendTilbakekrevingsvedtak(tilbakekrevingsvedtak: TilbakekrevingVedtak) {
-        logger.info("Sender tilbakekrevingsvedtak ${tilbakekrevingsvedtak.vedtakId} til tilbakekrevingskomponenten")
-        val request = toTilbakekrevingsvedtakRequest(tilbakekrevingsvedtak)
+    fun sendTilbakekrevingsvedtak(vedtak: TilbakekrevingVedtak) {
+        logger.info("Sender tilbakekrevingsvedtak ${vedtak.vedtakId} til tilbakekrevingskomponenten")
+        val request = toTilbakekrevingsvedtakRequest(vedtak)
+        val requestAsJson = request.toJson()
+
+        sporingRepository.lagreTilbakekrevingsvedtakRequest(vedtak.kravgrunnlagId, requestAsJson)
 
         val response =
             runBlocking {
                 val httpResponse =
                     httpClient.post("$url/tilbakekreving/tilbakekrevingsvedtak") {
                         contentType(ContentType.Application.Json)
-                        setBody(request.toJson())
+                        setBody(requestAsJson)
                     }
 
                 httpResponse.body<TilbakekrevingsvedtakResponse>()
             }
+
+        sporingRepository.lagreTilbakekrevingsvedtakResponse(vedtak.kravgrunnlagId, response.toJson())
 
         return kontrollerResponse(response)
     }
@@ -115,6 +125,7 @@ class TilbakekrevingKlient(private val url: String, private val httpClient: Http
             Alvorlighetsgrad.OK,
             Alvorlighetsgrad.OK_MED_VARSEL,
             -> Unit
+
             Alvorlighetsgrad.ALVORLIG_FEIL,
             Alvorlighetsgrad.SQL_FEIL,
             -> {

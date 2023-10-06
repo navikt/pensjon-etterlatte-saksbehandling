@@ -63,7 +63,7 @@ fun Route.vedtaksvurderingRoute(
         get("/{$BEHANDLINGSID_CALL_PARAMETER}/sammendrag") {
             withBehandlingId(behandlingKlient) { behandlingId ->
                 logger.info("Henter sammendrag av vedtak for behandling $behandlingId")
-                val vedtaksresultat = service.hentVedtak(behandlingId)?.toVedtakSammendragDto()
+                val vedtaksresultat = service.hentVedtakSammendrag(behandlingId)?.toVedtakSammendragDto()
                 if (vedtaksresultat == null) {
                     call.response.status(HttpStatusCode.NoContent)
                 } else {
@@ -205,6 +205,17 @@ fun Route.tilbakekrevingvedtakRoute(service: VedtakTilbakekrevingService) {
 }
 
 private fun Vedtak.toVedtakSammendragDto() =
+    VedtakSammendragDto(
+        id = id.toString(),
+        behandlingId = behandlingId,
+        vedtakType = type,
+        saksbehandlerId = vedtakFattet?.ansvarligSaksbehandler,
+        datoFattet = vedtakFattet?.tidspunkt?.toNorskTid(),
+        attestant = attestasjon?.attestant,
+        datoAttestert = attestasjon?.tidspunkt?.toNorskTid(),
+    )
+
+private fun VedtakSammendrag.toVedtakSammendragDto() =
     VedtakSammendragDto(
         id = id.toString(),
         behandlingId = behandlingId,

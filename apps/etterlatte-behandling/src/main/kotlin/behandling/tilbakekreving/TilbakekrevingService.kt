@@ -95,7 +95,7 @@ class TilbakekrevingService(
         inTransaction {
             logger.info("Fatter vedtak for tilbakekreving=$tilbakekrevingId")
 
-            tilbakekrevingDao.lagreTilbakekreving(tilbakekreving.copy(status = TilbakekrevingStatus.VEDTATT))
+            tilbakekrevingDao.lagreTilbakekreving(tilbakekreving.copy(status = TilbakekrevingStatus.FATTET_VEDTAK))
 
             hendelseDao.vedtakHendelse(
                 behandlingId = tilbakekreving.id,

@@ -11,22 +11,25 @@ import { useBehandling } from '~components/behandling/useBehandling'
 import { useAppDispatch, useAppSelector } from '~store/Store'
 import { isFailure, isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
 import { hentVedtakSammendrag } from '~shared/api/vedtaksvurdering'
-import { IBehandlingReducer, updateVedtakSammendrag } from '~store/reducers/BehandlingReducer'
+import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
 import { IHendelseType } from '~shared/types/IHendelse'
 import { Sidebar } from '~shared/components/Sidebar'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import Spinner from '~shared/Spinner'
+import { useVedtak } from '~components/vedtak/useVedtak'
+import { VedtakSammendrag } from '~components/vedtak/typer'
+import { updateVedtakSammendrag } from '~store/reducers/VedtakReducer'
 
-const mapTilBehandlingInfo = (behandling: IBehandlingReducer): IBehandlingInfo => ({
+const mapTilBehandlingInfo = (behandling: IBehandlingReducer, vedtak: VedtakSammendrag | null): IBehandlingInfo => ({
   type: behandling.behandlingType,
   behandlingId: behandling.id,
   sakId: behandling.sakId,
   sakType: behandling.sakType,
   status: behandling.status,
-  saksbehandler: behandling.vedtak?.saksbehandlerId,
+  saksbehandler: vedtak?.saksbehandlerId,
   virkningsdato: behandling.virkningstidspunkt?.dato,
-  datoFattet: behandling.vedtak?.datoFattet,
-  datoAttestert: behandling.vedtak?.datoAttestert,
+  datoFattet: vedtak?.datoFattet,
+  datoAttestert: vedtak?.datoAttestert,
   underkjentLogg: behandling.hendelser.filter((hendelse) => hendelse.hendelse === IHendelseType.VEDTAK_UNDERKJENT),
   fattetLogg: behandling.hendelser.filter((hendelse) => hendelse.hendelse === IHendelseType.VEDTAK_FATTET),
   attestertLogg: behandling.hendelser.filter((hendelse) => hendelse.hendelse === IHendelseType.VEDTAK_ATTESTERT),
@@ -34,12 +37,13 @@ const mapTilBehandlingInfo = (behandling: IBehandlingReducer): IBehandlingInfo =
 
 export const BehandlingSidemeny = () => {
   const behandling = useBehandling()
+  const vedtak = useVedtak()
   const dispatch = useAppDispatch()
   const saksbehandler = useAppSelector((state) => state.saksbehandlerReducer.saksbehandler)
   const [fetchVedtakStatus, fetchVedtakSammendrag] = useApiCall(hentVedtakSammendrag)
   const [beslutning, setBeslutning] = useState<IBeslutning>()
 
-  const behandlingsinfo = behandling ? mapTilBehandlingInfo(behandling) : undefined
+  const behandlingsinfo = behandling ? mapTilBehandlingInfo(behandling, vedtak) : undefined
 
   const kanAttestere =
     !!behandling &&
@@ -66,8 +70,14 @@ export const BehandlingSidemeny = () => {
             <>
               {isFailure(fetchVedtakStatus) && <ApiErrorAlert>Kunne ikke hente vedtak</ApiErrorAlert>}
               {isPending(fetchVedtakStatus) && <Spinner label="Henter vedtaksdetaljer" visible />}
-              {isSuccess(fetchVedtakStatus) && kanAttestere && (
-                <Attestering setBeslutning={setBeslutning} beslutning={beslutning} behandling={behandling} />
+              {isSuccess(fetchVedtakStatus) && vedtak && (
+                <Attestering
+                  setBeslutning={setBeslutning}
+                  beslutning={beslutning}
+                  behandlingId={behandling?.id}
+                  vedtak={vedtak}
+                  erFattet={behandling?.status === IBehandlingStatus.FATTET_VEDTAK}
+                />
               )}
             </>
           )}

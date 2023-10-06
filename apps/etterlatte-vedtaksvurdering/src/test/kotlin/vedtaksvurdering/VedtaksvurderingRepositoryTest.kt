@@ -244,6 +244,25 @@ internal class VedtaksvurderingRepositoryTest {
     }
 
     @Test
+    fun `skal hente sammendrag for et vedtak`() {
+        val nyttVedtak = opprettVedtak()
+        val vedtak = repository.opprettVedtak(nyttVedtak)
+
+        val sammendrag = repository.hentVedtakSammendrag(vedtak.behandlingId)
+
+        with(sammendrag!!) {
+            id shouldBe vedtak.id
+            soeker shouldBe vedtak.soeker
+            sakId shouldBe vedtak.sakId
+            behandlingId shouldBe vedtak.behandlingId
+            status shouldBe vedtak.status
+            type shouldBe vedtak.type
+            vedtakFattet shouldBe vedtak.vedtakFattet
+            attestasjon shouldBe vedtak.attestasjon
+        }
+    }
+
+    @Test
     fun `skal hente vedtak for fnr og fra-og-med angitt dato`() {
         val person1 = Folkeregisteridentifikator.of(FNR_1)
         val person2 = Folkeregisteridentifikator.of(FNR_2)

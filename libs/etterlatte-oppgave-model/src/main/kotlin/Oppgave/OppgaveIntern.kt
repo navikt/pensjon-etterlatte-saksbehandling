@@ -88,6 +88,7 @@ enum class OppgaveKilde {
     BEHANDLING,
     GENERELL_BEHANDLING,
     EKSTERN,
+    TILBAKEKREVING,
 }
 
 enum class OppgaveType {

@@ -8,25 +8,26 @@ import { hentSaksbehandlerForOppgaveUnderArbeid } from '~shared/api/oppgaver'
 import { useEffect, useState } from 'react'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
-import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
-import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 import { SidebarPanel } from '~shared/components/Sidebar'
+import { VedtakSammendrag } from '~components/vedtak/typer'
 
 type Props = {
   setBeslutning: (value: IBeslutning) => void
   beslutning: IBeslutning | undefined
-  behandling: IBehandlingReducer
+  behandlingId: string
+  vedtak?: VedtakSammendrag
+  erFattet: boolean
 }
 
-export const Attestering = ({ setBeslutning, beslutning, behandling }: Props) => {
+export const Attestering = ({ setBeslutning, beslutning, behandlingId, vedtak, erFattet }: Props) => {
   const { lastPage } = useBehandlingRoutes()
   const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.saksbehandler)
   const [saksbehandlerForOppgave, hentSaksbehandlerForOppgave] = useApiCall(hentSaksbehandlerForOppgaveUnderArbeid)
-  const attestantOgSaksbehandlerErSammePerson = behandling.vedtak?.saksbehandlerId === innloggetSaksbehandler.ident
+  const attestantOgSaksbehandlerErSammePerson = vedtak?.saksbehandlerId === innloggetSaksbehandler.ident
   const [oppgaveErTildeltInnloggetBruker, setOppgaveErTildeltInnloggetBruker] = useState(false)
 
   useEffect(() => {
-    hentSaksbehandlerForOppgave({ behandlingId: behandling.id }, (saksbehandler) => {
+    hentSaksbehandlerForOppgave({ behandlingId }, (saksbehandler) => {
       setOppgaveErTildeltInnloggetBruker(saksbehandler === innloggetSaksbehandler.ident)
     })
   }, [])
@@ -47,7 +48,6 @@ export const Attestering = ({ setBeslutning, beslutning, behandling }: Props) =>
               <Beslutningsvalg
                 beslutning={beslutning}
                 setBeslutning={setBeslutning}
-                behandling={behandling}
                 disabled={attestantOgSaksbehandlerErSammePerson}
               />
             ) : (
@@ -68,7 +68,7 @@ export const Attestering = ({ setBeslutning, beslutning, behandling }: Props) =>
               <BodyShort>Oppgaven er ikke tildelt noen.&nbsp;</BodyShort>
             )}
             <BodyShort spacing>
-              {behandling?.status == IBehandlingStatus.FATTET_VEDTAK
+              {erFattet
                 ? 'For å kunne attestere behandlingen, må oppgaven være tildelt deg.'
                 : 'For å kunne fortsette behandling, må oppgaven være tildelt deg.'}
             </BodyShort>

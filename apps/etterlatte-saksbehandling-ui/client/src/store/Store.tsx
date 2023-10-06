@@ -8,11 +8,13 @@ import { useDispatch, useSelector } from 'react-redux'
 import { appReducer } from '~store/reducers/AppconfigReducer'
 import { klageReducer } from '~store/reducers/KlageReducer'
 import { tilbakekrevingReducer } from '~store/reducers/TilbakekrevingReducer'
+import { vedtakReducer } from '~store/reducers/VedtakReducer'
 
 const reducer = {
   menuReducer: menuReducer,
   saksbehandlerReducer: saksbehandlerReducer,
   behandlingReducer: behandlingReducer,
+  vedtakReducer: vedtakReducer,
   appReducer: appReducer,
   klageReducer: klageReducer,
   tilbakekrevingReducer: tilbakekrevingReducer,

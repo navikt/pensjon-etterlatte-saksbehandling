@@ -1,11 +1,10 @@
 import { Select, Textarea } from '@navikt/ds-react'
 import { useState } from 'react'
-import { UnderkjennVedtak } from '../handinger/underkjennVedtak'
 import { BeslutningWrapper, Text } from '../styled'
 import { IReturType } from '../types'
-import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
+import { UnderkjennVedtak } from '~components/behandling/attestering/handinger/underkjennVedtak'
 
-export const Underkjenn = ({ behandling }: { behandling: IDetaljertBehandling }) => {
+export const Underkjenn = () => {
   const [tilbakemeldingFraAttestant, setTilbakemeldingFraAttestant] = useState('')
   const [returType, setReturType] = useState<IReturType>(IReturType.velg)
 
@@ -40,7 +39,7 @@ export const Underkjenn = ({ behandling }: { behandling: IDetaljertBehandling })
           autoComplete="off"
         />
       </div>
-      <UnderkjennVedtak behandling={behandling} kommentar={tilbakemeldingFraAttestant} valgtBegrunnelse={returType} />
+      <UnderkjennVedtak kommentar={tilbakemeldingFraAttestant} valgtBegrunnelse={returType} />
     </BeslutningWrapper>
   )
 }

@@ -24,6 +24,19 @@ export const HandlingerForOppgave = ({ oppgave }: { oppgave: OppgaveDTO }) => {
         )
     }
   }
+  if (kilde === 'TILBAKEKREVING') {
+    switch (type) {
+      case 'ATTESTERING':
+      case 'TILBAKEKREVING':
+        return (
+          erInnloggetSaksbehandlerOppgave && (
+            <Button size="small" href={`/tilbakekreving/${referanse}`} as="a">
+              Gå til tilbakekreving
+            </Button>
+          )
+        )
+    }
+  }
   switch (type) {
     case 'VURDER_KONSEKVENS':
       return (
@@ -80,12 +93,6 @@ export const HandlingerForOppgave = ({ oppgave }: { oppgave: OppgaveDTO }) => {
       return erInnloggetSaksbehandlerOppgave ? (
         <Button size="small" href={`/klage/${referanse}`} as="a">
           Gå til klage
-        </Button>
-      ) : null
-    case 'TILBAKEKREVING':
-      return erInnloggetSaksbehandlerOppgave ? (
-        <Button size="small" href={`/tilbakekreving/${referanse}`} as="a">
-          Gå til tilbakekreving
         </Button>
       ) : null
     case 'UTLAND':

@@ -3,20 +3,23 @@ import { isBefore } from 'date-fns'
 
 export const SAKSBEHANDLERFILTER = {
   visAlle: 'Vis alle',
-  Tildelt: 'Tildelt saksbehandler ',
-  IkkeTildelt: 'Ikke tildelt saksbehandler',
+  Tildelt: 'Tildelt oppgave',
+  IkkeTildelt: 'Ikke tildelt oppgave',
 }
-export type SaksbehandlerFilterKeys = keyof typeof SAKSBEHANDLERFILTER
 
-function filtrerSaksbehandler(saksbehandlerFilter: SaksbehandlerFilterKeys, oppgaver: OppgaveDTO[]): OppgaveDTO[] {
-  if (saksbehandlerFilter === 'visAlle') {
+function filtrerSaksbehandler(saksbehandlerFilter: string, oppgaver: OppgaveDTO[]): OppgaveDTO[] {
+  if (saksbehandlerFilter === SAKSBEHANDLERFILTER.visAlle) {
     return oppgaver
   } else {
     return oppgaver.filter((o) => {
-      if (saksbehandlerFilter === 'Tildelt') {
+      if (saksbehandlerFilter === SAKSBEHANDLERFILTER.Tildelt) {
         return o.saksbehandler !== null
-      } else if (saksbehandlerFilter === 'IkkeTildelt') {
+      } else if (saksbehandlerFilter === SAKSBEHANDLERFILTER.IkkeTildelt) {
         return o.saksbehandler === null
+      } else if (saksbehandlerFilter && saksbehandlerFilter !== '') {
+        return o.saksbehandler === saksbehandlerFilter
+      } else {
+        return true
       }
     })
   }
@@ -165,7 +168,7 @@ export function filtrerFrist(fristFilterKeys: FristFilterKeys, oppgaver: Oppgave
 export function filtrerOppgaver(
   enhetsFilter: EnhetFilterKeys,
   fristFilter: FristFilterKeys,
-  saksbehandlerFilter: SaksbehandlerFilterKeys,
+  saksbehandlerFilter: string,
   ytelseFilter: YtelseFilterKeys,
   oppgavestatusFilter: OppgavestatusFilterKeys,
   oppgavetypeFilter: OppgavetypeFilterKeys,
@@ -187,7 +190,7 @@ export function filtrerOppgaver(
 export interface Filter {
   enhetsFilter: EnhetFilterKeys
   fristFilter: FristFilterKeys
-  saksbehandlerFilter: SaksbehandlerFilterKeys
+  saksbehandlerFilter: string
   ytelseFilter: YtelseFilterKeys
   oppgavestatusFilter: OppgavestatusFilterKeys
   oppgavetypeFilter: OppgavetypeFilterKeys
@@ -199,7 +202,7 @@ export const initialFilter = (): Filter => {
   return {
     enhetsFilter: 'visAlle',
     fristFilter: 'visAlle',
-    saksbehandlerFilter: 'IkkeTildelt',
+    saksbehandlerFilter: SAKSBEHANDLERFILTER.IkkeTildelt,
     ytelseFilter: 'visAlle',
     oppgavestatusFilter: 'visAlle',
     oppgavetypeFilter: 'visAlle',

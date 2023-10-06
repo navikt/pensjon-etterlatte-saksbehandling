@@ -6,6 +6,7 @@ import io.kotest.matchers.shouldNotBe
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingAttesterVedtakDto
 import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingFattetVedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
@@ -94,7 +95,7 @@ class VedtakTilbakekrevingRepositoryTest {
                 ansvarligEnhet = "fire",
                 // TODO EY-2767 tilbakekreving objectnode
             )
-        repository.lagreFattetVedtak(oppdatertVedtak).let {
+        repository.lagreFattetVedtak(oppdatertVedtak).asClue {
             it.id shouldNotBe null
             it.behandlingId shouldBe oppdatertVedtak.tilbakekrevingId
             it.sakId shouldBe oppdatertVedtak.sakId
@@ -105,6 +106,62 @@ class VedtakTilbakekrevingRepositoryTest {
             it.tilbakekreving shouldBe oppdatertVedtak.tilbakekreving
             it.status shouldBe VedtakStatus.FATTET_VEDTAK
             it.type shouldBe VedtakType.TILBAKEKREVING
+        }
+    }
+
+    @Test
+    fun `lagreAttestertVedtak skal oppdatere vedtak med attestasjon`() {
+        val tilbakekrevingId = UUID.randomUUID()
+        repository.lagreFattetVedtak(
+            TilbakekrevingFattetVedtakDto(
+                tilbakekrevingId = tilbakekrevingId,
+                sakId = 123L,
+                sakType = SakType.OMSTILLINGSSTOENAD,
+                soeker = Folkeregisteridentifikator.of("08071272487"),
+                ansvarligSaksbehandler = "noen",
+                ansvarligEnhet = "enht",
+                tilbakekreving = objectMapper.createObjectNode(),
+            ),
+        )
+        val attestasjon =
+            TilbakekrevingAttesterVedtakDto(
+                tilbakekrevingId = tilbakekrevingId,
+                attestant = "saksbehandler",
+                attesterendeEnhet = "fire",
+            )
+
+        repository.lagreAttestertVedtak(attestasjon).asClue {
+            it.attestasjon shouldNotBe null
+            it.attestasjon!!.attestant shouldBe attestasjon.attestant
+            it.attestasjon!!.attesterendeEnhet shouldBe attestasjon.attesterendeEnhet
+            it.attestasjon!!.tidspunkt shouldNotBe null
+        }
+    }
+
+    @Test
+    fun `lagreUnderkjentVedtak skal nullstille vedtak`() {
+        val vedtak =
+            TilbakekrevingFattetVedtakDto(
+                tilbakekrevingId = UUID.randomUUID(),
+                sakId = 123L,
+                sakType = SakType.OMSTILLINGSSTOENAD,
+                soeker = Folkeregisteridentifikator.of("08071272487"),
+                ansvarligSaksbehandler = "noen",
+                ansvarligEnhet = "enht",
+                tilbakekreving = objectMapper.createObjectNode(),
+            )
+        repository.lagreFattetVedtak(vedtak)
+
+        repository.lagreUnderkjentVedtak(vedtak.tilbakekrevingId).asClue {
+            it.soeker shouldBe vedtak.soeker
+            it.sakId shouldBe vedtak.sakId
+            it.sakType shouldBe vedtak.sakType
+            it.behandlingId shouldBe vedtak.tilbakekrevingId
+            it.type shouldBe VedtakType.TILBAKEKREVING
+            it.status shouldBe VedtakStatus.RETURNERT
+            it.vedtakFattet shouldBe null
+            it.attestasjon shouldBe null
+            // it.tilbakekreving shouldBe null TODO EY-2767 tilbakekreving objectnode
         }
     }
 }

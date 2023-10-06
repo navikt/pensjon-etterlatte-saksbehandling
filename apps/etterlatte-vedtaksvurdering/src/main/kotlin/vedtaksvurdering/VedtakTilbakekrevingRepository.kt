@@ -2,7 +2,6 @@ package no.nav.etterlatte.vedtaksvurdering
 
 import kotliquery.Row
 import kotliquery.Session
-import kotliquery.TransactionalSession
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
@@ -11,6 +10,7 @@ import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
+import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingAttesterVedtakDto
 import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingFattetVedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
@@ -52,20 +52,41 @@ class VedtakTilbakekrevingRepository(private val datasource: DataSource) {
             hentVedtak(nyttVedtak.tilbakekrevingId, it)
         }
 
-    fun lagreUnderkjentVedtak(
-        tilbakekrevingId: UUID,
-        tx: TransactionalSession? = null,
-    ) = using(sessionOf(datasource)) {
-        // TODO oppdater med null og status ti RETURNERT
-    }
+    fun lagreAttestertVedtak(attestasjon: TilbakekrevingAttesterVedtakDto) =
+        using(sessionOf(datasource)) {
+            // language=SQL
+            queryOf(
+                statement = """
+                UPDATE vedtak 
+                SET attestant = :attestant, attestertVedtakEnhet = :attestertVedtakEnhet, datoAttestert = now(), 
+                    vedtakstatus = :vedtakstatus 
+                WHERE behandlingId = :behandlingId
+                """,
+                paramMap =
+                    mapOf(
+                        "behandlingId" to attestasjon.tilbakekrevingId,
+                        "attestant" to attestasjon.attestant,
+                        "attestertVedtakEnhet" to attestasjon.attesterendeEnhet,
+                        "vedtakstatus" to VedtakStatus.ATTESTERT.name,
+                    ),
+            ).let { query -> it.run(query.asUpdate) }
+            hentVedtak(attestasjon.tilbakekrevingId, it)
+        }
 
-    fun lagreFattetVedtak(
-        tilbakekrevingId: UUID,
-        attestert: Attestasjon,
-        tx: TransactionalSession? = null,
-    ) = using(sessionOf(datasource)) {
-        // TODO oppdater med attestert av og status til ATTESTERT
-    }
+    fun lagreUnderkjentVedtak(tilbakekrevingId: UUID) =
+        using(sessionOf(datasource)) {
+            // language=SQL
+            queryOf(
+                statement = """
+            UPDATE vedtak 
+            SET attestant = null, datoAttestert = null, attestertVedtakEnhet = null, saksbehandlerId = null, 
+                datoFattet = null, fattetVedtakEnhet = null, vedtakstatus = :vedtakstatus 
+            WHERE behandlingId = :behandlingId
+            """,
+                paramMap = mapOf("vedtakstatus" to VedtakStatus.RETURNERT.name, "behandlingId" to tilbakekrevingId),
+            ).let { query -> it.run(query.asUpdate) }
+            hentVedtak(tilbakekrevingId, it)
+        }
 
     private fun hentVedtak(
         tilbakekrevingId: UUID,

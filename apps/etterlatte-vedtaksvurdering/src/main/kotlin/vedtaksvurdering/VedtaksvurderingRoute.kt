@@ -21,6 +21,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.toNorskTid
 import no.nav.etterlatte.libs.common.vedtak.AttesterVedtakDto
 import no.nav.etterlatte.libs.common.vedtak.Behandling
 import no.nav.etterlatte.libs.common.vedtak.LoependeYtelseDTO
+import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingAttesterVedtakDto
 import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingFattetVedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakSamordningDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
@@ -200,6 +201,16 @@ fun Route.tilbakekrevingvedtakRoute(service: VedtakTilbakekrevingService) {
             val dto = call.receive<TilbakekrevingFattetVedtakDto>()
             logger.info("Fatter vedtak for tilbakekreving=${dto.tilbakekrevingId}")
             call.respond(service.lagreVedtak(dto))
+        }
+        post("/attestervedtak") {
+            val dto = call.receive<TilbakekrevingAttesterVedtakDto>()
+            logger.info("Attesterer vedtak for tilbakekreving=${dto.tilbakekrevingId}")
+            call.respond(service.attesterVedtak(dto))
+        }
+        post("/underkjennvedtak") {
+            val tilbakekrevingId = call.receive<UUID>()
+            logger.info("Fatter vedtak for tilbakekreving=$tilbakekrevingId")
+            call.respond(service.underkjennVedtak(tilbakekrevingId))
         }
     }
 }

@@ -3,8 +3,6 @@ package no.nav.etterlatte.migrering
 import com.fasterxml.jackson.module.kotlin.readValue
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
-import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.etterlatte.libs.common.utbetaling.UtbetalingResponseDto
 import no.nav.etterlatte.libs.common.utbetaling.UtbetalingStatusDto
 import no.nav.etterlatte.migrering.pen.PenKlient
@@ -14,7 +12,6 @@ import no.nav.etterlatte.utbetaling.common.UTBETALING_RESPONSE
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
-import no.nav.helse.rapids_rivers.River
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import rapidsandrivers.migrering.ListenerMedLoggingOgFeilhaandtering
@@ -28,11 +25,9 @@ internal class LyttPaaIverksattVedtak(
     private val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
     init {
-        River(rapidsConnection).apply {
-            eventName(EVENT_NAME_OPPDATERT)
+        initialiserRiver(rapidsConnection, EVENT_NAME_OPPDATERT) {
             validate { it.requireKey(UTBETALING_RESPONSE) }
-            correlationId()
-        }.register(this)
+        }
     }
 
     override fun haandterPakke(

@@ -8,14 +8,11 @@ import no.nav.etterlatte.libs.common.beregning.AvkortingDto
 import no.nav.etterlatte.libs.common.beregning.BeregningDTO
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
-import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
-import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.etterlatte.rapidsandrivers.EventNames.BEREGN
 import no.nav.etterlatte.rapidsandrivers.EventNames.OPPRETT_VEDTAK
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
-import no.nav.helse.rapids_rivers.River
 import no.nav.helse.rapids_rivers.toUUID
 import org.slf4j.LoggerFactory
 import rapidsandrivers.AVKORTING_KEY
@@ -36,17 +33,13 @@ internal class OmregningHendelser(
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     init {
-        logger.info("initierer rapid for omregninghendelser")
-        River(rapidsConnection).apply {
-            eventName(hendelsestype)
-
-            correlationId()
+        initialiserRiver(rapidsConnection, hendelsestype) {
             validate { it.requireKey(BEHANDLING_ID_KEY) }
             validate { it.requireKey(SAK_TYPE) }
             validate { it.rejectKey(BEREGNING_KEY) }
             validate { it.requireKey(HENDELSE_DATA_KEY) }
             validate { it.requireKey(BEHANDLING_VI_OMREGNER_FRA_KEY) }
-        }.register(this)
+        }
     }
 
     override fun haandterPakke(

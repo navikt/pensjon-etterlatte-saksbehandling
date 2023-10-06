@@ -6,7 +6,7 @@ import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
 import no.nav.pensjon.brevbaker.api.model.Telefonnummer
 
 abstract class BrevData {
-    protected inline fun <reified T : RevurderingInfo> valider(
+    inline fun <reified T : RevurderingInfo> valider(
         behandling: Behandling,
         revurderingAarsak: RevurderingAarsak,
     ): T {

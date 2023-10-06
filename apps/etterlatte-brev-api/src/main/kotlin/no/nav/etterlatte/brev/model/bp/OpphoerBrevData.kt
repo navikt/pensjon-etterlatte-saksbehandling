@@ -1,13 +1,12 @@
-package no.nav.etterlatte.brev.model
+package no.nav.etterlatte.brev.model.bp
 
 import no.nav.etterlatte.brev.behandling.Behandling
-import no.nav.etterlatte.brev.model.AvslagBrevData.valider
+import no.nav.etterlatte.brev.model.AvslagBrevData
+import no.nav.etterlatte.brev.model.OpphoerBrevData
 import no.nav.etterlatte.libs.common.behandling.Navn
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
 import java.time.LocalDate
-
-abstract class OpphoerBrevData : BrevData()
 
 data class AdopsjonRevurderingBrevdata(
     val virkningsdato: LocalDate,
@@ -19,7 +18,7 @@ data class AdopsjonRevurderingBrevdata(
     companion object {
         fun fra(behandling: Behandling): AdopsjonRevurderingBrevdata {
             val revurderingInfo =
-                valider<RevurderingInfo.Adopsjon>(
+                AvslagBrevData.valider<RevurderingInfo.Adopsjon>(
                     behandling,
                     RevurderingAarsak.ADOPSJON,
                 )
@@ -43,7 +42,7 @@ data class OmgjoeringAvFarskapRevurderingBrevdata(
     companion object {
         fun fra(behandling: Behandling): OmgjoeringAvFarskapRevurderingBrevdata {
             val revurderingInfo =
-                valider<RevurderingInfo.OmgjoeringAvFarskap>(
+                AvslagBrevData.valider<RevurderingInfo.OmgjoeringAvFarskap>(
                     behandling,
                     RevurderingAarsak.OMGJOERING_AV_FARSKAP,
                 )

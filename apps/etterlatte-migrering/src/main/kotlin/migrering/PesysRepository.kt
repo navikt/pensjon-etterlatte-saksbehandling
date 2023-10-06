@@ -8,7 +8,6 @@ import no.nav.etterlatte.libs.database.oppdater
 import no.nav.etterlatte.libs.database.opprett
 import no.nav.etterlatte.libs.database.transaction
 import no.nav.etterlatte.rapidsandrivers.migrering.PesysId
-import org.postgresql.util.PSQLException
 import org.slf4j.LoggerFactory
 import java.util.UUID
 import javax.sql.DataSource
@@ -68,7 +67,7 @@ internal class PesysRepository(private val dataSource: DataSource) : Transaction
         pesysId: PesysId,
         tx: TransactionalSession? = null,
     ) {
-        try {
+        if (hentKoplingTilBehandling(pesysId) == null) {
             tx.session {
                 opprett(
                     "INSERT INTO pesyskopling(behandling_id,pesys_id) VALUES(:behandling_id,:pesys_id)" +
@@ -77,9 +76,8 @@ internal class PesysRepository(private val dataSource: DataSource) : Transaction
                     "Lagra koplinga mellom behandling $behandlingId og pesyssak $pesysId i migreringsbasen",
                 )
             }
-        } catch (e: PSQLException) {
-            logger.info("Fikk feil under forsøk på å lagre kopling som alt fins. Ikke farlig, så ignorerer", e)
-            // Do nothing
+        } else {
+            logger.info("Fins allerede kopling i databasen mellom $behandlingId og $pesysId. Prøver ikke å opprette ny")
         }
     }
 

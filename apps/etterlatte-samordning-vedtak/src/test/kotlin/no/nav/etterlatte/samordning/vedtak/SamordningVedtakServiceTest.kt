@@ -7,6 +7,7 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldHave
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -27,13 +28,17 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
 import java.time.YearMonth.now
 import java.util.UUID
 
+const val ORGNO = "123456789"
+const val FNR = "10518209200"
+const val TPNR_SPK = "3010"
+
 class SamordningVedtakServiceTest {
     private val vedtakKlient = mockk<VedtaksvurderingKlient>()
-    private val samordningVedtakService = SamordningVedtakService(vedtakKlient)
+    private val tpKlient = mockk<TjenestepensjonKlient>()
+    private val samordningVedtakService = SamordningVedtakService(vedtakKlient, tpKlient)
 
     @AfterEach
     fun after() {
@@ -42,21 +47,24 @@ class SamordningVedtakServiceTest {
 
     @Test
     fun `skal kaste feil hvis vedtak ikke gjelder omstillingsstoenad`() {
-        coEvery { vedtakKlient.hentVedtak(123L, ORGNO) } returns
+        val vedtak =
             vedtak(
                 sakstype = SakType.BARNEPENSJON,
             )
 
+        coEvery { vedtakKlient.hentVedtak(123L, ORGNO) } returns vedtak
+        coEvery { tpKlient.harTpYtelseOnDate(FNR, tpnr = TPNR_SPK, now().atStartOfMonth()) } returns true
+
         shouldThrow<VedtakFeilSakstypeException> {
             runBlocking {
-                samordningVedtakService.hentVedtak(123L, ORGNO)
+                samordningVedtakService.hentVedtak(123L, TPNR_SPK, ORGNO)
             }
         }
     }
 
     @Test
     fun `skal mappe vedtak med to perioder, hvor nr 1 er lukket og nr 2 er aapen`() {
-        coEvery { vedtakKlient.hentVedtak(456L, ORGNO) } returns
+        val vedtak =
             vedtak(
                 vedtakId = 456L,
                 beregning = beregning(trygdetid = 32),
@@ -66,10 +74,12 @@ class SamordningVedtakServiceTest {
                         Periode(fom = now().plusMonths(1), tom = null),
                     ),
             )
+        coEvery { vedtakKlient.hentVedtak(456L, ORGNO) } returns vedtak
+        coEvery { tpKlient.harTpYtelseOnDate(FNR, tpnr = TPNR_SPK, now().atStartOfMonth()) } returns true
 
         val result =
             runBlocking {
-                samordningVedtakService.hentVedtak(456L, ORGNO)
+                samordningVedtakService.hentVedtak(456L, TPNR_SPK, ORGNO)
             }
 
         result.vedtakId shouldBe 456L
@@ -94,13 +104,14 @@ class SamordningVedtakServiceTest {
                     ),
                 ),
             )
+
+        coVerify { tpKlient.harTpYtelseOnDate(FNR, tpnr = TPNR_SPK, now().atStartOfMonth()) }
     }
 
     @Test
     fun `skal hente to vedtak`() {
-        val virkFom = LocalDate.now()
-
-        coEvery { vedtakKlient.hentVedtaksliste(virkFom, fnr = FNR, organisasjonsnummer = ORGNO) } returns
+        val virkFom = now().atStartOfMonth()
+        val vedtakliste =
             listOf(
                 vedtak(
                     vedtakId = 123L,
@@ -114,17 +125,17 @@ class SamordningVedtakServiceTest {
                 ),
             )
 
+        coEvery { vedtakKlient.hentVedtaksliste(virkFom, fnr = FNR, organisasjonsnummer = ORGNO) } returns vedtakliste
+        coEvery { tpKlient.harTpForholdByDate(FNR, tpnr = TPNR_SPK, fomDato = virkFom) } returns true
+
         val vedtaksliste =
             runBlocking {
-                samordningVedtakService.hentVedtaksliste(virkFom, FNR, ORGNO)
+                samordningVedtakService.hentVedtaksliste(virkFom, FNR, TPNR_SPK, ORGNO)
             }
 
         vedtaksliste shouldHaveSize 2
-    }
 
-    companion object {
-        const val ORGNO = "123456789"
-        const val FNR = "10518209200"
+        coVerify { tpKlient.harTpForholdByDate(FNR, tpnr = TPNR_SPK, fomDato = virkFom) }
     }
 }
 
@@ -136,6 +147,7 @@ fun vedtak(
 ): VedtakSamordningDto =
     VedtakSamordningDto(
         vedtakId = vedtakId ?: 5678L,
+        fnr = FNR,
         status = VedtakStatus.ATTESTERT,
         virkningstidspunkt = now(),
         sak = VedtakSak(ident = "123", sakstype, id = 1234L),

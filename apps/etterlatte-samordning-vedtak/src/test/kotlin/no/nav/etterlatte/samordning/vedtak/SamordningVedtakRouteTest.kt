@@ -50,6 +50,7 @@ class SamordningVedtakRouteTest {
             val response =
                 client.get("/api/vedtak/123") {
                     header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    header("tpnr", "3010")
                 }
 
             response.status shouldBe HttpStatusCode.Unauthorized
@@ -66,6 +67,7 @@ class SamordningVedtakRouteTest {
                 client.get("/api/vedtak/123") {
                     header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                     header(HttpHeaders.Authorization, "Bearer ${token()}")
+                    header("tpnr", "3010")
                 }
 
             response.status shouldBe HttpStatusCode.Unauthorized
@@ -73,8 +75,24 @@ class SamordningVedtakRouteTest {
     }
 
     @Test
+    fun `skal gi 400 dersom tpnr-header mangler`() {
+        testApplication {
+            environment { config = applicationConfig }
+            application { samordningVedtakApi() }
+
+            val response =
+                client.get("/api/vedtak/123") {
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    header(HttpHeaders.Authorization, "Bearer ${token("nav:etterlatteytelser:vedtaksinformasjon.read")}")
+                }
+
+            response.status shouldBe HttpStatusCode.BadRequest
+        }
+    }
+
+    @Test
     fun `skal gi 200 med gyldig token inkl scope`() {
-        coEvery { samordningVedtakService.hentVedtak(any<Long>(), any<String>()) } returns
+        coEvery { samordningVedtakService.hentVedtak(vedtakId = any<Long>(), tpnr = "3010", any<String>()) } returns
             opprettSamordningVedtakDto()
 
         testApplication {
@@ -88,10 +106,11 @@ class SamordningVedtakRouteTest {
                         HttpHeaders.Authorization,
                         "Bearer ${token("nav:etterlatteytelser:vedtaksinformasjon.read")}",
                     )
+                    header("tpnr", "3010")
                 }
 
             response.status shouldBe HttpStatusCode.OK
-            coVerify { samordningVedtakService.hentVedtak(any<Long>(), any<String>()) }
+            coVerify { samordningVedtakService.hentVedtak(vedtakId = any<Long>(), tpnr = "3010", any<String>()) }
         }
     }
 
@@ -104,6 +123,7 @@ class SamordningVedtakRouteTest {
             samordningVedtakService.hentVedtaksliste(
                 virkFom = virkFom,
                 fnr = fnr,
+                tpnr = "3010",
                 organisasjonsnummer = any<String>(),
             )
         } returns
@@ -117,6 +137,7 @@ class SamordningVedtakRouteTest {
                 client.get("/api/vedtak") {
                     parameter("virkFom", virkFom)
                     header("fnr", fnr)
+                    header("tpnr", "3010")
                     header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                     header(
                         HttpHeaders.Authorization,
@@ -129,6 +150,7 @@ class SamordningVedtakRouteTest {
                 samordningVedtakService.hentVedtaksliste(
                     virkFom = virkFom,
                     fnr = fnr,
+                    tpnr = "3010",
                     organisasjonsnummer = any<String>(),
                 )
             }

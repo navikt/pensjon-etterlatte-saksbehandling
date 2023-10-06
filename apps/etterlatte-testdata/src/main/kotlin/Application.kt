@@ -9,6 +9,7 @@ import com.github.michaelbull.result.get
 import com.github.mustachejava.DefaultMustacheFactory
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
+import dolly.TestnavClient
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.serialization.jackson.jackson
@@ -92,7 +93,12 @@ val features: List<TestDataFeature> =
         StandardMeldingFeature,
         SlettsakFeature,
         OpprettSoeknadFeature,
-        DollyFeature(DollyService(DollyClientImpl(config, httpClient))),
+        DollyFeature(
+            DollyService(
+                DollyClientImpl(config, httpClient),
+                TestnavClient(config, httpClient),
+            ),
+        ),
     )
 
 fun main() {
@@ -165,8 +171,14 @@ fun PipelineContext<Unit, ApplicationCall>.navIdentFraToken() = call.firstValidT
 
 fun PipelineContext<Unit, ApplicationCall>.usernameFraToken() = call.firstValidTokenClaims()?.get("preferred_username")?.toString()
 
-fun getClientAccessToken(): String =
+fun getDollyAccessToken(): String =
     runBlocking {
         azureAdClient.getAccessTokenForResource(listOf("api://${config.getString("dolly.client.id")}/.default"))
+            .get()!!.accessToken
+    }
+
+fun getTestnavAccessToken(): String =
+    runBlocking {
+        azureAdClient.getAccessTokenForResource(listOf("api://${config.getString("testnav.client.id")}/.default"))
             .get()!!.accessToken
     }

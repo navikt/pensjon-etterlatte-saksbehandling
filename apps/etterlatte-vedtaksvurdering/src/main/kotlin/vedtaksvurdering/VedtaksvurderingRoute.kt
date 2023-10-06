@@ -236,6 +236,7 @@ data class VedtakSammendragDto(
 private fun Vedtak.toSamordningsvedtakDto() =
     VedtakSamordningDto(
         vedtakId = id,
+        fnr = soeker.value,
         status = status,
         virkningstidspunkt = virkningstidspunkt,
         sak = VedtakSak(soeker.value, sakType, sakId),

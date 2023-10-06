@@ -1,7 +1,5 @@
 package no.nav.etterlatte.testdata.dolly
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.module.kotlin.readValue
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -42,11 +40,6 @@ interface DollyClient {
         pageNo: Int,
         pageSize: Int,
     ): TestGruppeBestillinger
-
-    suspend fun hentPersonInfo(
-        identer: List<String>,
-        accessToken: String,
-    ): List<DollyPersonResponse>
 
     suspend fun markerIdentIBruk(
         ident: String,
@@ -105,16 +98,6 @@ class DollyClientImpl(config: Config, private val httpClient: HttpClient) : Doll
         httpClient.get("$dollyUrl/gruppe/$gruppeId/page/$pageNo?pageSize=$pageSize") {
             header(HttpHeaders.Authorization, "Bearer $accessToken")
         }.body()
-
-    override suspend fun hentPersonInfo(
-        identer: List<String>,
-        accessToken: String,
-    ): List<DollyPersonResponse> =
-        httpClient.get("$dollyUrl/pdlperson/identer?identer=${identer.joinToString(",")}") {
-            header(HttpHeaders.Authorization, "Bearer $accessToken")
-        }.let {
-            objectMapper.readValue(it.body<JsonNode>()["data"]["hentPersonBolk"].toJson())
-        }
 
     override suspend fun markerIdentIBruk(
         ident: String,

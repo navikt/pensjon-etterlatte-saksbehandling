@@ -14,7 +14,7 @@ import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.libs.ktor.setReady
 import no.nav.etterlatte.tilbakekreving.config.ApplicationContext
 import no.nav.etterlatte.tilbakekreving.kravgrunnlag.testKravgrunnlagRoutes
-import no.nav.etterlatte.tilbakekreving.vedtak.testTilbakekrevingsvedtak
+import no.nav.etterlatte.tilbakekreving.vedtak.tilbakekrevingVedtakRoutes
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -39,8 +39,8 @@ class Server(private val context: ApplicationContext) {
                         routing { healthApi() }
                         metricsModule()
                         restModule(sikkerLogg, withMetrics = false) {
-                            testKravgrunnlagRoutes(service = context.service)
-                            testTilbakekrevingsvedtak(tilbakekrevingKlient = context.tilbakekrevingKlient)
+                            testKravgrunnlagRoutes(context.kravgrunnlagService)
+                            tilbakekrevingVedtakRoutes(context.tilbakekrevingVedtakService)
                         }
                     }
                     connector { port = context.properties.httpPort }

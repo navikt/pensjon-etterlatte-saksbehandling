@@ -22,14 +22,25 @@ fun Route.samordningVedtakRoute(samordningVedtakService: SamordningVedtakService
         get("{vedtakId}") {
             val vedtakId = requireNotNull(call.parameters["vedtakId"]).toLong()
 
+            val tpnummer =
+                call.request.headers["tpnr"]
+                    ?: return@get call.respond(HttpStatusCode.BadRequest, "tpnr ikke angitt")
+
             val samordningVedtakDto =
                 try {
                     samordningVedtakService.hentVedtak(
                         vedtakId = vedtakId,
+                        tpnr = tpnummer,
                         organisasjonsnummer = call.orgNummer,
                     )
                 } catch (e: VedtakFeilSakstypeException) {
                     call.respond(HttpStatusCode.Unauthorized, "Ikke tilgang til sakstype")
+                } catch (e: TjenestepensjonManglendeTilgangException) {
+                    call.respond(HttpStatusCode.Unauthorized, e.message)
+                } catch (e: TjenestepensjonUgyldigForesporselException) {
+                    call.respond(HttpStatusCode.BadRequest, e.message)
+                } catch (e: TjenestepensjonIkkeFunnetException) {
+                    call.respond(HttpStatusCode.NotFound, e.message)
                 } catch (e: IllegalArgumentException) {
                     call.respondNullable(HttpStatusCode.BadRequest, e.message)
                 }
@@ -46,13 +57,24 @@ fun Route.samordningVedtakRoute(samordningVedtakService: SamordningVedtakService
                 call.request.headers["fnr"]
                     ?: return@get call.respond(HttpStatusCode.BadRequest, "fnr ikke angitt")
 
+            val tpnummer =
+                call.request.headers["tpnr"]
+                    ?: return@get call.respond(HttpStatusCode.BadRequest, "tpnr ikke angitt")
+
             val samordningVedtakDtos =
                 try {
                     samordningVedtakService.hentVedtaksliste(
                         virkFom = virkFom,
                         fnr = fnr,
+                        tpnr = tpnummer,
                         organisasjonsnummer = call.orgNummer,
                     )
+                } catch (e: TjenestepensjonManglendeTilgangException) {
+                    call.respond(HttpStatusCode.Unauthorized, e.message)
+                } catch (e: TjenestepensjonUgyldigForesporselException) {
+                    call.respond(HttpStatusCode.BadRequest, e.message)
+                } catch (e: TjenestepensjonIkkeFunnetException) {
+                    call.respond(HttpStatusCode.NotFound, e.message)
                 } catch (e: IllegalArgumentException) {
                     call.respondNullable(HttpStatusCode.BadRequest, e.message)
                 }

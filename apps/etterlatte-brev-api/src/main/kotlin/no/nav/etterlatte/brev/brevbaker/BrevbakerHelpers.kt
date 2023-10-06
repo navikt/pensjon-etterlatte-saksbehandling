@@ -1,7 +1,7 @@
 package no.nav.etterlatte.brev.brevbaker
 
+import no.nav.etterlatte.brev.adresse.Avsender
 import no.nav.etterlatte.brev.behandling.Soeker
-import no.nav.etterlatte.brev.model.Avsender
 import no.nav.pensjon.brevbaker.api.model.Bruker
 import no.nav.pensjon.brevbaker.api.model.Felles
 import no.nav.pensjon.brevbaker.api.model.Foedselsnummer

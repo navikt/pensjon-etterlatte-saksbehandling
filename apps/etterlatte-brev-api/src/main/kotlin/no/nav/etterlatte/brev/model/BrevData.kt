@@ -3,7 +3,6 @@ package no.nav.etterlatte.brev.model
 import no.nav.etterlatte.brev.behandling.Behandling
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
-import no.nav.pensjon.brevbaker.api.model.Telefonnummer
 
 abstract class BrevData {
     inline fun <reified T : RevurderingInfo> valider(
@@ -26,12 +25,3 @@ abstract class BrevData {
         return behandling.revurderingInfo
     }
 }
-
-data class Avsender(
-    val kontor: String,
-    val adresse: String,
-    val postnummer: String,
-    val telefonnummer: Telefonnummer,
-    val saksbehandler: String,
-    val attestant: String?,
-)

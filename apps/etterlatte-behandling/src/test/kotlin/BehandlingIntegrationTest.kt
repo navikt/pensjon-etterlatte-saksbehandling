@@ -41,6 +41,7 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.GeografiskTilknytning
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -465,7 +466,7 @@ class BrevApiKlientTest : BrevApiKlient {
             mottaker =
                 Mottaker(
                     navn = "Mottaker mottakersen",
-                    foedselsnummer = "12312312312",
+                    foedselsnummer = Folkeregisteridentifikator.of("19448310410"),
                     orgnummer = null,
                 ),
         )
@@ -504,7 +505,7 @@ class BrevApiKlientTest : BrevApiKlient {
             mottaker =
                 Mottaker(
                     navn = "Mottaker mottakersen",
-                    foedselsnummer = "12312312312",
+                    foedselsnummer = Folkeregisteridentifikator.of("19448310410"),
                     orgnummer = null,
                 ),
         )

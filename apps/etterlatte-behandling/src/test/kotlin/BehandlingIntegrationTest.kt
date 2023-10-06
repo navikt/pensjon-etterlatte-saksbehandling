@@ -32,6 +32,7 @@ import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.kafka.TestProdusent
 import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.common.behandling.Mottaker
+import no.nav.etterlatte.libs.common.behandling.Mottakerident
 import no.nav.etterlatte.libs.common.behandling.PersonMedSakerOgRoller
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakOgRolle
@@ -41,7 +42,6 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.GeografiskTilknytning
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -466,7 +466,7 @@ class BrevApiKlientTest : BrevApiKlient {
             mottaker =
                 Mottaker(
                     navn = "Mottaker mottakersen",
-                    foedselsnummer = Folkeregisteridentifikator.of("19448310410"),
+                    foedselsnummer = Mottakerident("19448310410"),
                     orgnummer = null,
                 ),
         )
@@ -505,7 +505,7 @@ class BrevApiKlientTest : BrevApiKlient {
             mottaker =
                 Mottaker(
                     navn = "Mottaker mottakersen",
-                    foedselsnummer = Folkeregisteridentifikator.of("19448310410"),
+                    foedselsnummer = Mottakerident("19448310410"),
                     orgnummer = null,
                 ),
         )

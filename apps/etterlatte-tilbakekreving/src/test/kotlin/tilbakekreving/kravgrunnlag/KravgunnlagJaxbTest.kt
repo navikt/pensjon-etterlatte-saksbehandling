@@ -1,6 +1,6 @@
 package no.nav.etterlatte.tilbakekreving.kravgrunnlag
 
-import no.nav.etterlatte.testsupport.readFile
+import no.nav.etterlatte.tilbakekreving.readFile
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test

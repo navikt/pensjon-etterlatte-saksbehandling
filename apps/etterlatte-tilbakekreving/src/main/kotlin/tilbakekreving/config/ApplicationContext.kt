@@ -7,6 +7,7 @@ import no.nav.etterlatte.tilbakekreving.klienter.BehandlingKlient
 import no.nav.etterlatte.tilbakekreving.kravgrunnlag.KravgrunnlagConsumer
 import no.nav.etterlatte.tilbakekreving.kravgrunnlag.KravgrunnlagService
 import no.nav.etterlatte.tilbakekreving.vedtak.TilbakekrevingKlient
+import no.nav.etterlatte.tilbakekreving.vedtak.TilbakekrevingVedtakService
 
 class ApplicationContext(
     val properties: ApplicationProperties = ApplicationProperties.fromEnv(System.getenv()),
@@ -46,12 +47,14 @@ class ApplicationContext(
                 ),
         )
 
-    val service = KravgrunnlagService(behandlingKlient)
+    val tilbakekrevingVedtakService = TilbakekrevingVedtakService(tilbakekrevingKlient)
+
+    val kravgrunnlagService = KravgrunnlagService(behandlingKlient)
 
     val kravgrunnlagConsumer =
         KravgrunnlagConsumer(
             connectionFactory = jmsConnectionFactory,
             queue = properties.mqKravgrunnlagQueue,
-            kravgrunnlagService = service,
+            kravgrunnlagService = kravgrunnlagService,
         )
 }

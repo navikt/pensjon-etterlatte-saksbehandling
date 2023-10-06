@@ -66,7 +66,8 @@ internal class PesysRepository(private val dataSource: DataSource) : Transaction
     ) {
         tx.session {
             opprett(
-                "INSERT INTO pesyskopling(behandling_id,pesys_id) VALUES(:behandling_id,:pesys_id)",
+                "INSERT INTO pesyskopling(behandling_id,pesys_id) VALUES(:behandling_id,:pesys_id)" +
+                    " ON CONFLICT(behandling_id,pesys_id) DO NOTHING",
                 mapOf("behandling_id" to behandlingId, "pesys_id" to pesysId.id),
                 "Lagra koplinga mellom behandling $behandlingId og pesyssak $pesysId i migreringsbasen",
             )

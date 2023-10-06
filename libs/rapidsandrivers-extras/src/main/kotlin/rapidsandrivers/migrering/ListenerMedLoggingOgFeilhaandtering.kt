@@ -32,7 +32,7 @@ abstract class ListenerMedLoggingOgFeilhaandtering(protected val hendelsestype: 
         hendelsestype: String,
         block: River.() -> Unit = {},
     ) {
-        logger.info("Initierer river for ${this.javaClass.name}")
+        logger.info("Initialiserer river for ${this.javaClass.simpleName}")
         River(rapidsConnection).apply {
             eventName(hendelsestype)
             correlationId()

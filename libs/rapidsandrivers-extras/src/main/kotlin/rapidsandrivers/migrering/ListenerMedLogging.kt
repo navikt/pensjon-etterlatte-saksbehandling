@@ -39,7 +39,7 @@ abstract class ListenerMedLogging : River.PacketListener {
         rapidsConnection: RapidsConnection,
         block: River.() -> Unit = {},
     ) {
-        logger.info("Initierer river for ${this.javaClass.name}")
+        logger.info("Initialiserer river for ${this.javaClass.simpleName}")
         River(rapidsConnection).apply {
             correlationId()
             block()

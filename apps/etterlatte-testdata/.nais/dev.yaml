@@ -45,7 +45,12 @@ spec:
       value: dev-gcp.dolly.dolly-backend
     - name: DOLLY_RESOURCE_URL
       value: https://dolly-backend.intern.dev.nav.no/api/v1
+    - name: TESTNAV_CLIENT_ID
+      value: dev-gcp.dolly.testnav-person-service
+    - name: TESTNAV_RESOURCE_URL
+      value: https://testnav-person-service.intern.dev.nav.no/api/v2
   accessPolicy:
     outbound:
       external:
         - host: dolly-backend.intern.dev.nav.no
+        - host: testnav-person-service.intern.dev.nav.no

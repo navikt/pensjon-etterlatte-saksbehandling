@@ -1,11 +1,13 @@
 package no.nav.etterlatte.testdata.dolly
 
+import dolly.TestnavClient
 import kotlinx.coroutines.runBlocking
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 class DollyService(
     private val dollyClient: DollyClient,
+    private val testnavClient: TestnavClient,
 ) {
     private val logger: Logger = LoggerFactory.getLogger(DollyService::class.java)
 
@@ -50,7 +52,7 @@ class DollyService(
     ): List<ForenkletFamilieModell> =
         runBlocking {
             dollyClient.hentTestGruppeBestillinger(gruppeId, accessToken, 0, 10).let { bestillinger ->
-                dollyClient.hentPersonInfo(bestillinger.identer.map { it.ident }, accessToken)
+                testnavClient.hentPersonInfo(bestillinger.identer.map { it.ident })
                     .mapNotNull { personResponse ->
                         val avdoed = personResponse.ident
                         val ibruk = bestillinger.identer.any { avdoed == it.ident && it.ibruk }

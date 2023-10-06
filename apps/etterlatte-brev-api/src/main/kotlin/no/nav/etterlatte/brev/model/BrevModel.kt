@@ -2,9 +2,12 @@ package no.nav.etterlatte.brev.model
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import no.nav.etterlatte.brev.adresse.RegoppslagResponseDTO
+import no.nav.etterlatte.brev.behandling.Trygdetidsperiode
 import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
+import no.nav.pensjon.brevbaker.api.model.Kroner
+import java.time.LocalDate
 import java.util.UUID
 
 typealias BrevID = Long
@@ -151,3 +154,22 @@ enum class BrevProsessType {
     REDIGERBAR,
     AUTOMATISK,
 }
+
+data class EtterbetalingDTO(
+    val fraDato: LocalDate,
+    val tilDato: LocalDate,
+)
+
+data class Beregningsinfo(
+    val innhold: List<Slate.Element>,
+    val grunnbeloep: Kroner,
+    val beregningsperioder: List<NyBeregningsperiode>,
+    val trygdetidsperioder: List<Trygdetidsperiode>,
+)
+
+data class NyBeregningsperiode(
+    val inntekt: Kroner,
+    val trygdetid: Int,
+    val stoenadFoerReduksjon: Kroner,
+    var utbetaltBeloep: Kroner,
+)

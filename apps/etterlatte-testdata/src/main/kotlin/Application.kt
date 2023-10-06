@@ -9,6 +9,7 @@ import com.github.michaelbull.result.get
 import com.github.mustachejava.DefaultMustacheFactory
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
+import dolly.TestnavClient
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.serialization.jackson.jackson
@@ -92,7 +93,12 @@ val features: List<TestDataFeature> =
         StandardMeldingFeature,
         SlettsakFeature,
         OpprettSoeknadFeature,
-        DollyFeature(DollyService(DollyClientImpl(config, httpClient))),
+        DollyFeature(
+            DollyService(
+                DollyClientImpl(config, httpClient),
+                TestnavClient(httpClient, env["TESTNAV_RESOURCE_URL"]!!),
+            ),
+        ),
     )
 
 fun main() {

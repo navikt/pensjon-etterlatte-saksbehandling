@@ -6,35 +6,26 @@ import { useTilbakekreving } from '~components/tilbakekreving/useTilbakekreving'
 import { SidebarPanel } from '~shared/components/Sidebar'
 import { Dokumentoversikt } from '~components/person/dokumenter/dokumentoversikt'
 import { IRolle } from '~store/reducers/SaksbehandlerReducer'
-import { useAppSelector } from '~store/Store'
+import { useAppDispatch, useAppSelector } from '~store/Store'
 import { TilbakekrevingStatus } from '~shared/types/Tilbakekreving'
-import { isFailure, isSuccess, Result } from '~shared/hooks/useApiCall'
+import { isFailure, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
 import { isPending } from '@reduxjs/toolkit'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import Spinner from '~shared/Spinner'
 import { Attestering } from '~components/behandling/attestering/attestering/attestering'
 import { IBeslutning } from '~components/behandling/attestering/types'
-import { VedtakSammendrag, VedtakType } from '~components/vedtak/typer'
+import { hentVedtakSammendrag } from '~shared/api/vedtaksvurdering'
+import { useVedtak } from '~components/vedtak/useVedtak'
+import { updateVedtakSammendrag } from '~store/reducers/VedtakReducer'
 
 export function TilbakekrevingSidemeny() {
   const tilbakekreving = useTilbakekreving()
-  //const vedtak = useVedtak() // TODO EY-2767
-  const vedtak: VedtakSammendrag = {
-    id: '9',
-    behandlingId: 'd7497e08-2424-4275-a978-a0e55c51b229',
-    vedtakType: VedtakType.TILBAKEKREVING,
-    saksbehandlerId: '13018316042',
-    datoFattet: '2023-10-04 15:51:51.732458+02',
-  }
-  //const dispatch = useAppDispatch()
+  const vedtak = useVedtak()
+  const dispatch = useAppDispatch()
   const saksbehandler = useAppSelector((state) => state.saksbehandlerReducer.saksbehandler)
   const [collapsed, setCollapsed] = useState(false)
 
-  //const [fetchVedtakStatus, fetchVedtakSammendrag] = useApiCall(hentVedtakSammendrag) // TODO EY-2767
-  const fetchVedtakStatus: Result<any> = {
-    status: 'success',
-    data: vedtak,
-  }
+  const [fetchVedtakStatus, fetchVedtakSammendrag] = useApiCall(hentVedtakSammendrag)
   const [beslutning, setBeslutning] = useState<IBeslutning>()
 
   const kanAttestere =
@@ -44,13 +35,11 @@ export function TilbakekrevingSidemeny() {
 
   useEffect(() => {
     if (!tilbakekreving?.id) return
-    /* TODO EY-2767
     fetchVedtakSammendrag(tilbakekreving.id, (vedtakSammendrag) => {
       if (vedtakSammendrag !== null) {
         dispatch(updateVedtakSammendrag(vedtakSammendrag))
       }
     })
-    */
   }, [tilbakekreving?.id])
 
   return (

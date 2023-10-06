@@ -21,7 +21,10 @@ data class Tilbakekreving(
 ) {
     fun underBehandling() =
         when (status) {
-            TilbakekrevingStatus.UNDER_ARBEID, TilbakekrevingStatus.OPPRETTET -> true
+            TilbakekrevingStatus.UNDERKJENT,
+            TilbakekrevingStatus.UNDER_ARBEID,
+            TilbakekrevingStatus.OPPRETTET,
+            -> true
             else -> false
         }
 
@@ -133,6 +136,8 @@ enum class TilbakekrevingStatus {
     OPPRETTET,
     UNDER_ARBEID,
     FATTET_VEDTAK,
+    ATTESTERT,
+    UNDERKJENT,
 }
 
 enum class TilbakekrevingAarsak {
@@ -175,6 +180,4 @@ class TilbakekrevingHarMangelException(message: String?) : RuntimeException(mess
 
 class TilbakekrevingFinnesIkkeException(message: String?) : RuntimeException(message)
 
-class TilbakekrevingErIkkeUnderBehandlingException() : RuntimeException()
-
-class KravgrunnlagHarIkkeEksisterendeSakException : RuntimeException()
+class TilbakekrevingFeilTilstandException(message: String?) : RuntimeException(message)

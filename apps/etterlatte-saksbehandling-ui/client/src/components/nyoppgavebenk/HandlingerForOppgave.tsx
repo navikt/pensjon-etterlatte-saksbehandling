@@ -27,6 +27,7 @@ export const HandlingerForOppgave = ({ oppgave }: { oppgave: OppgaveDTO }) => {
   if (kilde === 'TILBAKEKREVING') {
     switch (type) {
       case 'ATTESTERING':
+      case 'UNDERKJENT':
       case 'TILBAKEKREVING':
         return (
           erInnloggetSaksbehandlerOppgave && (

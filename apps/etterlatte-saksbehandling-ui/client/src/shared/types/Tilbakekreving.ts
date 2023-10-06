@@ -59,6 +59,7 @@ export enum TilbakekrevingAktsomhet {
 export enum TilbakekrevingStatus {
   OPPRETTET = 'OPPRETTET',
   UNDER_ARBEID = 'UNDER_ARBEID',
+  FATTET_VEDTAK = 'FATTET_VEDTAK',
 }
 export enum TilbakekrevingSkyld {
   BRUKER = 'BRUKER',

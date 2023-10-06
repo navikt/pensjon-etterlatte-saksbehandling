@@ -132,7 +132,7 @@ fun List<KravgrunnlagPeriode>.tilTilbakekrevingPerioder(): List<TilbakekrevingPe
 enum class TilbakekrevingStatus {
     OPPRETTET,
     UNDER_ARBEID,
-    VEDTATT,
+    FATTET_VEDTAK,
 }
 
 enum class TilbakekrevingAarsak {

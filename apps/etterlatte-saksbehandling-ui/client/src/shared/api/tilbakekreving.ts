@@ -22,3 +22,21 @@ export function lagreTilbakekrevingsperioder(args: {
 export const fattVedtak = async (tilbakekrevingsId: string): Promise<ApiResponse<unknown>> => {
   return apiClient.post(`/tilbakekreving/${tilbakekrevingsId}/vedtak/fatt`, {})
 }
+
+export const attesterVedtak = async (args: {
+  tilbakekrevingsId: string
+  kommentar: string
+}): Promise<ApiResponse<unknown>> => {
+  return apiClient.post(`/tilbakekreving/${args.tilbakekrevingsId}/vedtak/attester`, { kommentar: args.kommentar })
+}
+
+export const underkjennVedtak = async (args: {
+  tilbakekrevingId: string
+  kommentar: string
+  valgtBegrunnelse: string
+}): Promise<ApiResponse<unknown>> => {
+  return apiClient.post(`/tilbakekreving/${args.tilbakekrevingId}/vedtak/underkjenn`, {
+    kommentar: args.kommentar,
+    valgtBegrunnelse: args.valgtBegrunnelse,
+  })
+}

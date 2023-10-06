@@ -19,6 +19,7 @@ import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMS_REVURDERING_ENDRI
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMS_REVURDERING_OPPHOER
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMS_REVURDERING_OPPHOER_GENERELL
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.TOM_MAL
+import no.nav.etterlatte.brev.model.bp.AvslagYrkesskadeBrevData
 import no.nav.etterlatte.brev.model.bp.EndringHovedmalBrevData
 import no.nav.etterlatte.brev.model.bp.InnvilgetBrevData
 import no.nav.etterlatte.brev.model.bp.InnvilgetBrevDataEnkel

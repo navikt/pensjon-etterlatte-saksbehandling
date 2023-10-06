@@ -1,6 +1,7 @@
 package no.nav.etterlatte.migrering
 
 import no.nav.etterlatte.BehandlingService
+import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -23,6 +24,7 @@ internal class AvbrytBehandlingHvisMigreringFeila(
         logger.info("initierer rapid for ${this.javaClass.name}")
         River(rapidsConnection).apply {
             eventName(hendelsestype)
+            correlationId()
             validate { it.requireKey(BEHANDLING_ID_KEY) }
         }.register(this)
     }

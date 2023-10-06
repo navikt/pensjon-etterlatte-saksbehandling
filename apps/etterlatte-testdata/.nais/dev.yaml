@@ -48,7 +48,7 @@ spec:
     - name: TESTNAV_CLIENT_ID
       value: dev-gcp.dolly.testnav-person-service
     - name: TESTNAV_RESOURCE_URL
-      value: https://testnav-person-service.intern.dev.nav.no/api
+      value: https://testnav-person-service.intern.dev.nav.no/api/v2
   accessPolicy:
     outbound:
       external:

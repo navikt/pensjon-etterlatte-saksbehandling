@@ -52,7 +52,7 @@ class DollyService(
     ): List<ForenkletFamilieModell> =
         runBlocking {
             dollyClient.hentTestGruppeBestillinger(gruppeId, accessToken, 0, 10).let { bestillinger ->
-                testnavClient.hentPersonInfo(bestillinger.identer.map { it.ident }, accessToken)
+                testnavClient.hentPersonInfo(bestillinger.identer.map { it.ident })
                     .mapNotNull { personResponse ->
                         val avdoed = personResponse.ident
                         val ibruk = bestillinger.identer.any { avdoed == it.ident && it.ibruk }

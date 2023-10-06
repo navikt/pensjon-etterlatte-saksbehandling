@@ -9,7 +9,7 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import no.nav.etterlatte.TestDataFeature
-import no.nav.etterlatte.getClientAccessToken
+import no.nav.etterlatte.getDollyAccessToken
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.navIdentFraToken
 import no.nav.etterlatte.objectMapper
@@ -32,7 +32,7 @@ class DollyFeature(private val dollyService: DollyService) : TestDataFeature {
     override val routes: Route.() -> Unit
         get() = {
             get {
-                val accessToken = getClientAccessToken()
+                val accessToken = getDollyAccessToken()
                 logger.info("got accesstoken")
                 val gruppeId = dollyService.hentTestGruppe(usernameFraToken()!!, accessToken)
 
@@ -50,7 +50,7 @@ class DollyFeature(private val dollyService: DollyService) : TestDataFeature {
 
             get("hent-familier") {
                 try {
-                    val accessToken = getClientAccessToken()
+                    val accessToken = getDollyAccessToken()
                     val gruppeId = call.request.queryParameters["gruppeId"]!!.toLong()
 
                     val familier =
@@ -76,7 +76,7 @@ class DollyFeature(private val dollyService: DollyService) : TestDataFeature {
             post("opprett-familie") {
                 call.receiveParameters().let {
                     try {
-                        val accessToken = getClientAccessToken()
+                        val accessToken = getDollyAccessToken()
                         val req =
                             BestillingRequest(
                                 it["helsoesken"]!!.toInt(),
@@ -129,7 +129,7 @@ class DollyFeature(private val dollyService: DollyService) : TestDataFeature {
                         )
                     logger.info("Publiserer melding med partisjon: $partisjon offset: $offset")
 
-                    dollyService.markerSomIBruk(request.avdoed, getClientAccessToken())
+                    dollyService.markerSomIBruk(request.avdoed, getDollyAccessToken())
 
                     call.respond(SoeknadResponse(200, noekkel).toJson())
                 } catch (e: Exception) {

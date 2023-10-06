@@ -96,7 +96,7 @@ val features: List<TestDataFeature> =
         DollyFeature(
             DollyService(
                 DollyClientImpl(config, httpClient),
-                TestnavClient(httpClient, env["TESTNAV_RESOURCE_URL"]!!),
+                TestnavClient(config, httpClient),
             ),
         ),
     )
@@ -171,8 +171,14 @@ fun PipelineContext<Unit, ApplicationCall>.navIdentFraToken() = call.firstValidT
 
 fun PipelineContext<Unit, ApplicationCall>.usernameFraToken() = call.firstValidTokenClaims()?.get("preferred_username")?.toString()
 
-fun getClientAccessToken(): String =
+fun getDollyAccessToken(): String =
     runBlocking {
         azureAdClient.getAccessTokenForResource(listOf("api://${config.getString("dolly.client.id")}/.default"))
+            .get()!!.accessToken
+    }
+
+fun getTestnavAccessToken(): String =
+    runBlocking {
+        azureAdClient.getAccessTokenForResource(listOf("api://${config.getString("testnav.client.id")}/.default"))
             .get()!!.accessToken
     }

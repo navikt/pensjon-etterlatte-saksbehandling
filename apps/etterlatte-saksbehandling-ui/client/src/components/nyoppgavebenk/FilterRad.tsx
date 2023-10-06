@@ -78,7 +78,7 @@ export const FilterRad = (props: {
               setFilter({ ...filter, saksbehandlerFilter: option })
             }
           }}
-        ></UNSAFE_Combobox>
+        />
 
         <Select
           label="Enhet"

@@ -18,14 +18,12 @@ import no.nav.etterlatte.libs.common.rapidsandrivers.GYLDIG_FOR_BEHANDLING_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.SAK_TYPE_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.SOEKNAD_ID_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
-import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.rapidsandrivers.EventNames
 import no.nav.etterlatte.sikkerLogg
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
-import no.nav.helse.rapids_rivers.River
 import org.slf4j.LoggerFactory
 import rapidsandrivers.migrering.ListenerMedLogging
 import java.time.OffsetDateTime
@@ -44,8 +42,7 @@ internal class Fordeler(
     private val logger = LoggerFactory.getLogger(Fordeler::class.java)
 
     init {
-        River(rapidsConnection).apply {
-            eventName(SoeknadInnsendt.eventNameInnsendt)
+        initialiserRiver(rapidsConnection, SoeknadInnsendt.eventNameInnsendt) {
             validate { it.demandValue(SoeknadInnsendt.skjemaInfoTypeKey, "BARNEPENSJON") }
             validate { it.demandValue(SoeknadInnsendt.skjemaInfoVersjonKey, "2") }
             validate { it.requireKey(SoeknadInnsendt.skjemaInfoKey) }
@@ -57,8 +54,7 @@ internal class Fordeler(
             validate { it.rejectKey(SoeknadInnsendt.dokarkivReturKey) }
             validate { it.rejectKey(GyldigSoeknadVurdert.sakIdKey) }
             validate { it.rejectKey(FordelerFordelt.soeknadFordeltKey) }
-            correlationId()
-        }.register(this)
+        }
     }
 
     override fun haandterPakke(

@@ -113,7 +113,7 @@ abstract class BehandlingIntegrationTest {
                         put("NAVANSATT_URL", "http://localhost")
                         put("SKJERMING_URL", "http://localhost")
                         put("OPPGAVE_URL", "http://localhost")
-                        put("KLAGE_URL", "http://localhost")
+                        put("ETTERLATTE_KLAGE_API_URL", "http://localhost")
                         put("OPPGAVE_SCOPE", "scope")
                     }.let { Miljoevariabler(it) },
                 config =

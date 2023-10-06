@@ -10,9 +10,8 @@ import no.nav.etterlatte.brev.VedtaksbrevService
 import no.nav.etterlatte.brev.adresse.AdresseService
 import no.nav.etterlatte.brev.adresse.Norg2Klient
 import no.nav.etterlatte.brev.adresse.RegoppslagKlient
-import no.nav.etterlatte.brev.behandling.SakOgBehandlingService
+import no.nav.etterlatte.brev.adresse.navansatt.NavansattKlient
 import no.nav.etterlatte.brev.behandlingklient.BehandlingKlient
-import no.nav.etterlatte.brev.beregning.BeregningKlient
 import no.nav.etterlatte.brev.brevRoute
 import no.nav.etterlatte.brev.brevbaker.BrevbakerJSONBlockMixIn
 import no.nav.etterlatte.brev.brevbaker.BrevbakerJSONParagraphMixIn
@@ -25,14 +24,19 @@ import no.nav.etterlatte.brev.dokarkiv.DokarkivKlient
 import no.nav.etterlatte.brev.dokarkiv.DokarkivServiceImpl
 import no.nav.etterlatte.brev.dokument.SafClient
 import no.nav.etterlatte.brev.dokument.dokumentRoute
-import no.nav.etterlatte.brev.grunnlag.GrunnlagKlient
+import no.nav.etterlatte.brev.hentinformasjon.BehandlingService
+import no.nav.etterlatte.brev.hentinformasjon.BeregningKlient
+import no.nav.etterlatte.brev.hentinformasjon.GrunnlagKlient
+import no.nav.etterlatte.brev.hentinformasjon.SakService
+import no.nav.etterlatte.brev.hentinformasjon.SoekerService
+import no.nav.etterlatte.brev.hentinformasjon.Tilgangssjekker
+import no.nav.etterlatte.brev.hentinformasjon.TrygdetidKlient
+import no.nav.etterlatte.brev.hentinformasjon.VedtaksvurderingKlient
+import no.nav.etterlatte.brev.hentinformasjon.VedtaksvurderingService
+import no.nav.etterlatte.brev.hentinformasjon.VilkaarsvurderingKlient
 import no.nav.etterlatte.brev.model.BrevDataMapper
 import no.nav.etterlatte.brev.model.BrevProsessTypeFactory
-import no.nav.etterlatte.brev.navansatt.NavansattKlient
-import no.nav.etterlatte.brev.trygdetid.TrygdetidKlient
-import no.nav.etterlatte.brev.vedtak.VedtaksvurderingKlient
 import no.nav.etterlatte.brev.vedtaksbrevRoute
-import no.nav.etterlatte.brev.vilkaarsvurdering.VilkaarsvurderingKlient
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleProperties
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstartOgAvslutning
@@ -100,8 +104,8 @@ class ApplicationBuilder {
     private val behandlingKlient = BehandlingKlient(config, httpClient())
     private val trygdetidKlient = TrygdetidKlient(config, httpClient())
     private val vilkaarsvurderingKlient = VilkaarsvurderingKlient(config, httpClient())
-    private val sakOgBehandlingService =
-        SakOgBehandlingService(
+    private val behandlingService =
+        BehandlingService(
             vedtakKlient,
             grunnlagKlient,
             beregningKlient,
@@ -130,13 +134,28 @@ class ApplicationBuilder {
 
     private val brevProsessTypeFactory = BrevProsessTypeFactory(featureToggleService)
 
+    private val soekerService = SoekerService(grunnlagKlient)
+
+    private val vedtaksvurderingService = VedtaksvurderingService(vedtakKlient)
+
+    private val sakService = SakService(behandlingKlient)
+
     private val brevService =
-        BrevService(db, sakOgBehandlingService, adresseService, dokarkivService, distribusjonService, brevbakerService)
+        BrevService(
+            db,
+            sakService,
+            soekerService,
+            adresseService,
+            dokarkivService,
+            distribusjonService,
+            brevbakerService,
+        )
 
     private val vedtaksbrevService =
         VedtaksbrevService(
             db,
-            sakOgBehandlingService,
+            behandlingService,
+            vedtaksvurderingService,
             adresseService,
             dokarkivService,
             brevbakerService,
@@ -147,13 +166,15 @@ class ApplicationBuilder {
     private val journalpostService =
         SafClient(httpClient(), env.requireEnvValue("SAF_BASE_URL"), env.requireEnvValue("SAF_SCOPE"))
 
+    private val tilgangssjekker = Tilgangssjekker(config, httpClient())
+
     private val rapidsConnection: RapidsConnection =
         RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(env))
             .withKtorModule {
                 restModule(sikkerLogg, routePrefix = "api", config = HoconApplicationConfig(config)) {
-                    brevRoute(brevService, behandlingKlient)
-                    vedtaksbrevRoute(vedtaksbrevService, behandlingKlient)
-                    dokumentRoute(journalpostService, dokarkivService, behandlingKlient)
+                    brevRoute(brevService, tilgangssjekker)
+                    vedtaksbrevRoute(vedtaksbrevService, tilgangssjekker)
+                    dokumentRoute(journalpostService, dokarkivService, tilgangssjekker)
                 }
             }
             .build()

@@ -1,50 +1,54 @@
-package no.nav.etterlatte.brev.behandling
+package no.nav.etterlatte.brev.hentinformasjon
 
-import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
+import no.nav.etterlatte.brev.behandling.AvkortetBeregningsperiode
+import no.nav.etterlatte.brev.behandling.Avkortingsinfo
+import no.nav.etterlatte.brev.behandling.Behandling
+import no.nav.etterlatte.brev.behandling.Beregningsperiode
+import no.nav.etterlatte.brev.behandling.ForenkletVedtak
+import no.nav.etterlatte.brev.behandling.PersonerISak
+import no.nav.etterlatte.brev.behandling.Trygdetidsperiode
+import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
+import no.nav.etterlatte.brev.behandling.hentUtbetaltBeloep
+import no.nav.etterlatte.brev.behandling.mapAvdoed
+import no.nav.etterlatte.brev.behandling.mapInnsender
+import no.nav.etterlatte.brev.behandling.mapSoeker
+import no.nav.etterlatte.brev.behandling.mapSpraak
+import no.nav.etterlatte.brev.behandling.mapVerge
 import no.nav.etterlatte.brev.behandlingklient.BehandlingKlient
-import no.nav.etterlatte.brev.beregning.BeregningKlient
-import no.nav.etterlatte.brev.grunnlag.GrunnlagKlient
 import no.nav.etterlatte.brev.model.EtterbetalingDTO
-import no.nav.etterlatte.brev.trygdetid.TrygdetidKlient
-import no.nav.etterlatte.brev.vedtak.VedtaksvurderingKlient
-import no.nav.etterlatte.brev.vilkaarsvurdering.VilkaarsvurderingKlient
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
-import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.pensjon.brevbaker.api.model.Kroner
 import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
 
-class SakOgBehandlingService(
+interface IBehandlingService {
+    suspend fun hentBehandling(
+        sakId: Long,
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Behandling
+}
+
+class BehandlingService(
     private val vedtaksvurderingKlient: VedtaksvurderingKlient,
     private val grunnlagKlient: GrunnlagKlient,
     private val beregningKlient: BeregningKlient,
     private val behandlingKlient: BehandlingKlient,
     private val trygdetidKlient: TrygdetidKlient,
     private val vilkaarsvurderingKlient: VilkaarsvurderingKlient,
-) {
-    suspend fun hentSak(
-        sakId: Long,
-        bruker: BrukerTokenInfo,
-    ) = behandlingKlient.hentSak(sakId, bruker)
-
-    suspend fun hentSoeker(
-        sakId: Long,
-        bruker: BrukerTokenInfo,
-    ): Soeker =
-        grunnlagKlient.hentGrunnlag(sakId, bruker)
-            .mapSoeker()
-
-    suspend fun hentBehandling(
+) : IBehandlingService {
+    override suspend fun hentBehandling(
         sakId: Long,
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
@@ -53,36 +57,24 @@ class SakOgBehandlingService(
             val vedtak = async { vedtaksvurderingKlient.hentVedtak(behandlingId, brukerTokenInfo) }
             val grunnlag = async { grunnlagKlient.hentGrunnlag(sakId, brukerTokenInfo) }
             val sak = async { behandlingKlient.hentSak(sakId, brukerTokenInfo) }
-            val innvilgelsesdato = { async { vedtaksvurderingKlient.hentInnvilgelsesdato(sakId, brukerTokenInfo) } }
-            val vilkaarsvurdering = async { vilkaarsvurderingKlient.hentVilkaarsvurdering(behandlingId, brukerTokenInfo) }
+            val vilkaarsvurdering =
+                async { vilkaarsvurderingKlient.hentVilkaarsvurdering(behandlingId, brukerTokenInfo) }
             val etterbetaling = async { behandlingKlient.hentEtterbetaling(behandlingId, brukerTokenInfo) }
 
             mapBehandling(
                 vedtak.await(),
                 grunnlag.await(),
                 sak.await(),
-                innvilgelsesdato,
                 vilkaarsvurdering.await(),
                 etterbetaling.await(),
                 brukerTokenInfo,
             )
         }
 
-    suspend fun hentVedtakSaksbehandlerOgStatus(
-        behandlingId: UUID,
-        brukerTokenInfo: BrukerTokenInfo,
-    ): Pair<String, VedtakStatus> {
-        val vedtakDto = vedtaksvurderingKlient.hentVedtak(behandlingId, brukerTokenInfo)
-        val saksbehandlerIdent = vedtakDto.vedtakFattet?.ansvarligSaksbehandler ?: brukerTokenInfo.ident()
-
-        return Pair(saksbehandlerIdent, vedtakDto.status)
-    }
-
     private suspend fun mapBehandling(
         vedtak: VedtakDto,
         grunnlag: Grunnlag,
         sak: Sak,
-        innvilgelsesdato: () -> Deferred<LocalDate?>,
         vilkaarsvurdering: VilkaarsvurderingDto,
         etterbetaling: EtterbetalingDTO?,
         brukerTokenInfo: BrukerTokenInfo,
@@ -92,9 +84,9 @@ class SakOgBehandlingService(
         val saksbehandlerIdent = vedtak.vedtakFattet?.ansvarligSaksbehandler ?: innloggetSaksbehandlerIdent
         val attestantIdent = vedtak.vedtakFattet?.let { vedtak.attestasjon?.attestant ?: innloggetSaksbehandlerIdent }
 
-        val datoInnvilgelse =
+        val opprinneligInnvilgelsesdato =
             if (vedtak.behandling.revurderingInfo != null) {
-                innvilgelsesdato().await()
+                vedtaksvurderingKlient.hentInnvilgelsesdato(sak.id, brukerTokenInfo)
             } else {
                 null
             }
@@ -121,7 +113,16 @@ class SakOgBehandlingService(
                     attestantIdent,
                     vedtak.vedtakFattet?.tidspunkt?.toNorskLocalDate(),
                 ),
-            utbetalingsinfo = finnUtbetalingsinfo(vedtak.behandling.id, vedtak.virkningstidspunkt, brukerTokenInfo),
+            utbetalingsinfo =
+                if (vilkaarsvurdering.resultat?.utfall == VilkaarsvurderingUtfall.OPPFYLT) {
+                    finnUtbetalingsinfo(
+                        vedtak.behandling.id,
+                        vedtak.virkningstidspunkt,
+                        brukerTokenInfo,
+                    )
+                } else {
+                    null
+                },
             forrigeUtbetalingsinfo = finnForrigeUbetalingsinfo(vedtak, sak, brukerTokenInfo),
             avkortingsinfo =
                 finnYtelseMedGrunnlag(
@@ -134,7 +135,7 @@ class SakOgBehandlingService(
             revurderingsaarsak = vedtak.behandling.revurderingsaarsak,
             revurderingInfo = vedtak.behandling.revurderingInfo,
             virkningsdato = vedtak.virkningstidspunkt,
-            innvilgelsesdato = datoInnvilgelse,
+            opprinneligInnvilgelsesdato = opprinneligInnvilgelsesdato,
             adopsjonsdato = LocalDate.now(), // TODO: Denne må vi hente anten frå PDL eller brukarinput
             trygdetid =
                 finnTrygdetid(
@@ -146,7 +147,7 @@ class SakOgBehandlingService(
         )
     }
 
-    private suspend fun SakOgBehandlingService.finnForrigeUbetalingsinfo(
+    private suspend fun finnForrigeUbetalingsinfo(
         vedtak: VedtakDto,
         sak: Sak,
         brukerTokenInfo: BrukerTokenInfo,

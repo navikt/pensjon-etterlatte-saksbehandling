@@ -7,7 +7,7 @@ import { PdlPersonStatusBar } from '~shared/statusbar/Statusbar'
 import { useBehandlingRoutes } from './BehandlingRoutes'
 import { StegMeny } from './StegMeny/stegmeny'
 import { useAppDispatch } from '~store/Store'
-import { isFailure, isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
+import { mapAllApiResult, useApiCall } from '~shared/hooks/useApiCall'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { useBehandling } from '~components/behandling/useBehandling'
 import { BehandlingSidemeny } from '~components/behandling/sidemeny/BehandlingSidemeny'
@@ -34,13 +34,15 @@ export const Behandling = () => {
     }
   }, [behandlingIdFraURL, behandling?.id])
 
-  return (
-    <>
-      {behandling?.søker && <PdlPersonStatusBar person={behandling?.søker} />}
-      {behandling && <StegMeny behandling={behandling} />}
-
-      {isPending(fetchBehandlingStatus) && <Spinner label="Henter behandling ..." visible />}
-      {isSuccess(fetchBehandlingStatus) && (
+  return mapAllApiResult(
+    fetchBehandlingStatus,
+    <Spinner label="Henter behandling ..." visible />,
+    null,
+    () => <ApiErrorAlert>Kunne ikke hente behandling</ApiErrorAlert>,
+    (behandling) => (
+      <>
+        {behandling.søker && <PdlPersonStatusBar person={behandling.søker} />}
+        <StegMeny behandling={behandling} />
         <GridContainer>
           <MainContent>
             <Routes>
@@ -53,8 +55,7 @@ export const Behandling = () => {
 
           <BehandlingSidemeny />
         </GridContainer>
-      )}
-      {isFailure(fetchBehandlingStatus) && <ApiErrorAlert>Kunne ikke hente behandling</ApiErrorAlert>}
-    </>
+      </>
+    )
   )
 }

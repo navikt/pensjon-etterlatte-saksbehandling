@@ -1,4 +1,4 @@
-package no.nav.etterlatte.brev.beregning
+package no.nav.etterlatte.brev.hentinformasjon
 
 import com.github.michaelbull.result.mapBoth
 import com.typesafe.config.Config
@@ -24,7 +24,7 @@ class BeregningKlient(config: Config, httpClient: HttpClient) {
     private val clientId = config.getString("beregning.client.id")
     private val resourceUrl = config.getString("beregning.resource.url")
 
-    suspend fun hentBeregning(
+    internal suspend fun hentBeregning(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): BeregningDTO {

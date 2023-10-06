@@ -1,5 +1,5 @@
 import { useAppSelector } from '~store/Store'
-import { isFailure, isInitial, isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
+import { mapAllApiResult, useApiCall } from '~shared/hooks/useApiCall'
 import { Oppgavetype, tildelSaksbehandlerApi } from '~shared/api/oppgaver'
 import { Alert, Button, Loader } from '@navikt/ds-react'
 import { PersonIcon } from '@navikt/aksel-icons'
@@ -23,30 +23,25 @@ export const TildelSaksbehandler = (props: {
     const nysaksbehandler = { saksbehandler: user.ident, versjon }
 
     tildelSaksbehandler({ oppgaveId, type, nysaksbehandler }, () => {
-      setTimeout(() => {
-        oppdaterTildeling(oppgaveId, user.ident)
-      }, 3000)
+      oppdaterTildeling(oppgaveId, user.ident)
     })
   }
 
-  return (
-    <>
-      {isPending(tildelSaksbehandlerSvar) && <Loader size="small" title="Setter saksbehandler" />}
-      {isSuccess(tildelSaksbehandlerSvar) && (
-        <Alert variant="success" size="small">
-          Oppgave tildelt deg
-        </Alert>
-      )}
-      {isFailure(tildelSaksbehandlerSvar) && (
-        <Alert variant="error" size="small">
-          Tildeling feilet
-        </Alert>
-      )}
-      {isInitial(tildelSaksbehandlerSvar) && (
-        <Button icon={<PersonIcon />} variant="tertiary" size="small" onClick={tildelSaksbehandlerWrapper}>
-          Tildel meg
-        </Button>
-      )}
-    </>
+  return mapAllApiResult(
+    tildelSaksbehandlerSvar,
+    <Loader size="small" title="Setter saksbehandler" />,
+    <Button icon={<PersonIcon />} variant="tertiary" size="small" onClick={tildelSaksbehandlerWrapper}>
+      Tildel meg
+    </Button>,
+    () => (
+      <Alert variant="error" size="small">
+        Tildeling feilet
+      </Alert>
+    ),
+    () => (
+      <Alert variant="success" size="small">
+        Oppgave tildelt deg
+      </Alert>
+    )
   )
 }

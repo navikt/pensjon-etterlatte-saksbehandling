@@ -131,7 +131,7 @@ data class BrevInnholdVedlegg(
                 payload = getJsonFile("/maler/vedlegg/oms_utfall_beregning.json").let { deserialize<Slate>(it) },
             )
 
-        private fun getJsonFile(url: String) = javaClass.getResource(url)!!.readText()
+        private fun getJsonFile(url: String) = this::class.java.getResource(url)!!.readText()
     }
 }
 
@@ -184,6 +184,7 @@ class BrevProsessTypeFactory(private val featureToggleService: FeatureToggleServ
 
                     else -> BrevProsessType.MANUELL
                 }
+            VedtakType.TILBAKEKREVING -> TODO("EY-2806")
         }
     }
 
@@ -217,6 +218,7 @@ class BrevProsessTypeFactory(private val featureToggleService: FeatureToggleServ
                 }
 
             VedtakType.AVSLAG -> BrevProsessType.MANUELL
+            VedtakType.TILBAKEKREVING -> TODO("EY-2806")
         }
     }
 }

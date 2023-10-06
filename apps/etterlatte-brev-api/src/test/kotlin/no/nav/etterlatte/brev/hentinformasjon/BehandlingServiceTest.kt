@@ -1,4 +1,4 @@
-package no.nav.etterlatte.brev.behandling
+package no.nav.etterlatte.brev.hentinformasjon
 
 import com.fasterxml.jackson.databind.JsonNode
 import io.mockk.clearAllMocks
@@ -10,12 +10,7 @@ import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.brev.behandlingklient.BehandlingKlient
 import no.nav.etterlatte.brev.behandlingklient.BehandlingKlientException
-import no.nav.etterlatte.brev.beregning.BeregningKlient
-import no.nav.etterlatte.brev.grunnlag.GrunnlagKlient
 import no.nav.etterlatte.brev.model.Spraak
-import no.nav.etterlatte.brev.trygdetid.TrygdetidKlient
-import no.nav.etterlatte.brev.vedtak.VedtaksvurderingKlient
-import no.nav.etterlatte.brev.vilkaarsvurdering.VilkaarsvurderingKlient
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -36,19 +31,20 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.pensjon.brevbaker.api.model.Kroner
 import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
-import no.nav.etterlatte.brev.behandling.Beregningsperiode as BrevBeregningsperiode
 
-internal class SakOgBehandlingServiceTest {
+internal class BehandlingServiceTest {
     private val vedtaksvurderingKlient = mockk<VedtaksvurderingKlient>()
     private val grunnlagKlient = mockk<GrunnlagKlient>()
     private val beregningKlient = mockk<BeregningKlient>()
@@ -57,7 +53,7 @@ internal class SakOgBehandlingServiceTest {
     private val vilkaarsvurderingKlient = mockk<VilkaarsvurderingKlient>()
 
     private val service =
-        SakOgBehandlingService(
+        BehandlingService(
             vedtaksvurderingKlient,
             grunnlagKlient,
             beregningKlient,
@@ -96,21 +92,21 @@ internal class SakOgBehandlingServiceTest {
                 service.hentBehandling(SAK_ID, BEHANDLING_ID, BRUKERTokenInfo)
             }
 
-        assertEquals(SAK_ID, behandling.sakId)
-        assertEquals(BEHANDLING_ID, behandling.behandlingId)
-        assertEquals(Spraak.NB, behandling.spraak)
+        Assertions.assertEquals(SAK_ID, behandling.sakId)
+        Assertions.assertEquals(BEHANDLING_ID, behandling.behandlingId)
+        Assertions.assertEquals(Spraak.NB, behandling.spraak)
         with(behandling.personerISak.soeker) {
-            assertEquals("Søker", fornavn)
-            assertEquals("Mellom", mellomnavn)
-            assertEquals("Barn", etternavn)
+            Assertions.assertEquals("Søker", fornavn)
+            Assertions.assertEquals("Mellom", mellomnavn)
+            Assertions.assertEquals("Barn", etternavn)
         }
-        assertEquals("Død Mellom Far", behandling.personerISak.avdoed.navn)
-        assertEquals(VedtakType.INNVILGELSE, behandling.vedtak.type)
-        assertEquals(123L, behandling.vedtak.id)
-        assertEquals(ENHET, behandling.vedtak.ansvarligEnhet)
-        assertEquals(SAKSBEHANDLER_IDENT, behandling.vedtak.saksbehandlerIdent)
-        assertEquals(ATTESTANT_IDENT, behandling.vedtak.attestantIdent)
-        assertEquals(YearMonth.now().atDay(1), behandling.utbetalingsinfo.virkningsdato)
+        Assertions.assertEquals("Død Mellom Far", behandling.personerISak.avdoed.navn)
+        Assertions.assertEquals(VedtakType.INNVILGELSE, behandling.vedtak.type)
+        Assertions.assertEquals(123L, behandling.vedtak.id)
+        Assertions.assertEquals(ENHET, behandling.vedtak.ansvarligEnhet)
+        Assertions.assertEquals(SAKSBEHANDLER_IDENT, behandling.vedtak.saksbehandlerIdent)
+        Assertions.assertEquals(ATTESTANT_IDENT, behandling.vedtak.attestantIdent)
+        Assertions.assertEquals(YearMonth.now().atDay(1), behandling.utbetalingsinfo!!.virkningsdato)
 
         coVerify(exactly = 1) {
             vedtaksvurderingKlient.hentVedtak(BEHANDLING_ID, any())
@@ -139,13 +135,13 @@ internal class SakOgBehandlingServiceTest {
                 service.hentBehandling(SAK_ID, BEHANDLING_ID, BRUKERTokenInfo)
             }
 
-        assertEquals(1, behandling.utbetalingsinfo.antallBarn)
-        assertEquals(Kroner(3063), behandling.utbetalingsinfo.beloep)
-        assertEquals(YearMonth.now().atDay(1), behandling.utbetalingsinfo.virkningsdato)
-        assertEquals(false, behandling.utbetalingsinfo.soeskenjustering)
-        assertEquals(
+        Assertions.assertEquals(1, behandling.utbetalingsinfo!!.antallBarn)
+        Assertions.assertEquals(Kroner(3063), behandling.utbetalingsinfo!!.beloep)
+        Assertions.assertEquals(YearMonth.now().atDay(1), behandling.utbetalingsinfo!!.virkningsdato)
+        Assertions.assertEquals(false, behandling.utbetalingsinfo!!.soeskenjustering)
+        Assertions.assertEquals(
             listOf(BREV_BEREGNINGSPERIODE),
-            behandling.utbetalingsinfo.beregningsperioder,
+            behandling.utbetalingsinfo!!.beregningsperioder,
         )
 
         coVerify(exactly = 1) {
@@ -175,8 +171,8 @@ internal class SakOgBehandlingServiceTest {
                 service.hentBehandling(SAK_ID, BEHANDLING_ID, BRUKERTokenInfo)
             }
 
-        assertEquals(2, behandling.utbetalingsinfo.antallBarn)
-        assertTrue(behandling.utbetalingsinfo.soeskenjustering)
+        Assertions.assertEquals(2, behandling.utbetalingsinfo!!.antallBarn)
+        Assertions.assertTrue(behandling.utbetalingsinfo!!.soeskenjustering)
 
         coVerify(exactly = 1) { vedtaksvurderingKlient.hentVedtak(any(), any()) }
         coVerify(exactly = 1) { grunnlagKlient.hentGrunnlag(any(), any()) }
@@ -258,7 +254,11 @@ internal class SakOgBehandlingServiceTest {
 
     private fun opprettTrygdetid() = null
 
-    private fun opprettVilkaarsvurdering(): VilkaarsvurderingDto = mockk<VilkaarsvurderingDto>()
+    private fun opprettVilkaarsvurdering(): VilkaarsvurderingDto {
+        val mock = mockk<VilkaarsvurderingDto>()
+        every { mock.resultat } returns VilkaarsvurderingResultat(VilkaarsvurderingUtfall.OPPFYLT, "", LocalDateTime.now(), "saksbehandler")
+        return mock
+    }
 
     private companion object {
         private val FNR = Folkeregisteridentifikator.of("11057523044")
@@ -271,6 +271,14 @@ internal class SakOgBehandlingServiceTest {
         private const val ATTESTANT_IDENT = "Z54321"
         private const val SAK_ID = 123L
         private val BREV_BEREGNINGSPERIODE =
-            BrevBeregningsperiode(YearMonth.now().atDay(1), null, Kroner(10000), 1, Kroner(3063), 10, false)
+            no.nav.etterlatte.brev.behandling.Beregningsperiode(
+                YearMonth.now().atDay(1),
+                null,
+                Kroner(10000),
+                1,
+                Kroner(3063),
+                10,
+                false,
+            )
     }
 }

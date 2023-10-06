@@ -1,4 +1,4 @@
-package no.nav.etterlatte.brev.vilkaarsvurdering
+package no.nav.etterlatte.brev.hentinformasjon
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.michaelbull.result.mapBoth
@@ -26,7 +26,7 @@ class VilkaarsvurderingKlient(config: Config, httpClient: HttpClient) {
     private val clientId = config.getString("vilkaarsvurdering.client.id")
     private val resourceUrl = config.getString("vilkaarsvurdering.resource.url")
 
-    suspend fun hentVilkaarsvurdering(
+    internal suspend fun hentVilkaarsvurdering(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): VilkaarsvurderingDto {
@@ -50,7 +50,7 @@ class VilkaarsvurderingKlient(config: Config, httpClient: HttpClient) {
                 is RetryResult.Success -> it.content
                 is RetryResult.Failure -> {
                     throw VilkaarsvurderingKlientException(
-                        "Klarte ikke hente vilkåårsvurdering for behandling med behandlingId=$behandlingId",
+                        "Klarte ikke hente vilkårsvurdering for behandling med behandlingId=$behandlingId",
                         it.samlaExceptions(),
                     )
                 }

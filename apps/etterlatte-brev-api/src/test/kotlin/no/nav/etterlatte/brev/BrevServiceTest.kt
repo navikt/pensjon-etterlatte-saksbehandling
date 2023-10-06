@@ -12,7 +12,6 @@ import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.brev.BrevService.BrevPayload
 import no.nav.etterlatte.brev.adresse.AdresseService
-import no.nav.etterlatte.brev.behandling.SakOgBehandlingService
 import no.nav.etterlatte.brev.brevbaker.BrevbakerKlient
 import no.nav.etterlatte.brev.brevbaker.BrevbakerService
 import no.nav.etterlatte.brev.db.BrevRepository
@@ -20,6 +19,9 @@ import no.nav.etterlatte.brev.distribusjon.DistribusjonServiceImpl
 import no.nav.etterlatte.brev.distribusjon.DistribusjonsTidspunktType
 import no.nav.etterlatte.brev.distribusjon.DistribusjonsType
 import no.nav.etterlatte.brev.dokarkiv.DokarkivServiceImpl
+import no.nav.etterlatte.brev.hentinformasjon.IBehandlingService
+import no.nav.etterlatte.brev.hentinformasjon.SakService
+import no.nav.etterlatte.brev.hentinformasjon.SoekerService
 import no.nav.etterlatte.brev.journalpost.JournalpostResponse
 import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Brev
@@ -45,7 +47,9 @@ import kotlin.random.Random
 internal class BrevServiceTest {
     private val db = mockk<BrevRepository>(relaxed = true)
     private val brevbaker = mockk<BrevbakerKlient>()
-    private val sakOgBehandlingService = mockk<SakOgBehandlingService>()
+    private val sakOgBehandlingService = mockk<IBehandlingService>()
+    private val sakService = mockk<SakService>()
+    private val soekerService = mockk<SoekerService>()
     private val adresseService = mockk<AdresseService>()
     private val dokarkivService = mockk<DokarkivServiceImpl>()
     private val distribusjonService = mockk<DistribusjonServiceImpl>()
@@ -54,7 +58,8 @@ internal class BrevServiceTest {
     private val brevService =
         BrevService(
             db,
-            sakOgBehandlingService,
+            sakService,
+            soekerService,
             adresseService,
             dokarkivService,
             distribusjonService,
@@ -159,7 +164,7 @@ internal class BrevServiceTest {
             val sak = Sak("ident", SakType.BARNEPENSJON, brev.sakId, "1234")
             val journalpostResponse = JournalpostResponse("444", journalpostferdigstilt = true)
 
-            coEvery { sakOgBehandlingService.hentSak(any(), any()) } returns sak
+            coEvery { sakService.hentSak(any(), any()) } returns sak
             coEvery { dokarkivService.journalfoer(any<Brev>(), any()) } returns journalpostResponse
             every { db.hentBrev(any()) } returns brev
             every { db.settBrevJournalfoert(any(), any()) } returns true
@@ -176,7 +181,7 @@ internal class BrevServiceTest {
                 db.settBrevJournalfoert(brev.id, journalpostResponse)
             }
             coVerify {
-                sakOgBehandlingService.hentSak(sak.id, bruker)
+                sakService.hentSak(sak.id, bruker)
                 dokarkivService.journalfoer(brev, sak)
             }
         }

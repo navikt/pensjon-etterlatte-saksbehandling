@@ -7,6 +7,7 @@ import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
 import java.time.LocalDate
 
 object AvslagBrevData : BrevData() {
+    // TODO: denne skal ikke ha hele behandlingen inn
     fun fra(behandling: Behandling): AvslagBrevData = AvslagBrevData
 }
 

@@ -23,6 +23,8 @@ import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
 import no.nav.etterlatte.behandling.klienter.NavAnsattKlient
 import no.nav.etterlatte.behandling.klienter.Norg2Klient
 import no.nav.etterlatte.behandling.klienter.OpprettetBrevDto
+import no.nav.etterlatte.behandling.klienter.VedtakKlient
+import no.nav.etterlatte.behandling.tilbakekreving.Tilbakekreving
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.config.ApplicationContext
 import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
@@ -120,6 +122,7 @@ abstract class BehandlingIntegrationTest {
                             mapOf(
                                 "pdltjenester.url" to "http://localhost",
                                 "grunnlag.resource.url" to "http://localhost",
+                                "vedtak.resource.url" to "http://localhost",
                             ),
                     ),
                 rapid = TestProdusent(),
@@ -131,6 +134,7 @@ abstract class BehandlingIntegrationTest {
                 navAnsattKlient = NavAnsattKlientTest(),
                 norg2Klient = norg2Klient ?: Norg2KlientTest(),
                 grunnlagKlientObo = GrunnlagKlientTest(),
+                vedtakKlient = VedtakKlientTest(),
                 gosysOppgaveKlient = GosysOppgaveKlientTest(),
                 brevApiHttpClient = BrevApiKlientTest(),
                 klageHttpClient = klageHttpClientTest(),
@@ -436,6 +440,16 @@ class GrunnlagKlientTest : GrunnlagKlient {
                     listOf("gjenlevende"),
                 ),
         )
+    }
+}
+
+class VedtakKlientTest : VedtakKlient {
+    override suspend fun fattVedtakTilbakekreving(
+        tilbakekreving: Tilbakekreving,
+        brukerTokenInfo: BrukerTokenInfo,
+        enhet: String,
+    ): Long {
+        return 123L
     }
 }
 

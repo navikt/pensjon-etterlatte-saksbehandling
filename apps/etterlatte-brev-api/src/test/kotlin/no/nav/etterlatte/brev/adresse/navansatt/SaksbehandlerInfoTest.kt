@@ -1,4 +1,4 @@
-package no.nav.etterlatte.brev.navansatt
+package no.nav.etterlatte.brev.adresse.navansatt
 
 import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Test

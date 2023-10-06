@@ -3,11 +3,12 @@ package no.nav.etterlatte.brev
 import no.nav.etterlatte.brev.adresse.AdresseService
 import no.nav.etterlatte.brev.behandling.Behandling
 import no.nav.etterlatte.brev.behandling.ForenkletVedtak
-import no.nav.etterlatte.brev.behandling.SakOgBehandlingService
 import no.nav.etterlatte.brev.brevbaker.BrevbakerRequest
 import no.nav.etterlatte.brev.brevbaker.BrevbakerService
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.dokarkiv.DokarkivServiceImpl
+import no.nav.etterlatte.brev.hentinformasjon.IBehandlingService
+import no.nav.etterlatte.brev.hentinformasjon.VedtaksvurderingService
 import no.nav.etterlatte.brev.journalpost.JournalpostResponse
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevData
@@ -33,7 +34,8 @@ import java.util.UUID
 
 class VedtaksbrevService(
     private val db: BrevRepository,
-    private val sakOgBehandlingService: SakOgBehandlingService,
+    private val sakOgBehandlingService: IBehandlingService,
+    private val vedtaksvurderingService: VedtaksvurderingService,
     private val adresseService: AdresseService,
     private val dokarkivService: DokarkivServiceImpl,
     private val brevbaker: BrevbakerService,
@@ -127,7 +129,7 @@ class VedtaksbrevService(
         }
 
         val (saksbehandlerIdent, vedtakStatus) =
-            sakOgBehandlingService.hentVedtakSaksbehandlerOgStatus(
+            vedtaksvurderingService.hentVedtakSaksbehandlerOgStatus(
                 brev.behandlingId!!,
                 brukerTokenInfo,
             )

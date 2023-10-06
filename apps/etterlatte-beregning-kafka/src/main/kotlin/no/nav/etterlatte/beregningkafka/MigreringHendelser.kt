@@ -43,25 +43,53 @@ internal class MigreringHendelser(rapidsConnection: RapidsConnection, private va
 
         beregningService.opprettBeregningsgrunnlag(behandlingId, tilGrunnlagDTO(packet.hendelseData))
 
-        runBlocking {
-            val beregning = beregningService.beregn(behandlingId).body<BeregningDTO>()
-            packet[BEREGNING_KEY] = beregning
-        }
+        val beregning =
+            runBlocking {
+                beregningService.beregn(behandlingId).body<BeregningDTO>()
+            }
+
+        verifiserNyBeregning(beregning, packet.hendelseData)
+
         packet.eventName = Migreringshendelser.VEDTAK
+        packet[BEREGNING_KEY] = beregning
         context.publish(packet.toJson())
         logger.info("Publiserte oppdatert migreringshendelse fra beregning for behandling $behandlingId")
     }
-
-    private fun tilGrunnlagDTO(request: MigreringRequest): BarnepensjonBeregningsGrunnlag =
-        BarnepensjonBeregningsGrunnlag(
-            soeskenMedIBeregning =
-                listOf(
-                    GrunnlagMedPeriode(
-                        fom = request.virkningstidspunkt.atDay(1),
-                        tom = null,
-                        data = emptyList(),
-                    ),
-                ),
-            institusjonsopphold = emptyList(),
-        )
 }
+
+private fun verifiserNyBeregning(
+    beregning: BeregningDTO,
+    migreringRequest: MigreringRequest,
+) {
+    check(beregning.beregningsperioder.size == 1) {
+        "Migrerte saker skal kun opprette en beregningperiode"
+    }
+
+    with(beregning.beregningsperioder.first()) {
+        check(trygdetid == migreringRequest.beregning.anvendtTrygdetid.toInt()) {
+            "Beregning må være basert på samme trygdetid som i Pesys"
+        }
+        check(grunnbelop == migreringRequest.beregning.g.toInt()) {
+            "Beregning må være basert på samme G som i Pesys"
+        }
+        check(utbetaltBeloep >= migreringRequest.beregning.brutto.toInt()) {
+            "Man skal ikke kunne komme dårligere ut på nytt regelverk. " +
+                "Beregnet beløp i Gjenny er lavere enn dagens beløp i Pesys."
+        }
+        // todo: Vi må også verifisere at samme beregningsmetode har blitt benyttet,
+        //  f. eks nasjonal, prorata og evt. avkorting (uføre, inst. opphold, fengsel)
+    }
+}
+
+private fun tilGrunnlagDTO(request: MigreringRequest): BarnepensjonBeregningsGrunnlag =
+    BarnepensjonBeregningsGrunnlag(
+        soeskenMedIBeregning =
+            listOf(
+                GrunnlagMedPeriode(
+                    fom = request.virkningstidspunkt.atDay(1),
+                    tom = null,
+                    data = emptyList(),
+                ),
+            ),
+        institusjonsopphold = emptyList(),
+    )

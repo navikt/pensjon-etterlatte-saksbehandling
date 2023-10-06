@@ -24,7 +24,7 @@ import io.mockk.coVerify
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.etterlatte.brev.behandlingklient.BehandlingKlient
+import no.nav.etterlatte.brev.hentinformasjon.Tilgangssjekker
 import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevProsessType
@@ -51,7 +51,7 @@ internal class VedtaksbrevRouteTest {
     private val mockOAuth2Server = MockOAuth2Server()
     private lateinit var hoconApplicationConfig: HoconApplicationConfig
     private val vedtaksbrevService = mockk<VedtaksbrevService>()
-    private val behandlingKlient = mockk<BehandlingKlient>()
+    private val tilgangssjekker = mockk<Tilgangssjekker>()
 
     @BeforeAll
     fun before() {
@@ -73,7 +73,7 @@ internal class VedtaksbrevRouteTest {
     @Test
     fun `Endepunkt for henting av vedtaksbrev - brev finnes`() {
         coEvery { vedtaksbrevService.hentVedtaksbrev(any()) } returns opprettBrev()
-        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any()) } returns true
+        coEvery { tilgangssjekker.harTilgangTilBehandling(any(), any()) } returns true
 
         testApplication {
             val client = httpClient()
@@ -93,7 +93,7 @@ internal class VedtaksbrevRouteTest {
     @Test
     fun `Endepunkt for henting av vedtaksbrev - brev finnes ikke`() {
         coEvery { vedtaksbrevService.hentVedtaksbrev(any()) } returns null
-        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any()) } returns true
+        coEvery { tilgangssjekker.harTilgangTilBehandling(any(), any()) } returns true
 
         testApplication {
             val client = httpClient()
@@ -109,14 +109,14 @@ internal class VedtaksbrevRouteTest {
 
         coVerify {
             vedtaksbrevService.hentVedtaksbrev(BEHANDLING_ID)
-            behandlingKlient.harTilgangTilBehandling(any(), any())
+            tilgangssjekker.harTilgangTilBehandling(any(), any())
         }
     }
 
     @Test
     fun `Endepunkt for oppretting av vedtaksbrev`() {
         coEvery { vedtaksbrevService.opprettVedtaksbrev(any(), any(), any()) } returns opprettBrev()
-        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any()) } returns true
+        coEvery { tilgangssjekker.harTilgangTilBehandling(any(), any()) } returns true
 
         testApplication {
             val client = httpClient()
@@ -133,7 +133,7 @@ internal class VedtaksbrevRouteTest {
 
         coVerify(exactly = 1) {
             vedtaksbrevService.opprettVedtaksbrev(SAK_ID, BEHANDLING_ID, any())
-            behandlingKlient.harTilgangTilBehandling(any(), any())
+            tilgangssjekker.harTilgangTilBehandling(any(), any())
         }
     }
 
@@ -143,7 +143,7 @@ internal class VedtaksbrevRouteTest {
         val pdf = Pdf("Hello world".toByteArray())
 
         coEvery { vedtaksbrevService.genererPdf(any(), any()) } returns pdf
-        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any()) } returns true
+        coEvery { tilgangssjekker.harTilgangTilBehandling(any(), any()) } returns true
 
         testApplication {
             val client = httpClient()
@@ -161,14 +161,14 @@ internal class VedtaksbrevRouteTest {
 
         coVerify(exactly = 1) {
             vedtaksbrevService.genererPdf(brevId, any())
-            behandlingKlient.harTilgangTilBehandling(any(), any())
+            tilgangssjekker.harTilgangTilBehandling(any(), any())
         }
     }
 
     @Test
     fun `Endepunkt for ferdigstilling av vedtaksbrev`() {
         coEvery { vedtaksbrevService.ferdigstillVedtaksbrev(any(), any()) } just Runs
-        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any()) } returns true
+        coEvery { tilgangssjekker.harTilgangTilBehandling(any(), any()) } returns true
 
         testApplication {
             val client = httpClient()
@@ -184,13 +184,13 @@ internal class VedtaksbrevRouteTest {
 
         coVerify(exactly = 1) {
             vedtaksbrevService.ferdigstillVedtaksbrev(BEHANDLING_ID, any())
-            behandlingKlient.harTilgangTilBehandling(any(), any())
+            tilgangssjekker.harTilgangTilBehandling(any(), any())
         }
     }
 
     @Test
     fun `Endepunkt som ikke finnes`() {
-        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any()) } returns true
+        coEvery { tilgangssjekker.harTilgangTilBehandling(any(), any()) } returns true
 
         testApplication {
             val client = httpClient()
@@ -205,7 +205,7 @@ internal class VedtaksbrevRouteTest {
 
         verify {
             vedtaksbrevService wasNot Called
-            behandlingKlient wasNot Called
+            tilgangssjekker wasNot Called
         }
     }
 
@@ -219,7 +219,7 @@ internal class VedtaksbrevRouteTest {
                 restModule(this.log, routePrefix = "api") {
                     vedtaksbrevRoute(
                         vedtaksbrevService,
-                        behandlingKlient,
+                        tilgangssjekker,
                     )
                 }
             }
@@ -231,7 +231,7 @@ internal class VedtaksbrevRouteTest {
 
         verify {
             vedtaksbrevService wasNot Called
-            behandlingKlient wasNot Called
+            tilgangssjekker wasNot Called
         }
     }
 
@@ -271,7 +271,7 @@ internal class VedtaksbrevRouteTest {
             restModule(this.log, routePrefix = "api") {
                 vedtaksbrevRoute(
                     vedtaksbrevService,
-                    behandlingKlient,
+                    tilgangssjekker,
                 )
             }
         }

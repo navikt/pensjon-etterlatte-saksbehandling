@@ -8,8 +8,8 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
-import no.nav.etterlatte.brev.behandlingklient.BehandlingKlient
 import no.nav.etterlatte.brev.dokarkiv.DokarkivService
+import no.nav.etterlatte.brev.hentinformasjon.Tilgangssjekker
 import no.nav.etterlatte.brev.journalpost.BrukerIdType
 import no.nav.etterlatte.brev.journalpost.FerdigstillJournalpostRequest
 import no.nav.etterlatte.libs.common.withFoedselsnummer
@@ -18,11 +18,11 @@ import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 fun Route.dokumentRoute(
     safService: SafService,
     dokarkivService: DokarkivService,
-    behandlingKlient: BehandlingKlient,
+    tilgangssjekker: Tilgangssjekker,
 ) {
     route("dokumenter") {
         post {
-            withFoedselsnummer(behandlingKlient) { foedselsnummer ->
+            withFoedselsnummer(tilgangssjekker) { foedselsnummer ->
                 val result = safService.hentDokumenter(foedselsnummer.value, BrukerIdType.FNR, brukerTokenInfo)
 
                 if (result.error == null) {

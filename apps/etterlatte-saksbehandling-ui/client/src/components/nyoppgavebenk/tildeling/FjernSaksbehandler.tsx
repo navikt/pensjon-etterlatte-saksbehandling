@@ -19,9 +19,7 @@ export const FjernSaksbehandler = (props: RedigerSaksbehandlerProps) => {
 
   useEffect(() => {
     if (isSuccess(fjernSaksbehandlerSvar)) {
-      setTimeout(() => {
-        oppdaterTildeling(oppgaveId, null)
-      }, 3000)
+      oppdaterTildeling(oppgaveId, null)
     }
   }, [fjernSaksbehandlerSvar])
 

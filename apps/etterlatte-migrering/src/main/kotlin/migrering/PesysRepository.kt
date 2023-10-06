@@ -8,6 +8,7 @@ import no.nav.etterlatte.libs.database.oppdater
 import no.nav.etterlatte.libs.database.opprett
 import no.nav.etterlatte.libs.database.transaction
 import no.nav.etterlatte.rapidsandrivers.migrering.PesysId
+import org.postgresql.util.PSQLException
 import org.slf4j.LoggerFactory
 import java.util.UUID
 import javax.sql.DataSource
@@ -76,7 +77,7 @@ internal class PesysRepository(private val dataSource: DataSource) : Transaction
                     "Lagra koplinga mellom behandling $behandlingId og pesyssak $pesysId i migreringsbasen",
                 )
             }
-        } catch (e: Exception) {
+        } catch (e: PSQLException) {
             logger.info("Fikk feil under forsøk på å lagre kopling som alt fins. Ikke farlig, så ignorerer", e)
             // Do nothing
         }

@@ -95,7 +95,7 @@ class BeregningsGrunnlagRepository(private val dataSource: DataSource) {
     companion object {
         val lagreGrunnlagQuery =
             """
-            INSERT INTO bp_beregningsgrunnlag(behandlings_id, soesken_med_i_beregning_perioder, institusjonsopphold, kilde)
+            INSERT INTO beregningsgrunnlag(behandlings_id, soesken_med_i_beregning_perioder, institusjonsopphold, kilde)
             VALUES(
                 :behandlings_id,
                 :soesken_med_i_beregning,
@@ -106,7 +106,7 @@ class BeregningsGrunnlagRepository(private val dataSource: DataSource) {
 
         val oppdaterGrunnlagQuery =
             """
-            UPDATE bp_beregningsgrunnlag
+            UPDATE beregningsgrunnlag
             SET soesken_med_i_beregning_perioder = :soesken_med_i_beregning, institusjonsopphold = :institusjonsopphold, kilde = :kilde
             WHERE behandlings_id = :behandlings_id
             """.trimMargin()
@@ -114,14 +114,14 @@ class BeregningsGrunnlagRepository(private val dataSource: DataSource) {
         val finnBarnepensjonsGrunnlagForBehandling =
             """
             SELECT behandlings_id, soesken_med_i_beregning_perioder, institusjonsopphold, kilde
-            FROM bp_beregningsgrunnlag
+            FROM beregningsgrunnlag
             WHERE behandlings_id = :behandlings_id
             """.trimIndent()
 
         val finnOmstillingstoenadGrunnlagForBehandling =
             """
             SELECT behandlings_id, institusjonsopphold, kilde
-            FROM bp_beregningsgrunnlag
+            FROM beregningsgrunnlag
             WHERE behandlings_id = :behandlings_id
             """.trimIndent()
     }

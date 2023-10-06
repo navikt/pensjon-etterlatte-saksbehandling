@@ -63,7 +63,7 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest {
     fun afterEach() {
         clearAllMocks()
         dataSource.connection.use {
-            it.prepareStatement(""" TRUNCATE bp_beregningsgrunnlag""").execute()
+            it.prepareStatement(""" TRUNCATE beregningsgrunnlag""").execute()
         }
     }
 

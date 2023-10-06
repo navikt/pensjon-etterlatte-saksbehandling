@@ -28,11 +28,13 @@ export const HandlingerForOppgave = ({ oppgave }: { oppgave: OppgaveDTO }) => {
     switch (type) {
       case 'ATTESTERING':
       case 'TILBAKEKREVING':
-        return erInnloggetSaksbehandlerOppgave ? (
-          <Button size="small" href={`/tilbakekreving/${referanse}`} as="a">
-            Gå til tilbakekreving
-          </Button>
-        ) : null
+        return (
+          erInnloggetSaksbehandlerOppgave && (
+            <Button size="small" href={`/tilbakekreving/${referanse}`} as="a">
+              Gå til tilbakekreving
+            </Button>
+          )
+        )
     }
   }
   switch (type) {

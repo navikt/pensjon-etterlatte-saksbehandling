@@ -9,7 +9,7 @@ export const UnderkjennVedtak = ({ kommentar, valgtBegrunnelse }: { kommentar: s
   const tilbakekreving = useTilbakekreving()
 
   if (behandling) {
-    return <UnderkjennYtelse behandling={behandling} kommentar={kommentar} valgtBegrunnelse={valgtBegrunnelse} />
+    return <UnderkjennYtelse behandlingId={behandling.id} kommentar={kommentar} valgtBegrunnelse={valgtBegrunnelse} />
   } else if (tilbakekreving) {
     return (
       <UnderkjennTilbakekreving

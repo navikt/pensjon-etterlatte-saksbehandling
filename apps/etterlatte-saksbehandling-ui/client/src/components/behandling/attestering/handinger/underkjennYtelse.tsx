@@ -3,16 +3,15 @@ import { useState } from 'react'
 import { GeneriskModal } from '~shared/modal/modal'
 import { hentBehandling, underkjennVedtak } from '~shared/api/behandling'
 import { useNavigate } from 'react-router'
-import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { isPending, useApiCall } from '~shared/hooks/useApiCall'
 
 type Props = {
-  behandling: IDetaljertBehandling
+  behandlingId: string
   kommentar: string
   valgtBegrunnelse: string
 }
 
-export const UnderkjennYtelse: React.FC<Props> = ({ behandling, kommentar, valgtBegrunnelse }) => {
+export const UnderkjennYtelse: React.FC<Props> = ({ behandlingId, kommentar, valgtBegrunnelse }) => {
   const [modalisOpen, setModalisOpen] = useState(false)
   const navigate = useNavigate()
 
@@ -20,10 +19,8 @@ export const UnderkjennYtelse: React.FC<Props> = ({ behandling, kommentar, valgt
   const [behandlingStatus, apiHentBehandling] = useApiCall(hentBehandling)
 
   const underkjenn = () => {
-    if (!behandling.id) throw new Error('Mangler behandlingsid')
-
-    apiUnderkjennVedtak({ behandlingId: behandling.id, kommentar, valgtBegrunnelse }, () => {
-      apiHentBehandling(behandling.id, (behandling) => {
+    apiUnderkjennVedtak({ behandlingId, kommentar, valgtBegrunnelse }, () => {
+      apiHentBehandling(behandlingId, (behandling) => {
         navigate(`/person/${behandling.søker?.foedselsnummer}`)
       })
     })

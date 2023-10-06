@@ -19,7 +19,6 @@ export const UnderkjennTilbakekreving: React.FC<Props> = ({ tilbakekreving, komm
   const [underkjennStatus, apiUnderkjennVedtak] = useApiCall(underkjennVedtak)
 
   const underkjenn = () => {
-    if (!tilbakekreving.id) throw new Error('Mangler tilbakekrevignsid')
     apiUnderkjennVedtak({ tilbakekrevingId: tilbakekreving.id, kommentar, valgtBegrunnelse }, () => {
       navigate(`/person/${tilbakekreving.sak.ident}`)
     })

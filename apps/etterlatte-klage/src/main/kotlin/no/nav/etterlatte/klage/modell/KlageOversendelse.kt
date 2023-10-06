@@ -88,7 +88,7 @@ data class KabalOversendelse(
                     else -> throw IllegalArgumentException("Kan ikke sende noe som ikke er innstilling til Kabal")
                 }
 
-            val erKlagerIkkeBruker = ekstraData.mottakerInnstilling.foedselsnummer != klage.sak.ident
+            val erKlagerIkkeBruker = ekstraData.mottakerInnstilling.foedselsnummer?.value != klage.sak.ident
 
             return KabalOversendelse(
                 type = KabalSakType.KLAGE,
@@ -156,7 +156,7 @@ fun Mottaker.tilKlagerPart(): KabalKlagerPart {
     if (fnr != null) {
         return KabalKlagerPart(
             type = KabalKlagerType.PERSON,
-            verdi = fnr,
+            verdi = fnr.value,
         )
     }
     val orgnr = this.orgnummer

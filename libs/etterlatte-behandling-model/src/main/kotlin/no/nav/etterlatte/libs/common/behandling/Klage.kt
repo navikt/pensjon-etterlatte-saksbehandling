@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.fasterxml.jackson.annotation.JsonTypeName
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.VergeEllerFullmektig
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -287,7 +288,7 @@ data class KlageOversendelseDto(val klage: Klage, val ekstraData: EkstradataInns
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class Mottaker(
     val navn: String,
-    val foedselsnummer: String?,
+    val foedselsnummer: Folkeregisteridentifikator?,
     val orgnummer: String? = null,
 )
 

@@ -925,9 +925,9 @@ internal class VedtaksvurderingServiceTest {
             }
 
         underkjentVedtak shouldNotBe null
-        underkjentVedtak.status shouldBe VedtakStatus.RETURNERT
+        underkjentVedtak.t.status shouldBe VedtakStatus.RETURNERT
 
-        verify(exactly = 1) { sendToRapidMock(match { it.contains(VedtakKafkaHendelseType.UNDERKJENT.name) }, any()) }
+        Assertions.assertEquals(VedtakKafkaHendelseType.UNDERKJENT, underkjentVedtak.rapidInfo.vedtakhendelse)
     }
 
     @Test

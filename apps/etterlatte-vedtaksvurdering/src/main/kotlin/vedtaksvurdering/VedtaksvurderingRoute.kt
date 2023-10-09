@@ -111,8 +111,9 @@ fun Route.vedtaksvurderingRoute(
                         brukerTokenInfo,
                         begrunnelse,
                     )
+                service.sendToRapid(underkjentVedtak.rapidInfo)
 
-                call.respond(underkjentVedtak.toDto())
+                call.respond(underkjentVedtak.t.toDto())
             }
         }
 

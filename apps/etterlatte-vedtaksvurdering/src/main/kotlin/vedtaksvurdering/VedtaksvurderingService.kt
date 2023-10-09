@@ -253,7 +253,7 @@ class VedtaksvurderingService(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
         begrunnelse: UnderkjennVedtakDto,
-    ): Vedtak {
+    ): VedtakOgRapid<Vedtak> {
         logger.info("Underkjenner vedtak for behandling med behandlingId=$behandlingId")
         val vedtak = hentVedtakNonNull(behandlingId)
 
@@ -283,14 +283,15 @@ class VedtaksvurderingService(
                 underkjentVedtak
             }
 
-        sendToRapid(
-            vedtakhendelse = VedtakKafkaHendelseType.UNDERKJENT,
-            vedtak = underkjentVedtak,
-            tekniskTid = underkjentTid,
-            behandlingId = behandlingId,
+        return VedtakOgRapid(
+            repository.hentVedtak(behandlingId)!!,
+            RapidInfo(
+                vedtakhendelse = VedtakKafkaHendelseType.UNDERKJENT,
+                vedtak = underkjentVedtak,
+                tekniskTid = underkjentTid,
+                behandlingId = behandlingId,
+            ),
         )
-
-        return repository.hentVedtak(behandlingId)!!
     }
 
     suspend fun iverksattVedtak(

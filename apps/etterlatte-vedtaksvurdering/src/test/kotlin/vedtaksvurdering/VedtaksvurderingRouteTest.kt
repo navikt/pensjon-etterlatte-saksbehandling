@@ -418,7 +418,8 @@ internal class VedtaksvurderingRouteTest {
                 status = VedtakStatus.RETURNERT,
             )
         val begrunnelse = UnderkjennVedtakDto("Ikke bra nok begrunnet", "Annet")
-        coEvery { vedtaksvurderingService.underkjennVedtak(any(), any(), any()) } returns underkjentVedtak
+        coEvery { vedtaksvurderingService.underkjennVedtak(any(), any(), any()) } returns
+            VedtakOgRapid(underkjentVedtak, mockk())
 
         testApplication {
             environment { config = applicationConfig }

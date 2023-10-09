@@ -33,7 +33,7 @@ spec:
     - name: KLAGE_TOPIC
       value: "klage.behandling-events.v1"
     - name: KABAL_URL
-      value: https://kabal-api.intern.dev.nav.no
+      value: http://kabal-api.klage
     - name: KABAL_AZURE_SCOPE
       value: api://dev-gcp.klage.kabal-api/.default
     - name: BEHANDLING_AZURE_SCOPE

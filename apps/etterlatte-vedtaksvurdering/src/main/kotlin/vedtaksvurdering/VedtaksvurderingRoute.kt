@@ -97,7 +97,19 @@ fun Route.vedtaksvurderingRoute(
                 val (kommentar) = call.receive<AttesterVedtakDto>()
                 val attestert = service.attesterVedtak(behandlingId, kommentar, brukerTokenInfo)
 
-                call.respond(attestert.toDto())
+                try {
+                    service.sendToRapid(attestert.rapidInfo)
+                } catch (e: Exception) {
+                    logger.error(
+                        "Kan ikke sende attestert vedtak på kafka for behandling id: $behandlingId, vedtak: ${attestert.t.id} " +
+                            "Saknr: ${attestert.t.sakId}. " +
+                            "Det betyr at vi ikke sender ut brev for vedtaket eller at en utbetaling går til oppdrag. " +
+                            "Denne hendelsen må sendes ut manuelt straks.",
+                        e,
+                    )
+                    throw e
+                }
+                call.respond(attestert.t.toDto())
             }
         }
 

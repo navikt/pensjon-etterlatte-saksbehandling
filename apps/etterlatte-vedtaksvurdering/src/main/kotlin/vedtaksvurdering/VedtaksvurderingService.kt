@@ -172,7 +172,7 @@ class VedtaksvurderingService(
         behandlingId: UUID,
         kommentar: String,
         brukerTokenInfo: BrukerTokenInfo,
-    ): Vedtak {
+    ): VedtakOgRapid<Vedtak> {
         logger.info("Attesterer vedtak for behandling med behandlingId=$behandlingId")
         val vedtak = hentVedtakNonNull(behandlingId)
 
@@ -217,8 +217,9 @@ class VedtaksvurderingService(
                 attestertVedtak
             }
 
-        try {
-            sendToRapid(
+        return VedtakOgRapid(
+            attestertVedtak,
+            RapidInfo(
                 vedtakhendelse = VedtakKafkaHendelseType.ATTESTERT,
                 vedtak = attestertVedtak,
                 tekniskTid = attestertVedtak.attestasjon!!.tidspunkt,
@@ -233,18 +234,8 @@ class VedtaksvurderingService(
                         KILDE_KEY to behandling.kilde,
                         REVURDERING_AARSAK to behandling.revurderingsaarsak.toString(),
                     ),
-            )
-        } catch (e: Exception) {
-            logger.error(
-                "Kan ikke sende attestert vedtak på kafka for behandling id: $behandlingId, vedtak: ${vedtak.id} " +
-                    "Saknr: ${sak.id}. Det betyr at vi ikke sender ut brev for vedtaket eller at en utbetaling går til oppdrag. " +
-                    "Denne hendelsen må sendes ut manuelt straks.",
-                e,
-            )
-            throw e
-        }
-
-        return attestertVedtak
+            ),
+        )
     }
 
     private fun RevurderingAarsak?.skalIkkeSendeBrev() = this != null && !utfall.skalSendeBrev

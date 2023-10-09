@@ -99,15 +99,15 @@ fun Route.brevRoute(
             withSakId(tilgangssjekker) {
                 val journalpostId = service.journalfoer(brevId, brukerTokenInfo)
 
-                call.respond(journalpostId)
+                call.respond(JournalpostIdDto(journalpostId))
             }
         }
 
         post("distribuer") {
             withSakId(tilgangssjekker) {
-                val journalpostId = service.distribuer(brevId)
+                val distribusjonskvittering = service.distribuer(brevId)
 
-                call.respond(journalpostId)
+                call.respond(DistribusjonskvitteringDto(distribusjonskvittering))
             }
         }
     }
@@ -148,4 +148,12 @@ data class OppdaterPayloadRequest(
 
 data class OppdaterMottakerRequest(
     val mottaker: Mottaker,
+)
+
+data class JournalpostIdDto(
+    val journalpostId: String,
+)
+
+data class DistribusjonskvitteringDto(
+    val distribusjonskvittering: String,
 )

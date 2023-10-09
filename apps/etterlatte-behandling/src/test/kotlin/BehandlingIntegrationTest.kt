@@ -19,7 +19,9 @@ import no.nav.etterlatte.behandling.domain.ArbeidsFordelingEnhet
 import no.nav.etterlatte.behandling.domain.SaksbehandlerEnhet
 import no.nav.etterlatte.behandling.domain.SaksbehandlerTema
 import no.nav.etterlatte.behandling.klienter.BrevApiKlient
+import no.nav.etterlatte.behandling.klienter.DistribusjonskvitteringDto
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
+import no.nav.etterlatte.behandling.klienter.JournalpostIdDto
 import no.nav.etterlatte.behandling.klienter.NavAnsattKlient
 import no.nav.etterlatte.behandling.klienter.Norg2Klient
 import no.nav.etterlatte.behandling.klienter.OpprettetBrevDto
@@ -498,16 +500,16 @@ class BrevApiKlientTest : BrevApiKlient {
         sakId: Long,
         brevId: Long,
         brukerTokenInfo: BrukerTokenInfo,
-    ): String {
-        return UUID.randomUUID().toString()
+    ): JournalpostIdDto {
+        return JournalpostIdDto(UUID.randomUUID().toString())
     }
 
     override suspend fun distribuerBrev(
         sakId: Long,
         brevId: Long,
         brukerTokenInfo: BrukerTokenInfo,
-    ): String {
-        return UUID.randomUUID().toString()
+    ): DistribusjonskvitteringDto {
+        return DistribusjonskvitteringDto(UUID.randomUUID().toString())
     }
 
     override suspend fun hentBrev(

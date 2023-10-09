@@ -7,6 +7,7 @@ import com.typesafe.config.Config
 import io.ktor.client.HttpClient
 import no.nav.etterlatte.behandling.objectMapper
 import no.nav.etterlatte.libs.common.behandling.Mottaker
+import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktorobo.Resource
@@ -31,7 +32,7 @@ interface BrevApiKlient {
         sakId: Long,
         brevId: Long,
         brukerTokenInfo: BrukerTokenInfo,
-    ): String
+    ): JournalpostIdDto
 
     /**
      * @return bestillingsId for distribusjonen
@@ -40,7 +41,7 @@ interface BrevApiKlient {
         sakId: Long,
         brevId: Long,
         brukerTokenInfo: BrukerTokenInfo,
-    ): String
+    ): DistribusjonskvitteringDto
 
     suspend fun hentBrev(
         sakId: Long,
@@ -108,7 +109,7 @@ class BrevApiKlientObo(config: Config, client: HttpClient) : BrevApiKlient {
         sakId: Long,
         brevId: Long,
         brukerTokenInfo: BrukerTokenInfo,
-    ): String {
+    ): JournalpostIdDto {
         try {
             return downstreamResourceClient.post(
                 resource =
@@ -120,7 +121,7 @@ class BrevApiKlientObo(config: Config, client: HttpClient) : BrevApiKlient {
                 postBody = Unit,
             ).mapBoth(
                 success = { resource ->
-                    resource.response!!.toString()
+                    objectMapper.readValue(resource.response!!.toJson())
                 },
                 failure = { errorResponse -> throw errorResponse },
             )
@@ -133,7 +134,7 @@ class BrevApiKlientObo(config: Config, client: HttpClient) : BrevApiKlient {
         sakId: Long,
         brevId: Long,
         brukerTokenInfo: BrukerTokenInfo,
-    ): String {
+    ): DistribusjonskvitteringDto {
         try {
             return downstreamResourceClient.post(
                 resource =
@@ -145,7 +146,7 @@ class BrevApiKlientObo(config: Config, client: HttpClient) : BrevApiKlient {
                 postBody = Unit,
             ).mapBoth(
                 success = { resource ->
-                    resource.response!!.toString()
+                    objectMapper.readValue(resource.response!!.toJson())
                 },
                 failure = { errorResponse -> throw errorResponse },
             )
@@ -181,3 +182,11 @@ class BrevApiKlientObo(config: Config, client: HttpClient) : BrevApiKlient {
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class OpprettetBrevDto(val id: Long, val mottaker: Mottaker)
+
+data class JournalpostIdDto(
+    val journalpostId: String,
+)
+
+data class DistribusjonskvitteringDto(
+    val distribusjonskvittering: String,
+)

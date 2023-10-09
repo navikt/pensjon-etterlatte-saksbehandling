@@ -88,7 +88,7 @@ fun Route.vedtaksvurderingRoute(
                 val fattetVedtak = service.fattVedtak(behandlingId, brukerTokenInfo)
                 rapidService.sendToRapid(fattetVedtak.rapidInfo)
 
-                call.respond(fattetVedtak.vedtak.toDto())
+                call.respond(fattetVedtak.vedtak)
             }
         }
 
@@ -102,15 +102,15 @@ fun Route.vedtaksvurderingRoute(
                     rapidService.sendToRapid(attestert.rapidInfo)
                 } catch (e: Exception) {
                     logger.error(
-                        "Kan ikke sende attestert vedtak på kafka for behandling id: $behandlingId, vedtak: ${attestert.vedtak.id} " +
-                            "Saknr: ${attestert.vedtak.sakId}. " +
+                        "Kan ikke sende attestert vedtak på kafka for behandling id: $behandlingId, vedtak: ${attestert.vedtak.vedtakId} " +
+                            "Saknr: ${attestert.vedtak.sak.id}. " +
                             "Det betyr at vi ikke sender ut brev for vedtaket eller at en utbetaling går til oppdrag. " +
                             "Denne hendelsen må sendes ut manuelt straks.",
                         e,
                     )
                     throw e
                 }
-                call.respond(attestert.vedtak.toDto())
+                call.respond(attestert.vedtak)
             }
         }
 
@@ -126,7 +126,7 @@ fun Route.vedtaksvurderingRoute(
                     )
                 rapidService.sendToRapid(underkjentVedtak.rapidInfo)
 
-                call.respond(underkjentVedtak.vedtak.toDto())
+                call.respond(underkjentVedtak.vedtak)
             }
         }
 
@@ -136,7 +136,7 @@ fun Route.vedtaksvurderingRoute(
                 val vedtak = service.iverksattVedtak(behandlingId, brukerTokenInfo)
                 rapidService.sendToRapid(vedtak.rapidInfo)
 
-                call.respond(HttpStatusCode.OK, vedtak.vedtak.toDto())
+                call.respond(HttpStatusCode.OK, vedtak.vedtak)
             }
         }
 

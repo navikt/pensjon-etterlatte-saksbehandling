@@ -369,7 +369,7 @@ internal class VedtaksvurderingRouteTest {
                 status = VedtakStatus.FATTET_VEDTAK,
                 vedtakFattet = VedtakFattet(SAKSBEHANDLER_1, ENHET_1, Tidspunkt.now()),
             )
-        coEvery { vedtaksvurderingService.fattVedtak(any(), any()) } returns VedtakOgRapid(fattetVedtak, mockk())
+        coEvery { vedtaksvurderingService.fattVedtak(any(), any()) } returns VedtakOgRapid(fattetVedtak.toDto(), mockk())
         coEvery { rapidService.sendToRapid(any()) } just runs
 
         testApplication {
@@ -430,7 +430,7 @@ internal class VedtaksvurderingRouteTest {
                 vedtakFattet = VedtakFattet(SAKSBEHANDLER_1, ENHET_1, Tidspunkt.now()),
                 attestasjon = Attestasjon(SAKSBEHANDLER_2, ENHET_2, Tidspunkt.now()),
             )
-        coEvery { vedtaksvurderingService.attesterVedtak(any(), any(), any()) } returns VedtakOgRapid(attestertVedtak, mockk())
+        coEvery { vedtaksvurderingService.attesterVedtak(any(), any(), any()) } returns VedtakOgRapid(attestertVedtak.toDto(), mockk())
         coEvery { rapidService.sendToRapid(any()) } just runs
 
         testApplication {
@@ -495,7 +495,7 @@ internal class VedtaksvurderingRouteTest {
             )
         val begrunnelse = UnderkjennVedtakDto("Ikke bra nok begrunnet", "Annet")
         coEvery { vedtaksvurderingService.underkjennVedtak(any(), any(), any()) } returns
-            VedtakOgRapid(underkjentVedtak, mockk())
+            VedtakOgRapid(underkjentVedtak.toDto(), mockk())
         coEvery { rapidService.sendToRapid(any()) } just runs
 
         testApplication {

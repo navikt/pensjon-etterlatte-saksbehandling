@@ -82,7 +82,7 @@ internal class AutomatiskBehandlingRoutesKtTest {
                 opprettetVedtak
             coEvery { vedtaksvurderingService.fattVedtak(behandlingId, any()) } returns
                 VedtakOgRapid(
-                    opprettetVedtak,
+                    opprettetVedtak.toDto(),
                     mockk(),
                 )
             coEvery { behandlingKlient.hentOppgaverForSak(any(), any()) } returns
@@ -97,7 +97,7 @@ internal class AutomatiskBehandlingRoutesKtTest {
                     any(),
                     any(),
                 )
-            } returns VedtakOgRapid(opprettetVedtak, mockk())
+            } returns VedtakOgRapid(opprettetVedtak.toDto(), mockk())
             coEvery { rapidService.sendToRapid(any()) } just runs
 
             environment { config = applicationConfig }
@@ -150,7 +150,7 @@ internal class AutomatiskBehandlingRoutesKtTest {
         const val CLIENT_ID = "azure-id for saksbehandler"
     }
 
-    fun lagOppgave(referanse: UUID) =
+    private fun lagOppgave(referanse: UUID) =
         OppgaveIntern(
             id = UUID.randomUUID(),
             status = Status.UNDER_BEHANDLING,

@@ -150,10 +150,10 @@ class VedtaksvurderingService(
                         }
                     }
                 VedtakOgRapid(
-                    fattetVedtakIntern,
+                    fattetVedtakIntern.toDto(),
                     RapidInfo(
                         vedtakhendelse = VedtakKafkaHendelseType.FATTET,
-                        vedtak = fattetVedtakIntern,
+                        vedtak = fattetVedtakIntern.toDto(),
                         tekniskTid = fattetVedtakIntern.vedtakFattet!!.tidspunkt,
                         behandlingId = behandlingId,
                     ),
@@ -213,10 +213,10 @@ class VedtaksvurderingService(
             }
 
         return VedtakOgRapid(
-            attestertVedtak,
+            attestertVedtak.toDto(),
             RapidInfo(
                 vedtakhendelse = VedtakKafkaHendelseType.ATTESTERT,
-                vedtak = attestertVedtak,
+                vedtak = attestertVedtak.toDto(),
                 tekniskTid = attestertVedtak.attestasjon!!.tidspunkt,
                 behandlingId = behandlingId,
                 extraParams =
@@ -270,10 +270,10 @@ class VedtaksvurderingService(
             }
 
         return VedtakOgRapid(
-            repository.hentVedtak(behandlingId)!!,
+            repository.hentVedtak(behandlingId)!!.toDto(),
             RapidInfo(
                 vedtakhendelse = VedtakKafkaHendelseType.UNDERKJENT,
-                vedtak = underkjentVedtak,
+                vedtak = underkjentVedtak.toDto(),
                 tekniskTid = underkjentTid,
                 behandlingId = behandlingId,
             ),
@@ -300,10 +300,10 @@ class VedtaksvurderingService(
             }
 
         return VedtakOgRapid(
-            iverksattVedtak,
+            iverksattVedtak.toDto(),
             RapidInfo(
                 vedtakhendelse = VedtakKafkaHendelseType.IVERKSATT,
-                vedtak = iverksattVedtak,
+                vedtak = iverksattVedtak.toDto(),
                 tekniskTid = Tidspunkt.now(clock),
                 behandlingId = behandlingId,
             ),

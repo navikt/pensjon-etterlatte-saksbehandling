@@ -6,6 +6,7 @@ import no.nav.etterlatte.libs.common.beregning.AvkortetYtelseDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingDto
 import no.nav.etterlatte.libs.common.beregning.BeregningDTO
 import no.nav.etterlatte.libs.common.deserialize
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.vedtak.VedtakSamordningDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import java.time.LocalDate
@@ -39,17 +40,17 @@ class SamordningVedtakService(
 
     suspend fun hentVedtaksliste(
         virkFom: LocalDate,
-        fnr: String,
-        tpnr: String,
+        fnr: Folkeregisteridentifikator,
+        tpnr: Tjenestepensjonnummer,
         organisasjonsnummer: String,
     ): List<SamordningVedtakDto> {
-        if (!tjenestepensjonKlient.harTpForholdByDate(fnr, tpnr, virkFom)) {
+        if (!tjenestepensjonKlient.harTpForholdByDate(fnr.value, tpnr.value, virkFom)) {
             throw TjenestepensjonManglendeTilgangException("Ikke gyldig tpforhold")
         }
 
         return vedtaksvurderingKlient.hentVedtaksliste(
             virkFom = virkFom,
-            fnr = fnr,
+            fnr = fnr.value,
             organisasjonsnummer = organisasjonsnummer,
         )
             .map { it.mapSamordningsvedtak() }

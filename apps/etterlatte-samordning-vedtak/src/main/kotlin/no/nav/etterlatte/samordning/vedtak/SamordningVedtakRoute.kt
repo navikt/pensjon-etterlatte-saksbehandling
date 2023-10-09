@@ -8,6 +8,7 @@ import io.ktor.server.response.respondNullable
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.route
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.ktor.hentTokenClaims
 import java.time.LocalDate
 
@@ -65,8 +66,8 @@ fun Route.samordningVedtakRoute(samordningVedtakService: SamordningVedtakService
                 try {
                     samordningVedtakService.hentVedtaksliste(
                         virkFom = virkFom,
-                        fnr = fnr,
-                        tpnr = tpnummer,
+                        fnr = Folkeregisteridentifikator.of(fnr),
+                        tpnr = Tjenestepensjonnummer(tpnummer),
                         organisasjonsnummer = call.orgNummer,
                     )
                 } catch (e: TjenestepensjonManglendeTilgangException) {

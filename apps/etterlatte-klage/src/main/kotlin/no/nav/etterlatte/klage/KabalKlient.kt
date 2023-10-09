@@ -8,6 +8,7 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import io.ktor.http.isSuccess
 import no.nav.etterlatte.klage.modell.KabalOversendelse
+import no.nav.etterlatte.libs.common.toJson
 
 interface KabalKlient {
     suspend fun sendTilKabal(kabalOversendelse: KabalOversendelse)
@@ -29,6 +30,6 @@ class KabalKlientImpl(private val client: HttpClient, private val kabalUrl: Stri
 
 class KabalKlientException(httpStatusCode: HttpStatusCode, kabalOversendelse: KabalOversendelse) :
     Exception(
-        "Fikk en feil mot Kabal-api i oversending av klage med id: ${kabalOversendelse.fagSak.fagsakId}. " +
-            "Statuskode: $httpStatusCode",
+        "Fikk en feil mot Kabal-api ($httpStatusCode) i oversending av klage med id: ${kabalOversendelse.fagSak.fagsakId}. " +
+            "Oversendelse: ${kabalOversendelse.toJson()}",
     )

@@ -67,7 +67,7 @@ internal fun Route.generellbehandlingRoutes(
         }
     }
 
-    post("/api/generellbehandling/sendtilattestering/{generellbehandlingId}") {
+    put("/api/generellbehandling/sendtilattestering/{$SAKID_CALL_PARAMETER}") {
         hvisEnabled(GenerellBehandlingToggle.KanBrukeGenerellBehandlingToggle) {
             kunSaksbehandler { saksbehandler ->
                 val request = call.receive<GenerellBehandling>()
@@ -92,7 +92,7 @@ internal fun Route.generellbehandlingRoutes(
                     )
                 }
                 logger.info(
-                    "Oppdatert generell behandling for sak ${request.sakId} av typen ${request.type}",
+                    "Oppdatert generell behandling for sak $sakId av typen ${request.type}",
                 )
                 call.respond(HttpStatusCode.OK)
             }

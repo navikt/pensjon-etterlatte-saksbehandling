@@ -1,3 +1,4 @@
+
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
@@ -91,7 +92,7 @@ class MigreringHendelserTest {
 
         Assertions.assertEquals(1, inspector.inspektør.size)
         val sendtTilRapid = inspector.inspektør.message(0)
-        Assertions.assertEquals(VedtakKafkaHendelseType.ATTESTERT.name, sendtTilRapid.get(EVENT_NAME_KEY).textValue())
+        Assertions.assertEquals(VedtakKafkaHendelseType.ATTESTERT.toString(), sendtTilRapid.get(EVENT_NAME_KEY).textValue())
         Assertions.assertEquals(sendtTilRapid.get(BEHANDLING_ID_KEY).textValue(), behandlingId)
     }
 }

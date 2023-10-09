@@ -11,6 +11,8 @@ import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.SKAL_SENDE_BREV
 import no.nav.etterlatte.libs.common.sak.VedtakSak
 import no.nav.etterlatte.libs.common.toJson
+import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseType
+import no.nav.etterlatte.rapidsandrivers.migrering.BREV_OPPRETTA_MIGRERING
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -25,7 +27,7 @@ internal class JournalfoerVedtaksbrev(
     private val logger = LoggerFactory.getLogger(JournalfoerVedtaksbrev::class.java)
 
     init {
-        initialiserRiver(rapidsConnection, BrevEventTypes.FERDIGSTILT.toString()) {
+        initialiserRiver(rapidsConnection, VedtakKafkaHendelseType.ATTESTERT.toString()) {
             validate { it.requireKey("vedtak") }
             validate { it.requireKey("vedtak.vedtakId") }
             validate { it.requireKey("vedtak.behandling.id") }
@@ -38,6 +40,7 @@ internal class JournalfoerVedtaksbrev(
                 it.rejectValues("vedtak.behandling.type", listOf(BehandlingType.MANUELT_OPPHOER.name))
             }
             validate { it.rejectValue(SKAL_SENDE_BREV, false) }
+            validate { it.rejectValue(BREV_OPPRETTA_MIGRERING, false) }
         }
     }
 

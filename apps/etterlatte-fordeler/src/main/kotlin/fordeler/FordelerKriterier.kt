@@ -61,10 +61,11 @@ class FordelerKriterier(private val featureToggleService: FeatureToggleService) 
         gjenlevende: Person?,
         soeknad: Barnepensjon,
     ): FordelerKriterierResultat {
-        val kriterier = when (tillatAlleAktivert(featureToggleService)) {
-            true -> emptyList()
-            false -> fordelerKriterier(barn, avdoed, gjenlevende)
-        }
+        val kriterier =
+            when (tillatAlleAktivert(featureToggleService)) {
+                true -> emptyList()
+                false -> fordelerKriterier(barn, avdoed, gjenlevende)
+            }
         return kriterier
             .filter { it.blirOppfyltAv(soeknad) }
             .map { it.fordelerKriterie }
@@ -136,7 +137,7 @@ class FordelerKriterier(private val featureToggleService: FeatureToggleService) 
         return (
             person.utland?.innflyttingTilNorge?.isNotEmpty() == true ||
                 person.utland?.utflyttingFraNorge?.isNotEmpty() == true
-            )
+        )
     }
 
     private fun personErIkkeRegistrertDoed(person: Person): Boolean {

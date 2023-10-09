@@ -18,7 +18,7 @@ import no.nav.etterlatte.libs.common.objectMapper
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.slf4j.LoggerFactory
 
-class BehandlingKlient(val behandlingHttpClient: HttpClient, val resourceUrl: String) {
+class BehandlingKlient(private val behandlingHttpClient: HttpClient, private val resourceUrl: String) {
     private val logger = LoggerFactory.getLogger(this.javaClass.name)
 
     fun haandterHendelse(record: ConsumerRecord<String, String>) {

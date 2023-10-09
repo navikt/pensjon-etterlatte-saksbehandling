@@ -29,16 +29,18 @@ internal fun Route.etterbetalingRoutes(service: EtterbetalingService) {
                     service.lagreEtterbetaling(
                         Etterbetaling(
                             behandlingId = behandlingsId,
-                        fra = requireNotNull(request.fraDato) { "Mangler fradato etterbetaling" }.let {
-                            YearMonth.from(
-                                it
-                            )
-                        },
-                        til = requireNotNull(request.tilDato) { "Mangler tildato etterbetaling" }.let {
-                            YearMonth.from(
-                                it
-                            )
-                        },
+                            fra =
+                                requireNotNull(request.fraDato) { "Mangler fradato etterbetaling" }.let {
+                                    YearMonth.from(
+                                        it,
+                                    )
+                                },
+                            til =
+                                requireNotNull(request.tilDato) { "Mangler tildato etterbetaling" }.let {
+                                    YearMonth.from(
+                                        it,
+                                    )
+                                },
                         ),
                     )
                 }

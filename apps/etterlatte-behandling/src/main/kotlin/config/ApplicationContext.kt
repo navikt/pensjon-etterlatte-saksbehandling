@@ -24,6 +24,7 @@ import no.nav.etterlatte.behandling.klienter.BrevApiKlient
 import no.nav.etterlatte.behandling.klienter.BrevApiKlientObo
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlientObo
+import no.nav.etterlatte.behandling.klienter.KlageKlientImpl
 import no.nav.etterlatte.behandling.klienter.NavAnsattKlient
 import no.nav.etterlatte.behandling.klienter.NavAnsattKlientImpl
 import no.nav.etterlatte.behandling.klienter.Norg2Klient
@@ -114,6 +115,14 @@ private fun featureToggleProperties(config: Config) =
         apiKey = config.getString("funksjonsbrytere.unleash.token"),
     )
 
+private fun klageHttpClient(config: Config) =
+    httpClientClientCredentials(
+        azureAppClientId = config.getString("azure.app.client.id"),
+        azureAppJwk = config.getString("azure.app.jwk"),
+        azureAppWellKnownUrl = config.getString("azure.app.well.known.url"),
+        azureAppScope = config.getString("klage.azure.scope"),
+    )
+
 internal class ApplicationContext(
     val env: Miljoevariabler = Miljoevariabler(System.getenv()),
     val config: Config = ConfigFactory.load(),
@@ -140,6 +149,7 @@ internal class ApplicationContext(
     val gosysOppgaveKlient: GosysOppgaveKlient = GosysOppgaveKlientImpl(config, httpClient()),
     val vedtakKlient: VedtakKlient = VedtakKlientImpl(config, httpClient()),
     val brevApiHttpClient: BrevApiKlient = BrevApiKlientObo(config, httpClient(forventSuksess = true)),
+    val klageHttpClient: HttpClient = klageHttpClient(config),
 ) {
     val httpPort = env.getOrDefault("HTTP_PORT", "8080").toInt()
     val saksbehandlerGroupIdsByKey = AzureGroup.values().associateWith { env.requireEnvValue(it.envKey) }
@@ -169,6 +179,7 @@ internal class ApplicationContext(
     val grunnlagKlient = GrunnlagKlientImpl(config, grunnlagHttpClient)
     val leaderElectionKlient = LeaderElection(env.getValue("ELECTOR_PATH"), leaderElectionHttpClient)
     val behandlingsHendelser = BehandlingsHendelserKafkaProducerImpl(rapid)
+    val klageKlient = KlageKlientImpl(klageHttpClient, resourceUrl = env.getValue("ETTERLATTE_KLAGE_API_URL"))
 
     // Metrikker
     val oppgaveMetrikker = OppgaveMetrics(metrikkerDao)
@@ -293,6 +304,7 @@ internal class ApplicationContext(
             hendelseDao = hendelseDao,
             oppgaveService = oppgaveService,
             brevApiKlient = brevApiHttpClient,
+            klageKlient = klageKlient,
         )
 
     val tilbakekrevingService =

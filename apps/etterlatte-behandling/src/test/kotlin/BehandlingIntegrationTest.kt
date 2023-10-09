@@ -31,6 +31,8 @@ import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.kafka.TestProdusent
 import no.nav.etterlatte.libs.common.Miljoevariabler
+import no.nav.etterlatte.libs.common.behandling.Mottaker
+import no.nav.etterlatte.libs.common.behandling.Mottakerident
 import no.nav.etterlatte.libs.common.behandling.PersonMedSakerOgRoller
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakOgRolle
@@ -112,6 +114,7 @@ abstract class BehandlingIntegrationTest {
                         put("NAVANSATT_URL", "http://localhost")
                         put("SKJERMING_URL", "http://localhost")
                         put("OPPGAVE_URL", "http://localhost")
+                        put("ETTERLATTE_KLAGE_API_URL", "http://localhost")
                         put("OPPGAVE_SCOPE", "scope")
                     }.let { Miljoevariabler(it) },
                 config =
@@ -135,6 +138,7 @@ abstract class BehandlingIntegrationTest {
                 vedtakKlient = VedtakKlientTest(),
                 gosysOppgaveKlient = GosysOppgaveKlientTest(),
                 brevApiHttpClient = BrevApiKlientTest(),
+                klageHttpClient = klageHttpClientTest(),
             ).also {
                 it.dataSource.migrate()
             }
@@ -233,6 +237,21 @@ abstract class BehandlingIntegrationTest {
                     } else {
                         error(request.url.fullPath)
                     }
+                }
+            }
+            install(ContentNegotiation) {
+                register(
+                    ContentType.Application.Json,
+                    JacksonConverter(objectMapper),
+                )
+            }
+        }
+
+    fun klageHttpClientTest() =
+        HttpClient(MockEngine) {
+            engine {
+                addHandler {
+                    respondOk()
                 }
             }
             install(ContentNegotiation) {
@@ -457,14 +476,23 @@ class BrevApiKlientTest : BrevApiKlient {
         sakId: Long,
         brukerTokenInfo: BrukerTokenInfo,
     ): OpprettetBrevDto {
-        return OpprettetBrevDto(brevId++)
+        return OpprettetBrevDto(
+            brevId++,
+            mottaker =
+                Mottaker(
+                    navn = "Mottaker mottakersen",
+                    foedselsnummer = Mottakerident("19448310410"),
+                    orgnummer = null,
+                ),
+        )
     }
 
     override suspend fun ferdigstillBrev(
         sakId: Long,
         brevId: Long,
         brukerTokenInfo: BrukerTokenInfo,
-    ) {}
+    ) {
+    }
 
     override suspend fun journalfoerBrev(
         sakId: Long,
@@ -480,6 +508,22 @@ class BrevApiKlientTest : BrevApiKlient {
         brukerTokenInfo: BrukerTokenInfo,
     ): String {
         return UUID.randomUUID().toString()
+    }
+
+    override suspend fun hentBrev(
+        sakId: Long,
+        brevId: Long,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): OpprettetBrevDto {
+        return OpprettetBrevDto(
+            id = brevId,
+            mottaker =
+                Mottaker(
+                    navn = "Mottaker mottakersen",
+                    foedselsnummer = Mottakerident("19448310410"),
+                    orgnummer = null,
+                ),
+        )
     }
 }
 

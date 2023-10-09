@@ -32,6 +32,7 @@ internal class FordeltSoeknadRiver(
             validate { it.requireKey(FordelerFordelt.skjemaInfoKey) }
             validate { it.demandValue(SoeknadInnsendt.skjemaInfoTypeKey, SoeknadType.BARNEPENSJON.name) }
             validate { it.rejectKey(GyldigSoeknadVurdert.behandlingIdKey) }
+            validate { it.rejectValue("trengerManuellJor", true) }
         }.register(this)
     }
 

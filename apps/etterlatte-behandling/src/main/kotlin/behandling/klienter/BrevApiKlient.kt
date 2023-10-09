@@ -6,6 +6,7 @@ import com.github.michaelbull.result.mapBoth
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
 import no.nav.etterlatte.behandling.objectMapper
+import no.nav.etterlatte.libs.common.behandling.Mottaker
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktorobo.Resource
@@ -40,6 +41,12 @@ interface BrevApiKlient {
         brevId: Long,
         brukerTokenInfo: BrukerTokenInfo,
     ): String
+
+    suspend fun hentBrev(
+        sakId: Long,
+        brevId: Long,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): OpprettetBrevDto
 }
 
 class BrevApiKlientObo(config: Config, client: HttpClient) : BrevApiKlient {
@@ -146,7 +153,31 @@ class BrevApiKlientObo(config: Config, client: HttpClient) : BrevApiKlient {
             throw e
         }
     }
+
+    override suspend fun hentBrev(
+        sakId: Long,
+        brevId: Long,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): OpprettetBrevDto {
+        try {
+            return downstreamResourceClient.get(
+                resource =
+                    Resource(
+                        clientId = clientId,
+                        url = "$resourceUrl/api/brev/$brevId?sakId=$sakId",
+                    ),
+                brukerTokenInfo = brukerTokenInfo,
+            ).mapBoth(
+                success = { resource ->
+                    objectMapper.readValue(resource.response.toString())
+                },
+                failure = { error -> throw error },
+            )
+        } catch (e: Exception) {
+            throw e
+        }
+    }
 }
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-data class OpprettetBrevDto(val id: Long)
+data class OpprettetBrevDto(val id: Long, val mottaker: Mottaker)

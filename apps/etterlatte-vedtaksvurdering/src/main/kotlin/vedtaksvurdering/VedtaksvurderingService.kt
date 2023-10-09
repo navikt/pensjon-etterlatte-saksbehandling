@@ -59,6 +59,11 @@ class VedtaksvurderingService(
         return repository.hentVedtak(behandlingId)
     }
 
+    fun hentVedtakSammendrag(behandlingId: UUID): VedtakSammendrag? {
+        logger.info("Henter sammendrag for vedtak for behandling$behandlingId")
+        return repository.hentVedtakSammendrag(behandlingId)
+    }
+
     private fun hentVedtakNonNull(behandlingId: UUID): Vedtak {
         return requireNotNull(hentVedtak(behandlingId)) { "Vedtak for behandling $behandlingId finnes ikke" }
     }

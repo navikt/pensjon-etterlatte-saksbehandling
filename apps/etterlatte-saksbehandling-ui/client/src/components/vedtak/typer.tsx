@@ -13,4 +13,5 @@ export enum VedtakType {
   OPPHOER = 'OPPHOER',
   AVSLAG = 'AVSLAG',
   ENDRING = 'ENDRING',
+  TILBAKEKREVING = 'TILBAKEKREVING ',
 }

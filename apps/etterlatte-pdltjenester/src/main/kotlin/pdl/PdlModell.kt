@@ -498,8 +498,12 @@ data class PdlHentForeldreansvarHistorikkRequest(
 )
 
 data class PdlHentForeldreansvarHistorikkResponse(
-    val data: PdlHistorikkForeldreansvar? = null,
+    val data: PdlHentForeldreansvarHistorikkHentPerson? = null,
     val errors: List<PdlResponseError>? = null,
+)
+
+data class PdlHentForeldreansvarHistorikkHentPerson(
+    val hentPerson: PdlHistorikkForeldreansvar? = null,
 )
 
 data class PdlHistorikkForeldreansvar(

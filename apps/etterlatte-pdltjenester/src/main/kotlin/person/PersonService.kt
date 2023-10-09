@@ -69,7 +69,7 @@ class PersonService(
 
         return pdlKlient.hentPersonHistorikkForeldreansvar(fnr)
             .let {
-                if (it.data == null) {
+                if (it.data?.hentPerson == null) {
                     val pdlFeil = it.errors?.asFormatertFeil()
                     if (it.errors?.personIkkeFunnet() == true) {
                         throw PdlFantIkkePerson("Fant ikke personen $fnr")
@@ -79,7 +79,7 @@ class PersonService(
                         )
                     }
                 } else {
-                    ForeldreansvarHistorikkMapper.mapForeldreAnsvar(it.data)
+                    ForeldreansvarHistorikkMapper.mapForeldreAnsvar(it.data.hentPerson)
                 }
             }
     }

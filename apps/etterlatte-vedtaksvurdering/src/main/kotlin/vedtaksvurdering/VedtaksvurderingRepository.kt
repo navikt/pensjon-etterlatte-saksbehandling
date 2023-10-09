@@ -184,6 +184,25 @@ class VedtaksvurderingRepository(private val datasource: DataSource) : Transacti
             }
         }
 
+    fun hentVedtakSammendrag(
+        behandlingId: UUID,
+        tx: TransactionalSession? = null,
+    ): VedtakSammendrag? =
+        tx.session {
+            hent(
+                queryString = """
+            SELECT id, fnr, sakid, behandlingId, vedtakstatus, saktype, type,
+                saksbehandlerId, datoFattet, fattetVedtakEnhet, 
+                attestant, datoattestert, attestertVedtakEnhet
+            FROM vedtak 
+            WHERE behandlingId = :behandlingId
+            """,
+                params = mapOf("behandlingId" to behandlingId),
+            ) {
+                it.toVedtakSammendrag()
+            }
+        }
+
     private fun hentVedtakNonNull(
         behandlingId: UUID,
         tx: TransactionalSession? = null,
@@ -333,6 +352,33 @@ class VedtaksvurderingRepository(private val datasource: DataSource) : Transacti
                 .also { require(it == 1) }
             return@session hentVedtakNonNull(behandlingId, this)
         }
+
+    private fun Row.toVedtakSammendrag() =
+        VedtakSammendrag(
+            id = long("id"),
+            sakId = long("sakid"),
+            sakType = SakType.valueOf(string("saktype")),
+            behandlingId = uuid("behandlingid"),
+            soeker = string("fnr").let { Folkeregisteridentifikator.of(it) },
+            status = string("vedtakstatus").let { VedtakStatus.valueOf(it) },
+            type = string("type").let { VedtakType.valueOf(it) },
+            vedtakFattet =
+                stringOrNull("saksbehandlerid")?.let {
+                    VedtakFattet(
+                        ansvarligSaksbehandler = string("saksbehandlerid"),
+                        ansvarligEnhet = string("fattetVedtakEnhet"),
+                        tidspunkt = sqlTimestamp("datofattet").toTidspunkt(),
+                    )
+                },
+            attestasjon =
+                stringOrNull("attestant")?.let {
+                    Attestasjon(
+                        attestant = string("attestant"),
+                        attesterendeEnhet = string("attestertVedtakEnhet"),
+                        tidspunkt = sqlTimestamp("datoattestert").toTidspunkt(),
+                    )
+                },
+        )
 
     private fun Row.toVedtak(utbetalingsperioder: List<Utbetalingsperiode>) =
         Vedtak(

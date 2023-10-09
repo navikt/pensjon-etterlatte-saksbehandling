@@ -58,6 +58,8 @@ export const formaterVedtakType = (type: VedtakType): string => {
       return 'Avslag'
     case VedtakType.ENDRING:
       return 'Endring'
+    case VedtakType.TILBAKEKREVING:
+      return 'Tilbakekreving'
   }
 }
 

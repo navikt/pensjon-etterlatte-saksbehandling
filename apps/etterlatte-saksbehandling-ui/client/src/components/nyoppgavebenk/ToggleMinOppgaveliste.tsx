@@ -95,7 +95,12 @@ export const ToggleMinOppgaveliste = () => {
         <>
           {oppgaveListeValg === 'Oppgavelista' && (
             <>
-              <FilterRad hentOppgaver={hentAlleOppgaver} filter={filter} setFilter={setFilter} />
+              <FilterRad
+                hentOppgaver={hentAlleOppgaver}
+                filter={filter}
+                setFilter={setFilter}
+                alleOppgaver={hentedeOppgaver}
+              />
               <Oppgavelista
                 oppgaver={hentedeOppgaver}
                 filtrerteOppgaver={filtrerteOppgaver}

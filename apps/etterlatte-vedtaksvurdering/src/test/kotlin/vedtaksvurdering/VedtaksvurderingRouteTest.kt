@@ -193,11 +193,11 @@ internal class VedtaksvurderingRouteTest {
     @Test
     fun `skal returnere vedtaksammendrag`() {
         val attestertVedtak =
-            vedtak().copy(
+            vedtaksammendrag().copy(
                 status = VedtakStatus.ATTESTERT,
                 attestasjon = Attestasjon(SAKSBEHANDLER_2, ENHET_2, Tidspunkt.now()),
             )
-        every { vedtaksvurderingService.hentVedtak(any<UUID>()) } returns attestertVedtak
+        every { vedtaksvurderingService.hentVedtakSammendrag(any<UUID>()) } returns attestertVedtak
 
         testApplication {
             environment { config = applicationConfig }
@@ -220,7 +220,7 @@ internal class VedtaksvurderingRouteTest {
 
             coVerify(exactly = 1) {
                 behandlingKlient.harTilgangTilBehandling(any(), any())
-                vedtaksvurderingService.hentVedtak(any<UUID>())
+                vedtaksvurderingService.hentVedtakSammendrag(any<UUID>())
             }
         }
     }

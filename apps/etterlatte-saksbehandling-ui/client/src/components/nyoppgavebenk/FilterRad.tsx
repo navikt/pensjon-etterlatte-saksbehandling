@@ -1,5 +1,5 @@
 import { Button, Select, TextField } from '@navikt/ds-react'
-import React from 'react'
+import React, { useState } from 'react'
 import {
   ENHETFILTER,
   EnhetFilterKeys,
@@ -14,16 +14,27 @@ import {
   oppgavetypefilter,
   OppgavetypeFilterKeys,
   SAKSBEHANDLERFILTER,
-  SaksbehandlerFilterKeys,
   YTELSEFILTER,
   YtelseFilterKeys,
 } from '~components/nyoppgavebenk/Oppgavelistafiltre'
 import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 import { FEATURE_TOGGLE_KAN_BRUKE_KLAGE } from '~components/person/OpprettKlage'
 import { FlexRow } from '~shared/styled'
+import { OppgaveDTO } from '~shared/api/oppgaver'
+import { UNSAFE_Combobox } from '@navikt/ds-react'
 
-export const FilterRad = (props: { hentOppgaver: () => void; filter: Filter; setFilter: (filter: Filter) => void }) => {
-  const { hentOppgaver, filter, setFilter } = props
+export const FilterRad = (props: {
+  hentOppgaver: () => void
+  filter: Filter
+  setFilter: (filter: Filter) => void
+  alleOppgaver: OppgaveDTO[]
+}) => {
+  const { hentOppgaver, filter, setFilter, alleOppgaver } = props
+
+  const saksbehandlere = new Set(
+    alleOppgaver.map((oppgave) => oppgave.saksbehandler).filter((s): s is Exclude<typeof s, null> => s !== null)
+  )
+  const [saksbehandlerFilterLokal, setSaksbehandlerFilterLokal] = useState<string>(filter.saksbehandlerFilter)
   const kanBrukeKlage = useFeatureEnabledMedDefault(FEATURE_TOGGLE_KAN_BRUKE_KLAGE, false)
   return (
     <>
@@ -45,23 +56,29 @@ export const FilterRad = (props: { hentOppgaver: () => void; filter: Filter; set
             })
           }
         >
-          {Object.entries(FRISTFILTER).map(([key, fristBeskrivelse]) => (
-            <option key={key} value={key}>
-              {fristBeskrivelse}
-            </option>
-          ))}
+          {Object.entries(FRISTFILTER)
+            .filter((o) => o)
+            .map(([key, fristBeskrivelse]) => (
+              <option key={key} value={key}>
+                {fristBeskrivelse}
+              </option>
+            ))}
         </Select>
-        <Select
+        <UNSAFE_Combobox
           label="Saksbehandler"
-          value={filter.saksbehandlerFilter}
-          onChange={(e) => setFilter({ ...filter, saksbehandlerFilter: e.target.value as SaksbehandlerFilterKeys })}
-        >
-          {Object.entries(SAKSBEHANDLERFILTER).map(([key, beskrivelse]) => (
-            <option key={key} value={key}>
-              {beskrivelse}
-            </option>
-          ))}
-        </Select>
+          value={saksbehandlerFilterLokal}
+          options={Object.entries(SAKSBEHANDLERFILTER)
+            .map(([, beskrivelse]) => beskrivelse)
+            .concat(Array.from(saksbehandlere))}
+          onChange={(e) => {
+            setSaksbehandlerFilterLokal(e?.target.value ? e?.target.value : '')
+          }}
+          onToggleSelected={(option, isSelected) => {
+            if (isSelected) {
+              setFilter({ ...filter, saksbehandlerFilter: option })
+            }
+          }}
+        />
 
         <Select
           label="Enhet"

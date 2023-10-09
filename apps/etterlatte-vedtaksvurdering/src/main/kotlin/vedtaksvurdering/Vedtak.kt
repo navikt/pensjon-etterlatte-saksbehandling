@@ -47,6 +47,28 @@ sealed class VedtakFelles(
     open val attestasjon: Attestasjon? = null,
 )
 
+data class VedtakSammendrag(
+    override val id: Long,
+    override val soeker: Folkeregisteridentifikator,
+    override val sakId: Long,
+    override val sakType: SakType,
+    override val behandlingId: UUID,
+    override val status: VedtakStatus,
+    override val type: VedtakType,
+    override val vedtakFattet: VedtakFattet? = null,
+    override val attestasjon: Attestasjon? = null,
+) : VedtakFelles(
+        id = id,
+        soeker = soeker,
+        sakId = sakId,
+        sakType = sakType,
+        behandlingId = behandlingId,
+        status = status,
+        type = type,
+        vedtakFattet = vedtakFattet,
+        attestasjon = attestasjon,
+    )
+
 data class Vedtak(
     override val id: Long,
     override val soeker: Folkeregisteridentifikator,

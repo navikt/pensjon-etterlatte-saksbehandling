@@ -2,17 +2,15 @@ import { Heading, Radio, RadioGroup } from '@navikt/ds-react'
 import { Underkjenn } from './underkjenn'
 import { RadioGroupWrapper } from '../styled'
 import { IBeslutning } from '../types'
-import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { Godkjenn } from '~components/behandling/attestering/attestering/godkjenn'
 
 type Props = {
   beslutning: IBeslutning | undefined
   setBeslutning: (value: IBeslutning) => void
-  behandling: IDetaljertBehandling
   disabled: boolean
 }
 
-export const Beslutningsvalg = ({ beslutning, setBeslutning, behandling, disabled }: Props) => {
+export const Beslutningsvalg = ({ beslutning, setBeslutning, disabled }: Props) => {
   return (
     <>
       <Heading size="xsmall">Beslutning</Heading>
@@ -31,8 +29,8 @@ export const Beslutningsvalg = ({ beslutning, setBeslutning, behandling, disable
           </div>
         </RadioGroup>
       </RadioGroupWrapper>
-      {beslutning === IBeslutning.godkjenn && <Godkjenn behandling={behandling} />}
-      {beslutning === IBeslutning.underkjenn && <Underkjenn behandling={behandling} />}
+      {beslutning === IBeslutning.godkjenn && <Godkjenn />}
+      {beslutning === IBeslutning.underkjenn && <Underkjenn />}
     </>
   )
 }

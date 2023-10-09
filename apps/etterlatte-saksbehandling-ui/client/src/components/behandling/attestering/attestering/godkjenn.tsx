@@ -1,10 +1,9 @@
 import { Textarea } from '@navikt/ds-react'
 import { useState } from 'react'
 import { BeslutningWrapper, Text } from '../styled'
-import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { AttesterVedtak } from '~components/behandling/attestering/handinger/attesterVedtak'
 
-export const Godkjenn = ({ behandling }: { behandling: IDetaljertBehandling }) => {
+export const Godkjenn = () => {
   const [tilbakemeldingFraAttestant, setTilbakemeldingFraAttestant] = useState('')
 
   return (
@@ -24,7 +23,7 @@ export const Godkjenn = ({ behandling }: { behandling: IDetaljertBehandling }) =
         />
       </div>
       <br />
-      <AttesterVedtak behandling={behandling} kommentar={tilbakemeldingFraAttestant} />
+      <AttesterVedtak kommentar={tilbakemeldingFraAttestant} />
     </BeslutningWrapper>
   )
 }

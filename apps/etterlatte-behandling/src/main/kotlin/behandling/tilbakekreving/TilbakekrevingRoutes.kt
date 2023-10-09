@@ -47,6 +47,18 @@ internal fun Route.tilbakekrevingRoutes(service: TilbakekrevingService) {
                 service.fattVedtak(tilbakekrevingId, brukerTokenInfo)
                 call.respond(HttpStatusCode.OK)
             }
+            post("attester") {
+                // TODO tilgangsjekk
+                val (kommentar) = call.receive<TilbakekrevingAttesterRequest>()
+                service.attesterVedtak(tilbakekrevingId, kommentar, brukerTokenInfo)
+                call.respond(HttpStatusCode.OK)
+            }
+            post("underkjenn") {
+                // TODO tilgangsjekk
+                val (kommentar, valgtBegrunnelse) = call.receive<TilbakekrevingUnderkjennRequest>()
+                service.underkjennVedtak(tilbakekrevingId, kommentar, valgtBegrunnelse, brukerTokenInfo)
+                call.respond(HttpStatusCode.OK)
+            }
         }
     }
 
@@ -56,7 +68,7 @@ internal fun Route.tilbakekrevingRoutes(service: TilbakekrevingService) {
                 try {
                     service.opprettTilbakekreving(it)
                     call.respond(HttpStatusCode.OK)
-                } catch (e: KravgrunnlagHarIkkeEksisterendeSakException) {
+                } catch (e: TilbakekrevingHarMangelException) {
                     call.respond(
                         HttpStatusCode.NotFound,
                         "Eksisterer ikke sak=${it.sakId.value} for kravgrunnlag=${it.kravgrunnlagId}",
@@ -69,4 +81,13 @@ internal fun Route.tilbakekrevingRoutes(service: TilbakekrevingService) {
 
 data class TilbakekrevingLagreRequest(
     val perioder: List<TilbakekrevingPeriode>,
+)
+
+data class TilbakekrevingAttesterRequest(
+    val kommentar: String,
+)
+
+data class TilbakekrevingUnderkjennRequest(
+    val kommentar: String,
+    val valgtBegrunnelse: String,
 )

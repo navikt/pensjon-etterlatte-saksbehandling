@@ -150,7 +150,7 @@ class BehandlingServiceImpl(
 
     override fun avbryt(behandlingId: UUID) =
         runBlocking {
-            behandlingKlient.post("$url/avbryt") {
+            behandlingKlient.post("$url/api/behandling/$behandlingId/avbryt") {
                 contentType(ContentType.Application.Json)
             }
         }

@@ -6,6 +6,7 @@ import React from 'react'
 import { Tilbakekreving } from '~shared/types/Tilbakekreving'
 import { TilbakekrevingVurderingOverordnet } from '~components/tilbakekreving/vurdering/TilbakekrevingVurderingOverordnet'
 import { TilbakekrevingVurderingPerioder } from '~components/tilbakekreving/vurdering/TilbakekrevingVurderingPerioder'
+import { TilbakekrevingVurderingOppsummering } from '~components/tilbakekreving/vurdering/TilbakekrevingVurderingOppsummering'
 
 export function TilbakekrevingVurdering({ tilbakekreving }: { tilbakekreving: Tilbakekreving }) {
   const navigate = useNavigate()
@@ -20,6 +21,7 @@ export function TilbakekrevingVurdering({ tilbakekreving }: { tilbakekreving: Ti
       </ContentHeader>
       <TilbakekrevingVurderingOverordnet tilbakekreving={tilbakekreving} />
       <TilbakekrevingVurderingPerioder tilbakekreving={tilbakekreving} />
+      <TilbakekrevingVurderingOppsummering tilbakekreving={tilbakekreving} />
       <FlexRow justify="center">
         <Button variant="primary" onClick={() => navigate(`/tilbakekreving/${tilbakekreving?.id}/oppsummering`)}>
           Gå til oppsummering

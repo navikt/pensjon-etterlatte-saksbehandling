@@ -37,7 +37,9 @@ class TilbakekrevingDao(private val connection: () -> Connection) {
                 prepareStatement(
                     """
                     SELECT t.id, t.sak_id, saktype, fnr, enhet, opprettet, status, kravgrunnlag,
-                            vurdering_beskrivelse, vurdering_konklusjon, vurdering_aarsak, vurdering_aktsomhet
+                            vurdering_beskrivelse, vurdering_konklusjon, vurdering_aarsak, vurdering_hjemmel,
+                            vurdering_aktsomhet, akstomhet_redusering_av_kravet,
+                            aktsomhet_strafferettslig_vurdering, aktsomhet_rentevurdering
                     FROM tilbakekreving t INNER JOIN sak s on t.sak_id = s.id
                     WHERE t.id = ?
                     """.trimIndent(),
@@ -89,16 +91,22 @@ class TilbakekrevingDao(private val connection: () -> Connection) {
                 """
                 INSERT INTO tilbakekreving(
                     id, status, sak_id, opprettet, kravgrunnlag,
-                     vurdering_beskrivelse, vurdering_konklusjon, vurdering_aarsak, vurdering_aktsomhet
+                    vurdering_beskrivelse, vurdering_konklusjon, vurdering_aarsak, vurdering_hjemmel,
+                    vurdering_aktsomhet, akstomhet_redusering_av_kravet,
+                    aktsomhet_strafferettslig_vurdering, aktsomhet_rentevurdering
                 )
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 ON CONFLICT (id) DO UPDATE SET
                     status = excluded.status,
                     kravgrunnlag = excluded.kravgrunnlag,
                     vurdering_beskrivelse = excluded.vurdering_beskrivelse,
                     vurdering_konklusjon = excluded.vurdering_konklusjon,
                     vurdering_aarsak = excluded.vurdering_aarsak,
-                    vurdering_aktsomhet = excluded.vurdering_aktsomhet 
+                    vurdering_hjemmel = excluded.vurdering_hjemmel,
+                    vurdering_aktsomhet = excluded.vurdering_aktsomhet,
+                    akstomhet_redusering_av_kravet = excluded.akstomhet_redusering_av_kravet,
+                    aktsomhet_strafferettslig_vurdering = excluded.aktsomhet_strafferettslig_vurdering, 
+                    aktsomhet_rentevurdering = excluded.aktsomhet_rentevurdering 
                 """.trimIndent(),
             )
         statement.setObject(1, tilbakekreving.id)
@@ -109,7 +117,11 @@ class TilbakekrevingDao(private val connection: () -> Connection) {
         statement.setString(6, tilbakekreving.vurdering.beskrivelse)
         statement.setString(7, tilbakekreving.vurdering.konklusjon)
         statement.setString(8, tilbakekreving.vurdering.aarsak?.name)
-        statement.setString(9, tilbakekreving.vurdering.aktsomhet?.name)
+        statement.setString(9, tilbakekreving.vurdering.hjemmel?.name)
+        statement.setString(10, tilbakekreving.vurdering.aktsomhet.aktsomhet?.name)
+        statement.setString(11, tilbakekreving.vurdering.aktsomhet.reduseringAvKravet)
+        statement.setString(12, tilbakekreving.vurdering.aktsomhet.strafferettsligVurdering)
+        statement.setString(13, tilbakekreving.vurdering.aktsomhet.rentevurdering)
         statement.executeUpdate().also { require(it == 1) }
     }
 
@@ -197,7 +209,14 @@ class TilbakekrevingDao(private val connection: () -> Connection) {
                     beskrivelse = getString("vurdering_beskrivelse"),
                     konklusjon = getString("vurdering_konklusjon"),
                     aarsak = getString("vurdering_aarsak")?.let { TilbakekrevingAarsak.valueOf(it) },
-                    aktsomhet = getString("vurdering_aktsomhet")?.let { TilbakekrevingAktsomhet.valueOf(it) },
+                    aktsomhet =
+                        TilbakekrevingVurderingUaktsomhet(
+                            aktsomhet = getString("vurdering_aktsomhet")?.let { TilbakekrevingAktsomhet.valueOf(it) },
+                            reduseringAvKravet = getString("akstomhet_redusering_av_kravet"),
+                            strafferettsligVurdering = getString("aktsomhet_strafferettslig_vurdering"),
+                            rentevurdering = getString("aktsomhet_rentevurdering"),
+                        ),
+                    hjemmel = getString("vurdering_hjemmel")?.let { TilbakekrevingHjemmel.valueOf(it) },
                 ),
             perioder = perioder,
             kravgrunnlag = getString("kravgrunnlag").let { objectMapper.readValue(it) },

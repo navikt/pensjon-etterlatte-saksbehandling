@@ -13,7 +13,15 @@ export interface TilbakekrevingVurdering {
   beskrivelse: string | null
   konklusjon: string | null
   aarsak: TilbakekrevingAarsak | null
+  aktsomhet: TilbakekrevingVurderingUaktsomhet
+  hjemmel: TilbakekrevingHjemmel | null
+}
+
+export interface TilbakekrevingVurderingUaktsomhet {
   aktsomhet: TilbakekrevingAktsomhet | null
+  reduseringAvKravet?: string
+  strafferettsligVurdering?: string
+  rentevurdering?: string
 }
 
 export interface TilbakekrevingPeriode {
@@ -73,4 +81,14 @@ export enum TilbakekrevingResultat {
   FORELDET = 'FORELDET',
   FULL_TILBAKEKREV = 'FULL_TILBAKEKREV',
   INGEN_TILBAKEKREV = 'INGEN_TILBAKEKREV',
+}
+
+export enum TilbakekrevingHjemmel {
+  ULOVFESTET = 'ULOVFESTET',
+  TJUETO_FEMTEN_EN_LEDD_EN = 'TJUETO_FEMTEN_EN_LEDD_EN',
+  TJUETO_FEMTEN_EN_LEDD_TO_FORSETT = 'TJUETO_FEMTEN_EN_LEDD_TO_FORSETT',
+  TJUETO_FEMTEN_EN_LEDD_TO_UAKTSOMT = 'TJUETO_FEMTEN_EN_LEDD_TO_UAKTSOMT',
+  TJUETO_FEMTEN_FEM = 'TJUETO_FEMTEN_FEM',
+  TJUETO_FEMTEN_SEKS = 'TJUETO_FEMTEN_SEKS',
+  TJUETO_SEKSTEN = 'TJUETO_SEKSTEN',
 }

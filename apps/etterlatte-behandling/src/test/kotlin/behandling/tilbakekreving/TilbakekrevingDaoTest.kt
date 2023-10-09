@@ -95,7 +95,14 @@ class TilbakekrevingDaoTest {
                         beskrivelse = "beskrivelse",
                         konklusjon = "konklusjon",
                         aarsak = TilbakekrevingAarsak.ANNET,
-                        aktsomhet = TilbakekrevingAktsomhet.GOD_TRO,
+                        aktsomhet =
+                            TilbakekrevingVurderingUaktsomhet(
+                                aktsomhet = TilbakekrevingAktsomhet.GOD_TRO,
+                                reduseringAvKravet = "Redusering av kravet",
+                                strafferettsligVurdering = "Strafferettslig",
+                                rentevurdering = "Rentevurdering",
+                            ),
+                        hjemmel = TilbakekrevingHjemmel.TJUETO_FEMTEN_EN_LEDD_EN,
                     ),
                 perioder =
                     lagret.perioder.map {

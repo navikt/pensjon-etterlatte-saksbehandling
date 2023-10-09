@@ -42,7 +42,14 @@ data class Tilbakekreving(
                     beskrivelse = null,
                     konklusjon = null,
                     aarsak = null,
-                    aktsomhet = null,
+                    aktsomhet =
+                        TilbakekrevingVurderingUaktsomhet(
+                            aktsomhet = null,
+                            reduseringAvKravet = null,
+                            strafferettsligVurdering = null,
+                            rentevurdering = null,
+                        ),
+                    hjemmel = null,
                 ),
             perioder = kravgrunnlag.perioder.tilTilbakekrevingPerioder(),
             kravgrunnlag = kravgrunnlag,
@@ -54,7 +61,15 @@ data class TilbakekrevingVurdering(
     val beskrivelse: String?,
     val konklusjon: String?,
     val aarsak: TilbakekrevingAarsak?,
+    val aktsomhet: TilbakekrevingVurderingUaktsomhet,
+    val hjemmel: TilbakekrevingHjemmel?,
+)
+
+data class TilbakekrevingVurderingUaktsomhet(
     val aktsomhet: TilbakekrevingAktsomhet?,
+    val reduseringAvKravet: String?,
+    val strafferettsligVurdering: String?,
+    val rentevurdering: String?,
 )
 
 data class TilbakekrevingPeriode(
@@ -159,6 +174,16 @@ enum class TilbakekrevingAktsomhet {
     GOD_TRO,
     SIMPEL_UAKTSOMHET,
     GROV_UAKTSOMHET,
+}
+
+enum class TilbakekrevingHjemmel {
+    ULOVFESTET,
+    TJUETO_FEMTEN_EN_LEDD_EN,
+    TJUETO_FEMTEN_EN_LEDD_TO_FORSETT,
+    TJUETO_FEMTEN_EN_LEDD_TO_UAKTSOMT,
+    TJUETO_FEMTEN_FEM,
+    TJUETO_FEMTEN_SEKS,
+    TJUETO_SEKSTEN,
 }
 
 enum class TilbakekrevingSkyld {

@@ -1,5 +1,6 @@
 package no.nav.etterlatte.klage.modell
 
+import com.fasterxml.jackson.annotation.JsonInclude
 import no.nav.etterlatte.libs.common.behandling.EkstradataInnstilling
 import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.behandling.KlageUtfall
@@ -59,6 +60,7 @@ enum class KabalYtelse {
  * Se https://kabal-api.intern.dev.nav.no/swagger-ui/index.html#/kabal-api-external/sendInnSakV3
  *
  **/
+@JsonInclude(JsonInclude.Include.NON_NULL)
 data class KabalOversendelse(
     val type: KabalSakType,
     val klager: KabalKlager,

@@ -12,6 +12,7 @@ import { addTilbakekreving } from '~store/reducers/TilbakekrevingReducer'
 import { useAppDispatch } from '~store/Store'
 import { HeadingWrapper, InnholdPadding } from '~components/behandling/soeknadsoversikt/styled'
 import { Button, Heading, Select, Table, TextField } from '@navikt/ds-react'
+import styled from 'styled-components'
 
 export function TilbakekrevingVurderingPerioder({ tilbakekreving }: { tilbakekreving: Tilbakekreving }) {
   const dispatch = useAppDispatch()
@@ -206,9 +207,11 @@ export function TilbakekrevingVurderingPerioder({ tilbakekreving }: { tilbakekre
           })}
         </Table.Body>
       </Table>
-      <Button variant="primary" onClick={lagrePerioder} loading={isPending(lagrePerioderStatus)}>
-        Lagre
-      </Button>
+      <ButtonWrapper>
+        <Button variant="primary" onClick={lagrePerioder} loading={isPending(lagrePerioderStatus)}>
+          Lagre
+        </Button>
+      </ButtonWrapper>
     </InnholdPadding>
   )
 }
@@ -216,3 +219,7 @@ export function TilbakekrevingVurderingPerioder({ tilbakekreving }: { tilbakekre
 const onChangeNumber = (e: React.ChangeEvent<HTMLInputElement>, onChange: (value: number | null) => void) => {
   onChange(isNaN(parseInt(e.target.value)) ? null : parseInt(e.target.value))
 }
+
+const ButtonWrapper = styled.div`
+  margin-top: 1em;
+`

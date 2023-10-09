@@ -10,9 +10,7 @@ import { ApiErrorAlert } from '~ErrorBoundary'
 import { hentTilbakekreving } from '~shared/api/tilbakekreving'
 import { addTilbakekreving, resetTilbakekreving } from '~store/reducers/TilbakekrevingReducer'
 import { useTilbakekreving } from '~components/tilbakekreving/useTilbakekreving'
-import { TilbakekrevingOversikt } from '~components/tilbakekreving/oversikt/TilbakekrevingOversikt'
 import { TilbakekrevingVurdering } from '~components/tilbakekreving/vurdering/TilbakekrevingVurdering'
-import { TilbakerevingsOppsummering } from '~components/tilbakekreving/vedtak/TilbakerevingsOppsummering'
 import { TilbakekrevingStegmeny } from '~components/tilbakekreving/stegmeny/TilbakekrevingStegmeny'
 import { TilbakekrevingSidemeny } from '~components/tilbakekreving/sidemeny/TilbakekrevingSidemeny'
 import { TilbakekrevingBrev } from '~components/tilbakekreving/brev/TilbakekrevingBrev'
@@ -53,9 +51,7 @@ export function Tilbakekrevingsbehandling() {
           <MainContent>
             <TilbakekrevingStegmeny />
             <Routes>
-              <Route path="oversikt" element={<TilbakekrevingOversikt />} />
               <Route path="vurdering" element={<TilbakekrevingVurdering tilbakekreving={tilbakekreving} />} />
-              <Route path="oppsummering" element={<TilbakerevingsOppsummering tilbakekreving={tilbakekreving} />} />
               <Route path="brev" element={<TilbakekrevingBrev tilbakekreving={tilbakekreving} />} />
               <Route path="*" element={<Navigate to="oversikt" replace />} />
             </Routes>

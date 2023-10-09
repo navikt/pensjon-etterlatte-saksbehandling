@@ -22,9 +22,9 @@ export function TilbakekrevingVurdering({ tilbakekreving }: { tilbakekreving: Ti
       <TilbakekrevingVurderingOverordnet tilbakekreving={tilbakekreving} />
       <TilbakekrevingVurderingPerioder tilbakekreving={tilbakekreving} />
       <TilbakekrevingVurderingOppsummering tilbakekreving={tilbakekreving} />
-      <FlexRow justify="center">
-        <Button variant="primary" onClick={() => navigate(`/tilbakekreving/${tilbakekreving?.id}/oppsummering`)}>
-          Gå til oppsummering
+      <FlexRow $spacing={true} justify="center">
+        <Button variant="primary" onClick={() => navigate(`/tilbakekreving/${tilbakekreving?.id}/brev`)}>
+          Opprett vedtak
         </Button>
       </FlexRow>
     </Content>

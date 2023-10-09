@@ -1,4 +1,4 @@
-import { Dokumenter, Generellbehandling, Utland } from '~shared/types/Generellbehandling'
+import { Dokumenter, Generellbehandling, Status, Utland } from '~shared/types/Generellbehandling'
 import { Content, ContentHeader, GridContainer, MainContent } from '~shared/styled'
 import { HeadingWrapper } from '~components/behandling/soeknadsoversikt/styled'
 import {
@@ -15,18 +15,16 @@ import {
   TextField,
 } from '@navikt/ds-react'
 import { useContext, useEffect, useState } from 'react'
-import { mapApiResult, useApiCall, isPending, isFailure, isSuccess } from '~shared/hooks/useApiCall'
-import { sendTilAttesteringGenerellBehandling, oppdaterGenerellBehandling } from '~shared/api/generellbehandling'
+import { isFailure, isPending, isSuccess, mapApiResult, useApiCall } from '~shared/hooks/useApiCall'
+import { oppdaterGenerellBehandling, sendTilAttesteringGenerellBehandling } from '~shared/api/generellbehandling'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { hentAlleLand, ILand, sorterLand } from '~shared/api/trygdetid'
 import styled from 'styled-components'
-import { PencilWritingIcon } from '@navikt/aksel-icons'
+import { ExternalLinkIcon, PencilWritingIcon, XMarkIcon } from '@navikt/aksel-icons'
 import { opprettBrevForSak } from '~shared/api/brev'
-import { ExternalLinkIcon } from '@navikt/aksel-icons'
 import { ABlue500, AGray400 } from '@navikt/ds-tokens/dist/tokens'
 import { ButtonGroup } from '~components/person/VurderHendelseModal'
-import { XMarkIcon } from '@navikt/aksel-icons'
 import { ConfigContext } from '~clientConfig'
 import { DatoVelger, formatDateToLocaleDateOrEmptyString } from '~shared/DatoVelger'
 
@@ -152,6 +150,7 @@ const Utland = (props: { utlandsBehandling: Generellbehandling & { innhold: Utla
                       Kravpakke sendes til
                     </Heading>
                     <Select
+                      readOnly={utlandsBehandling.status !== Status.OPPRETTET}
                       label="Land"
                       value={valgtLandIsoKode || ''}
                       onChange={(e) => {
@@ -171,6 +170,7 @@ const Utland = (props: { utlandsBehandling: Generellbehandling & { innhold: Utla
                     {errorLand && <Alert variant="error">Du må velge land</Alert>}
                     <div style={{ margin: '1rem 0rem' }}>
                       <Button
+                        disabled={utlandsBehandling.status !== Status.OPPRETTET}
                         onClick={() => {
                           if (valgtLandIsoKode) {
                             const finnesAllerede = valgteLandIsoKode.includes(valgtLandIsoKode)
@@ -226,7 +226,12 @@ const Utland = (props: { utlandsBehandling: Generellbehandling & { innhold: Utla
                 Gå til RINA for å opprette kravpakke til utlandet
                 <ExternalLinkIcon fill={ABlue500} />
               </LenkeMargin>
-              <TextField label="Saksnummer RINA" value={rinanummer} onChange={(e) => setRinanummer(e.target.value)} />
+              <TextField
+                label="Saksnummer RINA"
+                value={rinanummer}
+                onChange={(e) => setRinanummer(e.target.value)}
+                readOnly={utlandsBehandling.status !== Status.OPPRETTET}
+              />
             </div>
             <StandardBreddeTabell>
               <Table.Header>
@@ -241,6 +246,7 @@ const Utland = (props: { utlandsBehandling: Generellbehandling & { innhold: Utla
                   <Table.HeaderCell scope="row">P2100</Table.HeaderCell>
                   <Table.DataCell>
                     <Checkbox
+                      readOnly={utlandsBehandling.status !== Status.OPPRETTET}
                       checked={dokumenter.p2100.sendt}
                       onChange={(e) =>
                         setDokumenter({ ...dokumenter, p2100: { ...dokumenter.p2100, sendt: e.target.checked } })
@@ -251,6 +257,7 @@ const Utland = (props: { utlandsBehandling: Generellbehandling & { innhold: Utla
                   </Table.DataCell>
                   <Table.DataCell>
                     <DatoVelger
+                      disabled={utlandsBehandling.status !== Status.OPPRETTET}
                       label=""
                       value={dokumenter.p2100.dato ? new Date(dokumenter.p2100.dato) : undefined}
                       onChange={(date) =>
@@ -266,6 +273,7 @@ const Utland = (props: { utlandsBehandling: Generellbehandling & { innhold: Utla
                   <Table.HeaderCell scope="row">P5000</Table.HeaderCell>
                   <Table.DataCell>
                     <Checkbox
+                      readOnly={utlandsBehandling.status !== Status.OPPRETTET}
                       checked={dokumenter.p5000.sendt}
                       onChange={(e) =>
                         setDokumenter({ ...dokumenter, p5000: { ...dokumenter.p5000, sendt: e.target.checked } })
@@ -276,6 +284,7 @@ const Utland = (props: { utlandsBehandling: Generellbehandling & { innhold: Utla
                   </Table.DataCell>
                   <Table.DataCell>
                     <DatoVelger
+                      disabled={utlandsBehandling.status !== Status.OPPRETTET}
                       label=""
                       value={dokumenter.p5000.dato ? new Date(dokumenter.p5000.dato) : undefined}
                       onChange={(date) =>
@@ -291,6 +300,7 @@ const Utland = (props: { utlandsBehandling: Generellbehandling & { innhold: Utla
                   <Table.HeaderCell scope="row">P4000</Table.HeaderCell>
                   <Table.DataCell>
                     <Checkbox
+                      readOnly={utlandsBehandling.status !== Status.OPPRETTET}
                       checked={dokumenter.p4000.sendt}
                       onChange={(e) =>
                         setDokumenter({ ...dokumenter, p4000: { ...dokumenter.p4000, sendt: e.target.checked } })
@@ -301,6 +311,7 @@ const Utland = (props: { utlandsBehandling: Generellbehandling & { innhold: Utla
                   </Table.DataCell>
                   <Table.DataCell>
                     <DatoVelger
+                      disabled={utlandsBehandling.status !== Status.OPPRETTET}
                       label=""
                       value={dokumenter.p4000.dato ? new Date(dokumenter.p4000.dato) : undefined}
                       onChange={(date) =>
@@ -316,6 +327,7 @@ const Utland = (props: { utlandsBehandling: Generellbehandling & { innhold: Utla
                   <Table.HeaderCell scope="row">P6000</Table.HeaderCell>
                   <Table.DataCell>
                     <Checkbox
+                      readOnly={utlandsBehandling.status !== Status.OPPRETTET}
                       checked={dokumenter.p6000.sendt}
                       onChange={(e) =>
                         setDokumenter({ ...dokumenter, p6000: { ...dokumenter.p6000, sendt: e.target.checked } })
@@ -326,6 +338,7 @@ const Utland = (props: { utlandsBehandling: Generellbehandling & { innhold: Utla
                   </Table.DataCell>
                   <Table.DataCell>
                     <DatoVelger
+                      disabled={utlandsBehandling.status !== Status.OPPRETTET}
                       label=""
                       value={dokumenter.p6000.dato ? new Date(dokumenter.p6000.dato) : undefined}
                       onChange={(date) =>
@@ -341,6 +354,7 @@ const Utland = (props: { utlandsBehandling: Generellbehandling & { innhold: Utla
                   <Table.HeaderCell scope="row">P3000</Table.HeaderCell>
                   <Table.DataCell>
                     <Checkbox
+                      readOnly={utlandsBehandling.status !== Status.OPPRETTET}
                       checked={dokumenter.p3000.sendt}
                       onChange={(e) =>
                         setDokumenter({ ...dokumenter, p3000: { ...dokumenter.p3000, sendt: e.target.checked } })
@@ -351,6 +365,7 @@ const Utland = (props: { utlandsBehandling: Generellbehandling & { innhold: Utla
                   </Table.DataCell>
                   <Table.DataCell>
                     <DatoVelger
+                      disabled={utlandsBehandling.status !== Status.OPPRETTET}
                       label=""
                       value={dokumenter.p3000.dato ? new Date(dokumenter.p3000.dato) : undefined}
                       onChange={(date) =>
@@ -374,6 +389,7 @@ const Utland = (props: { utlandsBehandling: Generellbehandling & { innhold: Utla
               </p>
               <div>
                 <Button
+                  disabled={utlandsBehandling.status !== Status.OPPRETTET}
                   icon={<PencilWritingIcon />}
                   onClick={opprettNyttBrevINyFane}
                   loading={isPending(nyttBrevStatus)}

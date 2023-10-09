@@ -1,5 +1,6 @@
 package no.nav.etterlatte.fordeler
 
+import fordeler.FordelerFeatureToggle
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
@@ -10,6 +11,7 @@ import no.nav.etterlatte.behandling.BehandlingKlient
 import no.nav.etterlatte.fordeler.FordelerKriterie.AVDOED_ER_IKKE_REGISTRERT_SOM_DOED
 import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.libs.common.person.FamilieRelasjon
+import no.nav.etterlatte.libs.common.person.FamilieRelasjonManglerIdent
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.mockNorskAdresse
@@ -27,13 +29,16 @@ internal class FordelerServiceTest {
     private val pdlTjenesterKlient = mockk<PdlTjenesterKlient>()
     private val fordelerRepo = mockk<FordelerRepository>()
     private val behandlingKlient = mockk<BehandlingKlient>()
+    private val dummyFeatureToggleService = DummyFeatureToggleService()
+
     private val fordelerService =
         FordelerService(
-            FordelerKriterier(DummyFeatureToggleService()),
+            FordelerKriterier(),
             pdlTjenesterKlient,
             fordelerRepo,
             maxFordelingTilGjenny = Long.MAX_VALUE,
             behandlingKlient = behandlingKlient,
+            featureToggleService = dummyFeatureToggleService,
         )
 
     @Test
@@ -166,11 +171,12 @@ internal class FordelerServiceTest {
     fun `Skal ikke fordele søknader til GJENNY utover et maksimum antall`() {
         val fordelerService =
             FordelerService(
-                FordelerKriterier(DummyFeatureToggleService()),
+                FordelerKriterier(),
                 pdlTjenesterKlient,
                 fordelerRepo,
                 maxFordelingTilGjenny = 10,
                 behandlingKlient = behandlingKlient,
+                featureToggleService = dummyFeatureToggleService,
             )
 
         val barnFnr = Folkeregisteridentifikator.of(FNR_1)
@@ -217,11 +223,12 @@ internal class FordelerServiceTest {
     fun `returnerer UgyldigHendelse hvis en av barn, avdød, gjenlevende ikke finnes i PDL`() {
         val fordelerService =
             FordelerService(
-                FordelerKriterier(DummyFeatureToggleService()),
+                FordelerKriterier(),
                 pdlTjenesterKlient,
                 fordelerRepo,
                 maxFordelingTilGjenny = 10,
                 behandlingKlient = behandlingKlient,
+                featureToggleService = dummyFeatureToggleService,
             )
         every { fordelerRepo.finnFordeling(any()) } returns null
         every { fordelerRepo.lagreFordeling(any()) } returns Unit
@@ -266,11 +273,12 @@ internal class FordelerServiceTest {
     fun `kaster feil hvis en av barn, avdød, gjenlevende gir en feilmedling som ikke er PersonFinnesIkkeException`() {
         val fordelerService =
             FordelerService(
-                FordelerKriterier(DummyFeatureToggleService()),
+                FordelerKriterier(),
                 pdlTjenesterKlient,
                 fordelerRepo,
                 maxFordelingTilGjenny = 10,
                 behandlingKlient = behandlingKlient,
+                featureToggleService = dummyFeatureToggleService,
             )
         every { fordelerRepo.finnFordeling(any()) } returns null
         every { fordelerRepo.lagreFordeling(any()) } returns Unit
@@ -305,6 +313,18 @@ internal class FordelerServiceTest {
                     ),
             )
         assertThrows<Exception> { fordelerService.sjekkGyldighetForBehandling(fordelerEvent()) }
+    }
+
+    @Test
+    fun `legger til manuell journalfoering hvis en av personer i persongalleriet mangler ident`() {
+        every { fordelerRepo.finnFordeling(any()) } returns null
+        every { fordelerRepo.lagreFordeling(any()) } returns Unit
+        coEvery { pdlTjenesterKlient.hentPerson(any()) } throws FamilieRelasjonManglerIdent("")
+        dummyFeatureToggleService.settBryter(FordelerFeatureToggle.ManuellJournalfoering, true)
+
+        val resultat = fordelerService.sjekkGyldighetForBehandling(fordelerEvent())
+
+        assertTrue(resultat is FordelerResultat.TrengerManuellJournalfoering)
     }
 
     private fun fordelerEvent(hendelseGyldigTil: OffsetDateTime = OffsetDateTime.now().plusDays(1)) =

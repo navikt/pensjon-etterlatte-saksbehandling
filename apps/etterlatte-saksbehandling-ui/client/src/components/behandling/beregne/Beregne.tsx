@@ -12,7 +12,6 @@ import Spinner from '~shared/Spinner'
 import { BehandlingHandlingKnapper } from '~components/behandling/handlinger/BehandlingHandlingKnapper'
 import { Alert, Button, ErrorMessage, Heading } from '@navikt/ds-react'
 import { isFailure, isPending, useApiCall } from '~shared/hooks/useApiCall'
-import { fattVedtak, upsertVedtak } from '~shared/api/behandling'
 import { IBehandlingStatus, IBehandlingsType } from '~shared/types/IDetaljertBehandling'
 import styled from 'styled-components'
 import { NesteOgTilbake } from '../handlinger/NesteOgTilbake'
@@ -24,6 +23,7 @@ import { Avkorting } from '~components/behandling/avkorting/Avkorting'
 import { SakType } from '~shared/types/sak'
 import { erOpphoer } from '~shared/types/Revurderingsaarsak'
 import Etterbetaling from '~components/behandling/beregningsgrunnlag/Etterbetaling'
+import { fattVedtak, upsertVedtak } from '~shared/api/vedtaksvurdering'
 
 export const Beregne = (props: { behandling: IBehandlingReducer }) => {
   const { behandling } = props

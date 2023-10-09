@@ -1,10 +1,8 @@
-CREATE TABLE tilbakekreving
+CREATE TABLE tilbakekreving_hendelse
 (
-    kravgrunnlag_id BIGINT PRIMARY KEY,
-    sak_id          BIGINT                   NOT NULL,
-    behandling_id   UUID                     NOT NULL,
+    id              UUID PRIMARY KEY,
     opprettet       TIMESTAMP WITH TIME ZONE NOT NULL,
-    kravgrunnlag    JSONB                    NOT NULL,
-    vedtak          JSONB,
-    attestasjon     JSONB
+    payload         TEXT                     NOT NULL,
+    type            TEXT                     NOT NULL,
+    kravgrunnlag_id TEXT                     NOT NULL
 );

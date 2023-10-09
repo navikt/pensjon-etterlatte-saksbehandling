@@ -60,14 +60,7 @@ internal class GenerellBehandlingDaoTest {
 
     @Test
     fun `opprette kun med type`() {
-        val generellBehandlingUtland =
-            GenerellBehandling(
-                UUID.randomUUID(),
-                1L,
-                Tidspunkt.now(),
-                GenerellBehandling.GenerellBehandlingType.UTLAND,
-                null,
-            )
+        val generellBehandlingUtland = GenerellBehandling.opprettUtland(1L, null)
         val hentetGenBehandling = dao.opprettGenerellbehandling(generellBehandlingUtland)
 
         Assertions.assertEquals(generellBehandlingUtland.id, hentetGenBehandling.id)
@@ -83,6 +76,7 @@ internal class GenerellBehandlingDaoTest {
                 Tidspunkt.now(),
                 GenerellBehandling.GenerellBehandlingType.UTLAND,
                 Innhold.Annen("content"),
+                status = GenerellBehandling.Status.OPPRETTET,
             )
         }
     }
@@ -107,6 +101,7 @@ internal class GenerellBehandlingDaoTest {
                     "2grwg2",
                     "rita",
                 ),
+                status = GenerellBehandling.Status.OPPRETTET,
             )
         val hentetGenBehandling = dao.opprettGenerellbehandling(generellBehandlingUtland)
 
@@ -135,6 +130,7 @@ internal class GenerellBehandlingDaoTest {
                     "2grwg2",
                     "rita",
                 ),
+                status = GenerellBehandling.Status.OPPRETTET,
             )
         val annengenerebehandling =
             GenerellBehandling(
@@ -143,6 +139,7 @@ internal class GenerellBehandlingDaoTest {
                 Tidspunkt.now(),
                 GenerellBehandling.GenerellBehandlingType.ANNEN,
                 Innhold.Annen("vlabla"),
+                status = GenerellBehandling.Status.OPPRETTET,
             )
 
         dao.opprettGenerellbehandling(generellBehandlingUtland)

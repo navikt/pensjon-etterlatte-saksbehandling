@@ -50,9 +50,14 @@ spec:
     outbound:
       rules:
         - application: etterlatte-behandling
+        - application: kabal-api
+          namespace: klage
+          cluster: dev-gcp
+
       external:
         - host: etterlatte-proxy.dev-fss-pub.nais.io
         - host: etterlatte-unleash-api.nav.cloud.nais.io
+
     inbound:
       rules:
         - application: etterlatte-behandling

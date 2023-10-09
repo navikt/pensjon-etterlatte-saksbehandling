@@ -120,8 +120,9 @@ fun Route.vedtaksvurderingRoute(
             withBehandlingId(behandlingKlient) { behandlingId ->
                 logger.info("Iverksetter vedtak for behandling $behandlingId")
                 val vedtak = service.iverksattVedtak(behandlingId, brukerTokenInfo)
+                service.sendToRapid(vedtak.rapidInfo)
 
-                call.respond(HttpStatusCode.OK, vedtak.toDto())
+                call.respond(HttpStatusCode.OK, vedtak.t.toDto())
             }
         }
 

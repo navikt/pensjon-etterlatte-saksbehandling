@@ -774,9 +774,9 @@ internal class VedtaksvurderingServiceTest {
             }
 
         iverksattVedtak shouldNotBe null
-        iverksattVedtak.status shouldBe VedtakStatus.IVERKSATT
+        iverksattVedtak.t.status shouldBe VedtakStatus.IVERKSATT
 
-        verify(exactly = 1) { sendToRapidMock(match { it.contains(VedtakKafkaHendelseType.IVERKSATT.name) }, any()) }
+        Assertions.assertEquals(VedtakKafkaHendelseType.IVERKSATT, iverksattVedtak.rapidInfo.vedtakhendelse)
     }
 
     @Test

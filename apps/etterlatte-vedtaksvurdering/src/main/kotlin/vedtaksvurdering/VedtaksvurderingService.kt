@@ -296,7 +296,7 @@ class VedtaksvurderingService(
     suspend fun iverksattVedtak(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ): Vedtak {
+    ): VedtakOgRapid<Vedtak> {
         logger.info("Setter vedtak til iverksatt for behandling med behandlingId=$behandlingId")
         val vedtak = hentVedtakNonNull(behandlingId)
 
@@ -312,14 +312,15 @@ class VedtaksvurderingService(
                 iverksattVedtakLocal
             }
 
-        sendToRapid(
-            vedtakhendelse = VedtakKafkaHendelseType.IVERKSATT,
-            vedtak = iverksattVedtak,
-            tekniskTid = Tidspunkt.now(clock),
-            behandlingId = behandlingId,
+        return VedtakOgRapid(
+            iverksattVedtak,
+            RapidInfo(
+                vedtakhendelse = VedtakKafkaHendelseType.IVERKSATT,
+                vedtak = iverksattVedtak,
+                tekniskTid = Tidspunkt.now(clock),
+                behandlingId = behandlingId,
+            ),
         )
-
-        return iverksattVedtak
     }
 
     private fun verifiserGyldigBehandlingStatus(

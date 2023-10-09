@@ -117,6 +117,7 @@ spec:
   accessPolicy:
     outbound:
       rules:
+        - application: etterlatte-klage
         - application: etterlatte-brev-api
         - application: etterlatte-vilkaar
         - application: etterlatte-pdltjenester

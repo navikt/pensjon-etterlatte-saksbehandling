@@ -20,6 +20,7 @@ import no.nav.etterlatte.libs.common.behandlingsId
 import no.nav.etterlatte.libs.common.gosysOppgaveId
 import no.nav.etterlatte.libs.common.kunSaksbehandler
 import no.nav.etterlatte.libs.common.kunSystembruker
+import no.nav.etterlatte.libs.common.oppgave.NyOppgaveDto
 import no.nav.etterlatte.libs.common.oppgave.RedigerFristGosysRequest
 import no.nav.etterlatte.libs.common.oppgave.RedigerFristRequest
 import no.nav.etterlatte.libs.common.oppgave.SaksbehandlerEndringDto
@@ -50,6 +51,20 @@ internal fun Route.oppgaveRoutes(
             get("oppgaver") {
                 kunSystembruker {
                     call.respond(inTransaction { service.hentSakOgOppgaverForSak(sakId) })
+                }
+            }
+            post("oppgaver") {
+                kunSystembruker {
+                    val nyOppgaveDto = call.receive<NyOppgaveDto>()
+                    call.respond(
+                        service.opprettNyOppgaveMedSakOgReferanse(
+                            nyOppgaveDto.referanse,
+                            nyOppgaveDto.sakId,
+                            nyOppgaveDto.oppgaveKilde,
+                            nyOppgaveDto.oppgaveType,
+                            nyOppgaveDto.merknad,
+                        ),
+                    )
                 }
             }
         }

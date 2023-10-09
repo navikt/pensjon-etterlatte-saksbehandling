@@ -199,6 +199,10 @@ class FordelerService(
             behandlingKlient.hentSak(fnr, barnepensjon, gradering)
         }
     }
+
+    fun opprettOppgave(sakId: Long, foedselsnummer: String) {
+        return runBlocking { behandlingKlient.opprettOppgave(foedselsnummer, sakId) }
+    }
 }
 
 fun Foedselsnummer.toFolkeregisteridentifikator(): Folkeregisteridentifikator {

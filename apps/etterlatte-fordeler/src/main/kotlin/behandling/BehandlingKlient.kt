@@ -9,6 +9,9 @@ import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import no.nav.etterlatte.libs.common.FoedselsNummerMedGraderingDTO
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.oppgave.NyOppgaveDto
+import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
+import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 
 class BehandlingKlient(
@@ -23,6 +26,24 @@ class BehandlingKlient(
         return httpClient.post("$url/personer/saker/$sakType") {
             contentType(ContentType.Application.Json)
             setBody(FoedselsNummerMedGraderingDTO(fnr, gradering))
+        }.body<ObjectNode>()["id"].longValue()
+    }
+
+    suspend fun opprettOppgave(
+        fnr: String,
+        sakId: Long,
+    ): Long {
+        return httpClient.post("$url/api/oppgaver/sak/$sakId/oppgaver") {
+            contentType(ContentType.Application.Json)
+            setBody(
+                NyOppgaveDto(
+                    fnr,
+                    sakId,
+                    OppgaveKilde.EKSTERN,
+                    OppgaveType.MANUELL_JOURNALFOERING,
+                    "Noe feilet. Opprett søknad via Gosys-oppgave",
+                ),
+            )
         }.body<ObjectNode>()["id"].longValue()
     }
 }

@@ -68,7 +68,8 @@ internal class Fordeler(
         try {
             logger.info("Sjekker om soknad (${packet.soeknadId()}) er gyldig for fordeling")
 
-            when (val resultat = fordelerService.sjekkGyldighetForBehandling(packet.toFordelerEvent())) {
+            val fordelerEvent = packet.toFordelerEvent()
+            when (val resultat = fordelerService.sjekkGyldighetForBehandling(fordelerEvent)) {
                 is FordelerResultat.GyldigForBehandling -> {
                     logger.info("Soknad ${packet.soeknadId()} er gyldig for fordeling, henter sakId for Gjenny")
                     hentSakId(packet, resultat.gradering)?.let { sakIdForSoeknad ->
@@ -91,7 +92,12 @@ internal class Fordeler(
 
                 is FordelerResultat.TrengerManuellJournalfoering -> {
                     logger.warn("Trenger manuell journalføring: ${resultat.melding}")
-                    hentSakId(packet, AdressebeskyttelseGradering.UGRADERT)?.let { sakIdForSoeknad ->
+                    val sakId = hentSakId(packet, AdressebeskyttelseGradering.UGRADERT)
+                    sakId?.let { sakIdForSoeknad ->
+                        fordelerService.opprettOppgave(
+                            sakIdForSoeknad,
+                            fordelerEvent.soeknad.soeker.foedselsnummer.svar.value,
+                        )
                         context.publish(
                             packet
                                 .leggPaaSakId(sakIdForSoeknad)

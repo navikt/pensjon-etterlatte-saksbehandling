@@ -29,6 +29,7 @@ data class KlageAnnenPart(
     val skalMottaKopi: Boolean,
 )
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 data class KabalKlager(
     val id: KabalKlagerPart,
     val klagersProsessfullmektig: KlageAnnenPart?,

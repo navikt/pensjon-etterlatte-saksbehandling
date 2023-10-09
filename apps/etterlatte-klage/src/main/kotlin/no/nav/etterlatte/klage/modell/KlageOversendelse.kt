@@ -63,7 +63,7 @@ data class KabalOversendelse(
     val type: KabalSakType,
     val klager: KabalKlager,
     val sakenGjelder: KlageAnnenPart?,
-    val fagSak: KabalFagsak,
+    val fagsak: KabalFagsak,
     val kildeReferanse: String,
     val hjemler: List<KabalHjemmel>,
     val forrigeBehandlendeEnhet: String,
@@ -112,16 +112,16 @@ data class KabalOversendelse(
                         id = KabalKlagerPart(KabalKlagerType.PERSON, klage.sak.ident),
                         skalMottaKopi = true,
                     ).takeIf { erKlagerIkkeBruker },
-                fagSak = KabalFagsak(fagsakId = klage.sak.id.toString(), fagsystem = FAGSYSTEM),
+                fagsak = KabalFagsak(fagsakId = klage.sak.id.toString(), fagsystem = FAGSYSTEM),
                 kildeReferanse = klage.id.toString(),
                 hjemler = listOf(KabalHjemmel.FTRL_21_12), // TODO hent fra innstilling når hjemlene våre er på plass
                 forrigeBehandlendeEnhet = klage.sak.enhet,
                 tilknyttedeJournalposter =
                     listOfNotNull(
-                        KabalJournalpostref(
-                            type = KabalJournalpostType.OVERSENDELSESBREV,
-                            journalpostId = ekstraData.journalpostInnstillingsbrev,
-                        ),
+//                        KabalJournalpostref(
+//                            type = KabalJournalpostType.OVERSENDELSESBREV,
+//                            journalpostId = ekstraData.journalpostInnstillingsbrev,
+//                        ),
                         ekstraData.journalpostKlage?.let {
                             KabalJournalpostref(
                                 type = KabalJournalpostType.BRUKERS_KLAGE,

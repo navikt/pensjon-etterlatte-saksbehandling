@@ -31,6 +31,6 @@ class KabalKlientException(
     override val cause: Throwable?,
 ) :
     Exception(
-            "Fikk en feil mot Kabal-api i oversending av klage med id: ${kabalOversendelse.fagSak.fagsakId}. " +
+            "Fikk en feil mot Kabal-api i oversending av klage med id: ${kabalOversendelse.fagsak.fagsakId}. " +
                 "Oversendelse: ${kabalOversendelse.toJson()}",
         )

@@ -369,14 +369,13 @@ internal class VedtaksvurderingServiceTest {
             }
 
         fattetVedtak shouldNotBe null
-        with(fattetVedtak.vedtakFattet!!) {
+        with(fattetVedtak.t.vedtakFattet!!) {
             ansvarligSaksbehandler shouldBe gjeldendeSaksbehandler.ident
             ansvarligEnhet shouldBe ENHET_1
             tidspunkt shouldNotBe null
         }
 
         coVerify(exactly = 1) { behandlingKlientMock.kanFatteVedtak(any(), any()) }
-        verify(exactly = 1) { sendToRapidMock.invoke(any(), any()) }
     }
 
     @Test
@@ -542,7 +541,7 @@ internal class VedtaksvurderingServiceTest {
         coVerify(exactly = 1) { behandlingKlientMock.attesterVedtak(any(), capture(hendelse)) }
         hendelse.captured.vedtakHendelse.kommentar shouldBe KOMMENTAR
         hendelse.captured.vedtakOppgaveDTO.referanse shouldBe behandlingId.toString()
-        verify(exactly = 2) { sendToRapidMock.invoke(any(), any()) }
+        verify(exactly = 1) { sendToRapidMock.invoke(any(), any()) }
     }
 
     @Test
@@ -588,7 +587,6 @@ internal class VedtaksvurderingServiceTest {
             behandlingKlientMock.fattVedtakBehandling(any(), any())
             behandlingKlientMock.kanAttestereVedtak(any(), any(), null) // sjekke status behandling
         }
-        verify(exactly = 1) { sendToRapidMock.invoke(any(), any()) }
     }
 
     @Test
@@ -651,9 +649,9 @@ internal class VedtaksvurderingServiceTest {
         }
 
         val hendelse = mutableListOf<String>()
-        verify(exactly = 2) { sendToRapidMock.invoke(capture(hendelse), any()) }
+        verify(exactly = 1) { sendToRapidMock.invoke(capture(hendelse), any()) }
 
-        val attestertMelding = objectMapper.readTree(hendelse[1])
+        val attestertMelding = objectMapper.readTree(hendelse[0])
         attestertMelding.get(EVENT_NAME_KEY).textValue() shouldBe "VEDTAK:ATTESTERT"
         attestertMelding.get(SKAL_SENDE_BREV).isBoolean shouldBe true
         attestertMelding.get(SKAL_SENDE_BREV).booleanValue() shouldBe false

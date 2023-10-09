@@ -79,7 +79,11 @@ internal class AutomatiskBehandlingRoutesKtTest {
             val behandlingId = UUID.randomUUID()
             every { runBlocking { vedtaksvurderingService.opprettEllerOppdaterVedtak(any(), any()) } } returns
                 opprettetVedtak
-            every { runBlocking { vedtaksvurderingService.fattVedtak(behandlingId, any()) } } returns opprettetVedtak
+            every { runBlocking { vedtaksvurderingService.fattVedtak(behandlingId, any()) } } returns
+                VedtakOgRapid(
+                    opprettetVedtak,
+                    mockk(),
+                )
             every { runBlocking { behandlingKlient.hentOppgaverForSak(any(), any()) } } returns
                 OppgaveListe(
                     mockk(),

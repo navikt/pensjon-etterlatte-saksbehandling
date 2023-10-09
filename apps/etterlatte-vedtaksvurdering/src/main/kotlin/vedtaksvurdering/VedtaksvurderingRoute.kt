@@ -85,8 +85,9 @@ fun Route.vedtaksvurderingRoute(
             withBehandlingId(behandlingKlient) { behandlingId ->
                 logger.info("Fatter vedtak for behandling $behandlingId")
                 val fattetVedtak = service.fattVedtak(behandlingId, brukerTokenInfo)
+                service.sendToRapid(fattetVedtak.rapidInfo)
 
-                call.respond(fattetVedtak.toDto())
+                call.respond(fattetVedtak.t.toDto())
             }
         }
 

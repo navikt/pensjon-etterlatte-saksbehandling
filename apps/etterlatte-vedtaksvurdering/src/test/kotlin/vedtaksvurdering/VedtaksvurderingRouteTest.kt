@@ -20,7 +20,9 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.confirmVerified
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
+import io.mockk.runs
 import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJson
@@ -36,6 +38,7 @@ import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.vedtaksvurdering.LoependeYtelse
 import no.nav.etterlatte.vedtaksvurdering.UnderkjennVedtakDto
+import no.nav.etterlatte.vedtaksvurdering.VedtakOgRapid
 import no.nav.etterlatte.vedtaksvurdering.VedtakSammendragDto
 import no.nav.etterlatte.vedtaksvurdering.VedtaksvurderingService
 import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlient
@@ -308,7 +311,8 @@ internal class VedtaksvurderingRouteTest {
                 status = VedtakStatus.FATTET_VEDTAK,
                 vedtakFattet = VedtakFattet(SAKSBEHANDLER_1, ENHET_1, Tidspunkt.now()),
             )
-        coEvery { vedtaksvurderingService.fattVedtak(any(), any()) } returns fattetVedtak
+        coEvery { vedtaksvurderingService.fattVedtak(any(), any()) } returns VedtakOgRapid(fattetVedtak, mockk())
+        coEvery { vedtaksvurderingService.sendToRapid(any()) } just runs
 
         testApplication {
             environment { config = applicationConfig }
@@ -346,6 +350,7 @@ internal class VedtaksvurderingRouteTest {
             coVerify(exactly = 1) {
                 behandlingKlient.harTilgangTilBehandling(any(), any())
                 vedtaksvurderingService.fattVedtak(any(), match { it.ident() == SAKSBEHANDLER_1 })
+                vedtaksvurderingService.sendToRapid(any())
             }
         }
     }

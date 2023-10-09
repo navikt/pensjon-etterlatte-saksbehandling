@@ -113,7 +113,7 @@ class VedtaksvurderingService(
     suspend fun fattVedtak(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ): Vedtak {
+    ): VedtakOgRapid<Vedtak> {
         logger.info("Fatter vedtak for behandling med behandlingId=$behandlingId")
         val vedtak = hentVedtakNonNull(behandlingId)
 
@@ -154,13 +154,15 @@ class VedtaksvurderingService(
                             )
                         }
                     }
-                sendToRapid(
-                    vedtakhendelse = VedtakKafkaHendelseType.FATTET,
-                    vedtak = fattetVedtakIntern,
-                    tekniskTid = fattetVedtakIntern.vedtakFattet!!.tidspunkt,
-                    behandlingId = behandlingId,
+                VedtakOgRapid(
+                    fattetVedtakIntern,
+                    RapidInfo(
+                        vedtakhendelse = VedtakKafkaHendelseType.FATTET,
+                        vedtak = fattetVedtakIntern,
+                        tekniskTid = fattetVedtakIntern.vedtakFattet!!.tidspunkt,
+                        behandlingId = behandlingId,
+                    ),
                 )
-                fattetVedtakIntern
             }
 
         return fattetVedtak
@@ -518,6 +520,15 @@ class VedtaksvurderingService(
 
     private fun vilkaarsvurderingUtfallNonNull(vilkaarsvurderingUtfall: VilkaarsvurderingUtfall?) =
         requireNotNull(vilkaarsvurderingUtfall) { "Behandling mangler utfall på vilkårsvurdering" }
+
+    fun sendToRapid(rapidInfo: RapidInfo) =
+        sendToRapid(
+            vedtakhendelse = rapidInfo.vedtakhendelse,
+            vedtak = rapidInfo.vedtak,
+            tekniskTid = rapidInfo.tekniskTid,
+            behandlingId = rapidInfo.behandlingId,
+            extraParams = rapidInfo.extraParams,
+        )
 
     private fun sendToRapid(
         vedtakhendelse: VedtakKafkaHendelseType,

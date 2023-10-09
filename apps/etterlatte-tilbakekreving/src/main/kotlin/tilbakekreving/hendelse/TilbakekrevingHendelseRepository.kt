@@ -6,67 +6,56 @@ import kotliquery.using
 import java.util.UUID
 import javax.sql.DataSource
 
+internal enum class TilbakekrevingHendelseType {
+    KRAVGRUNNLAG_MOTTATT,
+    TILBAKEKREVINGSVEDTAK_SENDT,
+    TILBAKEKREVINGSVEDTAK_KVITTERING,
+}
+
 class TilbakekrevingHendelseRepository(private val dataSource: DataSource) {
     fun lagreMottattKravgrunnlag(
         kravgrunnlagId: String,
-        fagsystemId: String,
-        kravgrunnlagPayload: String,
+        payload: String,
+    ) = lagreTilbakekrevingHendelse(kravgrunnlagId, payload, TilbakekrevingHendelseType.KRAVGRUNNLAG_MOTTATT)
+
+    fun lagreTilbakekrevingsvedtakSendt(
+        kravgrunnlagId: String,
+        payload: String,
+    ) = lagreTilbakekrevingHendelse(kravgrunnlagId, payload, TilbakekrevingHendelseType.TILBAKEKREVINGSVEDTAK_SENDT)
+
+    fun lagreTilbakekrevingsvedtakKvitteringMottatt(
+        kravgrunnlagId: String,
+        payload: String,
+    ) = lagreTilbakekrevingHendelse(
+        kravgrunnlagId,
+        payload,
+        TilbakekrevingHendelseType.TILBAKEKREVINGSVEDTAK_KVITTERING,
+    )
+
+    private fun lagreTilbakekrevingHendelse(
+        kravgrunnlagId: String,
+        payload: String,
+        type: TilbakekrevingHendelseType,
     ) = using(sessionOf(dataSource)) { session ->
         queryOf(
             statement =
                 """
-                INSERT INTO tilbakekreving_hendelse(id, opprettet, kravgrunnlag_id, fagsystem_id, kravgrunnlag_payload)
-                VALUES(:id, now(), :kravgrunnlagId, :fagsystemId, :kravgrunnlagPayload)
+                INSERT INTO tilbakekreving_hendelse(id, opprettet, kravgrunnlag_id, payload, type)
+                VALUES(:id, now(), :kravgrunnlagId, :payload, :type)
                 """.trimIndent(),
             paramMap =
                 mapOf(
                     "id" to UUID.randomUUID(),
                     "kravgrunnlagId" to kravgrunnlagId,
-                    "fagsystemId" to fagsystemId,
-                    "kravgrunnlagPayload" to kravgrunnlagPayload,
+                    "payload" to payload,
+                    "type" to type.name,
                 ),
         ).let { query ->
-            session.update(query).also { require(it == 1) { "Feil under lagring av mottatt kravgrunnlag" } }
-        }
-    }
-
-    fun lagreTilbakekrevingsvedtakRequest(
-        kravgrunnlagId: String,
-        request: String,
-    ) = using(sessionOf(dataSource)) { session ->
-        queryOf(
-            statement =
-                """
-                UPDATE tilbakekreving_hendelse SET tilbakekrevingsvedtak_request = :request, endret = now()
-                WHERE kravgrunnlag_id = :kravgrunnlagId
-                """.trimIndent(),
-            paramMap =
-                mapOf(
-                    "kravgrunnlagId" to kravgrunnlagId,
-                    "request" to request,
-                ),
-        ).let { query ->
-            session.update(query).also { require(it == 1) { "Feil under lagring av vedtak request" } }
-        }
-    }
-
-    fun lagreTilbakekrevingsvedtakResponse(
-        kravgrunnlagId: String,
-        response: String,
-    ) = using(sessionOf(dataSource)) { session ->
-        queryOf(
-            statement =
-                """
-                UPDATE tilbakekreving_hendelse SET tilbakekrevingsvedtak_response = :response, endret = now()
-                WHERE kravgrunnlag_id = :kravgrunnlagId
-                """.trimIndent(),
-            paramMap =
-                mapOf(
-                    "kravgrunnlagId" to kravgrunnlagId,
-                    "response" to response,
-                ),
-        ).let { query ->
-            session.update(query).also { require(it == 1) { "Feil under lagring av vedtak response" } }
+            session.update(query).also {
+                require(it == 1) {
+                    "Feil under lagring av hendelse for kravgrunnlag $kravgrunnlagId"
+                }
+            }
         }
     }
 }

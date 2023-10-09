@@ -7,6 +7,7 @@ import no.nav.etterlatte.libs.database.POSTGRES_VERSION
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.tilbakekreving.hendelse.TilbakekrevingHendelseRepository
+import no.nav.etterlatte.tilbakekreving.hendelse.TilbakekrevingHendelseType
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
@@ -41,61 +42,79 @@ internal class TilbakekrevingHendelseRepositoryTest {
     }
 
     @Test
-    fun `skal lagre ned mottatt kravgrunnlag`() {
-        val fagsystemId = "2"
+    fun `skal lagre hendelse for mottatt kravgrunnlag`() {
         val kravgrunnlagId = "1"
-        val kravgrunnlagPayload = "<kravgrunnlag>payload</kravgrunnlag>"
+        val kravgrunnlag = "<kravgrunnlag>payload</kravgrunnlag>"
 
-        repository.lagreMottattKravgrunnlag(kravgrunnlagId, fagsystemId, kravgrunnlagPayload)
+        repository.lagreMottattKravgrunnlag(kravgrunnlagId, kravgrunnlag)
 
-        val tilbakekrevingHendelse = hentTilbakekrevingHendelse(kravgrunnlagId)
+        val tilbakekrevingHendelse =
+            hentTilbakekrevingHendelse(kravgrunnlagId, TilbakekrevingHendelseType.KRAVGRUNNLAG_MOTTATT)
+
         tilbakekrevingHendelse?.id shouldNotBe null
         tilbakekrevingHendelse?.opprettet shouldNotBe null
-        tilbakekrevingHendelse?.fagsystemId shouldBe fagsystemId
         tilbakekrevingHendelse?.kravgrunnlagId shouldBe kravgrunnlagId
-        tilbakekrevingHendelse?.kravgrunnlagPayload shouldBe kravgrunnlagPayload
+        tilbakekrevingHendelse?.payload shouldBe kravgrunnlag
+        tilbakekrevingHendelse?.type shouldBe TilbakekrevingHendelseType.KRAVGRUNNLAG_MOTTATT
     }
 
     @Test
-    fun `skal oppdatere kravgrunnlag med vedtak request og vedtak response`() {
-        val fagsystemId = "2"
+    fun `skal lagre hendelse for sendt tilbakekrevingsvedtak`() {
         val kravgrunnlagId = "1"
-        val kravgrunnlagPayload = "<kravgrunnlag>payload</kravgrunnlag>"
         val vedtakRequest = "request_payload"
+
+        repository.lagreTilbakekrevingsvedtakSendt(kravgrunnlagId, vedtakRequest)
+
+        val tilbakekrevingHendelse =
+            hentTilbakekrevingHendelse(kravgrunnlagId, TilbakekrevingHendelseType.TILBAKEKREVINGSVEDTAK_SENDT)
+
+        tilbakekrevingHendelse?.id shouldNotBe null
+        tilbakekrevingHendelse?.opprettet shouldNotBe null
+        tilbakekrevingHendelse?.kravgrunnlagId shouldBe kravgrunnlagId
+        tilbakekrevingHendelse?.payload shouldBe vedtakRequest
+        tilbakekrevingHendelse?.type shouldBe TilbakekrevingHendelseType.TILBAKEKREVINGSVEDTAK_SENDT
+    }
+
+    @Test
+    fun `skal lagre hendelse for tilbakekrevingsvedtak kvittering`() {
+        val kravgrunnlagId = "1"
         val vedtakResponse = "response_payload"
 
-        repository.lagreMottattKravgrunnlag(kravgrunnlagId, fagsystemId, kravgrunnlagPayload)
-        repository.lagreTilbakekrevingsvedtakRequest(kravgrunnlagId, vedtakRequest)
-        repository.lagreTilbakekrevingsvedtakResponse(kravgrunnlagId, vedtakResponse)
+        repository.lagreTilbakekrevingsvedtakKvitteringMottatt(kravgrunnlagId, vedtakResponse)
 
-        val tilbakekrevingHendelse = hentTilbakekrevingHendelse(kravgrunnlagId)
+        val tilbakekrevingHendelse =
+            hentTilbakekrevingHendelse(kravgrunnlagId, TilbakekrevingHendelseType.TILBAKEKREVINGSVEDTAK_KVITTERING)
 
-        tilbakekrevingHendelse?.endret shouldNotBe null
-        tilbakekrevingHendelse?.tilbakekrevingsvedtakRequest shouldBe vedtakRequest
-        tilbakekrevingHendelse?.tilbakekrevingsvedtakResponse shouldBe vedtakResponse
+        tilbakekrevingHendelse?.id shouldNotBe null
+        tilbakekrevingHendelse?.opprettet shouldNotBe null
+        tilbakekrevingHendelse?.kravgrunnlagId shouldBe kravgrunnlagId
+        tilbakekrevingHendelse?.payload shouldBe vedtakResponse
+        tilbakekrevingHendelse?.type shouldBe TilbakekrevingHendelseType.TILBAKEKREVINGSVEDTAK_KVITTERING
     }
 
     private fun cleanDatabase() {
         dataSource.connection.use { it.prepareStatement("TRUNCATE tilbakekreving_hendelse").apply { execute() } }
     }
 
-    private fun hentTilbakekrevingHendelse(kravgrunnlagId: String): TilbakekrevingHendelse? {
+    private fun hentTilbakekrevingHendelse(
+        kravgrunnlagId: String,
+        type: TilbakekrevingHendelseType,
+    ): TilbakekrevingHendelse? {
         dataSource.connection.use {
             val stmt =
-                it.prepareStatement("SELECT * FROM tilbakekreving_hendelse WHERE kravgrunnlag_id = ?").apply {
-                    setString(1, kravgrunnlagId)
-                }
+                it.prepareStatement("SELECT * FROM tilbakekreving_hendelse WHERE kravgrunnlag_id = ? AND type = ?")
+                    .apply {
+                        setString(1, kravgrunnlagId)
+                        setString(2, type.name)
+                    }
 
             return stmt.executeQuery().singleOrNull {
                 TilbakekrevingHendelse(
                     id = getString("id"),
                     opprettet = getString("opprettet"),
-                    endret = getString("endret"),
-                    fagsystemId = getString("fagsystem_id"),
                     kravgrunnlagId = getString("kravgrunnlag_id"),
-                    kravgrunnlagPayload = getString("kravgrunnlag_payload"),
-                    tilbakekrevingsvedtakRequest = getString("tilbakekrevingsvedtak_request"),
-                    tilbakekrevingsvedtakResponse = getString("tilbakekrevingsvedtak_response"),
+                    payload = getString("payload"),
+                    type = TilbakekrevingHendelseType.valueOf(getString("type")),
                 )
             }
         }
@@ -104,11 +123,8 @@ internal class TilbakekrevingHendelseRepositoryTest {
     private data class TilbakekrevingHendelse(
         val id: String,
         val opprettet: String,
-        val endret: String?,
-        val fagsystemId: String,
         val kravgrunnlagId: String,
-        val kravgrunnlagPayload: String,
-        val tilbakekrevingsvedtakRequest: String?,
-        val tilbakekrevingsvedtakResponse: String?,
+        val payload: String,
+        val type: TilbakekrevingHendelseType,
     )
 }

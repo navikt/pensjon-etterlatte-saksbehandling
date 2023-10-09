@@ -9,6 +9,7 @@ import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.mq.EtterlatteJmsConnectionFactory
 import no.nav.etterlatte.tilbakekreving.hendelse.TilbakekrevingHendelseRepository
 import no.nav.etterlatte.tilbakekreving.kravgrunnlag.KravgrunnlagJaxb.toDetaljertKravgrunnlagDto
+import no.nav.tilbakekreving.kravgrunnlag.detalj.v1.DetaljertKravgrunnlagDto
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -30,27 +31,36 @@ class KravgrunnlagConsumer(
 
     override fun onMessage(message: Message) =
         withLogContext {
-            var kravgrunnlagPayload: String? = null
+            var payload: String? = null
             try {
                 logger.info("Kravgrunnlag (id=${message.jmsMessageID}) mottatt ${message.deliveryCount()} gang(er)")
-                kravgrunnlagPayload = message.getBody(String::class.java)
+                payload = message.getBody(String::class.java)
 
-                val detaljertKravgrunnlag = toDetaljertKravgrunnlagDto(kravgrunnlagPayload)
+                val detaljertKravgrunnlag = toDetaljertKravgrunnlagDto(payload)
+
                 hendelseRepository.lagreMottattKravgrunnlag(
                     detaljertKravgrunnlag.kravgrunnlagId.toString(),
-                    detaljertKravgrunnlag.fagsystemId,
-                    kravgrunnlagPayload,
+                    payload,
                 )
+
+                sjekkForventetStatus(detaljertKravgrunnlag)
 
                 kravgrunnlagService.opprettTilbakekreving(detaljertKravgrunnlag)
             } catch (t: Throwable) {
                 logger.error("Feilet under mottak av kravgrunnlag (Sjekk sikkerlogg for payload", t)
-                sikkerLogg.error("Feilet under mottak av kravgrunnlag: ${kv("kravgrunnlag", kravgrunnlagPayload)}", t)
+                sikkerLogg.error("Feilet under mottak av kravgrunnlag: ${kv("kravgrunnlag", payload)}", t)
 
                 // Exception trigger retry - etter x forsøk vil meldingen legges på backout kø
                 throw t
             }
         }
+
+    private fun sjekkForventetStatus(detaljertKravgrunnlag: DetaljertKravgrunnlagDto) {
+        val status = detaljertKravgrunnlag.kodeStatusKrav
+        if (detaljertKravgrunnlag.kodeStatusKrav != "NY") {
+            throw Error("KodeStatusKrav hadde verdien $status, men forventet verdien NY - Dette må håndteres manuelt")
+        }
+    }
 
     private fun exceptionListener() =
         ExceptionListener {

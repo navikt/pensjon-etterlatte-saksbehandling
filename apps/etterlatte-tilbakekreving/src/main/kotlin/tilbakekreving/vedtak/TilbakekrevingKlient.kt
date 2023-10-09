@@ -39,7 +39,7 @@ class TilbakekrevingKlient(
         val request = toTilbakekrevingsvedtakRequest(vedtak)
         val requestAsJson = request.toJson()
 
-        hendelseRepository.lagreTilbakekrevingsvedtakRequest(vedtak.kravgrunnlagId, requestAsJson)
+        hendelseRepository.lagreTilbakekrevingsvedtakSendt(vedtak.kravgrunnlagId, requestAsJson)
 
         val response =
             runBlocking {
@@ -52,7 +52,7 @@ class TilbakekrevingKlient(
                 httpResponse.body<TilbakekrevingsvedtakResponse>()
             }
 
-        hendelseRepository.lagreTilbakekrevingsvedtakResponse(vedtak.kravgrunnlagId, response.toJson())
+        hendelseRepository.lagreTilbakekrevingsvedtakKvitteringMottatt(vedtak.kravgrunnlagId, response.toJson())
 
         return kontrollerResponse(response)
     }

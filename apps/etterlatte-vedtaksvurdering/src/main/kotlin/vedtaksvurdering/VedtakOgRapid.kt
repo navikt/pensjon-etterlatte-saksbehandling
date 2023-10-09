@@ -4,7 +4,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseType
 import java.util.UUID
 
-data class VedtakOgRapid<T>(val t: T, val rapidInfo: RapidInfo)
+data class VedtakOgRapid(val vedtak: Vedtak, val rapidInfo: RapidInfo)
 
 data class RapidInfo(
     val vedtakhendelse: VedtakKafkaHendelseType,

@@ -108,7 +108,7 @@ class VedtaksvurderingService(
     suspend fun fattVedtak(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ): VedtakOgRapid<Vedtak> {
+    ): VedtakOgRapid {
         logger.info("Fatter vedtak for behandling med behandlingId=$behandlingId")
         val vedtak = hentVedtakNonNull(behandlingId)
 
@@ -167,7 +167,7 @@ class VedtaksvurderingService(
         behandlingId: UUID,
         kommentar: String,
         brukerTokenInfo: BrukerTokenInfo,
-    ): VedtakOgRapid<Vedtak> {
+    ): VedtakOgRapid {
         logger.info("Attesterer vedtak for behandling med behandlingId=$behandlingId")
         val vedtak = hentVedtakNonNull(behandlingId)
 
@@ -239,7 +239,7 @@ class VedtaksvurderingService(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
         begrunnelse: UnderkjennVedtakDto,
-    ): VedtakOgRapid<Vedtak> {
+    ): VedtakOgRapid {
         logger.info("Underkjenner vedtak for behandling med behandlingId=$behandlingId")
         val vedtak = hentVedtakNonNull(behandlingId)
 
@@ -283,7 +283,7 @@ class VedtaksvurderingService(
     suspend fun iverksattVedtak(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ): VedtakOgRapid<Vedtak> {
+    ): VedtakOgRapid {
         logger.info("Setter vedtak til iverksatt for behandling med behandlingId=$behandlingId")
         val vedtak = hentVedtakNonNull(behandlingId)
 

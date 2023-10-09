@@ -364,7 +364,7 @@ internal class VedtaksvurderingServiceTest {
             }
 
         fattetVedtak shouldNotBe null
-        with(fattetVedtak.t.vedtakFattet!!) {
+        with(fattetVedtak.vedtak.vedtakFattet!!) {
             ansvarligSaksbehandler shouldBe gjeldendeSaksbehandler.ident
             ansvarligEnhet shouldBe ENHET_1
             tidspunkt shouldNotBe null
@@ -525,7 +525,7 @@ internal class VedtaksvurderingServiceTest {
             }
 
         attestertVedtak shouldNotBe null
-        with(attestertVedtak.t.attestasjon!!) {
+        with(attestertVedtak.vedtak.attestasjon!!) {
             this.attestant shouldBe attestant.ident
             attesterendeEnhet shouldBe ENHET_2
             tidspunkt shouldNotBe null
@@ -766,7 +766,7 @@ internal class VedtaksvurderingServiceTest {
             }
 
         iverksattVedtak shouldNotBe null
-        iverksattVedtak.t.status shouldBe VedtakStatus.IVERKSATT
+        iverksattVedtak.vedtak.status shouldBe VedtakStatus.IVERKSATT
 
         Assertions.assertEquals(VedtakKafkaHendelseType.IVERKSATT, iverksattVedtak.rapidInfo.vedtakhendelse)
     }
@@ -915,7 +915,7 @@ internal class VedtaksvurderingServiceTest {
             }
 
         underkjentVedtak shouldNotBe null
-        underkjentVedtak.t.status shouldBe VedtakStatus.RETURNERT
+        underkjentVedtak.vedtak.status shouldBe VedtakStatus.RETURNERT
 
         Assertions.assertEquals(VedtakKafkaHendelseType.UNDERKJENT, underkjentVedtak.rapidInfo.vedtakhendelse)
     }

@@ -26,6 +26,7 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
 import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseType
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
+import no.nav.etterlatte.rapidsandrivers.migrering.BREV_OPPRETTA_MIGRERING
 import no.nav.etterlatte.rapidsandrivers.migrering.KILDE_KEY
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
@@ -66,22 +67,19 @@ internal class OpprettVedtaksbrevForMigreringRiverTest {
         coVerify(exactly = 1) { vedtaksbrevService.ferdigstillVedtaksbrev(brev.behandlingId!!, any(), true) }
 
         val meldingSendt = inspektoer.message(0)
-        assertEquals(BrevEventTypes.FERDIGSTILT.name, meldingSendt.get(EVENT_NAME_KEY).asText())
+        assertEquals(VedtakKafkaHendelseType.ATTESTERT.toString(), meldingSendt.get(EVENT_NAME_KEY).asText())
+        assertEquals(true, meldingSendt.get(BREV_OPPRETTA_MIGRERING).asBoolean())
     }
 
     @Test
-    fun `sender for sak med opphav i Gjenny kun videre`() {
-        val inspektoer =
-            testRapid.apply {
-                sendTestMessage(
-                    opprettMelding(
-                        opprettVedtak(),
-                        Vedtaksloesning.GJENNY,
-                    ).toJson(),
-                )
-            }.inspektør
+    fun `plukker ikke opp sak med opphav i Gjenny`() {
+        val vedtak = opprettVedtak()
+        val melding = opprettMelding(vedtak, Vedtaksloesning.GJENNY)
+        opprettBrev()
 
-        assertEquals(BrevEventTypes.FERDIGSTILT.name, inspektoer.message(0).get(EVENT_NAME_KEY).asText())
+        val inspektoer = testRapid.apply { sendTestMessage(melding.toJson()) }.inspektør
+
+        assertEquals(0, inspektoer.size)
     }
 
     private fun opprettBrev() =
@@ -106,6 +104,7 @@ internal class OpprettVedtaksbrevForMigreringRiverTest {
                 EVENT_NAME_KEY to VedtakKafkaHendelseType.ATTESTERT.toString(),
                 "vedtak" to vedtak,
                 KILDE_KEY to kilde,
+                BREV_OPPRETTA_MIGRERING to false,
             ),
         )
 

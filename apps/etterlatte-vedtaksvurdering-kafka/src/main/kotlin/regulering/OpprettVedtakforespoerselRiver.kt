@@ -42,7 +42,7 @@ internal class OpprettVedtakforespoerselRiver(
             val respons = vedtak.opprettVedtakFattOgAttester(packet.sakId, behandlingId)
             logger.info("Opprettet vedtak ${respons.vedtak.vedtakId} for sak: $sakId og behandling: $behandlingId")
             with(respons.rapidInfo1) {
-                packet.eventName = vedtakhendelse.name
+                packet.eventName = vedtakhendelse.toString()
                 packet[TEKNISK_TID_KEY] = tekniskTid
                 packet["vedtak"] = vedtak
                 extraParams.forEach { (k, v) -> packet[k] = v }

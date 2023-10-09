@@ -107,7 +107,7 @@ class MigreringHendelserRiverTest {
         coVerify { vedtakService.opprettVedtakFattOgAttester(any(), any()) }
 
         val sendtTilRapid = inspector.inspektør.message(0)
-        Assertions.assertEquals(VedtakKafkaHendelseType.ATTESTERT.name, sendtTilRapid.get(EVENT_NAME_KEY).textValue())
+        Assertions.assertEquals(VedtakKafkaHendelseType.ATTESTERT.toString(), sendtTilRapid.get(EVENT_NAME_KEY).textValue())
         Assertions.assertEquals(sendtTilRapid.get(BEHANDLING_ID_KEY).textValue(), behandlingId)
     }
 }

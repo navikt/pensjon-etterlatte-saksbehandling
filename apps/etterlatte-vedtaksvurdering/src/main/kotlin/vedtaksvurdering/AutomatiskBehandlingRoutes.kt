@@ -18,6 +18,7 @@ import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlient
 
 fun Route.automatiskBehandlingRoutes(
     service: VedtaksvurderingService,
+    rapidService: VedtaksvurderingRapidService,
     behandlingKlient: BehandlingKlient,
 ) {
     route("/api/vedtak") {
@@ -29,7 +30,7 @@ fun Route.automatiskBehandlingRoutes(
                 val nyttVedtak = service.opprettEllerOppdaterVedtak(behandlingId, brukerTokenInfo)
 
                 logger.info("Fatter vedtak for behandling $behandlingId")
-                service.fattVedtak(behandlingId, brukerTokenInfo)
+                service.fattVedtak(behandlingId, brukerTokenInfo).also { rapidService.sendToRapid(it.rapidInfo) }
 
                 logger.info("Tildeler attesteringsoppgave til systembruker")
                 val oppgaveTilAttestering =
@@ -46,7 +47,7 @@ fun Route.automatiskBehandlingRoutes(
                     behandlingId,
                     "Automatisk attestert av ${Fagsaksystem.EY.systemnavn}",
                     brukerTokenInfo,
-                )
+                ).also { rapidService.sendToRapid(it.rapidInfo) }
 
                 call.respond(nyttVedtak.toDto())
             }

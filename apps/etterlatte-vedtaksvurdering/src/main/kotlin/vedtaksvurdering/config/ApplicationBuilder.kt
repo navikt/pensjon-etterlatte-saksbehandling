@@ -64,7 +64,7 @@ class ApplicationBuilder {
             .withKtorModule {
                 restModule(sikkerLogg, config = HoconApplicationConfig(config)) {
                     vedtaksvurderingRoute(vedtaksvurderingService, vedtaksvurderingRapidService, behandlingKlient)
-                    automatiskBehandlingRoutes(vedtaksvurderingService, behandlingKlient)
+                    automatiskBehandlingRoutes(vedtaksvurderingService, vedtaksvurderingRapidService, behandlingKlient)
                     samordningsvedtakRoute(vedtaksvurderingService)
                     tilbakekrevingvedtakRoute(vedtakTilbakekrevingService)
                 }

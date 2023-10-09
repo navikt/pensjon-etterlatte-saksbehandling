@@ -14,9 +14,9 @@ import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.confirmVerified
-import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
-import kotlinx.coroutines.runBlocking
+import io.mockk.runs
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
@@ -47,6 +47,7 @@ internal class AutomatiskBehandlingRoutesKtTest {
     private lateinit var applicationConfig: HoconApplicationConfig
     private val behandlingKlient = mockk<BehandlingKlient>()
     private val vedtaksvurderingService: VedtaksvurderingService = mockk()
+    private val rapidService: VedtaksvurderingRapidService = mockk()
 
     @BeforeAll
     fun before() {
@@ -77,31 +78,38 @@ internal class AutomatiskBehandlingRoutesKtTest {
         testApplication {
             val opprettetVedtak = vedtak()
             val behandlingId = UUID.randomUUID()
-            every { runBlocking { vedtaksvurderingService.opprettEllerOppdaterVedtak(any(), any()) } } returns
+            coEvery { vedtaksvurderingService.opprettEllerOppdaterVedtak(any(), any()) } returns
                 opprettetVedtak
-            every { runBlocking { vedtaksvurderingService.fattVedtak(behandlingId, any()) } } returns
+            coEvery { vedtaksvurderingService.fattVedtak(behandlingId, any()) } returns
                 VedtakOgRapid(
                     opprettetVedtak,
                     mockk(),
                 )
-            every { runBlocking { behandlingKlient.hentOppgaverForSak(any(), any()) } } returns
+            coEvery { behandlingKlient.hentOppgaverForSak(any(), any()) } returns
                 OppgaveListe(
                     mockk(),
                     listOf(lagOppgave(behandlingId)),
                 )
-            every { runBlocking { behandlingKlient.tildelSaksbehandler(any(), any()) } } returns true
-            every {
-                runBlocking {
-                    vedtaksvurderingService.attesterVedtak(
-                        behandlingId,
-                        any(),
-                        any(),
-                    )
-                }
+            coEvery { behandlingKlient.tildelSaksbehandler(any(), any()) } returns true
+            coEvery {
+                vedtaksvurderingService.attesterVedtak(
+                    behandlingId,
+                    any(),
+                    any(),
+                )
             } returns VedtakOgRapid(opprettetVedtak, mockk())
+            coEvery { rapidService.sendToRapid(any()) } just runs
 
             environment { config = applicationConfig }
-            application { restModule(log) { automatiskBehandlingRoutes(vedtaksvurderingService, behandlingKlient) } }
+            application {
+                restModule(log) {
+                    automatiskBehandlingRoutes(
+                        vedtaksvurderingService,
+                        rapidService,
+                        behandlingKlient,
+                    )
+                }
+            }
 
             val vedtak =
                 client.post("/api/vedtak/1/$behandlingId/automatisk") {
@@ -123,6 +131,9 @@ internal class AutomatiskBehandlingRoutesKtTest {
             }
             coVerify(atLeast = 1) {
                 behandlingKlient.harTilgangTilBehandling(any(), any())
+            }
+            coVerify(exactly = 2) {
+                rapidService.sendToRapid(any())
             }
         }
     }

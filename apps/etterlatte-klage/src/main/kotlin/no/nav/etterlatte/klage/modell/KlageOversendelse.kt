@@ -121,10 +121,10 @@ data class KabalOversendelse(
                 forrigeBehandlendeEnhet = klage.sak.enhet,
                 tilknyttedeJournalposter =
                     listOfNotNull(
-//                        KabalJournalpostref(
-//                            type = KabalJournalpostType.OVERSENDELSESBREV,
-//                            journalpostId = ekstraData.journalpostInnstillingsbrev,
-//                        ),
+                        KabalJournalpostref(
+                            type = KabalJournalpostType.OVERSENDELSESBREV,
+                            journalpostId = ekstraData.journalpostInnstillingsbrev,
+                        ),
                         ekstraData.journalpostKlage?.let {
                             KabalJournalpostref(
                                 type = KabalJournalpostType.BRUKERS_KLAGE,

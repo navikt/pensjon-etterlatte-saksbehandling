@@ -4,10 +4,10 @@ import io.ktor.client.HttpClient
 import io.ktor.client.plugins.ResponseException
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
+import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import no.nav.etterlatte.klage.modell.KabalOversendelse
-import no.nav.etterlatte.libs.common.toJson
 
 interface KabalKlient {
     suspend fun sendTilKabal(kabalOversendelse: KabalOversendelse)
@@ -21,16 +21,18 @@ class KabalKlientImpl(private val client: HttpClient, private val kabalUrl: Stri
                 setBody(kabalOversendelse)
             }
         } catch (e: ResponseException) {
-            throw KabalKlientException(kabalOversendelse, e)
+            val body = e.response.bodyAsText()
+            throw KabalKlientException(kabalOversendelse, body, e)
         }
     }
 }
 
 class KabalKlientException(
     kabalOversendelse: KabalOversendelse,
-    override val cause: Throwable?,
+    responseBody: String,
+    override val cause: ResponseException,
 ) :
     Exception(
             "Fikk en feil mot Kabal-api i oversending av klage med id: ${kabalOversendelse.fagsak.fagsakId}. " +
-                "Oversendelse: ${kabalOversendelse.toJson()}",
+                "Oversendelse hadde feil: $responseBody",
         )

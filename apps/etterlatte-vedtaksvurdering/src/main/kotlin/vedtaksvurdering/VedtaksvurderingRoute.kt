@@ -36,6 +36,7 @@ import java.util.UUID
 
 fun Route.vedtaksvurderingRoute(
     service: VedtaksvurderingService,
+    rapidService: VedtaksvurderingRapidService,
     behandlingKlient: BehandlingKlient,
 ) {
     route("/api/vedtak") {
@@ -85,7 +86,7 @@ fun Route.vedtaksvurderingRoute(
             withBehandlingId(behandlingKlient) { behandlingId ->
                 logger.info("Fatter vedtak for behandling $behandlingId")
                 val fattetVedtak = service.fattVedtak(behandlingId, brukerTokenInfo)
-                service.sendToRapid(fattetVedtak.rapidInfo)
+                rapidService.sendToRapid(fattetVedtak.rapidInfo)
 
                 call.respond(fattetVedtak.t.toDto())
             }
@@ -98,7 +99,7 @@ fun Route.vedtaksvurderingRoute(
                 val attestert = service.attesterVedtak(behandlingId, kommentar, brukerTokenInfo)
 
                 try {
-                    service.sendToRapid(attestert.rapidInfo)
+                    rapidService.sendToRapid(attestert.rapidInfo)
                 } catch (e: Exception) {
                     logger.error(
                         "Kan ikke sende attestert vedtak på kafka for behandling id: $behandlingId, vedtak: ${attestert.t.id} " +
@@ -123,7 +124,7 @@ fun Route.vedtaksvurderingRoute(
                         brukerTokenInfo,
                         begrunnelse,
                     )
-                service.sendToRapid(underkjentVedtak.rapidInfo)
+                rapidService.sendToRapid(underkjentVedtak.rapidInfo)
 
                 call.respond(underkjentVedtak.t.toDto())
             }
@@ -133,7 +134,7 @@ fun Route.vedtaksvurderingRoute(
             withBehandlingId(behandlingKlient) { behandlingId ->
                 logger.info("Iverksetter vedtak for behandling $behandlingId")
                 val vedtak = service.iverksattVedtak(behandlingId, brukerTokenInfo)
-                service.sendToRapid(vedtak.rapidInfo)
+                rapidService.sendToRapid(vedtak.rapidInfo)
 
                 call.respond(HttpStatusCode.OK, vedtak.t.toDto())
             }

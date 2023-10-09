@@ -9,12 +9,9 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.oppgave.VedtakEndringDTO
 import no.nav.etterlatte.libs.common.oppgave.VedtakOppgaveDTO
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
-import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.REVURDERING_AARSAK
 import no.nav.etterlatte.libs.common.rapidsandrivers.SKAL_SENDE_BREV
-import no.nav.etterlatte.libs.common.rapidsandrivers.TEKNISK_TID_KEY
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.tidspunkt.utcKlokke
 import no.nav.etterlatte.libs.common.toObjectNode
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
@@ -32,7 +29,6 @@ import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlient
 import no.nav.etterlatte.vedtaksvurdering.klienter.BeregningKlient
 import no.nav.etterlatte.vedtaksvurdering.klienter.VilkaarsvurderingKlient
-import no.nav.helse.rapids_rivers.JsonMessage
 import org.slf4j.LoggerFactory
 import java.time.Clock
 import java.time.LocalDate
@@ -44,7 +40,6 @@ class VedtaksvurderingService(
     private val beregningKlient: BeregningKlient,
     private val vilkaarsvurderingKlient: VilkaarsvurderingKlient,
     private val behandlingKlient: BehandlingKlient,
-    private val publiser: (String, UUID) -> Unit,
     private val clock: Clock = utcKlokke(),
 ) {
     private val logger = LoggerFactory.getLogger(VedtaksvurderingService::class.java)
@@ -513,32 +508,6 @@ class VedtaksvurderingService(
 
     private fun vilkaarsvurderingUtfallNonNull(vilkaarsvurderingUtfall: VilkaarsvurderingUtfall?) =
         requireNotNull(vilkaarsvurderingUtfall) { "Behandling mangler utfall på vilkårsvurdering" }
-
-    fun sendToRapid(rapidInfo: RapidInfo) =
-        sendToRapid(
-            vedtakhendelse = rapidInfo.vedtakhendelse,
-            vedtak = rapidInfo.vedtak,
-            tekniskTid = rapidInfo.tekniskTid,
-            behandlingId = rapidInfo.behandlingId,
-            extraParams = rapidInfo.extraParams,
-        )
-
-    private fun sendToRapid(
-        vedtakhendelse: VedtakKafkaHendelseType,
-        vedtak: Vedtak,
-        tekniskTid: Tidspunkt,
-        behandlingId: UUID,
-        extraParams: Map<String, Any> = emptyMap(),
-    ) = publiser(
-        JsonMessage.newMessage(
-            mapOf(
-                EVENT_NAME_KEY to vedtakhendelse.toString(),
-                "vedtak" to vedtak.toDto(),
-                TEKNISK_TID_KEY to tekniskTid.toLocalDatetimeUTC(),
-            ) + extraParams,
-        ).toJson(),
-        behandlingId,
-    )
 
     fun tilbakestillIkkeIverksatteVedtak(behandlingId: UUID): Vedtak? = repository.tilbakestillIkkeIverksatteVedtak(behandlingId)
 

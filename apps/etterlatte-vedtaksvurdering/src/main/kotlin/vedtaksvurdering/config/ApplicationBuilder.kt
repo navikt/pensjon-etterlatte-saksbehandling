@@ -12,6 +12,7 @@ import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.libs.ktor.setReady
 import no.nav.etterlatte.vedtaksvurdering.VedtakTilbakekrevingRepository
 import no.nav.etterlatte.vedtaksvurdering.VedtakTilbakekrevingService
+import no.nav.etterlatte.vedtaksvurdering.VedtaksvurderingRapidService
 import no.nav.etterlatte.vedtaksvurdering.VedtaksvurderingRepository
 import no.nav.etterlatte.vedtaksvurdering.VedtaksvurderingService
 import no.nav.etterlatte.vedtaksvurdering.automatiskBehandlingRoutes
@@ -51,8 +52,8 @@ class ApplicationBuilder {
             beregningKlient = BeregningKlientImpl(config, httpClient()),
             vilkaarsvurderingKlient = VilkaarsvurderingKlientImpl(config, httpClient()),
             behandlingKlient = behandlingKlient,
-            publiser = ::publiser,
         )
+    private val vedtaksvurderingRapidService = VedtaksvurderingRapidService(publiser = ::publiser)
     private val vedtakTilbakekrevingService =
         VedtakTilbakekrevingService(
             repository = VedtakTilbakekrevingRepository(dataSource),
@@ -62,7 +63,7 @@ class ApplicationBuilder {
         RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(getRapidEnv()))
             .withKtorModule {
                 restModule(sikkerLogg, config = HoconApplicationConfig(config)) {
-                    vedtaksvurderingRoute(vedtaksvurderingService, behandlingKlient)
+                    vedtaksvurderingRoute(vedtaksvurderingService, vedtaksvurderingRapidService, behandlingKlient)
                     automatiskBehandlingRoutes(vedtaksvurderingService, behandlingKlient)
                     samordningsvedtakRoute(vedtaksvurderingService)
                     tilbakekrevingvedtakRoute(vedtakTilbakekrevingService)

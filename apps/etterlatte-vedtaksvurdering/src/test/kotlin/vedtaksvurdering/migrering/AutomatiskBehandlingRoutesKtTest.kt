@@ -98,7 +98,7 @@ internal class AutomatiskBehandlingRoutesKtTest {
                         any(),
                     )
                 }
-            } returns opprettetVedtak
+            } returns VedtakOgRapid(opprettetVedtak, mockk())
 
             environment { config = applicationConfig }
             application { restModule(log) { automatiskBehandlingRoutes(vedtaksvurderingService, behandlingKlient) } }

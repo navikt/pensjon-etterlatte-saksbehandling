@@ -40,6 +40,7 @@ import no.nav.etterlatte.vedtaksvurdering.LoependeYtelse
 import no.nav.etterlatte.vedtaksvurdering.UnderkjennVedtakDto
 import no.nav.etterlatte.vedtaksvurdering.VedtakOgRapid
 import no.nav.etterlatte.vedtaksvurdering.VedtakSammendragDto
+import no.nav.etterlatte.vedtaksvurdering.VedtaksvurderingRapidService
 import no.nav.etterlatte.vedtaksvurdering.VedtaksvurderingService
 import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlient
 import no.nav.etterlatte.vedtaksvurdering.vedtaksvurderingRoute
@@ -61,6 +62,7 @@ internal class VedtaksvurderingRouteTest {
     private lateinit var applicationConfig: HoconApplicationConfig
     private val behandlingKlient = mockk<BehandlingKlient>()
     private val vedtaksvurderingService: VedtaksvurderingService = mockk()
+    private val rapidService: VedtaksvurderingRapidService = mockk()
 
     @BeforeAll
     fun before() {
@@ -90,7 +92,15 @@ internal class VedtaksvurderingRouteTest {
     fun `skal returnere 401 naar token mangler`() {
         testApplication {
             environment { config = applicationConfig }
-            application { restModule(log) { vedtaksvurderingRoute(vedtaksvurderingService, behandlingKlient) } }
+            application {
+                restModule(log) {
+                    vedtaksvurderingRoute(
+                        vedtaksvurderingService,
+                        rapidService,
+                        behandlingKlient,
+                    )
+                }
+            }
 
             val response =
                 client.get("/api/vedtak/${UUID.randomUUID()}") {
@@ -107,7 +117,15 @@ internal class VedtaksvurderingRouteTest {
 
         testApplication {
             environment { config = applicationConfig }
-            application { restModule(log) { vedtaksvurderingRoute(vedtaksvurderingService, behandlingKlient) } }
+            application {
+                restModule(log) {
+                    vedtaksvurderingRoute(
+                        vedtaksvurderingService,
+                        rapidService,
+                        behandlingKlient,
+                    )
+                }
+            }
 
             val response =
                 client.get("/api/vedtak/${UUID.randomUUID()}") {
@@ -131,7 +149,15 @@ internal class VedtaksvurderingRouteTest {
 
         testApplication {
             environment { config = applicationConfig }
-            application { restModule(log) { vedtaksvurderingRoute(vedtaksvurderingService, behandlingKlient) } }
+            application {
+                restModule(log) {
+                    vedtaksvurderingRoute(
+                        vedtaksvurderingService,
+                        rapidService,
+                        behandlingKlient,
+                    )
+                }
+            }
 
             val response =
                 client.get("/api/vedtak/${UUID.randomUUID()}") {
@@ -155,7 +181,15 @@ internal class VedtaksvurderingRouteTest {
 
         testApplication {
             environment { config = applicationConfig }
-            application { restModule(log) { vedtaksvurderingRoute(vedtaksvurderingService, behandlingKlient) } }
+            application {
+                restModule(log) {
+                    vedtaksvurderingRoute(
+                        vedtaksvurderingService,
+                        rapidService,
+                        behandlingKlient,
+                    )
+                }
+            }
 
             val vedtak =
                 client.get("/api/vedtak/${UUID.randomUUID()}") {
@@ -204,7 +238,15 @@ internal class VedtaksvurderingRouteTest {
 
         testApplication {
             environment { config = applicationConfig }
-            application { restModule(log) { vedtaksvurderingRoute(vedtaksvurderingService, behandlingKlient) } }
+            application {
+                restModule(log) {
+                    vedtaksvurderingRoute(
+                        vedtaksvurderingService,
+                        rapidService,
+                        behandlingKlient,
+                    )
+                }
+            }
 
             val vedtaksammendrag =
                 client.get("/api/vedtak/${UUID.randomUUID()}/sammendrag") {
@@ -238,7 +280,15 @@ internal class VedtaksvurderingRouteTest {
 
         testApplication {
             environment { config = applicationConfig }
-            application { restModule(log) { vedtaksvurderingRoute(vedtaksvurderingService, behandlingKlient) } }
+            application {
+                restModule(log) {
+                    vedtaksvurderingRoute(
+                        vedtaksvurderingService,
+                        rapidService,
+                        behandlingKlient,
+                    )
+                }
+            }
 
             val hentetLoependeYtelse =
                 client.get("/api/vedtak/loepende/$sakId?dato=${loependeYtelse.dato}") {
@@ -266,7 +316,15 @@ internal class VedtaksvurderingRouteTest {
 
         testApplication {
             environment { config = applicationConfig }
-            application { restModule(log) { vedtaksvurderingRoute(vedtaksvurderingService, behandlingKlient) } }
+            application {
+                restModule(log) {
+                    vedtaksvurderingRoute(
+                        vedtaksvurderingService,
+                        rapidService,
+                        behandlingKlient,
+                    )
+                }
+            }
 
             val vedtak =
                 client.post("/api/vedtak/${UUID.randomUUID()}/upsert") {
@@ -312,11 +370,19 @@ internal class VedtaksvurderingRouteTest {
                 vedtakFattet = VedtakFattet(SAKSBEHANDLER_1, ENHET_1, Tidspunkt.now()),
             )
         coEvery { vedtaksvurderingService.fattVedtak(any(), any()) } returns VedtakOgRapid(fattetVedtak, mockk())
-        coEvery { vedtaksvurderingService.sendToRapid(any()) } just runs
+        coEvery { rapidService.sendToRapid(any()) } just runs
 
         testApplication {
             environment { config = applicationConfig }
-            application { restModule(log) { vedtaksvurderingRoute(vedtaksvurderingService, behandlingKlient) } }
+            application {
+                restModule(log) {
+                    vedtaksvurderingRoute(
+                        vedtaksvurderingService,
+                        rapidService,
+                        behandlingKlient,
+                    )
+                }
+            }
 
             val vedtak =
                 client.post("/api/vedtak/${UUID.randomUUID()}/fattvedtak") {
@@ -350,7 +416,7 @@ internal class VedtaksvurderingRouteTest {
             coVerify(exactly = 1) {
                 behandlingKlient.harTilgangTilBehandling(any(), any())
                 vedtaksvurderingService.fattVedtak(any(), match { it.ident() == SAKSBEHANDLER_1 })
-                vedtaksvurderingService.sendToRapid(any())
+                rapidService.sendToRapid(any())
             }
         }
     }
@@ -364,11 +430,20 @@ internal class VedtaksvurderingRouteTest {
                 vedtakFattet = VedtakFattet(SAKSBEHANDLER_1, ENHET_1, Tidspunkt.now()),
                 attestasjon = Attestasjon(SAKSBEHANDLER_2, ENHET_2, Tidspunkt.now()),
             )
-        coEvery { vedtaksvurderingService.attesterVedtak(any(), any(), any()) } returns attestertVedtak
+        coEvery { vedtaksvurderingService.attesterVedtak(any(), any(), any()) } returns VedtakOgRapid(attestertVedtak, mockk())
+        coEvery { rapidService.sendToRapid(any()) } just runs
 
         testApplication {
             environment { config = applicationConfig }
-            application { restModule(log) { vedtaksvurderingRoute(vedtaksvurderingService, behandlingKlient) } }
+            application {
+                restModule(log) {
+                    vedtaksvurderingRoute(
+                        vedtaksvurderingService,
+                        rapidService,
+                        behandlingKlient,
+                    )
+                }
+            }
 
             val vedtak =
                 client.post("/api/vedtak/${UUID.randomUUID()}/attester") {
@@ -407,6 +482,7 @@ internal class VedtaksvurderingRouteTest {
                     match { it == attestertVedtakKommentar.kommentar },
                     match { it.ident() == SAKSBEHANDLER_1 },
                 )
+                rapidService.sendToRapid(any())
             }
         }
     }
@@ -420,10 +496,19 @@ internal class VedtaksvurderingRouteTest {
         val begrunnelse = UnderkjennVedtakDto("Ikke bra nok begrunnet", "Annet")
         coEvery { vedtaksvurderingService.underkjennVedtak(any(), any(), any()) } returns
             VedtakOgRapid(underkjentVedtak, mockk())
+        coEvery { rapidService.sendToRapid(any()) } just runs
 
         testApplication {
             environment { config = applicationConfig }
-            application { restModule(log) { vedtaksvurderingRoute(vedtaksvurderingService, behandlingKlient) } }
+            application {
+                restModule(log) {
+                    vedtaksvurderingRoute(
+                        vedtaksvurderingService,
+                        rapidService,
+                        behandlingKlient,
+                    )
+                }
+            }
 
             val vedtak =
                 client.post("/api/vedtak/${UUID.randomUUID()}/underkjenn") {
@@ -462,6 +547,7 @@ internal class VedtaksvurderingRouteTest {
                     match { it.ident() == SAKSBEHANDLER_1 },
                     match { it == begrunnelse },
                 )
+                rapidService.sendToRapid(any())
             }
         }
     }
@@ -476,7 +562,15 @@ internal class VedtaksvurderingRouteTest {
 
         testApplication {
             environment { config = applicationConfig }
-            application { restModule(log) { vedtaksvurderingRoute(vedtaksvurderingService, behandlingKlient) } }
+            application {
+                restModule(log) {
+                    vedtaksvurderingRoute(
+                        vedtaksvurderingService,
+                        rapidService,
+                        behandlingKlient,
+                    )
+                }
+            }
 
             client.patch("/api/vedtak/${UUID.randomUUID()}/tilbakestill") {
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())

@@ -4,10 +4,10 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.mq.JmsConnectionFactory
+import no.nav.etterlatte.tilbakekreving.hendelse.TilbakekrevingHendelseRepository
 import no.nav.etterlatte.tilbakekreving.klienter.BehandlingKlient
 import no.nav.etterlatte.tilbakekreving.kravgrunnlag.KravgrunnlagConsumer
 import no.nav.etterlatte.tilbakekreving.kravgrunnlag.KravgrunnlagService
-import no.nav.etterlatte.tilbakekreving.sporing.TilbakekrevingSporingRepository
 import no.nav.etterlatte.tilbakekreving.vedtak.TilbakekrevingKlient
 import no.nav.etterlatte.tilbakekreving.vedtak.TilbakekrevingVedtakService
 
@@ -44,7 +44,7 @@ class ApplicationContext(
                 ),
         )
 
-    val tilbakekrevingSporingRepository = TilbakekrevingSporingRepository(dataSource)
+    val tilbakekrevingHendelseRepository = TilbakekrevingHendelseRepository(dataSource)
 
     val tilbakekrevingKlient =
         TilbakekrevingKlient(
@@ -56,7 +56,7 @@ class ApplicationContext(
                     azureAppWellKnownUrl = properties.azureAppWellKnownUrl,
                     azureAppScope = properties.proxyScope,
                 ),
-            sporingRepository = tilbakekrevingSporingRepository,
+            hendelseRepository = tilbakekrevingHendelseRepository,
         )
 
     val tilbakekrevingVedtakService = TilbakekrevingVedtakService(tilbakekrevingKlient)
@@ -68,6 +68,6 @@ class ApplicationContext(
             connectionFactory = jmsConnectionFactory,
             queue = properties.mqKravgrunnlagQueue,
             kravgrunnlagService = kravgrunnlagService,
-            sporingRepository = tilbakekrevingSporingRepository,
+            hendelseRepository = tilbakekrevingHendelseRepository,
         )
 }

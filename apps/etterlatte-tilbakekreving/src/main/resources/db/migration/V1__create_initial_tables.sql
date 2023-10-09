@@ -1,4 +1,4 @@
-CREATE TABLE tilbakekreving_sporing
+CREATE TABLE tilbakekreving_hendelse
 (
     id                             UUID PRIMARY KEY,
     opprettet                      TIMESTAMP WITH TIME ZONE NOT NULL,

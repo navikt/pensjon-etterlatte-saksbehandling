@@ -1,4 +1,4 @@
-package no.nav.etterlatte.tilbakekreving.sporing
+package no.nav.etterlatte.tilbakekreving.hendelse
 
 import kotliquery.queryOf
 import kotliquery.sessionOf
@@ -6,7 +6,7 @@ import kotliquery.using
 import java.util.UUID
 import javax.sql.DataSource
 
-class TilbakekrevingSporingRepository(private val dataSource: DataSource) {
+class TilbakekrevingHendelseRepository(private val dataSource: DataSource) {
     fun lagreMottattKravgrunnlag(
         kravgrunnlagId: String,
         fagsystemId: String,
@@ -15,7 +15,7 @@ class TilbakekrevingSporingRepository(private val dataSource: DataSource) {
         queryOf(
             statement =
                 """
-                INSERT INTO tilbakekreving_sporing(id, opprettet, kravgrunnlag_id, fagsystem_id, kravgrunnlag_payload)
+                INSERT INTO tilbakekreving_hendelse(id, opprettet, kravgrunnlag_id, fagsystem_id, kravgrunnlag_payload)
                 VALUES(:id, now(), :kravgrunnlagId, :fagsystemId, :kravgrunnlagPayload)
                 """.trimIndent(),
             paramMap =
@@ -37,7 +37,7 @@ class TilbakekrevingSporingRepository(private val dataSource: DataSource) {
         queryOf(
             statement =
                 """
-                UPDATE tilbakekreving_sporing SET tilbakekrevingsvedtak_request = :request, endret = now()
+                UPDATE tilbakekreving_hendelse SET tilbakekrevingsvedtak_request = :request, endret = now()
                 WHERE kravgrunnlag_id = :kravgrunnlagId
                 """.trimIndent(),
             paramMap =
@@ -57,7 +57,7 @@ class TilbakekrevingSporingRepository(private val dataSource: DataSource) {
         queryOf(
             statement =
                 """
-                UPDATE tilbakekreving_sporing SET tilbakekrevingsvedtak_response = :response, endret = now()
+                UPDATE tilbakekreving_hendelse SET tilbakekrevingsvedtak_response = :response, endret = now()
                 WHERE kravgrunnlag_id = :kravgrunnlagId
                 """.trimIndent(),
             paramMap =

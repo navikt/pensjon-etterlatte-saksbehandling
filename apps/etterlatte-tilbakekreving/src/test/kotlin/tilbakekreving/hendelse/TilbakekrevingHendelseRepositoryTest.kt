@@ -1,4 +1,4 @@
-package tilbakekreving.sporing
+package tilbakekreving.hendelse
 
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
@@ -6,7 +6,7 @@ import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.POSTGRES_VERSION
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.database.singleOrNull
-import no.nav.etterlatte.tilbakekreving.sporing.TilbakekrevingSporingRepository
+import no.nav.etterlatte.tilbakekreving.hendelse.TilbakekrevingHendelseRepository
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
@@ -17,17 +17,17 @@ import org.testcontainers.junit.jupiter.Container
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-internal class TilbakekrevingSporingRepositoryTest {
+internal class TilbakekrevingHendelseRepositoryTest {
     @Container
     private val postgres = PostgreSQLContainer<Nothing>("postgres:$POSTGRES_VERSION")
-    private lateinit var repository: TilbakekrevingSporingRepository
+    private lateinit var repository: TilbakekrevingHendelseRepository
     private lateinit var dataSource: DataSource
 
     @BeforeAll
     fun beforeAll() {
         postgres.start()
         dataSource = DataSourceBuilder.createDataSource(postgres.jdbcUrl, postgres.username, postgres.password)
-        repository = TilbakekrevingSporingRepository(dataSource.apply { migrate() })
+        repository = TilbakekrevingHendelseRepository(dataSource.apply { migrate() })
     }
 
     @AfterAll
@@ -48,12 +48,12 @@ internal class TilbakekrevingSporingRepositoryTest {
 
         repository.lagreMottattKravgrunnlag(kravgrunnlagId, fagsystemId, kravgrunnlagPayload)
 
-        val tilbakekrevingSporing = hentTilbakekrevingSporing(kravgrunnlagId)
-        tilbakekrevingSporing?.id shouldNotBe null
-        tilbakekrevingSporing?.opprettet shouldNotBe null
-        tilbakekrevingSporing?.fagsystemId shouldBe fagsystemId
-        tilbakekrevingSporing?.kravgrunnlagId shouldBe kravgrunnlagId
-        tilbakekrevingSporing?.kravgrunnlagPayload shouldBe kravgrunnlagPayload
+        val tilbakekrevingHendelse = hentTilbakekrevingHendelse(kravgrunnlagId)
+        tilbakekrevingHendelse?.id shouldNotBe null
+        tilbakekrevingHendelse?.opprettet shouldNotBe null
+        tilbakekrevingHendelse?.fagsystemId shouldBe fagsystemId
+        tilbakekrevingHendelse?.kravgrunnlagId shouldBe kravgrunnlagId
+        tilbakekrevingHendelse?.kravgrunnlagPayload shouldBe kravgrunnlagPayload
     }
 
     @Test
@@ -68,26 +68,26 @@ internal class TilbakekrevingSporingRepositoryTest {
         repository.lagreTilbakekrevingsvedtakRequest(kravgrunnlagId, vedtakRequest)
         repository.lagreTilbakekrevingsvedtakResponse(kravgrunnlagId, vedtakResponse)
 
-        val tilbakekrevingSporing = hentTilbakekrevingSporing(kravgrunnlagId)
+        val tilbakekrevingHendelse = hentTilbakekrevingHendelse(kravgrunnlagId)
 
-        tilbakekrevingSporing?.endret shouldNotBe null
-        tilbakekrevingSporing?.tilbakekrevingsvedtakRequest shouldBe vedtakRequest
-        tilbakekrevingSporing?.tilbakekrevingsvedtakResponse shouldBe vedtakResponse
+        tilbakekrevingHendelse?.endret shouldNotBe null
+        tilbakekrevingHendelse?.tilbakekrevingsvedtakRequest shouldBe vedtakRequest
+        tilbakekrevingHendelse?.tilbakekrevingsvedtakResponse shouldBe vedtakResponse
     }
 
     private fun cleanDatabase() {
-        dataSource.connection.use { it.prepareStatement("TRUNCATE tilbakekreving_sporing").apply { execute() } }
+        dataSource.connection.use { it.prepareStatement("TRUNCATE tilbakekreving_hendelse").apply { execute() } }
     }
 
-    private fun hentTilbakekrevingSporing(kravgrunnlagId: String): TilbakekrevingSporing? {
+    private fun hentTilbakekrevingHendelse(kravgrunnlagId: String): TilbakekrevingHendelse? {
         dataSource.connection.use {
             val stmt =
-                it.prepareStatement("SELECT * FROM tilbakekreving_sporing WHERE kravgrunnlag_id = ?").apply {
+                it.prepareStatement("SELECT * FROM tilbakekreving_hendelse WHERE kravgrunnlag_id = ?").apply {
                     setString(1, kravgrunnlagId)
                 }
 
             return stmt.executeQuery().singleOrNull {
-                TilbakekrevingSporing(
+                TilbakekrevingHendelse(
                     id = getString("id"),
                     opprettet = getString("opprettet"),
                     endret = getString("endret"),
@@ -101,7 +101,7 @@ internal class TilbakekrevingSporingRepositoryTest {
         }
     }
 
-    private data class TilbakekrevingSporing(
+    private data class TilbakekrevingHendelse(
         val id: String,
         val opprettet: String,
         val endret: String?,

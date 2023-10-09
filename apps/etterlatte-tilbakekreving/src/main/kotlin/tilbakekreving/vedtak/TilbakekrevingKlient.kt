@@ -10,7 +10,7 @@ import kotlinx.coroutines.runBlocking
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.toJson
-import no.nav.etterlatte.tilbakekreving.sporing.TilbakekrevingSporingRepository
+import no.nav.etterlatte.tilbakekreving.hendelse.TilbakekrevingHendelseRepository
 import no.nav.okonomi.tilbakekrevingservice.TilbakekrevingsvedtakRequest
 import no.nav.okonomi.tilbakekrevingservice.TilbakekrevingsvedtakResponse
 import no.nav.tilbakekreving.tilbakekrevingsvedtak.vedtak.v1.TilbakekrevingsbelopDto
@@ -29,7 +29,7 @@ import javax.xml.datatype.XMLGregorianCalendar
 class TilbakekrevingKlient(
     private val url: String,
     private val httpClient: HttpClient,
-    private val sporingRepository: TilbakekrevingSporingRepository,
+    private val hendelseRepository: TilbakekrevingHendelseRepository,
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)
     private val sikkerLogg = sikkerlogger()
@@ -39,7 +39,7 @@ class TilbakekrevingKlient(
         val request = toTilbakekrevingsvedtakRequest(vedtak)
         val requestAsJson = request.toJson()
 
-        sporingRepository.lagreTilbakekrevingsvedtakRequest(vedtak.kravgrunnlagId, requestAsJson)
+        hendelseRepository.lagreTilbakekrevingsvedtakRequest(vedtak.kravgrunnlagId, requestAsJson)
 
         val response =
             runBlocking {
@@ -52,7 +52,7 @@ class TilbakekrevingKlient(
                 httpResponse.body<TilbakekrevingsvedtakResponse>()
             }
 
-        sporingRepository.lagreTilbakekrevingsvedtakResponse(vedtak.kravgrunnlagId, response.toJson())
+        hendelseRepository.lagreTilbakekrevingsvedtakResponse(vedtak.kravgrunnlagId, response.toJson())
 
         return kontrollerResponse(response)
     }

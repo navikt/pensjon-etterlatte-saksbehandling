@@ -7,8 +7,8 @@ import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.mq.EtterlatteJmsConnectionFactory
+import no.nav.etterlatte.tilbakekreving.hendelse.TilbakekrevingHendelseRepository
 import no.nav.etterlatte.tilbakekreving.kravgrunnlag.KravgrunnlagJaxb.toDetaljertKravgrunnlagDto
-import no.nav.etterlatte.tilbakekreving.sporing.TilbakekrevingSporingRepository
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -16,7 +16,7 @@ class KravgrunnlagConsumer(
     private val connectionFactory: EtterlatteJmsConnectionFactory,
     private val queue: String,
     private val kravgrunnlagService: KravgrunnlagService,
-    private val sporingRepository: TilbakekrevingSporingRepository,
+    private val hendelseRepository: TilbakekrevingHendelseRepository,
 ) : MessageListener {
     private val logger = LoggerFactory.getLogger(javaClass)
     private val sikkerLogg: Logger = sikkerlogger()
@@ -36,7 +36,7 @@ class KravgrunnlagConsumer(
                 kravgrunnlagPayload = message.getBody(String::class.java)
 
                 val detaljertKravgrunnlag = toDetaljertKravgrunnlagDto(kravgrunnlagPayload)
-                sporingRepository.lagreMottattKravgrunnlag(
+                hendelseRepository.lagreMottattKravgrunnlag(
                     detaljertKravgrunnlag.kravgrunnlagId.toString(),
                     detaljertKravgrunnlag.fagsystemId,
                     kravgrunnlagPayload,

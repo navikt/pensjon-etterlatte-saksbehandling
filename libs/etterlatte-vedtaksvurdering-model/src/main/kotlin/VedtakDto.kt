@@ -98,3 +98,9 @@ data class TilbakekrevingFattetVedtakDto(
     val ansvarligEnhet: String,
     val tilbakekreving: ObjectNode,
 )
+
+data class TilbakekrevingAttesterVedtakDto(
+    val tilbakekrevingId: UUID,
+    val attestant: String,
+    val attesterendeEnhet: String,
+)

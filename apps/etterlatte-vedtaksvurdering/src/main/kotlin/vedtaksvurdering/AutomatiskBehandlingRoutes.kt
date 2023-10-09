@@ -27,7 +27,7 @@ fun Route.automatiskBehandlingRoutes(
         post("/{$SAKID_CALL_PARAMETER}/{$BEHANDLINGSID_CALL_PARAMETER}/automatisk") {
             withBehandlingId(behandlingKlient) { behandlingId ->
                 logger.info("Håndterer behandling $behandlingId")
-                val nyttVedtak = service.opprettEllerOppdaterVedtak(behandlingId, brukerTokenInfo)
+                service.opprettEllerOppdaterVedtak(behandlingId, brukerTokenInfo)
 
                 logger.info("Fatter vedtak for behandling $behandlingId")
                 service.fattVedtak(behandlingId, brukerTokenInfo).also { rapidService.sendToRapid(it.rapidInfo) }
@@ -43,13 +43,14 @@ fun Route.automatiskBehandlingRoutes(
                 behandlingKlient.tildelSaksbehandler(oppgaveTilAttestering, brukerTokenInfo)
 
                 logger.info("Attesterer vedtak for behandling $behandlingId")
-                service.attesterVedtak(
-                    behandlingId,
-                    "Automatisk attestert av ${Fagsaksystem.EY.systemnavn}",
-                    brukerTokenInfo,
-                ).also { rapidService.sendToRapid(it.rapidInfo) }
+                val attestert =
+                    service.attesterVedtak(
+                        behandlingId,
+                        "Automatisk attestert av ${Fagsaksystem.EY.systemnavn}",
+                        brukerTokenInfo,
+                    )
 
-                call.respond(nyttVedtak.toDto())
+                call.respond(attestert)
             }
         }
     }

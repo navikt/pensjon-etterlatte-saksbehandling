@@ -24,7 +24,7 @@ import no.nav.etterlatte.libs.common.oppgave.OppgaveListe
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.common.vedtak.VedtakDto
+import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseType
 import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlient
@@ -97,7 +97,11 @@ internal class AutomatiskBehandlingRoutesKtTest {
                     any(),
                     any(),
                 )
-            } returns VedtakOgRapid(opprettetVedtak.toDto(), mockk())
+            } returns
+                VedtakOgRapid(
+                    opprettetVedtak.toDto(),
+                    RapidInfo(VedtakKafkaHendelseType.ATTESTERT, opprettetVedtak.toDto(), Tidspunkt.now(), behandlingId),
+                )
             coEvery { rapidService.sendToRapid(any()) } just runs
 
             environment { config = applicationConfig }
@@ -117,10 +121,11 @@ internal class AutomatiskBehandlingRoutesKtTest {
                     header(HttpHeaders.Authorization, "Bearer $token")
                 }.let {
                     it.status shouldBe HttpStatusCode.OK
-                    deserialize<VedtakDto>(it.bodyAsText())
+                    deserialize<VedtakOgRapid>(it.bodyAsText())
                 }
 
-            Assertions.assertEquals(vedtak.vedtakId, opprettetVedtak.id)
+            Assertions.assertEquals(vedtak.vedtak.vedtakId, opprettetVedtak.id)
+            Assertions.assertEquals(vedtak.rapidInfo.vedtakhendelse, VedtakKafkaHendelseType.ATTESTERT)
 
             coVerify(exactly = 1) {
                 vedtaksvurderingService.opprettEllerOppdaterVedtak(behandlingId, any())
@@ -128,12 +133,10 @@ internal class AutomatiskBehandlingRoutesKtTest {
                 vedtaksvurderingService.fattVedtak(behandlingId, any())
                 behandlingKlient.tildelSaksbehandler(any(), any())
                 vedtaksvurderingService.attesterVedtak(behandlingId, any(), any())
+                rapidService.sendToRapid(any())
             }
             coVerify(atLeast = 1) {
                 behandlingKlient.harTilgangTilBehandling(any(), any())
-            }
-            coVerify(exactly = 2) {
-                rapidService.sendToRapid(any())
             }
         }
     }

@@ -31,10 +31,9 @@ internal class FeilendeMigreringLytter(rapidsConnection: RapidsConnection, priva
 
     init {
         initialiserRiver(rapidsConnection, EventNames.FEILA) {
-            validate { it.interestedIn(FEILENDE_STEG) }
+            validate { it.requireKey(FEILENDE_STEG) }
             validate { it.requireKey(KILDE_KEY) }
             validate { it.requireValue(KILDE_KEY, Vedtaksloesning.PESYS.name) }
-            validate { it.interestedIn("vedtak.behandling.id") }
             validate { it.interestedIn(BEHANDLING_ID_KEY) }
             validate { it.interestedIn(PESYS_ID_KEY) }
             validate { it.interestedIn(HENDELSE_DATA_KEY) }
@@ -79,9 +78,6 @@ internal class FeilendeMigreringLytter(rapidsConnection: RapidsConnection, priva
             )
         } else if (packet.harVerdi(BEHANDLING_ID_KEY)) {
             repository.hentPesysId(packet.behandlingId)!!.let { Pair(it.pesysId, it.behandlingId) }
-        } else if (packet.harVerdi("vedtak.behandling.id")) {
-            repository.hentPesysId(packet["vedtak.behandling.id"].asText().toUUID())!!
-                .let { Pair(it.pesysId, it.behandlingId) }
         } else {
             throw IllegalArgumentException("Manglar pesys-identifikator, kan ikke kjøre feilhåndtering")
         }

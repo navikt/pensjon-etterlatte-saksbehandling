@@ -10,6 +10,7 @@ data class BeregningsinfoBP(
     val grunnbeloep: Kroner,
     val beregningsperioder: List<Beregningsperiode>,
     val antallBarn: Int,
-    val samlaTrygdetid: String,
+    val aarTrygdetid: Int,
+    val maanederTrygdetid: Int,
     val trygdetidsperioder: List<Trygdetidsperiode>,
 )

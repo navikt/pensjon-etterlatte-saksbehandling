@@ -40,7 +40,8 @@ data class Behandling(
 }
 
 data class Trygdetid(
-    val samlaTrygdetid: String,
+    val aarTrygdetid: Int,
+    val maanederTrygdetid: Int,
     val perioder: List<Trygdetidsperiode>,
 )
 

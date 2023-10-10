@@ -57,8 +57,9 @@ data class InnvilgetHovedmalBrevData(
                 grunnbeloep = behandling.utbetalingsinfo!!.beregningsperioder.last().grunnbeloep, // TODO
                 beregningsperioder = behandling.utbetalingsinfo.beregningsperioder,
                 antallBarn = behandling.utbetalingsinfo.antallBarn,
-                samlaTrygdetid = behandling.trygdetid?.samlaTrygdetid ?: "",
-                trygdetidsperioder = behandling.trygdetid?.perioder ?: listOf(),
+                aarTrygdetid = behandling.trygdetid!!.aarTrygdetid,
+                maanederTrygdetid = behandling.trygdetid.maanederTrygdetid,
+                trygdetidsperioder = behandling.trygdetid.perioder,
             )
         }
     }

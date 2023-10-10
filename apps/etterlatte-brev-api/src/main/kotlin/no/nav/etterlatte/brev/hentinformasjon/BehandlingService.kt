@@ -156,13 +156,15 @@ class BehandlingService(
         val forrigeUtbetalingsinfo =
             when (vedtak.behandling.type) {
                 BehandlingType.REVURDERING -> {
-                    val sisteIverksatteBehandling = behandlingKlient.hentSisteIverksatteBehandling(sak.id, brukerTokenInfo)
+                    val sisteIverksatteBehandling =
+                        behandlingKlient.hentSisteIverksatteBehandling(sak.id, brukerTokenInfo)
                     finnUtbetalingsinfo(
                         sisteIverksatteBehandling.id,
                         vedtak.virkningstidspunkt,
                         brukerTokenInfo,
                     )
                 }
+
                 else -> null
             }
         return forrigeUtbetalingsinfo
@@ -251,7 +253,13 @@ class BehandlingService(
             }
 
         val beregnetTrygdetid = trygdetidMedGrunnlag.beregnetTrygdetid?.resultat
-        val samlaTrygdetid = beregnetTrygdetid?.samletTrygdetidNorge ?: beregnetTrygdetid?.samletTrygdetidTeoretisk
-        return Trygdetid(samlaTrygdetid?.toString() ?: "", trygdetidsperioder)
+        val samlaTrygdetid = beregnetTrygdetid?.samletTrygdetidNorge ?: beregnetTrygdetid?.samletTrygdetidTeoretisk ?: 0
+        val aarTrygdetid = samlaTrygdetid % 12
+
+        return Trygdetid(
+            aarTrygdetid = aarTrygdetid,
+            maanederTrygdetid = samlaTrygdetid - aarTrygdetid,
+            perioder = trygdetidsperioder,
+        )
     }
 }

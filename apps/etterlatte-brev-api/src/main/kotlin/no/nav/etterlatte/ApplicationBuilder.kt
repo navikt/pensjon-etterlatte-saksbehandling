@@ -31,6 +31,7 @@ import no.nav.etterlatte.brev.hentinformasjon.SakService
 import no.nav.etterlatte.brev.hentinformasjon.SoekerService
 import no.nav.etterlatte.brev.hentinformasjon.Tilgangssjekker
 import no.nav.etterlatte.brev.hentinformasjon.TrygdetidKlient
+import no.nav.etterlatte.brev.hentinformasjon.TrygdetidService
 import no.nav.etterlatte.brev.hentinformasjon.VedtaksvurderingKlient
 import no.nav.etterlatte.brev.hentinformasjon.VedtaksvurderingService
 import no.nav.etterlatte.brev.hentinformasjon.VilkaarsvurderingKlient
@@ -104,13 +105,14 @@ class ApplicationBuilder {
     private val behandlingKlient = BehandlingKlient(config, httpClient())
     private val trygdetidKlient = TrygdetidKlient(config, httpClient())
     private val vilkaarsvurderingKlient = VilkaarsvurderingKlient(config, httpClient())
+    private val trygdetidService = TrygdetidService(trygdetidKlient)
     private val behandlingService =
         BehandlingService(
             vedtakKlient,
             grunnlagKlient,
             beregningKlient,
             behandlingKlient,
-            trygdetidKlient,
+            trygdetidService,
             vilkaarsvurderingKlient,
         )
     private val norg2Klient = Norg2Klient(env.requireEnvValue("NORG2_URL"), httpClient())

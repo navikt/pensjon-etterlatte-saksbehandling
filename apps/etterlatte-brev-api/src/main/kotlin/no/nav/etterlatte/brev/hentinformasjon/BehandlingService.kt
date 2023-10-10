@@ -8,8 +8,6 @@ import no.nav.etterlatte.brev.behandling.Behandling
 import no.nav.etterlatte.brev.behandling.Beregningsperiode
 import no.nav.etterlatte.brev.behandling.ForenkletVedtak
 import no.nav.etterlatte.brev.behandling.PersonerISak
-import no.nav.etterlatte.brev.behandling.Trygdetid
-import no.nav.etterlatte.brev.behandling.Trygdetidsperiode
 import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
 import no.nav.etterlatte.brev.behandling.hentUtbetaltBeloep
 import no.nav.etterlatte.brev.behandling.mapAvdoed
@@ -47,7 +45,7 @@ class BehandlingService(
     private val grunnlagKlient: GrunnlagKlient,
     private val beregningKlient: BeregningKlient,
     private val behandlingKlient: BehandlingKlient,
-    private val trygdetidKlient: TrygdetidKlient,
+    private val trygdetidService: TrygdetidService,
     private val vilkaarsvurderingKlient: VilkaarsvurderingKlient,
 ) : IBehandlingService {
     override suspend fun hentBehandling(
@@ -142,11 +140,7 @@ class BehandlingService(
             virkningsdato = vedtak.virkningstidspunkt,
             opprinneligInnvilgelsesdato = opprinneligInnvilgelsesdato,
             adopsjonsdato = LocalDate.now(), // TODO: Denne må vi hente anten frå PDL eller brukarinput
-            trygdetid =
-                finnTrygdetid(
-                    vedtak.behandling.id,
-                    brukerTokenInfo,
-                ),
+            trygdetid = trygdetidService.finnTrygdetid(vedtak.behandling.id, brukerTokenInfo),
             vilkaarsvurdering = vilkaarsvurdering,
             etterbetalingDTO = etterbetaling,
             grunnbeloep = grunnbeloep,
@@ -238,33 +232,6 @@ class BehandlingService(
             inntekt = Kroner(aarsInntekt),
             virkningsdato = virkningstidspunkt.atDay(1),
             beregningsperioder,
-        )
-    }
-
-    private suspend fun finnTrygdetid(
-        behandlingId: UUID,
-        brukerTokenInfo: BrukerTokenInfo,
-    ): Trygdetid? {
-        val trygdetidMedGrunnlag = trygdetidKlient.hentTrygdetid(behandlingId, brukerTokenInfo) ?: return null
-
-        val trygdetidsperioder =
-            trygdetidMedGrunnlag.trygdetidGrunnlag.map {
-                Trygdetidsperiode(
-                    datoFOM = it.periodeFra,
-                    datoTOM = it.periodeTil,
-                    land = it.bosted,
-                    opptjeningsperiode = it.beregnet?.aar.toString(),
-                )
-            }
-
-        val beregnetTrygdetid = trygdetidMedGrunnlag.beregnetTrygdetid?.resultat
-        val samlaTrygdetid = beregnetTrygdetid?.samletTrygdetidNorge ?: beregnetTrygdetid?.samletTrygdetidTeoretisk ?: 0
-        val aarTrygdetid = samlaTrygdetid % 12
-
-        return Trygdetid(
-            aarTrygdetid = aarTrygdetid,
-            maanederTrygdetid = samlaTrygdetid - aarTrygdetid,
-            perioder = trygdetidsperioder,
         )
     }
 }

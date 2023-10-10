@@ -51,7 +51,7 @@ internal class BehandlingServiceTest {
     private val grunnlagKlient = mockk<GrunnlagKlient>()
     private val beregningKlient = mockk<BeregningKlient>()
     private val behandlingKlient = mockk<BehandlingKlient>()
-    private val trygdetidKlient = mockk<TrygdetidKlient>()
+    private val trygdetidService = mockk<TrygdetidService>()
     private val vilkaarsvurderingKlient = mockk<VilkaarsvurderingKlient>()
 
     private val service =
@@ -60,7 +60,7 @@ internal class BehandlingServiceTest {
             grunnlagKlient,
             beregningKlient,
             behandlingKlient,
-            trygdetidKlient,
+            trygdetidService,
             vilkaarsvurderingKlient,
         )
 
@@ -86,7 +86,7 @@ internal class BehandlingServiceTest {
         coEvery { vedtaksvurderingKlient.hentVedtak(any(), any()) } returns opprettVedtak()
         coEvery { grunnlagKlient.hentGrunnlag(SAK_ID, BRUKERTokenInfo) } returns opprettGrunnlag()
         coEvery { beregningKlient.hentBeregning(any(), any()) } returns opprettBeregning()
-        coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns opprettTrygdetid()
+        coEvery { trygdetidService.finnTrygdetid(any(), any()) } returns opprettTrygdetid()
         coEvery { vilkaarsvurderingKlient.hentVilkaarsvurdering(any(), any()) } returns opprettVilkaarsvurdering()
         coEvery { beregningKlient.hentGrunnbeloep(any()) } returns opprettGrunnbeloep()
 
@@ -132,7 +132,7 @@ internal class BehandlingServiceTest {
         coEvery { vedtaksvurderingKlient.hentVedtak(any(), any()) } returns opprettVedtak()
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns opprettGrunnlag()
         coEvery { beregningKlient.hentBeregning(any(), any()) } returns opprettBeregning()
-        coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns opprettTrygdetid()
+        coEvery { trygdetidService.finnTrygdetid(any(), any()) } returns opprettTrygdetid()
         coEvery { vilkaarsvurderingKlient.hentVilkaarsvurdering(any(), any()) } returns opprettVilkaarsvurdering()
         coEvery { beregningKlient.hentGrunnbeloep(any()) } returns mockk()
 
@@ -170,7 +170,7 @@ internal class BehandlingServiceTest {
         coEvery { vedtaksvurderingKlient.hentVedtak(any(), any()) } returns opprettVedtak()
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns opprettGrunnlag()
         coEvery { beregningKlient.hentBeregning(any(), any()) } returns opprettBeregningSoeskenjustering()
-        coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns opprettTrygdetid()
+        coEvery { trygdetidService.finnTrygdetid(any(), any()) } returns opprettTrygdetid()
         coEvery { vilkaarsvurderingKlient.hentVilkaarsvurdering(any(), any()) } returns opprettVilkaarsvurdering()
         coEvery { beregningKlient.hentGrunnbeloep(any()) } returns mockk()
 

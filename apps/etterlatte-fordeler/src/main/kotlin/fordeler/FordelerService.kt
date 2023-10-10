@@ -75,7 +75,7 @@ class FordelerService(
                 "Fikk en familierelasjon som mangler ident fra PDL. Disse tilfellene støtter vi ikke per nå." +
                     " Se sikkerlogg for detaljer",
             )
-            sikkerLogg.info("Fikk en søknad med en familierelasjon som manglet ident", e)
+            sikkerLogg.info("Søknad ${event.soeknadId} har en familierelasjon som mangler ident", e)
 
             if (featureToggleService.isEnabled(FordelerFeatureToggle.ManuellJournalfoering, false)) {
                 FordelerResultat.TrengerManuellJournalfoering(e.message)

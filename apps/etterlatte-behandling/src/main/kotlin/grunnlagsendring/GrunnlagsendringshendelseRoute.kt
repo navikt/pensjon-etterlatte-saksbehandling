@@ -96,10 +96,8 @@ internal fun Route.grunnlagsendringshendelseRoute(grunnlagsendringshendelseServi
     route("/api/grunnlagsendringshendelse/{$SAKID_CALL_PARAMETER}/institusjon") {
         get {
             call.respond(
-                GrunnlagsendringsListe(
-                    grunnlagsendringshendelseService
-                        .hentAlleHendelserForSakAvType(sakId, GrunnlagsendringsType.INSTITUSJONSOPPHOLD),
-                ),
+                grunnlagsendringshendelseService
+                    .hentAlleHendelserForSakAvType(sakId, GrunnlagsendringsType.INSTITUSJONSOPPHOLD),
             )
         }
     }

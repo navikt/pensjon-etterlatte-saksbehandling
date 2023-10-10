@@ -1,26 +1,27 @@
-import { isFailure, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
-import { hentGrunnlagsendringshendelserInstitusjonsoppholdforSak } from '~shared/api/behandling'
+import { mapAllApiResult, useApiCall } from '~shared/hooks/useApiCall'
+import { hentGrunnlagsendringshendelserInstitusjonsoppholdForSak } from '~shared/api/behandling'
 import React, { useEffect } from 'react'
 import { InstitusjonsoppholdSamsvar } from '~components/person/typer'
 import { Table } from '@navikt/ds-react'
 import { formaterStringDato } from '~utils/formattering'
-import { isPending } from '@reduxjs/toolkit'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import Spinner from '~shared/Spinner'
 
 const Insthendelser = (props: { sakid: number }) => {
   const { sakid } = props
-  const [hendelser, hentInsthendelser] = useApiCall(hentGrunnlagsendringshendelserInstitusjonsoppholdforSak)
+  const [hendelser, hentInsthendelser] = useApiCall(hentGrunnlagsendringshendelserInstitusjonsoppholdForSak)
 
   useEffect(() => {
     hentInsthendelser(sakid)
   }, [])
 
-  return (
-    <>
-      {isPending(hendelser) && <Spinner visible label="Henter institusjonshendelser for søsken" />}
-      {isFailure(hendelser) && <ApiErrorAlert>Institusjonshendelser kan ikke hentes</ApiErrorAlert>}
-      {isSuccess(hendelser) && hendelser.data.length > 0 && (
+  return mapAllApiResult(
+    hendelser,
+    <Spinner visible label="Henter institusjonshendelser for søsken" />,
+    null,
+    () => <ApiErrorAlert>Institusjonshendelser kan ikke hentes</ApiErrorAlert>,
+    (hendelserarr) => {
+      return (
         <Table>
           <Table.Header>
             <Table.Row>
@@ -32,7 +33,7 @@ const Insthendelser = (props: { sakid: number }) => {
             </Table.Row>
           </Table.Header>
           <Table.Body>
-            {hendelser.data.map((hendelse) => {
+            {hendelserarr.map((hendelse) => {
               const inst = hendelse.samsvarMellomKildeOgGrunnlag as InstitusjonsoppholdSamsvar
               return (
                 <Table.Row key={hendelse.id}>
@@ -62,8 +63,8 @@ const Insthendelser = (props: { sakid: number }) => {
             })}
           </Table.Body>
         </Table>
-      )}
-    </>
+      )
+    }
   )
 }
 

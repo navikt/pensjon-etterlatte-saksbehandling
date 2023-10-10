@@ -109,26 +109,7 @@ data class BrevInnholdVedlegg(
     val tittel: String,
     val key: BrevVedleggKey,
     val payload: Slate? = null,
-) {
-    companion object {
-        fun inntektsendringOMS(): List<BrevInnholdVedlegg> =
-            listOf(
-                utfallBeregningOMS(),
-            )
-
-        fun innvilgelseOMS(): List<BrevInnholdVedlegg> =
-            listOf(
-                utfallBeregningOMS(),
-            )
-
-        private fun utfallBeregningOMS() =
-            BrevInnholdVedlegg(
-                tittel = "Utfall ved beregning av omstillingsstønad",
-                key = BrevVedleggKey.BEREGNING_INNHOLD,
-                payload = SlateHelper.getSlate("/maler/vedlegg/oms_utfall_beregning.json"),
-            )
-    }
-}
+)
 
 enum class BrevVedleggKey {
     BEREGNING_INNHOLD,

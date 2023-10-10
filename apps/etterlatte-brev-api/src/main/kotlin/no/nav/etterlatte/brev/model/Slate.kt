@@ -3,6 +3,7 @@ package no.nav.etterlatte.brev.model
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonValue
 import no.nav.etterlatte.brev.behandling.Behandling
+import no.nav.etterlatte.brev.model.oms.VedleggOMS
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.deserialize
@@ -59,12 +60,12 @@ object SlateHelper {
         return when (behandling.sakType) {
             SakType.OMSTILLINGSSTOENAD -> {
                 when (behandling.vedtak.type) {
-                    VedtakType.INNVILGELSE -> BrevInnholdVedlegg.innvilgelseOMS()
+                    VedtakType.INNVILGELSE -> VedleggOMS.innvilgelseOMS()
                     VedtakType.ENDRING -> {
                         when (behandling.revurderingsaarsak) {
                             RevurderingAarsak.INNTEKTSENDRING,
                             RevurderingAarsak.ANNEN,
-                            -> BrevInnholdVedlegg.inntektsendringOMS()
+                            -> VedleggOMS.inntektsendringOMS()
                             else -> null
                         }
                     }

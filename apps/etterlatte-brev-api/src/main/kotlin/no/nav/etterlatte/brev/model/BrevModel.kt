@@ -113,6 +113,7 @@ data class BrevInnholdVedlegg(
 
 enum class BrevVedleggKey {
     BEREGNING_INNHOLD,
+    BP_BEREGNING_TRYGDETID,
 }
 
 data class OpprettNyttBrev(

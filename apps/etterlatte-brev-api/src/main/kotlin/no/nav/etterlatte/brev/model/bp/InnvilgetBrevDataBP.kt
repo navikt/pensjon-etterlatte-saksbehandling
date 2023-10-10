@@ -12,24 +12,16 @@ import java.time.LocalDate
 data class InnvilgetBrevDataEnkel(
     val utbetalingsinfo: Utbetalingsinfo,
     val avdoed: Avdoed,
-    val erEtterbetaling: Boolean,
     val vedtaksdato: LocalDate,
-    val erInstitusjonsopphold: Boolean,
 ) : BrevData() {
     companion object {
         fun fra(behandling: Behandling) =
             InnvilgetBrevDataEnkel(
                 utbetalingsinfo = behandling.utbetalingsinfo!!,
                 avdoed = behandling.personerISak.avdoed,
-                erEtterbetaling = behandling.etterbetalingDTO != null,
                 vedtaksdato =
                     behandling.vedtak.vedtaksdato
                         ?: LocalDate.now(),
-                erInstitusjonsopphold =
-                    behandling.utbetalingsinfo.beregningsperioder
-                        .filter { it.datoFOM.isBefore(LocalDate.now().plusDays(1)) }
-                        .firstOrNull { it.datoTOM.erSamtidigEllerEtter(LocalDate.now()) }
-                        ?.institusjon ?: false,
             )
     }
 }
@@ -53,5 +45,3 @@ data class InnvilgetHovedmalBrevData(
             )
     }
 }
-
-private fun LocalDate?.erSamtidigEllerEtter(dato: LocalDate) = this == null || this.isAfter(dato.minusDays(1))

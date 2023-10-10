@@ -3,6 +3,7 @@ package no.nav.etterlatte.brev.model
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonValue
 import no.nav.etterlatte.brev.behandling.Behandling
+import no.nav.etterlatte.brev.model.bp.VedleggBP
 import no.nav.etterlatte.brev.model.oms.VedleggOMS
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -38,23 +39,22 @@ data class Slate(
 }
 
 object SlateHelper {
-    fun hentInitiellPayload(behandling: Behandling): Slate {
-        return when (behandling.sakType) {
+    fun hentInitiellPayload(behandling: Behandling): Slate =
+        when (behandling.sakType) {
             SakType.OMSTILLINGSSTOENAD -> {
                 when (behandling.vedtak.type) {
-                    VedtakType.INNVILGELSE -> getJsonFile("/maler/oms-nasjonal-innvilget.json")
-                    else -> getJsonFile("/maler/tom-brevmal.json")
+                    VedtakType.INNVILGELSE -> getSlate("/maler/oms-nasjonal-innvilget.json")
+                    else -> getSlate("/maler/tom-brevmal.json")
                 }
             }
 
             SakType.BARNEPENSJON -> {
                 when (behandling.vedtak.type) {
-                    VedtakType.AVSLAG -> getJsonFile("/maler/bp-avslag.json")
-                    else -> getJsonFile("/maler/tom-brevmal.json")
+                    VedtakType.AVSLAG -> getSlate("/maler/bp-avslag.json")
+                    else -> getSlate("/maler/tom-brevmal.json")
                 }
             }
-        }.let { deserialize(it) }
-    }
+        }
 
     fun hentInitiellPayloadVedlegg(behandling: Behandling): List<BrevInnholdVedlegg>? {
         return when (behandling.sakType) {
@@ -73,11 +73,16 @@ object SlateHelper {
                 }
             }
 
-            SakType.BARNEPENSJON -> null
+            SakType.BARNEPENSJON -> {
+                when (behandling.vedtak.type) {
+                    VedtakType.INNVILGELSE -> VedleggBP.innvilgelse()
+                    else -> null
+                }
+            }
         }
     }
 
-    fun opprettTomBrevmal() = deserialize<Slate>(getJsonFile("/maler/tom-brevmal.json"))
+    fun opprettTomBrevmal() = getSlate("/maler/tom-brevmal.json")
 
     private fun getJsonFile(url: String) = javaClass.getResource(url)!!.readText()
 

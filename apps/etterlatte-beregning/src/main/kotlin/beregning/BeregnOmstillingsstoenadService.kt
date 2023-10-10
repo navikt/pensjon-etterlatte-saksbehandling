@@ -50,7 +50,7 @@ class BeregnOmstillingsstoenadService(
         behandling: DetaljertBehandling,
         brukerTokenInfo: BrukerTokenInfo,
     ): Beregning {
-        val grunnlag = grunnlagKlient.hentGrunnlag(behandling.sak, brukerTokenInfo)
+        val grunnlag = grunnlagKlient.hentGrunnlag(behandling.id, brukerTokenInfo)
         val trygdetid =
             trygdetidKlient.hentTrygdetid(behandling.id, brukerTokenInfo) ?: throw Exception(
                 "Forventa å ha trygdetid for behandlingId=${behandling.id}",

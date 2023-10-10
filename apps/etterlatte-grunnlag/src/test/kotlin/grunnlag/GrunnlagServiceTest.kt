@@ -1,14 +1,18 @@
 package no.nav.etterlatte.grunnlag
 
+import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import kotlinx.coroutines.runBlocking
 import lagGrunnlagHendelse
 import no.nav.etterlatte.klienter.PdlTjenesterKlientImpl
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.Opplysning
+import no.nav.etterlatte.libs.common.grunnlag.Opplysningsbehov
 import no.nav.etterlatte.libs.common.grunnlag.hentBostedsadresse
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Navn
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.BOSTEDSADRESSE
@@ -27,36 +31,21 @@ import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import no.nav.etterlatte.libs.testdata.grunnlag.kilde
 import no.nav.etterlatte.libs.testdata.grunnlag.statiskUuid
 import org.junit.jupiter.api.Assertions
-import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.EnumSource
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Month
 import java.util.UUID
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class GrunnlagServiceTest {
     private val opplysningerMock = mockk<OpplysningDao>()
     private val pdlTjenesterKlientImpl = mockk<PdlTjenesterKlientImpl>()
     private val grunnlagService = RealGrunnlagService(pdlTjenesterKlientImpl, opplysningerMock, mockk())
 
     private val testData = GrunnlagTestData()
-
-    @BeforeAll
-    fun beforeAll() {
-        every { opplysningerMock.finnNyesteGrunnlag(1, PERSONGALLERI_V1) } returns
-            lagGrunnlagHendelse(
-                1,
-                4,
-                PERSONGALLERI_V1,
-                id = statiskUuid,
-                fnr = testData.soeker.foedselsnummer,
-                verdi = testData.hentPersonGalleri().toJsonNode(),
-                kilde = kilde,
-            )
-    }
 
     @Nested
     inner class MapperTilRiktigKategoriTest {
@@ -507,6 +496,36 @@ internal class GrunnlagServiceTest {
             Assertions.assertEquals(1, opplysningsgrunnlag.sak.size)
             Assertions.assertEquals(1, opplysningsgrunnlag.familie.size)
             Assertions.assertEquals(2, opplysningsgrunnlag.hentInnsender().size)
+        }
+    }
+
+    @Nested
+    inner class `Oppdatering av grunnlag`() {
+        @ParameterizedTest
+        @EnumSource(SakType::class)
+        fun `Alle i persongalleri oppdateres i grunnlag`(sakType: SakType) {
+            val persongalleri =
+                Persongalleri(
+                    soeker = "soeker",
+                    innsender = "innsender",
+                    soesken = listOf("soesken"),
+                    avdoed = listOf("avdoed"),
+                    gjenlevende = listOf("gjenlevende"),
+                )
+
+            coEvery { pdlTjenesterKlientImpl.hentPerson(persongalleri.soeker, any(), any()) } returns mockk()
+            coEvery { pdlTjenesterKlientImpl.hentPerson(persongalleri.innsender!!, any(), any()) } returns mockk()
+            coEvery { pdlTjenesterKlientImpl.hentPerson(persongalleri.soesken.first(), any(), any()) } returns mockk()
+            coEvery { pdlTjenesterKlientImpl.hentPerson(persongalleri.avdoed.first(), any(), any()) } returns mockk()
+            coEvery { pdlTjenesterKlientImpl.hentPerson(persongalleri.gjenlevende.first(), any(), any()) } returns mockk()
+
+            coEvery { pdlTjenesterKlientImpl.hentOpplysningsperson(any(), any(), any()) } returns mockk()
+
+            val behov = Opplysningsbehov(1, sakType, persongalleri)
+
+            runBlocking {
+                grunnlagService.oppdaterGrunnlag(behov)
+            }
         }
     }
 

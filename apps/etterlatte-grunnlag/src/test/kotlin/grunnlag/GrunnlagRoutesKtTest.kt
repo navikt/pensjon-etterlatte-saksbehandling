@@ -202,7 +202,7 @@ internal class GrunnlagRoutesKtTest {
             val actualResponse =
                 httpClient.post("api/grunnlag/sak/$sakId/nye-opplysninger") {
                     contentType(ContentType.Application.Json)
-                    setBody(NyeSaksopplysninger(opplysninger))
+                    setBody(NyeSaksopplysninger(sakId, opplysninger))
                     headers {
                         append(HttpHeaders.Authorization, "Bearer $token")
                     }

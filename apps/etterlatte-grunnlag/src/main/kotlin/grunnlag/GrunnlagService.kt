@@ -86,7 +86,7 @@ class RealGrunnlagService(
         val persongalleri = objectMapper.readValue(persongalleriJsonNode.opplysning.toJson(), Persongalleri::class.java)
         val grunnlag = opplysningDao.hentAlleGrunnlagForSak(sak)
 
-        return OpplysningsgrunnlagMapper(grunnlag, sak, persongalleri).hentGrunnlag()
+        return OpplysningsgrunnlagMapper(grunnlag, persongalleri).hentGrunnlag()
     }
 
     override fun hentSakerOgRoller(fnr: Folkeregisteridentifikator): PersonMedSakerOgRoller {

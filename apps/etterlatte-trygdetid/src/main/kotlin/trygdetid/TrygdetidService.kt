@@ -93,7 +93,7 @@ class TrygdetidService(
         behandling: DetaljertBehandling,
         brukerTokenInfo: BrukerTokenInfo,
     ): Trygdetid {
-        val avdoed = grunnlagKlient.hentGrunnlag(behandling.sak, brukerTokenInfo).hentAvdoed()
+        val avdoed = grunnlagKlient.hentGrunnlag(behandling.id, brukerTokenInfo).hentAvdoed()
         val trygdetid =
             Trygdetid(
                 sakId = behandling.sak,
@@ -191,9 +191,7 @@ class TrygdetidService(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): DatoerForBehandling {
-        val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
-
-        val avdoed = grunnlagKlient.hentGrunnlag(behandling.sak, brukerTokenInfo).hentAvdoed()
+        val avdoed = grunnlagKlient.hentGrunnlag(behandlingId, brukerTokenInfo).hentAvdoed()
 
         return DatoerForBehandling(
             foedselsDato =

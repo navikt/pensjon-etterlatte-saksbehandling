@@ -356,7 +356,8 @@ class GrunnlagsendringshendelseService(
         val pdlData = pdlKlient.hentPdlModell(hendelse.gjelderPerson, personRolle, sak.sakType)
         val grunnlag =
             runBlocking {
-                grunnlagKlient.hentGrunnlag(hendelse.sakId)
+                // TODO: behandlingId ikke nødvendigvis tilgjengelig her... hva blir riktig?
+                grunnlagKlient.hentGrunnlagForSak(hendelse.sakId)
             }
         try {
             val samsvarMellomPdlOgGrunnlag = finnSamsvarForHendelse(hendelse, pdlData, grunnlag, personRolle)

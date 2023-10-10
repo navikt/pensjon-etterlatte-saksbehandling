@@ -33,6 +33,7 @@ export default function RelevanteHendelser(props: Props) {
   const [relevanteHendelser, setRelevanteHendelser] = useState<Grunnlagsendringshendelse[]>([])
   const [hendelserStatus, hentHendelser] = useApiCall(hentGrunnlagsendringshendelserForPerson)
   const [revurderingerStatus, hentRevurderinger] = useApiCall(hentStoettedeRevurderinger)
+  // TODO: Dette kan bli problematisk... hva blir riktig her?
   const [personerISak, hentPersoner, resetPersoner] = useApiCall(hentPersonerISak)
 
   useEffect(() => {

@@ -7,5 +7,5 @@ class SoekerService(private val grunnlagKlient: GrunnlagKlient) {
     suspend fun hentSoeker(
         sakId: Long,
         bruker: BrukerTokenInfo,
-    ) = grunnlagKlient.hentGrunnlag(sakId, bruker).mapSoeker()
+    ) = grunnlagKlient.hentGrunnlagForSak(sakId, bruker).mapSoeker()
 }

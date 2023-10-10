@@ -14,16 +14,17 @@ import no.nav.etterlatte.libs.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktorobo.Resource
 import no.nav.etterlatte.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
+import java.util.UUID
 
 interface GrunnlagKlient {
     suspend fun finnPersonOpplysning(
-        sakId: Long,
+        behandlingId: UUID,
         opplysningsType: Opplysningstype,
         brukerTokenInfo: BrukerTokenInfo,
     ): Grunnlagsopplysning<Person>?
 
     suspend fun hentPersongalleri(
-        sakId: Long,
+        behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): Grunnlagsopplysning<Persongalleri>?
 }
@@ -40,19 +41,19 @@ class GrunnlagKlientObo(config: Config, httpClient: HttpClient) : GrunnlagKlient
     private val resourceUrl = config.getString("grunnlag.resource.url")
 
     override suspend fun finnPersonOpplysning(
-        sakId: Long,
+        behandlingId: UUID,
         opplysningsType: Opplysningstype,
         brukerTokenInfo: BrukerTokenInfo,
     ): Grunnlagsopplysning<Person>? {
         try {
-            logger.info("Henter opplysning ($opplysningsType) fra grunnlag for sak med sakId=$sakId")
+            logger.info("Henter opplysning ($opplysningsType) fra grunnlag for behandling (id=$behandlingId)")
 
             return downstreamResourceClient
                 .get(
                     resource =
                         Resource(
                             clientId = clientId,
-                            url = "$resourceUrl/grunnlag/sak/$sakId/$opplysningsType",
+                            url = "$resourceUrl/grunnlag/behandling/$behandlingId/$opplysningsType",
                         ),
                     brukerTokenInfo = brukerTokenInfo,
                 )
@@ -62,25 +63,25 @@ class GrunnlagKlientObo(config: Config, httpClient: HttpClient) : GrunnlagKlient
                 )
         } catch (e: Exception) {
             throw GrunnlagKlientException(
-                "Henting av opplysning ($opplysningsType) fra grunnlag for sak med sakId=$sakId feilet",
+                "Henting av opplysning ($opplysningsType) fra grunnlag for behandling (id=$behandlingId) feilet",
                 e,
             )
         }
     }
 
     override suspend fun hentPersongalleri(
-        sakId: Long,
+        behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): Grunnlagsopplysning<Persongalleri>? {
         try {
-            logger.info("Henter persongalleri fra grunnlag for sak med sakId=$sakId")
+            logger.info("Henter persongalleri fra grunnlag for behandling (id=$behandlingId)")
 
             return downstreamResourceClient
                 .get(
                     resource =
                         Resource(
                             clientId = clientId,
-                            url = "$resourceUrl/grunnlag/sak/$sakId/${Opplysningstype.PERSONGALLERI_V1}",
+                            url = "$resourceUrl/grunnlag/behandling/$behandlingId/${Opplysningstype.PERSONGALLERI_V1}",
                         ),
                     brukerTokenInfo = brukerTokenInfo,
                 )
@@ -89,7 +90,7 @@ class GrunnlagKlientObo(config: Config, httpClient: HttpClient) : GrunnlagKlient
                     failure = { errorResponse -> throw errorResponse },
                 )
         } catch (e: Exception) {
-            throw GrunnlagKlientException("Henting av persongalleri fra grunnlag for sak med sakId=$sakId feilet", e)
+            throw GrunnlagKlientException("Henting av persongalleri fra grunnlag for behandling (id=$behandlingId) feilet", e)
         }
     }
 }

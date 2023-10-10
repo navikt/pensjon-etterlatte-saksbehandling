@@ -136,7 +136,7 @@ internal class TrygdetidServiceTest {
         coVerify(exactly = 1) {
             behandlingKlient.kanOppdatereTrygdetid(behandlingId, saksbehandler)
             behandlingKlient.hentBehandling(behandlingId, saksbehandler)
-            grunnlagKlient.hentGrunnlag(sakId, saksbehandler)
+            grunnlagKlient.hentGrunnlag(behandlingId, saksbehandler)
             repository.hentTrygdetid(behandlingId)
             repository.opprettTrygdetid(
                 withArg { trygdetid ->

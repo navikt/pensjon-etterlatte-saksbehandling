@@ -417,7 +417,7 @@ abstract class BehandlingIntegrationTest {
 
 class GrunnlagKlientTest : GrunnlagKlient {
     override suspend fun finnPersonOpplysning(
-        sakId: Long,
+        behandlingId: UUID,
         opplysningsType: Opplysningstype,
         brukerTokenInfo: BrukerTokenInfo,
     ): Grunnlagsopplysning<Person> {
@@ -426,7 +426,7 @@ class GrunnlagKlientTest : GrunnlagKlient {
     }
 
     override suspend fun hentPersongalleri(
-        sakId: Long,
+        behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): Grunnlagsopplysning<Persongalleri> {
         return Grunnlagsopplysning(

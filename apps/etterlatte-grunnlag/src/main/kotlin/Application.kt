@@ -63,6 +63,7 @@ class ApplicationBuilder {
             .withKtorModule {
                 restModule(sikkerLogg, routePrefix = "api", config = HoconApplicationConfig(config)) {
                     route("grunnlag") {
+//                        nyGrunnlagRoute(grunnlagService, behandlingKlient)
                         grunnlagRoute(grunnlagService, behandlingKlient)
                         personRoute(grunnlagService, behandlingKlient)
                     }

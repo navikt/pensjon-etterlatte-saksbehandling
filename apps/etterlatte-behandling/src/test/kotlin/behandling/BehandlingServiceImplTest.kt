@@ -444,7 +444,7 @@ class BehandlingServiceImplTest {
         val grunnlagKlient =
             mockk<GrunnlagKlientTest> {
                 coEvery {
-                    finnPersonOpplysning(SAK_ID, opplysningstype, TOKEN)
+                    finnPersonOpplysning(behandling.id, opplysningstype, TOKEN)
                 } returns grunnlagsopplysningMedPersonopplysning
                 coEvery { hentPersongalleri(any(), any()) } answers { callOriginal() }
             }
@@ -777,7 +777,7 @@ class BehandlingServiceImplTest {
         val grunnlagKlient =
             mockk<GrunnlagKlientTest> {
                 coEvery {
-                    finnPersonOpplysning(SAK_ID, Opplysningstype.AVDOED_PDL_V1, TOKEN)
+                    finnPersonOpplysning(behandling.id, Opplysningstype.AVDOED_PDL_V1, TOKEN)
                 } returns grunnlagsopplysningMedPersonopplysning
                 coEvery { hentPersongalleri(any(), any()) } answers { callOriginal() }
             }

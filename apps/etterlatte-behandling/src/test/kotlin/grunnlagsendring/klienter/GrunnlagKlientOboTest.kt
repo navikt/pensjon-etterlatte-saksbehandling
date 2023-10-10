@@ -30,7 +30,7 @@ internal class GrunnlagKlientOboTest {
         val klient = GrunnlagKlientImpl(config, mockHttpClient(grunnlag))
         val hentetGrunnlag =
             runBlocking {
-                klient.hentGrunnlag(1)
+                klient.hentGrunnlagForSak(1)
             }
         assertEquals(grunnlag.soeker, hentetGrunnlag?.soeker)
     }

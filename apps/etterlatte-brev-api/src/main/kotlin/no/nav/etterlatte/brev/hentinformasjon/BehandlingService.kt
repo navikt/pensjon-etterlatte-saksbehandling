@@ -55,7 +55,7 @@ class BehandlingService(
     ): Behandling =
         coroutineScope {
             val vedtak = async { vedtaksvurderingKlient.hentVedtak(behandlingId, brukerTokenInfo) }
-            val grunnlag = async { grunnlagKlient.hentGrunnlag(sakId, brukerTokenInfo) }
+            val grunnlag = async { grunnlagKlient.hentGrunnlag(behandlingId, brukerTokenInfo) }
             val sak = async { behandlingKlient.hentSak(sakId, brukerTokenInfo) }
             val vilkaarsvurdering =
                 async { vilkaarsvurderingKlient.hentVilkaarsvurdering(behandlingId, brukerTokenInfo) }

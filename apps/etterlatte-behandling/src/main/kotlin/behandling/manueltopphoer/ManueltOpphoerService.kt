@@ -90,48 +90,52 @@ class RealManueltOpphoerService(
                 return@inTransaction null
             }
 
-            when (forrigeBehandling) {
-                is Foerstegangsbehandling, is Revurdering ->
-                    OpprettBehandling(
-                        type = BehandlingType.MANUELT_OPPHOER,
-                        sakId = forrigeBehandling.sak.id,
-                        status = BehandlingStatus.OPPRETTET,
-                        opphoerAarsaker = opphoerRequest.opphoerAarsaker,
-                        fritekstAarsak = opphoerRequest.fritekstAarsak,
-                        virkningstidspunkt = virkningstidspunkt,
-                        kilde = Vedtaksloesning.GJENNY,
-                    )
+            val nyBehandling =
+                when (forrigeBehandling) {
+                    is Foerstegangsbehandling, is Revurdering ->
+                        OpprettBehandling(
+                            type = BehandlingType.MANUELT_OPPHOER,
+                            sakId = forrigeBehandling.sak.id,
+                            status = BehandlingStatus.OPPRETTET,
+                            opphoerAarsaker = opphoerRequest.opphoerAarsaker,
+                            fritekstAarsak = opphoerRequest.fritekstAarsak,
+                            virkningstidspunkt = virkningstidspunkt,
+                            kilde = Vedtaksloesning.GJENNY,
+                        )
 
-                is ManueltOpphoer -> {
-                    logger.error("Kan ikke manuelt opphøre et manuelt opphør.")
-                    null
+                    is ManueltOpphoer -> {
+                        logger.error("Kan ikke manuelt opphøre et manuelt opphør.")
+                        return@inTransaction null
+                    }
+
+                    null -> {
+                        logger.error("En forrige ikke-avbrutt behandling for sak ${opphoerRequest.sakId} eksisterer ikke")
+                        return@inTransaction null
+                    }
                 }
 
-                null -> {
-                    logger.error("En forrige ikke-avbrutt behandling for sak ${opphoerRequest.sakId} eksisterer ikke")
-                    null
-                }
-            }?.let {
-                behandlingDao.opprettBehandling(it)
-                hendelseDao.behandlingOpprettet(it.toBehandlingOpprettet())
-                it.id
-            }?.let { id ->
-                oppgaveService.opprettNyOppgaveMedSakOgReferanse(
-                    referanse = id.toString(),
-                    sakId = opphoerRequest.sakId,
-                    oppgaveKilde = OppgaveKilde.BEHANDLING,
-                    oppgaveType = OppgaveType.MANUELT_OPPHOER,
-                    merknad = null,
-                )
-                (behandlingDao.hentBehandling(id) as ManueltOpphoer).sjekkEnhet()
-            }
-        }?.also { lagretManueltOpphoer ->
-            val persongalleri = runBlocking { grunnlagService.hentPersongalleri(opphoerRequest.sakId) }
-            behandlingHendelser.sendMeldingForHendelseMedDetaljertBehandling(
-                lagretManueltOpphoer.toStatistikkBehandling(persongalleri = persongalleri),
-                BehandlingHendelseType.OPPRETTET,
+            behandlingDao.opprettBehandling(nyBehandling)
+            hendelseDao.behandlingOpprettet(nyBehandling.toBehandlingOpprettet())
+
+            oppgaveService.opprettNyOppgaveMedSakOgReferanse(
+                referanse = nyBehandling.id.toString(),
+                sakId = opphoerRequest.sakId,
+                oppgaveKilde = OppgaveKilde.BEHANDLING,
+                oppgaveType = OppgaveType.MANUELT_OPPHOER,
+                merknad = null,
             )
-            logger.info("Manuelt opphør med id=${lagretManueltOpphoer.id} er opprettet.")
+
+            // TODO: Eventuelle feil her vil stoppe inTransaction.
+            //  Er det greit å hoppe over statistikk eller burde vi sikre at det alltid sendes melding?
+            (behandlingDao.hentBehandling(nyBehandling.id) as ManueltOpphoer).sjekkEnhet()
+                ?.also { lagretManueltOpphoer ->
+                    val persongalleri = runBlocking { grunnlagService.hentPersongalleri(forrigeBehandling.id) }
+                    behandlingHendelser.sendMeldingForHendelseMedDetaljertBehandling(
+                        lagretManueltOpphoer.toStatistikkBehandling(persongalleri = persongalleri),
+                        BehandlingHendelseType.OPPRETTET,
+                    )
+                    logger.info("Manuelt opphør med id=${lagretManueltOpphoer.id} er opprettet.")
+                }
         }
     }
 

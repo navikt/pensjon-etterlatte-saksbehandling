@@ -2,14 +2,12 @@ package no.nav.etterlatte.brev.model
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import no.nav.etterlatte.brev.adresse.RegoppslagResponseDTO
-import no.nav.etterlatte.brev.behandling.Behandling
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
-import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
-import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.brev.behandling.Trygdetidsperiode
 import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
-import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
+import no.nav.pensjon.brevbaker.api.model.Kroner
+import java.time.LocalDate
 import java.util.UUID
 
 typealias BrevID = Long
@@ -157,68 +155,21 @@ enum class BrevProsessType {
     AUTOMATISK,
 }
 
-class BrevProsessTypeFactory(private val featureToggleService: FeatureToggleService) {
-    fun fra(behandling: Behandling): BrevProsessType {
-        return when (behandling.sakType) {
-            SakType.OMSTILLINGSSTOENAD -> omsBrev(behandling)
-            SakType.BARNEPENSJON -> bpBrev(behandling)
-        }
-    }
+data class EtterbetalingDTO(
+    val fraDato: LocalDate,
+    val tilDato: LocalDate,
+)
 
-    private fun omsBrev(behandling: Behandling): BrevProsessType {
-        return when (behandling.vedtak.type) {
-            VedtakType.INNVILGELSE -> BrevProsessType.REDIGERBAR
-            VedtakType.OPPHOER ->
-                when (behandling.revurderingsaarsak?.redigerbartBrev) {
-                    true -> BrevProsessType.REDIGERBAR
-                    else -> BrevProsessType.MANUELL
-                }
+data class Beregningsinfo(
+    val innhold: List<Slate.Element>,
+    val grunnbeloep: Kroner,
+    val beregningsperioder: List<NyBeregningsperiode>,
+    val trygdetidsperioder: List<Trygdetidsperiode>,
+)
 
-            VedtakType.AVSLAG,
-            VedtakType.ENDRING,
-            ->
-                when (behandling.revurderingsaarsak) {
-                    RevurderingAarsak.INNTEKTSENDRING,
-                    RevurderingAarsak.ANNEN,
-                    -> BrevProsessType.REDIGERBAR
-
-                    else -> BrevProsessType.MANUELL
-                }
-            VedtakType.TILBAKEKREVING -> TODO("EY-2806")
-        }
-    }
-
-    private fun bpBrev(behandling: Behandling): BrevProsessType {
-        return when (behandling.vedtak.type) {
-            VedtakType.INNVILGELSE ->
-                when (
-                    featureToggleService.isEnabled(
-                        BrevDataFeatureToggle.NyMalInnvilgelse,
-                        false,
-                    )
-                ) {
-                    true -> BrevProsessType.REDIGERBAR
-                    false -> BrevProsessType.AUTOMATISK
-                }
-
-            VedtakType.ENDRING ->
-                when (behandling.revurderingsaarsak) {
-                    RevurderingAarsak.SOESKENJUSTERING -> BrevProsessType.REDIGERBAR
-                    RevurderingAarsak.FENGSELSOPPHOLD -> BrevProsessType.REDIGERBAR
-                    RevurderingAarsak.UT_AV_FENGSEL -> BrevProsessType.REDIGERBAR
-                    RevurderingAarsak.YRKESSKADE -> BrevProsessType.REDIGERBAR
-                    RevurderingAarsak.ANNEN -> BrevProsessType.REDIGERBAR
-                    else -> BrevProsessType.MANUELL
-                }
-
-            VedtakType.OPPHOER ->
-                when (behandling.revurderingsaarsak?.redigerbartBrev) {
-                    true -> BrevProsessType.REDIGERBAR
-                    else -> BrevProsessType.MANUELL
-                }
-
-            VedtakType.AVSLAG -> BrevProsessType.MANUELL
-            VedtakType.TILBAKEKREVING -> TODO("EY-2806")
-        }
-    }
-}
+data class NyBeregningsperiode(
+    val inntekt: Kroner,
+    val trygdetid: Int,
+    val stoenadFoerReduksjon: Kroner,
+    var utbetaltBeloep: Kroner,
+)

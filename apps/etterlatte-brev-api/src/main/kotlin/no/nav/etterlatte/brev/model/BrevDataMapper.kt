@@ -19,6 +19,17 @@ import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMS_REVURDERING_ENDRI
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMS_REVURDERING_OPPHOER
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMS_REVURDERING_OPPHOER_GENERELL
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.TOM_MAL
+import no.nav.etterlatte.brev.model.bp.AdopsjonRevurderingBrevdata
+import no.nav.etterlatte.brev.model.bp.AvslagYrkesskadeBrevData
+import no.nav.etterlatte.brev.model.bp.EndringHovedmalBrevData
+import no.nav.etterlatte.brev.model.bp.InnvilgetBrevData
+import no.nav.etterlatte.brev.model.bp.InnvilgetBrevDataEnkel
+import no.nav.etterlatte.brev.model.bp.InnvilgetHovedmalBrevData
+import no.nav.etterlatte.brev.model.bp.OmgjoeringAvFarskapRevurderingBrevdata
+import no.nav.etterlatte.brev.model.bp.SoeskenjusteringRevurderingBrevdata
+import no.nav.etterlatte.brev.model.oms.FoerstegangsvedtakUtfallDTO
+import no.nav.etterlatte.brev.model.oms.InntektsendringRevurderingOMS
+import no.nav.etterlatte.brev.model.oms.InnvilgetBrevDataOMS
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak

@@ -1,8 +1,8 @@
 package no.nav.etterlatte.brev.brevbaker
 
+import no.nav.etterlatte.brev.adresse.Avsender
 import no.nav.etterlatte.brev.behandling.Behandling
 import no.nav.etterlatte.brev.brevbaker.BrevbakerHelpers.mapFelles
-import no.nav.etterlatte.brev.model.Avsender
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.pensjon.brevbaker.api.model.Felles
 

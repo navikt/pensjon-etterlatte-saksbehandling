@@ -3,10 +3,9 @@ package no.nav.etterlatte.brev.model
 import no.nav.etterlatte.brev.behandling.Behandling
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
-import no.nav.pensjon.brevbaker.api.model.Telefonnummer
 
 abstract class BrevData {
-    protected inline fun <reified T : RevurderingInfo> valider(
+    inline fun <reified T : RevurderingInfo> valider(
         behandling: Behandling,
         revurderingAarsak: RevurderingAarsak,
     ): T {
@@ -27,11 +26,13 @@ abstract class BrevData {
     }
 }
 
-data class Avsender(
-    val kontor: String,
-    val adresse: String,
-    val postnummer: String,
-    val telefonnummer: Telefonnummer,
-    val saksbehandler: String,
-    val attestant: String?,
-)
+object AvslagBrevData : BrevData() {
+    // TODO: denne skal ikke ha hele behandlingen inn
+    fun fra(behandling: Behandling): AvslagBrevData = AvslagBrevData
+}
+
+abstract class EndringBrevData : BrevData()
+
+abstract class OpphoerBrevData : BrevData()
+
+data class ManueltBrevData(val innhold: List<Slate.Element>) : BrevData()

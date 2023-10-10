@@ -1,6 +1,5 @@
 package no.nav.etterlatte.behandling
 
-import io.kotest.assertions.any
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.just
@@ -99,7 +98,7 @@ class BehandlingServiceImplTest {
                 grunnlagsendringshendelseDao = mockk(),
                 hendelseDao = hendelserMock,
                 grunnlagKlient = mockk(),
-                sporingslogg = mockk(),
+                behandlingRequestLogger = mockk(),
                 featureToggleService = featureToggleService,
                 kommerBarnetTilGodeDao = mockk(),
                 oppgaveService = mockk(),
@@ -588,7 +587,7 @@ class BehandlingServiceImplTest {
                 grunnlagsendringshendelseDao = mockk(),
                 hendelseDao = hendelserMock,
                 grunnlagKlient = mockk(),
-                sporingslogg = mockk(),
+                behandlingRequestLogger = mockk(),
                 featureToggleService = featureToggleService,
                 kommerBarnetTilGodeDao = mockk(),
                 oppgaveService = mockk(),
@@ -636,7 +635,7 @@ class BehandlingServiceImplTest {
                 grunnlagsendringshendelseDao = mockk(),
                 hendelseDao = hendelserMock,
                 grunnlagKlient = mockk(),
-                sporingslogg = mockk(),
+                behandlingRequestLogger = mockk(),
                 featureToggleService = featureToggleService,
                 kommerBarnetTilGodeDao = mockk(),
                 oppgaveService = mockk(),
@@ -682,7 +681,7 @@ class BehandlingServiceImplTest {
                 grunnlagsendringshendelseDao = mockk(),
                 hendelseDao = mockk(),
                 grunnlagKlient = mockk(),
-                sporingslogg = mockk(),
+                behandlingRequestLogger = mockk(),
                 featureToggleService = featureToggleService,
                 kommerBarnetTilGodeDao = mockk(),
                 oppgaveService = mockk(),
@@ -811,7 +810,7 @@ class BehandlingServiceImplTest {
             grunnlagsendringshendelseDao = grunnlagsendringshendelseDao,
             hendelseDao = hendelseDao ?: mockk(),
             grunnlagKlient = grunnlagKlient ?: mockk(),
-            sporingslogg = mockk(),
+            behandlingRequestLogger = mockk(),
             featureToggleService = featureToggleService,
             kommerBarnetTilGodeDao = mockk(),
             oppgaveService = oppgaveService,

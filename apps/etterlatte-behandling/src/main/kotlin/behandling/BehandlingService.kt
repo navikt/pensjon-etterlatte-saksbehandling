@@ -31,12 +31,7 @@ import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
-import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.Person
-import no.nav.etterlatte.libs.sporingslogg.Decision
-import no.nav.etterlatte.libs.sporingslogg.HttpMethod
-import no.nav.etterlatte.libs.sporingslogg.Sporingslogg
-import no.nav.etterlatte.libs.sporingslogg.Sporingsrequest
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.tilgangsstyring.filterForEnheter
 import no.nav.etterlatte.token.BrukerTokenInfo
@@ -119,7 +114,7 @@ internal class BehandlingServiceImpl(
     private val grunnlagsendringshendelseDao: GrunnlagsendringshendelseDao,
     private val hendelseDao: HendelseDao,
     private val grunnlagKlient: GrunnlagKlient,
-    private val sporingslogg: Sporingslogg,
+    private val behandlingRequestLogger: BehandlingRequestLogger,
     private val featureToggleService: FeatureToggleService,
     private val kommerBarnetTilGodeDao: KommerBarnetTilGodeDao,
     private val oppgaveService: OppgaveService,
@@ -227,7 +222,7 @@ internal class BehandlingServiceImpl(
             soeknadMottattDato = behandling.mottattDato(),
             personopplysning = personopplysning,
         ).also {
-            personopplysning?.fnr?.let { loggRequest(brukerTokenInfo, it) }
+            personopplysning?.fnr?.let { behandlingRequestLogger.loggRequest(brukerTokenInfo, it) }
         }
     }
 
@@ -334,26 +329,11 @@ internal class BehandlingServiceImpl(
                 begrunnelse = behandling.begrunnelse(),
                 etterbetaling = inTransaction { etterbetalingService.hentEtterbetaling(behandlingId) },
             ).also {
-                gjenlevende.await()?.fnr?.let { loggRequest(brukerTokenInfo, it) }
-                soeker.await()?.fnr?.let { loggRequest(brukerTokenInfo, it) }
+                gjenlevende.await()?.fnr?.let { behandlingRequestLogger.loggRequest(brukerTokenInfo, it) }
+                soeker.await()?.fnr?.let { behandlingRequestLogger.loggRequest(brukerTokenInfo, it) }
             }
         }
     }
-
-    private fun loggRequest(
-        brukerTokenInfo: BrukerTokenInfo,
-        fnr: Folkeregisteridentifikator,
-    ) = sporingslogg.logg(
-        Sporingsrequest(
-            kallendeApplikasjon = "behandling",
-            oppdateringstype = HttpMethod.GET,
-            brukerId = brukerTokenInfo.ident(),
-            hvemBlirSlaattOpp = fnr.value,
-            endepunkt = "behandling",
-            resultat = Decision.Permit,
-            melding = "Hent behandling var vellykka",
-        ),
-    )
 
     override fun registrerVedtakHendelse(
         behandlingId: UUID,

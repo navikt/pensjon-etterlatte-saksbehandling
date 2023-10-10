@@ -136,7 +136,6 @@ data class VedtakEndringDTO(
 
 data class NyOppgaveDto(
     val referanse: String,
-    val sakId: Long,
     val oppgaveKilde: OppgaveKilde?,
     val oppgaveType: OppgaveType,
     val merknad: String?,

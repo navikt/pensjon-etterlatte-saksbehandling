@@ -48,25 +48,9 @@ internal fun Route.oppgaveRoutes(
         }
 
         route("/sak/{$SAKID_CALL_PARAMETER}") {
-            get("oppgaver") {
+            get("/oppgaver") {
                 kunSystembruker {
                     call.respond(inTransaction { service.hentSakOgOppgaverForSak(sakId) })
-                }
-            }
-            post("oppgaver") {
-                kunSystembruker {
-                    val nyOppgaveDto = call.receive<NyOppgaveDto>()
-                    call.respond(
-                        inTransaction {
-                            service.opprettNyOppgaveMedSakOgReferanse(
-                                nyOppgaveDto.referanse,
-                                nyOppgaveDto.sakId,
-                                nyOppgaveDto.oppgaveKilde,
-                                nyOppgaveDto.oppgaveType,
-                                nyOppgaveDto.merknad,
-                            )
-                        },
-                    )
                 }
             }
         }
@@ -161,6 +145,25 @@ internal fun Route.oppgaveRoutes(
                     )
                     call.respond(HttpStatusCode.OK)
                 }
+            }
+        }
+    }
+
+    route("/oppgaver/sak/{$SAKID_CALL_PARAMETER}/oppgaver") {
+        post {
+            kunSystembruker {
+                val nyOppgaveDto = call.receive<NyOppgaveDto>()
+                call.respond(
+                    inTransaction {
+                        service.opprettNyOppgaveMedSakOgReferanse(
+                            nyOppgaveDto.referanse,
+                            sakId,
+                            nyOppgaveDto.oppgaveKilde,
+                            nyOppgaveDto.oppgaveType,
+                            nyOppgaveDto.merknad,
+                        )
+                    },
+                )
             }
         }
     }

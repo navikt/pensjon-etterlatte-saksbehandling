@@ -33,12 +33,11 @@ class BehandlingKlient(
         fnr: String,
         sakId: Long,
     ): Long {
-        return httpClient.post("$url/api/oppgaver/sak/$sakId/oppgaver") {
+        return httpClient.post("$url/oppgaver/sak/$sakId/oppgaver") {
             contentType(ContentType.Application.Json)
             setBody(
                 NyOppgaveDto(
                     fnr,
-                    sakId,
                     OppgaveKilde.EKSTERN,
                     OppgaveType.MANUELL_JOURNALFOERING,
                     "Noe feilet. Opprett søknad via Gosys-oppgave",

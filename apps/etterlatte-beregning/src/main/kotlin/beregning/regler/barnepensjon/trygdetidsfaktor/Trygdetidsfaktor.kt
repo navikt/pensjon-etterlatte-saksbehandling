@@ -27,7 +27,7 @@ val nasjonalTrygdetidRegel =
     RegelMeta(
         gjelderFra = BP_1967_DATO,
         beskrivelse = "Finn trygdetid basert på faktisk nasjonal",
-        regelReferanse = RegelReferanse(id = "BP-BEREGNING-NASJONAL-TRYGDETID"),
+        regelReferanse = RegelReferanse(id = "BP-BEREGNING-1967-NASJONAL-TRYGDETID"),
     ) benytter trygdetidRegel med { trygdetid ->
         trygdetid.samletTrygdetidNorge ?: Beregningstall(0.0)
     }
@@ -36,7 +36,7 @@ val teoretiskTrygdetidRegel =
     RegelMeta(
         gjelderFra = BP_1967_DATO,
         beskrivelse = "Finn trygdetid basert på faktisk teoretisk og broek",
-        regelReferanse = RegelReferanse(id = "BP-BEREGNING-PRORATA-TRYGDETID"),
+        regelReferanse = RegelReferanse(id = "BP-BEREGNING-1967-PRORATA-TRYGDETID"),
     ) benytter trygdetidRegel med { trygdetid ->
         trygdetid.samletTrygdetidTeoretisk?.multiply(trygdetid.broek()) ?: Beregningstall(0.0)
     }
@@ -45,7 +45,7 @@ val trygdetidBruktRegel =
     RegelMeta(
         gjelderFra = BP_1967_DATO,
         beskrivelse = "Finn trygdetid basert på faktisk, teoretisk og beregningsmetgode",
-        regelReferanse = RegelReferanse(id = "BP-BEREGNING-VALGT-TRYGDETID"),
+        regelReferanse = RegelReferanse(id = "BP-BEREGNING-1967-VALGT-TRYGDETID"),
     ) benytter trygdetidRegel og nasjonalTrygdetidRegel og teoretiskTrygdetidRegel med { trygdetid, nasjonal, teoretisk ->
         val nasjonalBeregning = AnvendtTrgydetid(BeregningsMetode.NASJONAL, nasjonal)
         val teoretiskBeregning = AnvendtTrgydetid(BeregningsMetode.PRORATA, teoretisk)
@@ -63,7 +63,7 @@ val maksTrygdetid =
     definerKonstant<BarnepensjonGrunnlag, Beregningstall>(
         gjelderFra = BP_1967_DATO,
         beskrivelse = "Full trygdetidsopptjening er 40 år",
-        regelReferanse = RegelReferanse("BP-BEREGNING-MAKS-TRYGDETID"),
+        regelReferanse = RegelReferanse("BP-BEREGNING-1967-MAKS-TRYGDETID"),
         verdi = Beregningstall(40),
     )
 
@@ -71,7 +71,7 @@ val trygdetidsFaktor =
     RegelMeta(
         gjelderFra = BP_1967_DATO,
         beskrivelse = "Finn trygdetidsfaktor",
-        regelReferanse = RegelReferanse(id = "BP-BEREGNING-TRYGDETIDSFAKTOR"),
+        regelReferanse = RegelReferanse(id = "BP-BEREGNING-1967-TRYGDETIDSFAKTOR"),
     ) benytter maksTrygdetid og trygdetidBruktRegel med { maksTrygdetid, trygdetid ->
         minOf(trygdetid.trygdetid, maksTrygdetid).divide(maksTrygdetid)
     }

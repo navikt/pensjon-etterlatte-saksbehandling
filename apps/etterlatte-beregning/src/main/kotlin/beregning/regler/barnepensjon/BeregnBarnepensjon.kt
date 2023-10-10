@@ -69,7 +69,7 @@ val beregnBarnepensjon1967Regel =
     RegelMeta(
         gjelderFra = BP_1967_DATO,
         beskrivelse = "Reduserer ytelsen mot opptjening i folketrygden",
-        regelReferanse = RegelReferanse(id = "BP-BEREGNING-REDUSERMOTTRYGDETID"),
+        regelReferanse = RegelReferanse(id = "BP-BEREGNING-1967-REDUSERMOTTRYGDETID"),
     ) benytter barnepensjonSatsRegel og trygdetidsFaktor med { sats, trygdetidsfaktor ->
         sats.multiply(trygdetidsfaktor)
     }
@@ -87,7 +87,7 @@ val barnepensjonSatsMedInstitusjonsopphold =
     RegelMeta(
         gjelderFra = BP_1967_DATO,
         beskrivelse = "Sikrer at ytelsen ikke blir større med institusjonsoppholdberegning",
-        regelReferanse = RegelReferanse(id = "BP-BEREGNING-GUNSTIGHET-INSTITUSJON"),
+        regelReferanse = RegelReferanse(id = "BP-BEREGNING-1967-GUNSTIGHET-INSTITUSJON"),
     ) benytter barnepensjonSatsRegel og institusjonsoppholdSatsRegel med { standardSats, institusjonsoppholdSats ->
         institusjonsoppholdSats.coerceAtMost(standardSats)
     }
@@ -96,7 +96,7 @@ val barnepensjonSats =
     RegelMeta(
         gjelderFra = BP_1967_DATO,
         beskrivelse = "Bruker institusjonsoppholdberegning hvis barnet er i institusjon",
-        regelReferanse = RegelReferanse("BP-BEREGNING-KANSKJEANVENDINSTITUSJON"),
+        regelReferanse = RegelReferanse("BP-BEREGNING-1967-KANSKJEANVENDINSTITUSJON"),
     ) benytter barnepensjonSatsRegel og barnepensjonSatsMedInstitusjonsopphold og erBrukerIInstitusjon med {
             satsIkkeInstitusjonsopphold,
             satsInstitusjonsopphold,
@@ -109,7 +109,7 @@ val beregnBarnepensjon1967RegelMedInstitusjon =
     RegelMeta(
         gjelderFra = BP_1967_DATO,
         beskrivelse = "Reduserer ytelsen mot opptjening i folketrygden inkludert institusjonsopphold",
-        regelReferanse = RegelReferanse(id = "BP-BEREGNING-REDUSERMOTTRYGDETID-INSTITUSJON"),
+        regelReferanse = RegelReferanse(id = "BP-BEREGNING-1967-REDUSERMOTTRYGDETID-INSTITUSJON"),
     ) benytter barnepensjonSats og trygdetidsFaktor med { sats, trygdetidsfaktor ->
         sats.multiply(trygdetidsfaktor)
     }

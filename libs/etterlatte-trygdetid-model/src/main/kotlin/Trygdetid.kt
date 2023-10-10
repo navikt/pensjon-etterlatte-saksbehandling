@@ -1,6 +1,7 @@
 package no.nav.etterlatte.libs.common.trygdetid
 
 import com.fasterxml.jackson.databind.JsonNode
+import no.nav.etterlatte.libs.common.IntBroek
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import java.time.LocalDate
 import java.time.Period
@@ -60,21 +61,6 @@ data class BeregnetTrygdetidGrunnlagDto(
     val maaneder: Int,
     val aar: Int,
 )
-
-data class IntBroek(
-    val teller: Int,
-    val nevner: Int,
-) {
-    companion object {
-        fun fra(broek: Pair<Int?, Int?>): IntBroek? {
-            return broek.first?.let { teller ->
-                broek.second?.let { nevner ->
-                    IntBroek(teller, nevner)
-                }
-            }
-        }
-    }
-}
 
 data class DetaljertBeregnetTrygdetidResultat(
     val faktiskTrygdetidNorge: FaktiskTrygdetid?,

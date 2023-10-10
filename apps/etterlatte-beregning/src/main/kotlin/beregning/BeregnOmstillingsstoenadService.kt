@@ -1,6 +1,7 @@
 package no.nav.etterlatte.beregning
 
 import beregning.regler.finnAnvendtGrunnbeloep
+import beregning.regler.finnAnvendtTrygdetid
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlagOMS
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlagService
 import no.nav.etterlatte.beregning.grunnlag.PeriodisertBeregningGrunnlag
@@ -10,6 +11,8 @@ import no.nav.etterlatte.beregning.regler.omstillingstoenad.PeriodisertOmstillin
 import no.nav.etterlatte.beregning.regler.omstillingstoenad.kroneavrundetOmstillingstoenadRegel
 import no.nav.etterlatte.beregning.regler.omstillingstoenad.kroneavrundetOmstillingstoenadRegelMedInstitusjon
 import no.nav.etterlatte.beregning.regler.omstillingstoenad.sats.grunnbeloep
+import no.nav.etterlatte.beregning.regler.omstillingstoenad.trygdetidsfaktor.trygdetidBruktRegel
+import no.nav.etterlatte.beregning.regler.toSamlet
 import no.nav.etterlatte.grunnbeloep.GrunnbeloepRepository
 import no.nav.etterlatte.klienter.GrunnlagKlient
 import no.nav.etterlatte.klienter.TrygdetidKlient
@@ -30,7 +33,6 @@ import no.nav.etterlatte.libs.regler.RegelPeriode
 import no.nav.etterlatte.libs.regler.RegelkjoeringResultat
 import no.nav.etterlatte.libs.regler.eksekver
 import no.nav.etterlatte.libs.regler.finnAnvendteRegler
-import no.nav.etterlatte.regler.Beregningstall
 import no.nav.etterlatte.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
 import java.time.YearMonth
@@ -133,6 +135,16 @@ class BeregnOmstillingsstoenadService(
                                     "Anvendt grunnbeløp ikke funnet for perioden"
                                 }
 
+                            val trygdetid =
+                                requireNotNull(periodisertResultat.resultat.finnAnvendtTrygdetid(trygdetidBruktRegel)) {
+                                    "Anvendt trygdetid ikke funnet for perioden"
+                                }
+
+                            val trygdetidGrunnlagForPeriode =
+                                beregningsgrunnlag.avdoed.finnGrunnlagForPeriode(
+                                    periodisertResultat.periode.fraDato,
+                                ).verdi.trygdetid
+
                             Beregningsperiode(
                                 datoFOM = YearMonth.from(periodisertResultat.periode.fraDato),
                                 datoTOM = periodisertResultat.periode.tilDato?.let { YearMonth.from(it) },
@@ -143,10 +155,11 @@ class BeregnOmstillingsstoenadService(
                                     ).verdi,
                                 grunnbelopMnd = grunnbeloep.grunnbeloepPerMaaned,
                                 grunnbelop = grunnbeloep.grunnbeloep,
-                                trygdetid =
-                                    beregningsgrunnlag.avdoed.finnGrunnlagForPeriode(
-                                        periodisertResultat.periode.fraDato,
-                                    ).verdi.trygdetid.toInteger(),
+                                trygdetid = trygdetid.trygdetid.toInteger(),
+                                beregningsMetode = trygdetid.beregningsMetode,
+                                samletNorskTrygdetid = trygdetidGrunnlagForPeriode.samletTrygdetidNorge?.toInteger(),
+                                samletTeoretiskTrygdetid = trygdetidGrunnlagForPeriode.samletTrygdetidTeoretisk?.toInteger(),
+                                broek = trygdetidGrunnlagForPeriode.prorataBroek,
                                 regelResultat = objectMapper.valueToTree(periodisertResultat),
                                 regelVersjon = periodisertResultat.reglerVersjon,
                                 kilde =
@@ -196,16 +209,16 @@ class BeregnOmstillingsstoenadService(
         trygdetid: TrygdetidDto,
         beregningsGrunnlagOMS: BeregningsGrunnlagOMS,
     ): PeriodisertOmstillingstoenadGrunnlag {
-        val totalTrygdetid =
-            requireNotNull(trygdetid.beregnetTrygdetid?.resultat?.samletTrygdetidNorge) {
-                "Total trygdetid ikke satt for behandling ${trygdetid.behandlingId}"
+        val samletTrygdetid =
+            requireNotNull(trygdetid.beregnetTrygdetid?.resultat?.toSamlet(beregningsGrunnlagOMS.beregningsMetode.beregningsMetode)) {
+                "Trygdetid ikke satt for behandling ${trygdetid.behandlingId}"
             }
 
         return PeriodisertOmstillingstoenadGrunnlag(
             avdoed =
                 KonstantGrunnlag(
                     FaktumNode(
-                        verdi = Avdoed(Beregningstall(totalTrygdetid)),
+                        verdi = Avdoed(samletTrygdetid),
                         kilde =
                             Grunnlagsopplysning.RegelKilde(
                                 "Trygdetid fastsatt av saksbehandler",

@@ -5,6 +5,7 @@ import beregning.regler.barnepensjon.institusjonsoppholdSatsRegel
 import no.nav.etterlatte.beregning.grunnlag.InstitusjonsoppholdBeregningsgrunnlag
 import no.nav.etterlatte.beregning.regler.barnepensjon.sats.barnepensjonSatsRegel
 import no.nav.etterlatte.beregning.regler.barnepensjon.trygdetidsfaktor.trygdetidsFaktor
+import no.nav.etterlatte.libs.common.beregning.SamletTrygdetidMedBeregningsMetode
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.regler.FaktumNode
 import no.nav.etterlatte.libs.regler.PeriodisertGrunnlag
@@ -13,12 +14,11 @@ import no.nav.etterlatte.libs.regler.RegelReferanse
 import no.nav.etterlatte.libs.regler.benytter
 import no.nav.etterlatte.libs.regler.med
 import no.nav.etterlatte.libs.regler.og
-import no.nav.etterlatte.regler.Beregningstall
 import java.time.LocalDate
 
 data class PeriodisertBarnepensjonGrunnlag(
     val soeskenKull: PeriodisertGrunnlag<FaktumNode<List<Folkeregisteridentifikator>>>,
-    val avdoedesTrygdetid: PeriodisertGrunnlag<FaktumNode<Beregningstall>>,
+    val avdoedesTrygdetid: PeriodisertGrunnlag<FaktumNode<SamletTrygdetidMedBeregningsMetode>>,
     val institusjonsopphold: PeriodisertGrunnlag<FaktumNode<InstitusjonsoppholdBeregningsgrunnlag?>>,
     val avdoedeForeldre: PeriodisertGrunnlag<FaktumNode<List<Folkeregisteridentifikator>>>,
     val brukNyttRegelverk: Boolean,
@@ -60,7 +60,7 @@ data class PeriodisertBarnepensjonGrunnlag(
 
 data class BarnepensjonGrunnlag(
     val soeskenKull: FaktumNode<List<Folkeregisteridentifikator>>,
-    val avdoedesTrygdetid: FaktumNode<Beregningstall>,
+    val avdoedesTrygdetid: FaktumNode<SamletTrygdetidMedBeregningsMetode>,
     val institusjonsopphold: FaktumNode<InstitusjonsoppholdBeregningsgrunnlag?>,
     val avdoedeForeldre: FaktumNode<List<Folkeregisteridentifikator>>,
 )

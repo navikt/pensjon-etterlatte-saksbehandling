@@ -23,10 +23,12 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.POSTGRES_VERSION
 import no.nav.etterlatte.libs.database.migrate
+import no.nav.etterlatte.oppgave.OppgaveDaoImpl
+import no.nav.etterlatte.oppgave.OppgaveDaoMedEndringssporingImpl
+import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.sak.SakDao
 import no.nav.etterlatte.sak.SakService
 import no.nav.etterlatte.sak.SakServiceImpl
-import no.nav.etterlatte.sak.TilgangService
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.BeforeAll
@@ -48,7 +50,10 @@ internal class EgenAnsattServiceTest {
 
     private lateinit var dataSource: DataSource
     private lateinit var sakRepo: SakDao
+    private lateinit var oppgaveRepo: OppgaveDaoImpl
+    private lateinit var oppgaveRepoMedSporing: OppgaveDaoMedEndringssporingImpl
     private lateinit var sakService: SakService
+    private lateinit var oppgaveService: OppgaveService
     private lateinit var egenAnsattService: EgenAnsattService
 
     @BeforeAll
@@ -67,15 +72,20 @@ internal class EgenAnsattServiceTest {
         val pdlKlient = mockk<PdlKlient>()
         val norg2Klient = mockk<Norg2Klient>()
         val featureToggleService = mockk<FeatureToggleService>()
-        val tilgangService = mockk<TilgangService>()
         val skjermingKlient = mockk<SkjermingKlient>()
         val connection = dataSource.connection
         sakRepo = SakDao { connection }
+        oppgaveRepo = OppgaveDaoImpl { connection }
+        oppgaveRepoMedSporing = OppgaveDaoMedEndringssporingImpl(oppgaveRepo) { connection }
         sakService =
             spyk(
                 SakServiceImpl(sakRepo, pdlKlient, norg2Klient, featureToggleService, skjermingKlient),
             )
-        egenAnsattService = EgenAnsattService(sakService, sikkerLogg)
+        oppgaveService =
+            spyk(
+                OppgaveService(oppgaveRepoMedSporing, sakRepo, featureToggleService),
+            )
+        egenAnsattService = EgenAnsattService(sakService, oppgaveService, sikkerLogg)
 
         coEvery { skjermingKlient.personErSkjermet(any()) } returns false
         every { pdlKlient.hentGeografiskTilknytning(any(), any()) } returns GeografiskTilknytning(kommune = "0301")

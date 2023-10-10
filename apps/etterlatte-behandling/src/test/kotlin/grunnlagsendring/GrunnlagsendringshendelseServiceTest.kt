@@ -643,7 +643,7 @@ internal class GrunnlagsendringshendelseServiceTest {
         coEvery { grunnlagClient.hentAlleSakIder(any()) } returns sakIder
         every { sakService.oppdaterAdressebeskyttelse(any(), any()) } returns 1
         every { sakService.finnSaker(fnr) } returns saker
-        every { oppgaveService.endreEnhetForOppgaverTilknyttetSak(any(), any()) } returns Unit
+        every { oppgaveService.oppdaterEnhetForRelaterteOppgaver(any()) } returns Unit
         every {
             sakService.finnEnhetForPersonOgTema(any(), any(), any())
         } returns ArbeidsFordelingEnhet("NAV Familie- og pensjonsytelser Steinkjer", "4817")
@@ -661,8 +661,8 @@ internal class GrunnlagsendringshendelseServiceTest {
                     adressebeskyttelse.adressebeskyttelseGradering,
                 )
             }
-            verify(exactly = 6) {
-                oppgaveService.endreEnhetForOppgaverTilknyttetSak(any(), Enheter.STRENGT_FORTROLIG.enhetNr)
+            verify(exactly = 1) {
+                oppgaveService.oppdaterEnhetForRelaterteOppgaver(any())
             }
         }
     }
@@ -686,7 +686,7 @@ internal class GrunnlagsendringshendelseServiceTest {
         coEvery { grunnlagClient.hentAlleSakIder(any()) } returns sakIder
         every { sakService.oppdaterAdressebeskyttelse(any(), any()) } returns 1
         every { sakService.finnSaker(fnr) } returns saker
-        every { oppgaveService.endreEnhetForOppgaverTilknyttetSak(any(), any()) } returns Unit
+        every { oppgaveService.oppdaterEnhetForRelaterteOppgaver(any()) } returns Unit
         every {
             sakService.finnEnhetForPersonOgTema(any(), any(), any())
         } returns ArbeidsFordelingEnhet("NAV Familie- og pensjonsytelser Steinkjer", "4817")
@@ -704,8 +704,8 @@ internal class GrunnlagsendringshendelseServiceTest {
                     adressebeskyttelse.adressebeskyttelseGradering,
                 )
             }
-            verify(exactly = 6) {
-                oppgaveService.endreEnhetForOppgaverTilknyttetSak(any(), Enheter.STEINKJER.enhetNr)
+            verify(exactly = 1) {
+                oppgaveService.oppdaterEnhetForRelaterteOppgaver(any())
             }
         }
     }

@@ -5,11 +5,12 @@ import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.libs.common.person.maskerFnr
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.skjermet.EgenAnsattSkjermet
+import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.sak.SakService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-class EgenAnsattService(private val sakService: SakService, val sikkerLogg: Logger) {
+class EgenAnsattService(private val sakService: SakService, private val oppgaveService: OppgaveService, val sikkerLogg: Logger) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     fun haandterSkjerming(skjermetHendelse: EgenAnsattSkjermet) {
@@ -42,6 +43,7 @@ class EgenAnsattService(private val sakService: SakService, val sikkerLogg: Logg
                 )
             }
         sakService.oppdaterEnhetForSaker(sakerMedNyEnhet)
+        oppgaveService.oppdaterEnhetForRelaterteOppgaver(sakerMedNyEnhet)
         sakService.markerSakerMedSkjerming(saker.map { it.id }, skjermetHendelse.skjermet)
     }
 }

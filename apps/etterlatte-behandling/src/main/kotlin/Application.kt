@@ -130,7 +130,10 @@ internal fun Application.module(context: ApplicationContext) {
                 gosysOppgaveService = gosysOppgaveService,
             )
             grunnlagsendringshendelseRoute(grunnlagsendringshendelseService = grunnlagsendringshendelseService)
-            egenAnsattRoute(egenAnsattService = EgenAnsattService(sakService, sikkerLogg))
+            egenAnsattRoute(
+                egenAnsattService = EgenAnsattService(sakService, sikkerLogg),
+                requestLogger = behandlingRequestLogger,
+            )
             institusjonsoppholdRoute(institusjonsoppholdService = InstitusjonsoppholdService(institusjonsoppholdDao))
             tilgangRoutes(tilgangService)
 

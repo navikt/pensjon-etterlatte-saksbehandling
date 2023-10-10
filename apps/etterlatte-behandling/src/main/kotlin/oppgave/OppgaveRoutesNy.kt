@@ -55,14 +55,14 @@ internal fun Route.oppgaveRoutes(
         route("behandling/{$BEHANDLINGSID_CALL_PARAMETER}") {
             get("/hentsaksbehandler") {
                 kunSaksbehandler {
-                    val saksbehandler = service.hentSaksbehandlerForBehandling(behandlingsId)
+                    val saksbehandler = inTransaction { service.hentSaksbehandlerForBehandling(behandlingsId) }
                     call.respond(saksbehandler ?: HttpStatusCode.NoContent)
                 }
             }
 
             get("/oppgaveunderarbeid") {
                 kunSaksbehandler {
-                    val saksbehandler = service.hentSaksbehandlerForOppgaveUnderArbeid(behandlingsId)
+                    val saksbehandler = inTransaction { service.hentSaksbehandlerForOppgaveUnderArbeid(behandlingsId) }
                     call.respond(saksbehandler ?: HttpStatusCode.NoContent)
                 }
             }

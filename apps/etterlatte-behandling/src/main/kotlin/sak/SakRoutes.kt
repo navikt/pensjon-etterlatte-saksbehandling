@@ -144,7 +144,7 @@ internal fun Route.sakWebRoutes(
                         inTransaction {
                             sakService.finnSaker(fnr.value)
                                 .map { sak ->
-                                    OppgaveListe(sak, inTransaction { oppgaveService.hentOppgaverForSak(sak.id) })
+                                    OppgaveListe(sak, oppgaveService.hentOppgaverForSak(sak.id))
                                 }
                         }
                     call.respond(oppgaver)

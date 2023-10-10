@@ -340,11 +340,10 @@ class OppgaveService(
 
     fun hentSaksbehandlerForBehandling(behandlingsId: UUID): String? {
         val oppgaverForBehandlingUtenAttesterting =
-            inTransaction {
-                oppgaveDao.hentOppgaverForReferanse(behandlingsId.toString())
-            }.filter {
-                it.type !== OppgaveType.ATTESTERING
-            }
+            oppgaveDao.hentOppgaverForReferanse(behandlingsId.toString())
+                .filter {
+                    it.type !== OppgaveType.ATTESTERING
+                }
         return oppgaverForBehandlingUtenAttesterting.sortedByDescending { it.opprettet }[0].saksbehandler
     }
 
@@ -359,10 +358,7 @@ class OppgaveService(
     }
 
     fun hentSaksbehandlerForOppgaveUnderArbeid(behandlingsId: UUID): String? {
-        val oppgaverforBehandling =
-            inTransaction(gjenbruk = true) {
-                oppgaveDao.hentOppgaverForReferanse(behandlingsId.toString())
-            }
+        val oppgaverforBehandling = oppgaveDao.hentOppgaverForReferanse(behandlingsId.toString())
         return try {
             val oppgaveUnderbehandling = oppgaverforBehandling.single { it.status == Status.UNDER_BEHANDLING }
             oppgaveUnderbehandling.saksbehandler

@@ -11,7 +11,7 @@ object GrunnbeloepRepository {
         objectMapper.readValue(readFile("/grunnbelop.json"), GrunnbeloepListe::class.java).grunnbeloep
 
     private fun readFile(file: String) =
-        GrunnbeloepRepository::class.java.getResource("/grunnbelop.json")?.readText()
+        GrunnbeloepRepository::class.java.getResource(file)?.readText()
             ?: throw FileNotFoundException("Fant ikke filen $file")
 
     fun hentGjeldendeGrunnbeloep(dato: YearMonth): Grunnbeloep {

@@ -1,5 +1,6 @@
 package no.nav.etterlatte.klage.modell
 
+import com.fasterxml.jackson.annotation.JsonInclude
 import no.nav.etterlatte.libs.common.behandling.EkstradataInnstilling
 import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.behandling.KlageUtfall
@@ -28,6 +29,7 @@ data class KlageAnnenPart(
     val skalMottaKopi: Boolean,
 )
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 data class KabalKlager(
     val id: KabalKlagerPart,
     val klagersProsessfullmektig: KlageAnnenPart?,
@@ -59,11 +61,12 @@ enum class KabalYtelse {
  * Se https://kabal-api.intern.dev.nav.no/swagger-ui/index.html#/kabal-api-external/sendInnSakV3
  *
  **/
+@JsonInclude(JsonInclude.Include.NON_NULL)
 data class KabalOversendelse(
     val type: KabalSakType,
     val klager: KabalKlager,
     val sakenGjelder: KlageAnnenPart?,
-    val fagSak: KabalFagsak,
+    val fagsak: KabalFagsak,
     val kildeReferanse: String,
     val hjemler: List<KabalHjemmel>,
     val forrigeBehandlendeEnhet: String,
@@ -112,7 +115,7 @@ data class KabalOversendelse(
                         id = KabalKlagerPart(KabalKlagerType.PERSON, klage.sak.ident),
                         skalMottaKopi = true,
                     ).takeIf { erKlagerIkkeBruker },
-                fagSak = KabalFagsak(fagsakId = klage.sak.id.toString(), fagsystem = FAGSYSTEM),
+                fagsak = KabalFagsak(fagsakId = klage.sak.id.toString(), fagsystem = FAGSYSTEM),
                 kildeReferanse = klage.id.toString(),
                 hjemler = listOf(KabalHjemmel.FTRL_21_12), // TODO hent fra innstilling når hjemlene våre er på plass
                 forrigeBehandlendeEnhet = klage.sak.enhet,

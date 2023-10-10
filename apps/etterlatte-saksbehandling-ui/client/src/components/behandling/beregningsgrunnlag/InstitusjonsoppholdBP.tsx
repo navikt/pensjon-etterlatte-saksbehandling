@@ -85,11 +85,10 @@ const InstitusjonsoppholdBP = (props: InstitusjonsoppholdProps) => {
             status={null}
           >
             <p>
-              Barnepensjonen skal reduseres under opphold i en institusjon med fri kost og losji under statlig ansvar
-              eller tilsvarende institusjon i utlandet. Regelen gjelder ikke ved opphold i somatiske sykehusavdelinger.
-              Oppholdet må vare i tre måneder i tillegg til innleggelsesmåneden for at barnepensjonen skal bli redusert.
-              Dersom barnet har faste og nødvendige utgifter til bolig, kan arbeids- og velferdsetaten bestemme at
-              barnepensjonen ikke skal reduseres eller reduseres mindre enn hovedregelen sier.
+              Barnepensjon gis uten reduksjon i innleggelsesmåneden og de tre påfølgende månedene. Deretter kan stønaden
+              bli redusert. Blir man innlagt igjen innen tre måneder etter utskrivelsen skal stønaden reduseres fra
+              måneden etter innleggelse. Barnepensjon gis uten reduksjon for institusjonsopphold f.o.m.
+              utskrivingsmåneden.
             </p>
           </LovtekstMedLenke>
           <Insthendelser sakid={behandling.sakId} />

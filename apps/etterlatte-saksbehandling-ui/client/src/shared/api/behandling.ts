@@ -178,7 +178,7 @@ export const lagreBoddEllerArbeidetUtlandet = async (args: {
   })
 }
 
-export const hentGrunnlagsendringshendelserInstitusjonsoppholdforSak = async (
+export const hentGrunnlagsendringshendelserInstitusjonsoppholdForSak = async (
   sakid: number
 ): Promise<ApiResponse<Array<Grunnlagsendringshendelse>>> => {
   return apiClient.get(`/grunnlagsendringshendelse/${sakid}/institusjon`)

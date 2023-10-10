@@ -91,7 +91,7 @@ internal fun Route.oppgaveRoutes(
             route("saksbehandler", HttpMethod.Delete) {
                 handle {
                     kunSaksbehandler {
-                        service.fjernSaksbehandler(oppgaveId)
+                        inTransaction { service.fjernSaksbehandler(oppgaveId) }
                         call.respond(HttpStatusCode.OK)
                     }
                 }
@@ -99,7 +99,7 @@ internal fun Route.oppgaveRoutes(
             put("frist") {
                 kunSaksbehandler {
                     val redigerFrist = call.receive<RedigerFristRequest>()
-                    service.redigerFrist(oppgaveId, redigerFrist.frist)
+                    inTransaction { service.redigerFrist(oppgaveId, redigerFrist.frist) }
                     call.respond(HttpStatusCode.OK)
                 }
             }

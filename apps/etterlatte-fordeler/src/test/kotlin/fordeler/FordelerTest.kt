@@ -97,7 +97,7 @@ internal class FordelerTest {
             FordelerResultat.TrengerManuellJournalfoering("foo")
         every { fordelerMetricLogger.logMetricFordelt() } just runs
         every { fordelerService.hentSakId(any(), any<SakType>(), any<AdressebeskyttelseGradering>()) } returns 14L
-        every { fordelerService.opprettOppgave(any(), any()) } just runs
+        every { fordelerService.opprettOppgave(any()) } just runs
         val inspector = inspector.apply { sendTestMessage(BARNEPENSJON_SOKNAD) }.inspektør
 
         assertEquals("soeknad_innsendt", inspector.message(0).get(EVENT_NAME_KEY).asText())
@@ -105,7 +105,7 @@ internal class FordelerTest {
         assertEquals("true", inspector.message(0).get(FordelerFordelt.soeknadFordeltKey).asText())
         assertEquals("true", inspector.message(0).get(FordelerFordelt.soeknadTrengerManuellJournalfoering).asText())
 
-        verify { fordelerService.opprettOppgave(14, "07010776133") }
+        verify { fordelerService.opprettOppgave(14) }
         assertEquals("true", inspector.message(0).get(FordelerFordelt.soeknadTrengerManuellJournalfoering).asText())
 
         verify { fordelerMetricLogger.logMetricFordelt() }

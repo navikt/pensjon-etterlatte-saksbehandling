@@ -92,12 +92,8 @@ internal class Fordeler(
 
                 is FordelerResultat.TrengerManuellJournalfoering -> {
                     logger.warn("Trenger manuell journalføring: ${resultat.melding}")
-                    val sakId = hentSakId(packet, AdressebeskyttelseGradering.UGRADERT)
-                    sakId?.let { sakIdForSoeknad ->
-                        fordelerService.opprettOppgave(
-                            sakIdForSoeknad,
-                            fordelerEvent.soeknad.soeker.foedselsnummer.svar.value,
-                        )
+                    hentSakId(packet, AdressebeskyttelseGradering.UGRADERT)?.let { sakIdForSoeknad ->
+                        fordelerService.opprettOppgave(sakIdForSoeknad)
                         context.publish(
                             packet
                                 .leggPaaSakId(sakIdForSoeknad)

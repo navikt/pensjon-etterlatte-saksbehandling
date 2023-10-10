@@ -30,14 +30,12 @@ class BehandlingKlient(
     }
 
     suspend fun opprettOppgave(
-        fnr: String,
         sakId: Long,
     ): Long {
         return httpClient.post("$url/oppgaver/sak/$sakId/oppgaver") {
             contentType(ContentType.Application.Json)
             setBody(
                 NyOppgaveDto(
-                    fnr,
                     OppgaveKilde.EKSTERN,
                     OppgaveType.MANUELL_JOURNALFOERING,
                     "Noe feilet. Opprett søknad via Gosys-oppgave",

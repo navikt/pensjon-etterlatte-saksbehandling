@@ -200,8 +200,8 @@ class FordelerService(
         }
     }
 
-    fun opprettOppgave(sakId: Long, foedselsnummer: String) {
-        return runBlocking { behandlingKlient.opprettOppgave(foedselsnummer, sakId) }
+    fun opprettOppgave(sakId: Long) {
+        return runBlocking { behandlingKlient.opprettOppgave(sakId) }
     }
 }
 

@@ -156,7 +156,7 @@ internal fun Route.oppgaveRoutes(
                 call.respond(
                     inTransaction {
                         service.opprettNyOppgaveMedSakOgReferanse(
-                            nyOppgaveDto.referanse,
+                            "",
                             sakId,
                             nyOppgaveDto.oppgaveKilde,
                             nyOppgaveDto.oppgaveType,

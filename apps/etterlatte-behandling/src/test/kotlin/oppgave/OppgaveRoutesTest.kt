@@ -76,7 +76,7 @@ class OppgaveRoutesTest : BehandlingIntegrationTest() {
 
             client.post("/oppgaver/sak/${sak.id}/oppgaver") {
                 val dto =
-                    NyOppgaveDto("01018912345", OppgaveKilde.EKSTERN, OppgaveType.MANUELL_JOURNALFOERING, "abc")
+                    NyOppgaveDto(OppgaveKilde.EKSTERN, OppgaveType.MANUELL_JOURNALFOERING, "abc")
                 addAuthToken(systemBruker)
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(dto)

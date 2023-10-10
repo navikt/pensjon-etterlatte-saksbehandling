@@ -11,6 +11,7 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.brev.behandlingklient.BehandlingKlient
 import no.nav.etterlatte.brev.behandlingklient.BehandlingKlientException
 import no.nav.etterlatte.brev.model.Spraak
+import no.nav.etterlatte.grunnbeloep.Grunnbeloep
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -41,6 +42,7 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
+import java.time.Month
 import java.time.YearMonth
 import java.util.UUID
 
@@ -86,7 +88,7 @@ internal class BehandlingServiceTest {
         coEvery { beregningKlient.hentBeregning(any(), any()) } returns opprettBeregning()
         coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns opprettTrygdetid()
         coEvery { vilkaarsvurderingKlient.hentVilkaarsvurdering(any(), any()) } returns opprettVilkaarsvurdering()
-        coEvery { beregningKlient.hentGrunnbeloep(any()) } returns mockk()
+        coEvery { beregningKlient.hentGrunnbeloep(any()) } returns opprettGrunnbeloep()
 
         val behandling =
             runBlocking {
@@ -108,6 +110,7 @@ internal class BehandlingServiceTest {
         Assertions.assertEquals(SAKSBEHANDLER_IDENT, behandling.vedtak.saksbehandlerIdent)
         Assertions.assertEquals(ATTESTANT_IDENT, behandling.vedtak.attestantIdent)
         Assertions.assertEquals(YearMonth.now().atDay(1), behandling.utbetalingsinfo!!.virkningsdato)
+        Assertions.assertEquals(120_000, behandling.grunnbeloep.grunnbeloep)
 
         coVerify(exactly = 1) {
             vedtaksvurderingKlient.hentVedtak(BEHANDLING_ID, any())
@@ -264,9 +267,23 @@ internal class BehandlingServiceTest {
 
     private fun opprettVilkaarsvurdering(): VilkaarsvurderingDto {
         val mock = mockk<VilkaarsvurderingDto>()
-        every { mock.resultat } returns VilkaarsvurderingResultat(VilkaarsvurderingUtfall.OPPFYLT, "", LocalDateTime.now(), "saksbehandler")
+        every { mock.resultat } returns
+            VilkaarsvurderingResultat(
+                VilkaarsvurderingUtfall.OPPFYLT,
+                "",
+                LocalDateTime.now(),
+                "saksbehandler",
+            )
         return mock
     }
+
+    private fun opprettGrunnbeloep() =
+        Grunnbeloep(
+            dato = YearMonth.of(2023, Month.SEPTEMBER),
+            grunnbeloep = 120_000,
+            grunnbeloepPerMaaned = 10_000,
+            omregningsfaktor = null,
+        )
 
     private companion object {
         private val FNR = Folkeregisteridentifikator.of("11057523044")

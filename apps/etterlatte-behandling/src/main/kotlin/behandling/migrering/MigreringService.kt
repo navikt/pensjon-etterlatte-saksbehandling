@@ -83,13 +83,11 @@ class MigreringService(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
-        inTransaction {
-            val status = behandlingService.hentBehandling(behandlingId)!!.status
-            if (!status.kanAvbrytes()) {
-                logger.warn("Behandling $behandlingId kan ikke avbrytes, fordi den har status $status.")
-                return@inTransaction
-            }
-            behandlingService.avbrytBehandling(behandlingId, brukerTokenInfo)
+        val status = behandlingService.hentBehandling(behandlingId)!!.status
+        if (!status.kanAvbrytes()) {
+            logger.warn("Behandling $behandlingId kan ikke avbrytes, fordi den har status $status.")
+            return
         }
+        behandlingService.avbrytBehandling(behandlingId, brukerTokenInfo)
     }
 }

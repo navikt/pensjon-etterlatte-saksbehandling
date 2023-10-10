@@ -38,6 +38,8 @@ import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakOgRolle
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
+import no.nav.etterlatte.libs.common.brev.BestillingsIdDto
+import no.nav.etterlatte.libs.common.brev.JournalpostIdDto
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
@@ -498,16 +500,16 @@ class BrevApiKlientTest : BrevApiKlient {
         sakId: Long,
         brevId: Long,
         brukerTokenInfo: BrukerTokenInfo,
-    ): String {
-        return UUID.randomUUID().toString()
+    ): JournalpostIdDto {
+        return JournalpostIdDto(UUID.randomUUID().toString())
     }
 
     override suspend fun distribuerBrev(
         sakId: Long,
         brevId: Long,
         brukerTokenInfo: BrukerTokenInfo,
-    ): String {
-        return UUID.randomUUID().toString()
+    ): BestillingsIdDto {
+        return BestillingsIdDto(UUID.randomUUID().toString())
     }
 
     override suspend fun hentBrev(

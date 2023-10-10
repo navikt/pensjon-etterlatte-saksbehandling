@@ -15,6 +15,8 @@ import no.nav.etterlatte.brev.model.BrevInnholdVedlegg
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
+import no.nav.etterlatte.libs.common.brev.BestillingsIdDto
+import no.nav.etterlatte.libs.common.brev.JournalpostIdDto
 import no.nav.etterlatte.libs.common.withSakId
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import org.slf4j.LoggerFactory
@@ -99,15 +101,15 @@ fun Route.brevRoute(
             withSakId(tilgangssjekker) {
                 val journalpostId = service.journalfoer(brevId, brukerTokenInfo)
 
-                call.respond(journalpostId)
+                call.respond(JournalpostIdDto(journalpostId))
             }
         }
 
         post("distribuer") {
             withSakId(tilgangssjekker) {
-                val journalpostId = service.distribuer(brevId)
+                val bestillingsId = service.distribuer(brevId)
 
-                call.respond(journalpostId)
+                call.respond(BestillingsIdDto(bestillingsId))
             }
         }
     }

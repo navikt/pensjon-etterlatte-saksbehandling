@@ -87,6 +87,20 @@ class GenerellBehandlingService(
         )
     }
 
+    fun attester(
+        generellbehandlingId: UUID,
+        saksbehandler: Saksbehandler,
+    ) {
+        val hentetBehandling = hentBehandlingMedId(generellbehandlingId)
+        require(hentetBehandling !== null) { "Behandlingen må finnes, fant ikke id: $generellbehandlingId" }
+        require(hentetBehandling?.status === GenerellBehandling.Status.FATTET) {
+            "Behandling må ha status FATTET, hadde: ${hentetBehandling?.status}"
+        }
+
+        oppdaterBehandling(hentetBehandling!!.copy(status = GenerellBehandling.Status.ATTESTERT))
+        oppgaveService.ferdigStillOppgaveUnderBehandling(generellbehandlingId.toString(), saksbehandler)
+    }
+
     private fun validerUtland(innhold: Innhold.Utland) {
         if (innhold.landIsoKode.isEmpty()) {
             throw ManglerLandkodeException("Mangler landkode")

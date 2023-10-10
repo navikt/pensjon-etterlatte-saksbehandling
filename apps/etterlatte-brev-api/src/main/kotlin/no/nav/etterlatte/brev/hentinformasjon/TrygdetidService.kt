@@ -24,11 +24,11 @@ class TrygdetidService(private val trygdetidKlient: TrygdetidKlient) {
 
         val beregnetTrygdetid = trygdetidMedGrunnlag.beregnetTrygdetid?.resultat
         val samlaTrygdetid = beregnetTrygdetid?.samletTrygdetidNorge ?: beregnetTrygdetid?.samletTrygdetidTeoretisk ?: 0
-        val aarTrygdetid = samlaTrygdetid % 12
+        val aarTrygdetid = samlaTrygdetid.div(12)
 
         return Trygdetid(
             aarTrygdetid = aarTrygdetid,
-            maanederTrygdetid = samlaTrygdetid - aarTrygdetid,
+            maanederTrygdetid = samlaTrygdetid % 12,
             perioder = trygdetidsperioder,
         )
     }

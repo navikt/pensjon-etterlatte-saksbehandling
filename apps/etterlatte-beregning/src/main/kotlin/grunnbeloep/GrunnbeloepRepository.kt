@@ -3,7 +3,6 @@ package no.nav.etterlatte.grunnbeloep
 import com.fasterxml.jackson.annotation.JsonProperty
 import no.nav.etterlatte.libs.common.objectMapper
 import java.io.FileNotFoundException
-import java.math.BigDecimal
 import java.time.YearMonth
 
 object GrunnbeloepRepository {
@@ -29,13 +28,4 @@ object GrunnbeloepRepository {
 data class GrunnbeloepListe(
     @JsonProperty("grunnbeløp")
     val grunnbeloep: List<Grunnbeloep>,
-)
-
-data class Grunnbeloep(
-    val dato: YearMonth,
-    @JsonProperty("grunnbeløp")
-    val grunnbeloep: Int,
-    @JsonProperty("grunnbeløpPerMåned")
-    val grunnbeloepPerMaaned: Int,
-    val omregningsfaktor: BigDecimal?,
 )

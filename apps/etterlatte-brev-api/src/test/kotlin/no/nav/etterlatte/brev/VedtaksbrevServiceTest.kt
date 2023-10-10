@@ -44,6 +44,7 @@ import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
+import no.nav.etterlatte.grunnbeloep.Grunnbeloep
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
@@ -743,6 +744,13 @@ internal class VedtaksbrevServiceTest {
                 ),
             ),
         etterbetalingDTO = EtterbetalingDTO(LocalDate.now().minusMonths(1), LocalDate.now()),
+        grunnbeloep =
+            Grunnbeloep(
+                dato = YearMonth.now(),
+                grunnbeloep = 120_000,
+                grunnbeloepPerMaaned = 12_000,
+                omregningsfaktor = null,
+            ),
     )
 
     private fun opprettMottaker() =

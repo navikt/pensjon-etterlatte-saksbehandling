@@ -19,6 +19,7 @@ import no.nav.etterlatte.brev.behandling.mapSpraak
 import no.nav.etterlatte.brev.behandling.mapVerge
 import no.nav.etterlatte.brev.behandlingklient.BehandlingKlient
 import no.nav.etterlatte.brev.model.EtterbetalingDTO
+import no.nav.etterlatte.grunnbeloep.Grunnbeloep
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
@@ -61,6 +62,7 @@ class BehandlingService(
             val vilkaarsvurdering =
                 async { vilkaarsvurderingKlient.hentVilkaarsvurdering(behandlingId, brukerTokenInfo) }
             val etterbetaling = async { behandlingKlient.hentEtterbetaling(behandlingId, brukerTokenInfo) }
+            val grunnbeloep = async { beregningKlient.hentGrunnbeloep(brukerTokenInfo) }
 
             mapBehandling(
                 vedtak.await(),
@@ -68,6 +70,7 @@ class BehandlingService(
                 sak.await(),
                 vilkaarsvurdering.await(),
                 etterbetaling.await(),
+                grunnbeloep.await(),
                 brukerTokenInfo,
             )
         }
@@ -78,6 +81,7 @@ class BehandlingService(
         sak: Sak,
         vilkaarsvurdering: VilkaarsvurderingDto,
         etterbetaling: EtterbetalingDTO?,
+        grunnbeloep: Grunnbeloep,
         brukerTokenInfo: BrukerTokenInfo,
     ): Behandling {
         val innloggetSaksbehandlerIdent = brukerTokenInfo.ident()
@@ -145,6 +149,7 @@ class BehandlingService(
                 ),
             vilkaarsvurdering = vilkaarsvurdering,
             etterbetalingDTO = etterbetaling,
+            grunnbeloep = grunnbeloep,
         )
     }
 

@@ -2,6 +2,7 @@ package no.nav.etterlatte.brev.behandling
 
 import no.nav.etterlatte.brev.model.EtterbetalingDTO
 import no.nav.etterlatte.brev.model.Spraak
+import no.nav.etterlatte.grunnbeloep.Grunnbeloep
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -31,6 +32,7 @@ data class Behandling(
     val adopsjonsdato: LocalDate? = null,
     val trygdetid: Trygdetid? = null,
     val etterbetalingDTO: EtterbetalingDTO?,
+    val grunnbeloep: Grunnbeloep,
 ) {
     init {
         if (vedtak.type == VedtakType.INNVILGELSE) {

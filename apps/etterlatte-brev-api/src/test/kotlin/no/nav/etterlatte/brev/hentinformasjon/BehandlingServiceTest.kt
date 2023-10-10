@@ -86,6 +86,7 @@ internal class BehandlingServiceTest {
         coEvery { beregningKlient.hentBeregning(any(), any()) } returns opprettBeregning()
         coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns opprettTrygdetid()
         coEvery { vilkaarsvurderingKlient.hentVilkaarsvurdering(any(), any()) } returns opprettVilkaarsvurdering()
+        coEvery { beregningKlient.hentGrunnbeloep(any()) } returns mockk()
 
         val behandling =
             runBlocking {
@@ -112,6 +113,7 @@ internal class BehandlingServiceTest {
             vedtaksvurderingKlient.hentVedtak(BEHANDLING_ID, any())
             grunnlagKlient.hentGrunnlag(SAK_ID, any())
             beregningKlient.hentBeregning(BEHANDLING_ID, any())
+            beregningKlient.hentGrunnbeloep(any())
         }
     }
 
@@ -129,6 +131,7 @@ internal class BehandlingServiceTest {
         coEvery { beregningKlient.hentBeregning(any(), any()) } returns opprettBeregning()
         coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns opprettTrygdetid()
         coEvery { vilkaarsvurderingKlient.hentVilkaarsvurdering(any(), any()) } returns opprettVilkaarsvurdering()
+        coEvery { beregningKlient.hentGrunnbeloep(any()) } returns mockk()
 
         val behandling =
             runBlocking {
@@ -148,6 +151,7 @@ internal class BehandlingServiceTest {
             vedtaksvurderingKlient.hentVedtak(BEHANDLING_ID, any())
             grunnlagKlient.hentGrunnlag(SAK_ID, any())
             beregningKlient.hentBeregning(BEHANDLING_ID, any())
+            beregningKlient.hentGrunnbeloep(any())
         }
     }
 
@@ -165,6 +169,7 @@ internal class BehandlingServiceTest {
         coEvery { beregningKlient.hentBeregning(any(), any()) } returns opprettBeregningSoeskenjustering()
         coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns opprettTrygdetid()
         coEvery { vilkaarsvurderingKlient.hentVilkaarsvurdering(any(), any()) } returns opprettVilkaarsvurdering()
+        coEvery { beregningKlient.hentGrunnbeloep(any()) } returns mockk()
 
         val behandling =
             runBlocking {
@@ -174,9 +179,12 @@ internal class BehandlingServiceTest {
         Assertions.assertEquals(2, behandling.utbetalingsinfo!!.antallBarn)
         Assertions.assertTrue(behandling.utbetalingsinfo!!.soeskenjustering)
 
-        coVerify(exactly = 1) { vedtaksvurderingKlient.hentVedtak(any(), any()) }
-        coVerify(exactly = 1) { grunnlagKlient.hentGrunnlag(any(), any()) }
-        coVerify(exactly = 1) { beregningKlient.hentBeregning(any(), any()) }
+        coVerify(exactly = 1) {
+            vedtaksvurderingKlient.hentVedtak(any(), any())
+            grunnlagKlient.hentGrunnlag(any(), any())
+            beregningKlient.hentBeregning(any(), any())
+            beregningKlient.hentGrunnbeloep(any())
+        }
     }
 
     private fun opprettBeregning() =

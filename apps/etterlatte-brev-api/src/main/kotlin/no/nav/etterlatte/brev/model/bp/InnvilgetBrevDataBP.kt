@@ -3,13 +3,13 @@ package no.nav.etterlatte.brev.model.bp
 import no.nav.etterlatte.brev.behandling.Avdoed
 import no.nav.etterlatte.brev.behandling.Avkortingsinfo
 import no.nav.etterlatte.brev.behandling.Behandling
-import no.nav.etterlatte.brev.behandling.Beregningsperiode
 import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
 import no.nav.etterlatte.brev.model.BrevData
 import no.nav.etterlatte.brev.model.BrevVedleggKey
 import no.nav.etterlatte.brev.model.EtterbetalingDTO
 import no.nav.etterlatte.brev.model.InnholdMedVedlegg
 import no.nav.etterlatte.brev.model.Slate
+import no.nav.pensjon.brevbaker.api.model.Kroner
 import java.time.LocalDate
 
 data class InnvilgetBrevDataEnkel(
@@ -55,8 +55,8 @@ data class InnvilgetHovedmalBrevData(
         ): BeregningsinfoBP {
             return BeregningsinfoBP(
                 innhold = innhold.finnVedlegg(BrevVedleggKey.BP_BEREGNING_TRYGDETID),
-                grunnbeloep = behandling.utbetalingsinfo!!.beregningsperioder.finnInnevaerendePeriode().grunnbeloep,
-                beregningsperioder = behandling.utbetalingsinfo.beregningsperioder,
+                grunnbeloep = Kroner(behandling.grunnbeloep.grunnbeloep),
+                beregningsperioder = behandling.utbetalingsinfo!!.beregningsperioder,
                 antallBarn = behandling.utbetalingsinfo.antallBarn,
                 aarTrygdetid = behandling.trygdetid!!.aarTrygdetid,
                 maanederTrygdetid = behandling.trygdetid.maanederTrygdetid,
@@ -64,8 +64,4 @@ data class InnvilgetHovedmalBrevData(
             )
         }
     }
-}
-
-private fun List<Beregningsperiode>.finnInnevaerendePeriode(): Beregningsperiode {
-    return this.filter { it.datoFOM <= LocalDate.now() }.first { it.datoTOM == null || it.datoTOM >= LocalDate.now() }
 }

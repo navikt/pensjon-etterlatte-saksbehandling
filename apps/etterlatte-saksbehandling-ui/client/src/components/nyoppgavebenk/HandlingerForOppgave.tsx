@@ -47,7 +47,6 @@ export const HandlingerForOppgave = ({ oppgave }: { oppgave: OppgaveDTO }) => {
           </Button>
         </>
       )
-    case 'MANUELL_JOURNALFOERING':
     case 'UNDERKJENT':
     case 'FOERSTEGANGSBEHANDLING':
       return (

@@ -39,7 +39,7 @@ data class InntektsendringRevurderingOMS(
                                     utbetaltBeloep = it.utbetaltBeloep,
                                 )
                             },
-                        trygdetidsperioder = behandling.trygdetid!!,
+                        trygdetidsperioder = behandling.trygdetid!!.perioder,
                     ),
                 innhold = innholdMedVedlegg.innhold(),
             )

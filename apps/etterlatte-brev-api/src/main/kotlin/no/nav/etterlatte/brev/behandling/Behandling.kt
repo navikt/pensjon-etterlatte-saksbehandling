@@ -29,7 +29,7 @@ data class Behandling(
     val virkningsdato: YearMonth? = null,
     val opprinneligInnvilgelsesdato: LocalDate? = null, // Kun opphør RevurderingAarsak.OMGJOERING_AV_FARSKAP TODO: fix
     val adopsjonsdato: LocalDate? = null,
-    val trygdetid: List<Trygdetidsperiode>? = null,
+    val trygdetid: Trygdetid? = null,
     val etterbetalingDTO: EtterbetalingDTO?,
 ) {
     init {
@@ -38,6 +38,11 @@ data class Behandling(
         }
     }
 }
+
+data class Trygdetid(
+    val samlaTrygdetid: String,
+    val perioder: List<Trygdetidsperiode>,
+)
 
 data class Trygdetidsperiode(
     val datoFOM: LocalDate,

@@ -8,6 +8,7 @@ import no.nav.etterlatte.brev.behandling.Behandling
 import no.nav.etterlatte.brev.behandling.Beregningsperiode
 import no.nav.etterlatte.brev.behandling.ForenkletVedtak
 import no.nav.etterlatte.brev.behandling.PersonerISak
+import no.nav.etterlatte.brev.behandling.Trygdetid
 import no.nav.etterlatte.brev.behandling.Trygdetidsperiode
 import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
 import no.nav.etterlatte.brev.behandling.hentUtbetaltBeloep
@@ -236,11 +237,11 @@ class BehandlingService(
     private suspend fun finnTrygdetid(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ): List<Trygdetidsperiode>? {
-        val trygdetidMedGrunnlag = trygdetidKlient.hentTrygdetid(behandlingId, brukerTokenInfo)
+    ): Trygdetid? {
+        val trygdetidMedGrunnlag = trygdetidKlient.hentTrygdetid(behandlingId, brukerTokenInfo) ?: return null
 
         val trygdetidsperioder =
-            trygdetidMedGrunnlag?.trygdetidGrunnlag?.map {
+            trygdetidMedGrunnlag.trygdetidGrunnlag.map {
                 Trygdetidsperiode(
                     datoFOM = it.periodeFra,
                     datoTOM = it.periodeTil,
@@ -249,6 +250,8 @@ class BehandlingService(
                 )
             }
 
-        return trygdetidsperioder
+        val beregnetTrygdetid = trygdetidMedGrunnlag.beregnetTrygdetid?.resultat
+        val samlaTrygdetid = beregnetTrygdetid?.samletTrygdetidNorge ?: beregnetTrygdetid?.samletTrygdetidTeoretisk
+        return Trygdetid(samlaTrygdetid?.toString() ?: "", trygdetidsperioder)
     }
 }

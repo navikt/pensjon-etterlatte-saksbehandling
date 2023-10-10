@@ -45,7 +45,7 @@ data class InnvilgetBrevDataOMS(
                                     utbetaltBeloep = it.utbetaltBeloep,
                                 )
                             },
-                        trygdetidsperioder = behandling.trygdetid!!,
+                        trygdetidsperioder = behandling.trygdetid!!.perioder,
                     ),
                 innhold = innholdMedVedlegg.innhold(),
             )

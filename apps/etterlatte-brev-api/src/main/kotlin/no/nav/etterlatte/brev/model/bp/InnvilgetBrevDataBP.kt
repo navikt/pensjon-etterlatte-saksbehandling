@@ -5,11 +5,9 @@ import no.nav.etterlatte.brev.behandling.Avkortingsinfo
 import no.nav.etterlatte.brev.behandling.Behandling
 import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
 import no.nav.etterlatte.brev.model.BrevData
-import no.nav.etterlatte.brev.model.BrevVedleggKey
 import no.nav.etterlatte.brev.model.EtterbetalingDTO
 import no.nav.etterlatte.brev.model.InnholdMedVedlegg
 import no.nav.etterlatte.brev.model.Slate
-import no.nav.pensjon.brevbaker.api.model.Kroner
 import java.time.LocalDate
 
 data class InnvilgetBrevDataEnkel(
@@ -40,28 +38,12 @@ data class InnvilgetHovedmalBrevData(
         fun fra(
             behandling: Behandling,
             innhold: InnholdMedVedlegg,
-        ): InnvilgetHovedmalBrevData =
-            InnvilgetHovedmalBrevData(
-                utbetalingsinfo = behandling.utbetalingsinfo!!,
-                avkortingsinfo = behandling.avkortingsinfo,
-                beregningsinfo = tilBeregningsinfo(behandling, innhold),
-                etterbetalingDTO = behandling.etterbetalingDTO,
-                innhold = innhold.innhold(),
-            )
-
-        private fun tilBeregningsinfo(
-            behandling: Behandling,
-            innhold: InnholdMedVedlegg,
-        ): BeregningsinfoBP {
-            return BeregningsinfoBP(
-                innhold = innhold.finnVedlegg(BrevVedleggKey.BP_BEREGNING_TRYGDETID),
-                grunnbeloep = Kroner(behandling.grunnbeloep.grunnbeloep),
-                beregningsperioder = behandling.utbetalingsinfo!!.beregningsperioder,
-                antallBarn = behandling.utbetalingsinfo.antallBarn,
-                aarTrygdetid = behandling.trygdetid!!.aarTrygdetid,
-                maanederTrygdetid = behandling.trygdetid.maanederTrygdetid,
-                trygdetidsperioder = behandling.trygdetid.perioder,
-            )
-        }
+        ) = InnvilgetHovedmalBrevData(
+            utbetalingsinfo = behandling.utbetalingsinfo!!,
+            avkortingsinfo = behandling.avkortingsinfo,
+            beregningsinfo = BeregningsinfoBP.fra(behandling, innhold),
+            etterbetalingDTO = behandling.etterbetalingDTO,
+            innhold = innhold.innhold(),
+        )
     }
 }

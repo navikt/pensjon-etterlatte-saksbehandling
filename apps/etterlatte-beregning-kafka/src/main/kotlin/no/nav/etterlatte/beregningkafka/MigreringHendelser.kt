@@ -62,7 +62,7 @@ private fun verifiserNyBeregning(
     migreringRequest: MigreringRequest,
 ) {
     check(beregning.beregningsperioder.size == 1) {
-        "Migrerte saker skal kun opprette en beregningperiode"
+        "Migrerte saker skal kun opprette en beregningperiode, men oppretta ${beregning.beregningsperioder.size}"
     }
 
     with(beregning.beregningsperioder.first()) {

@@ -8,6 +8,7 @@ import no.nav.etterlatte.libs.database.oppdater
 import no.nav.etterlatte.libs.database.opprett
 import no.nav.etterlatte.libs.database.transaction
 import no.nav.etterlatte.rapidsandrivers.migrering.PesysId
+import org.slf4j.LoggerFactory
 import java.util.UUID
 import javax.sql.DataSource
 
@@ -22,6 +23,8 @@ internal class PesysRepository(private val dataSource: DataSource) : Transaction
             this.block(it)
         }
     }
+
+    private val logger = LoggerFactory.getLogger(this::class.java)
 
     fun lagrePesyssak(
         pesyssak: Pesyssak,
@@ -64,13 +67,17 @@ internal class PesysRepository(private val dataSource: DataSource) : Transaction
         pesysId: PesysId,
         tx: TransactionalSession? = null,
     ) {
-        tx.session {
-            opprett(
-                "INSERT INTO pesyskopling(behandling_id,pesys_id) VALUES(:behandling_id,:pesys_id)" +
-                    " ON CONFLICT(behandling_id,pesys_id) DO NOTHING",
-                mapOf("behandling_id" to behandlingId, "pesys_id" to pesysId.id),
-                "Lagra koplinga mellom behandling $behandlingId og pesyssak $pesysId i migreringsbasen",
-            )
+        if (hentKoplingTilBehandling(pesysId) == null) {
+            tx.session {
+                opprett(
+                    "INSERT INTO pesyskopling(behandling_id,pesys_id) VALUES(:behandling_id,:pesys_id)" +
+                        " ON CONFLICT(behandling_id,pesys_id) DO NOTHING",
+                    mapOf("behandling_id" to behandlingId, "pesys_id" to pesysId.id),
+                    "Lagra koplinga mellom behandling $behandlingId og pesyssak $pesysId i migreringsbasen",
+                )
+            }
+        } else {
+            logger.info("Fins allerede kopling i databasen mellom $behandlingId og $pesysId. Prøver ikke å opprette ny")
         }
     }
 

@@ -18,6 +18,9 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.rapidsandrivers.migrering.MigreringRequest
 import no.nav.etterlatte.sak.SakService
+import no.nav.etterlatte.token.BrukerTokenInfo
+import org.slf4j.LoggerFactory
+import java.util.UUID
 
 class MigreringService(
     private val sakService: SakService,
@@ -28,6 +31,8 @@ class MigreringService(
     private val behandlingService: BehandlingService,
     private val oppgaveService: OppgaveService,
 ) {
+    private val logger = LoggerFactory.getLogger(this::class.java)
+
     fun migrer(request: MigreringRequest) =
         inTransaction {
             opprettSakOgBehandling(request)?.let {
@@ -73,4 +78,16 @@ class MigreringService(
 
     private fun finnEllerOpprettSak(request: MigreringRequest) =
         sakService.finnEllerOpprettSak(request.soeker.value, SakType.BARNEPENSJON, request.enhet.nr)
+
+    fun avbrytBehandling(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {
+        val status = behandlingService.hentBehandling(behandlingId)!!.status
+        if (!status.kanAvbrytes()) {
+            logger.warn("Behandling $behandlingId kan ikke avbrytes, fordi den har status $status.")
+            return
+        }
+        behandlingService.avbrytBehandling(behandlingId, brukerTokenInfo)
+    }
 }

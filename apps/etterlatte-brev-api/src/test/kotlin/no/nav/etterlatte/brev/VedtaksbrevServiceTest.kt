@@ -76,7 +76,6 @@ import kotlin.random.Random
 internal class VedtaksbrevServiceTest {
     private val db = mockk<BrevRepository>(relaxed = true)
     private val brevbaker = mockk<BrevbakerKlient>()
-    private val brevService = mockk<BrevService>()
     private val sakOgBehandlingService = mockk<IBehandlingService>()
     private val vedtaksvurderingService = mockk<VedtaksvurderingService>()
     private val adresseService = mockk<AdresseService>()
@@ -206,16 +205,19 @@ internal class VedtaksbrevServiceTest {
         @ParameterizedTest
         @CsvSource(
             value = [
-                "BARNEPENSJON,YRKESSKADE,REDIGERBAR",
+                "BARNEPENSJON,YRKESSKADE,REDIGERBAR,ENDRING",
+                "BARNEPENSJON,,REDIGERBAR,INNVILGELSE",
             ],
         )
         fun `Vedtaksbrev finnes ikke - skal opprette nytt redigerbart brev`(
             sakType: SakType,
-            revurderingsaarsak: RevurderingAarsak,
+            revurderingsaarsak: RevurderingAarsak?,
             forventetProsessType: BrevProsessType,
+            vedtakType: VedtakType,
         ) {
+            featureToggleService.settBryter(BrevDataFeatureToggle.NyMalInnvilgelse, true)
             val sakId = Random.nextLong()
-            val behandling = opprettBehandling(sakType, VedtakType.ENDRING, revurderingsaarsak = revurderingsaarsak)
+            val behandling = opprettBehandling(sakType, vedtakType, revurderingsaarsak = revurderingsaarsak)
             val mottaker = opprettMottaker()
 
             coEvery { brevbaker.genererJSON(any()) } returns opprettRenderedJsonLetter()

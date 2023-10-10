@@ -57,13 +57,15 @@ internal fun Route.oppgaveRoutes(
                 kunSystembruker {
                     val nyOppgaveDto = call.receive<NyOppgaveDto>()
                     call.respond(
-                        service.opprettNyOppgaveMedSakOgReferanse(
-                            nyOppgaveDto.referanse,
-                            nyOppgaveDto.sakId,
-                            nyOppgaveDto.oppgaveKilde,
-                            nyOppgaveDto.oppgaveType,
-                            nyOppgaveDto.merknad,
-                        ),
+                        inTransaction {
+                            service.opprettNyOppgaveMedSakOgReferanse(
+                                nyOppgaveDto.referanse,
+                                nyOppgaveDto.sakId,
+                                nyOppgaveDto.oppgaveKilde,
+                                nyOppgaveDto.oppgaveType,
+                                nyOppgaveDto.merknad,
+                            )
+                        },
                     )
                 }
             }

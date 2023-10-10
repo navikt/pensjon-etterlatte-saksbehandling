@@ -37,9 +37,11 @@ internal fun Route.oppgaveRoutes(
         get {
             kunSaksbehandler {
                 call.respond(
-                    service.finnOppgaverForBruker(
-                        Kontekst.get().appUserAsSaksbehandler().saksbehandlerMedRoller,
-                    ),
+                    inTransaction {
+                        service.finnOppgaverForBruker(
+                            Kontekst.get().appUserAsSaksbehandler().saksbehandlerMedRoller,
+                        )
+                    },
                 )
             }
         }

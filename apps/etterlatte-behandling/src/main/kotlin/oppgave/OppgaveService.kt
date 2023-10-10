@@ -43,13 +43,9 @@ class OppgaveService(
         val aktuelleOppgavetyperForRoller = aktuelleOppgavetyperForRolleTilSaksbehandler(rollerSomBrukerHar)
 
         return if (bruker.harRolleStrengtFortrolig()) {
-            inTransaction {
-                oppgaveDao.finnOppgaverForStrengtFortroligOgStrengtFortroligUtland(aktuelleOppgavetyperForRoller)
-            }
+            oppgaveDao.finnOppgaverForStrengtFortroligOgStrengtFortroligUtland(aktuelleOppgavetyperForRoller)
         } else {
-            inTransaction {
-                oppgaveDao.hentOppgaver(aktuelleOppgavetyperForRoller)
-            }.sortedByDescending { it.opprettet }
+            oppgaveDao.hentOppgaver(aktuelleOppgavetyperForRoller).sortedByDescending { it.opprettet }
         }.filterForEnheter(Kontekst.get().AppUser)
     }
 

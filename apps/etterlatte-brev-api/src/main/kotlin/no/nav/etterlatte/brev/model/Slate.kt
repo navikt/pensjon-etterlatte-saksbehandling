@@ -79,4 +79,6 @@ object SlateHelper {
     fun opprettTomBrevmal() = deserialize<Slate>(getJsonFile("/maler/tom-brevmal.json"))
 
     private fun getJsonFile(url: String) = javaClass.getResource(url)!!.readText()
+
+    fun getSlate(url: String) = getJsonFile(url).let { deserialize<Slate>(it) }
 }

@@ -3,7 +3,6 @@ package no.nav.etterlatte.brev.model
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import no.nav.etterlatte.brev.adresse.RegoppslagResponseDTO
 import no.nav.etterlatte.brev.behandling.Trygdetidsperiode
-import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
 import no.nav.pensjon.brevbaker.api.model.Kroner
@@ -126,10 +125,8 @@ data class BrevInnholdVedlegg(
             BrevInnholdVedlegg(
                 tittel = "Utfall ved beregning av omstillingsstønad",
                 key = BrevVedleggKey.BEREGNING_INNHOLD,
-                payload = getJsonFile("/maler/vedlegg/oms_utfall_beregning.json").let { deserialize<Slate>(it) },
+                payload = SlateHelper.getSlate("/maler/vedlegg/oms_utfall_beregning.json"),
             )
-
-        private fun getJsonFile(url: String) = this::class.java.getResource(url)!!.readText()
     }
 }
 

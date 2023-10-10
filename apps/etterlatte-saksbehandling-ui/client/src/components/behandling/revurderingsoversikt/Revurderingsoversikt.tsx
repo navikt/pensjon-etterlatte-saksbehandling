@@ -23,6 +23,8 @@ import {
   OMS_OPPHOER_HJEMLER,
   OMS_REVURDERING_BESKRIVELSE,
   OMS_REVURDERING_HJEMLER,
+  OMS_INST_HJEMLER_VIRK,
+  OMS_INST_VIRK_BESKRIVELSE,
 } from '~components/behandling/soeknadsoversikt/soeknadoversikt/virkningstidspunkt/utils'
 import { SakType } from '~shared/types/sak'
 import { erOpphoer, Revurderingsaarsak, tekstRevurderingsaarsak } from '~shared/types/Revurderingsaarsak'
@@ -53,6 +55,8 @@ const hjemlerOgBeskrivelseOmstillingsstoenad = (revurderingsaarsak: Revurderings
       return [OMS_INNTEKTSENDRING_HJEMLER, OMS_INNTEKTSENDRING_BESKRIVELSE]
     case Revurderingsaarsak.SIVILSTAND:
       return [OMS_OPPHOER_HJEMLER, OMS_OPPHOER_BESKRIVELSE]
+    case Revurderingsaarsak.INSTITUSJONSOPPHOLD:
+      return [OMS_INST_HJEMLER_VIRK, OMS_INST_VIRK_BESKRIVELSE]
     default:
       return [OMS_REVURDERING_HJEMLER, OMS_REVURDERING_BESKRIVELSE]
   }

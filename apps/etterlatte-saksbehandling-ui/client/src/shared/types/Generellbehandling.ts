@@ -4,6 +4,14 @@ export interface Generellbehandling {
   innhold: Innhold
   type: GenerellBehandlingType
   opprettet: Date
+  status: Status
+}
+
+export enum Status {
+  OPPRETTET = 'OPPRETTET',
+  FATTET = 'FATTET',
+  ATTESTERT = 'ATTESTERT',
+  AVBRUTT = 'AVBRUTT',
 }
 
 export const Innholdstyper: Record<GenerellBehandlingType, string> = {

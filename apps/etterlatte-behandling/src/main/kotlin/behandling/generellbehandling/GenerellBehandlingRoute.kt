@@ -15,7 +15,9 @@ import io.ktor.util.pipeline.PipelineContext
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.inTransaction
+import no.nav.etterlatte.libs.common.GENERELLBEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
+import no.nav.etterlatte.libs.common.generellBehandlingId
 import no.nav.etterlatte.libs.common.generellbehandling.GenerellBehandling
 import no.nav.etterlatte.libs.common.kunSaksbehandler
 import no.nav.etterlatte.libs.common.sakId
@@ -77,6 +79,19 @@ internal fun Route.generellbehandlingRoutes(
                 logger.info(
                     "Opprettet generell behandling for sak $sakId av typen ${request.type}",
                 )
+                call.respond(HttpStatusCode.OK)
+            }
+        }
+    }
+
+    get("/api/generellbehandling/attester/{$SAKID_CALL_PARAMETER}/${GENERELLBEHANDLINGID_CALL_PARAMETER}") {
+        hvisEnabled(GenerellBehandlingToggle.KanBrukeGenerellBehandlingToggle) {
+            val generellBehandlingId = generellBehandlingId
+            kunSaksbehandler { saksbehandler ->
+                inTransaction {
+                    generellBehandlingService.attester(generellBehandlingId, saksbehandler)
+                }
+                logger.info("Attester generell behandling med id $generellBehandlingId")
                 call.respond(HttpStatusCode.OK)
             }
         }

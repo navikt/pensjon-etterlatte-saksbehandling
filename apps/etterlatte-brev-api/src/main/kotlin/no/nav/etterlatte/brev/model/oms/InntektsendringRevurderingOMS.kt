@@ -4,9 +4,9 @@ import no.nav.etterlatte.brev.behandling.Avkortingsinfo
 import no.nav.etterlatte.brev.behandling.Behandling
 import no.nav.etterlatte.brev.model.Beregningsinfo
 import no.nav.etterlatte.brev.model.BrevData
-import no.nav.etterlatte.brev.model.BrevInnholdVedlegg
 import no.nav.etterlatte.brev.model.BrevVedleggKey
 import no.nav.etterlatte.brev.model.EtterbetalingDTO
+import no.nav.etterlatte.brev.model.InnholdMedVedlegg
 import no.nav.etterlatte.brev.model.NyBeregningsperiode
 import no.nav.etterlatte.brev.model.Slate
 
@@ -20,8 +20,7 @@ data class InntektsendringRevurderingOMS(
     companion object {
         fun fra(
             behandling: Behandling,
-            innhold: List<Slate.Element>,
-            innholdVedlegg: List<BrevInnholdVedlegg>,
+            innholdMedVedlegg: InnholdMedVedlegg,
         ): InntektsendringRevurderingOMS =
             InntektsendringRevurderingOMS(
                 erEndret = true,
@@ -29,11 +28,7 @@ data class InntektsendringRevurderingOMS(
                 etterbetalinginfo = behandling.etterbetalingDTO,
                 beregningsinfo =
                     Beregningsinfo(
-                        innhold =
-                            innholdVedlegg.find {
-                                    vedlegg ->
-                                vedlegg.key == BrevVedleggKey.BEREGNING_INNHOLD
-                            }?.payload!!.elements,
+                        innhold = innholdMedVedlegg.finnVedlegg(BrevVedleggKey.BEREGNING_INNHOLD),
                         grunnbeloep = behandling.avkortingsinfo!!.grunnbeloep,
                         beregningsperioder =
                             behandling.avkortingsinfo.beregningsperioder.map {
@@ -46,7 +41,7 @@ data class InntektsendringRevurderingOMS(
                             },
                         trygdetidsperioder = behandling.trygdetid!!,
                     ),
-                innhold = innhold,
+                innhold = innholdMedVedlegg.innhold(),
             )
     }
 }

@@ -6,9 +6,9 @@ import no.nav.etterlatte.brev.behandling.Behandling
 import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
 import no.nav.etterlatte.brev.model.Beregningsinfo
 import no.nav.etterlatte.brev.model.BrevData
-import no.nav.etterlatte.brev.model.BrevInnholdVedlegg
 import no.nav.etterlatte.brev.model.BrevVedleggKey
 import no.nav.etterlatte.brev.model.EtterbetalingDTO
+import no.nav.etterlatte.brev.model.InnholdMedVedlegg
 import no.nav.etterlatte.brev.model.NyBeregningsperiode
 import no.nav.etterlatte.brev.model.Slate
 import no.nav.pensjon.brevbaker.api.model.Kroner
@@ -25,8 +25,7 @@ data class InnvilgetBrevDataOMS(
     companion object {
         fun fra(
             behandling: Behandling,
-            innhold: List<Slate.Element>,
-            innholdVedlegg: List<BrevInnholdVedlegg>,
+            innholdMedVedlegg: InnholdMedVedlegg,
         ): InnvilgetBrevDataOMS =
             InnvilgetBrevDataOMS(
                 utbetalingsinfo = behandling.utbetalingsinfo!!,
@@ -35,10 +34,7 @@ data class InnvilgetBrevDataOMS(
                 etterbetalinginfo = behandling.etterbetalingDTO,
                 beregningsinfo =
                     Beregningsinfo(
-                        innhold =
-                            innholdVedlegg.find { vedlegg ->
-                                vedlegg.key == BrevVedleggKey.BEREGNING_INNHOLD
-                            }?.payload!!.elements,
+                        innhold = innholdMedVedlegg.finnVedlegg(BrevVedleggKey.BEREGNING_INNHOLD),
                         grunnbeloep = behandling.avkortingsinfo!!.grunnbeloep,
                         beregningsperioder =
                             behandling.avkortingsinfo.beregningsperioder.map {
@@ -51,7 +47,7 @@ data class InnvilgetBrevDataOMS(
                             },
                         trygdetidsperioder = behandling.trygdetid!!,
                     ),
-                innhold = innhold,
+                innhold = innholdMedVedlegg.innhold(),
             )
     }
 }

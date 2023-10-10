@@ -6,6 +6,7 @@ import no.nav.etterlatte.brev.behandling.Behandling
 import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
 import no.nav.etterlatte.brev.model.BrevData
 import no.nav.etterlatte.brev.model.EtterbetalingDTO
+import no.nav.etterlatte.brev.model.InnholdMedVedlegg
 import no.nav.etterlatte.brev.model.Slate
 import java.time.LocalDate
 
@@ -35,13 +36,13 @@ data class InnvilgetHovedmalBrevData(
     companion object {
         fun fra(
             behandling: Behandling,
-            innhold: List<Slate.Element>,
+            innhold: InnholdMedVedlegg,
         ): InnvilgetHovedmalBrevData =
             InnvilgetHovedmalBrevData(
                 utbetalingsinfo = behandling.utbetalingsinfo!!,
                 avkortingsinfo = behandling.avkortingsinfo,
                 etterbetalingDTO = behandling.etterbetalingDTO,
-                innhold = innhold,
+                innhold = innhold.innhold(),
             )
     }
 }

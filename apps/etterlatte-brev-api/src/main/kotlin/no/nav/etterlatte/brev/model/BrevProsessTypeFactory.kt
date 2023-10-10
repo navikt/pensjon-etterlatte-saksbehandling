@@ -33,6 +33,7 @@ class BrevProsessTypeFactory(private val featureToggleService: FeatureToggleServ
 
                     else -> BrevProsessType.MANUELL
                 }
+
             VedtakType.TILBAKEKREVING -> TODO("EY-2806")
         }
     }

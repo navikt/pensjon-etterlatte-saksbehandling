@@ -212,10 +212,12 @@ const Utland = (props: { utlandsBehandling: Generellbehandling & { innhold: Utla
                               }}
                               key={landIsoKode}
                               onClick={() => {
-                                const nyLandliste = valgteLandIsoKode.filter(
-                                  (isolandkode) => isolandkode !== landIsoKode
-                                )
-                                setvalgteLandIsoKode(nyLandliste)
+                                if (redigerbar) {
+                                  const nyLandliste = valgteLandIsoKode.filter(
+                                    (isolandkode) => isolandkode !== landIsoKode
+                                  )
+                                  setvalgteLandIsoKode(nyLandliste)
+                                }
                               }}
                             >
                               {kodeverkLandMatch?.beskrivelse.tekst ?? landIsoKode}

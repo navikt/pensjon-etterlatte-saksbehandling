@@ -7,6 +7,8 @@ import com.typesafe.config.Config
 import io.ktor.client.HttpClient
 import no.nav.etterlatte.behandling.objectMapper
 import no.nav.etterlatte.libs.common.behandling.Mottaker
+import no.nav.etterlatte.libs.common.brev.BestillingsIdDto
+import no.nav.etterlatte.libs.common.brev.JournalpostIdDto
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktorobo.DownstreamResourceClient
@@ -41,7 +43,7 @@ interface BrevApiKlient {
         sakId: Long,
         brevId: Long,
         brukerTokenInfo: BrukerTokenInfo,
-    ): DistribusjonskvitteringDto
+    ): BestillingsIdDto
 
     suspend fun hentBrev(
         sakId: Long,
@@ -134,7 +136,7 @@ class BrevApiKlientObo(config: Config, client: HttpClient) : BrevApiKlient {
         sakId: Long,
         brevId: Long,
         brukerTokenInfo: BrukerTokenInfo,
-    ): DistribusjonskvitteringDto {
+    ): BestillingsIdDto {
         try {
             return downstreamResourceClient.post(
                 resource =
@@ -182,11 +184,3 @@ class BrevApiKlientObo(config: Config, client: HttpClient) : BrevApiKlient {
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class OpprettetBrevDto(val id: Long, val mottaker: Mottaker)
-
-data class JournalpostIdDto(
-    val journalpostId: String,
-)
-
-data class DistribusjonskvitteringDto(
-    val distribusjonskvittering: String,
-)

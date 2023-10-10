@@ -311,7 +311,7 @@ class KlageServiceImpl(
         brevApiKlient.ferdigstillBrev(sakId, brevId, saksbehandler)
         val journalpostIdJournalfoering = brevApiKlient.journalfoerBrev(sakId, brevId, saksbehandler).journalpostId
         val tidspunktJournalfoert = Tidspunkt.now()
-        val bestillingsIdDistribuering = brevApiKlient.distribuerBrev(sakId, brevId, saksbehandler).distribusjonskvittering
+        val bestillingsIdDistribuering = brevApiKlient.distribuerBrev(sakId, brevId, saksbehandler).bestillingsId
         logger.info(
             "Distribusjon av innstillingsbrevet med id=$brevId bestilt til klagen i sak med sakId=$sakId, " +
                 "med bestillingsId $bestillingsIdDistribuering",

@@ -5,9 +5,7 @@ import { TilbakekrevingNavLenke } from '~components/tilbakekreving/stegmeny/Tilb
 export function TilbakekrevingStegmeny() {
   return (
     <StegMenyWrapper>
-      <TilbakekrevingNavLenke path="oversikt" description="Oversikt" enabled separator />
       <TilbakekrevingNavLenke path="vurdering" description="Vurdering" enabled separator />
-      <TilbakekrevingNavLenke path="oppsummering" description="Oppsummering" enabled separator />
       <TilbakekrevingNavLenke path="brev" description="Brev" enabled separator={false} />
     </StegMenyWrapper>
   )

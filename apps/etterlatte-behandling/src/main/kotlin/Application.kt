@@ -89,6 +89,7 @@ internal fun Application.module(context: ApplicationContext) {
                 tilgangService = tilgangService,
                 sakService = sakService,
                 behandlingService = behandlingService,
+                requestLogger = behandlingRequestLogger,
             )
             sakWebRoutes(
                 tilgangService = tilgangService,
@@ -96,6 +97,7 @@ internal fun Application.module(context: ApplicationContext) {
                 behandlingService = behandlingService,
                 grunnlagsendringshendelseService = grunnlagsendringshendelseService,
                 oppgaveService = oppgaveService,
+                requestLogger = behandlingRequestLogger,
             )
             klageRoutes(klageService = klageService, featureToggleService = featureToggleService)
             tilbakekrevingRoutes(service = tilbakekrevingService)

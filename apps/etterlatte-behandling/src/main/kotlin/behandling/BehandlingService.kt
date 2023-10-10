@@ -222,7 +222,7 @@ internal class BehandlingServiceImpl(
             soeknadMottattDato = behandling.mottattDato(),
             personopplysning = personopplysning,
         ).also {
-            personopplysning?.fnr?.let { behandlingRequestLogger.loggRequest(brukerTokenInfo, it) }
+            personopplysning?.fnr?.let { behandlingRequestLogger.loggRequest(brukerTokenInfo, it, "behandling") }
         }
     }
 
@@ -329,8 +329,8 @@ internal class BehandlingServiceImpl(
                 begrunnelse = behandling.begrunnelse(),
                 etterbetaling = inTransaction { etterbetalingService.hentEtterbetaling(behandlingId) },
             ).also {
-                gjenlevende.await()?.fnr?.let { behandlingRequestLogger.loggRequest(brukerTokenInfo, it) }
-                soeker.await()?.fnr?.let { behandlingRequestLogger.loggRequest(brukerTokenInfo, it) }
+                gjenlevende.await()?.fnr?.let { behandlingRequestLogger.loggRequest(brukerTokenInfo, it, "behandling") }
+                soeker.await()?.fnr?.let { behandlingRequestLogger.loggRequest(brukerTokenInfo, it, "behandling") }
             }
         }
     }

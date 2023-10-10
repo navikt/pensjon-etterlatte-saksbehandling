@@ -11,13 +11,14 @@ class BehandlingRequestLogger(private val sporingslogg: Sporingslogg) {
     fun loggRequest(
         brukerTokenInfo: BrukerTokenInfo,
         fnr: Folkeregisteridentifikator,
+        endepunkt: String,
     ) = sporingslogg.logg(
         Sporingsrequest(
             kallendeApplikasjon = "behandling",
             oppdateringstype = HttpMethod.GET,
             brukerId = brukerTokenInfo.ident(),
             hvemBlirSlaattOpp = fnr.value,
-            endepunkt = "behandling",
+            endepunkt = endepunkt,
             resultat = Decision.Permit,
             melding = "Hent behandling var vellykka",
         ),

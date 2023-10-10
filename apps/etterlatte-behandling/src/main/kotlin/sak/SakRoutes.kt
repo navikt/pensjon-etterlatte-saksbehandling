@@ -9,6 +9,7 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.behandling.BehandlingListe
+import no.nav.etterlatte.behandling.BehandlingRequestLogger
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.domain.Grunnlagsendringshendelse
 import no.nav.etterlatte.behandling.domain.toBehandlingSammendrag
@@ -23,6 +24,7 @@ import no.nav.etterlatte.libs.common.kunSystembruker
 import no.nav.etterlatte.libs.common.oppgave.OppgaveListe
 import no.nav.etterlatte.libs.common.sak.Saker
 import no.nav.etterlatte.libs.common.sakId
+import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.tilgangsstyring.withFoedselsnummerAndGradering
 import no.nav.etterlatte.tilgangsstyring.withFoedselsnummerInternal
@@ -33,6 +35,7 @@ internal fun Route.sakSystemRoutes(
     tilgangService: TilgangService,
     sakService: SakService,
     behandlingService: BehandlingService,
+    requestLogger: BehandlingRequestLogger,
 ) {
     val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -69,14 +72,19 @@ internal fun Route.sakSystemRoutes(
     post("personer/saker/{type}") {
         withFoedselsnummerAndGradering(tilgangService) { fnr, gradering ->
             val type: SakType = enumValueOf(requireNotNull(call.parameters["type"]) { "Må ha en Saktype for å finne eller opprette sak" })
-            call.respond(inTransaction { sakService.finnEllerOpprettSak(fnr = fnr.value, type, gradering = gradering) })
+            val message = inTransaction { sakService.finnEllerOpprettSak(fnr = fnr.value, type, gradering = gradering) }
+            requestLogger.loggRequest(brukerTokenInfo, fnr, "personer/saker")
+            call.respond(message)
         }
     }
 
     post("personer/getsak/{type}") {
         withFoedselsnummerInternal(tilgangService) { fnr ->
             val type: SakType = enumValueOf(requireNotNull(call.parameters["type"]) { "Må ha en Saktype for å finne sak" })
-            val sak = inTransaction { sakService.finnSak(fnr.value, type) }
+            val sak =
+                inTransaction { sakService.finnSak(fnr.value, type) }.also {
+                    requestLogger.loggRequest(brukerTokenInfo, fnr, "personer/sak")
+                }
             call.respond(sak ?: HttpStatusCode.NotFound)
         }
     }
@@ -88,6 +96,7 @@ internal fun Route.sakWebRoutes(
     behandlingService: BehandlingService,
     grunnlagsendringshendelseService: GrunnlagsendringshendelseService,
     oppgaveService: OppgaveService,
+    requestLogger: BehandlingRequestLogger,
 ) {
     val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -118,7 +127,9 @@ internal fun Route.sakWebRoutes(
                             "Mangler påkrevd parameter {type} for å hente sak på bruker"
                         }.let { enumValueOf(it) }
 
-                    val sak = inTransaction { sakService.finnSak(fnr.value, type) }
+                    val sak =
+                        inTransaction { sakService.finnSak(fnr.value, type) }
+                            .also { requestLogger.loggRequest(brukerTokenInfo, fnr, "personer/sak/type") }
                     call.respond(sak ?: HttpStatusCode.NoContent)
                 }
             }
@@ -133,7 +144,7 @@ internal fun Route.sakWebRoutes(
                                         .map { it.toBehandlingSammendrag() }
                                         .let { BehandlingListe(sak, it) }
                                 }
-                        }
+                        }.also { requestLogger.loggRequest(brukerTokenInfo, fnr, "behandlinger") }
                     call.respond(behandlinger)
                 }
             }
@@ -146,7 +157,7 @@ internal fun Route.sakWebRoutes(
                                 .map { sak ->
                                     OppgaveListe(sak, oppgaveService.hentOppgaverForSak(sak.id))
                                 }
-                        }
+                        }.also { requestLogger.loggRequest(brukerTokenInfo, fnr, "oppgaver") }
                     call.respond(oppgaver)
                 }
             }
@@ -158,7 +169,7 @@ internal fun Route.sakWebRoutes(
                             sakService.finnSaker(fnr.value).map { sak ->
                                 GrunnlagsendringsListe(grunnlagsendringshendelseService.hentAlleHendelserForSak(sak.id))
                             }
-                        },
+                        }.also { requestLogger.loggRequest(brukerTokenInfo, fnr, "grunnlagsendringshendelser") },
                     )
                 }
             }

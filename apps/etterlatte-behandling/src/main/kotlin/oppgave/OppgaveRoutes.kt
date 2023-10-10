@@ -37,9 +37,11 @@ internal fun Route.oppgaveRoutes(
         get {
             kunSaksbehandler {
                 call.respond(
-                    service.finnOppgaverForBruker(
-                        Kontekst.get().appUserAsSaksbehandler().saksbehandlerMedRoller,
-                    ),
+                    inTransaction {
+                        service.finnOppgaverForBruker(
+                            Kontekst.get().appUserAsSaksbehandler().saksbehandlerMedRoller,
+                        )
+                    },
                 )
             }
         }
@@ -55,14 +57,14 @@ internal fun Route.oppgaveRoutes(
         route("behandling/{$BEHANDLINGSID_CALL_PARAMETER}") {
             get("/hentsaksbehandler") {
                 kunSaksbehandler {
-                    val saksbehandler = service.hentSaksbehandlerForBehandling(behandlingsId)
+                    val saksbehandler = inTransaction { service.hentSaksbehandlerForBehandling(behandlingsId) }
                     call.respond(saksbehandler ?: HttpStatusCode.NoContent)
                 }
             }
 
             get("/oppgaveunderarbeid") {
                 kunSaksbehandler {
-                    val saksbehandler = service.hentSaksbehandlerForOppgaveUnderArbeid(behandlingsId)
+                    val saksbehandler = inTransaction { service.hentSaksbehandlerForOppgaveUnderArbeid(behandlingsId) }
                     call.respond(saksbehandler ?: HttpStatusCode.NoContent)
                 }
             }
@@ -91,7 +93,7 @@ internal fun Route.oppgaveRoutes(
             route("saksbehandler", HttpMethod.Delete) {
                 handle {
                     kunSaksbehandler {
-                        service.fjernSaksbehandler(oppgaveId)
+                        inTransaction { service.fjernSaksbehandler(oppgaveId) }
                         call.respond(HttpStatusCode.OK)
                     }
                 }
@@ -99,7 +101,7 @@ internal fun Route.oppgaveRoutes(
             put("frist") {
                 kunSaksbehandler {
                     val redigerFrist = call.receive<RedigerFristRequest>()
-                    service.redigerFrist(oppgaveId, redigerFrist.frist)
+                    inTransaction { service.redigerFrist(oppgaveId, redigerFrist.frist) }
                     call.respond(HttpStatusCode.OK)
                 }
             }

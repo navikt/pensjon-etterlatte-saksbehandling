@@ -85,7 +85,7 @@ class MigreringService(
     ) {
         val status = behandlingService.hentBehandling(behandlingId)!!.status
         if (!status.kanAvbrytes()) {
-            logger.info("Behandling $behandlingId kan ikke avbrytes, fordi den har status $status.")
+            logger.warn("Behandling $behandlingId kan ikke avbrytes, fordi den har status $status.")
             return
         }
         behandlingService.avbrytBehandling(behandlingId, brukerTokenInfo)

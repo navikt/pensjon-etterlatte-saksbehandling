@@ -60,11 +60,6 @@ class VedtaksvurderingService(
         return repository.hentVedtak(behandlingId)
     }
 
-    fun hentVedtakSammendrag(behandlingId: UUID): VedtakSammendrag? {
-        logger.info("Henter sammendrag for vedtak for behandling$behandlingId")
-        return repository.hentVedtakSammendrag(behandlingId)
-    }
-
     private fun hentVedtakNonNull(behandlingId: UUID): Vedtak {
         return requireNotNull(hentVedtak(behandlingId)) { "Vedtak for behandling $behandlingId finnes ikke" }
     }
@@ -421,18 +416,21 @@ class VedtaksvurderingService(
     ): Vedtak {
         val oppdatertVedtak =
             eksisterendeVedtak.copy(
-                virkningstidspunkt = virkningstidspunkt,
-                beregning = beregningOgAvkorting?.beregning?.toObjectNode(),
-                avkorting = beregningOgAvkorting?.avkorting?.toObjectNode(),
-                vilkaarsvurdering = vilkaarsvurdering?.toObjectNode(),
-                utbetalingsperioder =
-                    opprettUtbetalingsperioder(
-                        vedtakType = vedtakType,
+                innhold =
+                    (eksisterendeVedtak.innhold as VedtakBehandlingInnhold).copy(
                         virkningstidspunkt = virkningstidspunkt,
-                        beregningOgAvkorting = beregningOgAvkorting,
-                        behandling.sakType,
+                        beregning = beregningOgAvkorting?.beregning?.toObjectNode(),
+                        avkorting = beregningOgAvkorting?.avkorting?.toObjectNode(),
+                        vilkaarsvurdering = vilkaarsvurdering?.toObjectNode(),
+                        utbetalingsperioder =
+                            opprettUtbetalingsperioder(
+                                vedtakType = vedtakType,
+                                virkningstidspunkt = virkningstidspunkt,
+                                beregningOgAvkorting = beregningOgAvkorting,
+                                behandling.sakType,
+                            ),
+                        revurderingInfo = behandling.revurderingInfo,
                     ),
-                revurderingInfo = behandling.revurderingInfo,
             )
         return repository.oppdaterVedtak(oppdatertVedtak)
     }

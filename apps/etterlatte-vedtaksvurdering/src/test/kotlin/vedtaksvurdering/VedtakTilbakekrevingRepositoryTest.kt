@@ -13,6 +13,7 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.POSTGRES_VERSION
 import no.nav.etterlatte.libs.database.migrate
+import no.nav.etterlatte.vedtaksvurdering.VedtakTilbakekrevingInnhold
 import no.nav.etterlatte.vedtaksvurdering.VedtakTilbakekrevingRepository
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
@@ -70,9 +71,9 @@ class VedtakTilbakekrevingRepositoryTest {
             it.soeker shouldBe nyttFattetVedtak.soeker
             it.vedtakFattet!!.ansvarligSaksbehandler shouldBe nyttFattetVedtak.ansvarligSaksbehandler
             it.vedtakFattet!!.ansvarligEnhet shouldBe nyttFattetVedtak.ansvarligEnhet
-            it.tilbakekreving shouldBe nyttFattetVedtak.tilbakekreving
             it.status shouldBe VedtakStatus.FATTET_VEDTAK
             it.type shouldBe VedtakType.TILBAKEKREVING
+            (it.innhold as VedtakTilbakekrevingInnhold).tilbakekreving shouldBe nyttFattetVedtak.tilbakekreving
         }
     }
 
@@ -103,7 +104,7 @@ class VedtakTilbakekrevingRepositoryTest {
             it.soeker shouldBe oppdatertVedtak.soeker
             it.vedtakFattet!!.ansvarligSaksbehandler shouldBe oppdatertVedtak.ansvarligSaksbehandler
             it.vedtakFattet!!.ansvarligEnhet shouldBe oppdatertVedtak.ansvarligEnhet
-            it.tilbakekreving shouldBe oppdatertVedtak.tilbakekreving
+            (it.innhold as VedtakTilbakekrevingInnhold).tilbakekreving shouldBe oppdatertVedtak.tilbakekreving
             it.status shouldBe VedtakStatus.FATTET_VEDTAK
             it.type shouldBe VedtakType.TILBAKEKREVING
         }

@@ -19,7 +19,7 @@ import java.util.UUID
 import javax.sql.DataSource
 
 class VedtakTilbakekrevingRepository(private val datasource: DataSource) {
-    fun lagreFattetVedtak(nyttVedtak: TilbakekrevingFattetVedtakDto): TilbakekrevingsVedtak =
+    fun lagreFattetVedtak(nyttVedtak: TilbakekrevingFattetVedtakDto): Vedtak =
         using(sessionOf(datasource)) {
             // language=SQL
             queryOf(
@@ -91,7 +91,7 @@ class VedtakTilbakekrevingRepository(private val datasource: DataSource) {
     private fun hentVedtak(
         tilbakekrevingId: UUID,
         session: Session,
-    ): TilbakekrevingsVedtak =
+    ): Vedtak =
         session.run(
             queryOf(
                 statement = """
@@ -105,7 +105,7 @@ class VedtakTilbakekrevingRepository(private val datasource: DataSource) {
         ) ?: throw Exception("Finner ikke vedtak med tilbakekrevingId=$tilbakekrevingId")
 
     private fun Row.toTilbakekrevingVedtak() =
-        TilbakekrevingsVedtak(
+        Vedtak(
             id = long("id"),
             sakId = long("sakid"),
             sakType = SakType.valueOf(string("saktype")),
@@ -129,6 +129,9 @@ class VedtakTilbakekrevingRepository(private val datasource: DataSource) {
                         tidspunkt = sqlTimestamp("datoattestert").toTidspunkt(),
                     )
                 },
-            tilbakekreving = objectMapper.createObjectNode(), // TODO EY-2767
+            innhold =
+                VedtakTilbakekrevingInnhold(
+                    tilbakekreving = objectMapper.createObjectNode(), // TODO EY-2767
+                ),
         )
 }

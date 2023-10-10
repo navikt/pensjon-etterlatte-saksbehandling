@@ -64,7 +64,7 @@ fun Route.vedtaksvurderingRoute(
         get("/{$BEHANDLINGSID_CALL_PARAMETER}/sammendrag") {
             withBehandlingId(behandlingKlient) { behandlingId ->
                 logger.info("Henter sammendrag av vedtak for behandling $behandlingId")
-                val vedtaksresultat = service.hentVedtakSammendrag(behandlingId)?.toVedtakSammendragDto()
+                val vedtaksresultat = service.hentVedtak(behandlingId)?.toVedtakSammendragDto()
                 if (vedtaksresultat == null) {
                     call.response.status(HttpStatusCode.NoContent)
                 } else {
@@ -226,17 +226,6 @@ private fun Vedtak.toVedtakSammendragDto() =
         datoAttestert = attestasjon?.tidspunkt?.toNorskTid(),
     )
 
-private fun VedtakSammendrag.toVedtakSammendragDto() =
-    VedtakSammendragDto(
-        id = id.toString(),
-        behandlingId = behandlingId,
-        vedtakType = type,
-        saksbehandlerId = vedtakFattet?.ansvarligSaksbehandler,
-        datoFattet = vedtakFattet?.tidspunkt?.toNorskTid(),
-        attestant = attestasjon?.attestant,
-        datoAttestert = attestasjon?.tidspunkt?.toNorskTid(),
-    )
-
 private fun LoependeYtelse.toDto() =
     LoependeYtelseDTO(
         erLoepende = erLoepende,
@@ -255,17 +244,25 @@ data class VedtakSammendragDto(
     val datoAttestert: ZonedDateTime?,
 )
 
-private fun Vedtak.toSamordningsvedtakDto() =
-    VedtakSamordningDto(
+private fun Vedtak.toSamordningsvedtakDto(): VedtakSamordningDto {
+    val innhold = innhold as VedtakBehandlingInnhold
+    return VedtakSamordningDto(
         vedtakId = id,
         fnr = soeker.value,
         status = status,
-        virkningstidspunkt = virkningstidspunkt,
         sak = VedtakSak(soeker.value, sakType, sakId),
-        behandling = Behandling(behandlingType, behandlingId, revurderingAarsak, revurderingInfo),
         type = type,
         vedtakFattet = vedtakFattet,
         attestasjon = attestasjon,
-        beregning = beregning,
-        avkorting = avkorting,
+        behandling =
+            Behandling(
+                innhold.behandlingType,
+                behandlingId,
+                innhold.revurderingAarsak,
+                innhold.revurderingInfo,
+            ),
+        virkningstidspunkt = innhold.virkningstidspunkt,
+        beregning = innhold.beregning,
+        avkorting = innhold.avkorting,
     )
+}

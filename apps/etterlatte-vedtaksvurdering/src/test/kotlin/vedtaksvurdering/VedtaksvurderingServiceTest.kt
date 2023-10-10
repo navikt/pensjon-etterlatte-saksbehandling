@@ -326,12 +326,12 @@ internal class VedtaksvurderingServiceTest {
                             behandlingId = behandlingId,
                         ),
                     )
-                nyttVedtak.virkningstidspunkt shouldBe virkningstidspunkt2023
+                (nyttVedtak.innhold as VedtakBehandlingInnhold).virkningstidspunkt shouldBe virkningstidspunkt2023
 
                 service.opprettEllerOppdaterVedtak(behandlingId, saksbehandler)
             }
 
-        oppdatertVedtak.virkningstidspunkt shouldBe virkningstidspunkt2024
+        (oppdatertVedtak.innhold as VedtakBehandlingInnhold).virkningstidspunkt shouldBe virkningstidspunkt2024
     }
 
     @Test
@@ -1050,9 +1050,10 @@ internal class VedtaksvurderingServiceTest {
             )
 
         with(runBlocking { service.opprettEllerOppdaterVedtak(behandlingId, saksbehandler) }) {
-            utbetalingsperioder.size shouldBe 1
-            utbetalingsperioder[0].beloep shouldBe BigDecimal(100)
-            utbetalingsperioder[0].periode.fom shouldBe virkningstidspunkt
+            val innhold = innhold as VedtakBehandlingInnhold
+            innhold.utbetalingsperioder.size shouldBe 1
+            innhold.utbetalingsperioder[0].beloep shouldBe BigDecimal(100)
+            innhold.utbetalingsperioder[0].periode.fom shouldBe virkningstidspunkt
         }
 
         coEvery { behandlingKlientMock.hentBehandling(any(), any()) } returns
@@ -1063,9 +1064,10 @@ internal class VedtaksvurderingServiceTest {
             )
 
         with(runBlocking { service.opprettEllerOppdaterVedtak(behandlingId, saksbehandler) }) {
-            utbetalingsperioder.size shouldBe 1
-            utbetalingsperioder[0].beloep shouldBe BigDecimal(50)
-            utbetalingsperioder[0].periode.fom shouldBe virkningstidspunkt
+            val innhold = innhold as VedtakBehandlingInnhold
+            innhold.utbetalingsperioder.size shouldBe 1
+            innhold.utbetalingsperioder[0].beloep shouldBe BigDecimal(50)
+            innhold.utbetalingsperioder[0].periode.fom shouldBe virkningstidspunkt
         }
     }
 

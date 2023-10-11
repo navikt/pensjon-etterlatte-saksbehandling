@@ -58,6 +58,13 @@ export const OMS_OPPHOER_HJEMLER: Array<Hjemmel> = [
   },
 ]
 
+export const OMS_INST_HJEMLER_VIRK: Array<Hjemmel> = [
+  {
+    lenke: 'https://lovdata.no/lov/1997-02-28-19/§17-13',
+    tittel: 'Folketrygdloven § 17-3',
+  },
+]
+
 export const OMS_INNTEKTSENDRING_HJEMLER: Array<Hjemmel> = [
   {
     lenke: 'https://lovdata.no/lov/(finnes ikke)',
@@ -73,3 +80,5 @@ export const OMS_OPPHOER_BESKRIVELSE =
   'Omstillingsstønaden stanses ved utgangen av den måneden retten til ytelsen faller bort.'
 export const OMS_INNTEKTSENDRING_BESKRIVELSE =
   'Alle inntektsendringer utenom etteroppgjør skal gjøres fra måneden etter bruker har meldt fra om endringen.'
+export const OMS_INST_VIRK_BESKRIVELSE =
+  'Omstillingsstønad gis uten reduksjon i innleggelsesmåneden og de tre påfølgende månedene. Deretter kan stønaden bli redusert. Blir man innlagt igjen innen tre måneder etter utskrivelsen skal stønaden reduseres fra måneden etter innleggelse. Omstillingsstønad gis uten reduksjon for institusjonsopphold f.o.m. utskrivingsmåneden.'

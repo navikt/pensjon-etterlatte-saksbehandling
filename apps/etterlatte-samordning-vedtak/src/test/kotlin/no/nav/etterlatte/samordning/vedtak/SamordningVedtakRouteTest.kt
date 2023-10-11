@@ -17,6 +17,7 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.confirmVerified
 import io.mockk.mockk
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.validateMaskinportenScope
 import no.nav.security.mock.oauth2.MockOAuth2Server
@@ -117,13 +118,13 @@ class SamordningVedtakRouteTest {
     @Test
     fun `skal gi 200 med gyldig token inkl scope - hent vedtaksliste med virkfom og fnr`() {
         val virkFom = LocalDate.now()
-        val fnr = "01015012345"
+        val fnr = "01448203510"
 
         coEvery {
             samordningVedtakService.hentVedtaksliste(
                 virkFom = virkFom,
-                fnr = fnr,
-                tpnr = "3010",
+                fnr = Folkeregisteridentifikator.of(fnr),
+                tpnr = Tjenestepensjonnummer("3010"),
                 organisasjonsnummer = any<String>(),
             )
         } returns
@@ -149,8 +150,8 @@ class SamordningVedtakRouteTest {
             coVerify {
                 samordningVedtakService.hentVedtaksliste(
                     virkFom = virkFom,
-                    fnr = fnr,
-                    tpnr = "3010",
+                    fnr = Folkeregisteridentifikator.of(fnr),
+                    tpnr = Tjenestepensjonnummer("3010"),
                     organisasjonsnummer = any<String>(),
                 )
             }

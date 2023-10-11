@@ -10,7 +10,6 @@ import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.libs.ktor.setReady
-import no.nav.etterlatte.vedtaksvurdering.VedtakTilbakekrevingRepository
 import no.nav.etterlatte.vedtaksvurdering.VedtakTilbakekrevingService
 import no.nav.etterlatte.vedtaksvurdering.VedtaksvurderingRepository
 import no.nav.etterlatte.vedtaksvurdering.VedtaksvurderingService
@@ -55,7 +54,7 @@ class ApplicationBuilder {
         )
     private val vedtakTilbakekrevingService =
         VedtakTilbakekrevingService(
-            repository = VedtakTilbakekrevingRepository(dataSource),
+            repository = VedtaksvurderingRepository(dataSource),
         )
 
     private val rapidsConnection =

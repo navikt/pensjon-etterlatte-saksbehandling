@@ -23,16 +23,9 @@ data class OpprettVedtak(
     val sakId: Long,
     val sakType: SakType,
     val behandlingId: UUID,
-    val behandlingType: BehandlingType,
-    val virkningstidspunkt: YearMonth,
     val status: VedtakStatus = VedtakStatus.OPPRETTET,
     val type: VedtakType,
-    val beregning: ObjectNode?,
-    val avkorting: ObjectNode?,
-    val vilkaarsvurdering: ObjectNode?,
-    val utbetalingsperioder: List<Utbetalingsperiode>,
-    val revurderingsaarsak: RevurderingAarsak?,
-    val revurderingInfo: RevurderingInfo?,
+    val innhold: VedtakInnhold,
 )
 
 data class Vedtak(

@@ -44,22 +44,25 @@ fun opprettVedtak(
     sakId = sakId,
     sakType = SakType.BARNEPENSJON,
     behandlingId = behandlingId,
-    behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-    revurderingsaarsak = null,
-    virkningstidspunkt = virkningstidspunkt,
     type = type,
-    beregning = beregning,
-    avkorting = avkorting,
-    vilkaarsvurdering = vilkaarsvurdering,
-    revurderingInfo = null,
-    utbetalingsperioder =
-        listOf(
-            Utbetalingsperiode(
-                id = 0,
-                periode = Periode(virkningstidspunkt, null),
-                beloep = BigDecimal.valueOf(100),
-                type = UtbetalingsperiodeType.UTBETALING,
-            ),
+    innhold =
+        VedtakBehandlingInnhold(
+            behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+            revurderingAarsak = null,
+            virkningstidspunkt = virkningstidspunkt,
+            beregning = beregning,
+            avkorting = avkorting,
+            vilkaarsvurdering = vilkaarsvurdering,
+            revurderingInfo = null,
+            utbetalingsperioder =
+                listOf(
+                    Utbetalingsperiode(
+                        id = 0,
+                        periode = Periode(virkningstidspunkt, null),
+                        beloep = BigDecimal.valueOf(100),
+                        type = UtbetalingsperiodeType.UTBETALING,
+                    ),
+                ),
         ),
 )
 

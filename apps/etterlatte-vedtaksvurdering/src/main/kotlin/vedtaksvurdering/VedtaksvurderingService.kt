@@ -385,22 +385,25 @@ class VedtaksvurderingService(
                 sakId = behandling.sak,
                 sakType = behandling.sakType,
                 behandlingId = behandling.id,
-                behandlingType = behandling.behandlingType,
-                virkningstidspunkt = virkningstidspunkt,
                 status = VedtakStatus.OPPRETTET,
                 type = vedtakType,
-                beregning = beregningOgAvkorting?.beregning?.toObjectNode(),
-                avkorting = beregningOgAvkorting?.avkorting?.toObjectNode(),
-                vilkaarsvurdering = vilkaarsvurdering?.toObjectNode(),
-                utbetalingsperioder =
-                    opprettUtbetalingsperioder(
-                        vedtakType = vedtakType,
+                innhold =
+                    VedtakBehandlingInnhold(
+                        behandlingType = behandling.behandlingType,
                         virkningstidspunkt = virkningstidspunkt,
-                        beregningOgAvkorting = beregningOgAvkorting,
-                        behandling.sakType,
+                        beregning = beregningOgAvkorting?.beregning?.toObjectNode(),
+                        avkorting = beregningOgAvkorting?.avkorting?.toObjectNode(),
+                        vilkaarsvurdering = vilkaarsvurdering?.toObjectNode(),
+                        utbetalingsperioder =
+                            opprettUtbetalingsperioder(
+                                vedtakType = vedtakType,
+                                virkningstidspunkt = virkningstidspunkt,
+                                beregningOgAvkorting = beregningOgAvkorting,
+                                behandling.sakType,
+                            ),
+                        revurderingAarsak = behandling.revurderingsaarsak,
+                        revurderingInfo = behandling.revurderingInfo,
                     ),
-                revurderingsaarsak = behandling.revurderingsaarsak,
-                revurderingInfo = behandling.revurderingInfo,
             )
 
         return repository.opprettVedtak(opprettetVedtak)

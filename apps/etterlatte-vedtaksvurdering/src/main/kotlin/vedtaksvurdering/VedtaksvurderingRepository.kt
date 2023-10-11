@@ -11,7 +11,6 @@ import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.toJson
-import no.nav.etterlatte.libs.common.toObjectNode
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
 import no.nav.etterlatte.libs.common.vedtak.Periode
 import no.nav.etterlatte.libs.common.vedtak.Utbetalingsperiode
@@ -46,6 +45,22 @@ class VedtaksvurderingRepository(private val datasource: DataSource) : Transacti
         tx: TransactionalSession? = null,
     ): Vedtak =
         tx.session {
+            val innholdParams =
+                when (opprettVedtak.innhold) {
+                    is VedtakTilbakekrevingInnhold -> mapOf("tilbakekreving" to opprettVedtak.innhold.tilbakekreving.toJson())
+                    is VedtakBehandlingInnhold ->
+                        opprettVedtak.innhold.let {
+                            mapOf(
+                                "behandlingtype" to it.behandlingType.name,
+                                "datovirkfom" to it.virkningstidspunkt.atDay(1),
+                                "beregningsresultat" to it.beregning?.toJson(),
+                                "avkorting" to it.avkorting?.toJson(),
+                                "vilkaarsresultat" to it.vilkaarsvurdering?.toJson(),
+                                "revurderingsaarsak" to it.revurderingAarsak?.name,
+                                // "revurderinginfo" to it.revurderingInfo?.toJson(), TODO EY-2767
+                            )
+                        }
+                }
             queryOf(
                 statement = """
                         INSERT INTO vedtak(
@@ -58,23 +73,18 @@ class VedtaksvurderingRepository(private val datasource: DataSource) : Transacti
                         """,
                 mapOf(
                     "behandlingId" to opprettVedtak.behandlingId,
-                    "behandlingtype" to opprettVedtak.behandlingType.name,
                     "sakid" to opprettVedtak.sakId,
                     "saktype" to opprettVedtak.sakType.name,
                     "fnr" to opprettVedtak.soeker.value,
                     "vedtakstatus" to opprettVedtak.status.name,
                     "type" to opprettVedtak.type.name,
-                    "datovirkfom" to opprettVedtak.virkningstidspunkt.atDay(1),
-                    "beregningsresultat" to opprettVedtak.beregning?.toJson(),
-                    "avkorting" to opprettVedtak.avkorting?.toJson(),
-                    "vilkaarsresultat" to opprettVedtak.vilkaarsvurdering?.toJson(),
-                    "revurderingsaarsak" to opprettVedtak.revurderingsaarsak?.name,
-                    "revurderinginfo" to opprettVedtak.revurderingInfo?.toJson(),
-                ),
+                ) + innholdParams,
             )
                 .let { query -> this.run(query.asUpdateAndReturnGeneratedKey) }
                 ?.let { vedtakId ->
-                    opprettUtbetalingsperioder(vedtakId, opprettVedtak.utbetalingsperioder, this)
+                    if (opprettVedtak.innhold is VedtakBehandlingInnhold) {
+                        opprettUtbetalingsperioder(vedtakId, opprettVedtak.innhold.utbetalingsperioder, this)
+                    }
                 } ?: throw Exception("Kunne ikke opprette vedtak for behandling ${opprettVedtak.behandlingId}")
             return@session hentVedtak(opprettVedtak.behandlingId, this)
                 ?: throw Exception("Kunne ikke opprette vedtak for behandling ${opprettVedtak.behandlingId}")
@@ -97,6 +107,7 @@ class VedtaksvurderingRepository(private val datasource: DataSource) : Transacti
                             "behandlingid" to oppdatertVedtak.behandlingId,
                             "revurderinginfo" to oppdatertVedtak.innhold.revurderingInfo?.toJson(),
                         )
+
                     is VedtakTilbakekrevingInnhold -> emptyMap() // TODO EY-2767 erstattes senere
                 }
             queryOf(
@@ -384,7 +395,11 @@ class VedtaksvurderingRepository(private val datasource: DataSource) : Transacti
                             revurderingAarsak = stringOrNull("revurderingsaarsak")?.let { RevurderingAarsak.valueOf(it) },
                             revurderingInfo = stringOrNull("revurderinginfo")?.let { objectMapper.readValue(it) },
                         )
-                    VedtakType.TILBAKEKREVING -> VedtakTilbakekrevingInnhold("".toObjectNode()) // TODO EY-2767 erstattes senere
+
+                    VedtakType.TILBAKEKREVING ->
+                        VedtakTilbakekrevingInnhold(
+                            tilbakekreving = objectMapper.createObjectNode(), // TODO EY-2767
+                        )
                 },
         )
 

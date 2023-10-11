@@ -64,7 +64,7 @@ private fun verifiserNyBeregning(
 ) {
     check(beregning.beregningsperioder.size == 1) {
         "Migrerte saker skal kun opprette en beregningperiode, men oppretta ${beregning.beregningsperioder.size}: " +
-            "${beregning.beregningsperioder.map { Periode(it.datoFOM, it.datoTOM) }}"
+            beregning.beregningsperioder.map { Periode(it.datoFOM, it.datoTOM) }.joinToString(", ")
     }
 
     with(beregning.beregningsperioder.first()) {

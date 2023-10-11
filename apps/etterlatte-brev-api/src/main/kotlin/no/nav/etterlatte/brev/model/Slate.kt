@@ -2,7 +2,7 @@ package no.nav.etterlatte.brev.model
 
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonValue
-import no.nav.etterlatte.brev.behandling.Behandling
+import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.deserialize
@@ -37,17 +37,17 @@ data class Slate(
 }
 
 object SlateHelper {
-    fun hentInitiellPayload(behandling: Behandling): Slate {
-        return when (behandling.sakType) {
+    fun hentInitiellPayload(generellBrevData: GenerellBrevData): Slate {
+        return when (generellBrevData.sak.sakType) {
             SakType.OMSTILLINGSSTOENAD -> {
-                when (behandling.vedtak.type) {
+                when (generellBrevData.forenkletVedtak.type) {
                     VedtakType.INNVILGELSE -> getJsonFile("/maler/oms-nasjonal-innvilget.json")
                     else -> getJsonFile("/maler/tom-brevmal.json")
                 }
             }
 
             SakType.BARNEPENSJON -> {
-                when (behandling.vedtak.type) {
+                when (generellBrevData.forenkletVedtak.type) {
                     VedtakType.AVSLAG -> getJsonFile("/maler/bp-avslag.json")
                     else -> getJsonFile("/maler/tom-brevmal.json")
                 }
@@ -55,13 +55,13 @@ object SlateHelper {
         }.let { deserialize(it) }
     }
 
-    fun hentInitiellPayloadVedlegg(behandling: Behandling): List<BrevInnholdVedlegg>? {
-        return when (behandling.sakType) {
+    fun hentInitiellPayloadVedlegg(generellBrevData: GenerellBrevData): List<BrevInnholdVedlegg>? {
+        return when (generellBrevData.sak.sakType) {
             SakType.OMSTILLINGSSTOENAD -> {
-                when (behandling.vedtak.type) {
+                when (generellBrevData.forenkletVedtak.type) {
                     VedtakType.INNVILGELSE -> BrevInnholdVedlegg.innvilgelseOMS()
                     VedtakType.ENDRING -> {
-                        when (behandling.revurderingsaarsak) {
+                        when (generellBrevData.revurderingsaarsak) {
                             RevurderingAarsak.INNTEKTSENDRING,
                             RevurderingAarsak.ANNEN,
                             -> BrevInnholdVedlegg.inntektsendringOMS()

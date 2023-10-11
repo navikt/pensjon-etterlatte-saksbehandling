@@ -2,7 +2,7 @@ package no.nav.etterlatte.brev.model.bp
 
 import no.nav.etterlatte.brev.behandling.Avdoed
 import no.nav.etterlatte.brev.behandling.Avkortingsinfo
-import no.nav.etterlatte.brev.behandling.Behandling
+import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
 import no.nav.etterlatte.brev.model.BrevData
 import no.nav.etterlatte.brev.model.EtterbetalingDTO
@@ -17,20 +17,23 @@ data class InnvilgetBrevDataEnkel(
     val erInstitusjonsopphold: Boolean,
 ) : BrevData() {
     companion object {
-        fun fra(behandling: Behandling) =
-            InnvilgetBrevDataEnkel(
-                utbetalingsinfo = behandling.utbetalingsinfo!!,
-                avdoed = behandling.personerISak.avdoed,
-                erEtterbetaling = behandling.etterbetalingDTO != null,
-                vedtaksdato =
-                    behandling.vedtak.vedtaksdato
-                        ?: LocalDate.now(),
-                erInstitusjonsopphold =
-                    behandling.utbetalingsinfo.beregningsperioder
-                        .filter { it.datoFOM.isBefore(LocalDate.now().plusDays(1)) }
-                        .firstOrNull { it.datoTOM.erSamtidigEllerEtter(LocalDate.now()) }
-                        ?.institusjon ?: false,
-            )
+        fun fra(
+            generellBrevData: GenerellBrevData,
+            utbetalingsinfo: Utbetalingsinfo,
+            etterbetalingDTO: EtterbetalingDTO?,
+        ) = InnvilgetBrevDataEnkel(
+            utbetalingsinfo = utbetalingsinfo,
+            avdoed = generellBrevData.personerISak.avdoed,
+            erEtterbetaling = etterbetalingDTO != null,
+            vedtaksdato =
+                generellBrevData.forenkletVedtak.vedtaksdato
+                    ?: LocalDate.now(),
+            erInstitusjonsopphold =
+                utbetalingsinfo.beregningsperioder
+                    .filter { it.datoFOM.isBefore(LocalDate.now().plusDays(1)) }
+                    .firstOrNull { it.datoTOM.erSamtidigEllerEtter(LocalDate.now()) }
+                    ?.institusjon ?: false,
+        )
     }
 }
 
@@ -42,13 +45,15 @@ data class InnvilgetHovedmalBrevData(
 ) : BrevData() {
     companion object {
         fun fra(
-            behandling: Behandling,
+            utbetalingsinfo: Utbetalingsinfo,
+            avkortingsinfo: Avkortingsinfo,
+            etterbetalingDTO: EtterbetalingDTO,
             innhold: List<Slate.Element>,
         ): InnvilgetHovedmalBrevData =
             InnvilgetHovedmalBrevData(
-                utbetalingsinfo = behandling.utbetalingsinfo!!,
-                avkortingsinfo = behandling.avkortingsinfo,
-                etterbetalingDTO = behandling.etterbetalingDTO,
+                utbetalingsinfo = utbetalingsinfo,
+                avkortingsinfo = avkortingsinfo,
+                etterbetalingDTO = etterbetalingDTO,
                 innhold = innhold,
             )
     }

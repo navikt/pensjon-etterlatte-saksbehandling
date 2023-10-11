@@ -1,6 +1,6 @@
 package no.nav.etterlatte.brev.model.bp
 
-import no.nav.etterlatte.brev.behandling.Behandling
+import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.model.AvslagBrevData
 import no.nav.etterlatte.brev.model.BrevData
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
@@ -13,14 +13,15 @@ data class AvslagYrkesskadeBrevData(
     val yrkesskadeEllerYrkessykdom: String,
 ) : BrevData() {
     companion object {
-        fun fra(behandling: Behandling): AvslagYrkesskadeBrevData =
+        fun fra(generellBrevData: GenerellBrevData): AvslagYrkesskadeBrevData =
             AvslagBrevData.valider<RevurderingInfo.Yrkesskade>(
-                behandling,
+                generellBrevData.revurderingsaarsak,
+                generellBrevData.forenkletVedtak.revurderingInfo,
                 RevurderingAarsak.YRKESSKADE,
             ).let {
                 AvslagYrkesskadeBrevData(
                     it.dinForelder,
-                    behandling.personerISak.avdoed.doedsdato,
+                    generellBrevData.personerISak.avdoed.doedsdato,
                     it.yrkesskadeEllerYrkessykdom,
                 )
             }

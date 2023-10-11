@@ -19,7 +19,7 @@ import no.nav.etterlatte.brev.distribusjon.DistribusjonServiceImpl
 import no.nav.etterlatte.brev.distribusjon.DistribusjonsTidspunktType
 import no.nav.etterlatte.brev.distribusjon.DistribusjonsType
 import no.nav.etterlatte.brev.dokarkiv.DokarkivServiceImpl
-import no.nav.etterlatte.brev.hentinformasjon.IBehandlingService
+import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
 import no.nav.etterlatte.brev.hentinformasjon.SakService
 import no.nav.etterlatte.brev.hentinformasjon.SoekerService
 import no.nav.etterlatte.brev.journalpost.JournalpostResponse
@@ -47,7 +47,7 @@ import kotlin.random.Random
 internal class BrevServiceTest {
     private val db = mockk<BrevRepository>(relaxed = true)
     private val brevbaker = mockk<BrevbakerKlient>()
-    private val sakOgBehandlingService = mockk<IBehandlingService>()
+    private val sakOgBehandlingService = mockk<BrevdataFacade>()
     private val sakService = mockk<SakService>()
     private val soekerService = mockk<SoekerService>()
     private val adresseService = mockk<AdresseService>()

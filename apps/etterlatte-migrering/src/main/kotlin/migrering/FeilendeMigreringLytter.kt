@@ -84,8 +84,10 @@ internal class FeilendeMigreringLytter(rapidsConnection: RapidsConnection, priva
         } else if (packet.harVerdi(BEHANDLING_ID_KEY)) {
             repository.hentPesysId(packet.behandlingId)!!.let { Pair(it.pesysId, it.behandlingId) }
         } else if (packet.harVerdi("vedtak.behandling.id")) {
-            repository.hentPesysId(packet["vedtak.behandling.id"].asText().toUUID())!!
-                .let { Pair(it.pesysId, it.behandlingId) }
+            val id = packet["vedtak.behandling.id"].asText().toUUID()
+            repository.hentPesysId(id)
+                ?.let { Pair(it.pesysId, it.behandlingId) }
+                ?: throw IllegalStateException("Mangler pesys-identifikator for behandling $id")
         } else {
             throw IllegalArgumentException("Manglar pesys-identifikator, kan ikke kjøre feilhåndtering")
         }

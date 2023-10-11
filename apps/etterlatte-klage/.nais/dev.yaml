@@ -16,6 +16,8 @@ spec:
     path: /health/isready
   strategy:
     type: Recreate
+  secureLogs:
+    enabled: true
   kafka:
     pool: nav-dev
   azure:

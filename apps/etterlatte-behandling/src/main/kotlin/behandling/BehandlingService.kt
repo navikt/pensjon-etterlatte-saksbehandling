@@ -152,38 +152,36 @@ internal class BehandlingServiceImpl(
         behandlingId: UUID,
         saksbehandler: BrukerTokenInfo,
     ) {
-        inTransaction {
-            val behandling =
-                hentBehandlingForId(behandlingId)
-                    ?: throw BehandlingNotFoundException("Fant ikke behandling med id=$behandlingId som skulle avbrytes")
-            if (!behandling.status.kanAvbrytes()) {
-                throw IllegalStateException("Kan ikke avbryte en behandling med status ${behandling.status}")
-            }
-
-            behandlingDao.avbrytBehandling(behandlingId).also {
-                val hendelserKnyttetTilBehandling =
-                    grunnlagsendringshendelseDao.hentGrunnlagsendringshendelseSomErTattMedIBehandling(behandlingId)
-                oppgaveService.avbrytOppgaveUnderBehandling(behandlingId.toString(), saksbehandler)
-
-                hendelserKnyttetTilBehandling.forEach { hendelse ->
-                    oppgaveService.opprettNyOppgaveMedSakOgReferanse(
-                        referanse = hendelse.id.toString(),
-                        sakId = behandling.sak.id,
-                        oppgaveKilde = OppgaveKilde.HENDELSE,
-                        oppgaveType = OppgaveType.VURDER_KONSEKVENS,
-                        merknad = hendelse.beskrivelse(),
-                    )
-                }
-
-                hendelseDao.behandlingAvbrutt(behandling, saksbehandler.ident())
-                grunnlagsendringshendelseDao.kobleGrunnlagsendringshendelserFraBehandlingId(behandlingId)
-            }
-            val persongalleri = runBlocking { grunnlagKlient.hentPersongalleri(behandling.sak.id, saksbehandler) }
-            behandlingHendelser.sendMeldingForHendelseMedDetaljertBehandling(
-                behandling.toStatistikkBehandling(persongalleri = persongalleri!!.opplysning),
-                BehandlingHendelseType.AVBRUTT,
-            )
+        val behandling =
+            hentBehandlingForId(behandlingId)
+                ?: throw BehandlingNotFoundException("Fant ikke behandling med id=$behandlingId som skulle avbrytes")
+        if (!behandling.status.kanAvbrytes()) {
+            throw IllegalStateException("Kan ikke avbryte en behandling med status ${behandling.status}")
         }
+
+        behandlingDao.avbrytBehandling(behandlingId).also {
+            val hendelserKnyttetTilBehandling =
+                grunnlagsendringshendelseDao.hentGrunnlagsendringshendelseSomErTattMedIBehandling(behandlingId)
+            oppgaveService.avbrytOppgaveUnderBehandling(behandlingId.toString(), saksbehandler)
+
+            hendelserKnyttetTilBehandling.forEach { hendelse ->
+                oppgaveService.opprettNyOppgaveMedSakOgReferanse(
+                    referanse = hendelse.id.toString(),
+                    sakId = behandling.sak.id,
+                    oppgaveKilde = OppgaveKilde.HENDELSE,
+                    oppgaveType = OppgaveType.VURDER_KONSEKVENS,
+                    merknad = hendelse.beskrivelse(),
+                )
+            }
+
+            hendelseDao.behandlingAvbrutt(behandling, saksbehandler.ident())
+            grunnlagsendringshendelseDao.kobleGrunnlagsendringshendelserFraBehandlingId(behandlingId)
+        }
+        val persongalleri = runBlocking { grunnlagKlient.hentPersongalleri(behandling.sak.id, saksbehandler) }
+        behandlingHendelser.sendMeldingForHendelseMedDetaljertBehandling(
+            behandling.toStatistikkBehandling(persongalleri = persongalleri!!.opplysning),
+            BehandlingHendelseType.AVBRUTT,
+        )
     }
 
     override suspend fun hentStatistikkBehandling(
@@ -219,7 +217,8 @@ internal class BehandlingServiceImpl(
         brukerTokenInfo: BrukerTokenInfo,
         opplysningstype: Opplysningstype,
     ): BehandlingMedGrunnlagsopplysninger<Person> {
-        val behandling = requireNotNull(inTransaction { hentBehandling(behandlingId) }) { "Fant ikke behandling $behandlingId" }
+        val behandling =
+            requireNotNull(inTransaction { hentBehandling(behandlingId) }) { "Fant ikke behandling $behandlingId" }
         val personopplysning = grunnlagKlient.finnPersonOpplysning(behandling.sak.id, opplysningstype, brukerTokenInfo)
 
         return BehandlingMedGrunnlagsopplysninger(

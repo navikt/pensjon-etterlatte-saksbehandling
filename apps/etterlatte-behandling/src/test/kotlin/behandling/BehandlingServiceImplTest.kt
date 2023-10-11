@@ -1,6 +1,5 @@
 package no.nav.etterlatte.behandling
 
-import io.kotest.assertions.any
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.just
@@ -298,7 +297,7 @@ class BehandlingServiceImplTest {
 
         assertFalse(didRollback)
         assertThrows<RuntimeException> {
-            behandlingService.avbrytBehandling(nyFoerstegangsbehandling.id, Saksbehandler("", "saksbehandler", null))
+            inTransaction { behandlingService.avbrytBehandling(nyFoerstegangsbehandling.id, Saksbehandler("", "saksbehandler", null)) }
         }
 
         assertTrue(didRollback)

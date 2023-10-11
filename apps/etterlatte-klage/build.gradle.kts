@@ -16,4 +16,5 @@ dependencies {
     implementation(libs.kafka.clients)
     implementation(libs.kafka.avroserializer)
     implementation(libs.ktor2.okhttp)
+    testImplementation("org.junit.jupiter:junit-jupiter:5.8.1")
 }

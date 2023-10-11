@@ -2,6 +2,7 @@ package no.nav.etterlatte.klage.modell
 
 import com.fasterxml.jackson.annotation.JsonInclude
 import no.nav.etterlatte.libs.common.behandling.EkstradataInnstilling
+import no.nav.etterlatte.libs.common.behandling.KabalHjemmel
 import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.behandling.KlageUtfall
 import no.nav.etterlatte.libs.common.behandling.Mottaker
@@ -48,6 +49,10 @@ fun SakType.tilYtelse(): Ytelse {
         SakType.BARNEPENSJON -> Ytelse.PEN_BAR
         SakType.OMSTILLINGSSTOENAD -> Ytelse.PEN_GJE
     }
+}
+
+fun KabalHjemmel.tilHjemmel(): Hjemmel {
+    return enumValueOf(this.name)
 }
 
 /**
@@ -112,7 +117,7 @@ data class KabalOversendelse(
                     ).takeIf { erKlagerIkkeBruker },
                 fagsak = KabalFagsak(fagsakId = klage.sak.id.toString(), fagsystem = fagsystem),
                 kildeReferanse = klage.id.toString(),
-                hjemler = listOf(Hjemmel.FTRL_22_12),
+                hjemler = listOf(innstilling.lovhjemmel.tilHjemmel()),
                 forrigeBehandlendeEnhet = klage.sak.enhet,
                 tilknyttedeJournalposter =
                     listOfNotNull(

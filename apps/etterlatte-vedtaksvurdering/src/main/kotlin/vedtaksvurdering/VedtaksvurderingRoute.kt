@@ -35,7 +35,8 @@ import java.time.LocalDate
 import java.util.UUID
 
 fun Route.vedtaksvurderingRoute(
-    service: VedtaksvurderingService,
+    vedtakService: VedtaksvurderingService,
+    vedtakBehandlingService: VedtakBehandlingService,
     behandlingKlient: BehandlingKlient,
 ) {
     route("/api/vedtak") {
@@ -44,7 +45,7 @@ fun Route.vedtaksvurderingRoute(
         get("/sak/{${SAKID_CALL_PARAMETER}}/iverksatte") {
             withSakId(behandlingKlient) { sakId ->
                 logger.info("Henter iverksatte vedtak for sak $sakId")
-                val iverksatteVedtak = service.hentIverksatteVedtakISak(sakId)
+                val iverksatteVedtak = vedtakBehandlingService.hentIverksatteVedtakISak(sakId)
                 call.respond(iverksatteVedtak.map { it.toVedtakSammendragDto() })
             }
         }
@@ -52,7 +53,7 @@ fun Route.vedtaksvurderingRoute(
         get("/{$BEHANDLINGSID_CALL_PARAMETER}") {
             withBehandlingId(behandlingKlient) { behandlingId ->
                 logger.info("Henter vedtak for behandling $behandlingId")
-                val vedtak = service.hentVedtak(behandlingId)
+                val vedtak = vedtakService.hentVedtak(behandlingId)
                 if (vedtak == null) {
                     call.response.status(HttpStatusCode.NotFound)
                 } else {
@@ -64,7 +65,7 @@ fun Route.vedtaksvurderingRoute(
         get("/{$BEHANDLINGSID_CALL_PARAMETER}/ny") {
             withBehandlingId(behandlingKlient) { behandlingId ->
                 logger.info("Henter vedtak for behandling $behandlingId")
-                val vedtak = service.hentVedtak(behandlingId)
+                val vedtak = vedtakService.hentVedtak(behandlingId)
                 if (vedtak == null) {
                     call.response.status(HttpStatusCode.NotFound)
                 } else {
@@ -76,7 +77,7 @@ fun Route.vedtaksvurderingRoute(
         get("/{$BEHANDLINGSID_CALL_PARAMETER}/sammendrag") {
             withBehandlingId(behandlingKlient) { behandlingId ->
                 logger.info("Henter sammendrag av vedtak for behandling $behandlingId")
-                val vedtaksresultat = service.hentVedtak(behandlingId)?.toVedtakSammendragDto()
+                val vedtaksresultat = vedtakService.hentVedtak(behandlingId)?.toVedtakSammendragDto()
                 if (vedtaksresultat == null) {
                     call.response.status(HttpStatusCode.NoContent)
                 } else {
@@ -88,7 +89,7 @@ fun Route.vedtaksvurderingRoute(
         post("/{$BEHANDLINGSID_CALL_PARAMETER}/upsert") {
             withBehandlingId(behandlingKlient) { behandlingId ->
                 logger.info("Oppretter eller oppdaterer vedtak for behandling $behandlingId")
-                val nyttVedtak = service.opprettEllerOppdaterVedtak(behandlingId, brukerTokenInfo)
+                val nyttVedtak = vedtakBehandlingService.opprettEllerOppdaterVedtak(behandlingId, brukerTokenInfo)
                 call.respond(nyttVedtak.toDto())
             }
         }
@@ -96,7 +97,7 @@ fun Route.vedtaksvurderingRoute(
         post("/{$BEHANDLINGSID_CALL_PARAMETER}/fattvedtak") {
             withBehandlingId(behandlingKlient) { behandlingId ->
                 logger.info("Fatter vedtak for behandling $behandlingId")
-                val fattetVedtak = service.fattVedtak(behandlingId, brukerTokenInfo)
+                val fattetVedtak = vedtakBehandlingService.fattVedtak(behandlingId, brukerTokenInfo)
 
                 call.respond(fattetVedtak.toDto())
             }
@@ -106,7 +107,7 @@ fun Route.vedtaksvurderingRoute(
             withBehandlingId(behandlingKlient) { behandlingId ->
                 logger.info("Attesterer vedtak for behandling $behandlingId")
                 val (kommentar) = call.receive<AttesterVedtakDto>()
-                val attestert = service.attesterVedtak(behandlingId, kommentar, brukerTokenInfo)
+                val attestert = vedtakBehandlingService.attesterVedtak(behandlingId, kommentar, brukerTokenInfo)
 
                 call.respond(attestert.toDto())
             }
@@ -117,7 +118,7 @@ fun Route.vedtaksvurderingRoute(
                 logger.info("Underkjenner vedtak for behandling $behandlingId")
                 val begrunnelse = call.receive<UnderkjennVedtakDto>()
                 val underkjentVedtak =
-                    service.underkjennVedtak(
+                    vedtakBehandlingService.underkjennVedtak(
                         behandlingId,
                         brukerTokenInfo,
                         begrunnelse,
@@ -130,7 +131,7 @@ fun Route.vedtaksvurderingRoute(
         post("/{$BEHANDLINGSID_CALL_PARAMETER}/iverksett") {
             withBehandlingId(behandlingKlient) { behandlingId ->
                 logger.info("Iverksetter vedtak for behandling $behandlingId")
-                val vedtak = service.iverksattVedtak(behandlingId, brukerTokenInfo)
+                val vedtak = vedtakBehandlingService.iverksattVedtak(behandlingId, brukerTokenInfo)
 
                 call.respond(HttpStatusCode.OK, vedtak.toDto())
             }
@@ -143,7 +144,7 @@ fun Route.vedtaksvurderingRoute(
                         ?: throw Exception("dato er påkrevet på formatet YYYY-MM-DD")
 
                 logger.info("Sjekker om vedtak er løpende for sak $sakId på dato $dato")
-                val loependeYtelse = service.sjekkOmVedtakErLoependePaaDato(sakId, dato)
+                val loependeYtelse = vedtakBehandlingService.sjekkOmVedtakErLoependePaaDato(sakId, dato)
                 call.respond(loependeYtelse.toDto())
             }
         }
@@ -151,7 +152,7 @@ fun Route.vedtaksvurderingRoute(
         patch("/{$BEHANDLINGSID_CALL_PARAMETER}/tilbakestill") {
             withBehandlingId(behandlingKlient) { behandlingId ->
                 logger.info("Tilbakestiller ikke iverksatte vedtak for behandling $behandlingId")
-                service.tilbakestillIkkeIverksatteVedtak(behandlingId)
+                vedtakBehandlingService.tilbakestillIkkeIverksatteVedtak(behandlingId)
                 call.respond(HttpStatusCode.OK)
             }
         }
@@ -164,7 +165,7 @@ fun Route.vedtaksvurderingRoute(
             val resultat: VedtakType = enumValueOf(requireNotNull(call.parameters["resultat"]))
             logger.info("Henter siste behandling med resultat $resultat")
 
-            val nyeste = service.hentNyesteBehandlingMedResultat(sakId, resultat)
+            val nyeste = vedtakBehandlingService.hentNyesteBehandlingMedResultat(sakId, resultat)
             if (nyeste != null) {
                 call.respond(nyeste.toDto())
             } else {
@@ -174,7 +175,10 @@ fun Route.vedtaksvurderingRoute(
     }
 }
 
-fun Route.samordningsvedtakRoute(service: VedtaksvurderingService) {
+fun Route.samordningsvedtakRoute(
+    vedtakService: VedtaksvurderingService,
+    vedtakBehandlingService: VedtakBehandlingService,
+) {
     route("/api/samordning/vedtak") {
         install(AuthorizationPlugin) {
             roles = setOf("samordning-read")
@@ -188,14 +192,14 @@ fun Route.samordningsvedtakRoute(service: VedtaksvurderingService) {
                 call.request.headers["fnr"]?.let { Folkeregisteridentifikator.of(it) }
                     ?: return@get call.respond(HttpStatusCode.BadRequest, "fnr ikke angitt")
 
-            val vedtaksliste = service.finnFerdigstilteVedtak(fnr, virkFom)
+            val vedtaksliste = vedtakBehandlingService.finnFerdigstilteVedtak(fnr, virkFom)
             call.respond(vedtaksliste.map { it.toSamordningsvedtakDto() })
         }
 
         get("/{vedtakId}") {
             val vedtakId = requireNotNull(call.parameters["vedtakId"]).toLong()
 
-            val vedtak = service.hentVedtak(vedtakId)
+            val vedtak = vedtakService.hentVedtak(vedtakId)
             if (vedtak != null) {
                 call.respond(vedtak.toSamordningsvedtakDto())
             } else {

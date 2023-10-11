@@ -6,7 +6,6 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.oppgave.VedtakEndringDTO
 import no.nav.etterlatte.libs.common.oppgave.VedtakOppgaveDTO
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
@@ -35,26 +34,20 @@ import no.nav.etterlatte.vedtaksvurdering.klienter.BeregningKlient
 import no.nav.etterlatte.vedtaksvurdering.klienter.VilkaarsvurderingKlient
 import no.nav.helse.rapids_rivers.JsonMessage
 import org.slf4j.LoggerFactory
+import java.time.Clock
+import java.time.LocalDate
+import java.time.YearMonth
 import java.util.UUID
 
-class VedtaksvurderingService(
+class VedtakBehandlingService(
     private val repository: VedtaksvurderingRepository,
+    private val beregningKlient: BeregningKlient,
+    private val vilkaarsvurderingKlient: VilkaarsvurderingKlient,
+    private val behandlingKlient: BehandlingKlient,
+    private val publiser: (String, UUID) -> Unit,
+    private val clock: Clock = utcKlokke(),
 ) {
-    private val logger = LoggerFactory.getLogger(VedtaksvurderingService::class.java)
-
-    fun hentVedtak(vedtakId: Long): Vedtak? {
-        logger.info("Henter vedtak med id=$vedtakId")
-        return repository.hentVedtak(vedtakId)
-    }
-
-    fun hentVedtak(behandlingId: UUID): Vedtak? {
-        logger.info("Henter vedtak for behandling med behandlingId=$behandlingId")
-        return repository.hentVedtak(behandlingId)
-    }
-
-    private fun hentVedtakNonNull(behandlingId: UUID): Vedtak {
-        return requireNotNull(hentVedtak(behandlingId)) { "Vedtak for behandling $behandlingId finnes ikke" }
-    }
+    private val logger = LoggerFactory.getLogger(VedtakBehandlingService::class.java)
 
     fun finnFerdigstilteVedtak(
         fnr: Folkeregisteridentifikator,
@@ -76,15 +69,13 @@ class VedtaksvurderingService(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): Vedtak {
-        val vedtak = hentVedtak(behandlingId)
+        val vedtak = repository.hentVedtak(behandlingId)
 
         if (vedtak != null) {
             verifiserGyldigVedtakStatus(vedtak.status, listOf(VedtakStatus.OPPRETTET, VedtakStatus.RETURNERT))
         }
 
         val (behandling, vilkaarsvurdering, beregningOgAvkorting) = hentDataForVedtak(behandlingId, brukerTokenInfo)
-        verifiserGrunnlagVersjon(vilkaarsvurdering, beregningOgAvkorting)
-
         val vedtakType = vedtakType(behandling.behandlingType, vilkaarsvurdering)
         val virkningstidspunkt =
             requireNotNull(behandling.virkningstidspunkt?.dato) {
@@ -97,23 +88,6 @@ class VedtaksvurderingService(
         } else {
             logger.info("Oppretter vedtak for behandling med behandlingId=$behandlingId")
             opprettVedtak(behandling, vedtakType, virkningstidspunkt, beregningOgAvkorting, vilkaarsvurdering)
-        }
-    }
-
-    /**
-     * TODO:
-     *  - Må sikre at vedtak ikke kan gjennomføres dersom det er diff på versjon
-     *  - Gi forståelig feilmelding til saksbehandler
-     **/
-    private fun verifiserGrunnlagVersjon(
-        vilkaarsvurdering: VilkaarsvurderingDto?,
-        beregningOgAvkorting: BeregningOgAvkorting?,
-    ) {
-        if (vilkaarsvurdering?.grunnlagVersjon == null || beregningOgAvkorting == null) {
-            return
-        } else if (vilkaarsvurdering.grunnlagVersjon != beregningOgAvkorting.beregning.grunnlagMetadata.versjon) {
-            logger.warn("Ulik versjon av grunnlag i vilkaarsvurdering og beregnin!")
-            return
         }
     }
 
@@ -185,13 +159,8 @@ class VedtaksvurderingService(
         verifiserGyldigVedtakStatus(vedtak.status, listOf(VedtakStatus.FATTET_VEDTAK))
         attestantHarAnnenIdentEnnSaksbehandler(vedtak.vedtakFattet!!.ansvarligSaksbehandler, brukerTokenInfo)
 
-        val (behandling, vilkaarsvurdering, beregningOgAvkorting, sak) =
-            hentDataForVedtak(behandlingId, brukerTokenInfo)
-
+        val (behandling, _, _, sak) = hentDataForVedtak(behandlingId, brukerTokenInfo)
         verifiserGyldigVedtakForRevurdering(behandling, vedtak)
-        verifiserGrunnlagVersjon(vilkaarsvurdering, beregningOgAvkorting)
-        // TODO: Låse versjon i grunnlag
-
         val attestertVedtak =
             repository.inTransaction { tx ->
                 val attestertVedtak =
@@ -330,6 +299,10 @@ class VedtaksvurderingService(
         )
 
         return iverksattVedtak
+    }
+
+    private fun hentVedtakNonNull(behandlingId: UUID): Vedtak {
+        return requireNotNull(repository.hentVedtak(behandlingId)) { "Vedtak for behandling $behandlingId finnes ikke" }
     }
 
     private fun verifiserGyldigBehandlingStatus(
@@ -583,7 +556,4 @@ class OpphoersrevurderingErIkkeOpphoersvedtakException(revurderingAarsak: Revurd
     )
 
 class UgyldigAttestantException(ident: String) :
-    IkkeTillattException(
-        code = "ATTESTANT_OG_SAKSBEHANDLER_ER_SAMME_PERSON",
-        detail = "Saksbehandler og attestant må være to forskjellige personer (ident=$ident)",
-    )
+    IllegalArgumentException("Saksbehandler og attestant må være to forskjellige personer (ident=$ident)")

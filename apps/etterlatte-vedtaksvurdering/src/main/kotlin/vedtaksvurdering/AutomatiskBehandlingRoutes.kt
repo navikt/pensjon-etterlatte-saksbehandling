@@ -17,7 +17,7 @@ import no.nav.etterlatte.token.Fagsaksystem
 import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlient
 
 fun Route.automatiskBehandlingRoutes(
-    service: VedtaksvurderingService,
+    service: VedtakBehandlingService,
     behandlingKlient: BehandlingKlient,
 ) {
     route("/api/vedtak") {

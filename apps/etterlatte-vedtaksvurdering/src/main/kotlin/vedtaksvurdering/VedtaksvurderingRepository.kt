@@ -57,7 +57,7 @@ class VedtaksvurderingRepository(private val datasource: DataSource) : Transacti
                                 "avkorting" to it.avkorting?.toJson(),
                                 "vilkaarsresultat" to it.vilkaarsvurdering?.toJson(),
                                 "revurderingsaarsak" to it.revurderingAarsak?.name,
-                                // "revurderinginfo" to it.revurderingInfo?.toJson(), TODO EY-2767
+                                "revurderinginfo" to it.revurderingInfo?.toJson(),
                             )
                         }
                 }

@@ -435,7 +435,11 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
                                         grunnForOmgjoering = GrunnForOmgjoering.FEIL_LOVANVENDELSE,
                                         begrunnelse = "Vi skjønte ikke",
                                     ),
-                                innstilling = InnstillingTilKabalUtenBrev(lovhjemmel = KabalHjemmel.FTRL_17_10.name, tekst = "En tekst"),
+                                innstilling =
+                                    InnstillingTilKabalUtenBrev(
+                                        lovhjemmel = KabalHjemmel.FTRL_3_5_TRYGDETID.name,
+                                        tekst = "En tekst",
+                                    ),
                             ),
                         ),
                     )

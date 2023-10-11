@@ -5,6 +5,7 @@ import com.typesafe.config.ConfigFactory
 import io.ktor.client.HttpClient
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.BehandlingFactory
+import no.nav.etterlatte.behandling.BehandlingRequestLogger
 import no.nav.etterlatte.behandling.BehandlingServiceImpl
 import no.nav.etterlatte.behandling.BehandlingStatusServiceImpl
 import no.nav.etterlatte.behandling.BehandlingsHendelserKafkaProducerImpl
@@ -154,6 +155,7 @@ internal class ApplicationContext(
     val httpPort = env.getOrDefault("HTTP_PORT", "8080").toInt()
     val saksbehandlerGroupIdsByKey = AzureGroup.values().associateWith { env.requireEnvValue(it.envKey) }
     val sporingslogg = Sporingslogg()
+    val behandlingRequestLogger = BehandlingRequestLogger(sporingslogg)
     val dataSource = DataSourceBuilder.createDataSource(env.props)
 
     // Dao
@@ -196,7 +198,7 @@ internal class ApplicationContext(
             hendelseDao = hendelseDao,
             grunnlagsendringshendelseDao = grunnlagsendringshendelseDao,
             grunnlagKlient = grunnlagKlientObo,
-            sporingslogg = sporingslogg,
+            behandlingRequestLogger = behandlingRequestLogger,
             featureToggleService = featureToggleService,
             kommerBarnetTilGodeDao = kommerBarnetTilGodeDao,
             oppgaveService = oppgaveService,

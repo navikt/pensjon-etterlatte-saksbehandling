@@ -33,6 +33,7 @@ import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 import BeregningsgrunnlagMetode from './BeregningsgrunnlagMetode'
 
 const featureToggleNameInstitusjonsopphold = 'pensjon-etterlatte.bp-bruk-institusjonsopphold' as const
+const featureToggleNameBrukFaktiskTrygdetid = 'pensjon-etterlatte.bp-bruk-faktisk-trygdetid' as const
 
 const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer }) => {
   const { behandling } = props
@@ -43,6 +44,7 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
   const [beregningsgrunnlag, fetchBeregningsgrunnlag] = useApiCall(hentBeregningsGrunnlag)
   const [endreBeregning, postOpprettEllerEndreBeregning] = useApiCall(opprettEllerEndreBeregning)
   const visInstitusjonsopphold = useFeatureEnabledMedDefault(featureToggleNameInstitusjonsopphold, false)
+  const visBeregningsmetode = useFeatureEnabledMedDefault(featureToggleNameBrukFaktiskTrygdetid, false)
   const [soeskenGrunnlagsData, setSoeskenGrunnlagsData] = useState<Soeskengrunnlag | null>(null)
   const [institusjonsoppholdsGrunnlagData, setInstitusjonsoppholdsGrunnlagData] =
     useState<InstitusjonsoppholdGrunnlagData | null>(null)
@@ -108,7 +110,7 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
   return (
     <>
       <>
-        {isSuccess(beregningsgrunnlag) && (
+        {visBeregningsmetode && isSuccess(beregningsgrunnlag) && (
           <BeregningsgrunnlagMetode
             behandling={behandling}
             onSubmit={(beregningsMetodeBeregningsgrunnlag) =>

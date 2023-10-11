@@ -7,6 +7,7 @@ import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.beregning.BeregnBarnepensjonServiceFeatureToggle
 import no.nav.etterlatte.beregning.grunnlag.BarnepensjonBeregningsGrunnlag
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlag
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlagRepository
@@ -15,6 +16,7 @@ import no.nav.etterlatte.beregning.grunnlag.GrunnlagMedPeriode
 import no.nav.etterlatte.beregning.grunnlag.InstitusjonsoppholdBeregningsgrunnlag
 import no.nav.etterlatte.beregning.grunnlag.Reduksjon
 import no.nav.etterlatte.beregning.regler.toGrunnlag
+import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.klienter.BehandlingKlientImpl
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
@@ -22,6 +24,7 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.SisteIverksatteBehandling
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
+import no.nav.etterlatte.libs.common.beregning.BeregningsMetodeBeregningsgrunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeskenMedIBeregning
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
@@ -41,10 +44,12 @@ import java.util.UUID.randomUUID
 internal class BeregningsGrunnlagServiceTest {
     private val behandlingKlient = mockk<BehandlingKlientImpl>()
     private val beregningsGrunnlagRepository = mockk<BeregningsGrunnlagRepository>()
+    private val featureToggleService = DummyFeatureToggleService()
     private val beregningsGrunnlagService: BeregningsGrunnlagService =
         BeregningsGrunnlagService(
             beregningsGrunnlagRepository,
             behandlingKlient,
+            featureToggleService,
         )
 
     private val personidenter =
@@ -365,6 +370,60 @@ internal class BeregningsGrunnlagServiceTest {
                 ),
                 slot.captured.soeskenMedIBeregning,
             )
+
+            verify(exactly = 1) { beregningsGrunnlagRepository.lagre(any()) }
+        }
+    }
+
+    @Test
+    fun `skal lagre beregningsmetode`() {
+        val behandling = mockBehandling(SakType.BARNEPENSJON, randomUUID())
+        val slot = slot<BeregningsGrunnlag>()
+
+        featureToggleService.settBryter(BeregnBarnepensjonServiceFeatureToggle.BrukFaktiskTrygdetid, true)
+
+        coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
+        coEvery { behandlingKlient.beregn(any(), any(), any()) } returns true
+        every { beregningsGrunnlagRepository.finnBarnepensjonGrunnlagForBehandling(any()) } returns null
+        every { beregningsGrunnlagRepository.lagre(capture(slot)) } returns true
+
+        runBlocking {
+            beregningsGrunnlagService.lagreBarnepensjonBeregningsGrunnlag(
+                randomUUID(),
+                BarnepensjonBeregningsGrunnlag(emptyList(), emptyList(), BeregningsMetodeBeregningsgrunnlag(BeregningsMetode.BEST)),
+                mockk {
+                    every { ident() } returns "Z123456"
+                },
+            )
+
+            assertEquals(BeregningsMetode.BEST, slot.captured.beregningsMetode.beregningsMetode)
+
+            verify(exactly = 1) { beregningsGrunnlagRepository.lagre(any()) }
+        }
+    }
+
+    @Test
+    fun `skal lagre beregningsmetode NASJONAL hvis feature toggle er false`() {
+        val behandling = mockBehandling(SakType.BARNEPENSJON, randomUUID())
+        val slot = slot<BeregningsGrunnlag>()
+
+        featureToggleService.settBryter(BeregnBarnepensjonServiceFeatureToggle.BrukFaktiskTrygdetid, false)
+
+        coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
+        coEvery { behandlingKlient.beregn(any(), any(), any()) } returns true
+        every { beregningsGrunnlagRepository.finnBarnepensjonGrunnlagForBehandling(any()) } returns null
+        every { beregningsGrunnlagRepository.lagre(capture(slot)) } returns true
+
+        runBlocking {
+            beregningsGrunnlagService.lagreBarnepensjonBeregningsGrunnlag(
+                randomUUID(),
+                BarnepensjonBeregningsGrunnlag(emptyList(), emptyList(), BeregningsMetodeBeregningsgrunnlag(BeregningsMetode.BEST)),
+                mockk {
+                    every { ident() } returns "Z123456"
+                },
+            )
+
+            assertEquals(BeregningsMetode.NASJONAL, slot.captured.beregningsMetode.beregningsMetode)
 
             verify(exactly = 1) { beregningsGrunnlagRepository.lagre(any()) }
         }

@@ -20,6 +20,7 @@ import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.etterlatte.beregning.regler.toGrunnlag
+import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
@@ -52,7 +53,8 @@ internal class BeregningsGrunnlagRoutesTest {
     private lateinit var applicationConfig: HoconApplicationConfig
     private val behandlingKlient = mockk<BehandlingKlient>()
     private val repository = mockk<BeregningsGrunnlagRepository>()
-    private val service = BeregningsGrunnlagService(repository, behandlingKlient)
+    private val featureToggleService = DummyFeatureToggleService()
+    private val service = BeregningsGrunnlagService(repository, behandlingKlient, featureToggleService)
 
     @BeforeAll
     fun before() {

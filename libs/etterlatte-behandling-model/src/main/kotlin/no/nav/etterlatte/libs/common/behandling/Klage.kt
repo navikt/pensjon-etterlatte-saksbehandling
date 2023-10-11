@@ -123,7 +123,7 @@ data class Klage(
             when (utfallMedBrev) {
                 is KlageUtfall.StadfesteVedtak -> utfallMedBrev.innstilling.lovhjemmel
                 is KlageUtfall.DelvisOmgjoering -> utfallMedBrev.innstilling.lovhjemmel
-                else -> null
+                is KlageUtfall.Omgjoering -> null
             }
         hjemmel?.let {
             require(it.kanBrukesForSaktype(this.sak.sakType)) {

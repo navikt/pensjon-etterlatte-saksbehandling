@@ -10,9 +10,11 @@ import {
   InnstillingTilKabalUtenBrev,
   Klage,
   KlageUtfallUtenBrev,
-  LOVHJEMLER_KLAGE,
+  LOVHJEMLER_BP,
+  LOVHJEMLER_OMS,
   Omgjoering,
   TEKSTER_AARSAK_OMGJOERING,
+  TEKSTER_LOVHJEMLER,
   Utfall,
 } from '~shared/types/Klage'
 import { Control, Controller, useForm } from 'react-hook-form'
@@ -23,6 +25,7 @@ import { useAppDispatch } from '~store/Store'
 import { addKlage } from '~store/reducers/KlageReducer'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { kanSeBrev } from '~components/klage/stegmeny/KlageStegmeny'
+import { SakType } from '~shared/types/sak'
 
 type FilledFormDataVurdering = {
   utfall: Utfall
@@ -244,6 +247,10 @@ function KlageOmgjoering(props: { control: Control<FormdataVurdering> }) {
 
 function KlageInnstilling(props: { control: Control<FormdataVurdering> }) {
   const { control } = props
+
+  const klage = useKlage()
+  const aktuelleHjemler = klage?.sak.sakType === SakType.BARNEPENSJON ? LOVHJEMLER_BP : LOVHJEMLER_OMS
+
   return (
     <>
       <Heading level="2" size="medium">
@@ -265,9 +272,9 @@ function KlageInnstilling(props: { control: Control<FormdataVurdering> }) {
               <>
                 <Select label="Hjemmel" value={value ?? ''} {...rest}>
                   <option value="">Velg hjemmel</option>
-                  {LOVHJEMLER_KLAGE.map((hjemmel) => (
+                  {aktuelleHjemler.map((hjemmel) => (
                     <option key={hjemmel} value={hjemmel}>
-                      {hjemmel}
+                      {TEKSTER_LOVHJEMLER[hjemmel]}
                     </option>
                   ))}
                 </Select>

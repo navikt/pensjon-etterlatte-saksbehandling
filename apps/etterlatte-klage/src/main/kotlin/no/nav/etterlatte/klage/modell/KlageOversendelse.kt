@@ -7,6 +7,9 @@ import no.nav.etterlatte.libs.common.behandling.KlageUtfall
 import no.nav.etterlatte.libs.common.behandling.Mottaker
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.klage.kodeverk.Fagsystem
+import no.nav.klage.kodeverk.Ytelse
+import no.nav.klage.kodeverk.hjemmel.Hjemmel
 import java.time.LocalDate
 
 enum class KabalSakType {
@@ -37,21 +40,13 @@ data class KabalKlager(
 
 data class KabalFagsak(
     val fagsakId: String,
-    val fagsystem: String,
+    val fagsystem: Fagsystem,
 )
 
-enum class KabalYtelse {
-    PEN_GJE,
-    PEN_BAR,
-    ;
-
-    companion object {
-        fun fra(sakType: SakType): KabalYtelse {
-            return when (sakType) {
-                SakType.BARNEPENSJON -> PEN_BAR
-                SakType.OMSTILLINGSSTOENAD -> PEN_GJE
-            }
-        }
+fun SakType.tilYtelse(): Ytelse {
+    return when (this) {
+        SakType.BARNEPENSJON -> Ytelse.PEN_BAR
+        SakType.OMSTILLINGSSTOENAD -> Ytelse.PEN_GJE
     }
 }
 
@@ -68,17 +63,17 @@ data class KabalOversendelse(
     val sakenGjelder: KlageAnnenPart?,
     val fagsak: KabalFagsak,
     val kildeReferanse: String,
-    val hjemler: List<KabalHjemmel>,
+    val hjemler: List<Hjemmel>,
     val forrigeBehandlendeEnhet: String,
     val tilknyttedeJournalposter: List<KabalJournalpostref>,
     val brukersHenvendelseMottattNavDato: LocalDate,
     val innsendtTilNav: LocalDate,
-    val kilde: String,
-    val ytelse: KabalYtelse,
+    val kilde: Fagsystem,
+    val ytelse: Ytelse,
     val kommentar: String?,
 ) {
     companion object {
-        private const val FAGSYSTEM: String = "EY"
+        private val fagsystem = Fagsystem.EY
 
         fun fra(
             klage: Klage,
@@ -115,9 +110,9 @@ data class KabalOversendelse(
                         id = KabalKlagerPart(KabalKlagerType.PERSON, klage.sak.ident),
                         skalMottaKopi = true,
                     ).takeIf { erKlagerIkkeBruker },
-                fagsak = KabalFagsak(fagsakId = klage.sak.id.toString(), fagsystem = FAGSYSTEM),
+                fagsak = KabalFagsak(fagsakId = klage.sak.id.toString(), fagsystem = fagsystem),
                 kildeReferanse = klage.id.toString(),
-                hjemler = listOf(KabalHjemmel.FTRL_21_12), // TODO hent fra innstilling når hjemlene våre er på plass
+                hjemler = listOf(Hjemmel.FTRL_22_12),
                 forrigeBehandlendeEnhet = klage.sak.enhet,
                 tilknyttedeJournalposter =
                     listOfNotNull(
@@ -146,8 +141,8 @@ data class KabalOversendelse(
                     ),
                 brukersHenvendelseMottattNavDato = Tidspunkt.now().toLocalDate(),
                 innsendtTilNav = Tidspunkt.now().toLocalDate(),
-                kilde = FAGSYSTEM,
-                ytelse = KabalYtelse.fra(klage.sak.sakType),
+                kilde = fagsystem,
+                ytelse = klage.sak.sakType.tilYtelse(),
                 kommentar = innstilling.tekst, // TODO rename her og i basen
             )
         }

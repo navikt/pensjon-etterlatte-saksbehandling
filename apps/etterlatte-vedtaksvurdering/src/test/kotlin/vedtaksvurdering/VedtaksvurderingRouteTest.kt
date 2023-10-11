@@ -31,13 +31,16 @@ import no.nav.etterlatte.libs.common.vedtak.Periode
 import no.nav.etterlatte.libs.common.vedtak.UtbetalingsperiodeType
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
+import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
+import no.nav.etterlatte.libs.common.vedtak.VedtakNyDto
+import no.nav.etterlatte.libs.common.vedtak.VedtakSammendragDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.vedtaksvurdering.LoependeYtelse
 import no.nav.etterlatte.vedtaksvurdering.UnderkjennVedtakDto
 import no.nav.etterlatte.vedtaksvurdering.VedtakBehandlingInnhold
-import no.nav.etterlatte.vedtaksvurdering.VedtakSammendragDto
+import no.nav.etterlatte.vedtaksvurdering.VedtakTilbakekrevingInnhold
 import no.nav.etterlatte.vedtaksvurdering.VedtaksvurderingService
 import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlient
 import no.nav.etterlatte.vedtaksvurdering.vedtaksvurderingRoute
@@ -188,6 +191,92 @@ internal class VedtaksvurderingRouteTest {
                 behandlingKlient.harTilgangTilBehandling(any(), any())
                 vedtaksvurderingService.hentVedtak(any<UUID>())
             }
+        }
+    }
+
+    @Test
+    fun `skal returnere eksisterende vedtaksvurdering for en behandling`() {
+        val opprettetVedtak = vedtak()
+        every { vedtaksvurderingService.hentVedtak(any<UUID>()) } returns opprettetVedtak
+
+        testApplication {
+            environment { config = applicationConfig }
+            application { restModule(log) { vedtaksvurderingRoute(vedtaksvurderingService, behandlingKlient) } }
+
+            val vedtak =
+                client.get("/api/vedtak/${UUID.randomUUID()}/ny") {
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    header(HttpHeaders.Authorization, "Bearer $token")
+                }.let {
+                    it.status shouldBe HttpStatusCode.OK
+                    deserialize<VedtakNyDto>(it.bodyAsText())
+                }
+
+            with(vedtak) {
+                id shouldBe opprettetVedtak.id
+                status shouldBe opprettetVedtak.status
+                behandlingId shouldBe opprettetVedtak.behandlingId
+                sak.sakType shouldBe opprettetVedtak.sakType
+                sak.id shouldBe opprettetVedtak.sakId
+                type shouldBe opprettetVedtak.type
+                vedtakFattet shouldBe null
+                attestasjon shouldBe null
+                (innhold as VedtakInnholdDto.VedtakBehandlingDto).let {
+                    val opprettVedtakInnhold = opprettetVedtak.innhold as VedtakBehandlingInnhold
+                    it.virkningstidspunkt shouldBe opprettVedtakInnhold.virkningstidspunkt
+                    it.behandling.type shouldBe opprettVedtakInnhold.behandlingType
+                    it.utbetalingsperioder shouldHaveSize 1
+                    with(it.utbetalingsperioder.first()) {
+                        id shouldBe 1L
+                        periode shouldBe Periode(it.virkningstidspunkt, null)
+                        beloep shouldBe BigDecimal.valueOf(100)
+                        type shouldBe UtbetalingsperiodeType.UTBETALING
+                    }
+                }
+            }
+
+            coVerify(exactly = 1) {
+                behandlingKlient.harTilgangTilBehandling(any(), any())
+                vedtaksvurderingService.hentVedtak(any<UUID>())
+            }
+        }
+    }
+
+    @Test
+    fun `skal returnere eksisterende vedtaksvurdering for en tilbakekreving`() {
+        val opprettetVedtak = vedtakTilbakekreving()
+        every { vedtaksvurderingService.hentVedtak(any<UUID>()) } returns opprettetVedtak
+
+        testApplication {
+            environment { config = applicationConfig }
+            application { restModule(log) { vedtaksvurderingRoute(vedtaksvurderingService, behandlingKlient) } }
+
+            val vedtak =
+                client.get("/api/vedtak/${UUID.randomUUID()}/ny") {
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    header(HttpHeaders.Authorization, "Bearer $token")
+                }.let {
+                    it.status shouldBe HttpStatusCode.OK
+                    deserialize<VedtakNyDto>(it.bodyAsText())
+                }
+
+            with(vedtak) {
+                id shouldBe opprettetVedtak.id
+                status shouldBe opprettetVedtak.status
+                behandlingId shouldBe opprettetVedtak.behandlingId
+                sak.sakType shouldBe opprettetVedtak.sakType
+                sak.id shouldBe opprettetVedtak.sakId
+                type shouldBe opprettetVedtak.type
+                vedtakFattet shouldBe null
+                attestasjon shouldBe null
+                (innhold as VedtakInnholdDto.VedtakTilbakekrevingDto).tilbakekreving shouldBe
+                    (opprettetVedtak.innhold as VedtakTilbakekrevingInnhold).tilbakekreving
+            }
+        }
+
+        coVerify(exactly = 1) {
+            behandlingKlient.harTilgangTilBehandling(any(), any())
+            vedtaksvurderingService.hentVedtak(any<UUID>())
         }
     }
 

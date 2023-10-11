@@ -23,6 +23,7 @@ import no.nav.etterlatte.libs.common.vedtak.Behandling
 import no.nav.etterlatte.libs.common.vedtak.LoependeYtelseDTO
 import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingAttesterVedtakDto
 import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingFattetVedtakDto
+import no.nav.etterlatte.libs.common.vedtak.VedtakSammendragDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakSamordningDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.common.withBehandlingId
@@ -31,7 +32,6 @@ import no.nav.etterlatte.libs.ktor.AuthorizationPlugin
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlient
 import java.time.LocalDate
-import java.time.ZonedDateTime
 import java.util.UUID
 
 fun Route.vedtaksvurderingRoute(
@@ -57,6 +57,18 @@ fun Route.vedtaksvurderingRoute(
                     call.response.status(HttpStatusCode.NotFound)
                 } else {
                     call.respond(vedtak.toDto())
+                }
+            }
+        }
+
+        get("/{$BEHANDLINGSID_CALL_PARAMETER}/ny") {
+            withBehandlingId(behandlingKlient) { behandlingId ->
+                logger.info("Henter vedtak for behandling $behandlingId")
+                val vedtak = service.hentVedtak(behandlingId)
+                if (vedtak == null) {
+                    call.response.status(HttpStatusCode.NotFound)
+                } else {
+                    call.respond(vedtak.toNyDto())
                 }
             }
         }
@@ -233,16 +245,6 @@ private fun LoependeYtelse.toDto() =
     )
 
 data class UnderkjennVedtakDto(val kommentar: String, val valgtBegrunnelse: String)
-
-data class VedtakSammendragDto(
-    val id: String,
-    val behandlingId: UUID,
-    val vedtakType: VedtakType?,
-    val saksbehandlerId: String?,
-    val datoFattet: ZonedDateTime?,
-    val attestant: String?,
-    val datoAttestert: ZonedDateTime?,
-)
 
 private fun Vedtak.toSamordningsvedtakDto(): VedtakSamordningDto {
     val innhold = innhold as VedtakBehandlingInnhold

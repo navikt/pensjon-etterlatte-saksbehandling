@@ -15,6 +15,7 @@ import no.nav.etterlatte.token.Saksbehandler
 import no.nav.etterlatte.vedtaksvurdering.OpprettVedtak
 import no.nav.etterlatte.vedtaksvurdering.Vedtak
 import no.nav.etterlatte.vedtaksvurdering.VedtakBehandlingInnhold
+import no.nav.etterlatte.vedtaksvurdering.VedtakTilbakekrevingInnhold
 import java.math.BigDecimal
 import java.time.Month
 import java.time.YearMonth
@@ -100,4 +101,20 @@ fun vedtak(
                 ),
             revurderingAarsak = revurderingAarsak,
         ),
+)
+
+fun vedtakTilbakekreving(
+    sakId: Long = 1L,
+    behandlingId: UUID = UUID.randomUUID(),
+    tilbakekreving: ObjectNode = objectMapper.createObjectNode(),
+) = Vedtak(
+    id = 1L,
+    status = VedtakStatus.OPPRETTET,
+    soeker = Folkeregisteridentifikator.of(FNR_1),
+    sakId = sakId,
+    sakType = SakType.BARNEPENSJON,
+    behandlingId = behandlingId,
+    type = VedtakType.INNVILGELSE,
+    innhold =
+        VedtakTilbakekrevingInnhold(tilbakekreving),
 )

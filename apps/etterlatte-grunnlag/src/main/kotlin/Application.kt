@@ -73,5 +73,5 @@ class ApplicationBuilder {
                 MigreringHendelser(this, grunnlagService)
             }
 
-    fun start() = setReady().also { rapidsConnection.start() }
+    fun start() = rapidsConnection.start().also { setReady() }
 }

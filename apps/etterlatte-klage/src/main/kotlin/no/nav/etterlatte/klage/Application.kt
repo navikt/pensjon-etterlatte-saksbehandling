@@ -35,6 +35,6 @@ class Server(private val context: ApplicationContext) {
 
     fun run() {
         startLytting(konsument = context.kabalKafkakonsument, logger = LoggerFactory.getLogger(Application::class.java))
-        setReady().also { engine.start(wait = true) }
+        engine.start(true).also { setReady() }
     }
 }

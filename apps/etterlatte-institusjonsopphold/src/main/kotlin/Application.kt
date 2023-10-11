@@ -41,7 +41,7 @@ class Server {
     fun run() {
         val env = System.getenv().toMutableMap()
         startInstitusjonsoppholdLytter(env, defaultConfig)
-        setReady().also { engine.start(true) }
+        engine.start(true).also { setReady() }
     }
 }
 

@@ -73,7 +73,7 @@ private class Server(private val context: ApplicationContext) {
         with(context) {
             dataSource.migrate()
             grunnlagsendringshendelseJob.schedule().also { addShutdownHook(it) }
-            setReady().also { engine.start(true) }
+            engine.start(true).also { setReady() }
         }
 }
 

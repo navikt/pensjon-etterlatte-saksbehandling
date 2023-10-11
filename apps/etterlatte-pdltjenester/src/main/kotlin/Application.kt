@@ -39,5 +39,5 @@ class Server(applicationContext: ApplicationContext) {
                 },
         )
 
-    fun run() = setReady().also { engine.start(true) }
+    fun run() = engine.start(true).also { setReady() }
 }

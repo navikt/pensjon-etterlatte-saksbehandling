@@ -51,7 +51,6 @@ class Server(private val context: ApplicationContext) {
         with(context) {
             // kravgrunnlagConsumer.start() TODO - må få økonomi til å gjøre oppsett for kø
 
-            setReady()
-            engine.start(true)
+            engine.start(true).also { setReady() }
         }
 }

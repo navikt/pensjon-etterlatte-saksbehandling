@@ -40,7 +40,7 @@ class Server(private val context: ApplicationContext) {
 
     fun run() {
         lesHendelserFraLeesah(context.leesahKonsument)
-        setReady().also { engine.start(true) }
+        engine.start(true).also { setReady() }
     }
 }
 

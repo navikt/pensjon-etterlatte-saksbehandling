@@ -79,7 +79,7 @@ class ApplicationBuilder {
                 )
             }
 
-    fun start() = setReady().also { rapidsConnection.start() }
+    fun start() = rapidsConnection.start().also { setReady() }
 
     private fun publiser(
         melding: String,

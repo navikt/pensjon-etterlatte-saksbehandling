@@ -199,7 +199,7 @@ class ApplicationBuilder {
             apiKey = config.getString("funksjonsbrytere.unleash.token"),
         )
 
-    fun start() = setReady().also { rapidsConnection.start() }
+    fun start() = rapidsConnection.start().also { setReady() }
 
     private fun httpClient(
         scope: String? = null,

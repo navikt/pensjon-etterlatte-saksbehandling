@@ -76,6 +76,7 @@ internal class MigrerSpesifikkSak(
         logger.info("Prøver å hente sak $sakId fra PEN")
         val sakFraPEN = runBlocking { penKlient.hentSak(sakId) }
         logger.info("Henta sak $sakId fra PEN")
+        logger.info("Full sak: $sakFraPEN")
         return sakFraPEN
     }
 

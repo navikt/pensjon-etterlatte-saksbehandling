@@ -88,10 +88,11 @@ const BeregningsgrunnlagOmstillingsstoenad = (props: { behandling: IBehandlingRe
       <>
         {isSuccess(beregningsgrunnlag) && (
           <BeregningsgrunnlagMetode
-            behandling={behandling}
-            onSubmit={(beregningsMetodeBeregningsgrunnlag) =>
-              setBeregningsMetodeBeregningsgrunnlag(beregningsMetodeBeregningsgrunnlag)
-            }
+            behandles={hentBehandlesFraStatus(behandling?.status)}
+            grunnlag={beregningsMetodeBeregningsgrunnlag}
+            onUpdate={(grunnlag) => {
+              setBeregningsMetodeBeregningsgrunnlag({ ...grunnlag })
+            }}
           />
         )}
         {isSuccess(beregningsgrunnlag) && (

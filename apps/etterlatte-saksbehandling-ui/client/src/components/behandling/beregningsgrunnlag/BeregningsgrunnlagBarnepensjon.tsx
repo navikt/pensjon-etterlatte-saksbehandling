@@ -59,6 +59,7 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
         dispatch(
           oppdaterBeregingsGrunnlag({ ...result, institusjonsopphold: result.institusjonsoppholdBeregningsgrunnlag })
         )
+        setBeregningsMetodeBeregningsgrunnlag(result.beregningsMetode)
       }
     })
   }, [])
@@ -112,10 +113,11 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
       <>
         {visBeregningsmetode && isSuccess(beregningsgrunnlag) && (
           <BeregningsgrunnlagMetode
-            behandling={behandling}
-            onSubmit={(beregningsMetodeBeregningsgrunnlag) =>
-              setBeregningsMetodeBeregningsgrunnlag(beregningsMetodeBeregningsgrunnlag)
-            }
+            behandles={hentBehandlesFraStatus(behandling?.status)}
+            grunnlag={beregningsMetodeBeregningsgrunnlag}
+            onUpdate={(grunnlag) => {
+              setBeregningsMetodeBeregningsgrunnlag({ ...grunnlag })
+            }}
           />
         )}
         {isSuccess(beregningsgrunnlag) && behandling.familieforhold && (

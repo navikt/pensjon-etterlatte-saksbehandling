@@ -1,31 +1,16 @@
-import { BodyShort, Button, Heading, Radio, RadioGroup, Textarea } from '@navikt/ds-react'
+import { BodyShort, Heading, Radio, RadioGroup, Textarea } from '@navikt/ds-react'
 import { useEffect, useState } from 'react'
 import styled from 'styled-components'
 import { BeregningsMetode, BeregningsMetodeBeregningsgrunnlag } from '~shared/types/Beregning'
-import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
-import { hentBehandlesFraStatus } from '../felles/utils'
 
 type BeregningsgrunnlagMetodeProps = {
-  behandling: IBehandlingReducer
-  onSubmit: (data: BeregningsMetodeBeregningsgrunnlag) => void
+  behandles: boolean
+  grunnlag: BeregningsMetodeBeregningsgrunnlag | null
+  onUpdate: (data: BeregningsMetodeBeregningsgrunnlag) => void
 }
 
 const BeregningsgrunnlagMetode = (props: BeregningsgrunnlagMetodeProps) => {
-  const { behandling, onSubmit } = props
-
-  const [beregningsMetodeBeregningsgrunnlag, setBeregningsMetodeBeregningsgrunnlag] =
-    useState<BeregningsMetodeBeregningsgrunnlag>()
-
-  const behandles = hentBehandlesFraStatus(behandling?.status)
-
-  useEffect(() => {
-    setBeregningsMetodeBeregningsgrunnlag(
-      behandling.beregningsGrunnlag?.beregningsMetode ?? {
-        beregningsMetode: BeregningsMetode.NASJONAL,
-        begrunnelse: '',
-      }
-    )
-  }, [])
+  const { behandles, grunnlag, onUpdate } = props
 
   const beskrivelseFor = (metode: BeregningsMetode) => {
     switch (metode) {
@@ -38,65 +23,66 @@ const BeregningsgrunnlagMetode = (props: BeregningsgrunnlagMetodeProps) => {
     }
   }
 
+  const [begrunnelse, setBegrunnelse] = useState<string>('')
+
+  useEffect(() => {
+    setBegrunnelse(grunnlag?.begrunnelse ?? '')
+  }, [])
+
   return (
-    beregningsMetodeBeregningsgrunnlag && (
-      <BeregningsgrunnlagMetodeWrapper>
-        <Heading size="medium" level="2">
-          Trygdetid brukt i beregningen
-        </Heading>
+    <BeregningsgrunnlagMetodeWrapper>
+      <Heading size="medium" level="2">
+        Trygdetid brukt i beregningen
+      </Heading>
 
-        {behandles && (
-          <>
-            <RadioGroup
-              legend=""
-              size="small"
-              className="radioGroup"
-              value={beregningsMetodeBeregningsgrunnlag.beregningsMetode}
-              onChange={(value) =>
-                setBeregningsMetodeBeregningsgrunnlag({
-                  ...beregningsMetodeBeregningsgrunnlag,
-                  beregningsMetode: value,
-                })
-              }
-            >
-              <Radio value={BeregningsMetode.NASJONAL}>{beskrivelseFor(BeregningsMetode.NASJONAL)}</Radio>
-              <Radio value={BeregningsMetode.PRORATA}>{beskrivelseFor(BeregningsMetode.PRORATA)}</Radio>
-              <Radio value={BeregningsMetode.BEST}>{beskrivelseFor(BeregningsMetode.BEST)}</Radio>
-            </RadioGroup>
+      {behandles && (
+        <>
+          <RadioGroup
+            legend=""
+            size="small"
+            className="radioGroup"
+            value={grunnlag?.beregningsMetode}
+            onChange={(value) =>
+              onUpdate({
+                beregningsMetode: value,
+                begrunnelse: grunnlag?.begrunnelse,
+              })
+            }
+          >
+            <Radio value={BeregningsMetode.NASJONAL}>{beskrivelseFor(BeregningsMetode.NASJONAL)}</Radio>
+            <Radio value={BeregningsMetode.PRORATA}>{beskrivelseFor(BeregningsMetode.PRORATA)}</Radio>
+            <Radio value={BeregningsMetode.BEST}>{beskrivelseFor(BeregningsMetode.BEST)}</Radio>
+          </RadioGroup>
 
-            <Begrunnelse
-              value={beregningsMetodeBeregningsgrunnlag.begrunnelse ?? ''}
-              onChange={(e) =>
-                setBeregningsMetodeBeregningsgrunnlag({
-                  ...beregningsMetodeBeregningsgrunnlag,
-                  begrunnelse: e.target.value,
-                })
-              }
-            />
+          <Begrunnelse
+            disabled={grunnlag === undefined}
+            value={begrunnelse}
+            onChange={(e) => setBegrunnelse(e.target.value)}
+            onBlur={() =>
+              onUpdate({
+                beregningsMetode: grunnlag!!.beregningsMetode,
+                begrunnelse: begrunnelse,
+              })
+            }
+          />
+        </>
+      )}
+      {!behandles && grunnlag && (
+        <>
+          <BodyShort>{beskrivelseFor(grunnlag.beregningsMetode)}</BodyShort>
 
-            <Button type="submit" size="small" onClick={() => onSubmit(beregningsMetodeBeregningsgrunnlag)}>
-              Lagre
-            </Button>
-          </>
-        )}
-        {!behandles && (
-          <>
-            <BodyShort>{beskrivelseFor(beregningsMetodeBeregningsgrunnlag.beregningsMetode)}</BodyShort>
+          {grunnlag.begrunnelse && grunnlag.begrunnelse.length > 0 && (
+            <>
+              <Heading size="small" level="3">
+                Begrunnelse
+              </Heading>
 
-            {beregningsMetodeBeregningsgrunnlag.begrunnelse &&
-              beregningsMetodeBeregningsgrunnlag.begrunnelse.length > 0 && (
-                <>
-                  <Heading size="small" level="3">
-                    Begrunnelse
-                  </Heading>
-
-                  <BodyShort>{beregningsMetodeBeregningsgrunnlag.begrunnelse ?? ''}</BodyShort>
-                </>
-              )}
-          </>
-        )}
-      </BeregningsgrunnlagMetodeWrapper>
-    )
+              <BodyShort>{grunnlag.begrunnelse}</BodyShort>
+            </>
+          )}
+        </>
+      )}
+    </BeregningsgrunnlagMetodeWrapper>
   )
 }
 

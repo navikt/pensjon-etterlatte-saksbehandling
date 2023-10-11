@@ -149,7 +149,7 @@ class KlageServiceImpl(
                         omgjoering = utfall.omgjoering,
                         innstilling =
                             InnstillingTilKabal(
-                                lovhjemmel = utfall.innstilling.lovhjemmel,
+                                lovhjemmel = enumValueOf(utfall.innstilling.lovhjemmel),
                                 tekst = utfall.innstilling.tekst,
                                 brev = brevForInnstilling(klage, saksbehandler),
                             ),
@@ -160,7 +160,7 @@ class KlageServiceImpl(
                     KlageUtfall.StadfesteVedtak(
                         innstilling =
                             InnstillingTilKabal(
-                                lovhjemmel = utfall.innstilling.lovhjemmel,
+                                lovhjemmel = enumValueOf(utfall.innstilling.lovhjemmel),
                                 tekst = utfall.innstilling.tekst,
                                 brev = brevForInnstilling(klage, saksbehandler),
                             ),

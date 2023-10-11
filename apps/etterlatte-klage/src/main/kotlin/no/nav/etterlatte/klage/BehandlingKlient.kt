@@ -10,11 +10,11 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.klage.modell.BehandlingEvent
 import no.nav.etterlatte.klage.modell.BehandlingEventType
 import no.nav.etterlatte.klage.modell.KlageinstansUtfall
-import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingResultat
 import no.nav.etterlatte.libs.common.behandling.KabalStatus
 import no.nav.etterlatte.libs.common.behandling.Kabalrespons
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.klage.kodeverk.Fagsystem
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.slf4j.LoggerFactory
 
@@ -30,16 +30,18 @@ class BehandlingKlient(private val behandlingHttpClient: HttpClient, private val
         )
         val klageHendelse = objectMapper.readValue<BehandlingEvent>(record.value())
         logger.info(
-            "Håndterer klagehendelse ${klageHendelse.eventId}",
+            "Håndterer klagehendelse ${klageHendelse.eventId} fra opprinnelig kilde ${klageHendelse.kilde}",
         )
 
-        if (klageHendelse.kilde == Vedtaksloesning.GJENNY.name) {
+        if (klageHendelse.kilde == Fagsystem.EY.name) {
             postTilBehandling(klageHendelse)
         }
     }
 
     private fun postTilBehandling(klageHendelse: BehandlingEvent) =
         runBlocking {
+            logger.info("Så en klagehendelse som har kilde EY. Sender hendelsen til behandling")
+
             val body =
                 when (klageHendelse.type) {
                     BehandlingEventType.KLAGEBEHANDLING_AVSLUTTET ->

@@ -39,6 +39,7 @@ import no.nav.etterlatte.libs.common.behandling.GrunnForOmgjoering
 import no.nav.etterlatte.libs.common.behandling.InnstillingTilKabalUtenBrev
 import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.JaNeiMedBegrunnelse
+import no.nav.etterlatte.libs.common.behandling.KabalHjemmel
 import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.behandling.KlageOmgjoering
 import no.nav.etterlatte.libs.common.behandling.KlageUtfallUtenBrev
@@ -434,7 +435,7 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
                                         grunnForOmgjoering = GrunnForOmgjoering.FEIL_LOVANVENDELSE,
                                         begrunnelse = "Vi skjønte ikke",
                                     ),
-                                innstilling = InnstillingTilKabalUtenBrev(lovhjemmel = "En hjemmel", tekst = "En tekst"),
+                                innstilling = InnstillingTilKabalUtenBrev(lovhjemmel = KabalHjemmel.FTRL_17_10.name, tekst = "En tekst"),
                             ),
                         ),
                     )

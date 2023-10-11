@@ -14,8 +14,8 @@ import no.nav.etterlatte.libs.regler.finnFaktumIGrunnlag
 import no.nav.etterlatte.libs.regler.med
 import no.nav.etterlatte.libs.regler.og
 import no.nav.etterlatte.trygdetid.TrygdetidGrunnlag
-import no.nav.etterlatte.trygdetid.TrygdetidPeriode
 import no.nav.etterlatte.trygdetid.TrygdetidType
+import no.nav.etterlatte.trygdetid.normaliser
 import java.time.LocalDate
 import java.time.Month
 import java.time.MonthDay
@@ -167,7 +167,6 @@ val dagerPrMaanedTrygdetidGrunnlag =
         verdi = 30,
     )
 
-// IDX2
 val opptjeningsDatoer: Regel<TrygdetidGrunnlagMedAvdoedGrunnlag, Pair<LocalDate, LocalDate>> =
     finnFaktumIGrunnlag(
         gjelderFra = TRYGDETID_DATO,
@@ -188,7 +187,6 @@ val finnDatoerForOpptjeningstid =
         )
     }
 
-// ID10
 val trygdetidGrunnlagListe: Regel<TrygdetidGrunnlagMedAvdoedGrunnlag, List<TrygdetidGrunnlag>> =
     finnFaktumIGrunnlag(
         gjelderFra = TRYGDETID_DATO,
@@ -399,40 +397,6 @@ val beregnDetaljertBeregnetTrygdetid =
 private fun FremtidigTrygdetid?.verdiOrZero() = this?.periode ?: Period.ZERO
 
 private fun FaktiskTrygdetid?.verdiOrZero() = this?.periode ?: Period.ZERO
-
-private fun List<TrygdetidGrunnlag>.normaliser() =
-    this.mapIndexed { idx, trygdetidGrunnlag ->
-        var fra = trygdetidGrunnlag.periode.fra
-        var til = trygdetidGrunnlag.periode.til
-
-        if (trygdetidGrunnlag.poengInnAar) {
-            fra = fra.with(MonthDay.of(1, 1))
-        }
-
-        if (trygdetidGrunnlag.poengUtAar) {
-            til = til.with(MonthDay.of(12, 31))
-        }
-
-        // Håndtere at den forrige var et ut år - og at dette hadde en fra i samme år
-        if (idx > 0) {
-            val prev = this[idx - 1]
-
-            if (prev.poengUtAar && prev.periode.til.year == fra.year) {
-                fra = LocalDate.of(prev.periode.til.year + 1, 1, 1)
-            }
-        }
-
-        // Håndtere at den neste var et inn år - og at dette hadde en til i samme år
-        if (idx < this.size - 2) {
-            val next = this[idx + 1]
-
-            if (next.poengInnAar && next.periode.til.year == fra.year) {
-                til = LocalDate.of(next.periode.til.year - 1, 12, 31)
-            }
-        }
-
-        trygdetidGrunnlag.copy(periode = TrygdetidPeriode(fra = fra, til = til.plusDays(1)))
-    }
 
 private fun List<TrygdetidGrunnlag>.summer(antallDagerEnMaanedTrygdetid: Int) =
     this.map { Period.between(it.periode.fra, it.periode.til) }

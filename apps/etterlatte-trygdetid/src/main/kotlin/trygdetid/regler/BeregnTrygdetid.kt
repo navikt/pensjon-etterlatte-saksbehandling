@@ -1,9 +1,9 @@
 package no.nav.etterlatte.trygdetid.regler
 
+import no.nav.etterlatte.libs.common.IntBroek
 import no.nav.etterlatte.libs.common.trygdetid.DetaljertBeregnetTrygdetidResultat
 import no.nav.etterlatte.libs.common.trygdetid.FaktiskTrygdetid
 import no.nav.etterlatte.libs.common.trygdetid.FremtidigTrygdetid
-import no.nav.etterlatte.libs.common.trygdetid.IntBroek
 import no.nav.etterlatte.libs.regler.FaktumNode
 import no.nav.etterlatte.libs.regler.Regel
 import no.nav.etterlatte.libs.regler.RegelMeta

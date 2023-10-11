@@ -2,6 +2,7 @@ import {
   PeriodisertBeregningsgrunnlag,
   PeriodisertBeregningsgrunnlagDto,
 } from '~components/behandling/beregningsgrunnlag/PeriodisertBeregningsgrunnlag'
+import { IProrataBroek } from '~shared/api/trygdetid'
 import { KildeSaksbehandler } from '~shared/types/kilde'
 
 export interface Beregning {
@@ -44,6 +45,10 @@ export interface Beregningsperiode {
   grunnbelopMnd: number
   grunnbelop: number
   trygdetid: number
+  beregningsMetode: string | undefined
+  samletNorskTrygdetid: number | undefined
+  samletTeoretiskTrygdetid: number | undefined
+  broek: IProrataBroek | undefined
 }
 
 export interface BeregningsGrunnlagDto {

@@ -15,6 +15,7 @@ import no.nav.etterlatte.avkorting.regler.InntektAvkortingGrunnlagWrapper
 import no.nav.etterlatte.beregning.Beregning
 import no.nav.etterlatte.beregning.grunnlag.InstitusjonsoppholdBeregningsgrunnlag
 import no.nav.etterlatte.beregning.regler.barnepensjon.BarnepensjonGrunnlag
+import no.nav.etterlatte.libs.common.IntBroek
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -26,6 +27,7 @@ import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetodeBeregningsgrunnlag
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
 import no.nav.etterlatte.libs.common.beregning.Beregningstype
+import no.nav.etterlatte.libs.common.beregning.SamletTrygdetidMedBeregningsMetode
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.Metadata
 import no.nav.etterlatte.libs.common.periode.Periode
@@ -60,9 +62,30 @@ fun barnepensjonGrunnlag(
     avdoedeForeldre: List<Folkeregisteridentifikator> = listOf(Folkeregisteridentifikator.of("11057523044")),
 ) = BarnepensjonGrunnlag(
     soeskenKull = FaktumNode(soeskenKull.map { Folkeregisteridentifikator.of(it) }, kilde, "søskenkull"),
-    avdoedesTrygdetid = FaktumNode(trygdeTid, kilde, "trygdetid"),
+    avdoedesTrygdetid =
+        FaktumNode(
+            SamletTrygdetidMedBeregningsMetode(BeregningsMetode.NASJONAL, trygdeTid, null, null),
+            kilde,
+            "trygdetid",
+        ),
     institusjonsopphold = FaktumNode(institusjonsopphold, kilde, "institusjonsopphold"),
     avdoedeForeldre = FaktumNode(avdoedeForeldre, kilde, "avdøde"),
+)
+
+fun samletTrygdetid(
+    beregningsMetode: BeregningsMetode,
+    samletTrygdetidNorge: Beregningstall? = null,
+    samletTrygdetidTeoretisk: Beregningstall? = null,
+    broek: IntBroek? = null,
+) = FaktumNode(
+    SamletTrygdetidMedBeregningsMetode(
+        beregningsMetode = beregningsMetode,
+        samletTrygdetidNorge = samletTrygdetidNorge,
+        samletTrygdetidTeoretisk = samletTrygdetidTeoretisk,
+        prorataBroek = broek,
+    ),
+    kilde,
+    "trygdetid",
 )
 
 fun Double.toBeregningstall(

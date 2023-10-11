@@ -7,16 +7,16 @@ import io.mockk.mockk
 import no.nav.etterlatte.beregning.grunnlag.InstitusjonsoppholdBeregningsgrunnlag
 import no.nav.etterlatte.beregning.regler.barnepensjon.BP_2024_DATO
 import no.nav.etterlatte.beregning.regler.barnepensjon.PeriodisertBarnepensjonGrunnlag
+import no.nav.etterlatte.libs.common.beregning.SamletTrygdetidMedBeregningsMetode
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.regler.FaktumNode
 import no.nav.etterlatte.libs.regler.PeriodisertGrunnlag
-import no.nav.etterlatte.regler.Beregningstall
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 class PeriodisertBarnepensjonGrunnlagTest {
     private val soeskenKull = mockk<PeriodisertGrunnlag<FaktumNode<List<Folkeregisteridentifikator>>>>()
-    private val avdoedesTrygdetid = mockk<PeriodisertGrunnlag<FaktumNode<Beregningstall>>>()
+    private val avdoedesTrygdetid = mockk<PeriodisertGrunnlag<FaktumNode<SamletTrygdetidMedBeregningsMetode>>>()
     private val institusjonsopphold = mockk<PeriodisertGrunnlag<FaktumNode<InstitusjonsoppholdBeregningsgrunnlag?>>>()
     private val avdoedeForeldre = mockk<PeriodisertGrunnlag<FaktumNode<List<Folkeregisteridentifikator>>>>()
 

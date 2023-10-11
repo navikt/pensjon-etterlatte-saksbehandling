@@ -77,3 +77,5 @@ spec:
     outbound:
       rules:
         - application: etterlatte-vedtaksvurdering
+      external:
+        - host: tp-api.prod-fss-pub.nais.io

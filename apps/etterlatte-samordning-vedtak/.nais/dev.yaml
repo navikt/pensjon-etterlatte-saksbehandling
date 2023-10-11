@@ -81,3 +81,5 @@ spec:
     outbound:
       rules:
         - application: etterlatte-vedtaksvurdering
+      external:
+        - host: tp-api-q2.dev-fss-pub.nais.io

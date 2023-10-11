@@ -23,6 +23,17 @@ export enum Beregningstype {
   OMS = 'OMS',
 }
 
+export enum BeregningsMetode {
+  BEST = 'BEST',
+  NASJONAL = 'NASJONAL',
+  PRORATA = 'PRORATA',
+}
+
+export interface BeregningsMetodeBeregningsgrunnlag {
+  beregningsMetode: BeregningsMetode
+  begrunnelse?: string | null
+}
+
 export interface Beregningsperiode {
   delytelsesId: string
   datoFOM: string
@@ -40,12 +51,14 @@ export interface BeregningsGrunnlagDto {
   kilde: KildeSaksbehandler
   institusjonsoppholdBeregningsgrunnlag: InstitusjonsoppholdGrunnlagDTO
   soeskenMedIBeregning: SoeskenMedIBeregningGrunnlagDto
+  beregningsMetode: BeregningsMetodeBeregningsgrunnlag
 }
 
 export interface BeregningsGrunnlagOMSDto {
   behandlingId: string
   kilde: KildeSaksbehandler
   institusjonsoppholdBeregningsgrunnlag: InstitusjonsoppholdGrunnlagDTO
+  beregningsMetode: BeregningsMetodeBeregningsgrunnlag
 }
 
 export type InstitusjonsoppholdGrunnlagDTO = PeriodisertBeregningsgrunnlagDto<InstitusjonsoppholdIBeregning>[]
@@ -58,10 +71,12 @@ export interface SoeskenMedIBeregning {
 export interface BeregningsGrunnlagPostDto {
   soeskenMedIBeregning: SoeskenMedIBeregningGrunnlagDto
   institusjonsopphold: InstitusjonsoppholdGrunnlagDTO | undefined
+  beregningsMetode: BeregningsMetodeBeregningsgrunnlag
 }
 
 export interface BeregningsGrunnlagOMSPostDto {
   institusjonsopphold: InstitusjonsoppholdGrunnlagDTO | undefined
+  beregningsMetode: BeregningsMetodeBeregningsgrunnlag
 }
 
 export type SoeskenMedIBeregningGrunnlagDto = PeriodisertBeregningsgrunnlagDto<SoeskenMedIBeregning[]>[]

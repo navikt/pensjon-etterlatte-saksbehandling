@@ -54,6 +54,10 @@ class BeregningsGrunnlagRepository(private val dataSource: DataSource) {
                                     objectMapper.writeValueAsString(
                                         beregningsGrunnlag.institusjonsoppholdBeregningsgrunnlag,
                                     ),
+                                "beregningsmetode" to
+                                    objectMapper.writeValueAsString(
+                                        beregningsGrunnlag.beregningsMetode,
+                                    ),
                                 "kilde" to beregningsGrunnlag.kilde.toJson(),
                             ),
                     ).asUpdate,
@@ -83,6 +87,10 @@ class BeregningsGrunnlagRepository(private val dataSource: DataSource) {
                                     objectMapper.writeValueAsString(
                                         beregningsGrunnlagOMS.institusjonsoppholdBeregningsgrunnlag,
                                     ),
+                                "beregningsmetode" to
+                                    objectMapper.writeValueAsString(
+                                        beregningsGrunnlagOMS.beregningsMetode,
+                                    ),
                                 "kilde" to beregningsGrunnlagOMS.kilde.toJson(),
                             ),
                     ).asUpdate,
@@ -95,11 +103,13 @@ class BeregningsGrunnlagRepository(private val dataSource: DataSource) {
     companion object {
         val lagreGrunnlagQuery =
             """
-            INSERT INTO beregningsgrunnlag(behandlings_id, soesken_med_i_beregning_perioder, institusjonsopphold, kilde)
+            INSERT INTO beregningsgrunnlag
+                (behandlings_id, soesken_med_i_beregning_perioder, institusjonsopphold, beregningsmetode, kilde)
             VALUES(
                 :behandlings_id,
                 :soesken_med_i_beregning,
                 :institusjonsopphold,
+                :beregningsmetode,
                 :kilde
             )
             """.trimMargin()
@@ -107,20 +117,24 @@ class BeregningsGrunnlagRepository(private val dataSource: DataSource) {
         val oppdaterGrunnlagQuery =
             """
             UPDATE beregningsgrunnlag
-            SET soesken_med_i_beregning_perioder = :soesken_med_i_beregning, institusjonsopphold = :institusjonsopphold, kilde = :kilde
+            SET
+                soesken_med_i_beregning_perioder = :soesken_med_i_beregning,
+                institusjonsopphold = :institusjonsopphold,
+                beregningsmetode = :beregningsmetode,
+                kilde = :kilde
             WHERE behandlings_id = :behandlings_id
             """.trimMargin()
 
         val finnBarnepensjonsGrunnlagForBehandling =
             """
-            SELECT behandlings_id, soesken_med_i_beregning_perioder, institusjonsopphold, kilde
+            SELECT behandlings_id, soesken_med_i_beregning_perioder, institusjonsopphold, beregningsmetode, kilde
             FROM beregningsgrunnlag
             WHERE behandlings_id = :behandlings_id
             """.trimIndent()
 
         val finnOmstillingstoenadGrunnlagForBehandling =
             """
-            SELECT behandlings_id, institusjonsopphold, kilde
+            SELECT behandlings_id, institusjonsopphold, beregningsmetode, kilde
             FROM beregningsgrunnlag
             WHERE behandlings_id = :behandlings_id
             """.trimIndent()
@@ -147,6 +161,12 @@ private fun Row.asBeregningsGrunnlagBP(): BeregningsGrunnlag {
                     it,
                 )
             },
+        beregningsMetode =
+            this.string("beregningsmetode").let {
+                objectMapper.readValue(
+                    it,
+                )
+            },
         kilde = objectMapper.readValue(this.string("kilde")),
     )
 }
@@ -156,6 +176,12 @@ private fun Row.asBeregningsGrunnlagOMS(): BeregningsGrunnlagOMS {
         behandlingId = this.uuid("behandlings_id"),
         institusjonsoppholdBeregningsgrunnlag =
             this.string("institusjonsopphold").let {
+                objectMapper.readValue(
+                    it,
+                )
+            },
+        beregningsMetode =
+            this.string("beregningsmetode").let {
                 objectMapper.readValue(
                     it,
                 )

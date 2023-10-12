@@ -127,19 +127,20 @@ internal class Fordeler(
     private fun hentSakId(
         packet: JsonMessage,
         gradering: AdressebeskyttelseGradering?,
-    ): Long? = try {
-        // Denne har ansvaret for å sette gradering
-        fordelerService.hentSakId(
-            packet[SoeknadInnsendt.fnrSoekerKey].textValue(),
-            SakType.BARNEPENSJON,
-            gradering,
-        )
-    } catch (e: ResponseException) {
-        logger.error("Avbrutt fordeling - kunne ikke hente sakId: ${e.message}")
+    ): Long? =
+        try {
+            // Denne har ansvaret for å sette gradering
+            fordelerService.hentSakId(
+                packet[SoeknadInnsendt.fnrSoekerKey].textValue(),
+                SakType.BARNEPENSJON,
+                gradering,
+            )
+        } catch (e: ResponseException) {
+            logger.error("Avbrutt fordeling - kunne ikke hente sakId: ${e.message}")
 
-        // Svelg slik at Innsendt søknad vil retry
-        null
-    }
+            // Svelg slik at Innsendt søknad vil retry
+            null
+        }
 
     private fun JsonMessage.toFordelerEvent() =
         FordelerEvent(

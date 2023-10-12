@@ -10,6 +10,7 @@ import no.nav.etterlatte.SystemUser
 import no.nav.etterlatte.User
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
+import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
@@ -216,7 +217,13 @@ class OppgaveService(
 
     class FeilSaksbehandlerPaaOppgaveException(message: String) : Exception(message)
 
-    fun endreEnhetForOppgaverTilknyttetSak(
+    fun oppdaterEnhetForRelaterteOppgaver(sakerMedNyEnhet: List<GrunnlagsendringshendelseService.SakMedEnhet>) {
+        sakerMedNyEnhet.forEach {
+            endreEnhetForOppgaverTilknyttetSak(it.id, it.enhet)
+        }
+    }
+
+    private fun endreEnhetForOppgaverTilknyttetSak(
         sakId: Long,
         enhetsID: String,
     ) {

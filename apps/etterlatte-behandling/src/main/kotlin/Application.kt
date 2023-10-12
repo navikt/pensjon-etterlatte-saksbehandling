@@ -131,7 +131,7 @@ internal fun Application.module(context: ApplicationContext) {
             )
             grunnlagsendringshendelseRoute(grunnlagsendringshendelseService = grunnlagsendringshendelseService)
             egenAnsattRoute(
-                egenAnsattService = EgenAnsattService(sakService, sikkerLogg),
+                egenAnsattService = EgenAnsattService(sakService, oppgaveService, sikkerLogg),
                 requestLogger = behandlingRequestLogger,
             )
             institusjonsoppholdRoute(institusjonsoppholdService = InstitusjonsoppholdService(institusjonsoppholdDao))

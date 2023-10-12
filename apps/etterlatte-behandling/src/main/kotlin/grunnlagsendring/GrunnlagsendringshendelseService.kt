@@ -192,13 +192,7 @@ class GrunnlagsendringshendelseService(
                 SakMedEnhet(it.id, finnEnhetFraGradering(fnr, gradering, it.sakType))
             }
         sakService.oppdaterEnhetForSaker(sakerMedNyEnhet)
-        oppdaterEnhetForRelaterteOppgaver(sakerMedNyEnhet)
-    }
-
-    private fun oppdaterEnhetForRelaterteOppgaver(sakerMedNyEnhet: List<SakMedEnhet>) {
-        sakerMedNyEnhet.forEach {
-            oppgaveService.endreEnhetForOppgaverTilknyttetSak(it.id, it.enhet)
-        }
+        oppgaveService.oppdaterEnhetForRelaterteOppgaver(sakerMedNyEnhet)
     }
 
     private fun finnEnhetFraGradering(

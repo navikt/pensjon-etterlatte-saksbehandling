@@ -29,9 +29,7 @@ class BehandlingKlient(
         }.body<ObjectNode>()["id"].longValue()
     }
 
-    suspend fun opprettOppgave(
-        sakId: Long,
-    ): Long {
+    suspend fun opprettOppgave(sakId: Long): Long {
         return httpClient.post("$url/oppgaver/sak/$sakId/oppgaver") {
             contentType(ContentType.Application.Json)
             setBody(

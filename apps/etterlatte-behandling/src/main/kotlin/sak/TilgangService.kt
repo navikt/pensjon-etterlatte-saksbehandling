@@ -1,5 +1,6 @@
 package no.nav.etterlatte.sak
 
+import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
 
@@ -61,7 +62,8 @@ class TilgangServiceImpl(
         oppgaveId: String,
         saksbehandlerMedRoller: SaksbehandlerMedRoller,
     ): Boolean {
-        val sakMedGraderingOgSkjermet = dao.hentSakMedGraderingOgSkjermingPaaOppgave(oppgaveId) ?: return true
+        val sakMedGraderingOgSkjermet =
+            dao.hentSakMedGraderingOgSkjermingPaaOppgave(oppgaveId) ?: throw GenerellIkkeFunnetException()
         return harTilgangSjekker(sakMedGraderingOgSkjermet, saksbehandlerMedRoller)
     }
 
@@ -69,7 +71,8 @@ class TilgangServiceImpl(
         klageId: String,
         saksbehandlerMedRoller: SaksbehandlerMedRoller,
     ): Boolean {
-        val sakMedGraderingOgSkjermet = dao.hentSakMedGraderingOgSkjermingPaaKlage(klageId) ?: return true
+        val sakMedGraderingOgSkjermet =
+            dao.hentSakMedGraderingOgSkjermingPaaKlage(klageId) ?: throw GenerellIkkeFunnetException()
         return harTilgangSjekker(sakMedGraderingOgSkjermet, saksbehandlerMedRoller)
     }
 
@@ -77,7 +80,7 @@ class TilgangServiceImpl(
         sakId: Long,
         saksbehandlerMedRoller: SaksbehandlerMedRoller,
     ): Boolean {
-        val sak = dao.hentSakMedGraderingOgSkjerming(sakId) ?: return true
+        val sak = dao.hentSakMedGraderingOgSkjerming(sakId) ?: throw GenerellIkkeFunnetException()
         return harTilgangSjekker(sak, saksbehandlerMedRoller)
     }
 
@@ -86,7 +89,7 @@ class TilgangServiceImpl(
         saksbehandlerMedRoller: SaksbehandlerMedRoller,
     ): Boolean {
         val sakMedGraderingOgSkjermet =
-            dao.hentSakMedGraderingOgSkjermingPaaBehandling(behandlingId) ?: return true
+            dao.hentSakMedGraderingOgSkjermingPaaBehandling(behandlingId) ?: throw GenerellIkkeFunnetException()
         return harTilgangSjekker(sakMedGraderingOgSkjermet, saksbehandlerMedRoller)
     }
 

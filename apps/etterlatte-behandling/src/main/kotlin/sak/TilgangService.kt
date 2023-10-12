@@ -28,11 +28,6 @@ interface TilgangService {
         klageId: String,
         saksbehandlerMedRoller: SaksbehandlerMedRoller,
     ): Boolean
-
-    fun harTilgangTilTilbakekreving(
-        tilbakekrevingId: String,
-        saksbehandlerMedRoller: SaksbehandlerMedRoller,
-    ): Boolean
 }
 
 data class SakMedGraderingOgSkjermet(
@@ -60,14 +55,6 @@ class TilgangServiceImpl(
         return finnSakerMedGradering.map {
             harTilgangSjekker(it, saksbehandlerMedRoller)
         }.all { it }
-    }
-
-    override fun harTilgangTilTilbakekreving(
-        tilbakekrevingId: String,
-        saksbehandlerMedRoller: SaksbehandlerMedRoller,
-    ): Boolean {
-        val sakMedGraderingOgSkjermet = dao.hentSakMedGraderingOgSkjermingPaaTilbakekreving(tilbakekrevingId) ?: return true
-        return harTilgangSjekker(sakMedGraderingOgSkjermet, saksbehandlerMedRoller)
     }
 
     override fun harTilgangTilOppgave(

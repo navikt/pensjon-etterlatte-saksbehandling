@@ -80,31 +80,6 @@ class SakTilgangDao(private val datasource: DataSource) {
         }
     }
 
-    fun hentSakMedGraderingOgSkjermingPaaTilbakekreving(tilbakekrevingId: String): SakMedGraderingOgSkjermet? {
-        datasource.connection.use { connection ->
-            val statement =
-                connection.prepareStatement(
-                    """
-                    SELECT s.id as sak_id, adressebeskyttelse, erskjermet 
-                    FROM tilbakekreving t
-                    INNER JOIN sak s on t.sak_id = s.id
-                    WHERE t.id = ?::uuid
-                    """.trimIndent(),
-                )
-            statement.setString(1, tilbakekrevingId)
-            return statement.executeQuery().singleOrNull {
-                SakMedGraderingOgSkjermet(
-                    id = getLong("sak_id"),
-                    adressebeskyttelseGradering =
-                        getString("adressebeskyttelse")?.let {
-                            AdressebeskyttelseGradering.valueOf(it)
-                        },
-                    erSkjermet = getBoolean("erskjermet"),
-                )
-            }
-        }
-    }
-
     fun hentSakMedGraderingOgSkjermingPaaKlage(klageId: String): SakMedGraderingOgSkjermet? {
         datasource.connection.use { connection ->
             val statement =

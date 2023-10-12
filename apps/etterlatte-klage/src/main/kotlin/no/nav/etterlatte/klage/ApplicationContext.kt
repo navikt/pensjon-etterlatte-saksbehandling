@@ -47,7 +47,7 @@ class ApplicationContext {
             azureAppScope = config.getString("behandling.azure.scope"),
         )
 
-    private val behandlingKlient: BehandlingKlient = BehandlingKlient(behandlingHttpClient, "")
+    private val behandlingKlient: BehandlingKlient = BehandlingKlient(behandlingHttpClient, config.getString("behandling.resource.url"))
 
     val kabalKafkakonsument: KlageKafkakonsument =
         KlageKafkakonsument(

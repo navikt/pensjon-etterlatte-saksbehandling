@@ -2,8 +2,8 @@ import styled from 'styled-components'
 import { BodyShort, Loader, Search as SearchField } from '@navikt/ds-react'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ANavRed, AGray900, ABlue500 } from '@navikt/ds-tokens/dist/tokens'
-import { XMarkOctagonIcon, InformationSquareIcon } from '@navikt/aksel-icons'
+import { ABlue500, AGray900, ANavRed } from '@navikt/ds-tokens/dist/tokens'
+import { InformationSquareIcon, XMarkOctagonIcon } from '@navikt/aksel-icons'
 import { isFailure, isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
 import { getPerson } from '~shared/api/grunnlag'
 import { GYLDIG_FNR } from '~utils/fnr'
@@ -120,7 +120,7 @@ export const Search = () => {
 }
 
 const feilmelding = (error: ApiError) => {
-  if (error.statusCode === 404) {
+  if (error.status === 404) {
     return 'Fant ingen data i Gjenny'
   } else {
     return 'En feil har skjedd'

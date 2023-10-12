@@ -15,7 +15,7 @@ const Versioncheck = () => {
     let timeoutReload: null | number = null
     intervalVersionCheck = window.setInterval(() => {
       hentClientConfig().then((res) => {
-        if (res.status === 'ok') {
+        if (res.ok) {
           const fetchedAppversion = res.data.cachebuster
           if (appVersion && fetchedAppversion !== appVersion) {
             setIsOutdated(true)

@@ -24,10 +24,10 @@ export default function DokumentModal({
 
     hentDokumentPDF({ journalpostId, dokumentInfoId })
       .then((res) => {
-        if (res.status === 'ok') {
+        if (res.ok) {
           return new Blob([res.data], { type: 'application/pdf' })
         } else {
-          throw Error(res.error)
+          throw Error(res.detail)
         }
       })
       .then((file) => URL.createObjectURL(file!!))

@@ -2,6 +2,7 @@ package no.nav.etterlatte.libs.ktor
 
 import com.fasterxml.jackson.databind.JsonMappingException
 import io.ktor.client.call.body
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.request.post
@@ -10,9 +11,11 @@ import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
+import io.ktor.http.HttpStatusCode.Companion.InternalServerError
 import io.ktor.http.HttpStatusCode.Companion.NotFound
 import io.ktor.http.HttpStatusCode.Companion.OK
 import io.ktor.http.contentType
+import io.ktor.serialization.jackson.JacksonConverter
 import io.ktor.server.application.call
 import io.ktor.server.application.log
 import io.ktor.server.config.HoconApplicationConfig
@@ -36,6 +39,9 @@ import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.withBehandlingId
 import no.nav.etterlatte.libs.common.withFoedselsnummer
 import no.nav.etterlatte.libs.common.withSakId
+import no.nav.etterlatte.libs.ktor.feilhaandtering.ExceptionResponse
+import no.nav.etterlatte.libs.ktor.feilhaandtering.IkkeFunnetException
+import no.nav.etterlatte.libs.ktor.feilhaandtering.InternfeilException
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -253,6 +259,68 @@ class RestModuleTest {
         }
     }
 
+    @Test
+    fun `statuspages håndterer kjente og ukjente exceptions`() {
+        testApplication {
+            environment {
+                config = hoconApplicationConfig
+            }
+            application {
+                restModule(this.log) {
+                    routesMedForskjelligeFeil()
+                }
+            }
+            val cli =
+                createClient {
+                    install(ContentNegotiation) {
+                        register(ContentType.Application.Json, JacksonConverter(objectMapper))
+                    }
+                    install(httpClient())
+                }
+
+            cli.get("ikke_funnet/exception") {
+                header(HttpHeaders.Authorization, "Bearer $token")
+                header(HttpHeaders.Accept, ContentType.Application.Json)
+            }.also {
+                val body = it.body<ExceptionResponse>()
+                assertEquals("IKKE_FUNNET", body.code)
+                assertEquals(NotFound.value, body.status)
+            }
+
+            cli.get("ikke_funnet/status") {
+                header(HttpHeaders.Authorization, "Bearer $token")
+                header(HttpHeaders.Accept, ContentType.Application.Json)
+            }.also {
+                val body = it.body<ExceptionResponse>()
+                assertEquals(NotFound.value, body.status)
+                assertEquals("NOT_FOUND", body.code)
+            }
+            cli.get("intern/vilkaarlig") {
+                header(HttpHeaders.Authorization, "Bearer $token")
+                header(HttpHeaders.Accept, ContentType.Application.Json)
+            }.also {
+                val bodyMapped = it.body<ExceptionResponse>()
+                assertEquals(InternalServerError.value, bodyMapped.status)
+            }
+
+            cli.get("intern/exception") {
+                header(HttpHeaders.Authorization, "Bearer $token")
+                header(HttpHeaders.Accept, ContentType.Application.Json)
+            }.also {
+                val bodyMapped = it.body<ExceptionResponse>()
+                assertEquals(InternalServerError.value, bodyMapped.status)
+            }
+
+            cli.get("intern/status") {
+                header(HttpHeaders.Authorization, "Bearer $token")
+                header(HttpHeaders.Accept, ContentType.Application.Json)
+            }.also {
+                val bodyMapped = it.body<ExceptionResponse>()
+                assertEquals(InternalServerError.value, bodyMapped.status)
+            }
+        }
+    }
+
     private fun Route.route1() {
         route("/test") {
             get("/") {
@@ -292,6 +360,29 @@ class RestModuleTest {
                 withFoedselsnummer(personTilgangsSjekkMock) {
                     call.respond(OK)
                 }
+            }
+        }
+    }
+
+    private fun Route.routesMedForskjelligeFeil() {
+        route("ikke_funnet") {
+            get("exception") {
+                throw IkkeFunnetException("IKKE_FUNNET", "Vi fant ikke det du lette etter")
+            }
+            get("status") {
+                call.respond(NotFound)
+            }
+        }
+
+        route("intern") {
+            get("vilkaarlig") {
+                throw Exception("Whoops")
+            }
+            get("exception") {
+                throw InternfeilException("Noe gikk galt :(")
+            }
+            get("status") {
+                call.respond(InternalServerError)
             }
         }
     }

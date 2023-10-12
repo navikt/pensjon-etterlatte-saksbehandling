@@ -22,8 +22,12 @@ export const AttesterYtelse = ({ behandling, kommentar }: { behandling: IDetalje
     apiAttesterVedtak(
       { behandlingId: behandling.id, kommentar },
       () => navigate(`/person/${behandling.søker?.foedselsnummer}`),
-      () => {
-        setError(`Ukjent feil oppsto ved attestering av vedtaket... Prøv igjen.`)
+      (error) => {
+        if (error.code === 'ATTESTANT_OG_SAKSBEHANDLER_ER_SAMME_PERSON') {
+          setError('Vedtaket er allerede fattet av deg. Du kan ikke attestere dine egne vedtak.')
+        } else {
+          setError(`En feil opptod ved attestering av vedtaket: ${error.detail}.`)
+        }
         setModalisOpen(false)
       }
     )

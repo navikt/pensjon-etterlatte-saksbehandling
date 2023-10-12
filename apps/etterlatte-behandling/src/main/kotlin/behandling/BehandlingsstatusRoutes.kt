@@ -12,6 +12,7 @@ import io.ktor.server.routing.route
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.behandlingsId
+import no.nav.etterlatte.libs.ktor.feilhaandtering.ForespoerselException
 import no.nav.etterlatte.tilgangsstyring.kunAttestant
 import no.nav.etterlatte.vedtaksvurdering.VedtakHendelse
 
@@ -149,6 +150,12 @@ private suspend fun haandterStatusEndring(
     runCatching(proevStatusEndring)
         .fold(
             onSuccess = { call.respond(HttpStatusCode.OK, OperasjonGyldig(true)) },
-            onFailure = { call.respond(HttpStatusCode.Conflict, it.message ?: "Statussjekk feilet") },
+            onFailure = { throw BehandlingKanIkkeBytteStatusException() },
         )
 }
+
+class BehandlingKanIkkeBytteStatusException : ForespoerselException(
+    status = HttpStatusCode.Conflict.value,
+    code = "BEHANDLING_HAR_UGYLDIG_STATUS",
+    detail = "Behandlingen kan ikke bytte til ønsket status",
+)

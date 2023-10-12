@@ -27,6 +27,7 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
+import no.nav.etterlatte.libs.ktor.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.rapidsandrivers.migrering.KILDE_KEY
 import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlient
@@ -565,4 +566,7 @@ class OpphoersrevurderingErIkkeOpphoersvedtakException(revurderingAarsak: Revurd
     )
 
 class UgyldigAttestantException(ident: String) :
-    IllegalArgumentException("Saksbehandler og attestant må være to forskjellige personer (ident=$ident)")
+    IkkeTillattException(
+        code = "ATTESTANT_OG_SAKSBEHANDLER_ER_SAMME_PERSON",
+        detail = "Saksbehandler og attestant må være to forskjellige personer (ident=$ident)",
+    )

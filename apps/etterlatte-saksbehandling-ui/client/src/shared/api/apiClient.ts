@@ -1,6 +1,4 @@
-export type ApiSuccess<T> = { status: 'ok'; data: T; statusCode: number }
-export type ApiError = { status: 'error'; statusCode: number; error?: any }
-
+export type ApiSuccess<T> = { ok: true; status: number; data: T }
 export type ApiResponse<T> = ApiSuccess<T> | ApiError
 
 type Method = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'
@@ -12,7 +10,18 @@ interface Options {
   noData?: boolean
 }
 
-async function retrieveData(props: Options, response: Response): Promise<any> {
+export interface JsonError {
+  status: number
+  detail: string
+  code?: string
+  meta?: Record<string, unknown>
+}
+
+export interface ApiError extends JsonError {
+  ok: false
+}
+
+export async function retrieveData(props: Options, response: Response): Promise<any> {
   if (props.noData || response.status === 204) {
     return null
   } else {
@@ -48,16 +57,27 @@ async function apiFetcher<T>(props: Options): Promise<ApiResponse<T>> {
       const data = await retrieveData(props, response)
 
       return {
-        status: 'ok',
-        statusCode: response.status,
+        ok: true,
+        status: response.status,
         data,
       }
+    } else {
+      const error: JsonError = await response.json()
+
+      console.error(error, response)
+      return { ...error, ok: false }
     }
-    console.error(response)
-    return { status: 'error', statusCode: response.status }
   } catch (e) {
     console.error('Rejection i fetch / utlesing av data', e)
-    return { status: 'error', statusCode: 500, error: e }
+    return {
+      ok: false,
+      status: 400,
+      code: 'FEIL_I_PARSING_AV_DATA',
+      detail: 'fikk en feil i parsing av data / rejection i fetch. Feilen ligger i meta',
+      meta: {
+        cause: e,
+      },
+    }
   }
 }
 

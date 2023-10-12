@@ -95,6 +95,8 @@ class VedtaksvurderingService(
         }
 
         val (behandling, vilkaarsvurdering, beregningOgAvkorting) = hentDataForVedtak(behandlingId, brukerTokenInfo)
+        verifiserGrunnlagVersjon(vilkaarsvurdering, beregningOgAvkorting)
+
         val vedtakType = vedtakType(behandling.behandlingType, vilkaarsvurdering)
         val virkningstidspunkt =
             requireNotNull(behandling.virkningstidspunkt?.dato) {
@@ -107,6 +109,20 @@ class VedtaksvurderingService(
         } else {
             logger.info("Oppretter vedtak for behandling med behandlingId=$behandlingId")
             opprettVedtak(behandling, vedtakType, virkningstidspunkt, beregningOgAvkorting, vilkaarsvurdering)
+        }
+    }
+
+    /**
+     * TODO: Feilmelding til saksbehandler
+     **/
+    private fun verifiserGrunnlagVersjon(
+        vilkaarsvurdering: VilkaarsvurderingDto?,
+        beregningOgAvkorting: BeregningOgAvkorting?,
+    ) {
+        if (vilkaarsvurdering?.grunnlagVersjon == null || beregningOgAvkorting == null) {
+            return
+        } else if (vilkaarsvurdering.grunnlagVersjon != beregningOgAvkorting.beregning.grunnlagMetadata.versjon) {
+            throw IllegalStateException("FML...")
         }
     }
 
@@ -178,8 +194,13 @@ class VedtaksvurderingService(
         verifiserGyldigVedtakStatus(vedtak.status, listOf(VedtakStatus.FATTET_VEDTAK))
         attestantHarAnnenIdentEnnSaksbehandler(vedtak.vedtakFattet!!.ansvarligSaksbehandler, brukerTokenInfo)
 
-        val (behandling, _, _, sak) = hentDataForVedtak(behandlingId, brukerTokenInfo)
+        val (behandling, vilkaarsvurdering, beregningOgAvkorting, sak) =
+            hentDataForVedtak(behandlingId, brukerTokenInfo)
+
         verifiserGyldigVedtakForRevurdering(behandling, vedtak)
+        verifiserGrunnlagVersjon(vilkaarsvurdering, beregningOgAvkorting)
+        // TODO: Låse versjon i grunnlag
+
         val attestertVedtak =
             repository.inTransaction { tx ->
                 val attestertVedtak =

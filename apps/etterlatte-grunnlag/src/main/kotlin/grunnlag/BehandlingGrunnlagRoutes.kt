@@ -9,34 +9,31 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.klienter.BehandlingKlient
+import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
+import no.nav.etterlatte.libs.common.behandlingsId
 import no.nav.etterlatte.libs.common.grunnlag.NyeSaksopplysninger
 import no.nav.etterlatte.libs.common.grunnlag.Opplysningsbehov
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.kunSystembruker
-import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sakId
 import no.nav.etterlatte.libs.common.withSakId
 
-fun Route.grunnlagRoute(
+fun Route.behandlingGrunnlagRoute(
     grunnlagService: GrunnlagService,
     behandlingKlient: BehandlingKlient,
 ) {
-    route("sak/{$SAKID_CALL_PARAMETER}") {
+    /**
+     * TODO:
+     *  Dette blir en stegvis endring for å redusere sjansen for at alt brekker.
+     *  Sak ID skal fjernes så fort vi har versjonert alt grunnlag i dev/prod med behandlingId
+     **/
+    route("sak/{$SAKID_CALL_PARAMETER}/behandling/{$BEHANDLINGSID_CALL_PARAMETER}") {
         get {
             withSakId(behandlingKlient) { sakId ->
                 when (val opplysningsgrunnlag = grunnlagService.hentOpplysningsgrunnlag(sakId)) {
                     null -> call.respond(HttpStatusCode.NotFound)
                     else -> call.respond(opplysningsgrunnlag)
-                }
-            }
-        }
-
-        get("personer/alle") {
-            withSakId(behandlingKlient) { sakId ->
-                when (val personerISak = grunnlagService.hentPersonerISak(sakId)) {
-                    null -> call.respond(HttpStatusCode.NotFound)
-                    else -> call.respond(PersonerISakDto(personerISak))
                 }
             }
         }
@@ -58,7 +55,7 @@ fun Route.grunnlagRoute(
 
         get("revurdering/${Opplysningstype.HISTORISK_FORELDREANSVAR.name}") {
             withSakId(behandlingKlient) { sakId ->
-                when (val historisk = grunnlagService.hentHistoriskForeldreansvar(sakId)) {
+                when (val historisk = grunnlagService.hentHistoriskForeldreansvar(sakId, behandlingsId)) {
                     null -> call.respond(HttpStatusCode.NotFound)
                     else -> call.respond(historisk)
                 }
@@ -68,7 +65,7 @@ fun Route.grunnlagRoute(
         post("nye-opplysninger") {
             withSakId(behandlingKlient) {
                 val opplysningsbehov = call.receive<NyeSaksopplysninger>()
-                grunnlagService.lagreNyeSaksopplysninger(sakId, opplysningsbehov.opplysninger)
+                grunnlagService.lagreNyeSaksopplysninger(sakId, behandlingsId, opplysningsbehov.opplysninger)
                 call.respond(HttpStatusCode.OK)
             }
         }
@@ -77,21 +74,10 @@ fun Route.grunnlagRoute(
             kunSystembruker {
                 withSakId(behandlingKlient) {
                     val opplysningsbehov = call.receive<Opplysningsbehov>()
-                    grunnlagService.oppdaterGrunnlag(opplysningsbehov)
+                    grunnlagService.oppdaterGrunnlag(behandlingsId, opplysningsbehov)
                     call.respond(HttpStatusCode.OK)
                 }
             }
         }
     }
 }
-
-private data class PersonerISakDto(
-    val personer: Map<Folkeregisteridentifikator, PersonMedNavn>,
-)
-
-data class PersonMedNavn(
-    val fnr: Folkeregisteridentifikator,
-    val fornavn: String,
-    val etternavn: String,
-    val mellomnavn: String?,
-)

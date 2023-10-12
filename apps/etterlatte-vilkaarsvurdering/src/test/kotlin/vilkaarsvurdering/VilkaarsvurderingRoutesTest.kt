@@ -94,7 +94,7 @@ internal class VilkaarsvurderingRoutesTest {
         } returns true
         coEvery { behandlingKlient.settBehandlingStatusOpprettet(any(), any(), any()) } returns true
         coEvery { behandlingKlient.harTilgangTilBehandling(any(), any()) } returns true
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns GrunnlagTestData().hentOpplysningsgrunnlag()
+        coEvery { grunnlagKlient.hentGrunnlag(any(), any(), any()) } returns GrunnlagTestData().hentOpplysningsgrunnlag()
     }
 
     @AfterEach

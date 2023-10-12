@@ -26,6 +26,11 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
+import rapidsandrivers.BEHANDLING_ID_KEY
+import rapidsandrivers.FNR_KEY
+import rapidsandrivers.OPPLYSNING_KEY
+import rapidsandrivers.SAK_ID_KEY
+import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class RapidTest {
@@ -84,9 +89,10 @@ internal class RapidTest {
             JsonMessage.newMessage(
                 mapOf(
                     "@event_name" to "OPPLYSNING:NY",
-                    "opplysning" to listOf(nyOpplysning),
-                    "fnr" to fnr,
-                    "sakId" to 1,
+                    OPPLYSNING_KEY to listOf(nyOpplysning),
+                    FNR_KEY to fnr,
+                    SAK_ID_KEY to 1,
+                    BEHANDLING_ID_KEY to UUID.randomUUID(),
                 ),
             ).toJson()
 
@@ -102,9 +108,10 @@ internal class RapidTest {
             JsonMessage.newMessage(
                 mapOf(
                     "@behov" to Opplysningstype.SOEKER_PDL_V1,
-                    "opplysning" to listOf(nyOpplysning),
-                    "fnr" to fnr,
-                    "sakId" to 1,
+                    OPPLYSNING_KEY to listOf(nyOpplysning),
+                    FNR_KEY to fnr,
+                    SAK_ID_KEY to 1,
+                    BEHANDLING_ID_KEY to UUID.randomUUID(),
                 ),
             ).toJson()
 

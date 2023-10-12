@@ -154,7 +154,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
             }
 
         verify { grunnlagService.leggInnNyttGrunnlag(revurdering!!, any()) }
-        coVerify { grunnlagService.hentPersongalleri(any()) }
+        coVerify { grunnlagService.hentPersongalleri(any(), any()) }
         verify {
             oppgaveService.opprettNyOppgaveMedSakOgReferanse(
                 revurdering?.id.toString(),
@@ -288,7 +288,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
             verify { hendelser.sendMeldingForHendelseMedDetaljertBehandling(any(), BehandlingHendelseType.OPPRETTET) }
             verify { grunnlagService.leggInnNyttGrunnlag(any(), any()) }
             verify { oppgaveService.hentOppgaverForSak(sak.id) }
-            coVerify { grunnlagService.hentPersongalleri(any()) }
+            coVerify { grunnlagService.hentPersongalleri(any(), any()) }
             verify {
                 oppgaveService.opprettNyOppgaveMedSakOgReferanse(
                     revurdering.id.toString(),
@@ -479,7 +479,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
                     hendelse.id,
                 )
             assertEquals(revurdering.id, grunnlaghendelse?.behandlingId)
-            coVerify { grunnlagService.hentPersongalleri(any()) }
+            coVerify { grunnlagService.hentPersongalleri(any(), any()) }
             verify { grunnlagService.leggInnNyttGrunnlag(behandling as Behandling, any()) }
             verify { grunnlagService.leggInnNyttGrunnlag(revurdering, any()) }
             verify { oppgaveService.hentOppgaverForSak(sak.id) }

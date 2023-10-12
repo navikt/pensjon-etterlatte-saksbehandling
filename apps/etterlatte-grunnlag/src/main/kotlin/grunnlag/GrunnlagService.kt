@@ -47,11 +47,13 @@ interface GrunnlagService {
 
     fun lagreNyeSaksopplysninger(
         sak: Long,
+        behandlingId: UUID,
         nyeOpplysninger: List<Grunnlagsopplysning<JsonNode>>,
     )
 
     fun lagreNyePersonopplysninger(
-        sak: Long,
+        sakId: Long,
+        behandlingId: UUID,
         fnr: Folkeregisteridentifikator,
         nyeOpplysninger: List<Grunnlagsopplysning<JsonNode>>,
     )
@@ -64,9 +66,15 @@ interface GrunnlagService {
 
     fun hentPersonerISak(sakId: Long): Map<Folkeregisteridentifikator, PersonMedNavn>?
 
-    suspend fun oppdaterGrunnlag(opplysningsbehov: Opplysningsbehov)
+    suspend fun oppdaterGrunnlag(
+        behandlingId: UUID,
+        opplysningsbehov: Opplysningsbehov,
+    )
 
-    fun hentHistoriskForeldreansvar(sakId: Long): Grunnlagsopplysning<JsonNode>?
+    fun hentHistoriskForeldreansvar(
+        sakId: Long,
+        behandlingId: UUID,
+    ): Grunnlagsopplysning<JsonNode>?
 }
 
 class RealGrunnlagService(
@@ -114,7 +122,10 @@ class RealGrunnlagService(
         }.associateBy { it.fnr }
     }
 
-    override suspend fun oppdaterGrunnlag(opplysningsbehov: Opplysningsbehov) {
+    override suspend fun oppdaterGrunnlag(
+        behandlingId: UUID,
+        opplysningsbehov: Opplysningsbehov,
+    ) {
         val pdlPersondatasGrunnlag =
             coroutineScope {
                 val persongalleri = opplysningsbehov.persongalleri
@@ -225,11 +236,17 @@ class RealGrunnlagService(
                     it.personDto.foedselsnummer.verdi,
                     it.personRolle,
                 )
-            lagreNyePersonopplysninger(opplysningsbehov.sakid, it.personDto.foedselsnummer.verdi, enkenPdlOpplysning)
+            lagreNyePersonopplysninger(
+                opplysningsbehov.sakid,
+                behandlingId,
+                it.personDto.foedselsnummer.verdi,
+                enkenPdlOpplysning,
+            )
         }
 
         lagreNyeSaksopplysninger(
             opplysningsbehov.sakid,
+            behandlingId,
             listOf(opplysningsbehov.persongalleri.tilGrunnlagsopplysning()),
         )
         logger.info("Oppdatert grunnlag for sak ${opplysningsbehov.sakid}")
@@ -253,7 +270,10 @@ class RealGrunnlagService(
         )
     }
 
-    override fun hentHistoriskForeldreansvar(sakId: Long): Grunnlagsopplysning<JsonNode>? {
+    override fun hentHistoriskForeldreansvar(
+        sakId: Long,
+        behandlingId: UUID,
+    ): Grunnlagsopplysning<JsonNode>? {
         val opplysning = opplysningDao.finnNyesteGrunnlag(sakId, Opplysningstype.HISTORISK_FORELDREANSVAR)?.opplysning
         if (opplysning != null) {
             return opplysning
@@ -313,37 +333,48 @@ class RealGrunnlagService(
     }
 
     override fun lagreNyePersonopplysninger(
-        sak: Long,
+        sakId: Long,
+        behandlingId: UUID,
         fnr: Folkeregisteridentifikator,
         nyeOpplysninger: List<Grunnlagsopplysning<JsonNode>>,
     ) {
         logger.info("Oppretter et grunnlag for personopplysninger")
-        val gjeldendeGrunnlag = opplysningDao.finnHendelserIGrunnlag(sak).map { it.opplysning.id }
-
-        for (opplysning in nyeOpplysninger) {
-            if (opplysning.id in gjeldendeGrunnlag) {
-                logger.warn(
-                    "Forsøker å lagre personopplysning ${opplysning.id} i sak $sak men den er allerede gjeldende",
-                )
-            } else {
-                opplysningDao.leggOpplysningTilGrunnlag(sak, opplysning, fnr)
-            }
-        }
+        oppdaterGrunnlagOgVersjon(sakId, behandlingId, fnr, nyeOpplysninger)
     }
 
     override fun lagreNyeSaksopplysninger(
         sak: Long,
+        behandlingId: UUID,
         nyeOpplysninger: List<Grunnlagsopplysning<JsonNode>>,
     ) {
         logger.info("Oppretter et grunnlag for saksopplysninger")
+        oppdaterGrunnlagOgVersjon(sak, behandlingId, fnr = null, nyeOpplysninger)
+    }
+
+    private fun oppdaterGrunnlagOgVersjon(
+        sak: Long,
+        behandlingId: UUID,
+        fnr: Folkeregisteridentifikator?,
+        nyeOpplysninger: List<Grunnlagsopplysning<JsonNode>>,
+    ) {
         val gjeldendeGrunnlag = opplysningDao.finnHendelserIGrunnlag(sak).map { it.opplysning.id }
 
-        for (opplysning in nyeOpplysninger) {
-            if (opplysning.id in gjeldendeGrunnlag) {
-                logger.warn("Forsøker å lagre sakopplysning ${opplysning.id} i sak $sak men den er allerede gjeldende")
-            } else {
-                opplysningDao.leggOpplysningTilGrunnlag(sak, opplysning, null)
-            }
+        val hendelsenummer =
+            nyeOpplysninger.mapNotNull { opplysning ->
+                if (opplysning.id in gjeldendeGrunnlag) {
+                    logger.warn("Forsøker å lagre opplysning ${opplysning.id} i sak $sak men den er allerede gjeldende")
+                    null
+                } else {
+                    opplysningDao.leggOpplysningTilGrunnlag(sak, opplysning, fnr)
+                }
+            }.maxOrNull()
+
+        if (hendelsenummer == null) {
+            logger.warn("Hendelsenummer er null – kan ikke oppdatere versjon for behandling (id=$behandlingId)")
+        } else {
+            // TODO: Hva skal vi gjøre dersom det forsøkes å oppdatere versjon som er låst? Bare hoppe over?
+            logger.info("Setter grunnlag for behandling (id=$behandlingId) til hendelsenummer=$hendelsenummer")
+            opplysningDao.oppdaterVersjonForBehandling(behandlingId, sak, hendelsenummer)
         }
     }
 

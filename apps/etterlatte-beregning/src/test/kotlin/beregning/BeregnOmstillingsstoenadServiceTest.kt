@@ -60,7 +60,7 @@ internal class BeregnOmstillingsstoenadServiceTest {
         val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
         val trygdetid = mockTrygdetid(behandling.id)
 
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
+        coEvery { grunnlagKlient.hentGrunnlag(any(), any(), any()) } returns grunnlag
         coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns trygdetid
         coEvery {
             beregningsGrunnlagService.hentOmstillingstoenadBeregningsGrunnlag(
@@ -99,7 +99,7 @@ internal class BeregnOmstillingsstoenadServiceTest {
         val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
         val trygdetid = mockTrygdetid(behandling.id)
 
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
+        coEvery { grunnlagKlient.hentGrunnlag(any(), any(), any()) } returns grunnlag
         coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns trygdetid
         coEvery {
             beregningsGrunnlagService.hentOmstillingstoenadBeregningsGrunnlag(
@@ -138,7 +138,7 @@ internal class BeregnOmstillingsstoenadServiceTest {
         val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
         val trygdetid = mockTrygdetid(behandling.id)
 
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
+        coEvery { grunnlagKlient.hentGrunnlag(any(), any(), any()) } returns grunnlag
         coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns trygdetid
         coEvery {
             beregningsGrunnlagService.hentOmstillingstoenadBeregningsGrunnlag(
@@ -177,7 +177,7 @@ internal class BeregnOmstillingsstoenadServiceTest {
         val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
         val trygdetid = mockTrygdetid(behandling.id)
 
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
+        coEvery { grunnlagKlient.hentGrunnlag(any(), any(), any()) } returns grunnlag
         coEvery { vilkaarsvurderingKlient.hentVilkaarsvurdering(any(), any()) } returns
             mockk {
                 every { resultat?.utfall } returns VilkaarsvurderingUtfall.OPPFYLT
@@ -218,7 +218,7 @@ internal class BeregnOmstillingsstoenadServiceTest {
         val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
         val trygdetid = mockTrygdetid(behandling.id)
 
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
+        coEvery { grunnlagKlient.hentGrunnlag(any(), any(), any()) } returns grunnlag
         coEvery { vilkaarsvurderingKlient.hentVilkaarsvurdering(any(), any()) } returns
             mockk {
                 every { resultat?.utfall } returns VilkaarsvurderingUtfall.IKKE_OPPFYLT
@@ -258,7 +258,7 @@ internal class BeregnOmstillingsstoenadServiceTest {
         val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
         val trygdetid = mockTrygdetid(behandling.id)
 
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
+        coEvery { grunnlagKlient.hentGrunnlag(any(), any(), any()) } returns grunnlag
         coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns trygdetid
         coEvery {
             beregningsGrunnlagService.hentOmstillingstoenadBeregningsGrunnlag(
@@ -295,7 +295,7 @@ internal class BeregnOmstillingsstoenadServiceTest {
         val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
         val trygdetid = mockTrygdetidUtenBeregnetTrygdetid(behandling.id)
 
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
+        coEvery { grunnlagKlient.hentGrunnlag(any(), any(), any()) } returns grunnlag
         coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns trygdetid
         coEvery {
             beregningsGrunnlagService.hentOmstillingstoenadBeregningsGrunnlag(
@@ -316,7 +316,7 @@ internal class BeregnOmstillingsstoenadServiceTest {
         val behandling = mockBehandling(BehandlingType.FØRSTEGANGSBEHANDLING)
         val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
 
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
+        coEvery { grunnlagKlient.hentGrunnlag(any(), any(), any()) } returns grunnlag
         coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns null
         coEvery {
             beregningsGrunnlagService.hentOmstillingstoenadBeregningsGrunnlag(

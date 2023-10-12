@@ -6,6 +6,7 @@ import no.nav.etterlatte.grunnlagsendring.klienter.GrunnlagKlientImpl
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.grunnlag.NyeSaksopplysninger
 import no.nav.etterlatte.libs.common.grunnlag.Opplysningsbehov
+import java.util.UUID
 
 class GrunnlagService(private val grunnlagKlient: GrunnlagKlientImpl) {
     /**
@@ -20,19 +21,23 @@ class GrunnlagService(private val grunnlagKlient: GrunnlagKlientImpl) {
     ) {
         runBlocking {
             val grunnlagsbehov = grunnlagsbehov(behandling, persongalleri)
-            grunnlagKlient.leggInnNyttGrunnlag(grunnlagsbehov)
+            grunnlagKlient.leggInnNyttGrunnlag(behandling.id, grunnlagsbehov)
         }
     }
 
     fun leggTilNyeOpplysninger(
         sakId: Long,
+        behandlingId: UUID,
         opplysninger: NyeSaksopplysninger,
     ) = runBlocking {
-        grunnlagKlient.lagreNyeSaksopplysninger(sakId, opplysninger)
+        grunnlagKlient.lagreNyeSaksopplysninger(sakId, behandlingId, opplysninger)
     }
 
-    suspend fun hentPersongalleri(sakId: Long): Persongalleri {
-        return grunnlagKlient.hentPersongalleri(sakId)
+    suspend fun hentPersongalleri(
+        sakId: Long,
+        behandlingId: UUID,
+    ): Persongalleri {
+        return grunnlagKlient.hentPersongalleri(sakId, behandlingId)
             ?.opplysning
             ?: throw NoSuchElementException("Persongalleri mangler for sak $sakId")
     }

@@ -81,7 +81,8 @@ class BehandlingKlient(private val behandlingHttpClient: HttpClient, private val
                             )
                     }
                 } catch (e: Exception) {
-                    logger.error("Kunne ikke mappe ut kabalresponsen riktig. vi mottok følgende: $klageHendelse")
+                    logger.error("Kunne ikke mappe ut kabalresponsen riktig. Hendelsen er logget til sikkerlogg")
+                    sikkerLogg.error("Kunne ikke mappe ut kabalresponsen riktig, eventet vi mottok var $klageHendelse")
                     throw e
                 }
 

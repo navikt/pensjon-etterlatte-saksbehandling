@@ -86,7 +86,7 @@ class TilgangServiceImpl(
         saksbehandlerMedRoller: SaksbehandlerMedRoller,
     ): Boolean {
         val sakMedGraderingOgSkjermet =
-            dao.hentSakMedGarderingOgSkjermingPaaBehandling(behandlingId) ?: return true
+            dao.hentSakMedGraderingOgSkjermingPaaBehandling(behandlingId) ?: return true
         return harTilgangSjekker(sakMedGraderingOgSkjermet, saksbehandlerMedRoller)
     }
 

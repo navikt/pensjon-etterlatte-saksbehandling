@@ -37,15 +37,17 @@ class SakTilgangDao(private val datasource: DataSource) {
         }
     }
 
-    fun hentSakMedGarderingOgSkjermingPaaBehandling(behandlingId: String): SakMedGraderingOgSkjermet? {
+    fun hentSakMedGraderingOgSkjermingPaaBehandling(behandlingId: String): SakMedGraderingOgSkjermet? {
         datasource.connection.use { connection ->
             val statement =
                 connection.prepareStatement(
-                    "SELECT s.id, adressebeskyttelse, erSkjermet FROM alle_behandlinger b" +
-                        " INNER JOIN sak s ON b.sak_id = s.id WHERE b.id = ?::uuid",
+                    "select id, adressebeskyttelse, erSkjermet from sak where id =" +
+                        " (select sak_id from behandling where id = ?::uuid" +
+                        " union select sak_id from tilbakekreving where id = ?::uuid)",
                 )
             statement.setString(1, behandlingId)
-            return statement.executeQuery().singleOrNull {
+            statement.setString(2, behandlingId)
+            return statement.executeQuery().single {
                 SakMedGraderingOgSkjermet(
                     id = getLong(1),
                     adressebeskyttelseGradering = getString(2)?.let { AdressebeskyttelseGradering.valueOf(it) },

@@ -72,8 +72,10 @@ spec:
     - name: TJENESTEPENSJON_URL
       value: https://tp-api.prod-fss-pub.nais.io
     - name: TJENESTEPENSJON_SCOPE
-      value: api://prod-fss.pensjonsamhandler.tp/.default
+      value: api://prod-fss.pensjonsamhandling.tp/.default
   accessPolicy:
     outbound:
       rules:
         - application: etterlatte-vedtaksvurdering
+      external:
+        - host: tp-api.prod-fss-pub.nais.io

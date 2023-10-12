@@ -34,14 +34,14 @@ import no.nav.etterlatte.libs.common.FoedselsnummerDTO
 import no.nav.etterlatte.libs.common.PersonTilgangsSjekk
 import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.SakTilgangsSjekk
+import no.nav.etterlatte.libs.common.feilhaandtering.ExceptionResponse
+import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.withBehandlingId
 import no.nav.etterlatte.libs.common.withFoedselsnummer
 import no.nav.etterlatte.libs.common.withSakId
-import no.nav.etterlatte.libs.ktor.feilhaandtering.ExceptionResponse
-import no.nav.etterlatte.libs.ktor.feilhaandtering.IkkeFunnetException
-import no.nav.etterlatte.libs.ktor.feilhaandtering.InternfeilException
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -270,7 +270,7 @@ class RestModuleTest {
                     routesMedForskjelligeFeil()
                 }
             }
-            val cli =
+            val client =
                 createClient {
                     install(ContentNegotiation) {
                         register(ContentType.Application.Json, JacksonConverter(objectMapper))
@@ -278,7 +278,7 @@ class RestModuleTest {
                     install(httpClient())
                 }
 
-            cli.get("ikke_funnet/exception") {
+            client.get("ikke_funnet/exception") {
                 header(HttpHeaders.Authorization, "Bearer $token")
                 header(HttpHeaders.Accept, ContentType.Application.Json)
             }.also {
@@ -287,15 +287,15 @@ class RestModuleTest {
                 assertEquals(NotFound.value, body.status)
             }
 
-//            cli.get("ikke_funnet/status") {
-//                header(HttpHeaders.Authorization, "Bearer $token")
-//                header(HttpHeaders.Accept, ContentType.Application.Json)
-//            }.also {
-//                val body = it.body<ExceptionResponse>()
-//                assertEquals(NotFound.value, body.status)
-//                assertEquals("NOT_FOUND", body.code)
-//            }
-            cli.get("intern/vilkaarlig") {
+            client.get("ikke_funnet/status") {
+                header(HttpHeaders.Authorization, "Bearer $token")
+                header(HttpHeaders.Accept, ContentType.Application.Json)
+            }.also {
+                val body = it.body<ExceptionResponse>()
+                assertEquals(NotFound.value, body.status)
+                assertEquals("NOT_FOUND", body.code)
+            }
+            client.get("intern/vilkaarlig") {
                 header(HttpHeaders.Authorization, "Bearer $token")
                 header(HttpHeaders.Accept, ContentType.Application.Json)
             }.also {
@@ -303,7 +303,7 @@ class RestModuleTest {
                 assertEquals(InternalServerError.value, bodyMapped.status)
             }
 
-            cli.get("intern/exception") {
+            client.get("intern/exception") {
                 header(HttpHeaders.Authorization, "Bearer $token")
                 header(HttpHeaders.Accept, ContentType.Application.Json)
             }.also {
@@ -311,13 +311,13 @@ class RestModuleTest {
                 assertEquals(InternalServerError.value, bodyMapped.status)
             }
 
-//            cli.get("intern/status") {
-//                header(HttpHeaders.Authorization, "Bearer $token")
-//                header(HttpHeaders.Accept, ContentType.Application.Json)
-//            }.also {
-//                val bodyMapped = it.body<ExceptionResponse>()
-//                assertEquals(InternalServerError.value, bodyMapped.status)
-//            }
+            client.get("intern/status") {
+                header(HttpHeaders.Authorization, "Bearer $token")
+                header(HttpHeaders.Accept, ContentType.Application.Json)
+            }.also {
+                val bodyMapped = it.body<ExceptionResponse>()
+                assertEquals(InternalServerError.value, bodyMapped.status)
+            }
         }
     }
 

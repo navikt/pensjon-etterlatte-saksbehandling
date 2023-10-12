@@ -6,23 +6,17 @@ import io.ktor.server.application.log
 import io.ktor.server.plugins.statuspages.StatusPagesConfig
 import io.ktor.server.response.respond
 import isProd
+import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
+import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
+import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.ktor.erDeserialiseringsException
 import org.slf4j.Logger
 
-data class ExceptionResponse(
-    val status: Int,
-    val detail: String,
-    val code: String?,
-    val meta: Map<String, Any>?,
-)
-
 class StatusPagesKonfigurasjon(private val sikkerLogg: Logger) {
-    // Håndteringen på statuscodes er risky å ta med i første omgang
-    // HttpStatusCode.allStatusCodes.filter { it.value in 400..499 }.toTypedArray()
-    private val statusCodes4xx = emptyArray<HttpStatusCode>()
-
-    // HttpStatusCode.allStatusCodes.filter { it.value in 500..599 }.toTypedArray()
-    private val statusCodes5xx = emptyArray<HttpStatusCode>()
+    private val statusCodes4xx = HttpStatusCode.allStatusCodes.filter { it.value in 400..499 }.toTypedArray()
+    private val statusCodes5xx = HttpStatusCode.allStatusCodes.filter { it.value in 500..599 }.toTypedArray()
 
     val config: StatusPagesConfig.() -> Unit = {
         exception<Throwable> { call, cause ->
@@ -46,10 +40,7 @@ class StatusPagesKonfigurasjon(private val sikkerLogg: Logger) {
         }
         status(*statusCodes4xx) { call, code ->
             when (code) {
-                HttpStatusCode.NotFound ->
-                    IkkeFunnetException("NOT_FOUND", "Ressursen ble ikke funnet").respond(
-                        call,
-                    )
+                HttpStatusCode.NotFound -> GenerellIkkeFunnetException()
 
                 HttpStatusCode.BadRequest ->
                     UgyldigForespoerselException(

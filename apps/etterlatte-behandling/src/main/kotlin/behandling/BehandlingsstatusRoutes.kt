@@ -12,7 +12,7 @@ import io.ktor.server.routing.route
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.behandlingsId
-import no.nav.etterlatte.libs.ktor.feilhaandtering.ForespoerselException
+import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
 import no.nav.etterlatte.tilgangsstyring.kunAttestant
 import no.nav.etterlatte.vedtaksvurdering.VedtakHendelse
 

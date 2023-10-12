@@ -1,6 +1,4 @@
-package no.nav.etterlatte.libs.ktor.feilhaandtering
-
-import io.ktor.http.HttpStatusCode
+package no.nav.etterlatte.libs.common.feilhaandtering
 
 open class ForespoerselException(
     open val status: Int,
@@ -28,18 +26,24 @@ open class UgyldigForespoerselException(
     override val detail: String,
     override val meta: Map<String, Any>? = null,
     override val cause: Throwable? = null,
-) : ForespoerselException(HttpStatusCode.BadRequest.value, code = code, detail = detail, meta = meta, cause = cause)
+) : ForespoerselException(status = 400, code = code, detail = detail, meta = meta, cause = cause)
 
 open class IkkeFunnetException(
     override val code: String,
     override val detail: String,
     override val meta: Map<String, Any>? = null,
     override val cause: Throwable? = null,
-) : ForespoerselException(status = HttpStatusCode.NotFound.value, code = code, detail = detail, meta = meta, cause = cause)
+) : ForespoerselException(status = 404, code = code, detail = detail, meta = meta, cause = cause)
+
+/**
+ * Brukes felles alle steder der vi ikke vil lekke noe informasjon om vi faktisk har funnet noe eller ikke ref.
+ * informasjonssikring
+ */
+class GenerellIkkeFunnetException : IkkeFunnetException(code = "NOT_FOUND", detail = "Kunne ikke finne ønsket ressurs")
 
 open class IkkeTillattException(
     override val code: String,
     override val detail: String,
     override val meta: Map<String, Any>? = null,
     override val cause: Throwable? = null,
-) : ForespoerselException(status = HttpStatusCode.Forbidden.value, code = code, detail = detail, meta = meta, cause = cause)
+) : ForespoerselException(status = 403, code = code, detail = detail, meta = meta, cause = cause)

@@ -7,6 +7,7 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.STOR_SNERK
 import no.nav.etterlatte.TRIVIELL_MIDTPUNKT
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.pdl.FantIkkePersonException
 import no.nav.etterlatte.libs.common.person.HentGeografiskTilknytningRequest
 import no.nav.etterlatte.libs.common.person.HentPdlIdentRequest
 import no.nav.etterlatte.libs.common.person.HentPersonRequest
@@ -213,7 +214,7 @@ internal class PersonServiceTest {
         coEvery { pdlKlient.hentPerson(any()) } returns mockResponse("/pdl/person_ikke_funnet.json")
 
         runBlocking {
-            assertThrows<PdlFantIkkePerson> {
+            assertThrows<FantIkkePersonException> {
                 personService.hentPerson(HentPersonRequest(STOR_SNERK, rolle = PersonRolle.BARN, SakType.BARNEPENSJON))
             }
         }
@@ -255,7 +256,7 @@ internal class PersonServiceTest {
     fun `finner ikke folkeregisterident`() {
         coEvery { pdlKlient.hentPdlIdentifikator(any()) } returns mockResponse("/pdl/ident_ikke_funnet.json")
         runBlocking {
-            assertThrows<PdlFantIkkePerson> {
+            assertThrows<FantIkkePersonException> {
                 personService.hentPdlIdentifikator(HentPdlIdentRequest(PersonIdent("1234")))
             }
         }

@@ -10,8 +10,8 @@ import no.nav.etterlatte.FNR_3
 import no.nav.etterlatte.behandling.BehandlingKlient
 import no.nav.etterlatte.fordeler.FordelerKriterie.AVDOED_ER_IKKE_REGISTRERT_SOM_DOED
 import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
+import no.nav.etterlatte.libs.common.pdl.IngenIdentFamilierelasjonException
 import no.nav.etterlatte.libs.common.person.FamilieRelasjon
-import no.nav.etterlatte.libs.common.person.FamilieRelasjonManglerIdent
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.mockNorskAdresse
@@ -319,7 +319,7 @@ internal class FordelerServiceTest {
     fun `legger til manuell journalfoering hvis en av personer i persongalleriet mangler ident`() {
         every { fordelerRepo.finnFordeling(any()) } returns null
         every { fordelerRepo.lagreFordeling(any()) } returns Unit
-        coEvery { pdlTjenesterKlient.hentPerson(any()) } throws FamilieRelasjonManglerIdent("")
+        coEvery { pdlTjenesterKlient.hentPerson(any()) } throws IngenIdentFamilierelasjonException()
         dummyFeatureToggleService.settBryter(FordelerFeatureToggle.ManuellJournalfoering, true)
 
         val resultat = fordelerService.sjekkGyldighetForBehandling(fordelerEvent())

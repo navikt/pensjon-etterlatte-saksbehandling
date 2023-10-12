@@ -4,10 +4,10 @@
       <env name="BRREG_URL" value="https://data.brreg.no" />
       <env name="DB_JDBC_URL" value="jdbc:postgresql://host.docker.internal:5435/postgres" />
       <env name="DB_USERNAME" value="postgres" />
-      <env name="DOKARKIV_SCOPE" value="api://dev-fss.teamdokumenthandtering.dokarkiv-q1/.default" />
-      <env name="DOKARKIV_URL" value="https://dokarkiv.dev-fss-pub.nais.io/rest/journalpostapi/v1/journalpost" />
-      <env name="DOKDIST_SCOPE" value="api://dev-fss.teamdokumenthandtering.saf-q1/.default" />
-      <env name="DOKDIST_URL" value="https://dokdistfordeling-q1.dev-fss-pub.nais.io/rest/v1" />
+      <env name="DOKARKIV_SCOPE" value="api://dev-fss.teamdokumenthandtering.dokarkiv/.default" />
+      <env name="DOKARKIV_URL" value="https://dokarkiv-q2.dev-fss-pub.nais.io/rest/journalpostapi/v1/journalpost" />
+      <env name="DOKDIST_SCOPE" value="api://dev-fss.teamdokumenthandtering.saf/.default" />
+      <env name="DOKDIST_URL" value="https://dokdistfordeling.dev-fss-pub.nais.io/rest/v1" />
       <env name="ETTERLATTE_BEHANDLING_CLIENT_ID" value="59967ac8-009c-492e-a618-e5a0f6b3e4e4" />
       <env name="ETTERLATTE_BEHANDLING_URL" value="https://etterlatte-behandling.intern.dev.nav.no" />
       <env name="ETTERLATTE_BEREGNING_CLIENT_ID" value="b07cf335-11fb-4efa-bd46-11f51afd5052" />

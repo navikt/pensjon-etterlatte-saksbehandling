@@ -58,17 +58,17 @@ spec:
     - name: NORG2_URL
       value: https://norg2.dev-fss-pub.nais.io/norg2/api/v1
     - name: SAF_BASE_URL
-      value: https://saf.dev-fss-pub.nais.io
+      value: https://saf-q2.dev-fss-pub.nais.io
     - name: SAF_SCOPE
-      value: api://dev-fss.teamdokumenthandtering.saf-q1/.default
+      value: api://dev-fss.teamdokumenthandtering.saf/.default
     - name: DOKARKIV_URL
-      value: https://dokarkiv.dev-fss-pub.nais.io/rest/journalpostapi/v1/journalpost
+      value: https://dokarkiv-q2.dev-fss-pub.nais.io/rest/journalpostapi/v1/journalpost
     - name: DOKARKIV_SCOPE
-      value: api://dev-fss.teamdokumenthandtering.dokarkiv-q1/.default
+      value: api://dev-fss.teamdokumenthandtering.dokarkiv/.default
     - name: DOKDIST_URL
-      value: https://dokdistfordeling-q1.dev-fss-pub.nais.io/rest/v1
+      value: https://dokdistfordeling.dev-fss-pub.nais.io/rest/v1
     - name: DOKDIST_SCOPE
-      value: api://dev-fss.teamdokumenthandtering.saf-q1/.default
+      value: api://dev-fss.teamdokumenthandtering.saf/.default
     - name: NAVANSATT_URL
       value: https://navansatt.dev-fss-pub.nais.io
     - name: KAFKA_RAPID_TOPIC
@@ -120,9 +120,9 @@ spec:
       external:
         - host: etterlatte-proxy.dev-fss-pub.nais.io
         - host: norg2.dev-fss-pub.nais.io
-        - host: saf.dev-fss-pub.nais.io
-        - host: dokarkiv.dev-fss-pub.nais.io
-        - host: dokdistfordeling-q1.dev-fss-pub.nais.io
+        - host: saf-q2.dev-fss-pub.nais.io
+        - host: dokarkiv-q2.dev-fss-pub.nais.io
+        - host: dokdistfordeling.dev-fss-pub.nais.io
         - host: data.brreg.no
         - host: navansatt.dev-fss-pub.nais.io
         - host: pensjon-brevbaker.intern.dev.nav.no

@@ -41,7 +41,7 @@ class SakTilgangDao(private val datasource: DataSource) {
         datasource.connection.use { connection ->
             val statement =
                 connection.prepareStatement(
-                    "SELECT s.id, adressebeskyttelse, erSkjermet FROM behandling b" +
+                    "SELECT s.id, adressebeskyttelse, erSkjermet FROM alle_behandlinger b" +
                         " INNER JOIN sak s ON b.sak_id = s.id WHERE b.id = ?::uuid",
                 )
             statement.setString(1, behandlingId)

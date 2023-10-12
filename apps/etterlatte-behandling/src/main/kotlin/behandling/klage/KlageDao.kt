@@ -1,6 +1,7 @@
 package no.nav.etterlatte.behandling.klage
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.etterlatte.libs.common.behandling.BehandlingResultat
 import no.nav.etterlatte.libs.common.behandling.KabalStatus
 import no.nav.etterlatte.libs.common.behandling.Kabalrespons
 import no.nav.etterlatte.libs.common.behandling.Klage
@@ -61,7 +62,7 @@ class KlageDaoImpl(private val connection: () -> Connection) : KlageDao {
                 prepareStatement(
                     """
                     SELECT k.id, k.sak_id, saktype, fnr, enhet, opprettet, status, 
-                        kabalstatus, formkrav, utfall, resultat
+                        kabalstatus, formkrav, utfall, resultat, kabalresultat
                     FROM klage k INNER JOIN sak s on k.sak_id = s.id
                     WHERE k.id = ?
                     """.trimIndent(),
@@ -79,7 +80,7 @@ class KlageDaoImpl(private val connection: () -> Connection) : KlageDao {
                 prepareStatement(
                     """
                     SELECT k.id, k.sak_id, saktype, fnr, enhet, opprettet, status, 
-                        kabalstatus, formkrav, utfall, resultat
+                        kabalstatus, formkrav, utfall, resultat, kabalresultat
                     FROM klage k INNER JOIN sak s on k.sak_id = s.id
                     WHERE s.id = ?
                     """.trimIndent(),
@@ -127,6 +128,7 @@ class KlageDaoImpl(private val connection: () -> Connection) : KlageDao {
             formkrav = getString("formkrav")?.let { objectMapper.readValue(it) },
             utfall = getString("utfall")?.let { objectMapper.readValue(it) },
             resultat = getString("resultat")?.let { objectMapper.readValue(it) },
+            kabalResultat = getString("kabalresultat")?.let { enumValueOf<BehandlingResultat>(it) },
         )
     }
 }

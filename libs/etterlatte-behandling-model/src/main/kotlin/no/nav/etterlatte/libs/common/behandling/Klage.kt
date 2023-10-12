@@ -45,7 +45,6 @@ enum class KlageStatus {
     }
 }
 
-// Placeholder til vi vet mer om hvilken flyt vi har her
 enum class KabalStatus {
     OPPRETTET,
     UTREDES,
@@ -87,6 +86,7 @@ data class Klage(
     val formkrav: FormkravMedBeslutter?,
     val utfall: KlageUtfall?,
     val resultat: KlageResultat?,
+    val kabalResultat: BehandlingResultat?,
 ) {
     fun oppdaterFormkrav(
         formkrav: Formkrav,
@@ -144,9 +144,12 @@ data class Klage(
                     "på grunn av status til klagen (${this.status})",
             )
         }
+        val harSendtTilKabal = resultat.sendtInnstillingsbrev?.sendtKabalTidspunkt != null
+
         return this.copy(
             resultat = resultat,
             status = KlageStatus.FERDIGSTILT,
+            kabalStatus = KabalStatus.OPPRETTET.takeIf { harSendtTilKabal },
         )
     }
 
@@ -187,6 +190,7 @@ data class Klage(
                 formkrav = null,
                 utfall = null,
                 resultat = null,
+                kabalResultat = null,
             )
         }
     }

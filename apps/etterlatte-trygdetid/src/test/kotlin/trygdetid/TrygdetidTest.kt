@@ -15,6 +15,13 @@ internal class TrygdetidTest {
                     trygdetidGrunnlag(
                         periode =
                             TrygdetidPeriode(
+                                fra = LocalDate.of(2017, 1, 1),
+                                til = LocalDate.of(2017, 6, 30),
+                            ),
+                    ),
+                    trygdetidGrunnlag(
+                        periode =
+                            TrygdetidPeriode(
                                 fra = LocalDate.of(2020, 1, 1),
                                 til = LocalDate.of(2020, 12, 31),
                             ),
@@ -41,7 +48,7 @@ internal class TrygdetidTest {
                         ),
                 ),
             )
-        oppdatert.trygdetidGrunnlag.size shouldBe 3
+        oppdatert.trygdetidGrunnlag.size shouldBe 4
         oppdatert.trygdetidGrunnlag.any { it.periode.fra == LocalDate.of(2018, 1, 1) } shouldBe true
     }
 
@@ -101,6 +108,23 @@ internal class TrygdetidTest {
                     TrygdetidPeriode(
                         fra = LocalDate.of(2019, 3, 20),
                         til = LocalDate.of(2023, 6, 1),
+                    ),
+            )
+
+        assertThrows<OverlappendePeriodeException> {
+            trygdetid.leggTilEllerOppdaterTrygdetidGrunnlag(overlappendePeriode)
+        }
+    }
+
+    @Test
+    fun `Skal kaste feil ved overlapp over en periode med poeng aar`() {
+        val overlappendePeriode =
+            trygdetidGrunnlag(
+                poengInnAar = true,
+                periode =
+                    TrygdetidPeriode(
+                        fra = LocalDate.of(2017, 8, 31),
+                        til = LocalDate.of(2017, 12, 31),
                     ),
             )
 

@@ -20,10 +20,15 @@ import {
 import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 import React, { useEffect, useState } from 'react'
 import InstitusjonsoppholdOMS from '~components/behandling/beregningsgrunnlag/InstitusjonsoppholdOMS'
-import { InstitusjonsoppholdGrunnlagData } from '~shared/types/Beregning'
+import {
+  BeregningsMetode,
+  BeregningsMetodeBeregningsgrunnlag,
+  InstitusjonsoppholdGrunnlagData,
+} from '~shared/types/Beregning'
 import { mapListeTilDto } from '~components/behandling/beregningsgrunnlag/PeriodisertBeregningsgrunnlag'
 import { Border } from '~components/behandling/soeknadsoversikt/styled'
 import Spinner from '~shared/Spinner'
+import BeregningsgrunnlagMetode from './BeregningsgrunnlagMetode'
 
 const BeregningsgrunnlagOmstillingsstoenad = (props: { behandling: IBehandlingReducer }) => {
   const { behandling } = props
@@ -35,6 +40,8 @@ const BeregningsgrunnlagOmstillingsstoenad = (props: { behandling: IBehandlingRe
   const [endreBeregning, postOpprettEllerEndreBeregning] = useApiCall(opprettEllerEndreBeregning)
   const [institusjonsoppholdsGrunnlagData, setInstitusjonsoppholdsGrunnlagData] =
     useState<InstitusjonsoppholdGrunnlagData | null>(null)
+  const [beregningsMetodeBeregningsgrunnlag, setBeregningsMetodeBeregningsgrunnlag] =
+    useState<BeregningsMetodeBeregningsgrunnlag | null>(null)
 
   useEffect(() => {
     fetchBeregningsgrunnlag(behandling.id, (result) => {
@@ -55,6 +62,11 @@ const BeregningsgrunnlagOmstillingsstoenad = (props: { behandling: IBehandlingRe
       institusjonsopphold: institusjonsoppholdsGrunnlagData
         ? mapListeTilDto(institusjonsoppholdsGrunnlagData)
         : behandling.beregningsGrunnlag?.institusjonsopphold ?? [],
+      beregningsMetode: beregningsMetodeBeregningsgrunnlag
+        ? beregningsMetodeBeregningsgrunnlag
+        : behandling.beregningsGrunnlag?.beregningsMetode ?? {
+            beregningsMetode: BeregningsMetode.NASJONAL,
+          },
     }
 
     postBeregningsgrunnlag(
@@ -74,6 +86,15 @@ const BeregningsgrunnlagOmstillingsstoenad = (props: { behandling: IBehandlingRe
   return (
     <>
       <>
+        {isSuccess(beregningsgrunnlag) && (
+          <BeregningsgrunnlagMetode
+            behandles={hentBehandlesFraStatus(behandling?.status)}
+            grunnlag={beregningsMetodeBeregningsgrunnlag}
+            onUpdate={(grunnlag) => {
+              setBeregningsMetodeBeregningsgrunnlag({ ...grunnlag })
+            }}
+          />
+        )}
         {isSuccess(beregningsgrunnlag) && (
           <InstitusjonsoppholdOMS
             behandling={behandling}

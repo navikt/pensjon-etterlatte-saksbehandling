@@ -5,10 +5,43 @@ import { formaterDato, formaterStringDato } from '~utils/formattering'
 import { Beregning } from '~shared/types/Beregning'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { Barnepensjonberegningssammendrag } from '~components/behandling/beregne/Barnepensjonberegningssammendrag'
+import { IProrataBroek } from '~shared/api/trygdetid'
 
 interface Props {
   behandling: IDetaljertBehandling
   beregning: Beregning
+}
+
+const ProrataBroek = ({ broek }: { broek: IProrataBroek }) => {
+  return (
+    <>
+      {broek.teller} / {broek.nevner}
+    </>
+  )
+}
+
+const BenyttetTrygdetid = ({
+  trygdetid,
+  beregningsMetode,
+  samletNorskTrygdetid,
+  samletTeoretiskTrygdetid,
+}: {
+  trygdetid: number
+  beregningsMetode: string | undefined
+  samletNorskTrygdetid: number | undefined
+  samletTeoretiskTrygdetid: number | undefined
+}) => {
+  let benyttetTrygdetid = trygdetid
+
+  if (beregningsMetode === 'NASJONAL' && samletNorskTrygdetid) {
+    benyttetTrygdetid = samletNorskTrygdetid
+  }
+
+  if (beregningsMetode === 'PRORATA' && samletTeoretiskTrygdetid) {
+    benyttetTrygdetid = samletTeoretiskTrygdetid
+  }
+
+  return <>{benyttetTrygdetid}</>
 }
 
 export const BarnepensjonSammendrag = ({ behandling, beregning }: Props) => {
@@ -31,6 +64,7 @@ export const BarnepensjonSammendrag = ({ behandling, beregning }: Props) => {
             <Table.HeaderCell>Periode</Table.HeaderCell>
             <Table.HeaderCell>Ytelse</Table.HeaderCell>
             <Table.HeaderCell>Trygdetid</Table.HeaderCell>
+            <Table.HeaderCell>Prorata Brøk</Table.HeaderCell>
             <Table.HeaderCell>Grunnbeløp</Table.HeaderCell>
             <Table.HeaderCell>Beregning gjelder</Table.HeaderCell>
             <Table.HeaderCell>Månedelig utbetaling før skatt</Table.HeaderCell>
@@ -59,7 +93,14 @@ export const BarnepensjonSammendrag = ({ behandling, beregning }: Props) => {
                 }`}
               </Table.DataCell>
               <Table.DataCell>Barnepensjon</Table.DataCell>
-              <Table.DataCell>{beregningsperiode.trygdetid} år</Table.DataCell>
+              <Table.DataCell>
+                <BenyttetTrygdetid {...beregningsperiode} /> år
+              </Table.DataCell>
+              <Table.DataCell>
+                {beregningsperiode.broek && beregningsperiode.beregningsMetode === 'PRORATA' && (
+                  <ProrataBroek broek={beregningsperiode.broek} />
+                )}
+              </Table.DataCell>
               <Table.DataCell>{beregningsperiode.grunnbelop} kr</Table.DataCell>
               <Table.DataCell>
                 {beregningsperiode.soeskenFlokk && `${beregningsperiode.soeskenFlokk.length + 1} barn`}{' '}
@@ -77,9 +118,9 @@ export const BarnepensjonSammendrag = ({ behandling, beregning }: Props) => {
 export const TableWrapper = styled.div`
   display: flex;
   flex-wrap: wrap;
-  max-width: 1000px;
+  max-width: 1200px;
   .table {
-    max-width: 1000px;
+    max-width: 1200px;
 
     .tableCell {
       max-width: 100px;

@@ -13,11 +13,14 @@ import no.nav.etterlatte.beregning.grunnlag.GrunnlagMedPeriode
 import no.nav.etterlatte.beregning.grunnlag.InstitusjonsoppholdBeregningsgrunnlag
 import no.nav.etterlatte.beregning.grunnlag.Reduksjon
 import no.nav.etterlatte.beregning.regler.bruker
+import no.nav.etterlatte.beregning.regler.toGrunnlag
 import no.nav.etterlatte.klienter.GrunnlagKlientImpl
 import no.nav.etterlatte.klienter.TrygdetidKlient
 import no.nav.etterlatte.klienter.VilkaarsvurderingKlient
+import no.nav.etterlatte.libs.common.IntBroek
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
+import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
 import no.nav.etterlatte.libs.common.beregning.Beregningstype
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
@@ -52,7 +55,7 @@ internal class BeregnOmstillingsstoenadServiceTest {
     }
 
     @Test
-    fun `skal beregne omstillingsstoenad foerstegangsbehandling`() {
+    fun `skal beregne omstillingsstoenad foerstegangsbehandling - nasjonal`() {
         val behandling = mockBehandling(BehandlingType.FØRSTEGANGSBEHANDLING)
         val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
         val trygdetid = mockTrygdetid(behandling.id)
@@ -65,6 +68,84 @@ internal class BeregnOmstillingsstoenadServiceTest {
                 any(),
             )
         } returns omstillingstoenadBeregningsGrunnlag(behandling.id)
+
+        runBlocking {
+            val beregning = beregnOmstillingsstoenadService.beregn(behandling, bruker)
+
+            with(beregning) {
+                beregningId shouldNotBe null
+                behandlingId shouldBe behandling.id
+                type shouldBe Beregningstype.OMS
+                beregnetDato shouldNotBe null
+                grunnlagMetadata shouldBe grunnlag.metadata
+                beregningsperioder.size shouldBeGreaterThanOrEqual 2
+                with(beregningsperioder.first()) {
+                    utbetaltBeloep shouldBe OMS_BELOEP_JAN_23
+                    datoFOM shouldBe behandling.virkningstidspunkt?.dato
+                    datoTOM shouldBe YearMonth.of(2023, Month.APRIL)
+                    grunnbelopMnd shouldBe GRUNNBELOEP_JAN_23
+                    soeskenFlokk shouldBe null
+                    this.trygdetid shouldBe TRYGDETID_40_AAR
+                    regelResultat shouldNotBe null
+                    regelVersjon shouldNotBe null
+                }
+            }
+        }
+    }
+
+    @Test
+    fun `skal beregne omstillingsstoenad foerstegangsbehandling - prorata`() {
+        val behandling = mockBehandling(BehandlingType.FØRSTEGANGSBEHANDLING)
+        val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
+        val trygdetid = mockTrygdetid(behandling.id)
+
+        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
+        coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns trygdetid
+        coEvery {
+            beregningsGrunnlagService.hentOmstillingstoenadBeregningsGrunnlag(
+                any(),
+                any(),
+            )
+        } returns omstillingstoenadBeregningsGrunnlag(behandling.id, BeregningsMetode.PRORATA)
+
+        runBlocking {
+            val beregning = beregnOmstillingsstoenadService.beregn(behandling, bruker)
+
+            with(beregning) {
+                beregningId shouldNotBe null
+                behandlingId shouldBe behandling.id
+                type shouldBe Beregningstype.OMS
+                beregnetDato shouldNotBe null
+                grunnlagMetadata shouldBe grunnlag.metadata
+                beregningsperioder.size shouldBeGreaterThanOrEqual 2
+                with(beregningsperioder.first()) {
+                    utbetaltBeloep shouldBe OMS_BELOEP_JAN_23_PRORATA
+                    datoFOM shouldBe behandling.virkningstidspunkt?.dato
+                    datoTOM shouldBe YearMonth.of(2023, Month.APRIL)
+                    grunnbelopMnd shouldBe GRUNNBELOEP_JAN_23
+                    soeskenFlokk shouldBe null
+                    this.trygdetid shouldBe PRORATA_TRYGDETID_30_AAR / 2
+                    regelResultat shouldNotBe null
+                    regelVersjon shouldNotBe null
+                }
+            }
+        }
+    }
+
+    @Test
+    fun `skal beregne omstillingsstoenad foerstegangsbehandling - best`() {
+        val behandling = mockBehandling(BehandlingType.FØRSTEGANGSBEHANDLING)
+        val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
+        val trygdetid = mockTrygdetid(behandling.id)
+
+        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
+        coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns trygdetid
+        coEvery {
+            beregningsGrunnlagService.hentOmstillingstoenadBeregningsGrunnlag(
+                any(),
+                any(),
+            )
+        } returns omstillingstoenadBeregningsGrunnlag(behandling.id, BeregningsMetode.BEST)
 
         runBlocking {
             val beregning = beregnOmstillingsstoenadService.beregn(behandling, bruker)
@@ -271,6 +352,8 @@ internal class BeregnOmstillingsstoenadServiceTest {
                     every { resultat } returns
                         mockk {
                             every { samletTrygdetidNorge } returns TRYGDETID_40_AAR
+                            every { samletTrygdetidTeoretisk } returns PRORATA_TRYGDETID_30_AAR
+                            every { prorataBroek } returns PRORATA_BROEK
                         }
                     every { tidspunkt } returns Tidspunkt.now()
                 }
@@ -286,25 +369,31 @@ internal class BeregnOmstillingsstoenadServiceTest {
     companion object {
         val VIRKNINGSTIDSPUNKT_JAN_23: YearMonth = YearMonth.of(2023, 1)
         const val TRYGDETID_40_AAR: Int = 40
+        const val PRORATA_TRYGDETID_30_AAR: Int = 30
+        val PRORATA_BROEK: IntBroek = IntBroek(1, 2)
         const val GRUNNBELOEP_JAN_23: Int = 9290
         const val OMS_BELOEP_JAN_23: Int = 20902
+        const val OMS_BELOEP_JAN_23_PRORATA: Int = 7838
     }
 
-    private fun omstillingstoenadBeregningsGrunnlag(behandlingId: UUID) =
-        BeregningsGrunnlagOMS(
-            behandlingId,
-            mockk {
-                every { ident } returns "Z123456"
-                every { tidspunkt } returns Tidspunkt.now()
-                every { type } returns ""
-            },
-            institusjonsoppholdBeregningsgrunnlag =
-                listOf(
-                    GrunnlagMedPeriode(
-                        fom = LocalDate.of(2022, 8, 1),
-                        tom = null,
-                        data = InstitusjonsoppholdBeregningsgrunnlag(Reduksjon.NEI_KORT_OPPHOLD),
-                    ),
+    private fun omstillingstoenadBeregningsGrunnlag(
+        behandlingId: UUID,
+        beregningsMetode: BeregningsMetode = BeregningsMetode.NASJONAL,
+    ) = BeregningsGrunnlagOMS(
+        behandlingId,
+        mockk {
+            every { ident } returns "Z123456"
+            every { tidspunkt } returns Tidspunkt.now()
+            every { type } returns ""
+        },
+        institusjonsoppholdBeregningsgrunnlag =
+            listOf(
+                GrunnlagMedPeriode(
+                    fom = LocalDate.of(2022, 8, 1),
+                    tom = null,
+                    data = InstitusjonsoppholdBeregningsgrunnlag(Reduksjon.NEI_KORT_OPPHOLD),
                 ),
-        )
+            ),
+        beregningsMetode = beregningsMetode.toGrunnlag(),
+    )
 }

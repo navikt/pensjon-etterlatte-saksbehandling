@@ -18,6 +18,7 @@ import no.nav.etterlatte.beregning.grunnlag.InstitusjonsoppholdBeregningsgrunnla
 import no.nav.etterlatte.beregning.grunnlag.Reduksjon
 import no.nav.etterlatte.beregning.regler.MAKS_TRYGDETID
 import no.nav.etterlatte.beregning.regler.bruker
+import no.nav.etterlatte.beregning.regler.toGrunnlag
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnbeloep.GrunnbeloepRepository.hentGjeldendeGrunnbeloep
 import no.nav.etterlatte.klienter.GrunnlagKlientImpl
@@ -25,6 +26,7 @@ import no.nav.etterlatte.klienter.TrygdetidKlient
 import no.nav.etterlatte.klienter.VilkaarsvurderingKlient
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
+import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
 import no.nav.etterlatte.libs.common.beregning.Beregningstype
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.Opplysning
@@ -185,6 +187,7 @@ class ReguleringTest {
                     data = InstitusjonsoppholdBeregningsgrunnlag(Reduksjon.NEI_KORT_OPPHOLD),
                 ),
             ),
+        beregningsMetode = BeregningsMetode.NASJONAL.toGrunnlag(),
     )
 
     private fun mockBehandling(virk: YearMonth = BeregnBarnepensjonServiceTest.VIRKNINGSTIDSPUNKT_JAN_23) =

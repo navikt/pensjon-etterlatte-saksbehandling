@@ -5,6 +5,7 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.beregning.grunnlag.BarnepensjonBeregningsGrunnlag
 import no.nav.etterlatte.beregning.grunnlag.GrunnlagMedPeriode
 import no.nav.etterlatte.libs.common.beregning.BeregningDTO
+import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.etterlatte.rapidsandrivers.migrering.MigreringRequest
@@ -62,7 +63,8 @@ private fun verifiserNyBeregning(
     migreringRequest: MigreringRequest,
 ) {
     check(beregning.beregningsperioder.size == 1) {
-        "Migrerte saker skal kun opprette en beregningperiode, men oppretta ${beregning.beregningsperioder.size}"
+        "Migrerte saker skal kun opprette en beregningperiode, men oppretta ${beregning.beregningsperioder.size}: " +
+            beregning.beregningsperioder.map { Periode(it.datoFOM, it.datoTOM) }.joinToString(", ")
     }
 
     with(beregning.beregningsperioder.first()) {

@@ -1,6 +1,5 @@
 import { Alert, Button } from '@navikt/ds-react'
 import { useState } from 'react'
-import { attesterVedtak } from '~shared/api/behandling'
 import { BeslutningWrapper } from '../styled'
 import { GeneriskModal } from '~shared/modal/modal'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
@@ -9,6 +8,7 @@ import { behandlingSkalSendeBrev } from '~components/behandling/felles/utils'
 import { ferdigstillVedtaksbrev } from '~shared/api/brev'
 import { isPending, useApiCall } from '~shared/hooks/useApiCall'
 import { FlexRow } from '~shared/styled'
+import { attesterVedtak } from '~shared/api/vedtaksvurdering'
 
 export const AttesterYtelse = ({ behandling, kommentar }: { behandling: IDetaljertBehandling; kommentar: string }) => {
   const navigate = useNavigate()

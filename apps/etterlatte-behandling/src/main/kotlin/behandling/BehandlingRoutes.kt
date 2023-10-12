@@ -134,7 +134,7 @@ internal fun Route.behandlingRoutes(
         }
 
         post("/avbryt") {
-            behandlingService.avbrytBehandling(behandlingsId, brukerTokenInfo)
+            inTransaction { behandlingService.avbrytBehandling(behandlingsId, brukerTokenInfo) }
             call.respond(HttpStatusCode.OK)
         }
 

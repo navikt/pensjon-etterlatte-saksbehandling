@@ -75,7 +75,7 @@ class FordelerService(
                 "Fikk en familierelasjon som mangler ident fra PDL. Disse tilfellene støtter vi ikke per nå." +
                     " Se sikkerlogg for detaljer",
             )
-            sikkerLogg.info("Fikk en søknad med en familierelasjon som manglet ident", e)
+            sikkerLogg.info("Søknad ${event.soeknadId} har en familierelasjon som mangler ident", e)
 
             if (featureToggleService.isEnabled(FordelerFeatureToggle.ManuellJournalfoering, false)) {
                 FordelerResultat.TrengerManuellJournalfoering(e.message)
@@ -87,7 +87,10 @@ class FordelerService(
         }
     }
 
-    private fun fordelSoeknad(event: FordelerEvent, tillatAlleScenarier: Boolean): Fordeling {
+    private fun fordelSoeknad(
+        event: FordelerEvent,
+        tillatAlleScenarier: Boolean,
+    ): Fordeling {
         val eksisterendeFordeling = finnEksisterendeFordeling(event.soeknadId)
         logger.debug("Eksisterende fordeling: ${eksisterendeFordeling?.fordeltTil?.name}")
         if (eksisterendeFordeling == null) {
@@ -112,7 +115,10 @@ class FordelerService(
         fordelerRepository.lagreFordeling(FordeltTransient(soeknadId, fordeltTil.name, kriterier.map { it.name }))
     }
 
-    private fun nyFordeling(event: FordelerEvent, tillatAlleScenarier: Boolean): Fordeling =
+    private fun nyFordeling(
+        event: FordelerEvent,
+        tillatAlleScenarier: Boolean,
+    ): Fordeling =
         runBlocking {
             val soeknad: Barnepensjon = event.soeknad
             val barn = pdlTjenesterKlient.hentPerson(hentBarnRequest(soeknad))
@@ -198,6 +204,10 @@ class FordelerService(
         return runBlocking {
             behandlingKlient.hentSak(fnr, barnepensjon, gradering)
         }
+    }
+
+    fun opprettOppgave(sakId: Long) {
+        return runBlocking { behandlingKlient.opprettOppgave(sakId) }
     }
 }
 

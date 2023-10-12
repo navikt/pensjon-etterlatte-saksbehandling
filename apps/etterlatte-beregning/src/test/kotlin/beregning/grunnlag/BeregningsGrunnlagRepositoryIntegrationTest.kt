@@ -7,6 +7,8 @@ import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlagRepository
 import no.nav.etterlatte.beregning.grunnlag.GrunnlagMedPeriode
 import no.nav.etterlatte.beregning.grunnlag.InstitusjonsoppholdBeregningsgrunnlag
 import no.nav.etterlatte.beregning.grunnlag.Reduksjon
+import no.nav.etterlatte.beregning.regler.toGrunnlag
+import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeskenMedIBeregning
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
@@ -80,6 +82,7 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest {
                     data = InstitusjonsoppholdBeregningsgrunnlag(Reduksjon.NEI_KORT_OPPHOLD),
                 ),
             )
+        val beregningsMetode = BeregningsMetode.NASJONAL.toGrunnlag()
 
         repository.lagre(
             BeregningsGrunnlag(
@@ -90,6 +93,7 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest {
                 ),
                 soeskenMedIBeregning,
                 institusjonsoppholdBeregningsgrunnlag,
+                beregningsMetode,
             ),
         )
 
@@ -99,6 +103,7 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest {
 
         assertEquals(soeskenMedIBeregning, result?.soeskenMedIBeregning)
         assertEquals(institusjonsoppholdBeregningsgrunnlag, result?.institusjonsoppholdBeregningsgrunnlag)
+        assertEquals(beregningsMetode, result?.beregningsMetode)
     }
 
     @Test
@@ -113,6 +118,7 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest {
                     data = InstitusjonsoppholdBeregningsgrunnlag(Reduksjon.NEI_KORT_OPPHOLD),
                 ),
             )
+        val beregningsMetode = BeregningsMetode.NASJONAL.toGrunnlag()
 
         repository.lagreOMS(
             BeregningsGrunnlagOMS(
@@ -122,6 +128,7 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest {
                     Tidspunkt.now(),
                 ),
                 institusjonsoppholdBeregningsgrunnlag,
+                beregningsMetode,
             ),
         )
 
@@ -130,6 +137,7 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest {
         assertNotNull(result)
 
         assertEquals(institusjonsoppholdBeregningsgrunnlag, result?.institusjonsoppholdBeregningsgrunnlag)
+        assertEquals(beregningsMetode, result?.beregningsMetode)
     }
 
     @Test
@@ -159,6 +167,8 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest {
                     data = InstitusjonsoppholdBeregningsgrunnlag(Reduksjon.JA_VANLIG),
                 ),
             )
+        val initialBeregningsMetode = BeregningsMetode.BEST.toGrunnlag()
+        val oppdatertBeregningsMetode = BeregningsMetode.PRORATA.toGrunnlag()
 
         repository.lagre(
             BeregningsGrunnlag(
@@ -169,6 +179,7 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest {
                 ),
                 initialSoeskenMedIBeregning,
                 initialInstitusjonsoppholdBeregningsgrunnlag,
+                initialBeregningsMetode,
             ),
         )
 
@@ -181,6 +192,7 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest {
                 ),
                 oppdatertSoeskenMedIBeregning,
                 oppdatertInstitusjonsoppholdBeregningsgrunnlag,
+                oppdatertBeregningsMetode,
             ),
         )
 
@@ -191,6 +203,7 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest {
         assertEquals(oppdatertSoeskenMedIBeregning, result?.soeskenMedIBeregning)
         assertEquals(oppdatertInstitusjonsoppholdBeregningsgrunnlag, result?.institusjonsoppholdBeregningsgrunnlag)
         assertEquals("Z654321", result?.kilde?.ident)
+        assertEquals(oppdatertBeregningsMetode, result?.beregningsMetode)
     }
 
     @Test
@@ -213,6 +226,8 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest {
                     data = InstitusjonsoppholdBeregningsgrunnlag(Reduksjon.JA_VANLIG),
                 ),
             )
+        val initialBeregningsMetode = BeregningsMetode.BEST.toGrunnlag()
+        val oppdatertBeregningsMetode = BeregningsMetode.PRORATA.toGrunnlag()
 
         repository.lagreOMS(
             BeregningsGrunnlagOMS(
@@ -222,6 +237,7 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest {
                     Tidspunkt.now(),
                 ),
                 initialInstitusjonsoppholdBeregningsgrunnlag,
+                initialBeregningsMetode,
             ),
         )
 
@@ -233,6 +249,7 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest {
                     Tidspunkt.now(),
                 ),
                 oppdatertInstitusjonsoppholdBeregningsgrunnlag,
+                oppdatertBeregningsMetode,
             ),
         )
 
@@ -242,10 +259,11 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest {
 
         assertEquals(oppdatertInstitusjonsoppholdBeregningsgrunnlag, result?.institusjonsoppholdBeregningsgrunnlag)
         assertEquals("Z654321", result?.kilde?.ident)
+        assertEquals(oppdatertBeregningsMetode, result?.beregningsMetode)
     }
 
     @Test
-    fun `skal håndtere at institusjonsopphold er null`() {
+    fun `skal haandtere at institusjonsopphold er null`() {
         val id = UUID.randomUUID()
 
         val oppdatertSoeskenMedIBeregning =
@@ -263,6 +281,7 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest {
                 ),
                 oppdatertSoeskenMedIBeregning,
                 emptyList(),
+                BeregningsMetode.BEST.toGrunnlag(),
             ),
         )
 

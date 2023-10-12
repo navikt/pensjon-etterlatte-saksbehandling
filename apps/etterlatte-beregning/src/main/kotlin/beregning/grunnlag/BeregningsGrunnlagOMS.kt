@@ -1,5 +1,6 @@
 package no.nav.etterlatte.beregning.grunnlag
 
+import no.nav.etterlatte.libs.common.beregning.BeregningsMetodeBeregningsgrunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import java.util.UUID
 
@@ -8,4 +9,5 @@ data class BeregningsGrunnlagOMS(
     val kilde: Grunnlagsopplysning.Saksbehandler,
     val institusjonsoppholdBeregningsgrunnlag: List<GrunnlagMedPeriode<InstitusjonsoppholdBeregningsgrunnlag>> =
         emptyList(),
+    val beregningsMetode: BeregningsMetodeBeregningsgrunnlag,
 )

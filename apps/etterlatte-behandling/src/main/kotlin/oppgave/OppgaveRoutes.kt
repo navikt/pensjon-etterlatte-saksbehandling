@@ -20,6 +20,7 @@ import no.nav.etterlatte.libs.common.behandlingsId
 import no.nav.etterlatte.libs.common.gosysOppgaveId
 import no.nav.etterlatte.libs.common.kunSaksbehandler
 import no.nav.etterlatte.libs.common.kunSystembruker
+import no.nav.etterlatte.libs.common.oppgave.NyOppgaveDto
 import no.nav.etterlatte.libs.common.oppgave.RedigerFristGosysRequest
 import no.nav.etterlatte.libs.common.oppgave.RedigerFristRequest
 import no.nav.etterlatte.libs.common.oppgave.SaksbehandlerEndringDto
@@ -37,15 +38,17 @@ internal fun Route.oppgaveRoutes(
         get {
             kunSaksbehandler {
                 call.respond(
-                    service.finnOppgaverForBruker(
-                        Kontekst.get().appUserAsSaksbehandler().saksbehandlerMedRoller,
-                    ),
+                    inTransaction {
+                        service.finnOppgaverForBruker(
+                            Kontekst.get().appUserAsSaksbehandler().saksbehandlerMedRoller,
+                        )
+                    },
                 )
             }
         }
 
         route("/sak/{$SAKID_CALL_PARAMETER}") {
-            get("oppgaver") {
+            get("/oppgaver") {
                 kunSystembruker {
                     call.respond(inTransaction { service.hentSakOgOppgaverForSak(sakId) })
                 }
@@ -55,14 +58,14 @@ internal fun Route.oppgaveRoutes(
         route("behandling/{$BEHANDLINGSID_CALL_PARAMETER}") {
             get("/hentsaksbehandler") {
                 kunSaksbehandler {
-                    val saksbehandler = service.hentSaksbehandlerForBehandling(behandlingsId)
+                    val saksbehandler = inTransaction { service.hentSaksbehandlerForBehandling(behandlingsId) }
                     call.respond(saksbehandler ?: HttpStatusCode.NoContent)
                 }
             }
 
             get("/oppgaveunderarbeid") {
                 kunSaksbehandler {
-                    val saksbehandler = service.hentSaksbehandlerForOppgaveUnderArbeid(behandlingsId)
+                    val saksbehandler = inTransaction { service.hentSaksbehandlerForOppgaveUnderArbeid(behandlingsId) }
                     call.respond(saksbehandler ?: HttpStatusCode.NoContent)
                 }
             }
@@ -91,7 +94,7 @@ internal fun Route.oppgaveRoutes(
             route("saksbehandler", HttpMethod.Delete) {
                 handle {
                     kunSaksbehandler {
-                        service.fjernSaksbehandler(oppgaveId)
+                        inTransaction { service.fjernSaksbehandler(oppgaveId) }
                         call.respond(HttpStatusCode.OK)
                     }
                 }
@@ -99,7 +102,7 @@ internal fun Route.oppgaveRoutes(
             put("frist") {
                 kunSaksbehandler {
                     val redigerFrist = call.receive<RedigerFristRequest>()
-                    service.redigerFrist(oppgaveId, redigerFrist.frist)
+                    inTransaction { service.redigerFrist(oppgaveId, redigerFrist.frist) }
                     call.respond(HttpStatusCode.OK)
                 }
             }
@@ -142,6 +145,25 @@ internal fun Route.oppgaveRoutes(
                     )
                     call.respond(HttpStatusCode.OK)
                 }
+            }
+        }
+    }
+
+    route("/oppgaver/sak/{$SAKID_CALL_PARAMETER}/oppgaver") {
+        post {
+            kunSystembruker {
+                val nyOppgaveDto = call.receive<NyOppgaveDto>()
+                call.respond(
+                    inTransaction {
+                        service.opprettNyOppgaveMedSakOgReferanse(
+                            "",
+                            sakId,
+                            nyOppgaveDto.oppgaveKilde,
+                            nyOppgaveDto.oppgaveType,
+                            nyOppgaveDto.merknad,
+                        )
+                    },
+                )
             }
         }
     }

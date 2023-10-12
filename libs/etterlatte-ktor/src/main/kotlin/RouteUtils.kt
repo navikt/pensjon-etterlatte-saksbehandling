@@ -20,6 +20,13 @@ const val OPPGAVEID_CALL_PARAMETER = "oppgaveId"
 const val KLAGEID_CALL_PARAMETER = "klageId"
 const val TILBAKEKREVINGID_CALL_PARAMETER = "tilbakekrevingId"
 const val OPPGAVEID_GOSYS_CALL_PARAMETER = "gosysOppgaveId"
+const val GENERELLBEHANDLINGID_CALL_PARAMETER = "generellbehandlingId"
+
+inline val PipelineContext<*, ApplicationCall>.generellBehandlingId: UUID
+    get() =
+        call.parameters[GENERELLBEHANDLINGID_CALL_PARAMETER]?.let { UUID.fromString(it) } ?: throw NullPointerException(
+            "Generellbehandlingid er ikke i path params",
+        )
 
 inline val PipelineContext<*, ApplicationCall>.behandlingsId: UUID
     get() =

@@ -68,7 +68,8 @@ internal class Fordeler(
         try {
             logger.info("Sjekker om soknad (${packet.soeknadId()}) er gyldig for fordeling")
 
-            when (val resultat = fordelerService.sjekkGyldighetForBehandling(packet.toFordelerEvent())) {
+            val fordelerEvent = packet.toFordelerEvent()
+            when (val resultat = fordelerService.sjekkGyldighetForBehandling(fordelerEvent)) {
                 is FordelerResultat.GyldigForBehandling -> {
                     logger.info("Soknad ${packet.soeknadId()} er gyldig for fordeling, henter sakId for Gjenny")
                     hentSakId(packet, resultat.gradering)?.let { sakIdForSoeknad ->
@@ -92,6 +93,7 @@ internal class Fordeler(
                 is FordelerResultat.TrengerManuellJournalfoering -> {
                     logger.warn("Trenger manuell journalføring: ${resultat.melding}")
                     hentSakId(packet, AdressebeskyttelseGradering.UGRADERT)?.let { sakIdForSoeknad ->
+                        fordelerService.opprettOppgave(sakIdForSoeknad)
                         context.publish(
                             packet
                                 .leggPaaSakId(sakIdForSoeknad)
@@ -125,19 +127,20 @@ internal class Fordeler(
     private fun hentSakId(
         packet: JsonMessage,
         gradering: AdressebeskyttelseGradering?,
-    ): Long? = try {
-        // Denne har ansvaret for å sette gradering
-        fordelerService.hentSakId(
-            packet[SoeknadInnsendt.fnrSoekerKey].textValue(),
-            SakType.BARNEPENSJON,
-            gradering,
-        )
-    } catch (e: ResponseException) {
-        logger.error("Avbrutt fordeling - kunne ikke hente sakId: ${e.message}")
+    ): Long? =
+        try {
+            // Denne har ansvaret for å sette gradering
+            fordelerService.hentSakId(
+                packet[SoeknadInnsendt.fnrSoekerKey].textValue(),
+                SakType.BARNEPENSJON,
+                gradering,
+            )
+        } catch (e: ResponseException) {
+            logger.error("Avbrutt fordeling - kunne ikke hente sakId: ${e.message}")
 
-        // Svelg slik at Innsendt søknad vil retry
-        null
-    }
+            // Svelg slik at Innsendt søknad vil retry
+            null
+        }
 
     private fun JsonMessage.toFordelerEvent() =
         FordelerEvent(

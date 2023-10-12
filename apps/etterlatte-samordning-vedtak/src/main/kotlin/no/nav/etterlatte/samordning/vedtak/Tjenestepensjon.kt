@@ -20,6 +20,12 @@ data class SamhandlerYtelseDto(
     val datoYtelseIverksattTom: LocalDate? = null,
 )
 
+data class Tjenestepensjonnummer(val value: String) {
+    init {
+        require(value == value.replace(Regex("[^0-9]"), ""))
+    }
+}
+
 class TjenestepensjonManglendeTilgangException(override val message: String, cause: Throwable? = null) : Exception(message, cause)
 
 class TjenestepensjonUgyldigForesporselException(override val message: String, cause: Throwable?) : Exception(message, cause)

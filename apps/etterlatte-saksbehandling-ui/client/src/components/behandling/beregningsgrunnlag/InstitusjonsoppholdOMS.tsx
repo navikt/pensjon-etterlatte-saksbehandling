@@ -73,23 +73,17 @@ const InstitusjonsoppholdOMS = (props: InstitusjonsoppholdProps) => {
             hjemler={[
               {
                 tittel: '§ 17-13.Ytelser til gjenlevende ektefelle under opphold i institusjon',
-                lenke: 'https://lovdata.no/dokument/NL/lov/1997-02-28-19/KAPITTEL_6-4#%C2%A717-13',
+                lenke: 'https://lovdata.no/lov/1997-02-28-19/§17-13',
               },
             ]}
             status={null}
           >
             <p>
-              Personer som mottar ytelser etter dette kapitlet, får ytelsene redusert etter bestemmelsene i denne
-              paragrafen under opphold i en institusjon med fri kost og losji under statlig ansvar eller tilsvarende
-              institusjon i utlandet. Ytelsene blir ikke redusert under opphold i somatiske sykehusavdelinger. Ytelser
-              etter dette kapitlet gis uten reduksjon i innleggelsesmåneden og de tre påfølgende månedene. Deretter blir
-              ytelsene redusert og skal under oppholdet utgjøre 45 prosent av grunnbeløpet. Ytelsene skal ikke reduseres
-              når vedkommende forsørger barn. Dersom vedkommende har faste og nødvendige utgifter til bolig, kan
-              arbeids- og velferdsetaten bestemme at ytelsene ikke skal reduseres eller reduseres mindre enn nevnt i
-              andre ledd. Dersom vedkommende innen tre måneder etter utskrivelsen på nytt kommer i institusjon, gis det
-              redusert ytelse fra og med måneden etter at det nye oppholdet tar til. Ytelsene skal utbetales etter
-              lovens vanlige bestemmelser fra og med utskrivingsmåneden. Ytelsen etter denne paragrafen må ikke
-              overstige den ytelsen vedkommende har rett til etter lovens vanlige bestemmelser.
+              Omstillingsstønad kan reduseres som følge av opphold i en institusjon med fri kost og losji under statlig
+              ansvar eller tilsvarende institusjon i utlandet. Regelen gjelder ikke ved opphold i somatiske
+              sykehusavdelinger. Oppholdet må vare i tre måneder i tillegg til innleggelsesmåneden for at stønaden skal
+              bli redusert. Dersom vedkommende har faste og nødvendige utgifter til bolig, skal stønaden ikke reduseres
+              eller reduseres mindre enn hovedregelen sier. Ytelsen skal ikke reduseres når etterlatte forsørger barn.
             </p>
           </LovtekstMedLenke>
           <Insthendelser sakid={behandling.sakId} />

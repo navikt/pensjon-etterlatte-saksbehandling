@@ -149,7 +149,7 @@ class KlageServiceImpl(
                         omgjoering = utfall.omgjoering,
                         innstilling =
                             InnstillingTilKabal(
-                                lovhjemmel = utfall.innstilling.lovhjemmel,
+                                lovhjemmel = enumValueOf(utfall.innstilling.lovhjemmel),
                                 tekst = utfall.innstilling.tekst,
                                 brev = brevForInnstilling(klage, saksbehandler),
                             ),
@@ -160,7 +160,7 @@ class KlageServiceImpl(
                     KlageUtfall.StadfesteVedtak(
                         innstilling =
                             InnstillingTilKabal(
-                                lovhjemmel = utfall.innstilling.lovhjemmel,
+                                lovhjemmel = enumValueOf(utfall.innstilling.lovhjemmel),
                                 tekst = utfall.innstilling.tekst,
                                 brev = brevForInnstilling(klage, saksbehandler),
                             ),
@@ -309,9 +309,9 @@ class KlageServiceImpl(
     ): Pair<Tidspunkt, String> {
         // TODO: Her bør vi ha noe error recovery: Hent status på brevet, og forsøk en resume fra der.
         brevApiKlient.ferdigstillBrev(sakId, brevId, saksbehandler)
-        val journalpostIdJournalfoering = brevApiKlient.journalfoerBrev(sakId, brevId, saksbehandler)
+        val journalpostIdJournalfoering = brevApiKlient.journalfoerBrev(sakId, brevId, saksbehandler).journalpostId
         val tidspunktJournalfoert = Tidspunkt.now()
-        val bestillingsIdDistribuering = brevApiKlient.distribuerBrev(sakId, brevId, saksbehandler)
+        val bestillingsIdDistribuering = brevApiKlient.distribuerBrev(sakId, brevId, saksbehandler).bestillingsId
         logger.info(
             "Distribusjon av innstillingsbrevet med id=$brevId bestilt til klagen i sak med sakId=$sakId, " +
                 "med bestillingsId $bestillingsIdDistribuering",

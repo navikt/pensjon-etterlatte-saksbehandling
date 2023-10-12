@@ -31,12 +31,7 @@ import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
-import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.Person
-import no.nav.etterlatte.libs.sporingslogg.Decision
-import no.nav.etterlatte.libs.sporingslogg.HttpMethod
-import no.nav.etterlatte.libs.sporingslogg.Sporingslogg
-import no.nav.etterlatte.libs.sporingslogg.Sporingsrequest
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.tilgangsstyring.filterForEnheter
 import no.nav.etterlatte.token.BrukerTokenInfo
@@ -119,7 +114,7 @@ internal class BehandlingServiceImpl(
     private val grunnlagsendringshendelseDao: GrunnlagsendringshendelseDao,
     private val hendelseDao: HendelseDao,
     private val grunnlagKlient: GrunnlagKlient,
-    private val sporingslogg: Sporingslogg,
+    private val behandlingRequestLogger: BehandlingRequestLogger,
     private val featureToggleService: FeatureToggleService,
     private val kommerBarnetTilGodeDao: KommerBarnetTilGodeDao,
     private val oppgaveService: OppgaveService,
@@ -152,38 +147,36 @@ internal class BehandlingServiceImpl(
         behandlingId: UUID,
         saksbehandler: BrukerTokenInfo,
     ) {
-        inTransaction {
-            val behandling =
-                hentBehandlingForId(behandlingId)
-                    ?: throw BehandlingNotFoundException("Fant ikke behandling med id=$behandlingId som skulle avbrytes")
-            if (!behandling.status.kanAvbrytes()) {
-                throw IllegalStateException("Kan ikke avbryte en behandling med status ${behandling.status}")
-            }
-
-            behandlingDao.avbrytBehandling(behandlingId).also {
-                val hendelserKnyttetTilBehandling =
-                    grunnlagsendringshendelseDao.hentGrunnlagsendringshendelseSomErTattMedIBehandling(behandlingId)
-                oppgaveService.avbrytOppgaveUnderBehandling(behandlingId.toString(), saksbehandler)
-
-                hendelserKnyttetTilBehandling.forEach { hendelse ->
-                    oppgaveService.opprettNyOppgaveMedSakOgReferanse(
-                        referanse = hendelse.id.toString(),
-                        sakId = behandling.sak.id,
-                        oppgaveKilde = OppgaveKilde.HENDELSE,
-                        oppgaveType = OppgaveType.VURDER_KONSEKVENS,
-                        merknad = hendelse.beskrivelse(),
-                    )
-                }
-
-                hendelseDao.behandlingAvbrutt(behandling, saksbehandler.ident())
-                grunnlagsendringshendelseDao.kobleGrunnlagsendringshendelserFraBehandlingId(behandlingId)
-            }
-            val persongalleri = runBlocking { grunnlagKlient.hentPersongalleri(behandling.sak.id, saksbehandler) }
-            behandlingHendelser.sendMeldingForHendelseMedDetaljertBehandling(
-                behandling.toStatistikkBehandling(persongalleri = persongalleri!!.opplysning),
-                BehandlingHendelseType.AVBRUTT,
-            )
+        val behandling =
+            hentBehandlingForId(behandlingId)
+                ?: throw BehandlingNotFoundException("Fant ikke behandling med id=$behandlingId som skulle avbrytes")
+        if (!behandling.status.kanAvbrytes()) {
+            throw IllegalStateException("Kan ikke avbryte en behandling med status ${behandling.status}")
         }
+
+        behandlingDao.avbrytBehandling(behandlingId).also {
+            val hendelserKnyttetTilBehandling =
+                grunnlagsendringshendelseDao.hentGrunnlagsendringshendelseSomErTattMedIBehandling(behandlingId)
+            oppgaveService.avbrytOppgaveUnderBehandling(behandlingId.toString(), saksbehandler)
+
+            hendelserKnyttetTilBehandling.forEach { hendelse ->
+                oppgaveService.opprettNyOppgaveMedSakOgReferanse(
+                    referanse = hendelse.id.toString(),
+                    sakId = behandling.sak.id,
+                    oppgaveKilde = OppgaveKilde.HENDELSE,
+                    oppgaveType = OppgaveType.VURDER_KONSEKVENS,
+                    merknad = hendelse.beskrivelse(),
+                )
+            }
+
+            hendelseDao.behandlingAvbrutt(behandling, saksbehandler.ident())
+            grunnlagsendringshendelseDao.kobleGrunnlagsendringshendelserFraBehandlingId(behandlingId)
+        }
+        val persongalleri = runBlocking { grunnlagKlient.hentPersongalleri(behandling.sak.id, saksbehandler) }
+        behandlingHendelser.sendMeldingForHendelseMedDetaljertBehandling(
+            behandling.toStatistikkBehandling(persongalleri = persongalleri!!.opplysning),
+            BehandlingHendelseType.AVBRUTT,
+        )
     }
 
     override suspend fun hentStatistikkBehandling(
@@ -219,7 +212,8 @@ internal class BehandlingServiceImpl(
         brukerTokenInfo: BrukerTokenInfo,
         opplysningstype: Opplysningstype,
     ): BehandlingMedGrunnlagsopplysninger<Person> {
-        val behandling = requireNotNull(inTransaction { hentBehandling(behandlingId) }) { "Fant ikke behandling $behandlingId" }
+        val behandling =
+            requireNotNull(inTransaction { hentBehandling(behandlingId) }) { "Fant ikke behandling $behandlingId" }
         val personopplysning = grunnlagKlient.finnPersonOpplysning(behandling.sak.id, opplysningstype, brukerTokenInfo)
 
         return BehandlingMedGrunnlagsopplysninger(
@@ -227,7 +221,7 @@ internal class BehandlingServiceImpl(
             soeknadMottattDato = behandling.mottattDato(),
             personopplysning = personopplysning,
         ).also {
-            personopplysning?.fnr?.let { loggRequest(brukerTokenInfo, it) }
+            personopplysning?.fnr?.let { behandlingRequestLogger.loggRequest(brukerTokenInfo, it, "behandling") }
         }
     }
 
@@ -334,26 +328,11 @@ internal class BehandlingServiceImpl(
                 begrunnelse = behandling.begrunnelse(),
                 etterbetaling = inTransaction { etterbetalingService.hentEtterbetaling(behandlingId) },
             ).also {
-                gjenlevende.await()?.fnr?.let { loggRequest(brukerTokenInfo, it) }
-                soeker.await()?.fnr?.let { loggRequest(brukerTokenInfo, it) }
+                gjenlevende.await()?.fnr?.let { behandlingRequestLogger.loggRequest(brukerTokenInfo, it, "behandling") }
+                soeker.await()?.fnr?.let { behandlingRequestLogger.loggRequest(brukerTokenInfo, it, "behandling") }
             }
         }
     }
-
-    private fun loggRequest(
-        brukerTokenInfo: BrukerTokenInfo,
-        fnr: Folkeregisteridentifikator,
-    ) = sporingslogg.logg(
-        Sporingsrequest(
-            kallendeApplikasjon = "behandling",
-            oppdateringstype = HttpMethod.GET,
-            brukerId = brukerTokenInfo.ident(),
-            hvemBlirSlaattOpp = fnr.value,
-            endepunkt = "behandling",
-            resultat = Decision.Permit,
-            melding = "Hent behandling var vellykka",
-        ),
-    )
 
     override fun registrerVedtakHendelse(
         behandlingId: UUID,

@@ -1,9 +1,10 @@
 import { Button } from '@navikt/ds-react'
 import { useState } from 'react'
 import { GeneriskModal } from '~shared/modal/modal'
-import { hentBehandling, underkjennVedtak } from '~shared/api/behandling'
+import { hentBehandling } from '~shared/api/behandling'
 import { useNavigate } from 'react-router'
 import { isPending, useApiCall } from '~shared/hooks/useApiCall'
+import { underkjennVedtak } from '~shared/api/vedtaksvurdering'
 
 type Props = {
   behandlingId: string

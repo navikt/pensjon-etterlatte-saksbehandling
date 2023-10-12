@@ -66,12 +66,17 @@ class GenerellBehandlingService(
         generellBehandling: GenerellBehandling,
         saksbehandler: Saksbehandler,
     ) {
+        val hentetBehandling = hentBehandlingMedId(generellBehandling.id)
+        require(hentetBehandling !== null) { "Behandlingen må finnes, fant ikke id: ${generellBehandling.id}" }
+        check(hentetBehandling!!.status == GenerellBehandling.Status.OPPRETTET) {
+            "Behandlingen må ha status opprettet, hadde ${generellBehandling.status}"
+        }
         when (generellBehandling.innhold) {
             is Innhold.Utland -> validerUtland(generellBehandling.innhold as Innhold.Utland)
             is Innhold.Annen -> throw NotImplementedError("Ikke implementert")
             null -> throw NotImplementedError("Ikke implementert")
         }
-        oppdaterBehandling(generellBehandling)
+        oppdaterBehandling(generellBehandling.copy(status = GenerellBehandling.Status.FATTET))
         oppgaveService.ferdigStillOppgaveUnderBehandling(generellBehandling.id.toString(), saksbehandler)
         oppgaveService.opprettNyOppgaveMedSakOgReferanse(
             generellBehandling.id.toString(),
@@ -80,6 +85,20 @@ class GenerellBehandlingService(
             OppgaveType.ATTESTERING,
             merknad = "Attestering av generell behandling type ${generellBehandling.type.name}",
         )
+    }
+
+    fun attester(
+        generellbehandlingId: UUID,
+        saksbehandler: Saksbehandler,
+    ) {
+        val hentetBehandling = hentBehandlingMedId(generellbehandlingId)
+        require(hentetBehandling !== null) { "Behandlingen må finnes, fant ikke id: $generellbehandlingId" }
+        require(hentetBehandling?.status === GenerellBehandling.Status.FATTET) {
+            "Behandling må ha status FATTET, hadde: ${hentetBehandling?.status}"
+        }
+
+        oppdaterBehandling(hentetBehandling!!.copy(status = GenerellBehandling.Status.ATTESTERT))
+        oppgaveService.ferdigStillOppgaveUnderBehandling(generellbehandlingId.toString(), saksbehandler)
     }
 
     private fun validerUtland(innhold: Innhold.Utland) {

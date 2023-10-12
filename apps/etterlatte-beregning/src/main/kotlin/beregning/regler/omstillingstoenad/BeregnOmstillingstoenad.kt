@@ -3,6 +3,7 @@ package no.nav.etterlatte.beregning.regler.omstillingstoenad
 import no.nav.etterlatte.beregning.grunnlag.InstitusjonsoppholdBeregningsgrunnlag
 import no.nav.etterlatte.beregning.regler.omstillingstoenad.sats.omstillingstoenadSatsRegel
 import no.nav.etterlatte.beregning.regler.omstillingstoenad.trygdetidsfaktor.trygdetidsFaktor
+import no.nav.etterlatte.libs.common.beregning.SamletTrygdetidMedBeregningsMetode
 import no.nav.etterlatte.libs.regler.FaktumNode
 import no.nav.etterlatte.libs.regler.PeriodisertGrunnlag
 import no.nav.etterlatte.libs.regler.RegelMeta
@@ -10,10 +11,9 @@ import no.nav.etterlatte.libs.regler.RegelReferanse
 import no.nav.etterlatte.libs.regler.benytter
 import no.nav.etterlatte.libs.regler.med
 import no.nav.etterlatte.libs.regler.og
-import no.nav.etterlatte.regler.Beregningstall
 import java.time.LocalDate
 
-data class Avdoed(val trygdetid: Beregningstall)
+data class Avdoed(val trygdetid: SamletTrygdetidMedBeregningsMetode)
 
 data class PeriodisertOmstillingstoenadGrunnlag(
     val avdoed: PeriodisertGrunnlag<FaktumNode<Avdoed>>,

@@ -11,6 +11,8 @@ import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { Border, InnholdPadding } from '~components/behandling/soeknadsoversikt/styled'
 import { HeadingWrapper } from '~components/person/SakOversikt'
 import {
+  BP_INSTITUSJONSOPPHOLD_BESKRIVELSE,
+  BP_INSTITUSJONSOPPHOLD_HJEMLER,
   BP_OPPHOER_BESKRIVELSE,
   BP_OPPHOER_HJEMLER,
   BP_REVURDERING_BESKRIVELSE,
@@ -19,12 +21,12 @@ import {
   BP_REVURDERING_YRKESSKADE_HJEMLER,
   OMS_INNTEKTSENDRING_BESKRIVELSE,
   OMS_INNTEKTSENDRING_HJEMLER,
+  OMS_INST_HJEMLER_VIRK,
+  OMS_INST_VIRK_BESKRIVELSE,
   OMS_OPPHOER_BESKRIVELSE,
   OMS_OPPHOER_HJEMLER,
   OMS_REVURDERING_BESKRIVELSE,
   OMS_REVURDERING_HJEMLER,
-  OMS_INST_HJEMLER_VIRK,
-  OMS_INST_VIRK_BESKRIVELSE,
 } from '~components/behandling/soeknadsoversikt/soeknadoversikt/virkningstidspunkt/utils'
 import { SakType } from '~shared/types/sak'
 import { erOpphoer, Revurderingsaarsak, tekstRevurderingsaarsak } from '~shared/types/Revurderingsaarsak'
@@ -68,6 +70,9 @@ const hjemlerOgBeskrivelseBarnepensjon = (revurderingsaarsak: Revurderingsaarsak
       return [BP_OPPHOER_HJEMLER, BP_OPPHOER_BESKRIVELSE]
     case Revurderingsaarsak.YRKESSKADE:
       return [BP_REVURDERING_YRKESSKADE_HJEMLER, BP_REVURDERING_YRKESSKADE_BESKRIVELSE]
+    case Revurderingsaarsak.INSTITUSJONSOPPHOLD:
+    case Revurderingsaarsak.FENGSELSOPPHOLD: //TODO: kanskje Revurderingsaarsak.UT_AV_FENGSEL: men ikke i bruk nå..
+      return [BP_INSTITUSJONSOPPHOLD_HJEMLER, BP_INSTITUSJONSOPPHOLD_BESKRIVELSE]
     default:
       return [BP_REVURDERING_HJEMLER, BP_REVURDERING_BESKRIVELSE]
   }

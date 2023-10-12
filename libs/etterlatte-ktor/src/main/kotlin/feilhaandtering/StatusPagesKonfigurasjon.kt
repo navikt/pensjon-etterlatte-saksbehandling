@@ -17,8 +17,12 @@ data class ExceptionResponse(
 )
 
 class StatusPagesKonfigurasjon(private val sikkerLogg: Logger) {
-    private val statusCodes4xx = HttpStatusCode.allStatusCodes.filter { it.value in 400..499 }.toTypedArray()
-    private val statusCodes5xx = HttpStatusCode.allStatusCodes.filter { it.value in 500..599 }.toTypedArray()
+    // Håndteringen på statuscodes er risky å ta med i første omgang
+    // HttpStatusCode.allStatusCodes.filter { it.value in 400..499 }.toTypedArray()
+    private val statusCodes4xx = emptyArray<HttpStatusCode>()
+
+    // HttpStatusCode.allStatusCodes.filter { it.value in 500..599 }.toTypedArray()
+    private val statusCodes5xx = emptyArray<HttpStatusCode>()
 
     val config: StatusPagesConfig.() -> Unit = {
         exception<Throwable> { call, cause ->

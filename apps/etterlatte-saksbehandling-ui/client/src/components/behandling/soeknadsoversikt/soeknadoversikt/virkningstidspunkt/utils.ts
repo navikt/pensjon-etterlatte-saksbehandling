@@ -21,6 +21,19 @@ export const BP_REVURDERING_HJEMLER: Array<Hjemmel> = [
   },
 ]
 
+export const BP_INSTITUSJONSOPPHOLD_HJEMLER: Array<Hjemmel> = [
+  {
+    tittel: '§ 18-8.Barnepensjon under opphold i institusjon',
+    lenke: 'https://lovdata.no/dokument/NL/lov/1997-02-28-19/KAPITTEL_6-6#%C2%A718-8',
+  },
+]
+
+export const BP_INSTITUSJONSOPPHOLD_BESKRIVELSE =
+  '              Barnepensjon gis uten reduksjon i innleggelsesmåneden og de tre påfølgende månedene. Deretter kan stønaden\n' +
+  '              bli redusert. Blir man innlagt igjen innen tre måneder etter utskrivelsen skal stønaden reduseres fra\n' +
+  '              måneden etter innleggelse. Barnepensjon gis uten reduksjon for institusjonsopphold f.o.m.\n' +
+  '              utskrivingsmåneden.'
+
 export const BP_OPPHOER_HJEMLER: Array<Hjemmel> = [
   {
     lenke: 'https://lovdata.no/lov/1997-02-28-19/§22-12',

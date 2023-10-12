@@ -21,6 +21,7 @@ import {
 import { Table } from '@navikt/ds-react'
 import InstitusjonsoppholdTableWrapper from '~components/behandling/beregningsgrunnlag/InstitusjonsoppholdTableWrapper'
 import styled from 'styled-components'
+import { BP_INSTITUSJONSOPPHOLD_HJEMLER } from '~components/behandling/soeknadsoversikt/soeknadoversikt/virkningstidspunkt/utils'
 
 const ReadMoreMarginBottom = styled(ReadMore)`
   margin-bottom: 1rem;
@@ -74,21 +75,13 @@ const InstitusjonsoppholdBP = (props: InstitusjonsoppholdProps) => {
         behandling.beregningsGrunnlag?.institusjonsopphold?.length > 0) ||
       behandles ? (
         <>
-          <LovtekstMedLenke
-            tittel="Institusjonsopphold"
-            hjemler={[
-              {
-                tittel: '§ 18-8.Barnepensjon under opphold i institusjon',
-                lenke: 'https://lovdata.no/dokument/NL/lov/1997-02-28-19/KAPITTEL_6-6#%C2%A718-8',
-              },
-            ]}
-            status={null}
-          >
+          <LovtekstMedLenke tittel="Institusjonsopphold" hjemler={BP_INSTITUSJONSOPPHOLD_HJEMLER} status={null}>
             <p>
-              Barnepensjon gis uten reduksjon i innleggelsesmåneden og de tre påfølgende månedene. Deretter kan stønaden
-              bli redusert. Blir man innlagt igjen innen tre måneder etter utskrivelsen skal stønaden reduseres fra
-              måneden etter innleggelse. Barnepensjon gis uten reduksjon for institusjonsopphold f.o.m.
-              utskrivingsmåneden.
+              Barnepensjonen skal reduseres under opphold i en institusjon med fri kost og losji under statlig ansvar
+              eller tilsvarende institusjon i utlandet. Regelen gjelder ikke ved opphold i somatiske sykehusavdelinger.
+              Oppholdet må vare i tre måneder i tillegg til innleggelsesmåneden for at barnepensjonen skal bli redusert.
+              Dersom barnet har faste og nødvendige utgifter til bolig, kan arbeids- og velferdsetaten bestemme at
+              barnepensjonen ikke skal reduseres eller reduseres mindre enn hovedregelen sier.
             </p>
           </LovtekstMedLenke>
           <Insthendelser sakid={behandling.sakId} />

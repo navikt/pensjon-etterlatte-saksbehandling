@@ -43,41 +43,46 @@ class BehandlingKlient(private val behandlingHttpClient: HttpClient, private val
             logger.info("Så en klagehendelse som har kilde EY. Sender hendelsen til behandling")
 
             val body =
-                when (klageHendelse.type) {
-                    BehandlingEventType.KLAGEBEHANDLING_AVSLUTTET ->
-                        Kabalrespons(
-                            KabalStatus.FERDIGSTILT,
-                            requireNotNull(klageHendelse.detaljer.klagebehandlingAvsluttet).utfall.tilResultat(),
-                        )
+                try {
+                    when (klageHendelse.type) {
+                        BehandlingEventType.KLAGEBEHANDLING_AVSLUTTET ->
+                            Kabalrespons(
+                                KabalStatus.FERDIGSTILT,
+                                requireNotNull(klageHendelse.detaljer.klagebehandlingAvsluttet).utfall.tilResultat(),
+                            )
 
-                    // TODO: Se på hvordan vi håndterer anke -- det burde nok sette et eget flagg
-                    //  og ikke overstyre første status
-                    BehandlingEventType.ANKEBEHANDLING_OPPRETTET ->
-                        Kabalrespons(
-                            KabalStatus.OPPRETTET,
-                            BehandlingResultat.IKKE_SATT,
-                        )
+                        // TODO: Se på hvordan vi håndterer anke -- det burde nok sette et eget flagg
+                        //  og ikke overstyre første status
+                        BehandlingEventType.ANKEBEHANDLING_OPPRETTET ->
+                            Kabalrespons(
+                                KabalStatus.OPPRETTET,
+                                BehandlingResultat.IKKE_SATT,
+                            )
 
-                    BehandlingEventType.ANKEBEHANDLING_AVSLUTTET ->
-                        Kabalrespons(
-                            KabalStatus.FERDIGSTILT,
-                            requireNotNull(klageHendelse.detaljer.ankebehandlingAvsluttet).utfall.tilResultat(),
-                        )
+                        BehandlingEventType.ANKEBEHANDLING_AVSLUTTET ->
+                            Kabalrespons(
+                                KabalStatus.FERDIGSTILT,
+                                requireNotNull(klageHendelse.detaljer.ankebehandlingAvsluttet).utfall.tilResultat(),
+                            )
 
-                    BehandlingEventType.ANKE_I_TRYGDERETTENBEHANDLING_OPPRETTET ->
-                        Kabalrespons(
-                            KabalStatus.OPPRETTET,
-                            requireNotNull(
-                                klageHendelse.detaljer.ankeITrygderettenbehandlingOpprettet,
-                            ).utfall?.tilResultat()
-                                ?: BehandlingResultat.IKKE_SATT,
-                        )
+                        BehandlingEventType.ANKE_I_TRYGDERETTENBEHANDLING_OPPRETTET ->
+                            Kabalrespons(
+                                KabalStatus.OPPRETTET,
+                                requireNotNull(
+                                    klageHendelse.detaljer.ankeITrygderettenbehandlingOpprettet,
+                                ).utfall?.tilResultat()
+                                    ?: BehandlingResultat.IKKE_SATT,
+                            )
 
-                    BehandlingEventType.BEHANDLING_FEILREGISTRERT ->
-                        Kabalrespons(
-                            KabalStatus.FERDIGSTILT,
-                            BehandlingResultat.HENLAGT,
-                        )
+                        BehandlingEventType.BEHANDLING_FEILREGISTRERT ->
+                            Kabalrespons(
+                                KabalStatus.FERDIGSTILT,
+                                BehandlingResultat.HENLAGT,
+                            )
+                    }
+                } catch (e: Exception) {
+                    logger.error("Kunne ikke mappe ut kabalresponsen riktig. vi mottok følgende: $klageHendelse")
+                    throw e
                 }
 
             behandlingHttpClient.patch(

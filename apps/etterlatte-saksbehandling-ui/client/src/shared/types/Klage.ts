@@ -375,5 +375,5 @@ const LOVHJEMLER_KUN_OMS = [
   'FTRL_17_A_8',
 ] as const
 
-export const LOVHJEMLER_BP = [...LOVHJEMLER_FELLES, ...LOVHJEMLER_KUN_BP] as const
-export const LOVHJEMLER_OMS = [...LOVHJEMLER_FELLES, ...LOVHJEMLER_KUN_OMS] as const
+export const LOVHJEMLER_BP = [...LOVHJEMLER_KUN_BP, ...LOVHJEMLER_FELLES] as const
+export const LOVHJEMLER_OMS = [...LOVHJEMLER_KUN_OMS, ...LOVHJEMLER_FELLES] as const

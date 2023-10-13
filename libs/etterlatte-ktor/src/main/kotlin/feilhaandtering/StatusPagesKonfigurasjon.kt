@@ -3,11 +3,14 @@ package no.nav.etterlatte.libs.ktor.feilhaandtering
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.log
+import io.ktor.server.plugins.BadRequestException
+import io.ktor.server.plugins.NotFoundException
 import io.ktor.server.plugins.statuspages.StatusPagesConfig
 import io.ktor.server.response.respond
 import isProd
 import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
+import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
@@ -29,6 +32,28 @@ class StatusPagesKonfigurasjon(private val sikkerLogg: Logger) {
                 is InternfeilException -> {
                     call.application.log.loggInternfeilException(cause)
                     cause.respond(call)
+                }
+
+                is NotFoundException -> {
+                    val wrapped =
+                        IkkeFunnetException(
+                            code = "NOT_FOUND",
+                            detail = cause.message ?: "Fant ikke ressursen",
+                            cause = cause,
+                        )
+                    call.application.log.loggForespoerselException(wrapped)
+                    wrapped.respond(call)
+                }
+
+                is BadRequestException -> {
+                    val wrapped =
+                        UgyldigForespoerselException(
+                            code = "BAD_REQUEST",
+                            detail = "Forespørselen er ugyldig",
+                            cause = cause,
+                        )
+                    call.application.log.loggForespoerselException(wrapped)
+                    wrapped.respond(call)
                 }
 
                 else -> {

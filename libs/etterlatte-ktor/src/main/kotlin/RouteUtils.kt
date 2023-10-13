@@ -18,7 +18,6 @@ const val BEHANDLINGSID_CALL_PARAMETER = "behandlingsid"
 const val SAKID_CALL_PARAMETER = "sakId"
 const val OPPGAVEID_CALL_PARAMETER = "oppgaveId"
 const val KLAGEID_CALL_PARAMETER = "klageId"
-const val TILBAKEKREVINGID_CALL_PARAMETER = "tilbakekrevingId"
 const val OPPGAVEID_GOSYS_CALL_PARAMETER = "gosysOppgaveId"
 const val GENERELLBEHANDLINGID_CALL_PARAMETER = "generellbehandlingId"
 
@@ -56,12 +55,6 @@ inline val PipelineContext<*, ApplicationCall>.klageId: UUID
     get() =
         requireNotNull(call.parameters[KLAGEID_CALL_PARAMETER]?.let { UUID.fromString(it) }) {
             "KlageId er ikke i path params"
-        }
-
-inline val PipelineContext<*, ApplicationCall>.tilbakekrevingId: UUID
-    get() =
-        requireNotNull(call.parameters[TILBAKEKREVINGID_CALL_PARAMETER]?.let { UUID.fromString(it) }) {
-            "TilbakekrevingId er ikke i path params"
         }
 
 suspend inline fun PipelineContext<*, ApplicationCall>.withBehandlingId(

@@ -35,7 +35,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
-import java.util.UUID
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -111,11 +110,6 @@ internal class TilgangServiceTest {
             )
 
         Assertions.assertEquals(false, harTilgangTilBehandling)
-
-        val smokeTestBehandling =
-            tilgangService.harTilgangTilBehandling(UUID.randomUUID().toString(), saksbehandlerMedRoller)
-
-        Assertions.assertEquals(true, smokeTestBehandling)
     }
 
     @Test

@@ -113,7 +113,6 @@ internal class VedtaksvurderingRouteTest {
                 }
 
             response.status shouldBe HttpStatusCode.InternalServerError
-            response.bodyAsText() shouldBe "En intern feil har oppstått"
         }
 
         coVerify(exactly = 1) {

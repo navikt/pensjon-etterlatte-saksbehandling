@@ -11,8 +11,8 @@ import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.innsendtsoeknad.barnepensjon.Barnepensjon
 import no.nav.etterlatte.libs.common.innsendtsoeknad.common.PersonType
+import no.nav.etterlatte.libs.common.pdl.IngenIdentFamilierelasjonException
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
-import no.nav.etterlatte.libs.common.person.FamilieRelasjonManglerIdent
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.HentPersonRequest
@@ -70,7 +70,7 @@ class FordelerService(
                     Vedtaksloesning.PESYS -> IkkeGyldigForBehandling(it.kriterier)
                 }
             }
-        } catch (e: FamilieRelasjonManglerIdent) {
+        } catch (e: IngenIdentFamilierelasjonException) {
             logger.warn(
                 "Fikk en familierelasjon som mangler ident fra PDL. Disse tilfellene støtter vi ikke per nå." +
                     " Se sikkerlogg for detaljer",
@@ -78,7 +78,7 @@ class FordelerService(
             sikkerLogg.info("Søknad ${event.soeknadId} har en familierelasjon som mangler ident", e)
 
             if (featureToggleService.isEnabled(FordelerFeatureToggle.ManuellJournalfoering, false)) {
-                FordelerResultat.TrengerManuellJournalfoering(e.message)
+                FordelerResultat.TrengerManuellJournalfoering(e.detail)
             } else {
                 IkkeGyldigForBehandling(listOf(FordelerKriterie.FAMILIERELASJON_MANGLER_IDENT))
             }

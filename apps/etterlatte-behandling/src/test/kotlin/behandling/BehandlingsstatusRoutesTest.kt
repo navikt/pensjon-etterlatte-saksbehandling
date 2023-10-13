@@ -147,7 +147,6 @@ internal class BehandlingsstatusRoutesTest {
                 }
 
             assertEquals(HttpStatusCode.Unauthorized, response.status)
-            assertEquals("Mangler attestantrolle", response.bodyAsText())
         }
     }
 

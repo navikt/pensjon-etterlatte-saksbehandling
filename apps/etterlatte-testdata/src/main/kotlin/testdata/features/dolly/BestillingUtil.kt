@@ -1,6 +1,7 @@
 package no.nav.etterlatte.testdata.features.dolly
 
 import no.nav.etterlatte.testdata.dolly.BestillingRequest
+import java.time.LocalDateTime
 
 fun generererBestilling(bestilling: BestillingRequest): String {
     val soeker = soeskenTemplate(true)
@@ -52,7 +53,7 @@ const val BESTLLING_TEMPLATE_START = """
       ],
       "forelderBarnRelasjon": """
 
-const val BESTLLING_TEMPLATE_END = """,
+val BESTLLING_TEMPLATE_END = """,
       "sivilstand": [
         {
           "id": null,
@@ -87,7 +88,7 @@ const val BESTLLING_TEMPLATE_END = """,
           "kilde": "Dolly",
           "master": "PDL",
           "folkeregistermetadata": null,
-          "doedsdato": "2022-08-17T09:14:07"
+          "doedsdato": "${LocalDateTime.now().minusWeeks(1)}"
         }
       ],
       "foreldreansvar": [

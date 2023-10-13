@@ -1,5 +1,7 @@
 package no.nav.etterlatte.person
 
+import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
+import io.kotest.matchers.shouldBe
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.mockk
@@ -99,7 +101,7 @@ internal class PersonServiceTest {
     }
 
     @Test
-    fun `skal mappe avdoed med barnekull`() {
+    fun `skal mappe avdoed med barnekull og ikke ta med barnas relasjoner`() {
         val person =
             runBlocking {
                 personService.hentPerson(
@@ -109,10 +111,14 @@ internal class PersonServiceTest {
 
         val expectedBarnFnr = listOf("70078749472", "06067018735")
 
-        assertNotNull(person.avdoedesBarn)
-        assertEquals(2, person.avdoedesBarn?.size)
-        assertTrue(person.avdoedesBarn?.get(0)?.foedselsnummer?.value in expectedBarnFnr)
-        assertTrue(person.avdoedesBarn?.get(1)?.foedselsnummer?.value in expectedBarnFnr)
+        val avdoedesBarn = person.avdoedesBarn!!
+        avdoedesBarn.map { it.foedselsnummer.value } shouldContainExactlyInAnyOrder expectedBarnFnr
+
+        avdoedesBarn.forEach { barn ->
+            barn.familieRelasjon!!.barn shouldBe null
+            barn.familieRelasjon!!.foreldre shouldBe null
+            barn.familieRelasjon!!.ansvarligeForeldre shouldBe null
+        }
     }
 
     @Test

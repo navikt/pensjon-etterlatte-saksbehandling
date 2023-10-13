@@ -31,7 +31,7 @@ object BarnekullMapper {
                     ppsKlient,
                     pdlKlient,
                     Folkeregisteridentifikator.of(it.ident),
-                    PersonRolle.BARN,
+                    PersonRolle.TILKNYTTET_BARN,
                     it.person!!,
                     saktype,
                 )

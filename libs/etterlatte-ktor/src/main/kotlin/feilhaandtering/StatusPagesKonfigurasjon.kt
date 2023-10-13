@@ -3,7 +3,6 @@ package no.nav.etterlatte.libs.ktor.feilhaandtering
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.log
-import io.ktor.server.plugins.BadRequestException
 import io.ktor.server.plugins.NotFoundException
 import io.ktor.server.plugins.statuspages.StatusPagesConfig
 import io.ktor.server.response.respond
@@ -39,17 +38,6 @@ class StatusPagesKonfigurasjon(private val sikkerLogg: Logger) {
                         IkkeFunnetException(
                             code = "NOT_FOUND",
                             detail = cause.message ?: "Fant ikke ressursen",
-                            cause = cause,
-                        )
-                    call.application.log.loggForespoerselException(wrapped)
-                    wrapped.respond(call)
-                }
-
-                is BadRequestException -> {
-                    val wrapped =
-                        UgyldigForespoerselException(
-                            code = "BAD_REQUEST",
-                            detail = "Forespørselen er ugyldig",
                             cause = cause,
                         )
                     call.application.log.loggForespoerselException(wrapped)

@@ -40,7 +40,7 @@ class StatusPagesKonfigurasjon(private val sikkerLogg: Logger) {
         }
         status(*statusCodes4xx) { call, code ->
             when (code) {
-                HttpStatusCode.NotFound -> GenerellIkkeFunnetException()
+                HttpStatusCode.NotFound -> GenerellIkkeFunnetException().respond(call)
 
                 HttpStatusCode.BadRequest ->
                     UgyldigForespoerselException(

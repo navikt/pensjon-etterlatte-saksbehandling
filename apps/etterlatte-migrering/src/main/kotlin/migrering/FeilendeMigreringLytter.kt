@@ -55,15 +55,19 @@ internal class FeilendeMigreringLytter(rapidsConnection: RapidsConnection, priva
         val pesyskopling = finnPesysId(packet)
 
         logger.warn("Migrering av pesyssak $pesyskopling feila")
+
+        if (pesyskopling.first == null) {
+            return
+        }
         repository.lagreFeilkjoering(
             request =
                 packet.takeIf { it.harVerdi(HENDELSE_DATA_KEY) }?.hendelseData?.toJson()
                     ?: "Har ikke requestobjektet tilgjengelig for logging",
             feilendeSteg = packet.feilendeSteg,
             feil = packet.feilmelding,
-            pesysId = pesyskopling.first,
+            pesysId = pesyskopling.first!!,
         )
-        repository.oppdaterStatus(pesyskopling.first, Migreringsstatus.MIGRERING_FEILA)
+        repository.oppdaterStatus(pesyskopling.first!!, Migreringsstatus.MIGRERING_FEILA)
         packet.eventName = Migreringshendelser.AVBRYT_BEHANDLING
         pesyskopling.second?.let {
             packet.behandlingId = it
@@ -71,7 +75,7 @@ internal class FeilendeMigreringLytter(rapidsConnection: RapidsConnection, priva
         }
     }
 
-    private fun finnPesysId(packet: JsonMessage): Pair<PesysId, UUID?> =
+    private fun finnPesysId(packet: JsonMessage): Pair<PesysId?, UUID?> =
         if (packet.harVerdi(PESYS_ID_KEY)) {
             repository.hentKoplingTilBehandling(packet.pesysId)?.let { Pair(it.pesysId, it.behandlingId) } ?: Pair(
                 packet.pesysId,
@@ -80,8 +84,10 @@ internal class FeilendeMigreringLytter(rapidsConnection: RapidsConnection, priva
         } else if (packet.harVerdi(BEHANDLING_ID_KEY)) {
             repository.hentPesysId(packet.behandlingId)!!.let { Pair(it.pesysId, it.behandlingId) }
         } else if (packet.harVerdi("vedtak.behandling.id")) {
-            repository.hentPesysId(packet["vedtak.behandling.id"].asText().toUUID())!!
-                .let { Pair(it.pesysId, it.behandlingId) }
+            val id = packet["vedtak.behandling.id"].asText().toUUID()
+            repository.hentPesysId(id)
+                ?.let { Pair(it.pesysId, it.behandlingId) }
+                ?: Pair(null, id).also { logger.warn("Mangler pesys-identifikator for behandling $id") }
         } else {
             throw IllegalArgumentException("Manglar pesys-identifikator, kan ikke kjøre feilhåndtering")
         }

@@ -1,4 +1,9 @@
-import { GyldigFramsattType, IGyldighetproving, IGyldighetResultat } from '~shared/types/IDetaljertBehandling'
+import {
+  GyldigFramsattType,
+  IDetaljertBehandling,
+  IGyldighetproving,
+  IGyldighetResultat,
+} from '~shared/types/IDetaljertBehandling'
 import { LovtekstMedLenke } from '~components/behandling/soeknadsoversikt/soeknadoversikt/LovtekstMedLenke'
 import {
   Beskrivelse,
@@ -11,9 +16,11 @@ import { Verge } from '~components/behandling/soeknadsoversikt/soeknadoversikt/g
 import { GyldigFramsattVurdering } from '~components/behandling/soeknadsoversikt/soeknadoversikt/gyldigFramsattSoeknad/barnepensjon/GyldigFramsattVurdering'
 
 export const GyldigFramsattBarnepensjon = ({
+  behandling,
   gyldigFramsatt,
   gyldigFremsattTilStatusIcon,
 }: {
+  behandling: IDetaljertBehandling
   gyldigFramsatt: IGyldighetResultat | undefined
   gyldigFremsattTilStatusIcon: 'success' | 'error' | 'warning'
 }) => {
@@ -55,10 +62,9 @@ export const GyldigFramsattBarnepensjon = ({
       </div>
       <VurderingsContainerWrapper>
         <GyldigFramsattVurdering
-          gyldigFramsatt={gyldigFramsatt}
-          innsenderErForelder={innsenderErForelder}
-          innsenderHarForeldreansvar={innsenderHarForeldreansvar}
-          ingenAnnenVergeEnnForelder={ingenAnnenVergeEnnForelder}
+          behandlingId={behandling.id}
+          gyldigFramsatt={behandling.gyldighetsprøving}
+          redigerbar={true}
         />
       </VurderingsContainerWrapper>
     </LovtekstMedLenke>

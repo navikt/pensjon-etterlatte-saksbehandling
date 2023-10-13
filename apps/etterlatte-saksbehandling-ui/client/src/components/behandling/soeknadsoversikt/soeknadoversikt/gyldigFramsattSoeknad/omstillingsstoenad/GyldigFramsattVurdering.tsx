@@ -29,14 +29,16 @@ export const GyldigFramsattVurdering = ({
   redigerbar: boolean
 }) => {
   const tittel = finnTittel(gyldigFramsatt)
-  const innsenderErGjenlevende = finnVurdering(gyldigFramsatt, GyldigFramsattType.INNSENDER_ER_GJENLEVENDE)
-  const manuellVurdering: IManuellVurdering = innsenderErGjenlevende?.basertPaaOpplysninger
+  const manuellVurdering =
+    finnVurdering(gyldigFramsatt, GyldigFramsattType.MANUELL_VURDERING) ||
+    finnVurdering(gyldigFramsatt, GyldigFramsattType.INNSENDER_ER_GJENLEVENDE)
+  const manuellVurderingOpplysninger: IManuellVurdering = manuellVurdering?.basertPaaOpplysninger
 
   const dispatch = useAppDispatch()
-  const [vurdert, setVurdert] = useState(manuellVurdering != null)
+  const [vurdert, setVurdert] = useState(manuellVurderingOpplysninger != null)
   const [svar, setSvar] = useState<JaNei | undefined>(finnSvar(gyldigFramsatt))
   const [radioError, setRadioError] = useState<string>('')
-  const [begrunnelse, setBegrunnelse] = useState<string>(manuellVurdering?.begrunnelse || '')
+  const [begrunnelse, setBegrunnelse] = useState<string>(manuellVurderingOpplysninger?.begrunnelse || '')
   const [begrunnelseError, setBegrunnelseError] = useState<string>('')
   const [, setGyldighetsproeving, resetToInitial] = useApiCall(lagreGyldighetsproeving)
 
@@ -66,8 +68,8 @@ export const GyldigFramsattVurdering = ({
     setSvar(finnSvar(gyldigFramsatt))
     setRadioError('')
     setBegrunnelseError('')
-    setBegrunnelse(manuellVurdering?.begrunnelse || '')
-    setVurdert(manuellVurdering != null)
+    setBegrunnelse(manuellVurderingOpplysninger?.begrunnelse || '')
+    setVurdert(manuellVurderingOpplysninger != null)
     onSuccess?.()
   }
 
@@ -88,16 +90,16 @@ export const GyldigFramsattVurdering = ({
       }
       redigerbar={redigerbar}
       vurdering={
-        manuellVurdering?.kilde
+        manuellVurderingOpplysninger?.kilde
           ? {
-              saksbehandler: manuellVurdering?.kilde.ident,
-              tidspunkt: new Date(manuellVurdering?.kilde.tidspunkt),
+              saksbehandler: manuellVurderingOpplysninger?.kilde.ident,
+              tidspunkt: new Date(manuellVurderingOpplysninger?.kilde.tidspunkt),
             }
           : undefined
       }
       lagreklikk={lagre}
       avbrytklikk={reset}
-      kommentar={manuellVurdering?.begrunnelse}
+      kommentar={manuellVurderingOpplysninger?.begrunnelse}
       defaultRediger={
         gyldigFramsatt?.resultat !== VurderingsResultat.OPPFYLT &&
         gyldigFramsatt?.resultat !== VurderingsResultat.IKKE_OPPFYLT

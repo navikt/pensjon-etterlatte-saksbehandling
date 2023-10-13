@@ -2,7 +2,7 @@ package no.nav.etterlatte.brev.model.bp
 
 import no.nav.etterlatte.brev.behandling.Avdoed
 import no.nav.etterlatte.brev.behandling.Avkortingsinfo
-import no.nav.etterlatte.brev.behandling.Behandling
+import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
 import no.nav.etterlatte.brev.model.BrevData
 
@@ -13,11 +13,15 @@ data class InnvilgetBrevData(
     val avdoed: Avdoed,
 ) : BrevData() {
     companion object {
-        fun fra(behandling: Behandling): InnvilgetBrevData =
+        fun fra(
+            generellBrevData: GenerellBrevData,
+            utbetalingsinfo: Utbetalingsinfo,
+            avkortingsinfo: Avkortingsinfo? = null,
+        ): InnvilgetBrevData =
             InnvilgetBrevData(
-                utbetalingsinfo = behandling.utbetalingsinfo!!,
-                avdoed = behandling.personerISak.avdoed,
-                avkortingsinfo = behandling.avkortingsinfo,
+                utbetalingsinfo = utbetalingsinfo,
+                avdoed = generellBrevData.personerISak.avdoed,
+                avkortingsinfo = avkortingsinfo,
             )
     }
 }

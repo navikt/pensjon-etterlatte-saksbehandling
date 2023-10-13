@@ -1,7 +1,7 @@
 package no.nav.etterlatte.brev.model.oms
 
 import no.nav.etterlatte.brev.behandling.Avkortingsinfo
-import no.nav.etterlatte.brev.behandling.Behandling
+import no.nav.etterlatte.brev.behandling.Trygdetidsperiode
 import no.nav.etterlatte.brev.model.Beregningsinfo
 import no.nav.etterlatte.brev.model.BrevData
 import no.nav.etterlatte.brev.model.BrevInnholdVedlegg
@@ -19,14 +19,16 @@ data class InntektsendringRevurderingOMS(
 ) : BrevData() {
     companion object {
         fun fra(
-            behandling: Behandling,
+            avkortingsinfo: Avkortingsinfo,
+            etterbetalingDTO: EtterbetalingDTO,
+            trygdetidsperioder: List<Trygdetidsperiode>,
             innhold: List<Slate.Element>,
             innholdVedlegg: List<BrevInnholdVedlegg>,
         ): InntektsendringRevurderingOMS =
             InntektsendringRevurderingOMS(
                 erEndret = true,
-                avkortingsinfo = behandling.avkortingsinfo,
-                etterbetalinginfo = behandling.etterbetalingDTO,
+                avkortingsinfo = avkortingsinfo,
+                etterbetalinginfo = etterbetalingDTO,
                 beregningsinfo =
                     Beregningsinfo(
                         innhold =
@@ -34,9 +36,9 @@ data class InntektsendringRevurderingOMS(
                                     vedlegg ->
                                 vedlegg.key == BrevVedleggKey.BEREGNING_INNHOLD
                             }?.payload!!.elements,
-                        grunnbeloep = behandling.avkortingsinfo!!.grunnbeloep,
+                        grunnbeloep = avkortingsinfo.grunnbeloep,
                         beregningsperioder =
-                            behandling.avkortingsinfo.beregningsperioder.map {
+                            avkortingsinfo.beregningsperioder.map {
                                 NyBeregningsperiode(
                                     inntekt = it.inntekt,
                                     trygdetid = it.trygdetid,
@@ -44,7 +46,7 @@ data class InntektsendringRevurderingOMS(
                                     utbetaltBeloep = it.utbetaltBeloep,
                                 )
                             },
-                        trygdetidsperioder = behandling.trygdetid!!,
+                        trygdetidsperioder = trygdetidsperioder,
                     ),
                 innhold = innhold,
             )

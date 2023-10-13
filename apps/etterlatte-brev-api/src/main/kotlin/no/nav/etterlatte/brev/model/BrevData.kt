@@ -1,34 +1,33 @@
 package no.nav.etterlatte.brev.model
 
-import no.nav.etterlatte.brev.behandling.Behandling
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
 
 abstract class BrevData {
     inline fun <reified T : RevurderingInfo> valider(
-        behandling: Behandling,
+        revurderingsaarsakVedtak: RevurderingAarsak?,
+        revurderingInfo: RevurderingInfo?,
         revurderingAarsak: RevurderingAarsak,
     ): T {
         val lesbartnavn = revurderingAarsak.name.lowercase()
-        if (behandling.revurderingsaarsak != revurderingAarsak) {
+        if (revurderingsaarsakVedtak != revurderingAarsak) {
             throw IllegalArgumentException(
                 "Kan ikke opprette et revurderingsbrev for $lesbartnavn når " +
-                    "revurderingsårsak er ${behandling.revurderingsaarsak}",
+                    "revurderingsårsak er $revurderingsaarsakVedtak",
             )
         }
-        if (behandling.revurderingInfo !is T) {
+        if (revurderingInfo !is T) {
             throw IllegalArgumentException(
                 "Kan ikke opprette et revurderingsbrev for $lesbartnavn når " +
                     "revurderingsinfo ikke er $lesbartnavn",
             )
         }
-        return behandling.revurderingInfo
+        return revurderingInfo
     }
 }
 
 object AvslagBrevData : BrevData() {
-    // TODO: denne skal ikke ha hele behandlingen inn
-    fun fra(behandling: Behandling): AvslagBrevData = AvslagBrevData
+    fun fra(): AvslagBrevData = AvslagBrevData
 }
 
 abstract class EndringBrevData : BrevData()

@@ -96,7 +96,7 @@ class BehandlingKlient(config: Config, httpClient: HttpClient) : BehandlingTilga
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): Boolean {
-        logger.info("Committer vilkaarsvurdering på behandling med id $behandlingId")
+        logger.info("Committer trygdetid oppdatert på behandling med id $behandlingId")
         val response =
             downstreamResourceClient.post(
                 resource = Resource(clientId = clientId, url = "$resourceUrl/behandlinger/$behandlingId/oppdaterTrygdetid"),

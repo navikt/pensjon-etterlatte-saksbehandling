@@ -1,4 +1,13 @@
-import { KabalStatus, Klage, KlageStatus, teksterKlagestatus, teksterKlageutfall } from '~shared/types/Klage'
+import {
+  KabalResultat,
+  KabalStatus,
+  Klage,
+  KlageStatus,
+  teksterKabalstatus,
+  teksterKabalUtfall,
+  teksterKlagestatus,
+  teksterKlageutfall,
+} from '~shared/types/Klage'
 import { mapApiResult, useApiCall } from '~shared/hooks/useApiCall'
 import { hentKlagerISak } from '~shared/api/klage'
 import React, { useEffect } from 'react'
@@ -31,13 +40,20 @@ function formaterKlageResultat(klage: Klage): string | null {
 
 function formaterKabalstatus(kabalStatus: KabalStatus | undefined) {
   if (kabalStatus === undefined) {
-    return '-'
+    return 'Ikke sendt til kabal'
   }
-  return null
+  return teksterKabalstatus[kabalStatus]
 }
 
 export function lenkeTilKlageMedId(id: string): string {
   return `/klage/${id}/`
+}
+
+function formaterKabalUtfall(kabalResultat: KabalResultat | undefined): string {
+  if (kabalResultat === undefined) {
+    return '-'
+  }
+  return teksterKabalUtfall[kabalResultat]
 }
 
 function KlageTabell(props: { klager: Array<Klage> }) {
@@ -69,7 +85,7 @@ function KlageTabell(props: { klager: Array<Klage> }) {
               <Table.DataCell>{formaterKlagestatus(klage.status)}</Table.DataCell>
               <Table.DataCell>{formaterKlageResultat(klage)}</Table.DataCell>
               <Table.DataCell>{formaterKabalstatus(klage.kabalStatus)}</Table.DataCell>
-              <Table.DataCell>Vi har ikke noe resultat fra Kabal enda</Table.DataCell>
+              <Table.DataCell>{formaterKabalUtfall(klage.kabalResultat)}</Table.DataCell>
               <Table.DataCell>
                 <Link href={lenkeTilKlageMedId(klage.id)}>Vis behandling</Link>
               </Table.DataCell>

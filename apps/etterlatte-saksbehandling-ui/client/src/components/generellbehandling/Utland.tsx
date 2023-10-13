@@ -254,7 +254,8 @@ const Utland = (props: { utlandsBehandling: Generellbehandling & { innhold: Utla
               )}
               {utlandsBehandling.tilknyttetBehandling ? null : (
                 <Alert variant="warning">
-                  Denne utlandsbehandlingen er tilknyttet en behandling. Vi kan derfor ikke hente avdoedes informasjon{' '}
+                  Denne utlandsbehandlingen er ikke tilknyttet en behandling. Vi kan derfor ikke hente avdoedes
+                  informasjon
                 </Alert>
               )}
               <div>

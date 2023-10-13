@@ -107,6 +107,7 @@ internal fun Application.module(context: ApplicationContext) {
                 manueltOpphoerService = manueltOpphoerService,
                 kommerBarnetTilGodeService = kommerBarnetTilGodeService,
                 aktivitetspliktService = aktivtetspliktService,
+                sjekklisteService = sjekklisteService,
                 behandlingFactory = behandlingFactory,
             )
             statistikkRoutes(behandlingService = behandlingService)

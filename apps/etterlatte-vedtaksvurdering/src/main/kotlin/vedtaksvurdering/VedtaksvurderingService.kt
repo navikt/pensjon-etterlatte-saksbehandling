@@ -113,7 +113,9 @@ class VedtaksvurderingService(
     }
 
     /**
-     * TODO: Feilmelding til saksbehandler
+     * TODO:
+     *  - Må sikre at vedtak ikke kan gjennomføres dersom det er diff på versjon
+     *  - Gi forståelig feilmelding til saksbehandler
      **/
     private fun verifiserGrunnlagVersjon(
         vilkaarsvurdering: VilkaarsvurderingDto?,
@@ -122,7 +124,8 @@ class VedtaksvurderingService(
         if (vilkaarsvurdering?.grunnlagVersjon == null || beregningOgAvkorting == null) {
             return
         } else if (vilkaarsvurdering.grunnlagVersjon != beregningOgAvkorting.beregning.grunnlagMetadata.versjon) {
-            throw IllegalStateException("FML...")
+            logger.warn("Ulik versjon av grunnlag i vilkaarsvurdering og beregnin!")
+            return
         }
     }
 

@@ -118,7 +118,7 @@ internal fun Route.klageRoutes(
                     kunSystembruker {
                         medBody<Kabalrespons> {
                             inTransaction {
-                                klageService.oppdaterKabalStatus(klageId, it)
+                                klageService.haandterKabalrespons(klageId, it)
                             }
                             call.respond(HttpStatusCode.OK)
                         }

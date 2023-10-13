@@ -3,6 +3,22 @@ import { KildeSaksbehandler } from '~shared/types/kilde'
 import { JaNei } from '~shared/types/ISvar'
 import { VedtakType } from '~components/vedtak/typer'
 
+export const enum KabalResultat {
+  MEDHOLD = 'MEDHOLD',
+  IKKE_MEDHOLD = 'IKKE_MEDHOLD',
+  IKKE_MEDHOLD_FORMKRAV_AVVIST = 'IKKE_MEDHOLD_FORMKRAV_AVVIST',
+  IKKE_SATT = 'IKKE_SATT',
+  HENLAGT = 'HENLAGT',
+}
+
+export const teksterKabalUtfall: Record<KabalResultat, string> = {
+  HENLAGT: 'Henlagt',
+  IKKE_MEDHOLD: 'Ikke medhold',
+  IKKE_MEDHOLD_FORMKRAV_AVVIST: 'Ikke medhold (formkrav avvist)',
+  IKKE_SATT: 'Ikke satt',
+  MEDHOLD: 'Medhold',
+}
+
 export interface Klage {
   id: string
   sak: ISak
@@ -11,6 +27,7 @@ export interface Klage {
   kabalStatus?: KabalStatus
   formkrav?: FormkravMedSaksbehandler
   utfall?: KlageUtfall
+  kabalResultat?: KabalResultat
 }
 
 export enum KlageStatus {
@@ -33,7 +50,19 @@ export const erKlageRedigerbar = (klage: Klage) => {
   return klage.status !== KlageStatus.FERDIGSTILT
 }
 
-export const enum KabalStatus {}
+export const enum KabalStatus {
+  OPPRETTET = 'OPPRETTET',
+  UTREDES = 'UTREDES',
+  VENTER = 'VENTER',
+  FERDIGSTILT = 'FERDIGSTILT',
+}
+
+export const teksterKabalstatus: Record<KabalStatus, string> = {
+  FERDIGSTILT: 'Ferdigstilt',
+  OPPRETTET: 'Opprettet',
+  UTREDES: 'Utredes',
+  VENTER: 'På vent',
+}
 
 export interface VedtaketKlagenGjelder {
   id: string

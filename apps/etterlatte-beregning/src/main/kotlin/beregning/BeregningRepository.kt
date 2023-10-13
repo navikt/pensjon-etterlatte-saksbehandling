@@ -5,6 +5,8 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import kotliquery.Row
 import kotliquery.queryOf
 import no.nav.etterlatte.beregning.grunnlag.InstitusjonsoppholdBeregningsgrunnlag
+import no.nav.etterlatte.libs.common.IntBroek
+import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
 import no.nav.etterlatte.libs.common.beregning.Beregningstype
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
@@ -72,6 +74,11 @@ class BeregningRepository(private val dataSource: DataSource) {
             "sakId" to beregning.grunnlagMetadata.sakId,
             "grunnlagVersjon" to beregning.grunnlagMetadata.versjon,
             "trygdetid" to beregningsperiode.trygdetid,
+            "beregningsMetode" to beregningsperiode.beregningsMetode?.name,
+            "samletNorskTrygdetid" to beregningsperiode.samletNorskTrygdetid,
+            "samletTeoretiskTrygdetid" to beregningsperiode.samletTeoretiskTrygdetid,
+            "prorataBroekTeller" to beregningsperiode.broek?.teller,
+            "prorataBroekNevner" to beregningsperiode.broek?.nevner,
             "regelResultat" to beregningsperiode.regelResultat?.toJson(),
             "regelVersjon" to beregningsperiode.regelVersjon,
             "kilde" to beregningsperiode.kilde?.toJson(),
@@ -105,6 +112,18 @@ private fun toBeregningsperiode(row: Row): BeregningsperiodeDAO =
                     versjon = long(BeregningsperiodeDatabaseColumns.GrunnlagVersjon.navn),
                 ),
             trygdetid = int(BeregningsperiodeDatabaseColumns.Trygdetid.navn),
+            beregningsMetode =
+                stringOrNull(BeregningsperiodeDatabaseColumns.BeregningsMetode.navn)?.let {
+                    BeregningsMetode.valueOf(it)
+                } ?: BeregningsMetode.NASJONAL,
+            samletNorskTrygdetid = intOrNull(BeregningsperiodeDatabaseColumns.SamletNorskTrygdetid.navn),
+            samletTeoretiskTrygdetid = intOrNull(BeregningsperiodeDatabaseColumns.SamletTeoretiskTrygdetid.navn),
+            broek =
+                intOrNull(BeregningsperiodeDatabaseColumns.ProrataBroekTeller.navn)?.let { teller ->
+                    intOrNull(BeregningsperiodeDatabaseColumns.ProrataBroekNevner.navn)?.let { nevner ->
+                        IntBroek(teller, nevner)
+                    }
+                },
             regelResultat =
                 stringOrNull(BeregningsperiodeDatabaseColumns.RegelResultat.navn)?.let {
                     objectMapper.readTree(it)
@@ -151,6 +170,10 @@ private fun toBeregning(beregningsperioder: List<BeregningsperiodeDAO>): Beregni
                     grunnbelopMnd = it.grunnbelopMnd,
                     grunnbelop = it.grunnbelop,
                     trygdetid = it.trygdetid,
+                    beregningsMetode = it.beregningsMetode,
+                    samletNorskTrygdetid = it.samletNorskTrygdetid,
+                    samletTeoretiskTrygdetid = it.samletTeoretiskTrygdetid,
+                    broek = it.broek,
                     regelResultat = it.regelResultat,
                     regelVersjon = it.regelVersjon,
                     kilde = it.kilde,
@@ -174,6 +197,11 @@ private enum class BeregningsperiodeDatabaseColumns(val navn: String) {
     SakId("sakId"),
     GrunnlagVersjon("grunnlagVersjon"),
     Trygdetid("trygdetid"),
+    BeregningsMetode("beregnings_metode"),
+    SamletNorskTrygdetid("samlet_norsk_trygdetid"),
+    SamletTeoretiskTrygdetid("samlet_teoretisk_trygdetid"),
+    ProrataBroekNevner("prorata_broek_nevner"),
+    ProrataBroekTeller("prorata_broek_teller"),
     RegelResultat("regelResultat"),
     RegelVersjon("regelVersjon"),
     Kilde("kilde"),
@@ -202,15 +230,22 @@ private object Queries {
             ${BeregningsperiodeDatabaseColumns.Grunnbeloep.navn}, 
             ${BeregningsperiodeDatabaseColumns.SakId.navn}, 
             ${BeregningsperiodeDatabaseColumns.GrunnlagVersjon.navn}, 
-            ${BeregningsperiodeDatabaseColumns.Trygdetid.navn}, 
+            ${BeregningsperiodeDatabaseColumns.Trygdetid.navn},
+            ${BeregningsperiodeDatabaseColumns.BeregningsMetode.navn},
+            ${BeregningsperiodeDatabaseColumns.SamletNorskTrygdetid.navn},
+            ${BeregningsperiodeDatabaseColumns.SamletTeoretiskTrygdetid.navn},
+            ${BeregningsperiodeDatabaseColumns.ProrataBroekTeller.navn},
+            ${BeregningsperiodeDatabaseColumns.ProrataBroekNevner.navn},
             ${BeregningsperiodeDatabaseColumns.RegelResultat.navn}, 
             ${BeregningsperiodeDatabaseColumns.RegelVersjon.navn},
             ${BeregningsperiodeDatabaseColumns.Kilde.navn},
             ${BeregningsperiodeDatabaseColumns.Institusjonsopphold.navn})
         VALUES(:id::UUID, :beregningId::UUID, :behandlingId::UUID, :type::TEXT, :beregnetDato::TIMESTAMP, 
             :datoFOM::TEXT, :datoTOM::TEXT, :utbetaltBeloep::BIGINT, :soeskenFlokk::JSONB, :grunnbeloepMnd::BIGINT, 
-            :grunnbeloep::BIGINT, :sakId::BIGINT, :grunnlagVersjon::BIGINT, :trygdetid::BIGINT, :regelResultat::JSONB, 
-            :regelVersjon::TEXT, :kilde::TEXT, :institusjonsopphold::JSONB) 
+            :grunnbeloep::BIGINT, :sakId::BIGINT, :grunnlagVersjon::BIGINT, :trygdetid::BIGINT, :beregningsMetode::TEXT,
+            :samletNorskTrygdetid::BIGINT, :samletTeoretiskTrygdetid::BIGINT, :prorataBroekTeller::BIGINT,
+            :prorataBroekNevner::BIGINT, :regelResultat::JSONB, :regelVersjon::TEXT, :kilde::TEXT,
+            :institusjonsopphold::JSONB) 
     """
 
     val slettBeregning = """
@@ -233,6 +268,10 @@ private data class BeregningsperiodeDAO(
     val grunnbelop: Int,
     val grunnlagMetadata: Metadata,
     val trygdetid: Int,
+    val beregningsMetode: BeregningsMetode? = null,
+    val samletNorskTrygdetid: Int? = null,
+    val samletTeoretiskTrygdetid: Int? = null,
+    val broek: IntBroek? = null,
     val regelResultat: JsonNode? = null,
     val regelVersjon: String? = null,
     val kilde: Grunnlagsopplysning.RegelKilde? = null,

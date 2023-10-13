@@ -3,6 +3,8 @@ package no.nav.etterlatte.beregning
 import no.nav.etterlatte.beregning.grunnlag.InstitusjonsoppholdBeregningsgrunnlag
 import no.nav.etterlatte.beregning.grunnlag.Reduksjon
 import no.nav.etterlatte.beregning.regler.FNR_1
+import no.nav.etterlatte.libs.common.IntBroek
+import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
 import no.nav.etterlatte.libs.common.beregning.Beregningstype
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
@@ -56,6 +58,19 @@ internal class BeregningRepositoryTest {
     }
 
     @Test
+    fun `lagre() skal returnere samme data som faktisk ble lagret - teoretisk trygdetid`() {
+        val beregning =
+            beregning(
+                beregningsMetode = BeregningsMetode.PRORATA,
+                samletTeoretiskTrygdetid = 12,
+                broek = IntBroek(1, 2),
+            )
+        val lagretBeregning = beregningRepository.lagreEllerOppdaterBeregning(beregning)
+
+        assertEquals(beregning, lagretBeregning)
+    }
+
+    @Test
     fun `det som hentes ut skal vaere likt det som originalt ble lagret`() {
         val beregningLagret = beregning()
         beregningRepository.lagreEllerOppdaterBeregning(beregningLagret)
@@ -85,6 +100,9 @@ internal class BeregningRepositoryTest {
     private fun beregning(
         behandlingId: UUID = randomUUID(),
         datoFOM: YearMonth = YearMonth.of(2021, 2),
+        beregningsMetode: BeregningsMetode = BeregningsMetode.NASJONAL,
+        samletTeoretiskTrygdetid: Int? = null,
+        broek: IntBroek? = null,
     ) = Beregning(
         beregningId = randomUUID(),
         behandlingId = behandlingId,
@@ -102,6 +120,10 @@ internal class BeregningRepositoryTest {
                     grunnbelopMnd = 10_000,
                     grunnbelop = 100_000,
                     trygdetid = 40,
+                    beregningsMetode = beregningsMetode,
+                    samletNorskTrygdetid = 40,
+                    samletTeoretiskTrygdetid = samletTeoretiskTrygdetid,
+                    broek = broek,
                     regelResultat = mapOf("regel" to "resultat").toObjectNode(),
                     regelVersjon = "1",
                     kilde = Grunnlagsopplysning.RegelKilde("regelid", Tidspunkt.now(), "1"),

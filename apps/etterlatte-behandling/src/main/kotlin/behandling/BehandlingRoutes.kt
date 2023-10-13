@@ -273,7 +273,7 @@ internal fun Route.behandlingRoutes(
         route("/sjekkliste") {
             get {
                 val result = sjekklisteService.hentSjekkliste(behandlingsId)
-                call.respond(result ?: HttpStatusCode.NoContent)
+                call.respond(result ?: HttpStatusCode.NotFound)
             }
 
             post {

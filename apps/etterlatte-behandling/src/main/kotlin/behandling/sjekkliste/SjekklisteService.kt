@@ -16,11 +16,16 @@ class SjekklisteService(
     }
 
     fun opprettSjekkliste(behandlingId: UUID): Sjekkliste {
-        val behandling = requireNotNull(behandlingService.hentBehandling(behandlingId))
+        val behandling =
+            inTransaction {
+                requireNotNull(behandlingService.hentBehandling(behandlingId))
+            }
 
         if (!behandling.status.kanEndres()) {
-            throw IllegalStateException("Kan ikke opprette sjekkliste for behandling ${behandling.id} med status ${behandling.status}")
-        } else if (hentSjekkliste(behandling.id) != null) {
+            throw IllegalStateException(
+                "Kan ikke opprette sjekkliste for behandling ${behandling.id} med status ${behandling.status}",
+            )
+        } else if (hentSjekkliste(behandlingId) != null) {
             throw IllegalStateException("Det finnes allerede en sjekkliste for behandling ${behandling.id}")
         }
 
@@ -30,10 +35,11 @@ class SjekklisteService(
                 SakType.OMSTILLINGSSTOENAD -> defaultSjekklisteItemsOMS
             }
 
-        return inTransaction {
+        inTransaction {
             dao.opprettSjekkliste(behandling.id, items)
-            requireNotNull(hentSjekkliste(behandling.id))
         }
+
+        return requireNotNull(hentSjekkliste(behandling.id))
     }
 
     fun oppdaterSjekkliste(

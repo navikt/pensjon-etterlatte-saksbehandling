@@ -58,23 +58,7 @@ class SjekklisteIntegrationTest {
         sjekklisteDao = SjekklisteDao { connection }
         sjekklisteService = SjekklisteService(sjekklisteDao, behandlingService)
 
-        Kontekst.set(
-            Context(
-                user,
-                object : DatabaseKontekst {
-                    override fun activeTx(): Connection {
-                        throw IllegalArgumentException()
-                    }
-
-                    override fun <T> inTransaction(
-                        gjenbruk: Boolean,
-                        block: () -> T,
-                    ): T {
-                        return block()
-                    }
-                },
-            ),
-        )
+        settOppKontekst(user)
     }
 
     @AfterAll
@@ -133,4 +117,24 @@ class SjekklisteIntegrationTest {
             this.versjon shouldBe 2
         }
     }
+}
+
+internal fun settOppKontekst(user: SaksbehandlerMedEnheterOgRoller) {
+    Kontekst.set(
+        Context(
+            user,
+            object : DatabaseKontekst {
+                override fun activeTx(): Connection {
+                    throw IllegalArgumentException()
+                }
+
+                override fun <T> inTransaction(
+                    gjenbruk: Boolean,
+                    block: () -> T,
+                ): T {
+                    return block()
+                }
+            },
+        ),
+    )
 }

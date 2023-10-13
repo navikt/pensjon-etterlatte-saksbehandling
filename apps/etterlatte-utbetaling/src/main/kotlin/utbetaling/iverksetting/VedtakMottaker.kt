@@ -2,8 +2,6 @@ package no.nav.etterlatte.utbetaling.iverksetting
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
-import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.utbetaling.UtbetalingResponseDto
 import no.nav.etterlatte.libs.common.utbetaling.UtbetalingStatusDto
@@ -22,7 +20,6 @@ import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetalingsvedtak
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
-import no.nav.helse.rapids_rivers.River
 import org.slf4j.LoggerFactory
 import rapidsandrivers.migrering.ListenerMedLogging
 import java.util.UUID
@@ -34,8 +31,7 @@ class VedtakMottaker(
     private val utbetalingService: UtbetalingService,
 ) : ListenerMedLogging() {
     init {
-        River(rapidsConnection).apply {
-            eventName(VedtakKafkaHendelseType.ATTESTERT.toString())
+        initialiserRiver(rapidsConnection, VedtakKafkaHendelseType.ATTESTERT.toString()) {
             validate { it.requireKey("vedtak") }
             validate {
                 it.requireAny(
@@ -43,8 +39,7 @@ class VedtakMottaker(
                     listOf(VedtakType.INNVILGELSE.name, VedtakType.OPPHOER.name, VedtakType.ENDRING.name),
                 )
             }
-            correlationId()
-        }.register(this)
+        }
     }
 
     override fun haandterPakke(

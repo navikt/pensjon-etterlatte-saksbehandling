@@ -10,13 +10,11 @@ import no.nav.etterlatte.libs.common.rapidsandrivers.GYLDIG_FOR_BEHANDLING_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.SAK_TYPE_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.SOEKNAD_ID_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
-import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.etterlatte.rapidsandrivers.EventNames
 import no.nav.etterlatte.statistikk.service.SoeknadStatistikkService
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
-import no.nav.helse.rapids_rivers.River
 import org.slf4j.LoggerFactory
 import rapidsandrivers.migrering.ListenerMedLogging
 
@@ -27,14 +25,12 @@ class SoeknadStatistikkRiver(
     private val logger = LoggerFactory.getLogger(this.javaClass)
 
     init {
-        River(rapidsConnection).apply {
-            eventName(EventNames.FORDELER_STATISTIKK)
+        initialiserRiver(rapidsConnection, EventNames.FORDELER_STATISTIKK) {
             validate { it.requireKey(SOEKNAD_ID_KEY) }
             validate { it.requireKey(GYLDIG_FOR_BEHANDLING_KEY) }
             validate { it.requireKey(SAK_TYPE_KEY) }
             validate { it.interestedIn(FEILENDE_KRITERIER_KEY) }
-            correlationId()
-        }.register(this)
+        }
     }
 
     override fun haandterPakke(

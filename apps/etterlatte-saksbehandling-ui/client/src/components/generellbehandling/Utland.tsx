@@ -31,6 +31,10 @@ import { ABlue500, AGray400 } from '@navikt/ds-tokens/dist/tokens'
 import { ButtonGroup } from '~components/person/VurderHendelseModal'
 import { ConfigContext } from '~clientConfig'
 import { DatoVelger, formatDateToLocaleDateOrEmptyString } from '~shared/DatoVelger'
+import { getGrunnlagsAvOpplysningstype } from '~shared/api/grunnlag'
+import { Grunnlagsopplysning } from '~shared/types/grunnlag'
+import { formaterNavn, IPdlPerson } from '~shared/types/Person'
+import { KildePdl } from '~shared/types/kilde'
 
 const TextFieldBegrunnelse = styled(Textarea).attrs({ size: 'medium' })`
   max-width: 40rem;
@@ -58,6 +62,8 @@ const Utland = (props: { utlandsBehandling: Generellbehandling & { innhold: Utla
   const [putOppdaterGenerellBehandlingStatus, putOppdaterGenerellBehandling] = useApiCall(oppdaterGenerellBehandling)
   const [sendTilAttesteringStatus, sendTilAttestering] = useApiCall(sendTilAttesteringGenerellBehandling)
   const [attesterStatus, attesterFetch] = useApiCall(attesterGenerellbehandling)
+  const [avdoedeStatus, avdoedeFetch] = useApiCall(getGrunnlagsAvOpplysningstype)
+  const [avdoed, setAvdoed] = useState<Grunnlagsopplysning<IPdlPerson, KildePdl> | null>(null)
 
   const [hentAlleLandRequest, fetchAlleLand] = useApiCall(hentAlleLand)
   const [alleLandKodeverk, setAlleLandKodeverk] = useState<ILand[] | null>(null)
@@ -86,6 +92,17 @@ const Utland = (props: { utlandsBehandling: Generellbehandling & { innhold: Utla
   }
 
   useEffect(() => {
+    if (utlandsBehandling.tilknyttetBehandling) {
+      avdoedeFetch(
+        {
+          sakId: utlandsBehandling.sakId,
+          behandlingId: utlandsBehandling.tilknyttetBehandling,
+          opplysningstype: 'AVDOED_PDL_V1',
+        },
+        (avdoed) => setAvdoed(avdoed)
+      )
+    }
+
     fetchAlleLand(null, (landliste) => {
       setAlleLandKodeverk(sorterLand(landliste))
     })
@@ -102,7 +119,6 @@ const Utland = (props: { utlandsBehandling: Generellbehandling & { innhold: Utla
           landIsoKode: valgteLandIsoKode,
           begrunnelse: notater,
           rinanummer: rinanummer,
-          tilknyttetBehandling: notater,
         },
       }
       putOppdaterGenerellBehandling(generellBehandling)
@@ -120,7 +136,6 @@ const Utland = (props: { utlandsBehandling: Generellbehandling & { innhold: Utla
         landIsoKode: valgteLandIsoKode,
         begrunnelse: notater,
         rinanummer: rinanummer,
-        tilknyttetBehandling: notater,
       },
     }
     sendTilAttestering(generellBehandling, () => window.location.reload())
@@ -237,6 +252,29 @@ const Utland = (props: { utlandsBehandling: Generellbehandling & { innhold: Utla
                   </>
                 )
               )}
+              {utlandsBehandling.tilknyttetBehandling ? null : (
+                <Alert variant="warning">
+                  Denne utlandsbehandlingen er tilknyttet en behandling. Vi kan derfor ikke hente avdoedes informasjon{' '}
+                </Alert>
+              )}
+              <div>
+                {isSuccess(avdoedeStatus) && avdoed && (
+                  <>
+                    <h3>Informasjon om avdøde</h3>
+                    <p>
+                      <b>Navn</b>
+                      <br />
+                      {formaterNavn(avdoed.opplysning)}
+                      <br />
+                      <b>Fødselsnummer</b>
+                      <br />
+                      {avdoed.opplysning.foedselsnummer}
+                      <br />
+                    </p>
+                  </>
+                )}
+                {isFailure(avdoedeStatus) && <ApiErrorAlert>Klarte ikke å hente informasjon om avdøed</ApiErrorAlert>}
+              </div>
 
               <LenkeMargin href={configContext['rinaUrl']} target="_blank" rel="noopener noreferrer">
                 Gå til RINA for å opprette kravpakke til utlandet

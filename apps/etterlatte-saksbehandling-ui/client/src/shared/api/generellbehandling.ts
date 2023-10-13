@@ -10,11 +10,11 @@ export function opprettNyGenerellBehandling(args: {
 }
 
 export function hentGenerellBehandling(generellbehandlingId: string): Promise<ApiResponse<Generellbehandling>> {
-  return apiClient.get(`/generellbehandling/${generellbehandlingId}`)
+  return apiClient.get(`/generellbehandling/hent/${generellbehandlingId}`)
 }
 
 export function oppdaterGenerellBehandling(generellbehandling: Generellbehandling): Promise<ApiResponse<void>> {
-  return apiClient.put(`/generellbehandling/${generellbehandling.sakId}`, { ...generellbehandling })
+  return apiClient.put(`/generellbehandling/oppdater/${generellbehandling.sakId}`, { ...generellbehandling })
 }
 
 export function sendTilAttesteringGenerellBehandling(

@@ -74,7 +74,7 @@ import java.util.UUID.randomUUID
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-internal class VedtaksvurderingServiceTest {
+internal class VedtakBehandlingServiceTest {
     @Container
     private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:$POSTGRES_VERSION")
     private lateinit var repository: VedtaksvurderingRepository

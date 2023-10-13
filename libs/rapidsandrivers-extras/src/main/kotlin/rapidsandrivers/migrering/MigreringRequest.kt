@@ -21,6 +21,13 @@ data class MigreringRequest(
     val flyktningStatus: Boolean = false,
     val spraak: Spraak,
 ) {
+    init {
+        check(avdoedForelder.size > 1 || gjenlevendeForelder != null) {
+            "Forventa å få enten to avdøde foreldre eller en gjenlevende forelder fra Pesys. " +
+                "Fikk ${avdoedForelder.size} avdøde foreldre. Gjenlevende forelder: ${gjenlevendeForelder != null}"
+        }
+    }
+
     fun opprettPersongalleri() =
         Persongalleri(
             soeker = this.soeker.value,

@@ -9,6 +9,7 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.vedtaksvurdering.Vedtak
+import no.nav.etterlatte.vedtaksvurdering.VedtakBehandlingInnhold
 import no.nav.etterlatte.vedtaksvurdering.Vedtakstidslinje
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -278,14 +279,9 @@ private fun lagVedtak(
         sakId = 1L,
         sakType = SakType.BARNEPENSJON,
         behandlingId = UUID.randomUUID(),
-        beregning = null,
-        avkorting = null,
-        vilkaarsvurdering = null,
         soeker = Folkeregisteridentifikator.of(FNR_1),
-        virkningstidspunkt = virkningsDato.let { YearMonth.from(it) },
         status = vedtakStatus,
         type = vedtakType,
-        behandlingType = behandlingType,
         vedtakFattet =
             VedtakFattet(
                 ansvarligSaksbehandler = SAKSBEHANDLER_1,
@@ -298,7 +294,15 @@ private fun lagVedtak(
                 attesterendeEnhet = ENHET_2,
                 tidspunkt = datoAttestert,
             ),
-        utbetalingsperioder = emptyList(),
-        revurderingAarsak = null,
+        innhold =
+            VedtakBehandlingInnhold(
+                virkningstidspunkt = virkningsDato.let { YearMonth.from(it) },
+                behandlingType = behandlingType,
+                beregning = null,
+                avkorting = null,
+                vilkaarsvurdering = null,
+                utbetalingsperioder = emptyList(),
+                revurderingAarsak = null,
+            ),
     )
 }

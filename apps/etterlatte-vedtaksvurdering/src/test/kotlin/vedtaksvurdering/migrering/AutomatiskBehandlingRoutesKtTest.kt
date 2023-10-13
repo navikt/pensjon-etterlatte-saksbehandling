@@ -46,7 +46,7 @@ internal class AutomatiskBehandlingRoutesKtTest {
     private val server = MockOAuth2Server()
     private lateinit var applicationConfig: HoconApplicationConfig
     private val behandlingKlient = mockk<BehandlingKlient>()
-    private val vedtaksvurderingService: VedtaksvurderingService = mockk()
+    private val service: VedtakBehandlingService = mockk()
 
     @BeforeAll
     fun before() {
@@ -77,9 +77,9 @@ internal class AutomatiskBehandlingRoutesKtTest {
         testApplication {
             val opprettetVedtak = vedtak()
             val behandlingId = UUID.randomUUID()
-            every { runBlocking { vedtaksvurderingService.opprettEllerOppdaterVedtak(any(), any()) } } returns
+            every { runBlocking { service.opprettEllerOppdaterVedtak(any(), any()) } } returns
                 opprettetVedtak
-            every { runBlocking { vedtaksvurderingService.fattVedtak(behandlingId, any()) } } returns opprettetVedtak
+            every { runBlocking { service.fattVedtak(behandlingId, any()) } } returns opprettetVedtak
             every { runBlocking { behandlingKlient.hentOppgaverForSak(any(), any()) } } returns
                 OppgaveListe(
                     mockk(),
@@ -88,7 +88,7 @@ internal class AutomatiskBehandlingRoutesKtTest {
             every { runBlocking { behandlingKlient.tildelSaksbehandler(any(), any()) } } returns true
             every {
                 runBlocking {
-                    vedtaksvurderingService.attesterVedtak(
+                    service.attesterVedtak(
                         behandlingId,
                         any(),
                         any(),
@@ -97,7 +97,7 @@ internal class AutomatiskBehandlingRoutesKtTest {
             } returns opprettetVedtak
 
             environment { config = applicationConfig }
-            application { restModule(log) { automatiskBehandlingRoutes(vedtaksvurderingService, behandlingKlient) } }
+            application { restModule(log) { automatiskBehandlingRoutes(service, behandlingKlient) } }
 
             val vedtak =
                 client.post("/api/vedtak/1/$behandlingId/automatisk") {
@@ -111,11 +111,11 @@ internal class AutomatiskBehandlingRoutesKtTest {
             Assertions.assertEquals(vedtak.vedtakId, opprettetVedtak.id)
 
             coVerify(exactly = 1) {
-                vedtaksvurderingService.opprettEllerOppdaterVedtak(behandlingId, any())
+                service.opprettEllerOppdaterVedtak(behandlingId, any())
                 behandlingKlient.hentOppgaverForSak(1, any())
-                vedtaksvurderingService.fattVedtak(behandlingId, any())
+                service.fattVedtak(behandlingId, any())
                 behandlingKlient.tildelSaksbehandler(any(), any())
-                vedtaksvurderingService.attesterVedtak(behandlingId, any(), any())
+                service.attesterVedtak(behandlingId, any(), any())
             }
             coVerify(atLeast = 1) {
                 behandlingKlient.harTilgangTilBehandling(any(), any())

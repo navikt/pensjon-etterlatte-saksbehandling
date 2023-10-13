@@ -14,7 +14,8 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.token.Saksbehandler
 import no.nav.etterlatte.vedtaksvurdering.OpprettVedtak
 import no.nav.etterlatte.vedtaksvurdering.Vedtak
-import no.nav.etterlatte.vedtaksvurdering.VedtakSammendrag
+import no.nav.etterlatte.vedtaksvurdering.VedtakBehandlingInnhold
+import no.nav.etterlatte.vedtaksvurdering.VedtakTilbakekrevingInnhold
 import java.math.BigDecimal
 import java.time.Month
 import java.time.YearMonth
@@ -44,22 +45,25 @@ fun opprettVedtak(
     sakId = sakId,
     sakType = SakType.BARNEPENSJON,
     behandlingId = behandlingId,
-    behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-    revurderingsaarsak = null,
-    virkningstidspunkt = virkningstidspunkt,
     type = type,
-    beregning = beregning,
-    avkorting = avkorting,
-    vilkaarsvurdering = vilkaarsvurdering,
-    revurderingInfo = null,
-    utbetalingsperioder =
-        listOf(
-            Utbetalingsperiode(
-                id = 0,
-                periode = Periode(virkningstidspunkt, null),
-                beloep = BigDecimal.valueOf(100),
-                type = UtbetalingsperiodeType.UTBETALING,
-            ),
+    innhold =
+        VedtakBehandlingInnhold(
+            behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+            revurderingAarsak = null,
+            virkningstidspunkt = virkningstidspunkt,
+            beregning = beregning,
+            avkorting = avkorting,
+            vilkaarsvurdering = vilkaarsvurdering,
+            revurderingInfo = null,
+            utbetalingsperioder =
+                listOf(
+                    Utbetalingsperiode(
+                        id = 0,
+                        periode = Periode(virkningstidspunkt, null),
+                        beloep = BigDecimal.valueOf(100),
+                        type = UtbetalingsperiodeType.UTBETALING,
+                    ),
+                ),
         ),
 )
 
@@ -78,28 +82,32 @@ fun vedtak(
     sakId = sakId,
     sakType = SakType.BARNEPENSJON,
     behandlingId = behandlingId,
-    behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-    virkningstidspunkt = virkningstidspunkt,
     type = VedtakType.INNVILGELSE,
-    beregning = beregning,
-    avkorting = avkorting,
-    vilkaarsvurdering = vilkaarsvurdering,
-    utbetalingsperioder =
-        listOf(
-            Utbetalingsperiode(
-                id = 1,
-                periode = Periode(virkningstidspunkt, null),
-                beloep = BigDecimal.valueOf(100),
-                type = UtbetalingsperiodeType.UTBETALING,
-            ),
+    innhold =
+        VedtakBehandlingInnhold(
+            behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+            virkningstidspunkt = virkningstidspunkt,
+            beregning = beregning,
+            avkorting = avkorting,
+            vilkaarsvurdering = vilkaarsvurdering,
+            utbetalingsperioder =
+                listOf(
+                    Utbetalingsperiode(
+                        id = 1,
+                        periode = Periode(virkningstidspunkt, null),
+                        beloep = BigDecimal.valueOf(100),
+                        type = UtbetalingsperiodeType.UTBETALING,
+                    ),
+                ),
+            revurderingAarsak = revurderingAarsak,
         ),
-    revurderingAarsak = revurderingAarsak,
 )
 
-fun vedtaksammendrag(
+fun vedtakTilbakekreving(
     sakId: Long = 1L,
     behandlingId: UUID = UUID.randomUUID(),
-) = VedtakSammendrag(
+    tilbakekreving: ObjectNode = objectMapper.createObjectNode(),
+) = Vedtak(
     id = 1L,
     status = VedtakStatus.OPPRETTET,
     soeker = Folkeregisteridentifikator.of(FNR_1),
@@ -107,4 +115,6 @@ fun vedtaksammendrag(
     sakType = SakType.BARNEPENSJON,
     behandlingId = behandlingId,
     type = VedtakType.INNVILGELSE,
+    innhold =
+        VedtakTilbakekrevingInnhold(tilbakekreving),
 )

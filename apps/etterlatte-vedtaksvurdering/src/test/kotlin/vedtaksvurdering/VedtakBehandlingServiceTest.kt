@@ -74,7 +74,7 @@ import java.util.UUID.randomUUID
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-internal class VedtaksvurderingServiceTest {
+internal class VedtakBehandlingServiceTest {
     @Container
     private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:$POSTGRES_VERSION")
     private lateinit var repository: VedtaksvurderingRepository
@@ -85,7 +85,7 @@ internal class VedtaksvurderingServiceTest {
     private val behandlingKlientMock = mockk<BehandlingKlient>()
     private val sendToRapidMock = mockk<(String, UUID) -> Unit>(relaxed = true)
 
-    private lateinit var service: VedtaksvurderingService
+    private lateinit var service: VedtakBehandlingService
 
     @BeforeAll
     fun beforeAll() {
@@ -100,7 +100,7 @@ internal class VedtaksvurderingServiceTest {
 
         repository = spyk(VedtaksvurderingRepository(dataSource))
         service =
-            VedtaksvurderingService(
+            VedtakBehandlingService(
                 repository = repository,
                 beregningKlient = beregningKlientMock,
                 vilkaarsvurderingKlient = vilkaarsvurderingKlientMock,
@@ -175,11 +175,10 @@ internal class VedtaksvurderingServiceTest {
         val vedtak =
             runBlocking {
                 service.opprettEllerOppdaterVedtak(behandlingId, saksbehandler)
-                service.hentVedtak(behandlingId)
             }
 
         vedtak shouldNotBe null
-        vedtak?.status shouldBe VedtakStatus.OPPRETTET
+        vedtak.status shouldBe VedtakStatus.OPPRETTET
     }
 
     // TODO sjekk flere caser rundt opprett
@@ -326,12 +325,12 @@ internal class VedtaksvurderingServiceTest {
                             behandlingId = behandlingId,
                         ),
                     )
-                nyttVedtak.virkningstidspunkt shouldBe virkningstidspunkt2023
+                (nyttVedtak.innhold as VedtakBehandlingInnhold).virkningstidspunkt shouldBe virkningstidspunkt2023
 
                 service.opprettEllerOppdaterVedtak(behandlingId, saksbehandler)
             }
 
-        oppdatertVedtak.virkningstidspunkt shouldBe virkningstidspunkt2024
+        (oppdatertVedtak.innhold as VedtakBehandlingInnhold).virkningstidspunkt shouldBe virkningstidspunkt2024
     }
 
     @Test
@@ -826,7 +825,7 @@ internal class VedtaksvurderingServiceTest {
                 service.iverksattVedtak(behandlingId, attestant)
             }
         }
-        val ikkeIverksattVedtak = service.hentVedtak(behandlingId)!!
+        val ikkeIverksattVedtak = repository.hentVedtak(behandlingId)!!
         ikkeIverksattVedtak shouldNotBe null
         ikkeIverksattVedtak.status shouldNotBe VedtakStatus.IVERKSATT
         ikkeIverksattVedtak.status shouldBe VedtakStatus.ATTESTERT
@@ -1050,9 +1049,10 @@ internal class VedtaksvurderingServiceTest {
             )
 
         with(runBlocking { service.opprettEllerOppdaterVedtak(behandlingId, saksbehandler) }) {
-            utbetalingsperioder.size shouldBe 1
-            utbetalingsperioder[0].beloep shouldBe BigDecimal(100)
-            utbetalingsperioder[0].periode.fom shouldBe virkningstidspunkt
+            val innhold = innhold as VedtakBehandlingInnhold
+            innhold.utbetalingsperioder.size shouldBe 1
+            innhold.utbetalingsperioder[0].beloep shouldBe BigDecimal(100)
+            innhold.utbetalingsperioder[0].periode.fom shouldBe virkningstidspunkt
         }
 
         coEvery { behandlingKlientMock.hentBehandling(any(), any()) } returns
@@ -1063,9 +1063,10 @@ internal class VedtaksvurderingServiceTest {
             )
 
         with(runBlocking { service.opprettEllerOppdaterVedtak(behandlingId, saksbehandler) }) {
-            utbetalingsperioder.size shouldBe 1
-            utbetalingsperioder[0].beloep shouldBe BigDecimal(50)
-            utbetalingsperioder[0].periode.fom shouldBe virkningstidspunkt
+            val innhold = innhold as VedtakBehandlingInnhold
+            innhold.utbetalingsperioder.size shouldBe 1
+            innhold.utbetalingsperioder[0].beloep shouldBe BigDecimal(50)
+            innhold.utbetalingsperioder[0].periode.fom shouldBe virkningstidspunkt
         }
     }
 

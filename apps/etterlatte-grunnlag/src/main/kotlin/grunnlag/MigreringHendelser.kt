@@ -1,6 +1,5 @@
 package no.nav.etterlatte.grunnlag
 
-import com.fasterxml.jackson.databind.JsonNode
 import no.nav.etterlatte.MigrerSoekerRequest
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
@@ -19,8 +18,10 @@ import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import rapidsandrivers.BEHANDLING_ID_KEY
 import rapidsandrivers.HENDELSE_DATA_KEY
 import rapidsandrivers.SAK_ID_KEY
+import rapidsandrivers.behandlingId
 import rapidsandrivers.migrering.ListenerMedLoggingOgFeilhaandtering
 import rapidsandrivers.sakId
 import java.util.UUID
@@ -34,6 +35,7 @@ class MigreringHendelser(
     init {
         initialiserRiver(rapidsConnection, hendelsestype) {
             validate { it.requireKey(SAK_ID_KEY) }
+            validate { it.requireKey(BEHANDLING_ID_KEY) }
             validate { it.requireKey(MIGRERING_GRUNNLAG_KEY) }
             validate { it.requireKey(PERSONGALLERI_KEY) }
             validate { it.requireKey(HENDELSE_DATA_KEY) }
@@ -46,11 +48,15 @@ class MigreringHendelser(
     ) {
         logger.info("Mottok grunnlagshendelser for migrering")
         val sakId = packet.sakId
+        val behandlingId = packet.behandlingId
+
         val request =
             objectMapper.treeToValue(packet[MIGRERING_GRUNNLAG_KEY], MigrerSoekerRequest::class.java)
 
-        lagreEnkeltgrunnlag(
+        grunnlagService.lagreNyePersonopplysninger(
             sakId,
+            behandlingId,
+            Folkeregisteridentifikator.of(request.soeker),
             listOf(
                 Grunnlagsopplysning(
                     UUID.randomUUID(),
@@ -67,7 +73,6 @@ class MigreringHendelser(
                     packet.hendelseData.spraak.toJsonNode(),
                 ),
             ),
-            request.soeker,
         )
 
         packet.eventName = Migreringshendelser.VILKAARSVURDER
@@ -75,14 +80,4 @@ class MigreringHendelser(
 
         logger.info("Behandla grunnlagshendelser for migrering for sak $sakId")
     }
-
-    private fun lagreEnkeltgrunnlag(
-        sakId: Long,
-        opplysninger: List<Grunnlagsopplysning<JsonNode>>,
-        fnr: String,
-    ) = grunnlagService.lagreNyePersonopplysninger(
-        sakId,
-        Folkeregisteridentifikator.of(fnr),
-        opplysninger,
-    )
 }

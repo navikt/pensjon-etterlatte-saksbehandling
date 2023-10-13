@@ -20,8 +20,9 @@ export const getPerson = async (fnr: string): Promise<ApiResponse<IPersonResult>
 
 export const getHistoriskForeldreansvar = (args: {
   sakId: number
+  behandlingId: string
 }): Promise<ApiResponse<Grunnlagsopplysning<Foreldreansvar, KildePdl>>> => {
   return apiClient.get<Grunnlagsopplysning<Foreldreansvar, KildePdl>>(
-    `/grunnlag/sak/${args.sakId}/revurdering/HISTORISK_FORELDREANSVAR`
+    `/grunnlag/sak/${args.sakId}/behandling/${args.behandlingId}/revurdering/HISTORISK_FORELDREANSVAR`
   )
 }

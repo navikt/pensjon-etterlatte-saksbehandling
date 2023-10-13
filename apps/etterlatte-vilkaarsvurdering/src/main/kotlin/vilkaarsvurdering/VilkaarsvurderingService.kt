@@ -241,7 +241,7 @@ class VilkaarsvurderingService(
     ): Pair<DetaljertBehandling, Grunnlag> {
         return coroutineScope {
             val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
-            val grunnlag = async { grunnlagKlient.hentGrunnlag(behandling.sak, brukerTokenInfo) }
+            val grunnlag = async { grunnlagKlient.hentGrunnlag(behandling.sak, behandlingId, brukerTokenInfo) }
 
             Pair(behandling, grunnlag.await())
         }

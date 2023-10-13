@@ -10,8 +10,9 @@ import no.nav.etterlatte.grunnlag.GrunnlagHendelser
 import no.nav.etterlatte.grunnlag.MigreringHendelser
 import no.nav.etterlatte.grunnlag.OpplysningDao
 import no.nav.etterlatte.grunnlag.RealGrunnlagService
-import no.nav.etterlatte.grunnlag.grunnlagRoute
+import no.nav.etterlatte.grunnlag.behandlingGrunnlagRoute
 import no.nav.etterlatte.grunnlag.personRoute
+import no.nav.etterlatte.grunnlag.sakGrunnlagRoute
 import no.nav.etterlatte.klienter.BehandlingKlientImpl
 import no.nav.etterlatte.klienter.PdlTjenesterKlientImpl
 import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstartOgAvslutning
@@ -63,7 +64,8 @@ class ApplicationBuilder {
             .withKtorModule {
                 restModule(sikkerLogg, routePrefix = "api", config = HoconApplicationConfig(config)) {
                     route("grunnlag") {
-                        grunnlagRoute(grunnlagService, behandlingKlient)
+                        sakGrunnlagRoute(grunnlagService, behandlingKlient)
+                        behandlingGrunnlagRoute(grunnlagService, behandlingKlient)
                         personRoute(grunnlagService, behandlingKlient)
                     }
                 }

@@ -77,19 +77,23 @@ class RealManueltOpphoerService(
         }
 
     override fun opprettManueltOpphoer(opphoerRequest: ManueltOpphoerRequest): ManueltOpphoer? {
-        return inTransaction {
-            val alleBehandlingerISak = behandlingDao.alleBehandlingerISak(opphoerRequest.sakId).filterForEnheter()
-            val forrigeBehandling = alleBehandlingerISak.sisteIkkeAvbrutteBehandling()
-            val virkningstidspunkt = alleBehandlingerISak.tidligsteIverksatteVirkningstidspunkt()
-
-            if (virkningstidspunkt == null) {
-                logger.warn(
-                    "Saken med id=${opphoerRequest.sakId} har ikke noe tidligste iverksatt virkningstidspunkt, " +
-                        "så det er ingenting å opphøre.",
-                )
-                return@inTransaction null
+        val alleBehandlingerISak =
+            inTransaction {
+                behandlingDao.alleBehandlingerISak(opphoerRequest.sakId).filterForEnheter()
             }
 
+        val forrigeBehandling = alleBehandlingerISak.sisteIkkeAvbrutteBehandling()
+        val virkningstidspunkt = alleBehandlingerISak.tidligsteIverksatteVirkningstidspunkt()
+
+        if (virkningstidspunkt == null) {
+            logger.warn(
+                "Saken med id=${opphoerRequest.sakId} har ikke noe tidligste iverksatt virkningstidspunkt, " +
+                    "så det er ingenting å opphøre.",
+            )
+            return null
+        }
+
+        val opprettBehandling =
             when (forrigeBehandling) {
                 is Foerstegangsbehandling, is Revurdering ->
                     OpprettBehandling(
@@ -104,29 +108,30 @@ class RealManueltOpphoerService(
 
                 is ManueltOpphoer -> {
                     logger.error("Kan ikke manuelt opphøre et manuelt opphør.")
-                    null
+                    return null
                 }
 
                 null -> {
                     logger.error("En forrige ikke-avbrutt behandling for sak ${opphoerRequest.sakId} eksisterer ikke")
-                    null
+                    return null
                 }
-            }?.let {
-                behandlingDao.opprettBehandling(it)
-                hendelseDao.behandlingOpprettet(it.toBehandlingOpprettet())
-                it.id
-            }?.let { id ->
-                oppgaveService.opprettNyOppgaveMedSakOgReferanse(
-                    referanse = id.toString(),
-                    sakId = opphoerRequest.sakId,
-                    oppgaveKilde = OppgaveKilde.BEHANDLING,
-                    oppgaveType = OppgaveType.MANUELT_OPPHOER,
-                    merknad = null,
-                )
-                (behandlingDao.hentBehandling(id) as ManueltOpphoer).sjekkEnhet()
             }
+
+        return inTransaction {
+            behandlingDao.opprettBehandling(opprettBehandling)
+            hendelseDao.behandlingOpprettet(opprettBehandling.toBehandlingOpprettet())
+            oppgaveService.opprettNyOppgaveMedSakOgReferanse(
+                referanse = opprettBehandling.id.toString(),
+                sakId = opphoerRequest.sakId,
+                oppgaveKilde = OppgaveKilde.BEHANDLING,
+                oppgaveType = OppgaveType.MANUELT_OPPHOER,
+                merknad = null,
+            )
+            (behandlingDao.hentBehandling(opprettBehandling.id) as ManueltOpphoer).sjekkEnhet()
         }?.also { lagretManueltOpphoer ->
-            val persongalleri = runBlocking { grunnlagService.hentPersongalleri(opphoerRequest.sakId) }
+            val persongalleri =
+                runBlocking { grunnlagService.hentPersongalleri(opphoerRequest.sakId, forrigeBehandling.id) }
+
             behandlingHendelser.sendMeldingForHendelseMedDetaljertBehandling(
                 lagretManueltOpphoer.toStatistikkBehandling(persongalleri = persongalleri),
                 BehandlingHendelseType.OPPRETTET,

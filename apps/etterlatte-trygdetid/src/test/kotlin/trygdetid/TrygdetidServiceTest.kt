@@ -125,7 +125,7 @@ internal class TrygdetidServiceTest {
 
         every { repository.hentTrygdetid(any()) } returns null
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
+        coEvery { grunnlagKlient.hentGrunnlag(any(), any(), any()) } returns grunnlag
         every { repository.opprettTrygdetid(any()) } returns trygdetid
         coEvery { behandlingKlient.settBehandlingStatusTrygdetidOppdatert(any(), any()) } returns true
 
@@ -136,7 +136,7 @@ internal class TrygdetidServiceTest {
         coVerify(exactly = 1) {
             behandlingKlient.kanOppdatereTrygdetid(behandlingId, saksbehandler)
             behandlingKlient.hentBehandling(behandlingId, saksbehandler)
-            grunnlagKlient.hentGrunnlag(sakId, saksbehandler)
+            grunnlagKlient.hentGrunnlag(sakId, behandlingId, saksbehandler)
             repository.hentTrygdetid(behandlingId)
             repository.opprettTrygdetid(
                 withArg { trygdetid ->
@@ -242,7 +242,7 @@ internal class TrygdetidServiceTest {
         val trygdetid = trygdetid(behandlingId, sakId)
         val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
 
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
+        coEvery { grunnlagKlient.hentGrunnlag(any(), any(), any()) } returns grunnlag
         every { repository.hentTrygdetid(behandlingId) } returns null
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
         coEvery { behandlingKlient.hentSisteIverksatteBehandling(any(), any()) } returns
@@ -264,7 +264,7 @@ internal class TrygdetidServiceTest {
             behandlingKlient.hentSisteIverksatteBehandling(sakId, saksbehandler)
             behandlingKlient.settBehandlingStatusTrygdetidOppdatert(behandlingId, saksbehandler)
             repository.hentTrygdetid(forrigeBehandlingId)
-            grunnlagKlient.hentGrunnlag(any(), any())
+            grunnlagKlient.hentGrunnlag(any(), any(), any())
 
             repository.opprettTrygdetid(
                 withArg {
@@ -342,7 +342,7 @@ internal class TrygdetidServiceTest {
         val trygdetid = trygdetid(behandlingId, sakId)
         val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
 
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
+        coEvery { grunnlagKlient.hentGrunnlag(any(), any(), any()) } returns grunnlag
         every { repository.hentTrygdetid(behandlingId) } returns null
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
         coEvery { behandlingKlient.hentSisteIverksatteBehandling(any(), any()) } returns
@@ -364,7 +364,7 @@ internal class TrygdetidServiceTest {
             behandlingKlient.hentSisteIverksatteBehandling(sakId, saksbehandler)
             behandlingKlient.settBehandlingStatusTrygdetidOppdatert(behandlingId, saksbehandler)
             repository.hentTrygdetid(forrigeBehandlingId)
-            grunnlagKlient.hentGrunnlag(any(), any())
+            grunnlagKlient.hentGrunnlag(any(), any(), any())
 
             repository.opprettTrygdetid(
                 withArg {
@@ -428,7 +428,7 @@ internal class TrygdetidServiceTest {
         every { repository.hentTrygdetid(behandlingId) } returns eksisterendeTrygdetid
         every { repository.oppdaterTrygdetid(any()) } answers { firstArg() }
         coEvery { behandlingKlient.hentBehandling(any(), any()) } answers { behandling(behandlingId = behandlingId) }
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
+        coEvery { grunnlagKlient.hentGrunnlag(any(), any(), any()) } returns grunnlag
         every { grunnlag.hentAvdoed() } returns avdoedGrunnlag
         every { avdoedGrunnlag[Opplysningstype.FOEDSELSDATO] } answers {
             Opplysning.Konstant(
@@ -474,7 +474,7 @@ internal class TrygdetidServiceTest {
             vilkaarsvurderingKlient.hentVilkaarsvurdering(any(), any())
             vilkaarsvurderingDto.isYrkesskade()
             behandlingKlient.hentBehandling(any(), any())
-            grunnlagKlient.hentGrunnlag(any(), any())
+            grunnlagKlient.hentGrunnlag(any(), behandlingId, any())
         }
 
         verify {
@@ -501,7 +501,7 @@ internal class TrygdetidServiceTest {
         every { vilkaarsvurderingDto.isYrkesskade() } returns false
         coEvery { vilkaarsvurderingKlient.hentVilkaarsvurdering(any(), any()) } returns vilkaarsvurderingDto
         coEvery { behandlingKlient.hentBehandling(any(), any()) } answers { behandling(behandlingId = behandlingId) }
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
+        coEvery { grunnlagKlient.hentGrunnlag(any(), any(), any()) } returns grunnlag
         every { grunnlag.hentAvdoed() } returns avdoedGrunnlag
         every { avdoedGrunnlag[Opplysningstype.FOEDSELSDATO] } answers {
             Opplysning.Konstant(
@@ -550,7 +550,7 @@ internal class TrygdetidServiceTest {
             vilkaarsvurderingKlient.hentVilkaarsvurdering(any(), any())
             vilkaarsvurderingDto.isYrkesskade()
             behandlingKlient.hentBehandling(any(), any())
-            grunnlagKlient.hentGrunnlag(any(), any())
+            grunnlagKlient.hentGrunnlag(any(), behandlingId, any())
         }
 
         verify {
@@ -573,7 +573,7 @@ internal class TrygdetidServiceTest {
         every { repository.hentTrygdetid(behandlingId) } returns eksisterendeTrygdetid
         every { repository.oppdaterTrygdetid(any()) } answers { firstArg() }
         coEvery { behandlingKlient.hentBehandling(any(), any()) } answers { behandling(behandlingId = behandlingId) }
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
+        coEvery { grunnlagKlient.hentGrunnlag(any(), any(), any()) } returns grunnlag
         every { grunnlag.hentAvdoed() } returns avdoedGrunnlag
         every { avdoedGrunnlag[Opplysningstype.FOEDSELSDATO] } answers {
             Opplysning.Konstant(
@@ -609,7 +609,7 @@ internal class TrygdetidServiceTest {
             beregningService.beregnTrygdetid(any(), any(), any())
             behandlingKlient.settBehandlingStatusTrygdetidOppdatert(behandlingId, saksbehandler)
             behandlingKlient.hentBehandling(any(), any())
-            grunnlagKlient.hentGrunnlag(any(), any())
+            grunnlagKlient.hentGrunnlag(any(), behandlingId, any())
         }
         verify {
             avdoedGrunnlag[Opplysningstype.FOEDSELSDATO]

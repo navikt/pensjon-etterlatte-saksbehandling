@@ -172,7 +172,10 @@ internal class BehandlingServiceImpl(
             hendelseDao.behandlingAvbrutt(behandling, saksbehandler.ident())
             grunnlagsendringshendelseDao.kobleGrunnlagsendringshendelserFraBehandlingId(behandlingId)
         }
-        val persongalleri = runBlocking { grunnlagKlient.hentPersongalleri(behandling.sak.id, saksbehandler) }
+
+        val persongalleri =
+            runBlocking { grunnlagKlient.hentPersongalleri(behandling.sak.id, behandlingId, saksbehandler) }
+
         behandlingHendelser.sendMeldingForHendelseMedDetaljertBehandling(
             behandling.toStatistikkBehandling(persongalleri = persongalleri!!.opplysning),
             BehandlingHendelseType.AVBRUTT,
@@ -185,7 +188,7 @@ internal class BehandlingServiceImpl(
     ): StatistikkBehandling? {
         return inTransaction { hentBehandling(behandlingId) }?.let {
             val persongalleri: Persongalleri =
-                grunnlagKlient.hentPersongalleri(it.sak.id, brukerTokenInfo)
+                grunnlagKlient.hentPersongalleri(it.sak.id, behandlingId, brukerTokenInfo)
                     ?.opplysning
                     ?: throw NoSuchElementException("Persongalleri mangler for sak ${it.sak.id}")
 
@@ -199,7 +202,7 @@ internal class BehandlingServiceImpl(
     ): DetaljertBehandling? {
         return inTransaction { hentBehandling(behandlingId) }?.let {
             val persongalleri: Persongalleri =
-                grunnlagKlient.hentPersongalleri(it.sak.id, brukerTokenInfo)
+                grunnlagKlient.hentPersongalleri(it.sak.id, behandlingId, brukerTokenInfo)
                     ?.opplysning
                     ?: throw NoSuchElementException("Persongalleri mangler for sak ${it.sak.id}")
 
@@ -214,7 +217,8 @@ internal class BehandlingServiceImpl(
     ): BehandlingMedGrunnlagsopplysninger<Person> {
         val behandling =
             requireNotNull(inTransaction { hentBehandling(behandlingId) }) { "Fant ikke behandling $behandlingId" }
-        val personopplysning = grunnlagKlient.finnPersonOpplysning(behandling.sak.id, opplysningstype, brukerTokenInfo)
+        val personopplysning =
+            grunnlagKlient.finnPersonOpplysning(behandling.sak.id, behandlingId, opplysningstype, brukerTokenInfo)
 
         return BehandlingMedGrunnlagsopplysninger(
             id = behandling.id,
@@ -284,13 +288,23 @@ internal class BehandlingServiceImpl(
             logger.info("Hentet vedtak for $behandlingId")
             val avdoed =
                 async {
-                    grunnlagKlient.finnPersonOpplysning(sakId, Opplysningstype.AVDOED_PDL_V1, brukerTokenInfo)
+                    grunnlagKlient.finnPersonOpplysning(
+                        sakId,
+                        behandlingId,
+                        Opplysningstype.AVDOED_PDL_V1,
+                        brukerTokenInfo,
+                    )
                 }
             logger.info("Hentet Opplysningstype.AVDOED_PDL_V1 for $behandlingId")
 
             val soeker =
                 async {
-                    grunnlagKlient.finnPersonOpplysning(sakId, Opplysningstype.SOEKER_PDL_V1, brukerTokenInfo)
+                    grunnlagKlient.finnPersonOpplysning(
+                        sakId,
+                        behandlingId,
+                        Opplysningstype.SOEKER_PDL_V1,
+                        brukerTokenInfo,
+                    )
                 }
             logger.info("Hentet Opplysningstype.SOEKER_PDL_V1 for $behandlingId")
 
@@ -301,6 +315,7 @@ internal class BehandlingServiceImpl(
                     async {
                         grunnlagKlient.finnPersonOpplysning(
                             sakId,
+                            behandlingId,
                             Opplysningstype.GJENLEVENDE_FORELDER_PDL_V1,
                             brukerTokenInfo,
                         )

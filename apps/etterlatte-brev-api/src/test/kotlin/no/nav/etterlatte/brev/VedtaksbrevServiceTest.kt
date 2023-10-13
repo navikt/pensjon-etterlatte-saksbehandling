@@ -723,7 +723,7 @@ internal class VedtaksbrevServiceTest {
         ),
         revurderingsaarsak = revurderingsaarsak,
         virkningsdato = YearMonth.of(LocalDate.now().year, LocalDate.now().month),
-        vilkaarsvurdering = VilkaarsvurderingDto(BEHANDLING_ID, emptyList(), YearMonth.now(), null),
+        vilkaarsvurdering = VilkaarsvurderingDto(BEHANDLING_ID, emptyList(), YearMonth.now(), null, 1),
         forrigeUtbetalingsinfo =
             Utbetalingsinfo(
                 1,

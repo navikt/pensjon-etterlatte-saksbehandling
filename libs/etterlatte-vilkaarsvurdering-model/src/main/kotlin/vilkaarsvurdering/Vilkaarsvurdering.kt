@@ -10,6 +10,7 @@ data class VilkaarsvurderingDto(
     val vilkaar: List<Vilkaar>,
     val virkningstidspunkt: YearMonth,
     val resultat: VilkaarsvurderingResultat? = null,
+    val grunnlagVersjon: Long,
 ) {
     fun isYrkesskade() =
         this.vilkaar.filter {

@@ -60,11 +60,11 @@ const AdopsjonGrunnlag = () => {
     )
 
   useEffect(() => {
-    if (!behandling?.sakId) {
+    if (!behandling?.sakId || !behandling.id) {
       return
     }
-    hentForeldreansvar({ sakId: behandling.sakId })
-  }, [behandling?.sakId])
+    hentForeldreansvar({ sakId: behandling.sakId, behandlingId: behandling.id })
+  }, [behandling?.sakId, behandling?.id])
 
   return mapApiResult(
     foreldreansvar,

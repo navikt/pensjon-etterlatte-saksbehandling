@@ -82,7 +82,7 @@ internal class BehandlingServiceTest {
         } throws BehandlingKlientException("har ikke tidligere behandling")
         coEvery { behandlingKlient.hentEtterbetaling(any(), any()) } returns null
         coEvery { vedtaksvurderingKlient.hentVedtak(any(), any()) } returns opprettVedtak()
-        coEvery { grunnlagKlient.hentGrunnlag(SAK_ID, BRUKERTokenInfo) } returns opprettGrunnlag()
+        coEvery { grunnlagKlient.hentGrunnlag(SAK_ID, BEHANDLING_ID, BRUKERTokenInfo) } returns opprettGrunnlag()
         coEvery { beregningKlient.hentBeregning(any(), any()) } returns opprettBeregning()
         coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns opprettTrygdetid()
         coEvery { vilkaarsvurderingKlient.hentVilkaarsvurdering(any(), any()) } returns opprettVilkaarsvurdering()
@@ -110,7 +110,7 @@ internal class BehandlingServiceTest {
 
         coVerify(exactly = 1) {
             vedtaksvurderingKlient.hentVedtak(BEHANDLING_ID, any())
-            grunnlagKlient.hentGrunnlag(SAK_ID, any())
+            grunnlagKlient.hentGrunnlag(SAK_ID, BEHANDLING_ID, any())
             beregningKlient.hentBeregning(BEHANDLING_ID, any())
         }
     }
@@ -125,7 +125,7 @@ internal class BehandlingServiceTest {
         } returns SisteIverksatteBehandling(UUID.randomUUID())
         coEvery { behandlingKlient.hentEtterbetaling(any(), any()) } returns null
         coEvery { vedtaksvurderingKlient.hentVedtak(any(), any()) } returns opprettVedtak()
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns opprettGrunnlag()
+        coEvery { grunnlagKlient.hentGrunnlag(any(), any(), any()) } returns opprettGrunnlag()
         coEvery { beregningKlient.hentBeregning(any(), any()) } returns opprettBeregning()
         coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns opprettTrygdetid()
         coEvery { vilkaarsvurderingKlient.hentVilkaarsvurdering(any(), any()) } returns opprettVilkaarsvurdering()
@@ -146,7 +146,7 @@ internal class BehandlingServiceTest {
 
         coVerify(exactly = 1) {
             vedtaksvurderingKlient.hentVedtak(BEHANDLING_ID, any())
-            grunnlagKlient.hentGrunnlag(SAK_ID, any())
+            grunnlagKlient.hentGrunnlag(SAK_ID, BEHANDLING_ID, any())
             beregningKlient.hentBeregning(BEHANDLING_ID, any())
         }
     }
@@ -161,7 +161,7 @@ internal class BehandlingServiceTest {
         } returns SisteIverksatteBehandling(UUID.randomUUID())
         coEvery { behandlingKlient.hentEtterbetaling(any(), any()) } returns null
         coEvery { vedtaksvurderingKlient.hentVedtak(any(), any()) } returns opprettVedtak()
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns opprettGrunnlag()
+        coEvery { grunnlagKlient.hentGrunnlag(any(), any(), any()) } returns opprettGrunnlag()
         coEvery { beregningKlient.hentBeregning(any(), any()) } returns opprettBeregningSoeskenjustering()
         coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns opprettTrygdetid()
         coEvery { vilkaarsvurderingKlient.hentVilkaarsvurdering(any(), any()) } returns opprettVilkaarsvurdering()
@@ -175,7 +175,7 @@ internal class BehandlingServiceTest {
         Assertions.assertTrue(behandling.utbetalingsinfo!!.soeskenjustering)
 
         coVerify(exactly = 1) { vedtaksvurderingKlient.hentVedtak(any(), any()) }
-        coVerify(exactly = 1) { grunnlagKlient.hentGrunnlag(any(), any()) }
+        coVerify(exactly = 1) { grunnlagKlient.hentGrunnlag(SAK_ID, BEHANDLING_ID, any()) }
         coVerify(exactly = 1) { beregningKlient.hentBeregning(any(), any()) }
     }
 

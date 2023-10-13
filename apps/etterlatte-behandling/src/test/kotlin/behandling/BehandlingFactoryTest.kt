@@ -629,8 +629,8 @@ class BehandlingFactoryTest {
             behandlingDaoMock.alleBehandlingerISak(any())
             behandlingHendelserKafkaProducerMock.sendMeldingForHendelseMedDetaljertBehandling(any(), BehandlingHendelseType.OPPRETTET)
             grunnlagService.leggInnNyttGrunnlag(any(), any())
-            grunnlagService.leggTilNyeOpplysninger(sak.id, any())
-            grunnlagService.leggTilNyeOpplysninger(sak.id, any())
+            grunnlagService.leggTilNyeOpplysninger(sak.id, any(), any())
+            grunnlagService.leggTilNyeOpplysninger(sak.id, any(), any())
             oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(any(), any())
             oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(any(), any())
         }

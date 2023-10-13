@@ -55,7 +55,7 @@ class BrevdataFacade(
         return coroutineScope {
             val sakDeferred = async { behandlingKlient.hentSak(sakId, brukerTokenInfo) }
             val vedtakDeferred = async { vedtaksvurderingKlient.hentVedtak(behandlingId, brukerTokenInfo) }
-            val grunnlag = async { grunnlagKlient.hentGrunnlag(sakId, brukerTokenInfo) }.await()
+            val grunnlag = async { grunnlagKlient.hentGrunnlag(sakId, behandlingId, brukerTokenInfo) }.await()
             val sak = sakDeferred.await()
             val personerISak =
                 PersonerISak(

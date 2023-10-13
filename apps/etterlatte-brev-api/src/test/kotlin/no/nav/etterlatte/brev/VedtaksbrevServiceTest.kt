@@ -16,7 +16,6 @@ import no.nav.etterlatte.brev.adresse.Avsender
 import no.nav.etterlatte.brev.behandling.Avdoed
 import no.nav.etterlatte.brev.behandling.AvkortetBeregningsperiode
 import no.nav.etterlatte.brev.behandling.Avkortingsinfo
-import no.nav.etterlatte.brev.behandling.Behandling
 import no.nav.etterlatte.brev.behandling.Beregningsperiode
 import no.nav.etterlatte.brev.behandling.ForenkletVedtak
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
@@ -39,7 +38,6 @@ import no.nav.etterlatte.brev.model.BrevDataMapper
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.BrevProsessType
 import no.nav.etterlatte.brev.model.BrevProsessTypeFactory
-import no.nav.etterlatte.brev.model.EtterbetalingDTO
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.OpprettNyttBrev
 import no.nav.etterlatte.brev.model.Pdf
@@ -54,7 +52,6 @@ import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.VedtakSak
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
 import no.nav.etterlatte.rivers.VedtakTilJournalfoering
 import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
@@ -775,74 +772,6 @@ internal class VedtaksbrevServiceTest {
             revurderingsaarsak,
         )
     }
-
-    private fun opprettBehandlingnotinuse(
-        sakType: SakType,
-        vedtakType: VedtakType,
-        vedtakStatus: VedtakStatus = VedtakStatus.OPPRETTET,
-        revurderingsaarsak: RevurderingAarsak? = null,
-    ) = Behandling(
-        SAK_ID,
-        sakType,
-        BEHANDLING_ID,
-        Spraak.NB,
-        PersonerISak(
-            Innsender(Foedselsnummer("11057523044")),
-            Soeker("GRØNN", "MELLOMNAVN", "KOPP", Foedselsnummer("12345612345")),
-            Avdoed("DØD TESTPERSON", LocalDate.now().minusMonths(1)),
-            verge = null,
-        ),
-        ForenkletVedtak(
-            1,
-            vedtakStatus,
-            vedtakType,
-            PORSGRUNN,
-            SAKSBEHANDLER.ident(),
-            attestantIdent = null,
-            vedtaksdato = null,
-            virkningstidspunkt = YearMonth.now(),
-            revurderingInfo = null,
-        ),
-        Utbetalingsinfo(
-            1,
-            Kroner(3436),
-            LocalDate.now(),
-            false,
-            listOf(
-                Beregningsperiode(
-                    LocalDate.now(),
-                    LocalDate.now().plusYears(4),
-                    Kroner(120000),
-                    1,
-                    Kroner(5000),
-                    40,
-                    false,
-                ),
-            ),
-        ),
-        revurderingsaarsak = revurderingsaarsak,
-        virkningsdato = YearMonth.of(LocalDate.now().year, LocalDate.now().month),
-        vilkaarsvurdering = VilkaarsvurderingDto(BEHANDLING_ID, emptyList(), YearMonth.now(), null, 1),
-        forrigeUtbetalingsinfo =
-            Utbetalingsinfo(
-                1,
-                Kroner(4320),
-                LocalDate.now(),
-                false,
-                listOf(
-                    Beregningsperiode(
-                        LocalDate.now(),
-                        LocalDate.now().plusYears(4),
-                        Kroner(120000),
-                        1,
-                        Kroner(5000),
-                        40,
-                        false,
-                    ),
-                ),
-            ),
-        etterbetalingDTO = EtterbetalingDTO(LocalDate.now().minusMonths(1), LocalDate.now()),
-    )
 
     private fun opprettMottaker() =
         Mottaker(

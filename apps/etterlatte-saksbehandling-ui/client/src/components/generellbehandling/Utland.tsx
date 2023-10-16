@@ -1,6 +1,6 @@
 import { Dokumenter, Generellbehandling, Status, Utland } from '~shared/types/Generellbehandling'
 import { Content, ContentHeader, GridContainer, MainContent } from '~shared/styled'
-import { HeadingWrapper } from '~components/behandling/soeknadsoversikt/styled'
+import { HeadingWrapper, InfoWrapper } from '~components/behandling/soeknadsoversikt/styled'
 import {
   Alert,
   BodyShort,
@@ -14,7 +14,7 @@ import {
   Textarea,
   TextField,
 } from '@navikt/ds-react'
-import { useContext, useEffect, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import { isFailure, isPending, isSuccess, mapApiResult, useApiCall } from '~shared/hooks/useApiCall'
 import {
   attesterGenerellbehandling,
@@ -35,6 +35,7 @@ import { getGrunnlagsAvOpplysningstype } from '~shared/api/grunnlag'
 import { Grunnlagsopplysning } from '~shared/types/grunnlag'
 import { formaterNavn, IPdlPerson } from '~shared/types/Person'
 import { KildePdl } from '~shared/types/kilde'
+import { Info } from '~components/behandling/soeknadsoversikt/Info'
 
 const TextFieldBegrunnelse = styled(Textarea).attrs({ size: 'medium' })`
   max-width: 40rem;
@@ -262,16 +263,10 @@ const Utland = (props: { utlandsBehandling: Generellbehandling & { innhold: Utla
                 {isSuccess(avdoedeStatus) && avdoed && (
                   <>
                     <h3>Informasjon om avdøde</h3>
-                    <p>
-                      <b>Navn</b>
-                      <br />
-                      {formaterNavn(avdoed.opplysning)}
-                      <br />
-                      <b>Fødselsnummer</b>
-                      <br />
-                      {avdoed.opplysning.foedselsnummer}
-                      <br />
-                    </p>
+                    <InfoWrapper>
+                      <Info label="Navn" tekst={formaterNavn(avdoed.opplysning)} />
+                      <Info label="Fødselsnummer" tekst={avdoed.opplysning.foedselsnummer} />
+                    </InfoWrapper>
                   </>
                 )}
                 {isFailure(avdoedeStatus) && <ApiErrorAlert>Klarte ikke å hente informasjon om avdøed</ApiErrorAlert>}

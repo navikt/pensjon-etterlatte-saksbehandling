@@ -61,7 +61,7 @@ internal class JournalfoerVedtaksbrevRiver(
                     ?: throw NoSuchElementException("Ingen vedtaksbrev funnet på behandlingId=$behandlingId")
 
             // TODO: Forbedre denne "fiksen". Gjøres nå for å lappe sammen
-            if (vedtaksbrev.status == Status.JOURNALFOERT) {
+            if (vedtaksbrev.status == Status.JOURNALFOERT || vedtaksbrev.status == Status.DISTRIBUERT) {
                 logger.warn("Vedtaksbrev (id=${vedtaksbrev.id}) er allerede journalført.")
                 return
             }

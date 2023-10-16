@@ -26,6 +26,7 @@ import no.nav.etterlatte.trygdetid.kafka.TrygdetidService
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import rapidsandrivers.BEHANDLING_ID_KEY
 import rapidsandrivers.HENDELSE_DATA_KEY
@@ -158,8 +159,9 @@ internal class MigreringHendelserTest {
     }
 
     @Test
-    fun `skal ikke opprette grunnlagsperioder dersom det ikke finnes perioder`() {
+    fun `skal overstyre resultat dersom det ikke finnes perioder`() {
         val behandlingId = slot<UUID>()
+        val beregnetTrygdetid = slot<DetaljertBeregnetTrygdetidResultat>()
         val trygdetidDto =
             TrygdetidDto(
                 id = UUID.randomUUID(),
@@ -201,6 +203,21 @@ internal class MigreringHendelserTest {
             )
         every { trygdetidService.beregnTrygdetid(capture(behandlingId)) } returns trygdetidDto
         every { trygdetidService.beregnTrygdetidGrunnlag(any(), any()) } returns trygdetidDto
+        every {
+            trygdetidService.overstyrBeregnetTrygdetid(
+                any(),
+                capture(beregnetTrygdetid),
+            )
+        } returns
+            trygdetidDto.copy(
+                beregnetTrygdetid =
+                    trygdetidDto.beregnetTrygdetid!!.copy(
+                        resultat =
+                            trygdetidDto.beregnetTrygdetid!!.resultat.copy(
+                                overstyrt = true,
+                            ),
+                    ),
+            )
 
         val melding =
             JsonMessage.newMessage(
@@ -216,11 +233,136 @@ internal class MigreringHendelserTest {
 
         assertEquals(UUID.fromString("a9d42eb9-561f-4320-8bba-2ba600e66e21"), behandlingId.captured)
         assertEquals(1, inspector.inspektør.size)
-        assertEquals(
-            trygdetidDto,
-            objectMapper.readValue<TrygdetidDto>(inspector.inspektør.message(0).get(TRYGDETID_KEY).asText()),
-        )
+        val trygdetidKafka: TrygdetidDto =
+            objectMapper.readValue<TrygdetidDto>(inspector.inspektør.message(0).get(TRYGDETID_KEY).asText())
+        assertTrue(beregnetTrygdetid.captured.overstyrt)
+        assertTrue(trygdetidKafka.beregnetTrygdetid!!.resultat.overstyrt)
         coVerify(exactly = 1) { trygdetidService.beregnTrygdetid(behandlingId.captured) }
         coVerify(exactly = 0) { trygdetidService.beregnTrygdetidGrunnlag(behandlingId.captured, any()) }
+        coVerify(exactly = 1) {
+            trygdetidService.overstyrBeregnetTrygdetid(
+                behandlingId.captured,
+                beregnetTrygdetid.captured,
+            )
+        }
+    }
+
+    @Test
+    fun `skal overstyre resultat dersom det feiler naar man legger til periode fra Pesys`() {
+        val behandlingId = slot<UUID>()
+        val beregnetTrygdetid = slot<DetaljertBeregnetTrygdetidResultat>()
+        val trygdetidDto =
+            TrygdetidDto(
+                id = UUID.randomUUID(),
+                behandlingId = UUID.randomUUID(),
+                beregnetTrygdetid =
+                    DetaljertBeregnetTrygdetidDto(
+                        DetaljertBeregnetTrygdetidResultat.fraSamletTrygdetidNorge(40),
+                        Tidspunkt.now(),
+                    ),
+                trygdetidGrunnlag = emptyList(),
+                opplysninger =
+                    GrunnlagOpplysningerDto(
+                        avdoedDoedsdato = null,
+                        avdoedFoedselsdato = null,
+                        avdoedFylteSeksten = null,
+                        avdoedFyllerSeksti = null,
+                    ),
+            )
+        val fnr = Folkeregisteridentifikator.of("12101376212")
+        val request =
+            MigreringRequest(
+                pesysId = PesysId(1),
+                enhet = Enhet("4817"),
+                soeker = fnr,
+                avdoedForelder = listOf(AvdoedForelder(fnr, Tidspunkt.now())),
+                gjenlevendeForelder = null,
+                virkningstidspunkt = YearMonth.now(),
+                foersteVirkningstidspunkt = YearMonth.now().minusYears(10),
+                beregning =
+                    Beregning(
+                        brutto = BigDecimal(1000),
+                        netto = BigDecimal(1000),
+                        anvendtTrygdetid = BigDecimal(40),
+                        datoVirkFom = Tidspunkt.now(),
+                        g = BigDecimal(100000),
+                    ),
+                trygdetid =
+                    Trygdetid(
+                        listOf(
+                            Trygdetidsgrunnlag(
+                                trygdetidGrunnlagId = 1L,
+                                personGrunnlagId = 2L,
+                                landTreBokstaver = "NOR",
+                                datoFom =
+                                    Tidspunkt.ofNorskTidssone(
+                                        LocalDate.parse("2000-01-01"),
+                                        LocalTime.of(0, 0, 0),
+                                    ),
+                                datoTom =
+                                    Tidspunkt.ofNorskTidssone(
+                                        LocalDate.parse("2015-01-01"),
+                                        LocalTime.of(0, 0, 0),
+                                    ),
+                                poengIInnAar = false,
+                                poengIUtAar = false,
+                                ikkeIProrata = false,
+                                faktiskTrygdetid = BigDecimal(20.5),
+                                fremtidigTrygdetid = BigDecimal(15),
+                                anvendtTrygdetid = BigDecimal(35.5),
+                            ),
+                        ),
+                    ),
+                spraak = Spraak.NN,
+            )
+        every { trygdetidService.beregnTrygdetid(capture(behandlingId)) } returns trygdetidDto
+        every {
+            trygdetidService.beregnTrygdetidGrunnlag(
+                any(),
+                any(),
+            )
+        } throws Exception("Noe feil skjedde ved opprettelse av periode")
+        every {
+            trygdetidService.overstyrBeregnetTrygdetid(
+                any(),
+                capture(beregnetTrygdetid),
+            )
+        } returns
+            trygdetidDto.copy(
+                beregnetTrygdetid =
+                    trygdetidDto.beregnetTrygdetid!!.copy(
+                        resultat =
+                            trygdetidDto.beregnetTrygdetid!!.resultat.copy(
+                                overstyrt = true,
+                            ),
+                    ),
+            )
+
+        val melding =
+            JsonMessage.newMessage(
+                Migreringshendelser.TRYGDETID,
+                mapOf(
+                    BEHANDLING_ID_KEY to "a9d42eb9-561f-4320-8bba-2ba600e66e21",
+                    VILKAARSVURDERT_KEY to "vilkaarsvurdert",
+                    HENDELSE_DATA_KEY to request,
+                ),
+            )
+
+        inspector.sendTestMessage(melding.toJson())
+
+        assertEquals(UUID.fromString("a9d42eb9-561f-4320-8bba-2ba600e66e21"), behandlingId.captured)
+        assertEquals(1, inspector.inspektør.size)
+        val trygdetidKafka: TrygdetidDto =
+            objectMapper.readValue<TrygdetidDto>(inspector.inspektør.message(0).get(TRYGDETID_KEY).asText())
+        assertTrue(beregnetTrygdetid.captured.overstyrt)
+        assertTrue(trygdetidKafka.beregnetTrygdetid!!.resultat.overstyrt)
+        coVerify(exactly = 1) { trygdetidService.beregnTrygdetid(behandlingId.captured) }
+        coVerify(exactly = 1) { trygdetidService.beregnTrygdetidGrunnlag(behandlingId.captured, any()) }
+        coVerify(exactly = 1) {
+            trygdetidService.overstyrBeregnetTrygdetid(
+                behandlingId.captured,
+                beregnetTrygdetid.captured,
+            )
+        }
     }
 }

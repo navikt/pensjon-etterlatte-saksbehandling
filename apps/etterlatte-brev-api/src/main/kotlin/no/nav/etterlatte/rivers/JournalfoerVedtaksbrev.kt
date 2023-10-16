@@ -25,7 +25,7 @@ internal class JournalfoerVedtaksbrev(
     private val logger = LoggerFactory.getLogger(JournalfoerVedtaksbrev::class.java)
 
     init {
-        initialiserRiver(rapidsConnection, BrevEventTypes.FERDIGSTILT.toString()) {
+        initialiserRiver(rapidsConnection, BrevEventTypes.FERDIGSTILT.name) {
             validate { it.requireKey("vedtak") }
             validate { it.requireKey("vedtak.vedtakId") }
             validate { it.requireKey("vedtak.behandling.id") }

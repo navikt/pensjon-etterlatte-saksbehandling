@@ -114,6 +114,17 @@ class GenerellBehandlingServiceTest {
     }
 
     @Test
+    fun `Kan kun oppdatere hvis statusen er opprettet`() {
+        val sak = sakRepo.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val manueltOpprettetBehandling = GenerellBehandling.opprettFraType(GenerellBehandling.GenerellBehandlingType.UTLAND, sak.id)
+        val opprettBehandling = service.opprettBehandling(manueltOpprettetBehandling)
+        dao.oppdaterGenerellBehandling(opprettBehandling.copy(status = GenerellBehandling.Status.FATTET))
+        assertThrows<KanIkkeEndreFattetEllerAttestertBehandling> {
+            service.lagreNyeOpplysninger(opprettBehandling)
+        }
+    }
+
+    @Test
     fun kanOppretteBehandlingOgFaarDaOgsaaEnOppgaveManuellOpprettelseUtenTildelingAvSaksbehandler() {
         val sak = sakRepo.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         val manueltOpprettetBehandling = GenerellBehandling.opprettFraType(GenerellBehandling.GenerellBehandlingType.UTLAND, sak.id)
@@ -201,7 +212,7 @@ class GenerellBehandlingServiceTest {
                 "124124124",
             )
         val behandlingUtfylt = opprettBehandling.copy(innhold = utlandInnhold)
-        val oppdaterBehandling = service.oppdaterBehandling(behandlingUtfylt)
+        val oppdaterBehandling = service.lagreNyeOpplysninger(behandlingUtfylt)
         service.sendTilAttestering(oppdaterBehandling, saksbehandler)
         val fattetBehandling = service.hentBehandlingMedId(oppdaterBehandling.id)
         Assertions.assertEquals(GenerellBehandling.Status.FATTET, fattetBehandling?.status)
@@ -247,7 +258,7 @@ class GenerellBehandlingServiceTest {
                 "124124124",
             )
         val behandlingUtfylt = opprettBehandling.copy(innhold = utlandInnhold)
-        val oppdaterBehandling = service.oppdaterBehandling(behandlingUtfylt)
+        val oppdaterBehandling = service.lagreNyeOpplysninger(behandlingUtfylt)
         assertThrows<DokumentManglerDatoException> {
             service.sendTilAttestering(oppdaterBehandling, saksbehandler)
         }
@@ -284,7 +295,7 @@ class GenerellBehandlingServiceTest {
                 "124124124",
             )
         val behandlingUtfylt = opprettBehandling.copy(innhold = utlandInnhold, status = GenerellBehandling.Status.FATTET)
-        val oppdaterBehandling = service.oppdaterBehandling(behandlingUtfylt)
+        val oppdaterBehandling = service.lagreNyeOpplysninger(behandlingUtfylt)
         assertThrows<IllegalStateException> {
             service.sendTilAttestering(oppdaterBehandling, saksbehandler)
         }
@@ -321,7 +332,7 @@ class GenerellBehandlingServiceTest {
                 "",
             )
         val behandlingUtfylt = opprettBehandling.copy(innhold = utlandInnhold)
-        val oppdaterBehandling = service.oppdaterBehandling(behandlingUtfylt)
+        val oppdaterBehandling = service.lagreNyeOpplysninger(behandlingUtfylt)
         assertThrows<ManglerRinanummerException> {
             service.sendTilAttestering(oppdaterBehandling, saksbehandler)
         }
@@ -358,7 +369,7 @@ class GenerellBehandlingServiceTest {
                 "rinanummer",
             )
         val behandlingUtfylt = opprettBehandling.copy(innhold = utlandInnhold)
-        val oppdaterBehandling = service.oppdaterBehandling(behandlingUtfylt)
+        val oppdaterBehandling = service.lagreNyeOpplysninger(behandlingUtfylt)
         assertThrows<ManglerLandkodeException> {
             service.sendTilAttestering(oppdaterBehandling, saksbehandler)
         }
@@ -395,7 +406,7 @@ class GenerellBehandlingServiceTest {
                 "rinanummer",
             )
         val behandlingUtfylt = opprettBehandling.copy(innhold = utlandInnhold)
-        val oppdaterBehandling = service.oppdaterBehandling(behandlingUtfylt)
+        val oppdaterBehandling = service.lagreNyeOpplysninger(behandlingUtfylt)
         assertThrows<LandFeilIsokodeException> {
             service.sendTilAttestering(oppdaterBehandling, saksbehandler)
         }
@@ -434,7 +445,7 @@ class GenerellBehandlingServiceTest {
                 "124124124",
             )
         val behandlingUtfylt = opprettBehandling.copy(innhold = utlandInnhold)
-        val oppdaterBehandling = service.oppdaterBehandling(behandlingUtfylt)
+        val oppdaterBehandling = service.lagreNyeOpplysninger(behandlingUtfylt)
         service.sendTilAttestering(oppdaterBehandling, saksbehandler)
         val fattetBehandling = service.hentBehandlingMedId(oppdaterBehandling.id)
         Assertions.assertEquals(GenerellBehandling.Status.FATTET, fattetBehandling?.status)

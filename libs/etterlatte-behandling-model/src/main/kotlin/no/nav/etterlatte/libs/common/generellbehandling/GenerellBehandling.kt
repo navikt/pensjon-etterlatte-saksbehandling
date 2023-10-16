@@ -19,6 +19,8 @@ data class GenerellBehandling(
         AVBRUTT,
     }
 
+    fun kanEndres() = this.status === Status.OPPRETTET
+
     init {
         if (innhold !== null) {
             when (type) {

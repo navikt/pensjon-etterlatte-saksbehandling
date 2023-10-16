@@ -1,6 +1,6 @@
 import { Dokumenter, Generellbehandling, Status, Utland } from '~shared/types/Generellbehandling'
 import { Content, ContentHeader, GridContainer, MainContent } from '~shared/styled'
-import { HeadingWrapper } from '~components/behandling/soeknadsoversikt/styled'
+import { HeadingWrapper, InfoWrapper } from '~components/behandling/soeknadsoversikt/styled'
 import {
   Alert,
   BodyShort,
@@ -14,7 +14,7 @@ import {
   Textarea,
   TextField,
 } from '@navikt/ds-react'
-import { useContext, useEffect, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import { isFailure, isPending, isSuccess, mapApiResult, useApiCall } from '~shared/hooks/useApiCall'
 import {
   attesterGenerellbehandling,
@@ -31,6 +31,11 @@ import { ABlue500, AGray400 } from '@navikt/ds-tokens/dist/tokens'
 import { ButtonGroup } from '~components/person/VurderHendelseModal'
 import { ConfigContext } from '~clientConfig'
 import { DatoVelger, formatDateToLocaleDateOrEmptyString } from '~shared/DatoVelger'
+import { getGrunnlagsAvOpplysningstype } from '~shared/api/grunnlag'
+import { Grunnlagsopplysning } from '~shared/types/grunnlag'
+import { formaterNavn, IPdlPerson } from '~shared/types/Person'
+import { KildePdl } from '~shared/types/kilde'
+import { Info } from '~components/behandling/soeknadsoversikt/Info'
 
 const TextFieldBegrunnelse = styled(Textarea).attrs({ size: 'medium' })`
   max-width: 40rem;
@@ -57,7 +62,9 @@ const Utland = (props: { utlandsBehandling: Generellbehandling & { innhold: Utla
   const innhold = utlandsBehandling.innhold
   const [putOppdaterGenerellBehandlingStatus, putOppdaterGenerellBehandling] = useApiCall(oppdaterGenerellBehandling)
   const [sendTilAttesteringStatus, sendTilAttestering] = useApiCall(sendTilAttesteringGenerellBehandling)
-  const [attesterFetchStatus, attesterFetch] = useApiCall(attesterGenerellbehandling)
+  const [attesterStatus, attesterFetch] = useApiCall(attesterGenerellbehandling)
+  const [avdoedeStatus, avdoedeFetch] = useApiCall(getGrunnlagsAvOpplysningstype)
+  const [avdoed, setAvdoed] = useState<Grunnlagsopplysning<IPdlPerson, KildePdl> | null>(null)
 
   const [hentAlleLandRequest, fetchAlleLand] = useApiCall(hentAlleLand)
   const [alleLandKodeverk, setAlleLandKodeverk] = useState<ILand[] | null>(null)
@@ -65,6 +72,7 @@ const Utland = (props: { utlandsBehandling: Generellbehandling & { innhold: Utla
   const [notater, setNotater] = useState<string>(innhold?.begrunnelse ?? '')
   const [valgtLandIsoKode, setValgtLandIsoKode] = useState<string>('')
   const [valgteLandIsoKode, setvalgteLandIsoKode] = useState<string[]>(innhold?.landIsoKode ?? [])
+  const [landAlleredeValgt, setLandAlleredeValgt] = useState<boolean>(false)
   const defaultDokumentState: Dokumenter = {
     p2100: { sendt: false },
     p3000: { sendt: false },
@@ -85,6 +93,17 @@ const Utland = (props: { utlandsBehandling: Generellbehandling & { innhold: Utla
   }
 
   useEffect(() => {
+    if (utlandsBehandling.tilknyttetBehandling) {
+      avdoedeFetch(
+        {
+          sakId: utlandsBehandling.sakId,
+          behandlingId: utlandsBehandling.tilknyttetBehandling,
+          opplysningstype: 'AVDOED_PDL_V1',
+        },
+        (avdoed) => setAvdoed(avdoed)
+      )
+    }
+
     fetchAlleLand(null, (landliste) => {
       setAlleLandKodeverk(sorterLand(landliste))
     })
@@ -101,7 +120,6 @@ const Utland = (props: { utlandsBehandling: Generellbehandling & { innhold: Utla
           landIsoKode: valgteLandIsoKode,
           begrunnelse: notater,
           rinanummer: rinanummer,
-          tilknyttetBehandling: notater,
         },
       }
       putOppdaterGenerellBehandling(generellBehandling)
@@ -119,10 +137,9 @@ const Utland = (props: { utlandsBehandling: Generellbehandling & { innhold: Utla
         landIsoKode: valgteLandIsoKode,
         begrunnelse: notater,
         rinanummer: rinanummer,
-        tilknyttetBehandling: notater,
       },
     }
-    sendTilAttestering(generellBehandling)
+    sendTilAttestering(generellBehandling, () => window.location.reload())
   }
 
   const redigerbar = utlandsBehandling.status === Status.OPPRETTET
@@ -164,6 +181,7 @@ const Utland = (props: { utlandsBehandling: Generellbehandling & { innhold: Utla
                         setValgtLandIsoKode(e.target.value)
                         setErrLand(false)
                       }}
+                      onBlur={() => setLandAlleredeValgt(false)}
                     >
                       <option value="" disabled={true}>
                         Velg land
@@ -179,9 +197,12 @@ const Utland = (props: { utlandsBehandling: Generellbehandling & { innhold: Utla
                       <Button
                         disabled={!redigerbar}
                         onClick={() => {
+                          setLandAlleredeValgt(false)
                           if (valgtLandIsoKode) {
                             const finnesAllerede = valgteLandIsoKode.includes(valgtLandIsoKode)
-                            if (!finnesAllerede) {
+                            if (finnesAllerede) {
+                              setLandAlleredeValgt(true)
+                            } else {
                               const nyLandListe = valgteLandIsoKode.concat([valgtLandIsoKode])
                               setvalgteLandIsoKode(nyLandListe)
                             }
@@ -190,6 +211,7 @@ const Utland = (props: { utlandsBehandling: Generellbehandling & { innhold: Utla
                       >
                         Legg til land
                       </Button>
+                      {landAlleredeValgt && <p>Landet er allerede valgt</p>}
                     </div>
                     {valgteLandIsoKode.length ? (
                       <Heading size="medium" level="3">
@@ -213,6 +235,7 @@ const Utland = (props: { utlandsBehandling: Generellbehandling & { innhold: Utla
                               key={landIsoKode}
                               onClick={() => {
                                 if (redigerbar) {
+                                  setLandAlleredeValgt(false)
                                   const nyLandliste = valgteLandIsoKode.filter(
                                     (isolandkode) => isolandkode !== landIsoKode
                                   )
@@ -229,6 +252,26 @@ const Utland = (props: { utlandsBehandling: Generellbehandling & { innhold: Utla
                     )}
                   </>
                 )
+              )}
+              {utlandsBehandling.tilknyttetBehandling ? (
+                <div>
+                  {isSuccess(avdoedeStatus) && avdoed && (
+                    <>
+                      <h3>Informasjon om avdøde</h3>
+                      <InfoWrapper>
+                        <Info label="Navn" tekst={formaterNavn(avdoed.opplysning)} />
+                        <Info label="Fødselsnummer" tekst={avdoed.opplysning.foedselsnummer} />
+                      </InfoWrapper>
+                    </>
+                  )}
+                  {isFailure(avdoedeStatus) && <ApiErrorAlert>Klarte ikke å hente informasjon om avdøed</ApiErrorAlert>}
+                  {isPending(avdoedeStatus) && <Spinner visible={true} label="Henter opplysninger om avdøde" />}
+                </div>
+              ) : (
+                <Alert variant="warning">
+                  Denne utlandsbehandlingen er ikke tilknyttet en behandling. Vi kan derfor ikke hente avdoedes
+                  informasjon
+                </Alert>
               )}
 
               <LenkeMargin href={configContext['rinaUrl']} target="_blank" rel="noopener noreferrer">
@@ -423,27 +466,24 @@ const Utland = (props: { utlandsBehandling: Generellbehandling & { innhold: Utla
               </Alert>
             )}
             <ButtonGroup>
-              <Button
-                disabled={!redigerbar}
-                onClick={() => oppaterGenerellbehandlingUtland()}
-                loading={isPending(putOppdaterGenerellBehandlingStatus)}
-              >
-                Lagre opplysninger
-              </Button>
-              <Button
-                disabled={!redigerbar}
-                onClick={() => sendTilAttesteringWrapper()}
-                loading={isPending(sendTilAttesteringStatus)}
-              >
-                Send til attestering
-              </Button>
-              <Button
-                disabled={utlandsBehandling.status !== Status.FATTET}
-                onClick={() => attesterFetch(utlandsBehandling)}
-                loading={isPending(attesterFetchStatus)}
-              >
-                Attester
-              </Button>
+              {redigerbar && (
+                <>
+                  <Button
+                    onClick={() => oppaterGenerellbehandlingUtland()}
+                    loading={isPending(putOppdaterGenerellBehandlingStatus)}
+                  >
+                    Lagre opplysninger
+                  </Button>
+                  <Button onClick={() => sendTilAttesteringWrapper()} loading={isPending(sendTilAttesteringStatus)}>
+                    Send til attestering
+                  </Button>
+                </>
+              )}
+              {utlandsBehandling.status === Status.FATTET && (
+                <Button onClick={() => attesterFetch(utlandsBehandling)} loading={isPending(attesterStatus)}>
+                  Attester
+                </Button>
+              )}
             </ButtonGroup>
           </Panel>
         </Content>

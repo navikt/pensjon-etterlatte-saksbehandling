@@ -20,6 +20,8 @@ class ManglerLandkodeException(message: String) : Exception(message)
 
 class ManglerRinanummerException(message: String) : Exception(message)
 
+class KanIkkeEndreFattetEllerAttestertBehandling(message: String) : Exception(message)
+
 class GenerellBehandlingService(
     private val generellBehandlingDao: GenerellBehandlingDao,
     private val oppgaveService: OppgaveService,
@@ -127,7 +129,20 @@ class GenerellBehandlingService(
         }
     }
 
-    fun oppdaterBehandling(generellBehandling: GenerellBehandling): GenerellBehandling {
+    fun lagreNyeOpplysninger(generellBehandling: GenerellBehandling): GenerellBehandling {
+        val lagretBehandling = generellBehandlingDao.hentGenerellBehandlingMedId(generellBehandling.id)
+        kanLagreNyBehandling(lagretBehandling)
+        return this.oppdaterBehandling(generellBehandling)
+    }
+
+    private fun kanLagreNyBehandling(generellBehandling: GenerellBehandling?) {
+        requireNotNull(generellBehandling) { "Behandlingen finnes ikke " }
+        if (!generellBehandling.kanEndres()) {
+            throw KanIkkeEndreFattetEllerAttestertBehandling("Behandling kan ikke være fattet eller attestert hvis du skal endre den")
+        }
+    }
+
+    private fun oppdaterBehandling(generellBehandling: GenerellBehandling): GenerellBehandling {
         return generellBehandlingDao.oppdaterGenerellBehandling(generellBehandling)
     }
 

@@ -5,6 +5,7 @@ export interface Generellbehandling {
   type: GenerellBehandlingType
   opprettet: Date
   status: Status
+  tilknyttetBehandling?: string
 }
 
 export enum Status {
@@ -32,7 +33,6 @@ export interface Utland {
   dokumenter?: Dokumenter
   rinanummer?: string
   begrunnelse?: string
-  tilknyttetBehandling?: string
 }
 
 export interface Dokumenter {

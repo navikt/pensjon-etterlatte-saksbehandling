@@ -14,6 +14,8 @@ import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_REVURDER
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_REVURDERING_OMGJOERING_AV_FARSKAP
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_REVURDERING_OPPHOER
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_REVURDERING_SOESKENJUSTERING
+import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMS_AVSLAG
+import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMS_AVSLAG_BEGRUNNELSE
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMS_FOERSTEGANGSVEDTAK_INNVILGELSE
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMS_FOERSTEGANGSVEDTAK_INNVILGELSE_UTFALL
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMS_OPPHOER_MANUELL
@@ -30,6 +32,7 @@ import no.nav.etterlatte.brev.model.bp.InnvilgetBrevDataEnkel
 import no.nav.etterlatte.brev.model.bp.InnvilgetHovedmalBrevData
 import no.nav.etterlatte.brev.model.bp.OmgjoeringAvFarskapRevurderingBrevdata
 import no.nav.etterlatte.brev.model.bp.SoeskenjusteringRevurderingBrevdata
+import no.nav.etterlatte.brev.model.oms.AvslagBrevDataOMS
 import no.nav.etterlatte.brev.model.oms.FoerstegangsvedtakUtfallDTO
 import no.nav.etterlatte.brev.model.oms.InntektsendringRevurderingOMS
 import no.nav.etterlatte.brev.model.oms.InnvilgetBrevDataOMS
@@ -153,16 +156,13 @@ class BrevDataMapper(private val featureToggleService: FeatureToggleService, pri
                             OMS_FOERSTEGANGSVEDTAK_INNVILGELSE_UTFALL,
                             OMS_FOERSTEGANGSVEDTAK_INNVILGELSE,
                         )
-                    VedtakType.AVSLAG -> TODO("Vedtakstype er ikke støttet: $vedtakType")
+                    VedtakType.AVSLAG -> BrevkodePar(OMS_AVSLAG_BEGRUNNELSE, OMS_AVSLAG)
                     VedtakType.ENDRING ->
                         when (generellBrevData.revurderingsaarsak) {
                             RevurderingAarsak.INNTEKTSENDRING,
                             RevurderingAarsak.ANNEN,
                             ->
-                                BrevkodePar(
-                                    TOM_MAL,
-                                    OMS_REVURDERING_ENDRING,
-                                )
+                                BrevkodePar(TOM_MAL, OMS_REVURDERING_ENDRING)
                             else -> TODO("Revurderingsbrev for ${generellBrevData.revurderingsaarsak} er ikke støttet")
                         }
                     VedtakType.OPPHOER ->
@@ -278,7 +278,8 @@ class BrevDataMapper(private val featureToggleService: FeatureToggleService, pri
                             FoerstegangsvedtakUtfallDTO.fra(generellBrevData, utbetaling.await(), avkortingHentet)
                         }
                     }
-                    VedtakType.AVSLAG -> TODO("Vedtakstype er ikke støttet: $vedtakType")
+                    VedtakType.AVSLAG ->
+                        AvslagBrevDataOMS.fra(generellBrevData.personerISak.avdoed.navn, emptyList())
                     VedtakType.ENDRING ->
                         when (generellBrevData.revurderingsaarsak) {
                             RevurderingAarsak.INNTEKTSENDRING,
@@ -377,6 +378,11 @@ class BrevDataMapper(private val featureToggleService: FeatureToggleService, pri
                     )
                 }
             }
+
+            OMS_AVSLAG -> {
+                AvslagBrevDataOMS.fra(generellBrevData.personerISak.avdoed.navn, innhold())
+            }
+
             else ->
                 when (generellBrevData.revurderingsaarsak?.redigerbartBrev) {
                     true -> ManueltBrevData(innholdMedVedlegg.innhold())

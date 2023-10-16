@@ -1,4 +1,4 @@
-import { IGyldighetResultat, IGyldighetproving } from '~shared/types/IDetaljertBehandling'
+import { IGyldighetproving, IGyldighetResultat } from '~shared/types/IDetaljertBehandling'
 import { VurderingsResultat } from '~shared/types/VurderingsResultat'
 import { hentGyldighetsTekst } from '../../../utils'
 import { VurderingsboksWrapper } from '~components/vurderingsboks/VurderingsboksWrapper'

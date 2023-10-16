@@ -97,16 +97,16 @@ export const soeknadRoutes = (behandling: IDetaljertBehandling): Array<Behandlin
       path: 'vilkaarsvurdering',
       description: 'Vilkårsvurdering',
       kreverBehandlingsstatus: IBehandlingStatus.VILKAARSVURDERT,
-  },
-  {
-    path: 'trygdetid',
-    description: 'Trygdetid',
-    kreverBehandlingsstatus: IBehandlingStatus.VILKAARSVURDERT,
+    },
+    {
+      path: 'trygdetid',
+      description: 'Trygdetid',
+      kreverBehandlingsstatus: IBehandlingStatus.VILKAARSVURDERT,
     },
     {
       path: 'beregningsgrunnlag',
       description: 'Beregningsgrunnlag',
-    kreverBehandlingsstatus: IBehandlingStatus.TRYGDETID_OPPDATERT,
+      kreverBehandlingsstatus: IBehandlingStatus.TRYGDETID_OPPDATERT,
     },
     {
       path: 'aktivitetsplikt',

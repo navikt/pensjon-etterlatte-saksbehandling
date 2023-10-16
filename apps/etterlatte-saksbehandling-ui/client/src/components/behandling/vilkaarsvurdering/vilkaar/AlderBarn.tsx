@@ -4,7 +4,7 @@ import { VilkaarColumn } from '../styled'
 import { hentKildenavn } from '../utils'
 import { formaterStringDato } from '~utils/formattering'
 import { KildeType } from '~shared/types/kilde'
-import { Detail } from "@navikt/ds-react";
+import { Detail } from '@navikt/ds-react'
 
 export const AlderBarn = ({ grunnlag }: { grunnlag: Vilkaarsgrunnlag<any>[] }) => {
   const foedselsdatoGrunnlag = grunnlag.find((grunnlag) => grunnlag.opplysningsType == 'SOEKER_FOEDSELSDATO')
@@ -22,29 +22,29 @@ export const AlderBarn = ({ grunnlag }: { grunnlag: Vilkaarsgrunnlag<any>[] }) =
     <>
       {doedsdato && doedsdatoKilde && doedsdatoKilde?.type === KildeType.pdl && (
         <VilkaarColumn>
-            <div>
-              <VilkaarStrong>Dødsfall</VilkaarStrong>
-            </div>
-            <span>{formaterStringDato(doedsdato)}</span>
-            <KildeDatoOpplysning type={doedsdatoKilde.type} dato={doedsdatoKilde.tidspunktForInnhenting} />
+          <div>
+            <VilkaarStrong>Dødsfall</VilkaarStrong>
+          </div>
+          <span>{formaterStringDato(doedsdato)}</span>
+          <KildeDatoOpplysning type={doedsdatoKilde.type} dato={doedsdatoKilde.tidspunktForInnhenting} />
         </VilkaarColumn>
       )}
       {foedselsdato && foedselsdatoKilde && foedselsdatoKilde?.type === KildeType.pdl && (
         <VilkaarColumn>
-            <div>
-              <VilkaarStrong>Barnets fødselsdato</VilkaarStrong>
-            </div>
-            <span>{formaterStringDato(foedselsdato)}</span>
-            <KildeDatoOpplysning type={foedselsdatoKilde.type} dato={foedselsdatoKilde.tidspunktForInnhenting} />
+          <div>
+            <VilkaarStrong>Barnets fødselsdato</VilkaarStrong>
+          </div>
+          <span>{formaterStringDato(foedselsdato)}</span>
+          <KildeDatoOpplysning type={foedselsdatoKilde.type} dato={foedselsdatoKilde.tidspunktForInnhenting} />
         </VilkaarColumn>
       )}
       {virkningstidspunkt && virkningstidspunktKilde && virkningstidspunktKilde?.type == KildeType.saksbehandler && (
         <VilkaarColumn>
-            <div>
-              <VilkaarStrong>Virkningstidspunkt</VilkaarStrong>
-            </div>
-            <span>{formaterStringDato(virkningstidspunkt)}</span>
-            <KildeDatoOpplysning type={virkningstidspunktKilde.type} dato={virkningstidspunktKilde.tidspunkt} />
+          <div>
+            <VilkaarStrong>Virkningstidspunkt</VilkaarStrong>
+          </div>
+          <span>{formaterStringDato(virkningstidspunkt)}</span>
+          <KildeDatoOpplysning type={virkningstidspunktKilde.type} dato={virkningstidspunktKilde.tidspunkt} />
         </VilkaarColumn>
       )}
     </>
@@ -66,5 +66,5 @@ const KildeDatoOpplysning = ({ type, dato }: { type?: KildeType; dato?: string }
 }
 
 export const VilkaarStrong = styled.strong`
-    white-space: nowrap;
+  white-space: nowrap;
 `

@@ -1,5 +1,6 @@
 import { addMonths, isBefore, subYears } from 'date-fns'
 import { Hjemmel } from '~components/behandling/soeknadsoversikt/soeknadoversikt/virkningstidspunkt/Virkningstidspunkt'
+
 export function hentMinimumsVirkningstidspunkt(avdoedDoedsdato: string | undefined, soeknadMottattDato: string): Date {
   const doedsdato = new Date(avdoedDoedsdato ?? '')
   //Pga bug i ds-react-month picker så må det være første i måneden.

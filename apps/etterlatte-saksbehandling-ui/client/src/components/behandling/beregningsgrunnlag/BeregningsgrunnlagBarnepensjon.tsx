@@ -4,9 +4,8 @@ import { useBehandlingRoutes } from '../BehandlingRoutes'
 import { hentBehandlesFraStatus } from '../felles/utils'
 import { NesteOgTilbake } from '../handlinger/NesteOgTilbake'
 import { useAppDispatch } from '~store/Store'
-import { hentBeregningsGrunnlag, opprettEllerEndreBeregning } from '~shared/api/beregning'
+import { hentBeregningsGrunnlag, lagreBeregningsGrunnlag, opprettEllerEndreBeregning } from '~shared/api/beregning'
 import { isFailure, isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
-import { lagreBeregningsGrunnlag } from '~shared/api/beregning'
 import {
   IBehandlingReducer,
   oppdaterBehandlingsstatus,

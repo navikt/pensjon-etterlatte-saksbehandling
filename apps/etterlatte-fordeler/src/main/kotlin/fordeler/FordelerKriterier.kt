@@ -126,7 +126,7 @@ class FordelerKriterier {
         return (
             person.utland?.innflyttingTilNorge?.isNotEmpty() == true ||
                 person.utland?.utflyttingFraNorge?.isNotEmpty() == true
-            )
+        )
     }
 
     private fun personErIkkeRegistrertDoed(person: Person): Boolean {

@@ -5,13 +5,12 @@ import { FristHandlinger } from '~components/nyoppgavebenk/minoppgaveliste/Frist
 import React, { useState } from 'react'
 import { HandlingerForOppgave } from '~components/nyoppgavebenk/HandlingerForOppgave'
 import { OppgavetypeTag, SaktypeTag } from '~components/nyoppgavebenk/Tags'
-import { PaginationWrapper } from '~components/nyoppgavebenk/Oppgavelista'
+import { HeaderPadding, PaginationWrapper } from '~components/nyoppgavebenk/Oppgavelista'
 import {
   filtrerOppgaveStatus,
   OPPGAVESTATUSFILTER,
   OppgavestatusFilterKeys,
 } from '~components/nyoppgavebenk/Oppgavelistafiltre'
-import { HeaderPadding } from '~components/nyoppgavebenk/Oppgavelista'
 import SaksoversiktLenke from '~components/nyoppgavebenk/SaksoversiktLenke'
 import styled from 'styled-components'
 import { RedigerSaksbehandler } from '../tildeling/RedigerSaksbehandler'

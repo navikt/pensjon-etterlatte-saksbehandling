@@ -9,7 +9,6 @@ import io.ktor.server.routing.route
 import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
-import no.nav.etterlatte.libs.common.sakId
 import no.nav.etterlatte.libs.common.withSakId
 
 fun Route.sakGrunnlagRoute(

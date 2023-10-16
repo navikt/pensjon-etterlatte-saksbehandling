@@ -31,6 +31,7 @@ import java.util.UUID
 
 internal sealed class TilstandException : IllegalStateException() {
     internal object UgyldigTilstand : TilstandException()
+
     internal object IkkeFyltUt : TilstandException()
 }
 

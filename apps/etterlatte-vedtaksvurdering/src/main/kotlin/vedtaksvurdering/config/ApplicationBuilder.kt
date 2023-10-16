@@ -10,7 +10,6 @@ import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.libs.ktor.setReady
-import no.nav.etterlatte.vedtaksvurdering.Ryddejobb
 import no.nav.etterlatte.vedtaksvurdering.VedtakBehandlingService
 import no.nav.etterlatte.vedtaksvurdering.VedtakTilbakekrevingService
 import no.nav.etterlatte.vedtaksvurdering.VedtaksvurderingRepository
@@ -27,7 +26,6 @@ import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.Logger
 import rapidsandrivers.getRapidEnv
 import java.util.UUID
-import kotlin.concurrent.thread
 
 val sikkerLogg: Logger = sikkerlogger()
 
@@ -62,12 +60,6 @@ class ApplicationBuilder {
             repository = VedtaksvurderingRepository(dataSource),
         )
 
-    private val ryddejobb =
-        Ryddejobb(
-            vedtakBehandlingService = vedtakBehandlingService,
-            publiser = ::publiser,
-        )
-
     private val rapidsConnection =
         RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(getRapidEnv()))
             .withKtorModule {
@@ -89,14 +81,7 @@ class ApplicationBuilder {
                 )
             }
 
-    fun start() =
-        setReady().also {
-            thread {
-                Thread.sleep(90_000)
-                ryddejobb.resendJournalfoeringbehovForAlleAttesterteOgIverksatteVedtak()
-            }
-            rapidsConnection.start()
-        }
+    fun start() = setReady().also { rapidsConnection.start() }
 
     private fun publiser(
         melding: String,

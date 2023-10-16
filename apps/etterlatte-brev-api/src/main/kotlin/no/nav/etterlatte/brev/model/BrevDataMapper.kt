@@ -331,14 +331,12 @@ class BrevDataMapper(private val featureToggleService: FeatureToggleService, pri
                     val avkortingsinfo = async { fetcher.hentAvkortinginfo() }
                     val trygdetid = async { fetcher.hentTrygdetid() }
                     val grunnbeloep = async { fetcher.hentGrunnbeloep() }
-                    val avkortingsinfoHentet = requireNotNull(avkortingsinfo.await()) { "${kode.ferdigstilling} Må ha avkortingsinfo" }
-                    val etterbetalingHentet = requireNotNull(etterbetaling.await()) { "${kode.ferdigstilling} Må ha etterbetalingsinfo" }
                     val trygdetidHentet = requireNotNull(trygdetid.await()) { "${kode.ferdigstilling} Må ha trygdetid" }
                     val grunnbeloepHentet = requireNotNull(grunnbeloep.await()) { "${kode.ferdigstilling} Må ha grunnbeløp" }
                     InnvilgetHovedmalBrevData.fra(
                         utbetaling.await(),
-                        avkortingsinfoHentet,
-                        etterbetalingHentet,
+                        avkortingsinfo.await(),
+                        etterbetaling.await(),
                         trygdetidHentet,
                         grunnbeloepHentet,
                         innholdMedVedlegg,
@@ -352,13 +350,12 @@ class BrevDataMapper(private val featureToggleService: FeatureToggleService, pri
                     val avkortingsinfo = async { fetcher.hentAvkortinginfo() }
                     val trygdetid = async { fetcher.hentTrygdetid() }
                     val avkortingsinfoHentet = requireNotNull(avkortingsinfo.await()) { "${kode.ferdigstilling} Må ha avkortingsinfo" }
-                    val etterbetalingHentet = requireNotNull(etterbetaling.await()) { "${kode.ferdigstilling} Må ha etterbetalingsinfo" }
                     val trygdetidHentet = requireNotNull(trygdetid.await()) { "${kode.ferdigstilling} Må ha trygdetid" }
                     InnvilgetBrevDataOMS.fra(
                         generellBrevData,
                         utbetaling.await(),
                         avkortingsinfoHentet,
-                        etterbetalingHentet,
+                        etterbetaling.await(),
                         trygdetidHentet,
                         innholdMedVedlegg,
                     )
@@ -371,11 +368,10 @@ class BrevDataMapper(private val featureToggleService: FeatureToggleService, pri
                     val avkortingsinfo = async { fetcher.hentAvkortinginfo() }
                     val trygdetid = async { fetcher.hentTrygdetid() }
                     val avkortingsinfoHentet = requireNotNull(avkortingsinfo.await()) { "${kode.ferdigstilling} Må ha avkortingsinfo" }
-                    val etterbetalingHentet = requireNotNull(etterbetaling.await()) { "${kode.ferdigstilling} Må ha etterbetalingsinfo" }
                     val trygdetidHentet = requireNotNull(trygdetid.await()) { "${kode.ferdigstilling} Må ha trygdetid" }
                     InntektsendringRevurderingOMS.fra(
                         avkortingsinfoHentet,
-                        etterbetalingHentet,
+                        etterbetaling.await(),
                         trygdetidHentet,
                         innholdMedVedlegg,
                     )

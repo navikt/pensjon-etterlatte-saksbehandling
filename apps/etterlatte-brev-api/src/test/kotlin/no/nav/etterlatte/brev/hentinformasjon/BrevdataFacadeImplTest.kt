@@ -172,7 +172,7 @@ internal class BrevdataFacadeImplTest {
     }
 
     @Test
-    fun test() {
+    fun `henter trygdetid`() {
         val behandlingId = UUID.randomUUID()
         coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns trygdetidDto(behandlingId)
         val trygdetid = runBlocking { service.finnTrygdetid(behandlingId, mockk()) }

@@ -4,7 +4,7 @@ create table sjekkliste
     kommentar    TEXT,
     adresse_brev TEXT,
     kontonr_reg  TEXT,
-    bekreftet    BIGINT,
+    bekreftet    BOOLEAN   NOT NULL DEFAULT FALSE,
     opprettet_av TEXT      NOT NULL,
     opprettet    TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     endret_av    TEXT      NOT NULL,

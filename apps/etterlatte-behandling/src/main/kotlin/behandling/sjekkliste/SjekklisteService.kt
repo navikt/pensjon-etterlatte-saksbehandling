@@ -44,11 +44,16 @@ class SjekklisteService(
 
     fun oppdaterSjekkliste(
         behandlingId: UUID,
-        oppdaterSjekkliste: OppdaterSjekkliste,
-    ) {
-        val behandling = requireNotNull(behandlingService.hentBehandling(behandlingId))
-        if (!behandling.status.kanEndres()) {
-            throw IllegalStateException("Kan ikke oppdatere sjekkliste for behandling ${behandling.id} med status ${behandling.status}")
+        oppdaterSjekkliste: OppdatertSjekkliste,
+    ): Sjekkliste {
+        return inTransaction {
+            val behandling = requireNotNull(behandlingService.hentBehandling(behandlingId))
+            if (!behandling.status.kanEndres()) {
+                throw IllegalStateException("Kan ikke oppdatere sjekkliste for behandling ${behandling.id} med status ${behandling.status}")
+            }
+
+            dao.oppdaterSjekkliste(behandlingId, oppdaterSjekkliste)
+            dao.hentSjekkliste(behandlingId)!!
         }
     }
 

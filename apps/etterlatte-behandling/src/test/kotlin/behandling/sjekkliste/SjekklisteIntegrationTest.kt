@@ -11,6 +11,7 @@ import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.sjekkliste.OppdaterSjekklisteItem
+import no.nav.etterlatte.behandling.sjekkliste.OppdatertSjekkliste
 import no.nav.etterlatte.behandling.sjekkliste.SjekklisteDao
 import no.nav.etterlatte.behandling.sjekkliste.SjekklisteService
 import no.nav.etterlatte.foerstegangsbehandling
@@ -21,6 +22,7 @@ import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.assertAll
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
 import java.sql.Connection
@@ -94,6 +96,32 @@ class SjekklisteIntegrationTest {
         sjekkliste.id shouldBe behandling.id
         sjekkliste.versjon shouldBe 1
         sjekkliste.sjekklisteItems shouldHaveAtLeastSize 10
+    }
+
+    @Test
+    fun `Oppdatere sjekkliste i db`() {
+        val behandling = foerstegangsbehandling(sakId = 33L)
+        every { behandlingService.hentBehandling(behandling.id) } returns behandling
+        sjekklisteService.opprettSjekkliste(behandling.id)
+
+        sjekklisteService.oppdaterSjekkliste(
+            behandling.id,
+            OppdatertSjekkliste(
+                kommentar = "noe rart her",
+                kontonrRegistrert = "5555.5555.5555",
+                bekreftet = true,
+                versjon = 3,
+            ),
+        )
+
+        val sjekkliste = sjekklisteService.hentSjekkliste(behandling.id)!!
+
+        assertAll(
+            { sjekkliste.versjon shouldBe 2 },
+            { sjekkliste.adresseForBrev shouldBe null },
+            { sjekkliste.kommentar shouldBe "noe rart her" },
+            { sjekkliste.bekreftet shouldBe true },
+        )
     }
 
     @Test

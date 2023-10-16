@@ -22,8 +22,8 @@ import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeServi
 import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerAarsak
 import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerRequest
 import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerService
-import no.nav.etterlatte.behandling.sjekkliste.OppdaterSjekkliste
 import no.nav.etterlatte.behandling.sjekkliste.OppdaterSjekklisteItem
+import no.nav.etterlatte.behandling.sjekkliste.OppdatertSjekkliste
 import no.nav.etterlatte.behandling.sjekkliste.SjekklisteService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
@@ -282,8 +282,9 @@ internal fun Route.behandlingRoutes(
             }
 
             put {
-                val oppdatering = call.receive<OppdaterSjekkliste>()
-                sjekklisteService.oppdaterSjekkliste(behandlingsId, oppdatering)
+                val oppdatering = call.receive<OppdatertSjekkliste>()
+                val result = sjekklisteService.oppdaterSjekkliste(behandlingsId, oppdatering)
+                call.respond(result)
             }
 
             post("/{sjekklisteItemId}") {

@@ -4,8 +4,8 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.behandling.BehandlingService
-import no.nav.etterlatte.behandling.sjekkliste.OppdaterSjekkliste
 import no.nav.etterlatte.behandling.sjekkliste.OppdaterSjekklisteItem
+import no.nav.etterlatte.behandling.sjekkliste.OppdatertSjekkliste
 import no.nav.etterlatte.behandling.sjekkliste.SjekklisteDao
 import no.nav.etterlatte.behandling.sjekkliste.SjekklisteService
 import no.nav.etterlatte.foerstegangsbehandling
@@ -41,7 +41,13 @@ class SjekklisteServiceTest {
             },
             {
                 assertThrows<IllegalStateException> {
-                    sjekklisteService.oppdaterSjekkliste(behandlingId, OppdaterSjekkliste())
+                    sjekklisteService.oppdaterSjekkliste(
+                        behandlingId,
+                        OppdatertSjekkliste(
+                            kommentar = "Lorem ipsum",
+                            versjon = 3,
+                        ),
+                    )
                 }
             },
         )

@@ -43,6 +43,37 @@ class SjekklisteDao(private val connection: () -> Connection) {
         }
     }
 
+    fun oppdaterSjekkliste(
+        sjekklisteId: UUID,
+        oppdatering: OppdatertSjekkliste,
+    ) {
+        val stmt =
+            connection().prepareStatement(
+                """
+                UPDATE sjekkliste 
+                 SET kommentar = ?,
+                     adresse_brev = ?,
+                     kontonr_reg = ?,
+                     bekreftet = ?,
+                     endret = CURRENT_TIMESTAMP,
+                     endret_av = ?,
+                     versjon = versjon + 1
+                WHERE id = ?
+                """.trimIndent(),
+            )
+        stmt.setObject(1, oppdatering.kommentar)
+        stmt.setObject(2, oppdatering.adresseForBrev)
+        stmt.setObject(3, oppdatering.kontonrRegistrert)
+        stmt.setObject(4, oppdatering.bekreftet)
+        stmt.setObject(5, Kontekst.get().AppUser.name())
+        stmt.setObject(6, sjekklisteId)
+        stmt.executeUpdate().also {
+            if (it != 1) {
+                throw IllegalStateException("Feil under oppdatering av sjekkliste $sjekklisteId")
+            }
+        }
+    }
+
     fun hentSjekkliste(id: UUID): Sjekkliste? {
         val stmt =
             connection().prepareStatement(
@@ -51,6 +82,7 @@ class SjekklisteDao(private val connection: () -> Connection) {
                  kommentar,
                  adresse_brev,
                  kontonr_reg,
+                 bekreftet,
                  versjon
                 FROM sjekkliste
                 WHERE id = ?
@@ -63,6 +95,7 @@ class SjekklisteDao(private val connection: () -> Connection) {
                 kommentar = getString("kommentar"),
                 adresseForBrev = getString("adresse_brev"),
                 kontonrRegistrert = getString("kontonr_reg"),
+                bekreftet = getBoolean("bekreftet"),
                 sjekklisteItems = hentSjekklisteItems(id),
                 versjon = getLong("versjon"),
             )

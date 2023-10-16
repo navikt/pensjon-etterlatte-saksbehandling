@@ -19,10 +19,12 @@ data class SjekklisteItem(
     val versjon: Long,
 )
 
-data class OppdaterSjekkliste(
+data class OppdatertSjekkliste(
     val kommentar: String? = null,
     val adresseForBrev: String? = null,
     val kontonrRegistrert: String? = null,
+    val bekreftet: Boolean = false,
+    val versjon: Long,
 )
 
 data class OppdaterSjekklisteItem(

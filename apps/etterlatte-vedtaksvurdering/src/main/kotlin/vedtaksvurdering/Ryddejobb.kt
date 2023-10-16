@@ -13,7 +13,8 @@ class Ryddejobb(
 
     fun resendJournalfoeringbehovForAlleAttesterteOgIverksatteVedtak() {
         logger.info("Kjører i gang med å sende alle attesterte vedtak ut for journalføring. RYDDEJOBB!")
-        val alleAttesterteOgIverksatteVedtak = vedtakBehandlingService.hentAttesterteEllerIverksatteVedtak()
+        val alleAttesterteOgIverksatteVedtak =
+            vedtakBehandlingService.hentAttesterteEllerIverksatteVedtakSomSkalSendeBrev()
         alleAttesterteOgIverksatteVedtak.forEach {
             try {
                 publiser(

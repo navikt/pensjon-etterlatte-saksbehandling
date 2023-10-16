@@ -552,8 +552,8 @@ class VedtakBehandlingService(
         behandlingId,
     )
 
-    fun hentAttesterteEllerIverksatteVedtak(): List<Vedtak> {
-        return repository.hentAttesterteEllerIverksatteVedtak()
+    fun hentAttesterteEllerIverksatteVedtakSomSkalSendeBrev(): List<Vedtak> {
+        return repository.hentAttesterteEllerIverksatteVedtakSomSkalSendeBrev()
     }
 
     fun tilbakestillIkkeIverksatteVedtak(behandlingId: UUID): Vedtak? = repository.tilbakestillIkkeIverksatteVedtak(behandlingId)

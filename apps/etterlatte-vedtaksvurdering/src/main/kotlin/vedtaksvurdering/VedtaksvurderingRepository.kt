@@ -442,14 +442,21 @@ class VedtaksvurderingRepository(private val datasource: DataSource) : Transacti
         }
     }
 
-    fun hentAttesterteEllerIverksatteVedtak(): List<Vedtak> {
+    fun hentAttesterteEllerIverksatteVedtakSomSkalSendeBrev(): List<Vedtak> {
         return datasource.transaction { session ->
             session.hentListe(
-                queryString = "SELECT * FROM vedtak WHERE vedtakstatus in (:attestert, :iverksatt)",
+                queryString =
+                    "SELECT * FROM vedtak " +
+                        "WHERE vedtakstatus in (:attestert, :iverksatt) " +
+                        "and type != :tilbakekreving " +
+                        "and revurderingsaarsak not in (:regulering, :doedsfall)",
                 params = {
                     mapOf(
                         "attestert" to VedtakStatus.ATTESTERT.name,
                         "iverksatt" to VedtakStatus.IVERKSATT.name,
+                        "tilbakekreving" to VedtakType.TILBAKEKREVING.name,
+                        "regulering" to RevurderingAarsak.REGULERING.name,
+                        "doedsfall" to RevurderingAarsak.DOEDSFALL.name,
                     )
                 },
             ) {

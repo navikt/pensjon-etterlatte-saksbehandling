@@ -1,12 +1,12 @@
 package no.nav.etterlatte.brev.model.oms
 
 import no.nav.etterlatte.brev.behandling.Avkortingsinfo
-import no.nav.etterlatte.brev.behandling.Trygdetidsperiode
+import no.nav.etterlatte.brev.behandling.Trygdetid
 import no.nav.etterlatte.brev.model.Beregningsinfo
 import no.nav.etterlatte.brev.model.BrevData
-import no.nav.etterlatte.brev.model.BrevInnholdVedlegg
 import no.nav.etterlatte.brev.model.BrevVedleggKey
 import no.nav.etterlatte.brev.model.EtterbetalingDTO
+import no.nav.etterlatte.brev.model.InnholdMedVedlegg
 import no.nav.etterlatte.brev.model.NyBeregningsperiode
 import no.nav.etterlatte.brev.model.Slate
 
@@ -21,9 +21,8 @@ data class InntektsendringRevurderingOMS(
         fun fra(
             avkortingsinfo: Avkortingsinfo,
             etterbetalingDTO: EtterbetalingDTO,
-            trygdetidsperioder: List<Trygdetidsperiode>,
-            innhold: List<Slate.Element>,
-            innholdVedlegg: List<BrevInnholdVedlegg>,
+            trygdetid: Trygdetid,
+            innholdMedVedlegg: InnholdMedVedlegg,
         ): InntektsendringRevurderingOMS =
             InntektsendringRevurderingOMS(
                 erEndret = true,
@@ -31,11 +30,7 @@ data class InntektsendringRevurderingOMS(
                 etterbetalinginfo = etterbetalingDTO,
                 beregningsinfo =
                     Beregningsinfo(
-                        innhold =
-                            innholdVedlegg.find {
-                                    vedlegg ->
-                                vedlegg.key == BrevVedleggKey.BEREGNING_INNHOLD
-                            }?.payload!!.elements,
+                        innhold = innholdMedVedlegg.finnVedlegg(BrevVedleggKey.BEREGNING_INNHOLD),
                         grunnbeloep = avkortingsinfo.grunnbeloep,
                         beregningsperioder =
                             avkortingsinfo.beregningsperioder.map {
@@ -46,9 +41,9 @@ data class InntektsendringRevurderingOMS(
                                     utbetaltBeloep = it.utbetaltBeloep,
                                 )
                             },
-                        trygdetidsperioder = trygdetidsperioder,
+                        trygdetidsperioder = trygdetid.perioder,
                     ),
-                innhold = innhold,
+                innhold = innholdMedVedlegg.innhold(),
             )
     }
 }

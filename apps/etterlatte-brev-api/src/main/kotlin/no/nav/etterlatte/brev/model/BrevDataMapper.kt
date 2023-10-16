@@ -66,6 +66,8 @@ private class BrevDatafetcher(
             brukerTokenInfo,
         )
 
+    suspend fun hentGrunnbeloep() = brevdataFacade.hentGrunnbeloep(brukerTokenInfo)
+
     suspend fun hentEtterbetaling() =
         brevdataFacade.hentEtterbetaling(
             behandlingId,
@@ -197,9 +199,7 @@ class BrevDataMapper(private val featureToggleService: FeatureToggleService, pri
                                 coroutineScope {
                                     val utbetaling =
                                         async { fetcher.hentUtbetaling() }
-                                    val etterbetaling =
-                                        async { fetcher.hentEtterbetaling() }
-                                    InnvilgetBrevDataEnkel.fra(generellBrevData, utbetaling.await(), etterbetaling.await())
+                                    InnvilgetBrevDataEnkel.fra(generellBrevData, utbetaling.await())
                                 }
                             }
                             false -> {
@@ -303,8 +303,7 @@ class BrevDataMapper(private val featureToggleService: FeatureToggleService, pri
     suspend fun brevDataFerdigstilling(
         generellBrevData: GenerellBrevData,
         brukerTokenInfo: BrukerTokenInfo,
-        innhold: () -> List<Slate.Element>,
-        innholdVedlegg: () -> List<BrevInnholdVedlegg>,
+        innholdMedVedlegg: InnholdMedVedlegg,
         kode: BrevkodePar,
     ): BrevData {
         val fetcher =
@@ -322,7 +321,7 @@ class BrevDataMapper(private val featureToggleService: FeatureToggleService, pri
                 coroutineScope {
                     val utbetaling = async { fetcher.hentUtbetaling() }
                     val etterbetaling = async { fetcher.hentEtterbetaling() }
-                    EndringHovedmalBrevData.fra(utbetaling.await(), etterbetaling.await(), innhold())
+                    EndringHovedmalBrevData.fra(utbetaling.await(), etterbetaling.await(), innholdMedVedlegg)
                 }
             }
             BARNEPENSJON_INNVILGELSE_NY -> {
@@ -330,9 +329,20 @@ class BrevDataMapper(private val featureToggleService: FeatureToggleService, pri
                     val utbetaling = async { fetcher.hentUtbetaling() }
                     val etterbetaling = async { fetcher.hentEtterbetaling() }
                     val avkortingsinfo = async { fetcher.hentAvkortinginfo() }
+                    val trygdetid = async { fetcher.hentTrygdetid() }
+                    val grunnbeloep = async { fetcher.hentGrunnbeloep() }
                     val avkortingsinfoHentet = requireNotNull(avkortingsinfo.await()) { "${kode.ferdigstilling} Må ha avkortingsinfo" }
                     val etterbetalingHentet = requireNotNull(etterbetaling.await()) { "${kode.ferdigstilling} Må ha etterbetalingsinfo" }
-                    InnvilgetHovedmalBrevData.fra(utbetaling.await(), avkortingsinfoHentet, etterbetalingHentet, innhold())
+                    val trygdetidHentet = requireNotNull(trygdetid.await()) { "${kode.ferdigstilling} Må ha trygdetid" }
+                    val grunnbeloepHentet = requireNotNull(grunnbeloep.await()) { "${kode.ferdigstilling} Må ha grunnbeløp" }
+                    InnvilgetHovedmalBrevData.fra(
+                        utbetaling.await(),
+                        avkortingsinfoHentet,
+                        etterbetalingHentet,
+                        trygdetidHentet,
+                        grunnbeloepHentet,
+                        innholdMedVedlegg,
+                    )
                 }
             }
             OMS_FOERSTEGANGSVEDTAK_INNVILGELSE -> {
@@ -350,8 +360,7 @@ class BrevDataMapper(private val featureToggleService: FeatureToggleService, pri
                         avkortingsinfoHentet,
                         etterbetalingHentet,
                         trygdetidHentet,
-                        innhold(),
-                        innholdVedlegg(),
+                        innholdMedVedlegg,
                     )
                 }
             }
@@ -368,14 +377,13 @@ class BrevDataMapper(private val featureToggleService: FeatureToggleService, pri
                         avkortingsinfoHentet,
                         etterbetalingHentet,
                         trygdetidHentet,
-                        innhold(),
-                        innholdVedlegg(),
+                        innholdMedVedlegg,
                     )
                 }
             }
             else ->
                 when (generellBrevData.revurderingsaarsak?.redigerbartBrev) {
-                    true -> ManueltBrevData(innhold())
+                    true -> ManueltBrevData(innholdMedVedlegg.innhold())
                     else -> brevData(generellBrevData, brukerTokenInfo)
                 }
         }

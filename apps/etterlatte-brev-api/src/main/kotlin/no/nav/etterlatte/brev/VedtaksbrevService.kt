@@ -21,6 +21,7 @@ import no.nav.etterlatte.brev.model.BrevProsessType.AUTOMATISK
 import no.nav.etterlatte.brev.model.BrevProsessType.MANUELL
 import no.nav.etterlatte.brev.model.BrevProsessType.REDIGERBAR
 import no.nav.etterlatte.brev.model.BrevProsessTypeFactory
+import no.nav.etterlatte.brev.model.InnholdMedVedlegg
 import no.nav.etterlatte.brev.model.ManueltBrevData
 import no.nav.etterlatte.brev.model.OpprettNyttBrev
 import no.nav.etterlatte.brev.model.Pdf
@@ -185,9 +186,12 @@ class VedtaksbrevService(
     ): BrevData =
         when (brev.prosessType) {
             REDIGERBAR ->
-                brevDataMapper.brevDataFerdigstilling(generellBrevData, brukerTokenInfo, {
-                    hentLagretInnhold(brev)
-                }, { hentLagretInnholdVedlegg(brev) }, brevkode)
+                brevDataMapper.brevDataFerdigstilling(
+                    generellBrevData,
+                    brukerTokenInfo,
+                    InnholdMedVedlegg({ hentLagretInnhold(brev) }, { hentLagretInnholdVedlegg(brev) }),
+                    brevkode,
+                )
             AUTOMATISK -> brevDataMapper.brevData(generellBrevData, brukerTokenInfo)
             MANUELL -> ManueltBrevData(hentLagretInnhold(brev))
         }

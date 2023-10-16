@@ -2,6 +2,7 @@ package no.nav.etterlatte.brev.behandling
 
 import no.nav.etterlatte.brev.model.EtterbetalingDTO
 import no.nav.etterlatte.brev.model.Spraak
+import no.nav.etterlatte.grunnbeloep.Grunnbeloep
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -39,8 +40,9 @@ data class Behandling(
     val virkningsdato: YearMonth? = null,
     val opprinneligInnvilgelsesdato: LocalDate? = null, // Kun opphør RevurderingAarsak.OMGJOERING_AV_FARSKAP TODO: fix
     val adopsjonsdato: LocalDate? = null,
-    val trygdetid: List<Trygdetidsperiode>? = null,
+    val trygdetid: Trygdetid? = null,
     val etterbetalingDTO: EtterbetalingDTO?,
+    val grunnbeloep: Grunnbeloep,
 ) {
     init {
         if (vedtak.type == VedtakType.INNVILGELSE) {
@@ -48,6 +50,12 @@ data class Behandling(
         }
     }
 }
+
+data class Trygdetid(
+    val aarTrygdetid: Int,
+    val maanederTrygdetid: Int,
+    val perioder: List<Trygdetidsperiode>,
+)
 
 data class Trygdetidsperiode(
     val datoFOM: LocalDate,

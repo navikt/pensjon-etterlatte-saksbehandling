@@ -120,7 +120,7 @@ internal class JournalfoerVedtaksbrevTest {
         val melding =
             JsonMessage.newMessage(
                 mapOf(
-                    EVENT_NAME_KEY to BrevEventTypes.FERDIGSTILT.toString(),
+                    EVENT_NAME_KEY to BrevEventTypes.FERDIGSTILT.name,
                     "vedtak" to vedtak,
                 ),
             )
@@ -137,7 +137,7 @@ internal class JournalfoerVedtaksbrevTest {
         val melding =
             JsonMessage.newMessage(
                 mapOf(
-                    EVENT_NAME_KEY to BrevEventTypes.FERDIGSTILT.toString(),
+                    EVENT_NAME_KEY to BrevEventTypes.FERDIGSTILT.name,
                     "vedtak" to vedtak,
                     SKAL_SENDE_BREV to false,
                 ),
@@ -166,7 +166,7 @@ internal class JournalfoerVedtaksbrevTest {
         return JsonMessage.newMessage(
             mapOf(
                 CORRELATION_ID_KEY to UUID.randomUUID().toString(),
-                EVENT_NAME_KEY to BrevEventTypes.FERDIGSTILT.toString(),
+                EVENT_NAME_KEY to BrevEventTypes.FERDIGSTILT.name,
                 "vedtak" to vedtak,
             ),
         )

@@ -195,7 +195,6 @@ internal class VedtaksbrevServiceTest {
         @CsvSource(
             value = [
                 "OMSTILLINGSSTOENAD,OPPHOER,MANUELL",
-                "OMSTILLINGSSTOENAD,AVSLAG,MANUELL",
                 "OMSTILLINGSSTOENAD,ENDRING,MANUELL",
                 "BARNEPENSJON,INNVILGELSE,AUTOMATISK",
                 "BARNEPENSJON,OPPHOER,MANUELL",

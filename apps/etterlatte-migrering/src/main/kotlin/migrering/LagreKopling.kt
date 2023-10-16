@@ -1,6 +1,5 @@
 package no.nav.etterlatte.migrering
 
-import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser
 import no.nav.etterlatte.rapidsandrivers.migrering.PESYS_ID_KEY
@@ -8,7 +7,6 @@ import no.nav.etterlatte.rapidsandrivers.migrering.pesysId
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
-import no.nav.helse.rapids_rivers.River
 import org.slf4j.LoggerFactory
 import rapidsandrivers.BEHANDLING_ID_KEY
 import rapidsandrivers.behandlingId
@@ -19,12 +17,10 @@ internal class LagreKopling(rapidsConnection: RapidsConnection, private val pesy
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     init {
-        River(rapidsConnection).apply {
-            eventName(hendelsestype)
-            correlationId()
+        initialiserRiver(rapidsConnection, hendelsestype) {
             validate { it.requireKey(PESYS_ID_KEY) }
             validate { it.requireKey(BEHANDLING_ID_KEY) }
-        }.register(this)
+        }
     }
 
     override fun haandterPakke(

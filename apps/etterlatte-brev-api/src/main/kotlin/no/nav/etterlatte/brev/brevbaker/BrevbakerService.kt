@@ -1,12 +1,13 @@
 package no.nav.etterlatte.brev.brevbaker
 
 import no.nav.etterlatte.brev.adresse.AdresseService
-import no.nav.etterlatte.brev.behandling.Behandling
+import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.model.BrevDataMapper
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.BrevProsessType
 import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.Slate
+import no.nav.etterlatte.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
 import java.util.Base64
 
@@ -28,13 +29,16 @@ class BrevbakerService(
             .also { logger.info("Generert brev (id=$brevID) med størrelse: ${it.bytes.size}") }
     }
 
-    suspend fun hentRedigerbarTekstFraBrevbakeren(behandling: Behandling): Slate {
+    suspend fun hentRedigerbarTekstFraBrevbakeren(
+        generellBrevData: GenerellBrevData,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Slate {
         val request =
             BrevbakerRequest.fra(
-                brevDataMapper.brevKode(behandling, BrevProsessType.REDIGERBAR).redigering,
-                brevDataMapper.brevData(behandling),
-                behandling,
-                adresseService.hentAvsender(behandling.vedtak),
+                brevDataMapper.brevKode(generellBrevData, BrevProsessType.REDIGERBAR).redigering,
+                brevDataMapper.brevData(generellBrevData, brukerTokenInfo),
+                generellBrevData,
+                adresseService.hentAvsender(generellBrevData.forenkletVedtak),
             )
         val brevbakerResponse = brevbakerKlient.genererJSON(request)
         return BlockTilSlateKonverterer.konverter(brevbakerResponse)

@@ -36,7 +36,7 @@ const UhaandtertHendelse = (props: {
         location.reload()
       },
       (err) => {
-        console.error(`Feil status: ${err.status} error: ${err.error}`)
+        console.error(`Feil status: ${err.status} error: ${err.detail}`)
       }
     )
   }

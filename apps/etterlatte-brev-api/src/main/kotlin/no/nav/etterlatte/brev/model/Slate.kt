@@ -2,7 +2,7 @@ package no.nav.etterlatte.brev.model
 
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonValue
-import no.nav.etterlatte.brev.behandling.Behandling
+import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.model.bp.VedleggBP
 import no.nav.etterlatte.brev.model.oms.VedleggOMS
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
@@ -39,30 +39,30 @@ data class Slate(
 }
 
 object SlateHelper {
-    fun hentInitiellPayload(behandling: Behandling): Slate =
-        when (behandling.sakType) {
+    fun hentInitiellPayload(generellBrevData: GenerellBrevData): Slate =
+        when (generellBrevData.sak.sakType) {
             SakType.OMSTILLINGSSTOENAD -> {
-                when (behandling.vedtak.type) {
+                when (generellBrevData.forenkletVedtak.type) {
                     VedtakType.INNVILGELSE -> getSlate("/maler/oms-nasjonal-innvilget.json")
                     else -> getSlate("/maler/tom-brevmal.json")
                 }
             }
 
             SakType.BARNEPENSJON -> {
-                when (behandling.vedtak.type) {
+                when (generellBrevData.forenkletVedtak.type) {
                     VedtakType.AVSLAG -> getSlate("/maler/bp-avslag.json")
                     else -> getSlate("/maler/tom-brevmal.json")
                 }
             }
         }
 
-    fun hentInitiellPayloadVedlegg(behandling: Behandling): List<BrevInnholdVedlegg>? {
-        return when (behandling.sakType) {
+    fun hentInitiellPayloadVedlegg(generellBrevData: GenerellBrevData): List<BrevInnholdVedlegg>? {
+        return when (generellBrevData.sak.sakType) {
             SakType.OMSTILLINGSSTOENAD -> {
-                when (behandling.vedtak.type) {
+                when (generellBrevData.forenkletVedtak.type) {
                     VedtakType.INNVILGELSE -> VedleggOMS.innvilgelseOMS()
                     VedtakType.ENDRING -> {
-                        when (behandling.revurderingsaarsak) {
+                        when (generellBrevData.revurderingsaarsak) {
                             RevurderingAarsak.INNTEKTSENDRING,
                             RevurderingAarsak.ANNEN,
                             -> VedleggOMS.inntektsendringOMS()
@@ -74,7 +74,7 @@ object SlateHelper {
             }
 
             SakType.BARNEPENSJON -> {
-                when (behandling.vedtak.type) {
+                when (generellBrevData.forenkletVedtak.type) {
                     VedtakType.INNVILGELSE -> VedleggBP.innvilgelse()
                     else -> null
                 }

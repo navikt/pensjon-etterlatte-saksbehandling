@@ -13,6 +13,7 @@ import no.nav.etterlatte.libs.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktorobo.Resource
 import no.nav.etterlatte.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
+import java.util.UUID
 
 class GrunnlagKlientException(override val message: String, override val cause: Throwable) : Exception(message, cause)
 
@@ -27,6 +28,7 @@ class GrunnlagKlient(config: Config, httpClient: HttpClient) {
 
     suspend fun hentGrunnlag(
         sakId: Long,
+        behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): Grunnlag {
         logger.info("Henter grunnlag for sak med sakId = $sakId")
@@ -37,7 +39,7 @@ class GrunnlagKlient(config: Config, httpClient: HttpClient) {
                     resource =
                         Resource(
                             clientId = clientId,
-                            url = "$resourceUrl/api/grunnlag/sak/$sakId",
+                            url = "$resourceUrl/api/grunnlag/sak/$sakId/behandling/$behandlingId",
                         ),
                     brukerTokenInfo = brukerTokenInfo,
                 )

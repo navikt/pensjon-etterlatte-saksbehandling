@@ -23,6 +23,7 @@ data class Vilkaarsvurdering(
             virkningstidspunkt = this.virkningstidspunkt,
             vilkaar = this.vilkaar,
             resultat = this.resultat,
+            grunnlagVersjon = this.grunnlagVersjon,
         )
 }
 

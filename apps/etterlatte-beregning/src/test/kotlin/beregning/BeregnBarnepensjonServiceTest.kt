@@ -21,12 +21,15 @@ import no.nav.etterlatte.beregning.regler.FNR_2
 import no.nav.etterlatte.beregning.regler.MAKS_TRYGDETID
 import no.nav.etterlatte.beregning.regler.barnepensjon.BP_2024_DATO
 import no.nav.etterlatte.beregning.regler.bruker
+import no.nav.etterlatte.beregning.regler.toGrunnlag
 import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.klienter.GrunnlagKlientImpl
 import no.nav.etterlatte.klienter.TrygdetidKlient
 import no.nav.etterlatte.klienter.VilkaarsvurderingKlient
+import no.nav.etterlatte.libs.common.IntBroek
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
+import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
 import no.nav.etterlatte.libs.common.beregning.Beregningstype
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsdata
@@ -79,7 +82,7 @@ internal class BeregnBarnepensjonServiceTest {
         val behandling = mockBehandling(BehandlingType.FØRSTEGANGSBEHANDLING)
         val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
 
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
+        coEvery { grunnlagKlient.hentGrunnlag(any(), any(), any()) } returns grunnlag
         coEvery {
             beregningsGrunnlagService.hentBarnepensjonBeregningsGrunnlag(
                 any(),
@@ -113,11 +116,11 @@ internal class BeregnBarnepensjonServiceTest {
     }
 
     @Test
-    fun `skal beregne barnepensjon foerstegangsbehandling - ingen soesken - med trygdetid`() {
+    fun `skal beregne barnepensjon foerstegangsbehandling - ingen soesken - med trygdetid - nasjonal`() {
         val behandling = mockBehandling(BehandlingType.FØRSTEGANGSBEHANDLING)
         val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
 
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
+        coEvery { grunnlagKlient.hentGrunnlag(any(), any(), any()) } returns grunnlag
         coEvery {
             beregningsGrunnlagService.hentBarnepensjonBeregningsGrunnlag(
                 any(),
@@ -153,11 +156,91 @@ internal class BeregnBarnepensjonServiceTest {
     }
 
     @Test
+    fun `skal beregne barnepensjon foerstegangsbehandling - ingen soesken - med trygdetid - prorata`() {
+        val behandling = mockBehandling(BehandlingType.FØRSTEGANGSBEHANDLING)
+        val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
+
+        coEvery { grunnlagKlient.hentGrunnlag(any(), any(), any()) } returns grunnlag
+        coEvery {
+            beregningsGrunnlagService.hentBarnepensjonBeregningsGrunnlag(
+                any(),
+                any(),
+            )
+        } returns barnepensjonBeregningsGrunnlag(behandling.id, emptyList(), BeregningsMetode.PRORATA)
+        coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns mockTrygdetid(behandling.id)
+        featureToggleService.settBryter(BrukFaktiskTrygdetid, true)
+
+        runBlocking {
+            val beregning = beregnBarnepensjonService().beregn(behandling, bruker)
+
+            with(beregning) {
+                beregningId shouldNotBe null
+                behandlingId shouldBe behandling.id
+                type shouldBe Beregningstype.BP
+                beregnetDato shouldNotBe null
+                grunnlagMetadata shouldBe grunnlag.metadata
+                beregningsperioder.size shouldBeGreaterThanOrEqual 2
+                with(beregningsperioder.first()) {
+                    utbetaltBeloep shouldBe BP_BELOEP_INGEN_SOESKEN_JAN_23_PRORATA
+                    datoFOM shouldBe behandling.virkningstidspunkt?.dato
+                    datoTOM shouldBe YearMonth.of(2023, Month.APRIL)
+                    grunnbelopMnd shouldBe GRUNNBELOEP_JAN_23
+                    soeskenFlokk shouldBe emptyList()
+                    trygdetid shouldBe PRORATA_TRYGDETID_30_AAR / 2
+                    regelResultat shouldNotBe null
+                    regelVersjon shouldNotBe null
+                }
+                beregningsperioder.filter { p -> BP_2024_DATO.equals(p.datoFOM) } shouldBe emptyList()
+            }
+        }
+    }
+
+    @Test
+    fun `skal beregne barnepensjon foerstegangsbehandling - ingen soesken - med trygdetid - best`() {
+        val behandling = mockBehandling(BehandlingType.FØRSTEGANGSBEHANDLING)
+        val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
+
+        coEvery { grunnlagKlient.hentGrunnlag(any(), any(), any()) } returns grunnlag
+        coEvery {
+            beregningsGrunnlagService.hentBarnepensjonBeregningsGrunnlag(
+                any(),
+                any(),
+            )
+        } returns barnepensjonBeregningsGrunnlag(behandling.id, emptyList(), BeregningsMetode.BEST)
+        coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns mockTrygdetid(behandling.id)
+        featureToggleService.settBryter(BrukFaktiskTrygdetid, true)
+
+        runBlocking {
+            val beregning = beregnBarnepensjonService().beregn(behandling, bruker)
+
+            with(beregning) {
+                beregningId shouldNotBe null
+                behandlingId shouldBe behandling.id
+                type shouldBe Beregningstype.BP
+                beregnetDato shouldNotBe null
+                grunnlagMetadata shouldBe grunnlag.metadata
+                beregningsperioder.size shouldBeGreaterThanOrEqual 2
+                with(beregningsperioder.first()) {
+                    utbetaltBeloep shouldBe BP_BELOEP_INGEN_SOESKEN_JAN_23
+                    datoFOM shouldBe behandling.virkningstidspunkt?.dato
+                    datoTOM shouldBe YearMonth.of(2023, Month.APRIL)
+                    grunnbelopMnd shouldBe GRUNNBELOEP_JAN_23
+                    soeskenFlokk shouldBe emptyList()
+                    trygdetid shouldBe MAKS_TRYGDETID
+                    regelResultat shouldNotBe null
+                    regelVersjon shouldNotBe null
+                }
+                beregningsperioder.filter { p -> BP_2024_DATO.equals(p.datoFOM) } shouldBe emptyList()
+            }
+        }
+    }
+
+    @Test
     fun `skal beregne barnepensjon foerstegangsbehandling - ett soesken`() {
         val behandling = mockBehandling(BehandlingType.FØRSTEGANGSBEHANDLING)
         val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
 
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
+        coEvery { grunnlagKlient.hentGrunnlag(any(), any(), any()) } returns grunnlag
         coEvery {
             beregningsGrunnlagService.hentBarnepensjonBeregningsGrunnlag(
                 any(),
@@ -193,7 +276,7 @@ internal class BeregnBarnepensjonServiceTest {
         val behandling = mockBehandling(BehandlingType.FØRSTEGANGSBEHANDLING)
         val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
 
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
+        coEvery { grunnlagKlient.hentGrunnlag(any(), any(), any()) } returns grunnlag
         coEvery {
             beregningsGrunnlagService.hentBarnepensjonBeregningsGrunnlag(
                 any(),
@@ -230,7 +313,7 @@ internal class BeregnBarnepensjonServiceTest {
         val behandling = mockBehandling(BehandlingType.FØRSTEGANGSBEHANDLING)
         val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
 
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
+        coEvery { grunnlagKlient.hentGrunnlag(any(), any(), any()) } returns grunnlag
         coEvery {
             beregningsGrunnlagService.hentBarnepensjonBeregningsGrunnlag(
                 any(),
@@ -266,7 +349,7 @@ internal class BeregnBarnepensjonServiceTest {
         val behandling = mockBehandling(BehandlingType.FØRSTEGANGSBEHANDLING)
         val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
 
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
+        coEvery { grunnlagKlient.hentGrunnlag(any(), any(), any()) } returns grunnlag
         coEvery {
             beregningsGrunnlagService.hentBarnepensjonBeregningsGrunnlag(
                 any(),
@@ -303,7 +386,7 @@ internal class BeregnBarnepensjonServiceTest {
         val behandling = mockBehandling(BehandlingType.REVURDERING)
         val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
 
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
+        coEvery { grunnlagKlient.hentGrunnlag(any(), any(), any()) } returns grunnlag
         coEvery {
             beregningsGrunnlagService.hentBarnepensjonBeregningsGrunnlag(
                 any(),
@@ -343,7 +426,7 @@ internal class BeregnBarnepensjonServiceTest {
         val behandling = mockBehandling(BehandlingType.REVURDERING)
         val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
 
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
+        coEvery { grunnlagKlient.hentGrunnlag(any(), any(), any()) } returns grunnlag
         coEvery {
             beregningsGrunnlagService.hentBarnepensjonBeregningsGrunnlag(
                 any(),
@@ -384,7 +467,7 @@ internal class BeregnBarnepensjonServiceTest {
         val behandling = mockBehandling(BehandlingType.REVURDERING)
         val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
 
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
+        coEvery { grunnlagKlient.hentGrunnlag(any(), any(), any()) } returns grunnlag
         coEvery {
             beregningsGrunnlagService.hentBarnepensjonBeregningsGrunnlag(
                 any(),
@@ -424,7 +507,7 @@ internal class BeregnBarnepensjonServiceTest {
         val behandling = mockBehandling(BehandlingType.REVURDERING)
         val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
 
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
+        coEvery { grunnlagKlient.hentGrunnlag(any(), any(), any()) } returns grunnlag
         coEvery {
             beregningsGrunnlagService.hentBarnepensjonBeregningsGrunnlag(
                 any(),
@@ -465,7 +548,7 @@ internal class BeregnBarnepensjonServiceTest {
         val behandling = mockBehandling(BehandlingType.MANUELT_OPPHOER)
         val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
 
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
+        coEvery { grunnlagKlient.hentGrunnlag(any(), any(), any()) } returns grunnlag
         coEvery {
             beregningsGrunnlagService.hentBarnepensjonBeregningsGrunnlag(
                 any(),
@@ -501,7 +584,7 @@ internal class BeregnBarnepensjonServiceTest {
         val behandling = mockBehandling(BehandlingType.MANUELT_OPPHOER)
         val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
 
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
+        coEvery { grunnlagKlient.hentGrunnlag(any(), any(), any()) } returns grunnlag
         coEvery {
             beregningsGrunnlagService.hentBarnepensjonBeregningsGrunnlag(
                 any(),
@@ -538,7 +621,7 @@ internal class BeregnBarnepensjonServiceTest {
         val behandling = mockBehandling(BehandlingType.FØRSTEGANGSBEHANDLING)
         val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
 
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
+        coEvery { grunnlagKlient.hentGrunnlag(any(), any(), any()) } returns grunnlag
         coEvery {
             beregningsGrunnlagService.hentBarnepensjonBeregningsGrunnlag(
                 any(),
@@ -593,7 +676,7 @@ internal class BeregnBarnepensjonServiceTest {
     @Test
     fun `skal beregne barnepensjon foerstegangsbehandling - med flere avdøde foreldre og nytt regelverk`() {
         val behandling = mockBehandling(BehandlingType.FØRSTEGANGSBEHANDLING)
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns
+        coEvery { grunnlagKlient.hentGrunnlag(any(), any(), any()) } returns
             grunnlagMedEkstraAvdoedForelder(LocalDate.of(2023, 11, 12))
         coEvery {
             beregningsGrunnlagService.hentBarnepensjonBeregningsGrunnlag(
@@ -656,6 +739,7 @@ internal class BeregnBarnepensjonServiceTest {
     private fun barnepensjonBeregningsGrunnlag(
         behandlingId: UUID,
         soesken: List<String>,
+        beregningsMetode: BeregningsMetode = BeregningsMetode.NASJONAL,
     ) = BeregningsGrunnlag(
         behandlingId,
         defaultKilde(),
@@ -674,6 +758,7 @@ internal class BeregnBarnepensjonServiceTest {
                 ),
             ),
         institusjonsoppholdBeregningsgrunnlag = defaultInstitusjonsopphold(),
+        beregningsMetode = beregningsMetode.toGrunnlag(),
     )
 
     private fun beregningsGrunnlagMedSoesken(
@@ -697,6 +782,7 @@ internal class BeregnBarnepensjonServiceTest {
                 )
             },
         institusjonsoppholdBeregningsgrunnlag = defaultInstitusjonsopphold(),
+        beregningsMetode = BeregningsMetode.NASJONAL.toGrunnlag(),
     )
 
     private fun defaultKilde(): Grunnlagsopplysning.Saksbehandler =
@@ -734,7 +820,9 @@ internal class BeregnBarnepensjonServiceTest {
                 mockk {
                     every { resultat } returns
                         mockk {
-                            every { samletTrygdetidNorge } returns BeregnOmstillingsstoenadServiceTest.TRYGDETID_40_AAR
+                            every { samletTrygdetidNorge } returns TRYGDETID_40_AAR
+                            every { samletTrygdetidTeoretisk } returns PRORATA_TRYGDETID_30_AAR
+                            every { prorataBroek } returns PRORATA_BROEK
                         }
                     every { tidspunkt } returns Tidspunkt.now()
                 }
@@ -742,9 +830,13 @@ internal class BeregnBarnepensjonServiceTest {
 
     companion object {
         val VIRKNINGSTIDSPUNKT_JAN_23: YearMonth = YearMonth.of(2023, Month.JANUARY)
+        const val TRYGDETID_40_AAR: Int = 40
+        const val PRORATA_TRYGDETID_30_AAR: Int = 30
+        val PRORATA_BROEK: IntBroek = IntBroek(1, 2)
         const val GRUNNBELOEP_JAN_23: Int = 9290
         const val GRUNNBELOEP_MAI_23: Int = 9885
         const val BP_BELOEP_INGEN_SOESKEN_JAN_23: Int = 3716
+        const val BP_BELOEP_INGEN_SOESKEN_JAN_23_PRORATA: Int = 1394
         const val BP_BELOEP_ETT_SOESKEN_JAN_23: Int = 3019
         const val BP_BELOEP_TO_SOESKEN_JAN_23: Int = 2787
         const val BP_BELOEP_ETT_SOESKEN_MAI_23: Int = 3213

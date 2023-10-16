@@ -92,7 +92,8 @@ class MigreringRoutesTest : BehandlingIntegrationTest() {
                     Assertions.assertEquals(HttpStatusCode.OK, status)
                 }.body<DetaljertBehandling>()
 
-            Assertions.assertNotNull(behandling.virkningstidspunkt)
+            // reformtidspunkt er konfigurert til å være 2023-10 p.t.
+            Assertions.assertEquals(YearMonth.of(2023, 10), behandling.virkningstidspunkt!!.dato)
 
             client.get("/saker/${behandling.sak}") {
                 addAuthToken(tokenSaksbehandler)

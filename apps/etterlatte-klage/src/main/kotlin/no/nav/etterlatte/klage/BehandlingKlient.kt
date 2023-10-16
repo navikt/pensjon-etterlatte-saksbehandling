@@ -10,11 +10,11 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.klage.modell.BehandlingEvent
 import no.nav.etterlatte.klage.modell.BehandlingEventType
 import no.nav.etterlatte.klage.modell.KlageinstansUtfall
-import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingResultat
 import no.nav.etterlatte.libs.common.behandling.KabalStatus
 import no.nav.etterlatte.libs.common.behandling.Kabalrespons
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.klage.kodeverk.Fagsystem
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.slf4j.LoggerFactory
 
@@ -30,52 +30,60 @@ class BehandlingKlient(private val behandlingHttpClient: HttpClient, private val
         )
         val klageHendelse = objectMapper.readValue<BehandlingEvent>(record.value())
         logger.info(
-            "Håndterer klagehendelse ${klageHendelse.eventId}",
+            "Håndterer klagehendelse ${klageHendelse.eventId} fra opprinnelig kilde ${klageHendelse.kilde}",
         )
 
-        if (klageHendelse.kilde == Vedtaksloesning.GJENNY.name) {
+        if (klageHendelse.kilde == Fagsystem.EY.name) {
             postTilBehandling(klageHendelse)
         }
     }
 
     private fun postTilBehandling(klageHendelse: BehandlingEvent) =
         runBlocking {
+            logger.info("Så en klagehendelse som har kilde EY. Sender hendelsen til behandling")
+
             val body =
-                when (klageHendelse.type) {
-                    BehandlingEventType.KLAGEBEHANDLING_AVSLUTTET ->
-                        Kabalrespons(
-                            KabalStatus.FERDIGSTILT,
-                            requireNotNull(klageHendelse.detaljer.klagebehandlingAvsluttet).utfall.tilResultat(),
-                        )
+                try {
+                    when (klageHendelse.type) {
+                        BehandlingEventType.KLAGEBEHANDLING_AVSLUTTET ->
+                            Kabalrespons(
+                                KabalStatus.FERDIGSTILT,
+                                requireNotNull(klageHendelse.detaljer.klagebehandlingAvsluttet).utfall.tilResultat(),
+                            )
 
-                    // TODO: Se på hvordan vi håndterer anke -- det burde nok sette et eget flagg
-                    //  og ikke overstyre første status
-                    BehandlingEventType.ANKEBEHANDLING_OPPRETTET ->
-                        Kabalrespons(
-                            KabalStatus.OPPRETTET,
-                            BehandlingResultat.IKKE_SATT,
-                        )
+                        // TODO: Se på hvordan vi håndterer anke -- det burde nok sette et eget flagg
+                        //  og ikke overstyre første status
+                        BehandlingEventType.ANKEBEHANDLING_OPPRETTET ->
+                            Kabalrespons(
+                                KabalStatus.OPPRETTET,
+                                BehandlingResultat.IKKE_SATT,
+                            )
 
-                    BehandlingEventType.ANKEBEHANDLING_AVSLUTTET ->
-                        Kabalrespons(
-                            KabalStatus.FERDIGSTILT,
-                            requireNotNull(klageHendelse.detaljer.ankebehandlingAvsluttet).utfall.tilResultat(),
-                        )
+                        BehandlingEventType.ANKEBEHANDLING_AVSLUTTET ->
+                            Kabalrespons(
+                                KabalStatus.FERDIGSTILT,
+                                requireNotNull(klageHendelse.detaljer.ankebehandlingAvsluttet).utfall.tilResultat(),
+                            )
 
-                    BehandlingEventType.ANKE_I_TRYGDERETTENBEHANDLING_OPPRETTET ->
-                        Kabalrespons(
-                            KabalStatus.OPPRETTET,
-                            requireNotNull(
-                                klageHendelse.detaljer.ankeITrygderettenbehandlingOpprettet,
-                            ).utfall?.tilResultat()
-                                ?: BehandlingResultat.IKKE_SATT,
-                        )
+                        BehandlingEventType.ANKE_I_TRYGDERETTENBEHANDLING_OPPRETTET ->
+                            Kabalrespons(
+                                KabalStatus.OPPRETTET,
+                                requireNotNull(
+                                    klageHendelse.detaljer.ankeITrygderettenbehandlingOpprettet,
+                                ).utfall?.tilResultat()
+                                    ?: BehandlingResultat.IKKE_SATT,
+                            )
 
-                    BehandlingEventType.BEHANDLING_FEILREGISTRERT ->
-                        Kabalrespons(
-                            KabalStatus.FERDIGSTILT,
-                            BehandlingResultat.HENLAGT,
-                        )
+                        BehandlingEventType.BEHANDLING_FEILREGISTRERT ->
+                            Kabalrespons(
+                                KabalStatus.FERDIGSTILT,
+                                BehandlingResultat.HENLAGT,
+                            )
+                    }
+                } catch (e: Exception) {
+                    logger.error("Kunne ikke mappe ut kabalresponsen riktig. Hendelsen er logget til sikkerlogg")
+                    sikkerLogg.error("Kunne ikke mappe ut kabalresponsen riktig, eventet vi mottok var $klageHendelse")
+                    throw e
                 }
 
             behandlingHttpClient.patch(

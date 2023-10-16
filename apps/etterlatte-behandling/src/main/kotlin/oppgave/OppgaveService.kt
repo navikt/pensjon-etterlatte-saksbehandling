@@ -10,6 +10,7 @@ import no.nav.etterlatte.SystemUser
 import no.nav.etterlatte.User
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
+import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
@@ -43,13 +44,9 @@ class OppgaveService(
         val aktuelleOppgavetyperForRoller = aktuelleOppgavetyperForRolleTilSaksbehandler(rollerSomBrukerHar)
 
         return if (bruker.harRolleStrengtFortrolig()) {
-            inTransaction {
-                oppgaveDao.finnOppgaverForStrengtFortroligOgStrengtFortroligUtland(aktuelleOppgavetyperForRoller)
-            }
+            oppgaveDao.finnOppgaverForStrengtFortroligOgStrengtFortroligUtland(aktuelleOppgavetyperForRoller)
         } else {
-            inTransaction {
-                oppgaveDao.hentOppgaver(aktuelleOppgavetyperForRoller)
-            }.sortedByDescending { it.opprettet }
+            oppgaveDao.hentOppgaver(aktuelleOppgavetyperForRoller).sortedByDescending { it.opprettet }
         }.filterForEnheter(Kontekst.get().AppUser)
     }
 
@@ -127,19 +124,17 @@ class OppgaveService(
     }
 
     fun fjernSaksbehandler(oppgaveId: UUID) {
-        inTransaction {
-            val hentetOppgave =
-                oppgaveDao.hentOppgave(oppgaveId)
-                    ?: throw NotFoundException("Oppgaven finnes ikke, id: $oppgaveId")
+        val hentetOppgave =
+            oppgaveDao.hentOppgave(oppgaveId)
+                ?: throw NotFoundException("Oppgaven finnes ikke, id: $oppgaveId")
 
-            sikreAtOppgaveIkkeErAvsluttet(hentetOppgave)
-            if (hentetOppgave.saksbehandler != null) {
-                oppgaveDao.fjernSaksbehandler(oppgaveId)
-            } else {
-                throw BadRequestException(
-                    "Oppgaven har ingen saksbehandler, id: $oppgaveId",
-                )
-            }
+        sikreAtOppgaveIkkeErAvsluttet(hentetOppgave)
+        if (hentetOppgave.saksbehandler != null) {
+            oppgaveDao.fjernSaksbehandler(oppgaveId)
+        } else {
+            throw BadRequestException(
+                "Oppgaven har ingen saksbehandler, id: $oppgaveId",
+            )
         }
     }
 
@@ -156,21 +151,19 @@ class OppgaveService(
         oppgaveId: UUID,
         frist: Tidspunkt,
     ) {
-        inTransaction {
-            if (frist.isBefore(Tidspunkt.now())) {
-                throw BadRequestException("Tidspunkt tilbake i tid id: $oppgaveId")
-            }
-            val hentetOppgave =
-                oppgaveDao.hentOppgave(oppgaveId)
-                    ?: throw NotFoundException("Oppgaven finnes ikke, id: $oppgaveId")
-            sikreAtOppgaveIkkeErAvsluttet(hentetOppgave)
-            if (hentetOppgave.saksbehandler != null) {
-                oppgaveDao.redigerFrist(oppgaveId, frist)
-            } else {
-                throw BadRequestException(
-                    "Oppgaven har ingen saksbehandler, id: $oppgaveId",
-                )
-            }
+        if (frist.isBefore(Tidspunkt.now())) {
+            throw BadRequestException("Tidspunkt tilbake i tid id: $oppgaveId")
+        }
+        val hentetOppgave =
+            oppgaveDao.hentOppgave(oppgaveId)
+                ?: throw NotFoundException("Oppgaven finnes ikke, id: $oppgaveId")
+        sikreAtOppgaveIkkeErAvsluttet(hentetOppgave)
+        if (hentetOppgave.saksbehandler != null) {
+            oppgaveDao.redigerFrist(oppgaveId, frist)
+        } else {
+            throw BadRequestException(
+                "Oppgaven har ingen saksbehandler, id: $oppgaveId",
+            )
         }
     }
 
@@ -224,7 +217,13 @@ class OppgaveService(
 
     class FeilSaksbehandlerPaaOppgaveException(message: String) : Exception(message)
 
-    fun endreEnhetForOppgaverTilknyttetSak(
+    fun oppdaterEnhetForRelaterteOppgaver(sakerMedNyEnhet: List<GrunnlagsendringshendelseService.SakMedEnhet>) {
+        sakerMedNyEnhet.forEach {
+            endreEnhetForOppgaverTilknyttetSak(it.id, it.enhet)
+        }
+    }
+
+    private fun endreEnhetForOppgaverTilknyttetSak(
         sakId: Long,
         enhetsID: String,
     ) {
@@ -340,11 +339,10 @@ class OppgaveService(
 
     fun hentSaksbehandlerForBehandling(behandlingsId: UUID): String? {
         val oppgaverForBehandlingUtenAttesterting =
-            inTransaction {
-                oppgaveDao.hentOppgaverForReferanse(behandlingsId.toString())
-            }.filter {
-                it.type !== OppgaveType.ATTESTERING
-            }
+            oppgaveDao.hentOppgaverForReferanse(behandlingsId.toString())
+                .filter {
+                    it.type !== OppgaveType.ATTESTERING
+                }
         return oppgaverForBehandlingUtenAttesterting.sortedByDescending { it.opprettet }[0].saksbehandler
     }
 
@@ -359,10 +357,7 @@ class OppgaveService(
     }
 
     fun hentSaksbehandlerForOppgaveUnderArbeid(behandlingsId: UUID): String? {
-        val oppgaverforBehandling =
-            inTransaction(gjenbruk = true) {
-                oppgaveDao.hentOppgaverForReferanse(behandlingsId.toString())
-            }
+        val oppgaverforBehandling = oppgaveDao.hentOppgaverForReferanse(behandlingsId.toString())
         return try {
             val oppgaveUnderbehandling = oppgaverforBehandling.single { it.status == Status.UNDER_BEHANDLING }
             oppgaveUnderbehandling.saksbehandler

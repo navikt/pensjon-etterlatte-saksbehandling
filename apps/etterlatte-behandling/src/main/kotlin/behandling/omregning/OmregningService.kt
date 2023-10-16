@@ -24,7 +24,7 @@ class OmregningService(
         val forrigeBehandling =
             behandlingService.hentSisteIverksatte(sakId)
                 ?: throw IllegalArgumentException("Fant ikke forrige behandling i sak $sakId")
-        val persongalleri = runBlocking { grunnlagService.hentPersongalleri(sakId) }
+        val persongalleri = runBlocking { grunnlagService.hentPersongalleri(sakId, forrigeBehandling.id) }
         val behandling =
             when (prosessType) {
                 Prosesstype.AUTOMATISK ->

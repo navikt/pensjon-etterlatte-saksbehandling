@@ -7,7 +7,13 @@ import { useNavigate } from 'react-router-dom'
 import { useKlage } from '~components/klage/useKlage'
 import Spinner from '~shared/Spinner'
 import { kanSeBrev, kanSeOppsummering } from '~components/klage/stegmeny/KlageStegmeny'
-import { InnstillingTilKabal, Klage, Omgjoering, TEKSTER_AARSAK_OMGJOERING } from '~shared/types/Klage'
+import {
+  InnstillingTilKabal,
+  Klage,
+  Omgjoering,
+  TEKSTER_AARSAK_OMGJOERING,
+  TEKSTER_LOVHJEMLER,
+} from '~shared/types/Klage'
 import { JaNei } from '~shared/types/ISvar'
 import { isFailure, isInitial, isPending, mapApiResult, useApiCall } from '~shared/hooks/useApiCall'
 import { ferdigstillKlagebehandling } from '~shared/api/klage'
@@ -75,7 +81,7 @@ function VisInnstilling(props: { innstilling: InnstillingTilKabal; sakId: number
         Innstilling til KA
       </Heading>
       <BodyShort spacing>
-        Vedtak opprettholdes med følgende hovedhjemmel: <strong>{innstilling.lovhjemmel}.</strong>
+        Vedtak opprettholdes med følgende hovedhjemmel: <strong>{TEKSTER_LOVHJEMLER[innstilling.lovhjemmel]}.</strong>
       </BodyShort>
       <BodyShort spacing>
         <Button size="small" variant="primary" onClick={visModal}>

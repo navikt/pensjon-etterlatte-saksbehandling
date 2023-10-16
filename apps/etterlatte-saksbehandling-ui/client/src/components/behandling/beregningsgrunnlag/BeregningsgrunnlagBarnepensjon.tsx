@@ -23,11 +23,17 @@ import Soeskenjustering, {
 } from '~components/behandling/beregningsgrunnlag/soeskenjustering/Soeskenjustering'
 import Spinner from '~shared/Spinner'
 import { IPdlPerson } from '~shared/types/Person'
-import { InstitusjonsoppholdGrunnlagData } from '~shared/types/Beregning'
+import {
+  BeregningsMetode,
+  BeregningsMetodeBeregningsgrunnlag,
+  InstitusjonsoppholdGrunnlagData,
+} from '~shared/types/Beregning'
 import { Border } from '~components/behandling/soeknadsoversikt/styled'
 import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
+import BeregningsgrunnlagMetode from './BeregningsgrunnlagMetode'
 
 const featureToggleNameInstitusjonsopphold = 'pensjon-etterlatte.bp-bruk-institusjonsopphold' as const
+const featureToggleNameBrukFaktiskTrygdetid = 'pensjon-etterlatte.bp-bruk-faktisk-trygdetid' as const
 
 const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer }) => {
   const { behandling } = props
@@ -38,9 +44,12 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
   const [beregningsgrunnlag, fetchBeregningsgrunnlag] = useApiCall(hentBeregningsGrunnlag)
   const [endreBeregning, postOpprettEllerEndreBeregning] = useApiCall(opprettEllerEndreBeregning)
   const visInstitusjonsopphold = useFeatureEnabledMedDefault(featureToggleNameInstitusjonsopphold, false)
+  const visBeregningsmetode = useFeatureEnabledMedDefault(featureToggleNameBrukFaktiskTrygdetid, false)
   const [soeskenGrunnlagsData, setSoeskenGrunnlagsData] = useState<Soeskengrunnlag | null>(null)
   const [institusjonsoppholdsGrunnlagData, setInstitusjonsoppholdsGrunnlagData] =
     useState<InstitusjonsoppholdGrunnlagData | null>(null)
+  const [beregningsMetodeBeregningsgrunnlag, setBeregningsMetodeBeregningsgrunnlag] =
+    useState<BeregningsMetodeBeregningsgrunnlag | null>(null)
 
   const [manglerSoeskenJustering, setSoeskenJusteringMangler] = useState<boolean>(false)
 
@@ -50,6 +59,7 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
         dispatch(
           oppdaterBeregingsGrunnlag({ ...result, institusjonsopphold: result.institusjonsoppholdBeregningsgrunnlag })
         )
+        setBeregningsMetodeBeregningsgrunnlag(result.beregningsMetode)
       }
     })
   }, [])
@@ -76,6 +86,11 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
         institusjonsopphold: institusjonsoppholdsGrunnlagData
           ? mapListeTilDto(institusjonsoppholdsGrunnlagData)
           : behandling.beregningsGrunnlag?.institusjonsopphold ?? [],
+        beregningsMetode: beregningsMetodeBeregningsgrunnlag
+          ? beregningsMetodeBeregningsgrunnlag
+          : behandling.beregningsGrunnlag?.beregningsMetode ?? {
+              beregningsMetode: BeregningsMetode.NASJONAL,
+            },
       }
 
       postBeregningsgrunnlag(
@@ -96,6 +111,15 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
   return (
     <>
       <>
+        {visBeregningsmetode && isSuccess(beregningsgrunnlag) && (
+          <BeregningsgrunnlagMetode
+            behandles={hentBehandlesFraStatus(behandling?.status)}
+            grunnlag={beregningsMetodeBeregningsgrunnlag}
+            onUpdate={(grunnlag) => {
+              setBeregningsMetodeBeregningsgrunnlag({ ...grunnlag })
+            }}
+          />
+        )}
         {isSuccess(beregningsgrunnlag) && behandling.familieforhold && (
           <Soeskenjustering
             behandling={behandling}

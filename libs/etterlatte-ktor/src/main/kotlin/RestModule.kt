@@ -3,11 +3,9 @@ package no.nav.etterlatte.libs.ktor
 import com.fasterxml.jackson.core.JacksonException
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
-import io.ktor.http.HttpStatusCode
 import io.ktor.serialization.jackson.JacksonConverter
 import io.ktor.server.application.Application
 import io.ktor.server.application.install
-import io.ktor.server.application.log
 import io.ktor.server.auth.Authentication
 import io.ktor.server.auth.authenticate
 import io.ktor.server.config.ApplicationConfig
@@ -18,15 +16,14 @@ import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.server.plugins.statuspages.StatusPages
 import io.ktor.server.request.httpMethod
 import io.ktor.server.request.path
-import io.ktor.server.response.respond
 import io.ktor.server.routing.IgnoreTrailingSlash
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
 import io.micrometer.core.instrument.binder.MeterBinder
-import isProd
 import no.nav.etterlatte.libs.common.logging.CORRELATION_ID
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.ktor.feilhaandtering.StatusPagesKonfigurasjon
 import no.nav.security.token.support.core.context.TokenValidationContext
 import no.nav.security.token.support.v2.tokenValidationSupport
 import org.slf4j.Logger
@@ -66,24 +63,14 @@ fun Application.restModule(
         generate { UUID.randomUUID().toString() }
     }
 
-    install(StatusPages) {
-        exception<Throwable> { call, cause ->
-            if (cause.erDeserialiseringsException() && isProd()) {
-                sikkerLogg.error("En feil har oppstått ved deserialisering", cause)
-                call.application.log.error("En feil har oppstått ved deserialisering. Se sikkerlogg for mer detaljer.")
-            } else {
-                call.application.log.error("En feil oppstod: ${cause.message}", cause)
-            }
-            call.respond(HttpStatusCode.InternalServerError, "En intern feil har oppstått")
-        }
-    }
-
     install(Authentication) {
         tokenValidationSupport(
             config = config,
             additionalValidation = additionalValidation,
         )
     }
+
+    install(StatusPages, StatusPagesKonfigurasjon(sikkerLogg).config)
 
     routing {
         healthApi()

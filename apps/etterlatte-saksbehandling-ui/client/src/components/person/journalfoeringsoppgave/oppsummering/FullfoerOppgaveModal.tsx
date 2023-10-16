@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Alert, BodyLong, BodyShort, Button, Heading, Modal } from '@navikt/ds-react'
 import { SaktypeTag } from '~components/nyoppgavebenk/Tags'
 import { OppgaveDTO } from '~shared/api/oppgaver'
-import { isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
+import { isFailure, isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
 import { opprettBehandling } from '~shared/api/behandling'
 import { NyBehandlingRequest } from '~shared/types/IDetaljertBehandling'
 import { useNavigate } from 'react-router-dom'
@@ -67,6 +67,11 @@ export default function FullfoerOppgaveModal({ oppgave, behandlingBehov }: Modal
                 Ferdigstill
               </Button>
             </FlexRow>
+          )}
+          {isFailure(status) && (
+            <Modal.Footer>
+              <Alert variant="error">Det oppsto en feil ved oppretting av behandlingen.</Alert>
+            </Modal.Footer>
           )}
         </Modal.Body>
       </Modal>

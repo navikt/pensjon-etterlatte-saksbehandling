@@ -45,7 +45,6 @@ enum class KlageStatus {
     }
 }
 
-// Placeholder til vi vet mer om hvilken flyt vi har her
 enum class KabalStatus {
     OPPRETTET,
     UTREDES,
@@ -87,6 +86,7 @@ data class Klage(
     val formkrav: FormkravMedBeslutter?,
     val utfall: KlageUtfall?,
     val resultat: KlageResultat?,
+    val kabalResultat: BehandlingResultat?,
 ) {
     fun oppdaterFormkrav(
         formkrav: Formkrav,
@@ -119,6 +119,18 @@ data class Klage(
                     "til klagen (${this.status})",
             )
         }
+        val hjemmel =
+            when (utfallMedBrev) {
+                is KlageUtfall.StadfesteVedtak -> utfallMedBrev.innstilling.lovhjemmel
+                is KlageUtfall.DelvisOmgjoering -> utfallMedBrev.innstilling.lovhjemmel
+                is KlageUtfall.Omgjoering -> null
+            }
+        hjemmel?.let {
+            require(it.kanBrukesForSaktype(this.sak.sakType)) {
+                "Hjemmelen $it er ikke gyldig for saktypen ${this.sak.sakType}"
+            }
+        }
+
         return this.copy(
             utfall = utfallMedBrev,
             status = KlageStatus.UTFALL_VURDERT,
@@ -132,9 +144,12 @@ data class Klage(
                     "på grunn av status til klagen (${this.status})",
             )
         }
+        val harSendtTilKabal = resultat.sendtInnstillingsbrev?.sendtKabalTidspunkt != null
+
         return this.copy(
             resultat = resultat,
             status = KlageStatus.FERDIGSTILT,
+            kabalStatus = KabalStatus.OPPRETTET.takeIf { harSendtTilKabal },
         )
     }
 
@@ -151,10 +166,12 @@ data class Klage(
             KlageStatus.UTFALL_VURDERT -> {
                 this.utfall != null
             }
+
             KlageStatus.FORMKRAV_IKKE_OPPFYLT -> {
                 // TODO("Støtt avslag på formkrav på klage")
                 false
             }
+
             else -> false
         }
     }
@@ -173,6 +190,7 @@ data class Klage(
                 formkrav = null,
                 utfall = null,
                 resultat = null,
+                kabalResultat = null,
             )
         }
     }
@@ -202,6 +220,141 @@ sealed class KlageUtfall {
     ) : KlageUtfall()
 }
 
+sealed class GyldigForYtelse {
+    abstract val gyldigForBarnepensjon: Boolean
+    abstract val gyldigForOmstillingsstoenad: Boolean
+
+    fun gyldigForSaktype(sakType: SakType): Boolean {
+        return when (sakType) {
+            SakType.BARNEPENSJON -> gyldigForBarnepensjon
+            SakType.OMSTILLINGSSTOENAD -> gyldigForOmstillingsstoenad
+        }
+    }
+
+    object OmsOgBp : GyldigForYtelse() {
+        override val gyldigForBarnepensjon = true
+        override val gyldigForOmstillingsstoenad = true
+    }
+
+    object KunOms : GyldigForYtelse() {
+        override val gyldigForBarnepensjon = false
+        override val gyldigForOmstillingsstoenad = true
+    }
+
+    object KunBp : GyldigForYtelse() {
+        override val gyldigForBarnepensjon = true
+        override val gyldigForOmstillingsstoenad = false
+    }
+}
+
+enum class KabalHjemmel(val gyldigForYtelse: GyldigForYtelse) {
+    FTRL_1_3(GyldigForYtelse.OmsOgBp),
+    FTRL_1_3_A(GyldigForYtelse.OmsOgBp),
+    FTRL_1_3_B(GyldigForYtelse.OmsOgBp),
+    FTRL_1_5(GyldigForYtelse.OmsOgBp),
+
+    FTRL_2_1(GyldigForYtelse.OmsOgBp),
+    FTRL_2_1_A(GyldigForYtelse.OmsOgBp),
+    FTRL_2_2(GyldigForYtelse.OmsOgBp),
+    FTRL_2_3(GyldigForYtelse.OmsOgBp),
+    FTRL_2_4(GyldigForYtelse.OmsOgBp),
+    FTRL_2_5(GyldigForYtelse.OmsOgBp),
+    FTRL_2_6(GyldigForYtelse.OmsOgBp),
+    FTRL_2_7(GyldigForYtelse.OmsOgBp),
+    FTRL_2_7_A(GyldigForYtelse.OmsOgBp),
+    FTRL_2_8(GyldigForYtelse.OmsOgBp),
+    FTRL_2_9(GyldigForYtelse.OmsOgBp),
+    FTRL_2_10(GyldigForYtelse.OmsOgBp),
+    FTRL_2_11(GyldigForYtelse.OmsOgBp),
+    FTRL_2_12(GyldigForYtelse.OmsOgBp),
+    FTRL_2_13(GyldigForYtelse.OmsOgBp),
+    FTRL_2_14(GyldigForYtelse.OmsOgBp),
+    FTRL_2_15(GyldigForYtelse.OmsOgBp),
+    FTRL_2_16(GyldigForYtelse.OmsOgBp),
+    FTRL_2_17(GyldigForYtelse.OmsOgBp),
+
+    FTRL_3_1(GyldigForYtelse.OmsOgBp),
+    FTRL_3_5_TRYGDETID(GyldigForYtelse.OmsOgBp),
+    FTRL_3_7(GyldigForYtelse.OmsOgBp),
+    FTRL_3_10(GyldigForYtelse.OmsOgBp),
+    FTRL_3_13(GyldigForYtelse.OmsOgBp),
+    FTRL_3_14(GyldigForYtelse.OmsOgBp),
+    FTRL_3_15(GyldigForYtelse.OmsOgBp),
+
+    FTRL_21_6(GyldigForYtelse.OmsOgBp),
+    FTRL_21_7(GyldigForYtelse.OmsOgBp),
+    FTRL_21_10(GyldigForYtelse.OmsOgBp),
+
+    FTRL_22_1(GyldigForYtelse.OmsOgBp),
+    FTRL_22_1_A(GyldigForYtelse.OmsOgBp),
+    FTRL_22_12(GyldigForYtelse.OmsOgBp),
+    FTRL_22_13_1(GyldigForYtelse.OmsOgBp),
+    FTRL_22_13_3(GyldigForYtelse.OmsOgBp),
+    FTRL_22_13_4_C(GyldigForYtelse.OmsOgBp),
+    FTRL_22_13_7(GyldigForYtelse.OmsOgBp),
+    FTRL_22_14_3(GyldigForYtelse.OmsOgBp),
+    FTRL_22_15_1_1(GyldigForYtelse.OmsOgBp),
+    FTRL_22_15_1_2(GyldigForYtelse.OmsOgBp),
+    FTRL_22_15_2(GyldigForYtelse.OmsOgBp),
+    FTRL_22_15_4(GyldigForYtelse.OmsOgBp),
+    FTRL_22_15_5(GyldigForYtelse.OmsOgBp),
+    FTRL_22_17A(GyldigForYtelse.OmsOgBp),
+    FTRL_22_17B(GyldigForYtelse.OmsOgBp),
+    FTRL_25_14(GyldigForYtelse.OmsOgBp),
+
+    FVL_31(GyldigForYtelse.OmsOgBp),
+    FVL_32(GyldigForYtelse.OmsOgBp),
+    FVL_33_2(GyldigForYtelse.OmsOgBp),
+    FVL_35_1_C(GyldigForYtelse.OmsOgBp),
+    FVL_36(GyldigForYtelse.OmsOgBp),
+
+    ANDRE_TRYGDEAVTALER(GyldigForYtelse.OmsOgBp),
+    EOES_AVTALEN_BEREGNING(GyldigForYtelse.OmsOgBp),
+    EOES_AVTALEN_MEDLEMSKAP_TRYGDETID(GyldigForYtelse.OmsOgBp),
+
+    FTRL_18_1_A(GyldigForYtelse.KunBp),
+    FTRL_18_2(GyldigForYtelse.KunBp),
+    FTRL_18_3(GyldigForYtelse.KunBp),
+    FTRL_18_4(GyldigForYtelse.KunBp),
+    FTRL_18_5(GyldigForYtelse.KunBp),
+    FTRL_18_6(GyldigForYtelse.KunBp),
+    FTRL_18_7(GyldigForYtelse.KunBp),
+    FTRL_18_8(GyldigForYtelse.KunBp),
+    FTRL_18_9(GyldigForYtelse.KunBp),
+    FTRL_18_10(GyldigForYtelse.KunBp),
+    FTRL_18_11(GyldigForYtelse.KunBp),
+
+    FTRL_17_1_A(GyldigForYtelse.KunOms),
+    FTRL_17_2(GyldigForYtelse.KunOms),
+    FTRL_17_3(GyldigForYtelse.KunOms),
+    FTRL_17_4(GyldigForYtelse.KunOms),
+    FTRL_17_5(GyldigForYtelse.KunOms),
+    FTRL_17_6(GyldigForYtelse.KunOms),
+    FTRL_17_7(GyldigForYtelse.KunOms),
+    FTRL_17_8(GyldigForYtelse.KunOms),
+    FTRL_17_9(GyldigForYtelse.KunOms),
+    FTRL_17_10(GyldigForYtelse.KunOms),
+    FTRL_17_11(GyldigForYtelse.KunOms),
+    FTRL_17_12(GyldigForYtelse.KunOms),
+    FTRL_17_13(GyldigForYtelse.KunOms),
+    FTRL_17_14(GyldigForYtelse.KunOms),
+    FTRL_17_15(GyldigForYtelse.KunOms),
+
+    FTRL_17_A_1(GyldigForYtelse.KunOms),
+    FTRL_17_A_2(GyldigForYtelse.KunOms),
+    FTRL_17_A_3(GyldigForYtelse.KunOms),
+    FTRL_17_A_4(GyldigForYtelse.KunOms),
+    FTRL_17_A_5(GyldigForYtelse.KunOms),
+    FTRL_17_A_6(GyldigForYtelse.KunOms),
+    FTRL_17_A_7(GyldigForYtelse.KunOms),
+    FTRL_17_A_8(GyldigForYtelse.KunOms),
+    ;
+
+    fun kanBrukesForSaktype(sakType: SakType): Boolean {
+        return this.gyldigForYtelse.gyldigForSaktype(sakType)
+    }
+}
+
 enum class GrunnForOmgjoering {
     FEIL_LOVANVENDELSE,
     FEIL_REGELVERKSFORSTAAELSE,
@@ -213,7 +366,7 @@ enum class GrunnForOmgjoering {
 
 data class KlageOmgjoering(val grunnForOmgjoering: GrunnForOmgjoering, val begrunnelse: String)
 
-class InnstillingTilKabal(val lovhjemmel: String, val tekst: String, val brev: KlageBrevInnstilling)
+class InnstillingTilKabal(val lovhjemmel: KabalHjemmel, val tekst: String, val brev: KlageBrevInnstilling)
 
 data class InnstillingTilKabalUtenBrev(val lovhjemmel: String, val tekst: String)
 

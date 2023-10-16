@@ -29,7 +29,7 @@ enum class Saksrolle {
                     SakType.BARNEPENSJON -> PersonRolle.BARN
                     SakType.OMSTILLINGSSTOENAD -> PersonRolle.GJENLEVENDE
                 }
-            SOESKEN -> PersonRolle.BARN
+            SOESKEN -> PersonRolle.TILKNYTTET_BARN
             AVDOED -> PersonRolle.AVDOED
             GJENLEVENDE -> PersonRolle.GJENLEVENDE
             UKJENT -> throw Exception("Ukjent Saksrolle kan ikke castes til PersonRolle")

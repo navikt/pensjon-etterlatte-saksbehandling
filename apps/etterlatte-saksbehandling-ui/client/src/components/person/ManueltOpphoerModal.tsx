@@ -80,7 +80,7 @@ export const ManueltOpphoerModal = ({
     setLoading(true)
     const kjenteAarsaker = selectedGrunner.filter((grunn) => grunn !== 'ANNET')
     const res = await sendInnManueltOpphoer(sakId, kjenteAarsaker, grunn)
-    if (res.status === 'ok') {
+    if (res.ok) {
       navigate(`/behandling/${res.data.behandlingId}/`)
     } else {
       setFeilmelding('Kunne ikke annullere denne saken nå. Prøv igjen senere, eller meld det som feil i systemet.')

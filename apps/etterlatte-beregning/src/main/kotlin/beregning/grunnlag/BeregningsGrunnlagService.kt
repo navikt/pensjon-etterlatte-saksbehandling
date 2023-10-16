@@ -1,8 +1,12 @@
 package no.nav.etterlatte.beregning.grunnlag
 
+import no.nav.etterlatte.beregning.BeregnBarnepensjonServiceFeatureToggle
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
+import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
+import no.nav.etterlatte.libs.common.beregning.BeregningsMetodeBeregningsgrunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
@@ -11,6 +15,7 @@ import java.util.UUID
 class BeregningsGrunnlagService(
     private val beregningsGrunnlagRepository: BeregningsGrunnlagRepository,
     private val behandlingKlient: BehandlingKlient,
+    private val featureToggleService: FeatureToggleService,
 ) {
     private val logger = LoggerFactory.getLogger(BeregningsGrunnlagService::class.java)
 
@@ -27,7 +32,11 @@ class BeregningsGrunnlagService(
                         // Her vil vi sjekke opp om det vi lagrer ned ikke er modifisert før virk på revurderingen
                         val sisteIverksatteBehandling =
                             behandlingKlient.hentSisteIverksatteBehandling(behandling.sak, brukerTokenInfo)
-                        grunnlagErIkkeEndretFoerVirk(behandling, sisteIverksatteBehandling.id, barnepensjonBeregningsGrunnlag)
+                        grunnlagErIkkeEndretFoerVirk(
+                            behandling,
+                            sisteIverksatteBehandling.id,
+                            barnepensjonBeregningsGrunnlag,
+                        )
                     } else {
                         true
                     }
@@ -48,6 +57,13 @@ class BeregningsGrunnlagService(
                             soeskenMedIBeregning = soeskenMedIBeregning,
                             institusjonsoppholdBeregningsgrunnlag =
                                 barnepensjonBeregningsGrunnlag.institusjonsopphold ?: emptyList(),
+                            beregningsMetode =
+                                barnepensjonBeregningsGrunnlag.beregningsMetode.takeIf {
+                                    featureToggleService.isEnabled(
+                                        BeregnBarnepensjonServiceFeatureToggle.BrukFaktiskTrygdetid,
+                                        false,
+                                    )
+                                } ?: BeregningsMetodeBeregningsgrunnlag(BeregningsMetode.NASJONAL),
                         ),
                     )
             }
@@ -84,6 +100,7 @@ class BeregningsGrunnlagService(
                             kilde = Grunnlagsopplysning.Saksbehandler.create(brukerTokenInfo.ident()),
                             institusjonsoppholdBeregningsgrunnlag =
                                 omstillingstoenadBeregningsGrunnlag.institusjonsopphold ?: emptyList(),
+                            beregningsMetode = omstillingstoenadBeregningsGrunnlag.beregningsMetode,
                         ),
                     )
             }

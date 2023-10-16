@@ -1,6 +1,6 @@
 package no.nav.etterlatte.brev.model.bp
 
-import no.nav.etterlatte.brev.behandling.Behandling
+import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
 import no.nav.etterlatte.brev.model.AvslagBrevData
 import no.nav.etterlatte.brev.model.BrevData
@@ -20,13 +20,14 @@ data class EndringHovedmalBrevData(
 ) : EndringBrevData() {
     companion object {
         fun fra(
-            behandling: Behandling,
+            utbetalingsinfo: Utbetalingsinfo,
+            etterbetalingDTO: EtterbetalingDTO?,
             innhold: InnholdMedVedlegg,
         ): BrevData =
             EndringHovedmalBrevData(
                 erEndret = true, // TODO når resten av fengselsopphold implementerast
-                etterbetaling = behandling.etterbetalingDTO,
-                utbetalingsinfo = behandling.utbetalingsinfo!!,
+                etterbetaling = etterbetalingDTO,
+                utbetalingsinfo = utbetalingsinfo,
                 innhold = innhold.innhold(),
             )
     }
@@ -37,15 +38,19 @@ data class SoeskenjusteringRevurderingBrevdata(
     val grunnForJustering: BarnepensjonSoeskenjusteringGrunn,
 ) : EndringBrevData() {
     companion object {
-        fun fra(behandling: Behandling): SoeskenjusteringRevurderingBrevdata {
+        fun fra(
+            generellBrevData: GenerellBrevData,
+            utbetalingsinfo: Utbetalingsinfo,
+        ): SoeskenjusteringRevurderingBrevdata {
             val revurderingsinfo =
                 AvslagBrevData.valider<RevurderingInfo.Soeskenjustering>(
-                    behandling,
+                    generellBrevData.revurderingsaarsak,
+                    generellBrevData.forenkletVedtak.revurderingInfo,
                     RevurderingAarsak.SOESKENJUSTERING,
                 )
 
             return SoeskenjusteringRevurderingBrevdata(
-                utbetalingsinfo = behandling.utbetalingsinfo!!,
+                utbetalingsinfo = utbetalingsinfo,
                 grunnForJustering = revurderingsinfo.grunnForSoeskenjustering,
             )
         }

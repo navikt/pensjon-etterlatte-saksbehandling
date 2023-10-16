@@ -10,7 +10,7 @@ import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.libs.ktor.setReady
-import no.nav.etterlatte.vedtaksvurdering.VedtakTilbakekrevingRepository
+import no.nav.etterlatte.vedtaksvurdering.VedtakBehandlingService
 import no.nav.etterlatte.vedtaksvurdering.VedtakTilbakekrevingService
 import no.nav.etterlatte.vedtaksvurdering.VedtaksvurderingRepository
 import no.nav.etterlatte.vedtaksvurdering.VedtaksvurderingService
@@ -46,7 +46,9 @@ class ApplicationBuilder {
 
     private val behandlingKlient = BehandlingKlientImpl(config, httpClient())
     private val vedtaksvurderingService =
-        VedtaksvurderingService(
+        VedtaksvurderingService(repository = VedtaksvurderingRepository.using(dataSource))
+    private val vedtakBehandlingService =
+        VedtakBehandlingService(
             repository = VedtaksvurderingRepository.using(dataSource),
             beregningKlient = BeregningKlientImpl(config, httpClient()),
             vilkaarsvurderingKlient = VilkaarsvurderingKlientImpl(config, httpClient()),
@@ -55,16 +57,16 @@ class ApplicationBuilder {
         )
     private val vedtakTilbakekrevingService =
         VedtakTilbakekrevingService(
-            repository = VedtakTilbakekrevingRepository(dataSource),
+            repository = VedtaksvurderingRepository(dataSource),
         )
 
     private val rapidsConnection =
         RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(getRapidEnv()))
             .withKtorModule {
                 restModule(sikkerLogg, config = HoconApplicationConfig(config)) {
-                    vedtaksvurderingRoute(vedtaksvurderingService, behandlingKlient)
-                    automatiskBehandlingRoutes(vedtaksvurderingService, behandlingKlient)
-                    samordningsvedtakRoute(vedtaksvurderingService)
+                    vedtaksvurderingRoute(vedtaksvurderingService, vedtakBehandlingService, behandlingKlient)
+                    automatiskBehandlingRoutes(vedtakBehandlingService, behandlingKlient)
+                    samordningsvedtakRoute(vedtaksvurderingService, vedtakBehandlingService)
                     tilbakekrevingvedtakRoute(vedtakTilbakekrevingService)
                 }
             }

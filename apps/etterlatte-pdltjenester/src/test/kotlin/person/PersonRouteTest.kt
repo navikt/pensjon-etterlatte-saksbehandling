@@ -3,7 +3,6 @@ package no.nav.etterlatte.person
 import io.ktor.client.request.header
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
-import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
@@ -211,7 +210,6 @@ class PersonRouteTest {
                 }
 
             assertEquals(HttpStatusCode.InternalServerError, response.status)
-            assertEquals("En intern feil har oppstått", response.bodyAsText())
             coVerify { personService.hentPerson(any()) }
             confirmVerified(personService)
         }
@@ -244,7 +242,6 @@ class PersonRouteTest {
                 }
 
             assertEquals(HttpStatusCode.InternalServerError, response.status)
-            assertEquals("En intern feil har oppstått", response.bodyAsText())
             coVerify { personService.hentPdlIdentifikator(any()) }
             confirmVerified(personService)
         }

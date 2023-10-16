@@ -9,7 +9,11 @@ dependencies {
     implementation(project(":libs:etterlatte-ktor"))
     implementation(project(":libs:etterlatte-funksjonsbrytere"))
     implementation(project(":libs:saksbehandling-common"))
+
     implementation(libs.kafka.clients)
     implementation(libs.kafka.avroserializer)
+    implementation(libs.klage.kodeverk)
     implementation(libs.ktor2.okhttp)
+
+    testImplementation(libs.test.jupiter.api)
 }

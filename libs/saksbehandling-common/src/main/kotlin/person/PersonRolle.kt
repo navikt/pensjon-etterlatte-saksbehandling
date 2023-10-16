@@ -5,4 +5,5 @@ enum class PersonRolle {
     BARN,
     AVDOED,
     GJENLEVENDE,
+    TILKNYTTET_BARN,
 }

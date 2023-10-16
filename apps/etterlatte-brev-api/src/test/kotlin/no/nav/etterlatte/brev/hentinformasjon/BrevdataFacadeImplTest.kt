@@ -11,7 +11,6 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.brev.behandlingklient.BehandlingKlient
 import no.nav.etterlatte.brev.behandlingklient.BehandlingKlientException
 import no.nav.etterlatte.brev.model.Spraak
-import no.nav.etterlatte.grunnbeloep.Grunnbeloep
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -26,14 +25,17 @@ import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.VedtakSak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
+import no.nav.etterlatte.libs.common.trygdetid.BeregnetTrygdetidGrunnlagDto
+import no.nav.etterlatte.libs.common.trygdetid.DetaljertBeregnetTrygdetidDto
+import no.nav.etterlatte.libs.common.trygdetid.DetaljertBeregnetTrygdetidResultat
+import no.nav.etterlatte.libs.common.trygdetid.GrunnlagOpplysningerDto
+import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
+import no.nav.etterlatte.libs.common.trygdetid.TrygdetidGrunnlagDto
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.pensjon.brevbaker.api.model.Kroner
@@ -41,27 +43,25 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.time.LocalDateTime
+import java.time.LocalDate
 import java.time.Month
 import java.time.YearMonth
 import java.util.UUID
 
-internal class BehandlingServiceTest {
+internal class BrevdataFacadeImplTest {
     private val vedtaksvurderingKlient = mockk<VedtaksvurderingKlient>()
     private val grunnlagKlient = mockk<GrunnlagKlient>()
     private val beregningKlient = mockk<BeregningKlient>()
     private val behandlingKlient = mockk<BehandlingKlient>()
-    private val trygdetidService = mockk<TrygdetidService>()
-    private val vilkaarsvurderingKlient = mockk<VilkaarsvurderingKlient>()
+    private val trygdetidKlient = mockk<TrygdetidKlient>()
 
     private val service =
-        BehandlingService(
+        BrevdataFacade(
             vedtaksvurderingKlient,
             grunnlagKlient,
             beregningKlient,
             behandlingKlient,
-            trygdetidService,
-            vilkaarsvurderingKlient,
+            trygdetidKlient,
         )
 
     @BeforeEach
@@ -84,39 +84,33 @@ internal class BehandlingServiceTest {
         } throws BehandlingKlientException("har ikke tidligere behandling")
         coEvery { behandlingKlient.hentEtterbetaling(any(), any()) } returns null
         coEvery { vedtaksvurderingKlient.hentVedtak(any(), any()) } returns opprettVedtak()
-        coEvery { grunnlagKlient.hentGrunnlag(SAK_ID, BRUKERTokenInfo) } returns opprettGrunnlag()
+        coEvery { grunnlagKlient.hentGrunnlag(SAK_ID, BEHANDLING_ID, BRUKERTokenInfo) } returns opprettGrunnlag()
         coEvery { beregningKlient.hentBeregning(any(), any()) } returns opprettBeregning()
-        coEvery { trygdetidService.finnTrygdetid(any(), any()) } returns opprettTrygdetid()
-        coEvery { vilkaarsvurderingKlient.hentVilkaarsvurdering(any(), any()) } returns opprettVilkaarsvurdering()
-        coEvery { beregningKlient.hentGrunnbeloep(any()) } returns opprettGrunnbeloep()
+        coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns opprettTrygdetid()
 
-        val behandling =
+        val generellBrevData =
             runBlocking {
-                service.hentBehandling(SAK_ID, BEHANDLING_ID, BRUKERTokenInfo)
+                service.hentGenerellBrevData(SAK_ID, BEHANDLING_ID, BRUKERTokenInfo)
             }
 
-        Assertions.assertEquals(SAK_ID, behandling.sakId)
-        Assertions.assertEquals(BEHANDLING_ID, behandling.behandlingId)
-        Assertions.assertEquals(Spraak.NB, behandling.spraak)
-        with(behandling.personerISak.soeker) {
+        Assertions.assertEquals(SAK_ID, generellBrevData.sak.id)
+        Assertions.assertEquals(BEHANDLING_ID, generellBrevData.behandlingId)
+        Assertions.assertEquals(Spraak.NB, generellBrevData.spraak)
+        with(generellBrevData.personerISak.soeker) {
             Assertions.assertEquals("Søker", fornavn)
             Assertions.assertEquals("Mellom", mellomnavn)
             Assertions.assertEquals("Barn", etternavn)
         }
-        Assertions.assertEquals("Død Mellom Far", behandling.personerISak.avdoed.navn)
-        Assertions.assertEquals(VedtakType.INNVILGELSE, behandling.vedtak.type)
-        Assertions.assertEquals(123L, behandling.vedtak.id)
-        Assertions.assertEquals(ENHET, behandling.vedtak.ansvarligEnhet)
-        Assertions.assertEquals(SAKSBEHANDLER_IDENT, behandling.vedtak.saksbehandlerIdent)
-        Assertions.assertEquals(ATTESTANT_IDENT, behandling.vedtak.attestantIdent)
-        Assertions.assertEquals(YearMonth.now().atDay(1), behandling.utbetalingsinfo!!.virkningsdato)
-        Assertions.assertEquals(120_000, behandling.grunnbeloep.grunnbeloep)
+        Assertions.assertEquals("Død Mellom Far", generellBrevData.personerISak.avdoed.navn)
+        Assertions.assertEquals(VedtakType.INNVILGELSE, generellBrevData.forenkletVedtak.type)
+        Assertions.assertEquals(123L, generellBrevData.forenkletVedtak.id)
+        Assertions.assertEquals(ENHET, generellBrevData.forenkletVedtak.ansvarligEnhet)
+        Assertions.assertEquals(SAKSBEHANDLER_IDENT, generellBrevData.forenkletVedtak.saksbehandlerIdent)
+        Assertions.assertEquals(ATTESTANT_IDENT, generellBrevData.forenkletVedtak.attestantIdent)
 
         coVerify(exactly = 1) {
-            vedtaksvurderingKlient.hentVedtak(BEHANDLING_ID, any())
-            grunnlagKlient.hentGrunnlag(SAK_ID, any())
-            beregningKlient.hentBeregning(BEHANDLING_ID, any())
-            beregningKlient.hentGrunnbeloep(any())
+            grunnlagKlient.hentGrunnlag(SAK_ID, BEHANDLING_ID, any())
+            vedtaksvurderingKlient.hentVedtak(any(), any())
         }
     }
 
@@ -130,31 +124,25 @@ internal class BehandlingServiceTest {
         } returns SisteIverksatteBehandling(UUID.randomUUID())
         coEvery { behandlingKlient.hentEtterbetaling(any(), any()) } returns null
         coEvery { vedtaksvurderingKlient.hentVedtak(any(), any()) } returns opprettVedtak()
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns opprettGrunnlag()
+        coEvery { grunnlagKlient.hentGrunnlag(any(), any(), any()) } returns opprettGrunnlag()
         coEvery { beregningKlient.hentBeregning(any(), any()) } returns opprettBeregning()
-        coEvery { trygdetidService.finnTrygdetid(any(), any()) } returns opprettTrygdetid()
-        coEvery { vilkaarsvurderingKlient.hentVilkaarsvurdering(any(), any()) } returns opprettVilkaarsvurdering()
-        coEvery { beregningKlient.hentGrunnbeloep(any()) } returns mockk()
+        coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns opprettTrygdetid()
 
-        val behandling =
+        val utbetalingsinfo =
             runBlocking {
-                service.hentBehandling(SAK_ID, BEHANDLING_ID, BRUKERTokenInfo)
+                service.finnUtbetalingsinfo(BEHANDLING_ID, YearMonth.now(), BRUKERTokenInfo)
             }
 
-        Assertions.assertEquals(1, behandling.utbetalingsinfo!!.antallBarn)
-        Assertions.assertEquals(Kroner(3063), behandling.utbetalingsinfo!!.beloep)
-        Assertions.assertEquals(YearMonth.now().atDay(1), behandling.utbetalingsinfo!!.virkningsdato)
-        Assertions.assertEquals(false, behandling.utbetalingsinfo!!.soeskenjustering)
+        Assertions.assertEquals(Kroner(3063), utbetalingsinfo.beloep)
+        Assertions.assertEquals(YearMonth.now().atDay(1), utbetalingsinfo.virkningsdato)
+        Assertions.assertEquals(false, utbetalingsinfo.soeskenjustering)
         Assertions.assertEquals(
             listOf(BREV_BEREGNINGSPERIODE),
-            behandling.utbetalingsinfo!!.beregningsperioder,
+            utbetalingsinfo.beregningsperioder,
         )
 
         coVerify(exactly = 1) {
-            vedtaksvurderingKlient.hentVedtak(BEHANDLING_ID, any())
-            grunnlagKlient.hentGrunnlag(SAK_ID, any())
             beregningKlient.hentBeregning(BEHANDLING_ID, any())
-            beregningKlient.hentGrunnbeloep(any())
         }
     }
 
@@ -168,27 +156,79 @@ internal class BehandlingServiceTest {
         } returns SisteIverksatteBehandling(UUID.randomUUID())
         coEvery { behandlingKlient.hentEtterbetaling(any(), any()) } returns null
         coEvery { vedtaksvurderingKlient.hentVedtak(any(), any()) } returns opprettVedtak()
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns opprettGrunnlag()
+        coEvery { grunnlagKlient.hentGrunnlag(any(), any(), any()) } returns opprettGrunnlag()
         coEvery { beregningKlient.hentBeregning(any(), any()) } returns opprettBeregningSoeskenjustering()
-        coEvery { trygdetidService.finnTrygdetid(any(), any()) } returns opprettTrygdetid()
-        coEvery { vilkaarsvurderingKlient.hentVilkaarsvurdering(any(), any()) } returns opprettVilkaarsvurdering()
-        coEvery { beregningKlient.hentGrunnbeloep(any()) } returns mockk()
+        coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns opprettTrygdetid()
 
-        val behandling =
+        val utbetalingsinfo =
             runBlocking {
-                service.hentBehandling(SAK_ID, BEHANDLING_ID, BRUKERTokenInfo)
+                service.finnUtbetalingsinfo(BEHANDLING_ID, YearMonth.now(), BRUKERTokenInfo)
             }
 
-        Assertions.assertEquals(2, behandling.utbetalingsinfo!!.antallBarn)
-        Assertions.assertTrue(behandling.utbetalingsinfo!!.soeskenjustering)
+        Assertions.assertEquals(2, utbetalingsinfo.antallBarn)
+        Assertions.assertTrue(utbetalingsinfo.soeskenjustering)
 
-        coVerify(exactly = 1) {
-            vedtaksvurderingKlient.hentVedtak(any(), any())
-            grunnlagKlient.hentGrunnlag(any(), any())
-            beregningKlient.hentBeregning(any(), any())
-            beregningKlient.hentGrunnbeloep(any())
-        }
+        coVerify(exactly = 1) { beregningKlient.hentBeregning(any(), any()) }
     }
+
+    @Test
+    fun test() {
+        val behandlingId = UUID.randomUUID()
+        coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns trygdetidDto(behandlingId)
+        val trygdetid = runBlocking { service.finnTrygdetid(behandlingId, mockk()) }
+        Assertions.assertEquals(3, trygdetid!!.aarTrygdetid)
+        Assertions.assertEquals(6, trygdetid.maanederTrygdetid)
+        Assertions.assertEquals("2", trygdetid.perioder[0].opptjeningsperiode)
+    }
+
+    private fun trygdetidDto(behandlingId: UUID) =
+        TrygdetidDto(
+            id = UUID.randomUUID(),
+            behandlingId = behandlingId,
+            beregnetTrygdetid =
+                DetaljertBeregnetTrygdetidDto(
+                    resultat =
+                        DetaljertBeregnetTrygdetidResultat(
+                            faktiskTrygdetidNorge = null,
+                            faktiskTrygdetidTeoretisk = null,
+                            fremtidigTrygdetidNorge = null,
+                            fremtidigTrygdetidTeoretisk = null,
+                            samletTrygdetidNorge = 42,
+                            samletTrygdetidTeoretisk = null,
+                            prorataBroek = null,
+                            overstyrt = false,
+                        ),
+                    tidspunkt = Tidspunkt.now(),
+                ),
+            trygdetidGrunnlag =
+                listOf(
+                    TrygdetidGrunnlagDto(
+                        id = UUID.randomUUID(),
+                        type = "",
+                        bosted = "Danmark",
+                        periodeFra = LocalDate.of(2020, Month.MARCH, 5),
+                        periodeTil = LocalDate.of(2023, Month.JANUARY, 1),
+                        kilde = null,
+                        beregnet =
+                            BeregnetTrygdetidGrunnlagDto(
+                                dager = 0,
+                                maaneder = 10,
+                                aar = 2,
+                            ),
+                        begrunnelse = null,
+                        poengInnAar = false,
+                        poengUtAar = false,
+                        prorata = false,
+                    ),
+                ),
+            opplysninger =
+                GrunnlagOpplysningerDto(
+                    avdoedDoedsdato = null,
+                    avdoedFoedselsdato = null,
+                    avdoedFylteSeksten = null,
+                    avdoedFyllerSeksti = null,
+                ),
+        )
 
     private fun opprettBeregning() =
         mockk<BeregningDTO> {
@@ -264,26 +304,6 @@ internal class BehandlingServiceTest {
     )
 
     private fun opprettTrygdetid() = null
-
-    private fun opprettVilkaarsvurdering(): VilkaarsvurderingDto {
-        val mock = mockk<VilkaarsvurderingDto>()
-        every { mock.resultat } returns
-            VilkaarsvurderingResultat(
-                VilkaarsvurderingUtfall.OPPFYLT,
-                "",
-                LocalDateTime.now(),
-                "saksbehandler",
-            )
-        return mock
-    }
-
-    private fun opprettGrunnbeloep() =
-        Grunnbeloep(
-            dato = YearMonth.of(2023, Month.SEPTEMBER),
-            grunnbeloep = 120_000,
-            grunnbeloepPerMaaned = 10_000,
-            omregningsfaktor = null,
-        )
 
     private companion object {
         private val FNR = Folkeregisteridentifikator.of("11057523044")

@@ -1,11 +1,13 @@
 package no.nav.etterlatte.brev.model.bp
 
-import no.nav.etterlatte.brev.behandling.Behandling
 import no.nav.etterlatte.brev.behandling.Beregningsperiode
+import no.nav.etterlatte.brev.behandling.Trygdetid
 import no.nav.etterlatte.brev.behandling.Trygdetidsperiode
+import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
 import no.nav.etterlatte.brev.model.BrevVedleggKey
 import no.nav.etterlatte.brev.model.InnholdMedVedlegg
 import no.nav.etterlatte.brev.model.Slate
+import no.nav.etterlatte.grunnbeloep.Grunnbeloep
 import no.nav.pensjon.brevbaker.api.model.Kroner
 
 data class BeregningsinfoBP(
@@ -19,16 +21,18 @@ data class BeregningsinfoBP(
 ) {
     companion object {
         fun fra(
-            behandling: Behandling,
+            utbetalingsinfo: Utbetalingsinfo,
+            trygdetid: Trygdetid,
+            grunnbeloep: Grunnbeloep,
             innhold: InnholdMedVedlegg,
         ) = BeregningsinfoBP(
             innhold = innhold.finnVedlegg(BrevVedleggKey.BP_BEREGNING_TRYGDETID),
-            grunnbeloep = Kroner(behandling.grunnbeloep.grunnbeloep),
-            beregningsperioder = behandling.utbetalingsinfo!!.beregningsperioder,
-            antallBarn = behandling.utbetalingsinfo.antallBarn,
-            aarTrygdetid = behandling.trygdetid!!.aarTrygdetid,
-            maanederTrygdetid = behandling.trygdetid.maanederTrygdetid,
-            trygdetidsperioder = behandling.trygdetid.perioder,
+            grunnbeloep = Kroner(grunnbeloep.grunnbeloep),
+            beregningsperioder = utbetalingsinfo.beregningsperioder,
+            antallBarn = utbetalingsinfo.antallBarn,
+            aarTrygdetid = trygdetid.aarTrygdetid,
+            maanederTrygdetid = trygdetid.maanederTrygdetid,
+            trygdetidsperioder = trygdetid.perioder,
         )
     }
 }

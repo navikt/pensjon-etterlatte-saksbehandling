@@ -4,9 +4,9 @@ import { useBehandlingRoutes } from '../BehandlingRoutes'
 import { useState } from 'react'
 import { useVedtaksResultat } from '../useVedtaksResultat'
 import { isFailure, isPending, useApiCall } from '~shared/hooks/useApiCall'
-import { upsertVedtak } from '~shared/api/behandling'
 import { useParams } from 'react-router-dom'
 import { ApiErrorAlert } from '~ErrorBoundary'
+import { upsertVedtak } from '~shared/api/vedtaksvurdering'
 
 export const VilkaarsVurderingKnapper = () => {
   const { next, goto } = useBehandlingRoutes()

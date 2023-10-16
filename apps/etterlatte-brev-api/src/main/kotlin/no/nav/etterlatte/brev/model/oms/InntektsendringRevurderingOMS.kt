@@ -1,7 +1,6 @@
 package no.nav.etterlatte.brev.model.oms
 
 import no.nav.etterlatte.brev.behandling.Avkortingsinfo
-import no.nav.etterlatte.brev.behandling.Behandling
 import no.nav.etterlatte.brev.model.Beregningsinfo
 import no.nav.etterlatte.brev.model.BrevData
 import no.nav.etterlatte.brev.model.BrevVedleggKey
@@ -19,19 +18,21 @@ data class InntektsendringRevurderingOMS(
 ) : BrevData() {
     companion object {
         fun fra(
-            behandling: Behandling,
+            avkortingsinfo: Avkortingsinfo,
+            etterbetalingDTO: EtterbetalingDTO,
+            trygdetid: Trygdetid,
             innholdMedVedlegg: InnholdMedVedlegg,
         ): InntektsendringRevurderingOMS =
             InntektsendringRevurderingOMS(
                 erEndret = true,
-                avkortingsinfo = behandling.avkortingsinfo,
-                etterbetalinginfo = behandling.etterbetalingDTO,
+                avkortingsinfo = avkortingsinfo,
+                etterbetalinginfo = etterbetalingDTO,
                 beregningsinfo =
                     Beregningsinfo(
                         innhold = innholdMedVedlegg.finnVedlegg(BrevVedleggKey.BEREGNING_INNHOLD),
-                        grunnbeloep = behandling.avkortingsinfo!!.grunnbeloep,
+                        grunnbeloep = avkortingsinfo!!.grunnbeloep,
                         beregningsperioder =
-                            behandling.avkortingsinfo.beregningsperioder.map {
+                            avkortingsinfo.beregningsperioder.map {
                                 NyBeregningsperiode(
                                     inntekt = it.inntekt,
                                     trygdetid = it.trygdetid,
@@ -39,7 +40,7 @@ data class InntektsendringRevurderingOMS(
                                     utbetaltBeloep = it.utbetaltBeloep,
                                 )
                             },
-                        trygdetidsperioder = behandling.trygdetid!!.perioder,
+                        trygdetidsperioder = trygdetid.perioder,
                     ),
                 innhold = innholdMedVedlegg.innhold(),
             )

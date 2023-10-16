@@ -1,6 +1,5 @@
 import { Alert, Button } from '@navikt/ds-react'
 import { useState } from 'react'
-import { attesterVedtak } from '~shared/api/behandling'
 import { BeslutningWrapper } from '../styled'
 import { GeneriskModal } from '~shared/modal/modal'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
@@ -9,6 +8,7 @@ import { behandlingSkalSendeBrev } from '~components/behandling/felles/utils'
 import { ferdigstillVedtaksbrev } from '~shared/api/brev'
 import { isPending, useApiCall } from '~shared/hooks/useApiCall'
 import { FlexRow } from '~shared/styled'
+import { attesterVedtak } from '~shared/api/vedtaksvurdering'
 
 export const AttesterYtelse = ({ behandling, kommentar }: { behandling: IDetaljertBehandling; kommentar: string }) => {
   const navigate = useNavigate()
@@ -22,8 +22,12 @@ export const AttesterYtelse = ({ behandling, kommentar }: { behandling: IDetalje
     apiAttesterVedtak(
       { behandlingId: behandling.id, kommentar },
       () => navigate(`/person/${behandling.søker?.foedselsnummer}`),
-      () => {
-        setError(`Ukjent feil oppsto ved attestering av vedtaket... Prøv igjen.`)
+      (error) => {
+        if (error.code === 'ATTESTANT_OG_SAKSBEHANDLER_ER_SAMME_PERSON') {
+          setError('Vedtaket er allerede fattet av deg. Du kan ikke attestere dine egne vedtak.')
+        } else {
+          setError(`En feil opptod ved attestering av vedtaket: ${error.detail}.`)
+        }
         setModalisOpen(false)
       }
     )

@@ -1,7 +1,7 @@
 package no.nav.etterlatte.pdl.mapper
 
+import no.nav.etterlatte.libs.common.pdl.IngenIdentFamilierelasjonException
 import no.nav.etterlatte.libs.common.person.FamilieRelasjon
-import no.nav.etterlatte.libs.common.person.FamilieRelasjonManglerIdent
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.pdl.PdlForelderBarnRelasjonRolle
@@ -24,7 +24,7 @@ object FamilieRelasjonMapper {
                             ?.mapValues { it.value.maxByOrNull { fa -> fa.metadata.sisteRegistrertDato() } }
                             ?.map {
                                 it.value?.ansvarlig?.let { Folkeregisteridentifikator.of(it) }
-                                    ?: throw FamilieRelasjonManglerIdent("${it.value} mangler ident")
+                                    ?: throw IngenIdentFamilierelasjonException("${it.value} mangler ident")
                             }
 
                     else -> null
@@ -38,7 +38,7 @@ object FamilieRelasjonMapper {
                             ?.mapValues { it.value.maxByOrNull { fbr -> fbr.metadata.sisteRegistrertDato() } }
                             ?.map {
                                 it.value?.relatertPersonsIdent?.let { Folkeregisteridentifikator.of(it) }
-                                    ?: throw FamilieRelasjonManglerIdent("${it.value} mangler ident")
+                                    ?: throw IngenIdentFamilierelasjonException("${it.value} mangler ident")
                             }
 
                     else -> null
@@ -52,7 +52,7 @@ object FamilieRelasjonMapper {
                             ?.mapValues { it.value.maxByOrNull { fbr -> fbr.metadata.sisteRegistrertDato() } }
                             ?.map {
                                 it.value?.relatertPersonsIdent?.let { Folkeregisteridentifikator.of(it) }
-                                    ?: throw FamilieRelasjonManglerIdent("${it.value} mangler ident")
+                                    ?: throw IngenIdentFamilierelasjonException("${it.value} mangler ident")
                             }
 
                     else -> null

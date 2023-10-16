@@ -14,16 +14,19 @@ import no.nav.etterlatte.libs.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktorobo.Resource
 import no.nav.etterlatte.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
+import java.util.UUID
 
 interface GrunnlagKlient {
     suspend fun finnPersonOpplysning(
         sakId: Long,
+        behandlingId: UUID,
         opplysningsType: Opplysningstype,
         brukerTokenInfo: BrukerTokenInfo,
     ): Grunnlagsopplysning<Person>?
 
     suspend fun hentPersongalleri(
         sakId: Long,
+        behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): Grunnlagsopplysning<Persongalleri>?
 }
@@ -41,6 +44,7 @@ class GrunnlagKlientObo(config: Config, httpClient: HttpClient) : GrunnlagKlient
 
     override suspend fun finnPersonOpplysning(
         sakId: Long,
+        behandlingId: UUID,
         opplysningsType: Opplysningstype,
         brukerTokenInfo: BrukerTokenInfo,
     ): Grunnlagsopplysning<Person>? {
@@ -52,7 +56,7 @@ class GrunnlagKlientObo(config: Config, httpClient: HttpClient) : GrunnlagKlient
                     resource =
                         Resource(
                             clientId = clientId,
-                            url = "$resourceUrl/grunnlag/sak/$sakId/$opplysningsType",
+                            url = "$resourceUrl/grunnlag/sak/$sakId/behandling/$behandlingId/$opplysningsType",
                         ),
                     brukerTokenInfo = brukerTokenInfo,
                 )
@@ -70,6 +74,7 @@ class GrunnlagKlientObo(config: Config, httpClient: HttpClient) : GrunnlagKlient
 
     override suspend fun hentPersongalleri(
         sakId: Long,
+        behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): Grunnlagsopplysning<Persongalleri>? {
         try {
@@ -80,7 +85,7 @@ class GrunnlagKlientObo(config: Config, httpClient: HttpClient) : GrunnlagKlient
                     resource =
                         Resource(
                             clientId = clientId,
-                            url = "$resourceUrl/grunnlag/sak/$sakId/${Opplysningstype.PERSONGALLERI_V1}",
+                            url = "$resourceUrl/grunnlag/sak/$sakId/behandling/$behandlingId/${Opplysningstype.PERSONGALLERI_V1}",
                         ),
                     brukerTokenInfo = brukerTokenInfo,
                 )

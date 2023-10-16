@@ -9,10 +9,16 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.application
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
+import no.nav.etterlatte.behandling.BehandlingRequestLogger
 import no.nav.etterlatte.inTransaction
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.skjermet.EgenAnsattSkjermet
+import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 
-internal fun Route.egenAnsattRoute(egenAnsattService: EgenAnsattService) {
+internal fun Route.egenAnsattRoute(
+    egenAnsattService: EgenAnsattService,
+    requestLogger: BehandlingRequestLogger,
+) {
     val logger = application.log
 
     route("/egenansatt") {
@@ -21,6 +27,12 @@ internal fun Route.egenAnsattRoute(egenAnsattService: EgenAnsattService) {
             logger.info("Mottar en egen ansatt hendelse fra skjermingsløsningen")
             inTransaction {
                 egenAnsattService.haandterSkjerming(skjermetHendelse)
+            }.also {
+                requestLogger.loggRequest(
+                    brukerTokenInfo,
+                    Folkeregisteridentifikator.of(skjermetHendelse.fnr),
+                    "egenansatt-skjermet",
+                )
             }
             call.respond(HttpStatusCode.OK)
         }

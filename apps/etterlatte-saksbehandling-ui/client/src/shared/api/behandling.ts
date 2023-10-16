@@ -1,12 +1,12 @@
 import {
-  NyBehandlingRequest,
   IBoddEllerArbeidetUtlandet,
   IDetaljertBehandling,
+  IEtterbetaling,
   IGyldighetResultat,
   IKommerBarnetTilgode,
   IUtenlandstilsnitt,
+  NyBehandlingRequest,
   Virkningstidspunkt,
-  IEtterbetaling,
 } from '~shared/types/IDetaljertBehandling'
 import { apiClient, ApiResponse } from './apiClient'
 import { ManueltOpphoerDetaljer } from '~components/behandling/manueltopphoeroversikt/ManueltOpphoerOversikt'
@@ -76,32 +76,6 @@ export const hentManueltOpphoerDetaljer = async (
   return apiClient.get(`/behandling/${behandlingId}/manueltopphoer`)
 }
 
-export const fattVedtak = async (behandlingsId: string): Promise<ApiResponse<unknown>> => {
-  return apiClient.post(`/vedtak/${behandlingsId}/fattvedtak`, {})
-}
-
-export const upsertVedtak = async (behandlingsId: string): Promise<ApiResponse<unknown>> => {
-  return apiClient.post(`/vedtak/${behandlingsId}/upsert`, {})
-}
-
-export const attesterVedtak = async (args: {
-  behandlingId: string
-  kommentar: string
-}): Promise<ApiResponse<unknown>> => {
-  return apiClient.post(`/vedtak/${args.behandlingId}/attester`, { kommentar: args.kommentar })
-}
-
-export const underkjennVedtak = async ({
-  behandlingId,
-  kommentar,
-  valgtBegrunnelse,
-}: {
-  behandlingId: string
-  kommentar: string
-  valgtBegrunnelse: string
-}): Promise<ApiResponse<unknown>> => {
-  return apiClient.post(`/vedtak/${behandlingId}/underkjenn`, { kommentar, valgtBegrunnelse })
-}
 export const lagreGyldighetsproeving = async (args: {
   behandlingId: string
   svar: string
@@ -178,7 +152,7 @@ export const lagreBoddEllerArbeidetUtlandet = async (args: {
   })
 }
 
-export const hentGrunnlagsendringshendelserInstitusjonsoppholdforSak = async (
+export const hentGrunnlagsendringshendelserInstitusjonsoppholdForSak = async (
   sakid: number
 ): Promise<ApiResponse<Array<Grunnlagsendringshendelse>>> => {
   return apiClient.get(`/grunnlagsendringshendelse/${sakid}/institusjon`)

@@ -116,7 +116,7 @@ data class AnkebehandlingAvsluttetDetaljer(
             "Journalpost referanser: ${journalpostReferanser.joinToString(", ")}"
 }
 
-data class BehandlingFeilregistrertDetaljer(val reason: String, val type: Type, val feilregistrert: LocalDateTime)
+data class BehandlingFeilregistrertDetaljer(val reason: String, val type: KabalSakType, val feilregistrert: LocalDateTime)
 
 data class AnkeITrygderettenbehandlingOpprettetDetaljer(
     val sendtTilTrygderetten: LocalDateTime,

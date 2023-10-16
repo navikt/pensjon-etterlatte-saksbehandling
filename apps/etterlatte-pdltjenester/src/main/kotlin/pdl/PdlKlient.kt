@@ -277,6 +277,21 @@ class PdlKlient(private val httpClient: HttpClient, private val apiUrl: String) 
                 familieRelasjon = true,
                 vergemaal = false,
             )
+        PersonRolle.TILKNYTTET_BARN ->
+            PdlVariables(
+                ident = fnr.value,
+                bostedsadresse = true,
+                bostedsadresseHistorikk = true,
+                deltBostedsadresse = true,
+                kontaktadresse = true,
+                kontaktadresseHistorikk = true,
+                oppholdsadresse = true,
+                oppholdsadresseHistorikk = true,
+                utland = true,
+                sivilstand = false,
+                familieRelasjon = false,
+                vergemaal = false,
+            )
     }
 
     companion object {

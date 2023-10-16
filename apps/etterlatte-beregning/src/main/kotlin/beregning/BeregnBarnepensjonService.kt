@@ -1,6 +1,7 @@
 package no.nav.etterlatte.beregning
 
 import beregning.regler.finnAnvendtGrunnbeloep
+import beregning.regler.finnAnvendtTrygdetid
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.etterlatte.beregning.BeregnBarnepensjonServiceFeatureToggle.BrukInstitusjonsoppholdIBeregning
 import no.nav.etterlatte.beregning.BeregnBarnepensjonServiceFeatureToggle.BrukNyttRegelverkIBeregning
@@ -16,6 +17,8 @@ import no.nav.etterlatte.beregning.regler.barnepensjon.sats.aktuelleBarnepensjon
 import no.nav.etterlatte.beregning.regler.barnepensjon.sats.barnepensjonSatsRegel1967
 import no.nav.etterlatte.beregning.regler.barnepensjon.sats.barnepensjonSatsRegel2024
 import no.nav.etterlatte.beregning.regler.barnepensjon.sats.grunnbeloep
+import no.nav.etterlatte.beregning.regler.barnepensjon.trygdetidsfaktor.trygdetidBruktRegel
+import no.nav.etterlatte.beregning.regler.toSamlet
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnbeloep.GrunnbeloepRepository
@@ -24,8 +27,10 @@ import no.nav.etterlatte.klienter.TrygdetidKlient
 import no.nav.etterlatte.klienter.VilkaarsvurderingKlient
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
+import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
 import no.nav.etterlatte.libs.common.beregning.Beregningstype
+import no.nav.etterlatte.libs.common.beregning.SamletTrygdetidMedBeregningsMetode
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsdata
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
@@ -83,7 +88,7 @@ class BeregnBarnepensjonService(
         behandling: DetaljertBehandling,
         brukerTokenInfo: BrukerTokenInfo,
     ): Beregning {
-        val grunnlag = grunnlagKlient.hentGrunnlag(behandling.sak, brukerTokenInfo)
+        val grunnlag = grunnlagKlient.hentGrunnlag(behandling.sak, behandling.id, brukerTokenInfo)
         val behandlingType = behandling.behandlingType
         val virkningstidspunkt =
             requireNotNull(behandling.virkningstidspunkt?.dato) { "Behandling ${behandling.id} mangler virkningstidspunkt" }
@@ -190,6 +195,16 @@ class BeregnBarnepensjonService(
                                     "Anvendt grunnbeløp ikke funnet for perioden"
                                 }
 
+                            val trygdetid =
+                                requireNotNull(periodisertResultat.resultat.finnAnvendtTrygdetid(trygdetidBruktRegel)) {
+                                    "Anvendt trygdetid ikke funnet for perioden"
+                                }
+
+                            val trygdetidGrunnlagForPeriode =
+                                beregningsgrunnlag.avdoedesTrygdetid.finnGrunnlagForPeriode(
+                                    periodisertResultat.periode.fraDato,
+                                ).verdi
+
                             Beregningsperiode(
                                 datoFOM = YearMonth.from(periodisertResultat.periode.fraDato),
                                 datoTOM = periodisertResultat.periode.tilDato?.let { YearMonth.from(it) },
@@ -206,10 +221,11 @@ class BeregnBarnepensjonService(
                                     ).verdi,
                                 grunnbelopMnd = grunnbeloep.grunnbeloepPerMaaned,
                                 grunnbelop = grunnbeloep.grunnbeloep,
-                                trygdetid =
-                                    beregningsgrunnlag.avdoedesTrygdetid.finnGrunnlagForPeriode(
-                                        periodisertResultat.periode.fraDato,
-                                    ).verdi.toInteger(),
+                                trygdetid = trygdetid.trygdetid.toInteger(),
+                                beregningsMetode = trygdetid.beregningsMetode,
+                                samletNorskTrygdetid = trygdetidGrunnlagForPeriode.samletTrygdetidNorge?.toInteger(),
+                                samletTeoretiskTrygdetid = trygdetidGrunnlagForPeriode.samletTrygdetidTeoretisk?.toInteger(),
+                                broek = trygdetidGrunnlagForPeriode.prorataBroek,
                                 regelResultat = objectMapper.valueToTree(periodisertResultat),
                                 regelVersjon = periodisertResultat.reglerVersjon,
                             )
@@ -280,31 +296,27 @@ class BeregnBarnepensjonService(
                 tom,
             ),
         avdoedesTrygdetid =
-            trygdetid?.beregnetTrygdetid?.resultat?.samletTrygdetidNorge.let { trygdetidTotal ->
-                if (trygdetidTotal != null) {
-                    KonstantGrunnlag(
-                        FaktumNode(
-                            verdi = Beregningstall(trygdetidTotal),
-                            kilde =
-                                Grunnlagsopplysning.RegelKilde(
-                                    "Trygdetid fastsatt av saksbehandler",
-                                    trygdetid?.beregnetTrygdetid?.tidspunkt
-                                        ?: throw Exception("Trygdetid mangler tidspunkt på beregnet trygdetid"),
-                                    "1",
-                                ),
-                            beskrivelse = "Trygdetid avdød forelder",
+            trygdetid?.beregnetTrygdetid?.resultat?.let {
+                KonstantGrunnlag(
+                    FaktumNode(
+                        verdi = it.toSamlet(beregningsGrunnlag.beregningsMetode.beregningsMetode),
+                        kilde = beregningsGrunnlag.kilde,
+                        beskrivelse = "Trygdetid avdød forelder",
+                    ),
+                )
+            } ?: KonstantGrunnlag(
+                FaktumNode(
+                    verdi =
+                        SamletTrygdetidMedBeregningsMetode(
+                            beregningsMetode = BeregningsMetode.NASJONAL,
+                            samletTrygdetidNorge = Beregningstall(FASTSATT_TRYGDETID_I_PILOT),
+                            samletTrygdetidTeoretisk = null,
+                            prorataBroek = null,
                         ),
-                    )
-                } else {
-                    KonstantGrunnlag(
-                        FaktumNode(
-                            verdi = Beregningstall(FASTSATT_TRYGDETID_I_PILOT),
-                            kilde = Grunnlagsopplysning.RegelKilde("MVP hardkodet trygdetid", Tidspunkt.now(), "1"),
-                            beskrivelse = "Trygdetid avdød forelder",
-                        ),
-                    )
-                }
-            },
+                    kilde = Grunnlagsopplysning.RegelKilde("MVP hardkodet trygdetid", Tidspunkt.now(), "1"),
+                    beskrivelse = "Trygdetid avdød forelder",
+                ),
+            ),
         institusjonsopphold =
             PeriodisertBeregningGrunnlag.lagPotensieltTomtGrunnlagMedDefaultUtenforPerioder(
                 beregningsGrunnlag.institusjonsoppholdBeregningsgrunnlag.mapVerdier { institusjonsopphold ->

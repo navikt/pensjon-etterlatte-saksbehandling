@@ -37,14 +37,16 @@ class SakTilgangDao(private val datasource: DataSource) {
         }
     }
 
-    fun hentSakMedGarderingOgSkjermingPaaBehandling(behandlingId: String): SakMedGraderingOgSkjermet? {
+    fun hentSakMedGraderingOgSkjermingPaaBehandling(behandlingId: String): SakMedGraderingOgSkjermet? {
         datasource.connection.use { connection ->
             val statement =
                 connection.prepareStatement(
-                    "SELECT s.id, adressebeskyttelse, erSkjermet FROM behandling b" +
-                        " INNER JOIN sak s ON b.sak_id = s.id WHERE b.id = ?::uuid",
+                    "select id, adressebeskyttelse, erSkjermet from sak where id =" +
+                        " (select sak_id from behandling where id = ?::uuid" +
+                        " union select sak_id from tilbakekreving where id = ?::uuid)",
                 )
             statement.setString(1, behandlingId)
+            statement.setString(2, behandlingId)
             return statement.executeQuery().singleOrNull {
                 SakMedGraderingOgSkjermet(
                     id = getLong(1),
@@ -67,31 +69,6 @@ class SakTilgangDao(private val datasource: DataSource) {
                     """.trimIndent(),
                 )
             statement.setString(1, oppgaveId)
-            return statement.executeQuery().singleOrNull {
-                SakMedGraderingOgSkjermet(
-                    id = getLong("sak_id"),
-                    adressebeskyttelseGradering =
-                        getString("adressebeskyttelse")?.let {
-                            AdressebeskyttelseGradering.valueOf(it)
-                        },
-                    erSkjermet = getBoolean("erskjermet"),
-                )
-            }
-        }
-    }
-
-    fun hentSakMedGraderingOgSkjermingPaaTilbakekreving(tilbakekrevingId: String): SakMedGraderingOgSkjermet? {
-        datasource.connection.use { connection ->
-            val statement =
-                connection.prepareStatement(
-                    """
-                    SELECT s.id as sak_id, adressebeskyttelse, erskjermet 
-                    FROM tilbakekreving t
-                    INNER JOIN sak s on t.sak_id = s.id
-                    WHERE t.id = ?::uuid
-                    """.trimIndent(),
-                )
-            statement.setString(1, tilbakekrevingId)
             return statement.executeQuery().singleOrNull {
                 SakMedGraderingOgSkjermet(
                     id = getLong("sak_id"),

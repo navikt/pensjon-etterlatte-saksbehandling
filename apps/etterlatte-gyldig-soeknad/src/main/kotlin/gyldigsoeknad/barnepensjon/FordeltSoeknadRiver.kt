@@ -9,12 +9,9 @@ import no.nav.etterlatte.libs.common.event.SoeknadInnsendt
 import no.nav.etterlatte.libs.common.innsendtsoeknad.barnepensjon.Barnepensjon
 import no.nav.etterlatte.libs.common.innsendtsoeknad.common.SoeknadType
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
-import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
-import no.nav.helse.rapids_rivers.River
 import org.slf4j.LoggerFactory
 import rapidsandrivers.migrering.ListenerMedLogging
 
@@ -26,14 +23,12 @@ internal class FordeltSoeknadRiver(
     private val logger = LoggerFactory.getLogger(FordeltSoeknadRiver::class.java)
 
     init {
-        River(rapidsConnection).apply {
-            eventName(SoeknadInnsendt.eventNameBehandlingBehov)
-            correlationId()
+        initialiserRiver(rapidsConnection, SoeknadInnsendt.eventNameBehandlingBehov) {
             validate { it.requireKey(FordelerFordelt.skjemaInfoKey) }
             validate { it.demandValue(SoeknadInnsendt.skjemaInfoTypeKey, SoeknadType.BARNEPENSJON.name) }
             validate { it.rejectKey(GyldigSoeknadVurdert.behandlingIdKey) }
-            validate { it.rejectValue("trengerManuellJor", true) }
-        }.register(this)
+            validate { it.rejectValue("trengerManuellJournalfoering", true) }
+        }
     }
 
     override fun haandterPakke(

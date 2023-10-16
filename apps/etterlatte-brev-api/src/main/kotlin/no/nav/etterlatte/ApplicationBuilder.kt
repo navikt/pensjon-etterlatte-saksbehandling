@@ -24,17 +24,15 @@ import no.nav.etterlatte.brev.dokarkiv.DokarkivKlient
 import no.nav.etterlatte.brev.dokarkiv.DokarkivServiceImpl
 import no.nav.etterlatte.brev.dokument.SafClient
 import no.nav.etterlatte.brev.dokument.dokumentRoute
-import no.nav.etterlatte.brev.hentinformasjon.BehandlingService
 import no.nav.etterlatte.brev.hentinformasjon.BeregningKlient
+import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
 import no.nav.etterlatte.brev.hentinformasjon.GrunnlagKlient
 import no.nav.etterlatte.brev.hentinformasjon.SakService
 import no.nav.etterlatte.brev.hentinformasjon.SoekerService
 import no.nav.etterlatte.brev.hentinformasjon.Tilgangssjekker
 import no.nav.etterlatte.brev.hentinformasjon.TrygdetidKlient
-import no.nav.etterlatte.brev.hentinformasjon.TrygdetidService
 import no.nav.etterlatte.brev.hentinformasjon.VedtaksvurderingKlient
 import no.nav.etterlatte.brev.hentinformasjon.VedtaksvurderingService
-import no.nav.etterlatte.brev.hentinformasjon.VilkaarsvurderingKlient
 import no.nav.etterlatte.brev.model.BrevDataMapper
 import no.nav.etterlatte.brev.model.BrevProsessTypeFactory
 import no.nav.etterlatte.brev.vedtaksbrevRoute
@@ -104,16 +102,13 @@ class ApplicationBuilder {
     private val beregningKlient = BeregningKlient(config, httpClient())
     private val behandlingKlient = BehandlingKlient(config, httpClient())
     private val trygdetidKlient = TrygdetidKlient(config, httpClient())
-    private val vilkaarsvurderingKlient = VilkaarsvurderingKlient(config, httpClient())
-    private val trygdetidService = TrygdetidService(trygdetidKlient)
-    private val behandlingService =
-        BehandlingService(
+    private val brevdataFacade =
+        BrevdataFacade(
             vedtakKlient,
             grunnlagKlient,
             beregningKlient,
             behandlingKlient,
-            trygdetidService,
-            vilkaarsvurderingKlient,
+            trygdetidKlient,
         )
     private val norg2Klient = Norg2Klient(env.requireEnvValue("NORG2_URL"), httpClient())
     private val datasource = DataSourceBuilder.createDataSource(env)
@@ -130,7 +125,7 @@ class ApplicationBuilder {
 
     private val featureToggleService = FeatureToggleService.initialiser(featureToggleProperties(config))
 
-    private val brevDataMapper = BrevDataMapper(featureToggleService)
+    private val brevDataMapper = BrevDataMapper(featureToggleService, brevdataFacade)
 
     private val brevbakerService = BrevbakerService(brevbaker, adresseService, brevDataMapper)
 
@@ -156,7 +151,7 @@ class ApplicationBuilder {
     private val vedtaksbrevService =
         VedtaksbrevService(
             db,
-            behandlingService,
+            brevdataFacade,
             vedtaksvurderingService,
             adresseService,
             dokarkivService,

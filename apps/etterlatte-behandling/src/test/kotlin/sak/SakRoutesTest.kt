@@ -9,6 +9,7 @@ import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.mockk
 import no.nav.etterlatte.attachMockContext
+import no.nav.etterlatte.behandling.BehandlingRequestLogger
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
@@ -36,6 +37,7 @@ internal class SakRoutesTest {
     private val grunnlagsendringshendelseService = mockk<GrunnlagsendringshendelseService>(relaxUnitFun = true)
     private val tilgangService = mockk<TilgangService>(relaxUnitFun = true)
     private val oppgaveService = mockk<OppgaveService>(relaxUnitFun = true)
+    private val requestLogger = mockk<BehandlingRequestLogger>()
 
     @BeforeAll
     fun before() {
@@ -91,6 +93,7 @@ internal class SakRoutesTest {
                 tilgangService,
                 sakService,
                 behandlingService,
+                requestLogger,
             )
             sakWebRoutes(
                 tilgangService,
@@ -98,6 +101,7 @@ internal class SakRoutesTest {
                 behandlingService,
                 grunnlagsendringshendelseService,
                 oppgaveService,
+                requestLogger,
             )
         }
     }

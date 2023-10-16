@@ -192,13 +192,7 @@ class GrunnlagsendringshendelseService(
                 SakMedEnhet(it.id, finnEnhetFraGradering(fnr, gradering, it.sakType))
             }
         sakService.oppdaterEnhetForSaker(sakerMedNyEnhet)
-        oppdaterEnhetForRelaterteOppgaver(sakerMedNyEnhet)
-    }
-
-    private fun oppdaterEnhetForRelaterteOppgaver(sakerMedNyEnhet: List<SakMedEnhet>) {
-        sakerMedNyEnhet.forEach {
-            oppgaveService.endreEnhetForOppgaverTilknyttetSak(it.id, it.enhet)
-        }
+        oppgaveService.oppdaterEnhetForRelaterteOppgaver(sakerMedNyEnhet)
     }
 
     private fun finnEnhetFraGradering(
@@ -423,7 +417,7 @@ class GrunnlagsendringshendelseService(
             }
 
             GrunnlagsendringsType.FORELDER_BARN_RELASJON -> {
-                if (personRolle == PersonRolle.BARN) {
+                if (personRolle in listOf(PersonRolle.BARN, PersonRolle.TILKNYTTET_BARN)) {
                     samsvarAnsvarligeForeldre(
                         ansvarligeForeldrePdl = pdlData.hentAnsvarligeForeldre(),
                         ansvarligeForeldreGrunnlag = grunnlag?.ansvarligeForeldre(rolle, fnr),

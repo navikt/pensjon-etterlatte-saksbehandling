@@ -16,6 +16,7 @@ import io.mockk.confirmVerified
 import io.mockk.mockk
 import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
 import no.nav.etterlatte.libs.ktor.restModule
+import no.nav.etterlatte.vedtaksvurdering.VedtakBehandlingService
 import no.nav.etterlatte.vedtaksvurdering.VedtaksvurderingService
 import no.nav.etterlatte.vedtaksvurdering.samordningsvedtakRoute
 import no.nav.security.mock.oauth2.MockOAuth2Server
@@ -31,6 +32,7 @@ class SamordningsvedtakRouteTest {
     private val server = MockOAuth2Server()
     private lateinit var applicationConfig: HoconApplicationConfig
     private val vedtaksvurderingService: VedtaksvurderingService = mockk()
+    private val vedtakBehandlingService: VedtakBehandlingService = mockk()
 
     @BeforeAll
     fun before() {
@@ -55,7 +57,7 @@ class SamordningsvedtakRouteTest {
     fun `skal returnere 401 naar token mangler noedvendig rolle`() {
         testApplication {
             environment { config = applicationConfig }
-            application { restModule(log) { samordningsvedtakRoute(vedtaksvurderingService) } }
+            application { restModule(log) { samordningsvedtakRoute(vedtaksvurderingService, vedtakBehandlingService) } }
 
             val response =
                 client.get("/api/samordning/vedtak/1234") {
@@ -73,7 +75,7 @@ class SamordningsvedtakRouteTest {
 
         testApplication {
             environment { config = applicationConfig }
-            application { restModule(log) { samordningsvedtakRoute(vedtaksvurderingService) } }
+            application { restModule(log) { samordningsvedtakRoute(vedtaksvurderingService, vedtakBehandlingService) } }
 
             val response =
                 client.get("/api/samordning/vedtak/1234") {

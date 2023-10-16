@@ -20,6 +20,7 @@ import no.nav.etterlatte.rapidsandrivers.migrering.MigreringRequest
 import no.nav.etterlatte.sak.SakService
 import no.nav.etterlatte.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
+import java.time.YearMonth
 import java.util.UUID
 
 class MigreringService(
@@ -50,9 +51,14 @@ class MigreringService(
                     pesys,
                     JaNeiMedBegrunnelse(JaNei.JA, "Automatisk importert fra Pesys"),
                 )
+
+                // todo: Nytt regelverk gjelder fra 2023-10 i DEV for å kunne iverksette mot oppdrag,
+                //  det skal egentlig være og må endres til 2024-01.
+                val virkningstidspunkt = YearMonth.of(2023, 10)
+
                 behandlingService.oppdaterVirkningstidspunkt(
                     it.id,
-                    request.virkningstidspunkt,
+                    virkningstidspunkt,
                     pesys,
                     "Automatisk importert fra Pesys",
                 )

@@ -38,6 +38,8 @@ import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakOgRolle
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
+import no.nav.etterlatte.libs.common.brev.BestillingsIdDto
+import no.nav.etterlatte.libs.common.brev.JournalpostIdDto
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
@@ -197,7 +199,7 @@ abstract class BehandlingIntegrationTest {
         HttpClient(MockEngine) {
             engine {
                 addHandler { request ->
-                    if (request.url.fullPath.matches(Regex("api/grunnlag/sak/[0-9]+"))) {
+                    if (request.url.fullPath.matches(Regex("api/grunnlag/sak/[0-9]+/behandling/*"))) {
                         val headers = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
                         respond(Grunnlag.empty().toJson(), headers = headers)
                     } else if (request.url.fullPath.endsWith("/PERSONGALLERI_V1")) {
@@ -416,6 +418,7 @@ abstract class BehandlingIntegrationTest {
 class GrunnlagKlientTest : GrunnlagKlient {
     override suspend fun finnPersonOpplysning(
         sakId: Long,
+        behandlingId: UUID,
         opplysningsType: Opplysningstype,
         brukerTokenInfo: BrukerTokenInfo,
     ): Grunnlagsopplysning<Person> {
@@ -425,6 +428,7 @@ class GrunnlagKlientTest : GrunnlagKlient {
 
     override suspend fun hentPersongalleri(
         sakId: Long,
+        behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): Grunnlagsopplysning<Persongalleri> {
         return Grunnlagsopplysning(
@@ -498,16 +502,16 @@ class BrevApiKlientTest : BrevApiKlient {
         sakId: Long,
         brevId: Long,
         brukerTokenInfo: BrukerTokenInfo,
-    ): String {
-        return UUID.randomUUID().toString()
+    ): JournalpostIdDto {
+        return JournalpostIdDto(UUID.randomUUID().toString())
     }
 
     override suspend fun distribuerBrev(
         sakId: Long,
         brevId: Long,
         brukerTokenInfo: BrukerTokenInfo,
-    ): String {
-        return UUID.randomUUID().toString()
+    ): BestillingsIdDto {
+        return BestillingsIdDto(UUID.randomUUID().toString())
     }
 
     override suspend fun hentBrev(

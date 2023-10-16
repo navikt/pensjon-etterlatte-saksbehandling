@@ -1,6 +1,5 @@
 package no.nav.etterlatte.behandling
 
-import io.kotest.assertions.any
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.just
@@ -99,7 +98,7 @@ class BehandlingServiceImplTest {
                 grunnlagsendringshendelseDao = mockk(),
                 hendelseDao = hendelserMock,
                 grunnlagKlient = mockk(),
-                sporingslogg = mockk(),
+                behandlingRequestLogger = mockk(),
                 featureToggleService = featureToggleService,
                 kommerBarnetTilGodeDao = mockk(),
                 oppgaveService = mockk(),
@@ -298,7 +297,7 @@ class BehandlingServiceImplTest {
 
         assertFalse(didRollback)
         assertThrows<RuntimeException> {
-            behandlingService.avbrytBehandling(nyFoerstegangsbehandling.id, Saksbehandler("", "saksbehandler", null))
+            inTransaction { behandlingService.avbrytBehandling(nyFoerstegangsbehandling.id, Saksbehandler("", "saksbehandler", null)) }
         }
 
         assertTrue(didRollback)
@@ -444,9 +443,9 @@ class BehandlingServiceImplTest {
         val grunnlagKlient =
             mockk<GrunnlagKlientTest> {
                 coEvery {
-                    finnPersonOpplysning(SAK_ID, opplysningstype, TOKEN)
+                    finnPersonOpplysning(SAK_ID, behandling.id, opplysningstype, TOKEN)
                 } returns grunnlagsopplysningMedPersonopplysning
-                coEvery { hentPersongalleri(any(), any()) } answers { callOriginal() }
+                coEvery { hentPersongalleri(any(), behandling.id, any()) } answers { callOriginal() }
             }
 
         val service =
@@ -588,7 +587,7 @@ class BehandlingServiceImplTest {
                 grunnlagsendringshendelseDao = mockk(),
                 hendelseDao = hendelserMock,
                 grunnlagKlient = mockk(),
-                sporingslogg = mockk(),
+                behandlingRequestLogger = mockk(),
                 featureToggleService = featureToggleService,
                 kommerBarnetTilGodeDao = mockk(),
                 oppgaveService = mockk(),
@@ -636,7 +635,7 @@ class BehandlingServiceImplTest {
                 grunnlagsendringshendelseDao = mockk(),
                 hendelseDao = hendelserMock,
                 grunnlagKlient = mockk(),
-                sporingslogg = mockk(),
+                behandlingRequestLogger = mockk(),
                 featureToggleService = featureToggleService,
                 kommerBarnetTilGodeDao = mockk(),
                 oppgaveService = mockk(),
@@ -682,7 +681,7 @@ class BehandlingServiceImplTest {
                 grunnlagsendringshendelseDao = mockk(),
                 hendelseDao = mockk(),
                 grunnlagKlient = mockk(),
-                sporingslogg = mockk(),
+                behandlingRequestLogger = mockk(),
                 featureToggleService = featureToggleService,
                 kommerBarnetTilGodeDao = mockk(),
                 oppgaveService = mockk(),
@@ -777,9 +776,9 @@ class BehandlingServiceImplTest {
         val grunnlagKlient =
             mockk<GrunnlagKlientTest> {
                 coEvery {
-                    finnPersonOpplysning(SAK_ID, Opplysningstype.AVDOED_PDL_V1, TOKEN)
+                    finnPersonOpplysning(SAK_ID, behandling.id, Opplysningstype.AVDOED_PDL_V1, TOKEN)
                 } returns grunnlagsopplysningMedPersonopplysning
-                coEvery { hentPersongalleri(any(), any()) } answers { callOriginal() }
+                coEvery { hentPersongalleri(any(), behandling.id, any()) } answers { callOriginal() }
             }
         return lagRealGenerellBehandlingService(
             behandlingDao =
@@ -811,7 +810,7 @@ class BehandlingServiceImplTest {
             grunnlagsendringshendelseDao = grunnlagsendringshendelseDao,
             hendelseDao = hendelseDao ?: mockk(),
             grunnlagKlient = grunnlagKlient ?: mockk(),
-            sporingslogg = mockk(),
+            behandlingRequestLogger = mockk(),
             featureToggleService = featureToggleService,
             kommerBarnetTilGodeDao = mockk(),
             oppgaveService = oppgaveService,

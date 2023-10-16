@@ -1,11 +1,16 @@
 package no.nav.etterlatte.klage.modell
 
+import com.fasterxml.jackson.annotation.JsonInclude
 import no.nav.etterlatte.libs.common.behandling.EkstradataInnstilling
+import no.nav.etterlatte.libs.common.behandling.KabalHjemmel
 import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.behandling.KlageUtfall
 import no.nav.etterlatte.libs.common.behandling.Mottaker
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.klage.kodeverk.Fagsystem
+import no.nav.klage.kodeverk.Ytelse
+import no.nav.klage.kodeverk.hjemmel.Hjemmel
 import java.time.LocalDate
 
 enum class KabalSakType {
@@ -28,6 +33,7 @@ data class KlageAnnenPart(
     val skalMottaKopi: Boolean,
 )
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 data class KabalKlager(
     val id: KabalKlagerPart,
     val klagersProsessfullmektig: KlageAnnenPart?,
@@ -35,22 +41,18 @@ data class KabalKlager(
 
 data class KabalFagsak(
     val fagsakId: String,
-    val fagsystem: String,
+    val fagsystem: Fagsystem,
 )
 
-enum class KabalYtelse {
-    PEN_GJE,
-    PEN_BAR,
-    ;
-
-    companion object {
-        fun fra(sakType: SakType): KabalYtelse {
-            return when (sakType) {
-                SakType.BARNEPENSJON -> PEN_BAR
-                SakType.OMSTILLINGSSTOENAD -> PEN_GJE
-            }
-        }
+fun SakType.tilYtelse(): Ytelse {
+    return when (this) {
+        SakType.BARNEPENSJON -> Ytelse.PEN_BAR
+        SakType.OMSTILLINGSSTOENAD -> Ytelse.PEN_GJE
     }
+}
+
+fun KabalHjemmel.tilHjemmel(): Hjemmel {
+    return enumValueOf(this.name)
 }
 
 /**
@@ -59,23 +61,24 @@ enum class KabalYtelse {
  * Se https://kabal-api.intern.dev.nav.no/swagger-ui/index.html#/kabal-api-external/sendInnSakV3
  *
  **/
+@JsonInclude(JsonInclude.Include.NON_NULL)
 data class KabalOversendelse(
     val type: KabalSakType,
     val klager: KabalKlager,
     val sakenGjelder: KlageAnnenPart?,
-    val fagSak: KabalFagsak,
+    val fagsak: KabalFagsak,
     val kildeReferanse: String,
-    val hjemler: List<KabalHjemmel>,
+    val hjemler: List<Hjemmel>,
     val forrigeBehandlendeEnhet: String,
     val tilknyttedeJournalposter: List<KabalJournalpostref>,
     val brukersHenvendelseMottattNavDato: LocalDate,
     val innsendtTilNav: LocalDate,
-    val kilde: String,
-    val ytelse: KabalYtelse,
+    val kilde: Fagsystem,
+    val ytelse: Ytelse,
     val kommentar: String?,
 ) {
     companion object {
-        private const val FAGSYSTEM: String = "EY"
+        private val fagsystem = Fagsystem.EY
 
         fun fra(
             klage: Klage,
@@ -112,9 +115,9 @@ data class KabalOversendelse(
                         id = KabalKlagerPart(KabalKlagerType.PERSON, klage.sak.ident),
                         skalMottaKopi = true,
                     ).takeIf { erKlagerIkkeBruker },
-                fagSak = KabalFagsak(fagsakId = klage.sak.id.toString(), fagsystem = FAGSYSTEM),
+                fagsak = KabalFagsak(fagsakId = klage.sak.id.toString(), fagsystem = fagsystem),
                 kildeReferanse = klage.id.toString(),
-                hjemler = listOf(KabalHjemmel.FTRL_21_12), // TODO hent fra innstilling når hjemlene våre er på plass
+                hjemler = listOf(innstilling.lovhjemmel.tilHjemmel()),
                 forrigeBehandlendeEnhet = klage.sak.enhet,
                 tilknyttedeJournalposter =
                     listOfNotNull(
@@ -143,8 +146,8 @@ data class KabalOversendelse(
                     ),
                 brukersHenvendelseMottattNavDato = Tidspunkt.now().toLocalDate(),
                 innsendtTilNav = Tidspunkt.now().toLocalDate(),
-                kilde = FAGSYSTEM,
-                ytelse = KabalYtelse.fra(klage.sak.sakType),
+                kilde = fagsystem,
+                ytelse = klage.sak.sakType.tilYtelse(),
                 kommentar = innstilling.tekst, // TODO rename her og i basen
             )
         }

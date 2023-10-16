@@ -5,7 +5,7 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.beregning.grunnlag.BarnepensjonBeregningsGrunnlag
 import no.nav.etterlatte.beregning.grunnlag.GrunnlagMedPeriode
 import no.nav.etterlatte.libs.common.beregning.BeregningDTO
-import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
+import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.etterlatte.rapidsandrivers.migrering.MigreringRequest
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser
@@ -13,7 +13,6 @@ import no.nav.etterlatte.rapidsandrivers.migrering.hendelseData
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
-import no.nav.helse.rapids_rivers.River
 import org.slf4j.LoggerFactory
 import rapidsandrivers.BEHANDLING_ID_KEY
 import rapidsandrivers.BEREGNING_KEY
@@ -26,12 +25,10 @@ internal class MigreringHendelser(rapidsConnection: RapidsConnection, private va
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     init {
-        River(rapidsConnection).apply {
-            eventName(hendelsestype)
+        initialiserRiver(rapidsConnection, hendelsestype) {
             validate { it.requireKey(BEHANDLING_ID_KEY) }
             validate { it.requireKey(HENDELSE_DATA_KEY) }
-            correlationId()
-        }.register(this)
+        }
     }
 
     override fun haandterPakke(
@@ -62,15 +59,18 @@ private fun verifiserNyBeregning(
     migreringRequest: MigreringRequest,
 ) {
     check(beregning.beregningsperioder.size == 1) {
-        "Migrerte saker skal kun opprette en beregningperiode, men oppretta ${beregning.beregningsperioder.size}"
+        "Migrerte saker skal kun opprette en beregningperiode, men oppretta ${beregning.beregningsperioder.size}: " +
+            beregning.beregningsperioder.map { Periode(it.datoFOM, it.datoTOM) }.joinToString(", ")
     }
 
     with(beregning.beregningsperioder.first()) {
         check(trygdetid == migreringRequest.beregning.anvendtTrygdetid.toInt()) {
-            "Beregning må være basert på samme trygdetid som i Pesys"
+            "Beregning må være basert på samme trygdetid som i Pesys. Er $trygdetid i Gjenny" +
+                ", var ${migreringRequest.beregning.anvendtTrygdetid} i Pesys."
         }
         check(grunnbelop == migreringRequest.beregning.g.toInt()) {
-            "Beregning må være basert på samme G som i Pesys"
+            "Beregning må være basert på samme G som i Pesys. Er $grunnbelop i Gjenny, " +
+                "var ${migreringRequest.beregning.g} i Pesys."
         }
         check(utbetaltBeloep >= migreringRequest.beregning.brutto.toInt()) {
             "Man skal ikke kunne komme dårligere ut på nytt regelverk. " +

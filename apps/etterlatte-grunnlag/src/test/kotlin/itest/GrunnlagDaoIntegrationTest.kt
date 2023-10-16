@@ -32,6 +32,8 @@ import no.nav.etterlatte.libs.testdata.grunnlag.kilde
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
@@ -43,6 +45,7 @@ import java.time.Month
 import java.time.YearMonth
 import java.util.UUID
 import javax.sql.DataSource
+import kotlin.random.Random
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class GrunnlagDaoIntegrationTest {
@@ -78,7 +81,7 @@ internal class GrunnlagDaoIntegrationTest {
     fun afterEach() {
         clearAllMocks()
         dataSource.connection.use {
-            it.prepareStatement(""" TRUNCATE grunnlagshendelse""").execute()
+            it.prepareStatement("TRUNCATE grunnlagshendelse").execute()
         }
     }
 
@@ -312,6 +315,36 @@ internal class GrunnlagDaoIntegrationTest {
         assertEquals(3, result.size)
 
         verify(exactly = 19) { opplysningRepo.leggOpplysningTilGrunnlag(any(), any(), any()) }
+    }
+
+    @Test
+    fun `Lagring av versjon for behandling`() {
+        val sakId = Random.nextLong()
+        val behandlingId = UUID.randomUUID()
+
+        assertNull(opplysningRepo.hentBehandlingVersjon(behandlingId))
+
+        val hendelsenummer1 = 1L
+        opplysningRepo.oppdaterVersjonForBehandling(behandlingId, sakId, hendelsenummer1)
+
+        val versjon1 = opplysningRepo.hentBehandlingVersjon(behandlingId)!!
+        assertEquals(behandlingId, versjon1.behandlingId)
+        assertEquals(sakId, versjon1.sakId)
+        assertEquals(hendelsenummer1, versjon1.hendelsenummer)
+        assertFalse(versjon1.laast)
+
+        val hendelsenummer2 = 42L
+        opplysningRepo.oppdaterVersjonForBehandling(behandlingId, sakId, hendelsenummer2)
+
+        val versjon2 = opplysningRepo.hentBehandlingVersjon(behandlingId)!!
+        assertEquals(hendelsenummer2, versjon2.hendelsenummer)
+
+        opplysningRepo.laasGrunnlagVersjonForBehandling(behandlingId)
+
+        val laastVersjon = opplysningRepo.hentBehandlingVersjon(behandlingId)!!
+        assertTrue(laastVersjon.laast)
+
+        // TODO: Teste endring av låst sak når det er avklart hvordan det skal håndteres
     }
 
     private companion object {

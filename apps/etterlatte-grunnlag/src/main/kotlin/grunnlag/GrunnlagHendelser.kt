@@ -8,7 +8,6 @@ import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.rapidsandrivers.BEHOV_NAME_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
-import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.rapidsandrivers.EventNames.FEILA
@@ -16,14 +15,15 @@ import no.nav.etterlatte.rapidsandrivers.migrering.VILKAARSVURDERT_KEY
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
-import no.nav.helse.rapids_rivers.River
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import rapidsandrivers.BEHANDLING_ID_KEY
 import rapidsandrivers.FNR_KEY
 import rapidsandrivers.GRUNNLAG_OPPDATERT
 import rapidsandrivers.OPPLYSNING_KEY
 import rapidsandrivers.SAK_ID_KEY
 import rapidsandrivers.migrering.ListenerMedLogging
+import java.util.UUID
 
 class GrunnlagHendelser(
     rapidsConnection: RapidsConnection,
@@ -32,17 +32,17 @@ class GrunnlagHendelser(
     private val logger: Logger = LoggerFactory.getLogger(GrunnlagHendelser::class.java)
 
     init {
-        River(rapidsConnection).apply {
-            correlationId()
+        initialiserRiverUtenEventName(rapidsConnection) {
             validate { it.interestedIn(EVENT_NAME_KEY) }
             validate { it.interestedIn(BEHOV_NAME_KEY) }
             validate { it.interestedIn(FNR_KEY) }
             validate { it.requireKey(OPPLYSNING_KEY) }
             validate { it.requireKey(SAK_ID_KEY) }
+            validate { it.requireKey(BEHANDLING_ID_KEY) }
             validate { it.rejectValue(EVENT_NAME_KEY, GRUNNLAG_OPPDATERT) }
             validate { it.rejectValue(EVENT_NAME_KEY, FEILA) }
             validate { it.rejectValue(VILKAARSVURDERT_KEY, true) }
-        }.register(this)
+        }
     }
 
     override fun haandterPakke(
@@ -54,6 +54,8 @@ class GrunnlagHendelser(
 
         if (eventName == "OPPLYSNING:NY" || opplysningType in OPPLYSNING_TYPER) {
             val sakId = packet[SAK_ID_KEY].asLong()
+            val behandlingId = packet[BEHANDLING_ID_KEY].let { UUID.fromString(it.asText()) }
+
             val opplysninger: List<Grunnlagsopplysning<JsonNode>> =
                 objectMapper.readValue(packet[OPPLYSNING_KEY].toJson())!!
 
@@ -61,11 +63,13 @@ class GrunnlagHendelser(
             if (fnr == null) {
                 grunnlagService.lagreNyeSaksopplysninger(
                     sakId,
+                    behandlingId,
                     opplysninger,
                 )
             } else {
                 grunnlagService.lagreNyePersonopplysninger(
                     sakId,
+                    behandlingId,
                     Folkeregisteridentifikator.of(fnr),
                     opplysninger,
                 )

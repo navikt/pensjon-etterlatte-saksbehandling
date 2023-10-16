@@ -27,7 +27,7 @@ class Grunnlag(
 
     fun hentAvdoede(): List<Grunnlagsdata<JsonNode>> = hentFamiliemedlemmer(PersonRolle.AVDOED)
 
-    fun hentSoesken() = familie.filter { it.hentPersonrolle()?.verdi == PersonRolle.BARN }
+    fun hentSoesken() = familie.filter { it.hentPersonrolle()?.verdi in listOf(PersonRolle.BARN, PersonRolle.TILKNYTTET_BARN) }
 
     private fun hentFamiliemedlem(personRolle: PersonRolle) =
         familie.find { it.hentPersonrolle()?.verdi == personRolle }

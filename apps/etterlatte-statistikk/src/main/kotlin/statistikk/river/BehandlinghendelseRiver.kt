@@ -16,7 +16,6 @@ import no.nav.etterlatte.statistikk.service.StatistikkService
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
-import no.nav.helse.rapids_rivers.River
 import org.slf4j.LoggerFactory
 import rapidsandrivers.migrering.ListenerMedLogging
 import java.time.LocalDateTime
@@ -35,7 +34,7 @@ class BehandlinghendelseRiver(
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     init {
-        River(rapidsConnection).apply {
+        initialiserRiverUtenEventName(rapidsConnection) {
             validate { it.demandAny(EVENT_NAME_KEY, behandlingshendelser) }
             validate { it.interestedIn(BehandlingRiverKey.behandlingObjectKey) }
             validate { it.requireKey("behandling.id") }
@@ -46,8 +45,7 @@ class BehandlinghendelseRiver(
             validate { it.requireKey("behandling.status") }
             validate { it.requireKey("behandling.type") }
             validate { it.interestedIn(TEKNISK_TID_KEY) }
-            correlationId()
-        }.register(this)
+        }
     }
 
     override fun haandterPakke(

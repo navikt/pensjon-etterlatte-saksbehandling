@@ -10,7 +10,15 @@ data class GenerellBehandling(
     val type: GenerellBehandlingType,
     val innhold: Innhold?,
     val tilknyttetBehandling: UUID? = null,
+    val status: Status,
 ) {
+    enum class Status {
+        OPPRETTET,
+        FATTET,
+        ATTESTERT,
+        AVBRUTT,
+    }
+
     init {
         if (innhold !== null) {
             when (type) {
@@ -31,11 +39,11 @@ data class GenerellBehandling(
         fun opprettFraType(
             type: GenerellBehandlingType,
             sakId: Long,
-        ) = GenerellBehandling(UUID.randomUUID(), sakId, Tidspunkt.now(), type, null)
+        ) = GenerellBehandling(UUID.randomUUID(), sakId, Tidspunkt.now(), type, null, null, Status.OPPRETTET)
 
         fun opprettUtland(
             sakId: Long,
-            behandlingreferanse: UUID,
+            behandlingreferanse: UUID?,
         ) = GenerellBehandling(
             UUID.randomUUID(),
             sakId,
@@ -43,6 +51,7 @@ data class GenerellBehandling(
             GenerellBehandlingType.UTLAND,
             null,
             tilknyttetBehandling = behandlingreferanse,
+            status = Status.OPPRETTET,
         )
     }
 

@@ -6,6 +6,7 @@ import no.nav.etterlatte.grunnbeloep.Grunnbeloep
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
@@ -13,6 +14,15 @@ import no.nav.pensjon.brevbaker.api.model.Kroner
 import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
+
+data class GenerellBrevData(
+    val sak: Sak,
+    val personerISak: PersonerISak,
+    val behandlingId: UUID,
+    val forenkletVedtak: ForenkletVedtak,
+    val spraak: Spraak,
+    val revurderingsaarsak: RevurderingAarsak? = null,
+)
 
 data class Behandling(
     val sakId: Long,
@@ -62,6 +72,8 @@ data class ForenkletVedtak(
     val saksbehandlerIdent: String,
     val attestantIdent: String?,
     val vedtaksdato: LocalDate?,
+    val virkningstidspunkt: YearMonth,
+    val revurderingInfo: RevurderingInfo? = null,
 )
 
 data class Utbetalingsinfo(

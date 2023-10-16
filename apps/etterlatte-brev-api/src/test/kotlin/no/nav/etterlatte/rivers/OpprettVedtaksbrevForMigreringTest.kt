@@ -66,7 +66,7 @@ internal class OpprettVedtaksbrevForMigreringTest {
         coVerify(exactly = 1) { vedtaksbrevService.ferdigstillVedtaksbrev(brev.behandlingId!!, any()) }
 
         val meldingSendt = inspektoer.message(0)
-        assertEquals(BrevEventTypes.FERDIGSTILT.name, meldingSendt.get(EVENT_NAME_KEY).asText())
+        assertEquals(BrevEventTypes.FERDIGSTILT.toEventName(), meldingSendt.get(EVENT_NAME_KEY).asText())
     }
 
     @Test
@@ -81,7 +81,7 @@ internal class OpprettVedtaksbrevForMigreringTest {
                 )
             }.inspektør
 
-        assertEquals(BrevEventTypes.FERDIGSTILT.name, inspektoer.message(0).get(EVENT_NAME_KEY).asText())
+        assertEquals(BrevEventTypes.FERDIGSTILT.toEventName(), inspektoer.message(0).get(EVENT_NAME_KEY).asText())
     }
 
     private fun opprettBrev() =

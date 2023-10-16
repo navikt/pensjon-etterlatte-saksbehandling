@@ -1,13 +1,15 @@
 package no.nav.etterlatte.rivers
 
-enum class BrevEventTypes {
+import no.nav.etterlatte.event.EventName
+
+enum class BrevEventTypes : EventName {
     OPPRETTET,
     FERDIGSTILT,
     JOURNALFOERT,
     DISTRIBUERT,
     ;
 
-    override fun toString(): String {
+    override fun toEventName(): String {
         return "BREV:$name"
     }
 }

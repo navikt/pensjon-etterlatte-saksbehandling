@@ -20,11 +20,11 @@ import java.util.UUID
 internal class OpprettVedtaksbrevForMigrering(
     rapidsConnection: RapidsConnection,
     private val service: VedtaksbrevService,
-) : ListenerMedLoggingOgFeilhaandtering(BrevEventTypes.OPPRETTET.name) {
+) : ListenerMedLoggingOgFeilhaandtering(BrevEventTypes.OPPRETTET.toEventName()) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     init {
-        initialiserRiver(rapidsConnection, VedtakKafkaHendelseType.ATTESTERT.toString()) {
+        initialiserRiver(rapidsConnection, VedtakKafkaHendelseType.ATTESTERT) {
             validate { it.requireKey("vedtak.behandling.id") }
             validate { it.requireKey("vedtak.sak.id") }
             validate { it.interestedIn(KILDE_KEY) }
@@ -35,7 +35,7 @@ internal class OpprettVedtaksbrevForMigrering(
         packet: JsonMessage,
         context: MessageContext,
     ) {
-        packet.eventName = BrevEventTypes.FERDIGSTILT.name
+        packet.eventName = BrevEventTypes.FERDIGSTILT.toEventName()
         if (packet.erMigrering()) {
             val sakId = packet["vedtak.sak.id"].asLong()
             logger.info("Oppretter vedtaksbrev i sak $sakId")

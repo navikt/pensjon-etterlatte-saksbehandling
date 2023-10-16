@@ -20,7 +20,7 @@ internal class DistribuerBrev(
     private val logger = LoggerFactory.getLogger(DistribuerBrev::class.java)
 
     init {
-        initialiserRiver(rapidsConnection, BrevEventTypes.JOURNALFOERT.toString()) {
+        initialiserRiver(rapidsConnection, BrevEventTypes.JOURNALFOERT) {
             validate { it.requireKey("brevId", "journalpostId", "distribusjonType") }
             validate { it.rejectKey("bestillingsId") }
         }

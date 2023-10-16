@@ -1,5 +1,6 @@
 package rapidsandrivers.migrering
 
+import no.nav.etterlatte.event.EventName
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
@@ -24,6 +25,13 @@ abstract class ListenerMedLogging : River.PacketListener {
         haandterPakke(packet, context)
     }
 
+    protected fun initialiserRiver(
+        rapidsConnection: RapidsConnection,
+        hendelsestype: EventName,
+        block: River.() -> Unit = {},
+    ) = initialiserRiver(rapidsConnection, hendelsestype.toEventName(), block)
+
+    @Deprecated("bruk heller den som tar inn EventName-enum")
     protected fun initialiserRiver(
         rapidsConnection: RapidsConnection,
         hendelsestype: String,

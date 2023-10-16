@@ -1,6 +1,8 @@
 package no.nav.etterlatte.libs.common.vedtak
 
-enum class VedtakKafkaHendelseType {
+import no.nav.etterlatte.event.EventName
+
+enum class VedtakKafkaHendelseType : EventName {
     VILKAARSVURDERT,
     BEREGNET,
     FATTET,
@@ -12,4 +14,6 @@ enum class VedtakKafkaHendelseType {
     override fun toString(): String {
         return "VEDTAK:$name"
     }
+
+    override fun toEventName() = toString()
 }

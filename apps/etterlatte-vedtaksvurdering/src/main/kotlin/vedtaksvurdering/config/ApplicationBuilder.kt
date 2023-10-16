@@ -91,11 +91,11 @@ class ApplicationBuilder {
 
     fun start() =
         setReady().also {
-            rapidsConnection.start()
             thread {
                 Thread.sleep(30_000)
                 ryddejobb.resendJournalfoeringbehovForAlleAttesterteOgIverksatteVedtak()
             }
+            rapidsConnection.start()
         }
 
     private fun publiser(

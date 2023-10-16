@@ -68,6 +68,7 @@ export const Sjekkliste = (props: { behandling: IBehandlingReducer }) => {
           <HMargin>
             <Textarea
               label="Kommentar"
+              name="Kommentar"
               description="Skriv ned annet som ikke kommer frem i sjekklisten."
               rows={3}
               readOnly={ferdigBehandlet}
@@ -75,11 +76,11 @@ export const Sjekkliste = (props: { behandling: IBehandlingReducer }) => {
           </HMargin>
 
           <HMargin>
-            <TextField label="Adresse brevet er sendt til" readOnly={ferdigBehandlet} />
+            <TextField label="Adresse brevet er sendt til" name="AdresseBrevforsendelse" readOnly={ferdigBehandlet} />
           </HMargin>
 
           <HMargin>
-            <TextField label="Kontonummer registrert" readOnly={ferdigBehandlet} />
+            <TextField label="Kontonummer registrert" name="KontonummerRegistrert" readOnly={ferdigBehandlet} />
           </HMargin>
         </>
       )}

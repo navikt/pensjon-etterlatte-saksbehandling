@@ -1,6 +1,6 @@
 package no.nav.etterlatte
 
-import no.nav.etterlatte.fordeler.FordelerServiceTest
+import no.nav.etterlatte.fordeler.FordelerRiverServiceTest
 import no.nav.etterlatte.libs.common.innsendtsoeknad.barnepensjon.Barnepensjon
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Adresse
@@ -107,5 +107,5 @@ fun readSoknad(file: String): Barnepensjon {
 }
 
 fun readFile(file: String) =
-    FordelerServiceTest::class.java.getResource(file)?.readText()
+    FordelerRiverServiceTest::class.java.getResource(file)?.readText()
         ?: throw FileNotFoundException("Fant ikke filen $file")

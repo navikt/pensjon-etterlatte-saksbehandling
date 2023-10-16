@@ -10,7 +10,7 @@ import no.nav.etterlatte.mq.EtterlatteJmsConnectionFactory
 import no.nav.etterlatte.mq.JmsConnectionFactory
 import no.nav.etterlatte.utbetaling.avstemming.KonsistensavstemmingJob
 import no.nav.etterlatte.utbetaling.avstemming.KonsistensavstemmingService
-import no.nav.etterlatte.utbetaling.common.Oppgavetrigger
+import no.nav.etterlatte.utbetaling.common.OppgavetriggerRiver
 import no.nav.etterlatte.utbetaling.common.april
 import no.nav.etterlatte.utbetaling.common.august
 import no.nav.etterlatte.utbetaling.common.februar
@@ -28,7 +28,7 @@ import no.nav.etterlatte.utbetaling.grensesnittavstemming.Grensesnittsavstemming
 import no.nav.etterlatte.utbetaling.grensesnittavstemming.GrensesnittsavstemmingService
 import no.nav.etterlatte.utbetaling.grensesnittavstemming.avstemmingsdata.AvstemmingsdataSender
 import no.nav.etterlatte.utbetaling.iverksetting.KvitteringMottaker
-import no.nav.etterlatte.utbetaling.iverksetting.VedtakMottaker
+import no.nav.etterlatte.utbetaling.iverksetting.VedtakMottakRiver
 import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.OppdragMapper
 import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.OppdragSender
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Saktype
@@ -152,8 +152,8 @@ class ApplicationContext(
             saktype = Saktype.OMSTILLINGSSTOENAD,
         )
 
-    val oppgavetrigger by lazy {
-        Oppgavetrigger(
+    val oppgavetriggerRiver by lazy {
+        OppgavetriggerRiver(
             rapidsConnection = rapidsConnection,
             utbetalingService = utbetalingService,
             grensesnittsavstemmingService = grensesnittsavstemmingService,
@@ -169,8 +169,8 @@ class ApplicationContext(
         )
     }
 
-    val vedtakMottaker by lazy {
-        VedtakMottaker(
+    val vedtakMottakRiver by lazy {
+        VedtakMottakRiver(
             rapidsConnection = rapidsConnection,
             utbetalingService = utbetalingService,
         )

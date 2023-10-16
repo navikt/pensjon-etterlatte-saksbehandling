@@ -26,7 +26,7 @@ import kotlin.math.round
 // TODO dato settes riktig senere
 val TRYGDETID_DATO: LocalDate = LocalDate.of(1900, 1, 1)
 
-data class TrygdetidPeriodMedPoengAar(
+data class TrygdetidPeriodeMedPoengaar(
     val fra: LocalDate,
     val til: LocalDate,
     val poengInnAar: Boolean,
@@ -34,14 +34,14 @@ data class TrygdetidPeriodMedPoengAar(
 )
 
 data class TrygdetidPeriodeGrunnlag(
-    val periode: FaktumNode<TrygdetidPeriodMedPoengAar>,
+    val periode: FaktumNode<TrygdetidPeriodeMedPoengaar>,
 )
 
 data class TotalTrygdetidGrunnlag(
     val beregnetTrygdetidPerioder: FaktumNode<List<Period>>,
 )
 
-val periode: Regel<TrygdetidPeriodeGrunnlag, TrygdetidPeriodMedPoengAar> =
+val periode: Regel<TrygdetidPeriodeGrunnlag, TrygdetidPeriodeMedPoengaar> =
     finnFaktumIGrunnlag(
         gjelderFra = TRYGDETID_DATO,
         beskrivelse = "Finner trygdetidsperiode fra grunnlag",
@@ -55,23 +55,23 @@ val beregnTrygdetidForPeriode =
         beskrivelse = "Beregner trygdetid fra og med periodeFra til og med periodeTil i år, måneder og dager",
         regelReferanse = RegelReferanse(id = "REGEL-TRYGDETID-BEREGNE-PERIODE"),
     ) benytter periode med { periode ->
-        fun TrygdetidPeriodMedPoengAar.erEttPoengAar() = fra.year == til.year && (poengInnAar || poengUtAar)
+        fun TrygdetidPeriodeMedPoengaar.erEttPoengaar() = fra.year == til.year && (poengInnAar || poengUtAar)
 
-        fun TrygdetidPeriodMedPoengAar.poengJustertFra() =
+        fun TrygdetidPeriodeMedPoengaar.poengJustertFra() =
             if (poengInnAar) {
                 fra.with(MonthDay.of(Month.JANUARY, 1))
             } else {
                 fra
             }
 
-        fun TrygdetidPeriodMedPoengAar.poengJustertTil() =
+        fun TrygdetidPeriodeMedPoengaar.poengJustertTil() =
             if (poengUtAar) {
                 til.with(MonthDay.of(Month.DECEMBER, 31))
             } else {
                 til
             }
 
-        if (periode.erEttPoengAar()) {
+        if (periode.erEttPoengaar()) {
             Period.ofYears(1)
         } else {
             Period.between(periode.poengJustertFra(), periode.poengJustertTil().plusDays(1))

@@ -4,7 +4,7 @@ import { Dokumentoversikt } from '~components/person/dokumenter/dokumentoversikt
 import AnnullerBehandling from '~components/behandling/handlinger/AnnullerBehanding'
 import { useEffect, useState } from 'react'
 import { IBeslutning } from '~components/behandling/attestering/types'
-import { IBehandlingInfo } from '~components/behandling/sidemeny/IBehandlingInfo'
+import { BehandlingFane, IBehandlingInfo } from '~components/behandling/sidemeny/IBehandlingInfo'
 import { IRolle } from '~store/reducers/SaksbehandlerReducer'
 import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 import { useBehandling } from '~components/behandling/useBehandling'
@@ -19,6 +19,9 @@ import Spinner from '~shared/Spinner'
 import { useVedtak } from '~components/vedtak/useVedtak'
 import { VedtakSammendrag } from '~components/vedtak/typer'
 import { updateVedtakSammendrag } from '~store/reducers/VedtakReducer'
+import { Tabs } from '@navikt/ds-react'
+import { DocPencilIcon, FileTextIcon } from '@navikt/aksel-icons'
+import { Sjekkliste } from '~components/behandling/sjekkliste/Sjekkliste'
 
 const mapTilBehandlingInfo = (behandling: IBehandlingReducer, vedtak: VedtakSammendrag | null): IBehandlingInfo => ({
   type: behandling.behandlingType,
@@ -42,6 +45,7 @@ export const BehandlingSidemeny = () => {
   const saksbehandler = useAppSelector((state) => state.saksbehandlerReducer.saksbehandler)
   const [fetchVedtakStatus, fetchVedtakSammendrag] = useApiCall(hentVedtakSammendrag)
   const [beslutning, setBeslutning] = useState<IBeslutning>()
+  const [fane, setFane] = useState(BehandlingFane.DOKUMENTER)
 
   const behandlingsinfo = behandling ? mapTilBehandlingInfo(behandling, vedtak) : undefined
 
@@ -84,7 +88,20 @@ export const BehandlingSidemeny = () => {
         </>
       )}
 
-      {behandling?.søker?.foedselsnummer && <Dokumentoversikt fnr={behandling.søker.foedselsnummer} liten />}
+      <Tabs value={fane} iconPosition="top" onChange={(val) => setFane(val as BehandlingFane)}>
+        <Tabs.List>
+          <Tabs.Tab value={BehandlingFane.DOKUMENTER} label="Dokumenter" icon={<FileTextIcon title="dokumenter" />} />
+          <Tabs.Tab value={BehandlingFane.SJEKKLISTE} label="Sjekkliste" icon={<DocPencilIcon title="sjekkliste" />} />
+        </Tabs.List>
+        <Tabs.Panel value={BehandlingFane.DOKUMENTER}>
+          {behandling?.søker?.foedselsnummer && <Dokumentoversikt fnr={behandling.søker.foedselsnummer} liten />}
+        </Tabs.Panel>
+        <Tabs.Panel value={BehandlingFane.SJEKKLISTE}>
+          {behandling?.søker?.foedselsnummer && <Sjekkliste behandling={behandling} />}
+        </Tabs.Panel>
+      </Tabs>
+
+      {/*{behandling?.søker?.foedselsnummer && <Dokumentoversikt fnr={behandling.søker.foedselsnummer} liten />}*/}
 
       <AnnullerBehandling />
     </Sidebar>

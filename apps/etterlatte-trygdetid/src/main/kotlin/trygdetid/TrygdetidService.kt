@@ -10,6 +10,7 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning.RegelKilde
 import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
 import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsdato
+import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsnummer
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.common.trygdetid.DetaljertBeregnetTrygdetidResultat
@@ -99,6 +100,7 @@ class TrygdetidService(
                 sakId = behandling.sak,
                 behandlingId = behandling.id,
                 opplysninger = hentOpplysninger(avdoed),
+                ident = avdoed.hentFoedselsnummer()?.verdi?.value,
             )
         return trygdetidRepository.opprettTrygdetid(trygdetid)
     }
@@ -271,6 +273,7 @@ class TrygdetidService(
                 opplysninger = forrigeTrygdetid.opplysninger.map { it.copy(id = UUID.randomUUID()) },
                 trygdetidGrunnlag = forrigeTrygdetid.trygdetidGrunnlag.map { it.copy(id = UUID.randomUUID()) },
                 beregnetTrygdetid = forrigeTrygdetid.beregnetTrygdetid,
+                ident = forrigeTrygdetid.ident,
             )
 
         return trygdetidRepository.opprettTrygdetid(kopiertTrygdetid)

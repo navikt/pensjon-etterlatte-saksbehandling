@@ -31,6 +31,7 @@ class TrygdetidRepository(private val dataSource: DataSource) {
                         id,
                         sak_id,
                         behandling_id,
+                        ident,
                         tidspunkt,
                         faktisk_trygdetid_norge_total,
                         faktisk_trygdetid_norge_antall_maaneder,
@@ -472,6 +473,7 @@ class TrygdetidRepository(private val dataSource: DataSource) {
             },
         trygdetidGrunnlag = trygdetidGrunnlag,
         opplysninger = opplysninger,
+        ident = stringOrNull("ident"),
     )
 
     private fun Row.toTrygdetidGrunnlag() =

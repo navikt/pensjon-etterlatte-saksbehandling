@@ -441,4 +441,20 @@ class VedtaksvurderingRepository(private val datasource: DataSource) : Transacti
             return@session hentVedtakNonNull(behandlingId, this)
         }
     }
+
+    fun hentAttesterteEllerIverksatteVedtak(): List<Vedtak> {
+        return datasource.transaction { session ->
+            session.hentListe(
+                queryString = "SELECT * FROM vedtak WHERE vedtakstatus in (:attestert, :iverksatt)",
+                params = {
+                    mapOf(
+                        "attestert" to VedtakStatus.ATTESTERT.name,
+                        "iverksatt" to VedtakStatus.IVERKSATT.name,
+                    )
+                },
+            ) {
+                it.toVedtak(emptyList())
+            }
+        }
+    }
 }

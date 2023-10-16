@@ -552,6 +552,10 @@ class VedtakBehandlingService(
         behandlingId,
     )
 
+    fun hentAttesterteEllerIverksatteVedtak(): List<Vedtak> {
+        return repository.hentAttesterteEllerIverksatteVedtak()
+    }
+
     fun tilbakestillIkkeIverksatteVedtak(behandlingId: UUID): Vedtak? = repository.tilbakestillIkkeIverksatteVedtak(behandlingId)
 
     fun hentNyesteBehandlingMedResultat(

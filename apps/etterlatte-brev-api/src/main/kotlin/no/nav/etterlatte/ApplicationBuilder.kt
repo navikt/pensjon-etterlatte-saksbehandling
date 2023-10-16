@@ -47,10 +47,10 @@ import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.libs.ktor.setReady
-import no.nav.etterlatte.rivers.DistribuerBrev
-import no.nav.etterlatte.rivers.JournalfoerVedtaksbrev
-import no.nav.etterlatte.rivers.OpprettVedtaksbrevForMigrering
-import no.nav.etterlatte.rivers.VedtaksbrevUnderkjent
+import no.nav.etterlatte.rivers.DistribuerBrevRiver
+import no.nav.etterlatte.rivers.JournalfoerVedtaksbrevRiver
+import no.nav.etterlatte.rivers.OpprettVedtaksbrevForMigreringRiver
+import no.nav.etterlatte.rivers.VedtaksbrevUnderkjentRiver
 import no.nav.etterlatte.security.ktor.clientCredential
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -183,10 +183,10 @@ class ApplicationBuilder {
                         }
                     },
                 )
-                OpprettVedtaksbrevForMigrering(this, vedtaksbrevService)
-                JournalfoerVedtaksbrev(this, vedtaksbrevService)
-                VedtaksbrevUnderkjent(this, vedtaksbrevService)
-                DistribuerBrev(this, vedtaksbrevService, distribusjonService)
+                OpprettVedtaksbrevForMigreringRiver(this, vedtaksbrevService)
+                JournalfoerVedtaksbrevRiver(this, vedtaksbrevService)
+                VedtaksbrevUnderkjentRiver(this, vedtaksbrevService)
+                DistribuerBrevRiver(this, vedtaksbrevService, distribusjonService)
             }
 
     private fun featureToggleProperties(config: Config) =

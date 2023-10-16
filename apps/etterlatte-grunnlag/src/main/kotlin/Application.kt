@@ -6,8 +6,8 @@ import com.typesafe.config.ConfigFactory
 import io.ktor.client.HttpClient
 import io.ktor.server.config.HoconApplicationConfig
 import io.ktor.server.routing.route
-import no.nav.etterlatte.grunnlag.GrunnlagHendelser
-import no.nav.etterlatte.grunnlag.MigreringHendelser
+import no.nav.etterlatte.grunnlag.GrunnlagHendelserRiver
+import no.nav.etterlatte.grunnlag.MigreringHendelserRiver
 import no.nav.etterlatte.grunnlag.OpplysningDao
 import no.nav.etterlatte.grunnlag.RealGrunnlagService
 import no.nav.etterlatte.grunnlag.behandlingGrunnlagRoute
@@ -71,8 +71,8 @@ class ApplicationBuilder {
                 }
             }
             .build().apply {
-                GrunnlagHendelser(this, grunnlagService)
-                MigreringHendelser(this, grunnlagService)
+                GrunnlagHendelserRiver(this, grunnlagService)
+                MigreringHendelserRiver(this, grunnlagService)
             }
 
     fun start() = setReady().also { rapidsConnection.start() }

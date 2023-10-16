@@ -36,7 +36,7 @@ import java.util.UUID
 
 internal class OpprettJournalfoerOgDistribuer {
     @Test
-    fun `hele flyten`() {
+    fun `melding om attestert vedtak gjoer at vi potensielt oppretter vedtaksbrev, og saa journalfoerer og distribuerer brevet `() {
         val behandlingId = UUID.randomUUID()
         val brev = lagBrev(behandlingId)
         val vedtaksbrevService =

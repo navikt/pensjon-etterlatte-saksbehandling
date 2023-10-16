@@ -83,7 +83,7 @@ internal fun Route.generellbehandlingRoutes(
         }
     }
 
-    put("/api/generellbehandling/attester/{$SAKID_CALL_PARAMETER}/{$GENERELLBEHANDLINGID_CALL_PARAMETER}") {
+    post("/api/generellbehandling/attester/{$SAKID_CALL_PARAMETER}/{$GENERELLBEHANDLINGID_CALL_PARAMETER}") {
         hvisEnabled(GenerellBehandlingToggle.KanBrukeGenerellBehandlingToggle) {
             val generellBehandlingId = generellBehandlingId
             kunSaksbehandler { saksbehandler ->

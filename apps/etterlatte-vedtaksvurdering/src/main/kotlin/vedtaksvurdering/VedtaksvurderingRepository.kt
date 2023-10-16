@@ -446,10 +446,12 @@ class VedtaksvurderingRepository(private val datasource: DataSource) : Transacti
         return datasource.transaction { session ->
             session.hentListe(
                 queryString =
-                    "SELECT * FROM vedtak " +
-                        "WHERE vedtakstatus in (:attestert, :iverksatt) " +
-                        "and type != :tilbakekreving " +
-                        "and revurderingsaarsak not in (:regulering, :doedsfall)",
+                    """
+                    SELECT * FROM vedtak
+                        WHERE vedtakstatus in (:attestert, :iverksatt)
+                        and type != :tilbakekreving
+                        and (revurderingsaarsak is null or revurderingsaarsak not in (:regulering, :doedsfall))
+                    """.trimIndent(),
                 params = {
                     mapOf(
                         "attestert" to VedtakStatus.ATTESTERT.name,

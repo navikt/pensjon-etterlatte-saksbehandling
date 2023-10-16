@@ -117,7 +117,7 @@ class ApplicationBuilder {
     fun start() =
         setReady().also {
             thread {
-                Thread.sleep(30_000)
+                Thread.sleep(90_000)
                 ryddejobb.resendJournalfoeringbehovForAlleAttesterteOgIverksatteVedtak()
             }
             rapidsConnection.start()

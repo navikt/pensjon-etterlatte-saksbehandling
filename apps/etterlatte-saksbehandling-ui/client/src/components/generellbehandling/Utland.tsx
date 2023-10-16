@@ -162,6 +162,26 @@ const Utland = (props: { utlandsBehandling: Generellbehandling & { innhold: Utla
           </ContentHeader>
           <Panel>
             <div>
+              {utlandsBehandling.tilknyttetBehandling ? (
+                <div>
+                  {isSuccess(avdoedeStatus) && avdoed && (
+                    <>
+                      <h3>Informasjon om avdøde</h3>
+                      <InfoWrapper>
+                        <Info label="Navn" tekst={formaterNavn(avdoed.opplysning)} />
+                        <Info label="Fødselsnummer" tekst={avdoed.opplysning.foedselsnummer} />
+                      </InfoWrapper>
+                    </>
+                  )}
+                  {isFailure(avdoedeStatus) && <ApiErrorAlert>Klarte ikke å hente informasjon om avdøed</ApiErrorAlert>}
+                  {isPending(avdoedeStatus) && <Spinner visible={true} label="Henter opplysninger om avdøde" />}
+                </div>
+              ) : (
+                <Alert variant="warning">
+                  Denne utlandsbehandlingen er ikke tilknyttet en behandling. Vi kan derfor ikke hente avdoedes
+                  informasjon
+                </Alert>
+              )}
               {mapApiResult(
                 hentAlleLandRequest,
                 <Spinner visible={true} label="Laster landliste" />,
@@ -252,26 +272,6 @@ const Utland = (props: { utlandsBehandling: Generellbehandling & { innhold: Utla
                     )}
                   </>
                 )
-              )}
-              {utlandsBehandling.tilknyttetBehandling ? (
-                <div>
-                  {isSuccess(avdoedeStatus) && avdoed && (
-                    <>
-                      <h3>Informasjon om avdøde</h3>
-                      <InfoWrapper>
-                        <Info label="Navn" tekst={formaterNavn(avdoed.opplysning)} />
-                        <Info label="Fødselsnummer" tekst={avdoed.opplysning.foedselsnummer} />
-                      </InfoWrapper>
-                    </>
-                  )}
-                  {isFailure(avdoedeStatus) && <ApiErrorAlert>Klarte ikke å hente informasjon om avdøed</ApiErrorAlert>}
-                  {isPending(avdoedeStatus) && <Spinner visible={true} label="Henter opplysninger om avdøde" />}
-                </div>
-              ) : (
-                <Alert variant="warning">
-                  Denne utlandsbehandlingen er ikke tilknyttet en behandling. Vi kan derfor ikke hente avdoedes
-                  informasjon
-                </Alert>
               )}
 
               <LenkeMargin href={configContext['rinaUrl']} target="_blank" rel="noopener noreferrer">

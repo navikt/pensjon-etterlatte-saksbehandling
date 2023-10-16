@@ -324,6 +324,7 @@ class OppgaveService(
         oppgaveKilde: OppgaveKilde?,
         oppgaveType: OppgaveType,
         merknad: String?,
+        frist: Tidspunkt? = null,
     ): OppgaveIntern {
         val sak = sakDao.hentSak(sakId)!!
         return lagreOppgave(
@@ -333,6 +334,7 @@ class OppgaveService(
                 oppgaveKilde = oppgaveKilde,
                 oppgaveType = oppgaveType,
                 merknad = merknad,
+                frist = frist,
             ),
         )
     }

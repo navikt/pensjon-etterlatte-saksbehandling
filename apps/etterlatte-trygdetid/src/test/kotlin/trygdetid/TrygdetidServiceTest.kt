@@ -894,4 +894,25 @@ internal class TrygdetidServiceTest {
             vilkaarsvurderingDto.isYrkesskade()
         }
     }
+
+    @Test
+    fun `skal oppdater overstyrt poengaar`() {
+        val behandlingId = randomUUID()
+
+        coEvery { repository.hentTrygdetid(any()) } returns trygdetid(behandlingId)
+        coEvery { repository.oppdaterTrygdetid(any(), any()) } returnsArgument 0
+
+        val trygdetid =
+            runBlocking {
+                service.overstyrNorskPoengaar(behandlingId, 10)
+            }
+
+        trygdetid shouldNotBe null
+        trygdetid.overstyrtNorskPoengaar shouldBe 10
+
+        verify(exactly = 1) {
+            repository.hentTrygdetid(behandlingId)
+            repository.oppdaterTrygdetid(trygdetid, false)
+        }
+    }
 }

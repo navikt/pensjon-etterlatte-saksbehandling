@@ -13,6 +13,12 @@ data class TrygdetidDto(
     val beregnetTrygdetid: DetaljertBeregnetTrygdetidDto?,
     val trygdetidGrunnlag: List<TrygdetidGrunnlagDto>,
     val opplysninger: GrunnlagOpplysningerDto,
+    val overstyrtNorskPoengaar: Int?,
+)
+
+data class TrygdetidOverstyringDto(
+    val behandlingId: UUID,
+    val overstyrtNorskPoengaar: Int?,
 )
 
 data class GrunnlagOpplysningerDto(

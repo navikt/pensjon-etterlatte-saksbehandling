@@ -342,4 +342,15 @@ class TrygdetidService(
             trygdetidRepository.oppdaterTrygdetid(nyTrygdetid, true)
         }
     }
+
+    fun overstyrNorskPoengaar(
+        behandlingsId: UUID,
+        overstyrtNorskPoengaar: Int?,
+    ): Trygdetid {
+        val trygdetid =
+            trygdetidRepository.hentTrygdetid(behandlingsId)
+                ?: throw Exception("Fant ikke gjeldende trygdetid for behandlingId=$behandlingsId")
+
+        return trygdetidRepository.oppdaterTrygdetid(trygdetid.copy(overstyrtNorskPoengaar = overstyrtNorskPoengaar))
+    }
 }

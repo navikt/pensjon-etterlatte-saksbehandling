@@ -296,6 +296,22 @@ internal class TrygdetidRepositoryTest {
     }
 
     @Test
+    fun `skal oppdatere trygdetid with overstyrt poengaar`() {
+        val behandling = behandlingMock()
+        val opprettetTrygdetid = trygdetid(behandling.id, behandling.sak)
+
+        val trygdetid = repository.opprettTrygdetid(opprettetTrygdetid)
+
+        val trygdetidMedOverstyrtPoengaar =
+            repository.oppdaterTrygdetid(
+                trygdetid.copy(overstyrtNorskPoengaar = 10),
+            )
+
+        trygdetidMedOverstyrtPoengaar shouldNotBe null
+        trygdetidMedOverstyrtPoengaar.overstyrtNorskPoengaar shouldBe 10
+    }
+
+    @Test
     fun `skal nullstille beregnet trygdetid`() {
         val beregnetTrygdetid = beregnetTrygdetid(total = 12, tidspunkt = Tidspunkt.now())
         val behandling = behandlingMock()

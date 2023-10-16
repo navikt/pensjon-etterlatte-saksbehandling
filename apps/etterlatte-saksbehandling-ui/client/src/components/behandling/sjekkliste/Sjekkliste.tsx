@@ -57,7 +57,10 @@ export const Sjekkliste = (props: { behandling: IBehandlingReducer }) => {
           ))}
 
           <HMargin>
-            <Link href={`${configContext['gosysUrl']}/personoversikt/fnr=${behandling.søker!.foedselsnummer}`}>
+            <Link
+              href={`${configContext['gosysUrl']}/personoversikt/fnr=${behandling.søker!.foedselsnummer}`}
+              target="_blank"
+            >
               Personoversikt i Gosys
             </Link>
           </HMargin>

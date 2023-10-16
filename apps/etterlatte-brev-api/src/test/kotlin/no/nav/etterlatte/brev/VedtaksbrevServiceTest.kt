@@ -660,7 +660,7 @@ internal class VedtaksbrevServiceTest {
     }
 
     @Nested
-    inner class JournalfoerVedtaksbrev {
+    inner class JournalfoerVedtaksbrevRiver {
         @Test
         fun `Vedtaksbrev journalfoeres som forventet`() {
             val forventetBrev = opprettBrev(Status.FERDIGSTILT, mockk())

@@ -2,9 +2,9 @@ package no.nav.etterlatte
 
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
-import no.nav.etterlatte.fordeler.Fordeler
 import no.nav.etterlatte.fordeler.FordelerKriterier
 import no.nav.etterlatte.fordeler.FordelerRepository
+import no.nav.etterlatte.fordeler.FordelerRiver
 import no.nav.etterlatte.fordeler.FordelerService
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleProperties
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
@@ -21,7 +21,7 @@ fun main() {
 
     RapidApplication.create(rapidEnv).also { rapidsConnection ->
         val ab = AppBuilder(Miljoevariabler(rapidEnv))
-        Fordeler(
+        FordelerRiver(
             rapidsConnection = rapidsConnection,
             fordelerService =
                 FordelerService(

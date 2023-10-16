@@ -2,7 +2,7 @@ package no.nav.etterlatte.itest
 
 import com.fasterxml.jackson.databind.JsonNode
 import io.mockk.mockk
-import no.nav.etterlatte.grunnlag.GrunnlagHendelser
+import no.nav.etterlatte.grunnlag.GrunnlagHendelserRiver
 import no.nav.etterlatte.grunnlag.OpplysningDao
 import no.nav.etterlatte.grunnlag.RealGrunnlagService
 import no.nav.etterlatte.klienter.PdlTjenesterKlientImpl
@@ -60,7 +60,7 @@ internal class RapidTest {
         grunnlagService = RealGrunnlagService(pdlTjenesterKlientImpl, opplysningRepo, mockk())
         inspector =
             TestRapid().apply {
-                GrunnlagHendelser(this, grunnlagService)
+                GrunnlagHendelserRiver(this, grunnlagService)
             }
     }
 

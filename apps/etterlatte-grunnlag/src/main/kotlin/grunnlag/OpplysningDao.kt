@@ -211,6 +211,15 @@ class OpplysningDao(private val datasource: DataSource) {
             }.executeQuery().toList { asGrunnlagshendelse() }
         }
 
+    // TODO: Fjerne når grunnlag er versjonert (EY-2567)
+    fun finnAlleSakIder(): Set<Long> =
+        connection.use {
+            it.prepareStatement("SELECT distinct(sak_id) FROM grunnlagshendelse")
+                .executeQuery()
+                .toList { getLong("sak_id") }
+                .toSet()
+        }
+
     fun finnAlleSakerForPerson(fnr: Folkeregisteridentifikator): Set<Long> =
         connection.use {
             it.prepareStatement(

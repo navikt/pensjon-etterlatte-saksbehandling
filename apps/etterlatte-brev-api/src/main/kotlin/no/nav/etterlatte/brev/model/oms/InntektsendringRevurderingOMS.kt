@@ -1,6 +1,7 @@
 package no.nav.etterlatte.brev.model.oms
 
 import no.nav.etterlatte.brev.behandling.Avkortingsinfo
+import no.nav.etterlatte.brev.behandling.Trygdetid
 import no.nav.etterlatte.brev.model.Beregningsinfo
 import no.nav.etterlatte.brev.model.BrevData
 import no.nav.etterlatte.brev.model.BrevVedleggKey

@@ -104,7 +104,7 @@ internal class VedtaksbrevServiceTest {
 
     @AfterEach
     fun after() {
-        confirmVerified(db, brevdataFacade, adresseService, dokarkivService, brevbaker)
+        confirmVerified(db, adresseService, dokarkivService, brevbaker)
     }
 
     private companion object {
@@ -269,6 +269,7 @@ internal class VedtaksbrevServiceTest {
             every { db.hentBrevForBehandling(behandling.behandlingId) } returns null
             coEvery { brevdataFacade.hentGenerellBrevData(any(), any(), any()) } returns behandling
             coEvery { adresseService.hentMottakerAdresse(any()) } returns mottaker
+            coEvery { brevdataFacade.finnUtbetalingsinfo(any(), any(), any()) } returns mockk()
 
             runBlocking {
                 vedtaksbrevService.opprettVedtaksbrev(

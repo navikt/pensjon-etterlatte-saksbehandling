@@ -286,7 +286,7 @@ internal fun Route.behandlingRoutes(
                 sjekklisteService.oppdaterSjekkliste(behandlingsId, oppdatering)
             }
 
-            post("/item/{sjekklisteItemId}") {
+            post("/{sjekklisteItemId}") {
                 val sjekklisteItemId = requireNotNull(call.parameters["sjekklisteItemId"]).toLong()
                 val oppdatering = call.receive<OppdaterSjekklisteItem>()
 

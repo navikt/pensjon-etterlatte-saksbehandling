@@ -82,7 +82,7 @@ class SjekklisteDao(private val connection: () -> Connection) {
                 """.trimIndent(),
             )
         stmt.setObject(1, sjekklisteId)
-        return stmt.executeQuery().toList { sjekklisteItem() }
+        return stmt.executeQuery().toList { sjekklisteItem() }.sortedBy { it.id }
     }
 
     fun hentSjekklisteItem(sjekklisteItemId: Long): SjekklisteItem {

@@ -57,7 +57,7 @@ class SjekklisteServiceTest {
             sjekklisteService.oppdaterSjekklisteItem(
                 behandlingId = behandlingId,
                 itemId = 123L,
-                oppdatering = OppdaterSjekklisteItem(avkrysset = true),
+                oppdatering = OppdaterSjekklisteItem(avkrysset = true, versjon = 5),
             )
         }
     }

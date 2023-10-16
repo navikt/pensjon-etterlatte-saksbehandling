@@ -57,12 +57,14 @@ class SjekklisteService(
         itemId: Long,
         oppdatering: OppdaterSjekklisteItem,
     ): SjekklisteItem {
-        val behandling = requireNotNull(behandlingService.hentBehandling(behandlingId))
-        if (!behandling.status.kanEndres()) {
-            throw IllegalStateException("Kan ikke oppdatere sjekkliste for behandling ${behandling.id} med status ${behandling.status}")
-        }
-
         return inTransaction {
+            val behandling = requireNotNull(behandlingService.hentBehandling(behandlingId))
+            if (!behandling.status.kanEndres()) {
+                throw IllegalStateException(
+                    "Kan ikke oppdatere sjekklisteelement for behandling ${behandling.id} med status ${behandling.status}",
+                )
+            }
+
             dao.oppdaterSjekklisteItem(itemId, oppdatering)
             dao.hentSjekklisteItem(itemId)
         }

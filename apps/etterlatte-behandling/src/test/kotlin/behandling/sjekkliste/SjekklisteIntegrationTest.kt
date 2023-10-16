@@ -109,7 +109,7 @@ class SjekklisteIntegrationTest {
             sjekklisteService.oppdaterSjekklisteItem(
                 behandling.id,
                 item.id,
-                oppdatering = OppdaterSjekklisteItem(avkrysset = true),
+                oppdatering = OppdaterSjekklisteItem(avkrysset = true, versjon = 2),
             ),
         ) {
             this.id shouldBe item.id

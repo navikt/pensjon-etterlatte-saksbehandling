@@ -1,4 +1,4 @@
-import { Button, Select, Textarea, Checkbox, CheckboxGroup } from '@navikt/ds-react'
+import { Button, Checkbox, CheckboxGroup, Select, Textarea } from '@navikt/ds-react'
 import { FormKnapper, FormWrapper, Innhold } from '~components/behandling/trygdetid/styled'
 import { isConflict, isFailure, isPending, useApiCall } from '~shared/hooks/useApiCall'
 import {

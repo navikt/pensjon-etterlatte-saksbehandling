@@ -10,7 +10,7 @@ import {
 import React, { FormEvent, useState } from 'react'
 import { BodyShort, Button, Heading, Select } from '@navikt/ds-react'
 import { hentBehandlesFraStatus } from '~components/behandling/felles/utils'
-import { isPending, isFailure, useApiCall, isSuccess } from '~shared/hooks/useApiCall'
+import { isFailure, isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
 import { lagreRevurderingInfo } from '~shared/api/revurdering'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { oppdaterRevurderingInfo } from '~store/reducers/BehandlingReducer'

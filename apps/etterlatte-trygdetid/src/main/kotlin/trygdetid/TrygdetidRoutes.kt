@@ -31,7 +31,6 @@ import no.nav.etterlatte.libs.common.withParam
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.etterlatte.trygdetid.klienter.BehandlingKlient
-import java.lang.UnsupportedOperationException
 import java.util.UUID
 
 fun Route.trygdetid(

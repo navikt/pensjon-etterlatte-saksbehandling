@@ -1,5 +1,5 @@
 import styled from 'styled-components'
-import { CheckmarkCircleIcon, XMarkOctagonIcon, ExclamationmarkTriangleIcon } from '@navikt/aksel-icons'
+import { CheckmarkCircleIcon, ExclamationmarkTriangleIcon, XMarkOctagonIcon } from '@navikt/aksel-icons'
 import { AGreen500, ANavRed, AOrange600 } from '@navikt/ds-tokens/dist/tokens'
 
 export type StatusIconProps = 'warning' | 'success' | 'error'

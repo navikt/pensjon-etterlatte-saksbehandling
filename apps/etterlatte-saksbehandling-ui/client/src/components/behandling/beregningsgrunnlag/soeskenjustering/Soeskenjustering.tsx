@@ -11,9 +11,9 @@ import { Border, HeadingWrapper } from '~components/behandling/soeknadsoversikt/
 import { ContentHeader } from '~shared/styled'
 import { FamilieforholdWrapper } from '~components/behandling/soeknadsoversikt/familieforhold/barnepensjon/FamilieforholdBarnepensjon'
 import {
+  feilIKomplettePerioderOverIntervall,
   mapListeFraDto,
   PeriodisertBeregningsgrunnlag,
-  feilIKomplettePerioderOverIntervall,
 } from '~components/behandling/beregningsgrunnlag/PeriodisertBeregningsgrunnlag'
 import { hentBehandlesFraStatus } from '~components/behandling/felles/utils'
 import SoeskenjusteringPeriode from '~components/behandling/beregningsgrunnlag/soeskenjustering/SoeskenjusteringPeriode'

@@ -5,7 +5,7 @@ import { oppdaterBehandlingsstatus, oppdaterVirkningstidspunkt } from '~store/re
 import { formaterDatoTilYearMonth, formaterStringDato } from '~utils/formattering'
 import { fastsettVirkningstidspunkt } from '~shared/api/behandling'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { Beskrivelse, InfoWrapper, InfobokserWrapper, VurderingsContainerWrapper } from '../../styled'
+import { Beskrivelse, InfobokserWrapper, InfoWrapper, VurderingsContainerWrapper } from '../../styled'
 import { useAppDispatch } from '~store/Store'
 import { IBehandlingStatus, Virkningstidspunkt } from '~shared/types/IDetaljertBehandling'
 import { addMonths } from 'date-fns'

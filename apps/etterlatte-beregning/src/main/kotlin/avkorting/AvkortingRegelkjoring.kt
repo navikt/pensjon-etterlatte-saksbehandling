@@ -22,7 +22,6 @@ import no.nav.etterlatte.libs.regler.RegelkjoeringResultat
 import no.nav.etterlatte.libs.regler.eksekver
 import no.nav.etterlatte.regler.Beregningstall
 import org.slf4j.LoggerFactory
-import java.lang.IllegalArgumentException
 import java.time.YearMonth
 import java.util.UUID
 

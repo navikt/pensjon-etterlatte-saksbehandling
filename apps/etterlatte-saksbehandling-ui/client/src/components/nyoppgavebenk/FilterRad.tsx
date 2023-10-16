@@ -1,4 +1,4 @@
-import { Button, Select, TextField } from '@navikt/ds-react'
+import { Button, Select, TextField, UNSAFE_Combobox } from '@navikt/ds-react'
 import React, { useState } from 'react'
 import {
   ENHETFILTER,
@@ -21,7 +21,6 @@ import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 import { FEATURE_TOGGLE_KAN_BRUKE_KLAGE } from '~components/person/OpprettKlage'
 import { FlexRow } from '~shared/styled'
 import { OppgaveDTO } from '~shared/api/oppgaver'
-import { UNSAFE_Combobox } from '@navikt/ds-react'
 
 export const FilterRad = (props: {
   hentOppgaver: () => void

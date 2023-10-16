@@ -1,6 +1,6 @@
 import {
-  Grunnlagsendringshendelse,
   GrunnlagendringshendelseSamsvarType,
+  Grunnlagsendringshendelse,
   GrunnlagsendringsType,
 } from '~components/person/typer'
 import { formaterKanskjeStringDatoMedFallback } from '~utils/formattering'

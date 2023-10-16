@@ -31,7 +31,7 @@ data class InntektsendringRevurderingOMS(
                 beregningsinfo =
                     Beregningsinfo(
                         innhold = innholdMedVedlegg.finnVedlegg(BrevVedleggKey.BEREGNING_INNHOLD),
-                        grunnbeloep = avkortingsinfo!!.grunnbeloep,
+                        grunnbeloep = avkortingsinfo.grunnbeloep,
                         beregningsperioder =
                             avkortingsinfo.beregningsperioder.map {
                                 NyBeregningsperiode(

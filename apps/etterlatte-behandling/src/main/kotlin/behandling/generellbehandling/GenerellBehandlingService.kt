@@ -6,10 +6,12 @@ import no.nav.etterlatte.libs.common.generellbehandling.Innhold
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.token.Saksbehandler
 import org.slf4j.LoggerFactory
+import java.time.temporal.ChronoUnit
 import java.util.UUID
 
 class DokumentManglerDatoException(message: String) : Exception(message)
@@ -80,12 +82,14 @@ class GenerellBehandlingService(
         }
         oppdaterBehandling(generellBehandling.copy(status = GenerellBehandling.Status.FATTET))
         oppgaveService.ferdigStillOppgaveUnderBehandling(generellBehandling.id.toString(), saksbehandler)
+        val trettiDagerFremITid = Tidspunkt.now().plus(30L, ChronoUnit.DAYS)
         oppgaveService.opprettNyOppgaveMedSakOgReferanse(
             generellBehandling.id.toString(),
             generellBehandling.sakId,
             OppgaveKilde.GENERELL_BEHANDLING,
             OppgaveType.ATTESTERING,
             merknad = "Attestering av generell behandling type ${generellBehandling.type.name}",
+            frist = trettiDagerFremITid,
         )
     }
 

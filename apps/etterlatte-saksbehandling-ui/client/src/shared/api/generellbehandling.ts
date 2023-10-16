@@ -24,5 +24,5 @@ export function sendTilAttesteringGenerellBehandling(
 }
 
 export function attesterGenerellbehandling(generellbehandling: Generellbehandling): Promise<ApiResponse<void>> {
-  return apiClient.get(`/generellbehandling/attester/${generellbehandling.sakId}/${generellbehandling.id}`)
+  return apiClient.put(`/generellbehandling/attester/${generellbehandling.sakId}/${generellbehandling.id}`, {})
 }

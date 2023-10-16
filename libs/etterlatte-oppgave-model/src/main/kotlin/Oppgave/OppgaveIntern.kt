@@ -154,6 +154,7 @@ fun opprettNyOppgaveMedReferanseOgSak(
     oppgaveKilde: OppgaveKilde?,
     oppgaveType: OppgaveType,
     merknad: String?,
+    frist: Tidspunkt? = null,
 ): OppgaveIntern {
     return OppgaveIntern(
         id = UUID.randomUUID(),
@@ -167,7 +168,7 @@ fun opprettNyOppgaveMedReferanseOgSak(
         opprettet = Tidspunkt.now(),
         sakType = sak.sakType,
         fnr = sak.ident,
-        frist = null,
+        frist = frist,
         type = oppgaveType,
     )
 }

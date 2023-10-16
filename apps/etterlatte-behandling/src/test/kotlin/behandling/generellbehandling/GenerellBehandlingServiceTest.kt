@@ -18,6 +18,7 @@ import no.nav.etterlatte.libs.common.generellbehandling.Innhold
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.Status
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.POSTGRES_VERSION
 import no.nav.etterlatte.libs.database.migrate
@@ -41,6 +42,7 @@ import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
 import java.sql.Connection
 import java.time.LocalDate
+import java.time.temporal.ChronoUnit
 import java.util.UUID
 import javax.sql.DataSource
 
@@ -457,13 +459,14 @@ class GenerellBehandlingServiceTest {
         }
         behandlingsOppgaverFattetOgAttestering.forExactly(1) { oppgave ->
             oppgave.status.shouldBe(Status.FERDIGSTILT)
+            oppgave.type.shouldBe(OppgaveType.UTLAND)
         }
 
         val attestant = Saksbehandler("token", "attestant", null)
         val oppgaveForAttestering = oppgaveService.hentOppgaverForReferanse(opprettBehandling.id.toString())
         Assertions.assertEquals(2, oppgaveForAttestering.size)
         val nyattesteringsoppgave = oppgaveForAttestering.filter { o -> o.status === Status.NY && o.erAttestering() }
-
+        Assertions.assertEquals(1, nyattesteringsoppgave.size)
         val saksbehandlerMedRoller =
             mockk<SaksbehandlerMedRoller> {
                 every { harRolleAttestant() } returns true
@@ -471,6 +474,8 @@ class GenerellBehandlingServiceTest {
         every { user.saksbehandlerMedRoller } returns saksbehandlerMedRoller
 
         val attesteringsOppgave = nyattesteringsoppgave[0]
+        val trettidagerfrem = Tidspunkt.now().plus(30L, ChronoUnit.DAYS).toNorskLocalDate()
+        Assertions.assertEquals(trettidagerfrem, attesteringsOppgave.frist!!.toNorskLocalDate())
         oppgaveService.tildelSaksbehandler(attesteringsOppgave.id, attestant.ident)
 
         service.attester(oppdaterBehandling.id, attestant)

@@ -86,7 +86,7 @@ class TrygdetidRepository(private val dataSource: DataSource) {
         dataSource.transaction { tx ->
             val gjeldendeTrygdetid = hentTrygdtidNotNull(oppdatertTrygdetid.behandlingId)
 
-            oppdaterOverstyrtPoengaar(gjeldendeTrygdetid.behandlingId, oppdatertTrygdetid.overstyrtNorskPoengaar, tx)
+            oppdaterOverstyrtPoengaar(gjeldendeTrygdetid.id, gjeldendeTrygdetid.behandlingId, oppdatertTrygdetid.overstyrtNorskPoengaar, tx)
 
             // opprett grunnlag
             oppdatertTrygdetid.trygdetidGrunnlag
@@ -255,6 +255,7 @@ class TrygdetidRepository(private val dataSource: DataSource) {
     }
 
     private fun oppdaterOverstyrtPoengaar(
+        id: UUID,
         behandlingId: UUID,
         overstyrtNorskPoengaar: Int? = null,
         tx: TransactionalSession,
@@ -263,10 +264,11 @@ class TrygdetidRepository(private val dataSource: DataSource) {
             statement =
                 """
                 UPDATE trygdetid 
-                  SET poengaar_overstyrt = :overstyrtNorskPoengaar WHERE behandling_id = :behandlingId
+                  SET poengaar_overstyrt = :overstyrtNorskPoengaar WHERE id = :id AND  behandling_id = :behandlingId
                 """.trimIndent(),
             paramMap =
                 mapOf(
+                    "id" to id,
                     "behandlingId" to behandlingId,
                     "overstyrtNorskPoengaar" to overstyrtNorskPoengaar,
                 ),

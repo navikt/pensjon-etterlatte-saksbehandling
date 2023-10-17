@@ -17,6 +17,7 @@ data class TrygdetidDto(
 )
 
 data class TrygdetidOverstyringDto(
+    val id: UUID,
     val behandlingId: UUID,
     val overstyrtNorskPoengaar: Int?,
 )

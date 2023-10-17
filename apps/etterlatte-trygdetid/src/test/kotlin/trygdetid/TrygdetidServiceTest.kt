@@ -899,12 +899,14 @@ internal class TrygdetidServiceTest {
     fun `skal oppdater overstyrt poengaar`() {
         val behandlingId = randomUUID()
 
-        coEvery { repository.hentTrygdetid(any()) } returns trygdetid(behandlingId)
+        val eksisterendeTrygdetid = trygdetid(behandlingId)
+
+        coEvery { repository.hentTrygdetid(any()) } returns eksisterendeTrygdetid
         coEvery { repository.oppdaterTrygdetid(any(), any()) } returnsArgument 0
 
         val trygdetid =
             runBlocking {
-                service.overstyrNorskPoengaar(behandlingId, 10)
+                service.overstyrNorskPoengaar(eksisterendeTrygdetid.id, behandlingId, 10)
             }
 
         trygdetid shouldNotBe null

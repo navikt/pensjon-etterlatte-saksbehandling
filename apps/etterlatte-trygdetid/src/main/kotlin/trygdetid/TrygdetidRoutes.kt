@@ -68,6 +68,7 @@ fun Route.trygdetid(
 
                 val trygdetid =
                     trygdetidService.overstyrNorskPoengaar(
+                        trygdetidOverstyringDto.id,
                         behandlingsId,
                         trygdetidOverstyringDto.overstyrtNorskPoengaar,
                     )

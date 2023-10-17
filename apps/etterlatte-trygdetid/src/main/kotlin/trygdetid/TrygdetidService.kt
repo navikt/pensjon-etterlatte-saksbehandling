@@ -344,12 +344,14 @@ class TrygdetidService(
     }
 
     fun overstyrNorskPoengaar(
+        id: UUID,
         behandlingsId: UUID,
         overstyrtNorskPoengaar: Int?,
     ): Trygdetid {
+        // TODO - EY-2849 - må bruke ID og ikke bare behandlingsId for å hente her
         val trygdetid =
             trygdetidRepository.hentTrygdetid(behandlingsId)
-                ?: throw Exception("Fant ikke gjeldende trygdetid for behandlingId=$behandlingsId")
+                ?: throw Exception("Fant ikke gjeldende trygdetid for id=$id og behandlingId=$behandlingsId")
 
         return trygdetidRepository.oppdaterTrygdetid(trygdetid.copy(overstyrtNorskPoengaar = overstyrtNorskPoengaar))
     }

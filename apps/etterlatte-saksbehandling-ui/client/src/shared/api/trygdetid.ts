@@ -6,6 +6,9 @@ export const hentTrygdetid = async (behandlingsId: string): Promise<ApiResponse<
 export const opprettTrygdetid = async (behandlingsId: string): Promise<ApiResponse<ITrygdetid>> =>
   apiClient.post(`/trygdetid/${behandlingsId}`, {})
 
+export const overstyrTrygdetid = async (overstyring: ITrygdetidOverstyring): Promise<ApiResponse<ITrygdetid>> =>
+  apiClient.post(`/trygdetid/${overstyring.behandlingId}/overstyr`, { ...overstyring })
+
 export const lagreYrkesskadeTrygdetidGrunnlag = async (args: {
   behandlingsId: string
 }): Promise<ApiResponse<ITrygdetid>> => apiClient.post(`/trygdetid/${args.behandlingsId}/grunnlag/yrkesskade`, {})
@@ -98,6 +101,12 @@ export interface ITrygdetid {
   beregnetTrygdetid?: IDetaljertBeregnetTrygdetid
   trygdetidGrunnlag: ITrygdetidGrunnlag[]
   opplysninger: IGrunnlagOpplysninger
+  overstyrtNorskPoengaar: number | undefined
+}
+
+export interface ITrygdetidOverstyring {
+  behandlingId: string
+  overstyrtNorskPoengaar: number | undefined
 }
 
 export interface IGrunnlagOpplysninger {

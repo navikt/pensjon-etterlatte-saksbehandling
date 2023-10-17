@@ -153,6 +153,7 @@ fun Trygdetid.toDto(): TrygdetidDto =
         beregnetTrygdetid = beregnetTrygdetid?.toDto(),
         trygdetidGrunnlag = trygdetidGrunnlag.map { it.toDto() },
         opplysninger = this.opplysninger.toDto(),
+        overstyrtNorskPoengaar = this.overstyrtNorskPoengaar,
     )
 
 private fun DetaljertBeregnetTrygdetid.toDto(): DetaljertBeregnetTrygdetidDto =

@@ -16,22 +16,34 @@ class VedtakTilbakekrevingService(
 
     fun lagreVedtak(dto: TilbakekrevingFattetVedtakDto): Long {
         logger.info("Fatter vedtak for tilbakekreving=$dto.tilbakekrevingId")
-        repository.opprettVedtak(
-            OpprettVedtak(
-                soeker = dto.soeker,
-                sakId = dto.sakId,
-                sakType = dto.sakType,
-                behandlingId = dto.tilbakekrevingId,
-                type = VedtakType.TILBAKEKREVING,
-                innhold = VedtakTilbakekrevingInnhold(dto.tilbakekreving),
-            ),
-        )
+        val eksisterendeVedtak = repository.hentVedtak(dto.tilbakekrevingId)
+        if (eksisterendeVedtak == null) {
+            repository.opprettVedtak(
+                OpprettVedtak(
+                    soeker = dto.soeker,
+                    sakId = dto.sakId,
+                    sakType = dto.sakType,
+                    behandlingId = dto.tilbakekrevingId,
+                    type = VedtakType.TILBAKEKREVING,
+                    innhold = VedtakTilbakekrevingInnhold(dto.tilbakekreving),
+                ),
+            )
+        } else {
+            repository.oppdaterVedtak(
+                eksisterendeVedtak.copy(
+                    innhold =
+                        VedtakTilbakekrevingInnhold(
+                            tilbakekreving = dto.tilbakekreving,
+                        ),
+                ),
+            )
+        }
         return repository.fattVedtak(
             dto.tilbakekrevingId,
             VedtakFattet(
                 ansvarligSaksbehandler = dto.ansvarligSaksbehandler,
                 ansvarligEnhet = dto.ansvarligEnhet,
-                tidspunkt = Tidspunkt.now(), // Blir ikke brukt for egen now() brueks i db..
+                tidspunkt = Tidspunkt.now(), // Blir ikke brukt fordi egen now() brukes i db..
             ),
         ).id
     }

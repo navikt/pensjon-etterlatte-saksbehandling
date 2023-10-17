@@ -17,6 +17,8 @@ import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringsListe
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
+import no.nav.etterlatte.libs.common.behandling.ForenkletBehandling
+import no.nav.etterlatte.libs.common.behandling.ForenkletBehandlingListeWrapper
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.SisteIverksatteBehandling
 import no.nav.etterlatte.libs.common.kunSaksbehandler
@@ -53,6 +55,17 @@ internal fun Route.sakSystemRoutes(
                         sakService.finnSak(sakId)
                     }
                 call.respond(sak ?: HttpStatusCode.NotFound)
+            }
+
+            // TODO: Fjerne når grunnlag er versjonert (EY-2567)
+            get("/behandlinger") {
+                kunSystembruker {
+                    val behandlinger =
+                        inTransaction { behandlingService.hentBehandlingerISak(sakId) }
+                            .map { ForenkletBehandling(it.sak.id, it.id, it.status) }
+
+                    call.respond(ForenkletBehandlingListeWrapper(behandlinger))
+                }
             }
 
             get("/behandlinger/sisteIverksatte") {

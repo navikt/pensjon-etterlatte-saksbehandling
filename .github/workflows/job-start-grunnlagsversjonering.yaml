@@ -7,15 +7,6 @@ env:
 
 on:
   workflow_dispatch: # Allow manually triggered workflow run
-    inputs:
-      deploy-prod:
-        description: 'Deploy til produksjon'
-        required: false
-        default: 'false'
-        type: choice
-        options:
-          - true
-          - false
   push:
     branches:
       - main
@@ -55,11 +46,15 @@ jobs:
           username: ${{ github.repository }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Build and publish docker image
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          docker login ghcr.io -u ${GITHUB_REPOSITORY} -p ${GITHUB_TOKEN}
-          docker build --tag ${IMAGE} jobs/${JOB_NAME}
-          docker push ${IMAGE}
+        uses: nais/docker-build-push@v0
+        id: docker-build-push
+        with:
+          team: etterlatte
+          identity_provider: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}
+          project_id: ${{ vars.NAIS_MANAGEMENT_PROJECT_ID }}
+          dockerfile: jobs/${{ github.workflow }}/Dockerfile
+          docker_context: jobs/${{ github.workflow }}/
+          image_suffix: ${{ github.workflow }}
+          tag: latest
       - name: Print docker tag
-        run: echo 'Docker-tag er ${{ env.image }} ' >> $GITHUB_STEP_SUMMARY
+        run: echo 'Docker-tag er ${{ steps.docker-build-push.outputs.image }} ' >> $GITHUB_STEP_SUMMARY

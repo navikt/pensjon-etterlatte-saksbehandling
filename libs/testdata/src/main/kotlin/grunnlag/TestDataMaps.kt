@@ -45,6 +45,7 @@ val HELSOESKEN_FOEDSELSNUMMER = Folkeregisteridentifikator.of("16478313601") // 
 val HELSOESKEN2_FOEDSELSNUMMER = Folkeregisteridentifikator.of("09508229892") // Tru Panjabi
 val HALVSOESKEN_FOEDSELSNUMMER = Folkeregisteridentifikator.of("27458328671") // Gjestfri Geometri
 val HALVSOESKEN_ANNEN_FORELDER = Folkeregisteridentifikator.of("31488338237") // Ulogisk Bensin
+val VERGE_FOEDSELSNUMMER = Folkeregisteridentifikator.of("02438311109") // Vrien Påske
 
 val ADRESSE_DEFAULT =
     listOf(

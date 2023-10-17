@@ -60,6 +60,12 @@ interface TrygdetidService {
         behandlingId: UUID,
         beregnetTrygdetid: DetaljertBeregnetTrygdetidResultat,
     ): Trygdetid
+
+    fun overstyrNorskPoengaar(
+        trygdetidId: UUID,
+        behandlingsId: UUID,
+        overstyrtNorskPoengaar: Int?,
+    ): Trygdetid
 }
 
 class TrygdetidServiceImpl(
@@ -388,15 +394,15 @@ class TrygdetidServiceImpl(
         }
     }
 
-    fun overstyrNorskPoengaar(
-        id: UUID,
+    override fun overstyrNorskPoengaar(
+        trygdetidId: UUID,
         behandlingsId: UUID,
         overstyrtNorskPoengaar: Int?,
     ): Trygdetid {
         // TODO - EY-2849 - må bruke ID og ikke bare behandlingsId for å hente her
         val trygdetid =
             trygdetidRepository.hentTrygdetid(behandlingsId)
-                ?: throw Exception("Fant ikke gjeldende trygdetid for id=$id og behandlingId=$behandlingsId")
+                ?: throw Exception("Fant ikke gjeldende trygdetid for id=$trygdetidId og behandlingId=$behandlingsId")
 
         return trygdetidRepository.oppdaterTrygdetid(trygdetid.copy(overstyrtNorskPoengaar = overstyrtNorskPoengaar))
     }

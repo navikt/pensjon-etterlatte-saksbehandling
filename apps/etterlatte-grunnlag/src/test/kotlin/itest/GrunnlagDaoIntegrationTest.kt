@@ -6,6 +6,7 @@ import io.mockk.clearAllMocks
 import io.mockk.spyk
 import io.mockk.verify
 import lagGrunnlagsopplysning
+import no.nav.etterlatte.grunnlag.BehandlingGrunnlagVersjon
 import no.nav.etterlatte.grunnlag.OpplysningDao
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
@@ -26,6 +27,7 @@ import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.POSTGRES_VERSION
 import no.nav.etterlatte.libs.database.migrate
+import no.nav.etterlatte.libs.database.toList
 import no.nav.etterlatte.libs.testdata.grunnlag.ADRESSE_DEFAULT
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.kilde
@@ -345,6 +347,35 @@ internal class GrunnlagDaoIntegrationTest {
         assertTrue(laastVersjon.laast)
 
         // TODO: Teste endring av låst sak når det er avklart hvordan det skal håndteres
+    }
+
+    @Test
+    fun `Lagring av versjon på flere behandlinger på samme sak`() {
+        val sakId = Random.nextLong()
+
+        val antall = 10
+
+        repeat(antall) {
+            opplysningRepo.oppdaterVersjonForBehandling(UUID.randomUUID(), sakId, Random.nextLong())
+        }
+
+        val versjoner =
+            dataSource.connection.use {
+                it.prepareStatement("SELECT * FROM behandling_versjon WHERE sak_id = $sakId")
+                    .executeQuery().toList {
+                        BehandlingGrunnlagVersjon(
+                            getObject("behandling_id") as UUID,
+                            getLong("sak_id"),
+                            getLong("hendelsenummer"),
+                            getBoolean("laast"),
+                        )
+                    }
+            }
+
+        assertEquals(antall, versjoner.size)
+        versjoner.forEach {
+            assertEquals(sakId, it.sakId)
+        }
     }
 
     private companion object {

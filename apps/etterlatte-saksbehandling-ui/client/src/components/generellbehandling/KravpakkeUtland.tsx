@@ -115,7 +115,7 @@ const KravpakkeUtland = (props: { utlandsBehandling: Generellbehandling & { innh
       const generellBehandling: Generellbehandling = {
         ...utlandsBehandling,
         innhold: {
-          type: 'UTLAND',
+          type: 'KRAVPAKKE_UTLAND',
           dokumenter: dokumenter,
           landIsoKode: valgteLandIsoKode,
           begrunnelse: notater,
@@ -132,7 +132,7 @@ const KravpakkeUtland = (props: { utlandsBehandling: Generellbehandling & { innh
     const generellBehandling: Generellbehandling = {
       ...utlandsBehandling,
       innhold: {
-        type: 'UTLAND',
+        type: 'KRAVPAKKE_UTLAND',
         dokumenter: dokumenter,
         landIsoKode: valgteLandIsoKode,
         begrunnelse: notater,

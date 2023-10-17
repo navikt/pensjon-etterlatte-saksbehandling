@@ -23,7 +23,7 @@ const GenerellBehandling = () => {
     () => <ApiErrorAlert>Kunne ikke hente generell behandling</ApiErrorAlert>,
     (generellBehandling) => {
       switch (generellBehandling.type) {
-        case 'UTLAND':
+        case 'KRAVPAKKE_UTLAND':
           return (
             <KravpakkeUtland
               utlandsBehandling={generellBehandling as Generellbehandling & { innhold: KravpakkeUtland }}

@@ -105,6 +105,7 @@ export interface ITrygdetid {
 }
 
 export interface ITrygdetidOverstyring {
+  id: string
   behandlingId: string
   overstyrtNorskPoengaar: number | undefined
 }

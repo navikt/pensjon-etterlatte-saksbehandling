@@ -39,6 +39,7 @@ import no.nav.etterlatte.libs.regler.FaktumNode
 import no.nav.etterlatte.libs.regler.RegelPeriode
 import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
 import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
+import no.nav.etterlatte.libs.testdata.grunnlag.HELSOESKEN_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.kilde
 import no.nav.etterlatte.regler.Beregningstall
 import no.nav.etterlatte.token.Saksbehandler
@@ -51,18 +52,16 @@ import java.util.UUID
 val REGEL_PERIODE = RegelPeriode(LocalDate.of(2023, 1, 1))
 
 const val FNR_1 = "11057523044"
-const val FNR_2 = "19040550081"
-const val FNR_3 = "24014021406"
 
 const val MAKS_TRYGDETID: Int = 40
 
 fun barnepensjonGrunnlag(
-    soeskenKull: List<String> = emptyList(),
+    soeskenKull: List<Folkeregisteridentifikator> = emptyList(),
     trygdeTid: Beregningstall = Beregningstall(MAKS_TRYGDETID),
     institusjonsopphold: InstitusjonsoppholdBeregningsgrunnlag? = null,
     avdoedeForeldre: List<Folkeregisteridentifikator> = listOf(AVDOED_FOEDSELSNUMMER),
 ) = BarnepensjonGrunnlag(
-    soeskenKull = FaktumNode(soeskenKull.map { Folkeregisteridentifikator.of(it) }, kilde, "søskenkull"),
+    soeskenKull = FaktumNode(soeskenKull, kilde, "søskenkull"),
     avdoedesTrygdetid =
         FaktumNode(
             SamletTrygdetidMedBeregningsMetode(BeregningsMetode.NASJONAL, trygdeTid, null, null),
@@ -269,7 +268,7 @@ fun beregningsperiode(
     datoFOM = datoFOM,
     datoTOM = datoTOM,
     utbetaltBeloep = utbetaltBeloep,
-    soeskenFlokk = listOf(FNR_1),
+    soeskenFlokk = listOf(HELSOESKEN_FOEDSELSNUMMER.value),
     grunnbelopMnd = grunnbeloepMnd,
     grunnbelop = grunnbeloep,
     trygdetid = trygdetid,

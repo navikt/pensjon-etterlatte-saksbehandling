@@ -43,6 +43,7 @@ val SOEKER2_FOEDSELSNUMMER = Folkeregisteridentifikator.of("09438336165") // Kry
 val INNSENDER_FOEDSELSNUMMER = Folkeregisteridentifikator.of("18498248795") // Vrien Netthinne
 val HELSOESKEN_FOEDSELSNUMMER = Folkeregisteridentifikator.of("16478313601") // Nødvendig Dugnad
 val HELSOESKEN2_FOEDSELSNUMMER = Folkeregisteridentifikator.of("09508229892") // Tru Panjabi
+val HELSOESKEN3_FOEDSELSNUMMER = Folkeregisteridentifikator.of("17418340118") // Kontant Kjede
 val HALVSOESKEN_FOEDSELSNUMMER = Folkeregisteridentifikator.of("27458328671") // Gjestfri Geometri
 val HALVSOESKEN_ANNEN_FORELDER = Folkeregisteridentifikator.of("31488338237") // Ulogisk Bensin
 val VERGE_FOEDSELSNUMMER = Folkeregisteridentifikator.of("02438311109") // Vrien Påske

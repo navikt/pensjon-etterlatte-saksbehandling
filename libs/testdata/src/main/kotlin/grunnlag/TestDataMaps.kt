@@ -36,11 +36,11 @@ val kilde = Grunnlagsopplysning.Pdl(Tidspunkt.now(), null, "opplysningsId1")
 val statiskUuid = randomUUID()!!
 
 val AVDOED_FOEDSELSNUMMER = Folkeregisteridentifikator.of("01448203510")
-val GJENLEVENDE_FOEDSELSNUMMER = Folkeregisteridentifikator.of("29106323621")
-val SOEKER_FOEDSELSNUMMER = Folkeregisteridentifikator.of("16021254243")
-val HELSOESKEN_FOEDSELSNUMMER = Folkeregisteridentifikator.of("06051250220")
-val HALVSOESKEN_FOEDSELSNUMMER = Folkeregisteridentifikator.of("09011076618")
-val HALVSOESKEN_ANNEN_FORELDER = Folkeregisteridentifikator.of("20127905941")
+val GJENLEVENDE_FOEDSELSNUMMER = Folkeregisteridentifikator.of("01498344336")
+val SOEKER_FOEDSELSNUMMER = Folkeregisteridentifikator.of("25478323363")
+val HELSOESKEN_FOEDSELSNUMMER = Folkeregisteridentifikator.of("16478313601")
+val HALVSOESKEN_FOEDSELSNUMMER = Folkeregisteridentifikator.of("27458328671")
+val HALVSOESKEN_ANNEN_FORELDER = Folkeregisteridentifikator.of("31488338237")
 
 val ADRESSE_DEFAULT =
     listOf(

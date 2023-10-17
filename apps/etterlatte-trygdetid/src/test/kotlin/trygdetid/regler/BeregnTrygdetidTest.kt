@@ -255,6 +255,7 @@ internal class BeregnTrygdetidTest {
         perioder: List<TrygdetidGrunnlag>,
         forventet: DetaljertBeregnetTrygdetidResultat,
         datoer: Pair<LocalDate, LocalDate>?,
+        norskPoengaar: Int?,
     ) {
         val grunnlag =
             FaktumNode(
@@ -263,6 +264,7 @@ internal class BeregnTrygdetidTest {
                         trygdetidGrunnlagListe = perioder,
                         foedselsDato = datoer?.first ?: LocalDate.of(1981, 2, 21),
                         doedsDato = datoer?.second ?: LocalDate.of(2023, 3, 15),
+                        norskPoengaar = norskPoengaar,
                     ),
                 kilde = Grunnlagsopplysning.Saksbehandler("Z12345", Tidspunkt.now()),
                 beskrivelse = "Perioder",
@@ -328,6 +330,7 @@ internal class BeregnTrygdetidTest {
                         overstyrt = false,
                     ),
                     null,
+                    null,
                 ),
                 Arguments.of(
                     "Nasjonal poengInnAar",
@@ -362,6 +365,7 @@ internal class BeregnTrygdetidTest {
                         prorataBroek = null,
                         overstyrt = false,
                     ),
+                    null,
                     null,
                 ),
                 Arguments.of(
@@ -398,6 +402,7 @@ internal class BeregnTrygdetidTest {
                         overstyrt = false,
                     ),
                     null,
+                    null,
                 ),
                 Arguments.of(
                     "Nasjonal poengInnAar og poengUtAar",
@@ -432,6 +437,7 @@ internal class BeregnTrygdetidTest {
                         prorataBroek = null,
                         overstyrt = false,
                     ),
+                    null,
                     null,
                 ),
                 Arguments.of(
@@ -516,6 +522,7 @@ internal class BeregnTrygdetidTest {
                         LocalDate.of(1976, 10, 3),
                         LocalDate.of(2023, 1, 29),
                     ),
+                    null,
                 ),
                 Arguments.of(
                     "Utland 2",
@@ -588,6 +595,7 @@ internal class BeregnTrygdetidTest {
                         LocalDate.of(1981, 2, 21),
                         LocalDate.of(2023, 3, 15),
                     ),
+                    null,
                 ),
                 Arguments.of(
                     "Utland 3",
@@ -645,6 +653,68 @@ internal class BeregnTrygdetidTest {
                         LocalDate.of(1981, 2, 21),
                         LocalDate.of(2023, 3, 15),
                     ),
+                    null,
+                ),
+                Arguments.of(
+                    "Utland med overstyrt norsk poengaar",
+                    listOf(
+                        byggTrygdetidGrunnlag(
+                            TrygdetidType.FAKTISK,
+                            LandNormalisert.NORGE.isoCode,
+                            TrygdetidPeriode(
+                                fra = LocalDate.of(2010, 1, 1),
+                                til = LocalDate.of(2010, 12, 31),
+                            ),
+                            poengInnAar = false,
+                            poengUtAar = false,
+                            medIProrata = true,
+                        ),
+                        byggTrygdetidGrunnlag(
+                            TrygdetidType.FAKTISK,
+                            LandNormalisert.SVERIGE.isoCode,
+                            TrygdetidPeriode(
+                                fra = LocalDate.of(2011, 1, 1),
+                                til = LocalDate.of(2023, 2, 28),
+                            ),
+                            poengInnAar = false,
+                            poengUtAar = false,
+                            medIProrata = true,
+                        ),
+                        byggTrygdetidGrunnlag(
+                            TrygdetidType.FREMTIDIG,
+                            LandNormalisert.NORGE.isoCode,
+                            TrygdetidPeriode(
+                                fra = LocalDate.of(2023, 3, 15),
+                                til = LocalDate.of(2047, 12, 31),
+                            ),
+                            poengInnAar = false,
+                            poengUtAar = false,
+                            medIProrata = true,
+                        ),
+                    ),
+                    DetaljertBeregnetTrygdetidResultat(
+                        faktiskTrygdetidNorge =
+                            FaktiskTrygdetid(
+                                periode = Period.ofYears(2),
+                                antallMaaneder = 24,
+                            ),
+                        faktiskTrygdetidTeoretisk =
+                            FaktiskTrygdetid(
+                                periode = Period.of(14, 2, 0),
+                                antallMaaneder = 170,
+                            ),
+                        fremtidigTrygdetidNorge = null,
+                        fremtidigTrygdetidTeoretisk = null,
+                        samletTrygdetidNorge = 2,
+                        samletTrygdetidTeoretisk = 14,
+                        prorataBroek = IntBroek(24, 170),
+                        overstyrt = false,
+                    ),
+                    Pair(
+                        LocalDate.of(1981, 2, 21),
+                        LocalDate.of(2023, 3, 15),
+                    ),
+                    2,
                 ),
             )
 

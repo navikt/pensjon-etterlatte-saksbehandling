@@ -1,5 +1,6 @@
 package no.nav.etterlatte.oppgave
 
+import io.ktor.http.HttpStatusCode
 import io.ktor.server.plugins.BadRequestException
 import io.ktor.server.plugins.NotFoundException
 import no.nav.etterlatte.ExternalUser
@@ -12,6 +13,7 @@ import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.inTransaction
+import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveListe
@@ -104,9 +106,7 @@ class OppgaveService(
         if (hentetOppgave.saksbehandler.isNullOrEmpty()) {
             oppgaveDao.settNySaksbehandler(oppgaveId, saksbehandler)
         } else {
-            throw BadRequestException(
-                "Oppgaven har allerede en saksbehandler, id: $oppgaveId",
-            )
+            throw OppgavenHarAlleredeSaksbehandlerException(oppgaveId)
         }
     }
 
@@ -432,3 +432,8 @@ enum class Rolle {
     ATTESTANT,
     STRENGT_FORTROLIG,
 }
+
+class OppgavenHarAlleredeSaksbehandlerException(oppgaveId: UUID) : IkkeTillattException(
+    code = HttpStatusCode.BadRequest.value.toString(),
+    detail = "Oppgaven har allerede en saksbehandler, id: $oppgaveId",
+)

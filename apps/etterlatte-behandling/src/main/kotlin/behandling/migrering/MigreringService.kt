@@ -16,6 +16,7 @@ import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.oppgave.OppgaveService
+import no.nav.etterlatte.oppgave.OppgavenHarAlleredeSaksbehandlerException
 import no.nav.etterlatte.rapidsandrivers.migrering.MigreringRequest
 import no.nav.etterlatte.sak.SakService
 import no.nav.etterlatte.token.BrukerTokenInfo
@@ -64,7 +65,11 @@ class MigreringService(
                 )
                 val nyopprettaOppgave =
                     oppgaveService.hentOppgaverForSak(it.sak.id).first { o -> o.referanse == it.id.toString() }
-                oppgaveService.tildelSaksbehandler(nyopprettaOppgave.id, pesys)
+                try {
+                    oppgaveService.tildelSaksbehandler(nyopprettaOppgave.id, pesys)
+                } catch (e: OppgavenHarAlleredeSaksbehandlerException) {
+                    logger.info("Oppgaven har allerede saksbehandler. Ikke så farlig for migrering, så vi kjører på", e)
+                }
 
                 behandlingsHendelser.sendMeldingForHendelseMedDetaljertBehandling(
                     it.toStatistikkBehandling(request.opprettPersongalleri()),

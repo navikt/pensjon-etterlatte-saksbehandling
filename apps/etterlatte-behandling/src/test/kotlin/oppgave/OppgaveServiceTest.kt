@@ -285,7 +285,7 @@ internal class OppgaveServiceTest {
         val nysaksbehandler = "nysaksbehandler"
         oppgaveService.tildelSaksbehandler(nyOppgave.id, nysaksbehandler)
         val err =
-            assertThrows<BadRequestException> {
+            assertThrows<OppgavenHarAlleredeSaksbehandlerException> {
                 oppgaveService.tildelSaksbehandler(nyOppgave.id, "enda en")
             }
         Assertions.assertTrue(err.message!!.startsWith("Oppgaven har allerede en saksbehandler"))

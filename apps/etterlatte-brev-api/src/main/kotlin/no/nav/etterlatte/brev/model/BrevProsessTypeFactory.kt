@@ -23,7 +23,7 @@ class BrevProsessTypeFactory(private val featureToggleService: FeatureToggleServ
                     else -> BrevProsessType.MANUELL
                 }
 
-            VedtakType.AVSLAG,
+            VedtakType.AVSLAG -> BrevProsessType.REDIGERBAR
             VedtakType.ENDRING,
             ->
                 when (generellBrevData.revurderingsaarsak) {

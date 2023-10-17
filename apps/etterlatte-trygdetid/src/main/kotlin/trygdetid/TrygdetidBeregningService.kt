@@ -12,8 +12,8 @@ import no.nav.etterlatte.libs.regler.eksekver
 import no.nav.etterlatte.trygdetid.regler.TotalTrygdetidGrunnlag
 import no.nav.etterlatte.trygdetid.regler.TrygdetidGrunnlagMedAvdoed
 import no.nav.etterlatte.trygdetid.regler.TrygdetidGrunnlagMedAvdoedGrunnlag
-import no.nav.etterlatte.trygdetid.regler.TrygdetidPeriodMedPoengAar
 import no.nav.etterlatte.trygdetid.regler.TrygdetidPeriodeGrunnlag
+import no.nav.etterlatte.trygdetid.regler.TrygdetidPeriodeMedPoengaar
 import no.nav.etterlatte.trygdetid.regler.beregnDetaljertBeregnetTrygdetid
 import no.nav.etterlatte.trygdetid.regler.beregnTrygdetidForPeriode
 import no.nav.etterlatte.trygdetid.regler.totalTrygdetidYrkesskade
@@ -111,7 +111,7 @@ object TrygdetidBeregningService {
                 periode =
                     FaktumNode(
                         verdi =
-                            TrygdetidPeriodMedPoengAar(
+                            TrygdetidPeriodeMedPoengaar(
                                 fra = trygdetidGrunnlag.periode.fra,
                                 til = trygdetidGrunnlag.periode.til,
                                 poengInnAar = trygdetidGrunnlag.poengInnAar,

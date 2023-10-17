@@ -25,6 +25,7 @@ import no.nav.etterlatte.libs.common.trygdetid.OpplysningsgrunnlagDto
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidGrunnlagDto
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidGrunnlagKildeDto
+import no.nav.etterlatte.libs.common.trygdetid.TrygdetidOverstyringDto
 import no.nav.etterlatte.libs.common.uuid
 import no.nav.etterlatte.libs.common.withBehandlingId
 import no.nav.etterlatte.libs.common.withParam
@@ -56,6 +57,21 @@ fun Route.trygdetid(
             withBehandlingId(behandlingKlient) {
                 logger.info("Oppretter trygdetid for behandling $behandlingsId")
                 val trygdetid = trygdetidService.opprettTrygdetid(behandlingsId, brukerTokenInfo)
+                call.respond(trygdetid.toDto())
+            }
+        }
+
+        post("overstyr") {
+            withBehandlingId(behandlingKlient) {
+                logger.info("Oppdater trygdetid (overstyring) for behandling $behandlingsId")
+                val trygdetidOverstyringDto = call.receive<TrygdetidOverstyringDto>()
+
+                val trygdetid =
+                    trygdetidService.overstyrNorskPoengaar(
+                        trygdetidOverstyringDto.id,
+                        behandlingsId,
+                        trygdetidOverstyringDto.overstyrtNorskPoengaar,
+                    )
                 call.respond(trygdetid.toDto())
             }
         }
@@ -138,6 +154,7 @@ fun Trygdetid.toDto(): TrygdetidDto =
         beregnetTrygdetid = beregnetTrygdetid?.toDto(),
         trygdetidGrunnlag = trygdetidGrunnlag.map { it.toDto() },
         opplysninger = this.opplysninger.toDto(),
+        overstyrtNorskPoengaar = this.overstyrtNorskPoengaar,
     )
 
 private fun DetaljertBeregnetTrygdetid.toDto(): DetaljertBeregnetTrygdetidDto =

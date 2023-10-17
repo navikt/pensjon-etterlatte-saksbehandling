@@ -29,6 +29,7 @@ import no.nav.etterlatte.brev.journalpost.FerdigstillJournalpostRequest
 import no.nav.etterlatte.libs.common.FoedselsnummerDTO
 import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
 import no.nav.etterlatte.libs.ktor.restModule
+import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
@@ -69,7 +70,7 @@ internal class DokumentRouteTest {
         coEvery { tilgangssjekker.harTilgangTilPerson(any(), any()) } returns true
 
         val token = accessToken
-        val fnr = "26117512737"
+        val fnr = SOEKER_FOEDSELSNUMMER.value
 
         testApplication {
             environment {

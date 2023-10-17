@@ -9,6 +9,7 @@ import no.nav.etterlatte.avkorting.avkorting
 import no.nav.etterlatte.beregning.beregning
 import no.nav.etterlatte.beregning.grunnlag.beregningsGrunnlag
 import no.nav.etterlatte.config.ApplicationContext
+import no.nav.etterlatte.grunnbeloep.grunnbeloep
 import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstartOgAvslutning
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.database.migrate
@@ -41,6 +42,7 @@ class Server(private val context: ApplicationContext) {
                                 beregningsGrunnlag(beregningsGrunnlagService, behandlingKlient)
                                 avkorting(avkortingService, behandlingKlient)
                                 ytelseMedGrunnlag(ytelseMedGrunnlagService, behandlingKlient)
+                                grunnbeloep(grunnbeloepService)
                             }
                         }
                         connector { port = properties.httpPort }

@@ -12,12 +12,14 @@ import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlagRepository
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlagService
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleProperties
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
+import no.nav.etterlatte.grunnbeloep.GrunnbeloepRepository
 import no.nav.etterlatte.klienter.BehandlingKlientImpl
 import no.nav.etterlatte.klienter.GrunnlagKlientImpl
 import no.nav.etterlatte.klienter.TrygdetidKlient
 import no.nav.etterlatte.klienter.VilkaarsvurderingKlientImpl
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.ktor.httpClient
+import no.nav.etterlatte.no.nav.etterlatte.grunnbeloep.GrunnbeloepService
 import no.nav.etterlatte.ytelseMedGrunnlag.YtelseMedGrunnlagService
 
 private fun featureToggleProperties(config: Config) =
@@ -91,4 +93,5 @@ class ApplicationContext {
             avkortingRepository = avkortingRepository,
             behandlingKlient = behandlingKlient,
         )
+    val grunnbeloepService = GrunnbeloepService(repository = GrunnbeloepRepository)
 }

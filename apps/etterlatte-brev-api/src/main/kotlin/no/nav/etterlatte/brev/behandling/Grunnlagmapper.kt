@@ -52,7 +52,7 @@ fun Grunnlag.mapInnsender(): Innsender? =
     }
 
 fun Grunnlag.mapSpraak(): Spraak =
-    with(this.sak) {
+    with(this.soeker) {
         LoggerFactory.getLogger(this::class.java).info("Opplysning: ${this.toJson()}")
         val opplysning = hentKonstantOpplysning<Spraak>(Opplysningstype.SPRAAK)
 

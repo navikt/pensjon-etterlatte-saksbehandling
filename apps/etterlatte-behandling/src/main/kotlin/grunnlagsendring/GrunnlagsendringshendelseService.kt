@@ -99,7 +99,7 @@ class GrunnlagsendringshendelseService(
     }
 
     fun settHendelseTilHistorisk(behandlingId: UUID) {
-        inTransaction {
+        inTransaction(true) {
             grunnlagsendringshendelseDao.oppdaterGrunnlagsendringHistorisk(behandlingId)
         }
     }

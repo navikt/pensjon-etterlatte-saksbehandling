@@ -5,12 +5,12 @@ import io.mockk.every
 import io.mockk.spyk
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.libs.common.Vedtaksloesning
-import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.FEILENDE_STEG
 import no.nav.etterlatte.libs.common.rapidsandrivers.FEILMELDING_KEY
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.database.POSTGRES_VERSION
+import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.etterlatte.opprettInMemoryDatabase
 import no.nav.etterlatte.rapidsandrivers.EventNames
 import no.nav.etterlatte.rapidsandrivers.migrering.Beregning
@@ -65,7 +65,7 @@ class FeilendeMigreringLytterRiverTestRiver {
                 Pesyssak(
                     id = pesysid.id,
                     enhet = Enhet("1"),
-                    soeker = Folkeregisteridentifikator.of("08071272487"),
+                    soeker = SOEKER_FOEDSELSNUMMER,
                     gjenlevendeForelder = null,
                     avdoedForelder = listOf(),
                     virkningstidspunkt = YearMonth.now(),
@@ -123,7 +123,7 @@ class FeilendeMigreringLytterRiverTestRiver {
                 Pesyssak(
                     id = pesysid.id,
                     enhet = Enhet("1"),
-                    soeker = Folkeregisteridentifikator.of("08071272487"),
+                    soeker = SOEKER_FOEDSELSNUMMER,
                     gjenlevendeForelder = null,
                     avdoedForelder = listOf(),
                     virkningstidspunkt = YearMonth.now(),

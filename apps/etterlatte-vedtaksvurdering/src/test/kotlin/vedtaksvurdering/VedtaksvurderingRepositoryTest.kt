@@ -22,6 +22,7 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.POSTGRES_VERSION
 import no.nav.etterlatte.libs.database.migrate
+import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.etterlatte.vedtaksvurdering.VedtakBehandlingInnhold
 import no.nav.etterlatte.vedtaksvurdering.VedtakTilbakekrevingInnhold
 import no.nav.etterlatte.vedtaksvurdering.VedtaksvurderingRepository
@@ -73,7 +74,7 @@ internal class VedtaksvurderingRepositoryTest {
             vedtak shouldNotBe null
             id shouldNotBe null
             status shouldBe VedtakStatus.OPPRETTET
-            soeker shouldBe Folkeregisteridentifikator.of(FNR_1)
+            soeker shouldBe SOEKER_FOEDSELSNUMMER
             sakId shouldBe 1L
             sakType shouldBe SakType.BARNEPENSJON
             behandlingId shouldNotBe null
@@ -105,7 +106,7 @@ internal class VedtaksvurderingRepositoryTest {
             vedtak shouldNotBe null
             id shouldNotBe null
             status shouldBe VedtakStatus.OPPRETTET
-            soeker shouldBe Folkeregisteridentifikator.of(FNR_1)
+            soeker shouldBe SOEKER_FOEDSELSNUMMER
             sakId shouldBe 1L
             sakType shouldBe SakType.BARNEPENSJON
             behandlingId shouldNotBe null
@@ -302,24 +303,24 @@ internal class VedtaksvurderingRepositoryTest {
 
     @Test
     fun `skal hente vedtak for fnr og fra-og-med angitt dato`() {
-        val person1 = Folkeregisteridentifikator.of(FNR_1)
-        val person2 = Folkeregisteridentifikator.of(FNR_2)
+        val soeker1 = SOEKER_FOEDSELSNUMMER
+        val soeker2 = Folkeregisteridentifikator.of(FNR_2)
 
         listOf(
-            opprettVedtak(sakId = 1, soeker = person1, virkningstidspunkt = YearMonth.of(2024, Month.JANUARY)),
-            opprettVedtak(sakId = 2, soeker = person2, virkningstidspunkt = YearMonth.of(2024, Month.JANUARY)),
-            opprettVedtak(sakId = 2, soeker = person2, virkningstidspunkt = YearMonth.of(2024, Month.MARCH)),
-            opprettVedtak(sakId = 1, soeker = person1, virkningstidspunkt = YearMonth.of(2024, Month.APRIL)),
-            opprettVedtak(sakId = 2, soeker = person2, virkningstidspunkt = YearMonth.of(2024, Month.JUNE)),
+            opprettVedtak(sakId = 1, soeker = soeker1, virkningstidspunkt = YearMonth.of(2024, Month.JANUARY)),
+            opprettVedtak(sakId = 2, soeker = soeker2, virkningstidspunkt = YearMonth.of(2024, Month.JANUARY)),
+            opprettVedtak(sakId = 2, soeker = soeker2, virkningstidspunkt = YearMonth.of(2024, Month.MARCH)),
+            opprettVedtak(sakId = 1, soeker = soeker1, virkningstidspunkt = YearMonth.of(2024, Month.APRIL)),
+            opprettVedtak(sakId = 2, soeker = soeker2, virkningstidspunkt = YearMonth.of(2024, Month.JUNE)),
         )
             .map { repository.opprettVedtak(it) }
             .forEach { repository.iverksattVedtak(it.behandlingId) }
 
-        val results = repository.hentFerdigstilteVedtak(person2, LocalDate.of(2024, Month.MARCH, 1))
+        val results = repository.hentFerdigstilteVedtak(soeker2, LocalDate.of(2024, Month.MARCH, 1))
 
         results.size shouldBeExactly 2
         results.forEach {
-            it.soeker shouldBe person2
+            it.soeker shouldBe soeker2
             (it.innhold as VedtakBehandlingInnhold).virkningstidspunkt shouldBeGreaterThanOrEqualTo
                 YearMonth.of(
                     2024,

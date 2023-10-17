@@ -27,9 +27,9 @@ import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetodeBeregningsgrunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeskenMedIBeregning
-import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
+import no.nav.etterlatte.libs.testdata.grunnlag.HELSOESKEN2_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.HELSOESKEN_FOEDSELSNUMMER
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -51,12 +51,6 @@ internal class BeregningsGrunnlagServiceTest {
             beregningsGrunnlagRepository,
             behandlingKlient,
             featureToggleService,
-        )
-
-    private val personidenter =
-        listOf(
-            "05108208963",
-            "18061264406",
         )
 
     @Test
@@ -118,7 +112,7 @@ internal class BeregningsGrunnlagServiceTest {
             )
         every { revurdering.virkningstidspunkt } returns virkMock
 
-        val soesken = personidenter.map { Folkeregisteridentifikator.of(it) }
+        val soesken = listOf(HELSOESKEN_FOEDSELSNUMMER, HELSOESKEN2_FOEDSELSNUMMER)
 
         val periode1 =
             GrunnlagMedPeriode(
@@ -194,7 +188,7 @@ internal class BeregningsGrunnlagServiceTest {
             )
         every { revurdering.virkningstidspunkt } returns virkMock
 
-        val soesken = personidenter.map { Folkeregisteridentifikator.of(it) }
+        val soesken = listOf(HELSOESKEN_FOEDSELSNUMMER, HELSOESKEN2_FOEDSELSNUMMER)
 
         val periode1 =
             GrunnlagMedPeriode(

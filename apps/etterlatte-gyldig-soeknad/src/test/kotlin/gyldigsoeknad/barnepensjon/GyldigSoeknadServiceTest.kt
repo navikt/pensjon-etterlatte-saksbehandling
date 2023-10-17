@@ -11,10 +11,12 @@ import no.nav.etterlatte.libs.common.innsendtsoeknad.barnepensjon.Barnepensjon
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.FamilieRelasjon
-import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.VergeEllerFullmektig
 import no.nav.etterlatte.libs.common.person.VergemaalEllerFremtidsfullmakt
+import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
+import no.nav.etterlatte.libs.testdata.grunnlag.GJENLEVENDE_FOEDSELSNUMMER
+import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.io.FileNotFoundException
@@ -145,15 +147,14 @@ internal class GyldigSoeknadServiceTest {
             )
         val soeknad = objectMapper.readValue(skjemaInfo, Barnepensjon::class.java)
 
-        val gjenlevendeFnr = "03108718357"
         val foreldreFnrMedGjenlevende =
             listOf(
-                Folkeregisteridentifikator.of(gjenlevendeFnr),
-                Folkeregisteridentifikator.of("22128202440"),
+                GJENLEVENDE_FOEDSELSNUMMER,
+                AVDOED_FOEDSELSNUMMER,
             )
-        val foreldreFnrUtenGjenlevende = listOf(Folkeregisteridentifikator.of("22128202440"))
-        val gjenlevende = listOf(PersonInfoGyldighet("navn navnulfsen", gjenlevendeFnr))
-        val innsender = PersonInfoGyldighet("innsendernavn", "03108718357")
+        val foreldreFnrUtenGjenlevende = listOf(AVDOED_FOEDSELSNUMMER)
+        val gjenlevende = listOf(PersonInfoGyldighet("navn navnulfsen", GJENLEVENDE_FOEDSELSNUMMER.value))
+        val innsender = PersonInfoGyldighet("innsendernavn", GJENLEVENDE_FOEDSELSNUMMER.value)
 
         fun readFile(file: String) =
             Companion::class.java.getResource(file)?.readText()
@@ -165,7 +166,7 @@ private fun mockPerson(vergemaalEllerFremtidsfullmakt: List<VergemaalEllerFremti
     Person(
         fornavn = "Test",
         etternavn = "Testulfsen",
-        foedselsnummer = Folkeregisteridentifikator.of("19078504903"),
+        foedselsnummer = SOEKER_FOEDSELSNUMMER,
         foedselsdato = LocalDate.parse("2020-06-10"),
         foedselsaar = 1985,
         foedeland = null,

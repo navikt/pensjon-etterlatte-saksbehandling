@@ -45,6 +45,7 @@ import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.POSTGRES_VERSION
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.database.transaction
+import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlient
 import no.nav.etterlatte.vedtaksvurdering.klienter.BeregningKlient
 import no.nav.etterlatte.vedtaksvurdering.klienter.VilkaarsvurderingKlient
@@ -60,7 +61,6 @@ import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
 import vedtaksvurdering.ENHET_1
 import vedtaksvurdering.ENHET_2
-import vedtaksvurdering.FNR_1
 import vedtaksvurdering.SAKSBEHANDLER_1
 import vedtaksvurdering.attestant
 import vedtaksvurdering.opprettVedtak
@@ -607,7 +607,7 @@ internal class VedtakBehandlingServiceTest {
                 behandlingOpprettet = Tidspunkt.now().toLocalDatetimeUTC(),
                 soeknadMottattDato = null,
                 innsender = null,
-                soeker = FNR_1,
+                soeker = SOEKER_FOEDSELSNUMMER,
                 gjenlevende = listOf(),
                 avdoed = listOf(),
                 soesken = listOf(),
@@ -1130,7 +1130,7 @@ internal class VedtakBehandlingServiceTest {
             behandlingOpprettet = LocalDateTime.now(),
             soeknadMottattDato = LocalDateTime.now(),
             innsender = null,
-            soeker = FNR_1,
+            soeker = SOEKER_FOEDSELSNUMMER,
             gjenlevende = listOf(),
             avdoed = listOf(),
             soesken = listOf(),

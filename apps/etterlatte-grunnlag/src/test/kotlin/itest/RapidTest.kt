@@ -9,12 +9,12 @@ import no.nav.etterlatte.klienter.PdlTjenesterKlientImpl
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.POSTGRES_VERSION
 import no.nav.etterlatte.libs.database.migrate
+import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.statiskUuid
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
@@ -69,7 +69,7 @@ internal class RapidTest {
         postgreSQLContainer.stop()
     }
 
-    private val fnr = Folkeregisteridentifikator.of("18057404783")
+    private val fnr = AVDOED_FOEDSELSNUMMER
     private val tidspunkt = Tidspunkt.now()
     private val kilde = Grunnlagsopplysning.Pdl(tidspunkt, null, null)
     private val nyOpplysning =

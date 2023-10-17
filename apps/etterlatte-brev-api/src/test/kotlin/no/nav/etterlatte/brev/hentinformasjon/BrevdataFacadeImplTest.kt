@@ -20,7 +20,6 @@ import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.Opplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
-import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.VedtakSak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -37,6 +36,7 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
+import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.pensjon.brevbaker.api.model.Kroner
 import org.junit.jupiter.api.AfterEach
@@ -276,7 +276,7 @@ internal class BrevdataFacadeImplTest {
                     Opplysningstype.SPRAAK to opprettOpplysning(Spraak.NB.toJsonNode()),
                     Opplysningstype.PERSONGALLERI_V1 to
                         opprettOpplysning(
-                            Persongalleri(soeker = FNR.value, innsender = "innsender").toJsonNode(),
+                            Persongalleri(soeker = SOEKER_FOEDSELSNUMMER.value, innsender = "innsender").toJsonNode(),
                         ),
                 ),
         ).hentOpplysningsgrunnlag()
@@ -307,7 +307,6 @@ internal class BrevdataFacadeImplTest {
     private fun opprettTrygdetid() = null
 
     private companion object {
-        private val FNR = Folkeregisteridentifikator.of("11057523044")
         private val GRUNNLAGSOPPLYSNING_PDL = Grunnlagsopplysning.Pdl(Tidspunkt.now(), null, null)
         private val STATISK_UUID = UUID.randomUUID()
         private val BEHANDLING_ID = UUID.randomUUID()

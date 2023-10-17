@@ -12,8 +12,8 @@ import io.ktor.http.fullPath
 import io.ktor.http.headersOf
 import io.ktor.serialization.jackson.jackson
 import io.mockk.mockk
-import no.nav.etterlatte.STOR_SNERK
-import no.nav.etterlatte.TRIVIELL_MIDTPUNKT
+import no.nav.etterlatte.JOVIAL_LAMA
+import no.nav.etterlatte.KONTANT_FOT
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.FamilieRelasjon
 import no.nav.etterlatte.libs.common.person.GeografiskTilknytning
@@ -35,7 +35,7 @@ internal class PdlKlientTest {
     fun `hent pdlModell skal returnere en Person`() {
         val klient = mockHttpClient(mockPerson())
         val pdlService = PdlKlientImpl(config, klient)
-        val fnr = TRIVIELL_MIDTPUNKT
+        val fnr = KONTANT_FOT
         val rolle = PersonRolle.BARN
         val resultat = pdlService.hentPdlModell(fnr.value, rolle, SakType.BARNEPENSJON)
         Assertions.assertEquals("Ola", resultat.fornavn.verdi)
@@ -47,7 +47,7 @@ internal class PdlKlientTest {
     fun `skal hente doedsdato`() {
         val klient = mockHttpClient(mockPerson())
         val pdlService = PdlKlientImpl(config, klient)
-        val fnr = TRIVIELL_MIDTPUNKT
+        val fnr = KONTANT_FOT
         val rolle = PersonRolle.BARN
         val resultat = pdlService.hentPdlModell(fnr.value, rolle, SakType.BARNEPENSJON).hentDoedsdato()
         Assertions.assertEquals(mockPerson().doedsdato?.verdi, resultat)
@@ -55,11 +55,11 @@ internal class PdlKlientTest {
 
     @Test
     fun `skal hente ansvarlige foreldre`() {
-        val familierelasjon = FamilieRelasjon(ansvarligeForeldre = listOf(STOR_SNERK), barn = null, foreldre = null)
+        val familierelasjon = FamilieRelasjon(ansvarligeForeldre = listOf(JOVIAL_LAMA), barn = null, foreldre = null)
         val mockperson = mockPerson(familieRelasjon = familierelasjon)
         val klient = mockHttpClient(mockperson)
         val pdlService = PdlKlientImpl(config, klient)
-        val fnr = TRIVIELL_MIDTPUNKT
+        val fnr = KONTANT_FOT
         val rolle = PersonRolle.BARN
         val resultat = pdlService.hentPdlModell(fnr.value, rolle, SakType.BARNEPENSJON).hentAnsvarligeForeldre()
         Assertions.assertEquals(familierelasjon.ansvarligeForeldre, resultat)
@@ -67,11 +67,11 @@ internal class PdlKlientTest {
 
     @Test
     fun `skal hente barn`() {
-        val familierelasjon = FamilieRelasjon(barn = listOf(STOR_SNERK), ansvarligeForeldre = null, foreldre = null)
+        val familierelasjon = FamilieRelasjon(barn = listOf(JOVIAL_LAMA), ansvarligeForeldre = null, foreldre = null)
         val mockperson = mockPerson(familieRelasjon = familierelasjon)
         val klient = mockHttpClient(mockperson)
         val pdlService = PdlKlientImpl(config, klient)
-        val fnr = TRIVIELL_MIDTPUNKT
+        val fnr = KONTANT_FOT
         val rolle = PersonRolle.BARN
         val resultat = pdlService.hentPdlModell(fnr.value, rolle, SakType.BARNEPENSJON).hentBarn()
         Assertions.assertEquals(familierelasjon.barn, resultat)
@@ -81,7 +81,7 @@ internal class PdlKlientTest {
     fun `skal hente geografisk tilknytning`() {
         val klient = mockHttpClient(GeografiskTilknytning(kommune = "0301", ukjent = false))
         val pdlService = PdlKlientImpl(config, klient)
-        val fnr = TRIVIELL_MIDTPUNKT
+        val fnr = KONTANT_FOT
         val resultat = pdlService.hentGeografiskTilknytning(fnr.value, SakType.BARNEPENSJON).geografiskTilknytning()
         Assertions.assertEquals("0301", resultat)
     }
@@ -102,7 +102,7 @@ internal class PdlKlientTest {
         val mockperson = mockPerson(utland = utland)
         val klient = mockHttpClient(mockperson)
         val pdlService = PdlKlientImpl(config, klient)
-        val fnr = TRIVIELL_MIDTPUNKT
+        val fnr = KONTANT_FOT
         val rolle = PersonRolle.BARN
         val resultat = pdlService.hentPdlModell(fnr.value, rolle, SakType.BARNEPENSJON).hentUtland()
         Assertions.assertEquals(utland, resultat)

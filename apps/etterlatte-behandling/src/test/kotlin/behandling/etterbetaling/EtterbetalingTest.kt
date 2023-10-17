@@ -19,8 +19,8 @@ import no.nav.etterlatte.libs.common.FoedselsnummerDTO
 import no.nav.etterlatte.libs.common.behandling.BehandlingsBehov
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
 import no.nav.etterlatte.module
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
@@ -57,7 +57,7 @@ class EtterbetalingTest : BehandlingIntegrationTest() {
                 module(applicationContext)
             }
 
-            val fnr = Folkeregisteridentifikator.of("08071272487").value
+            val fnr = AVDOED_FOEDSELSNUMMER.value
 
             val sak: Sak =
                 client.post("personer/saker/${SakType.BARNEPENSJON}") {

@@ -30,6 +30,7 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeskenMedIBeregn
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
+import no.nav.etterlatte.libs.testdata.grunnlag.HELSOESKEN_FOEDSELSNUMMER
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -67,7 +68,7 @@ internal class BeregningsGrunnlagServiceTest {
                     tom = null,
                     data =
                         listOf(
-                            SoeskenMedIBeregning(STOR_SNERK, true),
+                            SoeskenMedIBeregning(HELSOESKEN_FOEDSELSNUMMER, true),
                         ),
                 ),
             )
@@ -442,10 +443,6 @@ internal class BeregningsGrunnlagServiceTest {
             every { behandlingType } returns behandlingstype
             every { virkningstidspunkt } returns VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2023, 1))
         }
-
-    private companion object {
-        val STOR_SNERK = Folkeregisteridentifikator.of("11057523044")
-    }
 
     private fun beregningsgrunnlag(
         behandlingId: UUID = randomUUID(),

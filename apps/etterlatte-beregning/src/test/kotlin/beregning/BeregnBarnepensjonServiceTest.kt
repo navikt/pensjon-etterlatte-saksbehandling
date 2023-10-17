@@ -44,6 +44,7 @@ import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
+import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED2_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -714,7 +715,7 @@ internal class BeregnBarnepensjonServiceTest {
 
     private fun grunnlagMedEkstraAvdoedForelder(doedsdato: LocalDate): Grunnlag {
         val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
-        val nyligAvdoedFoedselsnummer = Folkeregisteridentifikator.of("15447924940")
+        val nyligAvdoedFoedselsnummer = AVDOED2_FOEDSELSNUMMER
         val nyligAvdoed: List<Grunnlagsdata<JsonNode>> =
             listOf(
                 mapOf(

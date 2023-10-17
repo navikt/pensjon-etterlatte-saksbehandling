@@ -11,11 +11,12 @@ import no.nav.etterlatte.beregning.regler.toGrunnlag
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeskenMedIBeregning
-import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.POSTGRES_VERSION
 import no.nav.etterlatte.libs.database.migrate
+import no.nav.etterlatte.libs.testdata.grunnlag.HELSOESKEN2_FOEDSELSNUMMER
+import no.nav.etterlatte.libs.testdata.grunnlag.HELSOESKEN_FOEDSELSNUMMER
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -73,7 +74,7 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest {
     fun `Opprettelse fungerer`() {
         val id = UUID.randomUUID()
 
-        val soeskenMedIBeregning = listOf(SoeskenMedIBeregning(STOR_SNERK, true)).somPeriodisertGrunnlag()
+        val soeskenMedIBeregning = listOf(SoeskenMedIBeregning(HELSOESKEN_FOEDSELSNUMMER, true)).somPeriodisertGrunnlag()
         val institusjonsoppholdBeregningsgrunnlag =
             listOf(
                 GrunnlagMedPeriode(
@@ -144,11 +145,11 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest {
     fun `Oppdatering fungerer`() {
         val id = UUID.randomUUID()
 
-        val initialSoeskenMedIBeregning = listOf(SoeskenMedIBeregning(STOR_SNERK, true)).somPeriodisertGrunnlag()
+        val initialSoeskenMedIBeregning = listOf(SoeskenMedIBeregning(HELSOESKEN_FOEDSELSNUMMER, true)).somPeriodisertGrunnlag()
         val oppdatertSoeskenMedIBeregning =
             listOf(
-                SoeskenMedIBeregning(STOR_SNERK, true),
-                SoeskenMedIBeregning(TRIVIELL_MIDTPUNKT, true),
+                SoeskenMedIBeregning(HELSOESKEN_FOEDSELSNUMMER, true),
+                SoeskenMedIBeregning(HELSOESKEN2_FOEDSELSNUMMER, true),
             ).somPeriodisertGrunnlag()
 
         val initialInstitusjonsoppholdBeregningsgrunnlag =
@@ -268,8 +269,8 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest {
 
         val oppdatertSoeskenMedIBeregning =
             listOf(
-                SoeskenMedIBeregning(STOR_SNERK, true),
-                SoeskenMedIBeregning(TRIVIELL_MIDTPUNKT, true),
+                SoeskenMedIBeregning(HELSOESKEN_FOEDSELSNUMMER, true),
+                SoeskenMedIBeregning(HELSOESKEN2_FOEDSELSNUMMER, true),
             ).somPeriodisertGrunnlag()
 
         repository.lagre(
@@ -288,11 +289,6 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest {
         val result = repository.finnBarnepensjonGrunnlagForBehandling(id)
 
         assertNotNull(result)
-    }
-
-    private companion object {
-        val STOR_SNERK = Folkeregisteridentifikator.of("11057523044")
-        val TRIVIELL_MIDTPUNKT = Folkeregisteridentifikator.of("19040550081")
     }
 
     private fun List<SoeskenMedIBeregning>.somPeriodisertGrunnlag(

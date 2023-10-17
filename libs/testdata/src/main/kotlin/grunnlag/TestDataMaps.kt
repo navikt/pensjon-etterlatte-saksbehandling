@@ -35,12 +35,14 @@ import java.util.UUID.randomUUID
 val kilde = Grunnlagsopplysning.Pdl(Tidspunkt.now(), null, "opplysningsId1")
 val statiskUuid = randomUUID()!!
 
-val AVDOED_FOEDSELSNUMMER = Folkeregisteridentifikator.of("01448203510")
-val GJENLEVENDE_FOEDSELSNUMMER = Folkeregisteridentifikator.of("01498344336")
-val SOEKER_FOEDSELSNUMMER = Folkeregisteridentifikator.of("25478323363")
-val HELSOESKEN_FOEDSELSNUMMER = Folkeregisteridentifikator.of("16478313601")
-val HALVSOESKEN_FOEDSELSNUMMER = Folkeregisteridentifikator.of("27458328671")
-val HALVSOESKEN_ANNEN_FORELDER = Folkeregisteridentifikator.of("31488338237")
+val AVDOED_FOEDSELSNUMMER = Folkeregisteridentifikator.of("08498224343") // Gjennomsiktig Klemme
+val AVDOED2_FOEDSELSNUMMER = Folkeregisteridentifikator.of("16508201382") // Kunnskapsrik Kråkebolle
+val GJENLEVENDE_FOEDSELSNUMMER = Folkeregisteridentifikator.of("01498344336") // Kunst Løvinne
+val SOEKER_FOEDSELSNUMMER = Folkeregisteridentifikator.of("25478323363") // Rød Blanding
+val HELSOESKEN_FOEDSELSNUMMER = Folkeregisteridentifikator.of("16478313601") // Nødvendig Dugnad
+val HELSOESKEN2_FOEDSELSNUMMER = Folkeregisteridentifikator.of("09508229892") // Tru Panjabi
+val HALVSOESKEN_FOEDSELSNUMMER = Folkeregisteridentifikator.of("27458328671") // Gjestfri Geometri
+val HALVSOESKEN_ANNEN_FORELDER = Folkeregisteridentifikator.of("31488338237") // Ulogisk Bensin
 
 val ADRESSE_DEFAULT =
     listOf(

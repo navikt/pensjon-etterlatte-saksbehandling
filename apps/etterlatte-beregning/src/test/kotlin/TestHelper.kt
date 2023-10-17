@@ -38,6 +38,7 @@ import no.nav.etterlatte.libs.common.toObjectNode
 import no.nav.etterlatte.libs.regler.FaktumNode
 import no.nav.etterlatte.libs.regler.RegelPeriode
 import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
+import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.kilde
 import no.nav.etterlatte.regler.Beregningstall
 import no.nav.etterlatte.token.Saksbehandler
@@ -59,7 +60,7 @@ fun barnepensjonGrunnlag(
     soeskenKull: List<String> = emptyList(),
     trygdeTid: Beregningstall = Beregningstall(MAKS_TRYGDETID),
     institusjonsopphold: InstitusjonsoppholdBeregningsgrunnlag? = null,
-    avdoedeForeldre: List<Folkeregisteridentifikator> = listOf(Folkeregisteridentifikator.of("11057523044")),
+    avdoedeForeldre: List<Folkeregisteridentifikator> = listOf(AVDOED_FOEDSELSNUMMER),
 ) = BarnepensjonGrunnlag(
     soeskenKull = FaktumNode(soeskenKull.map { Folkeregisteridentifikator.of(it) }, kilde, "søskenkull"),
     avdoedesTrygdetid =

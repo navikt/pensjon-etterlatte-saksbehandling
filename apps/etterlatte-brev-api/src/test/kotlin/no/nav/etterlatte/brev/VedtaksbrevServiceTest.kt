@@ -47,11 +47,11 @@ import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.VedtakSak
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
+import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.etterlatte.rivers.VedtakTilJournalfoering
 import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
@@ -110,7 +110,6 @@ internal class VedtaksbrevServiceTest {
     private companion object {
         private const val SAK_ID = 123L
         private val BEHANDLING_ID = UUID.randomUUID()
-        private val STOR_SNERK = Folkeregisteridentifikator.of("11057523044").value
         private const val PORSGRUNN = "0805"
         private val PDF_BYTES = "Hello world!".toByteArray()
         private val SAKSBEHANDLER = BrukerTokenInfo.of("token", "saksbehandler", null, null, null)
@@ -778,8 +777,8 @@ internal class VedtaksbrevServiceTest {
 
     private fun opprettMottaker() =
         Mottaker(
-            "Stor Snerk",
-            foedselsnummer = Foedselsnummer(STOR_SNERK),
+            "Rød Blanding",
+            foedselsnummer = Foedselsnummer(SOEKER_FOEDSELSNUMMER.value),
             orgnummer = null,
             adresse =
                 Adresse(

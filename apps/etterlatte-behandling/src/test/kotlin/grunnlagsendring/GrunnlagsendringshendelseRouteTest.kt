@@ -21,10 +21,10 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.pdlhendelse.Adressebeskyttelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
-import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
+import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
 import no.nav.etterlatte.module
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
@@ -45,7 +45,7 @@ class GrunnlagsendringshendelseRouteTest : BehandlingIntegrationTest() {
 
     @Test
     fun `Skal kunne håndtere en adressebeskyttelsesendring`() {
-        val fnr = Folkeregisteridentifikator.of("08071272487").value
+        val fnr = AVDOED_FOEDSELSNUMMER.value
 
         testApplication {
             environment {

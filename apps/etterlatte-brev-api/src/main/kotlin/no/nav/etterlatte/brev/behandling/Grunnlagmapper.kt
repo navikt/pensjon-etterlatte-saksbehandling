@@ -11,7 +11,9 @@ import no.nav.etterlatte.libs.common.grunnlag.hentNavn
 import no.nav.etterlatte.libs.common.grunnlag.hentVergemaalellerfremtidsfullmakt
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Navn
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
+import no.nav.etterlatte.libs.common.toJson
 import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
+import org.slf4j.LoggerFactory
 
 fun Grunnlag.mapSoeker(): Soeker =
     with(this.soeker) {
@@ -51,6 +53,7 @@ fun Grunnlag.mapInnsender(): Innsender? =
 
 fun Grunnlag.mapSpraak(): Spraak =
     with(this.sak) {
+        LoggerFactory.getLogger(this::class.java).info("Opplysning: ${this.toJson()}")
         val opplysning = hentKonstantOpplysning<Spraak>(Opplysningstype.SPRAAK)
 
         requireNotNull(opplysning?.verdi) {

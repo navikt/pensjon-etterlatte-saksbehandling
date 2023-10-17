@@ -21,6 +21,7 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.P
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.SIVILSTAND
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.SIVILSTATUS
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.SOEKNAD_MOTTATT_DATO
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.SPRAAK
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.STATSBORGERSKAP
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.UTENLANDSADRESSE
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.UTENLANDSOPPHOLD
@@ -98,10 +99,16 @@ fun Grunnlagsdata<JsonNode>.hentUtenlandsadresse() = this.hentKonstantOpplysning
 fun Grunnlagsdata<JsonNode>.hentSoeknadMottattDato() = this.hentKonstantOpplysning<Map<String, LocalDateTime>>(SOEKNAD_MOTTATT_DATO)
 
 inline fun <reified T> Grunnlagsdata<JsonNode>.hentKonstantOpplysning(opplysningstype: Opplysningstype): Opplysning.Konstant<T>? {
-    val grunnlagsdata = this[opplysningstype]
     val logger = LoggerFactory.getLogger(this::class.java)
-    logger.info("This: ${this.entries}")
-    logger.info("I Hent konstant opplysning for $opplysningstype: $grunnlagsdata")
+    if (opplysningstype == SPRAAK) {
+        logger.info("Henter språk")
+        logger.info("This-språk: ${this.toJson()}")
+        logger.info("This-entries: ${this.entries}")
+    }
+    val grunnlagsdata = this[opplysningstype]
+    if (opplysningstype == SPRAAK) {
+        logger.info("I Hent konstant opplysning for $opplysningstype: $grunnlagsdata")
+    }
 
     if (grunnlagsdata == null) {
         return null

@@ -1,6 +1,8 @@
 package no.nav.etterlatte.migrering
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.utbetaling.UtbetalingResponseDto
 import no.nav.etterlatte.libs.common.utbetaling.UtbetalingStatusDto
@@ -19,6 +21,7 @@ internal class LyttPaaIverksattVedtakRiver(
     rapidsConnection: RapidsConnection,
     private val pesysRepository: PesysRepository,
     private val penKlient: PenKlient,
+    private val featureToggleService: FeatureToggleService,
 ) :
     ListenerMedLoggingOgFeilhaandtering(Migreringshendelser.IVERKSATT) {
     private val logger: Logger = LoggerFactory.getLogger(this::class.java)
@@ -53,7 +56,11 @@ internal class LyttPaaIverksattVedtakRiver(
         when (respons.status) {
             UtbetalingStatusDto.GODKJENT, UtbetalingStatusDto.GODKJENT_MED_FEIL -> {
                 pesysRepository.oppdaterStatus(behandling.pesysId, Migreringsstatus.FERDIG)
-                //   runBlocking { penKlient.opphoerSak(behandling.pesysId) }
+                if (featureToggleService.isEnabled(MigreringFeatureToggle.OpphoerSakIPesys, false)) {
+                    runBlocking { penKlient.opphoerSak(behandling.pesysId) }
+                } else {
+                    logger.info("Opphør sak i Pesys er avskrudd, ville ellers gjort det.")
+                }
             }
             UtbetalingStatusDto.MOTTATT, UtbetalingStatusDto.SENDT -> {
                 logger.info("Fikk respons fra utbetaling med status ${respons.status} for ${respons.behandlingId}")

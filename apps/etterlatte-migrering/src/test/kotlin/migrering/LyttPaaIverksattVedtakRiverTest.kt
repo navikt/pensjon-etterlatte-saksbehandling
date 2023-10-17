@@ -8,6 +8,7 @@ import io.mockk.runs
 import io.mockk.spyk
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.utbetaling.UtbetalingResponseDto
 import no.nav.etterlatte.libs.common.utbetaling.UtbetalingStatusDto
@@ -21,7 +22,6 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
@@ -42,7 +42,6 @@ class LyttPaaIverksattVedtakRiverTest {
     @AfterEach
     fun stop() = postgreSQLContainer.stop()
 
-    @Disabled // For test
     @Test
     fun `sender opphoersmelding til PEN ved godkjent utbetaling`() {
         testApplication {
@@ -58,12 +57,14 @@ class LyttPaaIverksattVedtakRiverTest {
                 }
 
             val penKlient = mockk<PenKlient>().also { every { runBlocking { it.opphoerSak(pesysid) } } just runs }
+            val featureToggleService = DummyFeatureToggleService().also { it.settBryter(MigreringFeatureToggle.OpphoerSakIPesys, true) }
             TestRapid()
                 .apply {
                     LyttPaaIverksattVedtakRiver(
                         rapidsConnection = this,
                         pesysRepository = repository,
                         penKlient = penKlient,
+                        featureToggleService = featureToggleService,
                     )
                 }.sendTestMessage(
                     JsonMessage.newMessage(
@@ -97,12 +98,14 @@ class LyttPaaIverksattVedtakRiverTest {
                 }
 
             val penKlient = mockk<PenKlient>().also { every { runBlocking { it.opphoerSak(pesysid) } } just runs }
+            val featureToggleService = DummyFeatureToggleService().also { it.settBryter(MigreringFeatureToggle.OpphoerSakIPesys, true) }
             TestRapid()
                 .apply {
                     LyttPaaIverksattVedtakRiver(
                         rapidsConnection = this,
                         pesysRepository = repository,
                         penKlient = penKlient,
+                        featureToggleService,
                     )
                 }.sendTestMessage(
                     JsonMessage.newMessage(

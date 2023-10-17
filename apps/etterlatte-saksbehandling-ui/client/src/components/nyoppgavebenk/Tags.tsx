@@ -33,5 +33,9 @@ export const OppgavetypeTag = (props: { oppgavetype: Oppgavetype }) => {
   const { oppgavetype } = props
 
   const tagdata = OPPGAVETYPE_TIL_TAGDATA[oppgavetype]
-  return <Tag variant={tagdata.variant}>{tagdata.text}</Tag>
+  if (tagdata) {
+    return <Tag variant={tagdata.variant}>{tagdata.text}</Tag>
+  } else {
+    return <Tag variant={Variants.ALT1_FILLED}>Ukjent oppgave</Tag>
+  }
 }

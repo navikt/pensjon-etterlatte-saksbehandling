@@ -21,7 +21,6 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.P
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.SIVILSTAND
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.SIVILSTATUS
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.SOEKNAD_MOTTATT_DATO
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.SPRAAK
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.STATSBORGERSKAP
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.UTENLANDSADRESSE
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.UTENLANDSOPPHOLD
@@ -41,7 +40,6 @@ import no.nav.etterlatte.libs.common.person.UtenlandsoppholdOpplysninger
 import no.nav.etterlatte.libs.common.person.Utland
 import no.nav.etterlatte.libs.common.person.VergemaalEllerFremtidsfullmakt
 import no.nav.etterlatte.libs.common.toJson
-import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.LocalDateTime
 
@@ -99,21 +97,7 @@ fun Grunnlagsdata<JsonNode>.hentUtenlandsadresse() = this.hentKonstantOpplysning
 fun Grunnlagsdata<JsonNode>.hentSoeknadMottattDato() = this.hentKonstantOpplysning<Map<String, LocalDateTime>>(SOEKNAD_MOTTATT_DATO)
 
 inline fun <reified T> Grunnlagsdata<JsonNode>.hentKonstantOpplysning(opplysningstype: Opplysningstype): Opplysning.Konstant<T>? {
-    val logger = LoggerFactory.getLogger(this::class.java)
-    if (opplysningstype == SPRAAK) {
-        logger.info("Henter språk")
-        logger.info("This-språk: ${this.toJson()}")
-        logger.info("This-entries: ${this.entries}")
-        logger.info("this[spraak]: ${this[SPRAAK]}")
-    }
-    val grunnlagsdata = this[opplysningstype]
-    if (opplysningstype == SPRAAK) {
-        logger.info("I Hent konstant opplysning for $opplysningstype: $grunnlagsdata")
-    }
-
-    if (grunnlagsdata == null) {
-        return null
-    }
+    val grunnlagsdata = this[opplysningstype] ?: return null
 
     return when (grunnlagsdata) {
         is Opplysning.Konstant ->

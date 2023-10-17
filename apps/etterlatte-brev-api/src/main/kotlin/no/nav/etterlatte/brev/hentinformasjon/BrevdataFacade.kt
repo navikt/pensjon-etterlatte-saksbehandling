@@ -20,11 +20,9 @@ import no.nav.etterlatte.brev.behandling.mapVerge
 import no.nav.etterlatte.brev.behandlingklient.BehandlingKlient
 import no.nav.etterlatte.brev.model.EtterbetalingDTO
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.pensjon.brevbaker.api.model.Kroner
-import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
@@ -50,8 +48,6 @@ class BrevdataFacade(
         return vedtaksvurderingKlient.hentInnvilgelsesdato(sakId, brukerTokenInfo)
     }
 
-    val logger = LoggerFactory.getLogger(this::class.java)
-
     suspend fun hentGenerellBrevData(
         sakId: Long,
         behandlingId: UUID,
@@ -61,7 +57,6 @@ class BrevdataFacade(
             val sakDeferred = async { behandlingKlient.hentSak(sakId, brukerTokenInfo) }
             val vedtakDeferred = async { vedtaksvurderingKlient.hentVedtak(behandlingId, brukerTokenInfo) }
             val grunnlag = async { grunnlagKlient.hentGrunnlag(sakId, behandlingId, brukerTokenInfo) }.await()
-            logger.info("Grunnlag: ${grunnlag.toJson()}")
             val sak = sakDeferred.await()
             val personerISak =
                 PersonerISak(
@@ -70,8 +65,6 @@ class BrevdataFacade(
                     avdoed = grunnlag.mapAvdoed(), // TODO: Avdød kan potensielt være liste (begge foreldre døde).
                     verge = grunnlag.mapVerge(sak.sakType),
                 )
-            logger.info("Personer i sak, henta ut frå grunnlag: $personerISak")
-            logger.info("Språk, i brevdatafacade: ${grunnlag.mapSpraak()}")
             val vedtak = vedtakDeferred.await()
             val innloggetSaksbehandlerIdent = brukerTokenInfo.ident()
             val ansvarligEnhet = vedtak.vedtakFattet?.ansvarligEnhet ?: sak.enhet

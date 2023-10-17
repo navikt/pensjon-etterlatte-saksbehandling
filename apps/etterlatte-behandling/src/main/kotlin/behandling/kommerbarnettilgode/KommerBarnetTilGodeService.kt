@@ -1,7 +1,6 @@
 package no.nav.etterlatte.behandling.kommerbarnettilgode
 
 import no.nav.etterlatte.behandling.BehandlingDao
-import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import java.util.UUID
 
@@ -18,5 +17,5 @@ class KommerBarnetTilGodeService(
         }
     }
 
-    fun hentKommerBarnetTilGode(behandlingId: UUID) = inTransaction { kommerBarnetTilGodeDao.hentKommerBarnetTilGode(behandlingId) }
+    fun hentKommerBarnetTilGode(behandlingId: UUID) = kommerBarnetTilGodeDao.hentKommerBarnetTilGode(behandlingId)
 }

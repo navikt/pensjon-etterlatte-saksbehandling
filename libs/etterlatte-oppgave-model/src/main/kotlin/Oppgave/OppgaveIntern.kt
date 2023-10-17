@@ -107,7 +107,7 @@ enum class OppgaveType {
     ATTESTERING,
     UNDERKJENT,
     GOSYS,
-    KRAVPAKKE,
+    KRAVPAKKE_UTLAND,
     KLAGE,
     TILBAKEKREVING,
     OMGJOERING,

@@ -147,7 +147,7 @@ class GenerellBehandlingServiceTest {
         val manuellBehandlingOppgave = oppgaverforGenerellBehandling[0]
         Assertions.assertEquals(manueltOpprettetBehandling.id.toString(), manuellBehandlingOppgave.referanse)
         Assertions.assertEquals(OppgaveKilde.GENERELL_BEHANDLING, manuellBehandlingOppgave.kilde)
-        Assertions.assertEquals(OppgaveType.KRAVPAKKE, manuellBehandlingOppgave.type)
+        Assertions.assertEquals(OppgaveType.KRAVPAKKE_UTLAND, manuellBehandlingOppgave.type)
         Assertions.assertEquals(sak.id, manuellBehandlingOppgave.sakId)
         Assertions.assertNull(manuellBehandlingOppgave.saksbehandler)
     }
@@ -181,7 +181,7 @@ class GenerellBehandlingServiceTest {
         val manuellBehandlingOppgave = oppgaverforGenerellBehandling[0]
         Assertions.assertEquals(manueltOpprettetBehandling.id.toString(), manuellBehandlingOppgave.referanse)
         Assertions.assertEquals(OppgaveKilde.GENERELL_BEHANDLING, manuellBehandlingOppgave.kilde)
-        Assertions.assertEquals(OppgaveType.KRAVPAKKE, manuellBehandlingOppgave.type)
+        Assertions.assertEquals(OppgaveType.KRAVPAKKE_UTLAND, manuellBehandlingOppgave.type)
         Assertions.assertEquals(sak.id, manuellBehandlingOppgave.sakId)
         Assertions.assertNull(manuellBehandlingOppgave.saksbehandler)
     }
@@ -464,7 +464,7 @@ class GenerellBehandlingServiceTest {
         }
         behandlingsOppgaverFattetOgAttestering.forExactly(1) { oppgave ->
             oppgave.status.shouldBe(Status.FERDIGSTILT)
-            oppgave.type.shouldBe(OppgaveType.KRAVPAKKE)
+            oppgave.type.shouldBe(OppgaveType.KRAVPAKKE_UTLAND)
         }
 
         val attestant = Saksbehandler("token", "attestant", null)

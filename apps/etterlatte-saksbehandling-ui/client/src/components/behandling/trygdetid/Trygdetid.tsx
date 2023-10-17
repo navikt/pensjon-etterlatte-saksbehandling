@@ -53,6 +53,7 @@ export const Trygdetid = ({ redigerbar, utenlandstilsnitt }: Props) => {
     if (trygdetid.overstyrtNorskPoengaar) {
       requestOverstyrTrygdetid(
         {
+          id: trygdetid.id,
           behandlingId: trygdetid.behandlingId,
           overstyrtNorskPoengaar: trygdetid.overstyrtNorskPoengaar,
         },

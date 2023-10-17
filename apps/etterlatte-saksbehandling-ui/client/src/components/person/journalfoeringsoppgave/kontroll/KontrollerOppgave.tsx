@@ -29,7 +29,8 @@ import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import { hentSakForPerson } from '~shared/api/behandling'
 import { FormWrapper } from '~components/person/journalfoeringsoppgave/BehandleJournalfoeringOppgave'
 import { FlexRow } from '~shared/styled'
-import { FristWrapper } from '~components/nyoppgavebenk/Oppgavelista'
+
+import { FristWrapper } from '~components/nyoppgavebenk/FristWrapper'
 
 export default function KontrollerOppgave() {
   const state = useJournalfoeringOppgave()

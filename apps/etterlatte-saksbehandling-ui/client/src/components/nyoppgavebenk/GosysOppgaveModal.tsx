@@ -4,12 +4,12 @@ import { EyeIcon } from '@navikt/aksel-icons'
 import { useContext, useState } from 'react'
 import { OppgavetypeTag, SaktypeTag } from '~components/nyoppgavebenk/Tags'
 import { formaterFnr, formaterStringDato } from '~utils/formattering'
-import { FristWrapper } from '~components/nyoppgavebenk/Oppgavelista'
 import { OppgaveDTO } from '~shared/api/oppgaver'
 import { ConfigContext } from '~clientConfig'
 import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 import { FEATURE_TOGGLE_KAN_BRUKE_OPPGAVEBEHANDLING } from '~components/person/journalfoeringsoppgave/BehandleJournalfoeringOppgave'
 import { FlexRow } from '~shared/styled'
+import { FristWrapper } from '~components/nyoppgavebenk/FristWrapper'
 
 const TagRow = styled.div`
   display: flex;

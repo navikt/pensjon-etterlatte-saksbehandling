@@ -29,8 +29,8 @@ data class GenerellBehandling(
                         "Type $type matcher " +
                             "ikke innhold navn: ${innhold.javaClass.simpleName}"
                     }
-                GenerellBehandlingType.UTLAND ->
-                    require(innhold is Innhold.Utland) {
+                GenerellBehandlingType.KRAVPAKKE_UTLAND ->
+                    require(innhold is Innhold.KravpakkeUtland) {
                         "Type $type matcher ikke innhold navn: ${innhold.javaClass.simpleName}"
                     }
             }
@@ -50,7 +50,7 @@ data class GenerellBehandling(
             UUID.randomUUID(),
             sakId,
             Tidspunkt.now(),
-            GenerellBehandlingType.UTLAND,
+            GenerellBehandlingType.KRAVPAKKE_UTLAND,
             null,
             tilknyttetBehandling = behandlingreferanse,
             status = Status.OPPRETTET,
@@ -59,6 +59,6 @@ data class GenerellBehandling(
 
     enum class GenerellBehandlingType {
         ANNEN,
-        UTLAND,
+        KRAVPAKKE_UTLAND,
     }
 }

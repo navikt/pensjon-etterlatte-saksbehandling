@@ -4,7 +4,7 @@ import { mapApiResult, useApiCall } from '~shared/hooks/useApiCall'
 import { hentGenerellBehandling } from '~shared/api/generellbehandling'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import Spinner from '~shared/Spinner'
-import Utland from '~components/generellbehandling/Utland'
+import KravpakkeUtland from '~components/generellbehandling/KravpakkeUtland'
 import { Alert } from '@navikt/ds-react'
 import { Generellbehandling } from '~shared/types/Generellbehandling'
 
@@ -23,8 +23,12 @@ const GenerellBehandling = () => {
     () => <ApiErrorAlert>Kunne ikke hente generell behandling</ApiErrorAlert>,
     (generellBehandling) => {
       switch (generellBehandling.type) {
-        case 'UTLAND':
-          return <Utland utlandsBehandling={generellBehandling as Generellbehandling & { innhold: Utland }} />
+        case 'KRAVPAKKE_UTLAND':
+          return (
+            <KravpakkeUtland
+              utlandsBehandling={generellBehandling as Generellbehandling & { innhold: KravpakkeUtland }}
+            />
+          )
         case 'ANNEN':
           return <Alert variant="error">Annen er ikke støttet enda</Alert>
         default:

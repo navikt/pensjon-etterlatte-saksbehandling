@@ -74,7 +74,7 @@ internal class GenerellBehandlingDaoTest {
                 UUID.randomUUID(),
                 1L,
                 Tidspunkt.now(),
-                GenerellBehandling.GenerellBehandlingType.UTLAND,
+                GenerellBehandling.GenerellBehandlingType.KRAVPAKKE_UTLAND,
                 Innhold.Annen("content"),
                 status = GenerellBehandling.Status.OPPRETTET,
             )
@@ -83,13 +83,13 @@ internal class GenerellBehandlingDaoTest {
 
     @Test
     fun `Kan opprette og hente en generell behandling utland`() {
-        val generellBehandlingUtland =
+        val kravpakkeUtland =
             GenerellBehandling(
                 UUID.randomUUID(),
                 1L,
                 Tidspunkt.now(),
-                GenerellBehandling.GenerellBehandlingType.UTLAND,
-                Innhold.Utland(
+                GenerellBehandling.GenerellBehandlingType.KRAVPAKKE_UTLAND,
+                Innhold.KravpakkeUtland(
                     listOf("AFG"),
                     Dokumenter(
                         DokumentMedSendtDato(true, LocalDate.now()),
@@ -103,22 +103,22 @@ internal class GenerellBehandlingDaoTest {
                 ),
                 status = GenerellBehandling.Status.OPPRETTET,
             )
-        val hentetGenBehandling = dao.opprettGenerellbehandling(generellBehandlingUtland)
+        val hentetGenBehandling = dao.opprettGenerellbehandling(kravpakkeUtland)
 
-        Assertions.assertEquals(generellBehandlingUtland.id, hentetGenBehandling.id)
-        Assertions.assertEquals(generellBehandlingUtland.innhold, hentetGenBehandling.innhold)
+        Assertions.assertEquals(kravpakkeUtland.id, hentetGenBehandling.id)
+        Assertions.assertEquals(kravpakkeUtland.innhold, hentetGenBehandling.innhold)
     }
 
     @Test
     fun `Kan hente for sak`() {
         val sakId = 1L
-        val generellBehandlingUtland =
+        val kravpakkeUtland =
             GenerellBehandling(
                 UUID.randomUUID(),
                 1L,
                 Tidspunkt.now(),
-                GenerellBehandling.GenerellBehandlingType.UTLAND,
-                Innhold.Utland(
+                GenerellBehandling.GenerellBehandlingType.KRAVPAKKE_UTLAND,
+                Innhold.KravpakkeUtland(
                     listOf("AFG"),
                     Dokumenter(
                         DokumentMedSendtDato(true, LocalDate.now()),
@@ -142,12 +142,12 @@ internal class GenerellBehandlingDaoTest {
                 status = GenerellBehandling.Status.OPPRETTET,
             )
 
-        dao.opprettGenerellbehandling(generellBehandlingUtland)
+        dao.opprettGenerellbehandling(kravpakkeUtland)
         dao.opprettGenerellbehandling(annengenerebehandling)
         val hentetGenBehandling = dao.hentGenerellBehandlingForSak(sakId)
         Assertions.assertEquals(2, hentetGenBehandling.size)
-        val generellBehandling = hentetGenBehandling.single { it.innhold is Innhold.Utland }
-        Assertions.assertEquals(generellBehandlingUtland.id, generellBehandling.id)
-        Assertions.assertEquals(generellBehandlingUtland.innhold, generellBehandling.innhold)
+        val generellBehandling = hentetGenBehandling.single { it.innhold is Innhold.KravpakkeUtland }
+        Assertions.assertEquals(kravpakkeUtland.id, generellBehandling.id)
+        Assertions.assertEquals(kravpakkeUtland.innhold, generellBehandling.innhold)
     }
 }

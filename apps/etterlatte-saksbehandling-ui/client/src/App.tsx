@@ -26,12 +26,16 @@ import { ToggleMinOppgaveliste } from '~components/nyoppgavebenk/ToggleMinOppgav
 import { Tilbakekrevingsbehandling } from '~components/tilbakekreving/Tilbakekrevingsbehandling'
 import GenerellBehandling from '~components/generellbehandling/GenerellBehandling'
 
+const FEATURE_TOGGLE_KAN_BRUKE_GENERELL_BEHANDLING = 'pensjon-etterlatte.kan-bruke-generell-behandling'
+
 function App() {
   const innloggetbrukerHentet = useInnloggetSaksbehandler()
   registerLocale('nb', nb)
   const dispatch = useAppDispatch()
   const kanBrukeKlage = useFeatureEnabledMedDefault(FEATURE_TOGGLE_KAN_BRUKE_KLAGE, false)
   const kanBrukeOppgavebehandling = useFeatureEnabledMedDefault(FEATURE_TOGGLE_KAN_BRUKE_OPPGAVEBEHANDLING, false)
+  const kanBrukeGenerllBehandling = useFeatureEnabledMedDefault(FEATURE_TOGGLE_KAN_BRUKE_GENERELL_BEHANDLING, false)
+
   const [hentConfigStatus, hentConfig] = useApiCall(hentClientConfig)
 
   useEffect(() => {
@@ -62,7 +66,9 @@ function App() {
                   <Route path="/behandling/:behandlingId/*" element={<Behandling />} />
                   {kanBrukeKlage ? <Route path="/klage/:klageId/*" element={<Klagebehandling />} /> : null}
                   <Route path="/tilbakekreving/:tilbakekrevingId/*" element={<Tilbakekrevingsbehandling />} />
-                  <Route path="/generellbehandling/:generellbehandlingId" element={<GenerellBehandling />} />
+                  {kanBrukeGenerllBehandling && (
+                    <Route path="/generellbehandling/:generellbehandlingId" element={<GenerellBehandling />} />
+                  )}
                   <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>
               </ConfigContext.Provider>

@@ -1,8 +1,9 @@
 export interface ISjekkliste {
   id: string
-  kommentar: string | null
-  adresseForBrev: string | null
-  kontonrRegistrert: string | null
+  kommentar: string | undefined
+  adresseForBrev: string | undefined
+  kontonrRegistrert: string | undefined
+  bekreftet: boolean
   versjon: string
   sjekklisteItems: ISjekklisteItem[]
 }

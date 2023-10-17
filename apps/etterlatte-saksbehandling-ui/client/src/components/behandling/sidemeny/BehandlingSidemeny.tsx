@@ -101,8 +101,6 @@ export const BehandlingSidemeny = () => {
         </Tabs.Panel>
       </Tabs>
 
-      {/*{behandling?.søker?.foedselsnummer && <Dokumentoversikt fnr={behandling.søker.foedselsnummer} liten />}*/}
-
       <AnnullerBehandling />
     </Sidebar>
   )

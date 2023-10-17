@@ -1,12 +1,18 @@
 import { Select, Textarea } from '@navikt/ds-react'
 import { useState } from 'react'
 import { BeslutningWrapper, Text } from '../styled'
-import { IReturType } from '../types'
 import { UnderkjennVedtak } from '~components/behandling/attestering/handinger/underkjennVedtak'
+import { useVedtak } from '~components/vedtak/useVedtak'
+import { VedtakType } from '~components/vedtak/typer'
+import { IReturTypeBehandling, IReturTypeTilbakekreving } from '~components/behandling/attestering/types'
 
 export const Underkjenn = () => {
+  const vedtak = useVedtak()
+  const aarsak = vedtak?.vedtakType === VedtakType.TILBAKEKREVING ? IReturTypeTilbakekreving : IReturTypeBehandling
+  type aarsakTyper = Array<keyof typeof aarsak>
+
   const [tilbakemeldingFraAttestant, setTilbakemeldingFraAttestant] = useState('')
-  const [returType, setReturType] = useState<IReturType>(IReturType.velg)
+  const [returType, setReturType] = useState<aarsakTyper[number]>('velg')
 
   return (
     <BeslutningWrapper>
@@ -16,11 +22,11 @@ export const Underkjenn = () => {
           label="Årsak til retur"
           hideLabel={true}
           value={returType || ''}
-          onChange={(e) => setReturType(e.target.value as IReturType)}
+          onChange={(e) => setReturType(e.target.value as aarsakTyper[number])}
         >
-          {(Object.keys(IReturType) as Array<keyof typeof IReturType>).map((option) => (
+          {(Object.keys(aarsak) as aarsakTyper).map((option) => (
             <option key={option} value={option}>
-              {IReturType[option]}
+              {aarsak[option]}
             </option>
           ))}
         </Select>

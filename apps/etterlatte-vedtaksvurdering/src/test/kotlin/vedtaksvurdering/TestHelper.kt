@@ -67,6 +67,20 @@ fun opprettVedtak(
         ),
 )
 
+fun opprettVedtakTilbakekreving(
+    soeker: Folkeregisteridentifikator = Folkeregisteridentifikator.of(FNR_1),
+    sakId: Long = 1L,
+    behandlingId: UUID = UUID.randomUUID(),
+    tilbakekreving: ObjectNode = objectMapper.createObjectNode(),
+) = OpprettVedtak(
+    soeker = soeker,
+    sakId = sakId,
+    sakType = SakType.BARNEPENSJON,
+    behandlingId = behandlingId,
+    type = VedtakType.TILBAKEKREVING,
+    innhold = VedtakTilbakekrevingInnhold(tilbakekreving = tilbakekreving),
+)
+
 fun vedtak(
     virkningstidspunkt: YearMonth = YearMonth.of(2023, Month.JANUARY),
     sakId: Long = 1L,

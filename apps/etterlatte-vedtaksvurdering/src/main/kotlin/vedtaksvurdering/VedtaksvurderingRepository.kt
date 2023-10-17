@@ -65,10 +65,11 @@ class VedtaksvurderingRepository(private val datasource: DataSource) : Transacti
                 statement = """
                         INSERT INTO vedtak(
                             behandlingId, sakid, fnr, behandlingtype, saktype, vedtakstatus, type, datovirkfom, 
-                            beregningsresultat, avkorting, vilkaarsresultat, revurderingsaarsak, revurderinginfo)
+                            beregningsresultat, avkorting, vilkaarsresultat, revurderingsaarsak, revurderinginfo,
+                            tilbakekreving)
                         VALUES (:behandlingId, :sakid, :fnr, :behandlingtype, :saktype, :vedtakstatus, :type, 
                             :datovirkfom, :beregningsresultat, :avkorting, :vilkaarsresultat, :revurderingsaarsak,
-                            :revurderinginfo)
+                            :revurderinginfo, :tilbakekreving)
                         RETURNING id
                         """,
                 mapOf(
@@ -107,15 +108,21 @@ class VedtaksvurderingRepository(private val datasource: DataSource) : Transacti
                             "behandlingid" to oppdatertVedtak.behandlingId,
                             "revurderinginfo" to oppdatertVedtak.innhold.revurderingInfo?.toJson(),
                         )
-
-                    is VedtakTilbakekrevingInnhold -> emptyMap() // TODO EY-2767 erstattes senere
+                    is VedtakTilbakekrevingInnhold ->
+                        mapOf(
+                            "type" to oppdatertVedtak.type.name,
+                            "behandlingid" to oppdatertVedtak.behandlingId,
+                            "tilbakekreving" to oppdatertVedtak.innhold.tilbakekreving?.toJson(),
+                        )
                 }
+
             queryOf(
                 statement = """
                         UPDATE vedtak 
                         SET datovirkfom = :datovirkfom, type = :type, 
                             beregningsresultat = :beregningsresultat, avkorting = :avkorting,
-                             vilkaarsresultat = :vilkaarsresultat, revurderinginfo = :revurderinginfo
+                             vilkaarsresultat = :vilkaarsresultat, revurderinginfo = :revurderinginfo,
+                             tilbakekreving = :tilbakekreving
                         WHERE behandlingId = :behandlingid
                         """,
                 params,
@@ -173,7 +180,7 @@ class VedtaksvurderingRepository(private val datasource: DataSource) : Transacti
                 queryString = """
             SELECT sakid, behandlingId, saksbehandlerId, beregningsresultat, avkorting, vilkaarsresultat, id, fnr, 
                 datoFattet, datoattestert, attestant, datoVirkFom, vedtakstatus, saktype, behandlingtype, 
-                attestertVedtakEnhet, fattetVedtakEnhet, type, revurderingsaarsak, revurderinginfo
+                attestertVedtakEnhet, fattetVedtakEnhet, type, revurderingsaarsak, revurderinginfo, tilbakekreving 
             FROM vedtak 
             WHERE id = :vedtakId
             """,
@@ -192,7 +199,7 @@ class VedtaksvurderingRepository(private val datasource: DataSource) : Transacti
                 queryString = """
             SELECT sakid, behandlingId, saksbehandlerId, beregningsresultat, avkorting, vilkaarsresultat, id, fnr, 
                 datoFattet, datoattestert, attestant, datoVirkFom, vedtakstatus, saktype, behandlingtype, 
-                attestertVedtakEnhet, fattetVedtakEnhet, type, revurderingsaarsak, revurderinginfo
+                attestertVedtakEnhet, fattetVedtakEnhet, type, revurderingsaarsak, revurderinginfo, tilbakekreving 
             FROM vedtak 
             WHERE behandlingId = :behandlingId
             """,
@@ -215,7 +222,7 @@ class VedtaksvurderingRepository(private val datasource: DataSource) : Transacti
         val hentVedtak = """
             SELECT sakid, behandlingId, saksbehandlerId, beregningsresultat, avkorting, vilkaarsresultat, id, fnr, 
                 datoFattet, datoattestert, attestant, datoVirkFom, vedtakstatus, saktype, behandlingtype, 
-                attestertVedtakEnhet, fattetVedtakEnhet, type, revurderingsaarsak, revurderinginfo
+                attestertVedtakEnhet, fattetVedtakEnhet, type, revurderingsaarsak, revurderinginfo, tilbakekreving 
             FROM vedtak  
             WHERE sakId = :sakId
             """
@@ -398,7 +405,7 @@ class VedtaksvurderingRepository(private val datasource: DataSource) : Transacti
 
                     VedtakType.TILBAKEKREVING ->
                         VedtakTilbakekrevingInnhold(
-                            tilbakekreving = objectMapper.createObjectNode(), // TODO EY-2767
+                            tilbakekreving = string("tilbakekreving").let { objectMapper.readValue(it) },
                         )
                 },
         )

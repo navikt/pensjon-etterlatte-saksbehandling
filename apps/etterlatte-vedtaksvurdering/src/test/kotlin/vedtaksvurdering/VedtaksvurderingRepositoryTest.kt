@@ -23,6 +23,7 @@ import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.POSTGRES_VERSION
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.vedtaksvurdering.VedtakBehandlingInnhold
+import no.nav.etterlatte.vedtaksvurdering.VedtakTilbakekrevingInnhold
 import no.nav.etterlatte.vedtaksvurdering.VedtaksvurderingRepository
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
@@ -63,7 +64,7 @@ internal class VedtaksvurderingRepositoryTest {
     }
 
     @Test
-    fun `skal opprette vedtak`() {
+    fun `skal opprette vedtak for behandling`() {
         val nyttVedtak = opprettVedtak()
 
         val vedtak = repository.opprettVedtak(nyttVedtak)
@@ -95,7 +96,27 @@ internal class VedtaksvurderingRepositoryTest {
     }
 
     @Test
-    fun `skal oppdatere vedtak`() {
+    fun `skal opprette vedtak for tilbakekreving`() {
+        val nyttVedtak = opprettVedtakTilbakekreving()
+
+        val vedtak = repository.opprettVedtak(nyttVedtak)
+
+        with(vedtak) {
+            vedtak shouldNotBe null
+            id shouldNotBe null
+            status shouldBe VedtakStatus.OPPRETTET
+            soeker shouldBe Folkeregisteridentifikator.of(FNR_1)
+            sakId shouldBe 1L
+            sakType shouldBe SakType.BARNEPENSJON
+            behandlingId shouldNotBe null
+            type shouldBe VedtakType.TILBAKEKREVING
+            innhold should beInstanceOf<VedtakTilbakekrevingInnhold>()
+            (innhold as VedtakTilbakekrevingInnhold).tilbakekreving shouldBe objectMapper.createObjectNode()
+        }
+    }
+
+    @Test
+    fun `skal oppdatere vedtak for behandling`() {
         val nyttVedtak = opprettVedtak()
 
         val vedtak = repository.opprettVedtak(nyttVedtak)
@@ -133,6 +154,30 @@ internal class VedtaksvurderingRepositoryTest {
                 it.type shouldBe UtbetalingsperiodeType.OPPHOER
             }
         }
+    }
+
+    @Test
+    fun `skal oppdatere vedtak for tilbakekreving`() {
+        val nyttVedtak = opprettVedtakTilbakekreving()
+        val vedtak = repository.opprettVedtak(nyttVedtak)
+
+        val oppdatertTilbakekreving = objectMapper.createObjectNode()
+        oppdatertTilbakekreving.replace("endret", objectMapper.createObjectNode())
+
+        val oppdatertVedtak =
+            repository.oppdaterVedtak(
+                vedtak.copy(
+                    innhold =
+                        (vedtak.innhold as VedtakTilbakekrevingInnhold).copy(
+                            tilbakekreving = oppdatertTilbakekreving,
+                        ),
+                ),
+            )
+
+        oppdatertVedtak shouldNotBe null
+        oppdatertVedtak.type shouldBe VedtakType.TILBAKEKREVING
+        oppdatertVedtak.innhold should beInstanceOf<VedtakTilbakekrevingInnhold>()
+        (oppdatertVedtak.innhold as VedtakTilbakekrevingInnhold).tilbakekreving shouldBe oppdatertTilbakekreving
     }
 
     @Test

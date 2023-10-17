@@ -28,6 +28,7 @@ object BarnepensjonVilkaar {
         yrkesskadeAvdoed(),
         alderBarn(virkningstidspunkt, grunnlag),
         barnetsMedlemskap(),
+        vurderingAvEksport(),
         avdoedesForutgaaendeMedlemskap(),
     ).let { vilkaarListe ->
         val skalOppretteEoesVilkaar =
@@ -41,40 +42,42 @@ object BarnepensjonVilkaar {
 
     private fun formaal() =
         Vilkaar(
-            Delvilkaar(
-                type = VilkaarType.BP_FORMAAL,
-                tittel = "Lever barnet?",
-                beskrivelse =
-                    """
-                    Formålet med barnepensjon er å sikre inntekt for barn når en av foreldrene eller begge er døde. Dette betyr at barnet må være i live for å ha rett på barnepensjon.
-                    """.trimIndent(),
-                spoersmaal = "Lever barnet det søkes barnepensjon for på virkningstidspunktet?",
-                lovreferanse =
-                    Lovreferanse(
-                        paragraf = "§ 18-1",
-                        ledd = 1,
-                        lenke = "https://lovdata.no/lov/1997-02-28-19/%C2%A718-1",
-                    ),
-            ),
+            hovedvilkaar =
+                Delvilkaar(
+                    type = VilkaarType.BP_FORMAAL,
+                    tittel = "Lever barnet?",
+                    beskrivelse =
+                        """
+                        Formålet med barnepensjon er å sikre inntekt for barn når en av foreldrene eller begge er døde. Dette betyr at barnet må være i live for å ha rett på barnepensjon.
+                        """.trimIndent(),
+                    spoersmaal = "Lever barnet det søkes barnepensjon for på virkningstidspunktet?",
+                    lovreferanse =
+                        Lovreferanse(
+                            paragraf = "§ 18-1",
+                            ledd = 1,
+                            lenke = "https://lovdata.no/lov/1997-02-28-19/%C2%A718-3",
+                        ),
+                ),
         )
 
     private fun doedsfallForelder() =
         Vilkaar(
-            Delvilkaar(
-                type = VilkaarType.BP_DOEDSFALL_FORELDER,
-                tittel = "Dødsfall forelder",
-                beskrivelse =
-                    """
-                    For å ha rett på ytelsen må en eller begge foreldre være registrer død i folkeregisteret eller hos utenlandske myndigheter.
-                    """.trimIndent(),
-                spoersmaal = "Er en eller begge foreldrene registrert som død?",
-                lovreferanse =
-                    Lovreferanse(
-                        paragraf = "§ 18-4",
-                        ledd = 2,
-                        lenke = "https://lovdata.no/lov/1997-02-28-19/%C2%A718-4",
-                    ),
-            ),
+            hovedvilkaar =
+                Delvilkaar(
+                    type = VilkaarType.BP_DOEDSFALL_FORELDER,
+                    tittel = "Dødsfall forelder",
+                    beskrivelse =
+                        """
+                        For å ha rett på ytelsen må en eller begge foreldre være registrer død i folkeregisteret eller hos utenlandske myndigheter.
+                        """.trimIndent(),
+                    spoersmaal = "Er en eller begge foreldrene registrert som død?",
+                    lovreferanse =
+                        Lovreferanse(
+                            paragraf = "§ 18-4",
+                            ledd = 2,
+                            lenke = "https://lovdata.no/lov/1997-02-28-19/%C2%A718-4",
+                        ),
+                ),
         )
 
     private fun alderBarn(
@@ -134,6 +137,35 @@ object BarnepensjonVilkaar {
                     avdoedMindreEnn20AarsSamletBotidRettTilTilleggspensjon(),
                     barnetsMedlemskapYrkesskade(),
                     minstEttBarnForedreloestBarnekullMedlemTrygden(),
+                ),
+        )
+
+    private fun vurderingAvEksport() =
+        Vilkaar(
+            hovedvilkaar =
+                Delvilkaar(
+                    type = VilkaarType.BP_VURDERING_AV_EKSPORT,
+                    tittel = "Vurdering av eksport",
+                    beskrivelse =
+                        """
+                        Barnepensjon kan eksporteres hvis en av foreldrene har minst 20 års samlet botid i Norge, hvis avdøde har mindre enn 20 års botid, men har opptjent rett til tilleggspensjon eller hvis minst ett av barna i et foreldreløst barnekull er medlem i trygden.
+
+                        Skyldes dødsfallet en godkjent yrkesskade kan barnepensjonen eksporteres i sin helhet, jf. folketrygdloven § 18-10. Barnepensjon kan også fritt eksporteres til EØS-land, og til noen land Norge har bilaterale trygdeavtaler med. 
+
+                        Barnepensjon etter unntaksbestemmelsene i § 18-2 tredje, fjerde og sjette ledd beholdes bare så lenge barnet er medlem i trygden. Den beholdes likevel hvis barnet bor i EØS-land, eller i et land Norge har trygdeavtale med der eksport er tillatt, eller hvis barnet er tredjelandsborger med rettigheter med hjemmel i C-55/00 Gottardo, jf. Rekommandasjon nr. H1 og forholdet omfattes av aktuell avtale. 
+
+                        Andre hjemler:
+                        EØS - rådsforordning 883/2004
+                        Hovednummer 42 Trygdeavtaler
+                        Lenke til C-55/00 Gottardo: https://lovdata.no/pro/#document/NAV/rundskriv/r45-00/KAPITTEL_1-10-3    
+                        """.trimIndent(),
+                    spoersmaal = "Kan barnepensjonen eksporteres?",
+                    lovreferanse =
+                        Lovreferanse(
+                            paragraf = "§ 18-3",
+                            ledd = 2,
+                            lenke = "https://lovdata.no/lov/1997-02-28-19/%C2%A718-3",
+                        ),
                 ),
         )
 

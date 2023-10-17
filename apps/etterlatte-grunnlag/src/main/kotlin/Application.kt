@@ -12,7 +12,6 @@ import no.nav.etterlatte.grunnlag.OpplysningDao
 import no.nav.etterlatte.grunnlag.RealGrunnlagService
 import no.nav.etterlatte.grunnlag.behandlingGrunnlagRoute
 import no.nav.etterlatte.grunnlag.personRoute
-import no.nav.etterlatte.grunnlag.rivers.GrunnlagsversjoneringRiver
 import no.nav.etterlatte.grunnlag.sakGrunnlagRoute
 import no.nav.etterlatte.klienter.BehandlingKlientImpl
 import no.nav.etterlatte.klienter.PdlTjenesterKlientImpl
@@ -73,7 +72,6 @@ class ApplicationBuilder {
             }
             .build().apply {
                 GrunnlagHendelserRiver(this, grunnlagService)
-                GrunnlagsversjoneringRiver(this, behandlingKlient, grunnlagService)
                 MigreringHendelserRiver(this, grunnlagService)
             }
 

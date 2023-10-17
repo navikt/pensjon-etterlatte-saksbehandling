@@ -54,7 +54,17 @@ class GrunnlagKlient(config: Config, httpClient: HttpClient) {
                 Resource(clientId, "$baseUrl/api/grunnlag/sak/$sakid/behandling/$behandlingId"),
                 brukerTokenInfo,
             ).mapBoth(
-                success = { resource -> resource.response.let { deserialize(it.toString()) } },
+                success = {
+                        resource ->
+                    resource.response.let {
+                        deserialize(
+                            it.toString().also {
+                                    i ->
+                                LoggerFactory.getLogger(this::class.java).info("Grunnlag: $i")
+                            },
+                        )
+                    }
+                },
                 failure = { throwableErrorMessage -> throw throwableErrorMessage },
             )
         } catch (e: Exception) {

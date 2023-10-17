@@ -40,6 +40,7 @@ import no.nav.etterlatte.libs.common.person.UtenlandsoppholdOpplysninger
 import no.nav.etterlatte.libs.common.person.Utland
 import no.nav.etterlatte.libs.common.person.VergemaalEllerFremtidsfullmakt
 import no.nav.etterlatte.libs.common.toJson
+import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.LocalDateTime
 
@@ -97,7 +98,14 @@ fun Grunnlagsdata<JsonNode>.hentUtenlandsadresse() = this.hentKonstantOpplysning
 fun Grunnlagsdata<JsonNode>.hentSoeknadMottattDato() = this.hentKonstantOpplysning<Map<String, LocalDateTime>>(SOEKNAD_MOTTATT_DATO)
 
 inline fun <reified T> Grunnlagsdata<JsonNode>.hentKonstantOpplysning(opplysningstype: Opplysningstype): Opplysning.Konstant<T>? {
-    val grunnlagsdata = this[opplysningstype] ?: return null
+    val grunnlagsdata = this[opplysningstype]
+    val logger = LoggerFactory.getLogger(this::class.java)
+    logger.info("This: ${this.entries}")
+    logger.info("I Hent konstant opplysning for $opplysningstype: $grunnlagsdata")
+
+    if (grunnlagsdata == null) {
+        return null
+    }
 
     return when (grunnlagsdata) {
         is Opplysning.Konstant ->

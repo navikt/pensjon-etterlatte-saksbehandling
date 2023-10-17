@@ -380,7 +380,7 @@ class BrevDataMapper(private val featureToggleService: FeatureToggleService, pri
             }
 
             OMS_AVSLAG -> {
-                AvslagBrevDataOMS.fra(generellBrevData.personerISak.avdoed.navn, innhold())
+                AvslagBrevDataOMS.fra(generellBrevData.personerISak.avdoed.navn, innholdMedVedlegg.innhold())
             }
 
             else ->

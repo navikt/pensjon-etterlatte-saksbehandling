@@ -777,7 +777,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
                     nonNullBehandling.id.toString(),
                     sak.id,
                     OppgaveKilde.GENERELL_BEHANDLING,
-                    OppgaveType.KRAVPAKKE,
+                    OppgaveType.KRAVPAKKE_UTLAND,
                     merknad = null,
                 )
             }

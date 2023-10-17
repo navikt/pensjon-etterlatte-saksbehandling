@@ -22,22 +22,64 @@ import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.util.UUID
 
-class TrygdetidService(
+interface TrygdetidService {
+    suspend fun hentTrygdetid(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Trygdetid?
+
+    suspend fun opprettTrygdetid(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Trygdetid
+
+    suspend fun lagreTrygdetidGrunnlag(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+        trygdetidGrunnlag: TrygdetidGrunnlag,
+    ): Trygdetid
+
+    suspend fun lagreYrkesskadeTrygdetidGrunnlag(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Trygdetid
+
+    suspend fun slettTrygdetidGrunnlag(
+        behandlingId: UUID,
+        trygdetidGrunnlagId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Trygdetid
+
+    suspend fun kopierSisteTrygdetidberegning(
+        behandlingId: UUID,
+        forrigeBehandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Trygdetid
+
+    fun overstyrBeregnetTrygdetid(
+        behandlingId: UUID,
+        beregnetTrygdetid: DetaljertBeregnetTrygdetidResultat,
+    ): Trygdetid
+}
+
+class TrygdetidServiceImpl(
     private val trygdetidRepository: TrygdetidRepository,
     private val behandlingKlient: BehandlingKlient,
     private val grunnlagKlient: GrunnlagKlient,
     private val vilkaarsvurderingKlient: VilkaarsvuderingKlient,
     private val beregnTrygdetidService: TrygdetidBeregningService,
-) {
-    private val logger = LoggerFactory.getLogger(TrygdetidService::class.java)
+) : TrygdetidService {
+    private val logger = LoggerFactory.getLogger(TrygdetidServiceImpl::class.java)
 
-    suspend fun hentTrygdetid(
-        behandlingsId: UUID,
+    override suspend fun hentTrygdetid(
+        behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ) = trygdetidRepository.hentTrygdetid(behandlingsId)
-        ?.let { trygdetid -> sjekkYrkesskadeForEndring(behandlingsId, brukerTokenInfo, trygdetid) }
+    ): Trygdetid? {
+        return trygdetidRepository.hentTrygdetid(behandlingId)
+            ?.let { trygdetid -> sjekkYrkesskadeForEndring(behandlingId, brukerTokenInfo, trygdetid) }
+    }
 
-    suspend fun opprettTrygdetid(
+    override suspend fun opprettTrygdetid(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): Trygdetid =
@@ -119,7 +161,7 @@ class TrygdetidService(
         return trygdetid
     }
 
-    suspend fun lagreYrkesskadeTrygdetidGrunnlag(
+    override suspend fun lagreYrkesskadeTrygdetidGrunnlag(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): Trygdetid =
@@ -144,7 +186,7 @@ class TrygdetidService(
             }
         }
 
-    suspend fun lagreTrygdetidGrunnlag(
+    override suspend fun lagreTrygdetidGrunnlag(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
         trygdetidGrunnlag: TrygdetidGrunnlag,
@@ -207,7 +249,7 @@ class TrygdetidService(
         )
     }
 
-    suspend fun slettTrygdetidGrunnlag(
+    override suspend fun slettTrygdetidGrunnlag(
         behandlingId: UUID,
         trygdetidGrunnlagId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
@@ -236,7 +278,7 @@ class TrygdetidService(
             }
         }
 
-    suspend fun kopierSisteTrygdetidberegning(
+    override suspend fun kopierSisteTrygdetidberegning(
         behandlingId: UUID,
         forrigeBehandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
@@ -314,11 +356,11 @@ class TrygdetidService(
         return opplysninger
     }
 
-    private suspend fun tilstandssjekk(
+    private suspend fun <T> tilstandssjekk(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-        block: suspend () -> Trygdetid,
-    ): Trygdetid {
+        block: suspend () -> T,
+    ): T {
         val kanFastsetteTrygdetid = behandlingKlient.kanOppdatereTrygdetid(behandlingId, brukerTokenInfo)
         return if (kanFastsetteTrygdetid) {
             block()
@@ -327,13 +369,13 @@ class TrygdetidService(
         }
     }
 
-    fun overstyrBeregnetTrygdetid(
-        behandlingsId: UUID,
+    override fun overstyrBeregnetTrygdetid(
+        behandlingId: UUID,
         beregnetTrygdetid: DetaljertBeregnetTrygdetidResultat,
     ): Trygdetid {
         val trygdetid =
-            trygdetidRepository.hentTrygdetid(behandlingsId)
-                ?: throw Exception("Fant ikke gjeldende trygdetid for behandlingId=$behandlingsId")
+            trygdetidRepository.hentTrygdetid(behandlingId)
+                ?: throw Exception("Fant ikke gjeldende trygdetid for behandlingId=$behandlingId")
 
         return trygdetid.oppdaterBeregnetTrygdetid(
             DetaljertBeregnetTrygdetid(

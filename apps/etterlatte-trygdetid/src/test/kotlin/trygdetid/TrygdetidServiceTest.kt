@@ -34,7 +34,7 @@ import no.nav.etterlatte.trygdetid.Opplysningsgrunnlag
 import no.nav.etterlatte.trygdetid.TrygdetidBeregningService
 import no.nav.etterlatte.trygdetid.TrygdetidOpplysningType
 import no.nav.etterlatte.trygdetid.TrygdetidRepository
-import no.nav.etterlatte.trygdetid.TrygdetidService
+import no.nav.etterlatte.trygdetid.TrygdetidServiceImpl
 import no.nav.etterlatte.trygdetid.klienter.BehandlingKlient
 import no.nav.etterlatte.trygdetid.klienter.GrunnlagKlient
 import no.nav.etterlatte.trygdetid.klienter.VilkaarsvuderingKlient
@@ -53,7 +53,7 @@ internal class TrygdetidServiceTest {
     private val vilkaarsvurderingKlient: VilkaarsvuderingKlient = mockk()
     private val beregningService: TrygdetidBeregningService = spyk(TrygdetidBeregningService)
     private val service =
-        TrygdetidService(
+        TrygdetidServiceImpl(
             repository,
             behandlingKlient,
             grunnlagKlient,

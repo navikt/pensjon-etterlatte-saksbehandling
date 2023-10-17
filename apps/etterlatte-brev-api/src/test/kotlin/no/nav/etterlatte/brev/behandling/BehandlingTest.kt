@@ -32,7 +32,7 @@ internal class BehandlingTest {
     fun `MapSoeker mapper til Soeker`() {
         val grunnlag = opprettGrunnlag()
 
-        assertEquals(Soeker("Unormal", "Frisk", "Herresykkel", Foedselsnummer("16021254243")), grunnlag.mapSoeker())
+        assertEquals(Soeker("Unormal", "Frisk", "Herresykkel", Foedselsnummer(SOEKER_FOEDSELSNUMMER.value)), grunnlag.mapSoeker())
     }
 
     @Test
@@ -51,7 +51,7 @@ internal class BehandlingTest {
             )
 
         assertEquals(
-            Soeker("Unormal-Kar", "Frisk-Is", "Herresykkel", Foedselsnummer("16021254243")),
+            Soeker("Unormal-Kar", "Frisk-Is", "Herresykkel", Foedselsnummer(SOEKER_FOEDSELSNUMMER.value)),
             grunnlag.mapSoeker(),
         )
         assertEquals(Avdoed("Riv-Jern Kul-Kar Badeball-Sommer", LocalDate.of(2022, 8, 17)), grunnlag.mapAvdoed())
@@ -66,7 +66,7 @@ internal class BehandlingTest {
             )
 
         assertEquals(
-            Soeker("Unormal Kar", "Frisk Is", "Herresykkel", Foedselsnummer("16021254243")),
+            Soeker("Unormal Kar", "Frisk Is", "Herresykkel", Foedselsnummer(SOEKER_FOEDSELSNUMMER.value)),
             grunnlag.mapSoeker(),
         )
         assertEquals(Avdoed("Riv Jern Kul Kar Badeball-Sommer", LocalDate.of(2022, 8, 17)), grunnlag.mapAvdoed())
@@ -81,7 +81,7 @@ internal class BehandlingTest {
             )
 
         assertEquals(
-            Soeker("Unormal-Kar Kis", "Frisk-Is Tak", "Herresykkel Bom", Foedselsnummer("16021254243")),
+            Soeker("Unormal-Kar Kis", "Frisk-Is Tak", "Herresykkel Bom", Foedselsnummer(SOEKER_FOEDSELSNUMMER.value)),
             grunnlag.mapSoeker(),
         )
         assertEquals(

@@ -27,8 +27,8 @@ import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.GJENLEVENDE_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import no.nav.etterlatte.libs.testdata.grunnlag.HELSOESKEN_FOEDSELSNUMMER
+import no.nav.etterlatte.libs.testdata.grunnlag.INNSENDER_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER2_FOEDSELSNUMMER
-import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.kilde
 import no.nav.etterlatte.libs.testdata.grunnlag.statiskUuid
 import org.junit.jupiter.api.Assertions
@@ -335,7 +335,7 @@ internal class GrunnlagServiceTest {
     inner class `Test uthenting av saker og roller for person` {
         private val gjenlevendeFnr = GJENLEVENDE_FOEDSELSNUMMER
 
-        private val barnepensjonSoeker1 = SOEKER_FOEDSELSNUMMER
+        private val barnepensjonSoeker1 = INNSENDER_FOEDSELSNUMMER
         private val grunnlaghendelse1 =
             lagGrunnlagHendelse(
                 sakId = 1,
@@ -367,7 +367,7 @@ internal class GrunnlagServiceTest {
                         innsender = gjenlevendeFnr.value,
                         soesken =
                             listOf(
-                                SOEKER_FOEDSELSNUMMER.value,
+                                INNSENDER_FOEDSELSNUMMER.value,
                                 HELSOESKEN_FOEDSELSNUMMER.value,
                             ),
                         avdoed = listOf(AVDOED_FOEDSELSNUMMER.value),
@@ -484,7 +484,7 @@ internal class GrunnlagServiceTest {
                         2,
                         NAVN,
                         id = statiskUuid,
-                        fnr = SOEKER_FOEDSELSNUMMER,
+                        fnr = INNSENDER_FOEDSELSNUMMER,
                         verdi = Navn("Per", "Kalle", "Persson").toJsonNode(),
                         kilde = kilde,
                     ),
@@ -493,7 +493,7 @@ internal class GrunnlagServiceTest {
                         2,
                         PERSONROLLE,
                         id = statiskUuid,
-                        fnr = SOEKER_FOEDSELSNUMMER,
+                        fnr = INNSENDER_FOEDSELSNUMMER,
                         verdi = PersonRolle.INNSENDER.toJsonNode(),
                         kilde = kilde,
                     ),

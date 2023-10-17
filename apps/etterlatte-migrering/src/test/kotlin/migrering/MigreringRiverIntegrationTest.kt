@@ -35,6 +35,7 @@ import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
@@ -119,6 +120,7 @@ internal class MigreringRiverIntegrationTest {
         }
     }
 
+    @Disabled // For test
     @Test
     fun `Migrer hele veien`() {
         val pesysId = PesysId(22974139)

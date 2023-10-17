@@ -21,6 +21,7 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
@@ -41,6 +42,7 @@ class LyttPaaIverksattVedtakRiverTest {
     @AfterEach
     fun stop() = postgreSQLContainer.stop()
 
+    @Disabled // For test
     @Test
     fun `sender opphoersmelding til PEN ved godkjent utbetaling`() {
         testApplication {

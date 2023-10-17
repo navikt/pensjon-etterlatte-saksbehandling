@@ -1,7 +1,6 @@
 package no.nav.etterlatte.migrering
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.utbetaling.UtbetalingResponseDto
 import no.nav.etterlatte.libs.common.utbetaling.UtbetalingStatusDto
@@ -54,7 +53,7 @@ internal class LyttPaaIverksattVedtakRiver(
         when (respons.status) {
             UtbetalingStatusDto.GODKJENT, UtbetalingStatusDto.GODKJENT_MED_FEIL -> {
                 pesysRepository.oppdaterStatus(behandling.pesysId, Migreringsstatus.FERDIG)
-                runBlocking { penKlient.opphoerSak(behandling.pesysId) }
+                //   runBlocking { penKlient.opphoerSak(behandling.pesysId) }
             }
             UtbetalingStatusDto.MOTTATT, UtbetalingStatusDto.SENDT -> {
                 logger.info("Fikk respons fra utbetaling med status ${respons.status} for ${respons.behandlingId}")

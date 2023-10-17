@@ -32,7 +32,7 @@ export type Oppgavetype =
   | 'ATTESTERING'
   | 'UNDERKJENT'
   | 'GOSYS'
-  | 'UTLAND'
+  | 'KRAVPAKKE_UTLAND'
   | 'KLAGE'
   | 'TILBAKEKREVING'
   | 'OMGJOERING'

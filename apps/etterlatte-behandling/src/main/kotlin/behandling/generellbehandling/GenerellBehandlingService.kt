@@ -37,7 +37,7 @@ class GenerellBehandlingService(
                 opprettetbehandling.id.toString(),
                 opprettetbehandling.sakId,
                 OppgaveKilde.GENERELL_BEHANDLING,
-                OppgaveType.UTLAND,
+                OppgaveType.KRAVPAKKE,
                 null,
             )
         tildelSaksbehandlerTilNyOppgaveHvisFinnes(oppgaveForGenerellBehandling, opprettetbehandling)

@@ -104,6 +104,7 @@ inline fun <reified T> Grunnlagsdata<JsonNode>.hentKonstantOpplysning(opplysning
         logger.info("Henter språk")
         logger.info("This-språk: ${this.toJson()}")
         logger.info("This-entries: ${this.entries}")
+        logger.info("this[spraak]: ${this[SPRAAK]}")
     }
     val grunnlagsdata = this[opplysningstype]
     if (opplysningstype == SPRAAK) {

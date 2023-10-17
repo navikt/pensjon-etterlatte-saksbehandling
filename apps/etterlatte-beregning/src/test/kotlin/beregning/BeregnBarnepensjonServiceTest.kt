@@ -302,7 +302,7 @@ internal class BeregnBarnepensjonServiceTest {
                     datoFOM shouldBe behandling.virkningstidspunkt?.dato
                     datoTOM shouldBe YearMonth.of(2023, Month.APRIL)
                     grunnbelopMnd shouldBe GRUNNBELOEP_JAN_23
-                    soeskenFlokk shouldBe listOf(HELSOESKEN_FOEDSELSNUMMER)
+                    soeskenFlokk shouldBe listOf(HELSOESKEN_FOEDSELSNUMMER.value)
                     trygdetid shouldBe MAKS_TRYGDETID
                 }
             }

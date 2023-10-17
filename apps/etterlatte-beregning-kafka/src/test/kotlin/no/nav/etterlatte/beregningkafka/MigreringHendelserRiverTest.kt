@@ -6,6 +6,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import kotlinx.coroutines.runBlocking
+import no.nav.commons.foedselsnummer.testutils.FoedselsnummerGenerator
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.libs.common.beregning.BeregningDTO
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
@@ -61,13 +62,14 @@ internal class MigreringHendelserRiverTest {
             grunnlagMetadata = Metadata(1234, 1),
         )
     private val fnr = Folkeregisteridentifikator.of("12101376212")
+    val gt: FoedselsnummerGenerator = FoedselsnummerGenerator()
     private val request =
         MigreringRequest(
             pesysId = PesysId(1),
             enhet = Enhet("4817"),
             soeker = fnr,
             avdoedForelder = listOf(AvdoedForelder(fnr, Tidspunkt.now())),
-            gjenlevendeForelder = null,
+            gjenlevendeForelder = Folkeregisteridentifikator.of("01498344336"),
             virkningstidspunkt = YearMonth.now(),
             foersteVirkningstidspunkt = YearMonth.now().minusYears(10),
             beregning =
@@ -85,6 +87,7 @@ internal class MigreringHendelserRiverTest {
     @BeforeEach
     fun setUp() {
         every { behandlingService.opprettBeregningsgrunnlag(any(), any()) } returns mockk()
+        println(gt.foedselsnummer())
     }
 
     @Test

@@ -60,7 +60,7 @@ class MigreringRoutesTest : BehandlingIntegrationTest() {
                     enhet = Enhet("4817"),
                     soeker = fnr,
                     avdoedForelder = listOf(AvdoedForelder(fnr, Tidspunkt.now())),
-                    gjenlevendeForelder = null,
+                    gjenlevendeForelder = Folkeregisteridentifikator.of("01498344336"),
                     virkningstidspunkt = YearMonth.now(),
                     foersteVirkningstidspunkt = YearMonth.now().minusYears(10),
                     beregning =

@@ -40,6 +40,8 @@ internal class MigreringHendelserRiverTest {
     private val trygdetidService = mockk<TrygdetidService>()
     private val inspector = TestRapid().apply { MigreringHendelserRiver(this, trygdetidService) }
 
+    private val gjenlevendeForelder = "01498344336"
+
     @Test
     fun `skal oppdatere og beregne trygdetid og returnere siste beregning`() {
         val behandlingId = slot<UUID>()
@@ -62,14 +64,14 @@ internal class MigreringHendelserRiverTest {
                     ),
                 overstyrtNorskPoengaar = null,
             )
-        val fnr = Folkeregisteridentifikator.of("12101376212")
+        val fnr = Folkeregisteridentifikator.of("25478323363")
         val request =
             MigreringRequest(
                 pesysId = PesysId(1),
                 enhet = Enhet("4817"),
                 soeker = fnr,
                 avdoedForelder = listOf(AvdoedForelder(fnr, Tidspunkt.now())),
-                gjenlevendeForelder = null,
+                gjenlevendeForelder = Folkeregisteridentifikator.of(gjenlevendeForelder),
                 virkningstidspunkt = YearMonth.now(),
                 foersteVirkningstidspunkt = YearMonth.now().minusYears(10),
                 beregning =
@@ -182,14 +184,14 @@ internal class MigreringHendelserRiverTest {
                     ),
                 overstyrtNorskPoengaar = null,
             )
-        val fnr = Folkeregisteridentifikator.of("12101376212")
+        val fnr = Folkeregisteridentifikator.of("25478323363")
         val request =
             MigreringRequest(
                 pesysId = PesysId(1),
                 enhet = Enhet("4817"),
                 soeker = fnr,
                 avdoedForelder = listOf(AvdoedForelder(fnr, Tidspunkt.now())),
-                gjenlevendeForelder = null,
+                gjenlevendeForelder = Folkeregisteridentifikator.of(gjenlevendeForelder),
                 virkningstidspunkt = YearMonth.now(),
                 foersteVirkningstidspunkt = YearMonth.now().minusYears(10),
                 beregning =
@@ -272,14 +274,14 @@ internal class MigreringHendelserRiverTest {
                     ),
                 overstyrtNorskPoengaar = null,
             )
-        val fnr = Folkeregisteridentifikator.of("12101376212")
+        val fnr = Folkeregisteridentifikator.of("25478323363")
         val request =
             MigreringRequest(
                 pesysId = PesysId(1),
                 enhet = Enhet("4817"),
                 soeker = fnr,
                 avdoedForelder = listOf(AvdoedForelder(fnr, Tidspunkt.now())),
-                gjenlevendeForelder = null,
+                gjenlevendeForelder = Folkeregisteridentifikator.of(gjenlevendeForelder),
                 virkningstidspunkt = YearMonth.now(),
                 foersteVirkningstidspunkt = YearMonth.now().minusYears(10),
                 beregning =

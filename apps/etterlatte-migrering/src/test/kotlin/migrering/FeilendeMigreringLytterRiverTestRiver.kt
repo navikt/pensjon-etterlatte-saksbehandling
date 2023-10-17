@@ -66,7 +66,7 @@ class FeilendeMigreringLytterRiverTestRiver {
                     id = pesysid.id,
                     enhet = Enhet("1"),
                     soeker = Folkeregisteridentifikator.of("08071272487"),
-                    gjenlevendeForelder = null,
+                    gjenlevendeForelder = Folkeregisteridentifikator.of("01498344336"),
                     avdoedForelder = listOf(),
                     virkningstidspunkt = YearMonth.now(),
                     foersteVirkningstidspunkt = YearMonth.now(),

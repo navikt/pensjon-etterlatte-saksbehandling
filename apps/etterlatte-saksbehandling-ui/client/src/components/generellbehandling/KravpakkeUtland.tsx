@@ -1,4 +1,4 @@
-import { Dokumenter, Generellbehandling, Status, Utland } from '~shared/types/Generellbehandling'
+import { Dokumenter, Generellbehandling, Status, KravpakkeUtland } from '~shared/types/Generellbehandling'
 import { Content, ContentHeader, GridContainer, MainContent } from '~shared/styled'
 import { HeadingWrapper, InfoWrapper } from '~components/behandling/soeknadsoversikt/styled'
 import {
@@ -57,7 +57,7 @@ const FlexOrder = styled.div`
   flex-wrap: wrap;
 `
 
-const Utland = (props: { utlandsBehandling: Generellbehandling & { innhold: Utland } }) => {
+const KravpakkeUtland = (props: { utlandsBehandling: Generellbehandling & { innhold: KravpakkeUtland } }) => {
   const { utlandsBehandling } = props
   const innhold = utlandsBehandling.innhold
   const [putOppdaterGenerellBehandlingStatus, putOppdaterGenerellBehandling] = useApiCall(oppdaterGenerellBehandling)
@@ -491,4 +491,4 @@ const Utland = (props: { utlandsBehandling: Generellbehandling & { innhold: Utla
     </GridContainer>
   )
 }
-export default Utland
+export default KravpakkeUtland

@@ -1,0 +1,1 @@
+UPDATE GENERELLBEHANDLING set type = 'KRAVPAKKE_UTLAND', innhold = jsonb_set(innhold, '{type}', '"KRAVPAKKE_UTLAND"', true) where type = 'UTLAND'

@@ -6,8 +6,8 @@ import java.time.LocalDate
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
 sealed class Innhold {
-    @JsonTypeName("UTLAND")
-    data class Utland(
+    @JsonTypeName("KRAVPAKKE_UTLAND")
+    data class KravpakkeUtland(
         val landIsoKode: List<String>,
         val dokumenter: Dokumenter,
         val begrunnelse: String,

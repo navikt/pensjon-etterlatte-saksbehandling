@@ -76,7 +76,7 @@ class GenerellBehandlingService(
             "Behandlingen må ha status opprettet, hadde ${generellBehandling.status}"
         }
         when (generellBehandling.innhold) {
-            is Innhold.Utland -> validerUtland(generellBehandling.innhold as Innhold.Utland)
+            is Innhold.KravpakkeUtland -> validerUtland(generellBehandling.innhold as Innhold.KravpakkeUtland)
             is Innhold.Annen -> throw NotImplementedError("Ikke implementert")
             null -> throw NotImplementedError("Ikke implementert")
         }
@@ -107,7 +107,7 @@ class GenerellBehandlingService(
         oppgaveService.ferdigStillOppgaveUnderBehandling(generellbehandlingId.toString(), saksbehandler)
     }
 
-    private fun validerUtland(innhold: Innhold.Utland) {
+    private fun validerUtland(innhold: Innhold.KravpakkeUtland) {
         if (innhold.landIsoKode.isEmpty()) {
             throw ManglerLandkodeException("Mangler landkode")
         }

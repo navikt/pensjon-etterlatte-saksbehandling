@@ -15,6 +15,7 @@ import no.nav.etterlatte.libs.common.logging.samleExceptions
 import no.nav.etterlatte.libs.common.pdl.FantIkkePersonException
 import no.nav.etterlatte.libs.common.pdl.IngenIdentFamilierelasjonException
 import no.nav.etterlatte.libs.common.pdl.PdlFeilAarsak
+import no.nav.etterlatte.libs.common.pdl.PdlInternalServerError
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.HentPersonRequest
 import no.nav.etterlatte.libs.common.person.Person
@@ -54,6 +55,7 @@ class PdlTjenesterKlient(private val client: HttpClient, private val apiUrl: Str
                             throw FantIkkePersonException()
 
                         PdlFeilAarsak.INGEN_IDENT_FAMILIERELASJON -> throw IngenIdentFamilierelasjonException()
+                        PdlFeilAarsak.INTERNAL_SERVER_ERROR -> throw PdlInternalServerError()
                     }
                 }
             }

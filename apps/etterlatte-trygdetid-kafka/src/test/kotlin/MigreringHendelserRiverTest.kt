@@ -60,6 +60,7 @@ internal class MigreringHendelserRiverTest {
                         avdoedFylteSeksten = null,
                         avdoedFyllerSeksti = null,
                     ),
+                overstyrtNorskPoengaar = null,
                 ident = null,
             )
         val fnr = Folkeregisteridentifikator.of("12101376212")
@@ -180,6 +181,7 @@ internal class MigreringHendelserRiverTest {
                         avdoedFylteSeksten = null,
                         avdoedFyllerSeksti = null,
                     ),
+                overstyrtNorskPoengaar = null,
                 ident = null,
             )
         val fnr = Folkeregisteridentifikator.of("12101376212")
@@ -270,6 +272,7 @@ internal class MigreringHendelserRiverTest {
                         avdoedFylteSeksten = null,
                         avdoedFyllerSeksti = null,
                     ),
+                overstyrtNorskPoengaar = null,
                 ident = null,
             )
         val fnr = Folkeregisteridentifikator.of("12101376212")

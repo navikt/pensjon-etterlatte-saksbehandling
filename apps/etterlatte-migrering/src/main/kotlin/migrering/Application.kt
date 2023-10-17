@@ -26,7 +26,7 @@ internal class Server(private val context: ApplicationContext) {
                 MigreringRiver(rapidsConnection, penklient)
                 MigrerSpesifikkSakRiver(rapidsConnection, penklient, pesysRepository, featureToggleService, verifiserer)
                 LagreKoblingRiver(rapidsConnection, pesysRepository)
-                LyttPaaIverksattVedtakRiver(rapidsConnection, pesysRepository, penklient)
+                LyttPaaIverksattVedtakRiver(rapidsConnection, pesysRepository, penklient, featureToggleService)
                 FeilendeMigreringLytterRiver(rapidsConnection, pesysRepository)
             }.start()
         }

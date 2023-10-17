@@ -3,7 +3,6 @@ package no.nav.etterlatte.brev.model
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import no.nav.etterlatte.brev.adresse.RegoppslagResponseDTO
 import no.nav.etterlatte.brev.behandling.Trygdetidsperiode
-import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
 import no.nav.pensjon.brevbaker.api.model.Kroner
@@ -110,31 +109,11 @@ data class BrevInnholdVedlegg(
     val tittel: String,
     val key: BrevVedleggKey,
     val payload: Slate? = null,
-) {
-    companion object {
-        fun inntektsendringOMS(): List<BrevInnholdVedlegg> =
-            listOf(
-                utfallBeregningOMS(),
-            )
-
-        fun innvilgelseOMS(): List<BrevInnholdVedlegg> =
-            listOf(
-                utfallBeregningOMS(),
-            )
-
-        private fun utfallBeregningOMS() =
-            BrevInnholdVedlegg(
-                tittel = "Utfall ved beregning av omstillingsstønad",
-                key = BrevVedleggKey.BEREGNING_INNHOLD,
-                payload = getJsonFile("/maler/vedlegg/oms_utfall_beregning.json").let { deserialize<Slate>(it) },
-            )
-
-        private fun getJsonFile(url: String) = this::class.java.getResource(url)!!.readText()
-    }
-}
+)
 
 enum class BrevVedleggKey {
     BEREGNING_INNHOLD,
+    BP_BEREGNING_TRYGDETID,
 }
 
 data class OpprettNyttBrev(

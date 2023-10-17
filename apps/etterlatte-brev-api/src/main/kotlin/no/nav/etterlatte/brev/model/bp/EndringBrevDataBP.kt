@@ -6,6 +6,7 @@ import no.nav.etterlatte.brev.model.AvslagBrevData
 import no.nav.etterlatte.brev.model.BrevData
 import no.nav.etterlatte.brev.model.EndringBrevData
 import no.nav.etterlatte.brev.model.EtterbetalingDTO
+import no.nav.etterlatte.brev.model.InnholdMedVedlegg
 import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.libs.common.behandling.BarnepensjonSoeskenjusteringGrunn
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
@@ -21,13 +22,13 @@ data class EndringHovedmalBrevData(
         fun fra(
             utbetalingsinfo: Utbetalingsinfo,
             etterbetalingDTO: EtterbetalingDTO?,
-            innhold: List<Slate.Element>,
+            innhold: InnholdMedVedlegg,
         ): BrevData =
             EndringHovedmalBrevData(
                 erEndret = true, // TODO når resten av fengselsopphold implementerast
                 etterbetaling = etterbetalingDTO,
                 utbetalingsinfo = utbetalingsinfo,
-                innhold = innhold,
+                innhold = innhold.innhold(),
             )
     }
 }

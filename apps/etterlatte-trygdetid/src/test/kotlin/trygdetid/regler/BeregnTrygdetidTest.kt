@@ -16,8 +16,8 @@ import no.nav.etterlatte.trygdetid.TrygdetidType
 import no.nav.etterlatte.trygdetid.regler.TotalTrygdetidGrunnlag
 import no.nav.etterlatte.trygdetid.regler.TrygdetidGrunnlagMedAvdoed
 import no.nav.etterlatte.trygdetid.regler.TrygdetidGrunnlagMedAvdoedGrunnlag
-import no.nav.etterlatte.trygdetid.regler.TrygdetidPeriodMedPoengAar
 import no.nav.etterlatte.trygdetid.regler.TrygdetidPeriodeGrunnlag
+import no.nav.etterlatte.trygdetid.regler.TrygdetidPeriodeMedPoengaar
 import no.nav.etterlatte.trygdetid.regler.beregnAntallAarTotalTrygdetid
 import no.nav.etterlatte.trygdetid.regler.beregnDetaljertBeregnetTrygdetid
 import no.nav.etterlatte.trygdetid.regler.beregnTrygdetidForPeriode
@@ -42,7 +42,7 @@ internal class BeregnTrygdetidTest {
                 periode =
                     FaktumNode(
                         verdi =
-                            TrygdetidPeriodMedPoengAar(
+                            TrygdetidPeriodeMedPoengaar(
                                 fra = LocalDate.of(2023, 1, 1),
                                 til = LocalDate.of(2023, 1, 31),
                                 poengInnAar = false,
@@ -65,7 +65,7 @@ internal class BeregnTrygdetidTest {
                 periode =
                     FaktumNode(
                         verdi =
-                            TrygdetidPeriodMedPoengAar(
+                            TrygdetidPeriodeMedPoengaar(
                                 fra = LocalDate.of(2023, 1, 1),
                                 til = LocalDate.of(2023, 1, 1),
                                 poengInnAar = false,
@@ -88,7 +88,7 @@ internal class BeregnTrygdetidTest {
                 periode =
                     FaktumNode(
                         verdi =
-                            TrygdetidPeriodMedPoengAar(
+                            TrygdetidPeriodeMedPoengaar(
                                 fra = LocalDate.of(2023, 1, 1),
                                 til = LocalDate.of(2024, 2, 1),
                                 poengInnAar = false,
@@ -105,7 +105,7 @@ internal class BeregnTrygdetidTest {
     }
 
     @ParameterizedTest(name = "fra {0} til {1} poengInnAar {2} poengUtAar {3} skal gi periode {4}")
-    @MethodSource("verdierForPoengAarTest")
+    @MethodSource("verdierForPoengaarTest")
     fun `beregnTrygdetidMellomToDatoer skal ta hensyn til poengInnAar og poengUtAar`(
         fra: LocalDate,
         til: LocalDate,
@@ -118,7 +118,7 @@ internal class BeregnTrygdetidTest {
                 periode =
                     FaktumNode(
                         verdi =
-                            TrygdetidPeriodMedPoengAar(
+                            TrygdetidPeriodeMedPoengaar(
                                 fra = fra,
                                 til = til,
                                 poengInnAar = poengInnAar,
@@ -278,7 +278,7 @@ internal class BeregnTrygdetidTest {
 
     companion object {
         @JvmStatic
-        fun verdierForPoengAarTest(): Stream<Arguments> =
+        fun verdierForPoengaarTest(): Stream<Arguments> =
             Stream.of(
                 Arguments.of(LocalDate.of(2023, 5, 10), LocalDate.of(2023, 5, 30), false, false, Period.ofDays(21)),
                 Arguments.of(LocalDate.of(2023, 5, 10), LocalDate.of(2023, 5, 30), false, true, Period.ofYears(1)),

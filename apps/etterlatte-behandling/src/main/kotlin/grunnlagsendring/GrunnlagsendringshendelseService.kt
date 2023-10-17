@@ -99,9 +99,7 @@ class GrunnlagsendringshendelseService(
     }
 
     fun settHendelseTilHistorisk(behandlingId: UUID) {
-        inTransaction {
-            grunnlagsendringshendelseDao.oppdaterGrunnlagsendringHistorisk(behandlingId)
-        }
+        grunnlagsendringshendelseDao.oppdaterGrunnlagsendringHistorisk(behandlingId)
     }
 
     private fun ikkeVurderteHendelser(minutterGamle: Long): List<Grunnlagsendringshendelse> =

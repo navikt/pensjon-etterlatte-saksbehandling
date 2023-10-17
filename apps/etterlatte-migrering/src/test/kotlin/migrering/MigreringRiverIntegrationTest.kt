@@ -127,6 +127,7 @@ internal class MigreringRiverIntegrationTest {
             val featureToggleService =
                 DummyFeatureToggleService().also {
                     it.settBryter(MigreringFeatureToggle.SendSakTilMigrering, true)
+                    it.settBryter(MigreringFeatureToggle.OpphoerSakIPesys, true)
                 }
             val responsFraPEN =
                 objectMapper.readValue<BarnepensjonGrunnlagResponse>(
@@ -159,7 +160,7 @@ internal class MigreringRiverIntegrationTest {
                                 ),
                         )
                         LagreKoblingRiver(this, repository)
-                        LyttPaaIverksattVedtakRiver(this, repository, penKlient)
+                        LyttPaaIverksattVedtakRiver(this, repository, penKlient, featureToggleService)
                     }
             inspector.sendTestMessage(
                 JsonMessage.newMessage(

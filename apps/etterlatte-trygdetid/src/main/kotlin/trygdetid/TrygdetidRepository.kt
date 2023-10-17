@@ -51,7 +51,8 @@ class TrygdetidRepository(private val dataSource: DataSource) {
                         prorata_broek_nevner,
                         trygdetid_tidspunkt,
                         trygdetid_regelresultat,
-                        beregnet_trygdetid_overstyrt
+                        beregnet_trygdetid_overstyrt,
+                        poengaar_overstyrt
                     FROM trygdetid 
                     WHERE behandling_id = :behandlingId
                     """.trimIndent(),
@@ -85,6 +86,8 @@ class TrygdetidRepository(private val dataSource: DataSource) {
     ): Trygdetid =
         dataSource.transaction { tx ->
             val gjeldendeTrygdetid = hentTrygdtidNotNull(oppdatertTrygdetid.behandlingId)
+
+            oppdaterOverstyrtPoengaar(gjeldendeTrygdetid.id, gjeldendeTrygdetid.behandlingId, oppdatertTrygdetid.overstyrtNorskPoengaar, tx)
 
             // opprett grunnlag
             oppdatertTrygdetid.trygdetidGrunnlag
@@ -250,6 +253,29 @@ class TrygdetidRepository(private val dataSource: DataSource) {
                     "id" to trygdetidGrunnlagId,
                 ),
         ).let { query -> tx.update(query) }
+    }
+
+    private fun oppdaterOverstyrtPoengaar(
+        id: UUID,
+        behandlingId: UUID,
+        overstyrtNorskPoengaar: Int? = null,
+        tx: TransactionalSession,
+    ) {
+        queryOf(
+            statement =
+                """
+                UPDATE trygdetid 
+                  SET poengaar_overstyrt = :overstyrtNorskPoengaar WHERE id = :id AND  behandling_id = :behandlingId
+                """.trimIndent(),
+            paramMap =
+                mapOf(
+                    "id" to id,
+                    "behandlingId" to behandlingId,
+                    "overstyrtNorskPoengaar" to overstyrtNorskPoengaar,
+                ),
+        ).let { query ->
+            tx.update(query)
+        }
     }
 
     private fun oppdaterBeregnetTrygdetid(
@@ -473,6 +499,7 @@ class TrygdetidRepository(private val dataSource: DataSource) {
             },
         trygdetidGrunnlag = trygdetidGrunnlag,
         opplysninger = opplysninger,
+        overstyrtNorskPoengaar = intOrNull("poengaar_overstyrt"),
         ident = stringOrNull("ident"),
     )
 

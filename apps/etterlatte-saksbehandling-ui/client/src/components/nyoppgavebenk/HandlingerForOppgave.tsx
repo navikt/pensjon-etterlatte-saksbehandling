@@ -11,7 +11,7 @@ export const HandlingerForOppgave = ({ oppgave }: { oppgave: OppgaveDTO }) => {
   const erInnloggetSaksbehandlerOppgave = saksbehandler ? saksbehandler === user.ident : false
   if (kilde === 'GENERELL_BEHANDLING') {
     switch (type) {
-      case 'UTLAND':
+      case 'KRAVPAKKE_UTLAND':
       case 'ATTESTERING':
         return (
           <>
@@ -96,7 +96,7 @@ export const HandlingerForOppgave = ({ oppgave }: { oppgave: OppgaveDTO }) => {
           Gå til klage
         </Button>
       ) : null
-    case 'UTLAND':
+    case 'KRAVPAKKE_UTLAND':
       return erInnloggetSaksbehandlerOppgave ? (
         <Button size="small" href={`/generellbehandling/${referanse}`} as="a">
           Gå til utlandssak

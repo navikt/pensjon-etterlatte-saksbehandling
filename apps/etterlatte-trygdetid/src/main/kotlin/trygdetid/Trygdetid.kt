@@ -19,6 +19,7 @@ data class Trygdetid(
     val trygdetidGrunnlag: List<TrygdetidGrunnlag> = emptyList(),
     val opplysninger: List<Opplysningsgrunnlag> = emptyList(),
     val beregnetTrygdetid: DetaljertBeregnetTrygdetid? = null,
+    val overstyrtNorskPoengaar: Int? = null,
 ) {
     fun leggTilEllerOppdaterTrygdetidGrunnlag(nyttTrygdetidGrunnlag: TrygdetidGrunnlag): Trygdetid {
         val normalisertNyttTrygdetidGrunnlag = listOf(nyttTrygdetidGrunnlag).normaliser().first()

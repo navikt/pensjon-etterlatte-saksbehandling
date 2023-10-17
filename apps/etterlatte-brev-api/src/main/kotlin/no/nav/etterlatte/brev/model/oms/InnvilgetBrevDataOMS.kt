@@ -3,13 +3,13 @@ package no.nav.etterlatte.brev.model.oms
 import no.nav.etterlatte.brev.behandling.Avdoed
 import no.nav.etterlatte.brev.behandling.Avkortingsinfo
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
-import no.nav.etterlatte.brev.behandling.Trygdetidsperiode
+import no.nav.etterlatte.brev.behandling.Trygdetid
 import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
 import no.nav.etterlatte.brev.model.Beregningsinfo
 import no.nav.etterlatte.brev.model.BrevData
-import no.nav.etterlatte.brev.model.BrevInnholdVedlegg
 import no.nav.etterlatte.brev.model.BrevVedleggKey
 import no.nav.etterlatte.brev.model.EtterbetalingDTO
+import no.nav.etterlatte.brev.model.InnholdMedVedlegg
 import no.nav.etterlatte.brev.model.NyBeregningsperiode
 import no.nav.etterlatte.brev.model.Slate
 import no.nav.pensjon.brevbaker.api.model.Kroner
@@ -29,9 +29,8 @@ data class InnvilgetBrevDataOMS(
             utbetalingsinfo: Utbetalingsinfo,
             avkortingsinfo: Avkortingsinfo? = null,
             etterbetalinginfo: EtterbetalingDTO? = null,
-            trygdetidsperioder: List<Trygdetidsperiode>,
-            innhold: List<Slate.Element>,
-            innholdVedlegg: List<BrevInnholdVedlegg>,
+            trygdetid: Trygdetid,
+            innholdMedVedlegg: InnholdMedVedlegg,
         ): InnvilgetBrevDataOMS =
             InnvilgetBrevDataOMS(
                 utbetalingsinfo = utbetalingsinfo,
@@ -40,10 +39,7 @@ data class InnvilgetBrevDataOMS(
                 etterbetalinginfo = etterbetalinginfo,
                 beregningsinfo =
                     Beregningsinfo(
-                        innhold =
-                            innholdVedlegg.find { vedlegg ->
-                                vedlegg.key == BrevVedleggKey.BEREGNING_INNHOLD
-                            }?.payload!!.elements,
+                        innhold = innholdMedVedlegg.finnVedlegg(BrevVedleggKey.BEREGNING_INNHOLD),
                         grunnbeloep = avkortingsinfo!!.grunnbeloep,
                         beregningsperioder =
                             avkortingsinfo.beregningsperioder.map {
@@ -54,9 +50,9 @@ data class InnvilgetBrevDataOMS(
                                     utbetaltBeloep = it.utbetaltBeloep,
                                 )
                             },
-                        trygdetidsperioder = trygdetidsperioder,
+                        trygdetidsperioder = trygdetid.perioder,
                     ),
-                innhold = innhold,
+                innhold = innholdMedVedlegg.innhold(),
             )
     }
 }

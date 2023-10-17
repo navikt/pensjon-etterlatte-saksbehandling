@@ -62,6 +62,16 @@ interface GrunnlagService {
 
     fun hentSakerOgRoller(fnr: Folkeregisteridentifikator): PersonMedSakerOgRoller
 
+    // TODO: Fjerne når grunnlag er versjonert (EY-2567)
+    fun hentAlleSakIder(): Set<Long>
+
+    // TODO: Fjerne når grunnlag er versjonert (EY-2567)
+    fun oppdaterVersjonForBehandling(
+        sakId: Long,
+        behandlingId: UUID,
+        laasVersjon: Boolean,
+    )
+
     fun hentAlleSakerForFnr(fnr: Folkeregisteridentifikator): Set<Long>
 
     fun hentPersonerISak(sakId: Long): Map<Folkeregisteridentifikator, PersonMedNavn>?
@@ -103,6 +113,9 @@ class RealGrunnlagService(
             .map { (sakId, persongalleri) -> SakOgRolle(sakId, rolle = mapTilRolle(fnr.value, persongalleri)) }
             .let { PersonMedSakerOgRoller(fnr.value, it) }
     }
+
+    // TODO: Fjerne når grunnlag er versjonert (EY-2567)
+    override fun hentAlleSakIder(): Set<Long> = opplysningDao.finnAlleSakIder()
 
     override fun hentAlleSakerForFnr(fnr: Folkeregisteridentifikator): Set<Long> = opplysningDao.finnAlleSakerForPerson(fnr)
 
@@ -375,6 +388,31 @@ class RealGrunnlagService(
             // TODO: Hva skal vi gjøre dersom det forsøkes å oppdatere versjon som er låst? Bare hoppe over?
             logger.info("Setter grunnlag for behandling (id=$behandlingId) til hendelsenummer=$hendelsenummer")
             opplysningDao.oppdaterVersjonForBehandling(behandlingId, sak, hendelsenummer)
+        }
+    }
+
+    // TODO: Fjerne når grunnlag er versjonert (EY-2567)
+    override fun oppdaterVersjonForBehandling(
+        sakId: Long,
+        behandlingId: UUID,
+        laasVersjon: Boolean,
+    ) {
+        val grunnlag = hentOpplysningsgrunnlag(sakId)
+        if (grunnlag == null) {
+            logger.warn("Ingen grunnlag funnet for sak=$sakId - kan ikke sette versjon for behandlingId=$behandlingId")
+            return
+        }
+
+        val hendelsenummer = grunnlag.metadata.versjon
+
+        logger.info("Setter grunnlag for behandling (id=$behandlingId) til hendelsenummer=$hendelsenummer")
+        val oppdatertOK = opplysningDao.oppdaterVersjonForBehandling(behandlingId, sakId, hendelsenummer) > 0
+
+        if (laasVersjon) {
+            logger.info("Låser grunnlag (sakId=$sakId, behandlingId=$behandlingId)")
+            opplysningDao.laasGrunnlagVersjonForBehandling(behandlingId)
+        } else {
+            logger.info("Skal ikke låse grunnlag (sakId=$sakId, behandlingId=$behandlingId)")
         }
     }
 

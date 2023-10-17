@@ -104,7 +104,7 @@ internal class VedtaksbrevServiceTest {
 
     @AfterEach
     fun after() {
-        confirmVerified(db, brevdataFacade, adresseService, dokarkivService, brevbaker)
+        confirmVerified(db, adresseService, dokarkivService, brevbaker)
     }
 
     private companion object {
@@ -249,16 +249,19 @@ internal class VedtaksbrevServiceTest {
         @ParameterizedTest
         @CsvSource(
             value = [
-                "BARNEPENSJON,YRKESSKADE,REDIGERBAR",
+                "BARNEPENSJON,YRKESSKADE,REDIGERBAR,ENDRING",
+                "BARNEPENSJON,,REDIGERBAR,INNVILGELSE",
             ],
         )
         fun `Vedtaksbrev finnes ikke - skal opprette nytt redigerbart brev`(
             sakType: SakType,
-            revurderingsaarsak: RevurderingAarsak,
+            revurderingsaarsak: RevurderingAarsak?,
             forventetProsessType: BrevProsessType,
+            vedtakType: VedtakType,
         ) {
+            featureToggleService.settBryter(BrevDataFeatureToggle.NyMalInnvilgelse, true)
             val sakId = Random.nextLong()
-            val behandling = opprettGenerellBrevdata(sakType, VedtakType.ENDRING, revurderingsaarsak = revurderingsaarsak)
+            val behandling = opprettGenerellBrevdata(sakType, vedtakType, revurderingsaarsak = revurderingsaarsak)
             val mottaker = opprettMottaker()
 
             coEvery { brevbaker.genererJSON(any()) } returns opprettRenderedJsonLetter()
@@ -266,6 +269,7 @@ internal class VedtaksbrevServiceTest {
             every { db.hentBrevForBehandling(behandling.behandlingId) } returns null
             coEvery { brevdataFacade.hentGenerellBrevData(any(), any(), any()) } returns behandling
             coEvery { adresseService.hentMottakerAdresse(any()) } returns mottaker
+            coEvery { brevdataFacade.finnUtbetalingsinfo(any(), any(), any()) } returns mockk()
 
             runBlocking {
                 vedtaksbrevService.opprettVedtaksbrev(

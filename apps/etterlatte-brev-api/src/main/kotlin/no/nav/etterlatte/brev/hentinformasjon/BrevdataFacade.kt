@@ -8,6 +8,7 @@ import no.nav.etterlatte.brev.behandling.Beregningsperiode
 import no.nav.etterlatte.brev.behandling.ForenkletVedtak
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.behandling.PersonerISak
+import no.nav.etterlatte.brev.behandling.Trygdetid
 import no.nav.etterlatte.brev.behandling.Trygdetidsperiode
 import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
 import no.nav.etterlatte.brev.behandling.hentUtbetaltBeloep
@@ -124,6 +125,8 @@ class BrevdataFacade(
         )
     }
 
+    suspend fun hentGrunnbeloep(brukerTokenInfo: BrukerTokenInfo) = beregningKlient.hentGrunnbeloep(brukerTokenInfo)
+
     suspend fun finnAvkortingsinfo(
         behandlingId: UUID,
         sakType: SakType,
@@ -161,11 +164,11 @@ class BrevdataFacade(
     suspend fun finnTrygdetid(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ): List<Trygdetidsperiode>? {
-        val trygdetidMedGrunnlag = trygdetidKlient.hentTrygdetid(behandlingId, brukerTokenInfo)
+    ): Trygdetid? {
+        val trygdetidMedGrunnlag = trygdetidKlient.hentTrygdetid(behandlingId, brukerTokenInfo) ?: return null
 
         val trygdetidsperioder =
-            trygdetidMedGrunnlag?.trygdetidGrunnlag?.map {
+            trygdetidMedGrunnlag.trygdetidGrunnlag.map {
                 Trygdetidsperiode(
                     datoFOM = it.periodeFra,
                     datoTOM = it.periodeTil,
@@ -174,6 +177,14 @@ class BrevdataFacade(
                 )
             }
 
-        return trygdetidsperioder
+        val beregnetTrygdetid = trygdetidMedGrunnlag.beregnetTrygdetid?.resultat
+        val samlaTrygdetid = beregnetTrygdetid?.samletTrygdetidNorge ?: beregnetTrygdetid?.samletTrygdetidTeoretisk ?: 0
+        val aarTrygdetid = samlaTrygdetid.div(12)
+
+        return Trygdetid(
+            aarTrygdetid = aarTrygdetid,
+            maanederTrygdetid = samlaTrygdetid % 12,
+            perioder = trygdetidsperioder,
+        )
     }
 }

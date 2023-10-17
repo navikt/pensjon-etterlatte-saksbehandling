@@ -27,6 +27,7 @@ import no.nav.etterlatte.brev.model.OpprettNyttBrev
 import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.SlateHelper
 import no.nav.etterlatte.brev.model.Status
+import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.rivers.VedtakTilJournalfoering
 import no.nav.etterlatte.token.BrukerTokenInfo
@@ -68,12 +69,11 @@ class VedtaksbrevService(
 
         val generellBrevData = brevdataFacade.hentGenerellBrevData(sakId, behandlingId, brukerTokenInfo)
 
-        val mottaker =
-            if (generellBrevData.personerISak.innsender != null) {
-                adresseService.hentMottakerAdresse(generellBrevData.personerISak.innsender.fnr.value)
-            } else {
-                adresseService.hentMottakerAdresse(generellBrevData.personerISak.soeker.fnr.value)
+        val mottakerFnr =
+            with(generellBrevData.personerISak) {
+                innsender?.fnr?.value?.takeUnless { it == Vedtaksloesning.PESYS.name } ?: soeker.fnr.value
             }
+        val mottaker = adresseService.hentMottakerAdresse(mottakerFnr)
 
         val prosessType = brevProsessTypeFactory.fra(generellBrevData)
 
@@ -192,6 +192,7 @@ class VedtaksbrevService(
                     InnholdMedVedlegg({ hentLagretInnhold(brev) }, { hentLagretInnholdVedlegg(brev) }),
                     brevkode,
                 )
+
             AUTOMATISK -> brevDataMapper.brevData(generellBrevData, brukerTokenInfo)
             MANUELL -> ManueltBrevData(hentLagretInnhold(brev))
         }

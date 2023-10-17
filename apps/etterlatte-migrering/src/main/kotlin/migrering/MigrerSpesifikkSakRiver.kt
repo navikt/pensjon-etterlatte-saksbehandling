@@ -95,6 +95,7 @@ internal class MigrerSpesifikkSakRiver(
 
 enum class MigreringFeatureToggle(private val key: String) : FeatureToggle {
     SendSakTilMigrering("pensjon-etterlatte.bp-send-sak-til-migrering"),
+    OpphoerSakIPesys("opphoer-sak-i-pesys"),
     ;
 
     override fun key() = key

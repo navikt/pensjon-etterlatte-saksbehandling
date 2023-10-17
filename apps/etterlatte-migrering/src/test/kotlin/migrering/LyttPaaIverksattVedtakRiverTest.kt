@@ -8,6 +8,7 @@ import io.mockk.runs
 import io.mockk.spyk
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.utbetaling.UtbetalingResponseDto
 import no.nav.etterlatte.libs.common.utbetaling.UtbetalingStatusDto
@@ -56,12 +57,14 @@ class LyttPaaIverksattVedtakRiverTest {
                 }
 
             val penKlient = mockk<PenKlient>().also { every { runBlocking { it.opphoerSak(pesysid) } } just runs }
+            val featureToggleService = DummyFeatureToggleService().also { it.settBryter(MigreringFeatureToggle.OpphoerSakIPesys, true) }
             TestRapid()
                 .apply {
                     LyttPaaIverksattVedtakRiver(
                         rapidsConnection = this,
                         pesysRepository = repository,
                         penKlient = penKlient,
+                        featureToggleService = featureToggleService,
                     )
                 }.sendTestMessage(
                     JsonMessage.newMessage(
@@ -95,12 +98,14 @@ class LyttPaaIverksattVedtakRiverTest {
                 }
 
             val penKlient = mockk<PenKlient>().also { every { runBlocking { it.opphoerSak(pesysid) } } just runs }
+            val featureToggleService = DummyFeatureToggleService().also { it.settBryter(MigreringFeatureToggle.OpphoerSakIPesys, true) }
             TestRapid()
                 .apply {
                     LyttPaaIverksattVedtakRiver(
                         rapidsConnection = this,
                         pesysRepository = repository,
                         penKlient = penKlient,
+                        featureToggleService,
                     )
                 }.sendTestMessage(
                     JsonMessage.newMessage(

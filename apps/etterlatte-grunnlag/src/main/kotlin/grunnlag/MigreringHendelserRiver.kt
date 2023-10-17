@@ -65,6 +65,12 @@ class MigreringHendelserRiver(
                     objectMapper.createObjectNode(),
                     packet.persongalleri.toJsonNode(),
                 ),
+            ),
+        )
+        grunnlagService.lagreNyeSaksopplysninger(
+            sakId,
+            behandlingId,
+            listOf(
                 Grunnlagsopplysning(
                     UUID.randomUUID(),
                     Grunnlagsopplysning.Pesys.create(),

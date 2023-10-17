@@ -20,7 +20,7 @@ data class InntektsendringRevurderingOMS(
     companion object {
         fun fra(
             avkortingsinfo: Avkortingsinfo,
-            etterbetalingDTO: EtterbetalingDTO,
+            etterbetalingDTO: EtterbetalingDTO?,
             trygdetid: Trygdetid,
             innholdMedVedlegg: InnholdMedVedlegg,
         ): InntektsendringRevurderingOMS =

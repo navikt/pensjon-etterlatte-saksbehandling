@@ -40,8 +40,8 @@ data class InnvilgetHovedmalBrevData(
     companion object {
         fun fra(
             utbetalingsinfo: Utbetalingsinfo,
-            avkortingsinfo: Avkortingsinfo,
-            etterbetalingDTO: EtterbetalingDTO,
+            avkortingsinfo: Avkortingsinfo?,
+            etterbetalingDTO: EtterbetalingDTO?,
             trygdetid: Trygdetid,
             grunnbeloep: Grunnbeloep,
             innhold: InnholdMedVedlegg,

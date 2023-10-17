@@ -1,0 +1,1 @@
+ALTER TABLE behandling_versjon DROP CONSTRAINT behandling_versjon_sak_id_key;

@@ -83,7 +83,7 @@ internal class GenerellBehandlingDaoTest {
 
     @Test
     fun `Kan opprette og hente en generell behandling utland`() {
-        val generellBehandlingKravpakkeKRAVPAKKEUtland =
+        val kravpakkeUtland =
             GenerellBehandling(
                 UUID.randomUUID(),
                 1L,
@@ -103,16 +103,16 @@ internal class GenerellBehandlingDaoTest {
                 ),
                 status = GenerellBehandling.Status.OPPRETTET,
             )
-        val hentetGenBehandling = dao.opprettGenerellbehandling(generellBehandlingKravpakkeKRAVPAKKEUtland)
+        val hentetGenBehandling = dao.opprettGenerellbehandling(kravpakkeUtland)
 
-        Assertions.assertEquals(generellBehandlingKravpakkeKRAVPAKKEUtland.id, hentetGenBehandling.id)
-        Assertions.assertEquals(generellBehandlingKravpakkeKRAVPAKKEUtland.innhold, hentetGenBehandling.innhold)
+        Assertions.assertEquals(kravpakkeUtland.id, hentetGenBehandling.id)
+        Assertions.assertEquals(kravpakkeUtland.innhold, hentetGenBehandling.innhold)
     }
 
     @Test
     fun `Kan hente for sak`() {
         val sakId = 1L
-        val generellBehandlingKravpakkeKRAVPAKKEUtland =
+        val kravpakkeUtland =
             GenerellBehandling(
                 UUID.randomUUID(),
                 1L,
@@ -142,12 +142,12 @@ internal class GenerellBehandlingDaoTest {
                 status = GenerellBehandling.Status.OPPRETTET,
             )
 
-        dao.opprettGenerellbehandling(generellBehandlingKravpakkeKRAVPAKKEUtland)
+        dao.opprettGenerellbehandling(kravpakkeUtland)
         dao.opprettGenerellbehandling(annengenerebehandling)
         val hentetGenBehandling = dao.hentGenerellBehandlingForSak(sakId)
         Assertions.assertEquals(2, hentetGenBehandling.size)
         val generellBehandling = hentetGenBehandling.single { it.innhold is Innhold.KravpakkeUtland }
-        Assertions.assertEquals(generellBehandlingKravpakkeKRAVPAKKEUtland.id, generellBehandling.id)
-        Assertions.assertEquals(generellBehandlingKravpakkeKRAVPAKKEUtland.innhold, generellBehandling.innhold)
+        Assertions.assertEquals(kravpakkeUtland.id, generellBehandling.id)
+        Assertions.assertEquals(kravpakkeUtland.innhold, generellBehandling.innhold)
     }
 }

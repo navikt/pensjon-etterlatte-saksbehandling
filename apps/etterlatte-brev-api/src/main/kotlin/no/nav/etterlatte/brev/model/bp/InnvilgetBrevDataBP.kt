@@ -8,6 +8,7 @@ import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
 import no.nav.etterlatte.brev.model.BrevData
 import no.nav.etterlatte.brev.model.EtterbetalingDTO
 import no.nav.etterlatte.brev.model.InnholdMedVedlegg
+import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.grunnbeloep.Grunnbeloep
 import java.time.LocalDate
 
@@ -35,7 +36,7 @@ data class InnvilgetHovedmalBrevData(
     val avkortingsinfo: Avkortingsinfo? = null,
     val beregningsinfo: BeregningsinfoBP,
     val etterbetalingDTO: EtterbetalingDTO? = null,
-    val innhold: InnholdMedVedlegg,
+    val innhold: List<Slate.Element>,
 ) : BrevData() {
     companion object {
         fun fra(
@@ -51,7 +52,7 @@ data class InnvilgetHovedmalBrevData(
                 avkortingsinfo = avkortingsinfo,
                 beregningsinfo = BeregningsinfoBP.fra(utbetalingsinfo, trygdetid, grunnbeloep, innhold),
                 etterbetalingDTO = etterbetalingDTO,
-                innhold = innhold,
+                innhold = innhold.innhold(),
             )
     }
 }

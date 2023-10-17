@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonValue
 enum class Spraak(
     @get:JsonValue val verdi: String,
 ) {
-    NB("nb"),
-    NN("nn"),
-    EN("en"),
+    NB("NB"),
+    NN("NN"),
+    EN("EN"),
 }

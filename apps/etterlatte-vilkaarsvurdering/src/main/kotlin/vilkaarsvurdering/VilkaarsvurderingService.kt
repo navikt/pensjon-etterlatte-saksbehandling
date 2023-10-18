@@ -235,7 +235,7 @@ class VilkaarsvurderingService(
                         if (virkningstidspunkt.erPaaNyttRegelverk()) {
                             BarnepensjonVilkaar2024.inngangsvilkaar(grunnlag, featureToggleService)
                         } else {
-                            BarnepensjonVilkaar1967.inngangsvilkaar(grunnlag, virkningstidspunkt, featureToggleService)
+                            BarnepensjonVilkaar1967.inngangsvilkaar(grunnlag, featureToggleService)
                         }
 
                     BehandlingType.MANUELT_OPPHOER -> throw IllegalArgumentException(

@@ -1,7 +1,6 @@
 package no.nav.etterlatte.vilkaarsvurdering.vilkaar
 
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
-import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
 import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsdato
@@ -16,13 +15,12 @@ import no.nav.etterlatte.vilkaarsvurdering.VilkaarFeatureToggle
 object BarnepensjonVilkaar1967 {
     fun inngangsvilkaar(
         grunnlag: Grunnlag,
-        virkningstidspunkt: Virkningstidspunkt,
         featureToggleService: FeatureToggleService,
     ) = listOf(
         formaal(),
         doedsfallForelder(),
         yrkesskadeAvdoed(),
-        alderBarn(virkningstidspunkt, grunnlag),
+        alderBarn(grunnlag),
         barnetsMedlemskap(),
         vurderingAvEksport(),
         avdoedesForutgaaendeMedlemskap(),
@@ -76,10 +74,7 @@ object BarnepensjonVilkaar1967 {
                 ),
         )
 
-    private fun alderBarn(
-        virkningstidspunkt: Virkningstidspunkt,
-        grunnlag: Grunnlag,
-    ): Vilkaar =
+    private fun alderBarn(grunnlag: Grunnlag): Vilkaar =
         Vilkaar(
             hovedvilkaar =
                 Delvilkaar(
@@ -101,14 +96,10 @@ object BarnepensjonVilkaar1967 {
                 ),
             grunnlag =
                 with(grunnlag) {
-                    /**
-                     * EY-1561: Fjerner virkningstidspunkt fra grunnlaget siden vi ikke har kontroll på om virk. har endret seg.
-                     * val virkningstidspunktBehandling = virkningstidspunkt.toVilkaarsgrunnlag()
-                     */
                     val foedselsdatoBarn = soeker.hentFoedselsdato()?.toVilkaarsgrunnlag(SOEKER_FOEDSELSDATO)
                     val doedsdatoAvdoed = hentAvdoed().hentDoedsdato()?.toVilkaarsgrunnlag(AVDOED_DOEDSDATO)
 
-                    listOfNotNull(foedselsdatoBarn, doedsdatoAvdoed) // /*, virkningstidspunktBehandling*/
+                    listOfNotNull(foedselsdatoBarn, doedsdatoAvdoed)
                 },
         )
 

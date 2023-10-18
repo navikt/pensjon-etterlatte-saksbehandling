@@ -314,7 +314,6 @@ internal class VilkaarsvurderingRepositoryTest {
                 vilkaar =
                     BarnepensjonVilkaar1967.inngangsvilkaar(
                         grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag(),
-                        virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(),
                         featureToggleService = DummyFeatureToggleService(),
                     ),
             )

@@ -24,3 +24,5 @@ fun LocalDate.tilVirkningstidspunkt(begrunnelse: String) =
         Grunnlagsopplysning.automatiskSaksbehandler,
         begrunnelse,
     )
+
+fun Virkningstidspunkt.erPaaNyttRegelverk() = this.dato >= YearMonth.of(2024, 1)

@@ -14,6 +14,7 @@ import { Innsender } from '~components/behandling/soeknadsoversikt/soeknadoversi
 import { Foreldreansvar } from '~components/behandling/soeknadsoversikt/soeknadoversikt/gyldigFramsattSoeknad/barnepensjon/Foreldreansvar'
 import { Verge } from '~components/behandling/soeknadsoversikt/soeknadoversikt/gyldigFramsattSoeknad/barnepensjon/Verge'
 import { GyldigFramsattVurdering } from '~components/behandling/soeknadsoversikt/soeknadoversikt/gyldigFramsattSoeknad/barnepensjon/GyldigFramsattVurdering'
+import { hentBehandlesFraStatus } from '~components/behandling/felles/utils'
 
 export const GyldigFramsattBarnepensjon = ({
   behandling,
@@ -28,14 +29,13 @@ export const GyldigFramsattBarnepensjon = ({
     return <div style={{ color: 'red' }}>Kunne ikke hente ut data om søknaden er gyldig framsatt</div>
   }
 
+  const behandles = hentBehandlesFraStatus(behandling.status)
   const innsenderHarForeldreansvar = gyldigFramsatt.vurderinger.find(
     (g: IGyldighetproving) => g.navn === GyldigFramsattType.HAR_FORELDREANSVAR_FOR_BARNET
   )
-
   const innsenderErForelder = gyldigFramsatt.vurderinger.find(
     (g: IGyldighetproving) => g.navn === GyldigFramsattType.INNSENDER_ER_FORELDER
   )
-
   const ingenAnnenVergeEnnForelder = gyldigFramsatt.vurderinger.find(
     (g: IGyldighetproving) => g.navn === GyldigFramsattType.INGEN_ANNEN_VERGE_ENN_FORELDER
   )
@@ -67,7 +67,7 @@ export const GyldigFramsattBarnepensjon = ({
         <GyldigFramsattVurdering
           behandlingId={behandling.id}
           gyldigFramsatt={behandling.gyldighetsprøving}
-          redigerbar={true}
+          redigerbar={behandles}
         />
       </VurderingsContainerWrapper>
     </LovtekstMedLenke>

@@ -22,6 +22,7 @@ import { lagreGyldighetsproeving } from '~shared/api/behandling'
 export const GyldigFramsattVurdering = ({
   behandlingId,
   gyldigFramsatt,
+  redigerbar,
 }: {
   behandlingId: string
   gyldigFramsatt: IGyldighetResultat | undefined
@@ -69,11 +70,13 @@ export const GyldigFramsattVurdering = ({
     onSuccess?.()
   }
 
+  const tittel =
+    gyldigFramsatt?.resultat !== VurderingsResultat.OPPFYLT ? 'Søknad ikke gyldig fremsatt' : 'Søknad gyldig fremsatt'
   return !vurdert ? (
     <LeggTilVurderingButton onClick={() => setVurdert(true)}>Legg til vurdering</LeggTilVurderingButton>
   ) : (
     <VurderingsboksWrapper
-      tittel=""
+      tittel={tittel}
       subtittelKomponent={
         <>
           <BodyShort spacing>Er søknaden gyldig framsatt?</BodyShort>
@@ -84,11 +87,11 @@ export const GyldigFramsattVurdering = ({
           )}
         </>
       }
-      redigerbar={true}
+      redigerbar={redigerbar}
       vurdering={
-        manuellVurdering?.kilde
+        manuellVurdering
           ? {
-              saksbehandler: manuellVurdering?.kilde.ident,
+              saksbehandler: manuellVurdering.kilde.ident,
               tidspunkt: new Date(manuellVurdering?.kilde.tidspunkt),
             }
           : undefined

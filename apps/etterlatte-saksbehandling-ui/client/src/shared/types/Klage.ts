@@ -3,6 +3,22 @@ import { KildeSaksbehandler } from '~shared/types/kilde'
 import { JaNei } from '~shared/types/ISvar'
 import { VedtakType } from '~components/vedtak/typer'
 
+export const enum KabalResultat {
+  MEDHOLD = 'MEDHOLD',
+  IKKE_MEDHOLD = 'IKKE_MEDHOLD',
+  IKKE_MEDHOLD_FORMKRAV_AVVIST = 'IKKE_MEDHOLD_FORMKRAV_AVVIST',
+  IKKE_SATT = 'IKKE_SATT',
+  HENLAGT = 'HENLAGT',
+}
+
+export const teksterKabalUtfall: Record<KabalResultat, string> = {
+  HENLAGT: 'Henlagt',
+  IKKE_MEDHOLD: 'Ikke medhold',
+  IKKE_MEDHOLD_FORMKRAV_AVVIST: 'Ikke medhold (formkrav avvist)',
+  IKKE_SATT: 'Ikke satt',
+  MEDHOLD: 'Medhold',
+}
+
 export interface Klage {
   id: string
   sak: ISak
@@ -11,6 +27,7 @@ export interface Klage {
   kabalStatus?: KabalStatus
   formkrav?: FormkravMedSaksbehandler
   utfall?: KlageUtfall
+  kabalResultat?: KabalResultat
 }
 
 export enum KlageStatus {
@@ -33,7 +50,19 @@ export const erKlageRedigerbar = (klage: Klage) => {
   return klage.status !== KlageStatus.FERDIGSTILT
 }
 
-export const enum KabalStatus {}
+export const enum KabalStatus {
+  OPPRETTET = 'OPPRETTET',
+  UTREDES = 'UTREDES',
+  VENTER = 'VENTER',
+  FERDIGSTILT = 'FERDIGSTILT',
+}
+
+export const teksterKabalstatus: Record<KabalStatus, string> = {
+  FERDIGSTILT: 'Ferdigstilt',
+  OPPRETTET: 'Opprettet',
+  UTREDES: 'Utredes',
+  VENTER: 'På vent',
+}
 
 export interface VedtaketKlagenGjelder {
   id: string
@@ -194,7 +223,7 @@ export const TEKSTER_LOVHJEMLER: Record<AlleHjemler, string> = {
   FTRL_22_12: '§ 22-12',
   FTRL_22_13_1: '§ 22-13 1. ledd',
   FTRL_22_13_3: '§ 22-13 3. ledd',
-  FTRL_22_13_4_C: '$ 22-13 4. ledd c)',
+  FTRL_22_13_4_C: '§ 22-13 4. ledd c)',
   FTRL_22_13_7: '§ 22-13 7. ledd',
   FTRL_22_14_3: '§ 22-14 3. ledd',
   FTRL_22_15_1_1: '§ 22-15 1. ledd 1. pkt.',
@@ -230,7 +259,7 @@ export const TEKSTER_LOVHJEMLER: Record<AlleHjemler, string> = {
   FTRL_3_13: '§ 3-13',
   FTRL_3_14: '§ 3-14',
   FTRL_3_15: '§ 3-15',
-  FTRL_3_5_TRYGDETID: '$ 3-5 (trygdetid)',
+  FTRL_3_5_TRYGDETID: '§ 3-5 (trygdetid)',
   FTRL_3_7: '§ 3-7',
   FVL_31: 'Fvl. § 31',
   FVL_32: 'Fvl. § 32',
@@ -346,5 +375,5 @@ const LOVHJEMLER_KUN_OMS = [
   'FTRL_17_A_8',
 ] as const
 
-export const LOVHJEMLER_BP = [...LOVHJEMLER_FELLES, ...LOVHJEMLER_KUN_BP] as const
-export const LOVHJEMLER_OMS = [...LOVHJEMLER_FELLES, ...LOVHJEMLER_KUN_OMS] as const
+export const LOVHJEMLER_BP = [...LOVHJEMLER_KUN_BP, ...LOVHJEMLER_FELLES] as const
+export const LOVHJEMLER_OMS = [...LOVHJEMLER_KUN_OMS, ...LOVHJEMLER_FELLES] as const

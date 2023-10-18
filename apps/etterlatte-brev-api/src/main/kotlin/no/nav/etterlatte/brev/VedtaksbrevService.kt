@@ -1,13 +1,13 @@
 package no.nav.etterlatte.brev
 
 import no.nav.etterlatte.brev.adresse.AdresseService
-import no.nav.etterlatte.brev.behandling.Behandling
 import no.nav.etterlatte.brev.behandling.ForenkletVedtak
+import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.brevbaker.BrevbakerRequest
 import no.nav.etterlatte.brev.brevbaker.BrevbakerService
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.dokarkiv.DokarkivServiceImpl
-import no.nav.etterlatte.brev.hentinformasjon.IBehandlingService
+import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
 import no.nav.etterlatte.brev.hentinformasjon.VedtaksvurderingService
 import no.nav.etterlatte.brev.journalpost.JournalpostResponse
 import no.nav.etterlatte.brev.model.Brev
@@ -21,11 +21,13 @@ import no.nav.etterlatte.brev.model.BrevProsessType.AUTOMATISK
 import no.nav.etterlatte.brev.model.BrevProsessType.MANUELL
 import no.nav.etterlatte.brev.model.BrevProsessType.REDIGERBAR
 import no.nav.etterlatte.brev.model.BrevProsessTypeFactory
+import no.nav.etterlatte.brev.model.InnholdMedVedlegg
 import no.nav.etterlatte.brev.model.ManueltBrevData
 import no.nav.etterlatte.brev.model.OpprettNyttBrev
 import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.SlateHelper
 import no.nav.etterlatte.brev.model.Status
+import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.rivers.VedtakTilJournalfoering
 import no.nav.etterlatte.token.BrukerTokenInfo
@@ -34,7 +36,7 @@ import java.util.UUID
 
 class VedtaksbrevService(
     private val db: BrevRepository,
-    private val sakOgBehandlingService: IBehandlingService,
+    private val brevdataFacade: BrevdataFacade,
     private val vedtaksvurderingService: VedtaksvurderingService,
     private val adresseService: AdresseService,
     private val dokarkivService: DokarkivServiceImpl,
@@ -65,26 +67,25 @@ class VedtaksbrevService(
             "Vedtaksbrev finnes allerede på behandling (id=$behandlingId) og kan ikke opprettes på nytt"
         }
 
-        val behandling = sakOgBehandlingService.hentBehandling(sakId, behandlingId, brukerTokenInfo)
+        val generellBrevData = brevdataFacade.hentGenerellBrevData(sakId, behandlingId, brukerTokenInfo)
 
-        val mottaker =
-            if (behandling.personerISak.innsender != null) {
-                adresseService.hentMottakerAdresse(behandling.personerISak.innsender.fnr.value)
-            } else {
-                adresseService.hentMottakerAdresse(behandling.personerISak.soeker.fnr.value)
+        val mottakerFnr =
+            with(generellBrevData.personerISak) {
+                innsender?.fnr?.value?.takeUnless { it == Vedtaksloesning.PESYS.name } ?: soeker.fnr.value
             }
+        val mottaker = adresseService.hentMottakerAdresse(mottakerFnr)
 
-        val prosessType = brevProsessTypeFactory.fra(behandling)
+        val prosessType = brevProsessTypeFactory.fra(generellBrevData)
 
         val nyttBrev =
             OpprettNyttBrev(
                 sakId = sakId,
-                behandlingId = behandling.behandlingId,
+                behandlingId = behandlingId,
                 prosessType = prosessType,
-                soekerFnr = behandling.personerISak.soeker.fnr.value,
+                soekerFnr = generellBrevData.personerISak.soeker.fnr.value,
                 mottaker = mottaker,
-                innhold = opprettInnhold(behandling, prosessType),
-                innholdVedlegg = opprettInnholdVedlegg(behandling, prosessType),
+                innhold = opprettInnhold(generellBrevData, brukerTokenInfo, prosessType),
+                innholdVedlegg = opprettInnholdVedlegg(generellBrevData, prosessType),
             )
 
         return db.opprettBrev(nyttBrev)
@@ -101,15 +102,15 @@ class VedtaksbrevService(
             return requireNotNull(db.hentPdf(brev.id)) { "Fant ikke brev med id ${brev.id}" }
         }
 
-        val behandling = sakOgBehandlingService.hentBehandling(brev.sakId, brev.behandlingId!!, brukerTokenInfo)
-        val avsender = adresseService.hentAvsender(behandling.vedtak)
+        val generellBrevData = brevdataFacade.hentGenerellBrevData(brev.sakId, brev.behandlingId!!, brukerTokenInfo)
+        val avsender = adresseService.hentAvsender(generellBrevData.forenkletVedtak)
 
-        val kode = brevDataMapper.brevKode(behandling, brev.prosessType)
-        val brevData = opprettBrevData(brev, behandling, kode)
-        val brevRequest = BrevbakerRequest.fra(kode.ferdigstilling, brevData, behandling, avsender)
+        val brevkodePar = brevDataMapper.brevKode(generellBrevData, brev.prosessType)
+        val brevData = opprettBrevData(brev, generellBrevData, brukerTokenInfo, brevkodePar)
+        val brevRequest = BrevbakerRequest.fra(brevkodePar.ferdigstilling, brevData, generellBrevData, avsender)
 
         return brevbaker.genererPdf(brev.id, brevRequest)
-            .also { pdf -> lagrePdfHvisVedtakFattet(brev.id, behandling.vedtak, pdf, brukerTokenInfo) }
+            .also { pdf -> lagrePdfHvisVedtakFattet(brev.id, generellBrevData.forenkletVedtak, pdf, brukerTokenInfo) }
     }
 
     suspend fun ferdigstillVedtaksbrev(
@@ -158,10 +159,10 @@ class VedtaksbrevService(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): BrevService.BrevPayload {
-        val behandling = sakOgBehandlingService.hentBehandling(sakId, behandlingId, brukerTokenInfo)
-        val prosessType = brevProsessTypeFactory.fra(behandling)
-        val innhold = opprettInnhold(behandling, prosessType)
-        val innholdVedlegg = opprettInnholdVedlegg(behandling, prosessType)
+        val generellBrevData = brevdataFacade.hentGenerellBrevData(sakId, behandlingId, brukerTokenInfo)
+        val prosessType = brevProsessTypeFactory.fra(generellBrevData)
+        val innhold = opprettInnhold(generellBrevData, brukerTokenInfo, prosessType)
+        val innholdVedlegg = opprettInnholdVedlegg(generellBrevData, prosessType)
 
         if (innhold.payload != null) {
             db.oppdaterPayload(brevId, innhold.payload)
@@ -177,17 +178,22 @@ class VedtaksbrevService(
         )
     }
 
-    private fun opprettBrevData(
+    private suspend fun opprettBrevData(
         brev: Brev,
-        behandling: Behandling,
+        generellBrevData: GenerellBrevData,
+        brukerTokenInfo: BrukerTokenInfo,
         brevkode: BrevDataMapper.BrevkodePar,
     ): BrevData =
         when (brev.prosessType) {
             REDIGERBAR ->
-                brevDataMapper.brevDataFerdigstilling(behandling, {
-                    hentLagretInnhold(brev)
-                }, { hentLagretInnholdVedlegg(brev) }, brevkode)
-            AUTOMATISK -> brevDataMapper.brevData(behandling)
+                brevDataMapper.brevDataFerdigstilling(
+                    generellBrevData,
+                    brukerTokenInfo,
+                    InnholdMedVedlegg({ hentLagretInnhold(brev) }, { hentLagretInnholdVedlegg(brev) }),
+                    brevkode,
+                )
+
+            AUTOMATISK -> brevDataMapper.brevData(generellBrevData, brukerTokenInfo)
             MANUELL -> ManueltBrevData(hentLagretInnhold(brev))
         }
 
@@ -202,27 +208,28 @@ class VedtaksbrevService(
         }
 
     private suspend fun opprettInnhold(
-        behandling: Behandling,
+        generellBrevData: GenerellBrevData,
+        brukerTokenInfo: BrukerTokenInfo,
         prosessType: BrevProsessType,
     ): BrevInnhold {
-        val tittel = "Vedtak om ${behandling.vedtak.type.name.lowercase()}"
+        val tittel = "Vedtak om ${generellBrevData.forenkletVedtak.type.name.lowercase()}"
 
         val payload =
             when (prosessType) {
-                REDIGERBAR -> brevbaker.hentRedigerbarTekstFraBrevbakeren(behandling)
+                REDIGERBAR -> brevbaker.hentRedigerbarTekstFraBrevbakeren(generellBrevData, brukerTokenInfo)
                 AUTOMATISK -> null
-                MANUELL -> SlateHelper.hentInitiellPayload(behandling)
+                MANUELL -> SlateHelper.hentInitiellPayload(generellBrevData)
             }
 
-        return BrevInnhold(tittel, behandling.spraak, payload)
+        return BrevInnhold(tittel, generellBrevData.spraak, payload)
     }
 
     private fun opprettInnholdVedlegg(
-        behandling: Behandling,
+        generellBrevData: GenerellBrevData,
         prosessType: BrevProsessType,
     ): List<BrevInnholdVedlegg>? =
         when (prosessType) {
-            REDIGERBAR -> SlateHelper.hentInitiellPayloadVedlegg(behandling)
+            REDIGERBAR -> SlateHelper.hentInitiellPayloadVedlegg(generellBrevData)
             AUTOMATISK -> null
             MANUELL -> null
         }

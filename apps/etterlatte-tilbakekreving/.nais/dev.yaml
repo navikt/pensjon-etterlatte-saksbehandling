@@ -61,5 +61,10 @@ spec:
       rules:
         - application: etterlatte-behandling
       external:
+        - host: b27apvl222.preprod.local
+          ports:
+            - name: mq
+              port: 1413
+              protocol: TCP
         - host: etterlatte-unleash-api.nav.cloud.nais.io
         - host: etterlatte-proxy.dev-fss-pub.nais.io

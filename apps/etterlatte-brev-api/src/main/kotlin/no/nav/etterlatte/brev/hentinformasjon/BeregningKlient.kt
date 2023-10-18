@@ -3,6 +3,7 @@ package no.nav.etterlatte.brev.hentinformasjon
 import com.github.michaelbull.result.mapBoth
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
+import no.nav.etterlatte.grunnbeloep.Grunnbeloep
 import no.nav.etterlatte.libs.common.beregning.BeregningDTO
 import no.nav.etterlatte.libs.common.beregning.YtelseMedGrunnlagDto
 import no.nav.etterlatte.libs.common.deserialize
@@ -65,6 +66,22 @@ class BeregningKlient(config: Config, httpClient: HttpClient) {
                 "Henting av utregnet ytelse med grunnlag for behandling med behandlingId=$behandlingId feilet",
                 e,
             )
+        }
+    }
+
+    internal suspend fun hentGrunnbeloep(brukerTokenInfo: BrukerTokenInfo): Grunnbeloep {
+        try {
+            logger.info("Henter gjeldende grunnbeløp")
+
+            return downstreamResourceClient.get(
+                Resource(clientId, "$resourceUrl/api/beregning/grunnbeloep"),
+                brukerTokenInfo,
+            ).mapBoth(
+                success = { resource -> deserialize(resource.response.toString()) },
+                failure = { errorResponse -> throw errorResponse },
+            )
+        } catch (e: Exception) {
+            throw BeregningKlientException("Henting av grunnbeløp feilet", e)
         }
     }
 }

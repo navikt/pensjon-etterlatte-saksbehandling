@@ -42,7 +42,7 @@ class TilbakekrevingService(
             oppgaveService.opprettNyOppgaveMedSakOgReferanse(
                 referanse = tilbakekreving.id.toString(),
                 sakId = tilbakekreving.sak.id,
-                oppgaveKilde = OppgaveKilde.EKSTERN,
+                oppgaveKilde = OppgaveKilde.TILBAKEKREVING,
                 oppgaveType = OppgaveType.TILBAKEKREVING,
                 merknad = null,
             )

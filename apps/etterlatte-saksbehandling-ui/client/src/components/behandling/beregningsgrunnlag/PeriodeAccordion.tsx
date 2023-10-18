@@ -1,6 +1,6 @@
 import React, { ReactNode, useState } from 'react'
 import { Heading } from '@navikt/ds-react'
-import { ChevronUpIcon, ChevronDownIcon } from '@navikt/aksel-icons'
+import { ChevronDownIcon, ChevronUpIcon } from '@navikt/aksel-icons'
 import AnimateHeight from '@navikt/ds-react/esm/util/AnimateHeight'
 import styled from 'styled-components'
 

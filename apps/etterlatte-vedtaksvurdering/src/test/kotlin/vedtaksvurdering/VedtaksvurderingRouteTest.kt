@@ -33,13 +33,19 @@ import no.nav.etterlatte.libs.common.vedtak.Periode
 import no.nav.etterlatte.libs.common.vedtak.UtbetalingsperiodeType
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
+import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
+import no.nav.etterlatte.libs.common.vedtak.VedtakNyDto
+import no.nav.etterlatte.libs.common.vedtak.VedtakSammendragDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.vedtaksvurdering.LoependeYtelse
 import no.nav.etterlatte.vedtaksvurdering.UnderkjennVedtakDto
+import no.nav.etterlatte.vedtaksvurdering.VedtakBehandlingInnhold
+import no.nav.etterlatte.vedtaksvurdering.VedtakBehandlingService
 import no.nav.etterlatte.vedtaksvurdering.VedtakOgRapid
 import no.nav.etterlatte.vedtaksvurdering.VedtakSammendragDto
+import no.nav.etterlatte.vedtaksvurdering.VedtakTilbakekrevingInnhold
 import no.nav.etterlatte.vedtaksvurdering.VedtaksvurderingRapidService
 import no.nav.etterlatte.vedtaksvurdering.VedtaksvurderingService
 import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlient
@@ -62,6 +68,7 @@ internal class VedtaksvurderingRouteTest {
     private lateinit var applicationConfig: HoconApplicationConfig
     private val behandlingKlient = mockk<BehandlingKlient>()
     private val vedtaksvurderingService: VedtaksvurderingService = mockk()
+    private val vedtakBehandlingService: VedtakBehandlingService = mockk()
     private val rapidService: VedtaksvurderingRapidService = mockk()
 
     @BeforeAll
@@ -96,6 +103,7 @@ internal class VedtaksvurderingRouteTest {
                 restModule(log) {
                     vedtaksvurderingRoute(
                         vedtaksvurderingService,
+                        vedtakBehandlingService,
                         rapidService,
                         behandlingKlient,
                     )
@@ -121,6 +129,7 @@ internal class VedtaksvurderingRouteTest {
                 restModule(log) {
                     vedtaksvurderingRoute(
                         vedtaksvurderingService,
+                        vedtakBehandlingService,
                         rapidService,
                         behandlingKlient,
                     )
@@ -134,7 +143,6 @@ internal class VedtaksvurderingRouteTest {
                 }
 
             response.status shouldBe HttpStatusCode.InternalServerError
-            response.bodyAsText() shouldBe "En intern feil har oppstått"
         }
 
         coVerify(exactly = 1) {
@@ -153,6 +161,7 @@ internal class VedtaksvurderingRouteTest {
                 restModule(log) {
                     vedtaksvurderingRoute(
                         vedtaksvurderingService,
+                        vedtakBehandlingService,
                         rapidService,
                         behandlingKlient,
                     )
@@ -185,6 +194,7 @@ internal class VedtaksvurderingRouteTest {
                 restModule(log) {
                     vedtaksvurderingRoute(
                         vedtaksvurderingService,
+                        vedtakBehandlingService,
                         rapidService,
                         behandlingKlient,
                     )
@@ -203,18 +213,19 @@ internal class VedtaksvurderingRouteTest {
             with(vedtak) {
                 vedtakId shouldBe opprettetVedtak.id
                 status shouldBe opprettetVedtak.status
-                virkningstidspunkt shouldBe opprettetVedtak.virkningstidspunkt
                 behandling.id shouldBe opprettetVedtak.behandlingId
-                behandling.type shouldBe opprettetVedtak.behandlingType
                 sak.sakType shouldBe opprettetVedtak.sakType
                 sak.id shouldBe opprettetVedtak.sakId
                 type shouldBe opprettetVedtak.type
                 vedtakFattet shouldBe null
                 attestasjon shouldBe null
+                val opprettetVedtakInnhold = opprettetVedtak.innhold as VedtakBehandlingInnhold
+                virkningstidspunkt shouldBe opprettetVedtakInnhold.virkningstidspunkt
+                behandling.type shouldBe opprettetVedtakInnhold.behandlingType
                 utbetalingsperioder shouldHaveSize 1
                 with(utbetalingsperioder.first()) {
                     id shouldBe 1L
-                    periode shouldBe Periode(opprettetVedtak.virkningstidspunkt, null)
+                    periode shouldBe Periode(opprettetVedtakInnhold.virkningstidspunkt, null)
                     beloep shouldBe BigDecimal.valueOf(100)
                     type shouldBe UtbetalingsperiodeType.UTBETALING
                 }
@@ -228,13 +239,9 @@ internal class VedtaksvurderingRouteTest {
     }
 
     @Test
-    fun `skal returnere vedtaksammendrag`() {
-        val attestertVedtak =
-            vedtaksammendrag().copy(
-                status = VedtakStatus.ATTESTERT,
-                attestasjon = Attestasjon(SAKSBEHANDLER_2, ENHET_2, Tidspunkt.now()),
-            )
-        every { vedtaksvurderingService.hentVedtakSammendrag(any<UUID>()) } returns attestertVedtak
+    fun `skal returnere eksisterende vedtaksvurdering for en behandling`() {
+        val opprettetVedtak = vedtak()
+        every { vedtaksvurderingService.hentVedtak(any<UUID>()) } returns opprettetVedtak
 
         testApplication {
             environment { config = applicationConfig }
@@ -242,6 +249,113 @@ internal class VedtaksvurderingRouteTest {
                 restModule(log) {
                     vedtaksvurderingRoute(
                         vedtaksvurderingService,
+                        vedtakBehandlingService,
+                        behandlingKlient,
+                    )
+                }
+            }
+
+            val vedtak =
+                client.get("/api/vedtak/${UUID.randomUUID()}/ny") {
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    header(HttpHeaders.Authorization, "Bearer $token")
+                }.let {
+                    it.status shouldBe HttpStatusCode.OK
+                    deserialize<VedtakNyDto>(it.bodyAsText())
+                }
+
+            with(vedtak) {
+                id shouldBe opprettetVedtak.id
+                status shouldBe opprettetVedtak.status
+                behandlingId shouldBe opprettetVedtak.behandlingId
+                sak.sakType shouldBe opprettetVedtak.sakType
+                sak.id shouldBe opprettetVedtak.sakId
+                type shouldBe opprettetVedtak.type
+                vedtakFattet shouldBe null
+                attestasjon shouldBe null
+                (innhold as VedtakInnholdDto.VedtakBehandlingDto).let {
+                    val opprettVedtakInnhold = opprettetVedtak.innhold as VedtakBehandlingInnhold
+                    it.virkningstidspunkt shouldBe opprettVedtakInnhold.virkningstidspunkt
+                    it.behandling.type shouldBe opprettVedtakInnhold.behandlingType
+                    it.utbetalingsperioder shouldHaveSize 1
+                    with(it.utbetalingsperioder.first()) {
+                        id shouldBe 1L
+                        periode shouldBe Periode(it.virkningstidspunkt, null)
+                        beloep shouldBe BigDecimal.valueOf(100)
+                        type shouldBe UtbetalingsperiodeType.UTBETALING
+                    }
+                }
+            }
+
+            coVerify(exactly = 1) {
+                behandlingKlient.harTilgangTilBehandling(any(), any())
+                vedtaksvurderingService.hentVedtak(any<UUID>())
+            }
+        }
+    }
+
+    @Test
+    fun `skal returnere eksisterende vedtaksvurdering for en tilbakekreving`() {
+        val opprettetVedtak = vedtakTilbakekreving()
+        every { vedtaksvurderingService.hentVedtak(any<UUID>()) } returns opprettetVedtak
+
+        testApplication {
+            environment { config = applicationConfig }
+            application {
+                restModule(log) {
+                    vedtaksvurderingRoute(
+                        vedtaksvurderingService,
+                        vedtakBehandlingService,
+                        behandlingKlient,
+                    )
+                }
+            }
+
+            val vedtak =
+                client.get("/api/vedtak/${UUID.randomUUID()}/ny") {
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    header(HttpHeaders.Authorization, "Bearer $token")
+                }.let {
+                    it.status shouldBe HttpStatusCode.OK
+                    deserialize<VedtakNyDto>(it.bodyAsText())
+                }
+
+            with(vedtak) {
+                id shouldBe opprettetVedtak.id
+                status shouldBe opprettetVedtak.status
+                behandlingId shouldBe opprettetVedtak.behandlingId
+                sak.sakType shouldBe opprettetVedtak.sakType
+                sak.id shouldBe opprettetVedtak.sakId
+                type shouldBe opprettetVedtak.type
+                vedtakFattet shouldBe null
+                attestasjon shouldBe null
+                (innhold as VedtakInnholdDto.VedtakTilbakekrevingDto).tilbakekreving shouldBe
+                    (opprettetVedtak.innhold as VedtakTilbakekrevingInnhold).tilbakekreving
+            }
+        }
+
+        coVerify(exactly = 1) {
+            behandlingKlient.harTilgangTilBehandling(any(), any())
+            vedtaksvurderingService.hentVedtak(any<UUID>())
+        }
+    }
+
+    @Test
+    fun `skal returnere vedtaksammendrag`() {
+        val attestertVedtak =
+            vedtak().copy(
+                status = VedtakStatus.ATTESTERT,
+                attestasjon = Attestasjon(SAKSBEHANDLER_2, ENHET_2, Tidspunkt.now()),
+            )
+        every { vedtaksvurderingService.hentVedtak(any<UUID>()) } returns attestertVedtak
+
+        testApplication {
+            environment { config = applicationConfig }
+            application {
+                restModule(log) {
+                    vedtaksvurderingRoute(
+                        vedtaksvurderingService,
+                        vedtakBehandlingService,
                         rapidService,
                         behandlingKlient,
                     )
@@ -265,7 +379,7 @@ internal class VedtaksvurderingRouteTest {
 
             coVerify(exactly = 1) {
                 behandlingKlient.harTilgangTilBehandling(any(), any())
-                vedtaksvurderingService.hentVedtakSammendrag(any<UUID>())
+                vedtaksvurderingService.hentVedtak(any<UUID>())
             }
         }
     }
@@ -275,7 +389,7 @@ internal class VedtaksvurderingRouteTest {
         val sakId = 1L
         val loependeYtelse = LoependeYtelse(erLoepende = true, LocalDate.now())
 
-        every { vedtaksvurderingService.sjekkOmVedtakErLoependePaaDato(any(), any()) } returns loependeYtelse
+        every { vedtakBehandlingService.sjekkOmVedtakErLoependePaaDato(any(), any()) } returns loependeYtelse
         coEvery { behandlingKlient.harTilgangTilSak(any(), any()) } returns true
 
         testApplication {
@@ -284,6 +398,7 @@ internal class VedtaksvurderingRouteTest {
                 restModule(log) {
                     vedtaksvurderingRoute(
                         vedtaksvurderingService,
+                        vedtakBehandlingService,
                         rapidService,
                         behandlingKlient,
                     )
@@ -304,7 +419,7 @@ internal class VedtaksvurderingRouteTest {
 
             coVerify(exactly = 1) {
                 behandlingKlient.harTilgangTilSak(any(), any())
-                vedtaksvurderingService.sjekkOmVedtakErLoependePaaDato(any(), any())
+                vedtakBehandlingService.sjekkOmVedtakErLoependePaaDato(any(), any())
             }
         }
     }
@@ -312,7 +427,7 @@ internal class VedtaksvurderingRouteTest {
     @Test
     fun `skal opprette eller oppdatere vedtak`() {
         val opprettetVedtak = vedtak()
-        coEvery { vedtaksvurderingService.opprettEllerOppdaterVedtak(any(), any()) } returns opprettetVedtak
+        coEvery { vedtakBehandlingService.opprettEllerOppdaterVedtak(any(), any()) } returns opprettetVedtak
 
         testApplication {
             environment { config = applicationConfig }
@@ -320,6 +435,7 @@ internal class VedtaksvurderingRouteTest {
                 restModule(log) {
                     vedtaksvurderingRoute(
                         vedtaksvurderingService,
+                        vedtakBehandlingService,
                         rapidService,
                         behandlingKlient,
                     )
@@ -338,18 +454,19 @@ internal class VedtaksvurderingRouteTest {
             with(vedtak) {
                 vedtakId shouldBe opprettetVedtak.id
                 status shouldBe opprettetVedtak.status
-                virkningstidspunkt shouldBe opprettetVedtak.virkningstidspunkt
                 behandling.id shouldBe opprettetVedtak.behandlingId
-                behandling.type shouldBe opprettetVedtak.behandlingType
                 sak.sakType shouldBe opprettetVedtak.sakType
                 sak.id shouldBe opprettetVedtak.sakId
                 type shouldBe opprettetVedtak.type
                 vedtakFattet shouldBe null
                 attestasjon shouldBe null
+                val opprettetVedtakInnhold = opprettetVedtak.innhold as VedtakBehandlingInnhold
+                virkningstidspunkt shouldBe opprettetVedtakInnhold.virkningstidspunkt
+                behandling.type shouldBe opprettetVedtakInnhold.behandlingType
                 utbetalingsperioder shouldHaveSize 1
                 with(utbetalingsperioder.first()) {
                     id shouldBe 1L
-                    periode shouldBe Periode(opprettetVedtak.virkningstidspunkt, null)
+                    periode shouldBe Periode(opprettetVedtakInnhold.virkningstidspunkt, null)
                     beloep shouldBe BigDecimal.valueOf(100)
                     type shouldBe UtbetalingsperiodeType.UTBETALING
                 }
@@ -357,7 +474,7 @@ internal class VedtaksvurderingRouteTest {
 
             coVerify(exactly = 1) {
                 behandlingKlient.harTilgangTilBehandling(any(), any())
-                vedtaksvurderingService.opprettEllerOppdaterVedtak(any(), match { it.ident() == SAKSBEHANDLER_1 })
+                vedtakBehandlingService.opprettEllerOppdaterVedtak(any(), match { it.ident() == SAKSBEHANDLER_1 })
             }
         }
     }
@@ -369,7 +486,7 @@ internal class VedtaksvurderingRouteTest {
                 status = VedtakStatus.FATTET_VEDTAK,
                 vedtakFattet = VedtakFattet(SAKSBEHANDLER_1, ENHET_1, Tidspunkt.now()),
             )
-        coEvery { vedtaksvurderingService.fattVedtak(any(), any()) } returns VedtakOgRapid(fattetVedtak.toDto(), mockk())
+        coEvery { vedtakBehandlingService.fattVedtak(any(), any()) } returns fattetVedtak
         coEvery { rapidService.sendToRapid(any()) } just runs
 
         testApplication {
@@ -378,6 +495,7 @@ internal class VedtaksvurderingRouteTest {
                 restModule(log) {
                     vedtaksvurderingRoute(
                         vedtaksvurderingService,
+                        vedtakBehandlingService,
                         rapidService,
                         behandlingKlient,
                     )
@@ -396,18 +514,19 @@ internal class VedtaksvurderingRouteTest {
             with(vedtak) {
                 vedtakId shouldBe fattetVedtak.id
                 status shouldBe fattetVedtak.status
-                virkningstidspunkt shouldBe fattetVedtak.virkningstidspunkt
                 behandling.id shouldBe fattetVedtak.behandlingId
-                behandling.type shouldBe fattetVedtak.behandlingType
                 sak.sakType shouldBe fattetVedtak.sakType
                 sak.id shouldBe fattetVedtak.sakId
                 type shouldBe fattetVedtak.type
                 vedtakFattet shouldBe fattetVedtak.vedtakFattet
                 attestasjon shouldBe null
+                val fattetVedtakInnhold = fattetVedtak.innhold as VedtakBehandlingInnhold
+                virkningstidspunkt shouldBe fattetVedtakInnhold.virkningstidspunkt
+                behandling.type shouldBe fattetVedtakInnhold.behandlingType
                 utbetalingsperioder shouldHaveSize 1
                 with(utbetalingsperioder.first()) {
                     id shouldBe 1L
-                    periode shouldBe Periode(fattetVedtak.virkningstidspunkt, null)
+                    periode shouldBe Periode(fattetVedtakInnhold.virkningstidspunkt, null)
                     beloep shouldBe BigDecimal.valueOf(100)
                     type shouldBe UtbetalingsperiodeType.UTBETALING
                 }
@@ -415,7 +534,7 @@ internal class VedtaksvurderingRouteTest {
 
             coVerify(exactly = 1) {
                 behandlingKlient.harTilgangTilBehandling(any(), any())
-                vedtaksvurderingService.fattVedtak(any(), match { it.ident() == SAKSBEHANDLER_1 })
+                vedtakBehandlingService.fattVedtak(any(), match { it.ident() == SAKSBEHANDLER_1 })
                 rapidService.sendToRapid(any())
             }
         }
@@ -430,7 +549,7 @@ internal class VedtaksvurderingRouteTest {
                 vedtakFattet = VedtakFattet(SAKSBEHANDLER_1, ENHET_1, Tidspunkt.now()),
                 attestasjon = Attestasjon(SAKSBEHANDLER_2, ENHET_2, Tidspunkt.now()),
             )
-        coEvery { vedtaksvurderingService.attesterVedtak(any(), any(), any()) } returns VedtakOgRapid(attestertVedtak.toDto(), mockk())
+        coEvery { vedtakBehandlingService.attesterVedtak(any(), any(), any()) } returns attestertVedtak
         coEvery { rapidService.sendToRapid(any()) } just runs
 
         testApplication {
@@ -439,6 +558,7 @@ internal class VedtaksvurderingRouteTest {
                 restModule(log) {
                     vedtaksvurderingRoute(
                         vedtaksvurderingService,
+                        vedtakBehandlingService,
                         rapidService,
                         behandlingKlient,
                     )
@@ -458,18 +578,19 @@ internal class VedtaksvurderingRouteTest {
             with(vedtak) {
                 vedtakId shouldBe attestertVedtak.id
                 status shouldBe attestertVedtak.status
-                virkningstidspunkt shouldBe attestertVedtak.virkningstidspunkt
                 behandling.id shouldBe attestertVedtak.behandlingId
-                behandling.type shouldBe attestertVedtak.behandlingType
                 sak.sakType shouldBe attestertVedtak.sakType
                 sak.id shouldBe attestertVedtak.sakId
                 type shouldBe attestertVedtak.type
                 vedtakFattet shouldBe attestertVedtak.vedtakFattet
                 attestasjon shouldBe attestertVedtak.attestasjon
+                val attestertVedtakInnhold = attestertVedtak.innhold as VedtakBehandlingInnhold
+                virkningstidspunkt shouldBe attestertVedtakInnhold.virkningstidspunkt
+                behandling.type shouldBe attestertVedtakInnhold.behandlingType
                 utbetalingsperioder shouldHaveSize 1
                 with(utbetalingsperioder.first()) {
                     id shouldBe 1L
-                    periode shouldBe Periode(attestertVedtak.virkningstidspunkt, null)
+                    periode shouldBe Periode(attestertVedtakInnhold.virkningstidspunkt, null)
                     beloep shouldBe BigDecimal.valueOf(100)
                     type shouldBe UtbetalingsperiodeType.UTBETALING
                 }
@@ -477,7 +598,7 @@ internal class VedtaksvurderingRouteTest {
 
             coVerify(exactly = 1) {
                 behandlingKlient.harTilgangTilBehandling(any(), any())
-                vedtaksvurderingService.attesterVedtak(
+                vedtakBehandlingService.attesterVedtak(
                     any(),
                     match { it == attestertVedtakKommentar.kommentar },
                     match { it.ident() == SAKSBEHANDLER_1 },
@@ -494,7 +615,7 @@ internal class VedtaksvurderingRouteTest {
                 status = VedtakStatus.RETURNERT,
             )
         val begrunnelse = UnderkjennVedtakDto("Ikke bra nok begrunnet", "Annet")
-        coEvery { vedtaksvurderingService.underkjennVedtak(any(), any(), any()) } returns
+        coEvery { vedtakBehandlingService.underkjennVedtak(any(), any(), any()) } returns
             VedtakOgRapid(underkjentVedtak.toDto(), mockk())
         coEvery { rapidService.sendToRapid(any()) } just runs
 
@@ -504,6 +625,7 @@ internal class VedtaksvurderingRouteTest {
                 restModule(log) {
                     vedtaksvurderingRoute(
                         vedtaksvurderingService,
+                        vedtakBehandlingService,
                         rapidService,
                         behandlingKlient,
                     )
@@ -523,18 +645,19 @@ internal class VedtaksvurderingRouteTest {
             with(vedtak) {
                 vedtakId shouldBe underkjentVedtak.id
                 status shouldBe underkjentVedtak.status
-                virkningstidspunkt shouldBe underkjentVedtak.virkningstidspunkt
                 behandling.id shouldBe underkjentVedtak.behandlingId
-                behandling.type shouldBe underkjentVedtak.behandlingType
                 sak.sakType shouldBe underkjentVedtak.sakType
                 sak.id shouldBe underkjentVedtak.sakId
                 type shouldBe underkjentVedtak.type
                 vedtakFattet shouldBe null
                 attestasjon shouldBe null
+                val underkjentVedtakInnhold = underkjentVedtak.innhold as VedtakBehandlingInnhold
+                virkningstidspunkt shouldBe underkjentVedtakInnhold.virkningstidspunkt
+                behandling.type shouldBe underkjentVedtakInnhold.behandlingType
                 utbetalingsperioder shouldHaveSize 1
                 with(utbetalingsperioder.first()) {
                     id shouldBe 1L
-                    periode shouldBe Periode(underkjentVedtak.virkningstidspunkt, null)
+                    periode shouldBe Periode(underkjentVedtakInnhold.virkningstidspunkt, null)
                     beloep shouldBe BigDecimal.valueOf(100)
                     type shouldBe UtbetalingsperiodeType.UTBETALING
                 }
@@ -542,7 +665,7 @@ internal class VedtaksvurderingRouteTest {
 
             coVerify(exactly = 1) {
                 behandlingKlient.harTilgangTilBehandling(any(), any())
-                vedtaksvurderingService.underkjennVedtak(
+                vedtakBehandlingService.underkjennVedtak(
                     any(),
                     match { it.ident() == SAKSBEHANDLER_1 },
                     match { it == begrunnelse },
@@ -558,7 +681,7 @@ internal class VedtaksvurderingRouteTest {
             vedtak().copy(
                 status = VedtakStatus.RETURNERT,
             )
-        coEvery { vedtaksvurderingService.tilbakestillIkkeIverksatteVedtak(any()) } returns tilbakestiltVedtak
+        coEvery { vedtakBehandlingService.tilbakestillIkkeIverksatteVedtak(any()) } returns tilbakestiltVedtak
 
         testApplication {
             environment { config = applicationConfig }
@@ -566,6 +689,7 @@ internal class VedtaksvurderingRouteTest {
                 restModule(log) {
                     vedtaksvurderingRoute(
                         vedtaksvurderingService,
+                        vedtakBehandlingService,
                         rapidService,
                         behandlingKlient,
                     )
@@ -581,7 +705,7 @@ internal class VedtaksvurderingRouteTest {
 
             coVerify(exactly = 1) {
                 behandlingKlient.harTilgangTilBehandling(any(), any())
-                vedtaksvurderingService.tilbakestillIkkeIverksatteVedtak(any())
+                vedtakBehandlingService.tilbakestillIkkeIverksatteVedtak(any())
             }
         }
     }

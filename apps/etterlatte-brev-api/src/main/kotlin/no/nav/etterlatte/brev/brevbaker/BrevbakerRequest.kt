@@ -1,7 +1,7 @@
 package no.nav.etterlatte.brev.brevbaker
 
 import no.nav.etterlatte.brev.adresse.Avsender
-import no.nav.etterlatte.brev.behandling.Behandling
+import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.brevbaker.BrevbakerHelpers.mapFelles
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.pensjon.brevbaker.api.model.Felles
@@ -16,7 +16,7 @@ data class BrevbakerRequest(
         fun fra(
             brevKode: EtterlatteBrevKode,
             letterData: Any,
-            behandling: Behandling,
+            generellBrevData: GenerellBrevData,
             avsender: Avsender,
         ): BrevbakerRequest {
             return BrevbakerRequest(
@@ -24,12 +24,12 @@ data class BrevbakerRequest(
                 letterData = letterData,
                 felles =
                     mapFelles(
-                        sakId = behandling.sakId,
-                        soeker = behandling.personerISak.soeker,
+                        sakId = generellBrevData.sak.id,
+                        soeker = generellBrevData.personerISak.soeker,
                         avsender = avsender,
-                        vergeNavn = behandling.personerISak.verge?.navn,
+                        vergeNavn = generellBrevData.personerISak.verge?.navn,
                     ),
-                language = LanguageCode.spraakToLanguageCode(behandling.spraak),
+                language = LanguageCode.spraakToLanguageCode(generellBrevData.spraak),
             )
         }
     }
@@ -61,6 +61,8 @@ enum class EtterlatteBrevKode {
     OMS_FOERSTEGANGSVEDTAK_INNVILGELSE,
     OMS_FOERSTEGANGSVEDTAK_INNVILGELSE_UTFALL,
     OMS_INNVILGELSE_MANUELL,
+    OMS_AVSLAG,
+    OMS_AVSLAG_BEGRUNNELSE,
     OMS_OPPHOER_MANUELL,
     OMS_REVURDERING_ENDRING,
     OMS_REVURDERING_OPPHOER,

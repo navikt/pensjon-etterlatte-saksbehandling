@@ -17,6 +17,7 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.time.YearMonth
 import kotlin.random.Random
 
 internal class AdresseServiceTest {
@@ -53,6 +54,8 @@ internal class AdresseServiceTest {
                 SAKSBEHANDLER,
                 ATTESTANT,
                 vedtaksdato = null,
+                virkningstidspunkt = YearMonth.now(),
+                revurderingInfo = null,
             )
 
         val faktiskAvsender =

@@ -1,7 +1,7 @@
 package no.nav.etterlatte.grunnlagsendring
 
-import no.nav.etterlatte.STOR_SNERK
-import no.nav.etterlatte.TRIVIELL_MIDTPUNKT
+import no.nav.etterlatte.JOVIAL_LAMA
+import no.nav.etterlatte.KONTANT_FOT
 import no.nav.etterlatte.libs.common.person.InnflyttingTilNorge
 import no.nav.etterlatte.libs.common.person.Sivilstand
 import no.nav.etterlatte.libs.common.person.Sivilstatus
@@ -31,32 +31,32 @@ internal class SamsvarHelperKtTest {
 
     @Test
     fun `samsvarAnsvarligeForeldre med samsvar`() {
-        val ansvarligeForeldrePdl = listOf(STOR_SNERK, TRIVIELL_MIDTPUNKT)
-        val ansvarligeForeldreGrunnlag = listOf(STOR_SNERK, TRIVIELL_MIDTPUNKT)
+        val ansvarligeForeldrePdl = listOf(JOVIAL_LAMA, KONTANT_FOT)
+        val ansvarligeForeldreGrunnlag = listOf(JOVIAL_LAMA, KONTANT_FOT)
         val resultat = samsvarAnsvarligeForeldre(ansvarligeForeldrePdl, ansvarligeForeldreGrunnlag)
         assertTrue(resultat.samsvar)
     }
 
     @Test
     fun `samsvarAnsvarligeForeldre uten samsvar`() {
-        val ansvarligeForeldrePdl = listOf(STOR_SNERK, TRIVIELL_MIDTPUNKT)
-        val ansvarligeForeldreGrunnlag = listOf(STOR_SNERK)
+        val ansvarligeForeldrePdl = listOf(JOVIAL_LAMA, KONTANT_FOT)
+        val ansvarligeForeldreGrunnlag = listOf(JOVIAL_LAMA)
         val resultat = samsvarAnsvarligeForeldre(ansvarligeForeldrePdl, ansvarligeForeldreGrunnlag)
         assertFalse(resultat.samsvar)
     }
 
     @Test
     fun `samsvarBarn med samsvar`() {
-        val barnPdl = listOf(STOR_SNERK, TRIVIELL_MIDTPUNKT)
-        val barnGrunnlag = listOf(TRIVIELL_MIDTPUNKT, STOR_SNERK)
+        val barnPdl = listOf(JOVIAL_LAMA, KONTANT_FOT)
+        val barnGrunnlag = listOf(KONTANT_FOT, JOVIAL_LAMA)
         val resultat = samsvarBarn(barnPdl, barnGrunnlag)
         assertTrue(resultat.samsvar)
     }
 
     @Test
     fun `samsvarBarn uten samsvar`() {
-        val barnPdl = listOf(STOR_SNERK, TRIVIELL_MIDTPUNKT)
-        val barnGrunnlag = listOf(TRIVIELL_MIDTPUNKT)
+        val barnPdl = listOf(JOVIAL_LAMA, KONTANT_FOT)
+        val barnGrunnlag = listOf(KONTANT_FOT)
         val resultat = samsvarBarn(barnPdl, barnGrunnlag)
         assertFalse(resultat.samsvar)
     }

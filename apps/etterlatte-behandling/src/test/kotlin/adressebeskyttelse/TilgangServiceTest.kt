@@ -13,10 +13,10 @@ import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
-import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.POSTGRES_VERSION
 import no.nav.etterlatte.libs.database.migrate
+import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
 import no.nav.etterlatte.opprettBehandling
 import no.nav.etterlatte.sak.SakDao
 import no.nav.etterlatte.sak.SakService
@@ -35,7 +35,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
-import java.util.UUID
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -89,7 +88,7 @@ internal class TilgangServiceTest {
 
     @Test
     fun `Skal kunne sette adressebeskyttelse på sak`() {
-        val fnr = Folkeregisteridentifikator.of("08071272487").value
+        val fnr = AVDOED_FOEDSELSNUMMER.value
         val sakId = sakRepo.opprettSak(fnr, SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr).id
         val saksbehandlerMedRoller =
             SaksbehandlerMedRoller(
@@ -111,16 +110,11 @@ internal class TilgangServiceTest {
             )
 
         Assertions.assertEquals(false, harTilgangTilBehandling)
-
-        val smokeTestBehandling =
-            tilgangService.harTilgangTilBehandling(UUID.randomUUID().toString(), saksbehandlerMedRoller)
-
-        Assertions.assertEquals(true, smokeTestBehandling)
     }
 
     @Test
     fun `Skal kunne sette strengt fortrolig på sak og se på den med riktig rolle men ikke fortrolig rolle`() {
-        val fnr = Folkeregisteridentifikator.of("08071272487").value
+        val fnr = AVDOED_FOEDSELSNUMMER.value
         val sakId = sakRepo.opprettSak(fnr, SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr).id
         val jwtclaims = JWTClaimsSet.Builder().claim("groups", strengtfortroligDev).build()
 
@@ -162,7 +156,7 @@ internal class TilgangServiceTest {
 
     @Test
     fun `Skal kunne se på skjermet sak hvis riktig rolle`() {
-        val fnr = Folkeregisteridentifikator.of("08071272487").value
+        val fnr = AVDOED_FOEDSELSNUMMER.value
         val sakId = sakRepo.opprettSak(fnr, SakType.BARNEPENSJON, Enheter.EGNE_ANSATTE.enhetNr).id
         val jwtclaims = JWTClaimsSet.Builder().claim("groups", strengtfortroligDev).build()
         val saksbehandlerMedStrengtfortrolig =

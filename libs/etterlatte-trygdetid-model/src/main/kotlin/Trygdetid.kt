@@ -9,10 +9,18 @@ import java.util.UUID
 
 data class TrygdetidDto(
     val id: UUID,
+    val ident: String?,
     val behandlingId: UUID,
     val beregnetTrygdetid: DetaljertBeregnetTrygdetidDto?,
     val trygdetidGrunnlag: List<TrygdetidGrunnlagDto>,
     val opplysninger: GrunnlagOpplysningerDto,
+    val overstyrtNorskPoengaar: Int?,
+)
+
+data class TrygdetidOverstyringDto(
+    val id: UUID,
+    val behandlingId: UUID,
+    val overstyrtNorskPoengaar: Int?,
 )
 
 data class GrunnlagOpplysningerDto(

@@ -121,10 +121,7 @@ class BehandlingFactoryTest {
                         throw IllegalArgumentException()
                     }
 
-                    override fun <T> inTransaction(
-                        gjenbruk: Boolean,
-                        block: () -> T,
-                    ): T {
+                    override fun <T> inTransaction(block: () -> T): T {
                         return block()
                     }
                 },
@@ -629,8 +626,8 @@ class BehandlingFactoryTest {
             behandlingDaoMock.alleBehandlingerISak(any())
             behandlingHendelserKafkaProducerMock.sendMeldingForHendelseMedDetaljertBehandling(any(), BehandlingHendelseType.OPPRETTET)
             grunnlagService.leggInnNyttGrunnlag(any(), any())
-            grunnlagService.leggTilNyeOpplysninger(sak.id, any())
-            grunnlagService.leggTilNyeOpplysninger(sak.id, any())
+            grunnlagService.leggTilNyeOpplysninger(sak.id, any(), any())
+            grunnlagService.leggTilNyeOpplysninger(sak.id, any(), any())
             oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(any(), any())
             oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(any(), any())
         }

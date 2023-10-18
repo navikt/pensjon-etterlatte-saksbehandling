@@ -10,7 +10,7 @@ import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.libs.ktor.setReady
-import no.nav.etterlatte.vedtaksvurdering.VedtakTilbakekrevingRepository
+import no.nav.etterlatte.vedtaksvurdering.VedtakBehandlingService
 import no.nav.etterlatte.vedtaksvurdering.VedtakTilbakekrevingService
 import no.nav.etterlatte.vedtaksvurdering.VedtaksvurderingRapidService
 import no.nav.etterlatte.vedtaksvurdering.VedtaksvurderingRepository
@@ -47,7 +47,9 @@ class ApplicationBuilder {
 
     private val behandlingKlient = BehandlingKlientImpl(config, httpClient())
     private val vedtaksvurderingService =
-        VedtaksvurderingService(
+        VedtaksvurderingService(repository = VedtaksvurderingRepository.using(dataSource))
+    private val vedtakBehandlingService =
+        VedtakBehandlingService(
             repository = VedtaksvurderingRepository.using(dataSource),
             beregningKlient = BeregningKlientImpl(config, httpClient()),
             vilkaarsvurderingKlient = VilkaarsvurderingKlientImpl(config, httpClient()),
@@ -56,16 +58,16 @@ class ApplicationBuilder {
     private val vedtaksvurderingRapidService = VedtaksvurderingRapidService(publiser = ::publiser)
     private val vedtakTilbakekrevingService =
         VedtakTilbakekrevingService(
-            repository = VedtakTilbakekrevingRepository(dataSource),
+            repository = VedtaksvurderingRepository(dataSource),
         )
 
     private val rapidsConnection =
         RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(getRapidEnv()))
             .withKtorModule {
                 restModule(sikkerLogg, config = HoconApplicationConfig(config)) {
-                    vedtaksvurderingRoute(vedtaksvurderingService, vedtaksvurderingRapidService, behandlingKlient)
-                    automatiskBehandlingRoutes(vedtaksvurderingService, vedtaksvurderingRapidService, behandlingKlient)
-                    samordningsvedtakRoute(vedtaksvurderingService)
+                    vedtaksvurderingRoute(vedtaksvurderingService, vedtakBehandlingService, vedtaksvurderingRapidService, behandlingKlient)
+                    automatiskBehandlingRoutes(vedtakBehandlingService, vedtaksvurderingRapidService, behandlingKlient)
+                    samordningsvedtakRoute(vedtaksvurderingService, vedtakBehandlingService)
                     tilbakekrevingvedtakRoute(vedtakTilbakekrevingService)
                 }
             }

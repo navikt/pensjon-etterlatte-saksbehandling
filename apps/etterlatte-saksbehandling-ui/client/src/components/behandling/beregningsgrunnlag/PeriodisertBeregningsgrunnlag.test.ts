@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
-  PeriodisertBeregningsgrunnlag,
   feilIKomplettePerioderOverIntervall,
+  PeriodisertBeregningsgrunnlag,
 } from '~components/behandling/beregningsgrunnlag/PeriodisertBeregningsgrunnlag'
 
 describe('feilIKomplettePerioderOverIntervall', () => {

@@ -1,5 +1,5 @@
 import { BodyShort, Button, Detail, Heading } from '@navikt/ds-react'
-import { TrashIcon, PencilIcon } from '@navikt/aksel-icons'
+import { PencilIcon, TrashIcon } from '@navikt/aksel-icons'
 import React, { ReactElement, useState } from 'react'
 import styled from 'styled-components'
 import Spinner from '~shared/Spinner'

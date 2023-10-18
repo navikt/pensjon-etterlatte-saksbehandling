@@ -13,6 +13,7 @@ dependencies {
     implementation(project(":libs:etterlatte-sporingslogg"))
     implementation(project(":libs:ktor2client-auth-clientcredentials"))
     implementation(project(":libs:etterlatte-pdl-model"))
+    implementation(project(":libs:etterlatte-funksjonsbrytere"))
 
     implementation(libs.ktor2.servercore)
     implementation(libs.ktor2.servercio)
@@ -38,5 +39,6 @@ dependencies {
     testImplementation(libs.ktor2.servertests)
     testImplementation(libs.kotlinx.coroutinescore)
     testImplementation(libs.navfelles.mockoauth2server)
+    testImplementation(libs.test.kotest.assertionscore)
     testImplementation(project(":libs:testdata"))
 }

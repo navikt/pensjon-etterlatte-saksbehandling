@@ -22,7 +22,6 @@ import no.nav.etterlatte.libs.common.generellbehandling.GenerellBehandling
 import no.nav.etterlatte.libs.common.kunSaksbehandler
 import no.nav.etterlatte.libs.common.sakId
 import no.nav.etterlatte.sak.SakService
-import java.util.UUID
 
 enum class GenerellBehandlingToggle(private val key: String) : FeatureToggle {
     KanBrukeGenerellBehandlingToggle("pensjon-etterlatte.kan-bruke-generell-behandling"),
@@ -84,7 +83,7 @@ internal fun Route.generellbehandlingRoutes(
         }
     }
 
-    get("/api/generellbehandling/attester/{$SAKID_CALL_PARAMETER}/${GENERELLBEHANDLINGID_CALL_PARAMETER}") {
+    post("/api/generellbehandling/attester/{$SAKID_CALL_PARAMETER}/{$GENERELLBEHANDLINGID_CALL_PARAMETER}") {
         hvisEnabled(GenerellBehandlingToggle.KanBrukeGenerellBehandlingToggle) {
             val generellBehandlingId = generellBehandlingId
             kunSaksbehandler { saksbehandler ->
@@ -97,12 +96,12 @@ internal fun Route.generellbehandlingRoutes(
         }
     }
 
-    put("/api/generellbehandling/{$SAKID_CALL_PARAMETER}") {
+    put("/api/generellbehandling/oppdater/{$SAKID_CALL_PARAMETER}") {
         hvisEnabled(GenerellBehandlingToggle.KanBrukeGenerellBehandlingToggle) {
             kunSaksbehandler {
                 val request = call.receive<GenerellBehandling>()
                 inTransaction {
-                    generellBehandlingService.oppdaterBehandling(
+                    generellBehandlingService.lagreNyeOpplysninger(
                         request,
                     )
                 }
@@ -114,13 +113,11 @@ internal fun Route.generellbehandlingRoutes(
         }
     }
 
-    get("/api/generellbehandling/{generellbehandlingId}") {
+    get("/api/generellbehandling/hent/{$GENERELLBEHANDLINGID_CALL_PARAMETER}") {
         hvisEnabled(GenerellBehandlingToggle.KanBrukeGenerellBehandlingToggle) {
             kunSaksbehandler {
-                val id =
-                    call.parameters["generellbehandlingId"]
-                        ?: return@hvisEnabled call.respond(HttpStatusCode.NotFound, "Generell behandling finnes ikke")
-                val hentetBehandling = inTransaction { generellBehandlingService.hentBehandlingMedId(UUID.fromString(id)) }
+                val generellBehandlingId = generellBehandlingId
+                val hentetBehandling = inTransaction { generellBehandlingService.hentBehandlingMedId(generellBehandlingId) }
                 call.respond(hentetBehandling ?: HttpStatusCode.NotFound)
             }
         }

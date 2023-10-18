@@ -7,6 +7,7 @@ import {
   ITrygdetid,
   ITrygdetidGrunnlagType,
   opprettTrygdetid,
+  overstyrTrygdetid,
   sorterLand,
 } from '~shared/api/trygdetid'
 import Spinner from '~shared/Spinner'
@@ -22,6 +23,7 @@ import { IBehandlingStatus, IUtenlandstilsnitt, IUtenlandstilsnittType } from '~
 import { oppdaterBehandlingsstatus } from '~store/reducers/BehandlingReducer'
 import { useAppDispatch } from '~store/Store'
 import { TrygdetidDetaljer } from '~components/behandling/trygdetid/detaljer/TrygdetidDetaljer'
+import { OverstyrtTrygdetid } from './OverstyrtTrygdetid'
 
 interface Props {
   redigerbar: boolean
@@ -37,6 +39,7 @@ export const Trygdetid = ({ redigerbar, utenlandstilsnitt }: Props) => {
   const dispatch = useAppDispatch()
   const [hentTrygdetidRequest, fetchTrygdetid] = useApiCall(hentTrygdetid)
   const [opprettTrygdetidRequest, requestOpprettTrygdetid] = useApiCall(opprettTrygdetid)
+  const [overstyrTrygdetidRequest, requestOverstyrTrygdetid] = useApiCall(overstyrTrygdetid)
   const [hentAlleLandRequest, fetchAlleLand] = useApiCall(hentAlleLand)
   const [trygdetid, setTrygdetid] = useState<ITrygdetid>()
   const [landListe, setLandListe] = useState<ILand[]>()
@@ -44,6 +47,21 @@ export const Trygdetid = ({ redigerbar, utenlandstilsnitt }: Props) => {
   const oppdaterTrygdetid = (trygdetid: ITrygdetid) => {
     setTrygdetid(trygdetid)
     dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.TRYGDETID_OPPDATERT))
+  }
+
+  const overstyrTrygdetidPoengaar = (trygdetid: ITrygdetid) => {
+    if (trygdetid.overstyrtNorskPoengaar) {
+      requestOverstyrTrygdetid(
+        {
+          id: trygdetid.id,
+          behandlingId: trygdetid.behandlingId,
+          overstyrtNorskPoengaar: trygdetid.overstyrtNorskPoengaar,
+        },
+        (trygdetid: ITrygdetid) => {
+          oppdaterTrygdetid(trygdetid)
+        }
+      )
+    }
   }
 
   useEffect(() => {
@@ -94,6 +112,11 @@ export const Trygdetid = ({ redigerbar, utenlandstilsnitt }: Props) => {
             trygdetidGrunnlagType={ITrygdetidGrunnlagType.FAKTISK}
             redigerbar={redigerbar}
           />
+          <OverstyrtTrygdetid
+            redigerbar={redigerbar}
+            trygdetid={trygdetid}
+            overstyrTrygdetidPoengaar={overstyrTrygdetidPoengaar}
+          />
           <TrygdetidGrunnlagListe
             trygdetid={trygdetid}
             setTrygdetid={oppdaterTrygdetid}
@@ -112,6 +135,9 @@ export const Trygdetid = ({ redigerbar, utenlandstilsnitt }: Props) => {
       )}
       {isPending(opprettTrygdetidRequest) && <Spinner visible={true} label="Oppretter trygdetid" />}
       {isFailure(hentTrygdetidRequest) && <ApiErrorAlert>En feil har oppstått ved henting av trygdetid</ApiErrorAlert>}
+      {isFailure(overstyrTrygdetidRequest) && (
+        <ApiErrorAlert>En feil har oppstått ved lagring av norsk poengår</ApiErrorAlert>
+      )}
       {isFailure(opprettTrygdetidRequest) && (
         <ApiErrorAlert>En feil har oppstått ved opprettelse av trygdetid</ApiErrorAlert>
       )}

@@ -46,7 +46,7 @@ internal class AutomatiskBehandlingRoutesKtTest {
     private val server = MockOAuth2Server()
     private lateinit var applicationConfig: HoconApplicationConfig
     private val behandlingKlient = mockk<BehandlingKlient>()
-    private val vedtaksvurderingService: VedtaksvurderingService = mockk()
+    private val service: VedtakBehandlingService = mockk()
     private val rapidService: VedtaksvurderingRapidService = mockk()
 
     @BeforeAll
@@ -78,9 +78,9 @@ internal class AutomatiskBehandlingRoutesKtTest {
         testApplication {
             val opprettetVedtak = vedtak()
             val behandlingId = UUID.randomUUID()
-            coEvery { vedtaksvurderingService.opprettEllerOppdaterVedtak(any(), any()) } returns
+            coEvery { service.opprettEllerOppdaterVedtak(any(), any()) } returns
                 opprettetVedtak
-            coEvery { vedtaksvurderingService.fattVedtak(behandlingId, any()) } returns
+            coEvery { service.fattVedtak(behandlingId, any()) } returns
                 VedtakOgRapid(
                     opprettetVedtak.toDto(),
                     mockk(),
@@ -92,7 +92,7 @@ internal class AutomatiskBehandlingRoutesKtTest {
                 )
             coEvery { behandlingKlient.tildelSaksbehandler(any(), any()) } returns true
             coEvery {
-                vedtaksvurderingService.attesterVedtak(
+                service.attesterVedtak(
                     behandlingId,
                     any(),
                     any(),
@@ -108,7 +108,7 @@ internal class AutomatiskBehandlingRoutesKtTest {
             application {
                 restModule(log) {
                     automatiskBehandlingRoutes(
-                        vedtaksvurderingService,
+                        service,
                         rapidService,
                         behandlingKlient,
                     )
@@ -128,11 +128,11 @@ internal class AutomatiskBehandlingRoutesKtTest {
             Assertions.assertEquals(vedtak.rapidInfo.vedtakhendelse, VedtakKafkaHendelseType.ATTESTERT)
 
             coVerify(exactly = 1) {
-                vedtaksvurderingService.opprettEllerOppdaterVedtak(behandlingId, any())
+                service.opprettEllerOppdaterVedtak(behandlingId, any())
                 behandlingKlient.hentOppgaverForSak(1, any())
-                vedtaksvurderingService.fattVedtak(behandlingId, any())
+                service.fattVedtak(behandlingId, any())
                 behandlingKlient.tildelSaksbehandler(any(), any())
-                vedtaksvurderingService.attesterVedtak(behandlingId, any(), any())
+                service.attesterVedtak(behandlingId, any(), any())
                 rapidService.sendToRapid(any())
             }
             coVerify(atLeast = 1) {

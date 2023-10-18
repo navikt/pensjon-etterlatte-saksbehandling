@@ -38,9 +38,9 @@ fun jobs(applicationContext: ApplicationContext) {
 fun rapidApplication(applicationContext: ApplicationContext): RapidsConnection =
     applicationContext.rapidsConnection
         .apply {
-            applicationContext.vedtakMottaker
+            applicationContext.vedtakMottakRiver
             applicationContext.kvitteringMottaker
-            applicationContext.oppgavetrigger
+            applicationContext.oppgavetriggerRiver
 
             register(
                 object : RapidsConnection.StatusListener {

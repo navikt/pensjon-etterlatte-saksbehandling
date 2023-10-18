@@ -5,6 +5,7 @@ export interface Generellbehandling {
   type: GenerellBehandlingType
   opprettet: Date
   status: Status
+  tilknyttetBehandling?: string
 }
 
 export enum Status {
@@ -14,25 +15,19 @@ export enum Status {
   AVBRUTT = 'AVBRUTT',
 }
 
-export const Innholdstyper: Record<GenerellBehandlingType, string> = {
-  UTLAND: 'Utland',
-  ANNEN: 'Annen',
-}
+export type GenerellBehandlingType = GenerellBehandlingKravpakkeUtlandType | GenerellBehandlingAnnenType
 
-export type GenerellBehandlingType = GenerellBehandlingUtlandType | GenerellBehandlingAnnenType
-
-type GenerellBehandlingUtlandType = 'UTLAND'
+type GenerellBehandlingKravpakkeUtlandType = 'KRAVPAKKE_UTLAND'
 type GenerellBehandlingAnnenType = 'ANNEN'
 
-export type Innhold = Utland | Annen
+export type Innhold = KravpakkeUtland | Annen
 
-export interface Utland {
-  type: GenerellBehandlingUtlandType
+export interface KravpakkeUtland {
+  type: GenerellBehandlingKravpakkeUtlandType
   landIsoKode?: string[]
   dokumenter?: Dokumenter
   rinanummer?: string
   begrunnelse?: string
-  tilknyttetBehandling?: string
 }
 
 export interface Dokumenter {

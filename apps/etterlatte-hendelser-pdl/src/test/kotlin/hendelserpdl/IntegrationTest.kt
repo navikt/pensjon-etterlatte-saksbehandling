@@ -25,6 +25,7 @@ import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype.OPPRETTET
 import no.nav.etterlatte.libs.common.toJson
+import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
 import no.nav.person.pdl.leesah.Endringstype
 import no.nav.person.pdl.leesah.Personhendelse
 import no.nav.person.pdl.leesah.doedsfall.Doedsfall
@@ -80,7 +81,7 @@ class IntegrationTest {
                 endringstype = Endringstype.OPPRETTET
                 master = ""
                 opprettet = Instant.now()
-                personidenter = listOf(FNR.value)
+                personidenter = listOf(AVDOED_FOEDSELSNUMMER.value)
                 opplysningstype = LeesahOpplysningstype.DOEDSFALL_V1.toString()
                 doedsfall =
                     Doedsfall().apply {
@@ -158,7 +159,7 @@ class IntegrationTest {
                             val headers = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
                             val json =
                                 mapOf(
-                                    "folkeregisterident" to FNR.value,
+                                    "folkeregisterident" to AVDOED_FOEDSELSNUMMER.value,
                                     "type" to "FOLKEREGISTERIDENT",
                                 ).toJson()
                             respond(json, headers = headers)

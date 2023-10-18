@@ -1,0 +1,14 @@
+apiVersion: nais.io/v1
+kind: Naisjob
+metadata:
+  labels:
+    team: etterlatte
+  name: start-grunnlagsversjonering
+  namespace: etterlatte
+spec:
+  image: europe-north1-docker.pkg.dev/nais-management-233d/etterlatte/pensjon-etterlatte-saksbehandling-start-grunnlagsversjonering:2023.10.17-12.08-7d5a181
+  kafka:
+    pool: nav-dev
+  env:
+    - name: KAFKA_TARGET_TOPIC
+      value: etterlatte.dodsmelding

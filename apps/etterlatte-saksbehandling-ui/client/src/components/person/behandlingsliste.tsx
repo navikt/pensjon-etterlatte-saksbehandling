@@ -43,7 +43,7 @@ const VedtakKolonner = (props: { behandlingsId: string }) => {
       )}
       {isFailure(vedtak) && (
         <ExclamationmarkTriangleFillIcon
-          title={vedtak.error.error || 'Feil oppsto ved henting av sammendrag for behandling'}
+          title={vedtak.error.detail || 'Feil oppsto ved henting av sammendrag for behandling'}
         />
       )}
     </>

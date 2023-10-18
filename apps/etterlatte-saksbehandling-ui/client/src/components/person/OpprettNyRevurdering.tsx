@@ -32,7 +32,7 @@ export const OpprettNyRevurdering = ({
       },
       (err) => {
         setError('En feil skjedde ved opprettelse av revurderingen. Prøv igjen senere.')
-        console.error(`Feil ved opprettelse av revurdering, status: ${err.status} err: ${err.error}`)
+        console.error(`Feil ved opprettelse av revurdering, status: ${err.status} err: ${err.detail}`)
       }
     )
   }

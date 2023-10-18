@@ -24,7 +24,7 @@ export default function BehandleJournalfoeringOppgave() {
   useEffect(() => {
     if (GYLDIG_FNR(bruker)) {
       hentPerson(bruker!!, undefined, (error) => {
-        if (error.statusCode === 404) {
+        if (error.status === 404) {
           // TODO: Avventer design på hvordan vi skal håndtere visning av brukere som ikke finnes i vårt system
         }
       })

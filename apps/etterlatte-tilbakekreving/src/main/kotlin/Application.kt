@@ -49,7 +49,7 @@ class Server(private val context: ApplicationContext) {
 
     fun run() =
         with(context) {
-            // kravgrunnlagConsumer.start() TODO - må få økonomi til å gjøre oppsett for kø
+            kravgrunnlagConsumer.start()
 
             setReady()
             engine.start(true)

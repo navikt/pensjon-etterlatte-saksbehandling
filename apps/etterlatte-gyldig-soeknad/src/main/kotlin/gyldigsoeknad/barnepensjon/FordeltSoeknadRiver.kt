@@ -27,8 +27,9 @@ internal class FordeltSoeknadRiver(
             validate { it.requireKey(FordelerFordelt.skjemaInfoKey) }
             validate { it.demandValue(SoeknadInnsendt.skjemaInfoTypeKey, SoeknadType.BARNEPENSJON.name) }
             validate { it.rejectKey(GyldigSoeknadVurdert.behandlingIdKey) }
-            validate { it.rejectValue("trengerManuellJor", true) }
-        }    }
+            validate { it.rejectValue("trengerManuellJournalfoering", true) }
+        }
+    }
 
     override fun haandterPakke(
         packet: JsonMessage,

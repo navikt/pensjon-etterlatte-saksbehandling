@@ -22,7 +22,7 @@ const OPPGAVETYPE_TIL_TAGDATA: Record<Oppgavetype, { variant: Variants; text: st
   ATTESTERING: { variant: Variants.ALT3_FILLED, text: 'Attestering' },
   UNDERKJENT: { variant: Variants.ALT3, text: 'Underkjent' },
   GOSYS: { variant: Variants.INFO_FILLED, text: 'Gosys-oppgave' },
-  UTLAND: { variant: Variants.ALT2_FILLED, text: 'Utlandsoppgave' },
+  KRAVPAKKE_UTLAND: { variant: Variants.ALT2_FILLED, text: 'Kravpakke' },
   KLAGE: { variant: Variants.ALT2, text: 'Klage' },
   OMGJOERING: { variant: Variants.ALT2_MODERATE, text: 'Omgjøring' },
   TILBAKEKREVING: { variant: Variants.ALT2, text: 'Tilbakekreving' },
@@ -33,5 +33,9 @@ export const OppgavetypeTag = (props: { oppgavetype: Oppgavetype }) => {
   const { oppgavetype } = props
 
   const tagdata = OPPGAVETYPE_TIL_TAGDATA[oppgavetype]
-  return <Tag variant={tagdata.variant}>{tagdata.text}</Tag>
+  if (tagdata) {
+    return <Tag variant={tagdata.variant}>{tagdata.text}</Tag>
+  } else {
+    return <Tag variant={Variants.ALT1_FILLED}>Ukjent oppgave</Tag>
+  }
 }

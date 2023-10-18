@@ -1,6 +1,5 @@
 import { ChildEyesIcon } from '@navikt/aksel-icons'
-import { CopyButton } from '@navikt/ds-react'
-import { Heading, Link, Table } from '@navikt/ds-react'
+import { CopyButton, Heading, Link, Table } from '@navikt/ds-react'
 import { IFamilieforhold, IPdlPerson } from '~shared/types/Person'
 import styled from 'styled-components'
 import { IAdresse } from '~shared/types/IAdresse'
@@ -79,8 +78,8 @@ const BarnRow = ({ barn, familieforhold }: { barn: IPdlPerson; familieforhold: I
       }`
     : 'Mangler adresse'
 
-  const gjenlevendeFnr = familieforhold.gjenlevende.opplysning.foedselsnummer
-  const erGjenlevendesBarn = barn.familieRelasjon?.ansvarligeForeldre?.includes(gjenlevendeFnr)
+  const barnetsFnr = barn.foedselsnummer
+  const erGjenlevendesBarn = familieforhold.gjenlevende.opplysning.familieRelasjon?.barn?.includes(barnetsFnr) ?? false
 
   return (
     <Table.Row>

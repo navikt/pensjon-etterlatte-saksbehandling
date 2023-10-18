@@ -6,10 +6,12 @@ import no.nav.etterlatte.libs.common.generellbehandling.Innhold
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.token.Saksbehandler
 import org.slf4j.LoggerFactory
+import java.time.temporal.ChronoUnit
 import java.util.UUID
 
 class DokumentManglerDatoException(message: String) : Exception(message)
@@ -19,6 +21,8 @@ class LandFeilIsokodeException(message: String) : Exception(message)
 class ManglerLandkodeException(message: String) : Exception(message)
 
 class ManglerRinanummerException(message: String) : Exception(message)
+
+class KanIkkeEndreFattetEllerAttestertBehandling(message: String) : Exception(message)
 
 class GenerellBehandlingService(
     private val generellBehandlingDao: GenerellBehandlingDao,
@@ -33,7 +37,7 @@ class GenerellBehandlingService(
                 opprettetbehandling.id.toString(),
                 opprettetbehandling.sakId,
                 OppgaveKilde.GENERELL_BEHANDLING,
-                OppgaveType.UTLAND,
+                OppgaveType.KRAVPAKKE_UTLAND,
                 null,
             )
         tildelSaksbehandlerTilNyOppgaveHvisFinnes(oppgaveForGenerellBehandling, opprettetbehandling)
@@ -72,18 +76,20 @@ class GenerellBehandlingService(
             "Behandlingen må ha status opprettet, hadde ${generellBehandling.status}"
         }
         when (generellBehandling.innhold) {
-            is Innhold.Utland -> validerUtland(generellBehandling.innhold as Innhold.Utland)
+            is Innhold.KravpakkeUtland -> validerUtland(generellBehandling.innhold as Innhold.KravpakkeUtland)
             is Innhold.Annen -> throw NotImplementedError("Ikke implementert")
             null -> throw NotImplementedError("Ikke implementert")
         }
         oppdaterBehandling(generellBehandling.copy(status = GenerellBehandling.Status.FATTET))
         oppgaveService.ferdigStillOppgaveUnderBehandling(generellBehandling.id.toString(), saksbehandler)
+        val trettiDagerFremITid = Tidspunkt.now().plus(30L, ChronoUnit.DAYS)
         oppgaveService.opprettNyOppgaveMedSakOgReferanse(
             generellBehandling.id.toString(),
             generellBehandling.sakId,
             OppgaveKilde.GENERELL_BEHANDLING,
             OppgaveType.ATTESTERING,
             merknad = "Attestering av generell behandling type ${generellBehandling.type.name}",
+            frist = trettiDagerFremITid,
         )
     }
 
@@ -101,7 +107,7 @@ class GenerellBehandlingService(
         oppgaveService.ferdigStillOppgaveUnderBehandling(generellbehandlingId.toString(), saksbehandler)
     }
 
-    private fun validerUtland(innhold: Innhold.Utland) {
+    private fun validerUtland(innhold: Innhold.KravpakkeUtland) {
         if (innhold.landIsoKode.isEmpty()) {
             throw ManglerLandkodeException("Mangler landkode")
         }
@@ -127,7 +133,20 @@ class GenerellBehandlingService(
         }
     }
 
-    fun oppdaterBehandling(generellBehandling: GenerellBehandling): GenerellBehandling {
+    fun lagreNyeOpplysninger(generellBehandling: GenerellBehandling): GenerellBehandling {
+        val lagretBehandling = generellBehandlingDao.hentGenerellBehandlingMedId(generellBehandling.id)
+        kanLagreNyBehandling(lagretBehandling)
+        return this.oppdaterBehandling(generellBehandling)
+    }
+
+    private fun kanLagreNyBehandling(generellBehandling: GenerellBehandling?) {
+        requireNotNull(generellBehandling) { "Behandlingen finnes ikke " }
+        if (!generellBehandling.kanEndres()) {
+            throw KanIkkeEndreFattetEllerAttestertBehandling("Behandling kan ikke være fattet eller attestert hvis du skal endre den")
+        }
+    }
+
+    private fun oppdaterBehandling(generellBehandling: GenerellBehandling): GenerellBehandling {
         return generellBehandlingDao.oppdaterGenerellBehandling(generellBehandling)
     }
 

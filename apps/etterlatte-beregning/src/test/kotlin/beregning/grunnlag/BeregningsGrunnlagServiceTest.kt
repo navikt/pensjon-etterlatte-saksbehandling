@@ -27,9 +27,10 @@ import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetodeBeregningsgrunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeskenMedIBeregning
-import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
+import no.nav.etterlatte.libs.testdata.grunnlag.HELSOESKEN2_FOEDSELSNUMMER
+import no.nav.etterlatte.libs.testdata.grunnlag.HELSOESKEN_FOEDSELSNUMMER
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -52,12 +53,6 @@ internal class BeregningsGrunnlagServiceTest {
             featureToggleService,
         )
 
-    private val personidenter =
-        listOf(
-            "05108208963",
-            "18061264406",
-        )
-
     @Test
     fun `skal lagre soeksken med i beregning hvis ikke det finnes`() {
         val soeskenMedIBeregning: List<GrunnlagMedPeriode<List<SoeskenMedIBeregning>>> =
@@ -67,7 +62,7 @@ internal class BeregningsGrunnlagServiceTest {
                     tom = null,
                     data =
                         listOf(
-                            SoeskenMedIBeregning(STOR_SNERK, true),
+                            SoeskenMedIBeregning(HELSOESKEN_FOEDSELSNUMMER, true),
                         ),
                 ),
             )
@@ -117,7 +112,7 @@ internal class BeregningsGrunnlagServiceTest {
             )
         every { revurdering.virkningstidspunkt } returns virkMock
 
-        val soesken = personidenter.map { Folkeregisteridentifikator.of(it) }
+        val soesken = listOf(HELSOESKEN_FOEDSELSNUMMER, HELSOESKEN2_FOEDSELSNUMMER)
 
         val periode1 =
             GrunnlagMedPeriode(
@@ -193,7 +188,7 @@ internal class BeregningsGrunnlagServiceTest {
             )
         every { revurdering.virkningstidspunkt } returns virkMock
 
-        val soesken = personidenter.map { Folkeregisteridentifikator.of(it) }
+        val soesken = listOf(HELSOESKEN_FOEDSELSNUMMER, HELSOESKEN2_FOEDSELSNUMMER)
 
         val periode1 =
             GrunnlagMedPeriode(
@@ -442,10 +437,6 @@ internal class BeregningsGrunnlagServiceTest {
             every { behandlingType } returns behandlingstype
             every { virkningstidspunkt } returns VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2023, 1))
         }
-
-    private companion object {
-        val STOR_SNERK = Folkeregisteridentifikator.of("11057523044")
-    }
 
     private fun beregningsgrunnlag(
         behandlingId: UUID = randomUUID(),

@@ -35,12 +35,18 @@ import java.util.UUID.randomUUID
 val kilde = Grunnlagsopplysning.Pdl(Tidspunkt.now(), null, "opplysningsId1")
 val statiskUuid = randomUUID()!!
 
-val AVDOED_FOEDSELSNUMMER = Folkeregisteridentifikator.of("01448203510")
-val GJENLEVENDE_FOEDSELSNUMMER = Folkeregisteridentifikator.of("29106323621")
-val SOEKER_FOEDSELSNUMMER = Folkeregisteridentifikator.of("16021254243")
-val HELSOESKEN_FOEDSELSNUMMER = Folkeregisteridentifikator.of("06051250220")
-val HALVSOESKEN_FOEDSELSNUMMER = Folkeregisteridentifikator.of("09011076618")
-val HALVSOESKEN_ANNEN_FORELDER = Folkeregisteridentifikator.of("20127905941")
+val AVDOED_FOEDSELSNUMMER = Folkeregisteridentifikator.of("08498224343") // Gjennomsiktig Klemme
+val AVDOED2_FOEDSELSNUMMER = Folkeregisteridentifikator.of("16508201382") // Kunnskapsrik Kråkebolle
+val GJENLEVENDE_FOEDSELSNUMMER = Folkeregisteridentifikator.of("01498344336") // Kunst Løvinne
+val SOEKER_FOEDSELSNUMMER = Folkeregisteridentifikator.of("25478323363") // Rød Blanding
+val SOEKER2_FOEDSELSNUMMER = Folkeregisteridentifikator.of("09438336165") // Kry Vits
+val INNSENDER_FOEDSELSNUMMER = Folkeregisteridentifikator.of("18498248795") // Vrien Netthinne
+val HELSOESKEN_FOEDSELSNUMMER = Folkeregisteridentifikator.of("16478313601") // Nødvendig Dugnad
+val HELSOESKEN2_FOEDSELSNUMMER = Folkeregisteridentifikator.of("09508229892") // Tru Panjabi
+val HELSOESKEN3_FOEDSELSNUMMER = Folkeregisteridentifikator.of("17418340118") // Kontant Kjede
+val HALVSOESKEN_FOEDSELSNUMMER = Folkeregisteridentifikator.of("27458328671") // Gjestfri Geometri
+val HALVSOESKEN_ANNEN_FORELDER = Folkeregisteridentifikator.of("31488338237") // Ulogisk Bensin
+val VERGE_FOEDSELSNUMMER = Folkeregisteridentifikator.of("02438311109") // Vrien Påske
 
 val ADRESSE_DEFAULT =
     listOf(

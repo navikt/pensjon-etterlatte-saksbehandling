@@ -24,8 +24,8 @@ import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveListe
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
-import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
 import no.nav.etterlatte.module
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -51,7 +51,7 @@ class OppgaveRoutesTest : BehandlingIntegrationTest() {
 
     @Test
     fun verdikjedetest() {
-        val fnr = Folkeregisteridentifikator.of("08071272487").value
+        val fnr = AVDOED_FOEDSELSNUMMER.value
 
         testApplication {
             environment {

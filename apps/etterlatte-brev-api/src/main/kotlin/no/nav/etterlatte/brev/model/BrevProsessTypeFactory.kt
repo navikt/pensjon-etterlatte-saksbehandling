@@ -1,32 +1,32 @@
 package no.nav.etterlatte.brev.model
 
-import no.nav.etterlatte.brev.behandling.Behandling
+import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 
 class BrevProsessTypeFactory(private val featureToggleService: FeatureToggleService) {
-    fun fra(behandling: Behandling): BrevProsessType {
-        return when (behandling.sakType) {
-            SakType.OMSTILLINGSSTOENAD -> omsBrev(behandling)
-            SakType.BARNEPENSJON -> bpBrev(behandling)
+    fun fra(generellBrevData: GenerellBrevData): BrevProsessType {
+        return when (generellBrevData.sak.sakType) {
+            SakType.OMSTILLINGSSTOENAD -> omsBrev(generellBrevData)
+            SakType.BARNEPENSJON -> bpBrev(generellBrevData)
         }
     }
 
-    private fun omsBrev(behandling: Behandling): BrevProsessType {
-        return when (behandling.vedtak.type) {
+    private fun omsBrev(generellBrevData: GenerellBrevData): BrevProsessType {
+        return when (generellBrevData.forenkletVedtak.type) {
             VedtakType.INNVILGELSE -> BrevProsessType.REDIGERBAR
             VedtakType.OPPHOER ->
-                when (behandling.revurderingsaarsak?.redigerbartBrev) {
+                when (generellBrevData.revurderingsaarsak?.redigerbartBrev) {
                     true -> BrevProsessType.REDIGERBAR
                     else -> BrevProsessType.MANUELL
                 }
 
-            VedtakType.AVSLAG,
+            VedtakType.AVSLAG -> BrevProsessType.REDIGERBAR
             VedtakType.ENDRING,
             ->
-                when (behandling.revurderingsaarsak) {
+                when (generellBrevData.revurderingsaarsak) {
                     RevurderingAarsak.INNTEKTSENDRING,
                     RevurderingAarsak.ANNEN,
                     -> BrevProsessType.REDIGERBAR
@@ -38,8 +38,8 @@ class BrevProsessTypeFactory(private val featureToggleService: FeatureToggleServ
         }
     }
 
-    private fun bpBrev(behandling: Behandling): BrevProsessType {
-        return when (behandling.vedtak.type) {
+    private fun bpBrev(generellBrevData: GenerellBrevData): BrevProsessType {
+        return when (generellBrevData.forenkletVedtak.type) {
             VedtakType.INNVILGELSE ->
                 when (
                     featureToggleService.isEnabled(
@@ -52,7 +52,7 @@ class BrevProsessTypeFactory(private val featureToggleService: FeatureToggleServ
                 }
 
             VedtakType.ENDRING ->
-                when (behandling.revurderingsaarsak) {
+                when (generellBrevData.revurderingsaarsak) {
                     RevurderingAarsak.SOESKENJUSTERING -> BrevProsessType.REDIGERBAR
                     RevurderingAarsak.FENGSELSOPPHOLD -> BrevProsessType.REDIGERBAR
                     RevurderingAarsak.UT_AV_FENGSEL -> BrevProsessType.REDIGERBAR
@@ -62,7 +62,7 @@ class BrevProsessTypeFactory(private val featureToggleService: FeatureToggleServ
                 }
 
             VedtakType.OPPHOER ->
-                when (behandling.revurderingsaarsak?.redigerbartBrev) {
+                when (generellBrevData.revurderingsaarsak?.redigerbartBrev) {
                     true -> BrevProsessType.REDIGERBAR
                     else -> BrevProsessType.MANUELL
                 }

@@ -45,35 +45,47 @@ class VedtaksvurderingRepository(private val datasource: DataSource) : Transacti
         tx: TransactionalSession? = null,
     ): Vedtak =
         tx.session {
+            val innholdParams =
+                when (opprettVedtak.innhold) {
+                    is VedtakTilbakekrevingInnhold -> mapOf("tilbakekreving" to opprettVedtak.innhold.tilbakekreving.toJson())
+                    is VedtakBehandlingInnhold ->
+                        opprettVedtak.innhold.let {
+                            mapOf(
+                                "behandlingtype" to it.behandlingType.name,
+                                "datovirkfom" to it.virkningstidspunkt.atDay(1),
+                                "beregningsresultat" to it.beregning?.toJson(),
+                                "avkorting" to it.avkorting?.toJson(),
+                                "vilkaarsresultat" to it.vilkaarsvurdering?.toJson(),
+                                "revurderingsaarsak" to it.revurderingAarsak?.name,
+                                "revurderinginfo" to it.revurderingInfo?.toJson(),
+                            )
+                        }
+                }
             queryOf(
                 statement = """
                         INSERT INTO vedtak(
                             behandlingId, sakid, fnr, behandlingtype, saktype, vedtakstatus, type, datovirkfom, 
-                            beregningsresultat, avkorting, vilkaarsresultat, revurderingsaarsak, revurderinginfo)
+                            beregningsresultat, avkorting, vilkaarsresultat, revurderingsaarsak, revurderinginfo,
+                            tilbakekreving)
                         VALUES (:behandlingId, :sakid, :fnr, :behandlingtype, :saktype, :vedtakstatus, :type, 
                             :datovirkfom, :beregningsresultat, :avkorting, :vilkaarsresultat, :revurderingsaarsak,
-                            :revurderinginfo)
+                            :revurderinginfo, :tilbakekreving)
                         RETURNING id
                         """,
                 mapOf(
                     "behandlingId" to opprettVedtak.behandlingId,
-                    "behandlingtype" to opprettVedtak.behandlingType.name,
                     "sakid" to opprettVedtak.sakId,
                     "saktype" to opprettVedtak.sakType.name,
                     "fnr" to opprettVedtak.soeker.value,
                     "vedtakstatus" to opprettVedtak.status.name,
                     "type" to opprettVedtak.type.name,
-                    "datovirkfom" to opprettVedtak.virkningstidspunkt.atDay(1),
-                    "beregningsresultat" to opprettVedtak.beregning?.toJson(),
-                    "avkorting" to opprettVedtak.avkorting?.toJson(),
-                    "vilkaarsresultat" to opprettVedtak.vilkaarsvurdering?.toJson(),
-                    "revurderingsaarsak" to opprettVedtak.revurderingsaarsak?.name,
-                    "revurderinginfo" to opprettVedtak.revurderingInfo?.toJson(),
-                ),
+                ) + innholdParams,
             )
                 .let { query -> this.run(query.asUpdateAndReturnGeneratedKey) }
                 ?.let { vedtakId ->
-                    opprettUtbetalingsperioder(vedtakId, opprettVedtak.utbetalingsperioder, this)
+                    if (opprettVedtak.innhold is VedtakBehandlingInnhold) {
+                        opprettUtbetalingsperioder(vedtakId, opprettVedtak.innhold.utbetalingsperioder, this)
+                    }
                 } ?: throw Exception("Kunne ikke opprette vedtak for behandling ${opprettVedtak.behandlingId}")
             return@session hentVedtak(opprettVedtak.behandlingId, this)
                 ?: throw Exception("Kunne ikke opprette vedtak for behandling ${opprettVedtak.behandlingId}")
@@ -84,28 +96,42 @@ class VedtaksvurderingRepository(private val datasource: DataSource) : Transacti
         tx: TransactionalSession? = null,
     ): Vedtak =
         tx.session {
+            val params =
+                when (oppdatertVedtak.innhold) {
+                    is VedtakBehandlingInnhold ->
+                        mapOf(
+                            "datovirkfom" to oppdatertVedtak.innhold.virkningstidspunkt.atDay(1),
+                            "type" to oppdatertVedtak.type.name,
+                            "beregningsresultat" to oppdatertVedtak.innhold.beregning?.toJson(),
+                            "avkorting" to oppdatertVedtak.innhold.avkorting?.toJson(),
+                            "vilkaarsresultat" to oppdatertVedtak.innhold.vilkaarsvurdering?.toJson(),
+                            "behandlingid" to oppdatertVedtak.behandlingId,
+                            "revurderinginfo" to oppdatertVedtak.innhold.revurderingInfo?.toJson(),
+                        )
+                    is VedtakTilbakekrevingInnhold ->
+                        mapOf(
+                            "type" to oppdatertVedtak.type.name,
+                            "behandlingid" to oppdatertVedtak.behandlingId,
+                            "tilbakekreving" to oppdatertVedtak.innhold.tilbakekreving?.toJson(),
+                        )
+                }
+
             queryOf(
                 statement = """
                         UPDATE vedtak 
                         SET datovirkfom = :datovirkfom, type = :type, 
                             beregningsresultat = :beregningsresultat, avkorting = :avkorting,
-                             vilkaarsresultat = :vilkaarsresultat, revurderinginfo = :revurderinginfo
+                             vilkaarsresultat = :vilkaarsresultat, revurderinginfo = :revurderinginfo,
+                             tilbakekreving = :tilbakekreving
                         WHERE behandlingId = :behandlingid
                         """,
-                mapOf(
-                    "datovirkfom" to oppdatertVedtak.virkningstidspunkt.atDay(1),
-                    "type" to oppdatertVedtak.type.name,
-                    "beregningsresultat" to oppdatertVedtak.beregning?.toJson(),
-                    "avkorting" to oppdatertVedtak.avkorting?.toJson(),
-                    "vilkaarsresultat" to oppdatertVedtak.vilkaarsvurdering?.toJson(),
-                    "behandlingid" to oppdatertVedtak.behandlingId,
-                    "revurderinginfo" to oppdatertVedtak.revurderingInfo?.toJson(),
-                ),
+                params,
             ).let { query -> this.run(query.asUpdate) }
 
-            slettUtbetalingsperioder(oppdatertVedtak.id, this)
-            opprettUtbetalingsperioder(oppdatertVedtak.id, oppdatertVedtak.utbetalingsperioder, this)
-
+            if (oppdatertVedtak.innhold is VedtakBehandlingInnhold) {
+                slettUtbetalingsperioder(oppdatertVedtak.id, this)
+                opprettUtbetalingsperioder(oppdatertVedtak.id, oppdatertVedtak.innhold.utbetalingsperioder, this)
+            }
             return@session hentVedtak(oppdatertVedtak.behandlingId, this)
                 ?: throw Exception("Kunne ikke oppdatere vedtak for behandling ${oppdatertVedtak.behandlingId}")
         }
@@ -154,7 +180,7 @@ class VedtaksvurderingRepository(private val datasource: DataSource) : Transacti
                 queryString = """
             SELECT sakid, behandlingId, saksbehandlerId, beregningsresultat, avkorting, vilkaarsresultat, id, fnr, 
                 datoFattet, datoattestert, attestant, datoVirkFom, vedtakstatus, saktype, behandlingtype, 
-                attestertVedtakEnhet, fattetVedtakEnhet, type, revurderingsaarsak, revurderinginfo
+                attestertVedtakEnhet, fattetVedtakEnhet, type, revurderingsaarsak, revurderinginfo, tilbakekreving 
             FROM vedtak 
             WHERE id = :vedtakId
             """,
@@ -173,7 +199,7 @@ class VedtaksvurderingRepository(private val datasource: DataSource) : Transacti
                 queryString = """
             SELECT sakid, behandlingId, saksbehandlerId, beregningsresultat, avkorting, vilkaarsresultat, id, fnr, 
                 datoFattet, datoattestert, attestant, datoVirkFom, vedtakstatus, saktype, behandlingtype, 
-                attestertVedtakEnhet, fattetVedtakEnhet, type, revurderingsaarsak, revurderinginfo
+                attestertVedtakEnhet, fattetVedtakEnhet, type, revurderingsaarsak, revurderinginfo, tilbakekreving 
             FROM vedtak 
             WHERE behandlingId = :behandlingId
             """,
@@ -181,25 +207,6 @@ class VedtaksvurderingRepository(private val datasource: DataSource) : Transacti
             ) {
                 val utbetalingsperioder = hentUtbetalingsPerioder(it.long("id"), this)
                 it.toVedtak(utbetalingsperioder)
-            }
-        }
-
-    fun hentVedtakSammendrag(
-        behandlingId: UUID,
-        tx: TransactionalSession? = null,
-    ): VedtakSammendrag? =
-        tx.session {
-            hent(
-                queryString = """
-            SELECT id, fnr, sakid, behandlingId, vedtakstatus, saktype, type,
-                saksbehandlerId, datoFattet, fattetVedtakEnhet, 
-                attestant, datoattestert, attestertVedtakEnhet
-            FROM vedtak 
-            WHERE behandlingId = :behandlingId
-            """,
-                params = mapOf("behandlingId" to behandlingId),
-            ) {
-                it.toVedtakSammendrag()
             }
         }
 
@@ -215,7 +222,7 @@ class VedtaksvurderingRepository(private val datasource: DataSource) : Transacti
         val hentVedtak = """
             SELECT sakid, behandlingId, saksbehandlerId, beregningsresultat, avkorting, vilkaarsresultat, id, fnr, 
                 datoFattet, datoattestert, attestant, datoVirkFom, vedtakstatus, saktype, behandlingtype, 
-                attestertVedtakEnhet, fattetVedtakEnhet, type, revurderingsaarsak, revurderinginfo
+                attestertVedtakEnhet, fattetVedtakEnhet, type, revurderingsaarsak, revurderinginfo, tilbakekreving 
             FROM vedtak  
             WHERE sakId = :sakId
             """
@@ -353,47 +360,15 @@ class VedtaksvurderingRepository(private val datasource: DataSource) : Transacti
             return@session hentVedtakNonNull(behandlingId, this)
         }
 
-    private fun Row.toVedtakSammendrag() =
-        VedtakSammendrag(
-            id = long("id"),
-            sakId = long("sakid"),
-            sakType = SakType.valueOf(string("saktype")),
-            behandlingId = uuid("behandlingid"),
-            soeker = string("fnr").let { Folkeregisteridentifikator.of(it) },
-            status = string("vedtakstatus").let { VedtakStatus.valueOf(it) },
-            type = string("type").let { VedtakType.valueOf(it) },
-            vedtakFattet =
-                stringOrNull("saksbehandlerid")?.let {
-                    VedtakFattet(
-                        ansvarligSaksbehandler = string("saksbehandlerid"),
-                        ansvarligEnhet = string("fattetVedtakEnhet"),
-                        tidspunkt = sqlTimestamp("datofattet").toTidspunkt(),
-                    )
-                },
-            attestasjon =
-                stringOrNull("attestant")?.let {
-                    Attestasjon(
-                        attestant = string("attestant"),
-                        attesterendeEnhet = string("attestertVedtakEnhet"),
-                        tidspunkt = sqlTimestamp("datoattestert").toTidspunkt(),
-                    )
-                },
-        )
-
     private fun Row.toVedtak(utbetalingsperioder: List<Utbetalingsperiode>) =
         Vedtak(
             id = long("id"),
             sakId = long("sakid"),
             sakType = SakType.valueOf(string("saktype")),
             behandlingId = uuid("behandlingid"),
-            behandlingType = BehandlingType.valueOf(string("behandlingtype")),
             soeker = string("fnr").let { Folkeregisteridentifikator.of(it) },
             status = string("vedtakstatus").let { VedtakStatus.valueOf(it) },
             type = string("type").let { VedtakType.valueOf(it) },
-            virkningstidspunkt = sqlDate("datovirkfom").toLocalDate().let { YearMonth.from(it) },
-            vilkaarsvurdering = stringOrNull("vilkaarsresultat")?.let { objectMapper.readValue(it) },
-            beregning = stringOrNull("beregningsresultat")?.let { objectMapper.readValue(it) },
-            avkorting = stringOrNull("avkorting")?.let { objectMapper.readValue(it) },
             vedtakFattet =
                 stringOrNull("saksbehandlerid")?.let {
                     VedtakFattet(
@@ -410,9 +385,29 @@ class VedtaksvurderingRepository(private val datasource: DataSource) : Transacti
                         tidspunkt = sqlTimestamp("datoattestert").toTidspunkt(),
                     )
                 },
-            utbetalingsperioder = utbetalingsperioder,
-            revurderingAarsak = stringOrNull("revurderingsaarsak")?.let { RevurderingAarsak.valueOf(it) },
-            revurderingInfo = stringOrNull("revurderinginfo")?.let { objectMapper.readValue(it) },
+            innhold =
+                when (string("type").let { VedtakType.valueOf(it) }) {
+                    VedtakType.OPPHOER,
+                    VedtakType.AVSLAG,
+                    VedtakType.ENDRING,
+                    VedtakType.INNVILGELSE,
+                    ->
+                        VedtakBehandlingInnhold(
+                            behandlingType = BehandlingType.valueOf(string("behandlingtype")),
+                            virkningstidspunkt = sqlDate("datovirkfom").toLocalDate().let { YearMonth.from(it) },
+                            vilkaarsvurdering = stringOrNull("vilkaarsresultat")?.let { objectMapper.readValue(it) },
+                            beregning = stringOrNull("beregningsresultat")?.let { objectMapper.readValue(it) },
+                            avkorting = stringOrNull("avkorting")?.let { objectMapper.readValue(it) },
+                            utbetalingsperioder = utbetalingsperioder,
+                            revurderingAarsak = stringOrNull("revurderingsaarsak")?.let { RevurderingAarsak.valueOf(it) },
+                            revurderingInfo = stringOrNull("revurderinginfo")?.let { objectMapper.readValue(it) },
+                        )
+
+                    VedtakType.TILBAKEKREVING ->
+                        VedtakTilbakekrevingInnhold(
+                            tilbakekreving = string("tilbakekreving").let { objectMapper.readValue(it) },
+                        )
+                },
         )
 
     private fun Row.toUtbetalingsperiode() =

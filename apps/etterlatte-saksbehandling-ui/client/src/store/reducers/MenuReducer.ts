@@ -1,4 +1,4 @@
-import { createReducer, createAction } from '@reduxjs/toolkit'
+import { createAction, createReducer } from '@reduxjs/toolkit'
 
 export const toggle = createAction('menu/toggle')
 

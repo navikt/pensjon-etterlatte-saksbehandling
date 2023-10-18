@@ -1,9 +1,9 @@
 import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
 import React, { useState } from 'react'
 import { LovtekstMedLenke } from '~components/behandling/soeknadsoversikt/soeknadoversikt/LovtekstMedLenke'
-import { Button, Heading, ReadMore } from '@navikt/ds-react'
+import { Button, Heading, ReadMore, Table } from '@navikt/ds-react'
 import { AGreen500 } from '@navikt/ds-tokens/dist/tokens'
-import { PlusCircleIcon, CheckmarkCircleIcon } from '@navikt/aksel-icons'
+import { CheckmarkCircleIcon, PlusCircleIcon } from '@navikt/aksel-icons'
 import { InstitusjonsoppholdGrunnlagData, ReduksjonBP } from '~shared/types/Beregning'
 import { useFieldArray, useForm } from 'react-hook-form'
 import Insthendelser from '~components/behandling/beregningsgrunnlag/Insthendelser'
@@ -18,7 +18,6 @@ import {
   FeilIPerioder,
   validerInstitusjonsopphold,
 } from '~components/behandling/beregningsgrunnlag/InstitusjonsoppholdPerioder'
-import { Table } from '@navikt/ds-react'
 import InstitusjonsoppholdTableWrapper from '~components/behandling/beregningsgrunnlag/InstitusjonsoppholdTableWrapper'
 import styled from 'styled-components'
 import { BP_INSTITUSJONSOPPHOLD_HJEMLER } from '~components/behandling/soeknadsoversikt/soeknadoversikt/virkningstidspunkt/utils'

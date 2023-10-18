@@ -17,6 +17,7 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.NyeSaksopplysninger
 import no.nav.etterlatte.libs.common.grunnlag.Opplysningsbehov
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
+import java.util.UUID
 
 interface GrunnlagKlient {
     suspend fun hentGrunnlag(sakId: Long): Grunnlag?
@@ -25,12 +26,19 @@ interface GrunnlagKlient {
 
     suspend fun hentPersonSakOgRolle(fnr: String): PersonMedSakerOgRoller
 
-    suspend fun leggInnNyttGrunnlag(opplysningsbehov: Opplysningsbehov)
+    suspend fun leggInnNyttGrunnlag(
+        behandlingId: UUID,
+        opplysningsbehov: Opplysningsbehov,
+    )
 
-    suspend fun hentPersongalleri(sakId: Long): Grunnlagsopplysning<Persongalleri>?
+    suspend fun hentPersongalleri(
+        sakId: Long,
+        behandlingId: UUID,
+    ): Grunnlagsopplysning<Persongalleri>?
 
     suspend fun lagreNyeSaksopplysninger(
         sakId: Long,
+        behandlingId: UUID,
         saksopplysninger: NyeSaksopplysninger,
     )
 }
@@ -41,9 +49,12 @@ class GrunnlagKlientImpl(
 ) : GrunnlagKlient {
     private val url = config.getString("grunnlag.resource.url")
 
-    override suspend fun leggInnNyttGrunnlag(opplysningsbehov: Opplysningsbehov) {
+    override suspend fun leggInnNyttGrunnlag(
+        behandlingId: UUID,
+        opplysningsbehov: Opplysningsbehov,
+    ) {
         return grunnlagHttpClient
-            .post("$url/grunnlag/sak/${opplysningsbehov.sakid}/oppdater-grunnlag") {
+            .post("$url/grunnlag/sak/${opplysningsbehov.sakid}/behandling/$behandlingId/oppdater-grunnlag") {
                 accept(ContentType.Application.Json)
                 contentType(ContentType.Application.Json)
                 setBody(opplysningsbehov)
@@ -52,24 +63,31 @@ class GrunnlagKlientImpl(
 
     override suspend fun lagreNyeSaksopplysninger(
         sakId: Long,
+        behandlingId: UUID,
         saksopplysninger: NyeSaksopplysninger,
     ) {
         return grunnlagHttpClient
-            .post("$url/grunnlag/sak/$sakId/nye-opplysninger") {
+            .post("$url/grunnlag/sak/$sakId/behandling/$behandlingId/nye-opplysninger") {
                 accept(ContentType.Application.Json)
                 contentType(ContentType.Application.Json)
                 setBody(saksopplysninger)
             }.body()
     }
 
+    /**
+     * Henter komplett grunnlag for sak
+     **/
     override suspend fun hentGrunnlag(sakId: Long): Grunnlag? {
         return grunnlagHttpClient.get("$url/grunnlag/sak/$sakId") {
             accept(ContentType.Application.Json)
         }.body()
     }
 
-    override suspend fun hentPersongalleri(sakId: Long): Grunnlagsopplysning<Persongalleri>? {
-        return grunnlagHttpClient.get("$url/grunnlag/sak/$sakId/${Opplysningstype.PERSONGALLERI_V1}") {
+    override suspend fun hentPersongalleri(
+        sakId: Long,
+        behandlingId: UUID,
+    ): Grunnlagsopplysning<Persongalleri>? {
+        return grunnlagHttpClient.get("$url/grunnlag/sak/$sakId/behandling/$behandlingId/${Opplysningstype.PERSONGALLERI_V1}") {
             accept(ContentType.Application.Json)
         }.body()
     }

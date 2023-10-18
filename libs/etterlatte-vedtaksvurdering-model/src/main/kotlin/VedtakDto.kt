@@ -1,5 +1,7 @@
 package no.nav.etterlatte.libs.common.vedtak
 
+import com.fasterxml.jackson.annotation.JsonTypeInfo
+import com.fasterxml.jackson.annotation.JsonTypeName
 import com.fasterxml.jackson.databind.node.ObjectNode
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
@@ -10,9 +12,21 @@ import no.nav.etterlatte.libs.common.sak.VedtakSak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import java.math.BigDecimal
 import java.time.YearMonth
+import java.time.ZonedDateTime
 import java.util.Objects.isNull
 import java.util.UUID
 
+data class VedtakSammendragDto(
+    val id: String,
+    val behandlingId: UUID,
+    val vedtakType: VedtakType?,
+    val saksbehandlerId: String?,
+    val datoFattet: ZonedDateTime?,
+    val attestant: String?,
+    val datoAttestert: ZonedDateTime?,
+)
+
+@Deprecated("VedtakDto skal ersttates av VedtakNyDto")
 data class VedtakDto(
     val vedtakId: Long,
     val status: VedtakStatus,
@@ -24,6 +38,33 @@ data class VedtakDto(
     val attestasjon: Attestasjon?,
     val utbetalingsperioder: List<Utbetalingsperiode>,
 )
+
+// TODO Rename til VedtakDto når gammel dto er faset ut
+data class VedtakNyDto(
+    val id: Long,
+    val behandlingId: UUID,
+    val status: VedtakStatus,
+    val sak: VedtakSak,
+    val type: VedtakType,
+    val vedtakFattet: VedtakFattet?,
+    val attestasjon: Attestasjon?,
+    val innhold: VedtakInnholdDto,
+)
+
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
+sealed class VedtakInnholdDto {
+    @JsonTypeName("BEHANDLING")
+    data class VedtakBehandlingDto(
+        val virkningstidspunkt: YearMonth,
+        val behandling: Behandling,
+        val utbetalingsperioder: List<Utbetalingsperiode>,
+    ) : VedtakInnholdDto()
+
+    @JsonTypeName("TILBAKEKREVING")
+    data class VedtakTilbakekrevingDto(
+        val tilbakekreving: ObjectNode,
+    ) : VedtakInnholdDto()
+}
 
 enum class VedtakStatus {
     OPPRETTET,

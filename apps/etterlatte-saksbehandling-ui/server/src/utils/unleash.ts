@@ -1,4 +1,4 @@
-import { getFeatureToggleDefinitions, initialize, destroy } from 'unleash-client'
+import { destroy, getFeatureToggleDefinitions, initialize } from 'unleash-client'
 import { FeatureToggleConfig } from '../config/config'
 import GradualRolloutRandomStrategy from 'unleash-client/lib/strategy/gradual-rollout-random'
 import { logger } from '../monitoring/logger'

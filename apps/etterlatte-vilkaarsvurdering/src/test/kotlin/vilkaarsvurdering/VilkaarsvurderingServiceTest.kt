@@ -83,7 +83,7 @@ internal class VilkaarsvurderingServiceTest {
 
     @BeforeEach
     fun beforeEach() {
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns GrunnlagTestData().hentOpplysningsgrunnlag()
+        coEvery { grunnlagKlient.hentGrunnlag(any(), any(), any()) } returns GrunnlagTestData().hentOpplysningsgrunnlag()
         coEvery { behandlingKlient.kanSetteBehandlingStatusVilkaarsvurdert(any(), any()) } returns true
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns
             mockk<DetaljertBehandling>().apply {
@@ -190,7 +190,7 @@ internal class VilkaarsvurderingServiceTest {
                 opplysningsmapSakOverrides = mapOf(SOEKNAD_MOTTATT_DATO to soeknadMottattDatoOpplysning),
             ).hentOpplysningsgrunnlag()
 
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
+        coEvery { grunnlagKlient.hentGrunnlag(any(), any(), any()) } returns grunnlag
 
         val vilkaarsvurdering =
             runBlocking {
@@ -388,7 +388,7 @@ internal class VilkaarsvurderingServiceTest {
     fun `kan opprette og kopiere vilkaarsvurdering fra forrige behandling`() {
         val grunnlag: Grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
         val nyBehandlingId = UUID.randomUUID()
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
+        coEvery { grunnlagKlient.hentGrunnlag(any(), any(), any()) } returns grunnlag
         coEvery { behandlingKlient.settBehandlingStatusVilkaarsvurdert(any(), any()) } returns true
 
         runBlocking {
@@ -441,7 +441,7 @@ internal class VilkaarsvurderingServiceTest {
         val grunnlag: Grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
         val revurderingId = UUID.randomUUID()
 
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
+        coEvery { grunnlagKlient.hentGrunnlag(any(), any(), any()) } returns grunnlag
         coEvery { behandlingKlient.settBehandlingStatusVilkaarsvurdert(any(), any()) } returns true
         coEvery { behandlingKlient.hentBehandling(revurderingId, any()) } returns
             mockk {

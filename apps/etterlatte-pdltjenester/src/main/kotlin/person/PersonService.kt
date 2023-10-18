@@ -1,6 +1,7 @@
 package no.nav.etterlatte.person
 
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.pdl.FantIkkePersonException
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.GeografiskTilknytning
@@ -24,8 +25,6 @@ import org.slf4j.LoggerFactory
 
 class PdlForesporselFeilet(message: String) : RuntimeException(message)
 
-class PdlFantIkkePerson(message: String) : RuntimeException(message)
-
 class PersonService(
     private val pdlKlient: PdlKlient,
     private val ppsKlient: ParallelleSannheterKlient,
@@ -39,7 +38,7 @@ class PersonService(
             if (it.data?.hentPerson == null) {
                 val pdlFeil = it.errors?.asFormatertFeil()
                 if (it.errors?.personIkkeFunnet() == true) {
-                    throw PdlFantIkkePerson("Fant ikke personen ${request.foedselsnummer}")
+                    throw FantIkkePersonException("Fant ikke personen ${request.foedselsnummer}")
                 } else {
                     throw PdlForesporselFeilet(
                         "Kunne ikke hente person med fnr=${request.foedselsnummer} fra PDL: $pdlFeil",
@@ -72,7 +71,7 @@ class PersonService(
                 if (it.data?.hentPerson == null) {
                     val pdlFeil = it.errors?.asFormatertFeil()
                     if (it.errors?.personIkkeFunnet() == true) {
-                        throw PdlFantIkkePerson("Fant ikke personen $fnr")
+                        throw FantIkkePersonException("Fant ikke personen $fnr")
                     } else {
                         throw PdlForesporselFeilet(
                             "Kunne ikke hente person med fnr=$fnr fra PDL: $pdlFeil",
@@ -91,7 +90,7 @@ class PersonService(
             if (it.data?.hentPerson == null) {
                 val pdlFeil = it.errors?.asFormatertFeil()
                 if (it.errors?.personIkkeFunnet() == true) {
-                    throw PdlFantIkkePerson("Fant ikke personen ${request.foedselsnummer}")
+                    throw FantIkkePersonException("Fant ikke personen ${request.foedselsnummer}")
                 } else {
                     throw PdlForesporselFeilet(
                         "Kunne ikke hente opplysninger for ${request.foedselsnummer} fra PDL: $pdlFeil",
@@ -115,7 +114,7 @@ class PersonService(
             if (identResponse.data?.hentIdenter == null) {
                 val pdlFeil = identResponse.errors?.asFormatertFeil()
                 if (identResponse.errors?.personIkkeFunnet() == true) {
-                    throw PdlFantIkkePerson("Fant ikke personen ${request.ident}")
+                    throw FantIkkePersonException("Fant ikke personen ${request.ident}")
                 } else {
                     throw PdlForesporselFeilet(
                         "Kunne ikke hente pdlidentifkator " +
@@ -165,7 +164,7 @@ class PersonService(
             if (it.data?.hentGeografiskTilknytning == null) {
                 val pdlFeil = it.errors?.asFormatertFeil()
                 if (it.errors?.personIkkeFunnet() == true) {
-                    throw PdlFantIkkePerson("Fant ikke personen ${request.foedselsnummer}")
+                    throw FantIkkePersonException("Fant ikke personen ${request.foedselsnummer}")
                 } else {
                     throw PdlForesporselFeilet(
                         "Kunne ikke hente fnr=${request.foedselsnummer} fra PDL: $pdlFeil",

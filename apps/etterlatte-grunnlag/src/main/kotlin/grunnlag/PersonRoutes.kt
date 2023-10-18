@@ -4,11 +4,11 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
-import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.libs.common.hentNavidentFraToken
+import no.nav.etterlatte.libs.common.kunSystembruker
 import no.nav.etterlatte.libs.common.person.InvalidFoedselsnummerException
 import no.nav.etterlatte.libs.common.withFoedselsnummer
 
@@ -25,9 +25,11 @@ fun Route.personRoute(
         }
 
         post("roller") {
-            withFoedselsnummer(behandlingKlient) { fnr ->
-                val personMedSakOgRoller = grunnlagService.hentSakerOgRoller(fnr)
-                call.respond(personMedSakOgRoller)
+            kunSystembruker {
+                withFoedselsnummer(behandlingKlient) { fnr ->
+                    val personMedSakOgRoller = grunnlagService.hentSakerOgRoller(fnr)
+                    call.respond(personMedSakOgRoller)
+                }
             }
         }
 

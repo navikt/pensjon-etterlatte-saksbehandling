@@ -36,6 +36,10 @@ data class OppgaveIntern(
         return Status.erAvsluttet(this.status)
     }
 
+    fun erUnderbehandling(): Boolean {
+        return Status.erUnderbehandling(this.status)
+    }
+
     fun erAttestering(): Boolean {
         return OppgaveType.ATTESTERING === type
     }
@@ -80,6 +84,10 @@ enum class Status {
                 -> true
             }
         }
+
+        fun erUnderbehandling(status: Status): Boolean {
+            return status === UNDER_BEHANDLING
+        }
     }
 }
 
@@ -99,7 +107,7 @@ enum class OppgaveType {
     ATTESTERING,
     UNDERKJENT,
     GOSYS,
-    UTLAND,
+    KRAVPAKKE_UTLAND,
     KLAGE,
     TILBAKEKREVING,
     OMGJOERING,
@@ -146,6 +154,7 @@ fun opprettNyOppgaveMedReferanseOgSak(
     oppgaveKilde: OppgaveKilde?,
     oppgaveType: OppgaveType,
     merknad: String?,
+    frist: Tidspunkt? = null,
 ): OppgaveIntern {
     return OppgaveIntern(
         id = UUID.randomUUID(),
@@ -159,7 +168,7 @@ fun opprettNyOppgaveMedReferanseOgSak(
         opprettet = Tidspunkt.now(),
         sakType = sak.sakType,
         fnr = sak.ident,
-        frist = null,
+        frist = frist,
         type = oppgaveType,
     )
 }

@@ -31,6 +31,7 @@ class TrygdetidRepository(private val dataSource: DataSource) {
                         id,
                         sak_id,
                         behandling_id,
+                        ident,
                         tidspunkt,
                         faktisk_trygdetid_norge_total,
                         faktisk_trygdetid_norge_antall_maaneder,
@@ -50,7 +51,8 @@ class TrygdetidRepository(private val dataSource: DataSource) {
                         prorata_broek_nevner,
                         trygdetid_tidspunkt,
                         trygdetid_regelresultat,
-                        beregnet_trygdetid_overstyrt
+                        beregnet_trygdetid_overstyrt,
+                        poengaar_overstyrt
                     FROM trygdetid 
                     WHERE behandling_id = :behandlingId
                     """.trimIndent(),
@@ -84,6 +86,8 @@ class TrygdetidRepository(private val dataSource: DataSource) {
     ): Trygdetid =
         dataSource.transaction { tx ->
             val gjeldendeTrygdetid = hentTrygdtidNotNull(oppdatertTrygdetid.behandlingId)
+
+            oppdaterOverstyrtPoengaar(gjeldendeTrygdetid.id, gjeldendeTrygdetid.behandlingId, oppdatertTrygdetid.overstyrtNorskPoengaar, tx)
 
             // opprett grunnlag
             oppdatertTrygdetid.trygdetidGrunnlag
@@ -120,13 +124,14 @@ class TrygdetidRepository(private val dataSource: DataSource) {
     ) = queryOf(
         statement =
             """
-            INSERT INTO trygdetid(id, behandling_id, sak_id) VALUES(:id, :behandlingId, :sakId)
+            INSERT INTO trygdetid(id, behandling_id, sak_id, ident) VALUES(:id, :behandlingId, :sakId, :ident)
             """.trimIndent(),
         paramMap =
             mapOf(
                 "id" to trygdetid.id,
                 "behandlingId" to trygdetid.behandlingId,
                 "sakId" to trygdetid.sakId,
+                "ident" to trygdetid.ident,
             ),
     ).let { query -> tx.update(query) }
 
@@ -249,6 +254,29 @@ class TrygdetidRepository(private val dataSource: DataSource) {
                     "id" to trygdetidGrunnlagId,
                 ),
         ).let { query -> tx.update(query) }
+    }
+
+    private fun oppdaterOverstyrtPoengaar(
+        id: UUID,
+        behandlingId: UUID,
+        overstyrtNorskPoengaar: Int? = null,
+        tx: TransactionalSession,
+    ) {
+        queryOf(
+            statement =
+                """
+                UPDATE trygdetid 
+                  SET poengaar_overstyrt = :overstyrtNorskPoengaar WHERE id = :id AND  behandling_id = :behandlingId
+                """.trimIndent(),
+            paramMap =
+                mapOf(
+                    "id" to id,
+                    "behandlingId" to behandlingId,
+                    "overstyrtNorskPoengaar" to overstyrtNorskPoengaar,
+                ),
+        ).let { query ->
+            tx.update(query)
+        }
     }
 
     private fun oppdaterBeregnetTrygdetid(
@@ -472,6 +500,8 @@ class TrygdetidRepository(private val dataSource: DataSource) {
             },
         trygdetidGrunnlag = trygdetidGrunnlag,
         opplysninger = opplysninger,
+        overstyrtNorskPoengaar = intOrNull("poengaar_overstyrt"),
+        ident = stringOrNull("ident"),
     )
 
     private fun Row.toTrygdetidGrunnlag() =

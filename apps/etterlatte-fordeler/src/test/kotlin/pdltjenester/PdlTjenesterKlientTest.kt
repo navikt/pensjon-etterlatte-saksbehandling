@@ -10,12 +10,11 @@ import io.ktor.http.fullPath
 import io.ktor.http.headersOf
 import io.ktor.serialization.jackson.JacksonConverter
 import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.FNR_1
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.HentPersonRequest
 import no.nav.etterlatte.libs.common.person.PersonRolle
+import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.etterlatte.readFile
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -57,7 +56,7 @@ class PdlTjenesterKlientTest {
             runBlocking {
                 pdlTjenesterKlient.hentPerson(
                     HentPersonRequest(
-                        foedselsnummer = Folkeregisteridentifikator.of(FNR_1),
+                        foedselsnummer = SOEKER_FOEDSELSNUMMER,
                         rolle = PersonRolle.BARN,
                         saktype = SakType.BARNEPENSJON,
                     ),

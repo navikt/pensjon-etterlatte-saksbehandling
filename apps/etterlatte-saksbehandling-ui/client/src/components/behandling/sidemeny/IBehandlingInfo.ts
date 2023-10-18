@@ -1,4 +1,4 @@
-import { IBehandlingsType, IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
+import { IBehandlingStatus, IBehandlingsType } from '~shared/types/IDetaljertBehandling'
 import { IHendelse } from '~shared/types/IHendelse'
 import { SakType } from '~shared/types/sak'
 

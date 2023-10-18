@@ -12,8 +12,8 @@ import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.Context
 import no.nav.etterlatte.DatabaseKontekst
+import no.nav.etterlatte.KONTANT_FOT
 import no.nav.etterlatte.Kontekst
-import no.nav.etterlatte.TRIVIELL_MIDTPUNKT
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.domain.ArbeidsFordelingEnhet
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringStatus
@@ -93,10 +93,7 @@ internal class GrunnlagsendringshendelseServiceTest {
                         throw IllegalArgumentException()
                     }
 
-                    override fun <T> inTransaction(
-                        gjenbruk: Boolean,
-                        block: () -> T,
-                    ): T {
+                    override fun <T> inTransaction(block: () -> T): T {
                         return block()
                     }
                 },
@@ -631,7 +628,7 @@ internal class GrunnlagsendringshendelseServiceTest {
             sakIder.map {
                 Sak(
                     id = it,
-                    ident = TRIVIELL_MIDTPUNKT.value,
+                    ident = KONTANT_FOT.value,
                     sakType = SakType.BARNEPENSJON,
                     enhet = Enheter.PORSGRUNN.enhetNr,
                 )
@@ -674,7 +671,7 @@ internal class GrunnlagsendringshendelseServiceTest {
             sakIder.map {
                 Sak(
                     id = it,
-                    ident = TRIVIELL_MIDTPUNKT.value,
+                    ident = KONTANT_FOT.value,
                     sakType = SakType.BARNEPENSJON,
                     enhet = Enheter.PORSGRUNN.enhetNr,
                 )

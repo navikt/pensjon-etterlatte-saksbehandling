@@ -99,9 +99,7 @@ class GrunnlagsendringshendelseService(
     }
 
     fun settHendelseTilHistorisk(behandlingId: UUID) {
-        inTransaction {
-            grunnlagsendringshendelseDao.oppdaterGrunnlagsendringHistorisk(behandlingId)
-        }
+        grunnlagsendringshendelseDao.oppdaterGrunnlagsendringHistorisk(behandlingId)
     }
 
     private fun ikkeVurderteHendelser(minutterGamle: Long): List<Grunnlagsendringshendelse> =
@@ -417,7 +415,7 @@ class GrunnlagsendringshendelseService(
             }
 
             GrunnlagsendringsType.FORELDER_BARN_RELASJON -> {
-                if (personRolle == PersonRolle.BARN) {
+                if (personRolle in listOf(PersonRolle.BARN, PersonRolle.TILKNYTTET_BARN)) {
                     samsvarAnsvarligeForeldre(
                         ansvarligeForeldrePdl = pdlData.hentAnsvarligeForeldre(),
                         ansvarligeForeldreGrunnlag = grunnlag?.ansvarligeForeldre(rolle, fnr),

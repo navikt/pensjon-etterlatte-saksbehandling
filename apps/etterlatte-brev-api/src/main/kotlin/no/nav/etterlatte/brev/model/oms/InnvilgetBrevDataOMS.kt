@@ -2,13 +2,14 @@ package no.nav.etterlatte.brev.model.oms
 
 import no.nav.etterlatte.brev.behandling.Avdoed
 import no.nav.etterlatte.brev.behandling.Avkortingsinfo
-import no.nav.etterlatte.brev.behandling.Behandling
+import no.nav.etterlatte.brev.behandling.GenerellBrevData
+import no.nav.etterlatte.brev.behandling.Trygdetid
 import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
 import no.nav.etterlatte.brev.model.Beregningsinfo
 import no.nav.etterlatte.brev.model.BrevData
-import no.nav.etterlatte.brev.model.BrevInnholdVedlegg
 import no.nav.etterlatte.brev.model.BrevVedleggKey
 import no.nav.etterlatte.brev.model.EtterbetalingDTO
+import no.nav.etterlatte.brev.model.InnholdMedVedlegg
 import no.nav.etterlatte.brev.model.NyBeregningsperiode
 import no.nav.etterlatte.brev.model.Slate
 import no.nav.pensjon.brevbaker.api.model.Kroner
@@ -24,24 +25,24 @@ data class InnvilgetBrevDataOMS(
 ) : BrevData() {
     companion object {
         fun fra(
-            behandling: Behandling,
-            innhold: List<Slate.Element>,
-            innholdVedlegg: List<BrevInnholdVedlegg>,
+            generellBrevData: GenerellBrevData,
+            utbetalingsinfo: Utbetalingsinfo,
+            avkortingsinfo: Avkortingsinfo? = null,
+            etterbetalinginfo: EtterbetalingDTO? = null,
+            trygdetid: Trygdetid,
+            innholdMedVedlegg: InnholdMedVedlegg,
         ): InnvilgetBrevDataOMS =
             InnvilgetBrevDataOMS(
-                utbetalingsinfo = behandling.utbetalingsinfo!!,
-                avkortingsinfo = behandling.avkortingsinfo,
-                avdoed = behandling.personerISak.avdoed,
-                etterbetalinginfo = behandling.etterbetalingDTO,
+                utbetalingsinfo = utbetalingsinfo,
+                avkortingsinfo = avkortingsinfo,
+                avdoed = generellBrevData.personerISak.avdoed,
+                etterbetalinginfo = etterbetalinginfo,
                 beregningsinfo =
                     Beregningsinfo(
-                        innhold =
-                            innholdVedlegg.find { vedlegg ->
-                                vedlegg.key == BrevVedleggKey.BEREGNING_INNHOLD
-                            }?.payload!!.elements,
-                        grunnbeloep = behandling.avkortingsinfo!!.grunnbeloep,
+                        innhold = innholdMedVedlegg.finnVedlegg(BrevVedleggKey.BEREGNING_INNHOLD),
+                        grunnbeloep = avkortingsinfo!!.grunnbeloep,
                         beregningsperioder =
-                            behandling.avkortingsinfo.beregningsperioder.map {
+                            avkortingsinfo.beregningsperioder.map {
                                 NyBeregningsperiode(
                                     inntekt = it.inntekt,
                                     trygdetid = it.trygdetid,
@@ -49,9 +50,9 @@ data class InnvilgetBrevDataOMS(
                                     utbetaltBeloep = it.utbetaltBeloep,
                                 )
                             },
-                        trygdetidsperioder = behandling.trygdetid!!,
+                        trygdetidsperioder = trygdetid.perioder,
                     ),
-                innhold = innhold,
+                innhold = innholdMedVedlegg.innhold(),
             )
     }
 }
@@ -62,11 +63,15 @@ data class FoerstegangsvedtakUtfallDTO(
     val utbetalingsbeloep: Kroner,
 ) : BrevData() {
     companion object {
-        fun fra(behandling: Behandling): FoerstegangsvedtakUtfallDTO =
+        fun fra(
+            generellBrevData: GenerellBrevData,
+            utbetalingsinfo: Utbetalingsinfo,
+            avkortingsinfo: Avkortingsinfo,
+        ): FoerstegangsvedtakUtfallDTO =
             FoerstegangsvedtakUtfallDTO(
-                virkningsdato = behandling.utbetalingsinfo!!.virkningsdato,
-                avdoed = behandling.personerISak.avdoed,
-                utbetalingsbeloep = behandling.avkortingsinfo!!.beregningsperioder.first().utbetaltBeloep,
+                virkningsdato = utbetalingsinfo.virkningsdato,
+                avdoed = generellBrevData.personerISak.avdoed,
+                utbetalingsbeloep = avkortingsinfo.beregningsperioder.first().utbetaltBeloep,
             )
     }
 }

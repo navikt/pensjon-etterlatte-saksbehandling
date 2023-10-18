@@ -10,10 +10,12 @@ import io.ktor.client.request.setBody
 import io.ktor.http.ContentType.Application.Json
 import io.ktor.http.contentType
 import no.nav.etterlatte.libs.common.RetryResult
+import no.nav.etterlatte.libs.common.feilhaandtering.ExceptionResponse
 import no.nav.etterlatte.libs.common.logging.samleExceptions
-import no.nav.etterlatte.libs.common.pdl.PdlFeil
+import no.nav.etterlatte.libs.common.pdl.FantIkkePersonException
+import no.nav.etterlatte.libs.common.pdl.IngenIdentFamilierelasjonException
 import no.nav.etterlatte.libs.common.pdl.PdlFeilAarsak
-import no.nav.etterlatte.libs.common.person.FamilieRelasjonManglerIdent
+import no.nav.etterlatte.libs.common.pdl.PdlInternalServerError
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.HentPersonRequest
 import no.nav.etterlatte.libs.common.person.Person
@@ -43,18 +45,17 @@ class PdlTjenesterKlient(private val client: HttpClient, private val apiUrl: Str
                         }
                     val feilFraPdl =
                         try {
-                            response.body<PdlFeil>()
+                            val feil = response.body<ExceptionResponse>()
+                            enumValueOf<PdlFeilAarsak>(feil.code!!)
                         } catch (e: Exception) {
                             throw samleExceptions(it.exceptions + e)
                         }
-                    when (feilFraPdl.aarsak) {
+                    when (feilFraPdl) {
                         PdlFeilAarsak.FANT_IKKE_PERSON ->
-                            throw PersonFinnesIkkeException(hentPersonRequest.foedselsnummer)
+                            throw FantIkkePersonException()
 
-                        PdlFeilAarsak.INGEN_IDENT_FAMILIERELASJON -> throw FamilieRelasjonManglerIdent(
-                            "${hentPersonRequest.foedselsnummer} har en person i persongalleriet som " +
-                                "mangler ident: ${feilFraPdl.detaljer}",
-                        )
+                        PdlFeilAarsak.INGEN_IDENT_FAMILIERELASJON -> throw IngenIdentFamilierelasjonException()
+                        PdlFeilAarsak.INTERNAL_SERVER_ERROR -> throw PdlInternalServerError()
                     }
                 }
             }

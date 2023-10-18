@@ -2,19 +2,19 @@ package no.nav.etterlatte.itest
 
 import com.fasterxml.jackson.databind.JsonNode
 import io.mockk.mockk
-import no.nav.etterlatte.grunnlag.GrunnlagHendelser
+import no.nav.etterlatte.grunnlag.GrunnlagHendelserRiver
 import no.nav.etterlatte.grunnlag.OpplysningDao
 import no.nav.etterlatte.grunnlag.RealGrunnlagService
 import no.nav.etterlatte.klienter.PdlTjenesterKlientImpl
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.POSTGRES_VERSION
 import no.nav.etterlatte.libs.database.migrate
+import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.statiskUuid
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
@@ -26,6 +26,11 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
+import rapidsandrivers.BEHANDLING_ID_KEY
+import rapidsandrivers.FNR_KEY
+import rapidsandrivers.OPPLYSNING_KEY
+import rapidsandrivers.SAK_ID_KEY
+import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class RapidTest {
@@ -55,7 +60,7 @@ internal class RapidTest {
         grunnlagService = RealGrunnlagService(pdlTjenesterKlientImpl, opplysningRepo, mockk())
         inspector =
             TestRapid().apply {
-                GrunnlagHendelser(this, grunnlagService)
+                GrunnlagHendelserRiver(this, grunnlagService)
             }
     }
 
@@ -64,7 +69,7 @@ internal class RapidTest {
         postgreSQLContainer.stop()
     }
 
-    private val fnr = Folkeregisteridentifikator.of("18057404783")
+    private val fnr = AVDOED_FOEDSELSNUMMER
     private val tidspunkt = Tidspunkt.now()
     private val kilde = Grunnlagsopplysning.Pdl(tidspunkt, null, null)
     private val nyOpplysning =
@@ -84,9 +89,10 @@ internal class RapidTest {
             JsonMessage.newMessage(
                 mapOf(
                     "@event_name" to "OPPLYSNING:NY",
-                    "opplysning" to listOf(nyOpplysning),
-                    "fnr" to fnr,
-                    "sakId" to 1,
+                    OPPLYSNING_KEY to listOf(nyOpplysning),
+                    FNR_KEY to fnr,
+                    SAK_ID_KEY to 1,
+                    BEHANDLING_ID_KEY to UUID.randomUUID(),
                 ),
             ).toJson()
 
@@ -102,9 +108,10 @@ internal class RapidTest {
             JsonMessage.newMessage(
                 mapOf(
                     "@behov" to Opplysningstype.SOEKER_PDL_V1,
-                    "opplysning" to listOf(nyOpplysning),
-                    "fnr" to fnr,
-                    "sakId" to 1,
+                    OPPLYSNING_KEY to listOf(nyOpplysning),
+                    FNR_KEY to fnr,
+                    SAK_ID_KEY to 1,
+                    BEHANDLING_ID_KEY to UUID.randomUUID(),
                 ),
             ).toJson()
 

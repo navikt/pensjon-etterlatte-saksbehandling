@@ -3,8 +3,10 @@ package vedtaksvurdering
 import io.kotest.matchers.comparables.shouldBeGreaterThan
 import io.kotest.matchers.comparables.shouldBeGreaterThanOrEqualTo
 import io.kotest.matchers.ints.shouldBeExactly
+import io.kotest.matchers.should
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
+import io.kotest.matchers.types.beInstanceOf
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.objectMapper
@@ -20,6 +22,9 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.POSTGRES_VERSION
 import no.nav.etterlatte.libs.database.migrate
+import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
+import no.nav.etterlatte.vedtaksvurdering.VedtakBehandlingInnhold
+import no.nav.etterlatte.vedtaksvurdering.VedtakTilbakekrevingInnhold
 import no.nav.etterlatte.vedtaksvurdering.VedtaksvurderingRepository
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
@@ -60,7 +65,7 @@ internal class VedtaksvurderingRepositoryTest {
     }
 
     @Test
-    fun `skal opprette vedtak`() {
+    fun `skal opprette vedtak for behandling`() {
         val nyttVedtak = opprettVedtak()
 
         val vedtak = repository.opprettVedtak(nyttVedtak)
@@ -69,27 +74,50 @@ internal class VedtaksvurderingRepositoryTest {
             vedtak shouldNotBe null
             id shouldNotBe null
             status shouldBe VedtakStatus.OPPRETTET
-            soeker shouldBe Folkeregisteridentifikator.of(FNR_1)
+            soeker shouldBe SOEKER_FOEDSELSNUMMER
             sakId shouldBe 1L
             sakType shouldBe SakType.BARNEPENSJON
             behandlingId shouldNotBe null
-            behandlingType shouldBe BehandlingType.FØRSTEGANGSBEHANDLING
             type shouldBe VedtakType.INNVILGELSE
-            virkningstidspunkt shouldBe YearMonth.of(2023, Month.JANUARY)
-            vilkaarsvurdering shouldBe objectMapper.createObjectNode()
-            beregning shouldBe objectMapper.createObjectNode()
-            avkorting shouldBe objectMapper.createObjectNode()
-            utbetalingsperioder.first().let { utbetalingsperiode ->
-                utbetalingsperiode.id shouldNotBe null
-                utbetalingsperiode.periode shouldBe Periode(YearMonth.of(2023, Month.JANUARY), null)
-                utbetalingsperiode.beloep shouldBe BigDecimal.valueOf(100L)
-                utbetalingsperiode.type shouldBe UtbetalingsperiodeType.UTBETALING
+            innhold should beInstanceOf<VedtakBehandlingInnhold>()
+            (innhold as VedtakBehandlingInnhold).let {
+                it.behandlingType shouldBe BehandlingType.FØRSTEGANGSBEHANDLING
+                it.virkningstidspunkt shouldBe YearMonth.of(2023, Month.JANUARY)
+                it.vilkaarsvurdering shouldBe objectMapper.createObjectNode()
+                it.beregning shouldBe objectMapper.createObjectNode()
+                it.avkorting shouldBe objectMapper.createObjectNode()
+                it.utbetalingsperioder.first().let { utbetalingsperiode ->
+                    utbetalingsperiode.id shouldNotBe null
+                    utbetalingsperiode.periode shouldBe Periode(YearMonth.of(2023, Month.JANUARY), null)
+                    utbetalingsperiode.beloep shouldBe BigDecimal.valueOf(100L)
+                    utbetalingsperiode.type shouldBe UtbetalingsperiodeType.UTBETALING
+                }
             }
         }
     }
 
     @Test
-    fun `skal oppdatere vedtak`() {
+    fun `skal opprette vedtak for tilbakekreving`() {
+        val nyttVedtak = opprettVedtakTilbakekreving()
+
+        val vedtak = repository.opprettVedtak(nyttVedtak)
+
+        with(vedtak) {
+            vedtak shouldNotBe null
+            id shouldNotBe null
+            status shouldBe VedtakStatus.OPPRETTET
+            soeker shouldBe SOEKER_FOEDSELSNUMMER
+            sakId shouldBe 1L
+            sakType shouldBe SakType.BARNEPENSJON
+            behandlingId shouldNotBe null
+            type shouldBe VedtakType.TILBAKEKREVING
+            innhold should beInstanceOf<VedtakTilbakekrevingInnhold>()
+            (innhold as VedtakTilbakekrevingInnhold).tilbakekreving shouldBe objectMapper.createObjectNode()
+        }
+    }
+
+    @Test
+    fun `skal oppdatere vedtak for behandling`() {
         val nyttVedtak = opprettVedtak()
 
         val vedtak = repository.opprettVedtak(nyttVedtak)
@@ -99,28 +127,58 @@ internal class VedtaksvurderingRepositoryTest {
         val oppdatertVedtak =
             repository.oppdaterVedtak(
                 vedtak.copy(
-                    virkningstidspunkt = nyttVirkningstidspunkt,
                     type = VedtakType.OPPHOER,
-                    utbetalingsperioder =
-                        listOf(
-                            Utbetalingsperiode(
-                                periode = Periode(nyttVirkningstidspunkt, null),
-                                beloep = null,
-                                type = UtbetalingsperiodeType.OPPHOER,
-                            ),
+                    innhold =
+                        (vedtak.innhold as VedtakBehandlingInnhold).copy(
+                            virkningstidspunkt = nyttVirkningstidspunkt,
+                            utbetalingsperioder =
+                                listOf(
+                                    Utbetalingsperiode(
+                                        periode = Periode(nyttVirkningstidspunkt, null),
+                                        beloep = null,
+                                        type = UtbetalingsperiodeType.OPPHOER,
+                                    ),
+                                ),
                         ),
                 ),
             )
 
         oppdatertVedtak shouldNotBe null
-        oppdatertVedtak.virkningstidspunkt shouldBe nyttVirkningstidspunkt
         oppdatertVedtak.type shouldBe VedtakType.OPPHOER
-        oppdatertVedtak.utbetalingsperioder.first().let {
-            it.id!! shouldBeGreaterThan 0
-            it.periode shouldBe Periode(nyttVirkningstidspunkt, null)
-            it.beloep shouldBe null
-            it.type shouldBe UtbetalingsperiodeType.OPPHOER
+        oppdatertVedtak.innhold should beInstanceOf<VedtakBehandlingInnhold>()
+        (oppdatertVedtak.innhold as VedtakBehandlingInnhold).let { innhold ->
+            innhold.virkningstidspunkt shouldBe nyttVirkningstidspunkt
+            innhold.utbetalingsperioder.first().let {
+                it.id!! shouldBeGreaterThan 0
+                it.periode shouldBe Periode(nyttVirkningstidspunkt, null)
+                it.beloep shouldBe null
+                it.type shouldBe UtbetalingsperiodeType.OPPHOER
+            }
         }
+    }
+
+    @Test
+    fun `skal oppdatere vedtak for tilbakekreving`() {
+        val nyttVedtak = opprettVedtakTilbakekreving()
+        val vedtak = repository.opprettVedtak(nyttVedtak)
+
+        val oppdatertTilbakekreving = objectMapper.createObjectNode()
+        oppdatertTilbakekreving.replace("endret", objectMapper.createObjectNode())
+
+        val oppdatertVedtak =
+            repository.oppdaterVedtak(
+                vedtak.copy(
+                    innhold =
+                        (vedtak.innhold as VedtakTilbakekrevingInnhold).copy(
+                            tilbakekreving = oppdatertTilbakekreving,
+                        ),
+                ),
+            )
+
+        oppdatertVedtak shouldNotBe null
+        oppdatertVedtak.type shouldBe VedtakType.TILBAKEKREVING
+        oppdatertVedtak.innhold should beInstanceOf<VedtakTilbakekrevingInnhold>()
+        (oppdatertVedtak.innhold as VedtakTilbakekrevingInnhold).tilbakekreving shouldBe oppdatertTilbakekreving
     }
 
     @Test
@@ -244,45 +302,30 @@ internal class VedtaksvurderingRepositoryTest {
     }
 
     @Test
-    fun `skal hente sammendrag for et vedtak`() {
-        val nyttVedtak = opprettVedtak()
-        val vedtak = repository.opprettVedtak(nyttVedtak)
-
-        val sammendrag = repository.hentVedtakSammendrag(vedtak.behandlingId)
-
-        with(sammendrag!!) {
-            id shouldBe vedtak.id
-            soeker shouldBe vedtak.soeker
-            sakId shouldBe vedtak.sakId
-            behandlingId shouldBe vedtak.behandlingId
-            status shouldBe vedtak.status
-            type shouldBe vedtak.type
-            vedtakFattet shouldBe vedtak.vedtakFattet
-            attestasjon shouldBe vedtak.attestasjon
-        }
-    }
-
-    @Test
     fun `skal hente vedtak for fnr og fra-og-med angitt dato`() {
-        val person1 = Folkeregisteridentifikator.of(FNR_1)
-        val person2 = Folkeregisteridentifikator.of(FNR_2)
+        val soeker1 = SOEKER_FOEDSELSNUMMER
+        val soeker2 = Folkeregisteridentifikator.of(FNR_2)
 
         listOf(
-            opprettVedtak(sakId = 1, soeker = person1, virkningstidspunkt = YearMonth.of(2024, Month.JANUARY)),
-            opprettVedtak(sakId = 2, soeker = person2, virkningstidspunkt = YearMonth.of(2024, Month.JANUARY)),
-            opprettVedtak(sakId = 2, soeker = person2, virkningstidspunkt = YearMonth.of(2024, Month.MARCH)),
-            opprettVedtak(sakId = 1, soeker = person1, virkningstidspunkt = YearMonth.of(2024, Month.APRIL)),
-            opprettVedtak(sakId = 2, soeker = person2, virkningstidspunkt = YearMonth.of(2024, Month.JUNE)),
+            opprettVedtak(sakId = 1, soeker = soeker1, virkningstidspunkt = YearMonth.of(2024, Month.JANUARY)),
+            opprettVedtak(sakId = 2, soeker = soeker2, virkningstidspunkt = YearMonth.of(2024, Month.JANUARY)),
+            opprettVedtak(sakId = 2, soeker = soeker2, virkningstidspunkt = YearMonth.of(2024, Month.MARCH)),
+            opprettVedtak(sakId = 1, soeker = soeker1, virkningstidspunkt = YearMonth.of(2024, Month.APRIL)),
+            opprettVedtak(sakId = 2, soeker = soeker2, virkningstidspunkt = YearMonth.of(2024, Month.JUNE)),
         )
             .map { repository.opprettVedtak(it) }
             .forEach { repository.iverksattVedtak(it.behandlingId) }
 
-        val results = repository.hentFerdigstilteVedtak(person2, LocalDate.of(2024, Month.MARCH, 1))
+        val results = repository.hentFerdigstilteVedtak(soeker2, LocalDate.of(2024, Month.MARCH, 1))
 
         results.size shouldBeExactly 2
         results.forEach {
-            it.soeker shouldBe person2
-            it.virkningstidspunkt shouldBeGreaterThanOrEqualTo YearMonth.of(2024, Month.MARCH)
+            it.soeker shouldBe soeker2
+            (it.innhold as VedtakBehandlingInnhold).virkningstidspunkt shouldBeGreaterThanOrEqualTo
+                YearMonth.of(
+                    2024,
+                    Month.MARCH,
+                )
         }
     }
 }

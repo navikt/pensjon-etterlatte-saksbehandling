@@ -1,11 +1,12 @@
 package no.nav.etterlatte.brev.model.bp
 
-import no.nav.etterlatte.brev.behandling.Behandling
+import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
 import no.nav.etterlatte.brev.model.AvslagBrevData
 import no.nav.etterlatte.brev.model.BrevData
 import no.nav.etterlatte.brev.model.EndringBrevData
 import no.nav.etterlatte.brev.model.EtterbetalingDTO
+import no.nav.etterlatte.brev.model.InnholdMedVedlegg
 import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.libs.common.behandling.BarnepensjonSoeskenjusteringGrunn
 import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
@@ -19,14 +20,15 @@ data class EndringHovedmalBrevData(
 ) : EndringBrevData() {
     companion object {
         fun fra(
-            behandling: Behandling,
-            innhold: List<Slate.Element>,
+            utbetalingsinfo: Utbetalingsinfo,
+            etterbetalingDTO: EtterbetalingDTO?,
+            innhold: InnholdMedVedlegg,
         ): BrevData =
             EndringHovedmalBrevData(
                 erEndret = true, // TODO når resten av fengselsopphold implementerast
-                etterbetaling = behandling.etterbetalingDTO,
-                utbetalingsinfo = behandling.utbetalingsinfo!!,
-                innhold = innhold,
+                etterbetaling = etterbetalingDTO,
+                utbetalingsinfo = utbetalingsinfo,
+                innhold = innhold.innhold(),
             )
     }
 }
@@ -36,15 +38,19 @@ data class SoeskenjusteringRevurderingBrevdata(
     val grunnForJustering: BarnepensjonSoeskenjusteringGrunn,
 ) : EndringBrevData() {
     companion object {
-        fun fra(behandling: Behandling): SoeskenjusteringRevurderingBrevdata {
+        fun fra(
+            generellBrevData: GenerellBrevData,
+            utbetalingsinfo: Utbetalingsinfo,
+        ): SoeskenjusteringRevurderingBrevdata {
             val revurderingsinfo =
                 AvslagBrevData.valider<RevurderingInfo.Soeskenjustering>(
-                    behandling,
+                    generellBrevData.revurderingsaarsak,
+                    generellBrevData.forenkletVedtak.revurderingInfo,
                     RevurderingAarsak.SOESKENJUSTERING,
                 )
 
             return SoeskenjusteringRevurderingBrevdata(
-                utbetalingsinfo = behandling.utbetalingsinfo!!,
+                utbetalingsinfo = utbetalingsinfo,
                 grunnForJustering = revurderingsinfo.grunnForSoeskenjustering,
             )
         }

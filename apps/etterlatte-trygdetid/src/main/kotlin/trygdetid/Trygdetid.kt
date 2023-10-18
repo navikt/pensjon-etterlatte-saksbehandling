@@ -13,11 +13,13 @@ import java.util.UUID.randomUUID
 
 data class Trygdetid(
     val id: UUID = randomUUID(),
+    val ident: String?,
     val sakId: Long,
     val behandlingId: UUID,
     val trygdetidGrunnlag: List<TrygdetidGrunnlag> = emptyList(),
     val opplysninger: List<Opplysningsgrunnlag> = emptyList(),
     val beregnetTrygdetid: DetaljertBeregnetTrygdetid? = null,
+    val overstyrtNorskPoengaar: Int? = null,
 ) {
     fun leggTilEllerOppdaterTrygdetidGrunnlag(nyttTrygdetidGrunnlag: TrygdetidGrunnlag): Trygdetid {
         val normalisertNyttTrygdetidGrunnlag = listOf(nyttTrygdetidGrunnlag).normaliser().first()

@@ -34,6 +34,7 @@ dependencies {
     testImplementation(libs.el.impl)
     testImplementation(libs.ktor2.servertests)
     testImplementation(libs.ktor2.clientmock)
+    testImplementation(project(":libs:testdata"))
 }
 
 tasks.named("compileKotlin").configure { dependsOn(":apps:etterlatte-hendelser-pdl:generateAvroJava") }

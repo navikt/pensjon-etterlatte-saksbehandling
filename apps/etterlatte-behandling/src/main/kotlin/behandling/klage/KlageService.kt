@@ -5,9 +5,11 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.klienter.BrevApiKlient
 import no.nav.etterlatte.behandling.klienter.KlageKlient
+import no.nav.etterlatte.libs.common.behandling.BehandlingResultat
 import no.nav.etterlatte.libs.common.behandling.EkstradataInnstilling
 import no.nav.etterlatte.libs.common.behandling.Formkrav
 import no.nav.etterlatte.libs.common.behandling.InnstillingTilKabal
+import no.nav.etterlatte.libs.common.behandling.KabalStatus
 import no.nav.etterlatte.libs.common.behandling.Kabalrespons
 import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.behandling.KlageBrevInnstilling
@@ -48,7 +50,7 @@ interface KlageService {
         saksbehandler: Saksbehandler,
     ): Klage
 
-    fun oppdaterKabalStatus(
+    fun haandterKabalrespons(
         klageId: UUID,
         kabalrespons: Kabalrespons,
     )
@@ -188,10 +190,29 @@ class KlageServiceImpl(
         }
     }
 
-    override fun oppdaterKabalStatus(
+    override fun haandterKabalrespons(
         klageId: UUID,
         kabalrespons: Kabalrespons,
-    ) = klageDao.oppdaterKabalStatus(klageId, kabalrespons)
+    ) {
+        val opprinneligKlage = klageDao.hentKlage(klageId) ?: throw NotFoundException()
+
+        if (kabalrespons.kabalStatus == KabalStatus.FERDIGSTILT) {
+            // Se på hva kabalresponsen er, og opprett oppgave om det er nødvendig.
+            when (kabalrespons.resultat) {
+                BehandlingResultat.HENLAGT,
+                BehandlingResultat.IKKE_SATT,
+                -> {
+                } // Her trenger vi ikke gjøre noe
+                BehandlingResultat.IKKE_MEDHOLD,
+                BehandlingResultat.IKKE_MEDHOLD_FORMKRAV_AVVIST,
+                -> {
+                } // trenger vi å gjøre noe spesifikt her?
+                BehandlingResultat.MEDHOLD -> lagOppgaveForOmgjoering(opprinneligKlage)
+            }
+        }
+
+        klageDao.oppdaterKabalStatus(klageId, kabalrespons)
+    }
 
     override fun ferdigstillKlage(
         klageId: UUID,
@@ -219,7 +240,7 @@ class KlageServiceImpl(
                 null -> null to null
             }
 
-        val oppgaveOmgjoering = omgjoering?.let { ferdigstillOmgjoering(klage) }
+        val oppgaveOmgjoering = omgjoering?.let { lagOppgaveForOmgjoering(klage) }
         val sendtInnstillingsbrev = innstilling?.let { ferdigstillInnstilling(it, klage, saksbehandler) }
 
         val resultat =
@@ -260,7 +281,11 @@ class KlageServiceImpl(
             }
         val brev =
             runBlocking {
-                brevApiKlient.hentBrev(sakId = klage.sak.id, brevId = innstillingsbrev.brevId, brukerTokenInfo = saksbehandler)
+                brevApiKlient.hentBrev(
+                    sakId = klage.sak.id,
+                    brevId = innstillingsbrev.brevId,
+                    brukerTokenInfo = saksbehandler,
+                )
             }
         runBlocking {
             klageKlient.sendKlageTilKabal(
@@ -285,7 +310,7 @@ class KlageServiceImpl(
         )
     }
 
-    private fun ferdigstillOmgjoering(klage: Klage): OppgaveIntern {
+    private fun lagOppgaveForOmgjoering(klage: Klage): OppgaveIntern {
         val vedtaketKlagenGjelder =
             klage.formkrav?.formkrav?.vedtaketKlagenGjelder ?: throw OmgjoeringMaaGjeldeEtVedtakException(klage)
 

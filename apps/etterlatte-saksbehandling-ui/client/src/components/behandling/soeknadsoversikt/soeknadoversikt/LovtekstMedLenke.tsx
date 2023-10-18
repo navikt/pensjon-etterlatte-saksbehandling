@@ -2,7 +2,7 @@ import { BodyLong, Heading } from '@navikt/ds-react'
 import { ReactNode } from 'react'
 import styled from 'styled-components'
 import { SoeknadOversiktWrapper } from '../styled'
-import { StatusIconProps, StatusIcon } from '~shared/icons/statusIcon'
+import { StatusIcon, StatusIconProps } from '~shared/icons/statusIcon'
 import { HjemmelLenke, HjemmelLenkeProps } from '~components/behandling/felles/HjemmelLenke'
 
 interface LovtekstMedLenkeProps {

@@ -3,9 +3,6 @@ package beregning.regler.sats
 import io.kotest.matchers.collections.shouldBeIn
 import io.kotest.matchers.ints.shouldBeExactly
 import io.kotest.matchers.shouldBe
-import no.nav.etterlatte.beregning.regler.FNR_1
-import no.nav.etterlatte.beregning.regler.FNR_2
-import no.nav.etterlatte.beregning.regler.FNR_3
 import no.nav.etterlatte.beregning.regler.REGEL_PERIODE
 import no.nav.etterlatte.beregning.regler.barnepensjon.sats.aktuelleBarnepensjonSatsRegler
 import no.nav.etterlatte.beregning.regler.barnepensjon.sats.antallSoeskenIKullet1967
@@ -22,6 +19,9 @@ import no.nav.etterlatte.beregning.regler.barnepensjon.sats.soeskenIKullet1967
 import no.nav.etterlatte.beregning.regler.barnepensjonGrunnlag
 import no.nav.etterlatte.beregning.regler.toBeregningstall
 import no.nav.etterlatte.libs.regler.RegelPeriode
+import no.nav.etterlatte.libs.testdata.grunnlag.HELSOESKEN2_FOEDSELSNUMMER
+import no.nav.etterlatte.libs.testdata.grunnlag.HELSOESKEN3_FOEDSELSNUMMER
+import no.nav.etterlatte.libs.testdata.grunnlag.HELSOESKEN_FOEDSELSNUMMER
 import no.nav.etterlatte.regler.Beregningstall
 import no.nav.etterlatte.regler.Beregningstall.Companion.DESIMALER_DELBEREGNING
 import org.junit.jupiter.api.BeforeEach
@@ -66,19 +66,19 @@ internal class BarnepensjonSatsTest {
     fun `soeskenIKullet skal returnere liste med soesken`() {
         val resultat =
             soeskenIKullet1967.anvend(
-                grunnlag = barnepensjonGrunnlag(soeskenKull = listOf(FNR_1, FNR_2)),
+                grunnlag = barnepensjonGrunnlag(soeskenKull = listOf(HELSOESKEN_FOEDSELSNUMMER, HELSOESKEN2_FOEDSELSNUMMER)),
                 periode = REGEL_PERIODE,
             )
 
         resultat.verdi.size shouldBeExactly 2
-        resultat.verdi.forEach { it.value shouldBeIn listOf(FNR_1, FNR_2) }
+        resultat.verdi.forEach { it shouldBeIn listOf(HELSOESKEN_FOEDSELSNUMMER, HELSOESKEN2_FOEDSELSNUMMER) }
     }
 
     @Test
     fun `antallSoeskenIKullet skal returnere antall soesken i kullet`() {
         val resultat =
             antallSoeskenIKullet1967.anvend(
-                grunnlag = barnepensjonGrunnlag(soeskenKull = listOf(FNR_1, FNR_2)),
+                grunnlag = barnepensjonGrunnlag(soeskenKull = listOf(HELSOESKEN_FOEDSELSNUMMER, HELSOESKEN2_FOEDSELSNUMMER)),
                 periode = REGEL_PERIODE,
             )
 
@@ -144,7 +144,7 @@ internal class BarnepensjonSatsTest {
     fun `barnepensjonSatsRegel skal returnere 3019,25 kroner ved 1 soesken`() {
         val resultat =
             barnepensjonSatsRegel.anvend(
-                grunnlag = barnepensjonGrunnlag(soeskenKull = listOf(FNR_1)),
+                grunnlag = barnepensjonGrunnlag(soeskenKull = listOf(HELSOESKEN_FOEDSELSNUMMER)),
                 periode = REGEL_PERIODE,
             )
 
@@ -155,7 +155,7 @@ internal class BarnepensjonSatsTest {
     fun `barnepensjonSatsRegel skal returnere 2787,00 kroner ved 2 soesken`() {
         val resultat =
             barnepensjonSatsRegel.anvend(
-                grunnlag = barnepensjonGrunnlag(soeskenKull = listOf(FNR_1, FNR_2)),
+                grunnlag = barnepensjonGrunnlag(soeskenKull = listOf(HELSOESKEN_FOEDSELSNUMMER, HELSOESKEN2_FOEDSELSNUMMER)),
                 periode = REGEL_PERIODE,
             )
 
@@ -166,7 +166,10 @@ internal class BarnepensjonSatsTest {
     fun `barnepensjonSatsRegel skal returnere 2670,887 kroner ved 3 soesken`() {
         val resultat =
             barnepensjonSatsRegel.anvend(
-                grunnlag = barnepensjonGrunnlag(soeskenKull = listOf(FNR_1, FNR_2, FNR_3)),
+                grunnlag =
+                    barnepensjonGrunnlag(
+                        soeskenKull = listOf(HELSOESKEN_FOEDSELSNUMMER, HELSOESKEN2_FOEDSELSNUMMER, HELSOESKEN3_FOEDSELSNUMMER),
+                    ),
                 periode = REGEL_PERIODE,
             )
 

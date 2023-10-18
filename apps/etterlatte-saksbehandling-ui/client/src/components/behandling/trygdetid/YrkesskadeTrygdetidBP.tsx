@@ -5,7 +5,7 @@ import styled from 'styled-components'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { LovtekstMedLenke } from '~components/behandling/soeknadsoversikt/soeknadoversikt/LovtekstMedLenke'
 import Spinner from '~shared/Spinner'
-import { ITrygdetid, hentTrygdetid, opprettTrygdetid, lagreYrkesskadeTrygdetidGrunnlag } from '~shared/api/trygdetid'
+import { hentTrygdetid, ITrygdetid, lagreYrkesskadeTrygdetidGrunnlag, opprettTrygdetid } from '~shared/api/trygdetid'
 import { isFailure, isPending, useApiCall } from '~shared/hooks/useApiCall'
 
 const YrkesskadeTrygdetidBP = () => {

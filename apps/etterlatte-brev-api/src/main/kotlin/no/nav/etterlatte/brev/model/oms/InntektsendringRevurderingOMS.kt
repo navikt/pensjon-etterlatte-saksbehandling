@@ -1,12 +1,12 @@
 package no.nav.etterlatte.brev.model.oms
 
 import no.nav.etterlatte.brev.behandling.Avkortingsinfo
-import no.nav.etterlatte.brev.behandling.Behandling
+import no.nav.etterlatte.brev.behandling.Trygdetid
 import no.nav.etterlatte.brev.model.Beregningsinfo
 import no.nav.etterlatte.brev.model.BrevData
-import no.nav.etterlatte.brev.model.BrevInnholdVedlegg
 import no.nav.etterlatte.brev.model.BrevVedleggKey
 import no.nav.etterlatte.brev.model.EtterbetalingDTO
+import no.nav.etterlatte.brev.model.InnholdMedVedlegg
 import no.nav.etterlatte.brev.model.NyBeregningsperiode
 import no.nav.etterlatte.brev.model.Slate
 
@@ -19,24 +19,21 @@ data class InntektsendringRevurderingOMS(
 ) : BrevData() {
     companion object {
         fun fra(
-            behandling: Behandling,
-            innhold: List<Slate.Element>,
-            innholdVedlegg: List<BrevInnholdVedlegg>,
+            avkortingsinfo: Avkortingsinfo,
+            etterbetalingDTO: EtterbetalingDTO?,
+            trygdetid: Trygdetid,
+            innholdMedVedlegg: InnholdMedVedlegg,
         ): InntektsendringRevurderingOMS =
             InntektsendringRevurderingOMS(
                 erEndret = true,
-                avkortingsinfo = behandling.avkortingsinfo,
-                etterbetalinginfo = behandling.etterbetalingDTO,
+                avkortingsinfo = avkortingsinfo,
+                etterbetalinginfo = etterbetalingDTO,
                 beregningsinfo =
                     Beregningsinfo(
-                        innhold =
-                            innholdVedlegg.find {
-                                    vedlegg ->
-                                vedlegg.key == BrevVedleggKey.BEREGNING_INNHOLD
-                            }?.payload!!.elements,
-                        grunnbeloep = behandling.avkortingsinfo!!.grunnbeloep,
+                        innhold = innholdMedVedlegg.finnVedlegg(BrevVedleggKey.BEREGNING_INNHOLD),
+                        grunnbeloep = avkortingsinfo.grunnbeloep,
                         beregningsperioder =
-                            behandling.avkortingsinfo.beregningsperioder.map {
+                            avkortingsinfo.beregningsperioder.map {
                                 NyBeregningsperiode(
                                     inntekt = it.inntekt,
                                     trygdetid = it.trygdetid,
@@ -44,9 +41,9 @@ data class InntektsendringRevurderingOMS(
                                     utbetaltBeloep = it.utbetaltBeloep,
                                 )
                             },
-                        trygdetidsperioder = behandling.trygdetid!!,
+                        trygdetidsperioder = trygdetid.perioder,
                     ),
-                innhold = innhold,
+                innhold = innholdMedVedlegg.innhold(),
             )
     }
 }

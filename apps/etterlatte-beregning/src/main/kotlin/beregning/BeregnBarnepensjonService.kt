@@ -88,7 +88,7 @@ class BeregnBarnepensjonService(
         behandling: DetaljertBehandling,
         brukerTokenInfo: BrukerTokenInfo,
     ): Beregning {
-        val grunnlag = grunnlagKlient.hentGrunnlag(behandling.sak, brukerTokenInfo)
+        val grunnlag = grunnlagKlient.hentGrunnlag(behandling.sak, behandling.id, brukerTokenInfo)
         val behandlingType = behandling.behandlingType
         val virkningstidspunkt =
             requireNotNull(behandling.virkningstidspunkt?.dato) { "Behandling ${behandling.id} mangler virkningstidspunkt" }

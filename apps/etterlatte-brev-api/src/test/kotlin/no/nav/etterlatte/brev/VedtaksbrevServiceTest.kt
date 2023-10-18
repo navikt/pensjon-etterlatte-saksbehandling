@@ -429,6 +429,7 @@ internal class VedtaksbrevServiceTest {
             val brev = opprettBrev(Status.OPPRETTET, mockk())
 
             every { db.hentBrevForBehandling(any()) } returns brev
+            every { db.hentPdf(any()) } returns Pdf("".toByteArray())
             coEvery { vedtaksvurderingService.hentVedtakSaksbehandlerOgStatus(any(), any()) } returns
                 Pair(
                     SAKSBEHANDLER.ident(),
@@ -442,7 +443,37 @@ internal class VedtaksbrevServiceTest {
             verify {
                 db.hentBrevForBehandling(brev.behandlingId!!)
                 db.settBrevFerdigstilt(brev.id)
+                db.hentPdf(brev.id)
             }
+
+            coVerify {
+                vedtaksvurderingService.hentVedtakSaksbehandlerOgStatus(brev.behandlingId!!, any())
+            }
+        }
+
+        @Test
+        fun `Ferdigstille vedtaksbrev som ATTESTANT - status vedtak fattet, men PDF mangler`() {
+            val brev = opprettBrev(Status.OPPRETTET, mockk())
+
+            every { db.hentBrevForBehandling(any()) } returns brev
+            every { db.hentPdf(any()) } returns null
+            coEvery { vedtaksvurderingService.hentVedtakSaksbehandlerOgStatus(any(), any()) } returns
+                Pair(
+                    SAKSBEHANDLER.ident(),
+                    VedtakStatus.FATTET_VEDTAK,
+                )
+
+            runBlocking {
+                assertThrows<IllegalStateException> {
+                    vedtaksbrevService.ferdigstillVedtaksbrev(brev.behandlingId!!, brukerTokenInfo = ATTESTANT)
+                }
+            }
+
+            verify {
+                db.hentBrevForBehandling(brev.behandlingId!!)
+                db.hentPdf(brev.id)
+            }
+            verify(exactly = 0) { db.settBrevFerdigstilt(any()) }
 
             coVerify {
                 vedtaksvurderingService.hentVedtakSaksbehandlerOgStatus(brev.behandlingId!!, any())

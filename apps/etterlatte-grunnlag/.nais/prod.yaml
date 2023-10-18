@@ -79,7 +79,7 @@ spec:
     - name: ETTERLATTE_BEHANDLING_CLIENT_ID
       value: prod-gcp.etterlatte.etterlatte-behandling
     - name: ETTERLATTE_BEHANDLING_SCOPE
-      value: api://dev-gcp.etterlatte.etterlatte-behandling/.default
+      value: api://prod-gcp.etterlatte.etterlatte-behandling/.default
     - name: PDLTJENESTER_AZURE_SCOPE
       value: api://prod-gcp.etterlatte.etterlatte-pdltjenester/.default
     - name: PDLTJENESTER_URL

@@ -22,7 +22,18 @@ import java.util.UUID
 import javax.sql.DataSource
 
 class TrygdetidRepository(private val dataSource: DataSource) {
-    fun hentTrygdetid(behandlingId: UUID): Trygdetid? =
+    fun hentTrygdetidMedId(
+        behandlingId: UUID,
+        trygdetidId: UUID,
+    ): Trygdetid? {
+        return hentTrygdetiderForBehandling(behandlingId).find { it.id == trygdetidId }
+    }
+
+    fun hentTrygdetid(behandlingId: UUID): Trygdetid? {
+        return hentTrygdetiderForBehandling(behandlingId).firstOrNull()
+    }
+
+    fun hentTrygdetiderForBehandling(behandlingId: UUID): List<Trygdetid> =
         using(sessionOf(dataSource)) { session ->
             queryOf(
                 statement =
@@ -64,7 +75,7 @@ class TrygdetidRepository(private val dataSource: DataSource) {
                         val trygdetidGrunnlag = hentTrygdetidGrunnlag(trygdetidId)
                         val opplysninger = hentGrunnlagOpplysninger(trygdetidId)
                         row.toTrygdetid(trygdetidGrunnlag, opplysninger)
-                    }.asSingle,
+                    }.asList,
                 )
             }
         }
@@ -416,7 +427,7 @@ class TrygdetidRepository(private val dataSource: DataSource) {
         }
 
     private fun hentTrygdtidNotNull(behandlingsId: UUID) =
-        hentTrygdetid(behandlingsId)
+        hentTrygdetiderForBehandling(behandlingsId).firstOrNull()
             ?: throw Exception("Fant ikke trygdetid for $behandlingsId")
 
     private fun Row.toFaktiskTrygdetid(

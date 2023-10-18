@@ -13,7 +13,6 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarOpplysningType.AVD
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarOpplysningType.SOEKER_FOEDSELSDATO
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
 import no.nav.etterlatte.vilkaarsvurdering.VilkaarFeatureToggle
-import no.nav.etterlatte.vilkaarsvurdering.vilkaar.BarnepensjonVilkaar1967.toVilkaarsgrunnlag
 
 object BarnepensjonVilkaar2024 {
     fun inngangsvilkaar(

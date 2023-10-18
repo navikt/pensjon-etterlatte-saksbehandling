@@ -37,6 +37,7 @@ class TrygdetidBeregningServiceTest {
                 trygdetidGrunnlag,
                 now,
                 now,
+                null,
             )
         beregnetTrygdetid shouldNotBe null
         with(beregnetTrygdetid!!) {
@@ -67,6 +68,7 @@ class TrygdetidBeregningServiceTest {
                 trygdetidGrunnlag,
                 now,
                 now,
+                null,
             )
 
         beregnetTrygdetid!!.resultat.samletTrygdetidNorge shouldBe 40
@@ -84,9 +86,45 @@ class TrygdetidBeregningServiceTest {
                 trygdetidGrunnlag,
                 LocalDate.now(),
                 LocalDate.now(),
+                null,
             )
 
         beregnetTrygdetid!!.resultat.samletTrygdetidNorge shouldBe 0
+    }
+
+    @Test
+    fun `skal gi 22 aar total trygdetid med overstyrt poengaar`() {
+        val now = LocalDate.now()
+
+        val trygdetidGrunnlag =
+            listOf(
+                trygdetidGrunnlag(
+                    beregnetTrygdetidGrunnlag = beregnetTrygdetidGrunnlag(Period.ofYears(10)),
+                    periode = TrygdetidPeriode(now.minusYears(22), now.minusYears(12)),
+                ),
+                trygdetidGrunnlag(
+                    beregnetTrygdetidGrunnlag = beregnetTrygdetidGrunnlag(Period.ofYears(10)),
+                    periode = TrygdetidPeriode(now.minusYears(12), now.minusYears(2)),
+                ),
+                trygdetidGrunnlag(
+                    beregnetTrygdetidGrunnlag = beregnetTrygdetidGrunnlag(Period.ofYears(2)),
+                    periode = TrygdetidPeriode(now.minusYears(2), now),
+                ),
+            )
+
+        val beregnetTrygdetid =
+            TrygdetidBeregningService.beregnTrygdetid(
+                trygdetidGrunnlag,
+                now,
+                now,
+                10,
+            )
+        beregnetTrygdetid shouldNotBe null
+        with(beregnetTrygdetid!!) {
+            regelResultat shouldNotBe null
+            tidspunkt shouldNotBe null
+            resultat.samletTrygdetidNorge shouldBe 10
+        }
     }
 
     @Test

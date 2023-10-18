@@ -220,6 +220,7 @@ class TrygdetidServiceImpl(
                     trygdetidGrunnlag = trygdetidMedOppdatertTrygdetidGrunnlag.trygdetidGrunnlag,
                     datoer.foedselsDato,
                     datoer.doedsDato,
+                    trygdetidMedOppdatertTrygdetidGrunnlag.overstyrtNorskPoengaar,
                 )
 
             when (nyBeregnetTrygdetid) {
@@ -273,6 +274,7 @@ class TrygdetidServiceImpl(
                         trygdetid.trygdetidGrunnlag,
                         datoer.foedselsDato,
                         datoer.doedsDato,
+                        trygdetid.overstyrtNorskPoengaar,
                     )
             ) {
                 null -> trygdetid.nullstillBeregnetTrygdetid()

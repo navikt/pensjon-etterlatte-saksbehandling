@@ -27,6 +27,7 @@ object TrygdetidBeregningService {
         trygdetidGrunnlag: List<TrygdetidGrunnlag>,
         foedselsDato: LocalDate,
         doedsDato: LocalDate,
+        norskPoengaar: Int?,
     ): DetaljertBeregnetTrygdetid? {
         logger.info("Beregner antall år trygdetid")
 
@@ -45,6 +46,7 @@ object TrygdetidBeregningService {
                             trygdetidGrunnlagListe = trygdetidGrunnlag,
                             foedselsDato = foedselsDato,
                             doedsDato = doedsDato,
+                            norskPoengaar = norskPoengaar,
                         ),
                     kilde = "System",
                     beskrivelse = "Beregn detaljert trygdetidsgrunnlag",

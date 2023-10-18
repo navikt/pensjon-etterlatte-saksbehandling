@@ -72,6 +72,8 @@ interface GrunnlagService {
         laasVersjon: Boolean,
     )
 
+    fun laasVersjonForBehandling(behandlingId: UUID)
+
     fun hentAlleSakerForFnr(fnr: Folkeregisteridentifikator): Set<Long>
 
     fun hentPersonerISak(sakId: Long): Map<Folkeregisteridentifikator, PersonMedNavn>?
@@ -418,6 +420,11 @@ class RealGrunnlagService(
         } else {
             logger.info("Skal ikke låse grunnlag (sakId=$sakId, behandlingId=$behandlingId)")
         }
+    }
+
+    override fun laasVersjonForBehandling(behandlingId: UUID) {
+        logger.info("Låser grunnlagsversjon for behandling (id=$behandlingId)")
+        opplysningDao.laasGrunnlagVersjonForBehandling(behandlingId)
     }
 
     private fun vellykkaRequest(

@@ -13,6 +13,7 @@ import no.nav.etterlatte.grunnlag.RealGrunnlagService
 import no.nav.etterlatte.grunnlag.behandlingGrunnlagRoute
 import no.nav.etterlatte.grunnlag.personRoute
 import no.nav.etterlatte.grunnlag.rivers.GrunnlagsversjoneringRiver
+import no.nav.etterlatte.grunnlag.rivers.InitBehandlingVersjonRiver
 import no.nav.etterlatte.grunnlag.sakGrunnlagRoute
 import no.nav.etterlatte.klienter.BehandlingKlientImpl
 import no.nav.etterlatte.klienter.PdlTjenesterKlientImpl
@@ -83,7 +84,8 @@ class ApplicationBuilder {
                 }
             }
             .build().apply {
-                GrunnlagsversjoneringRiver(this, behandlingKlient, grunnlagService)
+                GrunnlagsversjoneringRiver(this, grunnlagService)
+                InitBehandlingVersjonRiver(this, behandlingKlient, grunnlagService)
                 GrunnlagHendelserRiver(this, grunnlagService)
                 MigreringHendelserRiver(this, grunnlagService)
             }

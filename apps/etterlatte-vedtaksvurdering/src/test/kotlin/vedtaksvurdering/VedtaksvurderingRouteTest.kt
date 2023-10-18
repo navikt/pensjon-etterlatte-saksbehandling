@@ -44,7 +44,6 @@ import no.nav.etterlatte.vedtaksvurdering.UnderkjennVedtakDto
 import no.nav.etterlatte.vedtaksvurdering.VedtakBehandlingInnhold
 import no.nav.etterlatte.vedtaksvurdering.VedtakBehandlingService
 import no.nav.etterlatte.vedtaksvurdering.VedtakOgRapid
-import no.nav.etterlatte.vedtaksvurdering.VedtakSammendragDto
 import no.nav.etterlatte.vedtaksvurdering.VedtakTilbakekrevingInnhold
 import no.nav.etterlatte.vedtaksvurdering.VedtaksvurderingRapidService
 import no.nav.etterlatte.vedtaksvurdering.VedtaksvurderingService
@@ -250,6 +249,7 @@ internal class VedtaksvurderingRouteTest {
                     vedtaksvurderingRoute(
                         vedtaksvurderingService,
                         vedtakBehandlingService,
+                        rapidService,
                         behandlingKlient,
                     )
                 }
@@ -306,6 +306,7 @@ internal class VedtaksvurderingRouteTest {
                     vedtaksvurderingRoute(
                         vedtaksvurderingService,
                         vedtakBehandlingService,
+                        rapidService,
                         behandlingKlient,
                     )
                 }
@@ -486,7 +487,7 @@ internal class VedtaksvurderingRouteTest {
                 status = VedtakStatus.FATTET_VEDTAK,
                 vedtakFattet = VedtakFattet(SAKSBEHANDLER_1, ENHET_1, Tidspunkt.now()),
             )
-        coEvery { vedtakBehandlingService.fattVedtak(any(), any()) } returns fattetVedtak
+        coEvery { vedtakBehandlingService.fattVedtak(any(), any()) } returns VedtakOgRapid(fattetVedtak.toDto(), mockk())
         coEvery { rapidService.sendToRapid(any()) } just runs
 
         testApplication {
@@ -549,7 +550,7 @@ internal class VedtaksvurderingRouteTest {
                 vedtakFattet = VedtakFattet(SAKSBEHANDLER_1, ENHET_1, Tidspunkt.now()),
                 attestasjon = Attestasjon(SAKSBEHANDLER_2, ENHET_2, Tidspunkt.now()),
             )
-        coEvery { vedtakBehandlingService.attesterVedtak(any(), any(), any()) } returns attestertVedtak
+        coEvery { vedtakBehandlingService.attesterVedtak(any(), any(), any()) } returns VedtakOgRapid(attestertVedtak.toDto(), mockk())
         coEvery { rapidService.sendToRapid(any()) } just runs
 
         testApplication {

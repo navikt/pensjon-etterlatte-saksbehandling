@@ -80,8 +80,12 @@ internal class FeilendeMigreringLytterRiver(rapidsConnection: RapidsConnection, 
                 null,
             )
         } else if (packet.harVerdi(BEHANDLING_ID_KEY)) {
-            repository.hentPesysId(packet.behandlingId)?.let { Pair(it.pesysId, it.behandlingId) }
-                ?: Pair(null, id).also { logger.warn("Mangler pesys-identifikator for behandling $id") }
+            with(packet.behandlingId) {
+                repository.hentPesysId(this)?.let { Pair(it.pesysId, it.behandlingId) }
+                    ?: Pair(
+                        null, this,
+                    ).also { logger.warn("Mangler pesys-identifikator for behandling $this") }
+            }
         } else {
             throw IllegalArgumentException("Manglar pesys-identifikator, kan ikke kjøre feilhåndtering")
         }

@@ -8,7 +8,7 @@ Tjenesten krever token utstedt av Maskinporten med scope _nav:etterlatteytelser:
 
 ### Autorisasjon
 
-Det må foreligge et tjenestepensjonsforhold i Tjenestepensjonsregisteret som gjelder kallende leverandør, personen vedtaket gjelder og på vedtakets virkningsdato.
+Det må foreligge et tjenestepensjonsforhold i Tjenestepensjonsregisteret som gjelder kallende leverandør, personen vedtaket gjelder og på vedtakets virkningsdato. Ved oppslag med _vedtakId_ så sjekkes det også om det finnes en løpende TP-ytelse gjeldende  på vedtakets fra-og-med dato.
 
 ## API
 
@@ -50,10 +50,10 @@ Det må foreligge et tjenestepensjonsforhold i Tjenestepensjonsregisteret som gj
 
 ## Integrasjon
 
-| Miljø | Ingress                                                  |
-|:------|:---------------------------------------------------------|
-| dev   | https://etterlatte-samordning-vedtak.ekstern.dev.nav.no  |
-| prod  | tbd                                                      |    
+| Miljø | Ingress                                                 |
+|:------|:--------------------------------------------------------|
+| dev   | https://etterlatte-samordning-vedtak.ekstern.dev.nav.no |
+| prod  | https://etterlatte-samordning-vedtak.nav.no             |    
 
 ## Kom i gang
 
@@ -66,7 +66,8 @@ Les [README](../../README.md) på rot i prosjektet.
 
 Appen bygges og deployes automatisk ved commits til `apps/etterlatte-samordning-vedtak/**`.
 
-For å trigge **manuell deploy** kan du gå til `Actions -> (velg workflow) -> Run workflow from <branch>`
+- Deployes både til dev og prod automatisk ved merge til main.
+- For å trigge manuell deploy (miljø kan velges) kan du gå til `Actions -> (velg workflow) -> Run workflow from <branch>`
 
 ## Henvendelser
 

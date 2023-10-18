@@ -136,7 +136,6 @@ class BrevDataMapper(private val featureToggleService: FeatureToggleService, pri
 
                             RevurderingAarsak.OMGJOERING_AV_FARSKAP ->
                                 BrevkodePar(BARNEPENSJON_REVURDERING_OMGJOERING_AV_FARSKAP, BARNEPENSJON_REVURDERING_OPPHOER)
-
                             RevurderingAarsak.FENGSELSOPPHOLD ->
                                 BrevkodePar(TOM_MAL, BARNEPENSJON_REVURDERING_ENDRING)
 
@@ -185,7 +184,9 @@ class BrevDataMapper(private val featureToggleService: FeatureToggleService, pri
                 brevdataFacade,
                 brukerTokenInfo,
                 generellBrevData.behandlingId,
-                generellBrevData.forenkletVedtak.virkningstidspunkt,
+                requireNotNull(generellBrevData.forenkletVedtak.virkningstidspunkt) {
+                    "brev for behandling=${generellBrevData.behandlingId} må ha virkningstidspunkt"
+                },
                 generellBrevData.forenkletVedtak.type,
                 generellBrevData.sak,
             )
@@ -312,7 +313,7 @@ class BrevDataMapper(private val featureToggleService: FeatureToggleService, pri
                 brevdataFacade,
                 brukerTokenInfo,
                 generellBrevData.behandlingId,
-                generellBrevData.forenkletVedtak.virkningstidspunkt,
+                requireNotNull(generellBrevData.forenkletVedtak.virkningstidspunkt) { "${kode.ferdigstilling} Må ha virkningstidspunkt" },
                 generellBrevData.forenkletVedtak.type,
                 generellBrevData.sak,
             )

@@ -72,7 +72,7 @@ data class ForenkletVedtak(
     val saksbehandlerIdent: String,
     val attestantIdent: String?,
     val vedtaksdato: LocalDate?,
-    val virkningstidspunkt: YearMonth,
+    val virkningstidspunkt: YearMonth? = null,
     val revurderingInfo: RevurderingInfo? = null,
 )
 

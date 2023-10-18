@@ -23,7 +23,12 @@ import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.testdata.grunnlag.ADRESSE_DEFAULT
+import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
+import no.nav.etterlatte.libs.testdata.grunnlag.GJENLEVENDE_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
+import no.nav.etterlatte.libs.testdata.grunnlag.HELSOESKEN_FOEDSELSNUMMER
+import no.nav.etterlatte.libs.testdata.grunnlag.INNSENDER_FOEDSELSNUMMER
+import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER2_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.kilde
 import no.nav.etterlatte.libs.testdata.grunnlag.statiskUuid
 import org.junit.jupiter.api.Assertions
@@ -328,9 +333,9 @@ internal class GrunnlagServiceTest {
 
     @Nested
     inner class `Test uthenting av saker og roller for person` {
-        private val gjenlevendeFnr = TRIVIELL_MIDTPUNKT
+        private val gjenlevendeFnr = GJENLEVENDE_FOEDSELSNUMMER
 
-        private val barnepensjonSoeker1 = BLAAOEYD_SAKS
+        private val barnepensjonSoeker1 = INNSENDER_FOEDSELSNUMMER
         private val grunnlaghendelse1 =
             lagGrunnlagHendelse(
                 sakId = 1,
@@ -342,15 +347,15 @@ internal class GrunnlagServiceTest {
                         innsender = gjenlevendeFnr.value,
                         soesken =
                             listOf(
-                                GOEYAL_KRONJUVEL.value,
-                                GROENN_STAUDE.value,
+                                SOEKER2_FOEDSELSNUMMER.value,
+                                HELSOESKEN_FOEDSELSNUMMER.value,
                             ),
-                        avdoed = listOf(STOR_SNERK.value),
+                        avdoed = listOf(AVDOED_FOEDSELSNUMMER.value),
                         gjenlevende = listOf(gjenlevendeFnr.value),
                     ).toJsonNode(),
             )
 
-        private val barnepensjonSoeker2 = GOEYAL_KRONJUVEL
+        private val barnepensjonSoeker2 = SOEKER2_FOEDSELSNUMMER
         private val grunnlaghendelse2 =
             lagGrunnlagHendelse(
                 sakId = 2,
@@ -362,10 +367,10 @@ internal class GrunnlagServiceTest {
                         innsender = gjenlevendeFnr.value,
                         soesken =
                             listOf(
-                                BLAAOEYD_SAKS.value,
-                                GROENN_STAUDE.value,
+                                INNSENDER_FOEDSELSNUMMER.value,
+                                HELSOESKEN_FOEDSELSNUMMER.value,
                             ),
-                        avdoed = listOf(STOR_SNERK.value),
+                        avdoed = listOf(AVDOED_FOEDSELSNUMMER.value),
                         gjenlevende = listOf(gjenlevendeFnr.value),
                     ).toJsonNode(),
             )
@@ -379,7 +384,7 @@ internal class GrunnlagServiceTest {
                     Persongalleri(
                         soeker = gjenlevendeFnr.value,
                         innsender = gjenlevendeFnr.value,
-                        avdoed = listOf(STOR_SNERK.value),
+                        avdoed = listOf(AVDOED_FOEDSELSNUMMER.value),
                     ).toJsonNode(),
             )
 
@@ -445,7 +450,7 @@ internal class GrunnlagServiceTest {
 
         @Test
         fun `Hent sak og rolle for person kun har tilknytning til saker hvor soesken soeker barnepensjon`() {
-            val soeskenFnr = GROENN_STAUDE
+            val soeskenFnr = HELSOESKEN_FOEDSELSNUMMER
 
             every { opplysningerMock.finnAllePersongalleriHvorPersonFinnes(soeskenFnr) } returns
                 listOf(
@@ -479,7 +484,7 @@ internal class GrunnlagServiceTest {
                         2,
                         NAVN,
                         id = statiskUuid,
-                        fnr = BLAAOEYD_SAKS,
+                        fnr = INNSENDER_FOEDSELSNUMMER,
                         verdi = Navn("Per", "Kalle", "Persson").toJsonNode(),
                         kilde = kilde,
                     ),
@@ -488,7 +493,7 @@ internal class GrunnlagServiceTest {
                         2,
                         PERSONROLLE,
                         id = statiskUuid,
-                        fnr = BLAAOEYD_SAKS,
+                        fnr = INNSENDER_FOEDSELSNUMMER,
                         verdi = PersonRolle.INNSENDER.toJsonNode(),
                         kilde = kilde,
                     ),
@@ -508,15 +513,5 @@ internal class GrunnlagServiceTest {
             Assertions.assertEquals(1, opplysningsgrunnlag.familie.size)
             Assertions.assertEquals(2, opplysningsgrunnlag.hentInnsender().size)
         }
-    }
-
-    companion object {
-        val TRIVIELL_MIDTPUNKT = Folkeregisteridentifikator.of("19040550081")
-        val STOR_SNERK = Folkeregisteridentifikator.of("11057523044")
-
-        // barn
-        val BLAAOEYD_SAKS = Folkeregisteridentifikator.of("05111850870")
-        val GOEYAL_KRONJUVEL = Folkeregisteridentifikator.of("27121779531")
-        val GROENN_STAUDE = Folkeregisteridentifikator.of("09011350027")
     }
 }

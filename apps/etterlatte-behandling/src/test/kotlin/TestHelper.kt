@@ -62,6 +62,7 @@ import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.ktor.restModule
+import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import java.sql.Connection
 import java.time.Instant
 import java.time.LocalDate
@@ -348,7 +349,7 @@ fun personOpplysning(doedsdato: LocalDate? = null) =
     Person(
         fornavn = "Test",
         etternavn = "Testulfsen",
-        foedselsnummer = Folkeregisteridentifikator.of("19078504903"),
+        foedselsnummer = SOEKER_FOEDSELSNUMMER,
         foedselsdato = LocalDate.parse("2020-06-10"),
         foedselsaar = 1985,
         foedeland = null,
@@ -374,8 +375,8 @@ fun kommerBarnetTilgode(
     kilde: Grunnlagsopplysning.Saksbehandler = Grunnlagsopplysning.Saksbehandler.create("S01"),
 ) = KommerBarnetTilgode(svar, begrunnelse, kilde, behandlingId)
 
-val TRIVIELL_MIDTPUNKT = Folkeregisteridentifikator.of("19040550081")
-val STOR_SNERK = Folkeregisteridentifikator.of("11057523044")
+val KONTANT_FOT = Folkeregisteridentifikator.of("10418305857")
+val JOVIAL_LAMA = Folkeregisteridentifikator.of("09498230323")
 
 fun mockPerson(
     utland: Utland? = null,
@@ -385,7 +386,7 @@ fun mockPerson(
     fornavn = OpplysningDTO(verdi = "Ola", opplysningsid = null),
     mellomnavn = OpplysningDTO(verdi = "Mellom", opplysningsid = null),
     etternavn = OpplysningDTO(verdi = "Nordmann", opplysningsid = null),
-    foedselsnummer = OpplysningDTO(TRIVIELL_MIDTPUNKT, null),
+    foedselsnummer = OpplysningDTO(KONTANT_FOT, null),
     foedselsdato = OpplysningDTO(LocalDate.now().minusYears(20), UUID.randomUUID().toString()),
     foedselsaar = OpplysningDTO(verdi = 2000, opplysningsid = null),
     foedeland = OpplysningDTO("Norge", UUID.randomUUID().toString()),

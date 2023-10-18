@@ -2,7 +2,6 @@ package no.nav.etterlatte.beregning
 
 import no.nav.etterlatte.beregning.grunnlag.InstitusjonsoppholdBeregningsgrunnlag
 import no.nav.etterlatte.beregning.grunnlag.Reduksjon
-import no.nav.etterlatte.beregning.regler.FNR_1
 import no.nav.etterlatte.libs.common.IntBroek
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
@@ -13,6 +12,7 @@ import no.nav.etterlatte.libs.common.toObjectNode
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.POSTGRES_VERSION
 import no.nav.etterlatte.libs.database.migrate
+import no.nav.etterlatte.libs.testdata.grunnlag.HELSOESKEN_FOEDSELSNUMMER
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeAll
@@ -115,7 +115,7 @@ internal class BeregningRepositoryTest {
                     datoFOM = datoFOM,
                     datoTOM = null,
                     utbetaltBeloep = 3000,
-                    soeskenFlokk = listOf(FNR_1),
+                    soeskenFlokk = listOf(HELSOESKEN_FOEDSELSNUMMER.value),
                     institusjonsopphold = InstitusjonsoppholdBeregningsgrunnlag(Reduksjon.JA_VANLIG),
                     grunnbelopMnd = 10_000,
                     grunnbelop = 100_000,

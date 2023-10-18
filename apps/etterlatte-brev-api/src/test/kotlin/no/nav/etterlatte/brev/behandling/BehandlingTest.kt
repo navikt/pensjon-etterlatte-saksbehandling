@@ -10,13 +10,13 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.Opplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Navn
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
-import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.person.VergeEllerFullmektig
 import no.nav.etterlatte.libs.common.person.VergemaalEllerFremtidsfullmakt
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
+import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
 import no.nav.pensjon.brevbaker.api.model.Kroner
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -32,7 +32,7 @@ internal class BehandlingTest {
     fun `MapSoeker mapper til Soeker`() {
         val grunnlag = opprettGrunnlag()
 
-        assertEquals(Soeker("Unormal", "Frisk", "Herresykkel", Foedselsnummer("16021254243")), grunnlag.mapSoeker())
+        assertEquals(Soeker("Unormal", "Frisk", "Herresykkel", Foedselsnummer(SOEKER_FOEDSELSNUMMER.value)), grunnlag.mapSoeker())
     }
 
     @Test
@@ -51,7 +51,7 @@ internal class BehandlingTest {
             )
 
         assertEquals(
-            Soeker("Unormal-Kar", "Frisk-Is", "Herresykkel", Foedselsnummer("16021254243")),
+            Soeker("Unormal-Kar", "Frisk-Is", "Herresykkel", Foedselsnummer(SOEKER_FOEDSELSNUMMER.value)),
             grunnlag.mapSoeker(),
         )
         assertEquals(Avdoed("Riv-Jern Kul-Kar Badeball-Sommer", LocalDate.of(2022, 8, 17)), grunnlag.mapAvdoed())
@@ -66,7 +66,7 @@ internal class BehandlingTest {
             )
 
         assertEquals(
-            Soeker("Unormal Kar", "Frisk Is", "Herresykkel", Foedselsnummer("16021254243")),
+            Soeker("Unormal Kar", "Frisk Is", "Herresykkel", Foedselsnummer(SOEKER_FOEDSELSNUMMER.value)),
             grunnlag.mapSoeker(),
         )
         assertEquals(Avdoed("Riv Jern Kul Kar Badeball-Sommer", LocalDate.of(2022, 8, 17)), grunnlag.mapAvdoed())
@@ -81,7 +81,7 @@ internal class BehandlingTest {
             )
 
         assertEquals(
-            Soeker("Unormal-Kar Kis", "Frisk-Is Tak", "Herresykkel Bom", Foedselsnummer("16021254243")),
+            Soeker("Unormal-Kar Kis", "Frisk-Is Tak", "Herresykkel Bom", Foedselsnummer(SOEKER_FOEDSELSNUMMER.value)),
             grunnlag.mapSoeker(),
         )
         assertEquals(
@@ -121,7 +121,7 @@ internal class BehandlingTest {
     @Test // TODO ...
     @Disabled("Skrus av inntil håndtering av verge er avklart på tvers av appene i Gjenny")
     fun `Verge finnes i grunnlag`() {
-        val soekerFnr = Folkeregisteridentifikator.of("16021254243")
+        val soekerFnr = SOEKER_FOEDSELSNUMMER
         val forventetVergeNavn = "Test Vergenavn"
 
         val grunnlag =
@@ -167,7 +167,7 @@ internal class BehandlingTest {
                     mapOf(
                         Opplysningstype.FOEDSELSNUMMER to
                             opprettOpplysning(
-                                Folkeregisteridentifikator.of("16021254243").toJsonNode(),
+                                SOEKER_FOEDSELSNUMMER.toJsonNode(),
                             ),
                     ),
                 familie =

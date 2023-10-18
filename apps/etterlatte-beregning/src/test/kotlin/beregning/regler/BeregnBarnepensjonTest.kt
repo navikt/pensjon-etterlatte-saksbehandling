@@ -3,9 +3,6 @@ package beregning.regler
 import io.kotest.matchers.shouldBe
 import no.nav.etterlatte.beregning.grunnlag.InstitusjonsoppholdBeregningsgrunnlag
 import no.nav.etterlatte.beregning.grunnlag.Reduksjon
-import no.nav.etterlatte.beregning.regler.FNR_1
-import no.nav.etterlatte.beregning.regler.FNR_2
-import no.nav.etterlatte.beregning.regler.FNR_3
 import no.nav.etterlatte.beregning.regler.barnepensjon.beregnBarnepensjon1967Regel
 import no.nav.etterlatte.beregning.regler.barnepensjon.beregnBarnepensjon1967RegelMedInstitusjon
 import no.nav.etterlatte.beregning.regler.barnepensjon.kroneavrundetBarnepensjonRegel
@@ -15,6 +12,9 @@ import no.nav.etterlatte.beregning.regler.barnepensjon.sats.barnepensjonSatsRege
 import no.nav.etterlatte.beregning.regler.barnepensjonGrunnlag
 import no.nav.etterlatte.beregning.regler.toBeregningstall
 import no.nav.etterlatte.libs.regler.RegelPeriode
+import no.nav.etterlatte.libs.testdata.grunnlag.HELSOESKEN2_FOEDSELSNUMMER
+import no.nav.etterlatte.libs.testdata.grunnlag.HELSOESKEN3_FOEDSELSNUMMER
+import no.nav.etterlatte.libs.testdata.grunnlag.HELSOESKEN_FOEDSELSNUMMER
 import no.nav.etterlatte.regler.Beregningstall
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
@@ -45,7 +45,7 @@ internal class BeregnBarnepensjonTest {
     fun `beregnBarnepensjon1967Regel skal gi 3019,25 ved 40 aars trygdetid og et soesken`() {
         val resultat =
             beregnBarnepensjon1967Regel.anvend(
-                grunnlag = barnepensjonGrunnlag(listOf(FNR_1)),
+                grunnlag = barnepensjonGrunnlag(listOf(HELSOESKEN_FOEDSELSNUMMER)),
                 periode = RegelPeriode(fraDato = LocalDate.of(2023, Month.JANUARY, 1)),
             )
 
@@ -56,7 +56,7 @@ internal class BeregnBarnepensjonTest {
     fun `beregnBarnepensjon1967Regel skal gi 2787,00 ved 40 aars trygdetid og to soesken`() {
         val resultat =
             beregnBarnepensjon1967Regel.anvend(
-                grunnlag = barnepensjonGrunnlag(listOf(FNR_1, FNR_2)),
+                grunnlag = barnepensjonGrunnlag(listOf(HELSOESKEN_FOEDSELSNUMMER, HELSOESKEN2_FOEDSELSNUMMER)),
                 periode = RegelPeriode(fraDato = LocalDate.of(2023, Month.JANUARY, 1)),
             )
 
@@ -67,7 +67,7 @@ internal class BeregnBarnepensjonTest {
     fun `beregnBarnepensjon1967Regel gi 2670,875 ved 40 aars trygdetid og tre soesken`() {
         val resultat =
             beregnBarnepensjon1967Regel.anvend(
-                grunnlag = barnepensjonGrunnlag(listOf(FNR_1, FNR_2, FNR_3)),
+                grunnlag = barnepensjonGrunnlag(listOf(HELSOESKEN_FOEDSELSNUMMER, HELSOESKEN2_FOEDSELSNUMMER, HELSOESKEN3_FOEDSELSNUMMER)),
                 periode = RegelPeriode(fraDato = LocalDate.of(2023, Month.JANUARY, 1)),
             )
 
@@ -80,7 +80,7 @@ internal class BeregnBarnepensjonTest {
             beregnBarnepensjon1967Regel.anvend(
                 grunnlag =
                     barnepensjonGrunnlag(
-                        soeskenKull = listOf(FNR_1, FNR_2, FNR_3),
+                        soeskenKull = listOf(HELSOESKEN_FOEDSELSNUMMER, HELSOESKEN2_FOEDSELSNUMMER, HELSOESKEN3_FOEDSELSNUMMER),
                         trygdeTid = Beregningstall(20),
                     ),
                 periode = RegelPeriode(fraDato = LocalDate.of(2023, Month.JANUARY, 1)),
@@ -95,7 +95,7 @@ internal class BeregnBarnepensjonTest {
             beregnBarnepensjon1967RegelMedInstitusjon.anvend(
                 grunnlag =
                     barnepensjonGrunnlag(
-                        soeskenKull = listOf(FNR_1, FNR_2, FNR_3),
+                        soeskenKull = listOf(HELSOESKEN_FOEDSELSNUMMER, HELSOESKEN2_FOEDSELSNUMMER, HELSOESKEN3_FOEDSELSNUMMER),
                         institusjonsopphold = InstitusjonsoppholdBeregningsgrunnlag(Reduksjon.JA_VANLIG),
                     ),
                 periode = RegelPeriode(fraDato = LocalDate.of(2023, Month.JANUARY, 1)),
@@ -110,7 +110,7 @@ internal class BeregnBarnepensjonTest {
             beregnBarnepensjon1967RegelMedInstitusjon.anvend(
                 grunnlag =
                     barnepensjonGrunnlag(
-                        soeskenKull = listOf(FNR_1, FNR_2, FNR_3),
+                        soeskenKull = listOf(HELSOESKEN_FOEDSELSNUMMER, HELSOESKEN2_FOEDSELSNUMMER, HELSOESKEN3_FOEDSELSNUMMER),
                         trygdeTid = Beregningstall(20),
                         institusjonsopphold = InstitusjonsoppholdBeregningsgrunnlag(Reduksjon.JA_VANLIG),
                     ),
@@ -126,7 +126,7 @@ internal class BeregnBarnepensjonTest {
             beregnBarnepensjon1967RegelMedInstitusjon.anvend(
                 grunnlag =
                     barnepensjonGrunnlag(
-                        soeskenKull = listOf(FNR_1, FNR_2, FNR_3),
+                        soeskenKull = listOf(HELSOESKEN_FOEDSELSNUMMER, HELSOESKEN2_FOEDSELSNUMMER, HELSOESKEN3_FOEDSELSNUMMER),
                         trygdeTid = Beregningstall(40),
                         institusjonsopphold = InstitusjonsoppholdBeregningsgrunnlag(Reduksjon.NEI_KORT_OPPHOLD),
                     ),
@@ -137,7 +137,7 @@ internal class BeregnBarnepensjonTest {
             beregnBarnepensjon1967RegelMedInstitusjon.anvend(
                 grunnlag =
                     barnepensjonGrunnlag(
-                        soeskenKull = listOf(FNR_1, FNR_2, FNR_3),
+                        soeskenKull = listOf(HELSOESKEN_FOEDSELSNUMMER, HELSOESKEN2_FOEDSELSNUMMER, HELSOESKEN3_FOEDSELSNUMMER),
                         trygdeTid = Beregningstall(40),
                         institusjonsopphold = null,
                     ),
@@ -153,7 +153,7 @@ internal class BeregnBarnepensjonTest {
             beregnBarnepensjon1967RegelMedInstitusjon.anvend(
                 grunnlag =
                     barnepensjonGrunnlag(
-                        soeskenKull = listOf(FNR_1, FNR_2, FNR_3),
+                        soeskenKull = listOf(HELSOESKEN_FOEDSELSNUMMER, HELSOESKEN2_FOEDSELSNUMMER, HELSOESKEN3_FOEDSELSNUMMER),
                         trygdeTid = Beregningstall(40),
                         institusjonsopphold = InstitusjonsoppholdBeregningsgrunnlag(Reduksjon.JA_VANLIG),
                     ),
@@ -177,7 +177,8 @@ internal class BeregnBarnepensjonTest {
 
     @Test
     fun `kroneavrundetBarnepensjonRegel skal runde av beloep`() {
-        val barnepensjonGrunnlag = barnepensjonGrunnlag(listOf(FNR_1, FNR_2, FNR_3))
+        val barnepensjonGrunnlag =
+            barnepensjonGrunnlag(listOf(HELSOESKEN_FOEDSELSNUMMER, HELSOESKEN2_FOEDSELSNUMMER, HELSOESKEN3_FOEDSELSNUMMER))
 
         val resultat =
             kroneavrundetBarnepensjonRegel.anvend(

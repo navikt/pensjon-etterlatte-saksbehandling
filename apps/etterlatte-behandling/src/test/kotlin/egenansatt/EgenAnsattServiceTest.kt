@@ -16,13 +16,14 @@ import no.nav.etterlatte.common.klienter.SkjermingKlient
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
-import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.GeografiskTilknytning
 import no.nav.etterlatte.libs.common.skjermet.EgenAnsattSkjermet
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.POSTGRES_VERSION
 import no.nav.etterlatte.libs.database.migrate
+import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED2_FOEDSELSNUMMER
+import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
 import no.nav.etterlatte.oppgave.OppgaveDaoImpl
 import no.nav.etterlatte.oppgave.OppgaveDaoMedEndringssporingImpl
 import no.nav.etterlatte.oppgave.OppgaveService
@@ -121,9 +122,9 @@ internal class EgenAnsattServiceTest {
 
     @Test
     fun sjekkAtSettingAvSkjermingFungererEtterOpprettelseAvSak() {
-        val fnr = Folkeregisteridentifikator.of("08071272487").value
+        val fnr = AVDOED_FOEDSELSNUMMER.value
         sakService.finnEllerOpprettSak(fnr, SakType.BARNEPENSJON, enhet = Enheter.EGNE_ANSATTE.enhetNr)
-        val fnr2 = Folkeregisteridentifikator.of("19078504903").value
+        val fnr2 = AVDOED2_FOEDSELSNUMMER.value
         sakService.finnEllerOpprettSak(fnr2, SakType.BARNEPENSJON, enhet = Enheter.EGNE_ANSATTE.enhetNr)
 
         assertNotNull(sakService.finnSak(fnr, SakType.BARNEPENSJON))

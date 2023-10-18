@@ -14,9 +14,10 @@ import io.ktor.server.testing.testApplication
 import no.nav.etterlatte.BehandlingIntegrationTest
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
-import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.BehandlingOgSak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
+import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.etterlatte.module
 import no.nav.etterlatte.rapidsandrivers.migrering.AvdoedForelder
 import no.nav.etterlatte.rapidsandrivers.migrering.Beregning
@@ -53,13 +54,12 @@ class MigreringRoutesTest : BehandlingIntegrationTest() {
                     }
                 }
             application { module(applicationContext) }
-            val fnr = Folkeregisteridentifikator.of("08071272487")
             val request =
                 MigreringRequest(
                     pesysId = PesysId(1),
                     enhet = Enhet("4817"),
-                    soeker = fnr,
-                    avdoedForelder = listOf(AvdoedForelder(fnr, Tidspunkt.now())),
+                    soeker = SOEKER_FOEDSELSNUMMER,
+                    avdoedForelder = listOf(AvdoedForelder(AVDOED_FOEDSELSNUMMER, Tidspunkt.now())),
                     gjenlevendeForelder = null,
                     virkningstidspunkt = YearMonth.now(),
                     foersteVirkningstidspunkt = YearMonth.now().minusYears(10),

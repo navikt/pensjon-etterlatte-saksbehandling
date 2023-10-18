@@ -16,8 +16,6 @@ import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlagService
 import no.nav.etterlatte.beregning.grunnlag.GrunnlagMedPeriode
 import no.nav.etterlatte.beregning.grunnlag.InstitusjonsoppholdBeregningsgrunnlag
 import no.nav.etterlatte.beregning.grunnlag.Reduksjon
-import no.nav.etterlatte.beregning.regler.FNR_1
-import no.nav.etterlatte.beregning.regler.FNR_2
 import no.nav.etterlatte.beregning.regler.MAKS_TRYGDETID
 import no.nav.etterlatte.beregning.regler.barnepensjon.BP_2024_DATO
 import no.nav.etterlatte.beregning.regler.bruker
@@ -44,7 +42,10 @@ import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
+import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED2_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
+import no.nav.etterlatte.libs.testdata.grunnlag.HELSOESKEN2_FOEDSELSNUMMER
+import no.nav.etterlatte.libs.testdata.grunnlag.HELSOESKEN_FOEDSELSNUMMER
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -246,7 +247,7 @@ internal class BeregnBarnepensjonServiceTest {
                 any(),
                 any(),
             )
-        } returns barnepensjonBeregningsGrunnlag(behandling.id, listOf(FNR_1))
+        } returns barnepensjonBeregningsGrunnlag(behandling.id, listOf(HELSOESKEN_FOEDSELSNUMMER))
         coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns null
 
         runBlocking {
@@ -264,7 +265,7 @@ internal class BeregnBarnepensjonServiceTest {
                     datoFOM shouldBe behandling.virkningstidspunkt?.dato
                     datoTOM shouldBe YearMonth.of(2023, Month.APRIL)
                     grunnbelopMnd shouldBe GRUNNBELOEP_JAN_23
-                    soeskenFlokk shouldBe listOf(FNR_1)
+                    soeskenFlokk shouldBe listOf(HELSOESKEN_FOEDSELSNUMMER.value)
                     trygdetid shouldBe MAKS_TRYGDETID
                 }
             }
@@ -282,7 +283,7 @@ internal class BeregnBarnepensjonServiceTest {
                 any(),
                 any(),
             )
-        } returns barnepensjonBeregningsGrunnlag(behandling.id, listOf(FNR_1))
+        } returns barnepensjonBeregningsGrunnlag(behandling.id, listOf(HELSOESKEN_FOEDSELSNUMMER))
         coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns mockTrygdetid(behandling.id)
         featureToggleService.settBryter(BrukFaktiskTrygdetid, true)
 
@@ -301,7 +302,7 @@ internal class BeregnBarnepensjonServiceTest {
                     datoFOM shouldBe behandling.virkningstidspunkt?.dato
                     datoTOM shouldBe YearMonth.of(2023, Month.APRIL)
                     grunnbelopMnd shouldBe GRUNNBELOEP_JAN_23
-                    soeskenFlokk shouldBe listOf(FNR_1)
+                    soeskenFlokk shouldBe listOf(HELSOESKEN_FOEDSELSNUMMER.value)
                     trygdetid shouldBe MAKS_TRYGDETID
                 }
             }
@@ -319,7 +320,7 @@ internal class BeregnBarnepensjonServiceTest {
                 any(),
                 any(),
             )
-        } returns barnepensjonBeregningsGrunnlag(behandling.id, listOf(FNR_1, FNR_2))
+        } returns barnepensjonBeregningsGrunnlag(behandling.id, listOf(HELSOESKEN_FOEDSELSNUMMER, HELSOESKEN2_FOEDSELSNUMMER))
         coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns null
 
         runBlocking {
@@ -337,7 +338,7 @@ internal class BeregnBarnepensjonServiceTest {
                     datoFOM shouldBe behandling.virkningstidspunkt?.dato
                     datoTOM shouldBe YearMonth.of(2023, Month.APRIL)
                     grunnbelopMnd shouldBe GRUNNBELOEP_JAN_23
-                    soeskenFlokk shouldBe listOf(FNR_1, FNR_2)
+                    soeskenFlokk shouldBe listOf(HELSOESKEN_FOEDSELSNUMMER.value, HELSOESKEN2_FOEDSELSNUMMER.value)
                     trygdetid shouldBe MAKS_TRYGDETID
                 }
             }
@@ -355,7 +356,7 @@ internal class BeregnBarnepensjonServiceTest {
                 any(),
                 any(),
             )
-        } returns barnepensjonBeregningsGrunnlag(behandling.id, listOf(FNR_1, FNR_2))
+        } returns barnepensjonBeregningsGrunnlag(behandling.id, listOf(HELSOESKEN_FOEDSELSNUMMER, HELSOESKEN2_FOEDSELSNUMMER))
         coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns mockTrygdetid(behandling.id)
         featureToggleService.settBryter(BrukFaktiskTrygdetid, true)
 
@@ -374,7 +375,7 @@ internal class BeregnBarnepensjonServiceTest {
                     datoFOM shouldBe behandling.virkningstidspunkt?.dato
                     datoTOM shouldBe YearMonth.of(2023, Month.APRIL)
                     grunnbelopMnd shouldBe GRUNNBELOEP_JAN_23
-                    soeskenFlokk shouldBe listOf(FNR_1, FNR_2)
+                    soeskenFlokk shouldBe listOf(HELSOESKEN_FOEDSELSNUMMER.value, HELSOESKEN2_FOEDSELSNUMMER.value)
                     trygdetid shouldBe MAKS_TRYGDETID
                 }
             }
@@ -630,8 +631,12 @@ internal class BeregnBarnepensjonServiceTest {
         } returns
             beregningsGrunnlagMedSoesken(
                 behandling.id,
-                Triple(YearMonth.of(2023, 1), YearMonth.of(2023, 3), listOf(FNR_1, FNR_2)),
-                Triple(YearMonth.of(2023, 4), null, listOf(FNR_1)),
+                Triple(
+                    YearMonth.of(2023, 1),
+                    YearMonth.of(2023, 3),
+                    listOf(HELSOESKEN_FOEDSELSNUMMER.value, HELSOESKEN2_FOEDSELSNUMMER.value),
+                ),
+                Triple(YearMonth.of(2023, 4), null, listOf(HELSOESKEN_FOEDSELSNUMMER.value)),
             )
         coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns mockTrygdetid(behandling.id)
         featureToggleService.settBryter(BrukFaktiskTrygdetid, true)
@@ -652,7 +657,7 @@ internal class BeregnBarnepensjonServiceTest {
                     datoFOM shouldBe behandling.virkningstidspunkt?.dato
                     datoTOM shouldBe YearMonth.of(2023, Month.MARCH)
                     grunnbelopMnd shouldBe GRUNNBELOEP_JAN_23
-                    soeskenFlokk shouldBe listOf(FNR_1, FNR_2)
+                    soeskenFlokk shouldBe listOf(HELSOESKEN_FOEDSELSNUMMER.value, HELSOESKEN2_FOEDSELSNUMMER.value)
                     trygdetid shouldBe MAKS_TRYGDETID
                     regelResultat shouldNotBe null
                     regelVersjon shouldNotBe null
@@ -714,7 +719,7 @@ internal class BeregnBarnepensjonServiceTest {
 
     private fun grunnlagMedEkstraAvdoedForelder(doedsdato: LocalDate): Grunnlag {
         val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
-        val nyligAvdoedFoedselsnummer = Folkeregisteridentifikator.of("15447924940")
+        val nyligAvdoedFoedselsnummer = AVDOED2_FOEDSELSNUMMER
         val nyligAvdoed: List<Grunnlagsdata<JsonNode>> =
             listOf(
                 mapOf(
@@ -738,7 +743,7 @@ internal class BeregnBarnepensjonServiceTest {
 
     private fun barnepensjonBeregningsGrunnlag(
         behandlingId: UUID,
-        soesken: List<String>,
+        soesken: List<Folkeregisteridentifikator>,
         beregningsMetode: BeregningsMetode = BeregningsMetode.NASJONAL,
     ) = BeregningsGrunnlag(
         behandlingId,
@@ -751,7 +756,7 @@ internal class BeregnBarnepensjonServiceTest {
                     data =
                         soesken.map {
                             SoeskenMedIBeregning(
-                                Folkeregisteridentifikator.of(it),
+                                it,
                                 skalBrukes = true,
                             )
                         },

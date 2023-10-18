@@ -17,7 +17,6 @@ import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlagService
-import no.nav.etterlatte.beregning.regler.FNR_1
 import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.klienter.TrygdetidKlient
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -32,6 +31,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
+import no.nav.etterlatte.libs.testdata.grunnlag.HELSOESKEN_FOEDSELSNUMMER
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
@@ -185,7 +185,7 @@ internal class BeregningRoutesTest {
                     datoFOM = datoFOM,
                     datoTOM = null,
                     utbetaltBeloep = 3000,
-                    soeskenFlokk = listOf(FNR_1),
+                    soeskenFlokk = listOf(HELSOESKEN_FOEDSELSNUMMER.value),
                     grunnbelopMnd = 10_000,
                     grunnbelop = 100_000,
                     trygdetid = 40,

@@ -10,6 +10,7 @@ import io.ktor.http.fullPath
 import io.ktor.http.headersOf
 import io.ktor.serialization.jackson.JacksonConverter
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -21,6 +22,7 @@ internal class ParallelleSannheterKlientTest {
         ParallelleSannheterKlient(
             httpClient = setupHttpClient(),
             apiUrl = "url",
+            featureToggleService = DummyFeatureToggleService(),
         )
 
     private fun setupHttpClient() =

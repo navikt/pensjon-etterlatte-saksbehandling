@@ -53,7 +53,10 @@ export const GyldigFramsattBarnepensjon = ({
       status={gyldigFremsattTilStatusIcon}
     >
       <div>
-        <Beskrivelse>Den som har rett til ytelsen må sette frem krav (forelder/verge hvis under 18 år).</Beskrivelse>
+        <Beskrivelse>
+          Den som har rett til ytelsen må sette frem krav (forelder/verge hvis under 18 år). Om annet må fullmakt ligge
+          i saken. Søknaden må være signert og vise hva det søkes om, og den må være fremsatt i riktig land.
+        </Beskrivelse>
         <InfobokserWrapper>
           <Innsender innsenderErForelder={innsenderErForelder} />
           <Foreldreansvar innsenderHarForeldreansvar={innsenderHarForeldreansvar} />

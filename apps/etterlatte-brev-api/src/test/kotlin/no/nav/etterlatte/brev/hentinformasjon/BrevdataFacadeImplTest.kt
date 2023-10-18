@@ -229,6 +229,7 @@ internal class BrevdataFacadeImplTest {
                     avdoedFyllerSeksti = null,
                 ),
             overstyrtNorskPoengaar = null,
+            ident = null,
         )
 
     private fun opprettBeregning() =

@@ -24,6 +24,7 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.Opplysning
 import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
 import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsdato
+import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsnummer
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -40,6 +41,7 @@ import no.nav.etterlatte.trygdetid.TrygdetidPeriode
 import no.nav.etterlatte.trygdetid.TrygdetidRepository
 import no.nav.etterlatte.trygdetid.TrygdetidService
 import no.nav.etterlatte.trygdetid.TrygdetidServiceImpl
+import no.nav.etterlatte.trygdetid.TrygdetidType
 import no.nav.etterlatte.trygdetid.klienter.BehandlingKlient
 import no.nav.etterlatte.trygdetid.klienter.GrunnlagKlient
 import no.nav.etterlatte.trygdetid.klienter.VilkaarsvuderingKlient
@@ -126,23 +128,39 @@ internal class TrygdetidServiceTest {
         val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
         val forventetFoedselsdato = grunnlag.hentAvdoed().hentFoedselsdato()!!.verdi
         val forventetDoedsdato = grunnlag.hentAvdoed().hentDoedsdato()!!.verdi
-        val trygdetid = trygdetid(behandlingId, sakId)
+        val forventetIdent = grunnlag.hentAvdoed().hentFoedselsnummer()!!.verdi
+        val trygdetid = trygdetid(behandlingId, sakId, ident = forventetIdent.value)
+        val vilkaarsvurderingDto = mockk<VilkaarsvurderingDto>()
 
-        every { repository.hentTrygdetiderForBehandling(any()) } returns emptyList()
+        every { repository.hentTrygdetiderForBehandling(any()) } returns emptyList() andThen listOf(trygdetid)
+        every { repository.hentTrygdetid(any()) } returns trygdetid
+        every { repository.hentTrygdetidMedId(any(), any()) } returns trygdetid
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
         coEvery { grunnlagKlient.hentGrunnlag(any(), any(), any()) } returns grunnlag
         every { repository.opprettTrygdetid(any()) } returns trygdetid
         coEvery { behandlingKlient.settBehandlingStatusTrygdetidOppdatert(any(), any()) } returns true
+        every { vilkaarsvurderingDto.isYrkesskade() } returns false
+        coEvery { vilkaarsvurderingKlient.hentVilkaarsvurdering(any(), any()) } returns vilkaarsvurderingDto
+        every { repository.oppdaterTrygdetid(any()) } returnsArgument 0
 
         runBlocking {
-            service.opprettTrygdetid(behandlingId, saksbehandler)
+            val opprettetTrygdetid = service.opprettTrygdetid(behandlingId, saksbehandler)
+
+            opprettetTrygdetid.trygdetidGrunnlag.size shouldBe 1
+            opprettetTrygdetid.trygdetidGrunnlag[0].type shouldBe TrygdetidType.FREMTIDIG
         }
 
-        coVerify(exactly = 1) {
+        coVerify(exactly = 2) {
             behandlingKlient.kanOppdatereTrygdetid(behandlingId, saksbehandler)
             behandlingKlient.hentBehandling(behandlingId, saksbehandler)
             grunnlagKlient.hentGrunnlag(sakId, behandlingId, saksbehandler)
+            behandlingKlient.settBehandlingStatusTrygdetidOppdatert(behandlingId, saksbehandler)
+        }
+
+        coVerify(exactly = 1) {
             repository.hentTrygdetiderForBehandling(behandlingId)
+            repository.hentTrygdetidMedId(any(), any())
+            vilkaarsvurderingKlient.hentVilkaarsvurdering(any(), any())
             repository.opprettTrygdetid(
                 withArg { trygdetid ->
                     trygdetid.opplysninger.let { opplysninger ->
@@ -169,12 +187,21 @@ internal class TrygdetidServiceTest {
                     }
                 },
             )
-            behandlingKlient.settBehandlingStatusTrygdetidOppdatert(behandlingId, saksbehandler)
+            repository.oppdaterTrygdetid(
+                withArg { trygdetid ->
+                    with(trygdetid.trygdetidGrunnlag[0]) {
+                        type shouldBe TrygdetidType.FREMTIDIG
+                    }
+                },
+            )
+            beregningService.beregnTrygdetidGrunnlag(any())
+            beregningService.beregnTrygdetid(any(), any(), any(), any())
         }
         verify {
             behandling.id
             behandling.sak
             behandling.behandlingType
+            vilkaarsvurderingDto.isYrkesskade()
         }
     }
 

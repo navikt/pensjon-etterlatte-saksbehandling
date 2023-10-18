@@ -31,6 +31,7 @@ class TrygdetidRepository(private val dataSource: DataSource) {
                         id,
                         sak_id,
                         behandling_id,
+                        ident,
                         tidspunkt,
                         faktisk_trygdetid_norge_total,
                         faktisk_trygdetid_norge_antall_maaneder,
@@ -123,13 +124,14 @@ class TrygdetidRepository(private val dataSource: DataSource) {
     ) = queryOf(
         statement =
             """
-            INSERT INTO trygdetid(id, behandling_id, sak_id) VALUES(:id, :behandlingId, :sakId)
+            INSERT INTO trygdetid(id, behandling_id, sak_id, ident) VALUES(:id, :behandlingId, :sakId, :ident)
             """.trimIndent(),
         paramMap =
             mapOf(
                 "id" to trygdetid.id,
                 "behandlingId" to trygdetid.behandlingId,
                 "sakId" to trygdetid.sakId,
+                "ident" to trygdetid.ident,
             ),
     ).let { query -> tx.update(query) }
 
@@ -499,6 +501,7 @@ class TrygdetidRepository(private val dataSource: DataSource) {
         trygdetidGrunnlag = trygdetidGrunnlag,
         opplysninger = opplysninger,
         overstyrtNorskPoengaar = intOrNull("poengaar_overstyrt"),
+        ident = stringOrNull("ident"),
     )
 
     private fun Row.toTrygdetidGrunnlag() =

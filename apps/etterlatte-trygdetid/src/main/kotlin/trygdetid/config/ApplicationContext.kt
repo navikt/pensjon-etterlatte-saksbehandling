@@ -7,7 +7,7 @@ import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.trygdetid.KodeverkService
 import no.nav.etterlatte.trygdetid.TrygdetidBeregningService
 import no.nav.etterlatte.trygdetid.TrygdetidRepository
-import no.nav.etterlatte.trygdetid.TrygdetidService
+import no.nav.etterlatte.trygdetid.TrygdetidServiceImpl
 import no.nav.etterlatte.trygdetid.avtale.AvtaleRepository
 import no.nav.etterlatte.trygdetid.avtale.AvtaleService
 import no.nav.etterlatte.trygdetid.klienter.BehandlingKlient
@@ -29,7 +29,7 @@ class ApplicationContext {
     val behandlingKlient = BehandlingKlient(config, httpClient())
     val kodeverkService = KodeverkService(KodeverkKlient(config, httpClient()))
     val trygdetidService =
-        TrygdetidService(
+        TrygdetidServiceImpl(
             TrygdetidRepository(dataSource),
             behandlingKlient = behandlingKlient,
             grunnlagKlient = grunnlagKlient,

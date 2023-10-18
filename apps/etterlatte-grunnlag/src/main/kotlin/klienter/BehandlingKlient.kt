@@ -32,7 +32,8 @@ interface BehandlingKlient : BehandlingTilgangsSjekk, SakTilgangsSjekk, PersonTi
 
 class BehandlingKlientException(override val message: String, override val cause: Throwable) : Exception(message, cause)
 
-class BehandlingKlientImpl(config: Config, private val httpClient: HttpClient) : BehandlingKlient {
+class BehandlingKlientImpl(config: Config, httpClient: HttpClient, private val httpClientSystembruker: HttpClient) :
+    BehandlingKlient {
     private val logger = LoggerFactory.getLogger(BehandlingKlient::class.java)
 
     private val azureAdClient = AzureAdClient(config)
@@ -69,7 +70,7 @@ class BehandlingKlientImpl(config: Config, private val httpClient: HttpClient) :
     }
 
     override suspend fun hentBehandlinger(sakId: Long): ForenkletBehandlingListeWrapper {
-        return httpClient.get("$resourceUrl/saker/$sakId/behandlinger").body()
+        return httpClientSystembruker.get("$resourceUrl/saker/$sakId/behandlinger").body()
     }
 
     override suspend fun harTilgangTilBehandling(

@@ -6,7 +6,7 @@ metadata:
   name: start-grunnlagsversjonering
   namespace: etterlatte
 spec:
-  image: ghcr.io/navikt/pensjon-etterlatte-saksbehandling/start-grunnlagsversjonering:latest
+  image: europe-north1-docker.pkg.dev/nais-management-233d/etterlatte/pensjon-etterlatte-saksbehandling-start-grunnlagsversjonering:2023.10.17-12.08-7d5a181
   kafka:
     pool: nav-dev
   env:

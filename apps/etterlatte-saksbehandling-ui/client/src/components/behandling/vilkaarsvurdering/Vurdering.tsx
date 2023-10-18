@@ -134,7 +134,7 @@ export const Vurdering = ({
     ) {
       return 'Vilkår er ikke oppfylt'
     } else {
-      return 'Vilkåret er ikke vurdert'
+      return 'Vilkåret er ikke aktuelt'
     }
   }
 
@@ -204,7 +204,7 @@ export const Vurdering = ({
                 <div className="flex">
                   <Radio value={VurderingsResultat.OPPFYLT}>Ja</Radio>
                   <Radio value={VurderingsResultat.IKKE_OPPFYLT}>Nei</Radio>
-                  <Radio value={VurderingsResultat.IKKE_VURDERT}>Ikke vurdert</Radio>
+                  <Radio value={VurderingsResultat.IKKE_VURDERT}>Ikke aktuelt</Radio>
                 </div>
               </RadioGroup>
             </RadioGroupWrapper>

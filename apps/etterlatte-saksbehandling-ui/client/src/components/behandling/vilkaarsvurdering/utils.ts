@@ -39,7 +39,7 @@ export function formaterVurderingsResultat(vurderingsResultat?: VurderingsResult
     case VurderingsResultat.IKKE_OPPFYLT:
       return 'Nei'
     case VurderingsResultat.IKKE_VURDERT:
-      return 'Ikke vurdert'
+      return 'Ikke aktuelt'
     default:
       return 'Ukjent'
   }

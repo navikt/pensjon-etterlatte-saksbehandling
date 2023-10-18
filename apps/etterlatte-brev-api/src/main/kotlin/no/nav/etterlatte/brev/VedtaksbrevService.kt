@@ -144,7 +144,11 @@ class VedtaksbrevService(
         if (!brukerTokenInfo.erSammePerson(saksbehandlerIdent)) {
             logger.info("Ferdigstiller brev med id=${brev.id}")
 
-            db.settBrevFerdigstilt(brev.id)
+            if (db.hentPdf(brev.id) == null) {
+                throw IllegalStateException("Kan ikke ferdigstille brev (id=${brev.id}) siden PDF er null!")
+            } else {
+                db.settBrevFerdigstilt(brev.id)
+            }
         } else {
             throw IllegalStateException(
                 "Kan ikke ferdigstille/låse brev når saksbehandler ($saksbehandlerIdent)" +

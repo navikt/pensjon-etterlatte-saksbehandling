@@ -12,6 +12,7 @@ import no.nav.etterlatte.grunnlag.OpplysningDao
 import no.nav.etterlatte.grunnlag.RealGrunnlagService
 import no.nav.etterlatte.grunnlag.behandlingGrunnlagRoute
 import no.nav.etterlatte.grunnlag.personRoute
+import no.nav.etterlatte.grunnlag.rivers.GrunnlagsversjoneringRiver
 import no.nav.etterlatte.grunnlag.sakGrunnlagRoute
 import no.nav.etterlatte.klienter.BehandlingKlientImpl
 import no.nav.etterlatte.klienter.PdlTjenesterKlientImpl
@@ -54,9 +55,20 @@ class ApplicationBuilder {
             ekstraJacksoninnstillinger = { it.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS) },
         )
     }
+
+    // TODO: Slette så fort grunnlag er mappet
+    private val behandlingSystemClient: HttpClient by lazy {
+        httpClientClientCredentials(
+            azureAppClientId = config.getString("azure.app.client.id"),
+            azureAppJwk = config.getString("azure.app.jwk"),
+            azureAppWellKnownUrl = config.getString("azure.app.well.known.url"),
+            azureAppScope = config.getString("behandling.azure.scope"),
+            ekstraJacksoninnstillinger = { it.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS) },
+        )
+    }
     private val pdltjenesterKlient = PdlTjenesterKlientImpl(pdlTjenester, env["PDLTJENESTER_URL"]!!)
     private val opplysningDao = OpplysningDao(ds)
-    private val behandlingKlient = BehandlingKlientImpl(config, httpClient())
+    private val behandlingKlient = BehandlingKlientImpl(config, httpClient(), behandlingSystemClient)
     private val grunnlagService = RealGrunnlagService(pdltjenesterKlient, opplysningDao, Sporingslogg())
 
     private val rapidsConnection =
@@ -71,6 +83,7 @@ class ApplicationBuilder {
                 }
             }
             .build().apply {
+                GrunnlagsversjoneringRiver(this, behandlingKlient, grunnlagService)
                 GrunnlagHendelserRiver(this, grunnlagService)
                 MigreringHendelserRiver(this, grunnlagService)
             }

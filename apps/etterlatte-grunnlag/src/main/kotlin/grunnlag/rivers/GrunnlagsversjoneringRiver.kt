@@ -28,11 +28,25 @@ class GrunnlagsversjoneringRiver(
         packet: JsonMessage,
         context: MessageContext,
     ) {
-        grunnlagService.hentAlleSakIder()
-            .flatMap { sakId -> runBlocking { behandlingKlient.hentBehandlinger(sakId).behandlinger } }
-            .forEach {
-                val skalLaaseVersjon = it.status in BehandlingStatus.iverksattEllerAttestert()
-                grunnlagService.oppdaterVersjonForBehandling(it.sakId, it.behandlingId, skalLaaseVersjon)
-            }
+        try {
+            val alleSakIderFraGrunnlag = grunnlagService.hentAlleSakIder()
+
+            logger.info("Fant ${alleSakIderFraGrunnlag.size} unike sak ider i grunnlag")
+
+            alleSakIderFraGrunnlag
+                .flatMap { sakId ->
+                    runBlocking {
+                        behandlingKlient.hentBehandlinger(sakId).behandlinger
+                            .also { logger.info("Fant ${it.size} behandlinger for sak=$sakId") }
+                    }
+                }
+                .forEach {
+                    logger.info("Forsøker å koble behandling mot hendelsenummer")
+                    val skalLaaseVersjon = it.status !in BehandlingStatus.underBehandling()
+                    grunnlagService.oppdaterVersjonForBehandling(it.sakId, it.behandlingId, skalLaaseVersjon)
+                }
+        } catch (e: Exception) {
+            logger.error("Feil ved oppdatering av versjon for behandling: ", e)
+        }
     }
 }

@@ -405,8 +405,12 @@ class RealGrunnlagService(
 
         val hendelsenummer = grunnlag.metadata.versjon
 
-        logger.info("Setter grunnlag for behandling (id=$behandlingId) til hendelsenummer=$hendelsenummer")
         val oppdatertOK = opplysningDao.oppdaterVersjonForBehandling(behandlingId, sakId, hendelsenummer) > 0
+        if (oppdatertOK) {
+            logger.info("Versjon satt til hendelsenummer=$hendelsenummer (sakId=$sakId, id=$behandlingId)")
+        } else {
+            logger.warn("Kunne ikke sette versjon til hendelsenummer=$hendelsenummer (sakId=$sakId, id=$behandlingId)")
+        }
 
         if (laasVersjon) {
             logger.info("Låser grunnlag (sakId=$sakId, behandlingId=$behandlingId)")

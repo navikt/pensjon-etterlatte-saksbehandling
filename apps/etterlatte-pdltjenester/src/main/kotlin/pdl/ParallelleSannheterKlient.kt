@@ -9,6 +9,8 @@ import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType.Application.Json
 import io.ktor.http.content.TextContent
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.RetryResult
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.retry
@@ -18,8 +20,30 @@ import org.slf4j.LoggerFactory
 
 class ParallelleSannheterException(override val message: String) : RuntimeException(message)
 
-class ParallelleSannheterKlient(val httpClient: HttpClient, val apiUrl: String) {
-    suspend fun avklarNavn(pdlNavn: List<PdlNavn>) = avklar(pdlNavn, Avklaring.NAVN)
+class ParallelleSannheterKlient(
+    val httpClient: HttpClient,
+    val apiUrl: String,
+    val featureToggleService: FeatureToggleService,
+) {
+    suspend fun avklarNavn(pdlNavn: List<PdlNavn>): PdlNavn =
+        if (featureToggleService.isEnabled(NavnFeatureToggles.AksepterManglendeNavn, false)) {
+            avklarNullable(pdlNavn, Avklaring.NAVN) ?: fallbackperson()
+        } else {
+            avklar(pdlNavn, Avklaring.NAVN)
+        }
+
+    private fun fallbackperson() =
+        PdlNavn(
+            fornavn = "Navn",
+            etternavn = "Navnesen",
+            metadata =
+                PdlMetadata(
+                    endringer = listOf(),
+                    historisk = false,
+                    master = "Hardkoda data fra Gjenny",
+                    opplysningsId = "-1",
+                ),
+        )
 
     suspend fun avklarAdressebeskyttelse(adressebeskyttelse: List<PdlAdressebeskyttelse>) =
         avklarNullable(adressebeskyttelse, Avklaring.ADRESSEBESKYTTELSE)
@@ -104,4 +128,11 @@ class ParallelleSannheterKlient(val httpClient: HttpClient, val apiUrl: String) 
     companion object {
         val logger: Logger = LoggerFactory.getLogger(ParallelleSannheterKlient::class.java)
     }
+}
+
+enum class NavnFeatureToggles(private val key: String) : FeatureToggle {
+    AksepterManglendeNavn("aksepter-manglende-navn"),
+    ;
+
+    override fun key() = key
 }

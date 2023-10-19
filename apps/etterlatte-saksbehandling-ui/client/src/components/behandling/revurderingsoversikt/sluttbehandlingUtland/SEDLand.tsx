@@ -1,5 +1,5 @@
 import { Button } from '@navikt/ds-react'
-import { useState } from 'react'
+import React from 'react'
 import { ILand } from '~shared/api/trygdetid'
 import { Table } from '@navikt/ds-react'
 import LandRad from '~components/behandling/revurderingsoversikt/sluttbehandlingUtland/LandRad'
@@ -15,8 +15,15 @@ export interface LandMedDokumenter {
   dokumenter: MottattDokument[]
 }
 
-export default function SEDLand({ landListe }: { landListe: ILand[] }) {
-  const [landMedDokumenter, setLandMedDokumenter] = useState<LandMedDokumenter[]>([])
+export default function SEDLand({
+  landListe,
+  landMedDokumenter,
+  setLandMedDokumenter,
+}: {
+  landListe: ILand[]
+  landMedDokumenter: LandMedDokumenter[]
+  setLandMedDokumenter: React.Dispatch<React.SetStateAction<LandMedDokumenter[]>>
+}) {
   return (
     <>
       <Table>

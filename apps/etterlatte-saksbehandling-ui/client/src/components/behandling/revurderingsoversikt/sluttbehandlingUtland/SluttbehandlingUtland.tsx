@@ -1,5 +1,5 @@
-import { Heading } from '@navikt/ds-react'
-import { isSuccess, mapAllApiResult, useApiCall } from '~shared/hooks/useApiCall'
+import { Button, Heading } from '@navikt/ds-react'
+import { isFailure, isSuccess, mapAllApiResult, useApiCall } from '~shared/hooks/useApiCall'
 import { hentKravpakkeforSak } from '~shared/api/generellbehandling'
 import { useEffect, useState } from 'react'
 import Spinner from '~shared/Spinner'
@@ -9,21 +9,35 @@ import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import { formaterNavn } from '~shared/types/Person'
 import { KravpakkeUtland } from '~shared/types/Generellbehandling'
 import { hentAlleLand, ILand, sorterLand } from '~shared/api/trygdetid'
-import SEDLand from '~components/behandling/revurderingsoversikt/sluttbehandlingUtland/SEDLand'
+import SEDLand, { LandMedDokumenter } from '~components/behandling/revurderingsoversikt/sluttbehandlingUtland/SEDLand'
 import { TextButton } from '~components/behandling/soeknadsoversikt/familieforhold/personer/personinfo/TextButton'
 import SluttbehandlingUtlandFelter from '~components/behandling/revurderingsoversikt/sluttbehandlingUtland/SluttbehandlingUtlandFelter'
+import { lagreRevurderingInfo } from '~shared/api/revurdering'
 
-export default function SluttbehandlingUtland({ sakId }: { sakId: number }) {
+export default function SluttbehandlingUtland({ sakId, revurderingId }: { sakId: number; revurderingId: string }) {
   const [kravpakkeStatus, hentKravpakke] = useApiCall(hentKravpakkeforSak)
   const [hentAlleLandRequest, fetchAlleLand] = useApiCall(hentAlleLand)
   const [alleLandKodeverk, setAlleLandKodeverk] = useState<ILand[] | null>(null)
   const [visHistorikk, setVisHistorikk] = useState(false)
+  const [lagrestatus, lagre] = useApiCall(lagreRevurderingInfo)
+  const [landMedDokumenter, setLandMedDokumenter] = useState<LandMedDokumenter[]>([])
+
   useEffect(() => {
     hentKravpakke(sakId)
     fetchAlleLand(null, (landliste) => {
       setAlleLandKodeverk(sorterLand(landliste))
     })
   }, [])
+
+  const lagreRevurderingsinfo = () => {
+    if (isSuccess(kravpakkeStatus)) {
+      lagre({
+        behandlingId: revurderingId,
+        begrunnelse: 'usikker', //TODO: wtf
+        revurderingInfo: { type: 'SLUTTBEHANDLING_UTLAND', landMedDokumenter: landMedDokumenter },
+      })
+    }
+  }
 
   return (
     <>
@@ -64,13 +78,25 @@ export default function SluttbehandlingUtland({ sakId }: { sakId: number }) {
         Mottatte SED
       </Heading>
       <p>Fyll inn hvilke SED som er mottatt i RINA pr land.</p>
-      {isSuccess(hentAlleLandRequest) && <SEDLand landListe={hentAlleLandRequest.data} />}
+      {isSuccess(hentAlleLandRequest) && (
+        <SEDLand
+          landListe={hentAlleLandRequest.data}
+          landMedDokumenter={landMedDokumenter}
+          setLandMedDokumenter={setLandMedDokumenter}
+        />
+      )}
+      <Button variant="secondary" onClick={() => lagreRevurderingsinfo()}>
+        Lagre opplysninger
+      </Button>
+      {isFailure(lagrestatus) && <ApiErrorAlert>Kunne ikke lagre revurderingsof</ApiErrorAlert>}
       <Heading level="2" size="medium" style={{ marginTop: '2rem' }}>
         Tidligere mottatte SED
       </Heading>
       <TextButton isOpen={visHistorikk} setIsOpen={setVisHistorikk} />
       {visHistorikk && <>Vis historikk her </>}
-      <SluttbehandlingUtlandFelter />
+      {isSuccess(kravpakkeStatus) && (
+        <SluttbehandlingUtlandFelter tilknyttetBehandling={kravpakkeStatus.data.kravpakke.tilknyttetBehandling} />
+      )}
     </>
   )
 }

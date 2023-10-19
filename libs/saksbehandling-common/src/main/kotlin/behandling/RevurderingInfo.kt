@@ -68,4 +68,16 @@ sealed class RevurderingInfo {
     data class OmgjoeringEtterKlage(
         val klageId: UUID,
     ) : RevurderingInfo()
+
+    @JsonTypeName("SLUTTBEHANDLING_UTLAND")
+    data class SluttbehandlingUtland(
+        val landIsoKode: String,
+        val dokumenter: List<MottattDokument>,
+    ) : RevurderingInfo()
 }
+
+data class MottattDokument(
+    val dokumenttype: String,
+    val dato: LocalDate,
+    val kommentar: String,
+)

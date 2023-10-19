@@ -121,7 +121,7 @@ export const Revurderingsoversikt = (props: { behandling: IDetaljertBehandling }
           </>
         )}
         {behandling.revurderingsaarsak === Revurderingaarsak.SLUTTBEHANDLING_UTLAND && (
-          <SluttbehandlingUtland sakId={behandling.sakId} />
+          <SluttbehandlingUtland sakId={behandling.sakId} revurderingId={behandling.id} />
         )}
         {behandling.revurderingsaarsak === Revurderingaarsak.SOESKENJUSTERING && (
           <GrunnForSoeskenjustering behandling={behandling} />

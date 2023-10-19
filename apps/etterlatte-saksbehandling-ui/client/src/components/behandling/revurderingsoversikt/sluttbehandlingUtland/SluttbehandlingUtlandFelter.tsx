@@ -12,6 +12,7 @@ export default function SluttbehandlingUtlandFelter({ tilknyttetBehandling }: { 
   useEffect(() => {
     fetchBehandling(tilknyttetBehandling)
   }, [])
+
   return (
     <>
       {mapAllApiResult(
@@ -22,11 +23,11 @@ export default function SluttbehandlingUtlandFelter({ tilknyttetBehandling }: { 
           <ApiErrorAlert>Kunne ikke hente behandling</ApiErrorAlert>
         ),
         (detaljertbehandling) => (
-          <div>
+          <>
             Hentet {detaljertbehandling.revurderingsaarsak}
             <Utenlandstilsnitt behandling={detaljertbehandling} redigerbar={false} />
             <BoddEllerArbeidetUtlandet behandling={detaljertbehandling} redigerbar={false} />
-          </div>
+          </>
         )
       )}
     </>

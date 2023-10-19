@@ -16,6 +16,7 @@ spec:
     path: /health/isready
   secureLogs:
     enabled: true
+  leaderElection: true
   prometheus:
     enabled: true
     path: /metrics

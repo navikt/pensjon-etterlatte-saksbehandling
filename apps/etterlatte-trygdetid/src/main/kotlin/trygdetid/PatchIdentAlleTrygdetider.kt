@@ -1,0 +1,115 @@
+package no.nav.etterlatte.trygdetid
+
+import kotlinx.coroutines.runBlocking
+import kotliquery.queryOf
+import kotliquery.sessionOf
+import kotliquery.using
+import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsnummer
+import no.nav.etterlatte.libs.jobs.LeaderElection
+import no.nav.etterlatte.token.Systembruker
+import no.nav.etterlatte.trygdetid.klienter.BehandlingKlient
+import no.nav.etterlatte.trygdetid.klienter.GrunnlagKlient
+import org.slf4j.LoggerFactory
+import java.util.UUID
+import javax.sql.DataSource
+
+class PatchIdentAlleTrygdetider(
+    private val grunnlagKlient: GrunnlagKlient,
+    private val behandlingKlient: BehandlingKlient,
+    private val dataSource: DataSource,
+    private val leaderElection: LeaderElection,
+) {
+    private val logger = LoggerFactory.getLogger(this::class.java)
+
+    fun leggPaaIdentDerDetMangler() {
+        if (!leaderElection.isLeader()) {
+            logger.info("patcher ingen trygdetider siden pod ikke er leader")
+            return
+        }
+        val trygdetiderSomManglerIdent = hentTrygdetiderSomManglerIdent()
+        logger.info("Starter patching av ${trygdetiderSomManglerIdent.size} trygdetider som mangler ident")
+        var antallOppdaterte = 0
+        trygdetiderSomManglerIdent.forEach {
+            try {
+                val (ident, sakId) = finnIdentForTrygdetid(it)
+                oppdaterIdentOgSakIdForTrygdetid(it, ident, sakId)
+                antallOppdaterte += 1
+            } catch (e: Exception) {
+                logger.error(
+                    "Kunne ikke oppdatere ident for trygdetid med id=${it.trygdetidId} i behandlingen med " +
+                        "id=${it.behandlingId} på grunn av feil",
+                    e,
+                )
+            }
+        }
+        logger.info(
+            "Oppdaterte ident på $antallOppdaterte av ${trygdetiderSomManglerIdent.size} trygdetider " +
+                "som manglet ident",
+        )
+    }
+
+    private fun oppdaterIdentOgSakIdForTrygdetid(
+        trygdetidIdOgBehandlingId: TrygdetidIdOgBehandlingId,
+        ident: String,
+        sakId: Long,
+    ) {
+        using(sessionOf(dataSource)) { session ->
+            queryOf(
+                "UPDATE trygdetid SET ident = :ident, sak_id = :sakId " +
+                    "WHERE id = :trygdetidId and behandling_id = :behandlingId and ident is null",
+                mapOf(
+                    "ident" to ident,
+                    "trygdetidId" to trygdetidIdOgBehandlingId.trygdetidId,
+                    "behandlingId" to trygdetidIdOgBehandlingId.behandlingId,
+                    "sakId" to (trygdetidIdOgBehandlingId.sakId ?: sakId),
+                ),
+            )
+                .let {
+                    session.run(it.asUpdate)
+                }
+        }
+    }
+
+    private fun finnIdentForTrygdetid(trygdetidIdOgBehandlingId: TrygdetidIdOgBehandlingId): Pair<String, Long> {
+        val sakId =
+            trygdetidIdOgBehandlingId.sakId ?: runBlocking {
+                logger.info("Henter sakId for trygdetid som mangler sak_id (${trygdetidIdOgBehandlingId.behandlingId})")
+                behandlingKlient.hentBehandling(trygdetidIdOgBehandlingId.behandlingId, Systembruker("trygdetid", "trygdetid"))
+                    .sak
+            }
+        val grunnlag =
+            runBlocking {
+                grunnlagKlient.hentGrunnlag(
+                    sakId = sakId,
+                    behandlingId = trygdetidIdOgBehandlingId.behandlingId,
+                    brukerTokenInfo = Systembruker("trygdetid", "trygdetid"),
+                )
+            }
+        return requireNotNull(grunnlag.hentAvdoed().hentFoedselsnummer()?.verdi?.value) {
+            "Kunne ikke hente avdøds fødselsnummer for behandling med id=${trygdetidIdOgBehandlingId.behandlingId}"
+        } to sakId
+    }
+
+    private fun hentTrygdetiderSomManglerIdent(): List<TrygdetidIdOgBehandlingId> {
+        return using(sessionOf(dataSource)) { session ->
+            queryOf("SELECT id, behandling_id, sak_id FROM trygdetid WHERE ident is null")
+                .let {
+                    session.run(
+                        it.map { row ->
+                            TrygdetidIdOgBehandlingId(
+                                trygdetidId = row.uuid("id"),
+                                behandlingId = row.uuid("behandling_id"),
+                                sakId = row.longOrNull("sak_id"),
+                            )
+                        }.asList,
+                    )
+                }
+        }
+    }
+}
+
+data class TrygdetidIdOgBehandlingId(
+    val trygdetidId: UUID,
+    val behandlingId: UUID,
+    val sakId: Long?,
+)

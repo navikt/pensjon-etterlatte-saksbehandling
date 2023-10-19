@@ -96,7 +96,7 @@ internal class FoedselsnummerTest {
 
     @Test
     fun `Foedselsnummer sin toString anonymiserer`() {
-        val fnr = Folkeregisteridentifikator.of("24014021406")
-        assertEquals("240140*****", fnr.toString())
+        val fnr = Folkeregisteridentifikator.of("08498224343")
+        assertEquals("084982*****", fnr.toString())
     }
 }

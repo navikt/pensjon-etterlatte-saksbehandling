@@ -47,6 +47,7 @@ val HELSOESKEN3_FOEDSELSNUMMER = Folkeregisteridentifikator.of("17418340118") //
 val HALVSOESKEN_FOEDSELSNUMMER = Folkeregisteridentifikator.of("27458328671") // Gjestfri Geometri
 val HALVSOESKEN_ANNEN_FORELDER = Folkeregisteridentifikator.of("31488338237") // Ulogisk Bensin
 val VERGE_FOEDSELSNUMMER = Folkeregisteridentifikator.of("02438311109") // Vrien Påske
+val BARN_FOEDSELSNUMMER = Folkeregisteridentifikator.of("08481376816") // Spiss Bjørk
 
 val ADRESSE_DEFAULT =
     listOf(

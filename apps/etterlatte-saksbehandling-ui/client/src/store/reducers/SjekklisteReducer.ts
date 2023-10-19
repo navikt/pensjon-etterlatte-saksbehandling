@@ -1,7 +1,6 @@
 import { ISjekkliste, ISjekklisteItem } from '~shared/types/Sjekkliste'
 import { createAction, createReducer } from '@reduxjs/toolkit'
 
-export const resetSjekkliste = createAction('sjekkliste/reset')
 export const updateSjekkliste = createAction<ISjekkliste>('sjekkliste/update')
 export const updateSjekklisteItem = createAction<ISjekklisteItem>('sjekkliste/updateItem')
 export const addValideringsfeil = createAction<String>('sjekkliste/addValideringsfeil')
@@ -12,10 +11,6 @@ const initialState: { sjekkliste: ISjekkliste | null; valideringsfeil: String[] 
 }
 
 export const sjekklisteReducer = createReducer(initialState, (builder) => {
-  builder.addCase(resetSjekkliste, (state) => {
-    state.sjekkliste = null
-    state.valideringsfeil = []
-  })
   builder.addCase(updateSjekkliste, (state, action) => {
     state.sjekkliste = action.payload
     state.valideringsfeil = []
@@ -29,6 +24,6 @@ export const sjekklisteReducer = createReducer(initialState, (builder) => {
     }
   })
   builder.addCase(addValideringsfeil, (state, action) => {
-    state.valideringsfeil = [action.payload]
+    state.valideringsfeil.push(action.payload)
   })
 })

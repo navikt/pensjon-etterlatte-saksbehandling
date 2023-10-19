@@ -12,7 +12,7 @@ import { ApiErrorAlert } from '~ErrorBoundary'
 import { useBehandling } from '~components/behandling/useBehandling'
 import { BehandlingSidemeny } from '~components/behandling/sidemeny/BehandlingSidemeny'
 import Spinner from '~shared/Spinner'
-import { resetSjekkliste, updateSjekkliste } from '~store/reducers/SjekklisteReducer'
+import { updateSjekkliste } from '~store/reducers/SjekklisteReducer'
 import { hentSjekkliste, opprettSjekkliste } from '~shared/api/sjekkliste'
 import { erFerdigBehandlet } from '~components/behandling/felles/utils'
 
@@ -23,8 +23,9 @@ export const Behandling = () => {
   const { behandlingRoutes } = useBehandlingRoutes()
   const [fetchBehandlingStatus, fetchBehandling] = useApiCall(hentBehandling)
 
-  const [hentSjekklisteResult, hentSjekklisteForBehandling] = useApiCall(hentSjekkliste)
-  const [opprettSjekklisteResult, opprettSjekklisteForBehandling] = useApiCall(opprettSjekkliste)
+  const [hentSjekklisteResult, hentSjekklisteForBehandling, resetSjekklisteResult] = useApiCall(hentSjekkliste)
+  const [opprettSjekklisteResult, opprettSjekklisteForBehandling, resetOpprettSjekkliste] =
+    useApiCall(opprettSjekkliste)
 
   useEffect(() => {
     if (!behandlingIdFraURL) {
@@ -41,7 +42,8 @@ export const Behandling = () => {
   }, [behandlingIdFraURL, behandling?.id])
 
   useEffect(() => {
-    dispatch(resetSjekkliste())
+    resetSjekklisteResult()
+    resetOpprettSjekkliste()
     if (behandling && isInitial(hentSjekklisteResult)) {
       hentSjekklisteForBehandling(
         behandling.id,

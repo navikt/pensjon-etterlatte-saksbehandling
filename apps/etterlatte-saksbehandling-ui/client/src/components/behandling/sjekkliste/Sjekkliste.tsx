@@ -44,7 +44,7 @@ export const Sjekkliste = (props: { behandling: IBehandlingReducer }) => {
   const fireOpppdater = useMemo(() => debounce(oppdaterSjekklisteApi, 1500), [])
 
   return (
-    <SidebarPanel border>
+    <SidebarPanel border id="sjekklistePanel">
       {sjekklisteValideringsfeil && (
         <Alert variant="error">Før du kan sende til attestering må du bekrefte at alle punkter er gjennomgått</Alert>
       )}

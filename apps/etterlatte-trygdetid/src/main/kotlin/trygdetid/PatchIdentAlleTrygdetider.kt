@@ -55,7 +55,7 @@ class PatchIdentAlleTrygdetider(
     ) {
         using(sessionOf(dataSource)) { session ->
             queryOf(
-                "UPDATE trygdetid SET ident = :ident, sak_id = :sakId" +
+                "UPDATE trygdetid SET ident = :ident, sak_id = :sakId " +
                     "WHERE id = :trygdetidId and behandling_id = :behandlingId and ident is null",
                 mapOf(
                     "ident" to ident,
@@ -73,7 +73,7 @@ class PatchIdentAlleTrygdetider(
     private fun finnIdentForTrygdetid(trygdetidIdOgBehandlingId: TrygdetidIdOgBehandlingId): Pair<String, Long> {
         val sakId =
             trygdetidIdOgBehandlingId.sakId ?: runBlocking {
-                logger.info("Henter sakId for trygdetid som mangler sak)id")
+                logger.info("Henter sakId for trygdetid som mangler sak_id (${trygdetidIdOgBehandlingId.behandlingId})")
                 behandlingKlient.hentBehandling(trygdetidIdOgBehandlingId.behandlingId, Systembruker("trygdetid", "trygdetid"))
                     .sak
             }

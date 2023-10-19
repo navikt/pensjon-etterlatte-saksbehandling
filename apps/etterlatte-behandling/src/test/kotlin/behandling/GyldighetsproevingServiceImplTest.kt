@@ -124,7 +124,7 @@ internal class GyldighetsproevingServiceImplTest {
     }
 
     @Test
-    fun `lagring av gyldighetsproeving skal lagre og returnere gyldighetsresultat for innsender er gjenlevende`() {
+    fun `lagring av gyldighetsproeving skal lagre og returnere gyldighetsresultat for manuell vurdering`() {
         val id = UUID.randomUUID()
         val now = LocalDateTime.now()
 
@@ -156,7 +156,7 @@ internal class GyldighetsproevingServiceImplTest {
                 vurderinger =
                     listOf(
                         VurdertGyldighet(
-                            navn = GyldighetsTyper.INNSENDER_ER_GJENLEVENDE,
+                            navn = GyldighetsTyper.MANUELL_VURDERING,
                             resultat = VurderingsResultat.OPPFYLT,
                             basertPaaOpplysninger =
                                 ManuellVurdering(

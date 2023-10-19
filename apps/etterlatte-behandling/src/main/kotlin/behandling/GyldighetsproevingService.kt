@@ -56,7 +56,7 @@ class GyldighetsproevingServiceImpl(
                     vurderinger =
                         listOf(
                             VurdertGyldighet(
-                                navn = GyldighetsTyper.INNSENDER_ER_GJENLEVENDE,
+                                navn = GyldighetsTyper.MANUELL_VURDERING,
                                 resultat = resultat,
                                 basertPaaOpplysninger =
                                     ManuellVurdering(

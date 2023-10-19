@@ -21,6 +21,7 @@ const gyldigFremsattTilStatusIcon = (gyldigFramsatt: IGyldighetResultat | undefi
 export const OversiktGyldigFramsatt = ({ behandling }: { behandling: IDetaljertBehandling }) => {
   return behandling.sakType === SakType.BARNEPENSJON ? (
     <GyldigFramsattBarnepensjon
+      behandling={behandling}
       gyldigFramsatt={behandling.gyldighetsprøving}
       gyldigFremsattTilStatusIcon={gyldigFremsattTilStatusIcon(behandling.gyldighetsprøving)}
     />

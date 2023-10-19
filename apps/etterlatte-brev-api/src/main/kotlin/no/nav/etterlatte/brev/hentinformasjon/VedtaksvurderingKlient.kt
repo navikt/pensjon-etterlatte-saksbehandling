@@ -5,6 +5,7 @@ import com.typesafe.config.Config
 import io.ktor.client.HttpClient
 import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
+import no.nav.etterlatte.libs.common.vedtak.VedtakNyDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktorobo.DownstreamResourceClient
@@ -29,12 +30,12 @@ class VedtaksvurderingKlient(config: Config, httpClient: HttpClient) {
     internal suspend fun hentVedtak(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ): VedtakDto {
+    ): VedtakNyDto {
         try {
             logger.info("Henter vedtaksvurdering behandling med behandlingId=$behandlingId")
 
             return downstreamResourceClient.get(
-                Resource(clientId, "$resourceUrl/api/vedtak/$behandlingId"),
+                Resource(clientId, "$resourceUrl/api/vedtak/$behandlingId/ny"),
                 brukerTokenInfo,
             ).mapBoth(
                 success = { resource -> resource.response.let { deserialize(it.toString()) } },

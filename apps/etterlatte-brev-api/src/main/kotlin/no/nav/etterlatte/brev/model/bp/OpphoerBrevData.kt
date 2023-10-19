@@ -27,8 +27,12 @@ data class AdopsjonRevurderingBrevdata(
                     RevurderingAarsak.ADOPSJON,
                 )
 
+            val virkningstidspunkt =
+                requireNotNull(generellBrevData.forenkletVedtak.virkningstidspunkt) {
+                    "brev for behandling=${generellBrevData.behandlingId} må ha virkningstidspunkt"
+                }
             return AdopsjonRevurderingBrevdata(
-                virkningsdato = generellBrevData.forenkletVedtak.virkningstidspunkt.atDay(1),
+                virkningsdato = virkningstidspunkt.atDay(1),
                 adopsjonsdato = adopsjonsdato,
                 adoptertAv1 = revurderingInfo.adoptertAv1,
                 adoptertAv2 = revurderingInfo.adoptertAv2,
@@ -54,8 +58,12 @@ data class OmgjoeringAvFarskapRevurderingBrevdata(
                     generellBrevData.forenkletVedtak.revurderingInfo,
                     RevurderingAarsak.OMGJOERING_AV_FARSKAP,
                 )
+            val virkningstidspunkt =
+                requireNotNull(generellBrevData.forenkletVedtak.virkningstidspunkt) {
+                    "Mangler virkningstidspunkt ${generellBrevData.behandlingId}"
+                }
             return OmgjoeringAvFarskapRevurderingBrevdata(
-                virkningsdato = generellBrevData.forenkletVedtak.virkningstidspunkt.atDay(1),
+                virkningsdato = virkningstidspunkt.atDay(1),
                 naavaerendeFar = revurderingInfo.naavaerendeFar,
                 forrigeFar = revurderingInfo.forrigeFar,
                 opprinneligInnvilgelsesdato = opprinneligInnvilgelsesdato,

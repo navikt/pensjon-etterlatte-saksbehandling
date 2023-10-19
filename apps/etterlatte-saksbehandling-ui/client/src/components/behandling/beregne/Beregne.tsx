@@ -21,7 +21,7 @@ import { BarnepensjonSammendrag } from '~components/behandling/beregne/Barnepens
 import { OmstillingsstoenadSammendrag } from '~components/behandling/beregne/OmstillingsstoenadSammendrag'
 import { Avkorting } from '~components/behandling/avkorting/Avkorting'
 import { SakType } from '~shared/types/sak'
-import { erOpphoer } from '~shared/types/Revurderingsaarsak'
+import { erOpphoer } from '~shared/types/Revurderingaarsak'
 import Etterbetaling from '~components/behandling/beregningsgrunnlag/Etterbetaling'
 import { fattVedtak, upsertVedtak } from '~shared/api/vedtaksvurdering'
 

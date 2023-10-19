@@ -13,7 +13,7 @@ import { SakType } from '~shared/types/sak'
 import { VurderingsResultat } from '~shared/types/VurderingsResultat'
 import { JaNei } from '~shared/types/ISvar'
 import { KildeType } from '~shared/types/kilde'
-import { Revurderingsaarsak } from '~shared/types/Revurderingsaarsak'
+import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
 
 describe('BARNEPENSJON: utfylt søknad er gyldig', () => {
   it('barnepensjon gyldig utfylt', () => {
@@ -164,11 +164,11 @@ describe('behandlingSkalSendeBrev', () => {
   const revurdering = {
     ...behandling,
     behandlingType: IBehandlingsType.REVURDERING,
-    revurderingsaarsak: Revurderingsaarsak.SOESKENJUSTERING,
+    revurderingsaarsak: Revurderingaarsak.SOESKENJUSTERING,
   }
   const regulering = {
     ...revurdering,
-    revurderingsaarsak: Revurderingsaarsak.REGULERING,
+    revurderingsaarsak: Revurderingaarsak.REGULERING,
   }
   const manueltopphoer = { ...behandling, behandlingType: IBehandlingsType.MANUELT_OPPHOER }
 

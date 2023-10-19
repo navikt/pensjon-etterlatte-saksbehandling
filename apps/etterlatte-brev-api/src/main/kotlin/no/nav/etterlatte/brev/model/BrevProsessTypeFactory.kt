@@ -2,7 +2,7 @@ package no.nav.etterlatte.brev.model
 
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
-import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 
@@ -27,8 +27,8 @@ class BrevProsessTypeFactory(private val featureToggleService: FeatureToggleServ
             VedtakType.ENDRING,
             ->
                 when (generellBrevData.revurderingsaarsak) {
-                    RevurderingAarsak.INNTEKTSENDRING,
-                    RevurderingAarsak.ANNEN,
+                    Revurderingaarsak.INNTEKTSENDRING,
+                    Revurderingaarsak.ANNEN,
                     -> BrevProsessType.REDIGERBAR
 
                     else -> BrevProsessType.MANUELL
@@ -53,11 +53,11 @@ class BrevProsessTypeFactory(private val featureToggleService: FeatureToggleServ
 
             VedtakType.ENDRING ->
                 when (generellBrevData.revurderingsaarsak) {
-                    RevurderingAarsak.SOESKENJUSTERING -> BrevProsessType.REDIGERBAR
-                    RevurderingAarsak.FENGSELSOPPHOLD -> BrevProsessType.REDIGERBAR
-                    RevurderingAarsak.UT_AV_FENGSEL -> BrevProsessType.REDIGERBAR
-                    RevurderingAarsak.YRKESSKADE -> BrevProsessType.REDIGERBAR
-                    RevurderingAarsak.ANNEN -> BrevProsessType.REDIGERBAR
+                    Revurderingaarsak.SOESKENJUSTERING -> BrevProsessType.REDIGERBAR
+                    Revurderingaarsak.FENGSELSOPPHOLD -> BrevProsessType.REDIGERBAR
+                    Revurderingaarsak.UT_AV_FENGSEL -> BrevProsessType.REDIGERBAR
+                    Revurderingaarsak.YRKESSKADE -> BrevProsessType.REDIGERBAR
+                    Revurderingaarsak.ANNEN -> BrevProsessType.REDIGERBAR
                     else -> BrevProsessType.MANUELL
                 }
 

@@ -1,6 +1,6 @@
 package no.nav.etterlatte.samordning.vedtak
 
-import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.beregning.AvkortetYtelseDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingDto
@@ -85,9 +85,9 @@ class SamordningVedtakService(
         }
     }
 
-    private fun RevurderingAarsak.toSamordningsvedtakAarsak(): String {
+    private fun Revurderingaarsak.toSamordningsvedtakAarsak(): String {
         return when (this) {
-            RevurderingAarsak.INNTEKTSENDRING -> SamordningVedtakAarsak.INNTEKT
+            Revurderingaarsak.INNTEKTSENDRING -> SamordningVedtakAarsak.INNTEKT
             else -> SamordningVedtakAarsak.ANNET
         }.name
     }

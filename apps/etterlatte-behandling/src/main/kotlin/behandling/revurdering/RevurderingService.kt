@@ -9,6 +9,7 @@ import no.nav.etterlatte.behandling.BehandlingHendelserKafkaProducer
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.GrunnlagService
 import no.nav.etterlatte.behandling.domain.Behandling
+import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.domain.OpprettBehandling
 import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.behandling.domain.toBehandlingOpprettet
@@ -24,8 +25,8 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
-import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.behandling.tilVirkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
@@ -42,34 +43,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
-interface RevurderingService {
-    fun opprettManuellRevurderingWrapper(
-        sakId: Long,
-        aarsak: RevurderingAarsak,
-        paaGrunnAvHendelseId: String? = null,
-        begrunnelse: String? = null,
-        fritekstAarsak: String? = null,
-        saksbehandler: Saksbehandler,
-    ): Revurdering?
-
-    fun opprettAutomatiskRevurdering(
-        sakId: Long,
-        forrigeBehandling: Behandling,
-        revurderingAarsak: RevurderingAarsak,
-        virkningstidspunkt: LocalDate? = null,
-        kilde: Vedtaksloesning,
-        persongalleri: Persongalleri,
-        mottattDato: String? = null,
-        begrunnelse: String? = null,
-    ): Revurdering?
-
-    fun lagreRevurderingInfo(
-        behandlingsId: UUID,
-        revurderingMedBegrunnelse: RevurderingMedBegrunnelse,
-        navIdent: String,
-    ): Boolean
-}
-
 enum class RevurderingServiceFeatureToggle(private val key: String) : FeatureToggle {
     OpprettManuellRevurdering("pensjon-etterlatte.opprett-manuell-revurdering"),
     ;
@@ -83,7 +56,9 @@ class RevurderingaarsakIkkeStoettetIMiljoeException(message: String) : Exception
 
 class RevurderingManglerIverksattBehandlingException(message: String) : Exception(message)
 
-class RevurderingServiceImpl(
+class RevurderingSluttbehandlingUtlandMaaHaEnBehandlingMedSkalSendeKravpakke(message: String) : Exception(message)
+
+class RevurderingService(
     private val oppgaveService: OppgaveService,
     private val grunnlagService: GrunnlagService,
     private val behandlingHendelser: BehandlingHendelserKafkaProducer,
@@ -94,8 +69,8 @@ class RevurderingServiceImpl(
     private val kommerBarnetTilGodeService: KommerBarnetTilGodeService,
     private val revurderingDao: RevurderingDao,
     private val behandlingService: BehandlingService,
-) : RevurderingService {
-    private val logger = LoggerFactory.getLogger(RevurderingServiceImpl::class.java)
+) {
+    private val logger = LoggerFactory.getLogger(RevurderingService::class.java)
 
     fun hentBehandling(id: UUID): Revurdering? = (behandlingDao.hentBehandling(id) as? Revurdering)?.sjekkEnhet()
 
@@ -115,9 +90,9 @@ class RevurderingServiceImpl(
         }
     }
 
-    override fun opprettManuellRevurderingWrapper(
+    fun opprettManuellRevurderingWrapper(
         sakId: Long,
-        aarsak: RevurderingAarsak,
+        aarsak: Revurderingaarsak,
         paaGrunnAvHendelseId: String?,
         begrunnelse: String?,
         fritekstAarsak: String?,
@@ -140,33 +115,48 @@ class RevurderingServiceImpl(
             }
 
         maksEnOppgaveUnderbehandlingForKildeBehandling(sakId)
-        val forrigeIverksatteBehandling = behandlingService.hentSisteIverksatte(sakId)
-        if (forrigeIverksatteBehandling != null) {
-            val sakType = forrigeIverksatteBehandling.sak.sakType
-            if (!aarsak.gyldigForSakType(sakType)) {
-                throw BadRequestException("$aarsak er ikke støttet for $sakType")
-            }
-            return opprettManuellRevurdering(
-                sakId = forrigeIverksatteBehandling.sak.id,
-                forrigeBehandling = forrigeIverksatteBehandling,
-                revurderingAarsak = aarsak,
-                paaGrunnAvHendelse = paaGrunnAvHendelseUuid,
-                begrunnelse = begrunnelse,
-                fritekstAarsak = fritekstAarsak,
-                saksbehandler = saksbehandler,
-            )
-        } else {
-            throw RevurderingManglerIverksattBehandlingException(
+        val forrigeIverksatteBehandling =
+            behandlingService.hentSisteIverksatte(sakId) ?: throw RevurderingManglerIverksattBehandlingException(
                 "Kan ikke revurdere en sak uten iverksatt behandling sakid:" +
                     " $sakId",
             )
+        val sakType = forrigeIverksatteBehandling.sak.sakType
+        if (!aarsak.gyldigForSakType(sakType)) {
+            throw BadRequestException("$aarsak er ikke støttet for $sakType")
+        }
+        kanOppretteRevurderingForAarsak(sakId, aarsak)
+        return opprettManuellRevurdering(
+            sakId = forrigeIverksatteBehandling.sak.id,
+            forrigeBehandling = forrigeIverksatteBehandling,
+            revurderingAarsak = aarsak,
+            paaGrunnAvHendelse = paaGrunnAvHendelseUuid,
+            begrunnelse = begrunnelse,
+            fritekstAarsak = fritekstAarsak,
+            saksbehandler = saksbehandler,
+        )
+    }
+
+    private fun kanOppretteRevurderingForAarsak(
+        sakId: Long,
+        aarsak: Revurderingaarsak,
+    ) {
+        if (aarsak == Revurderingaarsak.SLUTTBEHANDLING_UTLAND) {
+            val behandlingerForSak = behandlingService.hentBehandlingerISak(sakId)
+            behandlingerForSak.find {
+                    behandling ->
+                (behandling is Foerstegangsbehandling) && behandling.boddEllerArbeidetUtlandet?.skalSendeKravpakke == true
+            }
+                ?: throw RevurderingSluttbehandlingUtlandMaaHaEnBehandlingMedSkalSendeKravpakke(
+                    "Sak " +
+                        "$sakId må ha en førstegangsbehandling som har huket av for skalSendeKravpakke for å kunne opprette ${aarsak.name}",
+                )
         }
     }
 
     private fun opprettManuellRevurdering(
         sakId: Long,
         forrigeBehandling: Behandling,
-        revurderingAarsak: RevurderingAarsak,
+        revurderingAarsak: Revurderingaarsak,
         paaGrunnAvHendelse: UUID?,
         begrunnelse: String?,
         fritekstAarsak: String?,
@@ -213,15 +203,15 @@ class RevurderingServiceImpl(
             }
         }
 
-    override fun opprettAutomatiskRevurdering(
+    fun opprettAutomatiskRevurdering(
         sakId: Long,
         forrigeBehandling: Behandling,
-        revurderingAarsak: RevurderingAarsak,
-        virkningstidspunkt: LocalDate?,
+        revurderingAarsak: Revurderingaarsak,
+        virkningstidspunkt: LocalDate? = null,
         kilde: Vedtaksloesning,
         persongalleri: Persongalleri,
-        mottattDato: String?,
-        begrunnelse: String?,
+        mottattDato: String? = null,
+        begrunnelse: String? = null,
     ) = forrigeBehandling.sjekkEnhet()?.let {
         opprettRevurdering(
             sakId = sakId,
@@ -245,7 +235,7 @@ class RevurderingServiceImpl(
         return behandling.status.kanEndres()
     }
 
-    override fun lagreRevurderingInfo(
+    fun lagreRevurderingInfo(
         behandlingsId: UUID,
         revurderingMedBegrunnelse: RevurderingMedBegrunnelse,
         navIdent: String,
@@ -265,7 +255,7 @@ class RevurderingServiceImpl(
         mottattDato: String?,
         prosessType: Prosesstype,
         kilde: Vedtaksloesning,
-        revurderingAarsak: RevurderingAarsak,
+        revurderingAarsak: Revurderingaarsak,
         virkningstidspunkt: Virkningstidspunkt?,
         begrunnelse: String?,
         fritekstAarsak: String? = null,

@@ -37,7 +37,7 @@ import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.NyBehandlingRequest
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
-import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
@@ -528,7 +528,7 @@ class BehandlingFactoryTest {
         every { behandlingDaoMock.hentBehandling(any()) } returns
             revurdering(
                 sakId = 1,
-                revurderingAarsak = RevurderingAarsak.NY_SOEKNAD,
+                revurderingAarsak = Revurderingaarsak.NY_SOEKNAD,
                 enhet = Enheter.defaultEnhet.enhetNr,
             )
 

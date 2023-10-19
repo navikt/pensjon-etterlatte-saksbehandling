@@ -12,8 +12,8 @@ import io.ktor.server.routing.route
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
-import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandlingsId
 import no.nav.etterlatte.libs.common.hentNavidentFraToken
@@ -84,14 +84,14 @@ internal fun Route.revurderingRoutes(revurderingService: RevurderingService) {
                 call.parameters["saktype"]?.let { runCatching { SakType.valueOf(it) }.getOrNull() }
                     ?: return@get call.respond(HttpStatusCode.BadRequest, "Ugyldig saktype")
 
-            val stoettedeRevurderinger = RevurderingAarsak.values().filter { it.erStoettaRevurdering(sakType) }
+            val stoettedeRevurderinger = Revurderingaarsak.values().filter { it.erStoettaRevurdering(sakType) }
             call.respond(stoettedeRevurderinger)
         }
     }
 }
 
 data class OpprettRevurderingRequest(
-    val aarsak: RevurderingAarsak,
+    val aarsak: Revurderingaarsak,
     val paaGrunnAvHendelseId: String? = null,
     val begrunnelse: String? = null,
     val fritekstAarsak: String? = null,

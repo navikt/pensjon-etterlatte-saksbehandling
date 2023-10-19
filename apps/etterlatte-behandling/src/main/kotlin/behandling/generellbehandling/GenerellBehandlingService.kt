@@ -1,14 +1,21 @@
 package no.nav.etterlatte.behandling.generellbehandling
 
+import no.nav.etterlatte.behandling.BehandlingService
+import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
+import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
+import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.generellbehandling.DokumentMedSendtDato
 import no.nav.etterlatte.libs.common.generellbehandling.GenerellBehandling
 import no.nav.etterlatte.libs.common.generellbehandling.Innhold
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
+import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.oppgave.OppgaveService
+import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.etterlatte.token.Saksbehandler
 import org.slf4j.LoggerFactory
 import java.time.temporal.ChronoUnit
@@ -27,6 +34,8 @@ class KanIkkeEndreFattetEllerAttestertBehandling(message: String) : Exception(me
 class GenerellBehandlingService(
     private val generellBehandlingDao: GenerellBehandlingDao,
     private val oppgaveService: OppgaveService,
+    private val behandlingService: BehandlingService,
+    private val grunnlagKlient: GrunnlagKlient,
 ) {
     private val logger = LoggerFactory.getLogger(GenerellBehandlingService::class.java)
 
@@ -157,4 +166,54 @@ class GenerellBehandlingService(
     fun hentBehandlingForSak(sakId: Long): List<GenerellBehandling> {
         return generellBehandlingDao.hentGenerellBehandlingForSak(sakId)
     }
+
+    fun hentBehandlingForTilknyttetBehandling(tilknyttetBehandlingId: UUID): GenerellBehandling? {
+        return generellBehandlingDao.hentBehandlingForTilknyttetBehandling(tilknyttetBehandlingId)
+    }
+
+    suspend fun hentKravpakkeForSak(
+        sakId: Long,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): KravPakkeMedAvdoed {
+        val (kravpakke, forstegangsbehandlingMedKravpakke) =
+            inTransaction {
+                val behandlingerForSak = behandlingService.hentBehandlingerISak(sakId)
+                val forstegangsbehandlingMedKravpakke =
+                    behandlingerForSak.find {
+                            behandling ->
+                        (behandling is Foerstegangsbehandling) && behandling.boddEllerArbeidetUtlandet?.skalSendeKravpakke == true
+                    }
+                        ?: throw FantIkkeFoerstegangsbehandlingForKravpakkeOgSak("Fant ikke behandlingen for sak $sakId")
+                val kravpakke =
+                    this.hentBehandlingForTilknyttetBehandling(forstegangsbehandlingMedKravpakke.id)
+                        ?: throw FantIkkeKravpakkeForFoerstegangsbehandling(
+                            "Fant ikke" +
+                                " kravpakke for ${forstegangsbehandlingMedKravpakke.id}",
+                        )
+                Pair(kravpakke, forstegangsbehandlingMedKravpakke)
+            }
+        if (kravpakke.status == GenerellBehandling.Status.ATTESTERT) {
+            val avdoed =
+                grunnlagKlient.finnPersonOpplysning(
+                    sakId,
+                    forstegangsbehandlingMedKravpakke.id,
+                    Opplysningstype.AVDOED_PDL_V1,
+                    brukerTokenInfo,
+                ) ?: throw FantIkkeAvdoedException("Fant ikke avdød for sak: $sakId behandlingid: ${forstegangsbehandlingMedKravpakke.id}")
+            return KravPakkeMedAvdoed(kravpakke, avdoed.opplysning)
+        } else {
+            throw RuntimeException("Kravpakken for sak $sakId har ikke blitt attestert, status: ${kravpakke.status}")
+        }
+    }
 }
+
+class FantIkkeAvdoedException(msg: String) : Exception(msg)
+
+class FantIkkeFoerstegangsbehandlingForKravpakkeOgSak(msg: String) : Exception(msg)
+
+class FantIkkeKravpakkeForFoerstegangsbehandling(msg: String) : Exception(msg)
+
+data class KravPakkeMedAvdoed(
+    val kravpakke: GenerellBehandling,
+    val avdoed: Person,
+)

@@ -1,4 +1,4 @@
-import { Revurderingsaarsak } from '~shared/types/Revurderingsaarsak'
+import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
 import { useBehandling } from '~components/behandling/useBehandling'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import { formaterKanskjeStringDato, formaterStringDato } from '~utils/formattering'
@@ -99,12 +99,12 @@ const AdopsjonGrunnlag = () => {
 export const GrunnlagForVirkningstidspunkt = () => {
   const behandling = useBehandling()
   switch (behandling?.revurderingsaarsak) {
-    case Revurderingsaarsak.DOEDSFALL:
+    case Revurderingaarsak.DOEDSFALL:
       return <SoekerDoedsdatoGrunnlag />
-    case Revurderingsaarsak.OMGJOERING_AV_FARSKAP:
-    case Revurderingsaarsak.YRKESSKADE:
+    case Revurderingaarsak.OMGJOERING_AV_FARSKAP:
+    case Revurderingaarsak.YRKESSKADE:
       return <FoersteVirkGrunnlag />
-    case Revurderingsaarsak.ADOPSJON:
+    case Revurderingaarsak.ADOPSJON:
       return <AdopsjonGrunnlag />
   }
   return null

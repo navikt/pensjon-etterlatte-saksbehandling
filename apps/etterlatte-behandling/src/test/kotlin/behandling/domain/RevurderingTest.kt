@@ -8,7 +8,7 @@ import no.nav.etterlatte.kommerBarnetTilGodeVurdering
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
-import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -41,7 +41,7 @@ internal class RevurderingTest {
             virkningstidspunkt = virkningstidspunktVurdering(),
             utenlandstilsnitt = null,
             boddEllerArbeidetUtlandet = null,
-            revurderingsaarsak = RevurderingAarsak.REGULERING,
+            revurderingsaarsak = Revurderingaarsak.REGULERING,
             prosesstype = Prosesstype.MANUELL,
             kilde = Vedtaksloesning.GJENNY,
             revurderingInfo = null,
@@ -189,7 +189,7 @@ private fun opprettetRevurdering(prosesstype: Prosesstype): Revurdering {
         virkningstidspunkt = virkningstidspunktVurdering(),
         utenlandstilsnitt = null,
         boddEllerArbeidetUtlandet = null,
-        revurderingsaarsak = RevurderingAarsak.REGULERING,
+        revurderingsaarsak = Revurderingaarsak.REGULERING,
         prosesstype = prosesstype,
         kilde = Vedtaksloesning.GJENNY,
         revurderingInfo = null,

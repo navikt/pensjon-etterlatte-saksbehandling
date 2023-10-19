@@ -108,6 +108,7 @@ interface BehandlingService {
     fun hentFoersteVirk(sakId: Long): YearMonth?
 }
 
+// TODO: hvorfor har denne et interface?
 internal class BehandlingServiceImpl(
     private val behandlingDao: BehandlingDao,
     private val behandlingHendelser: BehandlingHendelserKafkaProducer,

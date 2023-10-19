@@ -1,5 +1,5 @@
 import { Grunnlagsendringshendelse, GrunnlagsendringsType } from '~components/person/typer'
-import { Revurderingsaarsak } from '~shared/types/Revurderingsaarsak'
+import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
 import React, { useState } from 'react'
 import { isFailure, isPending, useApiCall } from '~shared/hooks/useApiCall'
 import { lukkGrunnlagshendelse } from '~shared/api/behandling'
@@ -17,7 +17,7 @@ const UhaandtertHendelse = (props: {
   hendelse: Grunnlagsendringshendelse
   harAapenRevurdering: boolean
   startRevurdering: (hendelse: Grunnlagsendringshendelse) => void
-  revurderinger: Array<Revurderingsaarsak>
+  revurderinger: Array<Revurderingaarsak>
 }) => {
   const { hendelse, harAapenRevurdering, startRevurdering, revurderinger } = props
   const { samsvarMellomKildeOgGrunnlag, opprettet } = hendelse

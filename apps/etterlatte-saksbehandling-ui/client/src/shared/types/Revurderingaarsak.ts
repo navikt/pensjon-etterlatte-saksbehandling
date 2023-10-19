@@ -1,5 +1,6 @@
-//Denne må matche det som er definert i backend RevurderingAarsak.kt
-export enum Revurderingsaarsak {
+//Denne må matche det som er definert i backend Revurderingaarsak.kt
+
+export enum Revurderingaarsak {
   REGULERING = 'REGULERING',
   ANSVARLIGE_FORELDRE = 'ANSVARLIGE_FORELDRE',
   SOESKENJUSTERING = 'SOESKENJUSTERING',
@@ -18,9 +19,10 @@ export enum Revurderingsaarsak {
   UT_AV_FENGSEL = 'UT_AV_FENGSEL',
   INSTITUSJONSOPPHOLD = 'INSTITUSJONSOPPHOLD',
   OMGJOERING_ETTER_KLAGE = 'OMGJOERING_ETTER_KLAGE',
+  SLUTTBEHANDLING_UTLAND = 'SLUTTBEHANDLING_UTLAND',
 }
 
-export const tekstRevurderingsaarsak: Record<Revurderingsaarsak, string> = {
+export const tekstRevurderingsaarsak: Record<Revurderingaarsak, string> = {
   REGULERING: 'Regulering',
   ANSVARLIGE_FORELDRE: 'Ansvarlige foreldre',
   SOESKENJUSTERING: 'Søskenjustering',
@@ -39,12 +41,13 @@ export const tekstRevurderingsaarsak: Record<Revurderingsaarsak, string> = {
   UT_AV_FENGSEL: 'Ut av fengsel',
   INSTITUSJONSOPPHOLD: 'Institusjonsopphold',
   OMGJOERING_ETTER_KLAGE: 'Omgjøring etter klage',
+  SLUTTBEHANDLING_UTLAND: 'Sluttbehandling utland',
 } as const
 
-export const erOpphoer = (revurderingsaarsak: Revurderingsaarsak) =>
+export const erOpphoer = (revurderingsaarsak: Revurderingaarsak) =>
   [
-    Revurderingsaarsak.DOEDSFALL,
-    Revurderingsaarsak.ADOPSJON,
-    Revurderingsaarsak.OMGJOERING_AV_FARSKAP,
-    Revurderingsaarsak.SIVILSTAND,
+    Revurderingaarsak.DOEDSFALL,
+    Revurderingaarsak.ADOPSJON,
+    Revurderingaarsak.OMGJOERING_AV_FARSKAP,
+    Revurderingaarsak.SIVILSTAND,
   ].includes(revurderingsaarsak)

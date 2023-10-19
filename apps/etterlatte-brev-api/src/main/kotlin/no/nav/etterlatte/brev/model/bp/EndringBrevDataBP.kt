@@ -9,8 +9,8 @@ import no.nav.etterlatte.brev.model.EtterbetalingDTO
 import no.nav.etterlatte.brev.model.InnholdMedVedlegg
 import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.libs.common.behandling.BarnepensjonSoeskenjusteringGrunn
-import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 
 data class EndringHovedmalBrevData(
     val erEndret: Boolean,
@@ -46,7 +46,7 @@ data class SoeskenjusteringRevurderingBrevdata(
                 AvslagBrevData.valider<RevurderingInfo.Soeskenjustering>(
                     generellBrevData.revurderingsaarsak,
                     generellBrevData.forenkletVedtak.revurderingInfo,
-                    RevurderingAarsak.SOESKENJUSTERING,
+                    Revurderingaarsak.SOESKENJUSTERING,
                 )
 
             return SoeskenjusteringRevurderingBrevdata(

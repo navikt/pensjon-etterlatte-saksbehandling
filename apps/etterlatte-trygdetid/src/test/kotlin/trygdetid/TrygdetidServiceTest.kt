@@ -16,7 +16,7 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
-import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SisteIverksatteBehandling
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsdata
@@ -272,7 +272,7 @@ internal class TrygdetidServiceTest {
                 every { id } returns behandlingId
                 every { sak } returns sakId
                 every { behandlingType } returns BehandlingType.REVURDERING
-                every { revurderingsaarsak } returns RevurderingAarsak.SOESKENJUSTERING
+                every { revurderingsaarsak } returns Revurderingaarsak.SOESKENJUSTERING
             }
         val forrigeBehandlingId = randomUUID()
         val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
@@ -345,7 +345,7 @@ internal class TrygdetidServiceTest {
                 every { id } returns behandlingId
                 every { sak } returns sakId
                 every { behandlingType } returns BehandlingType.REVURDERING
-                every { revurderingsaarsak } returns RevurderingAarsak.REGULERING
+                every { revurderingsaarsak } returns Revurderingaarsak.REGULERING
                 every { prosesstype } returns Prosesstype.AUTOMATISK
             }
         val forrigeBehandlingId = randomUUID()
@@ -389,7 +389,7 @@ internal class TrygdetidServiceTest {
                 every { id } returns behandlingId
                 every { sak } returns sakId
                 every { behandlingType } returns BehandlingType.REVURDERING
-                every { revurderingsaarsak } returns RevurderingAarsak.REGULERING
+                every { revurderingsaarsak } returns Revurderingaarsak.REGULERING
                 every { prosesstype } returns Prosesstype.MANUELL
             }
         val forrigeBehandlingId = randomUUID()

@@ -9,7 +9,7 @@ import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
-import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.database.setJsonb
@@ -35,7 +35,7 @@ class RevurderingDao(private val connection: () -> Connection) {
             behandlingOpprettet = rs.somLocalDateTimeUTC("behandling_opprettet"),
             sistEndret = rs.somLocalDateTimeUTC("sist_endret"),
             status = rs.getString("status").let { BehandlingStatus.valueOf(it) },
-            revurderingsaarsak = rs.getString("revurdering_aarsak").let { RevurderingAarsak.valueOf(it) },
+            revurderingsaarsak = rs.getString("revurdering_aarsak").let { Revurderingaarsak.valueOf(it) },
             kommerBarnetTilgode = kommerBarnetTilGode.invoke(id),
             virkningstidspunkt = rs.getString("virkningstidspunkt")?.let { objectMapper.readValue(it) },
             utenlandstilsnitt = rs.getString("utenlandstilsnitt")?.let { objectMapper.readValue(it) },

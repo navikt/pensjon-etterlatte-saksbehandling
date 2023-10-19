@@ -1,38 +1,48 @@
 import styled from 'styled-components'
 import React, { useContext, useEffect, useMemo, useState } from 'react'
 import { SidebarPanel } from '~shared/components/Sidebar'
-import { isFailure, isInitial, useApiCall } from '~shared/hooks/useApiCall'
+import { isFailure, isInitial, isPending, useApiCall } from '~shared/hooks/useApiCall'
 import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
 import { hentSjekkliste, oppdaterSjekkliste, oppdaterSjekklisteItem, opprettSjekkliste } from '~shared/api/sjekkliste'
 import { BodyLong, Checkbox, ConfirmationPanel, Heading, Link, Textarea, TextField, VStack } from '@navikt/ds-react'
 import { ConfigContext } from '~clientConfig'
 import { hentBehandlesFraStatus } from '~components/behandling/felles/utils'
-import { ISjekkliste, ISjekklisteItem } from '~shared/types/Sjekkliste'
+import { ISjekklisteItem } from '~shared/types/Sjekkliste'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import debounce from 'lodash/debounce'
+import { useSjekkliste } from '~components/behandling/sjekkliste/useSjekkliste'
+import { useAppDispatch } from '~store/Store'
+import { updateSjekkliste, updateSjekklisteItem } from '~store/reducers/SjekklisteReducer'
+import Spinner from '~shared/Spinner'
 
 export const Sjekkliste = (props: { behandling: IBehandlingReducer }) => {
   const { behandling } = props
   const ferdigBehandlet = !hentBehandlesFraStatus(behandling.status)
 
+  const dispatch = useAppDispatch()
+
   const [hentSjekklisteResult, hentSjekklisteForBehandling] = useApiCall(hentSjekkliste)
   const [opprettSjekklisteResult, opprettSjekklisteForBehandling] = useApiCall(opprettSjekkliste)
   const [oppdaterSjekklisteResult, oppdaterSjekklisteApi] = useApiCall(oppdaterSjekkliste)
-  const [sjekkliste, setSjekkliste] = useState<ISjekkliste>()
+  const sjekkliste = useSjekkliste()
 
   const configContext = useContext(ConfigContext)
+
+  const dispatchUpdatedItem = (item: ISjekklisteItem) => {
+    dispatch(updateSjekklisteItem(item))
+  }
 
   useEffect(() => {
     if (isInitial(hentSjekklisteResult)) {
       hentSjekklisteForBehandling(
         behandling.id,
         (result) => {
-          setSjekkliste(result)
+          dispatch(updateSjekkliste(result))
         },
         () => {
           if (!ferdigBehandlet) {
             opprettSjekklisteForBehandling(behandling.id, (opprettet) => {
-              setSjekkliste(opprettet)
+              dispatch(updateSjekkliste(opprettet))
             })
           }
         }
@@ -43,14 +53,12 @@ export const Sjekkliste = (props: { behandling: IBehandlingReducer }) => {
   const fireOpppdater = useMemo(() => debounce(oppdaterSjekklisteApi, 1500), [])
 
   return (
-    <SidebarPanel>
+    <SidebarPanel border>
       <Heading spacing size="small">
         Sjekkliste
       </Heading>
-      <BodyLong>
-        Gjennomgå alle punktene og marker de som krever handling.
-        <Link href="#">Her finner du rutine til punktene.</Link>
-      </BodyLong>
+
+      {isPending(hentSjekklisteResult) && <Spinner label="Henter sjekkliste" visible />}
 
       {isFailure(hentSjekklisteResult) && <ApiErrorAlert>En feil oppstod ved henting av sjekklista</ApiErrorAlert>}
       {isFailure(opprettSjekklisteResult) && <ApiErrorAlert>Opprettelsen av sjekkliste feilet</ApiErrorAlert>}
@@ -58,12 +66,18 @@ export const Sjekkliste = (props: { behandling: IBehandlingReducer }) => {
 
       {sjekkliste && (
         <>
+          <BodyLong>
+            Gjennomgå alle punktene og marker de som krever handling.
+            <Link href="#">Her finner du rutine til punktene.</Link>
+          </BodyLong>
+
           {sjekkliste?.sjekklisteItems.map((item) => (
             <SjekklisteElement
               key={item.id}
               item={item}
               behandlingId={behandling.id}
               ferdigBehandlet={ferdigBehandlet}
+              onUpdated={dispatchUpdatedItem}
             />
           ))}
 
@@ -87,7 +101,7 @@ export const Sjekkliste = (props: { behandling: IBehandlingReducer }) => {
                   ...sjekkliste,
                   kommentar: e.currentTarget.value,
                 }
-                setSjekkliste(oppdatert)
+                dispatch(updateSjekkliste(oppdatert))
                 fireOpppdater(oppdatert)
               }}
               rows={3}
@@ -103,7 +117,7 @@ export const Sjekkliste = (props: { behandling: IBehandlingReducer }) => {
                   ...sjekkliste,
                   adresseForBrev: e.currentTarget.value,
                 }
-                setSjekkliste(oppdatert)
+                dispatch(updateSjekkliste(oppdatert))
                 fireOpppdater(oppdatert)
               }}
               readOnly={ferdigBehandlet}
@@ -118,7 +132,7 @@ export const Sjekkliste = (props: { behandling: IBehandlingReducer }) => {
                   ...sjekkliste,
                   kontonrRegistrert: e.currentTarget.value,
                 }
-                setSjekkliste(oppdatert)
+                dispatch(updateSjekkliste(oppdatert))
                 fireOpppdater(oppdatert)
               }}
               readOnly={ferdigBehandlet}
@@ -134,7 +148,7 @@ export const Sjekkliste = (props: { behandling: IBehandlingReducer }) => {
                     ...sjekkliste,
                     bekreftet: e.currentTarget.checked,
                   }
-                  setSjekkliste(oppdatert)
+                  dispatch(updateSjekkliste(oppdatert))
                   fireOpppdater(oppdatert)
                 }}
               />
@@ -150,24 +164,27 @@ const SjekklisteElement = ({
   item,
   behandlingId,
   ferdigBehandlet,
+  onUpdated,
 }: {
   item: ISjekklisteItem
   behandlingId: string
   ferdigBehandlet: boolean
+  onUpdated: (item: ISjekklisteItem) => void
 }) => {
+  const [avkrysset, setAvkrysset] = useState<boolean>(item.avkrysset)
   const [itemUpdateResult, oppdaterItem] = useApiCall(oppdaterSjekklisteItem)
 
   return (
     <>
-      {isFailure(itemUpdateResult) && <ApiErrorAlert>En feil oppsto ved lagring av data</ApiErrorAlert>}
+      {isFailure(itemUpdateResult) && <ApiErrorAlert>En feil oppsto ved oppdatering av sjekklista</ApiErrorAlert>}
 
       <Checkbox
-        checked={item.avkrysset}
+        checked={avkrysset}
         readOnly={ferdigBehandlet}
         onChange={(event) => {
           const checked = event.currentTarget.checked
-          item.avkrysset = checked
-          oppdaterItem({ behandlingId, item, checked }, (oppdatert) => (item.versjon = oppdatert.versjon))
+          setAvkrysset(checked)
+          oppdaterItem({ behandlingId, item, checked }, (oppdatert) => onUpdated(oppdatert))
         }}
       >
         {item.beskrivelse}

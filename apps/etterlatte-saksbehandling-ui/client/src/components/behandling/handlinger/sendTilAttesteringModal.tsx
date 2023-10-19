@@ -6,17 +6,25 @@ import { isFailure, isPending, useApiCall } from '~shared/hooks/useApiCall'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { FlexRow } from '~shared/styled'
 import { ApiResponse } from '~shared/api/apiClient'
+import { useSjekkliste } from '~components/behandling/sjekkliste/useSjekkliste'
+import { useAppDispatch } from '~store/Store'
+import { visSjekkliste } from '~store/reducers/BehandlingSidemenyReducer'
 
 export const SendTilAttesteringModal = ({
   behandlingId,
   fattVedtakApi,
+  valideringsfunksjon,
 }: {
   behandlingId: string
   fattVedtakApi: (id: string) => Promise<ApiResponse<unknown>>
+  valideringsfunksjon: (errors: String[]) => void
 }) => {
   const navigate = useNavigate()
   const [isOpen, setIsOpen] = useState(false)
   const [fattVedtakStatus, fattVedtak] = useApiCall(fattVedtakApi)
+
+  const sjekkliste = useSjekkliste()
+  const dispatch = useAppDispatch()
 
   const goToOppgavebenken = () => {
     navigate('/')
@@ -29,9 +37,18 @@ export const SendTilAttesteringModal = ({
     })
   }
 
+  const clickAttester = () => {
+    if (sjekkliste == null || !sjekkliste.bekreftet) {
+      valideringsfunksjon(['Sjekkliste trøbbel!'])
+      dispatch(visSjekkliste())
+    } else {
+      setIsOpen(true)
+    }
+  }
+
   return (
     <>
-      <Button variant="primary" onClick={() => setIsOpen(true)}>
+      <Button variant="primary" onClick={clickAttester}>
         {handlinger.ATTESTERING.navn}
       </Button>
       <Modal

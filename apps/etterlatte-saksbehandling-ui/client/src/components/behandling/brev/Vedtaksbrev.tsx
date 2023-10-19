@@ -22,6 +22,7 @@ import RedigerbartBrev from '~components/behandling/brev/RedigerbartBrev'
 import { isFailure, isPending, isPendingOrInitial, useApiCall } from '~shared/hooks/useApiCall'
 
 import { fattVedtak } from '~shared/api/vedtaksvurdering'
+import { SjekklisteValidering } from '~components/behandling/sjekkliste/SjekklisteValidering'
 
 export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
   const { behandlingId } = useParams()
@@ -31,6 +32,8 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
 
   const [hentBrevStatus, hentBrev] = useApiCall(hentVedtaksbrev)
   const [opprettBrevStatus, opprettNyttVedtaksbrev] = useApiCall(opprettVedtaksbrev)
+
+  const [sjekklisteValidationErrors, setSjekklisteValidationErrors] = useState<String[]>([])
 
   useEffect(() => {
     if (
@@ -96,9 +99,15 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
 
       <Border />
 
+      <SjekklisteValidering errors={sjekklisteValidationErrors} />
+
       <BehandlingHandlingKnapper>
         {hentBehandlesFraStatus(status) && (
-          <SendTilAttesteringModal behandlingId={props.behandling.id} fattVedtakApi={fattVedtak} />
+          <SendTilAttesteringModal
+            behandlingId={props.behandling.id}
+            fattVedtakApi={fattVedtak}
+            valideringsfunksjon={(errors) => setSjekklisteValidationErrors(errors)}
+          />
         )}
       </BehandlingHandlingKnapper>
     </Content>

@@ -22,6 +22,8 @@ import { updateVedtakSammendrag } from '~store/reducers/VedtakReducer'
 import { Tabs } from '@navikt/ds-react'
 import { DocPencilIcon, FileTextIcon } from '@navikt/aksel-icons'
 import { Sjekkliste } from '~components/behandling/sjekkliste/Sjekkliste'
+import { useBehandlingSidemenyFane } from '~components/behandling/sidemeny/useBehandlingSidemeny'
+import { visFane } from '~store/reducers/BehandlingSidemenyReducer'
 
 const mapTilBehandlingInfo = (behandling: IBehandlingReducer, vedtak: VedtakSammendrag | null): IBehandlingInfo => ({
   type: behandling.behandlingType,
@@ -45,7 +47,7 @@ export const BehandlingSidemeny = () => {
   const saksbehandler = useAppSelector((state) => state.saksbehandlerReducer.saksbehandler)
   const [fetchVedtakStatus, fetchVedtakSammendrag] = useApiCall(hentVedtakSammendrag)
   const [beslutning, setBeslutning] = useState<IBeslutning>()
-  const [fane, setFane] = useState(BehandlingFane.DOKUMENTER)
+  const fane = useBehandlingSidemenyFane()
 
   const behandlingsinfo = behandling ? mapTilBehandlingInfo(behandling, vedtak) : undefined
 
@@ -88,7 +90,7 @@ export const BehandlingSidemeny = () => {
         </>
       )}
 
-      <Tabs value={fane} iconPosition="top" onChange={(val) => setFane(val as BehandlingFane)}>
+      <Tabs value={fane} iconPosition="top" onChange={(val) => dispatch(visFane(val as BehandlingFane))}>
         <Tabs.List>
           <Tabs.Tab value={BehandlingFane.DOKUMENTER} label="Dokumenter" icon={<FileTextIcon title="dokumenter" />} />
           <Tabs.Tab value={BehandlingFane.SJEKKLISTE} label="Sjekkliste" icon={<DocPencilIcon title="sjekkliste" />} />

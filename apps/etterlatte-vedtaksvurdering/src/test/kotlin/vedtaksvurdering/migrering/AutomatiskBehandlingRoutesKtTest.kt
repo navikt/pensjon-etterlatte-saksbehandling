@@ -14,9 +14,9 @@ import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.confirmVerified
-import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
-import kotlinx.coroutines.runBlocking
+import io.mockk.runs
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
@@ -24,7 +24,7 @@ import no.nav.etterlatte.libs.common.oppgave.OppgaveListe
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.common.vedtak.VedtakDto
+import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseType
 import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlient
@@ -47,6 +47,7 @@ internal class AutomatiskBehandlingRoutesKtTest {
     private lateinit var applicationConfig: HoconApplicationConfig
     private val behandlingKlient = mockk<BehandlingKlient>()
     private val service: VedtakBehandlingService = mockk()
+    private val rapidService: VedtaksvurderingRapidService = mockk()
 
     @BeforeAll
     fun before() {
@@ -77,27 +78,42 @@ internal class AutomatiskBehandlingRoutesKtTest {
         testApplication {
             val opprettetVedtak = vedtak()
             val behandlingId = UUID.randomUUID()
-            every { runBlocking { service.opprettEllerOppdaterVedtak(any(), any()) } } returns
+            coEvery { service.opprettEllerOppdaterVedtak(any(), any()) } returns
                 opprettetVedtak
-            every { runBlocking { service.fattVedtak(behandlingId, any()) } } returns opprettetVedtak
-            every { runBlocking { behandlingKlient.hentOppgaverForSak(any(), any()) } } returns
+            coEvery { service.fattVedtak(behandlingId, any()) } returns
+                VedtakOgRapid(
+                    opprettetVedtak.toDto(),
+                    mockk(),
+                )
+            coEvery { behandlingKlient.hentOppgaverForSak(any(), any()) } returns
                 OppgaveListe(
                     mockk(),
                     listOf(lagOppgave(behandlingId)),
                 )
-            every { runBlocking { behandlingKlient.tildelSaksbehandler(any(), any()) } } returns true
-            every {
-                runBlocking {
-                    service.attesterVedtak(
-                        behandlingId,
-                        any(),
-                        any(),
-                    )
-                }
-            } returns opprettetVedtak
+            coEvery { behandlingKlient.tildelSaksbehandler(any(), any()) } returns true
+            coEvery {
+                service.attesterVedtak(
+                    behandlingId,
+                    any(),
+                    any(),
+                )
+            } returns
+                VedtakOgRapid(
+                    opprettetVedtak.toDto(),
+                    RapidInfo(VedtakKafkaHendelseType.ATTESTERT, opprettetVedtak.toDto(), Tidspunkt.now(), behandlingId),
+                )
+            coEvery { rapidService.sendToRapid(any()) } just runs
 
             environment { config = applicationConfig }
-            application { restModule(log) { automatiskBehandlingRoutes(service, behandlingKlient) } }
+            application {
+                restModule(log) {
+                    automatiskBehandlingRoutes(
+                        service,
+                        rapidService,
+                        behandlingKlient,
+                    )
+                }
+            }
 
             val vedtak =
                 client.post("/api/vedtak/1/$behandlingId/automatisk") {
@@ -105,10 +121,11 @@ internal class AutomatiskBehandlingRoutesKtTest {
                     header(HttpHeaders.Authorization, "Bearer $token")
                 }.let {
                     it.status shouldBe HttpStatusCode.OK
-                    deserialize<VedtakDto>(it.bodyAsText())
+                    deserialize<VedtakOgRapid>(it.bodyAsText())
                 }
 
-            Assertions.assertEquals(vedtak.vedtakId, opprettetVedtak.id)
+            Assertions.assertEquals(vedtak.vedtak.vedtakId, opprettetVedtak.id)
+            Assertions.assertEquals(vedtak.rapidInfo.vedtakhendelse, VedtakKafkaHendelseType.ATTESTERT)
 
             coVerify(exactly = 1) {
                 service.opprettEllerOppdaterVedtak(behandlingId, any())
@@ -116,6 +133,9 @@ internal class AutomatiskBehandlingRoutesKtTest {
                 service.fattVedtak(behandlingId, any())
                 behandlingKlient.tildelSaksbehandler(any(), any())
                 service.attesterVedtak(behandlingId, any(), any())
+            }
+            coVerify(exactly = 2) {
+                rapidService.sendToRapid(any())
             }
             coVerify(atLeast = 1) {
                 behandlingKlient.harTilgangTilBehandling(any(), any())
@@ -135,7 +155,7 @@ internal class AutomatiskBehandlingRoutesKtTest {
         const val CLIENT_ID = "azure-id for saksbehandler"
     }
 
-    fun lagOppgave(referanse: UUID) =
+    private fun lagOppgave(referanse: UUID) =
         OppgaveIntern(
             id = UUID.randomUUID(),
             status = Status.UNDER_BEHANDLING,

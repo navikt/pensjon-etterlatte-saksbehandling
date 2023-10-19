@@ -10,7 +10,6 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.spyk
-import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import kotliquery.queryOf
 import no.nav.etterlatte.libs.common.Vedtaksloesning
@@ -28,9 +27,7 @@ import no.nav.etterlatte.libs.common.beregning.BeregningDTO
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
 import no.nav.etterlatte.libs.common.beregning.Beregningstype
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
-import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.oppgave.VedtakEndringDTO
-import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.SKAL_SENDE_BREV
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -83,7 +80,6 @@ internal class VedtakBehandlingServiceTest {
     private val beregningKlientMock = mockk<BeregningKlient>()
     private val vilkaarsvurderingKlientMock = mockk<VilkaarsvurderingKlient>()
     private val behandlingKlientMock = mockk<BehandlingKlient>()
-    private val sendToRapidMock = mockk<(String, UUID) -> Unit>(relaxed = true)
 
     private lateinit var service: VedtakBehandlingService
 
@@ -105,7 +101,6 @@ internal class VedtakBehandlingServiceTest {
                 beregningKlient = beregningKlientMock,
                 vilkaarsvurderingKlient = vilkaarsvurderingKlientMock,
                 behandlingKlient = behandlingKlientMock,
-                publiser = sendToRapidMock,
             )
     }
 
@@ -368,14 +363,13 @@ internal class VedtakBehandlingServiceTest {
             }
 
         fattetVedtak shouldNotBe null
-        with(fattetVedtak.vedtakFattet!!) {
+        with(fattetVedtak.vedtak.vedtakFattet!!) {
             ansvarligSaksbehandler shouldBe gjeldendeSaksbehandler.ident
             ansvarligEnhet shouldBe ENHET_1
             tidspunkt shouldNotBe null
         }
 
         coVerify(exactly = 1) { behandlingKlientMock.kanFatteVedtak(any(), any()) }
-        verify(exactly = 1) { sendToRapidMock.invoke(any(), any()) }
     }
 
     @Test
@@ -530,7 +524,7 @@ internal class VedtakBehandlingServiceTest {
             }
 
         attestertVedtak shouldNotBe null
-        with(attestertVedtak.attestasjon!!) {
+        with(attestertVedtak.vedtak.attestasjon!!) {
             this.attestant shouldBe attestant.ident
             attesterendeEnhet shouldBe ENHET_2
             tidspunkt shouldNotBe null
@@ -541,7 +535,6 @@ internal class VedtakBehandlingServiceTest {
         coVerify(exactly = 1) { behandlingKlientMock.attesterVedtak(any(), capture(hendelse)) }
         hendelse.captured.vedtakHendelse.kommentar shouldBe KOMMENTAR
         hendelse.captured.vedtakOppgaveDTO.referanse shouldBe behandlingId.toString()
-        verify(exactly = 2) { sendToRapidMock.invoke(any(), any()) }
     }
 
     @Test
@@ -587,7 +580,6 @@ internal class VedtakBehandlingServiceTest {
             behandlingKlientMock.fattVedtakBehandling(any(), any())
             behandlingKlientMock.kanAttestereVedtak(any(), any(), null) // sjekke status behandling
         }
-        verify(exactly = 1) { sendToRapidMock.invoke(any(), any()) }
     }
 
     @Test
@@ -638,24 +630,22 @@ internal class VedtakBehandlingServiceTest {
                 avkorting = mockAvkorting(),
             )
 
-        runBlocking {
-            repository.opprettVedtak(
-                opprettVedtak(
-                    virkningstidspunkt = virkningstidspunkt,
-                    behandlingId = behandlingId,
-                ),
-            )
-            service.fattVedtak(behandlingId, gjeldendeSaksbehandler)
-            service.attesterVedtak(behandlingId, KOMMENTAR, attestant)
-        }
+        val attestering =
+            runBlocking {
+                repository.opprettVedtak(
+                    opprettVedtak(
+                        virkningstidspunkt = virkningstidspunkt,
+                        behandlingId = behandlingId,
+                    ),
+                )
+                service.fattVedtak(behandlingId, gjeldendeSaksbehandler)
+                service.attesterVedtak(behandlingId, KOMMENTAR, attestant)
+            }
 
-        val hendelse = mutableListOf<String>()
-        verify(exactly = 2) { sendToRapidMock.invoke(capture(hendelse), any()) }
+        val hendelse = attestering.rapidInfo
 
-        val attestertMelding = objectMapper.readTree(hendelse[1])
-        attestertMelding.get(EVENT_NAME_KEY).textValue() shouldBe "VEDTAK:ATTESTERT"
-        attestertMelding.get(SKAL_SENDE_BREV).isBoolean shouldBe true
-        attestertMelding.get(SKAL_SENDE_BREV).booleanValue() shouldBe false
+        Assertions.assertEquals(hendelse.vedtakhendelse, VedtakKafkaHendelseType.ATTESTERT)
+        Assertions.assertEquals(false, hendelse.extraParams[SKAL_SENDE_BREV])
     }
 
     @Test
@@ -775,9 +765,9 @@ internal class VedtakBehandlingServiceTest {
             }
 
         iverksattVedtak shouldNotBe null
-        iverksattVedtak.status shouldBe VedtakStatus.IVERKSATT
+        iverksattVedtak.vedtak.status shouldBe VedtakStatus.IVERKSATT
 
-        verify(exactly = 1) { sendToRapidMock(match { it.contains(VedtakKafkaHendelseType.IVERKSATT.name) }, any()) }
+        Assertions.assertEquals(VedtakKafkaHendelseType.IVERKSATT, iverksattVedtak.rapidInfo.vedtakhendelse)
     }
 
     @Test
@@ -829,8 +819,6 @@ internal class VedtakBehandlingServiceTest {
         ikkeIverksattVedtak shouldNotBe null
         ikkeIverksattVedtak.status shouldNotBe VedtakStatus.IVERKSATT
         ikkeIverksattVedtak.status shouldBe VedtakStatus.ATTESTERT
-
-        verify(exactly = 0) { sendToRapidMock(match { it.contains(VedtakKafkaHendelseType.IVERKSATT.name) }, any()) }
     }
 
     @Test
@@ -926,9 +914,9 @@ internal class VedtakBehandlingServiceTest {
             }
 
         underkjentVedtak shouldNotBe null
-        underkjentVedtak.status shouldBe VedtakStatus.RETURNERT
+        underkjentVedtak.vedtak.status shouldBe VedtakStatus.RETURNERT
 
-        verify(exactly = 1) { sendToRapidMock(match { it.contains(VedtakKafkaHendelseType.UNDERKJENT.name) }, any()) }
+        Assertions.assertEquals(VedtakKafkaHendelseType.UNDERKJENT, underkjentVedtak.rapidInfo.vedtakhendelse)
     }
 
     @Test

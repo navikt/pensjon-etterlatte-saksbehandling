@@ -18,7 +18,7 @@ fun Route.sakGrunnlagRoute(
     route("sak/{$SAKID_CALL_PARAMETER}") {
         get {
             withSakId(behandlingKlient) { sakId ->
-                when (val opplysningsgrunnlag = grunnlagService.hentOpplysningsgrunnlag(sakId)) {
+                when (val opplysningsgrunnlag = grunnlagService.hentOpplysningsgrunnlagForSak(sakId)) {
                     null -> call.respond(HttpStatusCode.NotFound)
                     else -> call.respond(opplysningsgrunnlag)
                 }
@@ -36,7 +36,7 @@ fun Route.sakGrunnlagRoute(
     }
 }
 
-private data class PersonerISakDto(
+data class PersonerISakDto(
     val personer: Map<Folkeregisteridentifikator, PersonMedNavn>,
 )
 

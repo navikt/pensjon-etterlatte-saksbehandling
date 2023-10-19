@@ -13,6 +13,7 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.AVDOED_PDL_V1
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.BOSTEDSADRESSE
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.GJENLEVENDE_FORELDER_PDL_V1
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.INNSENDER_PDL_V1
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.PERSONGALLERI_V1
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.SOEKER_PDL_V1
@@ -21,6 +22,8 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.S
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeknadMottattDato
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.periode.Periode
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.database.DataSourceBuilder
@@ -42,6 +45,7 @@ import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
@@ -150,24 +154,82 @@ internal class GrunnlagDaoIntegrationTest {
     }
 
     @Test
-    fun `Skal hente grunnlag opptil versjon på sak`() {
-        lagGrunnlagsopplysning(Opplysningstype.FOEDSELSDATO).also { opplysningRepo.leggOpplysningTilGrunnlag(1, it) }
-        lagGrunnlagsopplysning(Opplysningstype.DOEDSDATO).also { opplysningRepo.leggOpplysningTilGrunnlag(1, it) }
+    fun `Hente nyeste grunnlag av type`() {
+        val sakId = Random.nextLong()
+        val behandlingId = UUID.randomUUID()
+        val type = Opplysningstype.SOEKER_PDL_V1
 
-        assertEquals(1, opplysningRepo.finnGrunnlagOpptilVersjon(1, 1).size)
-        assertEquals(2, opplysningRepo.finnGrunnlagOpptilVersjon(1, 2).size)
+        lagGrunnlagsopplysning(type, verdi = opprettMockPerson(SOEKER_FOEDSELSNUMMER).toJsonNode())
+            .also { opplysningRepo.leggOpplysningTilGrunnlag(sakId, it) }
+        lagGrunnlagsopplysning(type, verdi = opprettMockPerson(SOEKER_FOEDSELSNUMMER).toJsonNode())
+            .also { opplysningRepo.leggOpplysningTilGrunnlag(sakId, it) }
+
+        val forventetOpplysning =
+            lagGrunnlagsopplysning(type, verdi = opprettMockPerson(SOEKER_FOEDSELSNUMMER).toJsonNode())
+        val forventetHendelsenummer = opplysningRepo.leggOpplysningTilGrunnlag(sakId, forventetOpplysning)
+
+        assertNull(
+            opplysningRepo.finnNyesteGrunnlagForBehandling(behandlingId, type),
+            "Skal ikke være låst til behandlingId enda",
+        )
+        assertEquals(3, forventetHendelsenummer)
+
+        opplysningRepo.oppdaterVersjonForBehandling(behandlingId, sakId, forventetHendelsenummer)
+
+        // Legge til to nye grunnlag på saken, men ikke koble til behandlingId
+        lagGrunnlagsopplysning(type, verdi = opprettMockPerson(SOEKER_FOEDSELSNUMMER).toJsonNode())
+            .also { opplysningRepo.leggOpplysningTilGrunnlag(sakId, it) }
+        val sisteOpplysning =
+            lagGrunnlagsopplysning(type, verdi = opprettMockPerson(SOEKER_FOEDSELSNUMMER).toJsonNode())
+                .also { opplysningRepo.leggOpplysningTilGrunnlag(sakId, it) }
+
+        val sisteGrunnlagForSak = opplysningRepo.finnNyesteGrunnlagForSak(sakId, type)!!
+        assertEquals(5, sisteGrunnlagForSak.hendelseNummer)
+        assertEquals(sisteOpplysning.toJson(), sisteGrunnlagForSak.opplysning.toJson())
+
+        val sisteGrunnlagForBehandling = opplysningRepo.finnNyesteGrunnlagForBehandling(behandlingId, type)!!
+        assertEquals(forventetHendelsenummer, sisteGrunnlagForBehandling.hendelseNummer)
+        assertEquals(forventetOpplysning.toJson(), sisteGrunnlagForBehandling.opplysning.toJson())
+
+        assertEquals(sisteGrunnlagForSak.sakId, sisteGrunnlagForBehandling.sakId)
+        assertNotEquals(sisteGrunnlagForSak.hendelseNummer, sisteGrunnlagForBehandling.hendelseNummer)
+        assertNotEquals(sisteGrunnlagForSak.opplysning.toJson(), sisteGrunnlagForBehandling.opplysning.toJson())
     }
 
     @Test
-    fun `Skal hente opplysning fra nyeste hendelse basert paa sakId og opplysningType`() {
+    fun `Skal hente opplysning fra nyeste hendelse basert paa SAK_ID og opplysningType`() {
         val uuid = UUID.randomUUID()
 
         lagGrunnlagsopplysning(AVDOED_PDL_V1).also { opplysningRepo.leggOpplysningTilGrunnlag(33, it) }
         lagGrunnlagsopplysning(AVDOED_PDL_V1, uuid = uuid).also { opplysningRepo.leggOpplysningTilGrunnlag(33, it) }
 
-        assertEquals(uuid, opplysningRepo.finnNyesteGrunnlag(33, Opplysningstype.AVDOED_PDL_V1)?.opplysning?.id)
+        assertEquals(uuid, opplysningRepo.finnNyesteGrunnlagForSak(33, Opplysningstype.AVDOED_PDL_V1)?.opplysning?.id)
         // Skal håndtere at opplysning ikke finnes
-        assertEquals(null, opplysningRepo.finnNyesteGrunnlag(0L, Opplysningstype.AVDOED_PDL_V1))
+        assertEquals(null, opplysningRepo.finnNyesteGrunnlagForSak(0L, Opplysningstype.AVDOED_PDL_V1))
+    }
+
+    @Test
+    fun `Skal hente opplysning fra nyeste hendelse basert paa BEHANDLING_ID og opplysningType`() {
+        val sakId = Random.nextLong()
+        val behandlingId = UUID.randomUUID()
+
+        lagGrunnlagsopplysning(AVDOED_PDL_V1).also { opplysningRepo.leggOpplysningTilGrunnlag(sakId, it) }
+        lagGrunnlagsopplysning(
+            AVDOED_PDL_V1,
+            uuid = behandlingId,
+        ).also { opplysningRepo.leggOpplysningTilGrunnlag(sakId, it) }
+
+        opplysningRepo.oppdaterVersjonForBehandling(behandlingId, sakId, 2)
+
+        assertEquals(
+            behandlingId,
+            opplysningRepo.finnNyesteGrunnlagForBehandling(behandlingId, Opplysningstype.AVDOED_PDL_V1)?.opplysning?.id,
+        )
+        // Skal håndtere at opplysning ikke finnes
+        assertEquals(
+            null,
+            opplysningRepo.finnNyesteGrunnlagForBehandling(UUID.randomUUID(), Opplysningstype.AVDOED_PDL_V1),
+        )
     }
 
     @Test
@@ -360,6 +422,37 @@ internal class GrunnlagDaoIntegrationTest {
     }
 
     @Test
+    fun `Hente grunnlag på behandling`() {
+        val sakId = Random.nextLong()
+        val behandlingId = UUID.randomUUID()
+
+        opplysningRepo.leggOpplysningTilGrunnlag(sakId, lagGrunnlagsopplysning(SOEKER_PDL_V1))
+        opplysningRepo.leggOpplysningTilGrunnlag(sakId, lagGrunnlagsopplysning(AVDOED_PDL_V1))
+        val sisteHendelsenummerForBehandling =
+            opplysningRepo.leggOpplysningTilGrunnlag(sakId, lagGrunnlagsopplysning(GJENLEVENDE_FORELDER_PDL_V1))
+
+        opplysningRepo.oppdaterVersjonForBehandling(behandlingId, sakId, sisteHendelsenummerForBehandling)
+
+        repeat(10) {
+            val annenBehandlingId = UUID.randomUUID()
+            val tempHendelsenummer =
+                Opplysningstype.values().maxOf { opplysningstype ->
+                    opplysningRepo.leggOpplysningTilGrunnlag(sakId, lagGrunnlagsopplysning(opplysningstype))
+                }
+            opplysningRepo.oppdaterVersjonForBehandling(annenBehandlingId, sakId, tempHendelsenummer)
+        }
+
+        val opplysninger = opplysningRepo.hentAlleGrunnlagForBehandling(behandlingId)
+        assertEquals(3, opplysninger.size)
+
+        val sisteVersjon = opplysningRepo.hentBehandlingVersjon(behandlingId)
+        assertEquals(sisteHendelsenummerForBehandling, sisteVersjon?.hendelsenummer)
+
+        val opplysningerForSak = opplysningRepo.hentAlleGrunnlagForSak(sakId)
+        assertEquals(373, opplysningerForSak.size)
+    }
+
+    @Test
     fun `Lagring av versjon på flere behandlinger på samme sak`() {
         val sakId = Random.nextLong()
 
@@ -387,4 +480,10 @@ internal class GrunnlagDaoIntegrationTest {
             assertEquals(sakId, it.sakId)
         }
     }
+
+    private fun opprettMockPerson(fnr: Folkeregisteridentifikator): Person =
+        Person(
+            UUID.randomUUID().toString(), null, UUID.randomUUID().toString(), fnr, null, 1234, null, null, null, null,
+            null, null, null, null, null, null, null, null, null, null,
+        )
 }

@@ -51,7 +51,7 @@ internal class GrunnlagServiceTest {
 
     @BeforeAll
     fun beforeAll() {
-        every { opplysningerMock.finnNyesteGrunnlag(1, PERSONGALLERI_V1) } returns
+        every { opplysningerMock.finnNyesteGrunnlagForBehandling(any(), PERSONGALLERI_V1) } returns
             lagGrunnlagHendelse(
                 1,
                 4,
@@ -116,7 +116,7 @@ internal class GrunnlagServiceTest {
 
             every { opplysningerMock.hentAlleGrunnlagForSak(1) } returns grunnlagshendelser
 
-            val actual = grunnlagService.hentOpplysningsgrunnlag(1)!!
+            val actual = grunnlagService.hentOpplysningsgrunnlagForSak(1)!!
             val expected =
                 mapOf(
                     NAVN to Opplysning.Konstant(statiskUuid, kilde, nyttNavn.toJsonNode()),
@@ -133,7 +133,7 @@ internal class GrunnlagServiceTest {
 
             every { opplysningerMock.hentAlleGrunnlagForSak(1) } returns grunnlagshendelser
 
-            val actual = grunnlagService.hentOpplysningsgrunnlag(1)!!
+            val actual = grunnlagService.hentOpplysningsgrunnlagForSak(1)!!
             val expected =
                 mapOf(
                     NAVN to Opplysning.Konstant(statiskUuid, kilde, nyttNavn.toJsonNode()),
@@ -151,7 +151,7 @@ internal class GrunnlagServiceTest {
 
             every { opplysningerMock.hentAlleGrunnlagForSak(1) } returns grunnlagshendelser
 
-            val actual = grunnlagService.hentOpplysningsgrunnlag(1)!!
+            val actual = grunnlagService.hentOpplysningsgrunnlagForSak(1)!!
             val expected =
                 mapOf(
                     NAVN to Opplysning.Konstant(statiskUuid, kilde, nyttNavn.toJsonNode()),
@@ -169,7 +169,7 @@ internal class GrunnlagServiceTest {
 
             every { opplysningerMock.hentAlleGrunnlagForSak(1) } returns grunnlagshendelser
 
-            val actual = grunnlagService.hentOpplysningsgrunnlag(1)!!
+            val actual = grunnlagService.hentOpplysningsgrunnlagForSak(1)!!
             val expected =
                 mapOf(
                     NAVN to Opplysning.Konstant(statiskUuid, kilde, nyttNavn.toJsonNode()),
@@ -212,14 +212,14 @@ internal class GrunnlagServiceTest {
 
             Assertions.assertEquals(
                 1,
-                grunnlagService.hentOpplysningsgrunnlag(1)!!.soeker.values.size,
+                grunnlagService.hentOpplysningsgrunnlagForSak(1)!!.soeker.values.size,
             )
         }
 
         @Test
         fun `tar alltid seneste versjon av samme opplysning`() {
             every { opplysningerMock.hentAlleGrunnlagForSak(1) } returns grunnlagshendelser
-            val opplysningsgrunnlag = grunnlagService.hentOpplysningsgrunnlag(1)!!
+            val opplysningsgrunnlag = grunnlagService.hentOpplysningsgrunnlagForSak(1)!!
 
             Assertions.assertEquals(
                 2,
@@ -267,7 +267,7 @@ internal class GrunnlagServiceTest {
 
         every { opplysningerMock.hentAlleGrunnlagForSak(1) } returns grunnlagshendelser
 
-        val actual = grunnlagService.hentOpplysningsgrunnlag(1)!!
+        val actual = grunnlagService.hentOpplysningsgrunnlagForSak(1)!!
         val expected =
             Opplysning.Konstant(
                 uuid1,
@@ -283,7 +283,7 @@ internal class GrunnlagServiceTest {
 
     @Test
     fun `kan hente og mappe opplysningsgrunnlag`() {
-        every { opplysningerMock.finnNyesteGrunnlag(1, PERSONGALLERI_V1) } returns
+        every { opplysningerMock.finnNyesteGrunnlagForSak(any<Long>(), PERSONGALLERI_V1) } returns
             lagGrunnlagHendelse(
                 1,
                 1,
@@ -294,7 +294,7 @@ internal class GrunnlagServiceTest {
                 kilde = kilde,
             )
 
-        every { opplysningerMock.hentAlleGrunnlagForSak(1) } returns
+        every { opplysningerMock.hentAlleGrunnlagForSak(any<Long>()) } returns
             listOf(
                 lagGrunnlagHendelse(
                     1,
@@ -324,7 +324,7 @@ internal class GrunnlagServiceTest {
                 ),
             )
 
-        val opplysningsgrunnlag = grunnlagService.hentOpplysningsgrunnlag(1)!!
+        val opplysningsgrunnlag = grunnlagService.hentOpplysningsgrunnlagForSak(1)!!
 
         Assertions.assertEquals(1, opplysningsgrunnlag.sak.size)
         Assertions.assertEquals(2, opplysningsgrunnlag.soeker.size)
@@ -467,7 +467,7 @@ internal class GrunnlagServiceTest {
 
         @Test
         fun `Kan mappe og hente innsender`() {
-            every { opplysningerMock.finnNyesteGrunnlag(1, PERSONGALLERI_V1) } returns
+            every { opplysningerMock.finnNyesteGrunnlagForBehandling(any(), PERSONGALLERI_V1) } returns
                 lagGrunnlagHendelse(
                     1,
                     1,
@@ -507,7 +507,7 @@ internal class GrunnlagServiceTest {
                     ),
                 )
 
-            val opplysningsgrunnlag = grunnlagService.hentOpplysningsgrunnlag(1)!!
+            val opplysningsgrunnlag = grunnlagService.hentOpplysningsgrunnlagForSak(1)!!
 
             Assertions.assertEquals(1, opplysningsgrunnlag.sak.size)
             Assertions.assertEquals(1, opplysningsgrunnlag.familie.size)

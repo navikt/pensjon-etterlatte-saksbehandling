@@ -43,5 +43,5 @@ class ApplicationContext {
 
     // TEMP SKAL FJERNES
     private val leaderElection = LeaderElection(electorPath = properties.electorPath, httpClient = httpClient())
-    val patchjobb = PatchIdentAlleTrygdetider(grunnlagKlient, dataSource, leaderElection)
+    val patchjobb = PatchIdentAlleTrygdetider(grunnlagKlient, behandlingKlient, dataSource, leaderElection)
 }

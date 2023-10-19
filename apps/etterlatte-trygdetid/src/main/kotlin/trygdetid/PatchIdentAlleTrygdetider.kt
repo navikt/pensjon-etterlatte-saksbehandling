@@ -7,6 +7,7 @@ import kotliquery.using
 import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsnummer
 import no.nav.etterlatte.libs.jobs.LeaderElection
 import no.nav.etterlatte.token.Systembruker
+import no.nav.etterlatte.trygdetid.klienter.BehandlingKlient
 import no.nav.etterlatte.trygdetid.klienter.GrunnlagKlient
 import org.slf4j.LoggerFactory
 import java.util.UUID
@@ -14,6 +15,7 @@ import javax.sql.DataSource
 
 class PatchIdentAlleTrygdetider(
     private val grunnlagKlient: GrunnlagKlient,
+    private val behandlingKlient: BehandlingKlient,
     private val dataSource: DataSource,
     private val leaderElection: LeaderElection,
 ) {
@@ -29,8 +31,8 @@ class PatchIdentAlleTrygdetider(
         var antallOppdaterte = 0
         trygdetiderSomManglerIdent.forEach {
             try {
-                val ident = finnIdentForTrygdetid(it)
-                oppdaterIdentForTrygdetid(it, ident)
+                val (ident, sakId) = finnIdentForTrygdetid(it)
+                oppdaterIdentOgSakIdForTrygdetid(it, ident, sakId)
                 antallOppdaterte += 1
             } catch (e: Exception) {
                 logger.error(
@@ -46,18 +48,20 @@ class PatchIdentAlleTrygdetider(
         )
     }
 
-    private fun oppdaterIdentForTrygdetid(
+    private fun oppdaterIdentOgSakIdForTrygdetid(
         trygdetidIdOgBehandlingId: TrygdetidIdOgBehandlingId,
         ident: String,
+        sakId: Long,
     ) {
         using(sessionOf(dataSource)) { session ->
             queryOf(
-                "UPDATE trygdetid SET ident = :ident " +
+                "UPDATE trygdetid SET ident = :ident, sak_id = :sakId" +
                     "WHERE id = :trygdetidId and behandling_id = :behandlingId and ident is null",
                 mapOf(
                     "ident" to ident,
                     "trygdetidId" to trygdetidIdOgBehandlingId.trygdetidId,
                     "behandlingId" to trygdetidIdOgBehandlingId.behandlingId,
+                    "sakId" to (trygdetidIdOgBehandlingId.sakId ?: sakId),
                 ),
             )
                 .let {
@@ -66,18 +70,24 @@ class PatchIdentAlleTrygdetider(
         }
     }
 
-    private fun finnIdentForTrygdetid(trygdetidIdOgBehandlingId: TrygdetidIdOgBehandlingId): String {
+    private fun finnIdentForTrygdetid(trygdetidIdOgBehandlingId: TrygdetidIdOgBehandlingId): Pair<String, Long> {
+        val sakId =
+            trygdetidIdOgBehandlingId.sakId ?: runBlocking {
+                logger.info("Henter sakId for trygdetid som mangler sak)id")
+                behandlingKlient.hentBehandling(trygdetidIdOgBehandlingId.behandlingId, Systembruker("trygdetid", "trygdetid"))
+                    .sak
+            }
         val grunnlag =
             runBlocking {
                 grunnlagKlient.hentGrunnlag(
-                    sakId = trygdetidIdOgBehandlingId.sakId,
+                    sakId = sakId,
                     behandlingId = trygdetidIdOgBehandlingId.behandlingId,
                     brukerTokenInfo = Systembruker("trygdetid", "trygdetid"),
                 )
             }
         return requireNotNull(grunnlag.hentAvdoed().hentFoedselsnummer()?.verdi?.value) {
             "Kunne ikke hente avdøds fødselsnummer for behandling med id=${trygdetidIdOgBehandlingId.behandlingId}"
-        }
+        } to sakId
     }
 
     private fun hentTrygdetiderSomManglerIdent(): List<TrygdetidIdOgBehandlingId> {
@@ -89,7 +99,7 @@ class PatchIdentAlleTrygdetider(
                             TrygdetidIdOgBehandlingId(
                                 trygdetidId = row.uuid("id"),
                                 behandlingId = row.uuid("behandling_id"),
-                                sakId = row.long("sak_id"),
+                                sakId = row.longOrNull("sak_id"),
                             )
                         }.asList,
                     )
@@ -101,5 +111,5 @@ class PatchIdentAlleTrygdetider(
 data class TrygdetidIdOgBehandlingId(
     val trygdetidId: UUID,
     val behandlingId: UUID,
-    val sakId: Long,
+    val sakId: Long?,
 )

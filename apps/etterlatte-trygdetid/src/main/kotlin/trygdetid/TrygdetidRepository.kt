@@ -89,16 +89,25 @@ class TrygdetidRepository(private val dataSource: DataSource) {
             if (trygdetid.beregnetTrygdetid != null) {
                 oppdaterBeregnetTrygdetid(trygdetid.behandlingId, trygdetid.beregnetTrygdetid, tx)
             }
-        }.let { hentTrygdtidNotNull(trygdetid.behandlingId) }
+        }.let { hentTrygdetidMedIdNotNull(behandlingsId = trygdetid.behandlingId, trygdetidId = trygdetid.id) }
 
     fun oppdaterTrygdetid(
         oppdatertTrygdetid: Trygdetid,
         overstyrt: Boolean = false,
     ): Trygdetid =
         dataSource.transaction { tx ->
-            val gjeldendeTrygdetid = hentTrygdtidNotNull(oppdatertTrygdetid.behandlingId)
+            val gjeldendeTrygdetid =
+                hentTrygdetidMedIdNotNull(
+                    behandlingsId = oppdatertTrygdetid.behandlingId,
+                    trygdetidId = oppdatertTrygdetid.id,
+                )
 
-            oppdaterOverstyrtPoengaar(gjeldendeTrygdetid.id, gjeldendeTrygdetid.behandlingId, oppdatertTrygdetid.overstyrtNorskPoengaar, tx)
+            oppdaterOverstyrtPoengaar(
+                gjeldendeTrygdetid.id,
+                gjeldendeTrygdetid.behandlingId,
+                oppdatertTrygdetid.overstyrtNorskPoengaar,
+                tx,
+            )
 
             // opprett grunnlag
             oppdatertTrygdetid.trygdetidGrunnlag
@@ -127,7 +136,7 @@ class TrygdetidRepository(private val dataSource: DataSource) {
             } else {
                 nullstillBeregnetTrygdetid(oppdatertTrygdetid.behandlingId, tx)
             }
-        }.let { hentTrygdtidNotNull(oppdatertTrygdetid.behandlingId) }
+        }.let { hentTrygdetidMedIdNotNull(oppdatertTrygdetid.behandlingId, oppdatertTrygdetid.id) }
 
     private fun opprettTrygdetid(
         trygdetid: Trygdetid,
@@ -426,9 +435,11 @@ class TrygdetidRepository(private val dataSource: DataSource) {
             )
         }
 
-    private fun hentTrygdtidNotNull(behandlingsId: UUID) =
-        hentTrygdetiderForBehandling(behandlingsId).firstOrNull()
-            ?: throw Exception("Fant ikke trygdetid for $behandlingsId")
+    private fun hentTrygdetidMedIdNotNull(
+        behandlingsId: UUID,
+        trygdetidId: UUID,
+    ) = hentTrygdetidMedId(behandlingsId, trygdetidId)
+        ?: throw Exception("Fant ikke trygdetid for $behandlingsId")
 
     private fun Row.toFaktiskTrygdetid(
         totalColumn: String,

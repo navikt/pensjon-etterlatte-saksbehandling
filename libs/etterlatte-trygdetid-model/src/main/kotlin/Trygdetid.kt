@@ -9,7 +9,7 @@ import java.util.UUID
 
 data class TrygdetidDto(
     val id: UUID,
-    val ident: String?,
+    val ident: String,
     val behandlingId: UUID,
     val beregnetTrygdetid: DetaljertBeregnetTrygdetidDto?,
     val trygdetidGrunnlag: List<TrygdetidGrunnlagDto>,

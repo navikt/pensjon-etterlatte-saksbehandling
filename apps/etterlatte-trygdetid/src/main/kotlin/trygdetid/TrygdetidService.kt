@@ -74,27 +74,27 @@ interface TrygdetidService {
 
 interface GammelTrygdetidServiceMedNy : NyTrygdetidService, TrygdetidService {
     override suspend fun hentTrygdetid(
-        behandlingsId: UUID,
+        behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): Trygdetid? {
-        return hentTrygdetiderIBehandling(behandlingsId, brukerTokenInfo).firstOrNull()
+        return hentTrygdetiderIBehandling(behandlingId, brukerTokenInfo).firstOrNull()
     }
 
     override suspend fun opprettTrygdetid(
-        behandlingsId: UUID,
+        behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): Trygdetid {
-        return opprettTrygdetiderForBehandling(behandlingsId, brukerTokenInfo).first()
+        return opprettTrygdetiderForBehandling(behandlingId, brukerTokenInfo).first()
     }
 
     override suspend fun lagreTrygdetidGrunnlag(
-        behandlingsId: UUID,
+        behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
         trygdetidGrunnlag: TrygdetidGrunnlag,
     ): Trygdetid {
-        val trygdetid = hentTrygdetidOld(behandlingsId) ?: throw GenerellIkkeFunnetException()
+        val trygdetid = hentTrygdetidOld(behandlingId) ?: throw GenerellIkkeFunnetException()
         return lagreTrygdetidGrunnlagForTrygdetidMedIdIBehandling(
-            behandlingsId,
+            behandlingId,
             trygdetid.id,
             trygdetidGrunnlag,
             brukerTokenInfo,
@@ -102,10 +102,10 @@ interface GammelTrygdetidServiceMedNy : NyTrygdetidService, TrygdetidService {
     }
 
     override suspend fun lagreYrkesskadeTrygdetidGrunnlag(
-        behandlingsId: UUID,
+        behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): Trygdetid {
-        return lagreYrkesskadeTrygdetidGrunnlagForBehandling(behandlingsId, brukerTokenInfo)
+        return lagreYrkesskadeTrygdetidGrunnlagForBehandling(behandlingId, brukerTokenInfo)
     }
 
     override fun overstyrNorskPoengaar(
@@ -117,20 +117,20 @@ interface GammelTrygdetidServiceMedNy : NyTrygdetidService, TrygdetidService {
     }
 
     override suspend fun slettTrygdetidGrunnlag(
-        behandlingsId: UUID,
+        behandlingId: UUID,
         trygdetidGrunnlagId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): Trygdetid {
-        val trygdetid = hentTrygdetidOld(behandlingsId) ?: throw GenerellIkkeFunnetException()
-        return slettTrygdetidGrunnlagForTrygdetid(behandlingsId, trygdetid.id, trygdetidGrunnlagId, brukerTokenInfo)
+        val trygdetid = hentTrygdetidOld(behandlingId) ?: throw GenerellIkkeFunnetException()
+        return slettTrygdetidGrunnlagForTrygdetid(behandlingId, trygdetid.id, trygdetidGrunnlagId, brukerTokenInfo)
     }
 
     override suspend fun kopierSisteTrygdetidberegning(
-        behandlingsId: UUID,
+        behandlingId: UUID,
         forrigeBehandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): Trygdetid {
-        return kopierSisteTrygdetidberegninger(behandlingsId, forrigeBehandlingId, brukerTokenInfo).first()
+        return kopierSisteTrygdetidberegninger(behandlingId, forrigeBehandlingId, brukerTokenInfo).first()
     }
 
     override fun overstyrBeregnetTrygdetid(
@@ -140,7 +140,7 @@ interface GammelTrygdetidServiceMedNy : NyTrygdetidService, TrygdetidService {
         val trygdetid =
             runBlocking { hentTrygdetidOld(behandlingId) }
                 ?: throw GenerellIkkeFunnetException()
-        return overstyrBeregnetTrygdetidForAvdoed(behandlingId, trygdetid.ident!!, beregnetTrygdetid)
+        return overstyrBeregnetTrygdetidForAvdoed(behandlingId, trygdetid.ident, beregnetTrygdetid)
     }
 }
 
@@ -175,7 +175,7 @@ interface NyTrygdetidService {
     ): Trygdetid
 
     suspend fun slettTrygdetidGrunnlagForTrygdetid(
-        behandlingsId: UUID,
+        behandlingId: UUID,
         trygdetidId: UUID,
         trygdetidGrunnlagId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
@@ -193,18 +193,18 @@ interface NyTrygdetidService {
     ): Trygdetid
 
     suspend fun lagreYrkesskadeTrygdetidGrunnlag(
-        behandlingsId: UUID,
+        behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): Trygdetid
 
     suspend fun kopierSisteTrygdetidberegninger(
-        behandlingsId: UUID,
+        behandlingId: UUID,
         forrigeBehandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): List<Trygdetid>
 
     fun overstyrBeregnetTrygdetidForAvdoed(
-        behandlingsId: UUID,
+        behandlingId: UUID,
         ident: String,
         beregnetTrygdetid: DetaljertBeregnetTrygdetidResultat,
     ): Trygdetid
@@ -305,7 +305,11 @@ class TrygdetidServiceImpl(
                         sakId = behandling.sak,
                         behandlingId = behandling.id,
                         opplysninger = hentOpplysninger(avdoed),
-                        ident = avdoed.hentFoedselsnummer()?.verdi?.value,
+                        ident =
+                            requireNotNull(avdoed.hentFoedselsnummer()?.verdi?.value) {
+                                "Kunne ikke hente identifikator for avdød til trygdetid i " +
+                                    "behandlingen med id=${behandling.id}"
+                            },
                     )
                 trygdetidRepository.opprettTrygdetid(trygdetid)
             }
@@ -364,7 +368,7 @@ class TrygdetidServiceImpl(
             val gjeldendeTrygdetid: Trygdetid =
                 trygdetidRepository.hentTrygdetidMedId(behandlingId, trygdetidId) ?: throw GenerellIkkeFunnetException()
 
-            val datoer = hentDatoerForBehandlingOgAvdoed(behandlingId, gjeldendeTrygdetid.ident!!, brukerTokenInfo)
+            val datoer = hentDatoerForBehandlingOgAvdoed(behandlingId, gjeldendeTrygdetid.ident, brukerTokenInfo)
 
             val sjekketGjeldendeTrygdetid =
                 sjekkYrkesskadeForEndring(behandlingId, brukerTokenInfo, gjeldendeTrygdetid)
@@ -402,14 +406,14 @@ class TrygdetidServiceImpl(
 
     private suspend fun hentDatoerForBehandlingOgAvdoed(
         behandlingId: UUID,
-        avdoed: String,
+        avdoedIdent: String,
         brukerTokenInfo: BrukerTokenInfo,
     ): DatoerForBehandling {
         val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
 
         val avdoed =
             grunnlagKlient.hentGrunnlag(behandling.sak, behandlingId, brukerTokenInfo).hentAvdoede()
-                .find { it.hentFoedselsnummer()?.verdi?.value == avdoed }
+                .find { it.hentFoedselsnummer()?.verdi?.value == avdoedIdent }
 
         return DatoerForBehandling(
             foedselsDato =
@@ -433,7 +437,7 @@ class TrygdetidServiceImpl(
                     ?.slettTrygdetidGrunnlag(trygdetidGrunnlagId)
                     ?: throw Exception("Fant ikke gjeldende trygdetid for behandlingId=$behandlingId")
 
-            val datoer = hentDatoerForBehandlingOgAvdoed(behandlingId, trygdetid.ident!!, brukerTokenInfo)
+            val datoer = hentDatoerForBehandlingOgAvdoed(behandlingId, trygdetid.ident, brukerTokenInfo)
 
             when (
                 val nyBeregnetTrygdetid =

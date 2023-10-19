@@ -13,7 +13,7 @@ import java.util.UUID.randomUUID
 
 data class Trygdetid(
     val id: UUID = randomUUID(),
-    val ident: String?,
+    val ident: String,
     val sakId: Long,
     val behandlingId: UUID,
     val trygdetidGrunnlag: List<TrygdetidGrunnlag> = emptyList(),

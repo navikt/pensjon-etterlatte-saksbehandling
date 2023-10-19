@@ -59,7 +59,7 @@ fun behandling(
 fun trygdetid(
     behandlingId: UUID = randomUUID(),
     sakId: Long = 1,
-    ident: String? = "en ident",
+    ident: String = "en ident",
     beregnetTrygdetid: DetaljertBeregnetTrygdetid? = null,
     trygdetidGrunnlag: List<TrygdetidGrunnlag> = emptyList(),
     opplysninger: List<Opplysningsgrunnlag> = emptyList(),

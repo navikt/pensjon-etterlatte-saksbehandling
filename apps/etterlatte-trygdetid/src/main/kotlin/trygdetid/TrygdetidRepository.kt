@@ -512,7 +512,7 @@ class TrygdetidRepository(private val dataSource: DataSource) {
         trygdetidGrunnlag = trygdetidGrunnlag,
         opplysninger = opplysninger,
         overstyrtNorskPoengaar = intOrNull("poengaar_overstyrt"),
-        ident = stringOrNull("ident"),
+        ident = string("ident"),
     )
 
     private fun Row.toTrygdetidGrunnlag() =

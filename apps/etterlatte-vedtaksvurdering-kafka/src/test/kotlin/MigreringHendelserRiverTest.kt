@@ -11,7 +11,9 @@ import no.nav.etterlatte.libs.common.sak.VedtakSak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.Behandling
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
+import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseType
+import no.nav.etterlatte.libs.common.vedtak.VedtakNyDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.rapidsandrivers.EventNames
@@ -80,7 +82,21 @@ class MigreringHendelserRiverTest {
                 vedtakDto,
                 RapidInfo(
                     vedtakhendelse = VedtakKafkaHendelseType.ATTESTERT,
-                    vedtak = vedtakDto,
+                    vedtak =
+                        VedtakNyDto(
+                            123,
+                            UUID.fromString(behandlingId),
+                            VedtakStatus.OPPRETTET,
+                            VedtakSak("1", SakType.BARNEPENSJON, 1),
+                            VedtakType.INNVILGELSE,
+                            null,
+                            null,
+                            VedtakInnholdDto.VedtakBehandlingDto(
+                                YearMonth.now(),
+                                Behandling(BehandlingType.FØRSTEGANGSBEHANDLING, UUID.fromString(behandlingId)),
+                                listOf(),
+                            ),
+                        ),
                     tekniskTid = Tidspunkt.now(),
                     behandlingId = UUID.fromString(behandlingId),
                 ),

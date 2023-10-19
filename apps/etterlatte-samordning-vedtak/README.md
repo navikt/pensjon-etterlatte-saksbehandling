@@ -8,7 +8,7 @@ Tjenesten krever token utstedt av Maskinporten med scope _nav:etterlatteytelser:
 
 ### Autorisasjon
 
-Det må foreligge et tjenestepensjonsforhold i Tjenestepensjonsregisteret som gjelder kallende leverandør, personen vedtaket gjelder og på vedtakets virkningsdato. Ved oppslag med _vedtakId_ så sjekkes det også om det finnes en løpende TP-ytelse gjeldende  på vedtakets fra-og-med dato.
+Det må foreligge et tjenestepensjonsforhold i Tjenestepensjonsregisteret som gjelder kallende leverandør, personen vedtaket gjelder og på vedtakets virkningsdato. Ved oppslag med _vedtakId_ så sjekkes det også om det finnes en løpende TP-ytelse gjeldende på vedtakets fra-og-med dato.
 
 ## API
 

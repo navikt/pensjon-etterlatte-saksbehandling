@@ -6,7 +6,7 @@ type Props = {
   setIsOpen: React.Dispatch<React.SetStateAction<boolean>>
 }
 
-export const TextButton: React.FC<Props> = ({ isOpen, setIsOpen }) => {
+export const TextButton = ({ isOpen, setIsOpen }: Props) => {
   return (
     <Button variant="tertiary" onClick={() => setIsOpen(!isOpen)}>
       Historikk {isOpen ? <ChevronUpIcon className="dropdownIcon" /> : <ChevronDownIcon className="dropdownIcon" />}

@@ -10,12 +10,14 @@ import { formaterNavn } from '~shared/types/Person'
 import { KravpakkeUtland } from '~shared/types/Generellbehandling'
 import { hentAlleLand, ILand, sorterLand } from '~shared/api/trygdetid'
 import SEDLand from '~components/behandling/revurderingsoversikt/sluttbehandlingUtland/SEDLand'
+import { TextButton } from '~components/behandling/soeknadsoversikt/familieforhold/personer/personinfo/TextButton'
+import SluttbehandlingUtlandFelter from '~components/behandling/revurderingsoversikt/sluttbehandlingUtland/SluttbehandlingUtlandFelter'
 
 export default function SluttbehandlingUtland({ sakId }: { sakId: number }) {
   const [kravpakkeStatus, hentKravpakke] = useApiCall(hentKravpakkeforSak)
   const [hentAlleLandRequest, fetchAlleLand] = useApiCall(hentAlleLand)
   const [alleLandKodeverk, setAlleLandKodeverk] = useState<ILand[] | null>(null)
-
+  const [visHistorikk, setVisHistorikk] = useState(false)
   useEffect(() => {
     hentKravpakke(sakId)
     fetchAlleLand(null, (landliste) => {
@@ -63,6 +65,12 @@ export default function SluttbehandlingUtland({ sakId }: { sakId: number }) {
       </Heading>
       <p>Fyll inn hvilke SED som er mottatt i RINA pr land.</p>
       {isSuccess(hentAlleLandRequest) && <SEDLand landListe={hentAlleLandRequest.data} />}
+      <Heading level="2" size="medium" style={{ marginTop: '2rem' }}>
+        Tidligere mottatte SED
+      </Heading>
+      <TextButton isOpen={visHistorikk} setIsOpen={setVisHistorikk} />
+      {visHistorikk && <>Vis historikk her </>}
+      <SluttbehandlingUtlandFelter />
     </>
   )
 }

@@ -118,14 +118,26 @@ class BehandlingFactory(
                 harBehandlingerForSak.filter { behandling ->
                     BehandlingStatus.underBehandling().find { it == behandling.status } != null
                 }
-            opprettFoerstegangsbehandling(harBehandlingUnderbehandling, sak, persongalleri, mottattDato, kilde)
+            opprettFoerstegangsbehandling(harBehandlingUnderbehandling, sak, mottattDato, kilde)
+                .also { behandling ->
+                    behandling?.let {
+                        grunnlagService.leggInnNyttGrunnlag(it, persongalleri)
+                        oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(
+                            referanse = behandling.id.toString(),
+                            sakId = sak.id,
+                        )
+                        behandlingHendelser.sendMeldingForHendelseMedDetaljertBehandling(
+                            it.toStatistikkBehandling(persongalleri),
+                            BehandlingHendelseType.OPPRETTET,
+                        )
+                    }
+                }
         }
     }
 
     private fun opprettFoerstegangsbehandling(
         harBehandlingUnderbehandling: List<Behandling>,
         sak: Sak,
-        persongalleri: Persongalleri,
         mottattDato: String?,
         kilde: Vedtaksloesning,
     ): Behandling? {
@@ -147,18 +159,6 @@ class BehandlingFactory(
             logger.info("Opprettet behandling ${opprettBehandling.id} i sak ${opprettBehandling.sakId}")
 
             behandlingDao.hentBehandling(opprettBehandling.id)?.sjekkEnhet()
-        }.also { behandling ->
-            behandling?.let {
-                grunnlagService.leggInnNyttGrunnlag(it, persongalleri)
-                oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(
-                    referanse = behandling.id.toString(),
-                    sakId = sak.id,
-                )
-                behandlingHendelser.sendMeldingForHendelseMedDetaljertBehandling(
-                    it.toStatistikkBehandling(persongalleri),
-                    BehandlingHendelseType.OPPRETTET,
-                )
-            }
         }
     }
 

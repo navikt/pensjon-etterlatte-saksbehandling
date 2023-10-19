@@ -11,22 +11,26 @@ import no.nav.etterlatte.brev.model.InnholdMedVedlegg
 import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.grunnbeloep.Grunnbeloep
 import java.time.LocalDate
+import java.time.YearMonth
 
 data class InnvilgetBrevDataEnkel(
     val utbetalingsinfo: Utbetalingsinfo,
     val avdoed: Avdoed,
     val vedtaksdato: LocalDate,
+    val erEtterbetaling: Boolean,
 ) : BrevData() {
     companion object {
         fun fra(
             generellBrevData: GenerellBrevData,
             utbetalingsinfo: Utbetalingsinfo,
+            erEtterbetaling: Boolean,
         ) = InnvilgetBrevDataEnkel(
             utbetalingsinfo = utbetalingsinfo,
             avdoed = generellBrevData.personerISak.avdoed,
             vedtaksdato =
-                generellBrevData.forenkletVedtak.vedtaksdato
-                    ?: LocalDate.now(),
+                generellBrevData.forenkletVedtak.vedtaksdato?.let { YearMonth.from(it).atDay(1) }
+                    ?: YearMonth.now().atDay(1),
+            erEtterbetaling = erEtterbetaling,
         )
     }
 }

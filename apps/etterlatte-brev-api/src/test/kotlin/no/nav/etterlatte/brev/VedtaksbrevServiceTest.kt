@@ -268,6 +268,7 @@ internal class VedtaksbrevServiceTest {
             coEvery { brevdataFacade.hentGenerellBrevData(any(), any(), any()) } returns behandling
             coEvery { adresseService.hentMottakerAdresse(any()) } returns mottaker
             coEvery { brevdataFacade.finnUtbetalingsinfo(any(), any(), any()) } returns mockk()
+            coEvery { brevdataFacade.hentEtterbetaling(any(), any()) } returns null
 
             runBlocking {
                 vedtaksbrevService.opprettVedtaksbrev(

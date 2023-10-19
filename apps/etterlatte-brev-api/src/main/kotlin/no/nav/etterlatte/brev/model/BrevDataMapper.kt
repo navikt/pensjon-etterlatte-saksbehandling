@@ -197,9 +197,13 @@ class BrevDataMapper(private val featureToggleService: FeatureToggleService, pri
                         when (brukNyInnvilgelsesmal()) {
                             true -> {
                                 coroutineScope {
-                                    val utbetaling =
-                                        async { fetcher.hentUtbetaling() }
-                                    InnvilgetBrevDataEnkel.fra(generellBrevData, utbetaling.await())
+                                    val utbetaling = async { fetcher.hentUtbetaling() }
+                                    val etterbetaling = async { fetcher.hentEtterbetaling() }
+                                    InnvilgetBrevDataEnkel.fra(
+                                        generellBrevData,
+                                        utbetaling.await(),
+                                        etterbetaling.await() != null,
+                                    )
                                 }
                             }
                             false -> {

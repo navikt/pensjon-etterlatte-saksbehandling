@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import React, { useEffect } from 'react'
 import { Navigate, Route, Routes, useParams } from 'react-router-dom'
 import { hentBehandling } from '~shared/api/behandling'
 import { GridContainer, MainContent } from '~shared/styled'
@@ -7,11 +7,14 @@ import { PdlPersonStatusBar } from '~shared/statusbar/Statusbar'
 import { useBehandlingRoutes } from './BehandlingRoutes'
 import { StegMeny } from './StegMeny/stegmeny'
 import { useAppDispatch } from '~store/Store'
-import { mapAllApiResult, useApiCall } from '~shared/hooks/useApiCall'
+import { isFailure, isInitial, isPending, mapAllApiResult, useApiCall } from '~shared/hooks/useApiCall'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { useBehandling } from '~components/behandling/useBehandling'
 import { BehandlingSidemeny } from '~components/behandling/sidemeny/BehandlingSidemeny'
 import Spinner from '~shared/Spinner'
+import { resetSjekkliste, updateSjekkliste } from '~store/reducers/SjekklisteReducer'
+import { hentSjekkliste, opprettSjekkliste } from '~shared/api/sjekkliste'
+import { erFerdigBehandlet } from '~components/behandling/felles/utils'
 
 export const Behandling = () => {
   const behandling = useBehandling()
@@ -19,6 +22,9 @@ export const Behandling = () => {
   const { behandlingId: behandlingIdFraURL } = useParams()
   const { behandlingRoutes } = useBehandlingRoutes()
   const [fetchBehandlingStatus, fetchBehandling] = useApiCall(hentBehandling)
+
+  const [hentSjekklisteResult, hentSjekklisteForBehandling] = useApiCall(hentSjekkliste)
+  const [opprettSjekklisteResult, opprettSjekklisteForBehandling] = useApiCall(opprettSjekkliste)
 
   useEffect(() => {
     if (!behandlingIdFraURL) {
@@ -34,6 +40,25 @@ export const Behandling = () => {
     }
   }, [behandlingIdFraURL, behandling?.id])
 
+  useEffect(() => {
+    dispatch(resetSjekkliste())
+    if (behandling && isInitial(hentSjekklisteResult)) {
+      hentSjekklisteForBehandling(
+        behandling.id,
+        (result) => {
+          dispatch(updateSjekkliste(result))
+        },
+        () => {
+          if (!erFerdigBehandlet(behandling.status)) {
+            opprettSjekklisteForBehandling(behandling.id, (opprettet) => {
+              dispatch(updateSjekkliste(opprettet))
+            })
+          }
+        }
+      )
+    }
+  }, [behandling])
+
   return mapAllApiResult(
     fetchBehandlingStatus,
     <Spinner label="Henter behandling ..." visible />,
@@ -43,7 +68,13 @@ export const Behandling = () => {
       if (behandling) {
         return (
           <>
-            {behandling.søker && <PdlPersonStatusBar person={behandling.søker} />}
+              {isPending(hentSjekklisteResult) && <Spinner label="Henter sjekkliste ..." visible />}
+              {isFailure(hentSjekklisteResult) && !erFerdigBehandlet(behandling.status) && (
+                  <ApiErrorAlert>En feil oppstod ved henting av sjekklista</ApiErrorAlert>
+              )}
+              {isFailure(opprettSjekklisteResult) && <ApiErrorAlert>Opprettelsen av sjekkliste feilet</ApiErrorAlert>}
+
+              {behandling.søker && <PdlPersonStatusBar person={behandling.søker} />}
             <StegMeny behandling={behandling} />
             <GridContainer>
               <MainContent>

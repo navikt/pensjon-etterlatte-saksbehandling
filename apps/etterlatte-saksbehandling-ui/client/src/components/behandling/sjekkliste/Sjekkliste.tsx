@@ -1,9 +1,9 @@
 import styled from 'styled-components'
-import React, { useContext, useEffect, useMemo, useState } from 'react'
+import React, { useContext, useMemo, useState } from 'react'
 import { SidebarPanel } from '~shared/components/Sidebar'
-import { isFailure, isInitial, isPending, useApiCall } from '~shared/hooks/useApiCall'
+import { isFailure, useApiCall } from '~shared/hooks/useApiCall'
 import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
-import { hentSjekkliste, oppdaterSjekkliste, oppdaterSjekklisteItem, opprettSjekkliste } from '~shared/api/sjekkliste'
+import { oppdaterSjekkliste, oppdaterSjekklisteItem } from '~shared/api/sjekkliste'
 import {
   Alert,
   BodyLong,
@@ -22,8 +22,7 @@ import { ApiErrorAlert } from '~ErrorBoundary'
 import debounce from 'lodash/debounce'
 import { useSjekkliste, useSjekklisteValideringsfeil } from '~components/behandling/sjekkliste/useSjekkliste'
 import { useAppDispatch } from '~store/Store'
-import { resetValideringsfeil, updateSjekkliste, updateSjekklisteItem } from '~store/reducers/SjekklisteReducer'
-import Spinner from '~shared/Spinner'
+import { updateSjekkliste, updateSjekklisteItem } from '~store/reducers/SjekklisteReducer'
 
 export const Sjekkliste = (props: { behandling: IBehandlingReducer }) => {
   const { behandling } = props
@@ -31,8 +30,6 @@ export const Sjekkliste = (props: { behandling: IBehandlingReducer }) => {
 
   const dispatch = useAppDispatch()
 
-  const [hentSjekklisteResult, hentSjekklisteForBehandling] = useApiCall(hentSjekkliste)
-  const [opprettSjekklisteResult, opprettSjekklisteForBehandling] = useApiCall(opprettSjekkliste)
   const [oppdaterSjekklisteResult, oppdaterSjekklisteApi] = useApiCall(oppdaterSjekkliste)
   const sjekkliste = useSjekkliste()
   const sjekklisteValideringsfeil = useSjekklisteValideringsfeil().length > 0
@@ -42,28 +39,6 @@ export const Sjekkliste = (props: { behandling: IBehandlingReducer }) => {
   const dispatchUpdatedItem = (item: ISjekklisteItem) => {
     dispatch(updateSjekklisteItem(item))
   }
-
-  useEffect(() => {
-    if (isInitial(hentSjekklisteResult)) {
-      hentSjekklisteForBehandling(
-        behandling.id,
-        (result) => {
-          dispatch(updateSjekkliste(result))
-        },
-        () => {
-          if (!ferdigBehandlet) {
-            opprettSjekklisteForBehandling(behandling.id, (opprettet) => {
-              dispatch(updateSjekkliste(opprettet))
-            })
-          }
-        }
-      )
-    }
-  }, [])
-
-  useEffect(() => {
-    dispatch(resetValideringsfeil())
-  }, [sjekkliste])
 
   const fireOpppdater = useMemo(() => debounce(oppdaterSjekklisteApi, 1500), [])
 
@@ -77,10 +52,6 @@ export const Sjekkliste = (props: { behandling: IBehandlingReducer }) => {
         Sjekkliste
       </Heading>
 
-      {isPending(hentSjekklisteResult) && <Spinner label="Henter sjekkliste" visible />}
-
-      {isFailure(hentSjekklisteResult) && <ApiErrorAlert>En feil oppstod ved henting av sjekklista</ApiErrorAlert>}
-      {isFailure(opprettSjekklisteResult) && <ApiErrorAlert>Opprettelsen av sjekkliste feilet</ApiErrorAlert>}
       {isFailure(oppdaterSjekklisteResult) && <ApiErrorAlert>Oppdateringen av sjekklista feilet</ApiErrorAlert>}
 
       {sjekkliste && (

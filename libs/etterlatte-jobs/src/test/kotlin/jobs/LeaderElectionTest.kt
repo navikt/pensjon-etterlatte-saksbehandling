@@ -9,6 +9,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.fullPath
 import io.ktor.serialization.jackson.JacksonConverter
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -51,6 +52,14 @@ internal class LeaderElectionTest {
         val httpClient = httpClient(response)
         val leaderElection = LeaderElectionLocalhost(localHostName, httpClient)
         assertFalse(leaderElection.isLeader())
+    }
+
+    @Test
+    fun testsanitize() {
+        Assertions.assertEquals("etterlatte-behandling-696cf4f4b7-tpvhm", "etterlatte-behandling-696cf4f4b7-tpvhm".sanitize())
+        Assertions.assertEquals("127.0.0.1", "127.0.0.1".sanitize())
+        Assertions.assertEquals("Ugyldig verdi", "Guest'%0AUser:'Admin".sanitize())
+        Assertions.assertEquals("Ugyldig verdi", "*!\"#!\"$\"!$!\"#\"!$:::::::".sanitize())
     }
 }
 

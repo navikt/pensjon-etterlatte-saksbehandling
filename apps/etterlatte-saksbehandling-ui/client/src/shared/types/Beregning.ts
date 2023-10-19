@@ -115,6 +115,7 @@ export type ReduksjonType = Record<string, string>
 export const ReduksjonBP: ReduksjonType = {
   VELG_REDUKSJON: 'Velg reduksjon',
   JA_VANLIG: 'Ja, etter vanlig sats(10% av G)',
+  JA_FORELDRELOES: 'Ja, etter vanlig sats - foreldreløs (45% av G)',
   NEI_KORT_OPPHOLD: 'Nei, kort opphold',
   JA_EGEN_PROSENT_AV_G: 'Ja, utgifter til bolig(egen % av G)',
   NEI_HOEYE_UTGIFTER_BOLIG: 'Nei, har høye utgifter til bolig',

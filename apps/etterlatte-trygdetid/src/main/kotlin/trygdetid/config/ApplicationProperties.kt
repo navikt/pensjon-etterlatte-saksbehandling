@@ -7,7 +7,6 @@ class ApplicationProperties(
     val dbUsername: String,
     val dbPassword: String,
     val httpPort: Int,
-    val electorPath: String,
 ) {
     companion object {
         fun fromEnv(env: Map<String, String>) =
@@ -22,7 +21,6 @@ class ApplicationProperties(
                     dbUsername = value("DB_USERNAME"),
                     dbPassword = value("DB_PASSWORD"),
                     httpPort = valueOrNull("HTTP_PORT")?.toInt() ?: 8080,
-                    electorPath = value("ELECTOR_PATH"),
                 )
             }
 

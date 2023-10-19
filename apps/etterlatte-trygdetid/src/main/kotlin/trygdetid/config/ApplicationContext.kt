@@ -3,8 +3,10 @@ package no.nav.etterlatte.trygdetid.config
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 import no.nav.etterlatte.libs.database.DataSourceBuilder
+import no.nav.etterlatte.libs.jobs.LeaderElection
 import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.trygdetid.KodeverkService
+import no.nav.etterlatte.trygdetid.PatchIdentAlleTrygdetider
 import no.nav.etterlatte.trygdetid.TrygdetidBeregningService
 import no.nav.etterlatte.trygdetid.TrygdetidRepository
 import no.nav.etterlatte.trygdetid.TrygdetidServiceImpl
@@ -38,4 +40,8 @@ class ApplicationContext {
         )
     private val avtaleRepository = AvtaleRepository(dataSource)
     val avtaleService = AvtaleService(avtaleRepository)
+
+    // TEMP SKAL FJERNES
+    private val leaderElection = LeaderElection(electorPath = properties.electorPath, httpClient = httpClient())
+    val patchjobb = PatchIdentAlleTrygdetider(grunnlagKlient, dataSource, leaderElection)
 }

@@ -17,6 +17,8 @@ dependencies {
     implementation(project(":libs:etterlatte-trygdetid-model"))
     implementation(project(":libs:ktor2client-onbehalfof"))
 
+    implementation(project(":libs:etterlatte-jobs"))
+
     implementation(libs.ktor2.servercio)
     implementation(libs.database.kotliquery)
 

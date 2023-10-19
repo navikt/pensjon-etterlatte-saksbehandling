@@ -15,18 +15,11 @@ import no.nav.etterlatte.trygdetid.config.ApplicationContext
 import no.nav.etterlatte.trygdetid.kodeverk
 import no.nav.etterlatte.trygdetid.trygdetid
 import org.slf4j.Logger
-import kotlin.concurrent.thread
 
 val sikkerLogg: Logger = sikkerlogger()
 
 fun main() {
-    ApplicationContext().let {
-        thread {
-            Thread.sleep(90_000) // gir serveren romslig med tid til å starte opp
-            it.patchjobb.leggPaaIdentDerDetMangler()
-        }
-        Server(it).run()
-    }
+    ApplicationContext().let { Server(it).run() }
 }
 
 class Server(private val context: ApplicationContext) {

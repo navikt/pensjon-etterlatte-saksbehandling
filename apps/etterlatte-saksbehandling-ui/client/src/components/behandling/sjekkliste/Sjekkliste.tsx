@@ -7,6 +7,7 @@ import { oppdaterSjekkliste, oppdaterSjekklisteItem } from '~shared/api/sjekklis
 import {
   Alert,
   BodyLong,
+  BodyShort,
   Checkbox,
   ConfirmationPanel,
   Heading,
@@ -147,6 +148,7 @@ export const Sjekkliste = (props: { behandling: IBehandlingReducer }) => {
           </VStack>
         </>
       )}
+      {!sjekkliste && <BodyShort>Ikke registrert</BodyShort>}
     </SidebarPanel>
   )
 }

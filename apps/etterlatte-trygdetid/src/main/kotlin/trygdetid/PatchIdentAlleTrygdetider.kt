@@ -26,10 +26,12 @@ class PatchIdentAlleTrygdetider(
         }
         val trygdetiderSomManglerIdent = hentTrygdetiderSomManglerIdent()
         logger.info("Starter patching av ${trygdetiderSomManglerIdent.size} trygdetider som mangler ident")
+        var antallOppdaterte = 0
         trygdetiderSomManglerIdent.forEach {
             try {
                 val ident = finnIdentForTrygdetid(it)
                 oppdaterIdentForTrygdetid(it, ident)
+                antallOppdaterte += 1
             } catch (e: Exception) {
                 logger.error(
                     "Kunne ikke oppdatere ident for trygdetid med id=${it.trygdetidId} i behandlingen med " +
@@ -38,6 +40,10 @@ class PatchIdentAlleTrygdetider(
                 )
             }
         }
+        logger.info(
+            "Oppdaterte ident på $antallOppdaterte av ${trygdetiderSomManglerIdent.size} trygdetider " +
+                "som manglet ident",
+        )
     }
 
     private fun oppdaterIdentForTrygdetid(

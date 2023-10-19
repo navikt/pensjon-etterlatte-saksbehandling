@@ -3,7 +3,6 @@ import {
   IBehandlingStatus,
   IGyldighetproving,
   IGyldighetResultat,
-  IManuellVurdering,
 } from '~shared/types/IDetaljertBehandling'
 import { VurderingsResultat } from '~shared/types/VurderingsResultat'
 import { VurderingsboksWrapper } from '~components/vurderingsboks/VurderingsboksWrapper'
@@ -28,12 +27,11 @@ export const GyldigFramsattVurdering = ({
   gyldigFramsatt: IGyldighetResultat | undefined
   redigerbar: boolean
 }) => {
-  const manuellVurdering: IManuellVurdering = finnVurdering(gyldigFramsatt, GyldigFramsattType.MANUELL_VURDERING)
-    ?.basertPaaOpplysninger
+  const manuellVurdering = finnVurdering(gyldigFramsatt, GyldigFramsattType.MANUELL_VURDERING)?.basertPaaOpplysninger
 
   const dispatch = useAppDispatch()
-  const [vurdert, setVurdert] = useState(gyldigFramsatt?.resultat != null)
   const [svar, setSvar] = useState<JaNei | undefined>(finnSvar(gyldigFramsatt))
+  const [vurdert, setVurdert] = useState(svar != undefined)
   const [radioError, setRadioError] = useState<string>('')
   const [begrunnelse, setBegrunnelse] = useState<string>(manuellVurdering?.begrunnelse || '')
   const [begrunnelseError, setBegrunnelseError] = useState<string>('')
@@ -66,12 +64,13 @@ export const GyldigFramsattVurdering = ({
     setRadioError('')
     setBegrunnelseError('')
     setBegrunnelse(manuellVurdering?.begrunnelse || '')
-    setVurdert(manuellVurdering != null)
+    setVurdert(finnSvar(gyldigFramsatt) != null)
     onSuccess?.()
   }
 
   const tittel =
     gyldigFramsatt?.resultat !== VurderingsResultat.OPPFYLT ? 'Søknad ikke gyldig fremsatt' : 'Søknad gyldig fremsatt'
+
   return !vurdert ? (
     <LeggTilVurderingButton onClick={() => setVurdert(true)}>Legg til vurdering</LeggTilVurderingButton>
   ) : (
@@ -96,10 +95,16 @@ export const GyldigFramsattVurdering = ({
             }
           : undefined
       }
+      automatiskVurdertDato={
+        manuellVurdering ? undefined : gyldigFramsatt ? new Date(gyldigFramsatt.vurdertDato) : undefined
+      }
       lagreklikk={lagre}
       avbrytklikk={reset}
       kommentar={manuellVurdering?.begrunnelse}
-      defaultRediger={true}
+      defaultRediger={
+        gyldigFramsatt?.resultat !== VurderingsResultat.OPPFYLT &&
+        gyldigFramsatt?.resultat !== VurderingsResultat.IKKE_OPPFYLT
+      }
     >
       <div>
         <VurderingsTitle title="Trenger avklaring" />

@@ -82,7 +82,7 @@ class PatchIdentAlleTrygdetider(
 
     private fun hentTrygdetiderSomManglerIdent(): List<TrygdetidIdOgBehandlingId> {
         return using(sessionOf(dataSource)) { session ->
-            queryOf("SELECT id, behandling_id, sak_id FROM trygdetid WHERE ident is null", null)
+            queryOf("SELECT id, behandling_id, sak_id FROM trygdetid WHERE ident is null")
                 .let {
                     session.run(
                         it.map { row ->

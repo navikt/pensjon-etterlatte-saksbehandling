@@ -23,15 +23,24 @@ data class InnvilgetBrevDataEnkel(
         fun fra(
             generellBrevData: GenerellBrevData,
             utbetalingsinfo: Utbetalingsinfo,
-            erEtterbetaling: Boolean,
+            etterbetalingDTO: EtterbetalingDTO?,
         ) = InnvilgetBrevDataEnkel(
             utbetalingsinfo = utbetalingsinfo,
             avdoed = generellBrevData.personerISak.avdoed,
-            vedtaksdato =
-                generellBrevData.forenkletVedtak.vedtaksdato?.let { YearMonth.from(it).atDay(1) }
-                    ?: YearMonth.now().atDay(1),
-            erEtterbetaling = erEtterbetaling,
+            vedtaksdato = finnVedtaksmaaned(generellBrevData, etterbetalingDTO).atDay(1),
+            erEtterbetaling = etterbetalingDTO != null,
         )
+
+        private fun finnVedtaksmaaned(
+            generellBrevData: GenerellBrevData,
+            etterbetalingDTO: EtterbetalingDTO?,
+        ): YearMonth {
+            if (etterbetalingDTO != null) {
+                return YearMonth.from(etterbetalingDTO.tilDato).plusMonths(1)
+            }
+            return generellBrevData.forenkletVedtak.vedtaksdato?.let { YearMonth.from(it) }
+                ?: YearMonth.now()
+        }
     }
 }
 

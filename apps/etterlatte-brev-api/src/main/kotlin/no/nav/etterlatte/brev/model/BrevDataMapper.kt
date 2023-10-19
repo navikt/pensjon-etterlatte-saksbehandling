@@ -202,7 +202,7 @@ class BrevDataMapper(private val featureToggleService: FeatureToggleService, pri
                                     InnvilgetBrevDataEnkel.fra(
                                         generellBrevData,
                                         utbetaling.await(),
-                                        etterbetaling.await() != null,
+                                        etterbetaling.await(),
                                     )
                                 }
                             }

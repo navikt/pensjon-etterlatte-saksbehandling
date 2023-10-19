@@ -36,6 +36,7 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakNyDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
+import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.etterlatte.token.BrukerTokenInfo
@@ -230,7 +231,7 @@ internal class BrevdataFacadeImplTest {
                     avdoedFyllerSeksti = null,
                 ),
             overstyrtNorskPoengaar = null,
-            ident = null,
+            ident = AVDOED_FOEDSELSNUMMER.value,
         )
 
     private fun opprettBeregning() =

@@ -9,15 +9,14 @@ import { ApiResponse } from '~shared/api/apiClient'
 import { useSjekkliste } from '~components/behandling/sjekkliste/useSjekkliste'
 import { useAppDispatch } from '~store/Store'
 import { visSjekkliste } from '~store/reducers/BehandlingSidemenyReducer'
+import { addValideringsfeil } from '~store/reducers/SjekklisteReducer'
 
 export const SendTilAttesteringModal = ({
   behandlingId,
   fattVedtakApi,
-  valideringsfunksjon,
 }: {
   behandlingId: string
   fattVedtakApi: (id: string) => Promise<ApiResponse<unknown>>
-  valideringsfunksjon: (errors: String[]) => void
 }) => {
   const navigate = useNavigate()
   const [isOpen, setIsOpen] = useState(false)
@@ -39,7 +38,7 @@ export const SendTilAttesteringModal = ({
 
   const clickAttester = () => {
     if (sjekkliste == null || !sjekkliste.bekreftet) {
-      valideringsfunksjon(['Sjekkliste trøbbel!'])
+      dispatch(addValideringsfeil('Feltet må hukses av for å ferdigstilles'))
       dispatch(visSjekkliste())
     } else {
       setIsOpen(true)

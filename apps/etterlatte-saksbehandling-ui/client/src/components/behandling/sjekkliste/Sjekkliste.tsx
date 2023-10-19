@@ -4,15 +4,25 @@ import { SidebarPanel } from '~shared/components/Sidebar'
 import { isFailure, isInitial, isPending, useApiCall } from '~shared/hooks/useApiCall'
 import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
 import { hentSjekkliste, oppdaterSjekkliste, oppdaterSjekklisteItem, opprettSjekkliste } from '~shared/api/sjekkliste'
-import { BodyLong, Checkbox, ConfirmationPanel, Heading, Link, Textarea, TextField, VStack } from '@navikt/ds-react'
+import {
+  Alert,
+  BodyLong,
+  Checkbox,
+  ConfirmationPanel,
+  Heading,
+  Link,
+  Textarea,
+  TextField,
+  VStack,
+} from '@navikt/ds-react'
 import { ConfigContext } from '~clientConfig'
 import { hentBehandlesFraStatus } from '~components/behandling/felles/utils'
 import { ISjekklisteItem } from '~shared/types/Sjekkliste'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import debounce from 'lodash/debounce'
-import { useSjekkliste } from '~components/behandling/sjekkliste/useSjekkliste'
+import { useSjekkliste, useSjekklisteValideringsfeil } from '~components/behandling/sjekkliste/useSjekkliste'
 import { useAppDispatch } from '~store/Store'
-import { updateSjekkliste, updateSjekklisteItem } from '~store/reducers/SjekklisteReducer'
+import { resetValideringsfeil, updateSjekkliste, updateSjekklisteItem } from '~store/reducers/SjekklisteReducer'
 import Spinner from '~shared/Spinner'
 
 export const Sjekkliste = (props: { behandling: IBehandlingReducer }) => {
@@ -25,6 +35,7 @@ export const Sjekkliste = (props: { behandling: IBehandlingReducer }) => {
   const [opprettSjekklisteResult, opprettSjekklisteForBehandling] = useApiCall(opprettSjekkliste)
   const [oppdaterSjekklisteResult, oppdaterSjekklisteApi] = useApiCall(oppdaterSjekkliste)
   const sjekkliste = useSjekkliste()
+  const sjekklisteValideringsfeil = useSjekklisteValideringsfeil().length > 0
 
   const configContext = useContext(ConfigContext)
 
@@ -50,10 +61,18 @@ export const Sjekkliste = (props: { behandling: IBehandlingReducer }) => {
     }
   }, [])
 
+  useEffect(() => {
+    dispatch(resetValideringsfeil())
+  }, [sjekkliste])
+
   const fireOpppdater = useMemo(() => debounce(oppdaterSjekklisteApi, 1500), [])
 
   return (
     <SidebarPanel border>
+      {sjekklisteValideringsfeil && (
+        <Alert variant="error">Før du kan sende til attestering må du bekrefte at alle punkter er gjennomgått</Alert>
+      )}
+
       <Heading spacing size="small">
         Sjekkliste
       </Heading>
@@ -143,6 +162,7 @@ export const Sjekkliste = (props: { behandling: IBehandlingReducer }) => {
                 name="BekreftGjennomgang"
                 checked={sjekkliste.bekreftet}
                 label="Jeg bekrefter at alle punkter er gjennomgått"
+                error={sjekklisteValideringsfeil && !sjekkliste.bekreftet && 'Feltet må hukes av for å ferdigstilles'}
                 onChange={(e) => {
                   const oppdatert = {
                     ...sjekkliste,

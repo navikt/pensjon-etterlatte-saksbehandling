@@ -3,9 +3,12 @@ import { createAction, createReducer } from '@reduxjs/toolkit'
 
 export const updateSjekkliste = createAction<ISjekkliste>('sjekkliste/update')
 export const updateSjekklisteItem = createAction<ISjekklisteItem>('sjekkliste/updateItem')
+export const addValideringsfeil = createAction<String>('sjekkliste/addValideringsfeil')
+export const resetValideringsfeil = createAction('sjekkliste/resetValidering')
 
-const initialState: { sjekkliste: ISjekkliste | null } = {
+const initialState: { sjekkliste: ISjekkliste | null; valideringsfeil: String[] } = {
   sjekkliste: null,
+  valideringsfeil: [],
 }
 
 export const sjekklisteReducer = createReducer(initialState, (builder) => {
@@ -19,5 +22,11 @@ export const sjekklisteReducer = createReducer(initialState, (builder) => {
       ...state.sjekkliste!,
       sjekklisteItems: updatedList,
     }
+  })
+  builder.addCase(addValideringsfeil, (state, action) => {
+    state.valideringsfeil = [action.payload]
+  })
+  builder.addCase(resetValideringsfeil, (state) => {
+    state.valideringsfeil = []
   })
 })

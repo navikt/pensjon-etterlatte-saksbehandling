@@ -93,7 +93,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
                         LocalDateTime.now().toString(),
                         Vedtaksloesning.GJENNY,
                     )
-            }
+            }?.behandling
 
         return Pair(sak, behandling as Foerstegangsbehandling)
     }

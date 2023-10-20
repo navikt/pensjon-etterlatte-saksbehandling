@@ -54,7 +54,7 @@ class GrunnlagKlientImpl(
         opplysningsbehov: Opplysningsbehov,
     ) {
         return grunnlagHttpClient
-            .post("$url/grunnlag/sak/${opplysningsbehov.sakId}/behandling/$behandlingId/oppdater-grunnlag") {
+            .post("$url/grunnlag/sak/${opplysningsbehov.sakId}/behandling/$behandlingId/opprett-grunnlag") {
                 accept(ContentType.Application.Json)
                 contentType(ContentType.Application.Json)
                 setBody(opplysningsbehov)

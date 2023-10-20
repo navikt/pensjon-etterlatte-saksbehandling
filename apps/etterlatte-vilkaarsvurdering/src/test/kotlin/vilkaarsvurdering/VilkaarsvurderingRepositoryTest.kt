@@ -85,7 +85,7 @@ internal class VilkaarsvurderingRepositoryTest {
         )
 
         vilkaarsvurderingRepository.hent(vilkaarsvurdering.behandlingId) shouldNotBe null
-        vilkaarsvurderingRepository.slettVilkaarvurdering(vilkaarsvurdering.behandlingId) shouldBe 1
+        vilkaarsvurderingRepository.slettVilkaarvurdering(vilkaarsvurdering.behandlingId) shouldBe true
         vilkaarsvurderingRepository.hent(vilkaarsvurdering.behandlingId) shouldBe null
         vilkaarsvurderingRepository.hent(annenVilkaarsvurdring) shouldNotBe null
     }

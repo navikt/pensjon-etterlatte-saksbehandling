@@ -142,7 +142,6 @@ spec:
         - application: etterlatte-oppdater-behandling
         - application: etterlatte-statistikk
         - application: etterlatte-vilkaarsvurdering
-        - application: etterlatte-vilkaarsvurdering-lokal
         - application: etterlatte-vedtaksvurdering
         - application: etterlatte-opplysninger-fra-soeknad
         - application: etterlatte-brev-api

@@ -148,6 +148,10 @@ internal class TrygdetidServiceTest {
 
             opprettetTrygdetid.trygdetidGrunnlag.size shouldBe 1
             opprettetTrygdetid.trygdetidGrunnlag[0].type shouldBe TrygdetidType.FREMTIDIG
+
+            opprettetTrygdetid.beregnetTrygdetid?.resultat?.prorataBroek?.let {
+                it.nevner shouldNotBe 0
+            }
         }
 
         coVerify(exactly = 2) {

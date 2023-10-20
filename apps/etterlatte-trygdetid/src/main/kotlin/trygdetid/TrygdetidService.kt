@@ -261,7 +261,7 @@ class TrygdetidServiceImpl(
             when (behandling.behandlingType) {
                 BehandlingType.FØRSTEGANGSBEHANDLING -> {
                     logger.info("Oppretter trygdetid for behandling $behandlingId")
-                    opprettTrygdetiderForBehandling(behandling, brukerTokenInfo, true)
+                    opprettTrygdetiderForBehandling(behandling, brukerTokenInfo)
                 }
 
                 BehandlingType.REVURDERING -> {
@@ -301,7 +301,6 @@ class TrygdetidServiceImpl(
     private suspend fun opprettTrygdetiderForBehandling(
         behandling: DetaljertBehandling,
         brukerTokenInfo: BrukerTokenInfo,
-        opprettFremtidigTrygdetid: Boolean = false,
     ): List<Trygdetid> {
         val avdoede = grunnlagKlient.hentGrunnlag(behandling.sak, behandling.id, brukerTokenInfo).hentAvdoede()
         val trygdetider =
@@ -320,11 +319,7 @@ class TrygdetidServiceImpl(
                 val opprettetTrygdetid = trygdetidRepository.opprettTrygdetid(trygdetid)
 
                 val oppdatertTrygdetid =
-                    if (opprettFremtidigTrygdetid) {
-                        opprettFremtidigTrygdetidForAvdoed(opprettetTrygdetid, avdoed, brukerTokenInfo)
-                    } else {
-                        null
-                    }
+                    opprettFremtidigTrygdetidForAvdoed(opprettetTrygdetid, avdoed, brukerTokenInfo)
 
                 oppdatertTrygdetid ?: opprettetTrygdetid
             }

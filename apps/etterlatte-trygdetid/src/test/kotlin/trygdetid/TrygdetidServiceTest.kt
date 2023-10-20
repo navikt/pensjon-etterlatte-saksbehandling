@@ -271,8 +271,10 @@ internal class TrygdetidServiceTest {
                 every { revurderingsaarsak } returns RevurderingAarsak.SOESKENJUSTERING
             }
         val forrigeBehandlingId = randomUUID()
-        val trygdetid = trygdetid(behandlingId, sakId)
         val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
+        val forventetIdent = grunnlag.hentAvdoed().hentFoedselsnummer()!!.verdi
+        val trygdetid = trygdetid(behandlingId, sakId, ident = forventetIdent.value)
+        val vilkaarsvurderingDto = mockk<VilkaarsvurderingDto>()
 
         coEvery { grunnlagKlient.hentGrunnlag(any(), any(), any()) } returns grunnlag
         every { repository.hentTrygdetiderForBehandling(behandlingId) } returns emptyList()
@@ -282,33 +284,51 @@ internal class TrygdetidServiceTest {
                 forrigeBehandlingId,
             )
         every { repository.hentTrygdetiderForBehandling(forrigeBehandlingId) } returns emptyList()
+        every { repository.hentTrygdetidMedId(any(), any()) } returns trygdetid
         every { repository.opprettTrygdetid(any()) } returns trygdetid
         coEvery { behandlingKlient.settBehandlingStatusTrygdetidOppdatert(any(), any()) } returns true
+        coEvery { vilkaarsvurderingKlient.hentVilkaarsvurdering(any(), any()) } returns vilkaarsvurderingDto
+        every { vilkaarsvurderingDto.isYrkesskade() } returns false
+        every { repository.oppdaterTrygdetid(any()) } returnsArgument 0
 
         runBlocking {
             service.opprettTrygdetid(behandlingId, saksbehandler)
         }
 
-        coVerify(exactly = 1) {
+        coVerify(exactly = 2) {
             behandlingKlient.kanOppdatereTrygdetid(behandlingId, saksbehandler)
-            repository.hentTrygdetiderForBehandling(behandlingId)
             behandlingKlient.hentBehandling(behandlingId, saksbehandler)
-            behandlingKlient.hentSisteIverksatteBehandling(sakId, saksbehandler)
+            grunnlagKlient.hentGrunnlag(sakId, behandlingId, saksbehandler)
             behandlingKlient.settBehandlingStatusTrygdetidOppdatert(behandlingId, saksbehandler)
-            repository.hentTrygdetiderForBehandling(forrigeBehandlingId)
-            grunnlagKlient.hentGrunnlag(any(), any(), any())
+        }
 
+        coVerify(exactly = 1) {
+            repository.hentTrygdetiderForBehandling(behandlingId)
+            behandlingKlient.hentSisteIverksatteBehandling(sakId, saksbehandler)
+            repository.hentTrygdetiderForBehandling(forrigeBehandlingId)
+            vilkaarsvurderingKlient.hentVilkaarsvurdering(any(), any())
+            repository.hentTrygdetidMedId(any(), any())
             repository.opprettTrygdetid(
                 withArg {
                     it.trygdetidGrunnlag shouldBe emptyList()
                 },
             )
+            repository.oppdaterTrygdetid(
+                withArg { trygdetid ->
+                    with(trygdetid.trygdetidGrunnlag[0]) {
+                        type shouldBe TrygdetidType.FREMTIDIG
+                    }
+                },
+            )
+            beregningService.beregnTrygdetidGrunnlag(any())
+            beregningService.beregnTrygdetid(any(), any(), any(), any())
         }
         verify {
             behandling.revurderingsaarsak
             behandling.id
             behandling.sak
             behandling.behandlingType
+            vilkaarsvurderingDto.isYrkesskade()
         }
     }
 
@@ -369,8 +389,10 @@ internal class TrygdetidServiceTest {
                 every { prosesstype } returns Prosesstype.MANUELL
             }
         val forrigeBehandlingId = randomUUID()
-        val trygdetid = trygdetid(behandlingId, sakId)
         val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
+        val forventetIdent = grunnlag.hentAvdoed().hentFoedselsnummer()!!.verdi
+        val trygdetid = trygdetid(behandlingId, sakId, ident = forventetIdent.value)
+        val vilkaarsvurderingDto = mockk<VilkaarsvurderingDto>()
 
         coEvery { grunnlagKlient.hentGrunnlag(any(), any(), any()) } returns grunnlag
         every { repository.hentTrygdetiderForBehandling(behandlingId) } returns emptyList()
@@ -382,25 +404,42 @@ internal class TrygdetidServiceTest {
         coEvery { behandlingKlient.settBehandlingStatusTrygdetidOppdatert(any(), any()) } returns true
         every { repository.hentTrygdetiderForBehandling(forrigeBehandlingId) } returns emptyList()
         every { repository.opprettTrygdetid(any()) } returns trygdetid
+        every { repository.hentTrygdetidMedId(any(), any()) } returns trygdetid
+        coEvery { vilkaarsvurderingKlient.hentVilkaarsvurdering(any(), any()) } returns vilkaarsvurderingDto
+        every { vilkaarsvurderingDto.isYrkesskade() } returns false
+        every { repository.oppdaterTrygdetid(any()) } returnsArgument 0
 
         runBlocking {
             service.opprettTrygdetid(behandlingId, saksbehandler)
         }
 
-        coVerify(exactly = 1) {
+        coVerify(exactly = 2) {
             behandlingKlient.kanOppdatereTrygdetid(behandlingId, saksbehandler)
-            repository.hentTrygdetiderForBehandling(behandlingId)
             behandlingKlient.hentBehandling(behandlingId, saksbehandler)
-            behandlingKlient.hentSisteIverksatteBehandling(sakId, saksbehandler)
+            grunnlagKlient.hentGrunnlag(sakId, behandlingId, saksbehandler)
             behandlingKlient.settBehandlingStatusTrygdetidOppdatert(behandlingId, saksbehandler)
-            repository.hentTrygdetiderForBehandling(forrigeBehandlingId)
-            grunnlagKlient.hentGrunnlag(any(), any(), any())
+        }
 
+        coVerify(exactly = 1) {
+            repository.hentTrygdetiderForBehandling(behandlingId)
+            behandlingKlient.hentSisteIverksatteBehandling(sakId, saksbehandler)
+            repository.hentTrygdetiderForBehandling(forrigeBehandlingId)
+            vilkaarsvurderingKlient.hentVilkaarsvurdering(any(), any())
+            repository.hentTrygdetidMedId(any(), any())
             repository.opprettTrygdetid(
                 withArg {
                     it.trygdetidGrunnlag shouldBe emptyList()
                 },
             )
+            repository.oppdaterTrygdetid(
+                withArg { trygdetid ->
+                    with(trygdetid.trygdetidGrunnlag[0]) {
+                        type shouldBe TrygdetidType.FREMTIDIG
+                    }
+                },
+            )
+            beregningService.beregnTrygdetidGrunnlag(any())
+            beregningService.beregnTrygdetid(any(), any(), any(), any())
         }
         verify {
             behandling.revurderingsaarsak
@@ -408,6 +447,7 @@ internal class TrygdetidServiceTest {
             behandling.id
             behandling.sak
             behandling.behandlingType
+            vilkaarsvurderingDto.isYrkesskade()
         }
     }
 

@@ -340,7 +340,7 @@ class TrygdetidServiceImpl(
                 type = TrygdetidType.FREMTIDIG,
                 bosted = LandNormalisert.NORGE.isoCode,
                 periode = periode,
-                kilde = Grunnlagsopplysning.Saksbehandler(brukerTokenInfo.ident(), Tidspunkt.now()),
+                kilde = Grunnlagsopplysning.Saksbehandler(Grunnlagsopplysning.automatiskSaksbehandler.ident, Tidspunkt.now()),
                 begrunnelse = "Automatisk beregnet fremtidig trygdetid",
                 poengInnAar = false,
                 poengUtAar = false,

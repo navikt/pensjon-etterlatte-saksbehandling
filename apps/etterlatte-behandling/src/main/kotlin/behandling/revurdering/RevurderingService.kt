@@ -29,6 +29,7 @@ import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.behandling.tilVirkningstidspunkt
+import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
@@ -57,6 +58,18 @@ class RevurderingaarsakIkkeStoettetIMiljoeException(message: String) : Exception
 class RevurderingManglerIverksattBehandlingException(message: String) : Exception(message)
 
 class RevurderingSluttbehandlingUtlandMaaHaEnBehandlingMedSkalSendeKravpakke(message: String) : Exception(message)
+
+class UgyldigBehandlingTypeForRevurdering :
+    IkkeTillattException(
+        code = "BEHANDLING_MAA_VAERE_REVURDERING",
+        detail = "Behandlingstypen må være revudering",
+    )
+
+class BehandlingKanIkkeEndres :
+    IkkeTillattException(
+        code = "BEHANDLINGEN_KAN_IKKE_ENDRES",
+        detail = "Behandlingen kan ikke endres",
+    )
 
 class RevurderingService(
     private val oppgaveService: OppgaveService,
@@ -227,12 +240,14 @@ class RevurderingService(
         )
     }
 
-    private fun behandlingErAvTypenRevurderingOgKanEndres(behandlingsId: UUID): Boolean {
+    private fun behandlingErAvTypenRevurderingOgKanEndres(behandlingsId: UUID) {
         val behandling = hentBehandling(behandlingsId)
         if (behandling?.type != BehandlingType.REVURDERING) {
-            return false
+            throw UgyldigBehandlingTypeForRevurdering()
         }
-        return behandling.status.kanEndres()
+        if (!behandling.status.kanEndres()) {
+            throw BehandlingKanIkkeEndres()
+        }
     }
 
     fun lagreRevurderingInfo(
@@ -240,9 +255,7 @@ class RevurderingService(
         revurderingMedBegrunnelse: RevurderingMedBegrunnelse,
         navIdent: String,
     ) {
-        if (!behandlingErAvTypenRevurderingOgKanEndres(behandlingsId)) {
-            throw RuntimeException("Kan ikke lagre revurderingsinfo")
-        }
+        behandlingErAvTypenRevurderingOgKanEndres(behandlingsId)
         val kilde = Grunnlagsopplysning.Saksbehandler.create(navIdent)
         revurderingDao.lagreRevurderingInfo(behandlingsId, revurderingMedBegrunnelse, kilde)
     }

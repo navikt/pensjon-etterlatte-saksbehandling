@@ -2,7 +2,7 @@
     {
       "id": "183d768a-9e98-45e1-b9e9-32fd3c86a4bd",
       "kilde": {
-        "fnr": "03108718357",
+        "fnr": "01498344336",
         "mottatDato": "2022-02-14T14:37:24.573612786Z",
         "type": "privatperson"
       },
@@ -12,7 +12,7 @@
         "type": "AVDOED",
         "fornavn": "fe",
         "etternavn": "fe",
-        "foedselsnummer": "22128202440",
+        "foedselsnummer": "08498224343",
         "doedsdato": "2022-01-01",
         "statsborgerskap": "Norge",
         "utenlandsopphold": {
@@ -26,7 +26,7 @@
     {
       "id": "cad5569b-be0d-499f-8f1b-e3a8e4aa484c",
       "kilde": {
-        "fnr": "03108718357",
+        "fnr": "01498344336",
         "mottatDato": "2022-02-14T14:37:24.573612786Z",
         "type": "privatperson"
       },
@@ -36,7 +36,7 @@
         "type": "BARN",
         "fornavn": "kirsten",
         "etternavn": "jakobsen",
-        "foedselsnummer": "12101376212",
+        "foedselsnummer": "25478323363",
         "statsborgerskap": "Norge",
         "utenlandsadresse": {
           "adresseIUtlandet": "NEI",
@@ -48,13 +48,13 @@
             "type": "FORELDER",
             "fornavn": "GØYAL",
             "etternavn": "HØYSTAKK",
-            "foedselsnummer": "12101376212"
+            "foedselsnummer": "25478323363"
           },
           {
             "type": "FORELDER",
             "fornavn": "fe",
             "etternavn": "fe",
-            "foedselsnummer": "22128202440"
+            "foedselsnummer": "08498224343"
           }
         ],
         "verge": {
@@ -70,7 +70,7 @@
     {
       "id": "c0ff69f8-8a82-4b68-95ef-541a33ee6acf",
       "kilde": {
-        "fnr": "03108718357",
+        "fnr": "01498344336",
         "mottatDato": "2022-02-14T14:37:24.573612786Z",
         "type": "privatperson"
       },
@@ -80,7 +80,7 @@
         "type": "GJENLEVENDE_FORELDER",
         "fornavn": "GØYAL",
         "etternavn": "HØYSTAKK",
-        "foedselsnummer": "03108718357",
+        "foedselsnummer": "01498344336",
         "adresse": "Sannergata 6C, 0557 Oslo",
         "statsborgerskap": "Norge",
         "telefonnummer": "11111111"
@@ -90,7 +90,7 @@
     {
       "id": "33e9eb39-efc0-4a0a-b595-84cfcf4da715",
       "kilde": {
-        "fnr": "03108718357",
+        "fnr": "01498344336",
         "mottatDato": "2022-02-14T14:37:24.573612786Z",
         "type": "privatperson"
       },
@@ -100,14 +100,14 @@
         "type": "INNSENDER",
         "fornavn": "GØYAL",
         "etternavn": "HØYSTAKK",
-        "foedselsnummer": "03108718357"
+        "foedselsnummer": "01498344336"
       },
       "attestering": null
     },
     {
       "id": "4fd9ca42-a2f8-4ccf-8615-ce9db6fa11b2",
       "kilde": {
-        "fnr": "03108718357",
+        "fnr": "01498344336",
         "mottatDato": "2022-02-14T14:37:24.573612786Z",
         "type": "privatperson"
       },
@@ -128,7 +128,7 @@
     {
       "id": "46e43b79-21a2-4eab-8cd2-cc7f20587311",
       "kilde": {
-        "fnr": "03108718357",
+        "fnr": "01498344336",
         "mottatDato": "2022-02-14T14:37:24.573612786Z",
         "type": "privatperson"
       },
@@ -142,7 +142,7 @@
     {
       "id": "98b0b5e3-93b9-46ac-b5f6-250e90e25fe0",
       "kilde": {
-        "fnr": "03108718357",
+        "fnr": "01498344336",
         "mottatDato": "2022-02-14T14:37:24.573612786Z",
         "type": "privatperson"
       },
@@ -156,7 +156,7 @@
     {
       "id": "ae835327-1545-45e5-ae43-76557df3efae",
       "kilde": {
-        "fnr": "03108718357",
+        "fnr": "01498344336",
         "mottatDato": "2022-02-14T14:37:24.573612786Z",
         "type": "privatperson"
       },
@@ -180,7 +180,7 @@
       "opplysning": {
         "fornavn": "VAKKER",
         "etternavn": "LAPP",
-        "foedselsnummer": "22128202440",
+        "foedselsnummer": "08498224343",
         "foedselsdato": "1982-12-22",
         "foedselsaar": 1982,
         "foedeland": "NOR",
@@ -215,7 +215,7 @@
           "ansvarligeForeldre": null,
           "foreldre": null,
           "barn": [
-            "12101376212"
+            "25478323363"
           ]
         }
       },
@@ -234,7 +234,7 @@
       "opplysning": {
         "fornavn": "BRÅKETE",
         "etternavn": "POTET",
-        "foedselsnummer": "03108718357",
+        "foedselsnummer": "01498344336",
         "foedselsdato": "1987-10-03",
         "foedselsaar": 1987,
         "foedeland": "NOR",
@@ -269,7 +269,7 @@
           "ansvarligeForeldre": null,
           "foreldre": null,
           "barn": [
-            "12101376212"
+            "25478323363"
           ]
         }
       },
@@ -288,7 +288,7 @@
       "opplysning": {
         "fornavn": "TALENTFULL",
         "etternavn": "BLYANT",
-        "foedselsnummer": "12101376212",
+        "foedselsnummer": "25478323363",
         "foedselsdato": "2013-10-12",
         "foedselsaar": 2013,
         "foedeland": "NOR",
@@ -321,12 +321,12 @@
         },
         "familieRelasjon": {
           "ansvarligeForeldre": [
-            "22128202440",
-            "03108718357"
+            "08498224343",
+            "01498344336"
           ],
           "foreldre": [
-            "22128202440",
-            "03108718357"
+            "08498224343",
+            "01498344336"
           ],
           "barn": null
         }

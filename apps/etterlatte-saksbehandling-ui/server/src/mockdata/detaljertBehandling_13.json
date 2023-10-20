@@ -9,18 +9,18 @@
         "resultat": "OPPFYLT",
         "basertPaaOpplysninger": {
           "familieRelasjon": {
-            "ansvarligeForeldre": ["22128202440", "03108718357"],
-            "foreldre": ["22128202440", "03108718357"],
+            "ansvarligeForeldre": ["08498224343", "01498344336"],
+            "foreldre": ["08498224343", "01498344336"],
             "barn": null
           },
           "innsender": {
             "navn": "BRÅKETE POTET",
-            "fnr": "03108718357"
+            "fnr": "01498344336"
           },
           "gjenlevende": [
             {
               "navn": "BRÅKETE POTET",
-              "fnr": "03108718357"
+              "fnr": "01498344336"
             }
           ]
         }
@@ -30,13 +30,13 @@
         "resultat": "OPPFYLT",
         "basertPaaOpplysninger": {
           "familieRelasjon": {
-            "ansvarligeForeldre": ["22128202440", "03108718357"],
-            "foreldre": ["22128202440", "03108718357"],
+            "ansvarligeForeldre": ["08498224343", "01498344336"],
+            "foreldre": ["08498224343", "01498344336"],
             "barn": null
           },
           "innsender": {
             "navn": "BRÅKETE POTET",
-            "fnr": "03108718357"
+            "fnr": "01498344336"
           }
         }
       }

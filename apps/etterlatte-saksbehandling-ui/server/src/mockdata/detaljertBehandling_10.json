@@ -9,18 +9,18 @@
         "resultat": "KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING",
         "basertPaaOpplysninger": {
           "familieRelasjon": {
-            "ansvarligeForeldre": ["22128202440"],
-            "foreldre": ["22128202440"],
+            "ansvarligeForeldre": ["08498224343"],
+            "foreldre": ["08498224343"],
             "barn": null
           },
           "innsender": {
             "navn": "BRÅKETE POTET",
-            "fnr": "03108718357"
+            "fnr": "01498344336"
           },
           "gjenlevende": [
             {
               "navn": "BRÅKETE POTET",
-              "fnr": "03108718357"
+              "fnr": "01498344336"
             }
           ]
         }
@@ -30,13 +30,13 @@
         "resultat": "KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING",
         "basertPaaOpplysninger": {
           "familieRelasjon": {
-            "ansvarligeForeldre": ["22128202440"],
-            "foreldre": ["22128202440"],
+            "ansvarligeForeldre": ["08498224343"],
+            "foreldre": ["08498224343"],
             "barn": null
           },
           "innsender": {
             "navn": "BRÅKETE POTET",
-            "fnr": "03108718357"
+            "fnr": "01498344336"
           }
         }
       },

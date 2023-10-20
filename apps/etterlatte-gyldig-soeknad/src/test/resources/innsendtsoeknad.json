@@ -13,7 +13,7 @@
         "spoersmaal": "Etternavn"
       },
       "foedselsnummer": {
-        "svar": "26058411891",
+        "svar": "25478323363",
         "spoersmaal": "Fødselsnummer"
       },
       "type": "INNSENDER"
@@ -52,7 +52,7 @@
         "spoersmaal": "Etternavn"
       },
       "foedselsnummer": {
-        "svar": "26058411891",
+        "svar": "25478323363",
         "spoersmaal": "Barnets fødselsnummer / d-nummer"
       },
       "statsborgerskap": {
@@ -218,7 +218,7 @@
   },
   "@lagret_soeknad_id": "TEST-157fb687-3dfe-40bf-b099-45d531c0d12d",
   "@template": "soeknad",
-  "@fnr_soeker": "26058411891",
+  "@fnr_soeker": "25478323363",
   "@hendelse_gyldig_til": "2022-05-12T10:17:34.833603804+02:00",
   "system_read_count": 2,
   "system_participating_services": [

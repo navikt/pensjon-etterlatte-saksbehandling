@@ -8,6 +8,8 @@ import no.nav.etterlatte.Context
 import no.nav.etterlatte.DatabaseKontekst
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
+import no.nav.etterlatte.behandling.BehandlingService
+import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -57,6 +59,8 @@ class GenerellBehandlingServiceTest {
     private lateinit var oppgaveService: OppgaveService
     private lateinit var sakRepo: SakDao
     private lateinit var service: GenerellBehandlingService
+    val grunnlagKlient = mockk<GrunnlagKlient>()
+    val behandlingService = mockk<BehandlingService>()
 
     @BeforeAll
     fun beforeAll() {
@@ -77,7 +81,7 @@ class GenerellBehandlingServiceTest {
         sakRepo = SakDao { connection }
 
         oppgaveService = OppgaveService(OppgaveDaoMedEndringssporingImpl(oppgaveDao) { connection }, sakRepo, DummyFeatureToggleService())
-        service = GenerellBehandlingService(dao, oppgaveService)
+        service = GenerellBehandlingService(dao, oppgaveService, behandlingService, grunnlagKlient)
     }
 
     @AfterEach

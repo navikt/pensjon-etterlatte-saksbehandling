@@ -39,7 +39,6 @@ internal fun Route.revurderingRoutes(revurderingService: RevurderingService) {
                                 )
                             }
                             call.respond(HttpStatusCode.NoContent)
-                            // call.respond(HttpStatusCode.Forbidden)
                         }
                     }
                 }

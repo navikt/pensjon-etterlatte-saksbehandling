@@ -108,7 +108,7 @@ class RevurderingService(
         aarsak: Revurderingaarsak,
         paaGrunnAvHendelseId: String?,
         begrunnelse: String?,
-        fritekstAarsak: String?,
+        fritekstAarsak: String? = null,
         saksbehandler: Saksbehandler,
     ): Revurdering? {
         if (!aarsak.kanBrukesIMiljo()) {

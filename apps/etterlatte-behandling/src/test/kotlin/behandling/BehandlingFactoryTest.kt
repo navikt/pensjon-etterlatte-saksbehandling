@@ -27,7 +27,7 @@ import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeService
 import no.nav.etterlatte.behandling.revurdering.RevurderingDao
-import no.nav.etterlatte.behandling.revurdering.RevurderingServiceImpl
+import no.nav.etterlatte.behandling.revurdering.RevurderingService
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseDao
@@ -86,7 +86,7 @@ class BehandlingFactoryTest {
         }
     private val revurderingDao = mockk<RevurderingDao>()
     private val revurderingService =
-        RevurderingServiceImpl(
+        RevurderingService(
             oppgaveService,
             grunnlagService,
             behandlingHendelserKafkaProducerMock,

@@ -7,7 +7,7 @@ data class IntBroek(
     companion object {
         fun fra(broek: Pair<Int?, Int?>): IntBroek? {
             return broek.first?.let { teller ->
-                broek.second?.let { nevner ->
+                broek.second.takeIf { it != null && it != 0 }?.let { nevner ->
                     IntBroek(teller, nevner)
                 }
             }

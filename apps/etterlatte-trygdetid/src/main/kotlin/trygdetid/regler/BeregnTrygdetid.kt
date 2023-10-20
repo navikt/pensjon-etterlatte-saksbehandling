@@ -407,11 +407,8 @@ val beregnDetaljertBeregnetTrygdetid =
                         40,
                     ),
                 prorataBroek =
-                    if (nasjonal?.antallMaaneder != teoretisk?.antallMaaneder) {
-                        IntBroek(
-                            nasjonal?.antallMaaneder?.toInt() ?: 0,
-                            teoretisk?.antallMaaneder?.toInt() ?: 0,
-                        )
+                    if (nasjonal?.antallMaaneder != teoretisk.antallMaaneder) {
+                        IntBroek.fra(Pair(nasjonal?.antallMaaneder?.toInt(), teoretisk.antallMaaneder.toInt()))
                     } else {
                         null
                     },

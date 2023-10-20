@@ -24,6 +24,7 @@ import no.nav.etterlatte.trygdetid.klienter.GrunnlagKlient
 import no.nav.etterlatte.trygdetid.klienter.VilkaarsvuderingKlient
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
+import java.time.temporal.TemporalAdjusters
 import java.util.UUID
 
 interface TrygdetidService {
@@ -219,6 +220,10 @@ class TrygdetidServiceImpl(
 ) : GammelTrygdetidServiceMedNy {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
+    companion object {
+        private const val SIST_FREMTIDIG_TRYGDETID_ALDER = 66L
+    }
+
     override suspend fun hentTrygdetidOld(behandlingId: UUID): Trygdetid? {
         return trygdetidRepository.hentTrygdetid(behandlingId)
     }
@@ -256,7 +261,7 @@ class TrygdetidServiceImpl(
             when (behandling.behandlingType) {
                 BehandlingType.FØRSTEGANGSBEHANDLING -> {
                     logger.info("Oppretter trygdetid for behandling $behandlingId")
-                    opprettTrygdetiderForBehandling(behandling, brukerTokenInfo)
+                    opprettTrygdetiderForBehandling(behandling, brukerTokenInfo, true)
                 }
 
                 BehandlingType.REVURDERING -> {
@@ -296,6 +301,7 @@ class TrygdetidServiceImpl(
     private suspend fun opprettTrygdetiderForBehandling(
         behandling: DetaljertBehandling,
         brukerTokenInfo: BrukerTokenInfo,
+        opprettFremtidigTrygdetid: Boolean = false,
     ): List<Trygdetid> {
         val avdoede = grunnlagKlient.hentGrunnlag(behandling.sak, behandling.id, brukerTokenInfo).hentAvdoede()
         val trygdetider =
@@ -311,9 +317,57 @@ class TrygdetidServiceImpl(
                                     "behandlingen med id=${behandling.id}"
                             },
                     )
-                trygdetidRepository.opprettTrygdetid(trygdetid)
+                val opprettetTrygdetid = trygdetidRepository.opprettTrygdetid(trygdetid)
+
+                val oppdatertTrygdetid =
+                    if (opprettFremtidigTrygdetid) {
+                        opprettFremtidigTrygdetidForAvdoed(opprettetTrygdetid, avdoed, brukerTokenInfo)
+                    } else {
+                        null
+                    }
+
+                oppdatertTrygdetid ?: opprettetTrygdetid
             }
+
         return trygdetider
+    }
+
+    private suspend fun opprettFremtidigTrygdetidForAvdoed(
+        trygdetid: Trygdetid,
+        avdoed: Grunnlagsdata<JsonNode>,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) = beregnfremtidigTrygdetidsPeriode(avdoed)?.let { periode ->
+        lagreTrygdetidGrunnlagForTrygdetidMedIdIBehandling(
+            trygdetid.behandlingId,
+            trygdetid.id,
+            TrygdetidGrunnlag(
+                id = UUID.randomUUID(),
+                type = TrygdetidType.FREMTIDIG,
+                bosted = LandNormalisert.NORGE.isoCode,
+                periode = periode,
+                kilde = Grunnlagsopplysning.Saksbehandler(brukerTokenInfo.ident(), Tidspunkt.now()),
+                begrunnelse = "Automatisk beregnet fremtidig trygdetid",
+                poengInnAar = false,
+                poengUtAar = false,
+                prorata = false,
+            ),
+            brukerTokenInfo,
+        )
+    }
+
+    private fun beregnfremtidigTrygdetidsPeriode(avdoed: Grunnlagsdata<JsonNode>): TrygdetidPeriode? {
+        val doedsDato = avdoed.hentDoedsdato()?.verdi
+
+        val sistFremtidigDato =
+            avdoed.hentFoedselsdato()?.verdi?.plusYears(
+                SIST_FREMTIDIG_TRYGDETID_ALDER,
+            )?.with(TemporalAdjusters.firstDayOfNextYear())?.minusDays(1)
+
+        return if (doedsDato != null && sistFremtidigDato != null) {
+            TrygdetidPeriode(doedsDato, sistFremtidigDato)
+        } else {
+            null
+        }
     }
 
     @Deprecated("Fungerer ikke bra med flere avdøde")
@@ -341,7 +395,8 @@ class TrygdetidServiceImpl(
                 trygdetidRepository.hentTrygdetiderForBehandling(behandlingId).firstOrNull()
                     ?: throw Exception("Fant ikke gjeldende trygdetid for behandlingId=$behandlingId")
 
-            val sjekketGjeldendeTrygdetid = sjekkYrkesskadeForEndring(behandlingId, brukerTokenInfo, gjeldendeTrygdetid)
+            val sjekketGjeldendeTrygdetid =
+                sjekkYrkesskadeForEndring(behandlingId, brukerTokenInfo, gjeldendeTrygdetid)
 
             val nyBeregnetTrygdetid =
                 beregnTrygdetidService.beregnTrygdetidForYrkesskade(
@@ -529,7 +584,7 @@ class TrygdetidServiceImpl(
                     TrygdetidOpplysningType.FYLLER_66,
                     kildeFoedselsnummer(),
                     // Ifølge paragraf § 3-5 regnes trygdetid frem til tidspunkt en person er fyller 66 pår
-                    foedselsdato?.verdi?.plusYears(66),
+                    foedselsdato?.verdi?.plusYears(SIST_FREMTIDIG_TRYGDETID_ALDER),
                 ),
                 avdoed.hentDoedsdato().let {
                     Opplysningsgrunnlag.ny(TrygdetidOpplysningType.DOEDSDATO, it?.kilde, it?.verdi)

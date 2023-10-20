@@ -195,7 +195,12 @@ export function revurderingRoutes(behandling: IBehandlingReducer): Array<Behandl
     description: 'Beregning',
     kreverBehandlingsstatus: IBehandlingStatus.BEREGNET,
   }
-  const brev = { path: 'brev', description: 'Vedtaksbrev' }
+  const brev = {
+    path: 'brev',
+    description: 'Vedtaksbrev',
+    kreverBehandlingsstatus:
+      behandling.sakType == SakType.OMSTILLINGSSTOENAD ? IBehandlingStatus.AVKORTET : IBehandlingStatus.BEREGNET,
+  }
 
   const erRevurderingsaarsakAnnenOgOpphoer =
     behandling.revurderingsaarsak == Revurderingsaarsak.ANNEN &&

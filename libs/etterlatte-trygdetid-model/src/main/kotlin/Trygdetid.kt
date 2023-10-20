@@ -70,6 +70,11 @@ data class BeregnetTrygdetidGrunnlagDto(
     val aar: Int,
 )
 
+data class MigreringOverstyringDto(
+    val ident: String,
+    val detaljertBeregnetTrygdetidResultat: DetaljertBeregnetTrygdetidResultat,
+)
+
 data class DetaljertBeregnetTrygdetidResultat(
     val faktiskTrygdetidNorge: FaktiskTrygdetid?,
     val faktiskTrygdetidTeoretisk: FaktiskTrygdetid?,

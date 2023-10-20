@@ -89,6 +89,7 @@ export const Vilkaarsvurdering = (props: { behandling: IBehandlingReducer }) => 
             behandlingId={behandlingId}
             redigerbar={behandles}
             behandlingstype={behandling.behandlingType}
+            revurderingsaarsak={behandling.revurderingsaarsak}
           />
         </>
       )}

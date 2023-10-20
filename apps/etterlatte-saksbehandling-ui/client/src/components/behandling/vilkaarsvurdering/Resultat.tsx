@@ -21,6 +21,9 @@ import { oppdaterBehandlingsstatus } from '~store/reducers/BehandlingReducer'
 import { IBehandlingStatus, IBehandlingsType } from '~shared/types/IDetaljertBehandling'
 import { SakType } from '~shared/types/sak'
 import { Border } from '~components/behandling/soeknadsoversikt/styled'
+import { Revurderingsaarsak } from '~shared/types/Revurderingsaarsak'
+import { behandlingSkalSendeBrev } from '~components/behandling/felles/utils'
+import { NesteOgTilbake } from '~components/behandling/handlinger/NesteOgTilbake'
 
 type Props = {
   virkningstidspunktDato: string | undefined
@@ -30,6 +33,7 @@ type Props = {
   behandlingId: string
   redigerbar: boolean
   behandlingstype: IBehandlingsType
+  revurderingsaarsak: Revurderingsaarsak | null
 }
 
 export const Resultat = (props: Props) => {
@@ -41,6 +45,7 @@ export const Resultat = (props: Props) => {
     behandlingId,
     redigerbar,
     behandlingstype,
+    revurderingsaarsak,
   } = props
   const [svar, setSvar] = useState<ISvar>()
   const [radioError, setRadioError] = useState<string>()
@@ -92,6 +97,7 @@ export const Resultat = (props: Props) => {
   const status = vilkaarsvurdering?.resultat?.utfall == VilkaarsvurderingResultat.OPPFYLT ? 'success' : 'error'
   const virkningstidspunktSamsvarer = virkningstidspunktDato === vilkaarsvurdering.virkningstidspunkt
   const erRevurdering = behandlingstype === IBehandlingsType.REVURDERING
+  const skalSendeBrev = behandlingSkalSendeBrev(behandlingstype, revurderingsaarsak)
 
   return (
     <>
@@ -193,11 +199,22 @@ export const Resultat = (props: Props) => {
         </WarningAlert>
       )}
 
-      <Border />
+      {skalSendeBrev ? null : (
+        <InfoAlert variant="info" inline>
+          Det sendes ikke vedtaksbrev for denne behandlingen.
+        </InfoAlert>
+      )}
 
-      <BehandlingHandlingKnapper>
-        {vilkaarsvurdering.resultat && virkningstidspunktSamsvarer && <VilkaarsVurderingKnapper />}
-      </BehandlingHandlingKnapper>
+      <Border />
+      {redigerbar ? (
+        <BehandlingHandlingKnapper>
+          {vilkaarsvurdering.resultat && virkningstidspunktSamsvarer && (
+            <VilkaarsVurderingKnapper behandlingId={behandlingId} skalSendeBrev={skalSendeBrev} />
+          )}
+        </BehandlingHandlingKnapper>
+      ) : (
+        <NesteOgTilbake></NesteOgTilbake>
+      )}
     </>
   )
 }
@@ -261,4 +278,8 @@ const ContentWrapper = styled.div`
 const WarningAlert = styled(Alert).attrs({ variant: 'warning' })`
   margin: 2em 4em 0 4em;
   max-width: fit-content;
+`
+
+const InfoAlert = styled(Alert).attrs({ variant: 'info' })`
+  margin: 2em 4em 2em 4em;
 `

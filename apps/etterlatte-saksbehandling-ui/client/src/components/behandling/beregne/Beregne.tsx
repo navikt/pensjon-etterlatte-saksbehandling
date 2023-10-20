@@ -61,7 +61,7 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
       const nyStatus =
         behandling.sakType === SakType.BARNEPENSJON ? IBehandlingStatus.BEREGNET : IBehandlingStatus.AVKORTET
       dispatch(oppdaterBehandlingsstatus(nyStatus))
-      if (behandlingSkalSendeBrev(behandling)) {
+      if (behandlingSkalSendeBrev(behandling.behandlingType, behandling.revurderingsaarsak)) {
         next()
       } else {
         setVisAttesteringsmodal(true)
@@ -95,7 +95,7 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
               </>
             ),
           }[beregningFraState.type]}
-        {behandlingSkalSendeBrev(behandling) ? null : (
+        {behandlingSkalSendeBrev(behandling.behandlingType, behandling.revurderingsaarsak) ? null : (
           <InfoAlert variant="info" inline>
             Det sendes ikke vedtaksbrev for denne behandlingen.
           </InfoAlert>
@@ -116,7 +116,9 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
             <SendTilAttesteringModal behandlingId={behandling.id} fattVedtakApi={fattVedtak} />
           ) : (
             <Button loading={isPending(vedtak)} variant="primary" onClick={opprettEllerOppdaterVedtak}>
-              {behandlingSkalSendeBrev(behandling) ? 'Gå videre til brev' : 'Fatt vedtak'}
+              {behandlingSkalSendeBrev(behandling.behandlingType, behandling.revurderingsaarsak)
+                ? 'Gå videre til brev'
+                : 'Fatt vedtak'}
             </Button>
           )}
         </BehandlingHandlingKnapper>

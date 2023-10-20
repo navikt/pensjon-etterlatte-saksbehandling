@@ -39,23 +39,28 @@ export const Behandling = () => {
     <Spinner label="Henter behandling ..." visible />,
     null,
     () => <ApiErrorAlert>Kunne ikke hente behandling</ApiErrorAlert>,
-    (behandling) => (
-      <>
-        {behandling.søker && <PdlPersonStatusBar person={behandling.søker} />}
-        <StegMeny behandling={behandling} />
-        <GridContainer>
-          <MainContent>
-            <Routes>
-              {behandlingRoutes.map((route) => (
-                <Route key={route.path} path={route.path} element={route.element} />
-              ))}
-              <Route path="*" element={<Navigate to={behandlingRoutes[0].path} replace />} />
-            </Routes>
-          </MainContent>
+    () => {
+      if (!!behandling) {
+        return (
+          <>
+            {behandling.søker && <PdlPersonStatusBar person={behandling.søker} />}
+            <StegMeny behandling={behandling} />
+            <GridContainer>
+              <MainContent>
+                <Routes>
+                  {behandlingRoutes.map((route) => (
+                    <Route key={route.path} path={route.path} element={route.element} />
+                  ))}
+                  <Route path="*" element={<Navigate to={behandlingRoutes[0].path} replace />} />
+                </Routes>
+              </MainContent>
 
-          <BehandlingSidemeny />
-        </GridContainer>
-      </>
-    )
+              <BehandlingSidemeny />
+            </GridContainer>
+          </>
+        )
+      }
+      return <></>
+    }
   )
 }

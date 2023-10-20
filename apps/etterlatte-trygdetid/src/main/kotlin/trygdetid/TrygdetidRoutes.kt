@@ -196,7 +196,7 @@ private fun Opplysningsgrunnlag.toDto(): OpplysningsgrunnlagDto =
             },
     )
 
-private fun TrygdetidGrunnlagDto.toTrygdetidGrunnlag(brukerTokenInfo: BrukerTokenInfo): TrygdetidGrunnlag =
+fun TrygdetidGrunnlagDto.toTrygdetidGrunnlag(brukerTokenInfo: BrukerTokenInfo): TrygdetidGrunnlag =
     TrygdetidGrunnlag(
         id = id ?: UUID.randomUUID(),
         type = TrygdetidType.valueOf(type),

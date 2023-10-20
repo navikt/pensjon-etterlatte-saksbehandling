@@ -45,6 +45,7 @@ import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
+import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED2_FOEDSELSNUMMER
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.sak.SakService
 import org.junit.jupiter.api.AfterEach
@@ -551,7 +552,7 @@ internal class GrunnlagsendringshendelseServiceTest {
     @Test
     fun `skal sette status til SJEKKET_AV_JOBB og opprette oppgave, for hendelser som er sjekket av jobb`() {
         val minutter = 60L
-        val avdoedFnr = "16017919184"
+        val avdoedFnr = AVDOED2_FOEDSELSNUMMER.value
         val sakId = 1L
         val grlgId = UUID.randomUUID()
         val doedsdato = LocalDate.of(2022, 3, 13)
@@ -633,7 +634,7 @@ internal class GrunnlagsendringshendelseServiceTest {
                     enhet = Enheter.PORSGRUNN.enhetNr,
                 )
             }
-        val fnr = "16017919184"
+        val fnr = "16508201382"
         val adressebeskyttelse =
             Adressebeskyttelse("1", Endringstype.OPPRETTET, fnr, AdressebeskyttelseGradering.STRENGT_FORTROLIG)
 
@@ -676,7 +677,7 @@ internal class GrunnlagsendringshendelseServiceTest {
                     enhet = Enheter.PORSGRUNN.enhetNr,
                 )
             }
-        val fnr = "16017919184"
+        val fnr = AVDOED2_FOEDSELSNUMMER.value
         val adressebeskyttelse =
             Adressebeskyttelse("1", Endringstype.OPPRETTET, fnr, AdressebeskyttelseGradering.FORTROLIG)
 

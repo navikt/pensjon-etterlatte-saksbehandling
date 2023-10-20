@@ -51,8 +51,6 @@ import java.util.UUID
 
 val REGEL_PERIODE = RegelPeriode(LocalDate.of(2023, 1, 1))
 
-const val FNR_1 = "11057523044"
-
 const val MAKS_TRYGDETID: Int = 40
 
 fun barnepensjonGrunnlag(

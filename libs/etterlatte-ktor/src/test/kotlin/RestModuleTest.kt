@@ -134,7 +134,7 @@ class RestModuleTest {
             client.post("/person") {
                 header(HttpHeaders.Authorization, "Bearer $token")
                 contentType(ContentType.Application.Json)
-                setBody(FoedselsnummerDTO("30106519672").toJson())
+                setBody(FoedselsnummerDTO("27458328671").toJson())
             }.let { assertEquals(OK, it.status) }
 
             coEvery { behandlingTilgangsSjekkMock.harTilgangTilBehandling(any(), any()) } returns false
@@ -150,7 +150,7 @@ class RestModuleTest {
             client.post("/person") {
                 header(HttpHeaders.Authorization, "Bearer $token")
                 contentType(ContentType.Application.Json)
-                setBody(FoedselsnummerDTO("30106519672").toJson())
+                setBody(FoedselsnummerDTO("27458328671").toJson())
             }.let { assertEquals(NotFound, it.status) }
         }
     }

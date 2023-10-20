@@ -1,8 +1,5 @@
 package no.nav.etterlatte.fordeler
 
-import no.nav.etterlatte.FNR_1
-import no.nav.etterlatte.FNR_2
-import no.nav.etterlatte.FNR_5
 import no.nav.etterlatte.SVERIGE
 import no.nav.etterlatte.libs.common.innsendtsoeknad.Spraak
 import no.nav.etterlatte.libs.common.person.AdresseType
@@ -14,6 +11,12 @@ import no.nav.etterlatte.libs.common.person.VergeEllerFullmektig
 import no.nav.etterlatte.libs.common.person.VergemaalEllerFremtidsfullmakt
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
+import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED2_FOEDSELSNUMMER
+import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
+import no.nav.etterlatte.libs.testdata.grunnlag.BARN_FOEDSELSNUMMER
+import no.nav.etterlatte.libs.testdata.grunnlag.GJENLEVENDE_FOEDSELSNUMMER
+import no.nav.etterlatte.libs.testdata.grunnlag.HELSOESKEN_FOEDSELSNUMMER
+import no.nav.etterlatte.libs.testdata.grunnlag.VERGE_FOEDSELSNUMMER
 import no.nav.etterlatte.mockNorskAdresse
 import no.nav.etterlatte.mockPerson
 import no.nav.etterlatte.mockUgyldigAdresse
@@ -38,12 +41,12 @@ internal class FordelerRiverKriterierTest {
                     FamilieRelasjon(
                         barn = null,
                         ansvarligeForeldre = null,
-                        foreldre = listOf(Folkeregisteridentifikator.of(FNR_2)),
+                        foreldre = listOf(AVDOED_FOEDSELSNUMMER),
                     ),
             )
         val avdoed =
             mockPerson(
-                fnr = FNR_2,
+                fnr = AVDOED_FOEDSELSNUMMER.value,
                 doedsdato = now().plusMonths(11),
                 bostedsadresse =
                     mockNorskAdresse(
@@ -53,7 +56,7 @@ internal class FordelerRiverKriterierTest {
                     FamilieRelasjon(
                         barn = listOf(barn.foedselsnummer),
                         ansvarligeForeldre = null,
-                        foreldre = listOf(Folkeregisteridentifikator.of(FNR_2)),
+                        foreldre = listOf(AVDOED2_FOEDSELSNUMMER),
                     ),
             )
         val gjenlevende =
@@ -89,12 +92,12 @@ internal class FordelerRiverKriterierTest {
                     FamilieRelasjon(
                         barn = null,
                         ansvarligeForeldre = null,
-                        foreldre = listOf(Folkeregisteridentifikator.of(FNR_2)),
+                        foreldre = listOf(AVDOED_FOEDSELSNUMMER),
                     ),
             )
         val avdoed =
             mockPerson(
-                fnr = FNR_2,
+                fnr = AVDOED_FOEDSELSNUMMER.value,
                 doedsdato = now().plusMonths(11),
                 bostedsadresse =
                     mockNorskAdresse(
@@ -104,7 +107,7 @@ internal class FordelerRiverKriterierTest {
                     FamilieRelasjon(
                         barn = listOf(barn.foedselsnummer),
                         ansvarligeForeldre = null,
-                        foreldre = listOf(Folkeregisteridentifikator.of(FNR_2)),
+                        foreldre = listOf(AVDOED2_FOEDSELSNUMMER),
                     ),
             )
 
@@ -170,7 +173,7 @@ internal class FordelerRiverKriterierTest {
                             type = "mindreaarig",
                             vergeEllerFullmektig =
                                 VergeEllerFullmektig(
-                                    motpartsPersonident = Folkeregisteridentifikator.of("08026800685"),
+                                    motpartsPersonident = VERGE_FOEDSELSNUMMER,
                                     navn = "Birger",
                                     omfang = "personligeOgOekonomiskeInteresser",
                                     omfangetErInnenPersonligOmraade = true,
@@ -288,7 +291,7 @@ internal class FordelerRiverKriterierTest {
                         barn =
                             listOf(
                                 Folkeregisteridentifikator.of(barn.foedselsnummer.value),
-                                Folkeregisteridentifikator.of(FNR_5),
+                                HELSOESKEN_FOEDSELSNUMMER,
                             ),
                         ansvarligeForeldre = null,
                         foreldre = null,
@@ -316,7 +319,7 @@ internal class FordelerRiverKriterierTest {
                         barn =
                             listOf(
                                 Folkeregisteridentifikator.of(barn.foedselsnummer.value),
-                                Folkeregisteridentifikator.of(FNR_1),
+                                BARN_FOEDSELSNUMMER,
                             ),
                         ansvarligeForeldre = null,
                         foreldre = null,
@@ -338,7 +341,7 @@ internal class FordelerRiverKriterierTest {
                     FamilieRelasjon(
                         barn = null,
                         ansvarligeForeldre = null,
-                        foreldre = listOf(Folkeregisteridentifikator.of(FNR_2)),
+                        foreldre = listOf(AVDOED2_FOEDSELSNUMMER),
                     ),
             )
         val avdoed =
@@ -539,7 +542,7 @@ internal class FordelerRiverKriterierTest {
             mockPerson(
                 familieRelasjon =
                     FamilieRelasjon(
-                        ansvarligeForeldre = listOf(Folkeregisteridentifikator.of(FNR_5)),
+                        ansvarligeForeldre = listOf(GJENLEVENDE_FOEDSELSNUMMER),
                         foreldre = null,
                         barn = null,
                     ),

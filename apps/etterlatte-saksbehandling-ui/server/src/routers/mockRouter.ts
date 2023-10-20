@@ -27,7 +27,7 @@ mockRouter.get('/modiacontextholder/decorator', (req: Request, res: Response) =>
 mockRouter.get(`/personer/:fnr`, (req: Request, res: Response) => {
   const fnr = req.params.fnr
 
-  if (req.params.fnr === '26117512737') {
+  if (req.params.fnr === '18498248795') {
     return res.json(personsokUtenSak)
   }
   let person = require(`../mockdata/personsok_${fnr}.json`)

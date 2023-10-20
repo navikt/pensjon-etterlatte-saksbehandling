@@ -30,11 +30,11 @@ internal class GyldigSoeknadServiceTest {
     fun `skal hente persongalleri fra søknad`() {
         val persongalleri = gyldigSoeknadService.hentPersongalleriFraSoeknad(soeknad)
 
-        assertEquals("12101376212", persongalleri.soeker)
-        assertEquals(listOf("03108718357"), persongalleri.gjenlevende)
-        assertEquals("03108718357", persongalleri.innsender)
+        assertEquals("25478323363", persongalleri.soeker)
+        assertEquals(listOf("01498344336"), persongalleri.gjenlevende)
+        assertEquals("01498344336", persongalleri.innsender)
         assertEquals(emptyList<String>(), persongalleri.soesken)
-        assertEquals(listOf("22128202440"), persongalleri.avdoed)
+        assertEquals(listOf("08498224343"), persongalleri.avdoed)
     }
 
     @Test

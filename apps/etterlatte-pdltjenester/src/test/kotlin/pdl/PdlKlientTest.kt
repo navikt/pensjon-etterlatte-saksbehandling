@@ -18,6 +18,7 @@ import no.nav.etterlatte.libs.common.person.HentPdlIdentRequest
 import no.nav.etterlatte.libs.common.person.HentPersonRequest
 import no.nav.etterlatte.libs.common.person.PersonIdent
 import no.nav.etterlatte.libs.common.person.PersonRolle
+import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
@@ -81,9 +82,9 @@ internal class PdlKlientTest {
         runBlocking {
             val identResponse =
                 pdlKlient.hentPdlIdentifikator(
-                    HentPdlIdentRequest(PersonIdent("2305469522806")),
+                    HentPdlIdentRequest(PersonIdent(AVDOED_FOEDSELSNUMMER.value)),
                 )
-            assertEquals("70078749472", identResponse.data?.hentIdenter?.identer?.first()?.ident)
+            assertEquals("09508229892", identResponse.data?.hentIdenter?.identer?.first()?.ident)
             assertEquals(false, identResponse.data?.hentIdenter?.identer?.first()?.historisk)
             assertEquals("FOLKEREGISTERIDENT", identResponse.data?.hentIdenter?.identer?.first()?.gruppe)
         }

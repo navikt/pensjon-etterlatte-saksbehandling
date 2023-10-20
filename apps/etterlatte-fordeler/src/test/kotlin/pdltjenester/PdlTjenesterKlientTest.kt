@@ -64,7 +64,7 @@ class PdlTjenesterKlientTest {
             }
 
         assertNotNull(person)
-        assertEquals(person.fornavn, "Jens")
-        assertEquals(person.etternavn, "Johnsen")
+        assertEquals(person.fornavn, "Rød")
+        assertEquals(person.etternavn, "Blanding")
     }
 }

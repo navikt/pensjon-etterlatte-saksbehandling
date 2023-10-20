@@ -22,7 +22,7 @@ val objectMapper: ObjectMapper =
         .registerModule(JavaTimeModule())
         .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
-val aremark_person = "12101376212"
+val aremark_person = "25478323363"
 val logger: Logger = LoggerFactory.getLogger("BEY001")
 
 fun main() {

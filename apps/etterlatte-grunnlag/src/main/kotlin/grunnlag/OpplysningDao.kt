@@ -7,6 +7,7 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.database.firstOrNull
 import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.libs.database.toList
 import org.jetbrains.annotations.TestOnly
@@ -158,26 +159,19 @@ class OpplysningDao(private val datasource: DataSource) {
             it.prepareStatement(
                 """
                 SELECT hendelse.sak_id, behandling_id, opplysning_id, kilde, opplysning_type, 
-                        opplysning, versjon.hendelsenummer, fnr, fom, tom
+                        opplysning, hendelse.hendelsenummer, fnr, fom, tom
                 FROM grunnlagshendelse hendelse 
                 LEFT JOIN behandling_versjon versjon 
                     ON versjon.sak_id = hendelse.sak_id AND versjon.hendelsenummer >= hendelse.hendelsenummer
                 WHERE versjon.behandling_id = ?
                 AND hendelse.opplysning_type = ?
-                AND NOT EXISTS(
-                    SELECT 1 FROM grunnlagshendelse annen
-                    LEFT JOIN behandling_versjon v2
-                        ON v2.sak_id = hendelse.sak_id AND v2.hendelsenummer >= annen.hendelsenummer
-                    WHERE v2.behandling_id = versjon.behandling_id
-                    AND annen.opplysning_type = hendelse.opplysning_type
-                    AND annen.hendelsenummer > hendelse.hendelsenummer
-                )
+                ORDER BY hendelse.hendelsenummer DESC
                 """.trimIndent(),
             )
                 .apply {
                     setObject(1, behandlingId)
                     setString(2, opplysningType.name)
-                }.executeQuery().singleOrNull { asGrunnlagshendelse() }
+                }.executeQuery().firstOrNull { asGrunnlagshendelse() }
         }
 
     fun leggOpplysningTilGrunnlag(

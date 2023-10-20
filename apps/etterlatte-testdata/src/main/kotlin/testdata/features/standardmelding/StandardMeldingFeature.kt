@@ -19,7 +19,7 @@ import no.nav.etterlatte.testdata.JsonMessage
 import java.time.OffsetDateTime
 import java.util.UUID
 
-const val AREMARK_PERSON = "12101376212"
+const val AREMARK_PERSON = "25478323363"
 
 object StandardMeldingFeature : TestDataFeature {
     override val beskrivelse: String

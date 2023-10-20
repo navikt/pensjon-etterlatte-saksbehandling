@@ -13,7 +13,7 @@
         "spoersmaal": "Etternavn"
       },
       "foedselsnummer": {
-        "svar": "03108718357",
+        "svar": "01498344336",
         "spoersmaal": "Fødselsnummer"
       },
       "type": "INNSENDER"
@@ -52,7 +52,7 @@
         "spoersmaal": "Etternavn"
       },
       "foedselsnummer": {
-        "svar": "12101376212",
+        "svar": "25478323363",
         "spoersmaal": "Barnets fødselsnummer / d-nummer"
       },
       "statsborgerskap": {
@@ -78,7 +78,7 @@
             "spoersmaal": "Etternavn"
           },
           "foedselsnummer": {
-            "svar": "12101376212",
+            "svar": "25478323363",
             "spoersmaal": "Fødselsnummer"
           },
           "type": "FORELDER"
@@ -93,7 +93,7 @@
             "spoersmaal": "Etternavn"
           },
           "foedselsnummer": {
-            "svar": "22128202440",
+            "svar": "08498224343",
             "spoersmaal": "Fødselsnummer"
           },
           "type": "FORELDER"
@@ -121,7 +121,7 @@
           "spoersmaal": "Etternavn"
         },
         "foedselsnummer": {
-          "svar": "03108718357",
+          "svar": "01498344336",
           "spoersmaal": "Fødselsnummer"
         },
         "adresse": {
@@ -209,7 +209,7 @@
   },
   "@lagret_soeknad_id": 682,
   "@template": "soeknad",
-  "@fnr_soeker": "12101376212",
+  "@fnr_soeker": "25478323363",
   "@hendelse_gyldig_til": "2023-02-18T08:52:15.614677856Z",
   "system_read_count": 2,
   "system_participating_services": [

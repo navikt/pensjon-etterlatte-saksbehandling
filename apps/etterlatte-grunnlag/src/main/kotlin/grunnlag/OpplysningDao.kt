@@ -65,13 +65,34 @@ class OpplysningDao(private val datasource: DataSource) {
                 }.executeQuery().toList { asGrunnlagshendelse() }
         }
 
+    fun hentAlleGrunnlagForBehandling(behandlingId: UUID): List<GrunnlagHendelse> =
+        connection.use {
+            it.prepareStatement(
+                """
+                SELECT bv.sak_id, opplysning_id, kilde, opplysning_type, opplysning, bv.hendelsenummer, fnr, fom, tom
+                FROM grunnlagshendelse hendelse 
+                LEFT JOIN behandling_versjon bv ON bv.sak_id = hendelse.sak_id 
+                WHERE bv.behandling_id = ? AND hendelse.hendelsenummer <= bv.hendelsenummer
+                """.trimIndent(),
+            )
+                .apply {
+                    setObject(1, behandlingId)
+                }.executeQuery().toList { asGrunnlagshendelse() }
+        }
+
     fun finnHendelserIGrunnlag(sakId: Long): List<GrunnlagHendelse> =
         connection.use {
             it.prepareStatement(
                 """
                 SELECT sak_id, opplysning_id, kilde, opplysning_type, opplysning, hendelsenummer, fnr, fom, tom
                 FROM grunnlagshendelse hendelse 
-                WHERE hendelse.sak_id = ? AND NOT EXISTS(SELECT 1 FROM grunnlagshendelse annen where annen.sak_id = hendelse.sak_id AND hendelse.opplysning_type = annen.opplysning_type AND annen.hendelsenummer > hendelse.hendelsenummer)
+                WHERE hendelse.sak_id = ? 
+                AND NOT EXISTS(
+                    SELECT 1 FROM grunnlagshendelse annen 
+                    WHERE annen.sak_id = hendelse.sak_id 
+                    AND hendelse.opplysning_type = annen.opplysning_type 
+                    AND annen.hendelsenummer > hendelse.hendelsenummer
+                )
                 """.trimIndent(),
             )
                 .apply {
@@ -92,7 +113,7 @@ class OpplysningDao(private val datasource: DataSource) {
                 AND hendelse.opplysning_type = ? 
                 AND NOT EXISTS(
                     SELECT 1 FROM grunnlagshendelse annen 
-                    where annen.fnr = hendelse.fnr 
+                    WHERE annen.fnr = hendelse.fnr 
                     AND hendelse.opplysning_type = annen.opplysning_type 
                     AND annen.hendelsenummer > hendelse.hendelsenummer
                 )
@@ -104,7 +125,7 @@ class OpplysningDao(private val datasource: DataSource) {
                 }.executeQuery().singleOrNull { asGrunnlagshendelse() }
         }
 
-    fun finnNyesteGrunnlag(
+    fun finnNyesteGrunnlagForSak(
         sakId: Long,
         opplysningType: Opplysningstype,
     ): GrunnlagHendelse? =
@@ -129,22 +150,34 @@ class OpplysningDao(private val datasource: DataSource) {
                 }.executeQuery().singleOrNull { asGrunnlagshendelse() }
         }
 
-    fun finnGrunnlagOpptilVersjon(
-        sakId: Long,
-        versjon: Long,
-    ): List<GrunnlagHendelse> =
+    fun finnNyesteGrunnlagForBehandling(
+        behandlingId: UUID,
+        opplysningType: Opplysningstype,
+    ): GrunnlagHendelse? =
         connection.use {
             it.prepareStatement(
                 """
-                SELECT sak_id, opplysning_id, kilde, opplysning_type, opplysning, hendelsenummer, fnr, fom, tom
+                SELECT hendelse.sak_id, behandling_id, opplysning_id, kilde, opplysning_type, 
+                        opplysning, versjon.hendelsenummer, fnr, fom, tom
                 FROM grunnlagshendelse hendelse 
-                WHERE hendelse.sak_id = ? AND hendelse.hendelsenummer <= ?
+                LEFT JOIN behandling_versjon versjon 
+                    ON versjon.sak_id = hendelse.sak_id AND versjon.hendelsenummer >= hendelse.hendelsenummer
+                WHERE versjon.behandling_id = ?
+                AND hendelse.opplysning_type = ?
+                AND NOT EXISTS(
+                    SELECT 1 FROM grunnlagshendelse annen
+                    LEFT JOIN behandling_versjon v2
+                        ON v2.sak_id = hendelse.sak_id AND v2.hendelsenummer >= annen.hendelsenummer
+                    WHERE v2.behandling_id = versjon.behandling_id
+                    AND annen.opplysning_type = hendelse.opplysning_type
+                    AND annen.hendelsenummer > hendelse.hendelsenummer
+                )
                 """.trimIndent(),
             )
                 .apply {
-                    setLong(1, sakId)
-                    setLong(2, versjon)
-                }.executeQuery().toList { asGrunnlagshendelse() }
+                    setObject(1, behandlingId)
+                    setString(2, opplysningType.name)
+                }.executeQuery().singleOrNull { asGrunnlagshendelse() }
         }
 
     fun leggOpplysningTilGrunnlag(

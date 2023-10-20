@@ -83,7 +83,7 @@ class BehandlingFactory(
                 ),
             )
 
-        grunnlagService.leggTilNyeOpplysninger(sak.id, behandling.id, NyeSaksopplysninger(opplysninger))
+        grunnlagService.leggTilNyeOpplysninger(behandling.id, NyeSaksopplysninger(sak.id, opplysninger))
 
         return behandling
     }

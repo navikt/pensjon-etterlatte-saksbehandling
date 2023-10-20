@@ -36,6 +36,7 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.NyeSaksopplysninger
 import no.nav.etterlatte.libs.common.grunnlag.Opplysningsbehov
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
+import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.serialize
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
@@ -49,8 +50,11 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.EnumSource
 import testsupport.buildTestApplicationConfigurationForOauth
 import java.util.UUID
+import kotlin.random.Random
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class BehandlingGrunnlagRoutesKtTest {
@@ -111,13 +115,7 @@ internal class BehandlingGrunnlagRoutesKtTest {
         val behandlingId = UUID.randomUUID()
 
         testApplication {
-            environment {
-                config = hoconApplicationConfig
-            }
-            application {
-                restModule(this.log, routePrefix = "api/grunnlag") { behandlingGrunnlagRoute(grunnlagService, behandlingKlient) }
-            }
-            val response = client.get("api/grunnlag/sak/1/behandling/$behandlingId")
+            val response = createHttpClient().get("api/grunnlag/sak/1/behandling/$behandlingId")
 
             assertEquals(HttpStatusCode.Unauthorized, response.status)
         }
@@ -130,7 +128,7 @@ internal class BehandlingGrunnlagRoutesKtTest {
         val behandlingId = UUID.randomUUID()
 
         every { grunnlagService.hentOpplysningsgrunnlag(any()) } returns null
-        coEvery { behandlingKlient.harTilgangTilSak(any(), any()) } returns true
+        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any()) } returns true
 
         testApplication {
             environment {
@@ -151,26 +149,20 @@ internal class BehandlingGrunnlagRoutesKtTest {
         }
 
         verify(exactly = 1) { grunnlagService.hentOpplysningsgrunnlag(any()) }
-        coVerify(exactly = 1) { behandlingKlient.harTilgangTilSak(any(), any()) }
+        coVerify(exactly = 1) { behandlingKlient.harTilgangTilBehandling(any(), any()) }
     }
 
     @Test
-    fun `200 ok gir mapped data`() {
+    fun `Hent grunnlag for behandling`() {
         val behandlingId = UUID.randomUUID()
         val testData = GrunnlagTestData().hentOpplysningsgrunnlag()
 
-        every { grunnlagService.hentOpplysningsgrunnlag(1) } returns testData
-        coEvery { behandlingKlient.harTilgangTilSak(any(), any()) } returns true
+        every { grunnlagService.hentOpplysningsgrunnlag(any<UUID>()) } returns testData
+        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any()) } returns true
 
         testApplication {
-            environment {
-                config = hoconApplicationConfig
-            }
-            application {
-                restModule(this.log, routePrefix = "api/grunnlag") { behandlingGrunnlagRoute(grunnlagService, behandlingKlient) }
-            }
             val response =
-                client.get("api/grunnlag/sak/1/behandling/$behandlingId") {
+                createHttpClient().get("api/grunnlag/sak/1/behandling/$behandlingId") {
                     headers {
                         append(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                         append(HttpHeaders.Authorization, "Bearer $token")
@@ -182,12 +174,81 @@ internal class BehandlingGrunnlagRoutesKtTest {
         }
 
         verify(exactly = 1) { grunnlagService.hentOpplysningsgrunnlag(any()) }
-        coVerify(exactly = 1) { behandlingKlient.harTilgangTilSak(any(), any()) }
+        coVerify(exactly = 1) { behandlingKlient.harTilgangTilBehandling(any(), any()) }
+    }
+
+    @ParameterizedTest
+    @EnumSource(Opplysningstype::class)
+    fun `Hent grunnlag av type for behandling`(type: Opplysningstype) {
+        val behandlingId = UUID.randomUUID()
+
+        val opplysning =
+            Grunnlagsopplysning(
+                id = UUID.randomUUID(),
+                kilde = Grunnlagsopplysning.Pdl(Tidspunkt.now(), null, null),
+                opplysningType = type,
+                meta = objectMapper.createObjectNode(),
+                opplysning = """{}""".toJsonNode(),
+            )
+
+        every { grunnlagService.hentGrunnlagAvType(any<UUID>(), any<Opplysningstype>()) } returns opplysning
+        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any()) } returns true
+
+        testApplication {
+            val response =
+                createHttpClient().get("api/grunnlag/sak/1/behandling/$behandlingId/$type") {
+                    headers {
+                        append(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                        append(HttpHeaders.Authorization, "Bearer $token")
+                    }
+                }
+
+            assertEquals(HttpStatusCode.OK, response.status)
+            assertEquals(serialize(opplysning), response.body<String>())
+        }
+
+        verify(exactly = 1) { grunnlagService.hentGrunnlagAvType(behandlingId, type) }
+        coVerify(exactly = 1) { behandlingKlient.harTilgangTilBehandling(any(), any()) }
+    }
+
+    @Test
+    fun `Hent historisk foreldreansvar for behandling`() {
+        val behandlingId = UUID.randomUUID()
+
+        val opplysning =
+            Grunnlagsopplysning(
+                id = UUID.randomUUID(),
+                kilde = Grunnlagsopplysning.Pdl(Tidspunkt.now(), null, null),
+                opplysningType = Opplysningstype.HISTORISK_FORELDREANSVAR,
+                meta = objectMapper.createObjectNode(),
+                opplysning = """{}""".toJsonNode(),
+            )
+
+        every { grunnlagService.hentHistoriskForeldreansvar(any<UUID>()) } returns opplysning
+        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any()) } returns true
+
+        testApplication {
+            val response =
+                createHttpClient().get(
+                    "api/grunnlag/sak/1/behandling/$behandlingId/revurdering/${Opplysningstype.HISTORISK_FORELDREANSVAR}",
+                ) {
+                    headers {
+                        append(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                        append(HttpHeaders.Authorization, "Bearer $token")
+                    }
+                }
+
+            assertEquals(HttpStatusCode.OK, response.status)
+            assertEquals(serialize(opplysning), response.body<String>())
+        }
+
+        verify(exactly = 1) { grunnlagService.hentHistoriskForeldreansvar(behandlingId) }
+        coVerify(exactly = 1) { behandlingKlient.harTilgangTilBehandling(any(), any()) }
     }
 
     @Test
     fun `Teste endepunkt for lagring av nye saksopplysninger`() {
-        val sakId = 12345L
+        val sakId = Random.nextLong()
         val behandlingId = UUID.randomUUID()
         val opplysninger =
             listOf(
@@ -199,17 +260,13 @@ internal class BehandlingGrunnlagRoutesKtTest {
             )
 
         every { grunnlagService.lagreNyeSaksopplysninger(any(), any(), any()) } just Runs
-        coEvery { behandlingKlient.harTilgangTilSak(any(), any()) } returns true
+        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any()) } returns true
 
         testApplication {
-            environment {
-                config = hoconApplicationConfig
-            }
-            val httpClient = createHttpClient()
             val actualResponse =
-                httpClient.post("api/grunnlag/sak/$sakId/behandling/$behandlingId/nye-opplysninger") {
+                createHttpClient().post("api/grunnlag/sak/1/behandling/$behandlingId/nye-opplysninger") {
                     contentType(ContentType.Application.Json)
-                    setBody(NyeSaksopplysninger(opplysninger))
+                    setBody(NyeSaksopplysninger(sakId, opplysninger))
                     headers {
                         append(HttpHeaders.Authorization, "Bearer $token")
                     }
@@ -221,7 +278,7 @@ internal class BehandlingGrunnlagRoutesKtTest {
         val opplysningerSlot = slot<List<Grunnlagsopplysning<JsonNode>>>()
 
         verify(exactly = 1) { grunnlagService.lagreNyeSaksopplysninger(sakId, behandlingId, capture(opplysningerSlot)) }
-        coVerify(exactly = 1) { behandlingKlient.harTilgangTilSak(sakId, any()) }
+        coVerify(exactly = 1) { behandlingKlient.harTilgangTilBehandling(behandlingId, any()) }
 
         val faktiskOpplysning = opplysningerSlot.captured.single()
 
@@ -238,12 +295,8 @@ internal class BehandlingGrunnlagRoutesKtTest {
         coEvery { grunnlagService.oppdaterGrunnlag(any(), any()) } just Runs
 
         testApplication {
-            environment {
-                config = hoconApplicationConfig
-            }
-            val httpClient = createHttpClient()
             val actualResponse =
-                httpClient.post("api/grunnlag/sak/$sakId/behandling/$behandlingId/oppdater-grunnlag") {
+                createHttpClient().post("api/grunnlag/sak/1/behandling/$behandlingId/oppdater-grunnlag") {
                     contentType(ContentType.Application.Json)
                     setBody(opplysningsbehov)
                     headers {
@@ -262,6 +315,9 @@ internal class BehandlingGrunnlagRoutesKtTest {
     }
 
     private fun ApplicationTestBuilder.createHttpClient(): HttpClient {
+        environment {
+            config = hoconApplicationConfig
+        }
         application {
             restModule(this.log, routePrefix = "api/grunnlag") {
                 behandlingGrunnlagRoute(grunnlagService, behandlingKlient)

@@ -4,6 +4,7 @@ import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
 import no.nav.etterlatte.inTransaction
+import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
 import no.nav.etterlatte.libs.common.generellbehandling.DokumentMedSendtDato
 import no.nav.etterlatte.libs.common.generellbehandling.GenerellBehandling
 import no.nav.etterlatte.libs.common.generellbehandling.Innhold
@@ -167,7 +168,7 @@ class GenerellBehandlingService(
         return generellBehandlingDao.hentGenerellBehandlingForSak(sakId)
     }
 
-    fun hentBehandlingForTilknyttetBehandling(tilknyttetBehandlingId: UUID): GenerellBehandling? {
+    private fun hentBehandlingForTilknyttetBehandling(tilknyttetBehandlingId: UUID): GenerellBehandling? {
         return generellBehandlingDao.hentBehandlingForTilknyttetBehandling(tilknyttetBehandlingId)
     }
 
@@ -207,11 +208,26 @@ class GenerellBehandlingService(
     }
 }
 
-class FantIkkeAvdoedException(msg: String) : Exception(msg)
+class FantIkkeAvdoedException(msg: String) :
+    ForespoerselException(
+        status = 400,
+        code = "FANT_IKKE_AVDOED",
+        detail = msg,
+    )
 
-class FantIkkeFoerstegangsbehandlingForKravpakkeOgSak(msg: String) : Exception(msg)
+class FantIkkeFoerstegangsbehandlingForKravpakkeOgSak(msg: String) :
+    ForespoerselException(
+        status = 400,
+        code = "FANT_IKKE_FOERSTEGANGSBEHANDLING_FOR_KRAVPAKKE",
+        detail = msg,
+    )
 
-class FantIkkeKravpakkeForFoerstegangsbehandling(msg: String) : Exception(msg)
+class FantIkkeKravpakkeForFoerstegangsbehandling(msg: String) :
+    ForespoerselException(
+        status = 400,
+        code = "FANT_IKKE_KRAVPAKKE_FOR_FOERSTEGANGSBEHANDLING_",
+        detail = msg,
+    )
 
 data class KravPakkeMedAvdoed(
     val kravpakke: GenerellBehandling,

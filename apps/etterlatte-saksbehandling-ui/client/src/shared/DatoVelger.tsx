@@ -10,6 +10,7 @@ export const DatoVelger = ({
   description,
   error,
   disabled = false,
+  size = 'medium',
 }: {
   value: Date | undefined
   onChange: (date: Date | undefined) => void
@@ -17,6 +18,7 @@ export const DatoVelger = ({
   description?: ReactNode
   error?: ReactNode
   disabled?: boolean
+  size?: string
 }) => {
   const { datepickerProps, inputProps } = useDatepicker({
     onDateChange: (date: Date) => onChange(date),
@@ -27,7 +29,14 @@ export const DatoVelger = ({
 
   return (
     <DatePicker {...datepickerProps}>
-      <DatePicker.Input {...inputProps} label={label} description={description} error={error} disabled={disabled} />
+      <DatePicker.Input
+        {...inputProps}
+        label={label}
+        description={description}
+        error={error}
+        disabled={disabled}
+        size={size}
+      />
     </DatePicker>
   )
 }

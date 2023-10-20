@@ -227,7 +227,7 @@ class RevurderingService(
         )
     }
 
-    private fun kanLagreRevurderingInfo(behandlingsId: UUID): Boolean {
+    private fun behandlingErAvTypenRevurderingOgKanEndres(behandlingsId: UUID): Boolean {
         val behandling = hentBehandling(behandlingsId)
         if (behandling?.type != BehandlingType.REVURDERING) {
             return false
@@ -239,13 +239,12 @@ class RevurderingService(
         behandlingsId: UUID,
         revurderingMedBegrunnelse: RevurderingMedBegrunnelse,
         navIdent: String,
-    ): Boolean {
-        if (!kanLagreRevurderingInfo(behandlingsId)) {
-            return false
+    ) {
+        if (!behandlingErAvTypenRevurderingOgKanEndres(behandlingsId)) {
+            throw RuntimeException("Kan ikke lagre revurderingsinfo")
         }
         val kilde = Grunnlagsopplysning.Saksbehandler.create(navIdent)
         revurderingDao.lagreRevurderingInfo(behandlingsId, revurderingMedBegrunnelse, kilde)
-        return true
     }
 
     private fun opprettRevurdering(

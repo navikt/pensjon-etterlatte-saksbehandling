@@ -2,6 +2,7 @@ import { Button, HStack, TextField } from '@navikt/ds-react'
 import { DatoVelger, formatDateToLocaleDateOrEmptyString } from '~shared/DatoVelger'
 import { MottattDokument } from '~components/behandling/revurderingsoversikt/sluttbehandlingUtland/SEDLand'
 import React from 'react'
+import { XMarkIcon } from '@navikt/aksel-icons'
 
 export default function DokumentRad({
   dokument,
@@ -25,12 +26,18 @@ export default function DokumentRad({
         onChange={(date) => oppdaterDokument('dato', formatDateToLocaleDateOrEmptyString(date))}
       />
       <TextField
+        size="small"
         label="Kommentar"
         value={dokument.kommentar}
         onChange={(e) => oppdaterDokument('kommentar', e.target.value)}
       />
-      <Button variant="tertiary" onClick={() => fjernDokument()}>
-        Fjern dokument
+      <Button
+        variant="tertiary"
+        icon={<XMarkIcon />}
+        onClick={() => fjernDokument()}
+        style={{ marginTop: '1.9rem', maxHeight: '3rem' }}
+      >
+        Slett
       </Button>
     </HStack>
   )

@@ -30,10 +30,10 @@ export default function SluttbehandlingUtland({ sakId, revurderingId }: { sakId:
   }, [])
 
   const lagreRevurderingsinfo = () => {
-    if (isSuccess(kravpakkeStatus)) {
+    if (true) {
       lagre({
         behandlingId: revurderingId,
-        begrunnelse: 'usikker', //TODO: wtf
+        begrunnelse: 'regeprgjrepi',
         revurderingInfo: { type: 'SLUTTBEHANDLING_UTLAND', landMedDokumenter: landMedDokumenter },
       })
     }
@@ -88,7 +88,7 @@ export default function SluttbehandlingUtland({ sakId, revurderingId }: { sakId:
       <Button variant="secondary" onClick={() => lagreRevurderingsinfo()}>
         Lagre opplysninger
       </Button>
-      {isFailure(lagrestatus) && <ApiErrorAlert>Kunne ikke lagre revurderingsof</ApiErrorAlert>}
+      {isFailure(lagrestatus) && <ApiErrorAlert>Kunne ikke lagre revurderingsinfo</ApiErrorAlert>}
       <Heading level="2" size="medium" style={{ marginTop: '2rem' }}>
         Tidligere mottatte SED
       </Heading>

@@ -71,10 +71,14 @@ sealed class RevurderingInfo {
 
     @JsonTypeName("SLUTTBEHANDLING_UTLAND")
     data class SluttbehandlingUtland(
-        val landIsoKode: String,
-        val dokumenter: List<MottattDokument>,
+        val landMedDokumenter: List<LandMedDokumenter>,
     ) : RevurderingInfo()
 }
+
+data class LandMedDokumenter(
+    val landIsoKode: String,
+    val dokumenter: List<MottattDokument>,
+)
 
 data class MottattDokument(
     val dokumenttype: String,

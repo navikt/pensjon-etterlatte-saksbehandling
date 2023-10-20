@@ -19,12 +19,10 @@ export default function LandRad({
   landMedDokumenter,
   oppdaterLandMedDokumenter,
   landListe,
-  fjernLand,
 }: {
   landMedDokumenter: LandMedDokumenter
   oppdaterLandMedDokumenter: (oppdatertLandMedDokumenter: LandMedDokumenter) => void
   landListe: ILand[]
-  fjernLand: () => void
 }) {
   const [valgtLandIsoKode, setValgtLandIsoKode] = useState<string>('')
   return (
@@ -50,9 +48,6 @@ export default function LandRad({
               </option>
             ))}
           </Select>
-          <Button variant="tertiary" onClick={() => fjernLand()} style={{ marginBottom: 'auto' }}>
-            Fjern land
-          </Button>
         </>
         <div>
           {landMedDokumenter.dokumenter.map((e, i) => {

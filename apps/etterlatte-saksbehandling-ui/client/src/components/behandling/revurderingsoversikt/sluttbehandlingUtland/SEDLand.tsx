@@ -3,6 +3,7 @@ import React from 'react'
 import { ILand } from '~shared/api/trygdetid'
 import { Table } from '@navikt/ds-react'
 import LandRad from '~components/behandling/revurderingsoversikt/sluttbehandlingUtland/LandRad'
+import { TrashIcon } from '@navikt/aksel-icons'
 
 export interface MottattDokument {
   dokumenttype?: string
@@ -32,6 +33,7 @@ export default function SEDLand({
             <Table.HeaderCell />
             <Table.HeaderCell scope="col">Land</Table.HeaderCell>
             <Table.HeaderCell scope="col">Dokumenter</Table.HeaderCell>
+            <Table.HeaderCell scope="col"></Table.HeaderCell>
           </Table.Row>
         </Table.Header>
         <Table.Body>
@@ -54,7 +56,6 @@ export default function SEDLand({
               <LandRad
                 landMedDokumenter={landogdoc}
                 oppdaterLandMedDokumenter={oppdaterLandMedDokumenter}
-                fjernLand={fjernLand}
                 landListe={landListe}
               />
             )
@@ -66,6 +67,16 @@ export default function SEDLand({
                     .filter((e) => !!e.dokumenttype)
                     .map((e) => e.dokumenttype)
                     .join(', ')}
+                </Table.DataCell>
+                <Table.DataCell scope="row">
+                  <Button
+                    variant="tertiary"
+                    icon={<TrashIcon />}
+                    onClick={() => fjernLand()}
+                    style={{ marginLeft: '20rem' }}
+                  >
+                    Slett SED
+                  </Button>
                 </Table.DataCell>
               </Table.ExpandableRow>
             )

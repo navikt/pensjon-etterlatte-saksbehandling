@@ -31,19 +31,15 @@ internal fun Route.revurderingRoutes(revurderingService: RevurderingService) {
                     hentNavidentFraToken { navIdent ->
                         logger.info("Lagrer revurderinginfo på behandling $behandlingsId")
                         medBody<RevurderingInfoDto> {
-                            val fikkLagret =
-                                inTransaction {
-                                    revurderingService.lagreRevurderingInfo(
-                                        behandlingsId,
-                                        RevurderingMedBegrunnelse(it.info, it.begrunnelse),
-                                        navIdent,
-                                    )
-                                }
-                            if (fikkLagret) {
-                                call.respond(HttpStatusCode.NoContent)
-                            } else {
-                                call.respond(HttpStatusCode.Forbidden)
+                            inTransaction {
+                                revurderingService.lagreRevurderingInfo(
+                                    behandlingsId,
+                                    RevurderingMedBegrunnelse(it.info, it.begrunnelse),
+                                    navIdent,
+                                )
                             }
+                            call.respond(HttpStatusCode.NoContent)
+                            // call.respond(HttpStatusCode.Forbidden)
                         }
                     }
                 }

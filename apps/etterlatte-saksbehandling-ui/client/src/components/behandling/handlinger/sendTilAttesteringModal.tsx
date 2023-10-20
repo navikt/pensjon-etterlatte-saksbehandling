@@ -10,6 +10,9 @@ import { useSjekkliste } from '~components/behandling/sjekkliste/useSjekkliste'
 import { useAppDispatch } from '~store/Store'
 import { visSjekkliste } from '~store/reducers/BehandlingSidemenyReducer'
 import { addValideringsfeil } from '~store/reducers/SjekklisteReducer'
+import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
+
+const featureToggleSjekklisteAktivert = 'pensjon-etterlatte.sjekkliste-send-til-attestering' as const
 
 export const SendTilAttesteringModal = ({
   behandlingId,
@@ -24,6 +27,7 @@ export const SendTilAttesteringModal = ({
 
   const sjekkliste = useSjekkliste()
   const dispatch = useAppDispatch()
+  const sjekklisteAktivert = useFeatureEnabledMedDefault(featureToggleSjekklisteAktivert, false)
 
   const goToOppgavebenken = () => {
     navigate('/')
@@ -37,7 +41,7 @@ export const SendTilAttesteringModal = ({
   }
 
   const clickAttester = () => {
-    if (sjekkliste == null || !sjekkliste.bekreftet) {
+    if (sjekklisteAktivert && (sjekkliste == null || !sjekkliste.bekreftet)) {
       dispatch(addValideringsfeil('Feltet må hukses av for å ferdigstilles'))
       dispatch(visSjekkliste())
     } else {

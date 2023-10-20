@@ -138,6 +138,7 @@ class VilkaarsvurderingService(
     suspend fun opprettVilkaarsvurdering(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
+        kopierVedRevurdering: Boolean = true,
     ): Vilkaarsvurdering =
         tilstandssjekkFoerKjoering(behandlingId, brukerTokenInfo) {
             vilkaarsvurderingRepository.hent(behandlingId)?.let {
@@ -157,31 +158,21 @@ class VilkaarsvurderingService(
 
             when (behandling.behandlingType) {
                 BehandlingType.FØRSTEGANGSBEHANDLING -> {
-                    val vilkaar =
-                        finnVilkaarForNyVilkaarsvurdering(
-                            grunnlag,
-                            virkningstidspunkt,
-                            behandling.behandlingType,
-                            behandling.sakType,
-                        )
-                    vilkaarsvurderingRepository.opprettVilkaarsvurdering(
-                        Vilkaarsvurdering(
-                            behandlingId = behandlingId,
-                            vilkaar = vilkaar,
-                            virkningstidspunkt = virkningstidspunkt.dato,
-                            grunnlagVersjon = grunnlag.metadata.versjon,
-                        ),
-                    )
+                    opprettNyVilkaarsvurdering(grunnlag, virkningstidspunkt, behandling, behandlingId)
                 }
 
                 BehandlingType.REVURDERING -> {
-                    logger.info("Kopierer vilkårsvurdering for behandling $behandlingId fra forrige behandling")
-                    val sisteIverksatteBehandling =
-                        behandlingKlient.hentSisteIverksatteBehandling(
-                            behandling.sak,
-                            brukerTokenInfo,
-                        )
-                    kopierVilkaarsvurdering(behandlingId, sisteIverksatteBehandling.id, brukerTokenInfo)
+                    if (kopierVedRevurdering) {
+                        logger.info("Kopierer vilkårsvurdering for behandling $behandlingId fra forrige behandling")
+                        val sisteIverksatteBehandling =
+                            behandlingKlient.hentSisteIverksatteBehandling(
+                                behandling.sak,
+                                brukerTokenInfo,
+                            )
+                        kopierVilkaarsvurdering(behandlingId, sisteIverksatteBehandling.id, brukerTokenInfo)
+                    } else {
+                        opprettNyVilkaarsvurdering(grunnlag, virkningstidspunkt, behandling, behandlingId)
+                    }
                 }
 
                 BehandlingType.MANUELT_OPPHOER -> throw RuntimeException(
@@ -189,6 +180,37 @@ class VilkaarsvurderingService(
                 )
             }
         }
+
+    fun slettVilkaarsvurdering(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) = vilkaarsvurderingRepository.slettVilkaarvurdering(behandlingId).also {
+        runBlocking { behandlingKlient.settBehandlingStatusOpprettet(behandlingId, brukerTokenInfo, true) }
+    }
+
+    private fun opprettNyVilkaarsvurdering(
+        grunnlag: Grunnlag,
+        virkningstidspunkt: Virkningstidspunkt,
+        behandling: DetaljertBehandling,
+        behandlingId: UUID,
+    ): Vilkaarsvurdering {
+        val vilkaar =
+            finnVilkaarForNyVilkaarsvurdering(
+                grunnlag,
+                virkningstidspunkt,
+                behandling.behandlingType,
+                behandling.sakType,
+            )
+
+        return vilkaarsvurderingRepository.opprettVilkaarsvurdering(
+            Vilkaarsvurdering(
+                behandlingId = behandlingId,
+                vilkaar = vilkaar,
+                virkningstidspunkt = virkningstidspunkt.dato,
+                grunnlagVersjon = grunnlag.metadata.versjon,
+            ),
+        )
+    }
 
     private fun finnVilkaarForNyVilkaarsvurdering(
         grunnlag: Grunnlag,

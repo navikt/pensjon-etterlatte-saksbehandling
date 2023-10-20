@@ -153,6 +153,16 @@ internal class VilkaarsvurderingServiceTest {
     }
 
     @Test
+    fun `Skal slette vilkaarsvurdering`() {
+        runBlocking { service.opprettVilkaarsvurdering(uuid, brukerTokenInfo) }
+        service.hentVilkaarsvurdering(uuid) shouldNotBe null
+        coEvery { behandlingKlient.settBehandlingStatusOpprettet(uuid, any(), true) } returns true
+
+        service.slettVilkaarsvurdering(uuid, brukerTokenInfo)
+        service.hentVilkaarsvurdering(uuid) shouldBe null
+    }
+
+    @Test
     fun `Skal opprette eoes vilkaar for barnepensjon hvis featuretoggle er skrudd paa`() {
         every { featureToggleService.isEnabled(any(), any()) } returns true
 
@@ -489,6 +499,62 @@ internal class VilkaarsvurderingServiceTest {
         val revurderingsvilkaar = runBlocking { service.opprettVilkaarsvurdering(revurderingId, brukerTokenInfo) }
         assertIsSimilar(foerstegangsvilkaar, revurderingsvilkaar)
         coVerify(exactly = 1) { behandlingKlient.settBehandlingStatusVilkaarsvurdert(revurderingId, brukerTokenInfo) }
+    }
+
+    @Test
+    fun `revurdering kopierer ikke forrige vilkaarsvurdering ved opprettelse naar kopierVedRevurdering er false`() {
+        val grunnlag: Grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
+        val revurderingId = UUID.randomUUID()
+
+        coEvery { grunnlagKlient.hentGrunnlag(any(), any(), any()) } returns grunnlag
+        coEvery { behandlingKlient.settBehandlingStatusVilkaarsvurdert(any(), any()) } returns true
+        coEvery { behandlingKlient.hentBehandling(revurderingId, any()) } returns
+            mockk {
+                every { id } returns revurderingId
+                every { sak } returns 1L
+                every { sakType } returns SakType.BARNEPENSJON
+                every { behandlingType } returns BehandlingType.REVURDERING
+                every { soeker } returns "10095512345"
+                every { virkningstidspunkt } returns VirkningstidspunktTestData.virkningstidsunkt()
+                every { revurderingsaarsak } returns RevurderingAarsak.REGULERING
+            }
+
+        coEvery { behandlingKlient.hentSisteIverksatteBehandling(any(), any()) } returns SisteIverksatteBehandling(uuid)
+
+        runBlocking {
+            service.opprettVilkaarsvurdering(uuid, brukerTokenInfo)
+            val vilkaarsvurdering = service.hentVilkaarsvurdering(uuid)!!
+            vilkaarsvurdering.vilkaar.forEach { vilkaar ->
+                service.oppdaterVurderingPaaVilkaar(
+                    uuid,
+                    brukerTokenInfo,
+                    VurdertVilkaar(
+                        vilkaar.id,
+                        VilkaarTypeOgUtfall(vilkaar.hovedvilkaar.type, Utfall.OPPFYLT),
+                        null,
+                        VilkaarVurderingData("kommentar", LocalDateTime.now(), "saksbehandler"),
+                    ),
+                )
+            }
+            service.oppdaterTotalVurdering(
+                uuid,
+                brukerTokenInfo,
+                VilkaarsvurderingResultat(
+                    VilkaarsvurderingUtfall.OPPFYLT,
+                    "kommentar",
+                    LocalDateTime.now(),
+                    "saksbehandler",
+                ),
+            )
+
+            service.hentVilkaarsvurdering(uuid)!!
+        }
+
+        val nyeVilkaar = runBlocking { service.opprettVilkaarsvurdering(revurderingId, brukerTokenInfo, false) }
+
+        nyeVilkaar.resultat shouldBe null
+        nyeVilkaar.vilkaar.forEach { it.vurdering shouldBe null }
+        coVerify(exactly = 0) { behandlingKlient.settBehandlingStatusVilkaarsvurdert(revurderingId, brukerTokenInfo) }
     }
 
     @Test

@@ -12,7 +12,6 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.application
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
-import io.ktor.server.routing.put
 import io.ktor.server.routing.route
 import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktService
 import no.nav.etterlatte.behandling.domain.ManueltOpphoer
@@ -22,9 +21,6 @@ import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeServi
 import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerAarsak
 import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerRequest
 import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerService
-import no.nav.etterlatte.behandling.sjekkliste.OppdaterSjekklisteItem
-import no.nav.etterlatte.behandling.sjekkliste.OppdatertSjekkliste
-import no.nav.etterlatte.behandling.sjekkliste.SjekklisteService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.Vedtaksloesning
@@ -56,7 +52,6 @@ internal fun Route.behandlingRoutes(
     kommerBarnetTilGodeService: KommerBarnetTilGodeService,
     manueltOpphoerService: ManueltOpphoerService,
     aktivitetspliktService: AktivitetspliktService,
-    sjekklisteService: SjekklisteService,
     behandlingFactory: BehandlingFactory,
 ) {
     val logger = application.log
@@ -267,37 +262,6 @@ internal fun Route.behandlingRoutes(
                         call.respond(HttpStatusCode.BadRequest, "Kunne ikke endre på feltet")
                     }
                 }
-            }
-        }
-
-        route("/sjekkliste") {
-            get {
-                val result = sjekklisteService.hentSjekkliste(behandlingsId)
-                call.respond(result ?: HttpStatusCode.NotFound)
-            }
-
-            post {
-                val result = sjekklisteService.opprettSjekkliste(behandlingsId)
-                call.respond(result)
-            }
-
-            put {
-                val oppdatering = call.receive<OppdatertSjekkliste>()
-                val result = sjekklisteService.oppdaterSjekkliste(behandlingsId, oppdatering)
-                call.respond(result)
-            }
-
-            post("/{sjekklisteItemId}") {
-                val sjekklisteItemId = requireNotNull(call.parameters["sjekklisteItemId"]).toLong()
-                val oppdatering = call.receive<OppdaterSjekklisteItem>()
-
-                val result =
-                    sjekklisteService.oppdaterSjekklisteItem(
-                        behandlingsId,
-                        sjekklisteItemId,
-                        oppdatering,
-                    )
-                call.respond(result)
             }
         }
     }

@@ -25,7 +25,6 @@ import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktService
 import no.nav.etterlatte.behandling.behandlingRoutes
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeService
 import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerService
-import no.nav.etterlatte.behandling.sjekkliste.SjekklisteService
 import no.nav.etterlatte.libs.common.behandling.UtenlandstilsnittType
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
@@ -53,7 +52,6 @@ internal class BehandlingRoutesTest {
     private val kommerBarnetTilGodeService = mockk<KommerBarnetTilGodeService>()
     private val manueltOpphoerService = mockk<ManueltOpphoerService>()
     private val aktivitetspliktService = mockk<AktivitetspliktService>()
-    private val sjekklisteService = mockk<SjekklisteService>()
     private val behandlingFactory = mockk<BehandlingFactory>()
 
     @BeforeAll
@@ -191,7 +189,6 @@ internal class BehandlingRoutesTest {
                 kommerBarnetTilGodeService,
                 manueltOpphoerService,
                 aktivitetspliktService,
-                sjekklisteService,
                 behandlingFactory,
             )
         }

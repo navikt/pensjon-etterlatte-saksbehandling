@@ -23,6 +23,7 @@ import no.nav.etterlatte.behandling.klage.klageRoutes
 import no.nav.etterlatte.behandling.omregning.migreringRoutes
 import no.nav.etterlatte.behandling.omregning.omregningRoutes
 import no.nav.etterlatte.behandling.revurdering.revurderingRoutes
+import no.nav.etterlatte.behandling.sjekklisteRoute
 import no.nav.etterlatte.behandling.statistikk.statistikkRoutes
 import no.nav.etterlatte.behandling.tilbakekreving.tilbakekrevingRoutes
 import no.nav.etterlatte.behandling.tilgang.tilgangRoutes
@@ -107,9 +108,9 @@ internal fun Application.module(context: ApplicationContext) {
                 manueltOpphoerService = manueltOpphoerService,
                 kommerBarnetTilGodeService = kommerBarnetTilGodeService,
                 aktivitetspliktService = aktivtetspliktService,
-                sjekklisteService = sjekklisteService,
                 behandlingFactory = behandlingFactory,
             )
+            sjekklisteRoute(sjekklisteService = sjekklisteService)
             statistikkRoutes(behandlingService = behandlingService)
             generellbehandlingRoutes(
                 generellBehandlingService = generellBehandlingService,

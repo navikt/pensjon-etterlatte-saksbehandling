@@ -122,8 +122,8 @@ spec:
         - application: etterlatte-vilkaar
         - application: etterlatte-pdltjenester
         - application: etterlatte-grunnlag
-        - application: skjermede-personer-pip
         - application: etterlatte-vedtaksvurdering
+        - application: skjermede-personer-pip # namespace hører til denne. Ikke legg til ny app i mellom.
           namespace: nom
       external:
         - host: skjermede-personer-pip.intern.dev.nav.no

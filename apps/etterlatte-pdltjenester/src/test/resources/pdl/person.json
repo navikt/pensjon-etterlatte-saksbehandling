@@ -71,7 +71,7 @@
       "foreldreansvar": [
         {
           "ansvar": "felles",
-          "ansvarlig": "26117512737",
+          "ansvarlig": "18498248795",
           "ansvarligUtenIdentifikator": null,
           "ansvarssubjekt": null,
           "folkeregistermetadata": {
@@ -99,7 +99,7 @@
         },
         {
           "ansvar": "felles",
-          "ansvarlig": "14097030880",
+          "ansvarlig": "16478313601",
           "ansvarligUtenIdentifikator": null,
           "ansvarssubjekt": null,
           "folkeregistermetadata": {
@@ -127,7 +127,7 @@
         },
         {
           "ansvar": "felles",
-          "ansvarlig": "14097030880",
+          "ansvarlig": "16478313601",
           "ansvarligUtenIdentifikator": null,
           "ansvarssubjekt": null,
           "folkeregistermetadata": {
@@ -155,7 +155,7 @@
         },
         {
           "ansvar": "felles",
-          "ansvarlig": "26117512737",
+          "ansvarlig": "18498248795",
           "ansvarligUtenIdentifikator": null,
           "ansvarssubjekt": null,
           "folkeregistermetadata": {
@@ -207,7 +207,7 @@
             ]
           },
           "minRolleForPerson": "BARN",
-          "relatertPersonsIdent": "14097030880",
+          "relatertPersonsIdent": "16478313601",
           "relatertPersonsRolle": "MOR"
         },
         {
@@ -234,7 +234,7 @@
             ]
           },
           "minRolleForPerson": "BARN",
-          "relatertPersonsIdent": "26117512737",
+          "relatertPersonsIdent": "18498248795",
           "relatertPersonsRolle": "FAR"
         },
         {
@@ -261,7 +261,7 @@
             ]
           },
           "minRolleForPerson": "BARN",
-          "relatertPersonsIdent": "14097030880",
+          "relatertPersonsIdent": "16478313601",
           "relatertPersonsRolle": "MOR"
         },
         {
@@ -288,7 +288,7 @@
             ]
           },
           "minRolleForPerson": "BARN",
-          "relatertPersonsIdent": "26117512737",
+          "relatertPersonsIdent": "18498248795",
           "relatertPersonsRolle": "FAR"
         }
       ],

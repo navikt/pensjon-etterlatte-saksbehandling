@@ -14,12 +14,12 @@ internal class FoedselsnummerTest {
     fun `Sjekk diverse gyldige test fnr`() {
         val gyldigeFnrListe =
             listOf(
-                "11057523044",
-                "26117512737",
-                "26104500284",
-                "24116324268",
-                "04096222195",
-                "05126307952",
+                "02438311109",
+                "18498248795",
+                "09438336165",
+                "31488338237",
+                "16508201382",
+                "27458328671",
             )
 
         assertAll(
@@ -32,13 +32,13 @@ internal class FoedselsnummerTest {
     @Test
     fun `Sjekk diverse gyldige test fnr med mellomrom eller bindestrek`() {
         assertAll(
-            { assertEquals("11057523044", Folkeregisteridentifikator.of("110575 23044").value) },
-            { assertEquals("11057523044", Folkeregisteridentifikator.of("110575-23044").value) },
-            { assertEquals("26117512737", Folkeregisteridentifikator.of("26 11 75 12737").value) },
-            { assertEquals("26117512737", Folkeregisteridentifikator.of("26-11-75-12737").value) },
-            { assertEquals("26104500284", Folkeregisteridentifikator.of(" 26104500284 ").value) },
-            { assertEquals("24116324268", Folkeregisteridentifikator.of(" 2 4 1 1 6 3 2 4 2 6 8 ").value) },
-            { assertEquals("05126307952", Folkeregisteridentifikator.of(" 05   126    307   952").value) },
+            { assertEquals("27458328671", Folkeregisteridentifikator.of("274583 28671").value) },
+            { assertEquals("27458328671", Folkeregisteridentifikator.of("274583-28671").value) },
+            { assertEquals("31488338237", Folkeregisteridentifikator.of("31 48 83 38237").value) },
+            { assertEquals("31488338237", Folkeregisteridentifikator.of("31-48-83-38237").value) },
+            { assertEquals("02438311109", Folkeregisteridentifikator.of(" 02438311109 ").value) },
+            { assertEquals("08481376816", Folkeregisteridentifikator.of(" 0 8 4 8 1 3 7 6 8 1 6 ").value) },
+            { assertEquals("09438336165", Folkeregisteridentifikator.of(" 09   438    336   165").value) },
         )
     }
 

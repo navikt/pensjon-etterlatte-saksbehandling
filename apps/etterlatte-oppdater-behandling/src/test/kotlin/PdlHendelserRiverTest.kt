@@ -23,7 +23,7 @@ class PdlHendelserRiverTest {
         every { behandlingService.sendDoedshendelse(capture(doedshendelse)) } returns Unit
         inspector.apply { sendTestMessage(readFile("/doedshendelse.json")) }
 
-        assertEquals("70078749472", doedshendelse.captured.fnr)
+        assertEquals("09508229892", doedshendelse.captured.fnr)
         assertEquals(LocalDate.of(2022, 1, 1), doedshendelse.captured.doedsdato)
         assertEquals(Endringstype.OPPRETTET, doedshendelse.captured.endringstype)
     }
@@ -34,7 +34,7 @@ class PdlHendelserRiverTest {
         every { behandlingService.sendUtflyttingshendelse(capture(utflyttingHendelse)) } returns Unit
         inspector.apply { sendTestMessage(readFile("/utflyttingHendelse.json")) }
 
-        assertEquals("70078749472", utflyttingHendelse.captured.fnr)
+        assertEquals("09508229892", utflyttingHendelse.captured.fnr)
         assertEquals("Sverige", utflyttingHendelse.captured.tilflyttingsLand)
         assertEquals(null, utflyttingHendelse.captured.tilflyttingsstedIUtlandet)
         assertEquals(LocalDate.of(2022, 8, 8), utflyttingHendelse.captured.utflyttingsdato)

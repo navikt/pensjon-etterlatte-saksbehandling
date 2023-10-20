@@ -409,6 +409,7 @@ class VedtakBehandlingService(
     ): Vedtak {
         val oppdatertVedtak =
             eksisterendeVedtak.copy(
+                type = vedtakType,
                 innhold =
                     (eksisterendeVedtak.innhold as VedtakBehandlingInnhold).copy(
                         virkningstidspunkt = virkningstidspunkt,
@@ -459,29 +460,32 @@ class VedtakBehandlingService(
     ): List<Utbetalingsperiode> {
         return when (vedtakType) {
             VedtakType.INNVILGELSE, VedtakType.ENDRING -> {
-                if (sakType == SakType.BARNEPENSJON) {
-                    val beregningsperioder =
-                        requireNotNull(beregningOgAvkorting?.beregning?.beregningsperioder) {
-                            "Mangler beregning"
+                when (sakType) {
+                    SakType.BARNEPENSJON -> {
+                        val beregningsperioder =
+                            requireNotNull(beregningOgAvkorting?.beregning?.beregningsperioder) {
+                                "Mangler beregning"
+                            }
+                        beregningsperioder.map {
+                            Utbetalingsperiode(
+                                periode = Periode(it.datoFOM, it.datoTOM),
+                                beloep = it.utbetaltBeloep.toBigDecimal(),
+                                type = UtbetalingsperiodeType.UTBETALING,
+                            )
                         }
-                    beregningsperioder.map {
-                        Utbetalingsperiode(
-                            periode = Periode(it.datoFOM, it.datoTOM),
-                            beloep = it.utbetaltBeloep.toBigDecimal(),
-                            type = UtbetalingsperiodeType.UTBETALING,
-                        )
                     }
-                } else {
-                    val avkortetYtelse =
-                        requireNotNull(beregningOgAvkorting?.avkorting?.avkortetYtelse) {
-                            "Mangler avkortet ytelse"
+                    SakType.OMSTILLINGSSTOENAD -> {
+                        val avkortetYtelse =
+                            requireNotNull(beregningOgAvkorting?.avkorting?.avkortetYtelse) {
+                                "Mangler avkortet ytelse"
+                            }
+                        avkortetYtelse.map {
+                            Utbetalingsperiode(
+                                periode = Periode(YearMonth.from(it.fom), YearMonth.from(it.fom)),
+                                beloep = it.ytelseEtterAvkorting.toBigDecimal(),
+                                type = UtbetalingsperiodeType.UTBETALING,
+                            )
                         }
-                    avkortetYtelse.map {
-                        Utbetalingsperiode(
-                            periode = Periode(YearMonth.from(it.fom), YearMonth.from(it.fom)),
-                            beloep = it.ytelseEtterAvkorting.toBigDecimal(),
-                            type = UtbetalingsperiodeType.UTBETALING,
-                        )
                     }
                 }
             }

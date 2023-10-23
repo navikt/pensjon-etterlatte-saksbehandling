@@ -83,7 +83,7 @@ class SjekklisteIntegrationTest {
         opprettet.id shouldBe behandling.id
         opprettet.versjon shouldBe 1
 
-        opprettet.sjekklisteItems shouldHaveAtLeastSize 10
+        opprettet.sjekklisteItems shouldHaveAtLeastSize 9
         opprettet.sjekklisteItems.forEach {
             it.avkrysset shouldBe false
             it.versjon shouldBe 1
@@ -100,7 +100,7 @@ class SjekklisteIntegrationTest {
 
         sjekkliste.id shouldBe behandling.id
         sjekkliste.versjon shouldBe 1
-        sjekkliste.sjekklisteItems shouldHaveAtLeastSize 10
+        sjekkliste.sjekklisteItems shouldHaveAtLeastSize 9
     }
 
     @Test

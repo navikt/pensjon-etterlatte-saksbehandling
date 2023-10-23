@@ -34,15 +34,14 @@ data class OppdaterSjekklisteItem(
 
 internal val defaultSjekklisteItemsBP =
     listOf(
-        "Behov for stønad til barnetilsyn og/eller utdanningsstønad. Oppfølgingsoppgave er opprettet.",
-        "Ikke søkt om, men kan ha rett på stønad til barnetilsyn - limt inn tekst i vedtak",
-        "Mulighet for, og ikke søkt om (utvidet) barnetrygd. Oppgave til barnetrygd sendt",
-        "Gjenlevende har gradert uføretrygd. Oppgave til NAY sendt.",
-        "Ikke registrert/feil kontonummer i saken - opprettet oppgave til NØP",
-        "Refusjonskrav (annen NAV-ytelse) i etterbetaling av OMS - opprettet oppgave til NØP",
-        "Samordning - løst opp pga ingen refusjon, se eget notat",
+        "Utbetalt bidragsforskudd som skal trekkes inn i etterbetaling - sendt oppgave til Bidrag",
+        "Mulighet for, og ikke søkt om (utvidet) barnetrygd - sendt oppgave til barnetrygd",
+        "Etterbetaling av barnepensjon blir mer enn 2G- kontaktet statsforvalter for informasjon",
+        "Ikke registrert/registrert annet kontonummer i saken - opprettet oppgave til NØP",
+        "Ved avslag: Informert om at barnet kan ha rett på bidragsforskudd",
+        "Barnet fyller 20 år innen tre måneder - satt til og med- dato i vedtaket",
+        "Barnet mottar uføretrygd fra NAV - pensjonen er avkortet",
         "Bosatt Norge: Innhenter EØS og bank-opplysninger",
-        "Bosatt Norge: Opprettet behandling/oppgave \"Utsendelse av kravpakke til utland\"",
         "Bosatt Norge: Sendt brev til bruker om krav til avtaleland",
     )
 

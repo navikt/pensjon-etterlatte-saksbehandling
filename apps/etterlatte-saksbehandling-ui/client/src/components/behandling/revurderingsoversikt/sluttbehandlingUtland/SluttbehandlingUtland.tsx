@@ -47,40 +47,42 @@ export default function SluttbehandlingUtland({ sakId, revurderingId }: { sakId:
         gjøres en vurdering av rettigheter og trygdeavtale etter man har mottatt nødvendig dokumentasjon fra utenlandske
         trygdemyndigheter
       </BodyShort>
-      <Heading level="2" size="medium">
-        Informasjon fra utsendelse av kravpakke
-      </Heading>
-      {mapAllApiResult(
-        kravpakkeStatus,
-        <Spinner visible={true} label="Henter kravpakke" />,
-        null,
-        () => (
-          <ApiErrorAlert>Klarte ikke å hente kravpakke for sluttbehandling</ApiErrorAlert>
-        ),
-        (kravpakkeMedAvdoed) => {
-          return (
-            <>
-              {kravpakkeMedAvdoed.kravpakke.innhold ? (
-                <InfoWrapper>
-                  <Info tekst={formaterNavn(kravpakkeMedAvdoed.avdoed)} label="Kravpakke gjelder" />
-                  <Info
-                    tekst={formaterKravpakkeLand(kravpakkeMedAvdoed.kravpakke.innhold, alleLandKodeverk)}
-                    label="Kravpakke sendt til"
-                  />
-                  <Info label="Saks-ID RINA" tekst={kravpakkeMedAvdoed.kravpakke.innhold.rinanummer} />
-                  <Info label="Notater" tekst={kravpakkeMedAvdoed.kravpakke.innhold.begrunnelse} />
-                </InfoWrapper>
-              ) : (
-                <Alert variant="warning">
-                  Fant ingen kravpakke for saken, kontroller at kravpakke ble opprettet. Finn sakens
-                  førstegangsbehandling og kontroller at den har huket av {`"skal sende kravpakke"`}
-                </Alert>
-              )}
-            </>
-          )
-        }
-      )}
-      <Heading level="2" size="medium">
+      <>
+        <Heading level="2" size="medium" style={{ marginTop: '2rem' }}>
+          Informasjon fra utsendelse av kravpakke
+        </Heading>
+        {mapAllApiResult(
+          kravpakkeStatus,
+          <Spinner visible={true} label="Henter kravpakke" />,
+          null,
+          () => (
+            <ApiErrorAlert>Klarte ikke å hente kravpakke for sluttbehandling</ApiErrorAlert>
+          ),
+          (kravpakkeMedAvdoed) => {
+            return (
+              <>
+                {kravpakkeMedAvdoed.kravpakke.innhold ? (
+                  <InfoWrapper>
+                    <Info tekst={formaterNavn(kravpakkeMedAvdoed.avdoed)} label="Kravpakke gjelder" />
+                    <Info
+                      tekst={formaterKravpakkeLand(kravpakkeMedAvdoed.kravpakke.innhold, alleLandKodeverk)}
+                      label="Kravpakke sendt til"
+                    />
+                    <Info label="Saks-ID RINA" tekst={kravpakkeMedAvdoed.kravpakke.innhold.rinanummer} />
+                    <Info label="Notater" tekst={kravpakkeMedAvdoed.kravpakke.innhold.begrunnelse} />
+                  </InfoWrapper>
+                ) : (
+                  <Alert variant="warning">
+                    Fant ingen kravpakke for saken, kontroller at kravpakke ble opprettet. Finn sakens
+                    førstegangsbehandling og kontroller at den har huket av {`"skal sende kravpakke"`}
+                  </Alert>
+                )}
+              </>
+            )
+          }
+        )}
+      </>
+      <Heading level="2" size="medium" style={{ marginTop: '2rem' }}>
         Mottatte SED
       </Heading>
       <BodyShort>Fyll inn hvilke SED som er mottatt i RINA pr land.</BodyShort>
@@ -97,11 +99,11 @@ export default function SluttbehandlingUtland({ sakId, revurderingId }: { sakId:
         </Button>
       ) : null}
       {isFailure(lagrestatus) && <ApiErrorAlert>Kunne ikke lagre revurderingsinfo</ApiErrorAlert>}
-      <Heading level="2" size="medium" style={{ marginTop: '2rem' }}>
+      <Heading level="2" size="medium" style={{ marginTop: '3rem' }}>
         Tidligere mottatte SED`er
       </Heading>
       <TextButton isOpen={visHistorikk} setIsOpen={setVisHistorikk} />
-      {visHistorikk && <BodyShort>Vis historikk her </BodyShort>}
+      {visHistorikk && <BodyShort>Vis historikk her. TODO: Hvor skal historikken komme fra Mari? </BodyShort>}
       {isSuccess(kravpakkeStatus) && (
         <SluttbehandlingUtlandFelter tilknyttetBehandling={kravpakkeStatus.data.kravpakke.tilknyttetBehandling} />
       )}
@@ -112,7 +114,7 @@ export default function SluttbehandlingUtland({ sakId, revurderingId }: { sakId:
 function formaterKravpakkeLand(innhold: KravpakkeUtland | undefined, landliste: ILand[] | null) {
   if (landliste && innhold?.landIsoKode) {
     return innhold?.landIsoKode
-      ?.map((kode) => landliste.find((kodeverkLand) => kodeverkLand.isoLandkode === kode))
+      ?.map((kode) => landliste.find((kodeverkLand) => kodeverkLand.isoLandkode === kode)?.beskrivelse.tekst)
       .join(', ')
   } else {
     return innhold?.landIsoKode ? innhold.landIsoKode.join(', ') : ''

@@ -63,6 +63,9 @@ class SjekklisteIntegrationTest {
         sjekklisteService = SjekklisteService(sjekklisteDao, behandlingService, oppgaveService)
 
         settOppKontekst(user)
+
+        every { user.name() } returns "Sak B. Handlersen"
+        every { oppgaveService.hentSaksbehandlerForOppgaveUnderArbeid(any()) } returns user.name()
     }
 
     @AfterAll

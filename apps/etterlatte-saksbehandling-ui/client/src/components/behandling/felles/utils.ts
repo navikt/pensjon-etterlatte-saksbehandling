@@ -4,7 +4,7 @@ import { IBehandlingStatus, IBehandlingsType, IDetaljertBehandling } from '~shar
 import { IBehandlingsammendrag } from '~components/person/typer'
 import { SakType } from '~shared/types/sak'
 import { JaNei } from '~shared/types/ISvar'
-import { Revurderingsaarsak } from '~shared/types/Revurderingsaarsak'
+import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
 
 export function behandlingErUtfylt(behandling: IDetaljertBehandling): boolean {
   const gyldigUtfylt = !!(
@@ -75,7 +75,7 @@ export const kunIverksatteBehandlinger = (behandlingliste: IBehandlingsammendrag
 
 export const behandlingSkalSendeBrev = (
   behandlingType: IBehandlingsType,
-  revurderingsaarsak: Revurderingsaarsak | null
+  revurderingsaarsak: Revurderingaarsak | null
 ): boolean => {
   switch (behandlingType) {
     case IBehandlingsType.FØRSTEGANGSBEHANDLING:
@@ -84,7 +84,7 @@ export const behandlingSkalSendeBrev = (
       return false
     case IBehandlingsType.REVURDERING:
       return !(
-        revurderingsaarsak === Revurderingsaarsak.REGULERING || revurderingsaarsak === Revurderingsaarsak.DOEDSFALL
+        revurderingsaarsak === Revurderingaarsak.REGULERING || revurderingsaarsak === Revurderingaarsak.DOEDSFALL
       )
   }
 }

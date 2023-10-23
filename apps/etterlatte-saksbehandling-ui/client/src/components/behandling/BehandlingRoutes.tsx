@@ -11,11 +11,11 @@ import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
 import { Revurderingsoversikt } from '~components/behandling/revurderingsoversikt/Revurderingsoversikt'
 import { behandlingSkalSendeBrev } from '~components/behandling/felles/utils'
 import { useBehandling } from '~components/behandling/useBehandling'
-import { erOpphoer, Revurderingsaarsak } from '~shared/types/Revurderingsaarsak'
 import { Aktivitetsplikt } from '~components/behandling/aktivitetsplikt/Aktivitetsplikt'
 import { SakType } from '~shared/types/sak'
 import TrygdetidVisning from '~components/behandling/trygdetid/TrygdetidVisning'
 import { VilkaarsvurderingResultat } from '~shared/api/vilkaarsvurdering'
+import { erOpphoer, Revurderingaarsak } from '~shared/types/Revurderingaarsak'
 
 type behandlingRouteTypes =
   | 'soeknadsoversikt'
@@ -207,7 +207,7 @@ export function revurderingRoutes(behandling: IBehandlingReducer): Array<Behandl
   }
 
   const erRevurderingsaarsakAnnenOgOpphoer =
-    behandling.revurderingsaarsak == Revurderingsaarsak.ANNEN &&
+    behandling.revurderingsaarsak == Revurderingaarsak.ANNEN &&
     behandling.vilkårsprøving?.resultat?.utfall == VilkaarsvurderingResultat.IKKE_OPPFYLT
 
   const defaultRoutes: Array<BehandlingRouteTypes> =

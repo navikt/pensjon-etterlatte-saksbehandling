@@ -119,6 +119,7 @@ export default function SluttbehandlingUtland({ sakId, revurderingId }: { sakId:
           landListe={hentAlleLandRequest.data}
           landMedDokumenter={landMedDokumenter}
           setLandMedDokumenter={setLandMedDokumenter}
+          resetFeilkoder={() => setFeilkoder(null)}
         />
       )}
       {landMedDokumenter.length > 0 ? (

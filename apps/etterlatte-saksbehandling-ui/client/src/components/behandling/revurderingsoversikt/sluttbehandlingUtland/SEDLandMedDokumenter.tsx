@@ -19,10 +19,12 @@ export default function SEDLandMedDokumenter({
   landListe,
   landMedDokumenter,
   setLandMedDokumenter,
+  resetFeilkoder,
 }: {
   landListe: ILand[]
   landMedDokumenter: LandMedDokumenter[]
   setLandMedDokumenter: React.Dispatch<React.SetStateAction<LandMedDokumenter[]>>
+  resetFeilkoder: () => void
 }) {
   return (
     <>
@@ -38,6 +40,7 @@ export default function SEDLandMedDokumenter({
         <Table.Body>
           {landMedDokumenter.map((landMedDokument, i) => {
             const oppdaterLandMedDokumenter = (oppdatertLandMedDokumenter: LandMedDokumenter) => {
+              resetFeilkoder()
               setLandMedDokumenter((landMedDokumenter) =>
                 landMedDokumenter.map((landMedDokumenter, idx) =>
                   idx === i ? oppdatertLandMedDokumenter : landMedDokumenter
@@ -45,6 +48,7 @@ export default function SEDLandMedDokumenter({
               )
             }
             const fjernLand = () => {
+              resetFeilkoder()
               setLandMedDokumenter((landMedDokumenter) => landMedDokumenter.filter((_, idx) => idx !== i))
             }
             const landRad = (

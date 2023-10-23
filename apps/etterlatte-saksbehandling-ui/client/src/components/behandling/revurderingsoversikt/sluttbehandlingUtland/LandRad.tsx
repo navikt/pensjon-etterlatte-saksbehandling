@@ -48,7 +48,7 @@ export default function LandRad({
       </Select>
       <div>
         {landMedDokumenter.dokumenter.map((e, i) => {
-          const oppdaterdokumenter = (field: string, value: string) => {
+          const oppdaterdokumenterForLand = (field: string, value: string) => {
             const oppdaterteDokumenter = landMedDokumenter.dokumenter.map((doc, idx) =>
               idx === i ? { ...doc, [field]: value } : doc
             )
@@ -56,13 +56,18 @@ export default function LandRad({
             oppdaterLandMedDokumenter(landMedDokumenterNy)
           }
 
-          const fjernDokument = () => {
+          const fjernDokumentForLand = () => {
             const oppdaterteDokumenter = landMedDokumenter.dokumenter.filter((_, idx) => idx !== i)
             const landMedDokumenterNy = { ...landMedDokumenter, dokumenter: oppdaterteDokumenter }
             oppdaterLandMedDokumenter(landMedDokumenterNy)
           }
           return (
-            <DokumentRad key={i} dokument={e} oppdaterDokument={oppdaterdokumenter} fjernDokument={fjernDokument} />
+            <DokumentRad
+              key={i}
+              dokument={e}
+              oppdaterDokument={oppdaterdokumenterForLand}
+              fjernDokument={fjernDokumentForLand}
+            />
           )
         })}
         <div>

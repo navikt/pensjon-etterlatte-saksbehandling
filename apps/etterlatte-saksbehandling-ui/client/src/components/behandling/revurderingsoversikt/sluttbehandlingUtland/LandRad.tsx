@@ -1,9 +1,9 @@
-import { Button, Select } from '@navikt/ds-react'
-import DokumentRad from '~components/behandling/revurderingsoversikt/sluttbehandlingUtland/DokumentRad'
+import { Select } from '@navikt/ds-react'
 import { LandMedDokumenter } from '~components/behandling/revurderingsoversikt/sluttbehandlingUtland/SEDLand'
 import React, { useState } from 'react'
 import { ILand } from '~shared/api/trygdetid'
 import styled from 'styled-components'
+import DokumenterForLand from '~components/behandling/revurderingsoversikt/sluttbehandlingUtland/DokumenterForLand'
 
 const Flex = styled.div`
   display: flex;
@@ -46,44 +46,7 @@ export default function LandRad({
           </option>
         ))}
       </Select>
-      <div>
-        {landMedDokumenter.dokumenter.map((e, i) => {
-          const oppdaterdokumenterForLand = (field: string, value: string) => {
-            const oppdaterteDokumenter = landMedDokumenter.dokumenter.map((doc, idx) =>
-              idx === i ? { ...doc, [field]: value } : doc
-            )
-            const landMedDokumenterNy = { ...landMedDokumenter, dokumenter: oppdaterteDokumenter }
-            oppdaterLandMedDokumenter(landMedDokumenterNy)
-          }
-
-          const fjernDokumentForLand = () => {
-            const oppdaterteDokumenter = landMedDokumenter.dokumenter.filter((_, idx) => idx !== i)
-            const landMedDokumenterNy = { ...landMedDokumenter, dokumenter: oppdaterteDokumenter }
-            oppdaterLandMedDokumenter(landMedDokumenterNy)
-          }
-          return (
-            <DokumentRad
-              key={i}
-              dokument={e}
-              oppdaterDokument={oppdaterdokumenterForLand}
-              fjernDokument={fjernDokumentForLand}
-            />
-          )
-        })}
-        <div>
-          <Button
-            onClick={() => {
-              oppdaterLandMedDokumenter({
-                ...landMedDokumenter,
-                dokumenter: landMedDokumenter.dokumenter.concat([{ dokumenttype: '', dato: undefined, kommentar: '' }]),
-              })
-            }}
-            variant="tertiary"
-          >
-            Legg til dokument
-          </Button>
-        </div>
-      </div>
+      <DokumenterForLand landMedDokumenter={landMedDokumenter} oppdaterLandMedDokumenter={oppdaterLandMedDokumenter} />
     </Flex>
   )
 }

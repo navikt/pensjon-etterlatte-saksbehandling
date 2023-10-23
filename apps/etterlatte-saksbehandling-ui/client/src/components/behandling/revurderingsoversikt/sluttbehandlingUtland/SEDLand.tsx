@@ -47,7 +47,7 @@ export default function SEDLand({
             const fjernLand = () => {
               setLandMedDokumenter((landMedDokumenter) => landMedDokumenter.filter((_, idx) => idx !== i))
             }
-            const landrad = (
+            const landRad = (
               <LandRad
                 landMedDokumenter={landMedDokument}
                 oppdaterLandMedDokumenter={oppdaterLandMedDokumenter}
@@ -55,7 +55,7 @@ export default function SEDLand({
               />
             )
             return (
-              <Table.ExpandableRow key={i} content={landrad} defaultOpen={true}>
+              <Table.ExpandableRow key={i} content={landRad} defaultOpen={true}>
                 <Table.DataCell scope="row">{landMedDokument.landIsoKode}</Table.DataCell>
                 <Table.DataCell>
                   {landMedDokument.dokumenter

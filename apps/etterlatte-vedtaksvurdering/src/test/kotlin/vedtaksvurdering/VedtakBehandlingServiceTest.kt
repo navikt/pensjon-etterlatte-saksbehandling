@@ -53,6 +53,7 @@ import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.assertDoesNotThrow
@@ -1067,6 +1068,56 @@ internal class VedtakBehandlingServiceTest {
             innhold.utbetalingsperioder.size shouldBe 1
             innhold.utbetalingsperioder[0].beloep shouldBe BigDecimal(50)
             innhold.utbetalingsperioder[0].periode.fom shouldBe virkningstidspunkt
+        }
+    }
+
+    @Nested
+    inner class `Verifisere grunnlagsversjon` {
+        @Test
+        fun `Vilkaar eller beregning er null`() {
+            assertDoesNotThrow {
+                val vilkaarsvurderingDto = mockk<VilkaarsvurderingDto>(relaxed = true)
+                service.verifiserGrunnlagVersjon(vilkaarsvurderingDto, null)
+            }
+
+            assertDoesNotThrow {
+                val beregningOgAvkorting = mockk<BeregningOgAvkorting>()
+                service.verifiserGrunnlagVersjon(null, beregningOgAvkorting)
+            }
+        }
+
+        @Test
+        fun `Ulike versjoner - skal kaste feil`() {
+            val vilkaarsvurderingDto =
+                mockk<VilkaarsvurderingDto> {
+                    every { grunnlagVersjon } returns 2
+                }
+
+            val beregningOgAvkorting =
+                mockk<BeregningOgAvkorting> {
+                    every { beregning.grunnlagMetadata.versjon } returns 3
+                }
+
+            assertThrows<UlikVersjonGrunnlag> {
+                service.verifiserGrunnlagVersjon(vilkaarsvurderingDto, beregningOgAvkorting)
+            }
+        }
+
+        @Test
+        fun `Like versjoner – skal ikke kaste feil`() {
+            val vilkaarsvurderingDto =
+                mockk<VilkaarsvurderingDto> {
+                    every { grunnlagVersjon } returns 1
+                }
+
+            val beregningOgAvkorting =
+                mockk<BeregningOgAvkorting> {
+                    every { beregning.grunnlagMetadata.versjon } returns 1
+                }
+
+            assertDoesNotThrow {
+                service.verifiserGrunnlagVersjon(vilkaarsvurderingDto, beregningOgAvkorting)
+            }
         }
     }
 

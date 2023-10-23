@@ -236,6 +236,8 @@ abstract class BehandlingIntegrationTest {
                         )
                     } else if (request.url.fullPath.endsWith("/oppdater-grunnlag")) {
                         respondOk()
+                    } else if (request.url.fullPath.endsWith("/opprett-grunnlag")) {
+                        respondOk()
                     } else {
                         error(request.url.fullPath)
                     }

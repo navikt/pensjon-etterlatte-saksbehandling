@@ -80,9 +80,15 @@ interface GrunnlagService {
 
     fun hentPersonerISak(sakId: Long): Map<Folkeregisteridentifikator, PersonMedNavn>?
 
-    suspend fun oppdaterGrunnlag(
+    suspend fun opprettGrunnlag(
         behandlingId: UUID,
         opplysningsbehov: Opplysningsbehov,
+    )
+
+    suspend fun oppdaterGrunnlag(
+        behandlingId: UUID,
+        sakId: Long,
+        sakType: SakType,
     )
 
     fun hentHistoriskForeldreansvar(behandlingId: UUID): Grunnlagsopplysning<JsonNode>?
@@ -151,7 +157,7 @@ class RealGrunnlagService(
         }.associateBy { it.fnr }
     }
 
-    override suspend fun oppdaterGrunnlag(
+    override suspend fun opprettGrunnlag(
         behandlingId: UUID,
         opplysningsbehov: Opplysningsbehov,
     ) {
@@ -296,6 +302,23 @@ class RealGrunnlagService(
             attestering = null,
             fnr = null,
             periode = null,
+        )
+    }
+
+    override suspend fun oppdaterGrunnlag(
+        behandlingId: UUID,
+        sakId: Long,
+        sakType: SakType,
+    ) {
+        val galleriHendelse = opplysningDao.finnNyesteGrunnlagForSak(
+            sakId,
+            Opplysningstype.PERSONGALLERI_V1,
+        )!!
+        val persongalleri = objectMapper.readValue(galleriHendelse.opplysning.toJson(), Persongalleri::class.java)
+
+        opprettGrunnlag(
+            behandlingId,
+            Opplysningsbehov(sakId, sakType, persongalleri),
         )
     }
 

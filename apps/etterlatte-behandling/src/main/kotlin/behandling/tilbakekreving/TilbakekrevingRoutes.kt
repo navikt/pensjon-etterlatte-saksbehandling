@@ -42,6 +42,11 @@ internal fun Route.tilbakekrevingRoutes(service: TilbakekrevingService) {
         }
 
         route("vedtak") {
+            post("opprett") {
+                // TODO tilgangsjekk
+                service.opprettVedtak(behandlingsId, brukerTokenInfo)
+                call.respond(HttpStatusCode.OK)
+            }
             post("fatt") {
                 // TODO tilgangsjekk
                 service.fattVedtak(behandlingsId, brukerTokenInfo)

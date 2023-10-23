@@ -3,7 +3,7 @@ import { Content, ContentHeader, FlexRow } from '~shared/styled'
 import { HeadingWrapper } from '~components/behandling/soeknadsoversikt/styled'
 import { SendTilAttesteringModal } from '~components/behandling/handlinger/sendTilAttesteringModal'
 import { Tilbakekreving, TilbakekrevingStatus } from '~shared/types/Tilbakekreving'
-import { fattVedtak } from '~shared/api/tilbakekreving'
+import { fattVedtak, opprettVedtak } from '~shared/api/tilbakekreving'
 import React, { useEffect, useState } from 'react'
 import { IBrev } from '~shared/types/Brev'
 import { isFailure, isPending, isPendingOrInitial, useApiCall } from '~shared/hooks/useApiCall'
@@ -12,18 +12,18 @@ import Spinner from '~shared/Spinner'
 import styled from 'styled-components'
 import ForhaandsvisningBrev from '~components/behandling/brev/ForhaandsvisningBrev'
 import MottakerPanel from '~components/behandling/brev/detaljer/MottakerPanel'
+import { useVedtak } from '~components/vedtak/useVedtak'
 
 export function TilbakekrevingBrev({ tilbakekreving }: { tilbakekreving: Tilbakekreving }) {
   const kanAttesteres = [TilbakekrevingStatus.OPPRETTET, TilbakekrevingStatus.UNDER_ARBEID].includes(
     tilbakekreving.status
   )
-
+  const vedtak = useVedtak()
   const [vedtaksbrev, setVedtaksbrev] = useState<IBrev | undefined>(undefined)
-  const [hentBrevStatus, hentBrev] = useApiCall(hentVedtaksbrev)
+  const [hentBrevStatus, hentBrevRequest] = useApiCall(hentVedtaksbrev)
   const [opprettBrevStatus, opprettNyttVedtaksbrev] = useApiCall(opprettVedtaksbrev)
-
-  useEffect(() => {
-    hentBrev(tilbakekreving.id, (brev, statusCode) => {
+  const hentBrev = () => {
+    hentBrevRequest(tilbakekreving.id, (brev, statusCode) => {
       if (statusCode === 200) {
         setVedtaksbrev(brev)
       } else if (statusCode === 204) {
@@ -32,7 +32,15 @@ export function TilbakekrevingBrev({ tilbakekreving }: { tilbakekreving: Tilbake
         })
       }
     })
-  }, [tilbakekreving])
+  }
+
+  useEffect(() => {
+    if (vedtak) {
+      hentBrev()
+    } else {
+      opprettVedtak(tilbakekreving.id).then(() => hentBrev())
+    }
+  }, [tilbakekreving, vedtak])
 
   if (isPendingOrInitial(hentBrevStatus)) {
     return <Spinner visible label="Henter brev ..." />

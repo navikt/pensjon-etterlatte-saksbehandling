@@ -15,6 +15,7 @@ import Spinner from '~shared/Spinner'
 import { updateSjekkliste } from '~store/reducers/SjekklisteReducer'
 import { hentSjekkliste, opprettSjekkliste } from '~shared/api/sjekkliste'
 import { erFerdigBehandlet } from '~components/behandling/felles/utils'
+import { IBehandlingsType } from '~shared/types/IDetaljertBehandling'
 
 export const Behandling = () => {
   const behandling = useBehandling()
@@ -44,7 +45,7 @@ export const Behandling = () => {
   useEffect(() => {
     resetSjekklisteResult()
     resetOpprettSjekkliste()
-    if (behandling && isInitial(hentSjekklisteResult)) {
+    if (behandling && erFoerstegangsbehandling() && isInitial(hentSjekklisteResult)) {
       hentSjekklisteForBehandling(
         behandling.id,
         (result) => {
@@ -61,6 +62,8 @@ export const Behandling = () => {
     }
   }, [behandling])
 
+  const erFoerstegangsbehandling = () => behandling?.behandlingType == IBehandlingsType.FØRSTEGANGSBEHANDLING
+
   return mapAllApiResult(
     fetchBehandlingStatus,
     <Spinner label="Henter behandling ..." visible />,
@@ -71,10 +74,12 @@ export const Behandling = () => {
         return (
           <>
               {isPending(hentSjekklisteResult) && <Spinner label="Henter sjekkliste ..." visible />}
-              {isFailure(hentSjekklisteResult) && !erFerdigBehandlet(behandling.status) && (
+              {isFailure(hentSjekklisteResult) && erFoerstegangsbehandling() && !erFerdigBehandlet(behandling.status) &&
                   <ApiErrorAlert>En feil oppstod ved henting av sjekklista</ApiErrorAlert>
-              )}
-              {isFailure(opprettSjekklisteResult) && <ApiErrorAlert>Opprettelsen av sjekkliste feilet</ApiErrorAlert>}
+              }
+              {isFailure(opprettSjekklisteResult) && erFoerstegangsbehandling() &&
+                  <ApiErrorAlert>Opprettelsen av sjekkliste feilet</ApiErrorAlert>
+              }
 
               {behandling.søker && <PdlPersonStatusBar person={behandling.søker} />}
             <StegMeny behandling={behandling} />

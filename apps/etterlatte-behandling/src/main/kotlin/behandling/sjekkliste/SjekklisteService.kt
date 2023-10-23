@@ -3,6 +3,7 @@ package no.nav.etterlatte.behandling.sjekkliste
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.domain.Behandling
+import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -28,7 +29,7 @@ class SjekklisteService(
                 requireNotNull(behandlingService.hentBehandling(behandlingId))
             }
 
-        if (!kanEndres(behandling.status)) {
+        if (!kanEndres(behandling)) {
             throw SjekklisteIkkeTillattException(
                 kode = "SJEKK01",
                 "Kan ikke opprette sjekkliste for behandling ${behandling.id} med status ${behandling.status}",
@@ -60,7 +61,7 @@ class SjekklisteService(
         return inTransaction {
             val behandling = requireNotNull(behandlingService.hentBehandling(behandlingId))
 
-            if (!(kanEndres(behandling.status) && behandling.oppgaveUnderArbeidErTildeltGjeldendeSaksbehandler())) {
+            if (!(kanEndres(behandling) && behandling.oppgaveUnderArbeidErTildeltGjeldendeSaksbehandler())) {
                 throw SjekklisteIkkeTillattException(
                     kode = "SJEKK03",
                     "Kan ikke oppdatere sjekkliste for behandling ${behandling.id} med status ${behandling.status}",
@@ -80,7 +81,7 @@ class SjekklisteService(
         return inTransaction {
             val behandling = requireNotNull(behandlingService.hentBehandling(behandlingId))
 
-            if (!(kanEndres(behandling.status) && behandling.oppgaveUnderArbeidErTildeltGjeldendeSaksbehandler())) {
+            if (!(kanEndres(behandling) && behandling.oppgaveUnderArbeidErTildeltGjeldendeSaksbehandler())) {
                 throw SjekklisteIkkeTillattException(
                     kode = "SJEKK04",
                     "Kan ikke oppdatere sjekklisteelement for behandling ${behandling.id} med status ${behandling.status}",
@@ -92,8 +93,9 @@ class SjekklisteService(
         }
     }
 
-    private fun kanEndres(status: BehandlingStatus): Boolean {
-        return BehandlingStatus.underBehandling().contains(status)
+    private fun kanEndres(behandling: Behandling): Boolean {
+        return BehandlingStatus.underBehandling().contains(behandling.status) &&
+            behandling is Foerstegangsbehandling
     }
 
     private fun Behandling.oppgaveUnderArbeidErTildeltGjeldendeSaksbehandler(): Boolean {

@@ -1,4 +1,4 @@
-import { Button, Heading } from '@navikt/ds-react'
+import { BodyShort, Button, Heading } from '@navikt/ds-react'
 import { isFailure, isSuccess, mapAllApiResult, useApiCall } from '~shared/hooks/useApiCall'
 import { hentKravpakkeforSak } from '~shared/api/generellbehandling'
 import { useEffect, useState } from 'react'
@@ -30,13 +30,10 @@ export default function SluttbehandlingUtland({ sakId, revurderingId }: { sakId:
   }, [])
 
   const lagreRevurderingsinfo = () => {
-    if (true) {
-      lagre({
-        behandlingId: revurderingId,
-        begrunnelse: 'regeprgjrepi',
-        revurderingInfo: { type: 'SLUTTBEHANDLING_UTLAND', landMedDokumenter: landMedDokumenter },
-      })
-    }
+    lagre({
+      behandlingId: revurderingId,
+      revurderingInfo: { type: 'SLUTTBEHANDLING_UTLAND', landMedDokumenter: landMedDokumenter },
+    })
   }
 
   return (
@@ -44,12 +41,12 @@ export default function SluttbehandlingUtland({ sakId, revurderingId }: { sakId:
       <Heading level="2" size="medium">
         Sluttbehandling ved mottatt info utland
       </Heading>
-      <p>
+      <BodyShort>
         Sluttbehandling gjøres i saker der gjenlevende er bosatt i Norge (på søknadstidspunktet), og avdøde har
         bodd/arbeidet i Norge og ett eller flere avtaleland, og det er satt fram krav om pensjon fra avtaleland. Det
         gjøres en vurdering av rettigheter og trygdeavtale etter man har mottatt nødvendig dokumentasjon fra utenlandske
         trygdemyndigheter
-      </p>
+      </BodyShort>
       <Heading level="2" size="medium">
         Informasjon fra utsendelse av kravpakke
       </Heading>
@@ -61,23 +58,21 @@ export default function SluttbehandlingUtland({ sakId, revurderingId }: { sakId:
           <ApiErrorAlert>Klarte ikke å hente kravpakke for sluttbehandling</ApiErrorAlert>
         ),
         (kravpakkeMedAvdoed) => (
-          <>
-            <InfoWrapper>
-              <Info tekst={formaterNavn(kravpakkeMedAvdoed.avdoed)} label="Kravpakke gjelder" />
-              <Info
-                tekst={formaterKravpakkeLand(kravpakkeMedAvdoed.kravpakke.innhold, alleLandKodeverk)}
-                label="Kravpakke sendt til"
-              />
-              <Info label="Saks-ID RINA" tekst={kravpakkeMedAvdoed.kravpakke.innhold.rinanummer} />
-              <Info label="Notater" tekst={kravpakkeMedAvdoed.kravpakke.innhold.begrunnelse} />
-            </InfoWrapper>
-          </>
+          <InfoWrapper>
+            <Info tekst={formaterNavn(kravpakkeMedAvdoed.avdoed)} label="Kravpakke gjelder" />
+            <Info
+              tekst={formaterKravpakkeLand(kravpakkeMedAvdoed.kravpakke.innhold, alleLandKodeverk)}
+              label="Kravpakke sendt til"
+            />
+            <Info label="Saks-ID RINA" tekst={kravpakkeMedAvdoed.kravpakke.innhold.rinanummer} />
+            <Info label="Notater" tekst={kravpakkeMedAvdoed.kravpakke.innhold.begrunnelse} />
+          </InfoWrapper>
         )
       )}
       <Heading level="2" size="medium">
         Mottatte SED
       </Heading>
-      <p>Fyll inn hvilke SED som er mottatt i RINA pr land.</p>
+      <BodyShort>Fyll inn hvilke SED som er mottatt i RINA pr land.</BodyShort>
       {isSuccess(hentAlleLandRequest) && (
         <SEDLand
           landListe={hentAlleLandRequest.data}
@@ -90,10 +85,10 @@ export default function SluttbehandlingUtland({ sakId, revurderingId }: { sakId:
       </Button>
       {isFailure(lagrestatus) && <ApiErrorAlert>Kunne ikke lagre revurderingsinfo</ApiErrorAlert>}
       <Heading level="2" size="medium" style={{ marginTop: '2rem' }}>
-        Tidligere mottatte SED
+        Tidligere mottatte SED`er
       </Heading>
       <TextButton isOpen={visHistorikk} setIsOpen={setVisHistorikk} />
-      {visHistorikk && <>Vis historikk her </>}
+      {visHistorikk && <BodyShort>Vis historikk her </BodyShort>}
       {isSuccess(kravpakkeStatus) && (
         <SluttbehandlingUtlandFelter tilknyttetBehandling={kravpakkeStatus.data.kravpakke.tilknyttetBehandling} />
       )}

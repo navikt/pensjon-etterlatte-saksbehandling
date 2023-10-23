@@ -1,7 +1,6 @@
-import { Button } from '@navikt/ds-react'
+import { Button, Table } from '@navikt/ds-react'
 import React from 'react'
 import { ILand } from '~shared/api/trygdetid'
-import { Table } from '@navikt/ds-react'
 import LandRad from '~components/behandling/revurderingsoversikt/sluttbehandlingUtland/LandRad'
 import { TrashIcon } from '@navikt/aksel-icons'
 
@@ -37,33 +36,29 @@ export default function SEDLand({
           </Table.Row>
         </Table.Header>
         <Table.Body>
-          {landMedDokumenter.map((landogdoc, i) => {
+          {landMedDokumenter.map((landMedDokument, i) => {
             const oppdaterLandMedDokumenter = (oppdatertLandMedDokumenter: LandMedDokumenter) => {
-              setLandMedDokumenter((landMedDokumenter) => {
-                const oppdaterteLandMedDokumenter = landMedDokumenter.map((landMedDokumenter, idx) =>
+              setLandMedDokumenter((landMedDokumenter) =>
+                landMedDokumenter.map((landMedDokumenter, idx) =>
                   idx === i ? oppdatertLandMedDokumenter : landMedDokumenter
                 )
-                return oppdaterteLandMedDokumenter
-              })
+              )
             }
             const fjernLand = () => {
-              setLandMedDokumenter((landMedDokumenter) => {
-                const nyLandlisteMedDokumenter = landMedDokumenter.filter((_, idx) => idx !== i)
-                return nyLandlisteMedDokumenter
-              })
+              setLandMedDokumenter((landMedDokumenter) => landMedDokumenter.filter((_, idx) => idx !== i))
             }
             const landrad = (
               <LandRad
-                landMedDokumenter={landogdoc}
+                landMedDokumenter={landMedDokument}
                 oppdaterLandMedDokumenter={oppdaterLandMedDokumenter}
                 landListe={landListe}
               />
             )
             return (
               <Table.ExpandableRow key={i} content={landrad} defaultOpen={true}>
-                <Table.DataCell scope="row">{landogdoc.landIsoKode}</Table.DataCell>
+                <Table.DataCell scope="row">{landMedDokument.landIsoKode}</Table.DataCell>
                 <Table.DataCell>
-                  {landogdoc.dokumenter
+                  {landMedDokument.dokumenter
                     .filter((e) => !!e.dokumenttype)
                     .map((e) => e.dokumenttype)
                     .join(', ')}

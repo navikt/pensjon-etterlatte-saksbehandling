@@ -20,7 +20,9 @@ export default function SluttbehandlingUtland({ sakId, revurderingId }: { sakId:
   const [alleLandKodeverk, setAlleLandKodeverk] = useState<ILand[] | null>(null)
   const [visHistorikk, setVisHistorikk] = useState(false)
   const [lagrestatus, lagre] = useApiCall(lagreRevurderingInfo)
-  const [landMedDokumenter, setLandMedDokumenter] = useState<LandMedDokumenter[]>([])
+  const [landMedDokumenter, setLandMedDokumenter] = useState<LandMedDokumenter[]>([
+    { landIsoKode: undefined, dokumenter: [{ dokumenttype: '', dato: undefined, kommentar: '' }] },
+  ])
 
   useEffect(() => {
     hentKravpakke(sakId)
@@ -103,7 +105,7 @@ export default function SluttbehandlingUtland({ sakId, revurderingId }: { sakId:
         Tidligere mottatte SED`er
       </Heading>
       <TextButton isOpen={visHistorikk} setIsOpen={setVisHistorikk} />
-      {visHistorikk && <BodyShort>Vis historikk her. TODO: Hvor skal historikken komme fra Mari? </BodyShort>}
+      {visHistorikk && <BodyShort>Vis historikk her. TODO: EY-2964 </BodyShort>}
       {isSuccess(kravpakkeStatus) && (
         <SluttbehandlingUtlandFelter tilknyttetBehandling={kravpakkeStatus.data.kravpakke.tilknyttetBehandling} />
       )}

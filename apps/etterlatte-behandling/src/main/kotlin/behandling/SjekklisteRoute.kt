@@ -14,6 +14,7 @@ import no.nav.etterlatte.behandling.sjekkliste.OppdatertSjekkliste
 import no.nav.etterlatte.behandling.sjekkliste.SjekklisteService
 import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.behandlingsId
+import no.nav.etterlatte.libs.common.kunSaksbehandler
 
 internal fun Route.sjekklisteRoute(sjekklisteService: SjekklisteService) {
     route("/api/sjekkliste/{$BEHANDLINGSID_CALL_PARAMETER}") {
@@ -28,22 +29,26 @@ internal fun Route.sjekklisteRoute(sjekklisteService: SjekklisteService) {
         }
 
         put {
-            val oppdatering = call.receive<OppdatertSjekkliste>()
-            val result = sjekklisteService.oppdaterSjekkliste(behandlingsId, oppdatering)
-            call.respond(result)
+            kunSaksbehandler {
+                val oppdatering = call.receive<OppdatertSjekkliste>()
+                val result = sjekklisteService.oppdaterSjekkliste(behandlingsId, oppdatering)
+                call.respond(result)
+            }
         }
 
         post("/item/{sjekklisteItemId}") {
-            val sjekklisteItemId = requireNotNull(call.parameters["sjekklisteItemId"]).toLong()
-            val oppdatering = call.receive<OppdaterSjekklisteItem>()
+            kunSaksbehandler {
+                val sjekklisteItemId = requireNotNull(call.parameters["sjekklisteItemId"]).toLong()
+                val oppdatering = call.receive<OppdaterSjekklisteItem>()
 
-            val result =
-                sjekklisteService.oppdaterSjekklisteItem(
-                    behandlingsId,
-                    sjekklisteItemId,
-                    oppdatering,
-                )
-            call.respond(result)
+                val result =
+                    sjekklisteService.oppdaterSjekklisteItem(
+                        behandlingsId,
+                        sjekklisteItemId,
+                        oppdatering,
+                    )
+                call.respond(result)
+            }
         }
     }
 }

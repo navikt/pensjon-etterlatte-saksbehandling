@@ -2,6 +2,8 @@ package beregning.grunnlag
 
 import no.nav.etterlatte.beregning.grunnlag.GrunnlagMedPeriode
 import no.nav.etterlatte.beregning.grunnlag.erGrunnlagLiktFoerEnDato
+import no.nav.etterlatte.beregning.grunnlag.kombinerOverlappendePerioder
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -9,6 +11,52 @@ import java.time.LocalDate
 import java.time.YearMonth
 
 class GrunnlagMedPeriodeKtTest {
+    @Test
+    fun `kombinerOverlappendePerioder gir riktige knekkpunkter når en periode er åpen og en er lukket`() {
+        val g1 =
+            GrunnlagMedPeriode(
+                data = "1",
+                fom = YearMonth.of(2022, 1).atDay(1),
+                tom = null,
+            )
+
+        val g2 =
+            GrunnlagMedPeriode(
+                data = "2",
+                fom = YearMonth.of(2022, 8).atDay(1),
+                tom = YearMonth.of(2023, 1).atEndOfMonth(),
+            )
+
+        val kombinert = listOf(g1, g2).kombinerOverlappendePerioder()
+        assertEquals(3, kombinert.size)
+        assertEquals(
+            setOf(g1.fom, g1.tom, g2.fom, g2.fom, g2.fom.minusDays(1), g2.tom, g2.tom?.plusDays(1)),
+            kombinert.flatMap {
+                listOf(it.fom, it.tom)
+            }.toSet(),
+        )
+    }
+
+    @Test
+    fun `kombinerOverlappendePerioder gir riktige knekkpunkter hvis vi har to lukkede perioder`() {
+        val g1 =
+            GrunnlagMedPeriode(
+                data = "1",
+                fom = YearMonth.of(2022, 1).atDay(1),
+                tom = YearMonth.of(2023, 7).atEndOfMonth(),
+            )
+
+        val g2 =
+            GrunnlagMedPeriode(
+                data = "2",
+                fom = YearMonth.of(2022, 8).atDay(1),
+                tom = YearMonth.of(2023, 1).atEndOfMonth(),
+            )
+
+        val kombinert = listOf(g1, g2).kombinerOverlappendePerioder()
+        println(kombinert)
+    }
+
     @Test
     fun `erInnenforPeriode gir riktig svar med en lukket periode`() {
         val g1 =

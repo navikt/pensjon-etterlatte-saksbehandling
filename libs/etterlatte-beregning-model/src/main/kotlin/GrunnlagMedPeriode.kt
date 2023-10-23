@@ -19,8 +19,10 @@ data class GrunnlagMedPeriode<T>(
         assert(periodeFom <= periodeTom) {
             "Perioder må ha fom >= tom"
         }
-
-        return fom <= periodeTom
+        if (tom == null) {
+            return fom <= periodeTom
+        }
+        return tom >= periodeFom
     }
 
     init {
@@ -32,7 +34,7 @@ data class GrunnlagMedPeriode<T>(
 
 fun <T> List<GrunnlagMedPeriode<T>>.kombinerOverlappendePerioder(): List<GrunnlagMedPeriode<List<T>>> {
     val harAapenSluttperiode = this.any { it.tom == null }
-    var knekkpunkter: List<LocalDate?> = ((this.flatMap { listOfNotNull(it.fom, it.tom) }).toSet().toList()).sorted()
+    var knekkpunkter: List<LocalDate?> = this.flatMap { listOfNotNull(it.fom, it.tom?.plusDays(1)) }.distinct().sorted()
     if (harAapenSluttperiode) {
         knekkpunkter = knekkpunkter.plus(listOf(null))
     }

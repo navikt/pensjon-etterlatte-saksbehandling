@@ -8,8 +8,7 @@ export const handlinger = {
     AVSLAG: { id: 'avslag', navn: 'Avslå og gå til brev' },
     VENT: { id: 'vent', navn: 'Sett saken på vent' },
     GJENNOPPTA: { id: 'vent', navn: 'Gjennoppta saken' },
-    OPPHOER: { id: 'opphoer', navn: 'Opphør og gå til brev' },
-    OPPHOER_FATT_VEDTAK: { id: 'opphoer', navn: 'Fatt vedtak' },
+    OPPHOER: { id: 'opphoer', navn: 'Gå til beregning' },
   },
   ATTESTERING: { id: 'beregne', navn: 'Send til attestering' },
 

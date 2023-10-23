@@ -5,16 +5,14 @@ import { useState } from 'react'
 import { useVedtaksResultat } from '../useVedtaksResultat'
 import { isFailure, isPending, useApiCall } from '~shared/hooks/useApiCall'
 import { ApiErrorAlert } from '~ErrorBoundary'
-import { fattVedtak, upsertVedtak } from '~shared/api/vedtaksvurdering'
-import { SendTilAttesteringModal } from '~components/behandling/handlinger/sendTilAttesteringModal'
+import { upsertVedtak } from '~shared/api/vedtaksvurdering'
 
-export const VilkaarsVurderingKnapper = (props: { behandlingId: string; skalSendeBrev: boolean }) => {
+export const VilkaarsVurderingKnapper = (props: { behandlingId: string }) => {
   const { next, goto } = useBehandlingRoutes()
-  const { behandlingId, skalSendeBrev } = props
+  const { behandlingId } = props
   const [ventNavn, setVentNavn] = useState<string>(handlinger.VILKAARSVURDERING.VENT.navn)
   const [vedtak, oppdaterVedtakRequest] = useApiCall(upsertVedtak)
   const vedtaksresultat = useVedtaksResultat()
-  const [visAttesteringsmodal, setVisAttesteringsmodal] = useState(false)
 
   function toggleVentNavn() {
     const navn =
@@ -24,13 +22,9 @@ export const VilkaarsVurderingKnapper = (props: { behandlingId: string; skalSend
     setVentNavn(navn)
   }
 
-  const oppdaterVedtak = () => {
+  const oppdaterVedtakAvslag = () => {
     oppdaterVedtakRequest(behandlingId, () => {
-      if (skalSendeBrev) {
-        goto('brev')
-      } else {
-        setVisAttesteringsmodal(true)
-      }
+      goto('brev')
     })
   }
 
@@ -41,7 +35,7 @@ export const VilkaarsVurderingKnapper = (props: { behandlingId: string; skalSend
           case 'avslag':
             return (
               <>
-                <Button variant="primary" loading={isPending(vedtak)} onClick={() => oppdaterVedtak()}>
+                <Button variant="primary" loading={isPending(vedtak)} onClick={() => oppdaterVedtakAvslag()}>
                   {handlinger.VILKAARSVURDERING.AVSLAG.navn}
                 </Button>
                 {isFailure(vedtak) && (
@@ -49,35 +43,24 @@ export const VilkaarsVurderingKnapper = (props: { behandlingId: string; skalSend
                 )}
               </>
             )
+          case 'uavklart':
+            return (
+              //TODO - oppdatere sak med Status "satt på vent" og Handlinger "Gjenoppta saken" i oppgavebenken
+              <Button variant="primary" onClick={toggleVentNavn}>
+                {ventNavn}
+              </Button>
+            )
           case 'opphoer':
             return (
-              <>
-                {visAttesteringsmodal ? (
-                  <SendTilAttesteringModal behandlingId={behandlingId} fattVedtakApi={fattVedtak} />
-                ) : (
-                  <Button variant="primary" loading={isPending(vedtak)} onClick={() => oppdaterVedtak()}>
-                    {skalSendeBrev
-                      ? handlinger.VILKAARSVURDERING.OPPHOER.navn
-                      : handlinger.VILKAARSVURDERING.OPPHOER_FATT_VEDTAK.navn}
-                  </Button>
-                )}
-                {isFailure(vedtak) && (
-                  <ApiErrorAlert>Kunne ikke opprette eller oppdatere vedtak, prøv igjen senere</ApiErrorAlert>
-                )}
-              </>
+              <Button variant="primary" onClick={next}>
+                {handlinger.VILKAARSVURDERING.OPPHOER.navn}
+              </Button>
             )
           case 'innvilget':
           case 'endring':
             return (
               <Button variant="primary" onClick={next}>
                 {handlinger.VILKAARSVURDERING.BEREGNE.navn}
-              </Button>
-            )
-          case 'uavklart':
-            return (
-              //TODO - oppdatere sak med Status "satt på vent" og Handlinger "Gjenoppta saken" i oppgavebenken
-              <Button variant="primary" onClick={toggleVentNavn}>
-                {ventNavn}
               </Button>
             )
         }

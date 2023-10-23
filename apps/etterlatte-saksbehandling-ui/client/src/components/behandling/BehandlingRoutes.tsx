@@ -132,11 +132,15 @@ export function soeknadRoutes(behandling: IBehandlingReducer): Array<BehandlingR
     ? [soeknadsoversikt, vilkaarsvurdering]
     : [soeknadsoversikt, vilkaarsvurdering, trygdetid, beregningsgrunnlag, aktivitetsplikt, beregning]
 
+  const defaultRoutesForYtelse = defaultRoutes.filter(
+    (route) => route.sakstype === undefined || route.sakstype === behandling.sakType
+  )
+
   if (behandlingSkalSendeBrev(behandling.behandlingType, behandling.revurderingsaarsak)) {
-    return [...defaultRoutes, brev]
+    return [...defaultRoutesForYtelse, brev]
   }
 
-  return defaultRoutes
+  return defaultRoutesForYtelse
 }
 
 export const manueltOpphoerRoutes: Array<BehandlingRouteTypes> = [
@@ -208,12 +212,16 @@ export function revurderingRoutes(behandling: IBehandlingReducer): Array<Behandl
 
   const defaultRoutes: Array<BehandlingRouteTypes> =
     erOpphoer(behandling.revurderingsaarsak!!) || erRevurderingsaarsakAnnenOgOpphoer
-      ? [revurderingsoversikt, vilkaarsvurdering]
+      ? [revurderingsoversikt, vilkaarsvurdering, beregning]
       : [revurderingsoversikt, vilkaarsvurdering, trygdetid, beregningsgrunnlag, aktivitetsplikt, beregning]
 
+  const defaultRoutesForYtelse = defaultRoutes.filter(
+    (route) => route.sakstype === undefined || route.sakstype === behandling.sakType
+  )
+
   if (behandlingSkalSendeBrev(behandling.behandlingType, behandling.revurderingsaarsak)) {
-    return [...defaultRoutes, brev]
+    return [...defaultRoutesForYtelse, brev]
   }
 
-  return defaultRoutes
+  return defaultRoutesForYtelse
 }

@@ -55,7 +55,7 @@ export const StegMeny = (props: { behandling: IBehandlingReducer }) => {
               key={pathInfo.path}
               pathInfo={pathInfo}
               behandling={props.behandling}
-              separator={erSisteRoute(index, soeknadRoutes_)}
+              separator={erSisteRoute(index, revurderingRoutes_)}
             />
           ))}
       </StegMenyWrapper>

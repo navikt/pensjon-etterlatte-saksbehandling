@@ -156,7 +156,7 @@ internal class VilkaarsvurderingServiceTest {
     fun `Skal slette vilkaarsvurdering`() {
         runBlocking { service.opprettVilkaarsvurdering(uuid, brukerTokenInfo) }
         service.hentVilkaarsvurdering(uuid) shouldNotBe null
-        coEvery { behandlingKlient.settBehandlingStatusOpprettet(any(), any(), any()) } returns true
+        coEvery { behandlingKlient.settBehandlingStatusOpprettet(uuid, brukerTokenInfo, any()) } returns true
 
         runBlocking { service.slettVilkaarsvurdering(uuid, brukerTokenInfo) }
         service.hentVilkaarsvurdering(uuid) shouldBe null

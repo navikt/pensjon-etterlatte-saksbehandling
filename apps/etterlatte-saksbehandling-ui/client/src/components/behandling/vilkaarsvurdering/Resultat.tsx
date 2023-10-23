@@ -21,6 +21,7 @@ import { oppdaterBehandlingsstatus } from '~store/reducers/BehandlingReducer'
 import { IBehandlingStatus, IBehandlingsType } from '~shared/types/IDetaljertBehandling'
 import { SakType } from '~shared/types/sak'
 import { Border } from '~components/behandling/soeknadsoversikt/styled'
+import { NesteOgTilbake } from '~components/behandling/handlinger/NesteOgTilbake'
 
 type Props = {
   virkningstidspunktDato: string | undefined
@@ -194,10 +195,15 @@ export const Resultat = (props: Props) => {
       )}
 
       <Border />
-
-      <BehandlingHandlingKnapper>
-        {vilkaarsvurdering.resultat && virkningstidspunktSamsvarer && <VilkaarsVurderingKnapper />}
-      </BehandlingHandlingKnapper>
+      {redigerbar ? (
+        <BehandlingHandlingKnapper>
+          {vilkaarsvurdering.resultat && virkningstidspunktSamsvarer && (
+            <VilkaarsVurderingKnapper behandlingId={behandlingId} />
+          )}
+        </BehandlingHandlingKnapper>
+      ) : (
+        <NesteOgTilbake></NesteOgTilbake>
+      )}
     </>
   )
 }

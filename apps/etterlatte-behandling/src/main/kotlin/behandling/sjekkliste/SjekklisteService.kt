@@ -1,13 +1,20 @@
 package no.nav.etterlatte.behandling.sjekkliste
 
+import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.BehandlingService
+import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.inTransaction
+import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
+import no.nav.etterlatte.oppgave.OppgaveService
 import java.util.UUID
 
 class SjekklisteService(
     private val dao: SjekklisteDao,
     private val behandlingService: BehandlingService,
+    private val oppgaveService: OppgaveService,
 ) {
     fun hentSjekkliste(id: UUID): Sjekkliste? {
         return inTransaction {
@@ -21,12 +28,16 @@ class SjekklisteService(
                 requireNotNull(behandlingService.hentBehandling(behandlingId))
             }
 
-        if (!behandling.status.kanEndres()) {
-            throw IllegalStateException(
+        if (!kanEndres(behandling.status)) {
+            throw SjekklisteIkkeTillattException(
+                kode = "SJEKK01",
                 "Kan ikke opprette sjekkliste for behandling ${behandling.id} med status ${behandling.status}",
             )
         } else if (hentSjekkliste(behandlingId) != null) {
-            throw IllegalStateException("Det finnes allerede en sjekkliste for behandling ${behandling.id}")
+            throw SjekklisteUgyldigForespoerselException(
+                kode = "SJEKK02",
+                "Det finnes allerede en sjekkliste for behandling ${behandling.id}",
+            )
         }
 
         val items =
@@ -48,8 +59,12 @@ class SjekklisteService(
     ): Sjekkliste {
         return inTransaction {
             val behandling = requireNotNull(behandlingService.hentBehandling(behandlingId))
-            if (!behandling.status.kanEndres()) {
-                throw IllegalStateException("Kan ikke oppdatere sjekkliste for behandling ${behandling.id} med status ${behandling.status}")
+
+            if (!(kanEndres(behandling.status) && behandling.oppgaveUnderArbeidErTildeltGjeldendeSaksbehandler())) {
+                throw SjekklisteIkkeTillattException(
+                    kode = "SJEKK03",
+                    "Kan ikke oppdatere sjekkliste for behandling ${behandling.id} med status ${behandling.status}",
+                )
             }
 
             dao.oppdaterSjekkliste(behandlingId, oppdaterSjekkliste)
@@ -64,8 +79,10 @@ class SjekklisteService(
     ): SjekklisteItem {
         return inTransaction {
             val behandling = requireNotNull(behandlingService.hentBehandling(behandlingId))
-            if (!behandling.status.kanEndres()) {
-                throw IllegalStateException(
+
+            if (!(kanEndres(behandling.status) && behandling.oppgaveUnderArbeidErTildeltGjeldendeSaksbehandler())) {
+                throw SjekklisteIkkeTillattException(
+                    kode = "SJEKK04",
                     "Kan ikke oppdatere sjekklisteelement for behandling ${behandling.id} med status ${behandling.status}",
                 )
             }
@@ -74,4 +91,22 @@ class SjekklisteService(
             dao.hentSjekklisteItem(itemId)
         }
     }
+
+    private fun kanEndres(status: BehandlingStatus): Boolean {
+        return BehandlingStatus.underBehandling().contains(status)
+    }
+
+    private fun Behandling.oppgaveUnderArbeidErTildeltGjeldendeSaksbehandler(): Boolean {
+        return Kontekst.get().AppUser.name() == oppgaveService.hentSaksbehandlerForOppgaveUnderArbeid(this.id)
+    }
 }
+
+internal class SjekklisteUgyldigForespoerselException(kode: String, detail: String) : UgyldigForespoerselException(
+    code = kode,
+    detail = detail,
+)
+
+internal class SjekklisteIkkeTillattException(kode: String, detail: String) : IkkeTillattException(
+    code = kode,
+    detail = detail,
+)

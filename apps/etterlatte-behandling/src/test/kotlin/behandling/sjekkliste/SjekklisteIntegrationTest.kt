@@ -18,6 +18,7 @@ import no.nav.etterlatte.foerstegangsbehandling
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.POSTGRES_VERSION
 import no.nav.etterlatte.libs.database.migrate
+import no.nav.etterlatte.oppgave.OppgaveService
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
@@ -36,6 +37,7 @@ class SjekklisteIntegrationTest {
         }
 
     private val behandlingService = mockk<BehandlingService>()
+    private val oppgaveService = mockk<OppgaveService>()
     private lateinit var dataSource: DataSource
     private lateinit var sjekklisteDao: SjekklisteDao
     private lateinit var sjekklisteService: SjekklisteService
@@ -58,7 +60,7 @@ class SjekklisteIntegrationTest {
 
         val connection = dataSource.connection
         sjekklisteDao = SjekklisteDao { connection }
-        sjekklisteService = SjekklisteService(sjekklisteDao, behandlingService)
+        sjekklisteService = SjekklisteService(sjekklisteDao, behandlingService, oppgaveService)
 
         settOppKontekst(user)
     }

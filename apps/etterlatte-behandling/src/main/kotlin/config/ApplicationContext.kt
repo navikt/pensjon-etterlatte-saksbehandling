@@ -217,7 +217,7 @@ internal class ApplicationContext(
     val kommerBarnetTilGodeService =
         KommerBarnetTilGodeService(kommerBarnetTilGodeDao, behandlingDao)
     val aktivtetspliktService = AktivitetspliktService(aktivitetspliktDao)
-    val sjekklisteService = SjekklisteService(sjekklisteDao, behandlingService)
+    val sjekklisteService = SjekklisteService(sjekklisteDao, behandlingService, oppgaveService)
     val grunnlagsService = GrunnlagService(grunnlagKlient = grunnlagKlient)
     val revurderingService =
         RevurderingService(

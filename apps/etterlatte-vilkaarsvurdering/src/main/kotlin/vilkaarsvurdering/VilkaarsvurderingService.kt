@@ -181,11 +181,14 @@ class VilkaarsvurderingService(
             }
         }
 
-    fun slettVilkaarsvurdering(
+    suspend fun slettVilkaarsvurdering(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ) = vilkaarsvurderingRepository.slettVilkaarvurdering(behandlingId).also {
-        runBlocking { behandlingKlient.settBehandlingStatusOpprettet(behandlingId, brukerTokenInfo, true) }
+    ) = if (behandlingKlient.settBehandlingStatusOpprettet(behandlingId, brukerTokenInfo, false)) {
+        vilkaarsvurderingRepository.slettVilkaarvurdering(behandlingId)
+        behandlingKlient.settBehandlingStatusOpprettet(behandlingId, brukerTokenInfo, true)
+    } else {
+        throw BehandlingstilstandException
     }
 
     private fun opprettNyVilkaarsvurdering(

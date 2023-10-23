@@ -23,13 +23,9 @@ export const StegMeny = (props: { behandling: IBehandlingReducer }) => {
 
   // Trenger vilkårsvurdering for å kunne vise riktig routes etter at vv i en behandling er utført
   useEffect(() => {
-    fetchVilkaarsvurdering(
-      id,
-      (vilkaarsvurdering) => {
-        dispatch(updateVilkaarsvurdering(vilkaarsvurdering))
-      },
-      () => {}
-    )
+    fetchVilkaarsvurdering(id, (vilkaarsvurdering) => {
+      dispatch(updateVilkaarsvurdering(vilkaarsvurdering))
+    })
   }, [id])
 
   if (isSuccess(fetchVilkaarsvurderingStatus)) {

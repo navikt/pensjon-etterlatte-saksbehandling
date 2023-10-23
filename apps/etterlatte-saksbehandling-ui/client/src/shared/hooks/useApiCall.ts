@@ -88,7 +88,7 @@ export const mapAllApiResult = <T>(
   mapPending: ReactElement,
   mapInitial: ReactElement | null,
   mapError: (_: ApiError) => ReactElement,
-  mapSuccess: (_: T) => ReactElement
+  mapSuccess: (_: T) => ReactElement | null
 ): ReactElement | null => {
   if (isPending(result)) {
     return mapPending

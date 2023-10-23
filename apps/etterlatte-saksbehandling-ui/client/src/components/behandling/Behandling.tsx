@@ -40,7 +40,7 @@ export const Behandling = () => {
     null,
     () => <ApiErrorAlert>Kunne ikke hente behandling</ApiErrorAlert>,
     () => {
-      if (!!behandling) {
+      if (behandling) {
         return (
           <>
             {behandling.søker && <PdlPersonStatusBar person={behandling.søker} />}
@@ -60,7 +60,7 @@ export const Behandling = () => {
           </>
         )
       }
-      return <></>
+      return null
     }
   )
 }

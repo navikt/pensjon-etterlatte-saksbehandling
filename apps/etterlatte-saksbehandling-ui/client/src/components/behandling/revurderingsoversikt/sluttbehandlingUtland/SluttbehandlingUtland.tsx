@@ -1,4 +1,4 @@
-import { BodyShort, Button, Heading } from '@navikt/ds-react'
+import { Alert, BodyShort, Button, Heading } from '@navikt/ds-react'
 import { isFailure, isSuccess, mapAllApiResult, useApiCall } from '~shared/hooks/useApiCall'
 import { hentKravpakkeforSak } from '~shared/api/generellbehandling'
 import { useEffect, useState } from 'react'
@@ -57,17 +57,28 @@ export default function SluttbehandlingUtland({ sakId, revurderingId }: { sakId:
         () => (
           <ApiErrorAlert>Klarte ikke å hente kravpakke for sluttbehandling</ApiErrorAlert>
         ),
-        (kravpakkeMedAvdoed) => (
-          <InfoWrapper>
-            <Info tekst={formaterNavn(kravpakkeMedAvdoed.avdoed)} label="Kravpakke gjelder" />
-            <Info
-              tekst={formaterKravpakkeLand(kravpakkeMedAvdoed.kravpakke.innhold, alleLandKodeverk)}
-              label="Kravpakke sendt til"
-            />
-            <Info label="Saks-ID RINA" tekst={kravpakkeMedAvdoed.kravpakke.innhold.rinanummer} />
-            <Info label="Notater" tekst={kravpakkeMedAvdoed.kravpakke.innhold.begrunnelse} />
-          </InfoWrapper>
-        )
+        (kravpakkeMedAvdoed) => {
+          return (
+            <>
+              {kravpakkeMedAvdoed.kravpakke.innhold ? (
+                <InfoWrapper>
+                  <Info tekst={formaterNavn(kravpakkeMedAvdoed.avdoed)} label="Kravpakke gjelder" />
+                  <Info
+                    tekst={formaterKravpakkeLand(kravpakkeMedAvdoed.kravpakke.innhold, alleLandKodeverk)}
+                    label="Kravpakke sendt til"
+                  />
+                  <Info label="Saks-ID RINA" tekst={kravpakkeMedAvdoed.kravpakke.innhold.rinanummer} />
+                  <Info label="Notater" tekst={kravpakkeMedAvdoed.kravpakke.innhold.begrunnelse} />
+                </InfoWrapper>
+              ) : (
+                <Alert variant="warning">
+                  Fant ingen kravpakke for saken, kontroller at kravpakke ble opprettet. Finn sakens
+                  førstegangsbehandling og kontroller at den har huket av {`"skal sende kravpakke"`}
+                </Alert>
+              )}
+            </>
+          )
+        }
       )}
       <Heading level="2" size="medium">
         Mottatte SED
@@ -80,9 +91,11 @@ export default function SluttbehandlingUtland({ sakId, revurderingId }: { sakId:
           setLandMedDokumenter={setLandMedDokumenter}
         />
       )}
-      <Button variant="secondary" onClick={() => lagreRevurderingsinfo()}>
-        Lagre opplysninger
-      </Button>
+      {landMedDokumenter.length > 0 ? (
+        <Button variant="secondary" onClick={() => lagreRevurderingsinfo()}>
+          Lagre opplysninger
+        </Button>
+      ) : null}
       {isFailure(lagrestatus) && <ApiErrorAlert>Kunne ikke lagre revurderingsinfo</ApiErrorAlert>}
       <Heading level="2" size="medium" style={{ marginTop: '2rem' }}>
         Tidligere mottatte SED`er
@@ -96,12 +109,12 @@ export default function SluttbehandlingUtland({ sakId, revurderingId }: { sakId:
   )
 }
 
-function formaterKravpakkeLand(innhold: KravpakkeUtland, landliste: ILand[] | null) {
-  if (landliste) {
-    return innhold.landIsoKode
+function formaterKravpakkeLand(innhold: KravpakkeUtland | undefined, landliste: ILand[] | null) {
+  if (landliste && innhold?.landIsoKode) {
+    return innhold?.landIsoKode
       ?.map((kode) => landliste.find((kodeverkLand) => kodeverkLand.isoLandkode === kode))
       .join(', ')
   } else {
-    return innhold.landIsoKode ? innhold.landIsoKode.join(', ') : ''
+    return innhold?.landIsoKode ? innhold.landIsoKode.join(', ') : ''
   }
 }

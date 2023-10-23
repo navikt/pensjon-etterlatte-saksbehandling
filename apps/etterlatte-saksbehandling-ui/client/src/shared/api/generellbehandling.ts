@@ -25,6 +25,6 @@ export function hentKravpakkeforSak(sakId: number): Promise<ApiResponse<KravPakk
 }
 
 export interface KravPakkeMedAvdoed {
-  kravpakke: Generellbehandling & { innhold: KravpakkeUtland }
+  kravpakke: Generellbehandling & { innhold?: KravpakkeUtland | undefined }
   avdoed: IPdlPerson
 }

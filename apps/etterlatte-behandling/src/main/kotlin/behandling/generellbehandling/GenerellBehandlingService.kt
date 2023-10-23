@@ -168,7 +168,7 @@ class GenerellBehandlingService(
         return generellBehandlingDao.hentGenerellBehandlingForSak(sakId)
     }
 
-    private fun hentBehandlingForTilknyttetBehandling(tilknyttetBehandlingId: UUID): GenerellBehandling? {
+    private fun hentGenerellbehandlingSinTilknyttetedeBehandling(tilknyttetBehandlingId: UUID): GenerellBehandling? {
         return generellBehandlingDao.hentBehandlingForTilknyttetBehandling(tilknyttetBehandlingId)
     }
 
@@ -179,19 +179,19 @@ class GenerellBehandlingService(
         val (kravpakke, forstegangsbehandlingMedKravpakke) =
             inTransaction {
                 val behandlingerForSak = behandlingService.hentBehandlingerISak(sakId)
-                val forstegangsbehandlingMedKravpakke =
+                val foerstegangsbehandlingMedKravpakke =
                     behandlingerForSak.find {
                             behandling ->
                         (behandling is Foerstegangsbehandling) && behandling.boddEllerArbeidetUtlandet?.skalSendeKravpakke == true
                     }
                         ?: throw FantIkkeFoerstegangsbehandlingForKravpakkeOgSak("Fant ikke behandlingen for sak $sakId")
                 val kravpakke =
-                    this.hentBehandlingForTilknyttetBehandling(forstegangsbehandlingMedKravpakke.id)
+                    this.hentGenerellbehandlingSinTilknyttetedeBehandling(foerstegangsbehandlingMedKravpakke.id)
                         ?: throw FantIkkeKravpakkeForFoerstegangsbehandling(
                             "Fant ikke" +
-                                " kravpakke for ${forstegangsbehandlingMedKravpakke.id}",
+                                " kravpakke for ${foerstegangsbehandlingMedKravpakke.id}",
                         )
-                Pair(kravpakke, forstegangsbehandlingMedKravpakke)
+                Pair(kravpakke, foerstegangsbehandlingMedKravpakke)
             }
         if (kravpakke.status == GenerellBehandling.Status.ATTESTERT) {
             val avdoed =
@@ -225,7 +225,7 @@ class FantIkkeFoerstegangsbehandlingForKravpakkeOgSak(msg: String) :
 class FantIkkeKravpakkeForFoerstegangsbehandling(msg: String) :
     ForespoerselException(
         status = 400,
-        code = "FANT_IKKE_KRAVPAKKE_FOR_FOERSTEGANGSBEHANDLING_",
+        code = "FANT_IKKE_KRAVPAKKE_FOR_FOERSTEGANGSBEHANDLING",
         detail = msg,
     )
 

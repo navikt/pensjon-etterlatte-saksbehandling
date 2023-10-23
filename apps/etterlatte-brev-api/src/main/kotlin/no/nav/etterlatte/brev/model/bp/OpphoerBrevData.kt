@@ -4,8 +4,8 @@ import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.model.AvslagBrevData
 import no.nav.etterlatte.brev.model.OpphoerBrevData
 import no.nav.etterlatte.libs.common.behandling.Navn
-import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import java.time.LocalDate
 
 data class AdopsjonRevurderingBrevdata(
@@ -24,7 +24,7 @@ data class AdopsjonRevurderingBrevdata(
                 AvslagBrevData.valider<RevurderingInfo.Adopsjon>(
                     generellBrevData.revurderingsaarsak,
                     generellBrevData.forenkletVedtak.revurderingInfo,
-                    RevurderingAarsak.ADOPSJON,
+                    Revurderingaarsak.ADOPSJON,
                 )
 
             val virkningstidspunkt =
@@ -56,7 +56,7 @@ data class OmgjoeringAvFarskapRevurderingBrevdata(
                 AvslagBrevData.valider<RevurderingInfo.OmgjoeringAvFarskap>(
                     generellBrevData.revurderingsaarsak,
                     generellBrevData.forenkletVedtak.revurderingInfo,
-                    RevurderingAarsak.OMGJOERING_AV_FARSKAP,
+                    Revurderingaarsak.OMGJOERING_AV_FARSKAP,
                 )
             val virkningstidspunkt =
                 requireNotNull(generellBrevData.forenkletVedtak.virkningstidspunkt) {

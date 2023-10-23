@@ -16,7 +16,7 @@ import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
-import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
@@ -175,7 +175,7 @@ internal class GrunnlagsendringshendelseDaoTest {
             opprettBehandling(
                 type = BehandlingType.REVURDERING,
                 sakId = sak1,
-                revurderingAarsak = RevurderingAarsak.REGULERING,
+                revurderingAarsak = Revurderingaarsak.REGULERING,
             )
         behandlingRepo.opprettBehandling(opprettBehandling)
 
@@ -368,7 +368,7 @@ internal class GrunnlagsendringshendelseDaoTest {
             opprettBehandling(
                 type = BehandlingType.REVURDERING,
                 sakId = sak1,
-                revurderingAarsak = RevurderingAarsak.REGULERING,
+                revurderingAarsak = Revurderingaarsak.REGULERING,
             )
         behandlingRepo.opprettBehandling(opprettBehandling)
 
@@ -401,7 +401,7 @@ internal class GrunnlagsendringshendelseDaoTest {
                 status = BehandlingStatus.OPPRETTET,
                 soeknadMottattDato = null,
                 virkningstidspunkt = null,
-                revurderingsAarsak = RevurderingAarsak.SOESKENJUSTERING,
+                revurderingsAarsak = Revurderingaarsak.SOESKENJUSTERING,
                 opphoerAarsaker = listOf(),
                 fritekstAarsak = null,
                 prosesstype = Prosesstype.MANUELL,

@@ -5,7 +5,7 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
-import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
@@ -288,7 +288,7 @@ class TrygdetidServiceImpl(
         behandling: DetaljertBehandling,
         brukerTokenInfo: BrukerTokenInfo,
     ): List<Trygdetid> =
-        if (behandling.revurderingsaarsak == RevurderingAarsak.REGULERING &&
+        if (behandling.revurderingsaarsak == Revurderingaarsak.REGULERING &&
             behandling.prosesstype == Prosesstype.AUTOMATISK
         ) {
             logger.info("Forrige trygdetid for ${behandling.id} finnes ikke - må reguleres manuelt")

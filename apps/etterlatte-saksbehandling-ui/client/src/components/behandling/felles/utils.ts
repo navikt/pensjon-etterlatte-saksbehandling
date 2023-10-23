@@ -4,7 +4,7 @@ import { IBehandlingStatus, IBehandlingsType, IDetaljertBehandling } from '~shar
 import { IBehandlingsammendrag } from '~components/person/typer'
 import { SakType } from '~shared/types/sak'
 import { JaNei } from '~shared/types/ISvar'
-import { Revurderingsaarsak } from '~shared/types/Revurderingsaarsak'
+import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
 import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
 
 export function behandlingErUtfylt(behandling: IDetaljertBehandling): boolean {
@@ -82,8 +82,8 @@ export const behandlingSkalSendeBrev = (behandling: IBehandlingReducer): boolean
       return false
     case IBehandlingsType.REVURDERING:
       return !(
-        behandling.revurderingsaarsak === Revurderingsaarsak.REGULERING ||
-        behandling.revurderingsaarsak === Revurderingsaarsak.DOEDSFALL
+        behandling.revurderingsaarsak === Revurderingaarsak.REGULERING ||
+        behandling.revurderingsaarsak === Revurderingaarsak.DOEDSFALL
       )
   }
 }

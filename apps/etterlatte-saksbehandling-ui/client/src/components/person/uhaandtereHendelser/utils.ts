@@ -6,7 +6,7 @@ import {
 import { formaterKanskjeStringDatoMedFallback } from '~utils/formattering'
 import React from 'react'
 import { PersonMedNavn } from '~shared/types/grunnlag'
-import { Revurderingsaarsak } from '~shared/types/Revurderingsaarsak'
+import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
 
 export const grunnlagsendringsTittel: Record<GrunnlagendringshendelseSamsvarType, string> = {
   GRUNNBELOEP: 'Regulering feilet',
@@ -47,22 +47,18 @@ export const grunnlagsendringsKilde = (type: GrunnlagendringshendelseSamsvarType
 }
 
 const grunnlagsEndringstyperTilRevurderingsAarsaker: Record<GrunnlagsendringsType, Array<string>> = {
-  GRUNNBELOEP: [Revurderingsaarsak.REGULERING],
-  DOEDSFALL: [Revurderingsaarsak.DOEDSFALL, Revurderingsaarsak.SOESKENJUSTERING],
-  UTFLYTTING: [Revurderingsaarsak.UTLAND],
-  FORELDER_BARN_RELASJON: [
-    Revurderingsaarsak.ANSVARLIGE_FORELDRE,
-    Revurderingsaarsak.BARN,
-    Revurderingsaarsak.SIVILSTAND,
-  ],
-  VERGEMAAL_ELLER_FREMTIDSFULLMAKT: [Revurderingsaarsak.VERGEMAAL_ELLER_FREMTIDSFULLMAKT],
-  SIVILSTAND: [Revurderingsaarsak.SIVILSTAND],
-  INSTITUSJONSOPPHOLD: [Revurderingsaarsak.SOESKENJUSTERING],
+  GRUNNBELOEP: [Revurderingaarsak.REGULERING],
+  DOEDSFALL: [Revurderingaarsak.DOEDSFALL, Revurderingaarsak.SOESKENJUSTERING],
+  UTFLYTTING: [Revurderingaarsak.UTLAND],
+  FORELDER_BARN_RELASJON: [Revurderingaarsak.ANSVARLIGE_FORELDRE, Revurderingaarsak.BARN, Revurderingaarsak.SIVILSTAND],
+  VERGEMAAL_ELLER_FREMTIDSFULLMAKT: [Revurderingaarsak.VERGEMAAL_ELLER_FREMTIDSFULLMAKT],
+  SIVILSTAND: [Revurderingaarsak.SIVILSTAND],
+  INSTITUSJONSOPPHOLD: [Revurderingaarsak.SOESKENJUSTERING],
 }
 
 export const stoetterRevurderingAvHendelse = (
   hendelse: Grunnlagsendringshendelse,
-  revurderinger: Array<Revurderingsaarsak>
+  revurderinger: Array<Revurderingaarsak>
 ): boolean => {
   return revurderinger.some(
     (revurdering) =>

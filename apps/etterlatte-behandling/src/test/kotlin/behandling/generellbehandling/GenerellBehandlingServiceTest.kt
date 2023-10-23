@@ -2,19 +2,32 @@ package no.nav.etterlatte.behandling.generellbehandling
 
 import io.kotest.inspectors.forExactly
 import io.kotest.matchers.shouldBe
+import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.Context
 import no.nav.etterlatte.DatabaseKontekst
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
+import no.nav.etterlatte.behandling.BehandlingDao
+import no.nav.etterlatte.behandling.BehandlingService
+import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
+import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
+import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
+import no.nav.etterlatte.behandling.revurdering.RevurderingDao
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
+import no.nav.etterlatte.grunnlagsOpplysningMedPersonopplysning
+import no.nav.etterlatte.libs.common.behandling.BehandlingType
+import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.generellbehandling.DokumentMedSendtDato
 import no.nav.etterlatte.libs.common.generellbehandling.Dokumenter
 import no.nav.etterlatte.libs.common.generellbehandling.GenerellBehandling
 import no.nav.etterlatte.libs.common.generellbehandling.Innhold
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.Status
@@ -26,6 +39,8 @@ import no.nav.etterlatte.oppgave.OppgaveDao
 import no.nav.etterlatte.oppgave.OppgaveDaoImpl
 import no.nav.etterlatte.oppgave.OppgaveDaoMedEndringssporingImpl
 import no.nav.etterlatte.oppgave.OppgaveService
+import no.nav.etterlatte.opprettBehandling
+import no.nav.etterlatte.personOpplysning
 import no.nav.etterlatte.sak.SakDao
 import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
 import no.nav.etterlatte.token.BrukerTokenInfo
@@ -57,6 +72,9 @@ class GenerellBehandlingServiceTest {
     private lateinit var oppgaveService: OppgaveService
     private lateinit var sakRepo: SakDao
     private lateinit var service: GenerellBehandlingService
+    private lateinit var behandlingRepo: BehandlingDao
+    val grunnlagKlient = mockk<GrunnlagKlient>()
+    val behandlingService = mockk<BehandlingService>()
 
     @BeforeAll
     fun beforeAll() {
@@ -75,9 +93,10 @@ class GenerellBehandlingServiceTest {
         dao = GenerellBehandlingDao { connection }
         oppgaveDao = OppgaveDaoImpl { connection }
         sakRepo = SakDao { connection }
-
+        behandlingRepo =
+            BehandlingDao(KommerBarnetTilGodeDao { connection }, RevurderingDao { connection }) { connection }
         oppgaveService = OppgaveService(OppgaveDaoMedEndringssporingImpl(oppgaveDao) { connection }, sakRepo, DummyFeatureToggleService())
-        service = GenerellBehandlingService(dao, oppgaveService)
+        service = GenerellBehandlingService(dao, oppgaveService, behandlingService, grunnlagKlient)
     }
 
     @AfterEach
@@ -125,6 +144,51 @@ class GenerellBehandlingServiceTest {
         assertThrows<KanIkkeEndreFattetEllerAttestertBehandling> {
             service.lagreNyeOpplysninger(opprettBehandling)
         }
+    }
+
+    @Test
+    fun `Finner kravpakke på sak`() {
+        val sak = sakRepo.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val foerstegangsbehandling =
+            opprettBehandling(
+                type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                sakId = sak.id,
+            )
+        behandlingRepo.opprettBehandling(foerstegangsbehandling)
+        behandlingRepo.lagreBoddEllerArbeidetUtlandet(
+            foerstegangsbehandling.id,
+            BoddEllerArbeidetUtlandet(
+                true,
+                Grunnlagsopplysning.Saksbehandler.create("ident"),
+                "begrunnelse",
+                boddArbeidetIkkeEosEllerAvtaleland = true,
+                boddArbeidetEosNordiskKonvensjon = true,
+                boddArbeidetAvtaleland = true,
+                vurdereAvoededsTrygdeavtale = true,
+                norgeErBehandlendeland = true,
+                skalSendeKravpakke = true,
+            ),
+        )
+        val foerstegangsbehandlingHentet = behandlingRepo.hentBehandling(foerstegangsbehandling.id) as Foerstegangsbehandling
+        val brukerTokenInfo = BrukerTokenInfo.of("token", "s1", null, null, null)
+        every { behandlingService.hentBehandlingerISak(sak.id) } returns listOf(foerstegangsbehandlingHentet)
+        val doedsdato = LocalDate.parse("2016-12-30")
+        val personopplysning = personOpplysning(doedsdato = doedsdato)
+        val grunnlagsopplysningMedPersonopplysning = grunnlagsOpplysningMedPersonopplysning(personopplysning)
+        coEvery {
+            grunnlagKlient.finnPersonOpplysning(sak.id, foerstegangsbehandling.id, Opplysningstype.AVDOED_PDL_V1, brukerTokenInfo)
+        } returns grunnlagsopplysningMedPersonopplysning
+
+        val manueltOpprettetBehandling =
+            GenerellBehandling.opprettFraType(
+                GenerellBehandling.GenerellBehandlingType.KRAVPAKKE_UTLAND,
+                sak.id,
+            ).copy(tilknyttetBehandling = foerstegangsbehandling.id, status = GenerellBehandling.Status.ATTESTERT)
+        val opprettBehandlingGenerell = service.opprettBehandling(manueltOpprettetBehandling)
+
+        val kravpakkeMedArbeidetUtlandet = runBlocking { service.hentKravpakkeForSak(sak.id, brukerTokenInfo) }
+        Assertions.assertEquals(opprettBehandlingGenerell.id, kravpakkeMedArbeidetUtlandet.kravpakke.id)
+        Assertions.assertEquals(foerstegangsbehandling.id, kravpakkeMedArbeidetUtlandet.kravpakke.tilknyttetBehandling)
     }
 
     @Test

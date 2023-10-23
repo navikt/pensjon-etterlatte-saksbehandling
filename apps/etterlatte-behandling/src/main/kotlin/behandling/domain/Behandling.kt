@@ -18,7 +18,7 @@ import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
-import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.StatistikkBehandling
 import no.nav.etterlatte.libs.common.behandling.Utenlandstilsnitt
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
@@ -66,7 +66,7 @@ sealed class Behandling {
             else -> null
         }
 
-    fun revurderingsaarsak(): RevurderingAarsak? =
+    fun revurderingsaarsak(): Revurderingaarsak? =
         when (this) {
             is Revurdering -> this.revurderingsaarsak
             else -> null

@@ -29,8 +29,8 @@ import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BarnepensjonSoeskenjusteringGrunn
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
-import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
@@ -47,7 +47,6 @@ import no.nav.etterlatte.token.Saksbehandler
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -133,7 +132,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
 
         val revurdering =
             inTransaction {
-                RevurderingServiceImpl(
+                RevurderingService(
                     oppgaveService,
                     grunnlagService,
                     hendelser,
@@ -146,7 +145,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
                     applicationContext.behandlingService,
                 ).opprettManuellRevurderingWrapper(
                     sakId = sak.id,
-                    aarsak = RevurderingAarsak.REGULERING,
+                    aarsak = Revurderingaarsak.REGULERING,
                     paaGrunnAvHendelseId = null,
                     begrunnelse = null,
                     saksbehandler = Saksbehandler("", "saksbehandler", null),
@@ -208,7 +207,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
             )
         }
         val revurderingService =
-            RevurderingServiceImpl(
+            RevurderingService(
                 oppgaveService,
                 grunnlagService,
                 hendelser,
@@ -224,7 +223,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
             inTransaction {
                 revurderingService.opprettManuellRevurderingWrapper(
                     sakId = sak.id,
-                    aarsak = RevurderingAarsak.SOESKENJUSTERING,
+                    aarsak = Revurderingaarsak.SOESKENJUSTERING,
                     paaGrunnAvHendelseId = null,
                     begrunnelse = null,
                     saksbehandler = Saksbehandler("", "saksbehandler", null),
@@ -232,15 +231,14 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
             }
 
         val revurderingInfo = RevurderingInfo.Soeskenjustering(BarnepensjonSoeskenjusteringGrunn.SOESKEN_DOER)
-        val fikkLagret =
-            inTransaction {
-                revurderingService.lagreRevurderingInfo(
-                    revurdering!!.id,
-                    RevurderingMedBegrunnelse(revurderingInfo, "abc"),
-                    "saksbehandler",
-                )
-            }
-        assertTrue(fikkLagret)
+        inTransaction {
+            revurderingService.lagreRevurderingInfo(
+                revurdering!!.id,
+                RevurderingMedBegrunnelse(revurderingInfo, "abc"),
+                "saksbehandler",
+            )
+        }
+
         inTransaction {
             val lagretRevurdering = applicationContext.behandlingDao.hentBehandling(revurdering!!.id) as Revurdering
             assertEquals(revurderingInfo, lagretRevurdering.revurderingInfo?.revurderingInfo)
@@ -250,15 +248,14 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
         // kan oppdatere
         val nyRevurderingInfo =
             RevurderingInfo.Soeskenjustering(BarnepensjonSoeskenjusteringGrunn.FORPLEID_ETTER_BARNEVERNSLOVEN)
-        assertTrue(
-            inTransaction {
-                revurderingService.lagreRevurderingInfo(
-                    revurdering!!.id,
-                    RevurderingMedBegrunnelse(nyRevurderingInfo, null),
-                    "saksbehandler",
-                )
-            },
-        )
+
+        inTransaction {
+            revurderingService.lagreRevurderingInfo(
+                revurdering!!.id,
+                RevurderingMedBegrunnelse(nyRevurderingInfo, null),
+                "saksbehandler",
+            )
+        }
         inTransaction {
             val oppdatert = applicationContext.behandlingDao.hentBehandling(revurdering!!.id) as Revurdering
             assertEquals(nyRevurderingInfo, oppdatert.revurderingInfo?.revurderingInfo)
@@ -272,16 +269,16 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
             )
         }
 
-        // kan ikke oppdatere en ferdig revurdering
-        assertFalse(
+        assertThrows<BehandlingKanIkkeEndres> {
             inTransaction {
                 revurderingService.lagreRevurderingInfo(
                     revurdering!!.id,
                     RevurderingMedBegrunnelse(revurderingInfo, null),
                     "saksbehandler",
                 )
-            },
-        )
+            }
+        }
+
         inTransaction {
             val ferdigRevurdering = applicationContext.behandlingDao.hentBehandling(revurdering!!.id) as Revurdering
             assertEquals(nyRevurderingInfo, ferdigRevurdering.revurderingInfo?.revurderingInfo)
@@ -336,7 +333,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
 
         assertNull(
             inTransaction {
-                RevurderingServiceImpl(
+                RevurderingService(
                     applicationContext.oppgaveService,
                     applicationContext.grunnlagsService,
                     hendelser,
@@ -349,7 +346,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
                     applicationContext.behandlingService,
                 ).opprettManuellRevurderingWrapper(
                     sakId = sak.id,
-                    aarsak = RevurderingAarsak.REGULERING,
+                    aarsak = Revurderingaarsak.REGULERING,
                     paaGrunnAvHendelseId = null,
                     begrunnelse = null,
                     saksbehandler = Saksbehandler("", "Jenny", null),
@@ -390,7 +387,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
         } returns true
 
         val revurderingService =
-            RevurderingServiceImpl(
+            RevurderingService(
                 oppgaveService,
                 grunnlagService,
                 hendelser,
@@ -465,7 +462,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
             inTransaction {
                 revurderingService.opprettManuellRevurderingWrapper(
                     sakId = sak.id,
-                    aarsak = RevurderingAarsak.REGULERING,
+                    aarsak = Revurderingaarsak.REGULERING,
                     paaGrunnAvHendelseId = hendelse.id.toString(),
                     begrunnelse = null,
                     saksbehandler = saksbehandler,
@@ -523,9 +520,158 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
     }
 
     @Test
+    fun `kan opprette ny revurdering med årsak = SLUTTBEHANDLING_UTLAND og lagre i db`() {
+        val hendelser = spyk(applicationContext.behandlingsHendelser)
+        val featureToggleService = mockk<FeatureToggleService>()
+        val grunnlagService = spyk(applicationContext.grunnlagsService)
+        val oppgaveService = spyk(applicationContext.oppgaveService)
+
+        every {
+            featureToggleService.isEnabled(
+                RevurderingServiceFeatureToggle.OpprettManuellRevurdering,
+                any(),
+            )
+        } returns true
+
+        every {
+            featureToggleService.isEnabled(
+                BehandlingServiceFeatureToggle.FiltrerMedEnhetId,
+                false,
+            )
+        } returns false
+
+        val (sak, behandling) = opprettSakMedFoerstegangsbehandling(fnr)
+
+        assertNotNull(behandling)
+
+        inTransaction {
+            applicationContext.behandlingDao.lagreStatus(
+                behandling!!.id,
+                BehandlingStatus.IVERKSATT,
+                Tidspunkt.now().toLocalDatetimeUTC(),
+            )
+        }
+
+        inTransaction {
+            applicationContext.behandlingDao.lagreBoddEllerArbeidetUtlandet(
+                behandling!!.id,
+                BoddEllerArbeidetUtlandet(
+                    true,
+                    Grunnlagsopplysning.Saksbehandler("ident", Tidspunkt.now()), "begrunnelse",
+                    boddArbeidetIkkeEosEllerAvtaleland = true,
+                    boddArbeidetEosNordiskKonvensjon = true,
+                    boddArbeidetAvtaleland = true,
+                    vurdereAvoededsTrygdeavtale = true,
+                    norgeErBehandlendeland = true,
+                    skalSendeKravpakke = true,
+                ),
+            )
+        }
+
+        val revurdering =
+            inTransaction {
+                RevurderingService(
+                    oppgaveService,
+                    grunnlagService,
+                    hendelser,
+                    featureToggleService,
+                    applicationContext.behandlingDao,
+                    applicationContext.hendelseDao,
+                    applicationContext.grunnlagsendringshendelseDao,
+                    applicationContext.kommerBarnetTilGodeService,
+                    applicationContext.revurderingDao,
+                    applicationContext.behandlingService,
+                ).opprettManuellRevurderingWrapper(
+                    sakId = sak.id,
+                    aarsak = Revurderingaarsak.SLUTTBEHANDLING_UTLAND,
+                    paaGrunnAvHendelseId = null,
+                    begrunnelse = null,
+                    saksbehandler = Saksbehandler("", "saksbehandler", null),
+                )
+            }
+
+        verify { grunnlagService.leggInnNyttGrunnlag(revurdering!!, any()) }
+        coVerify { grunnlagService.hentPersongalleri(any(), any()) }
+        verify {
+            oppgaveService.opprettNyOppgaveMedSakOgReferanse(
+                revurdering?.id.toString(),
+                sak.id,
+                OppgaveKilde.BEHANDLING,
+                OppgaveType.REVURDERING,
+                null,
+            )
+            oppgaveService.tildelSaksbehandler(any(), "saksbehandler")
+            inTransaction {
+                oppgaveService.hentOppgaverForSak(sak.id)
+            }
+        }
+        inTransaction {
+            assertEquals(revurdering, applicationContext.behandlingDao.hentBehandling(revurdering!!.id))
+            verify { hendelser.sendMeldingForHendelseMedDetaljertBehandling(any(), BehandlingHendelseType.OPPRETTET) }
+        }
+        confirmVerified(hendelser, grunnlagService, oppgaveService)
+    }
+
+    @Test
+    fun `Kan ikke opprette revurdering SLUTTBEHANDLING_UTLAND hvis man mangler en tidligere behandling med kravpakke`() {
+        val hendelser = spyk(applicationContext.behandlingsHendelser)
+        val featureToggleService = mockk<FeatureToggleService>()
+        val grunnlagService = spyk(applicationContext.grunnlagsService)
+        val oppgaveService = spyk(applicationContext.oppgaveService)
+
+        every {
+            featureToggleService.isEnabled(
+                RevurderingServiceFeatureToggle.OpprettManuellRevurdering,
+                any(),
+            )
+        } returns true
+
+        every {
+            featureToggleService.isEnabled(
+                BehandlingServiceFeatureToggle.FiltrerMedEnhetId,
+                false,
+            )
+        } returns false
+
+        val (sak, behandling) = opprettSakMedFoerstegangsbehandling(fnr)
+
+        assertNotNull(behandling)
+
+        inTransaction {
+            applicationContext.behandlingDao.lagreStatus(
+                behandling!!.id,
+                BehandlingStatus.IVERKSATT,
+                Tidspunkt.now().toLocalDatetimeUTC(),
+            )
+        }
+        assertThrows<RevurderingSluttbehandlingUtlandMaaHaEnBehandlingMedSkalSendeKravpakke> {
+            inTransaction {
+                RevurderingService(
+                    oppgaveService,
+                    grunnlagService,
+                    hendelser,
+                    featureToggleService,
+                    applicationContext.behandlingDao,
+                    applicationContext.hendelseDao,
+                    applicationContext.grunnlagsendringshendelseDao,
+                    applicationContext.kommerBarnetTilGodeService,
+                    applicationContext.revurderingDao,
+                    applicationContext.behandlingService,
+                ).opprettManuellRevurderingWrapper(
+                    sakId = sak.id,
+                    aarsak = Revurderingaarsak.SLUTTBEHANDLING_UTLAND,
+                    paaGrunnAvHendelseId = null,
+                    begrunnelse = null,
+                    saksbehandler = Saksbehandler("", "saksbehandler", null),
+                )
+            }
+        }
+    }
+
+    @Test
     fun `Skal få bad request hvis man mangler hendelsesid`() {
         val revurderingService =
-            RevurderingServiceImpl(
+            RevurderingService(
                 applicationContext.oppgaveService,
                 applicationContext.grunnlagsService,
                 applicationContext.behandlingsHendelser,
@@ -556,21 +702,21 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
             assertThrows<BadRequestException> {
                 revurderingService.opprettManuellRevurderingWrapper(
                     sakId = sak.id,
-                    aarsak = RevurderingAarsak.REGULERING,
+                    aarsak = Revurderingaarsak.REGULERING,
                     paaGrunnAvHendelseId = "124124124",
                     begrunnelse = null,
                     saksbehandler = Saksbehandler("", "Jenny", null),
                 )
             }
         assertTrue(
-            err.message!!.startsWith("${RevurderingAarsak.REGULERING} har en ugyldig hendelse id for sakid"),
+            err.message!!.startsWith("${Revurderingaarsak.REGULERING} har en ugyldig hendelse id for sakid"),
         )
     }
 
     @Test
     fun `Skal få bad request hvis man mangler forrige iverksattebehandling`() {
         val revurderingService =
-            RevurderingServiceImpl(
+            RevurderingService(
                 applicationContext.oppgaveService,
                 applicationContext.grunnlagsService,
                 applicationContext.behandlingsHendelser,
@@ -601,7 +747,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
             inTransaction {
                 revurderingService.opprettManuellRevurderingWrapper(
                     sakId = sak.id,
-                    aarsak = RevurderingAarsak.REGULERING,
+                    aarsak = Revurderingaarsak.REGULERING,
                     paaGrunnAvHendelseId = UUID.randomUUID().toString(),
                     begrunnelse = null,
                     saksbehandler = Saksbehandler("", "saksbehandler", null),
@@ -613,7 +759,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
     @Test
     fun `Kaster egen exception hvis revurderingaarsak ikke er stoettet for miljoe`() {
         val revurderingService =
-            RevurderingServiceImpl(
+            RevurderingService(
                 applicationContext.oppgaveService,
                 applicationContext.grunnlagsService,
                 applicationContext.behandlingsHendelser,
@@ -640,9 +786,9 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
 
         val (sak, _) = opprettSakMedFoerstegangsbehandling(fnr, behandlingFactory)
         val revurderingsAarsakIkkeStoettetIMiljoeBarn =
-            mockk<RevurderingAarsak>().also {
+            mockk<Revurderingaarsak>().also {
                 every { it.kanBrukesIMiljo() } returns false
-                every { it.name } returns RevurderingAarsak.BARN.name
+                every { it.name } returns Revurderingaarsak.BARN.name
             }
         assertThrows<RevurderingaarsakIkkeStoettetIMiljoeException> {
             revurderingService.opprettManuellRevurderingWrapper(
@@ -658,7 +804,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
     @Test
     fun `Kan ikke opprette ny manuell revurdering hvis det finnes en oppgave under behandling for sak med oppgavekilde behandling`() {
         val revurderingService =
-            RevurderingServiceImpl(
+            RevurderingService(
                 applicationContext.oppgaveService,
                 applicationContext.grunnlagsService,
                 applicationContext.behandlingsHendelser,
@@ -693,7 +839,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
             inTransaction {
                 revurderingService.opprettManuellRevurderingWrapper(
                     sakId = sak.id,
-                    aarsak = RevurderingAarsak.REGULERING,
+                    aarsak = Revurderingaarsak.REGULERING,
                     paaGrunnAvHendelseId = UUID.randomUUID().toString(),
                     begrunnelse = null,
                     saksbehandler = Saksbehandler("", "saksbehandler", null),
@@ -705,7 +851,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
     @Test
     fun `Kan opprette revurdering hvis en oppgave er under behandling med en annen oppgavekilde enn BEHANDLING`() {
         val revurderingService =
-            RevurderingServiceImpl(
+            RevurderingService(
                 applicationContext.oppgaveService,
                 applicationContext.grunnlagsService,
                 applicationContext.behandlingsHendelser,
@@ -786,7 +932,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
         inTransaction {
             revurderingService.opprettManuellRevurderingWrapper(
                 sakId = sak.id,
-                aarsak = RevurderingAarsak.REGULERING,
+                aarsak = Revurderingaarsak.REGULERING,
                 paaGrunnAvHendelseId = UUID.randomUUID().toString(),
                 begrunnelse = null,
                 saksbehandler = Saksbehandler("", "saksbehandler", null),

@@ -12,7 +12,7 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
-import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.SisteIverksatteBehandling
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
@@ -461,7 +461,7 @@ internal class VilkaarsvurderingServiceTest {
                 every { behandlingType } returns BehandlingType.REVURDERING
                 every { soeker } returns "10095512345"
                 every { virkningstidspunkt } returns VirkningstidspunktTestData.virkningstidsunkt()
-                every { revurderingsaarsak } returns RevurderingAarsak.REGULERING
+                every { revurderingsaarsak } returns Revurderingaarsak.REGULERING
             }
 
         coEvery { behandlingKlient.hentSisteIverksatteBehandling(any(), any()) } returns SisteIverksatteBehandling(uuid)
@@ -516,7 +516,7 @@ internal class VilkaarsvurderingServiceTest {
                 every { behandlingType } returns BehandlingType.REVURDERING
                 every { soeker } returns "10095512345"
                 every { virkningstidspunkt } returns VirkningstidspunktTestData.virkningstidsunkt()
-                every { revurderingsaarsak } returns RevurderingAarsak.REGULERING
+                every { revurderingsaarsak } returns Revurderingaarsak.REGULERING
             }
 
         coEvery { behandlingKlient.hentSisteIverksatteBehandling(any(), any()) } returns SisteIverksatteBehandling(uuid)

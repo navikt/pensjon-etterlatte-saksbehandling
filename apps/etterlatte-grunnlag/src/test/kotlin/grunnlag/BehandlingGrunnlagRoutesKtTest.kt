@@ -298,7 +298,7 @@ internal class BehandlingGrunnlagRoutesKtTest {
         val persongalleri = GrunnlagTestData().hentPersonGalleri()
         val opplysningsbehov = Opplysningsbehov(sakId, SakType.BARNEPENSJON, persongalleri)
 
-        coEvery { grunnlagService.oppdaterGrunnlag(any(), any()) } just Runs
+        coEvery { grunnlagService.opprettGrunnlag(any(), any()) } just Runs
 
         testApplication {
             val actualResponse =
@@ -314,7 +314,12 @@ internal class BehandlingGrunnlagRoutesKtTest {
         }
 
         val behovSlot = slot<Opplysningsbehov>()
-        coVerify(exactly = 1) { grunnlagService.oppdaterGrunnlag(behandlingId, capture(behovSlot)) }
+        coVerify(exactly = 1) {
+            grunnlagService.opprettGrunnlag(
+                behandlingId,
+                capture(behovSlot),
+            )
+        }
         coVerify { behandlingKlient wasNot Called }
 
         assertEquals(opplysningsbehov, behovSlot.captured)
@@ -324,15 +329,8 @@ internal class BehandlingGrunnlagRoutesKtTest {
     fun `Teste endepunkt for oppdatering av grunnlag`() {
         val sakId = 12345L
         val behandlingId = UUID.randomUUID()
-        val persongalleri = GrunnlagTestData().hentPersonGalleri()
-        val personGalleriOpplysning = lagGrunnlagsopplysning(
-            opplysningstype = Opplysningstype.PERSONGALLERI_V1,
-            kilde = Grunnlagsopplysning.Privatperson("fnr", Tidspunkt.now()),
-            verdi = persongalleri.toJsonNode(),
-        )
 
-        coEvery { grunnlagService.hentGrunnlagAvType(any(), any()) } returns personGalleriOpplysning
-        coEvery { grunnlagService.oppdaterGrunnlag(any(), any()) } just Runs
+        coEvery { grunnlagService.oppdaterGrunnlag(any(), any(), any()) } just Runs
 
         val request = OppdaterGrunnlagRequest(sakId, SakType.BARNEPENSJON)
         testApplication {
@@ -348,14 +346,14 @@ internal class BehandlingGrunnlagRoutesKtTest {
             assertEquals(HttpStatusCode.OK, actualResponse.status)
         }
 
-        val behovSlot = slot<Opplysningsbehov>()
-        coVerify(exactly = 1) { grunnlagService.hentGrunnlagAvType(behandlingId, Opplysningstype.PERSONGALLERI_V1) }
-        coVerify(exactly = 1) { grunnlagService.oppdaterGrunnlag(behandlingId, capture(behovSlot)) }
+        coVerify(exactly = 1) {
+            grunnlagService.oppdaterGrunnlag(
+                behandlingId,
+                sakId,
+                SakType.BARNEPENSJON,
+            )
+        }
         coVerify { behandlingKlient wasNot Called }
-
-        assertEquals(request.sakId, behovSlot.captured.sakId)
-        assertEquals(request.sakType, behovSlot.captured.sakType)
-        assertEquals(persongalleri, behovSlot.captured.persongalleri)
     }
 
     private fun ApplicationTestBuilder.createHttpClient(): HttpClient {

@@ -76,7 +76,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
 
     val fnr: String = "123"
 
-    fun opprettSakMedFoerstegangsbehandling(
+    private fun opprettSakMedFoerstegangsbehandling(
         fnr: String,
         behandlingFactory: BehandlingFactory? = null,
     ): Pair<Sak, Foerstegangsbehandling?> {
@@ -750,18 +750,17 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
                 ),
             )
         }
-        val attesteringsoppgave =
-            inTransaction {
-                applicationContext.oppgaveService.ferdigstillOppgaveUnderbehandlingOgLagNyMedType(
-                    VedtakOppgaveDTO(
-                        sakId = sak.id,
-                        referanse = nonNullBehandling.id.toString(),
-                    ),
-                    oppgaveType = OppgaveType.ATTESTERING,
-                    saksbehandler = Saksbehandler("", saksbehandler, null),
-                    merknad = null,
-                )
-            }
+        inTransaction {
+            applicationContext.oppgaveService.ferdigstillOppgaveUnderbehandlingOgLagNyMedType(
+                VedtakOppgaveDTO(
+                    sakId = sak.id,
+                    referanse = nonNullBehandling.id.toString(),
+                ),
+                oppgaveType = OppgaveType.ATTESTERING,
+                saksbehandler = Saksbehandler("", saksbehandler, null),
+                merknad = null,
+            )
+        }
 
         inTransaction {
             applicationContext.behandlingDao.lagreStatus(

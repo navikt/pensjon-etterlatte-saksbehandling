@@ -1,5 +1,5 @@
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
-import { LandMedDokumenter } from '~components/behandling/revurderingsoversikt/sluttbehandlingUtland/SEDLand'
+import { LandMedDokumenter } from '~components/behandling/revurderingsoversikt/sluttbehandlingUtland/SEDLandMedDokumenter'
 
 export const SOESKENJUSTERING_GRUNNER = [
   'NYTT_SOESKEN',

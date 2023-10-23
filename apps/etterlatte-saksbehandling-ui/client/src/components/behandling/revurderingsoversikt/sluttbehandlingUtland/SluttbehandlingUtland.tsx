@@ -9,7 +9,9 @@ import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import { formaterNavn } from '~shared/types/Person'
 import { KravpakkeUtland } from '~shared/types/Generellbehandling'
 import { hentAlleLand, ILand, sorterLand } from '~shared/api/trygdetid'
-import SEDLand, { LandMedDokumenter } from '~components/behandling/revurderingsoversikt/sluttbehandlingUtland/SEDLand'
+import SEDLandMedDokumenter, {
+  LandMedDokumenter,
+} from '~components/behandling/revurderingsoversikt/sluttbehandlingUtland/SEDLandMedDokumenter'
 import { TextButton } from '~components/behandling/soeknadsoversikt/familieforhold/personer/personinfo/TextButton'
 import SluttbehandlingUtlandFelter from '~components/behandling/revurderingsoversikt/sluttbehandlingUtland/SluttbehandlingUtlandFelter'
 import { lagreRevurderingInfo } from '~shared/api/revurdering'
@@ -23,6 +25,7 @@ export default function SluttbehandlingUtland({ sakId, revurderingId }: { sakId:
   const [landMedDokumenter, setLandMedDokumenter] = useState<LandMedDokumenter[]>([
     { landIsoKode: undefined, dokumenter: [{ dokumenttype: '', dato: undefined, kommentar: '' }] },
   ])
+  const [feilkoder, setFeilkoder] = useState<Set<string> | null>(null)
 
   useEffect(() => {
     hentKravpakke(sakId)
@@ -31,7 +34,27 @@ export default function SluttbehandlingUtland({ sakId, revurderingId }: { sakId:
     })
   }, [])
 
+  const validerSkjema = () => {
+    const feilkoder: Set<string> = new Set([])
+    if (landMedDokumenter.find((landmedDokument) => landmedDokument.landIsoKode === undefined)) {
+      feilkoder.add('MANGLER_LANDKODE')
+    }
+    if (landMedDokumenter.find((landMedDokument) => landMedDokument.dokumenter.length === 0)) {
+      feilkoder.add('LAND_MANGLER_DOKUMENTER')
+    } else {
+      landMedDokumenter.forEach((landMedDokument) => {
+        if (landMedDokument.dokumenter.find((e) => e.dokumenttype === undefined)) {
+          feilkoder.add('MANGLER_DOKUMENTTYPE')
+        }
+        if (landMedDokument.dokumenter.find((e) => e.dato === undefined)) {
+          feilkoder.add('MANGLER_DATO')
+        }
+      })
+    }
+    setFeilkoder(feilkoder)
+  }
   const lagreRevurderingsinfo = () => {
+    validerSkjema()
     lagre({
       behandlingId: revurderingId,
       revurderingInfo: { type: 'SLUTTBEHANDLING_UTLAND', landMedDokumenter: landMedDokumenter },
@@ -84,12 +107,15 @@ export default function SluttbehandlingUtland({ sakId, revurderingId }: { sakId:
           }
         )}
       </>
+      {feilkoder && feilkoder.size > 0
+        ? Array.from(feilkoder).map((Feilmelding, i) => <BodyShort key={i}>{Feilmelding}</BodyShort>)
+        : null}
       <Heading level="2" size="medium" style={{ marginTop: '2rem' }}>
         Mottatte SED
       </Heading>
       <BodyShort>Fyll inn hvilke SED som er mottatt i RINA pr land.</BodyShort>
       {isSuccess(hentAlleLandRequest) && (
-        <SEDLand
+        <SEDLandMedDokumenter
           landListe={hentAlleLandRequest.data}
           landMedDokumenter={landMedDokumenter}
           setLandMedDokumenter={setLandMedDokumenter}

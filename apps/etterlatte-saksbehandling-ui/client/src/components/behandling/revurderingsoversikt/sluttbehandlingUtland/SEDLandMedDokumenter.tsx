@@ -15,7 +15,7 @@ export interface LandMedDokumenter {
   dokumenter: MottattDokument[]
 }
 
-export default function SEDLand({
+export default function SEDLandMedDokumenter({
   landListe,
   landMedDokumenter,
   setLandMedDokumenter,

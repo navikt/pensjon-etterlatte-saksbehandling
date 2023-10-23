@@ -198,6 +198,12 @@ class VilkaarsvurderingRepository(private val ds: DataSource, private val delvil
             delvilkaarRepository.slettDelvilkaarResultat(vilkaarId, tx)
         }.let { hentNonNull(behandlingId) }
 
+    fun slettVilkaarvurdering(behandlingId: UUID) =
+        ds.transaction { tx ->
+            queryOf(Queries.SLETT_VILKAARSVURDERING, mapOf("behandling_id" to behandlingId))
+                .let { tx.run(it.asUpdate) }
+        } == 1
+
     private fun hentNonNull(behandlingId: UUID): Vilkaarsvurdering =
         hent(behandlingId) ?: throw RuntimeException("Fant ikke vilkårsvurdering for $behandlingId")
 
@@ -388,6 +394,11 @@ class VilkaarsvurderingRepository(private val ds: DataSource, private val delvil
             UPDATE vilkaar
             SET resultat_kommentar = null, resultat_tidspunkt = null, resultat_saksbehandler = null   
             WHERE id = :id
+        """
+
+        const val SLETT_VILKAARSVURDERING = """
+            DELETE FROM vilkaarsvurdering
+            WHERE behandling_id = :behandling_id
         """
     }
 }

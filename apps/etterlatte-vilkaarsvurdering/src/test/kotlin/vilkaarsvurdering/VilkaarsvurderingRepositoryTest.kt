@@ -73,6 +73,24 @@ internal class VilkaarsvurderingRepositoryTest {
     }
 
     @Test
+    fun `skal kun slette vilkaarsvurdering for en gitt behandlingId`() {
+        val annenVilkaarsvurdring = UUID.randomUUID()
+        vilkaarsvurderingRepository.opprettVilkaarsvurdering(vilkaarsvurdering)
+        vilkaarsvurderingRepository.opprettVilkaarsvurdering(
+            vilkaarsvurdering.copy(
+                behandlingId = annenVilkaarsvurdring,
+                id = UUID.randomUUID(),
+                vilkaar = vilkaarsvurdering.vilkaar.map { it.copy(id = UUID.randomUUID()) },
+            ),
+        )
+
+        vilkaarsvurderingRepository.hent(vilkaarsvurdering.behandlingId) shouldNotBe null
+        vilkaarsvurderingRepository.slettVilkaarvurdering(vilkaarsvurdering.behandlingId) shouldBe true
+        vilkaarsvurderingRepository.hent(vilkaarsvurdering.behandlingId) shouldBe null
+        vilkaarsvurderingRepository.hent(annenVilkaarsvurdring) shouldNotBe null
+    }
+
+    @Test
     fun `skal hente vilkaarsvurdering`() {
         vilkaarsvurderingRepository.opprettVilkaarsvurdering(vilkaarsvurdering)
 

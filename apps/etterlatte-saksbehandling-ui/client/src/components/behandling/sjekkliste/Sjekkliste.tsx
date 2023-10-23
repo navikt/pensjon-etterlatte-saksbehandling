@@ -1,5 +1,5 @@
 import styled from 'styled-components'
-import React, { useContext, useMemo, useState } from 'react'
+import React, { useContext, useEffect, useMemo, useState } from 'react'
 import { SidebarPanel } from '~shared/components/Sidebar'
 import { isFailure, useApiCall } from '~shared/hooks/useApiCall'
 import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
@@ -8,6 +8,7 @@ import {
   Alert,
   BodyLong,
   BodyShort,
+  Button,
   Checkbox,
   ConfirmationPanel,
   Heading,
@@ -22,12 +23,22 @@ import { ISjekklisteItem } from '~shared/types/Sjekkliste'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import debounce from 'lodash/debounce'
 import { useSjekkliste, useSjekklisteValideringsfeil } from '~components/behandling/sjekkliste/useSjekkliste'
-import { useAppDispatch } from '~store/Store'
+import { useAppDispatch, useAppSelector } from '~store/Store'
 import { updateSjekkliste, updateSjekklisteItem } from '~store/reducers/SjekklisteReducer'
+import { PencilIcon } from '@navikt/aksel-icons'
+import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
+import { hentSaksbehandlerForOppgaveUnderArbeid } from '~shared/api/oppgaver'
 
 export const Sjekkliste = (props: { behandling: IBehandlingReducer }) => {
   const { behandling } = props
+
+  const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.saksbehandler)
   const ferdigBehandlet = !hentBehandlesFraStatus(behandling.status)
+  const [redigerbar, setRedigerbar] = useState<boolean>(!ferdigBehandlet)
+  const [saksbehandlerForOppgaveResult, hentSaksbehandlerForOppgave] = useApiCall(
+    hentSaksbehandlerForOppgaveUnderArbeid
+  )
+  const [oppgaveErTildeltInnloggetBruker, setOppgaveErTildeltInnloggetBruker] = useState(false)
 
   const dispatch = useAppDispatch()
 
@@ -43,6 +54,13 @@ export const Sjekkliste = (props: { behandling: IBehandlingReducer }) => {
 
   const fireOpppdater = useMemo(() => debounce(oppdaterSjekklisteApi, 1500), [])
 
+  useEffect(() => {
+    behandling.status == IBehandlingStatus.FATTET_VEDTAK &&
+      hentSaksbehandlerForOppgave({ behandlingId: behandling.id }, (saksbehandler) => {
+        setOppgaveErTildeltInnloggetBruker(saksbehandler === innloggetSaksbehandler.ident)
+      })
+  }, [])
+
   return (
     <SidebarPanel border id="sjekklistePanel">
       {sjekklisteValideringsfeil && (
@@ -54,6 +72,9 @@ export const Sjekkliste = (props: { behandling: IBehandlingReducer }) => {
       </Heading>
 
       {isFailure(oppdaterSjekklisteResult) && <ApiErrorAlert>Oppdateringen av sjekklista feilet</ApiErrorAlert>}
+      {isFailure(saksbehandlerForOppgaveResult) && (
+        <ApiErrorAlert>Kunne ikke hente saksbehandler gjeldende oppgave</ApiErrorAlert>
+      )}
 
       {sjekkliste && (
         <>
@@ -67,7 +88,7 @@ export const Sjekkliste = (props: { behandling: IBehandlingReducer }) => {
               key={item.id}
               item={item}
               behandlingId={behandling.id}
-              ferdigBehandlet={ferdigBehandlet}
+              redigerbar={redigerbar}
               onUpdated={dispatchUpdatedItem}
             />
           ))}
@@ -96,7 +117,7 @@ export const Sjekkliste = (props: { behandling: IBehandlingReducer }) => {
                 fireOpppdater(oppdatert)
               }}
               rows={3}
-              readOnly={ferdigBehandlet}
+              readOnly={!redigerbar}
             />
 
             <TextField
@@ -111,7 +132,7 @@ export const Sjekkliste = (props: { behandling: IBehandlingReducer }) => {
                 dispatch(updateSjekkliste(oppdatert))
                 fireOpppdater(oppdatert)
               }}
-              readOnly={ferdigBehandlet}
+              readOnly={!redigerbar}
             />
 
             <TextField
@@ -126,10 +147,10 @@ export const Sjekkliste = (props: { behandling: IBehandlingReducer }) => {
                 dispatch(updateSjekkliste(oppdatert))
                 fireOpppdater(oppdatert)
               }}
-              readOnly={ferdigBehandlet}
+              readOnly={!redigerbar}
             />
 
-            {!ferdigBehandlet && (
+            {redigerbar && (
               <ConfirmationPanel
                 name="BekreftGjennomgang"
                 checked={sjekkliste.bekreftet}
@@ -146,6 +167,12 @@ export const Sjekkliste = (props: { behandling: IBehandlingReducer }) => {
               />
             )}
           </VStack>
+
+          {!redigerbar && oppgaveErTildeltInnloggetBruker && (
+            <Button variant="tertiary" icon={<PencilIcon />} onClick={() => setRedigerbar(true)}>
+              Rediger
+            </Button>
+          )}
         </>
       )}
       {!sjekkliste && <BodyShort>Ikke registrert</BodyShort>}
@@ -156,12 +183,12 @@ export const Sjekkliste = (props: { behandling: IBehandlingReducer }) => {
 const SjekklisteElement = ({
   item,
   behandlingId,
-  ferdigBehandlet,
+  redigerbar,
   onUpdated,
 }: {
   item: ISjekklisteItem
   behandlingId: string
-  ferdigBehandlet: boolean
+  redigerbar: boolean
   onUpdated: (item: ISjekklisteItem) => void
 }) => {
   const [avkrysset, setAvkrysset] = useState<boolean>(item.avkrysset)
@@ -173,7 +200,7 @@ const SjekklisteElement = ({
 
       <Checkbox
         checked={avkrysset}
-        readOnly={ferdigBehandlet}
+        readOnly={!redigerbar}
         onChange={(event) => {
           const checked = event.currentTarget.checked
           setAvkrysset(checked)

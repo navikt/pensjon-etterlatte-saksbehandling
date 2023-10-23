@@ -150,21 +150,28 @@ export const Sjekkliste = (props: { behandling: IBehandlingReducer }) => {
               readOnly={!redigerbar}
             />
 
-            <ConfirmationPanel
-              name="BekreftGjennomgang"
-              checked={sjekkliste.bekreftet}
-              label="Jeg bekrefter at alle punkter er gjennomgått"
-              error={sjekklisteValideringsfeil && !sjekkliste.bekreftet && 'Feltet må hukes av for å ferdigstilles'}
-              onChange={(e) => {
-                const oppdatert = {
-                  ...sjekkliste,
-                  bekreftet: e.currentTarget.checked,
-                }
-                dispatch(updateSjekkliste(oppdatert))
-                fireOpppdater(oppdatert)
-              }}
-              disabled={!redigerbar}
-            />
+            {redigerbar && (
+              <ConfirmationPanel
+                name="BekreftGjennomgang"
+                checked={sjekkliste.bekreftet}
+                label="Jeg bekrefter at alle punkter er gjennomgått"
+                error={sjekklisteValideringsfeil && !sjekkliste.bekreftet && 'Feltet må hukes av for å ferdigstilles'}
+                onChange={(e) => {
+                  const oppdatert = {
+                    ...sjekkliste,
+                    bekreftet: e.currentTarget.checked,
+                  }
+                  dispatch(updateSjekkliste(oppdatert))
+                  fireOpppdater(oppdatert)
+                }}
+              />
+            )}
+
+            {!redigerbar && (
+              <Checkbox checked={sjekkliste.bekreftet} readOnly={true}>
+                Jeg bekrefter at alle punkter er gjennomgått
+              </Checkbox>
+            )}
           </VStack>
 
           {!redigerbar && behandling.status == IBehandlingStatus.FATTET_VEDTAK && oppgaveErTildeltInnloggetBruker && (

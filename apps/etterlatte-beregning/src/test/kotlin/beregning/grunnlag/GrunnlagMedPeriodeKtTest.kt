@@ -6,8 +6,41 @@ import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
+import java.time.YearMonth
 
 class GrunnlagMedPeriodeKtTest {
+    @Test
+    fun `erInnenforPeriode gir riktig svar med en lukket periode`() {
+        val g1 =
+            GrunnlagMedPeriode(
+                data = "",
+                fom = LocalDate.of(2022, 8, 1),
+                tom = YearMonth.of(2023, 6).atEndOfMonth(),
+            )
+
+        assertTrue(g1.erInnenforPeriode(periodeFom = YearMonth.of(2022, 8).atDay(1), periodeTom = null))
+        assertTrue(g1.erInnenforPeriode(periodeFom = YearMonth.of(2023, 6).atEndOfMonth(), periodeTom = null))
+
+        assertFalse(g1.erInnenforPeriode(periodeFom = g1.tom!!.plusDays(1), null))
+        assertFalse(g1.erInnenforPeriode(periodeFom = g1.fom.minusDays(1), g1.fom.minusDays(1)))
+    }
+
+    @Test
+    fun `erInnenforPeriode gir riktig svar med en åpen periode`() {
+        val g1 =
+            GrunnlagMedPeriode(
+                data = "",
+                fom = LocalDate.of(2022, 8, 1),
+                tom = null,
+            )
+
+        assertTrue(g1.erInnenforPeriode(periodeFom = LocalDate.of(1970, 1, 1), periodeTom = null))
+        assertTrue(g1.erInnenforPeriode(periodeFom = LocalDate.of(2050, 1, 1), periodeTom = null))
+        assertTrue(g1.erInnenforPeriode(periodeFom = LocalDate.of(2050, 1, 1), periodeTom = LocalDate.of(2050, 1, 1)))
+
+        assertFalse(g1.erInnenforPeriode(periodeFom = g1.fom.minusDays(1), periodeTom = g1.fom.minusDays(1)))
+    }
+
     @Test
     fun `erGrunnlagLiktFoerEnDato gir true hvis grunnlagene er de samme`() {
         val periode = GrunnlagMedPeriode(data = "verdi1", fom = LocalDate.of(2022, 8, 1), tom = null)

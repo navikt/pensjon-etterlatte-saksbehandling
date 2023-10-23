@@ -90,7 +90,7 @@ class ReguleringTest {
                 BeregnBarnepensjonServiceTest.VIRKNINGSTIDSPUNKT_JAN_23.minusYears(1),
             )
 
-        coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns null
+        coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns emptyList()
         every {
             featureToggleService.isEnabled(BeregnBarnepensjonServiceFeatureToggle.BrukFaktiskTrygdetid, false)
         } returns false

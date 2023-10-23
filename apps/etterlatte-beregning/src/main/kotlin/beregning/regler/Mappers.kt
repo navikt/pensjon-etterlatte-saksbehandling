@@ -5,16 +5,21 @@ import no.nav.etterlatte.libs.common.beregning.SamletTrygdetidMedBeregningsMetod
 import no.nav.etterlatte.libs.common.trygdetid.DetaljertBeregnetTrygdetidResultat
 import no.nav.etterlatte.regler.Beregningstall
 
-fun DetaljertBeregnetTrygdetidResultat.toSamlet(beregningsMetode: BeregningsMetode): SamletTrygdetidMedBeregningsMetode {
+fun DetaljertBeregnetTrygdetidResultat.toSamlet(
+    beregningsMetode: BeregningsMetode,
+    avdoed: String?,
+): SamletTrygdetidMedBeregningsMetode {
     return SamletTrygdetidMedBeregningsMetode(
         beregningsMetode = beregningsMetode,
         samletTrygdetidNorge = this.samletTrygdetidNorge?.let { Beregningstall(it.toDouble()) },
         samletTrygdetidTeoretisk = this.samletTrygdetidTeoretisk?.let { Beregningstall(it.toDouble()) },
         prorataBroek = this.prorataBroek,
+        avdoed = avdoed,
     )
 }
 
-data class AnvendtTrgydetid(
+data class AnvendtTrygdetid(
     val beregningsMetode: BeregningsMetode,
     val trygdetid: Beregningstall,
+    val avdoed: String? = null,
 )

@@ -33,8 +33,7 @@ export const Sjekkliste = (props: { behandling: IBehandlingReducer }) => {
   const { behandling } = props
 
   const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.saksbehandler)
-  const ferdigBehandlet = !hentBehandlesFraStatus(behandling.status)
-  const [redigerbar, setRedigerbar] = useState<boolean>(!ferdigBehandlet)
+  const [redigerbar, setRedigerbar] = useState<boolean>(false)
   const [saksbehandlerForOppgaveResult, hentSaksbehandlerForOppgave] = useApiCall(
     hentSaksbehandlerForOppgaveUnderArbeid
   )
@@ -55,10 +54,11 @@ export const Sjekkliste = (props: { behandling: IBehandlingReducer }) => {
   const fireOpppdater = useMemo(() => debounce(oppdaterSjekklisteApi, 1500), [])
 
   useEffect(() => {
-    behandling.status == IBehandlingStatus.FATTET_VEDTAK &&
-      hentSaksbehandlerForOppgave({ behandlingId: behandling.id }, (saksbehandler) => {
-        setOppgaveErTildeltInnloggetBruker(saksbehandler === innloggetSaksbehandler.ident)
-      })
+    hentSaksbehandlerForOppgave({ behandlingId: behandling.id }, (saksbehandler) => {
+      const erSammeIdent = saksbehandler === innloggetSaksbehandler.ident
+      setOppgaveErTildeltInnloggetBruker(erSammeIdent)
+      setRedigerbar(hentBehandlesFraStatus(behandling.status) && erSammeIdent)
+    })
   }, [])
 
   return (
@@ -150,25 +150,24 @@ export const Sjekkliste = (props: { behandling: IBehandlingReducer }) => {
               readOnly={!redigerbar}
             />
 
-            {redigerbar && (
-              <ConfirmationPanel
-                name="BekreftGjennomgang"
-                checked={sjekkliste.bekreftet}
-                label="Jeg bekrefter at alle punkter er gjennomgått"
-                error={sjekklisteValideringsfeil && !sjekkliste.bekreftet && 'Feltet må hukes av for å ferdigstilles'}
-                onChange={(e) => {
-                  const oppdatert = {
-                    ...sjekkliste,
-                    bekreftet: e.currentTarget.checked,
-                  }
-                  dispatch(updateSjekkliste(oppdatert))
-                  fireOpppdater(oppdatert)
-                }}
-              />
-            )}
+            <ConfirmationPanel
+              name="BekreftGjennomgang"
+              checked={sjekkliste.bekreftet}
+              label="Jeg bekrefter at alle punkter er gjennomgått"
+              error={sjekklisteValideringsfeil && !sjekkliste.bekreftet && 'Feltet må hukes av for å ferdigstilles'}
+              onChange={(e) => {
+                const oppdatert = {
+                  ...sjekkliste,
+                  bekreftet: e.currentTarget.checked,
+                }
+                dispatch(updateSjekkliste(oppdatert))
+                fireOpppdater(oppdatert)
+              }}
+              disabled={!redigerbar}
+            />
           </VStack>
 
-          {!redigerbar && oppgaveErTildeltInnloggetBruker && (
+          {!redigerbar && behandling.status == IBehandlingStatus.FATTET_VEDTAK && oppgaveErTildeltInnloggetBruker && (
             <Button variant="tertiary" icon={<PencilIcon />} onClick={() => setRedigerbar(true)}>
               Rediger
             </Button>

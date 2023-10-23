@@ -516,7 +516,7 @@ internal class VilkaarsvurderingServiceTest {
                 every { behandlingType } returns BehandlingType.REVURDERING
                 every { soeker } returns "10095512345"
                 every { virkningstidspunkt } returns VirkningstidspunktTestData.virkningstidsunkt()
-                every { revurderingsaarsak } returns RevurderingAarsak.REGULERING
+                every { revurderingsaarsak } returns Revurderingaarsak.REGULERING
             }
 
         coEvery { behandlingKlient.hentSisteIverksatteBehandling(any(), any()) } returns SisteIverksatteBehandling(uuid)

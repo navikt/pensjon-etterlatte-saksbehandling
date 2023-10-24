@@ -1,6 +1,5 @@
 import { Select } from '@navikt/ds-react'
 import { LandMedDokumenter } from '~components/behandling/revurderingsoversikt/sluttbehandlingUtland/SEDLandMedDokumenter'
-import React, { useState } from 'react'
 import { ILand } from '~shared/api/trygdetid'
 import styled from 'styled-components'
 import DokumenterForLand from '~components/behandling/revurderingsoversikt/sluttbehandlingUtland/DokumenterForLand'
@@ -24,15 +23,13 @@ export default function LandRad({
   oppdaterLandMedDokumenter: (oppdatertLandMedDokumenter: LandMedDokumenter) => void
   landListe: ILand[]
 }) {
-  const [valgtLandIsoKode, setValgtLandIsoKode] = useState<string>('')
   return (
     <Flex>
       <Select
         style={{ marginRight: '2rem', minWidth: '10rem', maxWidth: '12rem' }}
         label="Velg land"
-        value={valgtLandIsoKode || ''}
+        value={landMedDokumenter.landIsoKode || ''}
         onChange={(e) => {
-          setValgtLandIsoKode(e.target.value)
           const landMedDokumenterMedLandKode = { ...landMedDokumenter, landIsoKode: e.target.value }
           oppdaterLandMedDokumenter(landMedDokumenterMedLandKode)
         }}

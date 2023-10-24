@@ -130,18 +130,16 @@ data class VedtakSamordningDto(
     val avkorting: ObjectNode?,
 )
 
-data class TilbakekrevingFattetVedtakDto(
+data class TilbakekrevingVedtakDto(
     val tilbakekrevingId: UUID,
     val sakId: Long,
     val sakType: SakType,
     val soeker: Folkeregisteridentifikator,
-    val ansvarligSaksbehandler: String,
-    val ansvarligEnhet: String,
     val tilbakekreving: ObjectNode,
 )
 
-data class TilbakekrevingAttesterVedtakDto(
+data class TilbakekrevingFattEllerAttesterVedtakDto(
     val tilbakekrevingId: UUID,
-    val attestant: String,
-    val attesterendeEnhet: String,
+    val saksbehandler: String,
+    val enhet: String,
 )

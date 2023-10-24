@@ -89,9 +89,10 @@ fun vedtak(
     beregning: ObjectNode? = objectMapper.createObjectNode(),
     avkorting: ObjectNode? = objectMapper.createObjectNode(),
     revurderingAarsak: Revurderingaarsak? = null,
+    status: VedtakStatus = VedtakStatus.OPPRETTET,
 ) = Vedtak(
     id = 1L,
-    status = VedtakStatus.OPPRETTET,
+    status = status,
     soeker = SOEKER_FOEDSELSNUMMER,
     sakId = sakId,
     sakType = SakType.BARNEPENSJON,

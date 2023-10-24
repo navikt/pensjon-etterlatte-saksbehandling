@@ -8,8 +8,8 @@ import no.nav.etterlatte.behandling.tilbakekreving.Tilbakekreving
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.toObjectNode
-import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingAttesterVedtakDto
-import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingFattetVedtakDto
+import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingFattEllerAttesterVedtakDto
+import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingVedtakDto
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktorobo.Resource
@@ -18,8 +18,14 @@ import org.slf4j.LoggerFactory
 import java.util.UUID
 
 interface VedtakKlient {
-    suspend fun fattVedtakTilbakekreving(
+    suspend fun lagreVedtakTilbakekreving(
         tilbakekreving: Tilbakekreving,
+        brukerTokenInfo: BrukerTokenInfo,
+        enhet: String,
+    ): Long
+
+    suspend fun fattVedtakTilbakekreving(
+        tilbakekrevingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
         enhet: String,
     ): Long
@@ -47,29 +53,29 @@ class VedtakKlientImpl(config: Config, httpClient: HttpClient) : VedtakKlient {
     private val clientId = config.getString("vedtak.client.id")
     private val resourceUrl = config.getString("vedtak.resource.url")
 
-    override suspend fun fattVedtakTilbakekreving(
+    override suspend fun lagreVedtakTilbakekreving(
         tilbakekreving: Tilbakekreving,
         brukerTokenInfo: BrukerTokenInfo,
         enhet: String,
     ): Long {
         try {
-            logger.info("Sender tilbakekreving som skal fatte vedtak for tilbakekreving=${tilbakekreving.id} til vedtak")
+            logger.info(
+                "Sender tilbakekreving som det skal opprettes eller oppdateres vedtak for tilbakekreving=${tilbakekreving.id} til vedtak",
+            )
             return downstreamResourceClient
                 .post(
                     resource =
                         Resource(
                             clientId = clientId,
-                            url = "$resourceUrl/tilbakekreving/fattvedtak",
+                            url = "$resourceUrl/tilbakekreving/lagre-vedtak",
                         ),
                     brukerTokenInfo = brukerTokenInfo,
                     postBody =
-                        TilbakekrevingFattetVedtakDto(
+                        TilbakekrevingVedtakDto(
                             tilbakekrevingId = tilbakekreving.id,
                             sakId = tilbakekreving.sak.id,
                             sakType = tilbakekreving.sak.sakType,
                             soeker = Folkeregisteridentifikator.of(tilbakekreving.sak.ident),
-                            ansvarligSaksbehandler = brukerTokenInfo.ident(),
-                            ansvarligEnhet = enhet,
                             tilbakekreving = tilbakekreving.toObjectNode(),
                         ),
                 )
@@ -79,7 +85,41 @@ class VedtakKlientImpl(config: Config, httpClient: HttpClient) : VedtakKlient {
                 )
         } catch (e: Exception) {
             throw VedtakKlientException(
-                "Fatting av vedtak for tilbakekreving med id=${tilbakekreving.id} feilet",
+                "Lagre vedtak for tilbakekreving med id=${tilbakekreving.id} feilet",
+                e,
+            )
+        }
+    }
+
+    override suspend fun fattVedtakTilbakekreving(
+        tilbakekrevingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+        enhet: String,
+    ): Long {
+        try {
+            logger.info("Sender tilbakekreving som skal fatte vedtak for tilbakekreving=$tilbakekrevingId til vedtak")
+            return downstreamResourceClient
+                .post(
+                    resource =
+                        Resource(
+                            clientId = clientId,
+                            url = "$resourceUrl/tilbakekreving/fatt-vedtak",
+                        ),
+                    brukerTokenInfo = brukerTokenInfo,
+                    postBody =
+                        TilbakekrevingFattEllerAttesterVedtakDto(
+                            tilbakekrevingId = tilbakekrevingId,
+                            saksbehandler = brukerTokenInfo.ident(),
+                            enhet = enhet,
+                        ),
+                )
+                .mapBoth(
+                    success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
+                    failure = { errorResponse -> throw errorResponse },
+                )
+        } catch (e: Exception) {
+            throw VedtakKlientException(
+                "Fatting av vedtak for tilbakekreving med id=$tilbakekrevingId feilet",
                 e,
             )
         }
@@ -97,14 +137,14 @@ class VedtakKlientImpl(config: Config, httpClient: HttpClient) : VedtakKlient {
                     resource =
                         Resource(
                             clientId = clientId,
-                            url = "$resourceUrl/tilbakekreving/attestervedtak",
+                            url = "$resourceUrl/tilbakekreving/attester-vedtak",
                         ),
                     brukerTokenInfo = brukerTokenInfo,
                     postBody =
-                        TilbakekrevingAttesterVedtakDto(
+                        TilbakekrevingFattEllerAttesterVedtakDto(
                             tilbakekrevingId = tilbakekrevingId,
-                            attestant = brukerTokenInfo.ident(),
-                            attesterendeEnhet = enhet,
+                            saksbehandler = brukerTokenInfo.ident(),
+                            enhet = enhet,
                         ),
                 )
                 .mapBoth(
@@ -130,7 +170,7 @@ class VedtakKlientImpl(config: Config, httpClient: HttpClient) : VedtakKlient {
                     resource =
                         Resource(
                             clientId = clientId,
-                            url = "$resourceUrl/tilbakekreving/underkjennvedtak",
+                            url = "$resourceUrl/tilbakekreving/underkjenn-vedtak",
                         ),
                     brukerTokenInfo = brukerTokenInfo,
                     postBody = tilbakekrevingId,

@@ -249,7 +249,7 @@ class VedtaksvurderingRepository(private val datasource: DataSource) : Transacti
                 datoFattet, datoattestert, attestant, datoVirkFom, vedtakstatus, saktype, behandlingtype, 
                 attestertVedtakEnhet, fattetVedtakEnhet, type, revurderingsaarsak, revurderinginfo
             FROM vedtak  
-            WHERE vedtakstatus = 'IVERKSATT'   
+            WHERE vedtakstatus in ('TIL_SAMORDNING', 'SAMORDNET', 'IVERKSATT')   
             AND fnr = :fnr
             AND datoVirkFom >= :virkFom
             """

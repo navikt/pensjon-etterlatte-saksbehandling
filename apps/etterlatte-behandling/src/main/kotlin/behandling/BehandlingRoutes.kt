@@ -36,6 +36,7 @@ import no.nav.etterlatte.libs.common.behandling.UtenlandstilsnittType
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.behandlingId
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.grunnlag.OppdaterGrunnlagRequest
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.hentNavidentFraToken
 import no.nav.etterlatte.libs.common.kunSaksbehandler
@@ -262,6 +263,20 @@ internal fun Route.behandlingRoutes(
                         call.respond(HttpStatusCode.BadRequest, "Kunne ikke endre på feltet")
                     }
                 }
+            }
+        }
+
+        route("/oppdater-grunnlag") {
+            post {
+                val request = call.receive<OppdaterGrunnlagRequest>()
+                inTransaction {
+                    behandlingService.oppdaterGrunnlag(
+                        behandlingsId,
+                        request.sakId,
+                        request.sakType,
+                    )
+                }
+                call.respond(HttpStatusCode.OK)
             }
         }
     }

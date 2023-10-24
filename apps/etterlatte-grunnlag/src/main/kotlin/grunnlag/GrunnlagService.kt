@@ -310,12 +310,15 @@ class RealGrunnlagService(
         sakId: Long,
         sakType: SakType,
     ) {
-        val galleriHendelse =
-            opplysningDao.finnNyesteGrunnlagForSak(
-                sakId,
-                Opplysningstype.PERSONGALLERI_V1,
-            )!!
-        val persongalleri = objectMapper.readValue(galleriHendelse.opplysning.toJson(), Persongalleri::class.java)
+        val persongalleriJsonNode =
+            opplysningDao.finnNyesteGrunnlagForSak(sakId, Opplysningstype.PERSONGALLERI_V1)?.opplysning
+
+        if (persongalleriJsonNode == null) {
+            logger.info("Klarte ikke å hente ut grunnlag for sak $sakId. Fant ikke persongalleri")
+            throw IllegalStateException("Fant ikke grunnlag for sak $sakId. Fant ikke persongalleri")
+        }
+
+        val persongalleri = objectMapper.readValue(persongalleriJsonNode.opplysning.toJson(), Persongalleri::class.java)
 
         opprettGrunnlag(
             behandlingId,

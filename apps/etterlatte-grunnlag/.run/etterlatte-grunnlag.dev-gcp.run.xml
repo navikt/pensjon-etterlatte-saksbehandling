@@ -11,7 +11,6 @@
         <env name="DB_DATABASE" value="postgres" />
         <env name="DB_USERNAME" value="postgres" />
         <env name="DB_PASSWORD" value="postgres" />
-        <env name="BEHANDLING_AZURE_SCOPE" value="59967ac8-009c-492e-a618-e5a0f6b3e4e4" />
         <env name="ETTERLATTE_BEHANDLING_CLIENT_ID" value="59967ac8-009c-492e-a618-e5a0f6b3e4e4" />
         <env name="ETTERLATTE_BEHANDLING_URL" value="https://etterlatte-behandling.intern.dev.nav.no" />
         <env name="PDLTJENESTER_AZURE_SCOPE" value="api://dev-gcp.etterlatte.etterlatte-pdltjenester/.default" />

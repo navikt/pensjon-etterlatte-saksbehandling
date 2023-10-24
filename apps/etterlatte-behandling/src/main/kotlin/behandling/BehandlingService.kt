@@ -37,6 +37,7 @@ import no.nav.etterlatte.tilgangsstyring.filterForEnheter
 import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.etterlatte.vedtaksvurdering.VedtakHendelse
 import org.slf4j.LoggerFactory
+import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
 
@@ -106,6 +107,12 @@ interface BehandlingService {
     ): Boolean
 
     fun hentFoersteVirk(sakId: Long): YearMonth?
+
+    fun oppdaterGrunnlag(
+        behandlingId: UUID,
+        sakId: Long,
+        sakType: SakType,
+    )
 }
 
 internal class BehandlingServiceImpl(
@@ -119,6 +126,7 @@ internal class BehandlingServiceImpl(
     private val kommerBarnetTilGodeDao: KommerBarnetTilGodeDao,
     private val oppgaveService: OppgaveService,
     private val etterbetalingService: EtterbetalingService,
+    private val grunnlagService: GrunnlagService,
 ) : BehandlingService {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -261,6 +269,11 @@ internal class BehandlingServiceImpl(
     override fun hentFoersteVirk(sakId: Long): YearMonth? {
         val behandlinger = hentBehandlingerISak(sakId)
         return behandlinger.tidligsteIverksatteVirkningstidspunkt()?.dato
+    }
+
+    override fun oppdaterGrunnlag(behandlingId: UUID, sakId: Long, sakType: SakType) {
+        grunnlagService.oppdaterGrunnlag(behandlingId, sakId, sakType)
+        behandlingDao.lagreStatus(behandlingId, BehandlingStatus.OPPRETTET, LocalDateTime.now())
     }
 
     override suspend fun hentDetaljertBehandlingMedTilbehoer(

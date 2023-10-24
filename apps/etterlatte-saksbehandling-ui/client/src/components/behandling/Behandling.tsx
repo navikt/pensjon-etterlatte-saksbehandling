@@ -16,6 +16,8 @@ import { updateSjekkliste } from '~store/reducers/SjekklisteReducer'
 import { hentSjekkliste, opprettSjekkliste } from '~shared/api/sjekkliste'
 import { erFerdigBehandlet } from '~components/behandling/felles/utils'
 import { IBehandlingsType } from '~shared/types/IDetaljertBehandling'
+import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
+import { featureToggleSjekklisteAktivert } from '~shared/types/Sjekkliste'
 
 export const Behandling = () => {
   const behandling = useBehandling()
@@ -27,6 +29,7 @@ export const Behandling = () => {
   const [hentSjekklisteResult, hentSjekklisteForBehandling, resetSjekklisteResult] = useApiCall(hentSjekkliste)
   const [opprettSjekklisteResult, opprettSjekklisteForBehandling, resetOpprettSjekkliste] =
     useApiCall(opprettSjekkliste)
+  const sjekklisteAktivert = useFeatureEnabledMedDefault(featureToggleSjekklisteAktivert, false)
 
   useEffect(() => {
     if (!behandlingIdFraURL) {
@@ -43,22 +46,24 @@ export const Behandling = () => {
   }, [behandlingIdFraURL, behandling?.id])
 
   useEffect(() => {
-    resetSjekklisteResult()
-    resetOpprettSjekkliste()
-    if (behandling && erFoerstegangsbehandling() && isInitial(hentSjekklisteResult)) {
-      hentSjekklisteForBehandling(
-        behandling.id,
-        (result) => {
-          dispatch(updateSjekkliste(result))
-        },
-        () => {
-          if (!erFerdigBehandlet(behandling.status)) {
-            opprettSjekklisteForBehandling(behandling.id, (opprettet) => {
-              dispatch(updateSjekkliste(opprettet))
-            })
+    if (sjekklisteAktivert) {
+      resetSjekklisteResult()
+      resetOpprettSjekkliste()
+      if (behandling && erFoerstegangsbehandling() && isInitial(hentSjekklisteResult)) {
+        hentSjekklisteForBehandling(
+          behandling.id,
+          (result) => {
+            dispatch(updateSjekkliste(result))
+          },
+          () => {
+            if (!erFerdigBehandlet(behandling.status)) {
+              opprettSjekklisteForBehandling(behandling.id, (opprettet) => {
+                dispatch(updateSjekkliste(opprettet))
+              })
+            }
           }
-        }
-      )
+        )
+      }
     }
   }, [behandling])
 

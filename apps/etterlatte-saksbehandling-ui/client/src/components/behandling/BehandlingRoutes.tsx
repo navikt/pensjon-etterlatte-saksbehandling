@@ -22,9 +22,9 @@ type behandlingRouteTypes =
   | 'revurderingsoversikt'
   | 'opphoeroversikt'
   | 'vilkaarsvurdering'
+  | 'aktivitetsplikt'
   | 'trygdetid'
   | 'beregningsgrunnlag'
-  | 'aktivitetsplikt'
   | 'beregne'
   | 'brev'
 
@@ -42,9 +42,9 @@ const behandlingRoutes = (
   { path: 'revurderingsoversikt', element: <Revurderingsoversikt behandling={behandling} /> },
   { path: 'opphoeroversikt', element: <ManueltOpphoerOversikt behandling={behandling} /> },
   { path: 'vilkaarsvurdering', element: <Vilkaarsvurdering behandling={behandling} /> },
+  { path: 'aktivitetsplikt', element: <Aktivitetsplikt behandling={behandling} /> },
   { path: 'trygdetid', element: <TrygdetidVisning behandling={behandling} /> },
   { path: 'beregningsgrunnlag', element: <Beregningsgrunnlag behandling={behandling} /> },
-  { path: 'aktivitetsplikt', element: <Aktivitetsplikt behandling={behandling} /> },
   { path: 'beregne', element: <Beregne behandling={behandling} /> },
   { path: 'brev', element: <Vedtaksbrev behandling={behandling} /> },
 ]
@@ -67,6 +67,12 @@ const routeTypes = {
     description: 'Vilkårsvurdering',
     kreverBehandlingsstatus: IBehandlingStatus.VILKAARSVURDERT,
   },
+  aktivitetsplikt: {
+    path: 'aktivitetsplikt',
+    description: 'Oppfølging av aktivitet',
+    kreverBehandlingsstatus: IBehandlingStatus.VILKAARSVURDERT,
+    sakstype: SakType.OMSTILLINGSSTOENAD,
+  },
   trygdetid: {
     path: 'trygdetid',
     description: 'Trygdetid',
@@ -76,12 +82,6 @@ const routeTypes = {
     path: 'beregningsgrunnlag',
     description: 'Beregningsgrunnlag',
     kreverBehandlingsstatus: IBehandlingStatus.TRYGDETID_OPPDATERT,
-  },
-  aktivitetsplikt: {
-    path: 'aktivitetsplikt',
-    description: 'Oppfølging av aktivitet',
-    kreverBehandlingsstatus: IBehandlingStatus.TRYGDETID_OPPDATERT,
-    sakstype: SakType.OMSTILLINGSSTOENAD,
   },
   beregning: {
     path: 'beregne',
@@ -172,9 +172,9 @@ export function soeknadRoutes(behandling: IBehandlingReducer): Array<BehandlingR
     : [
         routeTypes.soeknadsoversikt,
         routeTypes.vilkaarsvurdering,
+        routeTypes.aktivitetsplikt,
         routeTypes.trygdetid,
         routeTypes.beregningsgrunnlag,
-        routeTypes.aktivitetsplikt,
         routeTypes.beregning,
       ]
 

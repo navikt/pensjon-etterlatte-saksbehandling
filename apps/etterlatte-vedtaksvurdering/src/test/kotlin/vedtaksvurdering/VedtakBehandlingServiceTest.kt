@@ -18,8 +18,8 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
-import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.beregning.AvkortetYtelseDto
@@ -222,7 +222,7 @@ internal class VedtakBehandlingServiceTest {
             mockBehandling(
                 virkningstidspunkt,
                 behandlingId,
-                revurderingAarsak = RevurderingAarsak.DOEDSFALL,
+                revurderingAarsak = Revurderingaarsak.DOEDSFALL,
             )
         coEvery { vilkaarsvurderingKlientMock.hentVilkaarsvurdering(any(), any()) } returns mockVilkaarsvurdering()
         coEvery { beregningKlientMock.hentBeregningOgAvkorting(any(), any(), any()) } returns
@@ -266,7 +266,7 @@ internal class VedtakBehandlingServiceTest {
             mockBehandling(
                 virkningstidspunkt,
                 behandlingId,
-                revurderingAarsak = RevurderingAarsak.DOEDSFALL,
+                revurderingAarsak = Revurderingaarsak.DOEDSFALL,
             )
         coEvery { vilkaarsvurderingKlientMock.hentVilkaarsvurdering(any(), any()) } returns mockVilkaarsvurdering()
         coEvery { beregningKlientMock.hentBeregningOgAvkorting(any(), any(), any()) } returns
@@ -604,7 +604,7 @@ internal class VedtakBehandlingServiceTest {
                 sak = 1L,
                 sakType = SakType.BARNEPENSJON,
                 behandlingType = BehandlingType.REVURDERING,
-                revurderingsaarsak = RevurderingAarsak.REGULERING,
+                revurderingsaarsak = Revurderingaarsak.REGULERING,
                 behandlingOpprettet = Tidspunkt.now().toLocalDatetimeUTC(),
                 soeknadMottattDato = null,
                 innsender = null,
@@ -1185,7 +1185,7 @@ internal class VedtakBehandlingServiceTest {
         virk: YearMonth,
         behandlingId: UUID,
         saktype: SakType = SakType.BARNEPENSJON,
-        revurderingAarsak: RevurderingAarsak? = null,
+        revurderingAarsak: Revurderingaarsak? = null,
         revurderingInfo: RevurderingInfo? = null,
         sakId: Long = 1L,
     ): DetaljertBehandling =

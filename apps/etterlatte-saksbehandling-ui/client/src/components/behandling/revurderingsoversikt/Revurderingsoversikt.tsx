@@ -29,18 +29,20 @@ import {
   OMS_REVURDERING_HJEMLER,
 } from '~components/behandling/soeknadsoversikt/soeknadoversikt/virkningstidspunkt/utils'
 import { SakType } from '~shared/types/sak'
-import { erOpphoer, Revurderingsaarsak, tekstRevurderingsaarsak } from '~shared/types/Revurderingsaarsak'
+import { erOpphoer, Revurderingaarsak, tekstRevurderingsaarsak } from '~shared/types/Revurderingaarsak'
 import styled from 'styled-components'
 import { GrunnForSoeskenjustering } from '~components/behandling/revurderingsoversikt/GrunnForSoeskenjustering'
 import { AdoptertAv } from '~components/behandling/revurderingsoversikt/AdoptertAv'
 import { GrunnlagForVirkningstidspunkt } from '~components/behandling/revurderingsoversikt/GrunnlagForVirkningstidspunkt'
 import { OmgjoeringAvFarskap } from '~components/behandling/revurderingsoversikt/OmgjoeringAvFarskap'
 import { RevurderingAnnen } from '~components/behandling/revurderingsoversikt/RevurderingAnnen'
+import SluttbehandlingUtland from '~components/behandling/revurderingsoversikt/sluttbehandlingUtland/SluttbehandlingUtland'
+import { Soeknadsdato } from '~components/behandling/soeknadsoversikt/soeknadoversikt/Soeknadsdato'
 
-const revurderingsaarsakTilTekst = (revurderingsaarsak: Revurderingsaarsak): string =>
+const revurderingsaarsakTilTekst = (revurderingsaarsak: Revurderingaarsak): string =>
   tekstRevurderingsaarsak[revurderingsaarsak]
 
-const hjemlerOgBeskrivelse = (sakType: SakType, revurderingsaarsak: Revurderingsaarsak): [Array<Hjemmel>, string] => {
+const hjemlerOgBeskrivelse = (sakType: SakType, revurderingsaarsak: Revurderingaarsak): [Array<Hjemmel>, string] => {
   switch (sakType) {
     case SakType.OMSTILLINGSSTOENAD:
       return hjemlerOgBeskrivelseOmstillingsstoenad(revurderingsaarsak)
@@ -49,30 +51,32 @@ const hjemlerOgBeskrivelse = (sakType: SakType, revurderingsaarsak: Revurderings
   }
 }
 
-const hjemlerOgBeskrivelseOmstillingsstoenad = (revurderingsaarsak: Revurderingsaarsak): [Array<Hjemmel>, string] => {
+const hjemlerOgBeskrivelseOmstillingsstoenad = (revurderingsaarsak: Revurderingaarsak): [Array<Hjemmel>, string] => {
   switch (revurderingsaarsak) {
-    case Revurderingsaarsak.DOEDSFALL:
+    case Revurderingaarsak.DOEDSFALL:
       return [OMS_OPPHOER_HJEMLER, OMS_OPPHOER_BESKRIVELSE]
-    case Revurderingsaarsak.INNTEKTSENDRING:
+    case Revurderingaarsak.INNTEKTSENDRING:
       return [OMS_INNTEKTSENDRING_HJEMLER, OMS_INNTEKTSENDRING_BESKRIVELSE]
-    case Revurderingsaarsak.SIVILSTAND:
+    case Revurderingaarsak.SIVILSTAND:
       return [OMS_OPPHOER_HJEMLER, OMS_OPPHOER_BESKRIVELSE]
-    case Revurderingsaarsak.INSTITUSJONSOPPHOLD:
+    case Revurderingaarsak.INSTITUSJONSOPPHOLD:
       return [OMS_INST_HJEMLER_VIRK, OMS_INST_VIRK_BESKRIVELSE]
     default:
       return [OMS_REVURDERING_HJEMLER, OMS_REVURDERING_BESKRIVELSE]
   }
 }
 
-const hjemlerOgBeskrivelseBarnepensjon = (revurderingsaarsak: Revurderingsaarsak): [Array<Hjemmel>, string] => {
+const hjemlerOgBeskrivelseBarnepensjon = (revurderingsaarsak: Revurderingaarsak): [Array<Hjemmel>, string] => {
   switch (revurderingsaarsak) {
-    case Revurderingsaarsak.DOEDSFALL:
+    case Revurderingaarsak.DOEDSFALL:
       return [BP_OPPHOER_HJEMLER, BP_OPPHOER_BESKRIVELSE]
-    case Revurderingsaarsak.YRKESSKADE:
+    case Revurderingaarsak.YRKESSKADE:
       return [BP_REVURDERING_YRKESSKADE_HJEMLER, BP_REVURDERING_YRKESSKADE_BESKRIVELSE]
-    case Revurderingsaarsak.INSTITUSJONSOPPHOLD:
-    case Revurderingsaarsak.FENGSELSOPPHOLD: //TODO: kanskje Revurderingsaarsak.UT_AV_FENGSEL: men ikke i bruk nå..
+    case Revurderingaarsak.INSTITUSJONSOPPHOLD:
+    case Revurderingaarsak.FENGSELSOPPHOLD: //TODO: kanskje Revurderingaarsak.UT_AV_FENGSEL: men ikke i bruk nå..
       return [BP_INSTITUSJONSOPPHOLD_HJEMLER, BP_INSTITUSJONSOPPHOLD_BESKRIVELSE]
+
+    case Revurderingaarsak.SLUTTBEHANDLING_UTLAND: //TODO:EY-2878 Mari må si hvilke
     default:
       return [BP_REVURDERING_HJEMLER, BP_REVURDERING_BESKRIVELSE]
   }
@@ -95,12 +99,13 @@ export const Revurderingsoversikt = (props: { behandling: IDetaljertBehandling }
             Revurdering
           </Heading>
         </HeadingWrapper>
-        {revurderingsaarsak != Revurderingsaarsak.ANNEN && (
+        {revurderingsaarsak != Revurderingaarsak.ANNEN && (
           <BodyShort>
             {erOpphoer(revurderingsaarsak) ? 'Opphør' : 'Revurdering'} på grunn av{' '}
             <Lowercase>{revurderingsaarsakTilTekst(revurderingsaarsak)}</Lowercase>.
           </BodyShort>
         )}
+        <Soeknadsdato mottattDato={behandling.soeknadMottattDato} />
         {erOpphoer(revurderingsaarsak) && (
           <Alert variant="warning">
             Gjenny støtter ikke tilbakekreving per dags dato, så opphør må ikke gjennomføres hvis opphøret gjelder fra
@@ -115,14 +120,17 @@ export const Revurderingsoversikt = (props: { behandling: IDetaljertBehandling }
             <BodyShort>{behandling.begrunnelse}</BodyShort>
           </>
         )}
-        {behandling.revurderingsaarsak === Revurderingsaarsak.SOESKENJUSTERING && (
+        {behandling.revurderingsaarsak === Revurderingaarsak.SLUTTBEHANDLING_UTLAND && (
+          <SluttbehandlingUtland sakId={behandling.sakId} revurderingId={behandling.id} />
+        )}
+        {behandling.revurderingsaarsak === Revurderingaarsak.SOESKENJUSTERING && (
           <GrunnForSoeskenjustering behandling={behandling} />
         )}
-        {behandling.revurderingsaarsak === Revurderingsaarsak.ADOPSJON && <AdoptertAv behandling={behandling} />}
-        {behandling.revurderingsaarsak === Revurderingsaarsak.OMGJOERING_AV_FARSKAP && (
+        {behandling.revurderingsaarsak === Revurderingaarsak.ADOPSJON && <AdoptertAv behandling={behandling} />}
+        {behandling.revurderingsaarsak === Revurderingaarsak.OMGJOERING_AV_FARSKAP && (
           <OmgjoeringAvFarskap behandling={behandling} />
         )}
-        {behandling.revurderingsaarsak === Revurderingsaarsak.ANNEN && <RevurderingAnnen behandling={behandling} />}
+        {behandling.revurderingsaarsak === Revurderingaarsak.ANNEN && <RevurderingAnnen behandling={behandling} />}
         <Virkningstidspunkt
           redigerbar={behandles}
           virkningstidspunkt={behandling.virkningstidspunkt}

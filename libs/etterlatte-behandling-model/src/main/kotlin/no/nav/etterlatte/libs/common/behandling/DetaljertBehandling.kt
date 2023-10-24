@@ -26,7 +26,7 @@ data class DetaljertBehandling(
     val behandlingType: BehandlingType,
     val virkningstidspunkt: Virkningstidspunkt?,
     val boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet?,
-    val revurderingsaarsak: RevurderingAarsak? = null,
+    val revurderingsaarsak: Revurderingaarsak? = null,
     val revurderingInfo: RevurderingInfo?,
     val prosesstype: Prosesstype, // statistikk og trygdetid
     val enhet: String, // kun statistikk
@@ -37,4 +37,4 @@ data class DetaljertBehandling(
     }
 }
 
-fun RevurderingAarsak?.girOpphoer() = this != null && utfall.girOpphoer
+fun Revurderingaarsak?.girOpphoer() = this != null && utfall.girOpphoer

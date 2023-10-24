@@ -15,6 +15,7 @@ import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.NyeSaksopplysninger
+import no.nav.etterlatte.libs.common.grunnlag.OppdaterGrunnlagRequest
 import no.nav.etterlatte.libs.common.grunnlag.Opplysningsbehov
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import java.util.UUID
@@ -30,6 +31,8 @@ interface GrunnlagKlient {
         behandlingId: UUID,
         opplysningsbehov: Opplysningsbehov,
     )
+
+    suspend fun oppdaterGrunnlag(behandlingId: UUID, request: OppdaterGrunnlagRequest)
 
     suspend fun hentPersongalleri(
         sakId: Long,
@@ -54,10 +57,22 @@ class GrunnlagKlientImpl(
         opplysningsbehov: Opplysningsbehov,
     ) {
         return grunnlagHttpClient
-            .post("$url/grunnlag/sak/${opplysningsbehov.sakId}/behandling/$behandlingId/oppdater-grunnlag") {
+            .post("$url/grunnlag/sak/${opplysningsbehov.sakId}/behandling/$behandlingId/opprett-grunnlag") {
                 accept(ContentType.Application.Json)
                 contentType(ContentType.Application.Json)
                 setBody(opplysningsbehov)
+            }.body()
+    }
+
+    override suspend fun oppdaterGrunnlag(
+        behandlingId: UUID,
+        request: OppdaterGrunnlagRequest,
+    ) {
+        return grunnlagHttpClient
+            .post("$url/grunnlag/sak/${request.sakId}/behandling/$behandlingId/oppdater-grunnlag") {
+                accept(ContentType.Application.Json)
+                contentType(ContentType.Application.Json)
+                setBody(request)
             }.body()
     }
 

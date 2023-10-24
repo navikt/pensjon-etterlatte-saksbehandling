@@ -27,7 +27,7 @@ import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeService
 import no.nav.etterlatte.behandling.revurdering.RevurderingDao
-import no.nav.etterlatte.behandling.revurdering.RevurderingServiceImpl
+import no.nav.etterlatte.behandling.revurdering.RevurderingService
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseDao
@@ -37,7 +37,7 @@ import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.NyBehandlingRequest
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
-import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
@@ -86,7 +86,7 @@ class BehandlingFactoryTest {
         }
     private val revurderingDao = mockk<RevurderingDao>()
     private val revurderingService =
-        RevurderingServiceImpl(
+        RevurderingService(
             oppgaveService,
             grunnlagService,
             behandlingHendelserKafkaProducerMock,
@@ -528,7 +528,7 @@ class BehandlingFactoryTest {
         every { behandlingDaoMock.hentBehandling(any()) } returns
             revurdering(
                 sakId = 1,
-                revurderingAarsak = RevurderingAarsak.NY_SOEKNAD,
+                revurderingAarsak = Revurderingaarsak.NY_SOEKNAD,
                 enhet = Enheter.defaultEnhet.enhetNr,
             )
 

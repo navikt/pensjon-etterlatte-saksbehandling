@@ -4,16 +4,14 @@ import { useBehandlingRoutes } from '../BehandlingRoutes'
 import { useState } from 'react'
 import { useVedtaksResultat } from '../useVedtaksResultat'
 import { isFailure, isPending, useApiCall } from '~shared/hooks/useApiCall'
-import { useParams } from 'react-router-dom'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { upsertVedtak } from '~shared/api/vedtaksvurdering'
 
-export const VilkaarsVurderingKnapper = () => {
+export const VilkaarsVurderingKnapper = (props: { behandlingId: string }) => {
   const { next, goto } = useBehandlingRoutes()
+  const { behandlingId } = props
   const [ventNavn, setVentNavn] = useState<string>(handlinger.VILKAARSVURDERING.VENT.navn)
   const [vedtak, oppdaterVedtakRequest] = useApiCall(upsertVedtak)
-  const { behandlingId } = useParams()
-
   const vedtaksresultat = useVedtaksResultat()
 
   function toggleVentNavn() {
@@ -25,12 +23,11 @@ export const VilkaarsVurderingKnapper = () => {
   }
 
   const oppdaterVedtakAvslag = () => {
-    if (!behandlingId) throw new Error('Mangler behandlingsid')
-
     oppdaterVedtakRequest(behandlingId, () => {
       goto('brev')
     })
   }
+
   return (
     <>
       {(() => {

@@ -3,7 +3,7 @@ import React, { useState } from 'react'
 import styled from 'styled-components'
 import { isPending, useApiCall } from '~shared/hooks/useApiCall'
 import { opprettRevurdering as opprettRevurderingApi } from '~shared/api/behandling'
-import { Revurderingsaarsak, tekstRevurderingsaarsak } from '~shared/types/Revurderingsaarsak'
+import { Revurderingaarsak, tekstRevurderingsaarsak } from '~shared/types/Revurderingaarsak'
 import { useNavigate } from 'react-router-dom'
 import { ButtonGroup } from '~components/person/VurderHendelseModal'
 
@@ -12,11 +12,11 @@ export const OpprettNyRevurdering = ({
   revurderinger,
 }: {
   sakId: number
-  revurderinger: Array<Revurderingsaarsak>
+  revurderinger: Array<Revurderingaarsak>
 }) => {
   const [error, setError] = useState<string | null>(null)
   const [open, setOpen] = useState(false)
-  const [valgtRevurdering, setValgtRevurdering] = useState<Revurderingsaarsak | undefined>()
+  const [valgtRevurdering, setValgtRevurdering] = useState<Revurderingaarsak | undefined>()
   const [fritekstgrunn, setFritekstgrunn] = useState<string>('')
 
   const [opprettRevurderingStatus, opprettRevurdering, resetApiCall] = useApiCall(opprettRevurderingApi)
@@ -58,7 +58,7 @@ export const OpprettNyRevurdering = ({
             <Select
               label="Årsak til revurdering"
               value={valgtRevurdering}
-              onChange={(e) => setValgtRevurdering(e.target.value as Revurderingsaarsak)}
+              onChange={(e) => setValgtRevurdering(e.target.value as Revurderingaarsak)}
               error={error}
             >
               <option>Velg type</option>
@@ -70,7 +70,7 @@ export const OpprettNyRevurdering = ({
                 )
               })}
             </Select>
-            {valgtRevurdering === Revurderingsaarsak.ANNEN && (
+            {valgtRevurdering === Revurderingaarsak.ANNEN && (
               <AnnenRevurderingWrapper>
                 <TextField
                   label="Beskriv årsak"

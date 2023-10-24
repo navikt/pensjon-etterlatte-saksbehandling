@@ -14,7 +14,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.NyBehandlingRequest
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
-import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.NyeSaksopplysninger
 import no.nav.etterlatte.libs.common.grunnlag.lagOpplysning
@@ -116,7 +116,7 @@ class BehandlingFactory(
                 forrigeBehandling = forrigeBehandling,
                 mottattDato = mottattDato,
                 kilde = kilde,
-                revurderingAarsak = RevurderingAarsak.NY_SOEKNAD,
+                revurderingAarsak = Revurderingaarsak.NY_SOEKNAD,
             )?.let { BehandlingOgOppgave(it, null) }
         } else {
             val harBehandlingUnderbehandling =

@@ -34,6 +34,7 @@ import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.NyeSaksopplysninger
+import no.nav.etterlatte.libs.common.grunnlag.OppdaterGrunnlagRequest
 import no.nav.etterlatte.libs.common.grunnlag.Opplysningsbehov
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.objectMapper
@@ -135,7 +136,12 @@ internal class BehandlingGrunnlagRoutesKtTest {
                 config = hoconApplicationConfig
             }
             application {
-                restModule(this.log, routePrefix = "api/grunnlag") { behandlingGrunnlagRoute(grunnlagService, behandlingKlient) }
+                restModule(this.log, routePrefix = "api/grunnlag") {
+                    behandlingGrunnlagRoute(
+                        grunnlagService,
+                        behandlingKlient,
+                    )
+                }
             }
             val response =
                 client.get("api/grunnlag/sak/1/behandling/$behandlingId") {
@@ -286,17 +292,17 @@ internal class BehandlingGrunnlagRoutesKtTest {
     }
 
     @Test
-    fun `Teste endepunkt for oppdatering av grunnlag`() {
+    fun `Teste endepunkt for oppretting av grunnlag`() {
         val sakId = 12345L
         val behandlingId = UUID.randomUUID()
         val persongalleri = GrunnlagTestData().hentPersonGalleri()
         val opplysningsbehov = Opplysningsbehov(sakId, SakType.BARNEPENSJON, persongalleri)
 
-        coEvery { grunnlagService.oppdaterGrunnlag(any(), any()) } just Runs
+        coEvery { grunnlagService.opprettGrunnlag(any(), any()) } just Runs
 
         testApplication {
             val actualResponse =
-                createHttpClient().post("api/grunnlag/sak/1/behandling/$behandlingId/oppdater-grunnlag") {
+                createHttpClient().post("api/grunnlag/sak/1/behandling/$behandlingId/opprett-grunnlag") {
                     contentType(ContentType.Application.Json)
                     setBody(opplysningsbehov)
                     headers {
@@ -308,10 +314,46 @@ internal class BehandlingGrunnlagRoutesKtTest {
         }
 
         val behovSlot = slot<Opplysningsbehov>()
-        coVerify(exactly = 1) { grunnlagService.oppdaterGrunnlag(behandlingId, capture(behovSlot)) }
+        coVerify(exactly = 1) {
+            grunnlagService.opprettGrunnlag(
+                behandlingId,
+                capture(behovSlot),
+            )
+        }
         coVerify { behandlingKlient wasNot Called }
 
         assertEquals(opplysningsbehov, behovSlot.captured)
+    }
+
+    @Test
+    fun `Teste endepunkt for oppdatering av grunnlag`() {
+        val sakId = 12345L
+        val behandlingId = UUID.randomUUID()
+
+        coEvery { grunnlagService.oppdaterGrunnlag(any(), any(), any()) } just Runs
+
+        val request = OppdaterGrunnlagRequest(sakId, SakType.BARNEPENSJON)
+        testApplication {
+            val actualResponse =
+                createHttpClient().post("api/grunnlag/sak/1/behandling/$behandlingId/oppdater-grunnlag") {
+                    contentType(ContentType.Application.Json)
+                    setBody(request)
+                    headers {
+                        append(HttpHeaders.Authorization, "Bearer $systemBruker")
+                    }
+                }
+
+            assertEquals(HttpStatusCode.OK, actualResponse.status)
+        }
+
+        coVerify(exactly = 1) {
+            grunnlagService.oppdaterGrunnlag(
+                behandlingId,
+                sakId,
+                SakType.BARNEPENSJON,
+            )
+        }
+        coVerify { behandlingKlient wasNot Called }
     }
 
     private fun ApplicationTestBuilder.createHttpClient(): HttpClient {

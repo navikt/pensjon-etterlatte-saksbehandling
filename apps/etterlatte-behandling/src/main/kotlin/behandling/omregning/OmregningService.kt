@@ -6,7 +6,7 @@ import no.nav.etterlatte.behandling.GrunnlagService
 import no.nav.etterlatte.behandling.revurdering.RevurderingService
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
-import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import java.time.LocalDate
 import java.util.UUID
@@ -31,7 +31,7 @@ class OmregningService(
                     revurderingService.opprettAutomatiskRevurdering(
                         sakId = sakId,
                         forrigeBehandling = forrigeBehandling,
-                        revurderingAarsak = RevurderingAarsak.REGULERING,
+                        revurderingAarsak = Revurderingaarsak.REGULERING,
                         virkningstidspunkt = fraDato,
                         kilde = Vedtaksloesning.GJENNY,
                         persongalleri = persongalleri,

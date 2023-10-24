@@ -12,6 +12,7 @@ import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.grunnlag.NyeSaksopplysninger
+import no.nav.etterlatte.libs.common.grunnlag.OppdaterGrunnlagRequest
 import no.nav.etterlatte.libs.common.grunnlag.Opplysningsbehov
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.kunSystembruker
@@ -72,13 +73,21 @@ fun Route.behandlingGrunnlagRoute(
             }
         }
 
-        post("oppdater-grunnlag") {
+        post("opprett-grunnlag") {
             kunSystembruker {
                 withBehandlingId(behandlingKlient) { behandlingId ->
                     val opplysningsbehov = call.receive<Opplysningsbehov>()
-                    grunnlagService.oppdaterGrunnlag(behandlingId, opplysningsbehov)
+                    grunnlagService.opprettGrunnlag(behandlingId, opplysningsbehov)
                     call.respond(HttpStatusCode.OK)
                 }
+            }
+        }
+
+        post("oppdater-grunnlag") {
+            withBehandlingId(behandlingKlient) { behandlingId ->
+                val request = call.receive<OppdaterGrunnlagRequest>()
+                grunnlagService.oppdaterGrunnlag(behandlingId, request.sakId, request.sakType)
+                call.respond(HttpStatusCode.OK)
             }
         }
     }

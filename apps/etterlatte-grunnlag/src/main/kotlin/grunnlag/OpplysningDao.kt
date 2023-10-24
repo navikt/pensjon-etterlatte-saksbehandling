@@ -70,10 +70,11 @@ class OpplysningDao(private val datasource: DataSource) {
         connection.use {
             it.prepareStatement(
                 """
-                SELECT bv.sak_id, opplysning_id, kilde, opplysning_type, opplysning, bv.hendelsenummer, fnr, fom, tom
+                SELECT bv.sak_id, opplysning_id, kilde, opplysning_type, opplysning, hendelse.hendelsenummer, fnr, fom, tom
                 FROM grunnlagshendelse hendelse 
-                LEFT JOIN behandling_versjon bv ON bv.sak_id = hendelse.sak_id 
-                WHERE bv.behandling_id = ? AND hendelse.hendelsenummer <= bv.hendelsenummer
+                LEFT JOIN behandling_versjon bv 
+                    ON bv.sak_id = hendelse.sak_id AND bv.hendelsenummer >= hendelse.hendelsenummer 
+                WHERE bv.behandling_id = ?
                 """.trimIndent(),
             )
                 .apply {

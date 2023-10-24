@@ -22,6 +22,8 @@ import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMS_OPPHOER_MANUELL
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMS_REVURDERING_ENDRING
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMS_REVURDERING_OPPHOER
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMS_REVURDERING_OPPHOER_GENERELL
+import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.TILBAKEKREVING_FERDIG
+import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.TILBAKEKREVING_INNHOLD
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.TOM_MAL
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
 import no.nav.etterlatte.brev.model.bp.AdopsjonRevurderingBrevdata
@@ -36,9 +38,11 @@ import no.nav.etterlatte.brev.model.oms.AvslagBrevDataOMS
 import no.nav.etterlatte.brev.model.oms.FoerstegangsvedtakUtfallDTO
 import no.nav.etterlatte.brev.model.oms.InntektsendringRevurderingOMS
 import no.nav.etterlatte.brev.model.oms.InnvilgetBrevDataOMS
+import no.nav.etterlatte.brev.model.tilbakkreving.TilbakekrevingFerdigData
+import no.nav.etterlatte.brev.model.tilbakkreving.TilbakekrevingInnholdData
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
-import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
@@ -113,40 +117,40 @@ class BrevDataMapper(private val featureToggleService: FeatureToggleService, pri
 
                     VedtakType.AVSLAG ->
                         when (generellBrevData.revurderingsaarsak) {
-                            RevurderingAarsak.YRKESSKADE -> BrevkodePar(BARNEPENSJON_AVSLAG_IKKEYRKESSKADE, BARNEPENSJON_AVSLAG)
+                            Revurderingaarsak.YRKESSKADE -> BrevkodePar(BARNEPENSJON_AVSLAG_IKKEYRKESSKADE, BARNEPENSJON_AVSLAG)
                             else -> BrevkodePar(BARNEPENSJON_AVSLAG)
                         }
 
                     VedtakType.ENDRING ->
                         when (generellBrevData.revurderingsaarsak) {
-                            RevurderingAarsak.SOESKENJUSTERING -> BrevkodePar(BARNEPENSJON_REVURDERING_SOESKENJUSTERING)
-                            RevurderingAarsak.INSTITUSJONSOPPHOLD ->
+                            Revurderingaarsak.SOESKENJUSTERING -> BrevkodePar(BARNEPENSJON_REVURDERING_SOESKENJUSTERING)
+                            Revurderingaarsak.INSTITUSJONSOPPHOLD ->
                                 BrevkodePar(TOM_MAL, BARNEPENSJON_REVURDERING_ENDRING)
-                            RevurderingAarsak.YRKESSKADE ->
+                            Revurderingaarsak.YRKESSKADE ->
                                 BrevkodePar(TOM_MAL, BARNEPENSJON_REVURDERING_ENDRING)
-                            RevurderingAarsak.ANNEN -> BrevkodePar(TOM_MAL, BARNEPENSJON_REVURDERING_ENDRING)
+                            Revurderingaarsak.ANNEN -> BrevkodePar(TOM_MAL, BARNEPENSJON_REVURDERING_ENDRING)
 
                             else -> TODO("Revurderingsbrev for ${generellBrevData.revurderingsaarsak} er ikke støttet")
                         }
 
                     VedtakType.OPPHOER ->
                         when (generellBrevData.revurderingsaarsak) {
-                            RevurderingAarsak.ADOPSJON ->
+                            Revurderingaarsak.ADOPSJON ->
                                 BrevkodePar(BARNEPENSJON_REVURDERING_ADOPSJON, BARNEPENSJON_REVURDERING_OPPHOER)
 
-                            RevurderingAarsak.OMGJOERING_AV_FARSKAP ->
+                            Revurderingaarsak.OMGJOERING_AV_FARSKAP ->
                                 BrevkodePar(BARNEPENSJON_REVURDERING_OMGJOERING_AV_FARSKAP, BARNEPENSJON_REVURDERING_OPPHOER)
 
-                            RevurderingAarsak.FENGSELSOPPHOLD ->
+                            Revurderingaarsak.FENGSELSOPPHOLD ->
                                 BrevkodePar(TOM_MAL, BARNEPENSJON_REVURDERING_ENDRING)
 
-                            RevurderingAarsak.UT_AV_FENGSEL ->
+                            Revurderingaarsak.UT_AV_FENGSEL ->
                                 BrevkodePar(TOM_MAL, BARNEPENSJON_REVURDERING_ENDRING)
 
                             else -> TODO("Vedtakstype er ikke støttet: $vedtakType")
                         }
 
-                    VedtakType.TILBAKEKREVING -> BrevkodePar(TOM_MAL, TOM_MAL) // TODO EY-2806
+                    VedtakType.TILBAKEKREVING -> BrevkodePar(TILBAKEKREVING_INNHOLD, TILBAKEKREVING_FERDIG)
                 }
             }
 
@@ -160,20 +164,20 @@ class BrevDataMapper(private val featureToggleService: FeatureToggleService, pri
                     VedtakType.AVSLAG -> BrevkodePar(OMS_AVSLAG_BEGRUNNELSE, OMS_AVSLAG)
                     VedtakType.ENDRING ->
                         when (generellBrevData.revurderingsaarsak) {
-                            RevurderingAarsak.INNTEKTSENDRING,
-                            RevurderingAarsak.ANNEN,
+                            Revurderingaarsak.INNTEKTSENDRING,
+                            Revurderingaarsak.ANNEN,
                             ->
                                 BrevkodePar(TOM_MAL, OMS_REVURDERING_ENDRING)
                             else -> TODO("Revurderingsbrev for ${generellBrevData.revurderingsaarsak} er ikke støttet")
                         }
                     VedtakType.OPPHOER ->
                         when (generellBrevData.revurderingsaarsak) {
-                            RevurderingAarsak.SIVILSTAND ->
+                            Revurderingaarsak.SIVILSTAND ->
                                 BrevkodePar(OMS_REVURDERING_OPPHOER_GENERELL, OMS_REVURDERING_OPPHOER)
                             else -> TODO("Vedtakstype er ikke støttet: $vedtakType")
                         }
 
-                    VedtakType.TILBAKEKREVING -> BrevkodePar(TOM_MAL, TOM_MAL) // TODO EY-2806
+                    VedtakType.TILBAKEKREVING -> BrevkodePar(TILBAKEKREVING_INNHOLD, TILBAKEKREVING_FERDIG)
                 }
             }
         }
@@ -209,13 +213,13 @@ class BrevDataMapper(private val featureToggleService: FeatureToggleService, pri
 
                     VedtakType.AVSLAG ->
                         when (generellBrevData.revurderingsaarsak) {
-                            RevurderingAarsak.YRKESSKADE -> AvslagYrkesskadeBrevData.fra(generellBrevData)
+                            Revurderingaarsak.YRKESSKADE -> AvslagYrkesskadeBrevData.fra(generellBrevData)
                             else -> AvslagBrevData.fra()
                         }
 
                     VedtakType.ENDRING ->
                         when (generellBrevData.revurderingsaarsak) {
-                            RevurderingAarsak.SOESKENJUSTERING -> {
+                            Revurderingaarsak.SOESKENJUSTERING -> {
                                 coroutineScope {
                                     val utbetalingsinfo =
                                         async {
@@ -225,24 +229,24 @@ class BrevDataMapper(private val featureToggleService: FeatureToggleService, pri
                                 }
                             }
 
-                            RevurderingAarsak.FENGSELSOPPHOLD,
-                            RevurderingAarsak.UT_AV_FENGSEL,
-                            RevurderingAarsak.INSTITUSJONSOPPHOLD,
+                            Revurderingaarsak.FENGSELSOPPHOLD,
+                            Revurderingaarsak.UT_AV_FENGSEL,
+                            Revurderingaarsak.INSTITUSJONSOPPHOLD,
                             -> ManueltBrevData(emptyList())
 
-                            RevurderingAarsak.YRKESSKADE -> ManueltBrevData(emptyList())
-                            RevurderingAarsak.ANNEN -> ManueltBrevData(emptyList())
+                            Revurderingaarsak.YRKESSKADE -> ManueltBrevData(emptyList())
+                            Revurderingaarsak.ANNEN -> ManueltBrevData(emptyList())
                             else -> TODO("Revurderingsbrev for ${generellBrevData.revurderingsaarsak} er ikke støttet")
                         }
 
                     VedtakType.OPPHOER ->
                         when (generellBrevData.revurderingsaarsak) {
-                            RevurderingAarsak.ADOPSJON ->
+                            Revurderingaarsak.ADOPSJON ->
                                 AdopsjonRevurderingBrevdata.fra(
                                     generellBrevData,
                                     LocalDate.now(),
                                 ) // TODO: Denne må vi hente anten frå PDL eller brukarinput
-                            RevurderingAarsak.OMGJOERING_AV_FARSKAP -> {
+                            Revurderingaarsak.OMGJOERING_AV_FARSKAP -> {
                                 coroutineScope {
                                     val innvilgelsesDato =
                                         async {
@@ -262,7 +266,7 @@ class BrevDataMapper(private val featureToggleService: FeatureToggleService, pri
                             else -> TODO("Vedtakstype er ikke støttet: $vedtakType")
                         }
 
-                    VedtakType.TILBAKEKREVING -> ManueltBrevData(emptyList()) // TODO EY-2806
+                    VedtakType.TILBAKEKREVING -> TilbakekrevingInnholdData.fra(generellBrevData)
                 }
             }
 
@@ -284,8 +288,8 @@ class BrevDataMapper(private val featureToggleService: FeatureToggleService, pri
                         AvslagBrevDataOMS.fra(generellBrevData.personerISak.avdoed.navn, emptyList())
                     VedtakType.ENDRING ->
                         when (generellBrevData.revurderingsaarsak) {
-                            RevurderingAarsak.INNTEKTSENDRING,
-                            RevurderingAarsak.ANNEN,
+                            Revurderingaarsak.INNTEKTSENDRING,
+                            Revurderingaarsak.ANNEN,
                             -> ManueltBrevData(emptyList())
 
                             else -> TODO("Revurderingsbrev for ${generellBrevData.revurderingsaarsak} er ikke støttet")
@@ -293,11 +297,11 @@ class BrevDataMapper(private val featureToggleService: FeatureToggleService, pri
 
                     VedtakType.OPPHOER ->
                         when (generellBrevData.revurderingsaarsak) {
-                            RevurderingAarsak.SIVILSTAND -> ManueltBrevData(emptyList())
+                            Revurderingaarsak.SIVILSTAND -> ManueltBrevData(emptyList())
                             else -> TODO("Revurderingsbrev for ${generellBrevData.revurderingsaarsak} er ikke støttet")
                         }
 
-                    VedtakType.TILBAKEKREVING -> ManueltBrevData(emptyList()) // TODO EY-2806
+                    VedtakType.TILBAKEKREVING -> TilbakekrevingInnholdData.fra(generellBrevData)
                 }
             }
         }
@@ -384,21 +388,12 @@ class BrevDataMapper(private val featureToggleService: FeatureToggleService, pri
                 AvslagBrevDataOMS.fra(generellBrevData.personerISak.avdoed.navn, innholdMedVedlegg.innhold())
             }
 
-            /*
-             * TODO EY-2806
-             * TILBAKEKREVING -> {
-             *    ManueltBrevData(innholdMedVedlegg.innhold())
-             * }
-             */
+            TILBAKEKREVING_FERDIG -> TilbakekrevingFerdigData.fra(generellBrevData, innholdMedVedlegg)
 
             else ->
-                when (generellBrevData.forenkletVedtak.type) { // TODO EY-2806 midlertidig - erstattes av kommenter ovenfor
-                    VedtakType.TILBAKEKREVING -> ManueltBrevData(innholdMedVedlegg.innhold())
-                    else ->
-                        when (generellBrevData.revurderingsaarsak?.redigerbartBrev) {
-                            true -> ManueltBrevData(innholdMedVedlegg.innhold())
-                            else -> brevData(generellBrevData, brukerTokenInfo)
-                        }
+                when (generellBrevData.revurderingsaarsak?.redigerbartBrev) {
+                    true -> ManueltBrevData(innholdMedVedlegg.innhold())
+                    else -> brevData(generellBrevData, brukerTokenInfo)
                 }
         }
     }

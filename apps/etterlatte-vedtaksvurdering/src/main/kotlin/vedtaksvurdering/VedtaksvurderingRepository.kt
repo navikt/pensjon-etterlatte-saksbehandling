@@ -5,7 +5,7 @@ import kotliquery.Row
 import kotliquery.TransactionalSession
 import kotliquery.queryOf
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
-import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
@@ -399,7 +399,7 @@ class VedtaksvurderingRepository(private val datasource: DataSource) : Transacti
                             beregning = stringOrNull("beregningsresultat")?.let { objectMapper.readValue(it) },
                             avkorting = stringOrNull("avkorting")?.let { objectMapper.readValue(it) },
                             utbetalingsperioder = utbetalingsperioder,
-                            revurderingAarsak = stringOrNull("revurderingsaarsak")?.let { RevurderingAarsak.valueOf(it) },
+                            revurderingAarsak = stringOrNull("revurderingsaarsak")?.let { Revurderingaarsak.valueOf(it) },
                             revurderingInfo = stringOrNull("revurderinginfo")?.let { objectMapper.readValue(it) },
                         )
 

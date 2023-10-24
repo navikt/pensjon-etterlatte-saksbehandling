@@ -5,7 +5,7 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
-import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
@@ -237,7 +237,7 @@ class VedtakBehandlingService(
         return attestertVedtak
     }
 
-    private fun RevurderingAarsak?.skalIkkeSendeBrev() = this != null && !utfall.skalSendeBrev
+    private fun Revurderingaarsak?.skalIkkeSendeBrev() = this != null && !utfall.skalSendeBrev
 
     suspend fun underkjennVedtak(
         behandlingId: UUID,
@@ -587,7 +587,7 @@ class VedtakTilstandException(gjeldendeStatus: VedtakStatus, forventetStatus: Li
 class BehandlingstilstandException(vedtak: Vedtak) :
     IllegalStateException("Statussjekk for behandling ${vedtak.behandlingId} feilet")
 
-class OpphoersrevurderingErIkkeOpphoersvedtakException(revurderingAarsak: RevurderingAarsak?, vedtakType: VedtakType) :
+class OpphoersrevurderingErIkkeOpphoersvedtakException(revurderingAarsak: Revurderingaarsak?, vedtakType: VedtakType) :
     IllegalStateException(
         "Vedtaket er av type $vedtakType, men dette er " +
             "ikke gyldig for revurderingen med årsak $revurderingAarsak",

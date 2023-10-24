@@ -17,16 +17,28 @@ import SluttbehandlingUtlandFelter from '~components/behandling/revurderingsover
 import { lagreRevurderingInfo } from '~shared/api/revurdering'
 import { AWhite } from '@navikt/ds-tokens/dist/tokens'
 import { CheckmarkCircleIcon } from '@navikt/aksel-icons'
+import { SluttbehandlingUtlandInfo } from '~shared/types/RevurderingInfo'
 
-export default function SluttbehandlingUtland({ sakId, revurderingId }: { sakId: number; revurderingId: string }) {
+export default function SluttbehandlingUtland({
+  sakId,
+  revurderingId,
+  sluttbehandlingUtland,
+}: {
+  sakId: number
+  revurderingId: string
+  sluttbehandlingUtland: SluttbehandlingUtlandInfo | undefined
+}) {
   const [kravpakkeStatus, hentKravpakke] = useApiCall(hentKravpakkeforSak)
   const [hentAlleLandRequest, fetchAlleLand] = useApiCall(hentAlleLand)
   const [alleLandKodeverk, setAlleLandKodeverk] = useState<ILand[] | null>(null)
   const [visHistorikk, setVisHistorikk] = useState(false)
   const [lagreRevurderingsinfoStatus, lagreRevurderingsinfoApi] = useApiCall(lagreRevurderingInfo)
-  const [landMedDokumenter, setLandMedDokumenter] = useState<LandMedDokumenter[]>([
+  const initalStateLandMedDokumenter = [
     { landIsoKode: undefined, dokumenter: [{ dokumenttype: '', dato: undefined, kommentar: '' }] },
-  ])
+  ]
+  const [landMedDokumenter, setLandMedDokumenter] = useState<LandMedDokumenter[]>(
+    sluttbehandlingUtland ? sluttbehandlingUtland.landMedDokumenter : initalStateLandMedDokumenter
+  )
   const [feilkoder, setFeilkoder] = useState<Set<string>>(new Set([]))
   const [visLagretOk, setVisLagretOk] = useState<boolean>(false)
   useEffect(() => {

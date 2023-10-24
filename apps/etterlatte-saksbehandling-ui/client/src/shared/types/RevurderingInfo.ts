@@ -49,7 +49,7 @@ export interface InstitusjonsoppholdInfo {
   utskrevetdato: Date | undefined
 }
 
-export interface SluttbehandlingUtland {
+export interface SluttbehandlingUtlandInfo {
   type: 'SLUTTBEHANDLING_UTLAND'
   landMedDokumenter: LandMedDokumenter[]
 }
@@ -67,7 +67,7 @@ export type RevurderingInfo =
   | OmgjoeringAvFarskapInfo
   | FengselsoppholdInfo
   | InstitusjonsoppholdInfo
-  | SluttbehandlingUtland
+  | SluttbehandlingUtlandInfo
 
 export interface RevurderingMedBegrunnelse {
   revurderingInfo: RevurderingInfo

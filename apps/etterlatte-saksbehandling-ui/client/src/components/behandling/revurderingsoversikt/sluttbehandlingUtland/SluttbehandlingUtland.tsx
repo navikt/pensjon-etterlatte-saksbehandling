@@ -143,6 +143,7 @@ export default function SluttbehandlingUtland({ sakId, revurderingId }: { sakId:
       )}
       {landMedDokumenter.length > 0 ? (
         <Button
+          style={{ marginTop: '1.5rem', marginLeft: '0.5rem' }}
           loading={isPending(lagreRevurderingsinfoStatus)}
           variant="primary"
           onClick={() => lagreRevurderingsinfo()}

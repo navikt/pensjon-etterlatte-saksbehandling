@@ -32,7 +32,10 @@ interface GrunnlagKlient {
         opplysningsbehov: Opplysningsbehov,
     )
 
-    suspend fun oppdaterGrunnlag(behandlingId: UUID, request: OppdaterGrunnlagRequest)
+    suspend fun oppdaterGrunnlag(
+        behandlingId: UUID,
+        request: OppdaterGrunnlagRequest,
+    )
 
     suspend fun hentPersongalleri(
         sakId: Long,

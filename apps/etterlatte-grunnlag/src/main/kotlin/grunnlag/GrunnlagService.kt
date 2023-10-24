@@ -310,10 +310,11 @@ class RealGrunnlagService(
         sakId: Long,
         sakType: SakType,
     ) {
-        val galleriHendelse = opplysningDao.finnNyesteGrunnlagForSak(
-            sakId,
-            Opplysningstype.PERSONGALLERI_V1,
-        )!!
+        val galleriHendelse =
+            opplysningDao.finnNyesteGrunnlagForSak(
+                sakId,
+                Opplysningstype.PERSONGALLERI_V1,
+            )!!
         val persongalleri = objectMapper.readValue(galleriHendelse.opplysning.toJson(), Persongalleri::class.java)
 
         opprettGrunnlag(

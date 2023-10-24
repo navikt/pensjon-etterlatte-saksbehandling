@@ -52,6 +52,7 @@ const BeregningsgrunnlagOmstillingsstoenad = (props: { behandling: IBehandlingRe
             institusjonsopphold: result.institusjonsoppholdBeregningsgrunnlag,
           })
         )
+        setBeregningsMetodeBeregningsgrunnlag(result.beregningsMetode)
       }
     })
   }, [])

@@ -62,6 +62,31 @@ class GrunnlagMedPeriodeKtTest {
     }
 
     @Test
+    fun `kombinerOverlappendePerioder gir riktige knekkpunkter hvis vi har gap i periodene`() {
+        val g1 =
+            GrunnlagMedPeriode(
+                data = "1",
+                fom = YearMonth.of(2022, 1).atDay(1),
+                tom = YearMonth.of(2022, 5).atEndOfMonth(),
+            )
+
+        val g2 =
+            GrunnlagMedPeriode(
+                data = "2",
+                fom = YearMonth.of(2022, 8).atDay(1),
+                tom = YearMonth.of(2023, 1).atEndOfMonth(),
+            )
+        val kombinert = listOf(g1, g2).kombinerOverlappendePerioder()
+        assertEquals(3, kombinert.size)
+
+        val alleFom = kombinert.map { it.fom }
+        assertEquals(listOf(g1.fom, g1.tom?.plusDays(1), g2.fom), alleFom)
+
+        val alleTom = kombinert.map { it.tom }
+        assertEquals(listOf(g1.tom, g2.fom.minusDays(1), g2.tom), alleTom)
+    }
+
+    @Test
     fun `erInnenforPeriode gir riktig svar med en lukket periode`() {
         val g1 =
             GrunnlagMedPeriode(

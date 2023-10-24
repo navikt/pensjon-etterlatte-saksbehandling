@@ -1,5 +1,5 @@
-import { Alert, BodyShort, Button, Heading } from '@navikt/ds-react'
-import { isFailure, isSuccess, mapAllApiResult, useApiCall } from '~shared/hooks/useApiCall'
+import { Alert, BodyShort, Button, ErrorSummary, Heading } from '@navikt/ds-react'
+import { isFailure, isPending, isSuccess, mapAllApiResult, useApiCall } from '~shared/hooks/useApiCall'
 import { hentKravpakkeforSak } from '~shared/api/generellbehandling'
 import { useEffect, useState } from 'react'
 import Spinner from '~shared/Spinner'
@@ -15,18 +15,20 @@ import SEDLandMedDokumenter, {
 import { TextButton } from '~components/behandling/soeknadsoversikt/familieforhold/personer/personinfo/TextButton'
 import SluttbehandlingUtlandFelter from '~components/behandling/revurderingsoversikt/sluttbehandlingUtland/SluttbehandlingUtlandFelter'
 import { lagreRevurderingInfo } from '~shared/api/revurdering'
+import { AWhite } from '@navikt/ds-tokens/dist/tokens'
+import { CheckmarkCircleIcon } from '@navikt/aksel-icons'
 
 export default function SluttbehandlingUtland({ sakId, revurderingId }: { sakId: number; revurderingId: string }) {
   const [kravpakkeStatus, hentKravpakke] = useApiCall(hentKravpakkeforSak)
   const [hentAlleLandRequest, fetchAlleLand] = useApiCall(hentAlleLand)
   const [alleLandKodeverk, setAlleLandKodeverk] = useState<ILand[] | null>(null)
   const [visHistorikk, setVisHistorikk] = useState(false)
-  const [lagrestatus, lagre] = useApiCall(lagreRevurderingInfo)
+  const [lagreRevurderingsinfoStatus, lagreRevurderingsinfoApi] = useApiCall(lagreRevurderingInfo)
   const [landMedDokumenter, setLandMedDokumenter] = useState<LandMedDokumenter[]>([
     { landIsoKode: undefined, dokumenter: [{ dokumenttype: '', dato: undefined, kommentar: '' }] },
   ])
-  const [feilkoder, setFeilkoder] = useState<Set<string> | null>(null)
-
+  const [feilkoder, setFeilkoder] = useState<Set<string>>(new Set([]))
+  const [visLagretOk, setVisLagretOk] = useState<boolean>(false)
   useEffect(() => {
     hentKravpakke(sakId)
     fetchAlleLand(null, (landliste) => {
@@ -34,31 +36,40 @@ export default function SluttbehandlingUtland({ sakId, revurderingId }: { sakId:
     })
   }, [])
 
+  const lagreRevurderingsinfo = () => {
+    const feilkoder = validerSkjema()
+    if (feilkoder.size === 0) {
+      lagreRevurderingsinfoApi(
+        {
+          behandlingId: revurderingId,
+          revurderingInfo: { type: 'SLUTTBEHANDLING_UTLAND', landMedDokumenter: landMedDokumenter },
+        },
+        () => {
+          setVisLagretOk(true)
+          setTimeout(() => setVisLagretOk(false), 2000)
+        }
+      )
+    }
+  }
+
   const validerSkjema = () => {
     const feilkoder: Set<string> = new Set([])
-    if (landMedDokumenter.find((landmedDokument) => landmedDokument.landIsoKode === undefined)) {
-      feilkoder.add('MANGLER_LANDKODE')
+    if (landMedDokumenter.find((landmedDokument) => !landmedDokument.landIsoKode)) {
+      feilkoder.add('Du må velge et land for hver SED`er(land rad i tabellen under)')
     }
     if (landMedDokumenter.find((landMedDokument) => landMedDokument.dokumenter.length === 0)) {
-      feilkoder.add('LAND_MANGLER_DOKUMENTER')
-    } else {
-      landMedDokumenter.forEach((landMedDokument) => {
-        if (landMedDokument.dokumenter.find((e) => e.dokumenttype === undefined)) {
-          feilkoder.add('MANGLER_DOKUMENTTYPE')
-        }
-        if (landMedDokument.dokumenter.find((e) => e.dato === undefined)) {
-          feilkoder.add('MANGLER_DATO')
-        }
-      })
+      feilkoder.add('Du må legge til minst et dokument per land rad, eller slette landraden.')
     }
-    setFeilkoder(feilkoder)
-  }
-  const lagreRevurderingsinfo = () => {
-    validerSkjema()
-    lagre({
-      behandlingId: revurderingId,
-      revurderingInfo: { type: 'SLUTTBEHANDLING_UTLAND', landMedDokumenter: landMedDokumenter },
+    landMedDokumenter.forEach((landMedDokument) => {
+      if (landMedDokument.dokumenter.find((e) => !e.dokumenttype)) {
+        feilkoder.add('Du må skrive inn en dokumenttype(P2000 feks) eller fjerne dokumentraden.')
+      }
+      if (landMedDokument.dokumenter.find((e) => !e.dato)) {
+        feilkoder.add('Du må legge til dato for hvert dokument')
+      }
     })
+    setFeilkoder(feilkoder)
+    return feilkoder
   }
 
   return (
@@ -73,7 +84,7 @@ export default function SluttbehandlingUtland({ sakId, revurderingId }: { sakId:
         trygdemyndigheter
       </BodyShort>
       <>
-        <Heading level="2" size="medium" style={{ marginTop: '2rem' }}>
+        <Heading level="2" size="medium" style={{ marginTop: '4rem' }}>
           Informasjon fra utsendelse av kravpakke
         </Heading>
         {mapAllApiResult(
@@ -107,9 +118,16 @@ export default function SluttbehandlingUtland({ sakId, revurderingId }: { sakId:
           }
         )}
       </>
-      {feilkoder && feilkoder.size > 0
-        ? Array.from(feilkoder).map((Feilmelding, i) => <BodyShort key={i}>{Feilmelding}</BodyShort>)
-        : null}
+      {!!feilkoder?.size ? (
+        <ErrorSummary
+          style={{ marginTop: '10rem' }}
+          heading="SED`ene er ufullstendig utfylt, vennligst rett opp så du kan gå videre i revurderingen."
+        >
+          {Array.from(feilkoder).map((feilmelding, i) => (
+            <ErrorSummary.Item key={i}>{feilmelding}</ErrorSummary.Item>
+          ))}
+        </ErrorSummary>
+      ) : null}
       <Heading level="2" size="medium" style={{ marginTop: '2rem' }}>
         Mottatte SED
       </Heading>
@@ -119,16 +137,31 @@ export default function SluttbehandlingUtland({ sakId, revurderingId }: { sakId:
           landListe={hentAlleLandRequest.data}
           landMedDokumenter={landMedDokumenter}
           setLandMedDokumenter={setLandMedDokumenter}
-          resetFeilkoder={() => setFeilkoder(null)}
+          resetFeilkoder={() => setFeilkoder(new Set([]))}
         />
       )}
       {landMedDokumenter.length > 0 ? (
-        <Button variant="secondary" onClick={() => lagreRevurderingsinfo()}>
-          Lagre opplysninger
+        <Button
+          loading={isPending(lagreRevurderingsinfoStatus)}
+          variant="primary"
+          onClick={() => lagreRevurderingsinfo()}
+        >
+          {visLagretOk ? (
+            <div style={{ minWidth: '148px', minHeight: '24px' }}>
+              <CheckmarkCircleIcon
+                color={AWhite}
+                stroke={AWhite}
+                aria-hidden="true"
+                style={{ width: '2rem', height: '2rem', transform: 'translate(-40%, -20%)', position: 'absolute' }}
+              />
+            </div>
+          ) : (
+            <>Lagre opplysninger</>
+          )}
         </Button>
       ) : null}
-      {isFailure(lagrestatus) && <ApiErrorAlert>Kunne ikke lagre revurderingsinfo</ApiErrorAlert>}
-      <Heading level="2" size="medium" style={{ marginTop: '3rem' }}>
+      {isFailure(lagreRevurderingsinfoStatus) && <ApiErrorAlert>Kunne ikke lagre revurderingsinfo</ApiErrorAlert>}
+      <Heading level="2" size="medium" style={{ marginTop: '4rem' }}>
         Tidligere mottatte SED`er
       </Heading>
       <TextButton isOpen={visHistorikk} setIsOpen={setVisHistorikk} />

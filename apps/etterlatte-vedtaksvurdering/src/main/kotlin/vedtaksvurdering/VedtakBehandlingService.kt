@@ -1,13 +1,11 @@
 package no.nav.etterlatte.vedtaksvurdering
 
-import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.oppgave.VedtakEndringDTO
 import no.nav.etterlatte.libs.common.oppgave.VedtakOppgaveDTO
@@ -32,11 +30,11 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.rapidsandrivers.migrering.KILDE_KEY
 import no.nav.etterlatte.token.BrukerTokenInfo
+import no.nav.etterlatte.vedtaksvurdering.grunnlag.GrunnlagVersjonValidering.validerVersjon
 import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlient
 import no.nav.etterlatte.vedtaksvurdering.klienter.BeregningKlient
 import no.nav.etterlatte.vedtaksvurdering.klienter.VilkaarsvurderingKlient
 import no.nav.helse.rapids_rivers.JsonMessage
-import org.jetbrains.annotations.TestOnly
 import org.slf4j.LoggerFactory
 import java.time.Clock
 import java.time.LocalDate
@@ -80,7 +78,7 @@ class VedtakBehandlingService(
         }
 
         val (behandling, vilkaarsvurdering, beregningOgAvkorting) = hentDataForVedtak(behandlingId, brukerTokenInfo)
-        verifiserGrunnlagVersjon(vilkaarsvurdering, beregningOgAvkorting)
+        validerVersjon(vilkaarsvurdering, beregningOgAvkorting)
 
         val vedtakType = vedtakType(behandling.behandlingType, vilkaarsvurdering)
         val virkningstidspunkt =
@@ -108,7 +106,7 @@ class VedtakBehandlingService(
         verifiserGyldigVedtakStatus(vedtak.status, listOf(VedtakStatus.OPPRETTET, VedtakStatus.RETURNERT))
 
         val (_, vilkaarsvurdering, beregningOgAvkorting) = hentDataForVedtak(behandlingId, brukerTokenInfo)
-        verifiserGrunnlagVersjon(vilkaarsvurdering, beregningOgAvkorting)
+        validerVersjon(vilkaarsvurdering, beregningOgAvkorting)
 
         val sak = behandlingKlient.hentSak(vedtak.sakId, brukerTokenInfo)
 
@@ -522,29 +520,6 @@ class VedtakBehandlingService(
         }
     }
 
-    @TestOnly
-    fun verifiserGrunnlagVersjon(
-        vilkaarsvurdering: VilkaarsvurderingDto?,
-        beregningOgAvkorting: BeregningOgAvkorting?,
-    ) {
-        logger.info("Sjekker at grunnlagsversjon er konsekvent på tvers av appene")
-
-        if (vilkaarsvurdering?.grunnlagVersjon == null || beregningOgAvkorting == null) {
-            logger.info("Vilkaar og/eller beregning er null – fortsetter ...")
-        } else if (vilkaarsvurdering.grunnlagVersjon != beregningOgAvkorting.beregning.grunnlagMetadata.versjon) {
-            logger.error(
-                "Ulik versjon av grunnlag i vilkaarsvurdering (versjon=${vilkaarsvurdering.grunnlagVersjon})" +
-                    " og beregning (versjon=${beregningOgAvkorting.beregning.grunnlagMetadata.versjon})",
-            )
-
-            throw UlikVersjonGrunnlag(
-                "Ulik versjon av grunnlag brukt i vilkårsvurdering og beregning!",
-            )
-        } else {
-            logger.info("Samsvar mellom grunnlagsversjon i vilkårsvurdering og beregning – fortsetter ...")
-        }
-    }
-
     private fun vilkaarsvurderingUtfallNonNull(vilkaarsvurderingUtfall: VilkaarsvurderingUtfall?) =
         requireNotNull(vilkaarsvurderingUtfall) { "Behandling mangler utfall på vilkårsvurdering" }
 
@@ -598,9 +573,3 @@ class UgyldigAttestantException(ident: String) :
         code = "ATTESTANT_OG_SAKSBEHANDLER_ER_SAMME_PERSON",
         detail = "Saksbehandler og attestant må være to forskjellige personer (ident=$ident)",
     )
-
-class UlikVersjonGrunnlag(detail: String) : ForespoerselException(
-    code = "ULIK_VERSJON_GRUNNLAG",
-    status = HttpStatusCode.BadRequest.value,
-    detail = detail,
-)

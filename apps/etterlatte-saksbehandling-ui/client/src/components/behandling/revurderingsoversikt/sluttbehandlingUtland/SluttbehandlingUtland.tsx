@@ -46,7 +46,8 @@ export default function SluttbehandlingUtland({ sakId, revurderingId }: { sakId:
         },
         () => {
           setVisLagretOk(true)
-          setTimeout(() => setVisLagretOk(false), 2000)
+          const toSekunderIMs = 2000
+          setTimeout(() => setVisLagretOk(false), toSekunderIMs)
         }
       )
     }
@@ -152,7 +153,7 @@ export default function SluttbehandlingUtland({ sakId, revurderingId }: { sakId:
                 color={AWhite}
                 stroke={AWhite}
                 aria-hidden="true"
-                style={{ width: '2rem', height: '2rem', transform: 'translate(-40%, -20%)', position: 'absolute' }}
+                style={{ width: '1.8rem', height: '1.8rem', transform: 'translate(-40%, -10%)', position: 'absolute' }}
               />
             </div>
           ) : (

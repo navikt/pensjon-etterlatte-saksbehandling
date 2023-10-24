@@ -10,12 +10,12 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.inTransaction
-import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
+import no.nav.etterlatte.libs.common.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.behandlingsId
+import no.nav.etterlatte.libs.common.behandlingId
 import no.nav.etterlatte.libs.common.hentNavidentFraToken
 import no.nav.etterlatte.libs.common.kunSaksbehandler
 import no.nav.etterlatte.libs.common.medBody
@@ -25,15 +25,15 @@ internal fun Route.revurderingRoutes(revurderingService: RevurderingService) {
     val logger = application.log
 
     route("/api/revurdering") {
-        route("{$BEHANDLINGSID_CALL_PARAMETER}") {
+        route("{$BEHANDLINGID_CALL_PARAMETER}") {
             route("revurderinginfo") {
                 post {
                     hentNavidentFraToken { navIdent ->
-                        logger.info("Lagrer revurderinginfo på behandling $behandlingsId")
+                        logger.info("Lagrer revurderinginfo på behandling $behandlingId")
                         medBody<RevurderingInfoDto> {
                             inTransaction {
                                 revurderingService.lagreRevurderingInfo(
-                                    behandlingsId,
+                                    behandlingId,
                                     RevurderingMedBegrunnelse(it.info, it.begrunnelse),
                                     navIdent,
                                 )

@@ -72,7 +72,7 @@ const BeregningsgrunnlagOmstillingsstoenad = (props: { behandling: IBehandlingRe
 
     postBeregningsgrunnlag(
       {
-        behandlingsId: behandling.id,
+        behandlingId: behandling.id,
         grunnlag: beregningsgrunnlagOMS,
       },
       () =>

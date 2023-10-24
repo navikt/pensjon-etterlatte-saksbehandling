@@ -28,7 +28,7 @@ import io.ktor.server.routing.route
 import io.ktor.server.testing.testApplication
 import io.mockk.coEvery
 import io.mockk.mockk
-import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
+import no.nav.etterlatte.libs.common.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.BehandlingTilgangsSjekk
 import no.nav.etterlatte.libs.common.FoedselsnummerDTO
 import no.nav.etterlatte.libs.common.PersonTilgangsSjekk
@@ -346,7 +346,7 @@ class RestModuleTest {
 
     private fun Route.tilgangTestRoute() {
         route("") {
-            get("/behandling/{$BEHANDLINGSID_CALL_PARAMETER}") {
+            get("/behandling/{$BEHANDLINGID_CALL_PARAMETER}") {
                 withBehandlingId(behandlingTilgangsSjekkMock) {
                     call.respond(OK)
                 }

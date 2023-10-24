@@ -9,17 +9,17 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.put
 import io.ktor.server.routing.route
-import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
-import no.nav.etterlatte.libs.common.behandlingsId
+import no.nav.etterlatte.libs.common.BEHANDLINGID_CALL_PARAMETER
+import no.nav.etterlatte.libs.common.behandlingId
 import no.nav.etterlatte.libs.common.medBody
 import no.nav.etterlatte.libs.common.tilbakekreving.Kravgrunnlag
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 
 internal fun Route.tilbakekrevingRoutes(service: TilbakekrevingService) {
-    route("/api/tilbakekreving/{$BEHANDLINGSID_CALL_PARAMETER}") {
+    route("/api/tilbakekreving/{$BEHANDLINGID_CALL_PARAMETER}") {
         get {
             try {
-                call.respond(service.hentTilbakekreving(behandlingsId))
+                call.respond(service.hentTilbakekreving(behandlingId))
             } catch (e: TilbakekrevingFinnesIkkeException) {
                 call.respond(HttpStatusCode.NotFound)
             }
@@ -27,7 +27,7 @@ internal fun Route.tilbakekrevingRoutes(service: TilbakekrevingService) {
         put("/vurdering") {
             val vurdering = call.receive<TilbakekrevingVurdering>()
             try {
-                call.respond(service.lagreVurdering(behandlingsId, vurdering))
+                call.respond(service.lagreVurdering(behandlingId, vurdering))
             } catch (e: TilbakekrevingFinnesIkkeException) {
                 call.respond(HttpStatusCode.NotFound)
             }
@@ -35,7 +35,7 @@ internal fun Route.tilbakekrevingRoutes(service: TilbakekrevingService) {
         put("/perioder") {
             val request = call.receive<TilbakekrevingLagreRequest>()
             try {
-                call.respond(service.lagrePerioder(behandlingsId, request.perioder))
+                call.respond(service.lagrePerioder(behandlingId, request.perioder))
             } catch (e: TilbakekrevingFinnesIkkeException) {
                 call.respond(HttpStatusCode.NotFound)
             }
@@ -44,24 +44,24 @@ internal fun Route.tilbakekrevingRoutes(service: TilbakekrevingService) {
         route("vedtak") {
             post("opprett") {
                 // TODO tilgangsjekk
-                service.opprettVedtak(behandlingsId, brukerTokenInfo)
+                service.opprettVedtak(behandlingId, brukerTokenInfo)
                 call.respond(HttpStatusCode.OK)
             }
             post("fatt") {
                 // TODO tilgangsjekk
-                service.fattVedtak(behandlingsId, brukerTokenInfo)
+                service.fattVedtak(behandlingId, brukerTokenInfo)
                 call.respond(HttpStatusCode.OK)
             }
             post("attester") {
                 // TODO tilgangsjekk
                 val (kommentar) = call.receive<TilbakekrevingAttesterRequest>()
-                service.attesterVedtak(behandlingsId, kommentar, brukerTokenInfo)
+                service.attesterVedtak(behandlingId, kommentar, brukerTokenInfo)
                 call.respond(HttpStatusCode.OK)
             }
             post("underkjenn") {
                 // TODO tilgangsjekk
                 val (kommentar, valgtBegrunnelse) = call.receive<TilbakekrevingUnderkjennRequest>()
-                service.underkjennVedtak(behandlingsId, kommentar, valgtBegrunnelse, brukerTokenInfo)
+                service.underkjennVedtak(behandlingId, kommentar, valgtBegrunnelse, brukerTokenInfo)
                 call.respond(HttpStatusCode.OK)
             }
         }

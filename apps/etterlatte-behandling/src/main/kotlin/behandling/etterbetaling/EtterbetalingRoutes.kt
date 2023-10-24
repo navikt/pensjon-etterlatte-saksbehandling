@@ -11,9 +11,9 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.put
 import io.ktor.server.routing.route
 import no.nav.etterlatte.inTransaction
-import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
+import no.nav.etterlatte.libs.common.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.behandling.Etterbetaling
-import no.nav.etterlatte.libs.common.behandlingsId
+import no.nav.etterlatte.libs.common.behandlingId
 import no.nav.etterlatte.libs.common.medBody
 import java.time.LocalDate
 import java.time.YearMonth
@@ -21,14 +21,14 @@ import java.time.YearMonth
 internal fun Route.etterbetalingRoutes(service: EtterbetalingService) {
     val logger = application.log
 
-    route("/api/behandling/{$BEHANDLINGSID_CALL_PARAMETER}/etterbetaling") {
+    route("/api/behandling/{$BEHANDLINGID_CALL_PARAMETER}/etterbetaling") {
         put {
             medBody<EtterbetalingDTO> { request ->
-                logger.info("Lagrer etterbetaling for behandling $behandlingsId")
+                logger.info("Lagrer etterbetaling for behandling $behandlingId")
                 inTransaction {
                     service.lagreEtterbetaling(
                         Etterbetaling(
-                            behandlingId = behandlingsId,
+                            behandlingId = behandlingId,
                             fra =
                                 requireNotNull(request.fraDato) { "Mangler fradato etterbetaling" }.let {
                                     YearMonth.from(
@@ -49,7 +49,7 @@ internal fun Route.etterbetalingRoutes(service: EtterbetalingService) {
         }
 
         get {
-            when (val etterbetaling = inTransaction { service.hentEtterbetaling(behandlingsId) }) {
+            when (val etterbetaling = inTransaction { service.hentEtterbetaling(behandlingId) }) {
                 null -> call.respond(HttpStatusCode.NoContent)
                 else ->
                     call.respond(
@@ -63,8 +63,8 @@ internal fun Route.etterbetalingRoutes(service: EtterbetalingService) {
         }
 
         delete {
-            logger.info("Sletter etterbetaling for behandling $behandlingsId")
-            inTransaction { service.slettEtterbetaling(behandlingsId) }
+            logger.info("Sletter etterbetaling for behandling $behandlingId")
+            inTransaction { service.slettEtterbetaling(behandlingId) }
             call.respond(HttpStatusCode.OK)
         }
     }

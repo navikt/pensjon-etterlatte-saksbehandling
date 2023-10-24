@@ -151,7 +151,7 @@ const PeriodeRow = ({
   const slettGrunnlag = (grunnlagId: string) => {
     slettTrygdetidsgrunnlagRequest(
       {
-        behandlingsId: behandlingId,
+        behandlingId: behandlingId,
         trygdetidGrunnlagId: grunnlagId,
       },
       (oppdatertTrygdetid) => {

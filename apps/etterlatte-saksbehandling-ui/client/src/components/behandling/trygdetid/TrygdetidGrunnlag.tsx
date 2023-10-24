@@ -45,7 +45,7 @@ export const TrygdetidGrunnlag: React.FC<Props> = ({
     if (!behandlingId) throw new Error('Mangler behandlingsid')
     requestLagreTrygdetidgrunnlag(
       {
-        behandlingsId: behandlingId,
+        behandlingId: behandlingId,
         trygdetidgrunnlag: trygdetidgrunnlag,
       },
       (respons) => {

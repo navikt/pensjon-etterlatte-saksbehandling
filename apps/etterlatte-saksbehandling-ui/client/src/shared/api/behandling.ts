@@ -180,12 +180,6 @@ export const slettEtterbetaling = async (args: {
   return apiClient.delete(`/behandling/${args.behandlingId}/etterbetaling`)
 }
 
-export const oppdaterGrunnlag = async (args: {
-  sakId: number
-  behandlingId: string
-  sakType: string
-}): Promise<ApiResponse<void>> => {
-  return apiClient.post(`/behandling/${args.behandlingId}/oppdater-grunnlag`, {
-    ...args,
-  })
+export const oppdaterGrunnlag = async (args: { behandlingId: string }): Promise<ApiResponse<void>> => {
+  return apiClient.post(`/behandling/${args.behandlingId}/oppdater-grunnlag`, {})
 }

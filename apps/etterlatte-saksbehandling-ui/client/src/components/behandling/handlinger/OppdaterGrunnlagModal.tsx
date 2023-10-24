@@ -3,9 +3,9 @@ import { Alert, BodyLong, Button, Heading, Modal } from '@navikt/ds-react'
 import { useBehandling } from '~components/behandling/useBehandling'
 import { FlexRow } from '~shared/styled'
 import { isFailure, useApiCall } from '~shared/hooks/useApiCall'
-import { SakType } from '~shared/types/sak'
 import { oppdaterGrunnlag } from '~shared/api/behandling'
 import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
+import { hentBehandlesFraStatus } from '~components/behandling/felles/utils'
 
 export const FEATURE_TOGGLE_KAN_BRUKE_OPPDATER_GRUNNLAG = 'pensjon-etterlatte.kan-bruke-oppdater-grunnlag'
 
@@ -13,18 +13,18 @@ export default function OppdaterGrunnlagModal() {
   const behandling = useBehandling()
   const [isOpen, setIsOpen] = useState(false)
 
-  const kanOppdatereGrunnlag = useFeatureEnabledMedDefault(FEATURE_TOGGLE_KAN_BRUKE_OPPDATER_GRUNNLAG, false)
+  const featureAktiv = useFeatureEnabledMedDefault(FEATURE_TOGGLE_KAN_BRUKE_OPPDATER_GRUNNLAG, false)
 
-  if (!kanOppdatereGrunnlag || behandling == null) return
+  const behandles = behandling != null && hentBehandlesFraStatus(behandling.status)
+
+  if (!featureAktiv || !behandles) return
 
   const [oppdatert, apiOppdaterGrunnlag] = useApiCall(oppdaterGrunnlag)
 
   const lagre = () => {
     return apiOppdaterGrunnlag(
       {
-        sakId: behandling.sakId,
         behandlingId: behandling.id,
-        sakType: SakType.BARNEPENSJON,
       },
       () => {
         setIsOpen(false)

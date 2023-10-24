@@ -15,6 +15,7 @@ import no.nav.etterlatte.behandling.hendelse.HendelseType
 import no.nav.etterlatte.behandling.hendelse.registrerVedtakHendelseFelles
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
+import no.nav.etterlatte.behandling.revurdering.BehandlingKanIkkeEndres
 import no.nav.etterlatte.common.tidligsteIverksatteVirkningstidspunkt
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
@@ -108,11 +109,7 @@ interface BehandlingService {
 
     fun hentFoersteVirk(sakId: Long): YearMonth?
 
-    fun oppdaterGrunnlag(
-        behandlingId: UUID,
-        sakId: Long,
-        sakType: SakType,
-    )
+    fun oppdaterGrunnlag(behandlingId: UUID)
 }
 
 internal class BehandlingServiceImpl(
@@ -271,8 +268,13 @@ internal class BehandlingServiceImpl(
         return behandlinger.tidligsteIverksatteVirkningstidspunkt()?.dato
     }
 
-    override fun oppdaterGrunnlag(behandlingId: UUID, sakId: Long, sakType: SakType) {
-        grunnlagService.oppdaterGrunnlag(behandlingId, sakId, sakType)
+    override fun oppdaterGrunnlag(behandlingId: UUID) {
+        val behandling = behandlingDao.hentBehandling(behandlingId)
+            ?: throw BehandlingNotFoundException("Fant ikke behandling med id=$behandlingId")
+        if (!behandling.status.kanEndres()) {
+            throw BehandlingKanIkkeEndres()
+        }
+        grunnlagService.oppdaterGrunnlag(behandling.id, behandling.sak.id, behandling.sak.sakType)
         behandlingDao.lagreStatus(behandlingId, BehandlingStatus.OPPRETTET, LocalDateTime.now())
     }
 

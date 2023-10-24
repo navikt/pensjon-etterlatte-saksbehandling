@@ -22,7 +22,7 @@ data class GrunnlagMedPeriode<T>(
         if (tom == null) {
             return fom <= periodeTom
         }
-        return tom >= periodeFom
+        return tom >= periodeFom && fom <= periodeTom
     }
 
     init {

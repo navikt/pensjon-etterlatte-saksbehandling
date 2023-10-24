@@ -54,7 +54,11 @@ class GrunnlagMedPeriodeKtTest {
             )
 
         val kombinert = listOf(g1, g2).kombinerOverlappendePerioder()
-        println(kombinert)
+        val alleStartKnekkpunkt = kombinert.map { it.fom }
+        assertEquals(listOf(g1.fom, g2.fom, g2.tom?.plusDays(1)), alleStartKnekkpunkt)
+
+        val alleSluttKnekkpunkt = kombinert.map { it.tom }
+        assertEquals(listOf(g2.fom.minusDays(1), g2.tom, g1.tom), alleSluttKnekkpunkt)
     }
 
     @Test

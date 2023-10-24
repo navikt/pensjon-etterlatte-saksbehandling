@@ -176,7 +176,11 @@ class GenerellBehandlingServiceTest {
         val personopplysning = personOpplysning(doedsdato = doedsdato)
         val grunnlagsopplysningMedPersonopplysning = grunnlagsOpplysningMedPersonopplysning(personopplysning)
         coEvery {
-            grunnlagKlient.finnPersonOpplysning(sak.id, foerstegangsbehandling.id, Opplysningstype.AVDOED_PDL_V1, brukerTokenInfo)
+            grunnlagKlient.finnPersonOpplysning(
+                foerstegangsbehandling.id,
+                Opplysningstype.AVDOED_PDL_V1,
+                brukerTokenInfo,
+            )
         } returns grunnlagsopplysningMedPersonopplysning
 
         val manueltOpprettetBehandling =

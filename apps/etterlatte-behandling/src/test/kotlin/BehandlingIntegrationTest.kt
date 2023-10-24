@@ -199,7 +199,7 @@ abstract class BehandlingIntegrationTest {
         HttpClient(MockEngine) {
             engine {
                 addHandler { request ->
-                    if (request.url.fullPath.matches(Regex("api/grunnlag/sak/[0-9]+/behandling/*"))) {
+                    if (request.url.fullPath.matches(Regex("api/grunnlag/behandling/*"))) {
                         val headers = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
                         respond(Grunnlag.empty().toJson(), headers = headers)
                     } else if (request.url.fullPath.endsWith("/PERSONGALLERI_V1")) {
@@ -419,7 +419,6 @@ abstract class BehandlingIntegrationTest {
 
 class GrunnlagKlientTest : GrunnlagKlient {
     override suspend fun finnPersonOpplysning(
-        sakId: Long,
         behandlingId: UUID,
         opplysningsType: Opplysningstype,
         brukerTokenInfo: BrukerTokenInfo,
@@ -429,7 +428,6 @@ class GrunnlagKlientTest : GrunnlagKlient {
     }
 
     override suspend fun hentPersongalleri(
-        sakId: Long,
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): Grunnlagsopplysning<Persongalleri> {

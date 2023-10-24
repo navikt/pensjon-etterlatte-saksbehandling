@@ -177,7 +177,7 @@ class RevurderingService(
     ): Revurdering? =
         forrigeBehandling.sjekkEnhet()?.let {
             return if (featureToggleService.isEnabled(RevurderingServiceFeatureToggle.OpprettManuellRevurdering, false)) {
-                val persongalleri = runBlocking { grunnlagService.hentPersongalleri(sakId, forrigeBehandling.id) }
+                val persongalleri = runBlocking { grunnlagService.hentPersongalleri(forrigeBehandling.id) }
 
                 opprettRevurdering(
                     sakId = sakId,

@@ -86,7 +86,7 @@ internal class BrevdataFacadeImplTest {
         } throws BehandlingKlientException("har ikke tidligere behandling")
         coEvery { behandlingKlient.hentEtterbetaling(any(), any()) } returns null
         coEvery { vedtaksvurderingKlient.hentVedtak(any(), any()) } returns opprettVedtak()
-        coEvery { grunnlagKlient.hentGrunnlag(SAK_ID, BEHANDLING_ID, BRUKERTokenInfo) } returns opprettGrunnlag()
+        coEvery { grunnlagKlient.hentGrunnlag(BEHANDLING_ID, BRUKERTokenInfo) } returns opprettGrunnlag()
         coEvery { beregningKlient.hentBeregning(any(), any()) } returns opprettBeregning()
         coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns opprettTrygdetid()
 
@@ -111,7 +111,7 @@ internal class BrevdataFacadeImplTest {
         Assertions.assertEquals(ATTESTANT_IDENT, generellBrevData.forenkletVedtak.attestantIdent)
 
         coVerify(exactly = 1) {
-            grunnlagKlient.hentGrunnlag(SAK_ID, BEHANDLING_ID, any())
+            grunnlagKlient.hentGrunnlag(BEHANDLING_ID, any())
             vedtaksvurderingKlient.hentVedtak(any(), any())
         }
     }
@@ -126,7 +126,7 @@ internal class BrevdataFacadeImplTest {
         } returns SisteIverksatteBehandling(UUID.randomUUID())
         coEvery { behandlingKlient.hentEtterbetaling(any(), any()) } returns null
         coEvery { vedtaksvurderingKlient.hentVedtak(any(), any()) } returns opprettVedtak()
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any(), any()) } returns opprettGrunnlag()
+        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns opprettGrunnlag()
         coEvery { beregningKlient.hentBeregning(any(), any()) } returns opprettBeregning()
         coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns opprettTrygdetid()
 
@@ -158,7 +158,7 @@ internal class BrevdataFacadeImplTest {
         } returns SisteIverksatteBehandling(UUID.randomUUID())
         coEvery { behandlingKlient.hentEtterbetaling(any(), any()) } returns null
         coEvery { vedtaksvurderingKlient.hentVedtak(any(), any()) } returns opprettVedtak()
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any(), any()) } returns opprettGrunnlag()
+        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns opprettGrunnlag()
         coEvery { beregningKlient.hentBeregning(any(), any()) } returns opprettBeregningSoeskenjustering()
         coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns opprettTrygdetid()
 

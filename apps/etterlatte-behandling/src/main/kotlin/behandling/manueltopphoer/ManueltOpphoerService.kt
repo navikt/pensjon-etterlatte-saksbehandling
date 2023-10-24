@@ -130,7 +130,7 @@ class RealManueltOpphoerService(
             (behandlingDao.hentBehandling(opprettBehandling.id) as ManueltOpphoer).sjekkEnhet()
         }?.also { lagretManueltOpphoer ->
             val persongalleri =
-                runBlocking { grunnlagService.hentPersongalleri(opphoerRequest.sakId, forrigeBehandling.id) }
+                runBlocking { grunnlagService.hentPersongalleri(forrigeBehandling.id) }
 
             behandlingHendelser.sendMeldingForHendelseMedDetaljertBehandling(
                 lagretManueltOpphoer.toStatistikkBehandling(persongalleri = persongalleri),

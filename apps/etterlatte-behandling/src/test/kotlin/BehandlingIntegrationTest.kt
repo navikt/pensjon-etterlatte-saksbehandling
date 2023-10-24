@@ -24,7 +24,7 @@ import no.nav.etterlatte.behandling.klienter.NavAnsattKlient
 import no.nav.etterlatte.behandling.klienter.Norg2Klient
 import no.nav.etterlatte.behandling.klienter.OpprettetBrevDto
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
-import no.nav.etterlatte.behandling.tilbakekreving.Tilbakekreving
+import no.nav.etterlatte.behandling.tilbakekreving.TilbakekrevingBehandling
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.config.ApplicationContext
 import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
@@ -452,7 +452,7 @@ class GrunnlagKlientTest : GrunnlagKlient {
 
 class VedtakKlientTest : VedtakKlient {
     override suspend fun lagreVedtakTilbakekreving(
-        tilbakekreving: Tilbakekreving,
+        tilbakekrevingBehandling: TilbakekrevingBehandling,
         brukerTokenInfo: BrukerTokenInfo,
         enhet: String,
     ): Long {

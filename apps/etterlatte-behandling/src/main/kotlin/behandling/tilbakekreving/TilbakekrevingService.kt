@@ -10,6 +10,8 @@ import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.VedtakOppgaveDTO
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tilbakekreving.Kravgrunnlag
+import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingPeriode
+import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVurdering
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.sak.SakDao
 import no.nav.etterlatte.token.BrukerTokenInfo
@@ -34,26 +36,26 @@ class TilbakekrevingService(
                 sakDao.hentSak(kravgrunnlag.sakId.value)
                     ?: throw TilbakekrevingHarMangelException("Tilbakekreving mangler sak")
 
-            val tilbakekreving =
+            val tilbakekrevingBehandling =
                 tilbakekrevingDao.lagreTilbakekreving(
-                    Tilbakekreving.ny(kravgrunnlag, sak),
+                    TilbakekrevingBehandling.ny(kravgrunnlag, sak),
                 )
 
             oppgaveService.opprettNyOppgaveMedSakOgReferanse(
-                referanse = tilbakekreving.id.toString(),
-                sakId = tilbakekreving.sak.id,
+                referanse = tilbakekrevingBehandling.id.toString(),
+                sakId = tilbakekrevingBehandling.sak.id,
                 oppgaveKilde = OppgaveKilde.TILBAKEKREVING,
                 oppgaveType = OppgaveType.TILBAKEKREVING,
                 merknad = null,
             )
 
             hendelseDao.tilbakekrevingOpprettet(
-                tilbakekrevingId = tilbakekreving.id,
-                sakId = tilbakekreving.sak.id,
+                tilbakekrevingId = tilbakekrevingBehandling.id,
+                sakId = tilbakekrevingBehandling.sak.id,
             )
         }
 
-    fun hentTilbakekreving(tilbakekrevingId: UUID): Tilbakekreving =
+    fun hentTilbakekreving(tilbakekrevingId: UUID): TilbakekrevingBehandling =
         inTransaction {
             logger.info("Henter tilbakekreving med id=$tilbakekrevingId")
             tilbakekrevingDao.hentTilbakekreving(tilbakekrevingId)
@@ -62,27 +64,41 @@ class TilbakekrevingService(
     fun lagreVurdering(
         tilbakekrevingId: UUID,
         vurdering: TilbakekrevingVurdering,
-    ): Tilbakekreving =
+    ): TilbakekrevingBehandling =
         inTransaction {
             logger.info("Lagrer vurdering for tilbakekreving=$tilbakekrevingId")
             val eksisterende = tilbakekrevingDao.hentTilbakekreving(tilbakekrevingId)
             if (!eksisterende.underBehandling()) {
                 throw TilbakekrevingFeilTilstandException("Tilbakekreving er ikke under behandling")
             }
-            tilbakekrevingDao.lagreTilbakekreving(eksisterende.copy(vurdering = vurdering))
+            tilbakekrevingDao.lagreTilbakekreving(
+                eksisterende.copy(
+                    tilbakekreving =
+                        eksisterende.tilbakekreving.copy(
+                            vurdering = vurdering,
+                        ),
+                ),
+            )
         }
 
     fun lagrePerioder(
         tilbakekrevingId: UUID,
         perioder: List<TilbakekrevingPeriode>,
-    ): Tilbakekreving =
+    ): TilbakekrevingBehandling =
         inTransaction {
             logger.info("Lagrer perioder for tilbakekreving=$tilbakekrevingId")
             val eksisterende = tilbakekrevingDao.hentTilbakekreving(tilbakekrevingId)
             if (!eksisterende.underBehandling()) {
                 throw TilbakekrevingFeilTilstandException("Tilbakekreving er ikke under behandling")
             }
-            tilbakekrevingDao.lagreTilbakekreving(eksisterende.copy(perioder = perioder))
+            tilbakekrevingDao.lagreTilbakekreving(
+                eksisterende.copy(
+                    tilbakekreving =
+                        eksisterende.tilbakekreving.copy(
+                            perioder = perioder,
+                        ),
+                ),
+            )
         }
 
     suspend fun opprettVedtak(
@@ -96,7 +112,7 @@ class TilbakekrevingService(
         }
         runBlocking {
             vedtakKlient.lagreVedtakTilbakekreving(
-                tilbakekreving = tilbakekreving,
+                tilbakekrevingBehandling = tilbakekreving,
                 brukerTokenInfo = brukerTokenInfo,
                 enhet = tilbakekreving.sak.enhet,
             )

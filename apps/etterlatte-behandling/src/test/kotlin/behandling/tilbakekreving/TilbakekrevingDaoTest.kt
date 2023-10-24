@@ -14,6 +14,11 @@ import no.nav.etterlatte.libs.common.tilbakekreving.KravgrunnlagStatus
 import no.nav.etterlatte.libs.common.tilbakekreving.NavIdent
 import no.nav.etterlatte.libs.common.tilbakekreving.Periode
 import no.nav.etterlatte.libs.common.tilbakekreving.SakId
+import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingAarsak
+import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingAktsomhet
+import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingHjemmel
+import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVurdering
+import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVurderingUaktsomhet
 import no.nav.etterlatte.libs.common.tilbakekreving.UUID30
 import no.nav.etterlatte.libs.common.tilbakekreving.VedtakId
 import no.nav.etterlatte.libs.database.DataSourceBuilder
@@ -90,26 +95,29 @@ class TilbakekrevingDaoTest {
         val oppdatert =
             lagret.copy(
                 status = TilbakekrevingStatus.UNDER_ARBEID,
-                vurdering =
-                    TilbakekrevingVurdering(
-                        beskrivelse = "beskrivelse",
-                        konklusjon = "konklusjon",
-                        aarsak = TilbakekrevingAarsak.ANNET,
-                        aktsomhet =
-                            TilbakekrevingVurderingUaktsomhet(
-                                aktsomhet = TilbakekrevingAktsomhet.GOD_TRO,
-                                reduseringAvKravet = "Redusering av kravet",
-                                strafferettsligVurdering = "Strafferettslig",
-                                rentevurdering = "Rentevurdering",
+                tilbakekreving =
+                    lagret.tilbakekreving.copy(
+                        vurdering =
+                            TilbakekrevingVurdering(
+                                beskrivelse = "beskrivelse",
+                                konklusjon = "konklusjon",
+                                aarsak = TilbakekrevingAarsak.ANNET,
+                                aktsomhet =
+                                    TilbakekrevingVurderingUaktsomhet(
+                                        aktsomhet = TilbakekrevingAktsomhet.GOD_TRO,
+                                        reduseringAvKravet = "Redusering av kravet",
+                                        strafferettsligVurdering = "Strafferettslig",
+                                        rentevurdering = "Rentevurdering",
+                                    ),
+                                hjemmel = TilbakekrevingHjemmel.TJUETO_FEMTEN_EN_LEDD_EN,
                             ),
-                        hjemmel = TilbakekrevingHjemmel.TJUETO_FEMTEN_EN_LEDD_EN,
+                        perioder =
+                            lagret.tilbakekreving.perioder.map {
+                                it.copy(
+                                    ytelse = it.ytelse.copy(beregnetFeilutbetaling = 123),
+                                )
+                            },
                     ),
-                perioder =
-                    lagret.perioder.map {
-                        it.copy(
-                            ytelse = it.ytelse.copy(beregnetFeilutbetaling = 123),
-                        )
-                    },
             )
         val lagretOppdatert = tilbakekrevingDao.lagreTilbakekreving(oppdatert)
         lagretOppdatert shouldBe oppdatert
@@ -117,7 +125,7 @@ class TilbakekrevingDaoTest {
 
     companion object {
         private fun tilbakekreving(sak: Sak) =
-            Tilbakekreving.ny(
+            TilbakekrevingBehandling.ny(
                 sak = sak,
                 kravgrunnlag =
                     Kravgrunnlag(

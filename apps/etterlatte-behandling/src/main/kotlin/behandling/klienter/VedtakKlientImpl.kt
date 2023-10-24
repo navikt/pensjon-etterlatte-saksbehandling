@@ -4,7 +4,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.michaelbull.result.mapBoth
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
-import no.nav.etterlatte.behandling.tilbakekreving.Tilbakekreving
+import no.nav.etterlatte.behandling.tilbakekreving.TilbakekrevingBehandling
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.toObjectNode
@@ -19,7 +19,7 @@ import java.util.UUID
 
 interface VedtakKlient {
     suspend fun lagreVedtakTilbakekreving(
-        tilbakekreving: Tilbakekreving,
+        tilbakekrevingBehandling: TilbakekrevingBehandling,
         brukerTokenInfo: BrukerTokenInfo,
         enhet: String,
     ): Long
@@ -54,13 +54,13 @@ class VedtakKlientImpl(config: Config, httpClient: HttpClient) : VedtakKlient {
     private val resourceUrl = config.getString("vedtak.resource.url")
 
     override suspend fun lagreVedtakTilbakekreving(
-        tilbakekreving: Tilbakekreving,
+        tilbakekrevingBehandling: TilbakekrevingBehandling,
         brukerTokenInfo: BrukerTokenInfo,
         enhet: String,
     ): Long {
         try {
             logger.info(
-                "Sender tilbakekreving som det skal opprettes eller oppdateres vedtak for tilbakekreving=${tilbakekreving.id} til vedtak",
+                "Sender tilbakekreving som det skal lagre vedtak for tilbakekreving=${tilbakekrevingBehandling.id} til vedtak",
             )
             return downstreamResourceClient
                 .post(
@@ -72,11 +72,11 @@ class VedtakKlientImpl(config: Config, httpClient: HttpClient) : VedtakKlient {
                     brukerTokenInfo = brukerTokenInfo,
                     postBody =
                         TilbakekrevingVedtakDto(
-                            tilbakekrevingId = tilbakekreving.id,
-                            sakId = tilbakekreving.sak.id,
-                            sakType = tilbakekreving.sak.sakType,
-                            soeker = Folkeregisteridentifikator.of(tilbakekreving.sak.ident),
-                            tilbakekreving = tilbakekreving.toObjectNode(),
+                            tilbakekrevingId = tilbakekrevingBehandling.id,
+                            sakId = tilbakekrevingBehandling.sak.id,
+                            sakType = tilbakekrevingBehandling.sak.sakType,
+                            soeker = Folkeregisteridentifikator.of(tilbakekrevingBehandling.sak.ident),
+                            tilbakekreving = tilbakekrevingBehandling.tilbakekreving.toObjectNode(),
                         ),
                 )
                 .mapBoth(
@@ -85,7 +85,7 @@ class VedtakKlientImpl(config: Config, httpClient: HttpClient) : VedtakKlient {
                 )
         } catch (e: Exception) {
             throw VedtakKlientException(
-                "Lagre vedtak for tilbakekreving med id=${tilbakekreving.id} feilet",
+                "Lagre vedtak for tilbakekreving med id=${tilbakekrevingBehandling.id} feilet",
                 e,
             )
         }

@@ -7,6 +7,16 @@ import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.setTidspunkt
 import no.nav.etterlatte.libs.common.tilbakekreving.KlasseType
+import no.nav.etterlatte.libs.common.tilbakekreving.Tilbakekreving
+import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingAarsak
+import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingAktsomhet
+import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingHjemmel
+import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingPeriode
+import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingResultat
+import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingSkyld
+import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVurdering
+import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVurderingUaktsomhet
+import no.nav.etterlatte.libs.common.tilbakekreving.Tilbakekrevingsbelop
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.database.setJsonb
 import no.nav.etterlatte.libs.database.singleOrNull
@@ -19,7 +29,7 @@ import java.time.YearMonth
 import java.util.UUID
 
 class TilbakekrevingDao(private val connection: () -> Connection) {
-    fun hentTilbakekreving(tilbakekrevingId: UUID): Tilbakekreving {
+    fun hentTilbakekreving(tilbakekrevingId: UUID): TilbakekrevingBehandling {
         with(connection()) {
             val perioder = selectTilbakekrevingsperioder(this, tilbakekrevingId)
             return selectTilbakekreving(this, tilbakekrevingId, perioder)
@@ -31,7 +41,7 @@ class TilbakekrevingDao(private val connection: () -> Connection) {
         connection: Connection,
         tilbakekrevingId: UUID,
         perioder: List<TilbakekrevingPeriode>,
-    ): Tilbakekreving? =
+    ): TilbakekrevingBehandling? =
         with(connection) {
             val statement =
                 prepareStatement(
@@ -74,17 +84,17 @@ class TilbakekrevingDao(private val connection: () -> Connection) {
             }
         }
 
-    fun lagreTilbakekreving(tilbakekreving: Tilbakekreving): Tilbakekreving {
+    fun lagreTilbakekreving(tilbakekrevingBehandling: TilbakekrevingBehandling): TilbakekrevingBehandling {
         with(connection()) {
-            insertTilbakekreving(this, tilbakekreving)
-            insertTilbakekrevingsperioder(this, tilbakekreving)
+            insertTilbakekreving(this, tilbakekrevingBehandling)
+            insertTilbakekrevingsperioder(this, tilbakekrevingBehandling)
         }
-        return hentTilbakekreving(tilbakekreving.id)
+        return hentTilbakekreving(tilbakekrevingBehandling.id)
     }
 
     private fun insertTilbakekreving(
         connection: Connection,
-        tilbakekreving: Tilbakekreving,
+        tilbakekrevingBehandling: TilbakekrevingBehandling,
     ) = with(connection) {
         val statement =
             prepareStatement(
@@ -109,25 +119,27 @@ class TilbakekrevingDao(private val connection: () -> Connection) {
                     aktsomhet_rentevurdering = excluded.aktsomhet_rentevurdering 
                 """.trimIndent(),
             )
-        statement.setObject(1, tilbakekreving.id)
-        statement.setString(2, tilbakekreving.status.name)
-        statement.setLong(3, tilbakekreving.sak.id)
-        statement.setTidspunkt(4, tilbakekreving.opprettet)
-        statement.setJsonb(5, tilbakekreving.kravgrunnlag.toJsonNode())
-        statement.setString(6, tilbakekreving.vurdering.beskrivelse)
-        statement.setString(7, tilbakekreving.vurdering.konklusjon)
-        statement.setString(8, tilbakekreving.vurdering.aarsak?.name)
-        statement.setString(9, tilbakekreving.vurdering.hjemmel?.name)
-        statement.setString(10, tilbakekreving.vurdering.aktsomhet.aktsomhet?.name)
-        statement.setString(11, tilbakekreving.vurdering.aktsomhet.reduseringAvKravet)
-        statement.setString(12, tilbakekreving.vurdering.aktsomhet.strafferettsligVurdering)
-        statement.setString(13, tilbakekreving.vurdering.aktsomhet.rentevurdering)
+        statement.setObject(1, tilbakekrevingBehandling.id)
+        statement.setString(2, tilbakekrevingBehandling.status.name)
+        statement.setLong(3, tilbakekrevingBehandling.sak.id)
+        statement.setTidspunkt(4, tilbakekrevingBehandling.opprettet)
+        with(tilbakekrevingBehandling.tilbakekreving) {
+            statement.setJsonb(5, kravgrunnlag.toJsonNode())
+            statement.setString(6, vurdering.beskrivelse)
+            statement.setString(7, vurdering.konklusjon)
+            statement.setString(8, vurdering.aarsak?.name)
+            statement.setString(9, vurdering.hjemmel?.name)
+            statement.setString(10, vurdering.aktsomhet.aktsomhet?.name)
+            statement.setString(11, vurdering.aktsomhet.reduseringAvKravet)
+            statement.setString(12, vurdering.aktsomhet.strafferettsligVurdering)
+            statement.setString(13, vurdering.aktsomhet.rentevurdering)
+        }
         statement.executeUpdate().also { require(it == 1) }
     }
 
     private fun insertTilbakekrevingsperioder(
         connection: Connection,
-        tilbakekreving: Tilbakekreving,
+        tilbakekrevingBehandling: TilbakekrevingBehandling,
     ) = with(connection) {
         val statement =
             prepareStatement(
@@ -182,10 +194,10 @@ class TilbakekrevingDao(private val connection: () -> Connection) {
             statement.setString(13, beloeper.resultat?.name)
             statement.setInt(14, beloeper.tilbakekrevingsprosent)
             statement.setInt(15, beloeper.rentetillegg)
-            statement.setObject(16, tilbakekreving.id)
+            statement.setObject(16, tilbakekrevingBehandling.id)
             statement.addBatch()
         }
-        tilbakekreving.perioder.forEach {
+        tilbakekrevingBehandling.tilbakekreving.perioder.forEach {
             addArgumentsAndBatch(it.maaned, it.ytelse)
             addArgumentsAndBatch(it.maaned, it.feilkonto)
         }
@@ -193,7 +205,7 @@ class TilbakekrevingDao(private val connection: () -> Connection) {
     }
 
     private fun ResultSet.toTilbakekreving(perioder: List<TilbakekrevingPeriode>) =
-        Tilbakekreving(
+        TilbakekrevingBehandling(
             id = getString("id").let { UUID.fromString(it) },
             sak =
                 Sak(
@@ -204,22 +216,25 @@ class TilbakekrevingDao(private val connection: () -> Connection) {
                 ),
             opprettet = getTidspunkt("opprettet"),
             status = enumValueOf(getString("status")),
-            vurdering =
-                TilbakekrevingVurdering(
-                    beskrivelse = getString("vurdering_beskrivelse"),
-                    konklusjon = getString("vurdering_konklusjon"),
-                    aarsak = getString("vurdering_aarsak")?.let { TilbakekrevingAarsak.valueOf(it) },
-                    aktsomhet =
-                        TilbakekrevingVurderingUaktsomhet(
-                            aktsomhet = getString("vurdering_aktsomhet")?.let { TilbakekrevingAktsomhet.valueOf(it) },
-                            reduseringAvKravet = getString("akstomhet_redusering_av_kravet"),
-                            strafferettsligVurdering = getString("aktsomhet_strafferettslig_vurdering"),
-                            rentevurdering = getString("aktsomhet_rentevurdering"),
+            tilbakekreving =
+                Tilbakekreving(
+                    vurdering =
+                        TilbakekrevingVurdering(
+                            beskrivelse = getString("vurdering_beskrivelse"),
+                            konklusjon = getString("vurdering_konklusjon"),
+                            aarsak = getString("vurdering_aarsak")?.let { TilbakekrevingAarsak.valueOf(it) },
+                            aktsomhet =
+                                TilbakekrevingVurderingUaktsomhet(
+                                    aktsomhet = getString("vurdering_aktsomhet")?.let { TilbakekrevingAktsomhet.valueOf(it) },
+                                    reduseringAvKravet = getString("akstomhet_redusering_av_kravet"),
+                                    strafferettsligVurdering = getString("aktsomhet_strafferettslig_vurdering"),
+                                    rentevurdering = getString("aktsomhet_rentevurdering"),
+                                ),
+                            hjemmel = getString("vurdering_hjemmel")?.let { TilbakekrevingHjemmel.valueOf(it) },
                         ),
-                    hjemmel = getString("vurdering_hjemmel")?.let { TilbakekrevingHjemmel.valueOf(it) },
+                    perioder = perioder,
+                    kravgrunnlag = getString("kravgrunnlag").let { objectMapper.readValue(it) },
                 ),
-            perioder = perioder,
-            kravgrunnlag = getString("kravgrunnlag").let { objectMapper.readValue(it) },
         )
 
     private fun ResultSet.toTilbakekrevingsperiode(): Pair<YearMonth, Tilbakekrevingsbelop> {

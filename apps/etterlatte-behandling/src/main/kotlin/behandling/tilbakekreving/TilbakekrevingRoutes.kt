@@ -13,6 +13,8 @@ import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.behandlingsId
 import no.nav.etterlatte.libs.common.medBody
 import no.nav.etterlatte.libs.common.tilbakekreving.Kravgrunnlag
+import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingPeriode
+import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVurdering
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 
 internal fun Route.tilbakekrevingRoutes(service: TilbakekrevingService) {

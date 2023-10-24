@@ -85,6 +85,24 @@ class TilbakekrevingService(
             tilbakekrevingDao.lagreTilbakekreving(eksisterende.copy(perioder = perioder))
         }
 
+    suspend fun opprettVedtak(
+        tilbakekrevingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) = inTransaction {
+        logger.info("Oppretter vedtak for tilbakekreving=$tilbakekrevingId")
+        val tilbakekreving = tilbakekrevingDao.hentTilbakekreving(tilbakekrevingId)
+        if (!tilbakekreving.underBehandling()) {
+            throw TilbakekrevingFeilTilstandException("Tilbakekreving er ikke under behandling")
+        }
+        runBlocking {
+            vedtakKlient.lagreVedtakTilbakekreving(
+                tilbakekreving = tilbakekreving,
+                brukerTokenInfo = brukerTokenInfo,
+                enhet = tilbakekreving.sak.enhet,
+            )
+        }
+    }
+
     suspend fun fattVedtak(
         tilbakekrevingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
@@ -98,7 +116,7 @@ class TilbakekrevingService(
         val vedtakId =
             runBlocking {
                 vedtakKlient.fattVedtakTilbakekreving(
-                    tilbakekreving = tilbakekreving,
+                    tilbakekrevingId = tilbakekreving.id,
                     brukerTokenInfo = brukerTokenInfo,
                     enhet = tilbakekreving.sak.enhet,
                 )

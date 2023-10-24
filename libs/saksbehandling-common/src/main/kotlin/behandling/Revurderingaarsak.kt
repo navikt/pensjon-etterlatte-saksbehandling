@@ -58,8 +58,8 @@ sealed class Utfall {
     }
 }
 
-// Disse må ha en oversettelse i frontend RevurderingAarsak.ts
-enum class RevurderingAarsak(
+// Disse må ha en oversettelse i frontend Revurderingaarsak.ts
+enum class Revurderingaarsak(
     private val gyldigFor: List<SakType>,
     private val miljoe: KanBrukesIMiljoe,
     val utfall: Utfall,
@@ -83,6 +83,7 @@ enum class RevurderingAarsak(
     INSTITUSJONSOPPHOLD(SAKTYPE_BP_OMS, KunIDev, IkkeOpphoerSkalSendeBrev, redigerbartBrev = true),
     YRKESSKADE(SAKTYPE_BP_OMS, KunIDev, IkkeOpphoerSkalSendeBrev, redigerbartBrev = true),
     OMGJOERING_ETTER_KLAGE(SAKTYPE_BP_OMS, KunIDev, IkkeOpphoerSkalSendeBrev, redigerbartBrev = true),
+    SLUTTBEHANDLING_UTLAND(SAKTYPE_BP_OMS, KunIDev, IkkeOpphoerSkalSendeBrev, redigerbartBrev = true),
     ;
 
     fun kanBrukesIMiljo(): Boolean =

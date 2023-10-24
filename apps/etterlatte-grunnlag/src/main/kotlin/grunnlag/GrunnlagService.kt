@@ -36,7 +36,7 @@ import java.util.UUID
 
 interface GrunnlagService {
     fun hentGrunnlagAvType(
-        sak: Long,
+        behandlingId: UUID,
         opplysningstype: Opplysningstype,
     ): Grunnlagsopplysning<JsonNode>?
 
@@ -46,7 +46,7 @@ interface GrunnlagService {
     ): NavnOpplysningDTO?
 
     fun lagreNyeSaksopplysninger(
-        sak: Long,
+        sakId: Long,
         behandlingId: UUID,
         nyeOpplysninger: List<Grunnlagsopplysning<JsonNode>>,
     )
@@ -58,7 +58,9 @@ interface GrunnlagService {
         nyeOpplysninger: List<Grunnlagsopplysning<JsonNode>>,
     )
 
-    fun hentOpplysningsgrunnlag(sak: Long): Grunnlag?
+    fun hentOpplysningsgrunnlagForSak(sakId: Long): Grunnlag?
+
+    fun hentOpplysningsgrunnlag(behandlingId: UUID): Grunnlag?
 
     fun hentSakerOgRoller(fnr: Folkeregisteridentifikator): PersonMedSakerOgRoller
 
@@ -78,15 +80,18 @@ interface GrunnlagService {
 
     fun hentPersonerISak(sakId: Long): Map<Folkeregisteridentifikator, PersonMedNavn>?
 
-    suspend fun oppdaterGrunnlag(
+    suspend fun opprettGrunnlag(
         behandlingId: UUID,
         opplysningsbehov: Opplysningsbehov,
     )
 
-    fun hentHistoriskForeldreansvar(
-        sakId: Long,
+    suspend fun oppdaterGrunnlag(
         behandlingId: UUID,
-    ): Grunnlagsopplysning<JsonNode>?
+        sakId: Long,
+        sakType: SakType,
+    )
+
+    fun hentHistoriskForeldreansvar(behandlingId: UUID): Grunnlagsopplysning<JsonNode>?
 }
 
 class RealGrunnlagService(
@@ -96,17 +101,32 @@ class RealGrunnlagService(
 ) : GrunnlagService {
     private val logger = LoggerFactory.getLogger(RealGrunnlagService::class.java)
 
-    override fun hentOpplysningsgrunnlag(sak: Long): Grunnlag? {
-        val persongalleriJsonNode = opplysningDao.finnNyesteGrunnlag(sak, Opplysningstype.PERSONGALLERI_V1)?.opplysning
+    override fun hentOpplysningsgrunnlagForSak(sakId: Long): Grunnlag? {
+        val persongalleriJsonNode =
+            opplysningDao.finnNyesteGrunnlagForSak(sakId, Opplysningstype.PERSONGALLERI_V1)?.opplysning
 
         if (persongalleriJsonNode == null) {
-            logger.info("Klarte ikke å hente ut grunnlag for sak $sak. Fant ikke persongalleri")
+            logger.info("Klarte ikke å hente ut grunnlag for sak $sakId. Fant ikke persongalleri")
             return null
         }
         val persongalleri = objectMapper.readValue(persongalleriJsonNode.opplysning.toJson(), Persongalleri::class.java)
-        val grunnlag = opplysningDao.hentAlleGrunnlagForSak(sak)
+        val grunnlag = opplysningDao.hentAlleGrunnlagForSak(sakId)
 
-        return OpplysningsgrunnlagMapper(grunnlag, sak, persongalleri).hentGrunnlag()
+        return OpplysningsgrunnlagMapper(grunnlag, persongalleri).hentGrunnlag()
+    }
+
+    override fun hentOpplysningsgrunnlag(behandlingId: UUID): Grunnlag? {
+        val persongalleriJsonNode =
+            opplysningDao.finnNyesteGrunnlagForBehandling(behandlingId, Opplysningstype.PERSONGALLERI_V1)?.opplysning
+
+        if (persongalleriJsonNode == null) {
+            logger.info("Klarte ikke å hente ut grunnlag for behandling (id=$behandlingId). Fant ikke persongalleri")
+            return null
+        }
+        val persongalleri = objectMapper.readValue(persongalleriJsonNode.opplysning.toJson(), Persongalleri::class.java)
+        val grunnlag = opplysningDao.hentAlleGrunnlagForBehandling(behandlingId)
+
+        return OpplysningsgrunnlagMapper(grunnlag, persongalleri).hentGrunnlag()
     }
 
     override fun hentSakerOgRoller(fnr: Folkeregisteridentifikator): PersonMedSakerOgRoller {
@@ -122,7 +142,7 @@ class RealGrunnlagService(
     override fun hentAlleSakerForFnr(fnr: Folkeregisteridentifikator): Set<Long> = opplysningDao.finnAlleSakerForPerson(fnr)
 
     override fun hentPersonerISak(sakId: Long): Map<Folkeregisteridentifikator, PersonMedNavn>? {
-        val grunnlag = hentOpplysningsgrunnlag(sakId) ?: return null
+        val grunnlag = hentOpplysningsgrunnlagForSak(sakId) ?: return null
 
         val personer = listOf(grunnlag.soeker) + grunnlag.familie
         return personer.mapNotNull {
@@ -137,7 +157,7 @@ class RealGrunnlagService(
         }.associateBy { it.fnr }
     }
 
-    override suspend fun oppdaterGrunnlag(
+    override suspend fun opprettGrunnlag(
         behandlingId: UUID,
         opplysningsbehov: Opplysningsbehov,
     ) {
@@ -252,7 +272,7 @@ class RealGrunnlagService(
                     it.personRolle,
                 )
             lagreNyePersonopplysninger(
-                opplysningsbehov.sakid,
+                opplysningsbehov.sakId,
                 behandlingId,
                 it.personDto.foedselsnummer.verdi,
                 enkenPdlOpplysning,
@@ -260,11 +280,11 @@ class RealGrunnlagService(
         }
 
         lagreNyeSaksopplysninger(
-            opplysningsbehov.sakid,
+            opplysningsbehov.sakId,
             behandlingId,
             listOf(opplysningsbehov.persongalleri.tilGrunnlagsopplysning()),
         )
-        logger.info("Oppdatert grunnlag for sak ${opplysningsbehov.sakid}")
+        logger.info("Oppdatert grunnlag (sakId=${opplysningsbehov.sakId}, behandlingId=$behandlingId)")
     }
 
     private fun Persongalleri.tilGrunnlagsopplysning(): Grunnlagsopplysning<JsonNode> {
@@ -285,15 +305,33 @@ class RealGrunnlagService(
         )
     }
 
-    override fun hentHistoriskForeldreansvar(
-        sakId: Long,
+    override suspend fun oppdaterGrunnlag(
         behandlingId: UUID,
-    ): Grunnlagsopplysning<JsonNode>? {
-        val opplysning = opplysningDao.finnNyesteGrunnlag(sakId, Opplysningstype.HISTORISK_FORELDREANSVAR)?.opplysning
-        if (opplysning != null) {
-            return opplysning
+        sakId: Long,
+        sakType: SakType,
+    ) {
+        val galleriHendelse =
+            opplysningDao.finnNyesteGrunnlagForSak(
+                sakId,
+                Opplysningstype.PERSONGALLERI_V1,
+            )!!
+        val persongalleri = objectMapper.readValue(galleriHendelse.opplysning.toJson(), Persongalleri::class.java)
+
+        opprettGrunnlag(
+            behandlingId,
+            Opplysningsbehov(sakId, sakType, persongalleri),
+        )
+    }
+
+    override fun hentHistoriskForeldreansvar(behandlingId: UUID): Grunnlagsopplysning<JsonNode>? {
+        val grunnlagshendelse =
+            opplysningDao.finnNyesteGrunnlagForBehandling(behandlingId, Opplysningstype.HISTORISK_FORELDREANSVAR)
+
+        if (grunnlagshendelse?.opplysning != null) {
+            return grunnlagshendelse.opplysning
         }
-        val grunnlag = hentOpplysningsgrunnlag(sakId)
+
+        val grunnlag = hentOpplysningsgrunnlag(behandlingId)
         val soekerFnr = grunnlag?.soeker?.hentFoedselsnummer()?.verdi ?: return null
         val historiskForeldreansvar =
             pdltjenesterKlient.hentHistoriskForeldreansvar(
@@ -302,7 +340,12 @@ class RealGrunnlagService(
                 SakType.BARNEPENSJON,
             )
                 .tilGrunnlagsopplysning(soekerFnr)
-        opplysningDao.leggOpplysningTilGrunnlag(sakId, historiskForeldreansvar, soekerFnr)
+
+        val hendelsenummer =
+            opplysningDao.leggOpplysningTilGrunnlag(grunnlag.metadata.sakId, historiskForeldreansvar, soekerFnr)
+
+        opplysningDao.oppdaterVersjonForBehandling(behandlingId, grunnlag.metadata.sakId, hendelsenummer)
+
         return historiskForeldreansvar
     }
 
@@ -319,10 +362,10 @@ class RealGrunnlagService(
         }
 
     override fun hentGrunnlagAvType(
-        sak: Long,
+        behandlingId: UUID,
         opplysningstype: Opplysningstype,
     ): Grunnlagsopplysning<JsonNode>? {
-        return opplysningDao.finnNyesteGrunnlag(sak, opplysningstype)?.opplysning
+        return opplysningDao.finnNyesteGrunnlagForBehandling(behandlingId, opplysningstype)?.opplysning
     }
 
     override fun hentOpplysningstypeNavnFraFnr(
@@ -358,12 +401,12 @@ class RealGrunnlagService(
     }
 
     override fun lagreNyeSaksopplysninger(
-        sak: Long,
+        sakId: Long,
         behandlingId: UUID,
         nyeOpplysninger: List<Grunnlagsopplysning<JsonNode>>,
     ) {
         logger.info("Oppretter et grunnlag for saksopplysninger")
-        oppdaterGrunnlagOgVersjon(sak, behandlingId, fnr = null, nyeOpplysninger)
+        oppdaterGrunnlagOgVersjon(sakId, behandlingId, fnr = null, nyeOpplysninger)
     }
 
     private fun oppdaterGrunnlagOgVersjon(
@@ -373,6 +416,12 @@ class RealGrunnlagService(
         nyeOpplysninger: List<Grunnlagsopplysning<JsonNode>>,
     ) {
         val gjeldendeGrunnlag = opplysningDao.finnHendelserIGrunnlag(sak).map { it.opplysning.id }
+
+        val versjon = opplysningDao.hentBehandlingVersjon(behandlingId)
+        if (versjon?.laast ?: false) {
+            logger.warn("Grunnlag låst for behandling (id=$behandlingId). Avbryter oppdatering av grunnlaget...")
+            return
+        }
 
         val hendelsenummer =
             nyeOpplysninger.mapNotNull { opplysning ->
@@ -385,9 +434,8 @@ class RealGrunnlagService(
             }.maxOrNull()
 
         if (hendelsenummer == null) {
-            logger.warn("Hendelsenummer er null – kan ikke oppdatere versjon for behandling (id=$behandlingId)")
+            logger.error("Hendelsenummer er null – kan ikke oppdatere versjon for behandling (id=$behandlingId)")
         } else {
-            // TODO: Hva skal vi gjøre dersom det forsøkes å oppdatere versjon som er låst? Bare hoppe over?
             logger.info("Setter grunnlag for behandling (id=$behandlingId) til hendelsenummer=$hendelsenummer")
             opplysningDao.oppdaterVersjonForBehandling(behandlingId, sak, hendelsenummer)
         }
@@ -399,14 +447,18 @@ class RealGrunnlagService(
         behandlingId: UUID,
         laasVersjon: Boolean,
     ) {
-        val grunnlag = hentOpplysningsgrunnlag(sakId)
+        val grunnlag = hentOpplysningsgrunnlagForSak(sakId)
         if (grunnlag == null) {
             logger.warn("Ingen grunnlag funnet for sak=$sakId - kan ikke sette versjon for behandlingId=$behandlingId")
             return
         }
 
-        val hendelsenummer = grunnlag.metadata.versjon
+        val versjonErLaast = opplysningDao.hentBehandlingVersjon(behandlingId)?.laast ?: false
+        if (versjonErLaast) {
+            throw IllegalStateException("Kan ikke oppdatere versjon som er låst (behandlingId=$behandlingId)")
+        }
 
+        val hendelsenummer = grunnlag.metadata.versjon
         val oppdatertOK = opplysningDao.oppdaterVersjonForBehandling(behandlingId, sakId, hendelsenummer) > 0
         if (oppdatertOK) {
             logger.info("Versjon satt til hendelsenummer=$hendelsenummer (sakId=$sakId, id=$behandlingId)")

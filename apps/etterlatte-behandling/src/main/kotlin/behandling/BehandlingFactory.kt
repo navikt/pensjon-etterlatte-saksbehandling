@@ -14,7 +14,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.NyBehandlingRequest
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
-import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.NyeSaksopplysninger
 import no.nav.etterlatte.libs.common.grunnlag.lagOpplysning
@@ -22,6 +22,7 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeknadMottattDato
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.gyldigSoeknad.VurderingsResultat
+import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
@@ -58,7 +59,7 @@ class BehandlingFactory(
                 opprettBehandling(
                     sak.id, request.persongalleri, request.mottattDato, Vedtaksloesning.GJENNY,
                 ) ?: throw IllegalStateException("Kunne ikke opprette behandling")
-            }
+            }.behandling
 
         val gyldighetsvurdering =
             GyldighetsResultat(
@@ -75,10 +76,14 @@ class BehandlingFactory(
         val opplysninger =
             listOf(
                 lagOpplysning(Opplysningstype.SPRAAK, kilde, request.spraak.toJsonNode()),
-                lagOpplysning(Opplysningstype.SOEKNAD_MOTTATT_DATO, kilde, SoeknadMottattDato(mottattDato).toJsonNode()),
+                lagOpplysning(
+                    Opplysningstype.SOEKNAD_MOTTATT_DATO,
+                    kilde,
+                    SoeknadMottattDato(mottattDato).toJsonNode(),
+                ),
             )
 
-        grunnlagService.leggTilNyeOpplysninger(sak.id, behandling.id, NyeSaksopplysninger(opplysninger))
+        grunnlagService.leggTilNyeOpplysninger(behandling.id, NyeSaksopplysninger(sak.id, opplysninger))
 
         return behandling
     }
@@ -88,7 +93,7 @@ class BehandlingFactory(
         persongalleri: Persongalleri,
         mottattDato: String?,
         kilde: Vedtaksloesning,
-    ): Behandling? {
+    ): BehandlingOgOppgave? {
         logger.info("Starter behandling i sak $sakId")
 
         val sak =
@@ -111,21 +116,32 @@ class BehandlingFactory(
                 forrigeBehandling = forrigeBehandling,
                 mottattDato = mottattDato,
                 kilde = kilde,
-                revurderingAarsak = RevurderingAarsak.NY_SOEKNAD,
-            )
+                revurderingAarsak = Revurderingaarsak.NY_SOEKNAD,
+            )?.let { BehandlingOgOppgave(it, null) }
         } else {
             val harBehandlingUnderbehandling =
                 harBehandlingerForSak.filter { behandling ->
                     BehandlingStatus.underBehandling().find { it == behandling.status } != null
                 }
-            opprettFoerstegangsbehandling(harBehandlingUnderbehandling, sak, persongalleri, mottattDato, kilde)
+            val behandling =
+                opprettFoerstegangsbehandling(harBehandlingUnderbehandling, sak, mottattDato, kilde) ?: return null
+            grunnlagService.leggInnNyttGrunnlag(behandling, persongalleri)
+            val oppgave =
+                oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(
+                    referanse = behandling.id.toString(),
+                    sakId = sak.id,
+                )
+            behandlingHendelser.sendMeldingForHendelseMedDetaljertBehandling(
+                behandling.toStatistikkBehandling(persongalleri),
+                BehandlingHendelseType.OPPRETTET,
+            )
+            return BehandlingOgOppgave(behandling, oppgave)
         }
     }
 
     private fun opprettFoerstegangsbehandling(
         harBehandlingUnderbehandling: List<Behandling>,
         sak: Sak,
-        persongalleri: Persongalleri,
         mottattDato: String?,
         kilde: Vedtaksloesning,
     ): Behandling? {
@@ -147,18 +163,6 @@ class BehandlingFactory(
             logger.info("Opprettet behandling ${opprettBehandling.id} i sak ${opprettBehandling.sakId}")
 
             behandlingDao.hentBehandling(opprettBehandling.id)?.sjekkEnhet()
-        }.also { behandling ->
-            behandling?.let {
-                grunnlagService.leggInnNyttGrunnlag(it, persongalleri)
-                oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(
-                    referanse = behandling.id.toString(),
-                    sakId = sak.id,
-                )
-                behandlingHendelser.sendMeldingForHendelseMedDetaljertBehandling(
-                    it.toStatistikkBehandling(persongalleri),
-                    BehandlingHendelseType.OPPRETTET,
-                )
-            }
         }
     }
 
@@ -170,3 +174,5 @@ class BehandlingFactory(
             ).firstOrNull()
         }
 }
+
+data class BehandlingOgOppgave(val behandling: Behandling, val oppgave: OppgaveIntern?)

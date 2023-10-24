@@ -21,6 +21,7 @@ import no.nav.etterlatte.libs.common.generellBehandlingId
 import no.nav.etterlatte.libs.common.generellbehandling.GenerellBehandling
 import no.nav.etterlatte.libs.common.kunSaksbehandler
 import no.nav.etterlatte.libs.common.sakId
+import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.sak.SakService
 
 enum class GenerellBehandlingToggle(private val key: String) : FeatureToggle {
@@ -126,6 +127,14 @@ internal fun Route.generellbehandlingRoutes(
         hvisEnabled(GenerellBehandlingToggle.KanBrukeGenerellBehandlingToggle) {
             kunSaksbehandler {
                 call.respond(inTransaction { generellBehandlingService.hentBehandlingForSak(sakId) })
+            }
+        }
+    }
+
+    get("/api/generellbehandling/kravpakkeForSak/{$SAKID_CALL_PARAMETER}") {
+        hvisEnabled(GenerellBehandlingToggle.KanBrukeGenerellBehandlingToggle) {
+            kunSaksbehandler {
+                call.respond(generellBehandlingService.hentKravpakkeForSak(sakId, brukerTokenInfo))
             }
         }
     }

@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonValue
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.model.bp.VedleggBP
 import no.nav.etterlatte.brev.model.oms.VedleggOMS
-import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
@@ -63,8 +63,8 @@ object SlateHelper {
                     VedtakType.INNVILGELSE -> VedleggOMS.innvilgelseOMS()
                     VedtakType.ENDRING -> {
                         when (generellBrevData.revurderingsaarsak) {
-                            RevurderingAarsak.INNTEKTSENDRING,
-                            RevurderingAarsak.ANNEN,
+                            Revurderingaarsak.INNTEKTSENDRING,
+                            Revurderingaarsak.ANNEN,
                             -> VedleggOMS.inntektsendringOMS()
                             else -> null
                         }

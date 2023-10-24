@@ -26,11 +26,10 @@ class GrunnlagService(private val grunnlagKlient: GrunnlagKlientImpl) {
     }
 
     fun leggTilNyeOpplysninger(
-        sakId: Long,
         behandlingId: UUID,
         opplysninger: NyeSaksopplysninger,
     ) = runBlocking {
-        grunnlagKlient.lagreNyeSaksopplysninger(sakId, behandlingId, opplysninger)
+        grunnlagKlient.lagreNyeSaksopplysninger(opplysninger.sakId, behandlingId, opplysninger)
     }
 
     suspend fun hentPersongalleri(
@@ -47,7 +46,7 @@ class GrunnlagService(private val grunnlagKlient: GrunnlagKlientImpl) {
         persongalleri: Persongalleri,
     ): Opplysningsbehov {
         return Opplysningsbehov(
-            sakid = behandling.sak.id,
+            sakId = behandling.sak.id,
             sakType = behandling.sak.sakType,
             persongalleri = persongalleri,
         )

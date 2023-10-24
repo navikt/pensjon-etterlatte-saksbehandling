@@ -47,11 +47,16 @@ fun Route.vilkaarsvurdering(
         post("/{$BEHANDLINGSID_CALL_PARAMETER}/opprett") {
             withBehandlingId(behandlingKlient) { behandlingId ->
                 try {
+                    val kopierVedRevurdering =
+                        call.request.queryParameters["kopierVedRevurdering"]?.let { it.toBoolean() }
+                            ?: true
+
                     logger.info("Oppretter vilkårsvurdering for $behandlingId")
                     val vilkaarsvurdering =
                         vilkaarsvurderingService.opprettVilkaarsvurdering(
                             behandlingId,
                             brukerTokenInfo,
+                            kopierVedRevurdering,
                         )
 
                     call.respond(vilkaarsvurdering.toDto())
@@ -153,6 +158,23 @@ fun Route.vilkaarsvurdering(
                             "Kan ikke slette vurdering av vilkår på en vilkårsvurdering som har et resultat.",
                         )
                     }
+                }
+            }
+        }
+
+        delete("/{$BEHANDLINGSID_CALL_PARAMETER}") {
+            withBehandlingId(behandlingKlient) { behandlingId ->
+                logger.info("Sletter vilkårsvurdering for $behandlingId")
+
+                try {
+                    vilkaarsvurderingService.slettVilkaarsvurdering(behandlingId, brukerTokenInfo)
+                    call.respond(HttpStatusCode.OK)
+                } catch (e: BehandlingstilstandException) {
+                    logger.error(
+                        "Kunne ikke slette vilkårsvurdering for behandling $behandlingId. " +
+                            "Statussjekk feilet for behandling feilet",
+                    )
+                    call.respond(HttpStatusCode.PreconditionFailed, "Statussjekk for behandling feilet")
                 }
             }
         }

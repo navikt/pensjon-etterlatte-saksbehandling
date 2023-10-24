@@ -236,6 +236,8 @@ abstract class BehandlingIntegrationTest {
                         )
                     } else if (request.url.fullPath.endsWith("/oppdater-grunnlag")) {
                         respondOk()
+                    } else if (request.url.fullPath.endsWith("/opprett-grunnlag")) {
+                        respondOk()
                     } else {
                         error(request.url.fullPath)
                     }
@@ -449,8 +451,16 @@ class GrunnlagKlientTest : GrunnlagKlient {
 }
 
 class VedtakKlientTest : VedtakKlient {
-    override suspend fun fattVedtakTilbakekreving(
+    override suspend fun lagreVedtakTilbakekreving(
         tilbakekreving: Tilbakekreving,
+        brukerTokenInfo: BrukerTokenInfo,
+        enhet: String,
+    ): Long {
+        return 123L
+    }
+
+    override suspend fun fattVedtakTilbakekreving(
+        tilbakekrevingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
         enhet: String,
     ): Long {

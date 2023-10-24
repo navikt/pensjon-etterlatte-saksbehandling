@@ -31,10 +31,12 @@ import no.nav.etterlatte.libs.common.trygdetid.GrunnlagOpplysningerDto
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidGrunnlagDto
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
-import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
+import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
+import no.nav.etterlatte.libs.common.vedtak.VedtakNyDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
+import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.etterlatte.token.BrukerTokenInfo
@@ -229,7 +231,7 @@ internal class BrevdataFacadeImplTest {
                     avdoedFyllerSeksti = null,
                 ),
             overstyrtNorskPoengaar = null,
-            ident = null,
+            ident = AVDOED_FOEDSELSNUMMER.value,
         )
 
     private fun opprettBeregning() =
@@ -256,18 +258,21 @@ internal class BrevdataFacadeImplTest {
         }
 
     private fun opprettVedtak() =
-        mockk<VedtakDto> {
+        mockk<VedtakNyDto> {
             every { sak } returns VedtakSak("ident", SakType.BARNEPENSJON, SAK_ID)
-            every { behandling.id } returns BEHANDLING_ID
-            every { behandling.revurderingsaarsak } returns null
-            every { behandling.revurderingInfo } returns null
-            every { behandling.type } returns BehandlingType.FØRSTEGANGSBEHANDLING
-            every { vedtakId } returns 123L
+            every { id } returns 123L
             every { type } returns VedtakType.INNVILGELSE
             every { status } returns VedtakStatus.OPPRETTET
-            every { virkningstidspunkt } returns YearMonth.now()
             every { vedtakFattet } returns VedtakFattet(SAKSBEHANDLER_IDENT, ENHET, Tidspunkt.now())
             every { attestasjon } returns Attestasjon(ATTESTANT_IDENT, ENHET, Tidspunkt.now())
+            every { innhold } returns
+                mockk<VedtakInnholdDto.VedtakBehandlingDto> {
+                    every { behandling.id } returns BEHANDLING_ID
+                    every { virkningstidspunkt } returns YearMonth.now()
+                    every { behandling.revurderingsaarsak } returns null
+                    every { behandling.revurderingInfo } returns null
+                    every { behandling.type } returns BehandlingType.FØRSTEGANGSBEHANDLING
+                }
         }
 
     private fun opprettGrunnlag() =

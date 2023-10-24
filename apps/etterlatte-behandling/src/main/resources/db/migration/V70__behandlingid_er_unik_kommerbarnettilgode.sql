@@ -1,0 +1,1 @@
+alter table kommerbarnettilgode ADD primary key(behandling_id)

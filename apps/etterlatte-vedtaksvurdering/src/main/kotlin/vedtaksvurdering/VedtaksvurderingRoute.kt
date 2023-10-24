@@ -21,8 +21,8 @@ import no.nav.etterlatte.libs.common.tidspunkt.toNorskTid
 import no.nav.etterlatte.libs.common.vedtak.AttesterVedtakDto
 import no.nav.etterlatte.libs.common.vedtak.Behandling
 import no.nav.etterlatte.libs.common.vedtak.LoependeYtelseDTO
-import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingAttesterVedtakDto
-import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingFattetVedtakDto
+import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingFattEllerAttesterVedtakDto
+import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingVedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakSammendragDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakSamordningDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
@@ -213,17 +213,22 @@ fun Route.tilbakekrevingvedtakRoute(service: VedtakTilbakekrevingService) {
     val logger = application.log
 
     route("/tilbakekreving") {
-        post("/fattvedtak") {
-            val dto = call.receive<TilbakekrevingFattetVedtakDto>()
+        post("/lagre-vedtak") {
+            val dto = call.receive<TilbakekrevingVedtakDto>()
             logger.info("Fatter vedtak for tilbakekreving=${dto.tilbakekrevingId}")
-            call.respond(service.lagreVedtak(dto))
+            call.respond(service.opprettEllerOppdaterVedtak(dto))
         }
-        post("/attestervedtak") {
-            val dto = call.receive<TilbakekrevingAttesterVedtakDto>()
+        post("/fatt-vedtak") {
+            val dto = call.receive<TilbakekrevingFattEllerAttesterVedtakDto>()
+            logger.info("Fatter vedtak for tilbakekreving=${dto.tilbakekrevingId}")
+            call.respond(service.fattVedtak(dto))
+        }
+        post("/attester-vedtak") {
+            val dto = call.receive<TilbakekrevingFattEllerAttesterVedtakDto>()
             logger.info("Attesterer vedtak for tilbakekreving=${dto.tilbakekrevingId}")
             call.respond(service.attesterVedtak(dto))
         }
-        post("/underkjennvedtak") {
+        post("/underkjenn-vedtak") {
             val tilbakekrevingId = call.receive<UUID>()
             logger.info("Fatter vedtak for tilbakekreving=$tilbakekrevingId")
             call.respond(service.underkjennVedtak(tilbakekrevingId))

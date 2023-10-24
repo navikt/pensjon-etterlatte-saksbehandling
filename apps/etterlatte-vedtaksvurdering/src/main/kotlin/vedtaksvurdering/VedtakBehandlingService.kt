@@ -4,7 +4,7 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
-import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.oppgave.VedtakEndringDTO
@@ -251,7 +251,7 @@ class VedtakBehandlingService(
         return attestertVedtak
     }
 
-    private fun RevurderingAarsak?.skalIkkeSendeBrev() = this != null && !utfall.skalSendeBrev
+    private fun Revurderingaarsak?.skalIkkeSendeBrev() = this != null && !utfall.skalSendeBrev
 
     suspend fun underkjennVedtak(
         behandlingId: UUID,
@@ -409,6 +409,7 @@ class VedtakBehandlingService(
     ): Vedtak {
         val oppdatertVedtak =
             eksisterendeVedtak.copy(
+                type = vedtakType,
                 innhold =
                     (eksisterendeVedtak.innhold as VedtakBehandlingInnhold).copy(
                         virkningstidspunkt = virkningstidspunkt,
@@ -459,29 +460,32 @@ class VedtakBehandlingService(
     ): List<Utbetalingsperiode> {
         return when (vedtakType) {
             VedtakType.INNVILGELSE, VedtakType.ENDRING -> {
-                if (sakType == SakType.BARNEPENSJON) {
-                    val beregningsperioder =
-                        requireNotNull(beregningOgAvkorting?.beregning?.beregningsperioder) {
-                            "Mangler beregning"
+                when (sakType) {
+                    SakType.BARNEPENSJON -> {
+                        val beregningsperioder =
+                            requireNotNull(beregningOgAvkorting?.beregning?.beregningsperioder) {
+                                "Mangler beregning"
+                            }
+                        beregningsperioder.map {
+                            Utbetalingsperiode(
+                                periode = Periode(it.datoFOM, it.datoTOM),
+                                beloep = it.utbetaltBeloep.toBigDecimal(),
+                                type = UtbetalingsperiodeType.UTBETALING,
+                            )
                         }
-                    beregningsperioder.map {
-                        Utbetalingsperiode(
-                            periode = Periode(it.datoFOM, it.datoTOM),
-                            beloep = it.utbetaltBeloep.toBigDecimal(),
-                            type = UtbetalingsperiodeType.UTBETALING,
-                        )
                     }
-                } else {
-                    val avkortetYtelse =
-                        requireNotNull(beregningOgAvkorting?.avkorting?.avkortetYtelse) {
-                            "Mangler avkortet ytelse"
+                    SakType.OMSTILLINGSSTOENAD -> {
+                        val avkortetYtelse =
+                            requireNotNull(beregningOgAvkorting?.avkorting?.avkortetYtelse) {
+                                "Mangler avkortet ytelse"
+                            }
+                        avkortetYtelse.map {
+                            Utbetalingsperiode(
+                                periode = Periode(YearMonth.from(it.fom), YearMonth.from(it.fom)),
+                                beloep = it.ytelseEtterAvkorting.toBigDecimal(),
+                                type = UtbetalingsperiodeType.UTBETALING,
+                            )
                         }
-                    avkortetYtelse.map {
-                        Utbetalingsperiode(
-                            periode = Periode(YearMonth.from(it.fom), YearMonth.from(it.fom)),
-                            beloep = it.ytelseEtterAvkorting.toBigDecimal(),
-                            type = UtbetalingsperiodeType.UTBETALING,
-                        )
                     }
                 }
             }
@@ -574,7 +578,7 @@ class VedtakTilstandException(gjeldendeStatus: VedtakStatus, forventetStatus: Li
 class BehandlingstilstandException(vedtak: Vedtak) :
     IllegalStateException("Statussjekk for behandling ${vedtak.behandlingId} feilet")
 
-class OpphoersrevurderingErIkkeOpphoersvedtakException(revurderingAarsak: RevurderingAarsak?, vedtakType: VedtakType) :
+class OpphoersrevurderingErIkkeOpphoersvedtakException(revurderingAarsak: Revurderingaarsak?, vedtakType: VedtakType) :
     IllegalStateException(
         "Vedtaket er av type $vedtakType, men dette er " +
             "ikke gyldig for revurderingen med årsak $revurderingAarsak",

@@ -7,12 +7,12 @@ import org.junit.jupiter.api.Test
 internal class FoedselsnummerValidatorTest {
     @Test
     fun `Sjekk diverse gyldige test fnr`() {
-        isValid("11057523044") shouldBe true
-        isValid("26117512737") shouldBe true
-        isValid("26104500284") shouldBe true
-        isValid("24116324268") shouldBe true
-        isValid("04096222195") shouldBe true
-        isValid("05126307952") shouldBe true
+        isValid("02438311109") shouldBe true
+        isValid("18498248795") shouldBe true
+        isValid("09438336165") shouldBe true
+        isValid("31488338237") shouldBe true
+        isValid("16508201382") shouldBe true
+        isValid("27458328671") shouldBe true
     }
 
     @Test

@@ -16,6 +16,7 @@ import no.nav.etterlatte.libs.common.person.HentPersonRequest
 import no.nav.etterlatte.libs.common.person.PdlIdentifikator
 import no.nav.etterlatte.libs.common.person.PersonIdent
 import no.nav.etterlatte.libs.common.person.PersonRolle
+import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
 import no.nav.etterlatte.mockResponse
 import no.nav.etterlatte.pdl.ParallelleSannheterKlient
 import no.nav.etterlatte.pdl.PdlGeografiskTilknytning
@@ -43,7 +44,7 @@ internal class PersonServiceTest {
     private val personService = PersonService(pdlKlient, ppsKlient)
 
     private val aktorIdMedNpid = "1234567890123"
-    private val aktorIdMedFolkeregisterIdent = "2305469522806"
+    private val aktorIdMedFolkeregisterIdent = AVDOED_FOEDSELSNUMMER.value
 
     @BeforeEach
     fun beforeEach() {
@@ -110,7 +111,7 @@ internal class PersonServiceTest {
                 )
             }
 
-        val expectedBarnFnr = listOf("70078749472", "06067018735")
+        val expectedBarnFnr = listOf("09508229892", "17418340118")
 
         val avdoedesBarn = person.avdoedesBarn!!
         avdoedesBarn.map { it.foedselsnummer.value } shouldContainExactlyInAnyOrder expectedBarnFnr
@@ -131,7 +132,7 @@ internal class PersonServiceTest {
                 )
             }
 
-        val expectedForeldreFnr = listOf("26117512737", "14097030880")
+        val expectedForeldreFnr = listOf("18498248795", "16478313601")
 
         assertNotNull(person.familieRelasjon?.verdi?.foreldre)
         assertEquals(2, person.familieRelasjon?.verdi?.foreldre?.size)
@@ -148,7 +149,7 @@ internal class PersonServiceTest {
                 )
             }
 
-        val expectedForeldreFnr = listOf("26117512737", "14097030880")
+        val expectedForeldreFnr = listOf("18498248795", "16478313601")
 
         assertNotNull(person.familieRelasjon?.verdi?.ansvarligeForeldre)
         assertEquals(2, person.familieRelasjon?.verdi?.ansvarligeForeldre?.size)
@@ -166,7 +167,7 @@ internal class PersonServiceTest {
                 )
             }
 
-        val foreldreFnr = listOf("26117512737", "14097030880")
+        val foreldreFnr = listOf("18498248795", "16478313601")
 
         assertNotNull(person.familieRelasjon?.verdi?.barn)
         assertEquals(2, person.familieRelasjon?.verdi?.barn?.size)
@@ -238,7 +239,7 @@ internal class PersonServiceTest {
         if (personIdentResponse !is PdlIdentifikator.FolkeregisterIdent) {
             fail("Fikk ikke folkeregisteridentifikator")
         }
-        val expectedFolkeregisterIdent = "70078749472"
+        val expectedFolkeregisterIdent = "09508229892"
         assertEquals(expectedFolkeregisterIdent, personIdentResponse.folkeregisterident.value)
     }
 

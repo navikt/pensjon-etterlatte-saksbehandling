@@ -8,6 +8,8 @@ metadata:
 spec:
   image: {{image}}
   port: 8080
+  ingresses:
+    - "https://etterlatte-samordning-vedtak.nav.no"
   liveness:
     path: "health/isalive"
     initialDelay: 10

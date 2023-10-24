@@ -9,18 +9,18 @@
         "resultat": "IKKE_OPPFYLT",
         "basertPaaOpplysninger": {
           "familieRelasjon": {
-            "ansvarligeForeldre": ["22128202440"],
-            "foreldre": ["22128202440"],
+            "ansvarligeForeldre": ["08498224343"],
+            "foreldre": ["08498224343"],
             "barn": null
           },
           "innsender": {
             "navn": "BRÅKETE POTET",
-            "fnr": "03108718357"
+            "fnr": "01498344336"
           },
           "gjenlevende": [
             {
               "navn": "BRÅKETE POTET",
-              "fnr": "03108718357"
+              "fnr": "01498344336"
             }
           ]
         }
@@ -30,13 +30,13 @@
         "resultat": "IKKE_OPPFYLT",
         "basertPaaOpplysninger": {
           "familieRelasjon": {
-            "ansvarligeForeldre": ["22128202440"],
-            "foreldre": ["22128202440"],
+            "ansvarligeForeldre": ["08498224343"],
+            "foreldre": ["08498224343"],
             "barn": null
           },
           "innsender": {
             "navn": "BRÅKETE POTET",
-            "fnr": "03108718357"
+            "fnr": "01498344336"
           }
         }
       },
@@ -71,7 +71,7 @@
                 },
                 "opplysning": {
                   "doedsdato": "2022-02-10",
-                  "foedselsnummer": "22128202440"
+                  "foedselsnummer": "08498224343"
                 }
               }
             ]
@@ -97,7 +97,7 @@
                 },
                 "opplysning": {
                   "doedsdato": "2022-02-10",
-                  "foedselsnummer": "22128202440"
+                  "foedselsnummer": "08498224343"
                 }
               },
               {
@@ -110,7 +110,7 @@
                 },
                 "opplysning": {
                   "foedselsdato": "2000-10-12",
-                  "foedselsnummer": "12101376212"
+                  "foedselsnummer": "25478323363"
                 }
               }
             ]
@@ -136,7 +136,7 @@
                 },
                 "opplysning": {
                   "doedsdato": "2022-02-10",
-                  "foedselsnummer": "22128202440"
+                  "foedselsnummer": "08498224343"
                 }
               }
             ]
@@ -154,7 +154,7 @@
                   "type": "pdl"
                 },
                 "opplysning": {
-                  "foreldre": ["22128202440", "03108718357"]
+                  "foreldre": ["08498224343", "01498344336"]
                 }
               },
               {
@@ -167,7 +167,7 @@
                 },
                 "opplysning": {
                   "doedsdato": "2022-02-10",
-                  "foedselsnummer": "22128202440"
+                  "foedselsnummer": "08498224343"
                 }
               }
             ]
@@ -243,7 +243,7 @@
                 "id": "50c6b495-ddd2-4fa5-8863-6d8ba865eb81",
                 "kriterieOpplysningsType": "AVDOED_UTENLANDSOPPHOLD",
                 "kilde": {
-                  "fnr": "03108718357",
+                  "fnr": "01498344336",
                   "mottatDato": "2022-02-14T14:37:24.573612786Z",
                   "type": "privatperson"
                 },
@@ -387,7 +387,7 @@
                 },
                 "opplysning": {
                   "doedsdato": "2022-02-10",
-                  "foedselsnummer": "22128202440"
+                  "foedselsnummer": "08498224343"
                 }
               },
               {
@@ -622,7 +622,7 @@
               {
                 "kriterieOpplysningsType": "SOEKER_UTENLANDSOPPHOLD",
                 "kilde": {
-                  "fnr": "03108718357",
+                  "fnr": "01498344336",
                   "mottatDato": "2022-02-14T14:37:24.573612786Z",
                   "type": "privatperson"
                 },
@@ -642,7 +642,7 @@
                 },
                 "opplysning": {
                   "doedsdato": "2022-02-10",
-                  "foedselsnummer": "22128202440"
+                  "foedselsnummer": "08498224343"
                 }
               }
             ]
@@ -690,7 +690,7 @@
                 },
                 "opplysning": {
                   "doedsdato": "2022-02-10",
-                  "foedselsnummer": "22128202440"
+                  "foedselsnummer": "08498224343"
                 }
               }
             ]

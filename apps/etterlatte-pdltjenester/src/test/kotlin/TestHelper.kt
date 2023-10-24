@@ -14,13 +14,15 @@ import no.nav.etterlatte.libs.common.person.Utland
 import no.nav.etterlatte.libs.common.person.VergemaalEllerFremtidsfullmakt
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
+import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
+import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import java.time.LocalDate
 import java.util.UUID
 
 object TestHelper
 
-val TRIVIELL_MIDTPUNKT = Folkeregisteridentifikator.of("19040550081")
-val STOR_SNERK = Folkeregisteridentifikator.of("11057523044")
+val TRIVIELL_MIDTPUNKT = SOEKER_FOEDSELSNUMMER
+val STOR_SNERK = AVDOED_FOEDSELSNUMMER
 
 inline fun <reified T> mockResponse(fil: String): T {
     val json = TestHelper::class.java.getResource(fil)!!.readText()

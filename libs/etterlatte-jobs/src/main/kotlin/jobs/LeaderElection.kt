@@ -22,7 +22,7 @@ open class LeaderElection(
                 httpClient.get("http://$electorPath/").bodyAsText().let(objectMapper::readTree).get("name").asText()
             }
         val amLeader = leader == me()
-        logger.info("Current pod: ${me()}. Leader: $leader. Current pod is leader: $amLeader")
+        logger.info("Current pod: ${me()?.sanitize()}. Leader: ${leader.sanitize()}. Current pod is leader: $amLeader")
         return amLeader
     }
 
@@ -30,3 +30,7 @@ open class LeaderElection(
         private val logger = LoggerFactory.getLogger(LeaderElection::class.java)
     }
 }
+
+private val sanitizeRegex = Regex("[A-Za-z0-9.-]+$")
+
+fun String.sanitize() = this.takeIf { it.matches(sanitizeRegex) } ?: "Ugyldig verdi"

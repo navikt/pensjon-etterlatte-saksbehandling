@@ -33,7 +33,12 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
   const [opprettBrevStatus, opprettNyttVedtaksbrev] = useApiCall(opprettVedtaksbrev)
 
   useEffect(() => {
-    if (!behandlingId || !sakId || !behandlingSkalSendeBrev(props.behandling)) return
+    if (
+      !behandlingId ||
+      !sakId ||
+      !behandlingSkalSendeBrev(props.behandling.behandlingType, props.behandling.revurderingsaarsak)
+    )
+      return
 
     hentBrev(behandlingId, (brev, statusCode) => {
       if (statusCode === 200) {

@@ -3,7 +3,7 @@ import { JaNei } from '~shared/types/ISvar'
 import { KildeSaksbehandler } from '~shared/types/kilde'
 import { IFamilieforhold, IPdlPerson, Persongalleri } from '~shared/types/Person'
 import { VurderingsResultat } from '~shared/types/VurderingsResultat'
-import { Revurderingsaarsak } from '~shared/types/Revurderingsaarsak'
+import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
 import { SakType } from '~shared/types/sak'
 import { RevurderingMedBegrunnelse } from '~shared/types/RevurderingInfo'
 
@@ -22,7 +22,7 @@ export interface IDetaljertBehandling {
   familieforhold?: IFamilieforhold
   behandlingType: IBehandlingsType
   søker?: IPdlPerson
-  revurderingsaarsak: Revurderingsaarsak | null
+  revurderingsaarsak: Revurderingaarsak | null
   revurderinginfo: RevurderingMedBegrunnelse | null
   begrunnelse: string | null
   etterbetaling: IEtterbetaling | null
@@ -89,6 +89,7 @@ export enum GyldigFramsattType {
   HAR_FORELDREANSVAR_FOR_BARNET = 'HAR_FORELDREANSVAR_FOR_BARNET',
   INGEN_ANNEN_VERGE_ENN_FORELDER = 'INGEN_ANNEN_VERGE_ENN_FORELDER',
   INNSENDER_ER_GJENLEVENDE = 'INNSENDER_ER_GJENLEVENDE',
+  MANUELL_VURDERING = 'MANUELL_VURDERING',
 }
 
 export interface IGyldighetproving {

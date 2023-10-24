@@ -13,7 +13,7 @@ import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
 import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
-import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Utenlandstilsnitt
 import no.nav.etterlatte.libs.common.behandling.UtenlandstilsnittType
@@ -124,7 +124,7 @@ internal class BehandlingDaoIntegrationTest {
             opprettBehandling(
                 type = BehandlingType.REVURDERING,
                 sakId = sak1,
-                revurderingAarsak = RevurderingAarsak.REGULERING,
+                revurderingAarsak = Revurderingaarsak.REGULERING,
                 prosesstype = Prosesstype.MANUELL,
             )
 
@@ -320,7 +320,7 @@ internal class BehandlingDaoIntegrationTest {
             opprettBehandling(
                 type = BehandlingType.REVURDERING,
                 sakId = sak1,
-                revurderingAarsak = RevurderingAarsak.REGULERING,
+                revurderingAarsak = Revurderingaarsak.REGULERING,
                 prosesstype = Prosesstype.AUTOMATISK,
             ).also {
                 behandlingRepo.opprettBehandling(it)
@@ -358,7 +358,7 @@ internal class BehandlingDaoIntegrationTest {
                 opprettBehandling(
                     type = BehandlingType.REVURDERING,
                     sakId = sak1,
-                    revurderingAarsak = RevurderingAarsak.REGULERING,
+                    revurderingAarsak = Revurderingaarsak.REGULERING,
                     prosesstype = Prosesstype.AUTOMATISK,
                 ),
             )
@@ -390,7 +390,7 @@ internal class BehandlingDaoIntegrationTest {
                 opprettBehandling(
                     type = BehandlingType.REVURDERING,
                     sakId = sak1,
-                    revurderingAarsak = RevurderingAarsak.REGULERING,
+                    revurderingAarsak = Revurderingaarsak.REGULERING,
                     prosesstype = Prosesstype.MANUELL,
                 ),
             )

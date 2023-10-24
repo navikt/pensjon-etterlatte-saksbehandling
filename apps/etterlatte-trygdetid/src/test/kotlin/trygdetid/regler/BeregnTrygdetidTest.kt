@@ -646,7 +646,7 @@ internal class BeregnTrygdetidTest {
                             ),
                         samletTrygdetidNorge = 19,
                         samletTrygdetidTeoretisk = 31,
-                        prorataBroek = IntBroek(0, 146),
+                        prorataBroek = null,
                         overstyrt = false,
                     ),
                     Pair(

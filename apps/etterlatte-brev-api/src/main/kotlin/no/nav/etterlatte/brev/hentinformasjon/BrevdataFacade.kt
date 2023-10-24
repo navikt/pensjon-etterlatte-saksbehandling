@@ -20,6 +20,7 @@ import no.nav.etterlatte.brev.behandling.mapVerge
 import no.nav.etterlatte.brev.behandlingklient.BehandlingKlient
 import no.nav.etterlatte.brev.model.EtterbetalingDTO
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.pensjon.brevbaker.api.model.Kroner
@@ -56,7 +57,11 @@ class BrevdataFacade(
         return coroutineScope {
             val sakDeferred = async { behandlingKlient.hentSak(sakId, brukerTokenInfo) }
             val vedtakDeferred = async { vedtaksvurderingKlient.hentVedtak(behandlingId, brukerTokenInfo) }
-            val grunnlag = async { grunnlagKlient.hentGrunnlag(sakId, behandlingId, brukerTokenInfo) }.await()
+            val grunnlag =
+                when (vedtakDeferred.await().type) {
+                    VedtakType.TILBAKEKREVING -> async { grunnlagKlient.hentGrunnlagForSak(sakId, brukerTokenInfo) }.await()
+                    else -> async { grunnlagKlient.hentGrunnlag(sakId, behandlingId, brukerTokenInfo) }.await()
+                }
             val sak = sakDeferred.await()
             val personerISak =
                 PersonerISak(
@@ -69,27 +74,58 @@ class BrevdataFacade(
             val innloggetSaksbehandlerIdent = brukerTokenInfo.ident()
             val ansvarligEnhet = vedtak.vedtakFattet?.ansvarligEnhet ?: sak.enhet
             val saksbehandlerIdent = vedtak.vedtakFattet?.ansvarligSaksbehandler ?: innloggetSaksbehandlerIdent
-            val attestantIdent = vedtak.vedtakFattet?.let { vedtak.attestasjon?.attestant ?: innloggetSaksbehandlerIdent }
+            val attestantIdent =
+                vedtak.vedtakFattet?.let { vedtak.attestasjon?.attestant ?: innloggetSaksbehandlerIdent }
 
-            GenerellBrevData(
-                sak,
-                personerISak,
-                behandlingId,
-                forenkletVedtak =
-                    ForenkletVedtak(
-                        vedtak.vedtakId,
-                        vedtak.status,
-                        vedtak.type,
-                        ansvarligEnhet,
-                        saksbehandlerIdent,
-                        attestantIdent,
-                        vedtak.vedtakFattet?.tidspunkt?.toNorskLocalDate(),
-                        virkningstidspunkt = vedtak.virkningstidspunkt,
-                        revurderingInfo = vedtak.behandling.revurderingInfo,
-                    ),
-                grunnlag.mapSpraak(),
-                revurderingsaarsak = vedtak.behandling.revurderingsaarsak,
-            )
+            when (vedtak.type) {
+                VedtakType.INNVILGELSE,
+                VedtakType.OPPHOER,
+                VedtakType.AVSLAG,
+                VedtakType.ENDRING,
+                ->
+                    (vedtak.innhold as VedtakInnholdDto.VedtakBehandlingDto).let { vedtakInnhold ->
+                        GenerellBrevData(
+                            sak,
+                            personerISak,
+                            behandlingId,
+                            forenkletVedtak =
+                                ForenkletVedtak(
+                                    vedtak.id,
+                                    vedtak.status,
+                                    vedtak.type,
+                                    ansvarligEnhet,
+                                    saksbehandlerIdent,
+                                    attestantIdent,
+                                    vedtak.vedtakFattet?.tidspunkt?.toNorskLocalDate(),
+                                    virkningstidspunkt = vedtakInnhold.virkningstidspunkt,
+                                    revurderingInfo = vedtakInnhold.behandling.revurderingInfo,
+                                ),
+                            grunnlag.mapSpraak(),
+                            revurderingsaarsak = vedtakInnhold.behandling.revurderingsaarsak,
+                        )
+                    }
+
+                VedtakType.TILBAKEKREVING ->
+                    (vedtak.innhold as VedtakInnholdDto.VedtakTilbakekrevingDto).let { vedtakInnhold ->
+                        GenerellBrevData(
+                            sak,
+                            personerISak,
+                            behandlingId,
+                            forenkletVedtak =
+                                ForenkletVedtak(
+                                    vedtak.id,
+                                    vedtak.status,
+                                    vedtak.type,
+                                    ansvarligEnhet,
+                                    saksbehandlerIdent,
+                                    attestantIdent,
+                                    vedtak.vedtakFattet?.tidspunkt?.toNorskLocalDate(),
+                                ),
+                            grunnlag.mapSpraak(),
+                            // tilbakekreving = TODO EY-2806
+                        )
+                    }
+            }
         }
     }
 

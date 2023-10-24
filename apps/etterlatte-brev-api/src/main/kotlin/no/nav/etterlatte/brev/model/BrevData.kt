@@ -1,13 +1,13 @@
 package no.nav.etterlatte.brev.model
 
-import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 
 abstract class BrevData {
     inline fun <reified T : RevurderingInfo> valider(
-        revurderingsaarsakVedtak: RevurderingAarsak?,
+        revurderingsaarsakVedtak: Revurderingaarsak?,
         revurderingInfo: RevurderingInfo?,
-        revurderingAarsak: RevurderingAarsak,
+        revurderingAarsak: Revurderingaarsak,
     ): T {
         val lesbartnavn = revurderingAarsak.name.lowercase()
         if (revurderingsaarsakVedtak != revurderingAarsak) {

@@ -2,7 +2,7 @@ package vedtaksvurdering
 
 import com.fasterxml.jackson.databind.node.ObjectNode
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
-import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
@@ -88,10 +88,11 @@ fun vedtak(
     vilkaarsvurdering: ObjectNode? = objectMapper.createObjectNode(),
     beregning: ObjectNode? = objectMapper.createObjectNode(),
     avkorting: ObjectNode? = objectMapper.createObjectNode(),
-    revurderingAarsak: RevurderingAarsak? = null,
+    revurderingAarsak: Revurderingaarsak? = null,
+    status: VedtakStatus = VedtakStatus.OPPRETTET,
 ) = Vedtak(
     id = 1L,
-    status = VedtakStatus.OPPRETTET,
+    status = status,
     soeker = SOEKER_FOEDSELSNUMMER,
     sakId = sakId,
     sakType = SakType.BARNEPENSJON,

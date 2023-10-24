@@ -3,8 +3,8 @@ package no.nav.etterlatte.brev.behandling
 import no.nav.etterlatte.brev.model.EtterbetalingDTO
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.grunnbeloep.Grunnbeloep
-import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
@@ -21,7 +21,7 @@ data class GenerellBrevData(
     val behandlingId: UUID,
     val forenkletVedtak: ForenkletVedtak,
     val spraak: Spraak,
-    val revurderingsaarsak: RevurderingAarsak? = null,
+    val revurderingsaarsak: Revurderingaarsak? = null,
 )
 
 data class Behandling(
@@ -35,7 +35,7 @@ data class Behandling(
     val vilkaarsvurdering: VilkaarsvurderingDto,
     val forrigeUtbetalingsinfo: Utbetalingsinfo? = null,
     val avkortingsinfo: Avkortingsinfo? = null,
-    val revurderingsaarsak: RevurderingAarsak? = null,
+    val revurderingsaarsak: Revurderingaarsak? = null,
     val revurderingInfo: RevurderingInfo? = null,
     val virkningsdato: YearMonth? = null,
     val opprinneligInnvilgelsesdato: LocalDate? = null, // Kun opphør RevurderingAarsak.OMGJOERING_AV_FARSKAP TODO: fix
@@ -72,7 +72,7 @@ data class ForenkletVedtak(
     val saksbehandlerIdent: String,
     val attestantIdent: String?,
     val vedtaksdato: LocalDate?,
-    val virkningstidspunkt: YearMonth,
+    val virkningstidspunkt: YearMonth? = null,
     val revurderingInfo: RevurderingInfo? = null,
 )
 

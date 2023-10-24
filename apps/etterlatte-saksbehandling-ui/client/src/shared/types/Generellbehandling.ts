@@ -5,7 +5,7 @@ export interface Generellbehandling {
   type: GenerellBehandlingType
   opprettet: Date
   status: Status
-  tilknyttetBehandling?: string
+  tilknyttetBehandling: string
 }
 
 export enum Status {

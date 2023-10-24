@@ -1,4 +1,9 @@
-import { GyldigFramsattType, IGyldighetproving, IGyldighetResultat } from '~shared/types/IDetaljertBehandling'
+import {
+  GyldigFramsattType,
+  IDetaljertBehandling,
+  IGyldighetproving,
+  IGyldighetResultat,
+} from '~shared/types/IDetaljertBehandling'
 import { LovtekstMedLenke } from '~components/behandling/soeknadsoversikt/soeknadoversikt/LovtekstMedLenke'
 import {
   Beskrivelse,
@@ -9,11 +14,14 @@ import { Innsender } from '~components/behandling/soeknadsoversikt/soeknadoversi
 import { Foreldreansvar } from '~components/behandling/soeknadsoversikt/soeknadoversikt/gyldigFramsattSoeknad/barnepensjon/Foreldreansvar'
 import { Verge } from '~components/behandling/soeknadsoversikt/soeknadoversikt/gyldigFramsattSoeknad/barnepensjon/Verge'
 import { GyldigFramsattVurdering } from '~components/behandling/soeknadsoversikt/soeknadoversikt/gyldigFramsattSoeknad/barnepensjon/GyldigFramsattVurdering'
+import { hentBehandlesFraStatus } from '~components/behandling/felles/utils'
 
 export const GyldigFramsattBarnepensjon = ({
+  behandling,
   gyldigFramsatt,
   gyldigFremsattTilStatusIcon,
 }: {
+  behandling: IDetaljertBehandling
   gyldigFramsatt: IGyldighetResultat | undefined
   gyldigFremsattTilStatusIcon: 'success' | 'error' | 'warning'
 }) => {
@@ -21,14 +29,13 @@ export const GyldigFramsattBarnepensjon = ({
     return <div style={{ color: 'red' }}>Kunne ikke hente ut data om søknaden er gyldig framsatt</div>
   }
 
+  const behandles = hentBehandlesFraStatus(behandling.status)
   const innsenderHarForeldreansvar = gyldigFramsatt.vurderinger.find(
     (g: IGyldighetproving) => g.navn === GyldigFramsattType.HAR_FORELDREANSVAR_FOR_BARNET
   )
-
   const innsenderErForelder = gyldigFramsatt.vurderinger.find(
     (g: IGyldighetproving) => g.navn === GyldigFramsattType.INNSENDER_ER_FORELDER
   )
-
   const ingenAnnenVergeEnnForelder = gyldigFramsatt.vurderinger.find(
     (g: IGyldighetproving) => g.navn === GyldigFramsattType.INGEN_ANNEN_VERGE_ENN_FORELDER
   )
@@ -46,7 +53,10 @@ export const GyldigFramsattBarnepensjon = ({
       status={gyldigFremsattTilStatusIcon}
     >
       <div>
-        <Beskrivelse>Den som har rett til ytelsen må sette frem krav (forelder/verge hvis under 18 år).</Beskrivelse>
+        <Beskrivelse>
+          Den som har rett til ytelsen må sette frem krav (forelder/verge hvis under 18 år). Om annet må fullmakt ligge
+          i saken. Søknaden må være signert og vise hva det søkes om, og den må være fremsatt i riktig land.
+        </Beskrivelse>
         <InfobokserWrapper>
           <Innsender innsenderErForelder={innsenderErForelder} />
           <Foreldreansvar innsenderHarForeldreansvar={innsenderHarForeldreansvar} />
@@ -55,10 +65,9 @@ export const GyldigFramsattBarnepensjon = ({
       </div>
       <VurderingsContainerWrapper>
         <GyldigFramsattVurdering
-          gyldigFramsatt={gyldigFramsatt}
-          innsenderErForelder={innsenderErForelder}
-          innsenderHarForeldreansvar={innsenderHarForeldreansvar}
-          ingenAnnenVergeEnnForelder={ingenAnnenVergeEnnForelder}
+          behandlingId={behandling.id}
+          gyldigFramsatt={behandling.gyldighetsprøving}
+          redigerbar={behandles}
         />
       </VurderingsContainerWrapper>
     </LovtekstMedLenke>

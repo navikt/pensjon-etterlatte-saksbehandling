@@ -16,7 +16,8 @@ data class InstitusjonsoppholdBeregningsgrunnlag(
 enum class Reduksjon(val verdi: Prosent?) {
     VELG_REDUKSJON(null),
     JA_VANLIG(Prosent(90)),
-    JA_VANLIG_OMS(Prosent(65)),
+    JA_FORELDRELOES(Prosent(55)),
+    JA_VANLIG_OMS(Prosent(55)),
     NEI_KORT_OPPHOLD(Prosent(0)),
     JA_EGEN_PROSENT_AV_G(null),
     NEI_HOEYE_UTGIFTER_BOLIG(Prosent(0)),

@@ -172,7 +172,7 @@ class MigreringTest {
                 .also { assertTrue(it.status.isSuccess()) }
                 .let { objectMapper.readValue(it.bodyAsText(), VilkaarsvurderingDto::class.java) }
                 .vilkaar
-                .also { assertEquals(it.size, 6) }
+                .also { assertEquals(it.size, 7) }
                 .map { it.hovedvilkaar }
                 .map { it.resultat }
                 .forEach { assertTrue(it == Utfall.IKKE_VURDERT) }

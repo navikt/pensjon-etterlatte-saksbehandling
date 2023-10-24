@@ -40,7 +40,7 @@ class SkjermingslesingTest {
     @Test
     fun `Les skjermingshendelse og post det til behandlingsapp`() {
         val skjermingsProducer: KafkaProducer<String, String> = spyk(generateSkjermingsProducer())
-        val fnr = "70078749472"
+        val fnr = "09508229892"
         skjermingsProducer.send(ProducerRecord(pdlPersonTopic, fnr, "value"))
         val behandlingKlient = mockk<BehandlingKlient>()
         every { behandlingKlient.haandterHendelse(any()) } just runs

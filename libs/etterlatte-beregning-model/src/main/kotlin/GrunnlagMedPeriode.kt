@@ -9,10 +9,47 @@ data class GrunnlagMedPeriode<T>(
     val fom: LocalDate,
     val tom: LocalDate? = null,
 ) {
+    fun erInnenforPeriode(
+        periodeFom: LocalDate,
+        periodeTom: LocalDate?,
+    ): Boolean {
+        if (periodeTom == null) {
+            return tom == null || tom >= periodeFom
+        }
+        assert(periodeFom <= periodeTom) {
+            "Perioder må ha fom >= tom"
+        }
+        if (tom == null) {
+            return fom <= periodeTom
+        }
+        return tom >= periodeFom && fom <= periodeTom
+    }
+
     init {
         if (tom != null && fom > tom) {
             throw UgyldigPeriodeForGrunnlag(fom, tom)
         }
+    }
+}
+
+fun <T> List<GrunnlagMedPeriode<T>>.kombinerOverlappendePerioder(): List<GrunnlagMedPeriode<List<T>>> {
+    val harAapenSluttperiode = this.any { it.tom == null }
+    var knekkpunkter: List<LocalDate?> = this.flatMap { listOfNotNull(it.fom, it.tom?.plusDays(1)) }.distinct().sorted()
+    if (harAapenSluttperiode) {
+        knekkpunkter = knekkpunkter.plus(listOf(null))
+    }
+    val perioder = knekkpunkter.zipWithNext()
+    return perioder.map { (fom, tilOgIkkeMed) ->
+        val tom = tilOgIkkeMed?.minusDays(1)
+
+        val innenforPeriode =
+            this.filter { it.erInnenforPeriode(fom!!, tom) }
+                .map { it.data }
+        GrunnlagMedPeriode(
+            data = innenforPeriode,
+            fom = fom!!,
+            tom = tom,
+        )
     }
 }
 

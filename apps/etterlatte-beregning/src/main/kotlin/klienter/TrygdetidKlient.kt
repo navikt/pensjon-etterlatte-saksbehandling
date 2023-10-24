@@ -29,20 +29,20 @@ class TrygdetidKlient(config: Config, httpClient: HttpClient) {
     suspend fun hentTrygdetid(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ): TrygdetidDto? {
+    ): List<TrygdetidDto> {
         logger.info("Henter trygdetid med behandlingid $behandlingId")
-        return retry<TrygdetidDto?> {
+        return retry<List<TrygdetidDto>> {
             downstreamResourceClient
                 .get(
                     resource =
                         Resource(
                             clientId = clientId,
-                            url = "$resourceUrl/api/trygdetid/$behandlingId",
+                            url = "$resourceUrl/api/trygdetid_v2/$behandlingId",
                         ),
                     brukerTokenInfo = brukerTokenInfo,
                 )
                 .mapBoth(
-                    success = { resource -> resource.response?.let { objectMapper.readValue(it.toString()) } },
+                    success = { resource -> resource.response?.let { objectMapper.readValue(it.toString()) } ?: emptyList() },
                     failure = { throwableErrorMessage -> throw throwableErrorMessage },
                 )
         }.let {
@@ -69,7 +69,7 @@ class TrygdetidKlient(config: Config, httpClient: HttpClient) {
                 resource =
                     Resource(
                         clientId = clientId,
-                        url = "$resourceUrl/api/trygdetid/$behandlingId/kopier/$forrigeBehandlingId",
+                        url = "$resourceUrl/api/trygdetid_v2/$behandlingId/kopier/$forrigeBehandlingId",
                     ),
                 brukerTokenInfo = brukerTokenInfo,
                 {},

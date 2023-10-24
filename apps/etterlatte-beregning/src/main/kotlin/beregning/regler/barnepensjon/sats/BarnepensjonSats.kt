@@ -54,8 +54,8 @@ val avdodeForeldre2024: Regel<BarnepensjonGrunnlag, List<Folkeregisteridentifika
     finnFaktumIGrunnlag(
         gjelderFra = BP_2024_DATO,
         beskrivelse = "Finner om søker har to avdøde foreldre",
-        finnFaktum = BarnepensjonGrunnlag::avdoedeForeldre,
-        finnFelt = { it },
+        finnFaktum = BarnepensjonGrunnlag::avdoedesTrygdetid,
+        finnFelt = { it.map { Folkeregisteridentifikator.of(it.avdoed) } },
     )
 
 val harToAvdodeForeldre2024 =

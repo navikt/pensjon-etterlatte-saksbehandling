@@ -69,7 +69,7 @@ class BeregnOmstillingsstoenadService(
 
         val omstillingstoenadGrunnlag =
             opprettBeregningsgrunnlagOmstillingsstoenad(
-                trygdetid,
+                trygdetid.first(),
                 beregningsgrunnlag,
             )
         return when (behandlingType) {
@@ -210,7 +210,7 @@ class BeregnOmstillingsstoenadService(
         beregningsGrunnlagOMS: BeregningsGrunnlagOMS,
     ): PeriodisertOmstillingstoenadGrunnlag {
         val samletTrygdetid =
-            requireNotNull(trygdetid.beregnetTrygdetid?.resultat?.toSamlet(beregningsGrunnlagOMS.beregningsMetode.beregningsMetode)) {
+            requireNotNull(trygdetid.beregnetTrygdetid?.resultat?.toSamlet(beregningsGrunnlagOMS.beregningsMetode.beregningsMetode, null)) {
                 "Trygdetid ikke satt for behandling ${trygdetid.behandlingId}"
             }
 

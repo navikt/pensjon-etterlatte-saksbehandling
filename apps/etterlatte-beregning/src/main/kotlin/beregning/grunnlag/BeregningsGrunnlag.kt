@@ -12,4 +12,10 @@ data class BeregningsGrunnlag(
     val institusjonsoppholdBeregningsgrunnlag: List<GrunnlagMedPeriode<InstitusjonsoppholdBeregningsgrunnlag>> =
         emptyList(),
     val beregningsMetode: BeregningsMetodeBeregningsgrunnlag,
+    val avdoedeBeregningmetode: List<GrunnlagMedPeriode<BeregningsmetodeForAvdoed>> = emptyList(),
+)
+
+data class BeregningsmetodeForAvdoed(
+    val avdoed: String,
+    val beregningsMetode: BeregningsMetodeBeregningsgrunnlag,
 )

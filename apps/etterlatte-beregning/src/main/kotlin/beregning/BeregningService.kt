@@ -78,6 +78,7 @@ class BeregningService(
         brukerTokenInfo: BrukerTokenInfo,
         behandlingId: UUID,
     ) {
+        // Se på om vi må duplisere trygdetid her også
         val sisteIverksatteBehandling = behandlingKlient.hentSisteIverksatteBehandling(behandling.sak, brukerTokenInfo)
         val grunnlagDenneBehandlinga =
             beregningsGrunnlagService.hentBarnepensjonBeregningsGrunnlag(behandlingId, brukerTokenInfo)

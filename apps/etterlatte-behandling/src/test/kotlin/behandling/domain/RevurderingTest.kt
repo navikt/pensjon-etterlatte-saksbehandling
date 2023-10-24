@@ -65,6 +65,15 @@ internal class RevurderingTest {
         }
 
         @Test
+        fun `kan endre status gjennom gyldig statusendringsflyt - samordning`() {
+            val actual =
+                revurdering.tilVilkaarsvurdert().tilTrygdetidOppdatert().tilBeregnet(false).tilFattetVedtak()
+                    .tilAttestert().tilTilSamordning().tilSamordnet().tilIverksatt()
+
+            Assertions.assertEquals(BehandlingStatus.IVERKSATT, actual.status)
+        }
+
+        @Test
         fun `opprettet kan ikke gaa til andre statuser enn vilkaarsvurdert og opprettet`() {
             assertThrows<TilstandException.UgyldigTilstand> { revurdering.tilBeregnet(false) }
             assertThrows<TilstandException.UgyldigTilstand> { revurdering.tilFattetVedtak() }

@@ -1085,6 +1085,7 @@ internal class VedtakBehandlingServiceTest {
                 service.tilSamordningVedtak(behandlingId, attestant)
             }
 
+            coVerify { behandlingKlientMock wasNot called }
             verify { sendToRapidMock wasNot called }
         }
     }
@@ -1093,6 +1094,7 @@ internal class VedtakBehandlingServiceTest {
     fun `skal sette vedtak til til_samordning, maa vente paa samordning`() {
         val behandlingId = randomUUID()
 
+        coEvery { behandlingKlientMock.tilSamordning(behandlingId, attestant, any()) } returns true
         coEvery { samKlientMock.samordneVedtak(any()) } returns true
 
         runBlocking {
@@ -1101,6 +1103,7 @@ internal class VedtakBehandlingServiceTest {
 
             oppdatertVedtak.status shouldBe VedtakStatus.TIL_SAMORDNING
 
+            coVerify(exactly = 1) { behandlingKlientMock.tilSamordning(behandlingId, attestant, any()) }
             verify(exactly = 1) { sendToRapidMock(match { it.contains(VedtakKafkaHendelseType.TIL_SAMORDNING.name) }, any()) }
         }
     }
@@ -1109,7 +1112,9 @@ internal class VedtakBehandlingServiceTest {
     fun `skal sette vedtak til samordnet, trenger ikke vente paa samordning`() {
         val behandlingId = randomUUID()
 
+        coEvery { behandlingKlientMock.tilSamordning(behandlingId, attestant, any()) } returns true
         coEvery { samKlientMock.samordneVedtak(any()) } returns false
+        coEvery { behandlingKlientMock.samordnet(any(), any(), any()) } returns true
 
         runBlocking {
             repository.opprettVedtak(opprettVedtak(behandlingId = behandlingId, status = VedtakStatus.ATTESTERT))
@@ -1117,6 +1122,8 @@ internal class VedtakBehandlingServiceTest {
 
             oppdatertVedtak.status shouldBe VedtakStatus.SAMORDNET
 
+            coVerify(exactly = 1) { behandlingKlientMock.tilSamordning(behandlingId, attestant, any()) }
+            coVerify(exactly = 1) { behandlingKlientMock.samordnet(behandlingId, any(), any()) }
             verify(exactly = 1) { sendToRapidMock(match { it.contains(VedtakKafkaHendelseType.SAMORDNET.name) }, any()) }
         }
     }
@@ -1132,6 +1139,7 @@ internal class VedtakBehandlingServiceTest {
                 service.samordnetVedtak(behandlingId, attestant)
             }
 
+            coVerify { behandlingKlientMock wasNot called }
             verify { sendToRapidMock wasNot called }
         }
     }

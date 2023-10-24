@@ -66,6 +66,10 @@ data class AutomatiskRevurdering(
 
     override fun tilReturnert() = endreTilStatus(BehandlingStatus.RETURNERT)
 
+    override fun tilTilSamordning() = endreTilStatus(BehandlingStatus.TIL_SAMORDNING)
+
+    override fun tilSamordnet() = endreTilStatus(BehandlingStatus.SAMORDNET)
+
     override fun tilIverksatt() = endreTilStatus(BehandlingStatus.IVERKSATT)
 
     private fun endreTilStatus(status: BehandlingStatus) = this.copy(status = status, sistEndret = Tidspunkt.now().toLocalDatetimeUTC())

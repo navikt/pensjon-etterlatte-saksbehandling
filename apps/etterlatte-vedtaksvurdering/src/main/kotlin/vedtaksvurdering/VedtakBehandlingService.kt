@@ -311,11 +311,11 @@ class VedtakBehandlingService(
         val tilSamordningVedtakLocal =
             repository.inTransaction { tx ->
                 repository.tilSamordningVedtak(behandlingId, tx = tx)
-                // TODO
-//                        .also {
-//                        runBlocking {
-//                            behandlingKlient.tilSamordning(behandlingId, brukerTokenInfo, it.id)
-//                        }
+                    .also {
+                        runBlocking {
+                            behandlingKlient.tilSamordning(behandlingId, brukerTokenInfo, it.id)
+                        }
+                    }
             }
 
         sendToRapid(
@@ -344,11 +344,11 @@ class VedtakBehandlingService(
         val samordnetVedtakLocal =
             repository.inTransaction { tx ->
                 repository.samordnetVedtak(behandlingId, tx = tx)
-                // TODO
-//                        .also {
-//                        runBlocking {
-//                            behandlingKlient.samordnet(behandlingId, brukerTokenInfo, it.id)
-//                        }
+                    .also {
+                        runBlocking {
+                            behandlingKlient.samordnet(behandlingId, brukerTokenInfo, it.id)
+                        }
+                    }
             }
 
         sendToRapid(

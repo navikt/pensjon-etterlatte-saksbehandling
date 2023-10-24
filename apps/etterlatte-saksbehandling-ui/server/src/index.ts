@@ -102,6 +102,7 @@ if (isDev) {
       '/api/klage',
       '/api/tilbakekreving',
       '/api/generellbehandling',
+      '/api/sjekkliste',
     ],
     tokenMiddleware(ApiConfig.behandling.scope),
     proxy(ApiConfig.behandling.url)

@@ -1,0 +1,18 @@
+export interface ISjekkliste {
+  id: string
+  kommentar: string | undefined
+  adresseForBrev: string | undefined
+  kontonrRegistrert: string | undefined
+  bekreftet: boolean
+  versjon: string
+  sjekklisteItems: ISjekklisteItem[]
+}
+
+export interface ISjekklisteItem {
+  id: string
+  beskrivelse: string
+  avkrysset: boolean
+  versjon: string
+}
+
+export const featureToggleSjekklisteAktivert = 'pensjon-etterlatte.sjekkliste-send-til-attestering' as const

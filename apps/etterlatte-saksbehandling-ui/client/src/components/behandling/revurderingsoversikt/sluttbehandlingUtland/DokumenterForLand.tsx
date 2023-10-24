@@ -1,4 +1,4 @@
-import { LandMedDokumenter } from '~components/behandling/revurderingsoversikt/sluttbehandlingUtland/SEDLand'
+import { LandMedDokumenter } from '~components/behandling/revurderingsoversikt/sluttbehandlingUtland/SEDLandMedDokumenter'
 import DokumentRad from '~components/behandling/revurderingsoversikt/sluttbehandlingUtland/DokumentRad'
 import { Button } from '@navikt/ds-react'
 import React from 'react'

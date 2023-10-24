@@ -1,5 +1,5 @@
 import { Select } from '@navikt/ds-react'
-import { LandMedDokumenter } from '~components/behandling/revurderingsoversikt/sluttbehandlingUtland/SEDLand'
+import { LandMedDokumenter } from '~components/behandling/revurderingsoversikt/sluttbehandlingUtland/SEDLandMedDokumenter'
 import React, { useState } from 'react'
 import { ILand } from '~shared/api/trygdetid'
 import styled from 'styled-components'

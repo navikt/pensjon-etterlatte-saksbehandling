@@ -83,5 +83,5 @@ data class LandMedDokumenter(
 data class MottattDokument(
     val dokumenttype: String,
     val dato: LocalDate,
-    val kommentar: String,
+    val kommentar: String?,
 )

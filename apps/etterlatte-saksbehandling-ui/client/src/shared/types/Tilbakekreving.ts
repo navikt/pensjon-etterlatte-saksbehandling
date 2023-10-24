@@ -1,10 +1,14 @@
 import { ISak } from '~shared/types/sak'
 
-export interface Tilbakekreving {
+export interface TilbakekrevingBehandling {
   id: string
   status: TilbakekrevingStatus
   sak: ISak
   opprettet: string
+  tilbakekreving: Tilbakekreving
+}
+
+export interface Tilbakekreving {
   vurdering: TilbakekrevingVurdering
   perioder: TilbakekrevingPeriode[]
 }

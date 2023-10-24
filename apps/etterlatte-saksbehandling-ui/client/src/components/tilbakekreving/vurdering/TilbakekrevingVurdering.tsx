@@ -3,12 +3,12 @@ import { Content, ContentHeader, FlexRow } from '~shared/styled'
 import { HeadingWrapper } from '~components/behandling/soeknadsoversikt/styled'
 import { useNavigate } from 'react-router-dom'
 import React from 'react'
-import { Tilbakekreving } from '~shared/types/Tilbakekreving'
+import { TilbakekrevingBehandling } from '~shared/types/Tilbakekreving'
 import { TilbakekrevingVurderingOverordnet } from '~components/tilbakekreving/vurdering/TilbakekrevingVurderingOverordnet'
 import { TilbakekrevingVurderingPerioder } from '~components/tilbakekreving/vurdering/TilbakekrevingVurderingPerioder'
 import { TilbakekrevingVurderingOppsummering } from '~components/tilbakekreving/vurdering/TilbakekrevingVurderingOppsummering'
 
-export function TilbakekrevingVurdering({ tilbakekreving }: { tilbakekreving: Tilbakekreving }) {
+export function TilbakekrevingVurdering({ behandling }: { behandling: TilbakekrevingBehandling }) {
   const navigate = useNavigate()
   return (
     <Content>
@@ -19,11 +19,11 @@ export function TilbakekrevingVurdering({ tilbakekreving }: { tilbakekreving: Ti
           </Heading>
         </HeadingWrapper>
       </ContentHeader>
-      <TilbakekrevingVurderingOverordnet tilbakekreving={tilbakekreving} />
-      <TilbakekrevingVurderingPerioder tilbakekreving={tilbakekreving} />
-      <TilbakekrevingVurderingOppsummering tilbakekreving={tilbakekreving} />
+      <TilbakekrevingVurderingOverordnet behandling={behandling} />
+      <TilbakekrevingVurderingPerioder behandling={behandling} />
+      <TilbakekrevingVurderingOppsummering behandling={behandling} />
       <FlexRow $spacing={true} justify="center">
-        <Button variant="primary" onClick={() => navigate(`/tilbakekreving/${tilbakekreving?.id}/brev`)}>
+        <Button variant="primary" onClick={() => navigate(`/tilbakekreving/${behandling?.id}/brev`)}>
           Opprett vedtak
         </Button>
       </FlexRow>

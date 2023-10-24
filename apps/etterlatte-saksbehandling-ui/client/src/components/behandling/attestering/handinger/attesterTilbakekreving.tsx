@@ -5,14 +5,14 @@ import { GeneriskModal } from '~shared/modal/modal'
 import { useNavigate } from 'react-router'
 import { isPending, useApiCall } from '~shared/hooks/useApiCall'
 import { FlexRow } from '~shared/styled'
-import { Tilbakekreving } from '~shared/types/Tilbakekreving'
+import { TilbakekrevingBehandling } from '~shared/types/Tilbakekreving'
 import { attesterVedtak } from '~shared/api/tilbakekreving'
 
 export const AttesterTilbakekreving = ({
   tilbakekreving,
   kommentar,
 }: {
-  tilbakekreving: Tilbakekreving
+  tilbakekreving: TilbakekrevingBehandling
   kommentar: string
 }) => {
   const navigate = useNavigate()
@@ -24,7 +24,7 @@ export const AttesterTilbakekreving = ({
   const attester = () => {
     // TODO EY-2806 Ferdigstill brev?
     apiAttesterVedtak(
-      { tilbakekrevingsId: tilbakekreving.id, kommentar },
+      { behandlingsId: tilbakekreving.id, kommentar },
       () => navigate(`/person/${tilbakekreving.sak.ident}`),
       () => {
         setError(`Ukjent feil oppsto ved attestering av vedtaket... Prøv igjen.`)

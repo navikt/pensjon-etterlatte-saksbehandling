@@ -78,6 +78,9 @@ spec:
     - name: TJENESTEPENSJON_SCOPE
       value: api://dev-fss.pensjonsamhandling.tp-q2/.default
   accessPolicy:
+    inbound:
+      rules:
+        - application: etterlatte-krakend
     outbound:
       rules:
         - application: etterlatte-vedtaksvurdering

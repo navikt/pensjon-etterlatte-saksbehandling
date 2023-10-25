@@ -62,7 +62,7 @@ data class InnvilgetHovedmalBrevData(
             innhold: InnholdMedVedlegg,
         ): InnvilgetHovedmalBrevData =
             InnvilgetHovedmalBrevData(
-                utbetalingsinfo = utbetalingsinfo,
+                utbetalingsinfo = Utbetalingsinfo.kopier(utbetalingsinfo, etterbetalingDTO),
                 avkortingsinfo = avkortingsinfo,
                 beregningsinfo = BeregningsinfoBP.fra(utbetalingsinfo, trygdetid, grunnbeloep, innhold),
                 etterbetaling = EtterbetalingBrev.fra(etterbetalingDTO, utbetalingsinfo.beregningsperioder),

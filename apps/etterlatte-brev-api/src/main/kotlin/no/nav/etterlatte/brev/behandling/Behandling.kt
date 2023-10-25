@@ -7,6 +7,7 @@ import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.tilbakekreving.Tilbakekreving
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
@@ -74,6 +75,7 @@ data class ForenkletVedtak(
     val vedtaksdato: LocalDate?,
     val virkningstidspunkt: YearMonth? = null,
     val revurderingInfo: RevurderingInfo? = null,
+    val tilbakekreving: Tilbakekreving? = null,
 )
 
 data class Utbetalingsinfo(

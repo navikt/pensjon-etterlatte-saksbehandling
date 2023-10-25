@@ -326,7 +326,10 @@ class VedtakBehandlingService(
         )
 
         if (!samKlient.samordneVedtak(vedtak)) {
+            logger.info("Svar fra samordning: ikke nødvendig å vente [behandlingId=$behandlingId]")
             return samordnetVedtak(behandlingId, brukerTokenInfo, tilSamordningVedtakLocal)
+        } else {
+            logger.info("Svar fra samordning: må vente [behandlingId=$behandlingId]")
         }
 
         return tilSamordningVedtakLocal

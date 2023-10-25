@@ -2,7 +2,7 @@ import { Alert, ErrorMessage, Heading } from '@navikt/ds-react'
 import { Content, ContentHeader, FlexRow } from '~shared/styled'
 import { HeadingWrapper } from '~components/behandling/soeknadsoversikt/styled'
 import { SendTilAttesteringModal } from '~components/behandling/handlinger/sendTilAttesteringModal'
-import { Tilbakekreving, TilbakekrevingStatus } from '~shared/types/Tilbakekreving'
+import { TilbakekrevingBehandling, TilbakekrevingStatus } from '~shared/types/Tilbakekreving'
 import { fattVedtak, opprettVedtak } from '~shared/api/tilbakekreving'
 import React, { useEffect, useState } from 'react'
 import { IBrev } from '~shared/types/Brev'
@@ -14,7 +14,7 @@ import ForhaandsvisningBrev from '~components/behandling/brev/ForhaandsvisningBr
 import MottakerPanel from '~components/behandling/brev/detaljer/MottakerPanel'
 import { useVedtak } from '~components/vedtak/useVedtak'
 
-export function TilbakekrevingBrev({ tilbakekreving }: { tilbakekreving: Tilbakekreving }) {
+export function TilbakekrevingBrev({ tilbakekreving }: { tilbakekreving: TilbakekrevingBehandling }) {
   const kanAttesteres = [TilbakekrevingStatus.OPPRETTET, TilbakekrevingStatus.UNDER_ARBEID].includes(
     tilbakekreving.status
   )

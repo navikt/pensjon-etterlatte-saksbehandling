@@ -93,7 +93,7 @@ data class Utbetalingsinfo(
             utbetalingsinfo.copy(
                 beregningsperioder =
                     utbetalingsinfo.beregningsperioder.filter {
-                        YearMonth.from(it.datoFOM) >= YearMonth.from(etterbetalingDTO.fraDato)
+                        YearMonth.from(it.datoFOM) > YearMonth.from(etterbetalingDTO.tilDato)
                     },
             )
         }

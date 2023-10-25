@@ -170,7 +170,7 @@ data class EtterbetalingBrev(
             EtterbetalingBrev(
                 fraDato = dto.fraDato,
                 tilDato = dto.tilDato,
-                etterbetalingsperioder = perioder.filter { YearMonth.from(it.datoFOM) >= YearMonth.from(dto.fraDato) },
+                etterbetalingsperioder = perioder.filter { YearMonth.from(it.datoFOM) <= YearMonth.from(dto.tilDato) },
             )
         }
     }

@@ -10,7 +10,6 @@ import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.database.firstOrNull
 import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.libs.database.toList
-import org.jetbrains.annotations.TestOnly
 import java.sql.ResultSet
 import java.sql.Types.VARCHAR
 import java.time.YearMonth
@@ -263,7 +262,6 @@ class OpplysningDao(private val datasource: DataSource) {
             }.executeQuery().toList { getLong("sak_id") }.toSet()
         }
 
-    @TestOnly // Kun for testing av dao
     fun hentBehandlingVersjon(behandlingId: UUID): BehandlingGrunnlagVersjon? =
         connection.use {
             it.prepareStatement("SELECT * FROM behandling_versjon WHERE behandling_id = ?::UUID")
@@ -279,7 +277,6 @@ class OpplysningDao(private val datasource: DataSource) {
         }
 }
 
-@TestOnly // Kun for testing av dao
 data class BehandlingGrunnlagVersjon(
     val behandlingId: UUID,
     val sakId: Long,

@@ -12,14 +12,11 @@ export const FEATURE_TOGGLE_KAN_BRUKE_OPPDATER_GRUNNLAG = 'pensjon-etterlatte.ka
 export default function OppdaterGrunnlagModal() {
   const behandling = useBehandling()
   const [isOpen, setIsOpen] = useState(false)
-
   const featureAktiv = useFeatureEnabledMedDefault(FEATURE_TOGGLE_KAN_BRUKE_OPPDATER_GRUNNLAG, false)
-
   const behandles = behandling != null && hentBehandlesFraStatus(behandling.status)
+  const [oppdatert, apiOppdaterGrunnlag] = useApiCall(oppdaterGrunnlag)
 
   if (!featureAktiv || !behandles) return
-
-  const [oppdatert, apiOppdaterGrunnlag] = useApiCall(oppdaterGrunnlag)
 
   const lagre = () => {
     return apiOppdaterGrunnlag(

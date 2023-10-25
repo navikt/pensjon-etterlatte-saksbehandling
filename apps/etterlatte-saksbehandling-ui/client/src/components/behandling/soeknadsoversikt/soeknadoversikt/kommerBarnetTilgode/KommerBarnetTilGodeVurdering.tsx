@@ -1,4 +1,4 @@
-import { Undertekst, VurderingsTitle } from '../../styled'
+import { VurderingsTitle } from '../../styled'
 import styled from 'styled-components'
 import { useState } from 'react'
 import { IBehandlingStatus, IKommerBarnetTilgode } from '~shared/types/IDetaljertBehandling'
@@ -81,9 +81,6 @@ export const KommerBarnetTilGodeVurdering = ({
     >
       <div>
         <VurderingsTitle title="Vurderer du det som sannsynlig at pensjonen kommer barnet tilgode?" />
-        <Undertekst $gray={false}>
-          Boforholdet er avklart og sannsynliggjort at pensjonen kommer barnet til gode?
-        </Undertekst>
         <RadioGroupWrapper>
           <RadioGroup
             legend=""

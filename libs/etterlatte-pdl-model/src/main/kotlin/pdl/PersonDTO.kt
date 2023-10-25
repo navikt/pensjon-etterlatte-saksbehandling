@@ -32,30 +32,6 @@ data class PersonDTO(
     var familieRelasjon: OpplysningDTO<FamilieRelasjon>?,
     var avdoedesBarn: List<Person>?,
     var vergemaalEllerFremtidsfullmakt: List<OpplysningDTO<VergemaalEllerFremtidsfullmakt>>?,
-) {
-    fun tilPerson() =
-        Person(
-            fornavn = fornavn.verdi,
-            mellomnavn = mellomnavn?.verdi,
-            etternavn = etternavn.verdi,
-            foedselsnummer = foedselsnummer.verdi,
-            foedselsdato = foedselsdato?.verdi,
-            foedselsaar = foedselsaar.verdi,
-            foedeland = foedeland?.verdi,
-            doedsdato = doedsdato?.verdi,
-            adressebeskyttelse = adressebeskyttelse?.verdi,
-            bostedsadresse = bostedsadresse?.map { it.verdi },
-            deltBostedsadresse = deltBostedsadresse?.map { it.verdi },
-            kontaktadresse = kontaktadresse?.map { it.verdi },
-            oppholdsadresse = oppholdsadresse?.map { it.verdi },
-            sivilstatus = sivilstatus?.verdi,
-            sivilstand = sivilstand?.map { it.verdi },
-            statsborgerskap = statsborgerskap?.verdi,
-            utland = utland?.verdi,
-            familieRelasjon = familieRelasjon?.verdi,
-            avdoedesBarn = avdoedesBarn,
-            vergemaalEllerFremtidsfullmakt = vergemaalEllerFremtidsfullmakt?.map { it.verdi },
-        )
-}
+)
 
 open class OpplysningDTO<T>(val verdi: T, val opplysningsid: String?)

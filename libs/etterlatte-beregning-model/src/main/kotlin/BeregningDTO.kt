@@ -72,11 +72,6 @@ data class AvkortetYtelseDto(
     val restanse: Int,
 )
 
-data class ManuellRestanseDto(
-    val avkortetYtelseId: UUID,
-    val nyRestanse: Int,
-)
-
 data class YtelseMedGrunnlagDto(
     val perioder: List<YtelseMedGrunnlagPeriodisertDto>,
 )

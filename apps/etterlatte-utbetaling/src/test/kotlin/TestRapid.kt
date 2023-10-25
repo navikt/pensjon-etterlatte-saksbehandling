@@ -1,11 +1,9 @@
 package no.nav.etterlatte
 
-import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.rapids_rivers.RapidsConnection
-import no.nav.helse.rapids_rivers.isMissingOrNull
 
 /**
  * Legger til notifyStartup og notifyShutdown
@@ -20,7 +18,6 @@ class TestRapid : RapidsConnection() {
     }
 
     private val messages = mutableListOf<Pair<String?, String>>()
-    val inspektør get() = RapidInspector(messages.toList())
 
     fun reset() {
         messages.clear()
@@ -51,23 +48,5 @@ class TestRapid : RapidsConnection() {
 
     override fun stop() {
         notifyShutdown()
-    }
-
-    class RapidInspector(private val messages: List<Pair<String?, String>>) {
-        private val jsonMessages = mutableMapOf<Int, JsonNode>()
-        val size get() = messages.size
-
-        fun key(index: Int) = messages[index].first
-
-        fun message(index: Int) = jsonMessages.getOrPut(index) { objectMapper.readTree(messages[index].second) }
-
-        fun field(
-            index: Int,
-            field: String,
-        ) = requireNotNull(
-            message(index).path(field).takeUnless(JsonNode::isMissingOrNull),
-        ) {
-            "Message does not contain field '$field'"
-        }
     }
 }

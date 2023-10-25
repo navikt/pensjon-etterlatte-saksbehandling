@@ -37,7 +37,6 @@ open class JsonMessage(
                 .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
 
         private const val NESTED_KEY_SEPARATOR = '.'
-        private const val ID_KEY = "@id"
         private const val OPPRETTET_KEY = "@opprettet"
         private const val EVENT_NAME_KEY = "@event_name"
         private const val NEED_KEY = "@behov"
@@ -59,19 +58,6 @@ open class JsonMessage(
             randomIdGenerator: RandomIdGenerator? = null,
         ) = newMessage(
             mapOf(EVENT_NAME_KEY to eventName) + map,
-            randomIdGenerator,
-        )
-
-        fun newNeed(
-            behov: Collection<String>,
-            map: Map<String, Any> = emptyMap(),
-            randomIdGenerator: RandomIdGenerator? = null,
-        ) = newMessage(
-            "behov",
-            mapOf(
-                "@behovId" to UUID.randomUUID(),
-                NEED_KEY to behov,
-            ) + map,
             randomIdGenerator,
         )
 
@@ -112,13 +98,6 @@ open class JsonMessage(
         if (!json.hasNonNull("@opprettet")) set(OPPRETTET_KEY, opprettet)
         set(READ_COUNT_KEY, json.path(READ_COUNT_KEY).asInt(-1) + 1)
         initializeOrSetParticipatingServices(json, id, opprettet)
-    }
-
-    private fun node(path: String): JsonNode {
-        if (!path.contains(NESTED_KEY_SEPARATOR)) return json.path(path)
-        return path.split(NESTED_KEY_SEPARATOR).fold(json) { result, key ->
-            result.path(key)
-        }
     }
 
     operator fun get(key: String): JsonNode =

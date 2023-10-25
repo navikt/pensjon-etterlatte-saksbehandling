@@ -4,7 +4,6 @@ class ApplicationProperties(
     val jdbcUrl: String,
     val dbUsername: String,
     val dbPassword: String,
-    val behandlingScope: String,
 ) {
     companion object {
         fun fromEnv(env: Map<String, String>) =
@@ -18,7 +17,6 @@ class ApplicationProperties(
                         ),
                     dbUsername = value("DB_USERNAME"),
                     dbPassword = value("DB_PASSWORD"),
-                    behandlingScope = value("BEHANDLING_AZURE_SCOPE"),
                 )
             }
 

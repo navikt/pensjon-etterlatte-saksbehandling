@@ -2,14 +2,11 @@ package no.nav.etterlatte.metrics
 
 import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.database.toList
-import org.slf4j.LoggerFactory
 import java.sql.ResultSet
 import java.util.UUID
 import javax.sql.DataSource
 
 class OppgaveMetrikkerDao(private val dataSource: DataSource) {
-    private val logger = LoggerFactory.getLogger(this::class.java)
-
     fun hentOppgaveAntall(): OppgaveAntall {
         val alleOppgaver = hentAlleOppgaver()
         val aktive = alleOppgaver.filter { !Status.erAvsluttet(it.status) }.size

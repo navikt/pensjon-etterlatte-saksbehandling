@@ -15,7 +15,6 @@ import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.IverksettResultat.Ut
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.IverksettResultat.UtbetalingslinjerForVedtakEksisterer
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetaling
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingService
-import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingStatus
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetalingsvedtak
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -141,23 +140,6 @@ class VedtakMottakRiver(
                         status = UtbetalingStatusDto.valueOf(utbetaling.status().name),
                         vedtakId = utbetaling.vedtakId.value,
                         behandlingId = utbetaling.behandlingId.value,
-                    ),
-            ).toJson(),
-        )
-    }
-
-    // Mock for OMS
-    private fun sendUtbetalingSendtEventForOMSMock(
-        context: MessageContext,
-        utbetaling: Utbetalingsvedtak,
-    ) {
-        context.publish(
-            UtbetalingEventDto(
-                utbetalingResponse =
-                    UtbetalingResponseDto(
-                        status = UtbetalingStatusDto.valueOf(UtbetalingStatus.GODKJENT.name),
-                        vedtakId = utbetaling.vedtakId,
-                        behandlingId = utbetaling.behandling.id,
                     ),
             ).toJson(),
         )

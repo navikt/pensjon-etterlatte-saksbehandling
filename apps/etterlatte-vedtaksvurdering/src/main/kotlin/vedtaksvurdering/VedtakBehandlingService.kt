@@ -368,7 +368,7 @@ class VedtakBehandlingService(
         logger.info("Setter vedtak til iverksatt for behandling med behandlingId=$behandlingId")
         val vedtak = hentVedtakNonNull(behandlingId)
 
-        verifiserGyldigVedtakStatus(vedtak.status, listOf(VedtakStatus.ATTESTERT))
+        verifiserGyldigVedtakStatus(vedtak.status, listOf(VedtakStatus.ATTESTERT, VedtakStatus.SAMORDNET))
         val iverksattVedtak =
             repository.inTransaction { tx ->
                 val iverksattVedtakLocal =

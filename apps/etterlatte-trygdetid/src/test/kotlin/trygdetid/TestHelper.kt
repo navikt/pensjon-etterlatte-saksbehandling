@@ -12,7 +12,6 @@ import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.common.trygdetid.DetaljertBeregnetTrygdetidResultat
 import no.nav.etterlatte.libs.common.trygdetid.avtale.Trygdeavtale
 import no.nav.etterlatte.token.Saksbehandler
-import no.nav.etterlatte.token.Systembruker
 import no.nav.etterlatte.trygdetid.BeregnetTrygdetidGrunnlag
 import no.nav.etterlatte.trygdetid.DetaljertBeregnetTrygdetid
 import no.nav.etterlatte.trygdetid.LandNormalisert
@@ -28,8 +27,6 @@ import java.util.UUID
 import java.util.UUID.randomUUID
 
 val saksbehandler = Saksbehandler("token", "ident", null)
-
-val pesysBruker = Systembruker("", "")
 
 fun behandling(
     behandlingId: UUID = randomUUID(),

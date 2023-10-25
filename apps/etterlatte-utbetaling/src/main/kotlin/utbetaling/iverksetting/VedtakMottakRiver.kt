@@ -63,6 +63,7 @@ class VedtakMottakRiver(
         var vedtakId: Long? = null
         try {
             val vedtak: Utbetalingsvedtak = lesVedtak(packet).also { vedtakId = it.vedtakId }
+            // FIXME når VedtakNyDto tas i bruk: attestert ELLER samordnet (vedtakstatus)
             logger.info("Attestert vedtak med vedtakId=${vedtak.vedtakId} mottatt")
 
             when (val resultat = utbetalingService.iverksettUtbetaling(vedtak)) {

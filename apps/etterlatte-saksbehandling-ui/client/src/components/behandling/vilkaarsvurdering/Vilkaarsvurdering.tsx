@@ -87,7 +87,7 @@ export const Vilkaarsvurdering = (props: { behandling: IBehandlingReducer }) => 
 
       {behandlingId && vilkaarsvurdering && !isPending(slettVilkaarsvurderingStatus) && (
         <>
-          {visHarGammelVilkaarsvurdering() && (
+          {behandles && visHarGammelVilkaarsvurdering() && (
             <AlertWrapper>
               <Alert variant="info">
                 <BodyLong>

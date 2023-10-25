@@ -8,6 +8,7 @@ import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
 import no.nav.etterlatte.brev.model.Beregningsinfo
 import no.nav.etterlatte.brev.model.BrevData
 import no.nav.etterlatte.brev.model.BrevVedleggKey
+import no.nav.etterlatte.brev.model.EtterbetalingBrev
 import no.nav.etterlatte.brev.model.EtterbetalingDTO
 import no.nav.etterlatte.brev.model.InnholdMedVedlegg
 import no.nav.etterlatte.brev.model.NyBeregningsperiode
@@ -19,7 +20,7 @@ data class InnvilgetBrevDataOMS(
     val utbetalingsinfo: Utbetalingsinfo,
     val avkortingsinfo: Avkortingsinfo? = null,
     val avdoed: Avdoed,
-    val etterbetalinginfo: EtterbetalingDTO? = null,
+    val etterbetalinginfo: EtterbetalingBrev? = null,
     val beregningsinfo: Beregningsinfo? = null,
     val innhold: List<Slate.Element>,
 ) : BrevData() {
@@ -33,10 +34,10 @@ data class InnvilgetBrevDataOMS(
             innholdMedVedlegg: InnholdMedVedlegg,
         ): InnvilgetBrevDataOMS =
             InnvilgetBrevDataOMS(
-                utbetalingsinfo = utbetalingsinfo,
+                utbetalingsinfo = Utbetalingsinfo.kopier(utbetalingsinfo, etterbetalinginfo),
                 avkortingsinfo = avkortingsinfo,
                 avdoed = generellBrevData.personerISak.avdoed,
-                etterbetalinginfo = etterbetalinginfo,
+                etterbetalinginfo = EtterbetalingBrev.fra(etterbetalinginfo, utbetalingsinfo.beregningsperioder),
                 beregningsinfo =
                     Beregningsinfo(
                         innhold = innholdMedVedlegg.finnVedlegg(BrevVedleggKey.BEREGNING_INNHOLD),

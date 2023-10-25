@@ -82,7 +82,23 @@ data class Utbetalingsinfo(
     val virkningsdato: LocalDate,
     val soeskenjustering: Boolean,
     val beregningsperioder: List<Beregningsperiode>,
-)
+) {
+    companion object {
+        fun kopier(
+            utbetalingsinfo: Utbetalingsinfo,
+            etterbetalingDTO: EtterbetalingDTO?,
+        ) = if (etterbetalingDTO == null) {
+            utbetalingsinfo
+        } else {
+            utbetalingsinfo.copy(
+                beregningsperioder =
+                    utbetalingsinfo.beregningsperioder.filter {
+                        YearMonth.from(it.datoFOM) >= YearMonth.from(etterbetalingDTO.fraDato)
+                    },
+            )
+        }
+    }
+}
 
 data class Avkortingsinfo(
     val grunnbeloep: Kroner,

@@ -47,7 +47,7 @@ export const OversiktKommerBarnetTilgode = ({
 
   return (
     <LovtekstMedLenke
-      tittel="Kommer pensjonen barnet tilgode?"
+      tittel="Vurdering - kommer pensjonen barnet til gode?"
       hjemler={[
         { lenke: 'https://lovdata.no/lov/1997-02-28-19/§18-1', tittel: 'Folketrygdloven § 18-1' },
         { lenke: 'https://lovdata.no/lov/1997-02-28-19/§22-1', tittel: 'Folketrygdloven § 22-1' },

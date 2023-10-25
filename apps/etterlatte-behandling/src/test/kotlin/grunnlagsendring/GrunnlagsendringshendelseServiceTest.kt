@@ -629,7 +629,7 @@ internal class GrunnlagsendringshendelseServiceTest {
     }
 
     @Test
-    fun `TBD`() {
+    fun `Hendelse forkastes når den nye informasjonen samsvarer med PDL-data`() {
         val hendelseId = UUID.randomUUID()
         val minutter = Random.nextLong()
         val avdoedFnr = AVDOED2_FOEDSELSNUMMER.value

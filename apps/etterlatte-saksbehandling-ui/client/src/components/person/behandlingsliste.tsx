@@ -16,11 +16,11 @@ import { isFailure, isPending, isSuccess, useApiCall } from '~shared/hooks/useAp
 import Spinner from '~shared/Spinner'
 import { ExclamationmarkTriangleFillIcon } from '@navikt/aksel-icons'
 
-const VedtakKolonner = (props: { behandlingsId: string }) => {
+const VedtakKolonner = (props: { behandlingId: string }) => {
   const [vedtak, apiHentVedtaksammendrag] = useApiCall(hentVedtakSammendrag)
 
   useEffect(() => {
-    apiHentVedtaksammendrag(props.behandlingsId)
+    apiHentVedtaksammendrag(props.behandlingId)
   }, [])
 
   const attestertDato = (dato?: string) => {
@@ -110,7 +110,7 @@ export const Behandlingsliste = ({ behandlinger }: { behandlinger: IBehandlingsa
               <Table.DataCell>
                 {behandling.virkningstidspunkt ? formaterStringDato(behandling.virkningstidspunkt!!.dato) : ''}
               </Table.DataCell>
-              <VedtakKolonner behandlingsId={behandling.id} />
+              <VedtakKolonner behandlingId={behandling.id} />
               <Table.DataCell>
                 <Link href={lenkeTilBehandling(behandling)}>Vis behandling</Link>
               </Table.DataCell>

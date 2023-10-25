@@ -10,8 +10,8 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.put
 import io.ktor.server.routing.route
 import no.nav.etterlatte.brev.hentinformasjon.Tilgangssjekker
-import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
-import no.nav.etterlatte.libs.common.behandlingsId
+import no.nav.etterlatte.libs.common.BEHANDLINGID_CALL_PARAMETER
+import no.nav.etterlatte.libs.common.behandlingId
 import no.nav.etterlatte.libs.common.sakId
 import no.nav.etterlatte.libs.common.withBehandlingId
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
@@ -27,7 +27,7 @@ fun Route.vedtaksbrevRoute(
 ) {
     val logger = LoggerFactory.getLogger("no.nav.etterlatte.brev.VedaksbrevRoute")
 
-    route("brev/behandling/{$BEHANDLINGSID_CALL_PARAMETER}") {
+    route("brev/behandling/{$BEHANDLINGID_CALL_PARAMETER}") {
         get("vedtak") {
             withBehandlingId(tilgangssjekker) { behandlingId ->
                 logger.info("Henter vedtaksbrev for behandling (behandlingId=$behandlingId)")
@@ -93,7 +93,7 @@ fun Route.vedtaksbrevRoute(
                 logger.info("Tilbakestiller payload for vedtaksbrev (id=$brevId)")
 
                 measureTimedValue {
-                    service.hentNyttInnhold(sakId, brevId, behandlingsId, brukerTokenInfo)
+                    service.hentNyttInnhold(sakId, brevId, behandlingId, brukerTokenInfo)
                 }.let { (brevPayload, varighet) ->
                     logger.info(
                         "Oppretting av nytt innhold til brev (id=$brevId) tok ${varighet.toString(

@@ -68,7 +68,7 @@ interface TrygdetidService {
 
     fun overstyrNorskPoengaar(
         trygdetidId: UUID,
-        behandlingsId: UUID,
+        behandlingId: UUID,
         overstyrtNorskPoengaar: Int?,
     ): Trygdetid
 }
@@ -111,10 +111,10 @@ interface GammelTrygdetidServiceMedNy : NyTrygdetidService, TrygdetidService {
 
     override fun overstyrNorskPoengaar(
         trygdetidId: UUID,
-        behandlingsId: UUID,
+        behandlingId: UUID,
         overstyrtNorskPoengaar: Int?,
     ): Trygdetid {
-        return overstyrNorskPoengaaarForTrygdetid(trygdetidId, behandlingsId, overstyrtNorskPoengaar)
+        return overstyrNorskPoengaaarForTrygdetid(trygdetidId, behandlingId, overstyrtNorskPoengaar)
     }
 
     override suspend fun slettTrygdetidGrunnlag(
@@ -184,7 +184,7 @@ interface NyTrygdetidService {
 
     fun overstyrNorskPoengaaarForTrygdetid(
         trygdetidId: UUID,
-        behandlingsId: UUID,
+        behandlingId: UUID,
         overstyrtNorskPoengaar: Int?,
     ): Trygdetid
 
@@ -623,11 +623,11 @@ class TrygdetidServiceImpl(
 
     override fun overstyrNorskPoengaaarForTrygdetid(
         trygdetidId: UUID,
-        behandlingsId: UUID,
+        behandlingId: UUID,
         overstyrtNorskPoengaar: Int?,
     ): Trygdetid {
         val trygdetid =
-            trygdetidRepository.hentTrygdetidMedId(behandlingsId, trygdetidId)
+            trygdetidRepository.hentTrygdetidMedId(behandlingId, trygdetidId)
                 ?: throw GenerellIkkeFunnetException()
 
         return trygdetidRepository.oppdaterTrygdetid(trygdetid.copy(overstyrtNorskPoengaar = overstyrtNorskPoengaar))

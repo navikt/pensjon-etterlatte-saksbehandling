@@ -9,9 +9,9 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.inTransaction
-import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
+import no.nav.etterlatte.libs.common.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
-import no.nav.etterlatte.libs.common.behandlingsId
+import no.nav.etterlatte.libs.common.behandlingId
 import no.nav.etterlatte.libs.common.sakId
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.sak.TilgangService
@@ -37,11 +37,11 @@ internal fun Route.tilgangRoutes(tilgangService: TilgangService) {
             call.respond(harTilgang)
         }
 
-        get("/behandling/{$BEHANDLINGSID_CALL_PARAMETER}") {
+        get("/behandling/{$BEHANDLINGID_CALL_PARAMETER}") {
             val harTilgang =
                 harTilgangBrukertypeSjekk(brukerTokenInfo) { _ ->
                     tilgangService.harTilgangTilBehandling(
-                        behandlingsId.toString(),
+                        behandlingId.toString(),
                         Kontekst.get().appUserAsSaksbehandler().saksbehandlerMedRoller,
                     )
                 }

@@ -1,29 +1,29 @@
 import { apiClient, ApiResponse } from '~shared/api/apiClient'
 
-export const hentTrygdetid = async (behandlingsId: string): Promise<ApiResponse<ITrygdetid>> =>
-  apiClient.get<ITrygdetid>(`/trygdetid/${behandlingsId}`)
+export const hentTrygdetid = async (behandlingId: string): Promise<ApiResponse<ITrygdetid>> =>
+  apiClient.get<ITrygdetid>(`/trygdetid/${behandlingId}`)
 
-export const opprettTrygdetid = async (behandlingsId: string): Promise<ApiResponse<ITrygdetid>> =>
-  apiClient.post(`/trygdetid/${behandlingsId}`, {})
+export const opprettTrygdetid = async (behandlingId: string): Promise<ApiResponse<ITrygdetid>> =>
+  apiClient.post(`/trygdetid/${behandlingId}`, {})
 
 export const overstyrTrygdetid = async (overstyring: ITrygdetidOverstyring): Promise<ApiResponse<ITrygdetid>> =>
   apiClient.post(`/trygdetid/${overstyring.behandlingId}/overstyr`, { ...overstyring })
 
 export const lagreYrkesskadeTrygdetidGrunnlag = async (args: {
-  behandlingsId: string
-}): Promise<ApiResponse<ITrygdetid>> => apiClient.post(`/trygdetid/${args.behandlingsId}/grunnlag/yrkesskade`, {})
+  behandlingId: string
+}): Promise<ApiResponse<ITrygdetid>> => apiClient.post(`/trygdetid/${args.behandlingId}/grunnlag/yrkesskade`, {})
 
 export const lagreTrygdetidgrunnlag = async (args: {
-  behandlingsId: string
+  behandlingId: string
   trygdetidgrunnlag: OppdaterTrygdetidGrunnlag
 }): Promise<ApiResponse<ITrygdetid>> =>
-  apiClient.post(`/trygdetid/${args.behandlingsId}/grunnlag`, { ...args.trygdetidgrunnlag })
+  apiClient.post(`/trygdetid/${args.behandlingId}/grunnlag`, { ...args.trygdetidgrunnlag })
 
 export const slettTrygdetidsgrunnlag = async (args: {
-  behandlingsId: string
+  behandlingId: string
   trygdetidGrunnlagId: string
 }): Promise<ApiResponse<ITrygdetid>> =>
-  apiClient.delete<ITrygdetid>(`/trygdetid/${args.behandlingsId}/grunnlag/${args.trygdetidGrunnlagId}`)
+  apiClient.delete<ITrygdetid>(`/trygdetid/${args.behandlingId}/grunnlag/${args.trygdetidGrunnlagId}`)
 
 export const hentAlleLand = async (): Promise<ApiResponse<ILand[]>> =>
   apiClient.get<ILand[]>('/trygdetid/kodeverk/land')
@@ -90,10 +90,10 @@ export const hentTrygdeavtaleForBehandling = async (args: {
 }): Promise<ApiResponse<Trygdeavtale>> => apiClient.get<Trygdeavtale>(`/trygdetid/avtaler/${args.behandlingId}`)
 
 export const lagreTrygdeavtaleForBehandling = async (args: {
-  behandlingsId: string
+  behandlingId: string
   avtaleRequest: TrygdeavtaleRequest
 }): Promise<ApiResponse<Trygdeavtale>> =>
-  apiClient.post<Trygdeavtale>(`/trygdetid/avtaler/${args.behandlingsId}`, { ...args.avtaleRequest })
+  apiClient.post<Trygdeavtale>(`/trygdetid/avtaler/${args.behandlingId}`, { ...args.avtaleRequest })
 
 export interface ITrygdetid {
   id: string

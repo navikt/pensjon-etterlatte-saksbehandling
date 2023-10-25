@@ -12,7 +12,7 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.patch
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
-import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
+import no.nav.etterlatte.libs.common.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.VedtakSak
@@ -50,7 +50,7 @@ fun Route.vedtaksvurderingRoute(
             }
         }
 
-        get("/{$BEHANDLINGSID_CALL_PARAMETER}") {
+        get("/{$BEHANDLINGID_CALL_PARAMETER}") {
             withBehandlingId(behandlingKlient) { behandlingId ->
                 logger.info("Henter vedtak for behandling $behandlingId")
                 val vedtak = vedtakService.hentVedtak(behandlingId)
@@ -62,7 +62,7 @@ fun Route.vedtaksvurderingRoute(
             }
         }
 
-        get("/{$BEHANDLINGSID_CALL_PARAMETER}/ny") {
+        get("/{$BEHANDLINGID_CALL_PARAMETER}/ny") {
             withBehandlingId(behandlingKlient) { behandlingId ->
                 logger.info("Henter vedtak for behandling $behandlingId")
                 val vedtak = vedtakService.hentVedtak(behandlingId)
@@ -74,7 +74,7 @@ fun Route.vedtaksvurderingRoute(
             }
         }
 
-        get("/{$BEHANDLINGSID_CALL_PARAMETER}/sammendrag") {
+        get("/{$BEHANDLINGID_CALL_PARAMETER}/sammendrag") {
             withBehandlingId(behandlingKlient) { behandlingId ->
                 logger.info("Henter sammendrag av vedtak for behandling $behandlingId")
                 val vedtaksresultat = vedtakService.hentVedtak(behandlingId)?.toVedtakSammendragDto()
@@ -86,7 +86,7 @@ fun Route.vedtaksvurderingRoute(
             }
         }
 
-        post("/{$BEHANDLINGSID_CALL_PARAMETER}/upsert") {
+        post("/{$BEHANDLINGID_CALL_PARAMETER}/upsert") {
             withBehandlingId(behandlingKlient) { behandlingId ->
                 logger.info("Oppretter eller oppdaterer vedtak for behandling $behandlingId")
                 val nyttVedtak = vedtakBehandlingService.opprettEllerOppdaterVedtak(behandlingId, brukerTokenInfo)
@@ -94,7 +94,7 @@ fun Route.vedtaksvurderingRoute(
             }
         }
 
-        post("/{$BEHANDLINGSID_CALL_PARAMETER}/fattvedtak") {
+        post("/{$BEHANDLINGID_CALL_PARAMETER}/fattvedtak") {
             withBehandlingId(behandlingKlient) { behandlingId ->
                 logger.info("Fatter vedtak for behandling $behandlingId")
                 val fattetVedtak = vedtakBehandlingService.fattVedtak(behandlingId, brukerTokenInfo)
@@ -103,7 +103,7 @@ fun Route.vedtaksvurderingRoute(
             }
         }
 
-        post("/{$BEHANDLINGSID_CALL_PARAMETER}/attester") {
+        post("/{$BEHANDLINGID_CALL_PARAMETER}/attester") {
             withBehandlingId(behandlingKlient) { behandlingId ->
                 logger.info("Attesterer vedtak for behandling $behandlingId")
                 val (kommentar) = call.receive<AttesterVedtakDto>()
@@ -113,7 +113,7 @@ fun Route.vedtaksvurderingRoute(
             }
         }
 
-        post("/{$BEHANDLINGSID_CALL_PARAMETER}/underkjenn") {
+        post("/{$BEHANDLINGID_CALL_PARAMETER}/underkjenn") {
             withBehandlingId(behandlingKlient) { behandlingId ->
                 logger.info("Underkjenner vedtak for behandling $behandlingId")
                 val begrunnelse = call.receive<UnderkjennVedtakDto>()
@@ -128,7 +128,7 @@ fun Route.vedtaksvurderingRoute(
             }
         }
 
-        post("/{$BEHANDLINGSID_CALL_PARAMETER}/iverksett") {
+        post("/{$BEHANDLINGID_CALL_PARAMETER}/iverksett") {
             withBehandlingId(behandlingKlient) { behandlingId ->
                 logger.info("Iverksetter vedtak for behandling $behandlingId")
                 val vedtak = vedtakBehandlingService.iverksattVedtak(behandlingId, brukerTokenInfo)
@@ -149,7 +149,7 @@ fun Route.vedtaksvurderingRoute(
             }
         }
 
-        patch("/{$BEHANDLINGSID_CALL_PARAMETER}/tilbakestill") {
+        patch("/{$BEHANDLINGID_CALL_PARAMETER}/tilbakestill") {
             withBehandlingId(behandlingKlient) { behandlingId ->
                 logger.info("Tilbakestiller ikke iverksatte vedtak for behandling $behandlingId")
                 vedtakBehandlingService.tilbakestillIkkeIverksatteVedtak(behandlingId)

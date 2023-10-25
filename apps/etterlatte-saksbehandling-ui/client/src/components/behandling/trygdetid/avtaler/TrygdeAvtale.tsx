@@ -97,7 +97,7 @@ export const TrygdeAvtale = ({ redigerbar }: Props) => {
     if (!behandlingId) throw new Error('Mangler behandlingsid')
     lagreTrygdeavtale(
       {
-        behandlingsId: behandlingId,
+        behandlingId,
         avtaleRequest: {
           avtaleKode: trygdeavtale.avtaleKode,
           avtaleDatoKode: trygdeavtale.avtaleDatoKode,

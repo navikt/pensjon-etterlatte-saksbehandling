@@ -339,9 +339,9 @@ class OppgaveService(
         )
     }
 
-    fun hentSaksbehandlerForBehandling(behandlingsId: UUID): String? {
+    fun hentSaksbehandlerForBehandling(behandlingId: UUID): String? {
         val oppgaverForBehandlingUtenAttesterting =
-            oppgaveDao.hentOppgaverForReferanse(behandlingsId.toString())
+            oppgaveDao.hentOppgaverForReferanse(behandlingId.toString())
                 .filter {
                     it.type !== OppgaveType.ATTESTERING
                 }
@@ -358,16 +358,16 @@ class OppgaveService(
         return oppgaverForBehandlingFoerstegangs.sortedByDescending { it.opprettet }.firstOrNull()
     }
 
-    fun hentSaksbehandlerForOppgaveUnderArbeid(behandlingsId: UUID): String? {
-        val oppgaverforBehandling = oppgaveDao.hentOppgaverForReferanse(behandlingsId.toString())
+    fun hentSaksbehandlerForOppgaveUnderArbeid(behandlingId: UUID): String? {
+        val oppgaverforBehandling = oppgaveDao.hentOppgaverForReferanse(behandlingId.toString())
         return try {
             val oppgaveUnderbehandling = oppgaverforBehandling.single { it.status == Status.UNDER_BEHANDLING }
             oppgaveUnderbehandling.saksbehandler
         } catch (e: NoSuchElementException) {
-            logger.info("Det må finnes en oppgave under behandling, gjelder behandling: $behandlingsId")
+            logger.info("Det må finnes en oppgave under behandling, gjelder behandling: $behandlingId")
             return null
         } catch (e: IllegalArgumentException) {
-            logger.info("Skal kun ha en oppgave under behandling, gjelder behandling: $behandlingsId")
+            logger.info("Skal kun ha en oppgave under behandling, gjelder behandling: $behandlingId")
             return null
         }
     }

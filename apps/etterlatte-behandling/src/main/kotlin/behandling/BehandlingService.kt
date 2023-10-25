@@ -106,6 +106,8 @@ interface BehandlingService {
     ): Boolean
 
     fun hentFoersteVirk(sakId: Long): YearMonth?
+
+    fun oppdaterGrunnlag(behandlingId: UUID)
 }
 
 internal class BehandlingServiceImpl(
@@ -119,6 +121,7 @@ internal class BehandlingServiceImpl(
     private val kommerBarnetTilGodeDao: KommerBarnetTilGodeDao,
     private val oppgaveService: OppgaveService,
     private val etterbetalingService: EtterbetalingService,
+    private val grunnlagService: GrunnlagService,
 ) : BehandlingService {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -261,6 +264,15 @@ internal class BehandlingServiceImpl(
     override fun hentFoersteVirk(sakId: Long): YearMonth? {
         val behandlinger = hentBehandlingerISak(sakId)
         return behandlinger.tidligsteIverksatteVirkningstidspunkt()?.dato
+    }
+
+    override fun oppdaterGrunnlag(behandlingId: UUID) {
+        val behandling = behandlingDao.hentBehandling(behandlingId)
+            ?: throw BehandlingNotFoundException("Fant ikke behandling med id=$behandlingId")
+
+        grunnlagService.oppdaterGrunnlag(behandling.id, behandling.sak.id, behandling.sak.sakType)
+
+        behandlingDao.lagreStatus(behandling.tilOpprettet())
     }
 
     override suspend fun hentDetaljertBehandlingMedTilbehoer(

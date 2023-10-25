@@ -264,6 +264,13 @@ internal fun Route.behandlingRoutes(
                 }
             }
         }
+
+        post("/oppdater-grunnlag") {
+            inTransaction {
+                behandlingService.oppdaterGrunnlag(behandlingId)
+            }
+            call.respond(HttpStatusCode.OK)
+        }
     }
 
     route("/behandlinger") {

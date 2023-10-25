@@ -179,3 +179,7 @@ export const slettEtterbetaling = async (args: {
 }): Promise<ApiResponse<IKommerBarnetTilgode>> => {
   return apiClient.delete(`/behandling/${args.behandlingId}/etterbetaling`)
 }
+
+export const oppdaterGrunnlag = async (args: { behandlingId: string }): Promise<ApiResponse<void>> => {
+  return apiClient.post(`/behandling/${args.behandlingId}/oppdater-grunnlag`, {})
+}

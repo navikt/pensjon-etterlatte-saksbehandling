@@ -32,10 +32,7 @@ interface GrunnlagKlient {
         opplysningsbehov: Opplysningsbehov,
     )
 
-    suspend fun oppdaterGrunnlag(
-        behandlingId: UUID,
-        request: OppdaterGrunnlagRequest,
-    )
+    suspend fun oppdaterGrunnlag(behandlingId: UUID, request: OppdaterGrunnlagRequest)
 
     suspend fun hentPersongalleri(
         sakId: Long,
@@ -67,10 +64,7 @@ class GrunnlagKlientImpl(
             }.body()
     }
 
-    override suspend fun oppdaterGrunnlag(
-        behandlingId: UUID,
-        request: OppdaterGrunnlagRequest,
-    ) {
+    override suspend fun oppdaterGrunnlag(behandlingId: UUID, request: OppdaterGrunnlagRequest) {
         return grunnlagHttpClient
             .post("$url/grunnlag/sak/${request.sakId}/behandling/$behandlingId/oppdater-grunnlag") {
                 accept(ContentType.Application.Json)

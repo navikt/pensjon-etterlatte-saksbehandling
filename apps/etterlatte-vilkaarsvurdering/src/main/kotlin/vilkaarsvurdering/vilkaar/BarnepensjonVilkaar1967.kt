@@ -49,7 +49,7 @@ object BarnepensjonVilkaar1967 {
                         Lovreferanse(
                             paragraf = "§ 18-1",
                             ledd = 1,
-                            lenke = "https://lovdata.no/lov/1997-02-28-19/%C2%A718-3",
+                            lenke = "https://lovdata.no/lov/1997-02-28-19/%C2%A718-1",
                         ),
                 ),
         )

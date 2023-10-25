@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Alert, BodyLong, Button, Heading, Modal } from '@navikt/ds-react'
 import { useBehandling } from '~components/behandling/useBehandling'
 import { FlexRow } from '~shared/styled'
-import { isFailure, useApiCall } from '~shared/hooks/useApiCall'
+import { isFailure, isPending, useApiCall } from '~shared/hooks/useApiCall'
 import { oppdaterGrunnlag } from '~shared/api/behandling'
 import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 import { hentBehandlesFraStatus } from '~components/behandling/felles/utils'
@@ -45,16 +45,16 @@ export default function OppdaterGrunnlagModal() {
           </Heading>
 
           <BodyLong spacing>
-            Hvis grunnlaget ikke samsvarer med virkeligheten må du oppdatere grunnlaget. <br />
-            Statusen vil bli satt til Opprettet og hvis du har startet behandlingen allerede må du gå gjennom stegene på
-            nytt.
+            Oppdater grunnlaget hvis det ikke samsvarer med virkeligheten (f.eks. hvis dødsfallet eller ev. verge ikke
+            er registrert når behandlingen ble opprettet). Status på behandlingen vil da bli satt til
+            &quot;Opprettet&quot;. Hvis du har startet behandlingen allerede, må du gå gjennom stegene på nytt.
           </BodyLong>
 
           <FlexRow justify="center">
             <Button variant="secondary" onClick={() => setIsOpen(false)}>
               Nei, fortsett behandling
             </Button>
-            <Button variant="primary" onClick={() => lagre()}>
+            <Button variant="primary" onClick={() => lagre()} loading={isPending(oppdatert)}>
               Ja, oppdater grunnlaget
             </Button>
           </FlexRow>

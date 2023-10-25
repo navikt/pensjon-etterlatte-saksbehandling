@@ -265,13 +265,11 @@ internal fun Route.behandlingRoutes(
             }
         }
 
-        route("/oppdater-grunnlag") {
-            post {
-                inTransaction {
-                    behandlingService.oppdaterGrunnlag(behandlingsId)
-                }
-                call.respond(HttpStatusCode.OK)
+        post("/oppdater-grunnlag") {
+            inTransaction {
+                behandlingService.oppdaterGrunnlag(behandlingId)
             }
+            call.respond(HttpStatusCode.OK)
         }
     }
 

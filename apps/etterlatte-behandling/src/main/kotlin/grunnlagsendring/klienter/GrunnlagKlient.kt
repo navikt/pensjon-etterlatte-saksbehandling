@@ -3,18 +3,15 @@ package no.nav.etterlatte.grunnlagsendring.klienter
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
-import io.ktor.client.plugins.ResponseException
 import io.ktor.client.request.accept
 import io.ktor.client.request.get
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
-import io.ktor.http.isSuccess
 import no.nav.etterlatte.libs.common.FoedselsnummerDTO
 import no.nav.etterlatte.libs.common.behandling.PersonMedSakerOgRoller
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
-import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.NyeSaksopplysninger
@@ -68,16 +65,12 @@ class GrunnlagKlientImpl(
     }
 
     override suspend fun oppdaterGrunnlag(behandlingId: UUID, request: OppdaterGrunnlagRequest) {
-        val response = grunnlagHttpClient
+        return grunnlagHttpClient
             .post("$url/grunnlag/sak/${request.sakId}/behandling/$behandlingId/oppdater-grunnlag") {
                 accept(ContentType.Application.Json)
                 contentType(ContentType.Application.Json)
                 setBody(request)
-            }
-        if (!response.status.isSuccess()) {
-            throw InternfeilException("Klarte ikke å oppdatere grunnlag", ResponseException(response, "Ukjent feil"))
-        }
-        return response.body()
+            }.body()
     }
 
     override suspend fun lagreNyeSaksopplysninger(

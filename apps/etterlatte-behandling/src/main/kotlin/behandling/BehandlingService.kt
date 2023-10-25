@@ -15,7 +15,6 @@ import no.nav.etterlatte.behandling.hendelse.HendelseType
 import no.nav.etterlatte.behandling.hendelse.registrerVedtakHendelseFelles
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
-import no.nav.etterlatte.behandling.revurdering.BehandlingKanIkkeEndres
 import no.nav.etterlatte.common.tidligsteIverksatteVirkningstidspunkt
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
@@ -38,7 +37,6 @@ import no.nav.etterlatte.tilgangsstyring.filterForEnheter
 import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.etterlatte.vedtaksvurdering.VedtakHendelse
 import org.slf4j.LoggerFactory
-import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
 
@@ -271,11 +269,10 @@ internal class BehandlingServiceImpl(
     override fun oppdaterGrunnlag(behandlingId: UUID) {
         val behandling = behandlingDao.hentBehandling(behandlingId)
             ?: throw BehandlingNotFoundException("Fant ikke behandling med id=$behandlingId")
-        if (!behandling.status.kanEndres()) {
-            throw BehandlingKanIkkeEndres()
-        }
+
         grunnlagService.oppdaterGrunnlag(behandling.id, behandling.sak.id, behandling.sak.sakType)
-        behandlingDao.lagreStatus(behandlingId, BehandlingStatus.OPPRETTET, LocalDateTime.now())
+
+        behandlingDao.lagreStatus(behandling.tilOpprettet())
     }
 
     override suspend fun hentDetaljertBehandlingMedTilbehoer(

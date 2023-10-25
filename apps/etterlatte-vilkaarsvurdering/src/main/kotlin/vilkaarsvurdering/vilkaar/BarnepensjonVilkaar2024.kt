@@ -103,7 +103,7 @@ object BarnepensjonVilkaar2024 {
                     val foedselsdatoBarn = soeker.hentFoedselsdato()?.toVilkaarsgrunnlag(SOEKER_FOEDSELSDATO)
                     val doedsdatoAvdoed = hentAvdoed().hentDoedsdato()?.toVilkaarsgrunnlag(AVDOED_DOEDSDATO)
 
-                    listOfNotNull(foedselsdatoBarn, doedsdatoAvdoed) // /*, virkningstidspunktBehandling*/
+                    listOfNotNull(foedselsdatoBarn, doedsdatoAvdoed)
                 },
         )
 

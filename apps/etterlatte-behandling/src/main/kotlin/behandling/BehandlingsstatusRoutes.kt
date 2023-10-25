@@ -126,7 +126,7 @@ internal fun Route.behandlingsstatusRoutes(behandlingsstatusService: BehandlingS
             val vedtakHendelse = call.receive<VedtakHendelse>()
             haandterStatusEndring(call) {
                 inTransaction {
-                    behandlingsstatusService.settIverksattVedtak(behandlingId, vedtakHendelse)
+                    behandlingsstatusService.settTilSamordnetVedtak(behandlingId, vedtakHendelse)
                 }
             }
         }
@@ -135,7 +135,7 @@ internal fun Route.behandlingsstatusRoutes(behandlingsstatusService: BehandlingS
             val vedtakHendelse = call.receive<VedtakHendelse>()
             haandterStatusEndring(call) {
                 inTransaction {
-                    behandlingsstatusService.settIverksattVedtak(behandlingId, vedtakHendelse)
+                    behandlingsstatusService.settSamordnetVedtak(behandlingId, vedtakHendelse)
                 }
             }
         }

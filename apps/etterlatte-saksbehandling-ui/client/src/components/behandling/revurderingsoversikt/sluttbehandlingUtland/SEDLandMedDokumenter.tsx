@@ -46,6 +46,7 @@ export default function SEDLandMedDokumenter({
                 landMedDokumenter={landMedDokument}
                 oppdaterLandMedDokumenter={oppdaterLandMedDokumenter}
                 landListe={landListe}
+                lesevisning={false}
               />
             )
             return (

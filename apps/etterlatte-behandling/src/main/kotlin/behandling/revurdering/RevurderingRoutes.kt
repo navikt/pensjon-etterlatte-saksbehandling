@@ -74,7 +74,7 @@ internal fun Route.revurderingRoutes(revurderingService: RevurderingService) {
                 val revurderingsaarsak =
                     call.parameters["revurderingsaarsak"]?.let { Revurderingaarsak.valueOf(it) }
                         ?: return@get call.respond(HttpStatusCode.BadRequest, "Ugyldig revurderingsårsak")
-                call.respond(revurderingService.hentRevurderingsinfoForSakMedAarsak(sakId, revurderingsaarsak))
+                call.respond(inTransaction { revurderingService.hentRevurderingsinfoForSakMedAarsak(sakId, revurderingsaarsak) })
             }
         }
     }

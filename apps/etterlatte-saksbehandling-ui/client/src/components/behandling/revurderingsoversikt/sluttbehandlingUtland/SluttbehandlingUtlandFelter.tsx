@@ -24,7 +24,6 @@ export default function SluttbehandlingUtlandFelter({ tilknyttetBehandling }: { 
         ),
         (detaljertbehandling) => (
           <>
-            Hentet {detaljertbehandling.revurderingsaarsak}
             <Utenlandstilsnitt behandling={detaljertbehandling} redigerbar={false} />
             <BoddEllerArbeidetUtlandet behandling={detaljertbehandling} redigerbar={false} />
           </>

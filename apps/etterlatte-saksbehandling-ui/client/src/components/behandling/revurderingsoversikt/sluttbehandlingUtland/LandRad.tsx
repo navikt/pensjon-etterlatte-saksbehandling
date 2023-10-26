@@ -15,10 +15,12 @@ const Flex = styled.div`
 `
 
 export default function LandRad({
+  lesevisning = false,
   landMedDokumenter,
   oppdaterLandMedDokumenter,
   landListe,
 }: {
+  lesevisning: boolean
   landMedDokumenter: LandMedDokumenter
   oppdaterLandMedDokumenter: (oppdatertLandMedDokumenter: LandMedDokumenter) => void
   landListe: ILand[]
@@ -26,8 +28,9 @@ export default function LandRad({
   return (
     <Flex>
       <Select
+        readOnly={lesevisning}
         style={{ marginRight: '2rem', minWidth: '10rem', maxWidth: '12rem' }}
-        label="Velg land"
+        label={lesevisning ? 'Valgt lang' : 'Velg land'}
         value={landMedDokumenter.landIsoKode || ''}
         onChange={(e) => {
           const landMedDokumenterMedLandKode = { ...landMedDokumenter, landIsoKode: e.target.value }
@@ -43,7 +46,11 @@ export default function LandRad({
           </option>
         ))}
       </Select>
-      <DokumenterForLand landMedDokumenter={landMedDokumenter} oppdaterLandMedDokumenter={oppdaterLandMedDokumenter} />
+      <DokumenterForLand
+        lesevisning={lesevisning}
+        landMedDokumenter={landMedDokumenter}
+        oppdaterLandMedDokumenter={oppdaterLandMedDokumenter}
+      />
     </Flex>
   )
 }

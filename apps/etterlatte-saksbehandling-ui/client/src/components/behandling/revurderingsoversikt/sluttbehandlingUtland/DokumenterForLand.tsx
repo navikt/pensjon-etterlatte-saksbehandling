@@ -4,9 +4,11 @@ import React from 'react'
 import { LandMedDokumenter } from '~shared/types/RevurderingInfo'
 
 export default function DokumenterForLand({
+  lesevisning,
   landMedDokumenter,
   oppdaterLandMedDokumenter,
 }: {
+  lesevisning: boolean
   landMedDokumenter: LandMedDokumenter
   oppdaterLandMedDokumenter: (oppdatertLandMedDokumenter: LandMedDokumenter) => void
 }) {
@@ -28,6 +30,7 @@ export default function DokumenterForLand({
         }
         return (
           <DokumentRad
+            lesevisning={lesevisning}
             key={i}
             dokument={e}
             oppdaterDokument={oppdaterdokumenterForLand}
@@ -36,17 +39,19 @@ export default function DokumenterForLand({
         )
       })}
       <div>
-        <Button
-          onClick={() => {
-            oppdaterLandMedDokumenter({
-              ...landMedDokumenter,
-              dokumenter: landMedDokumenter.dokumenter.concat([{ dokumenttype: '', dato: undefined, kommentar: '' }]),
-            })
-          }}
-          variant="tertiary"
-        >
-          Legg til dokument
-        </Button>
+        {!lesevisning && (
+          <Button
+            onClick={() => {
+              oppdaterLandMedDokumenter({
+                ...landMedDokumenter,
+                dokumenter: landMedDokumenter.dokumenter.concat([{ dokumenttype: '', dato: undefined, kommentar: '' }]),
+              })
+            }}
+            variant="tertiary"
+          >
+            Legg til dokument
+          </Button>
+        )}
       </div>
     </div>
   )

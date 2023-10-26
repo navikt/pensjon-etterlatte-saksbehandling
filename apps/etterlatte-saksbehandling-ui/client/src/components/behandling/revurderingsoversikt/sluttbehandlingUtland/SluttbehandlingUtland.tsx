@@ -17,7 +17,7 @@ import { AWhite } from '@navikt/ds-tokens/dist/tokens'
 import { CheckmarkCircleIcon } from '@navikt/aksel-icons'
 import { LandMedDokumenter, SluttbehandlingUtlandInfo } from '~shared/types/RevurderingInfo'
 import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
-import HistoriskeSEDer from '~components/behandling/revurderingsoversikt/sluttbehandlingUtland/HistoriskeSEDer'
+import HistoriskeSEDer from '~components/behandling/revurderingsoversikt/sluttbehandlingUtland/historikk/HistoriskeSEDer'
 
 export default function SluttbehandlingUtland({
   sakId,
@@ -180,7 +180,7 @@ export default function SluttbehandlingUtland({
       ) : null}
       {isFailure(lagreRevurderingsinfoStatus) && <ApiErrorAlert>Kunne ikke lagre revurderingsinfo</ApiErrorAlert>}
       <Heading level="2" size="medium" style={{ marginTop: '4rem' }}>
-        Tidligere mottatte SED`er
+        Tidligere sluttbehandlinger
       </Heading>
       <TextButton isOpen={visHistorikk} setIsOpen={setVisHistorikk} />
       {visHistorikk &&

@@ -1,52 +1,81 @@
 import { FlexHeader } from '~components/behandling/soeknadsoversikt/familieforhold/styled'
-import { BodyShort, Heading, TextField } from '@navikt/ds-react'
+import { BodyShort, Button, Heading, TextField } from '@navikt/ds-react'
 import styled from 'styled-components'
 import { ITrygdetid } from '~shared/api/trygdetid'
 import { useEffect, useState } from 'react'
+import { FormKnapper } from './styled'
 
 interface Props {
   redigerbar: boolean
   trygdetid: ITrygdetid
+  virkningstidspunktEtterNyRegelDato: Boolean
   overstyrTrygdetidPoengaar: (trygdetid: ITrygdetid) => void
 }
 
-export const OverstyrtTrygdetid = ({ redigerbar, trygdetid, overstyrTrygdetidPoengaar }: Props) => {
+export const OverstyrtTrygdetid = ({
+  redigerbar,
+  trygdetid,
+  virkningstidspunktEtterNyRegelDato,
+  overstyrTrygdetidPoengaar,
+}: Props) => {
   const [overstyrtNorskPoengaar, setOverstyrtNorskPoengaar] = useState<number | undefined>(undefined)
 
   useEffect(() => {
-    setOverstyrtNorskPoengaar(trygdetid.overstyrtNorskPoengaar)
+    setOverstyrtNorskPoengaar(trygdetid.overstyrtNorskPoengaar ?? undefined)
   }, [])
+
+  const opptjentTekst = () => {
+    return virkningstidspunktEtterNyRegelDato
+      ? 'men har minimum tre poengår'
+      : 'men har opptjent rett til tilleggspensjon'
+  }
 
   return (
     <Overstyrt>
-      <FlexHeader>
-        <Heading size="small" level="4">
-          Norsk poengår
-        </Heading>
-      </FlexHeader>
-      {!redigerbar && (
+      {(redigerbar || overstyrtNorskPoengaar !== undefined) && (
+        <FlexHeader>
+          <Heading size="small" level="4">
+            Poengår i Norge
+          </Heading>
+        </FlexHeader>
+      )}
+      {!redigerbar && overstyrtNorskPoengaar !== undefined && (
         <>
           <BodyShort>
-            Den avdøde har mindre enn 20 års botid, men har opptjent rett til tilleggspensjon - norsk poengår:
+            Eksportvurdering - pensjonen er innvilget etter unntaksregelen om at avdød har mindre enn 20 års botid,
+            {opptjentTekst()}:
           </BodyShort>
-          <AntallAar>{trygdetid.overstyrtNorskPoengaar} 12</AntallAar>
+          <AntallAar>{trygdetid.overstyrtNorskPoengaar}</AntallAar>
         </>
       )}
       {redigerbar && (
         <>
           <BodyShort>
-            Hvis den avdøde har mindre enn 20 års botid, men har opptjent rett til tilleggspensjon - så må antall
-            poengår i Norge spesifiseres
+            Fyll ut ved eksportvurdering når pensjonen er innvilget etter unntaksregelen om at avdød har mindre enn 20
+            års botid, {opptjentTekst()}. Trygdetid skal da være lik antall poengår.
           </BodyShort>
           <AntallAarFelt
-            value={overstyrtNorskPoengaar}
+            value={overstyrtNorskPoengaar ?? ''}
             type="text"
             inputMode="numeric"
             pattern="[0-9]*"
-            label="Norsk poengår"
+            label="Antall år"
             onChange={(e) => setOverstyrtNorskPoengaar(e.target.value === '' ? undefined : Number(e.target.value))}
             onBlur={() => overstyrTrygdetidPoengaar({ ...trygdetid, overstyrtNorskPoengaar: overstyrtNorskPoengaar })}
           />
+          <FormKnapper>
+            <Button
+              size="small"
+              onClick={(event) => {
+                event.preventDefault()
+                setOverstyrtNorskPoengaar(undefined)
+                overstyrTrygdetidPoengaar({ ...trygdetid, overstyrtNorskPoengaar: undefined })
+              }}
+              disabled={overstyrtNorskPoengaar === undefined}
+            >
+              Slett
+            </Button>
+          </FormKnapper>
         </>
       )}
     </Overstyrt>

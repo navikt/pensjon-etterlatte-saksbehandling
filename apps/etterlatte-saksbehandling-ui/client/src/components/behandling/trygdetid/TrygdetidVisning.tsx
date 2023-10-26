@@ -41,6 +41,12 @@ const TrygdetidVisning = (props: { behandling: IDetaljertBehandling }) => {
     })
   }, [])
 
+  const virkningstidspunktEtterNyRegelDato = () => {
+    return (
+      behandling.virkningstidspunkt == null || new Date(behandling.virkningstidspunkt.dato) >= new Date('2024-01-01')
+    )
+  }
+
   return (
     <Content>
       <ContentHeader>
@@ -60,7 +66,11 @@ const TrygdetidVisning = (props: { behandling: IDetaljertBehandling }) => {
             [SakType.OMSTILLINGSSTOENAD]: <YrkesskadeTrygdetidOMS />,
           }[behandling.sakType]
         ) : beregnTrygdetid ? (
-          <Trygdetid redigerbar={behandles} utenlandstilsnitt={behandling.utenlandstilsnitt} />
+          <Trygdetid
+            redigerbar={behandles}
+            utenlandstilsnitt={behandling.utenlandstilsnitt}
+            virkningstidspunktEtterNyRegelDato={virkningstidspunktEtterNyRegelDato()}
+          />
         ) : (
           <FastTrygdetid />
         ))}

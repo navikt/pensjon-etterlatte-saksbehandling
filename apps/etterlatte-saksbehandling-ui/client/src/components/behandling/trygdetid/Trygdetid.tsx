@@ -28,13 +28,14 @@ import { OverstyrtTrygdetid } from './OverstyrtTrygdetid'
 interface Props {
   redigerbar: boolean
   utenlandstilsnitt?: IUtenlandstilsnitt
+  virkningstidspunktEtterNyRegelDato: Boolean
 }
 
 const visTrydeavtale = (utenlandstilsnittType?: IUtenlandstilsnittType): Boolean => {
   return utenlandstilsnittType === IUtenlandstilsnittType.BOSATT_UTLAND
 }
 
-export const Trygdetid = ({ redigerbar, utenlandstilsnitt }: Props) => {
+export const Trygdetid = ({ redigerbar, utenlandstilsnitt, virkningstidspunktEtterNyRegelDato }: Props) => {
   const { behandlingId } = useParams()
   const dispatch = useAppDispatch()
   const [hentTrygdetidRequest, fetchTrygdetid] = useApiCall(hentTrygdetid)
@@ -50,18 +51,16 @@ export const Trygdetid = ({ redigerbar, utenlandstilsnitt }: Props) => {
   }
 
   const overstyrTrygdetidPoengaar = (trygdetid: ITrygdetid) => {
-    if (trygdetid.overstyrtNorskPoengaar) {
-      requestOverstyrTrygdetid(
-        {
-          id: trygdetid.id,
-          behandlingId: trygdetid.behandlingId,
-          overstyrtNorskPoengaar: trygdetid.overstyrtNorskPoengaar,
-        },
-        (trygdetid: ITrygdetid) => {
-          oppdaterTrygdetid(trygdetid)
-        }
-      )
-    }
+    requestOverstyrTrygdetid(
+      {
+        id: trygdetid.id,
+        behandlingId: trygdetid.behandlingId,
+        overstyrtNorskPoengaar: trygdetid.overstyrtNorskPoengaar,
+      },
+      (trygdetid: ITrygdetid) => {
+        oppdaterTrygdetid(trygdetid)
+      }
+    )
   }
 
   useEffect(() => {
@@ -116,6 +115,7 @@ export const Trygdetid = ({ redigerbar, utenlandstilsnitt }: Props) => {
             redigerbar={redigerbar}
             trygdetid={trygdetid}
             overstyrTrygdetidPoengaar={overstyrTrygdetidPoengaar}
+            virkningstidspunktEtterNyRegelDato={virkningstidspunktEtterNyRegelDato}
           />
           <TrygdetidGrunnlagListe
             trygdetid={trygdetid}

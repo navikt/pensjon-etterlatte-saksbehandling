@@ -1,6 +1,8 @@
-import { VilkaarsvurderingResultat, VurderingsResultat } from '~shared/api/vilkaarsvurdering'
+import { IVilkaarsvurdering, VilkaarsvurderingResultat, VurderingsResultat } from '~shared/api/vilkaarsvurdering'
 import { ISvar } from '~shared/types/ISvar'
 import { KildeType } from '~shared/types/kilde'
+import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
+import { SakType } from '~shared/types/sak'
 
 export const svarTilTotalResultat = (svar: ISvar) => {
   switch (svar) {
@@ -43,4 +45,19 @@ export function formaterVurderingsResultat(vurderingsResultat?: VurderingsResult
     default:
       return 'Ukjent'
   }
+}
+
+// Siden vi ikke har noen versjonering av vilkårsvurdering p.t. så sjekker vi om det finnes vilkår
+// som kun eksisterer for nytt regelverk på barnepensjon.
+export function vilkaarsvurderingErPaaNyttRegelverk(vilkaarsvurdering: IVilkaarsvurdering): boolean {
+  return vilkaarsvurdering.vilkaar.some(
+    (vilkaar) => vilkaar.hovedvilkaar.type.startsWith('BP') && vilkaar.hovedvilkaar.type.endsWith('2024')
+  )
+}
+
+export function behandlingGjelderBarnepensjonPaaNyttRegelverk(behandling: IDetaljertBehandling): boolean {
+  return (
+    behandling.sakType === SakType.BARNEPENSJON &&
+    new Date(behandling.virkningstidspunkt!!.dato) >= new Date('2024-01-01')
+  )
 }

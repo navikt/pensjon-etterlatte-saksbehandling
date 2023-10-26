@@ -24,9 +24,11 @@ import { oppdaterBehandlingsstatus } from '~store/reducers/BehandlingReducer'
 import { useAppDispatch } from '~store/Store'
 import { TrygdetidDetaljer } from '~components/behandling/trygdetid/detaljer/TrygdetidDetaljer'
 import { OverstyrtTrygdetid } from './OverstyrtTrygdetid'
+import { SakType } from '~shared/types/sak'
 
 interface Props {
   redigerbar: boolean
+  sakType: SakType
   utenlandstilsnitt?: IUtenlandstilsnitt
   virkningstidspunktEtterNyRegelDato: Boolean
 }
@@ -35,7 +37,7 @@ const visTrydeavtale = (utenlandstilsnittType?: IUtenlandstilsnittType): Boolean
   return utenlandstilsnittType === IUtenlandstilsnittType.BOSATT_UTLAND
 }
 
-export const Trygdetid = ({ redigerbar, utenlandstilsnitt, virkningstidspunktEtterNyRegelDato }: Props) => {
+export const Trygdetid = ({ redigerbar, sakType, utenlandstilsnitt, virkningstidspunktEtterNyRegelDato }: Props) => {
   const { behandlingId } = useParams()
   const dispatch = useAppDispatch()
   const [hentTrygdetidRequest, fetchTrygdetid] = useApiCall(hentTrygdetid)
@@ -113,6 +115,7 @@ export const Trygdetid = ({ redigerbar, utenlandstilsnitt, virkningstidspunktEtt
           />
           <OverstyrtTrygdetid
             redigerbar={redigerbar}
+            sakType={sakType}
             trygdetid={trygdetid}
             overstyrTrygdetidPoengaar={overstyrTrygdetidPoengaar}
             virkningstidspunktEtterNyRegelDato={virkningstidspunktEtterNyRegelDato}

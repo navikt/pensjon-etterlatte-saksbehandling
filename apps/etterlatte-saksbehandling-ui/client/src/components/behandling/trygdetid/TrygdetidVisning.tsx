@@ -68,6 +68,7 @@ const TrygdetidVisning = (props: { behandling: IDetaljertBehandling }) => {
         ) : beregnTrygdetid ? (
           <Trygdetid
             redigerbar={behandles}
+            sakType={behandling.sakType}
             utenlandstilsnitt={behandling.utenlandstilsnitt}
             virkningstidspunktEtterNyRegelDato={virkningstidspunktEtterNyRegelDato()}
           />

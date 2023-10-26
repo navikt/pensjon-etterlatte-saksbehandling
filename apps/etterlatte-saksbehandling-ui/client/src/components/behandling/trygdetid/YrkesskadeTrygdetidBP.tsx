@@ -22,13 +22,13 @@ const YrkesskadeTrygdetidBP = () => {
     fetchTrygdetid(behandlingId, (trygdetid: ITrygdetid) => {
       if (trygdetid == null) {
         requestOpprettTrygdetid(behandlingId, () => {
-          requestOpprettYrkesskadeTrygdetidGrunnlag({ behandlingsId: behandlingId })
+          requestOpprettYrkesskadeTrygdetidGrunnlag({ behandlingId })
         })
       } else {
         // Må skrives om når vi gjør om til å støtte utenlands og poeng i inn/ut år (relatert til prorata)
         // Pt sjekker vi regelResultat string i backend (Trygdetid.kt) for å gjøre en "er dette yrkesskade"
         // I mellomtid så vil den bare erstatte en fast 40 år med en ny fast 40 år på samme grunnlag
-        requestOpprettYrkesskadeTrygdetidGrunnlag({ behandlingsId: behandlingId })
+        requestOpprettYrkesskadeTrygdetidGrunnlag({ behandlingId })
       }
     })
   }, [])

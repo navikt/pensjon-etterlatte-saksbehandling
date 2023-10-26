@@ -4,7 +4,9 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.grunnlagsendring.klienter.GrunnlagKlientImpl
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.grunnlag.NyeSaksopplysninger
+import no.nav.etterlatte.libs.common.grunnlag.OppdaterGrunnlagRequest
 import no.nav.etterlatte.libs.common.grunnlag.Opplysningsbehov
 import java.util.UUID
 
@@ -16,6 +18,19 @@ class GrunnlagService(private val grunnlagKlient: GrunnlagKlientImpl) {
         runBlocking {
             val grunnlagsbehov = grunnlagsbehov(behandling, persongalleri)
             grunnlagKlient.leggInnNyttGrunnlag(behandling.id, grunnlagsbehov)
+        }
+    }
+
+    fun oppdaterGrunnlag(
+        behandlingId: UUID,
+        sakId: Long,
+        sakType: SakType,
+    ) {
+        runBlocking {
+            grunnlagKlient.oppdaterGrunnlag(
+                behandlingId,
+                OppdaterGrunnlagRequest(sakId, sakType),
+            )
         }
     }
 

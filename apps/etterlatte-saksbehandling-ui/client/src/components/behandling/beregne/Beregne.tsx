@@ -1,4 +1,4 @@
-import { Content, ContentHeader } from '~shared/styled'
+import { Content, ContentHeader, FlexRow } from '~shared/styled'
 import { Border, HeadingWrapper } from '../soeknadsoversikt/styled'
 import { behandlingSkalSendeBrev, hentBehandlesFraStatus } from '../felles/utils'
 import { formaterStringDato } from '~utils/formattering'
@@ -10,7 +10,7 @@ import { hentBeregning } from '~shared/api/beregning'
 import { IBehandlingReducer, oppdaterBehandlingsstatus, oppdaterBeregning } from '~store/reducers/BehandlingReducer'
 import Spinner from '~shared/Spinner'
 import { BehandlingHandlingKnapper } from '~components/behandling/handlinger/BehandlingHandlingKnapper'
-import { Alert, Button, ErrorMessage, Heading } from '@navikt/ds-react'
+import { Alert, Button, Heading } from '@navikt/ds-react'
 import { isFailure, isPending, useApiCall } from '~shared/hooks/useApiCall'
 import { IBehandlingStatus, IBehandlingsType } from '~shared/types/IDetaljertBehandling'
 import styled from 'styled-components'
@@ -23,6 +23,7 @@ import { Avkorting } from '~components/behandling/avkorting/Avkorting'
 import { SakType } from '~shared/types/sak'
 import Etterbetaling from '~components/behandling/beregningsgrunnlag/Etterbetaling'
 import { fattVedtak, upsertVedtak } from '~shared/api/vedtaksvurdering'
+import { ApiErrorAlert } from '~ErrorBoundary'
 import { VilkaarsvurderingResultat } from '~shared/api/vilkaarsvurdering'
 
 export const Beregne = (props: { behandling: IBehandlingReducer }) => {
@@ -110,10 +111,17 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
           </EtterbetalingWrapper>
         )}
       </ContentHeader>
+
       <Border />
+
+      {isFailure(vedtak) && (
+        <FlexRow justify="center">
+          <ApiErrorAlert>{vedtak.error.detail || 'Vedtaksoppdatering feilet'}</ApiErrorAlert>
+        </FlexRow>
+      )}
+
       {behandles ? (
         <BehandlingHandlingKnapper>
-          {isFailure(vedtak) && <ErrorMessage>Vedtaksoppdatering feilet</ErrorMessage>}
           {visAttesteringsmodal ? (
             <SendTilAttesteringModal behandlingId={behandling.id} fattVedtakApi={fattVedtak} />
           ) : (
@@ -146,10 +154,6 @@ const EtterbetalingWrapper = styled.div`
   .text {
     margin: 1em 0 5em 0;
   }
-`
-
-const ApiErrorAlert = styled(Alert).attrs({ variant: 'error' })`
-  margin-top: 8px;
 `
 
 const InfoAlert = styled(Alert).attrs({ variant: 'info' })`

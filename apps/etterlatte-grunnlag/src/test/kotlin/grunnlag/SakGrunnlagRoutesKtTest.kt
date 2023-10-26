@@ -36,7 +36,6 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import testsupport.buildTestApplicationConfigurationForOauth
-import java.util.UUID
 import kotlin.random.Random
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -76,19 +75,6 @@ internal class SakGrunnlagRoutesKtTest {
                 mapOf(
                     "navn" to "Per Persson",
                     "NAVident" to "Saksbehandler01",
-                ),
-        ).serialize()
-    }
-
-    private val systemBruker: String by lazy {
-        val mittsystem = UUID.randomUUID().toString()
-        server.issueToken(
-            issuerId = AZURE_ISSUER,
-            audience = CLIENT_ID,
-            claims =
-                mapOf(
-                    "sub" to mittsystem,
-                    "oid" to mittsystem,
                 ),
         ).serialize()
     }

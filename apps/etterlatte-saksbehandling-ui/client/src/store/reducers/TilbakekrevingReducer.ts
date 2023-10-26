@@ -1,17 +1,17 @@
 import { createAction, createReducer } from '@reduxjs/toolkit'
-import { Tilbakekreving } from '~shared/types/Tilbakekreving'
+import { TilbakekrevingBehandling } from '~shared/types/Tilbakekreving'
 
-export const addTilbakekreving = createAction<Tilbakekreving>('tilbakekreving/add')
+export const addTilbakekreving = createAction<TilbakekrevingBehandling>('tilbakekreving/add')
 export const resetTilbakekreving = createAction('tilbakekreving/reset')
 
-const initialState: { tilbakekreving: Tilbakekreving | null } = {
-  tilbakekreving: null,
+const initialState: { tilbakekrevingBehandling: TilbakekrevingBehandling | null } = {
+  tilbakekrevingBehandling: null,
 }
 export const tilbakekrevingReducer = createReducer(initialState, (builder) => {
   builder.addCase(addTilbakekreving, (state, action) => {
-    state.tilbakekreving = action.payload
+    state.tilbakekrevingBehandling = action.payload
   })
   builder.addCase(resetTilbakekreving, (state) => {
-    state.tilbakekreving = null
+    state.tilbakekrevingBehandling = null
   })
 })

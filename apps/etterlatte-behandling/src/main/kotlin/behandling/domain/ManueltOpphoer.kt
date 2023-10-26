@@ -31,26 +31,6 @@ data class ManueltOpphoer(
     override val type: BehandlingType = BehandlingType.MANUELT_OPPHOER
     override val kilde = Vedtaksloesning.GJENNY
 
-    constructor(
-        sak: Sak,
-        opphoerAarsaker: List<ManueltOpphoerAarsak>,
-        fritekstAarsak: String?,
-        virkningstidspunkt: Virkningstidspunkt?,
-        utenlandstilsnitt: Utenlandstilsnitt?,
-        boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet?,
-    ) : this(
-        id = UUID.randomUUID(),
-        sak = sak,
-        behandlingOpprettet = Tidspunkt.now().toLocalDatetimeUTC(),
-        sistEndret = Tidspunkt.now().toLocalDatetimeUTC(),
-        status = BehandlingStatus.OPPRETTET,
-        opphoerAarsaker = opphoerAarsaker,
-        fritekstAarsak = fritekstAarsak,
-        virkningstidspunkt = virkningstidspunkt,
-        utenlandstilsnitt = utenlandstilsnitt,
-        boddEllerArbeidetUtlandet = boddEllerArbeidetUtlandet,
-    )
-
     private val erFyltUt: Boolean
         get() {
             return (virkningstidspunkt != null)

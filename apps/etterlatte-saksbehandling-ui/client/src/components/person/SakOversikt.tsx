@@ -9,7 +9,7 @@ import Spinner from '~shared/Spinner'
 import RelevanteHendelser from '~components/person/uhaandtereHendelser/RelevanteHendelser'
 import { isFailure, isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
 import { Alert, BodyShort, Heading, Link, Tag } from '@navikt/ds-react'
-import { ISak } from '~shared/types/sak'
+import { ISak, SakType } from '~shared/types/sak'
 import { formaterSakstype } from '~utils/formattering'
 import { ExternalLinkIcon } from '@navikt/aksel-icons'
 import { FEATURE_TOGGLE_KAN_BRUKE_KLAGE, OpprettKlage } from '~components/person/OpprettKlage'
@@ -43,7 +43,9 @@ export const SakOversikt = ({ fnr }: { fnr: string }) => {
               </Tag>
               <FlexRow justify="right">
                 <OpprettKlage sakId={sak.id} />
-                <ManueltOpphoerModal sakId={sak.id} behandlingliste={behandlingerStatus.data[0].behandlinger} />
+                {sak.sakType == SakType.BARNEPENSJON && (
+                  <ManueltOpphoerModal sakId={sak.id} behandlingliste={behandlingerStatus.data[0].behandlinger} />
+                )}
               </FlexRow>
             </Heading>
 

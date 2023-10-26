@@ -10,7 +10,7 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.klienter.BehandlingKlient
-import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
+import no.nav.etterlatte.libs.common.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.withBehandlingId
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 
@@ -21,7 +21,7 @@ fun Route.beregning(
     route("/api/beregning") {
         val logger = application.log
 
-        get("/{$BEHANDLINGSID_CALL_PARAMETER}") {
+        get("/{$BEHANDLINGID_CALL_PARAMETER}") {
             withBehandlingId(behandlingKlient) {
                 logger.info("Henter beregning med behandlingId=$it")
                 val beregning = beregningService.hentBeregning(it)
@@ -32,7 +32,7 @@ fun Route.beregning(
             }
         }
 
-        post("/{$BEHANDLINGSID_CALL_PARAMETER}") {
+        post("/{$BEHANDLINGID_CALL_PARAMETER}") {
             withBehandlingId(behandlingKlient) {
                 logger.info("Oppretter beregning for behandlingId=$it")
                 val beregning = beregningService.opprettBeregning(it, brukerTokenInfo)
@@ -40,7 +40,7 @@ fun Route.beregning(
             }
         }
 
-        post("/opprettForOpphoer/{$BEHANDLINGSID_CALL_PARAMETER}") {
+        post("/opprettForOpphoer/{$BEHANDLINGID_CALL_PARAMETER}") {
             withBehandlingId(behandlingKlient) {
                 beregningService.opprettForOpphoer(it, brukerTokenInfo)
                 call.respond(HttpStatusCode.OK)

@@ -11,6 +11,7 @@ import no.nav.etterlatte.libs.common.behandling.SakOgRolle
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.deserialize
+import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.Opplysningsbehov
@@ -310,12 +311,15 @@ class RealGrunnlagService(
         sakId: Long,
         sakType: SakType,
     ) {
-        val galleriHendelse =
-            opplysningDao.finnNyesteGrunnlagForSak(
-                sakId,
-                Opplysningstype.PERSONGALLERI_V1,
-            )!!
-        val persongalleri = objectMapper.readValue(galleriHendelse.opplysning.toJson(), Persongalleri::class.java)
+        val persongalleriJsonNode =
+            opplysningDao.finnNyesteGrunnlagForSak(sakId, Opplysningstype.PERSONGALLERI_V1)?.opplysning
+
+        if (persongalleriJsonNode == null) {
+            logger.info("Klarte ikke å hente ut grunnlag for sak $sakId. Fant ikke persongalleri")
+            throw IllegalStateException("Fant ikke grunnlag for sak $sakId. Fant ikke persongalleri")
+        }
+
+        val persongalleri = objectMapper.readValue(persongalleriJsonNode.opplysning.toJson(), Persongalleri::class.java)
 
         opprettGrunnlag(
             behandlingId,
@@ -418,9 +422,8 @@ class RealGrunnlagService(
         val gjeldendeGrunnlag = opplysningDao.finnHendelserIGrunnlag(sak).map { it.opplysning.id }
 
         val versjon = opplysningDao.hentBehandlingVersjon(behandlingId)
-        if (versjon?.laast ?: false) {
-            logger.warn("Grunnlag låst for behandling (id=$behandlingId). Avbryter oppdatering av grunnlaget...")
-            return
+        if (versjon?.laast == true) {
+            throw LaastGrunnlagKanIkkeEndres(behandlingId)
         }
 
         val hendelsenummer =
@@ -533,3 +536,12 @@ data class NavnOpplysningDTO(
     val etternavn: String,
     val foedselsnummer: String,
 )
+
+class LaastGrunnlagKanIkkeEndres(val behandlingId: UUID) :
+    IkkeTillattException(
+        code = "LAAST_GRUNNLAG_KAN_IKKE_ENDRES",
+        detail = """
+            Kan ikke sette ny grunnlagsversjon på behandling som er
+            låst til en versjon av grunnlag (behandlingId=$behandlingId)
+            """,
+    )

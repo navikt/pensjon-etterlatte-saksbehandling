@@ -54,7 +54,7 @@ export const ManueltOpphoerOversikt = (props: { behandling: IBehandlingReducer }
     setFeilmelding('')
     try {
       await lagreBeregningsGrunnlag({
-        behandlingsId: behandling.id,
+        behandlingId: behandling.id,
         grunnlag: {
           soeskenMedIBeregning: [],
           institusjonsopphold: [],

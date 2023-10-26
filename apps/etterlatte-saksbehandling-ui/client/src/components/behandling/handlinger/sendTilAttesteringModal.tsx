@@ -87,7 +87,11 @@ export const SendTilAttesteringModal = ({
               {handlinger.ATTESTERING_MODAL.JA.navn}
             </Button>
           </FlexRow>
-          {isFailure(fattVedtakStatus) && <ApiErrorAlert>En feil skjedde under attestering av vedtaket.</ApiErrorAlert>}
+          {isFailure(fattVedtakStatus) && (
+            <ApiErrorAlert>
+              {fattVedtakStatus.error.detail || 'En feil skjedde under attestering av vedtaket'}
+            </ApiErrorAlert>
+          )}
         </Modal.Body>
       </Modal>
     </>

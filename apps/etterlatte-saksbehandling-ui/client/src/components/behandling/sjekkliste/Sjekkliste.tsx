@@ -28,6 +28,7 @@ import { updateSjekkliste, updateSjekklisteItem } from '~store/reducers/Sjekklis
 import { PencilIcon } from '@navikt/aksel-icons'
 import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 import { hentSaksbehandlerForOppgaveUnderArbeid } from '~shared/api/oppgaver'
+import { SakType } from '~shared/types/sak'
 
 export const Sjekkliste = (props: { behandling: IBehandlingReducer }) => {
   const { behandling } = props
@@ -46,6 +47,11 @@ export const Sjekkliste = (props: { behandling: IBehandlingReducer }) => {
   const sjekklisteValideringsfeil = useSjekklisteValideringsfeil().length > 0
 
   const configContext = useContext(ConfigContext)
+
+  const rutinerBP =
+    'https://navno.sharepoint.com/:w:/r/sites/Pilot-Doffen/Delte dokumenter/General/Rutiner for sjekklister i Gjenny/BP - Rutine sjekkliste førstegangsbehandling.docx?web=1'
+  const rutinerOMS =
+    'https://navno.sharepoint.com/:w:/r/sites/Pilot-Doffen/Delte dokumenter/General/Rutiner for sjekklister i Gjenny/OMS - Rutine sjekkliste førstegangsbehandling .docx?web=1'
 
   const dispatchUpdatedItem = (item: ISjekklisteItem) => {
     dispatch(updateSjekklisteItem(item))
@@ -80,7 +86,9 @@ export const Sjekkliste = (props: { behandling: IBehandlingReducer }) => {
         <>
           <BodyLong>
             Gjennomgå alle punktene og marker de som krever handling.
-            <Link href="#">Her finner du rutine til punktene.</Link>
+            <Link href={behandling.sakType == SakType.BARNEPENSJON ? rutinerBP : rutinerOMS} target="_blank">
+              Her finner du rutine til punktene.
+            </Link>
           </BodyLong>
 
           {sjekkliste?.sjekklisteItems.map((item) => (

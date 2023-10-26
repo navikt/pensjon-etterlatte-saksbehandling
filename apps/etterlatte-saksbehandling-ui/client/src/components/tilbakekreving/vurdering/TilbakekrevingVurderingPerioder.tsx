@@ -1,5 +1,5 @@
 import {
-  Tilbakekreving,
+  TilbakekrevingBehandling,
   TilbakekrevingBeloep,
   TilbakekrevingPeriode,
   TilbakekrevingResultat,
@@ -14,10 +14,10 @@ import { HeadingWrapper, InnholdPadding } from '~components/behandling/soeknadso
 import { Button, Heading, Select, Table, TextField } from '@navikt/ds-react'
 import styled from 'styled-components'
 
-export function TilbakekrevingVurderingPerioder({ tilbakekreving }: { tilbakekreving: Tilbakekreving }) {
+export function TilbakekrevingVurderingPerioder({ behandling }: { behandling: TilbakekrevingBehandling }) {
   const dispatch = useAppDispatch()
   const [lagrePerioderStatus, lagrePerioderRequest] = useApiCall(lagreTilbakekrevingsperioder)
-  const [perioder, setPerioder] = useState<TilbakekrevingPeriode[]>(tilbakekreving.perioder)
+  const [perioder, setPerioder] = useState<TilbakekrevingPeriode[]>(behandling.tilbakekreving.perioder)
 
   const updateBeloeper = (index: number, oppdatertBeloep: TilbakekrevingBeloep) => {
     const oppdatert = perioder.map((periode, i) => (i === index ? { ...periode, ytelse: oppdatertBeloep } : periode))
@@ -26,7 +26,7 @@ export function TilbakekrevingVurderingPerioder({ tilbakekreving }: { tilbakekre
 
   const lagrePerioder = () => {
     // TODO validering?
-    lagrePerioderRequest({ tilbakekrevingsId: tilbakekreving.id, perioder }, (lagretTilbakekreving) => {
+    lagrePerioderRequest({ behandlingsId: behandling.id, perioder }, (lagretTilbakekreving) => {
       dispatch(addTilbakekreving(lagretTilbakekreving))
     })
   }

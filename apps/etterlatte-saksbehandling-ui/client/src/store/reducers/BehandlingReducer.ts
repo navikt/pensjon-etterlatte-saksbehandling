@@ -16,7 +16,9 @@ export const addBehandling = createAction<IDetaljertBehandling>('behandling/add'
 export const resetBehandling = createAction('behandling/reset')
 export const oppdaterGyldighetsproeving = createAction<IGyldighetResultat>('behandling/gyldighetsprøving')
 export const oppdaterVirkningstidspunkt = createAction<Virkningstidspunkt>('behandling/virkningstidspunkt')
-export const updateVilkaarsvurdering = createAction<IVilkaarsvurdering>('behandling/update_vilkaarsvurdering')
+export const updateVilkaarsvurdering = createAction<IVilkaarsvurdering | undefined>(
+  'behandling/update_vilkaarsvurdering'
+)
 export const oppdaterKommerBarnetTilgode = createAction<IKommerBarnetTilgode>('behandling/kommerBarnetTilgode')
 export const oppdaterUtenlandstilsnitt = createAction<IUtenlandstilsnitt>('behandling/utenlandstilsnitt')
 export const oppdaterBoddEllerArbeidetUtlandet = createAction<IBoddEllerArbeidetUtlandet>(

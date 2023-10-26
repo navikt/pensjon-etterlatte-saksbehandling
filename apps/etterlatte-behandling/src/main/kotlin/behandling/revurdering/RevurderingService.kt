@@ -240,8 +240,8 @@ class RevurderingService(
         )
     }
 
-    private fun behandlingErAvTypenRevurderingOgKanEndres(behandlingsId: UUID) {
-        val behandling = hentBehandling(behandlingsId)
+    private fun behandlingErAvTypenRevurderingOgKanEndres(behandlingId: UUID) {
+        val behandling = hentBehandling(behandlingId)
         if (behandling?.type != BehandlingType.REVURDERING) {
             throw UgyldigBehandlingTypeForRevurdering()
         }
@@ -251,13 +251,13 @@ class RevurderingService(
     }
 
     fun lagreRevurderingInfo(
-        behandlingsId: UUID,
+        behandlingId: UUID,
         revurderingMedBegrunnelse: RevurderingMedBegrunnelse,
         navIdent: String,
     ) {
-        behandlingErAvTypenRevurderingOgKanEndres(behandlingsId)
+        behandlingErAvTypenRevurderingOgKanEndres(behandlingId)
         val kilde = Grunnlagsopplysning.Saksbehandler.create(navIdent)
-        revurderingDao.lagreRevurderingInfo(behandlingsId, revurderingMedBegrunnelse, kilde)
+        revurderingDao.lagreRevurderingInfo(behandlingId, revurderingMedBegrunnelse, kilde)
     }
 
     private fun opprettRevurdering(

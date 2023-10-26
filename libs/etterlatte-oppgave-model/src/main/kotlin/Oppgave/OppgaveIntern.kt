@@ -36,10 +36,6 @@ data class OppgaveIntern(
         return Status.erAvsluttet(this.status)
     }
 
-    fun erUnderbehandling(): Boolean {
-        return Status.erUnderbehandling(this.status)
-    }
-
     fun erAttestering(): Boolean {
         return OppgaveType.ATTESTERING === type
     }

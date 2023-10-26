@@ -74,20 +74,28 @@ internal class VilkaarsvurderingRepositoryTest {
 
     @Test
     fun `skal kun slette vilkaarsvurdering for en gitt behandlingId`() {
-        val annenVilkaarsvurdring = UUID.randomUUID()
-        vilkaarsvurderingRepository.opprettVilkaarsvurdering(vilkaarsvurdering)
-        vilkaarsvurderingRepository.opprettVilkaarsvurdering(
-            vilkaarsvurdering.copy(
-                behandlingId = annenVilkaarsvurdring,
-                id = UUID.randomUUID(),
-                vilkaar = vilkaarsvurdering.vilkaar.map { it.copy(id = UUID.randomUUID()) },
-            ),
-        )
+        val opprettetVilkaarsvurdering = vilkaarsvurderingRepository.opprettVilkaarsvurdering(vilkaarsvurdering)
+        val opprettVilkaarsvurderingMedResultat =
+            vilkaarsvurderingRepository.lagreVilkaarsvurderingResultat(
+                opprettetVilkaarsvurdering.behandlingId,
+                vilkaarsvurdering.virkningstidspunkt.atDay(1),
+                vilkaarsvurderingResultat,
+            )
 
-        vilkaarsvurderingRepository.hent(vilkaarsvurdering.behandlingId) shouldNotBe null
-        vilkaarsvurderingRepository.slettVilkaarvurdering(vilkaarsvurdering.behandlingId) shouldBe true
-        vilkaarsvurderingRepository.hent(vilkaarsvurdering.behandlingId) shouldBe null
-        vilkaarsvurderingRepository.hent(annenVilkaarsvurdring) shouldNotBe null
+        val revurdertVilkaarsvurdering =
+            vilkaarsvurderingRepository.kopierVilkaarsvurdering(
+                opprettVilkaarsvurderingMedResultat.copy(
+                    behandlingId = UUID.randomUUID(),
+                    id = UUID.randomUUID(),
+                    vilkaar = vilkaarsvurdering.vilkaar.map { it.copy(id = UUID.randomUUID()) },
+                ),
+                opprettetVilkaarsvurdering.id,
+            )
+
+        vilkaarsvurderingRepository.hent(revurdertVilkaarsvurdering.behandlingId) shouldNotBe null
+        vilkaarsvurderingRepository.slettVilkaarvurdering(revurdertVilkaarsvurdering.id) shouldBe true
+        vilkaarsvurderingRepository.hent(revurdertVilkaarsvurdering.behandlingId) shouldBe null
+        vilkaarsvurderingRepository.hent(opprettetVilkaarsvurdering.behandlingId) shouldNotBe null
     }
 
     @Test

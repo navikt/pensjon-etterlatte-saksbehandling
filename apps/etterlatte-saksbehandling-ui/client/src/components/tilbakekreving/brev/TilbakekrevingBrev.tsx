@@ -2,7 +2,7 @@ import { Alert, ErrorMessage, Heading } from '@navikt/ds-react'
 import { Content, ContentHeader, FlexRow } from '~shared/styled'
 import { HeadingWrapper } from '~components/behandling/soeknadsoversikt/styled'
 import { SendTilAttesteringModal } from '~components/behandling/handlinger/sendTilAttesteringModal'
-import { Tilbakekreving, TilbakekrevingStatus } from '~shared/types/Tilbakekreving'
+import { TilbakekrevingBehandling, TilbakekrevingStatus } from '~shared/types/Tilbakekreving'
 import { fattVedtak, opprettVedtak } from '~shared/api/tilbakekreving'
 import React, { useEffect, useState } from 'react'
 import { IBrev } from '~shared/types/Brev'
@@ -10,11 +10,11 @@ import { isFailure, isPending, isPendingOrInitial, useApiCall } from '~shared/ho
 import { hentVedtaksbrev, opprettVedtaksbrev } from '~shared/api/brev'
 import Spinner from '~shared/Spinner'
 import styled from 'styled-components'
-import ForhaandsvisningBrev from '~components/behandling/brev/ForhaandsvisningBrev'
 import MottakerPanel from '~components/behandling/brev/detaljer/MottakerPanel'
 import { useVedtak } from '~components/vedtak/useVedtak'
+import RedigerbartBrev from '~components/behandling/brev/RedigerbartBrev'
 
-export function TilbakekrevingBrev({ tilbakekreving }: { tilbakekreving: Tilbakekreving }) {
+export function TilbakekrevingBrev({ tilbakekreving }: { tilbakekreving: TilbakekrevingBehandling }) {
   const kanAttesteres = [TilbakekrevingStatus.OPPRETTET, TilbakekrevingStatus.UNDER_ARBEID].includes(
     tilbakekreving.status
   )
@@ -68,7 +68,7 @@ export function TilbakekrevingBrev({ tilbakekreving }: { tilbakekreving: Tilbake
           </ContentHeader>
         </Sidebar>
 
-        {!!vedtaksbrev && <ForhaandsvisningBrev brev={vedtaksbrev} />}
+        {vedtaksbrev && <RedigerbartBrev brev={vedtaksbrev} kanRedigeres={true} />}
 
         {isFailure(hentBrevStatus) && <ErrorMessage>Feil ved henting av brev</ErrorMessage>}
         {isFailure(opprettBrevStatus) && <ErrorMessage>Kunne ikke opprette brev</ErrorMessage>}

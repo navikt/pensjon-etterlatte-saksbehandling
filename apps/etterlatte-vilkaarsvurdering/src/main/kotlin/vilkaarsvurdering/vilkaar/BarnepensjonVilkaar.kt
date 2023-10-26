@@ -15,7 +15,6 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarOpplysningType.SOE
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaarsgrunnlag
 import no.nav.etterlatte.vilkaarsvurdering.VilkaarFeatureToggle
-import java.util.UUID
 
 object BarnepensjonVilkaar {
     fun inngangsvilkaar(
@@ -415,13 +414,5 @@ object BarnepensjonVilkaar {
             opplysningsType = type,
             kilde = kilde,
             opplysning = verdi,
-        )
-
-    private fun Virkningstidspunkt.toVilkaarsgrunnlag() =
-        Vilkaarsgrunnlag(
-            id = UUID.randomUUID(),
-            opplysningsType = VilkaarOpplysningType.VIRKNINGSTIDSPUNKT,
-            kilde = kilde,
-            opplysning = dato,
         )
 }

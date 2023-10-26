@@ -65,7 +65,7 @@ class TilbakekrevingKlient(
                     vedtakId = vedtak.vedtakId.toBigInteger()
                     datoVedtakFagsystem = vedtak.fattetVedtak.dato.toXMLDate()
                     saksbehId = vedtak.fattetVedtak.saksbehandler
-                    enhetAnsvarlig = vedtak.fattetVedtak.enhet
+                    enhetAnsvarlig = ANSVARLIG_ENHET
                     kodeHjemmel = vedtak.vurdering.hjemmel
                     renterBeregnes =
                         if (vedtak.perioder.any { it.ytelse.rentetillegg > 0 }) {
@@ -171,5 +171,9 @@ class TilbakekrevingKlient(
     private enum class RenterBeregnes(val kode: String) {
         JA("J"),
         NEI("N"),
+    }
+
+    private companion object {
+        const val ANSVARLIG_ENHET = "4819"
     }
 }

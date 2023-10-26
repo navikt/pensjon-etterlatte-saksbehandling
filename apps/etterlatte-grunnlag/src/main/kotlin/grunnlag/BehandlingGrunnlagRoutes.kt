@@ -9,7 +9,7 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.klienter.BehandlingKlient
-import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
+import no.nav.etterlatte.libs.common.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.grunnlag.NyeSaksopplysninger
 import no.nav.etterlatte.libs.common.grunnlag.OppdaterGrunnlagRequest
 import no.nav.etterlatte.libs.common.grunnlag.Opplysningsbehov
@@ -26,7 +26,7 @@ fun Route.behandlingGrunnlagRoute(
      *  Dette blir en stegvis endring for å redusere sjansen for at alt brekker.
      *  Sak ID skal fjernes så fort vi har versjonert alt grunnlag i dev/prod med behandlingId
      **/
-    route("/behandling/{$BEHANDLINGSID_CALL_PARAMETER}") {
+    route("/behandling/{$BEHANDLINGID_CALL_PARAMETER}") {
         get {
             withBehandlingId(behandlingKlient) { behandlingId ->
                 when (val opplysningsgrunnlag = grunnlagService.hentOpplysningsgrunnlag(behandlingId)) {
@@ -83,10 +83,12 @@ fun Route.behandlingGrunnlagRoute(
         }
 
         post("oppdater-grunnlag") {
-            withBehandlingId(behandlingKlient) { behandlingId ->
-                val request = call.receive<OppdaterGrunnlagRequest>()
-                grunnlagService.oppdaterGrunnlag(behandlingId, request.sakId, request.sakType)
-                call.respond(HttpStatusCode.OK)
+            kunSystembruker {
+                withBehandlingId(behandlingKlient) { behandlingId ->
+                    val request = call.receive<OppdaterGrunnlagRequest>()
+                    grunnlagService.oppdaterGrunnlag(behandlingId, request.sakId, request.sakType)
+                    call.respond(HttpStatusCode.OK)
+                }
             }
         }
     }

@@ -10,8 +10,8 @@ import io.ktor.server.routing.application
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
-import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
-import no.nav.etterlatte.libs.common.behandlingsId
+import no.nav.etterlatte.libs.common.BEHANDLINGID_CALL_PARAMETER
+import no.nav.etterlatte.libs.common.behandlingId
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.trygdetid.avtale.Trygdeavtale
@@ -38,11 +38,11 @@ fun Route.avtale(
             call.respond(avtaleService.hentAvtaleKriterier())
         }
 
-        route("{$BEHANDLINGSID_CALL_PARAMETER}") {
+        route("{$BEHANDLINGID_CALL_PARAMETER}") {
             get {
                 withBehandlingId(behandlingKlient) {
-                    logger.info("Henter trygdeavtale for behandling $behandlingsId")
-                    val avtale = avtaleService.hentAvtaleForBehandling(behandlingsId)
+                    logger.info("Henter trygdeavtale for behandling $behandlingId")
+                    val avtale = avtaleService.hentAvtaleForBehandling(behandlingId)
                     if (avtale != null) {
                         call.respond(avtale)
                     } else {
@@ -53,10 +53,10 @@ fun Route.avtale(
 
             post {
                 withBehandlingId(behandlingKlient) {
-                    logger.info("Lagrer trygdeavtale for behandling $behandlingsId")
+                    logger.info("Lagrer trygdeavtale for behandling $behandlingId")
 
                     val trygdeavtaleRequest = call.receive<TrygdeavtaleRequest>()
-                    val avtale = trygdeavtaleRequest.toTrygdeavtale(behandlingsId, brukerTokenInfo)
+                    val avtale = trygdeavtaleRequest.toTrygdeavtale(behandlingId, brukerTokenInfo)
 
                     when (trygdeavtaleRequest.id) {
                         null -> avtaleService.opprettAvtale(avtale)

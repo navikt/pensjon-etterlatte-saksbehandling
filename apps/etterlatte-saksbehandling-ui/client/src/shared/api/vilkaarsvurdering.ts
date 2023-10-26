@@ -1,11 +1,20 @@
 import { Kilde } from '~shared/types/kilde'
 import { apiClient, ApiResponse } from './apiClient'
 
-export const hentVilkaarsvurdering = async (behandlingsId: string): Promise<ApiResponse<IVilkaarsvurdering>> =>
-  apiClient.get<IVilkaarsvurdering>(`/vilkaarsvurdering/${behandlingsId}`)
+export const hentVilkaarsvurdering = async (behandlingId: string): Promise<ApiResponse<IVilkaarsvurdering>> =>
+  apiClient.get<IVilkaarsvurdering>(`/vilkaarsvurdering/${behandlingId}`)
 
-export const opprettVilkaarsvurdering = async (behandlingsId: string): Promise<ApiResponse<IVilkaarsvurdering>> =>
-  apiClient.post<IVilkaarsvurdering>(`/vilkaarsvurdering/${behandlingsId}/opprett`, {})
+export const opprettVilkaarsvurdering = async (args: {
+  behandlingId: string
+  kopierVedRevurdering: boolean
+}): Promise<ApiResponse<IVilkaarsvurdering>> =>
+  apiClient.post<IVilkaarsvurdering>(
+    `/vilkaarsvurdering/${args.behandlingId}/opprett?kopierVedRevurdering=${args.kopierVedRevurdering}`,
+    {}
+  )
+
+export const slettVilkaarsvurdering = async (behandlingsId: string): Promise<ApiResponse<void>> =>
+  apiClient.delete(`/vilkaarsvurdering/${behandlingsId}`)
 
 export const vurderVilkaar = async (args: {
   behandlingId: string

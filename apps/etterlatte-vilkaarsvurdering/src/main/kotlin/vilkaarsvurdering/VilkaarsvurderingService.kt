@@ -185,7 +185,10 @@ class VilkaarsvurderingService(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ) = if (behandlingKlient.settBehandlingStatusOpprettet(behandlingId, brukerTokenInfo, false)) {
-        vilkaarsvurderingRepository.slettVilkaarvurdering(behandlingId)
+        val vilkaarsvurdering =
+            vilkaarsvurderingRepository.hent(behandlingId)
+                ?: throw IllegalStateException("Vilkårsvurdering eksisterer ikke")
+        vilkaarsvurderingRepository.slettVilkaarvurdering(vilkaarsvurdering.id)
         behandlingKlient.settBehandlingStatusOpprettet(behandlingId, brukerTokenInfo, true)
     } else {
         throw BehandlingstilstandException

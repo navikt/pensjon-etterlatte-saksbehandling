@@ -94,7 +94,7 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
 
       postBeregningsgrunnlag(
         {
-          behandlingsId: behandling.id,
+          behandlingId: behandling.id,
           grunnlag: beregningsgrunnlag,
         },
         () =>

@@ -21,10 +21,10 @@ class BeregningService(
 
     fun opprettBeregningsgrunnlagFraForrigeBehandling(
         omregningsId: UUID,
-        forrigeBehandlingsId: UUID,
+        forrigeBehandlingId: UUID,
     ): HttpResponse =
         runBlocking {
-            beregningApp.post("$url/api/beregning/beregningsgrunnlag/$omregningsId/fra/$forrigeBehandlingsId")
+            beregningApp.post("$url/api/beregning/beregningsgrunnlag/$omregningsId/fra/$forrigeBehandlingId")
         }
 
     fun opprettBeregningsgrunnlag(

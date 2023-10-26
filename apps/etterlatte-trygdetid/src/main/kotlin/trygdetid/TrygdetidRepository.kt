@@ -89,7 +89,7 @@ class TrygdetidRepository(private val dataSource: DataSource) {
             if (trygdetid.beregnetTrygdetid != null) {
                 oppdaterBeregnetTrygdetid(trygdetid.behandlingId, trygdetid.beregnetTrygdetid, tx)
             }
-        }.let { hentTrygdetidMedIdNotNull(behandlingsId = trygdetid.behandlingId, trygdetidId = trygdetid.id) }
+        }.let { hentTrygdetidMedIdNotNull(behandlingId = trygdetid.behandlingId, trygdetidId = trygdetid.id) }
 
     fun oppdaterTrygdetid(
         oppdatertTrygdetid: Trygdetid,
@@ -98,7 +98,7 @@ class TrygdetidRepository(private val dataSource: DataSource) {
         dataSource.transaction { tx ->
             val gjeldendeTrygdetid =
                 hentTrygdetidMedIdNotNull(
-                    behandlingsId = oppdatertTrygdetid.behandlingId,
+                    behandlingId = oppdatertTrygdetid.behandlingId,
                     trygdetidId = oppdatertTrygdetid.id,
                 )
 
@@ -436,10 +436,10 @@ class TrygdetidRepository(private val dataSource: DataSource) {
         }
 
     private fun hentTrygdetidMedIdNotNull(
-        behandlingsId: UUID,
+        behandlingId: UUID,
         trygdetidId: UUID,
-    ) = hentTrygdetidMedId(behandlingsId, trygdetidId)
-        ?: throw Exception("Fant ikke trygdetid for $behandlingsId")
+    ) = hentTrygdetidMedId(behandlingId, trygdetidId)
+        ?: throw Exception("Fant ikke trygdetid for $behandlingId")
 
     private fun Row.toFaktiskTrygdetid(
         totalColumn: String,

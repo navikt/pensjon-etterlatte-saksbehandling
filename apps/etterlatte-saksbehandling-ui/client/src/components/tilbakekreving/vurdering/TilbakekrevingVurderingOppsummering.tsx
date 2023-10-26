@@ -1,16 +1,16 @@
-import { Tilbakekreving } from '~shared/types/Tilbakekreving'
+import { TilbakekrevingBehandling } from '~shared/types/Tilbakekreving'
 import { InnholdPadding } from '~components/behandling/soeknadsoversikt/styled'
 import React from 'react'
 import { Heading, Table } from '@navikt/ds-react'
 import styled from 'styled-components'
 import { NOK } from '~utils/formattering'
 
-export function TilbakekrevingVurderingOppsummering({ tilbakekreving }: { tilbakekreving: Tilbakekreving }) {
+export function TilbakekrevingVurderingOppsummering({ behandling }: { behandling: TilbakekrevingBehandling }) {
   function sum(beloeper: (number | null)[]) {
     if (beloeper.length === 0) return 0
     return beloeper.map((beloep) => (beloep ? beloep : 0)).reduce((sum, current) => (sum += current))
   }
-
+  const tilbakekreving = behandling.tilbakekreving
   const sumFeilutbetaling = sum(tilbakekreving.perioder.map((it) => it.ytelse.beregnetFeilutbetaling))
   const sumTilbakekreving = sum(tilbakekreving.perioder.map((it) => it.ytelse.bruttoTilbakekreving))
   const sumRenter = sum(tilbakekreving.perioder.map((it) => it.ytelse.rentetillegg))

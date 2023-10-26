@@ -18,7 +18,7 @@ import no.nav.etterlatte.User
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.inTransaction
-import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
+import no.nav.etterlatte.libs.common.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.FoedselsNummerMedGraderingDTO
 import no.nav.etterlatte.libs.common.FoedselsnummerDTO
 import no.nav.etterlatte.libs.common.KLAGEID_CALL_PARAMETER
@@ -78,7 +78,7 @@ val adressebeskyttelsePlugin: RouteScopedPlugin<PluginConfiguration> =
 
             if (bruker is Saksbehandler) {
                 val saksbehandlerGroupIdsByKey = pluginConfig.saksbehandlerGroupIdsByKey
-                val behandlingId = call.parameters[BEHANDLINGSID_CALL_PARAMETER]
+                val behandlingId = call.parameters[BEHANDLINGID_CALL_PARAMETER]
                 if (!behandlingId.isNullOrEmpty()) {
                     if (!pluginConfig.harTilgangBehandling(
                             behandlingId,

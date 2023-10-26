@@ -22,11 +22,18 @@ type behandlingRouteTypes =
   | 'revurderingsoversikt'
   | 'opphoeroversikt'
   | 'vilkaarsvurdering'
+  | 'aktivitetsplikt'
   | 'trygdetid'
   | 'beregningsgrunnlag'
-  | 'aktivitetsplikt'
   | 'beregne'
   | 'brev'
+
+export interface BehandlingRouteTypes {
+  path: string
+  description: string
+  kreverBehandlingsstatus?: IBehandlingStatus
+  sakstype?: SakType
+}
 
 const behandlingRoutes = (
   behandling: IBehandlingReducer
@@ -35,12 +42,63 @@ const behandlingRoutes = (
   { path: 'revurderingsoversikt', element: <Revurderingsoversikt behandling={behandling} /> },
   { path: 'opphoeroversikt', element: <ManueltOpphoerOversikt behandling={behandling} /> },
   { path: 'vilkaarsvurdering', element: <Vilkaarsvurdering behandling={behandling} /> },
+  { path: 'aktivitetsplikt', element: <Aktivitetsplikt behandling={behandling} /> },
   { path: 'trygdetid', element: <TrygdetidVisning behandling={behandling} /> },
   { path: 'beregningsgrunnlag', element: <Beregningsgrunnlag behandling={behandling} /> },
-  { path: 'aktivitetsplikt', element: <Aktivitetsplikt behandling={behandling} /> },
   { path: 'beregne', element: <Beregne behandling={behandling} /> },
   { path: 'brev', element: <Vedtaksbrev behandling={behandling} /> },
 ]
+
+const routeTypes = {
+  soeknadsoversikt: {
+    path: 'soeknadsoversikt',
+    description: 'Søknadsoversikt',
+  },
+  revurderingsoversikt: {
+    path: 'revurderingsoversikt',
+    description: 'Revurderingsoversikt',
+  },
+  opphoeroversikt: {
+    path: 'opphoeroversikt',
+    description: 'Opphøroversikt',
+  },
+  vilkaarsvurdering: {
+    path: 'vilkaarsvurdering',
+    description: 'Vilkårsvurdering',
+    kreverBehandlingsstatus: IBehandlingStatus.VILKAARSVURDERT,
+  },
+  aktivitetsplikt: {
+    path: 'aktivitetsplikt',
+    description: 'Oppfølging av aktivitet',
+    kreverBehandlingsstatus: IBehandlingStatus.VILKAARSVURDERT,
+    sakstype: SakType.OMSTILLINGSSTOENAD,
+  },
+  trygdetid: {
+    path: 'trygdetid',
+    description: 'Trygdetid',
+    kreverBehandlingsstatus: IBehandlingStatus.VILKAARSVURDERT,
+  },
+  beregningsgrunnlag: {
+    path: 'beregningsgrunnlag',
+    description: 'Beregningsgrunnlag',
+    kreverBehandlingsstatus: IBehandlingStatus.TRYGDETID_OPPDATERT,
+  },
+  beregning: {
+    path: 'beregne',
+    description: 'Beregning',
+    kreverBehandlingsstatus: IBehandlingStatus.BEREGNET,
+  },
+  brevBp: {
+    path: 'brev',
+    description: 'Vedtaksbrev',
+    kreverBehandlingsstatus: IBehandlingStatus.BEREGNET,
+  },
+  brevOms: {
+    path: 'brev',
+    description: 'Vedtaksbrev',
+    kreverBehandlingsstatus: IBehandlingStatus.AVKORTET,
+  },
+}
 
 function useRouteNavigation() {
   const [currentRoute, setCurrentRoute] = useState<string | undefined>()
@@ -83,71 +141,6 @@ export const useBehandlingRoutes = () => {
   return { next, back, lastPage, firstPage, behandlingRoutes: aktuelleRoutes, currentRoute, goto }
 }
 
-export interface BehandlingRouteTypes {
-  path: string
-  description: string
-  kreverBehandlingsstatus?: IBehandlingStatus
-  sakstype?: SakType
-}
-
-export function soeknadRoutes(behandling: IBehandlingReducer): Array<BehandlingRouteTypes> {
-  const soeknadsoversikt = { path: 'soeknadsoversikt', description: 'Søknadsoversikt' }
-  const vilkaarsvurdering = {
-    path: 'vilkaarsvurdering',
-    description: 'Vilkårsvurdering',
-    kreverBehandlingsstatus: IBehandlingStatus.VILKAARSVURDERT,
-  }
-  const trygdetid = {
-    path: 'trygdetid',
-    description: 'Trygdetid',
-    kreverBehandlingsstatus: IBehandlingStatus.VILKAARSVURDERT,
-  }
-  const beregningsgrunnlag = {
-    path: 'beregningsgrunnlag',
-    description: 'Beregningsgrunnlag',
-    kreverBehandlingsstatus: IBehandlingStatus.TRYGDETID_OPPDATERT,
-  }
-  const aktivitetsplikt = {
-    path: 'aktivitetsplikt',
-    description: 'Oppfølging av aktivitet',
-    kreverBehandlingsstatus: IBehandlingStatus.TRYGDETID_OPPDATERT,
-    sakstype: SakType.OMSTILLINGSSTOENAD,
-  }
-
-  const beregning = {
-    path: 'beregne',
-    description: 'Beregning',
-    kreverBehandlingsstatus: IBehandlingStatus.BEREGNET,
-  }
-  const brev = {
-    path: 'brev',
-    description: 'Vedtaksbrev',
-    kreverBehandlingsstatus:
-      behandling.sakType == SakType.OMSTILLINGSSTOENAD ? IBehandlingStatus.AVKORTET : IBehandlingStatus.BEREGNET,
-  }
-
-  const erAvslag = behandling.vilkårsprøving?.resultat?.utfall == VilkaarsvurderingResultat.IKKE_OPPFYLT
-
-  const defaultRoutes: Array<BehandlingRouteTypes> = erAvslag
-    ? [soeknadsoversikt, vilkaarsvurdering]
-    : [soeknadsoversikt, vilkaarsvurdering, trygdetid, beregningsgrunnlag, aktivitetsplikt, beregning]
-
-  const defaultRoutesForYtelse = defaultRoutes.filter(
-    (route) => route.sakstype === undefined || route.sakstype === behandling.sakType
-  )
-
-  if (behandlingSkalSendeBrev(behandling.behandlingType, behandling.revurderingsaarsak)) {
-    return [...defaultRoutesForYtelse, brev]
-  }
-
-  return defaultRoutesForYtelse
-}
-
-export const manueltOpphoerRoutes: Array<BehandlingRouteTypes> = [
-  { path: 'opphoeroversikt', description: 'Opphøroversikt' },
-  { path: 'beregne', description: 'Beregning', kreverBehandlingsstatus: IBehandlingStatus.BEREGNET },
-]
-
 const hentAktuelleRoutes = (behandling: IBehandlingReducer | null) => {
   if (!behandling) return []
 
@@ -171,57 +164,57 @@ const hentAktuelleRoutes = (behandling: IBehandlingReducer | null) => {
   }
 }
 
-export function revurderingRoutes(behandling: IBehandlingReducer): Array<BehandlingRouteTypes> {
-  const revurderingsoversikt = { path: 'revurderingsoversikt', description: 'Revurderingsoversikt' }
-  const vilkaarsvurdering = {
-    path: 'vilkaarsvurdering',
-    description: 'Vilkårsvurdering',
-    kreverBehandlingsstatus: IBehandlingStatus.VILKAARSVURDERT,
-  }
-  const trygdetid = {
-    path: 'trygdetid',
-    description: 'Trygdetid',
-    kreverBehandlingsstatus: IBehandlingStatus.VILKAARSVURDERT,
-  }
-  const beregningsgrunnlag = {
-    path: 'beregningsgrunnlag',
-    description: 'Beregningsgrunnlag',
-    kreverBehandlingsstatus: IBehandlingStatus.TRYGDETID_OPPDATERT,
-  }
-  const aktivitetsplikt = {
-    path: 'aktivitetsplikt',
-    description: 'Oppfølging av aktivitet',
-    kreverBehandlingsstatus: IBehandlingStatus.TRYGDETID_OPPDATERT,
-    sakstype: SakType.OMSTILLINGSSTOENAD,
-  }
-  const beregning = {
-    path: 'beregne',
-    description: 'Beregning',
-    kreverBehandlingsstatus: IBehandlingStatus.BEREGNET,
-  }
-  const brev = {
-    path: 'brev',
-    description: 'Vedtaksbrev',
-    kreverBehandlingsstatus:
-      behandling.sakType == SakType.OMSTILLINGSSTOENAD ? IBehandlingStatus.AVKORTET : IBehandlingStatus.BEREGNET,
-  }
+export function soeknadRoutes(behandling: IBehandlingReducer): Array<BehandlingRouteTypes> {
+  const avslag = behandling.vilkårsprøving?.resultat?.utfall == VilkaarsvurderingResultat.IKKE_OPPFYLT
 
-  const erRevurderingsaarsakAnnenOgOpphoer =
-    behandling.revurderingsaarsak == Revurderingaarsak.ANNEN &&
-    behandling.vilkårsprøving?.resultat?.utfall == VilkaarsvurderingResultat.IKKE_OPPFYLT
+  const defaultRoutes: Array<BehandlingRouteTypes> = avslag
+    ? [routeTypes.soeknadsoversikt, routeTypes.vilkaarsvurdering]
+    : [
+        routeTypes.soeknadsoversikt,
+        routeTypes.vilkaarsvurdering,
+        routeTypes.aktivitetsplikt,
+        routeTypes.trygdetid,
+        routeTypes.beregningsgrunnlag,
+        routeTypes.beregning,
+      ]
 
-  const defaultRoutes: Array<BehandlingRouteTypes> =
-    erOpphoer(behandling.revurderingsaarsak!!) || erRevurderingsaarsakAnnenOgOpphoer
-      ? [revurderingsoversikt, vilkaarsvurdering, beregning]
-      : [revurderingsoversikt, vilkaarsvurdering, trygdetid, beregningsgrunnlag, aktivitetsplikt, beregning]
-
-  const defaultRoutesForYtelse = defaultRoutes.filter(
-    (route) => route.sakstype === undefined || route.sakstype === behandling.sakType
+  return leggTilBrevHvisKrevesAvBehandling(defaultRoutes, behandling).filter(
+    routesAktuelleForSakstype(behandling.sakType)
   )
-
-  if (behandlingSkalSendeBrev(behandling.behandlingType, behandling.revurderingsaarsak)) {
-    return [...defaultRoutesForYtelse, brev]
-  }
-
-  return defaultRoutesForYtelse
 }
+
+export function revurderingRoutes(behandling: IBehandlingReducer): Array<BehandlingRouteTypes> {
+  const opphoer =
+    erOpphoer(behandling.revurderingsaarsak!!) ||
+    (behandling.revurderingsaarsak == Revurderingaarsak.ANNEN &&
+      behandling.vilkårsprøving?.resultat?.utfall == VilkaarsvurderingResultat.IKKE_OPPFYLT)
+
+  const defaultRoutes: Array<BehandlingRouteTypes> = opphoer
+    ? [routeTypes.revurderingsoversikt, routeTypes.vilkaarsvurdering, routeTypes.beregning]
+    : [
+        routeTypes.revurderingsoversikt,
+        routeTypes.vilkaarsvurdering,
+        routeTypes.trygdetid,
+        routeTypes.beregningsgrunnlag,
+        routeTypes.beregning,
+      ]
+
+  return leggTilBrevHvisKrevesAvBehandling(defaultRoutes, behandling).filter(
+    routesAktuelleForSakstype(behandling.sakType)
+  )
+}
+
+const leggTilBrevHvisKrevesAvBehandling = (
+  routes: Array<BehandlingRouteTypes>,
+  behandling: IBehandlingReducer
+): Array<BehandlingRouteTypes> => {
+  if (behandlingSkalSendeBrev(behandling.behandlingType, behandling.revurderingsaarsak)) {
+    return [...routes, behandling.sakType == SakType.OMSTILLINGSSTOENAD ? routeTypes.brevOms : routeTypes.brevBp]
+  }
+  return routes
+}
+
+const routesAktuelleForSakstype = (sakType: SakType) => (route: BehandlingRouteTypes) =>
+  route.sakstype === undefined || route.sakstype === sakType
+
+export const manueltOpphoerRoutes: Array<BehandlingRouteTypes> = [routeTypes.opphoeroversikt, routeTypes.beregning]

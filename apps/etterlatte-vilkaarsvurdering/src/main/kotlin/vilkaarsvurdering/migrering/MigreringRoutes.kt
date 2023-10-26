@@ -10,7 +10,7 @@ import io.ktor.server.routing.application
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import io.ktor.util.pipeline.PipelineContext
-import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
+import no.nav.etterlatte.libs.common.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
@@ -29,7 +29,7 @@ fun Route.migrering(
     route("/api/vilkaarsvurdering/migrering") {
         val logger = application.log
 
-        post("/{$BEHANDLINGSID_CALL_PARAMETER}") {
+        post("/{$BEHANDLINGID_CALL_PARAMETER}") {
             withBehandlingId(behandlingKlient) { behandlingId ->
                 logger.info("Oppretter vilkårsvurdering for migrering for $behandlingId")
                 vilkaarsvurderingService.opprettVilkaarsvurdering(behandlingId, brukerTokenInfo)

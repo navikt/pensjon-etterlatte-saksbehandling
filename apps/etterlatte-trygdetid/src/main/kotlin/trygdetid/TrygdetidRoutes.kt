@@ -11,9 +11,9 @@ import io.ktor.server.routing.delete
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
-import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
+import no.nav.etterlatte.libs.common.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.Vedtaksloesning
-import no.nav.etterlatte.libs.common.behandlingsId
+import no.nav.etterlatte.libs.common.behandlingId
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.trygdetid.BeregnetTrygdetidGrunnlagDto
@@ -38,13 +38,13 @@ fun Route.trygdetid(
     trygdetidService: TrygdetidService,
     behandlingKlient: BehandlingKlient,
 ) {
-    route("/api/trygdetid/{$BEHANDLINGSID_CALL_PARAMETER}") {
+    route("/api/trygdetid/{$BEHANDLINGID_CALL_PARAMETER}") {
         val logger = application.log
 
         get {
             withBehandlingId(behandlingKlient) {
-                logger.info("Henter trygdetid for behandling $behandlingsId")
-                val trygdetid = trygdetidService.hentTrygdetid(behandlingsId, brukerTokenInfo)
+                logger.info("Henter trygdetid for behandling $behandlingId")
+                val trygdetid = trygdetidService.hentTrygdetid(behandlingId, brukerTokenInfo)
                 if (trygdetid != null) {
                     call.respond(trygdetid.toDto())
                 } else {
@@ -55,21 +55,21 @@ fun Route.trygdetid(
 
         post {
             withBehandlingId(behandlingKlient) {
-                logger.info("Oppretter trygdetid for behandling $behandlingsId")
-                val trygdetid = trygdetidService.opprettTrygdetid(behandlingsId, brukerTokenInfo)
+                logger.info("Oppretter trygdetid for behandling $behandlingId")
+                val trygdetid = trygdetidService.opprettTrygdetid(behandlingId, brukerTokenInfo)
                 call.respond(trygdetid.toDto())
             }
         }
 
         post("overstyr") {
             withBehandlingId(behandlingKlient) {
-                logger.info("Oppdater trygdetid (overstyring) for behandling $behandlingsId")
+                logger.info("Oppdater trygdetid (overstyring) for behandling $behandlingId")
                 val trygdetidOverstyringDto = call.receive<TrygdetidOverstyringDto>()
 
                 val trygdetid =
                     trygdetidService.overstyrNorskPoengaar(
                         trygdetidOverstyringDto.id,
-                        behandlingsId,
+                        behandlingId,
                         trygdetidOverstyringDto.overstyrtNorskPoengaar,
                     )
                 call.respond(trygdetid.toDto())
@@ -78,17 +78,17 @@ fun Route.trygdetid(
 
         post("/grunnlag") {
             withBehandlingId(behandlingKlient) {
-                logger.info("Legger til trygdetidsgrunnlag for behandling $behandlingsId")
+                logger.info("Legger til trygdetidsgrunnlag for behandling $behandlingId")
                 val trygdetidgrunnlagDto = call.receive<TrygdetidGrunnlagDto>()
 
                 try {
                     trygdetidService.lagreTrygdetidGrunnlag(
-                        behandlingsId,
+                        behandlingId,
                         brukerTokenInfo,
                         trygdetidgrunnlagDto.toTrygdetidGrunnlag(brukerTokenInfo),
                     ).let { trygdetid -> call.respond(trygdetid.toDto()) }
                 } catch (overlappendePeriodeException: OverlappendePeriodeException) {
-                    logger.info("Klarte ikke legge til ny trygdetidsperiode for $behandlingsId pga overlapp.")
+                    logger.info("Klarte ikke legge til ny trygdetidsperiode for $behandlingId pga overlapp.")
                     call.respond(HttpStatusCode.Conflict)
                 }
             }
@@ -96,15 +96,15 @@ fun Route.trygdetid(
 
         post("/grunnlag/yrkesskade") {
             withBehandlingId(behandlingKlient) {
-                logger.info("Legger til yrkesskade trygdetidsgrunnlag for behandling $behandlingsId")
+                logger.info("Legger til yrkesskade trygdetidsgrunnlag for behandling $behandlingId")
                 try {
                     trygdetidService.lagreYrkesskadeTrygdetidGrunnlag(
-                        behandlingsId,
+                        behandlingId,
                         brukerTokenInfo,
                     ).let { trygdetid -> call.respond(trygdetid.toDto()) }
                 } catch (overlappendePeriodeException: OverlappendePeriodeException) {
                     logger.info(
-                        "Klarte ikke legge til ny yrkesskade trygdetidsperiode for $behandlingsId pga overlapp.",
+                        "Klarte ikke legge til ny yrkesskade trygdetidsperiode for $behandlingId pga overlapp.",
                     )
                     call.respond(HttpStatusCode.Conflict)
                 }
@@ -114,10 +114,10 @@ fun Route.trygdetid(
         delete("/grunnlag/{trygdetidGrunnlagId}") {
             withBehandlingId(behandlingKlient) {
                 withParam("trygdetidGrunnlagId") { trygdetidGrunnlagId ->
-                    logger.info("Sletter trygdetidsgrunnlag for behandling $behandlingsId")
+                    logger.info("Sletter trygdetidsgrunnlag for behandling $behandlingId")
                     val trygdetid =
                         trygdetidService.slettTrygdetidGrunnlag(
-                            behandlingsId,
+                            behandlingId,
                             trygdetidGrunnlagId,
                             brukerTokenInfo,
                         )
@@ -128,20 +128,20 @@ fun Route.trygdetid(
 
         post("/kopier/{forrigeBehandlingId}") {
             withBehandlingId(behandlingKlient) {
-                logger.info("Oppretter kopi av forrige trygdetid for behandling $behandlingsId")
+                logger.info("Oppretter kopi av forrige trygdetid for behandling $behandlingId")
                 val forrigeBehandlingId = call.uuid("forrigeBehandlingId")
-                trygdetidService.kopierSisteTrygdetidberegning(behandlingsId, forrigeBehandlingId, brukerTokenInfo)
+                trygdetidService.kopierSisteTrygdetidberegning(behandlingId, forrigeBehandlingId, brukerTokenInfo)
                 call.respond(HttpStatusCode.OK)
             }
         }
 
         post("/migrering") {
             withBehandlingId(behandlingKlient) {
-                logger.info("Migrering overstyrer trygdetid for behandling $behandlingsId")
+                logger.info("Migrering overstyrer trygdetid for behandling $behandlingId")
 
                 val beregnetTrygdetid = call.receive<DetaljertBeregnetTrygdetidResultat>()
 
-                call.respond(trygdetidService.overstyrBeregnetTrygdetid(behandlingsId, beregnetTrygdetid).toDto())
+                call.respond(trygdetidService.overstyrBeregnetTrygdetid(behandlingId, beregnetTrygdetid).toDto())
             }
         }
     }

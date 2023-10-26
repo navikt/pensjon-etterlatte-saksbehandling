@@ -50,6 +50,3 @@ class BeregningKlientImpl(
         }
     }
 }
-
-class KunneIkkeHenteFraBeregning(override val message: String, override val cause: Throwable) :
-    Exception(message, cause)

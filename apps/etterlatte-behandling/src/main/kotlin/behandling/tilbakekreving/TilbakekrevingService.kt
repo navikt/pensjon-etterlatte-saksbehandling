@@ -3,14 +3,18 @@ package no.nav.etterlatte.behandling.tilbakekreving
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.hendelse.HendelseType
+import no.nav.etterlatte.behandling.klienter.TilbakekrevingKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.VedtakOppgaveDTO
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.tilbakekreving.FattetVedtak
 import no.nav.etterlatte.libs.common.tilbakekreving.Kravgrunnlag
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingPeriode
+import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingPeriodeVedtak
+import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVedtak
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVurdering
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.sak.SakDao
@@ -25,6 +29,7 @@ class TilbakekrevingService(
     private val hendelseDao: HendelseDao,
     private val oppgaveService: OppgaveService,
     private val vedtakKlient: VedtakKlient,
+    private val tilbakekrevingKlient: TilbakekrevingKlient,
 ) {
     private val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
@@ -169,25 +174,25 @@ class TilbakekrevingService(
         brukerTokenInfo: BrukerTokenInfo,
     ) = inTransaction {
         logger.info("Attesterer vedtak for tilbakekreving=$tilbakekrevingId")
-        val tilbakekreving = tilbakekrevingDao.hentTilbakekreving(tilbakekrevingId)
-        if (tilbakekreving.status != TilbakekrevingStatus.FATTET_VEDTAK) {
+        val behandling = tilbakekrevingDao.hentTilbakekreving(tilbakekrevingId)
+        if (behandling.status != TilbakekrevingStatus.FATTET_VEDTAK) {
             throw TilbakekrevingFeilTilstandException("Tilbakekreving kan ikke attesteres fordi vedtak ikke er fattet")
         }
 
-        val vedtakId =
+        val vedtak =
             runBlocking {
                 vedtakKlient.attesterVedtakTilbakekreving(
-                    tilbakekrevingId = tilbakekreving.id,
+                    tilbakekrevingId = behandling.id,
                     brukerTokenInfo = brukerTokenInfo,
-                    enhet = tilbakekreving.sak.enhet,
+                    enhet = behandling.sak.enhet,
                 )
             }
-        tilbakekrevingDao.lagreTilbakekreving(tilbakekreving.copy(status = TilbakekrevingStatus.ATTESTERT))
+        tilbakekrevingDao.lagreTilbakekreving(behandling.copy(status = TilbakekrevingStatus.ATTESTERT))
 
         hendelseDao.vedtakHendelse(
-            behandlingId = tilbakekreving.id,
-            sakId = tilbakekreving.sak.id,
-            vedtakId = vedtakId,
+            behandlingId = behandling.id,
+            sakId = behandling.sak.id,
+            vedtakId = vedtak.id,
             hendelse = HendelseType.ATTESTERT,
             inntruffet = Tidspunkt.now(),
             saksbehandler = brukerTokenInfo.ident(),
@@ -196,11 +201,36 @@ class TilbakekrevingService(
         )
 
         oppgaveService.ferdigStillOppgaveUnderBehandling(
-            referanse = tilbakekreving.id.toString(),
+            referanse = behandling.id.toString(),
             saksbehandler = brukerTokenInfo,
         )
 
-        // TODO start overlevering av vedtak til tilbakekreving
+        runBlocking {
+            tilbakekrevingKlient.sendTilbakekrevingsvedtak(
+                brukerTokenInfo,
+                TilbakekrevingVedtak(
+                    vedtakId = vedtak.id,
+                    fattetVedtak =
+                        FattetVedtak(
+                            saksbehandler = vedtak.fattetAv,
+                            enhet = vedtak.enhet,
+                            dato = vedtak.dato,
+                        ),
+                    aarsak = requireNotNull(behandling.tilbakekreving.vurdering.aarsak),
+                    hjemmel = requireNotNull(behandling.tilbakekreving.vurdering.hjemmel?.name),
+                    kravgrunnlagId = behandling.tilbakekreving.kravgrunnlag.kravgrunnlagId.value.toString(),
+                    kontrollfelt = behandling.tilbakekreving.kravgrunnlag.kontrollFelt.value,
+                    perioder =
+                        behandling.tilbakekreving.perioder.map {
+                            TilbakekrevingPeriodeVedtak(
+                                maaned = it.maaned,
+                                ytelse = it.ytelse.toVedtak(),
+                                feilkonto = it.ytelse.toVedtak(),
+                            )
+                        },
+                ),
+            )
+        }
     }
 
     suspend fun underkjennVedtak(

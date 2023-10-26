@@ -57,6 +57,9 @@ spec:
     - name: ETTERLATTE_PROXY_SCOPE
       value: api://dev-fss.etterlatte.etterlatte-proxy/.default
   accessPolicy:
+    inbound:
+      rules:
+        - application: etterlatte-behandling
     outbound:
       rules:
         - application: etterlatte-behandling

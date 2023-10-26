@@ -23,6 +23,7 @@ import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
 import no.nav.etterlatte.behandling.klienter.NavAnsattKlient
 import no.nav.etterlatte.behandling.klienter.Norg2Klient
 import no.nav.etterlatte.behandling.klienter.OpprettetBrevDto
+import no.nav.etterlatte.behandling.klienter.TilbakekrevingKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.behandling.tilbakekreving.TilbakekrevingBehandling
 import no.nav.etterlatte.common.Enheter
@@ -47,8 +48,10 @@ import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.GeografiskTilknytning
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVedtak
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.toObjectNode
+import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingVedtakLagretDto
 import no.nav.etterlatte.libs.database.POSTGRES_VERSION
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
@@ -141,6 +144,7 @@ abstract class BehandlingIntegrationTest {
                 gosysOppgaveKlient = GosysOppgaveKlientTest(),
                 brevApiHttpClient = BrevApiKlientTest(),
                 klageHttpClient = klageHttpClientTest(),
+                tilbakekrevingKlient = TilbakekrevingKlientTest(),
             ).also {
                 it.dataSource.migrate()
             }
@@ -469,8 +473,13 @@ class VedtakKlientTest : VedtakKlient {
         tilbakekrevingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
         enhet: String,
-    ): Long {
-        return 123L
+    ): TilbakekrevingVedtakLagretDto {
+        return TilbakekrevingVedtakLagretDto(
+            id = 123L,
+            fattetAv = "saksbehandler",
+            enhet = "enhet",
+            dato = LocalDate.now(),
+        )
     }
 
     override suspend fun underkjennVedtakTilbakekreving(
@@ -478,6 +487,14 @@ class VedtakKlientTest : VedtakKlient {
         brukerTokenInfo: BrukerTokenInfo,
     ): Long {
         return 123L
+    }
+}
+
+class TilbakekrevingKlientTest : TilbakekrevingKlient {
+    override suspend fun sendTilbakekrevingsvedtak(
+        brukerTokenInfo: BrukerTokenInfo,
+        tilbakekrevingVedtak: TilbakekrevingVedtak,
+    ) {
     }
 }
 

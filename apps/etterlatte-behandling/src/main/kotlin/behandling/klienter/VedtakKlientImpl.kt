@@ -10,6 +10,7 @@ import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.toObjectNode
 import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingFattEllerAttesterVedtakDto
 import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingVedtakDto
+import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingVedtakLagretDto
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktorobo.Resource
@@ -34,7 +35,7 @@ interface VedtakKlient {
         tilbakekrevingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
         enhet: String,
-    ): Long
+    ): TilbakekrevingVedtakLagretDto
 
     suspend fun underkjennVedtakTilbakekreving(
         tilbakekrevingId: UUID,
@@ -129,7 +130,7 @@ class VedtakKlientImpl(config: Config, httpClient: HttpClient) : VedtakKlient {
         tilbakekrevingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
         enhet: String,
-    ): Long {
+    ): TilbakekrevingVedtakLagretDto {
         try {
             logger.info("Sender attesteringsinfo for tilbakekreving=$tilbakekrevingId til vedtak")
             return downstreamResourceClient

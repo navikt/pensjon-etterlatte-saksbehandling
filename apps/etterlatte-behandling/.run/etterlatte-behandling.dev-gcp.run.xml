@@ -21,6 +21,8 @@
       <env name="ETTERLATTE_GRUNNLAG_URL" value="https://etterlatte-grunnlag.intern.dev.nav.no/api" />
       <env name="ETTERLATTE_VEDTAK_CLIENT_ID" value="069b1b2c-0a06-4cc9-8418-f100b8ff71be" />
       <env name="ETTERLATTE_VEDTAK_URL" value="https://etterlatte-vedtaksvurdering.intern.dev.nav.no" />
+      <env name="ETTERLATTE_TILBAKEKREVING_CLIENT_ID" value="9d1c5221-f39a-4635-80fb-04376e1011a6" />
+      <env name="ETTERLATTE_TILBAKEKREVING_URL" value="https://etterlatte-tilbakekreving.intern.dev.nav.no" />
       <env name="AZUREAD_ATTESTANT_GROUPID" value="63f46f74-84a8-4d1c-87a8-78532ab3ae60" />
       <env name="AZUREAD_SAKSBEHANDLER_GROUPID" value="8bb9b8d1-f46a-4ade-8ee8-5895eccdf8cf" />
       <env name="AZUREAD_STRENGT_FORTROLIG_GROUPID" value="5ef775f2-61f8-4283-bf3d-8d03f428aa14" />

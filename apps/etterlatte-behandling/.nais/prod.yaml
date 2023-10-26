@@ -88,6 +88,10 @@ spec:
       value: prod-gcp.etterlatte.etterlatte-vedtaksvurdering
     - name: ETTERLATTE_VEDTAK_URL
       value: http://etterlatte-vedtaksvurdering
+    - name: ETTERLATTE_TILBAKEKREVING_CLIENT_ID
+      value: 9d1c5221-f39a-4635-80fb-04376e1011a6 # TODO - DETTE ER DEV
+    - name: ETTERLATTE_TILBAKEKREVING_URL
+      value: http://etterlatte-tilbakekreving
     - name: AZUREAD_ATTESTANT_GROUPID
       value: 11053fd7-e674-4552-9a88-f9fcedfa70b3
     - name: AZUREAD_SAKSBEHANDLER_GROUPID

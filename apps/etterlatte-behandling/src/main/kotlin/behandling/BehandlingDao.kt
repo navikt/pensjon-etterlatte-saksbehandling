@@ -33,7 +33,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.libs.database.toList
-import no.nav.etterlatte.libs.database.toListParameterRs
+import no.nav.etterlatte.libs.database.toListPassesRsToBlock
 import java.sql.Connection
 import java.sql.ResultSet
 import java.time.LocalDateTime
@@ -78,7 +78,6 @@ class BehandlingDao(
         return stmt.executeQuery().behandlingsListe()
     }
 
-    // TODO: test for denne,
     fun hentAlleRevurderingerISakMedAarsak(
         sakid: Long,
         revurderingaarsak: Revurderingaarsak,
@@ -95,7 +94,7 @@ class BehandlingDao(
             )
         stmt.setLong(1, sakid)
         stmt.setString(2, revurderingaarsak.name)
-        return stmt.executeQuery().toListParameterRs { rs -> asRevurdering(rs) }
+        return stmt.executeQuery().toListPassesRsToBlock { rs -> asRevurdering(rs) }
     }
 
     private fun ResultSet.asRevurderingExtension() =

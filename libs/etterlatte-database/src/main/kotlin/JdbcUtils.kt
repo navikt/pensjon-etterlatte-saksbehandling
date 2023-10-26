@@ -40,7 +40,7 @@ fun <T> ResultSet.toList(block: ResultSet.() -> T): List<T> {
     return list
 }
 
-fun <T> ResultSet.toListParameterRs(block: (resultSet: ResultSet) -> T): List<T> {
+fun <T> ResultSet.toListPassesRsToBlock(block: (resultSet: ResultSet) -> T): List<T> {
     val list = ArrayList<T>()
     while (next()) {
         list.add(block(this))

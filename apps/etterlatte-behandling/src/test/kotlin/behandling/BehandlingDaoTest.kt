@@ -1,5 +1,7 @@
 package no.nav.etterlatte.behandling
 
+import io.kotest.inspectors.forExactly
+import io.kotest.matchers.shouldBe
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.domain.ManueltOpphoer
 import no.nav.etterlatte.behandling.domain.Revurdering
@@ -47,7 +49,7 @@ import java.time.YearMonth
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-internal class BehandlingDaoIntegrationTest {
+internal class BehandlingDaoTest {
     @Container
     private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:$POSTGRES_VERSION")
 
@@ -133,6 +135,45 @@ internal class BehandlingDaoIntegrationTest {
 
         assertEquals(opprettBehandling.id, opprettetBehandling.id)
         assertEquals(opprettBehandling.opprettet, opprettetBehandling.behandlingOpprettet.toTidspunkt())
+    }
+
+    @Test
+    fun `Kan hente revurdering for sak med revurderingsårsak`() {
+        val sak1 = sakRepo.opprettSak("123", SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr).id
+
+        val opprettBehandling =
+            opprettBehandling(
+                type = BehandlingType.REVURDERING,
+                sakId = sak1,
+                revurderingAarsak = Revurderingaarsak.REGULERING,
+                prosesstype = Prosesstype.MANUELL,
+            )
+
+        behandlingRepo.opprettBehandling(opprettBehandling)
+        behandlingRepo.opprettBehandling(
+            opprettBehandling(
+                type = BehandlingType.REVURDERING,
+                sakId = sak1,
+                revurderingAarsak = Revurderingaarsak.REGULERING,
+                prosesstype = Prosesstype.MANUELL,
+            ),
+        )
+
+        behandlingRepo.opprettBehandling(
+            opprettBehandling(
+                type = BehandlingType.REVURDERING,
+                sakId = sak1,
+                revurderingAarsak = Revurderingaarsak.UTLAND,
+                prosesstype = Prosesstype.MANUELL,
+            ),
+        )
+        val revurderingerForSakeMedAarsak =
+            behandlingRepo.hentAlleRevurderingerISakMedAarsak(sak1, Revurderingaarsak.REGULERING)
+
+        assertEquals(2, revurderingerForSakeMedAarsak.size)
+        revurderingerForSakeMedAarsak.forExactly(2) { revurdering ->
+            revurdering.sak.id shouldBe sak1
+        }
     }
 
     @Test

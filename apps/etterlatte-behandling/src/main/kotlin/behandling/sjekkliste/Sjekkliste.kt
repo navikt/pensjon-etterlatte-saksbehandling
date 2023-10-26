@@ -39,7 +39,6 @@ internal val defaultSjekklisteItemsBP =
         "Etterbetaling av barnepensjon blir mer enn 2G- kontaktet statsforvalter for informasjon",
         "Ikke registrert/registrert annet kontonummer i saken - opprettet oppgave til NØP",
         "Ved avslag: Informert om at barnet kan ha rett på bidragsforskudd",
-        "Barnet fyller 20 år innen tre måneder - satt til og med- dato i vedtaket",
         "Barnet mottar uføretrygd fra NAV - pensjonen er avkortet",
         "Bosatt Norge: Innhenter EØS og bank-opplysninger",
         "Bosatt Norge: Sendt brev til bruker om krav til avtaleland",

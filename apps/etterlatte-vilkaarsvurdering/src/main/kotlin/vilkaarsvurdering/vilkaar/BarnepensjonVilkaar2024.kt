@@ -81,10 +81,10 @@ object BarnepensjonVilkaar2024 {
                     tittel = "Barnets alder",
                     beskrivelse =
                         """
-                    For å ha rett på ytelsen må barnet være under 20 år på virkningstidspunktet.
-                    
-                    Det er overgangsregler for de som er innvilget barnepensjon før 01.01.2024, der dødsfall skyldtes en yrkes-skade/sykdom. Disse får pensjon til de er 21 år uavhengig av om de er under utdanning.
-                    """,
+                        For å ha rett på ytelsen må barnet være under 20 år på virkningstidspunktet.
+                        
+                        Det er overgangsregler for de som er innvilget barnepensjon før 01.01.2024, der dødsfall skyldtes en yrkes-skade/sykdom. Disse får pensjon til de er 21 år uavhengig av om de er under utdanning.
+                        """.trimIndent(),
                     spoersmaal = "Er barnet under 20 år på virkningstidspunktet?",
                     lovreferanse =
                         Lovreferanse(
@@ -115,10 +115,10 @@ object BarnepensjonVilkaar2024 {
                     tittel = "Barnets medlemskap",
                     beskrivelse =
                         """
-                    For å ha rett på ytelsen må barnet være medlem i trygden.
-                    
-                    Det er unntak som gjør at vilkåret over ikke gjelder. Se hvilke når du krysser "Nei" til spørsmålet om barnet er medlem på virkningstidspunktet.
-                    """,
+                        For å ha rett på ytelsen må barnet være medlem i trygden.
+                        
+                        Det er unntak som gjør at vilkåret over ikke gjelder. Se hvilke når du krysser "Nei" til spørsmålet om barnet er medlem på virkningstidspunktet.
+                        """.trimIndent(),
                     spoersmaal = "Er barnet medlem i trygden på virkningstidspunktet?",
                     lovreferanse =
                         Lovreferanse(

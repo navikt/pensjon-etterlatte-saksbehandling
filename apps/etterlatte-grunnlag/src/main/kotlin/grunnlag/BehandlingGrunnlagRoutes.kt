@@ -84,10 +84,12 @@ fun Route.behandlingGrunnlagRoute(
         }
 
         post("oppdater-grunnlag") {
-            withBehandlingId(behandlingKlient) { behandlingId ->
-                val request = call.receive<OppdaterGrunnlagRequest>()
-                grunnlagService.oppdaterGrunnlag(behandlingId, request.sakId, request.sakType)
-                call.respond(HttpStatusCode.OK)
+            kunSystembruker {
+                withBehandlingId(behandlingKlient) { behandlingId ->
+                    val request = call.receive<OppdaterGrunnlagRequest>()
+                    grunnlagService.oppdaterGrunnlag(behandlingId, request.sakId, request.sakType)
+                    call.respond(HttpStatusCode.OK)
+                }
             }
         }
     }

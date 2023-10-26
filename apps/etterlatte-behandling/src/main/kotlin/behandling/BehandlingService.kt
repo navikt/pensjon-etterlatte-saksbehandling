@@ -107,7 +107,7 @@ interface BehandlingService {
 
     fun hentFoersteVirk(sakId: Long): YearMonth?
 
-    fun oppdaterGrunnlag(behandlingId: UUID)
+    fun oppdaterGrunnlagOgStatus(behandlingId: UUID)
 }
 
 internal class BehandlingServiceImpl(
@@ -266,13 +266,14 @@ internal class BehandlingServiceImpl(
         return behandlinger.tidligsteIverksatteVirkningstidspunkt()?.dato
     }
 
-    override fun oppdaterGrunnlag(behandlingId: UUID) {
-        val behandling = behandlingDao.hentBehandling(behandlingId)
-            ?: throw BehandlingNotFoundException("Fant ikke behandling med id=$behandlingId")
+    override fun oppdaterGrunnlagOgStatus(behandlingId: UUID) {
+        hentBehandlingOrThrow(behandlingId)
+            .tilOpprettet()
+            .let { behandling ->
+                grunnlagService.oppdaterGrunnlag(behandling.id, behandling.sak.id, behandling.sak.sakType)
 
-        grunnlagService.oppdaterGrunnlag(behandling.id, behandling.sak.id, behandling.sak.sakType)
-
-        behandlingDao.lagreStatus(behandling.tilOpprettet())
+                behandlingDao.lagreStatus(behandling)
+            }
     }
 
     override suspend fun hentDetaljertBehandlingMedTilbehoer(
@@ -466,6 +467,11 @@ internal class BehandlingServiceImpl(
         this.filterBehandlingerForEnheter(
             featureToggleService = featureToggleService,
             user = Kontekst.get().AppUser,
+        )
+
+    private fun hentBehandlingOrThrow(behandlingId: UUID) = (
+        behandlingDao.hentBehandling(behandlingId)
+            ?: throw BehandlingNotFoundException("Fant ikke behandling med id=$behandlingId")
         )
 }
 

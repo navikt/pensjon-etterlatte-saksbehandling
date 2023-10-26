@@ -1,25 +1,22 @@
 import { useState } from 'react'
 import { Alert, BodyLong, Button, Heading, Modal } from '@navikt/ds-react'
-import { useBehandling } from '~components/behandling/useBehandling'
 import { FlexRow } from '~shared/styled'
 import { isFailure, isPending, useApiCall } from '~shared/hooks/useApiCall'
 import { oppdaterGrunnlag } from '~shared/api/behandling'
 import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 import { hentBehandlesFraStatus } from '~components/behandling/felles/utils'
+import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 
 export const FEATURE_TOGGLE_KAN_BRUKE_OPPDATER_GRUNNLAG = 'pensjon-etterlatte.kan-bruke-oppdater-grunnlag'
 
-export default function OppdaterGrunnlagModal() {
-  const behandling = useBehandling()
+export default function OppdaterGrunnlagModal({ behandling }: { behandling: IDetaljertBehandling }) {
   const [isOpen, setIsOpen] = useState(false)
   const featureAktiv = useFeatureEnabledMedDefault(FEATURE_TOGGLE_KAN_BRUKE_OPPDATER_GRUNNLAG, false)
-  const behandles = behandling != null && hentBehandlesFraStatus(behandling.status)
-  const [oppdatert, apiOppdaterGrunnlag] = useApiCall(oppdaterGrunnlag)
+  const behandles = hentBehandlesFraStatus(behandling.status)
+  const [oppdatertStatus, apiOppdaterGrunnlag] = useApiCall(oppdaterGrunnlag)
 
-  if (!featureAktiv || !behandles) return
-
-  const lagre = () => {
-    return apiOppdaterGrunnlag(
+  const oppdaterGrunnlagWrapper = () => {
+    apiOppdaterGrunnlag(
       {
         behandlingId: behandling.id,
       },
@@ -28,6 +25,8 @@ export default function OppdaterGrunnlagModal() {
       }
     )
   }
+
+  if (!featureAktiv || !behandles) return
 
   return (
     <>
@@ -51,11 +50,11 @@ export default function OppdaterGrunnlagModal() {
             <Button variant="secondary" onClick={() => setIsOpen(false)}>
               Nei, fortsett behandling
             </Button>
-            <Button variant="primary" onClick={() => lagre()} loading={isPending(oppdatert)}>
+            <Button variant="primary" onClick={() => oppdaterGrunnlagWrapper()} loading={isPending(oppdatertStatus)}>
               Ja, oppdater grunnlaget
             </Button>
           </FlexRow>
-          {isFailure(oppdatert) && <Alert variant="error">Oppdatering feilet</Alert>}
+          {isFailure(oppdatertStatus) && <Alert variant="error">Oppdatering feilet</Alert>}
         </Modal.Body>
       </Modal>
     </>

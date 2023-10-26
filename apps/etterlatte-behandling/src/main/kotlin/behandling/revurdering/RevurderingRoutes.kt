@@ -34,7 +34,7 @@ internal fun Route.revurderingRoutes(revurderingService: RevurderingService) {
                             inTransaction {
                                 revurderingService.lagreRevurderingInfo(
                                     behandlingId,
-                                    RevurderingMedBegrunnelse(it.info, it.begrunnelse),
+                                    RevurderingInfoMedBegrunnelse(it.info, it.begrunnelse),
                                     navIdent,
                                 )
                             }
@@ -45,7 +45,7 @@ internal fun Route.revurderingRoutes(revurderingService: RevurderingService) {
             }
         }
 
-        route("{$SAKID_CALL_PARAMETER}") {
+        route("/{$SAKID_CALL_PARAMETER}") {
             post {
                 kunSaksbehandler { saksbehandler ->
                     logger.info("Oppretter ny revurdering på sak $sakId")
@@ -70,13 +70,19 @@ internal fun Route.revurderingRoutes(revurderingService: RevurderingService) {
                     }
                 }
             }
+            get("/{revurderingsaarsak}") {
+                val revurderingsaarsak =
+                    call.parameters["revurderingsaarsak"]?.let { Revurderingaarsak.valueOf(it) }
+                        ?: return@get call.respond(HttpStatusCode.BadRequest, "Ugyldig revurderingsårsak")
+                call.respond(revurderingService.hentRevurderingsinfoForSakMedAarsak(sakId, revurderingsaarsak))
+            }
         }
     }
 
     route("/api/stoettederevurderinger/{saktype}") {
         get {
             val sakType =
-                call.parameters["saktype"]?.let { runCatching { SakType.valueOf(it) }.getOrNull() }
+                call.parameters["saktype"]?.let { SakType.valueOf(it) }
                     ?: return@get call.respond(HttpStatusCode.BadRequest, "Ugyldig saktype")
 
             val stoettedeRevurderinger = Revurderingaarsak.values().filter { it.erStoettaRevurdering(sakType) }

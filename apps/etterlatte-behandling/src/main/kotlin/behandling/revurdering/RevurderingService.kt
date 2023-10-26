@@ -71,6 +71,12 @@ class BehandlingKanIkkeEndres :
         detail = "Behandlingen kan ikke endres",
     )
 
+data class RevurderingsinfoMedIdOgOpprettetDato(
+    val revurderingInfo: RevurderingInfo,
+    val behandlingOpprettet: LocalDateTime,
+    val id: UUID,
+)
+
 class RevurderingService(
     private val oppgaveService: OppgaveService,
     private val grunnlagService: GrunnlagService,
@@ -86,6 +92,17 @@ class RevurderingService(
     private val logger = LoggerFactory.getLogger(RevurderingService::class.java)
 
     fun hentBehandling(id: UUID): Revurdering? = (behandlingDao.hentBehandling(id) as? Revurdering)?.sjekkEnhet()
+
+    fun hentRevurderingsinfoForSakMedAarsak(
+        sakId: Long,
+        revurderingAarsak: Revurderingaarsak,
+    ): List<RevurderingsinfoMedIdOgOpprettetDato> {
+        val hentAlleRevurderingerISakMedAarsak =
+            behandlingDao.hentAlleRevurderingerISakMedAarsak(sakId, revurderingAarsak)
+        return hentAlleRevurderingerISakMedAarsak
+            .filterNot { it.revurderingInfo?.revurderingInfo !== null }
+            .map { RevurderingsinfoMedIdOgOpprettetDato(it.revurderingInfo?.revurderingInfo!!, it.behandlingOpprettet, it.id) }
+    }
 
     private fun maksEnOppgaveUnderbehandlingForKildeBehandling(sakId: Long) {
         val oppgaverForSak = oppgaveService.hentOppgaverForSak(sakId)
@@ -252,12 +269,12 @@ class RevurderingService(
 
     fun lagreRevurderingInfo(
         behandlingId: UUID,
-        revurderingMedBegrunnelse: RevurderingMedBegrunnelse,
+        revurderingInfoMedBegrunnelse: RevurderingInfoMedBegrunnelse,
         navIdent: String,
     ) {
         behandlingErAvTypenRevurderingOgKanEndres(behandlingId)
         val kilde = Grunnlagsopplysning.Saksbehandler.create(navIdent)
-        revurderingDao.lagreRevurderingInfo(behandlingId, revurderingMedBegrunnelse, kilde)
+        revurderingDao.lagreRevurderingInfo(behandlingId, revurderingInfoMedBegrunnelse, kilde)
     }
 
     private fun opprettRevurdering(
@@ -325,7 +342,7 @@ class RevurderingService(
         saksbehandlerIdent: String,
     ) {
         val revurderingInfo = RevurderingInfo.RevurderingAarsakAnnen(fritekstAarsak)
-        lagreRevurderingInfo(behandlingId, RevurderingMedBegrunnelse(revurderingInfo, null), saksbehandlerIdent)
+        lagreRevurderingInfo(behandlingId, RevurderingInfoMedBegrunnelse(revurderingInfo, null), saksbehandlerIdent)
     }
 
     private fun <T : Behandling> T?.sjekkEnhet() =

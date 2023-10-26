@@ -1,8 +1,8 @@
 import { Button, HStack, TextField } from '@navikt/ds-react'
 import { DatoVelger, formatDateToLocaleDateOrEmptyString } from '~shared/DatoVelger'
-import { MottattDokument } from '~components/behandling/revurderingsoversikt/sluttbehandlingUtland/SEDLandMedDokumenter'
 import React from 'react'
 import { XMarkIcon } from '@navikt/aksel-icons'
+import { MottattDokument } from '~shared/types/RevurderingInfo'
 
 export default function DokumentRad({
   dokument,

@@ -9,15 +9,15 @@ import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import { formaterNavn } from '~shared/types/Person'
 import { KravpakkeUtland } from '~shared/types/Generellbehandling'
 import { hentAlleLand, ILand, sorterLand } from '~shared/api/trygdetid'
-import SEDLandMedDokumenter, {
-  LandMedDokumenter,
-} from '~components/behandling/revurderingsoversikt/sluttbehandlingUtland/SEDLandMedDokumenter'
+import SEDLandMedDokumenter from '~components/behandling/revurderingsoversikt/sluttbehandlingUtland/SEDLandMedDokumenter'
 import { TextButton } from '~components/behandling/soeknadsoversikt/familieforhold/personer/personinfo/TextButton'
 import SluttbehandlingUtlandFelter from '~components/behandling/revurderingsoversikt/sluttbehandlingUtland/SluttbehandlingUtlandFelter'
-import { lagreRevurderingInfo } from '~shared/api/revurdering'
+import { hentRevurderingerForSakMedAarsak, lagreRevurderingInfo } from '~shared/api/revurdering'
 import { AWhite } from '@navikt/ds-tokens/dist/tokens'
 import { CheckmarkCircleIcon } from '@navikt/aksel-icons'
-import { SluttbehandlingUtlandInfo } from '~shared/types/RevurderingInfo'
+import { LandMedDokumenter, SluttbehandlingUtlandInfo } from '~shared/types/RevurderingInfo'
+import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
+import HistoriskeSEDer from '~components/behandling/revurderingsoversikt/sluttbehandlingUtland/HistoriskeSEDer'
 
 export default function SluttbehandlingUtland({
   sakId,
@@ -33,6 +33,9 @@ export default function SluttbehandlingUtland({
   const [alleLandKodeverk, setAlleLandKodeverk] = useState<ILand[] | null>(null)
   const [visHistorikk, setVisHistorikk] = useState(false)
   const [lagreRevurderingsinfoStatus, lagreRevurderingsinfoApi] = useApiCall(lagreRevurderingInfo)
+  const [hentRevurderingerForSakMedAarsakStatus, hentRevurderingerForSakMedAarsakFetch] = useApiCall(
+    hentRevurderingerForSakMedAarsak
+  )
   const initalStateLandMedDokumenter = [
     { landIsoKode: undefined, dokumenter: [{ dokumenttype: '', dato: undefined, kommentar: '' }] },
   ]
@@ -46,6 +49,7 @@ export default function SluttbehandlingUtland({
     fetchAlleLand(null, (landliste) => {
       setAlleLandKodeverk(sorterLand(landliste))
     })
+    hentRevurderingerForSakMedAarsakFetch({ sakId, revurderingsaarsak: Revurderingaarsak.SLUTTBEHANDLING_UTLAND })
   }, [])
 
   const lagreRevurderingsinfo = () => {
@@ -179,7 +183,19 @@ export default function SluttbehandlingUtland({
         Tidligere mottatte SED`er
       </Heading>
       <TextButton isOpen={visHistorikk} setIsOpen={setVisHistorikk} />
-      {visHistorikk && <BodyShort>Vis historikk her. TODO: EY-2964 </BodyShort>}
+      {visHistorikk &&
+        mapAllApiResult(
+          hentRevurderingerForSakMedAarsakStatus,
+          <Spinner visible={true} label="Henter historikk" />,
+          null,
+          () => <ApiErrorAlert>Klarte ikke å hente historikken</ApiErrorAlert>,
+          (revurderingsinfoliste) => (
+            <HistoriskeSEDer
+              revurderingsinfoliste={revurderingsinfoliste}
+              landListe={alleLandKodeverk ? alleLandKodeverk : []}
+            />
+          )
+        )}
       {isSuccess(kravpakkeStatus) && (
         <SluttbehandlingUtlandFelter tilknyttetBehandling={kravpakkeStatus.data.kravpakke.tilknyttetBehandling} />
       )}
@@ -189,10 +205,17 @@ export default function SluttbehandlingUtland({
 
 function formaterKravpakkeLand(innhold: KravpakkeUtland | undefined, landliste: ILand[] | null) {
   if (landliste && innhold?.landIsoKode) {
-    return innhold?.landIsoKode
-      ?.map((kode) => landliste.find((kodeverkLand) => kodeverkLand.isoLandkode === kode)?.beskrivelse.tekst)
-      .join(', ')
+    return innhold?.landIsoKode?.map((kode) => oversettIsokodeTilLandnavn(landliste, kode)).join(', ')
   } else {
     return innhold?.landIsoKode ? innhold.landIsoKode.join(', ') : ''
+  }
+}
+
+export function oversettIsokodeTilLandnavn(landliste: ILand[], landIsoKode?: string) {
+  const hit = landliste.find((kodeverkLand) => kodeverkLand.isoLandkode === landIsoKode)
+  if (hit) {
+    return hit.beskrivelse.tekst
+  } else {
+    return landIsoKode
   }
 }

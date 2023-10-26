@@ -1,8 +1,8 @@
 import { Select } from '@navikt/ds-react'
-import { LandMedDokumenter } from '~components/behandling/revurderingsoversikt/sluttbehandlingUtland/SEDLandMedDokumenter'
 import { ILand } from '~shared/api/trygdetid'
 import styled from 'styled-components'
 import DokumenterForLand from '~components/behandling/revurderingsoversikt/sluttbehandlingUtland/DokumenterForLand'
+import { LandMedDokumenter } from '~shared/types/RevurderingInfo'
 
 const Flex = styled.div`
   display: flex;

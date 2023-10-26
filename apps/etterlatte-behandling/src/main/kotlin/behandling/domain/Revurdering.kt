@@ -1,6 +1,6 @@
 package no.nav.etterlatte.behandling.domain
 
-import no.nav.etterlatte.behandling.revurdering.RevurderingMedBegrunnelse
+import no.nav.etterlatte.behandling.revurdering.RevurderingInfoMedBegrunnelse
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -25,7 +25,7 @@ sealed class Revurdering(
     override val utenlandstilsnitt: Utenlandstilsnitt?,
     override val boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet?,
     open val revurderingsaarsak: Revurderingaarsak?,
-    open val revurderingInfo: RevurderingMedBegrunnelse?,
+    open val revurderingInfo: RevurderingInfoMedBegrunnelse?,
     override val prosesstype: Prosesstype,
     override val kilde: Vedtaksloesning,
     open val begrunnelse: String?,
@@ -50,7 +50,7 @@ sealed class Revurdering(
             revurderingsaarsak: Revurderingaarsak,
             prosesstype: Prosesstype,
             kilde: Vedtaksloesning,
-            revurderingInfo: RevurderingMedBegrunnelse?,
+            revurderingInfo: RevurderingInfoMedBegrunnelse?,
             begrunnelse: String?,
         ) = when (prosesstype) {
             Prosesstype.MANUELL ->

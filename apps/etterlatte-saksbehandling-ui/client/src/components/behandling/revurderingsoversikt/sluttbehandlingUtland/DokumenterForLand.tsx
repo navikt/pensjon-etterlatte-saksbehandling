@@ -1,7 +1,7 @@
-import { LandMedDokumenter } from '~components/behandling/revurderingsoversikt/sluttbehandlingUtland/SEDLandMedDokumenter'
 import DokumentRad from '~components/behandling/revurderingsoversikt/sluttbehandlingUtland/DokumentRad'
 import { Button } from '@navikt/ds-react'
 import React from 'react'
+import { LandMedDokumenter } from '~shared/types/RevurderingInfo'
 
 export default function DokumenterForLand({
   landMedDokumenter,

@@ -166,6 +166,14 @@ sealed class Behandling {
         throw BehandlingStoetterIkkeStatusEndringException(RETURNERT)
     }
 
+    open fun tilTilSamordning(): Behandling {
+        throw BehandlingStoetterIkkeStatusEndringException(OPPRETTET)
+    }
+
+    open fun tilSamordnet(): Behandling {
+        throw BehandlingStoetterIkkeStatusEndringException(OPPRETTET)
+    }
+
     open fun tilIverksatt(): Behandling {
         throw BehandlingStoetterIkkeStatusEndringException(OPPRETTET)
     }

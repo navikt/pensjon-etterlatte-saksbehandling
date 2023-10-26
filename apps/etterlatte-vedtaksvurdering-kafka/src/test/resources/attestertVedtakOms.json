@@ -1,13 +1,13 @@
 {
-  "@event_name": "VEDTAK:SAMORDNET",
+  "@event_name": "VEDTAK:ATTESTERT",
   "vedtak": {
-    "vedtakId": 1,
-    "status": "SAMORDNET",
-    "virkningstidspunkt":  "2022-01",
+    "vedtakId": 31,
+    "status": "ATTESTERT",
+    "virkningstidspunkt":  "2024-01",
     "sak": {
       "ident": "05126307952",
       "sakType": "OMSTILLINGSSTOENAD",
-      "id": 1
+      "id": 15
     },
     "behandling": {
       "type": "FØRSTEGANGSBEHANDLING",
@@ -18,7 +18,7 @@
       {
         "id": 1,
         "periode": {
-          "fom": "2022-01",
+          "fom": "2024-01",
           "tom": null
         },
         "beloep": 2000,
@@ -28,12 +28,12 @@
     "vedtakFattet": {
       "ansvarligSaksbehandler": "12345678",
       "ansvarligEnhet": "123",
-      "tidspunkt": "2022-05-23T12:25:43.667223+02:00"
+      "tidspunkt": "2023-10-23T12:25:43.667223+02:00"
     },
     "attestasjon": {
       "attestant": "87654321",
       "attesterendeEnhet": "123",
-      "tidspunkt": "2022-05-23T12:25:43.669844+02:00"
+      "tidspunkt": "2023-10-24T12:25:43.669844+02:00"
     }
   }
 }

@@ -128,6 +128,24 @@ fun Route.vedtaksvurderingRoute(
             }
         }
 
+        post("/{$BEHANDLINGID_CALL_PARAMETER}/tilsamordning") {
+            withBehandlingId(behandlingKlient) { behandlingId ->
+                logger.info("Vedtak er til samordning for behandling $behandlingId")
+                val vedtak = vedtakBehandlingService.tilSamordningVedtak(behandlingId, brukerTokenInfo)
+
+                call.respond(HttpStatusCode.OK, vedtak.toDto())
+            }
+        }
+
+        post("/{$BEHANDLINGID_CALL_PARAMETER}/samordnet") {
+            withBehandlingId(behandlingKlient) { behandlingId ->
+                logger.info("Vedtak ferdig samordning for behandling $behandlingId")
+                val vedtak = vedtakBehandlingService.samordnetVedtak(behandlingId, brukerTokenInfo)
+
+                call.respond(HttpStatusCode.OK, vedtak.toDto())
+            }
+        }
+
         post("/{$BEHANDLINGID_CALL_PARAMETER}/iverksett") {
             withBehandlingId(behandlingKlient) { behandlingId ->
                 logger.info("Iverksetter vedtak for behandling $behandlingId")

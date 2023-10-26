@@ -122,6 +122,24 @@ internal fun Route.behandlingsstatusRoutes(behandlingsstatusService: BehandlingS
             }
         }
 
+        post("/tilsamordning") {
+            val vedtakHendelse = call.receive<VedtakHendelse>()
+            haandterStatusEndring(call) {
+                inTransaction {
+                    behandlingsstatusService.settTilSamordnetVedtak(behandlingId, vedtakHendelse)
+                }
+            }
+        }
+
+        post("/samordnet") {
+            val vedtakHendelse = call.receive<VedtakHendelse>()
+            haandterStatusEndring(call) {
+                inTransaction {
+                    behandlingsstatusService.settSamordnetVedtak(behandlingId, vedtakHendelse)
+                }
+            }
+        }
+
         post("/iverksett") {
             val vedtakHendelse = call.receive<VedtakHendelse>()
             haandterStatusEndring(call) {

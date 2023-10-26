@@ -70,6 +70,8 @@ enum class VedtakStatus {
     OPPRETTET,
     FATTET_VEDTAK,
     ATTESTERT,
+    TIL_SAMORDNING,
+    SAMORDNET,
     RETURNERT,
     IVERKSATT,
 }

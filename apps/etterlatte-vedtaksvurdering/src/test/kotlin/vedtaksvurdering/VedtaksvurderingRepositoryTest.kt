@@ -307,11 +307,36 @@ internal class VedtaksvurderingRepositoryTest {
         val soeker2 = Folkeregisteridentifikator.of(FNR_2)
 
         listOf(
-            opprettVedtak(sakId = 1, soeker = soeker1, virkningstidspunkt = YearMonth.of(2024, Month.JANUARY)),
-            opprettVedtak(sakId = 2, soeker = soeker2, virkningstidspunkt = YearMonth.of(2024, Month.JANUARY)),
-            opprettVedtak(sakId = 2, soeker = soeker2, virkningstidspunkt = YearMonth.of(2024, Month.MARCH)),
-            opprettVedtak(sakId = 1, soeker = soeker1, virkningstidspunkt = YearMonth.of(2024, Month.APRIL)),
-            opprettVedtak(sakId = 2, soeker = soeker2, virkningstidspunkt = YearMonth.of(2024, Month.JUNE)),
+            opprettVedtak(
+                sakId = 1,
+                soeker = soeker1,
+                virkningstidspunkt = YearMonth.of(2024, Month.JANUARY),
+                status = VedtakStatus.IVERKSATT,
+            ),
+            opprettVedtak(
+                sakId = 2,
+                soeker = soeker2,
+                virkningstidspunkt = YearMonth.of(2024, Month.JANUARY),
+                status = VedtakStatus.IVERKSATT,
+            ),
+            opprettVedtak(
+                sakId = 2,
+                soeker = soeker2,
+                virkningstidspunkt = YearMonth.of(2024, Month.MARCH),
+                status = VedtakStatus.SAMORDNET,
+            ),
+            opprettVedtak(
+                sakId = 1,
+                soeker = soeker1,
+                virkningstidspunkt = YearMonth.of(2024, Month.APRIL),
+                status = VedtakStatus.IVERKSATT,
+            ),
+            opprettVedtak(
+                sakId = 2,
+                soeker = soeker2,
+                virkningstidspunkt = YearMonth.of(2024, Month.JUNE),
+                status = VedtakStatus.TIL_SAMORDNING,
+            ),
         )
             .map { repository.opprettVedtak(it) }
             .forEach { repository.iverksattVedtak(it.behandlingId) }

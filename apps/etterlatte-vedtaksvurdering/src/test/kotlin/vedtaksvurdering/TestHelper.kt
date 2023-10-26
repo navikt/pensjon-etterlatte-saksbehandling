@@ -37,6 +37,7 @@ fun opprettVedtak(
     sakId: Long = 1L,
     type: VedtakType = VedtakType.INNVILGELSE,
     behandlingId: UUID = UUID.randomUUID(),
+    status: VedtakStatus = VedtakStatus.OPPRETTET,
     vilkaarsvurdering: ObjectNode? = objectMapper.createObjectNode(),
     beregning: ObjectNode? = objectMapper.createObjectNode(),
     avkorting: ObjectNode? = objectMapper.createObjectNode(),
@@ -46,6 +47,7 @@ fun opprettVedtak(
     sakType = SakType.BARNEPENSJON,
     behandlingId = behandlingId,
     type = type,
+    status = status,
     innhold =
         VedtakBehandlingInnhold(
             behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,

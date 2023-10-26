@@ -32,7 +32,7 @@ internal class VedtakMottakRiverTest {
         }
 
     @Test
-    fun `skal returnere GODKJENT når vedtak er OMS`() {
+    fun `skal returnere GODKJENT naar vedtak er OMS`() {
         val utbetaling =
             utbetaling(
                 utbetalingshendelser = listOf(utbetalingshendelse(status = UtbetalingStatus.GODKJENT)),
@@ -42,7 +42,7 @@ internal class VedtakMottakRiverTest {
         every { utbetalingService.iverksettUtbetaling(any()) } returns
             IverksettResultat.SendtTilOppdrag(utbetaling)
 
-        inspector.apply { sendTestMessage(ATTESTERT_VEDTAK_OMS) }
+        inspector.apply { sendTestMessage(SAMORDNET_VEDTAK_OMS) }
         inspector.inspektør.message(0).run {
             val event = objectMapper.readValue(this.toJson(), UtbetalingEventDto::class.java)
             assertEquals(EVENT_NAME_OPPDATERT, event.event)
@@ -143,6 +143,6 @@ internal class VedtakMottakRiverTest {
 
     companion object {
         val ATTESTERT_VEDTAK = readFile("/vedtak.json")
-        val ATTESTERT_VEDTAK_OMS = readFile("/vedtakOms.json")
+        val SAMORDNET_VEDTAK_OMS = readFile("/vedtakOms.json")
     }
 }

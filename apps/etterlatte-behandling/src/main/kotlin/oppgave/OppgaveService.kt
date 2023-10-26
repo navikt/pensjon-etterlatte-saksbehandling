@@ -352,7 +352,7 @@ class OppgaveService(
             oppgaveDao.hentOppgaverForReferanse(behandlingId.toString()).filter {
                 it.type == OppgaveType.FOERSTEGANGSBEHANDLING
             }
-        return oppgaverForBehandlingFoerstegangs.sortedByDescending { it.opprettet }.firstOrNull()
+        return oppgaverForBehandlingFoerstegangs.maxByOrNull { it.opprettet }
     }
 
     fun hentSaksbehandlerForOppgaveUnderArbeid(behandlingId: UUID): String? {

@@ -45,7 +45,7 @@ export const Soeknadsoversikt = (props: { behandling: IDetaljertBehandling }) =>
         <Soeknadsdato mottattDato={behandling.soeknadMottattDato} />
       </ContentHeader>
       <InnholdPadding>
-        <OppdaterGrunnlagModal />
+        <OppdaterGrunnlagModal behandlingId={behandling.id} behandlingStatus={behandling.status} />
         <OversiktGyldigFramsatt behandling={behandling} />
         {behandling.gyldighetsprøving?.resultat === VurderingsResultat.OPPFYLT && (
           <>

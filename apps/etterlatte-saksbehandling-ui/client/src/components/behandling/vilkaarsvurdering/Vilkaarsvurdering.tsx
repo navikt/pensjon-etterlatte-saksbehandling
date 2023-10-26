@@ -64,6 +64,7 @@ export const Vilkaarsvurdering = (props: { behandling: IBehandlingReducer }) => 
 
   const visHarGammelVilkaarsvurdering = () =>
     vilkaarsvurdering &&
+    behandles &&
     !vilkaarsvurderingErPaaNyttRegelverk(vilkaarsvurdering) &&
     behandlingGjelderBarnepensjonPaaNyttRegelverk(behandling)
 
@@ -87,12 +88,13 @@ export const Vilkaarsvurdering = (props: { behandling: IBehandlingReducer }) => 
 
       {behandlingId && vilkaarsvurdering && !isPending(slettVilkaarsvurderingStatus) && (
         <>
-          {behandles && visHarGammelVilkaarsvurdering() && (
+          {visHarGammelVilkaarsvurdering() && (
             <AlertWrapper>
               <Alert variant="info">
                 <BodyLong>
                   Denne behandlingen har automatisk kopiert over en vilkårsvurdering fra gammelt regelverk (før
-                  1.1.2024). For å få oppdaterte vilkår ihht. nytt regelverk må vilkårsvurderingen opprettes på nytt.
+                  1.1.2024). For å få oppdaterte vilkår ihht. nytt regelverk må vilkårsvurderingen opprettes på nytt. Du
+                  kan kopiere ev. begrunnelser fra tidligere behandling.
                 </BodyLong>
                 <Button type="button" variant="secondary" onClick={resetVilkaarsvurdering}>
                   Slett vilkårsvurdering

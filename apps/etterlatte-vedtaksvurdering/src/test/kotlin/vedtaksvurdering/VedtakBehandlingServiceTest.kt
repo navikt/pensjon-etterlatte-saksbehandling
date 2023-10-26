@@ -671,6 +671,14 @@ internal class VedtakBehandlingServiceTest {
                 1L,
                 ENHET_1,
             )
+        coEvery { vilkaarsvurderingKlientMock.hentVilkaarsvurdering(any(), any()) } returns mockVilkaarsvurdering()
+        coEvery { behandlingKlientMock.hentBehandling(any(), any()) } returns
+            mockBehandling(
+                YearMonth.now(),
+                behandlingId,
+            )
+        coEvery { beregningKlientMock.hentBeregningOgAvkorting(any(), any(), any()) } returns mockk(relaxed = true)
+
         runBlocking {
             repository.opprettVedtak(opprettVedtak(behandlingId = behandlingId))
             service.fattVedtak(behandlingId, saksbehandler)
@@ -944,6 +952,13 @@ internal class VedtakBehandlingServiceTest {
         coEvery { behandlingKlientMock.kanFatteVedtak(any(), any()) } returns true
         coEvery { behandlingKlientMock.kanUnderkjenneVedtak(any(), any(), any()) } returns false
         coEvery { behandlingKlientMock.fattVedtakBehandling(any(), any()) } returns true
+        coEvery { vilkaarsvurderingKlientMock.hentVilkaarsvurdering(any(), any()) } returns mockVilkaarsvurdering()
+        coEvery { behandlingKlientMock.hentBehandling(any(), any()) } returns
+            mockBehandling(
+                YearMonth.now(),
+                behandlingId,
+            )
+        coEvery { beregningKlientMock.hentBeregningOgAvkorting(any(), any(), any()) } returns mockk(relaxed = true)
 
         runBlocking {
             repository.opprettVedtak(opprettVedtak(behandlingId = behandlingId))

@@ -30,6 +30,7 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.rapidsandrivers.migrering.KILDE_KEY
 import no.nav.etterlatte.token.BrukerTokenInfo
+import no.nav.etterlatte.vedtaksvurdering.grunnlag.GrunnlagVersjonValidering.validerVersjon
 import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlient
 import no.nav.etterlatte.vedtaksvurdering.klienter.BeregningKlient
 import no.nav.etterlatte.vedtaksvurdering.klienter.VilkaarsvurderingKlient
@@ -77,7 +78,7 @@ class VedtakBehandlingService(
         }
 
         val (behandling, vilkaarsvurdering, beregningOgAvkorting) = hentDataForVedtak(behandlingId, brukerTokenInfo)
-        verifiserGrunnlagVersjon(vilkaarsvurdering, beregningOgAvkorting)
+        validerVersjon(vilkaarsvurdering, beregningOgAvkorting)
 
         val vedtakType = vedtakType(behandling.behandlingType, vilkaarsvurdering)
         val virkningstidspunkt =
@@ -94,23 +95,6 @@ class VedtakBehandlingService(
         }
     }
 
-    /**
-     * TODO:
-     *  - Må sikre at vedtak ikke kan gjennomføres dersom det er diff på versjon
-     *  - Gi forståelig feilmelding til saksbehandler
-     **/
-    private fun verifiserGrunnlagVersjon(
-        vilkaarsvurdering: VilkaarsvurderingDto?,
-        beregningOgAvkorting: BeregningOgAvkorting?,
-    ) {
-        if (vilkaarsvurdering?.grunnlagVersjon == null || beregningOgAvkorting == null) {
-            return
-        } else if (vilkaarsvurdering.grunnlagVersjon != beregningOgAvkorting.beregning.grunnlagMetadata.versjon) {
-            logger.warn("Ulik versjon av grunnlag i vilkaarsvurdering og beregnin!")
-            return
-        }
-    }
-
     suspend fun fattVedtak(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
@@ -120,6 +104,9 @@ class VedtakBehandlingService(
 
         verifiserGyldigBehandlingStatus(behandlingKlient.kanFatteVedtak(behandlingId, brukerTokenInfo), vedtak)
         verifiserGyldigVedtakStatus(vedtak.status, listOf(VedtakStatus.OPPRETTET, VedtakStatus.RETURNERT))
+
+        val (_, vilkaarsvurdering, beregningOgAvkorting) = hentDataForVedtak(behandlingId, brukerTokenInfo)
+        validerVersjon(vilkaarsvurdering, beregningOgAvkorting)
 
         val sak = behandlingKlient.hentSak(vedtak.sakId, brukerTokenInfo)
 
@@ -179,12 +166,9 @@ class VedtakBehandlingService(
         verifiserGyldigVedtakStatus(vedtak.status, listOf(VedtakStatus.FATTET_VEDTAK))
         attestantHarAnnenIdentEnnSaksbehandler(vedtak.vedtakFattet!!.ansvarligSaksbehandler, brukerTokenInfo)
 
-        val (behandling, vilkaarsvurdering, beregningOgAvkorting, sak) =
-            hentDataForVedtak(behandlingId, brukerTokenInfo)
+        val (behandling, _, _, sak) = hentDataForVedtak(behandlingId, brukerTokenInfo)
 
         verifiserGyldigVedtakForRevurdering(behandling, vedtak)
-        verifiserGrunnlagVersjon(vilkaarsvurdering, beregningOgAvkorting)
-        // TODO: Låse versjon i grunnlag
 
         val attestertVedtak =
             repository.inTransaction { tx ->

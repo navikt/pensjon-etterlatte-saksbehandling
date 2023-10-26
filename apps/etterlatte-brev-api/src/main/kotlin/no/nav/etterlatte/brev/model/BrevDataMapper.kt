@@ -38,8 +38,8 @@ import no.nav.etterlatte.brev.model.oms.AvslagBrevDataOMS
 import no.nav.etterlatte.brev.model.oms.FoerstegangsvedtakUtfallDTO
 import no.nav.etterlatte.brev.model.oms.InntektsendringRevurderingOMS
 import no.nav.etterlatte.brev.model.oms.InnvilgetBrevDataOMS
-import no.nav.etterlatte.brev.model.tilbakkreving.TilbakekrevingFerdigData
-import no.nav.etterlatte.brev.model.tilbakkreving.TilbakekrevingInnholdData
+import no.nav.etterlatte.brev.model.tilbakekreving.TilbakekrevingFerdigData
+import no.nav.etterlatte.brev.model.tilbakekreving.TilbakekrevingInnholdBrevData
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
@@ -271,7 +271,7 @@ class BrevDataMapper(private val featureToggleService: FeatureToggleService, pri
                             else -> TODO("Vedtakstype er ikke støttet: $vedtakType")
                         }
 
-                    VedtakType.TILBAKEKREVING -> TilbakekrevingInnholdData.fra(generellBrevData)
+                    VedtakType.TILBAKEKREVING -> TilbakekrevingInnholdBrevData.fra(generellBrevData)
                 }
             }
 
@@ -306,7 +306,7 @@ class BrevDataMapper(private val featureToggleService: FeatureToggleService, pri
                             else -> TODO("Revurderingsbrev for ${generellBrevData.revurderingsaarsak} er ikke støttet")
                         }
 
-                    VedtakType.TILBAKEKREVING -> TilbakekrevingInnholdData.fra(generellBrevData)
+                    VedtakType.TILBAKEKREVING -> TilbakekrevingInnholdBrevData.fra(generellBrevData)
                 }
             }
         }

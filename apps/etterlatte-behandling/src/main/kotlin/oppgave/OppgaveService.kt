@@ -11,7 +11,6 @@ import no.nav.etterlatte.User
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
-import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveListe
@@ -350,12 +349,10 @@ class OppgaveService(
 
     fun hentOppgaveForSaksbehandlerFraFoerstegangsbehandling(behandlingId: UUID): OppgaveIntern? {
         val oppgaverForBehandlingFoerstegangs =
-            inTransaction {
-                oppgaveDao.hentOppgaverForReferanse(behandlingId.toString())
-            }.filter {
+            oppgaveDao.hentOppgaverForReferanse(behandlingId.toString()).filter {
                 it.type == OppgaveType.FOERSTEGANGSBEHANDLING
             }
-        return oppgaverForBehandlingFoerstegangs.sortedByDescending { it.opprettet }.firstOrNull()
+        return oppgaverForBehandlingFoerstegangs.maxByOrNull { it.opprettet }
     }
 
     fun hentSaksbehandlerForOppgaveUnderArbeid(behandlingId: UUID): String? {

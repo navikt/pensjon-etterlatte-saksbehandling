@@ -8,9 +8,9 @@ import { VurderingsResultat } from '~shared/types/VurderingsResultat'
 import { VurderingsboksWrapper } from '~components/vurderingsboks/VurderingsboksWrapper'
 import { LeggTilVurderingButton } from '~components/behandling/soeknadsoversikt/soeknadoversikt/LeggTilVurderingButton'
 import { useState } from 'react'
-import { Undertekst, VurderingsTitle } from '~components/behandling/soeknadsoversikt/styled'
+import { VurderingsTitle } from '~components/behandling/soeknadsoversikt/styled'
 import styled from 'styled-components'
-import { BodyShort, Label, Radio, RadioGroup } from '@navikt/ds-react'
+import { Label, Radio, RadioGroup } from '@navikt/ds-react'
 import { SoeknadsoversiktTextArea } from '~components/behandling/soeknadsoversikt/soeknadoversikt/SoeknadsoversiktTextArea'
 import { useAppDispatch } from '~store/Store'
 import { JaNei, JaNeiRec } from '~shared/types/ISvar'
@@ -68,8 +68,7 @@ export const GyldigFramsattVurdering = ({
     onSuccess?.()
   }
 
-  const tittel =
-    gyldigFramsatt?.resultat !== VurderingsResultat.OPPFYLT ? 'Søknad ikke gyldig fremsatt' : 'Søknad gyldig fremsatt'
+  const tittel = 'Er søknaden gyldig fremsatt?'
 
   return !vurdert ? (
     <LeggTilVurderingButton onClick={() => setVurdert(true)}>Legg til vurdering</LeggTilVurderingButton>
@@ -78,7 +77,6 @@ export const GyldigFramsattVurdering = ({
       tittel={tittel}
       subtittelKomponent={
         <>
-          <BodyShort spacing>Er søknaden gyldig framsatt?</BodyShort>
           {gyldigFramsatt?.resultat && (
             <Label as="p" size="small" style={{ marginBottom: '32px' }}>
               {JaNeiRec[gyldigFramsatt.resultat === VurderingsResultat.OPPFYLT ? JaNei.JA : JaNei.NEI]}
@@ -107,8 +105,7 @@ export const GyldigFramsattVurdering = ({
       }
     >
       <div>
-        <VurderingsTitle title="Trenger avklaring" />
-        <Undertekst $gray={false}>Er søknaden gyldig framsatt?</Undertekst>
+        <VurderingsTitle title="Er søknaden gyldig fremsatt?" />
         <RadioGroupWrapper>
           <RadioGroup
             legend=""

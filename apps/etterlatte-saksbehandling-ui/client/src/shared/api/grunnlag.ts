@@ -24,7 +24,7 @@ export const getGrunnlagsAvOpplysningstype = async (args: {
   behandlingId: string
   opplysningstype: string
 }): Promise<ApiResponse<Grunnlagsopplysning<IPdlPerson, KildePdl>>> => {
-  return apiClient.get(`/grunnlag/sak/${args.sakId}/behandling/${args.behandlingId}/${args.opplysningstype}`)
+  return apiClient.get(`/grunnlag/behandling/${args.behandlingId}/${args.opplysningstype}`)
 }
 
 export const getHistoriskForeldreansvar = (args: {
@@ -32,6 +32,6 @@ export const getHistoriskForeldreansvar = (args: {
   behandlingId: string
 }): Promise<ApiResponse<Grunnlagsopplysning<Foreldreansvar, KildePdl>>> => {
   return apiClient.get<Grunnlagsopplysning<Foreldreansvar, KildePdl>>(
-    `/grunnlag/sak/${args.sakId}/behandling/${args.behandlingId}/revurdering/HISTORISK_FORELDREANSVAR`
+    `/grunnlag/behandling/${args.behandlingId}/revurdering/HISTORISK_FORELDREANSVAR`
   )
 }

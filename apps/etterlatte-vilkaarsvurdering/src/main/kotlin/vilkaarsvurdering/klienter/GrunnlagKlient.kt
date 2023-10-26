@@ -40,7 +40,7 @@ class GrunnlagKlientImpl(config: Config, httpClient: HttpClient) : GrunnlagKlien
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): Grunnlag {
-        logger.info("Henter grunnlag for sak med sakId=$sakId")
+        logger.info("Henter grunnlag for behandling med id=$behandlingId")
 
         return retry<Grunnlag> {
             downstreamResourceClient
@@ -48,7 +48,7 @@ class GrunnlagKlientImpl(config: Config, httpClient: HttpClient) : GrunnlagKlien
                     resource =
                         Resource(
                             clientId = clientId,
-                            url = "$resourceUrl/grunnlag/sak/$sakId/behandling/$behandlingId",
+                            url = "$resourceUrl/grunnlag/behandling/$behandlingId",
                         ),
                     brukerTokenInfo = brukerTokenInfo,
                 )
@@ -61,7 +61,7 @@ class GrunnlagKlientImpl(config: Config, httpClient: HttpClient) : GrunnlagKlien
                 is Success -> it.content
                 is Failure -> {
                     throw GrunnlagKlientException(
-                        "Klarte ikke hente grunnlag for sak med sakId=$sakId",
+                        "Klarte ikke hente grunnlag for behandling med id=$behandlingId",
                         it.samlaExceptions(),
                     )
                 }

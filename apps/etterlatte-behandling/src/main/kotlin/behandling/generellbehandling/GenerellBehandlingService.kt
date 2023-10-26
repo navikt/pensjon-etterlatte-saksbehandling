@@ -196,7 +196,6 @@ class GenerellBehandlingService(
         if (kravpakke.status == GenerellBehandling.Status.ATTESTERT) {
             val avdoed =
                 grunnlagKlient.finnPersonOpplysning(
-                    sakId,
                     forstegangsbehandlingMedKravpakke.id,
                     Opplysningstype.AVDOED_PDL_V1,
                     brukerTokenInfo,

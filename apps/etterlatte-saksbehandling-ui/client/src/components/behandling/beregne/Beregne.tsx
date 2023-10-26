@@ -1,4 +1,3 @@
-
 import { Content, ContentHeader, FlexRow } from '~shared/styled'
 import { Border, HeadingWrapper } from '../soeknadsoversikt/styled'
 import { behandlingSkalSendeBrev, hentBehandlesFraStatus } from '../felles/utils'

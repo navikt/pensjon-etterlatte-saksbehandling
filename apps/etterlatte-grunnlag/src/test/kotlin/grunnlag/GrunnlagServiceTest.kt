@@ -559,16 +559,17 @@ internal class GrunnlagServiceTest {
                 ),
             )
 
-        every { opplysningerMock.finnHendelserIGrunnlag(sakId) } returns listOf(
-            lagGrunnlagHendelse(
-                sakId,
-                3,
-                PERSONGALLERI_V1,
-                id = statiskUuid,
-                verdi = testData.hentPersonGalleri().toJsonNode(),
-                kilde = kilde,
-            ),
-        )
+        every { opplysningerMock.finnHendelserIGrunnlag(sakId) } returns
+            listOf(
+                lagGrunnlagHendelse(
+                    sakId,
+                    3,
+                    PERSONGALLERI_V1,
+                    id = statiskUuid,
+                    verdi = testData.hentPersonGalleri().toJsonNode(),
+                    kilde = kilde,
+                ),
+            )
 
         val opplysningsperson = mockPerson()
         every { pdlTjenesterKlientImpl.hentPerson(any(), any(), any()) } returns testData.soeker

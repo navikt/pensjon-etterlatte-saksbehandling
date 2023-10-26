@@ -116,7 +116,7 @@ internal class BehandlingGrunnlagRoutesKtTest {
         val behandlingId = UUID.randomUUID()
 
         testApplication {
-            val response = createHttpClient().get("api/grunnlag/sak/1/behandling/$behandlingId")
+            val response = createHttpClient().get("api/grunnlag/behandling/$behandlingId")
 
             assertEquals(HttpStatusCode.Unauthorized, response.status)
         }
@@ -144,7 +144,7 @@ internal class BehandlingGrunnlagRoutesKtTest {
                 }
             }
             val response =
-                client.get("api/grunnlag/sak/1/behandling/$behandlingId") {
+                client.get("api/grunnlag/behandling/$behandlingId") {
                     headers {
                         append(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                         append(HttpHeaders.Authorization, "Bearer $token")
@@ -168,7 +168,7 @@ internal class BehandlingGrunnlagRoutesKtTest {
 
         testApplication {
             val response =
-                createHttpClient().get("api/grunnlag/sak/1/behandling/$behandlingId") {
+                createHttpClient().get("api/grunnlag/behandling/$behandlingId") {
                     headers {
                         append(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                         append(HttpHeaders.Authorization, "Bearer $token")
@@ -202,7 +202,7 @@ internal class BehandlingGrunnlagRoutesKtTest {
 
         testApplication {
             val response =
-                createHttpClient().get("api/grunnlag/sak/1/behandling/$behandlingId/$type") {
+                createHttpClient().get("api/grunnlag/behandling/$behandlingId/$type") {
                     headers {
                         append(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                         append(HttpHeaders.Authorization, "Bearer $token")
@@ -236,7 +236,7 @@ internal class BehandlingGrunnlagRoutesKtTest {
         testApplication {
             val response =
                 createHttpClient().get(
-                    "api/grunnlag/sak/1/behandling/$behandlingId/revurdering/${Opplysningstype.HISTORISK_FORELDREANSVAR}",
+                    "api/grunnlag/behandling/$behandlingId/revurdering/${Opplysningstype.HISTORISK_FORELDREANSVAR}",
                 ) {
                     headers {
                         append(HttpHeaders.ContentType, ContentType.Application.Json.toString())
@@ -270,7 +270,7 @@ internal class BehandlingGrunnlagRoutesKtTest {
 
         testApplication {
             val actualResponse =
-                createHttpClient().post("api/grunnlag/sak/1/behandling/$behandlingId/nye-opplysninger") {
+                createHttpClient().post("api/grunnlag/behandling/$behandlingId/nye-opplysninger") {
                     contentType(ContentType.Application.Json)
                     setBody(NyeSaksopplysninger(sakId, opplysninger))
                     headers {
@@ -302,7 +302,7 @@ internal class BehandlingGrunnlagRoutesKtTest {
 
         testApplication {
             val actualResponse =
-                createHttpClient().post("api/grunnlag/sak/1/behandling/$behandlingId/opprett-grunnlag") {
+                createHttpClient().post("api/grunnlag/behandling/$behandlingId/opprett-grunnlag") {
                     contentType(ContentType.Application.Json)
                     setBody(opplysningsbehov)
                     headers {
@@ -335,7 +335,7 @@ internal class BehandlingGrunnlagRoutesKtTest {
         val request = OppdaterGrunnlagRequest(sakId, SakType.BARNEPENSJON)
         testApplication {
             val actualResponse =
-                createHttpClient().post("api/grunnlag/sak/1/behandling/$behandlingId/oppdater-grunnlag") {
+                createHttpClient().post("api/grunnlag/behandling/$behandlingId/oppdater-grunnlag") {
                     contentType(ContentType.Application.Json)
                     setBody(request)
                     headers {

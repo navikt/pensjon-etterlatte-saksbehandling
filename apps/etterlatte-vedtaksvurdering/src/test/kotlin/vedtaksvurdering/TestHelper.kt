@@ -92,6 +92,7 @@ fun vedtak(
     avkorting: ObjectNode? = objectMapper.createObjectNode(),
     revurderingAarsak: Revurderingaarsak? = null,
     status: VedtakStatus = VedtakStatus.OPPRETTET,
+    utbetalingsperioder: List<Utbetalingsperiode>? = null,
 ) = Vedtak(
     id = 1L,
     status = status,
@@ -108,14 +109,15 @@ fun vedtak(
             avkorting = avkorting,
             vilkaarsvurdering = vilkaarsvurdering,
             utbetalingsperioder =
-                listOf(
-                    Utbetalingsperiode(
-                        id = 1,
-                        periode = Periode(virkningstidspunkt, null),
-                        beloep = BigDecimal.valueOf(100),
-                        type = UtbetalingsperiodeType.UTBETALING,
+                utbetalingsperioder
+                    ?: listOf(
+                        Utbetalingsperiode(
+                            id = 1,
+                            periode = Periode(virkningstidspunkt, null),
+                            beloep = BigDecimal.valueOf(100),
+                            type = UtbetalingsperiodeType.UTBETALING,
+                        ),
                     ),
-                ),
             revurderingAarsak = revurderingAarsak,
         ),
 )

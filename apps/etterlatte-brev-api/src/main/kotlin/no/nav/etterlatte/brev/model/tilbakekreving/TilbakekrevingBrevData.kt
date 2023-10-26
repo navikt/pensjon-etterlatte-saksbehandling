@@ -49,21 +49,15 @@ data class TilbakekrevingInnholdBrevData(
             )
         }
 
-        private fun sjekkOmHarRenter(tilbakekreving: Tilbakekreving): Boolean {
-            val forekomstAvRentetillegg =
-                tilbakekreving.perioder.find { periode ->
-                    periode.ytelse.rentetillegg.let { it != null && it > 0 }
-                }
-            return forekomstAvRentetillegg != null
-        }
+        private fun sjekkOmHarRenter(tilbakekreving: Tilbakekreving) =
+            tilbakekreving.perioder.any { periode ->
+                periode.ytelse.rentetillegg.let { it != null && it > 0 }
+            }
 
-        private fun sjekkOmHarForeldet(tilbakekreving: Tilbakekreving): Boolean {
-            val forekomstAvRentetillegg =
-                tilbakekreving.perioder.find { periode ->
-                    periode.ytelse.resultat.let { it != null && it == TilbakekrevingResultat.FORELDET }
-                }
-            return forekomstAvRentetillegg != null
-        }
+        private fun sjekkOmHarForeldet(tilbakekreving: Tilbakekreving) =
+            tilbakekreving.perioder.any { periode ->
+                periode.ytelse.resultat.let { it != null && it == TilbakekrevingResultat.FORELDET }
+            }
 
         private fun tilbakekrevingsPerioder(tilbakekreving: Tilbakekreving) =
             tilbakekreving.perioder.map { periode ->
@@ -85,28 +79,14 @@ data class TilbakekrevingInnholdBrevData(
                 )
             }
 
-        private fun perioderSummert(tilbakekreving: Tilbakekreving): TilbakekrevingBeloeperData {
-            var sumFeilutbetaling = 0
-            var sumBrutto = 0
-            var sumSkatt = 0
-            var sumNetto = 0
-            var sumRenter = 0
-            tilbakekreving.perioder.forEach {
-                val beloeper = it.ytelse
-                sumFeilutbetaling += beloeper.beregnetFeilutbetaling ?: 0
-                sumBrutto += beloeper.bruttoTilbakekreving ?: 0
-                sumSkatt += beloeper.skatt ?: 0
-                sumNetto += beloeper.nettoTilbakekreving ?: 0
-                sumRenter += beloeper.rentetillegg ?: 0
-            }
-            return TilbakekrevingBeloeperData(
-                feilutbetaling = Kroner(sumFeilutbetaling),
-                bruttoTilbakekreving = Kroner(sumBrutto),
-                fradragSkatt = Kroner(sumSkatt),
-                nettoTilbakekreving = Kroner(sumNetto),
-                renteTillegg = Kroner(sumRenter),
+        private fun perioderSummert(tilbakekreving: Tilbakekreving) =
+            TilbakekrevingBeloeperData(
+                feilutbetaling = Kroner(tilbakekreving.perioder.sumOf { it.ytelse.beregnetFeilutbetaling ?: 0 }),
+                bruttoTilbakekreving = Kroner(tilbakekreving.perioder.sumOf { it.ytelse.bruttoTilbakekreving ?: 0 }),
+                fradragSkatt = Kroner(tilbakekreving.perioder.sumOf { it.ytelse.skatt ?: 0 }),
+                nettoTilbakekreving = Kroner(tilbakekreving.perioder.sumOf { it.ytelse.nettoTilbakekreving ?: 0 }),
+                renteTillegg = Kroner(tilbakekreving.perioder.sumOf { it.ytelse.rentetillegg ?: 0 }),
             )
-        }
     }
 }
 

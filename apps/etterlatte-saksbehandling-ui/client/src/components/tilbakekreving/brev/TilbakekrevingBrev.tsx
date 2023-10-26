@@ -68,7 +68,7 @@ export function TilbakekrevingBrev({ tilbakekreving }: { tilbakekreving: Tilbake
           </ContentHeader>
         </Sidebar>
 
-        {!!vedtaksbrev && <RedigerbartBrev brev={vedtaksbrev!!} kanRedigeres={true} />}
+        {vedtaksbrev && <RedigerbartBrev brev={vedtaksbrev} kanRedigeres={true} />}
 
         {isFailure(hentBrevStatus) && <ErrorMessage>Feil ved henting av brev</ErrorMessage>}
         {isFailure(opprettBrevStatus) && <ErrorMessage>Kunne ikke opprette brev</ErrorMessage>}

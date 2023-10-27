@@ -142,11 +142,13 @@ class VedtakBehandlingService(
 
         return VedtakOgRapid(
             fattetVedtak.toDto(),
-            RapidInfo(
-                vedtakhendelse = VedtakKafkaHendelseType.FATTET,
-                vedtak = fattetVedtak.toDto(),
-                tekniskTid = fattetVedtak.vedtakFattet!!.tidspunkt,
-                behandlingId = behandlingId,
+            listOf(
+                RapidInfo(
+                    vedtakhendelse = VedtakKafkaHendelseType.FATTET,
+                    vedtak = fattetVedtak.toDto(),
+                    tekniskTid = fattetVedtak.vedtakFattet!!.tidspunkt,
+                    behandlingId = behandlingId,
+                ),
             ),
         )
     }
@@ -204,21 +206,23 @@ class VedtakBehandlingService(
 
         return VedtakOgRapid(
             attestertVedtak.toDto(),
-            RapidInfo(
-                vedtakhendelse = VedtakKafkaHendelseType.ATTESTERT,
-                vedtak = attestertVedtak.toDto(),
-                tekniskTid = attestertVedtak.attestasjon!!.tidspunkt,
-                behandlingId = behandlingId,
-                extraParams =
-                    mapOf(
-                        SKAL_SENDE_BREV to
-                            when {
-                                behandling.revurderingsaarsak.skalIkkeSendeBrev() -> false
-                                else -> true
-                            },
-                        KILDE_KEY to behandling.kilde,
-                        REVURDERING_AARSAK to behandling.revurderingsaarsak.toString(),
-                    ),
+            listOf(
+                RapidInfo(
+                    vedtakhendelse = VedtakKafkaHendelseType.ATTESTERT,
+                    vedtak = attestertVedtak.toDto(),
+                    tekniskTid = attestertVedtak.attestasjon!!.tidspunkt,
+                    behandlingId = behandlingId,
+                    extraParams =
+                        mapOf(
+                            SKAL_SENDE_BREV to
+                                when {
+                                    behandling.revurderingsaarsak.skalIkkeSendeBrev() -> false
+                                    else -> true
+                                },
+                            KILDE_KEY to behandling.kilde,
+                            REVURDERING_AARSAK to behandling.revurderingsaarsak.toString(),
+                        ),
+                ),
             ),
         )
     }
@@ -261,11 +265,13 @@ class VedtakBehandlingService(
 
         return VedtakOgRapid(
             repository.hentVedtak(behandlingId)!!.toDto(),
-            RapidInfo(
-                vedtakhendelse = VedtakKafkaHendelseType.UNDERKJENT,
-                vedtak = underkjentVedtak.toDto(),
-                tekniskTid = underkjentTid,
-                behandlingId = behandlingId,
+            listOf(
+                RapidInfo(
+                    vedtakhendelse = VedtakKafkaHendelseType.UNDERKJENT,
+                    vedtak = underkjentVedtak.toDto(),
+                    tekniskTid = underkjentTid,
+                    behandlingId = behandlingId,
+                ),
             ),
         )
     }
@@ -273,7 +279,7 @@ class VedtakBehandlingService(
     suspend fun tilSamordningVedtak(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ): Vedtak {
+    ): VedtakOgRapid {
         logger.info("Setter vedtak til til_samordning for behandling med behandlingId=$behandlingId")
         val vedtak = hentVedtakNonNull(behandlingId)
 
@@ -289,28 +295,31 @@ class VedtakBehandlingService(
                     }
             }
 
-        sendToRapid(
-            vedtakhendelse = VedtakKafkaHendelseType.TIL_SAMORDNING,
-            vedtak = tilSamordningVedtakLocal,
-            tekniskTid = Tidspunkt.now(clock),
-            behandlingId = behandlingId,
-        )
+        val tilSamordning =
+            RapidInfo(
+                vedtakhendelse = VedtakKafkaHendelseType.TIL_SAMORDNING,
+                vedtak = tilSamordningVedtakLocal.toDto(),
+                tekniskTid = Tidspunkt.now(clock),
+                behandlingId = behandlingId,
+            )
 
         if (!samKlient.samordneVedtak(vedtak)) {
             logger.info("Svar fra samordning: ikke nødvendig å vente [behandlingId=$behandlingId]")
-            return samordnetVedtak(behandlingId, brukerTokenInfo, tilSamordningVedtakLocal)
+
+            val vedtakEtterSvar = samordnetVedtak(behandlingId, brukerTokenInfo, tilSamordningVedtakLocal)
+            return VedtakOgRapid(vedtakEtterSvar.vedtak, listOf(tilSamordning) + vedtakEtterSvar.rapidInfo)
         } else {
             logger.info("Svar fra samordning: må vente [behandlingId=$behandlingId]")
         }
 
-        return tilSamordningVedtakLocal
+        return VedtakOgRapid(tilSamordningVedtakLocal.toDto(), listOf(tilSamordning))
     }
 
     suspend fun samordnetVedtak(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
         vedtakTilSamordning: Vedtak? = null,
-    ): Vedtak {
+    ): VedtakOgRapid {
         logger.info("Setter vedtak til samordnet for behandling med behandlingId=$behandlingId")
         val vedtak = vedtakTilSamordning ?: hentVedtakNonNull(behandlingId)
 
@@ -325,14 +334,17 @@ class VedtakBehandlingService(
                     }
             }
 
-        sendToRapid(
-            vedtakhendelse = VedtakKafkaHendelseType.SAMORDNET,
-            vedtak = samordnetVedtakLocal,
-            tekniskTid = Tidspunkt.now(clock),
-            behandlingId = behandlingId,
+        return VedtakOgRapid(
+            samordnetVedtakLocal.toDto(),
+            listOf(
+                RapidInfo(
+                    vedtakhendelse = VedtakKafkaHendelseType.SAMORDNET,
+                    vedtak = samordnetVedtakLocal.toDto(),
+                    tekniskTid = Tidspunkt.now(clock),
+                    behandlingId = behandlingId,
+                ),
+            ),
         )
-
-        return samordnetVedtakLocal
     }
 
     suspend fun iverksattVedtak(
@@ -356,11 +368,13 @@ class VedtakBehandlingService(
 
         return VedtakOgRapid(
             iverksattVedtak.toDto(),
-            RapidInfo(
-                vedtakhendelse = VedtakKafkaHendelseType.IVERKSATT,
-                vedtak = iverksattVedtak.toDto(),
-                tekniskTid = Tidspunkt.now(clock),
-                behandlingId = behandlingId,
+            listOf(
+                RapidInfo(
+                    vedtakhendelse = VedtakKafkaHendelseType.IVERKSATT,
+                    vedtak = iverksattVedtak.toDto(),
+                    tekniskTid = Tidspunkt.now(clock),
+                    behandlingId = behandlingId,
+                ),
             ),
         )
     }
@@ -513,6 +527,7 @@ class VedtakBehandlingService(
                             )
                         }
                     }
+
                     SakType.OMSTILLINGSSTOENAD -> {
                         val avkortetYtelse =
                             requireNotNull(beregningOgAvkorting?.avkorting?.avkortetYtelse) {

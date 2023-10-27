@@ -12,6 +12,8 @@ import java.util.UUID
 class VedtaksvurderingRapidService(
     private val publiser: (String, UUID) -> Unit,
 ) {
+    fun sendToRapid(rapidInfo: Collection<RapidInfo>) = rapidInfo.forEach { sendToRapid(it) }
+
     fun sendToRapid(rapidInfo: RapidInfo) =
         sendToRapid(
             vedtakhendelse = rapidInfo.vedtakhendelse,

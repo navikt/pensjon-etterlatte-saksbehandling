@@ -72,4 +72,4 @@ spec:
         - application: etterlatte-pdltjenester
       external:
         - host: etterlatte-unleash-api.nav.cloud.nais.io
-        - host: pensjon-pen-proxy-fss-q2.dev-fss-pub.nais.io
+        - host: pensjon-pen-q2.dev.adeo.no

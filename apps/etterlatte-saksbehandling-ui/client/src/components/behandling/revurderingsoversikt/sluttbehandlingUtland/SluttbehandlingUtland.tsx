@@ -212,9 +212,9 @@ function formaterKravpakkeLand(innhold: KravpakkeUtland | undefined, landliste: 
 }
 
 export function oversettIsokodeTilLandnavn(landliste: ILand[], landIsoKode?: string) {
-  const hit = landliste.find((kodeverkLand) => kodeverkLand.isoLandkode === landIsoKode)
-  if (hit) {
-    return hit.beskrivelse.tekst
+  const funnetLand = landliste.find((kodeverkLand) => kodeverkLand.isoLandkode === landIsoKode)
+  if (funnetLand) {
+    return funnetLand.beskrivelse.tekst
   } else {
     return landIsoKode
   }

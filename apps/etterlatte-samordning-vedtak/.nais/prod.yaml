@@ -79,6 +79,12 @@ spec:
     inbound:
       rules:
         - application: etterlatte-krakend
+        - application: pensjon-pen
+          namespace: pensjondeployer
+          cluster: prod-fss
+          permissions:
+            roles:
+              - les-oms-vedtak
     outbound:
       rules:
         - application: etterlatte-vedtaksvurdering

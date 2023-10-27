@@ -81,6 +81,24 @@ spec:
     inbound:
       rules:
         - application: etterlatte-krakend
+        - application: pensjon-pen-q1
+          namespace: pensjon-q2
+          cluster: dev-fss
+          permissions:
+            roles:
+              - les-oms-vedtak
+        - application: pensjon-pen-q2
+          namespace: pensjon-q2
+          cluster: dev-fss
+          permissions:
+            roles:
+              - les-oms-vedtak
+        - application: ida
+          namespace: traktor
+          cluster: prod-fss
+          permissions:
+            roles:
+              - les-oms-vedtak
     outbound:
       rules:
         - application: etterlatte-vedtaksvurdering

@@ -3,11 +3,11 @@ import { useState } from 'react'
 import { GeneriskModal } from '~shared/modal/modal'
 import { useNavigate } from 'react-router'
 import { isPending, useApiCall } from '~shared/hooks/useApiCall'
-import { Tilbakekreving } from '~shared/types/Tilbakekreving'
+import { TilbakekrevingBehandling } from '~shared/types/Tilbakekreving'
 import { underkjennVedtak } from '~shared/api/tilbakekreving'
 
 type Props = {
-  tilbakekreving: Tilbakekreving
+  tilbakekreving: TilbakekrevingBehandling
   kommentar: string
   valgtBegrunnelse: string
 }
@@ -19,7 +19,7 @@ export const UnderkjennTilbakekreving: React.FC<Props> = ({ tilbakekreving, komm
   const [underkjennStatus, apiUnderkjennVedtak] = useApiCall(underkjennVedtak)
 
   const underkjenn = () => {
-    apiUnderkjennVedtak({ tilbakekrevingId: tilbakekreving.id, kommentar, valgtBegrunnelse }, () => {
+    apiUnderkjennVedtak({ behandlingsId: tilbakekreving.id, kommentar, valgtBegrunnelse }, () => {
       navigate(`/person/${tilbakekreving.sak.ident}`)
     })
   }

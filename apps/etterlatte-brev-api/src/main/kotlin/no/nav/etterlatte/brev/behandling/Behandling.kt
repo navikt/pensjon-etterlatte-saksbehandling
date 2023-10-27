@@ -1,15 +1,12 @@
 package no.nav.etterlatte.brev.behandling
 
-import no.nav.etterlatte.brev.model.EtterbetalingDTO
 import no.nav.etterlatte.brev.model.Spraak
-import no.nav.etterlatte.grunnbeloep.Grunnbeloep
-import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
-import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.tilbakekreving.Tilbakekreving
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
 import no.nav.pensjon.brevbaker.api.model.Kroner
 import java.time.LocalDate
 import java.time.YearMonth
@@ -21,35 +18,8 @@ data class GenerellBrevData(
     val behandlingId: UUID,
     val forenkletVedtak: ForenkletVedtak,
     val spraak: Spraak,
-    val revurderingsaarsak: RevurderingAarsak? = null,
+    val revurderingsaarsak: Revurderingaarsak? = null,
 )
-
-data class Behandling(
-    val sakId: Long,
-    val sakType: SakType,
-    val behandlingId: UUID,
-    val spraak: Spraak,
-    val personerISak: PersonerISak,
-    val vedtak: ForenkletVedtak,
-    val utbetalingsinfo: Utbetalingsinfo? = null,
-    val vilkaarsvurdering: VilkaarsvurderingDto,
-    val forrigeUtbetalingsinfo: Utbetalingsinfo? = null,
-    val avkortingsinfo: Avkortingsinfo? = null,
-    val revurderingsaarsak: RevurderingAarsak? = null,
-    val revurderingInfo: RevurderingInfo? = null,
-    val virkningsdato: YearMonth? = null,
-    val opprinneligInnvilgelsesdato: LocalDate? = null, // Kun opphør RevurderingAarsak.OMGJOERING_AV_FARSKAP TODO: fix
-    val adopsjonsdato: LocalDate? = null,
-    val trygdetid: Trygdetid? = null,
-    val etterbetalingDTO: EtterbetalingDTO?,
-    val grunnbeloep: Grunnbeloep,
-) {
-    init {
-        if (vedtak.type == VedtakType.INNVILGELSE) {
-            requireNotNull(utbetalingsinfo) { "Utbetalingsinformasjon mangler på behandling (id=$behandlingId" }
-        }
-    }
-}
 
 data class Trygdetid(
     val aarTrygdetid: Int,
@@ -74,6 +44,7 @@ data class ForenkletVedtak(
     val vedtaksdato: LocalDate?,
     val virkningstidspunkt: YearMonth? = null,
     val revurderingInfo: RevurderingInfo? = null,
+    val tilbakekreving: Tilbakekreving? = null,
 )
 
 data class Utbetalingsinfo(

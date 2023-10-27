@@ -22,7 +22,18 @@ import java.util.UUID
 import javax.sql.DataSource
 
 class TrygdetidRepository(private val dataSource: DataSource) {
-    fun hentTrygdetid(behandlingId: UUID): Trygdetid? =
+    fun hentTrygdetidMedId(
+        behandlingId: UUID,
+        trygdetidId: UUID,
+    ): Trygdetid? {
+        return hentTrygdetiderForBehandling(behandlingId).find { it.id == trygdetidId }
+    }
+
+    fun hentTrygdetid(behandlingId: UUID): Trygdetid? {
+        return hentTrygdetiderForBehandling(behandlingId).firstOrNull()
+    }
+
+    fun hentTrygdetiderForBehandling(behandlingId: UUID): List<Trygdetid> =
         using(sessionOf(dataSource)) { session ->
             queryOf(
                 statement =
@@ -64,7 +75,7 @@ class TrygdetidRepository(private val dataSource: DataSource) {
                         val trygdetidGrunnlag = hentTrygdetidGrunnlag(trygdetidId)
                         val opplysninger = hentGrunnlagOpplysninger(trygdetidId)
                         row.toTrygdetid(trygdetidGrunnlag, opplysninger)
-                    }.asSingle,
+                    }.asList,
                 )
             }
         }
@@ -78,16 +89,25 @@ class TrygdetidRepository(private val dataSource: DataSource) {
             if (trygdetid.beregnetTrygdetid != null) {
                 oppdaterBeregnetTrygdetid(trygdetid.behandlingId, trygdetid.beregnetTrygdetid, tx)
             }
-        }.let { hentTrygdtidNotNull(trygdetid.behandlingId) }
+        }.let { hentTrygdetidMedIdNotNull(behandlingId = trygdetid.behandlingId, trygdetidId = trygdetid.id) }
 
     fun oppdaterTrygdetid(
         oppdatertTrygdetid: Trygdetid,
         overstyrt: Boolean = false,
     ): Trygdetid =
         dataSource.transaction { tx ->
-            val gjeldendeTrygdetid = hentTrygdtidNotNull(oppdatertTrygdetid.behandlingId)
+            val gjeldendeTrygdetid =
+                hentTrygdetidMedIdNotNull(
+                    behandlingId = oppdatertTrygdetid.behandlingId,
+                    trygdetidId = oppdatertTrygdetid.id,
+                )
 
-            oppdaterOverstyrtPoengaar(gjeldendeTrygdetid.id, gjeldendeTrygdetid.behandlingId, oppdatertTrygdetid.overstyrtNorskPoengaar, tx)
+            oppdaterOverstyrtPoengaar(
+                gjeldendeTrygdetid.id,
+                gjeldendeTrygdetid.behandlingId,
+                oppdatertTrygdetid.overstyrtNorskPoengaar,
+                tx,
+            )
 
             // opprett grunnlag
             oppdatertTrygdetid.trygdetidGrunnlag
@@ -116,7 +136,7 @@ class TrygdetidRepository(private val dataSource: DataSource) {
             } else {
                 nullstillBeregnetTrygdetid(oppdatertTrygdetid.behandlingId, tx)
             }
-        }.let { hentTrygdtidNotNull(oppdatertTrygdetid.behandlingId) }
+        }.let { hentTrygdetidMedIdNotNull(oppdatertTrygdetid.behandlingId, oppdatertTrygdetid.id) }
 
     private fun opprettTrygdetid(
         trygdetid: Trygdetid,
@@ -415,9 +435,11 @@ class TrygdetidRepository(private val dataSource: DataSource) {
             )
         }
 
-    private fun hentTrygdtidNotNull(behandlingsId: UUID) =
-        hentTrygdetid(behandlingsId)
-            ?: throw Exception("Fant ikke trygdetid for $behandlingsId")
+    private fun hentTrygdetidMedIdNotNull(
+        behandlingId: UUID,
+        trygdetidId: UUID,
+    ) = hentTrygdetidMedId(behandlingId, trygdetidId)
+        ?: throw Exception("Fant ikke trygdetid for $behandlingId")
 
     private fun Row.toFaktiskTrygdetid(
         totalColumn: String,
@@ -501,7 +523,7 @@ class TrygdetidRepository(private val dataSource: DataSource) {
         trygdetidGrunnlag = trygdetidGrunnlag,
         opplysninger = opplysninger,
         overstyrtNorskPoengaar = intOrNull("poengaar_overstyrt"),
-        ident = stringOrNull("ident"),
+        ident = string("ident"),
     )
 
     private fun Row.toTrygdetidGrunnlag() =

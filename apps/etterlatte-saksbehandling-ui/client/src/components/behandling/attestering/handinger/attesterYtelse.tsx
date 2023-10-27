@@ -13,7 +13,7 @@ import { attesterVedtak } from '~shared/api/vedtaksvurdering'
 export const AttesterYtelse = ({ behandling, kommentar }: { behandling: IDetaljertBehandling; kommentar: string }) => {
   const navigate = useNavigate()
   const [modalisOpen, setModalisOpen] = useState(false)
-  const skalSendeBrev = behandlingSkalSendeBrev(behandling)
+  const skalSendeBrev = behandlingSkalSendeBrev(behandling.behandlingType, behandling.revurderingsaarsak)
   const [error, setError] = useState<string>()
   const [ferdigstillVedtaksbrevStatus, apiFerdigstillVedtaksbrev] = useApiCall(ferdigstillVedtaksbrev)
   const [attesterVedtakStatus, apiAttesterVedtak] = useApiCall(attesterVedtak)

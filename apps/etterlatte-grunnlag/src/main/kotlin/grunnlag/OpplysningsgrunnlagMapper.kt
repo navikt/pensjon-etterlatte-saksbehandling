@@ -11,7 +11,6 @@ import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 
 class OpplysningsgrunnlagMapper(
     private val grunnlaghendelser: List<OpplysningDao.GrunnlagHendelse>,
-    private val sakId: Long,
     private val persongalleri: Persongalleri,
 ) {
     private data class GruppertHendelser(
@@ -54,6 +53,8 @@ class OpplysningsgrunnlagMapper(
                     familiemedlem.associateBy({ it.opplysningstype }, { it.opplysning })
                 }
         val sakMap = saksopplysninger.associateBy({ it.opplysningstype }, { it.opplysning })
+
+        val sakId = grunnlaghendelser.first().sakId
 
         return Grunnlag(
             soeker = soekerMap,

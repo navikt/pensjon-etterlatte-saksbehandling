@@ -21,7 +21,7 @@ import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
-import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
@@ -239,7 +239,7 @@ internal class RealManueltOpphoerServiceTest {
                             sakId = sakId,
                             status = BehandlingStatus.IVERKSATT,
                             persongalleri = Persongalleri(soeker = brukerFnr),
-                            revurderingAarsak = RevurderingAarsak.REGULERING,
+                            revurderingAarsak = Revurderingaarsak.REGULERING,
                             virkningstidspunkt =
                                 Virkningstidspunkt(
                                     YearMonth.of(2022, 10),
@@ -251,7 +251,7 @@ internal class RealManueltOpphoerServiceTest {
                             sakId = sakId,
                             status = BehandlingStatus.VILKAARSVURDERT,
                             persongalleri = Persongalleri(soeker = brukerFnr),
-                            revurderingAarsak = RevurderingAarsak.REGULERING,
+                            revurderingAarsak = Revurderingaarsak.REGULERING,
                             virkningstidspunkt =
                                 Virkningstidspunkt(
                                     YearMonth.of(2022, 5),

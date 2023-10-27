@@ -8,7 +8,7 @@ import {
 } from '~utils/formattering'
 import { IBehandlingStatus, IBehandlingsType, IUtenlandstilsnittType } from '~shared/types/IDetaljertBehandling'
 import React, { useEffect } from 'react'
-import { Revurderingsaarsak } from '~shared/types/Revurderingsaarsak'
+import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
 import { hentVedtakSammendrag } from '~shared/api/vedtaksvurdering'
 import { tagColors } from '~shared/Tags'
 import styled from 'styled-components'
@@ -16,11 +16,11 @@ import { isFailure, isPending, isSuccess, useApiCall } from '~shared/hooks/useAp
 import Spinner from '~shared/Spinner'
 import { ExclamationmarkTriangleFillIcon } from '@navikt/aksel-icons'
 
-const VedtakKolonner = (props: { behandlingsId: string }) => {
+const VedtakKolonner = (props: { behandlingId: string }) => {
   const [vedtak, apiHentVedtaksammendrag] = useApiCall(hentVedtakSammendrag)
 
   useEffect(() => {
-    apiHentVedtaksammendrag(props.behandlingsId)
+    apiHentVedtaksammendrag(props.behandlingId)
   }, [])
 
   const attestertDato = (dato?: string) => {
@@ -110,7 +110,7 @@ export const Behandlingsliste = ({ behandlinger }: { behandlinger: IBehandlingsa
               <Table.DataCell>
                 {behandling.virkningstidspunkt ? formaterStringDato(behandling.virkningstidspunkt!!.dato) : ''}
               </Table.DataCell>
-              <VedtakKolonner behandlingsId={behandling.id} />
+              <VedtakKolonner behandlingId={behandling.id} />
               <Table.DataCell>
                 <Link href={lenkeTilBehandling(behandling)}>Vis behandling</Link>
               </Table.DataCell>
@@ -130,35 +130,35 @@ function mapAarsak(aarsak: BehandlingOgRevurderingsAarsakerType) {
       return 'Søknad'
     case AarsaksTyper.REVURDERING:
       return 'Revurdering'
-    case Revurderingsaarsak.REGULERING:
+    case Revurderingaarsak.REGULERING:
       return 'Regulering'
-    case Revurderingsaarsak.ANSVARLIGE_FORELDRE:
+    case Revurderingaarsak.ANSVARLIGE_FORELDRE:
       return 'Ansvarlige foreldre'
-    case Revurderingsaarsak.SOESKENJUSTERING:
+    case Revurderingaarsak.SOESKENJUSTERING:
       return 'Søskenjustering'
-    case Revurderingsaarsak.UTLAND:
+    case Revurderingaarsak.UTLAND:
       return 'Ut-/innflytting til Norge'
-    case Revurderingsaarsak.BARN:
+    case Revurderingaarsak.BARN:
       return 'Barn'
-    case Revurderingsaarsak.DOEDSFALL:
+    case Revurderingaarsak.DOEDSFALL:
       return 'Dødsfall'
-    case Revurderingsaarsak.OMGJOERING_AV_FARSKAP:
+    case Revurderingaarsak.OMGJOERING_AV_FARSKAP:
       return 'Omgjøring av farskap'
-    case Revurderingsaarsak.ADOPSJON:
+    case Revurderingaarsak.ADOPSJON:
       return 'Adopsjon'
-    case Revurderingsaarsak.VERGEMAAL_ELLER_FREMTIDSFULLMAKT:
+    case Revurderingaarsak.VERGEMAAL_ELLER_FREMTIDSFULLMAKT:
       return 'Institusjonsopphold'
-    case Revurderingsaarsak.SIVILSTAND:
+    case Revurderingaarsak.SIVILSTAND:
       return 'Endring av sivilstand'
-    case Revurderingsaarsak.NY_SOEKNAD:
+    case Revurderingaarsak.NY_SOEKNAD:
       return 'Ny Søknad'
-    case Revurderingsaarsak.FENGSELSOPPHOLD:
+    case Revurderingaarsak.FENGSELSOPPHOLD:
       return 'Fengselsopphold'
-    case Revurderingsaarsak.YRKESSKADE:
+    case Revurderingaarsak.YRKESSKADE:
       return 'Yrkesskade'
-    case Revurderingsaarsak.UT_AV_FENGSEL:
+    case Revurderingaarsak.UT_AV_FENGSEL:
       return 'Ut av fengsel'
-    case Revurderingsaarsak.ANNEN:
+    case Revurderingaarsak.ANNEN:
       return 'Annen'
   }
 }
@@ -169,6 +169,10 @@ function endringStatusNavn(status: IBehandlingStatus) {
       return 'Til attestering'
     case IBehandlingStatus.ATTESTERT:
       return 'Attestert'
+    case IBehandlingStatus.TIL_SAMORDNING:
+      return 'Til samordning'
+    case IBehandlingStatus.SAMORDNET:
+      return 'Samordnet'
     case IBehandlingStatus.IVERKSATT:
       return 'Iverksatt'
     default:

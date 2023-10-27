@@ -18,6 +18,7 @@ import no.nav.etterlatte.vedtaksvurdering.VedtaksvurderingService
 import no.nav.etterlatte.vedtaksvurdering.automatiskBehandlingRoutes
 import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlientImpl
 import no.nav.etterlatte.vedtaksvurdering.klienter.BeregningKlientImpl
+import no.nav.etterlatte.vedtaksvurdering.klienter.SamKlientImpl
 import no.nav.etterlatte.vedtaksvurdering.klienter.VilkaarsvurderingKlientImpl
 import no.nav.etterlatte.vedtaksvurdering.samordningsvedtakRoute
 import no.nav.etterlatte.vedtaksvurdering.tilbakekrevingvedtakRoute
@@ -46,6 +47,7 @@ class ApplicationBuilder {
         )
 
     private val behandlingKlient = BehandlingKlientImpl(config, httpClient())
+    private val samKlient = SamKlientImpl()
     private val vedtaksvurderingService =
         VedtaksvurderingService(repository = VedtaksvurderingRepository.using(dataSource))
     private val vedtakBehandlingService =
@@ -54,6 +56,7 @@ class ApplicationBuilder {
             beregningKlient = BeregningKlientImpl(config, httpClient()),
             vilkaarsvurderingKlient = VilkaarsvurderingKlientImpl(config, httpClient()),
             behandlingKlient = behandlingKlient,
+            samKlient = samKlient,
         )
     private val vedtaksvurderingRapidService = VedtaksvurderingRapidService(publiser = ::publiser)
     private val vedtakTilbakekrevingService =

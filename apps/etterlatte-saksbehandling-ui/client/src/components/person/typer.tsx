@@ -5,7 +5,7 @@ import {
   IUtenlandstilsnitt,
   Virkningstidspunkt,
 } from '~shared/types/IDetaljertBehandling'
-import { Revurderingsaarsak } from '~shared/types/Revurderingsaarsak'
+import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
 import { ISak, SakType } from '~shared/types/sak'
 
 export interface IPersonResult {
@@ -40,7 +40,7 @@ export enum AarsaksTyper {
   REVURDERING = 'REVURDERING',
 }
 
-export type BehandlingOgRevurderingsAarsakerType = Revurderingsaarsak | AarsaksTyper
+export type BehandlingOgRevurderingsAarsakerType = Revurderingaarsak | AarsaksTyper
 
 export type GrunnlagendringshendelseSamsvarType = SamsvarMellomKildeOgGrunnlag['type']
 

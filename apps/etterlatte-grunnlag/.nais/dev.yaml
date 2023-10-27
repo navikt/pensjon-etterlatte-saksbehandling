@@ -78,9 +78,7 @@ spec:
     inbound:
       rules:
         - application: etterlatte-vilkaarsvurdering
-        - application: etterlatte-vilkaarsvurdering-lokal
         - application: etterlatte-trygdetid
-        - application: etterlatte-trygdetid-lokal
         - application: etterlatte-brev-api
         - application: etterlatte-beregning
         - application: etterlatte-behandling

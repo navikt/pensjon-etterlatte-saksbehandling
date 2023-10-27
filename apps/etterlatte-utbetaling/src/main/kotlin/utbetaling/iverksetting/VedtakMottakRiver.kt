@@ -1,6 +1,7 @@
 package no.nav.etterlatte.utbetaling.iverksetting
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.utbetaling.UtbetalingResponseDto
@@ -15,7 +16,6 @@ import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.IverksettResultat.Ut
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.IverksettResultat.UtbetalingslinjerForVedtakEksisterer
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetaling
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingService
-import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingStatus
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetalingsvedtak
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -31,8 +31,22 @@ class VedtakMottakRiver(
     private val utbetalingService: UtbetalingService,
 ) : ListenerMedLogging() {
     init {
+        // Barnepensjon
         initialiserRiver(rapidsConnection, VedtakKafkaHendelseType.ATTESTERT.toString()) {
             validate { it.requireKey("vedtak") }
+            validate { it.requireValue("vedtak.sak.sakType", SakType.BARNEPENSJON.name) }
+            validate {
+                it.requireAny(
+                    "vedtak.type",
+                    listOf(VedtakType.INNVILGELSE.name, VedtakType.OPPHOER.name, VedtakType.ENDRING.name),
+                )
+            }
+        }
+
+        // Omstillingsstønad
+        initialiserRiver(rapidsConnection, VedtakKafkaHendelseType.SAMORDNET.toString()) {
+            validate { it.requireKey("vedtak") }
+            validate { it.requireValue("vedtak.sak.sakType", SakType.OMSTILLINGSSTOENAD.name) }
             validate {
                 it.requireAny(
                     "vedtak.type",
@@ -49,6 +63,7 @@ class VedtakMottakRiver(
         var vedtakId: Long? = null
         try {
             val vedtak: Utbetalingsvedtak = lesVedtak(packet).also { vedtakId = it.vedtakId }
+            // FIXME når VedtakNyDto tas i bruk: attestert ELLER samordnet (vedtakstatus)
             logger.info("Attestert vedtak med vedtakId=${vedtak.vedtakId} mottatt")
 
             when (val resultat = utbetalingService.iverksettUtbetaling(vedtak)) {
@@ -141,23 +156,6 @@ class VedtakMottakRiver(
                         status = UtbetalingStatusDto.valueOf(utbetaling.status().name),
                         vedtakId = utbetaling.vedtakId.value,
                         behandlingId = utbetaling.behandlingId.value,
-                    ),
-            ).toJson(),
-        )
-    }
-
-    // Mock for OMS
-    private fun sendUtbetalingSendtEventForOMSMock(
-        context: MessageContext,
-        utbetaling: Utbetalingsvedtak,
-    ) {
-        context.publish(
-            UtbetalingEventDto(
-                utbetalingResponse =
-                    UtbetalingResponseDto(
-                        status = UtbetalingStatusDto.valueOf(UtbetalingStatus.GODKJENT.name),
-                        vedtakId = utbetaling.vedtakId,
-                        behandlingId = utbetaling.behandling.id,
                     ),
             ).toJson(),
         )

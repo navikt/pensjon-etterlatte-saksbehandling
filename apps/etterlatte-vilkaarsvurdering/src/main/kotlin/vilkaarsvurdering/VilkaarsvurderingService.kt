@@ -9,6 +9,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
+import no.nav.etterlatte.libs.common.behandling.erPaaNyttRegelverk
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaar
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
@@ -16,7 +17,8 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.kopier
 import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.etterlatte.vilkaarsvurdering.klienter.BehandlingKlient
 import no.nav.etterlatte.vilkaarsvurdering.klienter.GrunnlagKlient
-import no.nav.etterlatte.vilkaarsvurdering.vilkaar.BarnepensjonVilkaar
+import no.nav.etterlatte.vilkaarsvurdering.vilkaar.BarnepensjonVilkaar1967
+import no.nav.etterlatte.vilkaarsvurdering.vilkaar.BarnepensjonVilkaar2024
 import no.nav.etterlatte.vilkaarsvurdering.vilkaar.OmstillingstoenadVilkaar
 import org.slf4j.LoggerFactory
 import java.util.UUID
@@ -138,6 +140,7 @@ class VilkaarsvurderingService(
     suspend fun opprettVilkaarsvurdering(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
+        kopierVedRevurdering: Boolean = true,
     ): Vilkaarsvurdering =
         tilstandssjekkFoerKjoering(behandlingId, brukerTokenInfo) {
             vilkaarsvurderingRepository.hent(behandlingId)?.let {
@@ -157,31 +160,21 @@ class VilkaarsvurderingService(
 
             when (behandling.behandlingType) {
                 BehandlingType.FØRSTEGANGSBEHANDLING -> {
-                    val vilkaar =
-                        finnVilkaarForNyVilkaarsvurdering(
-                            grunnlag,
-                            virkningstidspunkt,
-                            behandling.behandlingType,
-                            behandling.sakType,
-                        )
-                    vilkaarsvurderingRepository.opprettVilkaarsvurdering(
-                        Vilkaarsvurdering(
-                            behandlingId = behandlingId,
-                            vilkaar = vilkaar,
-                            virkningstidspunkt = virkningstidspunkt.dato,
-                            grunnlagVersjon = grunnlag.metadata.versjon,
-                        ),
-                    )
+                    opprettNyVilkaarsvurdering(grunnlag, virkningstidspunkt, behandling, behandlingId)
                 }
 
                 BehandlingType.REVURDERING -> {
-                    logger.info("Kopierer vilkårsvurdering for behandling $behandlingId fra forrige behandling")
-                    val sisteIverksatteBehandling =
-                        behandlingKlient.hentSisteIverksatteBehandling(
-                            behandling.sak,
-                            brukerTokenInfo,
-                        )
-                    kopierVilkaarsvurdering(behandlingId, sisteIverksatteBehandling.id, brukerTokenInfo)
+                    if (kopierVedRevurdering) {
+                        logger.info("Kopierer vilkårsvurdering for behandling $behandlingId fra forrige behandling")
+                        val sisteIverksatteBehandling =
+                            behandlingKlient.hentSisteIverksatteBehandling(
+                                behandling.sak,
+                                brukerTokenInfo,
+                            )
+                        kopierVilkaarsvurdering(behandlingId, sisteIverksatteBehandling.id, brukerTokenInfo)
+                    } else {
+                        opprettNyVilkaarsvurdering(grunnlag, virkningstidspunkt, behandling, behandlingId)
+                    }
                 }
 
                 BehandlingType.MANUELT_OPPHOER -> throw RuntimeException(
@@ -189,6 +182,43 @@ class VilkaarsvurderingService(
                 )
             }
         }
+
+    suspend fun slettVilkaarsvurdering(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) = if (behandlingKlient.settBehandlingStatusOpprettet(behandlingId, brukerTokenInfo, false)) {
+        val vilkaarsvurdering =
+            vilkaarsvurderingRepository.hent(behandlingId)
+                ?: throw IllegalStateException("Vilkårsvurdering eksisterer ikke")
+        vilkaarsvurderingRepository.slettVilkaarvurdering(vilkaarsvurdering.id)
+        behandlingKlient.settBehandlingStatusOpprettet(behandlingId, brukerTokenInfo, true)
+    } else {
+        throw BehandlingstilstandException
+    }
+
+    private fun opprettNyVilkaarsvurdering(
+        grunnlag: Grunnlag,
+        virkningstidspunkt: Virkningstidspunkt,
+        behandling: DetaljertBehandling,
+        behandlingId: UUID,
+    ): Vilkaarsvurdering {
+        val vilkaar =
+            finnVilkaarForNyVilkaarsvurdering(
+                grunnlag,
+                virkningstidspunkt,
+                behandling.behandlingType,
+                behandling.sakType,
+            )
+
+        return vilkaarsvurderingRepository.opprettVilkaarsvurdering(
+            Vilkaarsvurdering(
+                behandlingId = behandlingId,
+                vilkaar = vilkaar,
+                virkningstidspunkt = virkningstidspunkt.dato,
+                grunnlagVersjon = grunnlag.metadata.versjon,
+            ),
+        )
+    }
 
     private fun finnVilkaarForNyVilkaarsvurdering(
         grunnlag: Grunnlag,
@@ -201,7 +231,12 @@ class VilkaarsvurderingService(
                 when (behandlingType) {
                     BehandlingType.FØRSTEGANGSBEHANDLING,
                     BehandlingType.REVURDERING,
-                    -> BarnepensjonVilkaar.inngangsvilkaar(grunnlag, virkningstidspunkt, featureToggleService)
+                    ->
+                        if (virkningstidspunkt.erPaaNyttRegelverk()) {
+                            BarnepensjonVilkaar2024.inngangsvilkaar(grunnlag, featureToggleService)
+                        } else {
+                            BarnepensjonVilkaar1967.inngangsvilkaar(grunnlag, featureToggleService)
+                        }
 
                     BehandlingType.MANUELT_OPPHOER -> throw IllegalArgumentException(
                         "Støtter ikke vilkårsvurdering for behandlingType=$behandlingType",

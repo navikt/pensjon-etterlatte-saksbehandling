@@ -4,16 +4,15 @@ import fordeler.FordelerFeatureToggle
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.etterlatte.FNR_1
-import no.nav.etterlatte.FNR_2
-import no.nav.etterlatte.FNR_3
 import no.nav.etterlatte.behandling.BehandlingKlient
 import no.nav.etterlatte.fordeler.FordelerKriterie.AVDOED_ER_IKKE_REGISTRERT_SOM_DOED
 import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.libs.common.pdl.IngenIdentFamilierelasjonException
 import no.nav.etterlatte.libs.common.person.FamilieRelasjon
-import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
+import no.nav.etterlatte.libs.testdata.grunnlag.GJENLEVENDE_FOEDSELSNUMMER
+import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.etterlatte.mockNorskAdresse
 import no.nav.etterlatte.mockPerson
 import no.nav.etterlatte.pdltjenester.PdlTjenesterKlient
@@ -43,9 +42,9 @@ internal class FordelerRiverServiceTest {
 
     @Test
     fun `skal fordele gyldig soknad til behandling`() {
-        val barnFnr = Folkeregisteridentifikator.of(FNR_1)
-        val avdoedFnr = Folkeregisteridentifikator.of(FNR_2)
-        val etterlattFnr = Folkeregisteridentifikator.of(FNR_3)
+        val barnFnr = SOEKER_FOEDSELSNUMMER
+        val avdoedFnr = AVDOED_FOEDSELSNUMMER
+        val etterlattFnr = GJENLEVENDE_FOEDSELSNUMMER
         every { fordelerRepo.finnFordeling(any()) } returns null
         every { fordelerRepo.lagreFordeling(any()) } returns Unit
         every { fordelerRepo.antallFordeltTil("GJENNY") } returns 0
@@ -92,9 +91,9 @@ internal class FordelerRiverServiceTest {
 
     @Test
     fun `skal ikke fordele hendelse som ikke oppfyller alle kriterier`() {
-        val barnFnr = Folkeregisteridentifikator.of(FNR_1)
-        val avdoedFnr = Folkeregisteridentifikator.of(FNR_2)
-        val etterlattFnr = Folkeregisteridentifikator.of(FNR_3)
+        val barnFnr = SOEKER_FOEDSELSNUMMER
+        val avdoedFnr = AVDOED_FOEDSELSNUMMER
+        val etterlattFnr = GJENLEVENDE_FOEDSELSNUMMER
 
         every { fordelerRepo.finnFordeling(any()) } returns null
         every { fordelerRepo.lagreFordeling(any()) } returns Unit
@@ -179,9 +178,9 @@ internal class FordelerRiverServiceTest {
                 featureToggleService = dummyFeatureToggleService,
             )
 
-        val barnFnr = Folkeregisteridentifikator.of(FNR_1)
-        val avdoedFnr = Folkeregisteridentifikator.of(FNR_2)
-        val etterlattFnr = Folkeregisteridentifikator.of(FNR_3)
+        val barnFnr = SOEKER_FOEDSELSNUMMER
+        val avdoedFnr = AVDOED_FOEDSELSNUMMER
+        val etterlattFnr = GJENLEVENDE_FOEDSELSNUMMER
         every { fordelerRepo.finnFordeling(any()) } returns null
         every { fordelerRepo.lagreFordeling(any()) } returns Unit
         every { fordelerRepo.antallFordeltTil("GJENNY") } returns 10
@@ -233,9 +232,9 @@ internal class FordelerRiverServiceTest {
         every { fordelerRepo.finnFordeling(any()) } returns null
         every { fordelerRepo.lagreFordeling(any()) } returns Unit
 
-        val barnFnr = Folkeregisteridentifikator.of(FNR_1)
-        val avdoedFnr = Folkeregisteridentifikator.of(FNR_2)
-        val etterlattFnr = Folkeregisteridentifikator.of(FNR_3)
+        val barnFnr = SOEKER_FOEDSELSNUMMER
+        val avdoedFnr = AVDOED_FOEDSELSNUMMER
+        val etterlattFnr = GJENLEVENDE_FOEDSELSNUMMER
 
         coEvery { pdlTjenesterKlient.hentPerson(match { it.foedselsnummer == barnFnr }) } returns
             mockPerson(
@@ -283,9 +282,9 @@ internal class FordelerRiverServiceTest {
         every { fordelerRepo.finnFordeling(any()) } returns null
         every { fordelerRepo.lagreFordeling(any()) } returns Unit
 
-        val barnFnr = Folkeregisteridentifikator.of(FNR_1)
-        val avdoedFnr = Folkeregisteridentifikator.of(FNR_2)
-        val etterlattFnr = Folkeregisteridentifikator.of(FNR_3)
+        val barnFnr = SOEKER_FOEDSELSNUMMER
+        val avdoedFnr = AVDOED_FOEDSELSNUMMER
+        val etterlattFnr = GJENLEVENDE_FOEDSELSNUMMER
 
         coEvery { pdlTjenesterKlient.hentPerson(match { it.foedselsnummer == barnFnr }) } returns
             mockPerson(

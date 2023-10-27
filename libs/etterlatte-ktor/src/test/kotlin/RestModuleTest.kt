@@ -28,7 +28,7 @@ import io.ktor.server.routing.route
 import io.ktor.server.testing.testApplication
 import io.mockk.coEvery
 import io.mockk.mockk
-import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
+import no.nav.etterlatte.libs.common.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.BehandlingTilgangsSjekk
 import no.nav.etterlatte.libs.common.FoedselsnummerDTO
 import no.nav.etterlatte.libs.common.PersonTilgangsSjekk
@@ -134,7 +134,7 @@ class RestModuleTest {
             client.post("/person") {
                 header(HttpHeaders.Authorization, "Bearer $token")
                 contentType(ContentType.Application.Json)
-                setBody(FoedselsnummerDTO("30106519672").toJson())
+                setBody(FoedselsnummerDTO("27458328671").toJson())
             }.let { assertEquals(OK, it.status) }
 
             coEvery { behandlingTilgangsSjekkMock.harTilgangTilBehandling(any(), any()) } returns false
@@ -150,7 +150,7 @@ class RestModuleTest {
             client.post("/person") {
                 header(HttpHeaders.Authorization, "Bearer $token")
                 contentType(ContentType.Application.Json)
-                setBody(FoedselsnummerDTO("30106519672").toJson())
+                setBody(FoedselsnummerDTO("27458328671").toJson())
             }.let { assertEquals(NotFound, it.status) }
         }
     }
@@ -346,7 +346,7 @@ class RestModuleTest {
 
     private fun Route.tilgangTestRoute() {
         route("") {
-            get("/behandling/{$BEHANDLINGSID_CALL_PARAMETER}") {
+            get("/behandling/{$BEHANDLINGID_CALL_PARAMETER}") {
                 withBehandlingId(behandlingTilgangsSjekkMock) {
                     call.respond(OK)
                 }

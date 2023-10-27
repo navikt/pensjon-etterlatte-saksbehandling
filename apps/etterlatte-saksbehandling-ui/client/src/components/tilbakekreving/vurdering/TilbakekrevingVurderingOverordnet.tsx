@@ -1,6 +1,6 @@
 import { BodyShort, Button, Label, Radio, RadioGroup, Select } from '@navikt/ds-react'
 import {
-  Tilbakekreving,
+  TilbakekrevingBehandling,
   TilbakekrevingAarsak,
   TilbakekrevingAktsomhet,
   TilbakekrevingHjemmel,
@@ -13,14 +13,14 @@ import { addTilbakekreving } from '~store/reducers/TilbakekrevingReducer'
 import styled from 'styled-components'
 import { useAppDispatch } from '~store/Store'
 
-export function TilbakekrevingVurderingOverordnet({ tilbakekreving }: { tilbakekreving: Tilbakekreving }) {
+export function TilbakekrevingVurderingOverordnet({ behandling }: { behandling: TilbakekrevingBehandling }) {
   const dispatch = useAppDispatch()
   const [lagreVurderingStatus, lagreVurderingRequest] = useApiCall(lagreTilbakekrevingsvurdering)
-  const [vurdering, setVurdering] = useState<TilbakekrevingVurdering>(tilbakekreving.vurdering)
+  const [vurdering, setVurdering] = useState<TilbakekrevingVurdering>(behandling.tilbakekreving.vurdering)
 
   const lagreVurdering = () => {
     // TODO validering?
-    lagreVurderingRequest({ tilbakekrevingsId: tilbakekreving.id, vurdering }, (lagretTilbakekreving) => {
+    lagreVurderingRequest({ behandlingsId: behandling.id, vurdering }, (lagretTilbakekreving) => {
       dispatch(addTilbakekreving(lagretTilbakekreving))
     })
   }

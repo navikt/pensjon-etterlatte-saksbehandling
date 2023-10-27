@@ -59,11 +59,11 @@ class BehandlingClient(
     }
 
     fun lagreGyldighetsVurdering(
-        behandlingsId: UUID,
+        behandlingId: UUID,
         gyldighet: GyldighetsResultat,
     ) {
         return runBlocking {
-            sakOgBehandlingApp.post("$url/behandlinger/$behandlingsId/gyldigfremsatt") {
+            sakOgBehandlingApp.post("$url/behandlinger/$behandlingId/gyldigfremsatt") {
                 contentType(ContentType.Application.Json)
                 setBody(gyldighet)
             }.body<String>()

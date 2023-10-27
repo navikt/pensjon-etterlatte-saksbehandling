@@ -89,6 +89,24 @@ class GenerellBehandlingDao(private val connection: () -> Connection) {
         }
     }
 
+    fun hentBehandlingForTilknyttetBehandling(tilknyttetBehandlingId: UUID): GenerellBehandling? {
+        return with(connection()) {
+            val statement =
+                prepareStatement(
+                    """
+                    SELECT id, innhold, sak_id, opprettet, type, tilknyttet_behandling, status 
+                    FROM generellbehandling
+                    WHERE tilknyttet_behandling = ?::uuid
+                    """.trimIndent(),
+                )
+
+            statement.setObject(1, tilknyttetBehandlingId)
+            statement.executeQuery().singleOrNull {
+                toGenerellBehandling()
+            }
+        }
+    }
+
     private fun ResultSet.toGenerellBehandling(): GenerellBehandling {
         return GenerellBehandling(
             id = getUUID("id"),

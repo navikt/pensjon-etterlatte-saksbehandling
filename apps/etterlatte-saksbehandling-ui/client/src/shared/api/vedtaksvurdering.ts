@@ -2,20 +2,20 @@ import { apiClient, ApiResponse } from './apiClient'
 import { VedtakSammendrag } from '~components/vedtak/typer'
 import { VedtaketKlagenGjelder } from '~shared/types/Klage'
 
-export const hentVedtakSammendrag = async (behandlingsId: string): Promise<ApiResponse<VedtakSammendrag>> => {
-  return apiClient.get(`vedtak/${behandlingsId}/sammendrag`)
+export const hentVedtakSammendrag = async (behandlingId: string): Promise<ApiResponse<VedtakSammendrag>> => {
+  return apiClient.get(`vedtak/${behandlingId}/sammendrag`)
 }
 
 export const hentIverksatteVedtakISak = async (sakId: number): Promise<ApiResponse<Array<VedtaketKlagenGjelder>>> => {
   return apiClient.get(`vedtak/sak/${sakId}/iverksatte`)
 }
 
-export const fattVedtak = async (behandlingsId: string): Promise<ApiResponse<unknown>> => {
-  return apiClient.post(`/vedtak/${behandlingsId}/fattvedtak`, {})
+export const fattVedtak = async (behandlingId: string): Promise<ApiResponse<unknown>> => {
+  return apiClient.post(`/vedtak/${behandlingId}/fattvedtak`, {})
 }
 
-export const upsertVedtak = async (behandlingsId: string): Promise<ApiResponse<unknown>> => {
-  return apiClient.post(`/vedtak/${behandlingsId}/upsert`, {})
+export const upsertVedtak = async (behandlingId: string): Promise<ApiResponse<unknown>> => {
+  return apiClient.post(`/vedtak/${behandlingId}/upsert`, {})
 }
 
 export const attesterVedtak = async (args: {

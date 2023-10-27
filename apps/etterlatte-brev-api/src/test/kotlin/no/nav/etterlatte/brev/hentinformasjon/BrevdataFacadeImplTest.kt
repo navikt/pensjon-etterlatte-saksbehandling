@@ -1,6 +1,7 @@
 package no.nav.etterlatte.brev.hentinformasjon
 
 import com.fasterxml.jackson.databind.JsonNode
+import io.kotest.matchers.shouldBe
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -11,6 +12,7 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.brev.behandlingklient.BehandlingKlient
 import no.nav.etterlatte.brev.behandlingklient.BehandlingKlientException
 import no.nav.etterlatte.brev.model.Spraak
+import no.nav.etterlatte.brev.model.tilbakekreving.tilbakekreving
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -23,7 +25,9 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.VedtakSak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.tilbakekreving.Tilbakekreving
 import no.nav.etterlatte.libs.common.toJsonNode
+import no.nav.etterlatte.libs.common.toObjectNode
 import no.nav.etterlatte.libs.common.trygdetid.BeregnetTrygdetidGrunnlagDto
 import no.nav.etterlatte.libs.common.trygdetid.DetaljertBeregnetTrygdetidDto
 import no.nav.etterlatte.libs.common.trygdetid.DetaljertBeregnetTrygdetidResultat
@@ -36,6 +40,7 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakNyDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
+import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.etterlatte.token.BrukerTokenInfo
@@ -76,7 +81,7 @@ internal class BrevdataFacadeImplTest {
     }
 
     @Test
-    fun `SakOgBehandling fungerer som forventet`() {
+    fun `hentGenerellBrevData fungerer som forventet for behandling`() {
         coEvery {
             behandlingKlient.hentSak(any(), any())
         } returns Sak("ident", SakType.BARNEPENSJON, SAK_ID, ENHET)
@@ -84,8 +89,8 @@ internal class BrevdataFacadeImplTest {
             behandlingKlient.hentSisteIverksatteBehandling(any(), any())
         } throws BehandlingKlientException("har ikke tidligere behandling")
         coEvery { behandlingKlient.hentEtterbetaling(any(), any()) } returns null
-        coEvery { vedtaksvurderingKlient.hentVedtak(any(), any()) } returns opprettVedtak()
-        coEvery { grunnlagKlient.hentGrunnlag(SAK_ID, BEHANDLING_ID, BRUKERTokenInfo) } returns opprettGrunnlag()
+        coEvery { vedtaksvurderingKlient.hentVedtak(any(), any()) } returns opprettBehandlingVedtak()
+        coEvery { grunnlagKlient.hentGrunnlag(BEHANDLING_ID, BRUKERTokenInfo) } returns opprettGrunnlag()
         coEvery { beregningKlient.hentBeregning(any(), any()) } returns opprettBeregning()
         coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns opprettTrygdetid()
 
@@ -110,7 +115,47 @@ internal class BrevdataFacadeImplTest {
         Assertions.assertEquals(ATTESTANT_IDENT, generellBrevData.forenkletVedtak.attestantIdent)
 
         coVerify(exactly = 1) {
-            grunnlagKlient.hentGrunnlag(SAK_ID, BEHANDLING_ID, any())
+            grunnlagKlient.hentGrunnlag(BEHANDLING_ID, any())
+            vedtaksvurderingKlient.hentVedtak(any(), any())
+        }
+    }
+
+    @Test
+    fun `hentGenerellBrevData fungerer som forventet for tilbakekreving`() {
+        val tilbakekreving = tilbakekreving()
+        coEvery {
+            behandlingKlient.hentSak(any(), any())
+        } returns Sak("ident", SakType.BARNEPENSJON, SAK_ID, ENHET)
+        coEvery {
+            vedtaksvurderingKlient.hentVedtak(any(), any())
+        } returns opprettTilbakekrevingVedtak(vedtakInnhold = tilbakekreving)
+        coEvery { grunnlagKlient.hentGrunnlagForSak(SAK_ID, BRUKERTokenInfo) } returns opprettGrunnlag()
+
+        val generellBrevData =
+            runBlocking {
+                service.hentGenerellBrevData(SAK_ID, BEHANDLING_ID, BRUKERTokenInfo)
+            }
+
+        generellBrevData.sak.id shouldBe SAK_ID
+        generellBrevData.behandlingId shouldBe BEHANDLING_ID
+        generellBrevData.spraak shouldBe Spraak.NB
+        generellBrevData.personerISak.avdoed.navn shouldBe "Død Mellom Far"
+        with(generellBrevData.personerISak.soeker) {
+            fornavn shouldBe "Søker"
+            mellomnavn shouldBe "Mellom"
+            etternavn shouldBe "Barn"
+        }
+        with(generellBrevData.forenkletVedtak) {
+            type shouldBe VedtakType.TILBAKEKREVING
+            id shouldBe 123L
+            ansvarligEnhet shouldBe ENHET
+            saksbehandlerIdent shouldBe SAKSBEHANDLER_IDENT
+            attestantIdent shouldBe ATTESTANT_IDENT
+            this.tilbakekreving shouldBe tilbakekreving
+        }
+
+        coVerify(exactly = 1) {
+            grunnlagKlient.hentGrunnlagForSak(SAK_ID, any())
             vedtaksvurderingKlient.hentVedtak(any(), any())
         }
     }
@@ -124,8 +169,8 @@ internal class BrevdataFacadeImplTest {
             behandlingKlient.hentSisteIverksatteBehandling(any(), any())
         } returns SisteIverksatteBehandling(UUID.randomUUID())
         coEvery { behandlingKlient.hentEtterbetaling(any(), any()) } returns null
-        coEvery { vedtaksvurderingKlient.hentVedtak(any(), any()) } returns opprettVedtak()
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any(), any()) } returns opprettGrunnlag()
+        coEvery { vedtaksvurderingKlient.hentVedtak(any(), any()) } returns opprettBehandlingVedtak()
+        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns opprettGrunnlag()
         coEvery { beregningKlient.hentBeregning(any(), any()) } returns opprettBeregning()
         coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns opprettTrygdetid()
 
@@ -156,8 +201,8 @@ internal class BrevdataFacadeImplTest {
             behandlingKlient.hentSisteIverksatteBehandling(any(), any())
         } returns SisteIverksatteBehandling(UUID.randomUUID())
         coEvery { behandlingKlient.hentEtterbetaling(any(), any()) } returns null
-        coEvery { vedtaksvurderingKlient.hentVedtak(any(), any()) } returns opprettVedtak()
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any(), any()) } returns opprettGrunnlag()
+        coEvery { vedtaksvurderingKlient.hentVedtak(any(), any()) } returns opprettBehandlingVedtak()
+        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns opprettGrunnlag()
         coEvery { beregningKlient.hentBeregning(any(), any()) } returns opprettBeregningSoeskenjustering()
         coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns opprettTrygdetid()
 
@@ -230,7 +275,7 @@ internal class BrevdataFacadeImplTest {
                     avdoedFyllerSeksti = null,
                 ),
             overstyrtNorskPoengaar = null,
-            ident = null,
+            ident = AVDOED_FOEDSELSNUMMER.value,
         )
 
     private fun opprettBeregning() =
@@ -256,11 +301,11 @@ internal class BrevdataFacadeImplTest {
                 )
         }
 
-    private fun opprettVedtak() =
+    private fun opprettBehandlingVedtak() =
         mockk<VedtakNyDto> {
+            every { type } returns VedtakType.INNVILGELSE
             every { sak } returns VedtakSak("ident", SakType.BARNEPENSJON, SAK_ID)
             every { id } returns 123L
-            every { type } returns VedtakType.INNVILGELSE
             every { status } returns VedtakStatus.OPPRETTET
             every { vedtakFattet } returns VedtakFattet(SAKSBEHANDLER_IDENT, ENHET, Tidspunkt.now())
             every { attestasjon } returns Attestasjon(ATTESTANT_IDENT, ENHET, Tidspunkt.now())
@@ -271,6 +316,20 @@ internal class BrevdataFacadeImplTest {
                     every { behandling.revurderingsaarsak } returns null
                     every { behandling.revurderingInfo } returns null
                     every { behandling.type } returns BehandlingType.FØRSTEGANGSBEHANDLING
+                }
+        }
+
+    private fun opprettTilbakekrevingVedtak(vedtakInnhold: Tilbakekreving = tilbakekreving()) =
+        mockk<VedtakNyDto> {
+            every { type } returns VedtakType.TILBAKEKREVING
+            every { sak } returns VedtakSak("ident", SakType.BARNEPENSJON, SAK_ID)
+            every { id } returns 123L
+            every { status } returns VedtakStatus.OPPRETTET
+            every { vedtakFattet } returns VedtakFattet(SAKSBEHANDLER_IDENT, ENHET, Tidspunkt.now())
+            every { attestasjon } returns Attestasjon(ATTESTANT_IDENT, ENHET, Tidspunkt.now())
+            every { innhold } returns
+                mockk<VedtakInnholdDto.VedtakTilbakekrevingDto> {
+                    every { tilbakekreving } returns vedtakInnhold.toObjectNode()
                 }
         }
 

@@ -6,7 +6,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
-import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Utenlandstilsnitt
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
@@ -27,7 +27,7 @@ data class ManuellRevurdering(
     override val virkningstidspunkt: Virkningstidspunkt?,
     override val utenlandstilsnitt: Utenlandstilsnitt?,
     override val boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet?,
-    override val revurderingsaarsak: RevurderingAarsak,
+    override val revurderingsaarsak: Revurderingaarsak,
     override val revurderingInfo: RevurderingMedBegrunnelse?,
     override val kilde: Vedtaksloesning,
     override val begrunnelse: String?,
@@ -141,8 +141,18 @@ data class ManuellRevurdering(
             endreTilStatus(BehandlingStatus.RETURNERT)
         }
 
+    override fun tilTilSamordning() =
+        hvisTilstandEr(listOf(BehandlingStatus.ATTESTERT)) {
+            endreTilStatus(BehandlingStatus.TIL_SAMORDNING)
+        }
+
+    override fun tilSamordnet() =
+        hvisTilstandEr(listOf(BehandlingStatus.ATTESTERT, BehandlingStatus.TIL_SAMORDNING)) {
+            endreTilStatus(BehandlingStatus.SAMORDNET)
+        }
+
     override fun tilIverksatt() =
-        hvisTilstandEr(BehandlingStatus.ATTESTERT) {
+        hvisTilstandEr(listOf(BehandlingStatus.ATTESTERT, BehandlingStatus.SAMORDNET)) {
             endreTilStatus(BehandlingStatus.IVERKSATT)
         }
 

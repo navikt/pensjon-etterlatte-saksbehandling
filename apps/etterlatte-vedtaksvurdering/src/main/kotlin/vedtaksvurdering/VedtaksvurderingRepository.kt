@@ -5,7 +5,7 @@ import kotliquery.Row
 import kotliquery.TransactionalSession
 import kotliquery.queryOf
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
-import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
@@ -249,7 +249,7 @@ class VedtaksvurderingRepository(private val datasource: DataSource) : Transacti
                 datoFattet, datoattestert, attestant, datoVirkFom, vedtakstatus, saktype, behandlingtype, 
                 attestertVedtakEnhet, fattetVedtakEnhet, type, revurderingsaarsak, revurderinginfo
             FROM vedtak  
-            WHERE vedtakstatus = 'IVERKSATT'   
+            WHERE vedtakstatus in ('TIL_SAMORDNING', 'SAMORDNET', 'IVERKSATT')   
             AND fnr = :fnr
             AND datoVirkFom >= :virkFom
             """
@@ -346,6 +346,34 @@ class VedtaksvurderingRepository(private val datasource: DataSource) : Transacti
             return@session hentVedtakNonNull(behandlingId, this)
         }
 
+    fun tilSamordningVedtak(
+        behandlingId: UUID,
+        tx: TransactionalSession? = null,
+    ): Vedtak =
+        tx.session {
+            oppdater(
+                query = "UPDATE vedtak SET vedtakstatus = :vedtakstatus WHERE behandlingId = :behandlingId",
+                params = mapOf("vedtakstatus" to VedtakStatus.TIL_SAMORDNING.name, "behandlingId" to behandlingId),
+                loggtekst = "Lagrer til_samordning vedtak",
+            )
+                .also { require(it == 1) }
+            return@session hentVedtakNonNull(behandlingId, this)
+        }
+
+    fun samordnetVedtak(
+        behandlingId: UUID,
+        tx: TransactionalSession? = null,
+    ): Vedtak =
+        tx.session {
+            oppdater(
+                query = "UPDATE vedtak SET vedtakstatus = :vedtakstatus WHERE behandlingId = :behandlingId",
+                params = mapOf("vedtakstatus" to VedtakStatus.SAMORDNET.name, "behandlingId" to behandlingId),
+                loggtekst = "Lagrer samordnet vedtak",
+            )
+                .also { require(it == 1) }
+            return@session hentVedtakNonNull(behandlingId, this)
+        }
+
     fun iverksattVedtak(
         behandlingId: UUID,
         tx: TransactionalSession? = null,
@@ -399,7 +427,7 @@ class VedtaksvurderingRepository(private val datasource: DataSource) : Transacti
                             beregning = stringOrNull("beregningsresultat")?.let { objectMapper.readValue(it) },
                             avkorting = stringOrNull("avkorting")?.let { objectMapper.readValue(it) },
                             utbetalingsperioder = utbetalingsperioder,
-                            revurderingAarsak = stringOrNull("revurderingsaarsak")?.let { RevurderingAarsak.valueOf(it) },
+                            revurderingAarsak = stringOrNull("revurderingsaarsak")?.let { Revurderingaarsak.valueOf(it) },
                             revurderingInfo = stringOrNull("revurderinginfo")?.let { objectMapper.readValue(it) },
                         )
 

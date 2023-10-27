@@ -25,7 +25,7 @@ import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseDao
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
-import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.behandling.Utenlandstilsnitt
 import no.nav.etterlatte.libs.common.behandling.UtenlandstilsnittType
@@ -79,7 +79,7 @@ class BehandlingServiceImplTest {
             mockk<BehandlingDao> {
                 every { alleBehandlingerISak(1) } returns
                     listOf(
-                        revurdering(sakId = 1, revurderingAarsak = RevurderingAarsak.REGULERING),
+                        revurdering(sakId = 1, revurderingAarsak = Revurderingaarsak.REGULERING),
                         foerstegangsbehandling(sakId = 1),
                     )
             }
@@ -100,6 +100,7 @@ class BehandlingServiceImplTest {
                 kommerBarnetTilGodeDao = mockk(),
                 oppgaveService = mockk(),
                 etterbetalingService = mockk(),
+                grunnlagService = mockk(),
             )
 
         val behandlinger = sut.hentBehandlingerISak(1)
@@ -437,9 +438,9 @@ class BehandlingServiceImplTest {
         val grunnlagKlient =
             mockk<GrunnlagKlientTest> {
                 coEvery {
-                    finnPersonOpplysning(SAK_ID, behandling.id, opplysningstype, TOKEN)
+                    finnPersonOpplysning(behandling.id, opplysningstype, TOKEN)
                 } returns grunnlagsopplysningMedPersonopplysning
-                coEvery { hentPersongalleri(any(), behandling.id, any()) } answers { callOriginal() }
+                coEvery { hentPersongalleri(behandling.id, any()) } answers { callOriginal() }
             }
 
         val service =
@@ -531,7 +532,7 @@ class BehandlingServiceImplTest {
             revurdering(
                 sakId = 1,
                 status = BehandlingStatus.BEREGNET,
-                revurderingAarsak = RevurderingAarsak.REGULERING,
+                revurderingAarsak = Revurderingaarsak.REGULERING,
             )
         val behandlingDaoMock =
             mockk<BehandlingDao> {
@@ -563,7 +564,7 @@ class BehandlingServiceImplTest {
                     listOf(
                         revurdering(
                             sakId = 1,
-                            revurderingAarsak = RevurderingAarsak.REGULERING,
+                            revurderingAarsak = Revurderingaarsak.REGULERING,
                             enhet = Enheter.PORSGRUNN.enhetNr,
                         ),
                         foerstegangsbehandling(sakId = 1, enhet = Enheter.PORSGRUNN.enhetNr),
@@ -586,6 +587,7 @@ class BehandlingServiceImplTest {
                 kommerBarnetTilGodeDao = mockk(),
                 oppgaveService = mockk(),
                 etterbetalingService = mockk(),
+                grunnlagService = mockk(),
             )
 
         val behandlinger = sut.hentBehandlingerISak(1)
@@ -611,7 +613,7 @@ class BehandlingServiceImplTest {
                     listOf(
                         revurdering(
                             sakId = 1,
-                            revurderingAarsak = RevurderingAarsak.REGULERING,
+                            revurderingAarsak = Revurderingaarsak.REGULERING,
                             enhet = Enheter.PORSGRUNN.enhetNr,
                         ),
                         foerstegangsbehandling(sakId = 1, enhet = Enheter.PORSGRUNN.enhetNr),
@@ -634,6 +636,7 @@ class BehandlingServiceImplTest {
                 kommerBarnetTilGodeDao = mockk(),
                 oppgaveService = mockk(),
                 etterbetalingService = mockk(),
+                grunnlagService = mockk(),
             )
 
         val behandlinger = sut.hentBehandlingerISak(1)
@@ -680,6 +683,7 @@ class BehandlingServiceImplTest {
                 kommerBarnetTilGodeDao = mockk(),
                 oppgaveService = mockk(),
                 etterbetalingService = mockk(),
+                grunnlagService = mockk(),
             )
 
         inTransaction {
@@ -737,6 +741,7 @@ class BehandlingServiceImplTest {
                 kommerBarnetTilGodeDao = mockk(),
                 oppgaveService = mockk(),
                 etterbetalingService = mockk(),
+                grunnlagService = mockk(),
             )
 
         inTransaction {
@@ -770,9 +775,9 @@ class BehandlingServiceImplTest {
         val grunnlagKlient =
             mockk<GrunnlagKlientTest> {
                 coEvery {
-                    finnPersonOpplysning(SAK_ID, behandling.id, Opplysningstype.AVDOED_PDL_V1, TOKEN)
+                    finnPersonOpplysning(behandling.id, Opplysningstype.AVDOED_PDL_V1, TOKEN)
                 } returns grunnlagsopplysningMedPersonopplysning
-                coEvery { hentPersongalleri(any(), behandling.id, any()) } answers { callOriginal() }
+                coEvery { hentPersongalleri(behandling.id, any()) } answers { callOriginal() }
             }
         return lagRealGenerellBehandlingService(
             behandlingDao =
@@ -809,6 +814,7 @@ class BehandlingServiceImplTest {
             kommerBarnetTilGodeDao = mockk(),
             oppgaveService = oppgaveService,
             etterbetalingService = mockk(),
+            grunnlagService = mockk(),
         )
 
     companion object {

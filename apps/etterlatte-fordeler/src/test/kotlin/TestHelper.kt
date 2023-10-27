@@ -15,21 +15,16 @@ import no.nav.etterlatte.libs.common.person.Utland
 import no.nav.etterlatte.libs.common.person.VergemaalEllerFremtidsfullmakt
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
+import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
 import java.io.FileNotFoundException
 import java.time.LocalDate
 import java.time.LocalDateTime
-
-const val FNR_1 = "07010776133"
-const val FNR_2 = "24014021406"
-const val FNR_3 = "11057523044"
-const val FNR_4 = "24014021406"
-const val FNR_5 = "09018701453"
 
 const val SVERIGE = "SWE"
 const val NORGE = "NOR"
 
 fun mockPerson(
-    fnr: String = FNR_3,
+    fnr: String = AVDOED_FOEDSELSNUMMER.value,
     foedselsaar: Int = 2010,
     foedselsdato: LocalDate? = LocalDate.parse("2010-04-19"),
     doedsdato: LocalDate? = null,

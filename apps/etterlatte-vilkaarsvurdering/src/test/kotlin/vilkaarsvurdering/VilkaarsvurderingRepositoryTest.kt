@@ -16,7 +16,7 @@ import no.nav.etterlatte.libs.database.POSTGRES_VERSION
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
-import no.nav.etterlatte.vilkaarsvurdering.vilkaar.BarnepensjonVilkaar
+import no.nav.etterlatte.vilkaarsvurdering.vilkaar.BarnepensjonVilkaar1967
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
@@ -70,6 +70,32 @@ internal class VilkaarsvurderingRepositoryTest {
         val opprettetVilkaarsvurdering = vilkaarsvurderingRepository.opprettVilkaarsvurdering(vilkaarsvurdering)
 
         opprettetVilkaarsvurdering shouldNotBe null
+    }
+
+    @Test
+    fun `skal kun slette vilkaarsvurdering for en gitt behandlingId`() {
+        val opprettetVilkaarsvurdering = vilkaarsvurderingRepository.opprettVilkaarsvurdering(vilkaarsvurdering)
+        val opprettVilkaarsvurderingMedResultat =
+            vilkaarsvurderingRepository.lagreVilkaarsvurderingResultat(
+                opprettetVilkaarsvurdering.behandlingId,
+                vilkaarsvurdering.virkningstidspunkt.atDay(1),
+                vilkaarsvurderingResultat,
+            )
+
+        val revurdertVilkaarsvurdering =
+            vilkaarsvurderingRepository.kopierVilkaarsvurdering(
+                opprettVilkaarsvurderingMedResultat.copy(
+                    behandlingId = UUID.randomUUID(),
+                    id = UUID.randomUUID(),
+                    vilkaar = vilkaarsvurdering.vilkaar.map { it.copy(id = UUID.randomUUID()) },
+                ),
+                opprettetVilkaarsvurdering.id,
+            )
+
+        vilkaarsvurderingRepository.hent(revurdertVilkaarsvurdering.behandlingId) shouldNotBe null
+        vilkaarsvurderingRepository.slettVilkaarvurdering(revurdertVilkaarsvurdering.id) shouldBe true
+        vilkaarsvurderingRepository.hent(revurdertVilkaarsvurdering.behandlingId) shouldBe null
+        vilkaarsvurderingRepository.hent(opprettetVilkaarsvurdering.behandlingId) shouldNotBe null
     }
 
     @Test
@@ -286,9 +312,8 @@ internal class VilkaarsvurderingRepositoryTest {
                 grunnlagVersjon = 1L,
                 virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt().dato,
                 vilkaar =
-                    BarnepensjonVilkaar.inngangsvilkaar(
+                    BarnepensjonVilkaar1967.inngangsvilkaar(
                         grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag(),
-                        virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(),
                         featureToggleService = DummyFeatureToggleService(),
                     ),
             )

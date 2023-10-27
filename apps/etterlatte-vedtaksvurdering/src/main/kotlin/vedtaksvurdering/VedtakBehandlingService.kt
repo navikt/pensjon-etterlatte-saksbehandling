@@ -4,7 +4,7 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
-import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.oppgave.VedtakEndringDTO
@@ -27,8 +27,10 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.rapidsandrivers.migrering.KILDE_KEY
 import no.nav.etterlatte.token.BrukerTokenInfo
+import no.nav.etterlatte.vedtaksvurdering.grunnlag.GrunnlagVersjonValidering.validerVersjon
 import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlient
 import no.nav.etterlatte.vedtaksvurdering.klienter.BeregningKlient
+import no.nav.etterlatte.vedtaksvurdering.klienter.SamKlient
 import no.nav.etterlatte.vedtaksvurdering.klienter.VilkaarsvurderingKlient
 import org.slf4j.LoggerFactory
 import java.time.Clock
@@ -41,6 +43,7 @@ class VedtakBehandlingService(
     private val beregningKlient: BeregningKlient,
     private val vilkaarsvurderingKlient: VilkaarsvurderingKlient,
     private val behandlingKlient: BehandlingKlient,
+    private val samKlient: SamKlient,
     private val clock: Clock = utcKlokke(),
 ) {
     private val logger = LoggerFactory.getLogger(VedtakBehandlingService::class.java)
@@ -72,7 +75,7 @@ class VedtakBehandlingService(
         }
 
         val (behandling, vilkaarsvurdering, beregningOgAvkorting) = hentDataForVedtak(behandlingId, brukerTokenInfo)
-        verifiserGrunnlagVersjon(vilkaarsvurdering, beregningOgAvkorting)
+        validerVersjon(vilkaarsvurdering, beregningOgAvkorting)
 
         val vedtakType = vedtakType(behandling.behandlingType, vilkaarsvurdering)
         val virkningstidspunkt =
@@ -89,23 +92,6 @@ class VedtakBehandlingService(
         }
     }
 
-    /**
-     * TODO:
-     *  - Må sikre at vedtak ikke kan gjennomføres dersom det er diff på versjon
-     *  - Gi forståelig feilmelding til saksbehandler
-     **/
-    private fun verifiserGrunnlagVersjon(
-        vilkaarsvurdering: VilkaarsvurderingDto?,
-        beregningOgAvkorting: BeregningOgAvkorting?,
-    ) {
-        if (vilkaarsvurdering?.grunnlagVersjon == null || beregningOgAvkorting == null) {
-            return
-        } else if (vilkaarsvurdering.grunnlagVersjon != beregningOgAvkorting.beregning.grunnlagMetadata.versjon) {
-            logger.warn("Ulik versjon av grunnlag i vilkaarsvurdering og beregnin!")
-            return
-        }
-    }
-
     suspend fun fattVedtak(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
@@ -115,6 +101,9 @@ class VedtakBehandlingService(
 
         verifiserGyldigBehandlingStatus(behandlingKlient.kanFatteVedtak(behandlingId, brukerTokenInfo), vedtak)
         verifiserGyldigVedtakStatus(vedtak.status, listOf(VedtakStatus.OPPRETTET, VedtakStatus.RETURNERT))
+
+        val (_, vilkaarsvurdering, beregningOgAvkorting) = hentDataForVedtak(behandlingId, brukerTokenInfo)
+        validerVersjon(vilkaarsvurdering, beregningOgAvkorting)
 
         val sak = behandlingKlient.hentSak(vedtak.sakId, brukerTokenInfo)
 
@@ -174,12 +163,9 @@ class VedtakBehandlingService(
         verifiserGyldigVedtakStatus(vedtak.status, listOf(VedtakStatus.FATTET_VEDTAK))
         attestantHarAnnenIdentEnnSaksbehandler(vedtak.vedtakFattet!!.ansvarligSaksbehandler, brukerTokenInfo)
 
-        val (behandling, vilkaarsvurdering, beregningOgAvkorting, sak) =
-            hentDataForVedtak(behandlingId, brukerTokenInfo)
+        val (behandling, _, _, sak) = hentDataForVedtak(behandlingId, brukerTokenInfo)
 
         verifiserGyldigVedtakForRevurdering(behandling, vedtak)
-        verifiserGrunnlagVersjon(vilkaarsvurdering, beregningOgAvkorting)
-        // TODO: Låse versjon i grunnlag
 
         val attestertVedtak =
             repository.inTransaction { tx ->
@@ -237,7 +223,7 @@ class VedtakBehandlingService(
         )
     }
 
-    private fun RevurderingAarsak?.skalIkkeSendeBrev() = this != null && !utfall.skalSendeBrev
+    private fun Revurderingaarsak?.skalIkkeSendeBrev() = this != null && !utfall.skalSendeBrev
 
     suspend fun underkjennVedtak(
         behandlingId: UUID,
@@ -284,6 +270,71 @@ class VedtakBehandlingService(
         )
     }
 
+    suspend fun tilSamordningVedtak(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Vedtak {
+        logger.info("Setter vedtak til til_samordning for behandling med behandlingId=$behandlingId")
+        val vedtak = hentVedtakNonNull(behandlingId)
+
+        verifiserGyldigVedtakStatus(vedtak.status, listOf(VedtakStatus.ATTESTERT))
+
+        val tilSamordningVedtakLocal =
+            repository.inTransaction { tx ->
+                repository.tilSamordningVedtak(behandlingId, tx = tx)
+                    .also {
+                        runBlocking {
+                            behandlingKlient.tilSamordning(behandlingId, brukerTokenInfo, it.id)
+                        }
+                    }
+            }
+
+        sendToRapid(
+            vedtakhendelse = VedtakKafkaHendelseType.TIL_SAMORDNING,
+            vedtak = tilSamordningVedtakLocal,
+            tekniskTid = Tidspunkt.now(clock),
+            behandlingId = behandlingId,
+        )
+
+        if (!samKlient.samordneVedtak(vedtak)) {
+            logger.info("Svar fra samordning: ikke nødvendig å vente [behandlingId=$behandlingId]")
+            return samordnetVedtak(behandlingId, brukerTokenInfo, tilSamordningVedtakLocal)
+        } else {
+            logger.info("Svar fra samordning: må vente [behandlingId=$behandlingId]")
+        }
+
+        return tilSamordningVedtakLocal
+    }
+
+    suspend fun samordnetVedtak(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+        vedtakTilSamordning: Vedtak? = null,
+    ): Vedtak {
+        logger.info("Setter vedtak til samordnet for behandling med behandlingId=$behandlingId")
+        val vedtak = vedtakTilSamordning ?: hentVedtakNonNull(behandlingId)
+
+        verifiserGyldigVedtakStatus(vedtak.status, listOf(VedtakStatus.TIL_SAMORDNING))
+        val samordnetVedtakLocal =
+            repository.inTransaction { tx ->
+                repository.samordnetVedtak(behandlingId, tx = tx)
+                    .also {
+                        runBlocking {
+                            behandlingKlient.samordnet(behandlingId, brukerTokenInfo, it.id)
+                        }
+                    }
+            }
+
+        sendToRapid(
+            vedtakhendelse = VedtakKafkaHendelseType.SAMORDNET,
+            vedtak = samordnetVedtakLocal,
+            tekniskTid = Tidspunkt.now(clock),
+            behandlingId = behandlingId,
+        )
+
+        return samordnetVedtakLocal
+    }
+
     suspend fun iverksattVedtak(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
@@ -291,7 +342,7 @@ class VedtakBehandlingService(
         logger.info("Setter vedtak til iverksatt for behandling med behandlingId=$behandlingId")
         val vedtak = hentVedtakNonNull(behandlingId)
 
-        verifiserGyldigVedtakStatus(vedtak.status, listOf(VedtakStatus.ATTESTERT))
+        verifiserGyldigVedtakStatus(vedtak.status, listOf(VedtakStatus.ATTESTERT, VedtakStatus.SAMORDNET))
         val iverksattVedtak =
             repository.inTransaction { tx ->
                 val iverksattVedtakLocal =
@@ -397,6 +448,7 @@ class VedtakBehandlingService(
     ): Vedtak {
         val oppdatertVedtak =
             eksisterendeVedtak.copy(
+                type = vedtakType,
                 innhold =
                     (eksisterendeVedtak.innhold as VedtakBehandlingInnhold).copy(
                         virkningstidspunkt = virkningstidspunkt,
@@ -447,29 +499,32 @@ class VedtakBehandlingService(
     ): List<Utbetalingsperiode> {
         return when (vedtakType) {
             VedtakType.INNVILGELSE, VedtakType.ENDRING -> {
-                if (sakType == SakType.BARNEPENSJON) {
-                    val beregningsperioder =
-                        requireNotNull(beregningOgAvkorting?.beregning?.beregningsperioder) {
-                            "Mangler beregning"
+                when (sakType) {
+                    SakType.BARNEPENSJON -> {
+                        val beregningsperioder =
+                            requireNotNull(beregningOgAvkorting?.beregning?.beregningsperioder) {
+                                "Mangler beregning"
+                            }
+                        beregningsperioder.map {
+                            Utbetalingsperiode(
+                                periode = Periode(it.datoFOM, it.datoTOM),
+                                beloep = it.utbetaltBeloep.toBigDecimal(),
+                                type = UtbetalingsperiodeType.UTBETALING,
+                            )
                         }
-                    beregningsperioder.map {
-                        Utbetalingsperiode(
-                            periode = Periode(it.datoFOM, it.datoTOM),
-                            beloep = it.utbetaltBeloep.toBigDecimal(),
-                            type = UtbetalingsperiodeType.UTBETALING,
-                        )
                     }
-                } else {
-                    val avkortetYtelse =
-                        requireNotNull(beregningOgAvkorting?.avkorting?.avkortetYtelse) {
-                            "Mangler avkortet ytelse"
+                    SakType.OMSTILLINGSSTOENAD -> {
+                        val avkortetYtelse =
+                            requireNotNull(beregningOgAvkorting?.avkorting?.avkortetYtelse) {
+                                "Mangler avkortet ytelse"
+                            }
+                        avkortetYtelse.map {
+                            Utbetalingsperiode(
+                                periode = Periode(YearMonth.from(it.fom), YearMonth.from(it.fom)),
+                                beloep = it.ytelseEtterAvkorting.toBigDecimal(),
+                                type = UtbetalingsperiodeType.UTBETALING,
+                            )
                         }
-                    avkortetYtelse.map {
-                        Utbetalingsperiode(
-                            periode = Periode(YearMonth.from(it.fom), YearMonth.from(it.fom)),
-                            beloep = it.ytelseEtterAvkorting.toBigDecimal(),
-                            type = UtbetalingsperiodeType.UTBETALING,
-                        )
                     }
                 }
             }
@@ -545,7 +600,7 @@ class VedtakTilstandException(gjeldendeStatus: VedtakStatus, forventetStatus: Li
 class BehandlingstilstandException(vedtak: Vedtak) :
     IllegalStateException("Statussjekk for behandling ${vedtak.behandlingId} feilet")
 
-class OpphoersrevurderingErIkkeOpphoersvedtakException(revurderingAarsak: RevurderingAarsak?, vedtakType: VedtakType) :
+class OpphoersrevurderingErIkkeOpphoersvedtakException(revurderingAarsak: Revurderingaarsak?, vedtakType: VedtakType) :
     IllegalStateException(
         "Vedtaket er av type $vedtakType, men dette er " +
             "ikke gyldig for revurderingen med årsak $revurderingAarsak",

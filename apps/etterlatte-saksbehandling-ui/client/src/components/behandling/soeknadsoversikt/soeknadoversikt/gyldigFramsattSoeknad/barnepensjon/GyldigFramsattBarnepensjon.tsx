@@ -42,7 +42,7 @@ export const GyldigFramsattBarnepensjon = ({
 
   return (
     <LovtekstMedLenke
-      tittel="Gyldig fremsatt"
+      tittel="Vurdering - søknad gyldig fremsatt"
       hjemler={[
         {
           lenke: 'https://lovdata.no/lov/1997-02-28-19/§22-13',

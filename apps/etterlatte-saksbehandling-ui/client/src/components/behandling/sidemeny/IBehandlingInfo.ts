@@ -16,3 +16,8 @@ export interface IBehandlingInfo {
   fattetLogg?: IHendelse[]
   attestertLogg?: IHendelse[]
 }
+
+export enum BehandlingFane {
+  DOKUMENTER = 'DOKUMENTER',
+  SJEKKLISTE = 'SJEKKLISTE',
+}

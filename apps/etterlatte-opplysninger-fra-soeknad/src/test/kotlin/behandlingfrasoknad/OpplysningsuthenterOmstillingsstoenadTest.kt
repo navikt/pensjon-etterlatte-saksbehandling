@@ -30,7 +30,7 @@ internal class OpplysningsuthenterOmstillingsstoenadTest {
     @Test
     fun `alle opplysninger skal ha innsender som kilde`() {
         opplysninger.forEach {
-            assertEquals("03108718357", (it.kilde as Grunnlagsopplysning.Privatperson).fnr)
+            assertEquals("01498344336", (it.kilde as Grunnlagsopplysning.Privatperson).fnr)
         }
     }
 
@@ -41,7 +41,7 @@ internal class OpplysningsuthenterOmstillingsstoenadTest {
                 assertEquals("Bernt", fornavn)
                 assertEquals("Jakobsen", etternavn)
                 assertEquals(PersonType.AVDOED, type)
-                assertEquals("22128202440", foedselsnummer.value)
+                assertEquals("08498224343", foedselsnummer.value)
                 assertEquals(LocalDate.of(2022, Month.JANUARY, 1), doedsdato)
                 assertEquals("Norge", statsborgerskap)
                 assertEquals(JaNeiVetIkke.NEI, utenlandsopphold.harHattUtenlandsopphold)
@@ -56,7 +56,7 @@ internal class OpplysningsuthenterOmstillingsstoenadTest {
                 assertEquals(PersonType.GJENLEVENDE, type)
                 assertEquals("Kirsten", fornavn)
                 assertEquals("Jakobsen", etternavn)
-                assertEquals("26058411891", foedselsnummer.value)
+                assertEquals("25478323363", foedselsnummer.value)
                 assertEquals("Et sted 31", adresse)
                 assertEquals("Norge", statsborgerskap)
                 assertEquals("12345678", telefonnummer)
@@ -71,7 +71,7 @@ internal class OpplysningsuthenterOmstillingsstoenadTest {
                 assertEquals(PersonType.INNSENDER, type)
                 assertEquals("GØYAL", fornavn)
                 assertEquals("HØYSTAKK", etternavn)
-                assertEquals("03108718357", foedselsnummer.value)
+                assertEquals("01498344336", foedselsnummer.value)
             }
     }
 

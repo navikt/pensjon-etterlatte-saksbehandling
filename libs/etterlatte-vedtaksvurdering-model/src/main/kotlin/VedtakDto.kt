@@ -4,8 +4,8 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.fasterxml.jackson.annotation.JsonTypeName
 import com.fasterxml.jackson.databind.node.ObjectNode
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
-import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.VedtakSak
@@ -70,6 +70,8 @@ enum class VedtakStatus {
     OPPRETTET,
     FATTET_VEDTAK,
     ATTESTERT,
+    TIL_SAMORDNING,
+    SAMORDNET,
     RETURNERT,
     IVERKSATT,
 }
@@ -77,7 +79,7 @@ enum class VedtakStatus {
 data class Behandling(
     val type: BehandlingType,
     val id: UUID,
-    val revurderingsaarsak: RevurderingAarsak? = null,
+    val revurderingsaarsak: Revurderingaarsak? = null,
     val revurderingInfo: RevurderingInfo? = null,
 )
 
@@ -130,18 +132,16 @@ data class VedtakSamordningDto(
     val avkorting: ObjectNode?,
 )
 
-data class TilbakekrevingFattetVedtakDto(
+data class TilbakekrevingVedtakDto(
     val tilbakekrevingId: UUID,
     val sakId: Long,
     val sakType: SakType,
     val soeker: Folkeregisteridentifikator,
-    val ansvarligSaksbehandler: String,
-    val ansvarligEnhet: String,
     val tilbakekreving: ObjectNode,
 )
 
-data class TilbakekrevingAttesterVedtakDto(
+data class TilbakekrevingFattEllerAttesterVedtakDto(
     val tilbakekrevingId: UUID,
-    val attestant: String,
-    val attesterendeEnhet: String,
+    val saksbehandler: String,
+    val enhet: String,
 )

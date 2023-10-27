@@ -22,6 +22,7 @@ import RedigerbartBrev from '~components/behandling/brev/RedigerbartBrev'
 import { isFailure, isPending, isPendingOrInitial, useApiCall } from '~shared/hooks/useApiCall'
 
 import { fattVedtak } from '~shared/api/vedtaksvurdering'
+import { SjekklisteValideringErrorSummary } from '~components/behandling/sjekkliste/SjekklisteValideringErrorSummary'
 
 export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
   const { behandlingId } = useParams()
@@ -33,7 +34,12 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
   const [opprettBrevStatus, opprettNyttVedtaksbrev] = useApiCall(opprettVedtaksbrev)
 
   useEffect(() => {
-    if (!behandlingId || !sakId || !behandlingSkalSendeBrev(props.behandling)) return
+    if (
+      !behandlingId ||
+      !sakId ||
+      !behandlingSkalSendeBrev(props.behandling.behandlingType, props.behandling.revurderingsaarsak)
+    )
+      return
 
     hentBrev(behandlingId, (brev, statusCode) => {
       if (statusCode === 200) {
@@ -90,6 +96,8 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
       </BrevContent>
 
       <Border />
+
+      <SjekklisteValideringErrorSummary />
 
       <BehandlingHandlingKnapper>
         {hentBehandlesFraStatus(status) && (

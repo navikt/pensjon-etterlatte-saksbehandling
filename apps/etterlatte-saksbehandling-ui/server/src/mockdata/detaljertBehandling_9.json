@@ -9,18 +9,18 @@
         "resultat": "OPPFYLT",
         "basertPaaOpplysninger": {
           "familieRelasjon": {
-            "ansvarligeForeldre": ["22128202440", "03108718357"],
-            "foreldre": ["22128202440", "03108718357"],
+            "ansvarligeForeldre": ["08498224343", "01498344336"],
+            "foreldre": ["08498224343", "01498344336"],
             "barn": null
           },
           "innsender": {
             "navn": "BRÅKETE POTET",
-            "fnr": "03108718357"
+            "fnr": "01498344336"
           },
           "gjenlevende": [
             {
               "navn": "BRÅKETE POTET",
-              "fnr": "03108718357"
+              "fnr": "01498344336"
             }
           ]
         }
@@ -30,13 +30,13 @@
         "resultat": "OPPFYLT",
         "basertPaaOpplysninger": {
           "familieRelasjon": {
-            "ansvarligeForeldre": ["22128202440", "03108718357"],
-            "foreldre": ["22128202440", "03108718357"],
+            "ansvarligeForeldre": ["08498224343", "01498344336"],
+            "foreldre": ["08498224343", "01498344336"],
             "barn": null
           },
           "innsender": {
             "navn": "BRÅKETE POTET",
-            "fnr": "03108718357"
+            "fnr": "01498344336"
           }
         }
       },
@@ -78,7 +78,7 @@
           {
             "fornavn": "TALENTFULL",
             "etternavn": "BLYANT",
-            "foedselsnummer": "12101376212",
+            "foedselsnummer": "25478323363",
             "foedselsdato": "2013-10-12",
             "foedselsaar": 2013,
             "foedeland": "NOR",
@@ -110,8 +110,8 @@
               "utflyttingFraNorge": []
             },
             "familieRelasjon": {
-              "ansvarligeForeldre": ["22128202440", "03108718357"],
-              "foreldre": ["22128202440", "03108718357"],
+              "ansvarligeForeldre": ["08498224343", "01498344336"],
+              "foreldre": ["08498224343", "01498344336"],
               "barn": null
             },
             "avdoedesBarn": null,
@@ -223,7 +223,7 @@
       "opplysning": {
         "fornavn": "VAKKER",
         "etternavn": "LAPP",
-        "foedselsnummer": "22128202440",
+        "foedselsnummer": "08498224343",
         "foedselsdato": "1982-12-22",
         "foedselsaar": 1982,
         "foedeland": "NOR",
@@ -258,7 +258,7 @@
           {
             "fornavn": "BRÅKETE",
             "etternavn": "SØSTER",
-            "foedselsnummer": "03108718357",
+            "foedselsnummer": "01498344336",
             "foedselsdato": "2019-10-03",
             "foedselsaar": 1987,
             "foedeland": "NOR",
@@ -333,7 +333,7 @@
       "opplysning": {
         "fornavn": "BRÅKETE",
         "etternavn": "POTET",
-        "foedselsnummer": "03108718357",
+        "foedselsnummer": "01498344336",
         "foedselsdato": "1987-10-03",
         "foedselsaar": 1987,
         "foedeland": "NOR",
@@ -367,7 +367,7 @@
         "familieRelasjon": {
           "ansvarligeForeldre": null,
           "foreldre": null,
-          "barn": ["12101376212", "03108718357"]
+          "barn": ["25478323363", "01498344336"]
         }
       }
     }

@@ -22,7 +22,7 @@ import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerAarsak
 import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerRequest
 import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerService
 import no.nav.etterlatte.inTransaction
-import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
+import no.nav.etterlatte.libs.common.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingsBehov
 import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
@@ -34,7 +34,7 @@ import no.nav.etterlatte.libs.common.behandling.OpprettAktivitetspliktOppfolging
 import no.nav.etterlatte.libs.common.behandling.Utenlandstilsnitt
 import no.nav.etterlatte.libs.common.behandling.UtenlandstilsnittType
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
-import no.nav.etterlatte.libs.common.behandlingsId
+import no.nav.etterlatte.libs.common.behandlingId
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.hentNavidentFraToken
@@ -64,10 +64,10 @@ internal fun Route.behandlingRoutes(
         }
     }
 
-    route("/api/behandling/{$BEHANDLINGSID_CALL_PARAMETER}/") {
+    route("/api/behandling/{$BEHANDLINGID_CALL_PARAMETER}/") {
         get {
             val detaljertBehandlingDTO =
-                behandlingService.hentDetaljertBehandlingMedTilbehoer(behandlingsId, brukerTokenInfo)
+                behandlingService.hentDetaljertBehandlingMedTilbehoer(behandlingId, brukerTokenInfo)
             call.respond(detaljertBehandlingDTO)
         }
 
@@ -78,7 +78,7 @@ internal fun Route.behandlingRoutes(
                     val lagretGyldighetsResultat =
                         inTransaction {
                             gyldighetsproevingService.lagreGyldighetsproeving(
-                                behandlingsId,
+                                behandlingId,
                                 navIdent,
                                 body,
                             )
@@ -98,7 +98,7 @@ internal fun Route.behandlingRoutes(
                         body.svar,
                         body.begrunnelse,
                         Grunnlagsopplysning.Saksbehandler.create(navIdent),
-                        behandlingsId,
+                        behandlingId,
                     )
 
                 try {
@@ -112,15 +112,15 @@ internal fun Route.behandlingRoutes(
 
         route("/manueltopphoer") {
             get {
-                logger.info("Henter manuelt opphør oppsummering for manuelt opphør med id=$behandlingsId")
+                logger.info("Henter manuelt opphør oppsummering for manuelt opphør med id=$behandlingId")
                 when (
                     val opphoerOgBehandlinger =
-                        manueltOpphoerService.hentManueltOpphoerOgAlleIverksatteBehandlingerISak(behandlingsId)
+                        manueltOpphoerService.hentManueltOpphoerOgAlleIverksatteBehandlingerISak(behandlingId)
                 ) {
                     null ->
                         call.respond(
                             HttpStatusCode.NotFound,
-                            "Fant ikke manuelt opphør med id=$behandlingsId",
+                            "Fant ikke manuelt opphør med id=$behandlingId",
                         )
 
                     else -> {
@@ -134,7 +134,7 @@ internal fun Route.behandlingRoutes(
         }
 
         post("/avbryt") {
-            inTransaction { behandlingService.avbrytBehandling(behandlingsId, brukerTokenInfo) }
+            inTransaction { behandlingService.avbrytBehandling(behandlingId, brukerTokenInfo) }
             call.respond(HttpStatusCode.OK)
         }
 
@@ -145,7 +145,7 @@ internal fun Route.behandlingRoutes(
 
                 val erGyldigVirkningstidspunkt =
                     behandlingService.erGyldigVirkningstidspunkt(
-                        behandlingsId,
+                        behandlingId,
                         brukerTokenInfo,
                         body,
                     )
@@ -157,7 +157,7 @@ internal fun Route.behandlingRoutes(
                     val virkningstidspunkt =
                         inTransaction {
                             behandlingService.oppdaterVirkningstidspunkt(
-                                behandlingsId,
+                                behandlingId,
                                 body.dato,
                                 navIdent,
                                 body.begrunnelse!!,
@@ -189,7 +189,7 @@ internal fun Route.behandlingRoutes(
                         )
 
                     inTransaction {
-                        behandlingService.oppdaterUtenlandstilsnitt(behandlingsId, utenlandstilsnitt)
+                        behandlingService.oppdaterUtenlandstilsnitt(behandlingId, utenlandstilsnitt)
                     }
 
                     call.respondText(
@@ -224,7 +224,7 @@ internal fun Route.behandlingRoutes(
 
                     inTransaction {
                         behandlingService.oppdaterBoddEllerArbeidetUtlandet(
-                            behandlingsId,
+                            behandlingId,
                             boddEllerArbeidetUtlandet,
                         )
                     }
@@ -242,7 +242,7 @@ internal fun Route.behandlingRoutes(
 
         route("/aktivitetsplikt") {
             get {
-                val result = aktivitetspliktService.hentAktivitetspliktOppfolging(behandlingsId)
+                val result = aktivitetspliktService.hentAktivitetspliktOppfolging(behandlingId)
                 call.respond(result ?: HttpStatusCode.NoContent)
             }
 
@@ -253,7 +253,7 @@ internal fun Route.behandlingRoutes(
                     try {
                         val result =
                             aktivitetspliktService.lagreAktivitetspliktOppfolging(
-                                behandlingsId,
+                                behandlingId,
                                 oppfolging,
                                 navIdent,
                             )
@@ -264,21 +264,28 @@ internal fun Route.behandlingRoutes(
                 }
             }
         }
+
+        post("/oppdater-grunnlag") {
+            inTransaction {
+                behandlingService.oppdaterGrunnlagOgStatus(behandlingId)
+            }
+            call.respond(HttpStatusCode.OK)
+        }
     }
 
     route("/behandlinger") {
-        route("/{$BEHANDLINGSID_CALL_PARAMETER}") {
+        route("/{$BEHANDLINGID_CALL_PARAMETER}") {
             get {
-                logger.info("Henter detaljert behandling for behandling med id=$behandlingsId")
-                when (val behandling = behandlingService.hentDetaljertBehandling(behandlingsId, brukerTokenInfo)) {
+                logger.info("Henter detaljert behandling for behandling med id=$behandlingId")
+                when (val behandling = behandlingService.hentDetaljertBehandling(behandlingId, brukerTokenInfo)) {
                     is DetaljertBehandling -> call.respond(behandling)
-                    else -> call.respond(HttpStatusCode.NotFound, "Fant ikke behandling med id=$behandlingsId")
+                    else -> call.respond(HttpStatusCode.NotFound, "Fant ikke behandling med id=$behandlingId")
                 }
             }
 
             post("/gyldigfremsatt") {
                 val body = call.receive<GyldighetsResultat>()
-                gyldighetsproevingService.lagreGyldighetsproeving(behandlingsId, body)
+                gyldighetsproevingService.lagreGyldighetsproeving(behandlingId, body)
                 call.respond(HttpStatusCode.OK)
             }
         }
@@ -296,7 +303,7 @@ internal fun Route.behandlingRoutes(
                                 behandlingsBehov.mottattDato,
                                 Vedtaksloesning.GJENNY,
                             )
-                        }
+                        }?.behandling
                 ) {
                     null -> call.respond(HttpStatusCode.NotFound)
                     else -> call.respondText(behandling.id.toString())

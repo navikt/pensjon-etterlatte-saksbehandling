@@ -5,6 +5,7 @@ import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.log
 import io.ktor.server.plugins.NotFoundException
 import io.ktor.server.plugins.statuspages.StatusPagesConfig
+import io.ktor.server.request.uri
 import io.ktor.server.response.respond
 import isProd
 import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
@@ -25,12 +26,12 @@ class StatusPagesKonfigurasjon(private val sikkerLogg: Logger) {
             when (cause) {
                 is ForespoerselException -> {
                     call.application.log.loggForespoerselException(cause)
-                    cause.respond(call)
+                    call.respond(cause)
                 }
 
                 is InternfeilException -> {
                     call.application.log.loggInternfeilException(cause)
-                    cause.respond(call)
+                    call.respond(cause)
                 }
 
                 is NotFoundException -> {
@@ -41,91 +42,104 @@ class StatusPagesKonfigurasjon(private val sikkerLogg: Logger) {
                             cause = cause,
                         )
                     call.application.log.loggForespoerselException(wrapped)
-                    wrapped.respond(call)
+                    call.respond(wrapped)
                 }
 
                 else -> {
                     val mappetFeil = InternfeilException("En feil har skjedd.", cause)
                     call.application.log.loggInternfeilException(mappetFeil)
-                    mappetFeil.respond(call)
+                    call.respond(mappetFeil)
                 }
             }
         }
+
         status(*statusCodes4xx) { call, code ->
             when (code) {
-                HttpStatusCode.NotFound -> GenerellIkkeFunnetException().respond(call)
+                HttpStatusCode.NotFound -> call.respond(GenerellIkkeFunnetException())
 
                 HttpStatusCode.BadRequest ->
-                    UgyldigForespoerselException(
-                        "BAD_REQUEST",
-                        "Forespørselen er ugyldig",
-                    ).respond(call)
+                    call.respond(
+                        UgyldigForespoerselException(
+                            code = "BAD_REQUEST",
+                            detail = "Forespørselen er ugyldig",
+                        ),
+                    )
 
                 HttpStatusCode.Forbidden ->
-                    IkkeTillattException(
-                        "FORBIDDEN",
-                        "Forespørselen er ikke tillatt",
-                    ).respond(call)
+                    call.respond(
+                        IkkeTillattException(
+                            code = "FORBIDDEN",
+                            detail = "Forespørselen er ikke tillatt",
+                        ),
+                    )
 
                 else ->
-                    ForespoerselException(
-                        status = code.value,
-                        code = "UNKNOWN_ERROR",
-                        detail = "En ukjent feil oppstod",
+                    call.respond(
+                        ForespoerselException(
+                            status = code.value,
+                            code = "UNKNOWN_ERROR",
+                            detail = "En ukjent feil oppstod",
+                        ),
                     )
-                        .respond(call)
             }
         }
 
         status(*statusCodes5xx) { call, code ->
-            // Maskerer alle interne feil som 500 internal server error
-            val feil = InternfeilException("Ukjent feil")
-            if (code !== HttpStatusCode.InternalServerError) {
-                call.application.log.error(
-                    "Et endepunkt returnerte en ikke-500 5xx-respons ($code). Maskerer som 500.",
-                    feil,
+            val feil =
+                ForespoerselException(
+                    status = code.value,
+                    detail = call.request.uri,
+                    code = "5XX_FEIL",
                 )
+
+            if (code !== HttpStatusCode.InternalServerError) {
+                call.application.log.error("Et endepunkt returnerte $code. Maskerer som 500: ", feil)
             } else {
-                call.application.log.error("Et endepunkt returnerte en 500-respons", feil)
+                call.application.log.error("Et endepunkt returnerte $code: ", feil)
             }
-            feil.respond(call)
+
+            // Maskerer alle interne feil som 500 internal server error
+            call.respond(InternfeilException("Ukjent feil"))
         }
     }
 
-    private fun Logger.loggInternfeilException(cause: InternfeilException) {
-        if (cause.erDeserialiseringsException() && isProd()) {
-            sikkerLogg.error("En feil har oppstått ved deserialisering", cause)
+    private fun Logger.loggInternfeilException(internfeil: InternfeilException) {
+        if (internfeil.erDeserialiseringsException() && isProd()) {
+            sikkerLogg.error("En feil har oppstått ved deserialisering", internfeil)
             this.error(
                 "En feil har oppstått ved deserialisering. Se sikkerlogg for mer detaljer.",
             )
         } else {
-            this.error("En intern feil oppstod i et endepunkt. Svarer frontend med 500-feil", cause)
+            this.error(
+                "En intern feil oppstod i et endepunkt. Svarer frontend med 500-feil",
+                internfeil.cause ?: internfeil,
+            )
         }
     }
 
-    private fun Logger.loggForespoerselException(cause: ForespoerselException) {
-        if (cause.erDeserialiseringsException() && isProd()) {
-            sikkerLogg.info("En feil har oppstått ved deserialisering", cause)
+    private fun Logger.loggForespoerselException(internfeil: ForespoerselException) {
+        if (internfeil.erDeserialiseringsException() && isProd()) {
+            sikkerLogg.info("En feil har oppstått ved deserialisering", internfeil)
             this.info(
                 "En feil har oppstått ved deserialisering i et endepunkt. Se sikkerlogg for mer detaljer. " +
-                    "Feilen fikk status ${cause.status} til frontend.",
+                    "Feilen fikk status ${internfeil.status} til frontend.",
             )
         }
         // Logger ikke meta, siden det kan inneholde identiferende informasjon
-        this.info("En forespørselsfeil oppstod i et endepunkt", cause.noMeta())
+        this.info("En forespørselsfeil oppstod i et endepunkt", internfeil.cause ?: internfeil.noMeta())
     }
 
-    private suspend fun ForespoerselException.respond(call: ApplicationCall) {
-        call.respond(
-            HttpStatusCode.fromValue(this.status),
-            this.somExceptionResponse(),
+    private suspend fun ApplicationCall.respond(feil: ForespoerselException) {
+        this.respond(
+            HttpStatusCode.fromValue(feil.status),
+            feil.somExceptionResponse(),
         )
     }
 
-    private suspend fun InternfeilException.respond(call: ApplicationCall) {
-        call.respond(
+    private suspend fun ApplicationCall.respond(feil: InternfeilException) {
+        this.respond(
             HttpStatusCode.InternalServerError,
-            this.somJsonRespons(),
+            feil.somJsonRespons(),
         )
     }
 }

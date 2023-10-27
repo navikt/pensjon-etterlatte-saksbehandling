@@ -7,7 +7,7 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.application
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
-import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
+import no.nav.etterlatte.libs.common.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.sakId
@@ -24,7 +24,7 @@ fun Route.automatiskBehandlingRoutes(
     route("/api/vedtak") {
         val logger = application.log
 
-        post("/{$SAKID_CALL_PARAMETER}/{$BEHANDLINGSID_CALL_PARAMETER}/automatisk") {
+        post("/{$SAKID_CALL_PARAMETER}/{$BEHANDLINGID_CALL_PARAMETER}/automatisk") {
             withBehandlingId(behandlingKlient) { behandlingId ->
                 logger.info("Håndterer behandling $behandlingId")
                 service.opprettEllerOppdaterVedtak(behandlingId, brukerTokenInfo)

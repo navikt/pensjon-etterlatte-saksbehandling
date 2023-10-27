@@ -1,5 +1,6 @@
 package no.nav.etterlatte.brev.hentinformasjon
 
+import com.fasterxml.jackson.module.kotlin.readValue
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.brev.behandling.AvkortetBeregningsperiode
@@ -20,6 +21,8 @@ import no.nav.etterlatte.brev.behandling.mapVerge
 import no.nav.etterlatte.brev.behandlingklient.BehandlingKlient
 import no.nav.etterlatte.brev.model.EtterbetalingDTO
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.token.BrukerTokenInfo
@@ -57,7 +60,18 @@ class BrevdataFacade(
         return coroutineScope {
             val sakDeferred = async { behandlingKlient.hentSak(sakId, brukerTokenInfo) }
             val vedtakDeferred = async { vedtaksvurderingKlient.hentVedtak(behandlingId, brukerTokenInfo) }
-            val grunnlag = async { grunnlagKlient.hentGrunnlag(sakId, behandlingId, brukerTokenInfo) }.await()
+            val grunnlag =
+                when (vedtakDeferred.await().type) {
+                    VedtakType.TILBAKEKREVING ->
+                        async {
+                            grunnlagKlient.hentGrunnlagForSak(
+                                sakId,
+                                brukerTokenInfo,
+                            )
+                        }.await()
+
+                    else -> async { grunnlagKlient.hentGrunnlag(behandlingId, brukerTokenInfo) }.await()
+                }
             val sak = sakDeferred.await()
             val personerISak =
                 PersonerISak(
@@ -102,25 +116,26 @@ class BrevdataFacade(
                     }
 
                 VedtakType.TILBAKEKREVING ->
-                    (vedtak.innhold as VedtakInnholdDto.VedtakTilbakekrevingDto).let { vedtakInnhold ->
-                        GenerellBrevData(
-                            sak,
-                            personerISak,
-                            behandlingId,
-                            forenkletVedtak =
-                                ForenkletVedtak(
-                                    vedtak.id,
-                                    vedtak.status,
-                                    vedtak.type,
-                                    ansvarligEnhet,
-                                    saksbehandlerIdent,
-                                    attestantIdent,
-                                    vedtak.vedtakFattet?.tidspunkt?.toNorskLocalDate(),
-                                ),
-                            grunnlag.mapSpraak(),
-                            // tilbakekreving = TODO EY-2806
-                        )
-                    }
+                    GenerellBrevData(
+                        sak,
+                        personerISak,
+                        behandlingId,
+                        forenkletVedtak =
+                            ForenkletVedtak(
+                                vedtak.id,
+                                vedtak.status,
+                                vedtak.type,
+                                ansvarligEnhet,
+                                saksbehandlerIdent,
+                                attestantIdent,
+                                vedtak.vedtakFattet?.tidspunkt?.toNorskLocalDate(),
+                                tilbakekreving =
+                                    objectMapper.readValue(
+                                        (vedtak.innhold as VedtakInnholdDto.VedtakTilbakekrevingDto).tilbakekreving.toJson(),
+                                    ),
+                            ),
+                        grunnlag.mapSpraak(),
+                    )
             }
         }
     }

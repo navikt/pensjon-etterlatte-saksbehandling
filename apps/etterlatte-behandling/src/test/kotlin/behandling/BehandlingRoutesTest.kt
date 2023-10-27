@@ -151,7 +151,7 @@ internal class BehandlingRoutesTest {
     }
 
     @Test
-    fun `Får bad request hvis virkningstidspunkt ikke er gyldig`() {
+    fun `Gir bad request hvis virkningstidspunkt ikke er gyldig`() {
         val bodyVirkningstidspunkt = Tidspunkt.parse("2017-02-01T00:00:00Z")
         val bodyBegrunnelse = "begrunnelse"
 

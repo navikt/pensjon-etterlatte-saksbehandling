@@ -1,11 +1,15 @@
 package no.nav.etterlatte.grunnlag
 
+import com.fasterxml.jackson.databind.JsonNode
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import kotlinx.coroutines.runBlocking
 import lagGrunnlagHendelse
+import mockPerson
 import no.nav.etterlatte.klienter.PdlTjenesterKlientImpl
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.Opplysning
@@ -14,6 +18,7 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Navn
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.BOSTEDSADRESSE
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.FOEDELAND
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.FOEDSELSDATO
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.FOEDSELSNUMMER
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.NAVN
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.PERSONGALLERI_V1
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.PERSONROLLE
@@ -31,7 +36,9 @@ import no.nav.etterlatte.libs.testdata.grunnlag.INNSENDER_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER2_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.kilde
 import no.nav.etterlatte.libs.testdata.grunnlag.statiskUuid
+import no.nav.etterlatte.pdl.HistorikkForeldreansvar
 import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -51,7 +58,7 @@ internal class GrunnlagServiceTest {
 
     @BeforeAll
     fun beforeAll() {
-        every { opplysningerMock.finnNyesteGrunnlag(1, PERSONGALLERI_V1) } returns
+        every { opplysningerMock.finnNyesteGrunnlagForBehandling(any(), PERSONGALLERI_V1) } returns
             lagGrunnlagHendelse(
                 1,
                 4,
@@ -116,7 +123,7 @@ internal class GrunnlagServiceTest {
 
             every { opplysningerMock.hentAlleGrunnlagForSak(1) } returns grunnlagshendelser
 
-            val actual = grunnlagService.hentOpplysningsgrunnlag(1)!!
+            val actual = grunnlagService.hentOpplysningsgrunnlagForSak(1)!!
             val expected =
                 mapOf(
                     NAVN to Opplysning.Konstant(statiskUuid, kilde, nyttNavn.toJsonNode()),
@@ -133,7 +140,7 @@ internal class GrunnlagServiceTest {
 
             every { opplysningerMock.hentAlleGrunnlagForSak(1) } returns grunnlagshendelser
 
-            val actual = grunnlagService.hentOpplysningsgrunnlag(1)!!
+            val actual = grunnlagService.hentOpplysningsgrunnlagForSak(1)!!
             val expected =
                 mapOf(
                     NAVN to Opplysning.Konstant(statiskUuid, kilde, nyttNavn.toJsonNode()),
@@ -151,7 +158,7 @@ internal class GrunnlagServiceTest {
 
             every { opplysningerMock.hentAlleGrunnlagForSak(1) } returns grunnlagshendelser
 
-            val actual = grunnlagService.hentOpplysningsgrunnlag(1)!!
+            val actual = grunnlagService.hentOpplysningsgrunnlagForSak(1)!!
             val expected =
                 mapOf(
                     NAVN to Opplysning.Konstant(statiskUuid, kilde, nyttNavn.toJsonNode()),
@@ -169,7 +176,7 @@ internal class GrunnlagServiceTest {
 
             every { opplysningerMock.hentAlleGrunnlagForSak(1) } returns grunnlagshendelser
 
-            val actual = grunnlagService.hentOpplysningsgrunnlag(1)!!
+            val actual = grunnlagService.hentOpplysningsgrunnlagForSak(1)!!
             val expected =
                 mapOf(
                     NAVN to Opplysning.Konstant(statiskUuid, kilde, nyttNavn.toJsonNode()),
@@ -212,14 +219,14 @@ internal class GrunnlagServiceTest {
 
             Assertions.assertEquals(
                 1,
-                grunnlagService.hentOpplysningsgrunnlag(1)!!.soeker.values.size,
+                grunnlagService.hentOpplysningsgrunnlagForSak(1)!!.soeker.values.size,
             )
         }
 
         @Test
         fun `tar alltid seneste versjon av samme opplysning`() {
             every { opplysningerMock.hentAlleGrunnlagForSak(1) } returns grunnlagshendelser
-            val opplysningsgrunnlag = grunnlagService.hentOpplysningsgrunnlag(1)!!
+            val opplysningsgrunnlag = grunnlagService.hentOpplysningsgrunnlagForSak(1)!!
 
             Assertions.assertEquals(
                 2,
@@ -267,7 +274,7 @@ internal class GrunnlagServiceTest {
 
         every { opplysningerMock.hentAlleGrunnlagForSak(1) } returns grunnlagshendelser
 
-        val actual = grunnlagService.hentOpplysningsgrunnlag(1)!!
+        val actual = grunnlagService.hentOpplysningsgrunnlagForSak(1)!!
         val expected =
             Opplysning.Konstant(
                 uuid1,
@@ -283,7 +290,7 @@ internal class GrunnlagServiceTest {
 
     @Test
     fun `kan hente og mappe opplysningsgrunnlag`() {
-        every { opplysningerMock.finnNyesteGrunnlag(1, PERSONGALLERI_V1) } returns
+        every { opplysningerMock.finnNyesteGrunnlagForSak(any<Long>(), PERSONGALLERI_V1) } returns
             lagGrunnlagHendelse(
                 1,
                 1,
@@ -294,7 +301,7 @@ internal class GrunnlagServiceTest {
                 kilde = kilde,
             )
 
-        every { opplysningerMock.hentAlleGrunnlagForSak(1) } returns
+        every { opplysningerMock.hentAlleGrunnlagForSak(any<Long>()) } returns
             listOf(
                 lagGrunnlagHendelse(
                     1,
@@ -324,7 +331,7 @@ internal class GrunnlagServiceTest {
                 ),
             )
 
-        val opplysningsgrunnlag = grunnlagService.hentOpplysningsgrunnlag(1)!!
+        val opplysningsgrunnlag = grunnlagService.hentOpplysningsgrunnlagForSak(1)!!
 
         Assertions.assertEquals(1, opplysningsgrunnlag.sak.size)
         Assertions.assertEquals(2, opplysningsgrunnlag.soeker.size)
@@ -460,14 +467,14 @@ internal class GrunnlagServiceTest {
 
             val soesken = grunnlagService.hentSakerOgRoller(soeskenFnr)
             Assertions.assertEquals(2, soesken.sakerOgRoller.size)
-            Assertions.assertTrue(soesken.sakerOgRoller.all { it.rolle == Saksrolle.SOESKEN })
+            assertTrue(soesken.sakerOgRoller.all { it.rolle == Saksrolle.SOESKEN })
 
             verify(exactly = 1) { opplysningerMock.finnAllePersongalleriHvorPersonFinnes(soeskenFnr) }
         }
 
         @Test
         fun `Kan mappe og hente innsender`() {
-            every { opplysningerMock.finnNyesteGrunnlag(1, PERSONGALLERI_V1) } returns
+            every { opplysningerMock.finnNyesteGrunnlagForBehandling(any(), PERSONGALLERI_V1) } returns
                 lagGrunnlagHendelse(
                     1,
                     1,
@@ -507,11 +514,86 @@ internal class GrunnlagServiceTest {
                     ),
                 )
 
-            val opplysningsgrunnlag = grunnlagService.hentOpplysningsgrunnlag(1)!!
+            val opplysningsgrunnlag = grunnlagService.hentOpplysningsgrunnlagForSak(1)!!
 
             Assertions.assertEquals(1, opplysningsgrunnlag.sak.size)
             Assertions.assertEquals(1, opplysningsgrunnlag.familie.size)
             Assertions.assertEquals(2, opplysningsgrunnlag.hentInnsender().size)
         }
+    }
+
+    @Test
+    fun `Kan oppdatere grunnlag`() {
+        val sakId = 1L
+        val behandlingId = UUID.randomUUID()
+        val sakType = SakType.BARNEPENSJON
+
+        every { opplysningerMock.finnNyesteGrunnlagForSak(any(), PERSONGALLERI_V1) } returns
+            lagGrunnlagHendelse(
+                sakId,
+                1,
+                PERSONGALLERI_V1,
+                id = statiskUuid,
+                verdi = testData.hentPersonGalleri().toJsonNode(),
+                kilde = kilde,
+            )
+
+        every { opplysningerMock.hentAlleGrunnlagForSak(sakId) } returns
+            listOf(
+                lagGrunnlagHendelse(
+                    sakId,
+                    2,
+                    NAVN,
+                    id = statiskUuid,
+                    fnr = INNSENDER_FOEDSELSNUMMER,
+                    verdi = Navn("Per", "Kalle", "Persson").toJsonNode(),
+                    kilde = kilde,
+                ),
+                lagGrunnlagHendelse(
+                    sakId,
+                    3,
+                    PERSONGALLERI_V1,
+                    id = statiskUuid,
+                    verdi = testData.hentPersonGalleri().toJsonNode(),
+                    kilde = kilde,
+                ),
+            )
+
+        every { opplysningerMock.finnHendelserIGrunnlag(sakId) } returns
+            listOf(
+                lagGrunnlagHendelse(
+                    sakId,
+                    3,
+                    PERSONGALLERI_V1,
+                    id = statiskUuid,
+                    verdi = testData.hentPersonGalleri().toJsonNode(),
+                    kilde = kilde,
+                ),
+            )
+
+        val opplysningsperson = mockPerson()
+        every { pdlTjenesterKlientImpl.hentPerson(any(), any(), any()) } returns testData.soeker
+        every { pdlTjenesterKlientImpl.hentOpplysningsperson(any(), any(), any()) } returns opplysningsperson
+        every {
+            pdlTjenesterKlientImpl.hentHistoriskForeldreansvar(any(), any(), any())
+        } returns mockk<HistorikkForeldreansvar>()
+        every {
+            opplysningerMock.hentBehandlingVersjon(behandlingId)
+        } returns BehandlingGrunnlagVersjon(behandlingId, sakId, 12L, false)
+        every {
+            opplysningerMock.leggOpplysningTilGrunnlag(any(), any(), any())
+        } returns 7L
+        every {
+            opplysningerMock.oppdaterVersjonForBehandling(any(), any(), any())
+        } returns 1
+
+        runBlocking { grunnlagService.oppdaterGrunnlag(behandlingId, sakId, sakType) }
+
+        val slot = mutableListOf<Grunnlagsopplysning<JsonNode>>()
+        verify {
+            opplysningerMock.leggOpplysningTilGrunnlag(sakId, capture(slot), opplysningsperson.foedselsnummer.verdi)
+            opplysningerMock.oppdaterVersjonForBehandling(behandlingId, sakId, 7)
+        }
+        assertTrue(slot.filter { oppl -> oppl.opplysningType == FOEDSELSNUMMER }.size > 1)
     }
 }

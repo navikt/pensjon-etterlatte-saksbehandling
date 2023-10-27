@@ -38,7 +38,9 @@ import no.nav.etterlatte.behandling.manueltopphoer.RealManueltOpphoerService
 import no.nav.etterlatte.behandling.omregning.MigreringService
 import no.nav.etterlatte.behandling.omregning.OmregningService
 import no.nav.etterlatte.behandling.revurdering.RevurderingDao
-import no.nav.etterlatte.behandling.revurdering.RevurderingServiceImpl
+import no.nav.etterlatte.behandling.revurdering.RevurderingService
+import no.nav.etterlatte.behandling.sjekkliste.SjekklisteDao
+import no.nav.etterlatte.behandling.sjekkliste.SjekklisteService
 import no.nav.etterlatte.behandling.tilbakekreving.TilbakekrevingDao
 import no.nav.etterlatte.behandling.tilbakekreving.TilbakekrevingService
 import no.nav.etterlatte.common.klienter.PdlKlientImpl
@@ -162,6 +164,7 @@ internal class ApplicationContext(
     val hendelseDao = HendelseDao { databaseContext().activeTx() }
     val kommerBarnetTilGodeDao = KommerBarnetTilGodeDao { databaseContext().activeTx() }
     val aktivitetspliktDao = AktivitetspliktDao { databaseContext().activeTx() }
+    val sjekklisteDao = SjekklisteDao { databaseContext().activeTx() }
     val revurderingDao = RevurderingDao { databaseContext().activeTx() }
     val behandlingDao = BehandlingDao(kommerBarnetTilGodeDao, revurderingDao) { databaseContext().activeTx() }
     val generellbehandlingDao = GenerellBehandlingDao { databaseContext().activeTx() }
@@ -188,9 +191,10 @@ internal class ApplicationContext(
 
     // Service
     val oppgaveService = OppgaveService(oppgaveDaoEndringer, sakDao, featureToggleService)
-    val generellBehandlingService = GenerellBehandlingService(generellbehandlingDao, oppgaveService)
+
     val gosysOppgaveService = GosysOppgaveServiceImpl(gosysOppgaveKlient, pdlKlient, featureToggleService)
     val etterbetalingService = EtterbetalingService(etterbetalingDao)
+    val grunnlagsService = GrunnlagService(grunnlagKlient)
     val behandlingService =
         BehandlingServiceImpl(
             behandlingDao = behandlingDao,
@@ -203,14 +207,21 @@ internal class ApplicationContext(
             kommerBarnetTilGodeDao = kommerBarnetTilGodeDao,
             oppgaveService = oppgaveService,
             etterbetalingService = etterbetalingService,
+            grunnlagService = grunnlagsService,
         )
-
+    val generellBehandlingService =
+        GenerellBehandlingService(
+            generellbehandlingDao,
+            oppgaveService,
+            behandlingService,
+            grunnlagKlientObo,
+        )
     val kommerBarnetTilGodeService =
         KommerBarnetTilGodeService(kommerBarnetTilGodeDao, behandlingDao)
     val aktivtetspliktService = AktivitetspliktService(aktivitetspliktDao)
-    val grunnlagsService = GrunnlagService(grunnlagKlient = grunnlagKlient)
+    val sjekklisteService = SjekklisteService(sjekklisteDao, behandlingService, oppgaveService)
     val revurderingService =
-        RevurderingServiceImpl(
+        RevurderingService(
             oppgaveService = oppgaveService,
             grunnlagService = grunnlagsService,
             behandlingHendelser = behandlingsHendelser,

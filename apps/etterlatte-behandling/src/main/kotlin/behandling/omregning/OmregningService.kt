@@ -6,7 +6,7 @@ import no.nav.etterlatte.behandling.GrunnlagService
 import no.nav.etterlatte.behandling.revurdering.RevurderingService
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
-import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import java.time.LocalDate
 import java.util.UUID
@@ -24,14 +24,14 @@ class OmregningService(
         val forrigeBehandling =
             behandlingService.hentSisteIverksatte(sakId)
                 ?: throw IllegalArgumentException("Fant ikke forrige behandling i sak $sakId")
-        val persongalleri = runBlocking { grunnlagService.hentPersongalleri(sakId, forrigeBehandling.id) }
+        val persongalleri = runBlocking { grunnlagService.hentPersongalleri(forrigeBehandling.id) }
         val behandling =
             when (prosessType) {
                 Prosesstype.AUTOMATISK ->
                     revurderingService.opprettAutomatiskRevurdering(
                         sakId = sakId,
                         forrigeBehandling = forrigeBehandling,
-                        revurderingAarsak = RevurderingAarsak.REGULERING,
+                        revurderingAarsak = Revurderingaarsak.REGULERING,
                         virkningstidspunkt = fraDato,
                         kilde = Vedtaksloesning.GJENNY,
                         persongalleri = persongalleri,

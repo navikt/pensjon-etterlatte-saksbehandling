@@ -11,7 +11,6 @@ import no.nav.etterlatte.User
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
-import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveListe
@@ -339,9 +338,9 @@ class OppgaveService(
         )
     }
 
-    fun hentSaksbehandlerForBehandling(behandlingsId: UUID): String? {
+    fun hentSaksbehandlerForBehandling(behandlingId: UUID): String? {
         val oppgaverForBehandlingUtenAttesterting =
-            oppgaveDao.hentOppgaverForReferanse(behandlingsId.toString())
+            oppgaveDao.hentOppgaverForReferanse(behandlingId.toString())
                 .filter {
                     it.type !== OppgaveType.ATTESTERING
                 }
@@ -350,24 +349,22 @@ class OppgaveService(
 
     fun hentOppgaveForSaksbehandlerFraFoerstegangsbehandling(behandlingId: UUID): OppgaveIntern? {
         val oppgaverForBehandlingFoerstegangs =
-            inTransaction {
-                oppgaveDao.hentOppgaverForReferanse(behandlingId.toString())
-            }.filter {
+            oppgaveDao.hentOppgaverForReferanse(behandlingId.toString()).filter {
                 it.type == OppgaveType.FOERSTEGANGSBEHANDLING
             }
-        return oppgaverForBehandlingFoerstegangs.sortedByDescending { it.opprettet }.firstOrNull()
+        return oppgaverForBehandlingFoerstegangs.maxByOrNull { it.opprettet }
     }
 
-    fun hentSaksbehandlerForOppgaveUnderArbeid(behandlingsId: UUID): String? {
-        val oppgaverforBehandling = oppgaveDao.hentOppgaverForReferanse(behandlingsId.toString())
+    fun hentSaksbehandlerForOppgaveUnderArbeid(behandlingId: UUID): String? {
+        val oppgaverforBehandling = oppgaveDao.hentOppgaverForReferanse(behandlingId.toString())
         return try {
             val oppgaveUnderbehandling = oppgaverforBehandling.single { it.status == Status.UNDER_BEHANDLING }
             oppgaveUnderbehandling.saksbehandler
         } catch (e: NoSuchElementException) {
-            logger.info("Det må finnes en oppgave under behandling, gjelder behandling: $behandlingsId")
+            logger.info("Det må finnes en oppgave under behandling, gjelder behandling: $behandlingId")
             return null
         } catch (e: IllegalArgumentException) {
-            logger.info("Skal kun ha en oppgave under behandling, gjelder behandling: $behandlingsId")
+            logger.info("Skal kun ha en oppgave under behandling, gjelder behandling: $behandlingId")
             return null
         }
     }

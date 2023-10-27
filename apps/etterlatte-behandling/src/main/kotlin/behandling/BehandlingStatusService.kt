@@ -73,6 +73,16 @@ interface BehandlingStatusService {
         vedtakHendelse: VedtakHendelse,
     )
 
+    fun settTilSamordnetVedtak(
+        behandlingId: UUID,
+        vedtakHendelse: VedtakHendelse,
+    )
+
+    fun settSamordnetVedtak(
+        behandlingId: UUID,
+        vedtakHendelse: VedtakHendelse,
+    )
+
     fun settIverksattVedtak(
         behandlingId: UUID,
         vedtakHendelse: VedtakHendelse,
@@ -172,6 +182,24 @@ class BehandlingStatusServiceImpl(
     ) {
         lagreNyBehandlingStatus(behandling.tilReturnert())
         registrerVedtakHendelse(behandling.id, vedtakHendelse, HendelseType.UNDERKJENT)
+    }
+
+    override fun settTilSamordnetVedtak(
+        behandlingId: UUID,
+        vedtakHendelse: VedtakHendelse,
+    ) {
+        val behandling = hentBehandling(behandlingId)
+        lagreNyBehandlingStatus(behandling.tilTilSamordning(), Tidspunkt.now().toLocalDatetimeUTC())
+        registrerVedtakHendelse(behandlingId, vedtakHendelse, HendelseType.TIL_SAMORDNING)
+    }
+
+    override fun settSamordnetVedtak(
+        behandlingId: UUID,
+        vedtakHendelse: VedtakHendelse,
+    ) {
+        val behandling = hentBehandling(behandlingId)
+        lagreNyBehandlingStatus(behandling.tilSamordnet(), Tidspunkt.now().toLocalDatetimeUTC())
+        registrerVedtakHendelse(behandlingId, vedtakHendelse, HendelseType.SAMORDNET)
     }
 
     override fun settIverksattVedtak(

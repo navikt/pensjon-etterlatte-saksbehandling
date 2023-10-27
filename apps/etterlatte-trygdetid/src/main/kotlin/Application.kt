@@ -14,6 +14,7 @@ import no.nav.etterlatte.trygdetid.avtale.avtale
 import no.nav.etterlatte.trygdetid.config.ApplicationContext
 import no.nav.etterlatte.trygdetid.kodeverk
 import no.nav.etterlatte.trygdetid.trygdetid
+import no.nav.etterlatte.trygdetid.trygdetidV2
 import org.slf4j.Logger
 
 val sikkerLogg: Logger = sikkerlogger()
@@ -37,6 +38,7 @@ class Server(private val context: ApplicationContext) {
                         module {
                             restModule(sikkerLogg, withMetrics = true) {
                                 trygdetid(trygdetidService, behandlingKlient)
+                                trygdetidV2(trygdetidService, behandlingKlient)
                                 avtale(avtaleService, behandlingKlient)
                                 kodeverk(kodeverkService)
                             }

@@ -11,7 +11,7 @@ import {
 import { apiClient, ApiResponse } from './apiClient'
 import { ManueltOpphoerDetaljer } from '~components/behandling/manueltopphoeroversikt/ManueltOpphoerOversikt'
 import { Grunnlagsendringshendelse, GrunnlagsendringsListe, IBehandlingListe } from '~components/person/typer'
-import { Revurderingsaarsak } from '~shared/types/Revurderingsaarsak'
+import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
 import { InstitusjonsoppholdBegrunnelse } from '~components/person/uhaandtereHendelser/InstitusjonsoppholdVurderingBegrunnelse'
 import { FoersteVirk, ISak, SakType } from '~shared/types/sak'
 import { InstitusjonsoppholdMedKilde } from '~components/person/uhaandtereHendelser/HistoriskeHendelser'
@@ -99,7 +99,7 @@ export const lagreBegrunnelseKommerBarnetTilgode = async (args: {
 
 export const opprettRevurdering = async (args: {
   sakId: number
-  aarsak: Revurderingsaarsak
+  aarsak: Revurderingaarsak
   paaGrunnAvHendelseId?: string
   begrunnelse?: string
   fritekstAarsak?: string
@@ -114,7 +114,7 @@ export const opprettRevurdering = async (args: {
 
 export const hentStoettedeRevurderinger = async (args: {
   sakType: SakType
-}): Promise<ApiResponse<Array<Revurderingsaarsak>>> => {
+}): Promise<ApiResponse<Array<Revurderingaarsak>>> => {
   return apiClient.get(`/stoettederevurderinger/${args.sakType}`)
 }
 
@@ -178,4 +178,8 @@ export const slettEtterbetaling = async (args: {
   behandlingId: string
 }): Promise<ApiResponse<IKommerBarnetTilgode>> => {
   return apiClient.delete(`/behandling/${args.behandlingId}/etterbetaling`)
+}
+
+export const oppdaterGrunnlag = async (args: { behandlingId: string }): Promise<ApiResponse<void>> => {
+  return apiClient.post(`/behandling/${args.behandlingId}/oppdater-grunnlag`, {})
 }

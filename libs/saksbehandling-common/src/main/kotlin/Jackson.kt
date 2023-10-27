@@ -1,5 +1,6 @@
 package no.nav.etterlatte.libs.common
 
+import com.fasterxml.jackson.core.JsonGenerator
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -18,6 +19,7 @@ val objectMapper: ObjectMapper =
         .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
         .enable(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES)
         .enable(DeserializationFeature.FAIL_ON_NUMBERS_FOR_ENUMS)
+        .enable(JsonGenerator.Feature.WRITE_BIGDECIMAL_AS_PLAIN)
         .build()
 
 fun serialize(value: Any): String = objectMapper.writeValueAsString(value)

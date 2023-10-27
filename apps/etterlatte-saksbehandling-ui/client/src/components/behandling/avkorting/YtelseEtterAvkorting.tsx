@@ -2,7 +2,6 @@ import { IAvkortetYtelse, IAvkorting } from '~shared/types/IAvkorting'
 import { Heading, Table } from '@navikt/ds-react'
 import React from 'react'
 import styled from 'styled-components'
-import { ManglerRegelspesifikasjon } from '~components/behandling/felles/ManglerRegelspesifikasjon'
 import { formaterDato, formaterStringDato, NOK } from '~utils/formattering'
 import { YtelseEtterAvkortingDetaljer } from '~components/behandling/avkorting/YtelseEtterAvkortingDetaljer'
 import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
@@ -97,15 +96,13 @@ export const YtelseEtterAvkorting = (props: {
                     </Table.DataCell>
                     <Table.DataCell>
                       <BredCelle>
-                        <ManglerRegelspesifikasjon>
-                          <Info
-                            tekst={NOK(ytelse.ytelseEtterAvkorting)}
-                            label=""
-                            undertekst={
-                              tidligereYtelse ? `${NOK(tidligereYtelse.ytelseEtterAvkorting)} (Forrige vedtak)` : ''
-                            }
-                          />
-                        </ManglerRegelspesifikasjon>
+                        <Info
+                          tekst={NOK(ytelse.ytelseEtterAvkorting)}
+                          label=""
+                          undertekst={
+                            tidligereYtelse ? `${NOK(tidligereYtelse.ytelseEtterAvkorting)} (Forrige vedtak)` : ''
+                          }
+                        />
                       </BredCelle>
                     </Table.DataCell>
                   </Table.ExpandableRow>

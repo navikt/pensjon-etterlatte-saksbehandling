@@ -63,7 +63,7 @@ internal class MigreringHendelserRiverTest {
                         avdoedFyllerSeksti = null,
                     ),
                 overstyrtNorskPoengaar = null,
-                ident = null,
+                ident = AVDOED_FOEDSELSNUMMER.value,
             )
         val request =
             MigreringRequest(
@@ -183,7 +183,7 @@ internal class MigreringHendelserRiverTest {
                         avdoedFyllerSeksti = null,
                     ),
                 overstyrtNorskPoengaar = null,
-                ident = null,
+                ident = AVDOED_FOEDSELSNUMMER.value,
             )
         val request =
             MigreringRequest(
@@ -273,7 +273,7 @@ internal class MigreringHendelserRiverTest {
                         avdoedFyllerSeksti = null,
                     ),
                 overstyrtNorskPoengaar = null,
-                ident = null,
+                ident = AVDOED_FOEDSELSNUMMER.value,
             )
         val request =
             MigreringRequest(

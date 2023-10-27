@@ -1,7 +1,7 @@
 {
-  "fornavn": "Jens",
-  "etternavn": "Johnsen",
-  "foedselsnummer": "11057523044",
+  "fornavn": "Rød",
+  "etternavn": "Blanding",
+  "foedselsnummer": "25478323363",
   "foedselsaar": 2010,
   "foedselsdato": "2010-04-19",
   "doedsdato": null,
@@ -49,16 +49,16 @@
   },
   "familieRelasjon": {
     "ansvarligeForeldre": [
-      "04096222195",
-      "19040550081"
+      "08498224343",
+      "16508201382"
     ],
     "foreldre": [
-      "04096222195",
-      "19040550081"
+      "08498224343",
+      "16508201382"
     ],
     "barn": [
-      "11057523044",
-      "31017123133"
+      "25478323363",
+      "16478313601"
     ]
   }
 }

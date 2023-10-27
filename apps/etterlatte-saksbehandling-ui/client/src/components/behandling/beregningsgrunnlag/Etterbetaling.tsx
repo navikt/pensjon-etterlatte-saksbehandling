@@ -106,7 +106,7 @@ const Etterbetaling = (props: {
     return (
       <>
         <Heading size="small" level="3">
-          Er etterbetaling
+          Innebærer etterbetaling?
         </Heading>
         <BodyShort>Fra og med måned: {formaterKanskjeStringDato(etterbetaling?.fraDato?.toString())}</BodyShort>
         <BodyShort>Til og med måned: {formaterKanskjeStringDato(etterbetaling?.tilDato?.toString())}</BodyShort>

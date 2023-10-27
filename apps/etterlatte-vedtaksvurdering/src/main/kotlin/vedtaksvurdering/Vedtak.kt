@@ -2,8 +2,8 @@ package no.nav.etterlatte.vedtaksvurdering
 
 import com.fasterxml.jackson.databind.node.ObjectNode
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
-import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.VedtakSak
@@ -101,7 +101,7 @@ sealed interface VedtakInnhold
 
 data class VedtakBehandlingInnhold(
     val behandlingType: BehandlingType,
-    val revurderingAarsak: RevurderingAarsak?,
+    val revurderingAarsak: Revurderingaarsak?,
     val virkningstidspunkt: YearMonth,
     val beregning: ObjectNode?,
     val avkorting: ObjectNode?,

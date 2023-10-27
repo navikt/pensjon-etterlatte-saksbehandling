@@ -6,7 +6,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
-import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.Utenlandstilsnitt
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.sak.Sak
@@ -25,7 +25,7 @@ data class AutomatiskRevurdering(
     override val virkningstidspunkt: Virkningstidspunkt?,
     override val utenlandstilsnitt: Utenlandstilsnitt?,
     override val boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet?,
-    override val revurderingsaarsak: RevurderingAarsak,
+    override val revurderingsaarsak: Revurderingaarsak,
     override val revurderingInfo: RevurderingMedBegrunnelse?,
     override val kilde: Vedtaksloesning,
     override val begrunnelse: String?,
@@ -65,6 +65,10 @@ data class AutomatiskRevurdering(
     override fun tilAttestert() = endreTilStatus(BehandlingStatus.ATTESTERT)
 
     override fun tilReturnert() = endreTilStatus(BehandlingStatus.RETURNERT)
+
+    override fun tilTilSamordning() = endreTilStatus(BehandlingStatus.TIL_SAMORDNING)
+
+    override fun tilSamordnet() = endreTilStatus(BehandlingStatus.SAMORDNET)
 
     override fun tilIverksatt() = endreTilStatus(BehandlingStatus.IVERKSATT)
 

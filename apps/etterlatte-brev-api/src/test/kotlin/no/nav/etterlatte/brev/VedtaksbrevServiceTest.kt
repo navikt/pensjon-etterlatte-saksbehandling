@@ -45,7 +45,7 @@ import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
-import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.VedtakSak
@@ -253,7 +253,7 @@ internal class VedtaksbrevServiceTest {
         )
         fun `Vedtaksbrev finnes ikke - skal opprette nytt redigerbart brev`(
             sakType: SakType,
-            revurderingsaarsak: RevurderingAarsak?,
+            revurderingsaarsak: Revurderingaarsak?,
             forventetProsessType: BrevProsessType,
             vedtakType: VedtakType,
         ) {
@@ -268,6 +268,7 @@ internal class VedtaksbrevServiceTest {
             coEvery { brevdataFacade.hentGenerellBrevData(any(), any(), any()) } returns behandling
             coEvery { adresseService.hentMottakerAdresse(any()) } returns mottaker
             coEvery { brevdataFacade.finnUtbetalingsinfo(any(), any(), any()) } returns mockk()
+            coEvery { brevdataFacade.hentEtterbetaling(any(), any()) } returns null
 
             runBlocking {
                 vedtaksbrevService.opprettVedtaksbrev(
@@ -776,7 +777,7 @@ internal class VedtaksbrevServiceTest {
         sakType: SakType,
         vedtakType: VedtakType,
         vedtakStatus: VedtakStatus = VedtakStatus.OPPRETTET,
-        revurderingsaarsak: RevurderingAarsak? = null,
+        revurderingsaarsak: Revurderingaarsak? = null,
     ): GenerellBrevData {
         val soeker = "12345612345"
         return GenerellBrevData(

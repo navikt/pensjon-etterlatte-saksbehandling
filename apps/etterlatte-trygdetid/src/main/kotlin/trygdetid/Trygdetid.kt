@@ -1,6 +1,8 @@
 package no.nav.etterlatte.trygdetid
 
 import com.fasterxml.jackson.databind.JsonNode
+import io.ktor.http.HttpStatusCode
+import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
@@ -13,7 +15,7 @@ import java.util.UUID.randomUUID
 
 data class Trygdetid(
     val id: UUID = randomUUID(),
-    val ident: String?,
+    val ident: String,
     val sakId: Long,
     val behandlingId: UUID,
     val trygdetidGrunnlag: List<TrygdetidGrunnlag> = emptyList(),
@@ -159,4 +161,8 @@ fun List<TrygdetidGrunnlag>.normaliser() =
         trygdetidGrunnlag.copy(periode = TrygdetidPeriode(fra = fra, til = til.plusDays(1)))
     }
 
-class OverlappendePeriodeException(override val message: String) : RuntimeException(message)
+class OverlappendePeriodeException(message: String) : ForespoerselException(
+    status = HttpStatusCode.Conflict.value,
+    code = "OVERLAPPENDE_PERIODE_TRYGDETID",
+    detail = message,
+)

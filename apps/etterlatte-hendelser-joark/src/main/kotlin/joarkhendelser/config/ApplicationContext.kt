@@ -8,9 +8,7 @@ import no.nav.etterlatte.joarkhendelser.common.JoarkhendelseKonsument
 import no.nav.etterlatte.libs.common.requireEnvValue
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 
-class ApplicationContext(
-    private val env: Map<String, String> = System.getenv(),
-) {
+class ApplicationContext(env: Map<String, String> = System.getenv()) {
     private val config: Config = ConfigFactory.load()
 
     private val behandlingHttpClient =
@@ -27,7 +25,7 @@ class ApplicationContext(
             url = config.getString("etterlatte.behandling.url"),
         )
 
-    private val joarkHendelseHandler: JoarkHendelseHandler =
+    private val joarkHendelseHandler =
         JoarkHendelseHandler(
             BehandlingKlient(
                 httpClient = behandlingHttpClient,
@@ -35,7 +33,7 @@ class ApplicationContext(
             ),
         )
 
-    val joarkKonsument: JoarkhendelseKonsument =
+    val joarkKonsument =
         JoarkhendelseKonsument(
             env.requireEnvValue("KAFKA_JOARK_HENDELSE_TOPIC"),
             KafkaEnvironment().generateKafkaConsumerProperties(env),

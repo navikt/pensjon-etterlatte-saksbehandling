@@ -1,4 +1,5 @@
 plugins {
+    alias(libs.plugins.avro)
     id("etterlatte.common")
 }
 
@@ -25,6 +26,8 @@ dependencies {
     implementation(libs.jackson.datatypejsr310)
 
     implementation(libs.kafka.clients)
+    implementation(libs.kafka.avro)
+    implementation(libs.kafka.avroserializer)
 
     testImplementation(libs.kafka.embeddedenv)
     testImplementation(libs.ktor2.servertests)

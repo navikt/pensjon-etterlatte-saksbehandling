@@ -59,7 +59,7 @@ spec:
     - name: PEN_URL
       value: https://pensjon-pen-q2.dev.adeo.no/pen/springapi
     - name: PEN_CLIENT_ID
-      value: d0883b92-b866-42cd-a216-5a0eec745e05
+      value: ddd52335-cfe8-4ee9-9e68-416a5ab26efa
     - name: ETTERLATTE_PDLTJENESTER_URL
       value: http://etterlatte-pdltjenester
     - name: PDLTJENESTER_AZURE_SCOPE

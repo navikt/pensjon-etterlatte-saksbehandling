@@ -99,9 +99,16 @@ class RevurderingService(
     ): List<RevurderingsinfoMedIdOgOpprettetDato> {
         val hentAlleRevurderingerISakMedAarsak =
             behandlingDao.hentAlleRevurderingerISakMedAarsak(sakId, revurderingAarsak)
+
         return hentAlleRevurderingerISakMedAarsak
-            .filterNot { it.revurderingInfo?.revurderingInfo !== null }
-            .map { RevurderingsinfoMedIdOgOpprettetDato(it.revurderingInfo?.revurderingInfo!!, it.behandlingOpprettet, it.id) }
+            .mapNotNull { if (it.revurderingInfo?.revurderingInfo != null) it else null }
+            .map {
+                RevurderingsinfoMedIdOgOpprettetDato(
+                    it.revurderingInfo!!.revurderingInfo!!,
+                    it.behandlingOpprettet,
+                    it.id,
+                )
+            }
     }
 
     private fun maksEnOppgaveUnderbehandlingForKildeBehandling(sakId: Long) {

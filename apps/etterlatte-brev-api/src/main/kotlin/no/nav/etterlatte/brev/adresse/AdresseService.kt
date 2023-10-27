@@ -5,9 +5,9 @@ import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.brev.adresse.navansatt.NavansattKlient
 import no.nav.etterlatte.brev.behandling.ForenkletVedtak
 import no.nav.etterlatte.brev.model.Mottaker
-import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.token.Fagsaksystem
 import no.nav.pensjon.brevbaker.api.model.Telefonnummer
 
 class AdresseService(
@@ -54,7 +54,7 @@ class AdresseService(
         }
 
     private suspend fun hentSaksbehandlerNavn(navn: String) =
-        if (navn == Vedtaksloesning.PESYS.name) {
+        if (navn == Fagsaksystem.EY.navn) {
             navn
         } else {
             navansattKlient.hentSaksbehandlerInfo(navn).fornavnEtternavn

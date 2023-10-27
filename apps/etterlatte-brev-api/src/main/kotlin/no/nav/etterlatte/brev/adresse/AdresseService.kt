@@ -5,6 +5,7 @@ import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.brev.adresse.navansatt.NavansattKlient
 import no.nav.etterlatte.brev.behandling.ForenkletVedtak
 import no.nav.etterlatte.brev.model.Mottaker
+import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.pensjon.brevbaker.api.model.Telefonnummer
@@ -28,10 +29,7 @@ class AdresseService(
         saksbehandlerIdent: String,
     ): Avsender =
         coroutineScope {
-            val saksbehandlerNavn =
-                async {
-                    navansattKlient.hentSaksbehandlerInfo(saksbehandlerIdent).fornavnEtternavn
-                }
+            val saksbehandlerNavn = async { hentSaksbehandlerNavn(saksbehandlerIdent) }
 
             val saksbehandlerEnhet = async { hentEnhet(sak.enhet) }
 
@@ -40,10 +38,7 @@ class AdresseService(
 
     suspend fun hentAvsender(vedtak: ForenkletVedtak): Avsender =
         coroutineScope {
-            val saksbehandlerNavn =
-                async {
-                    navansattKlient.hentSaksbehandlerInfo(vedtak.saksbehandlerIdent).fornavnEtternavn
-                }
+            val saksbehandlerNavn = async { hentSaksbehandlerNavn(vedtak.saksbehandlerIdent) }
 
             val saksbehandlerEnhet =
                 async {
@@ -52,10 +47,17 @@ class AdresseService(
 
             val attestantNavn =
                 async {
-                    vedtak.attestantIdent?.let { navansattKlient.hentSaksbehandlerInfo(it).fornavnEtternavn }
+                    vedtak.attestantIdent?.let { hentSaksbehandlerNavn(it) }
                 }
 
             mapTilAvsender(saksbehandlerEnhet.await(), saksbehandlerNavn.await(), attestantNavn.await())
+        }
+
+    private suspend fun hentSaksbehandlerNavn(navn: String) =
+        if (navn == Vedtaksloesning.PESYS.name) {
+            navn
+        } else {
+            navansattKlient.hentSaksbehandlerInfo(navn).fornavnEtternavn
         }
 
     private suspend fun hentEnhet(navEnhetNr: String): Norg2Enhet = norg2Klient.hentEnhet(navEnhetNr)

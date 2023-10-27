@@ -26,7 +26,7 @@ export const OpprettNyRevurdering = ({
       return setError('Du må velge en revurdering')
     }
     opprettRevurdering(
-      { sakId: sakId, aarsak: valgtRevurdering, fritekstAarsak: fritekstgrunn },
+      { sakId: sakId, aarsak: valgtRevurdering, fritekstAarsak: fritekstgrunn ? fritekstgrunn : null },
       (behandlingId: string) => {
         navigate(`/behandling/${behandlingId}/`)
       },

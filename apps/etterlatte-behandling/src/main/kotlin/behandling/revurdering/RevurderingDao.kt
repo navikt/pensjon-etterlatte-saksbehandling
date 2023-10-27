@@ -52,7 +52,7 @@ class RevurderingDao(private val connection: () -> Connection) {
 
     fun lagreRevurderingInfo(
         id: UUID,
-        revurderingMedBegrunnelse: RevurderingMedBegrunnelse,
+        revurderingInfoMedBegrunnelse: RevurderingInfoMedBegrunnelse,
         kilde: Grunnlagsopplysning.Kilde,
     ) {
         connection().prepareStatement(
@@ -62,14 +62,14 @@ class RevurderingDao(private val connection: () -> Connection) {
             """.trimIndent(),
         ).let { statement ->
             statement.setObject(1, id)
-            statement.setJsonb(2, revurderingMedBegrunnelse.revurderingInfo)
+            statement.setJsonb(2, revurderingInfoMedBegrunnelse.revurderingInfo)
             statement.setJsonb(3, kilde)
-            statement.stringOrNull(4, revurderingMedBegrunnelse.begrunnelse)
+            statement.stringOrNull(4, revurderingInfoMedBegrunnelse.begrunnelse)
             statement.executeUpdate()
         }
     }
 
-    private fun hentRevurderingInfoForBehandling(id: UUID): RevurderingMedBegrunnelse? =
+    private fun hentRevurderingInfoForBehandling(id: UUID): RevurderingInfoMedBegrunnelse? =
         connection().prepareStatement(
             """
             SELECT info, begrunnelse FROM revurdering_info 
@@ -79,7 +79,7 @@ class RevurderingDao(private val connection: () -> Connection) {
             statement.setObject(1, id)
             statement.executeQuery()
                 .singleOrNull {
-                    RevurderingMedBegrunnelse(
+                    RevurderingInfoMedBegrunnelse(
                         getString("info")?.let { objectMapper.readValue(it) },
                         getString("begrunnelse"),
                     )

@@ -1,5 +1,4 @@
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
-import { LandMedDokumenter } from '~components/behandling/revurderingsoversikt/sluttbehandlingUtland/SEDLandMedDokumenter'
 
 export const SOESKENJUSTERING_GRUNNER = [
   'NYTT_SOESKEN',
@@ -49,7 +48,18 @@ export interface InstitusjonsoppholdInfo {
   utskrevetdato: Date | undefined
 }
 
-export interface SluttbehandlingUtland {
+export interface MottattDokument {
+  dokumenttype?: string
+  dato?: string
+  kommentar?: string
+}
+
+export interface LandMedDokumenter {
+  landIsoKode?: string
+  dokumenter: MottattDokument[]
+}
+
+export interface SluttbehandlingUtlandInfo {
   type: 'SLUTTBEHANDLING_UTLAND'
   landMedDokumenter: LandMedDokumenter[]
 }
@@ -67,7 +77,13 @@ export type RevurderingInfo =
   | OmgjoeringAvFarskapInfo
   | FengselsoppholdInfo
   | InstitusjonsoppholdInfo
-  | SluttbehandlingUtland
+  | SluttbehandlingUtlandInfo
+
+export interface RevurderinginfoMedIdOgOpprettet {
+  id: string
+  opprettetDato: string
+  revurderingsinfo: RevurderingInfo
+}
 
 export interface RevurderingMedBegrunnelse {
   revurderingInfo: RevurderingInfo

@@ -1,6 +1,6 @@
 package no.nav.etterlatte.behandling.domain
 
-import no.nav.etterlatte.behandling.revurdering.RevurderingMedBegrunnelse
+import no.nav.etterlatte.behandling.revurdering.RevurderingInfoMedBegrunnelse
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
@@ -28,7 +28,7 @@ data class ManuellRevurdering(
     override val utenlandstilsnitt: Utenlandstilsnitt?,
     override val boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet?,
     override val revurderingsaarsak: Revurderingaarsak,
-    override val revurderingInfo: RevurderingMedBegrunnelse?,
+    override val revurderingInfo: RevurderingInfoMedBegrunnelse?,
     override val kilde: Vedtaksloesning,
     override val begrunnelse: String?,
 ) : Revurdering(

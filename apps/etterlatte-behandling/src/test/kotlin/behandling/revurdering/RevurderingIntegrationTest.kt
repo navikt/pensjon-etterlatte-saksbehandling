@@ -234,7 +234,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
         inTransaction {
             revurderingService.lagreRevurderingInfo(
                 revurdering!!.id,
-                RevurderingMedBegrunnelse(revurderingInfo, "abc"),
+                RevurderingInfoMedBegrunnelse(revurderingInfo, "abc"),
                 "saksbehandler",
             )
         }
@@ -252,7 +252,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
         inTransaction {
             revurderingService.lagreRevurderingInfo(
                 revurdering!!.id,
-                RevurderingMedBegrunnelse(nyRevurderingInfo, null),
+                RevurderingInfoMedBegrunnelse(nyRevurderingInfo, null),
                 "saksbehandler",
             )
         }
@@ -273,7 +273,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
             inTransaction {
                 revurderingService.lagreRevurderingInfo(
                     revurdering!!.id,
-                    RevurderingMedBegrunnelse(revurderingInfo, null),
+                    RevurderingInfoMedBegrunnelse(revurderingInfo, null),
                     "saksbehandler",
                 )
             }

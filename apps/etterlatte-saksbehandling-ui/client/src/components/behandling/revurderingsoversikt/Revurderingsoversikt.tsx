@@ -38,6 +38,7 @@ import { OmgjoeringAvFarskap } from '~components/behandling/revurderingsoversikt
 import { RevurderingAnnen } from '~components/behandling/revurderingsoversikt/RevurderingAnnen'
 import SluttbehandlingUtland from '~components/behandling/revurderingsoversikt/sluttbehandlingUtland/SluttbehandlingUtland'
 import { Soeknadsdato } from '~components/behandling/soeknadsoversikt/soeknadoversikt/Soeknadsdato'
+import { SluttbehandlingUtlandInfo } from '~shared/types/RevurderingInfo'
 
 const revurderingsaarsakTilTekst = (revurderingsaarsak: Revurderingaarsak): string =>
   tekstRevurderingsaarsak[revurderingsaarsak]
@@ -121,7 +122,11 @@ export const Revurderingsoversikt = (props: { behandling: IDetaljertBehandling }
           </>
         )}
         {behandling.revurderingsaarsak === Revurderingaarsak.SLUTTBEHANDLING_UTLAND && (
-          <SluttbehandlingUtland sakId={behandling.sakId} revurderingId={behandling.id} />
+          <SluttbehandlingUtland
+            sakId={behandling.sakId}
+            revurderingId={behandling.id}
+            sluttbehandlingUtland={behandling.revurderinginfo?.revurderingInfo as SluttbehandlingUtlandInfo | undefined}
+          />
         )}
         {behandling.revurderingsaarsak === Revurderingaarsak.SOESKENJUSTERING && (
           <GrunnForSoeskenjustering behandling={behandling} />

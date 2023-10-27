@@ -304,7 +304,7 @@ class RevurderingService(
         ).let { opprettBehandling ->
             behandlingDao.opprettBehandling(opprettBehandling)
 
-            fritekstAarsak?.let {
+            if (!fritekstAarsak.isNullOrEmpty()) {
                 lagreRevurderingsaarsakFritekst(fritekstAarsak, opprettBehandling.id, saksbehandlerIdent)
             }
 

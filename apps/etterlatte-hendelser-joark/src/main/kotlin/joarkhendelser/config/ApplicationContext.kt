@@ -19,12 +19,6 @@ class ApplicationContext(env: Map<String, String> = System.getenv()) {
             azureAppScope = config.getString("behandling.azure.scope"),
         )
 
-    private val behandlingKlient =
-        BehandlingKlient(
-            httpClient = behandlingHttpClient,
-            url = config.getString("etterlatte.behandling.url"),
-        )
-
     private val joarkHendelseHandler =
         JoarkHendelseHandler(
             BehandlingKlient(

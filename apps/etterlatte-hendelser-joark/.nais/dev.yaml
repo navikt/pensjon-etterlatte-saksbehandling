@@ -28,9 +28,8 @@ spec:
     max: 1
     min: 1
   env:
-    # TODO: Burde reset policy være earliest?
     - name: KAFKA_RESET_POLICY
-      value: latest
+      value: earliest
     - name: JOARK_HENDELSE_GROUP_ID
       value: etterlatte-v1
     - name: KAFKA_JOARK_HENDELSE_TOPIC

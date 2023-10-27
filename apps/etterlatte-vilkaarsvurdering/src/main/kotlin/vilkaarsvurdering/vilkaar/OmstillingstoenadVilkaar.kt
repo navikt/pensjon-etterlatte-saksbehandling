@@ -10,7 +10,6 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaar
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarOpplysningType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
 import no.nav.etterlatte.vilkaarsvurdering.VilkaarFeatureToggle
-import no.nav.etterlatte.vilkaarsvurdering.vilkaar.BarnepensjonVilkaar.toVilkaarsgrunnlag
 
 object OmstillingstoenadVilkaar {
     fun inngangsvilkaar(

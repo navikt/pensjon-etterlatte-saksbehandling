@@ -44,7 +44,7 @@ class GyldigSoeknadService(private val pdlClient: PdlClient) {
         saktype: SakType,
     ): GyldighetsResultat {
         val soekerPdl = hentSoekerFraPdl(persongalleri.soeker, saktype)
-        val familieRelasjonSoeker = soekerPdl?.familieRelasjon
+        val familieRelasjonSoeker = soekerPdl.familieRelasjon
         val personinfoInnsender = persongalleri.innsender?.let { hentNavnFraPdl(it, saktype) }
         val personinfoGjenlevende = persongalleri.gjenlevende.map { hentNavnFraPdl(it, saktype) }
 
@@ -85,14 +85,14 @@ class GyldigSoeknadService(private val pdlClient: PdlClient) {
     private fun hentSoekerFraPdl(
         fnrSoeker: String,
         saktype: SakType,
-    ): Person? {
+    ): Person {
         return pdlClient.hentPerson(fnrSoeker, PersonRolle.BARN, saktype)
     }
 
     private fun hentNavnFraPdl(
         fnr: String,
         saktype: SakType,
-    ): PersonInfoGyldighet? {
+    ): PersonInfoGyldighet {
         val person = pdlClient.hentPerson(fnr, PersonRolle.GJENLEVENDE, saktype)
         val navn = person.let { it.fornavn + " " + it.etternavn }
         return PersonInfoGyldighet(navn, fnr)
@@ -193,8 +193,6 @@ class GyldigSoeknadService(private val pdlClient: PdlClient) {
     private fun hentVurdering(resultat: List<VurderingsResultat>): VurderingsResultat {
         return if (resultat.all { it == VurderingsResultat.OPPFYLT }) {
             VurderingsResultat.OPPFYLT
-        } else if (resultat.any { it == VurderingsResultat.IKKE_OPPFYLT }) {
-            VurderingsResultat.IKKE_OPPFYLT
         } else {
             VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
         }

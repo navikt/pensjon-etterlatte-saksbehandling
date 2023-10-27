@@ -76,11 +76,17 @@ spec:
     - name: TJENESTEPENSJON_SCOPE
       value: api://prod-fss.pensjonsamhandling.tp/.default
   accessPolicy:
-    inbound:
-      rules:
-        - application: etterlatte-krakend
     outbound:
       rules:
         - application: etterlatte-vedtaksvurdering
       external:
         - host: tp-api.prod-fss-pub.nais.io
+    inbound:
+      rules:
+        - application: etterlatte-krakend
+        - application: pensjon-pen
+          namespace: pensjondeployer
+          cluster: prod-fss
+          permissions:
+            roles:
+              - les-oms-vedtak

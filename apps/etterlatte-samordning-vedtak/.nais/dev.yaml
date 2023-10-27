@@ -78,11 +78,29 @@ spec:
     - name: TJENESTEPENSJON_SCOPE
       value: api://dev-fss.pensjonsamhandling.tp-q2/.default
   accessPolicy:
-    inbound:
-      rules:
-        - application: etterlatte-krakend
     outbound:
       rules:
         - application: etterlatte-vedtaksvurdering
       external:
         - host: tp-api-q2.dev-fss-pub.nais.io
+    inbound:
+      rules:
+        - application: etterlatte-krakend
+        - application: pensjon-pen-q1
+          namespace: pensjon-q2
+          cluster: dev-fss
+          permissions:
+            roles:
+              - les-oms-vedtak
+        - application: pensjon-pen-q2
+          namespace: pensjon-q2
+          cluster: dev-fss
+          permissions:
+            roles:
+              - les-oms-vedtak
+        - application: ida
+          namespace: traktor
+          cluster: prod-fss
+          permissions:
+            roles:
+              - les-oms-vedtak

@@ -29,7 +29,12 @@ dependencies {
     implementation(libs.kafka.avro)
     implementation(libs.kafka.avroserializer)
 
+    implementation(libs.teamdokumenthandtering.avroschemas)
+
     testImplementation(libs.kafka.embeddedenv)
     testImplementation(libs.ktor2.servertests)
     testImplementation(libs.ktor2.clientmock)
 }
+
+tasks.named("compileKotlin").configure { dependsOn(":apps:etterlatte-hendelser-joark:generateAvroJava") }
+tasks.named("compileTestKotlin").configure { dependsOn(":apps:etterlatte-hendelser-joark:generateAvroJava") }

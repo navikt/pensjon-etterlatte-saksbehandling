@@ -2,11 +2,6 @@ package no.nav.etterlatte.joarkhendelser.joark
 
 import io.ktor.http.HttpStatusCode
 
-data class HentJournalposterResult(
-    val journalposter: List<Journalpost> = emptyList(),
-    val error: Error? = null,
-)
-
 data class HentJournalpostResult(
     val journalpost: Journalpost? = null,
     val error: Error? = null,
@@ -17,11 +12,6 @@ data class Error(
     val message: String,
 )
 
-data class JournalpostListeResponse(
-    val data: DokumentoversiktBruker? = null,
-    val errors: List<JournalpostResponseError>? = null,
-)
-
 data class JournalpostResponse(
     val data: ResponseData? = null,
     val errors: List<JournalpostResponseError>? = null,
@@ -30,14 +20,6 @@ data class JournalpostResponse(
         val journalpost: Journalpost? = null,
     )
 }
-
-data class DokumentoversiktBruker(
-    val dokumentoversiktBruker: Journalposter,
-)
-
-data class Journalposter(
-    val journalposter: List<Journalpost>,
-)
 
 data class JournalpostResponseError(
     val message: String?,
@@ -63,11 +45,12 @@ data class GraphqlRequest(
 )
 
 data class JournalpostVariables(
-    val journalpostId: String,
+    val journalpostId: Long,
 )
 
 data class Journalpost(
     val journalpostId: String,
+    val bruker: Bruker?,
     val tittel: String,
     val journalposttype: String,
     val journalstatus: String,
@@ -75,7 +58,20 @@ data class Journalpost(
     val avsenderMottaker: AvsenderMottaker,
     val kanal: String,
     val datoOpprettet: String,
+) {
+    fun erFerdigstilt(): Boolean = journalstatus == "FERDIGSTILT"
+}
+
+data class Bruker(
+    val id: String,
+    val type: BrukerIdType,
 )
+
+enum class BrukerIdType {
+    AKTOERID,
+    FNR,
+    ORGNR,
+}
 
 data class Dokumenter(
     val dokumentInfoId: String,

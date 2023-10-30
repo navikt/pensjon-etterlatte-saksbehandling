@@ -7,6 +7,7 @@ import io.ktor.client.request.accept
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
+import io.ktor.http.contentType
 import io.ktor.http.isSuccess
 import no.nav.etterlatte.joarkhendelser.joark.GraphqlRequest
 import no.nav.etterlatte.joarkhendelser.joark.HentJournalpostResult
@@ -14,14 +15,13 @@ import no.nav.etterlatte.joarkhendelser.joark.JournalpostResponse
 import no.nav.etterlatte.joarkhendelser.joark.JournalpostVariables
 import org.slf4j.LoggerFactory
 
-class SafClient(
+class SafKlient(
     private val httpClient: HttpClient,
     private val baseUrl: String,
-    private val safScope: String,
 ) {
-    private val logger = LoggerFactory.getLogger(SafClient::class.java)
+    private val logger = LoggerFactory.getLogger(SafKlient::class.java)
 
-    suspend fun hentJournalpost(id: String): HentJournalpostResult {
+    suspend fun hentJournalpost(id: Long): HentJournalpostResult {
         logger.info("Forsøker å hente journalpost med id=$id")
 
         val request = opprettHentJournalpostRequest(id)
@@ -29,6 +29,7 @@ class SafClient(
         val res =
             httpClient.post("$baseUrl/graphql") {
                 accept(ContentType.Application.Json)
+                contentType(ContentType.Application.Json)
                 setBody(request)
             }
 
@@ -41,7 +42,7 @@ class SafClient(
         }
     }
 
-    private fun opprettHentJournalpostRequest(journalpostId: String): GraphqlRequest {
+    private fun opprettHentJournalpostRequest(journalpostId: Long): GraphqlRequest {
         val query =
             javaClass.getResource("/graphql/journalpost.id.graphql")!!
                 .readText()

@@ -24,7 +24,7 @@ fun Route.beregning(
         get("/{$BEHANDLINGID_CALL_PARAMETER}") {
             withBehandlingId(behandlingKlient) {
                 logger.info("Henter beregning med behandlingId=$it")
-                val beregning = beregningService.hentBeregning(it)
+                val beregning = beregningService.hentBeregning(it, brukerTokenInfo)
                 when (beregning) {
                     null -> call.response.status(HttpStatusCode.NotFound)
                     else -> call.respond(beregning.toDTO())

@@ -17,6 +17,7 @@ data class BeregningDTO(
     val beregningsperioder: List<Beregningsperiode>,
     val beregnetDato: Tidspunkt,
     val grunnlagMetadata: Metadata,
+    val overstyrBeregning: OverstyrBeregningDTO?,
 )
 
 data class Beregningsperiode(
@@ -35,6 +36,10 @@ data class Beregningsperiode(
     val regelResultat: JsonNode? = null,
     val regelVersjon: String? = null,
     val kilde: Grunnlagsopplysning.RegelKilde? = null,
+)
+
+data class OverstyrBeregningDTO(
+    val beskrivelse: String,
 )
 
 data class AvkortingDto(

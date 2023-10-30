@@ -274,6 +274,7 @@ class BeregnBarnepensjonService(
         beregningsperioder = beregningsperioder,
         beregnetDato = Tidspunkt.now(),
         grunnlagMetadata = grunnlagMetadata,
+        overstyrBeregning = null,
     )
 
     private fun opprettBeregningsgrunnlag(

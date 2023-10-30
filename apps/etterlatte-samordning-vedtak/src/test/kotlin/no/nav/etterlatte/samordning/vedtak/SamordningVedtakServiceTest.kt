@@ -182,6 +182,7 @@ fun beregning(trygdetid: Int = 40) =
                     trygdetid = trygdetid,
                 ),
             ),
+        overstyrBeregning = null,
     )
 
 fun avkorting(vararg perioder: Periode) =

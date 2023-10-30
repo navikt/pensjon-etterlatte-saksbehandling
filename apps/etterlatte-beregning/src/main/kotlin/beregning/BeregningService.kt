@@ -20,10 +20,10 @@ class BeregningService(
 ) {
     private val logger = LoggerFactory.getLogger(BeregningService::class.java)
 
-    fun hentBeregning(behandlingId: UUID): Beregning? {
-        logger.info("Henter beregning for behandlingId=$behandlingId")
-        return beregningRepository.hent(behandlingId)
-    }
+    suspend fun hentBeregning(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) = hentBeregning(behandlingId).berikMedOverstyrBeregning(brukerTokenInfo)
 
     fun hentBeregningNonnull(behandlingId: UUID): Beregning {
         return hentBeregning(behandlingId) ?: throw Exception("Mangler beregning for behandlingId=$behandlingId")
@@ -46,7 +46,7 @@ class BeregningService(
 
             val lagretBeregning = beregningRepository.lagreEllerOppdaterBeregning(beregning)
             behandlingKlient.beregn(behandlingId, brukerTokenInfo, commit = true)
-            return lagretBeregning
+            return lagretBeregning.berikMedOverstyrBeregning(brukerTokenInfo) ?: lagretBeregning
         } else {
             throw IllegalStateException("Kan ikke beregne behandlingId=$behandlingId, behandling er i feil tilstand")
         }
@@ -72,6 +72,19 @@ class BeregningService(
             }
         }
     }
+
+    private fun hentBeregning(behandlingId: UUID): Beregning? {
+        logger.info("Henter beregning for behandlingId=$behandlingId")
+
+        return beregningRepository.hent(behandlingId)
+    }
+
+    private suspend fun Beregning?.berikMedOverstyrBeregning(brukerTokenInfo: BrukerTokenInfo) =
+        this?.let { beregning ->
+            val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
+
+            beregning.copy(overstyrBeregning = beregningRepository.hentOverstyrBeregning(behandling.sak))
+        }
 
     private suspend fun kopierBeregningsgrunnlagOgOpprettBeregningBarnepensjon(
         behandling: DetaljertBehandling,

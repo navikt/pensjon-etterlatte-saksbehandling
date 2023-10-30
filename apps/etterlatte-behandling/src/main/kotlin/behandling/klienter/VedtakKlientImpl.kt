@@ -68,7 +68,7 @@ class VedtakKlientImpl(config: Config, httpClient: HttpClient) : VedtakKlient {
                     resource =
                         Resource(
                             clientId = clientId,
-                            url = "$resourceUrl/tilbakekreving/lagre-vedtak",
+                            url = "$resourceUrl/tilbakekreving/${tilbakekrevingBehandling.id}/lagre-vedtak",
                         ),
                     brukerTokenInfo = brukerTokenInfo,
                     postBody =
@@ -104,7 +104,7 @@ class VedtakKlientImpl(config: Config, httpClient: HttpClient) : VedtakKlient {
                     resource =
                         Resource(
                             clientId = clientId,
-                            url = "$resourceUrl/tilbakekreving/fatt-vedtak",
+                            url = "$resourceUrl/tilbakekreving/$tilbakekrevingId/fatt-vedtak",
                         ),
                     brukerTokenInfo = brukerTokenInfo,
                     postBody =
@@ -138,7 +138,7 @@ class VedtakKlientImpl(config: Config, httpClient: HttpClient) : VedtakKlient {
                     resource =
                         Resource(
                             clientId = clientId,
-                            url = "$resourceUrl/tilbakekreving/attester-vedtak",
+                            url = "$resourceUrl/tilbakekreving/$tilbakekrevingId/attester-vedtak",
                         ),
                     brukerTokenInfo = brukerTokenInfo,
                     postBody =
@@ -171,7 +171,7 @@ class VedtakKlientImpl(config: Config, httpClient: HttpClient) : VedtakKlient {
                     resource =
                         Resource(
                             clientId = clientId,
-                            url = "$resourceUrl/tilbakekreving/underkjenn-vedtak",
+                            url = "$resourceUrl/tilbakekreving/$tilbakekrevingId/underkjenn-vedtak",
                         ),
                     brukerTokenInfo = brukerTokenInfo,
                     postBody = tilbakekrevingId,

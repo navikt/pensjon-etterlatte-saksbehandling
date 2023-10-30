@@ -75,7 +75,9 @@ const KravpakkeUtland = (props: { utlandsBehandling: Generellbehandling & { innh
   const [landAlleredeValgt, setLandAlleredeValgt] = useState<boolean>(false)
   const defaultDokumentState: DokumentSendtMedDato[] = [{ dokumenttype: '', sendt: false, dato: '' }]
 
-  const [dokumenter, setDokumenter] = useState<DokumentSendtMedDato[]>(defaultDokumentState) // TODO: rett opp her etter backend er fikset
+  const [dokumenter, setDokumenter] = useState<DokumentSendtMedDato[]>(
+    utlandsBehandling.innhold.dokumenter ?? defaultDokumentState
+  )
   const [errorLand, setErrLand] = useState<boolean>(false)
   const [nyttBrevStatus, opprettBrev] = useApiCall(opprettBrevForSak)
 

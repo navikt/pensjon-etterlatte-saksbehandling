@@ -1,7 +1,6 @@
 package no.nav.etterlatte.behandling.generellbehandling
 
 import no.nav.etterlatte.libs.common.generellbehandling.DokumentMedSendtDato
-import no.nav.etterlatte.libs.common.generellbehandling.Dokumenter
 import no.nav.etterlatte.libs.common.generellbehandling.GenerellBehandling
 import no.nav.etterlatte.libs.common.generellbehandling.Innhold
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -91,13 +90,7 @@ internal class GenerellBehandlingDaoTest {
                 GenerellBehandling.GenerellBehandlingType.KRAVPAKKE_UTLAND,
                 Innhold.KravpakkeUtland(
                     listOf("AFG"),
-                    Dokumenter(
-                        DokumentMedSendtDato(true, LocalDate.now()),
-                        DokumentMedSendtDato(true, LocalDate.now()),
-                        DokumentMedSendtDato(true, LocalDate.now()),
-                        DokumentMedSendtDato(true, LocalDate.now()),
-                        DokumentMedSendtDato(true, LocalDate.now()),
-                    ),
+                    listOf(DokumentMedSendtDato("P2000", true, LocalDate.now())),
                     "2grwg2",
                     "rita",
                 ),
@@ -120,13 +113,7 @@ internal class GenerellBehandlingDaoTest {
                 GenerellBehandling.GenerellBehandlingType.KRAVPAKKE_UTLAND,
                 Innhold.KravpakkeUtland(
                     listOf("AFG"),
-                    Dokumenter(
-                        DokumentMedSendtDato(true, LocalDate.now()),
-                        DokumentMedSendtDato(true, LocalDate.now()),
-                        DokumentMedSendtDato(true, LocalDate.now()),
-                        DokumentMedSendtDato(true, LocalDate.now()),
-                        DokumentMedSendtDato(true, LocalDate.now()),
-                    ),
+                    listOf(DokumentMedSendtDato("P2000", true, LocalDate.now())),
                     "2grwg2",
                     "rita",
                 ),

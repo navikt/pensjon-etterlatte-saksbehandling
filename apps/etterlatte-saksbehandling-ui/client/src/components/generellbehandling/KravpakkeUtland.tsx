@@ -1,4 +1,4 @@
-import { Dokumenter, Generellbehandling, Status, KravpakkeUtland } from '~shared/types/Generellbehandling'
+import { Generellbehandling, Status, KravpakkeUtland, DokumentSendtMedDato } from '~shared/types/Generellbehandling'
 import { Content, ContentHeader, GridContainer, MainContent } from '~shared/styled'
 import { HeadingWrapper, InfoWrapper } from '~components/behandling/soeknadsoversikt/styled'
 import {
@@ -73,14 +73,9 @@ const KravpakkeUtland = (props: { utlandsBehandling: Generellbehandling & { innh
   const [valgtLandIsoKode, setValgtLandIsoKode] = useState<string>('')
   const [valgteLandIsoKode, setvalgteLandIsoKode] = useState<string[]>(innhold?.landIsoKode ?? [])
   const [landAlleredeValgt, setLandAlleredeValgt] = useState<boolean>(false)
-  const defaultDokumentState: Dokumenter = {
-    p2100: { sendt: false },
-    p3000: { sendt: false },
-    p5000: { sendt: false },
-    p4000: { sendt: false },
-    p6000: { sendt: false },
-  }
-  const [dokumenter, setDokumenter] = useState<Dokumenter>(innhold?.dokumenter ?? defaultDokumentState)
+  const defaultDokumentState: DokumentSendtMedDato[] = [{ dokumenttype: '', sendt: false, dato: '' }]
+
+  const [dokumenter, setDokumenter] = useState<DokumentSendtMedDato[]>(defaultDokumentState) // TODO: rett opp her etter backend er fikset
   const [errorLand, setErrLand] = useState<boolean>(false)
   const [nyttBrevStatus, opprettBrev] = useApiCall(opprettBrevForSak)
 
@@ -285,152 +280,80 @@ const KravpakkeUtland = (props: { utlandsBehandling: Generellbehandling & { innh
                 readOnly={!redigerbar}
               />
             </div>
+
             <StandardBreddeTabell>
               <Table.Header>
                 <Table.Row>
-                  <Table.HeaderCell scope="col">Dokumenter fra RINA</Table.HeaderCell>
+                  <Table.HeaderCell scope="col">Dokumenttype(feks P2000)</Table.HeaderCell>
                   <Table.HeaderCell scope="col">Sendt</Table.HeaderCell>
                   <Table.HeaderCell scope="col">Dato sendt</Table.HeaderCell>
                 </Table.Row>
               </Table.Header>
               <Table.Body>
-                <Table.Row>
-                  <Table.HeaderCell scope="row">P2100</Table.HeaderCell>
-                  <Table.DataCell>
-                    <Checkbox
-                      readOnly={!redigerbar}
-                      checked={dokumenter.p2100.sendt}
-                      onChange={(e) =>
-                        setDokumenter({ ...dokumenter, p2100: { ...dokumenter.p2100, sendt: e.target.checked } })
-                      }
-                    >
-                      <></>
-                    </Checkbox>
-                  </Table.DataCell>
-                  <Table.DataCell>
-                    <DatoVelger
-                      disabled={!redigerbar}
-                      label=""
-                      value={dokumenter.p2100.dato ? new Date(dokumenter.p2100.dato) : undefined}
-                      onChange={(date) =>
-                        setDokumenter({
-                          ...dokumenter,
-                          p2100: { ...dokumenter.p2100, dato: formatDateToLocaleDateOrEmptyString(date) },
-                        })
-                      }
-                    />
-                  </Table.DataCell>
-                </Table.Row>
-                <Table.Row>
-                  <Table.HeaderCell scope="row">P5000</Table.HeaderCell>
-                  <Table.DataCell>
-                    <Checkbox
-                      readOnly={!redigerbar}
-                      checked={dokumenter.p5000.sendt}
-                      onChange={(e) =>
-                        setDokumenter({ ...dokumenter, p5000: { ...dokumenter.p5000, sendt: e.target.checked } })
-                      }
-                    >
-                      <></>
-                    </Checkbox>
-                  </Table.DataCell>
-                  <Table.DataCell>
-                    <DatoVelger
-                      disabled={!redigerbar}
-                      label=""
-                      value={dokumenter.p5000.dato ? new Date(dokumenter.p5000.dato) : undefined}
-                      onChange={(date) =>
-                        setDokumenter({
-                          ...dokumenter,
-                          p5000: { ...dokumenter.p5000, dato: formatDateToLocaleDateOrEmptyString(date) },
-                        })
-                      }
-                    />
-                  </Table.DataCell>
-                </Table.Row>
-                <Table.Row>
-                  <Table.HeaderCell scope="row">P4000</Table.HeaderCell>
-                  <Table.DataCell>
-                    <Checkbox
-                      readOnly={!redigerbar}
-                      checked={dokumenter.p4000.sendt}
-                      onChange={(e) =>
-                        setDokumenter({ ...dokumenter, p4000: { ...dokumenter.p4000, sendt: e.target.checked } })
-                      }
-                    >
-                      <></>
-                    </Checkbox>
-                  </Table.DataCell>
-                  <Table.DataCell>
-                    <DatoVelger
-                      disabled={!redigerbar}
-                      label=""
-                      value={dokumenter.p4000.dato ? new Date(dokumenter.p4000.dato) : undefined}
-                      onChange={(date) =>
-                        setDokumenter({
-                          ...dokumenter,
-                          p4000: { ...dokumenter.p4000, dato: formatDateToLocaleDateOrEmptyString(date) },
-                        })
-                      }
-                    />
-                  </Table.DataCell>
-                </Table.Row>
-                <Table.Row>
-                  <Table.HeaderCell scope="row">P6000</Table.HeaderCell>
-                  <Table.DataCell>
-                    <Checkbox
-                      readOnly={!redigerbar}
-                      checked={dokumenter.p6000.sendt}
-                      onChange={(e) =>
-                        setDokumenter({ ...dokumenter, p6000: { ...dokumenter.p6000, sendt: e.target.checked } })
-                      }
-                    >
-                      <></>
-                    </Checkbox>
-                  </Table.DataCell>
-                  <Table.DataCell>
-                    <DatoVelger
-                      disabled={!redigerbar}
-                      label=""
-                      value={dokumenter.p6000.dato ? new Date(dokumenter.p6000.dato) : undefined}
-                      onChange={(date) =>
-                        setDokumenter({
-                          ...dokumenter,
-                          p6000: { ...dokumenter.p6000, dato: formatDateToLocaleDateOrEmptyString(date) },
-                        })
-                      }
-                    />
-                  </Table.DataCell>
-                </Table.Row>
-                <Table.Row>
-                  <Table.HeaderCell scope="row">P3000</Table.HeaderCell>
-                  <Table.DataCell>
-                    <Checkbox
-                      readOnly={!redigerbar}
-                      checked={dokumenter.p3000.sendt}
-                      onChange={(e) =>
-                        setDokumenter({ ...dokumenter, p3000: { ...dokumenter.p3000, sendt: e.target.checked } })
-                      }
-                    >
-                      <></>
-                    </Checkbox>
-                  </Table.DataCell>
-                  <Table.DataCell>
-                    <DatoVelger
-                      disabled={utlandsBehandling.status !== Status.OPPRETTET}
-                      label=""
-                      value={dokumenter.p3000.dato ? new Date(dokumenter.p3000.dato) : undefined}
-                      onChange={(date) =>
-                        setDokumenter({
-                          ...dokumenter,
-                          p3000: { ...dokumenter.p3000, dato: formatDateToLocaleDateOrEmptyString(date) },
-                        })
-                      }
-                    />
-                  </Table.DataCell>
-                </Table.Row>
+                {dokumenter.map((dokument, idx) => {
+                  return (
+                    <Table.Row key={idx}>
+                      <Table.DataCell>
+                        <TextField
+                          disabled={!redigerbar}
+                          label={dokument.dokumenttype}
+                          size="medium"
+                          style={{ maxWidth: '16rem' }}
+                          onChange={(e) => {
+                            const oppdaterteDocType = dokumenter.map((doc, i) => {
+                              if (idx === i) {
+                                return { ...doc, dokumenttype: e.target.value }
+                              }
+                              return doc
+                            })
+                            setDokumenter(oppdaterteDocType)
+                          }}
+                        />
+                      </Table.DataCell>
+                      <Table.DataCell>
+                        <Checkbox
+                          readOnly={!redigerbar}
+                          checked={dokument.sendt}
+                          onChange={(e) => {
+                            const oppdaterteDocSendt = dokumenter.map((doc, i) => {
+                              if (idx === i) {
+                                return { ...doc, sendt: e.target.checked }
+                              }
+                              return doc
+                            })
+                            setDokumenter(oppdaterteDocSendt)
+                          }}
+                        >
+                          <></>
+                        </Checkbox>
+                      </Table.DataCell>
+                      <Table.DataCell>
+                        <DatoVelger
+                          disabled={!redigerbar}
+                          label=""
+                          value={dokument.dato ? new Date(dokument.dato) : undefined}
+                          onChange={(date) => {
+                            const oppdaterteDocDato = dokumenter.map((doc, i) => {
+                              if (idx === i) {
+                                return { ...doc, dato: formatDateToLocaleDateOrEmptyString(date) }
+                              }
+                              return doc
+                            })
+                            setDokumenter(oppdaterteDocDato)
+                          }}
+                        />
+                      </Table.DataCell>
+                    </Table.Row>
+                  )
+                })}
               </Table.Body>
             </StandardBreddeTabell>
+            <Button
+              style={{ marginTop: '1.5rem' }}
+              onClick={() => setDokumenter((dokumenter) => dokumenter.concat(defaultDokumentState))}
+            >
+              Legg til dokument
+            </Button>
             <div style={{ marginTop: '3.5rem', marginBottom: '3rem' }}>
               <Heading size="medium" level="3">
                 Varsling til bruker
@@ -474,9 +397,16 @@ const KravpakkeUtland = (props: { utlandsBehandling: Generellbehandling & { innh
                   >
                     Lagre opplysninger
                   </Button>
-                  <Button onClick={() => sendTilAttesteringWrapper()} loading={isPending(sendTilAttesteringStatus)}>
+                  <Button
+                    onClick={() => sendTilAttesteringWrapper()}
+                    disabled={isFailure(sendTilAttesteringStatus)}
+                    loading={isPending(sendTilAttesteringStatus)}
+                  >
                     Send til attestering
                   </Button>
+                  {isFailure(sendTilAttesteringStatus) && (
+                    <ApiErrorAlert>Klarte ikke å attestere kravpakke utland. Prøv igjen senere.</ApiErrorAlert>
+                  )}
                 </>
               )}
               {utlandsBehandling.status === Status.FATTET && (

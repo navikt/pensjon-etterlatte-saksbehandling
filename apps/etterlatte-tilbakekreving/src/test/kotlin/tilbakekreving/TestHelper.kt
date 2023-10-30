@@ -63,7 +63,7 @@ fun tilbakekrevingsvedtak(vedtakId: Long = 1) =
                 ),
             ),
         aarsak = TilbakekrevingAarsak.DODSFALL,
-        hjemmel = TilbakekrevingHjemmel.TJUETO_FEMTEN_SEKS.name,
+        hjemmel = TilbakekrevingHjemmel.TJUETO_FEMTEN_SEKS,
         kravgrunnlagId = "1",
         kontrollfelt = "2023-09-19-10.01.03.842916",
     )

@@ -69,13 +69,7 @@ class TilbakekrevingKlient(
                     datoVedtakFagsystem = vedtak.fattetVedtak.dato.toXMLDate()
                     saksbehId = vedtak.fattetVedtak.saksbehandler
                     enhetAnsvarlig = ANSVARLIG_ENHET
-                    kodeHjemmel = vedtak.hjemmel // TODO hva blir riktig her?
-                    renterBeregnes = // TODO Vil ikke dette føre til at renger legges til på alle uansett?
-                        if (vedtak.perioder.any { it.ytelse.rentetillegg > 0 }) {
-                            RenterBeregnes.JA.kode
-                        } else {
-                            RenterBeregnes.NEI.kode
-                        }
+                    kodeHjemmel = vedtak.hjemmel.kode
                     kontrollfelt = vedtak.kontrollfelt
                     vedtak.perioder.map { tilbakekrevingPeriode ->
                         TilbakekrevingsperiodeDto().apply {

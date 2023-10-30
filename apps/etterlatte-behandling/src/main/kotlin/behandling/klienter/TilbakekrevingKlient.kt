@@ -33,7 +33,7 @@ class TilbakekrevingKlientImpl(config: Config, httpClient: HttpClient) : Tilbake
         tilbakekrevingVedtak: TilbakekrevingVedtak,
     ) {
         try {
-            logger.info("Sender tilbakekrevingsvedtal til tilbakekreving med vedtakId=${tilbakekrevingVedtak.vedtakId}")
+            logger.info("Sender tilbakekrevingsvedtak til tilbakekreving med vedtakId=${tilbakekrevingVedtak.vedtakId}")
 
             return downstreamResourceClient
                 .post(

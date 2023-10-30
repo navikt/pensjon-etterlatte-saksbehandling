@@ -217,7 +217,7 @@ class TilbakekrevingService(
                             dato = vedtak.dato,
                         ),
                     aarsak = requireNotNull(behandling.tilbakekreving.vurdering.aarsak),
-                    hjemmel = requireNotNull(behandling.tilbakekreving.vurdering.hjemmel?.name),
+                    hjemmel = requireNotNull(behandling.tilbakekreving.vurdering.hjemmel),
                     kravgrunnlagId = behandling.tilbakekreving.kravgrunnlag.kravgrunnlagId.value.toString(),
                     kontrollfelt = behandling.tilbakekreving.kravgrunnlag.kontrollFelt.value,
                     perioder =

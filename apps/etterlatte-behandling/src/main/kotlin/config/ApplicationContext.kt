@@ -30,7 +30,6 @@ import no.nav.etterlatte.behandling.klienter.NavAnsattKlient
 import no.nav.etterlatte.behandling.klienter.NavAnsattKlientImpl
 import no.nav.etterlatte.behandling.klienter.Norg2Klient
 import no.nav.etterlatte.behandling.klienter.Norg2KlientImpl
-import no.nav.etterlatte.behandling.klienter.TilbakekrevingKlient
 import no.nav.etterlatte.behandling.klienter.TilbakekrevingKlientImpl
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlientImpl
@@ -128,6 +127,14 @@ private fun klageHttpClient(config: Config) =
         azureAppScope = config.getString("klage.azure.scope"),
     )
 
+private fun tilbakekrevingHttpClient(config: Config) =
+    httpClientClientCredentials(
+        azureAppClientId = config.getString("azure.app.client.id"),
+        azureAppJwk = config.getString("azure.app.jwk"),
+        azureAppWellKnownUrl = config.getString("azure.app.well.known.url"),
+        azureAppScope = config.getString("tilbakekreving.azure.scope"),
+    )
+
 internal class ApplicationContext(
     val env: Miljoevariabler = Miljoevariabler(System.getenv()),
     val config: Config = ConfigFactory.load(),
@@ -153,9 +160,9 @@ internal class ApplicationContext(
     val grunnlagKlientObo: GrunnlagKlient = GrunnlagKlientObo(config, httpClient()),
     val gosysOppgaveKlient: GosysOppgaveKlient = GosysOppgaveKlientImpl(config, httpClient()),
     val vedtakKlient: VedtakKlient = VedtakKlientImpl(config, httpClient()),
-    val tilbakekrevingKlient: TilbakekrevingKlient = TilbakekrevingKlientImpl(config, httpClient()),
     val brevApiHttpClient: BrevApiKlient = BrevApiKlientObo(config, httpClient(forventSuksess = true)),
     val klageHttpClient: HttpClient = klageHttpClient(config),
+    val tilbakekrevingHttpClient: HttpClient = tilbakekrevingHttpClient(config),
 ) {
     val httpPort = env.getOrDefault("HTTP_PORT", "8080").toInt()
     val saksbehandlerGroupIdsByKey = AzureGroup.values().associateWith { env.requireEnvValue(it.envKey) }
@@ -188,6 +195,8 @@ internal class ApplicationContext(
     val leaderElectionKlient = LeaderElection(env.getValue("ELECTOR_PATH"), leaderElectionHttpClient)
     val behandlingsHendelser = BehandlingsHendelserKafkaProducerImpl(rapid)
     val klageKlient = KlageKlientImpl(klageHttpClient, resourceUrl = env.getValue("ETTERLATTE_KLAGE_API_URL"))
+    val tilbakekrevingKlient =
+        TilbakekrevingKlientImpl(tilbakekrevingHttpClient, resourceUrl = env.getValue("ETTERLATTE_TILBAKEKREVING_URL"))
 
     // Metrikker
     val oppgaveMetrikker = OppgaveMetrics(metrikkerDao)

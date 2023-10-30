@@ -78,10 +78,10 @@ spec:
       value: 069b1b2c-0a06-4cc9-8418-f100b8ff71be
     - name: ETTERLATTE_VEDTAK_URL
       value: http://etterlatte-vedtaksvurdering
-    - name: ETTERLATTE_TILBAKEKREVING_CLIENT_ID
-      value: 9d1c5221-f39a-4635-80fb-04376e1011a6
     - name: ETTERLATTE_TILBAKEKREVING_URL
       value: http://etterlatte-tilbakekreving
+    - name: AZURE_SCOPE_ETTERLATTE_TILBAKEKREVING
+      value: api://dev-gcp.etterlatte.etterlatte-tilbakekreving/.default
     - name: ETTERLATTE_BREV_API_CLIENT_ID
       value: dev-gcp.etterlatte.etterlatte-brev-api
     - name: AZUREAD_ATTESTANT_GROUPID

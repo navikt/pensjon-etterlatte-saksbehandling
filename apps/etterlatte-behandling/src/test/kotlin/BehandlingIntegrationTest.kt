@@ -23,7 +23,6 @@ import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
 import no.nav.etterlatte.behandling.klienter.NavAnsattKlient
 import no.nav.etterlatte.behandling.klienter.Norg2Klient
 import no.nav.etterlatte.behandling.klienter.OpprettetBrevDto
-import no.nav.etterlatte.behandling.klienter.TilbakekrevingKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.behandling.tilbakekreving.TilbakekrevingBehandling
 import no.nav.etterlatte.common.Enheter
@@ -48,7 +47,6 @@ import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.GeografiskTilknytning
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVedtak
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.toObjectNode
 import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingVedtakLagretDto
@@ -120,6 +118,7 @@ abstract class BehandlingIntegrationTest {
                         put("SKJERMING_URL", "http://localhost")
                         put("OPPGAVE_URL", "http://localhost")
                         put("ETTERLATTE_KLAGE_API_URL", "http://localhost")
+                        put("ETTERLATTE_TILBAKEKREVING_URL", "http://localhost")
                         put("OPPGAVE_SCOPE", "scope")
                     }.let { Miljoevariabler(it) },
                 config =
@@ -144,7 +143,7 @@ abstract class BehandlingIntegrationTest {
                 gosysOppgaveKlient = GosysOppgaveKlientTest(),
                 brevApiHttpClient = BrevApiKlientTest(),
                 klageHttpClient = klageHttpClientTest(),
-                tilbakekrevingKlient = TilbakekrevingKlientTest(),
+                tilbakekrevingHttpClient = tilbakekrevingHttpClientTest(),
             ).also {
                 it.dataSource.migrate()
             }
@@ -256,6 +255,21 @@ abstract class BehandlingIntegrationTest {
         }
 
     fun klageHttpClientTest() =
+        HttpClient(MockEngine) {
+            engine {
+                addHandler {
+                    respondOk()
+                }
+            }
+            install(ContentNegotiation) {
+                register(
+                    ContentType.Application.Json,
+                    JacksonConverter(objectMapper),
+                )
+            }
+        }
+
+    fun tilbakekrevingHttpClientTest() =
         HttpClient(MockEngine) {
             engine {
                 addHandler {
@@ -487,14 +501,6 @@ class VedtakKlientTest : VedtakKlient {
         brukerTokenInfo: BrukerTokenInfo,
     ): Long {
         return 123L
-    }
-}
-
-class TilbakekrevingKlientTest : TilbakekrevingKlient {
-    override suspend fun sendTilbakekrevingsvedtak(
-        brukerTokenInfo: BrukerTokenInfo,
-        tilbakekrevingVedtak: TilbakekrevingVedtak,
-    ) {
     }
 }
 

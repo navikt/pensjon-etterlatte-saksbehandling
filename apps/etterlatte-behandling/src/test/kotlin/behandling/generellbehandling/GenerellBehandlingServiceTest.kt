@@ -315,7 +315,7 @@ class GenerellBehandlingServiceTest {
         val kravpakkeUtlandInnhold =
             Innhold.KravpakkeUtland(
                 listOf("AFG"),
-                listOf(DokumentMedSendtDato("P2000", true, LocalDate.now())),
+                listOf(DokumentMedSendtDato("P2000", true, null)),
                 "2grwg2",
                 "124124124",
             )

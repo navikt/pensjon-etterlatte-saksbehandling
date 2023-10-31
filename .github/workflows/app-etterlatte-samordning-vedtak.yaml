@@ -61,6 +61,7 @@ jobs:
     name: Deploy API gateway config dev
     needs: deploy
     runs-on: ubuntu-latest
+    timeout-minutes: 1
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -77,6 +78,7 @@ jobs:
     if: ${{ github.ref == 'refs/heads/main' || github.event.inputs.deploy-prod == 'true' }}
     needs: deploy-gateway-config-dev-gcp
     runs-on: ubuntu-latest
+    timeout-minutes: 1
     steps:
       - name: Checkout
         uses: actions/checkout@v4

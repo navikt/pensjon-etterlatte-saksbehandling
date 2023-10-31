@@ -1,7 +1,5 @@
 package no.nav.etterlatte.joarkhendelser.common
 
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.joarkhendelser.JoarkHendelseHandler
 import no.nav.etterlatte.kafka.Kafkakonsument
@@ -23,14 +21,10 @@ class JoarkhendelseKonsument(
     ) {
     override fun stream() {
         stream { hendelser ->
-            runBlocking {
-                val ventbareHendelser =
-                    hendelser.map {
-                        async(context = Dispatchers.Default) {
-                            joarkHendelseHandler.haandterHendelse(it)
-                        }
-                    }
-                ventbareHendelser.forEach { it.await() }
+            hendelser.forEach {
+                runBlocking {
+                    joarkHendelseHandler.haandterHendelse(it)
+                }
             }
         }
     }

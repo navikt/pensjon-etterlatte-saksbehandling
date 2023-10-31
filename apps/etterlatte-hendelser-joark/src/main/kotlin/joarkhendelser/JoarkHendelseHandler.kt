@@ -71,6 +71,7 @@ class JoarkHendelseHandler(
             val gradering = pdlKlient.hentAdressebeskyttelse(ident)
             logger.info("Bruker=${ident.maskerFnr()} har gradering $gradering")
 
+            logger.info("Oppretter ny ${sakType.name.lowercase()} for bruker=${ident.maskerFnr()} med gradering=$gradering")
             val sakId = behandlingKlient.hentEllerOpprettSak(ident, sakType, gradering)
 
             logger.info("Oppretter journalføringsoppgave for sak=$sakId")

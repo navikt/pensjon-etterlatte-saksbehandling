@@ -94,6 +94,9 @@ spec:
             roles:
               - samordning-read
         - application: etterlatte-vedtaksvurdering-kafka
+          permissions:
+            roles:
+              - samordning-write
     outbound:
       rules:
         - application: etterlatte-vilkaarsvurdering

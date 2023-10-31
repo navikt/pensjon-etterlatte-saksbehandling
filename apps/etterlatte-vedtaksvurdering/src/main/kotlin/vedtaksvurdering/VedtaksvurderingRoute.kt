@@ -190,6 +190,24 @@ fun Route.vedtaksvurderingRoute(
                 call.respond(HttpStatusCode.NoContent)
             }
         }
+
+        route("/samordnet") {
+            install(AuthorizationPlugin) {
+                roles = setOf("samordning-write")
+            }
+
+            post("/{vedtakId}") {
+                val vedtakId = requireNotNull(call.parameters["vedtakId"]).toLong()
+
+                val vedtak = vedtakService.hentVedtak(vedtakId)
+                if (vedtak == null) {
+                    call.respond(HttpStatusCode.NotFound)
+                }
+
+                val samordnetVedtak = vedtakBehandlingService.samordnetVedtak(vedtak!!.behandlingId, brukerTokenInfo)
+                call.respond(HttpStatusCode.OK, samordnetVedtak.toDto())
+            }
+        }
     }
 }
 

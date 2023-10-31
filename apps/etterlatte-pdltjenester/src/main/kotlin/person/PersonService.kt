@@ -1,5 +1,7 @@
 package no.nav.etterlatte.person
 
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.pdl.FantIkkePersonException
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
@@ -25,9 +27,18 @@ import org.slf4j.LoggerFactory
 
 class PdlForesporselFeilet(message: String) : RuntimeException(message)
 
+enum class PersonMappingToggle(val key: String) : FeatureToggle {
+    AksepterPersonerUtenIdenter("pensjon-etterlatte.aksepter-personer-uten-identer") {
+        override fun key(): String {
+            return key
+        }
+    },
+}
+
 class PersonService(
     private val pdlKlient: PdlKlient,
     private val ppsKlient: ParallelleSannheterKlient,
+    private val featureToggleService: FeatureToggleService,
 ) {
     private val logger = LoggerFactory.getLogger(PersonService::class.java)
 
@@ -52,6 +63,11 @@ class PersonService(
                     personRolle = request.rolle,
                     hentPerson = it.data.hentPerson,
                     saktype = request.saktype,
+                    aksepterPersonerUtenIdent =
+                        featureToggleService.isEnabled(
+                            PersonMappingToggle.AksepterPersonerUtenIdenter,
+                            false,
+                        ),
                 )
             }
         }
@@ -102,6 +118,11 @@ class PersonService(
                     pdlKlient = pdlKlient,
                     request = request,
                     hentPerson = it.data.hentPerson,
+                    aksepterPersonerUtenIdent =
+                        featureToggleService.isEnabled(
+                            PersonMappingToggle.AksepterPersonerUtenIdenter,
+                            false,
+                        ),
                 )
             }
         }

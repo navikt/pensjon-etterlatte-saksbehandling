@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.fasterxml.jackson.annotation.JsonTypeName
 import com.fasterxml.jackson.annotation.JsonValue
+import no.nav.etterlatte.libs.common.behandling.PersonUtenIdent
 import no.nav.etterlatte.libs.common.innsendtsoeknad.OppholdUtlandType
 import no.nav.etterlatte.libs.common.innsendtsoeknad.common.JaNeiVetIkke
 import java.time.LocalDate
@@ -105,6 +106,7 @@ data class FamilieRelasjon(
     val ansvarligeForeldre: List<Folkeregisteridentifikator>?,
     val foreldre: List<Folkeregisteridentifikator>?,
     val barn: List<Folkeregisteridentifikator>?,
+    val personerUtenIdent: List<PersonUtenIdent>? = null,
 )
 
 data class AvdoedesBarn(

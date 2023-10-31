@@ -22,6 +22,7 @@ object PersonMapper {
         personRolle: PersonRolle,
         hentPerson: PdlHentPerson,
         saktype: SakType,
+        aksepterPersonerUtenIdent: Boolean = false,
     ): Person =
         runBlocking {
             val navn = ppsKlient.avklarNavn(hentPerson.navn)
@@ -56,7 +57,7 @@ object PersonMapper {
                 sivilstatus = ppsSivilstand?.let { Sivilstatus.valueOf(it.type.name) } ?: Sivilstatus.UOPPGITT,
                 sivilstand = hentPerson.sivilstand?.let { SivilstandMapper.mapSivilstand(it) },
                 utland = UtlandMapper.mapUtland(hentPerson),
-                familieRelasjon = FamilieRelasjonMapper.mapFamilieRelasjon(hentPerson, personRolle),
+                familieRelasjon = FamilieRelasjonMapper.mapFamilieRelasjon(hentPerson, personRolle, aksepterPersonerUtenIdent),
                 avdoedesBarn =
                     if (personRolle == PersonRolle.AVDOED) {
                         BarnekullMapper.mapBarnekull(
@@ -77,6 +78,7 @@ object PersonMapper {
         pdlKlient: PdlKlient,
         request: HentPersonRequest,
         hentPerson: PdlHentPerson,
+        aksepterPersonerUtenIdent: Boolean = false,
     ): PersonDTO =
         runBlocking {
             val navn = ppsKlient.avklarNavn(hentPerson.navn)
@@ -126,7 +128,7 @@ object PersonMapper {
                 utland = OpplysningDTO(UtlandMapper.mapUtland(hentPerson), null),
                 familieRelasjon =
                     OpplysningDTO(
-                        FamilieRelasjonMapper.mapFamilieRelasjon(hentPerson, request.rolle),
+                        FamilieRelasjonMapper.mapFamilieRelasjon(hentPerson, request.rolle, aksepterPersonerUtenIdent),
                         null,
                     ), // TODO ai: tre opplysninger i en
                 avdoedesBarn =

@@ -292,62 +292,60 @@ const KravpakkeUtland = (props: { utlandsBehandling: Generellbehandling & { innh
                 </Table.Row>
               </Table.Header>
               <Table.Body>
-                {dokumenter.map((dokument, idx) => {
-                  return (
-                    <Table.Row key={idx}>
-                      <Table.DataCell>
-                        <TextField
-                          disabled={!redigerbar}
-                          label={dokument.dokumenttype}
-                          size="medium"
-                          style={{ maxWidth: '16rem' }}
-                          onChange={(e) => {
-                            const oppdaterteDocType = dokumenter.map((doc, i) => {
-                              if (idx === i) {
-                                return { ...doc, dokumenttype: e.target.value }
-                              }
-                              return doc
-                            })
-                            setDokumenter(oppdaterteDocType)
-                          }}
-                        />
-                      </Table.DataCell>
-                      <Table.DataCell>
-                        <Checkbox
-                          readOnly={!redigerbar}
-                          checked={dokument.sendt}
-                          onChange={(e) => {
-                            const oppdaterteDocSendt = dokumenter.map((doc, i) => {
-                              if (idx === i) {
-                                return { ...doc, sendt: e.target.checked }
-                              }
-                              return doc
-                            })
-                            setDokumenter(oppdaterteDocSendt)
-                          }}
-                        >
-                          <></>
-                        </Checkbox>
-                      </Table.DataCell>
-                      <Table.DataCell>
-                        <DatoVelger
-                          disabled={!redigerbar}
-                          label=""
-                          value={dokument.dato ? new Date(dokument.dato) : undefined}
-                          onChange={(date) => {
-                            const oppdaterteDocDato = dokumenter.map((doc, i) => {
-                              if (idx === i) {
-                                return { ...doc, dato: formatDateToLocaleDateOrEmptyString(date) }
-                              }
-                              return doc
-                            })
-                            setDokumenter(oppdaterteDocDato)
-                          }}
-                        />
-                      </Table.DataCell>
-                    </Table.Row>
-                  )
-                })}
+                {dokumenter.map((dokument, idx) => (
+                  <Table.Row key={idx}>
+                    <Table.DataCell>
+                      <TextField
+                        disabled={!redigerbar}
+                        label={dokument.dokumenttype}
+                        size="medium"
+                        style={{ maxWidth: '16rem' }}
+                        onChange={(e) => {
+                          const oppdaterteDocType = dokumenter.map((doc, i) => {
+                            if (idx === i) {
+                              return { ...doc, dokumenttype: e.target.value }
+                            }
+                            return doc
+                          })
+                          setDokumenter(oppdaterteDocType)
+                        }}
+                      />
+                    </Table.DataCell>
+                    <Table.DataCell>
+                      <Checkbox
+                        readOnly={!redigerbar}
+                        checked={dokument.sendt}
+                        onChange={(e) => {
+                          const oppdaterteDocSendt = dokumenter.map((doc, i) => {
+                            if (idx === i) {
+                              return { ...doc, sendt: e.target.checked }
+                            }
+                            return doc
+                          })
+                          setDokumenter(oppdaterteDocSendt)
+                        }}
+                      >
+                        <></>
+                      </Checkbox>
+                    </Table.DataCell>
+                    <Table.DataCell>
+                      <DatoVelger
+                        disabled={!redigerbar}
+                        label=""
+                        value={dokument.dato ? new Date(dokument.dato) : undefined}
+                        onChange={(date) => {
+                          const oppdaterteDocDato = dokumenter.map((doc, i) => {
+                            if (idx === i) {
+                              return { ...doc, dato: formatDateToLocaleDateOrEmptyString(date) }
+                            }
+                            return doc
+                          })
+                          setDokumenter(oppdaterteDocDato)
+                        }}
+                      />
+                    </Table.DataCell>
+                  </Table.Row>
+                ))}
               </Table.Body>
             </StandardBreddeTabell>
             <Button

@@ -219,8 +219,10 @@ function formaterKravpakkeLand(innhold: KravpakkeUtland | undefined, landliste: 
 
 const visDatoerForSendteDokumenter = (innhold: KravpakkeUtland | undefined): string => {
   if (innhold?.dokumenter) {
-    const sendteDokumenter = innhold.dokumenter.filter((doc) => doc.sendt && doc.dato)
-    return sendteDokumenter.map((e) => `${e.dokumenttype} ${formaterStringDato(e.dato as string)}`).join(', ')
+    return innhold.dokumenter
+      .filter((doc) => doc.sendt && doc.dato)
+      .map((e) => `${e.dokumenttype} ${formaterStringDato(e.dato as string)}`)
+      .join(', ')
   }
   return ''
 }

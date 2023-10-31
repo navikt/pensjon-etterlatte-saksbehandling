@@ -6,6 +6,8 @@ import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
+import jakarta.xml.bind.JAXBContext
+import jakarta.xml.bind.Marshaller
 import kotlinx.coroutines.runBlocking
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
@@ -22,6 +24,7 @@ import no.nav.tilbakekreving.tilbakekrevingsvedtak.vedtak.v1.Tilbakekrevingsperi
 import no.nav.tilbakekreving.tilbakekrevingsvedtak.vedtak.v1.TilbakekrevingsvedtakDto
 import no.nav.tilbakekreving.typer.v1.PeriodeDto
 import org.slf4j.LoggerFactory
+import java.io.StringWriter
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
@@ -38,19 +41,33 @@ class TilbakekrevingKlient(
     private val logger = LoggerFactory.getLogger(javaClass)
     private val sikkerLogg = sikkerlogger()
 
+    private val jaxbContext = JAXBContext.newInstance(TilbakekrevingsvedtakRequest::class.java)
+
+    private fun toXml(request: TilbakekrevingsvedtakRequest): String {
+        val marshaller = jaxbContext.createMarshaller()
+        marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true)
+
+        val stringWriter = StringWriter()
+        stringWriter.use {
+            marshaller.marshal(request, stringWriter)
+        }
+
+        return stringWriter.toString()
+    }
+
     fun sendTilbakekrevingsvedtak(vedtak: TilbakekrevingVedtak) {
         logger.info("Sender tilbakekrevingsvedtak ${vedtak.vedtakId} til tilbakekrevingskomponenten")
         val request = toTilbakekrevingsvedtakRequest(vedtak)
-        val requestAsJson = request.toJson()
+        val requestAsXml = toXml(request)
 
-        hendelseRepository.lagreTilbakekrevingsvedtakSendt(vedtak.kravgrunnlagId, requestAsJson)
+        hendelseRepository.lagreTilbakekrevingsvedtakSendt(vedtak.kravgrunnlagId, requestAsXml)
 
         val response =
             runBlocking {
                 val httpResponse =
                     httpClient.post("$url/tilbakekreving/tilbakekrevingsvedtak") {
-                        contentType(ContentType.Application.Json)
-                        setBody(requestAsJson)
+                        contentType(ContentType.Application.Xml)
+                        setBody(requestAsXml)
                     }
 
                 httpResponse.body<TilbakekrevingsvedtakResponse>()

@@ -93,11 +93,7 @@ object BarnepensjonVilkaar2024 {
                             lenke = "https://lovdata.no/lov/1997-02-28-19/%C2%A718-4",
                         ),
                 ),
-            unntaksvilkaar =
-                listOf(
-                    beggeForeldreDoedeUtdanningHovedbeskjeftigelse(),
-                    beggeForeldreDoedeLaerlingPraktikantInntektUnder2G(),
-                ),
+            unntaksvilkaar = listOf(yrkesskadeFordelPaaGammeltRegelverk()),
             grunnlag =
                 with(grunnlag) {
                     val foedselsdatoBarn = soeker.hentFoedselsdato()?.toVilkaarsgrunnlag(SOEKER_FOEDSELSDATO)
@@ -144,7 +140,7 @@ object BarnepensjonVilkaar2024 {
                     tittel = "Vurdering av eksport",
                     beskrivelse =
                         """
-                        Barnepensjon kan eksporteres hvis en av foreldrene har minst 20 års samlet botid i Norge, hvis avdøde har mindre enn 20 års botid, men har opptjent rett til tilleggspensjon eller hvis minst ett av barna i et foreldreløst barnekull er medlem i trygden.
+                        Barnepensjon kan eksporteres hvis en av foreldrene har minst 20 års samlet botid i Norge, hvis avdøde har mindre enn 20 års botid, men har minimum tre poengår eller hvis minst ett av barna i et foreldreløst barnekull er medlem i trygden.
 
                         Skyldes dødsfallet en godkjent yrkesskade kan barnepensjonen eksporteres i sin helhet, jf. folketrygdloven § 18-10. Barnepensjon kan også fritt eksporteres til EØS-land, og til noen land Norge har bilaterale trygdeavtaler med. 
 
@@ -252,28 +248,13 @@ object BarnepensjonVilkaar2024 {
             ),
         )
 
-    private fun beggeForeldreDoedeUtdanningHovedbeskjeftigelse() =
+    private fun yrkesskadeFordelPaaGammeltRegelverk() =
         Delvilkaar(
-            type = VilkaarType.BP_ALDER_BARN_UNNTAK_UTDANNING_2024,
-            tittel = "Ja. Barnet er foreldreløs og har utdanning som hovedbeskjeftigelse",
+            type = VilkaarType.BP_ALDER_BARN_UNNTAK_YS_GAMMELT_REGELVERK,
+            tittel = "Ja. Bruker er innvilget barnepensjon før 01.01.2024 med yrkesskade-fordel og skal ha til fylte 21 år",
             lovreferanse =
                 Lovreferanse(
-                    paragraf = "§ 18-4",
-                    ledd = 3,
-                ),
-        )
-
-    private fun beggeForeldreDoedeLaerlingPraktikantInntektUnder2G() =
-        Delvilkaar(
-            type = VilkaarType.BP_ALDER_BARN_UNNTAK_LAERLING_PRAKTIKANT_2024,
-            tittel =
-                """
-                Ja. Barnet er foreldreløs og er lærling/praktikant med en inntekt etter skatt på mindre enn to ganger grunnbeløpet
-                """.trimIndent(),
-            lovreferanse =
-                Lovreferanse(
-                    paragraf = "§ 18-4",
-                    ledd = 3,
+                    paragraf = "§ 18-11",
                 ),
         )
 

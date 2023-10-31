@@ -30,9 +30,7 @@ import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 import { hentSaksbehandlerForOppgaveUnderArbeid } from '~shared/api/oppgaver'
 import { SakType } from '~shared/types/sak'
 
-export const Sjekkliste = (props: { behandling: IBehandlingReducer }) => {
-  const { behandling } = props
-
+export const Sjekkliste = ({ behandling }: { behandling: IBehandlingReducer }) => {
   const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.saksbehandler)
   const [redigerbar, setRedigerbar] = useState<boolean>(false)
   const [saksbehandlerForOppgaveResult, hentSaksbehandlerForOppgave] = useApiCall(
@@ -92,7 +90,7 @@ export const Sjekkliste = (props: { behandling: IBehandlingReducer }) => {
           </BodyLong>
 
           {sjekkliste?.sjekklisteItems.map((item) => (
-            <SjekklisteElement
+            <SjekklisteItem
               key={item.id}
               item={item}
               behandlingId={behandling.id}
@@ -194,7 +192,7 @@ export const Sjekkliste = (props: { behandling: IBehandlingReducer }) => {
   )
 }
 
-const SjekklisteElement = ({
+const SjekklisteItem = ({
   item,
   behandlingId,
   redigerbar,

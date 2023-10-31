@@ -2,14 +2,13 @@ import { Behandlingsoppsummering } from '~components/behandling/attestering/opps
 import { Attestering } from '~components/behandling/attestering/attestering/attestering'
 import { Dokumentoversikt } from '~components/person/dokumenter/dokumentoversikt'
 import AnnullerBehandling from '~components/behandling/handlinger/AnnullerBehanding'
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { IBeslutning } from '~components/behandling/attestering/types'
 import { BehandlingFane, IBehandlingInfo } from '~components/behandling/sidemeny/IBehandlingInfo'
 import { IRolle } from '~store/reducers/SaksbehandlerReducer'
-import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
-import { useBehandling } from '~components/behandling/useBehandling'
+import { IBehandlingStatus, IBehandlingsType } from '~shared/types/IDetaljertBehandling'
 import { useAppDispatch, useAppSelector } from '~store/Store'
-import { isFailure, isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
+import { isFailure, isInitial, isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
 import { hentVedtakSammendrag } from '~shared/api/vedtaksvurdering'
 import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
 import { IHendelseType } from '~shared/types/IHendelse'
@@ -26,6 +25,9 @@ import { useBehandlingSidemenyFane } from '~components/behandling/sidemeny/useBe
 import { visFane } from '~store/reducers/BehandlingSidemenyReducer'
 import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 import { featureToggleSjekklisteAktivert } from '~shared/types/Sjekkliste'
+import { updateSjekkliste } from '~store/reducers/SjekklisteReducer'
+import { erFerdigBehandlet } from '~components/behandling/felles/utils'
+import { hentSjekkliste, opprettSjekkliste } from '~shared/api/sjekkliste'
 
 const mapTilBehandlingInfo = (behandling: IBehandlingReducer, vedtak: VedtakSammendrag | null): IBehandlingInfo => ({
   type: behandling.behandlingType,
@@ -42,8 +44,7 @@ const mapTilBehandlingInfo = (behandling: IBehandlingReducer, vedtak: VedtakSamm
   attestertLogg: behandling.hendelser.filter((hendelse) => hendelse.hendelse === IHendelseType.VEDTAK_ATTESTERT),
 })
 
-export const BehandlingSidemeny = () => {
-  const behandling = useBehandling()
+export const BehandlingSidemeny = ({ behandling }: { behandling: IBehandlingReducer }) => {
   const vedtak = useVedtak()
   const dispatch = useAppDispatch()
   const saksbehandler = useAppSelector((state) => state.saksbehandlerReducer.saksbehandler)
@@ -52,29 +53,57 @@ export const BehandlingSidemeny = () => {
   const fane = useBehandlingSidemenyFane()
   const sjekklisteAktivert = useFeatureEnabledMedDefault(featureToggleSjekklisteAktivert, false)
 
-  const behandlingsinfo = behandling ? mapTilBehandlingInfo(behandling, vedtak) : undefined
+  const behandlingsinfo = mapTilBehandlingInfo(behandling, vedtak)
 
   const kanAttestere =
-    !!behandling &&
+    behandling &&
     saksbehandler.rolle === IRolle.attestant &&
     behandlingsinfo?.status === IBehandlingStatus.FATTET_VEDTAK
 
   useEffect(() => {
-    if (!behandling?.id) return
-
     fetchVedtakSammendrag(behandling.id, (vedtakSammendrag) => {
       if (vedtakSammendrag !== null) {
         dispatch(updateVedtakSammendrag(vedtakSammendrag))
       }
     })
-  }, [behandling?.id])
+  }, [behandling.id])
+
+  const erFoerstegangsbehandling = behandling?.behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING
+
+  const [hentSjekklisteResult, hentSjekklisteForBehandling, resetSjekklisteResult] = useApiCall(hentSjekkliste)
+  const [opprettSjekklisteResult, opprettSjekklisteForBehandling, resetOpprettSjekkliste] =
+    useApiCall(opprettSjekkliste)
+
+  useEffect(() => {
+    if (sjekklisteAktivert) {
+      resetSjekklisteResult()
+      resetOpprettSjekkliste()
+      if (behandling && erFoerstegangsbehandling && isInitial(hentSjekklisteResult)) {
+        hentSjekklisteForBehandling(
+          behandling.id,
+          (result) => {
+            dispatch(updateSjekkliste(result))
+          },
+          () => {
+            if (!erFerdigBehandlet(behandling.status)) {
+              opprettSjekklisteForBehandling(behandling.id, (nySjekkliste) => {
+                dispatch(updateSjekkliste(nySjekkliste))
+              })
+            }
+          }
+        )
+      }
+    }
+  }, [behandling])
 
   return (
     <Sidebar>
+      {isFailure(opprettSjekklisteResult) && erFoerstegangsbehandling && (
+        <ApiErrorAlert>Opprettelsen av sjekkliste feilet</ApiErrorAlert>
+      )}
       {behandlingsinfo && (
         <>
           <Behandlingsoppsummering behandlingsInfo={behandlingsinfo} beslutning={beslutning} />
-
           {kanAttestere && (
             <>
               {isFailure(fetchVedtakStatus) && <ApiErrorAlert>Kunne ikke hente vedtak</ApiErrorAlert>}
@@ -83,9 +112,9 @@ export const BehandlingSidemeny = () => {
                 <Attestering
                   setBeslutning={setBeslutning}
                   beslutning={beslutning}
-                  behandlingId={behandling?.id}
+                  behandlingId={behandling.id}
                   vedtak={vedtak}
-                  erFattet={behandling?.status === IBehandlingStatus.FATTET_VEDTAK}
+                  erFattet={behandling.status === IBehandlingStatus.FATTET_VEDTAK}
                 />
               )}
             </>
@@ -104,18 +133,20 @@ export const BehandlingSidemeny = () => {
             />
           </Tabs.List>
           <Tabs.Panel value={BehandlingFane.DOKUMENTER}>
-            {behandling?.søker?.foedselsnummer && <Dokumentoversikt fnr={behandling.søker.foedselsnummer} liten />}
+            {behandling.søker?.foedselsnummer && <Dokumentoversikt fnr={behandling.søker.foedselsnummer} liten />}
           </Tabs.Panel>
+          {isPending(hentSjekklisteResult) && <Spinner label="Henter sjekkliste ..." visible />}
+          {isFailure(hentSjekklisteResult) && erFoerstegangsbehandling && !erFerdigBehandlet(behandling.status) && (
+            <ApiErrorAlert>En feil oppstod ved henting av sjekklista</ApiErrorAlert>
+          )}
           <Tabs.Panel value={BehandlingFane.SJEKKLISTE}>
-            {behandling?.søker?.foedselsnummer && <Sjekkliste behandling={behandling} />}
+            {behandling.søker?.foedselsnummer && <Sjekkliste behandling={behandling} />}
           </Tabs.Panel>
         </Tabs>
       )}
-
-      {!sjekklisteAktivert && behandling?.søker?.foedselsnummer && (
+      {!sjekklisteAktivert && behandling.søker?.foedselsnummer && (
         <Dokumentoversikt fnr={behandling.søker.foedselsnummer} liten />
       )}
-
       <AnnullerBehandling />
     </Sidebar>
   )

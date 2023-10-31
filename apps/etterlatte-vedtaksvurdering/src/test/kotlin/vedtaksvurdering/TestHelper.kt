@@ -9,6 +9,7 @@ import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.vedtak.Periode
 import no.nav.etterlatte.libs.common.vedtak.Utbetalingsperiode
 import no.nav.etterlatte.libs.common.vedtak.UtbetalingsperiodeType
+import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
@@ -124,9 +125,11 @@ fun vedtakTilbakekreving(
     sakId: Long = 1L,
     behandlingId: UUID = UUID.randomUUID(),
     tilbakekreving: ObjectNode = objectMapper.createObjectNode(),
+    status: VedtakStatus = VedtakStatus.OPPRETTET,
+    vedtakFattet: VedtakFattet? = null,
 ) = Vedtak(
     id = 1L,
-    status = VedtakStatus.OPPRETTET,
+    status = status,
     soeker = SOEKER_FOEDSELSNUMMER,
     sakId = sakId,
     sakType = SakType.BARNEPENSJON,
@@ -134,4 +137,5 @@ fun vedtakTilbakekreving(
     type = VedtakType.INNVILGELSE,
     innhold =
         VedtakTilbakekrevingInnhold(tilbakekreving),
+    vedtakFattet = vedtakFattet,
 )

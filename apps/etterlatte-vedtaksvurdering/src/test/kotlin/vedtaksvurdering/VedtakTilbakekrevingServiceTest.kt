@@ -8,8 +8,10 @@ import io.mockk.verify
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingFattEllerAttesterVedtakDto
 import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingVedtakDto
+import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.vedtaksvurdering.Vedtak
@@ -146,18 +148,33 @@ class VedtakTilbakekrevingServiceTest {
     }
 
     @Test
-    fun `attesterVedtak skal attestere vedtak`() {
+    fun `attesterVedtak skal attestere vedtak og returnere vedtaket`() {
         val dto =
             TilbakekrevingFattEllerAttesterVedtakDto(
                 tilbakekrevingId = UUID.randomUUID(),
                 saksbehandler = "saksbehandler",
                 enhet = "enhet",
             )
-        every { repo.hentVedtak(dto.tilbakekrevingId) } returns vedtak(status = VedtakStatus.FATTET_VEDTAK)
-        every { repo.attesterVedtak(any(), any()) } returns vedtak()
+        every { repo.hentVedtak(dto.tilbakekrevingId) } returns vedtakTilbakekreving(status = VedtakStatus.FATTET_VEDTAK)
+        val attestertVedtak =
+            vedtakTilbakekreving(
+                vedtakFattet =
+                    VedtakFattet(
+                        ansvarligSaksbehandler = "saksbehandler",
+                        ansvarligEnhet = "enhet",
+                        tidspunkt = Tidspunkt.now(),
+                    ),
+            )
+        every { repo.attesterVedtak(any(), any()) } returns attestertVedtak
 
-        service.attesterVedtak(dto) shouldBe 1L
+        val vedtakDto = service.attesterVedtak(dto)
 
+        with(vedtakDto) {
+            id shouldBe 1L
+            fattetAv shouldBe "saksbehandler"
+            enhet shouldBe "enhet"
+            dato shouldBe attestertVedtak.vedtakFattet!!.tidspunkt.toLocalDate()
+        }
         verify { repo.hentVedtak(dto.tilbakekrevingId) }
         verify {
             repo.attesterVedtak(

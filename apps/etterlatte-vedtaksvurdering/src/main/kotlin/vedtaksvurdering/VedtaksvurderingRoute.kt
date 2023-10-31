@@ -14,6 +14,7 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.libs.common.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
+import no.nav.etterlatte.libs.common.behandlingId
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.VedtakSak
 import no.nav.etterlatte.libs.common.sakId
@@ -32,7 +33,6 @@ import no.nav.etterlatte.libs.ktor.AuthorizationPlugin
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlient
 import java.time.LocalDate
-import java.util.UUID
 
 fun Route.vedtaksvurderingRoute(
     vedtakService: VedtaksvurderingService,
@@ -227,29 +227,39 @@ fun Route.samordningsvedtakRoute(
     }
 }
 
-fun Route.tilbakekrevingvedtakRoute(service: VedtakTilbakekrevingService) {
+fun Route.tilbakekrevingvedtakRoute(
+    service: VedtakTilbakekrevingService,
+    behandlingKlient: BehandlingKlient,
+) {
     val logger = application.log
 
-    route("/tilbakekreving") {
+    route("/tilbakekreving/{$BEHANDLINGID_CALL_PARAMETER}") {
         post("/lagre-vedtak") {
-            val dto = call.receive<TilbakekrevingVedtakDto>()
-            logger.info("Fatter vedtak for tilbakekreving=${dto.tilbakekrevingId}")
-            call.respond(service.opprettEllerOppdaterVedtak(dto))
+            withBehandlingId(behandlingKlient) {
+                val dto = call.receive<TilbakekrevingVedtakDto>()
+                logger.info("Oppretter vedtak for tilbakekreving=${dto.tilbakekrevingId}")
+                call.respond(service.opprettEllerOppdaterVedtak(dto))
+            }
         }
         post("/fatt-vedtak") {
-            val dto = call.receive<TilbakekrevingFattEllerAttesterVedtakDto>()
-            logger.info("Fatter vedtak for tilbakekreving=${dto.tilbakekrevingId}")
-            call.respond(service.fattVedtak(dto))
+            withBehandlingId(behandlingKlient) {
+                val dto = call.receive<TilbakekrevingFattEllerAttesterVedtakDto>()
+                logger.info("Fatter vedtak for tilbakekreving=${dto.tilbakekrevingId}")
+                call.respond(service.fattVedtak(dto))
+            }
         }
         post("/attester-vedtak") {
-            val dto = call.receive<TilbakekrevingFattEllerAttesterVedtakDto>()
-            logger.info("Attesterer vedtak for tilbakekreving=${dto.tilbakekrevingId}")
-            call.respond(service.attesterVedtak(dto))
+            withBehandlingId(behandlingKlient) {
+                val dto = call.receive<TilbakekrevingFattEllerAttesterVedtakDto>()
+                logger.info("Attesterer vedtak for tilbakekreving=${dto.tilbakekrevingId}")
+                call.respond(service.attesterVedtak(dto))
+            }
         }
         post("/underkjenn-vedtak") {
-            val tilbakekrevingId = call.receive<UUID>()
-            logger.info("Fatter vedtak for tilbakekreving=$tilbakekrevingId")
-            call.respond(service.underkjennVedtak(tilbakekrevingId))
+            withBehandlingId(behandlingKlient) {
+                logger.info("Underkjenner vedtak for tilbakekreving=$behandlingId")
+                call.respond(service.underkjennVedtak(behandlingId))
+            }
         }
     }
 }

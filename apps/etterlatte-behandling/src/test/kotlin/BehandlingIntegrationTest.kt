@@ -49,6 +49,7 @@ import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.toObjectNode
+import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingVedtakLagretDto
 import no.nav.etterlatte.libs.database.POSTGRES_VERSION
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
@@ -117,6 +118,7 @@ abstract class BehandlingIntegrationTest {
                         put("SKJERMING_URL", "http://localhost")
                         put("OPPGAVE_URL", "http://localhost")
                         put("ETTERLATTE_KLAGE_API_URL", "http://localhost")
+                        put("ETTERLATTE_TILBAKEKREVING_URL", "http://localhost")
                         put("OPPGAVE_SCOPE", "scope")
                     }.let { Miljoevariabler(it) },
                 config =
@@ -141,6 +143,7 @@ abstract class BehandlingIntegrationTest {
                 gosysOppgaveKlient = GosysOppgaveKlientTest(),
                 brevApiHttpClient = BrevApiKlientTest(),
                 klageHttpClient = klageHttpClientTest(),
+                tilbakekrevingHttpClient = tilbakekrevingHttpClientTest(),
             ).also {
                 it.dataSource.migrate()
             }
@@ -252,6 +255,21 @@ abstract class BehandlingIntegrationTest {
         }
 
     fun klageHttpClientTest() =
+        HttpClient(MockEngine) {
+            engine {
+                addHandler {
+                    respondOk()
+                }
+            }
+            install(ContentNegotiation) {
+                register(
+                    ContentType.Application.Json,
+                    JacksonConverter(objectMapper),
+                )
+            }
+        }
+
+    fun tilbakekrevingHttpClientTest() =
         HttpClient(MockEngine) {
             engine {
                 addHandler {
@@ -469,8 +487,13 @@ class VedtakKlientTest : VedtakKlient {
         tilbakekrevingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
         enhet: String,
-    ): Long {
-        return 123L
+    ): TilbakekrevingVedtakLagretDto {
+        return TilbakekrevingVedtakLagretDto(
+            id = 123L,
+            fattetAv = "saksbehandler",
+            enhet = "enhet",
+            dato = LocalDate.now(),
+        )
     }
 
     override suspend fun underkjennVedtakTilbakekreving(

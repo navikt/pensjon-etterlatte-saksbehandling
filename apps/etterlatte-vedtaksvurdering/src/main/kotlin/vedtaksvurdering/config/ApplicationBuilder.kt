@@ -70,7 +70,7 @@ class ApplicationBuilder {
                     vedtaksvurderingRoute(vedtaksvurderingService, vedtakBehandlingService, behandlingKlient)
                     automatiskBehandlingRoutes(vedtakBehandlingService, behandlingKlient)
                     samordningsvedtakRoute(vedtaksvurderingService, vedtakBehandlingService)
-                    tilbakekrevingvedtakRoute(vedtakTilbakekrevingService)
+                    tilbakekrevingvedtakRoute(vedtakTilbakekrevingService, behandlingKlient)
                 }
             }
             .build()

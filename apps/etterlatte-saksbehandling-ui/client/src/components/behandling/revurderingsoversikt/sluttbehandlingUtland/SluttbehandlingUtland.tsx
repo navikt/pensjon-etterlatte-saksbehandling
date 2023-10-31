@@ -18,6 +18,7 @@ import { CheckmarkCircleIcon } from '@navikt/aksel-icons'
 import { LandMedDokumenter, SluttbehandlingUtlandInfo } from '~shared/types/RevurderingInfo'
 import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
 import HistoriskeSEDer from '~components/behandling/revurderingsoversikt/sluttbehandlingUtland/historikk/HistoriskeSEDer'
+import { formaterStringDato } from '~utils/formattering'
 
 export default function SluttbehandlingUtland({
   sakId,
@@ -44,6 +45,7 @@ export default function SluttbehandlingUtland({
   )
   const [feilkoder, setFeilkoder] = useState<Set<string>>(new Set([]))
   const [visLagretOk, setVisLagretOk] = useState<boolean>(false)
+
   useEffect(() => {
     hentKravpakke(sakId)
     fetchAlleLand(null, (landliste) => {
@@ -116,13 +118,17 @@ export default function SluttbehandlingUtland({
               <>
                 {kravpakkeMedAvdoed.kravpakke.innhold ? (
                   <InfoWrapper>
-                    <Info tekst={formaterNavn(kravpakkeMedAvdoed.avdoed)} label="Kravpakke gjelder" />
+                    <Info label="Kravpakke gjelder" tekst={formaterNavn(kravpakkeMedAvdoed.avdoed)} />
                     <Info
                       tekst={formaterKravpakkeLand(kravpakkeMedAvdoed.kravpakke.innhold, alleLandKodeverk)}
                       label="Kravpakke sendt til"
                     />
+                    <Info
+                      label="Dokumenttyper og datosendt"
+                      tekst={visDatoerForSendteDokumenter(kravpakkeMedAvdoed.kravpakke.innhold)}
+                    />
                     <Info label="Saks-ID RINA" tekst={kravpakkeMedAvdoed.kravpakke.innhold.rinanummer} />
-                    <Info label="Notater" tekst={kravpakkeMedAvdoed.kravpakke.innhold.begrunnelse} />
+                    <Info label="Kommentar" tekst={kravpakkeMedAvdoed.kravpakke.innhold.begrunnelse} />
                   </InfoWrapper>
                 ) : (
                   <Alert variant="warning">
@@ -209,6 +215,16 @@ function formaterKravpakkeLand(innhold: KravpakkeUtland | undefined, landliste: 
   } else {
     return innhold?.landIsoKode ? innhold.landIsoKode.join(', ') : ''
   }
+}
+
+const visDatoerForSendteDokumenter = (innhold: KravpakkeUtland | undefined): string => {
+  if (innhold?.dokumenter) {
+    return innhold.dokumenter
+      .filter((doc) => doc.sendt && doc.dato)
+      .map((e) => `${e.dokumenttype} ${formaterStringDato(e.dato as string)}`)
+      .join(', ')
+  }
+  return ''
 }
 
 export function oversettIsokodeTilLandnavn(landliste: ILand[], landIsoKode?: string) {

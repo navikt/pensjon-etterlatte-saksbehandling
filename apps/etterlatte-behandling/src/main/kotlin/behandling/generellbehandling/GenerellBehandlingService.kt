@@ -127,19 +127,13 @@ class GenerellBehandlingService(
         if (innhold.rinanummer.isEmpty()) {
             throw ManglerRinanummerException("Må ha rinanummer")
         }
-        validerHvisAvhuketSaaHarDato(innhold.dokumenter.p2100, "P2100")
-        validerHvisAvhuketSaaHarDato(innhold.dokumenter.p3000, "P3000")
-        validerHvisAvhuketSaaHarDato(innhold.dokumenter.p4000, "P4000")
-        validerHvisAvhuketSaaHarDato(innhold.dokumenter.p5000, "P5000")
-        validerHvisAvhuketSaaHarDato(innhold.dokumenter.p6000, "P6000")
+        innhold.dokumenter.forEach { doc -> validerHvisAvhuketSaaHarDato(doc) }
     }
 
-    private fun validerHvisAvhuketSaaHarDato(
-        dokumentMedSendtDato: DokumentMedSendtDato,
-        dokumentnavn: String,
-    ) {
+    private fun validerHvisAvhuketSaaHarDato(dokumentMedSendtDato: DokumentMedSendtDato) {
         if (dokumentMedSendtDato.sendt) {
-            dokumentMedSendtDato.dato ?: throw DokumentManglerDatoException("Dokument $dokumentnavn er markert som sendt men mangler dato")
+            dokumentMedSendtDato.dato
+                ?: throw DokumentManglerDatoException("Dokument ${dokumentMedSendtDato.dokumenttype} er markert som sendt men mangler dato")
         }
     }
 

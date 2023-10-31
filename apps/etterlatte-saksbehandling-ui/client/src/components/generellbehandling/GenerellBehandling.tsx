@@ -26,7 +26,7 @@ const GenerellBehandling = () => {
         case 'KRAVPAKKE_UTLAND':
           return (
             <KravpakkeUtland
-              utlandsBehandling={generellBehandling as Generellbehandling & { innhold: KravpakkeUtland }}
+              utlandsBehandling={generellBehandling as Generellbehandling & { innhold: KravpakkeUtland | null }}
             />
           )
         case 'ANNEN':

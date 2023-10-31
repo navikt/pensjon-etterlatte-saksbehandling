@@ -57,7 +57,7 @@ const FlexOrder = styled.div`
   flex-wrap: wrap;
 `
 
-const KravpakkeUtland = (props: { utlandsBehandling: Generellbehandling & { innhold: KravpakkeUtland } }) => {
+const KravpakkeUtland = (props: { utlandsBehandling: Generellbehandling & { innhold: KravpakkeUtland | null } }) => {
   const { utlandsBehandling } = props
   const innhold = utlandsBehandling.innhold
   const [putOppdaterGenerellBehandlingStatus, putOppdaterGenerellBehandling] = useApiCall(oppdaterGenerellBehandling)
@@ -76,7 +76,7 @@ const KravpakkeUtland = (props: { utlandsBehandling: Generellbehandling & { innh
   const defaultDokumentState: DokumentSendtMedDato[] = [{ dokumenttype: '', sendt: false, dato: '' }]
 
   const [dokumenter, setDokumenter] = useState<DokumentSendtMedDato[]>(
-    utlandsBehandling.innhold.dokumenter ?? defaultDokumentState
+    utlandsBehandling.innhold?.dokumenter ?? defaultDokumentState
   )
   const [errorLand, setErrLand] = useState<boolean>(false)
   const [nyttBrevStatus, opprettBrev] = useApiCall(opprettBrevForSak)

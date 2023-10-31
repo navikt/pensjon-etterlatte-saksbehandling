@@ -124,7 +124,7 @@ export default function SluttbehandlingUtland({
                       label="Kravpakke sendt til"
                     />
                     <Info
-                      label="Dokumenttyper og datosendt"
+                      label="Dokumenttyper og dato sendt"
                       tekst={visDatoerForSendteDokumenter(kravpakkeMedAvdoed.kravpakke.innhold)}
                     />
                     <Info label="Saks-ID RINA" tekst={kravpakkeMedAvdoed.kravpakke.innhold.rinanummer} />

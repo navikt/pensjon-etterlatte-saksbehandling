@@ -8,6 +8,7 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.application
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
+import no.nav.etterlatte.libs.common.person.HentAdressebeskyttelseRequest
 import no.nav.etterlatte.libs.common.person.HentFolkeregisterIdenterForAktoerIdBolkRequest
 import no.nav.etterlatte.libs.common.person.HentGeografiskTilknytningRequest
 import no.nav.etterlatte.libs.common.person.HentPdlIdentRequest
@@ -31,6 +32,13 @@ fun Route.personRoute(service: PersonService) {
 
                 service.hentOpplysningsperson(hentPersonRequest).let { call.respond(it) }
             }
+        }
+
+        post("/adressebeskyttelse") {
+            val request = call.receive<HentAdressebeskyttelseRequest>()
+            logger.info("Henter adressebeskyttelse/gradering for fnr=${request.ident}")
+
+            call.respond(service.hentAdressebeskyttelseGradering(request))
         }
     }
 

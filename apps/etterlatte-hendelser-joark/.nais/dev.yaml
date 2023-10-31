@@ -42,9 +42,14 @@ spec:
       value: api://dev-gcp.etterlatte.etterlatte-behandling/.default
     - name: ETTERLATTE_BEHANDLING_URL
       value: http://etterlatte-behandling
+    - name: PDLTJENESTER_AZURE_SCOPE
+      value: api://dev-gcp.etterlatte.etterlatte-pdltjenester/.default
+    - name: ETTERLATTE_PDLTJENESTER_URL
+      value: http://etterlatte-pdltjenester
   accessPolicy:
     outbound:
       rules:
         - application: etterlatte-behandling
+        - application: etterlatte-pdltjenester
       external:
         - host: saf-q2.dev-fss-pub.nais.io

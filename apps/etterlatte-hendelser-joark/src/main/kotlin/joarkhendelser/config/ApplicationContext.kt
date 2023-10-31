@@ -4,6 +4,7 @@ import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 import joarkhendelser.behandling.BehandlingKlient
 import joarkhendelser.joark.SafKlient
+import joarkhendelser.pdl.PdlKlient
 import no.nav.etterlatte.joarkhendelser.JoarkHendelseHandler
 import no.nav.etterlatte.joarkhendelser.common.JoarkhendelseKonsument
 import no.nav.etterlatte.libs.common.requireEnvValue
@@ -24,10 +25,17 @@ class ApplicationContext(env: Map<String, String> = System.getenv()) {
             config.getString("saf.base.url"),
         )
 
+    private val pdlKlient =
+        PdlKlient(
+            httpClientCredentials(config.getString("pdl.azure.scope")),
+            config.getString("pdl.base.url"),
+        )
+
     private val joarkHendelseHandler =
         JoarkHendelseHandler(
             behandlingKlient,
             safKlient,
+            pdlKlient,
         )
 
     val joarkKonsument =

@@ -46,8 +46,6 @@ interface SakService {
 
     fun finnSak(id: Long): Sak?
 
-    fun slettSak(id: Long)
-
     fun markerSakerMedSkjerming(
         sakIder: List<Long>,
         skjermet: Boolean,
@@ -93,10 +91,6 @@ class SakServiceImpl(
 
     override fun finnSaker(person: String): List<Sak> {
         return finnSakerForPerson(person).filterForEnheter()
-    }
-
-    override fun slettSak(id: Long) {
-        dao.slettSak(id)
     }
 
     override fun markerSakerMedSkjerming(

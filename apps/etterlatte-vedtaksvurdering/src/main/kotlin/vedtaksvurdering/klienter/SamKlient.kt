@@ -1,19 +1,20 @@
 package no.nav.etterlatte.vedtaksvurdering.klienter
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import com.github.michaelbull.result.mapBoth
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
-import io.ktor.http.HttpStatusCode
+import io.ktor.client.call.body
+import io.ktor.client.plugins.ResponseException
+import io.ktor.client.request.post
+import io.ktor.client.request.setBody
+import io.ktor.http.ContentType
+import io.ktor.http.contentType
+import io.ktor.http.isSuccess
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
-import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
-import no.nav.etterlatte.libs.ktorobo.AzureAdClient
-import no.nav.etterlatte.libs.ktorobo.DownstreamResourceClient
-import no.nav.etterlatte.libs.ktorobo.Resource
 import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.etterlatte.vedtaksvurdering.Vedtak
 import no.nav.etterlatte.vedtaksvurdering.VedtakBehandlingInnhold
@@ -33,14 +34,11 @@ interface SamKlient {
 
 class SamKlientImpl(
     config: Config,
-    httpClient: HttpClient,
+    private val httpClient: HttpClient,
     private val featureToggleService: FeatureToggleService,
 ) : SamKlient {
     private val logger = LoggerFactory.getLogger(SamKlient::class.java)
-    private val azureAdClient = AzureAdClient(config)
-    private val downstreamResourceClient = DownstreamResourceClient(azureAdClient, httpClient)
 
-    private val clientId = config.getString("samordnevedtak.client.id")
     private val resourceUrl = config.getString("samordnevedtak.resource.url")
 
     override suspend fun samordneVedtak(
@@ -56,25 +54,20 @@ class SamKlientImpl(
         }
 
         try {
-            return downstreamResourceClient
-                .post(
-                    resource =
-                        Resource(
-                            clientId = clientId,
-                            url = "$resourceUrl/api/vedtak/samordne",
-                        ),
-                    brukerTokenInfo = brukerTokenInfo,
-                    postBody = vedtak.tilSamordneRequest(),
-                )
-                .mapBoth(
-                    success = { json -> json.response.let { objectMapper.readValue<SamordneVedtakRespons>(it.toString()) }.ventPaaSvar },
-                    failure = { throwableErrorMessage -> throw throwableErrorMessage },
-                )
+            val response =
+                httpClient.post(resourceUrl) {
+                    contentType(ContentType.Application.Json)
+                    setBody(vedtak.tilSamordneRequest())
+                }
+
+            if (response.status.isSuccess()) {
+                return response.body<String>().let { objectMapper.readValue<SamordneVedtakRespons>(it) }.ventPaaSvar
+            } else {
+                throw ResponseException(response, "Samordne vedtak feilet [id=${vedtak.id}]")
+            }
         } catch (e: Exception) {
-            logger.error("Samordne vedtak feilet", e)
-            throw SamordneVedtakExceptionUnauthorizedException(
-                "Samordne vedtak feilet [id=${vedtak.id}]",
-            )
+            logger.error("Samordne vedtak feilet [id=${vedtak.id}]", e)
+            throw SamordneVedtakGenerellException("Samordne vedtak feilet [id=${vedtak.id}]", e)
         }
     }
 }
@@ -83,7 +76,7 @@ internal fun Vedtak.tilSamordneRequest(): SamordneVedtakRequest {
     val innhold =
         when (this.innhold) {
             is VedtakBehandlingInnhold -> this.innhold
-            is VedtakTilbakekrevingInnhold -> throw SamordneVedtakBehandlingIkkeStoettetException(
+            is VedtakTilbakekrevingInnhold -> throw SamordneVedtakBehandlingUgyldigForespoerselException(
                 "Tilbakekreving skal ikke gjennom samordning",
             )
         }
@@ -109,16 +102,13 @@ internal data class SamordneVedtakRequest(
 
 private class SamordneVedtakRespons(val ventPaaSvar: Boolean)
 
-class SamordneVedtakExceptionUnauthorizedException(override val message: String) : ForespoerselException(
-    status = HttpStatusCode.Unauthorized.value,
-    code = "SAMORDNE_VEDTAK_FEIL_I_TILGANG",
-    detail = message,
-)
-
-class SamordneVedtakBehandlingIkkeStoettetException(override val message: String) : UgyldigForespoerselException(
-    "SAMORDNE_VEDTAK_BEHANDLING_IKKE_STOETTET",
+class SamordneVedtakBehandlingUgyldigForespoerselException(override val message: String) : UgyldigForespoerselException(
+    "SAMORDNE_VEDTAK_UGYLDIG_FORESPOERSEL",
     message,
 )
+
+class SamordneVedtakGenerellException(override val message: String, override val cause: Throwable) :
+    Exception(message, cause)
 
 enum class SamordneVedtakFeatureToggle(private val key: String) : FeatureToggle {
     SamordneVedtakMedSamToggle("pensjon-etterlatte.samordne-vedtak-med-sam"),

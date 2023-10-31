@@ -1,7 +1,7 @@
 export interface Generellbehandling {
   id: string
   sakId: number
-  innhold: Innhold
+  innhold: Innhold | null
   type: GenerellBehandlingType
   opprettet: Date
   status: Status

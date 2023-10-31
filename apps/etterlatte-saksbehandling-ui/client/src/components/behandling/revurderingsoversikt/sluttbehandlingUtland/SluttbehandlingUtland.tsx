@@ -124,7 +124,7 @@ export default function SluttbehandlingUtland({
                       label="Kravpakke sendt til"
                     />
                     <Info
-                      label="Dokumenttyper og datosendt"
+                      label="Dokumenttyper og dato sendt"
                       tekst={visDatoerForSendteDokumenter(kravpakkeMedAvdoed.kravpakke.innhold)}
                     />
                     <Info label="Saks-ID RINA" tekst={kravpakkeMedAvdoed.kravpakke.innhold.rinanummer} />
@@ -209,7 +209,7 @@ export default function SluttbehandlingUtland({
   )
 }
 
-function formaterKravpakkeLand(innhold: KravpakkeUtland | undefined, landliste: ILand[] | null) {
+function formaterKravpakkeLand(innhold: KravpakkeUtland | null, landliste: ILand[] | null) {
   if (landliste && innhold?.landIsoKode) {
     return innhold?.landIsoKode?.map((kode) => oversettIsokodeTilLandnavn(landliste, kode)).join(', ')
   } else {
@@ -217,7 +217,7 @@ function formaterKravpakkeLand(innhold: KravpakkeUtland | undefined, landliste: 
   }
 }
 
-const visDatoerForSendteDokumenter = (innhold: KravpakkeUtland | undefined): string => {
+const visDatoerForSendteDokumenter = (innhold: KravpakkeUtland | null): string => {
   if (innhold?.dokumenter) {
     return innhold.dokumenter
       .filter((doc) => doc.sendt && doc.dato)

@@ -57,7 +57,7 @@ const FlexOrder = styled.div`
   flex-wrap: wrap;
 `
 
-const KravpakkeUtland = (props: { utlandsBehandling: Generellbehandling & { innhold: KravpakkeUtland } }) => {
+const KravpakkeUtland = (props: { utlandsBehandling: Generellbehandling & { innhold: KravpakkeUtland | null } }) => {
   const { utlandsBehandling } = props
   const innhold = utlandsBehandling.innhold
   const [putOppdaterGenerellBehandlingStatus, putOppdaterGenerellBehandling] = useApiCall(oppdaterGenerellBehandling)
@@ -76,7 +76,7 @@ const KravpakkeUtland = (props: { utlandsBehandling: Generellbehandling & { innh
   const defaultDokumentState: DokumentSendtMedDato[] = [{ dokumenttype: '', sendt: false, dato: '' }]
 
   const [dokumenter, setDokumenter] = useState<DokumentSendtMedDato[]>(
-    utlandsBehandling.innhold.dokumenter ?? defaultDokumentState
+    utlandsBehandling.innhold?.dokumenter ?? defaultDokumentState
   )
   const [errorLand, setErrLand] = useState<boolean>(false)
   const [nyttBrevStatus, opprettBrev] = useApiCall(opprettBrevForSak)
@@ -295,21 +295,24 @@ const KravpakkeUtland = (props: { utlandsBehandling: Generellbehandling & { innh
                 {dokumenter.map((dokument, idx) => (
                   <Table.Row key={idx}>
                     <Table.DataCell>
-                      <TextField
-                        disabled={!redigerbar}
-                        label={dokument.dokumenttype}
-                        size="medium"
-                        style={{ maxWidth: '16rem' }}
-                        onChange={(e) => {
-                          const oppdaterteDocType = dokumenter.map((doc, i) => {
-                            if (idx === i) {
-                              return { ...doc, dokumenttype: e.target.value }
-                            }
-                            return doc
-                          })
-                          setDokumenter(oppdaterteDocType)
-                        }}
-                      />
+                      {redigerbar ? (
+                        <TextField
+                          label={dokument.dokumenttype}
+                          size="medium"
+                          style={{ maxWidth: '16rem' }}
+                          onChange={(e) => {
+                            const oppdaterteDocType = dokumenter.map((doc, i) => {
+                              if (idx === i) {
+                                return { ...doc, dokumenttype: e.target.value }
+                              }
+                              return doc
+                            })
+                            setDokumenter(oppdaterteDocType)
+                          }}
+                        />
+                      ) : (
+                        <BodyShort>dokument.dokumenttype</BodyShort>
+                      )}
                     </Table.DataCell>
                     <Table.DataCell>
                       <Checkbox
@@ -348,12 +351,14 @@ const KravpakkeUtland = (props: { utlandsBehandling: Generellbehandling & { innh
                 ))}
               </Table.Body>
             </StandardBreddeTabell>
-            <Button
-              style={{ marginTop: '1.5rem' }}
-              onClick={() => setDokumenter((dokumenter) => dokumenter.concat(defaultDokumentState))}
-            >
-              Legg til dokument
-            </Button>
+            {redigerbar && (
+              <Button
+                style={{ marginTop: '1.5rem' }}
+                onClick={() => setDokumenter((dokumenter) => dokumenter.concat(defaultDokumentState))}
+              >
+                Legg til dokument
+              </Button>
+            )}
             <div style={{ marginTop: '3.5rem', marginBottom: '3rem' }}>
               <Heading size="medium" level="3">
                 Varsling til bruker

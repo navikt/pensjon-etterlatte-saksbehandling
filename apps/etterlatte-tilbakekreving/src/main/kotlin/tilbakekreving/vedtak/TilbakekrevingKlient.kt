@@ -85,6 +85,7 @@ class TilbakekrevingKlient(
                     kodeAksjon = KodeAksjon.FATTE_VEDTAK.kode
                     vedtakId = vedtak.vedtakId.toBigInteger()
                     datoVedtakFagsystem = vedtak.fattetVedtak.dato.toXMLDate()
+                    renterBeregnes = "N"
                     saksbehId = vedtak.fattetVedtak.saksbehandler
                     enhetAnsvarlig = ANSVARLIG_ENHET
                     kodeHjemmel = vedtak.hjemmel.kode

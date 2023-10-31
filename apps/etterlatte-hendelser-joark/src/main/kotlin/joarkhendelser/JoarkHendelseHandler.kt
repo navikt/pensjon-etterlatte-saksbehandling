@@ -34,22 +34,21 @@ class JoarkHendelseHandler(
         logger.info("Starter behandling av hendelse (id=${hendelse.hendelsesId}) med tema ${hendelse.temaNytt}")
 
         val sakType = hentSakTypeFraTema(hendelse.temaNytt)
+        val journalpostId = hendelse.journalpostId
+
+        val journalpost = safKlient.hentJournalpost(journalpostId).journalpost
+
+        if (journalpost == null) {
+            // TODO: Hva skal vi gjøre her...?
+            logger.error("Fant ingen journalpost med id=$journalpostId")
+            return
+        } else if (journalpost.erFerdigstilt()) {
+            // Hva gjør vi med ferdigstilte journalposter...?
+            logger.error("Journalpost med id=${hendelse.journalpostId} er ferdigstilt")
+            return
+        }
 
         try {
-            val journalpostId = hendelse.journalpostId
-
-            val journalpost = safKlient.hentJournalpost(journalpostId).journalpost
-
-            if (journalpost == null) {
-                // TODO: Hva skal vi gjøre her...?
-                logger.error("Fant ingen journalpost med id=$journalpostId")
-                return
-            } else if (journalpost.erFerdigstilt()) {
-                // Hva gjør vi med ferdigstilte journalposter...?
-                logger.error("Journalpost med id=${hendelse.journalpostId} er ferdigstilt")
-                return
-            }
-
             val ident =
                 when (journalpost.bruker?.type) {
                     BrukerIdType.FNR -> journalpost.bruker.id
@@ -85,7 +84,8 @@ class JoarkHendelseHandler(
 
             logger.info("Opprettet oppgave (id=$oppgaveId) med sakId=$sakId")
         } catch (e: Exception) {
-            logger.error("Ukjent feil oppsto: ", e)
+            // TODO: Fjerne fnr logging før prodsetting
+            logger.error("Ukjent feil oppsto ved behandling av journalpost for bruker=${journalpost.bruker}: ", e)
             throw e
         }
     }

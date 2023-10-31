@@ -35,7 +35,10 @@ export const GyldigFramsattOmstillingsstoenad = ({
       status={gyldigFremsattTilStatusIcon}
     >
       <div>
-        <Beskrivelse>Gjenlevende selv må være innsender av søknad om omstillingsstønad.</Beskrivelse>
+        <Beskrivelse>
+          Den som har rett til ytelsen må sette frem krav (verge hvis aktuelt). Om annet må fullmakt ligge i saken.
+          Søknaden må være signert og vise hva det søkes om, og den må være fremsatt i riktig land.
+        </Beskrivelse>
         <InfobokserWrapper>
           <InfoWrapper>
             <Info tekst={navn} undertekst={undertekst} label="Innsender" />

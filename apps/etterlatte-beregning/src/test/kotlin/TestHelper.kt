@@ -13,6 +13,7 @@ import no.nav.etterlatte.avkorting.regler.AvkortetYtelseGrunnlag
 import no.nav.etterlatte.avkorting.regler.InntektAvkortingGrunnlag
 import no.nav.etterlatte.avkorting.regler.InntektAvkortingGrunnlagWrapper
 import no.nav.etterlatte.beregning.Beregning
+import no.nav.etterlatte.beregning.OverstyrBeregning
 import no.nav.etterlatte.beregning.grunnlag.InstitusjonsoppholdBeregningsgrunnlag
 import no.nav.etterlatte.beregning.regler.barnepensjon.BarnepensjonGrunnlag
 import no.nav.etterlatte.libs.common.IntBroek
@@ -246,6 +247,7 @@ fun avkortetYtelse(
 fun beregning(
     beregningId: UUID = UUID.randomUUID(),
     beregninger: List<Beregningsperiode> = listOf(beregningsperiode()),
+    overstyrBeregning: OverstyrBeregning? = null,
 ) = Beregning(
     beregningId = beregningId,
     behandlingId = UUID.randomUUID(),
@@ -253,6 +255,7 @@ fun beregning(
     beregningsperioder = beregninger,
     beregnetDato = Tidspunkt.now(),
     grunnlagMetadata = Metadata(sakId = 123L, versjon = 1L),
+    overstyrBeregning = overstyrBeregning,
 )
 
 fun beregningsperiode(

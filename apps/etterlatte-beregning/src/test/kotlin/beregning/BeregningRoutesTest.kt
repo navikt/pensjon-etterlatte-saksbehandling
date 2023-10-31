@@ -97,9 +97,13 @@ internal class BeregningRoutesTest {
     @Test
     fun `skal hente beregning`() {
         val beregning = beregning()
+        val behandling = mockk<DetaljertBehandling>()
 
         coEvery { behandlingKlient.harTilgangTilBehandling(any(), any()) } returns true
         every { beregningRepository.hent(beregning.behandlingId) } returns beregning
+        coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
+        every { behandling.sak } returns 1L
+        every { beregningRepository.hentOverstyrBeregning(1L) } returns null
 
         testApplication {
             environment { config = applicationConfig }
@@ -173,6 +177,7 @@ internal class BeregningRoutesTest {
     private fun beregning(
         behandlingId: UUID = randomUUID(),
         datoFOM: YearMonth = YearMonth.of(2021, 2),
+        overstyrBeregning: OverstyrBeregning? = null,
     ) = Beregning(
         beregningId = randomUUID(),
         behandlingId = behandlingId,
@@ -192,6 +197,7 @@ internal class BeregningRoutesTest {
                     kilde = Grunnlagsopplysning.RegelKilde("regelid", Tidspunkt.now(), "1"),
                 ),
             ),
+        overstyrBeregning = overstyrBeregning,
     )
 
     private fun mockBehandling(): DetaljertBehandling =

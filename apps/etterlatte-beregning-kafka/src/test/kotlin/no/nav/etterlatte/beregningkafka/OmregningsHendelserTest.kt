@@ -37,6 +37,7 @@ internal class OmregningsHendelserTest {
                 beregningsperioder = listOf(),
                 beregnetDato = Tidspunkt.now(),
                 grunnlagMetadata = Metadata(1234, 1),
+                overstyrBeregning = null,
             )
 
         val returnValue =

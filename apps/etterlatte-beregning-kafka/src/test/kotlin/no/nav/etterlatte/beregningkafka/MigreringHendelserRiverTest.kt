@@ -59,6 +59,7 @@ internal class MigreringHendelserRiverTest {
                 ),
             beregnetDato = Tidspunkt.now(),
             grunnlagMetadata = Metadata(1234, 1),
+            overstyrBeregning = null,
         )
     private val fnr = AVDOED_FOEDSELSNUMMER
     private val request =

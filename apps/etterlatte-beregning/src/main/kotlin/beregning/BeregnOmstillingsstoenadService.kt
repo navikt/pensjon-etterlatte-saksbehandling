@@ -170,6 +170,7 @@ class BeregnOmstillingsstoenadService(
                                     ),
                             )
                         },
+                    overstyrBeregning = null,
                 )
 
             is RegelkjoeringResultat.UgyldigPeriode ->
@@ -202,6 +203,7 @@ class BeregnOmstillingsstoenadService(
                         trygdetid = 0,
                     ),
                 ),
+            overstyrBeregning = null,
         )
     }
 

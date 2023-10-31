@@ -72,27 +72,29 @@ class TilbakekrevingKlient(
                     enhetAnsvarlig = ANSVARLIG_ENHET
                     kodeHjemmel = vedtak.hjemmel.kode
                     kontrollfelt = vedtak.kontrollfelt
-                    vedtak.perioder.map { tilbakekrevingPeriode ->
-                        TilbakekrevingsperiodeDto().apply {
-                            periode =
-                                PeriodeDto().apply {
-                                    fom = tilbakekrevingPeriode.maaned.atDay(1).toXMLDate()
-                                    tom = tilbakekrevingPeriode.maaned.atEndOfMonth().toXMLDate()
-                                }
-                            renterBeregnes =
-                                if (tilbakekrevingPeriode.ytelse.rentetillegg > 0) {
-                                    RenterBeregnes.JA.kode
-                                } else {
-                                    RenterBeregnes.NEI.kode
-                                }
-                            belopRenter = tilbakekrevingPeriode.ytelse.rentetillegg.toBigDecimal()
+                    tilbakekrevingsperiode.addAll(
+                        vedtak.perioder.map { tilbakekrevingPeriode ->
+                            TilbakekrevingsperiodeDto().apply {
+                                periode =
+                                    PeriodeDto().apply {
+                                        fom = tilbakekrevingPeriode.maaned.atDay(1).toXMLDate()
+                                        tom = tilbakekrevingPeriode.maaned.atEndOfMonth().toXMLDate()
+                                    }
+                                renterBeregnes =
+                                    if (tilbakekrevingPeriode.ytelse.rentetillegg > 0) {
+                                        RenterBeregnes.JA.kode
+                                    } else {
+                                        RenterBeregnes.NEI.kode
+                                    }
+                                belopRenter = tilbakekrevingPeriode.ytelse.rentetillegg.toBigDecimal()
 
-                            tilbakekrevingsbelop.apply {
-                                add(tilbakekrevingPeriode.ytelse.toTilbakekreivngsbelopYtelse(vedtak.aarsak))
-                                add(tilbakekrevingPeriode.feilkonto.toTilbakekreivngsbelopFeilkonto())
+                                tilbakekrevingsbelop.apply {
+                                    add(tilbakekrevingPeriode.ytelse.toTilbakekreivngsbelopYtelse(vedtak.aarsak))
+                                    add(tilbakekrevingPeriode.feilkonto.toTilbakekreivngsbelopFeilkonto())
+                                }
                             }
-                        }
-                    }
+                        },
+                    )
                 }
         }
     }

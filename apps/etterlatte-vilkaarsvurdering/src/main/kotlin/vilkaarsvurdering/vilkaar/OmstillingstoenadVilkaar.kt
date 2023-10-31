@@ -265,6 +265,8 @@ object OmstillingstoenadVilkaar {
                     beskrivelse =
                         """
                         For at dette vilkåret skal være oppfylt, og gjenlevende ha rett til ytelser etter dette kapitlet, må vedkommende være medlem i trygden.
+                        
+                        Der er unntak som gjør at vilkåret over ikke gjelder. Se hvilke når du krysser "Nei" til spørsmålet om gjenlevende er medlem i trygden.
                         """.trimIndent(),
                     spoersmaal = "Er gjenlevende medlem i trygden?",
                     lovreferanse =
@@ -285,7 +287,7 @@ object OmstillingstoenadVilkaar {
             type = VilkaarType.OMS_GJENLEVENDES_MEDLEMSKAP_UNNTAK_PENSJON,
             tittel =
                 """
-                Ja, både den avdøde og den gjenlevende har mindre enn 20 års botid, men avdøde har opptjent rett til tilleggspensjon
+                Ja, både avdøde og gjenlevende har mindre enn 20 års botid, og det gis stønad med en trygdetid lik avdødes antall poengår
                 """.trimIndent(),
             lovreferanse =
                 Lovreferanse(

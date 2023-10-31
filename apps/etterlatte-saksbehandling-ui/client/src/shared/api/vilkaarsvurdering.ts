@@ -57,9 +57,16 @@ export interface Vilkaar {
 
 export interface Vilkaarsgrunnlag<T> {
   id: string
-  opplysningsType: string
+  opplysningsType: VilkaarsgrunnlagOpplysningstyper
   kilde: Kilde
   opplysning: T
+}
+
+export enum VilkaarsgrunnlagOpplysningstyper {
+  SOEKER_FOEDSELSDATO = 'SOEKER_FOEDSELSDATO',
+  AVDOED_DOEDSDATO = 'AVDOED_DOEDSDATO',
+  VIRKNINGSTIDSPUNKT = 'VIRKNINGSTIDSPUNKT',
+  SOEKNAD_MOTTATT_DATO = 'SOEKNAD_MOTTATT_DATO',
 }
 
 export interface Delvilkaar {

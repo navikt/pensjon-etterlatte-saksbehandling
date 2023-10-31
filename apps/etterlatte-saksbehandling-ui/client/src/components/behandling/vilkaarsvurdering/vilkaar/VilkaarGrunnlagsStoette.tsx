@@ -11,7 +11,7 @@ export const VilkaarGrunnlagsStoette = ({ vilkaar }: { vilkaar: Vilkaar }) => {
       case 'OMS_AKTIVITET_ETTER_6_MND':
         return <OmsAktivitetEtter6Maaneder grunnlag={vilkaar.grunnlag} />
       default:
-        return <></>
+        return null
     }
   }
 

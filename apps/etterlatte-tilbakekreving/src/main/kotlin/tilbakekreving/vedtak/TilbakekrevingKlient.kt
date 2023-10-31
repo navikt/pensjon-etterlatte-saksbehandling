@@ -66,7 +66,7 @@ class TilbakekrevingKlient(
             runBlocking {
                 val httpResponse =
                     httpClient.post("$url/tilbakekreving/tilbakekrevingsvedtak") {
-                        contentType(ContentType.Text.Plain)
+                        contentType(ContentType.Application.Json)
                         setBody(requestAsXml)
                     }
 

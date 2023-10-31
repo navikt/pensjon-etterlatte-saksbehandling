@@ -24,9 +24,10 @@ class JoarkHendelseHandler(
         if (!hendelse.erTemaEtterlatte()) {
             logger.info("Hendelse (id=${hendelse.hendelsesId}) har tema ${hendelse.temaNytt} og håndteres ikke")
             return
-        } else if (hendelse.erFerdigstilt()) {
-            // Hva gjør vi med ferdigstilte journalposter...?
-            logger.error("Journalpost med id=${hendelse.journalpostId} er ferdigstilt")
+        } else if (hendelse.hendelsesType != "JournalpostMottatt") {
+            logger.warn(
+                "Hendelse (id=${hendelse.hendelsesId}) har hendelsestype=${hendelse.hendelsesType} og håndteres ikke",
+            )
             return
         }
 
@@ -42,6 +43,10 @@ class JoarkHendelseHandler(
             if (journalpost == null) {
                 // TODO: Hva skal vi gjøre her...?
                 logger.error("Fant ingen journalpost med id=$journalpostId")
+                return
+            } else if (journalpost.erFerdigstilt()) {
+                // Hva gjør vi med ferdigstilte journalposter...?
+                logger.error("Journalpost med id=${hendelse.journalpostId} er ferdigstilt")
                 return
             }
 
@@ -75,7 +80,8 @@ class JoarkHendelseHandler(
             val sakId = behandlingKlient.hentEllerOpprettSak(ident, sakType, gradering)
 
             logger.info("Oppretter journalføringsoppgave for sak=$sakId")
-            val oppgaveId = behandlingKlient.opprettOppgave(sakId)
+            val oppgaveId =
+                behandlingKlient.opprettOppgave(sakId, hendelse.journalpostStatusReadable(), journalpostId.toString())
 
             logger.info("Opprettet oppgave (id=$oppgaveId) med sakId=$sakId")
         } catch (e: Exception) {
@@ -96,4 +102,12 @@ private fun JournalfoeringHendelseRecord.erTemaEtterlatte(): Boolean =
     temaNytt == SakType.BARNEPENSJON.tema ||
         temaNytt == SakType.OMSTILLINGSSTOENAD.tema
 
-private fun JournalfoeringHendelseRecord.erFerdigstilt(): Boolean = journalpostStatus == "FERDIGSTILT"
+private fun JournalfoeringHendelseRecord.journalpostStatusReadable(): String =
+    when (journalpostStatus) {
+        "MOTTATT" -> "Mottatt"
+        "JOURNALFOERT" -> "Ferdigstilt"
+        "UKJENT_BRUKER" -> "Ukjent bruker"
+        "UTGAAR" -> "Feil ifm. mottak eller journalføring"
+        "OPPLASTING_DOKUMENT" -> throw IllegalArgumentException("Status $journalpostStatus tilhører dagpenger!")
+        else -> throw IllegalArgumentException("Ukjent journalpostStatus $journalpostStatus")
+    }

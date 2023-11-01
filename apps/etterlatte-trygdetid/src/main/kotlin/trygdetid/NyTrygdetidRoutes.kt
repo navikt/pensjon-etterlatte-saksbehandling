@@ -73,6 +73,7 @@ fun Route.trygdetidV2(
                         trygdetidOverstyringDto.id,
                         behandlingId,
                         trygdetidOverstyringDto.overstyrtNorskPoengaar,
+                        brukerTokenInfo,
                     )
                 call.respond(trygdetid.toDto())
             }

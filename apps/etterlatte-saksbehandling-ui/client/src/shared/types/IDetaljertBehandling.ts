@@ -56,14 +56,14 @@ export enum IBehandlingStatus {
   AVBRUTT = 'AVBRUTT',
 }
 
-export enum IUtenlandstilsnittType {
+export enum INasjonalitetsType {
   NASJONAL = 'NASJONAL',
   UTLANDSTILSNITT = 'UTLANDSTILSNITT',
   BOSATT_UTLAND = 'BOSATT_UTLAND',
 }
 
 export interface IUtenlandstilsnitt {
-  type: IUtenlandstilsnittType
+  type: INasjonalitetsType
   kilde: KildeSaksbehandler
   begrunnelse: string
 }

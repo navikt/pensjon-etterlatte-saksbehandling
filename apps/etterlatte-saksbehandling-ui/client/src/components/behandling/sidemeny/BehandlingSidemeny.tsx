@@ -6,7 +6,7 @@ import React, { useEffect, useState } from 'react'
 import { IBeslutning } from '~components/behandling/attestering/types'
 import { BehandlingFane, IBehandlingInfo } from '~components/behandling/sidemeny/IBehandlingInfo'
 import { IRolle } from '~store/reducers/SaksbehandlerReducer'
-import { IBehandlingStatus, IBehandlingsType } from '~shared/types/IDetaljertBehandling'
+import { IBehandlingStatus, IBehandlingsType, INasjonalitetsType } from '~shared/types/IDetaljertBehandling'
 import { useAppDispatch, useAppSelector } from '~store/Store'
 import { isFailure, isInitial, isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
 import { hentVedtakSammendrag } from '~shared/api/vedtaksvurdering'
@@ -28,12 +28,29 @@ import { featureToggleSjekklisteAktivert } from '~shared/types/Sjekkliste'
 import { updateSjekkliste } from '~store/reducers/SjekklisteReducer'
 import { erFerdigBehandlet } from '~components/behandling/felles/utils'
 import { hentSjekkliste, opprettSjekkliste } from '~shared/api/sjekkliste'
+import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
 
+const finnUtNasjonEllerUtland = (behandling: IBehandlingReducer): INasjonalitetsType => {
+  if (behandling.utenlandstilsnitt?.type) {
+    return behandling.utenlandstilsnitt?.type
+  } else {
+    if (behandling.behandlingType === IBehandlingsType.REVURDERING) {
+      if (behandling.revurderingsaarsak === Revurderingaarsak.SLUTTBEHANDLING_UTLAND) {
+        return INasjonalitetsType.UTLANDSTILSNITT //TODO: har ingen bedre måte å vite om det er bosatt utland eller bosatt norge https://jira.adeo.no/browse/EY-3018
+      } else {
+        return INasjonalitetsType.NASJONAL
+      }
+    } else {
+      return INasjonalitetsType.NASJONAL
+    }
+  }
+}
 const mapTilBehandlingInfo = (behandling: IBehandlingReducer, vedtak: VedtakSammendrag | null): IBehandlingInfo => ({
   type: behandling.behandlingType,
   behandlingId: behandling.id,
   sakId: behandling.sakId,
   sakType: behandling.sakType,
+  nasjonalEllerUtland: finnUtNasjonEllerUtland(behandling),
   status: behandling.status,
   saksbehandler: vedtak?.saksbehandlerId,
   virkningsdato: behandling.virkningstidspunkt?.dato,
@@ -68,7 +85,8 @@ export const BehandlingSidemeny = ({ behandling }: { behandling: IBehandlingRedu
     })
   }, [])
 
-  const erFoerstegangsbehandling = behandling?.behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING
+  const erFoerstegangsbehandling = behandling.behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING
+  const erRevurdering = behandling.behandlingType === IBehandlingsType.REVURDERING
 
   const [hentSjekklisteResult, hentSjekklisteForBehandling, resetSjekklisteResult] = useApiCall(hentSjekkliste)
   const [opprettSjekklisteResult, opprettSjekklisteForBehandling, resetOpprettSjekkliste] =
@@ -120,7 +138,7 @@ export const BehandlingSidemeny = ({ behandling }: { behandling: IBehandlingRedu
         </>
       )}
 
-      {sjekklisteAktivert && (
+      {sjekklisteAktivert && !erRevurdering && (
         <Tabs value={fane} iconPosition="top" onChange={(val) => dispatch(visFane(val as BehandlingFane))}>
           <Tabs.List>
             <Tabs.Tab value={BehandlingFane.DOKUMENTER} label="Dokumenter" icon={<FileTextIcon title="dokumenter" />} />
@@ -144,7 +162,7 @@ export const BehandlingSidemeny = ({ behandling }: { behandling: IBehandlingRedu
           </Tabs.Panel>
         </Tabs>
       )}
-      {!sjekklisteAktivert && behandling.søker?.foedselsnummer && (
+      {(!sjekklisteAktivert || erRevurdering) && behandling.søker?.foedselsnummer && (
         <Dokumentoversikt fnr={behandling.søker.foedselsnummer} liten />
       )}
       <AnnullerBehandling />

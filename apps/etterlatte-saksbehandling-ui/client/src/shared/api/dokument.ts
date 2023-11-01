@@ -7,6 +7,9 @@ export const hentDokumenter = async (fnr: string): Promise<ApiResponse<Journalpo
 export const ferdigstillJournalpost = async (journalpostId: string): Promise<ApiResponse<Blob>> =>
   apiClient.post(`/dokumenter/${journalpostId}/ferdigstill`, {})
 
+export const hentJournalpost = async (journalpostId: string): Promise<ApiResponse<Journalpost>> =>
+  apiClient.get(`/dokumenter/${journalpostId}`)
+
 export const hentDokumentPDF = async (args: {
   journalpostId: string
   dokumentInfoId: string

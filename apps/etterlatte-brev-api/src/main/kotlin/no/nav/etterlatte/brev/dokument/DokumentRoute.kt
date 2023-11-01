@@ -44,6 +44,13 @@ fun Route.dokumentRoute(
             call.respond(HttpStatusCode.OK)
         }
 
+        get("{journalpostId}") {
+            val journalpostId = call.parameters["journalpostId"]!!
+            val result = safService.hentJournalpost(journalpostId, brukerTokenInfo)
+
+            call.respond(result.journalpost ?: HttpStatusCode.NotFound)
+        }
+
         get("{journalpostId}/{dokumentInfoId}") {
             val journalpostId = call.parameters["journalpostId"]!!
             val dokumentInfoId = call.parameters["dokumentInfoId"]!!

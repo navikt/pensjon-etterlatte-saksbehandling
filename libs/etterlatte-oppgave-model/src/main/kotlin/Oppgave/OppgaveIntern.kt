@@ -108,6 +108,7 @@ enum class OppgaveType {
     TILBAKEKREVING,
     OMGJOERING,
     MANUELL_JOURNALFOERING,
+    JOURNALFOERING,
 }
 
 data class SaksbehandlerEndringDto(

@@ -1,27 +1,24 @@
 query(
-   $brukerId: BrukerIdInput!,
-   $foerste: Int!,
+   $journalpostId: String!,
 ) {
-    dokumentoversiktBruker(brukerId: $brukerId, foerste: $foerste, journalposttyper: [I, U], journalstatuser:[]) {
-        journalposter {
-            journalpostId
+    journalpost(journalpostId: $journalpostId) {
+        journalpostId
+        tittel
+        journalposttype
+        journalstatus
+        dokumenter {
+            dokumentInfoId
             tittel
-            journalposttype
-            journalstatus
-            dokumenter {
-                dokumentInfoId
-                tittel
-                dokumentvarianter {
-                    saksbehandlerHarTilgang
-                }
+            dokumentvarianter {
+                saksbehandlerHarTilgang
             }
-            avsenderMottaker {
-                id
-                navn
-                erLikBruker
-            }
-            kanal
-            datoOpprettet
         }
+        avsenderMottaker {
+            id
+            navn
+            erLikBruker
+        }
+        kanal
+        datoOpprettet
     }
 }

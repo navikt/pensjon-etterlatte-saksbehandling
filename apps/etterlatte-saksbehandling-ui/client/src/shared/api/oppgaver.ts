@@ -37,6 +37,7 @@ export type Oppgavetype =
   | 'TILBAKEKREVING'
   | 'OMGJOERING'
   | 'MANUELL_JOURNALFOERING'
+  | 'JOURNALFOERING'
 
 export const erOppgaveRedigerbar = (status: Oppgavestatus): boolean => ['NY', 'UNDER_BEHANDLING'].includes(status)
 

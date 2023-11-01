@@ -3,36 +3,38 @@ package no.nav.etterlatte.samordning.vedtak
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.call
+import io.ktor.server.application.install
 import io.ktor.server.response.respond
 import io.ktor.server.response.respondNullable
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.route
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.ktor.MaskinportenScopeAuthorizationPlugin
 import no.nav.etterlatte.libs.ktor.hentTokenClaims
 import java.time.LocalDate
 
 fun Route.samordningVedtakRoute(samordningVedtakService: SamordningVedtakService) {
-    route("ping") {
-        get {
-            call.respond("Tjeneste ok")
-        }
-    }
-
     route("api/vedtak") {
+        install(MaskinportenScopeAuthorizationPlugin) {
+            scopes = setOf("nav:etterlatteytelser:vedtaksinformasjon.read")
+        }
+
         get("{vedtakId}") {
             val vedtakId = requireNotNull(call.parameters["vedtakId"]).toLong()
 
             val tpnummer =
                 call.request.headers["tpnr"]
-                    ?: return@get call.respond(HttpStatusCode.BadRequest, "tpnr ikke angitt")
+                    ?: throw ManglerTpNrException()
 
             val samordningVedtakDto =
                 try {
                     samordningVedtakService.hentVedtak(
                         vedtakId = vedtakId,
-                        tpnr = tpnummer,
-                        organisasjonsnummer = call.orgNummer,
+                        MaskinportenTpContext(
+                            tpnr = Tjenestepensjonnummer(tpnummer),
+                            organisasjonsnr = call.orgNummer,
+                        ),
                     )
                 } catch (e: VedtakFeilSakstypeException) {
                     call.respond(HttpStatusCode.Unauthorized, "Ikke tilgang til sakstype")
@@ -60,15 +62,17 @@ fun Route.samordningVedtakRoute(samordningVedtakService: SamordningVedtakService
 
             val tpnummer =
                 call.request.headers["tpnr"]
-                    ?: return@get call.respond(HttpStatusCode.BadRequest, "tpnr ikke angitt")
+                    ?: throw ManglerTpNrException()
 
             val samordningVedtakDtos =
                 try {
                     samordningVedtakService.hentVedtaksliste(
                         virkFom = virkFom,
                         fnr = Folkeregisteridentifikator.of(fnr),
-                        tpnr = Tjenestepensjonnummer(tpnummer),
-                        organisasjonsnummer = call.orgNummer,
+                        MaskinportenTpContext(
+                            tpnr = Tjenestepensjonnummer(tpnummer),
+                            organisasjonsnr = call.orgNummer,
+                        ),
                     )
                 } catch (e: TjenestepensjonManglendeTilgangException) {
                     call.respond(HttpStatusCode.Unauthorized, e.message)

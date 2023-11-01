@@ -23,7 +23,7 @@ class TjenestepensjonKlient(config: Config, private val httpClient: HttpClient) 
 
     suspend fun harTpForholdByDate(
         fnr: String,
-        tpnr: String,
+        tpnr: Tjenestepensjonnummer,
         fomDato: LocalDate,
     ): Boolean {
         logger.info("Sjekk om det finnes tjenestepensjonsforhold pr $fomDato for ordning '$tpnr'")
@@ -33,7 +33,7 @@ class TjenestepensjonKlient(config: Config, private val httpClient: HttpClient) 
                 httpClient.get {
                     url("$tjenestepensjonUrl/finnForholdForBruker?datoFom=$fomDato")
                     header("fnr", fnr)
-                    header("tpnr", tpnr)
+                    header("tpnr", tpnr.value)
                 }.body()
             } catch (e: ClientRequestException) {
                 sikkerLogg.error("Feil ved sjekk av tjenestepensjonsforhold for [fnr=$fnr, fomDato=$fomDato, tpNr=$tpnr]", e)
@@ -50,7 +50,7 @@ class TjenestepensjonKlient(config: Config, private val httpClient: HttpClient) 
 
     suspend fun harTpYtelseOnDate(
         fnr: String,
-        tpnr: String,
+        tpnr: Tjenestepensjonnummer,
         fomDato: LocalDate,
     ): Boolean {
         logger.info("Sjekk om det finnes tjenestepensjonsytelse pr $fomDato for ordning '$tpnr'")
@@ -71,7 +71,7 @@ class TjenestepensjonKlient(config: Config, private val httpClient: HttpClient) 
                 }
             }
 
-        return tpNumre.tpNr.contains(tpnr)
+        return tpNumre.tpNr.contains(tpnr.value)
     }
 }
 

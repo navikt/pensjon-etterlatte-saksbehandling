@@ -22,14 +22,16 @@ class VedtaksvurderingKlient(config: Config, private val httpClient: HttpClient)
 
     suspend fun hentVedtak(
         vedtakId: Long,
-        organisasjonsnummer: String,
+        callerContext: CallerContext,
     ): VedtakSamordningDto {
         logger.info("Henter vedtaksvurdering med vedtakId=$vedtakId")
 
         return try {
             httpClient.get {
                 url("$vedtaksvurderingUrl/$vedtakId")
-                header("orgnr", organisasjonsnummer)
+                if (callerContext is MaskinportenTpContext) {
+                    header("orgnr", callerContext.organisasjonsnr)
+                }
             }.body()
         } catch (e: ClientRequestException) {
             when (e.response.status) {
@@ -44,7 +46,7 @@ class VedtaksvurderingKlient(config: Config, private val httpClient: HttpClient)
     suspend fun hentVedtaksliste(
         virkFom: LocalDate,
         fnr: String,
-        organisasjonsnummer: String,
+        callerContext: CallerContext,
     ): List<VedtakSamordningDto> {
         logger.info("Henter vedtaksliste, virkFom=$virkFom")
 
@@ -52,7 +54,9 @@ class VedtaksvurderingKlient(config: Config, private val httpClient: HttpClient)
             httpClient.get {
                 url("$vedtaksvurderingUrl?virkFom=$virkFom")
                 header("fnr", fnr)
-                header("orgnr", organisasjonsnummer)
+                if (callerContext is MaskinportenTpContext) {
+                    header("orgnr", callerContext.organisasjonsnr)
+                }
             }.body()
         } catch (e: ClientRequestException) {
             when (e.response.status) {

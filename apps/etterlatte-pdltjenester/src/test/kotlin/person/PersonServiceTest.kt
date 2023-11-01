@@ -4,10 +4,12 @@ import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.shouldBe
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
+import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.STOR_SNERK
 import no.nav.etterlatte.TRIVIELL_MIDTPUNKT
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.pdl.FantIkkePersonException
 import no.nav.etterlatte.libs.common.person.HentGeografiskTilknytningRequest
@@ -41,7 +43,8 @@ import org.junit.jupiter.api.fail
 internal class PersonServiceTest {
     private val pdlKlient = mockk<PdlKlient>()
     private val ppsKlient = mockk<ParallelleSannheterKlient>()
-    private val personService = PersonService(pdlKlient, ppsKlient)
+    private val featureToggleService = mockk<FeatureToggleService>()
+    private val personService = PersonService(pdlKlient, ppsKlient, featureToggleService)
 
     private val aktorIdMedNpid = "1234567890123"
     private val aktorIdMedFolkeregisterIdent = AVDOED_FOEDSELSNUMMER.value
@@ -65,6 +68,8 @@ internal class PersonServiceTest {
                         ),
                     ),
             )
+
+        every { featureToggleService.isEnabled(any(), any()) } returns true
 
         coEvery { pdlKlient.hentPerson(any()) } returns personResponse
         coEvery { pdlKlient.hentPersonBolk(any(), any()) } returns personBolkResponse

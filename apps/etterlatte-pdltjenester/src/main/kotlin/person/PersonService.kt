@@ -2,8 +2,10 @@ package no.nav.etterlatte.person
 
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
+import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.pdl.FantIkkePersonException
+import no.nav.etterlatte.libs.common.pdl.IngenIdentFamilierelasjonException
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.GeografiskTilknytning
@@ -11,11 +13,13 @@ import no.nav.etterlatte.libs.common.person.HentFolkeregisterIdenterForAktoerIdB
 import no.nav.etterlatte.libs.common.person.HentGeografiskTilknytningRequest
 import no.nav.etterlatte.libs.common.person.HentPdlIdentRequest
 import no.nav.etterlatte.libs.common.person.HentPersonRequest
+import no.nav.etterlatte.libs.common.person.HentPersongalleriRequest
 import no.nav.etterlatte.libs.common.person.NavPersonIdent
 import no.nav.etterlatte.libs.common.person.PDLIdentGruppeTyper
 import no.nav.etterlatte.libs.common.person.PdlIdentifikator
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.PersonRolle
+import no.nav.etterlatte.libs.common.person.Sivilstatus
 import no.nav.etterlatte.pdl.HistorikkForeldreansvar
 import no.nav.etterlatte.pdl.ParallelleSannheterKlient
 import no.nav.etterlatte.pdl.PdlKlient
@@ -171,6 +175,131 @@ class PersonService(
         }
     }
 
+    suspend fun hentPersongalleri(hentPersongalleriRequest: HentPersongalleriRequest): Persongalleri {
+        val persongalleri =
+            when (hentPersongalleriRequest.saktype) {
+                SakType.BARNEPENSJON ->
+                    hentPersongalleriForBarnepensjon(
+                        hentPersongalleriRequest.mottakerAvYtelsen,
+                        hentPersongalleriRequest.innsender,
+                    )
+
+                SakType.OMSTILLINGSSTOENAD ->
+                    hentPersongalleriForOmstillingsstoenad(
+                        hentPersongalleriRequest.mottakerAvYtelsen,
+                        hentPersongalleriRequest.innsender,
+                    )
+            }
+
+        if (persongalleri.personerUtenIdent.isNullOrEmpty() ||
+            featureToggleService.isEnabled(
+                PersonMappingToggle.AksepterPersonerUtenIdenter,
+                false,
+            )
+        ) {
+            return persongalleri
+        }
+        throw IngenIdentFamilierelasjonException()
+    }
+
+    private suspend fun hentPersongalleriForBarnepensjon(
+        mottakerAvYtelsen: Folkeregisteridentifikator,
+        innsender: Folkeregisteridentifikator?,
+    ): Persongalleri {
+        val mottaker =
+            hentPerson(
+                request =
+                    HentPersonRequest(
+                        foedselsnummer = mottakerAvYtelsen,
+                        rolle = PersonRolle.BARN,
+                        saktype = SakType.BARNEPENSJON,
+                    ),
+            )
+        val foreldre =
+            mottaker.familieRelasjon?.ansvarligeForeldre?.map {
+                hentPerson(
+                    request =
+                        HentPersonRequest(
+                            foedselsnummer = it, rolle = PersonRolle.GJENLEVENDE, saktype = SakType.BARNEPENSJON,
+                        ),
+                )
+            } ?: emptyList()
+
+        val (avdoede, gjenlevende) = foreldre.partition { it.doedsdato != null }
+        val soesken = avdoede.flatMap { it.avdoedesBarn ?: emptyList() }
+
+        val alleTilknyttedePersonerUtenIdent =
+            mottaker.familieRelasjon?.personerUtenIdent +
+                avdoede.flatMap {
+                    it.familieRelasjon?.personerUtenIdent ?: emptyList()
+                }
+        gjenlevende.flatMap { it.familieRelasjon?.personerUtenIdent ?: emptyList() }
+
+        return Persongalleri(
+            soeker = mottakerAvYtelsen.value,
+            innsender = innsender?.value,
+            soesken = soesken.map { it.foedselsnummer.value },
+            avdoed = avdoede.map { it.foedselsnummer.value },
+            gjenlevende = gjenlevende.map { it.foedselsnummer.value },
+            personerUtenIdent = if (alleTilknyttedePersonerUtenIdent.isNullOrEmpty()) null else alleTilknyttedePersonerUtenIdent,
+        )
+    }
+
+    suspend fun hentPersongalleriForOmstillingsstoenad(
+        mottakerAvYtelsen: Folkeregisteridentifikator,
+        innsender: Folkeregisteridentifikator?,
+    ): Persongalleri {
+        val mottaker =
+            hentPerson(
+                HentPersonRequest(
+                    foedselsnummer = mottakerAvYtelsen,
+                    rolle = PersonRolle.GJENLEVENDE,
+                    saktype = SakType.OMSTILLINGSSTOENAD,
+                ),
+            )
+
+        val partnerVedSivilstand =
+            mottaker.sivilstand?.filter {
+                listOf(
+                    Sivilstatus.GIFT,
+                    Sivilstatus.GJENLEVENDE_PARTNER,
+                    Sivilstatus.ENKE_ELLER_ENKEMANN,
+                ).contains(it.sivilstatus)
+            }?.mapNotNull { it.relatertVedSiviltilstand } ?: emptyList()
+
+        val (avdoede, levende) =
+            partnerVedSivilstand.map {
+                hentPerson(
+                    HentPersonRequest(
+                        foedselsnummer = it,
+                        rolle = PersonRolle.GJENLEVENDE,
+                        saktype = SakType.OMSTILLINGSSTOENAD,
+                    ),
+                )
+            }.partition { it.doedsdato != null }
+
+        // TODO: håndter tilfellet med felles barn med avdød riktig -- da gjelder det for samboer også
+
+        val personerUtenIdent =
+            (
+                avdoede.flatMap {
+                    it.familieRelasjon?.personerUtenIdent ?: emptyList()
+                }
+            ) + mottaker.familieRelasjon?.personerUtenIdent +
+                levende.flatMap {
+                    it.familieRelasjon?.personerUtenIdent ?: emptyList()
+                }
+
+        return Persongalleri(
+            soeker = mottakerAvYtelsen.value,
+            innsender = innsender?.value,
+            soesken = listOf(),
+            avdoed = avdoede.map { it.foedselsnummer.value },
+            gjenlevende = listOf(mottakerAvYtelsen.value) + levende.map { it.foedselsnummer.value },
+            personerUtenIdent = if (personerUtenIdent.isNullOrEmpty()) null else personerUtenIdent,
+        )
+    }
+
     suspend fun hentFolkeregisterIdenterForAktoerIdBolk(request: HentFolkeregisterIdenterForAktoerIdBolkRequest): Map<String, String?> {
         logger.info("Henter folkeregisteridenter for aktørIds=${request.aktoerIds}")
 
@@ -200,4 +329,8 @@ class PersonService(
     fun List<PdlResponseError>.asFormatertFeil() = this.joinToString(", ")
 
     fun List<PdlResponseError>.personIkkeFunnet() = any { it.extensions?.code == "not_found" }
+}
+
+infix operator fun <T> List<T>?.plus(other: List<T>?): List<T> {
+    return (this ?: emptyList()) + (other ?: emptyList())
 }

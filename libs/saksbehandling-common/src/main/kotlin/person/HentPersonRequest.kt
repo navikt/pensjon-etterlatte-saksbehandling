@@ -10,6 +10,12 @@ data class HentPersonRequest(
     val saktype: SakType,
 )
 
+data class HentPersongalleriRequest(
+    val mottakerAvYtelsen: Folkeregisteridentifikator,
+    val innsender: Folkeregisteridentifikator?,
+    val saktype: SakType,
+)
+
 data class HentPdlIdentRequest(
     val ident: PersonIdent,
 )

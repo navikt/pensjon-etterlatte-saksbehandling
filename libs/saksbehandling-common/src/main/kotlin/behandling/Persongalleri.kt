@@ -8,6 +8,7 @@ data class Persongalleri(
     val soesken: List<String> = emptyList(),
     val avdoed: List<String> = emptyList(),
     val gjenlevende: List<String> = emptyList(),
+    val personerUtenIdent: List<PersonUtenIdent>? = null,
 )
 
 enum class RelativPersonrolle {

@@ -32,6 +32,7 @@ import no.nav.tilbakekreving.tilbakekrevingsvedtak.vedtak.v1.Tilbakekrevingsperi
 import no.nav.tilbakekreving.tilbakekrevingsvedtak.vedtak.v1.TilbakekrevingsvedtakDto
 import no.nav.tilbakekreving.typer.v1.PeriodeDto
 import org.slf4j.LoggerFactory
+import java.math.BigDecimal
 import java.math.BigInteger
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -114,10 +115,10 @@ class TilbakekrevingKlient(
     private fun TilbakekrevingsbelopYtelseVedtak.toTilbakekreivngsbelopYtelse(aarsak: TilbakekrevingAarsak) =
         TilbakekrevingsbelopDto().apply {
             kodeKlasse = klasseKode
-            belopOpprUtbet = bruttoUtbetaling.toBigDecimal()
-            belopNy = nyBruttoUtbetaling.toBigDecimal()
-            belopTilbakekreves = bruttoTilbakekreving.toBigDecimal()
-            belopSkatt = skatt.toBigDecimal()
+            belopOpprUtbet = bruttoUtbetaling.toBigDecimal().setScale(2)
+            belopNy = nyBruttoUtbetaling.toBigDecimal().setScale(2)
+            belopTilbakekreves = bruttoTilbakekreving.toBigDecimal().setScale(2)
+            belopSkatt = skatt.toBigDecimal().setScale(2)
             kodeResultat = resultat.name
             kodeAarsak = aarsak.name
             kodeSkyld = skyld.name

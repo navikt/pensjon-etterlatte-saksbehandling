@@ -13,6 +13,7 @@ import no.nav.etterlatte.libs.common.oppgave.NyOppgaveDto
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
+import java.util.UUID
 
 class BehandlingKlient(
     private val httpClient: HttpClient,
@@ -33,7 +34,7 @@ class BehandlingKlient(
         sakId: Long,
         merknad: String,
         referanse: String,
-    ): Long {
+    ): UUID {
         return httpClient.post("$url/oppgaver/sak/$sakId/oppgaver") {
             contentType(ContentType.Application.Json)
             setBody(
@@ -44,6 +45,8 @@ class BehandlingKlient(
                     referanse,
                 ),
             )
-        }.body<ObjectNode>()["id"].longValue()
+        }.body<ObjectNode>().let {
+            UUID.fromString(it["id"].textValue())
+        }
     }
 }

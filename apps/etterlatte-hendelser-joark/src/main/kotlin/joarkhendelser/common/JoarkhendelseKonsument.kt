@@ -23,7 +23,7 @@ class JoarkhendelseKonsument(
         stream { hendelser ->
             hendelser.forEach {
                 runBlocking {
-                    joarkHendelseHandler.haandterHendelse(it)
+                    joarkHendelseHandler.haandterHendelse(it.value())
                 }
             }
         }

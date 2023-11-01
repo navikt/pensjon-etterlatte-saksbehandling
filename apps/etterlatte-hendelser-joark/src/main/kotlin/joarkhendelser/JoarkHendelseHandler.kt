@@ -4,14 +4,25 @@ import joarkhendelser.behandling.BehandlingKlient
 import joarkhendelser.joark.SafKlient
 import joarkhendelser.pdl.PdlKlient
 import no.nav.etterlatte.joarkhendelser.joark.BrukerIdType
+import no.nav.etterlatte.joarkhendelser.joark.erTemaEtterlatte
+import no.nav.etterlatte.joarkhendelser.joark.lagMerknadFraStatus
+import no.nav.etterlatte.joarkhendelser.joark.temaTilSakType
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.PdlIdentifikator
 import no.nav.etterlatte.libs.common.person.maskerFnr
 import no.nav.joarkjournalfoeringhendelser.JournalfoeringHendelseRecord
-import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
+/**
+ * Håndterer hendelser fra Joark og behandler de hendelsene som tilhører Team Etterlatte.
+ *
+ * Skal kun behandle:
+ *  EYB: [SakType.BARNEPENSJON]
+ *  EYO: [SakType.OMSTILLINGSSTOENAD]
+ *
+ * @see: https://confluence.adeo.no/display/BOA/Joarkhendelser
+ **/
 class JoarkHendelseHandler(
     private val behandlingKlient: BehandlingKlient,
     private val safKlient: SafKlient,
@@ -19,12 +30,20 @@ class JoarkHendelseHandler(
 ) {
     private val logger: Logger = LoggerFactory.getLogger(JoarkHendelseHandler::class.java)
 
-    suspend fun haandterHendelse(record: ConsumerRecord<String, JournalfoeringHendelseRecord>) {
-        val hendelse = record.value()
+    /* TODO:
+     *   Etterlatte-søknadene sin journalføringsriver vil bli problematisk for denne consumeren siden enkelte søknader
+     *   IKKE ferdigstilles. Må trolig skrive om en del der eller finne på noe lurt for å ikke lage dobbelt opp med
+     *   oppgaver til saksbehandler.
+     */
+    suspend fun haandterHendelse(hendelse: JournalfoeringHendelseRecord) {
+        if (!hendelse.erTemaEtterlatte()) {
+            logger.info("Hendelse (id=${hendelse.hendelsesId}) har tema ${hendelse.temaNytt} og håndteres ikke")
+            return // Avbryter behandling
+        }
 
-        if (!hendelseKanBehandles(hendelse)) return
+        logger.info("Starter behandling av hendelse (id=${hendelse.hendelsesId}) med tema ${hendelse.temaNytt}")
 
-        val sakType = hentSakTypeFraTema(hendelse.temaNytt)
+        val sakType = hendelse.temaTilSakType()
         val journalpostId = hendelse.journalpostId
 
         val journalpost = safKlient.hentJournalpost(journalpostId).journalpost
@@ -35,7 +54,7 @@ class JoarkHendelseHandler(
             return
         } else if (journalpost.erFerdigstilt()) {
             // Hva gjør vi med ferdigstilte journalposter...?
-            logger.error("Journalpost med id=${hendelse.journalpostId} er ferdigstilt")
+            logger.error("Journalpost med id=$journalpostId er ferdigstilt")
             return
         }
 
@@ -68,17 +87,13 @@ class JoarkHendelseHandler(
                     }
                 }
 
-            val gradering = pdlKlient.hentAdressebeskyttelse(ident)
-            logger.info("Bruker=${ident.maskerFnr()} har gradering $gradering")
-
-            logger.info("Oppretter ny ${sakType.name.lowercase()} for bruker=${ident.maskerFnr()} med gradering=$gradering")
-            val sakId = behandlingKlient.hentEllerOpprettSak(ident, sakType, gradering)
-
-            logger.info("Oppretter journalføringsoppgave for sak=$sakId")
-            val oppgaveId =
-                behandlingKlient.opprettOppgave(sakId, hendelse.journalpostStatusReadable(), journalpostId.toString())
-
-            logger.info("Opprettet oppgave (id=$oppgaveId) med sakId=$sakId")
+            when (val type = hendelse.hendelsesType) {
+                "JournalpostMottatt" -> behandleJournalpostMottatt(ident, sakType, hendelse)
+                "TemaEndret" -> TODO("Mangler støtte for å behandle journalpost=$journalpostId hendelsesType=$type")
+                "EndeligJournalført" -> TODO("Mangler støtte for å behandle journalpost=$journalpostId hendelsesType=$type")
+                "JournalpostUtgått" -> TODO("Mangler støtte for å behandle journalpost=$journalpostId hendelsesType=$type")
+                else -> throw IllegalArgumentException("Journalpost=$journalpostId har ukjent hendelsesType=$type")
+            }
         } catch (e: Exception) {
             // TODO: Fjerne fnr logging før prodsetting
             logger.error("Ukjent feil oppsto ved behandling av journalpost for bruker=${journalpost.bruker}: ", e)
@@ -86,39 +101,21 @@ class JoarkHendelseHandler(
         }
     }
 
-    private fun hentSakTypeFraTema(tema: String): SakType =
-        when (tema) {
-            "EYO" -> SakType.OMSTILLINGSSTOENAD
-            "EYB" -> SakType.BARNEPENSJON
-            else -> throw IllegalArgumentException("Ugyldig tema $tema")
-        }
+    private suspend fun behandleJournalpostMottatt(
+        ident: String,
+        sakType: SakType,
+        hendelse: JournalfoeringHendelseRecord,
+    ) {
+        val gradering = pdlKlient.hentAdressebeskyttelse(ident)
+        logger.info("Bruker=${ident.maskerFnr()} har gradering $gradering")
 
-    private fun hendelseKanBehandles(hendelse: JournalfoeringHendelseRecord): Boolean {
-        return if (!hendelse.erTemaEtterlatte()) {
-            logger.info("Hendelse (id=${hendelse.hendelsesId}) har tema ${hendelse.temaNytt} og håndteres ikke")
-            false
-        } else if (hendelse.hendelsesType != "JournalpostMottatt") {
-            logger.warn(
-                "Hendelse (id=${hendelse.hendelsesId}) har hendelsestype=${hendelse.hendelsesType} og håndteres ikke",
-            )
-            false
-        } else {
-            logger.info("Starter behandling av hendelse (id=${hendelse.hendelsesId}) med tema ${hendelse.temaNytt}")
-            true
-        }
+        logger.info("Oppretter ny ${sakType.name.lowercase()} for bruker=${ident.maskerFnr()} med gradering=$gradering")
+        val sakId = behandlingKlient.hentEllerOpprettSak(ident, sakType, gradering)
+
+        logger.info("Oppretter journalføringsoppgave for sak=$sakId")
+        val oppgaveId =
+            behandlingKlient.opprettOppgave(sakId, hendelse.lagMerknadFraStatus(), hendelse.journalpostId.toString())
+
+        logger.info("Opprettet oppgave (id=$oppgaveId) med sakId=$sakId")
     }
 }
-
-private fun JournalfoeringHendelseRecord.erTemaEtterlatte(): Boolean =
-    temaNytt == SakType.BARNEPENSJON.tema ||
-        temaNytt == SakType.OMSTILLINGSSTOENAD.tema
-
-private fun JournalfoeringHendelseRecord.journalpostStatusReadable(): String =
-    when (journalpostStatus) {
-        "MOTTATT" -> "Mottatt"
-        "JOURNALFOERT" -> "Ferdigstilt"
-        "UKJENT_BRUKER" -> "Ukjent bruker"
-        "UTGAAR" -> "Feil ifm. mottak eller journalføring"
-        "OPPLASTING_DOKUMENT" -> throw IllegalArgumentException("Status $journalpostStatus tilhører dagpenger!")
-        else -> throw IllegalArgumentException("Ukjent journalpostStatus $journalpostStatus")
-    }

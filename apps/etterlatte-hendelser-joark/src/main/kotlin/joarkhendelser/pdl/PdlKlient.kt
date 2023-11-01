@@ -22,19 +22,19 @@ class PdlKlient(
 ) {
     private val logger = LoggerFactory.getLogger(PdlKlient::class.java)
 
-    suspend fun hentPdlIdentifikator(fnr: String): PdlIdentifikator? {
-        logger.info("Henter ident fra PDL for fnr=${fnr.maskerFnr()}")
+    suspend fun hentPdlIdentifikator(ident: String): PdlIdentifikator? {
+        logger.info("Henter ident fra PDL for fnr=${ident.maskerFnr()}")
 
         return retry<PdlIdentifikator?> {
             httpClient.post("$url/pdlident") {
                 contentType(ContentType.Application.Json)
-                setBody(HentPdlIdentRequest(PersonIdent(fnr)))
+                setBody(HentPdlIdentRequest(PersonIdent(ident)))
             }.body()
         }.let { result ->
             when (result) {
                 is RetryResult.Success -> result.content
                 is RetryResult.Failure -> {
-                    logger.error("Feil ved henting av ident fra PDL for fnr=${fnr.maskerFnr()}")
+                    logger.error("Feil ved henting av ident fra PDL for fnr=${ident.maskerFnr()}")
                     throw result.samlaExceptions()
                 }
             }

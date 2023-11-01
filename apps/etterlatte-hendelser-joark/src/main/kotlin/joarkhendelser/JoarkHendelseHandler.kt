@@ -5,6 +5,7 @@ import joarkhendelser.joark.SafKlient
 import joarkhendelser.pdl.PdlKlient
 import no.nav.etterlatte.joarkhendelser.joark.BrukerIdType
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.person.PdlIdentifikator
 import no.nav.etterlatte.libs.common.person.maskerFnr
 import no.nav.joarkjournalfoeringhendelser.JournalfoeringHendelseRecord
 import org.apache.kafka.clients.consumer.ConsumerRecord
@@ -21,17 +22,7 @@ class JoarkHendelseHandler(
     suspend fun haandterHendelse(record: ConsumerRecord<String, JournalfoeringHendelseRecord>) {
         val hendelse = record.value()
 
-        if (!hendelse.erTemaEtterlatte()) {
-            logger.info("Hendelse (id=${hendelse.hendelsesId}) har tema ${hendelse.temaNytt} og håndteres ikke")
-            return
-        } else if (hendelse.hendelsesType != "JournalpostMottatt") {
-            logger.warn(
-                "Hendelse (id=${hendelse.hendelsesId}) har hendelsestype=${hendelse.hendelsesType} og håndteres ikke",
-            )
-            return
-        }
-
-        logger.info("Starter behandling av hendelse (id=${hendelse.hendelsesId}) med tema ${hendelse.temaNytt}")
+        if (!hendelseKanBehandles(hendelse)) return
 
         val sakType = hentSakTypeFraTema(hendelse.temaNytt)
         val journalpostId = hendelse.journalpostId
@@ -49,28 +40,33 @@ class JoarkHendelseHandler(
         }
 
         try {
-            val ident =
-                when (journalpost.bruker?.type) {
-                    BrukerIdType.FNR -> journalpost.bruker.id
-                    BrukerIdType.ORGNR -> {
-                        // Opprette oppgave til saksbehandler for å knytte til fnr og sak
-                        logger.error("Kan ikke behandle brukerId av type ${BrukerIdType.ORGNR}")
-                        return // TODO... Kaste exception...?
-                    }
+            if (journalpost.bruker == null) {
+                logger.error("Journalpost med id=$journalpostId mangler bruker!")
+                return
+            } else if (journalpost.bruker.type == BrukerIdType.ORGNR) {
+                // TODO:
+                //  Opprette oppgave til saksbehandler for å knytte til fnr og sak...?
+                //  Må vi lage støtte for ORGNR...?
+                logger.error("Journalpost med id=$journalpostId har brukerId av typen ${BrukerIdType.ORGNR}")
+                return
+            }
 
-                    BrukerIdType.AKTOERID -> {
-                        // Opprette oppgave til saksbehandler for å knytte til fnr og sak
-                        logger.error("Kan ikke behandle brukerId av type ${BrukerIdType.AKTOERID}")
+            val pdlIdentifikator =
+                pdlKlient.hentPdlIdentifikator(journalpost.bruker.id)
+
+            val ident =
+                when (pdlIdentifikator) {
+                    is PdlIdentifikator.FolkeregisterIdent -> pdlIdentifikator.folkeregisterident.value
+                    is PdlIdentifikator.Npid -> {
+                        logger.error("Ignorerer journalføringshendelse med NPID=${pdlIdentifikator.npid.ident}")
                         return
                     }
 
-                    else -> throw NullPointerException("Bruker er NULL på journalpost=$journalpostId")
+                    null -> {
+                        logger.error("Ident tilknyttet journalpost=$journalpostId er null i PDL – avbryter behandling")
+                        return
+                    }
                 }
-
-            if (pdlKlient.hentPdlIdentifikator(ident) == null) {
-                logger.info("Ident=${ident.maskerFnr()} er null i PDL – avbryter behandling")
-                return
-            }
 
             val gradering = pdlKlient.hentAdressebeskyttelse(ident)
             logger.info("Bruker=${ident.maskerFnr()} har gradering $gradering")
@@ -96,6 +92,21 @@ class JoarkHendelseHandler(
             "EYB" -> SakType.BARNEPENSJON
             else -> throw IllegalArgumentException("Ugyldig tema $tema")
         }
+
+    private fun hendelseKanBehandles(hendelse: JournalfoeringHendelseRecord): Boolean {
+        return if (!hendelse.erTemaEtterlatte()) {
+            logger.info("Hendelse (id=${hendelse.hendelsesId}) har tema ${hendelse.temaNytt} og håndteres ikke")
+            false
+        } else if (hendelse.hendelsesType != "JournalpostMottatt") {
+            logger.warn(
+                "Hendelse (id=${hendelse.hendelsesId}) har hendelsestype=${hendelse.hendelsesType} og håndteres ikke",
+            )
+            false
+        } else {
+            logger.info("Starter behandling av hendelse (id=${hendelse.hendelsesId}) med tema ${hendelse.temaNytt}")
+            true
+        }
+    }
 }
 
 private fun JournalfoeringHendelseRecord.erTemaEtterlatte(): Boolean =

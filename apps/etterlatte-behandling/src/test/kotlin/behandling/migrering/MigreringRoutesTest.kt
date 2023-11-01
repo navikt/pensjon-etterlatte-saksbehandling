@@ -62,13 +62,13 @@ class MigreringRoutesTest : BehandlingIntegrationTest() {
                     avdoedForelder = listOf(AvdoedForelder(AVDOED_FOEDSELSNUMMER, Tidspunkt.now())),
                     gjenlevendeForelder = null,
                     virkningstidspunkt = YearMonth.now(),
-                    foersteVirkningstidspunkt = YearMonth.now().minusYears(10),
                     beregning =
                         Beregning(
                             brutto = BigDecimal(1000),
                             netto = BigDecimal(1000),
                             anvendtTrygdetid = BigDecimal(40),
                             datoVirkFom = Tidspunkt.now(),
+                            prorataBroek = null,
                             g = BigDecimal(100000),
                         ),
                     trygdetid = Trygdetid(emptyList()),

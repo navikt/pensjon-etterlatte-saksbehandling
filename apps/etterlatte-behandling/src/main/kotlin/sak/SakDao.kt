@@ -91,12 +91,6 @@ class SakDao(private val connection: () -> Connection) {
         return statement.executeQuery().toList { this.toSak() }
     }
 
-    fun slettSak(id: Long) {
-        val statement = connection().prepareStatement("DELETE from sak where id = ?")
-        statement.setLong(1, id)
-        statement.executeUpdate()
-    }
-
     fun markerSakerMedSkjerming(
         sakIder: List<Long>,
         skjermet: Boolean,

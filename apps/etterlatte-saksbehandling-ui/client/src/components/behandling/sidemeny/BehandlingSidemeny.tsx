@@ -30,7 +30,7 @@ import { erFerdigBehandlet } from '~components/behandling/felles/utils'
 import { hentSjekkliste, opprettSjekkliste } from '~shared/api/sjekkliste'
 import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
 
-const finnUtNasjonEllerUtland = (behandling: IBehandlingReducer): INasjonalitetsType => {
+const finnUtNasjonalitet = (behandling: IBehandlingReducer): INasjonalitetsType => {
   if (behandling.utenlandstilsnitt?.type) {
     return behandling.utenlandstilsnitt?.type
   } else {
@@ -50,7 +50,7 @@ const mapTilBehandlingInfo = (behandling: IBehandlingReducer, vedtak: VedtakSamm
   behandlingId: behandling.id,
   sakId: behandling.sakId,
   sakType: behandling.sakType,
-  nasjonalEllerUtland: finnUtNasjonEllerUtland(behandling),
+  nasjonalEllerUtland: finnUtNasjonalitet(behandling),
   status: behandling.status,
   saksbehandler: vedtak?.saksbehandlerId,
   virkningsdato: behandling.virkningstidspunkt?.dato,

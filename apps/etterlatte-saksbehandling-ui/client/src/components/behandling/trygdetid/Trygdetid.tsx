@@ -18,38 +18,28 @@ import { BodyShort } from '@navikt/ds-react'
 import { Grunnlagopplysninger } from '~components/behandling/trygdetid/Grunnlagopplysninger'
 import { TrygdetidGrunnlagListe } from '~components/behandling/trygdetid/TrygdetidGrunnlagListe'
 import { TrygdeAvtale } from './avtaler/TrygdeAvtale'
-import {
-  IBehandlingStatus,
-  IBehandlingsType,
-  IDetaljertBehandling,
-  IUtenlandstilsnitt,
-} from '~shared/types/IDetaljertBehandling'
+import { IBehandlingStatus, IBehandlingsType, IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { oppdaterBehandlingsstatus } from '~store/reducers/BehandlingReducer'
 import { useAppDispatch } from '~store/Store'
 import { TrygdetidDetaljer } from '~components/behandling/trygdetid/detaljer/TrygdetidDetaljer'
 import { OverstyrtTrygdetid } from './OverstyrtTrygdetid'
-import { useBehandling } from '~components/behandling/useBehandling'
 import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
-import { SakType } from '~shared/types/sak'
 
 interface Props {
   redigerbar: boolean
-  sakType: SakType
-  utenlandstilsnitt?: IUtenlandstilsnitt
+  behandling: IDetaljertBehandling
   virkningstidspunktEtterNyRegelDato: Boolean
 }
 
-const visTrydeavtale = (behandling: IDetaljertBehandling | null): Boolean => {
+const visTrydeavtale = (behandling: IDetaljertBehandling): Boolean => {
   return (
-    !!behandling &&
-    (behandling.boddEllerArbeidetUtlandet?.vurdereAvoededsTrygdeavtale ||
-      (behandling.behandlingType == IBehandlingsType.REVURDERING &&
-        behandling.revurderingsaarsak == Revurderingaarsak.SLUTTBEHANDLING_UTLAND))
+    behandling.boddEllerArbeidetUtlandet?.vurdereAvoededsTrygdeavtale ||
+    (behandling.behandlingType == IBehandlingsType.REVURDERING &&
+      behandling.revurderingsaarsak == Revurderingaarsak.SLUTTBEHANDLING_UTLAND)
   )
 }
 
-export const Trygdetid = ({ redigerbar, sakType, virkningstidspunktEtterNyRegelDato }: Props) => {
-  const behandling = useBehandling()
+export const Trygdetid = ({ redigerbar, behandling, virkningstidspunktEtterNyRegelDato }: Props) => {
   const dispatch = useAppDispatch()
   const [hentTrygdetidRequest, fetchTrygdetid] = useApiCall(hentTrygdetid)
   const [opprettTrygdetidRequest, requestOpprettTrygdetid] = useApiCall(opprettTrygdetid)
@@ -126,7 +116,7 @@ export const Trygdetid = ({ redigerbar, sakType, virkningstidspunktEtterNyRegelD
           />
           <OverstyrtTrygdetid
             redigerbar={redigerbar}
-            sakType={sakType}
+            sakType={behandling.sakType}
             trygdetid={trygdetid}
             overstyrTrygdetidPoengaar={overstyrTrygdetidPoengaar}
             virkningstidspunktEtterNyRegelDato={virkningstidspunktEtterNyRegelDato}

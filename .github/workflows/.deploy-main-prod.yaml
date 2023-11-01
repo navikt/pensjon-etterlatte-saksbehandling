@@ -15,6 +15,7 @@ jobs:
   deploy-main:
     name: deploy-main-prod
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - uses: nais/deploy/actions/deploy@v1

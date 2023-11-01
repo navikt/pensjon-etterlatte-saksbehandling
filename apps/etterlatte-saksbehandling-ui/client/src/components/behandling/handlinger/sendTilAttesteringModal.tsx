@@ -49,7 +49,7 @@ export const SendTilAttesteringModal = ({
       behandling?.behandlingType == IBehandlingsType.FØRSTEGANGSBEHANDLING &&
       (sjekkliste == null || !sjekkliste.bekreftet)
     ) {
-      dispatch(addValideringsfeil('Feltet må hukses av for å ferdigstilles'))
+      dispatch(addValideringsfeil('Feltet må hukes av for å ferdigstilles'))
       dispatch(visSjekkliste())
     } else {
       setIsOpen(true)

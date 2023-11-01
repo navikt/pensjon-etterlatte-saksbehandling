@@ -42,6 +42,7 @@ export const Sjekkliste = ({ behandling }: { behandling: IBehandlingReducer }) =
 
   const [oppdaterSjekklisteResult, oppdaterSjekklisteApi] = useApiCall(oppdaterSjekkliste)
   const sjekkliste = useSjekkliste()
+
   const sjekklisteValideringsfeil = useSjekklisteValideringsfeil().length > 0
 
   const configContext = useContext(ConfigContext)

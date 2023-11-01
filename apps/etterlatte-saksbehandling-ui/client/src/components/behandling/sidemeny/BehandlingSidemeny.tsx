@@ -66,7 +66,7 @@ export const BehandlingSidemeny = ({ behandling }: { behandling: IBehandlingRedu
         dispatch(updateVedtakSammendrag(vedtakSammendrag))
       }
     })
-  }, [behandling.id])
+  }, [])
 
   const erFoerstegangsbehandling = behandling?.behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING
 
@@ -75,26 +75,24 @@ export const BehandlingSidemeny = ({ behandling }: { behandling: IBehandlingRedu
     useApiCall(opprettSjekkliste)
 
   useEffect(() => {
-    if (sjekklisteAktivert) {
-      resetSjekklisteResult()
-      resetOpprettSjekkliste()
-      if (behandling && erFoerstegangsbehandling && isInitial(hentSjekklisteResult)) {
-        hentSjekklisteForBehandling(
-          behandling.id,
-          (result) => {
-            dispatch(updateSjekkliste(result))
-          },
-          () => {
-            if (!erFerdigBehandlet(behandling.status)) {
-              opprettSjekklisteForBehandling(behandling.id, (nySjekkliste) => {
-                dispatch(updateSjekkliste(nySjekkliste))
-              })
-            }
+    resetSjekklisteResult()
+    resetOpprettSjekkliste()
+    if (behandling && erFoerstegangsbehandling && isInitial(hentSjekklisteResult)) {
+      hentSjekklisteForBehandling(
+        behandling.id,
+        (result) => {
+          dispatch(updateSjekkliste(result))
+        },
+        () => {
+          if (!erFerdigBehandlet(behandling.status)) {
+            opprettSjekklisteForBehandling(behandling.id, (nySjekkliste) => {
+              dispatch(updateSjekkliste(nySjekkliste))
+            })
           }
-        )
-      }
+        }
+      )
     }
-  }, [behandling])
+  }, [sjekklisteAktivert])
 
   return (
     <Sidebar>
@@ -135,12 +133,14 @@ export const BehandlingSidemeny = ({ behandling }: { behandling: IBehandlingRedu
           <Tabs.Panel value={BehandlingFane.DOKUMENTER}>
             {behandling.søker?.foedselsnummer && <Dokumentoversikt fnr={behandling.søker.foedselsnummer} liten />}
           </Tabs.Panel>
-          {isPending(hentSjekklisteResult) && <Spinner label="Henter sjekkliste ..." visible />}
-          {isFailure(hentSjekklisteResult) && erFoerstegangsbehandling && !erFerdigBehandlet(behandling.status) && (
-            <ApiErrorAlert>En feil oppstod ved henting av sjekklista</ApiErrorAlert>
-          )}
           <Tabs.Panel value={BehandlingFane.SJEKKLISTE}>
-            {behandling.søker?.foedselsnummer && <Sjekkliste behandling={behandling} />}
+            <>
+              {behandling.søker?.foedselsnummer && <Sjekkliste behandling={behandling} />}
+              {isPending(hentSjekklisteResult) && <Spinner label="Henter sjekkliste ..." visible />}
+              {isFailure(hentSjekklisteResult) && erFoerstegangsbehandling && !erFerdigBehandlet(behandling.status) && (
+                <ApiErrorAlert>En feil oppstod ved henting av sjekklista</ApiErrorAlert>
+              )}
+            </>
           </Tabs.Panel>
         </Tabs>
       )}

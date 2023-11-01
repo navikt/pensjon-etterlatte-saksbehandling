@@ -98,7 +98,7 @@ class TilbakekrevingKlient(
                                     } else {
                                         RenterBeregnes.NEI.kode
                                     }
-                                belopRenter = tilbakekrevingPeriode.ytelse.rentetillegg.toBigDecimal()
+                                belopRenter = tilbakekrevingPeriode.ytelse.rentetillegg.toBigDecimal().setScale(2)
 
                                 tilbakekrevingsbelop.apply {
                                     add(tilbakekrevingPeriode.ytelse.toTilbakekreivngsbelopYtelse(vedtak.aarsak))

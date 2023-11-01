@@ -29,7 +29,7 @@ spec:
     min: 1
   env:
     - name: KAFKA_RESET_POLICY
-      value: earliest
+      value: latest
     - name: JOARK_HENDELSE_GROUP_ID
       value: etterlatte-v1
     - name: KAFKA_JOARK_HENDELSE_TOPIC

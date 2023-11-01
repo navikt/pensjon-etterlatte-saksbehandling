@@ -138,8 +138,18 @@ data class Foerstegangsbehandling(
             endreTilStatus(BehandlingStatus.RETURNERT)
         }
 
+    override fun tilTilSamordning() =
+        hvisTilstandEr(listOf(BehandlingStatus.ATTESTERT)) {
+            endreTilStatus(BehandlingStatus.TIL_SAMORDNING)
+        }
+
+    override fun tilSamordnet() =
+        hvisTilstandEr(listOf(BehandlingStatus.ATTESTERT, BehandlingStatus.TIL_SAMORDNING)) {
+            endreTilStatus(BehandlingStatus.SAMORDNET)
+        }
+
     override fun tilIverksatt() =
-        hvisTilstandEr(BehandlingStatus.ATTESTERT) {
+        hvisTilstandEr(listOf(BehandlingStatus.ATTESTERT, BehandlingStatus.SAMORDNET)) {
             endreTilStatus(BehandlingStatus.IVERKSATT)
         }
 

@@ -9,6 +9,9 @@ import io.ktor.http.contentType
 import kotlinx.coroutines.runBlocking
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
+import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingAarsak
+import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVedtak
+import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingsbelopVedtak
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.tilbakekreving.hendelse.TilbakekrevingHendelseRepository
 import no.nav.okonomi.tilbakekrevingservice.TilbakekrevingsvedtakRequest
@@ -66,13 +69,7 @@ class TilbakekrevingKlient(
                     datoVedtakFagsystem = vedtak.fattetVedtak.dato.toXMLDate()
                     saksbehId = vedtak.fattetVedtak.saksbehandler
                     enhetAnsvarlig = ANSVARLIG_ENHET
-                    kodeHjemmel = vedtak.vurdering.hjemmel
-                    renterBeregnes =
-                        if (vedtak.perioder.any { it.ytelse.rentetillegg > 0 }) {
-                            RenterBeregnes.JA.kode
-                        } else {
-                            RenterBeregnes.NEI.kode
-                        }
+                    kodeHjemmel = vedtak.hjemmel.kode
                     kontrollfelt = vedtak.kontrollfelt
                     vedtak.perioder.map { tilbakekrevingPeriode ->
                         TilbakekrevingsperiodeDto().apply {
@@ -90,7 +87,7 @@ class TilbakekrevingKlient(
                             belopRenter = tilbakekrevingPeriode.ytelse.rentetillegg.toBigDecimal()
 
                             tilbakekrevingsbelop.apply {
-                                add(tilbakekrevingPeriode.ytelse.toTilbakekreivngsbelopYtelse(vedtak.vurdering.aarsak))
+                                add(tilbakekrevingPeriode.ytelse.toTilbakekreivngsbelopYtelse(vedtak.aarsak))
                                 add(tilbakekrevingPeriode.feilkonto.toTilbakekreivngsbelopFeilkonto())
                             }
                         }
@@ -99,7 +96,7 @@ class TilbakekrevingKlient(
         }
     }
 
-    private fun Tilbakekrevingsbelop.toTilbakekreivngsbelopYtelse(aarsak: TilbakekrevingAarsak) =
+    private fun TilbakekrevingsbelopVedtak.toTilbakekreivngsbelopYtelse(aarsak: TilbakekrevingAarsak) =
         TilbakekrevingsbelopDto().apply {
             kodeKlasse = klasseKode
             belopOpprUtbet = bruttoUtbetaling.toBigDecimal()
@@ -111,7 +108,7 @@ class TilbakekrevingKlient(
             kodeSkyld = skyld.name
         }
 
-    private fun Tilbakekrevingsbelop.toTilbakekreivngsbelopFeilkonto() =
+    private fun TilbakekrevingsbelopVedtak.toTilbakekreivngsbelopFeilkonto() =
         TilbakekrevingsbelopDto().apply {
             kodeKlasse = klasseKode
             belopOpprUtbet = bruttoUtbetaling.toBigDecimal()

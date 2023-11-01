@@ -11,6 +11,7 @@ import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.VedtakSak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import java.math.BigDecimal
+import java.time.LocalDate
 import java.time.YearMonth
 import java.time.ZonedDateTime
 import java.util.Objects.isNull
@@ -70,6 +71,8 @@ enum class VedtakStatus {
     OPPRETTET,
     FATTET_VEDTAK,
     ATTESTERT,
+    TIL_SAMORDNING,
+    SAMORDNET,
     RETURNERT,
     IVERKSATT,
 }
@@ -142,4 +145,11 @@ data class TilbakekrevingFattEllerAttesterVedtakDto(
     val tilbakekrevingId: UUID,
     val saksbehandler: String,
     val enhet: String,
+)
+
+data class TilbakekrevingVedtakLagretDto(
+    val id: Long,
+    val fattetAv: String,
+    val enhet: String,
+    val dato: LocalDate,
 )

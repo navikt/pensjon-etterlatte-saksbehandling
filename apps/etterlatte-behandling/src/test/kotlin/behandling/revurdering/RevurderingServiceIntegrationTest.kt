@@ -23,12 +23,15 @@ import no.nav.etterlatte.behandling.domain.SamsvarMellomKildeOgGrunnlag
 import no.nav.etterlatte.behandling.domain.toStatistikkBehandling
 import no.nav.etterlatte.common.DatabaseContext
 import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BarnepensjonSoeskenjusteringGrunn
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
+import no.nav.etterlatte.libs.common.behandling.LandMedDokumenter
+import no.nav.etterlatte.libs.common.behandling.MottattDokument
 import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -43,6 +46,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.persongalleri
 import no.nav.etterlatte.sak.SakServiceFeatureToggle
+import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.etterlatte.token.Saksbehandler
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
@@ -54,11 +58,12 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.assertThrows
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class RevurderingIntegrationTest : BehandlingIntegrationTest() {
+class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
     @BeforeAll
     fun start() {
         startServer()
@@ -234,7 +239,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
         inTransaction {
             revurderingService.lagreRevurderingInfo(
                 revurdering!!.id,
-                RevurderingMedBegrunnelse(revurderingInfo, "abc"),
+                RevurderingInfoMedBegrunnelse(revurderingInfo, "abc"),
                 "saksbehandler",
             )
         }
@@ -252,7 +257,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
         inTransaction {
             revurderingService.lagreRevurderingInfo(
                 revurdering!!.id,
-                RevurderingMedBegrunnelse(nyRevurderingInfo, null),
+                RevurderingInfoMedBegrunnelse(nyRevurderingInfo, null),
                 "saksbehandler",
             )
         }
@@ -273,7 +278,7 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
             inTransaction {
                 revurderingService.lagreRevurderingInfo(
                     revurdering!!.id,
-                    RevurderingMedBegrunnelse(revurderingInfo, null),
+                    RevurderingInfoMedBegrunnelse(revurderingInfo, null),
                     "saksbehandler",
                 )
             }
@@ -666,6 +671,137 @@ class RevurderingIntegrationTest : BehandlingIntegrationTest() {
                 )
             }
         }
+    }
+
+    @Test
+    fun `Skal kunne hente revurdering basert på sak og revurderingsårsak`() {
+        val featureToggleService = DummyFeatureToggleService()
+        featureToggleService.settBryter(RevurderingServiceFeatureToggle.OpprettManuellRevurdering, true)
+
+        val revurderingService =
+            RevurderingService(
+                applicationContext.oppgaveService,
+                applicationContext.grunnlagsService,
+                applicationContext.behandlingsHendelser,
+                featureToggleService,
+                applicationContext.behandlingDao,
+                applicationContext.hendelseDao,
+                applicationContext.grunnlagsendringshendelseDao,
+                applicationContext.kommerBarnetTilGodeService,
+                applicationContext.revurderingDao,
+                applicationContext.behandlingService,
+            )
+
+        val behandlingFactory =
+            BehandlingFactory(
+                oppgaveService = applicationContext.oppgaveService,
+                grunnlagService = applicationContext.grunnlagsService,
+                revurderingService = applicationContext.revurderingService,
+                gyldighetsproevingService = applicationContext.gyldighetsproevingService,
+                sakService = applicationContext.sakService,
+                behandlingDao = applicationContext.behandlingDao,
+                hendelseDao = applicationContext.hendelseDao,
+                behandlingHendelser = applicationContext.behandlingsHendelser,
+                featureToggleService = applicationContext.featureToggleService,
+            )
+        val (sak, behandling) = opprettSakMedFoerstegangsbehandling(fnr, behandlingFactory)
+        val hentOppgaverForSak = inTransaction { applicationContext.oppgaveService.hentOppgaverForSak(sak.id) }
+        val oppgaveForFoerstegangsbehandling = hentOppgaverForSak.single { it.status == Status.NY }
+
+        val saksbehandler = "saksbehandler"
+        inTransaction {
+            applicationContext.oppgaveService.tildelSaksbehandler(oppgaveForFoerstegangsbehandling.id, saksbehandler)
+        }
+        inTransaction {
+            applicationContext.behandlingDao.lagreBoddEllerArbeidetUtlandet(
+                behandling!!.id,
+                BoddEllerArbeidetUtlandet(
+                    boddEllerArbeidetUtlandet = true,
+                    skalSendeKravpakke = true,
+                    begrunnelse = "enbegrunnelse",
+                    kilde = Grunnlagsopplysning.Saksbehandler.create("saksbehandler"),
+                ),
+            )
+        }
+        inTransaction {
+            applicationContext.oppgaveService.ferdigstillOppgaveUnderbehandlingOgLagNyMedType(
+                VedtakOppgaveDTO(
+                    sakId = sak.id,
+                    referanse = behandling!!.id.toString(),
+                ),
+                oppgaveType = OppgaveType.ATTESTERING,
+                saksbehandler = Saksbehandler("", saksbehandler, null),
+                merknad = null,
+            )
+        }
+
+        inTransaction {
+            applicationContext.behandlingDao.lagreStatus(
+                behandling!!.id,
+                BehandlingStatus.IVERKSATT,
+                Tidspunkt.now().toLocalDatetimeUTC(),
+            )
+        }
+        val revurderingen =
+            inTransaction {
+                revurderingService.opprettManuellRevurderingWrapper(
+                    sakId = sak.id,
+                    aarsak = Revurderingaarsak.REGULERING,
+                    begrunnelse = null,
+                    paaGrunnAvHendelseId = null,
+                    saksbehandler = Saksbehandler("", "saksbehandler", null),
+                )
+            }
+        inTransaction {
+            applicationContext.behandlingService.avbrytBehandling(
+                revurderingen!!.id,
+                BrukerTokenInfo.of("acc", "saksbehandler", oid = null, sub = "sub", claims = null),
+            )
+        }
+
+        val revurderingto =
+            inTransaction {
+                revurderingService.opprettManuellRevurderingWrapper(
+                    sakId = sak.id,
+                    aarsak = Revurderingaarsak.SLUTTBEHANDLING_UTLAND,
+                    paaGrunnAvHendelseId = null,
+                    begrunnelse = null,
+                    saksbehandler = Saksbehandler("", "saksbehandler", null),
+                )
+            }
+
+        val hentRevurderingsinfoForSakMedAarsak =
+            inTransaction { revurderingService.hentRevurderingsinfoForSakMedAarsak(sak.id, Revurderingaarsak.REGULERING) }
+        assertEquals(0, hentRevurderingsinfoForSakMedAarsak.size)
+
+        inTransaction {
+            revurderingService.lagreRevurderingInfo(
+                revurderingto!!.id,
+                RevurderingInfoMedBegrunnelse(
+                    RevurderingInfo.SluttbehandlingUtland(
+                        listOf(
+                            LandMedDokumenter(
+                                landIsoKode = "AFG",
+                                dokumenter =
+                                    listOf(
+                                        MottattDokument(
+                                            dokumenttype = "P2000",
+                                            dato = LocalDate.now(),
+                                            kommentar = "kom",
+                                        ),
+                                    ),
+                            ),
+                        ),
+                    ),
+                    begrunnelse = "nei",
+                ),
+                navIdent = "ident",
+            )
+        }
+
+        val sluttbehandlingermedinfo =
+            inTransaction { revurderingService.hentRevurderingsinfoForSakMedAarsak(sak.id, Revurderingaarsak.SLUTTBEHANDLING_UTLAND) }
+        assertEquals(1, sluttbehandlingermedinfo.size)
     }
 
     @Test

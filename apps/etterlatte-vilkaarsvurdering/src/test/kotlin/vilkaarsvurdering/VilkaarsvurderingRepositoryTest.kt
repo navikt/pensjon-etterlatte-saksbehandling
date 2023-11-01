@@ -16,7 +16,7 @@ import no.nav.etterlatte.libs.database.POSTGRES_VERSION
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
-import no.nav.etterlatte.vilkaarsvurdering.vilkaar.BarnepensjonVilkaar
+import no.nav.etterlatte.vilkaarsvurdering.vilkaar.BarnepensjonVilkaar1967
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
@@ -312,9 +312,8 @@ internal class VilkaarsvurderingRepositoryTest {
                 grunnlagVersjon = 1L,
                 virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt().dato,
                 vilkaar =
-                    BarnepensjonVilkaar.inngangsvilkaar(
+                    BarnepensjonVilkaar1967.inngangsvilkaar(
                         grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag(),
-                        virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(),
                         featureToggleService = DummyFeatureToggleService(),
                     ),
             )

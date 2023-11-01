@@ -1,11 +1,15 @@
-import { Vilkaarsgrunnlag } from '~shared/api/vilkaarsvurdering'
+import { Vilkaarsgrunnlag, VilkaarsgrunnlagOpplysningstyper } from '~shared/api/vilkaarsvurdering'
 import { VilkaarColumn } from '../styled'
 import { formaterStringDato } from '~utils/formattering'
 import { VilkaarStrong } from './AlderBarn'
 
 export const OmsAktivitetEtter6Maaneder = ({ grunnlag }: { grunnlag: Vilkaarsgrunnlag<any>[] }) => {
-  const doedsdatoGrunnlag = grunnlag.find((grunnlag) => grunnlag.opplysningsType == 'AVDOED_DOEDSDATO')
-  const soeknadMottattGrunnlag = grunnlag.find((grunnlag) => grunnlag.opplysningsType == 'SOEKNAD_MOTTATT_DATO')
+  const doedsdatoGrunnlag = grunnlag.find(
+    (grunnlag) => grunnlag.opplysningsType === VilkaarsgrunnlagOpplysningstyper.AVDOED_DOEDSDATO
+  )
+  const soeknadMottattGrunnlag = grunnlag.find(
+    (grunnlag) => grunnlag.opplysningsType === VilkaarsgrunnlagOpplysningstyper.SOEKNAD_MOTTATT_DATO
+  )
 
   const doedsdato = doedsdatoGrunnlag?.opplysning
   const soeknadMottattDato = soeknadMottattGrunnlag?.opplysning

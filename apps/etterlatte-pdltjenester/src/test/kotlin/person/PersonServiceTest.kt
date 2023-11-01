@@ -12,6 +12,8 @@ import no.nav.etterlatte.TRIVIELL_MIDTPUNKT
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.pdl.FantIkkePersonException
+import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
+import no.nav.etterlatte.libs.common.person.HentAdressebeskyttelseRequest
 import no.nav.etterlatte.libs.common.person.HentGeografiskTilknytningRequest
 import no.nav.etterlatte.libs.common.person.HentPdlIdentRequest
 import no.nav.etterlatte.libs.common.person.HentPersonRequest
@@ -21,11 +23,16 @@ import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
 import no.nav.etterlatte.mockResponse
 import no.nav.etterlatte.pdl.ParallelleSannheterKlient
+import no.nav.etterlatte.pdl.PdlAdressebeskyttelse
+import no.nav.etterlatte.pdl.PdlAdressebeskyttelseData
+import no.nav.etterlatte.pdl.PdlAdressebeskyttelseResponse
 import no.nav.etterlatte.pdl.PdlGeografiskTilknytning
 import no.nav.etterlatte.pdl.PdlGeografiskTilknytningData
 import no.nav.etterlatte.pdl.PdlGeografiskTilknytningResponse
+import no.nav.etterlatte.pdl.PdlGradering
 import no.nav.etterlatte.pdl.PdlGtType
 import no.nav.etterlatte.pdl.PdlHentPerson
+import no.nav.etterlatte.pdl.PdlHentPersonAdressebeskyttelse
 import no.nav.etterlatte.pdl.PdlIdentResponse
 import no.nav.etterlatte.pdl.PdlKlient
 import no.nav.etterlatte.pdl.PdlPersonResponse
@@ -39,6 +46,8 @@ import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.fail
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.EnumSource
 
 internal class PersonServiceTest {
     private val pdlKlient = mockk<PdlKlient>()
@@ -285,5 +294,26 @@ internal class PersonServiceTest {
 
         assertEquals(tilknytning.ukjent, false)
         assertEquals(tilknytning.geografiskTilknytning(), "0301")
+    }
+
+    @ParameterizedTest
+    @EnumSource(PdlGradering::class)
+    fun `Skal hente gradering for person`(pdlGradering: PdlGradering) {
+        coEvery { pdlKlient.hentAdressebeskyttelse(any()) } returns
+            PdlAdressebeskyttelseResponse(
+                data =
+                    PdlAdressebeskyttelseData(
+                        PdlHentPersonAdressebeskyttelse(
+                            listOf(PdlAdressebeskyttelse(pdlGradering, null, mockk())),
+                        ),
+                    ),
+            )
+
+        val gradering =
+            runBlocking {
+                personService.hentAdressebeskyttelseGradering(HentAdressebeskyttelseRequest(PersonIdent(TRIVIELL_MIDTPUNKT.value)))
+            }
+
+        assertEquals(AdressebeskyttelseGradering.valueOf(pdlGradering.name), gradering)
     }
 }

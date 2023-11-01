@@ -76,6 +76,10 @@ spec:
       value: prod-gcp.etterlatte.etterlatte-behandling
     - name: BEHANDLING_AZURE_SCOPE
       value: api://prod-gcp.etterlatte.etterlatte-behandling/.default
+    - name: SAMORDNEVEDTAK_URL
+      value: https://sam.prod-fss-pub.nais.io
+    - name: SAMORDNEVEDTAK_AZURE_SCOPE
+      value: api://prod-fss.pensjonsamhandling.sam/.default
   envFrom:
     - secret: my-application-unleash-api-token
   accessPolicy:
@@ -97,3 +101,4 @@ spec:
         - application: etterlatte-behandling
       external:
         - host: etterlatte-unleash-api.nav.cloud.nais.io
+        - host: sam.prod-fss-pub.nais.io

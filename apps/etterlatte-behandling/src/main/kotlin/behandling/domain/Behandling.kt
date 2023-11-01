@@ -1,7 +1,7 @@
 package no.nav.etterlatte.behandling.domain
 
 import no.nav.etterlatte.behandling.BehandlingSammendrag
-import no.nav.etterlatte.behandling.revurdering.RevurderingMedBegrunnelse
+import no.nav.etterlatte.behandling.revurdering.RevurderingInfoMedBegrunnelse
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus.ATTESTERT
@@ -72,7 +72,7 @@ sealed class Behandling {
             else -> null
         }
 
-    fun revurderingInfo(): RevurderingMedBegrunnelse? =
+    fun revurderingInfo(): RevurderingInfoMedBegrunnelse? =
         when (this) {
             is Revurdering -> this.revurderingInfo
             else -> null
@@ -164,6 +164,14 @@ sealed class Behandling {
 
     open fun tilReturnert(): Behandling {
         throw BehandlingStoetterIkkeStatusEndringException(RETURNERT)
+    }
+
+    open fun tilTilSamordning(): Behandling {
+        throw BehandlingStoetterIkkeStatusEndringException(OPPRETTET)
+    }
+
+    open fun tilSamordnet(): Behandling {
+        throw BehandlingStoetterIkkeStatusEndringException(OPPRETTET)
     }
 
     open fun tilIverksatt(): Behandling {

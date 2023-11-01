@@ -42,6 +42,10 @@ export const Oversikt = ({
     switch (behandlingsInfo.status) {
       case IBehandlingStatus.FATTET_VEDTAK:
         return 'Attestering'
+      case IBehandlingStatus.TIL_SAMORDNING:
+        return 'Til samordning'
+      case IBehandlingStatus.SAMORDNET:
+        return 'Samordnet'
       case IBehandlingStatus.IVERKSATT:
         return 'Iverksatt'
       case IBehandlingStatus.AVBRUTT:

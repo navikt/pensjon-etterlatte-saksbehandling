@@ -1,31 +1,26 @@
 package no.nav.etterlatte.vilkaarsvurdering.vilkaar
 
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
-import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
-import no.nav.etterlatte.libs.common.grunnlag.Opplysning
 import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
 import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsdato
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Delvilkaar
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Lovreferanse
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaar
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarOpplysningType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarOpplysningType.AVDOED_DOEDSDATO
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarOpplysningType.SOEKER_FOEDSELSDATO
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaarsgrunnlag
 import no.nav.etterlatte.vilkaarsvurdering.VilkaarFeatureToggle
 
-object BarnepensjonVilkaar {
+object BarnepensjonVilkaar1967 {
     fun inngangsvilkaar(
         grunnlag: Grunnlag,
-        virkningstidspunkt: Virkningstidspunkt,
         featureToggleService: FeatureToggleService,
     ) = listOf(
         formaal(),
         doedsfallForelder(),
         yrkesskadeAvdoed(),
-        alderBarn(virkningstidspunkt, grunnlag),
+        alderBarn(grunnlag),
         barnetsMedlemskap(),
         vurderingAvEksport(),
         avdoedesForutgaaendeMedlemskap(),
@@ -54,7 +49,7 @@ object BarnepensjonVilkaar {
                         Lovreferanse(
                             paragraf = "§ 18-1",
                             ledd = 1,
-                            lenke = "https://lovdata.no/lov/1997-02-28-19/%C2%A718-3",
+                            lenke = "https://lovdata.no/lov/1997-02-28-19/%C2%A718-1",
                         ),
                 ),
         )
@@ -79,10 +74,7 @@ object BarnepensjonVilkaar {
                 ),
         )
 
-    private fun alderBarn(
-        virkningstidspunkt: Virkningstidspunkt,
-        grunnlag: Grunnlag,
-    ): Vilkaar =
+    private fun alderBarn(grunnlag: Grunnlag): Vilkaar =
         Vilkaar(
             hovedvilkaar =
                 Delvilkaar(
@@ -104,14 +96,10 @@ object BarnepensjonVilkaar {
                 ),
             grunnlag =
                 with(grunnlag) {
-                    /**
-                     * EY-1561: Fjerner virkningstidspunkt fra grunnlaget siden vi ikke har kontroll på om virk. har endret seg.
-                     * val virkningstidspunktBehandling = virkningstidspunkt.toVilkaarsgrunnlag()
-                     */
                     val foedselsdatoBarn = soeker.hentFoedselsdato()?.toVilkaarsgrunnlag(SOEKER_FOEDSELSDATO)
                     val doedsdatoAvdoed = hentAvdoed().hentDoedsdato()?.toVilkaarsgrunnlag(AVDOED_DOEDSDATO)
 
-                    listOfNotNull(foedselsdatoBarn, doedsdatoAvdoed) // /*, virkningstidspunktBehandling*/
+                    listOfNotNull(foedselsdatoBarn, doedsdatoAvdoed)
                 },
         )
 
@@ -329,7 +317,7 @@ object BarnepensjonVilkaar {
             type = VilkaarType.BP_FORUTGAAENDE_MEDLEMSKAP_UNNTAK_AVDOED_IKKE_FYLT_26_AAR,
             tittel =
                 """
-                Ja. Avdøde var medlem ved dødsfallet og hadde ikke fylt 26 år (oppfylles tidligst fra tidspunktet avdøde ville ha vært medlem i ett år hvis dødsfallet ikke skjedde
+                Ja. Avdøde var medlem ved dødsfallet og hadde ikke fylt 26 år (oppfylles tidligst fra tidspunktet avdøde ville ha vært medlem i ett år hvis dødsfallet ikke skjedde)
                 """.trimIndent(),
             lovreferanse =
                 Lovreferanse(
@@ -406,13 +394,5 @@ object BarnepensjonVilkaar {
                     ledd = 1,
                     bokstav = "a",
                 ),
-        )
-
-    internal fun <T> Opplysning.Konstant<out T?>.toVilkaarsgrunnlag(type: VilkaarOpplysningType) =
-        Vilkaarsgrunnlag(
-            id = id,
-            opplysningsType = type,
-            kilde = kilde,
-            opplysning = verdi,
         )
 }

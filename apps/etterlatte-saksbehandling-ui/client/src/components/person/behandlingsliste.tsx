@@ -169,6 +169,10 @@ function endringStatusNavn(status: IBehandlingStatus) {
       return 'Til attestering'
     case IBehandlingStatus.ATTESTERT:
       return 'Attestert'
+    case IBehandlingStatus.TIL_SAMORDNING:
+      return 'Til samordning'
+    case IBehandlingStatus.SAMORDNET:
+      return 'Samordnet'
     case IBehandlingStatus.IVERKSATT:
       return 'Iverksatt'
     default:

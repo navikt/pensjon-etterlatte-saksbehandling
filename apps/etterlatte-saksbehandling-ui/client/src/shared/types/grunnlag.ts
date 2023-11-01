@@ -1,7 +1,7 @@
 export interface Grunnlagsopplysning<T, K> {
   id: string
   kilde: K
-  opplysningsType: string
+  opplysningsType: string //TODO: Typet??
   opplysning: T
 }
 

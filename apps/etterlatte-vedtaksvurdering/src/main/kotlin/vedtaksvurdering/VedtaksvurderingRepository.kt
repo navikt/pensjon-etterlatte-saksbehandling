@@ -249,7 +249,7 @@ class VedtaksvurderingRepository(private val datasource: DataSource) : Transacti
                 datoFattet, datoattestert, attestant, datoVirkFom, vedtakstatus, saktype, behandlingtype, 
                 attestertVedtakEnhet, fattetVedtakEnhet, type, revurderingsaarsak, revurderinginfo
             FROM vedtak  
-            WHERE vedtakstatus = 'IVERKSATT'   
+            WHERE vedtakstatus in ('TIL_SAMORDNING', 'SAMORDNET', 'IVERKSATT')   
             AND fnr = :fnr
             AND datoVirkFom >= :virkFom
             """
@@ -341,6 +341,34 @@ class VedtaksvurderingRepository(private val datasource: DataSource) : Transacti
             """,
                 params = mapOf("vedtakstatus" to VedtakStatus.RETURNERT.name, "behandlingId" to behandlingId),
                 loggtekst = "Underkjenner vedtak for behandling $behandlingId",
+            )
+                .also { require(it == 1) }
+            return@session hentVedtakNonNull(behandlingId, this)
+        }
+
+    fun tilSamordningVedtak(
+        behandlingId: UUID,
+        tx: TransactionalSession? = null,
+    ): Vedtak =
+        tx.session {
+            oppdater(
+                query = "UPDATE vedtak SET vedtakstatus = :vedtakstatus WHERE behandlingId = :behandlingId",
+                params = mapOf("vedtakstatus" to VedtakStatus.TIL_SAMORDNING.name, "behandlingId" to behandlingId),
+                loggtekst = "Lagrer til_samordning vedtak",
+            )
+                .also { require(it == 1) }
+            return@session hentVedtakNonNull(behandlingId, this)
+        }
+
+    fun samordnetVedtak(
+        behandlingId: UUID,
+        tx: TransactionalSession? = null,
+    ): Vedtak =
+        tx.session {
+            oppdater(
+                query = "UPDATE vedtak SET vedtakstatus = :vedtakstatus WHERE behandlingId = :behandlingId",
+                params = mapOf("vedtakstatus" to VedtakStatus.SAMORDNET.name, "behandlingId" to behandlingId),
+                loggtekst = "Lagrer samordnet vedtak",
             )
                 .also { require(it == 1) }
             return@session hentVedtakNonNull(behandlingId, this)

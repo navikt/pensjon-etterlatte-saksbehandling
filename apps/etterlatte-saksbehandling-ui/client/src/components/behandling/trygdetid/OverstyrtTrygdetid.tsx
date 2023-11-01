@@ -4,9 +4,11 @@ import styled from 'styled-components'
 import { ITrygdetid } from '~shared/api/trygdetid'
 import { useEffect, useState } from 'react'
 import { FormKnapper } from './styled'
+import { SakType } from '~shared/types/sak'
 
 interface Props {
   redigerbar: boolean
+  sakType: SakType
   trygdetid: ITrygdetid
   virkningstidspunktEtterNyRegelDato: Boolean
   overstyrTrygdetidPoengaar: (trygdetid: ITrygdetid) => void
@@ -14,6 +16,7 @@ interface Props {
 
 export const OverstyrtTrygdetid = ({
   redigerbar,
+  sakType,
   trygdetid,
   virkningstidspunktEtterNyRegelDato,
   overstyrTrygdetidPoengaar,
@@ -30,6 +33,17 @@ export const OverstyrtTrygdetid = ({
       : 'men har opptjent rett til tilleggspensjon'
   }
 
+  const eksportBeskrivelse = () => {
+    switch (sakType) {
+      case SakType.BARNEPENSJON:
+        return `Fyll ut ved eksportvurdering når pensjonen er innvilget etter unntaksregelen om at avdød har mindre enn 20
+              års botid, ${opptjentTekst()}. Trygdetid skal da være lik antall poengår.`
+      case SakType.OMSTILLINGSSTOENAD:
+        return `Fyll ut ved eksportvurderdering når stønaden er innvilget etter unntaksregelen om å få trygdetid lik
+              avdødes antall poengår hvis samlet botid til avdøde eller gjenlevende er mindre enn 20 år.`
+    }
+  }
+
   return (
     <Overstyrt>
       {(redigerbar || overstyrtNorskPoengaar !== undefined) && (
@@ -41,19 +55,13 @@ export const OverstyrtTrygdetid = ({
       )}
       {!redigerbar && overstyrtNorskPoengaar !== undefined && (
         <>
-          <BodyShort>
-            Eksportvurdering - pensjonen er innvilget etter unntaksregelen om at avdød har mindre enn 20 års botid,
-            {opptjentTekst()}:
-          </BodyShort>
-          <AntallAar>{trygdetid.overstyrtNorskPoengaar}</AntallAar>
+          <BodyShort>{eksportBeskrivelse()}</BodyShort>
+          <AntallAar>{trygdetid.overstyrtNorskPoengaar} år</AntallAar>
         </>
       )}
       {redigerbar && (
         <>
-          <BodyShort>
-            Fyll ut ved eksportvurdering når pensjonen er innvilget etter unntaksregelen om at avdød har mindre enn 20
-            års botid, {opptjentTekst()}. Trygdetid skal da være lik antall poengår.
-          </BodyShort>
+          <BodyShort>{eksportBeskrivelse()}</BodyShort>
           <AntallAarFelt
             value={overstyrtNorskPoengaar ?? ''}
             type="text"

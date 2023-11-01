@@ -19,6 +19,11 @@ data class PdlFolkeregisterIdentRequest(
     val variables: PdlFolkeregisterIdentVariables,
 )
 
+data class PdlAdressebeskyttelseRequest(
+    val query: String,
+    val variables: PdlAdressebeskyttelseVariables,
+)
+
 data class PdlVariables(
     val ident: String,
     val bostedsadresse: Boolean,
@@ -55,6 +60,10 @@ data class PdlFolkeregisterIdentVariables(
     val historikk: Boolean,
 )
 
+data class PdlAdressebeskyttelseVariables(
+    val ident: String,
+)
+
 data class PdlPersonResponse(
     val data: PdlPersonResponseData? = null,
     val errors: List<PdlResponseError>? = null,
@@ -70,12 +79,21 @@ data class PdlIdentResponse(
     val errors: List<PdlResponseError>? = null,
 )
 
+data class PdlAdressebeskyttelseResponse(
+    val data: PdlAdressebeskyttelseData? = null,
+    val errors: List<PdlResponseError>? = null,
+)
+
 data class PdlFolkegisterIdentData(
     val hentIdenter: PdlFolkeregisterIdentResult? = null,
 )
 
 data class PdlFolkeregisterIdentResult(
     val identer: List<PdlIdenter>,
+)
+
+data class PdlAdressebeskyttelseData(
+    val hentPerson: PdlHentPersonAdressebeskyttelse? = null,
 )
 
 data class PdlIdenter(
@@ -120,6 +138,10 @@ data class PdlHentPersonBolkResult(
     val code: String,
     val ident: String,
     val person: PdlHentPerson? = null,
+)
+
+data class PdlHentPersonAdressebeskyttelse(
+    val adressebeskyttelse: List<PdlAdressebeskyttelse>,
 )
 
 data class PdlHentPerson(

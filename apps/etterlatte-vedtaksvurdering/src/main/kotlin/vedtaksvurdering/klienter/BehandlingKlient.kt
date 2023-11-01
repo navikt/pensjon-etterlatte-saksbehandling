@@ -70,6 +70,18 @@ interface BehandlingKlient : BehandlingTilgangsSjekk, SakTilgangsSjekk {
         vedtakHendelse: VedtakHendelse? = null,
     ): Boolean
 
+    suspend fun tilSamordning(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+        vedtakId: Long,
+    ): Boolean
+
+    suspend fun samordnet(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+        vedtakId: Long,
+    ): Boolean
+
     suspend fun iverksett(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
@@ -306,6 +318,32 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
     ): Boolean {
         return statussjekkForBehandling(behandlingId, brukerTokenInfo, BehandlingStatus.RETURNERT)
     }
+
+    override suspend fun tilSamordning(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+        vedtakId: Long,
+    ) = downstreamResourceClient.post(
+        Resource(clientId = clientId, url = "$resourceUrl/behandlinger/$behandlingId/tilsamordning"),
+        brukerTokenInfo,
+        VedtakHendelse(
+            vedtakId = vedtakId,
+            inntruffet = Tidspunkt.now(),
+        ),
+    ).mapBoth({ true }, { false })
+
+    override suspend fun samordnet(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+        vedtakId: Long,
+    ) = downstreamResourceClient.post(
+        Resource(clientId = clientId, url = "$resourceUrl/behandlinger/$behandlingId/samordnet"),
+        brukerTokenInfo,
+        VedtakHendelse(
+            vedtakId = vedtakId,
+            inntruffet = Tidspunkt.now(),
+        ),
+    ).mapBoth({ true }, { false })
 
     override suspend fun iverksett(
         behandlingId: UUID,

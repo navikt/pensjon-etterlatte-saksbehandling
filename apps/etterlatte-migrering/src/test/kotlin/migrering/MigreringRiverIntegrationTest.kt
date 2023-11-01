@@ -94,6 +94,7 @@ internal class MigreringRiverIntegrationTest {
                                         } returns mockk()
                                     },
                                     repository,
+                                    featureToggleService,
                                 ),
                         )
                     }
@@ -157,6 +158,7 @@ internal class MigreringRiverIntegrationTest {
                                         } returns mockk()
                                     },
                                     repository,
+                                    featureToggleService,
                                 ),
                         )
                         LagreKoblingRiver(this, repository)
@@ -242,6 +244,7 @@ internal class MigreringRiverIntegrationTest {
                                         } throws IllegalStateException("")
                                     },
                                     repository,
+                                    featureToggleService,
                                 ),
                         )
                     }

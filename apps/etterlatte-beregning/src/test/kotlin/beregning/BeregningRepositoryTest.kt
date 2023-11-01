@@ -103,6 +103,7 @@ internal class BeregningRepositoryTest {
         beregningsMetode: BeregningsMetode = BeregningsMetode.NASJONAL,
         samletTeoretiskTrygdetid: Int? = null,
         broek: IntBroek? = null,
+        overstyrBeregning: OverstyrBeregning? = null,
     ) = Beregning(
         beregningId = randomUUID(),
         behandlingId = behandlingId,
@@ -129,5 +130,6 @@ internal class BeregningRepositoryTest {
                     kilde = Grunnlagsopplysning.RegelKilde("regelid", Tidspunkt.now(), "1"),
                 ),
             ),
+        overstyrBeregning = overstyrBeregning,
     )
 }

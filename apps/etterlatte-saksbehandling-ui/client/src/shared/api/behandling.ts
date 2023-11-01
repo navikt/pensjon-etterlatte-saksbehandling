@@ -11,7 +11,6 @@ import {
 import { apiClient, ApiResponse } from './apiClient'
 import { ManueltOpphoerDetaljer } from '~components/behandling/manueltopphoeroversikt/ManueltOpphoerOversikt'
 import { Grunnlagsendringshendelse, GrunnlagsendringsListe, IBehandlingListe } from '~components/person/typer'
-import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
 import { InstitusjonsoppholdBegrunnelse } from '~components/person/uhaandtereHendelser/InstitusjonsoppholdVurderingBegrunnelse'
 import { FoersteVirk, ISak, SakType } from '~shared/types/sak'
 import { InstitusjonsoppholdMedKilde } from '~components/person/uhaandtereHendelser/HistoriskeHendelser'
@@ -95,27 +94,6 @@ export const lagreBegrunnelseKommerBarnetTilgode = async (args: {
     svar: args.svar,
     begrunnelse: args.begrunnelse,
   })
-}
-
-export const opprettRevurdering = async (args: {
-  sakId: number
-  aarsak: Revurderingaarsak
-  paaGrunnAvHendelseId?: string
-  begrunnelse?: string
-  fritekstAarsak?: string
-}): Promise<ApiResponse<string>> => {
-  return apiClient.post(`/revurdering/${args.sakId}`, {
-    aarsak: args.aarsak,
-    paaGrunnAvHendelseId: args.paaGrunnAvHendelseId,
-    begrunnelse: args.begrunnelse,
-    fritekstAarsak: args.fritekstAarsak,
-  })
-}
-
-export const hentStoettedeRevurderinger = async (args: {
-  sakType: SakType
-}): Promise<ApiResponse<Array<Revurderingaarsak>>> => {
-  return apiClient.get(`/stoettederevurderinger/${args.sakType}`)
 }
 
 export const lagreUtenlandstilsnitt = async (args: {

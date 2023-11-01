@@ -9,31 +9,49 @@ import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import { formaterNavn } from '~shared/types/Person'
 import { KravpakkeUtland } from '~shared/types/Generellbehandling'
 import { hentAlleLand, ILand, sorterLand } from '~shared/api/trygdetid'
-import SEDLandMedDokumenter, {
-  LandMedDokumenter,
-} from '~components/behandling/revurderingsoversikt/sluttbehandlingUtland/SEDLandMedDokumenter'
+import SEDLandMedDokumenter from '~components/behandling/revurderingsoversikt/sluttbehandlingUtland/SEDLandMedDokumenter'
 import { TextButton } from '~components/behandling/soeknadsoversikt/familieforhold/personer/personinfo/TextButton'
 import SluttbehandlingUtlandFelter from '~components/behandling/revurderingsoversikt/sluttbehandlingUtland/SluttbehandlingUtlandFelter'
-import { lagreRevurderingInfo } from '~shared/api/revurdering'
+import { hentRevurderingerForSakMedAarsak, lagreRevurderingInfo } from '~shared/api/revurdering'
 import { AWhite } from '@navikt/ds-tokens/dist/tokens'
 import { CheckmarkCircleIcon } from '@navikt/aksel-icons'
+import { LandMedDokumenter, SluttbehandlingUtlandInfo } from '~shared/types/RevurderingInfo'
+import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
+import HistoriskeSEDer from '~components/behandling/revurderingsoversikt/sluttbehandlingUtland/historikk/HistoriskeSEDer'
+import { formaterStringDato } from '~utils/formattering'
 
-export default function SluttbehandlingUtland({ sakId, revurderingId }: { sakId: number; revurderingId: string }) {
+export default function SluttbehandlingUtland({
+  sakId,
+  revurderingId,
+  sluttbehandlingUtland,
+}: {
+  sakId: number
+  revurderingId: string
+  sluttbehandlingUtland: SluttbehandlingUtlandInfo | undefined
+}) {
   const [kravpakkeStatus, hentKravpakke] = useApiCall(hentKravpakkeforSak)
   const [hentAlleLandRequest, fetchAlleLand] = useApiCall(hentAlleLand)
   const [alleLandKodeverk, setAlleLandKodeverk] = useState<ILand[] | null>(null)
   const [visHistorikk, setVisHistorikk] = useState(false)
   const [lagreRevurderingsinfoStatus, lagreRevurderingsinfoApi] = useApiCall(lagreRevurderingInfo)
-  const [landMedDokumenter, setLandMedDokumenter] = useState<LandMedDokumenter[]>([
+  const [hentRevurderingerForSakMedAarsakStatus, hentRevurderingerForSakMedAarsakFetch] = useApiCall(
+    hentRevurderingerForSakMedAarsak
+  )
+  const initalStateLandMedDokumenter = [
     { landIsoKode: undefined, dokumenter: [{ dokumenttype: '', dato: undefined, kommentar: '' }] },
-  ])
+  ]
+  const [landMedDokumenter, setLandMedDokumenter] = useState<LandMedDokumenter[]>(
+    sluttbehandlingUtland ? sluttbehandlingUtland.landMedDokumenter : initalStateLandMedDokumenter
+  )
   const [feilkoder, setFeilkoder] = useState<Set<string>>(new Set([]))
   const [visLagretOk, setVisLagretOk] = useState<boolean>(false)
+
   useEffect(() => {
     hentKravpakke(sakId)
     fetchAlleLand(null, (landliste) => {
       setAlleLandKodeverk(sorterLand(landliste))
     })
+    hentRevurderingerForSakMedAarsakFetch({ sakId, revurderingsaarsak: Revurderingaarsak.SLUTTBEHANDLING_UTLAND })
   }, [])
 
   const lagreRevurderingsinfo = () => {
@@ -100,13 +118,17 @@ export default function SluttbehandlingUtland({ sakId, revurderingId }: { sakId:
               <>
                 {kravpakkeMedAvdoed.kravpakke.innhold ? (
                   <InfoWrapper>
-                    <Info tekst={formaterNavn(kravpakkeMedAvdoed.avdoed)} label="Kravpakke gjelder" />
+                    <Info label="Kravpakke gjelder" tekst={formaterNavn(kravpakkeMedAvdoed.avdoed)} />
                     <Info
                       tekst={formaterKravpakkeLand(kravpakkeMedAvdoed.kravpakke.innhold, alleLandKodeverk)}
                       label="Kravpakke sendt til"
                     />
+                    <Info
+                      label="Dokumenttyper og dato sendt"
+                      tekst={visDatoerForSendteDokumenter(kravpakkeMedAvdoed.kravpakke.innhold)}
+                    />
                     <Info label="Saks-ID RINA" tekst={kravpakkeMedAvdoed.kravpakke.innhold.rinanummer} />
-                    <Info label="Notater" tekst={kravpakkeMedAvdoed.kravpakke.innhold.begrunnelse} />
+                    <Info label="Kommentar" tekst={kravpakkeMedAvdoed.kravpakke.innhold.begrunnelse} />
                   </InfoWrapper>
                 ) : (
                   <Alert variant="warning">
@@ -164,10 +186,22 @@ export default function SluttbehandlingUtland({ sakId, revurderingId }: { sakId:
       ) : null}
       {isFailure(lagreRevurderingsinfoStatus) && <ApiErrorAlert>Kunne ikke lagre revurderingsinfo</ApiErrorAlert>}
       <Heading level="2" size="medium" style={{ marginTop: '4rem' }}>
-        Tidligere mottatte SED`er
+        Tidligere sluttbehandlinger
       </Heading>
       <TextButton isOpen={visHistorikk} setIsOpen={setVisHistorikk} />
-      {visHistorikk && <BodyShort>Vis historikk her. TODO: EY-2964 </BodyShort>}
+      {visHistorikk &&
+        mapAllApiResult(
+          hentRevurderingerForSakMedAarsakStatus,
+          <Spinner visible={true} label="Henter historikk" />,
+          null,
+          () => <ApiErrorAlert>Klarte ikke å hente historikken</ApiErrorAlert>,
+          (revurderingsinfoliste) => (
+            <HistoriskeSEDer
+              revurderingsinfoliste={revurderingsinfoliste}
+              landListe={alleLandKodeverk ? alleLandKodeverk : []}
+            />
+          )
+        )}
       {isSuccess(kravpakkeStatus) && (
         <SluttbehandlingUtlandFelter tilknyttetBehandling={kravpakkeStatus.data.kravpakke.tilknyttetBehandling} />
       )}
@@ -175,12 +209,29 @@ export default function SluttbehandlingUtland({ sakId, revurderingId }: { sakId:
   )
 }
 
-function formaterKravpakkeLand(innhold: KravpakkeUtland | undefined, landliste: ILand[] | null) {
+function formaterKravpakkeLand(innhold: KravpakkeUtland | null, landliste: ILand[] | null) {
   if (landliste && innhold?.landIsoKode) {
-    return innhold?.landIsoKode
-      ?.map((kode) => landliste.find((kodeverkLand) => kodeverkLand.isoLandkode === kode)?.beskrivelse.tekst)
-      .join(', ')
+    return innhold?.landIsoKode?.map((kode) => oversettIsokodeTilLandnavn(landliste, kode)).join(', ')
   } else {
     return innhold?.landIsoKode ? innhold.landIsoKode.join(', ') : ''
+  }
+}
+
+const visDatoerForSendteDokumenter = (innhold: KravpakkeUtland | null): string => {
+  if (innhold?.dokumenter) {
+    return innhold.dokumenter
+      .filter((doc) => doc.sendt && doc.dato)
+      .map((e) => `${e.dokumenttype} ${formaterStringDato(e.dato as string)}`)
+      .join(', ')
+  }
+  return ''
+}
+
+export function oversettIsokodeTilLandnavn(landliste: ILand[], landIsoKode?: string) {
+  const funnetLand = landliste.find((kodeverkLand) => kodeverkLand.isoLandkode === landIsoKode)
+  if (funnetLand) {
+    return funnetLand.beskrivelse.tekst
+  } else {
+    return landIsoKode
   }
 }

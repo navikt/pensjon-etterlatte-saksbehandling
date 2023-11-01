@@ -119,7 +119,7 @@ data class TrygdetidPeriode(
     val til: LocalDate,
 ) {
     init {
-        require(fra.isBefore(til) || fra.isEqual(til)) { "Ugyldig periode, fra må være før eller lik til" }
+        require(fra.isBefore(til) || fra.isEqual(til)) { "Ugyldig periode, fra må være før eller lik til. Fra var $fra, til var $til" }
     }
 
     fun overlapperMed(other: TrygdetidPeriode): Boolean {

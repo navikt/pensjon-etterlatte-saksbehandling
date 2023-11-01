@@ -1,4 +1,4 @@
-import { Vilkaarsgrunnlag } from '~shared/api/vilkaarsvurdering'
+import { Vilkaarsgrunnlag, VilkaarsgrunnlagOpplysningstyper } from '~shared/api/vilkaarsvurdering'
 import styled from 'styled-components'
 import { VilkaarColumn } from '../styled'
 import { hentKildenavn } from '../utils'
@@ -7,9 +7,15 @@ import { KildeType } from '~shared/types/kilde'
 import { Detail } from '@navikt/ds-react'
 
 export const AlderBarn = ({ grunnlag }: { grunnlag: Vilkaarsgrunnlag<any>[] }) => {
-  const foedselsdatoGrunnlag = grunnlag.find((grunnlag) => grunnlag.opplysningsType == 'SOEKER_FOEDSELSDATO')
-  const doedsdatoGrunnlag = grunnlag.find((grunnlag) => grunnlag.opplysningsType == 'AVDOED_DOEDSDATO')
-  const virkningstidspunktGrunnlag = grunnlag.find((grunnlag) => grunnlag.opplysningsType == 'VIRKNINGSTIDSPUNKT')
+  const foedselsdatoGrunnlag = grunnlag.find(
+    (grunnlag) => grunnlag.opplysningsType === VilkaarsgrunnlagOpplysningstyper.SOEKER_FOEDSELSDATO
+  )
+  const doedsdatoGrunnlag = grunnlag.find(
+    (grunnlag) => grunnlag.opplysningsType === VilkaarsgrunnlagOpplysningstyper.AVDOED_DOEDSDATO
+  )
+  const virkningstidspunktGrunnlag = grunnlag.find(
+    (grunnlag) => grunnlag.opplysningsType === VilkaarsgrunnlagOpplysningstyper.VIRKNINGSTIDSPUNKT
+  )
 
   const foedselsdatoKilde = foedselsdatoGrunnlag?.kilde
   const foedselsdato = foedselsdatoGrunnlag?.opplysning
@@ -38,7 +44,7 @@ export const AlderBarn = ({ grunnlag }: { grunnlag: Vilkaarsgrunnlag<any>[] }) =
           <KildeDatoOpplysning type={foedselsdatoKilde.type} dato={foedselsdatoKilde.tidspunktForInnhenting} />
         </VilkaarColumn>
       )}
-      {virkningstidspunkt && virkningstidspunktKilde && virkningstidspunktKilde?.type == KildeType.saksbehandler && (
+      {virkningstidspunkt && virkningstidspunktKilde && virkningstidspunktKilde?.type === KildeType.saksbehandler && (
         <VilkaarColumn>
           <div>
             <VilkaarStrong>Virkningstidspunkt</VilkaarStrong>

@@ -14,10 +14,10 @@
   },
   "devDependencies": {
     "@types/chai": "^4.3.6",
-    "@types/cors": "^2.8.14",
-    "@types/express": "^4.17.18",
+    "@types/cors": "^2.8.15",
+    "@types/express": "^4.17.20",
     "@types/mocha": "^10.0.2",
-    "@types/node": "^20.8.0",
+    "@types/node": "^20.8.10",
     "@types/node-fetch": "^2.6.4",
     "@types/request": "^2.48.9",
     "@typescript-eslint/parser": "^6.7.3",

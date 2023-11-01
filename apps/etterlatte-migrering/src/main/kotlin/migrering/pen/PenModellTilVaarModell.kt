@@ -1,6 +1,7 @@
 package no.nav.etterlatte.migrering.pen
 
 import no.nav.etterlatte.brev.model.Spraak
+import no.nav.etterlatte.libs.common.IntBroek
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.migrering.Pesyssak
@@ -9,6 +10,7 @@ import no.nav.etterlatte.rapidsandrivers.migrering.Beregning
 import no.nav.etterlatte.rapidsandrivers.migrering.BeregningMeta
 import no.nav.etterlatte.rapidsandrivers.migrering.Enhet
 import no.nav.etterlatte.rapidsandrivers.migrering.Trygdetid
+import no.nav.etterlatte.rapidsandrivers.migrering.Trygdetidsgrunnlag
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.YearMonth
@@ -28,7 +30,6 @@ fun BarnepensjonGrunnlagResponse.tilVaarModell(): Pesyssak {
                     )
                 },
             virkningstidspunkt = YearMonth.from(virkningsdato),
-            foersteVirkningstidspunkt = YearMonth.from(virkningsdato), // TODO er dette feil?
             beregning =
                 with(beregning) {
                     Beregning(
@@ -37,6 +38,7 @@ fun BarnepensjonGrunnlagResponse.tilVaarModell(): Pesyssak {
                         anvendtTrygdetid = anvendtTrygdetid.toBigDecimal(),
                         datoVirkFom = tilTidspunkt(datoVirkFom),
                         g = g.toBigDecimal(),
+                        prorataBroek = proRataBrok?.let { IntBroek(it.teller, it.nevner) },
                         meta =
                             with(meta) {
                                 BeregningMeta(
@@ -50,10 +52,22 @@ fun BarnepensjonGrunnlagResponse.tilVaarModell(): Pesyssak {
                 },
             trygdetid =
                 Trygdetid(
-                    listOf(), // TODO: Parse ordentleg
+                    perioder =
+                        trygdetidsgrunnlagListe.map {
+                            Trygdetidsgrunnlag(
+                                trygdetidGrunnlagId = it.trygdetidGrunnlagId,
+                                personGrunnlagId = it.personGrunnlagId,
+                                landTreBokstaver = it.landTreBokstaver,
+                                datoFom = tilTidspunkt(it.datoFom),
+                                datoTom = tilTidspunkt(it.datoTom),
+                                poengIInnAar = it.poengIInnAar,
+                                poengIUtAar = it.poengIUtAar,
+                                ikkeIProrata = it.ikkeIProrata,
+                            )
+                        },
                 ),
-            flyktningStatus = false, // TODO
-            spraak = Spraak.NB, // TODO
+            flyktningStatus = false, // TODO - Støttes ikke av Gjenny
+            spraak = Spraak.NB, // TODO - Må fikses, ellers blir alle brev på norsk.
         )
     return pesyssak
 }

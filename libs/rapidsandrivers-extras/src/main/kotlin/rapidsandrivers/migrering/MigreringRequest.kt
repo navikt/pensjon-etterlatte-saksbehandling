@@ -1,6 +1,7 @@
 package no.nav.etterlatte.rapidsandrivers.migrering
 
 import no.nav.etterlatte.brev.model.Spraak
+import no.nav.etterlatte.libs.common.IntBroek
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
@@ -15,7 +16,6 @@ data class MigreringRequest(
     val gjenlevendeForelder: Folkeregisteridentifikator?,
     val avdoedForelder: List<AvdoedForelder>,
     val virkningstidspunkt: YearMonth,
-    val foersteVirkningstidspunkt: YearMonth,
     val beregning: Beregning,
     val trygdetid: Trygdetid,
     val flyktningStatus: Boolean = false,
@@ -46,6 +46,7 @@ data class Beregning(
     val anvendtTrygdetid: BigDecimal,
     val datoVirkFom: Tidspunkt,
     val g: BigDecimal,
+    val prorataBroek: IntBroek?,
     val meta: BeregningMeta? = null,
 )
 
@@ -69,7 +70,4 @@ data class Trygdetidsgrunnlag(
     val poengIInnAar: Boolean,
     val poengIUtAar: Boolean,
     val ikkeIProrata: Boolean,
-    val faktiskTrygdetid: BigDecimal,
-    val fremtidigTrygdetid: BigDecimal,
-    val anvendtTrygdetid: BigDecimal,
 )

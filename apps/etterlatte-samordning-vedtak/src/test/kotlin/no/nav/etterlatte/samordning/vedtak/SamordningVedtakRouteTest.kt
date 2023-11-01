@@ -19,7 +19,6 @@ import io.mockk.confirmVerified
 import io.mockk.mockk
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.ktor.restModule
-import no.nav.etterlatte.validateMaskinportenScope
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
@@ -93,7 +92,12 @@ class SamordningVedtakRouteTest {
 
     @Test
     fun `skal gi 200 med gyldig token inkl scope`() {
-        coEvery { samordningVedtakService.hentVedtak(vedtakId = any<Long>(), tpnr = "3010", any<String>()) } returns
+        coEvery {
+            samordningVedtakService.hentVedtak(
+                vedtakId = any<Long>(),
+                MaskinportenTpContext(tpnr = Tjenestepensjonnummer("3010"), organisasjonsnr = "0123456789"),
+            )
+        } returns
             opprettSamordningVedtakDto()
 
         testApplication {
@@ -111,7 +115,7 @@ class SamordningVedtakRouteTest {
                 }
 
             response.status shouldBe HttpStatusCode.OK
-            coVerify { samordningVedtakService.hentVedtak(vedtakId = any<Long>(), tpnr = "3010", any<String>()) }
+            coVerify { samordningVedtakService.hentVedtak(vedtakId = any<Long>(), any<MaskinportenTpContext>()) }
         }
     }
 
@@ -124,8 +128,11 @@ class SamordningVedtakRouteTest {
             samordningVedtakService.hentVedtaksliste(
                 virkFom = virkFom,
                 fnr = Folkeregisteridentifikator.of(fnr),
-                tpnr = Tjenestepensjonnummer("3010"),
-                organisasjonsnummer = any<String>(),
+                context =
+                    MaskinportenTpContext(
+                        tpnr = Tjenestepensjonnummer("3010"),
+                        organisasjonsnr = "0123456789",
+                    ),
             )
         } returns
             listOf(opprettSamordningVedtakDto())
@@ -151,18 +158,16 @@ class SamordningVedtakRouteTest {
                 samordningVedtakService.hentVedtaksliste(
                     virkFom = virkFom,
                     fnr = Folkeregisteridentifikator.of(fnr),
-                    tpnr = Tjenestepensjonnummer("3010"),
-                    organisasjonsnummer = any<String>(),
+                    any<MaskinportenTpContext>(),
                 )
             }
         }
     }
 
     private fun Application.samordningVedtakApi() {
-        restModule(
-            log,
-            additionalValidation = validateMaskinportenScope(),
-        ) { samordningVedtakRoute(samordningVedtakService = samordningVedtakService) }
+        restModule(log) {
+            samordningVedtakRoute(samordningVedtakService = samordningVedtakService)
+        }
     }
 
     private fun token(maskinportenScope: String? = null): String {

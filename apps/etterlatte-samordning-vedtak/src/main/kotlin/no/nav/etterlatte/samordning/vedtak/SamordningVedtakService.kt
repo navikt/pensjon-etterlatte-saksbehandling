@@ -17,14 +17,14 @@ class SamordningVedtakService(
 ) {
     suspend fun hentVedtak(
         vedtakId: Long,
-        tpnr: String,
-        organisasjonsnummer: String,
+        callerContext: CallerContext,
     ): SamordningVedtakDto {
-        val vedtak = vedtaksvurderingKlient.hentVedtak(vedtakId, organisasjonsnummer)
+        val vedtak = vedtaksvurderingKlient.hentVedtak(vedtakId, callerContext)
 
-        if (!tjenestepensjonKlient.harTpYtelseOnDate(
+        if (callerContext is MaskinportenTpContext &&
+            !tjenestepensjonKlient.harTpYtelseOnDate(
                 fnr = vedtak.fnr,
-                tpnr = tpnr,
+                tpnr = callerContext.tpnr,
                 fomDato = vedtak.virkningstidspunkt.atStartOfMonth(),
             )
         ) {
@@ -41,17 +41,17 @@ class SamordningVedtakService(
     suspend fun hentVedtaksliste(
         virkFom: LocalDate,
         fnr: Folkeregisteridentifikator,
-        tpnr: Tjenestepensjonnummer,
-        organisasjonsnummer: String,
+        context: CallerContext,
     ): List<SamordningVedtakDto> {
-        if (!tjenestepensjonKlient.harTpForholdByDate(fnr.value, tpnr.value, virkFom)) {
+        if (context is MaskinportenTpContext && !tjenestepensjonKlient.harTpForholdByDate(fnr.value, context.tpnr, virkFom)
+        ) {
             throw TjenestepensjonManglendeTilgangException("Ikke gyldig tpforhold")
         }
 
         return vedtaksvurderingKlient.hentVedtaksliste(
             virkFom = virkFom,
             fnr = fnr.value,
-            organisasjonsnummer = organisasjonsnummer,
+            callerContext = context,
         )
             .map { it.mapSamordningsvedtak() }
     }

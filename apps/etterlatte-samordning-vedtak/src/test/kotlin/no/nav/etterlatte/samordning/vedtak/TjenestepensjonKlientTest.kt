@@ -62,7 +62,7 @@ class TjenestepensjonKlientTest {
         val tpKlient = TjenestepensjonKlient(config, httpClient)
 
         runBlocking {
-            tpKlient.harTpForholdByDate("17057554321", "3010", datoHarTpYtelse)
+            tpKlient.harTpForholdByDate("17057554321", tpnr = Tjenestepensjonnummer("3010"), datoHarTpYtelse)
         } shouldBe true
     }
 
@@ -91,7 +91,7 @@ class TjenestepensjonKlientTest {
         val tpKlient = TjenestepensjonKlient(config, httpClient)
 
         runBlocking {
-            tpKlient.harTpForholdByDate("17057554321", "4100", datoHarIkkeTpYtelse)
+            tpKlient.harTpForholdByDate("17057554321", Tjenestepensjonnummer("4100"), datoHarIkkeTpYtelse)
         } shouldBe false
     }
 
@@ -117,11 +117,11 @@ class TjenestepensjonKlientTest {
         val tpKlient = TjenestepensjonKlient(config, httpClient)
 
         runBlocking {
-            tpKlient.harTpYtelseOnDate("01018012345", "3010", datoHarIkkeTpYtelse)
+            tpKlient.harTpYtelseOnDate("01018012345", Tjenestepensjonnummer("3010"), datoHarIkkeTpYtelse)
         } shouldBe false
 
         runBlocking {
-            tpKlient.harTpYtelseOnDate("01018012345", "3010", datoHarTpYtelse)
+            tpKlient.harTpYtelseOnDate("01018012345", Tjenestepensjonnummer("3010"), datoHarTpYtelse)
         } shouldBe true
     }
 

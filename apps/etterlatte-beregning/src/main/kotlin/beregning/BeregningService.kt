@@ -73,6 +73,15 @@ class BeregningService(
         }
     }
 
+    suspend fun hentOverstyrBeregning(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): OverstyrBeregning? {
+        val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
+
+        return beregningRepository.hentOverstyrBeregning(behandling.sak)
+    }
+
     private fun hentBeregning(behandlingId: UUID): Beregning? {
         logger.info("Henter beregning for behandlingId=$behandlingId")
 
@@ -80,11 +89,7 @@ class BeregningService(
     }
 
     private suspend fun Beregning?.berikMedOverstyrBeregning(brukerTokenInfo: BrukerTokenInfo) =
-        this?.let { beregning ->
-            val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
-
-            beregning.copy(overstyrBeregning = beregningRepository.hentOverstyrBeregning(behandling.sak))
-        }
+        this?.copy(overstyrBeregning = hentOverstyrBeregning(behandlingId, brukerTokenInfo))
 
     private suspend fun kopierBeregningsgrunnlagOgOpprettBeregningBarnepensjon(
         behandling: DetaljertBehandling,

@@ -1,13 +1,21 @@
 package no.nav.etterlatte.tilbakekreving.vedtak
 
+import com.fasterxml.jackson.core.JsonGenerator
+import com.fasterxml.jackson.databind.DeserializationFeature
+import com.fasterxml.jackson.databind.JsonSerializer
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.SerializationFeature
+import com.fasterxml.jackson.databind.SerializerProvider
+import com.fasterxml.jackson.databind.json.JsonMapper
+import com.fasterxml.jackson.databind.module.SimpleModule
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.fasterxml.jackson.module.kotlin.KotlinModule
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
-import jakarta.xml.bind.JAXBContext
-import jakarta.xml.bind.Marshaller
 import kotlinx.coroutines.runBlocking
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
@@ -24,7 +32,6 @@ import no.nav.tilbakekreving.tilbakekrevingsvedtak.vedtak.v1.Tilbakekrevingsperi
 import no.nav.tilbakekreving.tilbakekrevingsvedtak.vedtak.v1.TilbakekrevingsvedtakDto
 import no.nav.tilbakekreving.typer.v1.PeriodeDto
 import org.slf4j.LoggerFactory
-import java.io.StringWriter
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
@@ -41,33 +48,19 @@ class TilbakekrevingKlient(
     private val logger = LoggerFactory.getLogger(javaClass)
     private val sikkerLogg = sikkerlogger()
 
-    private val jaxbContext = JAXBContext.newInstance(TilbakekrevingsvedtakRequest::class.java)
-
-    private fun toXml(request: TilbakekrevingsvedtakRequest): String {
-        val marshaller = jaxbContext.createMarshaller()
-        marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true)
-
-        val stringWriter = StringWriter()
-        stringWriter.use {
-            marshaller.marshal(request, stringWriter)
-        }
-
-        return stringWriter.toString()
-    }
-
     fun sendTilbakekrevingsvedtak(vedtak: TilbakekrevingVedtak) {
         logger.info("Sender tilbakekrevingsvedtak ${vedtak.vedtakId} til tilbakekrevingskomponenten")
         val request = toTilbakekrevingsvedtakRequest(vedtak)
-        val requestAsXml = toXml(request)
+        val requestAsJson = vedtakObjectMapper.writeValueAsString(request)
 
-        hendelseRepository.lagreTilbakekrevingsvedtakSendt(vedtak.kravgrunnlagId, requestAsXml)
+        hendelseRepository.lagreTilbakekrevingsvedtakSendt(vedtak.kravgrunnlagId, requestAsJson)
 
         val response =
             runBlocking {
                 val httpResponse =
                     httpClient.post("$url/tilbakekreving/tilbakekrevingsvedtak") {
                         contentType(ContentType.Application.Json)
-                        setBody(requestAsXml)
+                        setBody(requestAsJson)
                     }
 
                 httpResponse.body<TilbakekrevingsvedtakResponse>()
@@ -85,7 +78,7 @@ class TilbakekrevingKlient(
                     kodeAksjon = KodeAksjon.FATTE_VEDTAK.kode
                     vedtakId = vedtak.vedtakId.toBigInteger()
                     datoVedtakFagsystem = vedtak.fattetVedtak.dato.toXMLDate()
-                    renterBeregnes = "N"
+                    renterBeregnes = RenterBeregnes.NEI.kode
                     saksbehId = vedtak.fattetVedtak.saksbehandler
                     enhetAnsvarlig = ANSVARLIG_ENHET
                     kodeHjemmel = vedtak.hjemmel.kode
@@ -192,5 +185,37 @@ class TilbakekrevingKlient(
 
     private companion object {
         const val ANSVARLIG_ENHET = "4819"
+    }
+}
+
+// Brukes for å få riktig dato-format ved serialisering
+private val vedtakObjectMapper: ObjectMapper =
+    JsonMapper.builder()
+        .addModule(JavaTimeModule())
+        .addModule(KotlinModule())
+        .addModule(CustomXMLGregorianCalendarModule())
+        .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+        .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+        .enable(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES)
+        .enable(DeserializationFeature.FAIL_ON_NUMBERS_FOR_ENUMS)
+        .enable(JsonGenerator.Feature.WRITE_BIGDECIMAL_AS_PLAIN)
+        .build()
+
+private class CustomXMLGregorianCalendarModule : SimpleModule() {
+    init {
+        addSerializer(
+            XMLGregorianCalendar::class.java,
+            object : JsonSerializer<XMLGregorianCalendar>() {
+                override fun serialize(
+                    value: XMLGregorianCalendar?,
+                    gen: JsonGenerator?,
+                    serializers: SerializerProvider?,
+                ) {
+                    if (value != null) {
+                        gen?.writeString(value.toGregorianCalendar().toZonedDateTime().toLocalDate().toString())
+                    }
+                }
+            },
+        )
     }
 }

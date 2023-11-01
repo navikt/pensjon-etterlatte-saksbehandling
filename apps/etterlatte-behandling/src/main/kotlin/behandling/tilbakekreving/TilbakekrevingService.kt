@@ -209,7 +209,8 @@ class TilbakekrevingService(
             tilbakekrevingKlient.sendTilbakekrevingsvedtak(
                 brukerTokenInfo,
                 TilbakekrevingVedtak(
-                    vedtakId = vedtak.id,
+                    // TODO sjekk opp dette - her sender vi vedtaksId fra tilbakekrevingskomponenten
+                    vedtakId = behandling.tilbakekreving.kravgrunnlag.vedtakId.value,
                     fattetVedtak =
                         FattetVedtak(
                             saksbehandler = vedtak.fattetAv,
@@ -225,7 +226,7 @@ class TilbakekrevingService(
                             TilbakekrevingPeriodeVedtak(
                                 maaned = it.maaned,
                                 ytelse = it.ytelse.toVedtak(),
-                                feilkonto = it.ytelse.toVedtak(),
+                                feilkonto = it.feilkonto.toVedtak(),
                             )
                         },
                 ),

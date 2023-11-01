@@ -32,6 +32,7 @@ import no.nav.tilbakekreving.tilbakekrevingsvedtak.vedtak.v1.Tilbakekrevingsperi
 import no.nav.tilbakekreving.tilbakekrevingsvedtak.vedtak.v1.TilbakekrevingsvedtakDto
 import no.nav.tilbakekreving.typer.v1.PeriodeDto
 import org.slf4j.LoggerFactory
+import java.math.BigInteger
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
@@ -76,7 +77,7 @@ class TilbakekrevingKlient(
             tilbakekrevingsvedtak =
                 TilbakekrevingsvedtakDto().apply {
                     kodeAksjon = KodeAksjon.FATTE_VEDTAK.kode
-                    vedtakId = vedtak.vedtakId.toBigInteger()
+                    vedtakId = BigInteger.valueOf(611603) // TODO hardkodet
                     datoVedtakFagsystem = vedtak.fattetVedtak.dato.toXMLDate()
                     renterBeregnes = RenterBeregnes.NEI.kode
                     saksbehId = vedtak.fattetVedtak.saksbehandler

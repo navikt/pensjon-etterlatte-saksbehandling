@@ -57,7 +57,7 @@ class ApplicationBuilder {
                 azureAppClientId = config.getString("azure.app.client.id"),
                 azureAppJwk = config.getString("azure.app.jwk"),
                 azureAppWellKnownUrl = config.getString("azure.app.well.known.url"),
-                azureAppScope = config.getString("azure.app.well.known.url"),
+                azureAppScope = config.getString("samordnevedtak.azure.scope"),
             ),
             featureToggleService,
         )

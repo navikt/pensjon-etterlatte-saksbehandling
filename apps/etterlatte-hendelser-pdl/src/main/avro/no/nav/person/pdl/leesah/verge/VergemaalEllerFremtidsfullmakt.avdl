@@ -6,7 +6,7 @@ protocol VergeV1 {
     union { null, no.nav.person.pdl.leesah.common.Personnavn } navn = null;
     union { null, string } motpartsPersonident = null;
     union { null, string } omfang = null;
-    boolean omfangetErInnenPersonligOmraade;
+    union{null, boolean} omfangetErInnenPersonligOmraade = null;
   }
 
   record VergemaalEllerFremtidsfullmakt {

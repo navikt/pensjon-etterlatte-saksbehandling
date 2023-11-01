@@ -416,6 +416,7 @@ data class PdlForelderBarnRelasjon(
     val minRolleForPerson: PdlForelderBarnRelasjonRolle? = null,
     val relatertPersonsIdent: String?,
     val relatertPersonsRolle: PdlForelderBarnRelasjonRolle,
+    val relatertPersonUtenFolkeregisteridentifikator: PdlRelatertBiPerson? = null,
 )
 
 enum class PdlForelderBarnRelasjonRolle {

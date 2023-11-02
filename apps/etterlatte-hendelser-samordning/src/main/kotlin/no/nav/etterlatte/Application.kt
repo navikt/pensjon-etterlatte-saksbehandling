@@ -1,3 +1,5 @@
+package no.nav.etterlatte
+
 import com.typesafe.config.ConfigFactory
 import io.ktor.server.application.Application
 import io.ktor.server.cio.CIO

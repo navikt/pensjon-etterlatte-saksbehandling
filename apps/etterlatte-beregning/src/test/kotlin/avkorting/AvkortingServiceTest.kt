@@ -71,7 +71,6 @@ internal class AvkortingServiceTest {
             }
 
             coVerify {
-                behandlingKlient.avkort(behandlingId, bruker, false)
                 avkortingRepository.hentAvkorting(behandlingId)
                 behandlingKlient.hentBehandling(behandlingId, bruker)
                 behandling.behandlingType
@@ -97,7 +96,6 @@ internal class AvkortingServiceTest {
                 service.hentAvkorting(behandlingId, bruker) shouldBe avkorting
             }
             coVerify {
-                behandlingKlient.avkort(behandlingId, bruker, false)
                 behandlingKlient.hentBehandling(behandlingId, bruker)
                 avkortingRepository.hentAvkorting(behandlingId)
                 avkorting.medYtelseFraOgMedVirkningstidspunkt(YearMonth.of(2023, 1))
@@ -173,7 +171,6 @@ internal class AvkortingServiceTest {
             }
 
             coVerify(exactly = 1) {
-                behandlingKlient.avkort(behandlingId, bruker, false)
                 behandlingKlient.hentBehandling(behandlingId, bruker)
                 avkortingRepository.hentAvkorting(behandlingId)
                 behandlingKlient.hentSisteIverksatteBehandling(behandling.sak, bruker)
@@ -212,7 +209,6 @@ internal class AvkortingServiceTest {
             }
 
             coVerify(exactly = 1) {
-                behandlingKlient.avkort(behandlingId, bruker, false)
                 behandlingKlient.hentBehandling(behandlingId, bruker)
                 avkortingRepository.hentAvkorting(behandlingId)
                 behandlingKlient.hentSisteIverksatteBehandling(behandling.sak, bruker)

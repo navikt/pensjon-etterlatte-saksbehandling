@@ -22,7 +22,6 @@ class AvkortingService(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): Avkorting? {
-        tilstandssjekk(behandlingId, brukerTokenInfo)
         logger.info("Henter avkorting for behandlingId=$behandlingId")
         val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
         val eksisterendeAvkorting = avkortingRepository.hentAvkorting(behandling.id)
@@ -114,6 +113,7 @@ class AvkortingService(
         avkorting: Avkorting,
         brukerTokenInfo: BrukerTokenInfo,
     ): Avkorting {
+        tilstandssjekk(behandlingId, brukerTokenInfo)
         val beregning = beregningService.hentBeregningNonnull(behandlingId)
         val beregnetAvkorting = avkorting.beregnAvkortingRevurdering(beregning)
         avkortingRepository.lagreAvkorting(behandlingId, beregnetAvkorting)

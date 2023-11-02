@@ -55,12 +55,37 @@ internal class AvkortingServiceTest {
     @Nested
     inner class HentAvkorting {
         @Test
-        fun `Skal hente avkorting med ytelse`() {
+        fun `Foerstegangsbehandling skal returnere null hvis avkorting ikke finnes`() {
             val behandlingId = UUID.randomUUID()
             val behandling =
                 behandling(
                     id = behandlingId,
                     behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+                    status = BehandlingStatus.BEREGNET,
+                )
+            every { avkortingRepository.hentAvkorting(behandlingId) } returns null
+            coEvery { behandlingKlient.hentBehandling(behandlingId, bruker) } returns behandling
+
+            runBlocking {
+                service.hentAvkorting(behandlingId, bruker) shouldBe null
+            }
+
+            coVerify {
+                behandlingKlient.avkort(behandlingId, bruker, false)
+                avkortingRepository.hentAvkorting(behandlingId)
+                behandlingKlient.hentBehandling(behandlingId, bruker)
+                behandling.behandlingType
+            }
+        }
+
+        @Test
+        fun `Foerstegangsbehandling skal hente avkorting hvis finnes fra foer`() {
+            val behandlingId = UUID.randomUUID()
+            val behandling =
+                behandling(
+                    id = behandlingId,
+                    behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+                    status = BehandlingStatus.AVKORTET,
                 )
             val avkorting = mockk<Avkorting>()
 
@@ -80,25 +105,41 @@ internal class AvkortingServiceTest {
         }
 
         @Test
-        fun `Skal returnere null hvis avkorting ikke finnes for en foerstegangsbehandling`() {
+        fun `Foerstegangsbehandling skal reberegne avkorting hvis beregning er beregnet paa nytt`() {
             val behandlingId = UUID.randomUUID()
             val behandling =
                 behandling(
                     id = behandlingId,
                     behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+                    status = BehandlingStatus.BEREGNET,
                 )
-            every { avkortingRepository.hentAvkorting(behandlingId) } returns null
+            val eksisterendeAvkorting = mockk<Avkorting>()
+            val beregning = mockk<Beregning>()
+            val reberegnetAvkorting = mockk<Avkorting>()
+            val lagretAvkorting = mockk<Avkorting>()
+
             coEvery { behandlingKlient.hentBehandling(behandlingId, bruker) } returns behandling
+            every { avkortingRepository.hentAvkorting(behandlingId) } returns eksisterendeAvkorting andThen lagretAvkorting
+            every { beregningService.hentBeregningNonnull(any()) } returns beregning
+            every { eksisterendeAvkorting.beregnAvkortingRevurdering(any()) } returns reberegnetAvkorting
+            every { avkortingRepository.lagreAvkorting(any(), any()) } returns Unit
+            coEvery { behandlingKlient.avkort(any(), any(), any()) } returns true
+            every { lagretAvkorting.medYtelseFraOgMedVirkningstidspunkt(any(), any()) } returns lagretAvkorting
 
             runBlocking {
-                service.hentAvkorting(behandlingId, bruker) shouldBe null
+                service.hentAvkorting(behandlingId, bruker) shouldBe lagretAvkorting
             }
-
-            coVerify {
+            coVerify(exactly = 1) {
                 behandlingKlient.avkort(behandlingId, bruker, false)
-                avkortingRepository.hentAvkorting(behandlingId)
                 behandlingKlient.hentBehandling(behandlingId, bruker)
-                behandling.behandlingType
+                beregningService.hentBeregningNonnull(behandlingId)
+                eksisterendeAvkorting.beregnAvkortingRevurdering(beregning)
+                avkortingRepository.lagreAvkorting(behandlingId, reberegnetAvkorting)
+                behandlingKlient.avkort(behandlingId, bruker, true)
+                lagretAvkorting.medYtelseFraOgMedVirkningstidspunkt(YearMonth.of(2023, 1))
+            }
+            coVerify(exactly = 2) {
+                avkortingRepository.hentAvkorting(behandlingId)
             }
         }
 
@@ -261,8 +302,8 @@ internal class AvkortingServiceTest {
             every { beregningService.hentBeregningNonnull(any()) } returns beregning
             every { eksisterendeAvkorting.beregnAvkortingRevurdering(any()) } returns reberegnetAvkorting
             every { avkortingRepository.lagreAvkorting(any(), any()) } returns Unit
-            every { lagretAvkorting.medYtelseFraOgMedVirkningstidspunkt(any(), any()) } returns lagretAvkorting
             coEvery { behandlingKlient.avkort(any(), any(), any()) } returns true
+            every { lagretAvkorting.medYtelseFraOgMedVirkningstidspunkt(any(), any()) } returns lagretAvkorting
 
             runBlocking {
                 service.hentAvkorting(behandlingId, bruker)
@@ -276,8 +317,8 @@ internal class AvkortingServiceTest {
                 beregningService.hentBeregningNonnull(behandlingId)
                 eksisterendeAvkorting.beregnAvkortingRevurdering(beregning)
                 avkortingRepository.lagreAvkorting(behandlingId, reberegnetAvkorting)
-                lagretAvkorting.medYtelseFraOgMedVirkningstidspunkt(YearMonth.of(2023, 1), forrigeAvkorting)
                 behandlingKlient.avkort(behandlingId, bruker, true)
+                lagretAvkorting.medYtelseFraOgMedVirkningstidspunkt(YearMonth.of(2023, 1), forrigeAvkorting)
             }
             coVerify(exactly = 2) {
                 avkortingRepository.hentAvkorting(behandlingId)

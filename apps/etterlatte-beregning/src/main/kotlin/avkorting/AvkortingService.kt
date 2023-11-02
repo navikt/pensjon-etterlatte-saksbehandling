@@ -28,7 +28,14 @@ class AvkortingService(
         val eksisterendeAvkorting = avkortingRepository.hentAvkorting(behandling.id)
 
         if (behandling.behandlingType == BehandlingType.FØRSTEGANGSBEHANDLING) {
-            return eksisterendeAvkorting?.let { avkortingMedTillegg(it, behandling) }
+            return eksisterendeAvkorting?.let {
+                if (behandling.status == BehandlingStatus.BEREGNET) {
+                    val reberegnetAvkorting = reberegnOgLagreAvkorting(behandling.id, eksisterendeAvkorting, brukerTokenInfo)
+                    avkortingMedTillegg(reberegnetAvkorting, behandling)
+                } else {
+                    avkortingMedTillegg(eksisterendeAvkorting, behandling)
+                }
+            }
         }
 
         val forrigeAvkorting = hentAvkortingForrigeBehandling(behandling.sak, brukerTokenInfo)

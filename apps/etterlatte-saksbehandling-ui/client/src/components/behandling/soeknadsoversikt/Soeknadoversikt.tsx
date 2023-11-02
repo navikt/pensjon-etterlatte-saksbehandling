@@ -46,6 +46,7 @@ export const Soeknadsoversikt = (props: { behandling: IDetaljertBehandling }) =>
       </ContentHeader>
       <InnholdPadding>
         <OppdaterGrunnlagModal behandlingId={behandling.id} behandlingStatus={behandling.status} />
+        <Utenlandstilsnitt behandling={behandling} redigerbar={behandles} />
         <OversiktGyldigFramsatt behandling={behandling} />
         {behandling.gyldighetsprøving?.resultat === VurderingsResultat.OPPFYLT && (
           <>
@@ -85,7 +86,6 @@ export const Soeknadsoversikt = (props: { behandling: IDetaljertBehandling }) =>
                 ),
               }}
             </Virkningstidspunkt>
-            <Utenlandstilsnitt behandling={behandling} redigerbar={behandles} />
             <BoddEllerArbeidetUtlandet behandling={behandling} redigerbar={behandles} />
           </>
         )}

@@ -11,7 +11,8 @@ import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingAarsak
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVedtak
-import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingsbelopVedtak
+import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingsbelopFeilkontoVedtak
+import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingsbelopYtelseVedtak
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.tilbakekreving.hendelse.TilbakekrevingHendelseRepository
 import no.nav.okonomi.tilbakekrevingservice.TilbakekrevingsvedtakRequest
@@ -96,7 +97,7 @@ class TilbakekrevingKlient(
         }
     }
 
-    private fun TilbakekrevingsbelopVedtak.toTilbakekreivngsbelopYtelse(aarsak: TilbakekrevingAarsak) =
+    private fun TilbakekrevingsbelopYtelseVedtak.toTilbakekreivngsbelopYtelse(aarsak: TilbakekrevingAarsak) =
         TilbakekrevingsbelopDto().apply {
             kodeKlasse = klasseKode
             belopOpprUtbet = bruttoUtbetaling.toBigDecimal()
@@ -108,13 +109,12 @@ class TilbakekrevingKlient(
             kodeSkyld = skyld.name
         }
 
-    private fun TilbakekrevingsbelopVedtak.toTilbakekreivngsbelopFeilkonto() =
+    private fun TilbakekrevingsbelopFeilkontoVedtak.toTilbakekreivngsbelopFeilkonto() =
         TilbakekrevingsbelopDto().apply {
             kodeKlasse = klasseKode
-            belopOpprUtbet = bruttoUtbetaling.toBigDecimal()
-            belopTilbakekreves = bruttoTilbakekreving.toBigDecimal()
-            belopSkatt = skatt.toBigDecimal()
-            // TODO kodeResultat og kodeAarsak er obligatorisk iht grensesnitt, men gir det mening for feilkonto?
+            belopOpprUtbet = bruttoUtbetaling.toBigDecimal().setScale(2)
+            belopNy = nyBruttoUtbetaling.toBigDecimal().setScale(2)
+            belopTilbakekreves = bruttoTilbakekreving.toBigDecimal().setScale(2)
         }
 
     private fun kontrollerResponse(response: TilbakekrevingsvedtakResponse) {

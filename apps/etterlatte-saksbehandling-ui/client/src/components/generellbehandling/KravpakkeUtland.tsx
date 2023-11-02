@@ -26,7 +26,7 @@ import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { hentAlleLand, ILand, sorterLand } from '~shared/api/trygdetid'
 import styled from 'styled-components'
-import { ExternalLinkIcon, PencilWritingIcon, XMarkIcon } from '@navikt/aksel-icons'
+import { ExternalLinkIcon, PencilWritingIcon } from '@navikt/aksel-icons'
 import { opprettBrevForSak } from '~shared/api/brev'
 import { ABlue500 } from '@navikt/ds-tokens/dist/tokens'
 import { ButtonGroup } from '~components/person/VurderHendelseModal'
@@ -237,10 +237,7 @@ const KravpakkeUtland = (props: { utlandsBehandling: Generellbehandling & { innh
                           )
                           return (
                             <Chips.Removable
-                              style={{
-                                cursor: 'pointer',
-                                marginRight: '0.6rem',
-                              }}
+                              style={{ cursor: 'pointer' }}
                               key={landIsoKode}
                               onClick={() => {
                                 if (redigerbar) {
@@ -253,7 +250,6 @@ const KravpakkeUtland = (props: { utlandsBehandling: Generellbehandling & { innh
                               }}
                             >
                               {kodeverkLandMatch?.beskrivelse.tekst ?? landIsoKode}
-                              <XMarkIcon />
                             </Chips.Removable>
                           )
                         })}

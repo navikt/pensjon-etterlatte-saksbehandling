@@ -11,7 +11,6 @@ import { KravpakkeUtland } from '~shared/types/Generellbehandling'
 import { hentAlleLand, ILand, sorterLand } from '~shared/api/trygdetid'
 import SEDLandMedDokumenter from '~components/behandling/revurderingsoversikt/sluttbehandlingUtland/SEDLandMedDokumenter'
 import { TextButton } from '~components/behandling/soeknadsoversikt/familieforhold/personer/personinfo/TextButton'
-import SluttbehandlingUtlandFelter from '~components/behandling/revurderingsoversikt/sluttbehandlingUtland/SluttbehandlingUtlandFelter'
 import { hentRevurderingerForSakMedAarsak, lagreRevurderingInfo } from '~shared/api/revurdering'
 import { AWhite } from '@navikt/ds-tokens/dist/tokens'
 import { CheckmarkCircleIcon } from '@navikt/aksel-icons'
@@ -202,9 +201,6 @@ export default function SluttbehandlingUtland({
             />
           )
         )}
-      {isSuccess(kravpakkeStatus) && (
-        <SluttbehandlingUtlandFelter tilknyttetBehandling={kravpakkeStatus.data.kravpakke.tilknyttetBehandling} />
-      )}
     </>
   )
 }

@@ -64,6 +64,13 @@ spec:
   azure:
     application:
       enabled: true
+      allowAllUsers: false
+      claims:
+        groups:
+          - id: 0af3955f-df85-4eb0-b5b2-45bf2c8aeb9e #SAKSBEHANDLER
+        extra:
+          - "NAVident"
+          - "azp_name"
   env:
     - name: MASKINPORTEN_WELL_KNOWN_URL
       value: https://maskinporten.no/.well-known/oauth-authorization-server

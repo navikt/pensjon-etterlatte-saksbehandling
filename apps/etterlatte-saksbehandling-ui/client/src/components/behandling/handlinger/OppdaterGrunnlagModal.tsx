@@ -37,7 +37,7 @@ export default function OppdaterGrunnlagModal({
   }
 
   return (
-    <div style={{ float: 'right' }}>
+    <div style={{ float: 'right', margin: '4rem' }}>
       <Button
         variant="secondary"
         size="small"

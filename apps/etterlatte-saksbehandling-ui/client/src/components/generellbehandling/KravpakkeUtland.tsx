@@ -6,6 +6,7 @@ import {
   BodyShort,
   Button,
   Checkbox,
+  Chips,
   Heading,
   Link,
   Panel,
@@ -27,7 +28,7 @@ import { hentAlleLand, ILand, sorterLand } from '~shared/api/trygdetid'
 import styled from 'styled-components'
 import { ExternalLinkIcon, PencilWritingIcon, XMarkIcon } from '@navikt/aksel-icons'
 import { opprettBrevForSak } from '~shared/api/brev'
-import { ABlue500, AGray400 } from '@navikt/ds-tokens/dist/tokens'
+import { ABlue500 } from '@navikt/ds-tokens/dist/tokens'
 import { ButtonGroup } from '~components/person/VurderHendelseModal'
 import { ConfigContext } from '~clientConfig'
 import { DatoVelger, formatDateToLocaleDateOrEmptyString } from '~shared/DatoVelger'
@@ -48,13 +49,6 @@ const StandardBreddeTabell = styled(Table)`
 
 const LenkeMargin = styled(Link)`
   margin: 2rem 0rem 0.5rem 0;
-`
-
-const FlexOrder = styled.div`
-  display: flex;
-  max-width: 55rem;
-  justify-content: flex-start;
-  flex-wrap: wrap;
 `
 
 const KravpakkeUtland = (props: { utlandsBehandling: Generellbehandling & { innhold: KravpakkeUtland | null } }) => {
@@ -236,16 +230,14 @@ const KravpakkeUtland = (props: { utlandsBehandling: Generellbehandling & { innh
                       </Heading>
                     ) : null}
                     {isSuccess(hentAlleLandRequest) && valgteLandIsoKode && (
-                      <FlexOrder>
+                      <Chips>
                         {valgteLandIsoKode.map((landIsoKode) => {
                           const kodeverkLandMatch = alleLandKodeverk?.find(
                             (kodeverkLand) => kodeverkLand.isoLandkode === landIsoKode
                           )
                           return (
-                            <BodyShort
+                            <Chips.Removable
                               style={{
-                                borderRadius: '10px',
-                                border: `2px solid ${AGray400}`,
                                 cursor: 'pointer',
                                 marginRight: '0.6rem',
                               }}
@@ -262,10 +254,10 @@ const KravpakkeUtland = (props: { utlandsBehandling: Generellbehandling & { innh
                             >
                               {kodeverkLandMatch?.beskrivelse.tekst ?? landIsoKode}
                               <XMarkIcon />
-                            </BodyShort>
+                            </Chips.Removable>
                           )
                         })}
-                      </FlexOrder>
+                      </Chips>
                     )}
                   </>
                 )
@@ -311,7 +303,7 @@ const KravpakkeUtland = (props: { utlandsBehandling: Generellbehandling & { innh
                           }}
                         />
                       ) : (
-                        <BodyShort>dokument.dokumenttype</BodyShort>
+                        <BodyShort>{dokument.dokumenttype}</BodyShort>
                       )}
                     </Table.DataCell>
                     <Table.DataCell>

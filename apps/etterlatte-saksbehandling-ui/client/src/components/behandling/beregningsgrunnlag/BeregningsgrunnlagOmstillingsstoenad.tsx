@@ -117,7 +117,7 @@ const BeregningsgrunnlagOmstillingsstoenad = (props: { behandling: IBehandlingRe
             onClick={onSubmit}
             loading={isPending(lagreBeregningsgrunnlagOMS) || isPending(endreBeregning)}
           >
-            Beregne og fatte vedtak
+            Beregn
           </Button>
         </BehandlingHandlingKnapper>
       ) : (

@@ -93,12 +93,13 @@ class TilbakekrevingKlient(
                                         fom = tilbakekrevingPeriode.maaned.atDay(1).toXMLDate()
                                         tom = tilbakekrevingPeriode.maaned.atEndOfMonth().toXMLDate()
                                     }
-                                renterBeregnes =
+                                /*renterBeregnes =
                                     if (tilbakekrevingPeriode.ytelse.rentetillegg > 0) {
                                         RenterBeregnes.JA.kode
                                     } else {
                                         RenterBeregnes.NEI.kode
-                                    }
+                                    }*/
+                                renterBeregnes = RenterBeregnes.NEI.kode
                                 belopRenter = tilbakekrevingPeriode.ytelse.rentetillegg.toBigDecimal().setScale(2)
 
                                 tilbakekrevingsbelop.apply {

@@ -56,7 +56,7 @@ export const GyldigFramsattBarnepensjon = ({
         <Beskrivelse>
           Den som har rett til ytelsen må sette frem krav (forelder/verge hvis under 18 år). Om annet må fullmakt ligge
           i saken. Søknaden må være signert og vise hva det søkes om, og den må være fremsatt i riktig land. Søknaden må
-          være fremstilt i riktig land, dette skal være landet bruker er bosatt i.(unntak hvis ikke avtaleland)
+          være fremstilt i riktig land, dette skal være landet bruker er bosatt i (unntak hvis ikke avtaleland).
         </Beskrivelse>
         <InfobokserWrapper>
           <Innsender innsenderErForelder={innsenderErForelder} />

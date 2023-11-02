@@ -101,6 +101,12 @@ spec:
           permissions:
             roles:
               - les-oms-vedtak
+        - application: pensjon-pen-q5
+          namespace: pensjon-q5
+          cluster: dev-fss
+          permissions:
+            roles:
+              - les-oms-vedtak
         - application: ida
           namespace: traktor
           cluster: prod-fss

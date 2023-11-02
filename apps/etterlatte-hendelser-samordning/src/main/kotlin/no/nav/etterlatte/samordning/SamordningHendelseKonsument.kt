@@ -1,6 +1,7 @@
 package no.nav.etterlatte.samordning
 
 import no.nav.etterlatte.kafka.Kafkakonsument
+import no.nav.etterlatte.libs.common.logging.withLogContext
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.slf4j.LoggerFactory
 import java.time.Duration
@@ -20,10 +21,12 @@ class SamordningHendelseKonsument(
         stream { meldinger ->
             meldinger
                 .forEach {
-                    handler.handleSamordningHendelse(
-                        hendelse = it.value(),
-                        hendelseKey = it.key(),
-                    )
+                    withLogContext {
+                        handler.handleSamordningHendelse(
+                            hendelse = it.value(),
+                            hendelseKey = it.key(),
+                        )
+                    }
                 }
         }
     }

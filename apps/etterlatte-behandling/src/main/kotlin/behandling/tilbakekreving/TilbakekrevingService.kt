@@ -225,8 +225,8 @@ class TilbakekrevingService(
                         behandling.tilbakekreving.perioder.map {
                             TilbakekrevingPeriodeVedtak(
                                 maaned = it.maaned,
-                                ytelse = it.ytelse.toVedtak(),
-                                feilkonto = it.feilkonto.toVedtak(),
+                                ytelse = it.ytelse.toYtelseVedtak(),
+                                feilkonto = it.feilkonto.toFeilkontoVedtak(),
                             )
                         },
                 ),

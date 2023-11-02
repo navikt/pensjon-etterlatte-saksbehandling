@@ -8,6 +8,7 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class SamordningMottattRiverTest {
@@ -27,7 +28,13 @@ internal class SamordningMottattRiverTest {
     @Test
     fun `skal lese vedtak og oppdatere til samordnet`() {
         val vedtakId = "67300342"
-        every { vedtakService.samordnetVedtak(vedtakId) } returns mockk<VedtakDto>()
+        every { vedtakService.samordnetVedtak(vedtakId) } returns
+            mockk<VedtakDto> {
+                every { behandling } returns
+                    mockk {
+                        every { id } returns UUID.randomUUID()
+                    }
+            }
 
         inspector.sendTestMessage(melding)
 

@@ -6,7 +6,6 @@ import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import java.math.BigDecimal
 import java.time.YearMonth
 
 data class MigreringRequest(
@@ -41,11 +40,11 @@ data class PesysId(val id: Long)
 data class Enhet(val nr: String)
 
 data class Beregning(
-    val brutto: BigDecimal,
-    val netto: BigDecimal,
-    val anvendtTrygdetid: BigDecimal,
+    val brutto: Int,
+    val netto: Int,
+    val anvendtTrygdetid: Int,
     val datoVirkFom: Tidspunkt,
-    val g: BigDecimal,
+    val g: Int,
     val prorataBroek: IntBroek?,
     val meta: BeregningMeta? = null,
 )

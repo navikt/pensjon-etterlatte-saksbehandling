@@ -64,15 +64,15 @@ private fun verifiserNyBeregning(
     }
 
     with(beregning.beregningsperioder.first()) {
-        check(trygdetid == migreringRequest.beregning.anvendtTrygdetid.toInt()) {
+        check(trygdetid == migreringRequest.beregning.anvendtTrygdetid) {
             "Beregning må være basert på samme trygdetid som i Pesys. Er $trygdetid i Gjenny" +
                 ", var ${migreringRequest.beregning.anvendtTrygdetid} i Pesys."
         }
-        check(grunnbelop == migreringRequest.beregning.g.toInt()) {
+        check(grunnbelop == migreringRequest.beregning.g) {
             "Beregning må være basert på samme G som i Pesys. Er $grunnbelop i Gjenny, " +
                 "var ${migreringRequest.beregning.g} i Pesys."
         }
-        check(utbetaltBeloep >= migreringRequest.beregning.brutto.toInt()) {
+        check(utbetaltBeloep >= migreringRequest.beregning.brutto) {
             "Man skal ikke kunne komme dårligere ut på nytt regelverk. " +
                 "Beregnet beløp i Gjenny er lavere enn dagens beløp i Pesys."
         }

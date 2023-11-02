@@ -79,7 +79,7 @@ internal class MigreringHendelserRiver(rapidsConnection: RapidsConnection, priva
             behandlingId = behandlingId,
             beregnetTrygdetid =
                 DetaljertBeregnetTrygdetidResultat.fraSamletTrygdetidNorge(
-                    request.beregning.anvendtTrygdetid.toInt(),
+                    request.beregning.anvendtTrygdetid,
                 ).copy(overstyrt = true),
         ).also { logger.warn("Trygdetid for behandling $behandlingId ble overstyrt med anvendt norsk tt fra Pesys") }
 

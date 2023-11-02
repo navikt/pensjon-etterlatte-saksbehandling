@@ -1,4 +1,4 @@
-import { IBehandlingStatus, IUtenlandstilsnitt, INasjonalitetsType } from '~shared/types/IDetaljertBehandling'
+import { IBehandlingStatus, IUtenlandstilsnitt, INasjonalitetType } from '~shared/types/IDetaljertBehandling'
 import { VurderingsboksWrapper } from '~components/vurderingsboks/VurderingsboksWrapper'
 import { BodyShort, Label, Radio, RadioGroup } from '@navikt/ds-react'
 import { RadioGroupWrapper } from '~components/behandling/vilkaarsvurdering/Vurdering'
@@ -11,10 +11,10 @@ import { lagreUtenlandstilsnitt } from '~shared/api/behandling'
 import { oppdaterBehandlingsstatus, oppdaterUtenlandstilsnitt } from '~store/reducers/BehandlingReducer'
 import { ApiErrorAlert } from '~ErrorBoundary'
 
-const UtenlandstilsnittTypeTittel: Record<INasjonalitetsType, string> = {
-  [INasjonalitetsType.NASJONAL]: 'Nasjonal',
-  [INasjonalitetsType.UTLANDSTILSNITT]: 'Utlandstilsnitt',
-  [INasjonalitetsType.BOSATT_UTLAND]: 'Bosatt utland',
+const UtenlandstilsnittTypeTittel: Record<INasjonalitetType, string> = {
+  [INasjonalitetType.NASJONAL]: 'Nasjonal',
+  [INasjonalitetType.UTLANDSTILSNITT]: 'Utlandstilsnitt',
+  [INasjonalitetType.BOSATT_UTLAND]: 'Bosatt utland',
 } as const
 
 export const UtenlandstilsnittVurdering = ({
@@ -30,7 +30,7 @@ export const UtenlandstilsnittVurdering = ({
 }) => {
   const dispatch = useAppDispatch()
 
-  const [svar, setSvar] = useState<INasjonalitetsType | undefined>(utenlandstilsnitt?.type)
+  const [svar, setSvar] = useState<INasjonalitetType | undefined>(utenlandstilsnitt?.type)
   const [radioError, setRadioError] = useState<string>('')
   const [begrunnelse, setBegrunnelse] = useState<string>(utenlandstilsnitt?.begrunnelse || '')
   const [setUtenlandstilsnittStatus, setUtenlandstilsnitt, resetToInitial] = useApiCall(lagreUtenlandstilsnitt)
@@ -95,15 +95,15 @@ export const UtenlandstilsnittVurdering = ({
             size="small"
             className="radioGroup"
             onChange={(event) => {
-              setSvar(INasjonalitetsType[event as INasjonalitetsType])
+              setSvar(INasjonalitetType[event as INasjonalitetType])
               setRadioError('')
             }}
             value={svar || ''}
             error={radioError ? radioError : false}
           >
-            <Radio value={INasjonalitetsType.NASJONAL}>Nasjonal</Radio>
-            <Radio value={INasjonalitetsType.UTLANDSTILSNITT}>Utlandstilsnitt</Radio>
-            <Radio value={INasjonalitetsType.BOSATT_UTLAND}>Bosatt Utland</Radio>
+            <Radio value={INasjonalitetType.NASJONAL}>Nasjonal</Radio>
+            <Radio value={INasjonalitetType.UTLANDSTILSNITT}>Utlandstilsnitt</Radio>
+            <Radio value={INasjonalitetType.BOSATT_UTLAND}>Bosatt Utland</Radio>
           </RadioGroup>
         </RadioGroupWrapper>
         <SoeknadsoversiktTextArea

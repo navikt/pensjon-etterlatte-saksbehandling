@@ -236,21 +236,30 @@ const KravpakkeUtland = (props: { utlandsBehandling: Generellbehandling & { innh
                             (kodeverkLand) => kodeverkLand.isoLandkode === landIsoKode
                           )
                           return (
-                            <Chips.Removable
-                              style={{ cursor: 'pointer' }}
-                              key={landIsoKode}
-                              onClick={() => {
-                                if (redigerbar) {
-                                  setLandAlleredeValgt(false)
-                                  const nyLandliste = valgteLandIsoKode.filter(
-                                    (isolandkode) => isolandkode !== landIsoKode
-                                  )
-                                  setvalgteLandIsoKode(nyLandliste)
-                                }
-                              }}
-                            >
-                              {kodeverkLandMatch?.beskrivelse.tekst ?? landIsoKode}
-                            </Chips.Removable>
+                            <>
+                              {redigerbar ? (
+                                <Chips.Removable
+                                  style={{ cursor: 'pointer' }}
+                                  key={landIsoKode}
+                                  variant="action"
+                                  onClick={() => {
+                                    if (redigerbar) {
+                                      setLandAlleredeValgt(false)
+                                      const nyLandliste = valgteLandIsoKode.filter(
+                                        (isolandkode) => isolandkode !== landIsoKode
+                                      )
+                                      setvalgteLandIsoKode(nyLandliste)
+                                    }
+                                  }}
+                                >
+                                  {kodeverkLandMatch?.beskrivelse.tekst ?? landIsoKode}
+                                </Chips.Removable>
+                              ) : (
+                                <Chips.Toggle variant="neutral">
+                                  {kodeverkLandMatch?.beskrivelse.tekst ?? landIsoKode}
+                                </Chips.Toggle>
+                              )}
+                            </>
                           )
                         })}
                       </Chips>

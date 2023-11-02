@@ -36,7 +36,7 @@ const finnUtNasjonalitet = (behandling: IBehandlingReducer): INasjonalitetsType 
   } else {
     if (behandling.behandlingType === IBehandlingsType.REVURDERING) {
       if (behandling.revurderingsaarsak === Revurderingaarsak.SLUTTBEHANDLING_UTLAND) {
-        return INasjonalitetsType.UTLANDSTILSNITT //TODO: har ingen bedre måte å vite om det er bosatt utland eller bosatt norge https://jira.adeo.no/browse/EY-3018
+        return INasjonalitetsType.UTLANDSTILSNITT //TODO:  https://jira.adeo.no/browse/EY-3037
       } else {
         return INasjonalitetsType.NASJONAL
       }

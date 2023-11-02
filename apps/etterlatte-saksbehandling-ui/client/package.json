@@ -28,9 +28,9 @@
     "react-router-dom": "^6.16.0",
     "react-table": "^7.8.0",
     "redux": "^4.2.0",
-    "slate": "^0.94.1",
-    "slate-history": "^0.93.0",
-    "slate-react": "^0.99.0",
+    "slate": "^0.100.0",
+    "slate-history": "^0.100.0",
+    "slate-react": "^0.100.1",
     "styled-components": "^5.3.10"
   },
   "devDependencies": {

@@ -187,7 +187,7 @@ const KravpakkeUtland = (props: { utlandsBehandling: Generellbehandling & { innh
                 ),
                 (landListe: ILand[]) => (
                   <>
-                    <Heading size="medium" level="3">
+                    <Heading size="medium" level="3" style={{ marginTop: '2rem' }}>
                       Kravpakke sendes til
                     </Heading>
                     <Select

@@ -13,12 +13,21 @@ export const HandlingerForOppgave = ({ oppgave }: { oppgave: OppgaveDTO }) => {
   if (kilde === 'GENERELL_BEHANDLING') {
     switch (type) {
       case 'KRAVPAKKE_UTLAND':
+        return (
+          <>
+            {erInnloggetSaksbehandlerOppgave && (
+              <Button size="small" as="a" href={`/generellbehandling/${referanse}`}>
+                Gå til kravpakke utland
+              </Button>
+            )}
+          </>
+        )
       case 'ATTESTERING':
         return (
           <>
             {erInnloggetSaksbehandlerOppgave && (
               <Button size="small" as="a" href={`/generellbehandling/${referanse}`}>
-                Gå til generell behandling
+                Gå til attestering av generell behandling
               </Button>
             )}
           </>

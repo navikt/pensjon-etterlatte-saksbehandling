@@ -55,7 +55,7 @@ class JoarkHendelseHandler(
             logger.error("Fant ingen journalpost med id=$journalpostId")
             return
         } else if (journalpost.erFerdigstilt()) {
-            // Hva gjør vi med ferdigstilte journalposter...?
+            // TODO: Hva gjør vi med ferdigstilte journalposter...?
             logger.error("Journalpost med id=$journalpostId er ferdigstilt")
             return
         }
@@ -68,7 +68,6 @@ class JoarkHendelseHandler(
                 return
             } else if (journalpost.bruker.type == BrukerIdType.ORGNR) {
                 // TODO:
-                //  Opprette oppgave til saksbehandler for å knytte til fnr og sak...?
                 //  Må vi lage støtte for ORGNR...?
                 logger.error("Journalpost med id=$journalpostId har brukerId av typen ${BrukerIdType.ORGNR}")
                 return
@@ -130,7 +129,7 @@ class JoarkHendelseHandler(
         val gradering = pdlKlient.hentAdressebeskyttelse(ident)
         logger.info("Bruker=${ident.maskerFnr()} har gradering $gradering")
 
-        logger.info("Oppretter ny ${sakType.name.lowercase()} for bruker=${ident.maskerFnr()} med gradering=$gradering")
+        logger.info("Henter/oppretter sak av type=${sakType.name.lowercase()} for bruker=${ident.maskerFnr()} med gradering=$gradering")
         val sakId = behandlingKlient.hentEllerOpprettSak(ident, sakType, gradering)
 
         logger.info("Oppretter journalføringsoppgave for sak=$sakId")

@@ -45,10 +45,12 @@ export const AvkortingInntekt = (props: {
         fratrekkInnAar: nyligste.fratrekkInnAar,
         fratrekkInnAarUtland: nyligste.fratrekkInnAarUtland,
         relevanteMaanederInnAar: nyligste.relevanteMaanederInnAar,
+        spesifikasjon: nyligste.spesifikasjon,
       }
     }
     return {
       fom: virkningstidspunkt(),
+      spesifikasjon: '',
     }
   }
 

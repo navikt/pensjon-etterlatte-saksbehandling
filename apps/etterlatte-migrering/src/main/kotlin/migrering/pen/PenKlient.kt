@@ -25,7 +25,10 @@ class PenKlient(config: Config, pen: HttpClient) {
         return listOf()
     }
 
-    suspend fun hentSak(sakid: Long): BarnepensjonGrunnlagResponse {
+    suspend fun hentSak(
+        sakid: Long,
+        lopendeJanuar2024: Boolean = true,
+    ): BarnepensjonGrunnlagResponse {
         logger.info("Henter sak $sakid fra PEN")
 
         return downstreamResourceClient
@@ -33,7 +36,7 @@ class PenKlient(config: Config, pen: HttpClient) {
                 resource =
                     Resource(
                         clientId = clientId,
-                        url = "$resourceUrl/barnepensjon-migrering/grunnlag?sakId=$sakid",
+                        url = "$resourceUrl/barnepensjon-migrering/grunnlag?sakId=$sakid&lopendeJanuar2024=$lopendeJanuar2024",
                     ),
                 brukerTokenInfo = migreringssystembruker,
             )

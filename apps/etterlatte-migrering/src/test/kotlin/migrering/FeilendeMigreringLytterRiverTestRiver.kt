@@ -69,13 +69,13 @@ class FeilendeMigreringLytterRiverTestRiver {
                     gjenlevendeForelder = null,
                     avdoedForelder = listOf(),
                     virkningstidspunkt = YearMonth.now(),
-                    foersteVirkningstidspunkt = YearMonth.now(),
                     beregning =
                         Beregning(
                             brutto = BigDecimal.ZERO,
                             netto = BigDecimal.ZERO,
                             anvendtTrygdetid = BigDecimal.ZERO,
                             datoVirkFom = Tidspunkt.now(),
+                            prorataBroek = null,
                             g = BigDecimal.ZERO,
                         ),
                     trygdetid = Trygdetid(perioder = listOf()),
@@ -127,13 +127,13 @@ class FeilendeMigreringLytterRiverTestRiver {
                     gjenlevendeForelder = null,
                     avdoedForelder = listOf(),
                     virkningstidspunkt = YearMonth.now(),
-                    foersteVirkningstidspunkt = YearMonth.now(),
                     beregning =
                         Beregning(
                             brutto = BigDecimal.ZERO,
                             netto = BigDecimal.ZERO,
                             anvendtTrygdetid = BigDecimal.ZERO,
                             datoVirkFom = Tidspunkt.now(),
+                            prorataBroek = null,
                             g = BigDecimal.ZERO,
                         ),
                     trygdetid = Trygdetid(perioder = listOf()),

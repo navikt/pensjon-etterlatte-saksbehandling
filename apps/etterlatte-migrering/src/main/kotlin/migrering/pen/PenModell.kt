@@ -19,12 +19,18 @@ data class AvdoedForelderBP(
     val doedsdato: LocalDate,
 )
 
+data class ProRataBrokBP(
+    val teller: Int,
+    val nevner: Int,
+)
+
 data class BeregningBP(
     val brutto: Int,
     val netto: Int,
     val anvendtTrygdetid: Int,
     val datoVirkFom: LocalDate,
     val g: Int,
+    val proRataBrok: ProRataBrokBP?,
     val meta: BeregningMetaBP,
 )
 

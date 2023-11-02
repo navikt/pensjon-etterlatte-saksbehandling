@@ -10,6 +10,7 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.route
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.ktor.AuthorizationPlugin
 import no.nav.etterlatte.libs.ktor.MaskinportenScopeAuthorizationPlugin
 import no.nav.etterlatte.libs.ktor.hentTokenClaims
 import java.time.LocalDate
@@ -73,6 +74,41 @@ fun Route.samordningVedtakRoute(samordningVedtakService: SamordningVedtakService
                             tpnr = Tjenestepensjonnummer(tpnummer),
                             organisasjonsnr = call.orgNummer,
                         ),
+                    )
+                } catch (e: TjenestepensjonManglendeTilgangException) {
+                    call.respond(HttpStatusCode.Unauthorized, e.message)
+                } catch (e: TjenestepensjonUgyldigForesporselException) {
+                    call.respond(HttpStatusCode.BadRequest, e.message)
+                } catch (e: TjenestepensjonIkkeFunnetException) {
+                    call.respond(HttpStatusCode.NotFound, e.message)
+                } catch (e: IllegalArgumentException) {
+                    call.respondNullable(HttpStatusCode.BadRequest, e.message)
+                }
+
+            call.respond(samordningVedtakDtos)
+        }
+    }
+
+    route("api/pensjon/vedtak") {
+        install(AuthorizationPlugin) {
+            roles = setOf("les-oms-vedtak")
+        }
+
+        get {
+            val virkFom =
+                call.parameters["virkFom"]?.let { runCatching { LocalDate.parse(it) }.getOrNull() }
+                    ?: return@get call.respond(HttpStatusCode.BadRequest, "virkFom ikke angitt")
+
+            val fnr =
+                call.request.headers["fnr"]
+                    ?: return@get call.respond(HttpStatusCode.BadRequest, "fnr ikke angitt")
+
+            val samordningVedtakDtos =
+                try {
+                    samordningVedtakService.hentVedtaksliste(
+                        virkFom = virkFom,
+                        fnr = Folkeregisteridentifikator.of(fnr),
+                        PensjonContext,
                     )
                 } catch (e: TjenestepensjonManglendeTilgangException) {
                     call.respond(HttpStatusCode.Unauthorized, e.message)

@@ -23,6 +23,8 @@ import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import java.time.LocalDate
@@ -36,131 +38,242 @@ class SamordningVedtakRouteTest {
     @BeforeAll
     fun before() {
         server.start()
-
-        applicationConfig =
-            buildTestApplicationConfigurationForOauth(server.config.httpServer.port(), ISSUER_ID)
     }
 
-    @Test
-    fun `skal gi 401 naar token mangler`() {
-        testApplication {
-            environment { config = applicationConfig }
-            application { samordningVedtakApi() }
-
-            val response =
-                client.get("/api/vedtak/123") {
-                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                    header("tpnr", "3010")
-                }
-
-            response.status shouldBe HttpStatusCode.Unauthorized
+    @Nested
+    inner class MaskinportenApi {
+        @BeforeEach
+        fun before() {
+            applicationConfig =
+                buildTestApplicationConfigurationForOauth(server.config.httpServer.port(), ISSUER_ID_MASKINPORTEN)
         }
-    }
 
-    @Test
-    fun `skal gi 401 med token hvor scope mangler`() {
-        testApplication {
-            environment { config = applicationConfig }
-            application { samordningVedtakApi() }
+        @Test
+        fun `skal gi 401 naar token mangler`() {
+            testApplication {
+                environment { config = applicationConfig }
+                application { samordningVedtakApi() }
 
-            val response =
-                client.get("/api/vedtak/123") {
-                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                    header(HttpHeaders.Authorization, "Bearer ${token()}")
-                    header("tpnr", "3010")
-                }
+                val response =
+                    client.get("/api/vedtak/123") {
+                        header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                        header("tpnr", "3010")
+                    }
 
-            response.status shouldBe HttpStatusCode.Unauthorized
+                response.status shouldBe HttpStatusCode.Unauthorized
+            }
         }
-    }
 
-    @Test
-    fun `skal gi 400 dersom tpnr-header mangler`() {
-        testApplication {
-            environment { config = applicationConfig }
-            application { samordningVedtakApi() }
+        @Test
+        fun `skal gi 401 med token hvor scope mangler`() {
+            testApplication {
+                environment { config = applicationConfig }
+                application { samordningVedtakApi() }
 
-            val response =
-                client.get("/api/vedtak/123") {
-                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                    header(HttpHeaders.Authorization, "Bearer ${token("nav:etterlatteytelser:vedtaksinformasjon.read")}")
-                }
+                val response =
+                    client.get("/api/vedtak/123") {
+                        header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                        header(HttpHeaders.Authorization, "Bearer ${token()}")
+                        header("tpnr", "3010")
+                    }
 
-            response.status shouldBe HttpStatusCode.BadRequest
+                response.status shouldBe HttpStatusCode.Unauthorized
+            }
         }
-    }
 
-    @Test
-    fun `skal gi 200 med gyldig token inkl scope`() {
-        coEvery {
-            samordningVedtakService.hentVedtak(
-                vedtakId = any<Long>(),
-                MaskinportenTpContext(tpnr = Tjenestepensjonnummer("3010"), organisasjonsnr = "0123456789"),
-            )
-        } returns
-            opprettSamordningVedtakDto()
+        @Test
+        fun `skal gi 400 dersom tpnr-header mangler`() {
+            testApplication {
+                environment { config = applicationConfig }
+                application { samordningVedtakApi() }
 
-        testApplication {
-            environment { config = applicationConfig }
-            application { samordningVedtakApi() }
+                val response =
+                    client.get("/api/vedtak/123") {
+                        header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                        header(
+                            HttpHeaders.Authorization,
+                            "Bearer ${token("nav:etterlatteytelser:vedtaksinformasjon.read")}",
+                        )
+                    }
 
-            val response =
-                client.get("/api/vedtak/123") {
-                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                    header(
-                        HttpHeaders.Authorization,
-                        "Bearer ${token("nav:etterlatteytelser:vedtaksinformasjon.read")}",
-                    )
-                    header("tpnr", "3010")
-                }
-
-            response.status shouldBe HttpStatusCode.OK
-            coVerify { samordningVedtakService.hentVedtak(vedtakId = any<Long>(), any<MaskinportenTpContext>()) }
+                response.status shouldBe HttpStatusCode.BadRequest
+            }
         }
-    }
 
-    @Test
-    fun `skal gi 200 med gyldig token inkl scope - hent vedtaksliste med virkfom og fnr`() {
-        val virkFom = LocalDate.now()
-        val fnr = "01448203510"
+        @Test
+        fun `skal gi 200 med gyldig token inkl scope`() {
+            coEvery {
+                samordningVedtakService.hentVedtak(
+                    vedtakId = any<Long>(),
+                    MaskinportenTpContext(tpnr = Tjenestepensjonnummer("3010"), organisasjonsnr = "0123456789"),
+                )
+            } returns
+                opprettSamordningVedtakDto()
 
-        coEvery {
-            samordningVedtakService.hentVedtaksliste(
-                virkFom = virkFom,
-                fnr = Folkeregisteridentifikator.of(fnr),
-                context =
-                    MaskinportenTpContext(
-                        tpnr = Tjenestepensjonnummer("3010"),
-                        organisasjonsnr = "0123456789",
-                    ),
-            )
-        } returns
-            listOf(opprettSamordningVedtakDto())
+            testApplication {
+                environment { config = applicationConfig }
+                application { samordningVedtakApi() }
 
-        testApplication {
-            environment { config = applicationConfig }
-            application { samordningVedtakApi() }
+                val response =
+                    client.get("/api/vedtak/123") {
+                        header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                        header(
+                            HttpHeaders.Authorization,
+                            "Bearer ${token("nav:etterlatteytelser:vedtaksinformasjon.read")}",
+                        )
+                        header("tpnr", "3010")
+                    }
 
-            val response =
-                client.get("/api/vedtak") {
-                    parameter("virkFom", virkFom)
-                    header("fnr", fnr)
-                    header("tpnr", "3010")
-                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                    header(
-                        HttpHeaders.Authorization,
-                        "Bearer ${token("nav:etterlatteytelser:vedtaksinformasjon.read")}",
-                    )
-                }
+                response.status shouldBe HttpStatusCode.OK
+                coVerify { samordningVedtakService.hentVedtak(vedtakId = any<Long>(), any<MaskinportenTpContext>()) }
+            }
+        }
 
-            response.status shouldBe HttpStatusCode.OK
-            coVerify {
+        @Test
+        fun `skal gi 200 med gyldig token inkl scope - hent vedtaksliste med virkfom og fnr`() {
+            val virkFom = LocalDate.now()
+            val fnr = "01448203510"
+
+            coEvery {
                 samordningVedtakService.hentVedtaksliste(
                     virkFom = virkFom,
                     fnr = Folkeregisteridentifikator.of(fnr),
-                    any<MaskinportenTpContext>(),
+                    context =
+                        MaskinportenTpContext(
+                            tpnr = Tjenestepensjonnummer("3010"),
+                            organisasjonsnr = "0123456789",
+                        ),
                 )
+            } returns
+                listOf(opprettSamordningVedtakDto())
+
+            testApplication {
+                environment { config = applicationConfig }
+                application { samordningVedtakApi() }
+
+                val response =
+                    client.get("/api/vedtak") {
+                        parameter("virkFom", virkFom)
+                        header("fnr", fnr)
+                        header("tpnr", "3010")
+                        header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                        header(
+                            HttpHeaders.Authorization,
+                            "Bearer ${token("nav:etterlatteytelser:vedtaksinformasjon.read")}",
+                        )
+                    }
+
+                response.status shouldBe HttpStatusCode.OK
+                coVerify {
+                    samordningVedtakService.hentVedtaksliste(
+                        virkFom = virkFom,
+                        fnr = Folkeregisteridentifikator.of(fnr),
+                        any<MaskinportenTpContext>(),
+                    )
+                }
             }
+        }
+
+        private fun token(maskinportenScope: String? = null): String {
+            val claims = mutableMapOf<String, Any>()
+            claims["consumer"] = mapOf("ID" to "0192:0123456789")
+            maskinportenScope?.let { claims["scope"] = it }
+
+            return server.issueToken(
+                issuerId = ISSUER_ID_MASKINPORTEN,
+                claims = claims,
+            ).serialize()
+        }
+    }
+
+    @Nested
+    inner class PensjonApi {
+        private val virkFom = LocalDate.now()
+        private val fnr = "01448203510"
+
+        @BeforeEach
+        fun before() {
+            applicationConfig =
+                buildTestApplicationConfigurationForOauth(server.config.httpServer.port(), ISSUER_ID_AZURE)
+        }
+
+        @Test
+        fun `skal gi 401 naar token mangler`() {
+            testApplication {
+                environment { config = applicationConfig }
+                application { samordningVedtakApi() }
+
+                val response =
+                    client.get("/api/pensjon/vedtak") {
+                        header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                        parameter("virkFom", virkFom)
+                        header("fnr", fnr)
+                    }
+
+                response.status shouldBe HttpStatusCode.Unauthorized
+            }
+        }
+
+        @Test
+        fun `skal gi 401 med token hvor rolle mangler`() {
+            testApplication {
+                environment { config = applicationConfig }
+                application { samordningVedtakApi() }
+
+                val response =
+                    client.get("/api/pensjon/vedtak") {
+                        header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                        header(HttpHeaders.Authorization, "Bearer ${token()}")
+                        parameter("virkFom", virkFom)
+                        header("fnr", fnr)
+                    }
+
+                response.status shouldBe HttpStatusCode.Unauthorized
+            }
+        }
+
+        @Test
+        fun `skal gi 200 med gyldig token inkl rolle`() {
+            coEvery {
+                samordningVedtakService.hentVedtaksliste(
+                    virkFom = virkFom,
+                    fnr = Folkeregisteridentifikator.of(fnr),
+                    context = PensjonContext,
+                )
+            } returns
+                listOf(opprettSamordningVedtakDto())
+
+            testApplication {
+                environment { config = applicationConfig }
+                application { samordningVedtakApi() }
+
+                val response =
+                    client.get("/api/pensjon/vedtak") {
+                        parameter("virkFom", virkFom)
+                        header("fnr", fnr)
+                        header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                        header(HttpHeaders.Authorization, "Bearer ${token("les-oms-vedtak")}")
+                    }
+
+                response.status shouldBe HttpStatusCode.OK
+                coVerify {
+                    samordningVedtakService.hentVedtaksliste(
+                        virkFom = virkFom,
+                        fnr = Folkeregisteridentifikator.of(fnr),
+                        PensjonContext,
+                    )
+                }
+            }
+        }
+
+        private fun token(role: String? = null): String {
+            val claims = mutableMapOf<String, Any>()
+            claims["roles"] = listOf(role)
+
+            return server.issueToken(
+                issuerId = ISSUER_ID_AZURE,
+                claims = claims,
+            ).serialize()
         }
     }
 
@@ -168,17 +281,6 @@ class SamordningVedtakRouteTest {
         restModule(log) {
             samordningVedtakRoute(samordningVedtakService = samordningVedtakService)
         }
-    }
-
-    private fun token(maskinportenScope: String? = null): String {
-        val claims = mutableMapOf<String, Any>()
-        claims["consumer"] = mapOf("ID" to "0192:0123456789")
-        maskinportenScope?.let { claims["scope"] = it }
-
-        return server.issueToken(
-            issuerId = ISSUER_ID,
-            claims = claims,
-        ).serialize()
     }
 
     @AfterEach
@@ -193,7 +295,8 @@ class SamordningVedtakRouteTest {
     }
 
     companion object {
-        const val ISSUER_ID = "maskinporten"
+        const val ISSUER_ID_MASKINPORTEN = "maskinporten"
+        const val ISSUER_ID_AZURE = "azure"
     }
 }
 

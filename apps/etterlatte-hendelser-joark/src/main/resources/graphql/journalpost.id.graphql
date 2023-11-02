@@ -6,6 +6,10 @@ query(
         tittel
         journalposttype
         journalstatus
+        bruker {
+            id
+            type
+        }
         dokumenter {
             dokumentInfoId
             tittel

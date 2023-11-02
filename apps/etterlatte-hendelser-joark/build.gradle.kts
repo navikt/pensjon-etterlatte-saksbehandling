@@ -3,6 +3,10 @@ plugins {
     id("etterlatte.common")
 }
 
+repositories {
+    maven("https://maven.pkg.github.com/navikt/teamdokumenthandtering-avro-schemas")
+}
+
 dependencies {
     implementation(project(":libs:ktor2client-auth-clientcredentials"))
     implementation(project(":libs:saksbehandling-common"))
@@ -28,6 +32,8 @@ dependencies {
     implementation(libs.kafka.clients)
     implementation(libs.kafka.avro)
     implementation(libs.kafka.avroserializer)
+
+    implementation(libs.teamdokumenthandtering.avroschemas)
 
     testImplementation(libs.kafka.embeddedenv)
     testImplementation(libs.ktor2.servertests)

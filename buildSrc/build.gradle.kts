@@ -15,7 +15,6 @@ repositories {
         // name = "JCenter Gradle Plugins",
         url = "https://dl.bintray.com/gradle/gradle-plugins",
     )
-    maven("https://maven.pkg.github.com/navikt/teamdokumenthandtering-avro-schemas")
 }
 
 dependencies {

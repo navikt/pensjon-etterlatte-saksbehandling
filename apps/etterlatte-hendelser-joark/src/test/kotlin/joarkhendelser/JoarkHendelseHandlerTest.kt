@@ -262,7 +262,7 @@ internal class JoarkHendelseHandlerTest {
         tittel = "Tittel",
         journalposttype = "journalposttype",
         journalstatus = status,
-        dokument = listOf(Dokument("dokumentInfoId", "tittel", emptyList())),
+        dokumenter = listOf(Dokument("dokumentInfoId", "tittel", emptyList())),
         avsenderMottaker = AvsenderMottaker(bruker?.id, "Fornavn Etternavn", true),
         kanal = "kanal",
         datoOpprettet = "datoOpprettet",

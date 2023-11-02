@@ -115,6 +115,7 @@ class JoarkHendelseHandler(
                 else -> throw IllegalArgumentException("Journalpost=$journalpostId har ukjent hendelsesType=$type")
             }
         } catch (e: Exception) {
+            logger.error("Ukjent feil ved behandling av hendelse=${hendelse.hendelsesId}. Se sikkerlogg for mer detaljer.")
             sikkerlogger().error("Ukjent feil oppsto ved behandling av journalpost for bruker=${journalpost.bruker}: ", e)
             throw e
         }

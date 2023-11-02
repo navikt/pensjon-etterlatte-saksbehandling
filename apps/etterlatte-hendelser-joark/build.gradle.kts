@@ -3,6 +3,10 @@ plugins {
     id("etterlatte.common")
 }
 
+repositories {
+    maven("https://maven.pkg.github.com/navikt/teamdokumenthandtering-avro-schemas")
+}
+
 dependencies {
     implementation(project(":libs:ktor2client-auth-clientcredentials"))
     implementation(project(":libs:saksbehandling-common"))
@@ -35,6 +39,3 @@ dependencies {
     testImplementation(libs.ktor2.servertests)
     testImplementation(libs.ktor2.clientmock)
 }
-
-tasks.named("compileKotlin").configure { dependsOn(":apps:etterlatte-hendelser-joark:generateAvroJava") }
-tasks.named("compileTestKotlin").configure { dependsOn(":apps:etterlatte-hendelser-joark:generateAvroJava") }

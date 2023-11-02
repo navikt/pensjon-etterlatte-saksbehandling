@@ -96,7 +96,7 @@ const OPPGAVETYPEFILTER: Record<OppgavetypeFilterKeys, string> = {
   VURDER_KONSEKVENS: 'Vurder konsekvense for hendelse',
   UNDERKJENT: 'Underkjent behandling',
   GOSYS: 'Gosys',
-  KRAVPAKKE_UTLAND: 'Utland',
+  KRAVPAKKE_UTLAND: 'Kravpakke utland',
   KLAGE: 'Klage',
   TILBAKEKREVING: 'Tilbakekreving',
   OMGJOERING: 'Omgjøring',

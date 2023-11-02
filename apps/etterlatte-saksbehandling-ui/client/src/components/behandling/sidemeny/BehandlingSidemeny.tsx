@@ -114,9 +114,6 @@ export const BehandlingSidemeny = ({ behandling }: { behandling: IBehandlingRedu
 
   return (
     <Sidebar>
-      {isFailure(opprettSjekklisteResult) && erFoerstegangsbehandling && (
-        <ApiErrorAlert>Opprettelsen av sjekkliste feilet</ApiErrorAlert>
-      )}
       {behandlingsinfo && (
         <>
           <Behandlingsoppsummering behandlingsInfo={behandlingsinfo} beslutning={beslutning} />
@@ -138,6 +135,9 @@ export const BehandlingSidemeny = ({ behandling }: { behandling: IBehandlingRedu
         </>
       )}
 
+      {isFailure(opprettSjekklisteResult) && erFoerstegangsbehandling && (
+        <ApiErrorAlert>Opprettelsen av sjekkliste feilet</ApiErrorAlert>
+      )}
       {sjekklisteAktivert && !erRevurdering && (
         <Tabs value={fane} iconPosition="top" onChange={(val) => dispatch(visFane(val as BehandlingFane))}>
           <Tabs.List>

@@ -9,12 +9,15 @@ import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.vedtak.VedtakSamordningDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
+import org.slf4j.LoggerFactory
 import java.time.LocalDate
 
 class SamordningVedtakService(
     private val vedtaksvurderingKlient: VedtaksvurderingKlient,
     private val tjenestepensjonKlient: TjenestepensjonKlient,
 ) {
+    private val logger = LoggerFactory.getLogger(SamordningVedtakService::class.java)
+
     suspend fun hentVedtak(
         vedtakId: Long,
         callerContext: CallerContext,
@@ -28,6 +31,7 @@ class SamordningVedtakService(
                 fomDato = vedtak.virkningstidspunkt.atStartOfMonth(),
             )
         ) {
+            logger.info("Avslår forespørsel, manglende/ikke gyldig TP-ytelse")
             throw TjenestepensjonManglendeTilgangException("Ikke gyldig tpYtelse")
         }
 
@@ -45,6 +49,7 @@ class SamordningVedtakService(
     ): List<SamordningVedtakDto> {
         if (context is MaskinportenTpContext && !tjenestepensjonKlient.harTpForholdByDate(fnr.value, context.tpnr, virkFom)
         ) {
+            logger.info("Avslår forespørsel, manglende/ikke gyldig TP-forhold")
             throw TjenestepensjonManglendeTilgangException("Ikke gyldig tpforhold")
         }
 

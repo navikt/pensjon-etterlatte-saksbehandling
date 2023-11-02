@@ -37,14 +37,6 @@ fun Route.samordningVedtakRoute(samordningVedtakService: SamordningVedtakService
                             organisasjonsnr = call.orgNummer,
                         ),
                     )
-                } catch (e: VedtakFeilSakstypeException) {
-                    call.respond(HttpStatusCode.Unauthorized, "Ikke tilgang til sakstype")
-                } catch (e: TjenestepensjonManglendeTilgangException) {
-                    call.respond(HttpStatusCode.Unauthorized, e.message)
-                } catch (e: TjenestepensjonUgyldigForesporselException) {
-                    call.respond(HttpStatusCode.BadRequest, e.message)
-                } catch (e: TjenestepensjonIkkeFunnetException) {
-                    call.respond(HttpStatusCode.NotFound, e.message)
                 } catch (e: IllegalArgumentException) {
                     call.respondNullable(HttpStatusCode.BadRequest, e.message)
                 }
@@ -55,11 +47,11 @@ fun Route.samordningVedtakRoute(samordningVedtakService: SamordningVedtakService
         get {
             val virkFom =
                 call.parameters["virkFom"]?.let { runCatching { LocalDate.parse(it) }.getOrNull() }
-                    ?: return@get call.respond(HttpStatusCode.BadRequest, "virkFom ikke angitt")
+                    ?: throw ManglerVirkFomException()
 
             val fnr =
                 call.request.headers["fnr"]
-                    ?: return@get call.respond(HttpStatusCode.BadRequest, "fnr ikke angitt")
+                    ?: throw ManglerFoedselsnummerException()
 
             val tpnummer =
                 call.request.headers["tpnr"]
@@ -75,12 +67,6 @@ fun Route.samordningVedtakRoute(samordningVedtakService: SamordningVedtakService
                             organisasjonsnr = call.orgNummer,
                         ),
                     )
-                } catch (e: TjenestepensjonManglendeTilgangException) {
-                    call.respond(HttpStatusCode.Unauthorized, e.message)
-                } catch (e: TjenestepensjonUgyldigForesporselException) {
-                    call.respond(HttpStatusCode.BadRequest, e.message)
-                } catch (e: TjenestepensjonIkkeFunnetException) {
-                    call.respond(HttpStatusCode.NotFound, e.message)
                 } catch (e: IllegalArgumentException) {
                     call.respondNullable(HttpStatusCode.BadRequest, e.message)
                 }
@@ -97,11 +83,11 @@ fun Route.samordningVedtakRoute(samordningVedtakService: SamordningVedtakService
         get {
             val virkFom =
                 call.parameters["virkFom"]?.let { runCatching { LocalDate.parse(it) }.getOrNull() }
-                    ?: return@get call.respond(HttpStatusCode.BadRequest, "virkFom ikke angitt")
+                    ?: throw ManglerVirkFomException()
 
             val fnr =
                 call.request.headers["fnr"]
-                    ?: return@get call.respond(HttpStatusCode.BadRequest, "fnr ikke angitt")
+                    ?: throw ManglerFoedselsnummerException()
 
             val samordningVedtakDtos =
                 try {
@@ -110,12 +96,6 @@ fun Route.samordningVedtakRoute(samordningVedtakService: SamordningVedtakService
                         fnr = Folkeregisteridentifikator.of(fnr),
                         PensjonContext,
                     )
-                } catch (e: TjenestepensjonManglendeTilgangException) {
-                    call.respond(HttpStatusCode.Unauthorized, e.message)
-                } catch (e: TjenestepensjonUgyldigForesporselException) {
-                    call.respond(HttpStatusCode.BadRequest, e.message)
-                } catch (e: TjenestepensjonIkkeFunnetException) {
-                    call.respond(HttpStatusCode.NotFound, e.message)
                 } catch (e: IllegalArgumentException) {
                     call.respondNullable(HttpStatusCode.BadRequest, e.message)
                 }

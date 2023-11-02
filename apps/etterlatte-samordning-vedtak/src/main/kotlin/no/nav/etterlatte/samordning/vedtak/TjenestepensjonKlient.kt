@@ -37,10 +37,11 @@ class TjenestepensjonKlient(config: Config, private val httpClient: HttpClient) 
                 }.body()
             } catch (e: ClientRequestException) {
                 sikkerLogg.error("Feil ved sjekk av tjenestepensjonsforhold for [fnr=$fnr, fomDato=$fomDato, tpNr=$tpnr]", e)
+                logger.error("Feil i kontroll mot TP-registeret", e)
                 when (e.response.status) {
-                    HttpStatusCode.Unauthorized -> throw TjenestepensjonManglendeTilgangException("TP: Ikke tilgang", e)
-                    HttpStatusCode.BadRequest -> throw TjenestepensjonUgyldigForesporselException("TP: Ugyldig forespørsel", e)
-                    HttpStatusCode.NotFound -> throw TjenestepensjonIkkeFunnetException("TP: Ressurs ikke funnet", e)
+                    HttpStatusCode.Unauthorized -> throw TjenestepensjonManglendeTilgangException("TP: Ikke tilgang")
+                    HttpStatusCode.BadRequest -> throw TjenestepensjonUgyldigForesporselException("TP: Ugyldig forespørsel")
+                    HttpStatusCode.NotFound -> throw TjenestepensjonIkkeFunnetException("TP: Ressurs ikke funnet")
                     else -> throw e
                 }
             }
@@ -63,10 +64,11 @@ class TjenestepensjonKlient(config: Config, private val httpClient: HttpClient) 
                 }.let { deserialize<TpNumre>(it.body()) }
             } catch (e: ClientRequestException) {
                 sikkerLogg.error("Feil ved sjekk av tjenestepensjonsytelse for [fnr=$fnr, fomDato=$fomDato, tpNr=$tpnr]", e)
+                logger.error("Feil i kontroll mot TP-registeret", e)
                 when (e.response.status) {
-                    HttpStatusCode.Unauthorized -> throw TjenestepensjonManglendeTilgangException("TP: Ikke tilgang", e)
-                    HttpStatusCode.BadRequest -> throw TjenestepensjonUgyldigForesporselException("TP: Ugyldig forespørsel", e)
-                    HttpStatusCode.NotFound -> throw TjenestepensjonIkkeFunnetException("TP: Ressurs ikke funnet", e)
+                    HttpStatusCode.Unauthorized -> throw TjenestepensjonManglendeTilgangException("TP: Ikke tilgang")
+                    HttpStatusCode.BadRequest -> throw TjenestepensjonUgyldigForesporselException("TP: Ugyldig forespørsel")
+                    HttpStatusCode.NotFound -> throw TjenestepensjonIkkeFunnetException("TP: Ressurs ikke funnet")
                     else -> throw e
                 }
             }

@@ -40,7 +40,7 @@ class BehandlingKlient(
             setBody(
                 NyOppgaveDto(
                     OppgaveKilde.HENDELSE,
-                    OppgaveType.MANUELL_JOURNALFOERING,
+                    OppgaveType.JOURNALFOERING,
                     merknad,
                     referanse,
                 ),

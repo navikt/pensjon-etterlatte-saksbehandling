@@ -53,13 +53,28 @@ data class Journalpost(
     val bruker: Bruker?,
     val tittel: String,
     val journalposttype: String,
-    val journalstatus: String,
-    val dokumenter: List<Dokumenter>,
+    val journalstatus: Journalstatus,
+    val dokument: List<Dokument>,
     val avsenderMottaker: AvsenderMottaker,
     val kanal: String,
     val datoOpprettet: String,
 ) {
-    fun erFerdigstilt(): Boolean = journalstatus == "FERDIGSTILT"
+    fun erFerdigstilt(): Boolean = journalstatus == Journalstatus.FERDIGSTILT
+}
+
+enum class Journalstatus {
+    MOTTATT,
+    JOURNALFOERT,
+    FERDIGSTILT,
+    EKSPEDERT,
+    UNDER_ARBEID,
+    FEILREGISTRERT,
+    UTGAAR,
+    AVBRUTT,
+    UKJENT_BRUKER,
+    RESERVERT,
+    OPPLASTING_DOKUMENT,
+    UKJENT,
 }
 
 data class Bruker(
@@ -73,7 +88,7 @@ enum class BrukerIdType {
     ORGNR,
 }
 
-data class Dokumenter(
+data class Dokument(
     val dokumentInfoId: String,
     val tittel: String,
     val dokumentvarianter: List<Dokumentvarianter>,

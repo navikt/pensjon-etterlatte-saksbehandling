@@ -17,12 +17,14 @@ fun JournalfoeringHendelseRecord.erTemaEtterlatte(): Boolean =
  **/
 fun JournalfoeringHendelseRecord.lagMerknadFraStatus(): String =
     when (journalpostStatus) {
-        "MOTTATT" -> "Mottatt"
-        "JOURNALFOERT" -> "Ferdigstilt"
-        "UKJENT_BRUKER" -> "Ukjent bruker"
-        "UTGAAR" -> "Feil ifm. mottak eller journalføring"
-        "OPPLASTING_DOKUMENT" -> throw IllegalArgumentException("Status $journalpostStatus tilhører dagpenger!")
-        else -> throw IllegalArgumentException("Ukjent journalpostStatus $journalpostStatus")
+        JournalpostStatus.MOTTATT -> "Mottatt journalpost"
+        JournalpostStatus.JOURNALFOERT -> "Ferdigstilt"
+        JournalpostStatus.UKJENT_BRUKER -> "Ukjent bruker"
+        JournalpostStatus.UTGAAR -> "Feil ifm. mottak eller journalføring"
+        JournalpostStatus.OPPLASTING_DOKUMENT ->
+            throw IllegalArgumentException("Status $journalpostStatus tilhører dagpenger!")
+        else ->
+            throw IllegalArgumentException("Ukjent journalpostStatus $journalpostStatus")
     }
 
 /**
@@ -34,3 +36,18 @@ fun JournalfoeringHendelseRecord.temaTilSakType(): SakType =
         "EYB" -> SakType.BARNEPENSJON
         else -> throw IllegalArgumentException("Ugyldig tema $temaNytt")
     }
+
+object HendelseType {
+    const val JOURNALPOST_MOTTATT = "JournalpostMottatt"
+    const val TEMA_ENDRET = "TemaEndret"
+    const val ENDELIG_JOURNALFOERT = "EndeligJournalført"
+    const val JOURNALPOST_UTGAATT = "JournalpostUtgått"
+}
+
+object JournalpostStatus {
+    const val MOTTATT = "MOTTATT"
+    const val JOURNALFOERT = "JOURNALFOERT"
+    const val UKJENT_BRUKER = "UKJENT_BRUKER"
+    const val UTGAAR = "UTGAAR"
+    const val OPPLASTING_DOKUMENT = "OPPLASTING_DOKUMENT"
+}

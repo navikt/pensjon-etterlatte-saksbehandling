@@ -4,10 +4,12 @@ import joarkhendelser.behandling.BehandlingKlient
 import joarkhendelser.joark.SafKlient
 import joarkhendelser.pdl.PdlKlient
 import no.nav.etterlatte.joarkhendelser.joark.BrukerIdType
+import no.nav.etterlatte.joarkhendelser.joark.HendelseType
 import no.nav.etterlatte.joarkhendelser.joark.erTemaEtterlatte
 import no.nav.etterlatte.joarkhendelser.joark.lagMerknadFraStatus
 import no.nav.etterlatte.joarkhendelser.joark.temaTilSakType
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.person.PdlIdentifikator
 import no.nav.etterlatte.libs.common.person.maskerFnr
 import no.nav.joarkjournalfoeringhendelser.JournalfoeringHendelseRecord
@@ -61,6 +63,8 @@ class JoarkHendelseHandler(
         try {
             if (journalpost.bruker == null) {
                 logger.error("Journalpost med id=$journalpostId mangler bruker!")
+                // TODO:
+                //  Burde vi lage oppgave på dette? Alt krever SakID, så hvordan skal det fungere hvis bruker mangler?
                 return
             } else if (journalpost.bruker.type == BrukerIdType.ORGNR) {
                 // TODO:
@@ -81,30 +85,46 @@ class JoarkHendelseHandler(
                         return
                     }
 
-                    null -> {
-                        logger.error("Ident tilknyttet journalpost=$journalpostId er null i PDL – avbryter behandling")
-                        return
-                    }
+                    null -> throw IllegalArgumentException(
+                        "Ident tilknyttet journalpost=$journalpostId er null i PDL – avbryter behandling",
+                    )
                 }
 
             when (val type = hendelse.hendelsesType) {
-                "JournalpostMottatt" -> behandleJournalpostMottatt(ident, sakType, hendelse)
-                "TemaEndret" -> TODO("Mangler støtte for å behandle journalpost=$journalpostId hendelsesType=$type")
-                "EndeligJournalført" -> TODO("Mangler støtte for å behandle journalpost=$journalpostId hendelsesType=$type")
-                "JournalpostUtgått" -> TODO("Mangler støtte for å behandle journalpost=$journalpostId hendelsesType=$type")
+                HendelseType.JOURNALPOST_MOTTATT ->
+                    behandleJournalpost(ident, sakType, hendelse) {
+                        hendelse.lagMerknadFraStatus()
+                    }
+
+                HendelseType.TEMA_ENDRET ->
+                    behandleJournalpost(ident, sakType, hendelse) {
+                        "Tema endret fra ${hendelse.temaGammelt} til ${hendelse.temaNytt}"
+                    }
+
+                // TODO: Må avklare om dette er noe vi faktisk trenger å behandle
+                HendelseType.ENDELIG_JOURNALFOERT ->
+                    behandleJournalpost(ident, sakType, hendelse) {
+                        "Endelig journalføring må vurderes"
+                    }
+
+                // TODO: Må avklare om dette er noe vi faktisk trenger å behandle
+                HendelseType.JOURNALPOST_UTGAATT ->
+                    behandleJournalpost(ident, sakType, hendelse) {
+                        "Journalpost har utgått og må vurderes."
+                    }
                 else -> throw IllegalArgumentException("Journalpost=$journalpostId har ukjent hendelsesType=$type")
             }
         } catch (e: Exception) {
-            // TODO: Fjerne fnr logging før prodsetting
-            logger.error("Ukjent feil oppsto ved behandling av journalpost for bruker=${journalpost.bruker}: ", e)
+            sikkerlogger().error("Ukjent feil oppsto ved behandling av journalpost for bruker=${journalpost.bruker}: ", e)
             throw e
         }
     }
 
-    private suspend fun behandleJournalpostMottatt(
+    private suspend fun behandleJournalpost(
         ident: String,
         sakType: SakType,
         hendelse: JournalfoeringHendelseRecord,
+        oppgaveMerknad: () -> String,
     ) {
         val gradering = pdlKlient.hentAdressebeskyttelse(ident)
         logger.info("Bruker=${ident.maskerFnr()} har gradering $gradering")
@@ -114,8 +134,8 @@ class JoarkHendelseHandler(
 
         logger.info("Oppretter journalføringsoppgave for sak=$sakId")
         val oppgaveId =
-            behandlingKlient.opprettOppgave(sakId, hendelse.lagMerknadFraStatus(), hendelse.journalpostId.toString())
+            behandlingKlient.opprettOppgave(sakId, oppgaveMerknad(), hendelse.journalpostId.toString())
 
-        logger.info("Opprettet oppgave (id=$oppgaveId) med sakId=$sakId")
+        logger.info("Opprettet oppgave=$oppgaveId med sakId=$sakId for hendelse=${hendelse.hendelsesId}")
     }
 }

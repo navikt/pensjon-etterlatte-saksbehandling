@@ -25,14 +25,16 @@ fun Grunnlag.mapSoeker(): Soeker =
         )
     }
 
-fun Grunnlag.mapAvdoed(): Avdoed =
+fun Grunnlag.mapAvdoede(): List<Avdoed> =
     with(this.familie) {
-        val avdoed = hentAvdoed()
+        val avdoede = hentAvdoede()
 
-        Avdoed(
-            navn = avdoed.hentNavn()!!.verdi.fulltNavn(),
-            doedsdato = avdoed.hentDoedsdato()!!.verdi!!,
-        )
+        return avdoede.map { avdoed ->
+            Avdoed(
+                navn = avdoed.hentNavn()!!.verdi.fulltNavn(),
+                doedsdato = avdoed.hentDoedsdato()!!.verdi!!,
+            )
+        }
     }
 
 fun Grunnlag.mapInnsender(): Innsender? =

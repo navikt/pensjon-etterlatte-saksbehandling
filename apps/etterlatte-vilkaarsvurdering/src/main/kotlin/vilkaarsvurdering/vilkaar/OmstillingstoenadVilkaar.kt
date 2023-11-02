@@ -370,15 +370,15 @@ object OmstillingstoenadVilkaar {
                 ),
             grunnlag =
                 with(grunnlag) {
-                    val doedsdatoAvdoedGrunnlag =
-                        hentAvdoed().hentDoedsdato()?.toVilkaarsgrunnlag(
-                            VilkaarOpplysningType.AVDOED_DOEDSDATO,
-                        )
+                    val doedsdatoAvdoedeGrunnlag =
+                        hentAvdoede().mapNotNull { avdoed ->
+                            avdoed.hentDoedsdato()?.toVilkaarsgrunnlag(VilkaarOpplysningType.AVDOED_DOEDSDATO)
+                        }
                     val soeknadMottattDatoGrunnlag =
                         sak.hentSoeknadMottattDato()?.toVilkaarsgrunnlag(
                             VilkaarOpplysningType.SOEKNAD_MOTTATT_DATO,
                         )
-                    listOfNotNull(doedsdatoAvdoedGrunnlag, soeknadMottattDatoGrunnlag)
+                    listOfNotNull(soeknadMottattDatoGrunnlag) + doedsdatoAvdoedeGrunnlag
                 },
         )
 

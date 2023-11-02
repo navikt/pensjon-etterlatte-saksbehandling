@@ -290,7 +290,7 @@ class BrevDataMapper(private val featureToggleService: FeatureToggleService, pri
                         }
                     }
                     VedtakType.AVSLAG ->
-                        AvslagBrevDataOMS.fra(generellBrevData.personerISak.avdoed.navn, emptyList())
+                        AvslagBrevDataOMS.fra(generellBrevData.personerISak.avdoede.first().navn, emptyList())
                     VedtakType.ENDRING ->
                         when (generellBrevData.revurderingsaarsak) {
                             Revurderingaarsak.INNTEKTSENDRING,
@@ -390,7 +390,7 @@ class BrevDataMapper(private val featureToggleService: FeatureToggleService, pri
             }
 
             OMS_AVSLAG -> {
-                AvslagBrevDataOMS.fra(generellBrevData.personerISak.avdoed.navn, innholdMedVedlegg.innhold())
+                AvslagBrevDataOMS.fra(generellBrevData.personerISak.avdoede.first().navn, innholdMedVedlegg.innhold())
             }
 
             TILBAKEKREVING_FERDIG -> TilbakekrevingFerdigData.fra(generellBrevData, innholdMedVedlegg)

@@ -97,9 +97,11 @@ object BarnepensjonVilkaar1967 {
             grunnlag =
                 with(grunnlag) {
                     val foedselsdatoBarn = soeker.hentFoedselsdato()?.toVilkaarsgrunnlag(SOEKER_FOEDSELSDATO)
-                    val doedsdatoAvdoed = hentAvdoed().hentDoedsdato()?.toVilkaarsgrunnlag(AVDOED_DOEDSDATO)
-
-                    listOfNotNull(foedselsdatoBarn, doedsdatoAvdoed)
+                    val doedsdatoAvdoede =
+                        hentAvdoede().mapNotNull { avdoed ->
+                            avdoed.hentDoedsdato()?.toVilkaarsgrunnlag(AVDOED_DOEDSDATO)
+                        }
+                    listOfNotNull(foedselsdatoBarn) + doedsdatoAvdoede
                 },
         )
 

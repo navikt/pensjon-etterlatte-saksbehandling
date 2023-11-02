@@ -36,7 +36,7 @@ data class InnvilgetBrevDataOMS(
             InnvilgetBrevDataOMS(
                 utbetalingsinfo = Utbetalingsinfo.kopier(utbetalingsinfo, etterbetalinginfo),
                 avkortingsinfo = avkortingsinfo,
-                avdoed = generellBrevData.personerISak.avdoed,
+                avdoed = generellBrevData.personerISak.avdoede.minBy { it.doedsdato },
                 etterbetalinginfo = EtterbetalingBrev.fra(etterbetalinginfo, utbetalingsinfo.beregningsperioder),
                 beregningsinfo =
                     Beregningsinfo(
@@ -71,7 +71,7 @@ data class FoerstegangsvedtakUtfallDTO(
         ): FoerstegangsvedtakUtfallDTO =
             FoerstegangsvedtakUtfallDTO(
                 virkningsdato = utbetalingsinfo.virkningsdato,
-                avdoed = generellBrevData.personerISak.avdoed,
+                avdoed = generellBrevData.personerISak.avdoede.minBy { it.doedsdato },
                 utbetalingsbeloep = avkortingsinfo.beregningsperioder.first().utbetaltBeloep,
             )
     }

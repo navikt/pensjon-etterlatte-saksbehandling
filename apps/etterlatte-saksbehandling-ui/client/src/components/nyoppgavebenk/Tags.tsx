@@ -27,6 +27,7 @@ const OPPGAVETYPE_TIL_TAGDATA: Record<Oppgavetype, { variant: Variants; text: st
   OMGJOERING: { variant: Variants.ALT2_MODERATE, text: 'Omgjøring' },
   TILBAKEKREVING: { variant: Variants.ALT2, text: 'Tilbakekreving' },
   MANUELL_JOURNALFOERING: { variant: Variants.ALT2, text: 'Manuell journalføring' },
+  JOURNALFOERING: { variant: Variants.ALT2, text: 'Journalføring' },
 } as const
 
 export const OppgavetypeTag = (props: { oppgavetype: Oppgavetype }) => {

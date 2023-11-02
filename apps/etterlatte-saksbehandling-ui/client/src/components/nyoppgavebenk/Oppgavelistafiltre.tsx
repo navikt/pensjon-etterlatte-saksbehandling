@@ -101,6 +101,7 @@ const OPPGAVETYPEFILTER: Record<OppgavetypeFilterKeys, string> = {
   TILBAKEKREVING: 'Tilbakekreving',
   OMGJOERING: 'Omgjøring',
   MANUELL_JOURNALFOERING: 'Manuell journalføring',
+  JOURNALFOERING: 'Journalføring',
 } as const
 
 export const oppgavetypefilter = (kanBrukeKlage: boolean): Array<[OppgavetypeFilterKeys, string]> => {

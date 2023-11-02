@@ -11,7 +11,7 @@
       <env name="ETTERLATTE_BEHANDLING_CLIENT_ID" value="59967ac8-009c-492e-a618-e5a0f6b3e4e4" />
       <env name="ETTERLATTE_BEHANDLING_URL" value="https://etterlatte-behandling.intern.dev.nav.no" />
       <env name="ETTERLATTE_BEREGNING_CLIENT_ID" value="b07cf335-11fb-4efa-bd46-11f51afd5052" />
-      <env name="ETTERLATTE_BEREGNING_URL" value="http://etterlatte-beregning.intern.dev.nav.no" />
+      <env name="ETTERLATTE_BEREGNING_URL" value="https://etterlatte-beregning.intern.dev.nav.no" />
       <env name="ETTERLATTE_GRUNNLAG_CLIENT_ID" value="ce96a301-13db-4409-b277-5b27f464d08b" />
       <env name="ETTERLATTE_GRUNNLAG_URL" value="https://etterlatte-grunnlag.intern.dev.nav.no" />
       <env name="ETTERLATTE_PROXY_OUTBOUND_SCOPE" value="&quot;&quot;" />
@@ -29,8 +29,8 @@
       <env name="NAVANSATT_OUTBOUND_SCOPE" value="api://dev-fss.teampensjon.navansatt/.default" />
       <env name="NAVANSATT_URL" value="https://navansatt.dev-fss-pub.nais.io" />
       <env name="NORG2_URL" value="https://norg2.dev-fss-pub.nais.io/norg2/api/v1" />
-      <env name="SAF_BASE_URL" value="http://host.docker.internal:9091" />
-      <env name="SAF_SCOPE" value="dev-fss:saf:saf" />
+      <env name="SAF_BASE_URL" value="https://saf-q2.dev-fss-pub.nais.io" />
+      <env name="SAF_SCOPE" value="api://dev-fss.teamdokumenthandtering.saf/.default" />
       <env name="SOKOS_KONTOREG_SCOPE" value="dev-gcp:okonomi:sokos-kontoregister-person" />
       <env name="SOKOS_KONTOREG_URL" value="https://sokos-kontoregister-person.intern.dev.nav.no" />
       <env name="BREVBAKER_URL" value="https://pensjon-brevbaker.intern.dev.nav.no" />

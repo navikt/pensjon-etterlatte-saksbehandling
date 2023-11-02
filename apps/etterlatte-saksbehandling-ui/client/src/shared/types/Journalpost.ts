@@ -5,6 +5,7 @@ export interface Journalpost {
   journalstatus: string
   dokumenter: Dokument[]
   avsenderMottaker: {
+    id?: string
     navn?: string
   }
   kanal: string

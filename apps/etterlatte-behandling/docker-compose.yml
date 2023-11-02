@@ -13,6 +13,6 @@ services:
     container_name: wiremock
     image: wiremock/wiremock
     ports:
-      - "9091:8080"
+      - "9094:8080"
     volumes:
       - ./stubs:/home/wiremock

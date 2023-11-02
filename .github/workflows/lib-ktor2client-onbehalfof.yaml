@@ -7,12 +7,14 @@ on:
       - main
     paths:
       - libs/ktor2client-onbehalfof/**
+      - libs/saksbehandling-common/**
       - gradle/libs.versions.toml
   pull_request:
     branches:
       - main
     paths:
       - libs/ktor2client-onbehalfof/**
+      - libs/saksbehandling-common/**
       - gradle/libs.versions.toml
 
 jobs:

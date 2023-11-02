@@ -7,6 +7,7 @@ import io.ktor.client.call.body
 import io.ktor.client.statement.HttpResponse
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.isSuccess
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 
 data class Resource(
     val clientId: String,
@@ -23,7 +24,7 @@ data class ThrowableErrorMessage(
 ) : Exception(message, throwable)
 
 class HttpStatusRuntimeException(val downstreamStatusCode: HttpStatusCode, override val message: String) :
-    RuntimeException(message)
+    InternfeilException(message)
 
 internal fun Throwable.toErr(url: String): Result<JsonNode, ThrowableErrorMessage> {
     return Err(
@@ -38,5 +39,5 @@ internal suspend fun HttpResponse.checkForError() =
     if (this.status.isSuccess()) {
         this
     } else {
-        throw HttpStatusRuntimeException(HttpStatusCode.InternalServerError, this.body<String>())
+        throw HttpStatusRuntimeException(this.status, this.body<String>())
     }

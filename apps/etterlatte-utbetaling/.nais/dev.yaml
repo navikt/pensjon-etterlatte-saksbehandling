@@ -72,7 +72,5 @@ spec:
       external:
         - host: b27apvl222.preprod.local
           ports:
-            - name: mq
-              port: 1413
-              protocol: TCP
+            - port: 1413
         - host: etterlatte-unleash-api.nav.cloud.nais.io

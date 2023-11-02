@@ -31,6 +31,7 @@ internal class SamordningMottattRiver(
             logger.info("Behandlet samordning ferdig for vedtak [behandlingId=${samordnetVedtak.behandling.id}]")
         } catch (e: Exception) {
             logger.error("Feil ved oppdatering av vedtak til SAMORDNET [vedtakId=$vedtakId]")
+            throw e
         }
     }
 }

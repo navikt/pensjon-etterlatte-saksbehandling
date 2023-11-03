@@ -40,24 +40,27 @@ export const Behandling = () => {
     null,
     () => <ApiErrorAlert>Kunne ikke hente behandling</ApiErrorAlert>,
     () => {
-      const behandlingGarra = behandlingFraRedux as IBehandlingReducer
-      return (
-        <>
-          {behandlingGarra.søker && <PdlPersonStatusBar person={behandlingGarra.søker} />}
-          <StegMeny behandling={behandlingGarra} />
-          <GridContainer>
-            <MainContent>
-              <Routes>
-                {behandlingRoutes.map((route) => (
-                  <Route key={route.path} path={route.path} element={route.element} />
-                ))}
-                <Route path="*" element={<Navigate to={behandlingRoutes[0].path} replace />} />
-              </Routes>
-            </MainContent>
-            <BehandlingSidemeny behandling={behandlingGarra} />
-          </GridContainer>
-        </>
-      )
+      if (behandlingFraRedux) {
+        const behandlingGarra = behandlingFraRedux as IBehandlingReducer
+        return (
+          <>
+            {behandlingGarra.søker && <PdlPersonStatusBar person={behandlingGarra.søker} />}
+            <StegMeny behandling={behandlingGarra} />
+            <GridContainer>
+              <MainContent>
+                <Routes>
+                  {behandlingRoutes.map((route) => (
+                    <Route key={route.path} path={route.path} element={route.element} />
+                  ))}
+                  <Route path="*" element={<Navigate to={behandlingRoutes[0].path} replace />} />
+                </Routes>
+              </MainContent>
+              <BehandlingSidemeny behandling={behandlingGarra} />
+            </GridContainer>
+          </>
+        )
+      }
+      return null
     }
   )
 }

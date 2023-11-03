@@ -12,6 +12,7 @@ import no.nav.etterlatte.behandling.domain.toStatistikkBehandling
 import no.nav.etterlatte.behandling.etterbetaling.EtterbetalingService
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.hendelse.HendelseType
+import no.nav.etterlatte.behandling.hendelse.LagretHendelse
 import no.nav.etterlatte.behandling.hendelse.registrerVedtakHendelseFelles
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
@@ -23,16 +24,19 @@ import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
+import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.StatistikkBehandling
-import no.nav.etterlatte.libs.common.behandling.Utenlandstilsnitt
+import no.nav.etterlatte.libs.common.behandling.Utenlandstilknytning
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.oppgave.OppgaveService
+import no.nav.etterlatte.sak.SakDao
+import no.nav.etterlatte.sak.SakUtenlandstilknytning
 import no.nav.etterlatte.tilgangsstyring.filterForEnheter
 import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.etterlatte.vedtaksvurdering.VedtakHendelse
@@ -76,7 +80,7 @@ interface BehandlingService {
 
     fun oppdaterUtenlandstilsnitt(
         behandlingId: UUID,
-        utenlandstilsnitt: Utenlandstilsnitt,
+        utenlandstilknytning: Utenlandstilknytning,
     )
 
     fun oppdaterBoddEllerArbeidetUtlandet(
@@ -122,6 +126,7 @@ internal class BehandlingServiceImpl(
     private val oppgaveService: OppgaveService,
     private val etterbetalingService: EtterbetalingService,
     private val grunnlagService: GrunnlagService,
+    private val sakDao: SakDao,
 ) : BehandlingService {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -276,11 +281,18 @@ internal class BehandlingServiceImpl(
             }
     }
 
+    data class BehandlingMedData(
+        val behandling: Behandling,
+        val kommerBarnetTilgode: KommerBarnetTilgode?,
+        val hendelserIBehandling: List<LagretHendelse>,
+        val sakOgUtenlandstilknytning: SakUtenlandstilknytning?,
+    )
+
     override suspend fun hentDetaljertBehandlingMedTilbehoer(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): DetaljertBehandlingDto {
-        val (behandling, kommerBarnetTilgode, hendelserIBehandling) =
+        val (behandling, kommerBarnetTilgode, hendelserIBehandling, sakOgUtenlandstilknytning) =
             inTransaction {
                 val behandling =
                     hentBehandling(behandlingId)
@@ -290,7 +302,8 @@ internal class BehandlingServiceImpl(
                 val kommerBarnetTilgode =
                     kommerBarnetTilGodeDao.hentKommerBarnetTilGode(behandlingId)
                         .takeIf { behandling.sak.sakType == SakType.BARNEPENSJON }
-                Triple(behandling, kommerBarnetTilgode, hendelserIBehandling)
+                val sakOgUtenlandstilknytning = sakDao.hentUtenlandstilknytningForSak(behandling.sak.id)
+                BehandlingMedData(behandling, kommerBarnetTilgode, hendelserIBehandling, sakOgUtenlandstilknytning)
             }
 
         val sakId = behandling.sak.id
@@ -341,7 +354,7 @@ internal class BehandlingServiceImpl(
                 kommerBarnetTilgode = kommerBarnetTilgode,
                 soeknadMottattDato = behandling.mottattDato(),
                 virkningstidspunkt = behandling.virkningstidspunkt,
-                utenlandstilsnitt = behandling.utenlandstilsnitt,
+                utenlandstilknytning = sakOgUtenlandstilknytning?.utenlandstilknytning,
                 boddEllerArbeidetUtlandet = behandling.boddEllerArbeidetUtlandet,
                 status = behandling.status,
                 hendelser = hendelserIBehandling,
@@ -410,7 +423,7 @@ internal class BehandlingServiceImpl(
 
     override fun oppdaterUtenlandstilsnitt(
         behandlingId: UUID,
-        utenlandstilsnitt: Utenlandstilsnitt,
+        utenlandstilknytning: Utenlandstilknytning,
     ) {
         val behandling =
             hentBehandling(behandlingId) ?: run {
@@ -419,11 +432,8 @@ internal class BehandlingServiceImpl(
             }
 
         try {
-            behandling.oppdaterUtenlandstilsnitt(utenlandstilsnitt)
-                .also {
-                    behandlingDao.lagreUtenlandstilsnitt(behandlingId, utenlandstilsnitt)
-                    behandlingDao.lagreStatus(it)
-                }
+            // TODO: skal kun skje mot sakdao
+            behandlingDao.lagreUtenlandstilsnitt(behandlingId, utenlandstilknytning)
         } catch (e: NotImplementedError) {
             logger.error(
                 "Kan ikke oppdatere utenlandstilsnitt for behandling: $behandlingId med typen ${behandling.type}",

@@ -1,4 +1,4 @@
-import { IBehandlingStatus, IUtenlandstilsnitt, INasjonalitetType } from '~shared/types/IDetaljertBehandling'
+import { IBehandlingStatus, IUtenlandstilknytning, UtenlandstilknytningType } from '~shared/types/IDetaljertBehandling'
 import { VurderingsboksWrapper } from '~components/vurderingsboks/VurderingsboksWrapper'
 import { BodyShort, Label, Radio, RadioGroup } from '@navikt/ds-react'
 import { RadioGroupWrapper } from '~components/behandling/vilkaarsvurdering/Vurdering'
@@ -7,39 +7,39 @@ import { SoeknadsoversiktTextArea } from '../SoeknadsoversiktTextArea'
 import { useAppDispatch } from '~store/Store'
 import { useState } from 'react'
 import { isFailure, useApiCall } from '~shared/hooks/useApiCall'
-import { lagreUtenlandstilsnitt } from '~shared/api/behandling'
+import { lagreUtenlandstilknytning } from '~shared/api/behandling'
 import { oppdaterBehandlingsstatus, oppdaterUtenlandstilsnitt } from '~store/reducers/BehandlingReducer'
 import { ApiErrorAlert } from '~ErrorBoundary'
 
-const UtenlandstilsnittTypeTittel: Record<INasjonalitetType, string> = {
-  [INasjonalitetType.NASJONAL]: 'Nasjonal',
-  [INasjonalitetType.UTLANDSTILSNITT]: 'Utlandstilsnitt',
-  [INasjonalitetType.BOSATT_UTLAND]: 'Bosatt utland',
+const UtenlandstilknytningTypeTittel: Record<UtenlandstilknytningType, string> = {
+  [UtenlandstilknytningType.NASJONAL]: 'Nasjonal',
+  [UtenlandstilknytningType.UTLANDSTILSNITT]: 'Utlandstilsnitt-bosatt Norge',
+  [UtenlandstilknytningType.BOSATT_UTLAND]: 'Bosatt utland',
 } as const
 
 export const UtenlandstilsnittVurdering = ({
-  utenlandstilsnitt,
+  utenlandstilknytning,
   redigerbar,
   setVurdert,
   behandlingId,
 }: {
-  utenlandstilsnitt: IUtenlandstilsnitt | undefined
+  utenlandstilknytning: IUtenlandstilknytning | undefined
   redigerbar: boolean
   setVurdert: (visVurderingKnapp: boolean) => void
   behandlingId: string
 }) => {
   const dispatch = useAppDispatch()
 
-  const [svar, setSvar] = useState<INasjonalitetType | undefined>(utenlandstilsnitt?.type)
+  const [svar, setSvar] = useState<UtenlandstilknytningType | undefined>(utenlandstilknytning?.type)
   const [radioError, setRadioError] = useState<string>('')
-  const [begrunnelse, setBegrunnelse] = useState<string>(utenlandstilsnitt?.begrunnelse || '')
-  const [setUtenlandstilsnittStatus, setUtenlandstilsnitt, resetToInitial] = useApiCall(lagreUtenlandstilsnitt)
+  const [begrunnelse, setBegrunnelse] = useState<string>(utenlandstilknytning?.begrunnelse || '')
+  const [setUtenlandstilknytningStatus, setUtenlandstilknytning, resetToInitial] = useApiCall(lagreUtenlandstilknytning)
 
   const lagre = (onSuccess?: () => void) => {
     !svar ? setRadioError('Du må velge et svar') : setRadioError('')
 
     if (svar !== undefined)
-      return setUtenlandstilsnitt({ behandlingId, begrunnelse, svar }, (response) => {
+      return setUtenlandstilknytning({ behandlingId, begrunnelse, svar }, (response) => {
         dispatch(oppdaterUtenlandstilsnitt(response))
         dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.OPPRETTET))
         onSuccess?.()
@@ -48,10 +48,10 @@ export const UtenlandstilsnittVurdering = ({
 
   const reset = (onSuccess?: () => void) => {
     resetToInitial()
-    setSvar(utenlandstilsnitt?.type)
+    setSvar(utenlandstilknytning?.type)
     setRadioError('')
-    setBegrunnelse(utenlandstilsnitt?.begrunnelse || '')
-    setVurdert(utenlandstilsnitt !== null)
+    setBegrunnelse(utenlandstilknytning?.begrunnelse || '')
+    setVurdert(utenlandstilknytning !== null)
     onSuccess?.()
   }
 
@@ -61,9 +61,9 @@ export const UtenlandstilsnittVurdering = ({
       subtittelKomponent={
         <>
           <BodyShort spacing>Hvilken type sak er dette?</BodyShort>
-          {utenlandstilsnitt?.type ? (
+          {utenlandstilknytning?.type ? (
             <Label as="p" size="small" style={{ marginBottom: '32px' }}>
-              {UtenlandstilsnittTypeTittel[utenlandstilsnitt.type]}
+              {UtenlandstilknytningTypeTittel[utenlandstilknytning.type]}
             </Label>
           ) : (
             <Label as="p" size="small" style={{ marginBottom: '32px' }}>
@@ -74,17 +74,17 @@ export const UtenlandstilsnittVurdering = ({
       }
       redigerbar={redigerbar}
       vurdering={
-        utenlandstilsnitt?.kilde
+        utenlandstilknytning?.kilde
           ? {
-              saksbehandler: utenlandstilsnitt?.kilde.ident,
-              tidspunkt: new Date(utenlandstilsnitt?.kilde.tidspunkt),
+              saksbehandler: utenlandstilknytning?.kilde.ident,
+              tidspunkt: new Date(utenlandstilknytning?.kilde.tidspunkt),
             }
           : undefined
       }
       lagreklikk={lagre}
       avbrytklikk={reset}
-      kommentar={utenlandstilsnitt?.begrunnelse}
-      defaultRediger={utenlandstilsnitt === null}
+      kommentar={utenlandstilknytning?.begrunnelse}
+      defaultRediger={utenlandstilknytning === null}
     >
       <>
         <VurderingsTitle title="Utlandstilknytning" />
@@ -95,15 +95,15 @@ export const UtenlandstilsnittVurdering = ({
             size="small"
             className="radioGroup"
             onChange={(event) => {
-              setSvar(INasjonalitetType[event as INasjonalitetType])
+              setSvar(UtenlandstilknytningType[event as UtenlandstilknytningType])
               setRadioError('')
             }}
             value={svar || ''}
             error={radioError ? radioError : false}
           >
-            <Radio value={INasjonalitetType.NASJONAL}>Nasjonal</Radio>
-            <Radio value={INasjonalitetType.UTLANDSTILSNITT}>Utlandstilsnitt</Radio>
-            <Radio value={INasjonalitetType.BOSATT_UTLAND}>Bosatt Utland</Radio>
+            <Radio value={UtenlandstilknytningType.NASJONAL}>Nasjonal</Radio>
+            <Radio value={UtenlandstilknytningType.UTLANDSTILSNITT}>Utlandstilsnitt - bosatt Norge</Radio>
+            <Radio value={UtenlandstilknytningType.BOSATT_UTLAND}>Bosatt Utland</Radio>
           </RadioGroup>
         </RadioGroupWrapper>
         <SoeknadsoversiktTextArea
@@ -114,7 +114,7 @@ export const UtenlandstilsnittVurdering = ({
           }}
           placeholder="Valgfritt"
         />
-        {isFailure(setUtenlandstilsnittStatus) && <ApiErrorAlert>Kunne ikke lagre utlandstilknytning</ApiErrorAlert>}
+        {isFailure(setUtenlandstilknytningStatus) && <ApiErrorAlert>Kunne ikke lagre utlandstilknytning</ApiErrorAlert>}
       </>
     </VurderingsboksWrapper>
   )

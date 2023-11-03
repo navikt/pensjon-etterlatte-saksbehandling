@@ -14,6 +14,7 @@ import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.behandling.Utenlandstilknytning
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.Sak
@@ -28,6 +29,11 @@ enum class SakServiceFeatureToggle(private val key: String) : FeatureToggle {
 }
 
 interface SakService {
+    fun oppdaterUtenlandstilknytning(
+        sakId: Long,
+        utenlandstilknytning: Utenlandstilknytning,
+    )
+
     fun hentSaker(): List<Sak>
 
     fun finnSaker(person: String): List<Sak>
@@ -62,7 +68,7 @@ interface SakService {
     fun sjekkOmSakerErGradert(sakIder: List<Long>): List<SakMedGradering>
 
     fun oppdaterAdressebeskyttelse(
-        id: Long,
+        sakId: Long,
         adressebeskyttelseGradering: AdressebeskyttelseGradering,
     ): Int
 }
@@ -75,6 +81,13 @@ class SakServiceImpl(
     private val skjermingKlient: SkjermingKlient,
 ) : SakService {
     private val logger = LoggerFactory.getLogger(this::class.java)
+
+    override fun oppdaterUtenlandstilknytning(
+        sakId: Long,
+        utenlandstilknytning: Utenlandstilknytning,
+    ) {
+        dao.oppdaterUtenlandstilknytning(sakId, utenlandstilknytning)
+    }
 
     override fun hentSaker(): List<Sak> {
         return dao.hentSaker().filterForEnheter()

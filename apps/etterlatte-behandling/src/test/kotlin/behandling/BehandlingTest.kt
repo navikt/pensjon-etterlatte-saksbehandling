@@ -41,7 +41,6 @@ internal class BehandlingTest {
             status = BehandlingStatus.OPPRETTET,
             kommerBarnetTilgode = KommerBarnetTilgode(JaNei.JA, "", saksbehandler, id),
             virkningstidspunkt = null,
-            utenlandstilsnitt = null,
             boddEllerArbeidetUtlandet = null,
             soeknadMottattDato = Tidspunkt.now().toLocalDatetimeUTC(),
             gyldighetsproeving = null,

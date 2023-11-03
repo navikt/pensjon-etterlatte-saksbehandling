@@ -27,8 +27,8 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
-import no.nav.etterlatte.libs.common.behandling.Utenlandstilsnitt
-import no.nav.etterlatte.libs.common.behandling.UtenlandstilsnittType
+import no.nav.etterlatte.libs.common.behandling.Utenlandstilknytning
+import no.nav.etterlatte.libs.common.behandling.UtenlandstilknytningType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
@@ -652,7 +652,7 @@ class BehandlingServiceImplTest {
 
         val uuid = UUID.randomUUID()
 
-        val slot = slot<Utenlandstilsnitt>()
+        val slot = slot<Utenlandstilknytning>()
 
         val behandlingDaoMock =
             mockk<BehandlingDao> {
@@ -689,15 +689,15 @@ class BehandlingServiceImplTest {
         inTransaction {
             sut.oppdaterUtenlandstilsnitt(
                 uuid,
-                Utenlandstilsnitt(
-                    UtenlandstilsnittType.BOSATT_UTLAND,
+                Utenlandstilknytning(
+                    UtenlandstilknytningType.BOSATT_UTLAND,
                     Grunnlagsopplysning.Saksbehandler.create("ident"),
                     "Test",
                 ),
             )
         }
 
-        assertEquals(UtenlandstilsnittType.BOSATT_UTLAND, slot.captured.type)
+        assertEquals(UtenlandstilknytningType.BOSATT_UTLAND, slot.captured.type)
         assertEquals("Test", slot.captured.begrunnelse)
         assertEquals("ident", slot.captured.kilde.ident)
     }

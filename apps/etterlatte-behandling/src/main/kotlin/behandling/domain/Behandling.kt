@@ -20,7 +20,6 @@ import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.StatistikkBehandling
-import no.nav.etterlatte.libs.common.behandling.Utenlandstilsnitt
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.sak.Sak
@@ -44,7 +43,6 @@ sealed class Behandling {
     abstract val type: BehandlingType
     abstract val kommerBarnetTilgode: KommerBarnetTilgode?
     abstract val virkningstidspunkt: Virkningstidspunkt?
-    abstract val utenlandstilsnitt: Utenlandstilsnitt?
     abstract val boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet?
     abstract val kilde: Vedtaksloesning
     open val prosesstype: Prosesstype = Prosesstype.MANUELL
@@ -84,13 +82,6 @@ sealed class Behandling {
         throw NotImplementedError(
             "Kan ikke oppdatere virkningstidspunkt på behandling $id. " +
                 "Denne behandlingstypen støtter ikke oppdatering av virkningstidspunkt.",
-        )
-    }
-
-    open fun oppdaterUtenlandstilsnitt(utenlandstilsnitt: Utenlandstilsnitt): Behandling {
-        throw NotImplementedError(
-            "Kan ikke oppdatere utenlandstilsnitt på behandling $id. " +
-                "Denne behandlingstypen støtter ikke oppdatering av utenlandstilsnitt.",
         )
     }
 
@@ -248,6 +239,5 @@ fun Behandling.toBehandlingSammendrag() =
                 is ManueltOpphoer -> "MANUELT_OPPHOER"
             },
         virkningstidspunkt = this.virkningstidspunkt,
-        utenlandstilsnitt = this.utenlandstilsnitt,
         boddEllerArbeidetUtlandet = this.boddEllerArbeidetUtlandet,
     )

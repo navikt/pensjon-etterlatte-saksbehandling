@@ -20,12 +20,12 @@ import no.nav.etterlatte.behandling.BehandlingFactory
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.BoddEllerArbeidetUtlandetRequest
 import no.nav.etterlatte.behandling.GyldighetsproevingService
-import no.nav.etterlatte.behandling.UtenlandstilsnittRequest
+import no.nav.etterlatte.behandling.UtenlandstilknytningRequest
 import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktService
 import no.nav.etterlatte.behandling.behandlingRoutes
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeService
 import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerService
-import no.nav.etterlatte.libs.common.behandling.UtenlandstilsnittType
+import no.nav.etterlatte.libs.common.behandling.UtenlandstilknytningType
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -82,7 +82,7 @@ internal class BehandlingRoutesTest {
                 client.post("/api/behandling/$behandlingId/utenlandstilsnitt") {
                     header(HttpHeaders.Authorization, "Bearer $token")
                     contentType(ContentType.Application.Json)
-                    setBody(UtenlandstilsnittRequest(UtenlandstilsnittType.BOSATT_UTLAND, "Test"))
+                    setBody(UtenlandstilknytningRequest(UtenlandstilknytningType.BOSATT_UTLAND, "Test"))
                 }
 
             assertEquals(200, response.status.value)

@@ -1,11 +1,11 @@
-import { IDetaljertBehandling, IUtenlandstilsnitt } from '~shared/types/IDetaljertBehandling'
+import { IDetaljertBehandling, IUtenlandstilknytning } from '~shared/types/IDetaljertBehandling'
 import { LovtekstMedLenke } from '../LovtekstMedLenke'
 import { Beskrivelse, VurderingsContainerWrapper } from '../../styled'
 import { useState } from 'react'
 import { LeggTilVurderingButton } from '../LeggTilVurderingButton'
 import { UtenlandstilsnittVurdering } from './UtenlandstilsnittVurdering'
 
-const statusIkon = (utenlandstilsnitt: IUtenlandstilsnitt | undefined) => {
+const statusIkon = (utenlandstilsnitt: IUtenlandstilknytning | undefined) => {
   if (utenlandstilsnitt == undefined) {
     return 'warning'
   }
@@ -32,7 +32,7 @@ export const Utenlandstilsnitt = ({
       <VurderingsContainerWrapper>
         {vurdert ? (
           <UtenlandstilsnittVurdering
-            utenlandstilsnitt={behandling.utenlandstilsnitt}
+            utenlandstilknytning={behandling.utenlandstilsnitt}
             redigerbar={redigerbar}
             setVurdert={(visVurderingKnapp: boolean) => setVurdert(visVurderingKnapp)}
             behandlingId={behandling.id}

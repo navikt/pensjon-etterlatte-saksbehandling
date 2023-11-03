@@ -583,12 +583,14 @@ class TrygdetidServiceImpl(
             trygdetidRepository.hentTrygdetiderForBehandling(behandlingId).find { it.ident == ident }
                 ?: throw GenerellIkkeFunnetException()
 
-        return trygdetid.oppdaterBeregnetTrygdetid(
-            DetaljertBeregnetTrygdetid(
-                resultat = beregnetTrygdetid,
-                tidspunkt = Tidspunkt.now(),
-                regelResultat = "".toJsonNode(),
-            ),
+        return trygdetid.copy(
+            trygdetidGrunnlag = emptyList(),
+            beregnetTrygdetid =
+                DetaljertBeregnetTrygdetid(
+                    resultat = beregnetTrygdetid,
+                    tidspunkt = Tidspunkt.now(),
+                    regelResultat = "".toJsonNode(),
+                ),
         ).also { nyTrygdetid ->
             trygdetidRepository.oppdaterTrygdetid(nyTrygdetid, true)
         }

@@ -8,6 +8,7 @@ import no.nav.etterlatte.libs.common.trygdetid.DetaljertBeregnetTrygdetidResulta
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidGrunnlagDto
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidGrunnlagKildeDto
+import no.nav.etterlatte.rapidsandrivers.migrering.Beregning
 import no.nav.etterlatte.rapidsandrivers.migrering.MigreringRequest
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser
 import no.nav.etterlatte.rapidsandrivers.migrering.TRYGDETID_KEY
@@ -25,7 +26,10 @@ import rapidsandrivers.behandlingId
 import rapidsandrivers.migrering.ListenerMedLoggingOgFeilhaandtering
 import java.util.UUID
 
-internal class MigreringHendelserRiver(rapidsConnection: RapidsConnection, private val trygdetidService: TrygdetidService) :
+internal class MigreringHendelserRiver(
+    rapidsConnection: RapidsConnection,
+    private val trygdetidService: TrygdetidService,
+) :
     ListenerMedLoggingOgFeilhaandtering(Migreringshendelser.TRYGDETID) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -51,37 +55,63 @@ internal class MigreringHendelserRiver(rapidsConnection: RapidsConnection, priva
         val oppdatertTrygdetid: TrygdetidDto =
             if (request.trygdetid.perioder.isNotEmpty()) {
                 try {
-                    request.trygdetid.perioder.map { periode ->
-                        val grunnlag = tilGrunnlag(periode)
-                        logger.info(
-                            "Forsøker å legge til periode ${grunnlag.periodeFra}-${grunnlag.periodeTil} for behandling $behandlingId",
-                        )
-                        trygdetidService.beregnTrygdetidGrunnlag(behandlingId, grunnlag)
-                    }.last()
+                    val trygdetid =
+                        request.trygdetid.perioder.map { periode ->
+                            val grunnlag = tilGrunnlag(periode)
+                            logger.info(
+                                "Forsøker å legge til periode ${grunnlag.periodeFra}-${grunnlag.periodeTil} for behandling $behandlingId",
+                            )
+                            trygdetidService.beregnTrygdetidGrunnlag(behandlingId, grunnlag)
+                        }.last()
+
+                    check(trygdetidIGjennyStemmerMedTrygdetidIPesys(trygdetid, request.beregning)) {
+                        "Beregnet trygdetid i Gjenny basert på perioder fra Pesys stemmer ikke med anvendt trygdetid i Pesys"
+                    }
+
+                    trygdetid
                 } catch (e: Exception) {
                     logger.warn("Klarte ikke legge til perioder fra Pesys for behandling $behandlingId", e)
-                    overstyrBeregnetTrygdetidNorge(request, behandlingId)
+                    overstyrBeregnetTrygdetid(request, behandlingId)
                 }
             } else {
                 logger.info("Vi mottok ingen trygdetidsperioder fra Pesys for behandling $behandlingId")
-                overstyrBeregnetTrygdetidNorge(request, behandlingId)
+                overstyrBeregnetTrygdetid(request, behandlingId)
             }
 
         sendBeregnetTrygdetid(packet, oppdatertTrygdetid, context, behandlingId)
     }
 
-    private fun overstyrBeregnetTrygdetidNorge(
+    private fun trygdetidIGjennyStemmerMedTrygdetidIPesys(
+        trygdetid: TrygdetidDto,
+        beregning: Beregning,
+    ): Boolean =
+        if (beregning.prorataBroek == null) {
+            trygdetid.beregnetTrygdetid?.resultat?.prorataBroek == null &&
+                trygdetid.beregnetTrygdetid?.resultat?.samletTrygdetidNorge == beregning.anvendtTrygdetid
+        } else {
+            trygdetid.beregnetTrygdetid?.resultat?.prorataBroek == beregning.prorataBroek &&
+                trygdetid.beregnetTrygdetid?.resultat?.samletTrygdetidTeoretisk == beregning.anvendtTrygdetid
+        }
+
+    private fun overstyrBeregnetTrygdetid(
         request: MigreringRequest,
         behandlingId: UUID,
-    ): TrygdetidDto =
-        // TODO - EY-2602 - flere felter trengs - feks utland
-        trygdetidService.overstyrBeregnetTrygdetid(
-            behandlingId = behandlingId,
-            beregnetTrygdetid =
-                DetaljertBeregnetTrygdetidResultat.fraSamletTrygdetidNorge(
+    ): TrygdetidDto {
+        val beregnetTrygdetid =
+            if (request.beregning.prorataBroek == null) {
+                DetaljertBeregnetTrygdetidResultat.fraSamletTrygdetidNorge(request.beregning.anvendtTrygdetid)
+            } else {
+                DetaljertBeregnetTrygdetidResultat.fraSamletTrygdetidProrata(
                     request.beregning.anvendtTrygdetid,
-                ).copy(overstyrt = true),
-        ).also { logger.warn("Trygdetid for behandling $behandlingId ble overstyrt med anvendt norsk tt fra Pesys") }
+                    request.beregning.prorataBroek,
+                )
+            }
+
+        return trygdetidService.overstyrBeregnetTrygdetid(
+            behandlingId = behandlingId,
+            beregnetTrygdetid = beregnetTrygdetid,
+        ).also { logger.warn("Trygdetid for behandling $behandlingId ble overstyrt med anvendt trygdetid fra Pesys") }
+    }
 
     private fun sendBeregnetTrygdetid(
         packet: JsonMessage,

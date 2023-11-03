@@ -716,6 +716,72 @@ internal class BeregnTrygdetidTest {
                     ),
                     2,
                 ),
+                Arguments.of(
+                    // ...arguments =
+                    "Skal ikke treffe 4/5 regel hvis 18/20 år er opptjening",
+                    listOf(
+                        byggTrygdetidGrunnlag(
+                            TrygdetidType.FAKTISK,
+                            LandNormalisert.NORGE.isoCode,
+                            TrygdetidPeriode(
+                                fra = LocalDate.of(2023, 2, 21).minusYears(18),
+                                til = LocalDate.of(2023, 2, 21),
+                            ),
+                            poengInnAar = false,
+                            poengUtAar = false,
+                            medIProrata = true,
+                        ),
+                        byggTrygdetidGrunnlag(
+                            type = TrygdetidType.FREMTIDIG,
+                            bosted = LandNormalisert.NORGE.isoCode,
+                            periode =
+                                TrygdetidPeriode(
+                                    fra = LocalDate.of(2023, 2, 21),
+                                    til =
+
+                                        LocalDate.of(2023, 2, 21).plusYears(30), // Døde 36 år gammel
+                                ),
+                            poengInnAar = false,
+                            poengUtAar = true,
+                            medIProrata = true,
+                        ),
+                    ),
+                    DetaljertBeregnetTrygdetidResultat(
+                        faktiskTrygdetidNorge =
+                            FaktiskTrygdetid(
+                                periode = Period.of(18, 1, 0),
+                                antallMaaneder = 217,
+                            ),
+                        faktiskTrygdetidTeoretisk =
+                            FaktiskTrygdetid(
+                                periode = Period.of(18, 1, 0),
+                                antallMaaneder = 217,
+                            ),
+                        fremtidigTrygdetidNorge =
+                            FremtidigTrygdetid(
+                                periode = Period.of(30, 11, 0),
+                                antallMaaneder = 371,
+                                opptjeningstidIMaaneder = 239,
+                                mindreEnnFireFemtedelerAvOpptjeningstiden = false,
+                            ),
+                        fremtidigTrygdetidTeoretisk =
+                            FremtidigTrygdetid(
+                                periode = Period.of(30, 11, 0),
+                                antallMaaneder = 371,
+                                opptjeningstidIMaaneder = 239,
+                                mindreEnnFireFemtedelerAvOpptjeningstiden = false,
+                            ),
+                        samletTrygdetidNorge = 40,
+                        samletTrygdetidTeoretisk = 40,
+                        prorataBroek = null,
+                        overstyrt = false,
+                    ),
+                    Pair(
+                        LocalDate.of(2023, 2, 21).minusYears(36), // 20 år med opptjening
+                        LocalDate.of(2023, 2, 21),
+                    ),
+                    null,
+                ),
             )
 
         private fun byggTrygdetidGrunnlag(

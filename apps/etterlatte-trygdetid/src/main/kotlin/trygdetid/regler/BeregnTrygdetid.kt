@@ -326,7 +326,7 @@ val fremtidigTrygdetidForNasjonal =
     ) benytter faktiskNorge og fremtidigTrygdetid og opptjeningsTidIMnd med { faktisk, fremtidig, opptjening ->
 
         if (fremtidig != null) {
-            val mindreEnnFireFemtedelerAvOpptjeningstiden = ((faktisk?.antallMaaneder ?: 0) / opptjening) < 0.8
+            val mindreEnnFireFemtedelerAvOpptjeningstiden = ((faktisk?.antallMaaneder ?: 0) * 5) < opptjening * 4
 
             val fremtidigPeriode =
                 fremtidig.justertForOpptjeningstiden(opptjening, mindreEnnFireFemtedelerAvOpptjeningstiden)
@@ -353,7 +353,7 @@ val fremtidigTrygdetidForTeoretisk =
             opptjening,
         ->
         if (fremtidig != null) {
-            val mindreEnnFireFemtedelerAvOpptjeningstiden = ((teoretisk?.antallMaaneder ?: 0) / opptjening) < 0.8
+            val mindreEnnFireFemtedelerAvOpptjeningstiden = teoretisk.antallMaaneder * 5 < opptjening * 4
 
             val fremtidigPeriode =
                 fremtidig.justertForOpptjeningstiden(opptjening, mindreEnnFireFemtedelerAvOpptjeningstiden)

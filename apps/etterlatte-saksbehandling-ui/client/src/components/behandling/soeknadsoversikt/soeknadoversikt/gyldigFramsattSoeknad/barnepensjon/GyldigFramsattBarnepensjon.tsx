@@ -12,7 +12,7 @@ import {
 } from '~components/behandling/soeknadsoversikt/styled'
 import { Innsender } from '~components/behandling/soeknadsoversikt/soeknadoversikt/gyldigFramsattSoeknad/barnepensjon/Innsender'
 import { Foreldreansvar } from '~components/behandling/soeknadsoversikt/soeknadoversikt/gyldigFramsattSoeknad/barnepensjon/Foreldreansvar'
-import { Verge } from '~components/behandling/soeknadsoversikt/soeknadoversikt/gyldigFramsattSoeknad/barnepensjon/Verge'
+import { Verger } from '~components/behandling/soeknadsoversikt/soeknadoversikt/gyldigFramsattSoeknad/barnepensjon/Verger'
 import { GyldigFramsattVurdering } from '~components/behandling/soeknadsoversikt/soeknadoversikt/gyldigFramsattSoeknad/barnepensjon/GyldigFramsattVurdering'
 import { hentBehandlesFraStatus } from '~components/behandling/felles/utils'
 
@@ -36,9 +36,7 @@ export const GyldigFramsattBarnepensjon = ({
   const innsenderErForelder = gyldigFramsatt.vurderinger.find(
     (g: IGyldighetproving) => g.navn === GyldigFramsattType.INNSENDER_ER_FORELDER
   )
-  const ingenAnnenVergeEnnForelder = gyldigFramsatt.vurderinger.find(
-    (g: IGyldighetproving) => g.navn === GyldigFramsattType.INGEN_ANNEN_VERGE_ENN_FORELDER
-  )
+  const vergerOgFullmektige = behandling.søker?.vergemaalEllerFremtidsfullmakt ?? []
 
   return (
     <LovtekstMedLenke
@@ -61,7 +59,7 @@ export const GyldigFramsattBarnepensjon = ({
         <InfobokserWrapper>
           <Innsender innsenderErForelder={innsenderErForelder} />
           <Foreldreansvar innsenderHarForeldreansvar={innsenderHarForeldreansvar} />
-          <Verge ingenAnnenVergeEnnForelder={ingenAnnenVergeEnnForelder} />
+          <Verger vergerOgFullmektige={vergerOgFullmektige} />
         </InfobokserWrapper>
       </div>
       <VurderingsContainerWrapper>

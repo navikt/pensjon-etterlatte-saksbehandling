@@ -1,6 +1,7 @@
 import { Grunnlagsopplysning } from '~shared/types/grunnlag'
 import { IAdresse } from '~shared/types/IAdresse'
 import { KildePdl } from './kilde'
+import { VergemaalEllerFremtidsfullmakt } from '~components/person/typer'
 
 export interface IFamilieforhold {
   avdoede: Grunnlagsopplysning<IPdlPerson, KildePdl>
@@ -28,7 +29,7 @@ export interface IPdlPerson {
   familieRelasjon?: IFamilieRelasjon
   sivilstatus?: Sivilstatus
   sivilstand?: Sivilstand[]
-  // ...
+  vergemaalEllerFremtidsfullmakt?: VergemaalEllerFremtidsfullmakt[]
 }
 
 export interface Sivilstand {

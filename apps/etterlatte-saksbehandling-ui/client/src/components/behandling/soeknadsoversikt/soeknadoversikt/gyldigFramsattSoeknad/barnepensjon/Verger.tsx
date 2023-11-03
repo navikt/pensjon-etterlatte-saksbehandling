@@ -7,16 +7,23 @@ interface Props {
 }
 
 export const Verger = ({ vergerOgFullmektige }: Props) => {
-  return (
-    <InfoWrapper>
-      {vergerOgFullmektige.map((it, index) => (
-        <Info
-          label="Verge"
-          tekst={it.vergeEllerFullmektig.motpartsPersonident}
-          undertekst={`${it.embete} (${it.type})`}
-          key={index}
-        />
-      ))}
-    </InfoWrapper>
-  )
+  function contents() {
+    if (vergerOgFullmektige.length > 0) {
+      return (
+        <>
+          {vergerOgFullmektige.map((it, index) => (
+            <Info
+              label="Verge"
+              tekst={it.vergeEllerFullmektig.motpartsPersonident}
+              undertekst={`${it.embete} (${it.type})`}
+              key={index}
+            />
+          ))}
+        </>
+      )
+    }
+    return <Info label="Verge" tekst="Ingen verge registrert i PDL" />
+  }
+
+  return <InfoWrapper>{contents()}</InfoWrapper>
 }

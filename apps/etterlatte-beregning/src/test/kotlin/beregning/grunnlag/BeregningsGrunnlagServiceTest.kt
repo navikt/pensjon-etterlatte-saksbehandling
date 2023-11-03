@@ -78,7 +78,7 @@ internal class BeregningsGrunnlagServiceTest {
         val behandling = mockBehandling(SakType.BARNEPENSJON, randomUUID())
 
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
-        coEvery { behandlingKlient.beregn(any(), any(), any()) } returns true
+        coEvery { behandlingKlient.kanBeregnes(any(), any(), any()) } returns true
         every { beregningsGrunnlagRepository.finnBarnepensjonGrunnlagForBehandling(any()) } returns null
         every { beregningsGrunnlagRepository.lagre(any()) } returns true
 
@@ -138,7 +138,7 @@ internal class BeregningsGrunnlagServiceTest {
             )
 
         coEvery { behandlingKlient.hentBehandling(foerstegangsbehandling.id, any()) } returns foerstegangsbehandling
-        coEvery { behandlingKlient.beregn(revurdering.id, any(), any()) } returns true
+        coEvery { behandlingKlient.kanBeregnes(revurdering.id, any(), any()) } returns true
         coEvery {
             behandlingKlient.hentSisteIverksatteBehandling(
                 sakId,
@@ -214,7 +214,7 @@ internal class BeregningsGrunnlagServiceTest {
             )
 
         coEvery { behandlingKlient.hentBehandling(foerstegangsbehandling.id, any()) } returns foerstegangsbehandling
-        coEvery { behandlingKlient.beregn(revurdering.id, any(), any()) } returns true
+        coEvery { behandlingKlient.kanBeregnes(revurdering.id, any(), any()) } returns true
         coEvery {
             behandlingKlient.hentSisteIverksatteBehandling(
                 sakId,
@@ -256,7 +256,7 @@ internal class BeregningsGrunnlagServiceTest {
         val behandlingsId = randomUUID()
 
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
-        coEvery { behandlingKlient.beregn(any(), any(), any()) } returns true
+        coEvery { behandlingKlient.kanBeregnes(any(), any(), any()) } returns true
         every { beregningsGrunnlagRepository.finnBarnepensjonGrunnlagForBehandling(omregningsId) } returns null
         every {
             beregningsGrunnlagRepository.finnBarnepensjonGrunnlagForBehandling(behandlingsId)
@@ -285,7 +285,7 @@ internal class BeregningsGrunnlagServiceTest {
         val behandlingsId = randomUUID()
 
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
-        coEvery { behandlingKlient.beregn(any(), any(), any()) } returns true
+        coEvery { behandlingKlient.kanBeregnes(any(), any(), any()) } returns true
         every { beregningsGrunnlagRepository.finnBarnepensjonGrunnlagForBehandling(behandlingsId) } returns null
 
         runBlocking {
@@ -305,7 +305,7 @@ internal class BeregningsGrunnlagServiceTest {
         val omregningsId = randomUUID()
 
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
-        coEvery { behandlingKlient.beregn(any(), any(), any()) } returns true
+        coEvery { behandlingKlient.kanBeregnes(any(), any(), any()) } returns true
         every { beregningsGrunnlagRepository.finnBarnepensjonGrunnlagForBehandling(any()) } returns
             BeregningsGrunnlag(
                 behandlingId = behandlingsId,
@@ -342,7 +342,7 @@ internal class BeregningsGrunnlagServiceTest {
         val slot = slot<BeregningsGrunnlag>()
 
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
-        coEvery { behandlingKlient.beregn(any(), any(), any()) } returns true
+        coEvery { behandlingKlient.kanBeregnes(any(), any(), any()) } returns true
         every { beregningsGrunnlagRepository.finnBarnepensjonGrunnlagForBehandling(any()) } returns null
         every { beregningsGrunnlagRepository.lagre(capture(slot)) } returns true
 
@@ -378,7 +378,7 @@ internal class BeregningsGrunnlagServiceTest {
         featureToggleService.settBryter(BeregnBarnepensjonServiceFeatureToggle.BrukFaktiskTrygdetid, true)
 
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
-        coEvery { behandlingKlient.beregn(any(), any(), any()) } returns true
+        coEvery { behandlingKlient.kanBeregnes(any(), any(), any()) } returns true
         every { beregningsGrunnlagRepository.finnBarnepensjonGrunnlagForBehandling(any()) } returns null
         every { beregningsGrunnlagRepository.lagre(capture(slot)) } returns true
 
@@ -405,7 +405,7 @@ internal class BeregningsGrunnlagServiceTest {
         featureToggleService.settBryter(BeregnBarnepensjonServiceFeatureToggle.BrukFaktiskTrygdetid, false)
 
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
-        coEvery { behandlingKlient.beregn(any(), any(), any()) } returns true
+        coEvery { behandlingKlient.kanBeregnes(any(), any(), any()) } returns true
         every { beregningsGrunnlagRepository.finnBarnepensjonGrunnlagForBehandling(any()) } returns null
         every { beregningsGrunnlagRepository.lagre(capture(slot)) } returns true
 

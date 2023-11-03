@@ -34,7 +34,7 @@ class BeregningService(
         brukerTokenInfo: BrukerTokenInfo,
     ): Beregning {
         logger.info("Oppretter beregning for behandlingId=$behandlingId")
-        val kanBeregneYtelse = behandlingKlient.beregn(behandlingId, brukerTokenInfo, commit = false)
+        val kanBeregneYtelse = behandlingKlient.kanBeregnes(behandlingId, brukerTokenInfo, commit = false)
         if (kanBeregneYtelse) {
             val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
 
@@ -45,7 +45,7 @@ class BeregningService(
                 }
 
             val lagretBeregning = beregningRepository.lagreEllerOppdaterBeregning(beregning)
-            behandlingKlient.beregn(behandlingId, brukerTokenInfo, commit = true)
+            behandlingKlient.kanBeregnes(behandlingId, brukerTokenInfo, commit = true)
             return lagretBeregning.berikMedOverstyrBeregning(brukerTokenInfo) ?: lagretBeregning
         } else {
             throw IllegalStateException("Kan ikke beregne behandlingId=$behandlingId, behandling er i feil tilstand")
@@ -56,7 +56,7 @@ class BeregningService(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
-        val kanBeregneYtelse = behandlingKlient.beregn(behandlingId, brukerTokenInfo, commit = false)
+        val kanBeregneYtelse = behandlingKlient.kanBeregnes(behandlingId, brukerTokenInfo, commit = false)
         if (kanBeregneYtelse) {
             val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
             if (behandling.revurderingsaarsak.girOpphoer()) {

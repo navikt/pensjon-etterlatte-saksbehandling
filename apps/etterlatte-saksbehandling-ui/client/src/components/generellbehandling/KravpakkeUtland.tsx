@@ -6,6 +6,7 @@ import {
   BodyShort,
   Button,
   Checkbox,
+  Chips,
   Heading,
   Link,
   Panel,
@@ -25,9 +26,9 @@ import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { hentAlleLand, ILand, sorterLand } from '~shared/api/trygdetid'
 import styled from 'styled-components'
-import { ExternalLinkIcon, PencilWritingIcon, XMarkIcon } from '@navikt/aksel-icons'
+import { ExternalLinkIcon, PencilWritingIcon } from '@navikt/aksel-icons'
 import { opprettBrevForSak } from '~shared/api/brev'
-import { ABlue500, AGray400 } from '@navikt/ds-tokens/dist/tokens'
+import { ABlue500 } from '@navikt/ds-tokens/dist/tokens'
 import { ButtonGroup } from '~components/person/VurderHendelseModal'
 import { ConfigContext } from '~clientConfig'
 import { DatoVelger, formatDateToLocaleDateOrEmptyString } from '~shared/DatoVelger'
@@ -48,13 +49,6 @@ const StandardBreddeTabell = styled(Table)`
 
 const LenkeMargin = styled(Link)`
   margin: 2rem 0rem 0.5rem 0;
-`
-
-const FlexOrder = styled.div`
-  display: flex;
-  max-width: 55rem;
-  justify-content: flex-start;
-  flex-wrap: wrap;
 `
 
 const KravpakkeUtland = (props: { utlandsBehandling: Generellbehandling & { innhold: KravpakkeUtland | null } }) => {
@@ -187,7 +181,7 @@ const KravpakkeUtland = (props: { utlandsBehandling: Generellbehandling & { innh
                 ),
                 (landListe: ILand[]) => (
                   <>
-                    <Heading size="medium" level="3">
+                    <Heading size="medium" level="3" style={{ marginTop: '2rem' }}>
                       Kravpakke sendes til
                     </Heading>
                     <Select
@@ -236,36 +230,39 @@ const KravpakkeUtland = (props: { utlandsBehandling: Generellbehandling & { innh
                       </Heading>
                     ) : null}
                     {isSuccess(hentAlleLandRequest) && valgteLandIsoKode && (
-                      <FlexOrder>
+                      <Chips>
                         {valgteLandIsoKode.map((landIsoKode) => {
                           const kodeverkLandMatch = alleLandKodeverk?.find(
                             (kodeverkLand) => kodeverkLand.isoLandkode === landIsoKode
                           )
                           return (
-                            <BodyShort
-                              style={{
-                                borderRadius: '10px',
-                                border: `2px solid ${AGray400}`,
-                                cursor: 'pointer',
-                                marginRight: '0.6rem',
-                              }}
-                              key={landIsoKode}
-                              onClick={() => {
-                                if (redigerbar) {
-                                  setLandAlleredeValgt(false)
-                                  const nyLandliste = valgteLandIsoKode.filter(
-                                    (isolandkode) => isolandkode !== landIsoKode
-                                  )
-                                  setvalgteLandIsoKode(nyLandliste)
-                                }
-                              }}
-                            >
-                              {kodeverkLandMatch?.beskrivelse.tekst ?? landIsoKode}
-                              <XMarkIcon />
-                            </BodyShort>
+                            <>
+                              {redigerbar ? (
+                                <Chips.Removable
+                                  style={{ cursor: 'pointer' }}
+                                  key={landIsoKode}
+                                  variant="action"
+                                  onClick={() => {
+                                    if (redigerbar) {
+                                      setLandAlleredeValgt(false)
+                                      const nyLandliste = valgteLandIsoKode.filter(
+                                        (isolandkode) => isolandkode !== landIsoKode
+                                      )
+                                      setvalgteLandIsoKode(nyLandliste)
+                                    }
+                                  }}
+                                >
+                                  {kodeverkLandMatch?.beskrivelse.tekst ?? landIsoKode}
+                                </Chips.Removable>
+                              ) : (
+                                <Chips.Toggle variant="neutral">
+                                  {kodeverkLandMatch?.beskrivelse.tekst ?? landIsoKode}
+                                </Chips.Toggle>
+                              )}
+                            </>
                           )
                         })}
-                      </FlexOrder>
+                      </Chips>
                     )}
                   </>
                 )
@@ -311,7 +308,7 @@ const KravpakkeUtland = (props: { utlandsBehandling: Generellbehandling & { innh
                           }}
                         />
                       ) : (
-                        <BodyShort>dokument.dokumenttype</BodyShort>
+                        <BodyShort>{dokument.dokumenttype}</BodyShort>
                       )}
                     </Table.DataCell>
                     <Table.DataCell>

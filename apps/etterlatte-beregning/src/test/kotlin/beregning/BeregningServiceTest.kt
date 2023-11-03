@@ -45,7 +45,7 @@ internal class BeregningServiceTest {
         every { beregningRepository.lagreEllerOppdaterBeregning(any()) } returns beregning
         every { beregningRepository.hentOverstyrBeregning(any()) } returns null
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
-        coEvery { behandlingKlient.beregn(any(), any(), any()) } returns true
+        coEvery { behandlingKlient.kanBeregnes(any(), any(), any()) } returns true
         coEvery { beregnBarnepensjonService.beregn(any(), any()) } returns mockk()
         every { beregning.behandlingId } returns behandling.id
         every { beregning.copy(any(), any(), any(), any(), any(), any(), any()) } returns beregning
@@ -53,8 +53,8 @@ internal class BeregningServiceTest {
         runBlocking {
             beregningService.opprettBeregning(behandling.id, bruker)
 
-            coVerify(exactly = 1) { behandlingKlient.beregn(any(), any(), false) }
-            coVerify(exactly = 1) { behandlingKlient.beregn(any(), any(), true) }
+            coVerify(exactly = 1) { behandlingKlient.kanBeregnes(any(), any(), false) }
+            coVerify(exactly = 1) { behandlingKlient.kanBeregnes(any(), any(), true) }
             coVerify(exactly = 1) { beregnBarnepensjonService.beregn(any(), any()) }
             verify(exactly = 1) { beregningRepository.lagreEllerOppdaterBeregning(any()) }
         }
@@ -74,7 +74,7 @@ internal class BeregningServiceTest {
         every { beregningRepository.lagreEllerOppdaterBeregning(any()) } returns beregning
         every { beregningRepository.hentOverstyrBeregning(any()) } returns overstyrBeregning
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
-        coEvery { behandlingKlient.beregn(any(), any(), any()) } returns true
+        coEvery { behandlingKlient.kanBeregnes(any(), any(), any()) } returns true
         coEvery { beregnBarnepensjonService.beregn(any(), any()) } returns mockk()
         every { beregning.behandlingId } returns behandling.id
         every { beregning.copy(any(), any(), any(), any(), any(), any(), overstyrBeregning) } returns beregning
@@ -82,8 +82,8 @@ internal class BeregningServiceTest {
         runBlocking {
             beregningService.opprettBeregning(behandling.id, bruker)
 
-            coVerify(exactly = 1) { behandlingKlient.beregn(any(), any(), false) }
-            coVerify(exactly = 1) { behandlingKlient.beregn(any(), any(), true) }
+            coVerify(exactly = 1) { behandlingKlient.kanBeregnes(any(), any(), false) }
+            coVerify(exactly = 1) { behandlingKlient.kanBeregnes(any(), any(), true) }
             coVerify(exactly = 1) { beregnBarnepensjonService.beregn(any(), any()) }
             verify(exactly = 1) { beregningRepository.lagreEllerOppdaterBeregning(any()) }
         }
@@ -95,14 +95,14 @@ internal class BeregningServiceTest {
 
         every { beregningRepository.lagreEllerOppdaterBeregning(any()) } returns mockk()
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
-        coEvery { behandlingKlient.beregn(any(), any(), any()) } returns false
+        coEvery { behandlingKlient.kanBeregnes(any(), any(), any()) } returns false
 
         runBlocking {
             assertThrows<IllegalStateException> {
                 beregningService.opprettBeregning(behandling.id, bruker)
             }
 
-            coVerify(exactly = 1) { behandlingKlient.beregn(any(), any(), false) }
+            coVerify(exactly = 1) { behandlingKlient.kanBeregnes(any(), any(), false) }
             coVerify(exactly = 0) { beregnBarnepensjonService.beregn(any(), any()) }
             verify(exactly = 0) { beregningRepository.lagreEllerOppdaterBeregning(any()) }
         }
@@ -116,7 +116,7 @@ internal class BeregningServiceTest {
         every { beregningRepository.lagreEllerOppdaterBeregning(any()) } returns beregning
         every { beregningRepository.hentOverstyrBeregning(any()) } returns null
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
-        coEvery { behandlingKlient.beregn(any(), any(), any()) } returns true
+        coEvery { behandlingKlient.kanBeregnes(any(), any(), any()) } returns true
         coEvery { beregnOmstillingsstoenadService.beregn(any(), any()) } returns mockk()
         every { beregning.behandlingId } returns behandling.id
         every { beregning.copy(any(), any(), any(), any(), any(), any(), any()) } returns beregning
@@ -124,8 +124,8 @@ internal class BeregningServiceTest {
         runBlocking {
             beregningService.opprettBeregning(behandling.id, bruker)
 
-            coVerify(exactly = 1) { behandlingKlient.beregn(any(), any(), false) }
-            coVerify(exactly = 1) { behandlingKlient.beregn(any(), any(), true) }
+            coVerify(exactly = 1) { behandlingKlient.kanBeregnes(any(), any(), false) }
+            coVerify(exactly = 1) { behandlingKlient.kanBeregnes(any(), any(), true) }
             coVerify(exactly = 1) { beregnOmstillingsstoenadService.beregn(any(), any()) }
             verify(exactly = 1) { beregningRepository.lagreEllerOppdaterBeregning(any()) }
         }
@@ -145,7 +145,7 @@ internal class BeregningServiceTest {
         every { beregningRepository.lagreEllerOppdaterBeregning(any()) } returns beregning
         every { beregningRepository.hentOverstyrBeregning(any()) } returns overstyrBeregning
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
-        coEvery { behandlingKlient.beregn(any(), any(), any()) } returns true
+        coEvery { behandlingKlient.kanBeregnes(any(), any(), any()) } returns true
         coEvery { beregnOmstillingsstoenadService.beregn(any(), any()) } returns mockk()
         every { beregning.behandlingId } returns behandling.id
         every { beregning.copy(any(), any(), any(), any(), any(), any(), overstyrBeregning) } returns beregning
@@ -153,8 +153,8 @@ internal class BeregningServiceTest {
         runBlocking {
             beregningService.opprettBeregning(behandling.id, bruker)
 
-            coVerify(exactly = 1) { behandlingKlient.beregn(any(), any(), false) }
-            coVerify(exactly = 1) { behandlingKlient.beregn(any(), any(), true) }
+            coVerify(exactly = 1) { behandlingKlient.kanBeregnes(any(), any(), false) }
+            coVerify(exactly = 1) { behandlingKlient.kanBeregnes(any(), any(), true) }
             coVerify(exactly = 1) { beregnOmstillingsstoenadService.beregn(any(), any()) }
             verify(exactly = 1) { beregningRepository.lagreEllerOppdaterBeregning(any()) }
         }
@@ -165,14 +165,14 @@ internal class BeregningServiceTest {
         val behandling = mockBehandling(SakType.OMSTILLINGSSTOENAD)
 
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
-        coEvery { behandlingKlient.beregn(any(), any(), any()) } returns false
+        coEvery { behandlingKlient.kanBeregnes(any(), any(), any()) } returns false
 
         runBlocking {
             assertThrows<IllegalStateException> {
                 beregningService.opprettBeregning(behandling.id, bruker)
             }
 
-            coVerify(exactly = 1) { behandlingKlient.beregn(any(), any(), false) }
+            coVerify(exactly = 1) { behandlingKlient.kanBeregnes(any(), any(), false) }
             coVerify(exactly = 0) { beregnOmstillingsstoenadService.beregn(any(), any()) }
             verify(exactly = 0) { beregningRepository.lagreEllerOppdaterBeregning(any()) }
         }

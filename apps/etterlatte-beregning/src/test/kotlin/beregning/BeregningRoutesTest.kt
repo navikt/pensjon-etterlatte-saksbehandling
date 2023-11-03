@@ -147,7 +147,7 @@ internal class BeregningRoutesTest {
         val behandling = mockBehandling()
         val beregning = beregning()
 
-        coEvery { behandlingKlient.beregn(any(), any(), any()) } returns true
+        coEvery { behandlingKlient.kanBeregnes(any(), any(), any()) } returns true
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns mockBehandling()
         coEvery { behandlingKlient.harTilgangTilBehandling(any(), any()) } returns true
         coEvery { beregnBarnepensjonService.beregn(any(), any()) } returns beregning

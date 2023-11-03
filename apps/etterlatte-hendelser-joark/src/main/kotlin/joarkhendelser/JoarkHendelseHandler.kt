@@ -1,17 +1,17 @@
 package no.nav.etterlatte.joarkhendelser
 
-import joarkhendelser.behandling.BehandlingKlient
 import joarkhendelser.joark.SafKlient
 import joarkhendelser.pdl.PdlKlient
+import no.nav.etterlatte.joarkhendelser.behandling.BehandlingService
 import no.nav.etterlatte.joarkhendelser.joark.BrukerIdType
 import no.nav.etterlatte.joarkhendelser.joark.HendelseType
+import no.nav.etterlatte.joarkhendelser.joark.Journalpost
 import no.nav.etterlatte.joarkhendelser.joark.erTemaEtterlatte
 import no.nav.etterlatte.joarkhendelser.joark.lagMerknadFraStatus
 import no.nav.etterlatte.joarkhendelser.joark.temaTilSakType
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.person.PdlIdentifikator
-import no.nav.etterlatte.libs.common.person.maskerFnr
 import no.nav.joarkjournalfoeringhendelser.JournalfoeringHendelseRecord
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -26,7 +26,7 @@ import org.slf4j.LoggerFactory
  * @see: https://confluence.adeo.no/display/BOA/Joarkhendelser
  **/
 class JoarkHendelseHandler(
-    private val behandlingKlient: BehandlingKlient,
+    private val behandlingService: BehandlingService,
     private val safKlient: SafKlient,
     private val pdlKlient: PdlKlient,
 ) {
@@ -90,27 +90,36 @@ class JoarkHendelseHandler(
                 }
 
             when (val type = hendelse.hendelsesType) {
-                HendelseType.JOURNALPOST_MOTTATT ->
-                    behandleJournalpost(ident, sakType, hendelse) {
-                        hendelse.lagMerknadFraStatus()
-                    }
+                HendelseType.JOURNALPOST_MOTTATT -> {
+                    behandlingService.opprettOppgave(
+                        ident,
+                        sakType,
+                        hendelse.lagMerknadFraStatus(journalpost.kanal),
+                        hendelse.journalpostId.toString(),
+                    )
+                }
 
-                HendelseType.TEMA_ENDRET ->
-                    behandleJournalpost(ident, sakType, hendelse) {
-                        "Tema endret fra ${hendelse.temaGammelt} til ${hendelse.temaNytt}"
-                    }
+                HendelseType.TEMA_ENDRET -> {
+                    behandlingService.opprettOppgave(
+                        ident,
+                        sakType,
+                        "Tema endret fra ${hendelse.temaGammelt} til ${hendelse.temaNytt}",
+                        hendelse.journalpostId.toString(),
+                    )
+                }
 
-                // TODO: Må avklare om dette er noe vi faktisk trenger å behandle
                 HendelseType.ENDELIG_JOURNALFOERT ->
-                    behandleJournalpost(ident, sakType, hendelse) {
-                        "Endelig journalføring må vurderes"
-                    }
+                    behandleEndeligJournalfoert(ident, sakType, journalpost)
 
                 // TODO: Må avklare om dette er noe vi faktisk trenger å behandle
-                HendelseType.JOURNALPOST_UTGAATT ->
-                    behandleJournalpost(ident, sakType, hendelse) {
-                        "Journalpost har utgått og må vurderes."
-                    }
+                HendelseType.JOURNALPOST_UTGAATT -> {
+                    behandlingService.opprettOppgave(
+                        ident,
+                        sakType,
+                        "Journalpost har utgått",
+                        hendelse.journalpostId.toString(),
+                    )
+                }
                 else -> throw IllegalArgumentException("Journalpost=$journalpostId har ukjent hendelsesType=$type")
             }
         } catch (e: Exception) {
@@ -120,22 +129,29 @@ class JoarkHendelseHandler(
         }
     }
 
-    private suspend fun behandleJournalpost(
+    /**
+     * Journalposthendelse har status "EndeligJournalfoert"
+     * Sjekker at journalposten er tilknyttet en sak i Gjenny
+     **/
+    private suspend fun behandleEndeligJournalfoert(
         ident: String,
         sakType: SakType,
-        hendelse: JournalfoeringHendelseRecord,
-        oppgaveMerknad: () -> String,
+        journalpost: Journalpost,
     ) {
-        val gradering = pdlKlient.hentAdressebeskyttelse(ident)
-        logger.info("Bruker=${ident.maskerFnr()} har gradering $gradering")
+        val sakId = behandlingService.hentSak(ident, sakType)
 
-        logger.info("Henter/oppretter sak av type=${sakType.name.lowercase()} for bruker=${ident.maskerFnr()} med gradering=$gradering")
-        val sakId = behandlingKlient.hentEllerOpprettSak(ident, sakType, gradering)
+        if (journalpost.sak?.fagsakId == null || sakId == null) {
+            logger.info("Journalpost ${journalpost.journalpostId} er ikke tilknyttet sak i Gjenny")
 
-        logger.info("Oppretter journalføringsoppgave for sak=$sakId")
-        val oppgaveId =
-            behandlingKlient.opprettOppgave(sakId, oppgaveMerknad(), hendelse.journalpostId.toString())
-
-        logger.info("Opprettet oppgave=$oppgaveId med sakId=$sakId for hendelse=${hendelse.hendelsesId}")
+            behandlingService.opprettOppgave(ident, sakType, "Kontroller kobling til sak", journalpost.journalpostId)
+        } else if (journalpost.sak.fagsakId == sakId.toString() && journalpost.sak.tema == sakType.tema) {
+            logger.info(
+                "Journalpost ${journalpost.journalpostId} er allerede tilknyttet" +
+                    " eksisterende sak (id=$sakId, type=$sakType)",
+            )
+            return
+        } else {
+            logger.info("Uhåndtert tilstand av journalpost=${journalpost.journalpostId}")
+        }
     }
 }

@@ -11,15 +11,18 @@ import joarkhendelser.joark.SafKlient
 import joarkhendelser.pdl.PdlKlient
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.joarkhendelser.JoarkHendelseHandler
+import no.nav.etterlatte.joarkhendelser.behandling.BehandlingService
 import no.nav.etterlatte.joarkhendelser.joark.AvsenderMottaker
 import no.nav.etterlatte.joarkhendelser.joark.Bruker
 import no.nav.etterlatte.joarkhendelser.joark.BrukerIdType
 import no.nav.etterlatte.joarkhendelser.joark.Dokument
+import no.nav.etterlatte.joarkhendelser.joark.Fagsak
 import no.nav.etterlatte.joarkhendelser.joark.HendelseType
 import no.nav.etterlatte.joarkhendelser.joark.HentJournalpostResult
 import no.nav.etterlatte.joarkhendelser.joark.Journalpost
 import no.nav.etterlatte.joarkhendelser.joark.JournalpostStatus
 import no.nav.etterlatte.joarkhendelser.joark.Journalstatus
+import no.nav.etterlatte.joarkhendelser.joark.Kanal
 import no.nav.etterlatte.libs.common.person.NavPersonIdent
 import no.nav.etterlatte.libs.common.person.PdlIdentifikator
 import no.nav.joarkjournalfoeringhendelser.JournalfoeringHendelseRecord
@@ -38,7 +41,8 @@ internal class JoarkHendelseHandlerTest {
     private val safKlientMock = mockk<SafKlient>()
     private val pdlKlientMock = mockk<PdlKlient>()
 
-    private val sut = JoarkHendelseHandler(behandlingKlientMock, safKlientMock, pdlKlientMock)
+    private val sut =
+        JoarkHendelseHandler(BehandlingService(behandlingKlientMock, pdlKlientMock), safKlientMock, pdlKlientMock)
 
     @AfterEach
     fun afterEach() {
@@ -263,8 +267,10 @@ internal class JoarkHendelseHandlerTest {
         journalposttype = "journalposttype",
         journalstatus = status,
         dokumenter = listOf(Dokument("dokumentInfoId", "tittel", emptyList())),
+        sak = Fagsak("1", "EY", "FAGSAK", "EYO"),
         avsenderMottaker = AvsenderMottaker(bruker?.id, "Fornavn Etternavn", true),
-        kanal = "kanal",
+        kanal = Kanal.SKAN_IM,
         datoOpprettet = "datoOpprettet",
+        opprettetAvNavn = "etterlatte:journalfoer-soeknad",
     )
 }

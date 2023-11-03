@@ -15,9 +15,9 @@ fun JournalfoeringHendelseRecord.erTemaEtterlatte(): Boolean =
 /**
  * Konverterer [JournalfoeringHendelseRecord] sin journalpostStatus til merknad som brukes i Gjenny-oppgaven
  **/
-fun JournalfoeringHendelseRecord.lagMerknadFraStatus(): String =
+fun JournalfoeringHendelseRecord.lagMerknadFraStatus(kanal: Kanal): String =
     when (journalpostStatus) {
-        JournalpostStatus.MOTTATT -> "Mottatt journalpost"
+        JournalpostStatus.MOTTATT -> "Mottatt journalpost (${kanal.beskrivelse})"
         JournalpostStatus.JOURNALFOERT -> "Ferdigstilt"
         JournalpostStatus.UKJENT_BRUKER -> "Ukjent bruker"
         JournalpostStatus.UTGAAR -> "Feil ifm. mottak eller journalføring"

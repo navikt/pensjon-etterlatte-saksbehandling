@@ -1,5 +1,6 @@
 package no.nav.etterlatte.joarkhendelser.joark
 
+import com.fasterxml.jackson.annotation.JsonCreator
 import io.ktor.http.HttpStatusCode
 
 data class HentJournalpostResult(
@@ -55,9 +56,11 @@ data class Journalpost(
     val journalposttype: String,
     val journalstatus: Journalstatus,
     val dokumenter: List<Dokument>,
+    val sak: Fagsak?,
     val avsenderMottaker: AvsenderMottaker,
-    val kanal: String,
+    val kanal: Kanal,
     val datoOpprettet: String,
+    val opprettetAvNavn: String?,
 ) {
     fun erFerdigstilt(): Boolean = journalstatus == Journalstatus.FERDIGSTILT
 }
@@ -98,8 +101,44 @@ data class Dokumentvarianter(
     val saksbehandlerHarTilgang: Boolean,
 )
 
+data class Fagsak(
+    val fagsakId: String?,
+    val fagsaksystem: String?,
+    val sakstype: String?,
+    val tema: String?,
+)
+
 data class AvsenderMottaker(
     val id: String?,
     val navn: String?,
     val erLikBruker: Boolean?,
 )
+
+enum class Kanal(val beskrivelse: String) {
+    ALTINN("Altinn"),
+    EESSI("EESSI"),
+    EIA("EIA"),
+    EKST_OPPS("Ekstern kilde"),
+    LOKAL_UTSKRIFT("Lokal utskrift"),
+    NAV_NO("nav.no"),
+    SENTRAL_UTSKRIFT("Sentral utskrift"),
+    SDP("SDP"),
+    SKAN_NETS("Skanning - NETS"),
+    SKAN_PEN("Skanning - Pensjon"),
+    SKAN_IM("Skanning - Iron Moutain"),
+    TRYGDERETTEN("Trygderetten"),
+    HELSENETTET("Helsenettet"),
+    INGEN_DISTRIBUSJON("Ingen distribusjon"),
+    NAV_NO_UINNLOGGET("Uinnlogget (nav.no)"),
+    INNSENDT_NAV_ANSATT("Innsendt av Nav-ansatt"),
+    NAV_NO_CHAT("Chat (nav.no)"),
+    DPVT("DPVT"),
+    UKJENT("Ukjent"),
+    ;
+
+    companion object {
+        @JvmStatic
+        @JsonCreator
+        fun fraVerdi(kanal: String) = values().firstOrNull { it.name == kanal } ?: UKJENT
+    }
+}

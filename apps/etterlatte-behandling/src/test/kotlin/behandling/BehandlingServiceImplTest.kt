@@ -101,6 +101,7 @@ class BehandlingServiceImplTest {
                 oppgaveService = mockk(),
                 etterbetalingService = mockk(),
                 grunnlagService = mockk(),
+                sakDao = mockk(),
             )
 
         val behandlinger = sut.hentBehandlingerISak(1)
@@ -588,6 +589,7 @@ class BehandlingServiceImplTest {
                 oppgaveService = mockk(),
                 etterbetalingService = mockk(),
                 grunnlagService = mockk(),
+                sakDao = mockk(),
             )
 
         val behandlinger = sut.hentBehandlingerISak(1)
@@ -637,6 +639,7 @@ class BehandlingServiceImplTest {
                 oppgaveService = mockk(),
                 etterbetalingService = mockk(),
                 grunnlagService = mockk(),
+                sakDao = mockk(),
             )
 
         val behandlinger = sut.hentBehandlingerISak(1)
@@ -684,6 +687,7 @@ class BehandlingServiceImplTest {
                 oppgaveService = mockk(),
                 etterbetalingService = mockk(),
                 grunnlagService = mockk(),
+                sakDao = mockk(),
             )
 
         inTransaction {
@@ -742,6 +746,7 @@ class BehandlingServiceImplTest {
                 oppgaveService = mockk(),
                 etterbetalingService = mockk(),
                 grunnlagService = mockk(),
+                sakDao = mockk(),
             )
 
         inTransaction {
@@ -815,6 +820,7 @@ class BehandlingServiceImplTest {
             oppgaveService = oppgaveService,
             etterbetalingService = mockk(),
             grunnlagService = mockk(),
+            sakDao = mockk(),
         )
 
     companion object {

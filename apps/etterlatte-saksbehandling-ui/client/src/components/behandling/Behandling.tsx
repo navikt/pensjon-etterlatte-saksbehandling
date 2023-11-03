@@ -14,7 +14,7 @@ import { BehandlingSidemeny } from '~components/behandling/sidemeny/BehandlingSi
 import Spinner from '~shared/Spinner'
 
 export const Behandling = () => {
-  const behandling = useBehandling()
+  const behandlingFraRedux = useBehandling()
   const dispatch = useAppDispatch()
   const { behandlingId: behandlingIdFraURL } = useParams()
   const { behandlingRoutes } = useBehandlingRoutes()
@@ -25,14 +25,14 @@ export const Behandling = () => {
       return
     }
 
-    if (behandlingIdFraURL !== behandling?.id) {
+    if (behandlingIdFraURL !== behandlingFraRedux?.id) {
       fetchBehandling(
         behandlingIdFraURL,
         (behandling) => dispatch(setBehandling(behandling)),
         () => dispatch(resetBehandling())
       )
     }
-  }, [behandlingIdFraURL, behandling?.id])
+  }, [behandlingIdFraURL, behandlingFraRedux?.id])
 
   return mapAllApiResult(
     fetchBehandlingStatus,
@@ -40,7 +40,7 @@ export const Behandling = () => {
     null,
     () => <ApiErrorAlert>Kunne ikke hente behandling</ApiErrorAlert>,
     () => {
-      const behandlingGarra = behandling as IBehandlingReducer
+      const behandlingGarra = behandlingFraRedux as IBehandlingReducer
       return (
         <>
           {behandlingGarra.søker && <PdlPersonStatusBar person={behandlingGarra.søker} />}

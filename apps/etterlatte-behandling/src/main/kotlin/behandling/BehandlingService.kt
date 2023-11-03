@@ -61,6 +61,11 @@ interface BehandlingService {
         saksbehandler: BrukerTokenInfo,
     )
 
+    fun registrerBehandlingHendelse(
+        behandling: Behandling,
+        saksbehandler: String,
+    )
+
     fun registrerVedtakHendelse(
         behandlingId: UUID,
         vedtakHendelse: VedtakHendelse,
@@ -358,6 +363,16 @@ internal class BehandlingServiceImpl(
             }
         }
     }
+
+    override fun registrerBehandlingHendelse(
+        behandling: Behandling,
+        saksbehandler: String,
+    ) = hendelseDao.behandlingHendelse(
+        behandlingId = behandling.id,
+        sakId = behandling.sak.id,
+        saksbehandler = saksbehandler,
+        status = behandling.status,
+    )
 
     override fun registrerVedtakHendelse(
         behandlingId: UUID,

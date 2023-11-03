@@ -7,9 +7,9 @@ import { SoeknadsoversiktTextArea } from '../SoeknadsoversiktTextArea'
 import { useAppDispatch } from '~store/Store'
 import { useState } from 'react'
 import { isFailure, useApiCall } from '~shared/hooks/useApiCall'
-import { lagreUtenlandstilknytning } from '~shared/api/behandling'
 import { oppdaterBehandlingsstatus, oppdaterUtenlandstilsnitt } from '~store/reducers/BehandlingReducer'
 import { ApiErrorAlert } from '~ErrorBoundary'
+import { lagreUtenlandstilknytning } from '~shared/api/sak'
 
 const UtenlandstilknytningTypeTittel: Record<UtenlandstilknytningType, string> = {
   [UtenlandstilknytningType.NASJONAL]: 'Nasjonal',
@@ -17,16 +17,16 @@ const UtenlandstilknytningTypeTittel: Record<UtenlandstilknytningType, string> =
   [UtenlandstilknytningType.BOSATT_UTLAND]: 'Bosatt utland',
 } as const
 
-export const UtenlandstilsnittVurdering = ({
+export const UtenlandstilknytningVurdering = ({
   utenlandstilknytning,
   redigerbar,
   setVurdert,
-  behandlingId,
+  sakId,
 }: {
   utenlandstilknytning: IUtenlandstilknytning | undefined
   redigerbar: boolean
   setVurdert: (visVurderingKnapp: boolean) => void
-  behandlingId: string
+  sakId: number
 }) => {
   const dispatch = useAppDispatch()
 
@@ -39,7 +39,7 @@ export const UtenlandstilsnittVurdering = ({
     !svar ? setRadioError('Du må velge et svar') : setRadioError('')
 
     if (svar !== undefined)
-      return setUtenlandstilknytning({ behandlingId, begrunnelse, svar }, (response) => {
+      return setUtenlandstilknytning({ sakId, begrunnelse, svar }, (response) => {
         dispatch(oppdaterUtenlandstilsnitt(response))
         dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.OPPRETTET))
         onSuccess?.()

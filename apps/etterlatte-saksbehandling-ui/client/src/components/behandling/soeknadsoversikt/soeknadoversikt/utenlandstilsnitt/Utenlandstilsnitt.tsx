@@ -3,7 +3,7 @@ import { LovtekstMedLenke } from '../LovtekstMedLenke'
 import { Beskrivelse, VurderingsContainerWrapper } from '../../styled'
 import { useState } from 'react'
 import { LeggTilVurderingButton } from '../LeggTilVurderingButton'
-import { UtenlandstilsnittVurdering } from './UtenlandstilsnittVurdering'
+import { UtenlandstilknytningVurdering } from './UtenlandstilknytningVurdering'
 
 const statusIkon = (utenlandstilsnitt: IUtenlandstilknytning | undefined) => {
   if (utenlandstilsnitt == undefined) {
@@ -31,11 +31,11 @@ export const Utenlandstilsnitt = ({
       </Beskrivelse>
       <VurderingsContainerWrapper>
         {vurdert ? (
-          <UtenlandstilsnittVurdering
+          <UtenlandstilknytningVurdering
             utenlandstilknytning={behandling.utenlandstilsnitt}
             redigerbar={redigerbar}
             setVurdert={(visVurderingKnapp: boolean) => setVurdert(visVurderingKnapp)}
-            behandlingId={behandling.id}
+            sakId={behandling.sakId}
           />
         ) : (
           <LeggTilVurderingButton onClick={() => setVurdert(true)}>Legg til vurdering</LeggTilVurderingButton>

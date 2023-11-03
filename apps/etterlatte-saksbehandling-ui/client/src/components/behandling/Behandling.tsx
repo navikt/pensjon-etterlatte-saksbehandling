@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 import { Navigate, Route, Routes, useParams } from 'react-router-dom'
 import { hentBehandling } from '~shared/api/behandling'
 import { GridContainer, MainContent } from '~shared/styled'
-import { setBehandling, resetBehandling } from '~store/reducers/BehandlingReducer'
+import { setBehandling, resetBehandling, IBehandlingReducer } from '~store/reducers/BehandlingReducer'
 import { PdlPersonStatusBar } from '~shared/statusbar/Statusbar'
 import { useBehandlingRoutes } from './BehandlingRoutes'
 import { StegMeny } from './StegMeny/stegmeny'
@@ -39,22 +39,25 @@ export const Behandling = () => {
     <Spinner label="Henter behandling ..." visible />,
     null,
     () => <ApiErrorAlert>Kunne ikke hente behandling</ApiErrorAlert>,
-    (hentetBehandling) => (
-      <>
-        {hentetBehandling.søker && <PdlPersonStatusBar person={hentetBehandling.søker} />}
-        <StegMeny behandling={hentetBehandling} />
-        <GridContainer>
-          <MainContent>
-            <Routes>
-              {behandlingRoutes.map((route) => (
-                <Route key={route.path} path={route.path} element={route.element} />
-              ))}
-              <Route path="*" element={<Navigate to={behandlingRoutes[0].path} replace />} />
-            </Routes>
-          </MainContent>
-          <BehandlingSidemeny behandling={hentetBehandling} />
-        </GridContainer>
-      </>
-    )
+    () => {
+      const behandlingGarra = behandling as IBehandlingReducer
+      return (
+        <>
+          {behandlingGarra.søker && <PdlPersonStatusBar person={behandlingGarra.søker} />}
+          <StegMeny behandling={behandlingGarra} />
+          <GridContainer>
+            <MainContent>
+              <Routes>
+                {behandlingRoutes.map((route) => (
+                  <Route key={route.path} path={route.path} element={route.element} />
+                ))}
+                <Route path="*" element={<Navigate to={behandlingRoutes[0].path} replace />} />
+              </Routes>
+            </MainContent>
+            <BehandlingSidemeny behandling={behandlingGarra} />
+          </GridContainer>
+        </>
+      )
+    }
   )
 }

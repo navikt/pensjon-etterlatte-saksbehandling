@@ -16,6 +16,7 @@ dependencies {
     implementation(project(":libs:saksbehandling-common"))
     implementation(libs.database.postgresql)
     implementation(libs.database.flywaydb)
+    implementation(libs.database.flywaydbpostgres)
     implementation(libs.database.hikaricp)
     implementation(libs.database.kotliquery)
 

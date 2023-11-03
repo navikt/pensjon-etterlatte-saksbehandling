@@ -31,9 +31,9 @@ import { hentSjekkliste, opprettSjekkliste } from '~shared/api/sjekkliste'
 import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
 
 const finnUtNasjonalitet = (behandling: IBehandlingReducer): UtenlandstilknytningType => {
-  if (behandling.utenlandstilsnitt?.type) {
+  if (behandling.utenlandstilknytning?.type) {
     //TODO: basere på sak
-    return behandling.utenlandstilsnitt?.type
+    return behandling.utenlandstilknytning?.type
   } else {
     if (behandling.behandlingType === IBehandlingsType.REVURDERING) {
       if (behandling.revurderingsaarsak === Revurderingaarsak.SLUTTBEHANDLING_UTLAND) {

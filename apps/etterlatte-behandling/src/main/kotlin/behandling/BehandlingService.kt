@@ -28,7 +28,6 @@ import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.StatistikkBehandling
-import no.nav.etterlatte.libs.common.behandling.Utenlandstilknytning
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
@@ -77,11 +76,6 @@ interface BehandlingService {
         ident: String,
         begrunnelse: String,
     ): Virkningstidspunkt
-
-    fun oppdaterUtenlandstilsnitt(
-        behandlingId: UUID,
-        utenlandstilknytning: Utenlandstilknytning,
-    )
 
     fun oppdaterBoddEllerArbeidetUtlandet(
         behandlingId: UUID,
@@ -419,28 +413,6 @@ internal class BehandlingServiceImpl(
         }
 
         return virkningstidspunkt
-    }
-
-    override fun oppdaterUtenlandstilsnitt(
-        behandlingId: UUID,
-        utenlandstilknytning: Utenlandstilknytning,
-    ) {
-        val behandling =
-            hentBehandling(behandlingId) ?: run {
-                logger.error("Prøvde å oppdatere utenlandstilsnitt på en behandling som ikke eksisterer: $behandlingId")
-                throw RuntimeException("Fant ikke behandling")
-            }
-
-        try {
-            // TODO: skal kun skje mot sakdao
-            behandlingDao.lagreUtenlandstilsnitt(behandlingId, utenlandstilknytning)
-        } catch (e: NotImplementedError) {
-            logger.error(
-                "Kan ikke oppdatere utenlandstilsnitt for behandling: $behandlingId med typen ${behandling.type}",
-                e,
-            )
-            throw e
-        }
     }
 
     override fun oppdaterBoddEllerArbeidetUtlandet(

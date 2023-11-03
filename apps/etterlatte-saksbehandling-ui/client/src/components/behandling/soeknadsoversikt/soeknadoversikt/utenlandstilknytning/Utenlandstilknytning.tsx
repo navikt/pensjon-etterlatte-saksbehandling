@@ -5,24 +5,24 @@ import { useState } from 'react'
 import { LeggTilVurderingButton } from '../LeggTilVurderingButton'
 import { UtenlandstilknytningVurdering } from './UtenlandstilknytningVurdering'
 
-const statusIkon = (utenlandstilsnitt: IUtenlandstilknytning | undefined) => {
-  if (utenlandstilsnitt == undefined) {
+const statusIkon = (utenlandstilsnitt: IUtenlandstilknytning | null) => {
+  if (utenlandstilsnitt === null) {
     return 'warning'
   }
   return 'success'
 }
 
-export const Utenlandstilsnitt = ({
+export const Utenlandstilknytning = ({
   behandling,
   redigerbar,
 }: {
   behandling: IDetaljertBehandling
   redigerbar: boolean
 }) => {
-  const [vurdert, setVurdert] = useState(behandling.utenlandstilsnitt !== undefined)
+  const [vurdert, setVurdert] = useState(behandling.utenlandstilknytning !== null)
 
   return (
-    <LovtekstMedLenke tittel="Utlandstilknytning" hjemler={[]} status={statusIkon(behandling.utenlandstilsnitt)}>
+    <LovtekstMedLenke tittel="Utlandstilknytning" hjemler={[]} status={statusIkon(behandling.utenlandstilknytning)}>
       <Beskrivelse>
         Svar for om saken skal behandles som følge av utlandstilknytning basert på om avdøde har bodd/arbeidet i
         EØS/avtale-land eller ikke, og om gjenlevende bor i Norge eller utlandet. Om søker bor i utlandet er det en
@@ -32,7 +32,7 @@ export const Utenlandstilsnitt = ({
       <VurderingsContainerWrapper>
         {vurdert ? (
           <UtenlandstilknytningVurdering
-            utenlandstilknytning={behandling.utenlandstilsnitt}
+            utenlandstilknytning={behandling.utenlandstilknytning}
             redigerbar={redigerbar}
             setVurdert={(visVurderingKnapp: boolean) => setVurdert(visVurderingKnapp)}
             sakId={behandling.sakId}

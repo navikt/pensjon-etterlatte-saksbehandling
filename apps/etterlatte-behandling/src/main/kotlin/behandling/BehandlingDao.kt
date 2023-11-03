@@ -19,7 +19,6 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
-import no.nav.etterlatte.libs.common.behandling.Utenlandstilknytning
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.sak.BehandlingOgSak
 import no.nav.etterlatte.libs.common.sak.Sak
@@ -225,18 +224,6 @@ class BehandlingDao(
         stmt.setString(1, status.name)
         stmt.setTidspunkt(2, sistEndret.toTidspunkt())
         stmt.setObject(3, behandlingId)
-        require(stmt.executeUpdate() == 1)
-    }
-
-    // TODO: RM
-    fun lagreUtenlandstilsnitt(
-        behandlingId: UUID,
-        utenlandstilknytning: Utenlandstilknytning,
-    ) {
-        val stmt =
-            connection().prepareStatement("UPDATE behandling SET utenlandstilsnitt = ? WHERE id = ?")
-        stmt.setString(1, objectMapper.writeValueAsString(utenlandstilknytning))
-        stmt.setObject(2, behandlingId)
         require(stmt.executeUpdate() == 1)
     }
 

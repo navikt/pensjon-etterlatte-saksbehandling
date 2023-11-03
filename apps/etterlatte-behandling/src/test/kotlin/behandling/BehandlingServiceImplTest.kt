@@ -27,8 +27,6 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
-import no.nav.etterlatte.libs.common.behandling.Utenlandstilknytning
-import no.nav.etterlatte.libs.common.behandling.UtenlandstilknytningType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
@@ -645,65 +643,6 @@ class BehandlingServiceImplTest {
         val behandlinger = sut.hentBehandlingerISak(1)
 
         assertEquals(0, behandlinger.size)
-    }
-
-    @Test
-    fun `kan oppdatere utenlandstilsnitt`() {
-        every {
-            user.enheter()
-        } returns listOf(Enheter.PORSGRUNN.enhetNr)
-
-        val uuid = UUID.randomUUID()
-
-        val slot = slot<Utenlandstilknytning>()
-
-        val behandlingDaoMock =
-            mockk<BehandlingDao> {
-                every { hentBehandling(any()) } returns
-                    foerstegangsbehandling(
-                        id = uuid,
-                        sakId = 1,
-                        enhet = Enheter.PORSGRUNN.enhetNr,
-                    )
-
-                every { lagreUtenlandstilsnitt(any(), capture(slot)) } just runs
-
-                every { lagreStatus(any()) } just runs
-            }
-
-        val featureToggleService = mockk<FeatureToggleService>()
-        every { featureToggleService.isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false) } returns true
-
-        val sut =
-            BehandlingServiceImpl(
-                behandlingDao = behandlingDaoMock,
-                behandlingHendelser = mockk(),
-                grunnlagsendringshendelseDao = mockk(),
-                hendelseDao = mockk(),
-                grunnlagKlient = mockk(),
-                behandlingRequestLogger = mockk(),
-                featureToggleService = featureToggleService,
-                kommerBarnetTilGodeDao = mockk(),
-                oppgaveService = mockk(),
-                etterbetalingService = mockk(),
-                grunnlagService = mockk(),
-                sakDao = mockk(),
-            )
-
-        inTransaction {
-            sut.oppdaterUtenlandstilsnitt(
-                uuid,
-                Utenlandstilknytning(
-                    UtenlandstilknytningType.BOSATT_UTLAND,
-                    Grunnlagsopplysning.Saksbehandler.create("ident"),
-                    "Test",
-                ),
-            )
-        }
-
-        assertEquals(UtenlandstilknytningType.BOSATT_UTLAND, slot.captured.type)
-        assertEquals("Test", slot.captured.begrunnelse)
-        assertEquals("ident", slot.captured.kilde.ident)
     }
 
     @Test

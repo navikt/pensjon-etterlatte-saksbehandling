@@ -15,7 +15,7 @@ export interface IDetaljertBehandling {
   kommerBarnetTilgode: IKommerBarnetTilgode | null
   soeknadMottattDato: string
   virkningstidspunkt: Virkningstidspunkt | null
-  utenlandstilsnitt: IUtenlandstilknytning | undefined
+  utenlandstilknytning: IUtenlandstilknytning | null
   boddEllerArbeidetUtlandet: IBoddEllerArbeidetUtlandet | null
   status: IBehandlingStatus
   hendelser: IHendelse[]

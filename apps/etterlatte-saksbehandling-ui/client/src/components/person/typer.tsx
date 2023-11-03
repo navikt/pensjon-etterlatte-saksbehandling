@@ -30,7 +30,7 @@ export interface IBehandlingsammendrag {
   behandlingType: IBehandlingsType
   aarsak: BehandlingOgRevurderingsAarsakerType
   virkningstidspunkt?: Virkningstidspunkt
-  utenlandstilsnitt?: IUtenlandstilknytning
+  utenlandstilsnitt?: IUtenlandstilknytning ///TODO: denne skal bestemmes fra sak og ikek her RM
   boddEllerArbeidetUtlandet?: IBoddEllerArbeidetUtlandet
 }
 

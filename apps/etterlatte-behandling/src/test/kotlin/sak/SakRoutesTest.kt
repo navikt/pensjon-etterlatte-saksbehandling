@@ -66,14 +66,14 @@ internal class SakRoutesTest {
     }
 
     @Test
-    fun `kan oppdater utenlandstilsnitt`() {
+    fun `kan oppdater utenlandstilknytning`() {
         coEvery {
             sakService.oppdaterUtenlandstilknytning(any(), any())
         } just runs
 
         withTestApplication { client ->
             val response =
-                client.post("/api/sak/1/utenlandstilsnitt") {
+                client.post("/api/sak/1/utenlandstilknytning") {
                     header(HttpHeaders.Authorization, "Bearer $token")
                     contentType(ContentType.Application.Json)
                     setBody(UtenlandstilknytningRequest(UtenlandstilknytningType.BOSATT_UTLAND, "Test"))

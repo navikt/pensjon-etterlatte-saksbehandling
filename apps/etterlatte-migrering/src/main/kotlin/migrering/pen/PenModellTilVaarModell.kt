@@ -33,11 +33,11 @@ fun BarnepensjonGrunnlagResponse.tilVaarModell(): Pesyssak {
             beregning =
                 with(beregning) {
                     Beregning(
-                        brutto = brutto.toBigDecimal(),
-                        netto = netto.toBigDecimal(),
-                        anvendtTrygdetid = anvendtTrygdetid.toBigDecimal(),
+                        brutto = brutto,
+                        netto = netto,
+                        anvendtTrygdetid = anvendtTrygdetid,
                         datoVirkFom = tilTidspunkt(datoVirkFom),
-                        g = g.toBigDecimal(),
+                        g = g,
                         prorataBroek = proRataBrok?.let { IntBroek(it.teller, it.nevner) },
                         meta =
                             with(meta) {

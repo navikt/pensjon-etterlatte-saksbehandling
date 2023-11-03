@@ -32,7 +32,6 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import rapidsandrivers.BEHANDLING_ID_KEY
 import rapidsandrivers.HENDELSE_DATA_KEY
-import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.YearMonth
@@ -75,12 +74,12 @@ internal class MigreringHendelserRiverTest {
                 virkningstidspunkt = YearMonth.now(),
                 beregning =
                     Beregning(
-                        brutto = BigDecimal(1000),
-                        netto = BigDecimal(1000),
-                        anvendtTrygdetid = BigDecimal(40),
+                        brutto = 3500,
+                        netto = 3500,
+                        anvendtTrygdetid = 40,
                         datoVirkFom = Tidspunkt.now(),
                         prorataBroek = null,
-                        g = BigDecimal(100000),
+                        g = 100_000,
                     ),
                 trygdetid =
                     Trygdetid(
@@ -189,12 +188,12 @@ internal class MigreringHendelserRiverTest {
                 virkningstidspunkt = YearMonth.now(),
                 beregning =
                     Beregning(
-                        brutto = BigDecimal(1000),
-                        netto = BigDecimal(1000),
-                        anvendtTrygdetid = BigDecimal(40),
+                        brutto = 3500,
+                        netto = 3500,
+                        anvendtTrygdetid = 40,
                         datoVirkFom = Tidspunkt.now(),
                         prorataBroek = null,
-                        g = BigDecimal(100000),
+                        g = 100_000,
                     ),
                 trygdetid = Trygdetid(emptyList()),
                 spraak = Spraak.NN,
@@ -279,12 +278,12 @@ internal class MigreringHendelserRiverTest {
                 virkningstidspunkt = YearMonth.now(),
                 beregning =
                     Beregning(
-                        brutto = BigDecimal(1000),
-                        netto = BigDecimal(1000),
-                        anvendtTrygdetid = BigDecimal(40),
+                        brutto = 3500,
+                        netto = 3500,
+                        anvendtTrygdetid = 40,
                         datoVirkFom = Tidspunkt.now(),
                         prorataBroek = null,
-                        g = BigDecimal(100000),
+                        g = 100_000,
                     ),
                 trygdetid =
                     Trygdetid(

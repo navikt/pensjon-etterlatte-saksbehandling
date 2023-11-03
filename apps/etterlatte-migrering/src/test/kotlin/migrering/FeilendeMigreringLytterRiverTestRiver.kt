@@ -29,7 +29,6 @@ import org.junit.jupiter.api.Test
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
 import rapidsandrivers.HENDELSE_DATA_KEY
-import java.math.BigDecimal
 import java.time.YearMonth
 import java.util.UUID
 import javax.sql.DataSource
@@ -71,12 +70,12 @@ class FeilendeMigreringLytterRiverTestRiver {
                     virkningstidspunkt = YearMonth.now(),
                     beregning =
                         Beregning(
-                            brutto = BigDecimal.ZERO,
-                            netto = BigDecimal.ZERO,
-                            anvendtTrygdetid = BigDecimal.ZERO,
+                            brutto = 3500,
+                            netto = 3500,
+                            anvendtTrygdetid = 40,
                             datoVirkFom = Tidspunkt.now(),
                             prorataBroek = null,
-                            g = BigDecimal.ZERO,
+                            g = 100_000,
                         ),
                     trygdetid = Trygdetid(perioder = listOf()),
                     flyktningStatus = false,
@@ -129,12 +128,12 @@ class FeilendeMigreringLytterRiverTestRiver {
                     virkningstidspunkt = YearMonth.now(),
                     beregning =
                         Beregning(
-                            brutto = BigDecimal.ZERO,
-                            netto = BigDecimal.ZERO,
-                            anvendtTrygdetid = BigDecimal.ZERO,
+                            brutto = 3500,
+                            netto = 3500,
+                            anvendtTrygdetid = 40,
                             datoVirkFom = Tidspunkt.now(),
                             prorataBroek = null,
-                            g = BigDecimal.ZERO,
+                            g = 100_000,
                         ),
                     trygdetid = Trygdetid(perioder = listOf()),
                     flyktningStatus = false,

@@ -209,7 +209,6 @@ class TilbakekrevingService(
             tilbakekrevingKlient.sendTilbakekrevingsvedtak(
                 brukerTokenInfo,
                 TilbakekrevingVedtak(
-                    // TODO sjekk opp dette - her sender vi vedtaksId fra tilbakekrevingskomponenten
                     vedtakId = behandling.tilbakekreving.kravgrunnlag.vedtakId.value,
                     fattetVedtak =
                         FattetVedtak(

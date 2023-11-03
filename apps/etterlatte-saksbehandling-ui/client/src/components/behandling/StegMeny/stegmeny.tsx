@@ -8,30 +8,31 @@ import {
   revurderingRoutes,
   soeknadRoutes,
 } from '~components/behandling/BehandlingRoutes'
-import { isSuccess, useApiCall } from '~shared/hooks/useApiCall'
+import { isFailure, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
 import { hentVilkaarsvurdering } from '~shared/api/vilkaarsvurdering'
 import { useEffect } from 'react'
 import { useAppDispatch } from '~store/Store'
+import { ApiErrorAlert } from '~ErrorBoundary'
 
 export const StegMeny = (props: { behandling: IBehandlingReducer }) => {
   const dispatch = useAppDispatch()
-  const { id, behandlingType } = props.behandling
+  const behandling = props.behandling
   const [fetchVilkaarsvurderingStatus, fetchVilkaarsvurdering] = useApiCall(hentVilkaarsvurdering)
-  const soeknadRoutes_ = soeknadRoutes(props.behandling)
-  const revurderingRoutes_ = revurderingRoutes(props.behandling)
+  const soeknadRoutes_ = soeknadRoutes(behandling)
+  const revurderingRoutes_ = revurderingRoutes(behandling)
   const erSisteRoute = (index: number, list: BehandlingRouteTypes[]) => index != list.length - 1
 
   // Trenger vilkårsvurdering for å kunne vise riktig routes etter at vv i en behandling er utført
   useEffect(() => {
-    fetchVilkaarsvurdering(id, (vilkaarsvurdering) => {
+    fetchVilkaarsvurdering(behandling.id, (vilkaarsvurdering) => {
       dispatch(updateVilkaarsvurdering(vilkaarsvurdering))
     })
-  }, [id])
+  }, [behandling.status])
 
   if (isSuccess(fetchVilkaarsvurderingStatus)) {
     return (
       <StegMenyWrapper role="navigation">
-        {behandlingType === IBehandlingsType.MANUELT_OPPHOER &&
+        {behandling.behandlingType === IBehandlingsType.MANUELT_OPPHOER &&
           manueltOpphoerRoutes.map((pathInfo, index) => (
             <NavLenke
               key={pathInfo.path}
@@ -40,7 +41,7 @@ export const StegMeny = (props: { behandling: IBehandlingReducer }) => {
               separator={erSisteRoute(index, manueltOpphoerRoutes)}
             />
           ))}
-        {behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING &&
+        {behandling.behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING &&
           soeknadRoutes_.map((pathInfo, index) => (
             <NavLenke
               key={pathInfo.path}
@@ -49,7 +50,7 @@ export const StegMeny = (props: { behandling: IBehandlingReducer }) => {
               separator={erSisteRoute(index, soeknadRoutes_)}
             />
           ))}
-        {behandlingType === IBehandlingsType.REVURDERING &&
+        {behandling.behandlingType === IBehandlingsType.REVURDERING &&
           revurderingRoutes_.map((pathInfo, index) => (
             <NavLenke
               key={pathInfo.path}
@@ -60,6 +61,9 @@ export const StegMeny = (props: { behandling: IBehandlingReducer }) => {
           ))}
       </StegMenyWrapper>
     )
+  }
+  if (isFailure(fetchVilkaarsvurderingStatus)) {
+    return <ApiErrorAlert>Kunne ikke hente vilkårsvurdering</ApiErrorAlert>
   }
   return null
 }

@@ -7,7 +7,7 @@ import { PdlPersonStatusBar } from '~shared/statusbar/Statusbar'
 import { useBehandlingRoutes } from './BehandlingRoutes'
 import { StegMeny } from './StegMeny/stegmeny'
 import { useAppDispatch } from '~store/Store'
-import { mapAllApiResult, useApiCall } from '~shared/hooks/useApiCall'
+import { isSuccess, isPending, isFailure, useApiCall } from '~shared/hooks/useApiCall'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { useBehandling } from '~components/behandling/useBehandling'
 import { BehandlingSidemeny } from '~components/behandling/sidemeny/BehandlingSidemeny'
@@ -34,15 +34,14 @@ export const Behandling = () => {
     }
   }, [behandlingIdFraURL, behandling?.id])
 
-  return mapAllApiResult(
-    fetchBehandlingStatus,
-    <Spinner label="Henter behandling ..." visible />,
-    null,
-    () => <ApiErrorAlert>Kunne ikke hente behandling</ApiErrorAlert>,
-    (hentetBehandling) => (
+  if (isPending(fetchBehandlingStatus)) {
+    return <Spinner label="Henter behandling ..." visible />
+  }
+  if (isSuccess(fetchBehandlingStatus) && behandling != null) {
+    return (
       <>
-        {hentetBehandling.søker && <PdlPersonStatusBar person={hentetBehandling.søker} />}
-        <StegMeny behandling={hentetBehandling} />
+        {behandling.søker && <PdlPersonStatusBar person={behandling.søker} />}
+        <StegMeny behandling={behandling} />
         <GridContainer>
           <MainContent>
             <Routes>
@@ -52,9 +51,13 @@ export const Behandling = () => {
               <Route path="*" element={<Navigate to={behandlingRoutes[0].path} replace />} />
             </Routes>
           </MainContent>
-          <BehandlingSidemeny behandling={hentetBehandling} />
+          <BehandlingSidemeny behandling={behandling} />
         </GridContainer>
       </>
     )
-  )
+  }
+  if (isFailure(fetchBehandlingStatus)) {
+    return <ApiErrorAlert>Kunne ikke hente behandling</ApiErrorAlert>
+  }
+  return null
 }

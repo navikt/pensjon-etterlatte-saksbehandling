@@ -23,7 +23,7 @@ class TjenestepensjonKlient(config: Config, private val httpClient: HttpClient) 
 
     suspend fun harTpForholdByDate(
         fnr: String,
-        tpnr: String,
+        tpnr: Tjenestepensjonnummer,
         fomDato: LocalDate,
     ): Boolean {
         logger.info("Sjekk om det finnes tjenestepensjonsforhold pr $fomDato for ordning '$tpnr'")
@@ -33,14 +33,15 @@ class TjenestepensjonKlient(config: Config, private val httpClient: HttpClient) 
                 httpClient.get {
                     url("$tjenestepensjonUrl/finnForholdForBruker?datoFom=$fomDato")
                     header("fnr", fnr)
-                    header("tpnr", tpnr)
+                    header("tpnr", tpnr.value)
                 }.body()
             } catch (e: ClientRequestException) {
                 sikkerLogg.error("Feil ved sjekk av tjenestepensjonsforhold for [fnr=$fnr, fomDato=$fomDato, tpNr=$tpnr]", e)
+                logger.error("Feil i kontroll mot TP-registeret", e)
                 when (e.response.status) {
-                    HttpStatusCode.Unauthorized -> throw TjenestepensjonManglendeTilgangException("TP: Ikke tilgang", e)
-                    HttpStatusCode.BadRequest -> throw TjenestepensjonUgyldigForesporselException("TP: Ugyldig forespørsel", e)
-                    HttpStatusCode.NotFound -> throw TjenestepensjonIkkeFunnetException("TP: Ressurs ikke funnet", e)
+                    HttpStatusCode.Unauthorized -> throw TjenestepensjonManglendeTilgangException("TP: Ikke tilgang")
+                    HttpStatusCode.BadRequest -> throw TjenestepensjonUgyldigForesporselException("TP: Ugyldig forespørsel")
+                    HttpStatusCode.NotFound -> throw TjenestepensjonIkkeFunnetException("TP: Ressurs ikke funnet")
                     else -> throw e
                 }
             }
@@ -50,7 +51,7 @@ class TjenestepensjonKlient(config: Config, private val httpClient: HttpClient) 
 
     suspend fun harTpYtelseOnDate(
         fnr: String,
-        tpnr: String,
+        tpnr: Tjenestepensjonnummer,
         fomDato: LocalDate,
     ): Boolean {
         logger.info("Sjekk om det finnes tjenestepensjonsytelse pr $fomDato for ordning '$tpnr'")
@@ -63,15 +64,16 @@ class TjenestepensjonKlient(config: Config, private val httpClient: HttpClient) 
                 }.let { deserialize<TpNumre>(it.body()) }
             } catch (e: ClientRequestException) {
                 sikkerLogg.error("Feil ved sjekk av tjenestepensjonsytelse for [fnr=$fnr, fomDato=$fomDato, tpNr=$tpnr]", e)
+                logger.error("Feil i kontroll mot TP-registeret", e)
                 when (e.response.status) {
-                    HttpStatusCode.Unauthorized -> throw TjenestepensjonManglendeTilgangException("TP: Ikke tilgang", e)
-                    HttpStatusCode.BadRequest -> throw TjenestepensjonUgyldigForesporselException("TP: Ugyldig forespørsel", e)
-                    HttpStatusCode.NotFound -> throw TjenestepensjonIkkeFunnetException("TP: Ressurs ikke funnet", e)
+                    HttpStatusCode.Unauthorized -> throw TjenestepensjonManglendeTilgangException("TP: Ikke tilgang")
+                    HttpStatusCode.BadRequest -> throw TjenestepensjonUgyldigForesporselException("TP: Ugyldig forespørsel")
+                    HttpStatusCode.NotFound -> throw TjenestepensjonIkkeFunnetException("TP: Ressurs ikke funnet")
                     else -> throw e
                 }
             }
 
-        return tpNumre.tpNr.contains(tpnr)
+        return tpNumre.tpNr.contains(tpnr.value)
     }
 }
 

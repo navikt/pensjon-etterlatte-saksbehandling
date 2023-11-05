@@ -11,11 +11,13 @@ import io.ktor.client.request.header
 import io.ktor.client.request.url
 import io.ktor.http.HttpStatusCode
 import no.nav.etterlatte.libs.common.deserialize
+import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 
 class TjenestepensjonKlient(config: Config, private val httpClient: HttpClient) {
     private val logger = LoggerFactory.getLogger(TjenestepensjonKlient::class.java)
+    private val sikkerLogg = sikkerlogger()
 
     private val tjenestepensjonUrl = "${config.getString("tjenestepensjon.url")}/api/tjenestepensjon"
 
@@ -34,6 +36,7 @@ class TjenestepensjonKlient(config: Config, private val httpClient: HttpClient) 
                     header("tpnr", tpnr)
                 }.body()
             } catch (e: ClientRequestException) {
+                sikkerLogg.error("Feil ved sjekk av tjenestepensjonsforhold for [fnr=$fnr, fomDato=$fomDato, tpNr=$tpnr]", e)
                 when (e.response.status) {
                     HttpStatusCode.Unauthorized -> throw TjenestepensjonManglendeTilgangException("TP: Ikke tilgang", e)
                     HttpStatusCode.BadRequest -> throw TjenestepensjonUgyldigForesporselException("TP: Ugyldig forespørsel", e)
@@ -59,6 +62,7 @@ class TjenestepensjonKlient(config: Config, private val httpClient: HttpClient) 
                     header("fnr", fnr)
                 }.let { deserialize<TpNumre>(it.body()) }
             } catch (e: ClientRequestException) {
+                sikkerLogg.error("Feil ved sjekk av tjenestepensjonsytelse for [fnr=$fnr, fomDato=$fomDato, tpNr=$tpnr]", e)
                 when (e.response.status) {
                     HttpStatusCode.Unauthorized -> throw TjenestepensjonManglendeTilgangException("TP: Ikke tilgang", e)
                     HttpStatusCode.BadRequest -> throw TjenestepensjonUgyldigForesporselException("TP: Ugyldig forespørsel", e)

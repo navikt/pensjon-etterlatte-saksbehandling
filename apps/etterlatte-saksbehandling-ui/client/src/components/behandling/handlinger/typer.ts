@@ -1,5 +1,4 @@
 export const handlinger = {
-  START: { id: 'start', navn: 'Neste side' },
   NESTE: { id: 'neste', navn: 'Neste side' },
   TILBAKE: { id: 'tilbake', navn: 'Tilbake' },
 

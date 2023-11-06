@@ -14,5 +14,3 @@ export interface ISjekklisteItem {
   avkrysset: boolean
   versjon: string
 }
-
-export const featureToggleSjekklisteAktivert = 'pensjon-etterlatte.sjekkliste-send-til-attestering' as const

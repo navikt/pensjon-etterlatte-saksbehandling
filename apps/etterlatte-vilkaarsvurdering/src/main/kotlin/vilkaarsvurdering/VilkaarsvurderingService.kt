@@ -5,11 +5,14 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
+import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.behandling.erPaaNyttRegelverk
+import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaar
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
@@ -256,11 +259,42 @@ class VilkaarsvurderingService(
                 }
         }
 
-    private suspend fun tilstandssjekkFoerKjoering(
+    suspend fun sjekkGyldighetOgOppdaterBehandlingStatus(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-        block: suspend () -> Vilkaarsvurdering,
-    ): Vilkaarsvurdering {
+    ): Boolean =
+        tilstandssjekkFoerKjoering(behandlingId, brukerTokenInfo) {
+            val vilkaarsvurdering =
+                vilkaarsvurderingRepository.hent(behandlingId)
+                    ?: throw VilkaarsvurderingIkkeFunnet()
+
+            val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
+            val virkningstidspunktFraBehandling =
+                behandling.virkningstidspunkt?.dato
+                    ?: throw BehandlingVirkningstidspunktIkkeSatt()
+
+            val vilkaarsvurderingErGyldig =
+                vilkaarsvurdering.resultat != null &&
+                    vilkaarsvurdering.virkningstidspunkt == virkningstidspunktFraBehandling
+
+            if (!vilkaarsvurderingErGyldig) {
+                throw VilkaarsvurderingIkkeGyldig()
+            }
+
+            // Dersom forrige steg (oversikt) har blitt endret vil statusen være OPPRETTET. Når man trykker videre
+            // fra vilkårsvurdering skal denne validere tilstand og sette status VILKAARSVURDERT.
+            if (behandling.status in listOf(BehandlingStatus.OPPRETTET)) {
+                behandlingKlient.settBehandlingStatusVilkaarsvurdert(behandlingId, brukerTokenInfo)
+            } else {
+                false
+            }
+        }
+
+    private suspend fun <T> tilstandssjekkFoerKjoering(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+        block: suspend () -> T,
+    ): T {
         val kanVilkaarsvurdere = behandlingKlient.kanSetteBehandlingStatusVilkaarsvurdert(behandlingId, brukerTokenInfo)
 
         if (!kanVilkaarsvurdere) {
@@ -286,3 +320,18 @@ class VilkaarsvurderingService(
 object BehandlingstilstandException : IllegalStateException()
 
 class VilkaarsvurderingTilstandException(message: String) : IllegalStateException(message)
+
+class VilkaarsvurderingIkkeFunnet : IkkeFunnetException(
+    code = "VILKAARSVURDERING_IKKE_FUNNET",
+    detail = "Vilkårsvurdering ikke funnet",
+)
+
+class VilkaarsvurderingIkkeGyldig : UgyldigForespoerselException(
+    code = "VILKAARSVURDERING_UGYLDIG_TILSTAND",
+    detail = "Vilkårsvurderingen er ikke i en gyldig tilstand for å kunne gå videre",
+)
+
+class BehandlingVirkningstidspunktIkkeSatt : UgyldigForespoerselException(
+    code = "VILKAARSVURDERING_VIRKNINGSTIDSPUNKT_IKKE_SATT",
+    detail = "Virkningstidspunkt for behandlingen er ikke satt",
+)

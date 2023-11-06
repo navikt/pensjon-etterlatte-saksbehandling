@@ -2,6 +2,7 @@ package no.nav.etterlatte.trygdetid
 
 import com.fasterxml.jackson.databind.JsonNode
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
@@ -72,6 +73,11 @@ interface TrygdetidService {
         overstyrtNorskPoengaar: Int?,
         brukerTokenInfo: BrukerTokenInfo,
     ): Trygdetid
+
+    suspend fun sjekkGyldighetOgOppdaterBehandlingStatus(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Boolean
 }
 
 interface GammelTrygdetidServiceMedNy : NyTrygdetidService, TrygdetidService {
@@ -600,6 +606,29 @@ class TrygdetidServiceImpl(
         }
     }
 
+    override suspend fun sjekkGyldighetOgOppdaterBehandlingStatus(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Boolean =
+        tilstandssjekk(behandlingId, brukerTokenInfo) {
+            val trygdetider = trygdetidRepository.hentTrygdetiderForBehandling(behandlingId)
+            val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
+
+            if (trygdetider.isNotEmpty() && trygdetider.any { it.beregnetTrygdetid == null }) {
+                throw TrygdetidErIkkeGyldig()
+            }
+
+            // TODO sjekk at dødsdato og fødselsdato for avdøde stemmer overrens med grunnlag
+
+            // Dersom forrige steg (vilkårsvurdering) har blitt endret vil statusen være VILKAARSVURDERT. Når man
+            // trykker videre fra vilkårsvurdering skal denne validere tilstand og sette status TRYGDETID_OPPDATERT.
+            if (behandling.status == BehandlingStatus.VILKAARSVURDERT) {
+                behandlingKlient.settBehandlingStatusTrygdetidOppdatert(behandlingId, brukerTokenInfo)
+            } else {
+                false
+            }
+        }
+
     override suspend fun overstyrNorskPoengaaarForTrygdetid(
         trygdetidId: UUID,
         behandlingId: UUID,
@@ -659,3 +688,8 @@ class StoetterIkkeTrygdetidForBehandlingstypen(behandlingType: BehandlingType) :
         code = "STOETTER_IKKE_BEHANDLINGTYPEN",
         detail = "Støtter ikke trygdetid for behandlingstypen $behandlingType",
     )
+
+class TrygdetidErIkkeGyldig : UgyldigForespoerselException(
+    code = "TRYGDETID_IKKE_GYLDIG",
+    detail = "Trygdetiden for den / de avdød(e) er ikke gyldig",
+)

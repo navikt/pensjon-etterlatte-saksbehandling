@@ -137,6 +137,14 @@ fun Route.vilkaarsvurdering(
             }
         }
 
+        post("/{$BEHANDLINGID_CALL_PARAMETER}/oppdater-status") {
+            withBehandlingId(behandlingKlient) { behandlingId ->
+                val statusOppdatert =
+                    vilkaarsvurderingService.sjekkGyldighetOgOppdaterBehandlingStatus(behandlingId, brukerTokenInfo)
+                call.respond(HttpStatusCode.OK, StatusOppdatertDto(statusOppdatert))
+            }
+        }
+
         delete("/{$BEHANDLINGID_CALL_PARAMETER}/{vilkaarId}") {
             withBehandlingId(behandlingKlient) { behandlingId ->
                 withParam("vilkaarId") { vilkaarId ->
@@ -229,6 +237,8 @@ fun Route.vilkaarsvurdering(
         }
     }
 }
+
+data class StatusOppdatertDto(val statusOppdatert: Boolean)
 
 private fun VurdertVilkaarDto.toVurdertVilkaar(saksbehandler: String) =
     VurdertVilkaar(

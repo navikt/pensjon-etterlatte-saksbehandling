@@ -25,6 +25,7 @@ import Etterbetaling from '~components/behandling/beregningsgrunnlag/Etterbetali
 import { fattVedtak, upsertVedtak } from '~shared/api/vedtaksvurdering'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { VilkaarsvurderingResultat } from '~shared/api/vilkaarsvurdering'
+import { handlinger } from '~components/behandling/handlinger/typer'
 
 export const Beregne = (props: { behandling: IBehandlingReducer }) => {
   const { behandling } = props
@@ -127,8 +128,8 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
           ) : (
             <Button loading={isPending(vedtak)} variant="primary" onClick={opprettEllerOppdaterVedtak}>
               {behandlingSkalSendeBrev(behandling.behandlingType, behandling.revurderingsaarsak)
-                ? 'Gå videre til brev'
-                : 'Fatt vedtak'}
+                ? handlinger.NESTE.navn
+                : handlinger.FATT_VEDTAK.navn}
             </Button>
           )}
         </BehandlingHandlingKnapper>

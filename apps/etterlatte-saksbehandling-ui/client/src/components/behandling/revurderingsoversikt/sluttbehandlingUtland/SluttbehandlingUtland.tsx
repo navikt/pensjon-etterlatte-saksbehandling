@@ -154,9 +154,10 @@ export default function SluttbehandlingUtland({
         Mottatte SED
       </Heading>
       <BodyShort>Fyll inn hvilke SED som er mottatt i RINA pr land.</BodyShort>
-      {isSuccess(hentAlleLandRequest) && (
+      {isPending(hentAlleLandRequest) && <Spinner visible={true} label="Henter land" />}
+      {isSuccess(hentAlleLandRequest) && alleLandKodeverk && (
         <SEDLandMedDokumenter
-          landListe={hentAlleLandRequest.data}
+          landListe={alleLandKodeverk}
           landMedDokumenter={landMedDokumenter}
           setLandMedDokumenter={setLandMedDokumenter}
           resetFeilkoder={() => setFeilkoder(new Set([]))}

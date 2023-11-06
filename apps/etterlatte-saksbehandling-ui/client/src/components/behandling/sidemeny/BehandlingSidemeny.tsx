@@ -23,8 +23,6 @@ import { DocPencilIcon, FileTextIcon } from '@navikt/aksel-icons'
 import { Sjekkliste } from '~components/behandling/sjekkliste/Sjekkliste'
 import { useBehandlingSidemenyFane } from '~components/behandling/sidemeny/useBehandlingSidemeny'
 import { visFane } from '~store/reducers/BehandlingSidemenyReducer'
-import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
-import { featureToggleSjekklisteAktivert } from '~shared/types/Sjekkliste'
 import { updateSjekkliste } from '~store/reducers/SjekklisteReducer'
 import { erFerdigBehandlet } from '~components/behandling/felles/utils'
 import { hentSjekkliste, opprettSjekkliste } from '~shared/api/sjekkliste'
@@ -68,7 +66,6 @@ export const BehandlingSidemeny = ({ behandling }: { behandling: IBehandlingRedu
   const [fetchVedtakStatus, fetchVedtakSammendrag] = useApiCall(hentVedtakSammendrag)
   const [beslutning, setBeslutning] = useState<IBeslutning>()
   const fane = useBehandlingSidemenyFane()
-  const sjekklisteAktivert = useFeatureEnabledMedDefault(featureToggleSjekklisteAktivert, false)
 
   const behandlingsinfo = mapTilBehandlingInfo(behandling, vedtak)
 
@@ -86,7 +83,6 @@ export const BehandlingSidemeny = ({ behandling }: { behandling: IBehandlingRedu
   }, [])
 
   const erFoerstegangsbehandling = behandling.behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING
-  const erRevurdering = behandling.behandlingType === IBehandlingsType.REVURDERING
 
   const [hentSjekklisteResult, hentSjekklisteForBehandling, resetSjekklisteResult] = useApiCall(hentSjekkliste)
   const [opprettSjekklisteResult, opprettSjekklisteForBehandling, resetOpprettSjekkliste] =
@@ -110,7 +106,7 @@ export const BehandlingSidemeny = ({ behandling }: { behandling: IBehandlingRedu
         }
       )
     }
-  }, [sjekklisteAktivert])
+  }, [])
 
   return (
     <Sidebar>
@@ -138,7 +134,7 @@ export const BehandlingSidemeny = ({ behandling }: { behandling: IBehandlingRedu
       {isFailure(opprettSjekklisteResult) && erFoerstegangsbehandling && (
         <ApiErrorAlert>Opprettelsen av sjekkliste feilet</ApiErrorAlert>
       )}
-      {sjekklisteAktivert && !erRevurdering && (
+      {erFoerstegangsbehandling && (
         <Tabs value={fane} iconPosition="top" onChange={(val) => dispatch(visFane(val as BehandlingFane))}>
           <Tabs.List>
             <Tabs.Tab value={BehandlingFane.DOKUMENTER} label="Dokumenter" icon={<FileTextIcon title="dokumenter" />} />
@@ -162,7 +158,7 @@ export const BehandlingSidemeny = ({ behandling }: { behandling: IBehandlingRedu
           </Tabs.Panel>
         </Tabs>
       )}
-      {(!sjekklisteAktivert || erRevurdering) && behandling.søker?.foedselsnummer && (
+      {!erFoerstegangsbehandling && behandling.søker?.foedselsnummer && (
         <Dokumentoversikt fnr={behandling.søker.foedselsnummer} liten />
       )}
       <AnnullerBehandling />

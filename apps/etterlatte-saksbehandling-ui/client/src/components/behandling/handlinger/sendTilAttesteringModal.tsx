@@ -10,11 +10,8 @@ import { useSjekkliste } from '~components/behandling/sjekkliste/useSjekkliste'
 import { useAppDispatch } from '~store/Store'
 import { visSjekkliste } from '~store/reducers/BehandlingSidemenyReducer'
 import { addValideringsfeil } from '~store/reducers/SjekklisteReducer'
-import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 import { useBehandling } from '~components/behandling/useBehandling'
 import { IBehandlingsType } from '~shared/types/IDetaljertBehandling'
-
-const featureToggleSjekklisteAktivert = 'pensjon-etterlatte.sjekkliste-send-til-attestering' as const
 
 export const SendTilAttesteringModal = ({
   behandlingId,
@@ -30,7 +27,6 @@ export const SendTilAttesteringModal = ({
   const sjekkliste = useSjekkliste()
   const behandling = useBehandling()
   const dispatch = useAppDispatch()
-  const sjekklisteAktivert = useFeatureEnabledMedDefault(featureToggleSjekklisteAktivert, false)
 
   const goToOppgavebenken = () => {
     navigate('/')
@@ -45,7 +41,6 @@ export const SendTilAttesteringModal = ({
 
   const clickAttester = () => {
     if (
-      sjekklisteAktivert &&
       behandling?.behandlingType == IBehandlingsType.FØRSTEGANGSBEHANDLING &&
       (sjekkliste == null || !sjekkliste.bekreftet)
     ) {

@@ -51,40 +51,33 @@ class JoarkHendelseHandler(
         val journalpost = safKlient.hentJournalpost(journalpostId).journalpost
 
         if (journalpost == null) {
-            // TODO: Hva skal vi gjøre her...?
-            logger.error("Fant ingen journalpost med id=$journalpostId")
-            return
+            throw NullPointerException("Fant ingen journalpost med id=$journalpostId")
         } else if (journalpost.erFerdigstilt()) {
-            // TODO: Hva gjør vi med ferdigstilte journalposter...?
-            logger.error("Journalpost med id=$journalpostId er ferdigstilt")
+            logger.info(
+                "Journalpost med id=$journalpostId er allerede ferdigstilt og tilknyttet sak (${journalpost.sak})",
+            )
             return
         }
 
         try {
             if (journalpost.bruker == null) {
-                logger.error("Journalpost med id=$journalpostId mangler bruker!")
                 // TODO:
                 //  Burde vi lage oppgave på dette? Alt krever SakID, så hvordan skal det fungere hvis bruker mangler?
-                return
+                throw IllegalStateException("Journalpost med id=$journalpostId mangler bruker!")
             } else if (journalpost.bruker.type == BrukerIdType.ORGNR) {
                 // TODO:
                 //  Må vi lage støtte for ORGNR...?
-                logger.error("Journalpost med id=$journalpostId har brukerId av typen ${BrukerIdType.ORGNR}")
-                return
+                throw IllegalStateException("Journalpost med id=$journalpostId har brukerId av typen ${BrukerIdType.ORGNR}")
             }
 
-            val pdlIdentifikator =
-                pdlKlient.hentPdlIdentifikator(journalpost.bruker.id)
-
             val ident =
-                when (pdlIdentifikator) {
+                when (val pdlIdentifikator = pdlKlient.hentPdlIdentifikator(journalpost.bruker.id)) {
                     is PdlIdentifikator.FolkeregisterIdent -> pdlIdentifikator.folkeregisterident.value
                     is PdlIdentifikator.Npid -> {
-                        logger.error("Ignorerer journalføringshendelse med NPID=${pdlIdentifikator.npid.ident}")
-                        return
+                        throw IllegalStateException("Bruker tilknyttet journalpost=$journalpostId har kun NPID!")
                     }
 
-                    null -> throw IllegalArgumentException(
+                    null -> throw IllegalStateException(
                         "Ident tilknyttet journalpost=$journalpostId er null i PDL – avbryter behandling",
                     )
                 }

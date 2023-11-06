@@ -37,6 +37,9 @@ fun JournalfoeringHendelseRecord.temaTilSakType(): SakType =
         else -> throw IllegalArgumentException("Ugyldig tema $temaNytt")
     }
 
+/**
+ * @see: <a href="https://confluence.adeo.no/x/Ix-DGQ">Joarkhendelser på Confluence</a>
+ **/
 object HendelseType {
     const val JOURNALPOST_MOTTATT = "JournalpostMottatt"
     const val TEMA_ENDRET = "TemaEndret"

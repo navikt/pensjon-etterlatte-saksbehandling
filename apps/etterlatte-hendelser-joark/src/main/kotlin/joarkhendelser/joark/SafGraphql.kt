@@ -2,6 +2,7 @@ package no.nav.etterlatte.joarkhendelser.joark
 
 import com.fasterxml.jackson.annotation.JsonCreator
 import io.ktor.http.HttpStatusCode
+import no.nav.etterlatte.token.Fagsaksystem
 
 data class HentJournalpostResult(
     val journalpost: Journalpost? = null,
@@ -62,7 +63,9 @@ data class Journalpost(
     val datoOpprettet: String,
     val opprettetAvNavn: String?,
 ) {
-    fun erFerdigstilt(): Boolean = journalstatus == Journalstatus.FERDIGSTILT
+    fun erFerdigstilt(): Boolean =
+        (journalstatus == Journalstatus.FERDIGSTILT || journalstatus == Journalstatus.JOURNALFOERT) &&
+            sak?.fagsaksystem == Fagsaksystem.EY.navn
 }
 
 enum class Journalstatus {

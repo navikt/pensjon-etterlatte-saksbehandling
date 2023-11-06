@@ -6,7 +6,6 @@ import no.nav.etterlatte.libs.common.beregning.BeregningDTO
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidGrunnlagDto
 import no.nav.etterlatte.token.BrukerTokenInfo
-import java.time.Period
 import java.util.UUID
 
 class TrygdetidService(private val trygdetidKlient: TrygdetidKlient) {
@@ -79,7 +78,7 @@ class TrygdetidService(private val trygdetidKlient: TrygdetidKlient) {
                     datoFOM = grunnlag.periodeFra,
                     datoTOM = grunnlag.periodeTil,
                     land = grunnlag.bosted,
-                    opptjeningsperiode = grunnlag.beregnet?.let { Period.of(it.aar, it.maaneder, it.dager) },
+                    opptjeningsperiode = grunnlag.beregnet,
                 )
             }
     }

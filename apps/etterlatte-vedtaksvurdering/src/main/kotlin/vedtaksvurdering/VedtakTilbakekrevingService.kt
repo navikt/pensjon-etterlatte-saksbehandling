@@ -5,6 +5,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
 import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingFattEllerAttesterVedtakDto
 import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingVedtakDto
+import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingVedtakLagretDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
@@ -61,17 +62,26 @@ class VedtakTilbakekrevingService(
         ).id
     }
 
-    fun attesterVedtak(tilbakekrevingVedtakData: TilbakekrevingFattEllerAttesterVedtakDto): Long {
+    fun attesterVedtak(tilbakekrevingVedtakData: TilbakekrevingFattEllerAttesterVedtakDto): TilbakekrevingVedtakLagretDto {
         logger.info("Attesterer vedtak for tilbakekreving=$tilbakekrevingVedtakData.tilbakekrevingId")
         verifiserGyldigVedtakStatus(tilbakekrevingVedtakData.tilbakekrevingId, listOf(VedtakStatus.FATTET_VEDTAK))
-        return repository.attesterVedtak(
-            tilbakekrevingVedtakData.tilbakekrevingId,
-            Attestasjon(
-                attestant = tilbakekrevingVedtakData.saksbehandler,
-                attesterendeEnhet = tilbakekrevingVedtakData.enhet,
-                tidspunkt = Tidspunkt.now(), // Blir ikke brukt for egen now() brueks i db..
-            ),
-        ).id
+        val vedtak =
+            repository.attesterVedtak(
+                tilbakekrevingVedtakData.tilbakekrevingId,
+                Attestasjon(
+                    attestant = tilbakekrevingVedtakData.saksbehandler,
+                    attesterendeEnhet = tilbakekrevingVedtakData.enhet,
+                    tidspunkt = Tidspunkt.now(), // Blir ikke brukt for egen now() brueks i db..
+                ),
+            )
+        return requireNotNull(vedtak.vedtakFattet).let {
+            TilbakekrevingVedtakLagretDto(
+                id = vedtak.id,
+                fattetAv = it.ansvarligSaksbehandler,
+                enhet = it.ansvarligEnhet,
+                dato = it.tidspunkt.toLocalDate(),
+            )
+        }
     }
 
     fun underkjennVedtak(tilbakekrevingId: UUID): Long {

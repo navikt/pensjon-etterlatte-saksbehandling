@@ -1,8 +1,16 @@
 package no.nav.etterlatte.gyldigsoeknad.barnepensjon
 
+import io.kotest.matchers.date.beInToday
+import io.kotest.matchers.maps.shouldHaveSize
+import io.kotest.matchers.should
+import io.kotest.matchers.shouldBe
+import io.mockk.every
 import io.mockk.mockk
 import no.nav.etterlatte.gyldigsoeknad.client.PdlClient
-import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsTyper
+import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsTyper.HAR_FORELDREANSVAR_FOR_BARNET
+import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsTyper.INGEN_ANNEN_VERGE_ENN_FORELDER
+import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsTyper.INNSENDER_ER_FORELDER
 import no.nav.etterlatte.libs.common.gyldigSoeknad.VurderingsResultat
 import no.nav.etterlatte.libs.common.gyldigSoeknad.gyldighetsgrunnlag.InnsenderHarForeldreansvarGrunnlag
 import no.nav.etterlatte.libs.common.gyldigSoeknad.gyldighetsgrunnlag.PersonInfoGyldighet
@@ -11,6 +19,7 @@ import no.nav.etterlatte.libs.common.innsendtsoeknad.barnepensjon.Barnepensjon
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.FamilieRelasjon
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.VergeEllerFullmektig
 import no.nav.etterlatte.libs.common.person.VergemaalEllerFremtidsfullmakt
@@ -41,7 +50,7 @@ internal class GyldigSoeknadServiceTest {
     fun vurderInnsenderErForelder() {
         val innsenderErForelder =
             gyldigSoeknadService.innsenderErForelder(
-                GyldighetsTyper.INNSENDER_ER_FORELDER,
+                INNSENDER_ER_FORELDER,
                 gjenlevende,
                 innsender,
                 FamilieRelasjon(listOf(), foreldreFnrMedGjenlevende, null),
@@ -49,7 +58,7 @@ internal class GyldigSoeknadServiceTest {
 
         val innsenderErIkkeForelder =
             gyldigSoeknadService.innsenderErForelder(
-                GyldighetsTyper.INNSENDER_ER_FORELDER,
+                INNSENDER_ER_FORELDER,
                 gjenlevende,
                 innsender,
                 FamilieRelasjon(listOf(), foreldreFnrUtenGjenlevende, null),
@@ -57,7 +66,7 @@ internal class GyldigSoeknadServiceTest {
 
         val foreldreMangler =
             gyldigSoeknadService.innsenderErForelder(
-                GyldighetsTyper.INNSENDER_ER_FORELDER,
+                INNSENDER_ER_FORELDER,
                 gjenlevende,
                 innsender,
                 null,
@@ -80,21 +89,21 @@ internal class GyldigSoeknadServiceTest {
     fun vurderInnsenderHarForeldreansvar() {
         val innsenderErForelder =
             GyldigSoeknadService(pdlClient).innsenderHarForeldreansvar(
-                GyldighetsTyper.INNSENDER_ER_FORELDER,
+                INNSENDER_ER_FORELDER,
                 innsender,
                 FamilieRelasjon(foreldreFnrMedGjenlevende, foreldreFnrMedGjenlevende, null),
             )
 
         val innsenderErIkkeForelder =
             GyldigSoeknadService(pdlClient).innsenderHarForeldreansvar(
-                GyldighetsTyper.INNSENDER_ER_FORELDER,
+                INNSENDER_ER_FORELDER,
                 innsender,
                 FamilieRelasjon(foreldreFnrUtenGjenlevende, foreldreFnrUtenGjenlevende, null),
             )
 
         val foreldreMangler =
             GyldigSoeknadService(pdlClient).innsenderHarForeldreansvar(
-                GyldighetsTyper.INNSENDER_ER_FORELDER,
+                INNSENDER_ER_FORELDER,
                 innsender,
                 null,
             )
@@ -127,17 +136,50 @@ internal class GyldigSoeknadServiceTest {
 
         val harIngenVerge =
             GyldigSoeknadService(pdlClient).ingenAnnenVergeEnnForelder(
-                GyldighetsTyper.INGEN_ANNEN_VERGE_ENN_FORELDER,
+                INGEN_ANNEN_VERGE_ENN_FORELDER,
                 soekerIngenVerge,
             )
 
         val harVerge =
             GyldigSoeknadService(pdlClient).ingenAnnenVergeEnnForelder(
-                GyldighetsTyper.INGEN_ANNEN_VERGE_ENN_FORELDER,
+                INGEN_ANNEN_VERGE_ENN_FORELDER,
                 soekerHarVerge,
             )
         assertEquals(VurderingsResultat.IKKE_OPPFYLT, harVerge.resultat)
         assertEquals(VurderingsResultat.OPPFYLT, harIngenVerge.resultat)
+    }
+
+    @Test
+    fun vurderGyldighet() {
+        val persongalleri = gyldigSoeknadService.hentPersongalleriFraSoeknad(soeknad)
+        val foreldre =
+            persongalleri
+                .let { listOf(it.avdoed[0], it.innsender) }
+                .map { Folkeregisteridentifikator.of(it) }
+        every {
+            pdlClient.hentPerson(match { it == soeknad.soeker.foedselsnummer.svar.value }, any(), any())
+        } returns
+            mockPerson(
+                familieRelasjon =
+                    FamilieRelasjon(
+                        ansvarligeForeldre = emptyList(),
+                        foreldre = foreldre,
+                        barn = emptyList(),
+                    ),
+            )
+        every {
+            pdlClient.hentPerson(match { it == soeknad.innsender.foedselsnummer.svar.value }, any(), any())
+        } returns mockPerson()
+
+        val gyldighet = gyldigSoeknadService.vurderGyldighet(persongalleri, SakType.BARNEPENSJON)
+
+        gyldighet.resultat shouldBe VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
+        val vurderinger = gyldighet.vurderinger.associateBy { it.navn }
+        vurderinger shouldHaveSize 3
+        vurderinger[INNSENDER_ER_FORELDER]?.resultat shouldBe VurderingsResultat.OPPFYLT
+        vurderinger[INGEN_ANNEN_VERGE_ENN_FORELDER]!!.resultat shouldBe VurderingsResultat.OPPFYLT
+        vurderinger[HAR_FORELDREANSVAR_FOR_BARNET]!!.resultat shouldBe VurderingsResultat.IKKE_OPPFYLT
+        gyldighet.vurdertDato should beInToday()
     }
 
     companion object {
@@ -162,25 +204,27 @@ internal class GyldigSoeknadServiceTest {
     }
 }
 
-private fun mockPerson(vergemaalEllerFremtidsfullmakt: List<VergemaalEllerFremtidsfullmakt>? = null) =
-    Person(
-        fornavn = "Test",
-        etternavn = "Testulfsen",
-        foedselsnummer = SOEKER_FOEDSELSNUMMER,
-        foedselsdato = LocalDate.parse("2020-06-10"),
-        foedselsaar = 1985,
-        foedeland = null,
-        doedsdato = null,
-        adressebeskyttelse = AdressebeskyttelseGradering.UGRADERT,
-        bostedsadresse = null,
-        deltBostedsadresse = null,
-        kontaktadresse = null,
-        oppholdsadresse = null,
-        sivilstatus = null,
-        sivilstand = null,
-        statsborgerskap = null,
-        utland = null,
-        familieRelasjon = FamilieRelasjon(null, null, null),
-        avdoedesBarn = null,
-        vergemaalEllerFremtidsfullmakt = vergemaalEllerFremtidsfullmakt,
-    )
+private fun mockPerson(
+    vergemaalEllerFremtidsfullmakt: List<VergemaalEllerFremtidsfullmakt>? = null,
+    familieRelasjon: FamilieRelasjon? = FamilieRelasjon(null, null, null),
+) = Person(
+    fornavn = "Test",
+    etternavn = "Testulfsen",
+    foedselsnummer = SOEKER_FOEDSELSNUMMER,
+    foedselsdato = LocalDate.parse("2020-06-10"),
+    foedselsaar = 1985,
+    foedeland = null,
+    doedsdato = null,
+    adressebeskyttelse = AdressebeskyttelseGradering.UGRADERT,
+    bostedsadresse = null,
+    deltBostedsadresse = null,
+    kontaktadresse = null,
+    oppholdsadresse = null,
+    sivilstatus = null,
+    sivilstand = null,
+    statsborgerskap = null,
+    utland = null,
+    familieRelasjon = familieRelasjon,
+    avdoedesBarn = null,
+    vergemaalEllerFremtidsfullmakt = vergemaalEllerFremtidsfullmakt,
+)

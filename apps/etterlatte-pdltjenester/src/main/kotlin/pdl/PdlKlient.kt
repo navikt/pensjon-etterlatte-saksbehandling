@@ -12,6 +12,7 @@ import no.nav.etterlatte.libs.common.RetryResult
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.Behandlingsnummer
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.person.HentAdressebeskyttelseRequest
 import no.nav.etterlatte.libs.common.person.HentFolkeregisterIdenterForAktoerIdBolkRequest
 import no.nav.etterlatte.libs.common.person.HentGeografiskTilknytningRequest
 import no.nav.etterlatte.libs.common.person.HentPdlIdentRequest
@@ -36,6 +37,28 @@ class PdlKlient(private val httpClient: HttpClient, private val apiUrl: String) 
         return retry<PdlPersonResponse>(times = 3) {
             httpClient.post(apiUrl) {
                 header(HEADER_BEHANDLINGSNUMMER, behandlingsnummer.behandlingsnummer)
+                header(HEADER_TEMA, HEADER_TEMA_VALUE)
+                accept(Json)
+                contentType(Json)
+                setBody(request)
+            }.body()
+        }.let {
+            when (it) {
+                is RetryResult.Success -> it.content
+                is RetryResult.Failure -> throw it.samlaExceptions()
+            }
+        }
+    }
+
+    suspend fun hentAdressebeskyttelse(hentAdressebeskyttelseRequest: HentAdressebeskyttelseRequest): PdlAdressebeskyttelseResponse {
+        val request =
+            PdlAdressebeskyttelseRequest(
+                query = getQuery("/pdl/hentAdressebeskyttelse.graphql"),
+                variables = PdlAdressebeskyttelseVariables(hentAdressebeskyttelseRequest.ident.value),
+            )
+
+        return retry<PdlAdressebeskyttelseResponse>(times = 3) {
+            httpClient.post(apiUrl) {
                 header(HEADER_TEMA, HEADER_TEMA_VALUE)
                 accept(Json)
                 contentType(Json)

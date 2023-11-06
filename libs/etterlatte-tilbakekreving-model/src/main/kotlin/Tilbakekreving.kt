@@ -1,6 +1,7 @@
 package no.nav.etterlatte.libs.common.tilbakekreving
 
 import java.math.BigDecimal
+import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
 
@@ -48,7 +49,7 @@ data class Tilbakekrevingsbelop(
     val rentetillegg: Int?,
 ) {
     companion object {
-        fun ny(grunnlagsbeloep: Grunnlagsbeloep) =
+        fun ytelse(grunnlagsbeloep: Grunnlagsbeloep) =
             Tilbakekrevingsbelop(
                 id = UUID.randomUUID(),
                 klasseKode = grunnlagsbeloep.klasseKode.value,
@@ -71,30 +72,56 @@ data class Tilbakekrevingsbelop(
                 id = UUID.randomUUID(),
                 klasseKode = grunnlagsbeloep.klasseKode.value,
                 klasseType = grunnlagsbeloep.klasseType.name,
-                bruttoUtbetaling = 0,
-                nyBruttoUtbetaling = 0,
-                skatteprosent = BigDecimal(0.0),
+                bruttoUtbetaling = grunnlagsbeloep.bruttoUtbetaling.toInt(),
+                nyBruttoUtbetaling = grunnlagsbeloep.nyBruttoUtbetaling.toInt(),
+                skatteprosent = grunnlagsbeloep.skatteProsent,
                 beregnetFeilutbetaling = null,
-                bruttoTilbakekreving = null,
+                bruttoTilbakekreving = grunnlagsbeloep.bruttoTilbakekreving.toInt(),
                 nettoTilbakekreving = null,
                 skatt = null,
                 skyld = null,
-                resultat = grunnlagsbeloep.resultat?.let { TilbakekrevingResultat.valueOf(it) },
+                resultat = null,
                 tilbakekrevingsprosent = null,
                 rentetillegg = null,
             )
     }
+
+    fun toYtelseVedtak() =
+        TilbakekrevingsbelopYtelseVedtak(
+            klasseKode = klasseKode,
+            bruttoUtbetaling = bruttoUtbetaling,
+            nyBruttoUtbetaling = nyBruttoUtbetaling,
+            skatteprosent = skatteprosent,
+            beregnetFeilutbetaling = requireNotNull(beregnetFeilutbetaling),
+            bruttoTilbakekreving = requireNotNull(bruttoTilbakekreving),
+            nettoTilbakekreving = requireNotNull(nettoTilbakekreving),
+            skatt = requireNotNull(skatt),
+            skyld = requireNotNull(skyld),
+            resultat = requireNotNull(resultat),
+            tilbakekrevingsprosent = requireNotNull(tilbakekrevingsprosent),
+            rentetillegg = requireNotNull(rentetillegg),
+        )
+
+    fun toFeilkontoVedtak() =
+        TilbakekrevingsbelopFeilkontoVedtak(
+            klasseKode = klasseKode,
+            bruttoUtbetaling = bruttoUtbetaling,
+            nyBruttoUtbetaling = nyBruttoUtbetaling,
+            bruttoTilbakekreving = requireNotNull(bruttoTilbakekreving),
+        )
 }
 
 fun List<KravgrunnlagPeriode>.tilTilbakekrevingPerioder(): List<TilbakekrevingPeriode> {
     return map { periode ->
-        val ytelse = requireNotNull(periode.grunnlagsbeloep.find { it.klasseType == KlasseType.YTEL }) { "Fant ingen ytelse" }
+        val ytelse =
+            requireNotNull(periode.grunnlagsbeloep.find { it.klasseType == KlasseType.YTEL }) { "Fant ingen ytelse" }
 
-        val feilkonto = requireNotNull(periode.grunnlagsbeloep.find { it.klasseType == KlasseType.FEIL }) { "Fant ikke feilkonto" }
+        val feilkonto =
+            requireNotNull(periode.grunnlagsbeloep.find { it.klasseType == KlasseType.FEIL }) { "Fant ikke feilkonto" }
 
         TilbakekrevingPeriode(
             maaned = periode.periode.fraOgMed,
-            ytelse = Tilbakekrevingsbelop.ny(ytelse),
+            ytelse = Tilbakekrevingsbelop.ytelse(ytelse),
             feilkonto = Tilbakekrevingsbelop.feilkonto(feilkonto),
         )
     }
@@ -121,14 +148,14 @@ enum class TilbakekrevingAktsomhet {
     GROV_UAKTSOMHET,
 }
 
-enum class TilbakekrevingHjemmel {
-    ULOVFESTET,
-    TJUETO_FEMTEN_EN_LEDD_EN,
-    TJUETO_FEMTEN_EN_LEDD_TO_FORSETT,
-    TJUETO_FEMTEN_EN_LEDD_TO_UAKTSOMT,
-    TJUETO_FEMTEN_FEM,
-    TJUETO_FEMTEN_SEKS,
-    TJUETO_SEKSTEN,
+enum class TilbakekrevingHjemmel(val kode: String) {
+    ULOVFESTET("ULOVFESTET,"),
+    TJUETO_FEMTEN_EN_LEDD_EN("22-15-1-1"),
+    TJUETO_FEMTEN_EN_LEDD_TO_FORSETT("22-15-1-2f"),
+    TJUETO_FEMTEN_EN_LEDD_TO_UAKTSOMT("22-15-1-2u"),
+    TJUETO_FEMTEN_FEM("22-15-5"),
+    TJUETO_FEMTEN_SEKS("22-15-6"),
+    TJUETO_SEKSTEN("22-16"),
 }
 
 enum class TilbakekrevingSkyld {
@@ -145,3 +172,50 @@ enum class TilbakekrevingResultat {
     FULL_TILBAKEKREV,
     INGEN_TILBAKEKREV,
 }
+
+/*
+* N.B Inneholder ikke alle vedtaksinfo kun det som er nødvendig for Tilbakekrevingskomponent.
+*/
+data class TilbakekrevingVedtak(
+    val vedtakId: Long,
+    val fattetVedtak: FattetVedtak,
+    val aarsak: TilbakekrevingAarsak,
+    val hjemmel: TilbakekrevingHjemmel,
+    val kravgrunnlagId: String,
+    val kontrollfelt: String,
+    val perioder: List<TilbakekrevingPeriodeVedtak>,
+)
+
+data class FattetVedtak(
+    val saksbehandler: String,
+    val enhet: String,
+    val dato: LocalDate,
+)
+
+data class TilbakekrevingPeriodeVedtak(
+    val maaned: YearMonth,
+    val ytelse: TilbakekrevingsbelopYtelseVedtak,
+    val feilkonto: TilbakekrevingsbelopFeilkontoVedtak,
+)
+
+data class TilbakekrevingsbelopYtelseVedtak(
+    val klasseKode: String,
+    val bruttoUtbetaling: Int,
+    val nyBruttoUtbetaling: Int,
+    val skatteprosent: BigDecimal,
+    val beregnetFeilutbetaling: Int,
+    val bruttoTilbakekreving: Int,
+    val nettoTilbakekreving: Int,
+    val skatt: Int,
+    val skyld: TilbakekrevingSkyld,
+    val resultat: TilbakekrevingResultat,
+    val tilbakekrevingsprosent: Int,
+    val rentetillegg: Int,
+)
+
+data class TilbakekrevingsbelopFeilkontoVedtak(
+    val klasseKode: String,
+    val bruttoUtbetaling: Int,
+    val nyBruttoUtbetaling: Int,
+    val bruttoTilbakekreving: Int,
+)

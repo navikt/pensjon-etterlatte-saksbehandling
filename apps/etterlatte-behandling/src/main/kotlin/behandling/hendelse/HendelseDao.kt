@@ -2,6 +2,7 @@ package no.nav.etterlatte.behandling.hendelse
 
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.BehandlingOpprettet
+import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.KlageHendelseType
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunkt
@@ -60,6 +61,25 @@ class HendelseDao(private val connection: () -> Connection) {
             null,
             null,
             null,
+        ),
+    )
+
+    fun behandlingHendelse(
+        behandlingId: UUID,
+        sakId: Long,
+        saksbehandler: String,
+        status: BehandlingStatus,
+    ) = lagreHendelse(
+        UlagretHendelse(
+            hendelse = "BEHANDLING:${status.name}",
+            inntruffet = Tidspunkt.now(),
+            vedtakId = null,
+            behandlingId = behandlingId,
+            sakId = sakId,
+            ident = saksbehandler,
+            identType = "SAKSBEHANDLER".takeIf { saksbehandler != null },
+            kommentar = null,
+            valgtBegrunnelse = null,
         ),
     )
 

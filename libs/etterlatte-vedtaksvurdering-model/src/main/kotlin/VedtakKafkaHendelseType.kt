@@ -6,6 +6,8 @@ enum class VedtakKafkaHendelseType {
     FATTET,
     ATTESTERT,
     UNDERKJENT,
+    TIL_SAMORDNING,
+    SAMORDNET,
     IVERKSATT,
     ;
 

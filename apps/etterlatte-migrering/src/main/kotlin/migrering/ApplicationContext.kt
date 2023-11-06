@@ -37,7 +37,8 @@ internal class ApplicationContext {
                 azureAppScope = config.getString("pdl.azure.scope"),
             ),
         )
-    val verifiserer = Verifiserer(pdlKlient = pdlKlient, repository = pesysRepository)
+    val verifiserer =
+        Verifiserer(pdlKlient = pdlKlient, repository = pesysRepository, featureToggleService = featureToggleService)
 }
 
 private fun featureToggleProperties(config: Config) =

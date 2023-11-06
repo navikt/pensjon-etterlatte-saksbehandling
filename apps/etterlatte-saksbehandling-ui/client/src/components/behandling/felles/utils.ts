@@ -59,6 +59,8 @@ export const hentBehandlesFraStatus = (status: IBehandlingStatus): boolean => {
 export const erFerdigBehandlet = (status: IBehandlingStatus): boolean => {
   return (
     status === IBehandlingStatus.ATTESTERT ||
+    status === IBehandlingStatus.TIL_SAMORDNING ||
+    status === IBehandlingStatus.SAMORDNET ||
     status === IBehandlingStatus.IVERKSATT ||
     status === IBehandlingStatus.AVBRUTT
   )

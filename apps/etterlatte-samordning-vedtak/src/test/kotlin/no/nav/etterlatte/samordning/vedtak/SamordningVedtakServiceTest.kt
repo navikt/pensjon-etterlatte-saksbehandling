@@ -41,6 +41,8 @@ class SamordningVedtakServiceTest {
     private val tpKlient = mockk<TjenestepensjonKlient>()
     private val samordningVedtakService = SamordningVedtakService(vedtakKlient, tpKlient)
 
+    private val tpnrSPK = Tjenestepensjonnummer(TPNR_SPK)
+
     @AfterEach
     fun after() {
         clearAllMocks()
@@ -53,12 +55,14 @@ class SamordningVedtakServiceTest {
                 sakstype = SakType.BARNEPENSJON,
             )
 
-        coEvery { vedtakKlient.hentVedtak(123L, ORGNO) } returns vedtak
-        coEvery { tpKlient.harTpYtelseOnDate(FNR, tpnr = TPNR_SPK, now().atStartOfMonth()) } returns true
+        val callerContext = MaskinportenTpContext(tpnrSPK, ORGNO)
+
+        coEvery { vedtakKlient.hentVedtak(123L, callerContext) } returns vedtak
+        coEvery { tpKlient.harTpYtelseOnDate(FNR, tpnr = tpnrSPK, now().atStartOfMonth()) } returns true
 
         shouldThrow<VedtakFeilSakstypeException> {
             runBlocking {
-                samordningVedtakService.hentVedtak(123L, TPNR_SPK, ORGNO)
+                samordningVedtakService.hentVedtak(123L, callerContext)
             }
         }
     }
@@ -75,12 +79,15 @@ class SamordningVedtakServiceTest {
                         Periode(fom = now().plusMonths(1), tom = null),
                     ),
             )
-        coEvery { vedtakKlient.hentVedtak(456L, ORGNO) } returns vedtak
-        coEvery { tpKlient.harTpYtelseOnDate(FNR, tpnr = TPNR_SPK, now().atStartOfMonth()) } returns true
+        coEvery { vedtakKlient.hentVedtak(456L, MaskinportenTpContext(tpnrSPK, ORGNO)) } returns vedtak
+        coEvery { tpKlient.harTpYtelseOnDate(FNR, tpnr = tpnrSPK, now().atStartOfMonth()) } returns true
 
         val result =
             runBlocking {
-                samordningVedtakService.hentVedtak(456L, TPNR_SPK, ORGNO)
+                samordningVedtakService.hentVedtak(
+                    456L,
+                    MaskinportenTpContext(tpnr = tpnrSPK, organisasjonsnr = ORGNO),
+                )
             }
 
         result.vedtakId shouldBe 456L
@@ -106,7 +113,7 @@ class SamordningVedtakServiceTest {
                 ),
             )
 
-        coVerify { tpKlient.harTpYtelseOnDate(FNR, tpnr = TPNR_SPK, now().atStartOfMonth()) }
+        coVerify { tpKlient.harTpYtelseOnDate(FNR, tpnr = tpnrSPK, now().atStartOfMonth()) }
     }
 
     @Test
@@ -126,22 +133,21 @@ class SamordningVedtakServiceTest {
                 ),
             )
 
-        coEvery { vedtakKlient.hentVedtaksliste(virkFom, fnr = FNR, organisasjonsnummer = ORGNO) } returns vedtakliste
-        coEvery { tpKlient.harTpForholdByDate(FNR, tpnr = TPNR_SPK, fomDato = virkFom) } returns true
+        coEvery { vedtakKlient.hentVedtaksliste(virkFom, fnr = FNR, MaskinportenTpContext(tpnrSPK, ORGNO)) } returns vedtakliste
+        coEvery { tpKlient.harTpForholdByDate(FNR, tpnr = tpnrSPK, fomDato = virkFom) } returns true
 
         val vedtaksliste =
             runBlocking {
                 samordningVedtakService.hentVedtaksliste(
                     virkFom,
                     Folkeregisteridentifikator.of(FNR),
-                    Tjenestepensjonnummer(TPNR_SPK),
-                    ORGNO,
+                    MaskinportenTpContext(tpnrSPK, ORGNO),
                 )
             }
 
         vedtaksliste shouldHaveSize 2
 
-        coVerify { tpKlient.harTpForholdByDate(FNR, tpnr = TPNR_SPK, fomDato = virkFom) }
+        coVerify { tpKlient.harTpForholdByDate(FNR, tpnr = tpnrSPK, fomDato = virkFom) }
     }
 }
 
@@ -182,6 +188,7 @@ fun beregning(trygdetid: Int = 40) =
                     trygdetid = trygdetid,
                 ),
             ),
+        overstyrBeregning = null,
     )
 
 fun avkorting(vararg perioder: Periode) =

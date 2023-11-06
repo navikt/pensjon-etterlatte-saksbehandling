@@ -15,28 +15,31 @@ import { ApiErrorAlert } from '~ErrorBoundary'
 import { LovtekstMedLenke } from '~components/behandling/soeknadsoversikt/soeknadoversikt/LovtekstMedLenke'
 import styled from 'styled-components'
 import { BodyShort } from '@navikt/ds-react'
-import { useParams } from 'react-router-dom'
 import { Grunnlagopplysninger } from '~components/behandling/trygdetid/Grunnlagopplysninger'
 import { TrygdetidGrunnlagListe } from '~components/behandling/trygdetid/TrygdetidGrunnlagListe'
 import { TrygdeAvtale } from './avtaler/TrygdeAvtale'
-import { IBehandlingStatus, IUtenlandstilsnitt, IUtenlandstilsnittType } from '~shared/types/IDetaljertBehandling'
+import { IBehandlingStatus, IDetaljertBehandling, IBehandlingsType } from '~shared/types/IDetaljertBehandling'
 import { oppdaterBehandlingsstatus } from '~store/reducers/BehandlingReducer'
 import { useAppDispatch } from '~store/Store'
 import { TrygdetidDetaljer } from '~components/behandling/trygdetid/detaljer/TrygdetidDetaljer'
 import { OverstyrtTrygdetid } from './OverstyrtTrygdetid'
+import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
 
 interface Props {
   redigerbar: boolean
-  utenlandstilsnitt?: IUtenlandstilsnitt
+  behandling: IDetaljertBehandling
   virkningstidspunktEtterNyRegelDato: Boolean
 }
 
-const visTrydeavtale = (utenlandstilsnittType?: IUtenlandstilsnittType): Boolean => {
-  return utenlandstilsnittType === IUtenlandstilsnittType.BOSATT_UTLAND
+const visTrydeavtale = (behandling: IDetaljertBehandling): Boolean => {
+  return (
+    behandling.boddEllerArbeidetUtlandet?.vurdereAvoededsTrygdeavtale ||
+    (behandling.behandlingType === IBehandlingsType.REVURDERING &&
+      behandling.revurderingsaarsak === Revurderingaarsak.SLUTTBEHANDLING_UTLAND)
+  )
 }
 
-export const Trygdetid = ({ redigerbar, utenlandstilsnitt, virkningstidspunktEtterNyRegelDato }: Props) => {
-  const { behandlingId } = useParams()
+export const Trygdetid = ({ redigerbar, behandling, virkningstidspunktEtterNyRegelDato }: Props) => {
   const dispatch = useAppDispatch()
   const [hentTrygdetidRequest, fetchTrygdetid] = useApiCall(hentTrygdetid)
   const [opprettTrygdetidRequest, requestOpprettTrygdetid] = useApiCall(opprettTrygdetid)
@@ -64,10 +67,10 @@ export const Trygdetid = ({ redigerbar, utenlandstilsnitt, virkningstidspunktEtt
   }
 
   useEffect(() => {
-    if (!behandlingId) throw new Error('Mangler behandlingsid')
-    fetchTrygdetid(behandlingId, (trygdetid: ITrygdetid) => {
+    if (!behandling?.id) throw new Error('Mangler behandlingsid')
+    fetchTrygdetid(behandling.id, (trygdetid: ITrygdetid) => {
       if (trygdetid == null) {
-        requestOpprettTrygdetid(behandlingId, (trygdetid: ITrygdetid) => {
+        requestOpprettTrygdetid(behandling.id, (trygdetid: ITrygdetid) => {
           oppdaterTrygdetid(trygdetid)
         })
       } else {
@@ -113,6 +116,7 @@ export const Trygdetid = ({ redigerbar, utenlandstilsnitt, virkningstidspunktEtt
           />
           <OverstyrtTrygdetid
             redigerbar={redigerbar}
+            sakType={behandling.sakType}
             trygdetid={trygdetid}
             overstyrTrygdetidPoengaar={overstyrTrygdetidPoengaar}
             virkningstidspunktEtterNyRegelDato={virkningstidspunktEtterNyRegelDato}
@@ -127,7 +131,7 @@ export const Trygdetid = ({ redigerbar, utenlandstilsnitt, virkningstidspunktEtt
           {trygdetid.beregnetTrygdetid && (
             <TrygdetidDetaljer beregnetTrygdetid={trygdetid.beregnetTrygdetid.resultat} />
           )}
-          {visTrydeavtale(utenlandstilsnitt?.type) && <TrygdeAvtale redigerbar={redigerbar} />}
+          {visTrydeavtale(behandling) && <TrygdeAvtale redigerbar={redigerbar} />}
         </>
       )}
       {(isPending(hentTrygdetidRequest) || isPending(hentAlleLandRequest)) && (

@@ -1,13 +1,12 @@
 package no.nav.etterlatte.behandling.domain
 
-import no.nav.etterlatte.behandling.revurdering.RevurderingMedBegrunnelse
+import no.nav.etterlatte.behandling.revurdering.RevurderingInfoMedBegrunnelse
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
-import no.nav.etterlatte.libs.common.behandling.Utenlandstilsnitt
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -23,10 +22,9 @@ data class AutomatiskRevurdering(
     override val status: BehandlingStatus,
     override val kommerBarnetTilgode: KommerBarnetTilgode?,
     override val virkningstidspunkt: Virkningstidspunkt?,
-    override val utenlandstilsnitt: Utenlandstilsnitt?,
     override val boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet?,
     override val revurderingsaarsak: Revurderingaarsak,
-    override val revurderingInfo: RevurderingMedBegrunnelse?,
+    override val revurderingInfo: RevurderingInfoMedBegrunnelse?,
     override val kilde: Vedtaksloesning,
     override val begrunnelse: String?,
 ) : Revurdering(
@@ -37,7 +35,6 @@ data class AutomatiskRevurdering(
         status = status,
         kommerBarnetTilgode = kommerBarnetTilgode,
         virkningstidspunkt = virkningstidspunkt,
-        utenlandstilsnitt = utenlandstilsnitt,
         boddEllerArbeidetUtlandet = boddEllerArbeidetUtlandet,
         revurderingsaarsak = revurderingsaarsak,
         revurderingInfo = revurderingInfo,
@@ -65,6 +62,10 @@ data class AutomatiskRevurdering(
     override fun tilAttestert() = endreTilStatus(BehandlingStatus.ATTESTERT)
 
     override fun tilReturnert() = endreTilStatus(BehandlingStatus.RETURNERT)
+
+    override fun tilTilSamordning() = endreTilStatus(BehandlingStatus.TIL_SAMORDNING)
+
+    override fun tilSamordnet() = endreTilStatus(BehandlingStatus.SAMORDNET)
 
     override fun tilIverksatt() = endreTilStatus(BehandlingStatus.IVERKSATT)
 

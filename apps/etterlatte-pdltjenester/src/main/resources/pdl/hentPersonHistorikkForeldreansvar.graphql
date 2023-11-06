@@ -52,6 +52,7 @@ query(
           minRolleForPerson
           relatertPersonsIdent
           relatertPersonsRolle
+          relatertPersonUtenFolkeregisteridentifikator{...relatertbiperson}
       }
   }
 }

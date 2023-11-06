@@ -56,3 +56,36 @@ jobs:
     with:
       image: ${{ needs.build.outputs.image }}
     secrets: inherit
+
+  deploy-gateway-config-dev-gcp:
+    name: Deploy API gateway config dev
+    needs: deploy
+    runs-on: ubuntu-latest
+    timeout-minutes: 1
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Deploy krakend ApiEndpoints
+        uses: nais/deploy/actions/deploy@v1
+        env:
+          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
+          CLUSTER: dev-gcp
+          RESOURCE: apps/etterlatte-samordning-vedtak/.nais/apiendpoints.yaml
+          PRINT_PAYLOAD: true
+
+  deploy-gateway-config-prod-gcp:
+    name: Deploy API gateway config prod
+    if: ${{ github.ref == 'refs/heads/main' || github.event.inputs.deploy-prod == 'true' }}
+    needs: deploy-gateway-config-dev-gcp
+    runs-on: ubuntu-latest
+    timeout-minutes: 1
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Deploy krakend ApiEndpoints
+        uses: nais/deploy/actions/deploy@v1
+        env:
+          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
+          CLUSTER: prod-gcp
+          RESOURCE: apps/${{ github.workflow }}/.nais/apiendpoints.yaml
+          PRINT_PAYLOAD: true

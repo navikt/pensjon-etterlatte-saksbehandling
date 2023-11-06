@@ -34,7 +34,6 @@ import org.junit.jupiter.api.Test
 import rapidsandrivers.BEHANDLING_ID_KEY
 import rapidsandrivers.BEREGNING_KEY
 import rapidsandrivers.HENDELSE_DATA_KEY
-import java.math.BigDecimal
 import java.time.YearMonth
 import java.util.UUID
 
@@ -60,6 +59,7 @@ internal class MigreringHendelserRiverTest {
                 ),
             beregnetDato = Tidspunkt.now(),
             grunnlagMetadata = Metadata(1234, 1),
+            overstyrBeregning = null,
         )
     private val fnr = AVDOED_FOEDSELSNUMMER
     private val request =
@@ -70,14 +70,14 @@ internal class MigreringHendelserRiverTest {
             avdoedForelder = listOf(AvdoedForelder(fnr, Tidspunkt.now())),
             gjenlevendeForelder = null,
             virkningstidspunkt = YearMonth.now(),
-            foersteVirkningstidspunkt = YearMonth.now().minusYears(10),
             beregning =
                 Beregning(
-                    brutto = BigDecimal(1000),
-                    netto = BigDecimal(1000),
-                    anvendtTrygdetid = BigDecimal(40),
+                    brutto = 1500,
+                    netto = 1500,
+                    anvendtTrygdetid = 40,
                     datoVirkFom = Tidspunkt.now(),
-                    g = BigDecimal(100000),
+                    prorataBroek = null,
+                    g = 100_000,
                 ),
             trygdetid = Trygdetid(emptyList()),
             spraak = Spraak.NN,
@@ -218,10 +218,7 @@ internal class MigreringHendelserRiverTest {
                         request.copy(
                             beregning =
                                 request.beregning.copy(
-                                    anvendtTrygdetid =
-                                        BigDecimal(
-                                            35,
-                                        ),
+                                    anvendtTrygdetid = 35,
                                 ),
                         ),
                 ),

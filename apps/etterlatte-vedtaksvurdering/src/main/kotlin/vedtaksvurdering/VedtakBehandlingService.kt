@@ -30,8 +30,10 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.rapidsandrivers.migrering.KILDE_KEY
 import no.nav.etterlatte.token.BrukerTokenInfo
+import no.nav.etterlatte.vedtaksvurdering.grunnlag.GrunnlagVersjonValidering.validerVersjon
 import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlient
 import no.nav.etterlatte.vedtaksvurdering.klienter.BeregningKlient
+import no.nav.etterlatte.vedtaksvurdering.klienter.SamKlient
 import no.nav.etterlatte.vedtaksvurdering.klienter.VilkaarsvurderingKlient
 import no.nav.helse.rapids_rivers.JsonMessage
 import org.slf4j.LoggerFactory
@@ -45,6 +47,7 @@ class VedtakBehandlingService(
     private val beregningKlient: BeregningKlient,
     private val vilkaarsvurderingKlient: VilkaarsvurderingKlient,
     private val behandlingKlient: BehandlingKlient,
+    private val samKlient: SamKlient,
     private val publiser: (String, UUID) -> Unit,
     private val clock: Clock = utcKlokke(),
 ) {
@@ -77,7 +80,7 @@ class VedtakBehandlingService(
         }
 
         val (behandling, vilkaarsvurdering, beregningOgAvkorting) = hentDataForVedtak(behandlingId, brukerTokenInfo)
-        verifiserGrunnlagVersjon(vilkaarsvurdering, beregningOgAvkorting)
+        validerVersjon(vilkaarsvurdering, beregningOgAvkorting)
 
         val vedtakType = vedtakType(behandling.behandlingType, vilkaarsvurdering)
         val virkningstidspunkt =
@@ -94,23 +97,6 @@ class VedtakBehandlingService(
         }
     }
 
-    /**
-     * TODO:
-     *  - Må sikre at vedtak ikke kan gjennomføres dersom det er diff på versjon
-     *  - Gi forståelig feilmelding til saksbehandler
-     **/
-    private fun verifiserGrunnlagVersjon(
-        vilkaarsvurdering: VilkaarsvurderingDto?,
-        beregningOgAvkorting: BeregningOgAvkorting?,
-    ) {
-        if (vilkaarsvurdering?.grunnlagVersjon == null || beregningOgAvkorting == null) {
-            return
-        } else if (vilkaarsvurdering.grunnlagVersjon != beregningOgAvkorting.beregning.grunnlagMetadata.versjon) {
-            logger.warn("Ulik versjon av grunnlag i vilkaarsvurdering og beregnin!")
-            return
-        }
-    }
-
     suspend fun fattVedtak(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
@@ -120,6 +106,9 @@ class VedtakBehandlingService(
 
         verifiserGyldigBehandlingStatus(behandlingKlient.kanFatteVedtak(behandlingId, brukerTokenInfo), vedtak)
         verifiserGyldigVedtakStatus(vedtak.status, listOf(VedtakStatus.OPPRETTET, VedtakStatus.RETURNERT))
+
+        val (_, vilkaarsvurdering, beregningOgAvkorting) = hentDataForVedtak(behandlingId, brukerTokenInfo)
+        validerVersjon(vilkaarsvurdering, beregningOgAvkorting)
 
         val sak = behandlingKlient.hentSak(vedtak.sakId, brukerTokenInfo)
 
@@ -179,12 +168,9 @@ class VedtakBehandlingService(
         verifiserGyldigVedtakStatus(vedtak.status, listOf(VedtakStatus.FATTET_VEDTAK))
         attestantHarAnnenIdentEnnSaksbehandler(vedtak.vedtakFattet!!.ansvarligSaksbehandler, brukerTokenInfo)
 
-        val (behandling, vilkaarsvurdering, beregningOgAvkorting, sak) =
-            hentDataForVedtak(behandlingId, brukerTokenInfo)
+        val (behandling, _, _, sak) = hentDataForVedtak(behandlingId, brukerTokenInfo)
 
         verifiserGyldigVedtakForRevurdering(behandling, vedtak)
-        verifiserGrunnlagVersjon(vilkaarsvurdering, beregningOgAvkorting)
-        // TODO: Låse versjon i grunnlag
 
         val attestertVedtak =
             repository.inTransaction { tx ->
@@ -297,6 +283,71 @@ class VedtakBehandlingService(
         return repository.hentVedtak(behandlingId)!!
     }
 
+    suspend fun tilSamordningVedtak(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Vedtak {
+        logger.info("Setter vedtak til til_samordning for behandling med behandlingId=$behandlingId")
+        val vedtak = hentVedtakNonNull(behandlingId)
+
+        verifiserGyldigVedtakStatus(vedtak.status, listOf(VedtakStatus.ATTESTERT))
+
+        val tilSamordningVedtakLocal =
+            repository.inTransaction { tx ->
+                repository.tilSamordningVedtak(behandlingId, tx = tx)
+                    .also {
+                        runBlocking {
+                            behandlingKlient.tilSamordning(behandlingId, brukerTokenInfo, it.id)
+                        }
+                    }
+            }
+
+        sendToRapid(
+            vedtakhendelse = VedtakKafkaHendelseType.TIL_SAMORDNING,
+            vedtak = tilSamordningVedtakLocal,
+            tekniskTid = Tidspunkt.now(clock),
+            behandlingId = behandlingId,
+        )
+
+        if (!samKlient.samordneVedtak(tilSamordningVedtakLocal, brukerTokenInfo)) {
+            logger.info("Svar fra samordning: ikke nødvendig å vente [behandlingId=$behandlingId]")
+            return samordnetVedtak(behandlingId, brukerTokenInfo, tilSamordningVedtakLocal)
+        } else {
+            logger.info("Svar fra samordning: må vente [behandlingId=$behandlingId]")
+        }
+
+        return tilSamordningVedtakLocal
+    }
+
+    suspend fun samordnetVedtak(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+        vedtakTilSamordning: Vedtak? = null,
+    ): Vedtak {
+        logger.info("Setter vedtak til samordnet for behandling med behandlingId=$behandlingId")
+        val vedtak = vedtakTilSamordning ?: hentVedtakNonNull(behandlingId)
+
+        verifiserGyldigVedtakStatus(vedtak.status, listOf(VedtakStatus.TIL_SAMORDNING))
+        val samordnetVedtakLocal =
+            repository.inTransaction { tx ->
+                repository.samordnetVedtak(behandlingId, tx = tx)
+                    .also {
+                        runBlocking {
+                            behandlingKlient.samordnet(behandlingId, brukerTokenInfo, it.id)
+                        }
+                    }
+            }
+
+        sendToRapid(
+            vedtakhendelse = VedtakKafkaHendelseType.SAMORDNET,
+            vedtak = samordnetVedtakLocal,
+            tekniskTid = Tidspunkt.now(clock),
+            behandlingId = behandlingId,
+        )
+
+        return samordnetVedtakLocal
+    }
+
     suspend fun iverksattVedtak(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
@@ -304,7 +355,7 @@ class VedtakBehandlingService(
         logger.info("Setter vedtak til iverksatt for behandling med behandlingId=$behandlingId")
         val vedtak = hentVedtakNonNull(behandlingId)
 
-        verifiserGyldigVedtakStatus(vedtak.status, listOf(VedtakStatus.ATTESTERT))
+        verifiserGyldigVedtakStatus(vedtak.status, listOf(VedtakStatus.ATTESTERT, VedtakStatus.SAMORDNET))
         val iverksattVedtak =
             repository.inTransaction { tx ->
                 val iverksattVedtakLocal =

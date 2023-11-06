@@ -56,10 +56,10 @@ class SafClient(
         fnr: String,
         idType: BrukerIdType,
         brukerTokenInfo: BrukerTokenInfo,
-    ): HentJournalposterResult {
+    ): HentDokumentoversiktBrukerResult {
         val request =
             GraphqlRequest(
-                query = getQuery("/graphql/journalpost.graphql"),
+                query = getQuery("/graphql/dokumentoversiktBruker.graphql"),
                 variables =
                     DokumentOversiktBrukerVariables(
                         brukerId =
@@ -81,10 +81,10 @@ class SafClient(
 
             if (res.status.isSuccess()) {
                 val journalposter: List<Journalpost> =
-                    res.body<JournalpostResponse>()
+                    res.body<DokumentoversiktBrukerResponse>()
                         .data?.dokumentoversiktBruker?.journalposter ?: emptyList()
 
-                HentJournalposterResult(journalposter = journalposter)
+                HentDokumentoversiktBrukerResult(journalposter = journalposter)
             } else if (res.status == HttpStatusCode.Forbidden) {
                 val error = res.bodyAsText()
                 logger.warn(
@@ -92,9 +92,56 @@ class SafClient(
                         "har ikke tilgang til å hente journalposter for bruker: $error",
                 )
 
-                HentJournalposterResult(
+                HentDokumentoversiktBrukerResult(
                     error =
-                        HentJournalposterResult.Error(
+                        HentDokumentoversiktBrukerResult.Error(
+                            HttpStatusCode.Forbidden,
+                            error,
+                        ),
+                )
+            } else {
+                throw ResponseException(res, "Ukjent feil oppsto ved henting av journalposter")
+            }
+        }.let {
+            when (it) {
+                is RetryResult.Success -> it.content
+                is RetryResult.Failure -> throw it.samlaExceptions()
+            }
+        }
+    }
+
+    override suspend fun hentJournalpost(
+        journalpostId: String,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): HentJournalpostResult {
+        val request =
+            GraphqlRequest(
+                query = getQuery("/graphql/journalpost.graphql"),
+                variables = JournalpostVariables(journalpostId),
+            )
+
+        return retry {
+            val res =
+                httpClient.post("$baseUrl/graphql") {
+                    header("Authorization", "Bearer ${getToken(brukerTokenInfo.accessToken())}")
+                    accept(ContentType.Application.Json)
+                    setBody(TextContent(request.toJson(), ContentType.Application.Json))
+                }
+
+            if (res.status.isSuccess()) {
+                val journalpost: Journalpost? = res.body<JournalpostResponse>().data?.journalpost
+
+                HentJournalpostResult(journalpost)
+            } else if (res.status == HttpStatusCode.Forbidden) {
+                val error = res.bodyAsText()
+                logger.warn(
+                    "Saksbehandler ${brukerTokenInfo.ident()} " +
+                        "har ikke tilgang til å hente journalposter for bruker: $error",
+                )
+
+                HentJournalpostResult(
+                    error =
+                        HentJournalpostResult.Error(
                             HttpStatusCode.Forbidden,
                             error,
                         ),

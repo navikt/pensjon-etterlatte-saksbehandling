@@ -5,6 +5,8 @@ import no.nav.etterlatte.regulering.AppBuilder
 import no.nav.etterlatte.regulering.LoependeYtelserforespoerselRiver
 import no.nav.etterlatte.regulering.OpprettVedtakforespoerselRiver
 import no.nav.etterlatte.vedtaksvurdering.rivers.LagreIverksattVedtakRiver
+import no.nav.etterlatte.vedtaksvurdering.samordning.AttestertVedtakRiver
+import no.nav.etterlatte.vedtaksvurdering.samordning.SamordningMottattRiver
 import no.nav.helse.rapids_rivers.RapidApplication
 import rapidsandrivers.getRapidEnv
 
@@ -16,5 +18,7 @@ fun main() {
         OpprettVedtakforespoerselRiver(rapidsConnection, vedtakKlient)
         MigreringHendelserRiver(rapidsConnection, vedtakKlient)
         LagreIverksattVedtakRiver(rapidsConnection, vedtakKlient)
+        AttestertVedtakRiver(rapidsConnection, vedtakKlient)
+        SamordningMottattRiver(rapidsConnection, vedtakKlient)
     }.start()
 }

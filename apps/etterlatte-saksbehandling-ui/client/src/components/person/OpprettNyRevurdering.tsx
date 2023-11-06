@@ -2,10 +2,10 @@ import { Button, Heading, Modal, Select, TextField } from '@navikt/ds-react'
 import React, { useState } from 'react'
 import styled from 'styled-components'
 import { isPending, useApiCall } from '~shared/hooks/useApiCall'
-import { opprettRevurdering as opprettRevurderingApi } from '~shared/api/behandling'
 import { Revurderingaarsak, tekstRevurderingsaarsak } from '~shared/types/Revurderingaarsak'
 import { useNavigate } from 'react-router-dom'
 import { ButtonGroup } from '~components/person/VurderHendelseModal'
+import { opprettRevurdering as opprettRevurderingApi } from '~shared/api/revurdering'
 
 export const OpprettNyRevurdering = ({
   sakId,
@@ -26,7 +26,7 @@ export const OpprettNyRevurdering = ({
       return setError('Du må velge en revurdering')
     }
     opprettRevurdering(
-      { sakId: sakId, aarsak: valgtRevurdering, fritekstAarsak: fritekstgrunn },
+      { sakId: sakId, aarsak: valgtRevurdering, fritekstAarsak: fritekstgrunn ? fritekstgrunn : null },
       (behandlingId: string) => {
         navigate(`/behandling/${behandlingId}/`)
       },

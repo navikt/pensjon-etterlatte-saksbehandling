@@ -42,121 +42,112 @@ const UhaandtertHendelse = (props: {
   }
 
   return (
-    <>
-      <Table.ExpandableRow
-        content={
-          <>
-            <HendelseBeskrivelse hendelse={hendelse} />
+    <Table.ExpandableRow
+      content={
+        <>
+          <HendelseBeskrivelse hendelse={hendelse} />
 
-            <BodyShort spacing>
-              {tattMedIBehandling ? (
+          <BodyShort spacing>
+            {tattMedIBehandling ? (
+              <Alert variant="info" inline>
+                Denne hendelsen har en revurdering knyttet til seg.{' '}
+                <BlueLink href={`/behandling/${hendelse.behandlingId}/revurderingsoversikt`}>
+                  Gå til revurdering
+                </BlueLink>
+              </Alert>
+            ) : harAapenRevurdering ? (
+              <Alert variant="info" inline>
+                Denne saken har en åpen revurdering, denne må behandles før en ny kan startes.
+              </Alert>
+            ) : (
+              !stoetterRevurdering && (
                 <Alert variant="info" inline>
-                  Denne hendelsen har en revurdering knyttet til seg.{' '}
-                  <BlueLink href={`/behandling/${hendelse.behandlingId}/revurderingsoversikt`}>
-                    Gå til revurdering
-                  </BlueLink>
+                  Automatisk revurdering støttes ikke for denne hendelsen
                 </Alert>
-              ) : harAapenRevurdering ? (
-                <Alert variant="info" inline>
-                  Denne saken har en åpen revurdering, denne må behandles før en ny kan startes.
-                </Alert>
-              ) : (
-                !stoetterRevurdering && (
-                  <Alert variant="info" inline>
-                    Automatisk revurdering støttes ikke for denne hendelsen
-                  </Alert>
-                )
-              )}
-            </BodyShort>
+              )
+            )}
+          </BodyShort>
 
-            <div style={{ minHeight: '3rem', marginTop: '1rem' }}>
-              <>
-                <div>
-                  {!tattMedIBehandling && stoetterRevurdering && (
-                    <Button
-                      disabled={harAapenRevurdering}
-                      onClick={() => startRevurdering(hendelse)}
-                      icon={<ArrowsCirclepathIcon />}
-                    >
-                      Start revurdering
-                    </Button>
-                  )}
-                  <Button
-                    variant="tertiary"
-                    onClick={() => setOpen(true)}
-                    icon={<XMarkIcon />}
-                    style={{ float: 'right' }}
-                  >
-                    Lukk hendelse
-                  </Button>
-                </div>
-
-                <Modal
-                  open={open}
-                  onClose={() => setOpen((x) => !x)}
-                  aria-labelledby="modal-heading"
-                  style={{ maxWidth: '60rem' }}
+          <div style={{ minHeight: '3rem', marginTop: '1rem' }}>
+            <div>
+              {!tattMedIBehandling && stoetterRevurdering && (
+                <Button
+                  disabled={harAapenRevurdering}
+                  onClick={() => startRevurdering(hendelse)}
+                  icon={<ArrowsCirclepathIcon />}
                 >
-                  <Modal.Body>
-                    <Heading spacing level="2" size="medium" id="modal-heading">
-                      Avslutt uten revurdering
-                    </Heading>
-                    {hendelse.type === GrunnlagsendringsType.INSTITUSJONSOPPHOLD ? (
-                      <>
-                        <InstitusjonsoppholdVurderingBegrunnelse
-                          sakId={hendelse.sakId}
-                          grunnlagsEndringshendelseId={hendelse.id}
-                          lukkGrunnlagshendelseWrapper={lukkGrunnlagshendelseWrapper}
-                        />
-                        <Button
-                          variant="secondary"
-                          onClick={() => {
-                            setOpen(false)
-                          }}
-                        >
-                          Lukk modal
-                        </Button>
-                      </>
-                    ) : (
-                      <>
-                        <BodyShort spacing>
-                          I noen tilfeller krever ikke ny informasjon eller hendelser noen revurdering. Beskriv hvorfor
-                          en revurdering ikke er nødvendig.
-                        </BodyShort>
-                        <Textarea
-                          label="Begrunnelse"
-                          value={hendelsekommentar}
-                          onChange={(e) => oppdaterKommentar(e.target.value)}
-                        />
-                        <ButtonGroup>
-                          <Button
-                            variant="secondary"
-                            onClick={() => {
-                              oppdaterKommentar('')
-                              setOpen(false)
-                              resetApiCall()
-                            }}
-                          >
-                            Avbryt
-                          </Button>
-                          <Button onClick={lukkGrunnlagshendelseWrapper}>Lagre</Button>
-                        </ButtonGroup>
-                      </>
-                    )}
-                    {isPending(res) && <Loader />}
-                    {isFailure(res) && <ApiErrorAlert>Vi kunne ikke lukke hendelsen</ApiErrorAlert>}
-                  </Modal.Body>
-                </Modal>
-              </>
+                  Start revurdering
+                </Button>
+              )}
+              <Button variant="tertiary" onClick={() => setOpen(true)} icon={<XMarkIcon />} style={{ float: 'right' }}>
+                Lukk hendelse
+              </Button>
             </div>
-          </>
-        }
-      >
-        <Table.DataCell>{grunnlagsendringsTittel[samsvarType]}</Table.DataCell>
-        <Table.DataCell>{formaterStringDato(opprettet)}</Table.DataCell>
-        <Table.DataCell></Table.DataCell>
-      </Table.ExpandableRow>
-    </>
+
+            <Modal
+              open={open}
+              onClose={() => setOpen(false)}
+              aria-labelledby="modal-heading"
+              style={{ maxWidth: '60rem' }}
+            >
+              <Modal.Body>
+                <Heading spacing level="2" size="medium" id="modal-heading">
+                  Avslutt uten revurdering
+                </Heading>
+                {hendelse.type === GrunnlagsendringsType.INSTITUSJONSOPPHOLD ? (
+                  <>
+                    <InstitusjonsoppholdVurderingBegrunnelse
+                      sakId={hendelse.sakId}
+                      grunnlagsEndringshendelseId={hendelse.id}
+                      lukkGrunnlagshendelseWrapper={lukkGrunnlagshendelseWrapper}
+                    />
+                    <Button
+                      variant="secondary"
+                      onClick={() => {
+                        setOpen(false)
+                      }}
+                    >
+                      Lukk modal
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <BodyShort spacing>
+                      I noen tilfeller krever ikke ny informasjon eller hendelser noen revurdering. Beskriv hvorfor en
+                      revurdering ikke er nødvendig.
+                    </BodyShort>
+                    <Textarea
+                      label="Begrunnelse"
+                      value={hendelsekommentar}
+                      onChange={(e) => oppdaterKommentar(e.target.value)}
+                    />
+                    <ButtonGroup>
+                      <Button
+                        variant="secondary"
+                        onClick={() => {
+                          oppdaterKommentar('')
+                          resetApiCall()
+                          setOpen(false)
+                        }}
+                      >
+                        Avbryt
+                      </Button>
+                      <Button onClick={lukkGrunnlagshendelseWrapper}>Lagre</Button>
+                    </ButtonGroup>
+                  </>
+                )}
+                {isPending(res) && <Loader />}
+                {isFailure(res) && <ApiErrorAlert>Vi kunne ikke lukke hendelsen</ApiErrorAlert>}
+              </Modal.Body>
+            </Modal>
+          </div>
+        </>
+      }
+    >
+      <Table.DataCell>{grunnlagsendringsTittel[samsvarType]}</Table.DataCell>
+      <Table.DataCell>{formaterStringDato(opprettet)}</Table.DataCell>
+      <Table.DataCell></Table.DataCell>
+    </Table.ExpandableRow>
   )
 }
 

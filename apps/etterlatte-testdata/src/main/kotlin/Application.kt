@@ -50,7 +50,6 @@ import no.nav.etterlatte.libs.ktor.metricsModule
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
 import no.nav.etterlatte.testdata.dolly.DollyClientImpl
 import no.nav.etterlatte.testdata.dolly.DollyService
-import no.nav.etterlatte.testdata.features.SlettsakFeature
 import no.nav.etterlatte.testdata.features.dolly.DollyFeature
 import no.nav.etterlatte.testdata.features.egendefinert.EgendefinertMeldingFeature
 import no.nav.etterlatte.testdata.features.index.IndexFeature
@@ -91,7 +90,6 @@ val features: List<TestDataFeature> =
         IndexFeature,
         EgendefinertMeldingFeature,
         StandardMeldingFeature,
-        SlettsakFeature,
         OpprettSoeknadFeature,
         DollyFeature(
             DollyService(

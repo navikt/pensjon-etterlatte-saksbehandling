@@ -6,6 +6,7 @@ import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.behandling.Trygdetid
 import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
 import no.nav.etterlatte.brev.model.BrevData
+import no.nav.etterlatte.brev.model.EtterbetalingBrev
 import no.nav.etterlatte.brev.model.EtterbetalingDTO
 import no.nav.etterlatte.brev.model.InnholdMedVedlegg
 import no.nav.etterlatte.brev.model.Slate
@@ -23,20 +24,20 @@ data class InnvilgetBrevDataEnkel(
         fun fra(
             generellBrevData: GenerellBrevData,
             utbetalingsinfo: Utbetalingsinfo,
-            etterbetalingDTO: EtterbetalingDTO?,
+            etterbetaling: EtterbetalingDTO?,
         ) = InnvilgetBrevDataEnkel(
             utbetalingsinfo = utbetalingsinfo,
             avdoed = generellBrevData.personerISak.avdoed,
-            vedtaksdato = finnVedtaksmaaned(generellBrevData, etterbetalingDTO).atDay(1),
-            erEtterbetaling = etterbetalingDTO != null,
+            vedtaksdato = finnVedtaksmaaned(generellBrevData, etterbetaling).atDay(1),
+            erEtterbetaling = etterbetaling != null,
         )
 
         private fun finnVedtaksmaaned(
             generellBrevData: GenerellBrevData,
-            etterbetalingDTO: EtterbetalingDTO?,
+            etterbetaling: EtterbetalingDTO?,
         ): YearMonth {
-            if (etterbetalingDTO != null) {
-                return YearMonth.from(etterbetalingDTO.tilDato).plusMonths(1)
+            if (etterbetaling != null) {
+                return YearMonth.from(etterbetaling.tilDato).plusMonths(1)
             }
             return generellBrevData.forenkletVedtak.vedtaksdato?.let { YearMonth.from(it) }
                 ?: YearMonth.now()
@@ -48,7 +49,7 @@ data class InnvilgetHovedmalBrevData(
     val utbetalingsinfo: Utbetalingsinfo,
     val avkortingsinfo: Avkortingsinfo? = null,
     val beregningsinfo: BeregningsinfoBP,
-    val etterbetalingDTO: EtterbetalingDTO? = null,
+    val etterbetaling: EtterbetalingBrev? = null,
     val innhold: List<Slate.Element>,
 ) : BrevData() {
     companion object {
@@ -61,10 +62,10 @@ data class InnvilgetHovedmalBrevData(
             innhold: InnholdMedVedlegg,
         ): InnvilgetHovedmalBrevData =
             InnvilgetHovedmalBrevData(
-                utbetalingsinfo = utbetalingsinfo,
+                utbetalingsinfo = Utbetalingsinfo.kopier(utbetalingsinfo, etterbetalingDTO),
                 avkortingsinfo = avkortingsinfo,
                 beregningsinfo = BeregningsinfoBP.fra(utbetalingsinfo, trygdetid, grunnbeloep, innhold),
-                etterbetalingDTO = etterbetalingDTO,
+                etterbetaling = EtterbetalingBrev.fra(etterbetalingDTO, utbetalingsinfo.beregningsperioder),
                 innhold = innhold.innhold(),
             )
     }

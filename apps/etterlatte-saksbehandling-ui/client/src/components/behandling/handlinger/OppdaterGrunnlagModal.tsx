@@ -1,19 +1,26 @@
-import { useState } from 'react'
+import React, { useState } from 'react'
 import { Alert, BodyLong, Button, Heading, Modal } from '@navikt/ds-react'
-import { useBehandling } from '~components/behandling/useBehandling'
 import { FlexRow } from '~shared/styled'
-import { isFailure, isPending, useApiCall } from '~shared/hooks/useApiCall'
+import { isFailure, isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
 import { oppdaterGrunnlag } from '~shared/api/behandling'
 import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 import { hentBehandlesFraStatus } from '~components/behandling/felles/utils'
+import Spinner from '~shared/Spinner'
+import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
+import { ArrowsCirclepathIcon } from '@navikt/aksel-icons'
 
 export const FEATURE_TOGGLE_KAN_BRUKE_OPPDATER_GRUNNLAG = 'pensjon-etterlatte.kan-bruke-oppdater-grunnlag'
 
-export default function OppdaterGrunnlagModal() {
-  const behandling = useBehandling()
+export default function OppdaterGrunnlagModal({
+  behandlingId,
+  behandlingStatus,
+}: {
+  behandlingId: string
+  behandlingStatus: IBehandlingStatus
+}) {
   const [isOpen, setIsOpen] = useState(false)
   const featureAktiv = useFeatureEnabledMedDefault(FEATURE_TOGGLE_KAN_BRUKE_OPPDATER_GRUNNLAG, false)
-  const behandles = behandling != null && hentBehandlesFraStatus(behandling.status)
+  const behandles = hentBehandlesFraStatus(behandlingStatus)
   const [oppdatert, apiOppdaterGrunnlag] = useApiCall(oppdaterGrunnlag)
 
   if (!featureAktiv || !behandles) return
@@ -21,17 +28,23 @@ export default function OppdaterGrunnlagModal() {
   const lagre = () => {
     return apiOppdaterGrunnlag(
       {
-        behandlingId: behandling.id,
+        behandlingId: behandlingId,
       },
       () => {
-        setIsOpen(false)
+        setTimeout(() => window.location.reload(), 2000)
       }
     )
   }
 
   return (
-    <>
-      <Button variant="primary" onClick={() => setIsOpen(true)}>
+    <div style={{ float: 'right', marginBottom: '2rem' }}>
+      <Button
+        variant="secondary"
+        size="small"
+        icon={<ArrowsCirclepathIcon />}
+        iconPosition="right"
+        onClick={() => setIsOpen(true)}
+      >
         Oppdater grunnlag
       </Button>
 
@@ -42,9 +55,9 @@ export default function OppdaterGrunnlagModal() {
           </Heading>
 
           <BodyLong spacing>
-            Oppdater grunnlaget hvis det ikke samsvarer med virkeligheten (f.eks. hvis dødsfallet eller ev. verge ikke
-            er registrert når behandlingen ble opprettet). Status på behandlingen vil da bli satt til
-            &quot;Opprettet&quot;. Hvis du har startet behandlingen allerede, må du gå gjennom stegene på nytt.
+            Oppdater grunnlaget hvis opplysningene i saken ikke samsvarer med hverandre (f.eks. hvis dødsfallet eller
+            evenutell verge ikke er registrert når behandlingen ble opprettet). Status på behandlingen vil da bli satt
+            til &quot;Opprettet&quot;. Hvis du har startet behandlingen allerede, må du gå gjennom stegene på nytt.
           </BodyLong>
 
           <FlexRow justify="center">
@@ -55,9 +68,10 @@ export default function OppdaterGrunnlagModal() {
               Ja, oppdater grunnlaget
             </Button>
           </FlexRow>
+          {isSuccess(oppdatert) && <Spinner visible label="Oppdatert – laster inn på nytt ..." />}
           {isFailure(oppdatert) && <Alert variant="error">Oppdatering feilet</Alert>}
         </Modal.Body>
       </Modal>
-    </>
+    </div>
   )
 }

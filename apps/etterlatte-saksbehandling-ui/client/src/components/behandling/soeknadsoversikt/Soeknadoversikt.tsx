@@ -8,7 +8,7 @@ import { NesteOgTilbake } from '../handlinger/NesteOgTilbake'
 import { behandlingErUtfylt, hentBehandlesFraStatus } from '../felles/utils'
 import { VurderingsResultat } from '~shared/types/VurderingsResultat'
 import { OversiktGyldigFramsatt } from '~components/behandling/soeknadsoversikt/soeknadoversikt/gyldigFramsattSoeknad/OversiktGyldigFramsatt'
-import { Utenlandstilsnitt } from '~components/behandling/soeknadsoversikt/soeknadoversikt/utenlandstilsnitt/Utenlandstilsnitt'
+import { Utenlandstilknytning } from '~components/behandling/soeknadsoversikt/soeknadoversikt/utenlandstilknytning/Utenlandstilknytning'
 import { SakType } from '~shared/types/sak'
 import { OversiktKommerBarnetTilgode } from '~components/behandling/soeknadsoversikt/soeknadoversikt/kommerBarnetTilgode/OversiktKommerBarnetTilgode'
 import { Start } from '~components/behandling/handlinger/start'
@@ -45,7 +45,8 @@ export const Soeknadsoversikt = (props: { behandling: IDetaljertBehandling }) =>
         <Soeknadsdato mottattDato={behandling.soeknadMottattDato} />
       </ContentHeader>
       <InnholdPadding>
-        <OppdaterGrunnlagModal />
+        <OppdaterGrunnlagModal behandlingId={behandling.id} behandlingStatus={behandling.status} />
+        <Utenlandstilknytning behandling={behandling} redigerbar={behandles} />
         <OversiktGyldigFramsatt behandling={behandling} />
         {behandling.gyldighetsprøving?.resultat === VurderingsResultat.OPPFYLT && (
           <>
@@ -85,7 +86,6 @@ export const Soeknadsoversikt = (props: { behandling: IDetaljertBehandling }) =>
                 ),
               }}
             </Virkningstidspunkt>
-            <Utenlandstilsnitt behandling={behandling} redigerbar={behandles} />
             <BoddEllerArbeidetUtlandet behandling={behandling} redigerbar={behandles} />
           </>
         )}

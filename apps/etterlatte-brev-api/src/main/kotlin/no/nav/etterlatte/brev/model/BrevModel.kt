@@ -2,11 +2,13 @@ package no.nav.etterlatte.brev.model
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import no.nav.etterlatte.brev.adresse.RegoppslagResponseDTO
+import no.nav.etterlatte.brev.behandling.Beregningsperiode
 import no.nav.etterlatte.brev.behandling.Trygdetidsperiode
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
 import no.nav.pensjon.brevbaker.api.model.Kroner
 import java.time.LocalDate
+import java.time.YearMonth
 import java.util.UUID
 
 typealias BrevID = Long
@@ -152,3 +154,24 @@ data class NyBeregningsperiode(
     val stoenadFoerReduksjon: Kroner,
     var utbetaltBeloep: Kroner,
 )
+
+data class EtterbetalingBrev(
+    val fraDato: LocalDate,
+    val tilDato: LocalDate,
+    val etterbetalingsperioder: List<Beregningsperiode>,
+) {
+    companion object {
+        fun fra(
+            dto: EtterbetalingDTO?,
+            perioder: List<Beregningsperiode>,
+        ) = if (dto == null) {
+            null
+        } else {
+            EtterbetalingBrev(
+                fraDato = dto.fraDato,
+                tilDato = dto.tilDato,
+                etterbetalingsperioder = perioder.filter { YearMonth.from(it.datoFOM) <= YearMonth.from(dto.tilDato) },
+            )
+        }
+    }
+}

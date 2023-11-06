@@ -2,6 +2,7 @@ package no.nav.etterlatte.libs.ktor
 
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.createRouteScopedPlugin
+import io.ktor.server.application.log
 import io.ktor.server.auth.AuthenticationChecked
 import io.ktor.server.response.respond
 
@@ -20,6 +21,7 @@ val AuthorizationPlugin =
                     call.firstValidTokenClaims()?.getAsList("roles") ?: emptyList()
 
                 if (userRoles.intersect(roles).isEmpty()) {
+                    application.log.info("Request avslått pga manglende rolle (gyldige: $roles)")
                     call.respond(HttpStatusCode.Unauthorized, "Har ikke påkrevd rolle ")
                 }
             }

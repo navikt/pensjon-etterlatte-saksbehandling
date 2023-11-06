@@ -13,6 +13,7 @@ import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.behandlingId
 import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
+import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.tilgangsstyring.kunAttestant
 import no.nav.etterlatte.vedtaksvurdering.VedtakHendelse
 
@@ -22,7 +23,7 @@ internal fun Route.behandlingsstatusRoutes(behandlingsstatusService: BehandlingS
             // Kalles kun av vilkårsvurdering når total-vurdering slettes
             haandterStatusEndring(call) {
                 inTransaction {
-                    behandlingsstatusService.settOpprettet(behandlingId)
+                    behandlingsstatusService.settOpprettet(behandlingId, brukerTokenInfo)
                 }
             }
         }
@@ -30,7 +31,7 @@ internal fun Route.behandlingsstatusRoutes(behandlingsstatusService: BehandlingS
             // Kalles kun av vilkårsvurdering når total-vurdering slettes
             haandterStatusEndring(call) {
                 inTransaction {
-                    behandlingsstatusService.settOpprettet(behandlingId, false)
+                    behandlingsstatusService.settOpprettet(behandlingId, brukerTokenInfo, false)
                 }
             }
         }
@@ -38,14 +39,14 @@ internal fun Route.behandlingsstatusRoutes(behandlingsstatusService: BehandlingS
         get("/vilkaarsvurder") {
             haandterStatusEndring(call) {
                 inTransaction {
-                    behandlingsstatusService.settVilkaarsvurdert(behandlingId, true)
+                    behandlingsstatusService.settVilkaarsvurdert(behandlingId, brukerTokenInfo)
                 }
             }
         }
         post("/vilkaarsvurder") {
             haandterStatusEndring(call) {
                 inTransaction {
-                    behandlingsstatusService.settVilkaarsvurdert(behandlingId, false)
+                    behandlingsstatusService.settVilkaarsvurdert(behandlingId, brukerTokenInfo, false)
                 }
             }
         }
@@ -53,14 +54,14 @@ internal fun Route.behandlingsstatusRoutes(behandlingsstatusService: BehandlingS
         get("/oppdaterTrygdetid") {
             haandterStatusEndring(call) {
                 inTransaction {
-                    behandlingsstatusService.settTrygdetidOppdatert(behandlingId, true)
+                    behandlingsstatusService.settTrygdetidOppdatert(behandlingId, brukerTokenInfo)
                 }
             }
         }
         post("/oppdaterTrygdetid") {
             haandterStatusEndring(call) {
                 inTransaction {
-                    behandlingsstatusService.settTrygdetidOppdatert(behandlingId, false)
+                    behandlingsstatusService.settTrygdetidOppdatert(behandlingId, brukerTokenInfo, false)
                 }
             }
         }
@@ -68,7 +69,7 @@ internal fun Route.behandlingsstatusRoutes(behandlingsstatusService: BehandlingS
         get("/beregn") {
             haandterStatusEndring(call) {
                 inTransaction {
-                    behandlingsstatusService.settBeregnet(behandlingId)
+                    behandlingsstatusService.settBeregnet(behandlingId, brukerTokenInfo)
                 }
             }
         }
@@ -76,7 +77,7 @@ internal fun Route.behandlingsstatusRoutes(behandlingsstatusService: BehandlingS
         post("/beregn") {
             haandterStatusEndring(call) {
                 inTransaction {
-                    behandlingsstatusService.settBeregnet(behandlingId, false)
+                    behandlingsstatusService.settBeregnet(behandlingId, brukerTokenInfo, false)
                 }
             }
         }
@@ -84,7 +85,7 @@ internal fun Route.behandlingsstatusRoutes(behandlingsstatusService: BehandlingS
         get("/avkort") {
             haandterStatusEndring(call) {
                 inTransaction {
-                    behandlingsstatusService.settAvkortet(behandlingId)
+                    behandlingsstatusService.settAvkortet(behandlingId, brukerTokenInfo)
                 }
             }
         }
@@ -92,7 +93,7 @@ internal fun Route.behandlingsstatusRoutes(behandlingsstatusService: BehandlingS
         post("/avkort") {
             haandterStatusEndring(call) {
                 inTransaction {
-                    behandlingsstatusService.settAvkortet(behandlingId, false)
+                    behandlingsstatusService.settAvkortet(behandlingId, brukerTokenInfo, false)
                 }
             }
         }
@@ -118,6 +119,24 @@ internal fun Route.behandlingsstatusRoutes(behandlingsstatusService: BehandlingS
                     inTransaction {
                         behandlingsstatusService.sjekkOmKanAttestere(behandlingId)
                     }
+                }
+            }
+        }
+
+        post("/tilsamordning") {
+            val vedtakHendelse = call.receive<VedtakHendelse>()
+            haandterStatusEndring(call) {
+                inTransaction {
+                    behandlingsstatusService.settTilSamordnetVedtak(behandlingId, vedtakHendelse)
+                }
+            }
+        }
+
+        post("/samordnet") {
+            val vedtakHendelse = call.receive<VedtakHendelse>()
+            haandterStatusEndring(call) {
+                inTransaction {
+                    behandlingsstatusService.settSamordnetVedtak(behandlingId, vedtakHendelse)
                 }
             }
         }

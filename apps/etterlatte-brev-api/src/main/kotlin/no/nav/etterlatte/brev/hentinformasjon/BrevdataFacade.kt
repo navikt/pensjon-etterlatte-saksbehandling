@@ -69,7 +69,7 @@ class BrevdataFacade(
                             )
                         }.await()
 
-                    else -> async { grunnlagKlient.hentGrunnlag(sakId, behandlingId, brukerTokenInfo) }.await()
+                    else -> async { grunnlagKlient.hentGrunnlag(behandlingId, brukerTokenInfo) }.await()
                 }
             val sak = sakDeferred.await()
             val personerISak =

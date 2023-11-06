@@ -181,7 +181,7 @@ internal class RevurderingRoutesTest {
                     header(HttpHeaders.Authorization, "Bearer $token")
                 }
 
-            assertEquals(HttpStatusCode.BadRequest, response.status)
+            assertEquals(HttpStatusCode.InternalServerError, response.status)
         }
     }
 

@@ -1,6 +1,7 @@
 package no.nav.etterlatte.vilkaarsvurdering
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
@@ -53,6 +54,7 @@ import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.YearMonth
 import java.util.UUID
 import javax.sql.DataSource
 
@@ -134,8 +136,67 @@ internal class VilkaarsvurderingServiceTest {
 
         vilkaarsvurdering shouldNotBe null
         vilkaarsvurdering.behandlingId shouldBe uuid
-        vilkaarsvurdering.vilkaar shouldHaveSize 7
+        vilkaarsvurdering.vilkaar.map { it.hovedvilkaar.type } shouldContainExactly
+            listOf(
+                VilkaarType.BP_FORMAAL,
+                VilkaarType.BP_DOEDSFALL_FORELDER,
+                VilkaarType.BP_YRKESSKADE_AVDOED,
+                VilkaarType.BP_ALDER_BARN,
+                VilkaarType.BP_FORTSATT_MEDLEMSKAP,
+                VilkaarType.BP_VURDERING_AV_EKSPORT,
+                VilkaarType.BP_FORUTGAAENDE_MEDLEMSKAP,
+            )
         vilkaarsvurdering.vilkaar.first { it.hovedvilkaar.type == VilkaarType.BP_ALDER_BARN }.let { vilkaar ->
+            vilkaar.grunnlag shouldNotBe null
+            vilkaar.grunnlag shouldHaveSize 2
+
+            vilkaar.grunnlag[0].let {
+                it.opplysningsType shouldBe VilkaarOpplysningType.SOEKER_FOEDSELSDATO
+                val opplysning: LocalDate = objectMapper.readValue(it.opplysning!!.toJson())
+                opplysning shouldBe grunnlag.soeker.hentFoedselsdato()?.verdi
+            }
+            vilkaar.grunnlag[1].let {
+                it.opplysningsType shouldBe VilkaarOpplysningType.AVDOED_DOEDSDATO
+                val opplysning: LocalDate? = objectMapper.readValue(it.opplysning!!.toJson())
+                opplysning shouldBe grunnlag.hentAvdoed().hentDoedsdato()?.verdi
+            }
+        }
+    }
+
+    @Test
+    fun `Ny vilkaarsvurdering for BP med virk fom 1-1-2024 skal ha vilkaar etter nytt regelverk`() {
+        val grunnlag: Grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
+        coEvery { behandlingKlient.hentBehandling(any(), any()) } returns
+            mockk<DetaljertBehandling>().apply {
+                every { id } returns UUID.randomUUID()
+                every { sak } returns 1L
+                every { sakType } returns SakType.BARNEPENSJON
+                every { behandlingType } returns BehandlingType.FØRSTEGANGSBEHANDLING
+                every { soeker } returns "10095512345"
+                every { virkningstidspunkt } returns
+                    VirkningstidspunktTestData.virkningstidsunkt()
+                        .copy(dato = YearMonth.of(2024, 1))
+                every { revurderingsaarsak } returns null
+            }
+
+        val vilkaarsvurdering =
+            runBlocking {
+                service.opprettVilkaarsvurdering(uuid, brukerTokenInfo)
+            }
+
+        vilkaarsvurdering shouldNotBe null
+        vilkaarsvurdering.behandlingId shouldBe uuid
+        vilkaarsvurdering.vilkaar.map { it.hovedvilkaar.type } shouldContainExactly
+            listOf(
+                VilkaarType.BP_FORMAAL_2024,
+                VilkaarType.BP_DOEDSFALL_FORELDER_2024,
+                VilkaarType.BP_YRKESSKADE_AVDOED_2024,
+                VilkaarType.BP_ALDER_BARN_2024,
+                VilkaarType.BP_FORTSATT_MEDLEMSKAP_2024,
+                VilkaarType.BP_VURDERING_AV_EKSPORT_2024,
+                VilkaarType.BP_FORUTGAAENDE_MEDLEMSKAP_2024,
+            )
+        vilkaarsvurdering.vilkaar.first { it.hovedvilkaar.type == VilkaarType.BP_ALDER_BARN_2024 }.let { vilkaar ->
             vilkaar.grunnlag shouldNotBe null
             vilkaar.grunnlag shouldHaveSize 2
 
@@ -209,7 +270,7 @@ internal class VilkaarsvurderingServiceTest {
 
         vilkaarsvurdering shouldNotBe null
         vilkaarsvurdering.behandlingId shouldBe uuid
-        vilkaarsvurdering.vilkaar shouldHaveSize 9
+        vilkaarsvurdering.vilkaar shouldHaveSize 10
         vilkaarsvurdering.vilkaar.first { it.hovedvilkaar.type == VilkaarType.OMS_ETTERLATTE_LEVER }.let { vilkaar ->
             vilkaar.grunnlag shouldBe emptyList()
         }
@@ -253,7 +314,7 @@ internal class VilkaarsvurderingServiceTest {
                 service.opprettVilkaarsvurdering(uuid, brukerTokenInfo)
             }
 
-        vilkaarsvurdering.vilkaar shouldHaveSize 10
+        vilkaarsvurdering.vilkaar shouldHaveSize 11
         vilkaarsvurdering.vilkaar.any { it.hovedvilkaar.type === VilkaarType.OMS_AVDOEDES_MEDLEMSKAP_EOES } shouldBe true
     }
 
@@ -265,7 +326,11 @@ internal class VilkaarsvurderingServiceTest {
         val vurdertVilkaar =
             VurdertVilkaar(
                 vilkaarId = vilkaarsvurdering.hentVilkaarMedHovedvilkaarType(VilkaarType.BP_FORTSATT_MEDLEMSKAP)?.id!!,
-                hovedvilkaar = VilkaarTypeOgUtfall(type = VilkaarType.BP_FORTSATT_MEDLEMSKAP, resultat = Utfall.OPPFYLT),
+                hovedvilkaar =
+                    VilkaarTypeOgUtfall(
+                        type = VilkaarType.BP_FORTSATT_MEDLEMSKAP,
+                        resultat = Utfall.OPPFYLT,
+                    ),
                 vurdering = vurdering,
             )
 

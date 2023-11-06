@@ -57,14 +57,15 @@ spec:
     - name: ETTERLATTE_PROXY_SCOPE
       value: api://dev-fss.etterlatte.etterlatte-proxy/.default
   accessPolicy:
+    inbound:
+      rules:
+        - application: etterlatte-behandling
     outbound:
       rules:
         - application: etterlatte-behandling
       external:
         - host: b27apvl222.preprod.local
           ports:
-            - name: mq
-              port: 1413
-              protocol: TCP
+            - port: 1413
         - host: etterlatte-unleash-api.nav.cloud.nais.io
         - host: etterlatte-proxy.dev-fss-pub.nais.io

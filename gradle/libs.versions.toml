@@ -3,19 +3,20 @@ avro = { id = "com.github.davidmc24.gradle.plugin.avro", version = "1.8.0" }
 cutterslade-analyze = { id = "ca.cutterslade.analyze", version = "1.9.1" }
 
 [versions]
-jackson-version = "2.15.2"
+jackson-version = "2.15.3"
 jupiter-version = "5.10.0"
 kotlinx-version = "1.7.3"
-ktor2-version = "2.3.4"
+ktor2-version = "2.3.5"
 navfelles-token-version = "3.1.5"
 prometheus-version = "0.16.0"
-testcontainer-version = "1.19.0"
+testcontainer-version = "1.19.1"
 
 [libraries]
 cache-caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version = "3.1.8" }
 
 database-hikaricp = { module = "com.zaxxer:HikariCP", version = "5.0.0" }
-database-flywaydb = { module = "org.flywaydb:flyway-core", version = "9.22.2" }
+database-flywaydb = { module = "org.flywaydb:flyway-core", version = "10.0.0" }
+database-flywaydbpostgres = { module = "org.flywaydb:flyway-database-postgresql", version = "10.0.0" }
 database-postgresql = { module = "org.postgresql:postgresql", version = "42.6.0" }
 database-kotliquery = { module = "com.github.seratch:kotliquery", version = "1.9.0" }
 
@@ -68,6 +69,7 @@ ktor2-clientmock = { module = "io.ktor:ktor-client-mock", version.ref = "ktor2-v
 ktor2-servertests = { module = "io.ktor:ktor-server-tests", version.ref = "ktor2-version" }
 
 etterlatte-common = { module = "no.nav.etterlatte:common", version = "2023.03.28-16.21.c37f68b0da69" }
+teamdokumenthandtering-avroschemas = { module = "no.nav.teamdokumenthandtering:teamdokumenthandtering-avro-schemas", version = "08c0b2d2" }
 
 logging-slf4japi = { module = "org.slf4j:slf4j-api", version = "2.0.9" }
 logging-logbackclassic = { module = "ch.qos.logback:logback-classic", version = "1.4.11" }

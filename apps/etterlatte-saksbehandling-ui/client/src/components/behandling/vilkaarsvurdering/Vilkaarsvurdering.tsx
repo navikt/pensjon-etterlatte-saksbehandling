@@ -1,7 +1,7 @@
 import { Content, ContentHeader } from '~shared/styled'
 import React, { useEffect } from 'react'
 import { useLocation, useParams } from 'react-router-dom'
-import { hentVilkaarsvurdering, opprettVilkaarsvurdering } from '~shared/api/vilkaarsvurdering'
+import { hentVilkaarsvurdering, opprettVilkaarsvurdering, slettVilkaarsvurdering } from '~shared/api/vilkaarsvurdering'
 import { ManueltVilkaar } from './ManueltVilkaar'
 import { Resultat } from './Resultat'
 import Spinner from '~shared/Spinner'
@@ -11,12 +11,17 @@ import {
   updateVilkaarsvurdering,
 } from '~store/reducers/BehandlingReducer'
 import { useAppDispatch } from '~store/Store'
-import { Heading } from '@navikt/ds-react'
+import { Alert, BodyLong, Button, Heading } from '@navikt/ds-react'
 import { Border, HeadingWrapper } from '../soeknadsoversikt/styled'
 import { hentBehandlesFraStatus } from '~components/behandling/felles/utils'
 import { isFailure, isInitial, isPending, useApiCall } from '~shared/hooks/useApiCall'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { IBehandlingStatus, IBehandlingsType } from '~shared/types/IDetaljertBehandling'
+import styled from 'styled-components'
+import {
+  behandlingGjelderBarnepensjonPaaNyttRegelverk,
+  vilkaarsvurderingErPaaNyttRegelverk,
+} from '~components/behandling/vilkaarsvurdering/utils'
 
 export const Vilkaarsvurdering = (props: { behandling: IBehandlingReducer }) => {
   const { behandling } = props
@@ -27,6 +32,7 @@ export const Vilkaarsvurdering = (props: { behandling: IBehandlingReducer }) => 
   const vilkaarsvurdering = behandling.vilkårsprøving
   const behandles = hentBehandlesFraStatus(behandling.status)
   const [vilkaarsvurderingStatus, fetchVilkaarsvurdering] = useApiCall(hentVilkaarsvurdering)
+  const [slettVilkaarsvurderingStatus, slettGammelVilkaarsvurdering] = useApiCall(slettVilkaarsvurdering)
   const [opprettNyVilkaarsvurderingStatus, opprettNyVilkaarsvurdering] = useApiCall(opprettVilkaarsvurdering)
 
   useEffect(() => {
@@ -39,7 +45,7 @@ export const Vilkaarsvurdering = (props: { behandling: IBehandlingReducer }) => 
     if (!vilkaarsvurdering) {
       fetchVilkaarsvurdering(behandlingId, (vilkaarsvurdering) => {
         if (vilkaarsvurdering == null) {
-          opprettHvisDenIkkeFinnes(behandlingId)
+          createVilkaarsvurdering(behandlingId, true)
         } else {
           dispatch(updateVilkaarsvurdering(vilkaarsvurdering))
         }
@@ -47,12 +53,26 @@ export const Vilkaarsvurdering = (props: { behandling: IBehandlingReducer }) => 
     }
   }, [behandlingId])
 
-  const opprettHvisDenIkkeFinnes = (behandlingId: string) => {
-    opprettNyVilkaarsvurdering(behandlingId, (vilkaarsvurdering) => {
+  const createVilkaarsvurdering = (behandlingId: string, kopier: boolean) => {
+    opprettNyVilkaarsvurdering({ behandlingId: behandlingId, kopierVedRevurdering: kopier }, (vilkaarsvurdering) => {
       dispatch(updateVilkaarsvurdering(vilkaarsvurdering))
       if (behandling.behandlingType === IBehandlingsType.REVURDERING) {
         dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.VILKAARSVURDERT))
       }
+    })
+  }
+
+  const visHarGammelVilkaarsvurdering = () =>
+    vilkaarsvurdering &&
+    behandles &&
+    !vilkaarsvurderingErPaaNyttRegelverk(vilkaarsvurdering) &&
+    behandlingGjelderBarnepensjonPaaNyttRegelverk(behandling)
+
+  const resetVilkaarsvurdering = () => {
+    if (!behandlingId) throw new Error('Mangler behandlingsid')
+    slettGammelVilkaarsvurdering(behandlingId, () => {
+      dispatch(updateVilkaarsvurdering(undefined))
+      createVilkaarsvurdering(behandlingId, false)
     })
   }
 
@@ -66,8 +86,26 @@ export const Vilkaarsvurdering = (props: { behandling: IBehandlingReducer }) => 
         </HeadingWrapper>
       </ContentHeader>
 
-      {behandlingId && vilkaarsvurdering && (
+      {behandlingId && vilkaarsvurdering && !isPending(slettVilkaarsvurderingStatus) && (
         <>
+          {visHarGammelVilkaarsvurdering() && (
+            <AlertWrapper>
+              <Alert variant="info">
+                <BodyLong>
+                  Denne behandlingen har automatisk kopiert over en vilkårsvurdering fra gammelt regelverk (før
+                  1.1.2024). For å få oppdaterte vilkår ihht. nytt regelverk må vilkårsvurderingen opprettes på nytt. Du
+                  kan kopiere ev. begrunnelser fra tidligere behandling.
+                </BodyLong>
+                <Button type="button" variant="secondary" onClick={resetVilkaarsvurdering}>
+                  Slett vilkårsvurdering
+                </Button>
+              </Alert>
+              {isFailure(slettVilkaarsvurderingStatus) && (
+                <ApiErrorAlert>Klarte ikke slette vilkårsvurderingen</ApiErrorAlert>
+              )}
+            </AlertWrapper>
+          )}
+
           <Border />
 
           {vilkaarsvurdering.vilkaar.map((value, index) => (
@@ -94,6 +132,7 @@ export const Vilkaarsvurdering = (props: { behandling: IBehandlingReducer }) => 
       )}
       {isPending(vilkaarsvurderingStatus) && <Spinner visible={true} label="Henter vilkårsvurdering" />}
       {isPending(opprettNyVilkaarsvurderingStatus) && <Spinner visible={true} label="Oppretter vilkårsvurdering" />}
+      {isPending(slettVilkaarsvurderingStatus) && <Spinner visible={true} label="Sletter vilkårsvurdering" />}
       {isFailure(vilkaarsvurderingStatus) && isInitial(opprettNyVilkaarsvurderingStatus) && (
         <ApiErrorAlert>En feil har oppstått</ApiErrorAlert>
       )}
@@ -107,3 +146,12 @@ export const Vilkaarsvurdering = (props: { behandling: IBehandlingReducer }) => 
     </Content>
   )
 }
+
+const AlertWrapper = styled.div`
+  margin: 1em 0 2em 4em;
+  max-width: 750px;
+
+  button {
+    margin-top: 10px;
+  }
+`

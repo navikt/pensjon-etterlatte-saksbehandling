@@ -267,7 +267,7 @@ internal class BeregningsGrunnlagRoutesTest {
     @Test
     fun `skal oppretter`() {
         coEvery { behandlingKlient.harTilgangTilBehandling(any(), any()) } returns true
-        coEvery { behandlingKlient.beregn(any(), any(), any()) } returns true
+        coEvery { behandlingKlient.kanBeregnes(any(), any(), any()) } returns true
         every { repository.finnBarnepensjonGrunnlagForBehandling(any()) } returns null
         every { repository.lagre(any()) } returns true
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns
@@ -331,7 +331,7 @@ internal class BeregningsGrunnlagRoutesTest {
     @Test
     fun `skal returnere conflict fra opprettelse `() {
         coEvery { behandlingKlient.harTilgangTilBehandling(any(), any()) } returns true
-        coEvery { behandlingKlient.beregn(any(), any(), any()) } returns true
+        coEvery { behandlingKlient.kanBeregnes(any(), any(), any()) } returns true
         every { repository.finnBarnepensjonGrunnlagForBehandling(any()) } returns null
         every { repository.lagre(any()) } returns false
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns
@@ -398,7 +398,7 @@ internal class BeregningsGrunnlagRoutesTest {
         val nye = randomUUID()
 
         coEvery { behandlingKlient.harTilgangTilBehandling(any(), any()) } returns true
-        coEvery { behandlingKlient.beregn(any(), any(), any()) } returns true
+        coEvery { behandlingKlient.kanBeregnes(any(), any(), any()) } returns true
         every { repository.finnBarnepensjonGrunnlagForBehandling(forrige) } returns
             BeregningsGrunnlag(
                 behandlingId = forrige,
@@ -429,7 +429,7 @@ internal class BeregningsGrunnlagRoutesTest {
         val nye = randomUUID()
 
         coEvery { behandlingKlient.harTilgangTilBehandling(any(), any()) } returns true
-        coEvery { behandlingKlient.beregn(any(), any(), any()) } returns true
+        coEvery { behandlingKlient.kanBeregnes(any(), any(), any()) } returns true
         every { repository.finnBarnepensjonGrunnlagForBehandling(forrige) } returns
             BeregningsGrunnlag(
                 behandlingId = forrige,
@@ -460,7 +460,7 @@ internal class BeregningsGrunnlagRoutesTest {
         val nye = randomUUID()
 
         coEvery { behandlingKlient.harTilgangTilBehandling(any(), any()) } returns true
-        coEvery { behandlingKlient.beregn(any(), any(), any()) } returns true
+        coEvery { behandlingKlient.kanBeregnes(any(), any(), any()) } returns true
         every { repository.finnBarnepensjonGrunnlagForBehandling(forrige) } returns null
         every { repository.lagre(any()) } returns true
 
@@ -483,7 +483,7 @@ internal class BeregningsGrunnlagRoutesTest {
         val nye = randomUUID()
 
         coEvery { behandlingKlient.harTilgangTilBehandling(any(), any()) } returns true
-        coEvery { behandlingKlient.beregn(any(), any(), any()) } returns true
+        coEvery { behandlingKlient.kanBeregnes(any(), any(), any()) } returns true
         every { repository.finnBarnepensjonGrunnlagForBehandling(forrige) } returns
             BeregningsGrunnlag(
                 behandlingId = forrige,

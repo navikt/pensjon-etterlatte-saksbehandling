@@ -30,7 +30,6 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import java.math.BigDecimal
 import java.time.YearMonth
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -62,14 +61,14 @@ class MigreringRoutesTest : BehandlingIntegrationTest() {
                     avdoedForelder = listOf(AvdoedForelder(AVDOED_FOEDSELSNUMMER, Tidspunkt.now())),
                     gjenlevendeForelder = null,
                     virkningstidspunkt = YearMonth.now(),
-                    foersteVirkningstidspunkt = YearMonth.now().minusYears(10),
                     beregning =
                         Beregning(
-                            brutto = BigDecimal(1000),
-                            netto = BigDecimal(1000),
-                            anvendtTrygdetid = BigDecimal(40),
+                            brutto = 3500,
+                            netto = 3500,
+                            anvendtTrygdetid = 40,
                             datoVirkFom = Tidspunkt.now(),
-                            g = BigDecimal(100000),
+                            prorataBroek = null,
+                            g = 100_000,
                         ),
                     trygdetid = Trygdetid(emptyList()),
                     flyktningStatus = false,

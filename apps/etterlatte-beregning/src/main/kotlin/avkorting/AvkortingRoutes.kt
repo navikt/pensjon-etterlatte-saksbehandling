@@ -47,7 +47,7 @@ fun Route.avkorting(
                 logger.info("Lagre avkorting for behandlingId=$it")
                 val avkortingGrunnlag = call.receive<AvkortingGrunnlagDto>()
                 val avkorting =
-                    avkortingService.lagreAvkorting(
+                    avkortingService.beregnAvkortingMedNyttGrunnlag(
                         it,
                         brukerTokenInfo,
                         avkortingGrunnlag.fromDto(brukerTokenInfo),

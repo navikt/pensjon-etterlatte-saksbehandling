@@ -14,6 +14,7 @@ import no.nav.etterlatte.libs.common.generellbehandling.GenerellBehandling
 import no.nav.etterlatte.libs.common.sak.SakIDListe
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
+import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.etterlatte.vedtaksvurdering.VedtakHendelse
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
@@ -29,26 +30,31 @@ enum class BehandlingStatusServiceFeatureToggle(private val key: String) : Featu
 interface BehandlingStatusService {
     fun settOpprettet(
         behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
         dryRun: Boolean = true,
     )
 
     fun settVilkaarsvurdert(
         behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
         dryRun: Boolean = true,
     )
 
     fun settTrygdetidOppdatert(
         behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
         dryRun: Boolean = true,
     )
 
     fun settBeregnet(
         behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
         dryRun: Boolean = true,
     )
 
     fun settAvkortet(
         behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
         dryRun: Boolean = true,
     )
 
@@ -73,6 +79,16 @@ interface BehandlingStatusService {
         vedtakHendelse: VedtakHendelse,
     )
 
+    fun settTilSamordnetVedtak(
+        behandlingId: UUID,
+        vedtakHendelse: VedtakHendelse,
+    )
+
+    fun settSamordnetVedtak(
+        behandlingId: UUID,
+        vedtakHendelse: VedtakHendelse,
+    )
+
     fun settIverksattVedtak(
         behandlingId: UUID,
         vedtakHendelse: VedtakHendelse,
@@ -92,35 +108,41 @@ class BehandlingStatusServiceImpl(
 
     override fun settOpprettet(
         behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
         dryRun: Boolean,
     ) {
         val behandling = hentBehandling(behandlingId).tilOpprettet()
 
         if (!dryRun) {
             behandlingDao.lagreStatus(behandling.id, behandling.status, behandling.sistEndret)
+            behandlingService.registrerBehandlingHendelse(behandling, brukerTokenInfo.ident())
         }
     }
 
     override fun settVilkaarsvurdert(
         behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
         dryRun: Boolean,
     ) {
         val behandling = hentBehandling(behandlingId).tilVilkaarsvurdert()
 
         if (!dryRun) {
             behandlingDao.lagreStatus(behandling.id, behandling.status, behandling.sistEndret)
+            behandlingService.registrerBehandlingHendelse(behandling, brukerTokenInfo.ident())
         }
     }
 
     override fun settTrygdetidOppdatert(
         behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
         dryRun: Boolean,
     ) {
-        hentBehandling(behandlingId).tilTrygdetidOppdatert().lagreEndring(dryRun)
+        hentBehandling(behandlingId).tilTrygdetidOppdatert().lagreEndring(dryRun, brukerTokenInfo.ident())
     }
 
     override fun settBeregnet(
         behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
         dryRun: Boolean,
     ) {
         hentBehandling(behandlingId).tilBeregnet(
@@ -128,14 +150,15 @@ class BehandlingStatusServiceImpl(
                 BehandlingStatusServiceFeatureToggle.BrukFaktiskTrygdetid,
                 false,
             ),
-        ).lagreEndring(dryRun)
+        ).lagreEndring(dryRun, brukerTokenInfo.ident())
     }
 
     override fun settAvkortet(
         behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
         dryRun: Boolean,
     ) {
-        hentBehandling(behandlingId).tilAvkortet().lagreEndring(dryRun)
+        hentBehandling(behandlingId).tilAvkortet().lagreEndring(dryRun, brukerTokenInfo.ident())
     }
 
     override fun sjekkOmKanFatteVedtak(behandlingId: UUID) {
@@ -172,6 +195,24 @@ class BehandlingStatusServiceImpl(
     ) {
         lagreNyBehandlingStatus(behandling.tilReturnert())
         registrerVedtakHendelse(behandling.id, vedtakHendelse, HendelseType.UNDERKJENT)
+    }
+
+    override fun settTilSamordnetVedtak(
+        behandlingId: UUID,
+        vedtakHendelse: VedtakHendelse,
+    ) {
+        val behandling = hentBehandling(behandlingId)
+        lagreNyBehandlingStatus(behandling.tilTilSamordning(), Tidspunkt.now().toLocalDatetimeUTC())
+        registrerVedtakHendelse(behandlingId, vedtakHendelse, HendelseType.TIL_SAMORDNING)
+    }
+
+    override fun settSamordnetVedtak(
+        behandlingId: UUID,
+        vedtakHendelse: VedtakHendelse,
+    ) {
+        val behandling = hentBehandling(behandlingId)
+        lagreNyBehandlingStatus(behandling.tilSamordnet(), Tidspunkt.now().toLocalDatetimeUTC())
+        registrerVedtakHendelse(behandlingId, vedtakHendelse, HendelseType.SAMORDNET)
     }
 
     override fun settIverksattVedtak(
@@ -225,9 +266,13 @@ class BehandlingStatusServiceImpl(
         )
     }
 
-    private fun Behandling.lagreEndring(dryRun: Boolean) {
+    private fun Behandling.lagreEndring(
+        dryRun: Boolean,
+        saksbehandler: String,
+    ) {
         if (dryRun) return
         lagreNyBehandlingStatus(this)
+        behandlingService.registrerBehandlingHendelse(this, saksbehandler)
     }
 
     private fun lagreNyBehandlingStatus(

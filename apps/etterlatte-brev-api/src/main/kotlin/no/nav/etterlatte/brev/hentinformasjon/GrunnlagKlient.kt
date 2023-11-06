@@ -43,22 +43,21 @@ class GrunnlagKlient(config: Config, httpClient: HttpClient) {
     }
 
     internal suspend fun hentGrunnlag(
-        sakid: Long,
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): Grunnlag {
         try {
-            logger.info("Henter grunnlag for sak med sakId=$sakid")
+            logger.info("Henter grunnlag for behandling med id=$behandlingId")
 
             return downstreamResourceClient.get(
-                Resource(clientId, "$baseUrl/api/grunnlag/sak/$sakid/behandling/$behandlingId"),
+                Resource(clientId, "$baseUrl/api/grunnlag/behandling/$behandlingId"),
                 brukerTokenInfo,
             ).mapBoth(
                 success = { resource -> resource.response.let { deserialize(it.toString()) } },
                 failure = { throwableErrorMessage -> throw throwableErrorMessage },
             )
         } catch (e: Exception) {
-            throw GrunnlagKlientException("Henting av grunnlag for sak med sakId=$sakid feilet", e)
+            throw GrunnlagKlientException("Henting av grunnlag for behandling med id=$behandlingId feilet", e)
         }
     }
 }

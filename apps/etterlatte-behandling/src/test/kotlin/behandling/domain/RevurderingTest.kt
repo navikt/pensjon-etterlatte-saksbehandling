@@ -39,7 +39,6 @@ internal class RevurderingTest {
             status = BehandlingStatus.OPPRETTET,
             kommerBarnetTilgode = kommerBarnetTilGodeVurdering(id),
             virkningstidspunkt = virkningstidspunktVurdering(),
-            utenlandstilsnitt = null,
             boddEllerArbeidetUtlandet = null,
             revurderingsaarsak = Revurderingaarsak.REGULERING,
             prosesstype = Prosesstype.MANUELL,
@@ -60,6 +59,15 @@ internal class RevurderingTest {
             val actual =
                 revurdering.tilVilkaarsvurdert().tilTrygdetidOppdatert().tilBeregnet(false).tilFattetVedtak()
                     .tilAttestert().tilIverksatt()
+
+            Assertions.assertEquals(BehandlingStatus.IVERKSATT, actual.status)
+        }
+
+        @Test
+        fun `kan endre status gjennom gyldig statusendringsflyt - samordning`() {
+            val actual =
+                revurdering.tilVilkaarsvurdert().tilTrygdetidOppdatert().tilBeregnet(false).tilFattetVedtak()
+                    .tilAttestert().tilTilSamordning().tilSamordnet().tilIverksatt()
 
             Assertions.assertEquals(BehandlingStatus.IVERKSATT, actual.status)
         }
@@ -187,7 +195,6 @@ private fun opprettetRevurdering(prosesstype: Prosesstype): Revurdering {
         status = BehandlingStatus.OPPRETTET,
         kommerBarnetTilgode = kommerBarnetTilGodeVurdering(id),
         virkningstidspunkt = virkningstidspunktVurdering(),
-        utenlandstilsnitt = null,
         boddEllerArbeidetUtlandet = null,
         revurderingsaarsak = Revurderingaarsak.REGULERING,
         prosesstype = prosesstype,

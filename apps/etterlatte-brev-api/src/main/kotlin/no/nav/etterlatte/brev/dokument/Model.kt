@@ -3,7 +3,7 @@ package no.nav.etterlatte.brev.dokument
 import io.ktor.http.HttpStatusCode
 import no.nav.etterlatte.brev.journalpost.BrukerIdType
 
-data class HentJournalposterResult(
+data class HentDokumentoversiktBrukerResult(
     val journalposter: List<Journalpost> = emptyList(),
     val error: Error? = null,
 ) {
@@ -13,7 +13,26 @@ data class HentJournalposterResult(
     )
 }
 
+data class HentJournalpostResult(
+    val journalpost: Journalpost? = null,
+    val error: Error? = null,
+) {
+    data class Error(
+        val statusCode: HttpStatusCode = HttpStatusCode.InternalServerError,
+        val message: String,
+    )
+}
+
 data class JournalpostResponse(
+    val data: ResponseData? = null,
+    val errors: List<JournalpostResponseError>? = null,
+) {
+    data class ResponseData(
+        val journalpost: Journalpost? = null,
+    )
+}
+
+data class DokumentoversiktBrukerResponse(
     val data: DokumentoversiktBruker? = null,
     val errors: List<JournalpostResponseError>? = null,
 )
@@ -46,13 +65,19 @@ data class PdlErrorExtension(
 
 data class GraphqlRequest(
     val query: String,
-    val variables: DokumentOversiktBrukerVariables,
+    val variables: GraphqlVariables,
 )
 
 data class DokumentOversiktBrukerVariables(
     val brukerId: BrukerId,
     val foerste: Int,
-)
+) : GraphqlVariables
+
+data class JournalpostVariables(
+    val journalpostId: String,
+) : GraphqlVariables
+
+interface GraphqlVariables
 
 data class BrukerId(
     val id: String,

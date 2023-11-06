@@ -9,6 +9,8 @@ enum class BehandlingStatus {
     FATTET_VEDTAK,
     ATTESTERT,
     RETURNERT,
+    TIL_SAMORDNING,
+    SAMORDNET,
     IVERKSATT,
     AVBRUTT,
     ;
@@ -34,6 +36,8 @@ enum class BehandlingStatus {
         fun iverksattEllerAttestert() =
             listOf(
                 IVERKSATT,
+                SAMORDNET,
+                TIL_SAMORDNING,
                 ATTESTERT,
             )
 
@@ -41,6 +45,16 @@ enum class BehandlingStatus {
 
         fun ikkeAvbrutt() = iverksattEllerAttestert() + underBehandling()
 
-        fun skalIkkeOmregnesVedGRegulering() = listOf(IVERKSATT, AVBRUTT, ATTESTERT, OPPRETTET, VILKAARSVURDERT, TRYGDETID_OPPDATERT)
+        fun skalIkkeOmregnesVedGRegulering() =
+            listOf(
+                IVERKSATT,
+                TIL_SAMORDNING,
+                SAMORDNET,
+                AVBRUTT,
+                ATTESTERT,
+                OPPRETTET,
+                VILKAARSVURDERT,
+                TRYGDETID_OPPDATERT,
+            )
     }
 }

@@ -23,7 +23,6 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.generellbehandling.DokumentMedSendtDato
-import no.nav.etterlatte.libs.common.generellbehandling.Dokumenter
 import no.nav.etterlatte.libs.common.generellbehandling.GenerellBehandling
 import no.nav.etterlatte.libs.common.generellbehandling.Innhold
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
@@ -176,7 +175,11 @@ class GenerellBehandlingServiceTest {
         val personopplysning = personOpplysning(doedsdato = doedsdato)
         val grunnlagsopplysningMedPersonopplysning = grunnlagsOpplysningMedPersonopplysning(personopplysning)
         coEvery {
-            grunnlagKlient.finnPersonOpplysning(sak.id, foerstegangsbehandling.id, Opplysningstype.AVDOED_PDL_V1, brukerTokenInfo)
+            grunnlagKlient.finnPersonOpplysning(
+                foerstegangsbehandling.id,
+                Opplysningstype.AVDOED_PDL_V1,
+                brukerTokenInfo,
+            )
         } returns grunnlagsopplysningMedPersonopplysning
 
         val manueltOpprettetBehandling =
@@ -272,13 +275,7 @@ class GenerellBehandlingServiceTest {
         val kravpakkeUtlandInnhold =
             Innhold.KravpakkeUtland(
                 listOf("AFG"),
-                Dokumenter(
-                    DokumentMedSendtDato(true, LocalDate.now()),
-                    DokumentMedSendtDato(true, LocalDate.now()),
-                    DokumentMedSendtDato(true, LocalDate.now()),
-                    DokumentMedSendtDato(true, LocalDate.now()),
-                    DokumentMedSendtDato(true, LocalDate.now()),
-                ),
+                listOf(DokumentMedSendtDato("P2000", true, LocalDate.now())),
                 "2grwg2",
                 "124124124",
             )
@@ -318,13 +315,7 @@ class GenerellBehandlingServiceTest {
         val kravpakkeUtlandInnhold =
             Innhold.KravpakkeUtland(
                 listOf("AFG"),
-                Dokumenter(
-                    DokumentMedSendtDato(true, LocalDate.now()),
-                    DokumentMedSendtDato(true, LocalDate.now()),
-                    DokumentMedSendtDato(true, LocalDate.now()),
-                    DokumentMedSendtDato(true, LocalDate.now()),
-                    DokumentMedSendtDato(true, null),
-                ),
+                listOf(DokumentMedSendtDato("P2000", true, null)),
                 "2grwg2",
                 "124124124",
             )
@@ -355,13 +346,7 @@ class GenerellBehandlingServiceTest {
         val kravpakkeUtlandInnhold =
             Innhold.KravpakkeUtland(
                 listOf("AFG"),
-                Dokumenter(
-                    DokumentMedSendtDato(true, LocalDate.now()),
-                    DokumentMedSendtDato(true, LocalDate.now()),
-                    DokumentMedSendtDato(true, LocalDate.now()),
-                    DokumentMedSendtDato(true, LocalDate.now()),
-                    DokumentMedSendtDato(true, null),
-                ),
+                listOf(DokumentMedSendtDato("P2000", true, LocalDate.now())),
                 "2grwg2",
                 "124124124",
             )
@@ -392,13 +377,7 @@ class GenerellBehandlingServiceTest {
         val kravpakkeUtlandInnhold =
             Innhold.KravpakkeUtland(
                 listOf("AFG"),
-                Dokumenter(
-                    DokumentMedSendtDato(true, LocalDate.now()),
-                    DokumentMedSendtDato(true, LocalDate.now()),
-                    DokumentMedSendtDato(true, LocalDate.now()),
-                    DokumentMedSendtDato(true, LocalDate.now()),
-                    DokumentMedSendtDato(true, LocalDate.now()),
-                ),
+                listOf(DokumentMedSendtDato("P2000", true, LocalDate.now())),
                 "2grwg2",
                 "",
             )
@@ -429,13 +408,7 @@ class GenerellBehandlingServiceTest {
         val kravpakkeUtlandInnhold =
             Innhold.KravpakkeUtland(
                 emptyList(),
-                Dokumenter(
-                    DokumentMedSendtDato(true, LocalDate.now()),
-                    DokumentMedSendtDato(true, LocalDate.now()),
-                    DokumentMedSendtDato(true, LocalDate.now()),
-                    DokumentMedSendtDato(true, LocalDate.now()),
-                    DokumentMedSendtDato(true, LocalDate.now()),
-                ),
+                listOf(DokumentMedSendtDato("P2000", true, LocalDate.now())),
                 "2grwg2",
                 "rinanummer",
             )
@@ -466,13 +439,7 @@ class GenerellBehandlingServiceTest {
         val kravpakkeUtlandInnhold =
             Innhold.KravpakkeUtland(
                 listOf("AFG", "ABDEF"),
-                Dokumenter(
-                    DokumentMedSendtDato(true, LocalDate.now()),
-                    DokumentMedSendtDato(true, LocalDate.now()),
-                    DokumentMedSendtDato(true, LocalDate.now()),
-                    DokumentMedSendtDato(true, LocalDate.now()),
-                    DokumentMedSendtDato(true, LocalDate.now()),
-                ),
+                listOf(DokumentMedSendtDato("P2000", true, LocalDate.now())),
                 "2grwg2",
                 "rinanummer",
             )
@@ -505,13 +472,7 @@ class GenerellBehandlingServiceTest {
         val kravpakkeUtlandInnhold =
             Innhold.KravpakkeUtland(
                 listOf("AFG"),
-                Dokumenter(
-                    DokumentMedSendtDato(true, LocalDate.now()),
-                    DokumentMedSendtDato(true, LocalDate.now()),
-                    DokumentMedSendtDato(true, LocalDate.now()),
-                    DokumentMedSendtDato(true, LocalDate.now()),
-                    DokumentMedSendtDato(true, LocalDate.now()),
-                ),
+                listOf(DokumentMedSendtDato("P2000", true, LocalDate.now())),
                 "2grwg2",
                 "124124124",
             )

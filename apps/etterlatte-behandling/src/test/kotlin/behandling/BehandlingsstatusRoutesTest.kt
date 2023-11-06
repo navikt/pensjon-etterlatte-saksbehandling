@@ -71,7 +71,7 @@ internal class BehandlingsstatusRoutesTest {
     fun `skal returnere 200 OK hvis behandlingstatus kan settes til vilkaarsvurdert`() {
         every { applicationContext.behandlingsStatusService } returns
             mockk {
-                every { settVilkaarsvurdert(any(), any()) } just runs
+                every { settVilkaarsvurdert(any(), any(), any()) } just runs
             }
 
         testApplication {
@@ -156,6 +156,7 @@ internal class BehandlingsstatusRoutesTest {
             mockk {
                 every {
                     settVilkaarsvurdert(
+                        any(),
                         any(),
                         any(),
                     )

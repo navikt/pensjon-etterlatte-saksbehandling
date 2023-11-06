@@ -12,7 +12,7 @@ import {
 } from '~components/behandling/soeknadsoversikt/styled'
 import { Innsender } from '~components/behandling/soeknadsoversikt/soeknadoversikt/gyldigFramsattSoeknad/barnepensjon/Innsender'
 import { Foreldreansvar } from '~components/behandling/soeknadsoversikt/soeknadoversikt/gyldigFramsattSoeknad/barnepensjon/Foreldreansvar'
-import { Verge } from '~components/behandling/soeknadsoversikt/soeknadoversikt/gyldigFramsattSoeknad/barnepensjon/Verge'
+import { Verger } from '~components/behandling/soeknadsoversikt/soeknadoversikt/gyldigFramsattSoeknad/barnepensjon/Verger'
 import { GyldigFramsattVurdering } from '~components/behandling/soeknadsoversikt/soeknadoversikt/gyldigFramsattSoeknad/barnepensjon/GyldigFramsattVurdering'
 import { hentBehandlesFraStatus } from '~components/behandling/felles/utils'
 
@@ -36,9 +36,7 @@ export const GyldigFramsattBarnepensjon = ({
   const innsenderErForelder = gyldigFramsatt.vurderinger.find(
     (g: IGyldighetproving) => g.navn === GyldigFramsattType.INNSENDER_ER_FORELDER
   )
-  const ingenAnnenVergeEnnForelder = gyldigFramsatt.vurderinger.find(
-    (g: IGyldighetproving) => g.navn === GyldigFramsattType.INGEN_ANNEN_VERGE_ENN_FORELDER
-  )
+  const vergerOgFullmektige = behandling.søker?.vergemaalEllerFremtidsfullmakt ?? []
 
   return (
     <LovtekstMedLenke
@@ -55,12 +53,13 @@ export const GyldigFramsattBarnepensjon = ({
       <div>
         <Beskrivelse>
           Den som har rett til ytelsen må sette frem krav (forelder/verge hvis under 18 år). Om annet må fullmakt ligge
-          i saken. Søknaden må være signert og vise hva det søkes om, og den må være fremsatt i riktig land.
+          i saken. Søknaden må være signert og vise hva det søkes om, og den må være fremsatt i riktig land. Søknaden må
+          være fremstilt i riktig land, dette skal være landet bruker er bosatt i (unntak hvis ikke avtaleland).
         </Beskrivelse>
         <InfobokserWrapper>
           <Innsender innsenderErForelder={innsenderErForelder} />
           <Foreldreansvar innsenderHarForeldreansvar={innsenderHarForeldreansvar} />
-          <Verge ingenAnnenVergeEnnForelder={ingenAnnenVergeEnnForelder} />
+          <Verger vergerOgFullmektige={vergerOgFullmektige} />
         </InfobokserWrapper>
       </div>
       <VurderingsContainerWrapper>

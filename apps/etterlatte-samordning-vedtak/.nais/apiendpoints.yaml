@@ -1,0 +1,33 @@
+apiVersion: krakend.nais.io/v1
+kind: ApiEndpoints
+metadata:
+  name: etterlatte-samordning-vedtak
+  namespace: etterlatte
+  labels:
+    team: etterlatte
+spec:
+  appName: etterlatte-samordning-vedtak
+  auth:
+    name: maskinporten
+    cache: true
+    debug: true
+    scope:
+      - "nav:etterlatteytelser:vedtaksinformasjon.read"
+  endpoints:
+    - path: /samordning/vedtak
+      method: GET
+      forwardHeaders:
+        - Authorization
+        - fnr
+        - tpnr
+      queryParams:
+        - virkFom
+      backendHost: http://etterlatte-samordning-vedtak
+      backendPath: /api/vedtak
+    - path: /samordning/vedtak/{vedtakId}
+      method: GET
+      forwardHeaders:
+        - Authorization
+        - tpnr
+      backendHost: http://etterlatte-samordning-vedtak
+      backendPath: /api/vedtak/{vedtakId}

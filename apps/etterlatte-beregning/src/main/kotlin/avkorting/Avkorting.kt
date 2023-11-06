@@ -18,8 +18,10 @@ data class Avkorting(
     val avkortetYtelseForrigeVedtak: List<AvkortetYtelse> = emptyList(),
 ) {
     /*
-     * Årsoppgjør inneholder ytelsen sine perioder for hele år og for behandlinger/vedtak er det kun
-     * virknigstidspunkt og fremover som er relevant.
+     * avkortetYtelseFraVirkningstidspunkt - Årsoppgjør inneholder ytelsen sine perioder for hele år
+     * og for behandlinger/vedtak er det kun virknigstidspunkt og fremover som er relevant.
+     *
+     * avkortetYtelseForrigeVedtak - brukes til å sammenligne med beløper til nye beregna perioder under behandlingen
      */
     fun medYtelseFraOgMedVirkningstidspunkt(
         virkningstidspunkt: YearMonth,

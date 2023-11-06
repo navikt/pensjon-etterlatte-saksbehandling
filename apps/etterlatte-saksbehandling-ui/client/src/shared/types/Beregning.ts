@@ -12,6 +12,11 @@ export interface Beregning {
   beregningsperioder: Beregningsperiode[]
   beregnetDato: string
   grunnlagMetadata: GrunnlagMetadata
+  overstyrBeregning: OverstyrBeregning | undefined
+}
+
+export interface OverstyrBeregning {
+  beskrivelse: string
 }
 
 export interface GrunnlagMetadata {

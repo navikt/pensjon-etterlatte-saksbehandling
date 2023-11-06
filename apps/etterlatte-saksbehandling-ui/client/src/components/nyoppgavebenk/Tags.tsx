@@ -22,11 +22,12 @@ const OPPGAVETYPE_TIL_TAGDATA: Record<Oppgavetype, { variant: Variants; text: st
   ATTESTERING: { variant: Variants.ALT3_FILLED, text: 'Attestering' },
   UNDERKJENT: { variant: Variants.ALT3, text: 'Underkjent' },
   GOSYS: { variant: Variants.INFO_FILLED, text: 'Gosys-oppgave' },
-  KRAVPAKKE_UTLAND: { variant: Variants.ALT2_FILLED, text: 'Kravpakke' },
+  KRAVPAKKE_UTLAND: { variant: Variants.ALT2_FILLED, text: 'Kravpakke utland' },
   KLAGE: { variant: Variants.ALT2, text: 'Klage' },
   OMGJOERING: { variant: Variants.ALT2_MODERATE, text: 'Omgjøring' },
   TILBAKEKREVING: { variant: Variants.ALT2, text: 'Tilbakekreving' },
   MANUELL_JOURNALFOERING: { variant: Variants.ALT2, text: 'Manuell journalføring' },
+  JOURNALFOERING: { variant: Variants.ALT2, text: 'Journalføring' },
 } as const
 
 export const OppgavetypeTag = (props: { oppgavetype: Oppgavetype }) => {

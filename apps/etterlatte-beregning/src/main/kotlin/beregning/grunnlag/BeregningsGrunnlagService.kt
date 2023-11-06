@@ -25,7 +25,7 @@ class BeregningsGrunnlagService(
         brukerTokenInfo: BrukerTokenInfo,
     ): Boolean =
         when {
-            behandlingKlient.beregn(behandlingId, brukerTokenInfo, false) -> {
+            behandlingKlient.kanBeregnes(behandlingId, brukerTokenInfo, false) -> {
                 val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
                 val kanLagreDetteGrunnlaget =
                     if (behandling.behandlingType == BehandlingType.REVURDERING) {
@@ -77,7 +77,7 @@ class BeregningsGrunnlagService(
         brukerTokenInfo: BrukerTokenInfo,
     ): Boolean =
         when {
-            behandlingKlient.beregn(behandlingId, brukerTokenInfo, false) -> {
+            behandlingKlient.kanBeregnes(behandlingId, brukerTokenInfo, false) -> {
                 val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
                 val kanLagreDetteGrunnlaget =
                     if (behandling.behandlingType == BehandlingType.REVURDERING) {

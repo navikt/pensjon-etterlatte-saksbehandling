@@ -1,8 +1,8 @@
 {
-  "@event_name": "VEDTAK:ATTESTERT",
+  "@event_name": "VEDTAK:SAMORDNET",
   "vedtak": {
     "vedtakId": 1,
-    "status": "ATTESTERT",
+    "status": "SAMORDNET",
     "virkningstidspunkt":  "2022-01",
     "sak": {
       "ident": "05126307952",

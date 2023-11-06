@@ -1,0 +1,33 @@
+{
+  "data": {
+    "hentPerson": {
+      "adressebeskyttelse": [
+        {
+          "gradering": "FORTROLIG",
+          "folkeregistermetadata": {
+            "ajourholdstidspunkt": "2021-08-05T15:11:03",
+            "gyldighetstidspunkt": "2021-08-05T15:11:03",
+            "opphoerstidspunkt": null,
+            "kilde": "Dolly",
+            "aarsak": null,
+            "sekvens": null
+          },
+          "metadata": {
+            "master": "FREG",
+            "historisk": false,
+            "opplysningsId": "39317e6c-e98f-4995-8d52-36f9703d1dae",
+            "endringer": [
+              {
+                "kilde": "Dolly",
+                "registrert": "2021-08-05T15:11:03",
+                "registrertAv": "Folkeregisteret",
+                "systemkilde": "FREG",
+                "type": "OPPRETT"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  }
+}

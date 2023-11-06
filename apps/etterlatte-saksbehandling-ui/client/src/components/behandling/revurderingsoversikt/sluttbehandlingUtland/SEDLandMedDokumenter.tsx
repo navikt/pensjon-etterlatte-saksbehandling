@@ -3,17 +3,7 @@ import React from 'react'
 import { ILand } from '~shared/api/trygdetid'
 import LandRad from '~components/behandling/revurderingsoversikt/sluttbehandlingUtland/LandRad'
 import { TrashIcon } from '@navikt/aksel-icons'
-
-export interface MottattDokument {
-  dokumenttype?: string
-  dato?: string
-  kommentar?: string
-}
-
-export interface LandMedDokumenter {
-  landIsoKode?: string
-  dokumenter: MottattDokument[]
-}
+import { LandMedDokumenter } from '~shared/types/RevurderingInfo'
 
 export default function SEDLandMedDokumenter({
   landListe,
@@ -56,6 +46,7 @@ export default function SEDLandMedDokumenter({
                 landMedDokumenter={landMedDokument}
                 oppdaterLandMedDokumenter={oppdaterLandMedDokumenter}
                 landListe={landListe}
+                lesevisning={false}
               />
             )
             return (

@@ -52,13 +52,10 @@ class MigreringService(
                     JaNeiMedBegrunnelse(JaNei.JA, "Automatisk importert fra Pesys"),
                 )
 
-                // todo: Nytt regelverk gjelder fra 2023-10 i DEV for å kunne iverksette mot oppdrag,
-                //  det skal egentlig være og må endres til 2024-01.
-                val virkningstidspunkt = YearMonth.of(2023, 10)
-
+                val virkningstidspunktForMigrering = YearMonth.of(2024, 1)
                 behandlingService.oppdaterVirkningstidspunkt(
                     behandling.id,
-                    virkningstidspunkt,
+                    virkningstidspunktForMigrering,
                     pesys,
                     "Automatisk importert fra Pesys",
                 )

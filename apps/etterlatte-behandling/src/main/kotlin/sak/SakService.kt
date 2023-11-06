@@ -17,6 +17,7 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Utenlandstilknytning
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.person.maskerFnr
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.tilgangsstyring.filterForEnheter
 import org.slf4j.LoggerFactory
@@ -71,6 +72,8 @@ interface SakService {
         sakId: Long,
         adressebeskyttelseGradering: AdressebeskyttelseGradering,
     ): Int
+
+    fun hentSakMedUtenlandstilknytning(fnr: String): SakUtenlandstilknytning
 }
 
 class SakServiceImpl(
@@ -137,6 +140,14 @@ class SakServiceImpl(
         adressebeskyttelseGradering: AdressebeskyttelseGradering,
     ): Int {
         return dao.oppdaterAdresseBeskyttelse(sakId, adressebeskyttelseGradering)
+    }
+
+    override fun hentSakMedUtenlandstilknytning(fnr: String): SakUtenlandstilknytning {
+        val finnSaker = dao.finnSaker(fnr)
+        if (finnSaker.size > 1) {
+            throw IllegalStateException("Person ${fnr.maskerFnr()} med sakider ${finnSaker.map { it.id }} må håndteres")
+        }
+        return dao.hentUtenlandstilknytningForSak(finnSaker[0].id)!! // Obs, ved begge ytelsene vil dette bli random
     }
 
     private fun sjekkSkjerming(

@@ -33,6 +33,7 @@ import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.brev.model.Status
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
@@ -232,6 +233,7 @@ internal class BrevRouteTest {
             prosessType = BrevProsessType.AUTOMATISK,
             soekerFnr = "soeker_fnr",
             status = Status.OPPRETTET,
+            opprettet = Tidspunkt.now(),
             mottaker =
                 Mottaker(
                     "Stor Snerk",

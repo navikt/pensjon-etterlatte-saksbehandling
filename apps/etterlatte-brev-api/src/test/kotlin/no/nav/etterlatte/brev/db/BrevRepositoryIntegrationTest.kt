@@ -20,6 +20,7 @@ import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.Status
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.POSTGRES_VERSION
 import no.nav.etterlatte.libs.database.migrate
@@ -417,6 +418,7 @@ internal class BrevRepositoryIntegrationTest {
         prosessType = BrevProsessType.AUTOMATISK,
         soekerFnr = "00000012345",
         mottaker = opprettMottaker(),
+        opprettet = Tidspunkt.now(),
         innhold = innhold ?: BrevInnhold("tittel", Spraak.NB),
         innholdVedlegg = innhold_vedlegg ?: null,
     )

@@ -4,7 +4,9 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.createRouteScopedPlugin
 import io.ktor.server.application.log
 import io.ktor.server.auth.AuthenticationChecked
-import io.ktor.server.response.respond
+import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
+import no.nav.etterlatte.libs.common.logging.getCorrelationId
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 
 val MaskinportenScopeAuthorizationPlugin =
     createRouteScopedPlugin(
@@ -21,7 +23,16 @@ val MaskinportenScopeAuthorizationPlugin =
 
                 if (userScopes.intersect(scopes).isEmpty()) {
                     application.log.info("Request avslått pga manglende scope (gyldige: $scopes)")
-                    call.respond(HttpStatusCode.Unauthorized, "Har ikke påkrevd scope")
+                    throw ForespoerselException(
+                        status = HttpStatusCode.Unauthorized.value,
+                        code = "GE-MASKINPORTEN-SCOPE",
+                        detail = "Har ikke påkrevd scope",
+                        meta =
+                            mapOf(
+                                "correlation-id" to getCorrelationId(),
+                                "tidspunkt" to Tidspunkt.now(),
+                            ),
+                    )
                 }
             }
         }

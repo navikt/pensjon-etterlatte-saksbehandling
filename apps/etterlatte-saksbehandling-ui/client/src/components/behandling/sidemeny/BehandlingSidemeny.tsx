@@ -6,7 +6,7 @@ import React, { useEffect, useState } from 'react'
 import { IBeslutning } from '~components/behandling/attestering/types'
 import { BehandlingFane, IBehandlingInfo } from '~components/behandling/sidemeny/IBehandlingInfo'
 import { IRolle } from '~store/reducers/SaksbehandlerReducer'
-import { IBehandlingStatus, IBehandlingsType, INasjonalitetType } from '~shared/types/IDetaljertBehandling'
+import { IBehandlingStatus, IBehandlingsType, UtenlandstilknytningType } from '~shared/types/IDetaljertBehandling'
 import { useAppDispatch, useAppSelector } from '~store/Store'
 import { isFailure, isInitial, isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
 import { hentVedtakSammendrag } from '~shared/api/vedtaksvurdering'
@@ -28,18 +28,19 @@ import { erFerdigBehandlet } from '~components/behandling/felles/utils'
 import { hentSjekkliste, opprettSjekkliste } from '~shared/api/sjekkliste'
 import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
 
-const finnUtNasjonalitet = (behandling: IBehandlingReducer): INasjonalitetType => {
-  if (behandling.utenlandstilsnitt?.type) {
-    return behandling.utenlandstilsnitt?.type
+const finnUtNasjonalitet = (behandling: IBehandlingReducer): UtenlandstilknytningType => {
+  if (behandling.utenlandstilknytning?.type) {
+    //TODO: basere på sak
+    return behandling.utenlandstilknytning?.type
   } else {
     if (behandling.behandlingType === IBehandlingsType.REVURDERING) {
       if (behandling.revurderingsaarsak === Revurderingaarsak.SLUTTBEHANDLING_UTLAND) {
-        return INasjonalitetType.UTLANDSTILSNITT //TODO:  https://jira.adeo.no/browse/EY-3037
+        return UtenlandstilknytningType.UTLANDSTILSNITT //TODO:  https://jira.adeo.no/browse/EY-3037
       } else {
-        return INasjonalitetType.NASJONAL
+        return UtenlandstilknytningType.NASJONAL
       }
     } else {
-      return INasjonalitetType.NASJONAL
+      return UtenlandstilknytningType.NASJONAL
     }
   }
 }

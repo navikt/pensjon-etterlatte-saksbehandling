@@ -220,6 +220,7 @@ internal class ApplicationContext(
             oppgaveService = oppgaveService,
             etterbetalingService = etterbetalingService,
             grunnlagService = grunnlagsService,
+            sakDao = sakDao,
         )
     val generellBehandlingService =
         GenerellBehandlingService(

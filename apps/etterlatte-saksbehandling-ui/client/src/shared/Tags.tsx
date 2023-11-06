@@ -1,4 +1,4 @@
-import { IBehandlingsType, INasjonalitetType } from '~shared/types/IDetaljertBehandling'
+import { IBehandlingsType, UtenlandstilknytningType } from '~shared/types/IDetaljertBehandling'
 import { SakType } from '~shared/types/sak'
 import styled from 'styled-components'
 
@@ -15,15 +15,15 @@ export enum Variants {
   ALT3_FILLED = 'alt3-filled',
 }
 
-export const tagColors: Record<SakType | IBehandlingsType | INasjonalitetType, Variants> = {
+export const tagColors: Record<SakType | IBehandlingsType | UtenlandstilknytningType, Variants> = {
   [IBehandlingsType.FØRSTEGANGSBEHANDLING]: Variants.ALT3_FILLED,
   [IBehandlingsType.REVURDERING]: Variants.ALT3_FILLED,
   [SakType.BARNEPENSJON]: Variants.INFO,
   [SakType.OMSTILLINGSSTOENAD]: Variants.NEUTRAL,
   [IBehandlingsType.MANUELT_OPPHOER]: Variants.ALT3_FILLED,
-  [INasjonalitetType.NASJONAL]: Variants.INFO_FILLED,
-  [INasjonalitetType.UTLANDSTILSNITT]: Variants.ALT3,
-  [INasjonalitetType.BOSATT_UTLAND]: Variants.ALT2,
+  [UtenlandstilknytningType.NASJONAL]: Variants.INFO_FILLED,
+  [UtenlandstilknytningType.UTLANDSTILSNITT]: Variants.ALT3,
+  [UtenlandstilknytningType.BOSATT_UTLAND]: Variants.ALT2,
 }
 
 export const TagList = styled.ul`

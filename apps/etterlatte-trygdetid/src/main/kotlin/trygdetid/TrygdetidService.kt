@@ -227,6 +227,10 @@ class TrygdetidServiceImpl(
         private const val SIST_FREMTIDIG_TRYGDETID_ALDER = 66L
     }
 
+    @Deprecated(
+        replaceWith = ReplaceWith("hentTrygdetiderIBehandling"),
+        message = "Håndterer ikke flere trygdetider i behandling riktig, kun for bruk i overgangsfase",
+    )
     override suspend fun hentTrygdetidOld(behandlingId: UUID): Trygdetid? {
         return trygdetidRepository.hentTrygdetid(behandlingId)
     }

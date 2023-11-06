@@ -1,4 +1,4 @@
-import { IBehandlingStatus, IBehandlingsType, INasjonalitetType } from '~shared/types/IDetaljertBehandling'
+import { IBehandlingStatus, IBehandlingsType, UtenlandstilknytningType } from '~shared/types/IDetaljertBehandling'
 import { IHendelse } from '~shared/types/IHendelse'
 import { SakType } from '~shared/types/sak'
 
@@ -12,7 +12,7 @@ export interface IBehandlingInfo {
   virkningsdato?: string
   datoFattet?: string
   datoAttestert?: string
-  nasjonalEllerUtland: INasjonalitetType
+  nasjonalEllerUtland: UtenlandstilknytningType
   underkjentLogg?: IHendelse[]
   fattetLogg?: IHendelse[]
   attestertLogg?: IHendelse[]

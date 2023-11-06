@@ -6,7 +6,7 @@ import {
   formaterStringDato,
   formaterVedtakType,
 } from '~utils/formattering'
-import { IBehandlingStatus, IBehandlingsType, INasjonalitetType } from '~shared/types/IDetaljertBehandling'
+import { IBehandlingStatus, IBehandlingsType, UtenlandstilknytningType } from '~shared/types/IDetaljertBehandling'
 import React, { useEffect } from 'react'
 import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
 import { hentVedtakSammendrag } from '~shared/api/vedtaksvurdering'
@@ -98,8 +98,11 @@ export const Behandlingsliste = ({ behandlinger }: { behandlinger: IBehandlingsa
                 <BehandlingstypeWrapper>{formaterBehandlingstype(behandling.behandlingType)}</BehandlingstypeWrapper>
               </Table.DataCell>
               <Table.DataCell>
-                <Tag variant={tagColors[behandling.utenlandstilsnitt?.type || INasjonalitetType.NASJONAL]} size="small">
-                  {formaterEnumTilLesbarString(behandling.utenlandstilsnitt?.type || INasjonalitetType.NASJONAL)}
+                <Tag
+                  variant={tagColors[behandling.utenlandstilsnitt?.type || UtenlandstilknytningType.NASJONAL]}
+                  size="small"
+                >
+                  {formaterEnumTilLesbarString(behandling.utenlandstilsnitt?.type || UtenlandstilknytningType.NASJONAL)}
                 </Tag>
               </Table.DataCell>
               <Table.DataCell>{mapAarsak(behandling.aarsak)}</Table.DataCell>

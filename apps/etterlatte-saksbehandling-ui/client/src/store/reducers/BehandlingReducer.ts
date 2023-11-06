@@ -7,7 +7,6 @@ import {
   IDetaljertBehandling,
   IGyldighetResultat,
   IKommerBarnetTilgode,
-  IUtenlandstilsnitt,
   Virkningstidspunkt,
 } from '~shared/types/IDetaljertBehandling'
 import { RevurderingInfo } from '~shared/types/RevurderingInfo'
@@ -20,7 +19,7 @@ export const updateVilkaarsvurdering = createAction<IVilkaarsvurdering | undefin
   'behandling/update_vilkaarsvurdering'
 )
 export const oppdaterKommerBarnetTilgode = createAction<IKommerBarnetTilgode>('behandling/kommerBarnetTilgode')
-export const oppdaterUtenlandstilsnitt = createAction<IUtenlandstilsnitt>('behandling/utenlandstilsnitt')
+
 export const oppdaterBoddEllerArbeidetUtlandet = createAction<IBoddEllerArbeidetUtlandet>(
   'behandling/boddellerarbeidetutlandet'
 )
@@ -64,9 +63,6 @@ export const behandlingReducer = createReducer(initialState, (builder) => {
   })
   builder.addCase(oppdaterKommerBarnetTilgode, (state, action) => {
     state.behandling!!.kommerBarnetTilgode = action.payload
-  })
-  builder.addCase(oppdaterUtenlandstilsnitt, (state, action) => {
-    state.behandling!!.utenlandstilsnitt = action.payload
   })
   builder.addCase(oppdaterBoddEllerArbeidetUtlandet, (state, action) => {
     state.behandling!!.boddEllerArbeidetUtlandet = action.payload

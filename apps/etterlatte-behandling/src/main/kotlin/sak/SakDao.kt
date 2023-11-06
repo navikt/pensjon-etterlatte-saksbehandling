@@ -22,7 +22,6 @@ data class SakUtenlandstilknytning(
 )
 
 class SakDao(private val connection: () -> Connection) {
-    // TODO: test dette
     fun hentUtenlandstilknytningForSak(sakId: Long): SakUtenlandstilknytning? {
         with(connection()) {
             val statement =

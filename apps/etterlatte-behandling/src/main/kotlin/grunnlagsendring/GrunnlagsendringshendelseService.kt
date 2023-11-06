@@ -11,6 +11,7 @@ import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.common.klienter.PdlKlient
 import no.nav.etterlatte.common.klienter.hentAnsvarligeForeldre
 import no.nav.etterlatte.common.klienter.hentBarn
+import no.nav.etterlatte.common.klienter.hentBostedsadresse
 import no.nav.etterlatte.common.klienter.hentDoedsdato
 import no.nav.etterlatte.common.klienter.hentSivilstand
 import no.nav.etterlatte.common.klienter.hentUtland
@@ -25,8 +26,10 @@ import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
+import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.pdlhendelse.Adressebeskyttelse
+import no.nav.etterlatte.libs.common.pdlhendelse.Bostedsadresse
 import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.SivilstandHendelse
@@ -106,6 +109,10 @@ class GrunnlagsendringshendelseService(
         return opprettHendelseAvTypeForPerson(doedshendelse.fnr, GrunnlagsendringsType.DOEDSFALL)
     }
 
+    fun opprettBostedhendelse(bostedsadresse: Bostedsadresse): List<Grunnlagsendringshendelse> {
+        return opprettHendelseAvTypeForPerson(bostedsadresse.fnr, GrunnlagsendringsType.BOSTED)
+    }
+
     fun opprettUtflyttingshendelse(utflyttingsHendelse: UtflyttingsHendelse): List<Grunnlagsendringshendelse> {
         return opprettHendelseAvTypeForPerson(utflyttingsHendelse.fnr, GrunnlagsendringsType.UTFLYTTING)
     }
@@ -170,6 +177,27 @@ class GrunnlagsendringshendelseService(
 
         if (sakIder.isNotEmpty() && gradering != AdressebeskyttelseGradering.UGRADERT) {
             logger.error("Vi har en eller flere saker som er beskyttet med gradering ($gradering), se sikkerLogg.")
+        }
+    }
+
+    fun oppdaterAdresseHendelse(bostedsadresse: Bostedsadresse) {
+        val oppgaverUnderBehandling =
+            oppgaveService.hentOppgaverForReferanse(bostedsadresse.fnr).map { it.status == Status.UNDER_BEHANDLING }
+        if (oppgaverUnderBehandling.isNotEmpty()) {
+            sikkerLogg.info("Oppretter manuell oppgave for Bosted fordi det er åpne behandlinger")
+            opprettBostedhendelse(bostedsadresse)
+        } else {
+            val finnSaker = sakService.finnSaker(bostedsadresse.fnr)
+
+            val sakerMedNyEnhet =
+                finnSaker.map {
+                    SakMedEnhet(
+                        it.id,
+                        sakService.finnEnhetForPersonOgTema(bostedsadresse.fnr, it.enhet, it.sakType).enhetNr,
+                    )
+                }
+            sakService.oppdaterEnhetForSaker(sakerMedNyEnhet)
+            oppgaveService.oppdaterEnhetForRelaterteOppgaver(sakerMedNyEnhet)
         }
     }
 
@@ -435,9 +463,19 @@ class GrunnlagsendringshendelseService(
                 samsvarSivilstand(pdlSivilstand, grunnlagSivilstand)
             }
 
-            GrunnlagsendringsType.GRUNNBELOEP -> SamsvarMellomKildeOgGrunnlag.Grunnbeloep(samsvar = false)
-            GrunnlagsendringsType.INSTITUSJONSOPPHOLD ->
+            GrunnlagsendringsType.BOSTED -> {
+                val pdlBosted = pdlData.hentBostedsadresse()
+                val grunnlagBosted = grunnlag?.bostedsadresse(rolle, fnr)?.verdi
+                samsvarBostedsadresse(pdlBosted, grunnlagBosted)
+            }
+
+            GrunnlagsendringsType.GRUNNBELOEP -> {
+                SamsvarMellomKildeOgGrunnlag.Grunnbeloep(samsvar = false)
+            }
+
+            GrunnlagsendringsType.INSTITUSJONSOPPHOLD -> {
                 throw IllegalStateException("Denne hendelsen skal gå rett til oppgavelisten og aldri komme hit")
+            }
         }
     }
 

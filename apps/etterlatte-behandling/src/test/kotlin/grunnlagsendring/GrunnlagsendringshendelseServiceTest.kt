@@ -40,6 +40,7 @@ import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.opprettNyOppgaveMedReferanseOgSak
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.pdlhendelse.Adressebeskyttelse
+import no.nav.etterlatte.libs.common.pdlhendelse.Bostedsadresse
 import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
 import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse
@@ -684,6 +685,60 @@ internal class GrunnlagsendringshendelseServiceTest {
         }
         coVerify {
             grunnlagClient.hentGrunnlag(sakId)
+        }
+    }
+
+    @Test
+    fun `Skal kunne sette adresse og faa oppdatert enhet`() {
+        val sakIder: Set<Long> = setOf(1, 2, 3, 4, 5, 6)
+        val saker =
+            sakIder.map {
+                Sak(
+                    id = it,
+                    ident = KONTANT_FOT.value,
+                    sakType = SakType.BARNEPENSJON,
+                    enhet = Enheter.PORSGRUNN.enhetNr,
+                )
+            }
+        val fnr = "16508201382"
+        val bostedsadresse = Bostedsadresse("1", Endringstype.OPPRETTET, fnr)
+        coEvery { grunnlagClient.hentAlleSakIder(any()) } returns sakIder
+        every { sakService.oppdaterAdressebeskyttelse(any(), any()) } returns 1
+        every { sakService.finnSaker(fnr) } returns saker
+        every { oppgaveService.oppdaterEnhetForRelaterteOppgaver(any()) } returns Unit
+        every { oppgaveService.hentOppgaverForReferanse(any()) } returns emptyList()
+        every {
+            sakService.finnEnhetForPersonOgTema(any(), any(), any())
+        } returns ArbeidsFordelingEnhet("NAV Familie- og pensjonsytelser Steinkjer", "4817")
+        every { sakService.oppdaterEnhetForSaker(any()) } just runs
+        runBlocking {
+            grunnlagsendringshendelseService.oppdaterAdresseHendelse(bostedsadresse)
+        }
+        coVerify(exactly = 1) { sakService.finnSaker(bostedsadresse.fnr) }
+
+        verify(exactly = 1) {
+            sakService.oppdaterEnhetForSaker(
+                listOf(
+                    GrunnlagsendringshendelseService.SakMedEnhet(1, "4817"),
+                    GrunnlagsendringshendelseService.SakMedEnhet(2, "4817"),
+                    GrunnlagsendringshendelseService.SakMedEnhet(3, "4817"),
+                    GrunnlagsendringshendelseService.SakMedEnhet(4, "4817"),
+                    GrunnlagsendringshendelseService.SakMedEnhet(5, "4817"),
+                    GrunnlagsendringshendelseService.SakMedEnhet(6, "4817"),
+                ),
+            )
+        }
+        verify(exactly = 1) {
+            oppgaveService.oppdaterEnhetForRelaterteOppgaver(
+                listOf(
+                    GrunnlagsendringshendelseService.SakMedEnhet(1, "4817"),
+                    GrunnlagsendringshendelseService.SakMedEnhet(2, "4817"),
+                    GrunnlagsendringshendelseService.SakMedEnhet(3, "4817"),
+                    GrunnlagsendringshendelseService.SakMedEnhet(4, "4817"),
+                    GrunnlagsendringshendelseService.SakMedEnhet(5, "4817"),
+                    GrunnlagsendringshendelseService.SakMedEnhet(6, "4817"),
+                ),
+            )
         }
     }
 

@@ -49,6 +49,12 @@ data class Adressebeskyttelse(
     val adressebeskyttelseGradering: AdressebeskyttelseGradering,
 ) : PdlHendelse
 
+data class Bostedsadresse(
+    override val hendelseId: String,
+    override val endringstype: Endringstype,
+    override val fnr: String,
+) : PdlHendelse
+
 data class SivilstandHendelse(
     override val hendelseId: String,
     override val endringstype: Endringstype,

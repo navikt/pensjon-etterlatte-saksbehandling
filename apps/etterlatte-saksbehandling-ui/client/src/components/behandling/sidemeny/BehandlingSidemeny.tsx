@@ -123,7 +123,6 @@ export const BehandlingSidemeny = ({ behandling }: { behandling: IBehandlingRedu
                 <Attestering
                   setBeslutning={setBeslutning}
                   beslutning={beslutning}
-                  behandlingId={behandling.id}
                   vedtak={vedtak}
                   erFattet={behandling.status === IBehandlingStatus.FATTET_VEDTAK}
                 />

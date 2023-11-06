@@ -62,7 +62,6 @@ export function TilbakekrevingSidemeny() {
             <Attestering
               setBeslutning={setBeslutning}
               beslutning={beslutning}
-              behandlingId={tilbakekreving?.id}
               vedtak={vedtak}
               erFattet={tilbakekreving?.status === TilbakekrevingStatus.FATTET_VEDTAK}
             />

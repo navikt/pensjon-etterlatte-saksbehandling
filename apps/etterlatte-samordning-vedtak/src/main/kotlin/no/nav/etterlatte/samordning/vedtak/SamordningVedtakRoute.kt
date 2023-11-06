@@ -9,6 +9,8 @@ import io.ktor.server.response.respondNullable
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.route
+import kotlinx.coroutines.slf4j.MDCContext
+import kotlinx.coroutines.withContext
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.ktor.AuthorizationPlugin
 import no.nav.etterlatte.libs.ktor.MaskinportenScopeAuthorizationPlugin
@@ -22,56 +24,60 @@ fun Route.samordningVedtakRoute(samordningVedtakService: SamordningVedtakService
         }
 
         get("{vedtakId}") {
-            val vedtakId = requireNotNull(call.parameters["vedtakId"]).toLong()
+            withContext(MDCContext()) {
+                val vedtakId = requireNotNull(call.parameters["vedtakId"]).toLong()
 
-            val tpnummer =
-                call.request.headers["tpnr"]
-                    ?: throw ManglerTpNrException()
+                val tpnummer =
+                    call.request.headers["tpnr"]
+                        ?: throw ManglerTpNrException()
 
-            val samordningVedtakDto =
-                try {
-                    samordningVedtakService.hentVedtak(
-                        vedtakId = vedtakId,
-                        MaskinportenTpContext(
-                            tpnr = Tjenestepensjonnummer(tpnummer),
-                            organisasjonsnr = call.orgNummer,
-                        ),
-                    )
-                } catch (e: IllegalArgumentException) {
-                    call.respondNullable(HttpStatusCode.BadRequest, e.message)
-                }
+                val samordningVedtakDto =
+                    try {
+                        samordningVedtakService.hentVedtak(
+                            vedtakId = vedtakId,
+                            MaskinportenTpContext(
+                                tpnr = Tjenestepensjonnummer(tpnummer),
+                                organisasjonsnr = call.orgNummer,
+                            ),
+                        )
+                    } catch (e: IllegalArgumentException) {
+                        call.respondNullable(HttpStatusCode.BadRequest, e.message)
+                    }
 
-            call.respond(samordningVedtakDto)
+                call.respond(HttpStatusCode.OK, samordningVedtakDto)
+            }
         }
 
         get {
-            val virkFom =
-                call.parameters["virkFom"]?.let { runCatching { LocalDate.parse(it) }.getOrNull() }
-                    ?: throw ManglerVirkFomException()
+            withContext(MDCContext()) {
+                val virkFom =
+                    call.parameters["virkFom"]?.let { runCatching { LocalDate.parse(it) }.getOrNull() }
+                        ?: throw ManglerVirkFomException()
 
-            val fnr =
-                call.request.headers["fnr"]
-                    ?: throw ManglerFoedselsnummerException()
+                val fnr =
+                    call.request.headers["fnr"]
+                        ?: throw ManglerFoedselsnummerException()
 
-            val tpnummer =
-                call.request.headers["tpnr"]
-                    ?: throw ManglerTpNrException()
+                val tpnummer =
+                    call.request.headers["tpnr"]
+                        ?: throw ManglerTpNrException()
 
-            val samordningVedtakDtos =
-                try {
-                    samordningVedtakService.hentVedtaksliste(
-                        virkFom = virkFom,
-                        fnr = Folkeregisteridentifikator.of(fnr),
-                        MaskinportenTpContext(
-                            tpnr = Tjenestepensjonnummer(tpnummer),
-                            organisasjonsnr = call.orgNummer,
-                        ),
-                    )
-                } catch (e: IllegalArgumentException) {
-                    call.respondNullable(HttpStatusCode.BadRequest, e.message)
-                }
+                val samordningVedtakDtos =
+                    try {
+                        samordningVedtakService.hentVedtaksliste(
+                            virkFom = virkFom,
+                            fnr = Folkeregisteridentifikator.of(fnr),
+                            MaskinportenTpContext(
+                                tpnr = Tjenestepensjonnummer(tpnummer),
+                                organisasjonsnr = call.orgNummer,
+                            ),
+                        )
+                    } catch (e: IllegalArgumentException) {
+                        call.respondNullable(HttpStatusCode.BadRequest, e.message)
+                    }
 
-            call.respond(samordningVedtakDtos)
+                call.respond(HttpStatusCode.OK, samordningVedtakDtos)
+            }
         }
     }
 
@@ -81,26 +87,28 @@ fun Route.samordningVedtakRoute(samordningVedtakService: SamordningVedtakService
         }
 
         get {
-            val virkFom =
-                call.parameters["virkFom"]?.let { runCatching { LocalDate.parse(it) }.getOrNull() }
-                    ?: throw ManglerVirkFomException()
+            withContext(MDCContext()) {
+                val virkFom =
+                    call.parameters["virkFom"]?.let { runCatching { LocalDate.parse(it) }.getOrNull() }
+                        ?: throw ManglerVirkFomException()
 
-            val fnr =
-                call.request.headers["fnr"]
-                    ?: throw ManglerFoedselsnummerException()
+                val fnr =
+                    call.request.headers["fnr"]
+                        ?: throw ManglerFoedselsnummerException()
 
-            val samordningVedtakDtos =
-                try {
-                    samordningVedtakService.hentVedtaksliste(
-                        virkFom = virkFom,
-                        fnr = Folkeregisteridentifikator.of(fnr),
-                        PensjonContext,
-                    )
-                } catch (e: IllegalArgumentException) {
-                    call.respondNullable(HttpStatusCode.BadRequest, e.message)
-                }
+                val samordningVedtakDtos =
+                    try {
+                        samordningVedtakService.hentVedtaksliste(
+                            virkFom = virkFom,
+                            fnr = Folkeregisteridentifikator.of(fnr),
+                            PensjonContext,
+                        )
+                    } catch (e: IllegalArgumentException) {
+                        call.respondNullable(HttpStatusCode.BadRequest, e.message)
+                    }
 
-            call.respond(samordningVedtakDtos)
+                call.respond(HttpStatusCode.OK, samordningVedtakDtos)
+            }
         }
     }
 }

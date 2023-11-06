@@ -83,7 +83,7 @@ internal class BrevdataFacadeImplTest {
         coEvery { vedtaksvurderingKlient.hentVedtak(any(), any()) } returns opprettBehandlingVedtak()
         coEvery { grunnlagKlient.hentGrunnlag(SAK_ID, BEHANDLING_ID, BRUKERTokenInfo) } returns opprettGrunnlag()
         coEvery { beregningKlient.hentBeregning(any(), any()) } returns opprettBeregning()
-        coEvery { trygdetidService.finnTrygdetid(any(), any()) } returns opprettTrygdetid()
+        coEvery { trygdetidService.finnTrygdetidsgrunnlag(any(), any(), any()) } returns opprettTrygdetid()
 
         val generellBrevData =
             runBlocking {
@@ -163,7 +163,7 @@ internal class BrevdataFacadeImplTest {
         coEvery { vedtaksvurderingKlient.hentVedtak(any(), any()) } returns opprettBehandlingVedtak()
         coEvery { grunnlagKlient.hentGrunnlag(any(), any(), any()) } returns opprettGrunnlag()
         coEvery { beregningKlient.hentBeregning(any(), any()) } returns opprettBeregning()
-        coEvery { trygdetidService.finnTrygdetid(any(), any()) } returns opprettTrygdetid()
+        coEvery { trygdetidService.finnTrygdetidsgrunnlag(any(), any(), any()) } returns opprettTrygdetid()
 
         val utbetalingsinfo =
             runBlocking {
@@ -195,7 +195,7 @@ internal class BrevdataFacadeImplTest {
         coEvery { vedtaksvurderingKlient.hentVedtak(any(), any()) } returns opprettBehandlingVedtak()
         coEvery { grunnlagKlient.hentGrunnlag(any(), any(), any()) } returns opprettGrunnlag()
         coEvery { beregningKlient.hentBeregning(any(), any()) } returns opprettBeregningSoeskenjustering()
-        coEvery { trygdetidService.finnTrygdetid(any(), any()) } returns opprettTrygdetid()
+        coEvery { trygdetidService.finnTrygdetidsgrunnlag(any(), any(), any()) } returns opprettTrygdetid()
 
         val utbetalingsinfo =
             runBlocking {

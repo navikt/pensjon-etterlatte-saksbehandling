@@ -2,73 +2,85 @@ package no.nav.etterlatte.brev.hentinformasjon
 
 import no.nav.etterlatte.brev.behandling.Trygdetid
 import no.nav.etterlatte.brev.behandling.Trygdetidsperiode
-import no.nav.etterlatte.libs.common.IntBroek
 import no.nav.etterlatte.libs.common.beregning.BeregningDTO
-import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
+import no.nav.etterlatte.libs.common.trygdetid.TrygdetidGrunnlagDto
 import no.nav.etterlatte.token.BrukerTokenInfo
+import java.time.Period
 import java.util.UUID
-import kotlin.math.max
 
 class TrygdetidService(private val trygdetidKlient: TrygdetidKlient) {
-    suspend fun finnTrygdetid(
+    suspend fun finnTrygdetidsgrunnlag(
         behandlingId: UUID,
         beregning: BeregningDTO,
         brukerTokenInfo: BrukerTokenInfo,
     ): Trygdetid? {
-        val trygdetidMedGrunnlag: TrygdetidDto =
-            trygdetidKlient.hentTrygdetid(behandlingId, brukerTokenInfo) ?: return null
+        val trygdetiderIBehandling: List<TrygdetidDto> =
+            trygdetidKlient.hentTrygdetid(behandlingId, brukerTokenInfo)
+        if (trygdetiderIBehandling.isEmpty()) {
+            return null
+        }
 
-        val trygdetidsperioder = finnTrygdetidsperioder(trygdetidMedGrunnlag)
+        // Trygdetid anvendt kan variere mellom beregningsperiodene, i tilfeller med mer enn en avdød.
+        // Dette spesialtilfellet er litt uheldig for oss, men tilnærmingen er
+        // foreløpig å bruke første beregningsperiode som grunnlag. Da kan man håndtere skiller i trygdetid vi
+        // dokumenterer i brevet ved å først innvilge, og så gjøre en revurdering.
+        // Hvis vi har lyst til å støtte mer komplekse førstegangsinnvilgelser / behandlinger som går over
+        // over flere perioder med ulike trygdetider må man håndtere dette i brevet, men det er ikke noe som er
+        // lagt opp til annet enn en eventuell redigering av fritekst i trygdetidsvedlegget.
+        // det vil uansett bli riktig for alle saker der vi kun benytter en trygdetid, som er overveiende flesteparten
+        val foersteBeregningsperiode = beregning.beregningsperioder.minBy { it.datoFOM }
+        val anvendtTrygdetid = foersteBeregningsperiode.trygdetid
 
-        val samlaTrygdetid2 =
-            beregning.beregningsperioder
-                .sumOf {
-                    when (it.beregningsMetode) {
-                        BeregningsMetode.NASJONAL -> it.samletNorskTrygdetid ?: 0
-                        BeregningsMetode.PRORATA -> beregnProrata(it.samletTeoretiskTrygdetid, it.broek)
-                        BeregningsMetode.BEST ->
-                            max(
-                                it.samletNorskTrygdetid ?: 0,
-                                beregnProrata(it.samletTeoretiskTrygdetid, it.broek),
-                            )
-                        null -> 0
-                    }
+        val trygdetidgrunnlagForAnvendtTrygdetid =
+            trygdetiderIBehandling.find { it.ident == foersteBeregningsperiode.trygdetidForIdent }
+                ?: trygdetiderIBehandling.first().also {
+                    "Fant ikke riktig trygdetid for identen som er brukt i beregning"
                 }
-        /*
-        Nasjonal - bruk samletTrygdetidNorge
-        Prorata - bruk samletTrygdetidTeoretisk ganget med prorata brøk (og her viser vi trygdetid og brøk - ikke resulterende verdi i gjenny)
-        Best - regn ut begge to og bruk den som gir høyest verdi
-         */
 
-        val beregnetTrygdetid = trygdetidMedGrunnlag.beregnetTrygdetid
-        val resultat = beregnetTrygdetid?.resultat
-        val samlaTrygdetid = resultat?.samletTrygdetidNorge ?: resultat?.samletTrygdetidTeoretisk ?: 0
+        if (trygdetidgrunnlagForAnvendtTrygdetid.beregnetTrygdetid?.resultat?.overstyrt == true) {
+            // vi har en overstyrt trygdetid fra pesys, og vi kan dermed ikke gi ut noe detaljert grunnlag på hvordan
+            // vi har kommet frem til trygdetiden
+            return Trygdetid(
+                aarTrygdetid = anvendtTrygdetid,
+                maanederTrygdetid = 0,
+                perioder = listOf(),
+                overstyrt = true,
+            )
+        }
+
+        val trygdetidsperioder =
+            finnTrygdetidsperioderForTabell(trygdetidgrunnlagForAnvendtTrygdetid.trygdetidGrunnlag, anvendtTrygdetid)
 
         return Trygdetid(
-            aarTrygdetid = samlaTrygdetid2,
-            maanederTrygdetid = samlaTrygdetid % 12,
+            aarTrygdetid = anvendtTrygdetid,
+            maanederTrygdetid = 0,
             perioder = trygdetidsperioder,
+            overstyrt = false,
         )
     }
 
-    private fun beregnProrata(
-        samletTeoretiskTrygdetid: Int?,
-        broek: IntBroek?,
-    ): Int {
-        if (broek == null) return samletTeoretiskTrygdetid ?: 0
-        val samlet = samletTeoretiskTrygdetid ?: 0
-        val br = broek.teller / broek.nevner
-        return samlet.times(br)
-    }
+    private fun finnTrygdetidsperioderForTabell(
+        trygdetidsgrunnlag: List<TrygdetidGrunnlagDto>,
+        anvendtTrygdetid: Int,
+    ): List<Trygdetidsperiode> {
+        val harKunNorskeTrygdetidsperioder = trygdetidsgrunnlag.all { !it.prorata || it.bosted == "NOR" }
 
-    private fun finnTrygdetidsperioder(trygdetidMedGrunnlag: TrygdetidDto) =
-        trygdetidMedGrunnlag.trygdetidGrunnlag.map {
-            Trygdetidsperiode(
-                datoFOM = it.periodeFra,
-                datoTOM = it.periodeTil,
-                land = it.bosted,
-                opptjeningsperiode = it.beregnet?.aar.toString(),
-            )
+        // Vi skal kun vise tabell hvis den har relevante perioder for bruker, dvs. vi har med avtaleland utenfor Norge
+        // eller vi har anvendt trygdetid < 40. Hvis ikke (kun norske og anvendt trygdetid = 40) er det unødvendig
+        if (harKunNorskeTrygdetidsperioder && anvendtTrygdetid == 40) {
+            return emptyList()
         }
+
+        return trygdetidsgrunnlag
+            .filter { it.prorata } // Vi skal kun ha med de som er avtaleland, dvs. er med i prorata
+            .map { grunnlag ->
+                Trygdetidsperiode(
+                    datoFOM = grunnlag.periodeFra,
+                    datoTOM = grunnlag.periodeTil,
+                    land = grunnlag.bosted,
+                    opptjeningsperiode = grunnlag.beregnet?.let { Period.of(it.aar, it.maaneder, it.dager) },
+                )
+            }
+    }
 }

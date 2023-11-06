@@ -1,8 +1,10 @@
 package no.nav.etterlatte.brev.hentinformasjon
 
 import io.mockk.coEvery
+import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.libs.common.beregning.BeregningDTO
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.trygdetid.BeregnetTrygdetidGrunnlagDto
 import no.nav.etterlatte.libs.common.trygdetid.DetaljertBeregnetTrygdetidDto
@@ -15,6 +17,7 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.Month
+import java.time.Period
 import java.util.UUID
 
 internal class TrygdetidServiceTest {
@@ -24,11 +27,22 @@ internal class TrygdetidServiceTest {
     fun `henter trygdetid`() {
         val service = TrygdetidService(trygdetidKlient)
         val behandlingId = UUID.randomUUID()
-        coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns trygdetidDto(behandlingId)
-        val trygdetid = runBlocking { service.finnTrygdetid(behandlingId, mockk()) }
-        Assertions.assertEquals(3, trygdetid!!.aarTrygdetid)
-        Assertions.assertEquals(6, trygdetid.maanederTrygdetid)
-        Assertions.assertEquals("2", trygdetid.perioder[0].opptjeningsperiode)
+        coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns listOf(trygdetidDto(behandlingId))
+
+        val beregning =
+            mockk<BeregningDTO> {
+                every { beregningsperioder } returns
+                    listOf(
+                        mockk {
+                            every { trygdetidForIdent } returns AVDOED_FOEDSELSNUMMER.value
+                            every { trygdetid } returns 23
+                        },
+                    )
+            }
+        val trygdetid = runBlocking { service.finnTrygdetidsgrunnlag(behandlingId, beregning, mockk()) }
+        Assertions.assertEquals(23, trygdetid!!.aarTrygdetid)
+        Assertions.assertEquals(0, trygdetid.maanederTrygdetid)
+        Assertions.assertEquals(Period.of(2, 10, 0), trygdetid.perioder[0].opptjeningsperiode)
     }
 
     private fun trygdetidDto(behandlingId: UUID) =
@@ -68,7 +82,7 @@ internal class TrygdetidServiceTest {
                         begrunnelse = null,
                         poengInnAar = false,
                         poengUtAar = false,
-                        prorata = false,
+                        prorata = true,
                     ),
                 ),
             opplysninger =

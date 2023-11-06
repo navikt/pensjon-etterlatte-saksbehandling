@@ -43,6 +43,7 @@ import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
 import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED2_FOEDSELSNUMMER
+import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import no.nav.etterlatte.libs.testdata.grunnlag.HELSOESKEN2_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.HELSOESKEN_FOEDSELSNUMMER
@@ -821,6 +822,7 @@ internal class BeregnBarnepensjonServiceTest {
         mockk<TrygdetidDto>().apply {
             every { id } returns randomUUID()
             every { behandlingId } returns behandlingId_
+            every { ident } returns AVDOED_FOEDSELSNUMMER.value
             every { beregnetTrygdetid } returns
                 mockk {
                     every { resultat } returns

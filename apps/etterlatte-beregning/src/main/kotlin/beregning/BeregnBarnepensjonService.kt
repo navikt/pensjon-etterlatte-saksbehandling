@@ -222,6 +222,10 @@ class BeregnBarnepensjonService(
                                 grunnbelopMnd = grunnbeloep.grunnbeloepPerMaaned,
                                 grunnbelop = grunnbeloep.grunnbeloep,
                                 trygdetid = trygdetid.trygdetid.toInteger(),
+                                trygdetidForIdent =
+                                    beregningsgrunnlag.avdoedesTrygdetid.finnGrunnlagForPeriode(
+                                        periodisertResultat.periode.fraDato,
+                                    ).verdi.ident,
                                 beregningsMetode = trygdetid.beregningsMetode,
                                 samletNorskTrygdetid = trygdetidGrunnlagForPeriode.samletTrygdetidNorge?.toInteger(),
                                 samletTeoretiskTrygdetid = trygdetidGrunnlagForPeriode.samletTrygdetidTeoretisk?.toInteger(),
@@ -296,10 +300,10 @@ class BeregnBarnepensjonService(
                 tom,
             ),
         avdoedesTrygdetid =
-            trygdetid?.beregnetTrygdetid?.resultat?.let {
+            trygdetid?.toSamlet(beregningsGrunnlag.beregningsMetode.beregningsMetode)?.let {
                 KonstantGrunnlag(
                     FaktumNode(
-                        verdi = it.toSamlet(beregningsGrunnlag.beregningsMetode.beregningsMetode),
+                        verdi = it,
                         kilde = beregningsGrunnlag.kilde,
                         beskrivelse = "Trygdetid avdød forelder",
                     ),
@@ -312,6 +316,7 @@ class BeregnBarnepensjonService(
                             samletTrygdetidNorge = Beregningstall(FASTSATT_TRYGDETID_I_PILOT),
                             samletTrygdetidTeoretisk = null,
                             prorataBroek = null,
+                            ident = null,
                         ),
                     kilde = Grunnlagsopplysning.RegelKilde("MVP hardkodet trygdetid", Tidspunkt.now(), "1"),
                     beskrivelse = "Trygdetid avdød forelder",

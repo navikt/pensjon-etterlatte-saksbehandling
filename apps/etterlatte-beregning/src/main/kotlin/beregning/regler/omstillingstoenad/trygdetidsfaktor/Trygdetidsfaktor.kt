@@ -1,6 +1,6 @@
 package no.nav.etterlatte.beregning.regler.omstillingstoenad.trygdetidsfaktor
 
-import no.nav.etterlatte.beregning.regler.AnvendtTrgydetid
+import no.nav.etterlatte.beregning.regler.AnvendtTrygdetid
 import no.nav.etterlatte.beregning.regler.omstillingstoenad.Avdoed
 import no.nav.etterlatte.beregning.regler.omstillingstoenad.OMS_GYLDIG_FROM_TEST
 import no.nav.etterlatte.beregning.regler.omstillingstoenad.OmstillingstoenadGrunnlag
@@ -52,8 +52,8 @@ val trygdetidBruktRegel =
             nasjonal,
             teoretisk,
         ->
-        val nasjonalBeregning = AnvendtTrgydetid(BeregningsMetode.NASJONAL, nasjonal)
-        val teoretiskBeregning = AnvendtTrgydetid(BeregningsMetode.PRORATA, teoretisk)
+        val nasjonalBeregning = AnvendtTrygdetid(BeregningsMetode.NASJONAL, nasjonal)
+        val teoretiskBeregning = AnvendtTrygdetid(BeregningsMetode.PRORATA, teoretisk)
 
         when (trygdetid.beregningsMetode) {
             BeregningsMetode.NASJONAL -> nasjonalBeregning

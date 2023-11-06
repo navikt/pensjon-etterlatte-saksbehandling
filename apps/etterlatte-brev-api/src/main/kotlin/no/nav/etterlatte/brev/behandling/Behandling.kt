@@ -9,6 +9,7 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.pensjon.brevbaker.api.model.Kroner
 import java.time.LocalDate
+import java.time.Period
 import java.time.YearMonth
 import java.util.UUID
 
@@ -25,13 +26,14 @@ data class Trygdetid(
     val aarTrygdetid: Int,
     val maanederTrygdetid: Int,
     val perioder: List<Trygdetidsperiode>,
+    val overstyrt: Boolean,
 )
 
 data class Trygdetidsperiode(
     val datoFOM: LocalDate,
     val datoTOM: LocalDate?,
     val land: String,
-    val opptjeningsperiode: String,
+    val opptjeningsperiode: Period?,
 )
 
 data class ForenkletVedtak(

@@ -55,6 +55,7 @@ internal class MigreringHendelserRiverTest {
                         grunnbelop = 100000,
                         trygdetid = 40,
                         grunnbelopMnd = 100000 / 12,
+                        trygdetidForIdent = null,
                     ),
                 ),
             beregnetDato = Tidspunkt.now(),

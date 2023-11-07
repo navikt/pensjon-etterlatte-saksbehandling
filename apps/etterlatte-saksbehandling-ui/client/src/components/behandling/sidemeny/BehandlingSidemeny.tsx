@@ -31,7 +31,7 @@ const finnUtNasjonalitet = (behandling: IBehandlingReducer): Utenlandstilknytnin
   if (behandling.utenlandstilknytning?.type) {
     return behandling.utenlandstilknytning?.type
   } else {
-    throw Error('Ingen utenlandstilknytning valgt')
+    return null
   }
 }
 const mapTilBehandlingInfo = (behandling: IBehandlingReducer, vedtak: VedtakSammendrag | null): IBehandlingInfo => ({

@@ -1,5 +1,6 @@
 package no.nav.etterlatte
 
+import io.ktor.server.application.install
 import io.ktor.server.cio.CIO
 import io.ktor.server.config.HoconApplicationConfig
 import io.ktor.server.engine.applicationEngineEnvironment
@@ -11,6 +12,8 @@ import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.libs.ktor.setReady
 import no.nav.etterlatte.samordning.ApplicationContext
 import no.nav.etterlatte.samordning.vedtak.samordningVedtakRoute
+import no.nav.etterlatte.samordning.vedtak.serverRequestLoggerPlugin
+import no.nav.etterlatte.samordning.vedtak.userIdMdcPlugin
 import org.slf4j.Logger
 
 val sikkerLogg: Logger = sikkerlogger()
@@ -37,7 +40,9 @@ class Server(applicationContext: ApplicationContext) {
                             withMetrics = true,
                         ) {
                             samordningVedtakRoute(samordningVedtakService = applicationContext.samordningVedtakService)
+                            install(userIdMdcPlugin)
                         }
+                        install(serverRequestLoggerPlugin)
                     }
                     connector { port = applicationContext.httpPort }
                 },

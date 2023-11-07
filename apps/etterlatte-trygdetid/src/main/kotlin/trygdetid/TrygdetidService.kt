@@ -614,11 +614,13 @@ class TrygdetidServiceImpl(
             val trygdetider = trygdetidRepository.hentTrygdetiderForBehandling(behandlingId)
             val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
 
-            if (trygdetider.isNotEmpty() && trygdetider.any { it.beregnetTrygdetid == null }) {
-                throw TrygdetidErIkkeGyldig()
+            if (trygdetider.isEmpty()) {
+                throw IngenTrygdetidFunnetForAvdoede()
             }
 
-            // TODO sjekk at dødsdato og fødselsdato for avdøde stemmer overrens med grunnlag
+            if (trygdetider.any { it.beregnetTrygdetid == null }) {
+                throw TrygdetidManglerBeregning()
+            }
 
             // Dersom forrige steg (vilkårsvurdering) har blitt endret vil statusen være VILKAARSVURDERT. Når man
             // trykker videre fra vilkårsvurdering skal denne validere tilstand og sette status TRYGDETID_OPPDATERT.
@@ -689,7 +691,12 @@ class StoetterIkkeTrygdetidForBehandlingstypen(behandlingType: BehandlingType) :
         detail = "Støtter ikke trygdetid for behandlingstypen $behandlingType",
     )
 
-class TrygdetidErIkkeGyldig : UgyldigForespoerselException(
-    code = "TRYGDETID_IKKE_GYLDIG",
-    detail = "Trygdetiden for den / de avdød(e) er ikke gyldig",
+class IngenTrygdetidFunnetForAvdoede : UgyldigForespoerselException(
+    code = "TRYGDETID_IKKE_FUNNET_AVDOEDE",
+    detail = "Ingen trygdetider er funnet for den / de avdøde",
+)
+
+class TrygdetidManglerBeregning : UgyldigForespoerselException(
+    code = "TRYGDETID_MANGLER_BEREGNING",
+    detail = "Oppgitt trygdetid er ikke gyldig fordi det mangler en beregning",
 )

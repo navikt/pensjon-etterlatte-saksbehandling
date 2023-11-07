@@ -1,55 +1,28 @@
 import { BodyShort, ErrorSummary, Heading, TextField } from '@navikt/ds-react'
 import SEDLandMedDokumenter from '~components/behandling/revurderingsoversikt/sluttbehandlingUtland/SEDLandMedDokumenter'
 import { ILand } from '~shared/api/trygdetid'
-import React, { useState } from 'react'
+import React from 'react'
 import { LandMedDokumenter } from '~shared/types/RevurderingInfo'
 import { InformationSquareIcon } from '@navikt/aksel-icons'
 import { ABlue500 } from '@navikt/ds-tokens/dist/tokens'
 
-export const MottatteSeder = ({ landliste }: { landliste: ILand[] }) => {
-  const initalStateLandMedDokumenter = [
-    {
-      landIsoKode: undefined,
-      dokumenter: [
-        { dokumenttype: 'P5000', dato: undefined, kommentar: '' },
-        { dokumenttype: 'P6000', dato: undefined, kommentar: '' },
-        { dokumenttype: 'P2100', dato: undefined, kommentar: '' },
-      ],
-    },
-  ]
-
-  const [landMedDokumenter, setLandMedDokumenter] = useState<LandMedDokumenter[]>(initalStateLandMedDokumenter)
-  const [feilkoder, setFeilkoder] = useState<Set<string>>(new Set([]))
-  const [rinanummer, setRinanummer] = useState<string>('')
-
-  const validerSkjema = () => {
-    const feilkoder: Set<string> = new Set([])
-    if (landMedDokumenter.find((landmedDokument) => !landmedDokument.landIsoKode)) {
-      feilkoder.add('Du må velge et land for hver SED`er(land rad i tabellen under)')
-    }
-    if (landMedDokumenter.find((landMedDokument) => landMedDokument.dokumenter.length === 0)) {
-      feilkoder.add('Du må legge til minst et dokument per land rad, eller slette landraden.')
-    }
-    landMedDokumenter.forEach((landMedDokument) => {
-      if (landMedDokument.dokumenter.find((e) => !e.dokumenttype)) {
-        feilkoder.add('Du må skrive inn en dokumenttype(P2000 feks) eller fjerne dokumentraden.')
-      }
-      if (landMedDokument.dokumenter.find((e) => !e.dato)) {
-        feilkoder.add('Du må legge til dato for hvert dokument')
-      }
-    })
-    if (!!rinanummer) {
-      feilkoder.add('Du må legge til et rinanummer')
-    }
-    setFeilkoder(feilkoder)
-    return feilkoder
-  }
-
-  const lagre = () => {
-    //TODO: koble mot backend
-    validerSkjema()
-  }
-
+export const MottatteSeder = ({
+  landliste,
+  feilkoder,
+  setFeilkoderMottatte,
+  landMedDokumenterMottatte,
+  setLandMedDokumenterMottatte,
+  rinanummer,
+  setRinanummer,
+}: {
+  landliste: ILand[]
+  feilkoder: Set<string>
+  setFeilkoderMottatte: React.Dispatch<React.SetStateAction<Set<string>>>
+  landMedDokumenterMottatte: LandMedDokumenter[]
+  setLandMedDokumenterMottatte: React.Dispatch<React.SetStateAction<LandMedDokumenter[]>>
+  rinanummer: string
+  setRinanummer: React.Dispatch<React.SetStateAction<string>>
+}) => {
   return (
     <>
       {!!feilkoder?.size ? (
@@ -62,7 +35,7 @@ export const MottatteSeder = ({ landliste }: { landliste: ILand[] }) => {
           ))}
         </ErrorSummary>
       ) : null}
-      <Heading onClick={() => lagre()} level="2" size="medium" style={{ marginTop: '2rem' }}>
+      <Heading level="2" size="medium" style={{ marginTop: '2rem' }}>
         Mottatte SED
       </Heading>
       <BodyShort>Fyll inn hvilke SED som er mottatt i RINA pr land.</BodyShort>
@@ -75,9 +48,9 @@ export const MottatteSeder = ({ landliste }: { landliste: ILand[] }) => {
       </div>
       <SEDLandMedDokumenter
         landListe={landliste}
-        landMedDokumenter={landMedDokumenter}
-        setLandMedDokumenter={setLandMedDokumenter}
-        resetFeilkoder={() => setFeilkoder(new Set([]))}
+        landMedDokumenter={landMedDokumenterMottatte}
+        setLandMedDokumenter={setLandMedDokumenterMottatte}
+        resetFeilkoder={() => setFeilkoderMottatte(new Set([]))}
       />
     </>
   )

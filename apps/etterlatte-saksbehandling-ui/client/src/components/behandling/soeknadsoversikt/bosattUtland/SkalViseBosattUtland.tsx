@@ -6,7 +6,7 @@ export const SkalViseBosattUtland = (props: { behandling: IDetaljertBehandling }
   return (
     <>
       {behandling.utenlandstilknytning?.type === UtenlandstilknytningType.BOSATT_UTLAND && (
-        <BosattUtland></BosattUtland>
+        <BosattUtland behandlingId={behandling.id} />
       )}
     </>
   )

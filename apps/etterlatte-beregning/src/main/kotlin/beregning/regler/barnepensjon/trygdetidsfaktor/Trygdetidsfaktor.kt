@@ -1,6 +1,6 @@
 package no.nav.etterlatte.beregning.regler.barnepensjon.trygdetidsfaktor
 
-import no.nav.etterlatte.beregning.regler.AnvendtTrgydetid
+import no.nav.etterlatte.beregning.regler.AnvendtTrygdetid
 import no.nav.etterlatte.beregning.regler.barnepensjon.BP_1967_DATO
 import no.nav.etterlatte.beregning.regler.barnepensjon.BarnepensjonGrunnlag
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
@@ -47,8 +47,8 @@ val trygdetidBruktRegel =
         beskrivelse = "Finn trygdetid basert på faktisk, teoretisk og beregningsmetgode",
         regelReferanse = RegelReferanse(id = "BP-BEREGNING-1967-VALGT-TRYGDETID"),
     ) benytter trygdetidRegel og nasjonalTrygdetidRegel og teoretiskTrygdetidRegel med { trygdetid, nasjonal, teoretisk ->
-        val nasjonalBeregning = AnvendtTrgydetid(BeregningsMetode.NASJONAL, nasjonal)
-        val teoretiskBeregning = AnvendtTrgydetid(BeregningsMetode.PRORATA, teoretisk)
+        val nasjonalBeregning = AnvendtTrygdetid(BeregningsMetode.NASJONAL, nasjonal)
+        val teoretiskBeregning = AnvendtTrygdetid(BeregningsMetode.PRORATA, teoretisk)
 
         when (trygdetid.beregningsMetode) {
             BeregningsMetode.NASJONAL -> nasjonalBeregning

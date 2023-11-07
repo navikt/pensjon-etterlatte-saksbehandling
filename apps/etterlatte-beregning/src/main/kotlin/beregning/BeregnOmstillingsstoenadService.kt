@@ -162,6 +162,7 @@ class BeregnOmstillingsstoenadService(
                                 broek = trygdetidGrunnlagForPeriode.prorataBroek,
                                 regelResultat = objectMapper.valueToTree(periodisertResultat),
                                 regelVersjon = periodisertResultat.reglerVersjon,
+                                trygdetidForIdent = trygdetidGrunnlagForPeriode.ident,
                                 kilde =
                                     Grunnlagsopplysning.RegelKilde(
                                         navn = kroneavrundetOmstillingstoenadRegel.regelReferanse.id,
@@ -212,7 +213,7 @@ class BeregnOmstillingsstoenadService(
         beregningsGrunnlagOMS: BeregningsGrunnlagOMS,
     ): PeriodisertOmstillingstoenadGrunnlag {
         val samletTrygdetid =
-            requireNotNull(trygdetid.beregnetTrygdetid?.resultat?.toSamlet(beregningsGrunnlagOMS.beregningsMetode.beregningsMetode)) {
+            requireNotNull(trygdetid.toSamlet(beregningsGrunnlagOMS.beregningsMetode.beregningsMetode)) {
                 "Trygdetid ikke satt for behandling ${trygdetid.behandlingId}"
             }
 

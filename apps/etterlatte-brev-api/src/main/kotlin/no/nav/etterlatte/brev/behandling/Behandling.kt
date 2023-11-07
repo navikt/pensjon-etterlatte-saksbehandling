@@ -6,6 +6,7 @@ import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tilbakekreving.Tilbakekreving
+import no.nav.etterlatte.libs.common.trygdetid.BeregnetTrygdetidGrunnlagDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.pensjon.brevbaker.api.model.Kroner
@@ -26,13 +27,14 @@ data class Trygdetid(
     val aarTrygdetid: Int,
     val maanederTrygdetid: Int,
     val perioder: List<Trygdetidsperiode>,
+    val overstyrt: Boolean,
 )
 
 data class Trygdetidsperiode(
     val datoFOM: LocalDate,
     val datoTOM: LocalDate?,
     val land: String,
-    val opptjeningsperiode: String,
+    val opptjeningsperiode: BeregnetTrygdetidGrunnlagDto?,
 )
 
 data class ForenkletVedtak(

@@ -26,11 +26,11 @@ class TrygdetidKlient(config: Config, httpClient: HttpClient) {
     internal suspend fun hentTrygdetid(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ): TrygdetidDto? {
+    ): List<TrygdetidDto> {
         try {
             logger.info("Henter trygdetid med behandlingid $behandlingId")
             return downstreamResourceClient.get(
-                Resource(clientId, "$resourceUrl/api/trygdetid/$behandlingId"),
+                Resource(clientId, "$resourceUrl/api/trygdetid_v2/$behandlingId"),
                 brukerTokenInfo,
             ).mapBoth(
                 success = { resource -> resource.response.let { deserialize(it.toString()) } },

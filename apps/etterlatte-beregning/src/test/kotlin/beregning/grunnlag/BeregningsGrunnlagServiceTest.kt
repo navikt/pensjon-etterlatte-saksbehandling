@@ -1,9 +1,12 @@
 package beregning.grunnlag
 
+import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
+import io.mockk.runs
 import io.mockk.slot
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
@@ -14,6 +17,9 @@ import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlagRepository
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlagService
 import no.nav.etterlatte.beregning.grunnlag.GrunnlagMedPeriode
 import no.nav.etterlatte.beregning.grunnlag.InstitusjonsoppholdBeregningsgrunnlag
+import no.nav.etterlatte.beregning.grunnlag.OverstyrBeregningGrunnlag
+import no.nav.etterlatte.beregning.grunnlag.OverstyrBeregningGrunnlagDTO
+import no.nav.etterlatte.beregning.grunnlag.OverstyrBeregningGrunnlagDao
 import no.nav.etterlatte.beregning.grunnlag.Reduksjon
 import no.nav.etterlatte.beregning.regler.toGrunnlag
 import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
@@ -421,6 +427,110 @@ internal class BeregningsGrunnlagServiceTest {
             assertEquals(BeregningsMetode.NASJONAL, slot.captured.beregningsMetode.beregningsMetode)
 
             verify(exactly = 1) { beregningsGrunnlagRepository.lagre(any()) }
+        }
+    }
+
+    @Test
+    fun `skal hente overstyr beregning grunnlag`() {
+        val behandlingId = randomUUID()
+
+        every { beregningsGrunnlagRepository.finnOverstyrBeregningGrunnlagForBehandling(behandlingId) } returns
+            listOf(
+                OverstyrBeregningGrunnlagDao(
+                    id = randomUUID(),
+                    behandlingId = behandlingId,
+                    datoFOM = LocalDate.now().minusYears(12L),
+                    datoTOM = LocalDate.now().minusYears(6L),
+                    utbetaltBeloep = 123L,
+                    trygdetid = 10L,
+                    sakId = 1L,
+                ),
+                OverstyrBeregningGrunnlagDao(
+                    id = randomUUID(),
+                    behandlingId = behandlingId,
+                    datoFOM = LocalDate.now().minusYears(6L),
+                    datoTOM = null,
+                    utbetaltBeloep = 456L,
+                    trygdetid = 20L,
+                    sakId = 1L,
+                ),
+            )
+
+        val grunnlag = beregningsGrunnlagService.hentOverstyrBeregningGrunnlag(behandlingId)
+
+        grunnlag.perioder.let { perioder ->
+            perioder.size shouldBe 2
+            perioder.minBy { it.fom }.let { periode ->
+                periode.fom shouldBe LocalDate.now().minusYears(12L)
+                periode.tom shouldBe LocalDate.now().minusYears(6L)
+                periode.data.utbetaltBeloep shouldBe 123L
+                periode.data.trygdetid shouldBe 10L
+            }
+            perioder.maxBy { it.fom }.let { periode ->
+                periode.fom shouldBe LocalDate.now().minusYears(6L)
+                periode.tom shouldBe null
+                periode.data.utbetaltBeloep shouldBe 456L
+                periode.data.trygdetid shouldBe 20L
+            }
+        }
+
+        verify(exactly = 1) {
+            beregningsGrunnlagRepository.finnOverstyrBeregningGrunnlagForBehandling(behandlingId)
+        }
+    }
+
+    @Test
+    fun `skal lagre overstyr beregning grunnlag`() {
+        val behandlingId = randomUUID()
+
+        val slot = slot<List<OverstyrBeregningGrunnlagDao>>()
+
+        val fom = LocalDate.now().minusYears(12)
+        val tom = LocalDate.now().minusYears(6)
+
+        coEvery {
+            behandlingKlient.hentBehandling(any(), any())
+        } returns mockBehandling(SakType.BARNEPENSJON, randomUUID(), BehandlingType.FØRSTEGANGSBEHANDLING, 3L)
+
+        every { beregningsGrunnlagRepository.lagreOverstyrBeregningGrunnlagForBehandling(behandlingId, capture(slot)) } just runs
+        every { beregningsGrunnlagRepository.finnOverstyrBeregningGrunnlagForBehandling(behandlingId) } returns emptyList()
+
+        runBlocking {
+            beregningsGrunnlagService.lagreOverstyrBeregningGrunnlag(
+                behandlingId = behandlingId,
+                data =
+                    OverstyrBeregningGrunnlagDTO(
+                        perioder =
+                            listOf(
+                                GrunnlagMedPeriode(
+                                    data =
+                                        OverstyrBeregningGrunnlag(
+                                            utbetaltBeloep = 12L,
+                                            trygdetid = 25L,
+                                        ),
+                                    fom = fom,
+                                    tom = tom,
+                                ),
+                            ),
+                    ),
+                brukerTokenInfo =
+                    mockk {
+                        every { ident() } returns "Z123456"
+                    },
+            )
+
+            slot.captured.first().let { dao ->
+                dao.behandlingId shouldBe behandlingId
+                dao.datoFOM shouldBe fom
+                dao.datoTOM shouldBe tom
+                dao.utbetaltBeloep shouldBe 12L
+                dao.trygdetid shouldBe 25L
+                dao.sakId shouldBe 3L
+            }
+
+            verify(exactly = 1) {
+                beregningsGrunnlagRepository.lagreOverstyrBeregningGrunnlagForBehandling(behandlingId, any())
+            }
         }
     }
 

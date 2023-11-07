@@ -17,7 +17,6 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.Month
-import java.time.Period
 import java.util.UUID
 
 internal class TrygdetidServiceTest {
@@ -42,7 +41,7 @@ internal class TrygdetidServiceTest {
         val trygdetid = runBlocking { service.finnTrygdetidsgrunnlag(behandlingId, beregning, mockk()) }
         Assertions.assertEquals(23, trygdetid!!.aarTrygdetid)
         Assertions.assertEquals(0, trygdetid.maanederTrygdetid)
-        Assertions.assertEquals(Period.of(2, 10, 0), trygdetid.perioder[0].opptjeningsperiode)
+        Assertions.assertEquals(BeregnetTrygdetidGrunnlagDto(dager = 0, maaneder = 10, aar = 2), trygdetid.perioder[0].opptjeningsperiode)
     }
 
     private fun trygdetidDto(behandlingId: UUID) =

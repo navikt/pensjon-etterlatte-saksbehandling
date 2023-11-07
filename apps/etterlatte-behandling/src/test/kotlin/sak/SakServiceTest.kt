@@ -236,8 +236,6 @@ internal class SakServiceTest {
     @Test
     fun `finnEllerOpprettSak feiler hvis PDL ikke finner geografisk tilknytning`() {
         val responseException = ResponseException(mockk(), "Oops")
-
-        every { sakDao.finnSaker(KONTANT_FOT.value) } returns emptyList()
         every {
             pdlKlient.hentGeografiskTilknytning(KONTANT_FOT.value, SakType.BARNEPENSJON)
         } throws responseException
@@ -255,7 +253,7 @@ internal class SakServiceTest {
 
         thrown.message shouldContain "Oops"
 
-        verify(exactly = 1) { sakDao.finnSaker(KONTANT_FOT.value) }
+        verify(exactly = 0) { sakDao.finnSaker(KONTANT_FOT.value) }
         verify(exactly = 1) { pdlKlient.hentGeografiskTilknytning(KONTANT_FOT.value, SakType.BARNEPENSJON) }
         verify {
             listOf(norg2Klient) wasNot Called
@@ -264,7 +262,6 @@ internal class SakServiceTest {
 
     @Test
     fun `finnEllerOpprettSak feiler hvis NORG2 ikke finner geografisk tilknytning`() {
-        every { sakDao.finnSaker(KONTANT_FOT.value) } returns emptyList()
         every {
             pdlKlient.hentGeografiskTilknytning(KONTANT_FOT.value, SakType.BARNEPENSJON)
         } returns GeografiskTilknytning(kommune = "0301", ukjent = false)
@@ -281,7 +278,7 @@ internal class SakServiceTest {
         thrown.tema shouldBe SakType.BARNEPENSJON.tema
         thrown.omraade shouldBe "0301"
 
-        verify(exactly = 1) { sakDao.finnSaker(KONTANT_FOT.value) }
+        verify(exactly = 0) { sakDao.finnSaker(KONTANT_FOT.value) }
         verify(exactly = 1) { pdlKlient.hentGeografiskTilknytning(KONTANT_FOT.value, SakType.BARNEPENSJON) }
         verify(exactly = 1) { norg2Klient.hentEnheterForOmraade(SakType.BARNEPENSJON.tema, "0301") }
     }

@@ -119,16 +119,17 @@ class SakServiceImpl(
         enhet: String?,
         gradering: AdressebeskyttelseGradering?,
     ): Sak {
-        val sak =
-            finnSakerForPersonOgType(fnr, type) ?: dao.opprettSak(
-                fnr,
-                type,
-                enhet ?: finnEnhetForPersonOgTema(fnr, type.tema, type).enhetNr,
-            )
-        this.sjekkSkjerming(fnr = fnr, sakId = sak.id)
+        val enhetFraNorg = finnEnhetForPersonOgTema(fnr, type.tema, type).enhetNr
+        if (enhet != null && enhet != enhetFraNorg) {
+            logger.info("Finner/oppretter sak med enhet $enhet, selv om geografisk tilknytning tilsier $enhetFraNorg")
+        }
+
+        val sak = finnSakerForPersonOgType(fnr, type) ?: dao.opprettSak(fnr, type, enhet ?: enhetFraNorg)
+        sjekkSkjerming(fnr = fnr, sakId = sak.id)
         gradering?.let {
             oppdaterAdressebeskyttelse(sak.id, it)
         }
+
         return sak
     }
 
@@ -188,6 +189,7 @@ class SakServiceImpl(
                     Enheter.defaultEnhet.navn,
                     Enheter.defaultEnhet.enhetNr,
                 )
+
             geografiskTilknytning == null -> throw IngenGeografiskOmraadeFunnetForEnhet(
                 Folkeregisteridentifikator.of(fnr),
                 tema,

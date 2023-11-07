@@ -109,12 +109,16 @@ updates:
           - "vite-tsconfig-paths"
           - "vitest"
           - "@vitejs/plugin-react-swc"
+          - "prom-client"
+          - "unleash-klient"
+          - "@types/node"
       react:
         patterns:
           - "react"
           - "react*"
           - "redux"
           - "@types/react*"
+          - "@reduxjs/toolkit"
 
 
   # ===============

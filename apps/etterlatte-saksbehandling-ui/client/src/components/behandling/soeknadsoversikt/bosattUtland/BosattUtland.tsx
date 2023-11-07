@@ -1,11 +1,11 @@
 import { MottatteSeder } from '~components/behandling/soeknadsoversikt/bosattUtland/MottatteSeder'
 import { SendteSeder } from '~components/behandling/soeknadsoversikt/bosattUtland/SendteSeder'
-import { isFailure, isPending, useApiCall } from '~shared/hooks/useApiCall'
+import { is5xxError, isFailure, isPending, useApiCall } from '~shared/hooks/useApiCall'
 import { hentAlleLand, ILand, sorterLand } from '~shared/api/trygdetid'
 import React, { useEffect, useState } from 'react'
 import Spinner from '~shared/Spinner'
-import { Bosattutland, lagreBosattutland } from '~shared/api/bosattutland'
-import { Button } from '@navikt/ds-react'
+import { Bosattutland, hentBosattutland, lagreBosattutland } from '~shared/api/bosattutland'
+import { Alert, Button } from '@navikt/ds-react'
 import { LandMedDokumenter } from '~shared/types/RevurderingInfo'
 import { oppdaterBehandlingsstatus } from '~store/reducers/BehandlingReducer'
 import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
@@ -19,6 +19,8 @@ export const BosattUtland = ({ behandlingId }: { behandlingId: string }) => {
   const [hentAlleLandRequest, fetchAlleLand] = useApiCall(hentAlleLand)
   const [alleLandKodeverk, setAlleLandKodeverk] = useState<ILand[] | null>(null)
   const [lagreBosattutlandStatus, lagreBosattutlandApi] = useApiCall(lagreBosattutland)
+  const [hentBosattUtlandStatus, hentBosattUtlandApi] = useApiCall(hentBosattutland)
+  const [hentetBosattUtland, setHentetBosattUtland] = useState<Bosattutland | null>(null)
   const [visLagretOk, setVisLagretOk] = useState<boolean>(false)
 
   const initalStateLandMedDokumenterMottatte = [
@@ -32,10 +34,10 @@ export const BosattUtland = ({ behandlingId }: { behandlingId: string }) => {
     },
   ]
   const [landMedDokumenterMottatte, setLandMedDokumenterMottatte] = useState<LandMedDokumenter[]>(
-    initalStateLandMedDokumenterMottatte
+    hentetBosattUtland?.mottatteSeder ?? initalStateLandMedDokumenterMottatte
   )
   const [feilkoderMottatte, setFeilkoderMottatte] = useState<Set<string>>(new Set([]))
-  const [rinanummer, setRinanummer] = useState<string>('')
+  const [rinanummer, setRinanummer] = useState<string>(hentetBosattUtland?.rinanummer ?? '')
 
   const initalStateLandMedDokumenter = [
     {
@@ -43,10 +45,13 @@ export const BosattUtland = ({ behandlingId }: { behandlingId: string }) => {
       dokumenter: [{ dokumenttype: 'P8000', dato: undefined, kommentar: '' }],
     },
   ]
-  const [landMedDokumenter, setLandMedDokumenter] = useState<LandMedDokumenter[]>(initalStateLandMedDokumenter)
+  const [landMedDokumenter, setLandMedDokumenter] = useState<LandMedDokumenter[]>(
+    hentetBosattUtland?.sendteSeder ?? initalStateLandMedDokumenter
+  )
   const [feilkoder, setFeilkoder] = useState<Set<string>>(new Set([]))
 
   useEffect(() => {
+    hentBosattUtlandApi(behandlingId, (bosattUtland) => setHentetBosattUtland(bosattUtland))
     fetchAlleLand(null, (landliste) => {
       setAlleLandKodeverk(sorterLand(landliste))
     })
@@ -97,6 +102,9 @@ export const BosattUtland = ({ behandlingId }: { behandlingId: string }) => {
   return (
     <>
       {isPending(hentAlleLandRequest) && <Spinner visible={true} label="Henter land" />}
+      {is5xxError(hentBosattUtlandStatus) && (
+        <Alert variant="warning">Vi klarte ikke å hente lagret data for bosatt utland</Alert>
+      )}
       {alleLandKodeverk && (
         <>
           <MottatteSeder

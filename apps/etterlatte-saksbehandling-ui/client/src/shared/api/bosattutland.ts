@@ -11,6 +11,10 @@ export const lagreBosattutland = async ({
   return apiClient.post(`/bosattutland/${behandlingId}`, { bosattutland })
 }
 
+export const hentBosattutland = async (behandlingId: string): Promise<ApiResponse<Bosattutland>> => {
+  return apiClient.get(`/bosattutland/${behandlingId}`)
+}
+
 export interface Bosattutland {
   behandlingId: string
   rinanummer: string

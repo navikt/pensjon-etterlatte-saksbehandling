@@ -78,7 +78,7 @@ export const Soeknadsoversikt = (props: { behandling: IDetaljertBehandling }) =>
                   <>
                     <Info
                       label="Dødsdato"
-                      tekst={avdoedDoedsdato ? formaterStringDato(avdoedDoedsdato) : ''}
+                      tekst={avdoedDoedsdato ? formaterStringDato(avdoedDoedsdato) : 'Ikke registrert!'}
                       undertekst={formaterKildePdl(avdoedDoedsdatoKilde)}
                     />
                     <Info label="Søknad mottatt" tekst={formaterStringDato(soeknadMottattDato)} />

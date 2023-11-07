@@ -14,6 +14,7 @@ const val MIGRERING_GRUNNLAG_KEY = "migrering_grunnlag"
 const val PERSONGALLERI_KEY = "persongalleri"
 const val PESYS_ID_KEY = "pesysId"
 const val KILDE_KEY = "kilde"
+const val LOPENDE_JANUAR_2024_KEY = "lopendeJanuar2024"
 
 var JsonMessage.hendelseData: MigreringRequest
     get() = objectMapper.treeToValue(this[HENDELSE_DATA_KEY], MigreringRequest::class.java)
@@ -31,6 +32,12 @@ var JsonMessage.pesysId: PesysId
     get() = objectMapper.treeToValue(this[PESYS_ID_KEY], PesysId::class.java)
     set(name) {
         this[PESYS_ID_KEY] = name
+    }
+
+var JsonMessage.loependeJanuer2024: Boolean
+    get() = this[LOPENDE_JANUAR_2024_KEY].asBoolean()
+    set(name) {
+        this[LOPENDE_JANUAR_2024_KEY] = name
     }
 
 var JsonMessage.kilde: Vedtaksloesning

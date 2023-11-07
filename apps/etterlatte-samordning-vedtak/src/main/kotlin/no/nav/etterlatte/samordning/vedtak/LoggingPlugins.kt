@@ -25,6 +25,7 @@ internal val LOGGER = KtorSimpleLogger("no.nav.etterlatte.samordning.requestLogg
 
 private val userAttribute = AttributeKey<String>("user")
 private val startTimeAttribute = AttributeKey<Long>("starttime")
+private val loggingPerformed = AttributeKey<Boolean>("requestLoggingPerformed")
 
 private object UserIdMdcHook : Hook<suspend (ApplicationCall) -> Unit> {
     private val UserIdMdcHook: PipelinePhase = PipelinePhase("UserIdMdc")
@@ -68,26 +69,32 @@ val userIdMdcPlugin: RouteScopedPlugin<PluginConfiguration> =
 val serverRequestLoggerPlugin =
     createApplicationPlugin("ServerRequestLoggingPlugin") {
         onCall { call ->
+            call.attributes.put(loggingPerformed, false)
             call.attributes.put(startTimeAttribute, System.currentTimeMillis())
         }
 
         on(ResponseSent) { call ->
-            val duration = call.attributes[startTimeAttribute].let { System.currentTimeMillis() - it }
-            val method = call.request.httpMethod.value
-            val responseCode = call.response.status()?.value
+            if (!call.attributes[loggingPerformed]) {
+                val duration = call.attributes[startTimeAttribute].let { System.currentTimeMillis() - it }
+                val method = call.request.httpMethod.value
+                val responseCode = call.response.status()?.value
 
-            val markers =
-                Markers.appendEntries(
-                    mapOf(
-                        "method" to method,
-                        "response_code" to responseCode,
-                        "response_time" to duration,
-                        "request_uri" to sanitizedPath(call.request.path()),
-                        "user" to (call.attributes.getOrNull(userAttribute) ?: "unknown"),
-                    ),
-                )
+                val markers =
+                    Markers.appendEntries(
+                        mapOf(
+                            "method" to method,
+                            "response_code" to responseCode,
+                            "response_time" to duration,
+                            "request_uri" to sanitizedPath(call.request.path()),
+                            "user" to (call.attributes.getOrNull(userAttribute) ?: "unknown"),
+                        ),
+                    )
 
-            LOGGER.info(markers, "Processed {} {} {} in {} ms", responseCode, method, call.request.uri, duration)
+                LOGGER.info(markers, "Processed {} {} {} in {} ms", responseCode, method, call.request.uri, duration)
+
+                // Workaround to avoid duplicate logging due to handling of unathorized both in Authenticate-plugin and StatusPages
+                call.attributes.put(loggingPerformed, true)
+            }
         }
     }
 

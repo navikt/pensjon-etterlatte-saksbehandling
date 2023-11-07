@@ -80,11 +80,10 @@ updates:
           - "eslint"
           - "eslint*"
           - "@testing-library*"
-      slate:
+      diverse:
         patterns:
           - "slate*"
-      vite:
-        patterns:
+          - "unleash*"
           - "vite"
           - "vite-tsconfig-paths"
           - "vitest"
@@ -118,14 +117,7 @@ updates:
           - "@types/mocha"
           - "chai"
           - "mocha"
-      nodefetch:
-        patterns:
-          - "node-fetch"
-          - "@types/node-fetch"
-      winston:
-        patterns:
-          - "winston*"
-      middleware:
+      prod:
         patterns:
           - "express"
           - "http-proxy-middleware"
@@ -136,6 +128,8 @@ updates:
           - "ts-node"
           - "ts-node-dev"
           - "@types/cors"
+          - "winston*"
+          - "@types/request"
 
 
   # ==============

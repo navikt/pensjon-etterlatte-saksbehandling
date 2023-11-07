@@ -7,7 +7,7 @@ import { SoeknadsoversiktTextArea } from '../SoeknadsoversiktTextArea'
 import { useAppDispatch } from '~store/Store'
 import { useState } from 'react'
 import { isFailure, useApiCall } from '~shared/hooks/useApiCall'
-import { oppdaterBehandlingsstatus } from '~store/reducers/BehandlingReducer'
+import { oppdaterBehandlingsstatus, oppdaterUtenlandstilknytning } from '~store/reducers/BehandlingReducer'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { lagreUtenlandstilknytning } from '~shared/api/sak'
 
@@ -39,7 +39,8 @@ export const UtenlandstilknytningVurdering = ({
     !svar ? setRadioError('Du må velge et svar') : setRadioError('')
 
     if (svar !== undefined)
-      return setUtenlandstilknytning({ sakId, begrunnelse, svar }, () => {
+      return setUtenlandstilknytning({ sakId, begrunnelse, svar }, (utenlandstilknyningstype) => {
+        dispatch(oppdaterUtenlandstilknytning(utenlandstilknyningstype))
         dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.OPPRETTET)) //Denne er her bare fordi denne ligger i søknadsoversikten, den burde ligget i saksoversikten etc eller tidligere i flyten
         onSuccess?.()
       })

@@ -12,7 +12,7 @@ export interface IBehandlingInfo {
   virkningsdato?: string
   datoFattet?: string
   datoAttestert?: string
-  nasjonalEllerUtland: UtenlandstilknytningType
+  nasjonalEllerUtland: UtenlandstilknytningType | null
   underkjentLogg?: IHendelse[]
   fattetLogg?: IHendelse[]
   attestertLogg?: IHendelse[]

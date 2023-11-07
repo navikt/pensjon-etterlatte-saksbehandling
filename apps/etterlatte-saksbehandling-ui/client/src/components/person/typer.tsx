@@ -2,7 +2,6 @@ import {
   IBehandlingStatus,
   IBehandlingsType,
   IBoddEllerArbeidetUtlandet,
-  IUtenlandstilknytning,
   Virkningstidspunkt,
 } from '~shared/types/IDetaljertBehandling'
 import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
@@ -30,7 +29,6 @@ export interface IBehandlingsammendrag {
   behandlingType: IBehandlingsType
   aarsak: BehandlingOgRevurderingsAarsakerType
   virkningstidspunkt?: Virkningstidspunkt
-  utenlandstilsnitt?: IUtenlandstilknytning ///TODO: denne skal bestemmes fra sak og ikek her RM
   boddEllerArbeidetUtlandet?: IBoddEllerArbeidetUtlandet
 }
 

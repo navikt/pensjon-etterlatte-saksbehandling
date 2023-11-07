@@ -28,6 +28,9 @@ import no.nav.etterlatte.common.klienter.PdlKlient
 import no.nav.etterlatte.common.klienter.SkjermingKlient
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.behandling.Utenlandstilknytning
+import no.nav.etterlatte.libs.common.behandling.UtenlandstilknytningType
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.GeografiskTilknytning
 import no.nav.etterlatte.libs.common.sak.Sak
@@ -328,6 +331,83 @@ internal class SakServiceTest {
         verify(exactly = 1) {
             sakDao.opprettSak(KONTANT_FOT.value, SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
         }
+    }
+
+    @Test
+    fun `Må ha en sak for å kunne hente utenlandstilknytning`() {
+        every { sakDao.finnSaker(KONTANT_FOT.value) } returns
+            emptyList()
+        val service: SakService =
+            SakServiceImpl(sakDao, pdlKlient, norg2Klient, featureToggleService, skjermingKlient)
+        assertThrows<BrukerManglerSak> { service.hentSakMedUtenlandstilknytning(KONTANT_FOT.value) }
+
+        verify { sakDao.finnSaker(KONTANT_FOT.value) }
+    }
+
+    @Test
+    fun `Må kun ha en sak for å kunne hente utenlandstilknytning`() {
+        val sak =
+            Sak(
+                id = 1L,
+                ident = KONTANT_FOT.value,
+                sakType = SakType.BARNEPENSJON,
+                enhet = Enheter.STEINKJER.enhetNr,
+            )
+        val sakto =
+            Sak(
+                id = 2L,
+                ident = KONTANT_FOT.value,
+                sakType = SakType.BARNEPENSJON,
+                enhet = Enheter.STEINKJER.enhetNr,
+            )
+        every { sakDao.finnSaker(KONTANT_FOT.value) } returns
+            listOf(sak, sakto)
+        val service: SakService =
+            SakServiceImpl(sakDao, pdlKlient, norg2Klient, featureToggleService, skjermingKlient)
+        assertThrows<BrukerHarMerEnnEnSak> { service.hentSakMedUtenlandstilknytning(KONTANT_FOT.value) }
+
+        verify { sakDao.finnSaker(KONTANT_FOT.value) }
+    }
+
+    @Test
+    fun `kan hente sak med utenlandstilknytning`() {
+        val sak =
+            Sak(
+                id = 1L,
+                ident = KONTANT_FOT.value,
+                sakType = SakType.BARNEPENSJON,
+                enhet = Enheter.STEINKJER.enhetNr,
+            )
+        every { sakDao.finnSaker(KONTANT_FOT.value) } returns
+            listOf(
+                sak,
+            )
+
+        val sakUtenlandstilknytning =
+            SakUtenlandstilknytning(
+                id = sak.id,
+                ident = KONTANT_FOT.value,
+                sakType = sak.sakType,
+                enhet = sak.enhet,
+                utenlandstilknytning =
+                    Utenlandstilknytning(
+                        UtenlandstilknytningType.BOSATT_UTLAND,
+                        Grunnlagsopplysning.Saksbehandler.create("ident"),
+                        "begrunnelse",
+                    ),
+            )
+
+        every { sakDao.hentUtenlandstilknytningForSak(sak.id) } returns
+            sakUtenlandstilknytning
+
+        val service: SakService =
+            SakServiceImpl(sakDao, pdlKlient, norg2Klient, featureToggleService, skjermingKlient)
+
+        val hentSakMedUtenlandstilknytning = service.hentSakMedUtenlandstilknytning(KONTANT_FOT.value)
+        hentSakMedUtenlandstilknytning shouldBe sakUtenlandstilknytning
+
+        verify { sakDao.hentUtenlandstilknytningForSak(sak.id) }
+        verify { sakDao.finnSaker(KONTANT_FOT.value) }
     }
 
     @Test

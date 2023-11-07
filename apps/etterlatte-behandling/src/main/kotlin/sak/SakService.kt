@@ -17,6 +17,7 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Utenlandstilknytning
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.person.maskerFnr
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.tilgangsstyring.filterForEnheter
 import org.slf4j.LoggerFactory
@@ -71,7 +72,13 @@ interface SakService {
         sakId: Long,
         adressebeskyttelseGradering: AdressebeskyttelseGradering,
     ): Int
+
+    fun hentSakMedUtenlandstilknytning(fnr: String): SakUtenlandstilknytning
 }
+
+class BrukerManglerSak(message: String) : Exception(message)
+
+class BrukerHarMerEnnEnSak(message: String) : Exception(message)
 
 class SakServiceImpl(
     private val dao: SakDao,
@@ -137,6 +144,27 @@ class SakServiceImpl(
         adressebeskyttelseGradering: AdressebeskyttelseGradering,
     ): Int {
         return dao.oppdaterAdresseBeskyttelse(sakId, adressebeskyttelseGradering)
+    }
+
+    override fun hentSakMedUtenlandstilknytning(fnr: String): SakUtenlandstilknytning {
+        val sakerForPerson = dao.finnSaker(fnr)
+
+        val sak =
+            when (sakerForPerson.size) {
+                0 -> throw BrukerManglerSak("Ingen saker funnet for maskert person: ${fnr.maskerFnr()}")
+                1 -> sakerForPerson[0]
+                else -> {
+                    logger.error(
+                        "Person har mer enn en sak, hvilken skal vise utenlandstilknytning? " +
+                            "Person ${fnr.maskerFnr()} har flere enn en sak ider ${sakerForPerson.map { it.id }} . Må håndteres",
+                    )
+                    throw BrukerHarMerEnnEnSak(
+                        "Person ${fnr.maskerFnr()} har flere enn en sak ider ${sakerForPerson.map { it.id }} . Må håndteres",
+                    )
+                }
+            }
+
+        return dao.hentUtenlandstilknytningForSak(sak.id)!!
     }
 
     private fun sjekkSkjerming(

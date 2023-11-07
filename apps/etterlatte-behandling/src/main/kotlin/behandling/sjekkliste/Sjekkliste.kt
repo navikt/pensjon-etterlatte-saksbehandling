@@ -38,6 +38,7 @@ internal val defaultSjekklisteItemsBP =
         "Mulighet for, og ikke søkt om (utvidet) barnetrygd - sendt oppgave til barnetrygd",
         "Etterbetaling av barnepensjon blir mer enn 2G- kontaktet statsforvalter for informasjon",
         "Ikke registrert/registrert annet kontonummer i saken - opprettet oppgave til NØP",
+        "Opprettet oppgave til NØP om skattetrekk",
         "Ved avslag: Informert om at barnet kan ha rett på bidragsforskudd",
         "Barnet mottar uføretrygd fra NAV - pensjonen er avkortet",
         "Bosatt Norge: Innhenter EØS og bank-opplysninger",

@@ -32,7 +32,6 @@ export const MottatteSeder = () => {
     })
   }, [])
 
-  //TODO: onsave
   const validerSkjema = () => {
     const feilkoder: Set<string> = new Set([])
     if (landMedDokumenter.find((landmedDokument) => !landmedDokument.landIsoKode)) {
@@ -54,6 +53,7 @@ export const MottatteSeder = () => {
   }
 
   const lagre = () => {
+    //TODO: koble mot backend
     validerSkjema()
   }
 

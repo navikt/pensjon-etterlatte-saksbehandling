@@ -269,16 +269,17 @@ class VilkaarsvurderingService(
                     ?: throw VilkaarsvurderingIkkeFunnet()
 
             val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
+
             val virkningstidspunktFraBehandling =
                 behandling.virkningstidspunkt?.dato
-                    ?: throw BehandlingVirkningstidspunktIkkeSatt()
+                    ?: throw BehandlingVirkningstidspunktIkkeFastsatt()
 
-            val vilkaarsvurderingErGyldig =
-                vilkaarsvurdering.resultat != null &&
-                    vilkaarsvurdering.virkningstidspunkt == virkningstidspunktFraBehandling
+            if (vilkaarsvurdering.resultat == null) {
+                throw VilkaarsvurderingManglerResultat()
+            }
 
-            if (!vilkaarsvurderingErGyldig) {
-                throw VilkaarsvurderingIkkeGyldig()
+            if (vilkaarsvurdering.virkningstidspunkt != virkningstidspunktFraBehandling) {
+                throw VirkningstidspunktSamsvarerIkke()
             }
 
             // Dersom forrige steg (oversikt) har blitt endret vil statusen være OPPRETTET. Når man trykker videre
@@ -326,12 +327,17 @@ class VilkaarsvurderingIkkeFunnet : IkkeFunnetException(
     detail = "Vilkårsvurdering ikke funnet",
 )
 
-class VilkaarsvurderingIkkeGyldig : UgyldigForespoerselException(
-    code = "VILKAARSVURDERING_UGYLDIG_TILSTAND",
-    detail = "Vilkårsvurderingen er ikke i en gyldig tilstand for å kunne gå videre",
+class VilkaarsvurderingManglerResultat : UgyldigForespoerselException(
+    code = "VILKAARSVURDERING_MANGLER_RESULTAT",
+    detail = "Vilkårsvurderingen har ikke et resultat",
 )
 
-class BehandlingVirkningstidspunktIkkeSatt : UgyldigForespoerselException(
+class VirkningstidspunktSamsvarerIkke : UgyldigForespoerselException(
+    code = "VILKAARSVURDERING_VIRKNINGSTIDSPUNKT_SAMSVARER_IKKE",
+    detail = "Vilkårsvurderingen har et virkningstidspunkt som ikke samsvarer med behandling",
+)
+
+class BehandlingVirkningstidspunktIkkeFastsatt : UgyldigForespoerselException(
     code = "VILKAARSVURDERING_VIRKNINGSTIDSPUNKT_IKKE_SATT",
     detail = "Virkningstidspunkt for behandlingen er ikke satt",
 )

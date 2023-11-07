@@ -5,12 +5,14 @@ import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
+import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
+import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
@@ -117,6 +119,7 @@ internal class VilkaarsvurderingServiceTest {
 
     @AfterEach
     fun afterEach() {
+        clearAllMocks()
         cleanDatabase()
     }
 
@@ -673,6 +676,90 @@ internal class VilkaarsvurderingServiceTest {
         oppdatertVilkaarsvurdering.toDto().isYrkesskade() shouldBe true
     }
 
+    @Test
+    fun `skal sjekke gyldighet og oppdatere status hvis vilkaarsvurdering er oppfylt men status er OPPRETTET`() {
+        coEvery { grunnlagKlient.hentGrunnlag(any(), any(), any()) } returns grunnlag()
+        coEvery { behandlingKlient.settBehandlingStatusVilkaarsvurdert(any(), any()) } returns true
+        coEvery { behandlingKlient.hentBehandling(any(), any()) } returns
+            detaljertBehandling(behandlingStatus = BehandlingStatus.OPPRETTET)
+
+        val statusOppdatert =
+            runBlocking {
+                service.opprettVilkaarsvurdering(uuid, brukerTokenInfo)
+                service.oppdaterTotalVurdering(
+                    behandlingId = uuid,
+                    brukerTokenInfo = brukerTokenInfo,
+                    resultat = vilkaarsvurderingResultat(VilkaarsvurderingUtfall.OPPFYLT),
+                )
+                service.sjekkGyldighetOgOppdaterBehandlingStatus(uuid, brukerTokenInfo)
+            }
+
+        statusOppdatert shouldBe true
+
+        coVerify(exactly = 2) {
+            /*
+            Kalles to ganger, først en gang under oppdaterTotalVurdering, deretter under
+            sjekkGyldighetOgOppdaterBehandlingStatus siden detaljerBehandling har mocket status OPPRETTET.
+             */
+            behandlingKlient.settBehandlingStatusVilkaarsvurdert(uuid, brukerTokenInfo)
+        }
+    }
+
+    @Test
+    fun `skal feile ved sjekking av gyldighet dersom vilkaarsvurdering mangler totalvurdering`() {
+        coEvery { grunnlagKlient.hentGrunnlag(any(), any(), any()) } returns grunnlag()
+        coEvery { behandlingKlient.hentBehandling(any(), any()) } returns detaljertBehandling()
+
+        runBlocking {
+            service.opprettVilkaarsvurdering(uuid, brukerTokenInfo)
+
+            assertThrows<VilkaarsvurderingManglerResultat> {
+                service.sjekkGyldighetOgOppdaterBehandlingStatus(uuid, brukerTokenInfo)
+            }
+        }
+    }
+
+    @Test
+    fun `skal feile ved sjekking av gyldighet dersom vilkaarsvurdering har virk som avviker fra behandling`() {
+        val virkBehandling = YearMonth.of(2023, 1)
+
+        coEvery { grunnlagKlient.hentGrunnlag(any(), any(), any()) } returns grunnlag()
+        coEvery { behandlingKlient.settBehandlingStatusVilkaarsvurdert(any(), any()) } returns true
+        coEvery { behandlingKlient.hentBehandling(any(), any()) } returns
+            detaljertBehandling(virk = virkBehandling) andThen // opprettelse
+            detaljertBehandling(virk = virkBehandling) andThen // oppdatering ved totalvurdering
+            detaljertBehandling() // sjekk av gyldighet
+
+        runBlocking {
+            service.opprettVilkaarsvurdering(uuid, brukerTokenInfo)
+            service.oppdaterTotalVurdering(
+                behandlingId = uuid,
+                brukerTokenInfo = brukerTokenInfo,
+                resultat = vilkaarsvurderingResultat(VilkaarsvurderingUtfall.OPPFYLT),
+            )
+
+            assertThrows<VirkningstidspunktSamsvarerIkke> {
+                service.sjekkGyldighetOgOppdaterBehandlingStatus(uuid, brukerTokenInfo)
+            }
+        }
+    }
+
+    private fun grunnlag() = GrunnlagTestData().hentOpplysningsgrunnlag()
+
+    private fun detaljertBehandling(
+        behandlingStatus: BehandlingStatus = BehandlingStatus.OPPRETTET,
+        virk: YearMonth = YearMonth.now(),
+    ) = mockk<DetaljertBehandling>().apply {
+        every { id } returns uuid
+        every { sak } returns 1L
+        every { sakType } returns SakType.BARNEPENSJON
+        every { status } returns behandlingStatus
+        every { behandlingType } returns BehandlingType.FØRSTEGANGSBEHANDLING
+        every { soeker } returns "10095512345"
+        every { virkningstidspunkt } returns VirkningstidspunktTestData.virkningstidsunkt(virk)
+        every { revurderingsaarsak } returns null
+    }
+
     private fun assertIsSimilar(
         v1: Vilkaarsvurdering,
         v2: Vilkaarsvurdering,
@@ -695,4 +782,12 @@ internal class VilkaarsvurderingServiceTest {
     }
 
     private fun vilkaarsVurderingData() = VilkaarVurderingData("en kommentar", Tidspunkt.now().toLocalDatetimeUTC(), "saksbehandler")
+
+    private fun vilkaarsvurderingResultat(utfall: VilkaarsvurderingUtfall) =
+        VilkaarsvurderingResultat(
+            utfall = utfall,
+            kommentar = "Kommentar",
+            tidspunkt = LocalDateTime.now(),
+            saksbehandler = "Saksbehandler",
+        )
 }

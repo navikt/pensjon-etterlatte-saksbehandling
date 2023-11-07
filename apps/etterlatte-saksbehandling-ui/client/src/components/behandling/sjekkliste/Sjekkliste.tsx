@@ -157,6 +157,23 @@ export const Sjekkliste = ({ behandling }: { behandling: IBehandlingReducer }) =
               readOnly={!redigerbar}
             />
 
+            {behandling.sakType == SakType.BARNEPENSJON && (
+              <TextField
+                label="Ønsket skattetrekk"
+                name="OnsketSkattetrekk"
+                value={sjekkliste.onsketSkattetrekk || ''}
+                onChange={(e) => {
+                  const oppdatert = {
+                    ...sjekkliste,
+                    onsketSkattetrekk: e.currentTarget.value,
+                  }
+                  dispatch(updateSjekkliste(oppdatert))
+                  fireOpppdater(oppdatert)
+                }}
+                readOnly={!redigerbar}
+              />
+            )}
+
             {redigerbar && (
               <ConfirmationPanel
                 name="BekreftGjennomgang"

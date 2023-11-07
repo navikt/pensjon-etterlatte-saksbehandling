@@ -41,8 +41,8 @@ class Server(applicationContext: ApplicationContext) {
                         ) {
                             samordningVedtakRoute(samordningVedtakService = applicationContext.samordningVedtakService)
                             install(userIdMdcPlugin)
+                            install(serverRequestLoggerPlugin)
                         }
-                        install(serverRequestLoggerPlugin)
                     }
                     connector { port = applicationContext.httpPort }
                 },

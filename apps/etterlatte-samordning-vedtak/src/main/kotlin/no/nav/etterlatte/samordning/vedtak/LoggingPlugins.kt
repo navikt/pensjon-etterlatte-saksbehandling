@@ -5,7 +5,6 @@ import io.ktor.server.application.ApplicationCallPipeline
 import io.ktor.server.application.Hook
 import io.ktor.server.application.RouteScopedPlugin
 import io.ktor.server.application.call
-import io.ktor.server.application.createApplicationPlugin
 import io.ktor.server.application.createRouteScopedPlugin
 import io.ktor.server.application.hooks.ResponseSent
 import io.ktor.server.request.httpMethod
@@ -67,7 +66,7 @@ val userIdMdcPlugin: RouteScopedPlugin<PluginConfiguration> =
     }
 
 val serverRequestLoggerPlugin =
-    createApplicationPlugin("ServerRequestLoggingPlugin") {
+    createRouteScopedPlugin("ServerRequestLoggingPlugin") {
         onCall { call ->
             call.attributes.put(loggingPerformed, false)
             call.attributes.put(startTimeAttribute, System.currentTimeMillis())

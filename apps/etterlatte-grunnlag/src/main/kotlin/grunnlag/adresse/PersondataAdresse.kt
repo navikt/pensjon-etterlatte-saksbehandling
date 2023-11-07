@@ -13,25 +13,29 @@ data class PersondataAdresse(
     val poststed: String?,
     val vergePid: String?,
 ) {
-    fun toVergeAdresse(): VergeAdresse {
-        return VergeAdresse(
+    fun toBrevMottaker(): BrevMottaker {
+        return BrevMottaker(
             navn = navn,
-            adresseType =
-                when (toLandkode()) {
-                    LANDKODE_NORGE -> "NORSKPOSTADRESSE"
-                    else -> "UTENLANDSKPOSTADRESSE"
-                },
-            adresselinje1 = adresselinjer.getOrNull(0),
-            adresselinje2 = adresselinjer.getOrNull(1),
-            adresselinje3 = adresselinjer.getOrNull(2),
-            postnummer = postnr,
-            poststed = poststed,
-            landkode = toLandkode(),
-            land =
-                when (toLandkode()) {
-                    LANDKODE_NORGE -> "NORGE"
-                    else -> (land ?: "UKJENT")
-                },
+            foedselsnummer = vergePid?.let { Foedselsnummer(it) },
+            adresse =
+                Adresse(
+                    adresseType =
+                        when (toLandkode()) {
+                            LANDKODE_NORGE -> "NORSKPOSTADRESSE"
+                            else -> "UTENLANDSKPOSTADRESSE"
+                        },
+                    adresselinje1 = adresselinjer.getOrNull(0),
+                    adresselinje2 = adresselinjer.getOrNull(1),
+                    adresselinje3 = adresselinjer.getOrNull(2),
+                    postnummer = postnr,
+                    poststed = poststed,
+                    landkode = toLandkode(),
+                    land =
+                        when (toLandkode()) {
+                            LANDKODE_NORGE -> "NORGE"
+                            else -> (land ?: "UKJENT")
+                        },
+                ),
         )
     }
 

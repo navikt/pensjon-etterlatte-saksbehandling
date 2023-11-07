@@ -18,7 +18,7 @@ import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import MottakerPanel from '~components/behandling/brev/detaljer/MottakerPanel'
 import ForhaandsvisningBrev from '~components/behandling/brev/ForhaandsvisningBrev'
 import Spinner from '~shared/Spinner'
-import { Adresse, BrevProsessType, IBrev } from '~shared/types/Brev'
+import { BrevProsessType, IBrev, Mottaker } from '~shared/types/Brev'
 import RedigerbartBrev from '~components/behandling/brev/RedigerbartBrev'
 import { isFailure, isPending, isPendingOrInitial, useApiCall } from '~shared/hooks/useApiCall'
 
@@ -44,7 +44,9 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
   const [opprettBrevStatus, opprettNyttVedtaksbrev] = useApiCall(opprettVedtaksbrev)
   const [, fetchBehandling] = useApiCall(hentBehandling)
   const [vergeadresseResult, getVergeadresse] = useApiCall(getVergeadresseFraGrunnlag)
-  const [vergeAdresse, setVergeadresse] = useState<Grunnlagsopplysning<Adresse, KildePersondata> | undefined>(undefined)
+  const [vergeAdresse, setVergeadresse] = useState<Grunnlagsopplysning<Mottaker, KildePersondata> | undefined>(
+    undefined
+  )
   const behandlingRedigertEtterOpprettetBrev = (vedtaksbrev: IBrev, hendelser: IHendelse[]) => {
     const hendelse = sisteBehandlingHendelse(hendelser)
     return new Date(hendelse.opprettet).getTime() > new Date(vedtaksbrev.statusEndret).getTime()

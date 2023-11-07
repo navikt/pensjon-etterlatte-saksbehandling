@@ -4,7 +4,7 @@ import { IPersonResult } from '~components/person/typer'
 import { Foreldreansvar } from '~shared/types/Foreldreansvar'
 import { KildePdl, KildePersondata } from '~shared/types/kilde'
 import { IPdlPerson } from '~shared/types/Person'
-import { Adresse } from '~shared/types/Brev'
+import { Mottaker } from '~shared/types/Brev'
 
 export const hentPersonerISak = async (sakId: number): Promise<ApiResponse<PersonerISakResponse>> => {
   return apiClient.get(`/grunnlag/sak/${sakId}/personer/alle`)
@@ -30,7 +30,7 @@ export const getGrunnlagsAvOpplysningstype = async (args: {
 
 export const getVergeadresseFraGrunnlag = async (
   behandlingId: string
-): Promise<ApiResponse<Grunnlagsopplysning<Adresse, KildePersondata>>> => {
+): Promise<ApiResponse<Grunnlagsopplysning<Mottaker, KildePersondata>>> => {
   return apiClient.get(`/grunnlag/behandling/${behandlingId}/VERGES_ADRESSE`)
 }
 

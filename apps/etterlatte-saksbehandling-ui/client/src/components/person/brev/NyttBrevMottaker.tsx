@@ -1,4 +1,4 @@
-import { Adresse, IBrev } from '~shared/types/Brev'
+import { IBrev, Mottaker } from '~shared/types/Brev'
 import { Alert, BodyShort, Heading, Label, Panel } from '@navikt/ds-react'
 import RedigerMottakerModal from '~components/person/brev/RedigerMottakerModal'
 import React, { useEffect, useState } from 'react'
@@ -14,7 +14,9 @@ export default function NyttBrevMottaker({ brev }: { brev: IBrev }) {
   const adresse = mottaker?.adresse
 
   const [vergeAdresseResult, getVergeadresse] = useApiCall(getVergeadresseFraGrunnlag)
-  const [vergeAdresse, setVergeadresse] = useState<Grunnlagsopplysning<Adresse, KildePersondata> | undefined>(undefined)
+  const [vergeAdresse, setVergeadresse] = useState<Grunnlagsopplysning<Mottaker, KildePersondata> | undefined>(
+    undefined
+  )
 
   useEffect(() => {
     if (brev.behandlingId) {

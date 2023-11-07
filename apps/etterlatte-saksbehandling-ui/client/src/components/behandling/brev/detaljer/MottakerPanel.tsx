@@ -1,5 +1,5 @@
 import { Alert, Heading, Panel } from '@navikt/ds-react'
-import { Adresse, IBrev, Mottaker } from '~shared/types/Brev'
+import { IBrev, Mottaker } from '~shared/types/Brev'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import { InfoWrapper } from '~components/behandling/soeknadsoversikt/styled'
 import React from 'react'
@@ -16,7 +16,7 @@ export default function MottakerPanel({
   vedtaksbrev: IBrev
   oppdater: (mottaker: Mottaker) => void
   redigerbar: Boolean
-  vergeadresse: Grunnlagsopplysning<Adresse, KildePersondata> | undefined
+  vergeadresse: Grunnlagsopplysning<Mottaker, KildePersondata> | undefined
 }) {
   const soekerFnr = vedtaksbrev.soekerFnr
 

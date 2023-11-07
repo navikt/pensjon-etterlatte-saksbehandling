@@ -1,6 +1,6 @@
 import { Alert, Button, Heading, Modal, Select, TextField, ToggleGroup } from '@navikt/ds-react'
 import React, { useState } from 'react'
-import { Adresse, IBrev, Mottaker } from '~shared/types/Brev'
+import { IBrev, Mottaker } from '~shared/types/Brev'
 import { DocPencilIcon } from '@navikt/aksel-icons'
 import styled, { css } from 'styled-components'
 import { isFailure, isPending, useApiCall } from '~shared/hooks/useApiCall'
@@ -19,7 +19,7 @@ enum MottakerType {
 interface Props {
   brev: IBrev
   oppdater: (mottaker: Mottaker) => void
-  vergeadresse: Grunnlagsopplysning<Adresse, KildePersondata> | undefined
+  vergeadresse: Grunnlagsopplysning<Mottaker, KildePersondata> | undefined
 }
 
 export default function RedigerMottakerModal({ brev, oppdater, vergeadresse }: Props) {
@@ -49,19 +49,19 @@ export default function RedigerMottakerModal({ brev, oppdater, vergeadresse }: P
     setIsOpen(false)
   }
 
-  function formaterAdresse(vergeadresse: Adresse) {
+  function formaterAdresse(vergeadresse: Mottaker) {
     return (
       <>
         {vergeadresse.navn}
         {vergeadresse.navn && <br />}
-        {vergeadresse.adresselinje1}
-        {vergeadresse.adresselinje1 && <br />}
-        {vergeadresse.adresselinje2}
-        {vergeadresse.adresselinje2 && <br />}
-        {vergeadresse.adresselinje3}
-        {vergeadresse.adresselinje3 && <br />}
-        {vergeadresse.postnummer} {vergeadresse.poststed}
-        {vergeadresse.land} ({vergeadresse.landkode})
+        {vergeadresse.adresse.adresselinje1}
+        {vergeadresse.adresse.adresselinje1 && <br />}
+        {vergeadresse.adresse.adresselinje2}
+        {vergeadresse.adresse.adresselinje2 && <br />}
+        {vergeadresse.adresse.adresselinje3}
+        {vergeadresse.adresse.adresselinje3 && <br />}
+        {vergeadresse.adresse.postnummer} {vergeadresse.adresse.poststed}
+        {vergeadresse.adresse.land} ({vergeadresse.adresse.landkode})
       </>
     )
   }

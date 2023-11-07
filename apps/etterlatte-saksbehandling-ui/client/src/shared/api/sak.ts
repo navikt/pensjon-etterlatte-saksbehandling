@@ -20,5 +20,5 @@ export const lagreUtenlandstilknytning = async ({
 export const hentSakMedUtenlandstilknytning = async (
   fnr: string
 ): Promise<ApiResponse<ISakMedUtenlandstilknytning>> => {
-  return apiClient.post(`/personer/utenlandstilknytning`, { fnr })
+  return apiClient.post(`/personer/utenlandstilknytning`, { foedselsnummer: fnr })
 }

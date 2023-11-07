@@ -1,25 +1,27 @@
-import { IGyldighetproving } from '~shared/types/IDetaljertBehandling'
-import { VurderingsResultat } from '~shared/types/VurderingsResultat'
 import { InfoWrapper } from '../../styled'
 import { Info } from '../../Info'
+import { Grunnlagsopplysning } from '~shared/types/grunnlag'
+import { IPdlPerson, Persongalleri } from '~shared/types/Person'
+import { KildePdl } from '~shared/types/kilde'
 
 interface Props {
-  innsenderHarForeldreansvar: IGyldighetproving | undefined
+  persongalleri: Grunnlagsopplysning<Persongalleri, KildePdl>
+  gjenlevende: Grunnlagsopplysning<IPdlPerson, KildePdl> | undefined
 }
 
-export const Foreldreansvar = ({ innsenderHarForeldreansvar }: Props) => {
-  const navn =
-    innsenderHarForeldreansvar?.resultat === VurderingsResultat.OPPFYLT
-      ? innsenderHarForeldreansvar?.basertPaaOpplysninger?.innsender?.navn
-      : undefined
+export const Foreldreansvar = ({ persongalleri, gjenlevende }: Props) => {
+  const oppfylt = persongalleri.opplysning.innsender == gjenlevende?.opplysning.foedselsnummer
+  const navn = oppfylt
+    ? [gjenlevende?.opplysning.fornavn, gjenlevende?.opplysning.mellomnavn, gjenlevende?.opplysning.etternavn].join(' ')
+    : 'Ukjent'
   const label = 'Foreldreansvar'
-  const tekst = settTekst(innsenderHarForeldreansvar?.resultat)
+  const tekst = settTekst(oppfylt)
 
-  function settTekst(vurdering: VurderingsResultat | undefined): string {
-    switch (vurdering) {
-      case VurderingsResultat.OPPFYLT:
+  function settTekst(oppfylt: Boolean): string {
+    switch (oppfylt) {
+      case true:
         return ''
-      case VurderingsResultat.IKKE_OPPFYLT:
+      case false:
         return 'Innsender har ikke foreldreansvar'
       default:
         return 'Mangler info'

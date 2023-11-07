@@ -3,7 +3,7 @@ import { Grunnlagsopplysning, PersonMedNavn, Personopplysninger } from '~shared/
 import { IPersonResult } from '~components/person/typer'
 import { Foreldreansvar } from '~shared/types/Foreldreansvar'
 import { KildePdl, KildePersondata } from '~shared/types/kilde'
-import { IPdlPerson } from '~shared/types/Person'
+import { IPdlPerson, Persongalleri } from '~shared/types/Person'
 import { Mottaker } from '~shared/types/Brev'
 
 export const hentPersonerISak = async (sakId: number): Promise<ApiResponse<PersonerISakResponse>> => {
@@ -55,4 +55,11 @@ export const hentPersonopplysningerForBehandling = async (
   behandlingId: string
 ): Promise<ApiResponse<Personopplysninger>> => {
   return apiClient.get<Personopplysninger>(`/grunnlag/behandling/${behandlingId}/personopplysninger`)
+}
+
+export const getPersongalleriFraPdl = async (args: {
+  sakId: number
+  behandlingId: string
+}): Promise<ApiResponse<Grunnlagsopplysning<Persongalleri, KildePdl>>> => {
+  return apiClient.get(`/grunnlag/behandling/${args.behandlingId}/PERSONGALLERI_PDL_V1`)
 }

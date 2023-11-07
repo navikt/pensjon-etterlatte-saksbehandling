@@ -5,6 +5,7 @@ import no.nav.etterlatte.brev.adresse.RegoppslagResponseDTO
 import no.nav.etterlatte.brev.behandling.Beregningsperiode
 import no.nav.etterlatte.brev.behandling.Trygdetidsperiode
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
 import no.nav.pensjon.brevbaker.api.model.Kroner
 import java.time.LocalDate
@@ -79,6 +80,7 @@ data class Brev(
     val prosessType: BrevProsessType,
     val soekerFnr: String,
     val status: Status,
+    val opprettet: Tidspunkt,
     val mottaker: Mottaker,
 ) {
     fun kanEndres() = status in listOf(Status.OPPRETTET, Status.OPPDATERT)
@@ -95,6 +97,7 @@ data class Brev(
             soekerFnr = opprettNyttBrev.soekerFnr,
             status = opprettNyttBrev.status,
             mottaker = opprettNyttBrev.mottaker,
+            opprettet = opprettNyttBrev.opprettet,
         )
     }
 }
@@ -124,6 +127,7 @@ data class OpprettNyttBrev(
     val soekerFnr: String,
     val prosessType: BrevProsessType,
     val mottaker: Mottaker,
+    val opprettet: Tidspunkt,
     val innhold: BrevInnhold,
     val innholdVedlegg: List<BrevInnholdVedlegg>?,
 ) {

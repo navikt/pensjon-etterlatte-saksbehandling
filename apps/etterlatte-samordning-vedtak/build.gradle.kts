@@ -30,7 +30,6 @@ dependencies {
     implementation(libs.ktor2.metricsmicrometer)
     implementation(libs.ktor2.jackson)
     implementation(libs.ktor2.auth)
-    implementation(libs.kotlinx.coroutinesslf4j)
 
     implementation(libs.bundles.jackson)
 

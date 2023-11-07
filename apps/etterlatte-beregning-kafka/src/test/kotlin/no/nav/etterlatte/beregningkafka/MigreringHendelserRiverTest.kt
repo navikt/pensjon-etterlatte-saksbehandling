@@ -7,7 +7,9 @@ import io.mockk.mockk
 import io.mockk.slot
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.brev.model.Spraak
+import no.nav.etterlatte.libs.common.IntBroek
 import no.nav.etterlatte.libs.common.beregning.BeregningDTO
+import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
 import no.nav.etterlatte.libs.common.beregning.Beregningstype
 import no.nav.etterlatte.libs.common.grunnlag.Metadata
@@ -20,6 +22,7 @@ import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
 import no.nav.etterlatte.rapidsandrivers.EventNames
 import no.nav.etterlatte.rapidsandrivers.migrering.AvdoedForelder
 import no.nav.etterlatte.rapidsandrivers.migrering.Beregning
+import no.nav.etterlatte.rapidsandrivers.migrering.BeregningMeta
 import no.nav.etterlatte.rapidsandrivers.migrering.Enhet
 import no.nav.etterlatte.rapidsandrivers.migrering.MigreringRequest
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser
@@ -53,7 +56,9 @@ internal class MigreringHendelserRiverTest {
                         utbetaltBeloep = 2500,
                         grunnbelop = 100000,
                         trygdetid = 40,
+                        samletNorskTrygdetid = 40,
                         grunnbelopMnd = 100000 / 12,
+                        beregningsMetode = BeregningsMetode.NASJONAL,
                     ),
                 ),
             beregnetDato = Tidspunkt.now(),
@@ -77,6 +82,13 @@ internal class MigreringHendelserRiverTest {
                     datoVirkFom = Tidspunkt.now(),
                     prorataBroek = null,
                     g = 100_000,
+                    meta =
+                        BeregningMeta(
+                            beregningsMetodeType = "FOLKETRYGD",
+                            resultatType = "",
+                            resultatKilde = "AUTO",
+                            kravVelgType = "",
+                        ),
                 ),
             trygdetid = Trygdetid(emptyList()),
             spraak = Spraak.NN,
@@ -88,7 +100,7 @@ internal class MigreringHendelserRiverTest {
     }
 
     @Test
-    fun `skal beregne for migrering`() {
+    fun `skal beregne etter folketrygd for migrering`() {
         val behandlingId = slot<UUID>()
         val returnValue =
             mockk<HttpResponse>().also {
@@ -114,6 +126,58 @@ internal class MigreringHendelserRiverTest {
         assertEquals(1, inspector.inspektør.size)
         val resultat = inspector.inspektør.message(0)
         assertEquals(beregningDTO.toJson(), resultat.get(BEREGNING_KEY).toJson())
+    }
+
+    @Test
+    fun `skal beregne etter EOES for migrering`() {
+        val behandlingId = slot<UUID>()
+        val prorataBeregningDTO =
+            beregningDTO.copy(
+                beregningsperioder =
+                    listOf(
+                        beregningDTO.beregningsperioder.first().copy(
+                            broek = IntBroek(150, 300),
+                            beregningsMetode = BeregningsMetode.PRORATA,
+                            samletTeoretiskTrygdetid = 40,
+                            samletNorskTrygdetid = 40,
+                            trygdetid = 20,
+                        ),
+                    ),
+            )
+        val returnValue =
+            mockk<HttpResponse>().also {
+                every {
+                    runBlocking { it.body<BeregningDTO>() }
+                } returns prorataBeregningDTO
+            }
+
+        every { behandlingService.beregn(capture(behandlingId)) } returns returnValue
+
+        val melding =
+            JsonMessage.newMessage(
+                Migreringshendelser.BEREGN,
+                mapOf(
+                    BEHANDLING_ID_KEY to "a9d42eb9-561f-4320-8bba-2ba600e66e21",
+                    HENDELSE_DATA_KEY to
+                        request.copy(
+                            beregning =
+                                request.beregning.copy(
+                                    prorataBroek = IntBroek(150, 300),
+                                    meta =
+                                        request.beregning.meta!!.copy(
+                                            beregningsMetodeType = "EOS",
+                                        ),
+                                ),
+                        ),
+                ),
+            )
+
+        inspector.sendTestMessage(melding.toJson())
+
+        assertEquals(UUID.fromString("a9d42eb9-561f-4320-8bba-2ba600e66e21"), behandlingId.captured)
+        assertEquals(1, inspector.inspektør.size)
+        val resultat = inspector.inspektør.message(0)
+        assertEquals(prorataBeregningDTO.toJson(), resultat.get(BEREGNING_KEY).toJson())
     }
 
     @Test
@@ -152,7 +216,7 @@ internal class MigreringHendelserRiverTest {
         assertEquals(Migreringshendelser.BEREGN, resultat.get(FEILENDE_STEG).textValue())
         assertTrue(
             resultat.get(FEILMELDING_KEY).textValue()
-                .contains("Beregnet beløp i Gjenny er lavere enn dagens beløp i Pesys."),
+                .contains("Man skal ikke kunne komme dårligere ut på nytt regelverk."),
         )
     }
 
@@ -233,6 +297,50 @@ internal class MigreringHendelserRiverTest {
         assertTrue(
             resultat.get(FEILMELDING_KEY).textValue()
                 .contains("Beregning må være basert på samme trygdetid som i Pesys"),
+        )
+    }
+
+    @Test
+    fun `Beregning skal feile hvis ulik beregningsmetode er benyttet`() {
+        val behandlingId = slot<UUID>()
+        val returnValue =
+            mockk<HttpResponse>().also {
+                every {
+                    runBlocking { it.body<BeregningDTO>() }
+                } returns beregningDTO
+            }
+
+        every { behandlingService.beregn(capture(behandlingId)) } returns returnValue
+
+        val melding =
+            JsonMessage.newMessage(
+                Migreringshendelser.BEREGN,
+                mapOf(
+                    BEHANDLING_ID_KEY to "a9d42eb9-561f-4320-8bba-2ba600e66e21",
+                    HENDELSE_DATA_KEY to
+                        request.copy(
+                            beregning =
+                                request.beregning.copy(
+                                    prorataBroek = IntBroek(150, 300),
+                                    meta =
+                                        request.beregning.meta!!.copy(
+                                            beregningsMetodeType = "EOS",
+                                        ),
+                                ),
+                        ),
+                ),
+            )
+
+        inspector.sendTestMessage(melding.toJson())
+
+        assertEquals(UUID.fromString("a9d42eb9-561f-4320-8bba-2ba600e66e21"), behandlingId.captured)
+        assertEquals(1, inspector.inspektør.size)
+        val resultat = inspector.inspektør.message(0)
+        assertEquals(EventNames.FEILA, resultat.get(EVENT_NAME_KEY).textValue())
+        assertEquals(Migreringshendelser.BEREGN, resultat.get(FEILENDE_STEG).textValue())
+        assertTrue(
+            resultat.get(FEILMELDING_KEY).textValue()
+                .contains("Migrerte saker skal benytte samme beregningsmetode som Pesys."),
         )
     }
 }

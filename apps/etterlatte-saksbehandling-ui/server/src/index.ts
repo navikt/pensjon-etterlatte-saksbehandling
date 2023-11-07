@@ -103,6 +103,7 @@ if (isDev) {
       '/api/tilbakekreving',
       '/api/generellbehandling',
       '/api/sjekkliste',
+      '/api/bosattutland',
     ],
     tokenMiddleware(ApiConfig.behandling.scope),
     proxy(ApiConfig.behandling.url)

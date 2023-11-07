@@ -1,31 +1,24 @@
-import { BodyShort, ErrorSummary, Heading, TextField } from '@navikt/ds-react'
 import { isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
-import SEDLandMedDokumenter from '~components/behandling/revurderingsoversikt/sluttbehandlingUtland/SEDLandMedDokumenter'
 import { hentAlleLand, ILand, sorterLand } from '~shared/api/trygdetid'
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { LandMedDokumenter } from '~shared/types/RevurderingInfo'
-import { InformationSquareIcon } from '@navikt/aksel-icons'
-import { ABlue500 } from '@navikt/ds-tokens/dist/tokens'
+import { BodyShort, ErrorSummary, Heading } from '@navikt/ds-react'
 import Spinner from '~shared/Spinner'
+import SEDLandMedDokumenter from '~components/behandling/revurderingsoversikt/sluttbehandlingUtland/SEDLandMedDokumenter'
 
-export const MottatteSeder = () => {
+export const SendteSeder = () => {
   const [hentAlleLandRequest, fetchAlleLand] = useApiCall(hentAlleLand)
   const [alleLandKodeverk, setAlleLandKodeverk] = useState<ILand[] | null>(null)
 
   const initalStateLandMedDokumenter = [
     {
       landIsoKode: undefined,
-      dokumenter: [
-        { dokumenttype: 'P5000', dato: undefined, kommentar: '' },
-        { dokumenttype: 'P6000', dato: undefined, kommentar: '' },
-        { dokumenttype: 'P2100', dato: undefined, kommentar: '' },
-      ],
+      dokumenter: [{ dokumenttype: 'P8000', dato: undefined, kommentar: '' }],
     },
   ]
 
   const [landMedDokumenter, setLandMedDokumenter] = useState<LandMedDokumenter[]>(initalStateLandMedDokumenter)
   const [feilkoder, setFeilkoder] = useState<Set<string>>(new Set([]))
-  const [rinanummer, setRinanummer] = useState<string>('')
 
   useEffect(() => {
     fetchAlleLand(null, (landliste) => {
@@ -49,9 +42,6 @@ export const MottatteSeder = () => {
         feilkoder.add('Du må legge til dato for hvert dokument')
       }
     })
-    if (!!rinanummer) {
-      feilkoder.add('Du må legge til et rinanummer')
-    }
     setFeilkoder(feilkoder)
     return feilkoder
   }
@@ -74,16 +64,9 @@ export const MottatteSeder = () => {
         </ErrorSummary>
       ) : null}
       <Heading onClick={() => lagre()} level="2" size="medium" style={{ marginTop: '2rem' }}>
-        Mottatte SED
+        Sendte SED
       </Heading>
       <BodyShort>Fyll inn hvilke SED som er mottatt i RINA pr land.</BodyShort>
-      <BodyShort>
-        <InformationSquareIcon stroke={ABlue500} fill={ABlue500} fontSize="1.2rem" />
-        Det kan hende det allerede ligger P5000/P6000 i avdødes sak. Sjekk opp i dette før du etterspør info.
-      </BodyShort>
-      <div style={{ width: '12rem', maxWidth: '20rem', margin: '2rem 0rem' }}>
-        <TextField label="Saksnummer RINA" value={rinanummer} onChange={(e) => setRinanummer(e.target.value)} />
-      </div>
       {isPending(hentAlleLandRequest) && <Spinner visible={true} label="Henter land" />}
       {isSuccess(hentAlleLandRequest) && alleLandKodeverk && (
         <SEDLandMedDokumenter

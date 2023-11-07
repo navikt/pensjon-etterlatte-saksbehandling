@@ -24,7 +24,7 @@ import { formaterStringDato } from '~utils/formattering'
 import Virkningstidspunkt from '~components/behandling/soeknadsoversikt/soeknadoversikt/virkningstidspunkt/Virkningstidspunkt'
 import { BoddEllerArbeidetUtlandet } from './soeknadoversikt/boddEllerArbeidetUtlandet/BoddEllerArbeidetUtlandet'
 import OppdaterGrunnlagModal from '~components/behandling/handlinger/OppdaterGrunnlagModal'
-import { BosattUtland } from '~components/behandling/soeknadsoversikt/bosattUtland/BosattUtland'
+import { SkalViseBosattUtland } from '~components/behandling/soeknadsoversikt/bosattUtland/SkalViseBosattUtland'
 
 export const Soeknadsoversikt = (props: { behandling: IDetaljertBehandling }) => {
   const { behandling } = props
@@ -90,7 +90,7 @@ export const Soeknadsoversikt = (props: { behandling: IDetaljertBehandling }) =>
             <BoddEllerArbeidetUtlandet behandling={behandling} redigerbar={behandles} />
           </>
         )}
-        <BosattUtland />
+        <SkalViseBosattUtland behandling={behandling} />
       </InnholdPadding>
       <Border />
       <Familieforhold behandling={behandling} />

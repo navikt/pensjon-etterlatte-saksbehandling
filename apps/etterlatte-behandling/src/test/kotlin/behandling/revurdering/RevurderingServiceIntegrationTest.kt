@@ -1,5 +1,7 @@
 package no.nav.etterlatte.behandling.revurdering
 
+import behandling.utland.LandMedDokumenter
+import behandling.utland.MottattDokument
 import io.ktor.server.plugins.BadRequestException
 import io.mockk.coVerify
 import io.mockk.confirmVerified
@@ -30,8 +32,6 @@ import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BarnepensjonSoeskenjusteringGrunn
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
-import no.nav.etterlatte.libs.common.behandling.LandMedDokumenter
-import no.nav.etterlatte.libs.common.behandling.MottattDokument
 import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType

@@ -7,6 +7,7 @@ import io.ktor.server.application.RouteScopedPlugin
 import io.ktor.server.application.call
 import io.ktor.server.application.createApplicationPlugin
 import io.ktor.server.application.createRouteScopedPlugin
+import io.ktor.server.application.hooks.ResponseSent
 import io.ktor.server.request.httpMethod
 import io.ktor.server.request.path
 import io.ktor.server.request.uri
@@ -70,7 +71,7 @@ val serverRequestLoggerPlugin =
             call.attributes.put(startTimeAttribute, System.currentTimeMillis())
         }
 
-        onCallRespond { call, _ ->
+        on(ResponseSent) { call ->
             val duration = call.attributes[startTimeAttribute].let { System.currentTimeMillis() - it }
             val method = call.request.httpMethod.value
             val responseCode = call.response.status()?.value

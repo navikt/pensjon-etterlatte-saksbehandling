@@ -44,7 +44,7 @@ fun Route.samordningVedtakRoute(samordningVedtakService: SamordningVedtakService
                         call.respondNullable(HttpStatusCode.BadRequest, e.message)
                     }
 
-                call.respond(HttpStatusCode.OK, samordningVedtakDto)
+                call.respond(samordningVedtakDto)
             }
         }
 
@@ -76,7 +76,7 @@ fun Route.samordningVedtakRoute(samordningVedtakService: SamordningVedtakService
                         call.respondNullable(HttpStatusCode.BadRequest, e.message)
                     }
 
-                call.respond(HttpStatusCode.OK, samordningVedtakDtos)
+                call.respond(samordningVedtakDtos)
             }
         }
     }
@@ -107,7 +107,7 @@ fun Route.samordningVedtakRoute(samordningVedtakService: SamordningVedtakService
                         call.respondNullable(HttpStatusCode.BadRequest, e.message)
                     }
 
-                call.respond(HttpStatusCode.OK, samordningVedtakDtos)
+                call.respond(samordningVedtakDtos)
             }
         }
     }

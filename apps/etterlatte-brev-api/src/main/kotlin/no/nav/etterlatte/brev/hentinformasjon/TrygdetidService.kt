@@ -6,9 +6,12 @@ import no.nav.etterlatte.libs.common.beregning.BeregningDTO
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidGrunnlagDto
 import no.nav.etterlatte.token.BrukerTokenInfo
+import org.slf4j.LoggerFactory
 import java.util.UUID
 
 class TrygdetidService(private val trygdetidKlient: TrygdetidKlient) {
+    private val logger = LoggerFactory.getLogger(this::class.java)
+
     suspend fun finnTrygdetidsgrunnlag(
         behandlingId: UUID,
         beregning: BeregningDTO,
@@ -34,7 +37,11 @@ class TrygdetidService(private val trygdetidKlient: TrygdetidKlient) {
         val trygdetidgrunnlagForAnvendtTrygdetid =
             trygdetiderIBehandling.find { it.ident == foersteBeregningsperiode.trygdetidForIdent }
                 ?: trygdetiderIBehandling.first().also {
-                    "Fant ikke riktig trygdetid for identen som er brukt i beregning"
+                    logger.error(
+                        "Fant ikke riktig trygdetid for identen som er brukt i beregning, benytter den" +
+                            " første av den vi fant i brevet, med id=${it.id} for behandlingId=${it.behandlingId}." +
+                            " Vi fant total ${trygdetiderIBehandling.size} trygdetider for behandlingen",
+                    )
                 }
 
         if (trygdetidgrunnlagForAnvendtTrygdetid.beregnetTrygdetid?.resultat?.overstyrt == true) {

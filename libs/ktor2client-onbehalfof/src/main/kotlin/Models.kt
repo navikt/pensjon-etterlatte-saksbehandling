@@ -5,7 +5,6 @@ import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Result
 import io.ktor.client.call.body
 import io.ktor.client.statement.HttpResponse
-import io.ktor.http.HttpStatusCode
 import io.ktor.http.isSuccess
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 
@@ -23,7 +22,7 @@ data class ThrowableErrorMessage(
     val throwable: Throwable,
 ) : Exception(message, throwable)
 
-class HttpStatusRuntimeException(val downstreamStatusCode: HttpStatusCode, override val message: String) :
+class HttpStatusRuntimeException(override val message: String) :
     InternfeilException(message)
 
 internal fun Throwable.toErr(url: String): Result<JsonNode, ThrowableErrorMessage> {
@@ -39,5 +38,7 @@ internal suspend fun HttpResponse.checkForError() =
     if (this.status.isSuccess()) {
         this
     } else {
-        throw HttpStatusRuntimeException(this.status, this.body<String>())
+        throw HttpStatusRuntimeException(
+            "Received response with status ${this.status.value} from downstream api with error: ${this.body<String>()}",
+        )
     }

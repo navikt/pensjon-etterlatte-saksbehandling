@@ -52,8 +52,8 @@ val userIdMdcPlugin: RouteScopedPlugin<PluginConfiguration> =
                 if (call.request.uri.contains("pensjon")) {
                     when (val bruker = call.brukerTokenInfo) {
                         is Systembruker -> bruker.sub
-                        is Saksbehandler -> bruker.ident
-                        else -> "ukjent"
+                        is Saksbehandler -> "Saksbehandler"
+                        else -> "Ukjent"
                     }
                 } else {
                     call.orgNummer

@@ -66,7 +66,7 @@ internal class SakRoutesTest {
     }
 
     @Test
-    fun `kan oppdater utenlandstilknytning`() {
+    fun `kan oppdatere utenlandstilknytning`() {
         coEvery {
             sakService.oppdaterUtenlandstilknytning(any(), any())
         } just runs

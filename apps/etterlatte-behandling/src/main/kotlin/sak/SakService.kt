@@ -76,6 +76,10 @@ interface SakService {
     fun hentSakMedUtenlandstilknytning(fnr: String): SakUtenlandstilknytning
 }
 
+class BrukerManglerSak(message: String) : Exception(message)
+
+class BrukerHarMerEnnEnSak(message: String) : Exception(message)
+
 class SakServiceImpl(
     private val dao: SakDao,
     private val pdlKlient: PdlKlient,
@@ -143,11 +147,24 @@ class SakServiceImpl(
     }
 
     override fun hentSakMedUtenlandstilknytning(fnr: String): SakUtenlandstilknytning {
-        val finnSaker = dao.finnSaker(fnr)
-        if (finnSaker.size > 1) {
-            throw IllegalStateException("Person ${fnr.maskerFnr()} med sakider ${finnSaker.map { it.id }} må håndteres")
-        }
-        return dao.hentUtenlandstilknytningForSak(finnSaker[0].id)!! // Obs, ved begge ytelsene vil dette bli random
+        val sakerForPerson = dao.finnSaker(fnr)
+
+        val sak =
+            when (sakerForPerson.size) {
+                0 -> throw BrukerManglerSak("Ingen saker funnet for maskert person: ${fnr.maskerFnr()}")
+                1 -> sakerForPerson[0]
+                else -> {
+                    logger.error(
+                        "Person har mer enn en sak, hvilken skal vise utenlandstilknytning? " +
+                            "Person ${fnr.maskerFnr()} har flere enn en sak ider ${sakerForPerson.map { it.id }} . Må håndteres",
+                    )
+                    throw BrukerHarMerEnnEnSak(
+                        "Person ${fnr.maskerFnr()} har flere enn en sak ider ${sakerForPerson.map { it.id }} . Må håndteres",
+                    )
+                }
+            }
+
+        return dao.hentUtenlandstilknytningForSak(sak.id)!!
     }
 
     private fun sjekkSkjerming(

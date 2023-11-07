@@ -24,20 +24,41 @@ updates:
           - "org.glassfish:jakarta.el"
       test:
         patterns:
-          - "org.junit.jupiter*"
+          - "org.junit*"
           - "io.kotest*"
           - "org.testcontainers*"
           - "com.github.tomakehurst:wiremock-jre8"
           - "io.mockk:mockk"
           - "no.nav.security:mock-oauth2-server"
-      metrics:
+      backend:
         patterns:
           - "io.micrometer*"
           - "io.prometheus*"
+          - "com.fasterxml.jackson*"
+          - "no.nav.security*"
+          - "io.getunleash*"
+          - "com.zaxxer:HikariCP"
+          - "org.postgresql*"
+          - "org.flyway*"
+          - "com.github.seratch:kotliquery"
+          - "com.github.ben-manes.caffeine:caffeine"
+          - "jakarta.xml.bind:jakarta.xml.bind-api"
+          - "org.glassfish.jaxb:jaxb-runtime"
+          - "no.nav.klage:klage-kodeverk"
+          - "com.michael-bull.kotlin-result:kotlin-result"
+          - "no.nav.teamdokumenthandtering:teamdokumenthandtering-avro-schemas"
+          - "org.slf4j*"
+          - "ch.qos.logback*"
+          - "net.logstash*"
+          - "com.github.navikt:rapids-and-rivers"
       jms-mq:
         patterns:
           - "org.messaginghub:pooled-jms"
           - "com.ibm.mq:com.ibm.mq.jakarta.client"
+      ktor-og-kotlinx:
+        patterns:
+          - "io.ktor*"
+          - "org.jetbrains.kotlinx*"
 
 
   # =============

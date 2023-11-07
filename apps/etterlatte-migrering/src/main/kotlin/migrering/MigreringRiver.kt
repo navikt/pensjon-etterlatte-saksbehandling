@@ -2,8 +2,10 @@ package no.nav.etterlatte.migrering
 
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
+import no.nav.etterlatte.rapidsandrivers.migrering.LOPENDE_JANUAR_2024_KEY
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser.MIGRER_SPESIFIKK_SAK
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser.START_MIGRERING
+import no.nav.etterlatte.rapidsandrivers.migrering.loependeJanuer2024
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -20,6 +22,7 @@ internal class MigreringRiver(rapidsConnection: RapidsConnection) :
     init {
         initialiserRiver(rapidsConnection, hendelsestype) {
             validate { it.requireKey(SAK_ID_FLERE_KEY) }
+            validate { it.requireKey(LOPENDE_JANUAR_2024_KEY) }
         }
     }
 
@@ -35,6 +38,7 @@ internal class MigreringRiver(rapidsConnection: RapidsConnection) :
                     mapOf(
                         EVENT_NAME_KEY to MIGRER_SPESIFIKK_SAK,
                         SAK_ID_KEY to it,
+                        LOPENDE_JANUAR_2024_KEY to packet.loependeJanuer2024,
                     ),
                 )
             context.publish(melding.toJson())

@@ -1,17 +1,12 @@
 import { BodyShort, ErrorSummary, Heading, TextField } from '@navikt/ds-react'
-import { isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
 import SEDLandMedDokumenter from '~components/behandling/revurderingsoversikt/sluttbehandlingUtland/SEDLandMedDokumenter'
-import { hentAlleLand, ILand, sorterLand } from '~shared/api/trygdetid'
-import React, { useEffect, useState } from 'react'
+import { ILand } from '~shared/api/trygdetid'
+import React, { useState } from 'react'
 import { LandMedDokumenter } from '~shared/types/RevurderingInfo'
 import { InformationSquareIcon } from '@navikt/aksel-icons'
 import { ABlue500 } from '@navikt/ds-tokens/dist/tokens'
-import Spinner from '~shared/Spinner'
 
-export const MottatteSeder = () => {
-  const [hentAlleLandRequest, fetchAlleLand] = useApiCall(hentAlleLand)
-  const [alleLandKodeverk, setAlleLandKodeverk] = useState<ILand[] | null>(null)
-
+export const MottatteSeder = ({ landliste }: { landliste: ILand[] }) => {
   const initalStateLandMedDokumenter = [
     {
       landIsoKode: undefined,
@@ -26,12 +21,6 @@ export const MottatteSeder = () => {
   const [landMedDokumenter, setLandMedDokumenter] = useState<LandMedDokumenter[]>(initalStateLandMedDokumenter)
   const [feilkoder, setFeilkoder] = useState<Set<string>>(new Set([]))
   const [rinanummer, setRinanummer] = useState<string>('')
-
-  useEffect(() => {
-    fetchAlleLand(null, (landliste) => {
-      setAlleLandKodeverk(sorterLand(landliste))
-    })
-  }, [])
 
   const validerSkjema = () => {
     const feilkoder: Set<string> = new Set([])
@@ -84,15 +73,12 @@ export const MottatteSeder = () => {
       <div style={{ width: '12rem', maxWidth: '20rem', margin: '2rem 0rem' }}>
         <TextField label="Saksnummer RINA" value={rinanummer} onChange={(e) => setRinanummer(e.target.value)} />
       </div>
-      {isPending(hentAlleLandRequest) && <Spinner visible={true} label="Henter land" />}
-      {isSuccess(hentAlleLandRequest) && alleLandKodeverk && (
-        <SEDLandMedDokumenter
-          landListe={alleLandKodeverk}
-          landMedDokumenter={landMedDokumenter}
-          setLandMedDokumenter={setLandMedDokumenter}
-          resetFeilkoder={() => setFeilkoder(new Set([]))}
-        />
-      )}
+      <SEDLandMedDokumenter
+        landListe={landliste}
+        landMedDokumenter={landMedDokumenter}
+        setLandMedDokumenter={setLandMedDokumenter}
+        resetFeilkoder={() => setFeilkoder(new Set([]))}
+      />
     </>
   )
 }

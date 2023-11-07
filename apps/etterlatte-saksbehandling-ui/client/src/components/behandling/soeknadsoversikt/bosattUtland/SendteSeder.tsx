@@ -1,15 +1,10 @@
-import { isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
-import { hentAlleLand, ILand, sorterLand } from '~shared/api/trygdetid'
-import { useEffect, useState } from 'react'
+import { ILand } from '~shared/api/trygdetid'
+import { useState } from 'react'
 import { LandMedDokumenter } from '~shared/types/RevurderingInfo'
 import { BodyShort, ErrorSummary, Heading } from '@navikt/ds-react'
-import Spinner from '~shared/Spinner'
 import SEDLandMedDokumenter from '~components/behandling/revurderingsoversikt/sluttbehandlingUtland/SEDLandMedDokumenter'
 
-export const SendteSeder = () => {
-  const [hentAlleLandRequest, fetchAlleLand] = useApiCall(hentAlleLand)
-  const [alleLandKodeverk, setAlleLandKodeverk] = useState<ILand[] | null>(null)
-
+export const SendteSeder = ({ landliste }: { landliste: ILand[] }) => {
   const initalStateLandMedDokumenter = [
     {
       landIsoKode: undefined,
@@ -19,12 +14,6 @@ export const SendteSeder = () => {
 
   const [landMedDokumenter, setLandMedDokumenter] = useState<LandMedDokumenter[]>(initalStateLandMedDokumenter)
   const [feilkoder, setFeilkoder] = useState<Set<string>>(new Set([]))
-
-  useEffect(() => {
-    fetchAlleLand(null, (landliste) => {
-      setAlleLandKodeverk(sorterLand(landliste))
-    })
-  }, [])
 
   const validerSkjema = () => {
     const feilkoder: Set<string> = new Set([])
@@ -67,15 +56,12 @@ export const SendteSeder = () => {
         Sendte SED
       </Heading>
       <BodyShort>Fyll inn hvilke SED som er mottatt i RINA pr land.</BodyShort>
-      {isPending(hentAlleLandRequest) && <Spinner visible={true} label="Henter land" />}
-      {isSuccess(hentAlleLandRequest) && alleLandKodeverk && (
-        <SEDLandMedDokumenter
-          landListe={alleLandKodeverk}
-          landMedDokumenter={landMedDokumenter}
-          setLandMedDokumenter={setLandMedDokumenter}
-          resetFeilkoder={() => setFeilkoder(new Set([]))}
-        />
-      )}
+      <SEDLandMedDokumenter
+        landListe={landliste}
+        landMedDokumenter={landMedDokumenter}
+        setLandMedDokumenter={setLandMedDokumenter}
+        resetFeilkoder={() => setFeilkoder(new Set([]))}
+      />
     </>
   )
 }

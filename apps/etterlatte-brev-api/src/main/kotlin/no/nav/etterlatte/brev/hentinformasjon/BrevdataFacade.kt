@@ -59,6 +59,7 @@ class BrevdataFacade(
     ): GenerellBrevData {
         return coroutineScope {
             val sakDeferred = async { behandlingKlient.hentSak(sakId, brukerTokenInfo) }
+            val systemkildeDeferred = async { behandlingKlient.hentKilde(behandlingId, brukerTokenInfo) }
             val vedtakDeferred = async { vedtaksvurderingKlient.hentVedtak(behandlingId, brukerTokenInfo) }
             val grunnlag =
                 when (vedtakDeferred.await().type) {
@@ -87,6 +88,8 @@ class BrevdataFacade(
             val attestantIdent =
                 vedtak.vedtakFattet?.let { vedtak.attestasjon?.attestant ?: innloggetSaksbehandlerIdent }
 
+            val systemkilde = systemkildeDeferred.await()
+
             when (vedtak.type) {
                 VedtakType.INNVILGELSE,
                 VedtakType.OPPHOER,
@@ -95,9 +98,9 @@ class BrevdataFacade(
                 ->
                     (vedtak.innhold as VedtakInnholdDto.VedtakBehandlingDto).let { vedtakInnhold ->
                         GenerellBrevData(
-                            sak,
-                            personerISak,
-                            behandlingId,
+                            sak = sak,
+                            personerISak = personerISak,
+                            behandlingId = behandlingId,
                             forenkletVedtak =
                                 ForenkletVedtak(
                                     vedtak.id,
@@ -110,16 +113,17 @@ class BrevdataFacade(
                                     virkningstidspunkt = vedtakInnhold.virkningstidspunkt,
                                     revurderingInfo = vedtakInnhold.behandling.revurderingInfo,
                                 ),
-                            grunnlag.mapSpraak(),
+                            spraak = grunnlag.mapSpraak(),
                             revurderingsaarsak = vedtakInnhold.behandling.revurderingsaarsak,
+                            systemkilde = systemkilde,
                         )
                     }
 
                 VedtakType.TILBAKEKREVING ->
                     GenerellBrevData(
-                        sak,
-                        personerISak,
-                        behandlingId,
+                        sak = sak,
+                        personerISak = personerISak,
+                        behandlingId = behandlingId,
                         forenkletVedtak =
                             ForenkletVedtak(
                                 vedtak.id,
@@ -134,7 +138,8 @@ class BrevdataFacade(
                                         (vedtak.innhold as VedtakInnholdDto.VedtakTilbakekrevingDto).tilbakekreving.toJson(),
                                     ),
                             ),
-                        grunnlag.mapSpraak(),
+                        spraak = grunnlag.mapSpraak(),
+                        systemkilde = systemkilde,
                     )
             }
         }

@@ -2,6 +2,7 @@ package no.nav.etterlatte.brev.behandling
 
 import no.nav.etterlatte.brev.model.EtterbetalingDTO
 import no.nav.etterlatte.brev.model.Spraak
+import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.sak.Sak
@@ -19,6 +20,7 @@ data class GenerellBrevData(
     val behandlingId: UUID,
     val forenkletVedtak: ForenkletVedtak,
     val spraak: Spraak,
+    val systemkilde: Vedtaksloesning,
     val revurderingsaarsak: Revurderingaarsak? = null,
 )
 

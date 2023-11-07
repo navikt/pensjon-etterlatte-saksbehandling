@@ -57,6 +57,7 @@ internal class JournalfoerVedtaksbrevRiverTest {
                 BrevProsessType.AUTOMATISK,
                 "fnr",
                 Status.FERDIGSTILT,
+                Tidspunkt.now(),
                 mottaker = mockk(),
             )
         val response = JournalpostResponse("1234", null, null, true, emptyList())
@@ -98,6 +99,7 @@ internal class JournalfoerVedtaksbrevRiverTest {
                 BrevProsessType.AUTOMATISK,
                 "fnr",
                 Status.JOURNALFOERT,
+                Tidspunkt.now(),
                 mottaker = mockk(),
             )
 

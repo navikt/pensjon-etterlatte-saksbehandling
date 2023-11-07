@@ -24,6 +24,7 @@ import no.nav.etterlatte.migrering.verifisering.PDLKlient
 import no.nav.etterlatte.migrering.verifisering.Verifiserer
 import no.nav.etterlatte.opprettInMemoryDatabase
 import no.nav.etterlatte.rapidsandrivers.EventNames
+import no.nav.etterlatte.rapidsandrivers.migrering.LOPENDE_JANUAR_2024_KEY
 import no.nav.etterlatte.rapidsandrivers.migrering.MigreringRequest
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser
 import no.nav.etterlatte.rapidsandrivers.migrering.PESYS_ID_KEY
@@ -40,6 +41,7 @@ import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
 import rapidsandrivers.BEHANDLING_ID_KEY
 import rapidsandrivers.HENDELSE_DATA_KEY
+import rapidsandrivers.SAK_ID_FLERE_KEY
 import rapidsandrivers.SAK_ID_KEY
 import java.time.Month
 import java.time.YearMonth
@@ -80,7 +82,7 @@ internal class MigreringRiverIntegrationTest {
                             rapidsConnection = this,
                             penKlient =
                                 mockk<PenKlient>()
-                                    .also { every { runBlocking { it.hentSak(any()) } } returns responsFraPEN },
+                                    .also { every { runBlocking { it.hentSak(any(), any()) } } returns responsFraPEN },
                             pesysRepository = repository,
                             featureToggleService = featureToggleService,
                             verifiserer =
@@ -103,6 +105,7 @@ internal class MigreringRiverIntegrationTest {
                     mapOf(
                         EVENT_NAME_KEY to Migreringshendelser.MIGRER_SPESIFIKK_SAK,
                         SAK_ID_KEY to "22974139",
+                        LOPENDE_JANUAR_2024_KEY to true,
                     ),
                 ).toJson(),
             )
@@ -136,7 +139,7 @@ internal class MigreringRiverIntegrationTest {
                 )
             val penKlient =
                 mockk<PenKlient>()
-                    .also { every { runBlocking { it.hentSak(any()) } } returns responsFraPEN }
+                    .also { every { runBlocking { it.hentSak(any(), any()) } } returns responsFraPEN }
                     .also { every { runBlocking { it.opphoerSak(any()) } } just runs }
 
             val inspector =
@@ -169,6 +172,7 @@ internal class MigreringRiverIntegrationTest {
                     mapOf(
                         EVENT_NAME_KEY to Migreringshendelser.MIGRER_SPESIFIKK_SAK,
                         SAK_ID_KEY to pesysId.id,
+                        LOPENDE_JANUAR_2024_KEY to true,
                     ),
                 ).toJson(),
             )
@@ -230,7 +234,7 @@ internal class MigreringRiverIntegrationTest {
                             rapidsConnection = this,
                             penKlient =
                                 mockk<PenKlient>()
-                                    .also { every { runBlocking { it.hentSak(any()) } } returns responsFraPEN },
+                                    .also { every { runBlocking { it.hentSak(any(), any()) } } returns responsFraPEN },
                             pesysRepository = repository,
                             featureToggleService = featureToggleService,
                             verifiserer =
@@ -253,6 +257,7 @@ internal class MigreringRiverIntegrationTest {
                     mapOf(
                         EVENT_NAME_KEY to Migreringshendelser.MIGRER_SPESIFIKK_SAK,
                         SAK_ID_KEY to pesysid,
+                        LOPENDE_JANUAR_2024_KEY to true,
                     ),
                 ).toJson(),
             )
@@ -260,6 +265,42 @@ internal class MigreringRiverIntegrationTest {
                 assertEquals(EventNames.FEILA, get(EVENT_NAME_KEY).textValue())
             }
             assertEquals(Migreringsstatus.VERIFISERING_FEILA, repository.hentStatus(pesysid))
+        }
+    }
+
+    @Test
+    fun `migrere flere saker samtidig`() {
+        testApplication {
+            val inspector =
+                TestRapid()
+                    .apply {
+                        MigreringRiver(rapidsConnection = this)
+                    }
+            inspector.sendTestMessage(
+                JsonMessage.newMessage(
+                    mapOf(
+                        EVENT_NAME_KEY to Migreringshendelser.START_MIGRERING,
+                        SAK_ID_FLERE_KEY to listOf("111", "222", "333"),
+                        LOPENDE_JANUAR_2024_KEY to false,
+                    ),
+                ).toJson(),
+            )
+
+            with(inspector.inspektør.message(0)) {
+                assertEquals(111L, get(SAK_ID_KEY).asLong())
+                assertEquals(Migreringshendelser.MIGRER_SPESIFIKK_SAK, get(EVENT_NAME_KEY).asText())
+                assertEquals(false, get(LOPENDE_JANUAR_2024_KEY).asBoolean())
+            }
+            with(inspector.inspektør.message(1)) {
+                assertEquals(222L, get(SAK_ID_KEY).asLong())
+                assertEquals(Migreringshendelser.MIGRER_SPESIFIKK_SAK, get(EVENT_NAME_KEY).asText())
+                assertEquals(false, get(LOPENDE_JANUAR_2024_KEY).asBoolean())
+            }
+            with(inspector.inspektør.message(2)) {
+                assertEquals(333L, get(SAK_ID_KEY).asLong())
+                assertEquals(Migreringshendelser.MIGRER_SPESIFIKK_SAK, get(EVENT_NAME_KEY).asText())
+                assertEquals(false, get(LOPENDE_JANUAR_2024_KEY).asBoolean())
+            }
         }
     }
 }

@@ -120,6 +120,7 @@ internal class VedtaksbrevUnderkjentRiverTest {
             BrevProsessType.AUTOMATISK,
             "fnr",
             Status.JOURNALFOERT,
+            Tidspunkt.now(),
             mottaker = mockk(),
         )
 }

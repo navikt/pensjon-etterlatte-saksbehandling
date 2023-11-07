@@ -671,7 +671,7 @@ internal class BeregnBarnepensjonServiceTest {
                     utbetaltBeloep shouldBe BP_BELOEP_ETT_SOESKEN_MAI_23
                     grunnbelopMnd shouldBe GRUNNBELOEP_MAI_23
                 }
-                with(beregningsperioder.single { p -> YearMonth.of(2023, 10).equals(p.datoFOM) }) {
+                with(beregningsperioder.single { p -> YearMonth.of(2024, 1).equals(p.datoFOM) }) {
                     utbetaltBeloep shouldBe BP_BELOEP_NYTT_REGELVERK_EN_DOED_FORELDER
                     grunnbelopMnd shouldBe GRUNNBELOEP_MAI_23
                 }
@@ -680,7 +680,7 @@ internal class BeregnBarnepensjonServiceTest {
     }
 
     @Test
-    fun `skal beregne barnepensjon foerstegangsbehandling - med flere avdøde foreldre og nytt regelverk`() {
+    fun `skal beregne barnepensjon foerstegangsbehandling - med flere avdoede foreldre og nytt regelverk`() {
         val behandling = mockBehandling(BehandlingType.FØRSTEGANGSBEHANDLING)
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns
             grunnlagMedEkstraAvdoedForelder(LocalDate.of(2023, 11, 12))
@@ -695,7 +695,7 @@ internal class BeregnBarnepensjonServiceTest {
 
         runBlocking {
             val beregning = beregnBarnepensjonService().beregn(behandling, bruker)
-            beregning.beregningsperioder.size shouldBeGreaterThanOrEqual 4
+            beregning.beregningsperioder.size shouldBeGreaterThanOrEqual 3
 
             with(beregning.beregningsperioder[0]) {
                 datoFOM shouldBe YearMonth.of(2023, 1)
@@ -703,15 +703,10 @@ internal class BeregnBarnepensjonServiceTest {
             }
             with(beregning.beregningsperioder[1]) {
                 datoFOM shouldBe YearMonth.of(2023, 5)
-                datoTOM shouldBe YearMonth.of(2023, 9)
+                datoTOM shouldBe YearMonth.of(2023, 12)
             }
             with(beregning.beregningsperioder[2]) {
-                datoFOM shouldBe YearMonth.of(2023, 10)
-                datoTOM shouldBe YearMonth.of(2023, 11)
-                utbetaltBeloep shouldBe BP_BELOEP_NYTT_REGELVERK_EN_DOED_FORELDER
-            }
-            with(beregning.beregningsperioder[3]) {
-                datoFOM shouldBe YearMonth.of(2023, 12)
+                datoFOM shouldBe YearMonth.of(2024, 1)
                 datoTOM shouldBe null
                 utbetaltBeloep shouldBe BP_BELOEP_NYTT_REGELVERK_TO_DOEDE_FORELDRE
             }
@@ -779,9 +774,9 @@ internal class BeregnBarnepensjonServiceTest {
                     fom = it.first.atDay(1),
                     tom = it.second?.atEndOfMonth(),
                     data =
-                        it.third.map {
+                        it.third.map { fnr ->
                             SoeskenMedIBeregning(
-                                Folkeregisteridentifikator.of(it),
+                                Folkeregisteridentifikator.of(fnr),
                                 skalBrukes = true,
                             )
                         },

@@ -26,22 +26,12 @@ import { visFane } from '~store/reducers/BehandlingSidemenyReducer'
 import { updateSjekkliste } from '~store/reducers/SjekklisteReducer'
 import { erFerdigBehandlet } from '~components/behandling/felles/utils'
 import { hentSjekkliste, opprettSjekkliste } from '~shared/api/sjekkliste'
-import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
 
-const finnUtNasjonalitet = (behandling: IBehandlingReducer): UtenlandstilknytningType => {
+const finnUtNasjonalitet = (behandling: IBehandlingReducer): UtenlandstilknytningType | null => {
   if (behandling.utenlandstilknytning?.type) {
-    //TODO: basere på sak
     return behandling.utenlandstilknytning?.type
   } else {
-    if (behandling.behandlingType === IBehandlingsType.REVURDERING) {
-      if (behandling.revurderingsaarsak === Revurderingaarsak.SLUTTBEHANDLING_UTLAND) {
-        return UtenlandstilknytningType.UTLANDSTILSNITT //TODO:  https://jira.adeo.no/browse/EY-3037
-      } else {
-        return UtenlandstilknytningType.NASJONAL
-      }
-    } else {
-      return UtenlandstilknytningType.NASJONAL
-    }
+    return null
   }
 }
 const mapTilBehandlingInfo = (behandling: IBehandlingReducer, vedtak: VedtakSammendrag | null): IBehandlingInfo => ({

@@ -28,6 +28,7 @@ import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.SlateHelper
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.libs.common.Vedtaksloesning
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.rivers.VedtakTilJournalfoering
 import no.nav.etterlatte.token.BrukerTokenInfo
@@ -84,6 +85,7 @@ class VedtaksbrevService(
                 prosessType = prosessType,
                 soekerFnr = generellBrevData.personerISak.soeker.fnr.value,
                 mottaker = mottaker,
+                opprettet = Tidspunkt.now(),
                 innhold = opprettInnhold(generellBrevData, brukerTokenInfo, prosessType),
                 innholdVedlegg = opprettInnholdVedlegg(generellBrevData, prosessType),
             )

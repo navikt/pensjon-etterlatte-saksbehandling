@@ -169,6 +169,13 @@ internal fun Route.sakWebRoutes(
         }
 
         route("/personer/") {
+            post("/utenlandstilknytning") {
+                withFoedselsnummerInternal(tilgangService) { fnr ->
+                    val sakUtenlandstilknytning = inTransaction { sakService.hentSakMedUtenlandstilknytning(fnr.value) }
+                    call.respond(sakUtenlandstilknytning)
+                }
+            }
+
             post("sak/{type}") {
                 withFoedselsnummerInternal(tilgangService) { fnr ->
                     val type: SakType =

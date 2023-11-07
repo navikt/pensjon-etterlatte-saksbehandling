@@ -4,9 +4,9 @@ cutterslade-analyze = { id = "ca.cutterslade.analyze", version = "1.9.1" }
 
 [versions]
 jackson-version = "2.15.3"
-jupiter-version = "5.10.0"
+jupiter-version = "5.10.1"
 kotlinx-version = "1.7.3"
-ktor2-version = "2.3.5"
+ktor2-version = "2.3.6"
 navfelles-token-version = "3.1.5"
 prometheus-version = "0.16.0"
 testcontainer-version = "1.19.1"
@@ -28,7 +28,7 @@ jackson-core = { module = "com.fasterxml.jackson.core:jackson-core", version.ref
 jackson-xml = { module = "com.fasterxml.jackson.dataformat:jackson-dataformat-xml", version.ref = "jackson-version" }
 
 jakartabind-api = { module = "jakarta.xml.bind:jakarta.xml.bind-api", version = "4.0.1" }
-jakartabind-impl = { module = "org.glassfish.jaxb:jaxb-runtime", version = "4.0.3" }
+jakartabind-impl = { module = "org.glassfish.jaxb:jaxb-runtime", version = "4.0.4" }
 
 kafka-clients = { module = "org.apache.kafka:kafka-clients", version = "3.5.1" }
 kafka-avro = { module = "org.apache.avro:avro", version = "1.11.2" }
@@ -95,7 +95,7 @@ test-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref
 test-jupiter-params = { module = "org.junit.jupiter:junit-jupiter-params", version.ref = "jupiter-version" }
 test-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "jupiter-version" }
 test-jupiter-root = { module = "org.junit.jupiter:junit-jupiter", version.ref = "jupiter-version" }
-test-kotest-assertionscore = { module = "io.kotest:kotest-assertions-core", version = "5.7.2" }
+test-kotest-assertionscore = { module = "io.kotest:kotest-assertions-core", version = "5.8.0" }
 test-mockk = { module = "io.mockk:mockk", version = "1.13.8" }
 test-testcontainer-jupiter = { module = "org.testcontainers:junit-jupiter", version.ref = "testcontainer-version" }
 test-testcontainer-postgresql = { module = "org.testcontainers:postgresql", version.ref = "testcontainer-version" }

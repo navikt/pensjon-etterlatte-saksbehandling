@@ -92,6 +92,7 @@ internal class OpprettVedtaksbrevForMigreringRiverTest {
             BrevProsessType.AUTOMATISK,
             "fnr",
             Status.FERDIGSTILT,
+            Tidspunkt.now(),
             mottaker = mockk(),
         )
 

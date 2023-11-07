@@ -36,7 +36,6 @@ export const GyldigFramsattBarnepensjon = ({
   const innsenderErForelder = gyldigFramsatt.vurderinger.find(
     (g: IGyldighetproving) => g.navn === GyldigFramsattType.INNSENDER_ER_FORELDER
   )
-  const vergerOgFullmektige = behandling.søker?.vergemaalEllerFremtidsfullmakt ?? []
 
   return (
     <LovtekstMedLenke
@@ -59,7 +58,7 @@ export const GyldigFramsattBarnepensjon = ({
         <InfobokserWrapper>
           <Innsender innsenderErForelder={innsenderErForelder} />
           <Foreldreansvar innsenderHarForeldreansvar={innsenderHarForeldreansvar} />
-          <Verger vergerOgFullmektige={vergerOgFullmektige} />
+          <Verger behandlingId={behandling.id} sakId={behandling.sakId} />
         </InfobokserWrapper>
       </div>
       <VurderingsContainerWrapper>

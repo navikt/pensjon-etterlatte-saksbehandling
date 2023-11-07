@@ -32,6 +32,7 @@ import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
 import org.junit.jupiter.api.AfterEach
@@ -283,6 +284,7 @@ internal class BrevServiceTest {
         prosessType = prosessType,
         soekerFnr = "fnr",
         status = status,
+        opprettet = Tidspunkt.now(),
         mottaker = opprettMottaker(),
     )
 

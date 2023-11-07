@@ -51,10 +51,8 @@ export const isPendingOrInitial = (result: Result<unknown>): result is Initial |
 export const isSuccessOrInitial = (result: Result<unknown>): result is Initial | Success<unknown> =>
   isSuccess(result) || isInitial(result)
 
-export const isConflict = (result: Result<unknown>): result is Error<ApiError> =>
-  result.status === 'error' && result.error.status === 409
-export const isNotFound = (result: Result<unknown>): result is Error<ApiError> =>
-  result.status === 'error' && result.error.status === 404
+export const isErrorWithCode = (result: Result<unknown>, code: number): result is Error<ApiError> =>
+  result.status === 'error' && result.error.status === code
 export const is5xxError = (result: Result<unknown>): result is Error<ApiError> =>
   result.status === 'error' && String(result.error.status).startsWith('5')
 

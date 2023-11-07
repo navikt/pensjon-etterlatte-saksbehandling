@@ -1,5 +1,5 @@
 import styled from 'styled-components'
-import { isNotFound, useApiCall } from '~shared/hooks/useApiCall'
+import { isErrorWithCode, useApiCall } from '~shared/hooks/useApiCall'
 import { hentAvkorting } from '~shared/api/avkorting'
 import React, { useEffect, useState } from 'react'
 import { IAvkorting } from '~shared/types/IAvkorting'
@@ -40,7 +40,7 @@ export const Avkorting = (props: { behandling: IBehandlingReducer }) => {
       )}
 
       {isPending(avkortingStatus) && <Spinner visible={true} label="Henter avkorting" />}
-      {isNotFound(avkortingStatus) && <ApiErrorAlert>En feil har oppstått</ApiErrorAlert>}
+      {isErrorWithCode(avkortingStatus, 404) && <ApiErrorAlert>En feil har oppstått</ApiErrorAlert>}
     </AvkortingWrapper>
   )
 }

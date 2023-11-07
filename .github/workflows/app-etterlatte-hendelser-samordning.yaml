@@ -45,8 +45,7 @@ jobs:
       id-token: 'write'
 
   deploy:
-    #if: github.event_name != 'pull_request'
-    if: false
+    if: github.event_name != 'pull_request'
     needs: build
     uses: ./.github/workflows/.deploy.yaml
     with:

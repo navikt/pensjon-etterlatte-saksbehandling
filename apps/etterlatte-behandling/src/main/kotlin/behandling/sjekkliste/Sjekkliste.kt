@@ -7,6 +7,7 @@ data class Sjekkliste(
     val kommentar: String? = null,
     val adresseForBrev: String? = null,
     val kontonrRegistrert: String? = null,
+    val onsketSkattetrekk: Int? = null,
     val bekreftet: Boolean = false,
     val sjekklisteItems: List<SjekklisteItem>,
     val versjon: Long,
@@ -23,6 +24,7 @@ data class OppdatertSjekkliste(
     val kommentar: String? = null,
     val adresseForBrev: String? = null,
     val kontonrRegistrert: String? = null,
+    val onsketSkattetrekk: Int? = null,
     val bekreftet: Boolean = false,
     val versjon: Long,
 )

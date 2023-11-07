@@ -20,6 +20,7 @@ import no.nav.etterlatte.brev.behandling.mapSpraak
 import no.nav.etterlatte.brev.behandling.mapVerge
 import no.nav.etterlatte.brev.behandlingklient.BehandlingKlient
 import no.nav.etterlatte.brev.model.EtterbetalingDTO
+import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
@@ -59,7 +60,6 @@ class BrevdataFacade(
     ): GenerellBrevData {
         return coroutineScope {
             val sakDeferred = async { behandlingKlient.hentSak(sakId, brukerTokenInfo) }
-            val systemkildeDeferred = async { behandlingKlient.hentKilde(behandlingId, brukerTokenInfo) }
             val vedtakDeferred = async { vedtaksvurderingKlient.hentVedtak(behandlingId, brukerTokenInfo) }
             val grunnlag =
                 when (vedtakDeferred.await().type) {
@@ -88,7 +88,14 @@ class BrevdataFacade(
             val attestantIdent =
                 vedtak.vedtakFattet?.let { vedtak.attestasjon?.attestant ?: innloggetSaksbehandlerIdent }
 
-            val systemkilde = systemkildeDeferred.await()
+            val systemkilde =
+                if (vedtak.type == VedtakType.INNVILGELSE) {
+                    // Dette kan være en pesys-sak
+                    behandlingKlient.hentKilde(behandlingId, brukerTokenInfo)
+                } else {
+                    // alle andre vedtak kommer fra Gjenny
+                    Vedtaksloesning.GJENNY
+                }
 
             when (vedtak.type) {
                 VedtakType.INNVILGELSE,

@@ -29,6 +29,7 @@ import { mapListeTilDto } from '~components/behandling/beregningsgrunnlag/Period
 import { Border } from '~components/behandling/soeknadsoversikt/styled'
 import Spinner from '~shared/Spinner'
 import BeregningsgrunnlagMetode from './BeregningsgrunnlagMetode'
+import { handlinger } from '~components/behandling/handlinger/typer'
 
 const BeregningsgrunnlagOmstillingsstoenad = (props: { behandling: IBehandlingReducer }) => {
   const { behandling } = props
@@ -117,7 +118,7 @@ const BeregningsgrunnlagOmstillingsstoenad = (props: { behandling: IBehandlingRe
             onClick={onSubmit}
             loading={isPending(lagreBeregningsgrunnlagOMS) || isPending(endreBeregning)}
           >
-            Beregn
+            {handlinger.NESTE.navn}
           </Button>
         </BehandlingHandlingKnapper>
       ) : (

@@ -8,16 +8,22 @@ import { isPending } from '@reduxjs/toolkit'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { YtelseEtterAvkorting } from '~components/behandling/avkorting/YtelseEtterAvkorting'
-import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
+import { IBehandlingReducer, oppdaterBehandlingsstatus } from '~store/reducers/BehandlingReducer'
+import { useAppDispatch } from '~store/Store'
+import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 
 export const Avkorting = (props: { behandling: IBehandlingReducer }) => {
   const behandling = props.behandling
+  const dispatch = useAppDispatch()
   const [avkortingStatus, hentAvkortingRequest] = useApiCall(hentAvkorting)
   const [avkorting, setAvkorting] = useState<IAvkorting>()
 
   useEffect(() => {
     if (!avkorting) {
-      hentAvkortingRequest(behandling.id, (res) => setAvkorting(res))
+      hentAvkortingRequest(behandling.id, (res) => {
+        dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.AVKORTET))
+        setAvkorting(res)
+      })
     }
   }, [])
 

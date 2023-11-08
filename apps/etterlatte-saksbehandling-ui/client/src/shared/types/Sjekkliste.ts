@@ -3,6 +3,7 @@ export interface ISjekkliste {
   kommentar: string | undefined
   adresseForBrev: string | undefined
   kontonrRegistrert: string | undefined
+  onsketSkattetrekk: number | undefined
   bekreftet: boolean
   versjon: string
   sjekklisteItems: ISjekklisteItem[]

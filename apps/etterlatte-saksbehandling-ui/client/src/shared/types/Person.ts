@@ -28,7 +28,7 @@ export interface IPdlPerson {
   etternavn: string
   foedselsnummer: string
   foedselsdato: Date
-  doedsdato: string | null
+  doedsdato: string | undefined
   bostedsadresse?: IAdresse[]
   deltBostedsadresse?: IAdresse[]
   kontaktadresse?: IAdresse[]

@@ -3,7 +3,7 @@ import { Border } from '../../styled'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { ErrorMessage } from '@navikt/ds-react'
 import { Person } from '~components/behandling/soeknadsoversikt/familieforhold/barnepensjon/Person'
-import { BarneListe } from '~components/behandling/soeknadsoversikt/familieforhold/barnepensjon/BarneListe'
+import { Soeskenliste } from '~components/behandling/soeknadsoversikt/familieforhold/barnepensjon/Soeskenliste'
 
 export interface PropsFamilieforhold {
   behandling: IDetaljertBehandling
@@ -28,7 +28,7 @@ export const FamilieforholdBarnepensjon = ({ behandling }: PropsFamilieforhold) 
           <Person person={avdoede.opplysning} kilde={avdoede.kilde} avdoed />
           <Person person={gjenlevende.opplysning} kilde={gjenlevende.kilde} gjenlevende />
         </FamilieforholdVoksne>
-        <BarneListe familieforhold={behandling.familieforhold!!} soekerFnr={behandling.søker.foedselsnummer} />
+        <Soeskenliste familieforhold={behandling.familieforhold!!} soekerFnr={behandling.søker.foedselsnummer} />
       </FamilieforholdWrapper>
       <Border />
     </>

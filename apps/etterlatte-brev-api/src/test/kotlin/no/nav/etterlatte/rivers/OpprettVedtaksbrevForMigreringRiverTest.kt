@@ -55,13 +55,13 @@ internal class OpprettVedtaksbrevForMigreringRiverTest {
         val melding = opprettMelding(vedtak, Vedtaksloesning.PESYS)
         val brev = opprettBrev()
 
-        coEvery { vedtaksbrevService.opprettVedtaksbrev(any(), behandlingId, any()) } returns brev
+        coEvery { vedtaksbrevService.opprettVedtaksbrev(any(), behandlingId, any(), true) } returns brev
         coEvery { vedtaksbrevService.genererPdf(brev.id, any(), true) } returns mockk<Pdf>()
         coEvery { vedtaksbrevService.ferdigstillVedtaksbrev(brev.behandlingId!!, any(), true) } just Runs
 
         val inspektoer = testRapid.apply { sendTestMessage(melding.toJson()) }.inspektør
 
-        coVerify(exactly = 1) { vedtaksbrevService.opprettVedtaksbrev(any(), behandlingId, any()) }
+        coVerify(exactly = 1) { vedtaksbrevService.opprettVedtaksbrev(any(), behandlingId, any(), true) }
         coVerify(exactly = 1) { vedtaksbrevService.genererPdf(brev.id, any(), true) }
         coVerify(exactly = 1) { vedtaksbrevService.ferdigstillVedtaksbrev(brev.behandlingId!!, any(), true) }
 

@@ -42,7 +42,7 @@ internal class OpprettVedtaksbrevForMigreringRiver(
             val behandlingId = packet["vedtak.behandling.id"].asUUID()
             val brukerTokenInfo = Systembruker("migrering", "migrering")
             runBlocking {
-                val vedtaksbrev: Brev = service.opprettVedtaksbrev(sakId, behandlingId, brukerTokenInfo)
+                val vedtaksbrev: Brev = service.opprettVedtaksbrev(sakId, behandlingId, brukerTokenInfo, true)
                 service.genererPdf(vedtaksbrev.id, brukerTokenInfo, true)
                 service.ferdigstillVedtaksbrev(vedtaksbrev.behandlingId!!, brukerTokenInfo, true)
             }

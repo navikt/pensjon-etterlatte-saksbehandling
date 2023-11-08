@@ -10,6 +10,7 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.Opplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Navn
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.person.VergeEllerFullmektig
 import no.nav.etterlatte.libs.common.person.VergemaalEllerFremtidsfullmakt
@@ -160,6 +161,7 @@ internal class BehandlingTest {
     @Test
     fun `Ingen verge i grunnlag`() {
         val gjenlevendeNavn = Navn("Elegang", "Mellomstor", "Barnevogn")
+        val gjenlevendeFnr = Folkeregisteridentifikator.of("10418305857")
 
         val grunnlag =
             Grunnlag(
@@ -175,6 +177,7 @@ internal class BehandlingTest {
                         mapOf(
                             Opplysningstype.PERSONROLLE to opprettOpplysning(PersonRolle.GJENLEVENDE.toJsonNode()),
                             Opplysningstype.NAVN to opprettOpplysning(gjenlevendeNavn.toJsonNode()),
+                            Opplysningstype.FOEDSELSNUMMER to opprettOpplysning(gjenlevendeFnr.toJsonNode()),
                         ),
                     ),
                 sak = emptyMap(),

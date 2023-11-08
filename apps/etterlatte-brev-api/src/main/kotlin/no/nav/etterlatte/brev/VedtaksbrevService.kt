@@ -63,6 +63,7 @@ class VedtaksbrevService(
         sakId: Long,
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
+        migrering: Boolean = false,
     ): Brev {
         require(hentVedtaksbrev(behandlingId) == null) {
             "Vedtaksbrev finnes allerede på behandling (id=$behandlingId) og kan ikke opprettes på nytt"
@@ -70,11 +71,16 @@ class VedtaksbrevService(
 
         val generellBrevData = brevdataFacade.hentGenerellBrevData(sakId, behandlingId, brukerTokenInfo)
 
-        val mottakerFnr =
+        val mottaker =
             with(generellBrevData.personerISak) {
-                innsender?.fnr?.value?.takeUnless { it == Vedtaksloesning.PESYS.name } ?: soeker.fnr.value
+                if (migrering && verge != null) {
+                    val fnr = verge.fnr
+                    TODO("Klarer ikke å finne adresse til verge enda")
+                } else {
+                    val fnr = innsender?.fnr?.value?.takeUnless { it == Vedtaksloesning.PESYS.name } ?: soeker.fnr.value
+                    adresseService.hentMottakerAdresse(fnr)
+                }
             }
-        val mottaker = adresseService.hentMottakerAdresse(mottakerFnr)
 
         val prosessType = brevProsessTypeFactory.fra(generellBrevData)
 
@@ -113,7 +119,15 @@ class VedtaksbrevService(
         val brevRequest = BrevbakerRequest.fra(brevkodePar.ferdigstilling, brevData, generellBrevData, avsender)
 
         return brevbaker.genererPdf(brev.id, brevRequest)
-            .also { pdf -> lagrePdfHvisVedtakFattet(brev.id, generellBrevData.forenkletVedtak, pdf, brukerTokenInfo, migrering) }
+            .also { pdf ->
+                lagrePdfHvisVedtakFattet(
+                    brev.id,
+                    generellBrevData.forenkletVedtak,
+                    pdf,
+                    brukerTokenInfo,
+                    migrering,
+                )
+            }
     }
 
     suspend fun ferdigstillVedtaksbrev(

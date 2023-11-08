@@ -15,9 +15,11 @@ import { useVedtak } from '~components/vedtak/useVedtak'
 import RedigerbartBrev from '~components/behandling/brev/RedigerbartBrev'
 
 export function TilbakekrevingBrev({ tilbakekreving }: { tilbakekreving: TilbakekrevingBehandling }) {
-  const kanAttesteres = [TilbakekrevingStatus.OPPRETTET, TilbakekrevingStatus.UNDER_ARBEID].includes(
-    tilbakekreving.status
-  )
+  const kanAttesteres = [
+    TilbakekrevingStatus.OPPRETTET,
+    TilbakekrevingStatus.UNDER_ARBEID,
+    TilbakekrevingStatus.UNDERKJENT,
+  ].includes(tilbakekreving.status)
   const vedtak = useVedtak()
   const [vedtaksbrev, setVedtaksbrev] = useState<IBrev | undefined>(undefined)
   const [hentBrevStatus, hentBrevRequest] = useApiCall(hentVedtaksbrev)

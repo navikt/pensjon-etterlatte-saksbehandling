@@ -25,7 +25,7 @@ export const GyldigFramsattOmstillingsstoenad = ({
 
   return (
     <LovtekstMedLenke
-      tittel="Er søknad gyldig fremsatt?"
+      tittel="Vurdering - søknad gyldig fremsatt"
       hjemler={[
         {
           lenke: 'https://lovdata.no/dokument/NL/lov/1997-02-28-19/KAPITTEL_8-2#%C2%A722-13',

@@ -51,6 +51,7 @@ internal class BeregningRoutesTest {
     private val behandlingKlient = mockk<BehandlingKlient>()
     private val beregnBarnepensjonService = mockk<BeregnBarnepensjonService>()
     private val beregnOmstillingsstoenadService = mockk<BeregnOmstillingsstoenadService>()
+    private val beregnOverstyrBeregningService = mockk<BeregnOverstyrBeregningService>()
     private val beregningsGrunnlagService = mockk<BeregningsGrunnlagService>()
     private val trygdetidKlient = mockk<TrygdetidKlient>()
     private val beregningService =
@@ -59,6 +60,7 @@ internal class BeregningRoutesTest {
             behandlingKlient = behandlingKlient,
             beregnBarnepensjonService = beregnBarnepensjonService,
             beregnOmstillingsstoenadService = beregnOmstillingsstoenadService,
+            beregnOverstyrBeregningService = beregnOverstyrBeregningService,
             beregningsGrunnlagService = beregningsGrunnlagService,
             trygdetidKlient = trygdetidKlient,
         )
@@ -150,6 +152,7 @@ internal class BeregningRoutesTest {
         coEvery { behandlingKlient.kanBeregnes(any(), any(), any()) } returns true
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns mockBehandling()
         coEvery { behandlingKlient.harTilgangTilBehandling(any(), any()) } returns true
+        every { beregningRepository.hentOverstyrBeregning(1L) } returns null
         coEvery { beregnBarnepensjonService.beregn(any(), any()) } returns beregning
         every { beregningRepository.lagreEllerOppdaterBeregning(any()) } returnsArgument 0
 

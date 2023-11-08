@@ -3,6 +3,8 @@ package no.nav.etterlatte.beregning.grunnlag
 import java.time.LocalDate
 import java.util.UUID
 
+// TODO EY- 3079 - beskrivelse for grunnlag og kilde for DTO
+
 data class OverstyrBeregningGrunnlagDao(
     val id: UUID,
     val behandlingId: UUID,

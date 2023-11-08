@@ -96,6 +96,7 @@ class VedtaksbrevService(
     suspend fun genererPdf(
         id: BrevID,
         brukerTokenInfo: BrukerTokenInfo,
+        migrering: Boolean = false,
     ): Pdf {
         val brev = hentBrev(id)
 
@@ -112,12 +113,13 @@ class VedtaksbrevService(
         val brevRequest = BrevbakerRequest.fra(brevkodePar.ferdigstilling, brevData, generellBrevData, avsender)
 
         return brevbaker.genererPdf(brev.id, brevRequest)
-            .also { pdf -> lagrePdfHvisVedtakFattet(brev.id, generellBrevData.forenkletVedtak, pdf, brukerTokenInfo) }
+            .also { pdf -> lagrePdfHvisVedtakFattet(brev.id, generellBrevData.forenkletVedtak, pdf, brukerTokenInfo, migrering) }
     }
 
     suspend fun ferdigstillVedtaksbrev(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
+        migrering: Boolean = false,
     ) {
         val brev =
             requireNotNull(hentVedtaksbrev(behandlingId)) {
@@ -137,7 +139,7 @@ class VedtaksbrevService(
                 brukerTokenInfo,
             )
 
-        if (vedtakStatus != VedtakStatus.FATTET_VEDTAK) {
+        if (vedtakStatus != VedtakStatus.FATTET_VEDTAK && !migrering) {
             throw IllegalStateException(
                 "Vedtak status er $vedtakStatus. Avventer ferdigstilling av brev (id=${brev.id})",
             )
@@ -245,8 +247,9 @@ class VedtaksbrevService(
         vedtak: ForenkletVedtak,
         pdf: Pdf,
         brukerTokenInfo: BrukerTokenInfo,
+        migrering: Boolean = false,
     ) {
-        if (vedtak.status != VedtakStatus.FATTET_VEDTAK) {
+        if (vedtak.status != VedtakStatus.FATTET_VEDTAK && !migrering) {
             logger.info("Vedtak status er ${vedtak.status}. Avventer ferdigstilling av brev (id=$brevId)")
             return
         }

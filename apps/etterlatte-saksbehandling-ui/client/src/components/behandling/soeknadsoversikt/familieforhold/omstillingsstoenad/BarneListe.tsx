@@ -60,7 +60,7 @@ export const BarneListe = ({ familieforhold }: Props) => {
 }
 
 const BarnRow = ({ barn, familieforhold }: { barn: IPdlPerson; familieforhold: IFamilieforhold }) => {
-  const erDoed = barn.doedsdato !== null
+  const erDoed = !!barn.doedsdato
   const barnetsFnr = barn.foedselsnummer
 
   const erGjenlevendesBarn = familieforhold.gjenlevende.opplysning.familieRelasjon?.barn?.includes(barnetsFnr) ?? false

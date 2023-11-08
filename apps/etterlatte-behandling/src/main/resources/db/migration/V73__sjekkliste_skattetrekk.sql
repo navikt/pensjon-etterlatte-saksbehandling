@@ -1,2 +1,2 @@
 ALTER TABLE sjekkliste
-    ADD COLUMN onsket_skattetrekk TEXT;
+    ADD COLUMN onsket_skattetrekk NUMERIC;

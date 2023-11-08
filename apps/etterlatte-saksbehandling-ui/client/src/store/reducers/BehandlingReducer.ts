@@ -1,6 +1,11 @@
 import { createAction, createReducer } from '@reduxjs/toolkit'
 import { IVilkaarsvurdering } from '~shared/api/vilkaarsvurdering'
-import { Beregning, BeregningsGrunnlagOMSPostDto, BeregningsGrunnlagPostDto } from '~shared/types/Beregning'
+import {
+  Beregning,
+  BeregningsGrunnlagOMSPostDto,
+  BeregningsGrunnlagPostDto,
+  OverstyrBeregningGrunnlagPostDTO,
+} from '~shared/types/Beregning'
 import {
   IBehandlingStatus,
   IBoddEllerArbeidetUtlandet,
@@ -31,6 +36,8 @@ export const oppdaterBeregingsGrunnlag = createAction<BeregningsGrunnlagPostDto>
 export const oppdaterBeregingsGrunnlagOMS = createAction<BeregningsGrunnlagOMSPostDto>(
   'behandling/beregningsgrunnlagOMS'
 )
+export const oppdaterOverstyrBeregningsGrunnlag =
+  createAction<OverstyrBeregningGrunnlagPostDTO>('behandling/overstyrBeregning')
 export const oppdaterRevurderingInfo = createAction<RevurderingInfo>('behandling/revurderinginfo')
 export const resetBeregning = createAction('behandling/beregning/reset')
 export const loggError = createAction<any>('loggError')
@@ -39,6 +46,7 @@ export const loggInfo = createAction<any>('loggInfo')
 export interface IBehandlingReducer extends IDetaljertBehandling {
   beregningsGrunnlag?: BeregningsGrunnlagPostDto
   beregningsGrunnlagOMS?: BeregningsGrunnlagOMSPostDto
+  overstyrBeregning?: OverstyrBeregningGrunnlagPostDTO
   beregning?: Beregning
   vilkårsprøving?: IVilkaarsvurdering
 }
@@ -83,6 +91,9 @@ export const behandlingReducer = createReducer(initialState, (builder) => {
   })
   builder.addCase(oppdaterBeregingsGrunnlagOMS, (state, action) => {
     state.behandling!!.beregningsGrunnlagOMS = action.payload
+  })
+  builder.addCase(oppdaterOverstyrBeregningsGrunnlag, (state, action) => {
+    state.behandling!!.overstyrBeregning = action.payload
   })
   builder.addCase(resetBeregning, (state) => {
     state.behandling!!.beregning = undefined

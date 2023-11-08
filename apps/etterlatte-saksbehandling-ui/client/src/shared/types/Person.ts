@@ -8,6 +8,14 @@ export interface IFamilieforhold {
   gjenlevende: Grunnlagsopplysning<IPdlPerson, KildePdl>
 }
 
+export const hentLevendeSoeskenFraAvdoedeForSoeker = (
+  avdoede: Grunnlagsopplysning<IPdlPerson, KildePdl>,
+  soekerFnr: string
+) => {
+  const soeskenliste = (avdoede?.opplysning.avdoedesBarn ?? []).filter((person) => person.foedselsnummer !== soekerFnr)
+  return soeskenliste.filter((soesken) => soesken.doedsdato === null)
+}
+
 export interface IFamilieRelasjon {
   ansvarligeForeldre?: string[]
   foreldre?: string[]
@@ -20,7 +28,7 @@ export interface IPdlPerson {
   etternavn: string
   foedselsnummer: string
   foedselsdato: Date
-  doedsdato: string
+  doedsdato: string | null
   bostedsadresse?: IAdresse[]
   deltBostedsadresse?: IAdresse[]
   kontaktadresse?: IAdresse[]

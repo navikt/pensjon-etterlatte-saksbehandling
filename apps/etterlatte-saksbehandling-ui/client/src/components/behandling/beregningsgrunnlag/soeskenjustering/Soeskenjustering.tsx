@@ -3,7 +3,7 @@ import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
 import { useFieldArray, useForm } from 'react-hook-form'
 import { Button, ErrorSummary, Heading } from '@navikt/ds-react'
 import styled from 'styled-components'
-import { IPdlPerson } from '~shared/types/Person'
+import { hentLevendeSoeskenFraAvdoedeForSoeker, IPdlPerson } from '~shared/types/Person'
 import { addMonths } from 'date-fns'
 import { SoeskenMedIBeregning } from '~shared/types/Beregning'
 import { Barn } from '~components/behandling/soeknadsoversikt/familieforhold/personer/Barn'
@@ -50,10 +50,10 @@ const Soeskenjustering = (props: SoeskenjusteringProps) => {
   }
   const [visFeil, setVisFeil] = useState(false)
 
-  const soesken: IPdlPerson[] =
-    behandling.familieforhold.avdoede.opplysning.avdoedesBarn?.filter(
-      (barn) => barn.foedselsnummer !== behandling.søker?.foedselsnummer
-    ) ?? []
+  const soesken = hentLevendeSoeskenFraAvdoedeForSoeker(
+    behandling.familieforhold.avdoede,
+    behandling.søker?.foedselsnummer as string
+  )
 
   const { handleSubmit, control, watch } = useForm<{
     soeskenMedIBeregning: PeriodisertBeregningsgrunnlag<SoeskenKanskjeMedIBeregning[]>[]

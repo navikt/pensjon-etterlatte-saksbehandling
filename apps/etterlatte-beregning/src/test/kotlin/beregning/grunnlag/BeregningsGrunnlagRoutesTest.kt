@@ -25,6 +25,7 @@ import io.mockk.slot
 import no.nav.etterlatte.beregning.regler.toGrunnlag
 import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.klienter.BehandlingKlient
+import no.nav.etterlatte.klienter.GrunnlagKlient
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -39,6 +40,7 @@ import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
 import no.nav.etterlatte.libs.ktor.restModule
+import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
@@ -57,8 +59,9 @@ internal class BeregningsGrunnlagRoutesTest {
     private lateinit var applicationConfig: HoconApplicationConfig
     private val behandlingKlient = mockk<BehandlingKlient>()
     private val repository = mockk<BeregningsGrunnlagRepository>()
+    private val grunnlagKlient = mockk<GrunnlagKlient>()
     private val featureToggleService = DummyFeatureToggleService()
-    private val service = BeregningsGrunnlagService(repository, behandlingKlient, featureToggleService)
+    private val service = BeregningsGrunnlagService(repository, behandlingKlient, featureToggleService, grunnlagKlient)
 
     @BeforeAll
     fun before() {
@@ -269,11 +272,13 @@ internal class BeregningsGrunnlagRoutesTest {
     }
 
     @Test
-    fun `skal oppretter`() {
+    fun `skal opprettere`() {
         coEvery { behandlingKlient.harTilgangTilBehandling(any(), any()) } returns true
         coEvery { behandlingKlient.kanBeregnes(any(), any(), any()) } returns true
         every { repository.finnBarnepensjonGrunnlagForBehandling(any()) } returns null
         every { repository.lagre(any()) } returns true
+        val hentOpplysningsgrunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
+        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns hentOpplysningsgrunnlag
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns
             DetaljertBehandling(
                 id = randomUUID(),
@@ -338,6 +343,8 @@ internal class BeregningsGrunnlagRoutesTest {
         coEvery { behandlingKlient.kanBeregnes(any(), any(), any()) } returns true
         every { repository.finnBarnepensjonGrunnlagForBehandling(any()) } returns null
         every { repository.lagre(any()) } returns false
+        val hentOpplysningsgrunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
+        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns hentOpplysningsgrunnlag
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns
             DetaljertBehandling(
                 id = randomUUID(),

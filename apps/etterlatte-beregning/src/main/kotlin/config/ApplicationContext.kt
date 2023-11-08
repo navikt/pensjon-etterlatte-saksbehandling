@@ -53,6 +53,7 @@ class ApplicationContext {
             beregningsGrunnlagRepository = beregningsGrunnlagRepository,
             behandlingKlient = behandlingKlient,
             featureToggleService = featureToggleService,
+            grunnlagKlient = grunnlagKlient,
         )
 
     val beregnBarnepensjonService =

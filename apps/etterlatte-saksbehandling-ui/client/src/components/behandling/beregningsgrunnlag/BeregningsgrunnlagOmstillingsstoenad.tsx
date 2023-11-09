@@ -15,12 +15,14 @@ import {
   IBehandlingReducer,
   oppdaterBehandlingsstatus,
   oppdaterBeregingsGrunnlagOMS,
+  oppdaterBeregning,
   resetBeregning,
 } from '~store/reducers/BehandlingReducer'
 import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 import React, { useEffect, useState } from 'react'
 import InstitusjonsoppholdOMS from '~components/behandling/beregningsgrunnlag/InstitusjonsoppholdOMS'
 import {
+  Beregning,
   BeregningsMetode,
   BeregningsMetodeBeregningsgrunnlag,
   InstitusjonsoppholdGrunnlagData,
@@ -77,9 +79,10 @@ const BeregningsgrunnlagOmstillingsstoenad = (props: { behandling: IBehandlingRe
         grunnlag: beregningsgrunnlagOMS,
       },
       () =>
-        postOpprettEllerEndreBeregning(behandling.id, () => {
+        postOpprettEllerEndreBeregning(behandling.id, (beregning: Beregning) => {
           dispatch(oppdaterBeregingsGrunnlagOMS(beregningsgrunnlagOMS))
           dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.BEREGNET))
+          dispatch(oppdaterBeregning(beregning))
           next()
         })
     )

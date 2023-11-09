@@ -13,6 +13,7 @@ import no.nav.etterlatte.brev.behandlingklient.BehandlingKlient
 import no.nav.etterlatte.brev.behandlingklient.BehandlingKlientException
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.tilbakekreving.tilbakekreving
+import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -80,6 +81,7 @@ internal class BrevdataFacadeImplTest {
             behandlingKlient.hentSisteIverksatteBehandling(any(), any())
         } throws BehandlingKlientException("har ikke tidligere behandling")
         coEvery { behandlingKlient.hentEtterbetaling(any(), any()) } returns null
+        coEvery { behandlingKlient.hentKilde(any(), any()) } returns Vedtaksloesning.GJENNY
         coEvery { vedtaksvurderingKlient.hentVedtak(any(), any()) } returns opprettBehandlingVedtak()
         coEvery { grunnlagKlient.hentGrunnlag(BEHANDLING_ID, BRUKERTokenInfo) } returns opprettGrunnlag()
         coEvery { beregningKlient.hentBeregning(any(), any()) } returns opprettBeregning()

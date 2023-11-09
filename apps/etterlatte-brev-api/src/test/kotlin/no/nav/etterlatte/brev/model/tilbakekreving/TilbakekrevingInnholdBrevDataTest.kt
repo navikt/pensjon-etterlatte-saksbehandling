@@ -8,6 +8,7 @@ import no.nav.etterlatte.brev.behandling.Innsender
 import no.nav.etterlatte.brev.behandling.PersonerISak
 import no.nav.etterlatte.brev.behandling.Soeker
 import no.nav.etterlatte.brev.model.Spraak
+import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingAktsomhet
@@ -154,6 +155,7 @@ class TilbakekrevingInnholdBrevDataTest {
                         ),
                 ),
             spraak = Spraak.NB,
+            systemkilde = Vedtaksloesning.GJENNY,
         )
     }
 }

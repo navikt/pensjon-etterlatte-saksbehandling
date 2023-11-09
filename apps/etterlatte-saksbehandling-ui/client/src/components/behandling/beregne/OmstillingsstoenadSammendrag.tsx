@@ -4,6 +4,7 @@ import { compareDesc, lastDayOfMonth } from 'date-fns'
 import { formaterDato, formaterStringDato, NOK } from '~utils/formattering'
 import { Beregning } from '~shared/types/Beregning'
 import { OmstillingsstoenadToolTip } from '~components/behandling/beregne/OmstillingsstoenadToolTip'
+import { ProrataBroek } from '~components/behandling/beregne/ProrataBroek'
 
 interface Props {
   beregning: Beregning
@@ -25,6 +26,7 @@ export const OmstillingsstoenadSammendrag = ({ beregning }: Props) => {
             <Table.HeaderCell>Periode</Table.HeaderCell>
             <Table.HeaderCell>Ytelse</Table.HeaderCell>
             <Table.HeaderCell>Trygdetid</Table.HeaderCell>
+            <Table.HeaderCell>Prorata Brøk</Table.HeaderCell>
             <Table.HeaderCell>Grunnbeløp</Table.HeaderCell>
             <Table.HeaderCell>Brutto stønad før avkorting</Table.HeaderCell>
           </Table.Row>
@@ -39,6 +41,11 @@ export const OmstillingsstoenadSammendrag = ({ beregning }: Props) => {
               </Table.DataCell>
               <Table.DataCell>Omstillingsstønad</Table.DataCell>
               <Table.DataCell>{beregningsperiode.trygdetid} år</Table.DataCell>
+              <Table.DataCell>
+                {beregningsperiode.broek && beregningsperiode.beregningsMetode === 'PRORATA' && (
+                  <ProrataBroek broek={beregningsperiode.broek} />
+                )}
+              </Table.DataCell>
               <Table.DataCell>{NOK(beregningsperiode.grunnbelop)}</Table.DataCell>
               <Table.DataCell>
                 {NOK(beregningsperiode.utbetaltBeloep)}{' '}

@@ -39,12 +39,12 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
     ? formaterStringDato(behandling.virkningstidspunkt.dato)
     : undefined
   const behandles = hentBehandlesFraStatus(behandling.status)
-  const opphoer = behandling.vilkårsprøving?.resultat?.utfall == VilkaarsvurderingResultat.IKKE_OPPFYLT
+  const erOpphoer = behandling.vilkårsprøving?.resultat?.utfall == VilkaarsvurderingResultat.IKKE_OPPFYLT
   const vedtaksresultat =
     behandling.behandlingType !== IBehandlingsType.MANUELT_OPPHOER ? useVedtaksResultat() : 'opphoer'
 
   useEffect(() => {
-    if (!opphoer) {
+    if (!erOpphoer) {
       hentBeregningRequest(behandling.id, (res) => dispatch(oppdaterBeregning(res)))
     }
   }, [])
@@ -72,41 +72,51 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
           <Vilkaarsresultat vedtaksresultat={vedtaksresultat} virkningstidspunktFormatert={virkningstidspunkt} />
         </HeadingWrapper>
       </ContentHeader>
-
-      {isPending(beregning) && <Spinner visible label="Henter beregning" />}
-      {isFailure(beregning) && <ApiErrorAlert>Kunne ikke hente beregning</ApiErrorAlert>}
-      {isSuccess(beregning) && (
+      {erOpphoer ? (
         <BeregningWrapper>
-          {!opphoer &&
-            (() => {
-              switch (beregning.data.type) {
-                case Beregningstype.BP:
-                  return <BarnepensjonSammendrag behandling={behandling} beregning={beregning.data} />
-                case Beregningstype.OMS:
-                  return (
-                    <>
-                      <OmstillingsstoenadSammendrag beregning={beregning.data} />
-                      <Avkorting behandling={behandling} />
-                    </>
-                  )
-              }
-            })()}
           {behandlingSkalSendeBrev(behandling.behandlingType, behandling.revurderingsaarsak) ? null : (
             <InfoAlert variant="info" inline>
               Det sendes ikke vedtaksbrev for denne behandlingen.
             </InfoAlert>
           )}
-          {!opphoer && (
-            <EtterbetalingWrapper>
-              <Etterbetaling
-                behandlingId={behandling.id}
-                lagraEtterbetaling={behandling.etterbetaling}
-                redigerbar={behandles}
-                virkningstidspunkt={virkningstidspunkt}
-              />
-            </EtterbetalingWrapper>
-          )}
         </BeregningWrapper>
+      ) : (
+        <>
+          {isPending(beregning) && <Spinner visible label="Henter beregning" />}
+          {isFailure(beregning) && <ApiErrorAlert>Kunne ikke hente beregning</ApiErrorAlert>}
+          {isSuccess(beregning) && (
+            <BeregningWrapper>
+              {(() => {
+                switch (beregning.data.type) {
+                  case Beregningstype.BP:
+                    return <BarnepensjonSammendrag behandling={behandling} beregning={beregning.data} />
+                  case Beregningstype.OMS:
+                    return (
+                      <>
+                        <OmstillingsstoenadSammendrag beregning={beregning.data} />
+                        <Avkorting behandling={behandling} />
+                      </>
+                    )
+                }
+              })()}
+
+              {behandlingSkalSendeBrev(behandling.behandlingType, behandling.revurderingsaarsak) ? null : (
+                <InfoAlert variant="info" inline>
+                  Det sendes ikke vedtaksbrev for denne behandlingen.
+                </InfoAlert>
+              )}
+
+              <EtterbetalingWrapper>
+                <Etterbetaling
+                  behandlingId={behandling.id}
+                  lagraEtterbetaling={behandling.etterbetaling}
+                  redigerbar={behandles}
+                  virkningstidspunkt={virkningstidspunkt}
+                />
+              </EtterbetalingWrapper>
+            </BeregningWrapper>
+          )}
+        </>
       )}
 
       <Border />
@@ -148,6 +158,7 @@ const EtterbetalingWrapper = styled.div`
 
 const InfoAlert = styled(Alert).attrs({ variant: 'info' })`
   margin-top: 2rem;
+  margin-bottom: 2rem;
 `
 
 const BeregningWrapper = styled.div`

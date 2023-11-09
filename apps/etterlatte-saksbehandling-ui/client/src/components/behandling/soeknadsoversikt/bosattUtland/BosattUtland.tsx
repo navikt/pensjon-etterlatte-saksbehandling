@@ -78,7 +78,7 @@ export const BosattUtland = ({ behandlingId }: { behandlingId: string }) => {
 
   const lagreBosattutlandApiWrapper = () => {
     const feilmeldingerMottatte = validerSkjema(landMedDokumenterMottatte)
-    if (!!rinanummer) feilmeldingerMottatte.add('Du må legge til et rinanummer')
+    if (!rinanummer) feilmeldingerMottatte.add('Du må legge til et rinanummer')
 
     const feilmeldingerSendte = validerSkjema(landMedDokumenter)
     setFeilkoder(feilmeldingerSendte)

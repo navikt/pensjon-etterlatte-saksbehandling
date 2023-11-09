@@ -23,6 +23,7 @@ export const MottatteSeder = ({
   rinanummer: string
   setRinanummer: React.Dispatch<React.SetStateAction<string>>
 }) => {
+  const resetFeilkoder = () => setFeilkoderMottatte(new Set([]))
   return (
     <>
       {!!feilkoder?.size ? (
@@ -44,13 +45,20 @@ export const MottatteSeder = ({
         Det kan hende det allerede ligger P5000/P6000 i avdødes sak. Sjekk opp i dette før du etterspør info.
       </BodyShort>
       <div style={{ width: '12rem', maxWidth: '20rem', margin: '2rem 0rem' }}>
-        <TextField label="Saksnummer RINA" value={rinanummer} onChange={(e) => setRinanummer(e.target.value)} />
+        <TextField
+          label="Saksnummer RINA"
+          value={rinanummer}
+          onChange={(e) => {
+            setRinanummer(e.target.value)
+            resetFeilkoder()
+          }}
+        />
       </div>
       <SEDLandMedDokumenter
         landListe={landliste}
         landMedDokumenter={landMedDokumenterMottatte}
         setLandMedDokumenter={setLandMedDokumenterMottatte}
-        resetFeilkoder={() => setFeilkoderMottatte(new Set([]))}
+        resetFeilkoder={resetFeilkoder}
       />
     </>
   )

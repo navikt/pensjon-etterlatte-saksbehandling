@@ -33,6 +33,7 @@ export interface NyBehandlingRequest {
   persongalleri?: Persongalleri
   mottattDato?: string
   spraak?: string
+  kilde?: string
 }
 
 export enum IBehandlingsType {

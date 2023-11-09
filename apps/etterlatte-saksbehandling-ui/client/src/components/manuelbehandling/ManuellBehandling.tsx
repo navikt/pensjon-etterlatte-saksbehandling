@@ -15,6 +15,7 @@ export default function ManuellBehandling() {
   const { behandlingBehov } = useJournalfoeringOppgave()
   const [status, opprettNyBehandling] = useApiCall(opprettBehandling)
   const [nyBehandlingId, setNyId] = useState('')
+  const [erMigrering, setErMigrering] = useState<boolean | null>(null)
 
   const ferdigstill = () => {
     opprettNyBehandling(
@@ -22,6 +23,7 @@ export default function ManuellBehandling() {
         ...behandlingBehov,
         sakType: SakType.BARNEPENSJON,
         mottattDato: behandlingBehov!!.mottattDato!!.replace('Z', ''),
+        kilde: erMigrering ? 'PESYS' : undefined,
       },
       (response) => {
         setNyId(response)
@@ -32,6 +34,21 @@ export default function ManuellBehandling() {
   return (
     <FormWrapper>
       <h1>Manuell behandling</h1>
+
+      <Select
+        label="Er det migrering fra Pesys?"
+        value={erMigrering == null ? '' : erMigrering ? 'ja' : 'nei'}
+        onChange={(e) => {
+          const svar = e.target.value
+          if (svar === 'ja') setErMigrering(true)
+          else if (svar === 'nei') setErMigrering(false)
+          else setErMigrering(null)
+        }}
+      >
+        <option>Velg ...</option>
+        <option value="ja">Ja</option>
+        <option value="nei">Nei</option>
+      </Select>
 
       <Select
         label="Hva skal språket/målform være?"
@@ -61,7 +78,12 @@ export default function ManuellBehandling() {
       <PersongalleriBarnepensjon />
 
       <Knapp>
-        <Button variant="secondary" onClick={ferdigstill} loading={isPending(status)} disabled={isPending(status)}>
+        <Button
+          variant="secondary"
+          onClick={ferdigstill}
+          loading={isPending(status)}
+          disabled={erMigrering == null || isPending(status)}
+        >
           Send inn
         </Button>
       </Knapp>

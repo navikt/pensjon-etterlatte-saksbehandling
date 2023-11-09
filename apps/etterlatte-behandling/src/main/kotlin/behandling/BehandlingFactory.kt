@@ -57,7 +57,7 @@ class BehandlingFactory(
         val behandling =
             inTransaction {
                 opprettBehandling(
-                    sak.id, request.persongalleri, request.mottattDato, Vedtaksloesning.GJENNY,
+                    sak.id, request.persongalleri, request.mottattDato, request.kilde ?: Vedtaksloesning.GJENNY,
                 ) ?: throw IllegalStateException("Kunne ikke opprette behandling")
             }.behandling
 

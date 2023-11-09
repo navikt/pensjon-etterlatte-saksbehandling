@@ -235,4 +235,52 @@ class BeregningsGrunnlagService(
 
         beregningsGrunnlagRepository.lagreOMS(forrigeGrunnlagOMS.copy(behandlingId = behandlingId))
     }
+
+    fun hentOverstyrBeregningGrunnlag(behandlingId: UUID): OverstyrBeregningGrunnlagDTO {
+        logger.info("Henter overstyr beregning grunnlag $behandlingId")
+
+        return OverstyrBeregningGrunnlagDTO(
+            perioder =
+                beregningsGrunnlagRepository.finnOverstyrBeregningGrunnlagForBehandling(
+                    behandlingId,
+                ).map { periode ->
+                    GrunnlagMedPeriode(
+                        data =
+                            OverstyrBeregningGrunnlag(
+                                utbetaltBeloep = periode.utbetaltBeloep,
+                                trygdetid = periode.trygdetid,
+                            ),
+                        fom = periode.datoFOM,
+                        tom = periode.datoTOM,
+                    )
+                },
+        )
+    }
+
+    suspend fun lagreOverstyrBeregningGrunnlag(
+        behandlingId: UUID,
+        data: OverstyrBeregningGrunnlagDTO,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): OverstyrBeregningGrunnlagDTO {
+        logger.info("Lagre overstyr beregning grunnlag $behandlingId")
+
+        val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
+
+        beregningsGrunnlagRepository.lagreOverstyrBeregningGrunnlagForBehandling(
+            behandlingId,
+            data.perioder.map {
+                OverstyrBeregningGrunnlagDao(
+                    id = UUID.randomUUID(),
+                    behandlingId = behandlingId,
+                    datoFOM = it.fom,
+                    datoTOM = it.tom,
+                    utbetaltBeloep = it.data.utbetaltBeloep,
+                    trygdetid = it.data.trygdetid,
+                    sakId = behandling.sak,
+                )
+            },
+        )
+
+        return hentOverstyrBeregningGrunnlag(behandlingId)
+    }
 }

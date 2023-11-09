@@ -6,6 +6,7 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.database.transaction
 import org.postgresql.util.PGobject
 import java.util.UUID
 import javax.sql.DataSource
@@ -100,6 +101,48 @@ class BeregningsGrunnlagRepository(private val dataSource: DataSource) {
         return count > 0
     }
 
+    fun finnOverstyrBeregningGrunnlagForBehandling(id: UUID): List<OverstyrBeregningGrunnlagDao> =
+        using(sessionOf(dataSource)) { session ->
+            session.run(
+                queryOf(
+                    statement = finnOverstyrBeregningGrunnlagForBehandling,
+                    paramMap = mapOf("behandlings_id" to id),
+                ).map { it.asOverstyrBeregningGrunnlag() }.asList,
+            )
+        }
+
+    fun lagreOverstyrBeregningGrunnlagForBehandling(
+        behandlingId: UUID,
+        data: List<OverstyrBeregningGrunnlagDao>,
+    ) {
+        dataSource.transaction { tx ->
+            tx.run(
+                queryOf(
+                    statement = slettOverstyrBeregningGrunnlagForBehandling,
+                    paramMap = mapOf("behandlings_id" to behandlingId),
+                ).asUpdate,
+            )
+
+            data.forEach { grunnlag ->
+                tx.run(
+                    queryOf(
+                        statement = lagreOverstyrBeregningGrunnlagForBehandling,
+                        paramMap =
+                            mapOf(
+                                "id" to grunnlag.id,
+                                "behandlings_id" to behandlingId,
+                                "dato_fom" to grunnlag.datoFOM,
+                                "dato_tom" to grunnlag.datoTOM,
+                                "utbetalt_beloep" to grunnlag.utbetaltBeloep,
+                                "trygdetid" to grunnlag.trygdetid,
+                                "sak_id" to grunnlag.sakId,
+                            ),
+                    ).asUpdate,
+                )
+            }
+        }
+    }
+
     companion object {
         val lagreGrunnlagQuery =
             """
@@ -138,6 +181,34 @@ class BeregningsGrunnlagRepository(private val dataSource: DataSource) {
             FROM beregningsgrunnlag
             WHERE behandlings_id = :behandlings_id
             """.trimIndent()
+
+        val finnOverstyrBeregningGrunnlagForBehandling =
+            """
+            SELECT id, behandlings_id, dato_fra_og_med, dato_til_og_med, utbetalt_beloep, trygdetid, sak_id
+            FROM overstyr_beregningsgrunnlag
+            WHERE behandlings_id = :behandlings_id
+            """.trimIndent()
+
+        val slettOverstyrBeregningGrunnlagForBehandling =
+            """
+            DELETE FROM overstyr_beregningsgrunnlag
+            WHERE behandlings_id = :behandlings_id
+            """.trimIndent()
+
+        val lagreOverstyrBeregningGrunnlagForBehandling =
+            """
+            INSERT INTO overstyr_beregningsgrunnlag
+                (id, behandlings_id, dato_fra_og_med, dato_til_og_med, utbetalt_beloep, trygdetid, sak_id)
+            VALUES(
+                :id,
+                :behandlings_id,
+                :dato_fom,
+                :dato_tom,
+                :utbetalt_beloep,
+                :trygdetid,
+                :sak_id
+            )
+            """.trimMargin()
     }
 }
 
@@ -187,5 +258,17 @@ private fun Row.asBeregningsGrunnlagOMS(): BeregningsGrunnlagOMS {
                 )
             },
         kilde = objectMapper.readValue(this.string("kilde")),
+    )
+}
+
+private fun Row.asOverstyrBeregningGrunnlag(): OverstyrBeregningGrunnlagDao {
+    return OverstyrBeregningGrunnlagDao(
+        id = this.uuid("id"),
+        behandlingId = this.uuid("behandlings_id"),
+        datoFOM = this.sqlDate("dato_fra_og_med").toLocalDate(),
+        datoTOM = this.sqlDateOrNull("dato_til_og_med")?.toLocalDate(),
+        utbetaltBeloep = this.longOrNull("utbetalt_beloep") ?: 0L,
+        trygdetid = this.longOrNull("trygdetid") ?: 0,
+        sakId = this.long("sak_id"),
     )
 }

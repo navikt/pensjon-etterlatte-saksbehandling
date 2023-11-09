@@ -27,6 +27,7 @@ import no.nav.etterlatte.brev.dokument.dokumentRoute
 import no.nav.etterlatte.brev.hentinformasjon.BeregningKlient
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
 import no.nav.etterlatte.brev.hentinformasjon.GrunnlagKlient
+import no.nav.etterlatte.brev.hentinformasjon.MigreringKlient
 import no.nav.etterlatte.brev.hentinformasjon.SakService
 import no.nav.etterlatte.brev.hentinformasjon.SoekerService
 import no.nav.etterlatte.brev.hentinformasjon.Tilgangssjekker
@@ -103,6 +104,7 @@ class ApplicationBuilder {
     private val beregningKlient = BeregningKlient(config, httpClient())
     private val behandlingKlient = BehandlingKlient(config, httpClient())
     private val trygdetidKlient = TrygdetidKlient(config, httpClient())
+    private val migreringKlient = MigreringKlient(config, httpClient())
     private val trygdetidService = TrygdetidService(trygdetidKlient)
     private val brevdataFacade =
         BrevdataFacade(
@@ -111,6 +113,7 @@ class ApplicationBuilder {
             beregningKlient,
             behandlingKlient,
             trygdetidService,
+            migreringKlient,
         )
     private val norg2Klient = Norg2Klient(env.requireEnvValue("NORG2_URL"), httpClient())
     private val datasource = DataSourceBuilder.createDataSource(env)

@@ -15,6 +15,7 @@ import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_REVURDER
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_REVURDERING_OMGJOERING_AV_FARSKAP
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_REVURDERING_OPPHOER
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_REVURDERING_SOESKENJUSTERING
+import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_VEDTAK_OMREGNING
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMS_AVSLAG
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMS_AVSLAG_BEGRUNNELSE
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMS_FOERSTEGANGSVEDTAK_INNVILGELSE
@@ -96,6 +97,8 @@ private class BrevDatafetcher(
     suspend fun hentInnvilgelsesdato() = brevdataFacade.hentInnvilgelsesdato(sak.id, brukerTokenInfo)
 
     suspend fun hentTrygdetid() = brevdataFacade.finnTrygdetid(behandlingId, brukerTokenInfo)
+
+    suspend fun hentMigreringRequest() = brevdataFacade.hentMigreringRequest(behandlingId, brukerTokenInfo)
 }
 
 class BrevDataMapper(
@@ -114,7 +117,7 @@ class BrevDataMapper(
     private fun brevKodeAutomatisk(generellBrevData: GenerellBrevData): BrevkodePar {
         if (generellBrevData.systemkilde == Vedtaksloesning.PESYS) {
             assert(generellBrevData.forenkletVedtak.type == VedtakType.INNVILGELSE)
-            return BrevkodePar(TOM_MAL) // TODO: denne skal være malen for omregning til nytt regelverk
+            return BrevkodePar(BARNEPENSJON_VEDTAK_OMREGNING)
         }
 
         return when (generellBrevData.sak.sakType) {
@@ -216,9 +219,11 @@ class BrevDataMapper(
             return coroutineScope {
                 val fetcher = datafetcher(brukerTokenInfo, generellBrevData)
                 val utbetaling = async { fetcher.hentUtbetaling() }
+                val migreringRequest = async { fetcher.hentMigreringRequest() }
                 OmregnetBPNyttRegelverk.fra(
                     generellBrevData,
                     utbetaling.await(),
+                    migreringRequest.await(),
                 )
             }
         }
@@ -361,9 +366,11 @@ class BrevDataMapper(
             return coroutineScope {
                 val fetcher = datafetcher(brukerTokenInfo, generellBrevData)
                 val utbetaling = async { fetcher.hentUtbetaling() }
+                val migreringRequest = async { fetcher.hentMigreringRequest() }
                 OmregnetBPNyttRegelverk.fra(
                     generellBrevData,
                     utbetaling.await(),
+                    migreringRequest.await(),
                 )
             }
         }

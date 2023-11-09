@@ -25,6 +25,7 @@ import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
+import no.nav.etterlatte.rapidsandrivers.migrering.MigreringRequest
 import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.pensjon.brevbaker.api.model.Kroner
 import java.time.LocalDate
@@ -37,6 +38,7 @@ class BrevdataFacade(
     private val beregningKlient: BeregningKlient,
     private val behandlingKlient: BehandlingKlient,
     private val trygdetidService: TrygdetidService,
+    private val migreringKlient: MigreringKlient,
 ) {
     suspend fun hentEtterbetaling(
         behandlingId: UUID,
@@ -226,5 +228,12 @@ class BrevdataFacade(
         val beregning = beregningKlient.hentBeregning(behandlingId, brukerTokenInfo)
 
         return trygdetidService.finnTrygdetidsgrunnlag(behandlingId, beregning, brukerTokenInfo)
+    }
+
+    suspend fun hentMigreringRequest(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): MigreringRequest {
+        return migreringKlient.hentMigreringRequest(behandlingId, brukerTokenInfo)
     }
 }

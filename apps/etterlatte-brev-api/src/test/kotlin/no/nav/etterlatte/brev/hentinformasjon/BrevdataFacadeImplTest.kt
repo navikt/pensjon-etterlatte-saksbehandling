@@ -52,6 +52,7 @@ internal class BrevdataFacadeImplTest {
     private val beregningKlient = mockk<BeregningKlient>()
     private val behandlingKlient = mockk<BehandlingKlient>()
     private val trygdetidService = mockk<TrygdetidService>()
+    private val migreringKlient = mockk<MigreringKlient>()
 
     private val service =
         BrevdataFacade(
@@ -60,6 +61,7 @@ internal class BrevdataFacadeImplTest {
             beregningKlient,
             behandlingKlient,
             trygdetidService,
+            migreringKlient,
         )
 
     @BeforeEach

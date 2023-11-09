@@ -28,7 +28,7 @@ import no.nav.etterlatte.brev.model.OpprettNyttBrev
 import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.SlateHelper
 import no.nav.etterlatte.brev.model.Status
-import no.nav.etterlatte.brev.model.bp.MigrertSakBrevData
+import no.nav.etterlatte.brev.model.bp.OmregnetBPNyttRegelverk
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
@@ -117,11 +117,16 @@ class VedtaksbrevService(
         return brevbaker.genererPdf(brev.id, brevRequest)
             .let {
                 when (brevData) {
-                    is MigrertSakBrevData -> {
+                    is OmregnetBPNyttRegelverk -> {
                         val forhaandsvarsel =
                             brevbaker.genererPdf(
                                 brev.id,
-                                BrevbakerRequest.fra(EtterlatteBrevKode.FORHAANDSVARSEL_MIGRERING, brevData, generellBrevData, avsender),
+                                BrevbakerRequest.fra(
+                                    EtterlatteBrevKode.BARNEPENSJON_FORHAANDSVARSEL_OMREGNING,
+                                    brevData,
+                                    generellBrevData,
+                                    avsender,
+                                ),
                             )
                         forhaandsvarsel.medPdfAppended(it)
                     }

@@ -18,7 +18,7 @@ class BosattUtlandDao(private val connection: () -> Connection) {
                     "insert into bosattutland(behandlingid, rinanummer, mottattSeder, sendteSeder) " +
                         "VALUES(?,?,?,?) RETURNING behandlingid, rinanummer, mottattSeder, sendteSeder",
                 )
-            statement.setObject(1, bosattUtland.behandlingid)
+            statement.setObject(1, bosattUtland.behandlingId)
             statement.setObject(2, bosattUtland.rinanummer)
             statement.setJsonb(3, bosattUtland.mottatteSeder)
             statement.setJsonb(4, bosattUtland.sendteSeder)
@@ -37,7 +37,7 @@ class BosattUtlandDao(private val connection: () -> Connection) {
 
     private fun ResultSet.toBosattUtland(): BosattUtland {
         return BosattUtland(
-            behandlingid = getUUID("behandlingid"),
+            behandlingId = getUUID("behandlingid"),
             rinanummer = getString("rinanummer"),
             mottatteSeder = getString("mottattSeder").let { objectMapper.readValue(it) },
             sendteSeder = getString("sendteSeder").let { objectMapper.readValue(it) },

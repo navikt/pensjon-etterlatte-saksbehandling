@@ -8,6 +8,7 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
+import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.behandlingId
 import no.nav.etterlatte.libs.common.kunSaksbehandler
@@ -17,13 +18,13 @@ internal fun Route.bosattUtlandRoutes(bosattUtlandService: BosattUtlandService) 
         post {
             kunSaksbehandler {
                 val request = call.receive<BosattUtland>()
-                val bosattUtland = bosattUtlandService.lagreBosattUtland(request)
+                val bosattUtland = inTransaction { bosattUtlandService.lagreBosattUtland(request) }
                 call.respond(bosattUtland)
             }
         }
         get {
             kunSaksbehandler {
-                when (val bosattUtland = bosattUtlandService.hentBosattUtland(behandlingId)) {
+                when (val bosattUtland = inTransaction { bosattUtlandService.hentBosattUtland(behandlingId) }) {
                     null -> call.respond(HttpStatusCode.NotFound)
                     else -> call.respond(bosattUtland)
                 }

@@ -8,7 +8,7 @@ export const lagreBosattutland = async ({
   bosattutland: Bosattutland
   behandlingId: string
 }): Promise<ApiResponse<Bosattutland>> => {
-  return apiClient.post(`/bosattutland/${behandlingId}`, { bosattutland })
+  return apiClient.post(`/bosattutland/${behandlingId}`, { ...bosattutland })
 }
 
 export const hentBosattutland = async (behandlingId: string): Promise<ApiResponse<Bosattutland>> => {

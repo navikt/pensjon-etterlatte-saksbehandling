@@ -14,7 +14,7 @@ class BosattUtlandService(val bosattUtlandDao: BosattUtlandDao) {
 }
 
 data class BosattUtland(
-    val behandlingid: UUID,
+    val behandlingId: UUID,
     val rinanummer: String,
     val mottatteSeder: List<LandMedDokumenter>,
     val sendteSeder: List<LandMedDokumenter>,

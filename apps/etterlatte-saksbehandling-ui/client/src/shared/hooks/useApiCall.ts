@@ -45,14 +45,16 @@ type Success<T> = { status: 'success'; data: T }
 export const isPending = (result: Result<unknown>): result is Pending => result.status === 'pending'
 export const isSuccess = <T>(result: Result<T>): result is Success<T> => result.status === 'success'
 export const isFailure = (result: Result<unknown>): result is Error<ApiError> => result.status === 'error'
-export const isConflict = (result: Result<unknown>): result is Error<ApiError> =>
-  result.status === 'error' && result.error.status === 409
 export const isInitial = (result: Result<unknown>): result is Initial => result.status === 'initial'
 export const isPendingOrInitial = (result: Result<unknown>): result is Initial | Pending =>
   isPending(result) || isInitial(result)
-
 export const isSuccessOrInitial = (result: Result<unknown>): result is Initial | Success<unknown> =>
   isSuccess(result) || isInitial(result)
+
+export const isErrorWithCode = (result: Result<unknown>, code: number): result is Error<ApiError> =>
+  result.status === 'error' && result.error.status === code
+export const is5xxError = (result: Result<unknown>): result is Error<ApiError> =>
+  result.status === 'error' && String(result.error.status).startsWith('5')
 
 const initial = <A = never>(): Result<A> => ({ status: 'initial' })
 const pending = <A = never>(): Result<A> => ({ status: 'pending' })

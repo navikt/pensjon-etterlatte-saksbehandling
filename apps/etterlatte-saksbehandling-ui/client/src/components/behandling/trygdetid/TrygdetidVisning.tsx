@@ -1,10 +1,10 @@
 import { SakType } from '~shared/types/sak'
 import { Border, HeadingWrapper } from '~components/behandling/soeknadsoversikt/styled'
-import { BodyShort, Button, Heading } from '@navikt/ds-react'
+import { Button, Heading } from '@navikt/ds-react'
 import { formaterStringDato } from '~utils/formattering'
 import { Content, ContentHeader } from '~shared/styled'
 import { IBehandlingStatus, IBehandlingsType, IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
-import { formaterVedtaksResultat, useVedtaksResultat } from '~components/behandling/useVedtaksResultat'
+import { useVedtaksResultat } from '~components/behandling/useVedtaksResultat'
 import { BehandlingHandlingKnapper } from '~components/behandling/handlinger/BehandlingHandlingKnapper'
 import { NesteOgTilbake } from '~components/behandling/handlinger/NesteOgTilbake'
 import { hentBehandlesFraStatus } from '~components/behandling/felles/utils'
@@ -22,6 +22,7 @@ import { oppdaterStatus } from '~shared/api/trygdetid'
 import { oppdaterBehandlingsstatus } from '~store/reducers/BehandlingReducer'
 import { useAppDispatch } from '~store/Store'
 import { handlinger } from '~components/behandling/handlinger/typer'
+import { Vilkaarsresultat } from '~components/behandling/felles/Vilkaarsresultat'
 
 const featureToggleNameTrygdetid = 'pensjon-etterlatte.bp-bruk-faktisk-trygdetid' as const
 
@@ -69,9 +70,7 @@ const TrygdetidVisning = (props: { behandling: IDetaljertBehandling }) => {
           <Heading spacing size="large" level="1">
             Trygdetid
           </Heading>
-          <BodyShort spacing>
-            Vilkårsresultat: <strong>{formaterVedtaksResultat(vedtaksresultat, virkningstidspunkt)}</strong>
-          </BodyShort>
+          <Vilkaarsresultat vedtaksresultat={vedtaksresultat} virkningstidspunktFormatert={virkningstidspunkt} />
         </HeadingWrapper>
       </ContentHeader>
       {isSuccess(vilkaarsvurdering) &&

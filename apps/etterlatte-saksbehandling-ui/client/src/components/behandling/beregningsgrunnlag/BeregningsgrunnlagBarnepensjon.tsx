@@ -10,6 +10,7 @@ import {
   IBehandlingReducer,
   oppdaterBehandlingsstatus,
   oppdaterBeregingsGrunnlag,
+  oppdaterBeregning,
   resetBeregning,
 } from '~store/reducers/BehandlingReducer'
 import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
@@ -23,6 +24,7 @@ import Soeskenjustering, {
 import Spinner from '~shared/Spinner'
 import { IPdlPerson } from '~shared/types/Person'
 import {
+  Beregning,
   BeregningsMetode,
   BeregningsMetodeBeregningsgrunnlag,
   InstitusjonsoppholdGrunnlagData,
@@ -99,9 +101,10 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
           grunnlag: beregningsgrunnlag,
         },
         () =>
-          postOpprettEllerEndreBeregning(behandling.id, () => {
+          postOpprettEllerEndreBeregning(behandling.id, (beregning: Beregning) => {
             dispatch(oppdaterBeregingsGrunnlag(beregningsgrunnlag))
             dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.BEREGNET))
+            dispatch(oppdaterBeregning(beregning))
             next()
           })
       )

@@ -2,7 +2,7 @@ import { Content, ContentHeader, FlexRow } from '~shared/styled'
 import { Border, HeadingWrapper } from '../soeknadsoversikt/styled'
 import { behandlingSkalSendeBrev, hentBehandlesFraStatus } from '../felles/utils'
 import { formaterStringDato } from '~utils/formattering'
-import { formaterVedtaksResultat, useVedtaksResultat } from '../useVedtaksResultat'
+import { useVedtaksResultat } from '../useVedtaksResultat'
 import { useAppDispatch } from '~store/Store'
 import { useBehandlingRoutes } from '../BehandlingRoutes'
 import React, { useEffect, useState } from 'react'
@@ -11,7 +11,7 @@ import { IBehandlingReducer, oppdaterBehandlingsstatus, oppdaterBeregning } from
 import Spinner from '~shared/Spinner'
 import { BehandlingHandlingKnapper } from '~components/behandling/handlinger/BehandlingHandlingKnapper'
 import { Alert, Button, Heading } from '@navikt/ds-react'
-import { isFailure, isPending, useApiCall } from '~shared/hooks/useApiCall'
+import { isFailure, isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
 import { IBehandlingStatus, IBehandlingsType } from '~shared/types/IDetaljertBehandling'
 import styled from 'styled-components'
 import { NesteOgTilbake } from '../handlinger/NesteOgTilbake'
@@ -26,34 +26,26 @@ import { fattVedtak, upsertVedtak } from '~shared/api/vedtaksvurdering'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { VilkaarsvurderingResultat } from '~shared/api/vilkaarsvurdering'
 import { handlinger } from '~components/behandling/handlinger/typer'
+import { Vilkaarsresultat } from '~components/behandling/felles/Vilkaarsresultat'
 
 export const Beregne = (props: { behandling: IBehandlingReducer }) => {
   const { behandling } = props
   const { next } = useBehandlingRoutes()
-  const beregningFraState = behandling.beregning
   const dispatch = useAppDispatch()
   const [beregning, hentBeregningRequest] = useApiCall(hentBeregning)
   const [vedtak, oppdaterVedtakRequest] = useApiCall(upsertVedtak)
   const [visAttesteringsmodal, setVisAttesteringsmodal] = useState(false)
-
   const virkningstidspunkt = behandling.virkningstidspunkt?.dato
     ? formaterStringDato(behandling.virkningstidspunkt.dato)
     : undefined
   const behandles = hentBehandlesFraStatus(behandling.status)
-  const opphoer = behandling.vilkårsprøving?.resultat?.utfall == VilkaarsvurderingResultat.IKKE_OPPFYLT
-
+  const erOpphoer = behandling.vilkårsprøving?.resultat?.utfall == VilkaarsvurderingResultat.IKKE_OPPFYLT
   const vedtaksresultat =
     behandling.behandlingType !== IBehandlingsType.MANUELT_OPPHOER ? useVedtaksResultat() : 'opphoer'
 
   useEffect(() => {
-    const hentBeregning = async () => {
-      if (!opphoer) {
-        hentBeregningRequest(behandling.id, (res) => dispatch(oppdaterBeregning(res)))
-      }
-    }
-
-    if (!beregningFraState && behandling.vilkårsprøving) {
-      void hentBeregning()
+    if (!erOpphoer) {
+      hentBeregningRequest(behandling.id, (res) => dispatch(oppdaterBeregning(res)))
     }
   }, [])
 
@@ -74,44 +66,58 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
     <Content>
       <ContentHeader>
         <HeadingWrapper>
-          <Heading size="large" level="1">
+          <Heading spacing size="large" level="1">
             Beregning og vedtak
           </Heading>
+          <Vilkaarsresultat vedtaksresultat={vedtaksresultat} virkningstidspunktFormatert={virkningstidspunkt} />
         </HeadingWrapper>
-        <InfoWrapper>
-          <div className="text">
-            Vilkårsresultat: <strong>{formaterVedtaksResultat(vedtaksresultat, virkningstidspunkt)}</strong>
-          </div>
-        </InfoWrapper>
-        {!beregningFraState && !opphoer && !isFailure(beregning) && <Spinner visible label="Laster" />}
-        {isFailure(beregning) && <ApiErrorAlert>Kunne ikke hente beregning</ApiErrorAlert>}
-        {beregningFraState &&
-          !opphoer &&
-          {
-            [Beregningstype.BP]: <BarnepensjonSammendrag behandling={behandling} beregning={beregningFraState} />,
-            [Beregningstype.OMS]: (
-              <>
-                <OmstillingsstoenadSammendrag beregning={beregningFraState} />
-                <Avkorting behandling={behandling} />
-              </>
-            ),
-          }[beregningFraState.type]}
-        {behandlingSkalSendeBrev(behandling.behandlingType, behandling.revurderingsaarsak) ? null : (
-          <InfoAlert variant="info" inline>
-            Det sendes ikke vedtaksbrev for denne behandlingen.
-          </InfoAlert>
-        )}
-        {!opphoer && (
-          <EtterbetalingWrapper>
-            <Etterbetaling
-              behandlingId={behandling.id}
-              lagraEtterbetaling={behandling.etterbetaling}
-              redigerbar={behandles}
-              virkningstidspunkt={virkningstidspunkt}
-            />
-          </EtterbetalingWrapper>
-        )}
       </ContentHeader>
+      {erOpphoer ? (
+        <BeregningWrapper>
+          {behandlingSkalSendeBrev(behandling.behandlingType, behandling.revurderingsaarsak) ? null : (
+            <InfoAlert variant="info" inline>
+              Det sendes ikke vedtaksbrev for denne behandlingen.
+            </InfoAlert>
+          )}
+        </BeregningWrapper>
+      ) : (
+        <>
+          {isPending(beregning) && <Spinner visible label="Henter beregning" />}
+          {isFailure(beregning) && <ApiErrorAlert>Kunne ikke hente beregning</ApiErrorAlert>}
+          {isSuccess(beregning) && (
+            <BeregningWrapper>
+              {(() => {
+                switch (beregning.data.type) {
+                  case Beregningstype.BP:
+                    return <BarnepensjonSammendrag behandling={behandling} beregning={beregning.data} />
+                  case Beregningstype.OMS:
+                    return (
+                      <>
+                        <OmstillingsstoenadSammendrag beregning={beregning.data} />
+                        <Avkorting behandling={behandling} />
+                      </>
+                    )
+                }
+              })()}
+
+              {behandlingSkalSendeBrev(behandling.behandlingType, behandling.revurderingsaarsak) ? null : (
+                <InfoAlert variant="info" inline>
+                  Det sendes ikke vedtaksbrev for denne behandlingen.
+                </InfoAlert>
+              )}
+
+              <EtterbetalingWrapper>
+                <Etterbetaling
+                  behandlingId={behandling.id}
+                  lagraEtterbetaling={behandling.etterbetaling}
+                  redigerbar={behandles}
+                  virkningstidspunkt={virkningstidspunkt}
+                />
+              </EtterbetalingWrapper>
+            </BeregningWrapper>
+          )}
+        </>
+      )}
 
       <Border />
 
@@ -140,16 +146,9 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
   )
 }
 
-const InfoWrapper = styled.div`
-  margin-top: 1em;
-  max-width: 500px;
-
-  .text {
-    margin: 1em 0 5em 0;
-  }
-`
 const EtterbetalingWrapper = styled.div`
   margin-top: 3rem;
+  margin-bottom: 3rem;
   max-width: 500px;
 
   .text {
@@ -159,4 +158,9 @@ const EtterbetalingWrapper = styled.div`
 
 const InfoAlert = styled(Alert).attrs({ variant: 'info' })`
   margin-top: 2rem;
+  margin-bottom: 2rem;
+`
+
+const BeregningWrapper = styled.div`
+  padding: 0 4em;
 `

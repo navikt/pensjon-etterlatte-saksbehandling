@@ -34,9 +34,10 @@ const formaterTidspunkt = (dato: Date) => format(new Date(dato), 'HH:mm:ss').toS
 interface RedigerbartBrevProps {
   brev: IBrev
   kanRedigeres: boolean
+  lukkAdvarselBehandlingEndret: () => void
 }
 
-export default function RedigerbartBrev({ brev, kanRedigeres }: RedigerbartBrevProps) {
+export default function RedigerbartBrev({ brev, kanRedigeres, lukkAdvarselBehandlingEndret }: RedigerbartBrevProps) {
   const [fane, setFane] = useState<string>(kanRedigeres ? ManueltBrevFane.REDIGER : ManueltBrevFane.FORHAANDSVIS)
   const [content, setContent] = useState<any[]>([])
   const [vedlegg, setVedlegg] = useState<any[]>([])
@@ -68,6 +69,7 @@ export default function RedigerbartBrev({ brev, kanRedigeres }: RedigerbartBrevP
         setContent(payload.hoveddel)
         setVedlegg(payload.vedlegg)
         setLagretStatus({ lagret: true, beskrivelse: `Lagret kl. ${formaterTidspunkt(new Date())}` })
+        lukkAdvarselBehandlingEndret()
       }
     )
   }

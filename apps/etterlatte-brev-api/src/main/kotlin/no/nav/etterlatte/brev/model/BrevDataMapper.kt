@@ -14,6 +14,7 @@ import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_REVURDER
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_REVURDERING_OMGJOERING_AV_FARSKAP
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_REVURDERING_OPPHOER
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_REVURDERING_SOESKENJUSTERING
+import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.FORHAANDSVARSEL_MIGRERING
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMS_AVSLAG
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMS_AVSLAG_BEGRUNNELSE
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMS_FOERSTEGANGSVEDTAK_INNVILGELSE
@@ -32,6 +33,7 @@ import no.nav.etterlatte.brev.model.bp.EndringHovedmalBrevData
 import no.nav.etterlatte.brev.model.bp.InnvilgetBrevData
 import no.nav.etterlatte.brev.model.bp.InnvilgetBrevDataEnkel
 import no.nav.etterlatte.brev.model.bp.InnvilgetHovedmalBrevData
+import no.nav.etterlatte.brev.model.bp.MigrertSakBrevData
 import no.nav.etterlatte.brev.model.bp.OmgjoeringAvFarskapRevurderingBrevdata
 import no.nav.etterlatte.brev.model.bp.SoeskenjusteringRevurderingBrevdata
 import no.nav.etterlatte.brev.model.oms.AvslagBrevDataOMS
@@ -42,6 +44,7 @@ import no.nav.etterlatte.brev.model.tilbakekreving.TilbakekrevingFerdigData
 import no.nav.etterlatte.brev.model.tilbakekreving.TilbakekrevingInnholdBrevData
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
+import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.Sak
@@ -95,7 +98,10 @@ private class BrevDatafetcher(
     suspend fun hentTrygdetid() = brevdataFacade.finnTrygdetid(behandlingId, brukerTokenInfo)
 }
 
-class BrevDataMapper(private val featureToggleService: FeatureToggleService, private val brevdataFacade: BrevdataFacade) {
+class BrevDataMapper(
+    private val featureToggleService: FeatureToggleService,
+    private val brevdataFacade: BrevdataFacade,
+) {
     fun brevKode(
         generellBrevData: GenerellBrevData,
         brevProsessType: BrevProsessType,
@@ -105,8 +111,13 @@ class BrevDataMapper(private val featureToggleService: FeatureToggleService, pri
         BrevProsessType.MANUELL -> BrevkodePar(OMS_OPPHOER_MANUELL)
     }
 
-    private fun brevKodeAutomatisk(generellBrevData: GenerellBrevData): BrevkodePar =
-        when (generellBrevData.sak.sakType) {
+    private fun brevKodeAutomatisk(generellBrevData: GenerellBrevData): BrevkodePar {
+        if (generellBrevData.systemkilde == Vedtaksloesning.PESYS) {
+            assert(generellBrevData.forenkletVedtak.type == VedtakType.INNVILGELSE)
+            return BrevkodePar(TOM_MAL)
+        }
+
+        return when (generellBrevData.sak.sakType) {
             SakType.BARNEPENSJON -> {
                 when (val vedtakType = generellBrevData.forenkletVedtak.type) {
                     VedtakType.INNVILGELSE ->
@@ -117,7 +128,12 @@ class BrevDataMapper(private val featureToggleService: FeatureToggleService, pri
 
                     VedtakType.AVSLAG ->
                         when (generellBrevData.revurderingsaarsak) {
-                            Revurderingaarsak.YRKESSKADE -> BrevkodePar(BARNEPENSJON_AVSLAG_IKKEYRKESSKADE, BARNEPENSJON_AVSLAG)
+                            Revurderingaarsak.YRKESSKADE ->
+                                BrevkodePar(
+                                    BARNEPENSJON_AVSLAG_IKKEYRKESSKADE,
+                                    BARNEPENSJON_AVSLAG,
+                                )
+
                             else -> BrevkodePar(BARNEPENSJON_AVSLAG)
                         }
 
@@ -126,8 +142,10 @@ class BrevDataMapper(private val featureToggleService: FeatureToggleService, pri
                             Revurderingaarsak.SOESKENJUSTERING -> BrevkodePar(BARNEPENSJON_REVURDERING_SOESKENJUSTERING)
                             Revurderingaarsak.INSTITUSJONSOPPHOLD ->
                                 BrevkodePar(TOM_MAL, BARNEPENSJON_REVURDERING_ENDRING)
+
                             Revurderingaarsak.YRKESSKADE ->
                                 BrevkodePar(TOM_MAL, BARNEPENSJON_REVURDERING_ENDRING)
+
                             Revurderingaarsak.ANNEN -> BrevkodePar(TOM_MAL, BARNEPENSJON_REVURDERING_ENDRING)
 
                             else -> TODO("Revurderingsbrev for ${generellBrevData.revurderingsaarsak} er ikke støttet")
@@ -139,7 +157,10 @@ class BrevDataMapper(private val featureToggleService: FeatureToggleService, pri
                                 BrevkodePar(BARNEPENSJON_REVURDERING_ADOPSJON, BARNEPENSJON_REVURDERING_OPPHOER)
 
                             Revurderingaarsak.OMGJOERING_AV_FARSKAP ->
-                                BrevkodePar(BARNEPENSJON_REVURDERING_OMGJOERING_AV_FARSKAP, BARNEPENSJON_REVURDERING_OPPHOER)
+                                BrevkodePar(
+                                    BARNEPENSJON_REVURDERING_OMGJOERING_AV_FARSKAP,
+                                    BARNEPENSJON_REVURDERING_OPPHOER,
+                                )
 
                             Revurderingaarsak.FENGSELSOPPHOLD ->
                                 BrevkodePar(TOM_MAL, BARNEPENSJON_REVURDERING_ENDRING)
@@ -161,6 +182,7 @@ class BrevDataMapper(private val featureToggleService: FeatureToggleService, pri
                             OMS_FOERSTEGANGSVEDTAK_INNVILGELSE_UTFALL,
                             OMS_FOERSTEGANGSVEDTAK_INNVILGELSE,
                         )
+
                     VedtakType.AVSLAG -> BrevkodePar(OMS_AVSLAG_BEGRUNNELSE, OMS_AVSLAG)
                     VedtakType.ENDRING ->
                         when (generellBrevData.revurderingsaarsak) {
@@ -168,12 +190,15 @@ class BrevDataMapper(private val featureToggleService: FeatureToggleService, pri
                             Revurderingaarsak.ANNEN,
                             ->
                                 BrevkodePar(TOM_MAL, OMS_REVURDERING_ENDRING)
+
                             else -> TODO("Revurderingsbrev for ${generellBrevData.revurderingsaarsak} er ikke støttet")
                         }
+
                     VedtakType.OPPHOER ->
                         when (generellBrevData.revurderingsaarsak) {
                             Revurderingaarsak.SIVILSTAND ->
                                 BrevkodePar(OMS_REVURDERING_OPPHOER_GENERELL, OMS_REVURDERING_OPPHOER)
+
                             else -> TODO("Vedtakstype er ikke støttet: $vedtakType")
                         }
 
@@ -181,11 +206,23 @@ class BrevDataMapper(private val featureToggleService: FeatureToggleService, pri
                 }
             }
         }
+    }
 
     suspend fun brevData(
         generellBrevData: GenerellBrevData,
         brukerTokenInfo: BrukerTokenInfo,
     ): BrevData {
+        if (generellBrevData.systemkilde == Vedtaksloesning.PESYS) {
+            return coroutineScope {
+                val fetcher = datafetcher(brukerTokenInfo, generellBrevData)
+                val utbetaling = async { fetcher.hentUtbetaling() }
+                MigrertSakBrevData.fra(
+                    generellBrevData,
+                    utbetaling.await(),
+                )
+            }
+        }
+
         return when (generellBrevData.sak.sakType) {
             SakType.BARNEPENSJON -> {
                 when (val vedtakType = generellBrevData.forenkletVedtak.type) {
@@ -289,8 +326,10 @@ class BrevDataMapper(private val featureToggleService: FeatureToggleService, pri
                             FoerstegangsvedtakUtfallDTO.fra(generellBrevData, utbetaling.await(), avkortingHentet)
                         }
                     }
+
                     VedtakType.AVSLAG ->
                         AvslagBrevDataOMS.fra(generellBrevData.personerISak.avdoed.navn, emptyList())
+
                     VedtakType.ENDRING ->
                         when (generellBrevData.revurderingsaarsak) {
                             Revurderingaarsak.INNTEKTSENDRING,
@@ -318,6 +357,17 @@ class BrevDataMapper(private val featureToggleService: FeatureToggleService, pri
         innholdMedVedlegg: InnholdMedVedlegg,
         kode: BrevkodePar,
     ): BrevData {
+        if (kode.ferdigstilling == FORHAANDSVARSEL_MIGRERING) {
+            return coroutineScope {
+                val fetcher = datafetcher(brukerTokenInfo, generellBrevData)
+                val utbetaling = async { fetcher.hentUtbetaling() }
+                MigrertSakBrevData.fra(
+                    generellBrevData,
+                    utbetaling.await(),
+                )
+            }
+        }
+
         return when (kode.ferdigstilling) {
             BARNEPENSJON_REVURDERING_ENDRING -> {
                 coroutineScope {

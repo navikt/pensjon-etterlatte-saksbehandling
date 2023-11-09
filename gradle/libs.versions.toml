@@ -41,6 +41,8 @@ klage-kodeverk = { module = "no.nav.klage:klage-kodeverk", version = "1.6.10" }
 
 kotlin-result = { module = "com.michael-bull.kotlin-result:kotlin-result", version = "1.1.18" }
 
+pdf-pdfbox = { module = "org.apache.pdfbox:pdfbox", version = "3.0.0" }
+
 
 kotlinx-coroutinescore = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx-version" }
 kotlinx-coroutinestest = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinx-version" }

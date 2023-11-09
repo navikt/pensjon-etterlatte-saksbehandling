@@ -5,6 +5,7 @@ import no.nav.etterlatte.brev.behandling.ForenkletVedtak
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.brevbaker.BrevbakerRequest
 import no.nav.etterlatte.brev.brevbaker.BrevbakerService
+import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.dokarkiv.DokarkivServiceImpl
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
@@ -27,6 +28,7 @@ import no.nav.etterlatte.brev.model.OpprettNyttBrev
 import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.SlateHelper
 import no.nav.etterlatte.brev.model.Status
+import no.nav.etterlatte.brev.model.bp.MigrertSakBrevData
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
@@ -112,6 +114,20 @@ class VedtaksbrevService(
         val brevRequest = BrevbakerRequest.fra(brevkodePar.ferdigstilling, brevData, generellBrevData, avsender)
 
         return brevbaker.genererPdf(brev.id, brevRequest)
+            .let {
+                when (brevData) {
+                    is MigrertSakBrevData -> {
+                        val forhaandsvarsel =
+                            brevbaker.genererPdf(
+                                brev.id,
+                                BrevbakerRequest.fra(EtterlatteBrevKode.FORHAANDSVARSEL_MIGRERING, brevData, generellBrevData, avsender),
+                            )
+                        forhaandsvarsel.medPdfAppended(it)
+                    }
+
+                    else -> it
+                }
+            }
             .also { pdf -> lagrePdfHvisVedtakFattet(brev.id, generellBrevData.forenkletVedtak, pdf, brukerTokenInfo) }
     }
 

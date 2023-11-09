@@ -8,6 +8,9 @@ import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
 import no.nav.pensjon.brevbaker.api.model.Kroner
+import org.apache.pdfbox.Loader
+import org.apache.pdfbox.multipdf.PDFMergerUtility
+import java.io.ByteArrayOutputStream
 import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
@@ -102,7 +105,17 @@ data class Brev(
     }
 }
 
-class Pdf(val bytes: ByteArray)
+class Pdf(val bytes: ByteArray) {
+    fun medPdfAppended(pdf: Pdf): Pdf {
+        val foerstePdf = Loader.loadPDF(this.bytes)
+        val andrePdf = Loader.loadPDF(pdf.bytes)
+        PDFMergerUtility().appendDocument(foerstePdf, andrePdf)
+
+        val out = ByteArrayOutputStream()
+        foerstePdf.save(out)
+        return Pdf(out.toByteArray())
+    }
+}
 
 data class BrevInnhold(
     val tittel: String,

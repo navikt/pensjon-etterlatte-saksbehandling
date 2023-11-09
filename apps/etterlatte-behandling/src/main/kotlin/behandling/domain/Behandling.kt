@@ -175,7 +175,10 @@ sealed class Behandling {
     ) : Exception(message)
 }
 
-internal fun Behandling.toStatistikkBehandling(persongalleri: Persongalleri): StatistikkBehandling {
+internal fun Behandling.toStatistikkBehandling(
+    persongalleri: Persongalleri,
+    pesysId: Long? = null,
+): StatistikkBehandling {
     return StatistikkBehandling(
         id = id,
         sak = sak,
@@ -196,6 +199,7 @@ internal fun Behandling.toStatistikkBehandling(persongalleri: Persongalleri): St
         revurderingInfo = revurderingInfo()?.revurderingInfo,
         enhet = sak.enhet,
         kilde = kilde,
+        pesysId = pesysId,
     )
 }
 

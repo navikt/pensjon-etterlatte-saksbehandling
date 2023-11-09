@@ -159,6 +159,8 @@ class StatistikkService(
             sakYtelsesgruppe = hentSakYtelsesgruppe(statistikkBehandling.sak.sakType, statistikkBehandling.avdoed ?: emptyList()),
             avdoedeForeldre = statistikkBehandling.avdoed,
             revurderingAarsak = statistikkBehandling.revurderingsaarsak?.name,
+            kilde = statistikkBehandling.kilde,
+            pesysId = statistikkBehandling.pesysId,
         )
     }
 
@@ -271,6 +273,8 @@ class StatistikkService(
                         null
                     },
                 revurderingAarsak = statistikkBehandling.revurderingsaarsak?.name,
+                kilde = statistikkBehandling.kilde,
+                pesysId = statistikkBehandling.pesysId,
             )
         if (behandlingHendelse == BehandlingHendelse.AVBRUTT) {
             return fellesRad.copy(

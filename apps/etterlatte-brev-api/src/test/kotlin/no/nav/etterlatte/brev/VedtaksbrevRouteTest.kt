@@ -257,6 +257,7 @@ internal class VedtaksbrevRouteTest {
             "soeker_fnr",
             Status.OPPRETTET,
             Tidspunkt.now(),
+            Tidspunkt.now(),
             Mottaker(
                 "Stor Snerk",
                 STOR_SNERK,

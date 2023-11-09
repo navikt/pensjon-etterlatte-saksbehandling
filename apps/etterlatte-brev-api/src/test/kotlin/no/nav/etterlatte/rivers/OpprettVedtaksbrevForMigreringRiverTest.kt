@@ -102,6 +102,7 @@ internal class OpprettVedtaksbrevForMigreringRiverTest {
             "fnr",
             Status.FERDIGSTILT,
             Tidspunkt.now(),
+            Tidspunkt.now(),
             mottaker = mockk(),
         )
 

@@ -151,6 +151,7 @@ internal class OpprettJournalfoerOgDistribuer {
             soekerFnr = "123",
             status = Status.FERDIGSTILT,
             Tidspunkt.now(),
+            Tidspunkt.now(),
             mottaker =
                 Mottaker(
                     "Marte Kirkerud",

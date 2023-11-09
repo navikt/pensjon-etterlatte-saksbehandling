@@ -6,6 +6,7 @@ import no.nav.etterlatte.brev.behandling.Beregningsperiode
 import no.nav.etterlatte.brev.behandling.Trygdetidsperiode
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.toJson
 import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
 import no.nav.pensjon.brevbaker.api.model.Kroner
 import org.apache.pdfbox.Loader
@@ -83,6 +84,7 @@ data class Brev(
     val prosessType: BrevProsessType,
     val soekerFnr: String,
     val status: Status,
+    val statusEndret: Tidspunkt,
     val opprettet: Tidspunkt,
     val mottaker: Mottaker,
 ) {
@@ -99,6 +101,7 @@ data class Brev(
             prosessType = opprettNyttBrev.prosessType,
             soekerFnr = opprettNyttBrev.soekerFnr,
             status = opprettNyttBrev.status,
+            statusEndret = opprettNyttBrev.opprettet,
             mottaker = opprettNyttBrev.mottaker,
             opprettet = opprettNyttBrev.opprettet,
         )
@@ -191,4 +194,9 @@ data class EtterbetalingBrev(
             )
         }
     }
+}
+
+fun main() {
+    val tidspunkt = Tidspunkt.now()
+    println(tidspunkt.toJson())
 }

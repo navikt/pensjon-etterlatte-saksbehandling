@@ -5,7 +5,8 @@ import java.util.UUID
 
 class BosattUtlandService(val bosattUtlandDao: BosattUtlandDao) {
     fun lagreBosattUtland(bosattUtland: BosattUtland): BosattUtland {
-        return bosattUtlandDao.lagreBosattUtland(bosattUtland)
+        bosattUtlandDao.lagreBosattUtland(bosattUtland)
+        return hentBosattUtland(bosattUtland.behandlingId)!!
     }
 
     fun hentBosattUtland(behandlingid: UUID): BosattUtland? {

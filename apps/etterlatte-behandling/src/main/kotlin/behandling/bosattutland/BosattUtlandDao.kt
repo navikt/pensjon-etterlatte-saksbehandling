@@ -4,25 +4,29 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.behandling.hendelse.getUUID
 import no.nav.etterlatte.behandling.objectMapper
 import no.nav.etterlatte.libs.database.setJsonb
-import no.nav.etterlatte.libs.database.single
 import no.nav.etterlatte.libs.database.singleOrNull
 import java.sql.Connection
 import java.sql.ResultSet
 import java.util.UUID
 
 class BosattUtlandDao(private val connection: () -> Connection) {
-    fun lagreBosattUtland(bosattUtland: BosattUtland): BosattUtland {
-        return with(connection()) {
+    fun lagreBosattUtland(bosattUtland: BosattUtland) {
+        with(connection()) {
             val statement =
                 prepareStatement(
-                    "insert into bosattutland(behandlingid, rinanummer, mottattSeder, sendteSeder) " +
-                        "VALUES(?,?,?,?) RETURNING behandlingid, rinanummer, mottattSeder, sendteSeder",
+                    """
+                    insert into bosattutland(behandlingid, rinanummer, mottattSeder, sendteSeder)
+                        VALUES(?,?,?,?)
+                        ON CONFLICT(behandlingid)
+                        DO UPDATE SET rinanummer = excluded.rinanummer,
+                        mottattSeder = excluded.mottattSeder, sendteSeder = excluded.sendteSeder
+                    """.trimIndent(),
                 )
             statement.setObject(1, bosattUtland.behandlingId)
             statement.setObject(2, bosattUtland.rinanummer)
             statement.setJsonb(3, bosattUtland.mottatteSeder)
             statement.setJsonb(4, bosattUtland.sendteSeder)
-            statement.executeQuery().single { toBosattUtland() }
+            require(statement.executeUpdate() == 1)
         }
     }
 

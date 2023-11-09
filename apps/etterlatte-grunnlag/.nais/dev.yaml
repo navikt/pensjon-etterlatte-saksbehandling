@@ -20,11 +20,6 @@ spec:
         flags:
           - name: max_connections
             value: "100"
-  #startup:
-  #  initialDelay: 7
-  #  failureThreshold: 10
-  #  periodSeconds: 5
-  #  path: /started
   liveness:
     initialDelay: 7
     failureThreshold: 10

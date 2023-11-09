@@ -1,5 +1,5 @@
 import styled from 'styled-components'
-import { isFailure, useApiCall } from '~shared/hooks/useApiCall'
+import { isErrorWithCode, useApiCall } from '~shared/hooks/useApiCall'
 import { hentAvkorting } from '~shared/api/avkorting'
 import React, { useEffect, useState } from 'react'
 import { IAvkorting } from '~shared/types/IAvkorting'
@@ -8,16 +8,22 @@ import { isPending } from '@reduxjs/toolkit'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { YtelseEtterAvkorting } from '~components/behandling/avkorting/YtelseEtterAvkorting'
-import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
+import { IBehandlingReducer, oppdaterBehandlingsstatus } from '~store/reducers/BehandlingReducer'
+import { useAppDispatch } from '~store/Store'
+import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 
 export const Avkorting = (props: { behandling: IBehandlingReducer }) => {
   const behandling = props.behandling
+  const dispatch = useAppDispatch()
   const [avkortingStatus, hentAvkortingRequest] = useApiCall(hentAvkorting)
   const [avkorting, setAvkorting] = useState<IAvkorting>()
 
   useEffect(() => {
     if (!avkorting) {
-      hentAvkortingRequest(behandling.id, (res) => setAvkorting(res))
+      hentAvkortingRequest(behandling.id, (res) => {
+        dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.AVKORTET))
+        setAvkorting(res)
+      })
     }
   }, [])
 
@@ -40,9 +46,7 @@ export const Avkorting = (props: { behandling: IBehandlingReducer }) => {
       )}
 
       {isPending(avkortingStatus) && <Spinner visible={true} label="Henter avkorting" />}
-      {isFailure(avkortingStatus) && avkortingStatus.error.status !== 404 && (
-        <ApiErrorAlert>En feil har oppstått</ApiErrorAlert>
-      )}
+      {isErrorWithCode(avkortingStatus, 404) && <ApiErrorAlert>En feil har oppstått</ApiErrorAlert>}
     </AvkortingWrapper>
   )
 }

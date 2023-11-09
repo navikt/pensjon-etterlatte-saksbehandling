@@ -14,6 +14,7 @@ import io.mockk.slot
 import io.mockk.spyk
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
@@ -37,6 +38,7 @@ import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import no.nav.etterlatte.trygdetid.BeregnetTrygdetidGrunnlag
 import no.nav.etterlatte.trygdetid.DetaljertBeregnetTrygdetid
+import no.nav.etterlatte.trygdetid.IngenTrygdetidFunnetForAvdoede
 import no.nav.etterlatte.trygdetid.LandNormalisert
 import no.nav.etterlatte.trygdetid.ManglerForrigeTrygdetidMaaReguleresManuelt
 import no.nav.etterlatte.trygdetid.Opplysningsgrunnlag
@@ -44,6 +46,7 @@ import no.nav.etterlatte.trygdetid.Trygdetid
 import no.nav.etterlatte.trygdetid.TrygdetidAlleredeOpprettetException
 import no.nav.etterlatte.trygdetid.TrygdetidBeregningService
 import no.nav.etterlatte.trygdetid.TrygdetidGrunnlag
+import no.nav.etterlatte.trygdetid.TrygdetidManglerBeregning
 import no.nav.etterlatte.trygdetid.TrygdetidOpplysningType
 import no.nav.etterlatte.trygdetid.TrygdetidPeriode
 import no.nav.etterlatte.trygdetid.TrygdetidRepository
@@ -1235,4 +1238,92 @@ internal class TrygdetidServiceTest {
             )
         }
     }
+
+    @Test
+    fun `skal sjekke gyldighet og oppdatere status hvis behandlingstatus er VILKAARSVURDERT`() {
+        val behandlingId = randomUUID()
+        val eksisterendeTrygdetid = trygdetid(behandlingId, beregnetTrygdetid = beregnetTrygdetid())
+
+        coEvery { behandlingKlient.hentBehandling(any(), any()) } returns
+            behandling(behandlingId, behandlingStatus = BehandlingStatus.VILKAARSVURDERT)
+        coEvery { behandlingKlient.settBehandlingStatusTrygdetidOppdatert(any(), any()) } returns true
+        every { repository.hentTrygdetiderForBehandling(behandlingId) } returns listOf(eksisterendeTrygdetid)
+
+        runBlocking {
+            val oppdatert = service.sjekkGyldighetOgOppdaterBehandlingStatus(behandlingId, saksbehandler)
+            oppdatert shouldBe true
+        }
+
+        coVerify(exactly = 1) {
+            behandlingKlient.kanOppdatereTrygdetid(any(), any())
+            behandlingKlient.hentBehandling(any(), any())
+            behandlingKlient.settBehandlingStatusTrygdetidOppdatert(any(), any())
+            repository.hentTrygdetiderForBehandling(behandlingId)
+        }
+    }
+
+    @Test
+    fun `skal feile ved sjekking av gyldighet dersom det ikke finnes noe trygdetid`() {
+        val behandlingId = randomUUID()
+
+        coEvery { behandlingKlient.hentBehandling(any(), any()) } returns
+            behandling(behandlingId, behandlingStatus = BehandlingStatus.VILKAARSVURDERT)
+        every { repository.hentTrygdetiderForBehandling(behandlingId) } returns emptyList()
+
+        runBlocking {
+            assertThrows<IngenTrygdetidFunnetForAvdoede> {
+                service.sjekkGyldighetOgOppdaterBehandlingStatus(behandlingId, saksbehandler)
+            }
+        }
+
+        coVerify(exactly = 1) {
+            behandlingKlient.kanOppdatereTrygdetid(any(), any())
+            behandlingKlient.hentBehandling(any(), any())
+            repository.hentTrygdetiderForBehandling(behandlingId)
+        }
+    }
+
+    @Test
+    fun `skal feile ved sjekking av gyldighet dersom det ikke finnes noe beregning i trygdetid`() {
+        val behandlingId = randomUUID()
+        val eksisterendeTrygdetid = trygdetid(behandlingId, beregnetTrygdetid = null)
+
+        coEvery { behandlingKlient.hentBehandling(any(), any()) } returns
+            behandling(behandlingId, behandlingStatus = BehandlingStatus.VILKAARSVURDERT)
+        coEvery { behandlingKlient.settBehandlingStatusTrygdetidOppdatert(any(), any()) } returns true
+        every { repository.hentTrygdetiderForBehandling(behandlingId) } returns listOf(eksisterendeTrygdetid)
+
+        runBlocking {
+            assertThrows<TrygdetidManglerBeregning> {
+                service.sjekkGyldighetOgOppdaterBehandlingStatus(behandlingId, saksbehandler)
+            }
+        }
+
+        coVerify(exactly = 1) {
+            behandlingKlient.kanOppdatereTrygdetid(any(), any())
+            behandlingKlient.hentBehandling(any(), any())
+            repository.hentTrygdetiderForBehandling(behandlingId)
+        }
+    }
+
+    private fun beregnetTrygdetid() =
+        DetaljertBeregnetTrygdetid(
+            resultat =
+                DetaljertBeregnetTrygdetidResultat(
+                    faktiskTrygdetidNorge =
+                        FaktiskTrygdetid(
+                            periode = Period.ofYears(5),
+                            antallMaaneder = 5 * 12,
+                        ),
+                    faktiskTrygdetidTeoretisk = null,
+                    fremtidigTrygdetidNorge = null,
+                    fremtidigTrygdetidTeoretisk = null,
+                    samletTrygdetidNorge = 5,
+                    samletTrygdetidTeoretisk = null,
+                    prorataBroek = null,
+                    overstyrt = false,
+                ),
+            tidspunkt = Tidspunkt.now(),
+            regelResultat = "".toJsonNode(),
+        )
 }

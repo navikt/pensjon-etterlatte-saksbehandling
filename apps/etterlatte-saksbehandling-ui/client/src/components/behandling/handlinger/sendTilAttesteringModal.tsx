@@ -54,7 +54,7 @@ export const SendTilAttesteringModal = ({
   return (
     <>
       <Button variant="primary" onClick={clickAttester}>
-        {handlinger.ATTESTERING.navn}
+        {handlinger.SEND_TIL_ATTESTERING.navn}
       </Button>
       <Modal
         open={isOpen}

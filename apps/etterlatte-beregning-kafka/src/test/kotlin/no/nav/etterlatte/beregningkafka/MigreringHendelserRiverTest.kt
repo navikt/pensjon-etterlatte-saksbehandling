@@ -59,6 +59,7 @@ internal class MigreringHendelserRiverTest {
                         samletNorskTrygdetid = 40,
                         grunnbelopMnd = 100000 / 12,
                         beregningsMetode = BeregningsMetode.NASJONAL,
+                        trygdetidForIdent = null,
                     ),
                 ),
             beregnetDato = Tidspunkt.now(),

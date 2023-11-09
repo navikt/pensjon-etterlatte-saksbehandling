@@ -7,6 +7,7 @@ data class Sjekkliste(
     val kommentar: String? = null,
     val adresseForBrev: String? = null,
     val kontonrRegistrert: String? = null,
+    val onsketSkattetrekk: Int? = null,
     val bekreftet: Boolean = false,
     val sjekklisteItems: List<SjekklisteItem>,
     val versjon: Long,
@@ -23,6 +24,7 @@ data class OppdatertSjekkliste(
     val kommentar: String? = null,
     val adresseForBrev: String? = null,
     val kontonrRegistrert: String? = null,
+    val onsketSkattetrekk: Int? = null,
     val bekreftet: Boolean = false,
     val versjon: Long,
 )
@@ -38,6 +40,7 @@ internal val defaultSjekklisteItemsBP =
         "Mulighet for, og ikke søkt om (utvidet) barnetrygd - sendt oppgave til barnetrygd",
         "Etterbetaling av barnepensjon blir mer enn 2G- kontaktet statsforvalter for informasjon",
         "Ikke registrert/registrert annet kontonummer i saken - opprettet oppgave til NØP",
+        "Opprettet oppgave til NØP om skattetrekk",
         "Ved avslag: Informert om at barnet kan ha rett på bidragsforskudd",
         "Barnet mottar uføretrygd fra NAV - pensjonen er avkortet",
         "Bosatt Norge: Innhenter EØS og bank-opplysninger",

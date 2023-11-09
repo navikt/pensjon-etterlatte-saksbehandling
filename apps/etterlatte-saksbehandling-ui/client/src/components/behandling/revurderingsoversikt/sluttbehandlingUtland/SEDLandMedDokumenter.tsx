@@ -74,6 +74,7 @@ export default function SEDLandMedDokumenter({
         </Table.Body>
       </Table>
       <Button
+        style={{ marginTop: '1rem' }}
         onClick={() => {
           setLandMedDokumenter((landMedDokumenter) => {
             return landMedDokumenter.concat({ dokumenter: [] })

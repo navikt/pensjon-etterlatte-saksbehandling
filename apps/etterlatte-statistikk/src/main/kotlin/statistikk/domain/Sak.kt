@@ -1,5 +1,6 @@
 package no.nav.etterlatte.statistikk.domain
 
+import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import java.time.LocalDate
@@ -61,5 +62,6 @@ data class SakRad(
     val vedtakLoependeTom: LocalDate?,
     val beregning: Beregning?,
     val avkorting: Avkorting?,
+    val kilde: Vedtaksloesning,
     val pesysId: Long?,
 )

@@ -3,6 +3,7 @@ package no.nav.etterlatte.statistikk.database
 import io.kotest.assertions.asClue
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
+import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseType
@@ -134,6 +135,7 @@ class SakRepositoryTest {
                     sakYtelsesgruppe = SakYtelsesgruppe.EN_AVDOED_FORELDER,
                     avdoedeForeldre = emptyList(),
                     revurderingAarsak = "MIGRERING",
+                    kilde = Vedtaksloesning.GJENNY,
                     pesysId = 123L,
                 ),
             )
@@ -181,6 +183,7 @@ class SakRepositoryTest {
                     sakYtelsesgruppe = SakYtelsesgruppe.EN_AVDOED_FORELDER,
                     avdoedeForeldre = emptyList(),
                     revurderingAarsak = "MIGRERING",
+                    kilde = Vedtaksloesning.GJENNY,
                     pesysId = 123L,
                 ),
             )

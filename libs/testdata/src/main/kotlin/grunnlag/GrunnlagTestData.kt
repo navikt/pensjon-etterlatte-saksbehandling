@@ -10,6 +10,7 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.A
 import no.nav.etterlatte.libs.common.person.AvdoedesBarn
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.testdata.pdl.personTestData
+import java.time.LocalDateTime
 import java.util.UUID.randomUUID
 
 data class GrunnlagTestData(
@@ -39,6 +40,36 @@ data class GrunnlagTestData(
                         AvdoedesBarn(listOf(soeker, soesken, halvsoesken)).toJsonNode(),
                     ),
             )
+
+    private val avdoedesBarnMedEnDoed
+        get() =
+            mapOf(
+                AVDOEDESBARN to
+                    Opplysning.Konstant(
+                        randomUUID(),
+                        kilde,
+                        AvdoedesBarn(
+                            listOf
+                                (
+                                    personTestData
+                                        (
+                                            soeskenTestopplysningerMap +
+                                                mapOf(
+                                                    Opplysningstype.DOEDSDATO
+                                                        to
+                                                        Opplysning.Konstant
+                                                            (
+                                                                randomUUID(), kilde,
+                                                                LocalDateTime.parse("2022-08-17T00:00:00").toJsonNode(),
+                                                            ),
+                                                ) +
+                                                opplysningsmapSoeskenOverrides,
+                                        ),
+                                ),
+                        ).toJsonNode(),
+                    ),
+            )
+
     val avdoed
         get() = personTestData(avdoedTestopplysningerMap + avdoedesBarnOverrides + opplysningsmapAvdoedOverrides)
 
@@ -49,6 +80,20 @@ data class GrunnlagTestData(
                 listOf(
                     soeskenTestopplysningerMap + opplysningsmapSoeskenOverrides,
                     avdoedTestopplysningerMap + avdoedesBarnOverrides + opplysningsmapAvdoedOverrides,
+                    gjenlevendeTestopplysningerMap + opplysningsmapGjenlevendeOverrides,
+                    halvsoeskenTestopplysningerMap + opplysningsmapHalvsoeskenOverrides,
+                ),
+            sak = opplysningsmapSakOverrides,
+            metadata = Metadata(1, 15),
+        )
+
+    fun hentGrunnlagMedEgneAvdoedesBarn(): Grunnlag =
+        Grunnlag(
+            soeker = soekerTestopplysningerMap + opplysningsmapSoekerOverrides,
+            familie =
+                listOf(
+                    soeskenTestopplysningerMap + opplysningsmapSoeskenOverrides,
+                    avdoedTestopplysningerMap + avdoedesBarnMedEnDoed + opplysningsmapAvdoedOverrides,
                     gjenlevendeTestopplysningerMap + opplysningsmapGjenlevendeOverrides,
                     halvsoeskenTestopplysningerMap + opplysningsmapHalvsoeskenOverrides,
                 ),

@@ -3,21 +3,61 @@ package no.nav.etterlatte.beregning.grunnlag
 import no.nav.etterlatte.beregning.BeregnBarnepensjonServiceFeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.klienter.BehandlingKlient
+import no.nav.etterlatte.klienter.GrunnlagKlient
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetodeBeregningsgrunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.grunnlag.hentAvdoedesbarn
 import no.nav.etterlatte.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
 import java.util.UUID
+
+class BPBeregningsgrunnlagSoeskenIkkeAvdoedesBarnException(msg: String) : Exception(msg)
+
+class BPBeregningsgrunnlagSoeskenMarkertDoedException(msg: String) : Exception(msg)
+
+class BPBeregningsgrunnlagMerEnnEnAvdoedException(msg: String) : Exception(msg)
 
 class BeregningsGrunnlagService(
     private val beregningsGrunnlagRepository: BeregningsGrunnlagRepository,
     private val behandlingKlient: BehandlingKlient,
     private val featureToggleService: FeatureToggleService,
+    private val grunnlagKlient: GrunnlagKlient,
 ) {
     private val logger = LoggerFactory.getLogger(BeregningsGrunnlagService::class.java)
+
+    private suspend fun validerBeregningsgrunnlagBarnepensjon(
+        behandlingId: UUID,
+        barnepensjonBeregningsGrunnlag: BarnepensjonBeregningsGrunnlag,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {
+        val soeskensFoedselsnummere =
+            barnepensjonBeregningsGrunnlag.soeskenMedIBeregning.flatMap { grunnlag -> grunnlag.data }
+                .map { it.foedselsnummer.value }
+
+        val grunnlag = grunnlagKlient.hentGrunnlag(behandlingId, brukerTokenInfo)
+        if (grunnlag.hentAvdoede().size > 1) {
+            throw BPBeregningsgrunnlagMerEnnEnAvdoedException("Kan maks ha en avdød, behandlingid: $behandlingId")
+        }
+        val avdoed = grunnlag.hentAvdoede().first().hentAvdoedesbarn()!!
+        val avdoedesBarn = avdoed.verdi.avdoedesBarn!!.associateBy({ it.foedselsnummer.value }, { it })
+
+        val alleSoeskenFinnes = soeskensFoedselsnummere.all { fnr -> avdoedesBarn.contains(fnr) }
+        if (!alleSoeskenFinnes) {
+            throw BPBeregningsgrunnlagSoeskenIkkeAvdoedesBarnException(
+                "Barnepensjon beregningsgrunnlag har søsken fnr som ikke er avdødeds barn. behandlingId: $behandlingId",
+            )
+        }
+
+        val alleSoeskenIberegningenErlevende = soeskensFoedselsnummere.all { fnr -> avdoedesBarn[fnr]?.doedsdato === null }
+        if (!alleSoeskenIberegningenErlevende) {
+            throw BPBeregningsgrunnlagSoeskenMarkertDoedException(
+                "Barnpensjon beregningsgrunnlag bruker søsken som er døde i beregningen. behandlingId: $behandlingId",
+            )
+        }
+    }
 
     suspend fun lagreBarnepensjonBeregningsGrunnlag(
         behandlingId: UUID,
@@ -26,6 +66,7 @@ class BeregningsGrunnlagService(
     ): Boolean =
         when {
             behandlingKlient.kanBeregnes(behandlingId, brukerTokenInfo, false) -> {
+                validerBeregningsgrunnlagBarnepensjon(behandlingId, barnepensjonBeregningsGrunnlag, brukerTokenInfo)
                 val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
                 val kanLagreDetteGrunnlaget =
                     if (behandling.behandlingType == BehandlingType.REVURDERING) {

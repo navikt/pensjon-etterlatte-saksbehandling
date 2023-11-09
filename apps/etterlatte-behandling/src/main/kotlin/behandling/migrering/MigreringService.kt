@@ -72,7 +72,7 @@ class MigreringService(
                 oppgaveService.tildelSaksbehandler(nyopprettaOppgave.id, pesys)
 
                 behandlingsHendelser.sendMeldingForHendelseMedDetaljertBehandling(
-                    behandling.toStatistikkBehandling(request.opprettPersongalleri()),
+                    behandling.toStatistikkBehandling(request.opprettPersongalleri(), pesysId = request.pesysId.id),
                     BehandlingHendelseType.OPPRETTET,
                 )
                 behandling

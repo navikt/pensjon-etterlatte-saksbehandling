@@ -91,6 +91,7 @@ class StatistikkServiceTest {
                 enhet = enhet,
                 kilde = Vedtaksloesning.GJENNY,
                 sistEndret = LocalDateTime.now(),
+                pesysId = 123L,
             )
         every { stoenadRepo.lagreStoenadsrad(any()) } returnsArgument 0
         every { sakRepo.lagreRad(any()) } returnsArgument 0
@@ -225,6 +226,7 @@ class StatistikkServiceTest {
                 enhet = enhet,
                 kilde = Vedtaksloesning.GJENNY,
                 sistEndret = LocalDateTime.now(),
+                pesysId = 123L,
             )
 
         val (registrertSakRad, registrertStoenadRad) =
@@ -355,4 +357,5 @@ fun behandling(
     revurderingInfo = null,
     prosesstype = Prosesstype.MANUELL,
     kilde = Vedtaksloesning.GJENNY,
+    pesysId = 123L,
 )

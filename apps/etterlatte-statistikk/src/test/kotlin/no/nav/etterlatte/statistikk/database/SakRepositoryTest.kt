@@ -134,6 +134,7 @@ class SakRepositoryTest {
                     sakYtelsesgruppe = SakYtelsesgruppe.EN_AVDOED_FORELDER,
                     avdoedeForeldre = emptyList(),
                     revurderingAarsak = "MIGRERING",
+                    pesysId = 123L,
                 ),
             )
 
@@ -180,6 +181,7 @@ class SakRepositoryTest {
                     sakYtelsesgruppe = SakYtelsesgruppe.EN_AVDOED_FORELDER,
                     avdoedeForeldre = emptyList(),
                     revurderingAarsak = "MIGRERING",
+                    pesysId = 123L,
                 ),
             )
         lagretRad shouldNotBe null

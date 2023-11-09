@@ -61,4 +61,5 @@ data class SakRad(
     val vedtakLoependeTom: LocalDate?,
     val beregning: Beregning?,
     val avkorting: Avkorting?,
+    val pesysId: Long?,
 )

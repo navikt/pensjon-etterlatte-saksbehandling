@@ -73,7 +73,7 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
         </HeadingWrapper>
       </ContentHeader>
 
-      {isPending(beregning) && <Spinner visible label="Laster" />}
+      {isPending(beregning) && <Spinner visible label="Henter beregning" />}
       {isFailure(beregning) && <ApiErrorAlert>Kunne ikke hente beregning</ApiErrorAlert>}
       {isSuccess(beregning) && (
         <BeregningWrapper>

@@ -65,7 +65,8 @@ async function apiFetcher<T>(props: Options): Promise<ApiResponse<T>> {
       }
     } else {
       const error: JsonError = await response.json()
-
+      const errorobj = { msg: 'Fikk feil i kall mot backend', errorInfo: JSON.stringify(error) }
+      logger.generalError(JSON.stringify(errorobj))
       console.error(error, response)
       return { ...error, ok: false }
     }

@@ -99,7 +99,7 @@ fun Route.vedtaksvurderingRoute(
             withBehandlingId(behandlingKlient) { behandlingId ->
                 logger.info("Fatter vedtak for behandling $behandlingId")
                 val fattetVedtak = vedtakBehandlingService.fattVedtak(behandlingId, brukerTokenInfo)
-                rapidService.sendToRapid(fattetVedtak.rapidInfo)
+                rapidService.sendToRapid(fattetVedtak)
 
                 call.respond(fattetVedtak.vedtak)
             }
@@ -112,7 +112,7 @@ fun Route.vedtaksvurderingRoute(
                 val attestert = vedtakBehandlingService.attesterVedtak(behandlingId, kommentar, brukerTokenInfo)
 
                 try {
-                    rapidService.sendToRapid(attestert.rapidInfo)
+                    rapidService.sendToRapid(attestert)
                 } catch (e: Exception) {
                     logger.error(
                         "Kan ikke sende attestert vedtak på kafka for behandling id: $behandlingId, vedtak: ${attestert.vedtak.vedtakId} " +
@@ -137,7 +137,7 @@ fun Route.vedtaksvurderingRoute(
                         brukerTokenInfo,
                         begrunnelse,
                     )
-                rapidService.sendToRapid(underkjentVedtak.rapidInfo)
+                rapidService.sendToRapid(underkjentVedtak)
 
                 call.respond(underkjentVedtak.vedtak)
             }
@@ -147,7 +147,7 @@ fun Route.vedtaksvurderingRoute(
             withBehandlingId(behandlingKlient) { behandlingId ->
                 logger.info("Vedtak er til samordning for behandling $behandlingId")
                 val vedtak = vedtakBehandlingService.tilSamordningVedtak(behandlingId, brukerTokenInfo)
-                rapidService.sendToRapid(vedtak.rapidInfo)
+                rapidService.sendToRapid(vedtak)
                 call.respond(HttpStatusCode.OK, vedtak)
             }
         }
@@ -156,7 +156,7 @@ fun Route.vedtaksvurderingRoute(
             withBehandlingId(behandlingKlient) { behandlingId ->
                 logger.info("Vedtak ferdig samordning for behandling $behandlingId")
                 val vedtak = vedtakBehandlingService.samordnetVedtak(behandlingId, brukerTokenInfo)
-                rapidService.sendToRapid(vedtak.rapidInfo)
+                rapidService.sendToRapid(vedtak)
                 call.respond(HttpStatusCode.OK, vedtak)
             }
         }
@@ -165,7 +165,7 @@ fun Route.vedtaksvurderingRoute(
             withBehandlingId(behandlingKlient) { behandlingId ->
                 logger.info("Iverksetter vedtak for behandling $behandlingId")
                 val vedtak = vedtakBehandlingService.iverksattVedtak(behandlingId, brukerTokenInfo)
-                rapidService.sendToRapid(vedtak.rapidInfo)
+                rapidService.sendToRapid(vedtak)
 
                 call.respond(HttpStatusCode.OK, vedtak.vedtak)
             }

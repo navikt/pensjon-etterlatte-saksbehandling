@@ -125,7 +125,7 @@ internal class AutomatiskBehandlingRoutesKtTest {
                 }
 
             Assertions.assertEquals(vedtak.vedtak.vedtakId, opprettetVedtak.id)
-            Assertions.assertEquals(vedtak.rapidInfo.vedtakhendelse, VedtakKafkaHendelseType.ATTESTERT)
+            Assertions.assertEquals(vedtak.rapidInfo1.vedtakhendelse, VedtakKafkaHendelseType.ATTESTERT)
 
             coVerify(exactly = 1) {
                 service.opprettEllerOppdaterVedtak(behandlingId, any())

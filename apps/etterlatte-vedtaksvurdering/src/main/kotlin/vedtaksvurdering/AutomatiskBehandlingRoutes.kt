@@ -30,7 +30,7 @@ fun Route.automatiskBehandlingRoutes(
                 service.opprettEllerOppdaterVedtak(behandlingId, brukerTokenInfo)
 
                 logger.info("Fatter vedtak for behandling $behandlingId")
-                service.fattVedtak(behandlingId, brukerTokenInfo).also { rapidService.sendToRapid(it.rapidInfo) }
+                service.fattVedtak(behandlingId, brukerTokenInfo).also { rapidService.sendToRapid(it) }
 
                 logger.info("Tildeler attesteringsoppgave til systembruker")
                 val oppgaveTilAttestering =
@@ -51,7 +51,7 @@ fun Route.automatiskBehandlingRoutes(
                     )
 
                 try {
-                    rapidService.sendToRapid(attestert.rapidInfo)
+                    rapidService.sendToRapid(attestert)
                 } catch (e: Exception) {
                     logger.error(
                         "Kan ikke sende attestert vedtak på kafka for behandling id: $behandlingId, vedtak: ${attestert.vedtak.vedtakId} " +

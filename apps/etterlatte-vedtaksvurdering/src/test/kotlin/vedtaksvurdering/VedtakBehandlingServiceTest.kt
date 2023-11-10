@@ -646,7 +646,7 @@ internal class VedtakBehandlingServiceTest {
                 service.attesterVedtak(behandlingId, KOMMENTAR, attestant)
             }
 
-        val hendelse = attestering.rapidInfo
+        val hendelse = attestering.rapidInfo1
 
         Assertions.assertEquals(hendelse.vedtakhendelse, VedtakKafkaHendelseType.ATTESTERT)
         Assertions.assertEquals(false, hendelse.extraParams[SKAL_SENDE_BREV])
@@ -779,7 +779,7 @@ internal class VedtakBehandlingServiceTest {
         iverksattVedtak shouldNotBe null
         iverksattVedtak.vedtak.status shouldBe VedtakStatus.IVERKSATT
 
-        Assertions.assertEquals(VedtakKafkaHendelseType.IVERKSATT, iverksattVedtak.rapidInfo.vedtakhendelse)
+        Assertions.assertEquals(VedtakKafkaHendelseType.IVERKSATT, iverksattVedtak.rapidInfo1.vedtakhendelse)
     }
 
     @Test
@@ -928,7 +928,7 @@ internal class VedtakBehandlingServiceTest {
         underkjentVedtak shouldNotBe null
         underkjentVedtak.vedtak.status shouldBe VedtakStatus.RETURNERT
 
-        Assertions.assertEquals(VedtakKafkaHendelseType.UNDERKJENT, underkjentVedtak.rapidInfo.vedtakhendelse)
+        Assertions.assertEquals(VedtakKafkaHendelseType.UNDERKJENT, underkjentVedtak.rapidInfo1.vedtakhendelse)
     }
 
     @Test
@@ -1089,7 +1089,6 @@ internal class VedtakBehandlingServiceTest {
             }
 
             coVerify { behandlingKlientMock wasNot called }
-            verify { sendToRapidMock wasNot called }
         }
     }
 
@@ -1104,10 +1103,9 @@ internal class VedtakBehandlingServiceTest {
             repository.opprettVedtak(opprettVedtak(behandlingId = behandlingId, status = VedtakStatus.ATTESTERT))
             val oppdatertVedtak = service.tilSamordningVedtak(behandlingId, attestant)
 
-            oppdatertVedtak.status shouldBe VedtakStatus.TIL_SAMORDNING
+            oppdatertVedtak.vedtak.status shouldBe VedtakStatus.TIL_SAMORDNING
 
             coVerify(exactly = 1) { behandlingKlientMock.tilSamordning(behandlingId, attestant, any()) }
-            verify(exactly = 1) { sendToRapidMock(match { it.contains(VedtakKafkaHendelseType.TIL_SAMORDNING.name) }, any()) }
         }
     }
 
@@ -1123,11 +1121,10 @@ internal class VedtakBehandlingServiceTest {
             repository.opprettVedtak(opprettVedtak(behandlingId = behandlingId, status = VedtakStatus.ATTESTERT))
             val oppdatertVedtak = service.tilSamordningVedtak(behandlingId, attestant)
 
-            oppdatertVedtak.status shouldBe VedtakStatus.SAMORDNET
+            oppdatertVedtak.vedtak.status shouldBe VedtakStatus.SAMORDNET
 
             coVerify(exactly = 1) { behandlingKlientMock.tilSamordning(behandlingId, attestant, any()) }
             coVerify(exactly = 1) { behandlingKlientMock.samordnet(behandlingId, any(), any()) }
-            verify(exactly = 1) { sendToRapidMock(match { it.contains(VedtakKafkaHendelseType.SAMORDNET.name) }, any()) }
         }
     }
 
@@ -1143,7 +1140,6 @@ internal class VedtakBehandlingServiceTest {
             }
 
             coVerify { behandlingKlientMock wasNot called }
-            verify { sendToRapidMock wasNot called }
         }
     }
 

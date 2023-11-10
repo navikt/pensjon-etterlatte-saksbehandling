@@ -12,9 +12,12 @@ import java.util.UUID
 class VedtaksvurderingRapidService(
     private val publiser: (String, UUID) -> Unit,
 ) {
-    fun sendToRapid(rapidInfo: Collection<RapidInfo>) = rapidInfo.forEach { sendToRapid(it) }
+    fun sendToRapid(vedtakOgRapid: VedtakOgRapid) {
+        sendToRapid(vedtakOgRapid.rapidInfo1)
+        vedtakOgRapid.rapidInfo2?.let { sendToRapid(it) }
+    }
 
-    fun sendToRapid(rapidInfo: RapidInfo) =
+    private fun sendToRapid(rapidInfo: RapidInfo) =
         sendToRapid(
             vedtakhendelse = rapidInfo.vedtakhendelse,
             vedtak = rapidInfo.vedtak,

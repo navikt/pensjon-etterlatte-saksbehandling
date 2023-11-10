@@ -34,7 +34,7 @@ const formaterTidspunkt = (dato: Date) => format(new Date(dato), 'HH:mm:ss').toS
 interface RedigerbartBrevProps {
   brev: IBrev
   kanRedigeres: boolean
-  lukkAdvarselBehandlingEndret: () => void
+  lukkAdvarselBehandlingEndret?: () => void
 }
 
 export default function RedigerbartBrev({ brev, kanRedigeres, lukkAdvarselBehandlingEndret }: RedigerbartBrevProps) {
@@ -69,7 +69,7 @@ export default function RedigerbartBrev({ brev, kanRedigeres, lukkAdvarselBehand
         setContent(payload.hoveddel)
         setVedlegg(payload.vedlegg)
         setLagretStatus({ lagret: true, beskrivelse: `Lagret kl. ${formaterTidspunkt(new Date())}` })
-        lukkAdvarselBehandlingEndret()
+        if (lukkAdvarselBehandlingEndret) lukkAdvarselBehandlingEndret()
       }
     )
   }

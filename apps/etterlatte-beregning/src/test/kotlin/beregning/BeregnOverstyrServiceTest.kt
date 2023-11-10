@@ -63,6 +63,12 @@ internal class BeregnOverstyrServiceTest {
                             null,
                         ),
                     ),
+                kilde =
+                    mockk {
+                        every { ident } returns "Z123456"
+                        every { tidspunkt } returns Tidspunkt.now()
+                        every { type } returns ""
+                    },
             )
 
         runBlocking {
@@ -117,6 +123,12 @@ internal class BeregnOverstyrServiceTest {
                             null,
                         ),
                     ),
+                kilde =
+                    mockk {
+                        every { ident } returns "Z123456"
+                        every { tidspunkt } returns Tidspunkt.now()
+                        every { type } returns ""
+                    },
             )
 
         runBlocking {
@@ -151,6 +163,12 @@ internal class BeregnOverstyrServiceTest {
                             null,
                         ),
                     ),
+                kilde =
+                    mockk {
+                        every { ident } returns "Z123456"
+                        every { tidspunkt } returns Tidspunkt.now()
+                        every { type } returns ""
+                    },
             )
 
         runBlocking {

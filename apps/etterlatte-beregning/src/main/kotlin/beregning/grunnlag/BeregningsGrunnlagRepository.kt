@@ -137,6 +137,7 @@ class BeregningsGrunnlagRepository(private val dataSource: DataSource) {
                                 "trygdetid" to grunnlag.trygdetid,
                                 "sak_id" to grunnlag.sakId,
                                 "beskrivelse" to grunnlag.beskrivelse,
+                                "kilde" to grunnlag.kilde.toJson(),
                             ),
                     ).asUpdate,
                 )
@@ -185,7 +186,16 @@ class BeregningsGrunnlagRepository(private val dataSource: DataSource) {
 
         val finnOverstyrBeregningGrunnlagForBehandling =
             """
-            SELECT id, behandlings_id, dato_fra_og_med, dato_til_og_med, utbetalt_beloep, trygdetid, sak_id, beskrivelse
+            SELECT
+                id,
+                behandlings_id,
+                dato_fra_og_med,
+                dato_til_og_med,
+                utbetalt_beloep,
+                trygdetid,
+                sak_id,
+                beskrivelse,
+                kilde
             FROM overstyr_beregningsgrunnlag
             WHERE behandlings_id = :behandlings_id
             """.trimIndent()
@@ -198,9 +208,18 @@ class BeregningsGrunnlagRepository(private val dataSource: DataSource) {
 
         val lagreOverstyrBeregningGrunnlagForBehandling =
             """
-            INSERT INTO overstyr_beregningsgrunnlag
-                (id, behandlings_id, dato_fra_og_med, dato_til_og_med, utbetalt_beloep, trygdetid, sak_id, beskrivelse)
-            VALUES(
+            INSERT INTO overstyr_beregningsgrunnlag (
+                id,
+                behandlings_id,
+                dato_fra_og_med,
+                dato_til_og_med,
+                utbetalt_beloep,
+                trygdetid,
+                sak_id,
+                beskrivelse,
+                kilde
+            )                
+            VALUES (
                 :id,
                 :behandlings_id,
                 :dato_fom,
@@ -208,7 +227,8 @@ class BeregningsGrunnlagRepository(private val dataSource: DataSource) {
                 :utbetalt_beloep,
                 :trygdetid,
                 :sak_id,
-                :beskrivelse
+                :beskrivelse,
+                :kilde
             )
             """.trimMargin()
     }
@@ -273,5 +293,6 @@ private fun Row.asOverstyrBeregningGrunnlag(): OverstyrBeregningGrunnlagDao {
         trygdetid = this.longOrNull("trygdetid") ?: 0,
         sakId = this.long("sak_id"),
         beskrivelse = this.string("beskrivelse"),
+        kilde = objectMapper.readValue(this.string("kilde")),
     )
 }

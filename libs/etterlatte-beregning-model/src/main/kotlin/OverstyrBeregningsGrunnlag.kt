@@ -1,9 +1,8 @@
 package no.nav.etterlatte.beregning.grunnlag
 
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import java.time.LocalDate
 import java.util.UUID
-
-// TODO EY- 3079 - beskrivelse for grunnlag og kilde for DTO
 
 data class OverstyrBeregningGrunnlagDao(
     val id: UUID,
@@ -14,6 +13,7 @@ data class OverstyrBeregningGrunnlagDao(
     val trygdetid: Long,
     val sakId: Long,
     val beskrivelse: String,
+    val kilde: Grunnlagsopplysning.Saksbehandler,
 )
 
 data class OverstyrBeregningGrunnlag(
@@ -24,4 +24,5 @@ data class OverstyrBeregningGrunnlag(
 
 data class OverstyrBeregningGrunnlagDTO(
     val perioder: List<GrunnlagMedPeriode<OverstyrBeregningGrunnlag>>,
+    val kilde: Grunnlagsopplysning.Saksbehandler,
 )

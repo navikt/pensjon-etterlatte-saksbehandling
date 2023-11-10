@@ -312,6 +312,11 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest {
                     trygdetid = 35L,
                     sakId = 1L,
                     beskrivelse = "test periode 1",
+                    kilde =
+                        Grunnlagsopplysning.Saksbehandler(
+                            ident = "Z123456",
+                            Tidspunkt.now(),
+                        ),
                 ),
                 OverstyrBeregningGrunnlagDao(
                     id = UUID.randomUUID(),
@@ -322,6 +327,11 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest {
                     trygdetid = 5L,
                     sakId = 1L,
                     beskrivelse = "test periode 2",
+                    kilde =
+                        Grunnlagsopplysning.Saksbehandler(
+                            ident = "Z123456",
+                            Tidspunkt.now(),
+                        ),
                 ),
             ),
         )
@@ -350,6 +360,11 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest {
                     trygdetid = 35L,
                     sakId = 1L,
                     beskrivelse = "test periode 1",
+                    kilde =
+                        Grunnlagsopplysning.Saksbehandler(
+                            ident = "Z123456",
+                            Tidspunkt.now(),
+                        ),
                 ),
                 OverstyrBeregningGrunnlagDao(
                     id = UUID.randomUUID(),
@@ -360,6 +375,11 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest {
                     trygdetid = 5L,
                     sakId = 1L,
                     beskrivelse = "test periode 2",
+                    kilde =
+                        Grunnlagsopplysning.Saksbehandler(
+                            ident = "Z123456",
+                            Tidspunkt.now(),
+                        ),
                 ),
             ),
         )
@@ -376,6 +396,11 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest {
                     trygdetid = 35L,
                     sakId = 1L,
                     beskrivelse = "test periode 3",
+                    kilde =
+                        Grunnlagsopplysning.Saksbehandler(
+                            ident = "Z123456",
+                            Tidspunkt.now(),
+                        ),
                 ),
                 OverstyrBeregningGrunnlagDao(
                     id = UUID.randomUUID(),
@@ -386,6 +411,11 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest {
                     trygdetid = 5L,
                     sakId = 1L,
                     beskrivelse = "test periode 4",
+                    kilde =
+                        Grunnlagsopplysning.Saksbehandler(
+                            ident = "Z123456",
+                            Tidspunkt.now(),
+                        ),
                 ),
             ),
         )

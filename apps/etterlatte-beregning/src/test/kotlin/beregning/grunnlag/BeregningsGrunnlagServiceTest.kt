@@ -116,7 +116,10 @@ internal class BeregningsGrunnlagServiceTest {
         coEvery { behandlingKlient.kanBeregnes(any(), any(), any()) } returns true
         val behandlingId = randomUUID()
         val brukertokeninfo = BrukerTokenInfo.of("token", "s1", null, null, null)
-        coEvery { grunnlagKlient.hentGrunnlag(behandlingId, brukertokeninfo) } returns grunnlagMedEkstraAvdoedForelder(LocalDate.now())
+        coEvery { grunnlagKlient.hentGrunnlag(behandlingId, brukertokeninfo) } returns
+            grunnlagMedEkstraAvdoedForelder(
+                LocalDate.now(),
+            )
         assertThrows<BPBeregningsgrunnlagMerEnnEnAvdoedException> {
             runBlocking {
                 beregningsGrunnlagService.lagreBarnepensjonBeregningsGrunnlag(
@@ -529,7 +532,11 @@ internal class BeregningsGrunnlagServiceTest {
         runBlocking {
             beregningsGrunnlagService.lagreBarnepensjonBeregningsGrunnlag(
                 randomUUID(),
-                BarnepensjonBeregningsGrunnlag(emptyList(), emptyList(), BeregningsMetodeBeregningsgrunnlag(BeregningsMetode.BEST)),
+                BarnepensjonBeregningsGrunnlag(
+                    emptyList(),
+                    emptyList(),
+                    BeregningsMetodeBeregningsgrunnlag(BeregningsMetode.BEST),
+                ),
                 mockk {
                     every { ident() } returns "Z123456"
                 },
@@ -557,7 +564,11 @@ internal class BeregningsGrunnlagServiceTest {
         runBlocking {
             beregningsGrunnlagService.lagreBarnepensjonBeregningsGrunnlag(
                 randomUUID(),
-                BarnepensjonBeregningsGrunnlag(emptyList(), emptyList(), BeregningsMetodeBeregningsgrunnlag(BeregningsMetode.BEST)),
+                BarnepensjonBeregningsGrunnlag(
+                    emptyList(),
+                    emptyList(),
+                    BeregningsMetodeBeregningsgrunnlag(BeregningsMetode.BEST),
+                ),
                 mockk {
                     every { ident() } returns "Z123456"
                 },
@@ -584,6 +595,12 @@ internal class BeregningsGrunnlagServiceTest {
                     trygdetid = 10L,
                     sakId = 1L,
                     beskrivelse = "test periode 1",
+                    kilde =
+                        mockk {
+                            every { ident } returns "Z123456"
+                            every { tidspunkt } returns Tidspunkt.now()
+                            every { type } returns ""
+                        },
                 ),
                 OverstyrBeregningGrunnlagDao(
                     id = randomUUID(),
@@ -594,6 +611,12 @@ internal class BeregningsGrunnlagServiceTest {
                     trygdetid = 20L,
                     sakId = 1L,
                     beskrivelse = "test periode 2",
+                    kilde =
+                        mockk {
+                            every { ident } returns "Z123456"
+                            every { tidspunkt } returns Tidspunkt.now()
+                            every { type } returns ""
+                        },
                 ),
             )
 
@@ -633,7 +656,12 @@ internal class BeregningsGrunnlagServiceTest {
             behandlingKlient.hentBehandling(any(), any())
         } returns mockBehandling(SakType.BARNEPENSJON, randomUUID(), BehandlingType.FØRSTEGANGSBEHANDLING, 3L)
 
-        every { beregningsGrunnlagRepository.lagreOverstyrBeregningGrunnlagForBehandling(behandlingId, capture(slot)) } just runs
+        every {
+            beregningsGrunnlagRepository.lagreOverstyrBeregningGrunnlagForBehandling(
+                behandlingId,
+                capture(slot),
+            )
+        } just runs
         every { beregningsGrunnlagRepository.finnOverstyrBeregningGrunnlagForBehandling(behandlingId) } returns emptyList()
 
         runBlocking {
@@ -653,6 +681,11 @@ internal class BeregningsGrunnlagServiceTest {
                                     fom = fom,
                                     tom = tom,
                                 ),
+                            ),
+                        kilde =
+                            Grunnlagsopplysning.Saksbehandler(
+                                ident = "Z123456",
+                                Tidspunkt.now(),
                             ),
                     ),
                 brukerTokenInfo =

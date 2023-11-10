@@ -543,6 +543,11 @@ internal class BeregningsGrunnlagRoutesTest {
                     trygdetid = 10L,
                     sakId = 1L,
                     beskrivelse = "test periode 1",
+                    kilde =
+                        Grunnlagsopplysning.Saksbehandler(
+                            ident = "Z123456",
+                            Tidspunkt.now(),
+                        ),
                 ),
                 OverstyrBeregningGrunnlagDao(
                     id = randomUUID(),
@@ -553,6 +558,11 @@ internal class BeregningsGrunnlagRoutesTest {
                     trygdetid = 20L,
                     sakId = 1L,
                     beskrivelse = "test periode 2",
+                    kilde =
+                        Grunnlagsopplysning.Saksbehandler(
+                            ident = "Z123456",
+                            Tidspunkt.now(),
+                        ),
                 ),
             )
 
@@ -637,6 +647,11 @@ internal class BeregningsGrunnlagRoutesTest {
                     trygdetid = 10L,
                     sakId = 222L,
                     beskrivelse = "test periode 1",
+                    kilde =
+                        Grunnlagsopplysning.Saksbehandler(
+                            ident = "Z123456",
+                            Tidspunkt.now(),
+                        ),
                 ),
                 OverstyrBeregningGrunnlagDao(
                     id = randomUUID(),
@@ -647,6 +662,11 @@ internal class BeregningsGrunnlagRoutesTest {
                     trygdetid = 20L,
                     sakId = 222L,
                     beskrivelse = "test periode 2",
+                    kilde =
+                        Grunnlagsopplysning.Saksbehandler(
+                            ident = "Z123456",
+                            Tidspunkt.now(),
+                        ),
                 ),
             )
 
@@ -688,6 +708,11 @@ internal class BeregningsGrunnlagRoutesTest {
                                     fom = LocalDate.now().minusYears(6L),
                                     tom = null,
                                 ),
+                            ),
+                        kilde =
+                            Grunnlagsopplysning.Saksbehandler(
+                                ident = "Z123456",
+                                Tidspunkt.now(),
                             ),
                     ),
                 )

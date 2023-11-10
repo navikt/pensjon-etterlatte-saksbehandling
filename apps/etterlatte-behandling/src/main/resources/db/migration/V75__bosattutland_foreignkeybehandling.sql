@@ -1,0 +1,1 @@
+alter table bosattutland add constraint bosattutland_behandlingid_fkey foreign key (behandlingid) references behandling(id)

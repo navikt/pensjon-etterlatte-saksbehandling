@@ -1,6 +1,7 @@
 package no.nav.etterlatte.statistikk.service
 
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
@@ -48,15 +49,22 @@ class StatistikkService(
         vedtakKafkaHendelseType: VedtakKafkaHendelseType,
         tekniskTid: LocalDateTime,
     ): Pair<SakRad?, StoenadRad?> {
-        val sakRad = registrerSakStatistikkForVedtak(vedtak, vedtakKafkaHendelseType, tekniskTid)
+        val sakRad = registrerSakStatistikkForVedtak(vedtak, vedtakKafkaHendelseType, tekniskTid) ?: throw Exception("")
         if (vedtakKafkaHendelseType == VedtakKafkaHendelseType.IVERKSATT) {
             val stoenadRad =
                 when (vedtak.type) {
                     VedtakType.INNVILGELSE,
                     VedtakType.ENDRING,
                     VedtakType.OPPHOER,
-                    -> stoenadRepository.lagreStoenadsrad(vedtakTilStoenadsrad(vedtak, tekniskTid))
-
+                    ->
+                        stoenadRepository.lagreStoenadsrad(
+                            vedtakTilStoenadsrad(
+                                vedtak,
+                                tekniskTid,
+                                sakRad.kilde,
+                                sakRad.pesysId,
+                            ),
+                        )
                     VedtakType.TILBAKEKREVING,
                     VedtakType.AVSLAG,
                     -> null
@@ -114,6 +122,7 @@ class StatistikkService(
                         hentBeregningForBehandling(statistikkBehandling.id),
                         hentAvkortingForBehandling(vedtak),
                     )
+
                 else -> Pair(null, null)
             }
 
@@ -158,7 +167,11 @@ class StatistikkService(
             sakUtland = SakUtland.NASJONAL,
             beregning = beregning,
             avkorting = avkorting,
-            sakYtelsesgruppe = hentSakYtelsesgruppe(statistikkBehandling.sak.sakType, statistikkBehandling.avdoed ?: emptyList()),
+            sakYtelsesgruppe =
+                hentSakYtelsesgruppe(
+                    statistikkBehandling.sak.sakType,
+                    statistikkBehandling.avdoed ?: emptyList(),
+                ),
             avdoedeForeldre = statistikkBehandling.avdoed,
             revurderingAarsak = statistikkBehandling.revurderingsaarsak?.name,
             kilde = statistikkBehandling.kilde,
@@ -200,6 +213,8 @@ class StatistikkService(
     private fun vedtakTilStoenadsrad(
         vedtak: VedtakNyDto,
         tekniskTid: LocalDateTime,
+        vedtaksloesning: Vedtaksloesning,
+        pesysid: Long?,
     ): StoenadRad {
         val persongalleri = hentPersongalleri(behandlingId = vedtak.behandlingId)
 
@@ -236,6 +251,8 @@ class StatistikkService(
             sakUtland = SakUtland.NASJONAL,
             virkningstidspunkt = vedtakInnhold.virkningstidspunkt,
             utbetalingsdato = utbetalingsdato,
+            kilde = vedtaksloesning,
+            pesysId = pesysid,
         )
     }
 
@@ -257,7 +274,12 @@ class StatistikkService(
                 behandlingStatus = behandlingHendelse.name,
                 behandlingResultat = null,
                 resultatBegrunnelse = null,
-                behandlingMetode = hentBehandlingMetode(null, statistikkBehandling.prosesstype, statistikkBehandling.revurderingsaarsak),
+                behandlingMetode =
+                    hentBehandlingMetode(
+                        null,
+                        statistikkBehandling.prosesstype,
+                        statistikkBehandling.revurderingsaarsak,
+                    ),
                 opprettetAv = "GJENNY",
                 ansvarligBeslutter = null,
                 aktorId = statistikkBehandling.sak.ident,
@@ -272,7 +294,11 @@ class StatistikkService(
                 sakUtland = SakUtland.NASJONAL,
                 beregning = null,
                 avkorting = null,
-                sakYtelsesgruppe = hentSakYtelsesgruppe(statistikkBehandling.sak.sakType, statistikkBehandling.avdoed ?: emptyList()),
+                sakYtelsesgruppe =
+                    hentSakYtelsesgruppe(
+                        statistikkBehandling.sak.sakType,
+                        statistikkBehandling.avdoed ?: emptyList(),
+                    ),
                 avdoedeForeldre =
                     if (statistikkBehandling.sak.sakType == SakType.BARNEPENSJON) {
                         statistikkBehandling.avdoed

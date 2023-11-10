@@ -134,7 +134,7 @@ internal class AutomatiskBehandlingRoutesKtTest {
                 behandlingKlient.tildelSaksbehandler(any(), any())
                 service.attesterVedtak(behandlingId, any(), any())
             }
-            coVerify(exactly = 2) {
+            coVerify(exactly = 1) {
                 rapidService.sendToRapid(any())
             }
             coVerify(atLeast = 1) {

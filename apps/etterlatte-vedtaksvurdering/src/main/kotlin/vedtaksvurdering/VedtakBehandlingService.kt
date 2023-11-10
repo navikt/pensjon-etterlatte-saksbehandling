@@ -600,7 +600,7 @@ class VedtakBehandlingService(
         JsonMessage.newMessage(
             mapOf(
                 EVENT_NAME_KEY to vedtakhendelse.toString(),
-                "vedtak" to vedtak.toDto(),
+                "vedtak" to vedtak.toNyDto(),
                 TEKNISK_TID_KEY to tekniskTid.toLocalDatetimeUTC(),
             ) + extraParams,
         ).toJson(),

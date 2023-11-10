@@ -8,6 +8,8 @@ enum class VedtakKafkaHendelseType : EventName {
     FATTET,
     ATTESTERT,
     UNDERKJENT,
+    TIL_SAMORDNING,
+    SAMORDNET,
     IVERKSATT,
     ;
 

@@ -25,6 +25,9 @@ import { FEATURE_TOGGLE_KAN_BRUKE_KLAGE } from '~components/person/OpprettKlage'
 import { ToggleMinOppgaveliste } from '~components/nyoppgavebenk/ToggleMinOppgaveliste'
 import { Tilbakekrevingsbehandling } from '~components/tilbakekreving/Tilbakekrevingsbehandling'
 import GenerellBehandling from '~components/generellbehandling/GenerellBehandling'
+import ManuellBehandling from '~components/manuelbehandling/ManuellBehandling'
+
+const FEATURE_TOGGLE_KAN_BRUKE_GENERELL_BEHANDLING = 'pensjon-etterlatte.kan-bruke-generell-behandling'
 
 function App() {
   const innloggetbrukerHentet = useInnloggetSaksbehandler()
@@ -32,6 +35,8 @@ function App() {
   const dispatch = useAppDispatch()
   const kanBrukeKlage = useFeatureEnabledMedDefault(FEATURE_TOGGLE_KAN_BRUKE_KLAGE, false)
   const kanBrukeOppgavebehandling = useFeatureEnabledMedDefault(FEATURE_TOGGLE_KAN_BRUKE_OPPGAVEBEHANDLING, false)
+  const kanBrukeGenerllBehandling = useFeatureEnabledMedDefault(FEATURE_TOGGLE_KAN_BRUKE_GENERELL_BEHANDLING, false)
+
   const [hentConfigStatus, hentConfig] = useApiCall(hentClientConfig)
 
   useEffect(() => {
@@ -60,9 +65,12 @@ function App() {
                   <Route path="/person/:fnr/sak/:sakId/brev" element={<BrevOversikt />} />
                   <Route path="/person/:fnr/sak/:sakId/brev/:brevId" element={<NyttBrev />} />
                   <Route path="/behandling/:behandlingId/*" element={<Behandling />} />
+                  <Route path="/manuellbehandling/*" element={<ManuellBehandling />} />
                   {kanBrukeKlage ? <Route path="/klage/:klageId/*" element={<Klagebehandling />} /> : null}
                   <Route path="/tilbakekreving/:tilbakekrevingId/*" element={<Tilbakekrevingsbehandling />} />
-                  <Route path="/generellbehandling/:generellbehandlingId" element={<GenerellBehandling />} />
+                  {kanBrukeGenerllBehandling && (
+                    <Route path="/generellbehandling/:generellbehandlingId" element={<GenerellBehandling />} />
+                  )}
                   <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>
               </ConfigContext.Provider>

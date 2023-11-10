@@ -4,14 +4,12 @@ import {
   IEtterbetaling,
   IGyldighetResultat,
   IKommerBarnetTilgode,
-  IUtenlandstilsnitt,
   NyBehandlingRequest,
   Virkningstidspunkt,
 } from '~shared/types/IDetaljertBehandling'
 import { apiClient, ApiResponse } from './apiClient'
 import { ManueltOpphoerDetaljer } from '~components/behandling/manueltopphoeroversikt/ManueltOpphoerOversikt'
 import { Grunnlagsendringshendelse, GrunnlagsendringsListe, IBehandlingListe } from '~components/person/typer'
-import { Revurderingsaarsak } from '~shared/types/Revurderingsaarsak'
 import { InstitusjonsoppholdBegrunnelse } from '~components/person/uhaandtereHendelser/InstitusjonsoppholdVurderingBegrunnelse'
 import { FoersteVirk, ISak, SakType } from '~shared/types/sak'
 import { InstitusjonsoppholdMedKilde } from '~components/person/uhaandtereHendelser/HistoriskeHendelser'
@@ -97,38 +95,6 @@ export const lagreBegrunnelseKommerBarnetTilgode = async (args: {
   })
 }
 
-export const opprettRevurdering = async (args: {
-  sakId: number
-  aarsak: Revurderingsaarsak
-  paaGrunnAvHendelseId?: string
-  begrunnelse?: string
-  fritekstAarsak?: string
-}): Promise<ApiResponse<string>> => {
-  return apiClient.post(`/revurdering/${args.sakId}`, {
-    aarsak: args.aarsak,
-    paaGrunnAvHendelseId: args.paaGrunnAvHendelseId,
-    begrunnelse: args.begrunnelse,
-    fritekstAarsak: args.fritekstAarsak,
-  })
-}
-
-export const hentStoettedeRevurderinger = async (args: {
-  sakType: SakType
-}): Promise<ApiResponse<Array<Revurderingsaarsak>>> => {
-  return apiClient.get(`/stoettederevurderinger/${args.sakType}`)
-}
-
-export const lagreUtenlandstilsnitt = async (args: {
-  behandlingId: string
-  begrunnelse: string
-  svar: string
-}): Promise<ApiResponse<IUtenlandstilsnitt>> => {
-  return apiClient.post(`/behandling/${args.behandlingId}/utenlandstilsnitt`, {
-    utenlandstilsnittType: args.svar,
-    begrunnelse: args.begrunnelse,
-  })
-}
-
 export const lagreBoddEllerArbeidetUtlandet = async (args: {
   behandlingId: string
   begrunnelse: string
@@ -178,4 +144,8 @@ export const slettEtterbetaling = async (args: {
   behandlingId: string
 }): Promise<ApiResponse<IKommerBarnetTilgode>> => {
   return apiClient.delete(`/behandling/${args.behandlingId}/etterbetaling`)
+}
+
+export const oppdaterGrunnlag = async (args: { behandlingId: string }): Promise<ApiResponse<void>> => {
+  return apiClient.post(`/behandling/${args.behandlingId}/oppdater-grunnlag`, {})
 }

@@ -14,9 +14,10 @@ import io.ktor.server.testing.testApplication
 import no.nav.etterlatte.BehandlingIntegrationTest
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
-import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.BehandlingOgSak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
+import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.etterlatte.module
 import no.nav.etterlatte.rapidsandrivers.migrering.AvdoedForelder
 import no.nav.etterlatte.rapidsandrivers.migrering.Beregning
@@ -29,7 +30,6 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import java.math.BigDecimal
 import java.time.YearMonth
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -53,23 +53,22 @@ class MigreringRoutesTest : BehandlingIntegrationTest() {
                     }
                 }
             application { module(applicationContext) }
-            val fnr = Folkeregisteridentifikator.of("08071272487")
             val request =
                 MigreringRequest(
                     pesysId = PesysId(1),
                     enhet = Enhet("4817"),
-                    soeker = fnr,
-                    avdoedForelder = listOf(AvdoedForelder(fnr, Tidspunkt.now())),
+                    soeker = SOEKER_FOEDSELSNUMMER,
+                    avdoedForelder = listOf(AvdoedForelder(AVDOED_FOEDSELSNUMMER, Tidspunkt.now())),
                     gjenlevendeForelder = null,
                     virkningstidspunkt = YearMonth.now(),
-                    foersteVirkningstidspunkt = YearMonth.now().minusYears(10),
                     beregning =
                         Beregning(
-                            brutto = BigDecimal(1000),
-                            netto = BigDecimal(1000),
-                            anvendtTrygdetid = BigDecimal(40),
+                            brutto = 3500,
+                            netto = 3500,
+                            anvendtTrygdetid = 40,
                             datoVirkFom = Tidspunkt.now(),
-                            g = BigDecimal(100000),
+                            prorataBroek = null,
+                            g = 100_000,
                         ),
                     trygdetid = Trygdetid(emptyList()),
                     flyktningStatus = false,
@@ -92,8 +91,7 @@ class MigreringRoutesTest : BehandlingIntegrationTest() {
                     Assertions.assertEquals(HttpStatusCode.OK, status)
                 }.body<DetaljertBehandling>()
 
-            // reformtidspunkt er konfigurert til å være 2023-10 p.t.
-            Assertions.assertEquals(YearMonth.of(2023, 10), behandling.virkningstidspunkt!!.dato)
+            Assertions.assertEquals(YearMonth.of(2024, 1), behandling.virkningstidspunkt!!.dato)
 
             client.get("/saker/${behandling.sak}") {
                 addAuthToken(tokenSaksbehandler)

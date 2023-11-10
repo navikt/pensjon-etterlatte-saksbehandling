@@ -23,6 +23,7 @@ import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
 import no.nav.etterlatte.libs.ktor.restModule
+import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import no.nav.etterlatte.mockFolkeregisterident
 import no.nav.etterlatte.mockGeografiskTilknytning
@@ -119,12 +120,12 @@ class PersonRouteTest {
 
     @Test
     fun `skal returnere folkeregisterIdent`() {
-        val hentPdlIdentRequest = HentPdlIdentRequest(ident = PersonIdent("2305469522806"))
+        val hentPdlIdentRequest = HentPdlIdentRequest(ident = PersonIdent(AVDOED_FOEDSELSNUMMER.value))
         coEvery {
             personService.hentPdlIdentifikator(hentPdlIdentRequest)
         } returns
             mockFolkeregisterident(
-                "70078749472",
+                "09508229892",
             )
 
         testApplication {
@@ -217,7 +218,7 @@ class PersonRouteTest {
 
     @Test
     fun `skal returne 500 naar kall mot folkeregisterident feiler`() {
-        val hentFolkeregisterIdentReq = HentPdlIdentRequest(ident = PersonIdent("2305469522806"))
+        val hentFolkeregisterIdentReq = HentPdlIdentRequest(ident = PersonIdent(AVDOED_FOEDSELSNUMMER.value))
 
         coEvery {
             personService.hentPdlIdentifikator(hentFolkeregisterIdentReq)

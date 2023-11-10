@@ -12,8 +12,8 @@ import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.Context
 import no.nav.etterlatte.DatabaseKontekst
+import no.nav.etterlatte.KONTANT_FOT
 import no.nav.etterlatte.Kontekst
-import no.nav.etterlatte.TRIVIELL_MIDTPUNKT
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.domain.ArbeidsFordelingEnhet
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringStatus
@@ -31,6 +31,10 @@ import no.nav.etterlatte.libs.common.behandling.PersonMedSakerOgRoller
 import no.nav.etterlatte.libs.common.behandling.SakOgRolle
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.grunnlag.Opplysning.Konstant
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.opprettNyOppgaveMedReferanseOgSak
@@ -45,6 +49,8 @@ import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
+import no.nav.etterlatte.libs.common.toJsonNode
+import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED2_FOEDSELSNUMMER
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.sak.SakService
 import org.junit.jupiter.api.AfterEach
@@ -56,10 +62,11 @@ import org.junit.jupiter.api.Test
 import java.sql.Connection
 import java.time.LocalDate
 import java.util.UUID
+import kotlin.random.Random
 
 internal class GrunnlagsendringshendelseServiceTest {
     private val behandlingService = mockk<BehandlingService>()
-    private val grunnlagshendelsesDao = mockk<GrunnlagsendringshendelseDao>()
+    private val grunnlagshendelsesDao = mockk<GrunnlagsendringshendelseDao>(relaxUnitFun = true)
     private val pdlService = mockk<PdlKlientImpl>()
     private val grunnlagClient = mockk<GrunnlagKlient>(relaxed = true, relaxUnitFun = true)
     private val sakService = mockk<SakService>()
@@ -93,10 +100,7 @@ internal class GrunnlagsendringshendelseServiceTest {
                         throw IllegalArgumentException()
                     }
 
-                    override fun <T> inTransaction(
-                        gjenbruk: Boolean,
-                        block: () -> T,
-                    ): T {
+                    override fun <T> inTransaction(block: () -> T): T {
                         return block()
                     }
                 },
@@ -554,7 +558,7 @@ internal class GrunnlagsendringshendelseServiceTest {
     @Test
     fun `skal sette status til SJEKKET_AV_JOBB og opprette oppgave, for hendelser som er sjekket av jobb`() {
         val minutter = 60L
-        val avdoedFnr = "16017919184"
+        val avdoedFnr = AVDOED2_FOEDSELSNUMMER.value
         val sakId = 1L
         val grlgId = UUID.randomUUID()
         val doedsdato = LocalDate.of(2022, 3, 13)
@@ -625,18 +629,77 @@ internal class GrunnlagsendringshendelseServiceTest {
     }
 
     @Test
+    fun `Hendelse forkastes når den nye informasjonen samsvarer med PDL-data`() {
+        val hendelseId = UUID.randomUUID()
+        val minutter = Random.nextLong()
+        val avdoedFnr = AVDOED2_FOEDSELSNUMMER.value
+        val sakId = Random.nextLong()
+        val rolle = Saksrolle.SOEKER
+        val doedsdato = LocalDate.now()
+        val personRolle = rolle.toPersonrolle(SakType.BARNEPENSJON)
+
+        val grunnlagsendringshendelser =
+            listOf(
+                grunnlagsendringshendelseMedSamsvar(
+                    id = hendelseId,
+                    sakId = sakId,
+                    opprettet = Tidspunkt.now().toLocalDatetimeUTC().minusHours(1),
+                    fnr = avdoedFnr,
+                    hendelseGjelderRolle = rolle,
+                    samsvarMellomKildeOgGrunnlag = null,
+                ),
+            )
+
+        val kilde = Grunnlagsopplysning.Pdl(Tidspunkt.now(), null, "opplysningsId1")
+        val grunnlag =
+            Grunnlag(
+                soeker =
+                    mapOf(
+                        Opplysningstype.DOEDSDATO to Konstant(UUID.randomUUID(), kilde, doedsdato.toJsonNode()),
+                    ),
+                familie = emptyList(),
+                sak = emptyMap(),
+                metadata = no.nav.etterlatte.libs.common.grunnlag.Metadata(sakId, 1),
+            )
+        coEvery { grunnlagClient.hentGrunnlag(sakId) } returns grunnlag
+        every { grunnlagshendelsesDao.hentIkkeVurderteGrunnlagsendringshendelserEldreEnn(any()) } returns grunnlagsendringshendelser
+        every { sakService.finnSak(any()) }
+            .returns(Sak(avdoedFnr, SakType.BARNEPENSJON, sakId, Enheter.defaultEnhet.enhetNr))
+
+        every { pdlService.hentPdlModell(any(), any(), any()) }
+            .returns(mockk<PersonDTO> { every { hentDoedsdato() } returns doedsdato })
+
+        grunnlagsendringshendelseService.sjekkKlareGrunnlagsendringshendelser(minutter)
+
+        verify {
+            grunnlagshendelsesDao.hentIkkeVurderteGrunnlagsendringshendelserEldreEnn(minutter)
+            sakService.finnSak(sakId)
+            pdlService.hentPdlModell(avdoedFnr, personRolle, SakType.BARNEPENSJON)
+            grunnlagshendelsesDao.oppdaterGrunnlagsendringStatusOgSamsvar(
+                hendelseId = hendelseId,
+                foerStatus = GrunnlagsendringStatus.VENTER_PAA_JOBB,
+                etterStatus = GrunnlagsendringStatus.FORKASTET,
+                samsvarMellomKildeOgGrunnlag = any(),
+            )
+        }
+        coVerify {
+            grunnlagClient.hentGrunnlag(sakId)
+        }
+    }
+
+    @Test
     fun `Skal kunne sette adressebeskyttelse strengt fortrolig og sette enhet`() {
         val sakIder: Set<Long> = setOf(1, 2, 3, 4, 5, 6)
         val saker =
             sakIder.map {
                 Sak(
                     id = it,
-                    ident = TRIVIELL_MIDTPUNKT.value,
+                    ident = KONTANT_FOT.value,
                     sakType = SakType.BARNEPENSJON,
                     enhet = Enheter.PORSGRUNN.enhetNr,
                 )
             }
-        val fnr = "16017919184"
+        val fnr = "16508201382"
         val adressebeskyttelse =
             Adressebeskyttelse("1", Endringstype.OPPRETTET, fnr, AdressebeskyttelseGradering.STRENGT_FORTROLIG)
 
@@ -674,12 +737,12 @@ internal class GrunnlagsendringshendelseServiceTest {
             sakIder.map {
                 Sak(
                     id = it,
-                    ident = TRIVIELL_MIDTPUNKT.value,
+                    ident = KONTANT_FOT.value,
                     sakType = SakType.BARNEPENSJON,
                     enhet = Enheter.PORSGRUNN.enhetNr,
                 )
             }
-        val fnr = "16017919184"
+        val fnr = AVDOED2_FOEDSELSNUMMER.value
         val adressebeskyttelse =
             Adressebeskyttelse("1", Endringstype.OPPRETTET, fnr, AdressebeskyttelseGradering.FORTROLIG)
 

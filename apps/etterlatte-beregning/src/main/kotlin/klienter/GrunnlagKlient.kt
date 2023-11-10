@@ -17,7 +17,6 @@ import java.util.UUID
 
 interface GrunnlagKlient {
     suspend fun hentGrunnlag(
-        sakId: Long,
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): Grunnlag
@@ -35,11 +34,10 @@ class GrunnlagKlientImpl(config: Config, httpClient: HttpClient) : GrunnlagKlien
     private val resourceUrl = config.getString("grunnlag.resource.url")
 
     override suspend fun hentGrunnlag(
-        sakId: Long,
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): Grunnlag {
-        logger.info("Henter grunnlag for sak med sakId = $sakId")
+        logger.info("Henter grunnlag for behandling med id=$behandlingId")
 
         return retry<Grunnlag> {
             downstreamResourceClient
@@ -47,7 +45,7 @@ class GrunnlagKlientImpl(config: Config, httpClient: HttpClient) : GrunnlagKlien
                     resource =
                         Resource(
                             clientId = clientId,
-                            url = "$resourceUrl/api/grunnlag/sak/$sakId/behandling/$behandlingId",
+                            url = "$resourceUrl/api/grunnlag/behandling/$behandlingId",
                         ),
                     brukerTokenInfo = brukerTokenInfo,
                 )
@@ -60,7 +58,7 @@ class GrunnlagKlientImpl(config: Config, httpClient: HttpClient) : GrunnlagKlien
                 is RetryResult.Success -> it.content
                 is RetryResult.Failure -> {
                     throw GrunnlagKlientException(
-                        "Klarte ikke hente grunnlag for sak med sakId=$sakId",
+                        "Klarte ikke hente grunnlag for behandling med id=$behandlingId",
                         it.samlaExceptions(),
                     )
                 }

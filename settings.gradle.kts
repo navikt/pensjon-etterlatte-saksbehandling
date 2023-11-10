@@ -22,6 +22,8 @@ include(
     "apps:etterlatte-klage",
     "apps:etterlatte-tilbakekreving",
     "apps:etterlatte-hendelser-pdl",
+    "apps:etterlatte-hendelser-joark",
+    "apps:etterlatte-hendelser-samordning",
     "apps:etterlatte-migrering",
     "apps:etterlatte-statistikk",
     "apps:etterlatte-vilkaarsvurdering",
@@ -53,6 +55,6 @@ include(
     "libs:etterlatte-vedtaksvurdering-model",
     "libs:etterlatte-vilkaarsvurdering-model",
     "libs:etterlatte-tilbakekreving-model",
-    "jobs:test-fordeler",
     "jobs:start-regulering",
+    "jobs:start-grunnlagsversjonering",
 )

@@ -4,8 +4,8 @@ import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.model.AvslagBrevData
 import no.nav.etterlatte.brev.model.OpphoerBrevData
 import no.nav.etterlatte.libs.common.behandling.Navn
-import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import java.time.LocalDate
 
 data class AdopsjonRevurderingBrevdata(
@@ -24,11 +24,15 @@ data class AdopsjonRevurderingBrevdata(
                 AvslagBrevData.valider<RevurderingInfo.Adopsjon>(
                     generellBrevData.revurderingsaarsak,
                     generellBrevData.forenkletVedtak.revurderingInfo,
-                    RevurderingAarsak.ADOPSJON,
+                    Revurderingaarsak.ADOPSJON,
                 )
 
+            val virkningstidspunkt =
+                requireNotNull(generellBrevData.forenkletVedtak.virkningstidspunkt) {
+                    "brev for behandling=${generellBrevData.behandlingId} må ha virkningstidspunkt"
+                }
             return AdopsjonRevurderingBrevdata(
-                virkningsdato = generellBrevData.forenkletVedtak.virkningstidspunkt.atDay(1),
+                virkningsdato = virkningstidspunkt.atDay(1),
                 adopsjonsdato = adopsjonsdato,
                 adoptertAv1 = revurderingInfo.adoptertAv1,
                 adoptertAv2 = revurderingInfo.adoptertAv2,
@@ -52,10 +56,14 @@ data class OmgjoeringAvFarskapRevurderingBrevdata(
                 AvslagBrevData.valider<RevurderingInfo.OmgjoeringAvFarskap>(
                     generellBrevData.revurderingsaarsak,
                     generellBrevData.forenkletVedtak.revurderingInfo,
-                    RevurderingAarsak.OMGJOERING_AV_FARSKAP,
+                    Revurderingaarsak.OMGJOERING_AV_FARSKAP,
                 )
+            val virkningstidspunkt =
+                requireNotNull(generellBrevData.forenkletVedtak.virkningstidspunkt) {
+                    "Mangler virkningstidspunkt ${generellBrevData.behandlingId}"
+                }
             return OmgjoeringAvFarskapRevurderingBrevdata(
-                virkningsdato = generellBrevData.forenkletVedtak.virkningstidspunkt.atDay(1),
+                virkningsdato = virkningstidspunkt.atDay(1),
                 naavaerendeFar = revurderingInfo.naavaerendeFar,
                 forrigeFar = revurderingInfo.forrigeFar,
                 opprinneligInnvilgelsesdato = opprinneligInnvilgelsesdato,

@@ -96,11 +96,12 @@ const OPPGAVETYPEFILTER: Record<OppgavetypeFilterKeys, string> = {
   VURDER_KONSEKVENS: 'Vurder konsekvense for hendelse',
   UNDERKJENT: 'Underkjent behandling',
   GOSYS: 'Gosys',
-  UTLAND: 'Utland',
+  KRAVPAKKE_UTLAND: 'Kravpakke utland',
   KLAGE: 'Klage',
   TILBAKEKREVING: 'Tilbakekreving',
   OMGJOERING: 'Omgjøring',
   MANUELL_JOURNALFOERING: 'Manuell journalføring',
+  JOURNALFOERING: 'Journalføring',
 } as const
 
 export const oppgavetypefilter = (kanBrukeKlage: boolean): Array<[OppgavetypeFilterKeys, string]> => {

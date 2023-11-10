@@ -2,13 +2,14 @@ package no.nav.etterlatte.brev.behandling
 
 import no.nav.etterlatte.brev.model.EtterbetalingDTO
 import no.nav.etterlatte.brev.model.Spraak
-import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
+import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
-import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.tilbakekreving.Tilbakekreving
+import no.nav.etterlatte.libs.common.trygdetid.BeregnetTrygdetidGrunnlagDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
 import no.nav.pensjon.brevbaker.api.model.Kroner
 import java.time.LocalDate
 import java.time.YearMonth
@@ -20,40 +21,22 @@ data class GenerellBrevData(
     val behandlingId: UUID,
     val forenkletVedtak: ForenkletVedtak,
     val spraak: Spraak,
-    val revurderingsaarsak: RevurderingAarsak? = null,
+    val systemkilde: Vedtaksloesning,
+    val revurderingsaarsak: Revurderingaarsak? = null,
 )
 
-data class Behandling(
-    val sakId: Long,
-    val sakType: SakType,
-    val behandlingId: UUID,
-    val spraak: Spraak,
-    val personerISak: PersonerISak,
-    val vedtak: ForenkletVedtak,
-    val utbetalingsinfo: Utbetalingsinfo? = null,
-    val vilkaarsvurdering: VilkaarsvurderingDto,
-    val forrigeUtbetalingsinfo: Utbetalingsinfo? = null,
-    val avkortingsinfo: Avkortingsinfo? = null,
-    val revurderingsaarsak: RevurderingAarsak? = null,
-    val revurderingInfo: RevurderingInfo? = null,
-    val virkningsdato: YearMonth? = null,
-    val opprinneligInnvilgelsesdato: LocalDate? = null, // Kun opphør RevurderingAarsak.OMGJOERING_AV_FARSKAP TODO: fix
-    val adopsjonsdato: LocalDate? = null,
-    val trygdetid: List<Trygdetidsperiode>? = null,
-    val etterbetalingDTO: EtterbetalingDTO?,
-) {
-    init {
-        if (vedtak.type == VedtakType.INNVILGELSE) {
-            requireNotNull(utbetalingsinfo) { "Utbetalingsinformasjon mangler på behandling (id=$behandlingId" }
-        }
-    }
-}
+data class Trygdetid(
+    val aarTrygdetid: Int,
+    val maanederTrygdetid: Int,
+    val perioder: List<Trygdetidsperiode>,
+    val overstyrt: Boolean,
+)
 
 data class Trygdetidsperiode(
     val datoFOM: LocalDate,
     val datoTOM: LocalDate?,
     val land: String,
-    val opptjeningsperiode: String,
+    val opptjeningsperiode: BeregnetTrygdetidGrunnlagDto?,
 )
 
 data class ForenkletVedtak(
@@ -64,8 +47,9 @@ data class ForenkletVedtak(
     val saksbehandlerIdent: String,
     val attestantIdent: String?,
     val vedtaksdato: LocalDate?,
-    val virkningstidspunkt: YearMonth,
+    val virkningstidspunkt: YearMonth? = null,
     val revurderingInfo: RevurderingInfo? = null,
+    val tilbakekreving: Tilbakekreving? = null,
 )
 
 data class Utbetalingsinfo(
@@ -74,7 +58,23 @@ data class Utbetalingsinfo(
     val virkningsdato: LocalDate,
     val soeskenjustering: Boolean,
     val beregningsperioder: List<Beregningsperiode>,
-)
+) {
+    companion object {
+        fun kopier(
+            utbetalingsinfo: Utbetalingsinfo,
+            etterbetalingDTO: EtterbetalingDTO?,
+        ) = if (etterbetalingDTO == null) {
+            utbetalingsinfo
+        } else {
+            utbetalingsinfo.copy(
+                beregningsperioder =
+                    utbetalingsinfo.beregningsperioder.filter {
+                        YearMonth.from(it.datoFOM) > YearMonth.from(etterbetalingDTO.tilDato)
+                    },
+            )
+        }
+    }
+}
 
 data class Avkortingsinfo(
     val grunnbeloep: Kroner,

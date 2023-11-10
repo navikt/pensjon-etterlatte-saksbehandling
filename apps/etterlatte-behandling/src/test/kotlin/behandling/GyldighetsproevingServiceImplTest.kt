@@ -69,10 +69,7 @@ internal class GyldighetsproevingServiceImplTest {
                         throw IllegalArgumentException()
                     }
 
-                    override fun <T> inTransaction(
-                        gjenbruk: Boolean,
-                        block: () -> T,
-                    ): T {
+                    override fun <T> inTransaction(block: () -> T): T {
                         return block()
                     }
                 },
@@ -115,7 +112,6 @@ internal class GyldighetsproevingServiceImplTest {
                         Grunnlagsopplysning.Saksbehandler.create("ident"),
                         "begrunnelse",
                     ),
-                utenlandstilsnitt = null,
                 boddEllerArbeidetUtlandet = null,
                 kommerBarnetTilgode = null,
                 kilde = Vedtaksloesning.GJENNY,
@@ -127,7 +123,7 @@ internal class GyldighetsproevingServiceImplTest {
     }
 
     @Test
-    fun `lagring av gyldighetsproeving skal lagre og returnere gyldighetsresultat for innsender er gjenlevende`() {
+    fun `lagring av gyldighetsproeving skal lagre og returnere gyldighetsresultat for manuell vurdering`() {
         val id = UUID.randomUUID()
         val now = LocalDateTime.now()
 
@@ -141,7 +137,6 @@ internal class GyldighetsproevingServiceImplTest {
                 kommerBarnetTilgode = null,
                 virkningstidspunkt = null,
                 boddEllerArbeidetUtlandet = null,
-                utenlandstilsnitt = null,
                 soeknadMottattDato = now,
                 gyldighetsproeving = null,
                 prosesstype = Prosesstype.MANUELL,
@@ -159,7 +154,7 @@ internal class GyldighetsproevingServiceImplTest {
                 vurderinger =
                     listOf(
                         VurdertGyldighet(
-                            navn = GyldighetsTyper.INNSENDER_ER_GJENLEVENDE,
+                            navn = GyldighetsTyper.MANUELL_VURDERING,
                             resultat = VurderingsResultat.OPPFYLT,
                             basertPaaOpplysninger =
                                 ManuellVurdering(
@@ -215,7 +210,6 @@ internal class GyldighetsproevingServiceImplTest {
                         Grunnlagsopplysning.Saksbehandler.create("ident"),
                         "begrunnelse",
                     ),
-                utenlandstilsnitt = null,
                 boddEllerArbeidetUtlandet = null,
                 kommerBarnetTilgode = null,
                 kilde = Vedtaksloesning.GJENNY,
@@ -259,7 +253,6 @@ internal class GyldighetsproevingServiceImplTest {
                         Grunnlagsopplysning.Saksbehandler.create("ident"),
                         "begrunnelse",
                     ),
-                utenlandstilsnitt = null,
                 boddEllerArbeidetUtlandet = null,
                 kommerBarnetTilgode = null,
                 kilde = Vedtaksloesning.GJENNY,
@@ -303,7 +296,6 @@ internal class GyldighetsproevingServiceImplTest {
                         Grunnlagsopplysning.Saksbehandler.create("ident"),
                         "begrunnelse",
                     ),
-                utenlandstilsnitt = null,
                 boddEllerArbeidetUtlandet = null,
                 kommerBarnetTilgode = null,
                 kilde = Vedtaksloesning.GJENNY,

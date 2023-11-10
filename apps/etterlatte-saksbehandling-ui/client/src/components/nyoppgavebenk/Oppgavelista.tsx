@@ -6,20 +6,9 @@ import styled from 'styled-components'
 import { OPPGAVESTATUSFILTER } from '~components/nyoppgavebenk/Oppgavelistafiltre'
 import { HandlingerForOppgave } from '~components/nyoppgavebenk/HandlingerForOppgave'
 import { OppgavetypeTag, SaktypeTag } from '~components/nyoppgavebenk/Tags'
-import { isBefore } from 'date-fns'
 import SaksoversiktLenke from '~components/nyoppgavebenk/SaksoversiktLenke'
 import { RedigerSaksbehandler } from './tildeling/RedigerSaksbehandler'
-import classnames from 'classnames'
-
-export const FristWrapper = ({ dato }: { dato?: string }) => {
-  const fristHarPassert = !!dato && isBefore(new Date(dato), new Date())
-
-  return (
-    <span className={classnames({ 'navds-error-message': fristHarPassert })}>
-      {dato ? formaterStringDato(dato) : 'Ingen frist'}
-    </span>
-  )
-}
+import { FristWrapper } from '~components/nyoppgavebenk/FristWrapper'
 
 export const PaginationWrapper = styled.div`
   display: flex;

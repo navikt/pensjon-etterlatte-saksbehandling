@@ -1,15 +1,25 @@
 package no.nav.etterlatte.behandling.generellbehandling
 
+import no.nav.etterlatte.behandling.BehandlingService
+import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
+import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
+import no.nav.etterlatte.inTransaction
+import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
 import no.nav.etterlatte.libs.common.generellbehandling.DokumentMedSendtDato
 import no.nav.etterlatte.libs.common.generellbehandling.GenerellBehandling
 import no.nav.etterlatte.libs.common.generellbehandling.Innhold
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
+import no.nav.etterlatte.libs.common.person.Person
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.oppgave.OppgaveService
+import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.etterlatte.token.Saksbehandler
 import org.slf4j.LoggerFactory
+import java.time.temporal.ChronoUnit
 import java.util.UUID
 
 class DokumentManglerDatoException(message: String) : Exception(message)
@@ -25,6 +35,8 @@ class KanIkkeEndreFattetEllerAttestertBehandling(message: String) : Exception(me
 class GenerellBehandlingService(
     private val generellBehandlingDao: GenerellBehandlingDao,
     private val oppgaveService: OppgaveService,
+    private val behandlingService: BehandlingService,
+    private val grunnlagKlient: GrunnlagKlient,
 ) {
     private val logger = LoggerFactory.getLogger(GenerellBehandlingService::class.java)
 
@@ -35,7 +47,7 @@ class GenerellBehandlingService(
                 opprettetbehandling.id.toString(),
                 opprettetbehandling.sakId,
                 OppgaveKilde.GENERELL_BEHANDLING,
-                OppgaveType.UTLAND,
+                OppgaveType.KRAVPAKKE_UTLAND,
                 null,
             )
         tildelSaksbehandlerTilNyOppgaveHvisFinnes(oppgaveForGenerellBehandling, opprettetbehandling)
@@ -74,18 +86,20 @@ class GenerellBehandlingService(
             "Behandlingen må ha status opprettet, hadde ${generellBehandling.status}"
         }
         when (generellBehandling.innhold) {
-            is Innhold.Utland -> validerUtland(generellBehandling.innhold as Innhold.Utland)
+            is Innhold.KravpakkeUtland -> validerUtland(generellBehandling.innhold as Innhold.KravpakkeUtland)
             is Innhold.Annen -> throw NotImplementedError("Ikke implementert")
             null -> throw NotImplementedError("Ikke implementert")
         }
         oppdaterBehandling(generellBehandling.copy(status = GenerellBehandling.Status.FATTET))
         oppgaveService.ferdigStillOppgaveUnderBehandling(generellBehandling.id.toString(), saksbehandler)
+        val trettiDagerFremITid = Tidspunkt.now().plus(30L, ChronoUnit.DAYS)
         oppgaveService.opprettNyOppgaveMedSakOgReferanse(
             generellBehandling.id.toString(),
             generellBehandling.sakId,
             OppgaveKilde.GENERELL_BEHANDLING,
             OppgaveType.ATTESTERING,
-            merknad = "Attestering av generell behandling type ${generellBehandling.type.name}",
+            merknad = "Attestering av ${generellBehandling.type.name}",
+            frist = trettiDagerFremITid,
         )
     }
 
@@ -103,7 +117,7 @@ class GenerellBehandlingService(
         oppgaveService.ferdigStillOppgaveUnderBehandling(generellbehandlingId.toString(), saksbehandler)
     }
 
-    private fun validerUtland(innhold: Innhold.Utland) {
+    private fun validerUtland(innhold: Innhold.KravpakkeUtland) {
         if (innhold.landIsoKode.isEmpty()) {
             throw ManglerLandkodeException("Mangler landkode")
         }
@@ -113,19 +127,13 @@ class GenerellBehandlingService(
         if (innhold.rinanummer.isEmpty()) {
             throw ManglerRinanummerException("Må ha rinanummer")
         }
-        validerHvisAvhuketSaaHarDato(innhold.dokumenter.p2100, "P2100")
-        validerHvisAvhuketSaaHarDato(innhold.dokumenter.p3000, "P3000")
-        validerHvisAvhuketSaaHarDato(innhold.dokumenter.p4000, "P4000")
-        validerHvisAvhuketSaaHarDato(innhold.dokumenter.p5000, "P5000")
-        validerHvisAvhuketSaaHarDato(innhold.dokumenter.p6000, "P6000")
+        innhold.dokumenter.forEach { doc -> validerHvisAvhuketSaaHarDato(doc) }
     }
 
-    private fun validerHvisAvhuketSaaHarDato(
-        dokumentMedSendtDato: DokumentMedSendtDato,
-        dokumentnavn: String,
-    ) {
+    private fun validerHvisAvhuketSaaHarDato(dokumentMedSendtDato: DokumentMedSendtDato) {
         if (dokumentMedSendtDato.sendt) {
-            dokumentMedSendtDato.dato ?: throw DokumentManglerDatoException("Dokument $dokumentnavn er markert som sendt men mangler dato")
+            dokumentMedSendtDato.dato
+                ?: throw DokumentManglerDatoException("Dokument ${dokumentMedSendtDato.dokumenttype} er markert som sendt men mangler dato")
         }
     }
 
@@ -153,4 +161,68 @@ class GenerellBehandlingService(
     fun hentBehandlingForSak(sakId: Long): List<GenerellBehandling> {
         return generellBehandlingDao.hentGenerellBehandlingForSak(sakId)
     }
+
+    private fun hentGenerellbehandlingSinTilknyttetedeBehandling(tilknyttetBehandlingId: UUID): GenerellBehandling? {
+        return generellBehandlingDao.hentBehandlingForTilknyttetBehandling(tilknyttetBehandlingId)
+    }
+
+    suspend fun hentKravpakkeForSak(
+        sakId: Long,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): KravPakkeMedAvdoed {
+        val (kravpakke, forstegangsbehandlingMedKravpakke) =
+            inTransaction {
+                val behandlingerForSak = behandlingService.hentBehandlingerISak(sakId)
+                val foerstegangsbehandlingMedKravpakke =
+                    behandlingerForSak.find {
+                            behandling ->
+                        (behandling is Foerstegangsbehandling) && behandling.boddEllerArbeidetUtlandet?.skalSendeKravpakke == true
+                    }
+                        ?: throw FantIkkeFoerstegangsbehandlingForKravpakkeOgSak("Fant ikke behandlingen for sak $sakId")
+                val kravpakke =
+                    this.hentGenerellbehandlingSinTilknyttetedeBehandling(foerstegangsbehandlingMedKravpakke.id)
+                        ?: throw FantIkkeKravpakkeForFoerstegangsbehandling(
+                            "Fant ikke" +
+                                " kravpakke for ${foerstegangsbehandlingMedKravpakke.id}",
+                        )
+                Pair(kravpakke, foerstegangsbehandlingMedKravpakke)
+            }
+        if (kravpakke.status == GenerellBehandling.Status.ATTESTERT) {
+            val avdoed =
+                grunnlagKlient.finnPersonOpplysning(
+                    forstegangsbehandlingMedKravpakke.id,
+                    Opplysningstype.AVDOED_PDL_V1,
+                    brukerTokenInfo,
+                ) ?: throw FantIkkeAvdoedException("Fant ikke avdød for sak: $sakId behandlingid: ${forstegangsbehandlingMedKravpakke.id}")
+            return KravPakkeMedAvdoed(kravpakke, avdoed.opplysning)
+        } else {
+            throw RuntimeException("Kravpakken for sak $sakId har ikke blitt attestert, status: ${kravpakke.status}")
+        }
+    }
 }
+
+class FantIkkeAvdoedException(msg: String) :
+    ForespoerselException(
+        status = 400,
+        code = "FANT_IKKE_AVDOED",
+        detail = msg,
+    )
+
+class FantIkkeFoerstegangsbehandlingForKravpakkeOgSak(msg: String) :
+    ForespoerselException(
+        status = 400,
+        code = "FANT_IKKE_FOERSTEGANGSBEHANDLING_FOR_KRAVPAKKE",
+        detail = msg,
+    )
+
+class FantIkkeKravpakkeForFoerstegangsbehandling(msg: String) :
+    ForespoerselException(
+        status = 400,
+        code = "FANT_IKKE_KRAVPAKKE_FOR_FOERSTEGANGSBEHANDLING",
+        detail = msg,
+    )
+
+data class KravPakkeMedAvdoed(
+    val kravpakke: GenerellBehandling,
+    val avdoed: Person,
+)

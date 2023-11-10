@@ -9,8 +9,8 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.put
 import io.ktor.server.routing.route
 import no.nav.etterlatte.inTransaction
-import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
-import no.nav.etterlatte.libs.common.behandlingsId
+import no.nav.etterlatte.libs.common.BEHANDLINGID_CALL_PARAMETER
+import no.nav.etterlatte.libs.common.behandlingId
 import no.nav.etterlatte.libs.common.sak.BehandlingOgSak
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 
@@ -26,8 +26,8 @@ fun Route.migreringRoutes(migreringService: MigreringService) {
                     )
             }
         }
-        put("/{$BEHANDLINGSID_CALL_PARAMETER}/avbryt") {
-            inTransaction { migreringService.avbrytBehandling(behandlingsId, brukerTokenInfo) }
+        put("/{$BEHANDLINGID_CALL_PARAMETER}/avbryt") {
+            inTransaction { migreringService.avbrytBehandling(behandlingId, brukerTokenInfo) }
             call.respond(HttpStatusCode.OK)
         }
     }

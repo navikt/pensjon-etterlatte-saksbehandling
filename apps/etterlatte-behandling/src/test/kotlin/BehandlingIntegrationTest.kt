@@ -24,7 +24,7 @@ import no.nav.etterlatte.behandling.klienter.NavAnsattKlient
 import no.nav.etterlatte.behandling.klienter.Norg2Klient
 import no.nav.etterlatte.behandling.klienter.OpprettetBrevDto
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
-import no.nav.etterlatte.behandling.tilbakekreving.Tilbakekreving
+import no.nav.etterlatte.behandling.tilbakekreving.TilbakekrevingBehandling
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.config.ApplicationContext
 import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
@@ -49,6 +49,7 @@ import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.toObjectNode
+import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingVedtakLagretDto
 import no.nav.etterlatte.libs.database.POSTGRES_VERSION
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
@@ -117,6 +118,7 @@ abstract class BehandlingIntegrationTest {
                         put("SKJERMING_URL", "http://localhost")
                         put("OPPGAVE_URL", "http://localhost")
                         put("ETTERLATTE_KLAGE_API_URL", "http://localhost")
+                        put("ETTERLATTE_TILBAKEKREVING_URL", "http://localhost")
                         put("OPPGAVE_SCOPE", "scope")
                     }.let { Miljoevariabler(it) },
                 config =
@@ -141,6 +143,7 @@ abstract class BehandlingIntegrationTest {
                 gosysOppgaveKlient = GosysOppgaveKlientTest(),
                 brevApiHttpClient = BrevApiKlientTest(),
                 klageHttpClient = klageHttpClientTest(),
+                tilbakekrevingHttpClient = tilbakekrevingHttpClientTest(),
             ).also {
                 it.dataSource.migrate()
             }
@@ -199,7 +202,7 @@ abstract class BehandlingIntegrationTest {
         HttpClient(MockEngine) {
             engine {
                 addHandler { request ->
-                    if (request.url.fullPath.matches(Regex("api/grunnlag/sak/[0-9]+/behandling/*"))) {
+                    if (request.url.fullPath.matches(Regex("api/grunnlag/behandling/*"))) {
                         val headers = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
                         respond(Grunnlag.empty().toJson(), headers = headers)
                     } else if (request.url.fullPath.endsWith("/PERSONGALLERI_V1")) {
@@ -236,6 +239,8 @@ abstract class BehandlingIntegrationTest {
                         )
                     } else if (request.url.fullPath.endsWith("/oppdater-grunnlag")) {
                         respondOk()
+                    } else if (request.url.fullPath.endsWith("/opprett-grunnlag")) {
+                        respondOk()
                     } else {
                         error(request.url.fullPath)
                     }
@@ -250,6 +255,21 @@ abstract class BehandlingIntegrationTest {
         }
 
     fun klageHttpClientTest() =
+        HttpClient(MockEngine) {
+            engine {
+                addHandler {
+                    respondOk()
+                }
+            }
+            install(ContentNegotiation) {
+                register(
+                    ContentType.Application.Json,
+                    JacksonConverter(objectMapper),
+                )
+            }
+        }
+
+    fun tilbakekrevingHttpClientTest() =
         HttpClient(MockEngine) {
             engine {
                 addHandler {
@@ -417,7 +437,6 @@ abstract class BehandlingIntegrationTest {
 
 class GrunnlagKlientTest : GrunnlagKlient {
     override suspend fun finnPersonOpplysning(
-        sakId: Long,
         behandlingId: UUID,
         opplysningsType: Opplysningstype,
         brukerTokenInfo: BrukerTokenInfo,
@@ -427,7 +446,6 @@ class GrunnlagKlientTest : GrunnlagKlient {
     }
 
     override suspend fun hentPersongalleri(
-        sakId: Long,
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): Grunnlagsopplysning<Persongalleri> {
@@ -449,8 +467,16 @@ class GrunnlagKlientTest : GrunnlagKlient {
 }
 
 class VedtakKlientTest : VedtakKlient {
+    override suspend fun lagreVedtakTilbakekreving(
+        tilbakekrevingBehandling: TilbakekrevingBehandling,
+        brukerTokenInfo: BrukerTokenInfo,
+        enhet: String,
+    ): Long {
+        return 123L
+    }
+
     override suspend fun fattVedtakTilbakekreving(
-        tilbakekreving: Tilbakekreving,
+        tilbakekrevingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
         enhet: String,
     ): Long {
@@ -461,8 +487,13 @@ class VedtakKlientTest : VedtakKlient {
         tilbakekrevingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
         enhet: String,
-    ): Long {
-        return 123L
+    ): TilbakekrevingVedtakLagretDto {
+        return TilbakekrevingVedtakLagretDto(
+            id = 123L,
+            fattetAv = "saksbehandler",
+            enhet = "enhet",
+            dato = LocalDate.now(),
+        )
     }
 
     override suspend fun underkjennVedtakTilbakekreving(

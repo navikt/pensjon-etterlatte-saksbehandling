@@ -1,11 +1,20 @@
 import { Kilde } from '~shared/types/kilde'
 import { apiClient, ApiResponse } from './apiClient'
 
-export const hentVilkaarsvurdering = async (behandlingsId: string): Promise<ApiResponse<IVilkaarsvurdering>> =>
-  apiClient.get<IVilkaarsvurdering>(`/vilkaarsvurdering/${behandlingsId}`)
+export const hentVilkaarsvurdering = async (behandlingId: string): Promise<ApiResponse<IVilkaarsvurdering>> =>
+  apiClient.get<IVilkaarsvurdering>(`/vilkaarsvurdering/${behandlingId}`)
 
-export const opprettVilkaarsvurdering = async (behandlingsId: string): Promise<ApiResponse<IVilkaarsvurdering>> =>
-  apiClient.post<IVilkaarsvurdering>(`/vilkaarsvurdering/${behandlingsId}/opprett`, {})
+export const opprettVilkaarsvurdering = async (args: {
+  behandlingId: string
+  kopierVedRevurdering: boolean
+}): Promise<ApiResponse<IVilkaarsvurdering>> =>
+  apiClient.post<IVilkaarsvurdering>(
+    `/vilkaarsvurdering/${args.behandlingId}/opprett?kopierVedRevurdering=${args.kopierVedRevurdering}`,
+    {}
+  )
+
+export const slettVilkaarsvurdering = async (behandlingsId: string): Promise<ApiResponse<void>> =>
+  apiClient.delete(`/vilkaarsvurdering/${behandlingsId}`)
 
 export const vurderVilkaar = async (args: {
   behandlingId: string
@@ -31,6 +40,13 @@ export const lagreTotalVurdering = async (args: {
     kommentar: args.kommentar,
   })
 
+export const oppdaterStatus = async (behandlingId: string): Promise<ApiResponse<StatusOppdatert>> =>
+  apiClient.post(`/vilkaarsvurdering/${behandlingId}/oppdater-status`, {})
+
+export interface StatusOppdatert {
+  statusOppdatert: boolean
+}
+
 export interface IVilkaarsvurdering {
   vilkaar: Vilkaar[]
   resultat?: VilkaarsvurderingVurdertResultat
@@ -48,9 +64,16 @@ export interface Vilkaar {
 
 export interface Vilkaarsgrunnlag<T> {
   id: string
-  opplysningsType: string
+  opplysningsType: VilkaarsgrunnlagOpplysningstyper
   kilde: Kilde
   opplysning: T
+}
+
+export enum VilkaarsgrunnlagOpplysningstyper {
+  SOEKER_FOEDSELSDATO = 'SOEKER_FOEDSELSDATO',
+  AVDOED_DOEDSDATO = 'AVDOED_DOEDSDATO',
+  VIRKNINGSTIDSPUNKT = 'VIRKNINGSTIDSPUNKT',
+  SOEKNAD_MOTTATT_DATO = 'SOEKNAD_MOTTATT_DATO',
 }
 
 export interface Delvilkaar {

@@ -9,10 +9,18 @@ import java.util.UUID
 
 data class TrygdetidDto(
     val id: UUID,
+    val ident: String,
     val behandlingId: UUID,
     val beregnetTrygdetid: DetaljertBeregnetTrygdetidDto?,
     val trygdetidGrunnlag: List<TrygdetidGrunnlagDto>,
     val opplysninger: GrunnlagOpplysningerDto,
+    val overstyrtNorskPoengaar: Int?,
+)
+
+data class TrygdetidOverstyringDto(
+    val id: UUID,
+    val behandlingId: UUID,
+    val overstyrtNorskPoengaar: Int?,
 )
 
 data class GrunnlagOpplysningerDto(
@@ -62,6 +70,13 @@ data class BeregnetTrygdetidGrunnlagDto(
     val aar: Int,
 )
 
+data class MigreringOverstyringDto(
+    val ident: String,
+    val detaljertBeregnetTrygdetidResultat: DetaljertBeregnetTrygdetidResultat,
+)
+
+data class StatusOppdatertDto(val statusOppdatert: Boolean)
+
 data class DetaljertBeregnetTrygdetidResultat(
     val faktiskTrygdetidNorge: FaktiskTrygdetid?,
     val faktiskTrygdetidTeoretisk: FaktiskTrygdetid?,
@@ -73,17 +88,31 @@ data class DetaljertBeregnetTrygdetidResultat(
     val overstyrt: Boolean,
 ) {
     companion object {
-        fun fraSamletTrygdetidNorge(verdi: Int) =
+        fun fraSamletTrygdetidNorge(anvendtTrygdetid: Int) =
             DetaljertBeregnetTrygdetidResultat(
                 faktiskTrygdetidNorge = null,
                 faktiskTrygdetidTeoretisk = null,
                 fremtidigTrygdetidNorge = null,
                 fremtidigTrygdetidTeoretisk = null,
-                samletTrygdetidNorge = verdi,
+                samletTrygdetidNorge = anvendtTrygdetid,
                 samletTrygdetidTeoretisk = null,
                 prorataBroek = null,
-                overstyrt = false,
+                overstyrt = true,
             )
+
+        fun fraSamletTrygdetidProrata(
+            anvendtTrygdetid: Int,
+            prorataBroek: IntBroek?,
+        ) = DetaljertBeregnetTrygdetidResultat(
+            faktiskTrygdetidNorge = null,
+            faktiskTrygdetidTeoretisk = null,
+            fremtidigTrygdetidNorge = null,
+            fremtidigTrygdetidTeoretisk = null,
+            samletTrygdetidNorge = null,
+            samletTrygdetidTeoretisk = anvendtTrygdetid,
+            prorataBroek = prorataBroek,
+            overstyrt = true,
+        )
     }
 }
 

@@ -66,13 +66,16 @@ spec:
       value: 59967ac8-009c-492e-a618-e5a0f6b3e4e4
     - name: BEHANDLING_AZURE_SCOPE
       value: api://dev-gcp.etterlatte.etterlatte-behandling/.default
+    - name: SAMORDNEVEDTAK_URL
+      value: https://sam-q2.dev-fss-pub.nais.io
+    - name: SAMORDNEVEDTAK_AZURE_SCOPE
+      value: api://dev-fss.pensjonsamhandling.sam-q2/.default
   envFrom:
     - secret: my-application-unleash-api-token
   accessPolicy:
     inbound:
       rules:
         - application: etterlatte-brev-api
-        - application: etterlatte-brev-api-lokal
         - application: etterlatte-saksbehandling-ui
         - application: etterlatte-saksbehandling-ui-lokal
         - application: etterlatte-behandling
@@ -81,6 +84,9 @@ spec:
             roles:
               - samordning-read
         - application: etterlatte-vedtaksvurdering-kafka
+          permissions:
+            roles:
+              - samordning-write
     outbound:
       rules:
         - application: etterlatte-vilkaarsvurdering
@@ -88,3 +94,4 @@ spec:
         - application: etterlatte-behandling
       external:
         - host: etterlatte-unleash-api.nav.cloud.nais.io
+        - host: sam-q2.dev-fss-pub.nais.io

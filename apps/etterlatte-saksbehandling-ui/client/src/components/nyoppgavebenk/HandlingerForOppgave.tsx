@@ -2,7 +2,8 @@ import { OppgaveDTO } from '~shared/api/oppgaver'
 import { Button } from '@navikt/ds-react'
 import { EyeIcon } from '@navikt/aksel-icons'
 import { useAppSelector } from '~store/Store'
-import { GosysOppgaveModal } from '~components/nyoppgavebenk/GosysOppgaveModal'
+import { GosysOppgaveModal } from '~components/nyoppgavebenk/oppgavemodal/GosysOppgaveModal'
+import { JournalfoeringOppgaveModal } from '~components/nyoppgavebenk/oppgavemodal/JournalfoeringOppgaveModal'
 
 export const HandlingerForOppgave = ({ oppgave }: { oppgave: OppgaveDTO }) => {
   const user = useAppSelector((state) => state.saksbehandlerReducer.saksbehandler)
@@ -11,13 +12,22 @@ export const HandlingerForOppgave = ({ oppgave }: { oppgave: OppgaveDTO }) => {
   const erInnloggetSaksbehandlerOppgave = saksbehandler ? saksbehandler === user.ident : false
   if (kilde === 'GENERELL_BEHANDLING') {
     switch (type) {
-      case 'UTLAND':
+      case 'KRAVPAKKE_UTLAND':
+        return (
+          <>
+            {erInnloggetSaksbehandlerOppgave && (
+              <Button size="small" as="a" href={`/generellbehandling/${referanse}`}>
+                Gå til kravpakke utland
+              </Button>
+            )}
+          </>
+        )
       case 'ATTESTERING':
         return (
           <>
             {erInnloggetSaksbehandlerOppgave && (
               <Button size="small" as="a" href={`/generellbehandling/${referanse}`}>
-                Gå til generell behandling
+                Gå til attestering av generell behandling
               </Button>
             )}
           </>
@@ -96,12 +106,14 @@ export const HandlingerForOppgave = ({ oppgave }: { oppgave: OppgaveDTO }) => {
           Gå til klage
         </Button>
       ) : null
-    case 'UTLAND':
+    case 'KRAVPAKKE_UTLAND':
       return erInnloggetSaksbehandlerOppgave ? (
         <Button size="small" href={`/generellbehandling/${referanse}`} as="a">
           Gå til utlandssak
         </Button>
       ) : null
+    case 'JOURNALFOERING':
+      return erInnloggetSaksbehandlerOppgave && <JournalfoeringOppgaveModal oppgave={oppgave} />
     default:
       return null
   }

@@ -3,7 +3,9 @@ package no.nav.etterlatte.brev.model
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonValue
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
-import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
+import no.nav.etterlatte.brev.model.bp.VedleggBP
+import no.nav.etterlatte.brev.model.oms.VedleggOMS
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
@@ -37,34 +39,33 @@ data class Slate(
 }
 
 object SlateHelper {
-    fun hentInitiellPayload(generellBrevData: GenerellBrevData): Slate {
-        return when (generellBrevData.sak.sakType) {
+    fun hentInitiellPayload(generellBrevData: GenerellBrevData): Slate =
+        when (generellBrevData.sak.sakType) {
             SakType.OMSTILLINGSSTOENAD -> {
                 when (generellBrevData.forenkletVedtak.type) {
-                    VedtakType.INNVILGELSE -> getJsonFile("/maler/oms-nasjonal-innvilget.json")
-                    else -> getJsonFile("/maler/tom-brevmal.json")
+                    VedtakType.INNVILGELSE -> getSlate("/maler/oms-nasjonal-innvilget.json")
+                    else -> getSlate("/maler/tom-brevmal.json")
                 }
             }
 
             SakType.BARNEPENSJON -> {
                 when (generellBrevData.forenkletVedtak.type) {
-                    VedtakType.AVSLAG -> getJsonFile("/maler/bp-avslag.json")
-                    else -> getJsonFile("/maler/tom-brevmal.json")
+                    VedtakType.AVSLAG -> getSlate("/maler/bp-avslag.json")
+                    else -> getSlate("/maler/tom-brevmal.json")
                 }
             }
-        }.let { deserialize(it) }
-    }
+        }
 
     fun hentInitiellPayloadVedlegg(generellBrevData: GenerellBrevData): List<BrevInnholdVedlegg>? {
         return when (generellBrevData.sak.sakType) {
             SakType.OMSTILLINGSSTOENAD -> {
                 when (generellBrevData.forenkletVedtak.type) {
-                    VedtakType.INNVILGELSE -> BrevInnholdVedlegg.innvilgelseOMS()
+                    VedtakType.INNVILGELSE -> VedleggOMS.innvilgelseOMS()
                     VedtakType.ENDRING -> {
                         when (generellBrevData.revurderingsaarsak) {
-                            RevurderingAarsak.INNTEKTSENDRING,
-                            RevurderingAarsak.ANNEN,
-                            -> BrevInnholdVedlegg.inntektsendringOMS()
+                            Revurderingaarsak.INNTEKTSENDRING,
+                            Revurderingaarsak.ANNEN,
+                            -> VedleggOMS.inntektsendringOMS()
                             else -> null
                         }
                     }
@@ -72,11 +73,18 @@ object SlateHelper {
                 }
             }
 
-            SakType.BARNEPENSJON -> null
+            SakType.BARNEPENSJON -> {
+                when (generellBrevData.forenkletVedtak.type) {
+                    VedtakType.INNVILGELSE -> VedleggBP.innvilgelse()
+                    else -> null
+                }
+            }
         }
     }
 
-    fun opprettTomBrevmal() = deserialize<Slate>(getJsonFile("/maler/tom-brevmal.json"))
+    fun opprettTomBrevmal() = getSlate("/maler/tom-brevmal.json")
 
     private fun getJsonFile(url: String) = javaClass.getResource(url)!!.readText()
+
+    fun getSlate(url: String) = getJsonFile(url).let { deserialize<Slate>(it) }
 }

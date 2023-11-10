@@ -7,9 +7,9 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.database.firstOrNull
 import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.libs.database.toList
-import org.jetbrains.annotations.TestOnly
 import java.sql.ResultSet
 import java.sql.Types.VARCHAR
 import java.time.YearMonth
@@ -65,13 +65,35 @@ class OpplysningDao(private val datasource: DataSource) {
                 }.executeQuery().toList { asGrunnlagshendelse() }
         }
 
+    fun hentAlleGrunnlagForBehandling(behandlingId: UUID): List<GrunnlagHendelse> =
+        connection.use {
+            it.prepareStatement(
+                """
+                SELECT bv.sak_id, opplysning_id, kilde, opplysning_type, opplysning, hendelse.hendelsenummer, fnr, fom, tom
+                FROM grunnlagshendelse hendelse 
+                LEFT JOIN behandling_versjon bv 
+                    ON bv.sak_id = hendelse.sak_id AND bv.hendelsenummer >= hendelse.hendelsenummer 
+                WHERE bv.behandling_id = ?
+                """.trimIndent(),
+            )
+                .apply {
+                    setObject(1, behandlingId)
+                }.executeQuery().toList { asGrunnlagshendelse() }
+        }
+
     fun finnHendelserIGrunnlag(sakId: Long): List<GrunnlagHendelse> =
         connection.use {
             it.prepareStatement(
                 """
                 SELECT sak_id, opplysning_id, kilde, opplysning_type, opplysning, hendelsenummer, fnr, fom, tom
                 FROM grunnlagshendelse hendelse 
-                WHERE hendelse.sak_id = ? AND NOT EXISTS(SELECT 1 FROM grunnlagshendelse annen where annen.sak_id = hendelse.sak_id AND hendelse.opplysning_type = annen.opplysning_type AND annen.hendelsenummer > hendelse.hendelsenummer)
+                WHERE hendelse.sak_id = ? 
+                AND NOT EXISTS(
+                    SELECT 1 FROM grunnlagshendelse annen 
+                    WHERE annen.sak_id = hendelse.sak_id 
+                    AND hendelse.opplysning_type = annen.opplysning_type 
+                    AND annen.hendelsenummer > hendelse.hendelsenummer
+                )
                 """.trimIndent(),
             )
                 .apply {
@@ -92,7 +114,7 @@ class OpplysningDao(private val datasource: DataSource) {
                 AND hendelse.opplysning_type = ? 
                 AND NOT EXISTS(
                     SELECT 1 FROM grunnlagshendelse annen 
-                    where annen.fnr = hendelse.fnr 
+                    WHERE annen.fnr = hendelse.fnr 
                     AND hendelse.opplysning_type = annen.opplysning_type 
                     AND annen.hendelsenummer > hendelse.hendelsenummer
                 )
@@ -104,7 +126,7 @@ class OpplysningDao(private val datasource: DataSource) {
                 }.executeQuery().singleOrNull { asGrunnlagshendelse() }
         }
 
-    fun finnNyesteGrunnlag(
+    fun finnNyesteGrunnlagForSak(
         sakId: Long,
         opplysningType: Opplysningstype,
     ): GrunnlagHendelse? =
@@ -129,22 +151,27 @@ class OpplysningDao(private val datasource: DataSource) {
                 }.executeQuery().singleOrNull { asGrunnlagshendelse() }
         }
 
-    fun finnGrunnlagOpptilVersjon(
-        sakId: Long,
-        versjon: Long,
-    ): List<GrunnlagHendelse> =
+    fun finnNyesteGrunnlagForBehandling(
+        behandlingId: UUID,
+        opplysningType: Opplysningstype,
+    ): GrunnlagHendelse? =
         connection.use {
             it.prepareStatement(
                 """
-                SELECT sak_id, opplysning_id, kilde, opplysning_type, opplysning, hendelsenummer, fnr, fom, tom
+                SELECT hendelse.sak_id, behandling_id, opplysning_id, kilde, opplysning_type, 
+                        opplysning, hendelse.hendelsenummer, fnr, fom, tom
                 FROM grunnlagshendelse hendelse 
-                WHERE hendelse.sak_id = ? AND hendelse.hendelsenummer <= ?
+                LEFT JOIN behandling_versjon versjon 
+                    ON versjon.sak_id = hendelse.sak_id AND versjon.hendelsenummer >= hendelse.hendelsenummer
+                WHERE versjon.behandling_id = ?
+                AND hendelse.opplysning_type = ?
+                ORDER BY hendelse.hendelsenummer DESC
                 """.trimIndent(),
             )
                 .apply {
-                    setLong(1, sakId)
-                    setLong(2, versjon)
-                }.executeQuery().toList { asGrunnlagshendelse() }
+                    setObject(1, behandlingId)
+                    setString(2, opplysningType.name)
+                }.executeQuery().firstOrNull { asGrunnlagshendelse() }
         }
 
     fun leggOpplysningTilGrunnlag(
@@ -211,6 +238,15 @@ class OpplysningDao(private val datasource: DataSource) {
             }.executeQuery().toList { asGrunnlagshendelse() }
         }
 
+    // TODO: Fjerne når grunnlag er versjonert (EY-2567)
+    fun finnAlleSakIder(): Set<Long> =
+        connection.use {
+            it.prepareStatement("SELECT distinct(sak_id) FROM grunnlagshendelse")
+                .executeQuery()
+                .toList { getLong("sak_id") }
+                .toSet()
+        }
+
     fun finnAlleSakerForPerson(fnr: Folkeregisteridentifikator): Set<Long> =
         connection.use {
             it.prepareStatement(
@@ -226,7 +262,6 @@ class OpplysningDao(private val datasource: DataSource) {
             }.executeQuery().toList { getLong("sak_id") }.toSet()
         }
 
-    @TestOnly // Kun for testing av dao
     fun hentBehandlingVersjon(behandlingId: UUID): BehandlingGrunnlagVersjon? =
         connection.use {
             it.prepareStatement("SELECT * FROM behandling_versjon WHERE behandling_id = ?::UUID")
@@ -242,7 +277,6 @@ class OpplysningDao(private val datasource: DataSource) {
         }
 }
 
-@TestOnly // Kun for testing av dao
 data class BehandlingGrunnlagVersjon(
     val behandlingId: UUID,
     val sakId: Long,

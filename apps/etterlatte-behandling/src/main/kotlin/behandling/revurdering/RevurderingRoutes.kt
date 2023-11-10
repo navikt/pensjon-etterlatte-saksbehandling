@@ -10,12 +10,12 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.inTransaction
-import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
+import no.nav.etterlatte.libs.common.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
-import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.behandlingsId
+import no.nav.etterlatte.libs.common.behandlingId
 import no.nav.etterlatte.libs.common.hentNavidentFraToken
 import no.nav.etterlatte.libs.common.kunSaksbehandler
 import no.nav.etterlatte.libs.common.medBody
@@ -25,32 +25,27 @@ internal fun Route.revurderingRoutes(revurderingService: RevurderingService) {
     val logger = application.log
 
     route("/api/revurdering") {
-        route("{$BEHANDLINGSID_CALL_PARAMETER}") {
+        route("{$BEHANDLINGID_CALL_PARAMETER}") {
             route("revurderinginfo") {
                 post {
                     hentNavidentFraToken { navIdent ->
-                        logger.info("Lagrer revurderinginfo på behandling $behandlingsId")
+                        logger.info("Lagrer revurderinginfo på behandling $behandlingId")
                         medBody<RevurderingInfoDto> {
-                            val fikkLagret =
-                                inTransaction {
-                                    revurderingService.lagreRevurderingInfo(
-                                        behandlingsId,
-                                        RevurderingMedBegrunnelse(it.info, it.begrunnelse),
-                                        navIdent,
-                                    )
-                                }
-                            if (fikkLagret) {
-                                call.respond(HttpStatusCode.NoContent)
-                            } else {
-                                call.respond(HttpStatusCode.Forbidden)
+                            inTransaction {
+                                revurderingService.lagreRevurderingInfo(
+                                    behandlingId,
+                                    RevurderingInfoMedBegrunnelse(it.info, it.begrunnelse),
+                                    navIdent,
+                                )
                             }
+                            call.respond(HttpStatusCode.NoContent)
                         }
                     }
                 }
             }
         }
 
-        route("{$SAKID_CALL_PARAMETER}") {
+        route("/{$SAKID_CALL_PARAMETER}") {
             post {
                 kunSaksbehandler { saksbehandler ->
                     logger.info("Oppretter ny revurdering på sak $sakId")
@@ -75,23 +70,29 @@ internal fun Route.revurderingRoutes(revurderingService: RevurderingService) {
                     }
                 }
             }
+            get("/{revurderingsaarsak}") {
+                val revurderingsaarsak =
+                    call.parameters["revurderingsaarsak"]?.let { Revurderingaarsak.valueOf(it) }
+                        ?: return@get call.respond(HttpStatusCode.BadRequest, "Ugyldig revurderingsårsak")
+                call.respond(inTransaction { revurderingService.hentRevurderingsinfoForSakMedAarsak(sakId, revurderingsaarsak) })
+            }
         }
     }
 
     route("/api/stoettederevurderinger/{saktype}") {
         get {
             val sakType =
-                call.parameters["saktype"]?.let { runCatching { SakType.valueOf(it) }.getOrNull() }
+                call.parameters["saktype"]?.let { SakType.valueOf(it) }
                     ?: return@get call.respond(HttpStatusCode.BadRequest, "Ugyldig saktype")
 
-            val stoettedeRevurderinger = RevurderingAarsak.values().filter { it.erStoettaRevurdering(sakType) }
+            val stoettedeRevurderinger = Revurderingaarsak.values().filter { it.erStoettaRevurdering(sakType) }
             call.respond(stoettedeRevurderinger)
         }
     }
 }
 
 data class OpprettRevurderingRequest(
-    val aarsak: RevurderingAarsak,
+    val aarsak: Revurderingaarsak,
     val paaGrunnAvHendelseId: String? = null,
     val begrunnelse: String? = null,
     val fritekstAarsak: String? = null,

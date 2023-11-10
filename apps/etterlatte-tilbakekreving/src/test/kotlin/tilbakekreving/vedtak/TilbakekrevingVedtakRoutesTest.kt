@@ -27,6 +27,7 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import testsupport.buildTestApplicationConfigurationForOauth
+import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class TilbakekrevingVedtakRoutesTest {
@@ -100,10 +101,15 @@ internal class TilbakekrevingVedtakRoutesTest {
     }
 
     private val token: String by lazy {
+        val system = UUID.randomUUID().toString()
         server.issueToken(
             issuerId = AZURE_ISSUER,
             audience = AZURE_CLIENT_ID,
-            claims = mapOf("navn" to "John Doe", "NAVident" to "Saksbehandler01"),
+            claims =
+                mapOf(
+                    "sub" to system,
+                    "oid" to system,
+                ),
         ).serialize()
     }
 

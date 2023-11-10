@@ -4,7 +4,7 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
-import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.StatistikkBehandling
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
@@ -159,6 +159,8 @@ class StatistikkService(
             sakYtelsesgruppe = hentSakYtelsesgruppe(statistikkBehandling.sak.sakType, statistikkBehandling.avdoed ?: emptyList()),
             avdoedeForeldre = statistikkBehandling.avdoed,
             revurderingAarsak = statistikkBehandling.revurderingsaarsak?.name,
+            kilde = statistikkBehandling.kilde,
+            pesysId = statistikkBehandling.pesysId,
         )
     }
 
@@ -271,6 +273,8 @@ class StatistikkService(
                         null
                     },
                 revurderingAarsak = statistikkBehandling.revurderingsaarsak?.name,
+                kilde = statistikkBehandling.kilde,
+                pesysId = statistikkBehandling.pesysId,
             )
         if (behandlingHendelse == BehandlingHendelse.AVBRUTT) {
             return fellesRad.copy(
@@ -326,7 +330,7 @@ internal fun hentSakYtelsesgruppe(
 internal fun hentBehandlingMetode(
     attestasjon: Attestasjon?,
     prosesstype: Prosesstype,
-    revurderingAarsak: RevurderingAarsak?,
+    revurderingAarsak: Revurderingaarsak?,
 ): BehandlingMetode =
     when (prosesstype) {
         Prosesstype.MANUELL ->
@@ -337,7 +341,7 @@ internal fun hentBehandlingMetode(
             }
 
         Prosesstype.AUTOMATISK ->
-            if (revurderingAarsak == RevurderingAarsak.REGULERING) {
+            if (revurderingAarsak == Revurderingaarsak.REGULERING) {
                 BehandlingMetode.AUTOMATISK_REGULERING
             } else {
                 BehandlingMetode.AUTOMATISK

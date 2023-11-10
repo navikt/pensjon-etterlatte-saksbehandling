@@ -1,7 +1,6 @@
 import React, { useState } from 'react'
 import styled from 'styled-components'
-import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapper'
-import { VilkaarsVurderingKnapper } from '../handlinger/vilkaarsvurderingKnapper'
+import { VilkaarsvurderingKnapper } from './VilkaarsvurderingKnapper'
 import {
   IVilkaarsvurdering,
   lagreTotalVurdering,
@@ -21,6 +20,7 @@ import { oppdaterBehandlingsstatus } from '~store/reducers/BehandlingReducer'
 import { IBehandlingStatus, IBehandlingsType } from '~shared/types/IDetaljertBehandling'
 import { SakType } from '~shared/types/sak'
 import { Border } from '~components/behandling/soeknadsoversikt/styled'
+import { NesteOgTilbake } from '~components/behandling/handlinger/NesteOgTilbake'
 
 type Props = {
   virkningstidspunktDato: string | undefined
@@ -194,10 +194,15 @@ export const Resultat = (props: Props) => {
       )}
 
       <Border />
-
-      <BehandlingHandlingKnapper>
-        {vilkaarsvurdering.resultat && virkningstidspunktSamsvarer && <VilkaarsVurderingKnapper />}
-      </BehandlingHandlingKnapper>
+      {redigerbar ? (
+        <>
+          {vilkaarsvurdering.resultat && virkningstidspunktSamsvarer && (
+            <VilkaarsvurderingKnapper behandlingId={behandlingId} />
+          )}
+        </>
+      ) : (
+        <NesteOgTilbake></NesteOgTilbake>
+      )}
     </>
   )
 }

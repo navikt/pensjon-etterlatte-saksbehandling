@@ -36,10 +36,6 @@ data class OppgaveIntern(
         return Status.erAvsluttet(this.status)
     }
 
-    fun erUnderbehandling(): Boolean {
-        return Status.erUnderbehandling(this.status)
-    }
-
     fun erAttestering(): Boolean {
         return OppgaveType.ATTESTERING === type
     }
@@ -107,11 +103,12 @@ enum class OppgaveType {
     ATTESTERING,
     UNDERKJENT,
     GOSYS,
-    UTLAND,
+    KRAVPAKKE_UTLAND,
     KLAGE,
     TILBAKEKREVING,
     OMGJOERING,
     MANUELL_JOURNALFOERING,
+    JOURNALFOERING,
 }
 
 data class SaksbehandlerEndringDto(
@@ -146,6 +143,7 @@ data class NyOppgaveDto(
     val oppgaveKilde: OppgaveKilde?,
     val oppgaveType: OppgaveType,
     val merknad: String?,
+    val referanse: String? = null,
 )
 
 fun opprettNyOppgaveMedReferanseOgSak(
@@ -154,6 +152,7 @@ fun opprettNyOppgaveMedReferanseOgSak(
     oppgaveKilde: OppgaveKilde?,
     oppgaveType: OppgaveType,
     merknad: String?,
+    frist: Tidspunkt? = null,
 ): OppgaveIntern {
     return OppgaveIntern(
         id = UUID.randomUUID(),
@@ -167,7 +166,7 @@ fun opprettNyOppgaveMedReferanseOgSak(
         opprettet = Tidspunkt.now(),
         sakType = sak.sakType,
         fnr = sak.ident,
-        frist = null,
+        frist = frist,
         type = oppgaveType,
     )
 }

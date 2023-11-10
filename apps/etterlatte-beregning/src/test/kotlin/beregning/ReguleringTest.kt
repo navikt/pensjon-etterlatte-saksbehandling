@@ -77,7 +77,7 @@ class ReguleringTest {
             GrunnlagTestData(opplysningsmapAvdoedOverrides = avdoedOverrides(virk.atDay(1).minusDays(20)))
                 .hentOpplysningsgrunnlag()
 
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any(), any()) } returns grunnlag
+        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
         coEvery {
             beregningsGrunnlagService.hentBarnepensjonBeregningsGrunnlag(
                 any(),

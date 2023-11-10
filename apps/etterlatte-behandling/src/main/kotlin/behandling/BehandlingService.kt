@@ -12,6 +12,7 @@ import no.nav.etterlatte.behandling.domain.toStatistikkBehandling
 import no.nav.etterlatte.behandling.etterbetaling.EtterbetalingService
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.hendelse.HendelseType
+import no.nav.etterlatte.behandling.hendelse.LagretHendelse
 import no.nav.etterlatte.behandling.hendelse.registrerVedtakHendelseFelles
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
@@ -23,16 +24,18 @@ import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
+import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.StatistikkBehandling
-import no.nav.etterlatte.libs.common.behandling.Utenlandstilsnitt
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.oppgave.OppgaveService
+import no.nav.etterlatte.sak.SakDao
+import no.nav.etterlatte.sak.SakUtenlandstilknytning
 import no.nav.etterlatte.tilgangsstyring.filterForEnheter
 import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.etterlatte.vedtaksvurdering.VedtakHendelse
@@ -61,6 +64,11 @@ interface BehandlingService {
         saksbehandler: BrukerTokenInfo,
     )
 
+    fun registrerBehandlingHendelse(
+        behandling: Behandling,
+        saksbehandler: String,
+    )
+
     fun registrerVedtakHendelse(
         behandlingId: UUID,
         vedtakHendelse: VedtakHendelse,
@@ -73,11 +81,6 @@ interface BehandlingService {
         ident: String,
         begrunnelse: String,
     ): Virkningstidspunkt
-
-    fun oppdaterUtenlandstilsnitt(
-        behandlingId: UUID,
-        utenlandstilsnitt: Utenlandstilsnitt,
-    )
 
     fun oppdaterBoddEllerArbeidetUtlandet(
         behandlingId: UUID,
@@ -106,6 +109,8 @@ interface BehandlingService {
     ): Boolean
 
     fun hentFoersteVirk(sakId: Long): YearMonth?
+
+    fun oppdaterGrunnlagOgStatus(behandlingId: UUID)
 }
 
 internal class BehandlingServiceImpl(
@@ -119,6 +124,8 @@ internal class BehandlingServiceImpl(
     private val kommerBarnetTilGodeDao: KommerBarnetTilGodeDao,
     private val oppgaveService: OppgaveService,
     private val etterbetalingService: EtterbetalingService,
+    private val grunnlagService: GrunnlagService,
+    private val sakDao: SakDao,
 ) : BehandlingService {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -174,7 +181,7 @@ internal class BehandlingServiceImpl(
         }
 
         val persongalleri =
-            runBlocking { grunnlagKlient.hentPersongalleri(behandling.sak.id, behandlingId, saksbehandler) }
+            runBlocking { grunnlagKlient.hentPersongalleri(behandlingId, saksbehandler) }
 
         behandlingHendelser.sendMeldingForHendelseMedDetaljertBehandling(
             behandling.toStatistikkBehandling(persongalleri = persongalleri!!.opplysning),
@@ -188,7 +195,7 @@ internal class BehandlingServiceImpl(
     ): StatistikkBehandling? {
         return inTransaction { hentBehandling(behandlingId) }?.let {
             val persongalleri: Persongalleri =
-                grunnlagKlient.hentPersongalleri(it.sak.id, behandlingId, brukerTokenInfo)
+                grunnlagKlient.hentPersongalleri(behandlingId, brukerTokenInfo)
                     ?.opplysning
                     ?: throw NoSuchElementException("Persongalleri mangler for sak ${it.sak.id}")
 
@@ -202,7 +209,7 @@ internal class BehandlingServiceImpl(
     ): DetaljertBehandling? {
         return inTransaction { hentBehandling(behandlingId) }?.let {
             val persongalleri: Persongalleri =
-                grunnlagKlient.hentPersongalleri(it.sak.id, behandlingId, brukerTokenInfo)
+                grunnlagKlient.hentPersongalleri(behandlingId, brukerTokenInfo)
                     ?.opplysning
                     ?: throw NoSuchElementException("Persongalleri mangler for sak ${it.sak.id}")
 
@@ -218,7 +225,7 @@ internal class BehandlingServiceImpl(
         val behandling =
             requireNotNull(inTransaction { hentBehandling(behandlingId) }) { "Fant ikke behandling $behandlingId" }
         val personopplysning =
-            grunnlagKlient.finnPersonOpplysning(behandling.sak.id, behandlingId, opplysningstype, brukerTokenInfo)
+            grunnlagKlient.finnPersonOpplysning(behandlingId, opplysningstype, brukerTokenInfo)
 
         return BehandlingMedGrunnlagsopplysninger(
             id = behandling.id,
@@ -263,11 +270,28 @@ internal class BehandlingServiceImpl(
         return behandlinger.tidligsteIverksatteVirkningstidspunkt()?.dato
     }
 
+    override fun oppdaterGrunnlagOgStatus(behandlingId: UUID) {
+        hentBehandlingOrThrow(behandlingId)
+            .tilOpprettet()
+            .let { behandling ->
+                grunnlagService.oppdaterGrunnlag(behandling.id, behandling.sak.id, behandling.sak.sakType)
+
+                behandlingDao.lagreStatus(behandling)
+            }
+    }
+
+    data class BehandlingMedData(
+        val behandling: Behandling,
+        val kommerBarnetTilgode: KommerBarnetTilgode?,
+        val hendelserIBehandling: List<LagretHendelse>,
+        val sakOgUtenlandstilknytning: SakUtenlandstilknytning?,
+    )
+
     override suspend fun hentDetaljertBehandlingMedTilbehoer(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): DetaljertBehandlingDto {
-        val (behandling, kommerBarnetTilgode, hendelserIBehandling) =
+        val (behandling, kommerBarnetTilgode, hendelserIBehandling, sakOgUtenlandstilknytning) =
             inTransaction {
                 val behandling =
                     hentBehandling(behandlingId)
@@ -277,7 +301,8 @@ internal class BehandlingServiceImpl(
                 val kommerBarnetTilgode =
                     kommerBarnetTilGodeDao.hentKommerBarnetTilGode(behandlingId)
                         .takeIf { behandling.sak.sakType == SakType.BARNEPENSJON }
-                Triple(behandling, kommerBarnetTilgode, hendelserIBehandling)
+                val sakOgUtenlandstilknytning = sakDao.hentUtenlandstilknytningForSak(behandling.sak.id)
+                BehandlingMedData(behandling, kommerBarnetTilgode, hendelserIBehandling, sakOgUtenlandstilknytning)
             }
 
         val sakId = behandling.sak.id
@@ -289,7 +314,6 @@ internal class BehandlingServiceImpl(
             val avdoed =
                 async {
                     grunnlagKlient.finnPersonOpplysning(
-                        sakId,
                         behandlingId,
                         Opplysningstype.AVDOED_PDL_V1,
                         brukerTokenInfo,
@@ -300,7 +324,6 @@ internal class BehandlingServiceImpl(
             val soeker =
                 async {
                     grunnlagKlient.finnPersonOpplysning(
-                        sakId,
                         behandlingId,
                         Opplysningstype.SOEKER_PDL_V1,
                         brukerTokenInfo,
@@ -314,7 +337,6 @@ internal class BehandlingServiceImpl(
                 } else {
                     async {
                         grunnlagKlient.finnPersonOpplysning(
-                            sakId,
                             behandlingId,
                             Opplysningstype.GJENLEVENDE_FORELDER_PDL_V1,
                             brukerTokenInfo,
@@ -331,7 +353,7 @@ internal class BehandlingServiceImpl(
                 kommerBarnetTilgode = kommerBarnetTilgode,
                 soeknadMottattDato = behandling.mottattDato(),
                 virkningstidspunkt = behandling.virkningstidspunkt,
-                utenlandstilsnitt = behandling.utenlandstilsnitt,
+                utenlandstilknytning = sakOgUtenlandstilknytning?.utenlandstilknytning,
                 boddEllerArbeidetUtlandet = behandling.boddEllerArbeidetUtlandet,
                 status = behandling.status,
                 hendelser = hendelserIBehandling,
@@ -348,6 +370,16 @@ internal class BehandlingServiceImpl(
             }
         }
     }
+
+    override fun registrerBehandlingHendelse(
+        behandling: Behandling,
+        saksbehandler: String,
+    ) = hendelseDao.behandlingHendelse(
+        behandlingId = behandling.id,
+        sakId = behandling.sak.id,
+        saksbehandler = saksbehandler,
+        status = behandling.status,
+    )
 
     override fun registrerVedtakHendelse(
         behandlingId: UUID,
@@ -398,31 +430,6 @@ internal class BehandlingServiceImpl(
         return virkningstidspunkt
     }
 
-    override fun oppdaterUtenlandstilsnitt(
-        behandlingId: UUID,
-        utenlandstilsnitt: Utenlandstilsnitt,
-    ) {
-        val behandling =
-            hentBehandling(behandlingId) ?: run {
-                logger.error("Prøvde å oppdatere utenlandstilsnitt på en behandling som ikke eksisterer: $behandlingId")
-                throw RuntimeException("Fant ikke behandling")
-            }
-
-        try {
-            behandling.oppdaterUtenlandstilsnitt(utenlandstilsnitt)
-                .also {
-                    behandlingDao.lagreUtenlandstilsnitt(behandlingId, utenlandstilsnitt)
-                    behandlingDao.lagreStatus(it)
-                }
-        } catch (e: NotImplementedError) {
-            logger.error(
-                "Kan ikke oppdatere utenlandstilsnitt for behandling: $behandlingId med typen ${behandling.type}",
-                e,
-            )
-            throw e
-        }
-    }
-
     override fun oppdaterBoddEllerArbeidetUtlandet(
         behandlingId: UUID,
         boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet,
@@ -454,6 +461,12 @@ internal class BehandlingServiceImpl(
         this.filterBehandlingerForEnheter(
             featureToggleService = featureToggleService,
             user = Kontekst.get().AppUser,
+        )
+
+    private fun hentBehandlingOrThrow(behandlingId: UUID) =
+        (
+            behandlingDao.hentBehandling(behandlingId)
+                ?: throw BehandlingNotFoundException("Fant ikke behandling med id=$behandlingId")
         )
 }
 

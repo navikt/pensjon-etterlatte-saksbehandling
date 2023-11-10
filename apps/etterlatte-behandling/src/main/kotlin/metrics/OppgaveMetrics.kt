@@ -3,11 +3,8 @@ package no.nav.etterlatte.metrics
 import io.micrometer.core.instrument.Gauge
 import io.micrometer.core.instrument.MeterRegistry
 import io.micrometer.core.instrument.binder.MeterBinder
-import org.slf4j.LoggerFactory
 
 class OppgaveMetrics(private val metrikkerDao: OppgaveMetrikkerDao) : MeterBinder {
-    private val logger = LoggerFactory.getLogger(this::class.java)
-
     override fun bindTo(registry: MeterRegistry) {
         val oppgaveAntall = metrikkerDao.hentOppgaveAntall()
 

@@ -45,13 +45,15 @@ import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
-import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
+import no.nav.etterlatte.libs.common.Vedtaksloesning
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.VedtakSak
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
+import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.etterlatte.rivers.VedtakTilJournalfoering
 import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
@@ -104,13 +106,12 @@ internal class VedtaksbrevServiceTest {
 
     @AfterEach
     fun after() {
-        confirmVerified(db, brevdataFacade, adresseService, dokarkivService, brevbaker)
+        confirmVerified(db, adresseService, dokarkivService, brevbaker)
     }
 
     private companion object {
         private const val SAK_ID = 123L
         private val BEHANDLING_ID = UUID.randomUUID()
-        private val STOR_SNERK = Folkeregisteridentifikator.of("11057523044").value
         private const val PORSGRUNN = "0805"
         private val PDF_BYTES = "Hello world!".toByteArray()
         private val SAKSBEHANDLER = BrukerTokenInfo.of("token", "saksbehandler", null, null, null)
@@ -195,7 +196,6 @@ internal class VedtaksbrevServiceTest {
         @CsvSource(
             value = [
                 "OMSTILLINGSSTOENAD,OPPHOER,MANUELL",
-                "OMSTILLINGSSTOENAD,AVSLAG,MANUELL",
                 "OMSTILLINGSSTOENAD,ENDRING,MANUELL",
                 "BARNEPENSJON,INNVILGELSE,AUTOMATISK",
                 "BARNEPENSJON,OPPHOER,MANUELL",
@@ -249,16 +249,19 @@ internal class VedtaksbrevServiceTest {
         @ParameterizedTest
         @CsvSource(
             value = [
-                "BARNEPENSJON,YRKESSKADE,REDIGERBAR",
+                "BARNEPENSJON,YRKESSKADE,REDIGERBAR,ENDRING",
+                "BARNEPENSJON,,REDIGERBAR,INNVILGELSE",
             ],
         )
         fun `Vedtaksbrev finnes ikke - skal opprette nytt redigerbart brev`(
             sakType: SakType,
-            revurderingsaarsak: RevurderingAarsak,
+            revurderingsaarsak: Revurderingaarsak?,
             forventetProsessType: BrevProsessType,
+            vedtakType: VedtakType,
         ) {
+            featureToggleService.settBryter(BrevDataFeatureToggle.NyMalInnvilgelse, true)
             val sakId = Random.nextLong()
-            val behandling = opprettGenerellBrevdata(sakType, VedtakType.ENDRING, revurderingsaarsak = revurderingsaarsak)
+            val behandling = opprettGenerellBrevdata(sakType, vedtakType, revurderingsaarsak = revurderingsaarsak)
             val mottaker = opprettMottaker()
 
             coEvery { brevbaker.genererJSON(any()) } returns opprettRenderedJsonLetter()
@@ -266,6 +269,8 @@ internal class VedtaksbrevServiceTest {
             every { db.hentBrevForBehandling(behandling.behandlingId) } returns null
             coEvery { brevdataFacade.hentGenerellBrevData(any(), any(), any()) } returns behandling
             coEvery { adresseService.hentMottakerAdresse(any()) } returns mottaker
+            coEvery { brevdataFacade.finnUtbetalingsinfo(any(), any(), any()) } returns mockk()
+            coEvery { brevdataFacade.hentEtterbetaling(any(), any()) } returns null
 
             runBlocking {
                 vedtaksbrevService.opprettVedtaksbrev(
@@ -427,6 +432,7 @@ internal class VedtaksbrevServiceTest {
             val brev = opprettBrev(Status.OPPRETTET, mockk())
 
             every { db.hentBrevForBehandling(any()) } returns brev
+            every { db.hentPdf(any()) } returns Pdf("".toByteArray())
             coEvery { vedtaksvurderingService.hentVedtakSaksbehandlerOgStatus(any(), any()) } returns
                 Pair(
                     SAKSBEHANDLER.ident(),
@@ -440,7 +446,37 @@ internal class VedtaksbrevServiceTest {
             verify {
                 db.hentBrevForBehandling(brev.behandlingId!!)
                 db.settBrevFerdigstilt(brev.id)
+                db.hentPdf(brev.id)
             }
+
+            coVerify {
+                vedtaksvurderingService.hentVedtakSaksbehandlerOgStatus(brev.behandlingId!!, any())
+            }
+        }
+
+        @Test
+        fun `Ferdigstille vedtaksbrev som ATTESTANT - status vedtak fattet, men PDF mangler`() {
+            val brev = opprettBrev(Status.OPPRETTET, mockk())
+
+            every { db.hentBrevForBehandling(any()) } returns brev
+            every { db.hentPdf(any()) } returns null
+            coEvery { vedtaksvurderingService.hentVedtakSaksbehandlerOgStatus(any(), any()) } returns
+                Pair(
+                    SAKSBEHANDLER.ident(),
+                    VedtakStatus.FATTET_VEDTAK,
+                )
+
+            runBlocking {
+                assertThrows<IllegalStateException> {
+                    vedtaksbrevService.ferdigstillVedtaksbrev(brev.behandlingId!!, brukerTokenInfo = ATTESTANT)
+                }
+            }
+
+            verify {
+                db.hentBrevForBehandling(brev.behandlingId!!)
+                db.hentPdf(brev.id)
+            }
+            verify(exactly = 0) { db.settBrevFerdigstilt(any()) }
 
             coVerify {
                 vedtaksvurderingService.hentVedtakSaksbehandlerOgStatus(brev.behandlingId!!, any())
@@ -660,7 +696,7 @@ internal class VedtaksbrevServiceTest {
     }
 
     @Nested
-    inner class JournalfoerVedtaksbrev {
+    inner class JournalfoerVedtaksbrevRiver {
         @Test
         fun `Vedtaksbrev journalfoeres som forventet`() {
             val forventetBrev = opprettBrev(Status.FERDIGSTILT, mockk())
@@ -702,6 +738,7 @@ internal class VedtaksbrevServiceTest {
                     BrevProsessType.AUTOMATISK,
                     "fnr",
                     status,
+                    Tidspunkt.now(),
                     opprettMottaker(),
                 )
 
@@ -728,6 +765,7 @@ internal class VedtaksbrevServiceTest {
         prosessType = prosessType,
         soekerFnr = "fnr",
         status = status,
+        Tidspunkt.now(),
         mottaker = opprettMottaker(),
     )
 
@@ -743,7 +781,8 @@ internal class VedtaksbrevServiceTest {
         sakType: SakType,
         vedtakType: VedtakType,
         vedtakStatus: VedtakStatus = VedtakStatus.OPPRETTET,
-        revurderingsaarsak: RevurderingAarsak? = null,
+        systemkilde: Vedtaksloesning = Vedtaksloesning.GJENNY,
+        revurderingsaarsak: Revurderingaarsak? = null,
     ): GenerellBrevData {
         val soeker = "12345612345"
         return GenerellBrevData(
@@ -769,14 +808,15 @@ internal class VedtaksbrevServiceTest {
                     revurderingInfo = null,
                 ),
             spraak = Spraak.NB,
-            revurderingsaarsak,
+            systemkilde = systemkilde,
+            revurderingsaarsak = revurderingsaarsak,
         )
     }
 
     private fun opprettMottaker() =
         Mottaker(
-            "Stor Snerk",
-            foedselsnummer = Foedselsnummer(STOR_SNERK),
+            "Rød Blanding",
+            foedselsnummer = Foedselsnummer(SOEKER_FOEDSELSNUMMER.value),
             orgnummer = null,
             adresse =
                 Adresse(

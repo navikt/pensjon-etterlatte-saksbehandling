@@ -5,11 +5,11 @@ import no.nav.etterlatte.behandling.BehandlingHendelseType
 import no.nav.etterlatte.behandling.BehandlingHendelserKafkaProducer
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.GyldighetsproevingService
-import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.toStatistikkBehandling
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.Vedtaksloesning
+import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.JaNeiMedBegrunnelse
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
@@ -36,45 +36,50 @@ class MigreringService(
 
     fun migrer(request: MigreringRequest) =
         inTransaction {
-            opprettSakOgBehandling(request)?.let {
+            opprettSakOgBehandling(request)?.let { behandlingOgOppgave ->
+                val behandling = behandlingOgOppgave.behandling
+                if (behandling.type != BehandlingType.FØRSTEGANGSBEHANDLING) {
+                    throw IllegalArgumentException(
+                        "Finnes allerede behandling for sak=${behandling.sak.id}. Stopper migrering for pesysId=${request.pesysId}",
+                    )
+                }
                 val pesys = Vedtaksloesning.PESYS.name
                 kommerBarnetTilGodeService.lagreKommerBarnetTilgode(
                     KommerBarnetTilgode(
                         JaNei.JA,
                         "Automatisk importert fra Pesys",
                         Grunnlagsopplysning.Pesys.create(),
-                        behandlingId = it.id,
+                        behandlingId = behandling.id,
                     ),
                 )
                 gyldighetsproevingService.lagreGyldighetsproeving(
-                    it.id,
+                    behandling.id,
                     pesys,
                     JaNeiMedBegrunnelse(JaNei.JA, "Automatisk importert fra Pesys"),
                 )
 
-                // todo: Nytt regelverk gjelder fra 2023-10 i DEV for å kunne iverksette mot oppdrag,
-                //  det skal egentlig være og må endres til 2024-01.
-                val virkningstidspunkt = YearMonth.of(2023, 10)
-
+                val virkningstidspunktForMigrering = YearMonth.of(2024, 1)
                 behandlingService.oppdaterVirkningstidspunkt(
-                    it.id,
-                    virkningstidspunkt,
+                    behandling.id,
+                    virkningstidspunktForMigrering,
                     pesys,
                     "Automatisk importert fra Pesys",
                 )
                 val nyopprettaOppgave =
-                    oppgaveService.hentOppgaverForSak(it.sak.id).first { o -> o.referanse == it.id.toString() }
+                    requireNotNull(behandlingOgOppgave.oppgave) {
+                        "Mangler oppgave for behandling=${behandling.id}. Stopper migrering for pesysId=${request.pesysId}"
+                    }
                 oppgaveService.tildelSaksbehandler(nyopprettaOppgave.id, pesys)
 
                 behandlingsHendelser.sendMeldingForHendelseMedDetaljertBehandling(
-                    it.toStatistikkBehandling(request.opprettPersongalleri()),
+                    behandling.toStatistikkBehandling(request.opprettPersongalleri(), pesysId = request.pesysId.id),
                     BehandlingHendelseType.OPPRETTET,
                 )
-                it
+                behandling
             }
         }
 
-    private fun opprettSakOgBehandling(request: MigreringRequest): Behandling? =
+    private fun opprettSakOgBehandling(request: MigreringRequest) =
         behandlingFactory.opprettBehandling(
             finnEllerOpprettSak(request).id,
             request.opprettPersongalleri(),

@@ -9,7 +9,7 @@ import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
-import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.database.setJsonb
@@ -35,10 +35,9 @@ class RevurderingDao(private val connection: () -> Connection) {
             behandlingOpprettet = rs.somLocalDateTimeUTC("behandling_opprettet"),
             sistEndret = rs.somLocalDateTimeUTC("sist_endret"),
             status = rs.getString("status").let { BehandlingStatus.valueOf(it) },
-            revurderingsaarsak = rs.getString("revurdering_aarsak").let { RevurderingAarsak.valueOf(it) },
+            revurderingsaarsak = rs.getString("revurdering_aarsak").let { Revurderingaarsak.valueOf(it) },
             kommerBarnetTilgode = kommerBarnetTilGode.invoke(id),
             virkningstidspunkt = rs.getString("virkningstidspunkt")?.let { objectMapper.readValue(it) },
-            utenlandstilsnitt = rs.getString("utenlandstilsnitt")?.let { objectMapper.readValue(it) },
             boddEllerArbeidetUtlandet =
                 rs.getString("bodd_eller_arbeidet_utlandet")?.let {
                     objectMapper.readValue(it)
@@ -52,7 +51,7 @@ class RevurderingDao(private val connection: () -> Connection) {
 
     fun lagreRevurderingInfo(
         id: UUID,
-        revurderingMedBegrunnelse: RevurderingMedBegrunnelse,
+        revurderingInfoMedBegrunnelse: RevurderingInfoMedBegrunnelse,
         kilde: Grunnlagsopplysning.Kilde,
     ) {
         connection().prepareStatement(
@@ -62,14 +61,14 @@ class RevurderingDao(private val connection: () -> Connection) {
             """.trimIndent(),
         ).let { statement ->
             statement.setObject(1, id)
-            statement.setJsonb(2, revurderingMedBegrunnelse.revurderingInfo)
+            statement.setJsonb(2, revurderingInfoMedBegrunnelse.revurderingInfo)
             statement.setJsonb(3, kilde)
-            statement.stringOrNull(4, revurderingMedBegrunnelse.begrunnelse)
+            statement.stringOrNull(4, revurderingInfoMedBegrunnelse.begrunnelse)
             statement.executeUpdate()
         }
     }
 
-    private fun hentRevurderingInfoForBehandling(id: UUID): RevurderingMedBegrunnelse? =
+    private fun hentRevurderingInfoForBehandling(id: UUID): RevurderingInfoMedBegrunnelse? =
         connection().prepareStatement(
             """
             SELECT info, begrunnelse FROM revurdering_info 
@@ -79,7 +78,7 @@ class RevurderingDao(private val connection: () -> Connection) {
             statement.setObject(1, id)
             statement.executeQuery()
                 .singleOrNull {
-                    RevurderingMedBegrunnelse(
+                    RevurderingInfoMedBegrunnelse(
                         getString("info")?.let { objectMapper.readValue(it) },
                         getString("begrunnelse"),
                     )

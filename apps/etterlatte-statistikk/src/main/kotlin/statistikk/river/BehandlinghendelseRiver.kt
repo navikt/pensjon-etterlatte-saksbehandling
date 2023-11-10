@@ -1,16 +1,12 @@
 package no.nav.etterlatte.statistikk.river
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.module.kotlin.treeToValue
-import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
-import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.StatistikkBehandling
 import no.nav.etterlatte.libs.common.event.BehandlingRiverKey
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.TEKNISK_TID_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
-import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.statistikk.service.StatistikkService
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -18,8 +14,6 @@ import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
 import rapidsandrivers.migrering.ListenerMedLogging
-import java.time.LocalDateTime
-import java.util.UUID
 
 class BehandlinghendelseRiver(
     rapidsConnection: RapidsConnection,
@@ -79,16 +73,6 @@ class BehandlinghendelseRiver(
         throw e
     }
 }
-
-@JsonIgnoreProperties(ignoreUnknown = true)
-data class BehandlingIntern(
-    val id: UUID,
-    val sak: Sak,
-    val behandlingOpprettet: LocalDateTime,
-    val sistEndret: LocalDateTime,
-    val status: BehandlingStatus,
-    val type: BehandlingType,
-)
 
 enum class BehandlingHendelse {
     OPPRETTET,

@@ -2,7 +2,7 @@ package no.nav.etterlatte.brev.model
 
 import io.kotest.matchers.shouldBe
 import no.nav.etterlatte.brev.adresse.RegoppslagResponseDTO
-import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
@@ -28,7 +28,7 @@ internal class MottakerRequestTest {
                         ),
                 )
 
-            val mottaker = Mottaker.fra(STOR_SNERK, regoppslagResponseDTO)
+            val mottaker = Mottaker.fra(SOEKER_FOEDSELSNUMMER, regoppslagResponseDTO)
 
             mottaker.navn shouldBe regoppslagResponseDTO.navn
             mottaker.adresse.adresselinje1 shouldBe "Testveien 13A"
@@ -59,7 +59,7 @@ internal class MottakerRequestTest {
                         ),
                 )
 
-            val mottaker = Mottaker.fra(STOR_SNERK, regoppslagResponseDTO)
+            val mottaker = Mottaker.fra(SOEKER_FOEDSELSNUMMER, regoppslagResponseDTO)
 
             mottaker.navn shouldBe regoppslagResponseDTO.navn
             mottaker.adresse.adresselinje1 shouldBe "c/o STOR SNERK"
@@ -70,9 +70,5 @@ internal class MottakerRequestTest {
             mottaker.adresse.land shouldBe regoppslagResponseDTO.adresse.land
             mottaker.adresse.landkode shouldBe regoppslagResponseDTO.adresse.landkode
         }
-    }
-
-    companion object {
-        private val STOR_SNERK = Folkeregisteridentifikator.of("11057523044")
     }
 }

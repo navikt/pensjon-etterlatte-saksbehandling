@@ -11,7 +11,8 @@
       <env name="ETTERLATTE_GRUNNLAG_CLIENT_ID" value="ce96a301-13db-4409-b277-5b27f464d08b" />
       <env name="ETTERLATTE_GRUNNLAG_URL" value="https://etterlatte-grunnlag.intern.dev.nav.no" />
       <env name="KODEVERK_URL" value="https://kodeverk.dev-fss-pub.nais.io/api/v1/kodeverk" />
-
+      <env name="ETTERLATTE_VILKAARSVURDERING_CLIENT_ID" value="dev-gcp.etterlatte.etterlatte-vilkaarsvurdering" />
+      <env name="ETTERLATTE_VILKAARSVURDERING_URL" value="https://etterlatte-vilkaarsvurdering.intern.dev.nav.no" />
     </envs>
     <option name="MAIN_CLASS_NAME" value="no.nav.etterlatte.ApplicationKt" />
     <module name="pensjon-etterlatte-saksbehandling.apps.etterlatte-trygdetid.main" />

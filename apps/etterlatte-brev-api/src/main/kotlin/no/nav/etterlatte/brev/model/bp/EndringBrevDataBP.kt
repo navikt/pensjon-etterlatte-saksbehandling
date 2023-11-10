@@ -5,29 +5,31 @@ import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
 import no.nav.etterlatte.brev.model.AvslagBrevData
 import no.nav.etterlatte.brev.model.BrevData
 import no.nav.etterlatte.brev.model.EndringBrevData
+import no.nav.etterlatte.brev.model.EtterbetalingBrev
 import no.nav.etterlatte.brev.model.EtterbetalingDTO
+import no.nav.etterlatte.brev.model.InnholdMedVedlegg
 import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.libs.common.behandling.BarnepensjonSoeskenjusteringGrunn
-import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
 import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 
 data class EndringHovedmalBrevData(
     val erEndret: Boolean,
-    val etterbetaling: EtterbetalingDTO?,
+    val etterbetaling: EtterbetalingBrev?,
     val utbetalingsinfo: Utbetalingsinfo,
     val innhold: List<Slate.Element>,
 ) : EndringBrevData() {
     companion object {
         fun fra(
             utbetalingsinfo: Utbetalingsinfo,
-            etterbetalingDTO: EtterbetalingDTO?,
-            innhold: List<Slate.Element>,
+            etterbetaling: EtterbetalingDTO?,
+            innhold: InnholdMedVedlegg,
         ): BrevData =
             EndringHovedmalBrevData(
                 erEndret = true, // TODO når resten av fengselsopphold implementerast
-                etterbetaling = etterbetalingDTO,
-                utbetalingsinfo = utbetalingsinfo,
-                innhold = innhold,
+                etterbetaling = EtterbetalingBrev.fra(etterbetaling, utbetalingsinfo.beregningsperioder),
+                utbetalingsinfo = Utbetalingsinfo.kopier(utbetalingsinfo, etterbetaling),
+                innhold = innhold.innhold(),
             )
     }
 }
@@ -45,7 +47,7 @@ data class SoeskenjusteringRevurderingBrevdata(
                 AvslagBrevData.valider<RevurderingInfo.Soeskenjustering>(
                     generellBrevData.revurderingsaarsak,
                     generellBrevData.forenkletVedtak.revurderingInfo,
-                    RevurderingAarsak.SOESKENJUSTERING,
+                    Revurderingaarsak.SOESKENJUSTERING,
                 )
 
             return SoeskenjusteringRevurderingBrevdata(

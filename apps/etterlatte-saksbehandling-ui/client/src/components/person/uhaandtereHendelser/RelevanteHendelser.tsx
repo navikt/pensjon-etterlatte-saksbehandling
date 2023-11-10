@@ -10,9 +10,10 @@ import VurderHendelseModal from '~components/person/VurderHendelseModal'
 import UhaandtertHendelse from '~components/person/uhaandtereHendelser/UhaandtertHendelse'
 import { IBehandlingsType } from '~shared/types/IDetaljertBehandling'
 import { erFerdigBehandlet } from '~components/behandling/felles/utils'
-import { hentGrunnlagsendringshendelserForPerson, hentStoettedeRevurderinger } from '~shared/api/behandling'
+import { hentGrunnlagsendringshendelserForPerson } from '~shared/api/behandling'
 import Spinner from '~shared/Spinner'
 import { ISak } from '~shared/types/sak'
+import { hentStoettedeRevurderinger } from '~shared/api/revurdering'
 
 type Props = {
   sak: ISak
@@ -32,7 +33,7 @@ export default function RelevanteHendelser(props: Props) {
 
   const [relevanteHendelser, setRelevanteHendelser] = useState<Grunnlagsendringshendelse[]>([])
   const [hendelserStatus, hentHendelser] = useApiCall(hentGrunnlagsendringshendelserForPerson)
-  const [revurderingerStatus, hentRevurderinger] = useApiCall(hentStoettedeRevurderinger)
+  const [muligeRevurderingAarsakerStatus, hentMuligeRevurderingeraarsaker] = useApiCall(hentStoettedeRevurderinger)
   const [personerISak, hentPersoner, resetPersoner] = useApiCall(hentPersonerISak)
 
   useEffect(() => {
@@ -42,7 +43,7 @@ export default function RelevanteHendelser(props: Props) {
   }, [sak.id])
 
   useEffect(() => {
-    if (sak.sakType && behandlingliste) hentRevurderinger({ sakType: sak.sakType })
+    if (sak.sakType && behandlingliste) hentMuligeRevurderingeraarsaker({ sakType: sak.sakType })
   }, [sak.sakType])
 
   const navneMap = useMemo(() => {
@@ -89,7 +90,9 @@ export default function RelevanteHendelser(props: Props) {
                       hendelse={hendelse}
                       harAapenRevurdering={harAapenRevurdering}
                       startRevurdering={startRevurdering}
-                      revurderinger={isSuccess(revurderingerStatus) ? revurderingerStatus.data : []}
+                      revurderinger={
+                        isSuccess(muligeRevurderingAarsakerStatus) ? muligeRevurderingAarsakerStatus.data : []
+                      }
                     />
                   ))}
                 </Table.Body>
@@ -106,11 +109,13 @@ export default function RelevanteHendelser(props: Props) {
           ))}
       </FnrTilNavnMapContext.Provider>
 
-      {isFailure(revurderingerStatus) && (
+      {isFailure(muligeRevurderingAarsakerStatus) && (
         <Alert variant="error">En feil skjedde under kallet for å hente støttede revurderinger</Alert>
       )}
-      {isPending(revurderingerStatus) && <Spinner visible label="Sjekker om det kan opprettes ny behandling ..." />}
-      {isSuccess(revurderingerStatus) && revurderingerStatus.data.length && (
+      {isPending(muligeRevurderingAarsakerStatus) && (
+        <Spinner visible label="Sjekker om det kan opprettes ny behandling ..." />
+      )}
+      {isSuccess(muligeRevurderingAarsakerStatus) && muligeRevurderingAarsakerStatus.data.length && (
         <>
           {valgtHendelse && (
             <VurderHendelseModal
@@ -118,10 +123,10 @@ export default function RelevanteHendelser(props: Props) {
               valgtHendelse={valgtHendelse}
               open={visOpprettRevurderingsmodal}
               setOpen={setVisOpprettRevurderingsmodal}
-              revurderinger={revurderingerStatus.data}
+              revurderinger={muligeRevurderingAarsakerStatus.data}
             />
           )}
-          <OpprettNyRevurdering revurderinger={revurderingerStatus.data} sakId={sak.id} />
+          <OpprettNyRevurdering revurderinger={muligeRevurderingAarsakerStatus.data} sakId={sak.id} />
         </>
       )}
 

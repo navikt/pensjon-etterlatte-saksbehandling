@@ -17,7 +17,6 @@ import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlagService
-import no.nav.etterlatte.beregning.regler.FNR_1
 import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.klienter.TrygdetidKlient
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -26,12 +25,14 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.beregning.BeregningDTO
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
 import no.nav.etterlatte.libs.common.beregning.Beregningstype
+import no.nav.etterlatte.libs.common.beregning.OverstyrBeregningDTO
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
+import no.nav.etterlatte.libs.testdata.grunnlag.HELSOESKEN_FOEDSELSNUMMER
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
@@ -50,6 +51,7 @@ internal class BeregningRoutesTest {
     private val behandlingKlient = mockk<BehandlingKlient>()
     private val beregnBarnepensjonService = mockk<BeregnBarnepensjonService>()
     private val beregnOmstillingsstoenadService = mockk<BeregnOmstillingsstoenadService>()
+    private val beregnOverstyrBeregningService = mockk<BeregnOverstyrBeregningService>()
     private val beregningsGrunnlagService = mockk<BeregningsGrunnlagService>()
     private val trygdetidKlient = mockk<TrygdetidKlient>()
     private val beregningService =
@@ -58,6 +60,7 @@ internal class BeregningRoutesTest {
             behandlingKlient = behandlingKlient,
             beregnBarnepensjonService = beregnBarnepensjonService,
             beregnOmstillingsstoenadService = beregnOmstillingsstoenadService,
+            beregnOverstyrBeregningService = beregnOverstyrBeregningService,
             beregningsGrunnlagService = beregningsGrunnlagService,
             trygdetidKlient = trygdetidKlient,
         )
@@ -97,9 +100,13 @@ internal class BeregningRoutesTest {
     @Test
     fun `skal hente beregning`() {
         val beregning = beregning()
+        val behandling = mockk<DetaljertBehandling>()
 
         coEvery { behandlingKlient.harTilgangTilBehandling(any(), any()) } returns true
         every { beregningRepository.hent(beregning.behandlingId) } returns beregning
+        coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
+        every { behandling.sak } returns 1L
+        every { beregningRepository.hentOverstyrBeregning(1L) } returns null
 
         testApplication {
             environment { config = applicationConfig }
@@ -142,9 +149,10 @@ internal class BeregningRoutesTest {
         val behandling = mockBehandling()
         val beregning = beregning()
 
-        coEvery { behandlingKlient.beregn(any(), any(), any()) } returns true
+        coEvery { behandlingKlient.kanBeregnes(any(), any(), any()) } returns true
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns mockBehandling()
         coEvery { behandlingKlient.harTilgangTilBehandling(any(), any()) } returns true
+        every { beregningRepository.hentOverstyrBeregning(1L) } returns null
         coEvery { beregnBarnepensjonService.beregn(any(), any()) } returns beregning
         every { beregningRepository.lagreEllerOppdaterBeregning(any()) } returnsArgument 0
 
@@ -170,9 +178,59 @@ internal class BeregningRoutesTest {
         }
     }
 
+    @Test
+    fun `skal hente overstyrBeregning`() {
+        val behandling = mockk<DetaljertBehandling>()
+
+        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any()) } returns true
+        coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
+        every { behandling.sak } returns 1L
+        every { beregningRepository.hentOverstyrBeregning(1L) } returns OverstyrBeregning(1L, "Test", Tidspunkt.now())
+
+        testApplication {
+            environment { config = applicationConfig }
+            application { restModule(log) { beregning(beregningService, behandlingKlient) } }
+
+            val response =
+                client.get("/api/beregning/${randomUUID()}/overstyrt") {
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    header(HttpHeaders.Authorization, "Bearer $token")
+                }
+
+            val hentetOverstyrBeregning = objectMapper.readValue(response.bodyAsText(), OverstyrBeregningDTO::class.java)
+
+            hentetOverstyrBeregning shouldNotBe null
+            hentetOverstyrBeregning.beskrivelse shouldBe "Test"
+        }
+    }
+
+    @Test
+    fun `skal ikke hente overstyrBeregning hvis den ikke finnes`() {
+        val behandling = mockk<DetaljertBehandling>()
+
+        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any()) } returns true
+        coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
+        every { behandling.sak } returns 1L
+        every { beregningRepository.hentOverstyrBeregning(1L) } returns null
+
+        testApplication {
+            environment { config = applicationConfig }
+            application { restModule(log) { beregning(beregningService, behandlingKlient) } }
+
+            val response =
+                client.get("/api/beregning/${randomUUID()}/overstyrt") {
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    header(HttpHeaders.Authorization, "Bearer $token")
+                }
+
+            response.status shouldBe HttpStatusCode.NoContent
+        }
+    }
+
     private fun beregning(
         behandlingId: UUID = randomUUID(),
         datoFOM: YearMonth = YearMonth.of(2021, 2),
+        overstyrBeregning: OverstyrBeregning? = null,
     ) = Beregning(
         beregningId = randomUUID(),
         behandlingId = behandlingId,
@@ -185,13 +243,14 @@ internal class BeregningRoutesTest {
                     datoFOM = datoFOM,
                     datoTOM = null,
                     utbetaltBeloep = 3000,
-                    soeskenFlokk = listOf(FNR_1),
+                    soeskenFlokk = listOf(HELSOESKEN_FOEDSELSNUMMER.value),
                     grunnbelopMnd = 10_000,
                     grunnbelop = 100_000,
                     trygdetid = 40,
                     kilde = Grunnlagsopplysning.RegelKilde("regelid", Tidspunkt.now(), "1"),
                 ),
             ),
+        overstyrBeregning = overstyrBeregning,
     )
 
     private fun mockBehandling(): DetaljertBehandling =

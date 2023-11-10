@@ -24,10 +24,26 @@ fun <T> ResultSet.single(block: ResultSet.() -> T): T {
     }
 }
 
+fun <T> ResultSet.firstOrNull(block: ResultSet.() -> T): T? {
+    return if (next()) {
+        block()
+    } else {
+        null
+    }
+}
+
 fun <T> ResultSet.toList(block: ResultSet.() -> T): List<T> {
     val list = ArrayList<T>()
     while (next()) {
         list.add(block())
+    }
+    return list
+}
+
+fun <T> ResultSet.toListPassesRsToBlock(block: (resultSet: ResultSet) -> T): List<T> {
+    val list = ArrayList<T>()
+    while (next()) {
+        list.add(block(this))
     }
     return list
 }

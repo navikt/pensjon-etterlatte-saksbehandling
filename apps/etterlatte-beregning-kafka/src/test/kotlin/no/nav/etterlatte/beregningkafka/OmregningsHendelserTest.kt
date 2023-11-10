@@ -22,7 +22,7 @@ import java.util.UUID
 internal class OmregningsHendelserTest {
     private val behandlingService = mockk<BeregningService>()
     private val trygdetidService = mockk<TrygdetidService>()
-    private val inspector = TestRapid().apply { OmregningHendelser(this, behandlingService, trygdetidService) }
+    private val inspector = TestRapid().apply { OmregningHendelserRiver(this, behandlingService, trygdetidService) }
 
     @Test
     fun `skal opprette omregning`() {
@@ -37,6 +37,7 @@ internal class OmregningsHendelserTest {
                 beregningsperioder = listOf(),
                 beregnetDato = Tidspunkt.now(),
                 grunnlagMetadata = Metadata(1234, 1),
+                overstyrBeregning = null,
             )
 
         val returnValue =

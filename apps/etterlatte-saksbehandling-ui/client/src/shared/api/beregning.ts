@@ -5,6 +5,8 @@ import {
   BeregningsGrunnlagOMSDto,
   BeregningsGrunnlagOMSPostDto,
   BeregningsGrunnlagPostDto,
+  OverstyrBeregning,
+  OverstyrBeregningGrunnlagPostDTO,
 } from '~shared/types/Beregning'
 
 export const hentBeregning = async (behandlingId: string): Promise<ApiResponse<Beregning>> => {
@@ -20,29 +22,46 @@ export const opprettBeregningForOpphoer = async (behandlingId: string): Promise<
 }
 
 export const lagreBeregningsGrunnlag = async (args: {
-  behandlingsId: string
+  behandlingId: string
   grunnlag: BeregningsGrunnlagPostDto
 }): Promise<ApiResponse<void>> => {
-  return apiClient.post(`/beregning/beregningsgrunnlag/${args.behandlingsId}/barnepensjon`, { ...args.grunnlag })
+  return apiClient.post(`/beregning/beregningsgrunnlag/${args.behandlingId}/barnepensjon`, { ...args.grunnlag })
 }
 
 export const lagreBeregningsGrunnlagOMS = async (args: {
-  behandlingsId: string
+  behandlingId: string
   grunnlag: BeregningsGrunnlagOMSPostDto
 }): Promise<ApiResponse<void>> => {
-  return apiClient.post(`/beregning/beregningsgrunnlag/${args.behandlingsId}/omstillingstoenad`, { ...args.grunnlag })
+  return apiClient.post(`/beregning/beregningsgrunnlag/${args.behandlingId}/omstillingstoenad`, { ...args.grunnlag })
 }
 
 export const hentBeregningsGrunnlag = async (
-  behandlingsId: string
+  behandlingId: string
 ): Promise<ApiResponse<BeregningsGrunnlagDto | null>> => {
-  return apiClient.get<BeregningsGrunnlagDto | null>(`/beregning/beregningsgrunnlag/${behandlingsId}/barnepensjon`)
+  return apiClient.get<BeregningsGrunnlagDto | null>(`/beregning/beregningsgrunnlag/${behandlingId}/barnepensjon`)
 }
 
 export const hentBeregningsGrunnlagOMS = async (
-  behandlingsId: string
+  behandlingId: string
 ): Promise<ApiResponse<BeregningsGrunnlagOMSDto | null>> => {
   return apiClient.get<BeregningsGrunnlagOMSDto | null>(
-    `/beregning/beregningsgrunnlag/${behandlingsId}/omstillingstoenad`
+    `/beregning/beregningsgrunnlag/${behandlingId}/omstillingstoenad`
   )
+}
+
+export const hentOverstyrBeregning = async (behandlingId: string): Promise<ApiResponse<OverstyrBeregning | null>> => {
+  return apiClient.get<OverstyrBeregning | null>(`/beregning/${behandlingId}/overstyrt`)
+}
+
+export const hentOverstyrBeregningGrunnlag = async (
+  behandlingId: string
+): Promise<ApiResponse<OverstyrBeregningGrunnlagPostDTO>> => {
+  return apiClient.get(`/beregning/beregningsgrunnlag/${behandlingId}/overstyr`)
+}
+
+export const lagreOverstyrBeregningGrunnlag = async (args: {
+  behandlingId: string
+  grunnlag: OverstyrBeregningGrunnlagPostDTO
+}): Promise<ApiResponse<OverstyrBeregningGrunnlagPostDTO>> => {
+  return apiClient.post(`/beregning/beregningsgrunnlag/${args.behandlingId}/overstyr`, { ...args.grunnlag })
 }

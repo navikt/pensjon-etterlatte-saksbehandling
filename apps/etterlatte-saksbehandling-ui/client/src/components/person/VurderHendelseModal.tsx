@@ -1,24 +1,24 @@
 import { Alert, BodyShort, Button, Heading, Modal, Select, TextField } from '@navikt/ds-react'
 import React, { useState } from 'react'
 import styled from 'styled-components'
-import { opprettRevurdering as opprettRevurderingApi } from '~shared/api/behandling'
 import { isPending, useApiCall } from '~shared/hooks/useApiCall'
 import { Grunnlagsendringshendelse, GrunnlagsendringsType } from '~components/person/typer'
-import { Revurderingsaarsak, tekstRevurderingsaarsak } from '~shared/types/Revurderingsaarsak'
+import { Revurderingaarsak, tekstRevurderingsaarsak } from '~shared/types/Revurderingaarsak'
 import { useNavigate } from 'react-router-dom'
 import { HjemmelLenke } from '~components/behandling/felles/HjemmelLenke'
+import { opprettRevurdering as opprettRevurderingApi } from '~shared/api/revurdering'
 
 type Props = {
   open: boolean
   setOpen: (value: boolean) => void
   sakId: number
-  revurderinger: Array<Revurderingsaarsak>
+  revurderinger: Array<Revurderingaarsak>
   valgtHendelse?: Grunnlagsendringshendelse
 }
 const VurderHendelseModal = (props: Props) => {
   const { revurderinger, valgtHendelse } = props
   const [error, setError] = useState<string | null>(null)
-  const [valgtAarsak, setValgtAarsak] = useState<Revurderingsaarsak | undefined>(undefined)
+  const [valgtAarsak, setValgtAarsak] = useState<Revurderingaarsak | undefined>(undefined)
   const [opprettRevurderingStatus, opprettRevurdering] = useApiCall(opprettRevurderingApi)
   const [begrunnelse, setBegrunnelse] = useState('')
   const [fritekstgrunn, setFritekstgrunn] = useState<string>('')
@@ -65,7 +65,7 @@ const VurderHendelseModal = (props: Props) => {
               <Select
                 label="Velg revurderingsårsak"
                 value={valgtAarsak}
-                onChange={(e) => setValgtAarsak(e.target.value as Revurderingsaarsak)}
+                onChange={(e) => setValgtAarsak(e.target.value as Revurderingaarsak)}
                 error={error}
               >
                 <option value="">Velg en årsak</option>
@@ -75,7 +75,7 @@ const VurderHendelseModal = (props: Props) => {
                   </option>
                 ))}
               </Select>
-              {valgtAarsak === Revurderingsaarsak.ANNEN && (
+              {valgtAarsak === Revurderingaarsak.ANNEN && (
                 <MarginTop>
                   <TextField
                     label="Beskriv årsak"

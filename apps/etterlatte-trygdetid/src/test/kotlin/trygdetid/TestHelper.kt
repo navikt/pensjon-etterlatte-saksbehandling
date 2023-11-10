@@ -12,7 +12,6 @@ import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.common.trygdetid.DetaljertBeregnetTrygdetidResultat
 import no.nav.etterlatte.libs.common.trygdetid.avtale.Trygdeavtale
 import no.nav.etterlatte.token.Saksbehandler
-import no.nav.etterlatte.token.Systembruker
 import no.nav.etterlatte.trygdetid.BeregnetTrygdetidGrunnlag
 import no.nav.etterlatte.trygdetid.DetaljertBeregnetTrygdetid
 import no.nav.etterlatte.trygdetid.LandNormalisert
@@ -29,11 +28,10 @@ import java.util.UUID.randomUUID
 
 val saksbehandler = Saksbehandler("token", "ident", null)
 
-val pesysBruker = Systembruker("", "")
-
 fun behandling(
     behandlingId: UUID = randomUUID(),
     sakId: Long = 1,
+    behandlingStatus: BehandlingStatus = BehandlingStatus.VILKAARSVURDERT,
 ) = DetaljertBehandling(
     id = behandlingId,
     sak = sakId,
@@ -45,7 +43,7 @@ fun behandling(
     gjenlevende = null,
     avdoed = null,
     soesken = null,
-    status = BehandlingStatus.VILKAARSVURDERT,
+    status = behandlingStatus,
     behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
     virkningstidspunkt = null,
     boddEllerArbeidetUtlandet = null,
@@ -59,6 +57,7 @@ fun behandling(
 fun trygdetid(
     behandlingId: UUID = randomUUID(),
     sakId: Long = 1,
+    ident: String = "en ident",
     beregnetTrygdetid: DetaljertBeregnetTrygdetid? = null,
     trygdetidGrunnlag: List<TrygdetidGrunnlag> = emptyList(),
     opplysninger: List<Opplysningsgrunnlag> = emptyList(),
@@ -69,6 +68,7 @@ fun trygdetid(
     trygdetidGrunnlag = trygdetidGrunnlag,
     opplysninger = opplysninger,
     beregnetTrygdetid = beregnetTrygdetid,
+    ident = ident,
 )
 
 fun trygdetidGrunnlag(

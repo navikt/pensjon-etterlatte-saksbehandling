@@ -20,12 +20,10 @@ import no.nav.etterlatte.behandling.BehandlingFactory
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.BoddEllerArbeidetUtlandetRequest
 import no.nav.etterlatte.behandling.GyldighetsproevingService
-import no.nav.etterlatte.behandling.UtenlandstilsnittRequest
 import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktService
 import no.nav.etterlatte.behandling.behandlingRoutes
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeService
 import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerService
-import no.nav.etterlatte.libs.common.behandling.UtenlandstilsnittType
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -69,24 +67,6 @@ internal class BehandlingRoutesTest {
     @AfterAll
     fun after() {
         mockOAuth2Server.shutdown()
-    }
-
-    @Test
-    fun `kan oppdater utenlandstilsnitt`() {
-        coEvery {
-            behandlingService.oppdaterUtenlandstilsnitt(any(), any())
-        } just runs
-
-        withTestApplication { client ->
-            val response =
-                client.post("/api/behandling/$behandlingId/utenlandstilsnitt") {
-                    header(HttpHeaders.Authorization, "Bearer $token")
-                    contentType(ContentType.Application.Json)
-                    setBody(UtenlandstilsnittRequest(UtenlandstilsnittType.BOSATT_UTLAND, "Test"))
-                }
-
-            assertEquals(200, response.status.value)
-        }
     }
 
     @Test
@@ -151,7 +131,7 @@ internal class BehandlingRoutesTest {
     }
 
     @Test
-    fun `Får bad request hvis virkningstidspunkt ikke er gyldig`() {
+    fun `Gir bad request hvis virkningstidspunkt ikke er gyldig`() {
         val bodyVirkningstidspunkt = Tidspunkt.parse("2017-02-01T00:00:00Z")
         val bodyBegrunnelse = "begrunnelse"
 

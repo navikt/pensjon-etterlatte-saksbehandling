@@ -12,12 +12,14 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.STOR_SNERK
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.person.HentAdressebeskyttelseRequest
 import no.nav.etterlatte.libs.common.person.HentFolkeregisterIdenterForAktoerIdBolkRequest
 import no.nav.etterlatte.libs.common.person.HentGeografiskTilknytningRequest
 import no.nav.etterlatte.libs.common.person.HentPdlIdentRequest
 import no.nav.etterlatte.libs.common.person.HentPersonRequest
 import no.nav.etterlatte.libs.common.person.PersonIdent
 import no.nav.etterlatte.libs.common.person.PersonRolle
+import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
@@ -81,9 +83,9 @@ internal class PdlKlientTest {
         runBlocking {
             val identResponse =
                 pdlKlient.hentPdlIdentifikator(
-                    HentPdlIdentRequest(PersonIdent("2305469522806")),
+                    HentPdlIdentRequest(PersonIdent(AVDOED_FOEDSELSNUMMER.value)),
                 )
-            assertEquals("70078749472", identResponse.data?.hentIdenter?.identer?.first()?.ident)
+            assertEquals("09508229892", identResponse.data?.hentIdenter?.identer?.first()?.ident)
             assertEquals(false, identResponse.data?.hentIdenter?.identer?.first()?.historisk)
             assertEquals("FOLKEREGISTERIDENT", identResponse.data?.hentIdenter?.identer?.first()?.gruppe)
         }
@@ -132,6 +134,20 @@ internal class PdlKlientTest {
 
             assertEquals("0301", personResponse.data?.hentGeografiskTilknytning?.gtKommune)
             assertEquals(PdlGtType.KOMMUNE, personResponse.data?.hentGeografiskTilknytning?.gtType)
+        }
+    }
+
+    @Test
+    fun `hentAdressebeskyttelse returnerer adressebeskyttelse`() {
+        mockEndpoint("/pdl/adressebeskyttelse.json")
+
+        runBlocking {
+            val response =
+                pdlKlient.hentAdressebeskyttelse(
+                    HentAdressebeskyttelseRequest(PersonIdent(STOR_SNERK.value)),
+                )
+
+            assertEquals(PdlGradering.FORTROLIG, response.data?.hentPerson?.adressebeskyttelse?.single()?.gradering)
         }
     }
 

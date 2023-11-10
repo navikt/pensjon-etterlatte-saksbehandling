@@ -31,13 +31,13 @@ export default function MottakerPanel({ vedtaksbrev }: { vedtaksbrev: IBrev }) {
           wide
           label="Adresse"
           tekst={
-            <div>
+            <>
               {[adresse?.adresselinje1, adresse?.adresselinje2, adresse?.adresselinje3].join('\n')}
               <br />
               {adresse?.postnummer} {adresse?.poststed}
               <br />
               {adresse?.land} ({adresse?.landkode})
-            </div>
+            </>
           }
         />
       </InfoWrapper>

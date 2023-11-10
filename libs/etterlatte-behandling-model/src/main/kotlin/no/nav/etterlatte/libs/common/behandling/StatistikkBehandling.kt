@@ -20,9 +20,10 @@ data class StatistikkBehandling(
     val behandlingType: BehandlingType,
     val virkningstidspunkt: Virkningstidspunkt?,
     val boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet?,
-    val revurderingsaarsak: RevurderingAarsak? = null,
+    val revurderingsaarsak: Revurderingaarsak? = null,
     val revurderingInfo: RevurderingInfo?,
     val prosesstype: Prosesstype,
     val enhet: String,
     val kilde: Vedtaksloesning,
+    val pesysId: Long?,
 )

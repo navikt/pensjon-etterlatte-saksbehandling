@@ -13,7 +13,7 @@
         "spoersmaal": "Etternavn"
       },
       "foedselsnummer": {
-        "svar": "11057523044",
+        "svar": "01498344336",
         "spoersmaal": "Fødselsnummer"
       },
       "type": "INNSENDER"
@@ -64,7 +64,7 @@
         "spoersmaal": "Etternavn"
       },
       "foedselsnummer": {
-        "svar": "07010776133",
+        "svar": "25478323363",
         "spoersmaal": "Barnets fødselsnummer / d-nummer"
       },
       "statsborgerskap": {
@@ -90,7 +90,7 @@
             "spoersmaal": "Etternavn"
           },
           "foedselsnummer": {
-            "svar": "11057523044",
+            "svar": "01498344336",
             "spoersmaal": "Fødselsnummer"
           },
           "type": "FORELDER"
@@ -105,7 +105,7 @@
             "spoersmaal": "Etternavn"
           },
           "foedselsnummer": {
-            "svar": "24014021406",
+            "svar": "08498224343",
             "spoersmaal": "Fødselsnummer"
           },
           "type": "FORELDER"
@@ -133,7 +133,7 @@
           "spoersmaal": "Etternavn"
         },
         "foedselsnummer": {
-          "svar": "11057523044",
+          "svar": "01498344336",
           "spoersmaal": "Fødselsnummer"
         },
         "adresse": {
@@ -164,7 +164,7 @@
           "spoersmaal": "Etternavn"
         },
         "foedselsnummer": {
-          "svar": "24014021406",
+          "svar": "08498224343",
           "spoersmaal": "Fødselsnummer / d-nummer"
         },
         "datoForDoedsfallet": {
@@ -287,7 +287,7 @@
   },
   "@lagret_soeknad_id": 621,
   "@template": "soeknad",
-  "@fnr_soeker": "07010776133",
+  "@fnr_soeker": "25478323363",
   "@hendelse_gyldig_til": "2023-02-10T10:23:30.808950460Z",
   "system_read_count": 2,
   "system_participating_services": [

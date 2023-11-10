@@ -30,7 +30,7 @@ interface BehandlingKlient : BehandlingTilgangsSjekk {
         brukerTokenInfo: BrukerTokenInfo,
     ): SisteIverksatteBehandling
 
-    suspend fun beregn(
+    suspend fun kanBeregnes(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
         commit: Boolean,
@@ -118,7 +118,7 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
         }
     }
 
-    override suspend fun beregn(
+    override suspend fun kanBeregnes(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
         commit: Boolean,

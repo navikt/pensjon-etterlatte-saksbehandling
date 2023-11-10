@@ -55,6 +55,10 @@ const Etterbetaling = (props: {
   const vis = useFeatureEnabledMedDefault(featureToggleNameEtterbetaling, false)
   const [errorTekst, setErrorTekst] = useState('')
 
+  if (!vis) {
+    return null
+  }
+
   const valider = () => {
     if (!erEtterbetaling) {
       return ''
@@ -95,9 +99,6 @@ const Etterbetaling = (props: {
     setEtterbetaling(lagraEtterbetaling)
   }
 
-  if (!vis) {
-    return null
-  }
   if (!redigerbar) {
     if (!erEtterbetaling) {
       return null
@@ -106,7 +107,7 @@ const Etterbetaling = (props: {
     return (
       <>
         <Heading size="small" level="3">
-          Er etterbetaling
+          Innebærer etterbetaling?
         </Heading>
         <BodyShort>Fra og med måned: {formaterKanskjeStringDato(etterbetaling?.fraDato?.toString())}</BodyShort>
         <BodyShort>Til og med måned: {formaterKanskjeStringDato(etterbetaling?.tilDato?.toString())}</BodyShort>
@@ -127,31 +128,33 @@ const Etterbetaling = (props: {
         </Heading>
       </Checkbox>
       {erEtterbetaling ? (
-        <EtterbetalingWrapper>
-          <MaanedSection>
-            <MaanedVelger
-              value={etterbetaling?.fraDato ? new Date(etterbetaling?.fraDato) : undefined}
-              onChange={(e) => setEtterbetaling({ ...etterbetaling, fraDato: e })}
-              label="Fra og med måned"
-            />
-          </MaanedSection>
-          <MaanedSection>
-            <MaanedVelger
-              value={etterbetaling?.tilDato ? new Date(etterbetaling?.tilDato) : undefined}
-              onChange={(e) => setEtterbetaling({ ...etterbetaling, tilDato: e })}
-              label="Til og med måned"
-            />
-          </MaanedSection>
-        </EtterbetalingWrapper>
+        <>
+          <EtterbetalingWrapper>
+            <MaanedSection>
+              <MaanedVelger
+                value={etterbetaling?.fraDato ? new Date(etterbetaling?.fraDato) : undefined}
+                onChange={(e) => setEtterbetaling({ ...etterbetaling, fraDato: e })}
+                label="Fra og med måned"
+              />
+            </MaanedSection>
+            <MaanedSection>
+              <MaanedVelger
+                value={etterbetaling?.tilDato ? new Date(etterbetaling?.tilDato) : undefined}
+                onChange={(e) => setEtterbetaling({ ...etterbetaling, tilDato: e })}
+                label="Til og med måned"
+              />
+            </MaanedSection>
+          </EtterbetalingWrapper>
+          <FlexRow justify="left">
+            <Button variant="secondary" disabled={isPending(status)} onClick={avbryt}>
+              Avbryt
+            </Button>
+            <Button variant="primary" loading={isPending(status)} onClick={lagre}>
+              Lagre etterbetaling
+            </Button>
+          </FlexRow>
+        </>
       ) : null}
-      <FlexRow justify="left">
-        <Button variant="secondary" disabled={isPending(status)} onClick={avbryt}>
-          Avbryt
-        </Button>
-        <Button variant="primary" loading={isPending(status)} onClick={lagre}>
-          Lagre etterbetaling
-        </Button>
-      </FlexRow>
       {errorTekst !== '' ? <ErrorMessage>{errorTekst}</ErrorMessage> : null}
     </>
   )

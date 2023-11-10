@@ -161,7 +161,7 @@ class AvkortingRoutesTest {
                         ),
                     ),
             )
-        coEvery { avkortingService.lagreAvkorting(any(), any(), any()) } returns avkorting
+        coEvery { avkortingService.beregnAvkortingMedNyttGrunnlag(any(), any(), any()) } returns avkorting
 
         testApplication(server.config.httpServer.port()) {
             val response =
@@ -175,7 +175,7 @@ class AvkortingRoutesTest {
             val result = objectMapper.readValue(response.bodyAsText(), AvkortingDto::class.java)
             result shouldBe dto
             coVerify {
-                avkortingService.lagreAvkorting(
+                avkortingService.beregnAvkortingMedNyttGrunnlag(
                     behandlingsId,
                     any(),
                     withArg {

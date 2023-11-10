@@ -21,14 +21,8 @@ class DatabaseContext(private val ds: DataSource) : DatabaseKontekst {
             "No currently open transaction",
         )
 
-    override fun <T> inTransaction(
-        gjenbruk: Boolean,
-        block: () -> T,
-    ): T {
+    override fun <T> inTransaction(block: () -> T): T {
         if (transaktionOpen.getAndSet(true)) {
-            if (gjenbruk) {
-                return block()
-            }
             throw IllegalStateException("Støtter ikke nøstede transactsjoner")
         }
         val c = ds.connection

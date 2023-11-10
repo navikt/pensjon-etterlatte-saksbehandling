@@ -1,9 +1,9 @@
-import { Undertekst, VurderingsTitle } from '../../styled'
+import { VurderingsTitle } from '../../styled'
 import styled from 'styled-components'
 import { useState } from 'react'
 import { IBehandlingStatus, IKommerBarnetTilgode } from '~shared/types/IDetaljertBehandling'
 import { JaNei, JaNeiRec } from '~shared/types/ISvar'
-import { BodyShort, Label, Radio, RadioGroup } from '@navikt/ds-react'
+import { Label, Radio, RadioGroup } from '@navikt/ds-react'
 import { VurderingsboksWrapper } from '~components/vurderingsboks/VurderingsboksWrapper'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { lagreBegrunnelseKommerBarnetTilgode } from '~shared/api/behandling'
@@ -55,10 +55,9 @@ export const KommerBarnetTilGodeVurdering = ({
 
   return (
     <VurderingsboksWrapper
-      tittel=""
+      tittel="Vurderer du det som sannsynlig at pensjonen kommer barnet tilgode?"
       subtittelKomponent={
         <>
-          <BodyShort spacing>Vurderer du det som sannsynlig at pensjonen kommer barnet tilgode?</BodyShort>
           {kommerBarnetTilgode?.svar && (
             <Label as="p" size="small" style={{ marginBottom: '32px' }}>
               {JaNeiRec[kommerBarnetTilgode.svar]}
@@ -81,10 +80,7 @@ export const KommerBarnetTilGodeVurdering = ({
       defaultRediger={kommerBarnetTilgode === null}
     >
       <div>
-        <VurderingsTitle title="Trenger avklaring" />
-        <Undertekst $gray={false}>
-          Boforholdet er avklart og sannsynliggjort at pensjonen kommer barnet til gode?
-        </Undertekst>
+        <VurderingsTitle title="Vurderer du det som sannsynlig at pensjonen kommer barnet tilgode?" />
         <RadioGroupWrapper>
           <RadioGroup
             legend=""

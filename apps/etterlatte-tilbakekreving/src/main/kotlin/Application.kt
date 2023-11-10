@@ -8,6 +8,7 @@ import io.ktor.server.engine.connector
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.routing.routing
 import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstartOgAvslutning
+import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.ktor.healthApi
 import no.nav.etterlatte.libs.ktor.metricsModule
 import no.nav.etterlatte.libs.ktor.restModule
@@ -49,7 +50,8 @@ class Server(private val context: ApplicationContext) {
 
     fun run() =
         with(context) {
-            // kravgrunnlagConsumer.start() TODO - må få økonomi til å gjøre oppsett for kø
+            dataSource.migrate()
+            kravgrunnlagConsumer.start()
 
             setReady()
             engine.start(true)

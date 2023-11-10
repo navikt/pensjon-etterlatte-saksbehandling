@@ -6,6 +6,7 @@ import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 enum class PdlFeilAarsak {
     FANT_IKKE_PERSON,
     INGEN_IDENT_FAMILIERELASJON,
+    INTERNAL_SERVER_ERROR,
 }
 
 class FantIkkePersonException(override val detail: String = "Fant ikke forespurt person i PDL") : IkkeFunnetException(
@@ -19,3 +20,5 @@ class IngenIdentFamilierelasjonException(override val detail: String = "En perso
         code = PdlFeilAarsak.INGEN_IDENT_FAMILIERELASJON.name,
         detail = detail,
     )
+
+class PdlInternalServerError : Exception()

@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 import { Navigate, Route, Routes, useParams } from 'react-router-dom'
 import { hentBehandling } from '~shared/api/behandling'
 import { GridContainer, MainContent } from '~shared/styled'
-import { addBehandling, resetBehandling } from '~store/reducers/BehandlingReducer'
+import { setBehandling, resetBehandling, IBehandlingReducer } from '~store/reducers/BehandlingReducer'
 import { PdlPersonStatusBar } from '~shared/statusbar/Statusbar'
 import { useBehandlingRoutes } from './BehandlingRoutes'
 import { StegMeny } from './StegMeny/stegmeny'
@@ -14,7 +14,7 @@ import { BehandlingSidemeny } from '~components/behandling/sidemeny/BehandlingSi
 import Spinner from '~shared/Spinner'
 
 export const Behandling = () => {
-  const behandling = useBehandling()
+  const behandlingFraRedux = useBehandling()
   const dispatch = useAppDispatch()
   const { behandlingId: behandlingIdFraURL } = useParams()
   const { behandlingRoutes } = useBehandlingRoutes()
@@ -25,37 +25,42 @@ export const Behandling = () => {
       return
     }
 
-    if (behandlingIdFraURL !== behandling?.id) {
+    if (behandlingIdFraURL !== behandlingFraRedux?.id) {
       fetchBehandling(
         behandlingIdFraURL,
-        (behandling) => dispatch(addBehandling(behandling)),
+        (behandling) => dispatch(setBehandling(behandling)),
         () => dispatch(resetBehandling())
       )
     }
-  }, [behandlingIdFraURL, behandling?.id])
+  }, [behandlingIdFraURL, behandlingFraRedux?.id])
 
   return mapAllApiResult(
     fetchBehandlingStatus,
     <Spinner label="Henter behandling ..." visible />,
     null,
     () => <ApiErrorAlert>Kunne ikke hente behandling</ApiErrorAlert>,
-    (behandling) => (
-      <>
-        {behandling.søker && <PdlPersonStatusBar person={behandling.søker} />}
-        <StegMeny behandling={behandling} />
-        <GridContainer>
-          <MainContent>
-            <Routes>
-              {behandlingRoutes.map((route) => (
-                <Route key={route.path} path={route.path} element={route.element} />
-              ))}
-              <Route path="*" element={<Navigate to={behandlingRoutes[0].path} replace />} />
-            </Routes>
-          </MainContent>
-
-          <BehandlingSidemeny />
-        </GridContainer>
-      </>
-    )
+    () => {
+      if (behandlingFraRedux) {
+        const behandlingGarra = behandlingFraRedux as IBehandlingReducer
+        return (
+          <>
+            {behandlingGarra.søker && <PdlPersonStatusBar person={behandlingGarra.søker} />}
+            <StegMeny behandling={behandlingGarra} />
+            <GridContainer>
+              <MainContent>
+                <Routes>
+                  {behandlingRoutes.map((route) => (
+                    <Route key={route.path} path={route.path} element={route.element} />
+                  ))}
+                  <Route path="*" element={<Navigate to={behandlingRoutes[0].path} replace />} />
+                </Routes>
+              </MainContent>
+              <BehandlingSidemeny behandling={behandlingGarra} />
+            </GridContainer>
+          </>
+        )
+      }
+      return null
+    }
   )
 }

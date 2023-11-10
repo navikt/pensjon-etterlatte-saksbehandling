@@ -20,11 +20,6 @@ spec:
         flags:
           - name: max_connections
             value: "100"
-  #startup:
-  #  initialDelay: 7
-  #  failureThreshold: 10
-  #  periodSeconds: 5
-  #  path: /started
   liveness:
     initialDelay: 7
     failureThreshold: 10
@@ -66,6 +61,8 @@ spec:
       value: http://etterlatte-behandling
     - name: ETTERLATTE_BEHANDLING_CLIENT_ID
       value: 59967ac8-009c-492e-a618-e5a0f6b3e4e4
+    - name: ETTERLATTE_BEHANDLING_SCOPE
+      value: api://dev-gcp.etterlatte.etterlatte-behandling/.default
     - name: PDLTJENESTER_AZURE_SCOPE
       value: api://dev-gcp.etterlatte.etterlatte-pdltjenester/.default
     - name: PDLTJENESTER_URL
@@ -76,9 +73,7 @@ spec:
     inbound:
       rules:
         - application: etterlatte-vilkaarsvurdering
-        - application: etterlatte-vilkaarsvurdering-lokal
         - application: etterlatte-trygdetid
-        - application: etterlatte-trygdetid-lokal
         - application: etterlatte-brev-api
         - application: etterlatte-beregning
         - application: etterlatte-behandling

@@ -48,6 +48,22 @@ export interface InstitusjonsoppholdInfo {
   utskrevetdato: Date | undefined
 }
 
+export interface MottattDokument {
+  dokumenttype?: string
+  dato?: string
+  kommentar?: string
+}
+
+export interface LandMedDokumenter {
+  landIsoKode?: string
+  dokumenter: MottattDokument[]
+}
+
+export interface SluttbehandlingUtlandInfo {
+  type: 'SLUTTBEHANDLING_UTLAND'
+  landMedDokumenter: LandMedDokumenter[]
+}
+
 export interface Navn {
   fornavn: string
   mellomnavn: string | undefined
@@ -61,6 +77,13 @@ export type RevurderingInfo =
   | OmgjoeringAvFarskapInfo
   | FengselsoppholdInfo
   | InstitusjonsoppholdInfo
+  | SluttbehandlingUtlandInfo
+
+export interface RevurderinginfoMedIdOgOpprettet {
+  id: string
+  opprettetDato: string
+  revurderingsinfo: RevurderingInfo
+}
 
 export interface RevurderingMedBegrunnelse {
   revurderingInfo: RevurderingInfo

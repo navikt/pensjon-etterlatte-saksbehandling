@@ -16,7 +16,7 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.etterlatte.behandling.revurdering.OpprettRevurderingRequest
 import no.nav.etterlatte.config.ApplicationContext
-import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
 import no.nav.etterlatte.module
@@ -72,7 +72,7 @@ internal class RevurderingRoutesTest {
                 client.post("api/revurdering/1") {
                     header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                     header(HttpHeaders.Authorization, "Bearer $token")
-                    setBody(OpprettRevurderingRequest(aarsak = RevurderingAarsak.REGULERING))
+                    setBody(OpprettRevurderingRequest(aarsak = Revurderingaarsak.REGULERING))
                 }
 
             assertEquals(HttpStatusCode.OK, response.status)
@@ -120,10 +120,10 @@ internal class RevurderingRoutesTest {
                     header(HttpHeaders.Authorization, "Bearer $token")
                 }
 
-            val revurderingAarsak: List<RevurderingAarsak> = response.body()
+            val revurderingAarsak: List<Revurderingaarsak> = response.body()
             assertEquals(HttpStatusCode.OK, response.status)
             val revurderingsaarsakerForBarnepensjon =
-                RevurderingAarsak.values().filter { it.erStoettaRevurdering(SakType.BARNEPENSJON) }
+                Revurderingaarsak.values().filter { it.erStoettaRevurdering(SakType.BARNEPENSJON) }
             assertEquals(revurderingsaarsakerForBarnepensjon.size, revurderingAarsak.size)
             assertTrue(
                 revurderingAarsak.containsAll<Any>(
@@ -151,13 +151,13 @@ internal class RevurderingRoutesTest {
                     header(HttpHeaders.Authorization, "Bearer $token")
                 }
 
-            val revurderingAarsak: List<RevurderingAarsak> = response.body()
+            val revurderingAarsak: List<Revurderingaarsak> = response.body()
             assertEquals(HttpStatusCode.OK, response.status)
             assertTrue(
                 revurderingAarsak.containsAll(
-                    RevurderingAarsak.values()
+                    Revurderingaarsak.values()
                         .filter { it.gyldigForSakType(SakType.OMSTILLINGSSTOENAD) }
-                        .filter { it.name !== RevurderingAarsak.NY_SOEKNAD.toString() },
+                        .filter { it.name !== Revurderingaarsak.NY_SOEKNAD.toString() },
                 ),
             )
         }
@@ -181,7 +181,7 @@ internal class RevurderingRoutesTest {
                     header(HttpHeaders.Authorization, "Bearer $token")
                 }
 
-            assertEquals(HttpStatusCode.BadRequest, response.status)
+            assertEquals(HttpStatusCode.InternalServerError, response.status)
         }
     }
 

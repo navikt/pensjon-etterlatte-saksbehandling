@@ -11,7 +11,7 @@ import io.ktor.server.routing.delete
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
-import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
+import no.nav.etterlatte.libs.common.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarVurderingData
@@ -30,7 +30,7 @@ fun Route.vilkaarsvurdering(
     route("/api/vilkaarsvurdering") {
         val logger = application.log
 
-        get("/{$BEHANDLINGSID_CALL_PARAMETER}") {
+        get("/{$BEHANDLINGID_CALL_PARAMETER}") {
             withBehandlingId(behandlingKlient) { behandlingId ->
                 logger.info("Henter vilkårsvurdering for $behandlingId")
                 val vilkaarsvurdering = vilkaarsvurderingService.hentVilkaarsvurdering(behandlingId)
@@ -44,14 +44,19 @@ fun Route.vilkaarsvurdering(
             }
         }
 
-        post("/{$BEHANDLINGSID_CALL_PARAMETER}/opprett") {
+        post("/{$BEHANDLINGID_CALL_PARAMETER}/opprett") {
             withBehandlingId(behandlingKlient) { behandlingId ->
                 try {
+                    val kopierVedRevurdering =
+                        call.request.queryParameters["kopierVedRevurdering"]?.let { it.toBoolean() }
+                            ?: true
+
                     logger.info("Oppretter vilkårsvurdering for $behandlingId")
                     val vilkaarsvurdering =
                         vilkaarsvurderingService.opprettVilkaarsvurdering(
                             behandlingId,
                             brukerTokenInfo,
+                            kopierVedRevurdering,
                         )
 
                     call.respond(vilkaarsvurdering.toDto())
@@ -68,7 +73,7 @@ fun Route.vilkaarsvurdering(
             }
         }
 
-        post("/{$BEHANDLINGSID_CALL_PARAMETER}/kopier") {
+        post("/{$BEHANDLINGID_CALL_PARAMETER}/kopier") {
             withBehandlingId(behandlingKlient) { behandlingId ->
                 val forrigeBehandling = call.receive<OpprettVilkaarsvurderingFraBehandling>().forrigeBehandling
 
@@ -102,7 +107,7 @@ fun Route.vilkaarsvurdering(
             }
         }
 
-        post("/{$BEHANDLINGSID_CALL_PARAMETER}") {
+        post("/{$BEHANDLINGID_CALL_PARAMETER}") {
             withBehandlingId(behandlingKlient) { behandlingId ->
                 val vurdertVilkaarDto = call.receive<VurdertVilkaarDto>()
                 val vurdertVilkaar = vurdertVilkaarDto.toVurdertVilkaar(brukerTokenInfo.ident())
@@ -132,7 +137,15 @@ fun Route.vilkaarsvurdering(
             }
         }
 
-        delete("/{$BEHANDLINGSID_CALL_PARAMETER}/{vilkaarId}") {
+        post("/{$BEHANDLINGID_CALL_PARAMETER}/oppdater-status") {
+            withBehandlingId(behandlingKlient) { behandlingId ->
+                val statusOppdatert =
+                    vilkaarsvurderingService.sjekkGyldighetOgOppdaterBehandlingStatus(behandlingId, brukerTokenInfo)
+                call.respond(HttpStatusCode.OK, StatusOppdatertDto(statusOppdatert))
+            }
+        }
+
+        delete("/{$BEHANDLINGID_CALL_PARAMETER}/{vilkaarId}") {
             withBehandlingId(behandlingKlient) { behandlingId ->
                 withParam("vilkaarId") { vilkaarId ->
                     logger.info("Sletter vurdering på vilkår $vilkaarId for $behandlingId")
@@ -157,8 +170,25 @@ fun Route.vilkaarsvurdering(
             }
         }
 
+        delete("/{$BEHANDLINGID_CALL_PARAMETER}") {
+            withBehandlingId(behandlingKlient) { behandlingId ->
+                logger.info("Sletter vilkårsvurdering for $behandlingId")
+
+                try {
+                    vilkaarsvurderingService.slettVilkaarsvurdering(behandlingId, brukerTokenInfo)
+                    call.respond(HttpStatusCode.OK)
+                } catch (e: BehandlingstilstandException) {
+                    logger.error(
+                        "Kunne ikke slette vilkårsvurdering for behandling $behandlingId. " +
+                            "Statussjekk feilet for behandling feilet",
+                    )
+                    call.respond(HttpStatusCode.PreconditionFailed, "Statussjekk for behandling feilet")
+                }
+            }
+        }
+
         route("/resultat") {
-            post("/{$BEHANDLINGSID_CALL_PARAMETER}") {
+            post("/{$BEHANDLINGID_CALL_PARAMETER}") {
                 withBehandlingId(behandlingKlient) { behandlingId ->
                     val vurdertResultatDto = call.receive<VurdertVilkaarsvurderingResultatDto>()
                     val vurdertResultat =
@@ -185,7 +215,7 @@ fun Route.vilkaarsvurdering(
                 }
             }
 
-            delete("/{$BEHANDLINGSID_CALL_PARAMETER}") {
+            delete("/{$BEHANDLINGID_CALL_PARAMETER}") {
                 withBehandlingId(behandlingKlient) { behandlingId ->
                     logger.info("Sletter vilkårsvurderingsresultat for $behandlingId")
                     try {
@@ -207,6 +237,8 @@ fun Route.vilkaarsvurdering(
         }
     }
 }
+
+data class StatusOppdatertDto(val statusOppdatert: Boolean)
 
 private fun VurdertVilkaarDto.toVurdertVilkaar(saksbehandler: String) =
     VurdertVilkaar(

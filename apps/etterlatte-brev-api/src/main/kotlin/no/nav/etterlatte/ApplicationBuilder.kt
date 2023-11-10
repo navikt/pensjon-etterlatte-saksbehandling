@@ -31,6 +31,7 @@ import no.nav.etterlatte.brev.hentinformasjon.SakService
 import no.nav.etterlatte.brev.hentinformasjon.SoekerService
 import no.nav.etterlatte.brev.hentinformasjon.Tilgangssjekker
 import no.nav.etterlatte.brev.hentinformasjon.TrygdetidKlient
+import no.nav.etterlatte.brev.hentinformasjon.TrygdetidService
 import no.nav.etterlatte.brev.hentinformasjon.VedtaksvurderingKlient
 import no.nav.etterlatte.brev.hentinformasjon.VedtaksvurderingService
 import no.nav.etterlatte.brev.model.BrevDataMapper
@@ -47,10 +48,10 @@ import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.libs.ktor.setReady
-import no.nav.etterlatte.rivers.DistribuerBrev
-import no.nav.etterlatte.rivers.JournalfoerVedtaksbrev
-import no.nav.etterlatte.rivers.OpprettVedtaksbrevForMigrering
-import no.nav.etterlatte.rivers.VedtaksbrevUnderkjent
+import no.nav.etterlatte.rivers.DistribuerBrevRiver
+import no.nav.etterlatte.rivers.JournalfoerVedtaksbrevRiver
+import no.nav.etterlatte.rivers.OpprettVedtaksbrevForMigreringRiver
+import no.nav.etterlatte.rivers.VedtaksbrevUnderkjentRiver
 import no.nav.etterlatte.security.ktor.clientCredential
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -102,13 +103,14 @@ class ApplicationBuilder {
     private val beregningKlient = BeregningKlient(config, httpClient())
     private val behandlingKlient = BehandlingKlient(config, httpClient())
     private val trygdetidKlient = TrygdetidKlient(config, httpClient())
+    private val trygdetidService = TrygdetidService(trygdetidKlient)
     private val brevdataFacade =
         BrevdataFacade(
             vedtakKlient,
             grunnlagKlient,
             beregningKlient,
             behandlingKlient,
-            trygdetidKlient,
+            trygdetidService,
         )
     private val norg2Klient = Norg2Klient(env.requireEnvValue("NORG2_URL"), httpClient())
     private val datasource = DataSourceBuilder.createDataSource(env)
@@ -183,10 +185,10 @@ class ApplicationBuilder {
                         }
                     },
                 )
-                OpprettVedtaksbrevForMigrering(this, vedtaksbrevService)
-                JournalfoerVedtaksbrev(this, vedtaksbrevService)
-                VedtaksbrevUnderkjent(this, vedtaksbrevService)
-                DistribuerBrev(this, vedtaksbrevService, distribusjonService)
+                OpprettVedtaksbrevForMigreringRiver(this, vedtaksbrevService)
+                JournalfoerVedtaksbrevRiver(this, vedtaksbrevService)
+                VedtaksbrevUnderkjentRiver(this, vedtaksbrevService)
+                DistribuerBrevRiver(this, vedtaksbrevService, distribusjonService)
             }
 
     private fun featureToggleProperties(config: Config) =

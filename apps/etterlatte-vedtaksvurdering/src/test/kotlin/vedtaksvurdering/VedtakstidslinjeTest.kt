@@ -2,12 +2,12 @@ package vedtaksvurdering
 
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
 import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
+import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.etterlatte.vedtaksvurdering.Vedtak
 import no.nav.etterlatte.vedtaksvurdering.VedtakBehandlingInnhold
 import no.nav.etterlatte.vedtaksvurdering.Vedtakstidslinje
@@ -279,7 +279,7 @@ private fun lagVedtak(
         sakId = 1L,
         sakType = SakType.BARNEPENSJON,
         behandlingId = UUID.randomUUID(),
-        soeker = Folkeregisteridentifikator.of(FNR_1),
+        soeker = SOEKER_FOEDSELSNUMMER,
         status = vedtakStatus,
         type = vedtakType,
         vedtakFattet =

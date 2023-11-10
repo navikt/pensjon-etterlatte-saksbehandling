@@ -13,6 +13,7 @@ import no.nav.etterlatte.avkorting.regler.AvkortetYtelseGrunnlag
 import no.nav.etterlatte.avkorting.regler.InntektAvkortingGrunnlag
 import no.nav.etterlatte.avkorting.regler.InntektAvkortingGrunnlagWrapper
 import no.nav.etterlatte.beregning.Beregning
+import no.nav.etterlatte.beregning.OverstyrBeregning
 import no.nav.etterlatte.beregning.grunnlag.InstitusjonsoppholdBeregningsgrunnlag
 import no.nav.etterlatte.beregning.regler.barnepensjon.BarnepensjonGrunnlag
 import no.nav.etterlatte.libs.common.IntBroek
@@ -38,6 +39,8 @@ import no.nav.etterlatte.libs.common.toObjectNode
 import no.nav.etterlatte.libs.regler.FaktumNode
 import no.nav.etterlatte.libs.regler.RegelPeriode
 import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
+import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
+import no.nav.etterlatte.libs.testdata.grunnlag.HELSOESKEN_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.kilde
 import no.nav.etterlatte.regler.Beregningstall
 import no.nav.etterlatte.token.Saksbehandler
@@ -49,22 +52,18 @@ import java.util.UUID
 
 val REGEL_PERIODE = RegelPeriode(LocalDate.of(2023, 1, 1))
 
-const val FNR_1 = "11057523044"
-const val FNR_2 = "19040550081"
-const val FNR_3 = "24014021406"
-
 const val MAKS_TRYGDETID: Int = 40
 
 fun barnepensjonGrunnlag(
-    soeskenKull: List<String> = emptyList(),
+    soeskenKull: List<Folkeregisteridentifikator> = emptyList(),
     trygdeTid: Beregningstall = Beregningstall(MAKS_TRYGDETID),
     institusjonsopphold: InstitusjonsoppholdBeregningsgrunnlag? = null,
-    avdoedeForeldre: List<Folkeregisteridentifikator> = listOf(Folkeregisteridentifikator.of("11057523044")),
+    avdoedeForeldre: List<Folkeregisteridentifikator> = listOf(AVDOED_FOEDSELSNUMMER),
 ) = BarnepensjonGrunnlag(
-    soeskenKull = FaktumNode(soeskenKull.map { Folkeregisteridentifikator.of(it) }, kilde, "søskenkull"),
+    soeskenKull = FaktumNode(soeskenKull, kilde, "søskenkull"),
     avdoedesTrygdetid =
         FaktumNode(
-            SamletTrygdetidMedBeregningsMetode(BeregningsMetode.NASJONAL, trygdeTid, null, null),
+            SamletTrygdetidMedBeregningsMetode(BeregningsMetode.NASJONAL, trygdeTid, null, null, null),
             kilde,
             "trygdetid",
         ),
@@ -83,6 +82,7 @@ fun samletTrygdetid(
         samletTrygdetidNorge = samletTrygdetidNorge,
         samletTrygdetidTeoretisk = samletTrygdetidTeoretisk,
         prorataBroek = broek,
+        ident = null,
     ),
     kilde,
     "trygdetid",
@@ -248,6 +248,7 @@ fun avkortetYtelse(
 fun beregning(
     beregningId: UUID = UUID.randomUUID(),
     beregninger: List<Beregningsperiode> = listOf(beregningsperiode()),
+    overstyrBeregning: OverstyrBeregning? = null,
 ) = Beregning(
     beregningId = beregningId,
     behandlingId = UUID.randomUUID(),
@@ -255,6 +256,7 @@ fun beregning(
     beregningsperioder = beregninger,
     beregnetDato = Tidspunkt.now(),
     grunnlagMetadata = Metadata(sakId = 123L, versjon = 1L),
+    overstyrBeregning = overstyrBeregning,
 )
 
 fun beregningsperiode(
@@ -268,7 +270,7 @@ fun beregningsperiode(
     datoFOM = datoFOM,
     datoTOM = datoTOM,
     utbetaltBeloep = utbetaltBeloep,
-    soeskenFlokk = listOf(FNR_1),
+    soeskenFlokk = listOf(HELSOESKEN_FOEDSELSNUMMER.value),
     grunnbelopMnd = grunnbeloepMnd,
     grunnbelop = grunnbeloep,
     trygdetid = trygdetid,
@@ -283,6 +285,7 @@ fun behandling(
     sakType: SakType = SakType.OMSTILLINGSSTOENAD,
     behandlingType: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
     virkningstidspunkt: Virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2023, 1)),
+    status: BehandlingStatus = BehandlingStatus.BEREGNET,
 ) = DetaljertBehandling(
     id = id,
     sak = sak,
@@ -294,7 +297,7 @@ fun behandling(
     gjenlevende = listOf(),
     avdoed = listOf(),
     soesken = listOf(),
-    status = BehandlingStatus.TRYGDETID_OPPDATERT,
+    status = status,
     behandlingType = behandlingType,
     virkningstidspunkt = virkningstidspunkt,
     revurderingsaarsak = null,

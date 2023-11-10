@@ -1,14 +1,13 @@
 package no.nav.etterlatte.behandling.domain
 
-import no.nav.etterlatte.behandling.revurdering.RevurderingMedBegrunnelse
+import no.nav.etterlatte.behandling.revurdering.RevurderingInfoMedBegrunnelse
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
-import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.behandling.Utenlandstilsnitt
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.behandling.girOpphoer
 import no.nav.etterlatte.libs.common.sak.Sak
@@ -25,10 +24,9 @@ data class ManuellRevurdering(
     override val status: BehandlingStatus,
     override val kommerBarnetTilgode: KommerBarnetTilgode?,
     override val virkningstidspunkt: Virkningstidspunkt?,
-    override val utenlandstilsnitt: Utenlandstilsnitt?,
     override val boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet?,
-    override val revurderingsaarsak: RevurderingAarsak,
-    override val revurderingInfo: RevurderingMedBegrunnelse?,
+    override val revurderingsaarsak: Revurderingaarsak,
+    override val revurderingInfo: RevurderingInfoMedBegrunnelse?,
     override val kilde: Vedtaksloesning,
     override val begrunnelse: String?,
 ) : Revurdering(
@@ -39,7 +37,6 @@ data class ManuellRevurdering(
         status = status,
         kommerBarnetTilgode = kommerBarnetTilgode,
         virkningstidspunkt = virkningstidspunkt,
-        utenlandstilsnitt = utenlandstilsnitt,
         boddEllerArbeidetUtlandet = boddEllerArbeidetUtlandet,
         revurderingsaarsak = revurderingsaarsak,
         revurderingInfo = revurderingInfo,
@@ -57,9 +54,6 @@ data class ManuellRevurdering(
 
     override fun oppdaterVirkningstidspunkt(virkningstidspunkt: Virkningstidspunkt) =
         hvisRedigerbar { endreTilStatus(BehandlingStatus.OPPRETTET).copy(virkningstidspunkt = virkningstidspunkt) }
-
-    override fun oppdaterUtenlandstilsnitt(utenlandstilsnitt: Utenlandstilsnitt) =
-        hvisRedigerbar { endreTilStatus(BehandlingStatus.OPPRETTET).copy(utenlandstilsnitt = utenlandstilsnitt) }
 
     override fun oppdaterBoddEllerArbeidetUtlandnet(boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet) =
         hvisRedigerbar {
@@ -141,8 +135,18 @@ data class ManuellRevurdering(
             endreTilStatus(BehandlingStatus.RETURNERT)
         }
 
+    override fun tilTilSamordning() =
+        hvisTilstandEr(listOf(BehandlingStatus.ATTESTERT)) {
+            endreTilStatus(BehandlingStatus.TIL_SAMORDNING)
+        }
+
+    override fun tilSamordnet() =
+        hvisTilstandEr(listOf(BehandlingStatus.ATTESTERT, BehandlingStatus.TIL_SAMORDNING)) {
+            endreTilStatus(BehandlingStatus.SAMORDNET)
+        }
+
     override fun tilIverksatt() =
-        hvisTilstandEr(BehandlingStatus.ATTESTERT) {
+        hvisTilstandEr(listOf(BehandlingStatus.ATTESTERT, BehandlingStatus.SAMORDNET)) {
             endreTilStatus(BehandlingStatus.IVERKSATT)
         }
 

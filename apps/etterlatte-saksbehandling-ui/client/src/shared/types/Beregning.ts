@@ -12,6 +12,11 @@ export interface Beregning {
   beregningsperioder: Beregningsperiode[]
   beregnetDato: string
   grunnlagMetadata: GrunnlagMetadata
+  overstyrBeregning: OverstyrBeregning | undefined
+}
+
+export interface OverstyrBeregning {
+  beskrivelse: string
 }
 
 export interface GrunnlagMetadata {
@@ -51,6 +56,11 @@ export interface Beregningsperiode {
   broek: IProrataBroek | undefined
 }
 
+export interface OverstyrBeregningsperiode {
+  utbetaltBeloep: string
+  trygdetid: string
+}
+
 export interface BeregningsGrunnlagDto {
   behandlingId: string
   kilde: KildeSaksbehandler
@@ -73,6 +83,12 @@ export interface SoeskenMedIBeregning {
   skalBrukes: boolean
 }
 
+export type OverstyrBeregningGrunnlagDTO = PeriodisertBeregningsgrunnlagDto<OverstyrBeregningsperiode>[]
+
+export interface OverstyrBeregningGrunnlagPostDTO {
+  perioder: OverstyrBeregningGrunnlagDTO
+}
+
 export interface BeregningsGrunnlagPostDto {
   soeskenMedIBeregning: SoeskenMedIBeregningGrunnlagDto
   institusjonsopphold: InstitusjonsoppholdGrunnlagDTO | undefined
@@ -86,6 +102,7 @@ export interface BeregningsGrunnlagOMSPostDto {
 
 export type SoeskenMedIBeregningGrunnlagDto = PeriodisertBeregningsgrunnlagDto<SoeskenMedIBeregning[]>[]
 export type InstitusjonsoppholdGrunnlagData = PeriodisertBeregningsgrunnlag<InstitusjonsoppholdIBeregning>[]
+export type OverstyrBeregingsperiodeGrunnlagData = PeriodisertBeregningsgrunnlag<OverstyrBeregningsperiode>[]
 
 export interface InstitusjonsoppholdIBeregning {
   reduksjon: ReduksjonKey
@@ -115,6 +132,7 @@ export type ReduksjonType = Record<string, string>
 export const ReduksjonBP: ReduksjonType = {
   VELG_REDUKSJON: 'Velg reduksjon',
   JA_VANLIG: 'Ja, etter vanlig sats(10% av G)',
+  JA_FORELDRELOES: 'Ja, etter vanlig sats - foreldreløs (45% av G)',
   NEI_KORT_OPPHOLD: 'Nei, kort opphold',
   JA_EGEN_PROSENT_AV_G: 'Ja, utgifter til bolig(egen % av G)',
   NEI_HOEYE_UTGIFTER_BOLIG: 'Nei, har høye utgifter til bolig',

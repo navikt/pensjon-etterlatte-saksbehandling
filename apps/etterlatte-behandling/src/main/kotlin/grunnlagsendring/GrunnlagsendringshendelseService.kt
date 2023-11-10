@@ -99,17 +99,8 @@ class GrunnlagsendringshendelseService(
     }
 
     fun settHendelseTilHistorisk(behandlingId: UUID) {
-        inTransaction {
-            grunnlagsendringshendelseDao.oppdaterGrunnlagsendringHistorisk(behandlingId)
-        }
+        grunnlagsendringshendelseDao.oppdaterGrunnlagsendringHistorisk(behandlingId)
     }
-
-    private fun ikkeVurderteHendelser(minutterGamle: Long): List<Grunnlagsendringshendelse> =
-        inTransaction {
-            grunnlagsendringshendelseDao.hentIkkeVurderteGrunnlagsendringshendelserEldreEnn(
-                minutter = minutterGamle,
-            )
-        }
 
     fun opprettDoedshendelse(doedshendelse: Doedshendelse): List<Grunnlagsendringshendelse> {
         return opprettHendelseAvTypeForPerson(doedshendelse.fnr, GrunnlagsendringsType.DOEDSFALL)
@@ -326,26 +317,24 @@ class GrunnlagsendringshendelseService(
         }
     }
 
-    fun sjekkKlareGrunnlagsendringshendelser(minutterGamle: Long) {
-        ikkeVurderteHendelser(minutterGamle)
-            .forEach { hendelse ->
-                try {
-                    verifiserOgHaandterHendelse(hendelse)
-                } catch (e: Exception) {
-                    logger.error(
-                        "Kunne ikke sjekke opp for hendelsen med id=${hendelse.id} på sak ${hendelse.sakId} " +
-                            "på grunn av feil",
-                        e,
-                    )
+    fun sjekkKlareGrunnlagsendringshendelser(minutterGamle: Long) =
+        inTransaction {
+            grunnlagsendringshendelseDao.hentIkkeVurderteGrunnlagsendringshendelserEldreEnn(minutterGamle)
+                .forEach { hendelse ->
+                    try {
+                        verifiserOgHaandterHendelse(hendelse)
+                    } catch (e: Exception) {
+                        logger.error(
+                            "Kunne ikke sjekke opp for hendelsen med id=${hendelse.id} på sak ${hendelse.sakId} " +
+                                "på grunn av feil",
+                            e,
+                        )
+                    }
                 }
-            }
-    }
+        }
 
     private fun verifiserOgHaandterHendelse(hendelse: Grunnlagsendringshendelse) {
-        val sak =
-            inTransaction {
-                sakService.finnSak(hendelse.sakId)!!
-            }
+        val sak = sakService.finnSak(hendelse.sakId)!!
         val personRolle = hendelse.hendelseGjelderRolle.toPersonrolle(sak.sakType)
         val pdlData = pdlKlient.hentPdlModell(hendelse.gjelderPerson, personRolle, sak.sakType)
         val grunnlag =
@@ -355,7 +344,7 @@ class GrunnlagsendringshendelseService(
         try {
             val samsvarMellomPdlOgGrunnlag = finnSamsvarForHendelse(hendelse, pdlData, grunnlag, personRolle)
             if (!samsvarMellomPdlOgGrunnlag.samsvar) {
-                inTransaction { oppdaterHendelseSjekket(hendelse, samsvarMellomPdlOgGrunnlag) }
+                oppdaterHendelseSjekket(hendelse, samsvarMellomPdlOgGrunnlag)
             } else {
                 forkastHendelse(hendelse.id, samsvarMellomPdlOgGrunnlag)
             }
@@ -455,7 +444,7 @@ class GrunnlagsendringshendelseService(
     private fun forkastHendelse(
         hendelseId: UUID,
         samsvarMellomKildeOgGrunnlag: SamsvarMellomKildeOgGrunnlag,
-    ) = inTransaction {
+    ) {
         logger.info("Forkaster grunnlagsendringshendelse med id $hendelseId.")
         grunnlagsendringshendelseDao.oppdaterGrunnlagsendringStatusOgSamsvar(
             hendelseId = hendelseId,

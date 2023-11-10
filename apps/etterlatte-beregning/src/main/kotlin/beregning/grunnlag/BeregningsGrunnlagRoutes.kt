@@ -10,8 +10,8 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.klienter.BehandlingKlient
-import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
-import no.nav.etterlatte.libs.common.behandlingsId
+import no.nav.etterlatte.libs.common.BEHANDLINGID_CALL_PARAMETER
+import no.nav.etterlatte.libs.common.behandlingId
 import no.nav.etterlatte.libs.common.withBehandlingId
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import org.slf4j.LoggerFactory
@@ -24,8 +24,8 @@ fun Route.beregningsGrunnlag(
     behandlingKlient: BehandlingKlient,
 ) {
     route("/api/beregning/beregningsgrunnlag") {
-        post("/{$BEHANDLINGSID_CALL_PARAMETER}/fra/{forrigeBehandlingId}") {
-            val behandlingId = behandlingsId
+        post("/{$BEHANDLINGID_CALL_PARAMETER}/fra/{forrigeBehandlingId}") {
+            val behandlingId = behandlingId
             val forrigeBehandlingId = call.uuid("forrigeBehandlingId")
 
             beregningsGrunnlagService.dupliserBeregningsGrunnlagBP(behandlingId, forrigeBehandlingId)
@@ -33,7 +33,7 @@ fun Route.beregningsGrunnlag(
             call.respond(HttpStatusCode.NoContent)
         }
 
-        post("/{$BEHANDLINGSID_CALL_PARAMETER}/barnepensjon") {
+        post("/{$BEHANDLINGID_CALL_PARAMETER}/barnepensjon") {
             withBehandlingId(behandlingKlient) { behandlingId ->
                 val body = call.receive<BarnepensjonBeregningsGrunnlag>()
 
@@ -49,7 +49,7 @@ fun Route.beregningsGrunnlag(
             }
         }
 
-        post("/{$BEHANDLINGSID_CALL_PARAMETER}/omstillingstoenad") {
+        post("/{$BEHANDLINGID_CALL_PARAMETER}/omstillingstoenad") {
             withBehandlingId(behandlingKlient) { behandlingId ->
                 val body = call.receive<OmstillingstoenadBeregningsGrunnlag>()
 
@@ -65,7 +65,7 @@ fun Route.beregningsGrunnlag(
             }
         }
 
-        get("/{$BEHANDLINGSID_CALL_PARAMETER}/barnepensjon") {
+        get("/{$BEHANDLINGID_CALL_PARAMETER}/barnepensjon") {
             withBehandlingId(behandlingKlient) { behandlingId ->
                 logger.info("Henter grunnlag for behandling $behandlingId")
                 val grunnlag =
@@ -77,7 +77,7 @@ fun Route.beregningsGrunnlag(
             }
         }
 
-        get("/{$BEHANDLINGSID_CALL_PARAMETER}/omstillingstoenad") {
+        get("/{$BEHANDLINGID_CALL_PARAMETER}/omstillingstoenad") {
             withBehandlingId(behandlingKlient) { behandlingId ->
                 logger.info("Henter grunnlag for behandling $behandlingId")
                 val grunnlag =
@@ -86,6 +86,36 @@ fun Route.beregningsGrunnlag(
                         brukerTokenInfo,
                     )
                 call.respond(HttpStatusCode.OK, grunnlag ?: HttpStatusCode.NoContent)
+            }
+        }
+
+        get("/{$BEHANDLINGID_CALL_PARAMETER}/overstyr") {
+            withBehandlingId(behandlingKlient) { behandlingId ->
+                logger.info("Henter overstyr grunnlag for behandling $behandlingId")
+
+                val grunnlag =
+                    beregningsGrunnlagService.hentOverstyrBeregningGrunnlag(
+                        behandlingId,
+                    )
+
+                call.respond(HttpStatusCode.OK, grunnlag)
+            }
+        }
+
+        post("/{$BEHANDLINGID_CALL_PARAMETER}/overstyr") {
+            withBehandlingId(behandlingKlient) { behandlingId ->
+                logger.info("Henter overstyr grunnlag for behandling $behandlingId")
+
+                val body = call.receive<OverstyrBeregningGrunnlagDTO>()
+
+                val grunnlag =
+                    beregningsGrunnlagService.lagreOverstyrBeregningGrunnlag(
+                        behandlingId,
+                        body,
+                        brukerTokenInfo,
+                    )
+
+                call.respond(HttpStatusCode.OK, grunnlag)
             }
         }
     }

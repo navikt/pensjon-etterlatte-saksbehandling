@@ -4,8 +4,7 @@ import { IBehandlingStatus, IBehandlingsType, IDetaljertBehandling } from '~shar
 import { IBehandlingsammendrag } from '~components/person/typer'
 import { SakType } from '~shared/types/sak'
 import { JaNei } from '~shared/types/ISvar'
-import { Revurderingsaarsak } from '~shared/types/Revurderingsaarsak'
-import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
+import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
 
 export function behandlingErUtfylt(behandling: IDetaljertBehandling): boolean {
   const gyldigUtfylt = !!(
@@ -60,6 +59,8 @@ export const hentBehandlesFraStatus = (status: IBehandlingStatus): boolean => {
 export const erFerdigBehandlet = (status: IBehandlingStatus): boolean => {
   return (
     status === IBehandlingStatus.ATTESTERT ||
+    status === IBehandlingStatus.TIL_SAMORDNING ||
+    status === IBehandlingStatus.SAMORDNET ||
     status === IBehandlingStatus.IVERKSATT ||
     status === IBehandlingStatus.AVBRUTT
   )
@@ -74,16 +75,18 @@ export const harIngenUavbrutteManuelleOpphoer = (behandlingliste: IBehandlingsam
 export const kunIverksatteBehandlinger = (behandlingliste: IBehandlingsammendrag[]): IBehandlingsammendrag[] =>
   behandlingliste.filter((behandling) => behandling.status === IBehandlingStatus.IVERKSATT)
 
-export const behandlingSkalSendeBrev = (behandling: IBehandlingReducer): boolean => {
-  switch (behandling.behandlingType) {
+export const behandlingSkalSendeBrev = (
+  behandlingType: IBehandlingsType,
+  revurderingsaarsak: Revurderingaarsak | null
+): boolean => {
+  switch (behandlingType) {
     case IBehandlingsType.FØRSTEGANGSBEHANDLING:
       return true
     case IBehandlingsType.MANUELT_OPPHOER:
       return false
     case IBehandlingsType.REVURDERING:
       return !(
-        behandling.revurderingsaarsak === Revurderingsaarsak.REGULERING ||
-        behandling.revurderingsaarsak === Revurderingsaarsak.DOEDSFALL
+        revurderingsaarsak === Revurderingaarsak.REGULERING || revurderingsaarsak === Revurderingaarsak.DOEDSFALL
       )
   }
 }

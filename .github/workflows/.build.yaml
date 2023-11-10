@@ -11,6 +11,7 @@ jobs:
   build-and-publish:
     name: Build & publish
     runs-on: ubuntu-latest-8-cores
+    timeout-minutes: 10
     permissions:
       contents: 'read'
       id-token: 'write'

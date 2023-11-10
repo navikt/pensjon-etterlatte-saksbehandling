@@ -69,7 +69,7 @@ class OmregningIntegrationTest : BehandlingIntegrationTest() {
                             persongalleri(),
                             LocalDateTime.now().toString(),
                             Vedtaksloesning.GJENNY,
-                        )
+                        )?.behandling
                 Pair(sak, behandling as Foerstegangsbehandling)
             }
         }

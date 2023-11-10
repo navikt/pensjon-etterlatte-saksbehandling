@@ -15,12 +15,14 @@ import {
   IBehandlingReducer,
   oppdaterBehandlingsstatus,
   oppdaterBeregingsGrunnlagOMS,
+  oppdaterBeregning,
   resetBeregning,
 } from '~store/reducers/BehandlingReducer'
 import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 import React, { useEffect, useState } from 'react'
 import InstitusjonsoppholdOMS from '~components/behandling/beregningsgrunnlag/InstitusjonsoppholdOMS'
 import {
+  Beregning,
   BeregningsMetode,
   BeregningsMetodeBeregningsgrunnlag,
   InstitusjonsoppholdGrunnlagData,
@@ -29,6 +31,7 @@ import { mapListeTilDto } from '~components/behandling/beregningsgrunnlag/Period
 import { Border } from '~components/behandling/soeknadsoversikt/styled'
 import Spinner from '~shared/Spinner'
 import BeregningsgrunnlagMetode from './BeregningsgrunnlagMetode'
+import { handlinger } from '~components/behandling/handlinger/typer'
 
 const BeregningsgrunnlagOmstillingsstoenad = (props: { behandling: IBehandlingReducer }) => {
   const { behandling } = props
@@ -52,6 +55,7 @@ const BeregningsgrunnlagOmstillingsstoenad = (props: { behandling: IBehandlingRe
             institusjonsopphold: result.institusjonsoppholdBeregningsgrunnlag,
           })
         )
+        setBeregningsMetodeBeregningsgrunnlag(result.beregningsMetode)
       }
     })
   }, [])
@@ -71,13 +75,14 @@ const BeregningsgrunnlagOmstillingsstoenad = (props: { behandling: IBehandlingRe
 
     postBeregningsgrunnlag(
       {
-        behandlingsId: behandling.id,
+        behandlingId: behandling.id,
         grunnlag: beregningsgrunnlagOMS,
       },
       () =>
-        postOpprettEllerEndreBeregning(behandling.id, () => {
+        postOpprettEllerEndreBeregning(behandling.id, (beregning: Beregning) => {
           dispatch(oppdaterBeregingsGrunnlagOMS(beregningsgrunnlagOMS))
           dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.BEREGNET))
+          dispatch(oppdaterBeregning(beregning))
           next()
         })
     )
@@ -116,7 +121,7 @@ const BeregningsgrunnlagOmstillingsstoenad = (props: { behandling: IBehandlingRe
             onClick={onSubmit}
             loading={isPending(lagreBeregningsgrunnlagOMS) || isPending(endreBeregning)}
           >
-            Beregne og fatte vedtak
+            {handlinger.NESTE.navn}
           </Button>
         </BehandlingHandlingKnapper>
       ) : (

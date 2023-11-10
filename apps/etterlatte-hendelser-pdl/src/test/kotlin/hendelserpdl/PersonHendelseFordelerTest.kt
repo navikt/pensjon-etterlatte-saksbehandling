@@ -19,6 +19,10 @@ import no.nav.etterlatte.libs.common.pdlhendelse.VergeMaalEllerFremtidsfullmakt
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.NavPersonIdent
 import no.nav.etterlatte.libs.common.person.PdlIdentifikator
+import no.nav.etterlatte.libs.testdata.grunnlag.GJENLEVENDE_FOEDSELSNUMMER
+import no.nav.etterlatte.libs.testdata.grunnlag.INNSENDER_FOEDSELSNUMMER
+import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
+import no.nav.etterlatte.libs.testdata.grunnlag.VERGE_FOEDSELSNUMMER
 import no.nav.person.identhendelse.v1.common.Personnavn
 import no.nav.person.identhendelse.v1.common.RelatertBiPerson
 import no.nav.person.pdl.leesah.Endringstype
@@ -42,7 +46,10 @@ internal class PersonHendelseFordelerTest {
 
     @BeforeEach
     fun setup() {
-        coEvery { pdlKlient.hentPdlIdentifikator(any()) } returns PdlIdentifikator.FolkeregisterIdent(FNR)
+        coEvery { pdlKlient.hentPdlIdentifikator(any()) } returns
+            PdlIdentifikator.FolkeregisterIdent(
+                SOEKER_FOEDSELSNUMMER,
+            )
         coEvery { kafkaProduser.publiser(any(), any()) } returns mockk(relaxed = true)
 
         personHendelseFordeler = PersonHendelseFordeler(kafkaProduser, pdlKlient)
@@ -54,13 +61,13 @@ internal class PersonHendelseFordelerTest {
             Personhendelse().apply {
                 hendelseId = "1"
                 endringstype = Endringstype.OPPRETTET
-                personidenter = listOf(FNR.value)
+                personidenter = listOf(SOEKER_FOEDSELSNUMMER.value)
                 opplysningstype = "NOE_ANNET_V1"
             }
 
         runBlocking { personHendelseFordeler.haandterHendelse(personHendelse) }
 
-        coVerify(exactly = 0) { pdlKlient.hentPdlIdentifikator(FNR.value) }
+        coVerify(exactly = 0) { pdlKlient.hentPdlIdentifikator(SOEKER_FOEDSELSNUMMER.value) }
         coVerify(exactly = 0) { kafkaProduser.publiser(any(), any()) }
 
         confirmVerified(pdlKlient, kafkaProduser)
@@ -95,7 +102,7 @@ internal class PersonHendelseFordelerTest {
             Personhendelse().apply {
                 hendelseId = "1"
                 endringstype = Endringstype.OPPRETTET
-                personidenter = listOf(FNR.value)
+                personidenter = listOf(SOEKER_FOEDSELSNUMMER.value)
                 opplysningstype = LeesahOpplysningstype.VERGEMAAL_ELLER_FREMTIDSFULLMAKT_V1.toString()
                 vergemaalEllerFremtidsfullmakt =
                     VergemaalEllerFremtidsfullmakt().apply {
@@ -105,7 +112,7 @@ internal class PersonHendelseFordelerTest {
 
         runBlocking { personHendelseFordeler.haandterHendelse(personHendelse) }
 
-        coVerify { pdlKlient.hentPdlIdentifikator(FNR.value) }
+        coVerify { pdlKlient.hentPdlIdentifikator(SOEKER_FOEDSELSNUMMER.value) }
         coVerify(exactly = 0) { kafkaProduser.publiser(any(), any()) }
 
         confirmVerified(pdlKlient, kafkaProduser)
@@ -117,7 +124,7 @@ internal class PersonHendelseFordelerTest {
             Personhendelse().apply {
                 hendelseId = "1"
                 endringstype = Endringstype.OPPRETTET
-                personidenter = listOf(FNR.value)
+                personidenter = listOf(SOEKER_FOEDSELSNUMMER.value)
                 opplysningstype = LeesahOpplysningstype.ADRESSEBESKYTTELSE_V1.toString()
                 adressebeskyttelse =
                     Adressebeskyttelse().apply {
@@ -127,7 +134,7 @@ internal class PersonHendelseFordelerTest {
 
         runBlocking { personHendelseFordeler.haandterHendelse(personHendelse) }
 
-        coVerify { pdlKlient.hentPdlIdentifikator(FNR.value) }
+        coVerify { pdlKlient.hentPdlIdentifikator(SOEKER_FOEDSELSNUMMER.value) }
         coVerify(exactly = 0) { kafkaProduser.publiser(any(), any()) }
 
         confirmVerified(pdlKlient, kafkaProduser)
@@ -139,7 +146,7 @@ internal class PersonHendelseFordelerTest {
             Personhendelse().apply {
                 hendelseId = "1"
                 endringstype = Endringstype.OPPRETTET
-                personidenter = listOf(FNR.value)
+                personidenter = listOf(SOEKER_FOEDSELSNUMMER.value)
                 opplysningstype = LeesahOpplysningstype.DOEDSFALL_V1.toString()
                 doedsfall =
                     Doedsfall().apply {
@@ -162,7 +169,7 @@ internal class PersonHendelseFordelerTest {
 
         runBlocking { personHendelseFordeler.haandterHendelse(personHendelse) }
 
-        coVerify { pdlKlient.hentPdlIdentifikator(FNR.value) }
+        coVerify { pdlKlient.hentPdlIdentifikator(SOEKER_FOEDSELSNUMMER.value) }
         coVerify {
             kafkaProduser.publiser(
                 any(),
@@ -182,12 +189,12 @@ internal class PersonHendelseFordelerTest {
             Personhendelse().apply {
                 hendelseId = "1"
                 endringstype = Endringstype.OPPRETTET
-                personidenter = listOf(FNR.value)
+                personidenter = listOf(SOEKER_FOEDSELSNUMMER.value)
                 opplysningstype = LeesahOpplysningstype.SIVILSTAND_V1.toString()
                 sivilstand =
                     Sivilstand().apply {
                         type = "GIFT"
-                        relatertVedSivilstand = FNR_2.value
+                        relatertVedSivilstand = GJENLEVENDE_FOEDSELSNUMMER.value
                         gyldigFraOgMed = LocalDate.of(2020, 1, 1)
                         bekreftelsesdato = LocalDate.of(2020, 1, 1)
                     }
@@ -211,7 +218,7 @@ internal class PersonHendelseFordelerTest {
 
         runBlocking { personHendelseFordeler.haandterHendelse(personHendelse) }
 
-        coVerify { pdlKlient.hentPdlIdentifikator(FNR.value) }
+        coVerify { pdlKlient.hentPdlIdentifikator(SOEKER_FOEDSELSNUMMER.value) }
         coVerify {
             kafkaProduser.publiser(
                 any(),
@@ -231,7 +238,7 @@ internal class PersonHendelseFordelerTest {
             Personhendelse().apply {
                 hendelseId = "1"
                 endringstype = Endringstype.OPPRETTET
-                personidenter = listOf(FNR.value)
+                personidenter = listOf(SOEKER_FOEDSELSNUMMER.value)
                 opplysningstype = LeesahOpplysningstype.UTFLYTTING_FRA_NORGE.toString()
                 utflyttingFraNorge =
                     UtflyttingFraNorge().apply {
@@ -258,7 +265,7 @@ internal class PersonHendelseFordelerTest {
 
         runBlocking { personHendelseFordeler.haandterHendelse(personHendelse) }
 
-        coVerify { pdlKlient.hentPdlIdentifikator(FNR.value) }
+        coVerify { pdlKlient.hentPdlIdentifikator(SOEKER_FOEDSELSNUMMER.value) }
         coVerify {
             kafkaProduser.publiser(
                 any(),
@@ -278,14 +285,14 @@ internal class PersonHendelseFordelerTest {
             Personhendelse().apply {
                 hendelseId = "1"
                 endringstype = Endringstype.OPPRETTET
-                personidenter = listOf(FNR.value)
+                personidenter = listOf(SOEKER_FOEDSELSNUMMER.value)
                 opplysningstype = LeesahOpplysningstype.VERGEMAAL_ELLER_FREMTIDSFULLMAKT_V1.toString()
                 vergemaalEllerFremtidsfullmakt =
                     VergemaalEllerFremtidsfullmakt().apply {
                         vergeEllerFullmektig =
                             VergeEllerFullmektig().apply {
                                 type = "mindreaarig"
-                                motpartsPersonident = FNR_2.value
+                                motpartsPersonident = VERGE_FOEDSELSNUMMER.value
                             }
                     }
             }
@@ -305,7 +312,7 @@ internal class PersonHendelseFordelerTest {
 
         runBlocking { personHendelseFordeler.haandterHendelse(personHendelse) }
 
-        coVerify { pdlKlient.hentPdlIdentifikator(FNR.value) }
+        coVerify { pdlKlient.hentPdlIdentifikator(SOEKER_FOEDSELSNUMMER.value) }
         coVerify {
             kafkaProduser.publiser(
                 any(),
@@ -326,7 +333,7 @@ internal class PersonHendelseFordelerTest {
             Personhendelse().apply {
                 hendelseId = "1"
                 endringstype = Endringstype.OPPRETTET
-                personidenter = listOf(FNR.value)
+                personidenter = listOf(SOEKER_FOEDSELSNUMMER.value)
                 opplysningstype = LeesahOpplysningstype.ADRESSEBESKYTTELSE_V1.toString()
                 adressebeskyttelse =
                     Adressebeskyttelse().apply {
@@ -349,7 +356,7 @@ internal class PersonHendelseFordelerTest {
 
         runBlocking { personHendelseFordeler.haandterHendelse(personHendelse) }
 
-        coVerify { pdlKlient.hentPdlIdentifikator(FNR.value) }
+        coVerify { pdlKlient.hentPdlIdentifikator(SOEKER_FOEDSELSNUMMER.value) }
         coVerify {
             kafkaProduser.publiser(
                 any(),
@@ -370,11 +377,11 @@ internal class PersonHendelseFordelerTest {
             Personhendelse().apply {
                 hendelseId = "1"
                 endringstype = Endringstype.OPPRETTET
-                personidenter = listOf(FNR.value)
+                personidenter = listOf(SOEKER_FOEDSELSNUMMER.value)
                 opplysningstype = LeesahOpplysningstype.FORELDERBARNRELASJON_V1.toString()
                 forelderBarnRelasjon =
                     ForelderBarnRelasjon().apply {
-                        relatertPersonsIdent = FNR_2.value
+                        relatertPersonsIdent = INNSENDER_FOEDSELSNUMMER.value
                         relatertPersonsRolle = "BARN"
                         minRolleForPerson = "FAR"
                         relatertPersonUtenFolkeregisteridentifikator =
@@ -407,7 +414,7 @@ internal class PersonHendelseFordelerTest {
 
         runBlocking { personHendelseFordeler.haandterHendelse(personHendelse) }
 
-        coVerify { pdlKlient.hentPdlIdentifikator(FNR.value) }
+        coVerify { pdlKlient.hentPdlIdentifikator(SOEKER_FOEDSELSNUMMER.value) }
         coVerify {
             kafkaProduser.publiser(
                 any(),

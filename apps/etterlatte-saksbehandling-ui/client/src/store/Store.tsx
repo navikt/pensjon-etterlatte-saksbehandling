@@ -9,16 +9,22 @@ import { appReducer } from '~store/reducers/AppconfigReducer'
 import { klageReducer } from '~store/reducers/KlageReducer'
 import { tilbakekrevingReducer } from '~store/reducers/TilbakekrevingReducer'
 import { vedtakReducer } from '~store/reducers/VedtakReducer'
+import { sjekklisteReducer } from '~store/reducers/SjekklisteReducer'
+import { behandlingsidemenyReducer } from '~store/reducers/BehandlingSidemenyReducer'
+import { saksbehandlerGjeldendeOppgaveReducer } from '~store/reducers/SaksbehandlerGjeldendeOppgaveReducer'
 
 const reducer = {
   menuReducer: menuReducer,
   saksbehandlerReducer: saksbehandlerReducer,
+  saksbehandlerGjeldendeOppgaveReducer: saksbehandlerGjeldendeOppgaveReducer,
   behandlingReducer: behandlingReducer,
+  behandlingSidemenyReducer: behandlingsidemenyReducer,
   vedtakReducer: vedtakReducer,
   appReducer: appReducer,
   klageReducer: klageReducer,
   tilbakekrevingReducer: tilbakekrevingReducer,
   journalfoeringOppgaveReducer: journalfoeringOppgaveReducer,
+  sjekklisteReducer: sjekklisteReducer,
 }
 export const store = configureStore({
   reducer,

@@ -22,6 +22,8 @@ import RedigerbartBrev from '~components/behandling/brev/RedigerbartBrev'
 import { isFailure, isPending, isPendingOrInitial, useApiCall } from '~shared/hooks/useApiCall'
 
 import { fattVedtak } from '~shared/api/vedtaksvurdering'
+import { SjekklisteValideringErrorSummary } from '~components/behandling/sjekkliste/SjekklisteValideringErrorSummary'
+import { IHendelseType } from '~shared/types/IHendelse'
 
 export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
   const { behandlingId } = useParams()
@@ -33,7 +35,12 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
   const [opprettBrevStatus, opprettNyttVedtaksbrev] = useApiCall(opprettVedtaksbrev)
 
   useEffect(() => {
-    if (!behandlingId || !sakId || !behandlingSkalSendeBrev(props.behandling)) return
+    if (
+      !behandlingId ||
+      !sakId ||
+      !behandlingSkalSendeBrev(props.behandling.behandlingType, props.behandling.revurderingsaarsak)
+    )
+      return
 
     hentBrev(behandlingId, (brev, statusCode) => {
       if (statusCode === 200) {
@@ -51,6 +58,23 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
   } else if (isPending(opprettBrevStatus)) {
     return <Spinner visible label="Ingen brev funnet. Oppretter brev ..." />
   }
+
+  const behandlingRedigertEtterOpprettetBrev = props.behandling.hendelser.find((hendelse) => {
+    if (!vedtaksbrev) return false
+
+    const erBehandlingshendelse = [
+      IHendelseType.BEHANDLING_OPPRETTET,
+      IHendelseType.BEHANDLING_VILKAARSVURDERT,
+      IHendelseType.BEHANDLING_TRYGDETID_OPPDATERT,
+      IHendelseType.BEHANDLING_BEREGNET,
+      IHendelseType.BEHANDLING_AVKORTET,
+    ].includes(hendelse.hendelse)
+
+    const hendelseErEtterBrevOpprettelse =
+      new Date(vedtaksbrev.opprettet).getTime() < new Date(hendelse.opprettet).getTime()
+
+    return erBehandlingshendelse && hendelseErEtterBrevOpprettelse
+  })
 
   return (
     <Content>
@@ -73,6 +97,11 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
                   : 'Dette er et manuelt opprettet brev. Kontroller innholdet nøye før attestering.'}
               </Alert>
             )}
+            {behandlingRedigertEtterOpprettetBrev && (
+              <Alert variant="warning">
+                Behandling er redigert etter brev ble opprettet. Brev bør derfor tilbakestilles..
+              </Alert>
+            )}
             <br />
             {vedtaksbrev && <MottakerPanel vedtaksbrev={vedtaksbrev} />}
           </ContentHeader>
@@ -90,6 +119,8 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
       </BrevContent>
 
       <Border />
+
+      <SjekklisteValideringErrorSummary />
 
       <BehandlingHandlingKnapper>
         {hentBehandlesFraStatus(status) && (

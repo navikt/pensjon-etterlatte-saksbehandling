@@ -24,7 +24,7 @@ import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.behandling.domain.SamsvarMellomKildeOgGrunnlag
 import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerAarsak
 import no.nav.etterlatte.behandling.objectMapper
-import no.nav.etterlatte.behandling.revurdering.RevurderingMedBegrunnelse
+import no.nav.etterlatte.behandling.revurdering.RevurderingInfoMedBegrunnelse
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.grunnlagsendring.samsvarDoedsdatoer
 import no.nav.etterlatte.libs.common.Vedtaksloesning
@@ -35,10 +35,9 @@ import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
-import no.nav.etterlatte.libs.common.behandling.RevurderingAarsak
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
-import no.nav.etterlatte.libs.common.behandling.Utenlandstilsnitt
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
@@ -62,6 +61,7 @@ import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.ktor.restModule
+import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import java.sql.Connection
 import java.time.Instant
 import java.time.LocalDate
@@ -107,10 +107,7 @@ fun Route.attachMockContext() {
                         throw IllegalArgumentException()
                     }
 
-                    override fun <T> inTransaction(
-                        gjenbruk: Boolean,
-                        block: () -> T,
-                    ): T {
+                    override fun <T> inTransaction(block: () -> T): T {
                         return block()
                     }
                 },
@@ -134,7 +131,7 @@ fun opprettBehandling(
     status: BehandlingStatus = BehandlingStatus.OPPRETTET,
     soeknadMottattDato: LocalDateTime = Tidspunkt.now().toLocalDatetimeUTC(),
     virkningstidspunkt: Virkningstidspunkt? = null,
-    revurderingAarsak: RevurderingAarsak? = null,
+    revurderingAarsak: Revurderingaarsak? = null,
     opphoerAarsaker: List<ManueltOpphoerAarsak>? = null,
     fritekstAarsak: String? = null,
     prosesstype: Prosesstype = Prosesstype.MANUELL,
@@ -162,7 +159,6 @@ fun foerstegangsbehandling(
     persongalleri: Persongalleri = persongalleri(),
     gyldighetsproeving: GyldighetsResultat? = null,
     virkningstidspunkt: Virkningstidspunkt? = null,
-    utenlandstilsnitt: Utenlandstilsnitt? = null,
     boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet? = null,
     kommerBarnetTilgode: KommerBarnetTilgode? = null,
     kilde: Vedtaksloesning = Vedtaksloesning.GJENNY,
@@ -182,7 +178,6 @@ fun foerstegangsbehandling(
     soeknadMottattDato = soeknadMottattDato,
     gyldighetsproeving = gyldighetsproeving,
     virkningstidspunkt = virkningstidspunkt,
-    utenlandstilsnitt = utenlandstilsnitt,
     boddEllerArbeidetUtlandet = boddEllerArbeidetUtlandet,
     kommerBarnetTilgode = kommerBarnetTilgode,
     kilde = kilde,
@@ -195,15 +190,14 @@ fun revurdering(
     sistEndret: LocalDateTime = Tidspunkt.now().toLocalDatetimeUTC(),
     status: BehandlingStatus = BehandlingStatus.OPPRETTET,
     persongalleri: Persongalleri = persongalleri(),
-    revurderingAarsak: RevurderingAarsak,
+    revurderingAarsak: Revurderingaarsak,
     kommerBarnetTilgode: KommerBarnetTilgode = kommerBarnetTilgode(id),
     virkningstidspunkt: Virkningstidspunkt? = null,
-    utenlandstilsnitt: Utenlandstilsnitt? = null,
     boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet? = null,
     prosesstype: Prosesstype = Prosesstype.MANUELL,
     kilde: Vedtaksloesning = Vedtaksloesning.GJENNY,
     enhet: String = Enheter.defaultEnhet.enhetNr,
-    revurderingInfo: RevurderingMedBegrunnelse? = null,
+    revurderingInfo: RevurderingInfoMedBegrunnelse? = null,
     begrunnelse: String? = null,
 ) = Revurdering.opprett(
     id = id,
@@ -219,7 +213,6 @@ fun revurdering(
     status = status,
     kommerBarnetTilgode = kommerBarnetTilgode,
     virkningstidspunkt = virkningstidspunkt,
-    utenlandstilsnitt = utenlandstilsnitt,
     boddEllerArbeidetUtlandet = boddEllerArbeidetUtlandet,
     revurderingsaarsak = revurderingAarsak,
     prosesstype = prosesstype,
@@ -239,7 +232,6 @@ fun manueltOpphoer(
         ),
     fritekstAarsak: String? = "Umulig å revurdere i nytt saksbehandlingssystem",
     virkningstidspunkt: Virkningstidspunkt? = null,
-    utenlandstilsnitt: Utenlandstilsnitt? = null,
     boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet? = null,
     enhet: String = Enheter.defaultEnhet.enhetNr,
 ) = ManueltOpphoer(
@@ -257,7 +249,6 @@ fun manueltOpphoer(
     opphoerAarsaker = opphoerAarsaker,
     fritekstAarsak = fritekstAarsak,
     virkningstidspunkt = virkningstidspunkt,
-    utenlandstilsnitt = utenlandstilsnitt,
     boddEllerArbeidetUtlandet = boddEllerArbeidetUtlandet,
 )
 
@@ -351,7 +342,7 @@ fun personOpplysning(doedsdato: LocalDate? = null) =
     Person(
         fornavn = "Test",
         etternavn = "Testulfsen",
-        foedselsnummer = Folkeregisteridentifikator.of("19078504903"),
+        foedselsnummer = SOEKER_FOEDSELSNUMMER,
         foedselsdato = LocalDate.parse("2020-06-10"),
         foedselsaar = 1985,
         foedeland = null,
@@ -377,8 +368,8 @@ fun kommerBarnetTilgode(
     kilde: Grunnlagsopplysning.Saksbehandler = Grunnlagsopplysning.Saksbehandler.create("S01"),
 ) = KommerBarnetTilgode(svar, begrunnelse, kilde, behandlingId)
 
-val TRIVIELL_MIDTPUNKT = Folkeregisteridentifikator.of("19040550081")
-val STOR_SNERK = Folkeregisteridentifikator.of("11057523044")
+val KONTANT_FOT = Folkeregisteridentifikator.of("10418305857")
+val JOVIAL_LAMA = Folkeregisteridentifikator.of("09498230323")
 
 fun mockPerson(
     utland: Utland? = null,
@@ -388,7 +379,7 @@ fun mockPerson(
     fornavn = OpplysningDTO(verdi = "Ola", opplysningsid = null),
     mellomnavn = OpplysningDTO(verdi = "Mellom", opplysningsid = null),
     etternavn = OpplysningDTO(verdi = "Nordmann", opplysningsid = null),
-    foedselsnummer = OpplysningDTO(TRIVIELL_MIDTPUNKT, null),
+    foedselsnummer = OpplysningDTO(KONTANT_FOT, null),
     foedselsdato = OpplysningDTO(LocalDate.now().minusYears(20), UUID.randomUUID().toString()),
     foedselsaar = OpplysningDTO(verdi = 2000, opplysningsid = null),
     foedeland = OpplysningDTO("Norge", UUID.randomUUID().toString()),

@@ -11,6 +11,7 @@ dependencies {
     implementation(project(":libs:ktor2client-onbehalfof"))
     implementation(project(":libs:etterlatte-sporingslogg"))
     implementation(project(":libs:etterlatte-behandling-model"))
+    implementation(project(":libs:etterlatte-vedtaksvurdering-model"))
     implementation(project(":libs:etterlatte-pdl-model"))
 
     implementation(libs.ktor2.servercore)

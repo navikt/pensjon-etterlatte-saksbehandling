@@ -12,11 +12,11 @@ import io.ktor.server.routing.put
 import io.ktor.server.routing.route
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.inTransaction
-import no.nav.etterlatte.libs.common.BEHANDLINGSID_CALL_PARAMETER
+import no.nav.etterlatte.libs.common.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.OPPGAVEID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.OPPGAVEID_GOSYS_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
-import no.nav.etterlatte.libs.common.behandlingsId
+import no.nav.etterlatte.libs.common.behandlingId
 import no.nav.etterlatte.libs.common.gosysOppgaveId
 import no.nav.etterlatte.libs.common.kunSaksbehandler
 import no.nav.etterlatte.libs.common.kunSystembruker
@@ -55,17 +55,17 @@ internal fun Route.oppgaveRoutes(
             }
         }
 
-        route("behandling/{$BEHANDLINGSID_CALL_PARAMETER}") {
+        route("behandling/{$BEHANDLINGID_CALL_PARAMETER}") {
             get("/hentsaksbehandler") {
                 kunSaksbehandler {
-                    val saksbehandler = inTransaction { service.hentSaksbehandlerForBehandling(behandlingsId) }
+                    val saksbehandler = inTransaction { service.hentSaksbehandlerForBehandling(behandlingId) }
                     call.respond(saksbehandler ?: HttpStatusCode.NoContent)
                 }
             }
 
             get("/oppgaveunderarbeid") {
                 kunSaksbehandler {
-                    val saksbehandler = inTransaction { service.hentSaksbehandlerForOppgaveUnderArbeid(behandlingsId) }
+                    val saksbehandler = inTransaction { service.hentSaksbehandlerForOppgaveUnderArbeid(behandlingId) }
                     call.respond(saksbehandler ?: HttpStatusCode.NoContent)
                 }
             }
@@ -156,7 +156,7 @@ internal fun Route.oppgaveRoutes(
                 call.respond(
                     inTransaction {
                         service.opprettNyOppgaveMedSakOgReferanse(
-                            "",
+                            nyOppgaveDto.referanse ?: "",
                             sakId,
                             nyOppgaveDto.oppgaveKilde,
                             nyOppgaveDto.oppgaveType,

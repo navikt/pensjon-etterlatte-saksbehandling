@@ -5,6 +5,7 @@ import no.nav.etterlatte.brev.behandling.ForenkletVedtak
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.brevbaker.BrevbakerRequest
 import no.nav.etterlatte.brev.brevbaker.BrevbakerService
+import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.dokarkiv.DokarkivServiceImpl
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
@@ -21,11 +22,15 @@ import no.nav.etterlatte.brev.model.BrevProsessType.AUTOMATISK
 import no.nav.etterlatte.brev.model.BrevProsessType.MANUELL
 import no.nav.etterlatte.brev.model.BrevProsessType.REDIGERBAR
 import no.nav.etterlatte.brev.model.BrevProsessTypeFactory
+import no.nav.etterlatte.brev.model.InnholdMedVedlegg
 import no.nav.etterlatte.brev.model.ManueltBrevData
 import no.nav.etterlatte.brev.model.OpprettNyttBrev
 import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.SlateHelper
 import no.nav.etterlatte.brev.model.Status
+import no.nav.etterlatte.brev.model.bp.OmregnetBPNyttRegelverk
+import no.nav.etterlatte.libs.common.Vedtaksloesning
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.rivers.VedtakTilJournalfoering
 import no.nav.etterlatte.token.BrukerTokenInfo
@@ -67,12 +72,11 @@ class VedtaksbrevService(
 
         val generellBrevData = brevdataFacade.hentGenerellBrevData(sakId, behandlingId, brukerTokenInfo)
 
-        val mottaker =
-            if (generellBrevData.personerISak.innsender != null) {
-                adresseService.hentMottakerAdresse(generellBrevData.personerISak.innsender.fnr.value)
-            } else {
-                adresseService.hentMottakerAdresse(generellBrevData.personerISak.soeker.fnr.value)
+        val mottakerFnr =
+            with(generellBrevData.personerISak) {
+                innsender?.fnr?.value?.takeUnless { it == Vedtaksloesning.PESYS.name } ?: soeker.fnr.value
             }
+        val mottaker = adresseService.hentMottakerAdresse(mottakerFnr)
 
         val prosessType = brevProsessTypeFactory.fra(generellBrevData)
 
@@ -83,6 +87,7 @@ class VedtaksbrevService(
                 prosessType = prosessType,
                 soekerFnr = generellBrevData.personerISak.soeker.fnr.value,
                 mottaker = mottaker,
+                opprettet = Tidspunkt.now(),
                 innhold = opprettInnhold(generellBrevData, brukerTokenInfo, prosessType),
                 innholdVedlegg = opprettInnholdVedlegg(generellBrevData, prosessType),
             )
@@ -93,6 +98,7 @@ class VedtaksbrevService(
     suspend fun genererPdf(
         id: BrevID,
         brukerTokenInfo: BrukerTokenInfo,
+        migrering: Boolean = false,
     ): Pdf {
         val brev = hentBrev(id)
 
@@ -109,12 +115,32 @@ class VedtaksbrevService(
         val brevRequest = BrevbakerRequest.fra(brevkodePar.ferdigstilling, brevData, generellBrevData, avsender)
 
         return brevbaker.genererPdf(brev.id, brevRequest)
-            .also { pdf -> lagrePdfHvisVedtakFattet(brev.id, generellBrevData.forenkletVedtak, pdf, brukerTokenInfo) }
+            .let {
+                when (brevData) {
+                    is OmregnetBPNyttRegelverk -> {
+                        val forhaandsvarsel =
+                            brevbaker.genererPdf(
+                                brev.id,
+                                BrevbakerRequest.fra(
+                                    EtterlatteBrevKode.BARNEPENSJON_FORHAANDSVARSEL_OMREGNING,
+                                    brevData,
+                                    generellBrevData,
+                                    avsender,
+                                ),
+                            )
+                        forhaandsvarsel.medPdfAppended(it)
+                    }
+
+                    else -> it
+                }
+            }
+            .also { pdf -> lagrePdfHvisVedtakFattet(brev.id, generellBrevData.forenkletVedtak, pdf, brukerTokenInfo, migrering) }
     }
 
     suspend fun ferdigstillVedtaksbrev(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
+        migrering: Boolean = false,
     ) {
         val brev =
             requireNotNull(hentVedtaksbrev(behandlingId)) {
@@ -134,7 +160,7 @@ class VedtaksbrevService(
                 brukerTokenInfo,
             )
 
-        if (vedtakStatus != VedtakStatus.FATTET_VEDTAK) {
+        if (vedtakStatus != VedtakStatus.FATTET_VEDTAK && !migrering) {
             throw IllegalStateException(
                 "Vedtak status er $vedtakStatus. Avventer ferdigstilling av brev (id=${brev.id})",
             )
@@ -143,7 +169,11 @@ class VedtaksbrevService(
         if (!brukerTokenInfo.erSammePerson(saksbehandlerIdent)) {
             logger.info("Ferdigstiller brev med id=${brev.id}")
 
-            db.settBrevFerdigstilt(brev.id)
+            if (db.hentPdf(brev.id) == null) {
+                throw IllegalStateException("Kan ikke ferdigstille brev (id=${brev.id}) siden PDF er null!")
+            } else {
+                db.settBrevFerdigstilt(brev.id)
+            }
         } else {
             throw IllegalStateException(
                 "Kan ikke ferdigstille/låse brev når saksbehandler ($saksbehandlerIdent)" +
@@ -185,9 +215,13 @@ class VedtaksbrevService(
     ): BrevData =
         when (brev.prosessType) {
             REDIGERBAR ->
-                brevDataMapper.brevDataFerdigstilling(generellBrevData, brukerTokenInfo, {
-                    hentLagretInnhold(brev)
-                }, { hentLagretInnholdVedlegg(brev) }, brevkode)
+                brevDataMapper.brevDataFerdigstilling(
+                    generellBrevData,
+                    brukerTokenInfo,
+                    InnholdMedVedlegg({ hentLagretInnhold(brev) }, { hentLagretInnholdVedlegg(brev) }),
+                    brevkode,
+                )
+
             AUTOMATISK -> brevDataMapper.brevData(generellBrevData, brukerTokenInfo)
             MANUELL -> ManueltBrevData(hentLagretInnhold(brev))
         }
@@ -234,8 +268,9 @@ class VedtaksbrevService(
         vedtak: ForenkletVedtak,
         pdf: Pdf,
         brukerTokenInfo: BrukerTokenInfo,
+        migrering: Boolean = false,
     ) {
-        if (vedtak.status != VedtakStatus.FATTET_VEDTAK) {
+        if (vedtak.status != VedtakStatus.FATTET_VEDTAK && !migrering) {
             logger.info("Vedtak status er ${vedtak.status}. Avventer ferdigstilling av brev (id=$brevId)")
             return
         }

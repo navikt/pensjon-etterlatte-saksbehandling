@@ -151,7 +151,7 @@ const PeriodeRow = ({
   const slettGrunnlag = (grunnlagId: string) => {
     slettTrygdetidsgrunnlagRequest(
       {
-        behandlingsId: behandlingId,
+        behandlingId: behandlingId,
         trygdetidGrunnlagId: grunnlagId,
       },
       (oppdatertTrygdetid) => {
@@ -231,6 +231,7 @@ const ExpandableInfo = styled.div`
 
 const GrunnlagListe = styled.div`
   margin-top: 2em;
+  margin-bottom: 2em;
 `
 
 const Datofelt = styled.div`

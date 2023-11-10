@@ -1,9 +1,11 @@
 package no.nav.etterlatte.sak
 
+import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
+import io.ktor.server.response.respondText
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
@@ -12,18 +14,26 @@ import no.nav.etterlatte.behandling.BehandlingListe
 import no.nav.etterlatte.behandling.BehandlingRequestLogger
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.domain.Grunnlagsendringshendelse
+import no.nav.etterlatte.behandling.domain.TilstandException
 import no.nav.etterlatte.behandling.domain.toBehandlingSammendrag
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringsListe
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
+import no.nav.etterlatte.libs.common.behandling.ForenkletBehandling
+import no.nav.etterlatte.libs.common.behandling.ForenkletBehandlingListeWrapper
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.SisteIverksatteBehandling
+import no.nav.etterlatte.libs.common.behandling.Utenlandstilknytning
+import no.nav.etterlatte.libs.common.behandling.UtenlandstilknytningType
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.hentNavidentFraToken
 import no.nav.etterlatte.libs.common.kunSaksbehandler
 import no.nav.etterlatte.libs.common.kunSystembruker
 import no.nav.etterlatte.libs.common.oppgave.OppgaveListe
 import no.nav.etterlatte.libs.common.sak.Saker
 import no.nav.etterlatte.libs.common.sakId
+import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.tilgangsstyring.withFoedselsnummerAndGradering
@@ -53,6 +63,17 @@ internal fun Route.sakSystemRoutes(
                         sakService.finnSak(sakId)
                     }
                 call.respond(sak ?: HttpStatusCode.NotFound)
+            }
+
+            // TODO: Fjerne når grunnlag er versjonert (EY-2567)
+            get("/behandlinger") {
+                kunSystembruker {
+                    val behandlinger =
+                        inTransaction { behandlingService.hentBehandlingerISak(sakId) }
+                            .map { ForenkletBehandling(it.sak.id, it.id, it.status) }
+
+                    call.respond(ForenkletBehandlingListeWrapper(behandlinger))
+                }
             }
 
             get("/behandlinger/sisteIverksatte") {
@@ -110,6 +131,34 @@ internal fun Route.sakWebRoutes(
                 call.respond(sak ?: HttpStatusCode.NotFound)
             }
 
+            post("/utenlandstilknytning") {
+                hentNavidentFraToken { navIdent ->
+                    logger.debug("Prøver å fastsette utenlandstilknytning")
+                    val body = call.receive<UtenlandstilknytningRequest>()
+
+                    try {
+                        val utenlandstilknytning =
+                            Utenlandstilknytning(
+                                type = body.utenlandstilknytningType,
+                                kilde = Grunnlagsopplysning.Saksbehandler.create(navIdent),
+                                begrunnelse = body.begrunnelse,
+                            )
+
+                        inTransaction {
+                            sakService.oppdaterUtenlandstilknytning(sakId, utenlandstilknytning)
+                        }
+
+                        call.respondText(
+                            contentType = ContentType.Application.Json,
+                            status = HttpStatusCode.OK,
+                            text = utenlandstilknytning.toJson(),
+                        )
+                    } catch (e: TilstandException.UgyldigTilstand) {
+                        call.respond(HttpStatusCode.BadRequest, "Kan ikke endre feltet")
+                    }
+                }
+            }
+
             get("/behandlinger/foerstevirk") {
                 logger.info("Henter første virkningstidspunkt på en iverksatt behandling i sak med id $sakId")
                 when (val foersteVirk = inTransaction { behandlingService.hentFoersteVirk(sakId) }) {
@@ -120,6 +169,13 @@ internal fun Route.sakWebRoutes(
         }
 
         route("/personer/") {
+            post("/utenlandstilknytning") {
+                withFoedselsnummerInternal(tilgangService) { fnr ->
+                    val sakUtenlandstilknytning = inTransaction { sakService.hentSakMedUtenlandstilknytning(fnr.value) }
+                    call.respond(sakUtenlandstilknytning)
+                }
+            }
+
             post("sak/{type}") {
                 withFoedselsnummerInternal(tilgangService) { fnr ->
                     val type: SakType =
@@ -184,5 +240,10 @@ internal fun Route.sakWebRoutes(
         }
     }
 }
+
+data class UtenlandstilknytningRequest(
+    val utenlandstilknytningType: UtenlandstilknytningType,
+    val begrunnelse: String,
+)
 
 data class FoersteVirkDto(val foersteIverksatteVirkISak: LocalDate, val sakId: Long)

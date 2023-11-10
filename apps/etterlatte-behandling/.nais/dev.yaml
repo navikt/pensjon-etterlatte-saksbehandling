@@ -78,6 +78,10 @@ spec:
       value: 069b1b2c-0a06-4cc9-8418-f100b8ff71be
     - name: ETTERLATTE_VEDTAK_URL
       value: http://etterlatte-vedtaksvurdering
+    - name: ETTERLATTE_TILBAKEKREVING_URL
+      value: http://etterlatte-tilbakekreving
+    - name: AZURE_SCOPE_ETTERLATTE_TILBAKEKREVING
+      value: api://dev-gcp.etterlatte.etterlatte-tilbakekreving/.default
     - name: ETTERLATTE_BREV_API_CLIENT_ID
       value: dev-gcp.etterlatte.etterlatte-brev-api
     - name: AZUREAD_ATTESTANT_GROUPID
@@ -122,8 +126,9 @@ spec:
         - application: etterlatte-vilkaar
         - application: etterlatte-pdltjenester
         - application: etterlatte-grunnlag
-        - application: skjermede-personer-pip
         - application: etterlatte-vedtaksvurdering
+        - application: etterlatte-tilbakekreving
+        - application: skjermede-personer-pip # namespace hører til denne. Ikke legg til ny app i mellom.
           namespace: nom
       external:
         - host: skjermede-personer-pip.intern.dev.nav.no
@@ -140,9 +145,9 @@ spec:
         - application: etterlatte-saksbehandling-ui-lokal
         - application: etterlatte-gyldig-soeknad
         - application: etterlatte-oppdater-behandling
+        - application: etterlatte-hendelser-joark
         - application: etterlatte-statistikk
         - application: etterlatte-vilkaarsvurdering
-        - application: etterlatte-vilkaarsvurdering-lokal
         - application: etterlatte-vedtaksvurdering
         - application: etterlatte-opplysninger-fra-soeknad
         - application: etterlatte-brev-api

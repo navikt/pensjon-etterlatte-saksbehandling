@@ -6,6 +6,12 @@ import { isFailure, isPending, useApiCall } from '~shared/hooks/useApiCall'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { FlexRow } from '~shared/styled'
 import { ApiResponse } from '~shared/api/apiClient'
+import { useSjekkliste } from '~components/behandling/sjekkliste/useSjekkliste'
+import { useAppDispatch } from '~store/Store'
+import { visSjekkliste } from '~store/reducers/BehandlingSidemenyReducer'
+import { addValideringsfeil } from '~store/reducers/SjekklisteReducer'
+import { useBehandling } from '~components/behandling/useBehandling'
+import { IBehandlingsType } from '~shared/types/IDetaljertBehandling'
 
 export const SendTilAttesteringModal = ({
   behandlingId,
@@ -18,6 +24,10 @@ export const SendTilAttesteringModal = ({
   const [isOpen, setIsOpen] = useState(false)
   const [fattVedtakStatus, fattVedtak] = useApiCall(fattVedtakApi)
 
+  const sjekkliste = useSjekkliste()
+  const behandling = useBehandling()
+  const dispatch = useAppDispatch()
+
   const goToOppgavebenken = () => {
     navigate('/')
   }
@@ -29,10 +39,22 @@ export const SendTilAttesteringModal = ({
     })
   }
 
+  const clickAttester = () => {
+    if (
+      behandling?.behandlingType == IBehandlingsType.FØRSTEGANGSBEHANDLING &&
+      (sjekkliste == null || !sjekkliste.bekreftet)
+    ) {
+      dispatch(addValideringsfeil('Feltet må hukes av for å ferdigstilles'))
+      dispatch(visSjekkliste())
+    } else {
+      setIsOpen(true)
+    }
+  }
+
   return (
     <>
-      <Button variant="primary" onClick={() => setIsOpen(true)}>
-        {handlinger.ATTESTERING.navn}
+      <Button variant="primary" onClick={clickAttester}>
+        {handlinger.SEND_TIL_ATTESTERING.navn}
       </Button>
       <Modal
         open={isOpen}
@@ -60,7 +82,11 @@ export const SendTilAttesteringModal = ({
               {handlinger.ATTESTERING_MODAL.JA.navn}
             </Button>
           </FlexRow>
-          {isFailure(fattVedtakStatus) && <ApiErrorAlert>En feil skjedde under attestering av vedtaket.</ApiErrorAlert>}
+          {isFailure(fattVedtakStatus) && (
+            <ApiErrorAlert>
+              {fattVedtakStatus.error.detail || 'En feil skjedde under attestering av vedtaket'}
+            </ApiErrorAlert>
+          )}
         </Modal.Body>
       </Modal>
     </>

@@ -13,7 +13,12 @@ type Props = {
 }
 
 export const Behandlingsoppsummering = ({ behandlingsInfo, beslutning }: Props) => {
-  if (behandlingsInfo.status === IBehandlingStatus.ATTESTERT || beslutning === IBeslutning.godkjenn) {
+  if (
+    behandlingsInfo.status === IBehandlingStatus.ATTESTERT ||
+    behandlingsInfo.status === IBehandlingStatus.TIL_SAMORDNING ||
+    behandlingsInfo.status === IBehandlingStatus.SAMORDNET ||
+    beslutning === IBeslutning.godkjenn
+  ) {
     return (
       <Innvilget behandlingsInfo={behandlingsInfo}>
         <KopierbarVerdi value={behandlingsInfo.sakId.toString()} />

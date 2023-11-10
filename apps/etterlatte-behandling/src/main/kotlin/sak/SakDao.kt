@@ -1,15 +1,61 @@
 package no.nav.etterlatte.sak
 
+import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.etterlatte.behandling.objectMapper
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.behandling.Utenlandstilknytning
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.database.setJsonb
 import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.libs.database.toList
 import java.sql.Connection
 import java.sql.ResultSet
 
+data class SakUtenlandstilknytning(
+    val ident: String,
+    val sakType: SakType,
+    val id: Long,
+    val enhet: String,
+    val utenlandstilknytning: Utenlandstilknytning? = null,
+)
+
 class SakDao(private val connection: () -> Connection) {
+    fun hentUtenlandstilknytningForSak(sakId: Long): SakUtenlandstilknytning? {
+        with(connection()) {
+            val statement =
+                prepareStatement(
+                    "SELECT * from sak where id = ?",
+                )
+            statement.setLong(1, sakId)
+            return statement.executeQuery().singleOrNull {
+                SakUtenlandstilknytning(
+                    sakType = enumValueOf(getString("sakType")),
+                    ident = getString("fnr"),
+                    id = getLong("id"),
+                    enhet = getString("enhet"),
+                    utenlandstilknytning = getString("utenlandstilknytning")?.let { objectMapper.readValue(it) },
+                )
+            }
+        }
+    }
+
+    fun oppdaterUtenlandstilknytning(
+        sakId: Long,
+        utenlandstilknytning: Utenlandstilknytning,
+    ) {
+        with(connection()) {
+            val statement =
+                prepareStatement(
+                    "UPDATE sak set utenlandstilknytning = ? where id = ?",
+                )
+            statement.setJsonb(1, utenlandstilknytning)
+            statement.setLong(2, sakId)
+            statement.executeUpdate()
+        }
+    }
+
     fun finnSakerMedGraderingOgSkjerming(sakIder: List<Long>): List<SakMedGradering> {
         with(connection()) {
             val statement =
@@ -89,12 +135,6 @@ class SakDao(private val connection: () -> Connection) {
         val statement = connection().prepareStatement("SELECT id, sakType, fnr, enhet from sak where fnr = ?")
         statement.setString(1, fnr)
         return statement.executeQuery().toList { this.toSak() }
-    }
-
-    fun slettSak(id: Long) {
-        val statement = connection().prepareStatement("DELETE from sak where id = ?")
-        statement.setLong(1, id)
-        statement.executeUpdate()
     }
 
     fun markerSakerMedSkjerming(

@@ -17,6 +17,7 @@ data class BeregningDTO(
     val beregningsperioder: List<Beregningsperiode>,
     val beregnetDato: Tidspunkt,
     val grunnlagMetadata: Metadata,
+    val overstyrBeregning: OverstyrBeregningDTO?,
 )
 
 data class Beregningsperiode(
@@ -28,6 +29,7 @@ data class Beregningsperiode(
     val grunnbelopMnd: Int,
     val grunnbelop: Int,
     val trygdetid: Int,
+    val trygdetidForIdent: String? = null,
     val beregningsMetode: BeregningsMetode? = null,
     val samletNorskTrygdetid: Int? = null,
     val samletTeoretiskTrygdetid: Int? = null,
@@ -35,6 +37,10 @@ data class Beregningsperiode(
     val regelResultat: JsonNode? = null,
     val regelVersjon: String? = null,
     val kilde: Grunnlagsopplysning.RegelKilde? = null,
+)
+
+data class OverstyrBeregningDTO(
+    val beskrivelse: String,
 )
 
 data class AvkortingDto(
@@ -70,11 +76,6 @@ data class AvkortetYtelseDto(
     val avkortingsbeloep: Int,
     val ytelseEtterAvkorting: Int,
     val restanse: Int,
-)
-
-data class ManuellRestanseDto(
-    val avkortetYtelseId: UUID,
-    val nyRestanse: Int,
 )
 
 data class YtelseMedGrunnlagDto(

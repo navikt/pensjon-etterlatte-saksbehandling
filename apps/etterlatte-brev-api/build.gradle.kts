@@ -15,6 +15,7 @@ dependencies {
     implementation(project(":libs:ktor2client-onbehalfof"))
     implementation(project(":libs:ktor2client-auth-clientcredentials"))
     implementation(project(":libs:etterlatte-vilkaarsvurdering-model"))
+    implementation(project(":libs:etterlatte-tilbakekreving-model"))
     implementation(project(":libs:etterlatte-funksjonsbrytere"))
 
     implementation("no.nav.pensjon.brevbaker:brevbaker-api-model-common:1.0.2")
@@ -34,6 +35,8 @@ dependencies {
     implementation(libs.ktor2.auth)
     implementation(libs.ktor2.authjwt)
     implementation(libs.cache.caffeine)
+
+    implementation(libs.pdf.pdfbox)
 
     implementation(libs.bundles.jackson)
 

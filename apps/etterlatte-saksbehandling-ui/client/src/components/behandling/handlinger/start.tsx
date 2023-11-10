@@ -7,7 +7,7 @@ export const Start = ({ disabled }: { disabled?: boolean }) => {
 
   return (
     <Button variant="primary" onClick={next} disabled={disabled}>
-      {handlinger.START.navn}
+      {handlinger.NESTE.navn}
     </Button>
   )
 }

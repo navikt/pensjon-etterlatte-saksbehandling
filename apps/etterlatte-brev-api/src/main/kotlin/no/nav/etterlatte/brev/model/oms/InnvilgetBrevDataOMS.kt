@@ -3,13 +3,14 @@ package no.nav.etterlatte.brev.model.oms
 import no.nav.etterlatte.brev.behandling.Avdoed
 import no.nav.etterlatte.brev.behandling.Avkortingsinfo
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
-import no.nav.etterlatte.brev.behandling.Trygdetidsperiode
+import no.nav.etterlatte.brev.behandling.Trygdetid
 import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
 import no.nav.etterlatte.brev.model.Beregningsinfo
 import no.nav.etterlatte.brev.model.BrevData
-import no.nav.etterlatte.brev.model.BrevInnholdVedlegg
 import no.nav.etterlatte.brev.model.BrevVedleggKey
+import no.nav.etterlatte.brev.model.EtterbetalingBrev
 import no.nav.etterlatte.brev.model.EtterbetalingDTO
+import no.nav.etterlatte.brev.model.InnholdMedVedlegg
 import no.nav.etterlatte.brev.model.NyBeregningsperiode
 import no.nav.etterlatte.brev.model.Slate
 import no.nav.pensjon.brevbaker.api.model.Kroner
@@ -19,7 +20,7 @@ data class InnvilgetBrevDataOMS(
     val utbetalingsinfo: Utbetalingsinfo,
     val avkortingsinfo: Avkortingsinfo? = null,
     val avdoed: Avdoed,
-    val etterbetalinginfo: EtterbetalingDTO? = null,
+    val etterbetalinginfo: EtterbetalingBrev? = null,
     val beregningsinfo: Beregningsinfo? = null,
     val innhold: List<Slate.Element>,
 ) : BrevData() {
@@ -29,21 +30,17 @@ data class InnvilgetBrevDataOMS(
             utbetalingsinfo: Utbetalingsinfo,
             avkortingsinfo: Avkortingsinfo? = null,
             etterbetalinginfo: EtterbetalingDTO? = null,
-            trygdetidsperioder: List<Trygdetidsperiode>,
-            innhold: List<Slate.Element>,
-            innholdVedlegg: List<BrevInnholdVedlegg>,
+            trygdetid: Trygdetid,
+            innholdMedVedlegg: InnholdMedVedlegg,
         ): InnvilgetBrevDataOMS =
             InnvilgetBrevDataOMS(
-                utbetalingsinfo = utbetalingsinfo,
+                utbetalingsinfo = Utbetalingsinfo.kopier(utbetalingsinfo, etterbetalinginfo),
                 avkortingsinfo = avkortingsinfo,
                 avdoed = generellBrevData.personerISak.avdoed,
-                etterbetalinginfo = etterbetalinginfo,
+                etterbetalinginfo = EtterbetalingBrev.fra(etterbetalinginfo, utbetalingsinfo.beregningsperioder),
                 beregningsinfo =
                     Beregningsinfo(
-                        innhold =
-                            innholdVedlegg.find { vedlegg ->
-                                vedlegg.key == BrevVedleggKey.BEREGNING_INNHOLD
-                            }?.payload!!.elements,
+                        innhold = innholdMedVedlegg.finnVedlegg(BrevVedleggKey.BEREGNING_INNHOLD),
                         grunnbeloep = avkortingsinfo!!.grunnbeloep,
                         beregningsperioder =
                             avkortingsinfo.beregningsperioder.map {
@@ -54,9 +51,9 @@ data class InnvilgetBrevDataOMS(
                                     utbetaltBeloep = it.utbetaltBeloep,
                                 )
                             },
-                        trygdetidsperioder = trygdetidsperioder,
+                        trygdetidsperioder = trygdetid.perioder,
                     ),
-                innhold = innhold,
+                innhold = innholdMedVedlegg.innhold(),
             )
     }
 }

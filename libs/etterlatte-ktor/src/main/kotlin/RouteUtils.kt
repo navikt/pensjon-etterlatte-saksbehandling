@@ -14,23 +14,23 @@ import no.nav.etterlatte.token.Saksbehandler
 import no.nav.etterlatte.token.Systembruker
 import java.util.UUID
 
-const val BEHANDLINGSID_CALL_PARAMETER = "behandlingsid"
+const val BEHANDLINGID_CALL_PARAMETER = "behandlingId"
 const val SAKID_CALL_PARAMETER = "sakId"
 const val OPPGAVEID_CALL_PARAMETER = "oppgaveId"
 const val KLAGEID_CALL_PARAMETER = "klageId"
 const val OPPGAVEID_GOSYS_CALL_PARAMETER = "gosysOppgaveId"
-const val GENERELLBEHANDLINGID_CALL_PARAMETER = "generellbehandlingId"
+const val GENERELLBEHANDLINGID_CALL_PARAMETER = "generellBehandlingId"
 
 inline val PipelineContext<*, ApplicationCall>.generellBehandlingId: UUID
     get() =
         call.parameters[GENERELLBEHANDLINGID_CALL_PARAMETER]?.let { UUID.fromString(it) } ?: throw NullPointerException(
-            "Generellbehandlingid er ikke i path params",
+            "GenerellBehandlingId er ikke i path params",
         )
 
-inline val PipelineContext<*, ApplicationCall>.behandlingsId: UUID
+inline val PipelineContext<*, ApplicationCall>.behandlingId: UUID
     get() =
-        call.parameters[BEHANDLINGSID_CALL_PARAMETER]?.let { UUID.fromString(it) } ?: throw NullPointerException(
-            "BehandlingsId er ikke i path params",
+        call.parameters[BEHANDLINGID_CALL_PARAMETER]?.let { UUID.fromString(it) } ?: throw NullPointerException(
+            "BehandlingId er ikke i path params",
         )
 
 inline val PipelineContext<*, ApplicationCall>.sakId: Long
@@ -60,7 +60,7 @@ inline val PipelineContext<*, ApplicationCall>.klageId: UUID
 suspend inline fun PipelineContext<*, ApplicationCall>.withBehandlingId(
     behandlingTilgangsSjekk: BehandlingTilgangsSjekk,
     onSuccess: (id: UUID) -> Unit,
-) = withParam(BEHANDLINGSID_CALL_PARAMETER) { behandlingId ->
+) = withParam(BEHANDLINGID_CALL_PARAMETER) { behandlingId ->
     when (brukerTokenInfo) {
         is Saksbehandler -> {
             val harTilgangTilBehandling =

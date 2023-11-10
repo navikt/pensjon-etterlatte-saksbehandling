@@ -1,5 +1,6 @@
 package no.nav.etterlatte.libs.common.behandling
 
+import behandling.utland.LandMedDokumenter
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.fasterxml.jackson.annotation.JsonTypeName
 import java.time.LocalDate
@@ -67,5 +68,10 @@ sealed class RevurderingInfo {
     @JsonTypeName("OMGJOERING_ETTER_KLAGE")
     data class OmgjoeringEtterKlage(
         val klageId: UUID,
+    ) : RevurderingInfo()
+
+    @JsonTypeName("SLUTTBEHANDLING_UTLAND")
+    data class SluttbehandlingUtland(
+        val landMedDokumenter: List<LandMedDokumenter>,
     ) : RevurderingInfo()
 }

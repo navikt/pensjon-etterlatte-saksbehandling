@@ -54,6 +54,17 @@ class BeregningRepository(private val dataSource: DataSource) {
         return hent(beregning.behandlingId)!!
     }
 
+    fun hentOverstyrBeregning(sakId: Long): OverstyrBeregning? {
+        return dataSource.transaction { tx ->
+            queryOf(
+                statement = Queries.hentOverstyrBeregning,
+                paramMap = mapOf("sakId" to sakId),
+            ).let { query ->
+                tx.run(query.map { toOverstyrBeregning(it) }.asSingle)
+            }
+        }
+    }
+
     private fun createMapFromBeregningsperiode(
         beregningsperiode: Beregningsperiode,
         beregning: Beregning,
@@ -85,6 +96,15 @@ class BeregningRepository(private val dataSource: DataSource) {
         )
     }
 }
+
+private fun toOverstyrBeregning(row: Row): OverstyrBeregning =
+    with(row) {
+        OverstyrBeregning(
+            sakId = long("sak_id"),
+            beskrivelse = string("beskrivelse"),
+            tidspunkt = sqlTimestamp("tidspunkt").toTidspunkt(),
+        )
+    }
 
 private fun toBeregningsperiode(row: Row): BeregningsperiodeDAO =
     with(row) {
@@ -179,6 +199,7 @@ private fun toBeregning(beregningsperioder: List<BeregningsperiodeDAO>): Beregni
                     kilde = it.kilde,
                 )
             },
+        overstyrBeregning = null,
     )
 }
 
@@ -252,6 +273,13 @@ private object Queries {
         DELETE FROM beregningsperiode 
         WHERE ${BeregningsperiodeDatabaseColumns.BehandlingId.navn} = :behandlingId::UUID
     """
+
+    val hentOverstyrBeregning =
+        """
+        SELECT *
+        FROM overstyr_beregning 
+        WHERE sak_id = :sakId
+        """.trimIndent()
 }
 
 private data class BeregningsperiodeDAO(

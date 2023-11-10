@@ -9,7 +9,8 @@ spec:
   image: {{image}}
   port: 8080
   ingresses:
-    - "https://etterlatte-samordning-vedtak.ekstern.dev.nav.no"
+    - "https://etterlatte-samordning-vedtak.ekstern.dev.nav.no"  # Skru av etterhvert, skal nås via etterlatte-gw
+    - "https://etterlatte-samordning-vedtak.intern.dev.nav.no"
   liveness:
     path: "health/isalive"
     initialDelay: 10
@@ -66,6 +67,13 @@ spec:
   azure:
     application:
       enabled: true
+      allowAllUsers: false
+      claims:
+        groups:
+          - id: 8bb9b8d1-f46a-4ade-8ee8-5895eccdf8cf #SAKSBEHANDLER
+        extra:
+          - "NAVident"
+          - "azp_name"
   env:
     - name: MASKINPORTEN_WELL_KNOWN_URL
       value: https://test.maskinporten.no/.well-known/oauth-authorization-server
@@ -78,6 +86,33 @@ spec:
     - name: TJENESTEPENSJON_SCOPE
       value: api://dev-fss.pensjonsamhandling.tp-q2/.default
   accessPolicy:
+    inbound:
+      rules:
+        - application: etterlatte-krakend
+        - application: pensjon-pen-q1
+          namespace: pensjon-q2
+          cluster: dev-fss
+          permissions:
+            roles:
+              - les-oms-vedtak
+        - application: pensjon-pen-q2
+          namespace: pensjon-q2
+          cluster: dev-fss
+          permissions:
+            roles:
+              - les-oms-vedtak
+        - application: pensjon-pen-q5
+          namespace: pensjon-q5
+          cluster: dev-fss
+          permissions:
+            roles:
+              - les-oms-vedtak
+        - application: ida
+          namespace: traktor
+          cluster: prod-fss
+          permissions:
+            roles:
+              - les-oms-vedtak
     outbound:
       rules:
         - application: etterlatte-vedtaksvurdering

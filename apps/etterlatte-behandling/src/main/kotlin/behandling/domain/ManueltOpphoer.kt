@@ -7,7 +7,6 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
-import no.nav.etterlatte.libs.common.behandling.Utenlandstilsnitt
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -22,7 +21,6 @@ data class ManueltOpphoer(
     override val sistEndret: LocalDateTime,
     override val status: BehandlingStatus,
     override val virkningstidspunkt: Virkningstidspunkt?,
-    override val utenlandstilsnitt: Utenlandstilsnitt?,
     override val boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet?,
     val opphoerAarsaker: List<ManueltOpphoerAarsak>,
     val fritekstAarsak: String?,
@@ -30,26 +28,6 @@ data class ManueltOpphoer(
 ) : Behandling() {
     override val type: BehandlingType = BehandlingType.MANUELT_OPPHOER
     override val kilde = Vedtaksloesning.GJENNY
-
-    constructor(
-        sak: Sak,
-        opphoerAarsaker: List<ManueltOpphoerAarsak>,
-        fritekstAarsak: String?,
-        virkningstidspunkt: Virkningstidspunkt?,
-        utenlandstilsnitt: Utenlandstilsnitt?,
-        boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet?,
-    ) : this(
-        id = UUID.randomUUID(),
-        sak = sak,
-        behandlingOpprettet = Tidspunkt.now().toLocalDatetimeUTC(),
-        sistEndret = Tidspunkt.now().toLocalDatetimeUTC(),
-        status = BehandlingStatus.OPPRETTET,
-        opphoerAarsaker = opphoerAarsaker,
-        fritekstAarsak = fritekstAarsak,
-        virkningstidspunkt = virkningstidspunkt,
-        utenlandstilsnitt = utenlandstilsnitt,
-        boddEllerArbeidetUtlandet = boddEllerArbeidetUtlandet,
-    )
 
     private val erFyltUt: Boolean
         get() {
@@ -102,8 +80,18 @@ data class ManueltOpphoer(
             endreTilStatus(BehandlingStatus.RETURNERT)
         }
 
+    override fun tilTilSamordning() =
+        hvisTilstandEr(listOf(BehandlingStatus.ATTESTERT)) {
+            endreTilStatus(BehandlingStatus.TIL_SAMORDNING)
+        }
+
+    override fun tilSamordnet() =
+        hvisTilstandEr(listOf(BehandlingStatus.ATTESTERT, BehandlingStatus.TIL_SAMORDNING)) {
+            endreTilStatus(BehandlingStatus.SAMORDNET)
+        }
+
     override fun tilIverksatt() =
-        hvisTilstandEr(BehandlingStatus.ATTESTERT) {
+        hvisTilstandEr(listOf(BehandlingStatus.ATTESTERT, BehandlingStatus.SAMORDNET)) {
             endreTilStatus(BehandlingStatus.IVERKSATT)
         }
 

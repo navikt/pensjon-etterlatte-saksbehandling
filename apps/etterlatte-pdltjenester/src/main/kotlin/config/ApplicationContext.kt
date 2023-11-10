@@ -2,6 +2,8 @@ package no.nav.etterlatte.config
 
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleProperties
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.pdl.ParallelleSannheterKlient
@@ -24,10 +26,13 @@ class ApplicationContext(env: Map<String, String>) {
             apiUrl = config.getString("pdl.url"),
         )
 
+    val featureToggleService = FeatureToggleService.initialiser(featureToggleProperties(config))
+
     val parallelleSannheterKlient =
         ParallelleSannheterKlient(
             httpClient = httpClient(),
             apiUrl = config.getString("pps.url"),
+            featureToggleService = featureToggleService,
         )
 
     val personService: PersonService =
@@ -36,3 +41,10 @@ class ApplicationContext(env: Map<String, String>) {
             ppsKlient = parallelleSannheterKlient,
         )
 }
+
+private fun featureToggleProperties(config: Config) =
+    FeatureToggleProperties(
+        applicationName = config.getString("funksjonsbrytere.unleash.applicationName"),
+        host = config.getString("funksjonsbrytere.unleash.host"),
+        apiKey = config.getString("funksjonsbrytere.unleash.token"),
+    )

@@ -88,7 +88,7 @@ class BeregnBarnepensjonService(
         behandling: DetaljertBehandling,
         brukerTokenInfo: BrukerTokenInfo,
     ): Beregning {
-        val grunnlag = grunnlagKlient.hentGrunnlag(behandling.sak, behandling.id, brukerTokenInfo)
+        val grunnlag = grunnlagKlient.hentGrunnlag(behandling.id, brukerTokenInfo)
         val behandlingType = behandling.behandlingType
         val virkningstidspunkt =
             requireNotNull(behandling.virkningstidspunkt?.dato) { "Behandling ${behandling.id} mangler virkningstidspunkt" }
@@ -222,6 +222,10 @@ class BeregnBarnepensjonService(
                                 grunnbelopMnd = grunnbeloep.grunnbeloepPerMaaned,
                                 grunnbelop = grunnbeloep.grunnbeloep,
                                 trygdetid = trygdetid.trygdetid.toInteger(),
+                                trygdetidForIdent =
+                                    beregningsgrunnlag.avdoedesTrygdetid.finnGrunnlagForPeriode(
+                                        periodisertResultat.periode.fraDato,
+                                    ).verdi.ident,
                                 beregningsMetode = trygdetid.beregningsMetode,
                                 samletNorskTrygdetid = trygdetidGrunnlagForPeriode.samletTrygdetidNorge?.toInteger(),
                                 samletTeoretiskTrygdetid = trygdetidGrunnlagForPeriode.samletTrygdetidTeoretisk?.toInteger(),
@@ -274,6 +278,7 @@ class BeregnBarnepensjonService(
         beregningsperioder = beregningsperioder,
         beregnetDato = Tidspunkt.now(),
         grunnlagMetadata = grunnlagMetadata,
+        overstyrBeregning = null,
     )
 
     private fun opprettBeregningsgrunnlag(
@@ -296,10 +301,10 @@ class BeregnBarnepensjonService(
                 tom,
             ),
         avdoedesTrygdetid =
-            trygdetid?.beregnetTrygdetid?.resultat?.let {
+            trygdetid?.toSamlet(beregningsGrunnlag.beregningsMetode.beregningsMetode)?.let {
                 KonstantGrunnlag(
                     FaktumNode(
-                        verdi = it.toSamlet(beregningsGrunnlag.beregningsMetode.beregningsMetode),
+                        verdi = it,
                         kilde = beregningsGrunnlag.kilde,
                         beskrivelse = "Trygdetid avdød forelder",
                     ),
@@ -312,6 +317,7 @@ class BeregnBarnepensjonService(
                             samletTrygdetidNorge = Beregningstall(FASTSATT_TRYGDETID_I_PILOT),
                             samletTrygdetidTeoretisk = null,
                             prorataBroek = null,
+                            ident = null,
                         ),
                     kilde = Grunnlagsopplysning.RegelKilde("MVP hardkodet trygdetid", Tidspunkt.now(), "1"),
                     beskrivelse = "Trygdetid avdød forelder",

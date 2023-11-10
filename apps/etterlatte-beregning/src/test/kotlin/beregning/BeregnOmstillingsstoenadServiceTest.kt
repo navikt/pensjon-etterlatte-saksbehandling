@@ -26,6 +26,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
+import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -60,7 +61,7 @@ internal class BeregnOmstillingsstoenadServiceTest {
         val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
         val trygdetid = mockTrygdetid(behandling.id)
 
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any(), any()) } returns grunnlag
+        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
         coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns trygdetid
         coEvery {
             beregningsGrunnlagService.hentOmstillingstoenadBeregningsGrunnlag(
@@ -99,7 +100,7 @@ internal class BeregnOmstillingsstoenadServiceTest {
         val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
         val trygdetid = mockTrygdetid(behandling.id)
 
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any(), any()) } returns grunnlag
+        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
         coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns trygdetid
         coEvery {
             beregningsGrunnlagService.hentOmstillingstoenadBeregningsGrunnlag(
@@ -138,7 +139,7 @@ internal class BeregnOmstillingsstoenadServiceTest {
         val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
         val trygdetid = mockTrygdetid(behandling.id)
 
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any(), any()) } returns grunnlag
+        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
         coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns trygdetid
         coEvery {
             beregningsGrunnlagService.hentOmstillingstoenadBeregningsGrunnlag(
@@ -177,7 +178,7 @@ internal class BeregnOmstillingsstoenadServiceTest {
         val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
         val trygdetid = mockTrygdetid(behandling.id)
 
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any(), any()) } returns grunnlag
+        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
         coEvery { vilkaarsvurderingKlient.hentVilkaarsvurdering(any(), any()) } returns
             mockk {
                 every { resultat?.utfall } returns VilkaarsvurderingUtfall.OPPFYLT
@@ -218,7 +219,7 @@ internal class BeregnOmstillingsstoenadServiceTest {
         val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
         val trygdetid = mockTrygdetid(behandling.id)
 
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any(), any()) } returns grunnlag
+        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
         coEvery { vilkaarsvurderingKlient.hentVilkaarsvurdering(any(), any()) } returns
             mockk {
                 every { resultat?.utfall } returns VilkaarsvurderingUtfall.IKKE_OPPFYLT
@@ -258,7 +259,7 @@ internal class BeregnOmstillingsstoenadServiceTest {
         val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
         val trygdetid = mockTrygdetid(behandling.id)
 
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any(), any()) } returns grunnlag
+        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
         coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns trygdetid
         coEvery {
             beregningsGrunnlagService.hentOmstillingstoenadBeregningsGrunnlag(
@@ -295,7 +296,7 @@ internal class BeregnOmstillingsstoenadServiceTest {
         val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
         val trygdetid = mockTrygdetidUtenBeregnetTrygdetid(behandling.id)
 
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any(), any()) } returns grunnlag
+        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
         coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns trygdetid
         coEvery {
             beregningsGrunnlagService.hentOmstillingstoenadBeregningsGrunnlag(
@@ -316,7 +317,7 @@ internal class BeregnOmstillingsstoenadServiceTest {
         val behandling = mockBehandling(BehandlingType.FØRSTEGANGSBEHANDLING)
         val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
 
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any(), any()) } returns grunnlag
+        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
         coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns null
         coEvery {
             beregningsGrunnlagService.hentOmstillingstoenadBeregningsGrunnlag(
@@ -357,6 +358,7 @@ internal class BeregnOmstillingsstoenadServiceTest {
                         }
                     every { tidspunkt } returns Tidspunkt.now()
                 }
+            every { ident } returns AVDOED_FOEDSELSNUMMER.value
         }
 
     private fun mockTrygdetidUtenBeregnetTrygdetid(behandlingId_: UUID): TrygdetidDto =

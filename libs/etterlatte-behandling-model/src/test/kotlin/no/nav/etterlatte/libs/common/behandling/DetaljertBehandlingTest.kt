@@ -15,20 +15,20 @@ class DetaljertBehandlingTest {
 
     @Test
     fun `med revurderingsaarsak som ikke gir opphoer kan vi vedta endring`() {
-        Assertions.assertTrue(lagBehandling(RevurderingAarsak.REGULERING).kanVedta(VedtakType.ENDRING))
+        Assertions.assertTrue(lagBehandling(Revurderingaarsak.REGULERING).kanVedta(VedtakType.ENDRING))
     }
 
     @Test
     fun `med revurderingsaarsak som gir opphoer kan vi vedta opphoer`() {
-        Assertions.assertTrue(lagBehandling(RevurderingAarsak.DOEDSFALL).kanVedta(VedtakType.OPPHOER))
+        Assertions.assertTrue(lagBehandling(Revurderingaarsak.DOEDSFALL).kanVedta(VedtakType.OPPHOER))
     }
 
     @Test
     fun `med revurderingsaarsak som gir opphoer kan vi ikke vedta endring`() {
-        Assertions.assertFalse(lagBehandling(RevurderingAarsak.OMGJOERING_AV_FARSKAP).kanVedta(VedtakType.ENDRING))
+        Assertions.assertFalse(lagBehandling(Revurderingaarsak.OMGJOERING_AV_FARSKAP).kanVedta(VedtakType.ENDRING))
     }
 
-    private fun lagBehandling(revurderingsaarsak: RevurderingAarsak?) =
+    private fun lagBehandling(revurderingsaarsak: Revurderingaarsak?) =
         DetaljertBehandling(
             id = UUID.randomUUID(),
             sak = 1L,

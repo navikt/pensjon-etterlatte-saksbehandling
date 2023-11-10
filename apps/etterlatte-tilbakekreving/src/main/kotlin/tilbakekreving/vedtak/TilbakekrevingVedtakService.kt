@@ -1,5 +1,6 @@
 package no.nav.etterlatte.tilbakekreving.vedtak
 
+import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVedtak
 import org.slf4j.LoggerFactory
 
 class TilbakekrevingVedtakService(private val tilbakekrevingKlient: TilbakekrevingKlient) {

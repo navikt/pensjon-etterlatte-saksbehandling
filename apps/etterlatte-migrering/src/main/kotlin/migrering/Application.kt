@@ -3,11 +3,11 @@ package no.nav.etterlatte
 import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstartOgAvslutning
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.migrering.ApplicationContext
-import no.nav.etterlatte.migrering.FeilendeMigreringLytter
-import no.nav.etterlatte.migrering.LagreKopling
-import no.nav.etterlatte.migrering.LyttPaaIverksattVedtak
-import no.nav.etterlatte.migrering.MigrerSpesifikkSak
-import no.nav.etterlatte.migrering.Migrering
+import no.nav.etterlatte.migrering.FeilendeMigreringLytterRiver
+import no.nav.etterlatte.migrering.LagreKoblingRiver
+import no.nav.etterlatte.migrering.LyttPaaIverksattVedtakRiver
+import no.nav.etterlatte.migrering.MigrerSpesifikkSakRiver
+import no.nav.etterlatte.migrering.MigreringRiver
 import no.nav.helse.rapids_rivers.RapidApplication
 import rapidsandrivers.getRapidEnv
 
@@ -23,11 +23,11 @@ internal class Server(private val context: ApplicationContext) {
             dataSource.migrate()
             val rapidEnv = getRapidEnv()
             RapidApplication.create(rapidEnv).also { rapidsConnection ->
-                Migrering(rapidsConnection, penklient)
-                MigrerSpesifikkSak(rapidsConnection, penklient, pesysRepository, featureToggleService, verifiserer)
-                LagreKopling(rapidsConnection, pesysRepository)
-                LyttPaaIverksattVedtak(rapidsConnection, pesysRepository, penklient)
-                FeilendeMigreringLytter(rapidsConnection, pesysRepository)
+                MigreringRiver(rapidsConnection)
+                MigrerSpesifikkSakRiver(rapidsConnection, penklient, pesysRepository, featureToggleService, verifiserer)
+                LagreKoblingRiver(rapidsConnection, pesysRepository)
+                LyttPaaIverksattVedtakRiver(rapidsConnection, pesysRepository, penklient, featureToggleService)
+                FeilendeMigreringLytterRiver(rapidsConnection, pesysRepository)
             }.start()
         }
 }

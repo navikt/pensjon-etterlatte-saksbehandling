@@ -1,6 +1,6 @@
 import { Button, Checkbox, CheckboxGroup, Select, Textarea } from '@navikt/ds-react'
 import { FormKnapper, FormWrapper, Innhold } from '~components/behandling/trygdetid/styled'
-import { isConflict, isFailure, isPending, useApiCall } from '~shared/hooks/useApiCall'
+import { isErrorWithCode, isFailure, isPending, useApiCall } from '~shared/hooks/useApiCall'
 import {
   ILand,
   ITrygdetid,
@@ -45,7 +45,7 @@ export const TrygdetidGrunnlag: React.FC<Props> = ({
     if (!behandlingId) throw new Error('Mangler behandlingsid')
     requestLagreTrygdetidgrunnlag(
       {
-        behandlingsId: behandlingId,
+        behandlingId: behandlingId,
         trygdetidgrunnlag: trygdetidgrunnlag,
       },
       (respons) => {
@@ -116,7 +116,7 @@ export const TrygdetidGrunnlag: React.FC<Props> = ({
 
             <FormWrapper>
               <Begrunnelse
-                value={trygdetidgrunnlag.begrunnelse}
+                value={trygdetidgrunnlag.begrunnelse ?? ''}
                 key={`begrunnelse-${trygdetidGrunnlagType}`}
                 onChange={(e) =>
                   setTrygdetidgrunnlag({
@@ -201,7 +201,7 @@ export const TrygdetidGrunnlag: React.FC<Props> = ({
 
       {isFailure(trygdetidgrunnlagStatus) && (
         <ApiErrorAlert>
-          {isConflict(trygdetidgrunnlagStatus)
+          {isErrorWithCode(trygdetidgrunnlagStatus, 409)
             ? 'Trygdetidsperioder kan ikke være overlappende'
             : 'En feil har oppstått'}
         </ApiErrorAlert>

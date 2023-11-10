@@ -12,8 +12,8 @@ import no.nav.etterlatte.libs.regler.eksekver
 import no.nav.etterlatte.trygdetid.regler.TotalTrygdetidGrunnlag
 import no.nav.etterlatte.trygdetid.regler.TrygdetidGrunnlagMedAvdoed
 import no.nav.etterlatte.trygdetid.regler.TrygdetidGrunnlagMedAvdoedGrunnlag
-import no.nav.etterlatte.trygdetid.regler.TrygdetidPeriodMedPoengAar
 import no.nav.etterlatte.trygdetid.regler.TrygdetidPeriodeGrunnlag
+import no.nav.etterlatte.trygdetid.regler.TrygdetidPeriodeMedPoengaar
 import no.nav.etterlatte.trygdetid.regler.beregnDetaljertBeregnetTrygdetid
 import no.nav.etterlatte.trygdetid.regler.beregnTrygdetidForPeriode
 import no.nav.etterlatte.trygdetid.regler.totalTrygdetidYrkesskade
@@ -27,6 +27,7 @@ object TrygdetidBeregningService {
         trygdetidGrunnlag: List<TrygdetidGrunnlag>,
         foedselsDato: LocalDate,
         doedsDato: LocalDate,
+        norskPoengaar: Int?,
     ): DetaljertBeregnetTrygdetid? {
         logger.info("Beregner antall år trygdetid")
 
@@ -45,6 +46,7 @@ object TrygdetidBeregningService {
                             trygdetidGrunnlagListe = trygdetidGrunnlag,
                             foedselsDato = foedselsDato,
                             doedsDato = doedsDato,
+                            norskPoengaar = norskPoengaar,
                         ),
                     kilde = "System",
                     beskrivelse = "Beregn detaljert trygdetidsgrunnlag",
@@ -111,7 +113,7 @@ object TrygdetidBeregningService {
                 periode =
                     FaktumNode(
                         verdi =
-                            TrygdetidPeriodMedPoengAar(
+                            TrygdetidPeriodeMedPoengaar(
                                 fra = trygdetidGrunnlag.periode.fra,
                                 til = trygdetidGrunnlag.periode.til,
                                 poengInnAar = trygdetidGrunnlag.poengInnAar,

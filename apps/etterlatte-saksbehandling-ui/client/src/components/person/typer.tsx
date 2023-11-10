@@ -2,10 +2,9 @@ import {
   IBehandlingStatus,
   IBehandlingsType,
   IBoddEllerArbeidetUtlandet,
-  IUtenlandstilsnitt,
   Virkningstidspunkt,
 } from '~shared/types/IDetaljertBehandling'
-import { Revurderingsaarsak } from '~shared/types/Revurderingsaarsak'
+import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
 import { ISak, SakType } from '~shared/types/sak'
 
 export interface IPersonResult {
@@ -30,7 +29,6 @@ export interface IBehandlingsammendrag {
   behandlingType: IBehandlingsType
   aarsak: BehandlingOgRevurderingsAarsakerType
   virkningstidspunkt?: Virkningstidspunkt
-  utenlandstilsnitt?: IUtenlandstilsnitt
   boddEllerArbeidetUtlandet?: IBoddEllerArbeidetUtlandet
 }
 
@@ -40,7 +38,7 @@ export enum AarsaksTyper {
   REVURDERING = 'REVURDERING',
 }
 
-export type BehandlingOgRevurderingsAarsakerType = Revurderingsaarsak | AarsaksTyper
+export type BehandlingOgRevurderingsAarsakerType = Revurderingaarsak | AarsaksTyper
 
 export type GrunnlagendringshendelseSamsvarType = SamsvarMellomKildeOgGrunnlag['type']
 

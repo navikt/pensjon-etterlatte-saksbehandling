@@ -1,10 +1,14 @@
 import { ISak } from '~shared/types/sak'
 
-export interface Tilbakekreving {
+export interface TilbakekrevingBehandling {
   id: string
   status: TilbakekrevingStatus
   sak: ISak
   opprettet: string
+  tilbakekreving: Tilbakekreving
+}
+
+export interface Tilbakekreving {
   vurdering: TilbakekrevingVurdering
   perioder: TilbakekrevingPeriode[]
 }
@@ -68,6 +72,7 @@ export enum TilbakekrevingStatus {
   OPPRETTET = 'OPPRETTET',
   UNDER_ARBEID = 'UNDER_ARBEID',
   FATTET_VEDTAK = 'FATTET_VEDTAK',
+  UNDERKJENT = 'UNDERKJENT',
 }
 export enum TilbakekrevingSkyld {
   BRUKER = 'BRUKER',

@@ -22,10 +22,10 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.pdlhendelse.Adressebeskyttelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
-import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.skjermet.EgenAnsattSkjermet
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
 import no.nav.etterlatte.module
 import no.nav.etterlatte.sak.SakServiceFeatureToggle
 import org.junit.jupiter.api.AfterEach
@@ -54,7 +54,7 @@ class KlageRoutesIntegrationTest : BehandlingIntegrationTest() {
     @Test
     fun `opprettelse av klage går bra og henting gir 404 etter at saken blir skjermet`() {
         withTestApplication { client ->
-            val fnr = Folkeregisteridentifikator.of("08071272487").value
+            val fnr = AVDOED_FOEDSELSNUMMER.value
             val sak: Sak =
                 client.post("/personer/saker/${SakType.BARNEPENSJON}") {
                     addAuthToken(tokenSaksbehandler)
@@ -102,7 +102,7 @@ class KlageRoutesIntegrationTest : BehandlingIntegrationTest() {
     @Test
     fun `opprettelse av klage går bra og henting gjør tilgangskontroll når saken får adressebeskyttelse`() {
         withTestApplication { client ->
-            val fnr = Folkeregisteridentifikator.of("08071272487").value
+            val fnr = AVDOED_FOEDSELSNUMMER.value
             val sak: Sak =
                 client.post("/personer/saker/${SakType.BARNEPENSJON}") {
                     addAuthToken(tokenSaksbehandler)

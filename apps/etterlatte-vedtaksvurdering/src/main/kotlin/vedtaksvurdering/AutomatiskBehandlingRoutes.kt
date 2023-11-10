@@ -50,19 +50,6 @@ fun Route.automatiskBehandlingRoutes(
                         brukerTokenInfo,
                     )
 
-                try {
-                    rapidService.sendToRapid(attestert)
-                } catch (e: Exception) {
-                    logger.error(
-                        "Kan ikke sende attestert vedtak på kafka for behandling id: $behandlingId, vedtak: ${attestert.vedtak.vedtakId} " +
-                            "Saknr: ${attestert.vedtak.sak.id}. " +
-                            "Det betyr at vi ikke sender ut brev for vedtaket eller at en utbetaling går til oppdrag. " +
-                            "Denne hendelsen må sendes ut manuelt straks.",
-                        e,
-                    )
-                    throw e
-                }
-
                 call.respond(attestert)
             }
         }

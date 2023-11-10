@@ -6,7 +6,6 @@ import no.nav.etterlatte.brev.behandling.Beregningsperiode
 import no.nav.etterlatte.brev.behandling.Trygdetidsperiode
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.common.toJson
 import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
 import no.nav.pensjon.brevbaker.api.model.Kroner
 import org.apache.pdfbox.Loader
@@ -194,9 +193,4 @@ data class EtterbetalingBrev(
             )
         }
     }
-}
-
-fun main() {
-    val tidspunkt = Tidspunkt.now()
-    println(tidspunkt.toJson())
 }

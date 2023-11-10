@@ -35,7 +35,7 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
   const { sakId, soeknadMottattDato, status } = props.behandling
 
   const [vedtaksbrev, setVedtaksbrev] = useState<IBrev | undefined>(undefined)
-  const [visAdvarselBehandlingEndret, setVisAdvarselBehandlingEndret] = useState<boolean>(false)
+  const [visAdvarselBehandlingEndret, setVisAdvarselBehandlingEndret] = useState(false)
 
   const [hentBrevStatus, hentBrev] = useApiCall(hentVedtaksbrev)
   const [opprettBrevStatus, opprettNyttVedtaksbrev] = useApiCall(opprettVedtaksbrev)

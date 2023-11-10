@@ -26,12 +26,12 @@ export default function RedigerMottakerModal({ brev, oppdater }: Props) {
   const [mottaker, setMottaker] = useState<Mottaker>(initialMottaker)
 
   const [mottakerType, setMottakerType] = useState(
-    brev.mottaker.orgnummer ? MottakerType.BEDRIFT : MottakerType.PRIVATPERSON
+    mottaker.orgnummer ? MottakerType.BEDRIFT : MottakerType.PRIVATPERSON
   )
 
   const lagre = () => {
-    if (mottakerType == MottakerType.BEDRIFT) brev.mottaker.foedselsnummer = undefined
-    else if (mottakerType == MottakerType.PRIVATPERSON) brev.mottaker.orgnummer = undefined
+    if (mottakerType == MottakerType.BEDRIFT) mottaker.foedselsnummer = undefined
+    else if (mottakerType == MottakerType.PRIVATPERSON) mottaker.orgnummer = undefined
 
     apiOppdaterMottaker({ brevId, sakId, mottaker }, () => {
       oppdater(mottaker)
@@ -80,7 +80,7 @@ export default function RedigerMottakerModal({ brev, oppdater }: Props) {
             )}
             {mottakerType == MottakerType.PRIVATPERSON && (
               <TextField
-                label="Fødselsnummer"
+                label="Fødselfffffsnummer"
                 onChange={(e) => setMottaker({ ...mottaker, foedselsnummer: { value: e.target.value } })}
                 value={mottaker.foedselsnummer?.value || ''}
                 pattern="[0-9]+"

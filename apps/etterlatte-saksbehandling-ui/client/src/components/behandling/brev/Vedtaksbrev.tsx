@@ -110,7 +110,6 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
                 redigerbar={manueltBrevKanRedigeres(status)}
               />
             )}
-            {vedtaksbrev?.mottaker?.navn}
           </ContentHeader>
         </Sidebar>
 

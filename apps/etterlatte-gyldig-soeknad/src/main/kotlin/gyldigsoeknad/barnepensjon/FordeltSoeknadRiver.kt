@@ -6,9 +6,13 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.event.FordelerFordelt
 import no.nav.etterlatte.libs.common.event.GyldigSoeknadVurdert
 import no.nav.etterlatte.libs.common.event.SoeknadInnsendt
+import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
+import no.nav.etterlatte.libs.common.gyldigSoeknad.VurderingsResultat
 import no.nav.etterlatte.libs.common.innsendtsoeknad.barnepensjon.Barnepensjon
 import no.nav.etterlatte.libs.common.innsendtsoeknad.common.SoeknadType
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -41,8 +45,12 @@ internal class FordeltSoeknadRiver(
             val soeknad = packet.soeknad()
             val personGalleri = gyldigSoeknadService.hentPersongalleriFraSoeknad(soeknad)
             val sak = behandlingClient.finnEllerOpprettSak(personGalleri.soeker, SakType.BARNEPENSJON.toString())
-            val gyldighetsVurdering = gyldigSoeknadService.vurderGyldighet(personGalleri, sak.sakType)
-            logger.info("Gyldighetsvurdering utført: {}", gyldighetsVurdering)
+            val gyldighetsVurdering =
+                GyldighetsResultat(
+                    VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING,
+                    emptyList(),
+                    Tidspunkt.now().toLocalDatetimeUTC(),
+                )
 
             val behandlingId = behandlingClient.opprettBehandling(sak.id, soeknad.mottattDato, personGalleri)
             behandlingClient.lagreGyldighetsVurdering(behandlingId, gyldighetsVurdering)

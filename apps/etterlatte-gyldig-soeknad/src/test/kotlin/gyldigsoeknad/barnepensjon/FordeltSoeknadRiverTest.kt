@@ -1,20 +1,19 @@
 package no.nav.etterlatte.gyldigsoeknad.barnepensjon
 
+import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.slot
+import io.mockk.verify
 import no.nav.etterlatte.gyldigsoeknad.client.BehandlingClient
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.event.GyldigSoeknadVurdert
 import no.nav.etterlatte.libs.common.event.SoeknadInnsendt
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
-import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsTyper
 import no.nav.etterlatte.libs.common.gyldigSoeknad.VurderingsResultat
-import no.nav.etterlatte.libs.common.gyldigSoeknad.VurdertGyldighet
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.sak.Sak
-import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -41,23 +40,10 @@ internal class FordeltSoeknadRiverTest {
                 gjenlevende = listOf("gjenlevende"),
             )
 
-        val gyldighetsResultat =
-            GyldighetsResultat(
-                VurderingsResultat.OPPFYLT,
-                listOf(
-                    VurdertGyldighet(
-                        GyldighetsTyper.INNSENDER_ER_FORELDER,
-                        VurderingsResultat.OPPFYLT,
-                        "innsenderFnr",
-                    ),
-                ),
-                Tidspunkt.now().toLocalDatetimeUTC(),
-            )
         val id = UUID.randomUUID()
         val sakId = 12345L
 
         every { gyldigSoeknadServiceMock.hentPersongalleriFraSoeknad(any()) } returns persongalleri
-        every { gyldigSoeknadServiceMock.vurderGyldighet(persongalleri, any()) } returns gyldighetsResultat
         every {
             behandlingClientMock.finnEllerOpprettSak(any(), any())
         } returns Sak(persongalleri.soeker, SakType.BARNEPENSJON, sakId, "4808")
@@ -71,6 +57,10 @@ internal class FordeltSoeknadRiverTest {
         assertEquals(id.toString(), inspector.message(0).get(GyldigSoeknadVurdert.behandlingIdKey).asText())
 
         assertEquals(1, inspector.size)
+
+        val actualGyldighet = slot<GyldighetsResultat>()
+        verify { behandlingClientMock.lagreGyldighetsVurdering(id, capture(actualGyldighet)) }
+        actualGyldighet.captured.resultat shouldBe VurderingsResultat.OPPFYLT
     }
 
     companion object {

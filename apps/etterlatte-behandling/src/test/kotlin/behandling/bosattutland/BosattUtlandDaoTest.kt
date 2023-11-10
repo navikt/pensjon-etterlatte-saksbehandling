@@ -65,5 +65,10 @@ internal class BosattUtlandDaoTest {
         bosattUtlandDao.lagreBosattUtland(bosattUtland)
         val hentBosattUtland = bosattUtlandDao.hentBosattUtland(behandlingid)
         hentBosattUtland shouldBe bosattUtland
+
+        val nyttrinanummer = "nyttrinanummer"
+        bosattUtlandDao.lagreBosattUtland(bosattUtland.copy(rinanummer = nyttrinanummer))
+        val oppdatertrinanummer = bosattUtlandDao.hentBosattUtland(bosattUtland.behandlingId)
+        oppdatertrinanummer?.rinanummer shouldBe nyttrinanummer
     }
 }

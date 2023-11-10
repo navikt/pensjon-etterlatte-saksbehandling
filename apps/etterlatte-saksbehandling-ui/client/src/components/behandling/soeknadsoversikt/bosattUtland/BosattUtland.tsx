@@ -1,11 +1,11 @@
 import { MottatteSeder } from '~components/behandling/soeknadsoversikt/bosattUtland/MottatteSeder'
 import { SendteSeder } from '~components/behandling/soeknadsoversikt/bosattUtland/SendteSeder'
-import { is5xxError, isFailure, isPending, useApiCall } from '~shared/hooks/useApiCall'
+import { isFailure, isPending, useApiCall } from '~shared/hooks/useApiCall'
 import { hentAlleLand, ILand, sorterLand } from '~shared/api/trygdetid'
 import React, { useEffect, useState } from 'react'
 import Spinner from '~shared/Spinner'
-import { Bosattutland, hentBosattutland, lagreBosattutland } from '~shared/api/bosattutland'
-import { Alert, Button } from '@navikt/ds-react'
+import { Bosattutland, lagreBosattutland } from '~shared/api/bosattutland'
+import { Button } from '@navikt/ds-react'
 import { LandMedDokumenter } from '~shared/types/RevurderingInfo'
 import { oppdaterBehandlingsstatus } from '~store/reducers/BehandlingReducer'
 import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
@@ -14,14 +14,25 @@ import { ApiErrorAlert } from '~ErrorBoundary'
 import { CheckmarkCircleIcon } from '@navikt/aksel-icons'
 import { AWhite } from '@navikt/ds-tokens/dist/tokens'
 
-export const BosattUtland = ({ behandlingId }: { behandlingId: string }) => {
+export const BosattUtland = ({
+  behandlingId,
+  bosattutland,
+}: {
+  behandlingId: string
+  bosattutland: Bosattutland | null
+}) => {
   const dispatch = useAppDispatch()
   const [hentAlleLandRequest, fetchAlleLand] = useApiCall(hentAlleLand)
   const [alleLandKodeverk, setAlleLandKodeverk] = useState<ILand[] | null>(null)
   const [lagreBosattutlandStatus, lagreBosattutlandApi] = useApiCall(lagreBosattutland)
-  const [hentBosattUtlandStatus, hentBosattUtlandApi] = useApiCall(hentBosattutland)
-  const [hentetBosattUtland, setHentetBosattUtland] = useState<Bosattutland | null>(null)
+
   const [visLagretOk, setVisLagretOk] = useState<boolean>(false)
+
+  useEffect(() => {
+    fetchAlleLand(null, (landliste) => {
+      setAlleLandKodeverk(sorterLand(landliste))
+    })
+  }, [])
 
   const initalStateLandMedDokumenterMottatte = [
     {
@@ -34,11 +45,11 @@ export const BosattUtland = ({ behandlingId }: { behandlingId: string }) => {
     },
   ]
   const [landMedDokumenterMottatte, setLandMedDokumenterMottatte] = useState<LandMedDokumenter[]>(
-    hentetBosattUtland?.mottatteSeder ?? initalStateLandMedDokumenterMottatte
+    bosattutland?.mottatteSeder ?? initalStateLandMedDokumenterMottatte
   )
   const [feilkoderMottatte, setFeilkoderMottatte] = useState<Set<string>>(new Set([]))
-  const [rinanummer, setRinanummer] = useState<string>(hentetBosattUtland?.rinanummer ?? '')
 
+  const [rinanummer, setRinanummer] = useState<string>(bosattutland?.rinanummer ?? '')
   const initalStateLandMedDokumenter = [
     {
       landIsoKode: undefined,
@@ -46,16 +57,9 @@ export const BosattUtland = ({ behandlingId }: { behandlingId: string }) => {
     },
   ]
   const [landMedDokumenter, setLandMedDokumenter] = useState<LandMedDokumenter[]>(
-    hentetBosattUtland?.sendteSeder ?? initalStateLandMedDokumenter
+    bosattutland?.sendteSeder ?? initalStateLandMedDokumenter
   )
   const [feilkoder, setFeilkoder] = useState<Set<string>>(new Set([]))
-
-  useEffect(() => {
-    hentBosattUtlandApi(behandlingId, (bosattUtland) => setHentetBosattUtland(bosattUtland))
-    fetchAlleLand(null, (landliste) => {
-      setAlleLandKodeverk(sorterLand(landliste))
-    })
-  }, [])
 
   const validerSkjema = (landMedDokumenter: LandMedDokumenter[]): Set<string> => {
     const feilkoder: Set<string> = new Set([])
@@ -101,10 +105,10 @@ export const BosattUtland = ({ behandlingId }: { behandlingId: string }) => {
 
   return (
     <>
-      {isPending(hentAlleLandRequest) && <Spinner visible={true} label="Henter land" />}
-      {is5xxError(hentBosattUtlandStatus) && (
-        <Alert variant="warning">Vi klarte ikke å hente lagret data for bosatt utland</Alert>
+      {isFailure(hentAlleLandRequest) && (
+        <ApiErrorAlert>Vi klarte ikke å hente landlisten, den er påkrevd for å kunne fylle inn SED data</ApiErrorAlert>
       )}
+      {isPending(hentAlleLandRequest) && <Spinner visible={true} label="Henter land" />}
       {alleLandKodeverk && (
         <>
           <MottatteSeder
@@ -123,27 +127,28 @@ export const BosattUtland = ({ behandlingId }: { behandlingId: string }) => {
             landMedDokumenter={landMedDokumenter}
             setLandMedDokumenter={setLandMedDokumenter}
           />
-          {isPending(lagreBosattutlandStatus) && <Spinner visible={true} label="Lagrer bosatt utland" />}
           {isFailure(lagreBosattutlandStatus) && <ApiErrorAlert>Klarte ikke å lagre bosatt utland</ApiErrorAlert>}
-          <Button onClick={() => lagreBosattutlandApiWrapper()}>
-            {visLagretOk ? (
-              <div style={{ minWidth: '148px', minHeight: '24px' }}>
-                <CheckmarkCircleIcon
-                  color={AWhite}
-                  stroke={AWhite}
-                  aria-hidden="true"
-                  style={{
-                    width: '1.8rem',
-                    height: '1.8rem',
-                    transform: 'translate(-40%, -10%)',
-                    position: 'absolute',
-                  }}
-                />
-              </div>
-            ) : (
-              <>Lagre bosatt utland</>
-            )}
-          </Button>
+          <div style={{ marginTop: '2rem' }}>
+            <Button onClick={() => lagreBosattutlandApiWrapper()} loading={isPending(lagreBosattutlandStatus)}>
+              {visLagretOk ? (
+                <div style={{ minWidth: '148px', minHeight: '24px' }}>
+                  <CheckmarkCircleIcon
+                    color={AWhite}
+                    stroke={AWhite}
+                    aria-hidden="true"
+                    style={{
+                      width: '1.8rem',
+                      height: '1.8rem',
+                      transform: 'translate(-40%, -10%)',
+                      position: 'absolute',
+                    }}
+                  />
+                </div>
+              ) : (
+                <>Lagre bosatt utland</>
+              )}
+            </Button>
+          </div>
         </>
       )}
     </>

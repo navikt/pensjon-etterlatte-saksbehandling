@@ -22,7 +22,7 @@ import Soeskenjustering, {
   Soeskengrunnlag,
 } from '~components/behandling/beregningsgrunnlag/soeskenjustering/Soeskenjustering'
 import Spinner from '~shared/Spinner'
-import { IPdlPerson } from '~shared/types/Person'
+import { hentLevendeSoeskenFraAvdoedeForSoeker } from '~shared/types/Person'
 import {
   Beregning,
   BeregningsMetode,
@@ -69,10 +69,11 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
   if (behandling.kommerBarnetTilgode == null || behandling.familieforhold?.avdoede == null) {
     return <ApiErrorAlert>Familieforhold kan ikke hentes ut</ApiErrorAlert>
   }
-  const soesken: IPdlPerson[] =
-    behandling.familieforhold.avdoede.opplysning.avdoedesBarn?.filter(
-      (barn) => barn.foedselsnummer !== behandling.søker?.foedselsnummer
-    ) ?? []
+
+  const soesken = hentLevendeSoeskenFraAvdoedeForSoeker(
+    behandling.familieforhold.avdoede,
+    behandling.søker?.foedselsnummer as string
+  )
   const harSoesken = soesken.length > 0
 
   const onSubmit = () => {

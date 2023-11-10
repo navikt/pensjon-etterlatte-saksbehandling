@@ -2,10 +2,12 @@ package no.nav.etterlatte.brev.behandling
 
 import no.nav.etterlatte.brev.model.EtterbetalingDTO
 import no.nav.etterlatte.brev.model.Spraak
+import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tilbakekreving.Tilbakekreving
+import no.nav.etterlatte.libs.common.trygdetid.BeregnetTrygdetidGrunnlagDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.pensjon.brevbaker.api.model.Kroner
@@ -19,6 +21,7 @@ data class GenerellBrevData(
     val behandlingId: UUID,
     val forenkletVedtak: ForenkletVedtak,
     val spraak: Spraak,
+    val systemkilde: Vedtaksloesning,
     val revurderingsaarsak: Revurderingaarsak? = null,
 )
 
@@ -26,13 +29,14 @@ data class Trygdetid(
     val aarTrygdetid: Int,
     val maanederTrygdetid: Int,
     val perioder: List<Trygdetidsperiode>,
+    val overstyrt: Boolean,
 )
 
 data class Trygdetidsperiode(
     val datoFOM: LocalDate,
     val datoTOM: LocalDate?,
     val land: String,
-    val opptjeningsperiode: String,
+    val opptjeningsperiode: BeregnetTrygdetidGrunnlagDto?,
 )
 
 data class ForenkletVedtak(

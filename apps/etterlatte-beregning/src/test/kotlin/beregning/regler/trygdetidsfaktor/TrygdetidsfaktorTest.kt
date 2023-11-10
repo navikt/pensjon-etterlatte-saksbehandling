@@ -1,7 +1,7 @@
 package beregning.regler.trygdetidsfaktor
 
 import io.kotest.matchers.shouldBe
-import no.nav.etterlatte.beregning.regler.AnvendtTrgydetid
+import no.nav.etterlatte.beregning.regler.AnvendtTrygdetid
 import no.nav.etterlatte.beregning.regler.REGEL_PERIODE
 import no.nav.etterlatte.beregning.regler.barnepensjon.trygdetidsfaktor.maksTrygdetid
 import no.nav.etterlatte.beregning.regler.barnepensjon.trygdetidsfaktor.trygdetidBruktRegel
@@ -33,7 +33,7 @@ internal class TrygdetidsfaktorTest {
                 REGEL_PERIODE,
             )
 
-        resultat.verdi shouldBe AnvendtTrgydetid(BeregningsMetode.NASJONAL, Beregningstall(40.0))
+        resultat.verdi shouldBe AnvendtTrygdetid(BeregningsMetode.NASJONAL, Beregningstall(40.0))
     }
 
     @Test
@@ -59,7 +59,7 @@ internal class TrygdetidsfaktorTest {
                 REGEL_PERIODE,
             )
 
-        resultat.verdi shouldBe AnvendtTrgydetid(BeregningsMetode.NASJONAL, Beregningstall(40.0))
+        resultat.verdi shouldBe AnvendtTrygdetid(BeregningsMetode.NASJONAL, Beregningstall(40.0))
     }
 
     @Test

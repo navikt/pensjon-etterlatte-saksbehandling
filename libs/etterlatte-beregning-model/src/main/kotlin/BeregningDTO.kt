@@ -29,6 +29,7 @@ data class Beregningsperiode(
     val grunnbelopMnd: Int,
     val grunnbelop: Int,
     val trygdetid: Int,
+    val trygdetidForIdent: String? = null,
     val beregningsMetode: BeregningsMetode? = null,
     val samletNorskTrygdetid: Int? = null,
     val samletTeoretiskTrygdetid: Int? = null,

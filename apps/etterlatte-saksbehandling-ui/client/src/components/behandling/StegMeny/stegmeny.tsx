@@ -15,10 +15,12 @@ import { useAppDispatch } from '~store/Store'
 
 export const StegMeny = (props: { behandling: IBehandlingReducer }) => {
   const dispatch = useAppDispatch()
-  const { id, behandlingType } = props.behandling
+  const behandling = props.behandling
+  const { id, behandlingType } = behandling
+
   const [fetchVilkaarsvurderingStatus, fetchVilkaarsvurdering] = useApiCall(hentVilkaarsvurdering)
-  const soeknadRoutes_ = soeknadRoutes(props.behandling)
-  const revurderingRoutes_ = revurderingRoutes(props.behandling)
+  const soeknadRoutes_ = soeknadRoutes(behandling)
+  const revurderingRoutes_ = revurderingRoutes(behandling)
   const erSisteRoute = (index: number, list: BehandlingRouteTypes[]) => index != list.length - 1
 
   // Trenger vilkårsvurdering for å kunne vise riktig routes etter at vv i en behandling er utført
@@ -26,7 +28,7 @@ export const StegMeny = (props: { behandling: IBehandlingReducer }) => {
     fetchVilkaarsvurdering(id, (vilkaarsvurdering) => {
       dispatch(updateVilkaarsvurdering(vilkaarsvurdering))
     })
-  }, [id])
+  }, [behandling.status])
 
   if (isSuccess(fetchVilkaarsvurderingStatus)) {
     return (

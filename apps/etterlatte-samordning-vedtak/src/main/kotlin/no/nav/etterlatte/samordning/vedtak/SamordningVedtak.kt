@@ -41,7 +41,7 @@ enum class SamordningVedtakAarsak {
 fun YearMonth.atStartOfMonth(): LocalDate = this.atDay(1)
 
 class VedtakFeilSakstypeException : UgyldigForespoerselException(
-    code = "002-FEIL_SAKSTYPE",
+    code = "004-FEIL_SAKSTYPE",
     detail = "Forespurt informasjon gjeldende ikke-støttet sakstype",
     meta = getMeta(),
 )

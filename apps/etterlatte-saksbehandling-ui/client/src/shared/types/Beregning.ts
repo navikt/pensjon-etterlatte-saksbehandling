@@ -56,6 +56,11 @@ export interface Beregningsperiode {
   broek: IProrataBroek | undefined
 }
 
+export interface OverstyrBeregningsperiode {
+  utbetaltBeloep: string
+  trygdetid: string
+}
+
 export interface BeregningsGrunnlagDto {
   behandlingId: string
   kilde: KildeSaksbehandler
@@ -78,6 +83,12 @@ export interface SoeskenMedIBeregning {
   skalBrukes: boolean
 }
 
+export type OverstyrBeregningGrunnlagDTO = PeriodisertBeregningsgrunnlagDto<OverstyrBeregningsperiode>[]
+
+export interface OverstyrBeregningGrunnlagPostDTO {
+  perioder: OverstyrBeregningGrunnlagDTO
+}
+
 export interface BeregningsGrunnlagPostDto {
   soeskenMedIBeregning: SoeskenMedIBeregningGrunnlagDto
   institusjonsopphold: InstitusjonsoppholdGrunnlagDTO | undefined
@@ -91,6 +102,7 @@ export interface BeregningsGrunnlagOMSPostDto {
 
 export type SoeskenMedIBeregningGrunnlagDto = PeriodisertBeregningsgrunnlagDto<SoeskenMedIBeregning[]>[]
 export type InstitusjonsoppholdGrunnlagData = PeriodisertBeregningsgrunnlag<InstitusjonsoppholdIBeregning>[]
+export type OverstyrBeregingsperiodeGrunnlagData = PeriodisertBeregningsgrunnlag<OverstyrBeregningsperiode>[]
 
 export interface InstitusjonsoppholdIBeregning {
   reduksjon: ReduksjonKey

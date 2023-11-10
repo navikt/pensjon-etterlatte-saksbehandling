@@ -5,8 +5,12 @@ import no.nav.etterlatte.brev.adresse.RegoppslagResponseDTO
 import no.nav.etterlatte.brev.behandling.Beregningsperiode
 import no.nav.etterlatte.brev.behandling.Trygdetidsperiode
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
 import no.nav.pensjon.brevbaker.api.model.Kroner
+import org.apache.pdfbox.Loader
+import org.apache.pdfbox.multipdf.PDFMergerUtility
+import java.io.ByteArrayOutputStream
 import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
@@ -79,6 +83,7 @@ data class Brev(
     val prosessType: BrevProsessType,
     val soekerFnr: String,
     val status: Status,
+    val opprettet: Tidspunkt,
     val mottaker: Mottaker,
 ) {
     fun kanEndres() = status in listOf(Status.OPPRETTET, Status.OPPDATERT)
@@ -95,11 +100,22 @@ data class Brev(
             soekerFnr = opprettNyttBrev.soekerFnr,
             status = opprettNyttBrev.status,
             mottaker = opprettNyttBrev.mottaker,
+            opprettet = opprettNyttBrev.opprettet,
         )
     }
 }
 
-class Pdf(val bytes: ByteArray)
+class Pdf(val bytes: ByteArray) {
+    fun medPdfAppended(pdf: Pdf): Pdf {
+        val foerstePdf = Loader.loadPDF(this.bytes)
+        val andrePdf = Loader.loadPDF(pdf.bytes)
+        PDFMergerUtility().appendDocument(foerstePdf, andrePdf)
+
+        val out = ByteArrayOutputStream()
+        foerstePdf.save(out)
+        return Pdf(out.toByteArray())
+    }
+}
 
 data class BrevInnhold(
     val tittel: String,
@@ -124,6 +140,7 @@ data class OpprettNyttBrev(
     val soekerFnr: String,
     val prosessType: BrevProsessType,
     val mottaker: Mottaker,
+    val opprettet: Tidspunkt,
     val innhold: BrevInnhold,
     val innholdVedlegg: List<BrevInnholdVedlegg>?,
 ) {

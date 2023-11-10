@@ -63,7 +63,7 @@ fun barnepensjonGrunnlag(
     soeskenKull = FaktumNode(soeskenKull, kilde, "søskenkull"),
     avdoedesTrygdetid =
         FaktumNode(
-            SamletTrygdetidMedBeregningsMetode(BeregningsMetode.NASJONAL, trygdeTid, null, null),
+            SamletTrygdetidMedBeregningsMetode(BeregningsMetode.NASJONAL, trygdeTid, null, null, null),
             kilde,
             "trygdetid",
         ),
@@ -82,6 +82,7 @@ fun samletTrygdetid(
         samletTrygdetidNorge = samletTrygdetidNorge,
         samletTrygdetidTeoretisk = samletTrygdetidTeoretisk,
         prorataBroek = broek,
+        ident = null,
     ),
     kilde,
     "trygdetid",

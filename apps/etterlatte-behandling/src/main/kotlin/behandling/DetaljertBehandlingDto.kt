@@ -9,7 +9,7 @@ import no.nav.etterlatte.libs.common.behandling.Etterbetaling
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.behandling.Utenlandstilsnitt
+import no.nav.etterlatte.libs.common.behandling.Utenlandstilknytning
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
@@ -27,7 +27,7 @@ data class DetaljertBehandlingDto(
     val gyldighetsprøving: GyldighetsResultat?,
     val soeknadMottattDato: LocalDateTime?,
     val virkningstidspunkt: Virkningstidspunkt?,
-    val utenlandstilsnitt: Utenlandstilsnitt?,
+    val utenlandstilknytning: Utenlandstilknytning?,
     val boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet?,
     val status: BehandlingStatus,
     val hendelser: List<LagretHendelse>?,

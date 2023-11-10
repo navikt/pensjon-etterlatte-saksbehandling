@@ -14,6 +14,7 @@ import { useBehandlingRoutes } from '~components/behandling/BehandlingRoutes'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { AktivitetspliktOppfolging } from '~shared/types/Aktivitetsplikt'
 import { erFerdigBehandlet } from '~components/behandling/felles/utils'
+import { handlinger } from '~components/behandling/handlinger/typer'
 
 export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => {
   const { behandling } = props
@@ -154,7 +155,7 @@ export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => 
 
       <BehandlingHandlingKnapper>
         <Button variant="primary" onClick={() => next()}>
-          Gå videre
+          {handlinger.NESTE.navn}
         </Button>
       </BehandlingHandlingKnapper>
     </Content>

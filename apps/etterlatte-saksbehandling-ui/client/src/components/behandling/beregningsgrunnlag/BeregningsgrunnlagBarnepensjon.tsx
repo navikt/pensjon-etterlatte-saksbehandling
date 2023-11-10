@@ -10,6 +10,7 @@ import {
   IBehandlingReducer,
   oppdaterBehandlingsstatus,
   oppdaterBeregingsGrunnlag,
+  oppdaterBeregning,
   resetBeregning,
 } from '~store/reducers/BehandlingReducer'
 import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
@@ -23,6 +24,7 @@ import Soeskenjustering, {
 import Spinner from '~shared/Spinner'
 import { IPdlPerson } from '~shared/types/Person'
 import {
+  Beregning,
   BeregningsMetode,
   BeregningsMetodeBeregningsgrunnlag,
   InstitusjonsoppholdGrunnlagData,
@@ -30,6 +32,7 @@ import {
 import { Border } from '~components/behandling/soeknadsoversikt/styled'
 import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 import BeregningsgrunnlagMetode from './BeregningsgrunnlagMetode'
+import { handlinger } from '~components/behandling/handlinger/typer'
 
 const featureToggleNameInstitusjonsopphold = 'pensjon-etterlatte.bp-bruk-institusjonsopphold' as const
 const featureToggleNameBrukFaktiskTrygdetid = 'pensjon-etterlatte.bp-bruk-faktisk-trygdetid' as const
@@ -98,9 +101,10 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
           grunnlag: beregningsgrunnlag,
         },
         () =>
-          postOpprettEllerEndreBeregning(behandling.id, () => {
+          postOpprettEllerEndreBeregning(behandling.id, (beregning: Beregning) => {
             dispatch(oppdaterBeregingsGrunnlag(beregningsgrunnlag))
             dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.BEREGNET))
+            dispatch(oppdaterBeregning(beregning))
             next()
           })
       )
@@ -148,7 +152,7 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
             onClick={onSubmit}
             loading={isPending(lagreBeregningsgrunnlag) || isPending(endreBeregning)}
           >
-            Beregn
+            {handlinger.NESTE.navn}
           </Button>
         </BehandlingHandlingKnapper>
       ) : (

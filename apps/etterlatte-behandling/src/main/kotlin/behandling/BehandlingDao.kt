@@ -19,7 +19,6 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
-import no.nav.etterlatte.libs.common.behandling.Utenlandstilsnitt
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.sak.BehandlingOgSak
 import no.nav.etterlatte.libs.common.sak.Sak
@@ -130,7 +129,6 @@ class BehandlingDao(
             gyldighetsproeving = rs.getString("gyldighetssproving")?.let { objectMapper.readValue(it) },
             status = rs.getString("status").let { BehandlingStatus.valueOf(it) },
             virkningstidspunkt = rs.getString("virkningstidspunkt")?.let { objectMapper.readValue(it) },
-            utenlandstilsnitt = rs.getString("utenlandstilsnitt")?.let { objectMapper.readValue(it) },
             boddEllerArbeidetUtlandet =
                 rs.getString("bodd_eller_arbeidet_utlandet")
                     ?.let { objectMapper.readValue(it) },
@@ -154,7 +152,6 @@ class BehandlingDao(
             sistEndret = rs.somLocalDateTimeUTC("sist_endret"),
             status = rs.getString("status").let { BehandlingStatus.valueOf(it) },
             virkningstidspunkt = rs.getString("virkningstidspunkt")?.let { objectMapper.readValue(it) },
-            utenlandstilsnitt = rs.getString("utenlandstilsnitt")?.let { objectMapper.readValue(it) },
             boddEllerArbeidetUtlandet = rs.getString("bodd_eller_arbeidet_utlandet")?.let { objectMapper.readValue(it) },
             opphoerAarsaker = rs.getString("opphoer_aarsaker").let { objectMapper.readValue(it) },
             fritekstAarsak = rs.getString("fritekst_aarsak"),
@@ -227,17 +224,6 @@ class BehandlingDao(
         stmt.setString(1, status.name)
         stmt.setTidspunkt(2, sistEndret.toTidspunkt())
         stmt.setObject(3, behandlingId)
-        require(stmt.executeUpdate() == 1)
-    }
-
-    fun lagreUtenlandstilsnitt(
-        behandlingId: UUID,
-        utenlandstilsnitt: Utenlandstilsnitt,
-    ) {
-        val stmt =
-            connection().prepareStatement("UPDATE behandling SET utenlandstilsnitt = ? WHERE id = ?")
-        stmt.setString(1, objectMapper.writeValueAsString(utenlandstilsnitt))
-        stmt.setObject(2, behandlingId)
         require(stmt.executeUpdate() == 1)
     }
 

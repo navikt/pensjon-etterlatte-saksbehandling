@@ -20,11 +20,6 @@ class PenKlient(config: Config, pen: HttpClient) {
     private val clientId = config.getString("pen.client.id")
     private val resourceUrl = config.getString("pen.client.url")
 
-    fun hentAlleSaker(): List<PesysId> {
-        // TODO i EY-2599: Kople opp mot PEN/Pesys her
-        return listOf()
-    }
-
     suspend fun hentSak(
         sakid: Long,
         lopendeJanuar2024: Boolean = true,

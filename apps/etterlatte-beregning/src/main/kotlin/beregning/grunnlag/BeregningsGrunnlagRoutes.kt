@@ -88,6 +88,36 @@ fun Route.beregningsGrunnlag(
                 call.respond(HttpStatusCode.OK, grunnlag ?: HttpStatusCode.NoContent)
             }
         }
+
+        get("/{$BEHANDLINGID_CALL_PARAMETER}/overstyr") {
+            withBehandlingId(behandlingKlient) { behandlingId ->
+                logger.info("Henter overstyr grunnlag for behandling $behandlingId")
+
+                val grunnlag =
+                    beregningsGrunnlagService.hentOverstyrBeregningGrunnlag(
+                        behandlingId,
+                    )
+
+                call.respond(HttpStatusCode.OK, grunnlag)
+            }
+        }
+
+        post("/{$BEHANDLINGID_CALL_PARAMETER}/overstyr") {
+            withBehandlingId(behandlingKlient) { behandlingId ->
+                logger.info("Henter overstyr grunnlag for behandling $behandlingId")
+
+                val body = call.receive<OverstyrBeregningGrunnlagDTO>()
+
+                val grunnlag =
+                    beregningsGrunnlagService.lagreOverstyrBeregningGrunnlag(
+                        behandlingId,
+                        body,
+                        brukerTokenInfo,
+                    )
+
+                call.respond(HttpStatusCode.OK, grunnlag)
+            }
+        }
     }
 }
 

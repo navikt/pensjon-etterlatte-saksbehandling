@@ -50,6 +50,7 @@ internal class InnvilgetHovedmalBrevDataTest {
                         aarTrygdetid = 10,
                         maanederTrygdetid = 0,
                         perioder = listOf(),
+                        overstyrt = false,
                     ),
                 grunnbeloep =
                     Grunnbeloep(

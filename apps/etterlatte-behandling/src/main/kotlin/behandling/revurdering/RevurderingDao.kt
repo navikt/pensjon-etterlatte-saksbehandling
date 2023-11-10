@@ -38,7 +38,6 @@ class RevurderingDao(private val connection: () -> Connection) {
             revurderingsaarsak = rs.getString("revurdering_aarsak").let { Revurderingaarsak.valueOf(it) },
             kommerBarnetTilgode = kommerBarnetTilGode.invoke(id),
             virkningstidspunkt = rs.getString("virkningstidspunkt")?.let { objectMapper.readValue(it) },
-            utenlandstilsnitt = rs.getString("utenlandstilsnitt")?.let { objectMapper.readValue(it) },
             boddEllerArbeidetUtlandet =
                 rs.getString("bodd_eller_arbeidet_utlandet")?.let {
                     objectMapper.readValue(it)

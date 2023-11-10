@@ -113,13 +113,15 @@ export const AvkortingInntekt = (props: {
         <InntektAvkortingTabell>
           <Table className="table" zebraStripes>
             <Table.Header>
-              <Table.HeaderCell>Forventet inntekt Norge</Table.HeaderCell>
-              <Table.HeaderCell>Forventet inntekt utland</Table.HeaderCell>
-              <Table.HeaderCell>Forventet inntekt totalt</Table.HeaderCell>
-              <Table.HeaderCell>Gjenværende måneder</Table.HeaderCell>
-              <Table.HeaderCell>Periode</Table.HeaderCell>
-              <Table.HeaderCell>Spesifikasjon av inntekt</Table.HeaderCell>
-              <Table.HeaderCell>Kilde</Table.HeaderCell>
+              <Table.Row>
+                <Table.HeaderCell>Forventet inntekt Norge</Table.HeaderCell>
+                <Table.HeaderCell>Forventet inntekt utland</Table.HeaderCell>
+                <Table.HeaderCell>Forventet inntekt totalt</Table.HeaderCell>
+                <Table.HeaderCell>Gjenværende måneder</Table.HeaderCell>
+                <Table.HeaderCell>Periode</Table.HeaderCell>
+                <Table.HeaderCell>Spesifikasjon av inntekt</Table.HeaderCell>
+                <Table.HeaderCell>Kilde</Table.HeaderCell>
+              </Table.Row>
             </Table.Header>
             <Table.Body>
               {(visHistorikk ? avkortingGrunnlag : aktivtGrunnlag()).map((inntektsgrunnlag, index) => {
@@ -140,7 +142,7 @@ export const AvkortingInntekt = (props: {
                         {` ${NOK(aarsinntekt)} - ${NOK(fratrekkInnAar)} = ${NOK(forventetInntekt)}`}).
                       </OmstillingsstoenadToolTip>
                     </Table.DataCell>
-                    <Table.DataCell key="Inntekt">
+                    <Table.DataCell key="InntektUtland">
                       {NOK(forventetInntektUtland)}
                       <OmstillingsstoenadToolTip title="Se hva forventet inntekt består av">
                         Forventet inntekt utland beregnes utfra inntekt utland med fratrekk for måneder før innvilgelse.

@@ -1,29 +1,53 @@
 import { InfoWrapper } from '../../../styled'
 import { Info } from '../../../Info'
-import { VergemaalEllerFremtidsfullmakt } from '~components/person/typer'
+import { isFailure, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
+import { getGrunnlagsAvOpplysningstype } from '~shared/api/grunnlag'
+import { KildePdl } from '~shared/types/kilde'
+import { IPdlPerson } from '~shared/types/Person'
+import { Grunnlagsopplysning } from '~shared/types/grunnlag'
+import { ApiErrorAlert } from '~ErrorBoundary'
+import { useEffect } from 'react'
+import { formaterKildePdl } from '~components/behandling/soeknadsoversikt/utils'
 
 interface Props {
-  vergerOgFullmektige: VergemaalEllerFremtidsfullmakt[]
+  behandlingId: string
+  sakId: number
 }
 
-export const Verger = ({ vergerOgFullmektige }: Props) => {
-  function contents() {
-    if (vergerOgFullmektige.length > 0) {
-      return (
-        <>
-          {vergerOgFullmektige.map((it, index) => (
-            <Info
-              label="Verge"
-              tekst={it.vergeEllerFullmektig.motpartsPersonident}
-              undertekst={`${it.embete} (${it.type})`}
-              key={index}
-            />
-          ))}
-        </>
-      )
+export const Verger = ({ sakId, behandlingId }: Props) => {
+  const [soeker, getSoekerFraGrunnlag] = useApiCall(getGrunnlagsAvOpplysningstype)
+  useEffect(() => {
+    getSoekerFraGrunnlag({
+      sakId: sakId,
+      behandlingId: behandlingId,
+      opplysningstype: 'SOEKER_PDL_V1',
+    })
+  }, [sakId, behandlingId])
+
+  function successContents(soekerOpplysning: Grunnlagsopplysning<IPdlPerson, KildePdl>) {
+    const vergeList = soekerOpplysning.opplysning.vergemaalEllerFremtidsfullmakt || []
+    if (vergeList?.length == 0) {
+      return <Info label="Verge" tekst="Ingen verge registrert" undertekst={formaterKildePdl(soekerOpplysning.kilde)} />
     }
-    return <Info label="Verge" tekst="Ingen verge registrert i PDL" />
+
+    return (
+      <>
+        {vergeList.map((it, index) => (
+          <Info
+            label="Verge"
+            tekst={it.vergeEllerFullmektig.motpartsPersonident}
+            undertekst={formaterKildePdl(soekerOpplysning.kilde)}
+            key={index}
+          />
+        ))}
+      </>
+    )
   }
 
-  return <InfoWrapper>{contents()}</InfoWrapper>
+  return (
+    <InfoWrapper>
+      {isSuccess(soeker) && successContents(soeker.data)}
+      {isFailure(soeker) && <ApiErrorAlert>Kunne ikke hente info om verger</ApiErrorAlert>}
+    </InfoWrapper>
+  )
 }

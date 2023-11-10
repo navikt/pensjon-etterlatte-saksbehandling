@@ -36,7 +36,6 @@ export const GyldigFramsattBarnepensjon = ({
   const innsenderErForelder = gyldigFramsatt.vurderinger.find(
     (g: IGyldighetproving) => g.navn === GyldigFramsattType.INNSENDER_ER_FORELDER
   )
-  const vergerOgFullmektige = behandling.søker?.vergemaalEllerFremtidsfullmakt ?? []
 
   return (
     <LovtekstMedLenke
@@ -47,19 +46,23 @@ export const GyldigFramsattBarnepensjon = ({
           tittel: 'Folketrygdloven § 22-13 første ledd og tilhørende rundskriv',
         },
         { lenke: 'https://lovdata.no/lov/2010-03-26-9/§9', tittel: 'Vergemålsloven § 9, § 16 og § 19' },
+        {
+          lenke: 'https://lovdata.no/pro/rundskriv/a45-01-02/ARTIKKEL_45',
+          tittel: 'Forordning 987/2009 artikkel 45 nr. 4',
+        },
       ]}
       status={gyldigFremsattTilStatusIcon}
     >
       <div>
         <Beskrivelse>
           Den som har rett til ytelsen må sette frem krav (forelder/verge hvis under 18 år). Om annet må fullmakt ligge
-          i saken. Søknaden må være signert og vise hva det søkes om, og den må være fremsatt i riktig land. Søknaden må
-          være fremstilt i riktig land, dette skal være landet bruker er bosatt i (unntak hvis ikke avtaleland).
+          i saken. Søknaden må være signert og vise hva det søkes om, og den må settes fram i bostedslandet eller i det
+          landet vedkommende sist var medlem.
         </Beskrivelse>
         <InfobokserWrapper>
           <Innsender innsenderErForelder={innsenderErForelder} />
           <Foreldreansvar innsenderHarForeldreansvar={innsenderHarForeldreansvar} />
-          <Verger vergerOgFullmektige={vergerOgFullmektige} />
+          <Verger behandlingId={behandling.id} sakId={behandling.sakId} />
         </InfobokserWrapper>
       </div>
       <VurderingsContainerWrapper>

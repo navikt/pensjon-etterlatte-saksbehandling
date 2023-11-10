@@ -2,6 +2,7 @@ package no.nav.etterlatte.libs.common.person
 
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonValue
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 
@@ -136,7 +137,8 @@ internal fun firesifretAarstallFraTosifret(
     }
 }
 
-class InvalidFoedselsnummerException(value: String?, cause: Throwable) : Exception(
-    "Ugyldig fødselsnummer $value",
-    cause,
+class InvalidFoedselsnummerException(value: String?, cause: Throwable) : UgyldigForespoerselException(
+    code = "UGYLDIG_FNR",
+    detail = "Ugyldig fødselsnummer $value",
+    cause = cause,
 )

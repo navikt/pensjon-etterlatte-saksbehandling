@@ -31,6 +31,7 @@ import no.nav.etterlatte.brev.model.BrevProsessType
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.Status
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
@@ -255,6 +256,7 @@ internal class VedtaksbrevRouteTest {
             BrevProsessType.AUTOMATISK,
             "soeker_fnr",
             Status.OPPRETTET,
+            Tidspunkt.now(),
             Mottaker(
                 "Stor Snerk",
                 STOR_SNERK,

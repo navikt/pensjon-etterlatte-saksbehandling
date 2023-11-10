@@ -30,6 +30,9 @@ export default function RedigerMottakerModal({ brev, oppdater }: Props) {
   )
 
   const lagre = () => {
+    if (mottakerType == MottakerType.BEDRIFT) brev.mottaker.foedselsnummer = undefined
+    else if (mottakerType == MottakerType.PRIVATPERSON) brev.mottaker.orgnummer = undefined
+
     apiOppdaterMottaker({ brevId, sakId, mottaker }, () => {
       oppdater(mottaker)
       setIsOpen(false)

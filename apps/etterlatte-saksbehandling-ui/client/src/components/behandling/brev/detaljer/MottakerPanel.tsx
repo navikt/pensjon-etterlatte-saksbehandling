@@ -1,15 +1,22 @@
 import { Alert, Heading, Panel } from '@navikt/ds-react'
-import { IBrev } from '~shared/types/Brev'
+import { IBrev, Mottaker } from '~shared/types/Brev'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import { InfoWrapper } from '~components/behandling/soeknadsoversikt/styled'
-import React, { useState } from 'react'
+import React from 'react'
 import RedigerMottakerModal from '~components/person/brev/RedigerMottakerModal'
 
-export default function MottakerPanel({ vedtaksbrev, redigerbar }: { vedtaksbrev: IBrev; redigerbar: Boolean }) {
+export default function MottakerPanel({
+  vedtaksbrev,
+  oppdater,
+  redigerbar,
+}: {
+  vedtaksbrev: IBrev
+  oppdater: (mottaker: Mottaker) => void
+  redigerbar: Boolean
+}) {
   const soekerFnr = vedtaksbrev.soekerFnr
 
-  const [brev, setBrev] = useState(vedtaksbrev)
-  const mottaker = brev.mottaker
+  const mottaker = vedtaksbrev.mottaker
   const adresse = mottaker.adresse
 
   const soekerErIkkeMottaker = soekerFnr !== mottaker.foedselsnummer?.value
@@ -27,14 +34,7 @@ export default function MottakerPanel({ vedtaksbrev, redigerbar }: { vedtaksbrev
       )}
       <br />
 
-      {redigerbar && (
-        <RedigerMottakerModal
-          brev={brev}
-          oppdater={(val) => {
-            setBrev({ ...brev, mottaker: val })
-          }}
-        />
-      )}
+      {redigerbar && <RedigerMottakerModal brev={vedtaksbrev} oppdater={oppdater} />}
       <InfoWrapper>
         <Info label="Navn" tekst={mottaker.navn || '-'} wide />
         {mottaker.foedselsnummer && <Info label="Fødselsnummer" tekst={mottaker.foedselsnummer.value} wide />}

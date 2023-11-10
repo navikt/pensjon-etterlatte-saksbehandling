@@ -128,7 +128,7 @@ data class VergeEllerFullmektig(
     val motpartsPersonident: Folkeregisteridentifikator?,
     val navn: String?,
     val omfang: String?,
-    val omfangetErInnenPersonligOmraade: Boolean,
+    val omfangetErInnenPersonligOmraade: Boolean?,
 )
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")

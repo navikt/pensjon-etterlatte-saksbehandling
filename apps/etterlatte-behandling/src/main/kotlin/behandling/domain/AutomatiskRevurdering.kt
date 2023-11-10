@@ -53,7 +53,7 @@ data class AutomatiskRevurdering(
 
     override fun tilTrygdetidOppdatert() = endreTilStatus(BehandlingStatus.TRYGDETID_OPPDATERT)
 
-    override fun tilBeregnet(fastTrygdetid: Boolean) = endreTilStatus(BehandlingStatus.BEREGNET)
+    override fun tilBeregnet() = endreTilStatus(BehandlingStatus.BEREGNET)
 
     override fun tilAvkortet() = endreTilStatus(BehandlingStatus.AVKORTET)
 

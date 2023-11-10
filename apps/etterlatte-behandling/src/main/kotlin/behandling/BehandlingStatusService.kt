@@ -145,12 +145,7 @@ class BehandlingStatusServiceImpl(
         brukerTokenInfo: BrukerTokenInfo,
         dryRun: Boolean,
     ) {
-        hentBehandling(behandlingId).tilBeregnet(
-            !featureToggleService.isEnabled(
-                BehandlingStatusServiceFeatureToggle.BrukFaktiskTrygdetid,
-                false,
-            ),
-        ).lagreEndring(dryRun, brukerTokenInfo.ident())
+        hentBehandling(behandlingId).tilBeregnet().lagreEndring(dryRun, brukerTokenInfo.ident())
     }
 
     override fun settAvkortet(

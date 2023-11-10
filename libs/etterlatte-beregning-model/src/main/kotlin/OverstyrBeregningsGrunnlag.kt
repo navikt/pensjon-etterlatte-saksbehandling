@@ -13,11 +13,13 @@ data class OverstyrBeregningGrunnlagDao(
     val utbetaltBeloep: Long,
     val trygdetid: Long,
     val sakId: Long,
+    val beskrivelse: String,
 )
 
 data class OverstyrBeregningGrunnlag(
     val utbetaltBeloep: Long,
     val trygdetid: Long,
+    val beskrivelse: String,
 )
 
 data class OverstyrBeregningGrunnlagDTO(

@@ -159,6 +159,7 @@ const OverstyrBeregningGrunnlag = (props: { behandling: IBehandlingReducer; over
                     <Table.HeaderCell scope="col">Periode</Table.HeaderCell>
                     <Table.HeaderCell scope="col">Utbetalt beløp</Table.HeaderCell>
                     <Table.HeaderCell scope="col">Trygdetid</Table.HeaderCell>
+                    <Table.HeaderCell scope="col">Beskrivelse</Table.HeaderCell>
                   </Table.Row>
                 </Table.Header>
                 <Table.Body id="forminstitusjonsopphold">
@@ -194,6 +195,7 @@ const OverstyrBeregningGrunnlag = (props: { behandling: IBehandlingReducer; over
                       data: {
                         utbetaltBeloep: '0',
                         trygdetid: '0',
+                        beskrivelse: '',
                       },
                     },
                   ])
@@ -260,6 +262,11 @@ function feilIOverstyrBeregningperiode(
   if (grunnlag.tom !== undefined && grunnlag.tom < grunnlag.fom) {
     feil.push('TOM_FOER_FOM')
   }
+
+  if (grunnlag.data.beskrivelse === undefined || grunnlag.data.beskrivelse === '') {
+    feil.push('BESKRIVELSE_MANGLER')
+  }
+
   return feil
 }
 
@@ -281,7 +288,11 @@ const FeilIPerioderOppsummering = styled(ErrorSummary)`
 `
 
 type FeilIPeriodeOverstyrBeregning = (typeof FEIL_I_PERIODE)[number]
-export type FeilIPeriodeGrunnlagAlle = FeilIPeriodeOverstyrBeregning | 'BELOEP_MANGLER' | 'TRYGDETID_MANGLER'
+export type FeilIPeriodeGrunnlagAlle =
+  | FeilIPeriodeOverstyrBeregning
+  | 'BELOEP_MANGLER'
+  | 'TRYGDETID_MANGLER'
+  | 'BESKRIVELSE_MANGLER'
 
 export const teksterFeilIPeriode: Record<FeilIPeriodeGrunnlagAlle, string> = {
   INGEN_PERIODER: 'Minst en periode må finnes',
@@ -292,6 +303,7 @@ export const teksterFeilIPeriode: Record<FeilIPeriodeGrunnlagAlle, string> = {
   TOM_FOER_FOM: 'Til og med kan ikke være før fra og med',
   BELOEP_MANGLER: 'Utbetalt beløp er påkrevd',
   TRYGDETID_MANGLER: 'Trygdetid er påkrevd',
+  BESKRIVELSE_MANGLER: 'Beskrivelse er påkrevd',
 } as const
 
 export default OverstyrBeregningGrunnlag

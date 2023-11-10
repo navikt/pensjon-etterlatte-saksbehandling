@@ -290,6 +290,7 @@ class BeregningsGrunnlagService(
                             OverstyrBeregningGrunnlag(
                                 utbetaltBeloep = periode.utbetaltBeloep,
                                 trygdetid = periode.trygdetid,
+                                beskrivelse = periode.beskrivelse,
                             ),
                         fom = periode.datoFOM,
                         tom = periode.datoTOM,
@@ -318,6 +319,7 @@ class BeregningsGrunnlagService(
                     utbetaltBeloep = it.data.utbetaltBeloep,
                     trygdetid = it.data.trygdetid,
                     sakId = behandling.sak,
+                    beskrivelse = it.data.beskrivelse,
                 )
             },
         )

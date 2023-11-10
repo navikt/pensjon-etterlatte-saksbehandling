@@ -583,6 +583,7 @@ internal class BeregningsGrunnlagServiceTest {
                     utbetaltBeloep = 123L,
                     trygdetid = 10L,
                     sakId = 1L,
+                    beskrivelse = "test periode 1",
                 ),
                 OverstyrBeregningGrunnlagDao(
                     id = randomUUID(),
@@ -592,6 +593,7 @@ internal class BeregningsGrunnlagServiceTest {
                     utbetaltBeloep = 456L,
                     trygdetid = 20L,
                     sakId = 1L,
+                    beskrivelse = "test periode 2",
                 ),
             )
 
@@ -646,6 +648,7 @@ internal class BeregningsGrunnlagServiceTest {
                                         OverstyrBeregningGrunnlag(
                                             utbetaltBeloep = 12L,
                                             trygdetid = 25L,
+                                            beskrivelse = "test periode 1",
                                         ),
                                     fom = fom,
                                     tom = tom,

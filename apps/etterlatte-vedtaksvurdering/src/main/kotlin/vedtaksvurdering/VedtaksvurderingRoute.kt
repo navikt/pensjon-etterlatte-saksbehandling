@@ -221,7 +221,7 @@ fun Route.vedtaksvurderingRoute(
                 }
 
                 val samordnetVedtak = vedtakBehandlingService.samordnetVedtak(vedtak!!.behandlingId, brukerTokenInfo)
-                call.respond(HttpStatusCode.OK, samordnetVedtak.toDto())
+                call.respond(HttpStatusCode.OK, samordnetVedtak.vedtak)
             }
         }
     }

@@ -1,3 +1,5 @@
+import { logger } from '~utils/logger'
+
 export type ApiSuccess<T> = { ok: true; status: number; data: T }
 export type ApiResponse<T> = ApiSuccess<T> | ApiError
 
@@ -69,6 +71,8 @@ async function apiFetcher<T>(props: Options): Promise<ApiResponse<T>> {
     }
   } catch (e) {
     console.error('Rejection i fetch / utlesing av data', e)
+    const errorobj = { msg: 'Fikk feil i kall mot backend', errorInfo: JSON.stringify(e) }
+    logger.generalError(JSON.stringify(errorobj))
     return {
       ok: false,
       status: 400,

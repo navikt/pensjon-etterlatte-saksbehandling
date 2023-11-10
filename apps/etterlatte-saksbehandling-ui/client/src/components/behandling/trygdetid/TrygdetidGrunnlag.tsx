@@ -116,7 +116,7 @@ export const TrygdetidGrunnlag: React.FC<Props> = ({
 
             <FormWrapper>
               <Begrunnelse
-                value={trygdetidgrunnlag.begrunnelse}
+                value={trygdetidgrunnlag.begrunnelse ?? ''}
                 key={`begrunnelse-${trygdetidGrunnlagType}`}
                 onChange={(e) =>
                   setTrygdetidgrunnlag({

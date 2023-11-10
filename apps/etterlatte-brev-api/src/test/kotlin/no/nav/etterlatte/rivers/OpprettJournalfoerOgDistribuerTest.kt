@@ -73,15 +73,15 @@ internal class OpprettJournalfoerOgDistribuer {
         )
 
         val journalfoermelding = testRapid.hentMelding(0)
-        Assertions.assertEquals(BrevEventTypes.FERDIGSTILT.name, journalfoermelding.somMap()[EVENT_NAME_KEY])
+        Assertions.assertEquals(BrevEventTypes.FERDIGSTILT.toEventName(), journalfoermelding.somMap()[EVENT_NAME_KEY])
         testRapid.sendTestMessage(journalfoermelding)
 
         val distribuermelding = testRapid.hentMelding(1)
-        Assertions.assertEquals(BrevEventTypes.JOURNALFOERT.toString(), distribuermelding.somMap()[EVENT_NAME_KEY])
+        Assertions.assertEquals(BrevEventTypes.JOURNALFOERT.toEventName(), distribuermelding.somMap()[EVENT_NAME_KEY])
         testRapid.sendTestMessage(distribuermelding)
 
         val distribuert = testRapid.hentMelding(2).somMap()
-        Assertions.assertEquals(BrevEventTypes.DISTRIBUERT.toString(), distribuert[EVENT_NAME_KEY])
+        Assertions.assertEquals(BrevEventTypes.DISTRIBUERT.toEventName(), distribuert[EVENT_NAME_KEY])
     }
 
     private fun lagBrev(behandlingId: UUID?) =

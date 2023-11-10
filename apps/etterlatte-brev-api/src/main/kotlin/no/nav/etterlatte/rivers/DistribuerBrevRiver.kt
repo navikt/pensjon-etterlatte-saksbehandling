@@ -65,7 +65,7 @@ internal class DistribuerBrevRiver(
     ) {
         logger.info("Brev har blitt distribuert. Svarer tilbake med bekreftelse.")
 
-        packet[EVENT_NAME_KEY] = BrevEventTypes.DISTRIBUERT.toString()
+        packet[EVENT_NAME_KEY] = BrevEventTypes.DISTRIBUERT.toEventName()
         packet["bestillingsId"] = bestillingsId
 
         publish(packet.toJson())

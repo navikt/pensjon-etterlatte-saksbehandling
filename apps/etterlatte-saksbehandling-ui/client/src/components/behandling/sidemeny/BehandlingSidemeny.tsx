@@ -27,7 +27,10 @@ import { updateSjekkliste } from '~store/reducers/SjekklisteReducer'
 import { erFerdigBehandlet } from '~components/behandling/felles/utils'
 import { hentSjekkliste, opprettSjekkliste } from '~shared/api/sjekkliste'
 import { hentSaksbehandlerForOppgaveUnderArbeid } from '~shared/api/oppgaver'
-import { setSaksbehandlerGjeldendeOppgave } from '~store/reducers/SaksbehandlerGjeldendeOppgaveReducer'
+import {
+  resetSaksbehandlerGjeldendeOppgave,
+  setSaksbehandlerGjeldendeOppgave,
+} from '~store/reducers/SaksbehandlerGjeldendeOppgaveReducer'
 
 const finnUtNasjonalitet = (behandling: IBehandlingReducer): UtenlandstilknytningType | null => {
   if (behandling.utenlandstilknytning?.type) {
@@ -79,9 +82,11 @@ export const BehandlingSidemeny = ({ behandling }: { behandling: IBehandlingRedu
   }, [])
 
   useEffect(() => {
-    hentSaksbehandlerForOppgave({ behandlingId: behandling.id }, (saksbehandler) => {
-      dispatch(setSaksbehandlerGjeldendeOppgave(saksbehandler))
-    })
+    hentSaksbehandlerForOppgave(
+      { behandlingId: behandling.id },
+      (saksbehandler) => dispatch(setSaksbehandlerGjeldendeOppgave(saksbehandler)),
+      () => dispatch(resetSaksbehandlerGjeldendeOppgave)
+    )
   }, [behandling.id])
 
   const erFoerstegangsbehandling = behandling.behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING

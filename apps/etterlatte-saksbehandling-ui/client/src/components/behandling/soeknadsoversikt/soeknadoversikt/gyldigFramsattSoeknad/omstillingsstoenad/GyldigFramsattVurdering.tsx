@@ -3,15 +3,14 @@ import {
   IBehandlingStatus,
   IGyldighetproving,
   IGyldighetResultat,
-  IManuellVurdering,
 } from '~shared/types/IDetaljertBehandling'
 import { VurderingsResultat } from '~shared/types/VurderingsResultat'
 import { VurderingsboksWrapper } from '~components/vurderingsboks/VurderingsboksWrapper'
 import { LeggTilVurderingButton } from '~components/behandling/soeknadsoversikt/soeknadoversikt/LeggTilVurderingButton'
 import { useState } from 'react'
-import { Undertekst, VurderingsTitle } from '~components/behandling/soeknadsoversikt/styled'
+import { VurderingsTitle } from '~components/behandling/soeknadsoversikt/styled'
 import styled from 'styled-components'
-import { BodyShort, Label, Radio, RadioGroup } from '@navikt/ds-react'
+import { Label, Radio, RadioGroup } from '@navikt/ds-react'
 import { SoeknadsoversiktTextArea } from '~components/behandling/soeknadsoversikt/soeknadoversikt/SoeknadsoversiktTextArea'
 import { useAppDispatch } from '~store/Store'
 import { JaNei, JaNeiRec } from '~shared/types/ISvar'
@@ -28,17 +27,13 @@ export const GyldigFramsattVurdering = ({
   gyldigFramsatt: IGyldighetResultat | undefined
   redigerbar: boolean
 }) => {
-  const tittel = finnTittel(gyldigFramsatt)
-  const manuellVurdering =
-    finnVurdering(gyldigFramsatt, GyldigFramsattType.MANUELL_VURDERING) ||
-    finnVurdering(gyldigFramsatt, GyldigFramsattType.INNSENDER_ER_GJENLEVENDE)
-  const manuellVurderingOpplysninger: IManuellVurdering = manuellVurdering?.basertPaaOpplysninger
+  const manuellVurdering = finnVurdering(gyldigFramsatt, GyldigFramsattType.MANUELL_VURDERING)?.basertPaaOpplysninger
 
   const dispatch = useAppDispatch()
-  const [vurdert, setVurdert] = useState(manuellVurderingOpplysninger != null)
   const [svar, setSvar] = useState<JaNei | undefined>(finnSvar(gyldigFramsatt))
+  const [vurdert, setVurdert] = useState(svar != null)
   const [radioError, setRadioError] = useState<string>('')
-  const [begrunnelse, setBegrunnelse] = useState<string>(manuellVurderingOpplysninger?.begrunnelse || '')
+  const [begrunnelse, setBegrunnelse] = useState<string>(manuellVurdering?.begrunnelse || '')
   const [begrunnelseError, setBegrunnelseError] = useState<string>('')
   const [, setGyldighetsproeving, resetToInitial] = useApiCall(lagreGyldighetsproeving)
 
@@ -68,10 +63,12 @@ export const GyldigFramsattVurdering = ({
     setSvar(finnSvar(gyldigFramsatt))
     setRadioError('')
     setBegrunnelseError('')
-    setBegrunnelse(manuellVurderingOpplysninger?.begrunnelse || '')
-    setVurdert(manuellVurderingOpplysninger != null)
+    setBegrunnelse(manuellVurdering?.begrunnelse || '')
+    setVurdert(manuellVurdering != null)
     onSuccess?.()
   }
+
+  const tittel = 'Er søknaden gyldig fremsatt?'
 
   return !vurdert ? (
     <LeggTilVurderingButton onClick={() => setVurdert(true)}>Legg til vurdering</LeggTilVurderingButton>
@@ -80,7 +77,6 @@ export const GyldigFramsattVurdering = ({
       tittel={tittel}
       subtittelKomponent={
         <>
-          <BodyShort spacing>Er innsender den gjenlevende?</BodyShort>
           {gyldigFramsatt?.resultat && (
             <Label as="p" size="small" style={{ marginBottom: '32px' }}>
               {JaNeiRec[gyldigFramsatt.resultat === VurderingsResultat.OPPFYLT ? JaNei.JA : JaNei.NEI]}
@@ -90,24 +86,23 @@ export const GyldigFramsattVurdering = ({
       }
       redigerbar={redigerbar}
       vurdering={
-        manuellVurderingOpplysninger?.kilde
+        manuellVurdering?.kilde
           ? {
-              saksbehandler: manuellVurderingOpplysninger?.kilde.ident,
-              tidspunkt: new Date(manuellVurderingOpplysninger?.kilde.tidspunkt),
+              saksbehandler: manuellVurdering?.kilde.ident,
+              tidspunkt: new Date(manuellVurdering?.kilde.tidspunkt),
             }
           : undefined
       }
       lagreklikk={lagre}
       avbrytklikk={reset}
-      kommentar={manuellVurderingOpplysninger?.begrunnelse}
+      kommentar={manuellVurdering?.begrunnelse}
       defaultRediger={
         gyldigFramsatt?.resultat !== VurderingsResultat.OPPFYLT &&
         gyldigFramsatt?.resultat !== VurderingsResultat.IKKE_OPPFYLT
       }
     >
       <div>
-        <VurderingsTitle title="Trenger avklaring" />
-        <Undertekst $gray={false}>Innsender er den gjenlevende?</Undertekst>
+        <VurderingsTitle title="Er søknaden gyldig fremsatt?" />
         <RadioGroupWrapper>
           <RadioGroup
             legend=""
@@ -138,17 +133,6 @@ export const GyldigFramsattVurdering = ({
       </div>
     </VurderingsboksWrapper>
   )
-}
-
-function finnTittel(gyldigFamsatt: IGyldighetResultat | undefined): string {
-  switch (gyldigFamsatt?.resultat) {
-    case VurderingsResultat.OPPFYLT:
-      return 'Innsender er gjenlevende'
-    case VurderingsResultat.IKKE_OPPFYLT:
-      return 'Innsender er ikke gjenlevende'
-    default:
-      return 'Trenger avklaring'
-  }
 }
 
 function finnVurdering(gyldigFramsatt: IGyldighetResultat | undefined, type: GyldigFramsattType) {

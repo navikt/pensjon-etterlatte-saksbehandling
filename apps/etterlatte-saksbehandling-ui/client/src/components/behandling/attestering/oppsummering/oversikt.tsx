@@ -8,9 +8,8 @@ import {
   formaterStringTidspunkt,
 } from '~utils/formattering'
 import { IBehandlingInfo } from '~components/behandling/sidemeny/IBehandlingInfo'
-import { Heading, Tag } from '@navikt/ds-react'
+import { BodyShort, Heading, Tag } from '@navikt/ds-react'
 import { tagColors, TagList } from '~shared/Tags'
-import { INasjonalitetsType } from '~components/behandling/fargetags/nasjonalitetsType'
 import { SidebarPanel } from '~shared/components/Sidebar'
 import { useEffect, useState } from 'react'
 import { isFailure, isInitial, isPending, isPendingOrInitial, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
@@ -81,9 +80,13 @@ export const Oversikt = ({
           </Tag>
         </li>
         <li>
-          <Tag variant={tagColors[INasjonalitetsType.NASJONAL]} size="small">
-            {formaterEnumTilLesbarString(INasjonalitetsType.NASJONAL)}
-          </Tag>
+          {behandlingsInfo.nasjonalEllerUtland ? (
+            <Tag variant={tagColors[behandlingsInfo.nasjonalEllerUtland]} size="small">
+              {formaterEnumTilLesbarString(behandlingsInfo.nasjonalEllerUtland)}
+            </Tag>
+          ) : (
+            <BodyShort>Du må velge en tilknytning</BodyShort>
+          )}
         </li>
       </TagList>
       <div className="info">

@@ -13,6 +13,7 @@ import no.nav.etterlatte.klienter.TrygdetidKlient
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -21,12 +22,10 @@ import java.util.UUID.randomUUID
 
 internal class BeregningServiceTest {
     private val behandlingKlient = mockk<BehandlingKlientImpl>()
-    private val beregningRepository =
-        mockk<BeregningRepository> {
-            every { lagreEllerOppdaterBeregning(any()) } returns mockk()
-        }
+    private val beregningRepository = mockk<BeregningRepository>()
     private val beregnBarnepensjonService = mockk<BeregnBarnepensjonService>()
     private val beregnOmstillingsstoenadService = mockk<BeregnOmstillingsstoenadService>()
+    private val beregnOverstyrBeregningService = mockk<BeregnOverstyrBeregningService>()
     private val beregningsGrunnlagService = mockk<BeregningsGrunnlagService>()
     private val trygdetidKlient = mockk<TrygdetidKlient>()
     private val beregningService: BeregningService =
@@ -35,6 +34,7 @@ internal class BeregningServiceTest {
             behandlingKlient = behandlingKlient,
             beregnBarnepensjonService = beregnBarnepensjonService,
             beregnOmstillingsstoenadService = beregnOmstillingsstoenadService,
+            beregnOverstyrBeregningService = beregnOverstyrBeregningService,
             beregningsGrunnlagService = beregningsGrunnlagService,
             trygdetidKlient = trygdetidKlient,
         )
@@ -42,17 +42,51 @@ internal class BeregningServiceTest {
     @Test
     fun `skal beregne barnepensjon og lagre resultatet hvis statussjekk i behandling passerer`() {
         val behandling = mockBehandling(SakType.BARNEPENSJON)
+        val beregning = mockk<Beregning>()
 
+        every { beregningRepository.lagreEllerOppdaterBeregning(any()) } returns beregning
+        every { beregningRepository.hentOverstyrBeregning(any()) } returns null
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
-        coEvery { behandlingKlient.beregn(any(), any(), any()) } returns true
+        coEvery { behandlingKlient.kanBeregnes(any(), any(), any()) } returns true
         coEvery { beregnBarnepensjonService.beregn(any(), any()) } returns mockk()
+        every { beregning.behandlingId } returns behandling.id
+        every { beregning.copy(any(), any(), any(), any(), any(), any(), any()) } returns beregning
 
         runBlocking {
             beregningService.opprettBeregning(behandling.id, bruker)
 
-            coVerify(exactly = 1) { behandlingKlient.beregn(any(), any(), false) }
-            coVerify(exactly = 1) { behandlingKlient.beregn(any(), any(), true) }
+            coVerify(exactly = 1) { behandlingKlient.kanBeregnes(any(), any(), false) }
+            coVerify(exactly = 1) { behandlingKlient.kanBeregnes(any(), any(), true) }
             coVerify(exactly = 1) { beregnBarnepensjonService.beregn(any(), any()) }
+            verify(exactly = 1) { beregningRepository.lagreEllerOppdaterBeregning(any()) }
+        }
+    }
+
+    @Test
+    fun `skal beregne barnepensjon og lagre resultatet hvis statussjekk i behandling passerer med manuelt beregning`() {
+        val behandling = mockBehandling(SakType.BARNEPENSJON)
+        val beregning = mockk<Beregning>()
+        val overstyrBeregning =
+            OverstyrBeregning(
+                behandling.sak,
+                "Test",
+                Tidspunkt.now(),
+            )
+
+        every { beregningRepository.lagreEllerOppdaterBeregning(any()) } returns beregning
+        every { beregningRepository.hentOverstyrBeregning(any()) } returns overstyrBeregning
+        coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
+        coEvery { behandlingKlient.kanBeregnes(any(), any(), any()) } returns true
+        coEvery { beregnOverstyrBeregningService.beregn(any(), any(), any()) } returns mockk()
+        every { beregning.behandlingId } returns behandling.id
+        every { beregning.copy(any(), any(), any(), any(), any(), any(), overstyrBeregning) } returns beregning
+
+        runBlocking {
+            beregningService.opprettBeregning(behandling.id, bruker)
+
+            coVerify(exactly = 1) { behandlingKlient.kanBeregnes(any(), any(), false) }
+            coVerify(exactly = 1) { behandlingKlient.kanBeregnes(any(), any(), true) }
+            coVerify(exactly = 1) { beregnOverstyrBeregningService.beregn(any(), any(), any()) }
             verify(exactly = 1) { beregningRepository.lagreEllerOppdaterBeregning(any()) }
         }
     }
@@ -61,15 +95,16 @@ internal class BeregningServiceTest {
     fun `skal ikke beregne barnepensjon eller lagre noe hvis statussjekk i behandling ikke passerer`() {
         val behandling = mockBehandling(SakType.BARNEPENSJON)
 
+        every { beregningRepository.lagreEllerOppdaterBeregning(any()) } returns mockk()
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
-        coEvery { behandlingKlient.beregn(any(), any(), any()) } returns false
+        coEvery { behandlingKlient.kanBeregnes(any(), any(), any()) } returns false
 
         runBlocking {
             assertThrows<IllegalStateException> {
                 beregningService.opprettBeregning(behandling.id, bruker)
             }
 
-            coVerify(exactly = 1) { behandlingKlient.beregn(any(), any(), false) }
+            coVerify(exactly = 1) { behandlingKlient.kanBeregnes(any(), any(), false) }
             coVerify(exactly = 0) { beregnBarnepensjonService.beregn(any(), any()) }
             verify(exactly = 0) { beregningRepository.lagreEllerOppdaterBeregning(any()) }
         }
@@ -78,17 +113,51 @@ internal class BeregningServiceTest {
     @Test
     fun `skal beregne omstillingsstoenad og lagre resultatet hvis statussjekk i behandling passerer`() {
         val behandling = mockBehandling(SakType.OMSTILLINGSSTOENAD)
+        val beregning = mockk<Beregning>()
 
+        every { beregningRepository.lagreEllerOppdaterBeregning(any()) } returns beregning
+        every { beregningRepository.hentOverstyrBeregning(any()) } returns null
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
-        coEvery { behandlingKlient.beregn(any(), any(), any()) } returns true
+        coEvery { behandlingKlient.kanBeregnes(any(), any(), any()) } returns true
         coEvery { beregnOmstillingsstoenadService.beregn(any(), any()) } returns mockk()
+        every { beregning.behandlingId } returns behandling.id
+        every { beregning.copy(any(), any(), any(), any(), any(), any(), any()) } returns beregning
 
         runBlocking {
             beregningService.opprettBeregning(behandling.id, bruker)
 
-            coVerify(exactly = 1) { behandlingKlient.beregn(any(), any(), false) }
-            coVerify(exactly = 1) { behandlingKlient.beregn(any(), any(), true) }
+            coVerify(exactly = 1) { behandlingKlient.kanBeregnes(any(), any(), false) }
+            coVerify(exactly = 1) { behandlingKlient.kanBeregnes(any(), any(), true) }
             coVerify(exactly = 1) { beregnOmstillingsstoenadService.beregn(any(), any()) }
+            verify(exactly = 1) { beregningRepository.lagreEllerOppdaterBeregning(any()) }
+        }
+    }
+
+    @Test
+    fun `skal beregne omstillingsstoenad og lagre resultatet hvis statussjekk i behandling passerermed manuelt beregning`() {
+        val behandling = mockBehandling(SakType.OMSTILLINGSSTOENAD)
+        val beregning = mockk<Beregning>()
+        val overstyrBeregning =
+            OverstyrBeregning(
+                behandling.sak,
+                "Test",
+                Tidspunkt.now(),
+            )
+
+        every { beregningRepository.lagreEllerOppdaterBeregning(any()) } returns beregning
+        every { beregningRepository.hentOverstyrBeregning(any()) } returns overstyrBeregning
+        coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
+        coEvery { behandlingKlient.kanBeregnes(any(), any(), any()) } returns true
+        coEvery { beregnOverstyrBeregningService.beregn(any(), any(), any()) } returns mockk()
+        every { beregning.behandlingId } returns behandling.id
+        every { beregning.copy(any(), any(), any(), any(), any(), any(), overstyrBeregning) } returns beregning
+
+        runBlocking {
+            beregningService.opprettBeregning(behandling.id, bruker)
+
+            coVerify(exactly = 1) { behandlingKlient.kanBeregnes(any(), any(), false) }
+            coVerify(exactly = 1) { behandlingKlient.kanBeregnes(any(), any(), true) }
+            coVerify(exactly = 1) { beregnOverstyrBeregningService.beregn(any(), any(), any()) }
             verify(exactly = 1) { beregningRepository.lagreEllerOppdaterBeregning(any()) }
         }
     }
@@ -98,14 +167,14 @@ internal class BeregningServiceTest {
         val behandling = mockBehandling(SakType.OMSTILLINGSSTOENAD)
 
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
-        coEvery { behandlingKlient.beregn(any(), any(), any()) } returns false
+        coEvery { behandlingKlient.kanBeregnes(any(), any(), any()) } returns false
 
         runBlocking {
             assertThrows<IllegalStateException> {
                 beregningService.opprettBeregning(behandling.id, bruker)
             }
 
-            coVerify(exactly = 1) { behandlingKlient.beregn(any(), any(), false) }
+            coVerify(exactly = 1) { behandlingKlient.kanBeregnes(any(), any(), false) }
             coVerify(exactly = 0) { beregnOmstillingsstoenadService.beregn(any(), any()) }
             verify(exactly = 0) { beregningRepository.lagreEllerOppdaterBeregning(any()) }
         }

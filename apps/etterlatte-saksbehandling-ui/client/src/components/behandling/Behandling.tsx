@@ -1,73 +1,38 @@
-import React, { useEffect } from 'react'
+import { useEffect } from 'react'
 import { Navigate, Route, Routes, useParams } from 'react-router-dom'
 import { hentBehandling } from '~shared/api/behandling'
 import { GridContainer, MainContent } from '~shared/styled'
-import { addBehandling, resetBehandling } from '~store/reducers/BehandlingReducer'
+import { setBehandling, resetBehandling, IBehandlingReducer } from '~store/reducers/BehandlingReducer'
 import { PdlPersonStatusBar } from '~shared/statusbar/Statusbar'
 import { useBehandlingRoutes } from './BehandlingRoutes'
 import { StegMeny } from './StegMeny/stegmeny'
 import { useAppDispatch } from '~store/Store'
-import { isFailure, isInitial, isPending, mapAllApiResult, useApiCall } from '~shared/hooks/useApiCall'
+import { mapAllApiResult, useApiCall } from '~shared/hooks/useApiCall'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { useBehandling } from '~components/behandling/useBehandling'
 import { BehandlingSidemeny } from '~components/behandling/sidemeny/BehandlingSidemeny'
 import Spinner from '~shared/Spinner'
-import { updateSjekkliste } from '~store/reducers/SjekklisteReducer'
-import { hentSjekkliste, opprettSjekkliste } from '~shared/api/sjekkliste'
-import { erFerdigBehandlet } from '~components/behandling/felles/utils'
-import { IBehandlingsType } from '~shared/types/IDetaljertBehandling'
-import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
-import { featureToggleSjekklisteAktivert } from '~shared/types/Sjekkliste'
 
 export const Behandling = () => {
-  const behandling = useBehandling()
+  const behandlingFraRedux = useBehandling()
   const dispatch = useAppDispatch()
   const { behandlingId: behandlingIdFraURL } = useParams()
   const { behandlingRoutes } = useBehandlingRoutes()
   const [fetchBehandlingStatus, fetchBehandling] = useApiCall(hentBehandling)
-
-  const [hentSjekklisteResult, hentSjekklisteForBehandling, resetSjekklisteResult] = useApiCall(hentSjekkliste)
-  const [opprettSjekklisteResult, opprettSjekklisteForBehandling, resetOpprettSjekkliste] =
-    useApiCall(opprettSjekkliste)
-  const sjekklisteAktivert = useFeatureEnabledMedDefault(featureToggleSjekklisteAktivert, false)
 
   useEffect(() => {
     if (!behandlingIdFraURL) {
       return
     }
 
-    if (behandlingIdFraURL !== behandling?.id) {
+    if (behandlingIdFraURL !== behandlingFraRedux?.id) {
       fetchBehandling(
         behandlingIdFraURL,
-        (behandling) => dispatch(addBehandling(behandling)),
+        (behandling) => dispatch(setBehandling(behandling)),
         () => dispatch(resetBehandling())
       )
     }
-  }, [behandlingIdFraURL, behandling?.id])
-
-  useEffect(() => {
-    if (sjekklisteAktivert) {
-      resetSjekklisteResult()
-      resetOpprettSjekkliste()
-      if (behandling && erFoerstegangsbehandling() && isInitial(hentSjekklisteResult)) {
-        hentSjekklisteForBehandling(
-          behandling.id,
-          (result) => {
-            dispatch(updateSjekkliste(result))
-          },
-          () => {
-            if (!erFerdigBehandlet(behandling.status)) {
-              opprettSjekklisteForBehandling(behandling.id, (opprettet) => {
-                dispatch(updateSjekkliste(opprettet))
-              })
-            }
-          }
-        )
-      }
-    }
-  }, [behandling])
-
-  const erFoerstegangsbehandling = () => behandling?.behandlingType == IBehandlingsType.FØRSTEGANGSBEHANDLING
+  }, [behandlingIdFraURL, behandlingFraRedux?.id])
 
   return mapAllApiResult(
     fetchBehandlingStatus,
@@ -75,19 +40,12 @@ export const Behandling = () => {
     null,
     () => <ApiErrorAlert>Kunne ikke hente behandling</ApiErrorAlert>,
     () => {
-      if (behandling) {
+      if (behandlingFraRedux) {
+        const behandlingGarra = behandlingFraRedux as IBehandlingReducer
         return (
           <>
-            {isPending(hentSjekklisteResult) && <Spinner label="Henter sjekkliste ..." visible />}
-            {isFailure(hentSjekklisteResult) && erFoerstegangsbehandling() && !erFerdigBehandlet(behandling.status) && (
-              <ApiErrorAlert>En feil oppstod ved henting av sjekklista</ApiErrorAlert>
-            )}
-            {isFailure(opprettSjekklisteResult) && erFoerstegangsbehandling() && (
-              <ApiErrorAlert>Opprettelsen av sjekkliste feilet</ApiErrorAlert>
-            )}
-
-            {behandling.søker && <PdlPersonStatusBar person={behandling.søker} />}
-            <StegMeny behandling={behandling} />
+            {behandlingGarra.søker && <PdlPersonStatusBar person={behandlingGarra.søker} />}
+            <StegMeny behandling={behandlingGarra} />
             <GridContainer>
               <MainContent>
                 <Routes>
@@ -97,8 +55,7 @@ export const Behandling = () => {
                   <Route path="*" element={<Navigate to={behandlingRoutes[0].path} replace />} />
                 </Routes>
               </MainContent>
-
-              <BehandlingSidemeny />
+              <BehandlingSidemeny behandling={behandlingGarra} />
             </GridContainer>
           </>
         )

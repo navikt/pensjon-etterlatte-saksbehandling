@@ -9,6 +9,7 @@ import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.domain.ManueltOpphoer
 import no.nav.etterlatte.behandling.domain.OpprettBehandling
+import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.behandling.hendelse.getUUID
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
 import no.nav.etterlatte.behandling.revurdering.RevurderingDao
@@ -17,7 +18,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
-import no.nav.etterlatte.libs.common.behandling.Utenlandstilsnitt
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.sak.BehandlingOgSak
 import no.nav.etterlatte.libs.common.sak.Sak
@@ -31,6 +32,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.libs.database.toList
+import no.nav.etterlatte.libs.database.toListPassesRsToBlock
 import java.sql.Connection
 import java.sql.ResultSet
 import java.time.LocalDateTime
@@ -75,6 +77,31 @@ class BehandlingDao(
         return stmt.executeQuery().behandlingsListe()
     }
 
+    fun hentAlleRevurderingerISakMedAarsak(
+        sakid: Long,
+        revurderingaarsak: Revurderingaarsak,
+    ): List<Revurdering> {
+        val stmt =
+            connection().prepareStatement(
+                """
+                SELECT b.*, s.sakType, s.enhet, s.fnr 
+                FROM behandling b
+                INNER JOIN sak s ON b.sak_id = s.id
+                WHERE sak_id = ? AND behandlingstype = 'REVURDERING'
+                AND revurdering_aarsak = ?
+                """.trimIndent(),
+            )
+        stmt.setLong(1, sakid)
+        stmt.setString(2, revurderingaarsak.name)
+        return stmt.executeQuery().toListPassesRsToBlock { rs -> asRevurdering(rs) }
+    }
+
+    private fun ResultSet.asRevurderingExtension() =
+        revurderingDao.asRevurdering(
+            this,
+            mapSak(this),
+        ) { i: UUID -> kommerBarnetTilGodeDao.hentKommerBarnetTilGode(i) }
+
     fun migrerStatusPaaAlleBehandlingerSomTrengerNyBeregning(): SakIDListe {
         with(connection()) {
             val stmt =
@@ -102,7 +129,6 @@ class BehandlingDao(
             gyldighetsproeving = rs.getString("gyldighetssproving")?.let { objectMapper.readValue(it) },
             status = rs.getString("status").let { BehandlingStatus.valueOf(it) },
             virkningstidspunkt = rs.getString("virkningstidspunkt")?.let { objectMapper.readValue(it) },
-            utenlandstilsnitt = rs.getString("utenlandstilsnitt")?.let { objectMapper.readValue(it) },
             boddEllerArbeidetUtlandet =
                 rs.getString("bodd_eller_arbeidet_utlandet")
                     ?.let { objectMapper.readValue(it) },
@@ -126,7 +152,6 @@ class BehandlingDao(
             sistEndret = rs.somLocalDateTimeUTC("sist_endret"),
             status = rs.getString("status").let { BehandlingStatus.valueOf(it) },
             virkningstidspunkt = rs.getString("virkningstidspunkt")?.let { objectMapper.readValue(it) },
-            utenlandstilsnitt = rs.getString("utenlandstilsnitt")?.let { objectMapper.readValue(it) },
             boddEllerArbeidetUtlandet = rs.getString("bodd_eller_arbeidet_utlandet")?.let { objectMapper.readValue(it) },
             opphoerAarsaker = rs.getString("opphoer_aarsaker").let { objectMapper.readValue(it) },
             fritekstAarsak = rs.getString("fritekst_aarsak"),
@@ -199,17 +224,6 @@ class BehandlingDao(
         stmt.setString(1, status.name)
         stmt.setTidspunkt(2, sistEndret.toTidspunkt())
         stmt.setObject(3, behandlingId)
-        require(stmt.executeUpdate() == 1)
-    }
-
-    fun lagreUtenlandstilsnitt(
-        behandlingId: UUID,
-        utenlandstilsnitt: Utenlandstilsnitt,
-    ) {
-        val stmt =
-            connection().prepareStatement("UPDATE behandling SET utenlandstilsnitt = ? WHERE id = ?")
-        stmt.setString(1, objectMapper.writeValueAsString(utenlandstilsnitt))
-        stmt.setObject(2, behandlingId)
         require(stmt.executeUpdate() == 1)
     }
 

@@ -9,25 +9,29 @@ import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.vedtak.VedtakSamordningDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
+import org.slf4j.LoggerFactory
 import java.time.LocalDate
 
 class SamordningVedtakService(
     private val vedtaksvurderingKlient: VedtaksvurderingKlient,
     private val tjenestepensjonKlient: TjenestepensjonKlient,
 ) {
+    private val logger = LoggerFactory.getLogger(SamordningVedtakService::class.java)
+
     suspend fun hentVedtak(
         vedtakId: Long,
-        tpnr: String,
-        organisasjonsnummer: String,
+        callerContext: CallerContext,
     ): SamordningVedtakDto {
-        val vedtak = vedtaksvurderingKlient.hentVedtak(vedtakId, organisasjonsnummer)
+        val vedtak = vedtaksvurderingKlient.hentVedtak(vedtakId, callerContext)
 
-        if (!tjenestepensjonKlient.harTpYtelseOnDate(
+        if (callerContext is MaskinportenTpContext &&
+            !tjenestepensjonKlient.harTpYtelseOnDate(
                 fnr = vedtak.fnr,
-                tpnr = tpnr,
+                tpnr = callerContext.tpnr,
                 fomDato = vedtak.virkningstidspunkt.atStartOfMonth(),
             )
         ) {
+            logger.info("Avslår forespørsel, manglende/ikke gyldig TP-ytelse")
             throw TjenestepensjonManglendeTilgangException("Ikke gyldig tpYtelse")
         }
 
@@ -41,17 +45,18 @@ class SamordningVedtakService(
     suspend fun hentVedtaksliste(
         virkFom: LocalDate,
         fnr: Folkeregisteridentifikator,
-        tpnr: Tjenestepensjonnummer,
-        organisasjonsnummer: String,
+        context: CallerContext,
     ): List<SamordningVedtakDto> {
-        if (!tjenestepensjonKlient.harTpForholdByDate(fnr.value, tpnr.value, virkFom)) {
+        if (context is MaskinportenTpContext && !tjenestepensjonKlient.harTpForholdByDate(fnr.value, context.tpnr, virkFom)
+        ) {
+            logger.info("Avslår forespørsel, manglende/ikke gyldig TP-forhold")
             throw TjenestepensjonManglendeTilgangException("Ikke gyldig tpforhold")
         }
 
         return vedtaksvurderingKlient.hentVedtaksliste(
             virkFom = virkFom,
             fnr = fnr.value,
-            organisasjonsnummer = organisasjonsnummer,
+            callerContext = context,
         )
             .map { it.mapSamordningsvedtak() }
     }

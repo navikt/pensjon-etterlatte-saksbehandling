@@ -12,6 +12,7 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.STOR_SNERK
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.person.HentAdressebeskyttelseRequest
 import no.nav.etterlatte.libs.common.person.HentFolkeregisterIdenterForAktoerIdBolkRequest
 import no.nav.etterlatte.libs.common.person.HentGeografiskTilknytningRequest
 import no.nav.etterlatte.libs.common.person.HentPdlIdentRequest
@@ -133,6 +134,20 @@ internal class PdlKlientTest {
 
             assertEquals("0301", personResponse.data?.hentGeografiskTilknytning?.gtKommune)
             assertEquals(PdlGtType.KOMMUNE, personResponse.data?.hentGeografiskTilknytning?.gtType)
+        }
+    }
+
+    @Test
+    fun `hentAdressebeskyttelse returnerer adressebeskyttelse`() {
+        mockEndpoint("/pdl/adressebeskyttelse.json")
+
+        runBlocking {
+            val response =
+                pdlKlient.hentAdressebeskyttelse(
+                    HentAdressebeskyttelseRequest(PersonIdent(STOR_SNERK.value)),
+                )
+
+            assertEquals(PdlGradering.FORTROLIG, response.data?.hentPerson?.adressebeskyttelse?.single()?.gradering)
         }
     }
 

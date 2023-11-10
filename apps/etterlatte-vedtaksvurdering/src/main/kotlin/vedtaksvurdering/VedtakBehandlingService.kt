@@ -297,7 +297,7 @@ class VedtakBehandlingService(
                 behandlingId = behandlingId,
             )
 
-        if (!samKlient.samordneVedtak(vedtak)) {
+        if (!samKlient.samordneVedtak(tilSamordningVedtakLocal, brukerTokenInfo)) {
             logger.info("Svar fra samordning: ikke nødvendig å vente [behandlingId=$behandlingId]")
 
             val vedtakEtterSvar = samordnetVedtak(behandlingId, brukerTokenInfo, tilSamordningVedtakLocal)

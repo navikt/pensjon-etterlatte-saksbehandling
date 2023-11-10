@@ -5,6 +5,8 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.beregning.grunnlag.BarnepensjonBeregningsGrunnlag
 import no.nav.etterlatte.beregning.grunnlag.GrunnlagMedPeriode
 import no.nav.etterlatte.libs.common.beregning.BeregningDTO
+import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
+import no.nav.etterlatte.libs.common.beregning.BeregningsMetodeBeregningsgrunnlag
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.etterlatte.rapidsandrivers.migrering.MigreringRequest
@@ -20,7 +22,10 @@ import rapidsandrivers.HENDELSE_DATA_KEY
 import rapidsandrivers.behandlingId
 import rapidsandrivers.migrering.ListenerMedLoggingOgFeilhaandtering
 
-internal class MigreringHendelserRiver(rapidsConnection: RapidsConnection, private val beregningService: BeregningService) :
+internal class MigreringHendelserRiver(
+    rapidsConnection: RapidsConnection,
+    private val beregningService: BeregningService,
+) :
     ListenerMedLoggingOgFeilhaandtering(Migreringshendelser.BEREGN) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -64,20 +69,50 @@ private fun verifiserNyBeregning(
     }
 
     with(beregning.beregningsperioder.first()) {
-        check(trygdetid == migreringRequest.beregning.anvendtTrygdetid.toInt()) {
-            "Beregning må være basert på samme trygdetid som i Pesys. Er $trygdetid i Gjenny" +
-                ", var ${migreringRequest.beregning.anvendtTrygdetid} i Pesys."
-        }
-        check(grunnbelop == migreringRequest.beregning.g.toInt()) {
+        check(grunnbelop == migreringRequest.beregning.g) {
             "Beregning må være basert på samme G som i Pesys. Er $grunnbelop i Gjenny, " +
                 "var ${migreringRequest.beregning.g} i Pesys."
         }
-        check(utbetaltBeloep >= migreringRequest.beregning.brutto.toInt()) {
+        check(utbetaltBeloep >= migreringRequest.beregning.brutto) {
             "Man skal ikke kunne komme dårligere ut på nytt regelverk. " +
-                "Beregnet beløp i Gjenny er lavere enn dagens beløp i Pesys."
+                "Beregnet beløp i Gjenny ($utbetaltBeloep) er lavere enn dagens beløp i Pesys " +
+                "(${migreringRequest.beregning.brutto})."
         }
-        // todo: Vi må også verifisere at samme beregningsmetode har blitt benyttet,
-        //  f. eks nasjonal, prorata og evt. avkorting (uføre, inst. opphold, fengsel)
+        check(beregningsMetode == migreringRequest.finnBeregningsmetode()) {
+            "Migrerte saker skal benytte samme beregningsmetode som Pesys. " +
+                "Kun folketrygd (nasjonal) og EOS (prorata) er støttet."
+        }
+
+        when (migreringRequest.finnBeregningsmetode()) {
+            BeregningsMetode.NASJONAL -> {
+                check(trygdetid == migreringRequest.beregning.anvendtTrygdetid) {
+                    "Beregning må være basert på samme trygdetid som i Pesys. Er $trygdetid i Gjenny" +
+                        ", var ${migreringRequest.beregning.anvendtTrygdetid} i Pesys."
+                }
+                check(trygdetid == samletNorskTrygdetid) {
+                    "Trygdetid ($trygdetid) skal ha samme verdi som samletNorskTrygdetid ($samletNorskTrygdetid) i " +
+                        "nasjonal beregning."
+                }
+            }
+            BeregningsMetode.PRORATA -> {
+                check(broek != null && broek == migreringRequest.beregning.prorataBroek) {
+                    "Det er brukt ulik proratabrøk i Pesys (${migreringRequest.beregning.prorataBroek}) og Gjenny " +
+                        "($broek), beregningen er trolig feil."
+                }
+                val anvendtTTBroek =
+                    migreringRequest.beregning.anvendtTrygdetid *
+                        migreringRequest.beregning.prorataBroek!!.teller /
+                        migreringRequest.beregning.prorataBroek!!.nevner
+                check(trygdetid == anvendtTTBroek) {
+                    "Trygdetid har blitt regnet ulikt i beregning mellom Pesys og Gjenny"
+                }
+                check(samletTeoretiskTrygdetid == migreringRequest.beregning.anvendtTrygdetid) {
+                    "Anvendt trygdetid i Pesys (${migreringRequest.beregning.anvendtTrygdetid}) stemmer ikke overens " +
+                        "med samletTeoretiskTrygdetid $samletTeoretiskTrygdetid som er brukt i Gjenny"
+                }
+            }
+            BeregningsMetode.BEST -> throw IllegalStateException("Migrering støtter ikke beregningsMetode.BEST")
+        }
     }
 }
 
@@ -92,4 +127,15 @@ private fun tilGrunnlagDTO(request: MigreringRequest): BarnepensjonBeregningsGru
                 ),
             ),
         institusjonsopphold = emptyList(),
+        beregningsMetode = BeregningsMetodeBeregningsgrunnlag(request.finnBeregningsmetode(), "Migrert fra Pesys"),
     )
+
+private fun MigreringRequest.finnBeregningsmetode(): BeregningsMetode =
+    when (val beregningsMetode = this.beregning.meta?.beregningsMetodeType) {
+        "FOLKETRYGD" -> BeregningsMetode.NASJONAL
+        "EOS" -> BeregningsMetode.PRORATA
+        "USA" -> throw IllegalStateException("Vi klarer ikke beregne saker etter beregningsmetode USA")
+        "NORDISK" -> throw IllegalStateException("Vi klarer ikke beregne etter beregningsmetode NORDISK")
+        null -> throw IllegalStateException("Vi kan ikke beregne saker som har vært overstyrt i Pesys")
+        else -> throw IllegalStateException("Har fått inn sak med ukjent beregningsmetode: $beregningsMetode")
+    }

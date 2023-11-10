@@ -1,5 +1,6 @@
 plugins {
     kotlin("jvm")
+    id("etterlatte.libs")
 }
 
 repositories {
@@ -26,6 +27,7 @@ dependencies {
     api(project(":libs:etterlatte-token-model"))
 
     implementation(libs.navfelles.tokenclientcore)
+    implementation(project(":libs:saksbehandling-common"))
 
     testImplementation(libs.navfelles.tokenvalidationktor2)
     testImplementation(libs.kotlinx.coroutinestest)

@@ -3,8 +3,10 @@ package no.nav.etterlatte.person
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.pdl.FantIkkePersonException
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
+import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.GeografiskTilknytning
+import no.nav.etterlatte.libs.common.person.HentAdressebeskyttelseRequest
 import no.nav.etterlatte.libs.common.person.HentFolkeregisterIdenterForAktoerIdBolkRequest
 import no.nav.etterlatte.libs.common.person.HentGeografiskTilknytningRequest
 import no.nav.etterlatte.libs.common.person.HentPdlIdentRequest
@@ -14,6 +16,7 @@ import no.nav.etterlatte.libs.common.person.PDLIdentGruppeTyper
 import no.nav.etterlatte.libs.common.person.PdlIdentifikator
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.PersonRolle
+import no.nav.etterlatte.libs.common.person.hentPrioritertGradering
 import no.nav.etterlatte.pdl.HistorikkForeldreansvar
 import no.nav.etterlatte.pdl.ParallelleSannheterKlient
 import no.nav.etterlatte.pdl.PdlKlient
@@ -53,6 +56,28 @@ class PersonService(
                     hentPerson = it.data.hentPerson,
                     saktype = request.saktype,
                 )
+            }
+        }
+    }
+
+    suspend fun hentAdressebeskyttelseGradering(request: HentAdressebeskyttelseRequest): AdressebeskyttelseGradering {
+        logger.info("Henter person med fnr=${request.ident} fra PDL")
+
+        return pdlKlient.hentAdressebeskyttelse(request).let {
+            if (it.data?.hentPerson == null) {
+                val pdlFeil = it.errors?.asFormatertFeil()
+                if (it.errors?.personIkkeFunnet() == true) {
+                    throw FantIkkePersonException("Fant ikke personen ${request.ident}")
+                } else {
+                    throw PdlForesporselFeilet(
+                        "Kunne ikke hente person med fnr=${request.ident} fra PDL: $pdlFeil",
+                    )
+                }
+            } else {
+                it.data.hentPerson.adressebeskyttelse
+                    .mapNotNull { adr -> adr.gradering }
+                    .map { pdlGradering -> AdressebeskyttelseGradering.valueOf(pdlGradering.name) }
+                    .hentPrioritertGradering()
             }
         }
     }

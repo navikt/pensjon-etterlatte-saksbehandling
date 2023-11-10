@@ -45,23 +45,19 @@ internal fun Route.tilbakekrevingRoutes(service: TilbakekrevingService) {
 
         route("vedtak") {
             post("opprett") {
-                // TODO tilgangsjekk
                 service.opprettVedtak(behandlingId, brukerTokenInfo)
                 call.respond(HttpStatusCode.OK)
             }
             post("fatt") {
-                // TODO tilgangsjekk
                 service.fattVedtak(behandlingId, brukerTokenInfo)
                 call.respond(HttpStatusCode.OK)
             }
             post("attester") {
-                // TODO tilgangsjekk
                 val (kommentar) = call.receive<TilbakekrevingAttesterRequest>()
                 service.attesterVedtak(behandlingId, kommentar, brukerTokenInfo)
                 call.respond(HttpStatusCode.OK)
             }
             post("underkjenn") {
-                // TODO tilgangsjekk
                 val (kommentar, valgtBegrunnelse) = call.receive<TilbakekrevingUnderkjennRequest>()
                 service.underkjennVedtak(behandlingId, kommentar, valgtBegrunnelse, brukerTokenInfo)
                 call.respond(HttpStatusCode.OK)

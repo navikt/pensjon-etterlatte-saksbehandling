@@ -57,9 +57,9 @@ spec:
       #sette tilbake til none senere
       value: earliest
     - name: PEN_URL
-      value: https://pensjon-pen-proxy-fss-q2.dev-fss-pub.nais.io
+      value: https://pensjon-pen-q2.dev-fss-pub.nais.io/pen/springapi
     - name: PEN_CLIENT_ID
-      value: d0883b92-b866-42cd-a216-5a0eec745e05
+      value: ddd52335-cfe8-4ee9-9e68-416a5ab26efa
     - name: ETTERLATTE_PDLTJENESTER_URL
       value: http://etterlatte-pdltjenester
     - name: PDLTJENESTER_AZURE_SCOPE
@@ -72,4 +72,4 @@ spec:
         - application: etterlatte-pdltjenester
       external:
         - host: etterlatte-unleash-api.nav.cloud.nais.io
-        - host: pensjon-pen-proxy-fss-q2.dev-fss-pub.nais.io
+        - host: pensjon-pen-q2.dev-fss-pub.nais.io

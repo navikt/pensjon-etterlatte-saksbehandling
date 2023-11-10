@@ -10,9 +10,10 @@ import VurderHendelseModal from '~components/person/VurderHendelseModal'
 import UhaandtertHendelse from '~components/person/uhaandtereHendelser/UhaandtertHendelse'
 import { IBehandlingsType } from '~shared/types/IDetaljertBehandling'
 import { erFerdigBehandlet } from '~components/behandling/felles/utils'
-import { hentGrunnlagsendringshendelserForPerson, hentStoettedeRevurderinger } from '~shared/api/behandling'
+import { hentGrunnlagsendringshendelserForPerson } from '~shared/api/behandling'
 import Spinner from '~shared/Spinner'
 import { ISak } from '~shared/types/sak'
+import { hentStoettedeRevurderinger } from '~shared/api/revurdering'
 
 type Props = {
   sak: ISak

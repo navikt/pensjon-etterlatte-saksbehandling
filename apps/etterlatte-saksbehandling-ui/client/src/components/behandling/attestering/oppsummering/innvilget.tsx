@@ -4,7 +4,7 @@ import { useAppSelector } from '~store/Store'
 import { IBehandlingInfo } from '~components/behandling/sidemeny/IBehandlingInfo'
 import { useVedtaksResultat, VedtakResultat } from '~components/behandling/useVedtaksResultat'
 
-function innvilgelsestekst(vedtaksresultat: VedtakResultat): string {
+function innvilgelsestekst(vedtaksresultat: VedtakResultat | null): string {
   switch (vedtaksresultat) {
     case 'innvilget':
       return 'Innvilget'
@@ -14,14 +14,14 @@ function innvilgelsestekst(vedtaksresultat: VedtakResultat): string {
       return 'Avslått'
     case 'endring':
       return 'Revurdert'
-    case 'uavklart':
-      return 'Uavklart'
+    case null:
+      return ''
   }
 }
 
-function Resultat({ vedtaksresultat }: { vedtaksresultat: VedtakResultat }) {
+function Resultat({ vedtaksresultat }: { vedtaksresultat: VedtakResultat | null }) {
   const tekst = innvilgelsestekst(vedtaksresultat)
-  const erInnvilget = vedtaksresultat !== 'uavklart' && vedtaksresultat !== 'avslag'
+  const erInnvilget = vedtaksresultat == 'innvilget' || vedtaksresultat == 'endring'
   return <UnderOverskrift innvilget={erInnvilget}>{tekst}</UnderOverskrift>
 }
 

@@ -1,7 +1,7 @@
 export interface Generellbehandling {
   id: string
   sakId: number
-  innhold: Innhold
+  innhold: Innhold | null
   type: GenerellBehandlingType
   opprettet: Date
   status: Status
@@ -25,20 +25,13 @@ export type Innhold = KravpakkeUtland | Annen
 export interface KravpakkeUtland {
   type: GenerellBehandlingKravpakkeUtlandType
   landIsoKode?: string[]
-  dokumenter?: Dokumenter
+  dokumenter?: DokumentSendtMedDato[]
   rinanummer?: string
   begrunnelse?: string
 }
 
-export interface Dokumenter {
-  p2100: DokumentSendtMedDato
-  p5000: DokumentSendtMedDato
-  p3000: DokumentSendtMedDato
-  p6000: DokumentSendtMedDato
-  p4000: DokumentSendtMedDato
-}
-
 export interface DokumentSendtMedDato {
+  dokumenttype: string
   sendt: boolean
   dato?: string
 }

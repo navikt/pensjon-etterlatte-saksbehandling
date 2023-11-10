@@ -14,6 +14,10 @@ data class HentPdlIdentRequest(
     val ident: PersonIdent,
 )
 
+data class HentAdressebeskyttelseRequest(
+    val ident: PersonIdent,
+)
+
 data class PersonIdent
     @JsonCreator
     constructor(

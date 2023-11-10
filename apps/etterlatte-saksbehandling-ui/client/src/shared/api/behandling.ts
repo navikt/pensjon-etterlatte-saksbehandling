@@ -4,14 +4,12 @@ import {
   IEtterbetaling,
   IGyldighetResultat,
   IKommerBarnetTilgode,
-  IUtenlandstilsnitt,
   NyBehandlingRequest,
   Virkningstidspunkt,
 } from '~shared/types/IDetaljertBehandling'
 import { apiClient, ApiResponse } from './apiClient'
 import { ManueltOpphoerDetaljer } from '~components/behandling/manueltopphoeroversikt/ManueltOpphoerOversikt'
 import { Grunnlagsendringshendelse, GrunnlagsendringsListe, IBehandlingListe } from '~components/person/typer'
-import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
 import { InstitusjonsoppholdBegrunnelse } from '~components/person/uhaandtereHendelser/InstitusjonsoppholdVurderingBegrunnelse'
 import { FoersteVirk, ISak, SakType } from '~shared/types/sak'
 import { InstitusjonsoppholdMedKilde } from '~components/person/uhaandtereHendelser/HistoriskeHendelser'
@@ -93,38 +91,6 @@ export const lagreBegrunnelseKommerBarnetTilgode = async (args: {
 }): Promise<ApiResponse<IKommerBarnetTilgode>> => {
   return apiClient.post(`/behandling/${args.behandlingId}/kommerbarnettilgode`, {
     svar: args.svar,
-    begrunnelse: args.begrunnelse,
-  })
-}
-
-export const opprettRevurdering = async (args: {
-  sakId: number
-  aarsak: Revurderingaarsak
-  paaGrunnAvHendelseId?: string
-  begrunnelse?: string
-  fritekstAarsak?: string
-}): Promise<ApiResponse<string>> => {
-  return apiClient.post(`/revurdering/${args.sakId}`, {
-    aarsak: args.aarsak,
-    paaGrunnAvHendelseId: args.paaGrunnAvHendelseId,
-    begrunnelse: args.begrunnelse,
-    fritekstAarsak: args.fritekstAarsak,
-  })
-}
-
-export const hentStoettedeRevurderinger = async (args: {
-  sakType: SakType
-}): Promise<ApiResponse<Array<Revurderingaarsak>>> => {
-  return apiClient.get(`/stoettederevurderinger/${args.sakType}`)
-}
-
-export const lagreUtenlandstilsnitt = async (args: {
-  behandlingId: string
-  begrunnelse: string
-  svar: string
-}): Promise<ApiResponse<IUtenlandstilsnitt>> => {
-  return apiClient.post(`/behandling/${args.behandlingId}/utenlandstilsnitt`, {
-    utenlandstilsnittType: args.svar,
     begrunnelse: args.begrunnelse,
   })
 }

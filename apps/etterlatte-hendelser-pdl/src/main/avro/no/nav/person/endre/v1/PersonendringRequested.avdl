@@ -23,7 +23,7 @@ protocol PersonendringRequestedV1 {
 
   record PersonendringRequested {
     long endringId;
-    string ident;
+    union { null, string } ident = null;
     union { null, boolean } opprettNyPerson = null;
     array<PersonopplysningRequested> endringer;
     Metadata metadata;

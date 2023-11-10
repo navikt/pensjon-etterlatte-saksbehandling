@@ -32,7 +32,6 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import rapidsandrivers.BEHANDLING_ID_KEY
 import rapidsandrivers.HENDELSE_DATA_KEY
-import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.YearMonth
@@ -73,14 +72,14 @@ internal class MigreringHendelserRiverTest {
                 avdoedForelder = listOf(AvdoedForelder(AVDOED_FOEDSELSNUMMER, Tidspunkt.now())),
                 gjenlevendeForelder = null,
                 virkningstidspunkt = YearMonth.now(),
-                foersteVirkningstidspunkt = YearMonth.now().minusYears(10),
                 beregning =
                     Beregning(
-                        brutto = BigDecimal(1000),
-                        netto = BigDecimal(1000),
-                        anvendtTrygdetid = BigDecimal(40),
+                        brutto = 3500,
+                        netto = 3500,
+                        anvendtTrygdetid = 40,
                         datoVirkFom = Tidspunkt.now(),
-                        g = BigDecimal(100000),
+                        prorataBroek = null,
+                        g = 100_000,
                     ),
                 trygdetid =
                     Trygdetid(
@@ -102,9 +101,6 @@ internal class MigreringHendelserRiverTest {
                                 poengIInnAar = false,
                                 poengIUtAar = false,
                                 ikkeIProrata = false,
-                                faktiskTrygdetid = BigDecimal(20.5),
-                                fremtidigTrygdetid = BigDecimal(15),
-                                anvendtTrygdetid = BigDecimal(35.5),
                             ),
                             Trygdetidsgrunnlag(
                                 trygdetidGrunnlagId = 3L,
@@ -123,9 +119,6 @@ internal class MigreringHendelserRiverTest {
                                 poengIInnAar = false,
                                 poengIUtAar = false,
                                 ikkeIProrata = false,
-                                faktiskTrygdetid = BigDecimal(20.5),
-                                fremtidigTrygdetid = BigDecimal(15),
-                                anvendtTrygdetid = BigDecimal(35.5),
                             ),
                         ),
                     ),
@@ -193,14 +186,14 @@ internal class MigreringHendelserRiverTest {
                 avdoedForelder = listOf(AvdoedForelder(AVDOED_FOEDSELSNUMMER, Tidspunkt.now())),
                 gjenlevendeForelder = null,
                 virkningstidspunkt = YearMonth.now(),
-                foersteVirkningstidspunkt = YearMonth.now().minusYears(10),
                 beregning =
                     Beregning(
-                        brutto = BigDecimal(1000),
-                        netto = BigDecimal(1000),
-                        anvendtTrygdetid = BigDecimal(40),
+                        brutto = 3500,
+                        netto = 3500,
+                        anvendtTrygdetid = 40,
                         datoVirkFom = Tidspunkt.now(),
-                        g = BigDecimal(100000),
+                        prorataBroek = null,
+                        g = 100_000,
                     ),
                 trygdetid = Trygdetid(emptyList()),
                 spraak = Spraak.NN,
@@ -283,14 +276,14 @@ internal class MigreringHendelserRiverTest {
                 avdoedForelder = listOf(AvdoedForelder(AVDOED_FOEDSELSNUMMER, Tidspunkt.now())),
                 gjenlevendeForelder = null,
                 virkningstidspunkt = YearMonth.now(),
-                foersteVirkningstidspunkt = YearMonth.now().minusYears(10),
                 beregning =
                     Beregning(
-                        brutto = BigDecimal(1000),
-                        netto = BigDecimal(1000),
-                        anvendtTrygdetid = BigDecimal(40),
+                        brutto = 3500,
+                        netto = 3500,
+                        anvendtTrygdetid = 40,
                         datoVirkFom = Tidspunkt.now(),
-                        g = BigDecimal(100000),
+                        prorataBroek = null,
+                        g = 100_000,
                     ),
                 trygdetid =
                     Trygdetid(
@@ -312,9 +305,6 @@ internal class MigreringHendelserRiverTest {
                                 poengIInnAar = false,
                                 poengIUtAar = false,
                                 ikkeIProrata = false,
-                                faktiskTrygdetid = BigDecimal(20.5),
-                                fremtidigTrygdetid = BigDecimal(15),
-                                anvendtTrygdetid = BigDecimal(35.5),
                             ),
                         ),
                     ),
@@ -361,6 +351,124 @@ internal class MigreringHendelserRiverTest {
             objectMapper.readValue<TrygdetidDto>(inspector.inspektør.message(0).get(TRYGDETID_KEY).asText())
         assertTrue(beregnetTrygdetid.captured.overstyrt)
         assertTrue(trygdetidKafka.beregnetTrygdetid!!.resultat.overstyrt)
+        coVerify(exactly = 1) { trygdetidService.beregnTrygdetid(behandlingId.captured) }
+        coVerify(exactly = 1) { trygdetidService.beregnTrygdetidGrunnlag(behandlingId.captured, any()) }
+        coVerify(exactly = 1) {
+            trygdetidService.overstyrBeregnetTrygdetid(
+                behandlingId.captured,
+                beregnetTrygdetid.captured,
+            )
+        }
+    }
+
+    @Test
+    fun `skal overstyre resultat dersom det ikke stemmer overens med anvendt fra Pesys`() {
+        val behandlingId = slot<UUID>()
+        val beregnetTrygdetid = slot<DetaljertBeregnetTrygdetidResultat>()
+        val trygdetidDto =
+            TrygdetidDto(
+                id = UUID.randomUUID(),
+                behandlingId = UUID.randomUUID(),
+                beregnetTrygdetid =
+                    DetaljertBeregnetTrygdetidDto(
+                        DetaljertBeregnetTrygdetidResultat.fraSamletTrygdetidNorge(40),
+                        Tidspunkt.now(),
+                    ),
+                trygdetidGrunnlag = emptyList(),
+                opplysninger =
+                    GrunnlagOpplysningerDto(
+                        avdoedDoedsdato = null,
+                        avdoedFoedselsdato = null,
+                        avdoedFylteSeksten = null,
+                        avdoedFyllerSeksti = null,
+                    ),
+                overstyrtNorskPoengaar = null,
+                ident = AVDOED_FOEDSELSNUMMER.value,
+            )
+        val request =
+            MigreringRequest(
+                pesysId = PesysId(1),
+                enhet = Enhet("4817"),
+                soeker = SOEKER_FOEDSELSNUMMER,
+                avdoedForelder = listOf(AvdoedForelder(AVDOED_FOEDSELSNUMMER, Tidspunkt.now())),
+                gjenlevendeForelder = null,
+                virkningstidspunkt = YearMonth.now(),
+                beregning =
+                    Beregning(
+                        brutto = 3500,
+                        netto = 3500,
+                        anvendtTrygdetid = 30,
+                        datoVirkFom = Tidspunkt.now(),
+                        prorataBroek = null,
+                        g = 100_000,
+                    ),
+                trygdetid =
+                    Trygdetid(
+                        listOf(
+                            Trygdetidsgrunnlag(
+                                trygdetidGrunnlagId = 1L,
+                                personGrunnlagId = 2L,
+                                landTreBokstaver = "NOR",
+                                datoFom =
+                                    Tidspunkt.ofNorskTidssone(
+                                        LocalDate.parse("2000-01-01"),
+                                        LocalTime.of(0, 0, 0),
+                                    ),
+                                datoTom =
+                                    Tidspunkt.ofNorskTidssone(
+                                        LocalDate.parse("2020-01-01"),
+                                        LocalTime.of(0, 0, 0),
+                                    ),
+                                poengIInnAar = false,
+                                poengIUtAar = false,
+                                ikkeIProrata = false,
+                            ),
+                        ),
+                    ),
+                spraak = Spraak.NN,
+            )
+        every { trygdetidService.beregnTrygdetid(capture(behandlingId)) } returns trygdetidDto
+        every {
+            trygdetidService.beregnTrygdetidGrunnlag(
+                any(),
+                any(),
+            )
+        }
+        every {
+            trygdetidService.overstyrBeregnetTrygdetid(
+                any(),
+                capture(beregnetTrygdetid),
+            )
+        } returns
+            trygdetidDto.copy(
+                beregnetTrygdetid =
+                    trygdetidDto.beregnetTrygdetid!!.copy(
+                        resultat =
+                            trygdetidDto.beregnetTrygdetid!!.resultat.copy(
+                                overstyrt = true,
+                            ),
+                    ),
+            )
+
+        val melding =
+            JsonMessage.newMessage(
+                Migreringshendelser.TRYGDETID,
+                mapOf(
+                    BEHANDLING_ID_KEY to "a9d42eb9-561f-4320-8bba-2ba600e66e21",
+                    VILKAARSVURDERT_KEY to "vilkaarsvurdert",
+                    HENDELSE_DATA_KEY to request,
+                ),
+            )
+
+        inspector.sendTestMessage(melding.toJson())
+
+        assertEquals(UUID.fromString("a9d42eb9-561f-4320-8bba-2ba600e66e21"), behandlingId.captured)
+        assertEquals(1, inspector.inspektør.size)
+        val trygdetidKafka: TrygdetidDto =
+            objectMapper.readValue<TrygdetidDto>(inspector.inspektør.message(0).get(TRYGDETID_KEY).asText())
+        assertTrue(beregnetTrygdetid.captured.overstyrt)
+        assertTrue(trygdetidKafka.beregnetTrygdetid!!.resultat.overstyrt)
+        assertEquals(request.beregning.anvendtTrygdetid, beregnetTrygdetid.captured.samletTrygdetidNorge)
         coVerify(exactly = 1) { trygdetidService.beregnTrygdetid(behandlingId.captured) }
         coVerify(exactly = 1) { trygdetidService.beregnTrygdetidGrunnlag(behandlingId.captured, any()) }
         coVerify(exactly = 1) {

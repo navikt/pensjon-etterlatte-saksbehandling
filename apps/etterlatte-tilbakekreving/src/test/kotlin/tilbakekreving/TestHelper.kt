@@ -1,13 +1,14 @@
 package no.nav.etterlatte.tilbakekreving
 
-import no.nav.etterlatte.tilbakekreving.vedtak.FattetVedtak
-import no.nav.etterlatte.tilbakekreving.vedtak.TilbakekrevingAarsak
-import no.nav.etterlatte.tilbakekreving.vedtak.TilbakekrevingPeriode
-import no.nav.etterlatte.tilbakekreving.vedtak.TilbakekrevingResultat
-import no.nav.etterlatte.tilbakekreving.vedtak.TilbakekrevingSkyld
-import no.nav.etterlatte.tilbakekreving.vedtak.TilbakekrevingVedtak
-import no.nav.etterlatte.tilbakekreving.vedtak.TilbakekrevingVurdering
-import no.nav.etterlatte.tilbakekreving.vedtak.Tilbakekrevingsbelop
+import no.nav.etterlatte.libs.common.tilbakekreving.FattetVedtak
+import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingAarsak
+import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingHjemmel
+import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingPeriodeVedtak
+import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingResultat
+import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingSkyld
+import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVedtak
+import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingsbelopFeilkontoVedtak
+import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingsbelopYtelseVedtak
 import java.io.FileNotFoundException
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -28,10 +29,10 @@ fun tilbakekrevingsvedtak(vedtakId: Long = 1) =
             ),
         perioder =
             listOf(
-                TilbakekrevingPeriode(
+                TilbakekrevingPeriodeVedtak(
                     maaned = YearMonth.of(2023, 1),
                     ytelse =
-                        Tilbakekrevingsbelop(
+                        TilbakekrevingsbelopYtelseVedtak(
                             klasseKode = "YTEL",
                             bruttoUtbetaling = 1000,
                             nyBruttoUtbetaling = 500,
@@ -46,27 +47,16 @@ fun tilbakekrevingsvedtak(vedtakId: Long = 1) =
                             rentetillegg = 50,
                         ),
                     feilkonto =
-                        Tilbakekrevingsbelop(
+                        TilbakekrevingsbelopFeilkontoVedtak(
                             klasseKode = "FEIL",
                             bruttoUtbetaling = 0,
-                            nyBruttoUtbetaling = 0,
-                            skatteprosent = BigDecimal.ZERO,
-                            beregnetFeilutbetaling = 500,
+                            nyBruttoUtbetaling = 500,
                             bruttoTilbakekreving = 0,
-                            nettoTilbakekreving = 0,
-                            skatt = 0,
-                            skyld = TilbakekrevingSkyld.BRUKER,
-                            resultat = TilbakekrevingResultat.FULL_TILBAKEKREV,
-                            tilbakekrevingsprosent = 0,
-                            rentetillegg = 0,
                         ),
                 ),
             ),
-        vurdering =
-            TilbakekrevingVurdering(
-                aarsak = TilbakekrevingAarsak.DODSFALL,
-                hjemmel = "hjemmel",
-            ),
+        aarsak = TilbakekrevingAarsak.DODSFALL,
+        hjemmel = TilbakekrevingHjemmel.TJUETO_FEMTEN_SEKS,
         kravgrunnlagId = "1",
         kontrollfelt = "2023-09-19-10.01.03.842916",
     )

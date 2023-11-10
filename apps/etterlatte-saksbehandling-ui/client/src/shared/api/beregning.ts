@@ -5,6 +5,8 @@ import {
   BeregningsGrunnlagOMSDto,
   BeregningsGrunnlagOMSPostDto,
   BeregningsGrunnlagPostDto,
+  OverstyrBeregning,
+  OverstyrBeregningGrunnlagPostDTO,
 } from '~shared/types/Beregning'
 
 export const hentBeregning = async (behandlingId: string): Promise<ApiResponse<Beregning>> => {
@@ -45,4 +47,21 @@ export const hentBeregningsGrunnlagOMS = async (
   return apiClient.get<BeregningsGrunnlagOMSDto | null>(
     `/beregning/beregningsgrunnlag/${behandlingId}/omstillingstoenad`
   )
+}
+
+export const hentOverstyrBeregning = async (behandlingId: string): Promise<ApiResponse<OverstyrBeregning | null>> => {
+  return apiClient.get<OverstyrBeregning | null>(`/beregning/${behandlingId}/overstyrt`)
+}
+
+export const hentOverstyrBeregningGrunnlag = async (
+  behandlingId: string
+): Promise<ApiResponse<OverstyrBeregningGrunnlagPostDTO>> => {
+  return apiClient.get(`/beregning/beregningsgrunnlag/${behandlingId}/overstyr`)
+}
+
+export const lagreOverstyrBeregningGrunnlag = async (args: {
+  behandlingId: string
+  grunnlag: OverstyrBeregningGrunnlagPostDTO
+}): Promise<ApiResponse<OverstyrBeregningGrunnlagPostDTO>> => {
+  return apiClient.post(`/beregning/beregningsgrunnlag/${args.behandlingId}/overstyr`, { ...args.grunnlag })
 }

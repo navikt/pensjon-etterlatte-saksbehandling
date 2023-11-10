@@ -1,11 +1,11 @@
 package no.nav.etterlatte.rapidsandrivers.migrering
 
 import no.nav.etterlatte.brev.model.Spraak
+import no.nav.etterlatte.libs.common.IntBroek
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import java.math.BigDecimal
 import java.time.YearMonth
 
 data class MigreringRequest(
@@ -15,7 +15,6 @@ data class MigreringRequest(
     val gjenlevendeForelder: Folkeregisteridentifikator?,
     val avdoedForelder: List<AvdoedForelder>,
     val virkningstidspunkt: YearMonth,
-    val foersteVirkningstidspunkt: YearMonth,
     val beregning: Beregning,
     val trygdetid: Trygdetid,
     val flyktningStatus: Boolean = false,
@@ -41,11 +40,12 @@ data class PesysId(val id: Long)
 data class Enhet(val nr: String)
 
 data class Beregning(
-    val brutto: BigDecimal,
-    val netto: BigDecimal,
-    val anvendtTrygdetid: BigDecimal,
+    val brutto: Int,
+    val netto: Int,
+    val anvendtTrygdetid: Int,
     val datoVirkFom: Tidspunkt,
-    val g: BigDecimal,
+    val g: Int,
+    val prorataBroek: IntBroek?,
     val meta: BeregningMeta? = null,
 )
 
@@ -69,7 +69,4 @@ data class Trygdetidsgrunnlag(
     val poengIInnAar: Boolean,
     val poengIUtAar: Boolean,
     val ikkeIProrata: Boolean,
-    val faktiskTrygdetid: BigDecimal,
-    val fremtidigTrygdetid: BigDecimal,
-    val anvendtTrygdetid: BigDecimal,
 )

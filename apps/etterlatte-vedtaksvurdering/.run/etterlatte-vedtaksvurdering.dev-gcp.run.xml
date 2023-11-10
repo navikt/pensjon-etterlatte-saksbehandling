@@ -16,6 +16,8 @@
       <env name="ETTERLATTE_VILKAARSVURDERING_CLIENT_ID" value="dev-gcp.etterlatte.etterlatte-vilkaarsvurdering" />
       <env name="ETTERLATTE_VILKAARSVURDERING_URL" value="https://etterlatte-vilkaarsvurdering.intern.dev.nav.no" />
       <env name="BEHANDLING_AZURE_SCOPE" value="api://dev-gcp.etterlatte.etterlatte-behandling/.default" />
+      <env name="SAMORDNEVEDTAK_URL" value="https://sam-q2.dev-fss-pub.nais.io" />
+      <env name="SAMORDNEVEDTAK_AZURE_SCOPE" value="api://dev-fss.pensjonsamhandling.sam-q2/.default" />
     </envs>
     <option name="MAIN_CLASS_NAME" value="no.nav.etterlatte.ApplicationKt" />
     <module name="pensjon-etterlatte-saksbehandling.apps.etterlatte-vedtaksvurdering.main" />

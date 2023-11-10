@@ -11,6 +11,7 @@ import io.ktor.http.fullPath
 import io.ktor.http.headersOf
 import io.ktor.serialization.jackson.JacksonConverter
 import io.mockk.mockk
+import io.mockk.verify
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.tilbakekreving.hendelse.TilbakekrevingHendelseRepository
@@ -22,7 +23,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
 internal class TilbakekrevingKlientTest {
-    private val tilbakekrevingHendelseRepository = mockk<TilbakekrevingHendelseRepository>(relaxed = true)
+    private val hendelseRepository = mockk<TilbakekrevingHendelseRepository>(relaxed = true)
 
     @Test
     fun `skal kunne sende tilbakekrevingvedtak og haandtere ok fra tilbakekrevingskomponenten`() {
@@ -32,10 +33,18 @@ internal class TilbakekrevingKlientTest {
             }
 
         val httpClient = mockedHttpClient("/tilbakekreving/tilbakekrevingsvedtak", HttpMethod.Post, response)
-        val tilbakekrevingKlient = TilbakekrevingKlient("", httpClient, tilbakekrevingHendelseRepository)
+        val tilbakekrevingKlient = TilbakekrevingKlient("", httpClient, hendelseRepository)
 
         val tilbakekrevingsvedtak = tilbakekrevingsvedtak()
         tilbakekrevingKlient.sendTilbakekrevingsvedtak(tilbakekrevingsvedtak)
+
+        verify {
+            hendelseRepository.lagreTilbakekrevingsvedtakSendt(tilbakekrevingsvedtak.kravgrunnlagId, any())
+            hendelseRepository.lagreTilbakekrevingsvedtakKvitteringMottatt(
+                tilbakekrevingsvedtak.kravgrunnlagId,
+                any(),
+            )
+        }
     }
 
     @Test
@@ -46,12 +55,20 @@ internal class TilbakekrevingKlientTest {
             }
 
         val httpClient = mockedHttpClient("/tilbakekreving/tilbakekrevingsvedtak", HttpMethod.Post, response)
-        val tilbakekrevingKlient = TilbakekrevingKlient("", httpClient, tilbakekrevingHendelseRepository)
+        val tilbakekrevingKlient = TilbakekrevingKlient("", httpClient, hendelseRepository)
 
         val tilbakekrevingsvedtak = tilbakekrevingsvedtak()
 
         assertThrows<Exception>("Tilbakekrevingsvedtak feilet med alvorlighetsgrad 08") {
             tilbakekrevingKlient.sendTilbakekrevingsvedtak(tilbakekrevingsvedtak)
+        }
+
+        verify {
+            hendelseRepository.lagreTilbakekrevingsvedtakSendt(tilbakekrevingsvedtak.kravgrunnlagId, any())
+            hendelseRepository.lagreTilbakekrevingsvedtakKvitteringMottatt(
+                tilbakekrevingsvedtak.kravgrunnlagId,
+                any(),
+            )
         }
     }
 
@@ -75,6 +92,7 @@ internal class TilbakekrevingKlientTest {
                                 HttpStatusCode.OK,
                                 headersOf("Content-Type" to listOf(ContentType.Application.Json.toString())),
                             )
+
                         else -> error("Unhandled ${request.url.fullPath}")
                     }
                 }

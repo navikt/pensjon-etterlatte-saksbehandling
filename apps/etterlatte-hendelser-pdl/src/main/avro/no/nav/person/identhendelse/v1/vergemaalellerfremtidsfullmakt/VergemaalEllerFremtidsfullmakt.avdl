@@ -8,7 +8,22 @@ protocol VergemaalEllerFremtidsfullmaktV1{
     union { null, no.nav.person.identhendelse.v1.common.Personnavn } navn = null;
     union { null, string } foedselsEllerDNummer = null;
     union { null, string } omfang = null;
-    boolean omfangetErInnenPersonligOmraade;
+    union{null, boolean} omfangetErInnenPersonligOmraade = null;
+    union{null, IdentifiserendeInformasjon} identifiserendeInformasjon = null;
+    union{null, array<Tjenesteomraade>} tjenesteomraade = null;
+
+  }
+
+  record Tjenesteomraade {
+    string tjenesteoppgave;
+    string tjenestevirksomhet;
+  }
+
+  record IdentifiserendeInformasjon {
+    union{null, date} foedselsdato = null;
+    union{null, string} kjoenn = null;
+    union{null, no.nav.person.identhendelse.v1.common.Personnavn} personnavn = null;
+    union{null, array<string>} statsborgerskap = null;
   }
 
   record VergemaalEllerFremtidsfullmakt {

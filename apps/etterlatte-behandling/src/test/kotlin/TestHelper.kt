@@ -24,7 +24,7 @@ import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.behandling.domain.SamsvarMellomKildeOgGrunnlag
 import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerAarsak
 import no.nav.etterlatte.behandling.objectMapper
-import no.nav.etterlatte.behandling.revurdering.RevurderingMedBegrunnelse
+import no.nav.etterlatte.behandling.revurdering.RevurderingInfoMedBegrunnelse
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.grunnlagsendring.samsvarDoedsdatoer
 import no.nav.etterlatte.libs.common.Vedtaksloesning
@@ -38,7 +38,6 @@ import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
-import no.nav.etterlatte.libs.common.behandling.Utenlandstilsnitt
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
@@ -160,7 +159,6 @@ fun foerstegangsbehandling(
     persongalleri: Persongalleri = persongalleri(),
     gyldighetsproeving: GyldighetsResultat? = null,
     virkningstidspunkt: Virkningstidspunkt? = null,
-    utenlandstilsnitt: Utenlandstilsnitt? = null,
     boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet? = null,
     kommerBarnetTilgode: KommerBarnetTilgode? = null,
     kilde: Vedtaksloesning = Vedtaksloesning.GJENNY,
@@ -180,7 +178,6 @@ fun foerstegangsbehandling(
     soeknadMottattDato = soeknadMottattDato,
     gyldighetsproeving = gyldighetsproeving,
     virkningstidspunkt = virkningstidspunkt,
-    utenlandstilsnitt = utenlandstilsnitt,
     boddEllerArbeidetUtlandet = boddEllerArbeidetUtlandet,
     kommerBarnetTilgode = kommerBarnetTilgode,
     kilde = kilde,
@@ -196,12 +193,11 @@ fun revurdering(
     revurderingAarsak: Revurderingaarsak,
     kommerBarnetTilgode: KommerBarnetTilgode = kommerBarnetTilgode(id),
     virkningstidspunkt: Virkningstidspunkt? = null,
-    utenlandstilsnitt: Utenlandstilsnitt? = null,
     boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet? = null,
     prosesstype: Prosesstype = Prosesstype.MANUELL,
     kilde: Vedtaksloesning = Vedtaksloesning.GJENNY,
     enhet: String = Enheter.defaultEnhet.enhetNr,
-    revurderingInfo: RevurderingMedBegrunnelse? = null,
+    revurderingInfo: RevurderingInfoMedBegrunnelse? = null,
     begrunnelse: String? = null,
 ) = Revurdering.opprett(
     id = id,
@@ -217,7 +213,6 @@ fun revurdering(
     status = status,
     kommerBarnetTilgode = kommerBarnetTilgode,
     virkningstidspunkt = virkningstidspunkt,
-    utenlandstilsnitt = utenlandstilsnitt,
     boddEllerArbeidetUtlandet = boddEllerArbeidetUtlandet,
     revurderingsaarsak = revurderingAarsak,
     prosesstype = prosesstype,
@@ -237,7 +232,6 @@ fun manueltOpphoer(
         ),
     fritekstAarsak: String? = "Umulig å revurdere i nytt saksbehandlingssystem",
     virkningstidspunkt: Virkningstidspunkt? = null,
-    utenlandstilsnitt: Utenlandstilsnitt? = null,
     boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet? = null,
     enhet: String = Enheter.defaultEnhet.enhetNr,
 ) = ManueltOpphoer(
@@ -255,7 +249,6 @@ fun manueltOpphoer(
     opphoerAarsaker = opphoerAarsaker,
     fritekstAarsak = fritekstAarsak,
     virkningstidspunkt = virkningstidspunkt,
-    utenlandstilsnitt = utenlandstilsnitt,
     boddEllerArbeidetUtlandet = boddEllerArbeidetUtlandet,
 )
 

@@ -1,6 +1,7 @@
 package no.nav.etterlatte.statistikk.database
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.tidspunkt.setTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
@@ -15,6 +16,7 @@ import java.sql.Date
 import java.sql.PreparedStatement
 import java.sql.ResultSet
 import java.sql.Statement
+import java.sql.Types
 import java.util.UUID
 import javax.sql.DataSource
 
@@ -37,8 +39,9 @@ class SakRepository(private val datasource: DataSource) {
                         behandling_type, behandling_status, behandling_resultat, resultat_begrunnelse, behandling_metode, 
                         opprettet_av, ansvarlig_beslutter, aktor_id, dato_foerste_utbetaling, teknisk_tid, sak_ytelse, 
                         vedtak_loepende_fom, vedtak_loepende_tom, saksbehandler, ansvarlig_enhet, soeknad_format, 
-                        sak_utland, beregning, sak_ytelsesgruppe, avdoede_foreldre, revurdering_aarsak, avkorting
-                    ) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        sak_utland, beregning, sak_ytelsesgruppe, avdoede_foreldre, revurdering_aarsak, avkorting,
+                        kilde, pesysid 
+                    ) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     """.trimIndent(),
                     Statement.RETURN_GENERATED_KEYS,
                 ).apply {
@@ -89,6 +92,8 @@ class SakRepository(private val datasource: DataSource) {
             avdoedeForeldre = getString("avdoede_foreldre")?.let { objectMapper.readValue(it) },
             revurderingAarsak = getString("revurdering_aarsak"),
             avkorting = getString("avkorting")?.let { objectMapper.readValue(it) },
+            kilde = getString("kilde").let { Vedtaksloesning.valueOf(it) },
+            pesysId = getLong("pesysid"),
         )
 
     fun hentRader(): List<SakRad> {
@@ -99,7 +104,7 @@ class SakRepository(private val datasource: DataSource) {
                     behandling_type, behandling_status, behandling_resultat, resultat_begrunnelse, behandling_metode,
                     opprettet_av, ansvarlig_beslutter, aktor_id, dato_foerste_utbetaling, teknisk_tid, sak_ytelse,
                     vedtak_loepende_fom, vedtak_loepende_tom, saksbehandler, ansvarlig_enhet, soeknad_format, sak_utland,
-                    beregning, sak_ytelsesgruppe, avdoede_foreldre, revurdering_aarsak, avkorting
+                    beregning, sak_ytelsesgruppe, avdoede_foreldre, revurdering_aarsak, avkorting, kilde, pesysid
                 FROM sak
                 """.trimIndent(),
             )
@@ -137,4 +142,6 @@ private fun PreparedStatement.setSakRad(sakRad: SakRad): PreparedStatement =
         setJsonb(26, sakRad.avdoedeForeldre)
         setString(27, sakRad.revurderingAarsak)
         setJsonb(28, sakRad.avkorting)
+        setString(29, sakRad.kilde.name)
+        sakRad.pesysId?.let { setLong(30, it) } ?: setNull(30, Types.BIGINT)
     }

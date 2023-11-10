@@ -1,0 +1,27 @@
+query(
+   $brukerId: BrukerIdInput!,
+   $foerste: Int!,
+) {
+    dokumentoversiktBruker(brukerId: $brukerId, foerste: $foerste, journalposttyper: [I, U], journalstatuser:[]) {
+        journalposter {
+            journalpostId
+            tittel
+            journalposttype
+            journalstatus
+            dokumenter {
+                dokumentInfoId
+                tittel
+                dokumentvarianter {
+                    saksbehandlerHarTilgang
+                }
+            }
+            avsenderMottaker {
+                id
+                navn
+                erLikBruker
+            }
+            kanal
+            datoOpprettet
+        }
+    }
+}

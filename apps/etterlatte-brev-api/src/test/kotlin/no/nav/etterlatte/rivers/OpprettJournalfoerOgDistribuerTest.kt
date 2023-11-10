@@ -92,6 +92,7 @@ internal class OpprettJournalfoerOgDistribuer {
             prosessType = BrevProsessType.AUTOMATISK,
             soekerFnr = "123",
             status = Status.FERDIGSTILT,
+            Tidspunkt.now(),
             mottaker =
                 Mottaker(
                     "Marte Kirkerud",

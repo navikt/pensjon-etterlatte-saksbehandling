@@ -5,19 +5,11 @@ import { formaterDato, formaterStringDato } from '~utils/formattering'
 import { Beregning } from '~shared/types/Beregning'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { Barnepensjonberegningssammendrag } from '~components/behandling/beregne/Barnepensjonberegningssammendrag'
-import { IProrataBroek } from '~shared/api/trygdetid'
+import { ProrataBroek } from '~components/behandling/beregne/ProrataBroek'
 
 interface Props {
   behandling: IDetaljertBehandling
   beregning: Beregning
-}
-
-const ProrataBroek = ({ broek }: { broek: IProrataBroek }) => {
-  return (
-    <>
-      {broek.teller} / {broek.nevner}
-    </>
-  )
 }
 
 const BenyttetTrygdetid = ({

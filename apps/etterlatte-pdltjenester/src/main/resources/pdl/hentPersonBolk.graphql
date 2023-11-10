@@ -214,6 +214,7 @@ query(
                 minRolleForPerson
                 relatertPersonsIdent
                 relatertPersonsRolle
+                relatertPersonUtenFolkeregisteridentifikator{...relatertbiperson}
             }
 
             statsborgerskap(historikk: false) @include(if: $utland) {

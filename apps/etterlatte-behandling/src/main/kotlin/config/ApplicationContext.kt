@@ -14,6 +14,8 @@ import no.nav.etterlatte.behandling.GrunnlagService
 import no.nav.etterlatte.behandling.GyldighetsproevingServiceImpl
 import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktDao
 import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktService
+import no.nav.etterlatte.behandling.bosattutland.BosattUtlandDao
+import no.nav.etterlatte.behandling.bosattutland.BosattUtlandService
 import no.nav.etterlatte.behandling.etterbetaling.EtterbetalingDao
 import no.nav.etterlatte.behandling.etterbetaling.EtterbetalingService
 import no.nav.etterlatte.behandling.generellbehandling.GenerellBehandlingDao
@@ -30,6 +32,7 @@ import no.nav.etterlatte.behandling.klienter.NavAnsattKlient
 import no.nav.etterlatte.behandling.klienter.NavAnsattKlientImpl
 import no.nav.etterlatte.behandling.klienter.Norg2Klient
 import no.nav.etterlatte.behandling.klienter.Norg2KlientImpl
+import no.nav.etterlatte.behandling.klienter.TilbakekrevingKlientImpl
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlientImpl
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
@@ -126,6 +129,14 @@ private fun klageHttpClient(config: Config) =
         azureAppScope = config.getString("klage.azure.scope"),
     )
 
+private fun tilbakekrevingHttpClient(config: Config) =
+    httpClientClientCredentials(
+        azureAppClientId = config.getString("azure.app.client.id"),
+        azureAppJwk = config.getString("azure.app.jwk"),
+        azureAppWellKnownUrl = config.getString("azure.app.well.known.url"),
+        azureAppScope = config.getString("tilbakekreving.azure.scope"),
+    )
+
 internal class ApplicationContext(
     val env: Miljoevariabler = Miljoevariabler(System.getenv()),
     val config: Config = ConfigFactory.load(),
@@ -153,6 +164,7 @@ internal class ApplicationContext(
     val vedtakKlient: VedtakKlient = VedtakKlientImpl(config, httpClient()),
     val brevApiHttpClient: BrevApiKlient = BrevApiKlientObo(config, httpClient(forventSuksess = true)),
     val klageHttpClient: HttpClient = klageHttpClient(config),
+    val tilbakekrevingHttpClient: HttpClient = tilbakekrevingHttpClient(config),
 ) {
     val httpPort = env.getOrDefault("HTTP_PORT", "8080").toInt()
     val saksbehandlerGroupIdsByKey = AzureGroup.values().associateWith { env.requireEnvValue(it.envKey) }
@@ -177,6 +189,7 @@ internal class ApplicationContext(
     val klageDao = KlageDaoImpl { databaseContext().activeTx() }
     val tilbakekrevingDao = TilbakekrevingDao { databaseContext().activeTx() }
     val etterbetalingDao = EtterbetalingDao { databaseContext().activeTx() }
+    val bosattUtlandDao = BosattUtlandDao { databaseContext().activeTx() }
 
     // Klient
     val pdlKlient = PdlKlientImpl(config, pdlHttpClient)
@@ -185,6 +198,8 @@ internal class ApplicationContext(
     val leaderElectionKlient = LeaderElection(env.getValue("ELECTOR_PATH"), leaderElectionHttpClient)
     val behandlingsHendelser = BehandlingsHendelserKafkaProducerImpl(rapid)
     val klageKlient = KlageKlientImpl(klageHttpClient, resourceUrl = env.getValue("ETTERLATTE_KLAGE_API_URL"))
+    val tilbakekrevingKlient =
+        TilbakekrevingKlientImpl(tilbakekrevingHttpClient, resourceUrl = env.getValue("ETTERLATTE_TILBAKEKREVING_URL"))
 
     // Metrikker
     val oppgaveMetrikker = OppgaveMetrics(metrikkerDao)
@@ -208,6 +223,7 @@ internal class ApplicationContext(
             oppgaveService = oppgaveService,
             etterbetalingService = etterbetalingService,
             grunnlagService = grunnlagsService,
+            sakDao = sakDao,
         )
     val generellBehandlingService =
         GenerellBehandlingService(
@@ -310,6 +326,8 @@ internal class ApplicationContext(
             oppgaveService = oppgaveService,
         )
 
+    val bosattUtlandService = BosattUtlandService(bosattUtlandDao = bosattUtlandDao)
+
     val klageService =
         KlageServiceImpl(
             klageDao = klageDao,
@@ -327,6 +345,7 @@ internal class ApplicationContext(
             hendelseDao = hendelseDao,
             oppgaveService = oppgaveService,
             vedtakKlient = vedtakKlient,
+            tilbakekrevingKlient = tilbakekrevingKlient,
         )
 
     // Job

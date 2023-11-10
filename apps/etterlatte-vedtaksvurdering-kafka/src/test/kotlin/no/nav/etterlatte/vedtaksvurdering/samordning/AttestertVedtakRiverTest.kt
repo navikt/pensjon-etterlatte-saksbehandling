@@ -26,7 +26,7 @@ internal class AttestertVedtakRiverTest {
         val behandlingIdVal = UUID.fromString("e89c6e25-4f22-48b3-b975-4c868d830913")
         val sakIdVal = 15L
         val vedtakIdVal = 31L
-        every { vedtakService.tilSamordnetVedtak(behandlingIdVal) } returns
+        every { vedtakService.tilSamordningVedtak(behandlingIdVal) } returns
             mockk {
                 every { sak } returns mockk { every { id } returns sakIdVal }
                 every { behandling } returns mockk { every { id } returns behandlingIdVal }
@@ -35,6 +35,6 @@ internal class AttestertVedtakRiverTest {
 
         inspector.sendTestMessage(melding)
 
-        verify { vedtakService.tilSamordnetVedtak(behandlingIdVal) }
+        verify { vedtakService.tilSamordningVedtak(behandlingIdVal) }
     }
 }

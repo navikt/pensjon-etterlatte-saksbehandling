@@ -1,5 +1,10 @@
 package no.nav.etterlatte.tilbakekreving.vedtak
 
+import com.fasterxml.jackson.core.JsonGenerator
+import com.fasterxml.jackson.databind.JsonSerializer
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.SerializerProvider
+import com.fasterxml.jackson.databind.module.SimpleModule
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.post
@@ -9,6 +14,11 @@ import io.ktor.http.contentType
 import kotlinx.coroutines.runBlocking
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
+import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingAarsak
+import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVedtak
+import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingsbelopFeilkontoVedtak
+import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingsbelopYtelseVedtak
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.tilbakekreving.hendelse.TilbakekrevingHendelseRepository
 import no.nav.okonomi.tilbakekrevingservice.TilbakekrevingsvedtakRequest
@@ -19,10 +29,6 @@ import no.nav.tilbakekreving.tilbakekrevingsvedtak.vedtak.v1.Tilbakekrevingsvedt
 import no.nav.tilbakekreving.typer.v1.PeriodeDto
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.LocalTime
-import java.time.format.DateTimeFormatter
-import javax.xml.datatype.DatatypeConstants
 import javax.xml.datatype.DatatypeFactory
 import javax.xml.datatype.XMLGregorianCalendar
 
@@ -31,13 +37,16 @@ class TilbakekrevingKlient(
     private val httpClient: HttpClient,
     private val hendelseRepository: TilbakekrevingHendelseRepository,
 ) {
+    // Egen objectmapper for å fjerne timestamp fra xml-datoer da dette ikke blir riktig mot tilbakekrevingskomponenten
+    private val vedtakObjectMapper: ObjectMapper = objectMapper.copy().registerModule(CustomXMLGregorianCalendarModule())
+
     private val logger = LoggerFactory.getLogger(javaClass)
     private val sikkerLogg = sikkerlogger()
 
     fun sendTilbakekrevingsvedtak(vedtak: TilbakekrevingVedtak) {
         logger.info("Sender tilbakekrevingsvedtak ${vedtak.vedtakId} til tilbakekrevingskomponenten")
         val request = toTilbakekrevingsvedtakRequest(vedtak)
-        val requestAsJson = request.toJson()
+        val requestAsJson = vedtakObjectMapper.writeValueAsString(request)
 
         hendelseRepository.lagreTilbakekrevingsvedtakSendt(vedtak.kravgrunnlagId, requestAsJson)
 
@@ -62,62 +71,66 @@ class TilbakekrevingKlient(
             tilbakekrevingsvedtak =
                 TilbakekrevingsvedtakDto().apply {
                     kodeAksjon = KodeAksjon.FATTE_VEDTAK.kode
+
+                    // Dette er vedtaksid'en fra kravgrunnlaget, altså ikke vedtaksid'en fra vedtaket i Gjenny
                     vedtakId = vedtak.vedtakId.toBigInteger()
                     datoVedtakFagsystem = vedtak.fattetVedtak.dato.toXMLDate()
-                    saksbehId = vedtak.fattetVedtak.saksbehandler
-                    enhetAnsvarlig = ANSVARLIG_ENHET
-                    kodeHjemmel = vedtak.vurdering.hjemmel
-                    renterBeregnes =
-                        if (vedtak.perioder.any { it.ytelse.rentetillegg > 0 }) {
-                            RenterBeregnes.JA.kode
-                        } else {
-                            RenterBeregnes.NEI.kode
-                        }
-                    kontrollfelt = vedtak.kontrollfelt
-                    vedtak.perioder.map { tilbakekrevingPeriode ->
-                        TilbakekrevingsperiodeDto().apply {
-                            periode =
-                                PeriodeDto().apply {
-                                    fom = tilbakekrevingPeriode.maaned.atDay(1).toXMLDate()
-                                    tom = tilbakekrevingPeriode.maaned.atEndOfMonth().toXMLDate()
-                                }
-                            renterBeregnes =
-                                if (tilbakekrevingPeriode.ytelse.rentetillegg > 0) {
-                                    RenterBeregnes.JA.kode
-                                } else {
-                                    RenterBeregnes.NEI.kode
-                                }
-                            belopRenter = tilbakekrevingPeriode.ytelse.rentetillegg.toBigDecimal()
 
-                            tilbakekrevingsbelop.apply {
-                                add(tilbakekrevingPeriode.ytelse.toTilbakekreivngsbelopYtelse(vedtak.vurdering.aarsak))
-                                add(tilbakekrevingPeriode.feilkonto.toTilbakekreivngsbelopFeilkonto())
+                    // Settes kun dersom det skal beregnes renter på hele tilbakekrevingen av tilbakekrevingskomponenten
+                    renterBeregnes = RenterBeregnes.NEI.kode
+                    saksbehId = vedtak.fattetVedtak.saksbehandler
+
+                    // Skal være satt som statisk enhet 4819
+                    enhetAnsvarlig = ANSVARLIG_ENHET
+                    kodeHjemmel = vedtak.hjemmel.kode
+
+                    // Dette skal være likt kontrollfeltet i mottatt kravgrunnlag, hvis forskjellig er grunnlag utdatert
+                    kontrollfelt = vedtak.kontrollfelt
+                    tilbakekrevingsperiode.addAll(
+                        vedtak.perioder.map { tilbakekrevingPeriode ->
+                            TilbakekrevingsperiodeDto().apply {
+                                periode =
+                                    PeriodeDto().apply {
+                                        fom = tilbakekrevingPeriode.maaned.atDay(1).toXMLDate()
+                                        tom = tilbakekrevingPeriode.maaned.atEndOfMonth().toXMLDate()
+                                    }
+
+                                // Saksbehandler beregner renter, derfor settes denne til NEI
+                                renterBeregnes = RenterBeregnes.NEI.kode
+                                belopRenter = tilbakekrevingPeriode.ytelse.rentetillegg.medToDesimaler()
+
+                                tilbakekrevingsbelop.apply {
+                                    add(tilbakekrevingPeriode.ytelse.toTilbakekreivngsbelopYtelse(vedtak.aarsak))
+
+                                    // Feilkonto skal i praksis være tilsvarende det vi mottar
+                                    add(tilbakekrevingPeriode.feilkonto.toTilbakekreivngsbelopFeilkonto())
+                                }
                             }
-                        }
-                    }
+                        },
+                    )
                 }
         }
     }
 
-    private fun Tilbakekrevingsbelop.toTilbakekreivngsbelopYtelse(aarsak: TilbakekrevingAarsak) =
+    private fun TilbakekrevingsbelopYtelseVedtak.toTilbakekreivngsbelopYtelse(aarsak: TilbakekrevingAarsak) =
         TilbakekrevingsbelopDto().apply {
             kodeKlasse = klasseKode
-            belopOpprUtbet = bruttoUtbetaling.toBigDecimal()
-            belopNy = nyBruttoUtbetaling.toBigDecimal()
-            belopTilbakekreves = bruttoTilbakekreving.toBigDecimal()
-            belopSkatt = skatt.toBigDecimal()
+            belopOpprUtbet = bruttoUtbetaling.medToDesimaler()
+            belopNy = nyBruttoUtbetaling.medToDesimaler()
+            belopTilbakekreves = bruttoTilbakekreving.medToDesimaler()
+            belopSkatt = skatt.medToDesimaler()
             kodeResultat = resultat.name
             kodeAarsak = aarsak.name
             kodeSkyld = skyld.name
         }
 
-    private fun Tilbakekrevingsbelop.toTilbakekreivngsbelopFeilkonto() =
+    private fun TilbakekrevingsbelopFeilkontoVedtak.toTilbakekreivngsbelopFeilkonto() =
         TilbakekrevingsbelopDto().apply {
+            // Kun obligatoriske felter sendes her
             kodeKlasse = klasseKode
-            belopOpprUtbet = bruttoUtbetaling.toBigDecimal()
-            belopTilbakekreves = bruttoTilbakekreving.toBigDecimal()
-            belopSkatt = skatt.toBigDecimal()
-            // TODO kodeResultat og kodeAarsak er obligatorisk iht grensesnitt, men gir det mening for feilkonto?
+            belopOpprUtbet = bruttoUtbetaling.medToDesimaler()
+            belopNy = nyBruttoUtbetaling.medToDesimaler()
+            belopTilbakekreves = bruttoTilbakekreving.medToDesimaler()
         }
 
     private fun kontrollerResponse(response: TilbakekrevingsvedtakResponse) {
@@ -133,14 +146,6 @@ class TilbakekrevingKlient(
                 sikkerLogg.error(err, kv("response", response.toJson()))
                 throw Exception(err)
             }
-        }
-    }
-
-    private fun LocalDate.toXMLDate(): XMLGregorianCalendar {
-        return DatatypeFactory.newInstance().newXMLGregorianCalendar(
-            LocalDateTime.of(this, LocalTime.MIDNIGHT).format(DateTimeFormatter.ofPattern("yyyy-MM-dd")),
-        ).apply {
-            timezone = DatatypeConstants.FIELD_UNDEFINED
         }
     }
 
@@ -169,11 +174,35 @@ class TilbakekrevingKlient(
     }
 
     private enum class RenterBeregnes(val kode: String) {
-        JA("J"),
         NEI("N"),
     }
 
     private companion object {
         const val ANSVARLIG_ENHET = "4819"
+    }
+
+    private fun LocalDate.toXMLDate(): XMLGregorianCalendar {
+        return DatatypeFactory.newInstance().newXMLGregorianCalendar(toString())
+    }
+
+    private fun Int.medToDesimaler() = this.toBigDecimal().setScale(2)
+}
+
+private class CustomXMLGregorianCalendarModule : SimpleModule() {
+    init {
+        addSerializer(
+            XMLGregorianCalendar::class.java,
+            object : JsonSerializer<XMLGregorianCalendar>() {
+                override fun serialize(
+                    value: XMLGregorianCalendar?,
+                    gen: JsonGenerator?,
+                    ser: SerializerProvider?,
+                ) {
+                    if (value != null) {
+                        gen?.writeString(value.toGregorianCalendar().toZonedDateTime().toLocalDate().toString())
+                    }
+                }
+            },
+        )
     }
 }

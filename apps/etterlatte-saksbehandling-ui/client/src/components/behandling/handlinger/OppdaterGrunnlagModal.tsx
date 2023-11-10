@@ -6,7 +6,6 @@ import { oppdaterGrunnlag } from '~shared/api/behandling'
 import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 import { hentBehandlesFraStatus } from '~components/behandling/felles/utils'
 import Spinner from '~shared/Spinner'
-import { Beskrivelse } from '~components/behandling/soeknadsoversikt/styled'
 import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 import { ArrowsCirclepathIcon } from '@navikt/aksel-icons'
 
@@ -38,11 +37,7 @@ export default function OppdaterGrunnlagModal({
   }
 
   return (
-    <>
-      <Heading size="small">Oppdater grunnlag</Heading>
-      <Beskrivelse>
-        Oppdater bare ved behov. Hvis opplysningene i saken ikke samsvarer med hverandre må du oppdatere grunnlaget.
-      </Beskrivelse>
+    <div style={{ float: 'right', marginBottom: '2rem' }}>
       <Button
         variant="secondary"
         size="small"
@@ -77,6 +72,6 @@ export default function OppdaterGrunnlagModal({
           {isFailure(oppdatert) && <Alert variant="error">Oppdatering feilet</Alert>}
         </Modal.Body>
       </Modal>
-    </>
+    </div>
   )
 }

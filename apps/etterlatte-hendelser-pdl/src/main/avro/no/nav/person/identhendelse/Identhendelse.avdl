@@ -13,6 +13,8 @@ protocol IdenthendelseProto {
   import idl "v1/flytting/InnflyttingTilNorge.avdl";
   import idl "v1/flytting/UtflyttingFraNorge.avdl";
   import idl "v1/foedsel/Foedsel.avdl";
+  import idl "v1/foedested/Foedested.avdl";
+  import idl "v1/foedselsdato/Foedselsdato.avdl";
   import idl "v1/foreldreansvar/Foreldreansvar.avdl";
   import idl "v1/forelderbarnrelasjon/ForelderBarnRelasjon.avdl";
   import idl "v1/fullmakt/Fullmakt.avdl";
@@ -45,7 +47,7 @@ protocol IdenthendelseProto {
     string hendelseId;                                            // Alltids UUID.randomUuid().toString(). Unik identifikator for hendelsen
     string personident;                                           // Subjektet for identhendelsen, f.eks gjeldende ident når vi får fra FREG
     string master;                                                // Hittil kun FREG eller PDL, men sier hvem som eier opplysningen
-    timestamp_ms opprettet;                                       // Tidspunkt.now().toLocalDatetimeUTC()
+    timestamp_ms opprettet;                                       // LocalDateTime.now()
     string opplysningstype;                                       // Opplysningstype i tekstlig format, f.eks UTENLANDSK_ID_V1. Skal være enum fra Opplysningstype java objektet
     Endringstype endringstype;                                    // Den faglige aksjonen.
     union { null, string } tidligereHendelseId = null;            // Peker til en tidligere identhendelse som denne erstatter. Brukt i forbindelse med korrigering, opphør og annullering.
@@ -66,6 +68,8 @@ protocol IdenthendelseProto {
     union { null, no.nav.person.identhendelse.v1.flytting.InnflyttingTilNorge } innflyttingTilNorge = null;
     union { null, no.nav.person.identhendelse.v1.flytting.UtflyttingFraNorge } utflyttingFraNorge = null;
     union { null, no.nav.person.identhendelse.v1.foedsel.Foedsel } foedsel = null;
+    union { null, no.nav.person.identhendelse.v1.foedested.Foedested } foedested = null;
+    union { null, no.nav.person.identhendelse.v1.foedselsdato.Foedselsdato } foedselsdato = null;
     union { null, no.nav.person.identhendelse.v1.foreldreansvar.Foreldreansvar } foreldreansvar = null;
     union { null, no.nav.person.identhendelse.v1.forelderbarnrelasjon.ForelderBarnRelasjon } forelderbarnrelasjon = null;
     union { null, no.nav.person.identhendelse.v1.fullmakt.Fullmakt } fullmakt = null;

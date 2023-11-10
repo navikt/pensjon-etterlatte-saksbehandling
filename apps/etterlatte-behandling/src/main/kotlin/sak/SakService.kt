@@ -14,8 +14,10 @@ import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.behandling.Utenlandstilknytning
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.person.maskerFnr
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.tilgangsstyring.filterForEnheter
 import org.slf4j.LoggerFactory
@@ -28,6 +30,11 @@ enum class SakServiceFeatureToggle(private val key: String) : FeatureToggle {
 }
 
 interface SakService {
+    fun oppdaterUtenlandstilknytning(
+        sakId: Long,
+        utenlandstilknytning: Utenlandstilknytning,
+    )
+
     fun hentSaker(): List<Sak>
 
     fun finnSaker(person: String): List<Sak>
@@ -46,8 +53,6 @@ interface SakService {
 
     fun finnSak(id: Long): Sak?
 
-    fun slettSak(id: Long)
-
     fun markerSakerMedSkjerming(
         sakIder: List<Long>,
         skjermet: Boolean,
@@ -64,10 +69,16 @@ interface SakService {
     fun sjekkOmSakerErGradert(sakIder: List<Long>): List<SakMedGradering>
 
     fun oppdaterAdressebeskyttelse(
-        id: Long,
+        sakId: Long,
         adressebeskyttelseGradering: AdressebeskyttelseGradering,
     ): Int
+
+    fun hentSakMedUtenlandstilknytning(fnr: String): SakUtenlandstilknytning
 }
+
+class BrukerManglerSak(message: String) : Exception(message)
+
+class BrukerHarMerEnnEnSak(message: String) : Exception(message)
 
 class SakServiceImpl(
     private val dao: SakDao,
@@ -77,6 +88,13 @@ class SakServiceImpl(
     private val skjermingKlient: SkjermingKlient,
 ) : SakService {
     private val logger = LoggerFactory.getLogger(this::class.java)
+
+    override fun oppdaterUtenlandstilknytning(
+        sakId: Long,
+        utenlandstilknytning: Utenlandstilknytning,
+    ) {
+        dao.oppdaterUtenlandstilknytning(sakId, utenlandstilknytning)
+    }
 
     override fun hentSaker(): List<Sak> {
         return dao.hentSaker().filterForEnheter()
@@ -95,10 +113,6 @@ class SakServiceImpl(
         return finnSakerForPerson(person).filterForEnheter()
     }
 
-    override fun slettSak(id: Long) {
-        dao.slettSak(id)
-    }
-
     override fun markerSakerMedSkjerming(
         sakIder: List<Long>,
         skjermet: Boolean,
@@ -112,16 +126,17 @@ class SakServiceImpl(
         enhet: String?,
         gradering: AdressebeskyttelseGradering?,
     ): Sak {
-        val sak =
-            finnSakerForPersonOgType(fnr, type) ?: dao.opprettSak(
-                fnr,
-                type,
-                enhet ?: finnEnhetForPersonOgTema(fnr, type.tema, type).enhetNr,
-            )
-        this.sjekkSkjerming(fnr = fnr, sakId = sak.id)
+        val enhetFraNorg = finnEnhetForPersonOgTema(fnr, type.tema, type).enhetNr
+        if (enhet != null && enhet != enhetFraNorg) {
+            logger.info("Finner/oppretter sak med enhet $enhet, selv om geografisk tilknytning tilsier $enhetFraNorg")
+        }
+
+        val sak = finnSakerForPersonOgType(fnr, type) ?: dao.opprettSak(fnr, type, enhet ?: enhetFraNorg)
+        sjekkSkjerming(fnr = fnr, sakId = sak.id)
         gradering?.let {
             oppdaterAdressebeskyttelse(sak.id, it)
         }
+
         return sak
     }
 
@@ -130,6 +145,27 @@ class SakServiceImpl(
         adressebeskyttelseGradering: AdressebeskyttelseGradering,
     ): Int {
         return dao.oppdaterAdresseBeskyttelse(sakId, adressebeskyttelseGradering)
+    }
+
+    override fun hentSakMedUtenlandstilknytning(fnr: String): SakUtenlandstilknytning {
+        val sakerForPerson = dao.finnSaker(fnr)
+
+        val sak =
+            when (sakerForPerson.size) {
+                0 -> throw BrukerManglerSak("Ingen saker funnet for maskert person: ${fnr.maskerFnr()}")
+                1 -> sakerForPerson[0]
+                else -> {
+                    logger.error(
+                        "Person har mer enn en sak, hvilken skal vise utenlandstilknytning? " +
+                            "Person ${fnr.maskerFnr()} har flere enn en sak ider ${sakerForPerson.map { it.id }} . Må håndteres",
+                    )
+                    throw BrukerHarMerEnnEnSak(
+                        "Person ${fnr.maskerFnr()} har flere enn en sak ider ${sakerForPerson.map { it.id }} . Må håndteres",
+                    )
+                }
+            }
+
+        return dao.hentUtenlandstilknytningForSak(sak.id)!!
     }
 
     private fun sjekkSkjerming(
@@ -181,6 +217,7 @@ class SakServiceImpl(
                     Enheter.defaultEnhet.navn,
                     Enheter.defaultEnhet.enhetNr,
                 )
+
             geografiskTilknytning == null -> throw IngenGeografiskOmraadeFunnetForEnhet(
                 Folkeregisteridentifikator.of(fnr),
                 tema,

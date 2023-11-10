@@ -23,6 +23,7 @@ object OmstillingstoenadVilkaar {
         yrkesskade(),
         avdoedesMedlemskap(),
         gjenlevendesMedlemskap(),
+        vurderingAvEksport(),
         aktivitetEtter6Maaneder(grunnlag),
         oevrigeVilkaar(),
     ).let { vilkaarListe ->
@@ -265,6 +266,8 @@ object OmstillingstoenadVilkaar {
                     beskrivelse =
                         """
                         For at dette vilkåret skal være oppfylt, og gjenlevende ha rett til ytelser etter dette kapitlet, må vedkommende være medlem i trygden.
+                        
+                        Der er unntak som gjør at vilkåret over ikke gjelder. Se hvilke når du krysser "Nei" til spørsmålet om gjenlevende er medlem i trygden.
                         """.trimIndent(),
                     spoersmaal = "Er gjenlevende medlem i trygden?",
                     lovreferanse =
@@ -285,7 +288,7 @@ object OmstillingstoenadVilkaar {
             type = VilkaarType.OMS_GJENLEVENDES_MEDLEMSKAP_UNNTAK_PENSJON,
             tittel =
                 """
-                Ja, både den avdøde og den gjenlevende har mindre enn 20 års botid, men avdøde har opptjent rett til tilleggspensjon
+                Ja, både avdøde og gjenlevende har mindre enn 20 års botid, og det gis stønad med en trygdetid lik avdødes antall poengår
                 """.trimIndent(),
             lovreferanse =
                 Lovreferanse(
@@ -377,6 +380,34 @@ object OmstillingstoenadVilkaar {
                         )
                     listOfNotNull(doedsdatoAvdoedGrunnlag, soeknadMottattDatoGrunnlag)
                 },
+        )
+
+    private fun vurderingAvEksport() =
+        Vilkaar(
+            hovedvilkaar =
+                Delvilkaar(
+                    type = VilkaarType.OMS_VURDERING_AV_EKSPORT,
+                    tittel = "Vurdering av eksport",
+                    beskrivelse =
+                        """
+                        Omstillingsstønaden kan eksporteres hvis avdøde eller gjenlvende har minst 20 års samlet botid i Norge, eller hvis avdøde eller gjenlevende har mindre enn 20 års botid, men da redusert etter en trygdetid lik avdødes antall poengår i Norge.
+                        
+                        Skyldes dødsfallet en godkjent yrkesskade kan omstllingsstønaden eksporteres i sin helhet, jf. folketrygdloven § 17-12. Omstillingsstønaden kan også fritt eksporteres til EØS-land, og til noen land Norge har bilaterale trygdeavtaler med.
+                        
+                        Omstllingsstønad etter unntaksbestemmelsene i § 17-2 tredje, fjerde og sjette ledd beholdes bare så lenge gjenlevende er medlem i trygden. Den beholdes likevel hvis gjenlevende bor i EØS-land, eller i et land Norge har trygdeavtale med der eksport er tillatt, eller hvis gjenlevende er tredjelandsborger med rettigheter med hjemmel i C-55/00 Gottardo, jf. Rekommandasjon nr. H1 og forholdet omfattes av aktuell avtale.
+                        
+                        Andre hjemler:
+                        EØS - rådsforordning 883/2004
+                        Hovednummer 42 Trygdeavtaler
+                        Lenke til C-55/00 Gottardo: https://lovdata.no/pro/#document/NAV/rundskriv/r45-00/KAPITTEL_1-10-3
+                        """.trimIndent(),
+                    spoersmaal = "Kan omstillingsstønaden eksporteres?",
+                    lovreferanse =
+                        Lovreferanse(
+                            paragraf = "§ 17-3",
+                            ledd = 2,
+                        ),
+                ),
         )
 
     private fun aktivitetEtter6MaanederGjenlevendeOver55ogLavInntekt() =

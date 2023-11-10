@@ -13,6 +13,7 @@ import no.nav.etterlatte.avkorting.regler.AvkortetYtelseGrunnlag
 import no.nav.etterlatte.avkorting.regler.InntektAvkortingGrunnlag
 import no.nav.etterlatte.avkorting.regler.InntektAvkortingGrunnlagWrapper
 import no.nav.etterlatte.beregning.Beregning
+import no.nav.etterlatte.beregning.OverstyrBeregning
 import no.nav.etterlatte.beregning.grunnlag.InstitusjonsoppholdBeregningsgrunnlag
 import no.nav.etterlatte.beregning.regler.barnepensjon.BarnepensjonGrunnlag
 import no.nav.etterlatte.libs.common.IntBroek
@@ -62,7 +63,7 @@ fun barnepensjonGrunnlag(
     soeskenKull = FaktumNode(soeskenKull, kilde, "søskenkull"),
     avdoedesTrygdetid =
         FaktumNode(
-            SamletTrygdetidMedBeregningsMetode(BeregningsMetode.NASJONAL, trygdeTid, null, null),
+            SamletTrygdetidMedBeregningsMetode(BeregningsMetode.NASJONAL, trygdeTid, null, null, null),
             kilde,
             "trygdetid",
         ),
@@ -81,6 +82,7 @@ fun samletTrygdetid(
         samletTrygdetidNorge = samletTrygdetidNorge,
         samletTrygdetidTeoretisk = samletTrygdetidTeoretisk,
         prorataBroek = broek,
+        ident = null,
     ),
     kilde,
     "trygdetid",
@@ -246,6 +248,7 @@ fun avkortetYtelse(
 fun beregning(
     beregningId: UUID = UUID.randomUUID(),
     beregninger: List<Beregningsperiode> = listOf(beregningsperiode()),
+    overstyrBeregning: OverstyrBeregning? = null,
 ) = Beregning(
     beregningId = beregningId,
     behandlingId = UUID.randomUUID(),
@@ -253,6 +256,7 @@ fun beregning(
     beregningsperioder = beregninger,
     beregnetDato = Tidspunkt.now(),
     grunnlagMetadata = Metadata(sakId = 123L, versjon = 1L),
+    overstyrBeregning = overstyrBeregning,
 )
 
 fun beregningsperiode(
@@ -281,6 +285,7 @@ fun behandling(
     sakType: SakType = SakType.OMSTILLINGSSTOENAD,
     behandlingType: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
     virkningstidspunkt: Virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2023, 1)),
+    status: BehandlingStatus = BehandlingStatus.BEREGNET,
 ) = DetaljertBehandling(
     id = id,
     sak = sak,
@@ -292,7 +297,7 @@ fun behandling(
     gjenlevende = listOf(),
     avdoed = listOf(),
     soesken = listOf(),
-    status = BehandlingStatus.TRYGDETID_OPPDATERT,
+    status = status,
     behandlingType = behandlingType,
     virkningstidspunkt = virkningstidspunkt,
     revurderingsaarsak = null,

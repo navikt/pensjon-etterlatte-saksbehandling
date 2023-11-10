@@ -1,7 +1,7 @@
 package no.nav.etterlatte.behandling.domain
 
 import no.nav.etterlatte.behandling.BehandlingSammendrag
-import no.nav.etterlatte.behandling.revurdering.RevurderingMedBegrunnelse
+import no.nav.etterlatte.behandling.revurdering.RevurderingInfoMedBegrunnelse
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus.ATTESTERT
@@ -20,7 +20,6 @@ import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.StatistikkBehandling
-import no.nav.etterlatte.libs.common.behandling.Utenlandstilsnitt
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.sak.Sak
@@ -44,7 +43,6 @@ sealed class Behandling {
     abstract val type: BehandlingType
     abstract val kommerBarnetTilgode: KommerBarnetTilgode?
     abstract val virkningstidspunkt: Virkningstidspunkt?
-    abstract val utenlandstilsnitt: Utenlandstilsnitt?
     abstract val boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet?
     abstract val kilde: Vedtaksloesning
     open val prosesstype: Prosesstype = Prosesstype.MANUELL
@@ -72,7 +70,7 @@ sealed class Behandling {
             else -> null
         }
 
-    fun revurderingInfo(): RevurderingMedBegrunnelse? =
+    fun revurderingInfo(): RevurderingInfoMedBegrunnelse? =
         when (this) {
             is Revurdering -> this.revurderingInfo
             else -> null
@@ -84,13 +82,6 @@ sealed class Behandling {
         throw NotImplementedError(
             "Kan ikke oppdatere virkningstidspunkt på behandling $id. " +
                 "Denne behandlingstypen støtter ikke oppdatering av virkningstidspunkt.",
-        )
-    }
-
-    open fun oppdaterUtenlandstilsnitt(utenlandstilsnitt: Utenlandstilsnitt): Behandling {
-        throw NotImplementedError(
-            "Kan ikke oppdatere utenlandstilsnitt på behandling $id. " +
-                "Denne behandlingstypen støtter ikke oppdatering av utenlandstilsnitt.",
         )
     }
 
@@ -184,7 +175,10 @@ sealed class Behandling {
     ) : Exception(message)
 }
 
-internal fun Behandling.toStatistikkBehandling(persongalleri: Persongalleri): StatistikkBehandling {
+internal fun Behandling.toStatistikkBehandling(
+    persongalleri: Persongalleri,
+    pesysId: Long? = null,
+): StatistikkBehandling {
     return StatistikkBehandling(
         id = id,
         sak = sak,
@@ -205,6 +199,7 @@ internal fun Behandling.toStatistikkBehandling(persongalleri: Persongalleri): St
         revurderingInfo = revurderingInfo()?.revurderingInfo,
         enhet = sak.enhet,
         kilde = kilde,
+        pesysId = pesysId,
     )
 }
 
@@ -248,6 +243,5 @@ fun Behandling.toBehandlingSammendrag() =
                 is ManueltOpphoer -> "MANUELT_OPPHOER"
             },
         virkningstidspunkt = this.virkningstidspunkt,
-        utenlandstilsnitt = this.utenlandstilsnitt,
         boddEllerArbeidetUtlandet = this.boddEllerArbeidetUtlandet,
     )

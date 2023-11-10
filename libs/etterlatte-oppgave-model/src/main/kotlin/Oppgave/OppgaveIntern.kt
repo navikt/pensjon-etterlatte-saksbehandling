@@ -108,6 +108,7 @@ enum class OppgaveType {
     TILBAKEKREVING,
     OMGJOERING,
     MANUELL_JOURNALFOERING,
+    JOURNALFOERING,
 }
 
 data class SaksbehandlerEndringDto(
@@ -142,6 +143,7 @@ data class NyOppgaveDto(
     val oppgaveKilde: OppgaveKilde?,
     val oppgaveType: OppgaveType,
     val merknad: String?,
+    val referanse: String? = null,
 )
 
 fun opprettNyOppgaveMedReferanseOgSak(

@@ -82,9 +82,9 @@ data class ManuellRevurdering(
             ),
         ) { endreTilStatus(BehandlingStatus.TRYGDETID_OPPDATERT) }
 
-    override fun tilBeregnet(fastTrygdetid: Boolean) =
+    override fun tilBeregnet() =
         hvisTilstandEr(
-            if (fastTrygdetid || this.revurderingsaarsak.girOpphoer()) {
+            if (this.revurderingsaarsak.girOpphoer()) {
                 listOf(
                     BehandlingStatus.VILKAARSVURDERT,
                     BehandlingStatus.BEREGNET,

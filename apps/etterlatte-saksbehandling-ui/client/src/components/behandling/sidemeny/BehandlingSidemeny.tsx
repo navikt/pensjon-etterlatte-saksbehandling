@@ -26,6 +26,11 @@ import { visFane } from '~store/reducers/BehandlingSidemenyReducer'
 import { updateSjekkliste } from '~store/reducers/SjekklisteReducer'
 import { erFerdigBehandlet } from '~components/behandling/felles/utils'
 import { hentSjekkliste, opprettSjekkliste } from '~shared/api/sjekkliste'
+import { hentSaksbehandlerForOppgaveUnderArbeid } from '~shared/api/oppgaver'
+import {
+  resetSaksbehandlerGjeldendeOppgave,
+  setSaksbehandlerGjeldendeOppgave,
+} from '~store/reducers/SaksbehandlerGjeldendeOppgaveReducer'
 
 const finnUtNasjonalitet = (behandling: IBehandlingReducer): UtenlandstilknytningType | null => {
   if (behandling.utenlandstilknytning?.type) {
@@ -57,6 +62,9 @@ export const BehandlingSidemeny = ({ behandling }: { behandling: IBehandlingRedu
   const [fetchVedtakStatus, fetchVedtakSammendrag] = useApiCall(hentVedtakSammendrag)
   const [beslutning, setBeslutning] = useState<IBeslutning>()
   const fane = useBehandlingSidemenyFane()
+  const [saksbehandlerForOppgaveResult, hentSaksbehandlerForOppgave] = useApiCall(
+    hentSaksbehandlerForOppgaveUnderArbeid
+  )
 
   const behandlingsinfo = mapTilBehandlingInfo(behandling, vedtak)
 
@@ -72,6 +80,14 @@ export const BehandlingSidemeny = ({ behandling }: { behandling: IBehandlingRedu
       }
     })
   }, [])
+
+  useEffect(() => {
+    hentSaksbehandlerForOppgave(
+      { behandlingId: behandling.id },
+      (saksbehandler) => dispatch(setSaksbehandlerGjeldendeOppgave(saksbehandler)),
+      () => dispatch(resetSaksbehandlerGjeldendeOppgave)
+    )
+  }, [behandling.id])
 
   const erFoerstegangsbehandling = behandling.behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING
 
@@ -112,7 +128,6 @@ export const BehandlingSidemeny = ({ behandling }: { behandling: IBehandlingRedu
                 <Attestering
                   setBeslutning={setBeslutning}
                   beslutning={beslutning}
-                  behandlingId={behandling.id}
                   vedtak={vedtak}
                   erFattet={behandling.status === IBehandlingStatus.FATTET_VEDTAK}
                 />
@@ -124,6 +139,9 @@ export const BehandlingSidemeny = ({ behandling }: { behandling: IBehandlingRedu
 
       {isFailure(opprettSjekklisteResult) && erFoerstegangsbehandling && (
         <ApiErrorAlert>Opprettelsen av sjekkliste feilet</ApiErrorAlert>
+      )}
+      {isFailure(saksbehandlerForOppgaveResult) && (
+        <ApiErrorAlert>Kunne ikke hente saksbehandler gjeldende oppgave</ApiErrorAlert>
       )}
       {erFoerstegangsbehandling && (
         <Tabs value={fane} iconPosition="top" onChange={(val) => dispatch(visFane(val as BehandlingFane))}>

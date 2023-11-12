@@ -15,6 +15,7 @@ class BeregningService(
     private val behandlingKlient: BehandlingKlient,
     private val beregnBarnepensjonService: BeregnBarnepensjonService,
     private val beregnOmstillingsstoenadService: BeregnOmstillingsstoenadService,
+    private val beregnOverstyrBeregningService: BeregnOverstyrBeregningService,
     private val beregningsGrunnlagService: BeregningsGrunnlagService,
     private val trygdetidKlient: TrygdetidKlient,
 ) {
@@ -38,10 +39,20 @@ class BeregningService(
         if (kanBeregneYtelse) {
             val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
 
+            val overstyrBeregning = hentOverstyrBeregning(behandlingId, brukerTokenInfo)
+
             val beregning =
-                when (behandling.sakType) {
-                    SakType.BARNEPENSJON -> beregnBarnepensjonService.beregn(behandling, brukerTokenInfo)
-                    SakType.OMSTILLINGSSTOENAD -> beregnOmstillingsstoenadService.beregn(behandling, brukerTokenInfo)
+                if (overstyrBeregning != null) {
+                    beregnOverstyrBeregningService.beregn(behandling, overstyrBeregning, brukerTokenInfo)
+                } else {
+                    when (behandling.sakType) {
+                        SakType.BARNEPENSJON -> beregnBarnepensjonService.beregn(behandling, brukerTokenInfo)
+                        SakType.OMSTILLINGSSTOENAD ->
+                            beregnOmstillingsstoenadService.beregn(
+                                behandling,
+                                brukerTokenInfo,
+                            )
+                    }
                 }
 
             val lagretBeregning = beregningRepository.lagreEllerOppdaterBeregning(beregning)

@@ -1,5 +1,6 @@
 import { Content, ContentHeader } from '~shared/styled'
 import {
+  Beregning,
   OverstyrBeregingsperiodeGrunnlagData,
   OverstyrBeregning,
   OverstyrBeregningsperiode,
@@ -22,11 +23,16 @@ import { CheckmarkCircleIcon, PlusCircleIcon } from '@navikt/aksel-icons'
 import {
   IBehandlingReducer,
   oppdaterBehandlingsstatus,
+  oppdaterBeregning,
   oppdaterOverstyrBeregningsGrunnlag,
 } from '~store/reducers/BehandlingReducer'
 import { addMonths } from 'date-fns'
 import { AGreen500 } from '@navikt/ds-tokens/dist/tokens'
-import { hentOverstyrBeregningGrunnlag, lagreOverstyrBeregningGrunnlag } from '~shared/api/beregning'
+import {
+  hentOverstyrBeregningGrunnlag,
+  lagreOverstyrBeregningGrunnlag,
+  opprettEllerEndreBeregning,
+} from '~shared/api/beregning'
 import { useAppDispatch, useAppSelector } from '~store/Store'
 import { isFailure, isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
 import Spinner from '~shared/Spinner'
@@ -51,6 +57,7 @@ const OverstyrBeregningGrunnlag = (props: { behandling: IBehandlingReducer; over
   })
   const [overstyrBeregningGrunnlag, fetchOverstyrBeregningGrunnlag] = useApiCall(hentOverstyrBeregningGrunnlag)
   const [persistOverstyrBeregningGrunnlag, saveOverstyrBeregningGrunnlag] = useApiCall(lagreOverstyrBeregningGrunnlag)
+  const [endreBeregning, postOpprettEllerEndreBeregning] = useApiCall(opprettEllerEndreBeregning)
   const { next } = useBehandlingRoutes()
 
   const dispatch = useAppDispatch()
@@ -95,7 +102,6 @@ const OverstyrBeregningGrunnlag = (props: { behandling: IBehandlingReducer; over
         },
         (result) => {
           dispatch(oppdaterOverstyrBeregningsGrunnlag(result))
-          dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.BEREGNET))
         }
       )
       setVisOkLagret(true)
@@ -113,7 +119,11 @@ const OverstyrBeregningGrunnlag = (props: { behandling: IBehandlingReducer; over
 
   const onSubmit = () => {
     if (validerOgLagre(allePerioder)) {
-      next()
+      postOpprettEllerEndreBeregning(behandling.id, (beregning: Beregning) => {
+        dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.BEREGNET))
+        dispatch(oppdaterBeregning(beregning))
+        next()
+      })
     }
   }
 
@@ -214,9 +224,14 @@ const OverstyrBeregningGrunnlag = (props: { behandling: IBehandlingReducer; over
       {isFailure(persistOverstyrBeregningGrunnlag) && (
         <ApiErrorAlert>En feil har oppstått ved lagring av grunnlag</ApiErrorAlert>
       )}
+      {isFailure(endreBeregning) && <ApiErrorAlert>Kunne ikke opprette ny beregning</ApiErrorAlert>}
       {behandles ? (
         <BehandlingHandlingKnapper>
-          <Button variant="primary" onClick={onSubmit} loading={isPending(persistOverstyrBeregningGrunnlag)}>
+          <Button
+            variant="primary"
+            onClick={onSubmit}
+            loading={isPending(persistOverstyrBeregningGrunnlag || isPending(endreBeregning))}
+          >
             Beregn
           </Button>
         </BehandlingHandlingKnapper>

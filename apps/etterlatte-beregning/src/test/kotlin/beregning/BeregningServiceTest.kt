@@ -25,6 +25,7 @@ internal class BeregningServiceTest {
     private val beregningRepository = mockk<BeregningRepository>()
     private val beregnBarnepensjonService = mockk<BeregnBarnepensjonService>()
     private val beregnOmstillingsstoenadService = mockk<BeregnOmstillingsstoenadService>()
+    private val beregnOverstyrBeregningService = mockk<BeregnOverstyrBeregningService>()
     private val beregningsGrunnlagService = mockk<BeregningsGrunnlagService>()
     private val trygdetidKlient = mockk<TrygdetidKlient>()
     private val beregningService: BeregningService =
@@ -33,6 +34,7 @@ internal class BeregningServiceTest {
             behandlingKlient = behandlingKlient,
             beregnBarnepensjonService = beregnBarnepensjonService,
             beregnOmstillingsstoenadService = beregnOmstillingsstoenadService,
+            beregnOverstyrBeregningService = beregnOverstyrBeregningService,
             beregningsGrunnlagService = beregningsGrunnlagService,
             trygdetidKlient = trygdetidKlient,
         )
@@ -75,7 +77,7 @@ internal class BeregningServiceTest {
         every { beregningRepository.hentOverstyrBeregning(any()) } returns overstyrBeregning
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
         coEvery { behandlingKlient.kanBeregnes(any(), any(), any()) } returns true
-        coEvery { beregnBarnepensjonService.beregn(any(), any()) } returns mockk()
+        coEvery { beregnOverstyrBeregningService.beregn(any(), any(), any()) } returns mockk()
         every { beregning.behandlingId } returns behandling.id
         every { beregning.copy(any(), any(), any(), any(), any(), any(), overstyrBeregning) } returns beregning
 
@@ -84,7 +86,7 @@ internal class BeregningServiceTest {
 
             coVerify(exactly = 1) { behandlingKlient.kanBeregnes(any(), any(), false) }
             coVerify(exactly = 1) { behandlingKlient.kanBeregnes(any(), any(), true) }
-            coVerify(exactly = 1) { beregnBarnepensjonService.beregn(any(), any()) }
+            coVerify(exactly = 1) { beregnOverstyrBeregningService.beregn(any(), any(), any()) }
             verify(exactly = 1) { beregningRepository.lagreEllerOppdaterBeregning(any()) }
         }
     }
@@ -146,7 +148,7 @@ internal class BeregningServiceTest {
         every { beregningRepository.hentOverstyrBeregning(any()) } returns overstyrBeregning
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
         coEvery { behandlingKlient.kanBeregnes(any(), any(), any()) } returns true
-        coEvery { beregnOmstillingsstoenadService.beregn(any(), any()) } returns mockk()
+        coEvery { beregnOverstyrBeregningService.beregn(any(), any(), any()) } returns mockk()
         every { beregning.behandlingId } returns behandling.id
         every { beregning.copy(any(), any(), any(), any(), any(), any(), overstyrBeregning) } returns beregning
 
@@ -155,7 +157,7 @@ internal class BeregningServiceTest {
 
             coVerify(exactly = 1) { behandlingKlient.kanBeregnes(any(), any(), false) }
             coVerify(exactly = 1) { behandlingKlient.kanBeregnes(any(), any(), true) }
-            coVerify(exactly = 1) { beregnOmstillingsstoenadService.beregn(any(), any()) }
+            coVerify(exactly = 1) { beregnOverstyrBeregningService.beregn(any(), any(), any()) }
             verify(exactly = 1) { beregningRepository.lagreEllerOppdaterBeregning(any()) }
         }
     }

@@ -181,23 +181,24 @@ class GrunnlagsendringshendelseService(
     }
 
     fun oppdaterAdresseHendelse(bostedsadresse: Bostedsadresse) {
-        val oppgaverUnderBehandling =
-            oppgaveService.hentOppgaverForReferanse(bostedsadresse.fnr).map { it.status == Status.UNDER_BEHANDLING }
-        if (oppgaverUnderBehandling.isNotEmpty()) {
-            logger.info("Oppretter manuell oppgave for Bosted fordi det er åpne behandlinger")
-            opprettBostedhendelse(bostedsadresse)
-        } else {
-            val finnSaker = sakService.finnSaker(bostedsadresse.fnr)
-
-            val sakerMedNyEnhet =
-                finnSaker.map {
-                    SakMedEnhet(
-                        it.id,
-                        sakService.finnEnhetForPersonOgTema(bostedsadresse.fnr, it.enhet, it.sakType).enhetNr,
-                    )
-                }
-            sakService.oppdaterEnhetForSaker(sakerMedNyEnhet)
-            oppgaveService.oppdaterEnhetForRelaterteOppgaver(sakerMedNyEnhet)
+        val finnSaker = sakService.finnSaker(bostedsadresse.fnr)
+        val sakerMedNyEnhet =
+            finnSaker.map {
+                SakMedEnhet(
+                    it.id,
+                    sakService.finnEnhetForPersonOgTema(bostedsadresse.fnr, it.enhet, it.sakType).enhetNr,
+                )
+            }
+        sakerMedNyEnhet.forEach { sakMedEnhet ->
+            val oppgaverUnderBehandling =
+                oppgaveService.hentOppgaverForSak(sakMedEnhet.id).map { it.status == Status.UNDER_BEHANDLING }
+            if (oppgaverUnderBehandling.isNotEmpty()) {
+                logger.info("Oppretter manuell oppgave for Bosted fordi det er åpne behandlinger")
+                opprettBostedhendelse(bostedsadresse)
+            } else {
+                sakService.oppdaterEnhetForSaker(listOf(sakMedEnhet))
+                oppgaveService.oppdaterEnhetForRelaterteOppgaver(listOf(sakMedEnhet))
+            }
         }
     }
 

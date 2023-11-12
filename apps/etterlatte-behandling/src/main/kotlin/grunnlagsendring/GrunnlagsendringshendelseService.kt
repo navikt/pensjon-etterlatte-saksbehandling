@@ -187,7 +187,7 @@ class GrunnlagsendringshendelseService(
                 finnSaker.map {
                     SakMedEnhet(
                         it.id,
-                        sakService.finnEnhetForPersonOgTema(bostedsadresse.fnr, it.enhet, it.sakType).enhetNr,
+                        sakService.finnEnhetForPersonOgTema(bostedsadresse.fnr, it.sakType.tema, it.sakType).enhetNr,
                     )
                 }
             sakerMedNyEnhet.forEach { sakMedEnhet ->

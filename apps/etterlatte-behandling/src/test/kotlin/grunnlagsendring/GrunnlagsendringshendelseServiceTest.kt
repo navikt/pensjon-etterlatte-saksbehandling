@@ -706,7 +706,7 @@ internal class GrunnlagsendringshendelseServiceTest {
         every { sakService.oppdaterAdressebeskyttelse(any(), any()) } returns 1
         every { sakService.finnSaker(fnr) } returns saker
         every { oppgaveService.oppdaterEnhetForRelaterteOppgaver(any()) } returns Unit
-        every { oppgaveService.hentOppgaverForReferanse(any()) } returns emptyList()
+        every { oppgaveService.hentOppgaverForSak(any()) } returns emptyList()
         every {
             sakService.finnEnhetForPersonOgTema(any(), any(), any())
         } returns ArbeidsFordelingEnhet("NAV Familie- og pensjonsytelser Steinkjer", "4817")
@@ -716,28 +716,14 @@ internal class GrunnlagsendringshendelseServiceTest {
         }
         coVerify(exactly = 1) { sakService.finnSaker(bostedsadresse.fnr) }
 
-        verify(exactly = 1) {
+        verify(exactly = 6) {
             sakService.oppdaterEnhetForSaker(
-                listOf(
-                    GrunnlagsendringshendelseService.SakMedEnhet(1, "4817"),
-                    GrunnlagsendringshendelseService.SakMedEnhet(2, "4817"),
-                    GrunnlagsendringshendelseService.SakMedEnhet(3, "4817"),
-                    GrunnlagsendringshendelseService.SakMedEnhet(4, "4817"),
-                    GrunnlagsendringshendelseService.SakMedEnhet(5, "4817"),
-                    GrunnlagsendringshendelseService.SakMedEnhet(6, "4817"),
-                ),
+                any(),
             )
         }
-        verify(exactly = 1) {
+        verify(exactly = 6) {
             oppgaveService.oppdaterEnhetForRelaterteOppgaver(
-                listOf(
-                    GrunnlagsendringshendelseService.SakMedEnhet(1, "4817"),
-                    GrunnlagsendringshendelseService.SakMedEnhet(2, "4817"),
-                    GrunnlagsendringshendelseService.SakMedEnhet(3, "4817"),
-                    GrunnlagsendringshendelseService.SakMedEnhet(4, "4817"),
-                    GrunnlagsendringshendelseService.SakMedEnhet(5, "4817"),
-                    GrunnlagsendringshendelseService.SakMedEnhet(6, "4817"),
-                ),
+                any(),
             )
         }
     }

@@ -184,7 +184,7 @@ class GrunnlagsendringshendelseService(
         val oppgaverUnderBehandling =
             oppgaveService.hentOppgaverForReferanse(bostedsadresse.fnr).map { it.status == Status.UNDER_BEHANDLING }
         if (oppgaverUnderBehandling.isNotEmpty()) {
-            sikkerLogg.info("Oppretter manuell oppgave for Bosted fordi det er åpne behandlinger")
+            logger.info("Oppretter manuell oppgave for Bosted fordi det er åpne behandlinger")
             opprettBostedhendelse(bostedsadresse)
         } else {
             val finnSaker = sakService.finnSaker(bostedsadresse.fnr)

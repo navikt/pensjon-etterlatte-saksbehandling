@@ -104,7 +104,15 @@ class ApplicationBuilder {
     private val beregningKlient = BeregningKlient(config, httpClient())
     private val behandlingKlient = BehandlingKlient(config, httpClient())
     private val trygdetidKlient = TrygdetidKlient(config, httpClient())
-    private val migreringKlient = MigreringKlient(config, httpClient())
+    private val migreringHttpClient =
+        httpClientClientCredentials(
+            azureAppClientId = config.getString("azure.app.client.id"),
+            azureAppJwk = config.getString("azure.app.jwk"),
+            azureAppWellKnownUrl = config.getString("azure.app.well.known.url"),
+            azureAppScope = config.getString("migrering.outbound.scope"),
+        )
+
+    private val migreringKlient = MigreringKlient(config.getString("migrering.resource.url"), migreringHttpClient)
     private val trygdetidService = TrygdetidService(trygdetidKlient)
     private val brevdataFacade =
         BrevdataFacade(

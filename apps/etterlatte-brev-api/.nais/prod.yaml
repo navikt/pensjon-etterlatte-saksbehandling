@@ -107,6 +107,10 @@ spec:
       value: http://etterlatte-behandling
     - name: ETTERLATTE_BEHANDLING_CLIENT_ID
       value: prod-gcp.etterlatte.etterlatte-behandling
+    - name: ETTERLATTE_MIGRERING_URL
+      value: http://etterlatte-migrering
+    - name: ETTERLATTE_MIGRERING_OUTBOUND_SCOPE
+      value: api://prod-gcp.etterlatte.etterlatte-migrering/.default
     - name: ETTERLATTE_TRYGDETID_URL
       value: http://etterlatte-trygdetid
     - name: ETTERLATTE_TRYGDETID_CLIENT_ID
@@ -122,6 +126,7 @@ spec:
         - application: etterlatte-beregning
         - application: etterlatte-behandling
         - application: etterlatte-trygdetid
+        - application: etterlatte-migrering
       external:
         - host: etterlatte-proxy.prod-fss-pub.nais.io
         - host: norg2.prod-fss-pub.nais.io

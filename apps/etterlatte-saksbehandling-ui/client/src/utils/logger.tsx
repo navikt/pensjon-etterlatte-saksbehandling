@@ -38,6 +38,14 @@ export const logger = {
         console.error('Unable to log error message: ', data, ' err: ', err)
       })
   },
+  generalInfo: (info: string) => {
+    const data = { type: 'info', data: info, jsonContent: { ...defaultContext } }
+    loggFunc(data)
+      .then(() => store.dispatch(loggInfo(data)))
+      .catch((err) => {
+        console.error('Unable to log info message: ', data, ' err: ', err)
+      })
+  },
   generalError: (info: string) => {
     const data = { type: 'error', data: info, jsonContent: { ...defaultContext } }
     loggFunc(data)

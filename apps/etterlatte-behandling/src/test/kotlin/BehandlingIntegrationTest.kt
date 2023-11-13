@@ -622,7 +622,7 @@ class NavAnsattKlientTest : NavAnsattKlient {
     override suspend fun hentSaksbehandlerEnhet(ident: String): List<SaksbehandlerEnhet> {
         return listOf(
             SaksbehandlerEnhet(Enheter.defaultEnhet.enhetNr, Enheter.defaultEnhet.navn),
-            SaksbehandlerEnhet(Enheter.STEINKJER.navn, Enheter.STEINKJER.enhetNr),
+            SaksbehandlerEnhet(Enheter.STEINKJER.enhetNr, Enheter.STEINKJER.navn),
         )
     }
 

@@ -43,13 +43,7 @@ internal class ApplicationContext {
 
     val krrKlient =
         KrrKlient(
-            client =
-                httpClientClientCredentials(
-                    azureAppClientId = config.getString("azure.app.client.id"),
-                    azureAppJwk = config.getString("azure.app.jwk"),
-                    azureAppWellKnownUrl = config.getString("azure.app.well.known.url"),
-                    azureAppScope = config.getString("krr.scope"),
-                ),
+            client = httpClient(),
             config = config,
         )
 }

@@ -65,6 +65,24 @@ class BeregningRepository(private val dataSource: DataSource) {
         }
     }
 
+    fun opprettOverstyrBeregning(overstyrBeregning: OverstyrBeregning): OverstyrBeregning? {
+        dataSource.transaction { tx ->
+            queryOf(
+                statement = Queries.opprettOverstyrBeregning,
+                paramMap =
+                    mapOf(
+                        "sakId" to overstyrBeregning.sakId,
+                        "beskrivelse" to overstyrBeregning.beskrivelse,
+                        "tidspunkt" to overstyrBeregning.tidspunkt.toTimestamp(),
+                    ),
+            ).let { query ->
+                tx.run(query.asUpdate)
+            }
+        }
+
+        return hentOverstyrBeregning(overstyrBeregning.sakId)
+    }
+
     private fun createMapFromBeregningsperiode(
         beregningsperiode: Beregningsperiode,
         beregning: Beregning,
@@ -279,6 +297,12 @@ private object Queries {
         SELECT *
         FROM overstyr_beregning 
         WHERE sak_id = :sakId
+        """.trimIndent()
+
+    val opprettOverstyrBeregning =
+        """
+        INSERT INTO overstyr_beregning (sak_id, beskrivelse, tidspunkt)
+        VALUES (:sakId, :beskrivelse, :tidspunkt)
         """.trimIndent()
 }
 

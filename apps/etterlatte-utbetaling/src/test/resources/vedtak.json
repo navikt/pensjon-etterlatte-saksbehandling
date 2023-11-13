@@ -1,30 +1,15 @@
 {
   "@event_name": "VEDTAK:ATTESTERT",
   "vedtak": {
-    "vedtakId": 1,
+    "id": 1,
+    "behandlingId": "e89c6e25-4f22-48b3-b975-4c868d830913",
     "status": "ATTESTERT",
-    "virkningstidspunkt":  "2022-01",
     "sak": {
       "ident": "05126307952",
       "sakType": "BARNEPENSJON",
       "id": 1
     },
-    "behandling": {
-      "type": "FØRSTEGANGSBEHANDLING",
-      "id": "e89c6e25-4f22-48b3-b975-4c868d830913"
-    },
     "type": "INNVILGELSE",
-    "utbetalingsperioder": [
-      {
-        "id": 1,
-        "periode": {
-          "fom": "2022-01",
-          "tom": null
-        },
-        "beloep": 2000,
-        "type": "UTBETALING"
-      }
-    ],
     "vedtakFattet": {
       "ansvarligSaksbehandler": "12345678",
       "ansvarligEnhet": "123",
@@ -34,6 +19,25 @@
       "attestant": "87654321",
       "attesterendeEnhet": "123",
       "tidspunkt": "2022-05-23T12:25:43.669844+02:00"
+    },
+    "innhold": {
+      "type": "BEHANDLING",
+      "virkningstidspunkt": "2022-01",
+      "behandling": {
+        "type": "FØRSTEGANGSBEHANDLING",
+        "id": "e89c6e25-4f22-48b3-b975-4c868d830913"
+      },
+      "utbetalingsperioder": [
+        {
+          "id": 1,
+          "periode": {
+            "fom": "2022-01",
+            "tom": null
+          },
+          "beloep": 2000,
+          "type": "UTBETALING"
+        }
+      ]
     }
   }
 }

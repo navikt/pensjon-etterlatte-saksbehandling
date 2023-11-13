@@ -10,9 +10,10 @@ import no.nav.etterlatte.libs.common.vedtak.Behandling
 import no.nav.etterlatte.libs.common.vedtak.Periode
 import no.nav.etterlatte.libs.common.vedtak.Utbetalingsperiode
 import no.nav.etterlatte.libs.common.vedtak.UtbetalingsperiodeType
-import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
+import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseType
+import no.nav.etterlatte.libs.common.vedtak.VedtakNyDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import java.math.BigDecimal
@@ -39,33 +40,36 @@ fun vedtak(
             type = BehandlingType.FØRSTEGANGSBEHANDLING,
         ),
     saktype: SakType = SakType.BARNEPENSJON,
-): VedtakDto =
-    VedtakDto(
-        vedtakId = vedtakId,
-        status = VedtakStatus.ATTESTERT,
-        behandling = behandling,
-        sak =
-            VedtakSak(
-                id = sakId,
-                ident = ident,
-                sakType = saktype,
-            ),
-        type = VedtakType.INNVILGELSE,
-        virkningstidspunkt = YearMonth.of(2022, 1),
-        vedtakFattet =
-            VedtakFattet(
-                ansvarligSaksbehandler = "12345678",
-                ansvarligEnhet = "123",
-                tidspunkt = Tidspunkt.now(),
-            ),
-        attestasjon =
-            Attestasjon(
-                attestant = "87654321",
-                attesterendeEnhet = "123",
-                tidspunkt = Tidspunkt.now(),
-            ),
-        utbetalingsperioder = utbetalingsperioder,
-    )
+) = VedtakNyDto(
+    id = vedtakId,
+    behandlingId = behandling.id,
+    status = VedtakStatus.ATTESTERT,
+    sak =
+        VedtakSak(
+            id = sakId,
+            ident = ident,
+            sakType = saktype,
+        ),
+    type = VedtakType.INNVILGELSE,
+    vedtakFattet =
+        VedtakFattet(
+            ansvarligSaksbehandler = "12345678",
+            ansvarligEnhet = "123",
+            tidspunkt = Tidspunkt.now(),
+        ),
+    attestasjon =
+        Attestasjon(
+            attestant = "87654321",
+            attesterendeEnhet = "123",
+            tidspunkt = Tidspunkt.now(),
+        ),
+    innhold =
+        VedtakInnholdDto.VedtakBehandlingDto(
+            behandling = behandling,
+            virkningstidspunkt = YearMonth.of(2022, 1),
+            utbetalingsperioder = utbetalingsperioder,
+        ),
+)
 
 fun ugyldigVedtakTilUtbetaling(
     vedtakId: Long = 1,
@@ -75,110 +79,126 @@ fun ugyldigVedtakTilUtbetaling(
             type = BehandlingType.FØRSTEGANGSBEHANDLING,
         ),
     saktype: SakType = SakType.BARNEPENSJON,
-): VedtakDto =
-    VedtakDto(
-        vedtakId = vedtakId,
-        status = VedtakStatus.ATTESTERT,
-        behandling = behandling,
-        sak =
-            VedtakSak(
-                id = 1,
-                ident = "12345678913",
-                sakType = saktype,
-            ),
-        type = VedtakType.INNVILGELSE,
-        virkningstidspunkt = YearMonth.of(2022, 1),
-        vedtakFattet = null,
-        utbetalingsperioder =
-            listOf(
-                Utbetalingsperiode(
-                    1,
-                    Periode(YearMonth.of(2022, 1), null),
-                    BigDecimal.valueOf(1000),
-                    UtbetalingsperiodeType.UTBETALING,
+) = VedtakNyDto(
+    id = vedtakId,
+    behandlingId = behandling.id,
+    status = VedtakStatus.ATTESTERT,
+    sak =
+        VedtakSak(
+            id = 1,
+            ident = "12345678913",
+            sakType = saktype,
+        ),
+    type = VedtakType.INNVILGELSE,
+    vedtakFattet = null,
+    attestasjon =
+        Attestasjon(
+            attestant = "87654321",
+            attesterendeEnhet = "123",
+            tidspunkt = Tidspunkt.now(),
+        ),
+    innhold =
+        VedtakInnholdDto.VedtakBehandlingDto(
+            behandling = behandling,
+            virkningstidspunkt = YearMonth.of(2022, 1),
+            utbetalingsperioder =
+                listOf(
+                    Utbetalingsperiode(
+                        1,
+                        Periode(YearMonth.of(2022, 1), null),
+                        BigDecimal.valueOf(1000),
+                        UtbetalingsperiodeType.UTBETALING,
+                    ),
                 ),
-            ),
-        attestasjon =
-            Attestasjon(
-                attestant = "87654321",
-                attesterendeEnhet = "123",
-                tidspunkt = Tidspunkt.now(),
-            ),
-    )
+        ),
+)
 
 fun revurderingVedtak(
-    vedtak: VedtakDto,
-    nyttBeloep: BigDecimal = BigDecimal(vedtak.utbetalingsperioder.first().beloep!!.longValueExact() - 1000),
-    utbetalingsperioder: List<Utbetalingsperiode> =
-        listOf(
-            Utbetalingsperiode(
-                id = vedtak.utbetalingsperioder.last().id!! + 1,
-                periode = Periode(fom = vedtak.utbetalingsperioder.first().periode.fom.plusMonths(1), null),
-                beloep = nyttBeloep,
-                type = UtbetalingsperiodeType.UTBETALING,
-            ),
+    vedtak: VedtakNyDto,
+    behandling: Behandling =
+        Behandling(
+            id = UUID.randomUUID(),
+            type = BehandlingType.REVURDERING,
         ),
-): VedtakDto =
-    VedtakDto(
-        vedtakId = vedtak.vedtakId + 1,
-        status = VedtakStatus.ATTESTERT,
-        behandling =
-            Behandling(
-                id = UUID.randomUUID(),
-                type = BehandlingType.REVURDERING,
-            ),
-        sak = vedtak.sak,
-        type = VedtakType.ENDRING,
-        virkningstidspunkt = YearMonth.of(2022, 1),
-        vedtakFattet =
-            VedtakFattet(
-                ansvarligSaksbehandler = "12345678",
-                ansvarligEnhet = "123",
-                tidspunkt = Tidspunkt.now(),
-            ),
-        utbetalingsperioder = utbetalingsperioder,
-        attestasjon =
-            Attestasjon(
-                attestant = "87654321",
-                attesterendeEnhet = "123",
-                tidspunkt = Tidspunkt.now(),
-            ),
-    )
-
-fun opphoersVedtak(vedtak: VedtakDto): VedtakDto =
-    VedtakDto(
-        vedtakId = vedtak.vedtakId + 1,
-        status = VedtakStatus.ATTESTERT,
-        behandling =
-            Behandling(
-                id = UUID.randomUUID(),
-                type = BehandlingType.REVURDERING,
-            ),
-        sak = vedtak.sak,
-        type = VedtakType.OPPHOER,
-        virkningstidspunkt = YearMonth.of(2022, 1),
-        vedtakFattet =
-            VedtakFattet(
-                ansvarligSaksbehandler = "12345678",
-                ansvarligEnhet = "123",
-                tidspunkt = Tidspunkt.now(),
-            ),
-        utbetalingsperioder =
+    utbetalingsperioder: List<Utbetalingsperiode> =
+        (vedtak.innhold as VedtakInnholdDto.VedtakBehandlingDto).let {
             listOf(
                 Utbetalingsperiode(
-                    id = vedtak.utbetalingsperioder.last().id!! + 1,
-                    periode = Periode(fom = vedtak.utbetalingsperioder.first().periode.fom.plusMonths(1), null),
-                    beloep = null,
-                    type = UtbetalingsperiodeType.OPPHOER,
+                    id = it.utbetalingsperioder.last().id!! + 1,
+                    periode = Periode(fom = it.utbetalingsperioder.first().periode.fom.plusMonths(1), null),
+                    beloep = BigDecimal(it.utbetalingsperioder.first().beloep!!.longValueExact() - 1000),
+                    type = UtbetalingsperiodeType.UTBETALING,
                 ),
-            ),
-        attestasjon =
-            Attestasjon(
-                attestant = "87654321",
-                attesterendeEnhet = "123",
-                tidspunkt = Tidspunkt.now(),
-            ),
-    )
+            )
+        },
+) = VedtakNyDto(
+    id = vedtak.id + 1,
+    behandlingId = behandling.id,
+    status = VedtakStatus.ATTESTERT,
+    sak = vedtak.sak,
+    type = VedtakType.ENDRING,
+    vedtakFattet =
+        VedtakFattet(
+            ansvarligSaksbehandler = "12345678",
+            ansvarligEnhet = "123",
+            tidspunkt = Tidspunkt.now(),
+        ),
+    attestasjon =
+        Attestasjon(
+            attestant = "87654321",
+            attesterendeEnhet = "123",
+            tidspunkt = Tidspunkt.now(),
+        ),
+    innhold =
+        VedtakInnholdDto.VedtakBehandlingDto(
+            behandling = behandling,
+            virkningstidspunkt = YearMonth.of(2022, 1),
+            utbetalingsperioder = utbetalingsperioder,
+        ),
+)
+
+fun opphoersVedtak(
+    vedtak: VedtakNyDto,
+    behandling: Behandling =
+        Behandling(
+            id = UUID.randomUUID(),
+            type = BehandlingType.REVURDERING,
+        ),
+) = VedtakNyDto(
+    id = vedtak.id + 1,
+    behandlingId = behandling.id,
+    status = VedtakStatus.ATTESTERT,
+    sak = vedtak.sak,
+    type = VedtakType.OPPHOER,
+    vedtakFattet =
+        VedtakFattet(
+            ansvarligSaksbehandler = "12345678",
+            ansvarligEnhet = "123",
+            tidspunkt = Tidspunkt.now(),
+        ),
+    attestasjon =
+        Attestasjon(
+            attestant = "87654321",
+            attesterendeEnhet = "123",
+            tidspunkt = Tidspunkt.now(),
+        ),
+    innhold =
+        VedtakInnholdDto.VedtakBehandlingDto(
+            virkningstidspunkt = YearMonth.of(2022, 1),
+            behandling = behandling,
+            utbetalingsperioder =
+                (vedtak.innhold as VedtakInnholdDto.VedtakBehandlingDto).let {
+                    listOf(
+                        Utbetalingsperiode(
+                            id = it.utbetalingsperioder.last().id!! + 1,
+                            periode = Periode(fom = it.utbetalingsperioder.first().periode.fom.plusMonths(1), null),
+                            beloep = null,
+                            type = UtbetalingsperiodeType.OPPHOER,
+                        ),
+                    )
+                },
+        ),
+)
 
 fun genererEtterfolgendeUtbetalingsperioder(
     antall: Int,
@@ -212,7 +232,7 @@ fun genererEtterfolgendeUtbetalingsperioder(
     }
 }
 
-fun vedtakEvent(vedtakDto: VedtakDto) =
+fun vedtakEvent(vedtakDto: VedtakNyDto) =
     """
     {
       "@event_name": "${VedtakKafkaHendelseType.ATTESTERT}",
@@ -237,6 +257,7 @@ fun main() {
         )
     val vedtakEvent = vedtakEvent(vedtak)
 
+    val vedtakInnhold = (vedtak.innhold as VedtakInnholdDto.VedtakBehandlingDto)
     val revurderingsvedtak =
         revurderingVedtak(
             vedtak = vedtak,
@@ -244,9 +265,9 @@ fun main() {
                 genererEtterfolgendeUtbetalingsperioder(
                     antall = 2,
                     intervallMnd = 6,
-                    forrigeId = vedtak.utbetalingsperioder.last().id!!,
-                    startPeriode = vedtak.utbetalingsperioder.last().periode.fom.plusMonths(1),
-                    startBelop = vedtak.utbetalingsperioder.last().beloep!!,
+                    forrigeId = vedtakInnhold.utbetalingsperioder.last().id!!,
+                    startPeriode = vedtakInnhold.utbetalingsperioder.last().periode.fom.plusMonths(1),
+                    startBelop = vedtakInnhold.utbetalingsperioder.last().beloep!!,
                 ),
         )
     val revurderingsvedtakEvent = vedtakEvent(revurderingsvedtak)

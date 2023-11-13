@@ -1,6 +1,7 @@
 package no.nav.etterlatte.statistikk.service
 
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
@@ -10,8 +11,9 @@ import no.nav.etterlatte.libs.common.behandling.StatistikkBehandling
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
 import no.nav.etterlatte.libs.common.vedtak.UtbetalingsperiodeType
-import no.nav.etterlatte.libs.common.vedtak.VedtakDto
+import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseType
+import no.nav.etterlatte.libs.common.vedtak.VedtakNyDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.statistikk.clients.BehandlingKlient
 import no.nav.etterlatte.statistikk.clients.BeregningKlient
@@ -43,19 +45,26 @@ class StatistikkService(
     private val logger = LoggerFactory.getLogger(this.javaClass)
 
     fun registrerStatistikkForVedtak(
-        vedtak: VedtakDto,
+        vedtak: VedtakNyDto,
         vedtakKafkaHendelseType: VedtakKafkaHendelseType,
         tekniskTid: LocalDateTime,
     ): Pair<SakRad?, StoenadRad?> {
-        val sakRad = registrerSakStatistikkForVedtak(vedtak, vedtakKafkaHendelseType, tekniskTid)
+        val sakRad = registrerSakStatistikkForVedtak(vedtak, vedtakKafkaHendelseType, tekniskTid) ?: throw Exception("")
         if (vedtakKafkaHendelseType == VedtakKafkaHendelseType.IVERKSATT) {
             val stoenadRad =
                 when (vedtak.type) {
                     VedtakType.INNVILGELSE,
                     VedtakType.ENDRING,
                     VedtakType.OPPHOER,
-                    -> stoenadRepository.lagreStoenadsrad(vedtakTilStoenadsrad(vedtak, tekniskTid))
-
+                    ->
+                        stoenadRepository.lagreStoenadsrad(
+                            vedtakTilStoenadsrad(
+                                vedtak,
+                                tekniskTid,
+                                sakRad.kilde,
+                                sakRad.pesysId,
+                            ),
+                        )
                     VedtakType.TILBAKEKREVING,
                     VedtakType.AVSLAG,
                     -> null
@@ -71,7 +80,7 @@ class StatistikkService(
     }
 
     private fun registrerSakStatistikkForVedtak(
-        vedtak: VedtakDto,
+        vedtak: VedtakNyDto,
         hendelse: VedtakKafkaHendelseType,
         tekniskTid: LocalDateTime,
     ): SakRad? {
@@ -86,21 +95,22 @@ class StatistikkService(
         }
     }
 
-    private fun hentAvkortingForBehandling(vedtak: VedtakDto): Avkorting? {
+    private fun hentAvkortingForBehandling(vedtak: VedtakNyDto): Avkorting? {
         if (vedtak.sak.sakType == SakType.OMSTILLINGSSTOENAD) {
             return runBlocking {
-                beregningKlient.hentAvkortingForBehandling(vedtak.behandling.id)
+                beregningKlient.hentAvkortingForBehandling(vedtak.behandlingId)
             }
         }
         return null
     }
 
     private fun vedtakshendelseTilSakRad(
-        vedtak: VedtakDto,
+        vedtak: VedtakNyDto,
         hendelse: VedtakKafkaHendelseType,
         tekniskTid: LocalDateTime,
     ): SakRad {
-        val statistikkBehandling = hentStatistikkBehandling(vedtak.behandling.id)
+        val vedtakInnhold = (vedtak.innhold as VedtakInnholdDto.VedtakBehandlingDto)
+        val statistikkBehandling = hentStatistikkBehandling(vedtak.behandlingId)
         val mottattTid = statistikkBehandling.soeknadMottattDato ?: statistikkBehandling.behandlingOpprettet
         val (beregning, avkorting) =
             when (hendelse) {
@@ -112,13 +122,14 @@ class StatistikkService(
                         hentBeregningForBehandling(statistikkBehandling.id),
                         hentAvkortingForBehandling(vedtak),
                     )
+
                 else -> Pair(null, null)
             }
 
         val foersteUtbetaling =
             if (vedtak.type == VedtakType.INNVILGELSE) {
                 vedtak.vedtakFattet?.let {
-                    vedtak.utbetalingsperioder.minByOrNull { it.periode.fom }
+                    vedtakInnhold.utbetalingsperioder.minByOrNull { it.periode.fom }
                 }
             } else {
                 null
@@ -126,13 +137,13 @@ class StatistikkService(
 
         return SakRad(
             id = -1,
-            behandlingId = vedtak.behandling.id,
+            behandlingId = vedtakInnhold.behandling.id,
             sakId = vedtak.sak.id,
             mottattTidspunkt = mottattTid.toTidspunkt(),
             registrertTidspunkt = statistikkBehandling.behandlingOpprettet.toTidspunkt(),
             ferdigbehandletTidspunkt = vedtak.attestasjon?.tidspunkt,
             vedtakTidspunkt = vedtak.attestasjon?.tidspunkt,
-            behandlingType = vedtak.behandling.type,
+            behandlingType = vedtakInnhold.behandling.type,
             behandlingStatus = hendelse.name,
             behandlingResultat = behandlingResultatFraVedtak(vedtak, hendelse, statistikkBehandling),
             resultatBegrunnelse = null,
@@ -149,14 +160,18 @@ class StatistikkService(
             datoFoersteUtbetaling = foersteUtbetaling?.periode?.fom?.atDay(1),
             tekniskTid = tekniskTid.toTidspunkt(),
             sakYtelse = vedtak.sak.sakType.name,
-            vedtakLoependeFom = vedtak.virkningstidspunkt.atDay(1),
-            vedtakLoependeTom = vedtak.virkningstidspunkt.atEndOfMonth(),
+            vedtakLoependeFom = vedtakInnhold.virkningstidspunkt.atDay(1),
+            vedtakLoependeTom = vedtakInnhold.virkningstidspunkt.atEndOfMonth(),
             saksbehandler = vedtak.vedtakFattet?.ansvarligSaksbehandler,
             ansvarligEnhet = vedtak.attestasjon?.attesterendeEnhet ?: statistikkBehandling.enhet,
             sakUtland = SakUtland.NASJONAL,
             beregning = beregning,
             avkorting = avkorting,
-            sakYtelsesgruppe = hentSakYtelsesgruppe(statistikkBehandling.sak.sakType, statistikkBehandling.avdoed ?: emptyList()),
+            sakYtelsesgruppe =
+                hentSakYtelsesgruppe(
+                    statistikkBehandling.sak.sakType,
+                    statistikkBehandling.avdoed ?: emptyList(),
+                ),
             avdoedeForeldre = statistikkBehandling.avdoed,
             revurderingAarsak = statistikkBehandling.revurderingsaarsak?.name,
             kilde = statistikkBehandling.kilde,
@@ -165,7 +180,7 @@ class StatistikkService(
     }
 
     private fun behandlingResultatFraVedtak(
-        vedtak: VedtakDto,
+        vedtak: VedtakNyDto,
         vedtakKafkaHendelseType: VedtakKafkaHendelseType,
         statistikkBehandling: StatistikkBehandling,
     ): BehandlingResultat? {
@@ -175,7 +190,11 @@ class StatistikkService(
         if (vedtakKafkaHendelseType !in listOf(VedtakKafkaHendelseType.ATTESTERT, VedtakKafkaHendelseType.IVERKSATT)) {
             return null
         }
-        return when (vedtak.utbetalingsperioder.any { it.type == UtbetalingsperiodeType.OPPHOER }) {
+        return when (
+            (vedtak.innhold as VedtakInnholdDto.VedtakBehandlingDto).utbetalingsperioder.any {
+                it.type == UtbetalingsperiodeType.OPPHOER
+            }
+        ) {
             true -> BehandlingResultat.OPPHOER
             false -> BehandlingResultat.INNVILGELSE
         }
@@ -192,28 +211,31 @@ class StatistikkService(
         }
 
     private fun vedtakTilStoenadsrad(
-        vedtak: VedtakDto,
+        vedtak: VedtakNyDto,
         tekniskTid: LocalDateTime,
+        vedtaksloesning: Vedtaksloesning,
+        pesysid: Long?,
     ): StoenadRad {
-        val persongalleri = hentPersongalleri(behandlingId = vedtak.behandling.id)
+        val persongalleri = hentPersongalleri(behandlingId = vedtak.behandlingId)
 
-        val beregning = hentBeregningForBehandling(vedtak.behandling.id)
+        val beregning = hentBeregningForBehandling(vedtak.behandlingId)
         val avkorting = hentAvkortingForBehandling(vedtak)
         val utbetalingsdato =
             vedtak.vedtakFattet?.tidspunkt?.let {
                 val vedtattDato = it.toLocalDate()
                 YearMonth.of(vedtattDato.year, vedtattDato.monthValue).plusMonths(1).atDay(20)
             }
+        val vedtakInnhold = (vedtak.innhold as VedtakInnholdDto.VedtakBehandlingDto)
         return StoenadRad(
             id = -1,
             fnrSoeker = vedtak.sak.ident,
             fnrForeldre = persongalleri.avdoed,
             fnrSoesken = persongalleri.soesken,
             anvendtTrygdetid = "40",
-            nettoYtelse = vedtak.utbetalingsperioder.firstOrNull()?.beloep.toString(), // TODO  Bør utbedres?
+            nettoYtelse = vedtakInnhold.utbetalingsperioder.firstOrNull()?.beloep.toString(), // TODO  Bør utbedres?
             beregningType = "FOLKETRYGD",
             anvendtSats = "",
-            behandlingId = vedtak.behandling.id,
+            behandlingId = vedtakInnhold.behandling.id,
             sakId = vedtak.sak.id,
             sakNummer = vedtak.sak.id,
             tekniskTid = tekniskTid.toTidspunkt(),
@@ -221,14 +243,16 @@ class StatistikkService(
             versjon = "",
             saksbehandler = vedtak.vedtakFattet!!.ansvarligSaksbehandler,
             attestant = vedtak.attestasjon?.attestant,
-            vedtakLoependeFom = vedtak.virkningstidspunkt.atDay(1),
+            vedtakLoependeFom = vedtakInnhold.virkningstidspunkt.atDay(1),
             vedtakLoependeTom = null,
             beregning = beregning,
             avkorting = avkorting,
             vedtakType = vedtak.type,
             sakUtland = SakUtland.NASJONAL,
-            virkningstidspunkt = vedtak.virkningstidspunkt,
+            virkningstidspunkt = vedtakInnhold.virkningstidspunkt,
             utbetalingsdato = utbetalingsdato,
+            kilde = vedtaksloesning,
+            pesysId = pesysid,
         )
     }
 
@@ -250,7 +274,12 @@ class StatistikkService(
                 behandlingStatus = behandlingHendelse.name,
                 behandlingResultat = null,
                 resultatBegrunnelse = null,
-                behandlingMetode = hentBehandlingMetode(null, statistikkBehandling.prosesstype, statistikkBehandling.revurderingsaarsak),
+                behandlingMetode =
+                    hentBehandlingMetode(
+                        null,
+                        statistikkBehandling.prosesstype,
+                        statistikkBehandling.revurderingsaarsak,
+                    ),
                 opprettetAv = "GJENNY",
                 ansvarligBeslutter = null,
                 aktorId = statistikkBehandling.sak.ident,
@@ -265,7 +294,11 @@ class StatistikkService(
                 sakUtland = SakUtland.NASJONAL,
                 beregning = null,
                 avkorting = null,
-                sakYtelsesgruppe = hentSakYtelsesgruppe(statistikkBehandling.sak.sakType, statistikkBehandling.avdoed ?: emptyList()),
+                sakYtelsesgruppe =
+                    hentSakYtelsesgruppe(
+                        statistikkBehandling.sak.sakType,
+                        statistikkBehandling.avdoed ?: emptyList(),
+                    ),
                 avdoedeForeldre =
                     if (statistikkBehandling.sak.sakType == SakType.BARNEPENSJON) {
                         statistikkBehandling.avdoed

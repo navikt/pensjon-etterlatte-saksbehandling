@@ -74,7 +74,12 @@ internal val soekerTestopplysningerMap: Map<Opplysningstype, Opplysning<JsonNode
         FOEDSELSDATO to Opplysning.Konstant(randomUUID(), kilde, SOEKER_FOEDSELSNUMMER.getBirthDate().toJsonNode()),
         FOEDSELSAAR to Opplysning.Konstant(randomUUID(), kilde, SOEKER_FOEDSELSNUMMER.getBirthDate().year.toJsonNode()),
         FOEDELAND to Opplysning.Konstant(randomUUID(), kilde, "NOR".toJsonNode()),
-        ADRESSEBESKYTTELSE to Opplysning.Konstant(randomUUID(), kilde, AdressebeskyttelseGradering.UGRADERT.toJsonNode()),
+        ADRESSEBESKYTTELSE to
+            Opplysning.Konstant(
+                randomUUID(),
+                kilde,
+                AdressebeskyttelseGradering.UGRADERT.toJsonNode(),
+            ),
         BOSTEDSADRESSE to
             Opplysning.Konstant(
                 randomUUID(),
@@ -100,9 +105,19 @@ internal val soeskenTestopplysningerMap: Map<Opplysningstype, Opplysning<JsonNod
         NAVN to Opplysning.Konstant(randomUUID(), kilde, Navn("Hel", "mellom", "Søsken").toJsonNode()),
         FOEDSELSNUMMER to Opplysning.Konstant(randomUUID(), kilde, HELSOESKEN_FOEDSELSNUMMER.toJsonNode()),
         FOEDSELSDATO to Opplysning.Konstant(randomUUID(), kilde, HELSOESKEN_FOEDSELSNUMMER.getBirthDate().toJsonNode()),
-        FOEDSELSAAR to Opplysning.Konstant(randomUUID(), kilde, HELSOESKEN_FOEDSELSNUMMER.getBirthDate().year.toJsonNode()),
+        FOEDSELSAAR to
+            Opplysning.Konstant(
+                randomUUID(),
+                kilde,
+                HELSOESKEN_FOEDSELSNUMMER.getBirthDate().year.toJsonNode(),
+            ),
         FOEDELAND to Opplysning.Konstant(randomUUID(), kilde, "NOR".toJsonNode()),
-        ADRESSEBESKYTTELSE to Opplysning.Konstant(randomUUID(), kilde, AdressebeskyttelseGradering.UGRADERT.toJsonNode()),
+        ADRESSEBESKYTTELSE to
+            Opplysning.Konstant(
+                randomUUID(),
+                kilde,
+                AdressebeskyttelseGradering.UGRADERT.toJsonNode(),
+            ),
         BOSTEDSADRESSE to
             Opplysning.Konstant(
                 randomUUID(),
@@ -127,7 +142,12 @@ internal val halvsoeskenTestopplysningerMap: Map<Opplysningstype, Opplysning<Jso
     mapOf(
         NAVN to Opplysning.Konstant(randomUUID(), kilde, Navn("Halv", "mellom", "Søsken").toJsonNode()),
         FOEDSELSNUMMER to Opplysning.Konstant(randomUUID(), kilde, HALVSOESKEN_FOEDSELSNUMMER.toJsonNode()),
-        FOEDSELSDATO to Opplysning.Konstant(randomUUID(), kilde, HALVSOESKEN_FOEDSELSNUMMER.getBirthDate().toJsonNode()),
+        FOEDSELSDATO to
+            Opplysning.Konstant(
+                randomUUID(),
+                kilde,
+                HALVSOESKEN_FOEDSELSNUMMER.getBirthDate().toJsonNode(),
+            ),
         FOEDSELSAAR to
             Opplysning.Konstant(
                 randomUUID(),
@@ -135,7 +155,12 @@ internal val halvsoeskenTestopplysningerMap: Map<Opplysningstype, Opplysning<Jso
                 HALVSOESKEN_FOEDSELSNUMMER.getBirthDate().year.toJsonNode(),
             ),
         FOEDELAND to Opplysning.Konstant(randomUUID(), kilde, "NOR".toJsonNode()),
-        ADRESSEBESKYTTELSE to Opplysning.Konstant(randomUUID(), kilde, AdressebeskyttelseGradering.UGRADERT.toJsonNode()),
+        ADRESSEBESKYTTELSE to
+            Opplysning.Konstant(
+                randomUUID(),
+                kilde,
+                AdressebeskyttelseGradering.UGRADERT.toJsonNode(),
+            ),
         BOSTEDSADRESSE to
             Opplysning.Konstant(
                 randomUUID(),
@@ -164,7 +189,12 @@ internal val avdoedTestopplysningerMap: Map<Opplysningstype, Opplysning<JsonNode
         FOEDSELSAAR to Opplysning.Konstant(randomUUID(), kilde, AVDOED_FOEDSELSNUMMER.getBirthDate().year.toJsonNode()),
         FOEDELAND to Opplysning.Konstant(randomUUID(), kilde, "NOR".toJsonNode()),
         DOEDSDATO to Opplysning.Konstant(randomUUID(), kilde, LocalDateTime.parse("2022-08-17T00:00:00").toJsonNode()),
-        ADRESSEBESKYTTELSE to Opplysning.Konstant(randomUUID(), kilde, AdressebeskyttelseGradering.UGRADERT.toJsonNode()),
+        ADRESSEBESKYTTELSE to
+            Opplysning.Konstant(
+                randomUUID(),
+                kilde,
+                AdressebeskyttelseGradering.UGRADERT.toJsonNode(),
+            ),
         BOSTEDSADRESSE to
             Opplysning.Konstant(
                 randomUUID(),
@@ -178,7 +208,12 @@ internal val avdoedTestopplysningerMap: Map<Opplysningstype, Opplysning<JsonNode
             Opplysning.Konstant(
                 randomUUID(),
                 kilde,
-                AvdoedesBarn(listOf(personTestData(soekerTestopplysningerMap), personTestData(soeskenTestopplysningerMap)))
+                AvdoedesBarn(
+                    listOf(
+                        personTestData(soekerTestopplysningerMap),
+                        personTestData(soeskenTestopplysningerMap),
+                    ),
+                )
                     .toJsonNode(),
             ),
         FAMILIERELASJON to
@@ -193,11 +228,23 @@ internal val avdoedTestopplysningerMap: Map<Opplysningstype, Opplysning<JsonNode
             ),
     )
 
+val eldreAvdoedTestopplysningerMap: Map<Opplysningstype, Opplysning<JsonNode>> =
+    avdoedTestopplysningerMap.toMutableMap().let { map ->
+        map[DOEDSDATO] = Opplysning.Konstant(randomUUID(), kilde, AVDOED_FOEDSELSNUMMER.getBirthDate().plusYears(67).toJsonNode())
+
+        map
+    }.toMap()
+
 internal val gjenlevendeTestopplysningerMap: Map<Opplysningstype, Opplysning<JsonNode>> =
     mapOf(
         NAVN to Opplysning.Konstant(randomUUID(), kilde, Navn("Levende", "mellom", "Mor").toJsonNode()),
         FOEDSELSNUMMER to Opplysning.Konstant(randomUUID(), kilde, GJENLEVENDE_FOEDSELSNUMMER.toJsonNode()),
-        FOEDSELSDATO to Opplysning.Konstant(randomUUID(), kilde, GJENLEVENDE_FOEDSELSNUMMER.getBirthDate().toJsonNode()),
+        FOEDSELSDATO to
+            Opplysning.Konstant(
+                randomUUID(),
+                kilde,
+                GJENLEVENDE_FOEDSELSNUMMER.getBirthDate().toJsonNode(),
+            ),
         FOEDSELSAAR to
             Opplysning.Konstant(
                 randomUUID(),
@@ -205,7 +252,12 @@ internal val gjenlevendeTestopplysningerMap: Map<Opplysningstype, Opplysning<Jso
                 GJENLEVENDE_FOEDSELSNUMMER.getBirthDate().year.toJsonNode(),
             ),
         FOEDELAND to Opplysning.Konstant(randomUUID(), kilde, "NOR".toJsonNode()),
-        ADRESSEBESKYTTELSE to Opplysning.Konstant(randomUUID(), kilde, AdressebeskyttelseGradering.UGRADERT.toJsonNode()),
+        ADRESSEBESKYTTELSE to
+            Opplysning.Konstant(
+                randomUUID(),
+                kilde,
+                AdressebeskyttelseGradering.UGRADERT.toJsonNode(),
+            ),
         BOSTEDSADRESSE to
             Opplysning.Konstant(
                 randomUUID(),

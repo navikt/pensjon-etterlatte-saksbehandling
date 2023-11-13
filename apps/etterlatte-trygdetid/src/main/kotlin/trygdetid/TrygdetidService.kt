@@ -385,7 +385,7 @@ class TrygdetidServiceImpl(
                 SIST_FREMTIDIG_TRYGDETID_ALDER,
             )?.with(TemporalAdjusters.firstDayOfNextYear())?.minusDays(1)
 
-        return if (doedsDato != null && sistFremtidigDato != null) {
+        return if (doedsDato != null && sistFremtidigDato != null && doedsDato.isBefore(sistFremtidigDato)) {
             TrygdetidPeriode(doedsDato, sistFremtidigDato)
         } else {
             null

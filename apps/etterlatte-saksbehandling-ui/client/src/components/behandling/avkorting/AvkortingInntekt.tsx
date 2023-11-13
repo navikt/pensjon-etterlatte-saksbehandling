@@ -9,7 +9,6 @@ import { HjemmelLenke } from '~components/behandling/felles/HjemmelLenke'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
 import { PencilIcon } from '@navikt/aksel-icons'
-import { hentBehandlesFraStatus } from '~components/behandling/felles/utils'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { TextButton } from '~components/behandling/soeknadsoversikt/familieforhold/personer/personinfo/TextButton'
 import { OmstillingsstoenadToolTip } from '~components/behandling/beregne/OmstillingsstoenadToolTip'
@@ -17,13 +16,14 @@ import { OmstillingsstoenadToolTip } from '~components/behandling/beregne/Omstil
 export const AvkortingInntekt = (props: {
   behandling: IBehandlingReducer
   avkortingGrunnlag: IAvkortingGrunnlag[]
+  redigerbar: boolean
   setAvkorting: (avkorting: IAvkorting) => void
 }) => {
   const behandling = props.behandling
+  const redigerbar = props.redigerbar
   const avkortingGrunnlag = [...props.avkortingGrunnlag]
   avkortingGrunnlag?.sort((a, b) => new Date(b.fom!).getTime() - new Date(a.fom!).getTime())
 
-  const redigerbar = hentBehandlesFraStatus(behandling.status)
   if (!behandling) throw new Error('Mangler behandling')
 
   const virkningstidspunkt = () => {

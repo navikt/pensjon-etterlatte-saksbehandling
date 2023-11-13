@@ -10,17 +10,22 @@ import { YtelseEtterAvkorting } from '~components/behandling/avkorting/YtelseEtt
 import { IBehandlingReducer, oppdaterBehandlingsstatus } from '~store/reducers/BehandlingReducer'
 import { useAppDispatch } from '~store/Store'
 import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
+import { hentBehandlesFraStatus } from '~components/behandling/felles/utils'
 
 export const Avkorting = (props: { behandling: IBehandlingReducer }) => {
   const behandling = props.behandling
   const dispatch = useAppDispatch()
   const [avkortingStatus, hentAvkortingRequest] = useApiCall(hentAvkorting)
   const [avkorting, setAvkorting] = useState<IAvkorting>()
+  const redigerbar = hentBehandlesFraStatus(behandling.status)
 
   useEffect(() => {
     if (!avkorting) {
       hentAvkortingRequest(behandling.id, (res) => {
-        dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.AVKORTET))
+        const avkortingFinnesOgErUnderBehandling = res && redigerbar
+        if (avkortingFinnesOgErUnderBehandling) {
+          dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.AVKORTET))
+        }
         setAvkorting(res)
       })
     }
@@ -33,6 +38,7 @@ export const Avkorting = (props: { behandling: IBehandlingReducer }) => {
           behandling={behandling}
           avkortingGrunnlag={avkorting == null ? [] : avkorting.avkortingGrunnlag}
           setAvkorting={setAvkorting}
+          redigerbar={redigerbar}
         />
       )}
       {avkorting && (

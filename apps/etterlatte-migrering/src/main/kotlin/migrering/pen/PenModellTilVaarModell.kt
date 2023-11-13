@@ -1,10 +1,12 @@
 package no.nav.etterlatte.migrering.pen
 
+import io.ktor.util.toUpperCasePreservingASCIIRules
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.libs.common.IntBroek
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.migrering.Pesyssak
+import no.nav.etterlatte.migrering.person.krr.DigitalKontaktinformasjon
 import no.nav.etterlatte.rapidsandrivers.migrering.AvdoedForelder
 import no.nav.etterlatte.rapidsandrivers.migrering.Beregning
 import no.nav.etterlatte.rapidsandrivers.migrering.BeregningMeta
@@ -15,7 +17,9 @@ import java.time.LocalDate
 import java.time.LocalTime
 import java.time.YearMonth
 
-fun BarnepensjonGrunnlagResponse.tilVaarModell(): Pesyssak {
+fun BarnepensjonGrunnlagResponse.tilVaarModell(
+    hentKontaktinformasjon: (id: Folkeregisteridentifikator) -> DigitalKontaktinformasjon?,
+): Pesyssak {
     val pesyssak =
         Pesyssak(
             id = sakId,
@@ -67,7 +71,12 @@ fun BarnepensjonGrunnlagResponse.tilVaarModell(): Pesyssak {
                         },
                 ),
             flyktningStatus = false, // TODO - Støttes ikke av Gjenny
-            spraak = Spraak.NB, // TODO - Må fikses, ellers blir alle brev på norsk.
+            spraak =
+                hentKontaktinformasjon(Folkeregisteridentifikator.of(soeker))
+                    ?.spraak
+                    ?.toUpperCasePreservingASCIIRules()
+                    ?.let { Spraak.valueOf(it) }
+                    ?: Spraak.NN,
         )
     return pesyssak
 }

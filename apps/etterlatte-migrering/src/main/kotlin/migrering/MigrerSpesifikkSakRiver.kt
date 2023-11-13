@@ -59,9 +59,9 @@ internal class MigrerSpesifikkSakRiver(
         val lopendeJanuar2024 = packet.loependeJanuer2024
 
         val pesyssak =
-            hentSak(sakId, lopendeJanuar2024).tilVaarModell().also {
-                pesysRepository.lagrePesyssak(pesyssak = it)
-            }
+            hentSak(sakId, lopendeJanuar2024)
+                .tilVaarModell { runBlocking { krrKlient.hentDigitalKontaktinformasjon(it) } }
+                .also { pesysRepository.lagrePesyssak(pesyssak = it) }
         packet.eventName = Migreringshendelser.MIGRER_SAK
         val request = pesyssak.tilMigreringsrequest()
         packet.hendelseData = request

@@ -98,7 +98,7 @@ private class BrevDatafetcher(
 
     suspend fun hentTrygdetid() = brevdataFacade.finnTrygdetid(behandlingId, brukerTokenInfo)
 
-    suspend fun hentMigreringRequest() = brevdataFacade.hentMigreringRequest(behandlingId, brukerTokenInfo)
+    suspend fun hentMigreringRequest() = brevdataFacade.hentMigreringRequest(behandlingId)
 }
 
 class BrevDataMapper(

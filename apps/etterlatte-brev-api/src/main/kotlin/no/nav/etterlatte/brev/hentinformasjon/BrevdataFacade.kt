@@ -230,10 +230,7 @@ class BrevdataFacade(
         return trygdetidService.finnTrygdetidsgrunnlag(behandlingId, beregning, brukerTokenInfo)
     }
 
-    suspend fun hentMigreringRequest(
-        behandlingId: UUID,
-        brukerTokenInfo: BrukerTokenInfo,
-    ): MigreringRequest {
-        return migreringKlient.hentMigreringRequest(behandlingId, brukerTokenInfo)
+    suspend fun hentMigreringRequest(behandlingId: UUID): MigreringRequest {
+        return migreringKlient.hentMigreringRequest(behandlingId)
     }
 }

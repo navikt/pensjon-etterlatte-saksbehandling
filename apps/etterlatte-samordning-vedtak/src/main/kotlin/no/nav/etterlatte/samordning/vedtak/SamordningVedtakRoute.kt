@@ -106,6 +106,12 @@ fun Route.samordningVedtakRoute(
 
             call.respond(samordningVedtakDtos)
         }
+
+        get("/ping") {
+            call.respond(
+                getMeta(),
+            )
+        }
     }
 }
 

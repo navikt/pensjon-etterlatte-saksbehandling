@@ -7,7 +7,6 @@ import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.rapidsandrivers.migrering.MigreringRequest
 import java.util.UUID
 
-// TODO: hvordan henter vi migreringInfoen for brev?
 class MigreringKlient(private val apiUrl: String, private val httpClient: HttpClient) {
     suspend fun hentMigreringRequest(behandlingId: UUID): MigreringRequest {
         return try {

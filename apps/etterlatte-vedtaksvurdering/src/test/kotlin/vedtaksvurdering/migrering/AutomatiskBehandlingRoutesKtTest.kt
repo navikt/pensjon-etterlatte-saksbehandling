@@ -100,7 +100,7 @@ internal class AutomatiskBehandlingRoutesKtTest {
             } returns
                 VedtakOgRapid(
                     opprettetVedtak.toDto(),
-                    RapidInfo(VedtakKafkaHendelseType.ATTESTERT, opprettetVedtak.toDto(), Tidspunkt.now(), behandlingId),
+                    RapidInfo(VedtakKafkaHendelseType.ATTESTERT, opprettetVedtak.toNyDto(), Tidspunkt.now(), behandlingId),
                 )
             coEvery { rapidService.sendToRapid(any()) } just runs
 

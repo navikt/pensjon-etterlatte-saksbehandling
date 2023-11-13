@@ -315,7 +315,10 @@ val opptjeningsTidIMnd =
         beskrivelse = "Finn ut opptjeningstid",
         regelReferanse = RegelReferanse(id = "REGEL-BEREGN-OPPTJENINGSPERIODE"),
     ) benytter finnDatoerForOpptjeningstid med { datoer ->
-        ChronoUnit.MONTHS.between(datoer.first, datoer.second)
+        maxOf(
+            0L,
+            ChronoUnit.MONTHS.between(datoer.first, datoer.second),
+        )
     }
 
 val fremtidigTrygdetidForNasjonal =

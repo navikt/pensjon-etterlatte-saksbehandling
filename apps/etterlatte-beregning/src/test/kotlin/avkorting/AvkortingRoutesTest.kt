@@ -63,7 +63,7 @@ class AvkortingRoutesTest {
     }
 
     @Test
-    fun `skal returnere 404 naar avkorting ikke finnes`() {
+    fun `skal returnere 204 naar avkorting ikke finnes`() {
         coEvery { avkortingService.hentAvkorting(any(), any()) } returns null
 
         testApplication(server.config.httpServer.port()) {
@@ -73,7 +73,7 @@ class AvkortingRoutesTest {
                     header(HttpHeaders.Authorization, "Bearer $token")
                 }
 
-            response.status shouldBe HttpStatusCode.NotFound
+            response.status shouldBe HttpStatusCode.NoContent
         }
     }
 

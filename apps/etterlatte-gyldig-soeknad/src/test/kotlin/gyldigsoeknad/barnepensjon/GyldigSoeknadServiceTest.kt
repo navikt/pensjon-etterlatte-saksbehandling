@@ -32,29 +32,3 @@ internal class GyldigSoeknadServiceTest {
                 ?: throw FileNotFoundException("Fant ikke filen $file")
     }
 }
-
-private fun mockPerson(
-    vergemaalEllerFremtidsfullmakt: List<VergemaalEllerFremtidsfullmakt>? = null,
-    familieRelasjon: FamilieRelasjon? = FamilieRelasjon(null, null, null),
-) = Person(
-    fornavn = "Test",
-    etternavn = "Testulfsen",
-    foedselsnummer = SOEKER_FOEDSELSNUMMER,
-    foedselsdato = LocalDate.parse("2020-06-10"),
-    foedselsaar = 1985,
-    foedeland = null,
-    doedsdato = null,
-    adressebeskyttelse = AdressebeskyttelseGradering.UGRADERT,
-    bostedsadresse = null,
-    deltBostedsadresse = null,
-    kontaktadresse = null,
-    oppholdsadresse = null,
-    sivilstatus = null,
-    sivilstand = null,
-    statsborgerskap = null,
-    utland = null,
-    familieRelasjon = familieRelasjon,
-    avdoedesBarn = null,
-    avdoedesBarnUtenIdent = null,
-    vergemaalEllerFremtidsfullmakt = vergemaalEllerFremtidsfullmakt,
-)

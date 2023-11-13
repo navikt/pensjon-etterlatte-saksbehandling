@@ -31,7 +31,7 @@ internal class FordeltSoeknadRiverTest {
         }
 
     @Test
-    fun `skal sjekke om søknad er gyldig fremsatt og returnere resultatet av dette`() {
+    fun `behandling av søknad-melding skal sette KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING`() {
         val persongalleri =
             Persongalleri(
                 soeker = "soeker",
@@ -60,7 +60,7 @@ internal class FordeltSoeknadRiverTest {
 
         val actualGyldighet = slot<GyldighetsResultat>()
         verify { behandlingClientMock.lagreGyldighetsVurdering(id, capture(actualGyldighet)) }
-        actualGyldighet.captured.resultat shouldBe VurderingsResultat.OPPFYLT
+        actualGyldighet.captured.resultat shouldBe VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
     }
 
     companion object {

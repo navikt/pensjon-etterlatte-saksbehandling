@@ -614,7 +614,7 @@ class Norg2KlientTest : Norg2Klient {
         tema: String,
         omraade: String,
     ): List<ArbeidsFordelingEnhet> {
-        return listOf(ArbeidsFordelingEnhet(Enheter.STEINKJER.enhetNr, Enheter.STEINKJER.navn))
+        return listOf(ArbeidsFordelingEnhet(Enheter.STEINKJER.navn, Enheter.STEINKJER.enhetNr))
     }
 }
 
@@ -622,7 +622,7 @@ class NavAnsattKlientTest : NavAnsattKlient {
     override suspend fun hentSaksbehandlerEnhet(ident: String): List<SaksbehandlerEnhet> {
         return listOf(
             SaksbehandlerEnhet(Enheter.defaultEnhet.enhetNr, Enheter.defaultEnhet.navn),
-            SaksbehandlerEnhet(Enheter.STEINKJER.enhetNr, Enheter.STEINKJER.navn),
+            SaksbehandlerEnhet(Enheter.STEINKJER.navn, Enheter.STEINKJER.enhetNr),
         )
     }
 

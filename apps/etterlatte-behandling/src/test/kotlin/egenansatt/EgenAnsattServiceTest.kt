@@ -92,7 +92,7 @@ internal class EgenAnsattServiceTest {
         every { pdlKlient.hentGeografiskTilknytning(any(), any()) } returns GeografiskTilknytning(kommune = "0301")
         every {
             norg2Klient.hentEnheterForOmraade("EYB", "0301")
-        } returns listOf(ArbeidsFordelingEnhet(Enheter.STEINKJER.enhetNr, Enheter.STEINKJER.navn))
+        } returns listOf(ArbeidsFordelingEnhet(Enheter.STEINKJER.navn, Enheter.STEINKJER.enhetNr))
 
         every { featureToggleService.isEnabled(any(), any()) } returns false
     }

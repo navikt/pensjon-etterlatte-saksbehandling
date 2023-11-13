@@ -54,7 +54,7 @@ class Norg2KlientTest {
 
         resultat.size shouldBeExactly 1
 
-        resultat shouldContainExactly listOf(ArbeidsFordelingEnhet(Enheter.STEINKJER.enhetNr, Enheter.STEINKJER.navn))
+        resultat shouldContainExactly listOf(ArbeidsFordelingEnhet(Enheter.STEINKJER.navn, Enheter.STEINKJER.enhetNr))
     }
 
     private fun mockHttpClient(jsonRespons: String): HttpClient {

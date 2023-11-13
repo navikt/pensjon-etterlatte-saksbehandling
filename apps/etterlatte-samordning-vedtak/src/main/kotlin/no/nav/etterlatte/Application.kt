@@ -39,7 +39,10 @@ class Server(applicationContext: ApplicationContext) {
                             sikkerLogg,
                             withMetrics = true,
                         ) {
-                            samordningVedtakRoute(samordningVedtakService = applicationContext.samordningVedtakService)
+                            samordningVedtakRoute(
+                                samordningVedtakService = applicationContext.samordningVedtakService,
+                                config = applicationContext.config,
+                            )
                             install(userIdMdcPlugin)
                             install(serverRequestLoggerPlugin)
                         }

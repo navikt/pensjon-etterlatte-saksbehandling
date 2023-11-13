@@ -61,13 +61,16 @@ const KravpakkeUtland = (props: { utlandsBehandling: Generellbehandling & { innh
   const [avdoed, setAvdoed] = useState<Grunnlagsopplysning<IPdlPerson, KildePdl> | null>(null)
 
   const [hentAlleLandRequest, fetchAlleLand] = useApiCall(hentAlleLand)
+
+  const [dokumentDropdown, setDokumentDropdown] = useState<string>('')
+
   const [alleLandKodeverk, setAlleLandKodeverk] = useState<ILand[] | null>(null)
   const [rinanummer, setRinanummer] = useState<string>(innhold?.rinanummer ?? '')
   const [notater, setNotater] = useState<string>(innhold?.begrunnelse ?? '')
   const [valgtLandIsoKode, setValgtLandIsoKode] = useState<string>('')
   const [valgteLandIsoKode, setvalgteLandIsoKode] = useState<string[]>(innhold?.landIsoKode ?? [])
   const [landAlleredeValgt, setLandAlleredeValgt] = useState<boolean>(false)
-  const defaultDokumentState: DokumentSendtMedDato[] = [{ dokumenttype: '', sendt: false, dato: '' }]
+  const defaultDokumentState: DokumentSendtMedDato[] = []
 
   const [dokumenter, setDokumenter] = useState<DokumentSendtMedDato[]>(
     utlandsBehandling.innhold?.dokumenter ?? defaultDokumentState
@@ -134,7 +137,6 @@ const KravpakkeUtland = (props: { utlandsBehandling: Generellbehandling & { innh
   }
 
   const redigerbar = utlandsBehandling.status === Status.OPPRETTET
-
   return (
     <GridContainer>
       <MainContent style={{ whiteSpace: 'pre-wrap' }}>
@@ -279,7 +281,41 @@ const KravpakkeUtland = (props: { utlandsBehandling: Generellbehandling & { innh
                 readOnly={!redigerbar}
               />
             </div>
-
+            <div style={{ marginTop: '2rem' }}>
+              <Select
+                label="Hvile dokumenter vil du legge til?"
+                value={dokumentDropdown}
+                onChange={(e) => setDokumentDropdown(e.target.value)}
+              >
+                <option value="" disabled={true}>
+                  Velg dokument
+                </option>
+                <option value="P2100">P2100</option>
+                <option value="P3000">P3000</option>
+                <option value="P4000">P4000</option>
+                <option value="P5000">P5000</option>
+                <option value="P6000">P6000</option>
+                <option value="P8000">P8000</option>
+                <option value="velg dokument">Annet</option>
+              </Select>
+              {redigerbar && (
+                <Button
+                  style={{ marginTop: '0.5rem' }}
+                  onClick={() => {
+                    if (dokumentDropdown) {
+                      const nyttDokument: DokumentSendtMedDato = {
+                        dokumenttype: dokumentDropdown,
+                        sendt: false,
+                        dato: '',
+                      }
+                      setDokumenter((prev) => prev.concat([nyttDokument]))
+                    }
+                  }}
+                >
+                  Legg til valgt dokument
+                </Button>
+              )}
+            </div>
             <StandardBreddeTabell>
               <Table.Header>
                 <Table.Row>
@@ -294,7 +330,8 @@ const KravpakkeUtland = (props: { utlandsBehandling: Generellbehandling & { innh
                     <Table.DataCell>
                       {redigerbar ? (
                         <TextField
-                          label={dokument.dokumenttype}
+                          label=""
+                          value={dokument.dokumenttype}
                           size="medium"
                           style={{ maxWidth: '16rem' }}
                           onChange={(e) => {
@@ -348,14 +385,6 @@ const KravpakkeUtland = (props: { utlandsBehandling: Generellbehandling & { innh
                 ))}
               </Table.Body>
             </StandardBreddeTabell>
-            {redigerbar && (
-              <Button
-                style={{ marginTop: '1.5rem' }}
-                onClick={() => setDokumenter((dokumenter) => dokumenter.concat(defaultDokumentState))}
-              >
-                Legg til dokument
-              </Button>
-            )}
             <div style={{ marginTop: '3.5rem', marginBottom: '3rem' }}>
               <Heading size="medium" level="3">
                 Varsling til bruker

@@ -3,6 +3,7 @@ package no.nav.etterlatte.beregning
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
 import io.ktor.server.application.log
+import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.application
@@ -12,6 +13,7 @@ import io.ktor.server.routing.route
 import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.libs.common.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.behandlingId
+import no.nav.etterlatte.libs.common.beregning.OverstyrBeregningDTO
 import no.nav.etterlatte.libs.common.withBehandlingId
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 
@@ -37,6 +39,24 @@ fun Route.beregning(
                 logger.info("Henter overstyrBeregning med behandlingId=$it")
 
                 val overstyrBeregning = beregningService.hentOverstyrBeregning(behandlingId, brukerTokenInfo).toDTO()
+
+                when (overstyrBeregning) {
+                    null -> call.response.status(HttpStatusCode.NoContent)
+                    else -> call.respond(overstyrBeregning)
+                }
+            }
+        }
+
+        post("/{$BEHANDLINGID_CALL_PARAMETER}/overstyrt") {
+            withBehandlingId(behandlingKlient) {
+                logger.info("Oppretter overstyrBeregning med behandlingId=$it")
+
+                val overstyrBeregning =
+                    beregningService.opprettOverstyrBeregning(
+                        behandlingId,
+                        call.receive<OverstyrBeregningDTO>(),
+                        brukerTokenInfo,
+                    ).toDTO()
 
                 when (overstyrBeregning) {
                     null -> call.response.status(HttpStatusCode.NoContent)

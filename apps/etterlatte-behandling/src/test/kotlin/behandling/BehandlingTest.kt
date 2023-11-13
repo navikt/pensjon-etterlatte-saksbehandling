@@ -74,7 +74,7 @@ internal class BehandlingTest {
                 .oppdaterGyldighetsproeving(gyldighetsResultat)
                 .tilVilkaarsvurdert()
                 .tilTrygdetidOppdatert()
-                .tilBeregnet(false)
+                .tilBeregnet()
                 .tilFattetVedtak()
 
         assertThrows<TilstandException.UgyldigTilstand> {
@@ -90,7 +90,7 @@ internal class BehandlingTest {
                 .oppdaterGyldighetsproeving(gyldighetsResultat)
                 .tilVilkaarsvurdert()
                 .tilTrygdetidOppdatert()
-                .tilBeregnet(false)
+                .tilBeregnet()
                 .tilFattetVedtak()
                 .tilAttestert()
                 .tilIverksatt()
@@ -138,7 +138,7 @@ internal class BehandlingTest {
                 .oppdaterGyldighetsproeving(gyldighetsResultat)
                 .tilVilkaarsvurdert()
                 .tilTrygdetidOppdatert()
-                .tilBeregnet(false)
+                .tilBeregnet()
                 .tilFattetVedtak()
                 .tilReturnert()
 
@@ -175,11 +175,11 @@ internal class BehandlingTest {
                 .oppdaterGyldighetsproeving(gyldighetsResultat)
                 .tilVilkaarsvurdert()
                 .tilTrygdetidOppdatert()
-                .tilBeregnet(false)
+                .tilBeregnet()
                 .tilFattetVedtak()
 
         initialBehandling.tilReturnert().tilFattetVedtak()
-        initialBehandling.tilReturnert().tilBeregnet(false)
+        initialBehandling.tilReturnert().tilBeregnet()
         initialBehandling.tilReturnert().tilVilkaarsvurdert()
         initialBehandling.tilReturnert().tilTrygdetidOppdatert()
         initialBehandling.tilReturnert().tilOpprettet()
@@ -193,7 +193,7 @@ internal class BehandlingTest {
                 .oppdaterGyldighetsproeving(gyldighetsResultat)
                 .tilVilkaarsvurdert()
                 .tilTrygdetidOppdatert()
-                .tilBeregnet(false)
+                .tilBeregnet()
                 .tilFattetVedtak()
                 .tilReturnert()
 
@@ -210,7 +210,7 @@ internal class BehandlingTest {
                 .oppdaterGyldighetsproeving(gyldighetsResultat)
                 .tilVilkaarsvurdert()
                 .tilTrygdetidOppdatert()
-                .tilBeregnet(false)
+                .tilBeregnet()
                 .tilFattetVedtak()
                 .tilReturnert()
 
@@ -220,44 +220,23 @@ internal class BehandlingTest {
     }
 
     @Test
-    fun `kan gaa fra VILKAARSVURDERT til BEREGNET ved fast trygdetid`() {
-        behandling
-            .oppdaterVirkningstidspunkt(virkningstidspunkt)
-            .oppdaterGyldighetsproeving(gyldighetsResultat)
-            .tilVilkaarsvurdert()
-            .tilBeregnet(true)
-    }
-
-    @Test
-    fun `kan ikke gaa fra VILKAARSVURDERT til TRYGDETID_OPPRETTET ved fast trygdetid`() {
-        assertThrows<TilstandException.UgyldigTilstand> {
-            behandling
-                .oppdaterVirkningstidspunkt(virkningstidspunkt)
-                .oppdaterGyldighetsproeving(gyldighetsResultat)
-                .tilVilkaarsvurdert()
-                .tilTrygdetidOppdatert()
-                .tilBeregnet(true)
-        }
-    }
-
-    @Test
-    fun `kan gaa fra VILKAARSVURDERT til TRYGDETID_OPPRETTET ved faktisk trygdetid`() {
+    fun `kan gaa fra VILKAARSVURDERT til TRYGDETID_OPPRETTET`() {
         behandling
             .oppdaterVirkningstidspunkt(virkningstidspunkt)
             .oppdaterGyldighetsproeving(gyldighetsResultat)
             .tilVilkaarsvurdert()
             .tilTrygdetidOppdatert()
-            .tilBeregnet(false)
+            .tilBeregnet()
     }
 
     @Test
-    fun `kan ikke gaa fra VILKAARSVURDERT til BEREGNET ved faktisk trygdetid`() {
+    fun `kan ikke gaa fra VILKAARSVURDERT til BEREGNET`() {
         assertThrows<TilstandException.UgyldigTilstand> {
             behandling
                 .oppdaterVirkningstidspunkt(virkningstidspunkt)
                 .oppdaterGyldighetsproeving(gyldighetsResultat)
                 .tilVilkaarsvurdert()
-                .tilBeregnet(false)
+                .tilBeregnet()
         }
     }
 }

@@ -15,6 +15,7 @@ import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.testdata.grunnlag.HELSOESKEN_FOEDSELSNUMMER
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -95,6 +96,26 @@ internal class BeregningRepositoryTest {
         val beregningHentetNy = beregningRepository.hent(beregningLagret.behandlingId)
 
         assertEquals(nyBeregning, beregningHentetNy)
+    }
+
+    @Test
+    fun `skal ikke hente en overstyr beregning som ikke finnes`() {
+        val overstyrBeregning = beregningRepository.hentOverstyrBeregning(0L)
+
+        assertTrue(overstyrBeregning == null)
+    }
+
+    @Test
+    fun `skal lagre og hente en overstyr beregning`() {
+        val opprettetOverstyrBeregning = beregningRepository.opprettOverstyrBeregning(OverstyrBeregning(1L, "Test", Tidspunkt.now()))
+
+        val overstyrBeregning = beregningRepository.hentOverstyrBeregning(1L)
+
+        assertTrue(opprettetOverstyrBeregning != null)
+        assertTrue(overstyrBeregning != null)
+
+        assertEquals(opprettetOverstyrBeregning?.sakId, overstyrBeregning?.sakId)
+        assertEquals(opprettetOverstyrBeregning?.beskrivelse, overstyrBeregning?.beskrivelse)
     }
 
     private fun beregning(

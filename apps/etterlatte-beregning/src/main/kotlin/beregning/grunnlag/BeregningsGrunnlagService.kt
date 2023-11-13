@@ -9,6 +9,7 @@ import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetodeBeregningsgrunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning.Companion.automatiskSaksbehandler
 import no.nav.etterlatte.libs.common.grunnlag.hentAvdoedesbarn
 import no.nav.etterlatte.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
@@ -280,22 +281,26 @@ class BeregningsGrunnlagService(
     fun hentOverstyrBeregningGrunnlag(behandlingId: UUID): OverstyrBeregningGrunnlagDTO {
         logger.info("Henter overstyr beregning grunnlag $behandlingId")
 
-        return OverstyrBeregningGrunnlagDTO(
-            perioder =
-                beregningsGrunnlagRepository.finnOverstyrBeregningGrunnlagForBehandling(
-                    behandlingId,
-                ).map { periode ->
-                    GrunnlagMedPeriode(
-                        data =
-                            OverstyrBeregningGrunnlag(
-                                utbetaltBeloep = periode.utbetaltBeloep,
-                                trygdetid = periode.trygdetid,
-                            ),
-                        fom = periode.datoFOM,
-                        tom = periode.datoTOM,
-                    )
-                },
-        )
+        return beregningsGrunnlagRepository.finnOverstyrBeregningGrunnlagForBehandling(
+            behandlingId,
+        ).let { overstyrBeregningGrunnlagDaoListe ->
+            OverstyrBeregningGrunnlagDTO(
+                perioder =
+                    overstyrBeregningGrunnlagDaoListe.map { periode ->
+                        GrunnlagMedPeriode(
+                            data =
+                                OverstyrBeregningGrunnlag(
+                                    utbetaltBeloep = periode.utbetaltBeloep,
+                                    trygdetid = periode.trygdetid,
+                                    beskrivelse = periode.beskrivelse,
+                                ),
+                            fom = periode.datoFOM,
+                            tom = periode.datoTOM,
+                        )
+                    },
+                kilde = overstyrBeregningGrunnlagDaoListe.firstOrNull()?.kilde ?: automatiskSaksbehandler,
+            )
+        }
     }
 
     suspend fun lagreOverstyrBeregningGrunnlag(
@@ -318,6 +323,8 @@ class BeregningsGrunnlagService(
                     utbetaltBeloep = it.data.utbetaltBeloep,
                     trygdetid = it.data.trygdetid,
                     sakId = behandling.sak,
+                    beskrivelse = it.data.beskrivelse,
+                    kilde = Grunnlagsopplysning.Saksbehandler.create(brukerTokenInfo.ident()),
                 )
             },
         )

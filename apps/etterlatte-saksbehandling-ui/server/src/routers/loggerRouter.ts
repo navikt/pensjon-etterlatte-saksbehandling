@@ -45,8 +45,8 @@ loggerRouter.post('/', express.json(), (req, res) => {
         `General error from frontend: ${JSON.stringify(body.data)} \n details: ${JSON.stringify(body.jsonContent)}`
       )
     }
-    res.sendStatus(200)
   }
+  res.sendStatus(200)
 })
 
 function stackInfoIsInvalid(numbers: IStackLineNoColumnNo): boolean {

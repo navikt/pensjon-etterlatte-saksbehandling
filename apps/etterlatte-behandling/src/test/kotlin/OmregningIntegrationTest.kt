@@ -100,7 +100,7 @@ class OmregningIntegrationTest : BehandlingIntegrationTest() {
                     .oppdaterVirkningstidspunkt(virkningstidspunkt)
                     .tilVilkaarsvurdert()
                     .tilTrygdetidOppdatert()
-                    .tilBeregnet(false)
+                    .tilBeregnet()
                     .tilFattetVedtak()
                     .tilAttestert()
                     .tilIverksatt()

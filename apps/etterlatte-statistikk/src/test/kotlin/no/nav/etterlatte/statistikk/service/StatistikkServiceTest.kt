@@ -23,9 +23,10 @@ import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
 import no.nav.etterlatte.libs.common.vedtak.Behandling
 import no.nav.etterlatte.libs.common.vedtak.Utbetalingsperiode
-import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
+import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseType
+import no.nav.etterlatte.libs.common.vedtak.VedtakNyDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.statistikk.clients.BehandlingKlient
@@ -314,18 +315,21 @@ fun vedtak(
     pensjonTilUtbetaling: List<Utbetalingsperiode>? = null,
     vedtakFattet: VedtakFattet? = null,
     attestasjon: Attestasjon? = null,
-): VedtakDto =
-    VedtakDto(
-        vedtakId = vedtakId,
-        status = VedtakStatus.ATTESTERT,
-        virkningstidspunkt = virk,
-        sak = VedtakSak(ident = ident, sakType = sakType, id = sakId),
-        behandling = Behandling(type = behandlingType, id = behandlingId),
-        type = type,
-        utbetalingsperioder = pensjonTilUtbetaling ?: emptyList(),
-        vedtakFattet = vedtakFattet,
-        attestasjon = attestasjon,
-    )
+) = VedtakNyDto(
+    id = vedtakId,
+    behandlingId = behandlingId,
+    status = VedtakStatus.ATTESTERT,
+    sak = VedtakSak(ident = ident, sakType = sakType, id = sakId),
+    type = type,
+    vedtakFattet = vedtakFattet,
+    attestasjon = attestasjon,
+    innhold =
+        VedtakInnholdDto.VedtakBehandlingDto(
+            virkningstidspunkt = virk,
+            behandling = Behandling(type = behandlingType, id = behandlingId),
+            utbetalingsperioder = pensjonTilUtbetaling ?: emptyList(),
+        ),
+)
 
 fun behandling(
     id: UUID = UUID.randomUUID(),

@@ -85,12 +85,20 @@ spec:
       value: https://tp-api-q2.dev-fss-pub.nais.io
     - name: TJENESTEPENSJON_SCOPE
       value: api://dev-fss.pensjonsamhandling.tp-q2/.default
+    - name: ROLLE_PENSJONSAKSBEHANDLER
+      value: 8bb9b8d1-f46a-4ade-8ee8-5895eccdf8cf
   accessPolicy:
     inbound:
       rules:
         - application: etterlatte-krakend
+        - application: pensjon-pen-q0
+          namespace: pensjon-q0
+          cluster: dev-fss
+          permissions:
+            roles:
+              - les-oms-vedtak
         - application: pensjon-pen-q1
-          namespace: pensjon-q2
+          namespace: pensjon-q1
           cluster: dev-fss
           permissions:
             roles:

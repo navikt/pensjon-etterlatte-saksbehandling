@@ -25,6 +25,7 @@ import no.nav.etterlatte.common.klienter.hentDoedsdato
 import no.nav.etterlatte.foerstegangsbehandling
 import no.nav.etterlatte.grunnlagsendring.klienter.GrunnlagKlient
 import no.nav.etterlatte.grunnlagsendringshendelseMedSamsvar
+import no.nav.etterlatte.grunnlagsinformasjonDoedshendelse
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.PersonMedSakerOgRoller
@@ -35,8 +36,10 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.Opplysning.Konstant
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
+import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
+import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.oppgave.opprettNyOppgaveMedReferanseOgSak
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.pdlhendelse.Adressebeskyttelse
@@ -63,6 +66,7 @@ import org.junit.jupiter.api.Test
 import java.sql.Connection
 import java.time.LocalDate
 import java.util.UUID
+import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.random.Random
 
 internal class GrunnlagsendringshendelseServiceTest {
@@ -102,6 +106,7 @@ internal class GrunnlagsendringshendelseServiceTest {
                     }
 
                     override fun <T> inTransaction(block: () -> T): T {
+                        println("invoked")
                         return block()
                     }
                 },
@@ -729,6 +734,98 @@ internal class GrunnlagsendringshendelseServiceTest {
     }
 
     @Test
+    fun `Oppretter ny bostedshendelse hvis det finnes en oppgave under behandling for sak`() {
+        Kontekst.set(
+            Context(
+                mockk(),
+                object : DatabaseKontekst {
+                    private val transaktionOpen = AtomicBoolean(false)
+
+                    override fun activeTx(): Connection {
+                        throw IllegalArgumentException()
+                    }
+
+                    override fun <T> inTransaction(block: () -> T): T {
+                        if (transaktionOpen.getAndSet(true)) {
+                            throw IllegalStateException("Støtter ikke nøstede transactsjoner")
+                        }
+                        return block()
+                    }
+                },
+            ),
+        )
+
+        val sakIder: Set<Long> = setOf(1, 2)
+        val saker =
+            sakIder.map {
+                Sak(
+                    id = it,
+                    ident = KONTANT_FOT.value,
+                    sakType = SakType.BARNEPENSJON,
+                    enhet = Enheter.PORSGRUNN.enhetNr,
+                )
+            }
+
+        val bostedsadresse = Bostedsadresse("1", Endringstype.OPPRETTET, KONTANT_FOT.value)
+        coEvery { grunnlagClient.hentAlleSakIder(any()) } returns sakIder
+        coEvery { grunnlagClient.hentPersonSakOgRolle(KONTANT_FOT.value) } returns
+            PersonMedSakerOgRoller(
+                KONTANT_FOT.value,
+                listOf(
+                    SakOgRolle(1L, Saksrolle.UKJENT),
+                ),
+            )
+        every { sakService.oppdaterAdressebeskyttelse(any(), any()) } returns 1
+        every { sakService.finnSaker(KONTANT_FOT.value) } returns saker
+        every { oppgaveService.oppdaterEnhetForRelaterteOppgaver(any()) } returns Unit
+        every { oppgaveService.hentOppgaverForSak(2L) } returns
+            listOf(
+                OppgaveIntern(
+                    UUID.randomUUID(), Status.FERDIGSTILT,
+                    Enheter.PORSGRUNN.enhetNr, 2L, null,
+                    OppgaveType.FOERSTEGANGSBEHANDLING, "saksbehandler",
+                    "refernase", null, Tidspunkt.now(), SakType.BARNEPENSJON, null, null,
+                ),
+            )
+        every { oppgaveService.hentOppgaverForSak(1L) } returns
+            listOf(
+                OppgaveIntern(
+                    UUID.randomUUID(), Status.UNDER_BEHANDLING, Enheter.PORSGRUNN.enhetNr,
+                    1L, null, OppgaveType.FOERSTEGANGSBEHANDLING, "saksbehandler",
+                    "refernase", null, Tidspunkt.now(), SakType.BARNEPENSJON, null, null,
+                ),
+            )
+        every {
+            sakService.finnEnhetForPersonOgTema(any(), any(), any())
+        } returns ArbeidsFordelingEnhet(Enheter.STEINKJER.navn, Enheter.STEINKJER.enhetNr)
+        every { sakService.oppdaterEnhetForSaker(any()) } just runs
+        every { grunnlagshendelsesDao.hentGrunnlagsendringshendelserMedStatuserISak(any(), any()) } returns emptyList()
+        val grunnlagsendringshendelseMedSamsvar =
+            grunnlagsendringshendelseMedSamsvar(
+                sakId = 1L,
+                opprettet = Tidspunkt.now().toLocalDatetimeUTC().minusMinutes(30),
+                fnr = grunnlagsinformasjonDoedshendelse().fnr,
+                samsvarMellomKildeOgGrunnlag = null,
+            )
+        every { grunnlagshendelsesDao.opprettGrunnlagsendringshendelse(any()) } returns grunnlagsendringshendelseMedSamsvar
+        runBlocking {
+            grunnlagsendringshendelseService.oppdaterAdresseHendelse(bostedsadresse)
+        }
+        coVerify(exactly = 1) { sakService.finnSaker(bostedsadresse.fnr) }
+        coVerify(exactly = 1) { grunnlagClient.hentPersonSakOgRolle(KONTANT_FOT.value) }
+        verify(exactly = 1) {
+            sakService.oppdaterEnhetForSaker(
+                any(),
+            )
+        }
+        verify(exactly = 1) {
+            oppgaveService.oppdaterEnhetForRelaterteOppgaver(
+                any(),
+            )
+        }
+    }
+
+    @Test
     fun `Skal kunne sette adressebeskyttelse strengt fortrolig og sette enhet`() {
         val sakIder: Set<Long> = setOf(1, 2, 3, 4, 5, 6)
         val saker =
@@ -750,7 +847,7 @@ internal class GrunnlagsendringshendelseServiceTest {
         every { oppgaveService.oppdaterEnhetForRelaterteOppgaver(any()) } returns Unit
         every {
             sakService.finnEnhetForPersonOgTema(any(), any(), any())
-        } returns ArbeidsFordelingEnhet("NAV Familie- og pensjonsytelser Steinkjer", "4817")
+        } returns ArbeidsFordelingEnhet(Enheter.STEINKJER.navn, Enheter.STEINKJER.enhetNr)
         every { sakService.oppdaterEnhetForSaker(any()) } just runs
         runBlocking {
             grunnlagsendringshendelseService.oppdaterAdressebeskyttelseHendelse(adressebeskyttelse)
@@ -793,7 +890,7 @@ internal class GrunnlagsendringshendelseServiceTest {
         every { oppgaveService.oppdaterEnhetForRelaterteOppgaver(any()) } returns Unit
         every {
             sakService.finnEnhetForPersonOgTema(any(), any(), any())
-        } returns ArbeidsFordelingEnhet("NAV Familie- og pensjonsytelser Steinkjer", "4817")
+        } returns ArbeidsFordelingEnhet(Enheter.STEINKJER.navn, Enheter.STEINKJER.enhetNr)
         every { sakService.oppdaterEnhetForSaker(any()) } just runs
         runBlocking {
             grunnlagsendringshendelseService.oppdaterAdressebeskyttelseHendelse(adressebeskyttelse)

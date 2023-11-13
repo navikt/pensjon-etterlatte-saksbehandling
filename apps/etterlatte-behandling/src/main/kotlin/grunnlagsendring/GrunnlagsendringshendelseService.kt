@@ -105,16 +105,16 @@ class GrunnlagsendringshendelseService(
         grunnlagsendringshendelseDao.oppdaterGrunnlagsendringHistorisk(behandlingId)
     }
 
-    fun opprettDoedshendelse(doedshendelse: Doedshendelse): List<Grunnlagsendringshendelse> {
-        return opprettHendelseAvTypeForPerson(doedshendelse.fnr, GrunnlagsendringsType.DOEDSFALL)
-    }
-
     fun opprettBostedhendelse(bostedsadresse: Bostedsadresse): List<Grunnlagsendringshendelse> {
         return opprettHendelseAvTypeForPerson(bostedsadresse.fnr, GrunnlagsendringsType.BOSTED)
     }
 
+    fun opprettDoedshendelse(doedshendelse: Doedshendelse): List<Grunnlagsendringshendelse> {
+        return inTransaction { opprettHendelseAvTypeForPerson(doedshendelse.fnr, GrunnlagsendringsType.DOEDSFALL) }
+    }
+
     fun opprettUtflyttingshendelse(utflyttingsHendelse: UtflyttingsHendelse): List<Grunnlagsendringshendelse> {
-        return opprettHendelseAvTypeForPerson(utflyttingsHendelse.fnr, GrunnlagsendringsType.UTFLYTTING)
+        return inTransaction { opprettHendelseAvTypeForPerson(utflyttingsHendelse.fnr, GrunnlagsendringsType.UTFLYTTING) }
     }
 
     fun opprettForelderBarnRelasjonHendelse(forelderBarnRelasjonHendelse: ForelderBarnRelasjonHendelse): List<Grunnlagsendringshendelse> {
@@ -192,7 +192,7 @@ class GrunnlagsendringshendelseService(
                 }
             sakerMedNyEnhet.forEach { sakMedEnhet ->
                 val oppgaverUnderBehandling =
-                    oppgaveService.hentOppgaverForSak(sakMedEnhet.id).map { it.status == Status.UNDER_BEHANDLING }
+                    oppgaveService.hentOppgaverForSak(sakMedEnhet.id).filter { it.status == Status.UNDER_BEHANDLING }
                 if (oppgaverUnderBehandling.isNotEmpty()) {
                     logger.info("Oppretter manuell oppgave for Bosted fordi det er åpne behandlinger")
                     opprettBostedhendelse(bostedsadresse)
@@ -288,33 +288,31 @@ class GrunnlagsendringshendelseService(
         val sakerOgRoller = runBlocking { grunnlagKlient.hentPersonSakOgRolle(fnr).sakerOgRoller }
 
         return sakerOgRoller.let {
-            inTransaction {
-                it.filter { rolleOgSak ->
-                    !hendelseEksistererFraFoer(
-                        rolleOgSak.sakId,
-                        fnr,
-                        grunnlagendringType,
-                    )
-                }
-                    .map { rolleOgSak ->
-                        val hendelseId = UUID.randomUUID()
-                        logger.info(
-                            "Oppretter grunnlagsendringshendelse med id=$hendelseId for hendelse av " +
-                                "type $grunnlagendringType på sak med id=${rolleOgSak.sakId}",
-                        )
-                        val hendelse =
-                            Grunnlagsendringshendelse(
-                                id = hendelseId,
-                                sakId = rolleOgSak.sakId,
-                                status = grunnlagsEndringsStatus,
-                                type = grunnlagendringType,
-                                opprettet = tidspunktForMottakAvHendelse,
-                                hendelseGjelderRolle = rolleOgSak.rolle,
-                                gjelderPerson = fnr,
-                            )
-                        grunnlagsendringshendelseDao.opprettGrunnlagsendringshendelse(hendelse)
-                    }
+            it.filter { rolleOgSak ->
+                !hendelseEksistererFraFoer(
+                    rolleOgSak.sakId,
+                    fnr,
+                    grunnlagendringType,
+                )
             }
+                .map { rolleOgSak ->
+                    val hendelseId = UUID.randomUUID()
+                    logger.info(
+                        "Oppretter grunnlagsendringshendelse med id=$hendelseId for hendelse av " +
+                            "type $grunnlagendringType på sak med id=${rolleOgSak.sakId}",
+                    )
+                    val hendelse =
+                        Grunnlagsendringshendelse(
+                            id = hendelseId,
+                            sakId = rolleOgSak.sakId,
+                            status = grunnlagsEndringsStatus,
+                            type = grunnlagendringType,
+                            opprettet = tidspunktForMottakAvHendelse,
+                            hendelseGjelderRolle = rolleOgSak.rolle,
+                            gjelderPerson = fnr,
+                        )
+                    grunnlagsendringshendelseDao.opprettGrunnlagsendringshendelse(hendelse)
+                }
         }
     }
 

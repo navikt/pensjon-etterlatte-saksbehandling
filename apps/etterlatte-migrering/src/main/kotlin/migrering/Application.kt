@@ -8,6 +8,7 @@ import no.nav.etterlatte.migrering.LagreKoblingRiver
 import no.nav.etterlatte.migrering.LyttPaaIverksattVedtakRiver
 import no.nav.etterlatte.migrering.MigrerSpesifikkSakRiver
 import no.nav.etterlatte.migrering.MigreringRiver
+import no.nav.etterlatte.migrering.PauseMigreringRiver
 import no.nav.helse.rapids_rivers.RapidApplication
 import rapidsandrivers.getRapidEnv
 
@@ -33,6 +34,7 @@ internal class Server(private val context: ApplicationContext) {
                     krrKlient,
                 )
                 LagreKoblingRiver(rapidsConnection, pesysRepository)
+                PauseMigreringRiver(rapidsConnection, pesysRepository)
                 LyttPaaIverksattVedtakRiver(rapidsConnection, pesysRepository, penklient, featureToggleService)
                 FeilendeMigreringLytterRiver(rapidsConnection, pesysRepository)
             }.start()

@@ -28,6 +28,8 @@ import no.nav.etterlatte.migrering.verifisering.Verifiserer
 import no.nav.etterlatte.opprettInMemoryDatabase
 import no.nav.etterlatte.rapidsandrivers.EventNames
 import no.nav.etterlatte.rapidsandrivers.migrering.LOPENDE_JANUAR_2024_KEY
+import no.nav.etterlatte.rapidsandrivers.migrering.MIGRERING_KJORING_VARIANT
+import no.nav.etterlatte.rapidsandrivers.migrering.MigreringKjoringVariant
 import no.nav.etterlatte.rapidsandrivers.migrering.MigreringRequest
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser
 import no.nav.etterlatte.rapidsandrivers.migrering.PESYS_ID_KEY
@@ -123,6 +125,7 @@ internal class MigreringRiverIntegrationTest {
                         EVENT_NAME_KEY to Migreringshendelser.MIGRER_SPESIFIKK_SAK,
                         SAK_ID_KEY to "22974139",
                         LOPENDE_JANUAR_2024_KEY to true,
+                        MIGRERING_KJORING_VARIANT to MigreringKjoringVariant.FULL_KJORING,
                     ),
                 ).toJson(),
             )
@@ -191,6 +194,7 @@ internal class MigreringRiverIntegrationTest {
                         EVENT_NAME_KEY to Migreringshendelser.MIGRER_SPESIFIKK_SAK,
                         SAK_ID_KEY to pesysId.id,
                         LOPENDE_JANUAR_2024_KEY to true,
+                        MIGRERING_KJORING_VARIANT to MigreringKjoringVariant.FULL_KJORING,
                     ),
                 ).toJson(),
             )
@@ -228,6 +232,119 @@ internal class MigreringRiverIntegrationTest {
             )
             verify { runBlocking { penKlient.opphoerSak(pesysId) } }
             assertEquals(repository.hentStatus(pesysId.id), Migreringsstatus.FERDIG)
+        }
+    }
+
+    @Test
+    fun `Start migrering med pause`() {
+        val pesysId = PesysId(22974139)
+        testApplication {
+            val repository = PesysRepository(datasource)
+            val featureToggleService =
+                DummyFeatureToggleService().also {
+                    it.settBryter(MigreringFeatureToggle.SendSakTilMigrering, true)
+                    it.settBryter(MigreringFeatureToggle.OpphoerSakIPesys, true)
+                }
+            val responsFraPEN =
+                objectMapper.readValue<BarnepensjonGrunnlagResponse>(
+                    this::class.java.getResource("/penrespons.json")!!.readText(),
+                )
+            val penKlient =
+                mockk<PenKlient>()
+                    .also { every { runBlocking { it.hentSak(any(), any()) } } returns responsFraPEN }
+                    .also { every { runBlocking { it.opphoerSak(any()) } } just runs }
+
+            val inspector =
+                TestRapid()
+                    .apply {
+                        MigrerSpesifikkSakRiver(
+                            rapidsConnection = this,
+                            penKlient = penKlient,
+                            pesysRepository = repository,
+                            featureToggleService = featureToggleService,
+                            verifiserer =
+                                Verifiserer(
+                                    mockk<PDLKlient>().also {
+                                        every {
+                                            it.hentPerson(
+                                                any(),
+                                                any(),
+                                            )
+                                        } returns mockk()
+                                    },
+                                    repository,
+                                    featureToggleService,
+                                ),
+                        )
+                        LagreKoblingRiver(this, repository)
+                        PauseMigreringRiver(this, repository)
+                    }
+
+            inspector.sendTestMessage(
+                JsonMessage.newMessage(
+                    mapOf(
+                        EVENT_NAME_KEY to Migreringshendelser.MIGRER_SPESIFIKK_SAK,
+                        SAK_ID_KEY to pesysId.id,
+                        LOPENDE_JANUAR_2024_KEY to true,
+                        MIGRERING_KJORING_VARIANT to MigreringKjoringVariant.MED_PAUSE,
+                    ),
+                ).toJson(),
+            )
+
+            assertEquals(1, inspector.inspektør.size)
+            val oppstartMigreringMelding = inspector.inspektør.message(0)
+            assertEquals(Migreringshendelser.MIGRER_SAK, oppstartMigreringMelding.get(EVENT_NAME_KEY).asText())
+            assertEquals(
+                MigreringKjoringVariant.MED_PAUSE.name,
+                oppstartMigreringMelding.get(MIGRERING_KJORING_VARIANT).asText(),
+            )
+            val behandlingId = UUID.randomUUID()
+            inspector.sendTestMessage(
+                JsonMessage.newMessage(
+                    mapOf(
+                        EVENT_NAME_KEY to Migreringshendelser.LAGRE_KOPLING,
+                        BEHANDLING_ID_KEY to behandlingId,
+                        PESYS_ID_KEY to pesysId,
+                    ),
+                ).toJson(),
+            )
+
+            inspector.sendTestMessage(
+                JsonMessage.newMessage(
+                    mapOf(
+                        EVENT_NAME_KEY to Migreringshendelser.PAUSE,
+                        PESYS_ID_KEY to pesysId,
+                    ),
+                ).toJson(),
+            )
+
+            with(repository.hentSaker()) {
+                assertEquals(1, size)
+                assertEquals(get(0).id, pesysId.id)
+                assertEquals(get(0).virkningstidspunkt, YearMonth.of(2023, Month.SEPTEMBER))
+                assertEquals(repository.hentStatus(pesysId.id), Migreringsstatus.PAUSE)
+            }
+
+            inspector.sendTestMessage(
+                JsonMessage.newMessage(
+                    mapOf(
+                        EVENT_NAME_KEY to Migreringshendelser.MIGRER_SPESIFIKK_SAK,
+                        SAK_ID_KEY to pesysId.id,
+                        LOPENDE_JANUAR_2024_KEY to true,
+                        MIGRERING_KJORING_VARIANT to MigreringKjoringVariant.FORTSETT_ETTER_PAUSE,
+                    ),
+                ).toJson(),
+            )
+            assertEquals(3, inspector.inspektør.size)
+            val forttsettMigreringMelding = inspector.inspektør.message(2)
+            assertEquals(Migreringshendelser.VEDTAK, forttsettMigreringMelding.get(EVENT_NAME_KEY).asText())
+            assertEquals(behandlingId.toString(), forttsettMigreringMelding.get(BEHANDLING_ID_KEY).asText())
+            assertEquals(pesysId.id, forttsettMigreringMelding.get(SAK_ID_KEY).asLong())
+            assertEquals(Migreringshendelser.VEDTAK, forttsettMigreringMelding.get(EVENT_NAME_KEY).asText())
+            assertEquals(
+                MigreringKjoringVariant.FORTSETT_ETTER_PAUSE.name,
+                forttsettMigreringMelding.get(MIGRERING_KJORING_VARIANT).asText(),
+            )
         }
     }
 
@@ -277,6 +394,7 @@ internal class MigreringRiverIntegrationTest {
                         EVENT_NAME_KEY to Migreringshendelser.MIGRER_SPESIFIKK_SAK,
                         SAK_ID_KEY to pesysid,
                         LOPENDE_JANUAR_2024_KEY to true,
+                        MIGRERING_KJORING_VARIANT to MigreringKjoringVariant.FULL_KJORING,
                     ),
                 ).toJson(),
             )
@@ -301,6 +419,7 @@ internal class MigreringRiverIntegrationTest {
                         EVENT_NAME_KEY to Migreringshendelser.START_MIGRERING,
                         SAK_ID_FLERE_KEY to listOf("111", "222", "333"),
                         LOPENDE_JANUAR_2024_KEY to false,
+                        MIGRERING_KJORING_VARIANT to MigreringKjoringVariant.FULL_KJORING,
                     ),
                 ).toJson(),
             )
@@ -327,7 +446,7 @@ internal class MigreringRiverIntegrationTest {
 internal fun PesysRepository.hentSaker(tx: TransactionalSession? = null): List<Pesyssak> =
     tx.session {
         hentListe(
-            "SELECT sak from pesyssak WHERE status = '${Migreringsstatus.UNDER_MIGRERING.name}'",
+            "SELECT sak from pesyssak WHERE status in('${Migreringsstatus.UNDER_MIGRERING.name}','${Migreringsstatus.PAUSE.name}')",
         ) {
             objectMapper.readValue(it.string("sak"), Pesyssak::class.java)
         }

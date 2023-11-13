@@ -14,6 +14,8 @@ import no.nav.etterlatte.migrering.person.krr.KrrKlient
 import no.nav.etterlatte.migrering.verifisering.Verifiserer
 import no.nav.etterlatte.rapidsandrivers.migrering.FNR_KEY
 import no.nav.etterlatte.rapidsandrivers.migrering.LOPENDE_JANUAR_2024_KEY
+import no.nav.etterlatte.rapidsandrivers.migrering.MIGRERING_KJORING_VARIANT
+import no.nav.etterlatte.rapidsandrivers.migrering.MigreringKjoringVariant
 import no.nav.etterlatte.rapidsandrivers.migrering.MigreringRequest
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser.MIGRER_SPESIFIKK_SAK
@@ -21,11 +23,13 @@ import no.nav.etterlatte.rapidsandrivers.migrering.PesysId
 import no.nav.etterlatte.rapidsandrivers.migrering.hendelseData
 import no.nav.etterlatte.rapidsandrivers.migrering.kilde
 import no.nav.etterlatte.rapidsandrivers.migrering.loependeJanuer2024
+import no.nav.etterlatte.rapidsandrivers.migrering.migreringKjoringVariant
 import no.nav.etterlatte.rapidsandrivers.migrering.pesysId
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
+import rapidsandrivers.BEHANDLING_ID_KEY
 import rapidsandrivers.SAK_ID_KEY
 import rapidsandrivers.migrering.ListenerMedLoggingOgFeilhaandtering
 import rapidsandrivers.sakId
@@ -44,6 +48,7 @@ internal class MigrerSpesifikkSakRiver(
         initialiserRiver(rapidsConnection, hendelsestype) {
             validate { it.requireKey(SAK_ID_KEY) }
             validate { it.requireKey(LOPENDE_JANUAR_2024_KEY) }
+            validate { it.requireKey(MIGRERING_KJORING_VARIANT) }
         }
     }
 
@@ -52,8 +57,26 @@ internal class MigrerSpesifikkSakRiver(
         context: MessageContext,
     ) {
         val sakId = packet.sakId
-        if (pesysRepository.hentStatus(sakId) in setOf(Migreringsstatus.UNDER_MIGRERING, Migreringsstatus.FERDIG)) {
-            logger.info("Har allerede migrert sak $sakId. Avbryter.")
+        val kjoringsVariant = packet.migreringKjoringVariant
+        val migreringStatus = pesysRepository.hentStatus(sakId)
+
+        if (kjoringsVariant == MigreringKjoringVariant.FORTSETT_ETTER_PAUSE) {
+            if (migreringStatus == Migreringsstatus.PAUSE) {
+                sendSakRettTilVedtak(packet, context)
+            } else {
+                logger.info("Sak $sakId har status $migreringStatus og kan ikke fortsette etter pause. Avbryter.")
+            }
+            return
+        }
+
+        if (migreringStatus in
+            setOf(
+                Migreringsstatus.UNDER_MIGRERING,
+                Migreringsstatus.FERDIG,
+                Migreringsstatus.PAUSE,
+            )
+        ) {
+            logger.info("Sak $sakId har status $migreringStatus. Avbryter.")
             return
         }
         val lopendeJanuar2024 = packet.loependeJanuer2024
@@ -99,6 +122,26 @@ internal class MigrerSpesifikkSakRiver(
             "Migrering starta for pesys-sak ${sak.id} og melding om behandling ble sendt.",
         )
         pesysRepository.oppdaterStatus(PesysId(sak.id), Migreringsstatus.UNDER_MIGRERING)
+    }
+
+    private fun sendSakRettTilVedtak(
+        packet: JsonMessage,
+        context: MessageContext,
+    ) {
+        val sakId = packet.sakId
+        if (!featureToggleService.isEnabled(MigreringFeatureToggle.SendSakTilMigrering, false)) {
+            logger.info("Migrering er skrudd av. Sender ikke pesys-sak $sakId videre.")
+            return
+        }
+
+        val behandlingId =
+            pesysRepository.hentKoplingTilBehandling(PesysId(sakId))?.behandlingId
+                ?: throw IllegalStateException("Mangler kobling mellom behandling i Gjenny og pesys sak for pesysId=$sakId")
+
+        packet[BEHANDLING_ID_KEY] = behandlingId
+        packet.eventName = Migreringshendelser.VEDTAK
+        context.publish(packet.toJson())
+        logger.info("Fortsetter migrering for sak $sakId.")
     }
 }
 

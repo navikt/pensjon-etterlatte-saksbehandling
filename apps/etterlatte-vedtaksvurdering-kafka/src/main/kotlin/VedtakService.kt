@@ -5,11 +5,15 @@ import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.request.patch
 import io.ktor.client.request.post
+import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vedtak.LoependeYtelseDTO
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
+import no.nav.etterlatte.libs.common.vedtak.VedtakNyDto
+import no.nav.etterlatte.rapidsandrivers.migrering.MigreringKjoringVariant
 import no.nav.etterlatte.vedtaksvurdering.VedtakOgRapid
 import java.time.LocalDate
 import java.util.UUID
@@ -24,6 +28,12 @@ interface VedtakService {
         sakId: Long,
         behandlingId: UUID,
     ): VedtakOgRapid
+
+    fun opprettVedtakFattOgAttester(
+        sakId: Long,
+        behandlingId: UUID,
+        kjoringVariant: MigreringKjoringVariant,
+    ): VedtakNyDto
 
     fun tilbakestillVedtak(behandlingId: UUID)
 
@@ -49,6 +59,18 @@ class VedtakServiceImpl(private val vedtakKlient: HttpClient, private val url: S
     ): VedtakOgRapid =
         runBlocking {
             vedtakKlient.post("$url/api/vedtak/$sakId/$behandlingId/automatisk").body()
+        }
+
+    override fun opprettVedtakFattOgAttester(
+        sakId: Long,
+        behandlingId: UUID,
+        kjoringVariant: MigreringKjoringVariant,
+    ): VedtakNyDto =
+        runBlocking {
+            vedtakKlient.post("$url/api/vedtak/$sakId/$behandlingId/automatisk/stegvis") {
+                contentType(ContentType.Application.Json)
+                setBody(kjoringVariant.toJson())
+            }.body()
         }
 
     override fun tilbakestillVedtak(behandlingId: UUID) {

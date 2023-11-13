@@ -15,6 +15,7 @@ const val PERSONGALLERI_KEY = "persongalleri"
 const val PESYS_ID_KEY = "pesysId"
 const val KILDE_KEY = "kilde"
 const val LOPENDE_JANUAR_2024_KEY = "lopendeJanuar2024"
+const val MIGRERING_KJORING_VARIANT = "migreringKjoringVariant"
 const val BREV_OPPRETTA_MIGRERING = "brev_oppretta_migrering"
 
 var JsonMessage.hendelseData: MigreringRequest
@@ -45,4 +46,10 @@ var JsonMessage.kilde: Vedtaksloesning
     get() = objectMapper.treeToValue(this[KILDE_KEY], Vedtaksloesning::class.java)
     set(name) {
         this[KILDE_KEY] = name
+    }
+
+var JsonMessage.migreringKjoringVariant: MigreringKjoringVariant
+    get() = objectMapper.treeToValue(this[MIGRERING_KJORING_VARIANT], MigreringKjoringVariant::class.java)
+    set(name) {
+        this[MIGRERING_KJORING_VARIANT] = name
     }

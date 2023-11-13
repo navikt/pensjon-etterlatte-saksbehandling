@@ -69,7 +69,7 @@ spec:
     - name: KRR_SCOPE
       value: api://dev-gcp.team-rocket.digdir-krr-proxy/.default
     - name: KRR_AUDIENCE
-      value: dev-gcp:team-rocket:digdir-krr-proxy
+      value: dev-gcp.team-rocket.digdir-krr-proxy
   envFrom:
     - secret: my-application-unleash-api-token
   accessPolicy:

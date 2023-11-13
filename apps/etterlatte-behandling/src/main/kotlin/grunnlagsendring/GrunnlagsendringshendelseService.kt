@@ -118,26 +118,32 @@ class GrunnlagsendringshendelseService(
     }
 
     fun opprettForelderBarnRelasjonHendelse(forelderBarnRelasjonHendelse: ForelderBarnRelasjonHendelse): List<Grunnlagsendringshendelse> {
-        return opprettHendelseAvTypeForPerson(
-            forelderBarnRelasjonHendelse.fnr,
-            GrunnlagsendringsType.FORELDER_BARN_RELASJON,
-        )
+        return inTransaction {
+            opprettHendelseAvTypeForPerson(
+                forelderBarnRelasjonHendelse.fnr,
+                GrunnlagsendringsType.FORELDER_BARN_RELASJON,
+            )
+        }
     }
 
     fun opprettVergemaalEllerFremtidsfullmakt(
         vergeMaalEllerFremtidsfullmakt: VergeMaalEllerFremtidsfullmakt,
     ): List<Grunnlagsendringshendelse> {
-        return opprettHendelseAvTypeForPerson(
-            vergeMaalEllerFremtidsfullmakt.fnr,
-            GrunnlagsendringsType.VERGEMAAL_ELLER_FREMTIDSFULLMAKT,
-        )
+        return inTransaction {
+            opprettHendelseAvTypeForPerson(
+                vergeMaalEllerFremtidsfullmakt.fnr,
+                GrunnlagsendringsType.VERGEMAAL_ELLER_FREMTIDSFULLMAKT,
+            )
+        }
     }
 
     fun opprettSivilstandHendelse(sivilstandHendelse: SivilstandHendelse): List<Grunnlagsendringshendelse> {
-        return opprettHendelseAvTypeForPerson(
-            sivilstandHendelse.fnr,
-            GrunnlagsendringsType.SIVILSTAND,
-        )
+        return inTransaction {
+            opprettHendelseAvTypeForPerson(
+                sivilstandHendelse.fnr,
+                GrunnlagsendringsType.SIVILSTAND,
+            )
+        }
     }
 
     fun opprettInstitusjonsOppholdhendelse(oppholdsHendelse: InstitusjonsoppholdHendelseBeriket): List<Grunnlagsendringshendelse> {

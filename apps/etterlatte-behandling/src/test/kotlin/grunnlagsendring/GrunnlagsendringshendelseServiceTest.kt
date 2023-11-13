@@ -106,7 +106,6 @@ internal class GrunnlagsendringshendelseServiceTest {
                     }
 
                     override fun <T> inTransaction(block: () -> T): T {
-                        println("invoked")
                         return block()
                     }
                 },

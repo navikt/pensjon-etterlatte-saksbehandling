@@ -1,6 +1,6 @@
 import { Control, Controller, FieldArrayWithId, UseFormRegister, UseFormWatch } from 'react-hook-form'
 import MaanedVelger from '~components/behandling/beregningsgrunnlag/MaanedVelger'
-import { Button, TextField } from '@navikt/ds-react'
+import { Button, TextField, Textarea } from '@navikt/ds-react'
 import { OverstyrBeregingsperiodeGrunnlagData } from '~shared/types/Beregning'
 import styled from 'styled-components'
 import { TrashIcon } from '@navikt/aksel-icons'
@@ -56,6 +56,11 @@ const OverstyrBeregningPeriode = (props: OverstyrBeregningPerioder) => {
           />
           <VerdiFelt label="Utbetalt Beløp" {...register(`overstyrBeregningForm.${index}.data.utbetaltBeloep`)} />
           <VerdiFelt label="Anvendt Trygdetid" {...register(`overstyrBeregningForm.${index}.data.trygdetid`)} />
+          <Beskrivelse
+            label="Beskrivelse"
+            size="medium"
+            {...register(`overstyrBeregningForm.${index}.data.beskrivelse`)}
+          />
         </MinimimBeregningsperiodeWrapper>
         {mineFeil.length > 0 && visFeil ? <FeilForPeriode feil={mineFeil} /> : null}
         {behandles && (
@@ -104,9 +109,14 @@ const MinimimBeregningsperiodeWrapper = styled.div`
   display: flex;
   flex-direction: row;
   justify-content: space-between;
+  align-items: start;
 `
 
 const VerdiFelt = styled(TextField)`
+  margin-bottom: 12px;
+`
+
+const Beskrivelse = styled(Textarea)`
   margin-bottom: 12px;
 `
 

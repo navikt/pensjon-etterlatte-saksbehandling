@@ -311,6 +311,12 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest {
                     utbetaltBeloep = 123L,
                     trygdetid = 35L,
                     sakId = 1L,
+                    beskrivelse = "test periode 1",
+                    kilde =
+                        Grunnlagsopplysning.Saksbehandler(
+                            ident = "Z123456",
+                            Tidspunkt.now(),
+                        ),
                 ),
                 OverstyrBeregningGrunnlagDao(
                     id = UUID.randomUUID(),
@@ -320,6 +326,12 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest {
                     utbetaltBeloep = 321L,
                     trygdetid = 5L,
                     sakId = 1L,
+                    beskrivelse = "test periode 2",
+                    kilde =
+                        Grunnlagsopplysning.Saksbehandler(
+                            ident = "Z123456",
+                            Tidspunkt.now(),
+                        ),
                 ),
             ),
         )
@@ -347,6 +359,12 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest {
                     utbetaltBeloep = 123L,
                     trygdetid = 35L,
                     sakId = 1L,
+                    beskrivelse = "test periode 1",
+                    kilde =
+                        Grunnlagsopplysning.Saksbehandler(
+                            ident = "Z123456",
+                            Tidspunkt.now(),
+                        ),
                 ),
                 OverstyrBeregningGrunnlagDao(
                     id = UUID.randomUUID(),
@@ -356,6 +374,12 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest {
                     utbetaltBeloep = 321L,
                     trygdetid = 5L,
                     sakId = 1L,
+                    beskrivelse = "test periode 2",
+                    kilde =
+                        Grunnlagsopplysning.Saksbehandler(
+                            ident = "Z123456",
+                            Tidspunkt.now(),
+                        ),
                 ),
             ),
         )
@@ -371,6 +395,12 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest {
                     utbetaltBeloep = 223L,
                     trygdetid = 35L,
                     sakId = 1L,
+                    beskrivelse = "test periode 3",
+                    kilde =
+                        Grunnlagsopplysning.Saksbehandler(
+                            ident = "Z123456",
+                            Tidspunkt.now(),
+                        ),
                 ),
                 OverstyrBeregningGrunnlagDao(
                     id = UUID.randomUUID(),
@@ -380,6 +410,12 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest {
                     utbetaltBeloep = 322L,
                     trygdetid = 5L,
                     sakId = 1L,
+                    beskrivelse = "test periode 4",
+                    kilde =
+                        Grunnlagsopplysning.Saksbehandler(
+                            ident = "Z123456",
+                            Tidspunkt.now(),
+                        ),
                 ),
             ),
         )
@@ -388,8 +424,16 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest {
 
         data.size shouldBe 2
         data.first().behandlingId shouldBe behandlingId
-        data.minBy { it.utbetaltBeloep }.utbetaltBeloep shouldBe 223L
-        data.maxBy { it.utbetaltBeloep }.utbetaltBeloep shouldBe 322L
+        data.minBy { it.utbetaltBeloep }.let {
+            it.utbetaltBeloep shouldBe 223L
+            it.trygdetid shouldBe 35L
+            it.beskrivelse shouldBe "test periode 3"
+        }
+        data.maxBy { it.utbetaltBeloep }.let {
+            it.utbetaltBeloep shouldBe 322L
+            it.trygdetid shouldBe 5L
+            it.beskrivelse shouldBe "test periode 4"
+        }
     }
 
     private fun List<SoeskenMedIBeregning>.somPeriodisertGrunnlag(

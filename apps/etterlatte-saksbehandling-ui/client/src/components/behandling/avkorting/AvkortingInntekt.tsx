@@ -1,4 +1,4 @@
-import { BodyShort, Button, ErrorMessage, Heading, Label, ReadMore, Table, TextField } from '@navikt/ds-react'
+import { BodyShort, Button, ErrorMessage, Heading, Label, ReadMore, Table, Textarea, TextField } from '@navikt/ds-react'
 import styled from 'styled-components'
 import React, { FormEvent, useState } from 'react'
 import { IAvkorting, IAvkortingGrunnlag } from '~shared/types/IAvkorting'
@@ -245,16 +245,18 @@ export const AvkortingInntekt = (props: {
                   </DatoSection>
                 </FormWrapper>
                 <TextAreaWrapper>
-                  <SpesifikasjonLabel>
-                    <Label>Spesifikasjon av inntekt</Label>
-                    <ReadMore header="Hva regnes som inntekt?">
-                      Med inntekt menes all arbeidsinntekt og ytelser som likestilles med arbeidsinntekt. Likestilt med
-                      arbeidsinntekt er dagpenger etter kap 4, sykepenger etter kap 8, stønad ved barns og andre
-                      nærståendes sykdom etter kap 9, arbeidsavklaringspenger etter kap 11, svangerskapspenger og
-                      foreldrepenger etter kap 14 og pensjonsytelser etter AFP tilskottloven kapitlene 2 og 3.
-                    </ReadMore>
-                  </SpesifikasjonLabel>
-                  <textarea
+                  <Textarea
+                    label={
+                      <SpesifikasjonLabel>
+                        <Label>Spesifikasjon av inntekt</Label>
+                        <ReadMore header="Hva regnes som inntekt?">
+                          Med inntekt menes all arbeidsinntekt og ytelser som likestilles med arbeidsinntekt. Likestilt
+                          med arbeidsinntekt er dagpenger etter kap 4, sykepenger etter kap 8, stønad ved barns og andre
+                          nærståendes sykdom etter kap 9, arbeidsavklaringspenger etter kap 11, svangerskapspenger og
+                          foreldrepenger etter kap 14 og pensjonsytelser etter AFP tilskottloven kapitlene 2 og 3.
+                        </ReadMore>
+                      </SpesifikasjonLabel>
+                    }
                     value={inntektGrunnlagForm.spesifikasjon}
                     onChange={(e) =>
                       setInntektGrunnlagForm({

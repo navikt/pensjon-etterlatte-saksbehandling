@@ -1,5 +1,5 @@
 import styled from 'styled-components'
-import { isErrorWithCode, isPendingOrInitial, useApiCall } from '~shared/hooks/useApiCall'
+import { isFailure, isPendingOrInitial, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
 import { hentAvkorting } from '~shared/api/avkorting'
 import React, { useEffect, useState } from 'react'
 import { IAvkorting } from '~shared/types/IAvkorting'
@@ -28,7 +28,7 @@ export const Avkorting = (props: { behandling: IBehandlingReducer }) => {
 
   return (
     <AvkortingWrapper>
-      {!['initial', 'pending'].includes(avkortingStatus.status) && (
+      {isSuccess(avkortingStatus) && (
         <AvkortingInntekt
           behandling={behandling}
           avkortingGrunnlag={avkorting == null ? [] : avkorting.avkortingGrunnlag}
@@ -44,7 +44,7 @@ export const Avkorting = (props: { behandling: IBehandlingReducer }) => {
         />
       )}
       {isPendingOrInitial(avkortingStatus) && <Spinner visible label="Henter avkorting" />}
-      {isErrorWithCode(avkortingStatus, 404) && <ApiErrorAlert>En feil har oppstått</ApiErrorAlert>}
+      {isFailure(avkortingStatus) && <ApiErrorAlert>En feil har oppstått</ApiErrorAlert>}
     </AvkortingWrapper>
   )
 }

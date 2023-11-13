@@ -4,7 +4,6 @@ import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleProperties
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
-import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
@@ -13,7 +12,7 @@ import no.nav.etterlatte.migrering.person.krr.KrrKlient
 import no.nav.etterlatte.migrering.verifisering.PDLKlient
 import no.nav.etterlatte.migrering.verifisering.Verifiserer
 
-internal class ApplicationContext(env: Miljoevariabler) {
+internal class ApplicationContext {
     private val properties: ApplicationProperties = ApplicationProperties.fromEnv(System.getenv())
     val dataSource =
         DataSourceBuilder.createDataSource(
@@ -46,9 +45,9 @@ internal class ApplicationContext(env: Miljoevariabler) {
         KrrKlient(
             client =
                 httpClientClientCredentials(
-                    azureAppClientId = env.requireEnvValue("AZURE_APP_CLIENT_ID"),
-                    azureAppJwk = env.requireEnvValue("AZURE_APP_JWK"),
-                    azureAppWellKnownUrl = env.requireEnvValue("AZURE_APP_WELL_KNOWN_URL"),
+                    azureAppClientId = config.getString("azure.app.client.id"),
+                    azureAppJwk = config.getString("azure.app.jwk"),
+                    azureAppWellKnownUrl = config.getString("azure.app.well.known.url"),
                     azureAppScope = config.getString("krr.outbound"),
                 ),
             config = config,

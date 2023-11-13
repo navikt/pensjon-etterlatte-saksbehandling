@@ -1,6 +1,5 @@
 package no.nav.etterlatte
 
-import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstartOgAvslutning
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.migrering.ApplicationContext
@@ -12,7 +11,7 @@ import no.nav.etterlatte.migrering.MigreringRiver
 import no.nav.helse.rapids_rivers.RapidApplication
 import rapidsandrivers.getRapidEnv
 
-fun main() = ApplicationContext(Miljoevariabler(System.getenv())).let { Server(it).run() }
+fun main() = ApplicationContext().let { Server(it).run() }
 
 internal class Server(private val context: ApplicationContext) {
     init {

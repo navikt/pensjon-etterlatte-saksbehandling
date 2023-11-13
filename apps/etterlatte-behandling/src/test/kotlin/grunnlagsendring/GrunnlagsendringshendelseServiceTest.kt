@@ -713,7 +713,7 @@ internal class GrunnlagsendringshendelseServiceTest {
         every { oppgaveService.hentOppgaverForSak(any()) } returns emptyList()
         every {
             sakService.finnEnhetForPersonOgTema(any(), any(), any())
-        } returns ArbeidsFordelingEnhet("NAV Familie- og pensjonsytelser Steinkjer", "4817")
+        } returns ArbeidsFordelingEnhet(Enheter.STEINKJER.enhetNr, Enheter.STEINKJER.navn)
         every { sakService.oppdaterEnhetForSaker(any()) } just runs
         runBlocking {
             grunnlagsendringshendelseService.oppdaterAdresseHendelse(bostedsadresse)

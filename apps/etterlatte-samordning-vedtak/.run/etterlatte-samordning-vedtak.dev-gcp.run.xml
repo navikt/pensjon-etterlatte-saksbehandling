@@ -7,6 +7,8 @@
       <env name="TJENESTEPENSJON_SCOPE" value="api://dev-fss.pensjonsamhandling.tp-q2/.default" />
       <env name="ROLLE_PENSJONSAKSBEHANDLER" value="8bb9b8d1-f46a-4ade-8ee8-5895eccdf8cf" />
       <env name="HTTP_PORT" value="8094" />
+      <env name="LOGBACK_APPENDER" value="STDOUT" />
+      <env name="LOGBACK_LEVEL" value="DEBUG" />
     </envs>
     <option name="MAIN_CLASS_NAME" value="no.nav.etterlatte.ApplicationKt" />
     <module name="pensjon-etterlatte-saksbehandling.apps.etterlatte-samordning-vedtak.main" />

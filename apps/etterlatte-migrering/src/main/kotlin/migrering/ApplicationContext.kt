@@ -4,14 +4,16 @@ import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleProperties
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
+import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.migrering.pen.PenKlient
+import no.nav.etterlatte.migrering.person.krr.KrrKlient
 import no.nav.etterlatte.migrering.verifisering.PDLKlient
 import no.nav.etterlatte.migrering.verifisering.Verifiserer
 
-internal class ApplicationContext {
+internal class ApplicationContext(env: Miljoevariabler) {
     private val properties: ApplicationProperties = ApplicationProperties.fromEnv(System.getenv())
     val dataSource =
         DataSourceBuilder.createDataSource(
@@ -39,6 +41,18 @@ internal class ApplicationContext {
         )
     val verifiserer =
         Verifiserer(pdlKlient = pdlKlient, repository = pesysRepository, featureToggleService = featureToggleService)
+
+    val krrKlient =
+        KrrKlient(
+            client =
+                httpClientClientCredentials(
+                    azureAppClientId = env.requireEnvValue("AZURE_APP_CLIENT_ID"),
+                    azureAppJwk = env.requireEnvValue("AZURE_APP_JWK"),
+                    azureAppWellKnownUrl = env.requireEnvValue("AZURE_APP_WELL_KNOWN_URL"),
+                    azureAppScope = config.getString("krr.outbound"),
+                ),
+            config = config,
+        )
 }
 
 private fun featureToggleProperties(config: Config) =

@@ -1,5 +1,6 @@
 package no.nav.etterlatte.samordning.vedtak
 
+import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 import io.kotest.matchers.shouldBe
 import io.ktor.client.request.get
@@ -28,11 +29,13 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import java.time.LocalDate
+import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class SamordningVedtakRouteTest {
     private val server = MockOAuth2Server()
     private val samordningVedtakService = mockk<SamordningVedtakService>()
+    private lateinit var config: Config
     private lateinit var applicationConfig: HoconApplicationConfig
 
     @BeforeAll
@@ -44,8 +47,8 @@ class SamordningVedtakRouteTest {
     inner class MaskinportenApi {
         @BeforeEach
         fun before() {
-            applicationConfig =
-                buildTestApplicationConfigurationForOauth(server.config.httpServer.port(), ISSUER_ID_MASKINPORTEN)
+            config = config(server.config.httpServer.port(), ISSUER_ID_MASKINPORTEN)
+            applicationConfig = HoconApplicationConfig(config)
         }
 
         @Test
@@ -193,8 +196,8 @@ class SamordningVedtakRouteTest {
 
         @BeforeEach
         fun before() {
-            applicationConfig =
-                buildTestApplicationConfigurationForOauth(server.config.httpServer.port(), ISSUER_ID_AZURE)
+            config = config(server.config.httpServer.port(), ISSUER_ID_AZURE)
+            applicationConfig = HoconApplicationConfig(config)
         }
 
         @Test
@@ -269,6 +272,8 @@ class SamordningVedtakRouteTest {
         private fun token(role: String? = null): String {
             val claims = mutableMapOf<String, Any>()
             claims["roles"] = listOf(role)
+            claims["oid"] = "pensjon-pen"
+            claims["sub"] = "pensjon-pen"
 
             return server.issueToken(
                 issuerId = ISSUER_ID_AZURE,
@@ -279,7 +284,10 @@ class SamordningVedtakRouteTest {
 
     private fun Application.samordningVedtakApi() {
         restModule(log) {
-            samordningVedtakRoute(samordningVedtakService = samordningVedtakService)
+            samordningVedtakRoute(
+                samordningVedtakService = samordningVedtakService,
+                config = config,
+            )
         }
     }
 
@@ -300,21 +308,23 @@ class SamordningVedtakRouteTest {
     }
 }
 
-fun buildTestApplicationConfigurationForOauth(
+private fun config(
     port: Int,
     issuerId: String,
-) = HoconApplicationConfig(
-    ConfigFactory.parseMap(
-        mapOf(
-            "no.nav.security.jwt.issuers" to
-                listOf(
-                    mapOf(
-                        "discoveryurl" to "http://localhost:$port/$issuerId/.well-known/openid-configuration",
-                        "issuer_name" to issuerId,
-                        "validation.optional_claims" to "aud,nbf,sub",
-                    ),
+) = ConfigFactory.parseMap(
+    mapOf(
+        "no.nav.security.jwt.issuers" to
+            listOf(
+                mapOf(
+                    "discoveryurl" to "http://localhost:$port/$issuerId/.well-known/openid-configuration",
+                    "issuer_name" to issuerId,
+                    "validation.optional_claims" to "aud,nbf,sub",
                 ),
-        ),
+            ),
+        "roller" to
+            mapOf(
+                "pensjon-saksbehandler" to UUID.randomUUID().toString(),
+            ),
     ),
 )
 

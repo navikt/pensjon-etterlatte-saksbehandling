@@ -83,6 +83,8 @@ spec:
       value: https://tp-api.prod-fss-pub.nais.io
     - name: TJENESTEPENSJON_SCOPE
       value: api://prod-fss.pensjonsamhandling.tp/.default
+    - name: ROLLE_PENSJONSAKSBEHANDLER
+      value: 0af3955f-df85-4eb0-b5b2-45bf2c8aeb9e
   accessPolicy:
     inbound:
       rules:

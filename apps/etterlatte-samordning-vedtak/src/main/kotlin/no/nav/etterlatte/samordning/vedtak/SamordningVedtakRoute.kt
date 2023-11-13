@@ -1,5 +1,6 @@
 package no.nav.etterlatte.samordning.vedtak
 
+import com.typesafe.config.Config
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.call
@@ -15,7 +16,10 @@ import no.nav.etterlatte.libs.ktor.MaskinportenScopeAuthorizationPlugin
 import no.nav.etterlatte.libs.ktor.hentTokenClaims
 import java.time.LocalDate
 
-fun Route.samordningVedtakRoute(samordningVedtakService: SamordningVedtakService) {
+fun Route.samordningVedtakRoute(
+    samordningVedtakService: SamordningVedtakService,
+    config: Config,
+) {
     route("api/vedtak") {
         install(MaskinportenScopeAuthorizationPlugin) {
             scopes = setOf("nav:etterlatteytelser:vedtaksinformasjon.read")
@@ -77,7 +81,7 @@ fun Route.samordningVedtakRoute(samordningVedtakService: SamordningVedtakService
 
     route("api/pensjon/vedtak") {
         install(AuthorizationPlugin) {
-            roles = setOf("les-oms-vedtak")
+            roles = setOf("les-oms-vedtak", config.getString("roller.pensjon-saksbehandler"))
         }
 
         get {

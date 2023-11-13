@@ -91,6 +91,12 @@ spec:
     inbound:
       rules:
         - application: etterlatte-krakend
+        - application: pensjon-pen-q0
+          namespace: pensjon-q0
+          cluster: dev-fss
+          permissions:
+            roles:
+              - les-oms-vedtak
         - application: pensjon-pen-q1
           namespace: pensjon-q1
           cluster: dev-fss

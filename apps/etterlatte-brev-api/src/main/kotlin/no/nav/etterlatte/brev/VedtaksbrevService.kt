@@ -1,5 +1,6 @@
 package no.nav.etterlatte.brev
 
+import com.fasterxml.jackson.databind.JsonNode
 import no.nav.etterlatte.brev.adresse.AdresseService
 import no.nav.etterlatte.brev.behandling.ForenkletVedtak
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
@@ -302,9 +303,12 @@ class VedtaksbrevService(
             }
     }
 
-    fun slettVedtaksbrev(id: BrevID): Boolean {
-        logger.info("Sletter vedtaksbrev (id=$id)")
+    fun fjernFerdigstiltStatusUnderkjentVedtak(
+        id: BrevID,
+        vedtak: JsonNode,
+    ): Boolean {
+        logger.info("Fjerner status FERDIGSTILT på vedtaksbrev (id=$id)")
 
-        return db.slett(id)
+        return db.fjernFerdigstiltStatusUnderkjentVedtak(id, vedtak)
     }
 }

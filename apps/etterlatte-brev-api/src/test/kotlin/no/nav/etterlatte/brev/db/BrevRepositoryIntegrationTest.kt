@@ -21,6 +21,7 @@ import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.POSTGRES_VERSION
 import no.nav.etterlatte.libs.database.migrate
@@ -189,14 +190,21 @@ internal class BrevRepositoryIntegrationTest {
     }
 
     @Test
-    fun `Slett brev`() {
-        val behandlingId = UUID.randomUUID()
+    fun `Endre status ved underkjent vedtak`() {
+        val ulagretBrev = ulagretBrev(behandlingId = UUID.randomUUID())
+        val brev = db.opprettBrev(ulagretBrev)
 
-        db.opprettBrev(ulagretBrev(behandlingId = behandlingId))
+        brev.status shouldBe Status.OPPRETTET
 
-        val brev = db.hentBrevForBehandling(behandlingId)!!
+        db.oppdaterPayload(brev.id, Slate())
+        db.settBrevFerdigstilt(brev.id)
 
-        assertTrue(db.slett(brev.id))
+        val ferdigstiltBrev = db.hentBrev(brev.id)
+        ferdigstiltBrev.status shouldBe Status.FERDIGSTILT
+
+        db.fjernFerdigstiltStatusUnderkjentVedtak(brev.id, """{"key":"value"}""".toJsonNode())
+        val underkjentBrev = db.hentBrev(brev.id)
+        underkjentBrev.status shouldBe Status.OPPDATERT
     }
 
     @Test

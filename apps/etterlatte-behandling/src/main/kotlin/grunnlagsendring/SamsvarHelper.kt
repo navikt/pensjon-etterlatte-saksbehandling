@@ -1,6 +1,7 @@
 package no.nav.etterlatte.grunnlagsendring
 
 import no.nav.etterlatte.behandling.domain.SamsvarMellomKildeOgGrunnlag
+import no.nav.etterlatte.libs.common.person.Adresse
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.Sivilstand
 import no.nav.etterlatte.libs.common.person.Utland
@@ -51,6 +52,15 @@ fun samsvarSivilstand(
     fraPdl = sivilstandPdl,
     fraGrunnlag = sivilstandGrunnlag,
     samsvar = sivilstandPdl erLikRekkefoelgeIgnorert sivilstandGrunnlag,
+)
+
+fun samsvarBostedsadresse(
+    adressePdl: List<Adresse>?,
+    adresseGrunnlag: List<Adresse>?,
+) = SamsvarMellomKildeOgGrunnlag.Adresse(
+    fraPdl = adressePdl,
+    fraGrunnlag = adresseGrunnlag,
+    samsvar = adressePdl erLikRekkefoelgeIgnorert adresseGrunnlag,
 )
 
 infix fun <T> List<T>?.erLikRekkefoelgeIgnorert(other: List<T>?): Boolean = this?.size == other?.size && this?.toSet() == other?.toSet()

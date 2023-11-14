@@ -103,7 +103,13 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
               </Alert>
             )}
             <br />
-            {vedtaksbrev && <MottakerPanel vedtaksbrev={vedtaksbrev} />}
+            {vedtaksbrev && (
+              <MottakerPanel
+                vedtaksbrev={vedtaksbrev}
+                oppdater={(val) => setVedtaksbrev({ ...vedtaksbrev, mottaker: val })}
+                redigerbar={manueltBrevKanRedigeres(status)}
+              />
+            )}
           </ContentHeader>
         </Sidebar>
 

@@ -50,7 +50,7 @@ val userIdMdcPlugin: RouteScopedPlugin<PluginConfiguration> =
             val user =
                 if (call.request.uri.contains("pensjon")) {
                     when (val bruker = call.brukerTokenInfo) {
-                        is Systembruker -> bruker.sub
+                        is Systembruker -> bruker.jwtTokenClaims?.getStringClaim("azp_name") ?: bruker.sub
                         is Saksbehandler -> "Saksbehandler"
                         else -> "Ukjent"
                     }

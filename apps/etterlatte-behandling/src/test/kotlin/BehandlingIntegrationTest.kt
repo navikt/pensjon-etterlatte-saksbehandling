@@ -614,7 +614,7 @@ class Norg2KlientTest : Norg2Klient {
         tema: String,
         omraade: String,
     ): List<ArbeidsFordelingEnhet> {
-        return listOf(ArbeidsFordelingEnhet("NAV Familie- og pensjonsytelser Steinkjer", "4817"))
+        return listOf(ArbeidsFordelingEnhet(Enheter.STEINKJER.navn, Enheter.STEINKJER.enhetNr))
     }
 }
 

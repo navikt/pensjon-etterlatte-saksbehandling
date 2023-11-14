@@ -121,6 +121,7 @@ export const Trygdetid = ({ redigerbar, behandling, virkningstidspunktEtterNyReg
             overstyrTrygdetidPoengaar={overstyrTrygdetidPoengaar}
             virkningstidspunktEtterNyRegelDato={virkningstidspunktEtterNyRegelDato}
           />
+          {isPending(overstyrTrygdetidRequest) && <Spinner visible={true} label="Oppdatere poengår" />}
           <TrygdetidGrunnlagListe
             trygdetid={trygdetid}
             setTrygdetid={oppdaterTrygdetid}

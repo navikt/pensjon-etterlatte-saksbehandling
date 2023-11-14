@@ -65,13 +65,25 @@ async function apiFetcher<T>(props: Options): Promise<ApiResponse<T>> {
       }
     } else {
       const error: JsonError = await response.json()
-      const errorobj = {
-        msg: 'Fikk feil i kall mot backend',
-        errorInfo: JSON.stringify({ url: url, method: method, error: error }),
+
+      if (response.status >= 500) {
+        const errorobj = {
+          msg: 'Fikk feil i kall mot backend',
+          errorInfo: JSON.stringify({ url: url, method: method, error: error }),
+        }
+        logger.generalError(JSON.stringify(errorobj))
+        console.error(error, response)
+        return { ...error, ok: false }
+      } else {
+        // logger 3xx og 4xx som info
+        const errorobj = {
+          msg: `Fikk status=${response.status} i kall mot backend`,
+          errorInfo: JSON.stringify({ url: url, method: method, error: error }),
+        }
+        logger.generalInfo(JSON.stringify(errorobj))
+        console.log(error, response)
+        return { ...error, ok: false }
       }
-      logger.generalError(JSON.stringify(errorobj))
-      console.error(error, response)
-      return { ...error, ok: false }
     }
   } catch (e) {
     console.error('Rejection i fetch / utlesing av data', e)

@@ -1,5 +1,6 @@
 package no.nav.etterlatte.brev.db
 
+import com.fasterxml.jackson.databind.JsonNode
 import kotliquery.Row
 import kotliquery.Session
 import kotliquery.queryOf
@@ -178,6 +179,14 @@ class BrevRepository(private val ds: DataSource) {
         }
     }
 
+    fun fjernFerdigstiltStatusUnderkjentVedtak(
+        id: BrevID,
+        vedtak: JsonNode,
+    ): Boolean =
+        using(sessionOf(ds)) {
+            it.lagreHendelse(id, Status.OPPDATERT, vedtak.toJson()) > 0
+        }
+
     fun settBrevFerdigstilt(id: BrevID) {
         using(sessionOf(ds)) {
             it.lagreHendelse(id, Status.FERDIGSTILT)
@@ -279,11 +288,6 @@ class BrevRepository(private val ds: DataSource) {
             ).also { oppdatert -> require(oppdatert == 1) }
 
             tx.lagreHendelse(brevId, Status.DISTRIBUERT, distResponse.toJson()) > 0
-        }
-
-    fun slett(id: BrevID): Boolean =
-        using(sessionOf(ds)) {
-            it.run(queryOf("DELETE FROM brev WHERE id = ?", id).asUpdate) > 0
         }
 
     private fun Session.lagreHendelse(

@@ -6,6 +6,7 @@ import joarkhendelser.behandling.BehandlingKlient
 import joarkhendelser.joark.SafKlient
 import joarkhendelser.pdl.PdlKlient
 import no.nav.etterlatte.joarkhendelser.JoarkHendelseHandler
+import no.nav.etterlatte.joarkhendelser.behandling.BehandlingService
 import no.nav.etterlatte.joarkhendelser.common.JoarkhendelseKonsument
 import no.nav.etterlatte.libs.common.requireEnvValue
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
@@ -33,7 +34,7 @@ class ApplicationContext(env: Map<String, String> = System.getenv()) {
 
     private val joarkHendelseHandler =
         JoarkHendelseHandler(
-            behandlingKlient,
+            BehandlingService(behandlingKlient, pdlKlient),
             safKlient,
             pdlKlient,
         )

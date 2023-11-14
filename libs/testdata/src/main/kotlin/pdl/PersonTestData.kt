@@ -44,4 +44,5 @@ fun personTestData(opplysningsmap: Map<Opplysningstype, Opplysning<JsonNode>>): 
         familieRelasjon = opplysningsmap.hentFamilierelasjon()?.verdi,
         avdoedesBarn = opplysningsmap.hentAvdoedesbarn()?.verdi?.avdoedesBarn,
         vergemaalEllerFremtidsfullmakt = opplysningsmap.hentVergemaalellerfremtidsfullmakt()?.verdi,
+        avdoedesBarnUtenIdent = null,
     )

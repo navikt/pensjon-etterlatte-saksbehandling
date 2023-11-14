@@ -50,7 +50,7 @@ internal class ApplicationContext {
                     azureAppWellKnownUrl = config.getString("azure.app.well.known.url"),
                     azureAppScope = config.getString("krr.scope"),
                 ),
-            config = config,
+            url = config.getString("krr.url"),
         )
 }
 

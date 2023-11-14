@@ -18,6 +18,7 @@ import io.mockk.confirmVerified
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
+import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
@@ -26,8 +27,6 @@ import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJson
-import no.nav.etterlatte.libs.common.vedtak.VedtakDto
-import no.nav.etterlatte.libs.common.vedtak.VedtakNyDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseType
 import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
 import no.nav.etterlatte.libs.ktor.restModule
@@ -56,7 +55,7 @@ internal class AutomatiskBehandlingRoutesKtTest {
     private val vedtakService: VedtakBehandlingService = mockk()
     private val rapidService: VedtaksvurderingRapidService = mockk()
     private val automatiskBehandlingService = AutomatiskBehandlingService(vedtakService, rapidService, behandlingKlient)
-    
+
     @BeforeAll
     fun before() {
         server.start()
@@ -108,14 +107,26 @@ internal class AutomatiskBehandlingRoutesKtTest {
             } returns
                 VedtakOgRapid(
                     opprettetVedtak.toDto(),
-                    RapidInfo(VedtakKafkaHendelseType.ATTESTERT, opprettetVedtak.toNyDto(), Tidspunkt.now(), behandlingId),
+                    RapidInfo(
+                        VedtakKafkaHendelseType.ATTESTERT,
+                        opprettetVedtak.toNyDto(),
+                        Tidspunkt.now(),
+                        behandlingId,
+                    ),
                 )
             coEvery { rapidService.sendToRapid(any()) } just runs
 
             environment { config = applicationConfig }
-            application { restModule(log) { automatiskBehandlingRoutes(automatiskBehandlingService, behandlingKlient) } }
+            application {
+                restModule(log) {
+                    automatiskBehandlingRoutes(
+                        automatiskBehandlingService,
+                        behandlingKlient,
+                    )
+                }
+            }
 
-            val vedtak =
+            val respons =
                 client.post("/api/vedtak/1/$behandlingId/automatisk") {
                     header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                     header(HttpHeaders.Authorization, "Bearer $token")
@@ -124,8 +135,8 @@ internal class AutomatiskBehandlingRoutesKtTest {
                     deserialize<VedtakOgRapid>(it.bodyAsText())
                 }
 
-            assertEquals(vedtak.vedtak.vedtakId, opprettetVedtak.id)
-            assertEquals(vedtak.rapidInfo1.vedtakhendelse, VedtakKafkaHendelseType.ATTESTERT)
+            assertEquals(respons.vedtak.vedtakId, opprettetVedtak.id)
+            assertEquals(respons.rapidInfo1.vedtakhendelse, VedtakKafkaHendelseType.ATTESTERT)
 
             coVerify(exactly = 1) {
                 vedtakService.opprettEllerOppdaterVedtak(behandlingId, any())
@@ -134,7 +145,7 @@ internal class AutomatiskBehandlingRoutesKtTest {
                 behandlingKlient.tildelSaksbehandler(any(), any())
                 vedtakService.attesterVedtak(behandlingId, any(), any())
             }
-            coVerify(exactly = 1) {
+            coVerify(exactly = 2) {
                 rapidService.sendToRapid(any())
             }
             coVerify(atLeast = 1) {
@@ -151,39 +162,56 @@ internal class AutomatiskBehandlingRoutesKtTest {
             testApplication {
                 val opprettetVedtak = vedtak()
                 val behandlingId = UUID.randomUUID()
-                every { runBlocking { vedtakService.opprettEllerOppdaterVedtak(any(), any()) } } returns
+                coEvery { vedtakService.opprettEllerOppdaterVedtak(any(), any()) } returns
                     opprettetVedtak
-                every { runBlocking { vedtakService.fattVedtak(behandlingId, any()) } } returns opprettetVedtak
-                every { runBlocking { behandlingKlient.hentOppgaverForSak(any(), any()) } } returns
+                coEvery { vedtakService.fattVedtak(behandlingId, any()) } returns
+                    VedtakOgRapid(opprettetVedtak.toDto(), mockk())
+                coEvery { behandlingKlient.hentOppgaverForSak(any(), any()) } returns
                     OppgaveListe(
                         mockk(),
                         listOf(lagOppgave(behandlingId)),
                     )
-                every { runBlocking { behandlingKlient.tildelSaksbehandler(any(), any()) } } returns true
-                every {
-                    runBlocking {
-                        vedtakService.attesterVedtak(
+                coEvery { behandlingKlient.tildelSaksbehandler(any(), any()) } returns true
+                coEvery {
+                    vedtakService.attesterVedtak(
+                        behandlingId,
+                        any(),
+                        any(),
+                    )
+                } returns
+                    VedtakOgRapid(
+                        opprettetVedtak.toDto(),
+                        RapidInfo(
+                            VedtakKafkaHendelseType.ATTESTERT,
+                            opprettetVedtak.toNyDto(),
+                            Tidspunkt.now(),
                             behandlingId,
-                            any(),
-                            any(),
-                        )
-                    }
-                } returns opprettetVedtak
+                        ),
+                    )
+
+                coEvery { rapidService.sendToRapid(any()) } just runs
 
                 environment { config = applicationConfig }
-                application { restModule(log) { automatiskBehandlingRoutes(automatiskBehandlingService, behandlingKlient) } }
+                application {
+                    restModule(log) {
+                        automatiskBehandlingRoutes(
+                            automatiskBehandlingService,
+                            behandlingKlient,
+                        )
+                    }
+                }
 
-                val vedtak =
+                val respons =
                     client.post("/api/vedtak/1/$behandlingId/automatisk/stegvis") {
                         header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                         header(HttpHeaders.Authorization, "Bearer $token")
                         setBody(MigreringKjoringVariant.FULL_KJORING.toJson())
                     }.let {
                         it.status shouldBe HttpStatusCode.OK
-                        deserialize<VedtakNyDto>(it.bodyAsText())
+                        deserialize<VedtakOgRapid>(it.bodyAsText())
                     }
 
-                assertEquals(vedtak.id, opprettetVedtak.id)
+                assertEquals(respons.vedtak.vedtakId, opprettetVedtak.id)
 
                 coVerify(exactly = 1) {
                     vedtakService.opprettEllerOppdaterVedtak(behandlingId, any())
@@ -191,6 +219,9 @@ internal class AutomatiskBehandlingRoutesKtTest {
                     vedtakService.fattVedtak(behandlingId, any())
                     behandlingKlient.tildelSaksbehandler(any(), any())
                     vedtakService.attesterVedtak(behandlingId, any(), any())
+                }
+                coVerify(exactly = 2) {
+                    rapidService.sendToRapid(any())
                 }
                 coVerify(atLeast = 1) {
                     behandlingKlient.harTilgangTilBehandling(any(), any())
@@ -203,36 +234,54 @@ internal class AutomatiskBehandlingRoutesKtTest {
             testApplication {
                 val opprettetVedtak = vedtak()
                 val behandlingId = UUID.randomUUID()
-                every { runBlocking { vedtakService.opprettEllerOppdaterVedtak(any(), any()) } } returns
+                coEvery { runBlocking { vedtakService.opprettEllerOppdaterVedtak(any(), any()) } } returns
                     opprettetVedtak
-                every { runBlocking { vedtakService.fattVedtak(behandlingId, any()) } } returns opprettetVedtak
-                every { runBlocking { behandlingKlient.hentOppgaverForSak(any(), any()) } } returns
+                coEvery { runBlocking { vedtakService.fattVedtak(behandlingId, any()) } } returns
+                    VedtakOgRapid(
+                        opprettetVedtak.toDto(),
+                        RapidInfo(
+                            VedtakKafkaHendelseType.FATTET,
+                            opprettetVedtak.toNyDto(),
+                            Tidspunkt.now(),
+                            behandlingId,
+                        ),
+                    )
+                coEvery { runBlocking { behandlingKlient.hentOppgaverForSak(any(), any()) } } returns
                     OppgaveListe(
                         mockk(),
                         listOf(lagOppgave(behandlingId)),
                     )
-                every { runBlocking { behandlingKlient.tildelSaksbehandler(any(), any()) } } returns true
+                coEvery { runBlocking { behandlingKlient.tildelSaksbehandler(any(), any()) } } returns true
+                coEvery { rapidService.sendToRapid(any()) } just runs
 
                 environment { config = applicationConfig }
-                application { restModule(log) { automatiskBehandlingRoutes(automatiskBehandlingService, behandlingKlient) } }
+                application {
+                    restModule(log) {
+                        automatiskBehandlingRoutes(
+                            automatiskBehandlingService,
+                            behandlingKlient,
+                        )
+                    }
+                }
 
-                val vedtak =
+                val respons =
                     client.post("/api/vedtak/1/$behandlingId/automatisk/stegvis") {
                         header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                         header(HttpHeaders.Authorization, "Bearer $token")
                         setBody(MigreringKjoringVariant.MED_PAUSE.toJson())
                     }.let {
                         it.status shouldBe HttpStatusCode.OK
-                        deserialize<VedtakNyDto>(it.bodyAsText())
+                        deserialize<VedtakOgRapid>(it.bodyAsText())
                     }
 
-                assertEquals(vedtak.id, opprettetVedtak.id)
+                assertEquals(respons.vedtak.vedtakId, opprettetVedtak.id)
 
                 coVerify(exactly = 1) {
                     vedtakService.opprettEllerOppdaterVedtak(behandlingId, any())
                     behandlingKlient.hentOppgaverForSak(1, any())
                     vedtakService.fattVedtak(behandlingId, any())
                     behandlingKlient.tildelSaksbehandler(any(), any())
+                    rapidService.sendToRapid(any())
                 }
                 coVerify(atLeast = 1) {
                     behandlingKlient.harTilgangTilBehandling(any(), any())
@@ -245,7 +294,7 @@ internal class AutomatiskBehandlingRoutesKtTest {
             testApplication {
                 val opprettetVedtak = vedtak()
                 val behandlingId = UUID.randomUUID()
-                every {
+                coEvery {
                     runBlocking {
                         vedtakService.attesterVedtak(
                             behandlingId,
@@ -253,25 +302,43 @@ internal class AutomatiskBehandlingRoutesKtTest {
                             any(),
                         )
                     }
-                } returns opprettetVedtak
+                } returns
+                    VedtakOgRapid(
+                        opprettetVedtak.toDto(),
+                        RapidInfo(
+                            VedtakKafkaHendelseType.ATTESTERT,
+                            opprettetVedtak.toNyDto(),
+                            Tidspunkt.now(),
+                            behandlingId,
+                        ),
+                    )
+                coEvery { rapidService.sendToRapid(any()) } just runs
 
                 environment { config = applicationConfig }
-                application { restModule(log) { automatiskBehandlingRoutes(automatiskBehandlingService, behandlingKlient) } }
+                application {
+                    restModule(log) {
+                        automatiskBehandlingRoutes(
+                            automatiskBehandlingService,
+                            behandlingKlient,
+                        )
+                    }
+                }
 
-                val vedtak =
+                val respons =
                     client.post("/api/vedtak/1/$behandlingId/automatisk/stegvis") {
                         header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                         header(HttpHeaders.Authorization, "Bearer $token")
                         setBody(MigreringKjoringVariant.FORTSETT_ETTER_PAUSE.toJson())
                     }.let {
                         it.status shouldBe HttpStatusCode.OK
-                        deserialize<VedtakNyDto>(it.bodyAsText())
+                        deserialize<VedtakOgRapid>(it.bodyAsText())
                     }
 
-                assertEquals(vedtak.id, opprettetVedtak.id)
+                assertEquals(respons.vedtak.vedtakId, opprettetVedtak.id)
 
                 coVerify(exactly = 1) {
                     vedtakService.attesterVedtak(behandlingId, any(), any())
+                    rapidService.sendToRapid(any())
                 }
                 coVerify(atLeast = 1) {
                     behandlingKlient.harTilgangTilBehandling(any(), any())

@@ -275,6 +275,7 @@ internal class MigreringRiverIntegrationTest {
                                     repository,
                                     featureToggleService,
                                 ),
+                            krrKlient = mockk<KrrKlient>().also { coEvery { it.hentDigitalKontaktinformasjon(any()) } returns null },
                         )
                         LagreKoblingRiver(this, repository)
                         PauseMigreringRiver(this, repository)

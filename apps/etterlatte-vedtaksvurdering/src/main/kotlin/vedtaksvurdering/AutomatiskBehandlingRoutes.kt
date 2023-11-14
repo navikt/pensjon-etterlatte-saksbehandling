@@ -28,7 +28,7 @@ fun Route.automatiskBehandlingRoutes(
                 logger.info("Håndterer behandling $behandlingId")
                 val nyttVedtak =
                     service.vedtakStegvis(behandlingId, sakId, brukerTokenInfo, MigreringKjoringVariant.FULL_KJORING)
-                call.respond(nyttVedtak.toDto())
+                call.respond(nyttVedtak)
             }
         }
 
@@ -37,7 +37,7 @@ fun Route.automatiskBehandlingRoutes(
                 val kjoringVariant = call.receive<MigreringKjoringVariant>()
                 logger.info("Håndterer behandling $behandlingId med kjøringsvariant ${kjoringVariant.name}")
                 val nyttVedtak = service.vedtakStegvis(behandlingId, sakId, brukerTokenInfo, kjoringVariant)
-                call.respond(nyttVedtak.toNyDto())
+                call.respond(nyttVedtak)
             }
         }
     }

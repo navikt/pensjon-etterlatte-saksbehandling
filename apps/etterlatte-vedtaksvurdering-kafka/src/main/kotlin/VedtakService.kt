@@ -12,7 +12,6 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vedtak.LoependeYtelseDTO
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
-import no.nav.etterlatte.libs.common.vedtak.VedtakNyDto
 import no.nav.etterlatte.rapidsandrivers.migrering.MigreringKjoringVariant
 import no.nav.etterlatte.vedtaksvurdering.VedtakOgRapid
 import java.time.LocalDate
@@ -33,7 +32,7 @@ interface VedtakService {
         sakId: Long,
         behandlingId: UUID,
         kjoringVariant: MigreringKjoringVariant,
-    ): VedtakNyDto
+    ): VedtakOgRapid
 
     fun tilbakestillVedtak(behandlingId: UUID)
 
@@ -65,7 +64,7 @@ class VedtakServiceImpl(private val vedtakKlient: HttpClient, private val url: S
         sakId: Long,
         behandlingId: UUID,
         kjoringVariant: MigreringKjoringVariant,
-    ): VedtakNyDto =
+    ): VedtakOgRapid =
         runBlocking {
             vedtakKlient.post("$url/api/vedtak/$sakId/$behandlingId/automatisk/stegvis") {
                 contentType(ContentType.Application.Json)

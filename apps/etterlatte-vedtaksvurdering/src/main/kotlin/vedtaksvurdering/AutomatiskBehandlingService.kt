@@ -10,6 +10,7 @@ import java.util.UUID
 
 class AutomatiskBehandlingService(
     val service: VedtakBehandlingService,
+    val rapidService: VedtaksvurderingRapidService,
     val behandlingKlient: BehandlingKlient,
 ) {
     private val logger = LoggerFactory.getLogger(AutomatiskBehandlingService::class.java)
@@ -19,12 +20,13 @@ class AutomatiskBehandlingService(
         sakId: Long,
         brukerTokenInfo: BrukerTokenInfo,
         kjoringVariant: MigreringKjoringVariant,
-    ): Vedtak =
+    ): VedtakOgRapid =
         when (kjoringVariant) {
             MigreringKjoringVariant.FULL_KJORING -> {
                 opprettOgFattVedtak(behandlingId, sakId, brukerTokenInfo)
                 attesterVedtak(behandlingId, brukerTokenInfo)
             }
+
             MigreringKjoringVariant.MED_PAUSE -> opprettOgFattVedtak(behandlingId, sakId, brukerTokenInfo)
             MigreringKjoringVariant.FORTSETT_ETTER_PAUSE -> attesterVedtak(behandlingId, brukerTokenInfo)
         }
@@ -33,10 +35,11 @@ class AutomatiskBehandlingService(
         behandlingId: UUID,
         sakId: Long,
         brukerTokenInfo: BrukerTokenInfo,
-    ): Vedtak {
+    ): VedtakOgRapid {
+        logger.info("Håndterer behandling $behandlingId")
+        service.opprettEllerOppdaterVedtak(behandlingId, brukerTokenInfo)
         logger.info("Fatter vedtak for behandling $behandlingId")
-        val vedtak = service.opprettEllerOppdaterVedtak(behandlingId, brukerTokenInfo)
-        service.fattVedtak(behandlingId, brukerTokenInfo)
+        val vedtakOgRapid = service.fattVedtak(behandlingId, brukerTokenInfo).also { rapidService.sendToRapid(it) }
 
         logger.info("Tildeler attesteringsoppgave til systembruker")
         val oppgaveTilAttestering =
@@ -47,18 +50,18 @@ class AutomatiskBehandlingService(
                 .filterNot { it.erAvsluttet() }
                 .first()
         behandlingKlient.tildelSaksbehandler(oppgaveTilAttestering, brukerTokenInfo)
-        return vedtak
+        return vedtakOgRapid
     }
 
     private suspend fun attesterVedtak(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ): Vedtak {
+    ): VedtakOgRapid {
         logger.info("Attesterer vedtak for behandling $behandlingId")
         return service.attesterVedtak(
             behandlingId,
             "Automatisk attestert av ${Fagsaksystem.EY.systemnavn}",
             brukerTokenInfo,
-        )
+        ).also { rapidService.sendToRapid(it) }
     }
 }

@@ -76,6 +76,7 @@ spec:
         - application: etterlatte-pdltjenester
         - application: digdir-krr-proxy
           namespace: team-rocket
+          cluster: dev-gcp
       external:
         - host: etterlatte-unleash-api.nav.cloud.nais.io
         - host: pensjon-pen-q2.dev-fss-pub.nais.io

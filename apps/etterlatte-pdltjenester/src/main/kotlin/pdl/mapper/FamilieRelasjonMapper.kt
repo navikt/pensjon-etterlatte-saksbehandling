@@ -4,7 +4,7 @@ import no.nav.etterlatte.libs.common.behandling.Navn
 import no.nav.etterlatte.libs.common.behandling.PersonUtenIdent
 import no.nav.etterlatte.libs.common.behandling.RelatertPerson
 import no.nav.etterlatte.libs.common.behandling.RelativPersonrolle
-import no.nav.etterlatte.libs.common.pdl.IngenIdentFamilierelasjonException
+import no.nav.etterlatte.libs.common.pdl.AkseptererIkkePersonerUtenIdentException
 import no.nav.etterlatte.libs.common.person.FamilieRelasjon
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.PersonRolle
@@ -81,7 +81,7 @@ object FamilieRelasjonMapper {
                 "Feilet i mapping av familierelasjon på grunn av personer som mangler identer. " +
                     "Mappet følgende personer som mangler identer: $personerUtenIdent",
             )
-            throw IngenIdentFamilierelasjonException()
+            throw AkseptererIkkePersonerUtenIdentException()
         }
 
         return FamilieRelasjon(

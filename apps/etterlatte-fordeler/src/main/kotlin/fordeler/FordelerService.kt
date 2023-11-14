@@ -11,7 +11,7 @@ import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.innsendtsoeknad.barnepensjon.Barnepensjon
 import no.nav.etterlatte.libs.common.innsendtsoeknad.common.PersonType
-import no.nav.etterlatte.libs.common.pdl.IngenIdentFamilierelasjonException
+import no.nav.etterlatte.libs.common.pdl.AkseptererIkkePersonerUtenIdentException
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
@@ -70,7 +70,7 @@ class FordelerService(
                     Vedtaksloesning.PESYS -> IkkeGyldigForBehandling(it.kriterier)
                 }
             }
-        } catch (e: IngenIdentFamilierelasjonException) {
+        } catch (e: AkseptererIkkePersonerUtenIdentException) {
             logger.warn(
                 "Fikk en familierelasjon som mangler ident fra PDL. Disse tilfellene støtter vi ikke per nå." +
                     " Se sikkerlogg for detaljer",

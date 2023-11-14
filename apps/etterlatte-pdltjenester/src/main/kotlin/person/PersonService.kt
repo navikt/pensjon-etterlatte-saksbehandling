@@ -4,8 +4,8 @@ import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.pdl.AkseptererIkkePersonerUtenIdentException
 import no.nav.etterlatte.libs.common.pdl.FantIkkePersonException
-import no.nav.etterlatte.libs.common.pdl.IngenIdentFamilierelasjonException
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
@@ -224,7 +224,7 @@ class PersonService(
         ) {
             return persongalleri
         }
-        throw IngenIdentFamilierelasjonException()
+        throw AkseptererIkkePersonerUtenIdentException()
     }
 
     private suspend fun hentPersongalleriForBarnepensjon(

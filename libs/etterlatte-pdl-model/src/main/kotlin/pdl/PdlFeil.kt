@@ -14,7 +14,7 @@ class FantIkkePersonException(override val detail: String = "Fant ikke forespurt
     detail = detail,
 )
 
-class IngenIdentFamilierelasjonException(override val detail: String = "En person i familierelasjon mangler ident") :
+class AkseptererIkkePersonerUtenIdentException(override val detail: String = "En person i familierelasjon mangler ident") :
     ForespoerselException(
         status = 400,
         code = PdlFeilAarsak.INGEN_IDENT_FAMILIERELASJON.name,

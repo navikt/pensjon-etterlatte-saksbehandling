@@ -1,5 +1,6 @@
 package no.nav.etterlatte.statistikk.database
 
+import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toNorskTidspunkt
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
@@ -134,6 +135,8 @@ class StoenadRepositoryTest {
                 sakUtland = SakUtland.NASJONAL,
                 virkningstidspunkt = YearMonth.of(2023, 6),
                 utbetalingsdato = LocalDate.of(2023, 7, 20),
+                kilde = Vedtaksloesning.GJENNY,
+                pesysId = 123L,
             ),
         )
         repo.hentStoenadRader().also {
@@ -180,6 +183,8 @@ class StoenadRepositoryTest {
                 sakUtland = SakUtland.NASJONAL,
                 virkningstidspunkt = YearMonth.of(2023, 6),
                 utbetalingsdato = LocalDate.of(2023, 7, 20),
+                kilde = Vedtaksloesning.GJENNY,
+                pesysId = 123L,
             ),
         )
         repo.hentStoenadRader().also {
@@ -334,6 +339,8 @@ class StoenadRepositoryTest {
                 sakUtland = SakUtland.NASJONAL,
                 virkningstidspunkt = YearMonth.of(2023, 6),
                 utbetalingsdato = LocalDate.of(2023, 7, 20),
+                kilde = Vedtaksloesning.GJENNY,
+                pesysId = 123L,
             )
 
         assertDoesNotThrow {
@@ -371,6 +378,8 @@ class StoenadRepositoryTest {
                     sakUtland = SakUtland.NASJONAL,
                     virkningstidspunkt = YearMonth.of(2023, 6),
                     utbetalingsdato = LocalDate.of(2023, 7, 20),
+                    kilde = Vedtaksloesning.GJENNY,
+                    pesysId = 123L,
                 ),
             )
 

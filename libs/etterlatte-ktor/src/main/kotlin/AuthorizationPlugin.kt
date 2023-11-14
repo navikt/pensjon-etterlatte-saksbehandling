@@ -19,10 +19,8 @@ val AuthorizationPlugin =
         val roles = pluginConfig.roles
         pluginConfig.apply {
             on(AuthenticationChecked) { call ->
-                val userRoles =
-                    call.firstValidTokenClaims()?.getAsList("roles") ?: emptyList()
-
-                if (userRoles.intersect(roles).isEmpty()) {
+                val roller = call.brukerTokenInfo.roller
+                if (roller.intersect(roles).isEmpty()) {
                     application.log.info("Request avslått pga manglende rolle (gyldige: $roles)")
                     throw ForespoerselException(
                         status = HttpStatusCode.Unauthorized.value,

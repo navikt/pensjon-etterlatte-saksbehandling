@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { IVilkaarsvurdering } from '~shared/api/vilkaarsvurdering'
 import { vilkaarsvurderingErPaaNyttRegelverk } from '~components/behandling/vilkaarsvurdering/utils'
+// @vitest-environment jsdom
 
 describe('Tester hjelpefunksjoner for vilkårsvurdering', () => {
   it('barnepensjon vilkaarsvurdering er ikke paa nytt regelverk', () => {

@@ -69,6 +69,6 @@ enum class VilkaarType(val rekkefoelge: Int) {
     ;
 
     companion object {
-        fun yrkesskadeVilkaarTyper() = listOf(BP_YRKESSKADE_AVDOED, OMS_YRKESSKADE)
+        fun yrkesskadeVilkaarTyper() = listOf(BP_YRKESSKADE_AVDOED, BP_YRKESSKADE_AVDOED_2024, OMS_YRKESSKADE)
     }
 }

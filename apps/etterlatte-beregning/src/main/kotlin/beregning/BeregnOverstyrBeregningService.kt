@@ -16,7 +16,6 @@ import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
 import no.nav.etterlatte.libs.common.beregning.Beregningstype
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
-import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning.Companion.automatiskSaksbehandler
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.regler.FaktumNode
@@ -89,7 +88,7 @@ class BeregnOverstyrBeregningService(
                     beregningsGrunnlag.perioder.mapVerdier { overstyrBeregningGrunnlag ->
                         FaktumNode(
                             verdi = overstyrBeregningGrunnlag,
-                            kilde = automatiskSaksbehandler, // TODO EY- 3079 - kilde for DTO
+                            kilde = beregningsGrunnlag.kilde,
                             beskrivelse = "Overstyr beregning grunnlag",
                         )
                     },

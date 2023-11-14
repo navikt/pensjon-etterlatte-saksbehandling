@@ -59,6 +59,7 @@ export interface Beregningsperiode {
 export interface OverstyrBeregningsperiode {
   utbetaltBeloep: string
   trygdetid: string
+  beskrivelse: string
 }
 
 export interface BeregningsGrunnlagDto {

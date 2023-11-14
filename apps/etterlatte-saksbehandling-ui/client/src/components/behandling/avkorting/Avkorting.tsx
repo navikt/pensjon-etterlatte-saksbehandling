@@ -1,5 +1,5 @@
 import styled from 'styled-components'
-import { isErrorWithCode, isPendingOrInitial, useApiCall } from '~shared/hooks/useApiCall'
+import { isFailure, isPendingOrInitial, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
 import { hentAvkorting } from '~shared/api/avkorting'
 import React, { useEffect, useState } from 'react'
 import { IAvkorting } from '~shared/types/IAvkorting'
@@ -10,17 +10,22 @@ import { YtelseEtterAvkorting } from '~components/behandling/avkorting/YtelseEtt
 import { IBehandlingReducer, oppdaterBehandlingsstatus } from '~store/reducers/BehandlingReducer'
 import { useAppDispatch } from '~store/Store'
 import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
+import { hentBehandlesFraStatus } from '~components/behandling/felles/utils'
 
 export const Avkorting = (props: { behandling: IBehandlingReducer }) => {
   const behandling = props.behandling
   const dispatch = useAppDispatch()
   const [avkortingStatus, hentAvkortingRequest] = useApiCall(hentAvkorting)
   const [avkorting, setAvkorting] = useState<IAvkorting>()
+  const redigerbar = hentBehandlesFraStatus(behandling.status)
 
   useEffect(() => {
     if (!avkorting) {
       hentAvkortingRequest(behandling.id, (res) => {
-        dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.AVKORTET))
+        const avkortingFinnesOgErUnderBehandling = res && redigerbar
+        if (avkortingFinnesOgErUnderBehandling) {
+          dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.AVKORTET))
+        }
         setAvkorting(res)
       })
     }
@@ -28,11 +33,12 @@ export const Avkorting = (props: { behandling: IBehandlingReducer }) => {
 
   return (
     <AvkortingWrapper>
-      {!['initial', 'pending'].includes(avkortingStatus.status) && (
+      {isSuccess(avkortingStatus) && (
         <AvkortingInntekt
           behandling={behandling}
           avkortingGrunnlag={avkorting == null ? [] : avkorting.avkortingGrunnlag}
           setAvkorting={setAvkorting}
+          redigerbar={redigerbar}
         />
       )}
       {avkorting && (
@@ -44,7 +50,7 @@ export const Avkorting = (props: { behandling: IBehandlingReducer }) => {
         />
       )}
       {isPendingOrInitial(avkortingStatus) && <Spinner visible label="Henter avkorting" />}
-      {isErrorWithCode(avkortingStatus, 404) && <ApiErrorAlert>En feil har oppstått</ApiErrorAlert>}
+      {isFailure(avkortingStatus) && <ApiErrorAlert>En feil har oppstått</ApiErrorAlert>}
     </AvkortingWrapper>
   )
 }

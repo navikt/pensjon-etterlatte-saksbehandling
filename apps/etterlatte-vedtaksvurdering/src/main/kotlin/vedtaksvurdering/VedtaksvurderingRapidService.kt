@@ -4,8 +4,8 @@ import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.TEKNISK_TID_KEY
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
-import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseType
+import no.nav.etterlatte.libs.common.vedtak.VedtakNyDto
 import no.nav.helse.rapids_rivers.JsonMessage
 import java.util.UUID
 
@@ -28,7 +28,7 @@ class VedtaksvurderingRapidService(
 
     private fun sendToRapid(
         vedtakhendelse: VedtakKafkaHendelseType,
-        vedtak: VedtakDto,
+        vedtak: VedtakNyDto,
         tekniskTid: Tidspunkt,
         behandlingId: UUID,
         extraParams: Map<String, Any> = emptyMap(),

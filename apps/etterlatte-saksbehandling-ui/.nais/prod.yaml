@@ -107,3 +107,4 @@ spec:
         - application: etterlatte-beregning
         - application: etterlatte-vedtaksvurdering
         - application: etterlatte-grunnlag
+        - application: etterlatte-trygdetid

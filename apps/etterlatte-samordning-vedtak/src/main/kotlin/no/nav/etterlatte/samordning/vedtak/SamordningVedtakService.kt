@@ -62,8 +62,8 @@ class SamordningVedtakService(
     }
 
     private fun VedtakSamordningDto.mapSamordningsvedtak(): SamordningVedtakDto {
-        val beregning = deserialize<BeregningDTO>(beregning.toString())
-        val avkorting = deserialize<AvkortingDto>(avkorting.toString())
+        val beregning = beregning?.let { deserialize<BeregningDTO>(it.toString()) }
+        val avkorting = avkorting?.let { deserialize<AvkortingDto>(it.toString()) }
 
         return SamordningVedtakDto(
             vedtakId = vedtakId,
@@ -72,11 +72,12 @@ class SamordningVedtakService(
             opphoersdato = virkningstidspunkt.takeIf { type == VedtakType.OPPHOER }?.atStartOfMonth(),
             type = type.toSamordningsvedtakType(),
             aarsak = behandling.revurderingsaarsak?.toSamordningsvedtakAarsak(),
-            anvendtTrygdetid = beregning.beregningsperioder.first().trygdetid,
+            anvendtTrygdetid = beregning?.beregningsperioder?.first()?.trygdetid ?: 0,
             perioder =
-                avkorting.avkortetYtelse
-                    .map { it.toSamordningVedtakPeriode() }
-                    .sortedBy { it.fom },
+                avkorting?.avkortetYtelse
+                    ?.map { it.toSamordningVedtakPeriode() }
+                    ?.sortedBy { it.fom }
+                    ?: emptyList(),
         )
     }
 
@@ -93,6 +94,7 @@ class SamordningVedtakService(
     private fun Revurderingaarsak.toSamordningsvedtakAarsak(): String {
         return when (this) {
             Revurderingaarsak.INNTEKTSENDRING -> SamordningVedtakAarsak.INNTEKT
+            Revurderingaarsak.DOEDSFALL -> SamordningVedtakAarsak.DOEDSFALL
             else -> SamordningVedtakAarsak.ANNET
         }.name
     }

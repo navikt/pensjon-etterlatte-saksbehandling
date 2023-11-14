@@ -26,11 +26,11 @@ import { hentGosysOppgave } from '~shared/api/oppgaver'
 import { DatoVelger } from '~shared/DatoVelger'
 import { InfoWrapper } from '~components/behandling/soeknadsoversikt/styled'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
-import { hentSakForPerson } from '~shared/api/behandling'
 import { FormWrapper } from '~components/person/journalfoeringsoppgave/BehandleJournalfoeringOppgave'
 import { FlexRow } from '~shared/styled'
 
 import { FristWrapper } from '~components/nyoppgavebenk/FristWrapper'
+import { hentSakForPerson } from '~shared/api/sak'
 
 export default function KontrollerOppgave() {
   const state = useJournalfoeringOppgave()

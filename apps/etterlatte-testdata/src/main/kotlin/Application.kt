@@ -58,6 +58,7 @@ import no.nav.etterlatte.testdata.features.standardmelding.StandardMeldingFeatur
 import no.nav.security.token.support.v2.tokenValidationSupport
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import testdata.features.samordning.SamordningMottattFeature
 
 private val env = System.getenv()
 
@@ -97,6 +98,7 @@ val features: List<TestDataFeature> =
                 TestnavClient(config, httpClient),
             ),
         ),
+        SamordningMottattFeature,
     )
 
 fun main() {

@@ -92,7 +92,12 @@ class SamordningsvedtakRouteTest {
         server.issueToken(
             issuerId = AZURE_ISSUER,
             audience = CLIENT_ID,
-            claims = mapOf("roles" to roles),
+            claims =
+                mapOf(
+                    "roles" to roles,
+                    "sub" to "pensjon-pen",
+                    "oid" to "pensjon-pen",
+                ),
         ).serialize()
 
     private companion object {

@@ -4,8 +4,9 @@ import RedigerMottakerModal from '~components/person/brev/RedigerMottakerModal'
 import { useState } from 'react'
 
 export default function NyttBrevMottaker({ brev }: { brev: IBrev }) {
-  const [mottaker, setMottaker] = useState(brev.mottaker)
+  const [brevState, setBrevState] = useState(brev)
 
+  const mottaker = brevState.mottaker
   const adresse = mottaker?.adresse
 
   return (
@@ -13,9 +14,8 @@ export default function NyttBrevMottaker({ brev }: { brev: IBrev }) {
       <Panel border>
         <Heading spacing level="2" size="medium">
           Mottaker
-          <RedigerMottakerModal brev={brev} oppdater={(val) => setMottaker(val)} />
+          <RedigerMottakerModal brev={brevState} oppdater={(val) => setBrevState({ ...brevState, mottaker: val })} />
         </Heading>
-
         <>
           <BodyShort spacing size="small">
             <Label>Navn</Label>

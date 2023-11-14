@@ -51,6 +51,7 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.VedtakSak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
@@ -180,13 +181,14 @@ internal class VedtaksbrevServiceTest {
 
         @Test
         fun `Sletting av brev`() {
-            every { db.slett(any()) } returns true
+            every { db.fjernFerdigstiltStatusUnderkjentVedtak(any(), any()) } returns true
 
-            val slettetOK = vedtaksbrevService.slettVedtaksbrev(1)
+            val vedtak = """{}""".toJsonNode()
+            val gjenaapnetOK = vedtaksbrevService.fjernFerdigstiltStatusUnderkjentVedtak(1, vedtak)
 
-            slettetOK shouldBe true
+            gjenaapnetOK shouldBe true
 
-            verify { db.slett(1) }
+            verify { db.fjernFerdigstiltStatusUnderkjentVedtak(1, vedtak) }
         }
     }
 

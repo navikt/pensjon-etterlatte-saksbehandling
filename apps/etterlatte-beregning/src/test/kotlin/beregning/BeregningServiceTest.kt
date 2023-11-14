@@ -1,5 +1,7 @@
 package no.nav.etterlatte.beregning
 
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -13,6 +15,7 @@ import no.nav.etterlatte.klienter.TrygdetidKlient
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.beregning.OverstyrBeregningDTO
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
 import org.junit.jupiter.api.Test
@@ -177,6 +180,95 @@ internal class BeregningServiceTest {
             coVerify(exactly = 1) { behandlingKlient.kanBeregnes(any(), any(), false) }
             coVerify(exactly = 0) { beregnOmstillingsstoenadService.beregn(any(), any()) }
             verify(exactly = 0) { beregningRepository.lagreEllerOppdaterBeregning(any()) }
+        }
+    }
+
+    @Test
+    fun `skal ikke hente overstyr beregning der den ikke finnes`() {
+        val behandling = mockBehandling(SakType.OMSTILLINGSSTOENAD)
+
+        coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
+        every { beregningRepository.hentOverstyrBeregning(any()) } returns null
+
+        runBlocking {
+            val overstyrBeregning = beregningService.hentOverstyrBeregning(behandling.id, bruker)
+
+            overstyrBeregning shouldBe null
+
+            verify(exactly = 1) { beregningRepository.hentOverstyrBeregning(any()) }
+        }
+    }
+
+    @Test
+    fun `skal hente overstyr beregning der den finnes`() {
+        val behandling = mockBehandling(SakType.OMSTILLINGSSTOENAD)
+
+        coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
+        every { beregningRepository.hentOverstyrBeregning(any()) } returns
+            OverstyrBeregning(
+                behandling.sak,
+                "Test",
+                Tidspunkt.now(),
+            )
+
+        runBlocking {
+            val overstyrBeregning = beregningService.hentOverstyrBeregning(behandling.id, bruker)
+
+            overstyrBeregning shouldNotBe null
+
+            overstyrBeregning?.sakId shouldBe behandling.sak
+            overstyrBeregning?.beskrivelse shouldBe "Test"
+
+            verify(exactly = 1) { beregningRepository.hentOverstyrBeregning(any()) }
+        }
+    }
+
+    @Test
+    fun `skal opprette overstyr beregning der den ikke finnes`() {
+        val behandling = mockBehandling(SakType.OMSTILLINGSSTOENAD)
+
+        coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
+        every { beregningRepository.hentOverstyrBeregning(any()) } returns null
+        every { beregningRepository.opprettOverstyrBeregning(any()) } returnsArgument 0
+
+        runBlocking {
+            val overstyrBeregning =
+                beregningService.opprettOverstyrBeregning(behandling.id, OverstyrBeregningDTO("Test"), bruker)
+
+            overstyrBeregning shouldNotBe null
+
+            overstyrBeregning?.sakId shouldBe behandling.sak
+            overstyrBeregning?.beskrivelse shouldBe "Test"
+
+            verify(exactly = 1) {
+                beregningRepository.opprettOverstyrBeregning(any())
+                beregningRepository.hentOverstyrBeregning(any())
+            }
+        }
+    }
+
+    @Test
+    fun `skal ikke overskrive overstyr beregning der den finnes`() {
+        val behandling = mockBehandling(SakType.OMSTILLINGSSTOENAD)
+
+        coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
+        every { beregningRepository.hentOverstyrBeregning(any()) } returns
+            OverstyrBeregning(
+                behandling.sak,
+                "Test",
+                Tidspunkt.now(),
+            )
+
+        runBlocking {
+            val overstyrBeregning =
+                beregningService.opprettOverstyrBeregning(behandling.id, OverstyrBeregningDTO("Test 2"), bruker)
+
+            overstyrBeregning shouldNotBe null
+
+            overstyrBeregning?.sakId shouldBe behandling.sak
+            overstyrBeregning?.beskrivelse shouldBe "Test"
+
+            verify(exactly = 1) { beregningRepository.hentOverstyrBeregning(any()) }
         }
     }
 

@@ -1,7 +1,8 @@
 package no.nav.etterlatte.utbetaling.iverksetting.utbetaling
 
 import no.nav.etterlatte.libs.common.vedtak.Behandling
-import no.nav.etterlatte.libs.common.vedtak.VedtakDto
+import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
+import no.nav.etterlatte.libs.common.vedtak.VedtakNyDto
 import java.math.BigDecimal
 import java.time.YearMonth
 
@@ -14,19 +15,20 @@ data class Utbetalingsvedtak(
     val attestasjon: Attestasjon,
 ) {
     companion object {
-        fun fra(vedtak: VedtakDto) =
-            Utbetalingsvedtak(
-                vedtakId = vedtak.vedtakId,
+        fun fra(vedtak: VedtakNyDto): Utbetalingsvedtak {
+            val innhold = (vedtak.innhold as VedtakInnholdDto.VedtakBehandlingDto)
+            return Utbetalingsvedtak(
+                vedtakId = vedtak.id,
                 sak = Sak(vedtak.sak.ident, vedtak.sak.id, Saktype.fraString(vedtak.sak.sakType.toString())),
                 behandling =
                     Behandling(
-                        type = vedtak.behandling.type,
-                        id = vedtak.behandling.id,
-                        revurderingsaarsak = vedtak.behandling.revurderingsaarsak,
-                        revurderingInfo = vedtak.behandling.revurderingInfo,
+                        type = innhold.behandling.type,
+                        id = innhold.behandling.id,
+                        revurderingsaarsak = innhold.behandling.revurderingsaarsak,
+                        revurderingInfo = innhold.behandling.revurderingInfo,
                     ),
                 pensjonTilUtbetaling =
-                    vedtak.utbetalingsperioder.map {
+                    innhold.utbetalingsperioder.map {
                         Utbetalingsperiode(
                             id = it.id!!,
                             periode =
@@ -53,6 +55,7 @@ data class Utbetalingsvedtak(
                         )
                     } ?: throw Exception("Mangler attestant på vedtak"),
             )
+        }
     }
 }
 

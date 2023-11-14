@@ -26,10 +26,13 @@ export default function RedigerMottakerModal({ brev, oppdater }: Props) {
   const [mottaker, setMottaker] = useState<Mottaker>(initialMottaker)
 
   const [mottakerType, setMottakerType] = useState(
-    brev.mottaker.orgnummer ? MottakerType.BEDRIFT : MottakerType.PRIVATPERSON
+    mottaker.orgnummer ? MottakerType.BEDRIFT : MottakerType.PRIVATPERSON
   )
 
   const lagre = () => {
+    if (mottakerType == MottakerType.BEDRIFT) mottaker.foedselsnummer = undefined
+    else if (mottakerType == MottakerType.PRIVATPERSON) mottaker.orgnummer = undefined
+
     apiOppdaterMottaker({ brevId, sakId, mottaker }, () => {
       oppdater(mottaker)
       setIsOpen(false)

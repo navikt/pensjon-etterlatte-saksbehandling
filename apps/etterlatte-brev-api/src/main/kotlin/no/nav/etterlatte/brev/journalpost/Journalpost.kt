@@ -1,5 +1,7 @@
 package no.nav.etterlatte.brev.journalpost
 
+import no.nav.etterlatte.token.Fagsaksystem
+
 data class JournalpostRequest(
     val tittel: String,
     val journalpostType: JournalPostType,
@@ -35,7 +37,7 @@ data class JournalpostDokument(
 data class JournalpostSak(
     val sakstype: Sakstype,
     val fagsakId: String? = null,
-    val fagsaksystem: String? = "EY",
+    val fagsaksystem: String? = Fagsaksystem.EY.navn,
 )
 
 enum class Sakstype {

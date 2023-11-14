@@ -1,21 +1,39 @@
 import { useParams } from 'react-router-dom'
-import { useEffect } from 'react'
-import { mapApiResult, useApiCall } from '~shared/hooks/useApiCall'
+import React, { useEffect } from 'react'
+import { isFailure, isSuccess, mapApiResult, useApiCall } from '~shared/hooks/useApiCall'
 import { hentGenerellBehandling } from '~shared/api/generellbehandling'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import Spinner from '~shared/Spinner'
 import KravpakkeUtland from '~components/generellbehandling/KravpakkeUtland'
 import { Alert } from '@navikt/ds-react'
 import { Generellbehandling } from '~shared/types/Generellbehandling'
+import { StatusBar } from '~shared/statusbar/Statusbar'
+import { getPerson } from '~shared/api/grunnlag'
+import { hentSak } from '~shared/api/sak'
 
 const GenerellBehandling = () => {
   const { generellbehandlingId } = useParams()
-  const [fetchGenerellbehandlingStatus, fetchGenerellbehandling] = useApiCall(hentGenerellBehandling)
   if (!generellbehandlingId) return null
+
+  const [fetchGenerellbehandlingStatus, fetchGenerellbehandling] = useApiCall(hentGenerellBehandling)
+  const [personStatus, hentPerson] = useApiCall(getPerson)
+  const [hentSakStatus, hentSakApi] = useApiCall(hentSak)
 
   useEffect(() => {
     fetchGenerellbehandling(generellbehandlingId)
   }, [generellbehandlingId])
+
+  useEffect(() => {
+    if (isSuccess(fetchGenerellbehandlingStatus)) {
+      hentSakApi(fetchGenerellbehandlingStatus.data.sakId)
+    }
+  }, [fetchGenerellbehandlingStatus])
+
+  useEffect(() => {
+    if (isSuccess(hentSakStatus)) {
+      hentPerson(hentSakStatus.data.ident)
+    }
+  }, [hentSakStatus])
 
   return mapApiResult(
     fetchGenerellbehandlingStatus,
@@ -25,9 +43,15 @@ const GenerellBehandling = () => {
       switch (generellBehandling.type) {
         case 'KRAVPAKKE_UTLAND':
           return (
-            <KravpakkeUtland
-              utlandsBehandling={generellBehandling as Generellbehandling & { innhold: KravpakkeUtland | null }}
-            />
+            <>
+              {isFailure(hentSakStatus) && (
+                <ApiErrorAlert>Vi klarte ikke å hente sak og derfor vil navn baren være borte</ApiErrorAlert>
+              )}
+              <StatusBar result={personStatus} />
+              <KravpakkeUtland
+                utlandsBehandling={generellBehandling as Generellbehandling & { innhold: KravpakkeUtland | null }}
+              />
+            </>
           )
         case 'ANNEN':
           return <Alert variant="error">Annen er ikke støttet enda</Alert>

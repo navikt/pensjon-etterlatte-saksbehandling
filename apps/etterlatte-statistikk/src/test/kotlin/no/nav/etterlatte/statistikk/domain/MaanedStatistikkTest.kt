@@ -1,5 +1,6 @@
 package no.nav.etterlatte.statistikk.domain
 
+import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import org.junit.jupiter.api.Assertions
@@ -82,6 +83,8 @@ fun stoenadRad(
     sakUtland: SakUtland = SakUtland.NASJONAL,
     virknigstidspunkt: YearMonth = YearMonth.of(2023, 6),
     utbetalingsdato: LocalDate = LocalDate.of(2023, 7, 20),
+    kilde: Vedtaksloesning = Vedtaksloesning.GJENNY,
+    pesysId: Long = 123L,
 ): StoenadRad =
     StoenadRad(
         id = id,
@@ -108,4 +111,6 @@ fun stoenadRad(
         sakUtland = sakUtland,
         virkningstidspunkt = virknigstidspunkt,
         utbetalingsdato = utbetalingsdato,
+        kilde = kilde,
+        pesysId = pesysId,
     )

@@ -15,9 +15,9 @@ fun JournalfoeringHendelseRecord.erTemaEtterlatte(): Boolean =
 /**
  * Konverterer [JournalfoeringHendelseRecord] sin journalpostStatus til merknad som brukes i Gjenny-oppgaven
  **/
-fun JournalfoeringHendelseRecord.lagMerknadFraStatus(): String =
+fun JournalfoeringHendelseRecord.lagMerknadFraStatus(kanal: Kanal): String =
     when (journalpostStatus) {
-        JournalpostStatus.MOTTATT -> "Mottatt journalpost"
+        JournalpostStatus.MOTTATT -> "Mottatt journalpost (${kanal.beskrivelse})"
         JournalpostStatus.JOURNALFOERT -> "Ferdigstilt"
         JournalpostStatus.UKJENT_BRUKER -> "Ukjent bruker"
         JournalpostStatus.UTGAAR -> "Feil ifm. mottak eller journalføring"
@@ -37,6 +37,9 @@ fun JournalfoeringHendelseRecord.temaTilSakType(): SakType =
         else -> throw IllegalArgumentException("Ugyldig tema $temaNytt")
     }
 
+/**
+ * @see: <a href="https://confluence.adeo.no/x/Ix-DGQ">Joarkhendelser på Confluence</a>
+ **/
 object HendelseType {
     const val JOURNALPOST_MOTTATT = "JournalpostMottatt"
     const val TEMA_ENDRET = "TemaEndret"

@@ -66,7 +66,13 @@ export function TilbakekrevingBrev({ tilbakekreving }: { tilbakekreving: Tilbake
               Dette er et manuelt opprettet brev. Kontroller innholdet nøye før attestering.
             </Alert>
             <br />
-            {vedtaksbrev && <MottakerPanel vedtaksbrev={vedtaksbrev} />}
+            {vedtaksbrev && (
+              <MottakerPanel
+                vedtaksbrev={vedtaksbrev}
+                oppdater={(val) => setVedtaksbrev({ ...vedtaksbrev, mottaker: val })}
+                redigerbar={false}
+              />
+            )}
           </ContentHeader>
         </Sidebar>
 

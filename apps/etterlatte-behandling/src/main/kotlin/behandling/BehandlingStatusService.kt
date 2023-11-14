@@ -2,6 +2,7 @@ package no.nav.etterlatte.behandling
 
 import io.ktor.server.plugins.NotFoundException
 import no.nav.etterlatte.behandling.domain.Behandling
+import no.nav.etterlatte.behandling.domain.ManuellRevurdering
 import no.nav.etterlatte.behandling.generellbehandling.GenerellBehandlingService
 import no.nav.etterlatte.behandling.generellbehandling.GenerellBehandlingToggle
 import no.nav.etterlatte.behandling.hendelse.HendelseType
@@ -22,6 +23,7 @@ import java.util.UUID
 
 enum class BehandlingStatusServiceFeatureToggle(private val key: String) : FeatureToggle {
     BrukFaktiskTrygdetid("pensjon-etterlatte.bp-bruk-faktisk-trygdetid"),
+    OpphoerStatusovergang("pensjon-etterlatte.opphoer-statusovergang-vv-til-fattetv"),
     ;
 
     override fun key() = key
@@ -157,7 +159,10 @@ class BehandlingStatusServiceImpl(
     }
 
     override fun sjekkOmKanFatteVedtak(behandlingId: UUID) {
-        hentBehandling(behandlingId).tilFattetVedtak()
+        when (val behandling = hentBehandling(behandlingId)) {
+            is ManuellRevurdering -> behandling.tilFattetVedtak(featureToggleService)
+            else -> behandling.tilFattetVedtak()
+        }
     }
 
     override fun settFattetVedtak(

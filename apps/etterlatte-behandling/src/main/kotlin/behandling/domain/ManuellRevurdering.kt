@@ -1,6 +1,8 @@
 package no.nav.etterlatte.behandling.domain
 
+import no.nav.etterlatte.behandling.BehandlingStatusServiceFeatureToggle
 import no.nav.etterlatte.behandling.revurdering.RevurderingInfoMedBegrunnelse
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
@@ -107,6 +109,31 @@ data class ManuellRevurdering(
                 BehandlingStatus.RETURNERT,
             ),
         ) { endreTilStatus(BehandlingStatus.AVKORTET) }
+
+    /**
+     Utforskning av mulighet for vilkaarsvurdert -> fattet_vedtak i kontekst av opphør
+     */
+    fun tilFattetVedtak(featureToggleService: FeatureToggleService): Revurdering {
+        if (!erFyltUt()) {
+            logger.info(("Behandling ($id) må være fylt ut for å settes til fattet vedtak"))
+            throw TilstandException.IkkeFyltUt
+        }
+
+        if (featureToggleService.isEnabled(BehandlingStatusServiceFeatureToggle.OpphoerStatusovergang, false)) {
+            return hvisTilstandEr(
+                listOf(
+                    BehandlingStatus.VILKAARSVURDERT,
+                    BehandlingStatus.BEREGNET,
+                    BehandlingStatus.AVKORTET,
+                    BehandlingStatus.RETURNERT,
+                ),
+            ) {
+                endreTilStatus(BehandlingStatus.FATTET_VEDTAK)
+            }
+        }
+
+        return tilFattetVedtak()
+    }
 
     override fun tilFattetVedtak(): Revurdering {
         if (!erFyltUt()) {

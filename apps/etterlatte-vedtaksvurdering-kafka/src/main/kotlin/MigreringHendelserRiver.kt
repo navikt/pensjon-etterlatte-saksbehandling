@@ -1,5 +1,7 @@
 package no.nav.etterlatte
 
+import no.nav.etterlatte.libs.common.rapidsandrivers.TEKNISK_TID_KEY
+import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser.VEDTAK
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -34,7 +36,14 @@ internal class MigreringHendelserRiver(
 
         withFeilhaandtering(packet, context, VEDTAK) {
             val respons = vedtak.opprettVedtakFattOgAttester(packet.sakId, behandlingId)
-            logger.info("Opprettet vedtak ${respons.vedtakId} for migrert behandling: $behandlingId")
+            logger.info("Opprettet vedtak ${respons.vedtak.vedtakId} for migrert behandling: $behandlingId")
+            with(respons.rapidInfo1) {
+                packet.eventName = vedtakhendelse.name
+                packet[TEKNISK_TID_KEY] = tekniskTid
+                packet["vedtak"] = vedtak
+                extraParams.forEach { (k, v) -> packet[k] = v }
+                context.publish(behandlingId.toString(), packet.toJson())
+            }
         }
     }
 }

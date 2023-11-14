@@ -75,6 +75,8 @@ data class MigreringOverstyringDto(
     val detaljertBeregnetTrygdetidResultat: DetaljertBeregnetTrygdetidResultat,
 )
 
+data class StatusOppdatertDto(val statusOppdatert: Boolean)
+
 data class DetaljertBeregnetTrygdetidResultat(
     val faktiskTrygdetidNorge: FaktiskTrygdetid?,
     val faktiskTrygdetidTeoretisk: FaktiskTrygdetid?,

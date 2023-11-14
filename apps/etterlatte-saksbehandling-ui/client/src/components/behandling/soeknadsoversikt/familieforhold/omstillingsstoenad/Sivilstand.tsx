@@ -57,7 +57,7 @@ export const Sivilstand = ({ familieforhold, avdoed }: Props) => {
                   </Table.DataCell>
                   <Table.DataCell>
                     {ss.relatertVedSiviltilstand === avdoed.foedselsnummer
-                      ? format(new Date(avdoed.doedsdato), DatoFormat.DAG_MAANED_AAR)
+                      ? format(new Date(avdoed.doedsdato!), DatoFormat.DAG_MAANED_AAR)
                       : ''}
                   </Table.DataCell>
                 </Table.Row>

@@ -8,12 +8,12 @@ import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.request.url
 import io.ktor.http.HttpStatusCode
+import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
+import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.vedtak.VedtakSamordningDto
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
-
-class VedtakvurderingKlientException(message: String, cause: Throwable) :
-    Exception(message, cause)
 
 class VedtaksvurderingKlient(config: Config, private val httpClient: HttpClient) {
     private val logger = LoggerFactory.getLogger(VedtaksvurderingKlient::class.java)
@@ -22,20 +22,23 @@ class VedtaksvurderingKlient(config: Config, private val httpClient: HttpClient)
 
     suspend fun hentVedtak(
         vedtakId: Long,
-        organisasjonsnummer: String,
+        callerContext: CallerContext,
     ): VedtakSamordningDto {
         logger.info("Henter vedtaksvurdering med vedtakId=$vedtakId")
 
         return try {
             httpClient.get {
                 url("$vedtaksvurderingUrl/$vedtakId")
-                header("orgnr", organisasjonsnummer)
+                if (callerContext is MaskinportenTpContext) {
+                    header("orgnr", callerContext.organisasjonsnr)
+                }
             }.body()
         } catch (e: ClientRequestException) {
+            logger.error("Det oppstod feil i kall til vedtak API", e)
             when (e.response.status) {
-                HttpStatusCode.Unauthorized -> throw VedtakvurderingKlientException("Vedtak: Ikke tilgang", e)
-                HttpStatusCode.BadRequest -> throw VedtakvurderingKlientException("Vedtak: Ugyldig forespørsel", e)
-                HttpStatusCode.NotFound -> throw VedtakvurderingKlientException("Vedtak: Ressurs ikke funnet", e)
+                HttpStatusCode.Unauthorized -> throw VedtakvurderingManglendeTilgangException("Vedtak: Ikke tilgang")
+                HttpStatusCode.BadRequest -> throw VedtakvurderingUgyldigForesporselException("Vedtak: Ugyldig forespørsel")
+                HttpStatusCode.NotFound -> throw VedtakvurderingIkkeFunnetException("Vedtak: Ressurs ikke funnet")
                 else -> throw e
             }
         }
@@ -44,7 +47,7 @@ class VedtaksvurderingKlient(config: Config, private val httpClient: HttpClient)
     suspend fun hentVedtaksliste(
         virkFom: LocalDate,
         fnr: String,
-        organisasjonsnummer: String,
+        callerContext: CallerContext,
     ): List<VedtakSamordningDto> {
         logger.info("Henter vedtaksliste, virkFom=$virkFom")
 
@@ -52,15 +55,36 @@ class VedtaksvurderingKlient(config: Config, private val httpClient: HttpClient)
             httpClient.get {
                 url("$vedtaksvurderingUrl?virkFom=$virkFom")
                 header("fnr", fnr)
-                header("orgnr", organisasjonsnummer)
+                if (callerContext is MaskinportenTpContext) {
+                    header("orgnr", callerContext.organisasjonsnr)
+                }
             }.body()
         } catch (e: ClientRequestException) {
+            logger.error("Det oppstod feil i kall til vedtaksliste API", e)
             when (e.response.status) {
-                HttpStatusCode.Unauthorized -> throw VedtakvurderingKlientException("Vedtak: Ikke tilgang", e)
-                HttpStatusCode.BadRequest -> throw VedtakvurderingKlientException("Vedtak: Ugyldig forespørsel", e)
-                HttpStatusCode.NotFound -> throw VedtakvurderingKlientException("Vedtak: Ressurs ikke funnet", e)
+                HttpStatusCode.Unauthorized -> throw VedtakvurderingManglendeTilgangException("Vedtak: Ikke tilgang")
+                HttpStatusCode.BadRequest -> throw VedtakvurderingUgyldigForesporselException("Vedtak: Ugyldig forespørsel")
+                HttpStatusCode.NotFound -> throw VedtakvurderingIkkeFunnetException("Vedtak: Ressurs ikke funnet")
                 else -> throw e
             }
         }
     }
 }
+
+class VedtakvurderingManglendeTilgangException(detail: String) : IkkeTillattException(
+    code = "020-VEDTAK-TILGANG",
+    detail = detail,
+    meta = getMeta(),
+)
+
+class VedtakvurderingUgyldigForesporselException(detail: String) : UgyldigForespoerselException(
+    code = "020-VEDTAK-FORESPOERSEL",
+    detail = detail,
+    meta = getMeta(),
+)
+
+class VedtakvurderingIkkeFunnetException(detail: String) : IkkeFunnetException(
+    code = "020-VEDTAK-IKKE-FUNNET",
+    detail = detail,
+    meta = getMeta(),
+)

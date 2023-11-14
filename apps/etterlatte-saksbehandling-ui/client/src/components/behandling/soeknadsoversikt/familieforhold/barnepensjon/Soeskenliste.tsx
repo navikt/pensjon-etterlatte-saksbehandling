@@ -1,6 +1,6 @@
 import { ChildEyesIcon } from '@navikt/aksel-icons'
 import { CopyButton, Heading, Link, Table } from '@navikt/ds-react'
-import { IFamilieforhold, IPdlPerson } from '~shared/types/Person'
+import { hentLevendeSoeskenFraAvdoedeForSoeker, IFamilieforhold, IPdlPerson } from '~shared/types/Person'
 import styled from 'styled-components'
 import { IAdresse } from '~shared/types/IAdresse'
 import { differenceInYears, format, parse } from 'date-fns'
@@ -17,11 +17,8 @@ type Props = {
   soekerFnr: string
 }
 
-export const BarneListe = ({ familieforhold, soekerFnr }: Props) => {
-  const barneListe = (familieforhold.avdoede?.opplysning.avdoedesBarn ?? []).filter(
-    (person) => person.foedselsnummer !== soekerFnr
-  )
-
+export const Soeskenliste = ({ familieforhold, soekerFnr }: Props) => {
+  const barneListeIngenDoedeSoesken = hentLevendeSoeskenFraAvdoedeForSoeker(familieforhold.avdoede, soekerFnr)
   return (
     <div>
       <FlexHeader>
@@ -44,8 +41,8 @@ export const BarneListe = ({ familieforhold, soekerFnr }: Props) => {
             </Table.Row>
           </Table.Header>
           <Table.Body>
-            {barneListe.length ? (
-              barneListe.map((barn, i) => {
+            {barneListeIngenDoedeSoesken.length ? (
+              barneListeIngenDoedeSoesken.map((barn, i) => {
                 return <BarnRow key={i + barn.foedselsnummer} barn={barn} familieforhold={familieforhold} />
               })
             ) : (
@@ -66,7 +63,7 @@ const BarnRow = ({ barn, familieforhold }: { barn: IPdlPerson; familieforhold: I
   const foedselsdato = parse(String(barn.foedselsdato), DatoFormat.AAR_MAANED_DAG, new Date())
   const alder = differenceInYears(new Date(), foedselsdato)
 
-  const navn = `${barn.fornavn} ${barn.etternavn} (${alder} år)`
+  const navnMedAlder = `${barn.fornavn} ${barn.etternavn} (${alder} år)`
 
   const aktivAdresse: IAdresse | undefined = barn.bostedsadresse?.find((adresse: IAdresse) => adresse.aktiv)
   const adresse = `${aktivAdresse?.adresseLinje1}, ${aktivAdresse?.postnr ?? ''} ${aktivAdresse?.poststed ?? ''}`
@@ -83,7 +80,7 @@ const BarnRow = ({ barn, familieforhold }: { barn: IPdlPerson; familieforhold: I
 
   return (
     <Table.Row>
-      <Table.DataCell>{navn}</Table.DataCell>
+      <Table.DataCell>{navnMedAlder}</Table.DataCell>
       <Table.DataCell>
         <FnrWrapper>
           <Link href={`/person/${barn.foedselsnummer}`} target="_blank" rel="noreferrer noopener">

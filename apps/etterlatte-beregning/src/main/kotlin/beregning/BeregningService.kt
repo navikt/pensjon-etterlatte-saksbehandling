@@ -6,6 +6,8 @@ import no.nav.etterlatte.klienter.TrygdetidKlient
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.girOpphoer
+import no.nav.etterlatte.libs.common.beregning.OverstyrBeregningDTO
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
 import java.util.UUID
@@ -15,6 +17,7 @@ class BeregningService(
     private val behandlingKlient: BehandlingKlient,
     private val beregnBarnepensjonService: BeregnBarnepensjonService,
     private val beregnOmstillingsstoenadService: BeregnOmstillingsstoenadService,
+    private val beregnOverstyrBeregningService: BeregnOverstyrBeregningService,
     private val beregningsGrunnlagService: BeregningsGrunnlagService,
     private val trygdetidKlient: TrygdetidKlient,
 ) {
@@ -38,10 +41,20 @@ class BeregningService(
         if (kanBeregneYtelse) {
             val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
 
+            val overstyrBeregning = hentOverstyrBeregning(behandlingId, brukerTokenInfo)
+
             val beregning =
-                when (behandling.sakType) {
-                    SakType.BARNEPENSJON -> beregnBarnepensjonService.beregn(behandling, brukerTokenInfo)
-                    SakType.OMSTILLINGSSTOENAD -> beregnOmstillingsstoenadService.beregn(behandling, brukerTokenInfo)
+                if (overstyrBeregning != null) {
+                    beregnOverstyrBeregningService.beregn(behandling, overstyrBeregning, brukerTokenInfo)
+                } else {
+                    when (behandling.sakType) {
+                        SakType.BARNEPENSJON -> beregnBarnepensjonService.beregn(behandling, brukerTokenInfo)
+                        SakType.OMSTILLINGSSTOENAD ->
+                            beregnOmstillingsstoenadService.beregn(
+                                behandling,
+                                brukerTokenInfo,
+                            )
+                    }
                 }
 
             val lagretBeregning = beregningRepository.lagreEllerOppdaterBeregning(beregning)
@@ -80,6 +93,23 @@ class BeregningService(
         val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
 
         return beregningRepository.hentOverstyrBeregning(behandling.sak)
+    }
+
+    suspend fun opprettOverstyrBeregning(
+        behandlingId: UUID,
+        overstyrBeregning: OverstyrBeregningDTO,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): OverstyrBeregning? {
+        val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
+
+        return hentOverstyrBeregning(behandlingId, brukerTokenInfo).takeIf { it != null }
+            ?: beregningRepository.opprettOverstyrBeregning(
+                OverstyrBeregning(
+                    behandling.sak,
+                    overstyrBeregning.beskrivelse,
+                    Tidspunkt.now(),
+                ),
+            )
     }
 
     private fun hentBeregning(behandlingId: UUID): Beregning? {

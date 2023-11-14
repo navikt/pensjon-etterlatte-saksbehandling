@@ -1,4 +1,4 @@
-import { Heading, Link, Table, Tag } from '@navikt/ds-react'
+import { Heading, Link, Table } from '@navikt/ds-react'
 import { AarsaksTyper, BehandlingOgRevurderingsAarsakerType, IBehandlingsammendrag } from './typer'
 import {
   formaterBehandlingstype,
@@ -6,11 +6,10 @@ import {
   formaterStringDato,
   formaterVedtakType,
 } from '~utils/formattering'
-import { IBehandlingStatus, IBehandlingsType, INasjonalitetType } from '~shared/types/IDetaljertBehandling'
+import { IBehandlingStatus, IBehandlingsType } from '~shared/types/IDetaljertBehandling'
 import React, { useEffect } from 'react'
 import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
 import { hentVedtakSammendrag } from '~shared/api/vedtaksvurdering'
-import { tagColors } from '~shared/Tags'
 import styled from 'styled-components'
 import { isFailure, isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
 import Spinner from '~shared/Spinner'
@@ -81,7 +80,6 @@ export const Behandlingsliste = ({ behandlinger }: { behandlinger: IBehandlingsa
           <Table.Row>
             <Table.HeaderCell>Reg. dato</Table.HeaderCell>
             <Table.HeaderCell>Behandlingstype</Table.HeaderCell>
-            <Table.HeaderCell>Utenlandstilsnitt</Table.HeaderCell>
             <Table.HeaderCell>Årsak</Table.HeaderCell>
             <Table.HeaderCell>Status</Table.HeaderCell>
             <Table.HeaderCell>Virkningstidspunkt</Table.HeaderCell>
@@ -96,11 +94,6 @@ export const Behandlingsliste = ({ behandlinger }: { behandlinger: IBehandlingsa
               <Table.DataCell>{formaterStringDato(behandling.behandlingOpprettet)}</Table.DataCell>
               <Table.DataCell>
                 <BehandlingstypeWrapper>{formaterBehandlingstype(behandling.behandlingType)}</BehandlingstypeWrapper>
-              </Table.DataCell>
-              <Table.DataCell>
-                <Tag variant={tagColors[behandling.utenlandstilsnitt?.type || INasjonalitetType.NASJONAL]} size="small">
-                  {formaterEnumTilLesbarString(behandling.utenlandstilsnitt?.type || INasjonalitetType.NASJONAL)}
-                </Tag>
               </Table.DataCell>
               <Table.DataCell>{mapAarsak(behandling.aarsak)}</Table.DataCell>
               <Table.DataCell>{formaterEnumTilLesbarString(endringStatusNavn(behandling.status))}</Table.DataCell>

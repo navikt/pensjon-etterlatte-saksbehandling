@@ -7,7 +7,6 @@ import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
-import no.nav.etterlatte.libs.common.behandling.Utenlandstilsnitt
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -23,7 +22,6 @@ data class AutomatiskRevurdering(
     override val status: BehandlingStatus,
     override val kommerBarnetTilgode: KommerBarnetTilgode?,
     override val virkningstidspunkt: Virkningstidspunkt?,
-    override val utenlandstilsnitt: Utenlandstilsnitt?,
     override val boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet?,
     override val revurderingsaarsak: Revurderingaarsak,
     override val revurderingInfo: RevurderingInfoMedBegrunnelse?,
@@ -37,7 +35,6 @@ data class AutomatiskRevurdering(
         status = status,
         kommerBarnetTilgode = kommerBarnetTilgode,
         virkningstidspunkt = virkningstidspunkt,
-        utenlandstilsnitt = utenlandstilsnitt,
         boddEllerArbeidetUtlandet = boddEllerArbeidetUtlandet,
         revurderingsaarsak = revurderingsaarsak,
         revurderingInfo = revurderingInfo,
@@ -56,7 +53,7 @@ data class AutomatiskRevurdering(
 
     override fun tilTrygdetidOppdatert() = endreTilStatus(BehandlingStatus.TRYGDETID_OPPDATERT)
 
-    override fun tilBeregnet(fastTrygdetid: Boolean) = endreTilStatus(BehandlingStatus.BEREGNET)
+    override fun tilBeregnet() = endreTilStatus(BehandlingStatus.BEREGNET)
 
     override fun tilAvkortet() = endreTilStatus(BehandlingStatus.AVKORTET)
 

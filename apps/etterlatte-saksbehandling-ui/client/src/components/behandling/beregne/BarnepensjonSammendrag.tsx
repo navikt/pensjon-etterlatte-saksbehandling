@@ -5,19 +5,12 @@ import { formaterDato, formaterStringDato } from '~utils/formattering'
 import { Beregning } from '~shared/types/Beregning'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { Barnepensjonberegningssammendrag } from '~components/behandling/beregne/Barnepensjonberegningssammendrag'
-import { IProrataBroek } from '~shared/api/trygdetid'
+import { ProrataBroek } from '~components/behandling/beregne/ProrataBroek'
+import { hentLevendeSoeskenFraAvdoedeForSoeker } from '~shared/types/Person'
 
 interface Props {
   behandling: IDetaljertBehandling
   beregning: Beregning
-}
-
-const ProrataBroek = ({ broek }: { broek: IProrataBroek }) => {
-  return (
-    <>
-      {broek.teller} / {broek.nevner}
-    </>
-  )
 }
 
 const BenyttetTrygdetid = ({
@@ -45,13 +38,18 @@ const BenyttetTrygdetid = ({
 }
 
 export const BarnepensjonSammendrag = ({ behandling, beregning }: Props) => {
+  if (!behandling.familieforhold) {
+    return null
+  }
   const beregningsperioder = [...beregning.beregningsperioder].sort((a, b) =>
     compareDesc(new Date(a.datoFOM), new Date(b.datoFOM))
   )
   const soeker = behandling.søker
-  const soesken = behandling.familieforhold?.avdoede.opplysning.avdoedesBarn?.filter(
-    (barn) => barn.foedselsnummer !== soeker?.foedselsnummer
+  const soesken = hentLevendeSoeskenFraAvdoedeForSoeker(
+    behandling.familieforhold.avdoede,
+    soeker?.foedselsnummer as string
   )
+
   return (
     <TableWrapper>
       <Heading spacing size="small" level="2">

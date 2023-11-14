@@ -1,6 +1,7 @@
 package no.nav.etterlatte.statistikk.database
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.tidspunkt.setTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toNorskTidspunkt
@@ -15,6 +16,7 @@ import java.sql.Date
 import java.sql.PreparedStatement
 import java.sql.ResultSet
 import java.sql.Statement
+import java.sql.Types
 import java.time.LocalTime
 import java.time.YearMonth
 import java.util.UUID
@@ -36,7 +38,8 @@ class StoenadRepository(private val datasource: DataSource) {
                 SELECT id, fnrSoeker, fnrForeldre, 
                     fnrSoesken, anvendtTrygdetid, nettoYtelse, beregningType, anvendtSats, behandlingId, sakId, 
                     sakNummer, tekniskTid, sakYtelse, versjon, saksbehandler, attestant, vedtakLoependeFom, 
-                    vedtakLoependeTom, beregning, avkorting, vedtakType, sak_utland, virkningstidspunkt, utbetalingsdato
+                    vedtakLoependeTom, beregning, avkorting, vedtakType, sak_utland, virkningstidspunkt, utbetalingsdato,
+                    kilde, pesysid 
                 FROM stoenad
                 """.trimIndent(),
             ).executeQuery().toList {
@@ -70,8 +73,8 @@ class StoenadRepository(private val datasource: DataSource) {
                     fnrSoeker, fnrForeldre, fnrSoesken, anvendtTrygdetid, nettoYtelse, beregningType, anvendtSats, 
                     behandlingId, sakId, tekniskTid, sakYtelse, versjon, saksbehandler, attestant, 
                     vedtakLoependeFom, vedtakLoependeTom, statistikkMaaned, sak_utland,
-                    virkningstidspunkt, utbetalingsdato, avkortingsbeloep, aarsinntekt
-                ) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    virkningstidspunkt, utbetalingsdato, avkortingsbeloep, aarsinntekt, kilde, pesysid 
+                ) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """.trimIndent(),
             ).apply {
                 setString(1, maanedStatistikkRad.fnrSoeker)
@@ -96,6 +99,8 @@ class StoenadRepository(private val datasource: DataSource) {
                 setDate(20, maanedStatistikkRad.utbetalingsdato?.let { Date.valueOf(it) })
                 setString(21, maanedStatistikkRad.avkortingsbeloep)
                 setString(22, maanedStatistikkRad.aarsinntekt)
+                setString(23, maanedStatistikkRad.kilde.name)
+                maanedStatistikkRad.pesysId?.let { setLong(24, it) } ?: setNull(24, Types.BIGINT)
             }.executeUpdate()
         }
     }
@@ -109,8 +114,8 @@ class StoenadRepository(private val datasource: DataSource) {
                         fnrSoeker, fnrForeldre, fnrSoesken, anvendtTrygdetid, nettoYtelse, beregningType, anvendtSats, 
                         behandlingId, sakId, sakNummer, tekniskTid, sakYtelse, versjon, saksbehandler, attestant, 
                         vedtakLoependeFom, vedtakLoependeTom, beregning, avkorting, vedtakType, sak_utland,
-                         virkningstidspunkt, utbetalingsdato
-                    ) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                         virkningstidspunkt, utbetalingsdato, kilde, pesysid 
+                    ) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     """.trimIndent(),
                     Statement.RETURN_GENERATED_KEYS,
                 ).apply {
@@ -241,6 +246,8 @@ private fun PreparedStatement.setStoenadRad(stoenadsrad: StoenadRad): PreparedSt
         setString(21, stoenadsrad.sakUtland?.toString())
         setDate(22, Date.valueOf(stoenadsrad.virkningstidspunkt?.atDay(1)))
         setDate(23, stoenadsrad.utbetalingsdato?.let { Date.valueOf(it) })
+        setString(24, stoenadsrad.kilde.name)
+        stoenadsrad.pesysId?.let { setLong(25, it) } ?: setNull(25, Types.BIGINT)
     }
 
 private fun ResultSet.asStoenadRad(): StoenadRad =
@@ -269,4 +276,6 @@ private fun ResultSet.asStoenadRad(): StoenadRad =
         sakUtland = getString("sak_utland")?.let { enumValueOf<SakUtland>(it) },
         virkningstidspunkt = getDate("virkningstidspunkt")?.toLocalDate()?.let { YearMonth.of(it.year, it.monthValue) },
         utbetalingsdato = getDate("utbetalingsdato")?.toLocalDate(),
+        kilde = getString("kilde").let { Vedtaksloesning.valueOf(it) },
+        pesysId = getLong("pesysid"),
     )

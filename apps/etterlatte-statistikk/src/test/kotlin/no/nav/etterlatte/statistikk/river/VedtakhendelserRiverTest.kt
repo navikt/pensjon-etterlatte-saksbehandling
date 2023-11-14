@@ -2,6 +2,7 @@ package no.nav.etterlatte.statistikk.river
 
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJson
@@ -59,6 +60,8 @@ internal class VedtakhendelserRiverTest {
             sakUtland = SakUtland.NASJONAL,
             virkningstidspunkt = YearMonth.of(2023, 6),
             utbetalingsdato = LocalDate.of(2023, 7, 20),
+            kilde = Vedtaksloesning.GJENNY,
+            pesysId = 123L,
         )
 
     @Test

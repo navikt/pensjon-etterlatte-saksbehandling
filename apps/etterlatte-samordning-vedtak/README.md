@@ -64,6 +64,37 @@ Det må foreligge et tjenestepensjonsforhold i Tjenestepensjonsregisteret som gj
 | dev   | https://etterlatte-samordning-vedtak.ekstern.dev.nav.no |
 | prod  | https://etterlatte-samordning-vedtak.nav.no             |    
 
+## Feilkoder
+
+| Kode                    | HTTP-statuskode | Beskrivelse                                              |
+|-------------------------|-----------------|----------------------------------------------------------|
+| GE-MASKINPORTEN-SCOPE   | 401             | Manglende/feil scope                                     |
+| 001-TPNR-MANGLER        | 400             | Ikke angitt header med gjeldende ordningsnummer          |
+| 002-FNR-MANGLER         | 400             | Ikke angitt header med fødselsnummer det skal spørres på |
+| 003-VIRKFOM-MANGLER     | 400             | Ikke angitt virkFom som query parameter                  |
+| 004-FEIL_SAKSTYPE       | 400             | Etterspurt vedtak som ikke angår omstillingsstønad       |
+| 010-TP-TILGANG          | 403             | Ikke tilgang til TP/etterspurt data                      |
+| 011-TP-FORESPOERSEL     | 400             | Feil ved spørring mot TP                                 |
+| 012-TP-IKKE-FUNNET      | 404             | Kunne ikke finne TP-ressurs                              |
+| 020-VEDTAK-TILGANG      | 403             | Ikke tilgang til vedtak/etterspurt data                  |
+| 021-VEDTAK-FORESPOERSEL | 400             | Feil ved spørring mot vedtak                             |
+| 022-VEDTAK-IKKE-FUNNET  | 404             | Kunne ikke finne vedtaksressurs                          |
+
+### Eksempel-payload ved feil
+
+```
+{
+    "status": 401,
+    "detail": "Har ikke påkrevd scope",
+    "code": "GE-MASKINPORTEN-SCOPE",
+    "meta": {
+        "correlation-id": "30e9a443-f620-4c9e-9547-1bd77d4c86ca",
+        "tidspunkt": "2023-11-06T09:19:35.748618Z"
+    }
+}
+```
+
+
 ## Kom i gang
 
 ### Hvordan kjøre lokalt mot dev-gcp

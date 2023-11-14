@@ -1,5 +1,6 @@
 package no.nav.etterlatte
 
+import io.ktor.server.application.install
 import io.ktor.server.cio.CIO
 import io.ktor.server.config.HoconApplicationConfig
 import io.ktor.server.engine.applicationEngineEnvironment
@@ -11,7 +12,8 @@ import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.libs.ktor.setReady
 import no.nav.etterlatte.samordning.ApplicationContext
 import no.nav.etterlatte.samordning.vedtak.samordningVedtakRoute
-import no.nav.security.token.support.core.context.TokenValidationContext
+import no.nav.etterlatte.samordning.vedtak.serverRequestLoggerPlugin
+import no.nav.etterlatte.samordning.vedtak.userIdMdcPlugin
 import org.slf4j.Logger
 
 val sikkerLogg: Logger = sikkerlogger()
@@ -36,9 +38,13 @@ class Server(applicationContext: ApplicationContext) {
                         restModule(
                             sikkerLogg,
                             withMetrics = true,
-                            additionalValidation = validateMaskinportenScope(),
                         ) {
-                            samordningVedtakRoute(samordningVedtakService = applicationContext.samordningVedtakService)
+                            samordningVedtakRoute(
+                                samordningVedtakService = applicationContext.samordningVedtakService,
+                                config = applicationContext.config,
+                            )
+                            install(userIdMdcPlugin)
+                            install(serverRequestLoggerPlugin)
                         }
                     }
                     connector { port = applicationContext.httpPort }
@@ -46,18 +52,4 @@ class Server(applicationContext: ApplicationContext) {
         )
 
     fun run() = setReady().also { engine.start(true) }
-}
-
-fun validateMaskinportenScope(): (TokenValidationContext) -> Boolean {
-    val scopeValidation: (TokenValidationContext) -> Boolean = { ctx ->
-        val scopes =
-            ctx.getClaims("maskinporten")
-                ?.getStringClaim("scope")
-                ?.split(" ")
-                ?: emptyList()
-
-        val allowedScopes = setOf("nav:etterlatteytelser:vedtaksinformasjon.read")
-        scopes.any(allowedScopes::contains)
-    }
-    return scopeValidation
 }

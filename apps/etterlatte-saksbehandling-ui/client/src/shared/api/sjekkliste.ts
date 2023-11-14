@@ -11,6 +11,7 @@ export const oppdaterSjekkliste = async (sjekkliste: ISjekkliste) =>
     kommentar: sjekkliste.kommentar,
     adresseForBrev: sjekkliste.adresseForBrev,
     kontonrRegistrert: sjekkliste.kontonrRegistrert,
+    onsketSkattetrekk: sjekkliste.onsketSkattetrekk,
     bekreftet: sjekkliste.bekreftet,
     versjon: sjekkliste.versjon,
   })

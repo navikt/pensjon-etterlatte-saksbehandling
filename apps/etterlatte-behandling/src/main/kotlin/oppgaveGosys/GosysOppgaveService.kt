@@ -64,15 +64,17 @@ class GosysOppgaveServiceImpl(
                 pdlKlient.hentFolkeregisterIdenterForAktoerIdBolk(aktoerIds)
             }
 
-        return gosysOppgaver.oppgaver.map { it.fraGosysOppgaveTilNy(fnrByAktoerId) }
+        return gosysOppgaver.oppgaver
+            .filter { it.aktoerId != null }
+            .map { it.fraGosysOppgaveTilNy(fnrByAktoerId) }
     }
 
     override suspend fun hentOppgave(
         id: Long,
         brukerTokenInfo: BrukerTokenInfo,
-    ): GosysOppgave? {
+    ): GosysOppgave {
         return cache.getIfPresent(id) ?: gosysOppgaveKlient.hentOppgave(id, brukerTokenInfo).let {
-            it.fraGosysOppgaveTilNy(pdlKlient.hentFolkeregisterIdenterForAktoerIdBolk(setOf(it.aktoerId)))
+            it.fraGosysOppgaveTilNy(pdlKlient.hentFolkeregisterIdenterForAktoerIdBolk(setOf(it.aktoerId!!)))
         }.also { cache.put(id, it) }
     }
 

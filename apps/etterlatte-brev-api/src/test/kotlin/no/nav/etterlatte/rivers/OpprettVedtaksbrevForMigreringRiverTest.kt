@@ -56,14 +56,14 @@ internal class OpprettVedtaksbrevForMigreringRiverTest {
         val brev = opprettBrev()
 
         coEvery { vedtaksbrevService.opprettVedtaksbrev(any(), behandlingId, any()) } returns brev
-        coEvery { vedtaksbrevService.genererPdf(brev.id, any()) } returns mockk<Pdf>()
-        coEvery { vedtaksbrevService.ferdigstillVedtaksbrev(brev.behandlingId!!, any()) } just Runs
+        coEvery { vedtaksbrevService.genererPdf(brev.id, any(), true) } returns mockk<Pdf>()
+        coEvery { vedtaksbrevService.ferdigstillVedtaksbrev(brev.behandlingId!!, any(), true) } just Runs
 
         val inspektoer = testRapid.apply { sendTestMessage(melding.toJson()) }.inspektør
 
         coVerify(exactly = 1) { vedtaksbrevService.opprettVedtaksbrev(any(), behandlingId, any()) }
-        coVerify(exactly = 1) { vedtaksbrevService.genererPdf(brev.id, any()) }
-        coVerify(exactly = 1) { vedtaksbrevService.ferdigstillVedtaksbrev(brev.behandlingId!!, any()) }
+        coVerify(exactly = 1) { vedtaksbrevService.genererPdf(brev.id, any(), true) }
+        coVerify(exactly = 1) { vedtaksbrevService.ferdigstillVedtaksbrev(brev.behandlingId!!, any(), true) }
 
         val meldingSendt = inspektoer.message(0)
         assertEquals(BrevEventTypes.FERDIGSTILT.name, meldingSendt.get(EVENT_NAME_KEY).asText())
@@ -92,6 +92,7 @@ internal class OpprettVedtaksbrevForMigreringRiverTest {
             BrevProsessType.AUTOMATISK,
             "fnr",
             Status.FERDIGSTILT,
+            Tidspunkt.now(),
             mottaker = mockk(),
         )
 

@@ -112,3 +112,12 @@ export function feilIKomplettePerioderOverIntervallInstitusjonsopphold(
 
   return [...feil]
 }
+
+export const FEIL_I_PERIODE = [
+  'TOM_FOER_FOM',
+  'PERIODE_OVERLAPPER_MED_NESTE',
+  'HULL_ETTER_PERIODE',
+  'INGEN_PERIODER',
+  'DEKKER_IKKE_START_AV_INTERVALL',
+  'DEKKER_IKKE_SLUTT_AV_INTERVALL',
+] as const

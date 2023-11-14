@@ -112,38 +112,41 @@ const SoeskenjusteringPeriode = (props: SoeskenjusteringPeriodeProps) => {
     >
       <UstiletListe>
         {fields.map((item, k) => {
+          const soeskenFinnes = fnrTilSoesken[item.foedselsnummer]
           return (
-            <li key={item.id}>
-              <SoeskenContainer>
-                <Soesken person={fnrTilSoesken[item.foedselsnummer]} familieforhold={behandling.familieforhold!} />
-                <Controller
-                  name={`soeskenMedIBeregning.${index}.data.${k}`}
-                  control={control}
-                  render={(soesken) =>
-                    behandles ? (
-                      <RadioGroupRow
-                        legend="Oppdras sammen"
-                        value={soesken.field.value?.skalBrukes ?? null}
-                        onChange={(value) => {
-                          soesken.field.onChange({
-                            foedselsnummer: item.foedselsnummer,
-                            skalBrukes: value,
-                          })
-                        }}
-                      >
-                        <Radio value={true}>Ja</Radio>
-                        <Radio value={false}>Nei</Radio>
-                      </RadioGroupRow>
-                    ) : (
-                      <OppdrasSammenLes>
-                        <strong>Oppdras sammen</strong>
-                        <label>{soesken.field.value?.skalBrukes ? 'Ja' : 'Nei'}</label>
-                      </OppdrasSammenLes>
-                    )
-                  }
-                />
-              </SoeskenContainer>
-            </li>
+            soeskenFinnes && (
+              <li key={item.id}>
+                <SoeskenContainer>
+                  <Soesken person={fnrTilSoesken[item.foedselsnummer]} familieforhold={behandling.familieforhold!} />
+                  <Controller
+                    name={`soeskenMedIBeregning.${index}.data.${k}`}
+                    control={control}
+                    render={(soesken) =>
+                      behandles ? (
+                        <RadioGroupRow
+                          legend="Oppdras sammen"
+                          value={soesken.field.value?.skalBrukes ?? null}
+                          onChange={(value) => {
+                            soesken.field.onChange({
+                              foedselsnummer: item.foedselsnummer,
+                              skalBrukes: value,
+                            })
+                          }}
+                        >
+                          <Radio value={true}>Ja</Radio>
+                          <Radio value={false}>Nei</Radio>
+                        </RadioGroupRow>
+                      ) : (
+                        <OppdrasSammenLes>
+                          <strong>Oppdras sammen</strong>
+                          <label>{soesken.field.value?.skalBrukes ? 'Ja' : 'Nei'}</label>
+                        </OppdrasSammenLes>
+                      )
+                    }
+                  />
+                </SoeskenContainer>
+              </li>
+            )
           )
         })}
       </UstiletListe>

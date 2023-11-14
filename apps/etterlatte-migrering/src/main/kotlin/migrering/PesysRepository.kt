@@ -126,7 +126,7 @@ internal class PesysRepository(private val dataSource: DataSource) : Transaction
                 Feilkjoering.FEILMELDING to feil,
                 Feilkjoering.FEILENDE_STEG to feilendeSteg,
             ),
-            "Lagra feilkjøringsdata for $request.pesysId.id",
+            "Lagra feilkjøringsdata for $pesysId",
         )
     }
 

@@ -10,7 +10,6 @@ import no.nav.etterlatte.brev.behandling.ForenkletVedtak
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.behandling.PersonerISak
 import no.nav.etterlatte.brev.behandling.Trygdetid
-import no.nav.etterlatte.brev.behandling.Trygdetidsperiode
 import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
 import no.nav.etterlatte.brev.behandling.hentUtbetaltBeloep
 import no.nav.etterlatte.brev.behandling.mapAvdoed
@@ -20,6 +19,7 @@ import no.nav.etterlatte.brev.behandling.mapSpraak
 import no.nav.etterlatte.brev.behandling.mapVerge
 import no.nav.etterlatte.brev.behandlingklient.BehandlingKlient
 import no.nav.etterlatte.brev.model.EtterbetalingDTO
+import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
@@ -36,7 +36,7 @@ class BrevdataFacade(
     private val grunnlagKlient: GrunnlagKlient,
     private val beregningKlient: BeregningKlient,
     private val behandlingKlient: BehandlingKlient,
-    private val trygdetidKlient: TrygdetidKlient,
+    private val trygdetidService: TrygdetidService,
 ) {
     suspend fun hentEtterbetaling(
         behandlingId: UUID,
@@ -87,6 +87,15 @@ class BrevdataFacade(
             val attestantIdent =
                 vedtak.vedtakFattet?.let { vedtak.attestasjon?.attestant ?: innloggetSaksbehandlerIdent }
 
+            val systemkilde =
+                if (vedtak.type == VedtakType.INNVILGELSE) {
+                    // Dette kan være en pesys-sak
+                    behandlingKlient.hentKilde(behandlingId, brukerTokenInfo)
+                } else {
+                    // alle andre vedtak kommer fra Gjenny
+                    Vedtaksloesning.GJENNY
+                }
+
             when (vedtak.type) {
                 VedtakType.INNVILGELSE,
                 VedtakType.OPPHOER,
@@ -95,9 +104,9 @@ class BrevdataFacade(
                 ->
                     (vedtak.innhold as VedtakInnholdDto.VedtakBehandlingDto).let { vedtakInnhold ->
                         GenerellBrevData(
-                            sak,
-                            personerISak,
-                            behandlingId,
+                            sak = sak,
+                            personerISak = personerISak,
+                            behandlingId = behandlingId,
                             forenkletVedtak =
                                 ForenkletVedtak(
                                     vedtak.id,
@@ -110,16 +119,17 @@ class BrevdataFacade(
                                     virkningstidspunkt = vedtakInnhold.virkningstidspunkt,
                                     revurderingInfo = vedtakInnhold.behandling.revurderingInfo,
                                 ),
-                            grunnlag.mapSpraak(),
+                            spraak = grunnlag.mapSpraak(),
                             revurderingsaarsak = vedtakInnhold.behandling.revurderingsaarsak,
+                            systemkilde = systemkilde,
                         )
                     }
 
                 VedtakType.TILBAKEKREVING ->
                     GenerellBrevData(
-                        sak,
-                        personerISak,
-                        behandlingId,
+                        sak = sak,
+                        personerISak = personerISak,
+                        behandlingId = behandlingId,
                         forenkletVedtak =
                             ForenkletVedtak(
                                 vedtak.id,
@@ -134,7 +144,8 @@ class BrevdataFacade(
                                         (vedtak.innhold as VedtakInnholdDto.VedtakTilbakekrevingDto).tilbakekreving.toJson(),
                                     ),
                             ),
-                        grunnlag.mapSpraak(),
+                        spraak = grunnlag.mapSpraak(),
+                        systemkilde = systemkilde,
                     )
             }
         }
@@ -212,26 +223,8 @@ class BrevdataFacade(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): Trygdetid? {
-        val trygdetidMedGrunnlag = trygdetidKlient.hentTrygdetid(behandlingId, brukerTokenInfo) ?: return null
+        val beregning = beregningKlient.hentBeregning(behandlingId, brukerTokenInfo)
 
-        val trygdetidsperioder =
-            trygdetidMedGrunnlag.trygdetidGrunnlag.map {
-                Trygdetidsperiode(
-                    datoFOM = it.periodeFra,
-                    datoTOM = it.periodeTil,
-                    land = it.bosted,
-                    opptjeningsperiode = it.beregnet?.aar.toString(),
-                )
-            }
-
-        val beregnetTrygdetid = trygdetidMedGrunnlag.beregnetTrygdetid?.resultat
-        val samlaTrygdetid = beregnetTrygdetid?.samletTrygdetidNorge ?: beregnetTrygdetid?.samletTrygdetidTeoretisk ?: 0
-        val aarTrygdetid = samlaTrygdetid.div(12)
-
-        return Trygdetid(
-            aarTrygdetid = aarTrygdetid,
-            maanederTrygdetid = samlaTrygdetid % 12,
-            perioder = trygdetidsperioder,
-        )
+        return trygdetidService.finnTrygdetidsgrunnlag(behandlingId, beregning, brukerTokenInfo)
     }
 }

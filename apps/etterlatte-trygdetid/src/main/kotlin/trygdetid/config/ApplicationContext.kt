@@ -2,6 +2,8 @@ package no.nav.etterlatte.trygdetid.config
 
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleProperties
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.trygdetid.KodeverkService
@@ -35,7 +37,15 @@ class ApplicationContext {
             grunnlagKlient = grunnlagKlient,
             vilkaarsvurderingKlient = vilkaarsvurderingKlient,
             beregnTrygdetidService = TrygdetidBeregningService,
+            featureToggleService = FeatureToggleService.initialiser(featureToggleProperties(config)),
         )
     private val avtaleRepository = AvtaleRepository(dataSource)
     val avtaleService = AvtaleService(avtaleRepository)
 }
+
+private fun featureToggleProperties(config: Config) =
+    FeatureToggleProperties(
+        applicationName = config.getString("funksjonsbrytere.unleash.applicationName"),
+        host = config.getString("funksjonsbrytere.unleash.host"),
+        apiKey = config.getString("funksjonsbrytere.unleash.token"),
+    )

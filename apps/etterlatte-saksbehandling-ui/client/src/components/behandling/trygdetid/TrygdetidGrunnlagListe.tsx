@@ -231,6 +231,7 @@ const ExpandableInfo = styled.div`
 
 const GrunnlagListe = styled.div`
   margin-top: 2em;
+  margin-bottom: 2em;
 `
 
 const Datofelt = styled.div`

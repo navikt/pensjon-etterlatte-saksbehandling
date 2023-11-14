@@ -198,7 +198,6 @@ const opprettBehandling = (
     kommerBarnetTilgode,
     soeknadMottattDato: '01-01-2023',
     virkningstidspunkt,
-    utenlandstilsnitt: undefined,
     boddEllerArbeidetUtlandet,
     status: IBehandlingStatus.OPPRETTET,
     hendelser: [],
@@ -207,6 +206,7 @@ const opprettBehandling = (
     revurderinginfo: null,
     begrunnelse: null,
     etterbetaling: null,
+    utenlandstilknytning: null,
   }
 }
 

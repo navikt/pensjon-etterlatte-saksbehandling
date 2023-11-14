@@ -1,7 +1,6 @@
 import React, { useState } from 'react'
 import styled from 'styled-components'
-import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapper'
-import { VilkaarsVurderingKnapper } from '../handlinger/vilkaarsvurderingKnapper'
+import { VilkaarsvurderingKnapper } from './VilkaarsvurderingKnapper'
 import {
   IVilkaarsvurdering,
   lagreTotalVurdering,
@@ -196,11 +195,11 @@ export const Resultat = (props: Props) => {
 
       <Border />
       {redigerbar ? (
-        <BehandlingHandlingKnapper>
+        <>
           {vilkaarsvurdering.resultat && virkningstidspunktSamsvarer && (
-            <VilkaarsVurderingKnapper behandlingId={behandlingId} />
+            <VilkaarsvurderingKnapper behandlingId={behandlingId} />
           )}
-        </BehandlingHandlingKnapper>
+        </>
       ) : (
         <NesteOgTilbake></NesteOgTilbake>
       )}

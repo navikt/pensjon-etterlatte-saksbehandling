@@ -7,6 +7,10 @@ sealed class BrukerTokenInfo {
 
     abstract fun erSammePerson(ident: String?): Boolean
 
+    abstract fun getClaims(): JwtTokenClaims?
+
+    abstract val roller: List<String>
+
     abstract fun accessToken(): String
 
     abstract fun kanEndreOppgaverFor(ident: String?): Boolean
@@ -25,7 +29,7 @@ sealed class BrukerTokenInfo {
             claims: JwtTokenClaims?,
         ): BrukerTokenInfo {
             return if (erSystembruker(oid = oid, sub = sub)) {
-                Systembruker(oid!!, sub!!)
+                Systembruker(oid!!, sub!!, claims)
             } else if (saksbehandler != null) {
                 Saksbehandler(accessToken, saksbehandler, claims)
             } else {
@@ -37,10 +41,17 @@ sealed class BrukerTokenInfo {
     }
 }
 
-data class Systembruker(val oid: String, val sub: String) : BrukerTokenInfo() {
+data class Systembruker(val oid: String, val sub: String, val jwtTokenClaims: JwtTokenClaims? = null) : BrukerTokenInfo() {
+    constructor(oid: String, sub: String) : this(oid, sub, null)
+
     override fun ident() = Fagsaksystem.EY.navn
 
     override fun accessToken() = throw NotImplementedError("Kun relevant for saksbehandler")
+
+    override fun getClaims() = jwtTokenClaims
+
+    override val roller: List<String>
+        get() = getClaims()?.getAsList("roles") ?: emptyList()
 
     override fun erSammePerson(ident: String?) = false
 
@@ -60,7 +71,10 @@ data class Saksbehandler(
 
     override fun erSammePerson(ident: String?) = ident == this.ident
 
-    fun getClaims() = jwtTokenClaims
+    override fun getClaims() = jwtTokenClaims
+
+    override val roller: List<String>
+        get() = getClaims()?.getAsList("groups") ?: emptyList()
 }
 
 enum class Claims {

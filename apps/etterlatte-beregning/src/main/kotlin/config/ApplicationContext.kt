@@ -6,6 +6,7 @@ import no.nav.etterlatte.avkorting.AvkortingRepository
 import no.nav.etterlatte.avkorting.AvkortingService
 import no.nav.etterlatte.beregning.BeregnBarnepensjonService
 import no.nav.etterlatte.beregning.BeregnOmstillingsstoenadService
+import no.nav.etterlatte.beregning.BeregnOverstyrBeregningService
 import no.nav.etterlatte.beregning.BeregningRepository
 import no.nav.etterlatte.beregning.BeregningService
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlagRepository
@@ -53,6 +54,7 @@ class ApplicationContext {
             beregningsGrunnlagRepository = beregningsGrunnlagRepository,
             behandlingKlient = behandlingKlient,
             featureToggleService = featureToggleService,
+            grunnlagKlient = grunnlagKlient,
         )
 
     val beregnBarnepensjonService =
@@ -70,6 +72,11 @@ class ApplicationContext {
             grunnlagKlient = grunnlagKlient,
             trygdetidKlient = trygdetidKlient,
         )
+    val beregnOverstyrBeregningService =
+        BeregnOverstyrBeregningService(
+            beregningsGrunnlagService = beregningsGrunnlagService,
+            grunnlagKlient = grunnlagKlient,
+        )
     val beregningRepository = BeregningRepository(dataSource)
     val beregningService =
         BeregningService(
@@ -77,6 +84,7 @@ class ApplicationContext {
             behandlingKlient = behandlingKlient,
             beregnBarnepensjonService = beregnBarnepensjonService,
             beregnOmstillingsstoenadService = beregnOmstillingsstoenadService,
+            beregnOverstyrBeregningService = beregnOverstyrBeregningService,
             beregningsGrunnlagService = beregningsGrunnlagService,
             trygdetidKlient = trygdetidKlient,
         )

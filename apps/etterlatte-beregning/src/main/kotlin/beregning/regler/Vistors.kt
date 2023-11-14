@@ -1,6 +1,6 @@
 package beregning.regler
 
-import no.nav.etterlatte.beregning.regler.AnvendtTrgydetid
+import no.nav.etterlatte.beregning.regler.AnvendtTrygdetid
 import no.nav.etterlatte.grunnbeloep.Grunnbeloep
 import no.nav.etterlatte.libs.regler.Node
 import no.nav.etterlatte.libs.regler.Regel
@@ -26,18 +26,18 @@ fun SubsumsjonsNode<*>.finnAnvendtGrunnbeloep(grunnbeloepRegel: Regel<*, *>): Gr
     }
 
 class FinnAnvendtTrygdetidVisitor(private val trygdetidRegel: Regel<*, *>) : Visitor {
-    var anvendtTrygdetid: AnvendtTrgydetid? = null
+    var anvendtTrygdetid: AnvendtTrygdetid? = null
 
     override fun visit(node: Node<*>) {}
 
     override fun visit(node: SubsumsjonsNode<*>) {
-        if (node.regel === trygdetidRegel && node.verdi is AnvendtTrgydetid) {
-            anvendtTrygdetid = (node.verdi as AnvendtTrgydetid)
+        if (node.regel === trygdetidRegel && node.verdi is AnvendtTrygdetid) {
+            anvendtTrygdetid = (node.verdi as AnvendtTrygdetid)
         }
     }
 }
 
-fun SubsumsjonsNode<*>.finnAnvendtTrygdetid(trygdetidRegel: Regel<*, *>): AnvendtTrgydetid? =
+fun SubsumsjonsNode<*>.finnAnvendtTrygdetid(trygdetidRegel: Regel<*, *>): AnvendtTrygdetid? =
     with(FinnAnvendtTrygdetidVisitor(trygdetidRegel)) {
         accept(this)
         anvendtTrygdetid

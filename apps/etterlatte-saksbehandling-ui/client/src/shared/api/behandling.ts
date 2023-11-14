@@ -4,7 +4,6 @@ import {
   IEtterbetaling,
   IGyldighetResultat,
   IKommerBarnetTilgode,
-  IUtenlandstilsnitt,
   NyBehandlingRequest,
   Virkningstidspunkt,
 } from '~shared/types/IDetaljertBehandling'
@@ -92,17 +91,6 @@ export const lagreBegrunnelseKommerBarnetTilgode = async (args: {
 }): Promise<ApiResponse<IKommerBarnetTilgode>> => {
   return apiClient.post(`/behandling/${args.behandlingId}/kommerbarnettilgode`, {
     svar: args.svar,
-    begrunnelse: args.begrunnelse,
-  })
-}
-
-export const lagreUtenlandstilsnitt = async (args: {
-  behandlingId: string
-  begrunnelse: string
-  svar: string
-}): Promise<ApiResponse<IUtenlandstilsnitt>> => {
-  return apiClient.post(`/behandling/${args.behandlingId}/utenlandstilsnitt`, {
-    utenlandstilsnittType: args.svar,
     begrunnelse: args.begrunnelse,
   })
 }

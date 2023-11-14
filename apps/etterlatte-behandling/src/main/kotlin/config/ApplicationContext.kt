@@ -14,6 +14,8 @@ import no.nav.etterlatte.behandling.GrunnlagService
 import no.nav.etterlatte.behandling.GyldighetsproevingServiceImpl
 import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktDao
 import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktService
+import no.nav.etterlatte.behandling.bosattutland.BosattUtlandDao
+import no.nav.etterlatte.behandling.bosattutland.BosattUtlandService
 import no.nav.etterlatte.behandling.etterbetaling.EtterbetalingDao
 import no.nav.etterlatte.behandling.etterbetaling.EtterbetalingService
 import no.nav.etterlatte.behandling.generellbehandling.GenerellBehandlingDao
@@ -187,6 +189,7 @@ internal class ApplicationContext(
     val klageDao = KlageDaoImpl { databaseContext().activeTx() }
     val tilbakekrevingDao = TilbakekrevingDao { databaseContext().activeTx() }
     val etterbetalingDao = EtterbetalingDao { databaseContext().activeTx() }
+    val bosattUtlandDao = BosattUtlandDao { databaseContext().activeTx() }
 
     // Klient
     val pdlKlient = PdlKlientImpl(config, pdlHttpClient)
@@ -220,6 +223,7 @@ internal class ApplicationContext(
             oppgaveService = oppgaveService,
             etterbetalingService = etterbetalingService,
             grunnlagService = grunnlagsService,
+            sakDao = sakDao,
         )
     val generellBehandlingService =
         GenerellBehandlingService(
@@ -321,6 +325,8 @@ internal class ApplicationContext(
             behandlingService = behandlingService,
             oppgaveService = oppgaveService,
         )
+
+    val bosattUtlandService = BosattUtlandService(bosattUtlandDao = bosattUtlandDao)
 
     val klageService =
         KlageServiceImpl(

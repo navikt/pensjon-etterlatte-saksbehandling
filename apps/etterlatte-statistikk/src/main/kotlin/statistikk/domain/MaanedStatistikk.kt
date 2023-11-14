@@ -1,5 +1,6 @@
 package no.nav.etterlatte.statistikk.domain
 
+import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import java.time.LocalDate
@@ -31,6 +32,8 @@ data class MaanedStoenadRad(
     val sakUtland: SakUtland?,
     val virkningstidspunkt: YearMonth?,
     val utbetalingsdato: LocalDate?,
+    val kilde: Vedtaksloesning,
+    val pesysId: Long?,
 )
 
 class MaanedStatistikk(val maaned: YearMonth, stoenadRader: List<StoenadRad>) {
@@ -105,6 +108,8 @@ class MaanedStatistikk(val maaned: YearMonth, stoenadRader: List<StoenadRad>) {
                     sakUtland = sisteVedtak.sakUtland,
                     virkningstidspunkt = sisteVedtak.virkningstidspunkt,
                     utbetalingsdato = sisteVedtak.utbetalingsdato,
+                    kilde = sisteVedtak.kilde,
+                    pesysId = sisteVedtak.pesysId,
                 )
             }
     }

@@ -45,10 +45,12 @@ import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
+import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.VedtakSak
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
@@ -738,6 +740,7 @@ internal class VedtaksbrevServiceTest {
                     BrevProsessType.AUTOMATISK,
                     "fnr",
                     status,
+                    Tidspunkt.now(),
                     opprettMottaker(),
                 )
 
@@ -764,6 +767,7 @@ internal class VedtaksbrevServiceTest {
         prosessType = prosessType,
         soekerFnr = "fnr",
         status = status,
+        Tidspunkt.now(),
         mottaker = opprettMottaker(),
     )
 
@@ -779,6 +783,7 @@ internal class VedtaksbrevServiceTest {
         sakType: SakType,
         vedtakType: VedtakType,
         vedtakStatus: VedtakStatus = VedtakStatus.OPPRETTET,
+        systemkilde: Vedtaksloesning = Vedtaksloesning.GJENNY,
         revurderingsaarsak: Revurderingaarsak? = null,
     ): GenerellBrevData {
         val soeker = "12345612345"
@@ -805,7 +810,8 @@ internal class VedtaksbrevServiceTest {
                     revurderingInfo = null,
                 ),
             spraak = Spraak.NB,
-            revurderingsaarsak,
+            systemkilde = systemkilde,
+            revurderingsaarsak = revurderingsaarsak,
         )
     }
 

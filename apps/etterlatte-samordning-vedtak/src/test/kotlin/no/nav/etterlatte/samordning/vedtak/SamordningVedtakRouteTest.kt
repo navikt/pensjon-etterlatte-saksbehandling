@@ -139,7 +139,7 @@ class SamordningVedtakRouteTest {
 
             coEvery {
                 samordningVedtakService.hentVedtaksliste(
-                    virkFom = virkFom,
+                    fomDato = virkFom,
                     fnr = Folkeregisteridentifikator.of(fnr),
                     context =
                         MaskinportenTpContext(
@@ -156,7 +156,7 @@ class SamordningVedtakRouteTest {
 
                 val response =
                     client.get("/api/vedtak") {
-                        parameter("virkFom", virkFom)
+                        parameter("fomDato", virkFom)
                         header("fnr", fnr)
                         header("tpnr", "3010")
                         header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
@@ -169,7 +169,7 @@ class SamordningVedtakRouteTest {
                 response.status shouldBe HttpStatusCode.OK
                 coVerify {
                     samordningVedtakService.hentVedtaksliste(
-                        virkFom = virkFom,
+                        fomDato = virkFom,
                         fnr = Folkeregisteridentifikator.of(fnr),
                         any<MaskinportenTpContext>(),
                     )
@@ -209,7 +209,7 @@ class SamordningVedtakRouteTest {
                 val response =
                     client.get("/api/pensjon/vedtak") {
                         header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                        parameter("virkFom", virkFom)
+                        parameter("fomDato", virkFom)
                         header("fnr", fnr)
                     }
 
@@ -227,7 +227,7 @@ class SamordningVedtakRouteTest {
                     client.get("/api/pensjon/vedtak") {
                         header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                         header(HttpHeaders.Authorization, "Bearer ${token()}")
-                        parameter("virkFom", virkFom)
+                        parameter("fomDato", virkFom)
                         header("fnr", fnr)
                     }
 
@@ -239,7 +239,7 @@ class SamordningVedtakRouteTest {
         fun `skal gi 200 med gyldig token inkl rolle`() {
             coEvery {
                 samordningVedtakService.hentVedtaksliste(
-                    virkFom = virkFom,
+                    fomDato = virkFom,
                     fnr = Folkeregisteridentifikator.of(fnr),
                     context = PensjonContext,
                 )
@@ -252,7 +252,7 @@ class SamordningVedtakRouteTest {
 
                 val response =
                     client.get("/api/pensjon/vedtak") {
-                        parameter("virkFom", virkFom)
+                        parameter("fomDato", virkFom)
                         header("fnr", fnr)
                         header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                         header(HttpHeaders.Authorization, "Bearer ${token("les-oms-vedtak")}")
@@ -261,7 +261,7 @@ class SamordningVedtakRouteTest {
                 response.status shouldBe HttpStatusCode.OK
                 coVerify {
                     samordningVedtakService.hentVedtaksliste(
-                        virkFom = virkFom,
+                        fomDato = virkFom,
                         fnr = Folkeregisteridentifikator.of(fnr),
                         PensjonContext,
                     )

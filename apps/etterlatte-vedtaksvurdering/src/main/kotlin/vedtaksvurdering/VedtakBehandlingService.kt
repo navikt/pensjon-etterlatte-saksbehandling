@@ -55,9 +55,9 @@ class VedtakBehandlingService(
 
     fun finnFerdigstilteVedtak(
         fnr: Folkeregisteridentifikator,
-        virkFom: LocalDate,
+        fomDato: LocalDate,
     ): List<Vedtak> {
-        return repository.hentFerdigstilteVedtak(fnr, virkFom)
+        return repository.hentFerdigstilteVedtak(fnr, fomDato)
     }
 
     fun sjekkOmVedtakErLoependePaaDato(

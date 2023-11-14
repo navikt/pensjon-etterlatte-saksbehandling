@@ -236,12 +236,9 @@ class VedtaksvurderingRepository(private val datasource: DataSource) : Transacti
         }
     }
 
-    /**
-     * TODO vedtakstatus SAMORDNET e.l.?
-     */
     fun hentFerdigstilteVedtak(
         fnr: Folkeregisteridentifikator,
-        virkFom: LocalDate,
+        fomDato: LocalDate,
         tx: TransactionalSession? = null,
     ): List<Vedtak> {
         val hentVedtak = """
@@ -251,12 +248,12 @@ class VedtaksvurderingRepository(private val datasource: DataSource) : Transacti
             FROM vedtak  
             WHERE vedtakstatus in ('TIL_SAMORDNING', 'SAMORDNET', 'IVERKSATT')   
             AND fnr = :fnr
-            AND datoVirkFom >= :virkFom
+            AND datoVirkFom >= :fomDato
             """
         return tx.session {
             hentListe(
                 queryString = hentVedtak,
-                params = { mapOf("fnr" to fnr.value, "virkFom" to virkFom) },
+                params = { mapOf("fnr" to fnr.value, "fomDato" to fomDato) },
             ) {
                 val utbetalingsperioder = hentUtbetalingsPerioder(it.long("id"), this)
                 it.toVedtak(utbetalingsperioder)

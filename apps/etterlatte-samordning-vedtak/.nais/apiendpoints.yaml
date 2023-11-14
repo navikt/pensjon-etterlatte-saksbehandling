@@ -21,7 +21,8 @@ spec:
         - fnr
         - tpnr
       queryParams:
-        - virkFom
+        - virkFom  # deprecated
+        - fomDato
       backendHost: http://etterlatte-samordning-vedtak
       backendPath: /api/vedtak
     - path: /samordning/vedtak/{vedtakId}

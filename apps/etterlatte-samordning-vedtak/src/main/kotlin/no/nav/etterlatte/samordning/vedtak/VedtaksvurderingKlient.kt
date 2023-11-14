@@ -45,15 +45,15 @@ class VedtaksvurderingKlient(config: Config, private val httpClient: HttpClient)
     }
 
     suspend fun hentVedtaksliste(
-        virkFom: LocalDate,
+        fomDato: LocalDate,
         fnr: String,
         callerContext: CallerContext,
     ): List<VedtakSamordningDto> {
-        logger.info("Henter vedtaksliste, virkFom=$virkFom")
+        logger.info("Henter vedtaksliste, fomDato=$fomDato")
 
         return try {
             httpClient.get {
-                url("$vedtaksvurderingUrl?virkFom=$virkFom")
+                url("$vedtaksvurderingUrl?fomDato=$fomDato")
                 header("fnr", fnr)
                 if (callerContext is MaskinportenTpContext) {
                     header("orgnr", callerContext.organisasjonsnr)

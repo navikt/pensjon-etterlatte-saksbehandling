@@ -118,7 +118,7 @@ class SamordningVedtakServiceTest {
 
     @Test
     fun `skal hente to vedtak`() {
-        val virkFom = now().atStartOfMonth()
+        val fomDato = now().atStartOfMonth()
         val vedtakliste =
             listOf(
                 vedtak(
@@ -133,13 +133,13 @@ class SamordningVedtakServiceTest {
                 ),
             )
 
-        coEvery { vedtakKlient.hentVedtaksliste(virkFom, fnr = FNR, MaskinportenTpContext(tpnrSPK, ORGNO)) } returns vedtakliste
-        coEvery { tpKlient.harTpForholdByDate(FNR, tpnr = tpnrSPK, fomDato = virkFom) } returns true
+        coEvery { vedtakKlient.hentVedtaksliste(fomDato, fnr = FNR, MaskinportenTpContext(tpnrSPK, ORGNO)) } returns vedtakliste
+        coEvery { tpKlient.harTpForholdByDate(FNR, tpnr = tpnrSPK, fomDato = fomDato) } returns true
 
         val vedtaksliste =
             runBlocking {
                 samordningVedtakService.hentVedtaksliste(
-                    virkFom,
+                    fomDato,
                     Folkeregisteridentifikator.of(FNR),
                     MaskinportenTpContext(tpnrSPK, ORGNO),
                 )
@@ -147,7 +147,7 @@ class SamordningVedtakServiceTest {
 
         vedtaksliste shouldHaveSize 2
 
-        coVerify { tpKlient.harTpForholdByDate(FNR, tpnr = tpnrSPK, fomDato = virkFom) }
+        coVerify { tpKlient.harTpForholdByDate(FNR, tpnr = tpnrSPK, fomDato = fomDato) }
     }
 }
 

@@ -43,18 +43,18 @@ class SamordningVedtakService(
     }
 
     suspend fun hentVedtaksliste(
-        virkFom: LocalDate,
+        fomDato: LocalDate,
         fnr: Folkeregisteridentifikator,
         context: CallerContext,
     ): List<SamordningVedtakDto> {
-        if (context is MaskinportenTpContext && !tjenestepensjonKlient.harTpForholdByDate(fnr.value, context.tpnr, virkFom)
+        if (context is MaskinportenTpContext && !tjenestepensjonKlient.harTpForholdByDate(fnr.value, context.tpnr, fomDato)
         ) {
             logger.info("Avslår forespørsel, manglende/ikke gyldig TP-forhold")
             throw TjenestepensjonManglendeTilgangException("Ikke gyldig tpforhold")
         }
 
         return vedtaksvurderingKlient.hentVedtaksliste(
-            virkFom = virkFom,
+            fomDato = fomDato,
             fnr = fnr.value,
             callerContext = context,
         )

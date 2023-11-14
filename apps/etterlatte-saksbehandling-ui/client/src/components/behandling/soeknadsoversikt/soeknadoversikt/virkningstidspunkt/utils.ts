@@ -57,6 +57,8 @@ export const BP_REVURDERING_YRKESSKADE_BESKRIVELSE =
   'Når dødsfall skyldes en godkjent yrkes-skade/sykdom, skal dette med i beregningen fra innvilgelsestidspunkt av ytelsen. Dette er fordi man tar utgangspunkt i kravet om ytelsen og ikke selve yrkesskade-fordelen.'
 export const BP_OPPHOER_BESKRIVELSE =
   'Barnepensjonen stanses ved utgangen av den måneden retten til ytelsen faller bort.'
+export const BP_OMS_SLUTTBEHANDLING_BESKRIVELSE =
+  'Ved sluttbehandling av en ytelse skal virkningstidspunktet settes lik innvilgelsestidspunkt for ytelsen.'
 
 export const OMS_REVURDERING_HJEMLER: Array<Hjemmel> = [
   {

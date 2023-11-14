@@ -10,12 +10,9 @@ import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.oppgave.VedtakEndringDTO
 import no.nav.etterlatte.libs.common.oppgave.VedtakOppgaveDTO
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
-import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.REVURDERING_AARSAK
 import no.nav.etterlatte.libs.common.rapidsandrivers.SKAL_SENDE_BREV
-import no.nav.etterlatte.libs.common.rapidsandrivers.TEKNISK_TID_KEY
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.tidspunkt.utcKlokke
 import no.nav.etterlatte.libs.common.toObjectNode
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
@@ -35,7 +32,6 @@ import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlient
 import no.nav.etterlatte.vedtaksvurdering.klienter.BeregningKlient
 import no.nav.etterlatte.vedtaksvurdering.klienter.SamKlient
 import no.nav.etterlatte.vedtaksvurdering.klienter.VilkaarsvurderingKlient
-import no.nav.helse.rapids_rivers.JsonMessage
 import org.slf4j.LoggerFactory
 import java.time.Clock
 import java.time.LocalDate
@@ -48,7 +44,6 @@ class VedtakBehandlingService(
     private val vilkaarsvurderingKlient: VilkaarsvurderingKlient,
     private val behandlingKlient: BehandlingKlient,
     private val samKlient: SamKlient,
-    private val publiser: (String, UUID) -> Unit,
     private val clock: Clock = utcKlokke(),
 ) {
     private val logger = LoggerFactory.getLogger(VedtakBehandlingService::class.java)
@@ -100,7 +95,7 @@ class VedtakBehandlingService(
     suspend fun fattVedtak(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ): Vedtak {
+    ): VedtakOgRapid {
         logger.info("Fatter vedtak for behandling med behandlingId=$behandlingId")
         val vedtak = hentVedtakNonNull(behandlingId)
 
@@ -114,53 +109,53 @@ class VedtakBehandlingService(
 
         val fattetVedtak =
             repository.inTransaction { tx ->
-                val fattetVedtakIntern =
-                    fattVedtak(
-                        behandlingId,
-                        VedtakFattet(
-                            brukerTokenInfo.ident(),
-                            sak.enhet,
-                            Tidspunkt.now(clock),
-                        ),
-                        tx,
-                    ).also { fattetVedtak ->
-                        runBlocking {
-                            behandlingKlient.fattVedtakBehandling(
-                                brukerTokenInfo = brukerTokenInfo,
-                                vedtakEndringDTO =
-                                    VedtakEndringDTO(
-                                        vedtakOppgaveDTO =
-                                            VedtakOppgaveDTO(
-                                                sakId = sak.id,
-                                                referanse = behandlingId.toString(),
-                                            ),
-                                        vedtakHendelse =
-                                            VedtakHendelse(
-                                                vedtakId = fattetVedtak.id,
-                                                inntruffet = fattetVedtak.vedtakFattet?.tidspunkt!!,
-                                                saksbehandler = fattetVedtak.vedtakFattet.ansvarligSaksbehandler,
-                                            ),
-                                    ),
-                            )
-                        }
+                fattVedtak(
+                    behandlingId,
+                    VedtakFattet(
+                        brukerTokenInfo.ident(),
+                        sak.enhet,
+                        Tidspunkt.now(clock),
+                    ),
+                    tx,
+                ).also { fattetVedtak ->
+                    runBlocking {
+                        behandlingKlient.fattVedtakBehandling(
+                            brukerTokenInfo = brukerTokenInfo,
+                            vedtakEndringDTO =
+                                VedtakEndringDTO(
+                                    vedtakOppgaveDTO =
+                                        VedtakOppgaveDTO(
+                                            sakId = sak.id,
+                                            referanse = behandlingId.toString(),
+                                        ),
+                                    vedtakHendelse =
+                                        VedtakHendelse(
+                                            vedtakId = fattetVedtak.id,
+                                            inntruffet = fattetVedtak.vedtakFattet?.tidspunkt!!,
+                                            saksbehandler = fattetVedtak.vedtakFattet.ansvarligSaksbehandler,
+                                        ),
+                                ),
+                        )
                     }
-                sendToRapid(
-                    vedtakhendelse = VedtakKafkaHendelseType.FATTET,
-                    vedtak = fattetVedtakIntern,
-                    tekniskTid = fattetVedtakIntern.vedtakFattet!!.tidspunkt,
-                    behandlingId = behandlingId,
-                )
-                fattetVedtakIntern
+                }
             }
 
-        return fattetVedtak
+        return VedtakOgRapid(
+            fattetVedtak.toDto(),
+            RapidInfo(
+                vedtakhendelse = VedtakKafkaHendelseType.FATTET,
+                vedtak = fattetVedtak.toNyDto(),
+                tekniskTid = fattetVedtak.vedtakFattet!!.tidspunkt,
+                behandlingId = behandlingId,
+            ),
+        )
     }
 
     suspend fun attesterVedtak(
         behandlingId: UUID,
         kommentar: String,
         brukerTokenInfo: BrukerTokenInfo,
-    ): Vedtak {
+    ): VedtakOgRapid {
         logger.info("Attesterer vedtak for behandling med behandlingId=$behandlingId")
         val vedtak = hentVedtakNonNull(behandlingId)
 
@@ -207,10 +202,11 @@ class VedtakBehandlingService(
                 attestertVedtak
             }
 
-        try {
-            sendToRapid(
+        return VedtakOgRapid(
+            attestertVedtak.toDto(),
+            RapidInfo(
                 vedtakhendelse = VedtakKafkaHendelseType.ATTESTERT,
-                vedtak = attestertVedtak,
+                vedtak = attestertVedtak.toNyDto(),
                 tekniskTid = attestertVedtak.attestasjon!!.tidspunkt,
                 behandlingId = behandlingId,
                 extraParams =
@@ -223,18 +219,8 @@ class VedtakBehandlingService(
                         KILDE_KEY to behandling.kilde,
                         REVURDERING_AARSAK to behandling.revurderingsaarsak.toString(),
                     ),
-            )
-        } catch (e: Exception) {
-            logger.error(
-                "Kan ikke sende attestert vedtak på kafka for behandling id: $behandlingId, vedtak: ${vedtak.id} " +
-                    "Saknr: ${sak.id}. Det betyr at vi ikke sender ut brev for vedtaket eller at en utbetaling går til oppdrag. " +
-                    "Denne hendelsen må sendes ut manuelt straks.",
-                e,
-            )
-            throw e
-        }
-
-        return attestertVedtak
+            ),
+        )
     }
 
     private fun Revurderingaarsak?.skalIkkeSendeBrev() = this != null && !utfall.skalSendeBrev
@@ -243,7 +229,7 @@ class VedtakBehandlingService(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
         begrunnelse: UnderkjennVedtakDto,
-    ): Vedtak {
+    ): VedtakOgRapid {
         logger.info("Underkjenner vedtak for behandling med behandlingId=$behandlingId")
         val vedtak = hentVedtakNonNull(behandlingId)
 
@@ -273,20 +259,21 @@ class VedtakBehandlingService(
                 underkjentVedtak
             }
 
-        sendToRapid(
-            vedtakhendelse = VedtakKafkaHendelseType.UNDERKJENT,
-            vedtak = underkjentVedtak,
-            tekniskTid = underkjentTid,
-            behandlingId = behandlingId,
+        return VedtakOgRapid(
+            repository.hentVedtak(behandlingId)!!.toDto(),
+            RapidInfo(
+                vedtakhendelse = VedtakKafkaHendelseType.UNDERKJENT,
+                vedtak = underkjentVedtak.toNyDto(),
+                tekniskTid = underkjentTid,
+                behandlingId = behandlingId,
+            ),
         )
-
-        return repository.hentVedtak(behandlingId)!!
     }
 
     suspend fun tilSamordningVedtak(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ): Vedtak {
+    ): VedtakOgRapid {
         logger.info("Setter vedtak til til_samordning for behandling med behandlingId=$behandlingId")
         val vedtak = hentVedtakNonNull(behandlingId)
 
@@ -302,28 +289,31 @@ class VedtakBehandlingService(
                     }
             }
 
-        sendToRapid(
-            vedtakhendelse = VedtakKafkaHendelseType.TIL_SAMORDNING,
-            vedtak = tilSamordningVedtakLocal,
-            tekniskTid = Tidspunkt.now(clock),
-            behandlingId = behandlingId,
-        )
+        val tilSamordning =
+            RapidInfo(
+                vedtakhendelse = VedtakKafkaHendelseType.TIL_SAMORDNING,
+                vedtak = tilSamordningVedtakLocal.toNyDto(),
+                tekniskTid = Tidspunkt.now(clock),
+                behandlingId = behandlingId,
+            )
 
         if (!samKlient.samordneVedtak(tilSamordningVedtakLocal, brukerTokenInfo)) {
             logger.info("Svar fra samordning: ikke nødvendig å vente for vedtak=${vedtak.id} [behandlingId=$behandlingId]")
-            return samordnetVedtak(behandlingId, brukerTokenInfo, tilSamordningVedtakLocal)
+
+            val vedtakEtterSvar = samordnetVedtak(behandlingId, brukerTokenInfo, tilSamordningVedtakLocal)
+            return VedtakOgRapid(vedtakEtterSvar.vedtak, tilSamordning, vedtakEtterSvar.rapidInfo1)
         } else {
             logger.info("Svar fra samordning: må vente for vedtak=${vedtak.id} [behandlingId=$behandlingId]")
         }
 
-        return tilSamordningVedtakLocal
+        return VedtakOgRapid(tilSamordningVedtakLocal.toDto(), tilSamordning)
     }
 
     suspend fun samordnetVedtak(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
         vedtakTilSamordning: Vedtak? = null,
-    ): Vedtak {
+    ): VedtakOgRapid {
         logger.info("Setter vedtak til samordnet for behandling med behandlingId=$behandlingId")
         val vedtak = vedtakTilSamordning ?: hentVedtakNonNull(behandlingId)
 
@@ -338,20 +328,21 @@ class VedtakBehandlingService(
                     }
             }
 
-        sendToRapid(
-            vedtakhendelse = VedtakKafkaHendelseType.SAMORDNET,
-            vedtak = samordnetVedtakLocal,
-            tekniskTid = Tidspunkt.now(clock),
-            behandlingId = behandlingId,
+        return VedtakOgRapid(
+            samordnetVedtakLocal.toDto(),
+            RapidInfo(
+                vedtakhendelse = VedtakKafkaHendelseType.SAMORDNET,
+                vedtak = samordnetVedtakLocal.toNyDto(),
+                tekniskTid = Tidspunkt.now(clock),
+                behandlingId = behandlingId,
+            ),
         )
-
-        return samordnetVedtakLocal
     }
 
     suspend fun iverksattVedtak(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ): Vedtak {
+    ): VedtakOgRapid {
         logger.info("Setter vedtak til iverksatt for behandling med behandlingId=$behandlingId")
         val vedtak = hentVedtakNonNull(behandlingId)
 
@@ -367,14 +358,15 @@ class VedtakBehandlingService(
                 iverksattVedtakLocal
             }
 
-        sendToRapid(
-            vedtakhendelse = VedtakKafkaHendelseType.IVERKSATT,
-            vedtak = iverksattVedtak,
-            tekniskTid = Tidspunkt.now(clock),
-            behandlingId = behandlingId,
+        return VedtakOgRapid(
+            iverksattVedtak.toDto(),
+            RapidInfo(
+                vedtakhendelse = VedtakKafkaHendelseType.IVERKSATT,
+                vedtak = iverksattVedtak.toNyDto(),
+                tekniskTid = Tidspunkt.now(clock),
+                behandlingId = behandlingId,
+            ),
         )
-
-        return iverksattVedtak
     }
 
     private fun hentVedtakNonNull(behandlingId: UUID): Vedtak {
@@ -525,6 +517,7 @@ class VedtakBehandlingService(
                             )
                         }
                     }
+
                     SakType.OMSTILLINGSSTOENAD -> {
                         val avkortetYtelse =
                             requireNotNull(beregningOgAvkorting?.avkorting?.avkortetYtelse) {
@@ -589,23 +582,6 @@ class VedtakBehandlingService(
 
     private fun vilkaarsvurderingUtfallNonNull(vilkaarsvurderingUtfall: VilkaarsvurderingUtfall?) =
         requireNotNull(vilkaarsvurderingUtfall) { "Behandling mangler utfall på vilkårsvurdering" }
-
-    private fun sendToRapid(
-        vedtakhendelse: VedtakKafkaHendelseType,
-        vedtak: Vedtak,
-        tekniskTid: Tidspunkt,
-        behandlingId: UUID,
-        extraParams: Map<String, Any> = emptyMap(),
-    ) = publiser(
-        JsonMessage.newMessage(
-            mapOf(
-                EVENT_NAME_KEY to vedtakhendelse.toString(),
-                "vedtak" to vedtak.toNyDto(),
-                TEKNISK_TID_KEY to tekniskTid.toLocalDatetimeUTC(),
-            ) + extraParams,
-        ).toJson(),
-        behandlingId,
-    )
 
     fun tilbakestillIkkeIverksatteVedtak(behandlingId: UUID): Vedtak? = repository.tilbakestillIkkeIverksatteVedtak(behandlingId)
 

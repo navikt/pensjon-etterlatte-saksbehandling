@@ -20,7 +20,9 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.confirmVerified
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
+import io.mockk.runs
 import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJson
@@ -41,7 +43,9 @@ import no.nav.etterlatte.vedtaksvurdering.LoependeYtelse
 import no.nav.etterlatte.vedtaksvurdering.UnderkjennVedtakDto
 import no.nav.etterlatte.vedtaksvurdering.VedtakBehandlingInnhold
 import no.nav.etterlatte.vedtaksvurdering.VedtakBehandlingService
+import no.nav.etterlatte.vedtaksvurdering.VedtakOgRapid
 import no.nav.etterlatte.vedtaksvurdering.VedtakTilbakekrevingInnhold
+import no.nav.etterlatte.vedtaksvurdering.VedtaksvurderingRapidService
 import no.nav.etterlatte.vedtaksvurdering.VedtaksvurderingService
 import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlient
 import no.nav.etterlatte.vedtaksvurdering.vedtaksvurderingRoute
@@ -64,6 +68,7 @@ internal class VedtaksvurderingRouteTest {
     private val behandlingKlient = mockk<BehandlingKlient>()
     private val vedtaksvurderingService: VedtaksvurderingService = mockk()
     private val vedtakBehandlingService: VedtakBehandlingService = mockk()
+    private val rapidService: VedtaksvurderingRapidService = mockk()
 
     @BeforeAll
     fun before() {
@@ -98,6 +103,7 @@ internal class VedtaksvurderingRouteTest {
                     vedtaksvurderingRoute(
                         vedtaksvurderingService,
                         vedtakBehandlingService,
+                        rapidService,
                         behandlingKlient,
                     )
                 }
@@ -123,6 +129,7 @@ internal class VedtaksvurderingRouteTest {
                     vedtaksvurderingRoute(
                         vedtaksvurderingService,
                         vedtakBehandlingService,
+                        rapidService,
                         behandlingKlient,
                     )
                 }
@@ -154,6 +161,7 @@ internal class VedtaksvurderingRouteTest {
                     vedtaksvurderingRoute(
                         vedtaksvurderingService,
                         vedtakBehandlingService,
+                        rapidService,
                         behandlingKlient,
                     )
                 }
@@ -186,6 +194,7 @@ internal class VedtaksvurderingRouteTest {
                     vedtaksvurderingRoute(
                         vedtaksvurderingService,
                         vedtakBehandlingService,
+                        rapidService,
                         behandlingKlient,
                     )
                 }
@@ -240,6 +249,7 @@ internal class VedtaksvurderingRouteTest {
                     vedtaksvurderingRoute(
                         vedtaksvurderingService,
                         vedtakBehandlingService,
+                        rapidService,
                         behandlingKlient,
                     )
                 }
@@ -296,6 +306,7 @@ internal class VedtaksvurderingRouteTest {
                     vedtaksvurderingRoute(
                         vedtaksvurderingService,
                         vedtakBehandlingService,
+                        rapidService,
                         behandlingKlient,
                     )
                 }
@@ -346,6 +357,7 @@ internal class VedtaksvurderingRouteTest {
                     vedtaksvurderingRoute(
                         vedtaksvurderingService,
                         vedtakBehandlingService,
+                        rapidService,
                         behandlingKlient,
                     )
                 }
@@ -388,6 +400,7 @@ internal class VedtaksvurderingRouteTest {
                     vedtaksvurderingRoute(
                         vedtaksvurderingService,
                         vedtakBehandlingService,
+                        rapidService,
                         behandlingKlient,
                     )
                 }
@@ -424,6 +437,7 @@ internal class VedtaksvurderingRouteTest {
                     vedtaksvurderingRoute(
                         vedtaksvurderingService,
                         vedtakBehandlingService,
+                        rapidService,
                         behandlingKlient,
                     )
                 }
@@ -473,7 +487,8 @@ internal class VedtaksvurderingRouteTest {
                 status = VedtakStatus.FATTET_VEDTAK,
                 vedtakFattet = VedtakFattet(SAKSBEHANDLER_1, ENHET_1, Tidspunkt.now()),
             )
-        coEvery { vedtakBehandlingService.fattVedtak(any(), any()) } returns fattetVedtak
+        coEvery { vedtakBehandlingService.fattVedtak(any(), any()) } returns VedtakOgRapid(fattetVedtak.toDto(), mockk())
+        coEvery { rapidService.sendToRapid(any()) } just runs
 
         testApplication {
             environment { config = applicationConfig }
@@ -482,6 +497,7 @@ internal class VedtaksvurderingRouteTest {
                     vedtaksvurderingRoute(
                         vedtaksvurderingService,
                         vedtakBehandlingService,
+                        rapidService,
                         behandlingKlient,
                     )
                 }
@@ -520,6 +536,7 @@ internal class VedtaksvurderingRouteTest {
             coVerify(exactly = 1) {
                 behandlingKlient.harTilgangTilBehandling(any(), any())
                 vedtakBehandlingService.fattVedtak(any(), match { it.ident() == SAKSBEHANDLER_1 })
+                rapidService.sendToRapid(any())
             }
         }
     }
@@ -533,7 +550,8 @@ internal class VedtaksvurderingRouteTest {
                 vedtakFattet = VedtakFattet(SAKSBEHANDLER_1, ENHET_1, Tidspunkt.now()),
                 attestasjon = Attestasjon(SAKSBEHANDLER_2, ENHET_2, Tidspunkt.now()),
             )
-        coEvery { vedtakBehandlingService.attesterVedtak(any(), any(), any()) } returns attestertVedtak
+        coEvery { vedtakBehandlingService.attesterVedtak(any(), any(), any()) } returns VedtakOgRapid(attestertVedtak.toDto(), mockk())
+        coEvery { rapidService.sendToRapid(any()) } just runs
 
         testApplication {
             environment { config = applicationConfig }
@@ -542,6 +560,7 @@ internal class VedtaksvurderingRouteTest {
                     vedtaksvurderingRoute(
                         vedtaksvurderingService,
                         vedtakBehandlingService,
+                        rapidService,
                         behandlingKlient,
                     )
                 }
@@ -585,6 +604,7 @@ internal class VedtaksvurderingRouteTest {
                     match { it == attestertVedtakKommentar.kommentar },
                     match { it.ident() == SAKSBEHANDLER_1 },
                 )
+                rapidService.sendToRapid(any())
             }
         }
     }
@@ -596,7 +616,9 @@ internal class VedtaksvurderingRouteTest {
                 status = VedtakStatus.RETURNERT,
             )
         val begrunnelse = UnderkjennVedtakDto("Ikke bra nok begrunnet", "Annet")
-        coEvery { vedtakBehandlingService.underkjennVedtak(any(), any(), any()) } returns underkjentVedtak
+        coEvery { vedtakBehandlingService.underkjennVedtak(any(), any(), any()) } returns
+            VedtakOgRapid(underkjentVedtak.toDto(), mockk())
+        coEvery { rapidService.sendToRapid(any()) } just runs
 
         testApplication {
             environment { config = applicationConfig }
@@ -605,6 +627,7 @@ internal class VedtaksvurderingRouteTest {
                     vedtaksvurderingRoute(
                         vedtaksvurderingService,
                         vedtakBehandlingService,
+                        rapidService,
                         behandlingKlient,
                     )
                 }
@@ -648,6 +671,7 @@ internal class VedtaksvurderingRouteTest {
                     match { it.ident() == SAKSBEHANDLER_1 },
                     match { it == begrunnelse },
                 )
+                rapidService.sendToRapid(any())
             }
         }
     }
@@ -667,6 +691,7 @@ internal class VedtaksvurderingRouteTest {
                     vedtaksvurderingRoute(
                         vedtaksvurderingService,
                         vedtakBehandlingService,
+                        rapidService,
                         behandlingKlient,
                     )
                 }

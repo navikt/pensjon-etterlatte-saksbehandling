@@ -140,7 +140,7 @@ class DelvilkaarRepository {
         tx: TransactionalSession,
     ) = settResultatPaaAlleDelvilkaar(vilkaarId, tx, null)
 
-    internal fun settResultatPaaAlleDelvilkaar(
+    private fun settResultatPaaAlleDelvilkaar(
         vilkaarId: UUID,
         tx: TransactionalSession,
         utfall: Utfall?,

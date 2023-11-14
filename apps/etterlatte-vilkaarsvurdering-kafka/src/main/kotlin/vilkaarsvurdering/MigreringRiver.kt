@@ -4,6 +4,7 @@ import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser.VILKAARSVURDER
 import no.nav.etterlatte.rapidsandrivers.migrering.VILKAARSVURDERT_KEY
+import no.nav.etterlatte.rapidsandrivers.migrering.hendelseData
 import no.nav.etterlatte.vilkaarsvurdering.services.VilkaarsvurderingService
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -31,8 +32,9 @@ internal class MigreringRiver(
         context: MessageContext,
     ) {
         val behandlingId = packet.behandlingId
+        val yrkesskadeFordel = packet.hendelseData.avdoedForelder.any { it.yrkesskade }
         logger.info("Mottatt vilkårs-migreringshendelse for $BEHANDLING_ID_KEY $behandlingId")
-        vilkaarsvurderingService.migrer(behandlingId)
+        vilkaarsvurderingService.migrer(behandlingId, yrkesskadeFordel)
         packet[VILKAARSVURDERT_KEY] = true
         packet.eventName = Migreringshendelser.TRYGDETID
         context.publish(packet.toJson())

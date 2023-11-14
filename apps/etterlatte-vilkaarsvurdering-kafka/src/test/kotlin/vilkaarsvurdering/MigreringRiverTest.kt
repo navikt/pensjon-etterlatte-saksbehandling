@@ -18,7 +18,7 @@ import java.util.UUID
 internal class MigreringRiverTest {
     private val vilkaarsvurderingServiceMock =
         mockk<VilkaarsvurderingService> {
-            coEvery { migrer(any()) } returns mockk()
+            coEvery { migrer(any(), any()) } returns mockk()
         }
     private val testRapid =
         TestRapid()
@@ -41,9 +41,7 @@ internal class MigreringRiverTest {
         testRapid.sendTestMessage(melding)
 
         coVerify(exactly = 1) {
-            vilkaarsvurderingServiceMock.migrer(
-                behandlingId,
-            )
+            vilkaarsvurderingServiceMock.migrer(behandlingId, false)
         }
         with(testRapid.inspektør.message(0)) {
             assertEquals(Migreringshendelser.TRYGDETID, this["@event_name"].asText())

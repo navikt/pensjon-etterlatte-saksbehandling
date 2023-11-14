@@ -7,6 +7,8 @@
       <env name="KAFKA_TARGET_TOPIC" value="etterlatte" />
       <env name="DOLLY_CLIENT_ID" value="1" />
       <env name="DOLLY_RESOURCE_URL" value="http://localhost" />
+      <env name="TESTNAV_CLIENT_ID" value="dev-gcp.dolly.testnav-person-service" />
+      <env name="TESTNAV_RESOURCE_URL" value="https://testnav-person-service.intern.dev.nav.no/api/v2" />
     </envs>
     <option name="MAIN_CLASS_NAME" value="no.nav.etterlatte.ApplicationKt" />
     <module name="pensjon-etterlatte-saksbehandling.apps.etterlatte-testdata.main" />

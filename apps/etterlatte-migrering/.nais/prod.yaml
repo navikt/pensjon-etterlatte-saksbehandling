@@ -1,0 +1,80 @@
+apiVersion: "nais.io/v1alpha1"
+kind: "Application"
+metadata:
+  name: etterlatte-migrering
+  namespace: etterlatte
+  labels:
+    team: etterlatte
+spec:
+  image: {{image}}
+  port: 8080
+  liveness:
+    initialDelay: 5
+    path: /isalive
+  readiness:
+    initialDelay: 5
+    path: /isready
+  kafka:
+    pool: nav-prod
+  prometheus:
+    enabled: true
+    path: /metrics
+  gcp:
+    sqlInstances:
+      - type: POSTGRES_14
+        name: etterlatte-migrering
+        databases:
+          - name: migrering
+            envVarPrefix: DB
+        flags:
+          - name: max_connections
+            value: "100"
+  azure:
+    application:
+      enabled: true
+      tenant: nav.no
+      claims:
+        groups:
+          - id: 11053fd7-e674-4552-9a88-f9fcedfa70b3 # 0000-GA-PENSJON_ATTESTERING
+          - id: 0af3955f-df85-4eb0-b5b2-45bf2c8aeb9e # 0000-GA-PENSJON_SAKSBEHANDLER
+          - id: ad7b87a6-9180-467c-affc-20a566b0fec0 # 0000-GA-Strengt_Fortrolig_Adresse
+          - id: 9ec6487d-f37a-4aad-a027-cd221c1ac32b #0000-GA-Fortrolig_Adresse
+          - id: e750ceb5-b70b-4d94-b4fa-9d22467b786b # 0000-GA-Egne_ansatte
+        extra:
+          - NAVident
+  secureLogs:
+    enabled: true
+  replicas:
+    cpuThresholdPercentage: 90
+    max: 1
+    min: 1
+  env:
+    - name: KAFKA_RAPID_TOPIC
+      value: etterlatte.dodsmelding
+    - name: KAFKA_RESET_POLICY
+      #sette tilbake til none senere
+      value: earliest
+    - name: PEN_URL
+      value: https://pensjon-pen-q2.dev-fss-pub.nais.io/pen/springapi # TODO oppdater
+    - name: PEN_CLIENT_ID
+      value: ddd52335-cfe8-4ee9-9e68-416a5ab26efa # TODO oppdater
+    - name: ETTERLATTE_PDLTJENESTER_URL
+      value: http://etterlatte-pdltjenester
+    - name: PDLTJENESTER_AZURE_SCOPE
+      value: api://prod-gcp.etterlatte.etterlatte-pdltjenester/.default
+    - name: KRR_ENDPOINT_URL
+      value: http://digdir-krr-proxy.team-rocket
+    - name: KRR_SCOPE
+      value: api://prod-gcp.team-rocket.digdir-krr-proxy/.default
+  envFrom:
+    - secret: my-application-unleash-api-token
+  accessPolicy:
+    outbound:
+      rules:
+        - application: etterlatte-pdltjenester
+        - application: digdir-krr-proxy
+          namespace: team-rocket
+          cluster: prod-gcp
+      external:
+        - host: etterlatte-unleash-api.nav.cloud.nais.io
+        - host: pensjon-pen-q2.dev-fss-pub.nais.io # TODO oppdater

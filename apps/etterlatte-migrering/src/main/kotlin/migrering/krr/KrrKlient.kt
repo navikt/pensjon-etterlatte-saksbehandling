@@ -29,7 +29,7 @@ class KrrKlient(private val client: HttpClient, config: Config) : Krr {
 
         return try {
             val response =
-                client.get("$url/person") {
+                client.get("$url/rest/v1/person") {
                     header(HttpHeaders.NavPersonIdent, fnr.value)
                     accept(ContentType.Application.Json)
                     contentType(ContentType.Application.Json)
@@ -42,7 +42,7 @@ class KrrKlient(private val client: HttpClient, config: Config) : Krr {
                 throw ClientRequestException(response, response.toString())
             }
         } catch (cause: Throwable) {
-            logger.warn("Klarte ikke å hente kontaktinformasjon fra KRR.", cause)
+            logger.warn("Klarte ikke å hente kontaktinformasjon fra KRR på $url.", cause)
             return null
         }
     }

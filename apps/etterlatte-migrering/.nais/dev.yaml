@@ -65,7 +65,7 @@ spec:
     - name: PDLTJENESTER_AZURE_SCOPE
       value: api://dev-gcp.etterlatte.etterlatte-pdltjenester/.default
     - name: KRR_ENDPOINT_URL
-      value: https://digdir-krr-proxy.intern.dev.nav.no/rest/v1
+      value: https://digdir-krr-proxy
     - name: KRR_SCOPE
       value: api://dev-gcp.team-rocket.digdir-krr-proxy/.default
   envFrom:
@@ -80,3 +80,4 @@ spec:
       external:
         - host: etterlatte-unleash-api.nav.cloud.nais.io
         - host: pensjon-pen-q2.dev-fss-pub.nais.io
+        - host: digdir-krr-proxy.intern.dev.nav.no

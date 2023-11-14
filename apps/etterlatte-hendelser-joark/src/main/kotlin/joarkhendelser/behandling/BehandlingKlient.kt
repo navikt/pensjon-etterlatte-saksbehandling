@@ -3,11 +3,14 @@ package joarkhendelser.behandling
 import com.fasterxml.jackson.databind.node.ObjectNode
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
+import io.ktor.client.plugins.ResponseException
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
+import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import no.nav.etterlatte.libs.common.FoedselsNummerMedGraderingDTO
+import no.nav.etterlatte.libs.common.FoedselsnummerDTO
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.oppgave.NyOppgaveDto
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
@@ -19,6 +22,23 @@ class BehandlingKlient(
     private val httpClient: HttpClient,
     private val url: String,
 ) {
+    suspend fun hentSak(
+        fnr: String,
+        sakType: SakType,
+    ): Long? =
+        try {
+            httpClient.post("$url/personer/getsak/$sakType") {
+                contentType(ContentType.Application.Json)
+                setBody(FoedselsnummerDTO(fnr))
+            }.body<ObjectNode>()["id"].longValue()
+        } catch (re: ResponseException) {
+            if (re.response.status == HttpStatusCode.NotFound) {
+                null
+            } else {
+                throw re
+            }
+        }
+
     suspend fun hentEllerOpprettSak(
         fnr: String,
         sakType: SakType,

@@ -15,6 +15,7 @@ const val PERSONGALLERI_KEY = "persongalleri"
 const val PESYS_ID_KEY = "pesysId"
 const val KILDE_KEY = "kilde"
 const val LOPENDE_JANUAR_2024_KEY = "lopendeJanuar2024"
+const val BREV_OPPRETTA_MIGRERING = "brev_oppretta_migrering"
 
 var JsonMessage.hendelseData: MigreringRequest
     get() = objectMapper.treeToValue(this[HENDELSE_DATA_KEY], MigreringRequest::class.java)

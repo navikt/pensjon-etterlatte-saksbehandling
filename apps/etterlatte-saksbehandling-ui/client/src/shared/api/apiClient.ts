@@ -1,3 +1,5 @@
+import { logger } from '~utils/logger'
+
 export type ApiSuccess<T> = { ok: true; status: number; data: T }
 export type ApiResponse<T> = ApiSuccess<T> | ApiError
 
@@ -64,11 +66,29 @@ async function apiFetcher<T>(props: Options): Promise<ApiResponse<T>> {
     } else {
       const error: JsonError = await response.json()
 
-      console.error(error, response)
-      return { ...error, ok: false }
+      if (response.status >= 500) {
+        const errorobj = {
+          msg: 'Fikk feil i kall mot backend',
+          errorInfo: JSON.stringify({ url: url, method: method, error: error }),
+        }
+        logger.generalError(JSON.stringify(errorobj))
+        console.error(error, response)
+        return { ...error, ok: false }
+      } else {
+        // logger 3xx og 4xx som info
+        const errorobj = {
+          msg: `Fikk status=${response.status} i kall mot backend`,
+          errorInfo: JSON.stringify({ url: url, method: method, error: error }),
+        }
+        logger.generalInfo(JSON.stringify(errorobj))
+        console.log(error, response)
+        return { ...error, ok: false }
+      }
     }
   } catch (e) {
     console.error('Rejection i fetch / utlesing av data', e)
+    const errorobj = { msg: 'Fikk Rejection i kall mot backend', errorInfo: { url: url, method: method } }
+    logger.generalError(JSON.stringify(errorobj))
     return {
       ok: false,
       status: 400,

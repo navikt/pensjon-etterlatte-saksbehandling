@@ -13,14 +13,15 @@ import Spinner from '~shared/Spinner'
 import { useBehandlingRoutes } from '~components/behandling/BehandlingRoutes'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { AktivitetspliktOppfolging } from '~shared/types/Aktivitetsplikt'
-import { erFerdigBehandlet } from '~components/behandling/felles/utils'
+import { hentBehandlesFraStatus } from '~components/behandling/felles/utils'
+import { handlinger } from '~components/behandling/handlinger/typer'
 
 export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => {
   const { behandling } = props
   const { next } = useBehandlingRoutes()
 
   const avdoedesDoedsdato = behandling?.familieforhold?.avdoede?.opplysning?.doedsdato
-  const ferdigBehandlet = erFerdigBehandlet(behandling.status)
+  const redigerbar = hentBehandlesFraStatus(behandling.status)
   const configContext = useContext(ConfigContext)
 
   const [beskrivelse, setBeskrivelse] = useState<string>('')
@@ -75,7 +76,7 @@ export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => 
         {!isPending(hentet) && aktivitetOppfolging && (
           <SpacingWrapper>
             <BodyLong>{aktivitetOppfolging.aktivitet}</BodyLong>
-            {!ferdigBehandlet && (
+            {redigerbar && (
               <Button variant="tertiary" icon={<PencilIcon />} onClick={() => edit()}>
                 Rediger
               </Button>
@@ -154,7 +155,7 @@ export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => 
 
       <BehandlingHandlingKnapper>
         <Button variant="primary" onClick={() => next()}>
-          Gå videre
+          {handlinger.NESTE.navn}
         </Button>
       </BehandlingHandlingKnapper>
     </Content>

@@ -438,7 +438,7 @@ data class PdlVergeEllerFullmektig(
     val motpartsPersonident: Folkeregisteridentifikator?,
     val navn: PdlPersonnavn?,
     val omfang: String?,
-    val omfangetErInnenPersonligOmraade: Boolean,
+    val omfangetErInnenPersonligOmraade: Boolean?,
 )
 
 data class PdlGeografiskTilknytningIdentVariables(

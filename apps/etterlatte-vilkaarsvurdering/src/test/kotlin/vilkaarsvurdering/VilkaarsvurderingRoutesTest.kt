@@ -18,6 +18,7 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
+import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -27,6 +28,7 @@ import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Utfall
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.POSTGRES_VERSION
@@ -52,6 +54,7 @@ import org.junit.jupiter.api.TestInstance
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
 import testsupport.buildTestApplicationConfigurationForOauth
+import java.time.LocalDateTime
 import java.util.UUID
 import javax.sql.DataSource
 
@@ -756,6 +759,38 @@ internal class VilkaarsvurderingRoutesTest {
         }
     }
 
+    @Test
+    fun `skal sjekke gyldighet og oppdatere status hvis den er OPPRETTET`() {
+        coEvery { behandlingKlient.settBehandlingStatusVilkaarsvurdert(any(), any()) } returns true
+
+        testApplication {
+            environment {
+                config = hoconApplicationConfig
+            }
+            application { restModule(this.log) { vilkaarsvurdering(vilkaarsvurderingServiceImpl, behandlingKlient) } }
+
+            runBlocking {
+                vilkaarsvurderingServiceImpl.opprettVilkaarsvurdering(behandlingId, oboToken)
+                vilkaarsvurderingServiceImpl.oppdaterTotalVurdering(behandlingId, oboToken, vilkaarsvurderingResultat())
+            }
+
+            val response =
+                client.post("/api/vilkaarsvurdering/$behandlingId/oppdater-status") {
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    header(HttpHeaders.Authorization, "Bearer $token")
+                }
+
+            val dto = objectMapper.readValue(response.bodyAsText(), StatusOppdatertDto::class.java)
+
+            assertEquals(HttpStatusCode.OK, response.status)
+            assertEquals(dto.statusOppdatert, true)
+
+            coVerify(exactly = 2) {
+                behandlingKlient.settBehandlingStatusVilkaarsvurdert(any(), any())
+            }
+        }
+    }
+
     private fun opprettVilkaarsvurdering(vilkaarsvurderingService: VilkaarsvurderingService): Vilkaarsvurdering =
         runBlocking {
             vilkaarsvurderingService.opprettVilkaarsvurdering(behandlingId, oboToken)
@@ -766,11 +801,20 @@ internal class VilkaarsvurderingRoutesTest {
             every { id } returns UUID.randomUUID()
             every { sak } returns 1L
             every { sakType } returns SakType.BARNEPENSJON
+            every { status } returns BehandlingStatus.OPPRETTET
             every { behandlingType } returns BehandlingType.FØRSTEGANGSBEHANDLING
             every { soeker } returns "10095512345"
             every { virkningstidspunkt } returns VirkningstidspunktTestData.virkningstidsunkt()
             every { revurderingsaarsak } returns null
         }
+
+    private fun vilkaarsvurderingResultat(utfall: VilkaarsvurderingUtfall = VilkaarsvurderingUtfall.OPPFYLT) =
+        VilkaarsvurderingResultat(
+            utfall = utfall,
+            kommentar = "Kommentar",
+            tidspunkt = LocalDateTime.now(),
+            saksbehandler = "Saksbehandler",
+        )
 
     private companion object {
         val behandlingId: UUID = UUID.randomUUID()

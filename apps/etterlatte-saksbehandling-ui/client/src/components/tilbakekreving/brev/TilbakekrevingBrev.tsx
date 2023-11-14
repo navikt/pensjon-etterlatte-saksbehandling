@@ -15,9 +15,11 @@ import { useVedtak } from '~components/vedtak/useVedtak'
 import RedigerbartBrev from '~components/behandling/brev/RedigerbartBrev'
 
 export function TilbakekrevingBrev({ tilbakekreving }: { tilbakekreving: TilbakekrevingBehandling }) {
-  const kanAttesteres = [TilbakekrevingStatus.OPPRETTET, TilbakekrevingStatus.UNDER_ARBEID].includes(
-    tilbakekreving.status
-  )
+  const kanAttesteres = [
+    TilbakekrevingStatus.OPPRETTET,
+    TilbakekrevingStatus.UNDER_ARBEID,
+    TilbakekrevingStatus.UNDERKJENT,
+  ].includes(tilbakekreving.status)
   const vedtak = useVedtak()
   const [vedtaksbrev, setVedtaksbrev] = useState<IBrev | undefined>(undefined)
   const [hentBrevStatus, hentBrevRequest] = useApiCall(hentVedtaksbrev)
@@ -64,7 +66,13 @@ export function TilbakekrevingBrev({ tilbakekreving }: { tilbakekreving: Tilbake
               Dette er et manuelt opprettet brev. Kontroller innholdet nøye før attestering.
             </Alert>
             <br />
-            {vedtaksbrev && <MottakerPanel vedtaksbrev={vedtaksbrev} />}
+            {vedtaksbrev && (
+              <MottakerPanel
+                vedtaksbrev={vedtaksbrev}
+                oppdater={(val) => setVedtaksbrev({ ...vedtaksbrev, mottaker: val })}
+                redigerbar={false}
+              />
+            )}
           </ContentHeader>
         </Sidebar>
 

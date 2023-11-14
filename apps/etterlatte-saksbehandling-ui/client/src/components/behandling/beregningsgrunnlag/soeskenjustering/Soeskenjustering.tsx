@@ -3,7 +3,7 @@ import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
 import { useFieldArray, useForm } from 'react-hook-form'
 import { Button, ErrorSummary, Heading } from '@navikt/ds-react'
 import styled from 'styled-components'
-import { IPdlPerson } from '~shared/types/Person'
+import { hentLevendeSoeskenFraAvdoedeForSoeker, IPdlPerson } from '~shared/types/Person'
 import { addMonths } from 'date-fns'
 import { SoeskenMedIBeregning } from '~shared/types/Beregning'
 import { Barn } from '~components/behandling/soeknadsoversikt/familieforhold/personer/Barn'
@@ -11,6 +11,7 @@ import { Border, HeadingWrapper } from '~components/behandling/soeknadsoversikt/
 import { ContentHeader } from '~shared/styled'
 import { FamilieforholdWrapper } from '~components/behandling/soeknadsoversikt/familieforhold/barnepensjon/FamilieforholdBarnepensjon'
 import {
+  FEIL_I_PERIODE,
   feilIKomplettePerioderOverIntervall,
   mapListeFraDto,
   PeriodisertBeregningsgrunnlag,
@@ -50,10 +51,10 @@ const Soeskenjustering = (props: SoeskenjusteringProps) => {
   }
   const [visFeil, setVisFeil] = useState(false)
 
-  const soesken: IPdlPerson[] =
-    behandling.familieforhold.avdoede.opplysning.avdoedesBarn?.filter(
-      (barn) => barn.foedselsnummer !== behandling.søker?.foedselsnummer
-    ) ?? []
+  const soesken = hentLevendeSoeskenFraAvdoedeForSoeker(
+    behandling.familieforhold.avdoede,
+    behandling.søker?.foedselsnummer as string
+  )
 
   const { handleSubmit, control, watch } = useForm<{
     soeskenMedIBeregning: PeriodisertBeregningsgrunnlag<SoeskenKanskjeMedIBeregning[]>[]
@@ -193,7 +194,7 @@ const FeilIPerioder = (props: { feil: [number, FeilIPeriodeGrunnlagAlle][] }) =>
   return (
     <FeilIPerioderOppsummering heading="Du må fikse feil i periodiseringen før du kan beregne">
       {props.feil.map(([index, feil]) => (
-        <ErrorSummary.Item key={`${index}${feil}`} href={`#soeskenjustering̋.${index}`}>
+        <ErrorSummary.Item key={`${index}${feil}`} href={`#soeskenjustering.${index}`}>
           {teksterFeilIPeriode[feil]}
         </ErrorSummary.Item>
       ))}
@@ -206,14 +207,6 @@ const FeilIPerioderOppsummering = styled(ErrorSummary)`
   width: 30em;
 `
 
-export const FEIL_I_PERIODE = [
-  'TOM_FOER_FOM',
-  'PERIODE_OVERLAPPER_MED_NESTE',
-  'HULL_ETTER_PERIODE',
-  'INGEN_PERIODER',
-  'DEKKER_IKKE_START_AV_INTERVALL',
-  'DEKKER_IKKE_SLUTT_AV_INTERVALL',
-] as const
 export type FeilIPeriodeSoeskenjustering = (typeof FEIL_I_PERIODE)[number]
 export type FeilIPeriodeGrunnlagAlle = FeilIPeriodeSoeskenjustering | 'IKKE_ALLE_VALGT'
 

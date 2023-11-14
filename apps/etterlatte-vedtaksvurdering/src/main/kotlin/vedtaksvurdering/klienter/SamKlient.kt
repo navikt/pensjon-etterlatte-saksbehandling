@@ -55,7 +55,7 @@ class SamKlientImpl(
 
         try {
             val response =
-                httpClient.post(resourceUrl) {
+                httpClient.post("$resourceUrl/api/vedtak/samordne") {
                     contentType(ContentType.Application.Json)
                     setBody(vedtak.tilSamordneRequest())
                 }

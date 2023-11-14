@@ -1,10 +1,19 @@
 import { Grunnlagsopplysning } from '~shared/types/grunnlag'
 import { IAdresse } from '~shared/types/IAdresse'
 import { KildePdl } from './kilde'
+import { VergemaalEllerFremtidsfullmakt } from '~components/person/typer'
 
 export interface IFamilieforhold {
   avdoede: Grunnlagsopplysning<IPdlPerson, KildePdl>
   gjenlevende: Grunnlagsopplysning<IPdlPerson, KildePdl>
+}
+
+export const hentLevendeSoeskenFraAvdoedeForSoeker = (
+  avdoede: Grunnlagsopplysning<IPdlPerson, KildePdl>,
+  soekerFnr: string
+) => {
+  const soeskenliste = (avdoede?.opplysning.avdoedesBarn ?? []).filter((person) => person.foedselsnummer !== soekerFnr)
+  return soeskenliste.filter((soesken) => soesken.doedsdato === null)
 }
 
 export interface IFamilieRelasjon {
@@ -19,7 +28,7 @@ export interface IPdlPerson {
   etternavn: string
   foedselsnummer: string
   foedselsdato: Date
-  doedsdato: string
+  doedsdato: string | undefined
   bostedsadresse?: IAdresse[]
   deltBostedsadresse?: IAdresse[]
   kontaktadresse?: IAdresse[]
@@ -28,7 +37,7 @@ export interface IPdlPerson {
   familieRelasjon?: IFamilieRelasjon
   sivilstatus?: Sivilstatus
   sivilstand?: Sivilstand[]
-  // ...
+  vergemaalEllerFremtidsfullmakt?: VergemaalEllerFremtidsfullmakt[]
 }
 
 export interface Sivilstand {

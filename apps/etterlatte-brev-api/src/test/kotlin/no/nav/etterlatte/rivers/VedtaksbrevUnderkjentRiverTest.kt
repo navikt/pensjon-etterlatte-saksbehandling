@@ -55,11 +55,11 @@ internal class VedtaksbrevUnderkjentRiverTest {
     }
 
     @Test
-    fun `Vedtaksbrev slettet ok`() {
+    fun `Vedtaksbrev gjenåpnet ok`() {
         val brev = opprettBrev()
 
         every { vedtaksbrevService.hentVedtaksbrev(any()) } returns brev
-        every { vedtaksbrevService.slettVedtaksbrev(any()) } returns true
+        every { vedtaksbrevService.fjernFerdigstiltStatusUnderkjentVedtak(any(), any()) } returns true
 
         val vedtak = opprettVedtak()
         val melding = opprettMelding(vedtak)
@@ -67,15 +67,15 @@ internal class VedtaksbrevUnderkjentRiverTest {
         testRapid.apply { sendTestMessage(melding.toJson()) }.inspektør
 
         verify(exactly = 1) { vedtaksbrevService.hentVedtaksbrev(vedtak.behandling.id) }
-        verify(exactly = 1) { vedtaksbrevService.slettVedtaksbrev(brev.id) }
+        verify(exactly = 1) { vedtaksbrevService.fjernFerdigstiltStatusUnderkjentVedtak(brev.id, any()) }
     }
 
     @Test
-    fun `Feil ved sletting`() {
+    fun `Feil ved gjenåpning av vedtaksbrev`() {
         val brev = opprettBrev()
 
         every { vedtaksbrevService.hentVedtaksbrev(any()) } returns brev
-        every { vedtaksbrevService.slettVedtaksbrev(any()) } returns false
+        every { vedtaksbrevService.fjernFerdigstiltStatusUnderkjentVedtak(any(), any()) } returns false
 
         val vedtak = opprettVedtak()
         val melding = opprettMelding(vedtak)
@@ -85,7 +85,7 @@ internal class VedtaksbrevUnderkjentRiverTest {
         }
 
         verify(exactly = 1) { vedtaksbrevService.hentVedtaksbrev(vedtak.behandling.id) }
-        verify(exactly = 1) { vedtaksbrevService.slettVedtaksbrev(brev.id) }
+        verify(exactly = 1) { vedtaksbrevService.fjernFerdigstiltStatusUnderkjentVedtak(brev.id, any()) }
     }
 
     private fun opprettMelding(vedtak: VedtakDto): JsonMessage {
@@ -120,6 +120,7 @@ internal class VedtaksbrevUnderkjentRiverTest {
             BrevProsessType.AUTOMATISK,
             "fnr",
             Status.JOURNALFOERT,
+            Tidspunkt.now(),
             mottaker = mockk(),
         )
 }

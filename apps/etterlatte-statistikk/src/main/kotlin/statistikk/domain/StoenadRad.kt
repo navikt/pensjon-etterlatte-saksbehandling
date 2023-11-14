@@ -1,5 +1,6 @@
 package no.nav.etterlatte.statistikk.domain
 
+import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import java.time.LocalDate
@@ -31,4 +32,6 @@ data class StoenadRad(
     val sakUtland: SakUtland?,
     val virkningstidspunkt: YearMonth?,
     val utbetalingsdato: LocalDate?,
+    val kilde: Vedtaksloesning,
+    val pesysId: Long?,
 )

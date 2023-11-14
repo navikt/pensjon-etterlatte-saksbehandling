@@ -60,11 +60,33 @@ export const BarneListe = ({ familieforhold }: Props) => {
 }
 
 const BarnRow = ({ barn, familieforhold }: { barn: IPdlPerson; familieforhold: IFamilieforhold }) => {
+  const erDoed = !!barn.doedsdato
+  const barnetsFnr = barn.foedselsnummer
+
+  const erGjenlevendesBarn = familieforhold.gjenlevende.opplysning.familieRelasjon?.barn?.includes(barnetsFnr) ?? false
+
+  if (erDoed) {
+    const navn = `${barn.fornavn} ${barn.etternavn} '(død)'}`
+    return (
+      <Table.Row>
+        <Table.DataCell>{navn}</Table.DataCell>
+        <Table.DataCell>
+          <FnrWrapper>
+            <Link href={`/person/${barn.foedselsnummer}`} target="_blank" rel="noreferrer noopener">
+              {formaterFnr(barn.foedselsnummer)}
+            </Link>
+            <CopyButton copyText={barn.foedselsnummer} size="small" />
+          </FnrWrapper>
+        </Table.DataCell>
+        <Table.DataCell>-</Table.DataCell>
+        <Table.DataCell>-</Table.DataCell>
+        <Table.DataCell>{erGjenlevendesBarn ? 'Gjenlevende og avdød' : 'Kun avdød'}</Table.DataCell>
+      </Table.Row>
+    )
+  }
   const foedselsdato = parse(String(barn.foedselsdato), DatoFormat.AAR_MAANED_DAG, new Date())
   const alder = differenceInYears(new Date(), foedselsdato)
-
-  const navn = `${barn.fornavn} ${barn.etternavn} (${alder} år)`
-
+  const navnMedAlder = `${barn.fornavn} ${barn.etternavn} (${alder} år)`
   const aktivAdresse: IAdresse | undefined = barn.bostedsadresse?.find((adresse: IAdresse) => adresse.aktiv)
   const adresse = `${aktivAdresse?.adresseLinje1}, ${aktivAdresse?.postnr ?? ''} ${aktivAdresse?.poststed ?? ''}`
   const periode = aktivAdresse
@@ -75,12 +97,9 @@ const BarnRow = ({ barn, familieforhold }: { barn: IPdlPerson; familieforhold: I
       }`
     : 'Mangler adresse'
 
-  const barnetsFnr = barn.foedselsnummer
-  const erGjenlevendesBarn = familieforhold.gjenlevende.opplysning.familieRelasjon?.barn?.includes(barnetsFnr) ?? false
-
   return (
     <Table.Row>
-      <Table.DataCell>{navn}</Table.DataCell>
+      <Table.DataCell>{navnMedAlder}</Table.DataCell>
       <Table.DataCell>
         <FnrWrapper>
           <Link href={`/person/${barn.foedselsnummer}`} target="_blank" rel="noreferrer noopener">

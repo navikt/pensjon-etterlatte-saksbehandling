@@ -63,7 +63,7 @@ class AvkortingRoutesTest {
     }
 
     @Test
-    fun `skal returnere 404 naar avkorting ikke finnes`() {
+    fun `skal returnere 204 naar avkorting ikke finnes`() {
         coEvery { avkortingService.hentAvkorting(any(), any()) } returns null
 
         testApplication(server.config.httpServer.port()) {
@@ -73,7 +73,7 @@ class AvkortingRoutesTest {
                     header(HttpHeaders.Authorization, "Bearer $token")
                 }
 
-            response.status shouldBe HttpStatusCode.NotFound
+            response.status shouldBe HttpStatusCode.NoContent
         }
     }
 
@@ -161,7 +161,7 @@ class AvkortingRoutesTest {
                         ),
                     ),
             )
-        coEvery { avkortingService.lagreAvkorting(any(), any(), any()) } returns avkorting
+        coEvery { avkortingService.beregnAvkortingMedNyttGrunnlag(any(), any(), any()) } returns avkorting
 
         testApplication(server.config.httpServer.port()) {
             val response =
@@ -175,7 +175,7 @@ class AvkortingRoutesTest {
             val result = objectMapper.readValue(response.bodyAsText(), AvkortingDto::class.java)
             result shouldBe dto
             coVerify {
-                avkortingService.lagreAvkorting(
+                avkortingService.beregnAvkortingMedNyttGrunnlag(
                     behandlingsId,
                     any(),
                     withArg {

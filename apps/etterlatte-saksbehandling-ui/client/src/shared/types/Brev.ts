@@ -6,6 +6,7 @@ export interface IBrev {
   soekerFnr: string
   status: BrevStatus
   mottaker: Mottaker
+  opprettet: string
 }
 
 export interface Mottaker {

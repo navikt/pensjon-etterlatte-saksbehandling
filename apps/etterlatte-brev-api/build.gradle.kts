@@ -36,6 +36,8 @@ dependencies {
     implementation(libs.ktor2.authjwt)
     implementation(libs.cache.caffeine)
 
+    implementation(libs.pdf.pdfbox)
+
     implementation(libs.bundles.jackson)
 
     implementation(libs.navfelles.tokenclientcore)

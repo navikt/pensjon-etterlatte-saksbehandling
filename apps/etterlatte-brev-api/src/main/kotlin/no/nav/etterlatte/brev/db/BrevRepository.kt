@@ -1,5 +1,6 @@
 package no.nav.etterlatte.brev.db
 
+import com.fasterxml.jackson.databind.JsonNode
 import kotliquery.Row
 import kotliquery.Session
 import kotliquery.queryOf
@@ -32,7 +33,9 @@ import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.libs.common.deserialize
+import no.nav.etterlatte.libs.common.tidspunkt.toTimestamp
 import no.nav.etterlatte.libs.common.toJson
+import no.nav.etterlatte.libs.database.tidspunkt
 import no.nav.etterlatte.libs.database.transaction
 import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
 import java.util.UUID
@@ -176,6 +179,14 @@ class BrevRepository(private val ds: DataSource) {
         }
     }
 
+    fun fjernFerdigstiltStatusUnderkjentVedtak(
+        id: BrevID,
+        vedtak: JsonNode,
+    ): Boolean =
+        using(sessionOf(ds)) {
+            it.lagreHendelse(id, Status.OPPDATERT, vedtak.toJson()) > 0
+        }
+
     fun settBrevFerdigstilt(id: BrevID) {
         using(sessionOf(ds)) {
             it.lagreHendelse(id, Status.FERDIGSTILT)
@@ -193,6 +204,7 @@ class BrevRepository(private val ds: DataSource) {
                             "behandling_id" to ulagretBrev.behandlingId,
                             "prosess_type" to ulagretBrev.prosessType.name,
                             "soeker_fnr" to ulagretBrev.soekerFnr,
+                            "opprettet" to ulagretBrev.opprettet.toTimestamp(),
                         ),
                     ).asUpdateAndReturnGeneratedKey,
                 )
@@ -278,11 +290,6 @@ class BrevRepository(private val ds: DataSource) {
             tx.lagreHendelse(brevId, Status.DISTRIBUERT, distResponse.toJson()) > 0
         }
 
-    fun slett(id: BrevID): Boolean =
-        using(sessionOf(ds)) {
-            it.run(queryOf("DELETE FROM brev WHERE id = ?", id).asUpdate) > 0
-        }
-
     private fun Session.lagreHendelse(
         brevId: BrevID,
         status: Status,
@@ -306,6 +313,7 @@ class BrevRepository(private val ds: DataSource) {
             soekerFnr = row.string("soeker_fnr"),
             prosessType = BrevProsessType.valueOf(row.string("prosess_type")),
             status = row.string("status_id").let { Status.valueOf(it) },
+            opprettet = row.tidspunkt("opprettet"),
             mottaker =
                 Mottaker(
                     navn = row.string("navn"),
@@ -348,7 +356,7 @@ class BrevRepository(private val ds: DataSource) {
     // language=SQL
     private object Queries {
         const val HENT_BREV_QUERY = """
-            SELECT b.id, b.sak_id, b.behandling_id, b.prosess_type, b.soeker_fnr, h.status_id, m.*
+            SELECT b.id, b.sak_id, b.behandling_id, b.prosess_type, b.soeker_fnr, b.opprettet, h.status_id, m.*
             FROM brev b
             INNER JOIN mottaker m on b.id = m.brev_id
             INNER JOIN hendelse h on b.id = h.brev_id
@@ -361,7 +369,7 @@ class BrevRepository(private val ds: DataSource) {
         """
 
         const val HENT_BREV_FOR_BEHANDLING_QUERY = """
-            SELECT b.id, b.sak_id, b.behandling_id, b.prosess_type, b.soeker_fnr, h.status_id, m.*
+            SELECT b.id, b.sak_id, b.behandling_id, b.prosess_type, b.soeker_fnr, h.status_id, b.opprettet, m.*
             FROM brev b
             INNER JOIN mottaker m on b.id = m.brev_id
             INNER JOIN hendelse h on b.id = h.brev_id
@@ -374,7 +382,7 @@ class BrevRepository(private val ds: DataSource) {
         """
 
         const val HENT_BREV_FOR_SAK_QUERY = """
-            SELECT b.id, b.sak_id, b.behandling_id, b.prosess_type, b.soeker_fnr, h.status_id, m.*
+            SELECT b.id, b.sak_id, b.behandling_id, b.prosess_type, b.soeker_fnr, h.status_id, b.opprettet, m.*
             FROM brev b
             INNER JOIN mottaker m on b.id = m.brev_id
             INNER JOIN hendelse h on b.id = h.brev_id
@@ -387,8 +395,8 @@ class BrevRepository(private val ds: DataSource) {
         """
 
         const val OPPRETT_BREV_QUERY = """
-            INSERT INTO brev (sak_id, behandling_id, prosess_type, soeker_fnr) 
-            VALUES (:sak_id, :behandling_id, :prosess_type, :soeker_fnr) 
+            INSERT INTO brev (sak_id, behandling_id, prosess_type, soeker_fnr, opprettet) 
+            VALUES (:sak_id, :behandling_id, :prosess_type, :soeker_fnr, :opprettet) 
             ON CONFLICT DO NOTHING;
         """
 

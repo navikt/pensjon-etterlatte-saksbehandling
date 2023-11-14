@@ -1,5 +1,6 @@
 package no.nav.etterlatte.libs.common.behandling
 
+import behandling.utland.LandMedDokumenter
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.fasterxml.jackson.annotation.JsonTypeName
 import java.time.LocalDate
@@ -74,14 +75,3 @@ sealed class RevurderingInfo {
         val landMedDokumenter: List<LandMedDokumenter>,
     ) : RevurderingInfo()
 }
-
-data class LandMedDokumenter(
-    val landIsoKode: String,
-    val dokumenter: List<MottattDokument>,
-)
-
-data class MottattDokument(
-    val dokumenttype: String,
-    val dato: LocalDate,
-    val kommentar: String?,
-)

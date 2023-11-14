@@ -6,12 +6,22 @@ query(
         tittel
         journalposttype
         journalstatus
+        bruker {
+            id
+            type
+        }
         dokumenter {
             dokumentInfoId
             tittel
             dokumentvarianter {
                 saksbehandlerHarTilgang
             }
+        }
+        sak {
+            fagsakId
+            fagsaksystem
+            sakstype
+            tema
         }
         avsenderMottaker {
             id
@@ -20,5 +30,6 @@ query(
         }
         kanal
         datoOpprettet
+        opprettetAvNavn
     }
 }

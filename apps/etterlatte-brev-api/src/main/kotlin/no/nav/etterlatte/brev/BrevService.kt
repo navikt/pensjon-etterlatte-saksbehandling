@@ -27,6 +27,7 @@ import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.brev.model.SlateHelper
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.Status
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
 
@@ -64,6 +65,7 @@ class BrevService(
                 soekerFnr = sak.ident,
                 prosessType = BrevProsessType.MANUELL,
                 mottaker = mottaker,
+                opprettet = Tidspunkt.now(),
                 innhold = BrevInnhold("Nytt brev", Spraak.NB, SlateHelper.opprettTomBrevmal()),
                 innholdVedlegg = null,
             )

@@ -11,7 +11,6 @@ import { KravpakkeUtland } from '~shared/types/Generellbehandling'
 import { hentAlleLand, ILand, sorterLand } from '~shared/api/trygdetid'
 import SEDLandMedDokumenter from '~components/behandling/revurderingsoversikt/sluttbehandlingUtland/SEDLandMedDokumenter'
 import { TextButton } from '~components/behandling/soeknadsoversikt/familieforhold/personer/personinfo/TextButton'
-import SluttbehandlingUtlandFelter from '~components/behandling/revurderingsoversikt/sluttbehandlingUtland/SluttbehandlingUtlandFelter'
 import { hentRevurderingerForSakMedAarsak, lagreRevurderingInfo } from '~shared/api/revurdering'
 import { AWhite } from '@navikt/ds-tokens/dist/tokens'
 import { CheckmarkCircleIcon } from '@navikt/aksel-icons'
@@ -152,12 +151,13 @@ export default function SluttbehandlingUtland({
         </ErrorSummary>
       ) : null}
       <Heading level="2" size="medium" style={{ marginTop: '2rem' }}>
-        Mottatte SED
+        Mottatt krav fra utland
       </Heading>
       <BodyShort>Fyll inn hvilke SED som er mottatt i RINA pr land.</BodyShort>
-      {isSuccess(hentAlleLandRequest) && (
+      {isPending(hentAlleLandRequest) && <Spinner visible={true} label="Henter land" />}
+      {isSuccess(hentAlleLandRequest) && alleLandKodeverk && (
         <SEDLandMedDokumenter
-          landListe={hentAlleLandRequest.data}
+          landListe={alleLandKodeverk}
           landMedDokumenter={landMedDokumenter}
           setLandMedDokumenter={setLandMedDokumenter}
           resetFeilkoder={() => setFeilkoder(new Set([]))}
@@ -202,9 +202,6 @@ export default function SluttbehandlingUtland({
             />
           )
         )}
-      {isSuccess(kravpakkeStatus) && (
-        <SluttbehandlingUtlandFelter tilknyttetBehandling={kravpakkeStatus.data.kravpakke.tilknyttetBehandling} />
-      )}
     </>
   )
 }

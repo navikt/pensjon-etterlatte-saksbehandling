@@ -74,8 +74,6 @@ spec:
       external:
         - host: mpls04.adeo.no
           ports:
-            - name: mq
-              port: 1414
-              protocol: TCP
+            - port: 1414
         - host: etterlatte-unleash-api.nav.cloud.nais.io
         - host: etterlatte-proxy.prod-fss-pub.nais.io

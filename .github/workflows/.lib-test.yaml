@@ -7,6 +7,7 @@ jobs:
   test:
     name: Verify pull request
     runs-on: ubuntu-latest-8-cores
+    timeout-minutes: 10
     steps:
       - name: Checkout code
         uses: actions/checkout@v4

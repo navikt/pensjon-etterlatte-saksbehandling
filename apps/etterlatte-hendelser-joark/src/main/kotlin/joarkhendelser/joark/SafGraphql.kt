@@ -1,11 +1,8 @@
 package no.nav.etterlatte.joarkhendelser.joark
 
+import com.fasterxml.jackson.annotation.JsonCreator
 import io.ktor.http.HttpStatusCode
-
-data class HentJournalposterResult(
-    val journalposter: List<Journalpost> = emptyList(),
-    val error: Error? = null,
-)
+import no.nav.etterlatte.token.Fagsaksystem
 
 data class HentJournalpostResult(
     val journalpost: Journalpost? = null,
@@ -17,11 +14,6 @@ data class Error(
     val message: String,
 )
 
-data class JournalpostListeResponse(
-    val data: DokumentoversiktBruker? = null,
-    val errors: List<JournalpostResponseError>? = null,
-)
-
 data class JournalpostResponse(
     val data: ResponseData? = null,
     val errors: List<JournalpostResponseError>? = null,
@@ -30,14 +22,6 @@ data class JournalpostResponse(
         val journalpost: Journalpost? = null,
     )
 }
-
-data class DokumentoversiktBruker(
-    val dokumentoversiktBruker: Journalposter,
-)
-
-data class Journalposter(
-    val journalposter: List<Journalpost>,
-)
 
 data class JournalpostResponseError(
     val message: String?,
@@ -63,21 +47,54 @@ data class GraphqlRequest(
 )
 
 data class JournalpostVariables(
-    val journalpostId: String,
+    val journalpostId: Long,
 )
 
 data class Journalpost(
     val journalpostId: String,
+    val bruker: Bruker?,
     val tittel: String,
     val journalposttype: String,
-    val journalstatus: String,
-    val dokumenter: List<Dokumenter>,
+    val journalstatus: Journalstatus,
+    val dokumenter: List<Dokument>,
+    val sak: Fagsak?,
     val avsenderMottaker: AvsenderMottaker,
-    val kanal: String,
+    val kanal: Kanal,
     val datoOpprettet: String,
+    val opprettetAvNavn: String?,
+) {
+    fun erFerdigstilt(): Boolean =
+        (journalstatus == Journalstatus.FERDIGSTILT || journalstatus == Journalstatus.JOURNALFOERT) &&
+            sak?.fagsaksystem == Fagsaksystem.EY.navn
+}
+
+enum class Journalstatus {
+    MOTTATT,
+    JOURNALFOERT,
+    FERDIGSTILT,
+    EKSPEDERT,
+    UNDER_ARBEID,
+    FEILREGISTRERT,
+    UTGAAR,
+    AVBRUTT,
+    UKJENT_BRUKER,
+    RESERVERT,
+    OPPLASTING_DOKUMENT,
+    UKJENT,
+}
+
+data class Bruker(
+    val id: String,
+    val type: BrukerIdType,
 )
 
-data class Dokumenter(
+enum class BrukerIdType {
+    AKTOERID,
+    FNR,
+    ORGNR,
+}
+
+data class Dokument(
     val dokumentInfoId: String,
     val tittel: String,
     val dokumentvarianter: List<Dokumentvarianter>,
@@ -87,8 +104,44 @@ data class Dokumentvarianter(
     val saksbehandlerHarTilgang: Boolean,
 )
 
+data class Fagsak(
+    val fagsakId: String?,
+    val fagsaksystem: String?,
+    val sakstype: String?,
+    val tema: String?,
+)
+
 data class AvsenderMottaker(
     val id: String?,
     val navn: String?,
     val erLikBruker: Boolean?,
 )
+
+enum class Kanal(val beskrivelse: String) {
+    ALTINN("Altinn"),
+    EESSI("EESSI"),
+    EIA("EIA"),
+    EKST_OPPS("Ekstern kilde"),
+    LOKAL_UTSKRIFT("Lokal utskrift"),
+    NAV_NO("nav.no"),
+    SENTRAL_UTSKRIFT("Sentral utskrift"),
+    SDP("SDP"),
+    SKAN_NETS("Skanning - NETS"),
+    SKAN_PEN("Skanning - Pensjon"),
+    SKAN_IM("Skanning - Iron Moutain"),
+    TRYGDERETTEN("Trygderetten"),
+    HELSENETTET("Helsenettet"),
+    INGEN_DISTRIBUSJON("Ingen distribusjon"),
+    NAV_NO_UINNLOGGET("Uinnlogget (nav.no)"),
+    INNSENDT_NAV_ANSATT("Innsendt av Nav-ansatt"),
+    NAV_NO_CHAT("Chat (nav.no)"),
+    DPVT("DPVT"),
+    UKJENT("Ukjent"),
+    ;
+
+    companion object {
+        @JvmStatic
+        @JsonCreator
+        fun fraVerdi(kanal: String) = values().firstOrNull { it.name == kanal } ?: UKJENT
+    }
+}

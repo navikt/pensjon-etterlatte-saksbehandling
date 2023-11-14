@@ -49,7 +49,7 @@ data class Tilbakekrevingsbelop(
     val rentetillegg: Int?,
 ) {
     companion object {
-        fun ny(grunnlagsbeloep: Grunnlagsbeloep) =
+        fun ytelse(grunnlagsbeloep: Grunnlagsbeloep) =
             Tilbakekrevingsbelop(
                 id = UUID.randomUUID(),
                 klasseKode = grunnlagsbeloep.klasseKode.value,
@@ -72,22 +72,22 @@ data class Tilbakekrevingsbelop(
                 id = UUID.randomUUID(),
                 klasseKode = grunnlagsbeloep.klasseKode.value,
                 klasseType = grunnlagsbeloep.klasseType.name,
-                bruttoUtbetaling = 0,
-                nyBruttoUtbetaling = 0,
-                skatteprosent = BigDecimal(0.0),
+                bruttoUtbetaling = grunnlagsbeloep.bruttoUtbetaling.toInt(),
+                nyBruttoUtbetaling = grunnlagsbeloep.nyBruttoUtbetaling.toInt(),
+                skatteprosent = grunnlagsbeloep.skatteProsent,
                 beregnetFeilutbetaling = null,
-                bruttoTilbakekreving = null,
+                bruttoTilbakekreving = grunnlagsbeloep.bruttoTilbakekreving.toInt(),
                 nettoTilbakekreving = null,
                 skatt = null,
                 skyld = null,
-                resultat = grunnlagsbeloep.resultat?.let { TilbakekrevingResultat.valueOf(it) },
+                resultat = null,
                 tilbakekrevingsprosent = null,
                 rentetillegg = null,
             )
     }
 
-    fun toVedtak() =
-        TilbakekrevingsbelopVedtak(
+    fun toYtelseVedtak() =
+        TilbakekrevingsbelopYtelseVedtak(
             klasseKode = klasseKode,
             bruttoUtbetaling = bruttoUtbetaling,
             nyBruttoUtbetaling = nyBruttoUtbetaling,
@@ -101,6 +101,14 @@ data class Tilbakekrevingsbelop(
             tilbakekrevingsprosent = requireNotNull(tilbakekrevingsprosent),
             rentetillegg = requireNotNull(rentetillegg),
         )
+
+    fun toFeilkontoVedtak() =
+        TilbakekrevingsbelopFeilkontoVedtak(
+            klasseKode = klasseKode,
+            bruttoUtbetaling = bruttoUtbetaling,
+            nyBruttoUtbetaling = nyBruttoUtbetaling,
+            bruttoTilbakekreving = requireNotNull(bruttoTilbakekreving),
+        )
 }
 
 fun List<KravgrunnlagPeriode>.tilTilbakekrevingPerioder(): List<TilbakekrevingPeriode> {
@@ -113,7 +121,7 @@ fun List<KravgrunnlagPeriode>.tilTilbakekrevingPerioder(): List<TilbakekrevingPe
 
         TilbakekrevingPeriode(
             maaned = periode.periode.fraOgMed,
-            ytelse = Tilbakekrevingsbelop.ny(ytelse),
+            ytelse = Tilbakekrevingsbelop.ytelse(ytelse),
             feilkonto = Tilbakekrevingsbelop.feilkonto(feilkonto),
         )
     }
@@ -186,11 +194,11 @@ data class FattetVedtak(
 
 data class TilbakekrevingPeriodeVedtak(
     val maaned: YearMonth,
-    val ytelse: TilbakekrevingsbelopVedtak,
-    val feilkonto: TilbakekrevingsbelopVedtak,
+    val ytelse: TilbakekrevingsbelopYtelseVedtak,
+    val feilkonto: TilbakekrevingsbelopFeilkontoVedtak,
 )
 
-data class TilbakekrevingsbelopVedtak(
+data class TilbakekrevingsbelopYtelseVedtak(
     val klasseKode: String,
     val bruttoUtbetaling: Int,
     val nyBruttoUtbetaling: Int,
@@ -203,4 +211,11 @@ data class TilbakekrevingsbelopVedtak(
     val resultat: TilbakekrevingResultat,
     val tilbakekrevingsprosent: Int,
     val rentetillegg: Int,
+)
+
+data class TilbakekrevingsbelopFeilkontoVedtak(
+    val klasseKode: String,
+    val bruttoUtbetaling: Int,
+    val nyBruttoUtbetaling: Int,
+    val bruttoTilbakekreving: Int,
 )

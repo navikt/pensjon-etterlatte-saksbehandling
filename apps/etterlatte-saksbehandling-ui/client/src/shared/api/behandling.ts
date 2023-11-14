@@ -4,7 +4,6 @@ import {
   IEtterbetaling,
   IGyldighetResultat,
   IKommerBarnetTilgode,
-  IUtenlandstilsnitt,
   NyBehandlingRequest,
   Virkningstidspunkt,
 } from '~shared/types/IDetaljertBehandling'
@@ -12,7 +11,7 @@ import { apiClient, ApiResponse } from './apiClient'
 import { ManueltOpphoerDetaljer } from '~components/behandling/manueltopphoeroversikt/ManueltOpphoerOversikt'
 import { Grunnlagsendringshendelse, GrunnlagsendringsListe, IBehandlingListe } from '~components/person/typer'
 import { InstitusjonsoppholdBegrunnelse } from '~components/person/uhaandtereHendelser/InstitusjonsoppholdVurderingBegrunnelse'
-import { FoersteVirk, ISak, SakType } from '~shared/types/sak'
+import { FoersteVirk, ISak } from '~shared/types/sak'
 import { InstitusjonsoppholdMedKilde } from '~components/person/uhaandtereHendelser/HistoriskeHendelser'
 
 export const hentBehandlingerForPerson = async (fnr: string): Promise<ApiResponse<IBehandlingListe[]>> => {
@@ -32,9 +31,6 @@ export const lukkGrunnlagshendelse = async (hendelse: Grunnlagsendringshendelse)
 export const hentBehandling = async (id: string): Promise<ApiResponse<IDetaljertBehandling>> => {
   return apiClient.get(`/behandling/${id}`)
 }
-
-export const hentSakForPerson = async (args: { fnr: string; type: SakType }): Promise<ApiResponse<ISak>> =>
-  apiClient.post(`/personer/sak/${args.type}`, { foedselsnummer: args.fnr })
 
 export const opprettBehandling = async (nyBehandlingRequest: NyBehandlingRequest): Promise<ApiResponse<string>> =>
   apiClient.post(`/behandling`, { ...nyBehandlingRequest })
@@ -92,17 +88,6 @@ export const lagreBegrunnelseKommerBarnetTilgode = async (args: {
 }): Promise<ApiResponse<IKommerBarnetTilgode>> => {
   return apiClient.post(`/behandling/${args.behandlingId}/kommerbarnettilgode`, {
     svar: args.svar,
-    begrunnelse: args.begrunnelse,
-  })
-}
-
-export const lagreUtenlandstilsnitt = async (args: {
-  behandlingId: string
-  begrunnelse: string
-  svar: string
-}): Promise<ApiResponse<IUtenlandstilsnitt>> => {
-  return apiClient.post(`/behandling/${args.behandlingId}/utenlandstilsnitt`, {
-    utenlandstilsnittType: args.svar,
     begrunnelse: args.begrunnelse,
   })
 }

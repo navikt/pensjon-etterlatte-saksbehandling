@@ -17,8 +17,6 @@ import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.behandling.Utenlandstilsnitt
-import no.nav.etterlatte.libs.common.behandling.UtenlandstilsnittType
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
@@ -252,38 +250,6 @@ internal class BehandlingDaoTest {
             gyldighetsproevingBehanding.gyldighetsproeving,
             lagretGyldighetsproving.gyldighetsproeving,
         )
-    }
-
-    @Test
-    fun `Skal legge til utenlandstilsnitt til en opprettet behandling`() {
-        val sak1 = sakRepo.opprettSak("123", SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr).id
-
-        val opprettBehandling =
-            opprettBehandling(
-                type = BehandlingType.FØRSTEGANGSBEHANDLING,
-                sakId = sak1,
-            )
-
-        behandlingRepo.opprettBehandling(opprettBehandling)
-
-        val opprettetBehandling =
-            requireNotNull(behandlingRepo.hentBehandling(opprettBehandling.id)) as Foerstegangsbehandling
-
-        behandlingRepo.lagreUtenlandstilsnitt(
-            opprettetBehandling.id,
-            Utenlandstilsnitt(
-                UtenlandstilsnittType.BOSATT_UTLAND,
-                Grunnlagsopplysning.Saksbehandler.create("navIdent"),
-                "Test",
-            ),
-        )
-
-        val lagretBehandling =
-            requireNotNull(behandlingRepo.hentBehandling(opprettBehandling.id)) as Foerstegangsbehandling
-
-        assertEquals(UtenlandstilsnittType.BOSATT_UTLAND, lagretBehandling.utenlandstilsnitt?.type)
-        assertEquals("Test", lagretBehandling.utenlandstilsnitt?.begrunnelse)
-        assertEquals("navIdent", lagretBehandling.utenlandstilsnitt?.kilde?.ident)
     }
 
     @Test

@@ -36,7 +36,7 @@ fun Route.avkorting(
                 logger.info("Henter avkorting med behandlingId=$it")
                 val avkorting = avkortingService.hentAvkorting(it, brukerTokenInfo)
                 when (avkorting) {
-                    null -> call.response.status(HttpStatusCode.NotFound)
+                    null -> call.response.status(HttpStatusCode.NoContent)
                     else -> call.respond(avkorting.toDto())
                 }
             }
@@ -47,7 +47,7 @@ fun Route.avkorting(
                 logger.info("Lagre avkorting for behandlingId=$it")
                 val avkortingGrunnlag = call.receive<AvkortingGrunnlagDto>()
                 val avkorting =
-                    avkortingService.lagreAvkorting(
+                    avkortingService.beregnAvkortingMedNyttGrunnlag(
                         it,
                         brukerTokenInfo,
                         avkortingGrunnlag.fromDto(brukerTokenInfo),

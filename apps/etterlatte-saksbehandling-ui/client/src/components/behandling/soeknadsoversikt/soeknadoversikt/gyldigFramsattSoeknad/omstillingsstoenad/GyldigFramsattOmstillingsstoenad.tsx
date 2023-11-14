@@ -25,11 +25,15 @@ export const GyldigFramsattOmstillingsstoenad = ({
 
   return (
     <LovtekstMedLenke
-      tittel="Er søknad gyldig fremsatt?"
+      tittel="Vurdering - søknad gyldig fremsatt"
       hjemler={[
         {
           lenke: 'https://lovdata.no/dokument/NL/lov/1997-02-28-19/KAPITTEL_8-2#%C2%A722-13',
           tittel: 'Folketrygdloven § 22-13 første ledd',
+        },
+        {
+          lenke: 'https://lovdata.no/pro/rundskriv/a45-01-02/ARTIKKEL_45',
+          tittel: 'Forordning 987/2009 artikkel 45 nr. 4',
         },
       ]}
       status={gyldigFremsattTilStatusIcon}
@@ -37,7 +41,8 @@ export const GyldigFramsattOmstillingsstoenad = ({
       <div>
         <Beskrivelse>
           Den som har rett til ytelsen må sette frem krav (verge hvis aktuelt). Om annet må fullmakt ligge i saken.
-          Søknaden må være signert og vise hva det søkes om, og den må være fremsatt i riktig land.
+          Søknaden må være signert og vise hva det søkes om, og den må settes fram i bostedslandet eller i det landet
+          vedkommende sist var medlem.
         </Beskrivelse>
         <InfobokserWrapper>
           <InfoWrapper>

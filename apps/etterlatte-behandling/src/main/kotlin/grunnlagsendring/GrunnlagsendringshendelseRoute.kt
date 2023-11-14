@@ -16,6 +16,7 @@ import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.institusjonsopphold.InstitusjonsoppholdHendelseBeriket
 import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.pdlhendelse.Adressebeskyttelse
+import no.nav.etterlatte.libs.common.pdlhendelse.Bostedsadresse
 import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.SivilstandHendelse
@@ -52,6 +53,13 @@ internal fun Route.grunnlagsendringshendelseRoute(grunnlagsendringshendelseServi
             val adressebeskyttelse = call.receive<Adressebeskyttelse>()
             logger.info("Mottar en adressebeskyttelse-hendelse fra PDL")
             grunnlagsendringshendelseService.oppdaterAdressebeskyttelseHendelse(adressebeskyttelse)
+            call.respond(HttpStatusCode.OK)
+        }
+
+        post("/bostedsadresse") {
+            val bostedsadresse = call.receive<Bostedsadresse>()
+            logger.info("Mottar en adresse-hendelse fra PDL")
+            grunnlagsendringshendelseService.oppdaterAdresseHendelse(bostedsadresse)
             call.respond(HttpStatusCode.OK)
         }
 

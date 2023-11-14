@@ -20,7 +20,7 @@ internal fun Route.sjekklisteRoute(sjekklisteService: SjekklisteService) {
     route("/api/sjekkliste/{$BEHANDLINGID_CALL_PARAMETER}") {
         get {
             val result = sjekklisteService.hentSjekkliste(behandlingId)
-            call.respond(result ?: HttpStatusCode.NotFound)
+            call.respond(result ?: HttpStatusCode.NoContent)
         }
 
         post {

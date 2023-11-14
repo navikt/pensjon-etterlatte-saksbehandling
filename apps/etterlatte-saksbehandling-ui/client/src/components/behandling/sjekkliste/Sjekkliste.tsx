@@ -27,23 +27,20 @@ import { useAppDispatch, useAppSelector } from '~store/Store'
 import { updateSjekkliste, updateSjekklisteItem } from '~store/reducers/SjekklisteReducer'
 import { PencilIcon } from '@navikt/aksel-icons'
 import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
-import { hentSaksbehandlerForOppgaveUnderArbeid } from '~shared/api/oppgaver'
 import { SakType } from '~shared/types/sak'
+import { useSaksbehandlerGjeldendeOppgave } from '~components/behandling/sidemeny/useSaksbehandlerGjeldendeOppgave'
 
-export const Sjekkliste = (props: { behandling: IBehandlingReducer }) => {
-  const { behandling } = props
-
+export const Sjekkliste = ({ behandling }: { behandling: IBehandlingReducer }) => {
   const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.saksbehandler)
   const [redigerbar, setRedigerbar] = useState<boolean>(false)
-  const [saksbehandlerForOppgaveResult, hentSaksbehandlerForOppgave] = useApiCall(
-    hentSaksbehandlerForOppgaveUnderArbeid
-  )
   const [oppgaveErTildeltInnloggetBruker, setOppgaveErTildeltInnloggetBruker] = useState(false)
+  const saksbehandlerGjeldendeOppgave = useSaksbehandlerGjeldendeOppgave()
 
   const dispatch = useAppDispatch()
 
   const [oppdaterSjekklisteResult, oppdaterSjekklisteApi] = useApiCall(oppdaterSjekkliste)
   const sjekkliste = useSjekkliste()
+
   const sjekklisteValideringsfeil = useSjekklisteValideringsfeil().length > 0
 
   const configContext = useContext(ConfigContext)
@@ -60,11 +57,9 @@ export const Sjekkliste = (props: { behandling: IBehandlingReducer }) => {
   const fireOpppdater = useMemo(() => debounce(oppdaterSjekklisteApi, 1500), [])
 
   useEffect(() => {
-    hentSaksbehandlerForOppgave({ behandlingId: behandling.id }, (saksbehandler) => {
-      const erSammeIdent = saksbehandler === innloggetSaksbehandler.ident
-      setOppgaveErTildeltInnloggetBruker(erSammeIdent)
-      setRedigerbar(hentBehandlesFraStatus(behandling.status) && erSammeIdent)
-    })
+    const erSammeIdent = saksbehandlerGjeldendeOppgave === innloggetSaksbehandler.ident
+    setOppgaveErTildeltInnloggetBruker(erSammeIdent)
+    setRedigerbar(hentBehandlesFraStatus(behandling.status) && erSammeIdent)
   }, [])
 
   return (
@@ -78,9 +73,6 @@ export const Sjekkliste = (props: { behandling: IBehandlingReducer }) => {
       </Heading>
 
       {isFailure(oppdaterSjekklisteResult) && <ApiErrorAlert>Oppdateringen av sjekklista feilet</ApiErrorAlert>}
-      {isFailure(saksbehandlerForOppgaveResult) && (
-        <ApiErrorAlert>Kunne ikke hente saksbehandler gjeldende oppgave</ApiErrorAlert>
-      )}
 
       {sjekkliste && (
         <>
@@ -92,7 +84,7 @@ export const Sjekkliste = (props: { behandling: IBehandlingReducer }) => {
           </BodyLong>
 
           {sjekkliste?.sjekklisteItems.map((item) => (
-            <SjekklisteElement
+            <SjekklisteItem
               key={item.id}
               item={item}
               behandlingId={behandling.id}
@@ -158,6 +150,26 @@ export const Sjekkliste = (props: { behandling: IBehandlingReducer }) => {
               readOnly={!redigerbar}
             />
 
+            {behandling.sakType == SakType.BARNEPENSJON && (
+              <TextField
+                label="Ønsket skattetrekk"
+                name="OnsketSkattetrekk"
+                value={sjekkliste.onsketSkattetrekk || undefined}
+                onChange={(e) => {
+                  const isNumberOrEmpty = /^\d*$/.test(e.target.value)
+                  if (isNumberOrEmpty) {
+                    const oppdatert = {
+                      ...sjekkliste,
+                      onsketSkattetrekk: e.target.value === '' ? undefined : Number(e.target.value),
+                    }
+                    dispatch(updateSjekkliste(oppdatert))
+                    fireOpppdater(oppdatert)
+                  }
+                }}
+                readOnly={!redigerbar}
+              />
+            )}
+
             {redigerbar && (
               <ConfirmationPanel
                 name="BekreftGjennomgang"
@@ -194,7 +206,7 @@ export const Sjekkliste = (props: { behandling: IBehandlingReducer }) => {
   )
 }
 
-const SjekklisteElement = ({
+const SjekklisteItem = ({
   item,
   behandlingId,
   redigerbar,

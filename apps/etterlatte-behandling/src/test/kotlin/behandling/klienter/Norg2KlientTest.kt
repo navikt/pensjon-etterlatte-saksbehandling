@@ -13,6 +13,7 @@ import io.ktor.http.fullPath
 import io.ktor.http.headersOf
 import io.ktor.serialization.jackson.jackson
 import no.nav.etterlatte.behandling.domain.ArbeidsFordelingEnhet
+import no.nav.etterlatte.common.Enheter
 import org.junit.jupiter.api.Test
 
 class Norg2KlientTest {
@@ -53,7 +54,7 @@ class Norg2KlientTest {
 
         resultat.size shouldBeExactly 1
 
-        resultat shouldContainExactly listOf(ArbeidsFordelingEnhet("NAV Familie- og pensjonsytelser Steinkjer", "4817"))
+        resultat shouldContainExactly listOf(ArbeidsFordelingEnhet(Enheter.STEINKJER.navn, Enheter.STEINKJER.enhetNr))
     }
 
     private fun mockHttpClient(jsonRespons: String): HttpClient {

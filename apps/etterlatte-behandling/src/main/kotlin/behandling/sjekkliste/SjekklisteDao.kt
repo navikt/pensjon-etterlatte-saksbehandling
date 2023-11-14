@@ -54,6 +54,7 @@ class SjekklisteDao(private val connection: () -> Connection) {
                  SET kommentar = ?,
                      adresse_brev = ?,
                      kontonr_reg = ?,
+                     onsket_skattetrekk = ?,
                      bekreftet = ?,
                      endret = CURRENT_TIMESTAMP,
                      endret_av = ?,
@@ -64,9 +65,10 @@ class SjekklisteDao(private val connection: () -> Connection) {
         stmt.setObject(1, oppdatering.kommentar)
         stmt.setObject(2, oppdatering.adresseForBrev)
         stmt.setObject(3, oppdatering.kontonrRegistrert)
-        stmt.setObject(4, oppdatering.bekreftet)
-        stmt.setObject(5, Kontekst.get().AppUser.name())
-        stmt.setObject(6, sjekklisteId)
+        stmt.setObject(4, oppdatering.onsketSkattetrekk)
+        stmt.setObject(5, oppdatering.bekreftet)
+        stmt.setObject(6, Kontekst.get().AppUser.name())
+        stmt.setObject(7, sjekklisteId)
         stmt.executeUpdate().also {
             if (it != 1) {
                 throw IllegalStateException("Feil under oppdatering av sjekkliste $sjekklisteId")
@@ -82,6 +84,7 @@ class SjekklisteDao(private val connection: () -> Connection) {
                  kommentar,
                  adresse_brev,
                  kontonr_reg,
+                 onsket_skattetrekk,
                  bekreftet,
                  versjon
                 FROM sjekkliste
@@ -95,6 +98,7 @@ class SjekklisteDao(private val connection: () -> Connection) {
                 kommentar = getString("kommentar"),
                 adresseForBrev = getString("adresse_brev"),
                 kontonrRegistrert = getString("kontonr_reg"),
+                onsketSkattetrekk = getInt("onsket_skattetrekk"),
                 bekreftet = getBoolean("bekreftet"),
                 sjekklisteItems = hentSjekklisteItems(id),
                 versjon = getLong("versjon"),

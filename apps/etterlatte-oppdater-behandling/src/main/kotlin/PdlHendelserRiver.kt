@@ -3,6 +3,7 @@ package no.nav.etterlatte
 import com.fasterxml.jackson.module.kotlin.treeToValue
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.pdlhendelse.Adressebeskyttelse
+import no.nav.etterlatte.libs.common.pdlhendelse.Bostedsadresse
 import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.SivilstandHendelse
@@ -58,6 +59,13 @@ internal class PdlHendelserRiver(
                     val adressebeskyttelse: Adressebeskyttelse =
                         objectMapper.treeToValue(packet["hendelse_data"])
                     behandlinger.sendAdressebeskyttelseHendelse(adressebeskyttelse)
+                }
+
+                "BOSTEDSADRESSE_V1" -> {
+                    logger.info("Bostedsadresse mottatt")
+                    val bostedsadresse: Bostedsadresse =
+                        objectMapper.treeToValue(packet["hendelse_data"])
+                    behandlinger.sendAdresseHendelse(bostedsadresse)
                 }
 
                 "VERGEMAAL_ELLER_FREMTIDSFULLMAKT_V1" -> {

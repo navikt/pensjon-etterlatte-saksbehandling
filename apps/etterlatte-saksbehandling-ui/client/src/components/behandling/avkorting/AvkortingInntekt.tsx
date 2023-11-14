@@ -1,4 +1,4 @@
-import { BodyShort, Button, ErrorMessage, Heading, Label, ReadMore, Table, TextField } from '@navikt/ds-react'
+import { BodyShort, Button, ErrorMessage, Heading, Label, ReadMore, Table, Textarea, TextField } from '@navikt/ds-react'
 import styled from 'styled-components'
 import React, { FormEvent, useState } from 'react'
 import { IAvkorting, IAvkortingGrunnlag } from '~shared/types/IAvkorting'
@@ -9,7 +9,6 @@ import { HjemmelLenke } from '~components/behandling/felles/HjemmelLenke'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
 import { PencilIcon } from '@navikt/aksel-icons'
-import { hentBehandlesFraStatus } from '~components/behandling/felles/utils'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { TextButton } from '~components/behandling/soeknadsoversikt/familieforhold/personer/personinfo/TextButton'
 import { OmstillingsstoenadToolTip } from '~components/behandling/beregne/OmstillingsstoenadToolTip'
@@ -17,13 +16,14 @@ import { OmstillingsstoenadToolTip } from '~components/behandling/beregne/Omstil
 export const AvkortingInntekt = (props: {
   behandling: IBehandlingReducer
   avkortingGrunnlag: IAvkortingGrunnlag[]
+  redigerbar: boolean
   setAvkorting: (avkorting: IAvkorting) => void
 }) => {
   const behandling = props.behandling
+  const redigerbar = props.redigerbar
   const avkortingGrunnlag = [...props.avkortingGrunnlag]
   avkortingGrunnlag?.sort((a, b) => new Date(b.fom!).getTime() - new Date(a.fom!).getTime())
 
-  const redigerbar = hentBehandlesFraStatus(behandling.status)
   if (!behandling) throw new Error('Mangler behandling')
 
   const virkningstidspunkt = () => {
@@ -45,10 +45,12 @@ export const AvkortingInntekt = (props: {
         fratrekkInnAar: nyligste.fratrekkInnAar,
         fratrekkInnAarUtland: nyligste.fratrekkInnAarUtland,
         relevanteMaanederInnAar: nyligste.relevanteMaanederInnAar,
+        spesifikasjon: nyligste.spesifikasjon,
       }
     }
     return {
       fom: virkningstidspunkt(),
+      spesifikasjon: '',
     }
   }
 
@@ -111,13 +113,15 @@ export const AvkortingInntekt = (props: {
         <InntektAvkortingTabell>
           <Table className="table" zebraStripes>
             <Table.Header>
-              <Table.HeaderCell>Forventet inntekt Norge</Table.HeaderCell>
-              <Table.HeaderCell>Forventet inntekt utland</Table.HeaderCell>
-              <Table.HeaderCell>Forventet inntekt totalt</Table.HeaderCell>
-              <Table.HeaderCell>Gjenværende måneder</Table.HeaderCell>
-              <Table.HeaderCell>Periode</Table.HeaderCell>
-              <Table.HeaderCell>Spesifikasjon av inntekt</Table.HeaderCell>
-              <Table.HeaderCell>Kilde</Table.HeaderCell>
+              <Table.Row>
+                <Table.HeaderCell>Forventet inntekt Norge</Table.HeaderCell>
+                <Table.HeaderCell>Forventet inntekt utland</Table.HeaderCell>
+                <Table.HeaderCell>Forventet inntekt totalt</Table.HeaderCell>
+                <Table.HeaderCell>Gjenværende måneder</Table.HeaderCell>
+                <Table.HeaderCell>Periode</Table.HeaderCell>
+                <Table.HeaderCell>Spesifikasjon av inntekt</Table.HeaderCell>
+                <Table.HeaderCell>Kilde</Table.HeaderCell>
+              </Table.Row>
             </Table.Header>
             <Table.Body>
               {(visHistorikk ? avkortingGrunnlag : aktivtGrunnlag()).map((inntektsgrunnlag, index) => {
@@ -138,7 +142,7 @@ export const AvkortingInntekt = (props: {
                         {` ${NOK(aarsinntekt)} - ${NOK(fratrekkInnAar)} = ${NOK(forventetInntekt)}`}).
                       </OmstillingsstoenadToolTip>
                     </Table.DataCell>
-                    <Table.DataCell key="Inntekt">
+                    <Table.DataCell key="InntektUtland">
                       {NOK(forventetInntektUtland)}
                       <OmstillingsstoenadToolTip title="Se hva forventet inntekt består av">
                         Forventet inntekt utland beregnes utfra inntekt utland med fratrekk for måneder før innvilgelse.
@@ -241,16 +245,18 @@ export const AvkortingInntekt = (props: {
                   </DatoSection>
                 </FormWrapper>
                 <TextAreaWrapper>
-                  <SpesifikasjonLabel>
-                    <Label>Spesifikasjon av inntekt</Label>
-                    <ReadMore header="Hva regnes som inntekt?">
-                      Med inntekt menes all arbeidsinntekt og ytelser som likestilles med arbeidsinntekt. Likestilt med
-                      arbeidsinntekt er dagpenger etter kap 4, sykepenger etter kap 8, stønad ved barns og andre
-                      nærståendes sykdom etter kap 9, arbeidsavklaringspenger etter kap 11, svangerskapspenger og
-                      foreldrepenger etter kap 14 og pensjonsytelser etter AFP tilskottloven kapitlene 2 og 3.
-                    </ReadMore>
-                  </SpesifikasjonLabel>
-                  <textarea
+                  <Textarea
+                    label={
+                      <SpesifikasjonLabel>
+                        <Label>Spesifikasjon av inntekt</Label>
+                        <ReadMore header="Hva regnes som inntekt?">
+                          Med inntekt menes all arbeidsinntekt og ytelser som likestilles med arbeidsinntekt. Likestilt
+                          med arbeidsinntekt er dagpenger etter kap 4, sykepenger etter kap 8, stønad ved barns og andre
+                          nærståendes sykdom etter kap 9, arbeidsavklaringspenger etter kap 11, svangerskapspenger og
+                          foreldrepenger etter kap 14 og pensjonsytelser etter AFP tilskottloven kapitlene 2 og 3.
+                        </ReadMore>
+                      </SpesifikasjonLabel>
+                    }
                     value={inntektGrunnlagForm.spesifikasjon}
                     onChange={(e) =>
                       setInntektGrunnlagForm({

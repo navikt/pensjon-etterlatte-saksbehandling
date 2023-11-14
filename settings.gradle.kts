@@ -23,6 +23,7 @@ include(
     "apps:etterlatte-tilbakekreving",
     "apps:etterlatte-hendelser-pdl",
     "apps:etterlatte-hendelser-joark",
+    "apps:etterlatte-hendelser-samordning",
     "apps:etterlatte-migrering",
     "apps:etterlatte-statistikk",
     "apps:etterlatte-vilkaarsvurdering",

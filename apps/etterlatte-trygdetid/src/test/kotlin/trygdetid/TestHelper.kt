@@ -31,6 +31,7 @@ val saksbehandler = Saksbehandler("token", "ident", null)
 fun behandling(
     behandlingId: UUID = randomUUID(),
     sakId: Long = 1,
+    behandlingStatus: BehandlingStatus = BehandlingStatus.VILKAARSVURDERT,
 ) = DetaljertBehandling(
     id = behandlingId,
     sak = sakId,
@@ -42,7 +43,7 @@ fun behandling(
     gjenlevende = null,
     avdoed = null,
     soesken = null,
-    status = BehandlingStatus.VILKAARSVURDERT,
+    status = behandlingStatus,
     behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
     virkningstidspunkt = null,
     boddEllerArbeidetUtlandet = null,

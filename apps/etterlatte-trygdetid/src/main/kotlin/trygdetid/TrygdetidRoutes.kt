@@ -22,6 +22,7 @@ import no.nav.etterlatte.libs.common.trygdetid.DetaljertBeregnetTrygdetidResulta
 import no.nav.etterlatte.libs.common.trygdetid.GrunnlagOpplysningerDto
 import no.nav.etterlatte.libs.common.trygdetid.OpplysningkildeDto
 import no.nav.etterlatte.libs.common.trygdetid.OpplysningsgrunnlagDto
+import no.nav.etterlatte.libs.common.trygdetid.StatusOppdatertDto
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidGrunnlagDto
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidGrunnlagKildeDto
@@ -71,6 +72,7 @@ fun Route.trygdetid(
                         trygdetidOverstyringDto.id,
                         behandlingId,
                         trygdetidOverstyringDto.overstyrtNorskPoengaar,
+                        brukerTokenInfo,
                     )
                 call.respond(trygdetid.toDto())
             }
@@ -142,6 +144,14 @@ fun Route.trygdetid(
                 val beregnetTrygdetid = call.receive<DetaljertBeregnetTrygdetidResultat>()
 
                 call.respond(trygdetidService.overstyrBeregnetTrygdetid(behandlingId, beregnetTrygdetid).toDto())
+            }
+        }
+
+        post("/oppdater-status") {
+            withBehandlingId(behandlingKlient) { behandlingId ->
+                val statusOppdatert =
+                    trygdetidService.sjekkGyldighetOgOppdaterBehandlingStatus(behandlingId, brukerTokenInfo)
+                call.respond(HttpStatusCode.OK, StatusOppdatertDto(statusOppdatert))
             }
         }
     }

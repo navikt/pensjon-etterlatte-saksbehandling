@@ -31,27 +31,28 @@ internal class VedtaksbrevUnderkjentRiver(
         packet: JsonMessage,
         context: MessageContext,
     ) {
+        val vedtakId = packet["vedtak.vedtakId"].asLong()
+
         try {
-            val vedtakId = packet["vedtak.vedtakId"].asLong()
             val behandlingId = UUID.fromString(packet["vedtak.behandling.id"].asText())
 
-            logger.info("Vedtak (id=$vedtakId) er underkjent - starter sletting av vedtaksbrev")
+            logger.info("Vedtak (id=$vedtakId) er underkjent - åpner vedtaksbrev for nye endringer")
 
             val vedtaksbrev = service.hentVedtaksbrev(behandlingId)
             if (vedtaksbrev == null) {
-                logger.warn("Fant ingen vedtaksbrev for behandling (id=$behandlingId) - avbryter sletting")
+                logger.warn("Fant ingen vedtaksbrev for behandling (id=$behandlingId) - avbryter ")
                 return
             }
 
-            val slettetOK = service.slettVedtaksbrev(vedtaksbrev.id)
+            val endretOK = service.fjernFerdigstiltStatusUnderkjentVedtak(vedtaksbrev.id, packet["vedtak"])
 
-            if (slettetOK) {
-                logger.info("Vedtaksbrev (id=${vedtaksbrev.id}) for vedtak (id=$vedtakId) er slettet")
+            if (endretOK) {
+                logger.info("Vedtaksbrev (id=${vedtaksbrev.id}) for vedtak (id=$vedtakId) åpnet for endringer")
             } else {
-                throw Exception("Kunne ikke slette vedtaksbrev (id=${vedtaksbrev.id})")
+                throw Exception("Kunne ikke åpne vedtaksbrev (id=${vedtaksbrev.id}) for endringer")
             }
         } catch (e: Exception) {
-            logger.error("Feil ved sletting av vedtaksbrev for underkjent vedtak: ", e)
+            logger.error("Feil ved gjenåpning av vedtaksbrev for underkjent vedtak (id=$vedtakId): ", e)
             throw e
         }
     }

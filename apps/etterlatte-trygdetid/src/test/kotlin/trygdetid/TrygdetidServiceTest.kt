@@ -10,9 +10,12 @@ import io.mockk.coVerify
 import io.mockk.confirmVerified
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.slot
 import io.mockk.spyk
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
+import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
@@ -29,13 +32,23 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
+import no.nav.etterlatte.libs.common.trygdetid.DetaljertBeregnetTrygdetidResultat
+import no.nav.etterlatte.libs.common.trygdetid.FaktiskTrygdetid
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
+import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
+import no.nav.etterlatte.libs.testdata.grunnlag.eldreAvdoedTestopplysningerMap
+import no.nav.etterlatte.trygdetid.BeregnetTrygdetidGrunnlag
+import no.nav.etterlatte.trygdetid.DetaljertBeregnetTrygdetid
+import no.nav.etterlatte.trygdetid.IngenTrygdetidFunnetForAvdoede
 import no.nav.etterlatte.trygdetid.LandNormalisert
 import no.nav.etterlatte.trygdetid.ManglerForrigeTrygdetidMaaReguleresManuelt
 import no.nav.etterlatte.trygdetid.Opplysningsgrunnlag
+import no.nav.etterlatte.trygdetid.Trygdetid
 import no.nav.etterlatte.trygdetid.TrygdetidAlleredeOpprettetException
 import no.nav.etterlatte.trygdetid.TrygdetidBeregningService
+import no.nav.etterlatte.trygdetid.TrygdetidGrunnlag
+import no.nav.etterlatte.trygdetid.TrygdetidManglerBeregning
 import no.nav.etterlatte.trygdetid.TrygdetidOpplysningType
 import no.nav.etterlatte.trygdetid.TrygdetidPeriode
 import no.nav.etterlatte.trygdetid.TrygdetidRepository
@@ -58,6 +71,7 @@ internal class TrygdetidServiceTest {
     private val behandlingKlient: BehandlingKlient = mockk()
     private val grunnlagKlient: GrunnlagKlient = mockk()
     private val vilkaarsvurderingKlient: VilkaarsvuderingKlient = mockk()
+    private val featureToggleService: FeatureToggleService = mockk()
     private val beregningService: TrygdetidBeregningService = spyk(TrygdetidBeregningService)
     private val service: TrygdetidService =
         TrygdetidServiceImpl(
@@ -66,6 +80,7 @@ internal class TrygdetidServiceTest {
             grunnlagKlient,
             vilkaarsvurderingKlient,
             beregningService,
+            featureToggleService,
         )
 
     @BeforeEach
@@ -489,9 +504,8 @@ internal class TrygdetidServiceTest {
     @Test
     fun `skal lagre nytt trygdetidsgrunnlag`() {
         val behandlingId = randomUUID()
-        val avdoedIdent = "01478343724"
         val trygdetidGrunnlag = trygdetidGrunnlag()
-        val eksisterendeTrygdetid = trygdetid(behandlingId, ident = avdoedIdent)
+        val eksisterendeTrygdetid = trygdetid(behandlingId, ident = AVDOED_FOEDSELSNUMMER.value)
         val vilkaarsvurderingDto = mockk<VilkaarsvurderingDto>()
 
         val grunnlag = mockk<Grunnlag>()
@@ -522,7 +536,7 @@ internal class TrygdetidServiceTest {
                         registersReferanse = null,
                         opplysningId = null,
                     ),
-                verdi = Folkeregisteridentifikator.of(avdoedIdent).toJsonNode(),
+                verdi = Folkeregisteridentifikator.of(AVDOED_FOEDSELSNUMMER.value).toJsonNode(),
             )
         }
         every { avdoedGrunnlag[Opplysningstype.DOEDSDATO] } answers {
@@ -577,13 +591,11 @@ internal class TrygdetidServiceTest {
     @Test
     fun `skal lagre nytt trygdetidsgrunnlag med overstyrt poengaar`() {
         val behandlingId = randomUUID()
-        val avdoedIdent = "01478343724"
-
         val trygdetidGrunnlag =
             trygdetidGrunnlag().copy(
                 periode = TrygdetidPeriode(LocalDate.now().minusYears(2), LocalDate.now().minusYears(1)),
             )
-        val eksisterendeTrygdetid = trygdetid(behandlingId, ident = avdoedIdent).copy(overstyrtNorskPoengaar = 10)
+        val eksisterendeTrygdetid = trygdetid(behandlingId, ident = AVDOED_FOEDSELSNUMMER.value).copy(overstyrtNorskPoengaar = 10)
         val vilkaarsvurderingDto = mockk<VilkaarsvurderingDto>()
 
         val grunnlag = mockk<Grunnlag>()
@@ -614,7 +626,7 @@ internal class TrygdetidServiceTest {
                         registersReferanse = null,
                         opplysningId = null,
                     ),
-                verdi = Folkeregisteridentifikator.of(avdoedIdent).toJsonNode(),
+                verdi = Folkeregisteridentifikator.of(AVDOED_FOEDSELSNUMMER.value).toJsonNode(),
             )
         }
         every { avdoedGrunnlag[Opplysningstype.DOEDSDATO] } answers {
@@ -670,10 +682,8 @@ internal class TrygdetidServiceTest {
     fun `skal oppdatere trygdetidsgrunnlag`() {
         val behandlingId = randomUUID()
         val trygdetidGrunnlag = trygdetidGrunnlag()
-        val avdoedIdent = "01478343724"
-
         val eksisterendeTrygdetid =
-            trygdetid(behandlingId, trygdetidGrunnlag = listOf(trygdetidGrunnlag), ident = avdoedIdent)
+            trygdetid(behandlingId, trygdetidGrunnlag = listOf(trygdetidGrunnlag), ident = AVDOED_FOEDSELSNUMMER.value)
         val endretTrygdetidGrunnlag = trygdetidGrunnlag.copy(bosted = LandNormalisert.NORGE.isoCode)
         val vilkaarsvurderingDto = mockk<VilkaarsvurderingDto>()
 
@@ -705,7 +715,7 @@ internal class TrygdetidServiceTest {
                         registersReferanse = null,
                         opplysningId = null,
                     ),
-                verdi = Folkeregisteridentifikator.of(avdoedIdent).toJsonNode(),
+                verdi = Folkeregisteridentifikator.of(AVDOED_FOEDSELSNUMMER.value).toJsonNode(),
             )
         }
         every { avdoedGrunnlag[Opplysningstype.DOEDSDATO] } answers {
@@ -763,10 +773,9 @@ internal class TrygdetidServiceTest {
     @Test
     fun `skal slette trygdetidsgrunnlag`() {
         val behandlingId = randomUUID()
-        val avdoedIdent = "01478343724"
         val trygdetidGrunnlag = trygdetidGrunnlag()
         val eksisterendeTrygdetid =
-            trygdetid(behandlingId, trygdetidGrunnlag = listOf(trygdetidGrunnlag), ident = avdoedIdent)
+            trygdetid(behandlingId, trygdetidGrunnlag = listOf(trygdetidGrunnlag), ident = AVDOED_FOEDSELSNUMMER.value)
 
         coEvery { behandlingKlient.settBehandlingStatusTrygdetidOppdatert(any(), any()) } returns true
         val grunnlag = mockk<Grunnlag>()
@@ -795,7 +804,7 @@ internal class TrygdetidServiceTest {
                         registersReferanse = null,
                         opplysningId = null,
                     ),
-                verdi = Folkeregisteridentifikator.of(avdoedIdent).toJsonNode(),
+                verdi = Folkeregisteridentifikator.of(AVDOED_FOEDSELSNUMMER.value).toJsonNode(),
             )
         }
         every { avdoedGrunnlag[Opplysningstype.DOEDSDATO] } answers {
@@ -833,6 +842,36 @@ internal class TrygdetidServiceTest {
             avdoedGrunnlag[Opplysningstype.DOEDSDATO]
             avdoedGrunnlag[Opplysningstype.FOEDSELSNUMMER]
             grunnlag.hentAvdoede()
+        }
+    }
+
+    @Test
+    fun `skal overstyre beregnet trygdetid og slette grunnlaget`() {
+        val behandlingId = randomUUID()
+        val trygdetidGrunnlag = trygdetidGrunnlag()
+        val eksisterendeTrygdetid =
+            trygdetid(
+                behandlingId,
+                trygdetidGrunnlag = listOf(trygdetidGrunnlag),
+                ident = AVDOED_FOEDSELSNUMMER.value,
+                beregnetTrygdetid = beregnetTrygdetid(35, Tidspunkt.now()),
+            )
+        val oppdatertTrygdetidCaptured = slot<Trygdetid>()
+        coEvery { behandlingKlient.settBehandlingStatusTrygdetidOppdatert(any(), any()) } returns true
+        coEvery { repository.hentTrygdetid(behandlingId) } returns eksisterendeTrygdetid
+        coEvery { repository.hentTrygdetiderForBehandling(behandlingId) } returns listOf(eksisterendeTrygdetid)
+        coEvery { repository.oppdaterTrygdetid(capture(oppdatertTrygdetidCaptured), true) } returns eksisterendeTrygdetid
+
+        service.overstyrBeregnetTrygdetid(behandlingId, beregnetTrygdetid(25, Tidspunkt.now()).resultat)
+
+        coVerify(exactly = 1) {
+            repository.hentTrygdetid(behandlingId)
+            repository.hentTrygdetiderForBehandling(behandlingId)
+            repository.oppdaterTrygdetid(oppdatertTrygdetidCaptured.captured, true)
+        }
+        with(oppdatertTrygdetidCaptured.captured) {
+            this.trygdetidGrunnlag.size shouldBe 0
+            this.beregnetTrygdetid?.resultat?.samletTrygdetidNorge shouldBe 25
         }
     }
 
@@ -1119,22 +1158,278 @@ internal class TrygdetidServiceTest {
     fun `skal oppdater overstyrt poengaar`() {
         val behandlingId = randomUUID()
 
-        val eksisterendeTrygdetid = trygdetid(behandlingId)
+        val behandling = behandling(behandlingId)
+        val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
+        val forventetIdent = grunnlag.hentAvdoed().hentFoedselsnummer()!!.verdi
 
+        val beregnetTrygdetid =
+            DetaljertBeregnetTrygdetid(
+                resultat =
+                    DetaljertBeregnetTrygdetidResultat(
+                        faktiskTrygdetidNorge =
+                            FaktiskTrygdetid(
+                                periode = Period.ofYears(5),
+                                antallMaaneder = 5 * 12,
+                            ),
+                        faktiskTrygdetidTeoretisk = null,
+                        fremtidigTrygdetidNorge = null,
+                        fremtidigTrygdetidTeoretisk = null,
+                        samletTrygdetidNorge = 5,
+                        samletTrygdetidTeoretisk = null,
+                        prorataBroek = null,
+                        overstyrt = false,
+                    ),
+                tidspunkt = Tidspunkt.now(),
+                regelResultat = "".toJsonNode(),
+            )
+
+        val eksisterendeTrygdetid =
+            trygdetid(
+                behandlingId,
+                beregnetTrygdetid = beregnetTrygdetid,
+                ident = forventetIdent.value,
+                trygdetidGrunnlag =
+                    listOf(
+                        TrygdetidGrunnlag(
+                            id = randomUUID(),
+                            type = TrygdetidType.FAKTISK,
+                            bosted = "",
+                            periode = TrygdetidPeriode(fra = LocalDate.now().minusYears(5), til = LocalDate.now()),
+                            kilde = Grunnlagsopplysning.Saksbehandler("", Tidspunkt.now()),
+                            beregnetTrygdetid =
+                                BeregnetTrygdetidGrunnlag(
+                                    verdi = Period.ofYears(5),
+                                    tidspunkt = Tidspunkt.now(),
+                                    regelResultat = "".toJsonNode(),
+                                ),
+                            begrunnelse = "",
+                            poengInnAar = false,
+                            poengUtAar = false,
+                            prorata = false,
+                        ),
+                    ),
+            )
+
+        coEvery { grunnlagKlient.hentGrunnlag(any(), any(), any()) } returns grunnlag
+        coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
         coEvery { repository.hentTrygdetidMedId(any(), any()) } returns eksisterendeTrygdetid
         coEvery { repository.oppdaterTrygdetid(any(), any()) } returnsArgument 0
+        coEvery { behandlingKlient.settBehandlingStatusTrygdetidOppdatert(any(), any()) } returns true
 
         val trygdetid =
             runBlocking {
-                service.overstyrNorskPoengaar(eksisterendeTrygdetid.id, behandlingId, 10)
+                service.overstyrNorskPoengaar(eksisterendeTrygdetid.id, behandlingId, 10, saksbehandler)
             }
 
         trygdetid shouldNotBe null
         trygdetid.overstyrtNorskPoengaar shouldBe 10
+        trygdetid.beregnetTrygdetid?.resultat?.samletTrygdetidNorge shouldBe 10
 
+        coVerify(exactly = 1) {
+            behandlingKlient.kanOppdatereTrygdetid(any(), any())
+            behandlingKlient.hentBehandling(any(), any())
+            behandlingKlient.settBehandlingStatusTrygdetidOppdatert(any(), any())
+            grunnlagKlient.hentGrunnlag(any(), any(), any())
+        }
         verify(exactly = 1) {
             repository.hentTrygdetidMedId(any(), any())
-            repository.oppdaterTrygdetid(trygdetid, false)
+            beregningService.beregnTrygdetid(any(), any(), any(), 10)
+            repository.oppdaterTrygdetid(
+                withArg {
+                    it.overstyrtNorskPoengaar shouldBe 10
+                    it.beregnetTrygdetid?.resultat?.samletTrygdetidNorge shouldBe 10
+                },
+            )
         }
     }
+
+    @Test
+    fun `skal sjekke gyldighet og oppdatere status hvis behandlingstatus er VILKAARSVURDERT`() {
+        val behandlingId = randomUUID()
+        val eksisterendeTrygdetid = trygdetid(behandlingId, beregnetTrygdetid = beregnetTrygdetid())
+
+        coEvery { featureToggleService.isEnabled(any(), any()) } returns true
+        coEvery { behandlingKlient.hentBehandling(any(), any()) } returns
+            behandling(behandlingId, behandlingStatus = BehandlingStatus.VILKAARSVURDERT)
+        coEvery { behandlingKlient.settBehandlingStatusTrygdetidOppdatert(any(), any()) } returns true
+        every { repository.hentTrygdetiderForBehandling(behandlingId) } returns listOf(eksisterendeTrygdetid)
+
+        runBlocking {
+            val oppdatert = service.sjekkGyldighetOgOppdaterBehandlingStatus(behandlingId, saksbehandler)
+            oppdatert shouldBe true
+        }
+
+        coVerify(exactly = 1) {
+            featureToggleService.isEnabled(any(), any())
+            behandlingKlient.kanOppdatereTrygdetid(any(), any())
+            behandlingKlient.hentBehandling(any(), any())
+            behandlingKlient.settBehandlingStatusTrygdetidOppdatert(any(), any())
+            repository.hentTrygdetiderForBehandling(behandlingId)
+        }
+    }
+
+    @Test
+    fun `skal feile ved sjekking av gyldighet dersom det ikke finnes noe trygdetid`() {
+        val behandlingId = randomUUID()
+
+        coEvery { featureToggleService.isEnabled(any(), any()) } returns true
+        coEvery { behandlingKlient.hentBehandling(any(), any()) } returns
+            behandling(behandlingId, behandlingStatus = BehandlingStatus.VILKAARSVURDERT)
+        every { repository.hentTrygdetiderForBehandling(behandlingId) } returns emptyList()
+
+        runBlocking {
+            assertThrows<IngenTrygdetidFunnetForAvdoede> {
+                service.sjekkGyldighetOgOppdaterBehandlingStatus(behandlingId, saksbehandler)
+            }
+        }
+
+        coVerify(exactly = 1) {
+            featureToggleService.isEnabled(any(), any())
+            behandlingKlient.kanOppdatereTrygdetid(any(), any())
+            behandlingKlient.hentBehandling(any(), any())
+            repository.hentTrygdetiderForBehandling(behandlingId)
+        }
+    }
+
+    @Test
+    fun `skal feile ved sjekking av gyldighet dersom det ikke finnes noe beregning i trygdetid`() {
+        val behandlingId = randomUUID()
+        val eksisterendeTrygdetid = trygdetid(behandlingId, beregnetTrygdetid = null)
+
+        coEvery { featureToggleService.isEnabled(any(), any()) } returns true
+        coEvery { behandlingKlient.hentBehandling(any(), any()) } returns
+            behandling(behandlingId, behandlingStatus = BehandlingStatus.VILKAARSVURDERT)
+        coEvery { behandlingKlient.settBehandlingStatusTrygdetidOppdatert(any(), any()) } returns true
+        every { repository.hentTrygdetiderForBehandling(behandlingId) } returns listOf(eksisterendeTrygdetid)
+
+        runBlocking {
+            assertThrows<TrygdetidManglerBeregning> {
+                service.sjekkGyldighetOgOppdaterBehandlingStatus(behandlingId, saksbehandler)
+            }
+        }
+
+        coVerify(exactly = 1) {
+            featureToggleService.isEnabled(any(), any())
+            behandlingKlient.kanOppdatereTrygdetid(any(), any())
+            behandlingKlient.hentBehandling(any(), any())
+            repository.hentTrygdetiderForBehandling(behandlingId)
+        }
+    }
+
+    @Test
+    fun `skal ikke sjekke noe gyldighet dersom vi har fast trygdetid`() {
+        val behandlingId = randomUUID()
+
+        coEvery { featureToggleService.isEnabled(any(), any()) } returns false
+        coEvery { behandlingKlient.hentBehandling(any(), any()) } returns
+            behandling(behandlingId, behandlingStatus = BehandlingStatus.VILKAARSVURDERT)
+        coEvery { behandlingKlient.settBehandlingStatusTrygdetidOppdatert(any(), any()) } returns true
+        every { repository.hentTrygdetiderForBehandling(behandlingId) } returns emptyList()
+
+        runBlocking {
+            val oppdatertStatus = service.sjekkGyldighetOgOppdaterBehandlingStatus(behandlingId, saksbehandler)
+            oppdatertStatus shouldBe true
+        }
+
+        coVerify(exactly = 1) {
+            featureToggleService.isEnabled(any(), any())
+            behandlingKlient.kanOppdatereTrygdetid(any(), any())
+            behandlingKlient.hentBehandling(any(), any())
+            repository.hentTrygdetiderForBehandling(behandlingId)
+            behandlingKlient.settBehandlingStatusTrygdetidOppdatert(any(), any())
+        }
+    }
+
+    @Test
+    fun `skal ikke opprette fremtidig grunnlag hvis man er for gammel`() {
+        val behandlingId = randomUUID()
+        val sakId = 123L
+        val behandling =
+            mockk<DetaljertBehandling>().apply {
+                every { id } returns behandlingId
+                every { sak } returns sakId
+                every { behandlingType } returns BehandlingType.FØRSTEGANGSBEHANDLING
+            }
+        val grunnlag = GrunnlagTestData(opplysningsmapAvdoedOverrides = eldreAvdoedTestopplysningerMap).hentOpplysningsgrunnlag()
+        val forventetFoedselsdato = grunnlag.hentAvdoed().hentFoedselsdato()!!.verdi
+        val forventetDoedsdato = grunnlag.hentAvdoed().hentDoedsdato()!!.verdi
+        val forventetIdent = grunnlag.hentAvdoed().hentFoedselsnummer()!!.verdi
+        val trygdetid = trygdetid(behandlingId, sakId, ident = forventetIdent.value)
+        val vilkaarsvurderingDto = mockk<VilkaarsvurderingDto>()
+
+        every { repository.hentTrygdetiderForBehandling(any()) } returns emptyList() andThen listOf(trygdetid)
+        every { repository.hentTrygdetid(any()) } returns trygdetid
+        coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
+        coEvery { grunnlagKlient.hentGrunnlag(any(), any(), any()) } returns grunnlag
+        every { repository.opprettTrygdetid(any()) } returns trygdetid
+        coEvery { behandlingKlient.settBehandlingStatusTrygdetidOppdatert(any(), any()) } returns true
+        coEvery { vilkaarsvurderingKlient.hentVilkaarsvurdering(any(), any()) } returns vilkaarsvurderingDto
+        every { repository.oppdaterTrygdetid(any()) } returnsArgument 0
+
+        runBlocking {
+            val opprettetTrygdetid = service.opprettTrygdetid(behandlingId, saksbehandler)
+
+            opprettetTrygdetid.trygdetidGrunnlag.size shouldBe 0
+        }
+
+        coVerify(exactly = 1) {
+            grunnlagKlient.hentGrunnlag(sakId, behandlingId, saksbehandler)
+            behandlingKlient.kanOppdatereTrygdetid(behandlingId, saksbehandler)
+            behandlingKlient.hentBehandling(behandlingId, saksbehandler)
+            behandlingKlient.settBehandlingStatusTrygdetidOppdatert(behandlingId, saksbehandler)
+            repository.hentTrygdetiderForBehandling(behandlingId)
+            repository.opprettTrygdetid(
+                withArg { trygdetid ->
+                    trygdetid.opplysninger.let { opplysninger ->
+                        with(opplysninger[0]) {
+                            type shouldBe TrygdetidOpplysningType.FOEDSELSDATO
+                            opplysning shouldBe forventetFoedselsdato.toJsonNode()
+                            kilde shouldNotBe null
+                        }
+                        with(opplysninger[1]) {
+                            type shouldBe TrygdetidOpplysningType.FYLT_16
+                            opplysning shouldBe forventetFoedselsdato.plusYears(16).toJsonNode()
+                            kilde shouldNotBe null
+                        }
+                        with(opplysninger[2]) {
+                            type shouldBe TrygdetidOpplysningType.FYLLER_66
+                            opplysning shouldBe forventetFoedselsdato.plusYears(66).toJsonNode()
+                            kilde shouldNotBe null
+                        }
+                        with(opplysninger[3]) {
+                            type shouldBe TrygdetidOpplysningType.DOEDSDATO
+                            opplysning shouldBe forventetDoedsdato!!.toJsonNode()
+                            kilde shouldNotBe null
+                        }
+                    }
+                },
+            )
+        }
+        verify {
+            behandling.id
+            behandling.sak
+            behandling.behandlingType
+        }
+    }
+
+    private fun beregnetTrygdetid() =
+        DetaljertBeregnetTrygdetid(
+            resultat =
+                DetaljertBeregnetTrygdetidResultat(
+                    faktiskTrygdetidNorge =
+                        FaktiskTrygdetid(
+                            periode = Period.ofYears(5),
+                            antallMaaneder = 5 * 12,
+                        ),
+                    faktiskTrygdetidTeoretisk = null,
+                    fremtidigTrygdetidNorge = null,
+                    fremtidigTrygdetidTeoretisk = null,
+                    samletTrygdetidNorge = 5,
+                    samletTrygdetidTeoretisk = null,
+                    prorataBroek = null,
+                    overstyrt = false,
+                ),
+            tidspunkt = Tidspunkt.now(),
+            regelResultat = "".toJsonNode(),
+        )
 }

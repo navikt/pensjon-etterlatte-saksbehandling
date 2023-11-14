@@ -15,6 +15,7 @@ import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.libs.ktor.setReady
 import no.nav.etterlatte.vedtaksvurdering.VedtakBehandlingService
 import no.nav.etterlatte.vedtaksvurdering.VedtakTilbakekrevingService
+import no.nav.etterlatte.vedtaksvurdering.VedtaksvurderingRapidService
 import no.nav.etterlatte.vedtaksvurdering.VedtaksvurderingRepository
 import no.nav.etterlatte.vedtaksvurdering.VedtaksvurderingService
 import no.nav.etterlatte.vedtaksvurdering.automatiskBehandlingRoutes
@@ -57,7 +58,7 @@ class ApplicationBuilder {
                 azureAppClientId = config.getString("azure.app.client.id"),
                 azureAppJwk = config.getString("azure.app.jwk"),
                 azureAppWellKnownUrl = config.getString("azure.app.well.known.url"),
-                azureAppScope = config.getString("azure.app.well.known.url"),
+                azureAppScope = config.getString("samordnevedtak.azure.scope"),
             ),
             featureToggleService,
         )
@@ -70,8 +71,8 @@ class ApplicationBuilder {
             vilkaarsvurderingKlient = VilkaarsvurderingKlientImpl(config, httpClient()),
             behandlingKlient = behandlingKlient,
             samKlient = samKlient,
-            publiser = ::publiser,
         )
+    private val vedtaksvurderingRapidService = VedtaksvurderingRapidService(publiser = ::publiser)
     private val vedtakTilbakekrevingService =
         VedtakTilbakekrevingService(
             repository = VedtaksvurderingRepository(dataSource),
@@ -81,8 +82,8 @@ class ApplicationBuilder {
         RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(getRapidEnv()))
             .withKtorModule {
                 restModule(sikkerLogg, config = HoconApplicationConfig(config)) {
-                    vedtaksvurderingRoute(vedtaksvurderingService, vedtakBehandlingService, behandlingKlient)
-                    automatiskBehandlingRoutes(vedtakBehandlingService, behandlingKlient)
+                    vedtaksvurderingRoute(vedtaksvurderingService, vedtakBehandlingService, vedtaksvurderingRapidService, behandlingKlient)
+                    automatiskBehandlingRoutes(vedtakBehandlingService, vedtaksvurderingRapidService, behandlingKlient)
                     samordningsvedtakRoute(vedtaksvurderingService, vedtakBehandlingService)
                     tilbakekrevingvedtakRoute(vedtakTilbakekrevingService, behandlingKlient)
                 }

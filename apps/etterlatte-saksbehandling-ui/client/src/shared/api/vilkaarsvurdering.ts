@@ -40,6 +40,13 @@ export const lagreTotalVurdering = async (args: {
     kommentar: args.kommentar,
   })
 
+export const oppdaterStatus = async (behandlingId: string): Promise<ApiResponse<StatusOppdatert>> =>
+  apiClient.post(`/vilkaarsvurdering/${behandlingId}/oppdater-status`, {})
+
+export interface StatusOppdatert {
+  statusOppdatert: boolean
+}
+
 export interface IVilkaarsvurdering {
   vilkaar: Vilkaar[]
   resultat?: VilkaarsvurderingVurdertResultat

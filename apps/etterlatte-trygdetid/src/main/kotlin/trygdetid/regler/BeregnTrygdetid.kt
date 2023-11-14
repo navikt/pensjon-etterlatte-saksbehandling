@@ -41,6 +41,11 @@ data class TotalTrygdetidGrunnlag(
     val beregnetTrygdetidPerioder: FaktumNode<List<Period>>,
 )
 
+data class TrygdetidPar<T>(
+    val nasjonal: T?,
+    val teoretisk: T?,
+)
+
 val periode: Regel<TrygdetidPeriodeGrunnlag, TrygdetidPeriodeMedPoengaar> =
     finnFaktumIGrunnlag(
         gjelderFra = TRYGDETID_DATO,
@@ -315,7 +320,10 @@ val opptjeningsTidIMnd =
         beskrivelse = "Finn ut opptjeningstid",
         regelReferanse = RegelReferanse(id = "REGEL-BEREGN-OPPTJENINGSPERIODE"),
     ) benytter finnDatoerForOpptjeningstid med { datoer ->
-        ChronoUnit.MONTHS.between(datoer.first, datoer.second)
+        maxOf(
+            0L,
+            ChronoUnit.MONTHS.between(datoer.first, datoer.second),
+        )
     }
 
 val fremtidigTrygdetidForNasjonal =
@@ -326,7 +334,7 @@ val fremtidigTrygdetidForNasjonal =
     ) benytter faktiskNorge og fremtidigTrygdetid og opptjeningsTidIMnd med { faktisk, fremtidig, opptjening ->
 
         if (fremtidig != null) {
-            val mindreEnnFireFemtedelerAvOpptjeningstiden = ((faktisk?.antallMaaneder ?: 0) / opptjening) < 0.8
+            val mindreEnnFireFemtedelerAvOpptjeningstiden = ((faktisk?.antallMaaneder ?: 0) * 5) < opptjening * 4
 
             val fremtidigPeriode =
                 fremtidig.justertForOpptjeningstiden(opptjening, mindreEnnFireFemtedelerAvOpptjeningstiden)
@@ -353,7 +361,7 @@ val fremtidigTrygdetidForTeoretisk =
             opptjening,
         ->
         if (fremtidig != null) {
-            val mindreEnnFireFemtedelerAvOpptjeningstiden = ((teoretisk?.antallMaaneder ?: 0) / opptjening) < 0.8
+            val mindreEnnFireFemtedelerAvOpptjeningstiden = teoretisk.antallMaaneder * 5 < opptjening * 4
 
             val fremtidigPeriode =
                 fremtidig.justertForOpptjeningstiden(opptjening, mindreEnnFireFemtedelerAvOpptjeningstiden)
@@ -369,6 +377,18 @@ val fremtidigTrygdetidForTeoretisk =
         }
     }
 
+val beregnetFaktiskTrygdetid =
+    RegelMeta(
+        gjelderFra = TRYGDETID_DATO,
+        beskrivelse = "Gruppere faktisk trygdetid",
+        regelReferanse = RegelReferanse(id = "REGEL-FAKTISK-TRYGDETID"),
+    ) benytter faktiskNorge og summerFaktiskTeoretisk med {
+            nasjonal,
+            teoretisk,
+        ->
+        TrygdetidPar(nasjonal, teoretisk)
+    }
+
 val beregnetFremtidigTrygdetid =
     RegelMeta(
         gjelderFra = TRYGDETID_DATO,
@@ -379,36 +399,66 @@ val beregnetFremtidigTrygdetid =
             teoretisk,
             norskPoengaar,
         ->
-        Pair(nasjonal, teoretisk).takeIf { norskPoengaar == null }
+        TrygdetidPar(nasjonal, teoretisk).takeIf { norskPoengaar == null }
     }
+
+val avrundetTrygdetid =
+    RegelMeta(
+        gjelderFra = TRYGDETID_DATO,
+        beskrivelse = "Avrunder trygdetid til nærmeste hele år basert på måneder",
+        regelReferanse = RegelReferanse(id = "REGEL-TOTAL-TRYGDETID-AVRUNDING"),
+    ) benytter beregnetFaktiskTrygdetid og
+        beregnetFremtidigTrygdetid med { faktisk, fremtidig ->
+
+            TrygdetidPar(
+                nasjonal =
+                    minOf(
+                        faktisk.nasjonal.verdiOrZero().plus(fremtidig?.nasjonal.verdiOrZero()).normalized().let {
+                            if (it.months >= 6) {
+                                it.years + 1
+                            } else {
+                                it.years
+                            }
+                        },
+                        40,
+                    ),
+                teoretisk =
+                    minOf(
+                        faktisk.teoretisk.verdiOrZero().plus(fremtidig?.teoretisk.verdiOrZero()).normalized().let {
+                            if (it.months >= 6) {
+                                it.years + 1
+                            } else {
+                                it.years
+                            }
+                        },
+                        40,
+                    ),
+            )
+        }
 
 val beregnDetaljertBeregnetTrygdetid =
     RegelMeta(
         gjelderFra = TRYGDETID_DATO,
         beskrivelse = "Beregn detaljert trygdetid",
         regelReferanse = RegelReferanse(id = "REGEL-TOTAL-DETALJERT-TRYGDETID"),
-    ) benytter faktiskNorge og
-        summerFaktiskTeoretisk og
-        beregnetFremtidigTrygdetid med { nasjonal, teoretisk, fremtidig ->
+    ) benytter beregnetFaktiskTrygdetid og
+        beregnetFremtidigTrygdetid og avrundetTrygdetid med { faktisk, fremtidig, avrundet ->
 
             DetaljertBeregnetTrygdetidResultat(
-                faktiskTrygdetidNorge = nasjonal,
-                faktiskTrygdetidTeoretisk = teoretisk,
-                fremtidigTrygdetidNorge = fremtidig?.first,
-                fremtidigTrygdetidTeoretisk = fremtidig?.second,
-                samletTrygdetidNorge =
-                    minOf(
-                        nasjonal.verdiOrZero().plus(fremtidig?.first.verdiOrZero()).normalized().years,
-                        40,
-                    ),
-                samletTrygdetidTeoretisk =
-                    minOf(
-                        teoretisk.verdiOrZero().plus(fremtidig?.second.verdiOrZero()).normalized().years,
-                        40,
-                    ),
+                faktiskTrygdetidNorge = faktisk.nasjonal,
+                faktiskTrygdetidTeoretisk = faktisk.teoretisk,
+                fremtidigTrygdetidNorge = fremtidig?.nasjonal,
+                fremtidigTrygdetidTeoretisk = fremtidig?.teoretisk,
+                samletTrygdetidNorge = avrundet.nasjonal,
+                samletTrygdetidTeoretisk = avrundet.teoretisk,
                 prorataBroek =
-                    if (nasjonal?.antallMaaneder != teoretisk.antallMaaneder) {
-                        IntBroek.fra(Pair(nasjonal?.antallMaaneder?.toInt(), teoretisk.antallMaaneder.toInt()))
+                    if (faktisk.nasjonal?.antallMaaneder != faktisk.teoretisk?.antallMaaneder) {
+                        IntBroek.fra(
+                            Pair(
+                                faktisk.nasjonal?.antallMaaneder?.toInt(),
+                                faktisk.teoretisk?.antallMaaneder?.toInt(),
+                            ),
+                        )
                     } else {
                         null
                     },

@@ -8,7 +8,7 @@ import { NesteOgTilbake } from '../handlinger/NesteOgTilbake'
 import { behandlingErUtfylt, hentBehandlesFraStatus } from '../felles/utils'
 import { VurderingsResultat } from '~shared/types/VurderingsResultat'
 import { OversiktGyldigFramsatt } from '~components/behandling/soeknadsoversikt/soeknadoversikt/gyldigFramsattSoeknad/OversiktGyldigFramsatt'
-import { Utenlandstilsnitt } from '~components/behandling/soeknadsoversikt/soeknadoversikt/utenlandstilsnitt/Utenlandstilsnitt'
+import { Utenlandstilknytning } from '~components/behandling/soeknadsoversikt/soeknadoversikt/utenlandstilknytning/Utenlandstilknytning'
 import { SakType } from '~shared/types/sak'
 import { OversiktKommerBarnetTilgode } from '~components/behandling/soeknadsoversikt/soeknadoversikt/kommerBarnetTilgode/OversiktKommerBarnetTilgode'
 import { Start } from '~components/behandling/handlinger/start'
@@ -24,6 +24,7 @@ import { formaterStringDato } from '~utils/formattering'
 import Virkningstidspunkt from '~components/behandling/soeknadsoversikt/soeknadoversikt/virkningstidspunkt/Virkningstidspunkt'
 import { BoddEllerArbeidetUtlandet } from './soeknadoversikt/boddEllerArbeidetUtlandet/BoddEllerArbeidetUtlandet'
 import OppdaterGrunnlagModal from '~components/behandling/handlinger/OppdaterGrunnlagModal'
+import { SkalViseBosattUtland } from '~components/behandling/soeknadsoversikt/bosattUtland/SkalViseBosattUtland'
 
 export const Soeknadsoversikt = (props: { behandling: IDetaljertBehandling }) => {
   const { behandling } = props
@@ -46,6 +47,7 @@ export const Soeknadsoversikt = (props: { behandling: IDetaljertBehandling }) =>
       </ContentHeader>
       <InnholdPadding>
         <OppdaterGrunnlagModal behandlingId={behandling.id} behandlingStatus={behandling.status} />
+        <Utenlandstilknytning behandling={behandling} redigerbar={behandles} />
         <OversiktGyldigFramsatt behandling={behandling} />
         {behandling.gyldighetsprøving?.resultat === VurderingsResultat.OPPFYLT && (
           <>
@@ -77,7 +79,7 @@ export const Soeknadsoversikt = (props: { behandling: IDetaljertBehandling }) =>
                   <>
                     <Info
                       label="Dødsdato"
-                      tekst={avdoedDoedsdato ? formaterStringDato(avdoedDoedsdato) : ''}
+                      tekst={avdoedDoedsdato ? formaterStringDato(avdoedDoedsdato) : 'Ikke registrert!'}
                       undertekst={formaterKildePdl(avdoedDoedsdatoKilde)}
                     />
                     <Info label="Søknad mottatt" tekst={formaterStringDato(soeknadMottattDato)} />
@@ -85,10 +87,10 @@ export const Soeknadsoversikt = (props: { behandling: IDetaljertBehandling }) =>
                 ),
               }}
             </Virkningstidspunkt>
-            <Utenlandstilsnitt behandling={behandling} redigerbar={behandles} />
             <BoddEllerArbeidetUtlandet behandling={behandling} redigerbar={behandles} />
           </>
         )}
+        <SkalViseBosattUtland behandling={behandling} />
       </InnholdPadding>
       <Border />
       <Familieforhold behandling={behandling} />

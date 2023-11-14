@@ -24,6 +24,7 @@ import no.nav.etterlatte.libs.common.vedtak.Attestasjon
 import no.nav.etterlatte.libs.common.vedtak.Behandling
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
+import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseType
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -57,6 +58,7 @@ internal class JournalfoerVedtaksbrevRiverTest {
                 BrevProsessType.AUTOMATISK,
                 "fnr",
                 Status.FERDIGSTILT,
+                Tidspunkt.now(),
                 mottaker = mockk(),
             )
         val response = JournalpostResponse("1234", null, null, true, emptyList())
@@ -98,6 +100,7 @@ internal class JournalfoerVedtaksbrevRiverTest {
                 BrevProsessType.AUTOMATISK,
                 "fnr",
                 Status.JOURNALFOERT,
+                Tidspunkt.now(),
                 mottaker = mockk(),
             )
 
@@ -166,7 +169,7 @@ internal class JournalfoerVedtaksbrevRiverTest {
         return JsonMessage.newMessage(
             mapOf(
                 CORRELATION_ID_KEY to UUID.randomUUID().toString(),
-                EVENT_NAME_KEY to BrevEventTypes.FERDIGSTILT.name,
+                EVENT_NAME_KEY to VedtakKafkaHendelseType.ATTESTERT.toString(),
                 "vedtak" to vedtak,
             ),
         )

@@ -39,15 +39,14 @@ internal class RevurderingTest {
             status = BehandlingStatus.OPPRETTET,
             kommerBarnetTilgode = kommerBarnetTilGodeVurdering(id),
             virkningstidspunkt = virkningstidspunktVurdering(),
-            utenlandstilsnitt = null,
             boddEllerArbeidetUtlandet = null,
             revurderingsaarsak = Revurderingaarsak.REGULERING,
             prosesstype = Prosesstype.MANUELL,
             kilde = Vedtaksloesning.GJENNY,
             revurderingInfo = null,
             begrunnelse = null,
-        ).tilVilkaarsvurdert().tilTrygdetidOppdatert().tilBeregnet(false)
-            .tilVilkaarsvurdert().tilTrygdetidOppdatert().tilBeregnet(false).tilFattetVedtak().tilAttestert()
+        ).tilVilkaarsvurdert().tilTrygdetidOppdatert().tilBeregnet()
+            .tilVilkaarsvurdert().tilTrygdetidOppdatert().tilBeregnet().tilFattetVedtak().tilAttestert()
             .tilIverksatt()
     }
 
@@ -58,7 +57,7 @@ internal class RevurderingTest {
         @Test
         fun `kan endre status gjennom gyldig statusendringsflyt`() {
             val actual =
-                revurdering.tilVilkaarsvurdert().tilTrygdetidOppdatert().tilBeregnet(false).tilFattetVedtak()
+                revurdering.tilVilkaarsvurdert().tilTrygdetidOppdatert().tilBeregnet().tilFattetVedtak()
                     .tilAttestert().tilIverksatt()
 
             Assertions.assertEquals(BehandlingStatus.IVERKSATT, actual.status)
@@ -67,7 +66,7 @@ internal class RevurderingTest {
         @Test
         fun `kan endre status gjennom gyldig statusendringsflyt - samordning`() {
             val actual =
-                revurdering.tilVilkaarsvurdert().tilTrygdetidOppdatert().tilBeregnet(false).tilFattetVedtak()
+                revurdering.tilVilkaarsvurdert().tilTrygdetidOppdatert().tilBeregnet().tilFattetVedtak()
                     .tilAttestert().tilTilSamordning().tilSamordnet().tilIverksatt()
 
             Assertions.assertEquals(BehandlingStatus.IVERKSATT, actual.status)
@@ -75,7 +74,7 @@ internal class RevurderingTest {
 
         @Test
         fun `opprettet kan ikke gaa til andre statuser enn vilkaarsvurdert og opprettet`() {
-            assertThrows<TilstandException.UgyldigTilstand> { revurdering.tilBeregnet(false) }
+            assertThrows<TilstandException.UgyldigTilstand> { revurdering.tilBeregnet() }
             assertThrows<TilstandException.UgyldigTilstand> { revurdering.tilFattetVedtak() }
             assertThrows<TilstandException.UgyldigTilstand> { revurdering.tilIverksatt() }
             assertThrows<TilstandException.UgyldigTilstand> { revurdering.tilReturnert() }
@@ -88,7 +87,7 @@ internal class RevurderingTest {
         fun `vilkaarsvurdert kan ikke gaa til andre statuser enn trygdetid oppdatert og opprettet`() {
             val vilkaarsvurdert = revurdering.tilVilkaarsvurdert()
 
-            assertThrows<TilstandException.UgyldigTilstand> { vilkaarsvurdert.tilBeregnet(false) }
+            assertThrows<TilstandException.UgyldigTilstand> { vilkaarsvurdert.tilBeregnet() }
             assertThrows<TilstandException.UgyldigTilstand> { vilkaarsvurdert.tilFattetVedtak() }
             assertThrows<TilstandException.UgyldigTilstand> { vilkaarsvurdert.tilIverksatt() }
             assertThrows<TilstandException.UgyldigTilstand> { vilkaarsvurdert.tilReturnert() }
@@ -108,12 +107,12 @@ internal class RevurderingTest {
             assertDoesNotThrow { trygdetidOppdatert.tilOpprettet() }
             assertDoesNotThrow { trygdetidOppdatert.tilVilkaarsvurdert() }
             assertDoesNotThrow { trygdetidOppdatert.tilTrygdetidOppdatert() }
-            assertDoesNotThrow { trygdetidOppdatert.tilBeregnet(false) }
+            assertDoesNotThrow { trygdetidOppdatert.tilBeregnet() }
         }
 
         @Test
         fun beregnet() {
-            val beregnet = revurdering.tilVilkaarsvurdert().tilTrygdetidOppdatert().tilBeregnet(false)
+            val beregnet = revurdering.tilVilkaarsvurdert().tilTrygdetidOppdatert().tilBeregnet()
 
             assertThrows<TilstandException.UgyldigTilstand> { beregnet.tilReturnert() }
             assertThrows<TilstandException.UgyldigTilstand> { beregnet.tilIverksatt() }
@@ -122,8 +121,8 @@ internal class RevurderingTest {
             assertDoesNotThrow { beregnet.tilVilkaarsvurdert() }
             assertDoesNotThrow { beregnet.tilTrygdetidOppdatert() }
             assertDoesNotThrow { beregnet.tilTrygdetidOppdatert() }
-            assertDoesNotThrow { beregnet.tilBeregnet(false) }
-            assertDoesNotThrow { beregnet.tilBeregnet(false) }
+            assertDoesNotThrow { beregnet.tilBeregnet() }
+            assertDoesNotThrow { beregnet.tilBeregnet() }
             assertDoesNotThrow { beregnet.tilFattetVedtak() }
         }
     }
@@ -151,13 +150,13 @@ internal class RevurderingTest {
 
         @Test
         fun beregnet() {
-            val beregnet = revurdering.tilVilkaarsvurdert().tilTrygdetidOppdatert().tilBeregnet(false)
+            val beregnet = revurdering.tilVilkaarsvurdert().tilTrygdetidOppdatert().tilBeregnet()
             assertKanGaaTilAlleStatuser(beregnet)
         }
 
         @Test
         fun fattet() {
-            val fattet = revurdering.tilVilkaarsvurdert().tilTrygdetidOppdatert().tilBeregnet(false).tilFattetVedtak()
+            val fattet = revurdering.tilVilkaarsvurdert().tilTrygdetidOppdatert().tilBeregnet().tilFattetVedtak()
             assertKanGaaTilAlleStatuser(fattet)
         }
 
@@ -171,7 +170,7 @@ internal class RevurderingTest {
                 BehandlingStatus.TRYGDETID_OPPDATERT,
                 revurdering.tilTrygdetidOppdatert().status,
             )
-            Assertions.assertEquals(BehandlingStatus.BEREGNET, revurdering.tilBeregnet(false).status)
+            Assertions.assertEquals(BehandlingStatus.BEREGNET, revurdering.tilBeregnet().status)
             Assertions.assertEquals(BehandlingStatus.FATTET_VEDTAK, revurdering.tilFattetVedtak().status)
             Assertions.assertEquals(BehandlingStatus.ATTESTERT, revurdering.tilAttestert().status)
             Assertions.assertEquals(BehandlingStatus.RETURNERT, revurdering.tilReturnert().status)
@@ -196,7 +195,6 @@ private fun opprettetRevurdering(prosesstype: Prosesstype): Revurdering {
         status = BehandlingStatus.OPPRETTET,
         kommerBarnetTilgode = kommerBarnetTilGodeVurdering(id),
         virkningstidspunkt = virkningstidspunktVurdering(),
-        utenlandstilsnitt = null,
         boddEllerArbeidetUtlandet = null,
         revurderingsaarsak = Revurderingaarsak.REGULERING,
         prosesstype = prosesstype,

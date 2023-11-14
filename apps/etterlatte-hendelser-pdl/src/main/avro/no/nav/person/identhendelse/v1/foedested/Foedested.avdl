@@ -1,0 +1,9 @@
+@namespace("no.nav.person.identhendelse.v1.foedested")
+protocol FoedestedV1 {
+
+  record Foedested {
+    union { null, string } foedeland = null;
+    union { null, string } foedested = null;
+    union { null, string } foedekommune = null;
+  }
+}

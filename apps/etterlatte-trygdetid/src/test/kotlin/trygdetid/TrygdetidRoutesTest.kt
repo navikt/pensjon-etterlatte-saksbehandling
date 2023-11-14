@@ -3,14 +3,19 @@ package no.nav.etterlatte.trygdetid
 import io.kotest.matchers.shouldBe
 import io.ktor.client.request.get
 import io.ktor.client.request.header
+import io.ktor.client.request.post
+import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.log
 import io.ktor.server.testing.ApplicationTestBuilder
+import io.ktor.server.testing.testApplication
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
+import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.trygdetid.StatusOppdatertDto
 import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.trygdetid.klienter.BehandlingKlient
@@ -53,9 +58,32 @@ internal class TrygdetidRoutesTest {
             response.status shouldBe HttpStatusCode.NoContent
         }
 
-        coVerify(exactly = 1) {
+        coVerify {
             behandlingKlient.harTilgangTilBehandling(any(), any())
             trygdetidService.hentTrygdetid(any(), any())
+        }
+    }
+
+    @Test
+    fun `skal returnere 200 og status ved kall mot oppdater-status`() {
+        coEvery { trygdetidService.sjekkGyldighetOgOppdaterBehandlingStatus(any(), any()) } returns true
+
+        testApplication(server.config.httpServer.port()) {
+            val response =
+                client.post("/api/trygdetid/${randomUUID()}/oppdater-status") {
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    header(HttpHeaders.Authorization, "Bearer $token")
+                }
+
+            val dto = objectMapper.readValue(response.bodyAsText(), StatusOppdatertDto::class.java)
+
+            response.status shouldBe HttpStatusCode.OK
+            dto.statusOppdatert shouldBe true
+        }
+
+        coVerify {
+            behandlingKlient.harTilgangTilBehandling(any(), any())
+            trygdetidService.sjekkGyldighetOgOppdaterBehandlingStatus(any(), any())
         }
     }
 
@@ -63,7 +91,7 @@ internal class TrygdetidRoutesTest {
         port: Int,
         block: suspend ApplicationTestBuilder.() -> Unit,
     ) {
-        io.ktor.server.testing.testApplication {
+        testApplication {
             environment {
                 config = buildTestApplicationConfigurationForOauth(port, AZURE_ISSUER, AZURE_CLIENT_ID)
             }

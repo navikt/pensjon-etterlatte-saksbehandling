@@ -23,6 +23,7 @@ import { isFailure, isPending, isPendingOrInitial, useApiCall } from '~shared/ho
 
 import { fattVedtak } from '~shared/api/vedtaksvurdering'
 import { SjekklisteValideringErrorSummary } from '~components/behandling/sjekkliste/SjekklisteValideringErrorSummary'
+import { IHendelseType } from '~shared/types/IHendelse'
 
 export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
   const { behandlingId } = useParams()
@@ -58,6 +59,23 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
     return <Spinner visible label="Ingen brev funnet. Oppretter brev ..." />
   }
 
+  const behandlingRedigertEtterOpprettetBrev = props.behandling.hendelser.find((hendelse) => {
+    if (!vedtaksbrev) return false
+
+    const erBehandlingshendelse = [
+      IHendelseType.BEHANDLING_OPPRETTET,
+      IHendelseType.BEHANDLING_VILKAARSVURDERT,
+      IHendelseType.BEHANDLING_TRYGDETID_OPPDATERT,
+      IHendelseType.BEHANDLING_BEREGNET,
+      IHendelseType.BEHANDLING_AVKORTET,
+    ].includes(hendelse.hendelse)
+
+    const hendelseErEtterBrevOpprettelse =
+      new Date(vedtaksbrev.opprettet).getTime() < new Date(hendelse.opprettet).getTime()
+
+    return erBehandlingshendelse && hendelseErEtterBrevOpprettelse
+  })
+
   return (
     <Content>
       <BrevContent>
@@ -79,8 +97,19 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
                   : 'Dette er et manuelt opprettet brev. Kontroller innholdet nøye før attestering.'}
               </Alert>
             )}
+            {behandlingRedigertEtterOpprettetBrev && (
+              <Alert variant="warning">
+                Behandling er redigert etter brev ble opprettet. Brev bør derfor tilbakestilles..
+              </Alert>
+            )}
             <br />
-            {vedtaksbrev && <MottakerPanel vedtaksbrev={vedtaksbrev} />}
+            {vedtaksbrev && (
+              <MottakerPanel
+                vedtaksbrev={vedtaksbrev}
+                oppdater={(val) => setVedtaksbrev({ ...vedtaksbrev, mottaker: val })}
+                redigerbar={manueltBrevKanRedigeres(status)}
+              />
+            )}
           </ContentHeader>
         </Sidebar>
 

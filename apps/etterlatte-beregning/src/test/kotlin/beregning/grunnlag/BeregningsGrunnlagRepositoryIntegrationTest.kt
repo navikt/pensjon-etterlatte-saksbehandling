@@ -1,11 +1,13 @@
 package beregning.grunnlag
 
+import io.kotest.matchers.shouldBe
 import io.mockk.clearAllMocks
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlag
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlagOMS
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlagRepository
 import no.nav.etterlatte.beregning.grunnlag.GrunnlagMedPeriode
 import no.nav.etterlatte.beregning.grunnlag.InstitusjonsoppholdBeregningsgrunnlag
+import no.nav.etterlatte.beregning.grunnlag.OverstyrBeregningGrunnlagDao
 import no.nav.etterlatte.beregning.grunnlag.Reduksjon
 import no.nav.etterlatte.beregning.regler.toGrunnlag
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
@@ -67,6 +69,7 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest {
         clearAllMocks()
         dataSource.connection.use {
             it.prepareStatement(""" TRUNCATE beregningsgrunnlag""").execute()
+            it.prepareStatement(""" TRUNCATE overstyr_beregningsgrunnlag""").execute()
         }
     }
 
@@ -74,7 +77,8 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest {
     fun `Opprettelse fungerer`() {
         val id = UUID.randomUUID()
 
-        val soeskenMedIBeregning = listOf(SoeskenMedIBeregning(HELSOESKEN_FOEDSELSNUMMER, true)).somPeriodisertGrunnlag()
+        val soeskenMedIBeregning =
+            listOf(SoeskenMedIBeregning(HELSOESKEN_FOEDSELSNUMMER, true)).somPeriodisertGrunnlag()
         val institusjonsoppholdBeregningsgrunnlag =
             listOf(
                 GrunnlagMedPeriode(
@@ -145,7 +149,8 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest {
     fun `Oppdatering fungerer`() {
         val id = UUID.randomUUID()
 
-        val initialSoeskenMedIBeregning = listOf(SoeskenMedIBeregning(HELSOESKEN_FOEDSELSNUMMER, true)).somPeriodisertGrunnlag()
+        val initialSoeskenMedIBeregning =
+            listOf(SoeskenMedIBeregning(HELSOESKEN_FOEDSELSNUMMER, true)).somPeriodisertGrunnlag()
         val oppdatertSoeskenMedIBeregning =
             listOf(
                 SoeskenMedIBeregning(HELSOESKEN_FOEDSELSNUMMER, true),
@@ -289,6 +294,146 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest {
         val result = repository.finnBarnepensjonGrunnlagForBehandling(id)
 
         assertNotNull(result)
+    }
+
+    @Test
+    fun `skal kunne lagre og hente overstyr beregningsgrunnlag`() {
+        val behandlingId = UUID.randomUUID()
+
+        repository.lagreOverstyrBeregningGrunnlagForBehandling(
+            behandlingId,
+            listOf(
+                OverstyrBeregningGrunnlagDao(
+                    id = UUID.randomUUID(),
+                    behandlingId = behandlingId,
+                    datoFOM = LocalDate.now().minusYears(12),
+                    datoTOM = LocalDate.now().minusYears(6),
+                    utbetaltBeloep = 123L,
+                    trygdetid = 35L,
+                    sakId = 1L,
+                    beskrivelse = "test periode 1",
+                    kilde =
+                        Grunnlagsopplysning.Saksbehandler(
+                            ident = "Z123456",
+                            Tidspunkt.now(),
+                        ),
+                ),
+                OverstyrBeregningGrunnlagDao(
+                    id = UUID.randomUUID(),
+                    behandlingId = behandlingId,
+                    datoFOM = LocalDate.now().minusYears(6).plusDays(1),
+                    datoTOM = LocalDate.now(),
+                    utbetaltBeloep = 321L,
+                    trygdetid = 5L,
+                    sakId = 1L,
+                    beskrivelse = "test periode 2",
+                    kilde =
+                        Grunnlagsopplysning.Saksbehandler(
+                            ident = "Z123456",
+                            Tidspunkt.now(),
+                        ),
+                ),
+            ),
+        )
+
+        val data = repository.finnOverstyrBeregningGrunnlagForBehandling(behandlingId)
+
+        data.size shouldBe 2
+        data.first().behandlingId shouldBe behandlingId
+        data.minBy { it.utbetaltBeloep }.utbetaltBeloep shouldBe 123L
+        data.maxBy { it.utbetaltBeloep }.utbetaltBeloep shouldBe 321L
+    }
+
+    @Test
+    fun `skal kunne lagre og hente overstyr beregningsgrunnlag som erstatter eksisterende`() {
+        val behandlingId = UUID.randomUUID()
+
+        repository.lagreOverstyrBeregningGrunnlagForBehandling(
+            behandlingId,
+            listOf(
+                OverstyrBeregningGrunnlagDao(
+                    id = UUID.randomUUID(),
+                    behandlingId = behandlingId,
+                    datoFOM = LocalDate.now().minusYears(12),
+                    datoTOM = LocalDate.now().minusYears(6),
+                    utbetaltBeloep = 123L,
+                    trygdetid = 35L,
+                    sakId = 1L,
+                    beskrivelse = "test periode 1",
+                    kilde =
+                        Grunnlagsopplysning.Saksbehandler(
+                            ident = "Z123456",
+                            Tidspunkt.now(),
+                        ),
+                ),
+                OverstyrBeregningGrunnlagDao(
+                    id = UUID.randomUUID(),
+                    behandlingId = behandlingId,
+                    datoFOM = LocalDate.now().minusYears(6).plusDays(1),
+                    datoTOM = LocalDate.now(),
+                    utbetaltBeloep = 321L,
+                    trygdetid = 5L,
+                    sakId = 1L,
+                    beskrivelse = "test periode 2",
+                    kilde =
+                        Grunnlagsopplysning.Saksbehandler(
+                            ident = "Z123456",
+                            Tidspunkt.now(),
+                        ),
+                ),
+            ),
+        )
+
+        repository.lagreOverstyrBeregningGrunnlagForBehandling(
+            behandlingId,
+            listOf(
+                OverstyrBeregningGrunnlagDao(
+                    id = UUID.randomUUID(),
+                    behandlingId = behandlingId,
+                    datoFOM = LocalDate.now().minusYears(12),
+                    datoTOM = LocalDate.now().minusYears(6),
+                    utbetaltBeloep = 223L,
+                    trygdetid = 35L,
+                    sakId = 1L,
+                    beskrivelse = "test periode 3",
+                    kilde =
+                        Grunnlagsopplysning.Saksbehandler(
+                            ident = "Z123456",
+                            Tidspunkt.now(),
+                        ),
+                ),
+                OverstyrBeregningGrunnlagDao(
+                    id = UUID.randomUUID(),
+                    behandlingId = behandlingId,
+                    datoFOM = LocalDate.now().minusYears(6).plusDays(1),
+                    datoTOM = LocalDate.now(),
+                    utbetaltBeloep = 322L,
+                    trygdetid = 5L,
+                    sakId = 1L,
+                    beskrivelse = "test periode 4",
+                    kilde =
+                        Grunnlagsopplysning.Saksbehandler(
+                            ident = "Z123456",
+                            Tidspunkt.now(),
+                        ),
+                ),
+            ),
+        )
+
+        val data = repository.finnOverstyrBeregningGrunnlagForBehandling(behandlingId)
+
+        data.size shouldBe 2
+        data.first().behandlingId shouldBe behandlingId
+        data.minBy { it.utbetaltBeloep }.let {
+            it.utbetaltBeloep shouldBe 223L
+            it.trygdetid shouldBe 35L
+            it.beskrivelse shouldBe "test periode 3"
+        }
+        data.maxBy { it.utbetaltBeloep }.let {
+            it.utbetaltBeloep shouldBe 322L
+            it.trygdetid shouldBe 5L
+            it.beskrivelse shouldBe "test periode 4"
+        }
     }
 
     private fun List<SoeskenMedIBeregning>.somPeriodisertGrunnlag(

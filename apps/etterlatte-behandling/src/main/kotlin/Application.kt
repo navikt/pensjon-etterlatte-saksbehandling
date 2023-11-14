@@ -17,6 +17,7 @@ import kotlinx.coroutines.withContext
 import no.nav.etterlatte.behandling.behandlingRoutes
 import no.nav.etterlatte.behandling.behandlingVedtakRoute
 import no.nav.etterlatte.behandling.behandlingsstatusRoutes
+import no.nav.etterlatte.behandling.bosattutland.bosattUtlandRoutes
 import no.nav.etterlatte.behandling.etterbetaling.etterbetalingRoutes
 import no.nav.etterlatte.behandling.generellbehandling.generellbehandlingRoutes
 import no.nav.etterlatte.behandling.klage.klageRoutes
@@ -120,6 +121,7 @@ internal fun Application.module(context: ApplicationContext) {
             revurderingRoutes(revurderingService = revurderingService)
             omregningRoutes(omregningService = omregningService)
             migreringRoutes(migreringService = migreringService)
+            bosattUtlandRoutes(bosattUtlandService = bosattUtlandService)
             behandlingsstatusRoutes(behandlingsstatusService = behandlingsStatusService)
             behandlingVedtakRoute(
                 behandlingsstatusService = behandlingsStatusService,

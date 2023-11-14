@@ -8,6 +8,7 @@ import {
   rolletekst,
 } from '~components/person/uhaandtereHendelser/utils'
 import {
+  AdresseSamsvar,
   AnsvarligeForeldreSamsvar,
   BarnSamsvar,
   DoedsdatoSamsvar,
@@ -23,6 +24,7 @@ import { formaterKanskjeStringDatoMedFallback, formaterStringDato } from '~utils
 import styled from 'styled-components'
 import { BodyShort } from '@navikt/ds-react'
 import { institusjonstype } from '~components/behandling/beregningsgrunnlag/Insthendelser'
+import { Adressevisning } from '~components/behandling/felles/Adressevisning'
 
 const AnsvarligeForeldreSamsvar = (props: { samsvar: AnsvarligeForeldreSamsvar }) => {
   const navneMap = useContext(FnrTilNavnMapContext)
@@ -76,6 +78,26 @@ const Doedsdato = (props: { samsvar: DoedsdatoSamsvar }) => {
       <div>
         <BodySmall>Eksisterende grunnlag</BodySmall>
         <BodySmall>{formaterKanskjeStringDatoMedFallback('Ingen', samsvar.fraGrunnlag)}</BodySmall>
+      </div>
+    </GrunnlagSammenligningWrapper>
+  )
+}
+
+const Adresse = (props: { adresse: AdresseSamsvar }) => {
+  const { adresse } = props
+  return (
+    <GrunnlagSammenligningWrapper>
+      <div>
+        <BodySmall>Nytt grunnlag (PDL)</BodySmall>
+        <BodySmall>
+          <Adressevisning adresser={adresse.fraPdl} soeknadsoversikt={false} />
+        </BodySmall>
+      </div>
+      <div>
+        <BodySmall>Eksisterende grunnlag</BodySmall>
+        <BodySmall>
+          <Adressevisning adresser={adresse.fraGrunnlag} soeknadsoversikt={false} />
+        </BodySmall>
       </div>
     </GrunnlagSammenligningWrapper>
   )
@@ -256,6 +278,13 @@ export const HendelseBeskrivelse = (props: { hendelse: Grunnlagsendringshendelse
         <Header>
           <HendelseDetaljer hendelse={hendelse} />
           <Doedsdato samsvar={hendelse.samsvarMellomKildeOgGrunnlag} />
+        </Header>
+      )
+    case 'ADRESSE':
+      return (
+        <Header>
+          <HendelseDetaljer hendelse={hendelse} />
+          <Adresse adresse={hendelse.samsvarMellomKildeOgGrunnlag} />
         </Header>
       )
     case 'BARN':

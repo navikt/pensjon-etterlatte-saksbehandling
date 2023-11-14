@@ -2,6 +2,7 @@ package no.nav.etterlatte.grunnlagsendring
 
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
+import no.nav.etterlatte.libs.common.grunnlag.hentBostedsadresse
 import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
 import no.nav.etterlatte.libs.common.grunnlag.hentFamilierelasjon
 import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsnummer
@@ -21,14 +22,42 @@ fun Grunnlag.doedsdato(
     Saksrolle.GJENLEVENDE -> {
         hentGjenlevende().hentDoedsdato()
     }
+
     Saksrolle.SOEKER -> {
         soeker.hentDoedsdato()
     }
+
     Saksrolle.SOESKEN -> {
         hentSoesken().find { it.hentFoedselsnummer()?.verdi?.value == fnr }?.hentDoedsdato()
     }
+
     else -> throw GrunnlagRolleException(
         "Proevde aa finne doedsdato for $saksrolle, men det skal ikke kunne skje",
+    )
+}
+
+fun Grunnlag.bostedsadresse(
+    saksrolle: Saksrolle,
+    fnr: String,
+) = when (saksrolle) {
+    Saksrolle.AVDOED -> {
+        hentAvdoed().hentBostedsadresse()
+    }
+
+    Saksrolle.GJENLEVENDE -> {
+        hentGjenlevende().hentBostedsadresse()
+    }
+
+    Saksrolle.SOEKER -> {
+        soeker.hentBostedsadresse()
+    }
+
+    Saksrolle.SOESKEN -> {
+        hentSoesken().find { it.hentFoedselsnummer()?.verdi?.value == fnr }?.hentBostedsadresse()
+    }
+
+    else -> throw GrunnlagRolleException(
+        "Proevde aa finne bostedsadresse for $saksrolle, men det skal ikke kunne skje",
     )
 }
 
@@ -39,6 +68,7 @@ fun Grunnlag.ansvarligeForeldre(
     Saksrolle.SOEKER -> {
         soeker.hentFamilierelasjon()?.verdi?.ansvarligeForeldre
     }
+
     Saksrolle.SOESKEN -> {
         hentSoesken().find { it.hentFoedselsnummer()?.verdi?.value == fnr }
             ?.hentFamilierelasjon()?.verdi?.ansvarligeForeldre

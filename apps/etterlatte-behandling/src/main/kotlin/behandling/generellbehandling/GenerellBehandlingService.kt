@@ -98,7 +98,7 @@ class GenerellBehandlingService(
             generellBehandling.sakId,
             OppgaveKilde.GENERELL_BEHANDLING,
             OppgaveType.ATTESTERING,
-            merknad = "Attestering av generell behandling type ${generellBehandling.type.name}",
+            merknad = "Attestering av ${generellBehandling.type.name}",
             frist = trettiDagerFremITid,
         )
     }

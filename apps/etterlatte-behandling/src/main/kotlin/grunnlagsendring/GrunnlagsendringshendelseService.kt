@@ -11,6 +11,7 @@ import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.common.klienter.PdlKlient
 import no.nav.etterlatte.common.klienter.hentAnsvarligeForeldre
 import no.nav.etterlatte.common.klienter.hentBarn
+import no.nav.etterlatte.common.klienter.hentBostedsadresse
 import no.nav.etterlatte.common.klienter.hentDoedsdato
 import no.nav.etterlatte.common.klienter.hentSivilstand
 import no.nav.etterlatte.common.klienter.hentUtland
@@ -25,8 +26,10 @@ import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
+import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.pdlhendelse.Adressebeskyttelse
+import no.nav.etterlatte.libs.common.pdlhendelse.Bostedsadresse
 import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.SivilstandHendelse
@@ -102,35 +105,45 @@ class GrunnlagsendringshendelseService(
         grunnlagsendringshendelseDao.oppdaterGrunnlagsendringHistorisk(behandlingId)
     }
 
+    fun opprettBostedhendelse(bostedsadresse: Bostedsadresse): List<Grunnlagsendringshendelse> {
+        return opprettHendelseAvTypeForPerson(bostedsadresse.fnr, GrunnlagsendringsType.BOSTED)
+    }
+
     fun opprettDoedshendelse(doedshendelse: Doedshendelse): List<Grunnlagsendringshendelse> {
-        return opprettHendelseAvTypeForPerson(doedshendelse.fnr, GrunnlagsendringsType.DOEDSFALL)
+        return inTransaction { opprettHendelseAvTypeForPerson(doedshendelse.fnr, GrunnlagsendringsType.DOEDSFALL) }
     }
 
     fun opprettUtflyttingshendelse(utflyttingsHendelse: UtflyttingsHendelse): List<Grunnlagsendringshendelse> {
-        return opprettHendelseAvTypeForPerson(utflyttingsHendelse.fnr, GrunnlagsendringsType.UTFLYTTING)
+        return inTransaction { opprettHendelseAvTypeForPerson(utflyttingsHendelse.fnr, GrunnlagsendringsType.UTFLYTTING) }
     }
 
     fun opprettForelderBarnRelasjonHendelse(forelderBarnRelasjonHendelse: ForelderBarnRelasjonHendelse): List<Grunnlagsendringshendelse> {
-        return opprettHendelseAvTypeForPerson(
-            forelderBarnRelasjonHendelse.fnr,
-            GrunnlagsendringsType.FORELDER_BARN_RELASJON,
-        )
+        return inTransaction {
+            opprettHendelseAvTypeForPerson(
+                forelderBarnRelasjonHendelse.fnr,
+                GrunnlagsendringsType.FORELDER_BARN_RELASJON,
+            )
+        }
     }
 
     fun opprettVergemaalEllerFremtidsfullmakt(
         vergeMaalEllerFremtidsfullmakt: VergeMaalEllerFremtidsfullmakt,
     ): List<Grunnlagsendringshendelse> {
-        return opprettHendelseAvTypeForPerson(
-            vergeMaalEllerFremtidsfullmakt.fnr,
-            GrunnlagsendringsType.VERGEMAAL_ELLER_FREMTIDSFULLMAKT,
-        )
+        return inTransaction {
+            opprettHendelseAvTypeForPerson(
+                vergeMaalEllerFremtidsfullmakt.fnr,
+                GrunnlagsendringsType.VERGEMAAL_ELLER_FREMTIDSFULLMAKT,
+            )
+        }
     }
 
     fun opprettSivilstandHendelse(sivilstandHendelse: SivilstandHendelse): List<Grunnlagsendringshendelse> {
-        return opprettHendelseAvTypeForPerson(
-            sivilstandHendelse.fnr,
-            GrunnlagsendringsType.SIVILSTAND,
-        )
+        return inTransaction {
+            opprettHendelseAvTypeForPerson(
+                sivilstandHendelse.fnr,
+                GrunnlagsendringsType.SIVILSTAND,
+            )
+        }
     }
 
     fun opprettInstitusjonsOppholdhendelse(oppholdsHendelse: InstitusjonsoppholdHendelseBeriket): List<Grunnlagsendringshendelse> {
@@ -170,6 +183,30 @@ class GrunnlagsendringshendelseService(
 
         if (sakIder.isNotEmpty() && gradering != AdressebeskyttelseGradering.UGRADERT) {
             logger.error("Vi har en eller flere saker som er beskyttet med gradering ($gradering), se sikkerLogg.")
+        }
+    }
+
+    fun oppdaterAdresseHendelse(bostedsadresse: Bostedsadresse) {
+        inTransaction {
+            val finnSaker = sakService.finnSaker(bostedsadresse.fnr)
+            val sakerMedNyEnhet =
+                finnSaker.map {
+                    SakMedEnhet(
+                        it.id,
+                        sakService.finnEnhetForPersonOgTema(bostedsadresse.fnr, it.sakType.tema, it.sakType).enhetNr,
+                    )
+                }
+            sakerMedNyEnhet.forEach { sakMedEnhet ->
+                val oppgaverUnderBehandling =
+                    oppgaveService.hentOppgaverForSak(sakMedEnhet.id).filter { it.status == Status.UNDER_BEHANDLING }
+                if (oppgaverUnderBehandling.isNotEmpty()) {
+                    logger.info("Oppretter manuell oppgave for Bosted fordi det er åpne behandlinger")
+                    opprettBostedhendelse(bostedsadresse)
+                } else {
+                    sakService.oppdaterEnhetForSaker(listOf(sakMedEnhet))
+                    oppgaveService.oppdaterEnhetForRelaterteOppgaver(listOf(sakMedEnhet))
+                }
+            }
         }
     }
 
@@ -257,33 +294,31 @@ class GrunnlagsendringshendelseService(
         val sakerOgRoller = runBlocking { grunnlagKlient.hentPersonSakOgRolle(fnr).sakerOgRoller }
 
         return sakerOgRoller.let {
-            inTransaction {
-                it.filter { rolleOgSak ->
-                    !hendelseEksistererFraFoer(
-                        rolleOgSak.sakId,
-                        fnr,
-                        grunnlagendringType,
-                    )
-                }
-                    .map { rolleOgSak ->
-                        val hendelseId = UUID.randomUUID()
-                        logger.info(
-                            "Oppretter grunnlagsendringshendelse med id=$hendelseId for hendelse av " +
-                                "type $grunnlagendringType på sak med id=${rolleOgSak.sakId}",
-                        )
-                        val hendelse =
-                            Grunnlagsendringshendelse(
-                                id = hendelseId,
-                                sakId = rolleOgSak.sakId,
-                                status = grunnlagsEndringsStatus,
-                                type = grunnlagendringType,
-                                opprettet = tidspunktForMottakAvHendelse,
-                                hendelseGjelderRolle = rolleOgSak.rolle,
-                                gjelderPerson = fnr,
-                            )
-                        grunnlagsendringshendelseDao.opprettGrunnlagsendringshendelse(hendelse)
-                    }
+            it.filter { rolleOgSak ->
+                !hendelseEksistererFraFoer(
+                    rolleOgSak.sakId,
+                    fnr,
+                    grunnlagendringType,
+                )
             }
+                .map { rolleOgSak ->
+                    val hendelseId = UUID.randomUUID()
+                    logger.info(
+                        "Oppretter grunnlagsendringshendelse med id=$hendelseId for hendelse av " +
+                            "type $grunnlagendringType på sak med id=${rolleOgSak.sakId}",
+                    )
+                    val hendelse =
+                        Grunnlagsendringshendelse(
+                            id = hendelseId,
+                            sakId = rolleOgSak.sakId,
+                            status = grunnlagsEndringsStatus,
+                            type = grunnlagendringType,
+                            opprettet = tidspunktForMottakAvHendelse,
+                            hendelseGjelderRolle = rolleOgSak.rolle,
+                            gjelderPerson = fnr,
+                        )
+                    grunnlagsendringshendelseDao.opprettGrunnlagsendringshendelse(hendelse)
+                }
         }
     }
 
@@ -435,9 +470,19 @@ class GrunnlagsendringshendelseService(
                 samsvarSivilstand(pdlSivilstand, grunnlagSivilstand)
             }
 
-            GrunnlagsendringsType.GRUNNBELOEP -> SamsvarMellomKildeOgGrunnlag.Grunnbeloep(samsvar = false)
-            GrunnlagsendringsType.INSTITUSJONSOPPHOLD ->
+            GrunnlagsendringsType.BOSTED -> {
+                val pdlBosted = pdlData.hentBostedsadresse()
+                val grunnlagBosted = grunnlag?.bostedsadresse(rolle, fnr)?.verdi
+                samsvarBostedsadresse(pdlBosted, grunnlagBosted)
+            }
+
+            GrunnlagsendringsType.GRUNNBELOEP -> {
+                SamsvarMellomKildeOgGrunnlag.Grunnbeloep(samsvar = false)
+            }
+
+            GrunnlagsendringsType.INSTITUSJONSOPPHOLD -> {
                 throw IllegalStateException("Denne hendelsen skal gå rett til oppgavelisten og aldri komme hit")
+            }
         }
     }
 

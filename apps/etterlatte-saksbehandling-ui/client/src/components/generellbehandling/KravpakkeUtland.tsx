@@ -6,6 +6,7 @@ import {
   BodyShort,
   Button,
   Checkbox,
+  Chips,
   Heading,
   Link,
   Panel,
@@ -15,7 +16,7 @@ import {
   TextField,
 } from '@navikt/ds-react'
 import React, { useContext, useEffect, useState } from 'react'
-import { isFailure, isPending, isSuccess, mapApiResult, useApiCall } from '~shared/hooks/useApiCall'
+import { isFailure, isPending, isPendingOrInitial, isSuccess, mapApiResult, useApiCall } from '~shared/hooks/useApiCall'
 import {
   attesterGenerellbehandling,
   oppdaterGenerellBehandling,
@@ -25,9 +26,9 @@ import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { hentAlleLand, ILand, sorterLand } from '~shared/api/trygdetid'
 import styled from 'styled-components'
-import { ExternalLinkIcon, PencilWritingIcon, XMarkIcon } from '@navikt/aksel-icons'
+import { ExternalLinkIcon, PencilWritingIcon } from '@navikt/aksel-icons'
 import { opprettBrevForSak } from '~shared/api/brev'
-import { ABlue500, AGray400 } from '@navikt/ds-tokens/dist/tokens'
+import { ABlue500 } from '@navikt/ds-tokens/dist/tokens'
 import { ButtonGroup } from '~components/person/VurderHendelseModal'
 import { ConfigContext } from '~clientConfig'
 import { DatoVelger, formatDateToLocaleDateOrEmptyString } from '~shared/DatoVelger'
@@ -50,13 +51,6 @@ const LenkeMargin = styled(Link)`
   margin: 2rem 0rem 0.5rem 0;
 `
 
-const FlexOrder = styled.div`
-  display: flex;
-  max-width: 55rem;
-  justify-content: flex-start;
-  flex-wrap: wrap;
-`
-
 const KravpakkeUtland = (props: { utlandsBehandling: Generellbehandling & { innhold: KravpakkeUtland | null } }) => {
   const { utlandsBehandling } = props
   const innhold = utlandsBehandling.innhold
@@ -67,13 +61,16 @@ const KravpakkeUtland = (props: { utlandsBehandling: Generellbehandling & { innh
   const [avdoed, setAvdoed] = useState<Grunnlagsopplysning<IPdlPerson, KildePdl> | null>(null)
 
   const [hentAlleLandRequest, fetchAlleLand] = useApiCall(hentAlleLand)
+
+  const [dokumentDropdown, setDokumentDropdown] = useState<string>('')
+
   const [alleLandKodeverk, setAlleLandKodeverk] = useState<ILand[] | null>(null)
   const [rinanummer, setRinanummer] = useState<string>(innhold?.rinanummer ?? '')
   const [notater, setNotater] = useState<string>(innhold?.begrunnelse ?? '')
   const [valgtLandIsoKode, setValgtLandIsoKode] = useState<string>('')
   const [valgteLandIsoKode, setvalgteLandIsoKode] = useState<string[]>(innhold?.landIsoKode ?? [])
   const [landAlleredeValgt, setLandAlleredeValgt] = useState<boolean>(false)
-  const defaultDokumentState: DokumentSendtMedDato[] = [{ dokumenttype: '', sendt: false, dato: '' }]
+  const defaultDokumentState: DokumentSendtMedDato[] = []
 
   const [dokumenter, setDokumenter] = useState<DokumentSendtMedDato[]>(
     utlandsBehandling.innhold?.dokumenter ?? defaultDokumentState
@@ -140,7 +137,6 @@ const KravpakkeUtland = (props: { utlandsBehandling: Generellbehandling & { innh
   }
 
   const redigerbar = utlandsBehandling.status === Status.OPPRETTET
-
   return (
     <GridContainer>
       <MainContent style={{ whiteSpace: 'pre-wrap' }}>
@@ -171,7 +167,9 @@ const KravpakkeUtland = (props: { utlandsBehandling: Generellbehandling & { innh
                     </>
                   )}
                   {isFailure(avdoedeStatus) && <ApiErrorAlert>Klarte ikke å hente informasjon om avdøed</ApiErrorAlert>}
-                  {isPending(avdoedeStatus) && <Spinner visible={true} label="Henter opplysninger om avdøde" />}
+                  {isPendingOrInitial(avdoedeStatus) && (
+                    <Spinner visible={true} label="Henter opplysninger om avdøde" />
+                  )}
                 </div>
               ) : (
                 <Alert variant="warning">
@@ -187,7 +185,7 @@ const KravpakkeUtland = (props: { utlandsBehandling: Generellbehandling & { innh
                 ),
                 (landListe: ILand[]) => (
                   <>
-                    <Heading size="medium" level="3">
+                    <Heading size="medium" level="3" style={{ marginTop: '2rem' }}>
                       Kravpakke sendes til
                     </Heading>
                     <Select
@@ -236,36 +234,39 @@ const KravpakkeUtland = (props: { utlandsBehandling: Generellbehandling & { innh
                       </Heading>
                     ) : null}
                     {isSuccess(hentAlleLandRequest) && valgteLandIsoKode && (
-                      <FlexOrder>
+                      <Chips>
                         {valgteLandIsoKode.map((landIsoKode) => {
                           const kodeverkLandMatch = alleLandKodeverk?.find(
                             (kodeverkLand) => kodeverkLand.isoLandkode === landIsoKode
                           )
                           return (
-                            <BodyShort
-                              style={{
-                                borderRadius: '10px',
-                                border: `2px solid ${AGray400}`,
-                                cursor: 'pointer',
-                                marginRight: '0.6rem',
-                              }}
-                              key={landIsoKode}
-                              onClick={() => {
-                                if (redigerbar) {
-                                  setLandAlleredeValgt(false)
-                                  const nyLandliste = valgteLandIsoKode.filter(
-                                    (isolandkode) => isolandkode !== landIsoKode
-                                  )
-                                  setvalgteLandIsoKode(nyLandliste)
-                                }
-                              }}
-                            >
-                              {kodeverkLandMatch?.beskrivelse.tekst ?? landIsoKode}
-                              <XMarkIcon />
-                            </BodyShort>
+                            <>
+                              {redigerbar ? (
+                                <Chips.Removable
+                                  style={{ cursor: 'pointer' }}
+                                  key={landIsoKode}
+                                  variant="action"
+                                  onClick={() => {
+                                    if (redigerbar) {
+                                      setLandAlleredeValgt(false)
+                                      const nyLandliste = valgteLandIsoKode.filter(
+                                        (isolandkode) => isolandkode !== landIsoKode
+                                      )
+                                      setvalgteLandIsoKode(nyLandliste)
+                                    }
+                                  }}
+                                >
+                                  {kodeverkLandMatch?.beskrivelse.tekst ?? landIsoKode}
+                                </Chips.Removable>
+                              ) : (
+                                <Chips.Toggle variant="neutral">
+                                  {kodeverkLandMatch?.beskrivelse.tekst ?? landIsoKode}
+                                </Chips.Toggle>
+                              )}
+                            </>
                           )
                         })}
-                      </FlexOrder>
+                      </Chips>
                     )}
                   </>
                 )
@@ -282,7 +283,41 @@ const KravpakkeUtland = (props: { utlandsBehandling: Generellbehandling & { innh
                 readOnly={!redigerbar}
               />
             </div>
-
+            <div style={{ marginTop: '2rem' }}>
+              <Select
+                label="Hvile dokumenter vil du legge til?"
+                value={dokumentDropdown}
+                onChange={(e) => setDokumentDropdown(e.target.value)}
+              >
+                <option value="" disabled={true}>
+                  Velg dokument
+                </option>
+                <option value="P2100">P2100</option>
+                <option value="P3000">P3000</option>
+                <option value="P4000">P4000</option>
+                <option value="P5000">P5000</option>
+                <option value="P6000">P6000</option>
+                <option value="P8000">P8000</option>
+                <option value="velg dokument">Annet</option>
+              </Select>
+              {redigerbar && (
+                <Button
+                  style={{ marginTop: '0.5rem' }}
+                  onClick={() => {
+                    if (dokumentDropdown) {
+                      const nyttDokument: DokumentSendtMedDato = {
+                        dokumenttype: dokumentDropdown,
+                        sendt: false,
+                        dato: '',
+                      }
+                      setDokumenter((prev) => prev.concat([nyttDokument]))
+                    }
+                  }}
+                >
+                  Legg til valgt dokument
+                </Button>
+              )}
+            </div>
             <StandardBreddeTabell>
               <Table.Header>
                 <Table.Row>
@@ -297,7 +332,8 @@ const KravpakkeUtland = (props: { utlandsBehandling: Generellbehandling & { innh
                     <Table.DataCell>
                       {redigerbar ? (
                         <TextField
-                          label={dokument.dokumenttype}
+                          label=""
+                          value={dokument.dokumenttype}
                           size="medium"
                           style={{ maxWidth: '16rem' }}
                           onChange={(e) => {
@@ -311,7 +347,7 @@ const KravpakkeUtland = (props: { utlandsBehandling: Generellbehandling & { innh
                           }}
                         />
                       ) : (
-                        <BodyShort>dokument.dokumenttype</BodyShort>
+                        <BodyShort>{dokument.dokumenttype}</BodyShort>
                       )}
                     </Table.DataCell>
                     <Table.DataCell>
@@ -351,14 +387,6 @@ const KravpakkeUtland = (props: { utlandsBehandling: Generellbehandling & { innh
                 ))}
               </Table.Body>
             </StandardBreddeTabell>
-            {redigerbar && (
-              <Button
-                style={{ marginTop: '1.5rem' }}
-                onClick={() => setDokumenter((dokumenter) => dokumenter.concat(defaultDokumentState))}
-              >
-                Legg til dokument
-              </Button>
-            )}
             <div style={{ marginTop: '3.5rem', marginBottom: '3rem' }}>
               <Heading size="medium" level="3">
                 Varsling til bruker

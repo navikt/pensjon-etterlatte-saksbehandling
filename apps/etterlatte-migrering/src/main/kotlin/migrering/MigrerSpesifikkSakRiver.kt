@@ -10,14 +10,17 @@ import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.etterlatte.migrering.pen.BarnepensjonGrunnlagResponse
 import no.nav.etterlatte.migrering.pen.PenKlient
 import no.nav.etterlatte.migrering.pen.tilVaarModell
+import no.nav.etterlatte.migrering.person.krr.KrrKlient
 import no.nav.etterlatte.migrering.verifisering.Verifiserer
 import no.nav.etterlatte.rapidsandrivers.migrering.FNR_KEY
+import no.nav.etterlatte.rapidsandrivers.migrering.LOPENDE_JANUAR_2024_KEY
 import no.nav.etterlatte.rapidsandrivers.migrering.MigreringRequest
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser.MIGRER_SPESIFIKK_SAK
 import no.nav.etterlatte.rapidsandrivers.migrering.PesysId
 import no.nav.etterlatte.rapidsandrivers.migrering.hendelseData
 import no.nav.etterlatte.rapidsandrivers.migrering.kilde
+import no.nav.etterlatte.rapidsandrivers.migrering.loependeJanuer2024
 import no.nav.etterlatte.rapidsandrivers.migrering.pesysId
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -33,12 +36,14 @@ internal class MigrerSpesifikkSakRiver(
     private val pesysRepository: PesysRepository,
     private val featureToggleService: FeatureToggleService,
     private val verifiserer: Verifiserer,
+    private val krrKlient: KrrKlient,
 ) : ListenerMedLoggingOgFeilhaandtering(MIGRER_SPESIFIKK_SAK) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     init {
         initialiserRiver(rapidsConnection, hendelsestype) {
             validate { it.requireKey(SAK_ID_KEY) }
+            validate { it.requireKey(LOPENDE_JANUAR_2024_KEY) }
         }
     }
 
@@ -51,11 +56,12 @@ internal class MigrerSpesifikkSakRiver(
             logger.info("Har allerede migrert sak $sakId. Avbryter.")
             return
         }
+        val lopendeJanuar2024 = packet.loependeJanuer2024
 
         val pesyssak =
-            hentSak(sakId).tilVaarModell().also {
-                pesysRepository.lagrePesyssak(pesyssak = it)
-            }
+            hentSak(sakId, lopendeJanuar2024)
+                .tilVaarModell { runBlocking { krrKlient.hentDigitalKontaktinformasjon(it) } }
+                .also { pesysRepository.lagrePesyssak(pesyssak = it) }
         packet.eventName = Migreringshendelser.MIGRER_SAK
         val request = pesyssak.tilMigreringsrequest()
         packet.hendelseData = request
@@ -68,9 +74,12 @@ internal class MigrerSpesifikkSakRiver(
         }
     }
 
-    private fun hentSak(sakId: Long): BarnepensjonGrunnlagResponse {
+    private fun hentSak(
+        sakId: Long,
+        lopendeJanuar2024: Boolean,
+    ): BarnepensjonGrunnlagResponse {
         logger.info("Prøver å hente sak $sakId fra PEN")
-        val sakFraPEN = runBlocking { penKlient.hentSak(sakId) }
+        val sakFraPEN = runBlocking { penKlient.hentSak(sakId, lopendeJanuar2024) }
         logger.info("Henta sak $sakId fra PEN")
         return sakFraPEN
     }

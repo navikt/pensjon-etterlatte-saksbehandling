@@ -63,7 +63,7 @@ fun barnepensjonGrunnlag(
     soeskenKull = FaktumNode(soeskenKull, kilde, "søskenkull"),
     avdoedesTrygdetid =
         FaktumNode(
-            SamletTrygdetidMedBeregningsMetode(BeregningsMetode.NASJONAL, trygdeTid, null, null),
+            SamletTrygdetidMedBeregningsMetode(BeregningsMetode.NASJONAL, trygdeTid, null, null, null),
             kilde,
             "trygdetid",
         ),
@@ -82,6 +82,7 @@ fun samletTrygdetid(
         samletTrygdetidNorge = samletTrygdetidNorge,
         samletTrygdetidTeoretisk = samletTrygdetidTeoretisk,
         prorataBroek = broek,
+        ident = null,
     ),
     kilde,
     "trygdetid",
@@ -284,6 +285,7 @@ fun behandling(
     sakType: SakType = SakType.OMSTILLINGSSTOENAD,
     behandlingType: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
     virkningstidspunkt: Virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2023, 1)),
+    status: BehandlingStatus = BehandlingStatus.BEREGNET,
 ) = DetaljertBehandling(
     id = id,
     sak = sak,
@@ -295,7 +297,7 @@ fun behandling(
     gjenlevende = listOf(),
     avdoed = listOf(),
     soesken = listOf(),
-    status = BehandlingStatus.TRYGDETID_OPPDATERT,
+    status = status,
     behandlingType = behandlingType,
     virkningstidspunkt = virkningstidspunkt,
     revurderingsaarsak = null,

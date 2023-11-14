@@ -29,30 +29,15 @@
     }
   ],
   "vedtak": {
-    "vedtakId": 217,
+    "id": 217,
+    "behandlingId": "989d8e2d-633c-4a10-942c-36c0ca2cc17a",
     "status": "ATTESTERT",
-    "virkningstidspunkt": "2022-09",
     "sak": {
       "ident": "18111159498",
       "sakType": "BARNEPENSJON",
       "id": 45
     },
-    "behandling": {
-      "type": "FØRSTEGANGSBEHANDLING",
-      "id": "989d8e2d-633c-4a10-942c-36c0ca2cc17a"
-    },
     "type": "INNVILGELSE",
-    "utbetalingsperioder": [
-      {
-        "id": 49,
-        "periode": {
-          "fom": "2022-09",
-          "tom": null
-        },
-        "beloep": 9290,
-        "type": "UTBETALING"
-      }
-    ],
     "vedtakFattet": {
       "ansvarligSaksbehandler": "Z994985",
       "ansvarligEnhet": "0000",
@@ -62,6 +47,25 @@
       "attestant": "Z994985",
       "attesterendeEnhet": "0000",
       "tidspunkt": "2022-09-20T11:43:19.002997Z"
+    },
+    "innhold": {
+      "type": "BEHANDLING",
+      "behandling": {
+        "type": "FØRSTEGANGSBEHANDLING",
+        "id": "989d8e2d-633c-4a10-942c-36c0ca2cc17a"
+      },
+      "virkningstidspunkt": "2022-09",
+      "utbetalingsperioder": [
+        {
+          "id": 49,
+          "periode": {
+            "fom": "2022-09",
+            "tom": null
+          },
+          "beloep": 9290,
+          "type": "UTBETALING"
+        }
+      ]
     }
   }
 }

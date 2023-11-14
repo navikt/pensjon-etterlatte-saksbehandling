@@ -1,6 +1,7 @@
 package no.nav.etterlatte.hendelserpdl
 
 import no.nav.etterlatte.hendelserpdl.LeesahOpplysningstype.ADRESSEBESKYTTELSE_V1
+import no.nav.etterlatte.hendelserpdl.LeesahOpplysningstype.BOSTEDSADRESSE_V1
 import no.nav.etterlatte.hendelserpdl.LeesahOpplysningstype.DOEDSFALL_V1
 import no.nav.etterlatte.hendelserpdl.LeesahOpplysningstype.FORELDERBARNRELASJON_V1
 import no.nav.etterlatte.hendelserpdl.LeesahOpplysningstype.SIVILSTAND_V1
@@ -11,6 +12,7 @@ import no.nav.etterlatte.kafka.JsonMessage
 import no.nav.etterlatte.kafka.KafkaProdusent
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.pdlhendelse.Adressebeskyttelse
+import no.nav.etterlatte.libs.common.pdlhendelse.Bostedsadresse
 import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
 import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse
@@ -34,6 +36,7 @@ enum class LeesahOpplysningstype {
     DOEDSFALL_V1,
     VERGEMAAL_ELLER_FREMTIDSFULLMAKT_V1,
     SIVILSTAND_V1,
+    BOSTEDSADRESSE_V1,
 }
 
 class PersonHendelseFordeler(
@@ -71,6 +74,7 @@ class PersonHendelseFordeler(
                         DOEDSFALL_V1 -> haandterDoedsHendelse(hendelse, ident)
                         UTFLYTTING_FRA_NORGE -> haandterUtflyttingFraNorge(hendelse, ident)
                         SIVILSTAND_V1 -> haandterSivilstand(hendelse, ident)
+                        BOSTEDSADRESSE_V1 -> haandterBostedsadresse(hendelse, ident)
                     }
                 }
             }
@@ -106,6 +110,21 @@ class PersonHendelseFordeler(
                     endringstype = hendelse.endringstype(),
                     fnr = personnummer.folkeregisterident.value,
                     vergeIdent = hendelse.vergemaalEllerFremtidsfullmakt?.vergeEllerFullmektig?.motpartsPersonident,
+                ),
+        )
+    }
+
+    private fun haandterBostedsadresse(
+        hendelse: Personhendelse,
+        personnummer: PdlIdentifikator.FolkeregisterIdent,
+    ) {
+        publiserPaaRapid(
+            opplysningstype = BOSTEDSADRESSE_V1,
+            hendelse =
+                Bostedsadresse(
+                    hendelseId = hendelse.hendelseId,
+                    endringstype = hendelse.endringstype(),
+                    fnr = personnummer.folkeregisterident.value,
                 ),
         )
     }

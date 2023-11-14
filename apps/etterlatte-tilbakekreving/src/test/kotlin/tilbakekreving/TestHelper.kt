@@ -7,7 +7,8 @@ import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingPeriodeVedtak
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingResultat
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingSkyld
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVedtak
-import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingsbelopVedtak
+import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingsbelopFeilkontoVedtak
+import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingsbelopYtelseVedtak
 import java.io.FileNotFoundException
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -31,7 +32,7 @@ fun tilbakekrevingsvedtak(vedtakId: Long = 1) =
                 TilbakekrevingPeriodeVedtak(
                     maaned = YearMonth.of(2023, 1),
                     ytelse =
-                        TilbakekrevingsbelopVedtak(
+                        TilbakekrevingsbelopYtelseVedtak(
                             klasseKode = "YTEL",
                             bruttoUtbetaling = 1000,
                             nyBruttoUtbetaling = 500,
@@ -46,19 +47,11 @@ fun tilbakekrevingsvedtak(vedtakId: Long = 1) =
                             rentetillegg = 50,
                         ),
                     feilkonto =
-                        TilbakekrevingsbelopVedtak(
+                        TilbakekrevingsbelopFeilkontoVedtak(
                             klasseKode = "FEIL",
                             bruttoUtbetaling = 0,
-                            nyBruttoUtbetaling = 0,
-                            skatteprosent = BigDecimal.ZERO,
-                            beregnetFeilutbetaling = 500,
+                            nyBruttoUtbetaling = 500,
                             bruttoTilbakekreving = 0,
-                            nettoTilbakekreving = 0,
-                            skatt = 0,
-                            skyld = TilbakekrevingSkyld.BRUKER,
-                            resultat = TilbakekrevingResultat.FULL_TILBAKEKREV,
-                            tilbakekrevingsprosent = 0,
-                            rentetillegg = 0,
                         ),
                 ),
             ),

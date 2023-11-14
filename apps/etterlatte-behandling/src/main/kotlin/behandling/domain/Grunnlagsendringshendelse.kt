@@ -29,6 +29,7 @@ enum class GrunnlagsendringsType {
     SIVILSTAND,
     GRUNNBELOEP,
     INSTITUSJONSOPPHOLD,
+    BOSTED,
     ;
 
     fun beskrivelse(): String {
@@ -40,6 +41,7 @@ enum class GrunnlagsendringsType {
             SIVILSTAND -> "Sivilstand"
             GRUNNBELOEP -> "Grunnbeløp"
             INSTITUSJONSOPPHOLD -> "Institusjonsopphold"
+            BOSTED -> "Bostedsadresse"
         }
     }
 }

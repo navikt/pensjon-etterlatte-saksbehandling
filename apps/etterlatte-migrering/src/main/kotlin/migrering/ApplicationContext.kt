@@ -8,6 +8,7 @@ import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.migrering.pen.PenKlient
+import no.nav.etterlatte.migrering.person.krr.KrrKlient
 import no.nav.etterlatte.migrering.verifisering.PDLKlient
 import no.nav.etterlatte.migrering.verifisering.Verifiserer
 
@@ -39,6 +40,18 @@ internal class ApplicationContext {
         )
     val verifiserer =
         Verifiserer(pdlKlient = pdlKlient, repository = pesysRepository, featureToggleService = featureToggleService)
+
+    val krrKlient =
+        KrrKlient(
+            client =
+                httpClientClientCredentials(
+                    azureAppClientId = config.getString("azure.app.client.id"),
+                    azureAppJwk = config.getString("azure.app.jwk"),
+                    azureAppWellKnownUrl = config.getString("azure.app.well.known.url"),
+                    azureAppScope = config.getString("krr.scope"),
+                ),
+            url = config.getString("krr.url"),
+        )
 }
 
 private fun featureToggleProperties(config: Config) =

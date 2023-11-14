@@ -66,8 +66,8 @@ spec:
       value: api://dev-gcp.etterlatte.etterlatte-pdltjenester/.default
     - name: KRR_ENDPOINT_URL
       value: https://digdir-krr-proxy.intern.dev.nav.no/rest/v1
-    - name: KRR_AUDIENCE
-      value: dev-gcp.team-rocket.digdir-krr-proxy
+    - name: KRR_SCOPE
+      value: api://dev-gcp.team-rocket.digdir-krr-proxy/.default
   envFrom:
     - secret: my-application-unleash-api-token
   accessPolicy:

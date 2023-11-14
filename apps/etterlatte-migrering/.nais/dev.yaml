@@ -65,7 +65,7 @@ spec:
     - name: PDLTJENESTER_AZURE_SCOPE
       value: api://dev-gcp.etterlatte.etterlatte-pdltjenester/.default
     - name: KRR_ENDPOINT_URL
-      value: https://digdir-krr-proxy.team-rocket
+      value: http://digdir-krr-proxy.team-rocket
     - name: KRR_SCOPE
       value: api://dev-gcp.team-rocket.digdir-krr-proxy/.default
   envFrom:

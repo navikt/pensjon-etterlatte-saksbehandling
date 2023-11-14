@@ -6,6 +6,7 @@ import {
 } from '~shared/types/IDetaljertBehandling'
 import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
 import { ISak, SakType } from '~shared/types/sak'
+import { IAdresse } from '~shared/types/IAdresse'
 
 export interface IPersonResult {
   fornavn: string
@@ -50,6 +51,7 @@ export enum GrunnlagsendringsType {
   SIVILSTAND = 'SIVILSTAND',
   GRUNNBELOEP = 'GRUNNBELOEP',
   INSTITUSJONSOPPHOLD = 'INSTITUSJONSOPPHOLD',
+  ADRESSE = 'ADRESSE',
 }
 
 export const GRUNNLAGSENDRING_STATUS = [
@@ -95,6 +97,13 @@ export interface BarnSamsvar {
   samsvar: boolean
   fraPdl?: string[]
   fraGrunnlag?: string[]
+}
+
+export interface AdresseSamsvar {
+  type: 'ADRESSE'
+  samsvar: boolean
+  fraPdl: IAdresse[]
+  fraGrunnlag: IAdresse[]
 }
 
 export interface AnsvarligeForeldreSamsvar {
@@ -169,6 +178,7 @@ export type SamsvarMellomKildeOgGrunnlag =
   | SivilstandSamsvar
   | ReguleringSamsvar
   | InstitusjonsoppholdSamsvar
+  | AdresseSamsvar
 
 export type GrunnlagsendringStatus = (typeof GRUNNLAGSENDRING_STATUS)[number]
 

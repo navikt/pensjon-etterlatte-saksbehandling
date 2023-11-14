@@ -150,6 +150,13 @@ const tekster = new Map<GrunnlagsendringsType, Grunnlagsendringstekst>([
     },
   ],
   [
+    GrunnlagsendringsType.ADRESSE,
+    {
+      tittel: 'Adresse',
+      beskrivelse: 'Adressebeskrivelse',
+    },
+  ],
+  [
     GrunnlagsendringsType.FORELDER_BARN_RELASJON,
     {
       tittel: 'Foreldre-barn-relasjon',

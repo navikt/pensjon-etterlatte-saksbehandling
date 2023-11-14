@@ -36,6 +36,7 @@ data class Person(
     var utland: Utland?,
     var familieRelasjon: FamilieRelasjon?,
     var avdoedesBarn: List<Person>?,
+    var avdoedesBarnUtenIdent: List<PersonUtenIdent>?,
     var vergemaalEllerFremtidsfullmakt: List<VergemaalEllerFremtidsfullmakt>?,
 )
 

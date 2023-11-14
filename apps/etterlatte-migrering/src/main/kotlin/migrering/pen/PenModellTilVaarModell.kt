@@ -19,6 +19,8 @@ import java.time.LocalDate
 import java.time.LocalTime
 import java.time.YearMonth
 
+val standarspraak = Spraak.NN
+
 fun BarnepensjonGrunnlagResponse.tilVaarModell(
     hentKontaktinformasjon: (id: Folkeregisteridentifikator) -> DigitalKontaktinformasjon?,
 ): Pesyssak =
@@ -83,7 +85,7 @@ private fun BarnepensjonGrunnlagResponse.finnSpraak(
         ?.spraak
         ?.toLowerCasePreservingASCIIRules()
         ?.let { tilVaarSpraakmodell(logger, it) }
-        ?: Spraak.NN.also { logger.info("Fant ikke kontaktinformasjon i KRR, bruker $it som fallback.") }
+        ?: standarspraak.also { logger.info("Fant ikke kontaktinformasjon i KRR, bruker $it som fallback.") }
 }
 
 private fun tilVaarSpraakmodell(
@@ -93,7 +95,8 @@ private fun tilVaarSpraakmodell(
     "nb" -> Spraak.NB
     "nn" -> Spraak.NN
     "en" -> Spraak.EN
-    else -> Spraak.NN.also { logger.warn("Fikk $spraakFraKRR fra KRR, som vi ikke støtter, bruker $it som fallback.") }
+    "se" -> standarspraak.also { logger.info("Fikk nordsamisk fra KRR, som vi ikke støtter, bruker $it som fallback.") }
+    else -> standarspraak.also { logger.warn("Fikk $spraakFraKRR fra KRR, som vi ikke støtter, bruker $it som fallback.") }
 }
 
 private fun tilTidspunkt(dato: LocalDate) = Tidspunkt.ofNorskTidssone(dato, LocalTime.NOON)

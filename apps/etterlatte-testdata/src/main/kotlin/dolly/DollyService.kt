@@ -69,8 +69,11 @@ class DollyService(
                                     gjenlevende = gjenlevendeEktefelle,
                                     barn =
                                         personResponse.person.forelderBarnRelasjon
-                                            .filter { it.relatertPersonsRolle == "BARN" }
-                                            .map { it.relatertPersonsIdent },
+                                            .filter {
+                                                it.relatertPersonsRolle == "BARN" &&
+                                                    it.relatertPersonsIdent != null
+                                            }
+                                            .map { it.relatertPersonsIdent!! },
                                 )
                         }
                     }

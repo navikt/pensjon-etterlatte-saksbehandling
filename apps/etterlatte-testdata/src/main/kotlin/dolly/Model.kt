@@ -43,7 +43,7 @@ data class DollyPerson(
 )
 
 data class ForelderBarnRelasjon(
-    val relatertPersonsIdent: String,
+    val relatertPersonsIdent: String?,
     val relatertPersonsRolle: String,
 )
 

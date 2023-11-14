@@ -28,10 +28,6 @@ const BoddEllerArbeidetIUtlandetVisning = (props: { boddEllerArbeidetUtlandet: I
           <Label as="p" size="small">
             {JaNeiRec[boddEllerArbeidetUtlandet.vurdereAvoededsTrygdeavtale ? JaNei.JA : JaNei.NEI]}
           </Label>
-          <BodyShort spacing>Norge er behandlende land</BodyShort>
-          <Label as="p" size="small">
-            {JaNeiRec[boddEllerArbeidetUtlandet.norgeErBehandlendeland ? JaNei.JA : JaNei.NEI]}
-          </Label>
           <BodyShort spacing>Det skal sendes kravpakke</BodyShort>
           <Label as="p" size="small">
             {JaNeiRec[boddEllerArbeidetUtlandet.skalSendeKravpakke ? JaNei.JA : JaNei.NEI]}

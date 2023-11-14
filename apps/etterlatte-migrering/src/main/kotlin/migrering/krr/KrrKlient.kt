@@ -9,7 +9,6 @@ import io.ktor.client.request.header
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import io.ktor.http.isSuccess
-import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -26,7 +25,6 @@ class KrrKlient(private val client: HttpClient, private val url: String) {
                     header("Nav-Personident", fnr.value)
                     accept(ContentType.Application.Json)
                     contentType(ContentType.Application.Json)
-                    header("Nav-Call-Id", getCorrelationId())
                 }
 
             if (response.status.isSuccess()) {

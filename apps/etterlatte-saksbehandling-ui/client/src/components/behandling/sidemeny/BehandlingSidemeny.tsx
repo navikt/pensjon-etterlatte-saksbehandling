@@ -95,25 +95,27 @@ export const BehandlingSidemeny = ({ behandling }: { behandling: IBehandlingRedu
   const [opprettSjekklisteResult, opprettSjekklisteForBehandling, resetOpprettSjekkliste] =
     useApiCall(opprettSjekkliste)
 
-  useEffect(() => {
-    resetSjekklisteResult()
-    resetOpprettSjekkliste()
-    if (behandling && erFoerstegangsbehandling && isInitial(hentSjekklisteResult)) {
-      hentSjekklisteForBehandling(
-        behandling.id,
-        (result) => {
-          dispatch(updateSjekkliste(result))
-        },
-        () => {
-          if (!erFerdigBehandlet(behandling.status)) {
-            opprettSjekklisteForBehandling(behandling.id, (nySjekkliste) => {
-              dispatch(updateSjekkliste(nySjekkliste))
-            })
+  function byttFane(fane: BehandlingFane) {
+    if (fane === BehandlingFane.SJEKKLISTE) {
+      resetSjekklisteResult()
+      resetOpprettSjekkliste()
+      if (behandling && erFoerstegangsbehandling && isInitial(hentSjekklisteResult)) {
+        hentSjekklisteForBehandling(behandling.id, (result, statusCode) => {
+          if (statusCode === 204) {
+            if (!erFerdigBehandlet(behandling.status)) {
+              opprettSjekklisteForBehandling(behandling.id, (nySjekkliste) => {
+                dispatch(updateSjekkliste(nySjekkliste))
+              })
+            }
+          } else {
+            dispatch(updateSjekkliste(result))
           }
-        }
-      )
+        })
+      }
     }
-  }, [])
+
+    dispatch(visFane(fane))
+  }
 
   return (
     <Sidebar>
@@ -144,7 +146,7 @@ export const BehandlingSidemeny = ({ behandling }: { behandling: IBehandlingRedu
         <ApiErrorAlert>Kunne ikke hente saksbehandler gjeldende oppgave</ApiErrorAlert>
       )}
       {erFoerstegangsbehandling && (
-        <Tabs value={fane} iconPosition="top" onChange={(val) => dispatch(visFane(val as BehandlingFane))}>
+        <Tabs value={fane} iconPosition="top" onChange={(val) => byttFane(val as BehandlingFane)}>
           <Tabs.List>
             <Tabs.Tab value={BehandlingFane.DOKUMENTER} label="Dokumenter" icon={<FileTextIcon title="dokumenter" />} />
             <Tabs.Tab

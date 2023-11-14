@@ -21,67 +21,69 @@ import java.time.YearMonth
 
 fun BarnepensjonGrunnlagResponse.tilVaarModell(
     hentKontaktinformasjon: (id: Folkeregisteridentifikator) -> DigitalKontaktinformasjon?,
-): Pesyssak {
-    val logger = LoggerFactory.getLogger(this::class.java)
-    val pesyssak =
-        Pesyssak(
-            id = sakId,
-            enhet = Enhet(enhet),
-            soeker = Folkeregisteridentifikator.of(soeker),
-            gjenlevendeForelder = gjenlevendeForelder?.let { Folkeregisteridentifikator.of(it) },
-            avdoedForelder =
-                avdoedForeldre.map {
-                    AvdoedForelder(
-                        ident = Folkeregisteridentifikator.of(it.ident),
-                        doedsdato = tilTidspunkt(it.doedsdato),
-                    )
-                },
-            virkningstidspunkt = YearMonth.from(virkningsdato),
-            beregning =
-                with(beregning) {
-                    Beregning(
-                        brutto = brutto,
-                        netto = netto,
-                        anvendtTrygdetid = anvendtTrygdetid,
-                        datoVirkFom = tilTidspunkt(datoVirkFom),
-                        g = g,
-                        prorataBroek = proRataBrok?.let { IntBroek(it.teller, it.nevner) },
-                        meta =
-                            with(meta) {
-                                BeregningMeta(
-                                    resultatType = resultatType,
-                                    beregningsMetodeType = beregningsMetodeType ?: "Ukjent",
-                                    resultatKilde = resultatKilde,
-                                    kravVelgType = kravVelgType,
-                                )
-                            },
-                    )
-                },
-            trygdetid =
-                Trygdetid(
-                    perioder =
-                        trygdetidsgrunnlagListe.map {
-                            Trygdetidsgrunnlag(
-                                trygdetidGrunnlagId = it.trygdetidGrunnlagId,
-                                personGrunnlagId = it.personGrunnlagId,
-                                landTreBokstaver = it.landTreBokstaver,
-                                datoFom = tilTidspunkt(it.datoFom),
-                                datoTom = tilTidspunkt(it.datoTom),
-                                poengIInnAar = it.poengIInnAar,
-                                poengIUtAar = it.poengIUtAar,
-                                ikkeIProrata = it.ikkeIProrata,
+): Pesyssak =
+    Pesyssak(
+        id = sakId,
+        enhet = Enhet(enhet),
+        soeker = Folkeregisteridentifikator.of(soeker),
+        gjenlevendeForelder = gjenlevendeForelder?.let { Folkeregisteridentifikator.of(it) },
+        avdoedForelder =
+            avdoedForeldre.map {
+                AvdoedForelder(
+                    ident = Folkeregisteridentifikator.of(it.ident),
+                    doedsdato = tilTidspunkt(it.doedsdato),
+                )
+            },
+        virkningstidspunkt = YearMonth.from(virkningsdato),
+        beregning =
+            with(beregning) {
+                Beregning(
+                    brutto = brutto,
+                    netto = netto,
+                    anvendtTrygdetid = anvendtTrygdetid,
+                    datoVirkFom = tilTidspunkt(datoVirkFom),
+                    g = g,
+                    prorataBroek = proRataBrok?.let { IntBroek(it.teller, it.nevner) },
+                    meta =
+                        with(meta) {
+                            BeregningMeta(
+                                resultatType = resultatType,
+                                beregningsMetodeType = beregningsMetodeType ?: "Ukjent",
+                                resultatKilde = resultatKilde,
+                                kravVelgType = kravVelgType,
                             )
                         },
-                ),
-            flyktningStatus = false, // TODO - Støttes ikke av Gjenny
-            spraak =
-                hentKontaktinformasjon(Folkeregisteridentifikator.of(soeker))
-                    ?.spraak
-                    ?.toLowerCasePreservingASCIIRules()
-                    ?.let { tilVaarSpraakmodell(logger, it) }
-                    ?: Spraak.NN.also { logger.info("Fant ikke kontaktinformasjon i KRR, bruker $it som fallback.") },
-        )
-    return pesyssak
+                )
+            },
+        trygdetid =
+            Trygdetid(
+                perioder =
+                    trygdetidsgrunnlagListe.map {
+                        Trygdetidsgrunnlag(
+                            trygdetidGrunnlagId = it.trygdetidGrunnlagId,
+                            personGrunnlagId = it.personGrunnlagId,
+                            landTreBokstaver = it.landTreBokstaver,
+                            datoFom = tilTidspunkt(it.datoFom),
+                            datoTom = tilTidspunkt(it.datoTom),
+                            poengIInnAar = it.poengIInnAar,
+                            poengIUtAar = it.poengIUtAar,
+                            ikkeIProrata = it.ikkeIProrata,
+                        )
+                    },
+            ),
+        flyktningStatus = false, // TODO - Støttes ikke av Gjenny
+        spraak = finnSpraak(hentKontaktinformasjon),
+    )
+
+private fun BarnepensjonGrunnlagResponse.finnSpraak(
+    hentKontaktinformasjon: (id: Folkeregisteridentifikator) -> DigitalKontaktinformasjon?,
+): Spraak {
+    val logger = LoggerFactory.getLogger(this::class.java)
+    return hentKontaktinformasjon(Folkeregisteridentifikator.of(soeker))
+        ?.spraak
+        ?.toLowerCasePreservingASCIIRules()
+        ?.let { tilVaarSpraakmodell(logger, it) }
+        ?: Spraak.NN.also { logger.info("Fant ikke kontaktinformasjon i KRR, bruker $it som fallback.") }
 }
 
 private fun tilVaarSpraakmodell(

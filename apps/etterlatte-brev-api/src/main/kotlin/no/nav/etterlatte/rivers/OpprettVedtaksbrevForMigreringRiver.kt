@@ -41,8 +41,8 @@ internal class OpprettVedtaksbrevForMigreringRiver(
         val brukerTokenInfo = Systembruker("migrering", "migrering")
         runBlocking {
             val vedtaksbrev: Brev = service.opprettVedtaksbrev(sakId, behandlingId, brukerTokenInfo)
-            service.genererPdf(vedtaksbrev.id, brukerTokenInfo)
-            service.ferdigstillVedtaksbrev(vedtaksbrev.behandlingId!!, brukerTokenInfo)
+            service.genererPdf(vedtaksbrev.id, brukerTokenInfo, true)
+            service.ferdigstillVedtaksbrev(vedtaksbrev.behandlingId!!, brukerTokenInfo, true)
         }
         logger.info("Har oppretta vedtaksbrev i sak $sakId")
         packet[BREV_OPPRETTA_MIGRERING] = true

@@ -40,14 +40,11 @@ class KrrKlient(private val client: HttpClient, config: Config) : Krr {
                 throw ClientRequestException(response, response.toString())
             }
         } catch (cause: Throwable) {
-            logger.warn("Klarte ikke å hente kontaktinformasjon fra KRR.", KrrException(cause))
+            logger.warn("Klarte ikke å hente kontaktinformasjon fra KRR.", cause)
             return null
         }
     }
 }
-
-class KrrException(cause: Throwable) :
-    Exception("Klarte ikke å hente digital kontaktinfo fra Krr", cause)
 
 val HttpHeaders.NavPersonIdent: String
     get() = "Nav-Personident"

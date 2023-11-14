@@ -2,7 +2,7 @@ package no.nav.etterlatte.beregning
 
 import beregning.regler.finnAnvendtGrunnbeloep
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlagService
-import no.nav.etterlatte.beregning.grunnlag.OverstyrBeregningGrunnlagDTO
+import no.nav.etterlatte.beregning.grunnlag.OverstyrBeregningGrunnlag
 import no.nav.etterlatte.beregning.grunnlag.PeriodisertBeregningGrunnlag
 import no.nav.etterlatte.beregning.grunnlag.mapVerdier
 import no.nav.etterlatte.beregning.regler.overstyr.PeriodisertOverstyrGrunnlag
@@ -79,7 +79,7 @@ class BeregnOverstyrBeregningService(
     }
 
     private fun opprettOverstyrGrunnlag(
-        beregningsGrunnlag: OverstyrBeregningGrunnlagDTO,
+        beregningsGrunnlag: OverstyrBeregningGrunnlag,
         fom: LocalDate,
     ) = PeriodisertOverstyrGrunnlag(
         overstyrGrunnlag =

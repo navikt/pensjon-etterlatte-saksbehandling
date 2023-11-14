@@ -685,12 +685,12 @@ internal class BeregningsGrunnlagRoutesTest {
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 header(HttpHeaders.Authorization, "Bearer $token")
                 setBody(
-                    OverstyrBeregningGrunnlagDTO(
+                    OverstyrBeregningGrunnlag(
                         perioder =
                             listOf(
                                 GrunnlagMedPeriode(
                                     data =
-                                        OverstyrBeregningGrunnlag(
+                                        OverstyrBeregningGrunnlagData(
                                             utbetaltBeloep = 123L,
                                             trygdetid = 10L,
                                             beskrivelse = "test periode 1",
@@ -700,7 +700,7 @@ internal class BeregningsGrunnlagRoutesTest {
                                 ),
                                 GrunnlagMedPeriode(
                                     data =
-                                        OverstyrBeregningGrunnlag(
+                                        OverstyrBeregningGrunnlagData(
                                             utbetaltBeloep = 456L,
                                             trygdetid = 20L,
                                             beskrivelse = "test periode 2",
@@ -719,7 +719,7 @@ internal class BeregningsGrunnlagRoutesTest {
             }.let { response ->
                 response.status shouldBe HttpStatusCode.OK
 
-                val grunnlag = objectMapper.readValue(response.bodyAsText(), OverstyrBeregningGrunnlagDTO::class.java)
+                val grunnlag = objectMapper.readValue(response.bodyAsText(), OverstyrBeregningGrunnlag::class.java)
 
                 grunnlag.perioder.let { perioder ->
                     perioder.size shouldBe 2

@@ -94,8 +94,11 @@ fun Route.beregningsGrunnlag(
                 logger.info("Henter overstyr grunnlag for behandling $behandlingId")
 
                 val grunnlag =
-                    beregningsGrunnlagService.hentOverstyrBeregningGrunnlag(
-                        behandlingId,
+                    OverstyrBeregningGrunnlagDTO(
+                        perioder =
+                            beregningsGrunnlagService.hentOverstyrBeregningGrunnlag(
+                                behandlingId,
+                            ).perioder,
                     )
 
                 call.respond(HttpStatusCode.OK, grunnlag)

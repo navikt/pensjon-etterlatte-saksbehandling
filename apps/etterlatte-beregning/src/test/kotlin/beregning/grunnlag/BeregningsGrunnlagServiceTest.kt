@@ -21,9 +21,9 @@ import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlagRepository
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlagService
 import no.nav.etterlatte.beregning.grunnlag.GrunnlagMedPeriode
 import no.nav.etterlatte.beregning.grunnlag.InstitusjonsoppholdBeregningsgrunnlag
-import no.nav.etterlatte.beregning.grunnlag.OverstyrBeregningGrunnlag
 import no.nav.etterlatte.beregning.grunnlag.OverstyrBeregningGrunnlagDTO
 import no.nav.etterlatte.beregning.grunnlag.OverstyrBeregningGrunnlagDao
+import no.nav.etterlatte.beregning.grunnlag.OverstyrBeregningGrunnlagData
 import no.nav.etterlatte.beregning.grunnlag.Reduksjon
 import no.nav.etterlatte.beregning.regler.toGrunnlag
 import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
@@ -673,7 +673,7 @@ internal class BeregningsGrunnlagServiceTest {
                             listOf(
                                 GrunnlagMedPeriode(
                                     data =
-                                        OverstyrBeregningGrunnlag(
+                                        OverstyrBeregningGrunnlagData(
                                             utbetaltBeloep = 12L,
                                             trygdetid = 25L,
                                             beskrivelse = "test periode 1",
@@ -681,11 +681,6 @@ internal class BeregningsGrunnlagServiceTest {
                                     fom = fom,
                                     tom = tom,
                                 ),
-                            ),
-                        kilde =
-                            Grunnlagsopplysning.Saksbehandler(
-                                ident = "Z123456",
-                                Tidspunkt.now(),
                             ),
                     ),
                 brukerTokenInfo =

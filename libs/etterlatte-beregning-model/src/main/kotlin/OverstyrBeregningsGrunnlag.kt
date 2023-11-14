@@ -16,13 +16,17 @@ data class OverstyrBeregningGrunnlagDao(
     val kilde: Grunnlagsopplysning.Saksbehandler,
 )
 
-data class OverstyrBeregningGrunnlag(
+data class OverstyrBeregningGrunnlagData(
     val utbetaltBeloep: Long,
     val trygdetid: Long,
     val beskrivelse: String,
 )
 
 data class OverstyrBeregningGrunnlagDTO(
-    val perioder: List<GrunnlagMedPeriode<OverstyrBeregningGrunnlag>>,
+    val perioder: List<GrunnlagMedPeriode<OverstyrBeregningGrunnlagData>>,
+)
+
+data class OverstyrBeregningGrunnlag(
+    val perioder: List<GrunnlagMedPeriode<OverstyrBeregningGrunnlagData>>,
     val kilde: Grunnlagsopplysning.Saksbehandler,
 )

@@ -278,18 +278,18 @@ class BeregningsGrunnlagService(
         beregningsGrunnlagRepository.lagreOMS(forrigeGrunnlagOMS.copy(behandlingId = behandlingId))
     }
 
-    fun hentOverstyrBeregningGrunnlag(behandlingId: UUID): OverstyrBeregningGrunnlagDTO {
+    fun hentOverstyrBeregningGrunnlag(behandlingId: UUID): OverstyrBeregningGrunnlag {
         logger.info("Henter overstyr beregning grunnlag $behandlingId")
 
         return beregningsGrunnlagRepository.finnOverstyrBeregningGrunnlagForBehandling(
             behandlingId,
         ).let { overstyrBeregningGrunnlagDaoListe ->
-            OverstyrBeregningGrunnlagDTO(
+            OverstyrBeregningGrunnlag(
                 perioder =
                     overstyrBeregningGrunnlagDaoListe.map { periode ->
                         GrunnlagMedPeriode(
                             data =
-                                OverstyrBeregningGrunnlag(
+                                OverstyrBeregningGrunnlagData(
                                     utbetaltBeloep = periode.utbetaltBeloep,
                                     trygdetid = periode.trygdetid,
                                     beskrivelse = periode.beskrivelse,
@@ -307,7 +307,7 @@ class BeregningsGrunnlagService(
         behandlingId: UUID,
         data: OverstyrBeregningGrunnlagDTO,
         brukerTokenInfo: BrukerTokenInfo,
-    ): OverstyrBeregningGrunnlagDTO {
+    ): OverstyrBeregningGrunnlag {
         logger.info("Lagre overstyr beregning grunnlag $behandlingId")
 
         val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)

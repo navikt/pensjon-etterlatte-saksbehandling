@@ -10,7 +10,7 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlagService
 import no.nav.etterlatte.beregning.grunnlag.GrunnlagMedPeriode
 import no.nav.etterlatte.beregning.grunnlag.OverstyrBeregningGrunnlag
-import no.nav.etterlatte.beregning.grunnlag.OverstyrBeregningGrunnlagDTO
+import no.nav.etterlatte.beregning.grunnlag.OverstyrBeregningGrunnlagData
 import no.nav.etterlatte.beregning.regler.bruker
 import no.nav.etterlatte.klienter.GrunnlagKlientImpl
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -49,16 +49,16 @@ internal class BeregnOverstyrServiceTest {
 
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
         every { beregningsGrunnlagService.hentOverstyrBeregningGrunnlag(any()) } returns
-            OverstyrBeregningGrunnlagDTO(
+            OverstyrBeregningGrunnlag(
                 perioder =
                     listOf(
                         GrunnlagMedPeriode(
-                            OverstyrBeregningGrunnlag(123L, 20L, "test periode 1"),
+                            OverstyrBeregningGrunnlagData(123L, 20L, "test periode 1"),
                             LocalDate.of(2019, 11, 1),
                             LocalDate.of(2020, 4, 30),
                         ),
                         GrunnlagMedPeriode(
-                            OverstyrBeregningGrunnlag(456, 10L, "test periode 2"),
+                            OverstyrBeregningGrunnlagData(456, 10L, "test periode 2"),
                             LocalDate.of(2020, 5, 1),
                             null,
                         ),
@@ -109,16 +109,16 @@ internal class BeregnOverstyrServiceTest {
 
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
         every { beregningsGrunnlagService.hentOverstyrBeregningGrunnlag(any()) } returns
-            OverstyrBeregningGrunnlagDTO(
+            OverstyrBeregningGrunnlag(
                 perioder =
                     listOf(
                         GrunnlagMedPeriode(
-                            OverstyrBeregningGrunnlag(123L, 20L, "test periode 1"),
+                            OverstyrBeregningGrunnlagData(123L, 20L, "test periode 1"),
                             LocalDate.of(2019, 11, 1),
                             LocalDate.of(2020, 4, 1),
                         ),
                         GrunnlagMedPeriode(
-                            OverstyrBeregningGrunnlag(456, 10L, "test periode 2"),
+                            OverstyrBeregningGrunnlagData(456, 10L, "test periode 2"),
                             LocalDate.of(2020, 4, 2),
                             null,
                         ),
@@ -149,16 +149,16 @@ internal class BeregnOverstyrServiceTest {
 
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
         every { beregningsGrunnlagService.hentOverstyrBeregningGrunnlag(any()) } returns
-            OverstyrBeregningGrunnlagDTO(
+            OverstyrBeregningGrunnlag(
                 perioder =
                     listOf(
                         GrunnlagMedPeriode(
-                            OverstyrBeregningGrunnlag(123L, 20L, "test periode 1"),
+                            OverstyrBeregningGrunnlagData(123L, 20L, "test periode 1"),
                             LocalDate.of(2019, 11, 1),
                             LocalDate.of(2020, 4, 1),
                         ),
                         GrunnlagMedPeriode(
-                            OverstyrBeregningGrunnlag(456, 10L, "test periode 2"),
+                            OverstyrBeregningGrunnlagData(456, 10L, "test periode 2"),
                             LocalDate.of(2020, 4, 2),
                             null,
                         ),

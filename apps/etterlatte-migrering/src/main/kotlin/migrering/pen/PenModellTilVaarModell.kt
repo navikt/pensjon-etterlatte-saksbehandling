@@ -13,6 +13,7 @@ import no.nav.etterlatte.rapidsandrivers.migrering.BeregningMeta
 import no.nav.etterlatte.rapidsandrivers.migrering.Enhet
 import no.nav.etterlatte.rapidsandrivers.migrering.Trygdetid
 import no.nav.etterlatte.rapidsandrivers.migrering.Trygdetidsgrunnlag
+import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.YearMonth
@@ -20,6 +21,7 @@ import java.time.YearMonth
 fun BarnepensjonGrunnlagResponse.tilVaarModell(
     hentKontaktinformasjon: (id: Folkeregisteridentifikator) -> DigitalKontaktinformasjon?,
 ): Pesyssak {
+    val logger = LoggerFactory.getLogger(this::class.java)
     val pesyssak =
         Pesyssak(
             id = sakId,
@@ -76,7 +78,7 @@ fun BarnepensjonGrunnlagResponse.tilVaarModell(
                     ?.spraak
                     ?.toUpperCasePreservingASCIIRules()
                     ?.let { Spraak.valueOf(it) }
-                    ?: Spraak.NN,
+                    ?: Spraak.NN.also { logger.info("Fant ikke kontaktinformasjon i KRR, bruker $it som fallback.") },
         )
     return pesyssak
 }

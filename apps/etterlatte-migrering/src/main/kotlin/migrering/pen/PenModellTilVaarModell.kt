@@ -1,6 +1,6 @@
 package no.nav.etterlatte.migrering.pen
 
-import io.ktor.util.toUpperCasePreservingASCIIRules
+import io.ktor.util.toLowerCasePreservingASCIIRules
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.libs.common.IntBroek
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
@@ -13,6 +13,7 @@ import no.nav.etterlatte.rapidsandrivers.migrering.BeregningMeta
 import no.nav.etterlatte.rapidsandrivers.migrering.Enhet
 import no.nav.etterlatte.rapidsandrivers.migrering.Trygdetid
 import no.nav.etterlatte.rapidsandrivers.migrering.Trygdetidsgrunnlag
+import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.LocalTime
@@ -76,11 +77,21 @@ fun BarnepensjonGrunnlagResponse.tilVaarModell(
             spraak =
                 hentKontaktinformasjon(Folkeregisteridentifikator.of(soeker))
                     ?.spraak
-                    ?.toUpperCasePreservingASCIIRules()
-                    ?.let { Spraak.valueOf(it) }
+                    ?.toLowerCasePreservingASCIIRules()
+                    ?.let { tilVaarSpraakmodell(logger, it) }
                     ?: Spraak.NN.also { logger.info("Fant ikke kontaktinformasjon i KRR, bruker $it som fallback.") },
         )
     return pesyssak
+}
+
+private fun tilVaarSpraakmodell(
+    logger: Logger,
+    spraakFraKRR: String,
+) = when (spraakFraKRR) {
+    "nb" -> Spraak.NB
+    "nn" -> Spraak.NN
+    "en" -> Spraak.EN
+    else -> Spraak.NN.also { logger.warn("Fikk $spraakFraKRR fra KRR, som vi ikke støtter, bruker $it som fallback.") }
 }
 
 private fun tilTidspunkt(dato: LocalDate) = Tidspunkt.ofNorskTidssone(dato, LocalTime.NOON)

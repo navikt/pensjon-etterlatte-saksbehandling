@@ -221,6 +221,7 @@ fun Route.vedtaksvurderingRoute(
                 }
 
                 val samordnetVedtak = vedtakBehandlingService.samordnetVedtak(vedtak!!.behandlingId, brukerTokenInfo)
+                rapidService.sendToRapid(samordnetVedtak)
                 call.respond(HttpStatusCode.OK, samordnetVedtak.vedtak)
             }
         }

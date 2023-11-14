@@ -1,0 +1,338 @@
+{
+  "data": {
+    "hentPerson": {
+      "adressebeskyttelse": [],
+      "navn": [
+        {
+          "fornavn": "PÅLITELIG",
+          "mellomnavn": null,
+          "etternavn": "BRUK",
+          "forkortetNavn": null,
+          "metadata": {
+            "master": "FREG",
+            "historisk": false,
+            "opplysningsId": "eb1057bf-56bb-4267-9650-ee27aaa4154a",
+            "endringer": [
+              {
+                "kilde": "Dolly",
+                "registrert": "2023-11-14T09:57:56",
+                "registrertAv": "Folkeregisteret",
+                "systemkilde": "FREG",
+                "type": "OPPRETT"
+              }
+            ]
+          }
+        }
+      ],
+      "foedsel": [
+        {
+          "foedselsdato": "1982-04-29",
+          "foedeland": "NOR",
+          "foedested": null,
+          "foedselsaar": 1982,
+          "metadata": {
+            "master": "FREG",
+            "historisk": false,
+            "opplysningsId": "f6814cd7-fe47-4328-9cb5-569e6f08e2b8",
+            "endringer": [
+              {
+                "kilde": "Dolly",
+                "registrert": "2023-11-14T09:57:57",
+                "registrertAv": "Folkeregisteret",
+                "systemkilde": "FREG",
+                "type": "OPPRETT"
+              }
+            ]
+          }
+        }
+      ],
+      "sivilstand": [
+        {
+          "type": "GIFT",
+          "gyldigFraOgMed": "2015-08-12",
+          "relatertVedSivilstand": "26089111675",
+          "metadata": {
+            "master": "FREG",
+            "historisk": false,
+            "opplysningsId": "a9606bbd-fe89-43e1-b24c-872aa82f4161",
+            "endringer": [
+              {
+                "kilde": "Dolly",
+                "registrert": "2023-11-14T09:57:56",
+                "registrertAv": "Folkeregisteret",
+                "systemkilde": "FREG",
+                "type": "OPPRETT"
+              }
+            ]
+          }
+        }
+      ],
+      "doedsfall": [
+        {
+          "doedsdato": "2022-08-17",
+          "folkeregistermetadata": null,
+          "metadata": {
+            "master": "PDL",
+            "historisk": false,
+            "opplysningsId": "938e0b8a-a081-4900-a0a1-f46083f0ec70",
+            "endringer": [
+              {
+                "kilde": "Dolly",
+                "registrert": "2023-11-14T09:57:56",
+                "registrertAv": "dev-fss:dolly:testnav-pdl-proxy-trygdeetaten",
+                "systemkilde": "dev-fss:dolly:testnav-pdl-proxy-trygdeetaten",
+                "type": "OPPRETT"
+              }
+            ]
+          }
+        }
+      ],
+      "bostedsadresse": [
+        {
+          "coAdressenavn": null,
+          "vegadresse": {
+            "husbokstav": null,
+            "husnummer": "2",
+            "adressenavn": "Bjørga",
+            "postnummer": "7336",
+            "kommunenummer": "5059",
+            "bydelsnummer": null
+          },
+          "utenlandskAdresse": null,
+          "matrikkeladresse": null,
+          "ukjentBosted": null,
+          "gyldigFraOgMed": "2012-05-31T00:00",
+          "gyldigTilOgMed": null,
+          "metadata": {
+            "master": "FREG",
+            "historisk": true,
+            "opplysningsId": "4b4aa21c-97fa-43c1-b42e-dfd602103de5",
+            "endringer": [
+              {
+                "kilde": "Dolly",
+                "registrert": "2023-11-14T09:57:56",
+                "registrertAv": "Folkeregisteret",
+                "systemkilde": "FREG",
+                "type": "OPPRETT"
+              }
+            ]
+          },
+          "folkeregistermetadata": {
+            "ajourholdstidspunkt": "2012-05-31T00:00",
+            "gyldighetstidspunkt": "2012-05-31T00:00",
+            "opphoerstidspunkt": null,
+            "kilde": "Dolly",
+            "aarsak": null,
+            "sekvens": null
+          }
+        }
+      ],
+      "deltBosted": [],
+      "kontaktadresse": [],
+      "oppholdsadresse": [],
+      "foreldreansvar": [
+        {
+          "ansvar": "felles",
+          "ansvarlig": null,
+          "ansvarligUtenIdentifikator": null,
+          "ansvarssubjekt": "31051255073",
+          "folkeregistermetadata": {
+            "ajourholdstidspunkt": null,
+            "gyldighetstidspunkt": null,
+            "opphoerstidspunkt": null,
+            "kilde": "Dolly",
+            "aarsak": null,
+            "sekvens": null
+          },
+          "metadata": {
+            "master": "FREG",
+            "historisk": false,
+            "opplysningsId": "ec157b31-1539-4459-b8aa-e96c13d9d33e",
+            "endringer": [
+              {
+                "kilde": "Dolly",
+                "registrert": "2023-11-14T09:57:57",
+                "registrertAv": "Folkeregisteret",
+                "systemkilde": "FREG",
+                "type": "OPPRETT"
+              }
+            ]
+          }
+        }
+      ],
+      "forelderBarnRelasjon": [
+        {
+          "folkeregistermetadata": {
+            "ajourholdstidspunkt": "2023-11-14T09:56:58",
+            "gyldighetstidspunkt": "2023-11-14T09:56:58",
+            "opphoerstidspunkt": null,
+            "kilde": "Dolly",
+            "aarsak": null,
+            "sekvens": null
+          },
+          "metadata": {
+            "master": "FREG",
+            "historisk": false,
+            "opplysningsId": "c947ed89-7108-45fb-81c6-64846de8c0ea",
+            "endringer": [
+              {
+                "kilde": "Dolly",
+                "registrert": "2023-11-14T09:57:56",
+                "registrertAv": "Folkeregisteret",
+                "systemkilde": "FREG",
+                "type": "OPPRETT"
+              }
+            ]
+          },
+          "minRolleForPerson": "BARN",
+          "relatertPersonsIdent": null,
+          "relatertPersonsRolle": "FAR",
+          "relatertPersonUtenFolkeregisteridentifikator": {
+            "foedselsdato": "1919-11-12",
+            "kjoenn": "UKJENT",
+            "navn": {
+              "etternavn": "Andrefiolin",
+              "fornavn": "Jordisk",
+              "mellomnavn": null
+            },
+            "statsborgerskap": "AFG"
+          }
+        },
+        {
+          "folkeregistermetadata": {
+            "ajourholdstidspunkt": "2023-11-14T09:56:56",
+            "gyldighetstidspunkt": "2023-11-14T09:56:56",
+            "opphoerstidspunkt": null,
+            "kilde": "Dolly",
+            "aarsak": null,
+            "sekvens": null
+          },
+          "metadata": {
+            "master": "FREG",
+            "historisk": false,
+            "opplysningsId": "d01652b9-cb9a-46cf-a1d5-c4d6823068af",
+            "endringer": [
+              {
+                "kilde": "Dolly",
+                "registrert": "2023-11-14T09:57:56",
+                "registrertAv": "Folkeregisteret",
+                "systemkilde": "FREG",
+                "type": "OPPRETT"
+              }
+            ]
+          },
+          "minRolleForPerson": "FAR",
+          "relatertPersonsIdent": "31051255073",
+          "relatertPersonsRolle": "BARN",
+          "relatertPersonUtenFolkeregisteridentifikator": null
+        },
+        {
+          "folkeregistermetadata": {
+            "ajourholdstidspunkt": "2023-11-14T09:56:59",
+            "gyldighetstidspunkt": "2023-11-14T09:56:59",
+            "opphoerstidspunkt": null,
+            "kilde": "Dolly",
+            "aarsak": null,
+            "sekvens": null
+          },
+          "metadata": {
+            "master": "FREG",
+            "historisk": false,
+            "opplysningsId": "63f7ce4d-ad6c-4146-b2b1-6aeca205efc3",
+            "endringer": [
+              {
+                "kilde": "Dolly",
+                "registrert": "2023-11-14T09:57:56",
+                "registrertAv": "Folkeregisteret",
+                "systemkilde": "FREG",
+                "type": "OPPRETT"
+              }
+            ]
+          },
+          "minRolleForPerson": "BARN",
+          "relatertPersonsIdent": null,
+          "relatertPersonsRolle": "FAR",
+          "relatertPersonUtenFolkeregisteridentifikator": {
+            "foedselsdato": "1919-11-12",
+            "kjoenn": "UKJENT",
+            "navn": {
+              "etternavn": "Andrefiolin",
+              "fornavn": "Jordisk",
+              "mellomnavn": null
+            },
+            "statsborgerskap": "AFG"
+          }
+        },
+        {
+          "folkeregistermetadata": {
+            "ajourholdstidspunkt": "2023-11-14T09:56:57",
+            "gyldighetstidspunkt": "2023-11-14T09:56:57",
+            "opphoerstidspunkt": null,
+            "kilde": "Dolly",
+            "aarsak": null,
+            "sekvens": null
+          },
+          "metadata": {
+            "master": "FREG",
+            "historisk": false,
+            "opplysningsId": "b6af6805-41ba-4566-85b3-de519192329e",
+            "endringer": [
+              {
+                "kilde": "Dolly",
+                "registrert": "2023-11-14T09:57:57",
+                "registrertAv": "Folkeregisteret",
+                "systemkilde": "FREG",
+                "type": "OPPRETT"
+              }
+            ]
+          },
+          "minRolleForPerson": "FAR",
+          "relatertPersonsIdent": null,
+          "relatertPersonsRolle": "BARN",
+          "relatertPersonUtenFolkeregisteridentifikator": {
+            "foedselsdato": "2023-10-31",
+            "kjoenn": "UKJENT",
+            "navn": {
+              "etternavn": "Eplekake",
+              "fornavn": "Flott",
+              "mellomnavn": "Gyngende"
+            },
+            "statsborgerskap": "AGO"
+          }
+        }
+      ],
+      "statsborgerskap": [
+        {
+          "land": "NOR",
+          "gyldigFraOgMed": "1982-04-29",
+          "gyldigTilOgMed": null,
+          "metadata": {
+            "master": "FREG",
+            "historisk": false,
+            "opplysningsId": "6e83f68b-1821-4598-b919-85e53da2dd4f",
+            "endringer": [
+              {
+                "kilde": "Dolly",
+                "registrert": "2023-11-14T09:57:56",
+                "registrertAv": "Folkeregisteret",
+                "systemkilde": "FREG",
+                "type": "OPPRETT"
+              }
+            ]
+          },
+          "folkeregistermetadata": {
+            "ajourholdstidspunkt": "1982-04-29T00:00",
+            "gyldighetstidspunkt": "1982-04-29T00:00",
+            "opphoerstidspunkt": null,
+            "kilde": "Dolly",
+            "aarsak": null,
+            "sekvens": null
+          }
+        }
+      ],
+      "utflyttingFraNorge": [],
+      "innflyttingTilNorge": [],
+      "vergemaalEllerFremtidsfullmakt": []
+    }
+  }
+}

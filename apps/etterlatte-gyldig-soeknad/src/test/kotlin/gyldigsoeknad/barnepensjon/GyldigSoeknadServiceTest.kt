@@ -226,5 +226,6 @@ private fun mockPerson(
     utland = null,
     familieRelasjon = familieRelasjon,
     avdoedesBarn = null,
+    avdoedesBarnUtenIdent = null,
     vergemaalEllerFremtidsfullmakt = vergemaalEllerFremtidsfullmakt,
 )

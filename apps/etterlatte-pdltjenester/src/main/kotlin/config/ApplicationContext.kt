@@ -39,6 +39,7 @@ class ApplicationContext(env: Map<String, String>) {
         PersonService(
             pdlKlient = pdlKlient,
             ppsKlient = parallelleSannheterKlient,
+            featureToggleService = featureToggleService,
         )
 }
 

@@ -358,6 +358,7 @@ fun personOpplysning(doedsdato: LocalDate? = null) =
         utland = null,
         familieRelasjon = FamilieRelasjon(null, null, null),
         avdoedesBarn = null,
+        avdoedesBarnUtenIdent = null,
         vergemaalEllerFremtidsfullmakt = null,
     )
 

@@ -22,6 +22,7 @@ object PersonMapper {
         personRolle: PersonRolle,
         hentPerson: PdlHentPerson,
         saktype: SakType,
+        aksepterPersonerUtenIdent: Boolean = false,
     ): Person =
         runBlocking {
             val navn = ppsKlient.avklarNavn(hentPerson.navn)
@@ -30,6 +31,18 @@ object PersonMapper {
             val ppsSivilstand = hentPerson.sivilstand?.let { ppsKlient.avklarSivilstand(it) }
             val foedsel = ppsKlient.avklarFoedsel(hentPerson.foedsel)
             val doedsfall = ppsKlient.avklarDoedsfall(hentPerson.doedsfall)
+            val barnekull =
+                if (personRolle == PersonRolle.AVDOED) {
+                    BarnekullMapper.mapBarnekull(
+                        pdlKlient,
+                        ppsKlient,
+                        hentPerson,
+                        saktype,
+                        aksepterPersonerUtenIdent,
+                    )
+                } else {
+                    null
+                }
 
             Person(
                 fornavn = navn.fornavn,
@@ -56,18 +69,9 @@ object PersonMapper {
                 sivilstatus = ppsSivilstand?.let { Sivilstatus.valueOf(it.type.name) } ?: Sivilstatus.UOPPGITT,
                 sivilstand = hentPerson.sivilstand?.let { SivilstandMapper.mapSivilstand(it) },
                 utland = UtlandMapper.mapUtland(hentPerson),
-                familieRelasjon = FamilieRelasjonMapper.mapFamilieRelasjon(hentPerson, personRolle),
-                avdoedesBarn =
-                    if (personRolle == PersonRolle.AVDOED) {
-                        BarnekullMapper.mapBarnekull(
-                            pdlKlient,
-                            ppsKlient,
-                            hentPerson,
-                            saktype,
-                        )
-                    } else {
-                        null
-                    },
+                familieRelasjon = FamilieRelasjonMapper.mapFamilieRelasjon(hentPerson, personRolle, aksepterPersonerUtenIdent),
+                avdoedesBarn = barnekull?.barn,
+                avdoedesBarnUtenIdent = barnekull?.barnUtenIdent,
                 vergemaalEllerFremtidsfullmakt = hentPerson.vergemaalEllerFremtidsfullmakt?.let { VergeMapper.mapVerge(it) },
             )
         }
@@ -77,6 +81,7 @@ object PersonMapper {
         pdlKlient: PdlKlient,
         request: HentPersonRequest,
         hentPerson: PdlHentPerson,
+        aksepterPersonerUtenIdent: Boolean = false,
     ): PersonDTO =
         runBlocking {
             val navn = ppsKlient.avklarNavn(hentPerson.navn)
@@ -85,6 +90,18 @@ object PersonMapper {
             val ppsSivilstand = hentPerson.sivilstand?.let { ppsKlient.avklarSivilstand(it) }
             val foedsel = ppsKlient.avklarFoedsel(hentPerson.foedsel)
             val doedsfall = ppsKlient.avklarDoedsfall(hentPerson.doedsfall)
+            val barnekull =
+                if (request.rolle == PersonRolle.AVDOED) {
+                    BarnekullMapper.mapBarnekull(
+                        pdlKlient,
+                        ppsKlient,
+                        hentPerson,
+                        request.saktype,
+                        aksepterPersonerUtenIdent,
+                    )
+                } else {
+                    null
+                }
 
             PersonDTO(
                 fornavn = OpplysningDTO(navn.fornavn, navn.metadata.opplysningsId),
@@ -126,20 +143,10 @@ object PersonMapper {
                 utland = OpplysningDTO(UtlandMapper.mapUtland(hentPerson), null),
                 familieRelasjon =
                     OpplysningDTO(
-                        FamilieRelasjonMapper.mapFamilieRelasjon(hentPerson, request.rolle),
+                        FamilieRelasjonMapper.mapFamilieRelasjon(hentPerson, request.rolle, aksepterPersonerUtenIdent),
                         null,
                     ), // TODO ai: tre opplysninger i en
-                avdoedesBarn =
-                    if (request.rolle == PersonRolle.AVDOED) {
-                        BarnekullMapper.mapBarnekull(
-                            pdlKlient,
-                            ppsKlient,
-                            hentPerson,
-                            request.saktype,
-                        )
-                    } else {
-                        null
-                    },
+                avdoedesBarn = barnekull?.barn,
                 vergemaalEllerFremtidsfullmakt =
                     hentPerson.vergemaalEllerFremtidsfullmakt?.let { VergeMapper.mapVerge(it) }
                         ?.map { OpplysningDTO(it, null) },

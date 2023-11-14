@@ -17,7 +17,7 @@ data class PersonDTO(
     val etternavn: OpplysningDTO<String>,
     val foedselsnummer: OpplysningDTO<Folkeregisteridentifikator>,
     val foedselsdato: OpplysningDTO<LocalDate>?,
-    val foedselsaar: OpplysningDTO<Int>,
+    val foedselsaar: OpplysningDTO<Int>?,
     val foedeland: OpplysningDTO<String>?,
     val doedsdato: OpplysningDTO<LocalDate>?,
     val adressebeskyttelse: OpplysningDTO<AdressebeskyttelseGradering>?,

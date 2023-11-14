@@ -8,6 +8,7 @@ import no.nav.etterlatte.libs.common.pdl.IngenIdentFamilierelasjonException
 import no.nav.etterlatte.libs.common.person.FamilieRelasjon
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.PersonRolle
+import no.nav.etterlatte.pdl.PdlForelderAnsvar
 import no.nav.etterlatte.pdl.PdlForelderBarnRelasjon
 import no.nav.etterlatte.pdl.PdlForelderBarnRelasjonRolle
 import no.nav.etterlatte.pdl.PdlHentPerson
@@ -91,30 +92,42 @@ object FamilieRelasjonMapper {
         )
     }
 
-    private fun mapPersonerUtenIdenter(
-        hentPerson: PdlHentPerson,
+    private fun mapForelderBarnUtenIdent(
+        forelderBarnRelasjon: List<PdlForelderBarnRelasjon>?,
         personRolle: PersonRolle,
-    ): List<PersonUtenIdent>? {
-        val forelderBarnUtenIdent =
-            hentPerson.forelderBarnRelasjon
-                ?.filter { it.relatertPersonsIdent == null && erRelevantForPersonrolle(it, personRolle) }
-                ?.mapNotNull { forelderBarnRelasjon ->
-                    forelderBarnRelasjon.relatertPersonUtenFolkeregisteridentifikator?.tilRelatertPerson()
-                        ?.let { forelderBarnRelasjon.relatertPersonsRolle to it }
-                }
-                ?.map { (rolle, person) -> PersonUtenIdent(rolle = rolle.tilRelativPersonrolle(), person = person) }
-                ?: emptyList()
+    ): List<PersonUtenIdent> {
+        return forelderBarnRelasjon
+            ?.filter { it.relatertPersonsIdent == null && erRelevantForPersonrolle(it, personRolle) }
+            ?.mapNotNull { forelderBarnRelasjon ->
+                forelderBarnRelasjon.relatertPersonUtenFolkeregisteridentifikator?.tilRelatertPerson()
+                    ?.let { forelderBarnRelasjon.relatertPersonsRolle to it }
+            }
+            ?.map { (rolle, person) -> PersonUtenIdent(rolle = rolle.tilRelativPersonrolle(), person = person) }
+            ?: emptyList()
+    }
 
-        val foreldreUtenIdent =
-            if (personRolle == PersonRolle.BARN) {
-                hentPerson.foreldreansvar
+    private fun mapForeldreansvarUtenIdent(
+        foreldreansvar: List<PdlForelderAnsvar>?,
+        personRolle: PersonRolle,
+    ): List<PersonUtenIdent> {
+        return when (personRolle) {
+            PersonRolle.BARN ->
+                foreldreansvar
                     ?.filter { it.ansvarlig == null }
                     ?.mapNotNull { it.ansvarligUtenIdentifikator?.tilRelatertPerson() }
                     ?.map { PersonUtenIdent(rolle = RelativPersonrolle.FORELDER, person = it) }
                     ?: emptyList()
-            } else {
-                emptyList()
-            }
+
+            else -> emptyList()
+        }
+    }
+
+    private fun mapPersonerUtenIdenter(
+        pdlPerson: PdlHentPerson,
+        personRolle: PersonRolle,
+    ): List<PersonUtenIdent>? {
+        val forelderBarnUtenIdent = mapForelderBarnUtenIdent(pdlPerson.forelderBarnRelasjon, personRolle)
+        val foreldreUtenIdent = mapForeldreansvarUtenIdent(pdlPerson.foreldreansvar, personRolle)
 
         if (forelderBarnUtenIdent.isNotEmpty() || foreldreUtenIdent.isNotEmpty()) {
             return forelderBarnUtenIdent + foreldreUtenIdent

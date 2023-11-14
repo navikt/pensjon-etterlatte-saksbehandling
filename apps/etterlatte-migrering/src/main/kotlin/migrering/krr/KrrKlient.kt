@@ -28,8 +28,8 @@ class KrrKlient(private val client: HttpClient, private val url: String) {
                 }
 
             if (response.status.isSuccess()) {
-                logger.info("Hentet kontaktinformasjon fra KRR")
-                response.body()
+                response.body<DigitalKontaktinformasjon?>()
+                    .also { logger.info("Hentet kontaktinformasjon fra KRR. Var null? ${it != null}") }
             } else {
                 throw ClientRequestException(response, response.toString())
             }

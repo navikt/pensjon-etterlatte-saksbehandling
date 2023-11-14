@@ -41,7 +41,7 @@ const BeregningsgrunnlagMetode = (props: BeregningsgrunnlagMetodeProps) => {
             legend=""
             size="small"
             className="radioGroup"
-            value={grunnlag?.beregningsMetode}
+            value={grunnlag?.beregningsMetode ?? ''}
             onChange={(value) =>
               onUpdate({
                 beregningsMetode: value,

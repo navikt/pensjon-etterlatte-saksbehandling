@@ -19,7 +19,7 @@ import java.time.LocalDate
 import java.time.LocalTime
 import java.time.YearMonth
 
-val standardspraak = Spraak.NN
+val standardspraak = Spraak.NB
 
 fun BarnepensjonGrunnlagResponse.tilVaarModell(
     hentKontaktinformasjon: (id: Folkeregisteridentifikator) -> DigitalKontaktinformasjon?,

@@ -37,7 +37,7 @@ export const MottatteSeder = ({
         </ErrorSummary>
       ) : null}
       <Heading level="2" size="medium" style={{ marginTop: '2rem' }}>
-        Mottatte SED
+        Mottatt krav fra utland
       </Heading>
       <BodyShort>Fyll inn hvilke SED som er mottatt i RINA pr land.</BodyShort>
       <BodyShort>

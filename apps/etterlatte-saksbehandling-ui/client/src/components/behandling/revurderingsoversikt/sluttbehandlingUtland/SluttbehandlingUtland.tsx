@@ -151,7 +151,7 @@ export default function SluttbehandlingUtland({
         </ErrorSummary>
       ) : null}
       <Heading level="2" size="medium" style={{ marginTop: '2rem' }}>
-        Mottatte SED
+        Mottatt krav fra utland
       </Heading>
       <BodyShort>Fyll inn hvilke SED som er mottatt i RINA pr land.</BodyShort>
       {isPending(hentAlleLandRequest) && <Spinner visible={true} label="Henter land" />}

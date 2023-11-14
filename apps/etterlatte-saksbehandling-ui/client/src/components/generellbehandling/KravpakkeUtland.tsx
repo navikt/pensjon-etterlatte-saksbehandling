@@ -16,7 +16,7 @@ import {
   TextField,
 } from '@navikt/ds-react'
 import React, { useContext, useEffect, useState } from 'react'
-import { isFailure, isPending, isSuccess, mapApiResult, useApiCall } from '~shared/hooks/useApiCall'
+import { isFailure, isPending, isPendingOrInitial, isSuccess, mapApiResult, useApiCall } from '~shared/hooks/useApiCall'
 import {
   attesterGenerellbehandling,
   oppdaterGenerellBehandling,
@@ -167,7 +167,9 @@ const KravpakkeUtland = (props: { utlandsBehandling: Generellbehandling & { innh
                     </>
                   )}
                   {isFailure(avdoedeStatus) && <ApiErrorAlert>Klarte ikke å hente informasjon om avdøed</ApiErrorAlert>}
-                  {isPending(avdoedeStatus) && <Spinner visible={true} label="Henter opplysninger om avdøde" />}
+                  {isPendingOrInitial(avdoedeStatus) && (
+                    <Spinner visible={true} label="Henter opplysninger om avdøde" />
+                  )}
                 </div>
               ) : (
                 <Alert variant="warning">

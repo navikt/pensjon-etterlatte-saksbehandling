@@ -10,6 +10,7 @@ import io.ktor.http.contentType
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
+import no.nav.etterlatte.libs.common.person.Adresse
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.GeografiskTilknytning
 import no.nav.etterlatte.libs.common.person.HentFolkeregisterIdenterForAktoerIdBolkRequest
@@ -104,6 +105,11 @@ fun PersonDTO.hentVergemaal(): List<VergemaalEllerFremtidsfullmakt>? =
 
 fun PersonDTO.hentSivilstand(): List<Sivilstand>? =
     this.sivilstand?.map {
+        it.verdi
+    }
+
+fun PersonDTO.hentBostedsadresse(): List<Adresse>? =
+    this.bostedsadresse?.map {
         it.verdi
     }
 

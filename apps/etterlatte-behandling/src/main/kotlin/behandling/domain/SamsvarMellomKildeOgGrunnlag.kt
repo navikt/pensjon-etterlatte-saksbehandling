@@ -75,4 +75,11 @@ sealed class SamsvarMellomKildeOgGrunnlag {
         val oppholdstype: InstitusjonsoppholdsType,
         val oppholdBeriket: InstitusjonsoppholdHendelseBeriket?,
     ) : SamsvarMellomKildeOgGrunnlag()
+
+    @JsonTypeName("ADRESSE")
+    data class Adresse(
+        override val samsvar: Boolean,
+        val fraPdl: List<no.nav.etterlatte.libs.common.person.Adresse>?,
+        val fraGrunnlag: List<no.nav.etterlatte.libs.common.person.Adresse>?,
+    ) : SamsvarMellomKildeOgGrunnlag()
 }

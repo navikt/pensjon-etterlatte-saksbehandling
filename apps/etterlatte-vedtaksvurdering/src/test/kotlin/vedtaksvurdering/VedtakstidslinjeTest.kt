@@ -24,7 +24,6 @@ import java.time.LocalDate
 import java.time.LocalTime
 import java.time.Month
 import java.time.YearMonth
-import java.time.temporal.ChronoUnit
 import java.time.temporal.ChronoUnit.DAYS
 import java.util.UUID
 
@@ -277,30 +276,58 @@ internal class VedtakstidslinjeTest {
 
     @Nested
     inner class Sammenstill {
+        private val januar2024 = YearMonth.of(2024, Month.JANUARY)
+        private val feb2024 = YearMonth.of(2024, Month.FEBRUARY)
+        private val mars2024 = YearMonth.of(2024, Month.MARCH)
+        private val april2024 = YearMonth.of(2024, Month.APRIL)
+        private val mai2024 = YearMonth.of(2024, Month.MAY)
+
+        @Test
+        fun `skal benytte vedtak iverksatt foer angitt dato`() {
+            val sammenstilt =
+                Vedtakstidslinje(
+                    listOf(
+                        lagStandardVedtakMedEnAapenUtbetalingsperiode(
+                            id = 15,
+                            virkningFom = januar2024,
+                            vedtakFattetDato = Tidspunkt.now().minus(50, DAYS),
+                        ),
+                    ),
+                ).sammenstill(feb2024)
+
+            assertAll(
+                { sammenstilt.size shouldBe 1 },
+                { sammenstilt[0].id shouldBe 15 },
+                { sammenstilt[0].utbetalingsperioder.size shouldBe 1 },
+                { sammenstilt[0].utbetalingsperioder[0].id shouldBe 150 },
+            )
+        }
+
         @Test
         fun `Skal filtrere vekk tidligere vedtak dersom siste overlapper i sin helhet`() {
-            val januar2024 = YearMonth.of(2024, Month.JANUARY)
-
-            val sammenstilt =
+            val vedtakstidslinje =
                 Vedtakstidslinje(
                     listOf(
                         lagStandardVedtakMedEnAapenUtbetalingsperiode(
                             id = 1,
                             virkningFom = januar2024,
-                            vedtakFattetDato = Tidspunkt.now().minus(50, ChronoUnit.DAYS),
+                            vedtakFattetDato = Tidspunkt.now().minus(50, DAYS),
                         ),
                         lagStandardVedtakMedEnAapenUtbetalingsperiode(
                             id = 2,
-                            virkningFom = YearMonth.of(2024, Month.FEBRUARY),
-                            vedtakFattetDato = Tidspunkt.now().minus(30, ChronoUnit.DAYS),
+                            virkningFom = feb2024,
+                            vedtakFattetDato = Tidspunkt.now().minus(30, DAYS),
                         ),
                         lagStandardVedtakMedEnAapenUtbetalingsperiode(
                             id = 3,
                             virkningFom = januar2024,
-                            vedtakFattetDato = Tidspunkt.now().minus(10, ChronoUnit.DAYS),
+                            vedtakFattetDato = Tidspunkt.now().minus(10, DAYS),
                         ),
                     ),
-                ).sammenstill()
+                )
+
+            val sammenstilt =
+                vedtakstidslinje.sammenstill(januar2024)
 
             assertAll(
                 { sammenstilt.size shouldBe 1 },
@@ -312,10 +339,6 @@ internal class VedtakstidslinjeTest {
 
         @Test
         fun `To vedtak skal gi perioder hvor periode paa vedtak 1 er lukket dagen foer vedtak 2 sin virkningsdato`() {
-            val januar2024 = YearMonth.of(2024, Month.JANUARY)
-            val feb2024 = YearMonth.of(2024, Month.FEBRUARY)
-            val mars2024 = YearMonth.of(2024, Month.MARCH)
-
             val vedtakFomJanuar2024 =
                 lagStandardVedtakMedEnAapenUtbetalingsperiode(
                     id = 1,
@@ -341,7 +364,9 @@ internal class VedtakstidslinjeTest {
                         ),
                 )
 
-            val sammenstilt = Vedtakstidslinje(listOf(vedtakFomJanuar2024, vedtakFomMars2024)).sammenstill()
+            val sammenstilt =
+                Vedtakstidslinje(listOf(vedtakFomJanuar2024, vedtakFomMars2024))
+                    .sammenstill(januar2024)
 
             assertAll(
                 { sammenstilt.size shouldBe 2 },
@@ -356,12 +381,6 @@ internal class VedtakstidslinjeTest {
 
         @Test
         fun `Skal filtrere vekk periode 3, samt lukke periode 2 tidligere, for det tidligste vedtaket`() {
-            val januar2024 = YearMonth.of(2024, Month.JANUARY)
-            val feb2024 = YearMonth.of(2024, Month.FEBRUARY)
-            val mars2024 = YearMonth.of(2024, Month.MARCH)
-            val april2024 = YearMonth.of(2024, Month.APRIL)
-            val mai2024 = YearMonth.of(2024, Month.MAY)
-
             val vedtakFomJanuar2024 =
                 lagVedtak(
                     id = 1,
@@ -410,7 +429,9 @@ internal class VedtakstidslinjeTest {
                         ),
                 )
 
-            val sammenstilt = Vedtakstidslinje(listOf(vedtakFomJanuar2024, vedtakFomMars2024)).sammenstill()
+            val sammenstilt =
+                Vedtakstidslinje(listOf(vedtakFomJanuar2024, vedtakFomMars2024))
+                    .sammenstill(januar2024)
 
             assertAll(
                 { sammenstilt.size shouldBe 2 },

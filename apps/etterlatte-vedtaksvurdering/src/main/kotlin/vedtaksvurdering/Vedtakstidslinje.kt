@@ -42,11 +42,7 @@ class Vedtakstidslinje(private val vedtak: List<Vedtak>) {
     /**
      * Opprette en kontinuerlig, "gjeldende" tidslinje med vedtak og underliggende perioder
      */
-    fun sammenstill(): List<Vedtak> {
-        if (vedtak.size < 2) { // Unødvendig å gjøre noe
-            return vedtak
-        }
-
+    fun sammenstill(fomDato: YearMonth): List<Vedtak> {
         val vedtakByVirkningsdato = mutableMapOf<Periode, Vedtak>()
         var currentVirkningstidspunkt: YearMonth? = null
 
@@ -63,6 +59,7 @@ class Vedtakstidslinje(private val vedtak: List<Vedtak>) {
         }
 
         return vedtakByVirkningsdato
+            .filter { (k, _) -> k.tom == null || k.tom!!.isAfter(fomDato) }
             .map { (k, v) -> v.kopier(k) }
             .sortedBy { it.virkningstidspunkt }
     }

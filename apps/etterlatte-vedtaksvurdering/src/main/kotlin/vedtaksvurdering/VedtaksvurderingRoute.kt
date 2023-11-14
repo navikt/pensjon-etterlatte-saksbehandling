@@ -246,10 +246,10 @@ fun Route.samordningsvedtakRoute(
                 call.request.headers["fnr"]?.let { Folkeregisteridentifikator.of(it) }
                     ?: return@get call.respond(HttpStatusCode.BadRequest, "fnr ikke angitt")
 
-            val vedtaksliste = vedtakBehandlingService.finnFerdigstilteVedtak(fnr, fomDato)
-            val tidslinjeJustert = Vedtakstidslinje(vedtaksliste).sammenstill(
-                YearMonth.of(fomDato.year, fomDato.month)
-            )
+            val vedtaksliste = vedtakBehandlingService.finnFerdigstilteVedtak(fnr)
+            val tidslinjeJustert =
+                Vedtakstidslinje(vedtaksliste)
+                    .sammenstill(YearMonth.of(fomDato.year, fomDato.month))
             call.respond(tidslinjeJustert.map { it.toSamordningsvedtakDto() })
         }
 

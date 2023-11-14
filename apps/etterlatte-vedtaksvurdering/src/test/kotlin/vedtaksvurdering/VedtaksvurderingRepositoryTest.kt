@@ -1,7 +1,6 @@
 package vedtaksvurdering
 
 import io.kotest.matchers.comparables.shouldBeGreaterThan
-import io.kotest.matchers.comparables.shouldBeGreaterThanOrEqualTo
 import io.kotest.matchers.ints.shouldBeExactly
 import io.kotest.matchers.should
 import io.kotest.matchers.shouldBe
@@ -33,7 +32,6 @@ import org.junit.jupiter.api.TestInstance
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
 import java.math.BigDecimal
-import java.time.LocalDate
 import java.time.Month
 import java.time.YearMonth
 import javax.sql.DataSource
@@ -302,37 +300,37 @@ internal class VedtaksvurderingRepositoryTest {
     }
 
     @Test
-    fun `skal hente vedtak for fnr og fra-og-med angitt dato`() {
-        val soeker1 = SOEKER_FOEDSELSNUMMER
+    fun `skal hente vedtak for fnr`() {
+        val soeker1 = Folkeregisteridentifikator.of(FNR_1)
         val soeker2 = Folkeregisteridentifikator.of(FNR_2)
 
         listOf(
             opprettVedtak(
-                sakId = 1,
+                sakId = 10,
                 soeker = soeker1,
                 virkningstidspunkt = YearMonth.of(2024, Month.JANUARY),
                 status = VedtakStatus.IVERKSATT,
             ),
             opprettVedtak(
-                sakId = 2,
+                sakId = 20,
                 soeker = soeker2,
                 virkningstidspunkt = YearMonth.of(2024, Month.JANUARY),
                 status = VedtakStatus.IVERKSATT,
             ),
             opprettVedtak(
-                sakId = 2,
+                sakId = 20,
                 soeker = soeker2,
                 virkningstidspunkt = YearMonth.of(2024, Month.MARCH),
                 status = VedtakStatus.SAMORDNET,
             ),
             opprettVedtak(
-                sakId = 1,
+                sakId = 10,
                 soeker = soeker1,
                 virkningstidspunkt = YearMonth.of(2024, Month.APRIL),
                 status = VedtakStatus.IVERKSATT,
             ),
             opprettVedtak(
-                sakId = 2,
+                sakId = 20,
                 soeker = soeker2,
                 virkningstidspunkt = YearMonth.of(2024, Month.JUNE),
                 status = VedtakStatus.TIL_SAMORDNING,
@@ -341,16 +339,11 @@ internal class VedtaksvurderingRepositoryTest {
             .map { repository.opprettVedtak(it) }
             .forEach { repository.iverksattVedtak(it.behandlingId) }
 
-        val results = repository.hentFerdigstilteVedtak(soeker2, LocalDate.of(2024, Month.MARCH, 1))
+        val results = repository.hentFerdigstilteVedtak(soeker2)
 
-        results.size shouldBeExactly 2
+        results.size shouldBeExactly 3
         results.forEach {
             it.soeker shouldBe soeker2
-            (it.innhold as VedtakBehandlingInnhold).virkningstidspunkt shouldBeGreaterThanOrEqualTo
-                YearMonth.of(
-                    2024,
-                    Month.MARCH,
-                )
         }
     }
 }

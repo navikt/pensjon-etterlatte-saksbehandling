@@ -91,16 +91,20 @@ export const FELLES_REVURDERING_HJEMLER: Array<Hjemmel> = [
 ]
 export const FELLES_SLUTTBEHANDLING_HJEMLER: Array<Hjemmel> = [
   {
-    lenke: 'https://lovdata.no/lov/1997-02-28-19/§22-12',
-    tittel: 'Folketrygdloven § 22-12 fjerde, femte og sjette ledd',
+    lenke: 'https://lovdata.no/pro/lov/1997-02-28-19/§22-12',
+    tittel: 'Folketrygdloven § 22-12 første ledd',
+  },
+  {
+    lenke: 'https://lovdata.no/pro/lov/1997-02-28-19/§22-13',
+    tittel: 'Folketrygdloven § 22-13 fjerde ledd',
   },
   {
     lenke: 'https://lovdata.no/pro/#document/NLX3/eu/32004r0883/a4',
     tittel: 'EØS forordning 883/2004',
   },
   {
-    lenke: 'https://lovdata.no/pro/#reference/eu/32009r0987',
-    tittel: 'Forordning nr. 987/2009',
+    lenke: 'https://lovdata.no/pro/#document/NLX3/eu/32009r0987',
+    tittel: 'EØS-forordning 987/2009',
   },
 ]
 

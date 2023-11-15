@@ -100,7 +100,6 @@ export const lagreBoddEllerArbeidetUtlandet = async (args: {
   boddArbeidetEosNordiskKonvensjon?: boolean
   boddArbeidetAvtaleland?: boolean
   vurdereAvoededsTrygdeavtale?: boolean
-  norgeErBehandlendeland?: boolean
   skalSendeKravpakke?: boolean
 }): Promise<ApiResponse<IBoddEllerArbeidetUtlandet>> => {
   return apiClient.post(`/behandling/${args.behandlingId}/boddellerarbeidetutlandet`, {
@@ -110,7 +109,6 @@ export const lagreBoddEllerArbeidetUtlandet = async (args: {
     boddArbeidetEosNordiskKonvensjon: args.boddArbeidetEosNordiskKonvensjon,
     boddArbeidetAvtaleland: args.boddArbeidetAvtaleland,
     vurdereAvoededsTrygdeavtale: args.vurdereAvoededsTrygdeavtale,
-    norgeErBehandlendeland: args.norgeErBehandlendeland,
     skalSendeKravpakke: args.skalSendeKravpakke,
   })
 }

@@ -181,7 +181,6 @@ internal fun Route.behandlingRoutes(
                             boddArbeidetEosNordiskKonvensjon = body.boddArbeidetEosNordiskKonvensjon,
                             boddArbeidetAvtaleland = body.boddArbeidetAvtaleland,
                             vurdereAvoededsTrygdeavtale = body.vurdereAvoededsTrygdeavtale,
-                            norgeErBehandlendeland = body.norgeErBehandlendeland,
                             skalSendeKravpakke = body.skalSendeKravpakke,
                         )
 

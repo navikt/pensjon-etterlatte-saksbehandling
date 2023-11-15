@@ -562,12 +562,12 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
                 behandling!!.id,
                 BoddEllerArbeidetUtlandet(
                     true,
-                    Grunnlagsopplysning.Saksbehandler("ident", Tidspunkt.now()), "begrunnelse",
+                    Grunnlagsopplysning.Saksbehandler("ident", Tidspunkt.now()),
+                    "begrunnelse",
                     boddArbeidetIkkeEosEllerAvtaleland = true,
                     boddArbeidetEosNordiskKonvensjon = true,
                     boddArbeidetAvtaleland = true,
                     vurdereAvoededsTrygdeavtale = true,
-                    norgeErBehandlendeland = true,
                     skalSendeKravpakke = true,
                 ),
             )

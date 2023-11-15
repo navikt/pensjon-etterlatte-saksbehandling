@@ -164,7 +164,6 @@ class GenerellBehandlingServiceTest {
                 boddArbeidetEosNordiskKonvensjon = true,
                 boddArbeidetAvtaleland = true,
                 vurdereAvoededsTrygdeavtale = true,
-                norgeErBehandlendeland = true,
                 skalSendeKravpakke = true,
             ),
         )

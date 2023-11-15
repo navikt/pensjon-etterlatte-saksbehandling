@@ -8,6 +8,7 @@ import kotlinx.coroutines.runBlocking
 import lagGrunnlagHendelse
 import mockPerson
 import no.nav.etterlatte.klienter.PdlTjenesterKlientImpl
+import no.nav.etterlatte.klienter.PersondataKlient
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
@@ -52,7 +53,14 @@ import java.util.UUID
 internal class GrunnlagServiceTest {
     private val opplysningerMock = mockk<OpplysningDao>()
     private val pdlTjenesterKlientImpl = mockk<PdlTjenesterKlientImpl>()
-    private val grunnlagService = RealGrunnlagService(pdlTjenesterKlientImpl, opplysningerMock, mockk())
+    private val persondataKlient = mockk<PersondataKlient>()
+    private val grunnlagService =
+        RealGrunnlagService(
+            pdlTjenesterKlientImpl,
+            opplysningerMock,
+            mockk(),
+            persondataKlient,
+        )
 
     private val testData = GrunnlagTestData()
 

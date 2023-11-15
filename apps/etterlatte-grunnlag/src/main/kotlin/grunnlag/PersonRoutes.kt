@@ -65,5 +65,12 @@ fun Route.personRoute(
                 }
             }
         }
+
+        post("vergeadresse") {
+            withFoedselsnummer(behandlingKlient) { fnr ->
+                val vergeadresse = grunnlagService.hentVergeadresse(fnr)
+                call.respond(vergeadresse)
+            }
+        }
     }
 }

@@ -1,9 +1,11 @@
 package no.nav.etterlatte.grunnlag
 
 import com.fasterxml.jackson.databind.JsonNode
+import grunnlag.adresse.VergeAdresse
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.klienter.PdlTjenesterKlientImpl
+import no.nav.etterlatte.klienter.PersondataKlient
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.PersonMedSakerOgRoller
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
@@ -93,12 +95,15 @@ interface GrunnlagService {
     )
 
     fun hentHistoriskForeldreansvar(behandlingId: UUID): Grunnlagsopplysning<JsonNode>?
+
+    suspend fun hentVergeadresse(folkeregisteridentifikator: Folkeregisteridentifikator): VergeAdresse
 }
 
 class RealGrunnlagService(
     private val pdltjenesterKlient: PdlTjenesterKlientImpl,
     private val opplysningDao: OpplysningDao,
     private val sporingslogg: Sporingslogg,
+    private val persondataKlient: PersondataKlient,
 ) : GrunnlagService {
     private val logger = LoggerFactory.getLogger(RealGrunnlagService::class.java)
 
@@ -183,7 +188,13 @@ class RealGrunnlagService(
                 val requesterGjenlevende =
                     persongalleri.gjenlevende.map {
                         Pair(
-                            async { pdltjenesterKlient.hentPerson(it, PersonRolle.GJENLEVENDE, opplysningsbehov.sakType) },
+                            async {
+                                pdltjenesterKlient.hentPerson(
+                                    it,
+                                    PersonRolle.GJENLEVENDE,
+                                    opplysningsbehov.sakType,
+                                )
+                            },
                             async {
                                 pdltjenesterKlient.hentOpplysningsperson(
                                     it,
@@ -200,7 +211,13 @@ class RealGrunnlagService(
                     }
                 val soeker =
                     Pair(
-                        async { pdltjenesterKlient.hentPerson(persongalleri.soeker, soekerRolle, opplysningsbehov.sakType) },
+                        async {
+                            pdltjenesterKlient.hentPerson(
+                                persongalleri.soeker,
+                                soekerRolle,
+                                opplysningsbehov.sakType,
+                            )
+                        },
                         async {
                             pdltjenesterKlient
                                 .hentOpplysningsperson(persongalleri.soeker, soekerRolle, opplysningsbehov.sakType)
@@ -212,7 +229,11 @@ class RealGrunnlagService(
                         ?.let { innsenderFnr ->
                             Pair(
                                 async {
-                                    pdltjenesterKlient.hentPerson(innsenderFnr, PersonRolle.INNSENDER, opplysningsbehov.sakType)
+                                    pdltjenesterKlient.hentPerson(
+                                        innsenderFnr,
+                                        PersonRolle.INNSENDER,
+                                        opplysningsbehov.sakType,
+                                    )
                                 },
                                 async {
                                     pdltjenesterKlient.hentOpplysningsperson(
@@ -351,6 +372,11 @@ class RealGrunnlagService(
         opplysningDao.oppdaterVersjonForBehandling(behandlingId, grunnlag.metadata.sakId, hendelsenummer)
 
         return historiskForeldreansvar
+    }
+
+    override suspend fun hentVergeadresse(folkeregisteridentifikator: Folkeregisteridentifikator): VergeAdresse {
+        return persondataKlient.hentAdresseForVerge(folkeregisteridentifikator)
+            .toVergeAdresse()
     }
 
     private fun mapTilRolle(

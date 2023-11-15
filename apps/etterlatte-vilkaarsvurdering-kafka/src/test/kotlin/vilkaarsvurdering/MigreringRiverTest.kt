@@ -49,6 +49,7 @@ internal class MigreringRiverTest {
                 enhet = Enhet("4817"),
                 soeker = SOEKER_FOEDSELSNUMMER,
                 avdoedForelder = listOf(AvdoedForelder(AVDOED_FOEDSELSNUMMER, Tidspunkt.now())),
+                dodAvYrkesskade = false,
                 gjenlevendeForelder = null,
                 virkningstidspunkt = YearMonth.now(),
                 beregning =

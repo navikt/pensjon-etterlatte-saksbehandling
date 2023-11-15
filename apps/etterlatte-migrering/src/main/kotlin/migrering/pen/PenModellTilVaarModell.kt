@@ -36,6 +36,7 @@ fun BarnepensjonGrunnlagResponse.tilVaarModell(
                     doedsdato = tilTidspunkt(it.doedsdato),
                 )
             },
+        dodAvYrkesskade = dodAvYrkesskade,
         virkningstidspunkt = YearMonth.from(virkningsdato),
         beregning =
             with(beregning) {
@@ -73,7 +74,7 @@ fun BarnepensjonGrunnlagResponse.tilVaarModell(
                         )
                     },
             ),
-        flyktningStatus = false, // TODO - Støttes ikke av Gjenny
+        flyktningStatus = flyktning,
         spraak = finnSpraak(hentKontaktinformasjon),
     )
 

@@ -73,6 +73,7 @@ internal class MigreringHendelserRiverTest {
             enhet = Enhet("4817"),
             soeker = fnr,
             avdoedForelder = listOf(AvdoedForelder(fnr, Tidspunkt.now())),
+            dodAvYrkesskade = false,
             gjenlevendeForelder = null,
             virkningstidspunkt = YearMonth.now(),
             beregning =

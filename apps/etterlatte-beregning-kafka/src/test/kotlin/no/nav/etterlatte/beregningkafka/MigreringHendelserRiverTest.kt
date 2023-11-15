@@ -75,7 +75,7 @@ internal class MigreringHendelserRiverTest {
             avdoedForelder = listOf(AvdoedForelder(fnr, Tidspunkt.now())),
             dodAvYrkesskade = false,
             gjenlevendeForelder = null,
-            virkningstidspunkt = YearMonth.now(),
+            foersteVirkningstidspunkt = YearMonth.now(),
             beregning =
                 Beregning(
                     brutto = 1500,

@@ -37,7 +37,7 @@ fun BarnepensjonGrunnlagResponse.tilVaarModell(
                 )
             },
         dodAvYrkesskade = dodAvYrkesskade,
-        virkningstidspunkt = YearMonth.from(virkningsdato),
+        foersteVirkningstidspunkt = YearMonth.from(virkningsdato),
         beregning =
             with(beregning) {
                 Beregning(

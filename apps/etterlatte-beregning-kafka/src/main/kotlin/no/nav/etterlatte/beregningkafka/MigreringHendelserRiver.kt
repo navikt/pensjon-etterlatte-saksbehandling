@@ -21,6 +21,7 @@ import rapidsandrivers.BEREGNING_KEY
 import rapidsandrivers.HENDELSE_DATA_KEY
 import rapidsandrivers.behandlingId
 import rapidsandrivers.migrering.ListenerMedLoggingOgFeilhaandtering
+import java.time.LocalDate
 
 internal class MigreringHendelserRiver(
     rapidsConnection: RapidsConnection,
@@ -121,7 +122,7 @@ private fun tilGrunnlagDTO(request: MigreringRequest): BarnepensjonBeregningsGru
         soeskenMedIBeregning =
             listOf(
                 GrunnlagMedPeriode(
-                    fom = request.virkningstidspunkt.atDay(1),
+                    fom = LocalDate.of(2024, 1, 1),
                     tom = null,
                     data = emptyList(),
                 ),

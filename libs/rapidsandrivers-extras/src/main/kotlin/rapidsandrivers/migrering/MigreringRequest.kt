@@ -21,7 +21,7 @@ data class MigreringRequest(
     val gjenlevendeForelder: Folkeregisteridentifikator?,
     val avdoedForelder: List<AvdoedForelder>,
     val dodAvYrkesskade: Boolean,
-    val virkningstidspunkt: YearMonth,
+    val foersteVirkningstidspunkt: YearMonth,
     val beregning: Beregning,
     val trygdetid: Trygdetid,
     val flyktningStatus: Boolean = false,

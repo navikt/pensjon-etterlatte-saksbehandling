@@ -61,7 +61,7 @@ class MigreringRoutesTest : BehandlingIntegrationTest() {
                     avdoedForelder = listOf(AvdoedForelder(AVDOED_FOEDSELSNUMMER, Tidspunkt.now())),
                     dodAvYrkesskade = false,
                     gjenlevendeForelder = null,
-                    virkningstidspunkt = YearMonth.now(),
+                    foersteVirkningstidspunkt = YearMonth.now(),
                     beregning =
                         Beregning(
                             brutto = 3500,

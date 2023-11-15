@@ -132,7 +132,7 @@ internal class MigreringRiverIntegrationTest {
             with(repository.hentSaker()) {
                 assertEquals(1, size)
                 assertEquals(get(0).id, 22974139)
-                assertEquals(get(0).virkningstidspunkt, YearMonth.of(2023, Month.SEPTEMBER))
+                assertEquals(get(0).foersteVirkningstidspunkt, YearMonth.of(2023, Month.SEPTEMBER))
             }
 
             val melding1 = inspector.inspektør.message(0)
@@ -201,7 +201,7 @@ internal class MigreringRiverIntegrationTest {
             with(repository.hentSaker()) {
                 assertEquals(1, size)
                 assertEquals(get(0).id, pesysId.id)
-                assertEquals(get(0).virkningstidspunkt, YearMonth.of(2023, Month.SEPTEMBER))
+                assertEquals(get(0).foersteVirkningstidspunkt, YearMonth.of(2023, Month.SEPTEMBER))
                 assertEquals(repository.hentStatus(pesysId.id), Migreringsstatus.UNDER_MIGRERING)
             }
             val behandlingId = UUID.randomUUID()
@@ -322,7 +322,7 @@ internal class MigreringRiverIntegrationTest {
             with(repository.hentSaker()) {
                 assertEquals(1, size)
                 assertEquals(get(0).id, pesysId.id)
-                assertEquals(get(0).virkningstidspunkt, YearMonth.of(2023, Month.SEPTEMBER))
+                assertEquals(get(0).foersteVirkningstidspunkt, YearMonth.of(2023, Month.SEPTEMBER))
                 assertEquals(repository.hentStatus(pesysId.id), Migreringsstatus.PAUSE)
             }
 

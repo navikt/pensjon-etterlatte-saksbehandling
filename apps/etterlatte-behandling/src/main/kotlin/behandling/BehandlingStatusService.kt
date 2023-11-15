@@ -1,7 +1,10 @@
 package no.nav.etterlatte.behandling
 
+import io.getunleash.UnleashContext
 import io.ktor.server.plugins.NotFoundException
+import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.domain.Behandling
+import no.nav.etterlatte.behandling.domain.ManuellRevurdering
 import no.nav.etterlatte.behandling.generellbehandling.GenerellBehandlingService
 import no.nav.etterlatte.behandling.generellbehandling.GenerellBehandlingToggle
 import no.nav.etterlatte.behandling.hendelse.HendelseType
@@ -22,6 +25,7 @@ import java.util.UUID
 
 enum class BehandlingStatusServiceFeatureToggle(private val key: String) : FeatureToggle {
     BrukFaktiskTrygdetid("pensjon-etterlatte.bp-bruk-faktisk-trygdetid"),
+    OpphoerStatusovergang("pensjon-etterlatte.opphoer-statusovergang-vv-til-fattetv"),
     ;
 
     override fun key() = key
@@ -157,14 +161,45 @@ class BehandlingStatusServiceImpl(
     }
 
     override fun sjekkOmKanFatteVedtak(behandlingId: UUID) {
-        hentBehandling(behandlingId).tilFattetVedtak()
+        val user = Kontekst.get().AppUser.name()
+        val behandling = hentBehandling(behandlingId)
+
+        if (behandling is ManuellRevurdering &&
+            featureToggleService.isEnabled(
+                toggleId = BehandlingStatusServiceFeatureToggle.OpphoerStatusovergang,
+                defaultValue = false,
+                context =
+                    UnleashContext.builder()
+                        .userId(user)
+                        .build(),
+            )
+        ) {
+            behandling.tilFattetVedtakUtvidet()
+        } else {
+            behandling.tilFattetVedtak()
+        }
     }
 
     override fun settFattetVedtak(
         behandling: Behandling,
         vedtakHendelse: VedtakHendelse,
     ) {
-        lagreNyBehandlingStatus(behandling.tilFattetVedtak())
+        val user = Kontekst.get().AppUser.name()
+        if (behandling is ManuellRevurdering &&
+            featureToggleService.isEnabled(
+                toggleId = BehandlingStatusServiceFeatureToggle.OpphoerStatusovergang,
+                defaultValue = false,
+                context =
+                    UnleashContext.builder()
+                        .userId(user)
+                        .build(),
+            )
+        ) {
+            lagreNyBehandlingStatus(behandling.tilFattetVedtakUtvidet())
+        } else {
+            lagreNyBehandlingStatus(behandling.tilFattetVedtak())
+        }
+
         registrerVedtakHendelse(behandling.id, vedtakHendelse, HendelseType.FATTET)
     }
 

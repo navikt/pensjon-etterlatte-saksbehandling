@@ -4,6 +4,7 @@ import io.getunleash.DefaultUnleash
 import io.getunleash.UnleashContext
 import io.getunleash.UnleashContextProvider
 import io.getunleash.strategy.GradualRolloutRandomStrategy
+import io.getunleash.strategy.GradualRolloutUserIdStrategy
 import io.getunleash.util.UnleashConfig
 import org.slf4j.LoggerFactory
 
@@ -11,6 +12,7 @@ interface FeatureToggleService {
     fun isEnabled(
         toggleId: FeatureToggle,
         defaultValue: Boolean,
+        context: UnleashContext? = null,
     ): Boolean
 
     companion object {
@@ -30,6 +32,7 @@ class UnleashFeatureToggleService(private val properties: FeatureTogglePropertie
                 .apiKey(properties.apiKey)
                 .build(),
             GradualRolloutRandomStrategy(),
+            GradualRolloutUserIdStrategy(),
         )
 
     private fun lagUnleashContextProvider() =
@@ -42,10 +45,20 @@ class UnleashFeatureToggleService(private val properties: FeatureTogglePropertie
     override fun isEnabled(
         toggleId: FeatureToggle,
         defaultValue: Boolean,
+        context: UnleashContext?,
     ) = try {
-        defaultUnleash.isEnabled(toggleId.key(), defaultValue)
+        context?.let { defaultUnleash.isEnabled(toggleId.key(), merge(it), defaultValue) }
+            ?: defaultUnleash.isEnabled(toggleId.key(), defaultValue)
     } catch (e: Exception) {
         logger.warn("Fikk feilmelding fra Unleash for toggle $toggleId, bruker defaultverdi $defaultValue", e)
         defaultValue
+    }
+
+    private fun merge(other: UnleashContext): UnleashContext {
+        return UnleashContext.builder()
+            .appName(other.appName.orElse(properties.applicationName))
+            .userId(other.userId.orElse(null))
+            .sessionId(other.sessionId.orElse(null))
+            .build()
     }
 }

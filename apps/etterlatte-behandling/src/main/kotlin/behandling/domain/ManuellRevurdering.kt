@@ -108,6 +108,27 @@ data class ManuellRevurdering(
             ),
         ) { endreTilStatus(BehandlingStatus.AVKORTET) }
 
+    /**
+     Utforskning av mulighet for vilkaarsvurdert -> fattet_vedtak i kontekst av opphør
+     */
+    fun tilFattetVedtakUtvidet(): Revurdering {
+        if (!erFyltUt()) {
+            logger.info(("Behandling ($id) må være fylt ut for å settes til fattet vedtak"))
+            throw TilstandException.IkkeFyltUt
+        }
+
+        return hvisTilstandEr(
+            listOf(
+                BehandlingStatus.VILKAARSVURDERT,
+                BehandlingStatus.BEREGNET,
+                BehandlingStatus.AVKORTET,
+                BehandlingStatus.RETURNERT,
+            ),
+        ) {
+            endreTilStatus(BehandlingStatus.FATTET_VEDTAK)
+        }
+    }
+
     override fun tilFattetVedtak(): Revurdering {
         if (!erFyltUt()) {
             logger.info(("Behandling ($id) må være fylt ut for å settes til fattet vedtak"))

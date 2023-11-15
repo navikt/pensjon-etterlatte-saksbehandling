@@ -2,6 +2,7 @@ package no.nav.etterlatte.vedtaksvurdering.klienter
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.typesafe.config.Config
+import io.getunleash.UnleashContext
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.plugins.ResponseException
@@ -48,6 +49,10 @@ class SamKlientImpl(
         if (!featureToggleService.isEnabled(
                 toggleId = SamordneVedtakFeatureToggle.SamordneVedtakMedSamToggle,
                 defaultValue = false,
+                context =
+                    UnleashContext.builder()
+                        .userId(brukerTokenInfo.ident())
+                        .build(),
             )
         ) {
             return false

@@ -369,7 +369,18 @@ class BrevDataMapper(
                     val fetcher = datafetcher(brukerTokenInfo, generellBrevData)
                     val utbetaling = async { fetcher.hentUtbetaling() }
                     val etterbetaling = async { fetcher.hentEtterbetaling() }
-                    EndringHovedmalBrevData.fra(utbetaling.await(), etterbetaling.await(), innholdMedVedlegg)
+                    val trygdetid = async { fetcher.hentTrygdetid() }
+                    val grunnbeloep = async { fetcher.hentGrunnbeloep() }
+                    val trygdetidHentet = requireNotNull(trygdetid.await()) { "${kode.ferdigstilling} Må ha trygdetid" }
+                    val grunnbeloepHentet =
+                        requireNotNull(grunnbeloep.await()) { "${kode.ferdigstilling} Må ha grunnbeløp" }
+                    EndringHovedmalBrevData.fra(
+                        utbetaling.await(),
+                        etterbetaling.await(),
+                        trygdetidHentet,
+                        grunnbeloepHentet,
+                        innholdMedVedlegg,
+                    )
                 }
             }
 

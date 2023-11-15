@@ -3,6 +3,7 @@ package vilkaarsvurdering.migrering
 import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.request.post
+import io.ktor.client.request.setBody
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
@@ -19,7 +20,9 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Utfall
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.POSTGRES_VERSION
@@ -29,11 +32,11 @@ import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import no.nav.etterlatte.vilkaarsvurdering.DelvilkaarRepository
+import no.nav.etterlatte.vilkaarsvurdering.VilkaarsvurderingMigreringRequest
 import no.nav.etterlatte.vilkaarsvurdering.VilkaarsvurderingRepository
 import no.nav.etterlatte.vilkaarsvurdering.VilkaarsvurderingService
 import no.nav.etterlatte.vilkaarsvurdering.klienter.BehandlingKlient
 import no.nav.etterlatte.vilkaarsvurdering.klienter.GrunnlagKlient
-import no.nav.etterlatte.vilkaarsvurdering.migrering.MigreringRepository
 import no.nav.etterlatte.vilkaarsvurdering.migrering.MigreringService
 import no.nav.etterlatte.vilkaarsvurdering.migrering.migrering
 import no.nav.etterlatte.vilkaarsvurdering.vilkaarsvurdering
@@ -48,6 +51,7 @@ import org.junit.jupiter.api.TestInstance
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
 import testsupport.buildTestApplicationConfigurationForOauth
+import java.time.YearMonth
 import java.util.UUID
 import javax.sql.DataSource
 
@@ -95,7 +99,6 @@ class MigreringTest {
 
         migreringService =
             MigreringService(
-                MigreringRepository(delvilkaarRepository, ds),
                 vilkaarsvurderingRepository,
             )
         coEvery { behandlingKlient.harTilgangTilBehandling(any(), any()) } returns true
@@ -112,7 +115,7 @@ class MigreringTest {
             every { sakType } returns SakType.BARNEPENSJON
             every { behandlingType } returns BehandlingType.FØRSTEGANGSBEHANDLING
             every { soeker } returns "10095512345"
-            every { virkningstidspunkt } returns VirkningstidspunktTestData.virkningstidsunkt()
+            every { virkningstidspunkt } returns VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2024, 1))
             every { revurderingsaarsak } returns null
         }
 
@@ -147,7 +150,7 @@ class MigreringTest {
     }
 
     @Test
-    fun testMigrering() {
+    fun `Skal opprette vilkaarsvurdering for migrering`() {
         testApplication {
             environment {
                 config = hoconApplicationConfig
@@ -162,20 +165,61 @@ class MigreringTest {
             val response =
                 client.post("/api/vilkaarsvurdering/migrering/$behandlingId") {
                     header(HttpHeaders.Authorization, "Bearer $token")
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    setBody(VilkaarsvurderingMigreringRequest(yrkesskadeFordel = false).toJson())
                 }
             assertEquals(HttpStatusCode.Accepted, response.status)
 
-            client.get("/api/vilkaarsvurdering/$behandlingId") {
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                header(HttpHeaders.Authorization, "Bearer $token")
+            val vilkaar =
+                client.get("/api/vilkaarsvurdering/$behandlingId") {
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    header(HttpHeaders.Authorization, "Bearer $token")
+                }
+                    .also { assertTrue(it.status.isSuccess()) }
+                    .let { objectMapper.readValue(it.bodyAsText(), VilkaarsvurderingDto::class.java) }
+                    .vilkaar
+                    .also { assertEquals(it.size, 7) }
+            vilkaar.find { it.hovedvilkaar.type == VilkaarType.BP_YRKESSKADE_AVDOED_2024 }
+                .let { assertEquals(it!!.hovedvilkaar.resultat, Utfall.IKKE_OPPFYLT) }
+            vilkaar.filter { it.hovedvilkaar.type != VilkaarType.BP_YRKESSKADE_AVDOED_2024 }
+                .forEach { assertEquals(it.hovedvilkaar.resultat, Utfall.IKKE_VURDERT) }
+        }
+    }
+
+    @Test
+    fun `Skal sette yrkesskade som oppfylt ved migrering dersom avdoede hadde yrkesskade`() {
+        testApplication {
+            environment {
+                config = hoconApplicationConfig
             }
-                .also { assertTrue(it.status.isSuccess()) }
-                .let { objectMapper.readValue(it.bodyAsText(), VilkaarsvurderingDto::class.java) }
-                .vilkaar
-                .also { assertEquals(it.size, 7) }
-                .map { it.hovedvilkaar }
-                .map { it.resultat }
-                .forEach { assertTrue(it == Utfall.IKKE_VURDERT) }
+            application {
+                restModule(this.log) {
+                    vilkaarsvurdering(vilkaarsvurderingServiceImpl, behandlingKlient)
+                    migrering(migreringService, behandlingKlient, vilkaarsvurderingServiceImpl)
+                }
+            }
+
+            val response =
+                client.post("/api/vilkaarsvurdering/migrering/$behandlingId") {
+                    header(HttpHeaders.Authorization, "Bearer $token")
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    setBody(VilkaarsvurderingMigreringRequest(yrkesskadeFordel = true).toJson())
+                }
+            assertEquals(HttpStatusCode.Accepted, response.status)
+
+            val vilkaar =
+                client.get("/api/vilkaarsvurdering/$behandlingId") {
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    header(HttpHeaders.Authorization, "Bearer $token")
+                }
+                    .also { assertTrue(it.status.isSuccess()) }
+                    .let { objectMapper.readValue(it.bodyAsText(), VilkaarsvurderingDto::class.java) }
+                    .vilkaar
+                    .also { assertEquals(it.size, 7) }
+            vilkaar.find { it.hovedvilkaar.type == VilkaarType.BP_YRKESSKADE_AVDOED_2024 }
+                .let { assertEquals(it!!.hovedvilkaar.resultat, Utfall.OPPFYLT) }
+            vilkaar.filter { it.hovedvilkaar.type != VilkaarType.BP_YRKESSKADE_AVDOED_2024 }
+                .forEach { assertEquals(it.hovedvilkaar.resultat, Utfall.IKKE_VURDERT) }
         }
     }
 }

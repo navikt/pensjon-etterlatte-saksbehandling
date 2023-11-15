@@ -11,7 +11,6 @@ import no.nav.etterlatte.vilkaarsvurdering.VilkaarsvurderingRepository
 import no.nav.etterlatte.vilkaarsvurdering.VilkaarsvurderingService
 import no.nav.etterlatte.vilkaarsvurdering.klienter.BehandlingKlientImpl
 import no.nav.etterlatte.vilkaarsvurdering.klienter.GrunnlagKlientImpl
-import no.nav.etterlatte.vilkaarsvurdering.migrering.MigreringRepository
 import no.nav.etterlatte.vilkaarsvurdering.migrering.MigreringService
 
 class ApplicationContext {
@@ -33,11 +32,7 @@ class ApplicationContext {
             grunnlagKlient = GrunnlagKlientImpl(config, httpClient()),
             featureToggleService = FeatureToggleService.initialiser(featureToggleProperties(config)),
         )
-    val migreringService =
-        MigreringService(
-            MigreringRepository(delvilkaarRepository, dataSource),
-            vilkaarsvurderingRepository,
-        )
+    val migreringService = MigreringService(vilkaarsvurderingRepository)
 }
 
 private fun featureToggleProperties(config: Config) =

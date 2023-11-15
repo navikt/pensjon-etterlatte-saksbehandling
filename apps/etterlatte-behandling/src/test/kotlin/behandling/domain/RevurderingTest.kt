@@ -57,8 +57,16 @@ internal class RevurderingTest {
         @Test
         fun `kan endre status gjennom gyldig statusendringsflyt`() {
             val actual =
-                revurdering.tilVilkaarsvurdert().tilTrygdetidOppdatert().tilBeregnet().tilFattetVedtak()
-                    .tilAttestert().tilIverksatt()
+                revurdering
+                    .tilVilkaarsvurdert()
+                    .tilTrygdetidOppdatert()
+                    .tilBeregnet()
+                    .tilAvkortet()
+                    .tilBeregnet()
+                    .tilAvkortet()
+                    .tilFattetVedtak()
+                    .tilAttestert()
+                    .tilIverksatt()
 
             Assertions.assertEquals(BehandlingStatus.IVERKSATT, actual.status)
         }

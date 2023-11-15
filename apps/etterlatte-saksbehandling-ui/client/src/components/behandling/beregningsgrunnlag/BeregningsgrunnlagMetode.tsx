@@ -17,7 +17,7 @@ const BeregningsgrunnlagMetode = (props: BeregningsgrunnlagMetodeProps) => {
       case BeregningsMetode.BEST:
         return 'Den som gir høyest verdi av nasjonal/prorata (EØS/avtale-land, der rettighet er oppfylt etter nasjonale regler)'
       case BeregningsMetode.NASJONAL:
-        return 'Nasjonal (nasjonal sak)'
+        return 'Nasjonal beregning (folketrygdberegning)'
       case BeregningsMetode.PRORATA:
         return 'Prorata (EØS/avtale-land, der rettighet er oppfylt ved sammenlegging)'
     }

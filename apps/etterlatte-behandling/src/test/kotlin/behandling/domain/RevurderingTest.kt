@@ -65,7 +65,8 @@ internal class RevurderingTest {
                     .tilBeregnet()
                     .tilAvkortet()
                     .tilFattetVedtak()
-                    .tilAttestert().tilIverksatt()
+                    .tilAttestert()
+                    .tilIverksatt()
 
             Assertions.assertEquals(BehandlingStatus.IVERKSATT, actual.status)
         }

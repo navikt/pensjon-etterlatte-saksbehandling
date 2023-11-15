@@ -29,7 +29,7 @@ sealed class BrukerTokenInfo {
             claims: JwtTokenClaims?,
         ): BrukerTokenInfo {
             return if (erSystembruker(oid = oid, sub = sub)) {
-                Systembruker(oid!!, sub!!, claims)
+                Systembruker(oid!!, sub!!, saksbehandler, claims)
             } else if (saksbehandler != null) {
                 Saksbehandler(accessToken, saksbehandler, claims)
             } else {
@@ -41,10 +41,15 @@ sealed class BrukerTokenInfo {
     }
 }
 
-data class Systembruker(val oid: String, val sub: String, val jwtTokenClaims: JwtTokenClaims? = null) : BrukerTokenInfo() {
+data class Systembruker(
+    val oid: String,
+    val sub: String,
+    val navn: String? = null,
+    val jwtTokenClaims: JwtTokenClaims? = null,
+) : BrukerTokenInfo() {
     constructor(oid: String, sub: String) : this(oid, sub, null)
 
-    override fun ident() = Fagsaksystem.EY.navn
+    override fun ident() = navn ?: Fagsaksystem.EY.navn
 
     override fun accessToken() = throw NotImplementedError("Kun relevant for saksbehandler")
 

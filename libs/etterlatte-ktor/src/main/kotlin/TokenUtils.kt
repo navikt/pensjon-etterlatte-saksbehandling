@@ -35,7 +35,16 @@ inline val ApplicationCall.brukerTokenInfo: BrukerTokenInfo
                     val sub = it.getClaim(Claims.sub)
                     Pair(oid, sub)
                 }
-        val saksbehandler = claims?.getClaim(Claims.NAVident)
+        val saksbehandler =
+            claims?.getClaim(Claims.NAVident)
+                ?: (
+                    if (oidSub?.first?.equals(oidSub.second) == true) {
+                        claims.getStringClaim("azp_name") // Authorized Party Name
+                    } else {
+                        null
+                    }
+                )
+
         return BrukerTokenInfo.of(
             accessToken = hentAccessToken(this),
             oid = oidSub?.first,

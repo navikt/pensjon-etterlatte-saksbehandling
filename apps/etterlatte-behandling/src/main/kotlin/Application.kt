@@ -13,6 +13,7 @@ import io.ktor.server.engine.embeddedServer
 import io.ktor.server.routing.Route
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.asContextElement
+import kotlinx.coroutines.slf4j.MDCContext
 import kotlinx.coroutines.withContext
 import no.nav.etterlatte.behandling.behandlingRoutes
 import no.nav.etterlatte.behandling.behandlingVedtakRoute
@@ -47,6 +48,7 @@ import no.nav.etterlatte.sak.sakSystemRoutes
 import no.nav.etterlatte.sak.sakWebRoutes
 import no.nav.etterlatte.tilgangsstyring.adressebeskyttelsePlugin
 import org.slf4j.Logger
+import org.slf4j.MDC
 import javax.sql.DataSource
 
 val sikkerLogg: Logger = sikkerlogger()
@@ -86,6 +88,7 @@ internal fun Application.module(context: ApplicationContext) {
             withMetrics = true,
             additionalMetrics = listOf(oppgaveMetrikker),
         ) {
+            attachMdc()
             attachContekst(dataSource, context)
             sakSystemRoutes(
                 tilgangService = tilgangService,
@@ -193,5 +196,17 @@ private fun Route.attachContekst(
             proceed()
         }
         Kontekst.remove()
+    }
+}
+
+// Fordi CallLogging::mdc kjøres _pre_-autentisering, og dermed ingen gyldige tokens i brukertokeninfo.
+// Hente ut fra ikke-validert token istedet?
+private fun Route.attachMdc() {
+    intercept(ApplicationCallPipeline.Call) {
+        MDC.put("user", call.brukerTokenInfo.ident())
+
+        withContext(MDCContext()) {
+            proceed()
+        }
     }
 }

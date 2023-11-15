@@ -91,4 +91,4 @@ export const FELLES_REVURDERING_HJEMLER: Array<Hjemmel> = [
 ]
 
 export const FELLES_SLUTTBEHANDLING_BESKRIVELSE =
-  'Ved sluttbehandling av en ytelse skal virkningstidspunktet settes lik innvilgelsestidspunkt for ytelsen.'
+  'Ved sluttbehandling skal virkningstidspunktet settes lik virkningstidspunkt på førstegangsbehandlingen av ytelsen.'

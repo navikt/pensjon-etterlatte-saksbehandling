@@ -18,11 +18,11 @@ data class AvslagYrkesskadeBrevData(
                 generellBrevData.revurderingsaarsak,
                 generellBrevData.forenkletVedtak.revurderingInfo,
                 Revurderingaarsak.YRKESSKADE,
-            ).let {
+            ).let { infoYrkesskade ->
                 AvslagYrkesskadeBrevData(
-                    it.dinForelder,
-                    generellBrevData.personerISak.avdoed.doedsdato,
-                    it.yrkesskadeEllerYrkessykdom,
+                    infoYrkesskade.dinForelder,
+                    generellBrevData.personerISak.avdoede.minBy { it.doedsdato }.doedsdato,
+                    infoYrkesskade.yrkesskadeEllerYrkessykdom,
                 )
             }
     }

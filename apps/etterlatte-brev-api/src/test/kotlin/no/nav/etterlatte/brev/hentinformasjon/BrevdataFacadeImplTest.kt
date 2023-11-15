@@ -100,7 +100,7 @@ internal class BrevdataFacadeImplTest {
             Assertions.assertEquals("Mellom", mellomnavn)
             Assertions.assertEquals("Barn", etternavn)
         }
-        Assertions.assertEquals("Død Mellom Far", generellBrevData.personerISak.avdoed.navn)
+        Assertions.assertEquals("Død Mellom Far", generellBrevData.personerISak.avdoede.first().navn)
         Assertions.assertEquals(VedtakType.INNVILGELSE, generellBrevData.forenkletVedtak.type)
         Assertions.assertEquals(123L, generellBrevData.forenkletVedtak.id)
         Assertions.assertEquals(ENHET, generellBrevData.forenkletVedtak.ansvarligEnhet)
@@ -132,7 +132,7 @@ internal class BrevdataFacadeImplTest {
         generellBrevData.sak.id shouldBe SAK_ID
         generellBrevData.behandlingId shouldBe BEHANDLING_ID
         generellBrevData.spraak shouldBe Spraak.NB
-        generellBrevData.personerISak.avdoed.navn shouldBe "Død Mellom Far"
+        generellBrevData.personerISak.avdoede.first().navn shouldBe "Død Mellom Far"
         with(generellBrevData.personerISak.soeker) {
             fornavn shouldBe "Søker"
             mellomnavn shouldBe "Mellom"

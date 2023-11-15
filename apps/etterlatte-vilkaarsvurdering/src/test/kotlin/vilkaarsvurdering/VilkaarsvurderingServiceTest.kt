@@ -161,7 +161,7 @@ internal class VilkaarsvurderingServiceTest {
             vilkaar.grunnlag[1].let {
                 it.opplysningsType shouldBe VilkaarOpplysningType.AVDOED_DOEDSDATO
                 val opplysning: LocalDate? = objectMapper.readValue(it.opplysning!!.toJson())
-                opplysning shouldBe grunnlag.hentAvdoed().hentDoedsdato()?.verdi
+                opplysning shouldBe grunnlag.hentAvdoede().first().hentDoedsdato()?.verdi
             }
         }
     }
@@ -211,7 +211,7 @@ internal class VilkaarsvurderingServiceTest {
             vilkaar.grunnlag[1].let {
                 it.opplysningsType shouldBe VilkaarOpplysningType.AVDOED_DOEDSDATO
                 val opplysning: LocalDate? = objectMapper.readValue(it.opplysning!!.toJson())
-                opplysning shouldBe grunnlag.hentAvdoed().hentDoedsdato()?.verdi
+                opplysning shouldBe grunnlag.hentAvdoede().first().hentDoedsdato()?.verdi
             }
         }
     }
@@ -287,7 +287,7 @@ internal class VilkaarsvurderingServiceTest {
             vilkaar.grunnlag[0].let {
                 it.opplysningsType shouldBe VilkaarOpplysningType.AVDOED_DOEDSDATO
                 val opplysning: LocalDate = objectMapper.readValue(it.opplysning!!.toJson())
-                opplysning shouldBe grunnlag.hentAvdoed().hentDoedsdato()?.verdi
+                opplysning shouldBe grunnlag.hentAvdoede().first().hentDoedsdato()?.verdi
             }
             vilkaar.grunnlag[1].let {
                 it.opplysningsType shouldBe VilkaarOpplysningType.SOEKNAD_MOTTATT_DATO

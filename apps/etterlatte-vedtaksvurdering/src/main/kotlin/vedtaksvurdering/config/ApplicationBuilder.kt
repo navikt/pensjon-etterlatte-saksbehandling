@@ -78,11 +78,12 @@ class ApplicationBuilder {
         VedtakTilbakekrevingService(
             repository = VedtaksvurderingRepository(dataSource),
         )
-    private val automatiskBehandlingService = AutomatiskBehandlingService(
-        vedtakBehandlingService,
-        vedtaksvurderingRapidService,
-        behandlingKlient
-    )
+    private val automatiskBehandlingService =
+        AutomatiskBehandlingService(
+            vedtakBehandlingService,
+            vedtaksvurderingRapidService,
+            behandlingKlient,
+        )
 
     private val rapidsConnection =
         RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(getRapidEnv()))

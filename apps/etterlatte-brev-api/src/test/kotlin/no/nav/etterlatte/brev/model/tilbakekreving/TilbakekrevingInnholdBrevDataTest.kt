@@ -134,7 +134,7 @@ class TilbakekrevingInnholdBrevDataTest {
                 PersonerISak(
                     Innsender(Foedselsnummer("11057523044")),
                     Soeker("GRØNN", "MELLOMNAVN", "KOPP", Foedselsnummer("12345612345")),
-                    Avdoed("DØD TESTPERSON", LocalDate.now().minusMonths(1)),
+                    listOf(Avdoed("DØD TESTPERSON", LocalDate.now().minusMonths(1))),
                     verge = null,
                 ),
             behandlingId = UUID.randomUUID(),

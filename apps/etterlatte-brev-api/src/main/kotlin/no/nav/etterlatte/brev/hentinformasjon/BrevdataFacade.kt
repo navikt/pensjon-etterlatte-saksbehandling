@@ -12,7 +12,7 @@ import no.nav.etterlatte.brev.behandling.PersonerISak
 import no.nav.etterlatte.brev.behandling.Trygdetid
 import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
 import no.nav.etterlatte.brev.behandling.hentUtbetaltBeloep
-import no.nav.etterlatte.brev.behandling.mapAvdoed
+import no.nav.etterlatte.brev.behandling.mapAvdoede
 import no.nav.etterlatte.brev.behandling.mapInnsender
 import no.nav.etterlatte.brev.behandling.mapSoeker
 import no.nav.etterlatte.brev.behandling.mapSpraak
@@ -77,7 +77,7 @@ class BrevdataFacade(
                 PersonerISak(
                     innsender = grunnlag.mapInnsender(),
                     soeker = grunnlag.mapSoeker(),
-                    avdoed = grunnlag.mapAvdoed(), // TODO: Avdød kan potensielt være liste (begge foreldre døde).
+                    avdoede = grunnlag.mapAvdoede(),
                     verge = grunnlag.mapVerge(sak.sakType),
                 )
             val vedtak = vedtakDeferred.await()

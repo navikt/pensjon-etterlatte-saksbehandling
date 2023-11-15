@@ -148,8 +148,8 @@ internal class GrunnlagServiceTest {
                     PERSONROLLE to Opplysning.Konstant(statiskUuid, kilde, PersonRolle.AVDOED.toJsonNode()),
                 )
 
-            Assertions.assertEquals(expected[NAVN], actual.hentAvdoed()[NAVN])
-            Assertions.assertEquals(expected[FOEDSELSDATO], actual.hentAvdoed()[FOEDSELSDATO])
+            Assertions.assertEquals(expected[NAVN], actual.hentAvdoede()[0][NAVN])
+            Assertions.assertEquals(expected[FOEDSELSDATO], actual.hentAvdoede()[0][FOEDSELSDATO])
         }
 
         @Test

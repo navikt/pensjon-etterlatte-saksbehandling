@@ -67,17 +67,13 @@ internal class PesysRepository(private val dataSource: DataSource) : Transaction
         pesysId: PesysId,
         tx: TransactionalSession? = null,
     ) {
-        if (hentKoplingTilBehandling(pesysId) == null) {
-            tx.session {
-                opprett(
-                    "INSERT INTO pesyskopling(behandling_id,pesys_id) VALUES(:behandling_id,:pesys_id)" +
-                        " ON CONFLICT(behandling_id,pesys_id) DO NOTHING",
-                    mapOf("behandling_id" to behandlingId, "pesys_id" to pesysId.id),
-                    "Lagra koplinga mellom behandling $behandlingId og pesyssak $pesysId i migreringsbasen",
-                )
-            }
-        } else {
-            logger.info("Fins allerede kopling i databasen mellom $behandlingId og $pesysId. Prøver ikke å opprette ny")
+        tx.session {
+            opprett(
+                "INSERT INTO pesyskopling(behandling_id,pesys_id) VALUES(:behandling_id,:pesys_id)" +
+                    " ON CONFLICT(pesys_id) DO UPDATE SET behandling_id = :behandling_id",
+                mapOf("behandling_id" to behandlingId, "pesys_id" to pesysId.id),
+                "Lagra koplinga mellom behandling $behandlingId og pesyssak $pesysId i migreringsbasen",
+            )
         }
     }
 

@@ -15,13 +15,6 @@ export const BP_FOERSTEGANGSBEHANDLING_HJEMLER: Array<Hjemmel> = [
   { lenke: 'https://lovdata.no/lov/1997-02-28-19/§22-13', tittel: '§ 22-13 fjerde ledd' },
 ]
 
-export const BP_REVURDERING_HJEMLER: Array<Hjemmel> = [
-  {
-    lenke: 'https://lovdata.no/lov/1997-02-28-19/§22-12',
-    tittel: 'Folketrygdloven § 22-12 fjerde, femte og sjette ledd',
-  },
-]
-
 export const BP_INSTITUSJONSOPPHOLD_HJEMLER: Array<Hjemmel> = [
   {
     tittel: '§ 18-8.Barnepensjon under opphold i institusjon',
@@ -58,13 +51,6 @@ export const BP_REVURDERING_YRKESSKADE_BESKRIVELSE =
 export const BP_OPPHOER_BESKRIVELSE =
   'Barnepensjonen stanses ved utgangen av den måneden retten til ytelsen faller bort.'
 
-export const OMS_REVURDERING_HJEMLER: Array<Hjemmel> = [
-  {
-    lenke: 'https://lovdata.no/lov/1997-02-28-19/§22-12',
-    tittel: 'Folketrygdloven § 22-12 fjerde, femte og sjette ledd',
-  },
-]
-
 export const OMS_OPPHOER_HJEMLER: Array<Hjemmel> = [
   {
     lenke: 'https://lovdata.no/lov/1997-02-28-19/§22-12',
@@ -96,3 +82,13 @@ export const OMS_INNTEKTSENDRING_BESKRIVELSE =
   'Alle inntektsendringer utenom etteroppgjør skal gjøres fra måneden etter bruker har meldt fra om endringen.'
 export const OMS_INST_VIRK_BESKRIVELSE =
   'Omstillingsstønad gis uten reduksjon i innleggelsesmåneden og de tre påfølgende månedene. Deretter kan stønaden bli redusert. Blir man innlagt igjen innen tre måneder etter utskrivelsen skal stønaden reduseres fra måneden etter innleggelse. Omstillingsstønad gis uten reduksjon for institusjonsopphold f.o.m. utskrivingsmåneden.'
+
+export const FELLES_REVURDERING_HJEMLER: Array<Hjemmel> = [
+  {
+    lenke: 'https://lovdata.no/lov/1997-02-28-19/§22-12',
+    tittel: 'Folketrygdloven § 22-12 fjerde, femte og sjette ledd',
+  },
+]
+
+export const FELLES_SLUTTBEHANDLING_BESKRIVELSE =
+  'Ved sluttbehandling skal virkningstidspunktet settes lik virkningstidspunkt på førstegangsbehandlingen av ytelsen.'

@@ -13,10 +13,11 @@ import { HeadingWrapper } from '~components/person/SakOversikt'
 import {
   BP_INSTITUSJONSOPPHOLD_BESKRIVELSE,
   BP_INSTITUSJONSOPPHOLD_HJEMLER,
+  FELLES_SLUTTBEHANDLING_BESKRIVELSE,
   BP_OPPHOER_BESKRIVELSE,
   BP_OPPHOER_HJEMLER,
   BP_REVURDERING_BESKRIVELSE,
-  BP_REVURDERING_HJEMLER,
+  FELLES_REVURDERING_HJEMLER,
   BP_REVURDERING_YRKESSKADE_BESKRIVELSE,
   BP_REVURDERING_YRKESSKADE_HJEMLER,
   OMS_INNTEKTSENDRING_BESKRIVELSE,
@@ -26,7 +27,6 @@ import {
   OMS_OPPHOER_BESKRIVELSE,
   OMS_OPPHOER_HJEMLER,
   OMS_REVURDERING_BESKRIVELSE,
-  OMS_REVURDERING_HJEMLER,
 } from '~components/behandling/soeknadsoversikt/soeknadoversikt/virkningstidspunkt/utils'
 import { SakType } from '~shared/types/sak'
 import { erOpphoer, Revurderingaarsak, tekstRevurderingsaarsak } from '~shared/types/Revurderingaarsak'
@@ -63,8 +63,10 @@ const hjemlerOgBeskrivelseOmstillingsstoenad = (revurderingsaarsak: Revurderinga
       return [OMS_OPPHOER_HJEMLER, OMS_OPPHOER_BESKRIVELSE]
     case Revurderingaarsak.INSTITUSJONSOPPHOLD:
       return [OMS_INST_HJEMLER_VIRK, OMS_INST_VIRK_BESKRIVELSE]
+    case Revurderingaarsak.SLUTTBEHANDLING_UTLAND:
+      return [FELLES_REVURDERING_HJEMLER, FELLES_SLUTTBEHANDLING_BESKRIVELSE]
     default:
-      return [OMS_REVURDERING_HJEMLER, OMS_REVURDERING_BESKRIVELSE]
+      return [FELLES_REVURDERING_HJEMLER, OMS_REVURDERING_BESKRIVELSE]
   }
 }
 
@@ -77,10 +79,10 @@ const hjemlerOgBeskrivelseBarnepensjon = (revurderingsaarsak: Revurderingaarsak)
     case Revurderingaarsak.INSTITUSJONSOPPHOLD:
     case Revurderingaarsak.FENGSELSOPPHOLD: //TODO: kanskje Revurderingaarsak.UT_AV_FENGSEL: men ikke i bruk nå..
       return [BP_INSTITUSJONSOPPHOLD_HJEMLER, BP_INSTITUSJONSOPPHOLD_BESKRIVELSE]
-
-    case Revurderingaarsak.SLUTTBEHANDLING_UTLAND: //TODO:EY-2878 Mari må si hvilke
+    case Revurderingaarsak.SLUTTBEHANDLING_UTLAND:
+      return [FELLES_REVURDERING_HJEMLER, FELLES_SLUTTBEHANDLING_BESKRIVELSE]
     default:
-      return [BP_REVURDERING_HJEMLER, BP_REVURDERING_BESKRIVELSE]
+      return [FELLES_REVURDERING_HJEMLER, BP_REVURDERING_BESKRIVELSE]
   }
 }
 

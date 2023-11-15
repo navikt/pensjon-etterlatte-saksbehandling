@@ -2,6 +2,7 @@ package no.nav.etterlatte.vedtaksvurdering
 
 import io.ktor.server.application.call
 import io.ktor.server.application.log
+import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.application
@@ -9,16 +10,14 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.libs.common.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
-import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.sakId
 import no.nav.etterlatte.libs.common.withBehandlingId
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
-import no.nav.etterlatte.token.Fagsaksystem
+import no.nav.etterlatte.rapidsandrivers.migrering.MigreringKjoringVariant
 import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlient
 
 fun Route.automatiskBehandlingRoutes(
-    service: VedtakBehandlingService,
-    rapidService: VedtaksvurderingRapidService,
+    service: AutomatiskBehandlingService,
     behandlingKlient: BehandlingKlient,
 ) {
     route("/api/vedtak") {
@@ -27,30 +26,18 @@ fun Route.automatiskBehandlingRoutes(
         post("/{$SAKID_CALL_PARAMETER}/{$BEHANDLINGID_CALL_PARAMETER}/automatisk") {
             withBehandlingId(behandlingKlient) { behandlingId ->
                 logger.info("Håndterer behandling $behandlingId")
-                service.opprettEllerOppdaterVedtak(behandlingId, brukerTokenInfo)
+                val nyttVedtak =
+                    service.vedtakStegvis(behandlingId, sakId, brukerTokenInfo, MigreringKjoringVariant.FULL_KJORING)
+                call.respond(nyttVedtak)
+            }
+        }
 
-                logger.info("Fatter vedtak for behandling $behandlingId")
-                service.fattVedtak(behandlingId, brukerTokenInfo).also { rapidService.sendToRapid(it) }
-
-                logger.info("Tildeler attesteringsoppgave til systembruker")
-                val oppgaveTilAttestering =
-                    behandlingKlient.hentOppgaverForSak(sakId, brukerTokenInfo)
-                        .oppgaver
-                        .filter { it.referanse == behandlingId.toString() }
-                        .filter { it.type == OppgaveType.ATTESTERING }
-                        .filterNot { it.erAvsluttet() }
-                        .first()
-                behandlingKlient.tildelSaksbehandler(oppgaveTilAttestering, brukerTokenInfo)
-
-                logger.info("Attesterer vedtak for behandling $behandlingId")
-                val attestert =
-                    service.attesterVedtak(
-                        behandlingId,
-                        "Automatisk attestert av ${Fagsaksystem.EY.systemnavn}",
-                        brukerTokenInfo,
-                    )
-
-                call.respond(attestert)
+        post("/{$SAKID_CALL_PARAMETER}/{$BEHANDLINGID_CALL_PARAMETER}/automatisk/stegvis") {
+            withBehandlingId(behandlingKlient) { behandlingId ->
+                val kjoringVariant = call.receive<MigreringKjoringVariant>()
+                logger.info("Håndterer behandling $behandlingId med kjøringsvariant ${kjoringVariant.name}")
+                val nyttVedtak = service.vedtakStegvis(behandlingId, sakId, brukerTokenInfo, kjoringVariant)
+                call.respond(nyttVedtak)
             }
         }
     }

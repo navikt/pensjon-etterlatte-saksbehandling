@@ -13,6 +13,7 @@ import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.libs.ktor.setReady
+import no.nav.etterlatte.vedtaksvurdering.AutomatiskBehandlingService
 import no.nav.etterlatte.vedtaksvurdering.VedtakBehandlingService
 import no.nav.etterlatte.vedtaksvurdering.VedtakTilbakekrevingService
 import no.nav.etterlatte.vedtaksvurdering.VedtaksvurderingRapidService
@@ -77,13 +78,18 @@ class ApplicationBuilder {
         VedtakTilbakekrevingService(
             repository = VedtaksvurderingRepository(dataSource),
         )
+    private val automatiskBehandlingService = AutomatiskBehandlingService(
+        vedtakBehandlingService,
+        vedtaksvurderingRapidService,
+        behandlingKlient
+    )
 
     private val rapidsConnection =
         RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(getRapidEnv()))
             .withKtorModule {
                 restModule(sikkerLogg, config = HoconApplicationConfig(config)) {
                     vedtaksvurderingRoute(vedtaksvurderingService, vedtakBehandlingService, vedtaksvurderingRapidService, behandlingKlient)
-                    automatiskBehandlingRoutes(vedtakBehandlingService, vedtaksvurderingRapidService, behandlingKlient)
+                    automatiskBehandlingRoutes(automatiskBehandlingService, behandlingKlient)
                     samordningsvedtakRoute(vedtaksvurderingService, vedtakBehandlingService)
                     tilbakekrevingvedtakRoute(vedtakTilbakekrevingService, behandlingKlient)
                 }

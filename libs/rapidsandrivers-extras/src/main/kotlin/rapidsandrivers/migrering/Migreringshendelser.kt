@@ -15,6 +15,7 @@ object Migreringshendelser {
     const val TRYGDETID = "${PREFIX}TRYGDETID"
     const val TRYGDETID_GRUNNLAG = "${PREFIX}TRYGDETID_GRUNNLAG"
     const val VEDTAK = "${PREFIX}VEDTAK"
+    const val PAUSE = "${PREFIX}PAUSE"
     const val IVERKSATT = "${PREFIX}IVERKSATT"
     const val AVBRYT_BEHANDLING = "${PREFIX}AVBRYT_BEHANDLING"
 }

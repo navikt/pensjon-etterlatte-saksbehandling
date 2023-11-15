@@ -8,6 +8,12 @@ import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import java.time.YearMonth
 
+enum class MigreringKjoringVariant {
+    FULL_KJORING,
+    MED_PAUSE,
+    FORTSETT_ETTER_PAUSE,
+}
+
 data class MigreringRequest(
     val pesysId: PesysId,
     val enhet: Enhet,

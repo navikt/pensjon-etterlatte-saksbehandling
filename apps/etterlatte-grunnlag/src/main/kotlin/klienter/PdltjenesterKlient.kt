@@ -7,10 +7,12 @@ import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.HentPersonRequest
+import no.nav.etterlatte.libs.common.person.HentPersongalleriRequest
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.pdl.HistorikkForeldreansvar
@@ -33,6 +35,12 @@ interface PdlTjenesterKlient {
         rolle: PersonRolle,
         sakType: SakType,
     ): HistorikkForeldreansvar
+
+    suspend fun hentPersongalleri(
+        foedselsnummer: String,
+        sakType: SakType,
+        innsender: String?,
+    ): Persongalleri
 }
 
 class PdlTjenesterKlientImpl(private val pdl: HttpClient, private val url: String) : PdlTjenesterKlient {
@@ -50,6 +58,23 @@ class PdlTjenesterKlientImpl(private val pdl: HttpClient, private val url: Strin
                 }.body<Person>()
             }
         return response
+    }
+
+    override suspend fun hentPersongalleri(
+        foedselsnummer: String,
+        sakType: SakType,
+        innsender: String?,
+    ): Persongalleri {
+        val persongalleriRequest =
+            HentPersongalleriRequest(
+                mottakerAvYtelsen = Folkeregisteridentifikator.of(foedselsnummer),
+                saktype = sakType,
+                innsender = innsender?.let { Folkeregisteridentifikator.of(it) },
+            )
+        return pdl.post("$url/persongalleri") {
+            contentType(ContentType.Application.Json)
+            setBody(persongalleriRequest)
+        }.body<Persongalleri>()
     }
 
     override fun hentOpplysningsperson(

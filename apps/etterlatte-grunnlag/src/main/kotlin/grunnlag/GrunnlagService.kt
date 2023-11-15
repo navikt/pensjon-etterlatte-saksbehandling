@@ -162,6 +162,13 @@ class RealGrunnlagService(
         behandlingId: UUID,
         opplysningsbehov: Opplysningsbehov,
     ) {
+        val persongalleriFraPdl =
+            pdltjenesterKlient.hentPersongalleri(
+                opplysningsbehov.persongalleri.soeker,
+                opplysningsbehov.sakType,
+                opplysningsbehov.persongalleri.innsender,
+            )
+
         val pdlPersondatasGrunnlag =
             coroutineScope {
                 val persongalleri = opplysningsbehov.persongalleri
@@ -183,7 +190,13 @@ class RealGrunnlagService(
                 val requesterGjenlevende =
                     persongalleri.gjenlevende.map {
                         Pair(
-                            async { pdltjenesterKlient.hentPerson(it, PersonRolle.GJENLEVENDE, opplysningsbehov.sakType) },
+                            async {
+                                pdltjenesterKlient.hentPerson(
+                                    it,
+                                    PersonRolle.GJENLEVENDE,
+                                    opplysningsbehov.sakType,
+                                )
+                            },
                             async {
                                 pdltjenesterKlient.hentOpplysningsperson(
                                     it,
@@ -200,7 +213,13 @@ class RealGrunnlagService(
                     }
                 val soeker =
                     Pair(
-                        async { pdltjenesterKlient.hentPerson(persongalleri.soeker, soekerRolle, opplysningsbehov.sakType) },
+                        async {
+                            pdltjenesterKlient.hentPerson(
+                                persongalleri.soeker,
+                                soekerRolle,
+                                opplysningsbehov.sakType,
+                            )
+                        },
                         async {
                             pdltjenesterKlient
                                 .hentOpplysningsperson(persongalleri.soeker, soekerRolle, opplysningsbehov.sakType)
@@ -212,7 +231,11 @@ class RealGrunnlagService(
                         ?.let { innsenderFnr ->
                             Pair(
                                 async {
-                                    pdltjenesterKlient.hentPerson(innsenderFnr, PersonRolle.INNSENDER, opplysningsbehov.sakType)
+                                    pdltjenesterKlient.hentPerson(
+                                        innsenderFnr,
+                                        PersonRolle.INNSENDER,
+                                        opplysningsbehov.sakType,
+                                    )
                                 },
                                 async {
                                     pdltjenesterKlient.hentOpplysningsperson(
@@ -264,7 +287,7 @@ class RealGrunnlagService(
             }
 
         pdlPersondatasGrunnlag.forEach {
-            val enkenPdlOpplysning =
+            val enkelPdlOpplysning =
                 lagEnkelopplysningerFraPDL(
                     it.person,
                     it.personDto,
@@ -276,19 +299,24 @@ class RealGrunnlagService(
                 opplysningsbehov.sakId,
                 behandlingId,
                 it.personDto.foedselsnummer.verdi,
-                enkenPdlOpplysning,
+                enkelPdlOpplysning,
             )
         }
+        lagreNyeSaksopplysninger(
+            opplysningsbehov.sakId,
+            behandlingId,
+            listOf(persongalleriFraPdl.tilGrunnlagsopplysningFraPdl()),
+        )
 
         lagreNyeSaksopplysninger(
             opplysningsbehov.sakId,
             behandlingId,
-            listOf(opplysningsbehov.persongalleri.tilGrunnlagsopplysning()),
+            listOf(opplysningsbehov.persongalleri.tilGrunnlagsopplysningFraSoeknad()),
         )
         logger.info("Oppdatert grunnlag (sakId=${opplysningsbehov.sakId}, behandlingId=$behandlingId)")
     }
 
-    private fun Persongalleri.tilGrunnlagsopplysning(): Grunnlagsopplysning<JsonNode> {
+    private fun Persongalleri.tilGrunnlagsopplysningFraSoeknad(): Grunnlagsopplysning<JsonNode> {
         return Grunnlagsopplysning(
             id = UUID.randomUUID(),
             kilde =
@@ -298,6 +326,19 @@ class RealGrunnlagService(
                     Grunnlagsopplysning.Privatperson(this.innsender!!, Tidspunkt.now())
                 },
             opplysningType = Opplysningstype.PERSONGALLERI_V1,
+            meta = objectMapper.createObjectNode(),
+            opplysning = this.toJsonNode(),
+            attestering = null,
+            fnr = null,
+            periode = null,
+        )
+    }
+
+    private fun Persongalleri.tilGrunnlagsopplysningFraPdl(): Grunnlagsopplysning<JsonNode> {
+        return Grunnlagsopplysning(
+            id = UUID.randomUUID(),
+            kilde = Grunnlagsopplysning.Pdl(Tidspunkt.now(), null, null),
+            opplysningType = Opplysningstype.PERSONGALLERI_V1, // kanskje bruke noe annet?
             meta = objectMapper.createObjectNode(),
             opplysning = this.toJsonNode(),
             attestering = null,

@@ -8,11 +8,13 @@ import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseType
 import no.nav.etterlatte.rapidsandrivers.migrering.BREV_OPPRETTA_MIGRERING
 import no.nav.etterlatte.rapidsandrivers.migrering.KILDE_KEY
+import no.nav.etterlatte.rapidsandrivers.migrering.hendelseData
 import no.nav.etterlatte.token.Systembruker
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
+import rapidsandrivers.HENDELSE_DATA_KEY
 import rapidsandrivers.migrering.ListenerMedLoggingOgFeilhaandtering
 import java.util.UUID
 
@@ -26,6 +28,7 @@ internal class OpprettVedtaksbrevForMigreringRiver(
         initialiserRiver(rapidsConnection, VedtakKafkaHendelseType.ATTESTERT.toString()) {
             validate { it.requireKey("vedtak.behandling.id") }
             validate { it.requireKey("vedtak.sak.id") }
+            validate { it.requireKey(HENDELSE_DATA_KEY) }
             validate { it.requireValue(KILDE_KEY, Vedtaksloesning.PESYS.name) }
             validate { it.requireValue(BREV_OPPRETTA_MIGRERING, false) }
         }
@@ -41,7 +44,8 @@ internal class OpprettVedtaksbrevForMigreringRiver(
         val brukerTokenInfo = Systembruker("migrering", "migrering")
         runBlocking {
             val vedtaksbrev: Brev = service.opprettVedtaksbrev(sakId, behandlingId, brukerTokenInfo)
-            service.genererPdf(vedtaksbrev.id, brukerTokenInfo, true)
+            val hendelseData = packet.hendelseData
+            service.genererPdf(vedtaksbrev.id, brukerTokenInfo, hendelseData)
             service.ferdigstillVedtaksbrev(vedtaksbrev.behandlingId!!, brukerTokenInfo, true)
         }
         logger.info("Har oppretta vedtaksbrev i sak $sakId")

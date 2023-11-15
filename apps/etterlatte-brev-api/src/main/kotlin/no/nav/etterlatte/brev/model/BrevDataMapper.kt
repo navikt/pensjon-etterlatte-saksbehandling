@@ -6,7 +6,6 @@ import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_AVSLAG
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_AVSLAG_IKKEYRKESSKADE
-import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_FORHAANDSVARSEL_OMREGNING
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_INNVILGELSE
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_INNVILGELSE_ENKEL
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_INNVILGELSE_NY
@@ -15,6 +14,7 @@ import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_REVURDER
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_REVURDERING_OMGJOERING_AV_FARSKAP
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_REVURDERING_OPPHOER
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_REVURDERING_SOESKENJUSTERING
+import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_VEDTAK_OMREGNING
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMS_AVSLAG
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMS_AVSLAG_BEGRUNNELSE
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMS_FOERSTEGANGSVEDTAK_INNVILGELSE
@@ -34,7 +34,6 @@ import no.nav.etterlatte.brev.model.bp.InnvilgetBrevData
 import no.nav.etterlatte.brev.model.bp.InnvilgetBrevDataEnkel
 import no.nav.etterlatte.brev.model.bp.InnvilgetHovedmalBrevData
 import no.nav.etterlatte.brev.model.bp.OmgjoeringAvFarskapRevurderingBrevdata
-import no.nav.etterlatte.brev.model.bp.OmregnetBPNyttRegelverk
 import no.nav.etterlatte.brev.model.bp.SoeskenjusteringRevurderingBrevdata
 import no.nav.etterlatte.brev.model.oms.AvslagBrevDataOMS
 import no.nav.etterlatte.brev.model.oms.FoerstegangsvedtakUtfallDTO
@@ -114,7 +113,7 @@ class BrevDataMapper(
     private fun brevKodeAutomatisk(generellBrevData: GenerellBrevData): BrevkodePar {
         if (generellBrevData.systemkilde == Vedtaksloesning.PESYS) {
             assert(generellBrevData.forenkletVedtak.type == VedtakType.INNVILGELSE)
-            return BrevkodePar(TOM_MAL) // TODO: denne skal være malen for omregning til nytt regelverk
+            return BrevkodePar(BARNEPENSJON_VEDTAK_OMREGNING)
         }
 
         return when (generellBrevData.sak.sakType) {
@@ -212,17 +211,6 @@ class BrevDataMapper(
         generellBrevData: GenerellBrevData,
         brukerTokenInfo: BrukerTokenInfo,
     ): BrevData {
-        if (generellBrevData.systemkilde == Vedtaksloesning.PESYS) {
-            return coroutineScope {
-                val fetcher = datafetcher(brukerTokenInfo, generellBrevData)
-                val utbetaling = async { fetcher.hentUtbetaling() }
-                OmregnetBPNyttRegelverk.fra(
-                    generellBrevData,
-                    utbetaling.await(),
-                )
-            }
-        }
-
         return when (generellBrevData.sak.sakType) {
             SakType.BARNEPENSJON -> {
                 when (val vedtakType = generellBrevData.forenkletVedtak.type) {
@@ -357,17 +345,6 @@ class BrevDataMapper(
         innholdMedVedlegg: InnholdMedVedlegg,
         kode: BrevkodePar,
     ): BrevData {
-        if (kode.ferdigstilling == BARNEPENSJON_FORHAANDSVARSEL_OMREGNING) {
-            return coroutineScope {
-                val fetcher = datafetcher(brukerTokenInfo, generellBrevData)
-                val utbetaling = async { fetcher.hentUtbetaling() }
-                OmregnetBPNyttRegelverk.fra(
-                    generellBrevData,
-                    utbetaling.await(),
-                )
-            }
-        }
-
         return when (kode.ferdigstilling) {
             BARNEPENSJON_REVURDERING_ENDRING -> {
                 coroutineScope {

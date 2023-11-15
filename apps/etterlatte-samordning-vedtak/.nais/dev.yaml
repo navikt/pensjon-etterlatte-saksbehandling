@@ -82,9 +82,9 @@ spec:
     - name: ETTERLATTE_VEDTAKSVURDERING_SCOPE
       value: api://dev-gcp.etterlatte.etterlatte-vedtaksvurdering/.default
     - name: TJENESTEPENSJON_URL
-      value: https://tp-api-q2.dev-fss-pub.nais.io
+      value: https://tp-api-q1.dev-fss-pub.nais.io
     - name: TJENESTEPENSJON_SCOPE
-      value: api://dev-fss.pensjonsamhandling.tp-q2/.default
+      value: api://dev-fss.pensjonsamhandling.tp-q1/.default
     - name: ROLLE_PENSJONSAKSBEHANDLER
       value: 8bb9b8d1-f46a-4ade-8ee8-5895eccdf8cf
   accessPolicy:
@@ -125,4 +125,4 @@ spec:
       rules:
         - application: etterlatte-vedtaksvurdering
       external:
-        - host: tp-api-q2.dev-fss-pub.nais.io
+        - host: tp-api-q1.dev-fss-pub.nais.io

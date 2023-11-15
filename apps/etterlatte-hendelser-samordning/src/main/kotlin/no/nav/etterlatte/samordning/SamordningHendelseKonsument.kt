@@ -26,7 +26,6 @@ class SamordningHendelseKonsument(
                     withLogContext {
                         handler.handleSamordningHendelse(
                             hendelse = it.value(),
-                            hendelseKey = it.key(),
                         )
                     }
                 }

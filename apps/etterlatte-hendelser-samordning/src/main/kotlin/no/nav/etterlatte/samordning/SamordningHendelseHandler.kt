@@ -14,10 +14,7 @@ class SamordningHendelseHandler(
     /**
      * Skal kun dytte info videre for Omstillingsstønad-hendelser slik at R&R lytter kan faktisk håndtere det
      */
-    fun handleSamordningHendelse(
-        hendelse: SamordningVedtakHendelse,
-        hendelseKey: String,
-    ) {
+    fun handleSamordningHendelse(hendelse: SamordningVedtakHendelse) {
         if (hendelse.fagomrade != FAGOMRADE_OMS) {
             return
         }
@@ -40,7 +37,7 @@ class SamordningHendelseHandler(
             }
         } else {
             logger.warn(
-                "Mottatt hendelse $hendelseKey med fagområde EYO, men ikke ytelse OMS [vedtakId=${hendelse.vedtakId}",
+                "Mottatt hendelse med fagområde EYO, men ikke ytelse OMS [vedtakId=${hendelse.vedtakId}",
             )
         }
     }

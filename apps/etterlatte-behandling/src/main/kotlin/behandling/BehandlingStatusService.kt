@@ -161,7 +161,6 @@ class BehandlingStatusServiceImpl(
     }
 
     override fun sjekkOmKanFatteVedtak(behandlingId: UUID) {
-        val user = Kontekst.get().AppUser.name()
         val behandling = hentBehandling(behandlingId)
 
         if (behandling is ManuellRevurdering &&
@@ -170,7 +169,7 @@ class BehandlingStatusServiceImpl(
                 defaultValue = false,
                 context =
                     UnleashContext.builder()
-                        .userId(user)
+                        .userId(Kontekst.get().AppUser.name())
                         .build(),
             )
         ) {

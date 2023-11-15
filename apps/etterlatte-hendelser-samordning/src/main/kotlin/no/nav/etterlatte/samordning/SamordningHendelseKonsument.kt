@@ -21,6 +21,8 @@ class SamordningHendelseKonsument(
         stream { meldinger ->
             meldinger
                 .forEach {
+                    logger.info("Behandler $it")
+
                     withLogContext {
                         handler.handleSamordningHendelse(
                             hendelse = it.value(),

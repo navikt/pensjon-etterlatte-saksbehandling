@@ -25,17 +25,19 @@ class SamordningHendelseHandler(
         if (hendelse.artTypeKode == SAKSTYPE_OMS) {
             logger.info("Behandler samordning-hendelse [vedtakId=${hendelse.vedtakId}")
 
-            kafkaProduser.publiser(
-                noekkel = UUID.randomUUID().toString(),
-                verdi =
-                    JsonMessage.newMessage(
-                        eventName = "VEDTAK:SAMORDNING_MOTTATT",
-                        map =
-                            mapOf(
-                                "vedtakId" to hendelse.vedtakId,
-                            ),
-                    ),
-            )
+            hendelse.vedtakId?.let {
+                kafkaProduser.publiser(
+                    noekkel = UUID.randomUUID().toString(),
+                    verdi =
+                        JsonMessage.newMessage(
+                            eventName = "VEDTAK:SAMORDNING_MOTTATT",
+                            map =
+                                mapOf(
+                                    "vedtakId" to it,
+                                ),
+                        ),
+                )
+            }
         } else {
             logger.warn(
                 "Mottatt hendelse $hendelseKey med fagområde EYO, men ikke ytelse OMS [vedtakId=${hendelse.vedtakId}",

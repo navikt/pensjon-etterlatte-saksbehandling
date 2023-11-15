@@ -1,12 +1,11 @@
 import { addMonths, isBefore, subYears } from 'date-fns'
-import { Hjemmel } from '~components/behandling/soeknadsoversikt/soeknadoversikt/virkningstidspunkt/Virkningstidspunkt'
+import { Hjemmel } from '~components/behandling/virkningstidspunkt/Virkningstidspunkt'
 
-export function hentMinimumsVirkningstidspunkt(avdoedDoedsdato: string | undefined, soeknadMottattDato: string): Date {
+export function hentMinimumsVirkningstidspunkt(avdoedDoedsdato: string | undefined, soeknadMottattDato: Date): Date {
   const doedsdato = new Date(avdoedDoedsdato ?? '')
   //Pga bug i ds-react-month picker så må det være første i måneden.
-  const treAarFoerSoeknad = subYears(new Date(soeknadMottattDato), 3)
+  const treAarFoerSoeknad = subYears(soeknadMottattDato, 3)
   const maanedEtterDoedsdato = addMonths(doedsdato, 1)
-
   return isBefore(doedsdato, treAarFoerSoeknad) ? treAarFoerSoeknad : maanedEtterDoedsdato
 }
 
@@ -41,6 +40,9 @@ export const BP_REVURDERING_YRKESSKADE_HJEMLER: Array<Hjemmel> = [
     tittel: 'Folketrygdloven § 22-13',
   },
 ]
+
+export const BOSATT_UTLAND_FELLES_BESKRIVELSE =
+  'Barnepensjon kan tidligst innvilges fra og med den første i måneden etter dødsfallet og den kan gis for opptil tre år før søknaden er mottatt.'
 
 export const BP_FOERSTEGANGSBEHANDLING_BESKRIVELSE =
   'Barnepensjon kan tidligst innvilges fra og med den første i måneden etter dødsfallet og den kan gis for opptil tre år før søknaden er mottatt.'

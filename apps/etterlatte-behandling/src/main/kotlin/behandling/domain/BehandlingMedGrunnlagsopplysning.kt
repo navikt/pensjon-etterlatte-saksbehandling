@@ -1,11 +1,12 @@
 package no.nav.etterlatte.behandling.domain
 
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.sak.SakUtenlandstilknytning
 import java.time.LocalDateTime
-import java.util.UUID
 
-data class BehandlingMedGrunnlagsopplysninger<Person>(
-    val id: UUID,
+data class BehandlingMedGrunnlagsopplysning<Person>(
+    val behandling: Behandling,
     val soeknadMottattDato: LocalDateTime?,
     val personopplysning: Grunnlagsopplysning<Person>?,
+    val utenlandstilknytning: SakUtenlandstilknytning?,
 )

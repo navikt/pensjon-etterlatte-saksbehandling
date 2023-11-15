@@ -2,7 +2,7 @@ import { IBehandlingStatus, IUtenlandstilknytning, UtenlandstilknytningType } fr
 import { VurderingsboksWrapper } from '~components/vurderingsboks/VurderingsboksWrapper'
 import { BodyShort, Label, Radio, RadioGroup } from '@navikt/ds-react'
 import { RadioGroupWrapper } from '~components/behandling/vilkaarsvurdering/Vurdering'
-import { Undertekst, VurderingsTitle } from '../../styled'
+import { Undertekst, VurderingsTitle } from '../styled'
 import { SoeknadsoversiktTextArea } from '../SoeknadsoversiktTextArea'
 import { useAppDispatch } from '~store/Store'
 import { useState } from 'react'

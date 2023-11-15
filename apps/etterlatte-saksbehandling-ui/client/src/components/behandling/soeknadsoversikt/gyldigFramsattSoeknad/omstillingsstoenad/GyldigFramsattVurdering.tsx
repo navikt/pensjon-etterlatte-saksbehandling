@@ -6,12 +6,12 @@ import {
 } from '~shared/types/IDetaljertBehandling'
 import { VurderingsResultat } from '~shared/types/VurderingsResultat'
 import { VurderingsboksWrapper } from '~components/vurderingsboks/VurderingsboksWrapper'
-import { LeggTilVurderingButton } from '~components/behandling/soeknadsoversikt/soeknadoversikt/LeggTilVurderingButton'
+import { LeggTilVurderingButton } from '~components/behandling/soeknadsoversikt/LeggTilVurderingButton'
 import { useState } from 'react'
 import { VurderingsTitle } from '~components/behandling/soeknadsoversikt/styled'
 import styled from 'styled-components'
 import { Label, Radio, RadioGroup } from '@navikt/ds-react'
-import { SoeknadsoversiktTextArea } from '~components/behandling/soeknadsoversikt/soeknadoversikt/SoeknadsoversiktTextArea'
+import { SoeknadsoversiktTextArea } from '~components/behandling/soeknadsoversikt/SoeknadsoversiktTextArea'
 import { useAppDispatch } from '~store/Store'
 import { JaNei, JaNeiRec } from '~shared/types/ISvar'
 import { oppdaterBehandlingsstatus, oppdaterGyldighetsproeving } from '~store/reducers/BehandlingReducer'
@@ -31,7 +31,7 @@ export const GyldigFramsattVurdering = ({
 
   const dispatch = useAppDispatch()
   const [svar, setSvar] = useState<JaNei | undefined>(finnSvar(gyldigFramsatt))
-  const [vurdert, setVurdert] = useState(svar != undefined)
+  const [vurdert, setVurdert] = useState(svar != null)
   const [radioError, setRadioError] = useState<string>('')
   const [begrunnelse, setBegrunnelse] = useState<string>(manuellVurdering?.begrunnelse || '')
   const [begrunnelseError, setBegrunnelseError] = useState<string>('')
@@ -64,7 +64,7 @@ export const GyldigFramsattVurdering = ({
     setRadioError('')
     setBegrunnelseError('')
     setBegrunnelse(manuellVurdering?.begrunnelse || '')
-    setVurdert(finnSvar(gyldigFramsatt) != null)
+    setVurdert(manuellVurdering != null)
     onSuccess?.()
   }
 
@@ -86,15 +86,12 @@ export const GyldigFramsattVurdering = ({
       }
       redigerbar={redigerbar}
       vurdering={
-        manuellVurdering
+        manuellVurdering?.kilde
           ? {
-              saksbehandler: manuellVurdering.kilde.ident,
+              saksbehandler: manuellVurdering?.kilde.ident,
               tidspunkt: new Date(manuellVurdering?.kilde.tidspunkt),
             }
           : undefined
-      }
-      automatiskVurdertDato={
-        manuellVurdering ? undefined : gyldigFramsatt ? new Date(gyldigFramsatt.vurdertDato) : undefined
       }
       lagreklikk={lagre}
       avbrytklikk={reset}

@@ -152,6 +152,7 @@ internal fun Route.behandlingRoutes(
                                 body.dato,
                                 navIdent,
                                 body.begrunnelse!!,
+                                kravdato = body.kravdato,
                             )
                         }
 

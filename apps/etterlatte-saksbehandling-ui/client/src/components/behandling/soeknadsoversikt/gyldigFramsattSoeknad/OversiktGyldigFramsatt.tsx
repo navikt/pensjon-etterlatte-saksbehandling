@@ -1,7 +1,7 @@
 import { IDetaljertBehandling, IGyldighetResultat } from '~shared/types/IDetaljertBehandling'
 import { VurderingsResultat } from '~shared/types/VurderingsResultat'
-import { GyldigFramsattBarnepensjon } from '~components/behandling/soeknadsoversikt/soeknadoversikt/gyldigFramsattSoeknad/barnepensjon/GyldigFramsattBarnepensjon'
-import { GyldigFramsattOmstillingsstoenad } from '~components/behandling/soeknadsoversikt/soeknadoversikt/gyldigFramsattSoeknad/omstillingsstoenad/GyldigFramsattOmstillingsstoenad'
+import { GyldigFramsattBarnepensjon } from '~components/behandling/soeknadsoversikt/gyldigFramsattSoeknad/barnepensjon/GyldigFramsattBarnepensjon'
+import { GyldigFramsattOmstillingsstoenad } from '~components/behandling/soeknadsoversikt/gyldigFramsattSoeknad/omstillingsstoenad/GyldigFramsattOmstillingsstoenad'
 import { SakType } from '~shared/types/sak'
 
 const gyldigFremsattTilStatusIcon = (gyldigFramsatt: IGyldighetResultat | undefined) => {

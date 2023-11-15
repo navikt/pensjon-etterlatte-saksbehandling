@@ -183,14 +183,13 @@ class BehandlingStatusServiceImpl(
         behandling: Behandling,
         vedtakHendelse: VedtakHendelse,
     ) {
-        val user = Kontekst.get().AppUser.name()
         if (behandling is ManuellRevurdering &&
             featureToggleService.isEnabled(
                 toggleId = BehandlingStatusServiceFeatureToggle.OpphoerStatusovergang,
                 defaultValue = false,
                 context =
                     UnleashContext.builder()
-                        .userId(user)
+                        .userId(Kontekst.get().AppUser.name())
                         .build(),
             )
         ) {

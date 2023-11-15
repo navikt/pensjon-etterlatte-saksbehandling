@@ -7,6 +7,6 @@ data class Avsender(
     val adresse: String,
     val postnummer: String,
     val telefonnummer: Telefonnummer,
-    val saksbehandler: String,
+    val saksbehandler: String?,
     val attestant: String?,
 )

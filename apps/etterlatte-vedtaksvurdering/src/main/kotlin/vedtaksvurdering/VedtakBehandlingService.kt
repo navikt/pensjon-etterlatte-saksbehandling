@@ -48,11 +48,8 @@ class VedtakBehandlingService(
 ) {
     private val logger = LoggerFactory.getLogger(VedtakBehandlingService::class.java)
 
-    fun finnFerdigstilteVedtak(
-        fnr: Folkeregisteridentifikator,
-        virkFom: LocalDate,
-    ): List<Vedtak> {
-        return repository.hentFerdigstilteVedtak(fnr, virkFom)
+    fun finnFerdigstilteVedtak(fnr: Folkeregisteridentifikator): List<Vedtak> {
+        return repository.hentFerdigstilteVedtak(fnr)
     }
 
     fun sjekkOmVedtakErLoependePaaDato(

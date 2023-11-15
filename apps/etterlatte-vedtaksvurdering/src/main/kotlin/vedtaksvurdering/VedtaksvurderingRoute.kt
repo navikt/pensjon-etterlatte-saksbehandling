@@ -238,14 +238,13 @@ fun Route.samordningsvedtakRoute(
         }
 
         get {
-            val virkFom =
-                call.parameters["virkFom"]?.let { runCatching { LocalDate.parse(it) }.getOrNull() }
-                    ?: return@get call.respond(HttpStatusCode.BadRequest, "virkFom ikke angitt")
+            call.parameters["fomDato"]?.let { runCatching { LocalDate.parse(it) }.getOrNull() }
+                ?: return@get call.respond(HttpStatusCode.BadRequest, "fomDato ikke angitt")
             val fnr =
                 call.request.headers["fnr"]?.let { Folkeregisteridentifikator.of(it) }
                     ?: return@get call.respond(HttpStatusCode.BadRequest, "fnr ikke angitt")
 
-            val vedtaksliste = vedtakBehandlingService.finnFerdigstilteVedtak(fnr, virkFom)
+            val vedtaksliste = vedtakBehandlingService.finnFerdigstilteVedtak(fnr)
             call.respond(vedtaksliste.map { it.toSamordningsvedtakDto() })
         }
 

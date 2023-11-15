@@ -23,6 +23,7 @@ import java.time.Month
 import java.time.YearMonth
 import java.util.UUID
 
+const val FNR_1 = "28098208560"
 const val FNR_2 = "04417103428"
 const val SAKSBEHANDLER_1 = "saksbehandler1"
 const val SAKSBEHANDLER_2 = "saksbehandler2"

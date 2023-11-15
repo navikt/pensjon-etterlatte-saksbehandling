@@ -14,7 +14,8 @@ Det må foreligge et tjenestepensjonsforhold i Tjenestepensjonsregisteret som gj
 
 | Endepunkt                      | Headers        | Responstype         | Beskrivelse                                                                                                                         |
 |:-------------------------------|----------------|---------------------|:------------------------------------------------------------------------------------------------------------------------------------|
-| /api/vedtak?virkFom=YYYY-MM-DD | fnr <br/> tpnr | Samordningsvedtak[] | Henter ut vedtaksinformasjon for gitt person fra og med gitt dato.                                                                  |
+| /api/vedtak?fomDato=YYYY-MM-DD | fnr <br/> tpnr | Samordningsvedtak[] | Henter ut vedtaksinformasjon for gitt person fra og med gitt dato.                                                                  |
+| /api/vedtak?virkFom=YYYY-MM-DD | fnr <br/> tpnr | Samordningsvedtak[] | **DEPRECATED** Henter ut vedtaksinformasjon for gitt person fra og med gitt dato.                                                   |
 | /api/vedtak/{nav-vedtak-id}    | tpnr           | Samordningsvedtak   | Henter ut informasjon om et spesifikt vedtak. VedtaksIDen kommer fra samordningskøen hvor det varsles løpende om vedtak som gjøres. |
 
 | Header | Beskrivelse                      |

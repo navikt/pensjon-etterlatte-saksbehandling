@@ -49,8 +49,9 @@ fun Route.samordningVedtakRoute(
         }
 
         get {
-            val virkFom =
-                call.parameters["virkFom"]?.let { runCatching { LocalDate.parse(it) }.getOrNull() }
+            val fomDato =
+                call.parameters["fomDato"]?.let { runCatching { LocalDate.parse(it) }.getOrNull() }
+                    ?: call.parameters["virkFom"]?.let { runCatching { LocalDate.parse(it) }.getOrNull() }
                     ?: throw ManglerVirkFomException()
 
             val fnr =
@@ -64,7 +65,7 @@ fun Route.samordningVedtakRoute(
             val samordningVedtakDtos =
                 try {
                     samordningVedtakService.hentVedtaksliste(
-                        virkFom = virkFom,
+                        fomDato = fomDato,
                         fnr = Folkeregisteridentifikator.of(fnr),
                         MaskinportenTpContext(
                             tpnr = Tjenestepensjonnummer(tpnummer),
@@ -85,8 +86,9 @@ fun Route.samordningVedtakRoute(
         }
 
         get {
-            val virkFom =
-                call.parameters["virkFom"]?.let { runCatching { LocalDate.parse(it) }.getOrNull() }
+            val fomDato =
+                call.parameters["fomDato"]?.let { runCatching { LocalDate.parse(it) }.getOrNull() }
+                    ?: call.parameters["virkFom"]?.let { runCatching { LocalDate.parse(it) }.getOrNull() }
                     ?: throw ManglerVirkFomException()
 
             val fnr =
@@ -96,7 +98,7 @@ fun Route.samordningVedtakRoute(
             val samordningVedtakDtos =
                 try {
                     samordningVedtakService.hentVedtaksliste(
-                        virkFom = virkFom,
+                        fomDato = fomDato,
                         fnr = Folkeregisteridentifikator.of(fnr),
                         PensjonContext,
                     )

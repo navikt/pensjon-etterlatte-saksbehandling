@@ -24,7 +24,6 @@ import no.nav.etterlatte.libs.database.hentListe
 import no.nav.etterlatte.libs.database.oppdater
 import no.nav.etterlatte.libs.database.transaction
 import java.sql.Date
-import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
 import javax.sql.DataSource
@@ -236,12 +235,8 @@ class VedtaksvurderingRepository(private val datasource: DataSource) : Transacti
         }
     }
 
-    /**
-     * TODO vedtakstatus SAMORDNET e.l.?
-     */
     fun hentFerdigstilteVedtak(
         fnr: Folkeregisteridentifikator,
-        virkFom: LocalDate,
         tx: TransactionalSession? = null,
     ): List<Vedtak> {
         val hentVedtak = """
@@ -251,12 +246,11 @@ class VedtaksvurderingRepository(private val datasource: DataSource) : Transacti
             FROM vedtak  
             WHERE vedtakstatus in ('TIL_SAMORDNING', 'SAMORDNET', 'IVERKSATT')   
             AND fnr = :fnr
-            AND datoVirkFom >= :virkFom
             """
         return tx.session {
             hentListe(
                 queryString = hentVedtak,
-                params = { mapOf("fnr" to fnr.value, "virkFom" to virkFom) },
+                params = { mapOf("fnr" to fnr.value) },
             ) {
                 val utbetalingsperioder = hentUtbetalingsPerioder(it.long("id"), this)
                 it.toVedtak(utbetalingsperioder)

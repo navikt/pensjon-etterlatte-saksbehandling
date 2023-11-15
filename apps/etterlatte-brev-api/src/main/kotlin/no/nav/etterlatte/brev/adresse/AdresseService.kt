@@ -55,7 +55,7 @@ class AdresseService(
 
     private suspend fun hentSaksbehandlerNavn(navn: String) =
         if (navn == Fagsaksystem.EY.navn) {
-            navn
+            null
         } else {
             navansattKlient.hentSaksbehandlerInfo(navn).fornavnEtternavn
         }
@@ -64,7 +64,7 @@ class AdresseService(
 
     private fun mapTilAvsender(
         enhet: Norg2Enhet,
-        saksbehandlerNavn: String,
+        saksbehandlerNavn: String?,
         attestantNavn: String?,
     ): Avsender {
         val postadresse = enhet.kontaktinfo?.postadresse

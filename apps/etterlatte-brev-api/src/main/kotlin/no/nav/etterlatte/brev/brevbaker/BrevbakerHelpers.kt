@@ -32,10 +32,12 @@ object BrevbakerHelpers {
                 foedselsnummer = Foedselsnummer(soeker.fnr.value),
             ),
         signerendeSaksbehandlere =
-            SignerendeSaksbehandlere(
-                saksbehandler = avsender.saksbehandler,
-                attesterendeSaksbehandler = avsender.attestant,
-            ),
+            avsender.saksbehandler?.let {
+                SignerendeSaksbehandlere(
+                    saksbehandler = avsender.saksbehandler,
+                    attesterendeSaksbehandler = avsender.attestant,
+                )
+            },
         vergeNavn = vergeNavn,
     )
 }

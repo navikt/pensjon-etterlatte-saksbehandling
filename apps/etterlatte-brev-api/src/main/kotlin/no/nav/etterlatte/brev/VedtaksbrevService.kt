@@ -1,6 +1,7 @@
 package no.nav.etterlatte.brev
 
 import com.fasterxml.jackson.databind.JsonNode
+import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.brev.adresse.AdresseService
 import no.nav.etterlatte.brev.behandling.ForenkletVedtak
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
@@ -31,8 +32,10 @@ import no.nav.etterlatte.brev.model.SlateHelper
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.brev.model.bp.OmregnetBPNyttRegelverk
 import no.nav.etterlatte.libs.common.Vedtaksloesning
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
+import no.nav.etterlatte.rapidsandrivers.migrering.MigreringRequest
 import no.nav.etterlatte.rivers.VedtakTilJournalfoering
 import no.nav.etterlatte.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
@@ -99,7 +102,7 @@ class VedtaksbrevService(
     suspend fun genererPdf(
         id: BrevID,
         brukerTokenInfo: BrukerTokenInfo,
-        migrering: Boolean = false,
+        migrering: MigreringRequest? = null,
     ): Pdf {
         val brev = hentBrev(id)
 
@@ -112,7 +115,13 @@ class VedtaksbrevService(
         val avsender = adresseService.hentAvsender(generellBrevData.forenkletVedtak)
 
         val brevkodePar = brevDataMapper.brevKode(generellBrevData, brev.prosessType)
-        val brevData = opprettBrevData(brev, generellBrevData, brukerTokenInfo, brevkodePar)
+
+        val brevData =
+            when (migrering) {
+                null -> opprettBrevData(brev, generellBrevData, brukerTokenInfo, brevkodePar)
+                else -> opprettMigreringBrevdata(generellBrevData, migrering, brukerTokenInfo)
+            }
+
         val brevRequest = BrevbakerRequest.fra(brevkodePar.ferdigstilling, brevData, generellBrevData, avsender)
 
         return brevbaker.genererPdf(brev.id, brevRequest)
@@ -135,7 +144,35 @@ class VedtaksbrevService(
                     else -> it
                 }
             }
-            .also { pdf -> lagrePdfHvisVedtakFattet(brev.id, generellBrevData.forenkletVedtak, pdf, brukerTokenInfo, migrering) }
+            .also { pdf ->
+                lagrePdfHvisVedtakFattet(
+                    brev.id,
+                    generellBrevData.forenkletVedtak,
+                    pdf,
+                    brukerTokenInfo,
+                    migrering != null,
+                )
+            }
+    }
+
+    private suspend fun opprettMigreringBrevdata(
+        generellBrevData: GenerellBrevData,
+        migrering: MigreringRequest,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): BrevData {
+        if (generellBrevData.systemkilde != Vedtaksloesning.PESYS) {
+            throw InternfeilException("Kan ikke opprette et migreringsbrev fra pesys hvis kilde ikke er pesys")
+        }
+        return coroutineScope {
+            val virkningstidspunkt =
+                requireNotNull(generellBrevData.forenkletVedtak.virkningstidspunkt) {
+                    "Migreringsvedtaket må ha et virkningstidspunkt"
+                }
+
+            val utbetalingsinfo =
+                brevdataFacade.finnUtbetalingsinfo(generellBrevData.behandlingId, virkningstidspunkt, brukerTokenInfo)
+            OmregnetBPNyttRegelverk.fra(generellBrevData, utbetalingsinfo, migrering)
+        }
     }
 
     suspend fun ferdigstillVedtaksbrev(

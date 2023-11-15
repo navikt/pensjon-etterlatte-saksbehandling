@@ -34,6 +34,7 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
+import rapidsandrivers.HENDELSE_DATA_KEY
 import java.time.YearMonth
 import java.util.UUID
 
@@ -98,7 +99,7 @@ internal class OpprettJournalfoerOgDistribuer {
                     )
                 coEvery { it.hentBrev(any()) } returns brev
                 coEvery { it.opprettVedtaksbrev(any(), any(), any()) } returns brev
-                coEvery { it.genererPdf(brev.id, any(), true) } returns mockk()
+                coEvery { it.genererPdf(brev.id, any(), any()) } returns mockk()
                 coEvery { it.ferdigstillVedtaksbrev(behandlingId, any(), true) } just runs
             }
         val distribusjonService =
@@ -120,6 +121,7 @@ internal class OpprettJournalfoerOgDistribuer {
                     "vedtak" to lagVedtakDto(behandlingId),
                     KILDE_KEY to Vedtaksloesning.PESYS.name,
                     BREV_OPPRETTA_MIGRERING to false,
+                    HENDELSE_DATA_KEY to migreringRequest(),
                 ),
             ).toJson(),
         )

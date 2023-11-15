@@ -478,4 +478,71 @@ internal class MigreringHendelserRiverTest {
             )
         }
     }
+
+    @Test
+    fun `skal opprette eget grunnlag for yrkesskade dersom det ikke finnes perioder`() {
+        val behandlingId = slot<UUID>()
+        val trygdetidDto =
+            TrygdetidDto(
+                id = UUID.randomUUID(),
+                behandlingId = UUID.randomUUID(),
+                beregnetTrygdetid =
+                    DetaljertBeregnetTrygdetidDto(
+                        DetaljertBeregnetTrygdetidResultat.fraSamletTrygdetidNorge(40),
+                        Tidspunkt.now(),
+                    ),
+                trygdetidGrunnlag = emptyList(),
+                opplysninger =
+                    GrunnlagOpplysningerDto(
+                        avdoedDoedsdato = null,
+                        avdoedFoedselsdato = null,
+                        avdoedFylteSeksten = null,
+                        avdoedFyllerSeksti = null,
+                    ),
+                overstyrtNorskPoengaar = null,
+                ident = AVDOED_FOEDSELSNUMMER.value,
+            )
+        val request =
+            MigreringRequest(
+                pesysId = PesysId(1),
+                enhet = Enhet("4817"),
+                soeker = SOEKER_FOEDSELSNUMMER,
+                avdoedForelder = listOf(AvdoedForelder(AVDOED_FOEDSELSNUMMER, Tidspunkt.now(), true)),
+                gjenlevendeForelder = null,
+                virkningstidspunkt = YearMonth.now(),
+                beregning =
+                    Beregning(
+                        brutto = 3500,
+                        netto = 3500,
+                        anvendtTrygdetid = 40,
+                        datoVirkFom = Tidspunkt.now(),
+                        prorataBroek = null,
+                        g = 100_000,
+                    ),
+                trygdetid = Trygdetid(emptyList()),
+                spraak = Spraak.NN,
+            )
+        every { trygdetidService.beregnTrygdetid(capture(behandlingId)) } returns trygdetidDto
+        every { trygdetidService.beregnTrygdetidGrunnlag(any(), any()) } returns trygdetidDto
+        every { trygdetidService.opprettGrunnlagVedYrkesskade(any()) } returns trygdetidDto
+
+        val melding =
+            JsonMessage.newMessage(
+                Migreringshendelser.TRYGDETID,
+                mapOf(
+                    BEHANDLING_ID_KEY to "a9d42eb9-561f-4320-8bba-2ba600e66e21",
+                    VILKAARSVURDERT_KEY to "vilkaarsvurdert",
+                    HENDELSE_DATA_KEY to request,
+                ),
+            )
+
+        inspector.sendTestMessage(melding.toJson())
+
+        assertEquals(UUID.fromString("a9d42eb9-561f-4320-8bba-2ba600e66e21"), behandlingId.captured)
+        assertEquals(1, inspector.inspektør.size)
+        coVerify(exactly = 1) { trygdetidService.beregnTrygdetid(behandlingId.captured) }
+        coVerify(exactly = 0) { trygdetidService.beregnTrygdetidGrunnlag(behandlingId.captured, any()) }
+        coVerify(exactly = 0) { trygdetidService.overstyrBeregnetTrygdetid(behandlingId.captured, any()) }
+        coVerify(exactly = 1) { trygdetidService.opprettGrunnlagVedYrkesskade(behandlingId.captured) }
+    }
 }

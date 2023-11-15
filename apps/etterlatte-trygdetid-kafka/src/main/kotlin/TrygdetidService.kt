@@ -44,4 +44,11 @@ class TrygdetidService(
                 setBody(beregnetTrygdetid)
             }.body()
         }
+
+    fun opprettGrunnlagVedYrkesskade(behandlingId: UUID): TrygdetidDto =
+        runBlocking {
+            trygdetidApp.post("$url/api/trygdetid/$behandlingId/grunnlag/yrkesskade") {
+                contentType(ContentType.Application.Json)
+            }.body()
+        }
 }

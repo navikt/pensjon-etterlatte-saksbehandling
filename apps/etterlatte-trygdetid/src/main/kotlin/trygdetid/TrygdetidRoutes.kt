@@ -99,17 +99,10 @@ fun Route.trygdetid(
         post("/grunnlag/yrkesskade") {
             withBehandlingId(behandlingKlient) {
                 logger.info("Legger til yrkesskade trygdetidsgrunnlag for behandling $behandlingId")
-                try {
-                    trygdetidService.lagreYrkesskadeTrygdetidGrunnlag(
-                        behandlingId,
-                        brukerTokenInfo,
-                    ).let { trygdetid -> call.respond(trygdetid.toDto()) }
-                } catch (overlappendePeriodeException: OverlappendePeriodeException) {
-                    logger.info(
-                        "Klarte ikke legge til ny yrkesskade trygdetidsperiode for $behandlingId pga overlapp.",
-                    )
-                    call.respond(HttpStatusCode.Conflict)
-                }
+                trygdetidService.lagreYrkesskadeTrygdetidGrunnlag(
+                    behandlingId,
+                    brukerTokenInfo,
+                ).let { trygdetid -> call.respond(trygdetid.toDto()) }
             }
         }
 

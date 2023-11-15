@@ -50,35 +50,44 @@ internal class MigreringHendelserRiver(
 
         logger.info("Mottatt trygdetid-migreringshendelse for behandling $behandlingId")
         trygdetidService.beregnTrygdetid(behandlingId)
-        logger.info("Opprettet trygdetid for behandling $behandlingId, forsøker å legge til perioder")
+        logger.info("Opprettet trygdetid for behandling $behandlingId")
 
         val oppdatertTrygdetid: TrygdetidDto =
-            if (request.trygdetid.perioder.isNotEmpty()) {
-                try {
-                    val trygdetid =
-                        request.trygdetid.perioder.map { periode ->
-                            val grunnlag = tilGrunnlag(periode)
-                            logger.info(
-                                "Forsøker å legge til periode ${grunnlag.periodeFra}-${grunnlag.periodeTil} for behandling $behandlingId",
-                            )
-                            trygdetidService.beregnTrygdetidGrunnlag(behandlingId, grunnlag)
-                        }.last()
-
-                    check(trygdetidIGjennyStemmerMedTrygdetidIPesys(trygdetid, request.beregning)) {
-                        "Beregnet trygdetid i Gjenny basert på perioder fra Pesys stemmer ikke med anvendt trygdetid i Pesys"
-                    }
-
-                    trygdetid
-                } catch (e: Exception) {
-                    logger.warn("Klarte ikke legge til perioder fra Pesys for behandling $behandlingId", e)
-                    overstyrBeregnetTrygdetid(request, behandlingId)
-                }
+            if (request.avdoedForelder.any { it.yrkesskade }) {
+                logger.info("Avdød hadde yrkesskade i Pesys, oppretter yrkesskadegrunnlag for behandling $behandlingId")
+                trygdetidService.opprettGrunnlagVedYrkesskade(behandlingId)
+            } else if (request.trygdetid.perioder.isNotEmpty()) {
+                logger.info("Mottok trygdetidsperioder for behandling $behandlingId")
+                leggTilPerioder(request, behandlingId)
             } else {
                 logger.info("Vi mottok ingen trygdetidsperioder fra Pesys for behandling $behandlingId")
                 overstyrBeregnetTrygdetid(request, behandlingId)
             }
 
         sendBeregnetTrygdetid(packet, oppdatertTrygdetid, context, behandlingId)
+    }
+
+    private fun leggTilPerioder(
+        request: MigreringRequest,
+        behandlingId: UUID,
+    ) = try {
+        val trygdetid =
+            request.trygdetid.perioder.map { periode ->
+                val grunnlag = tilGrunnlag(periode)
+                logger.info(
+                    "Forsøker å legge til periode ${grunnlag.periodeFra}-${grunnlag.periodeTil} for behandling $behandlingId",
+                )
+                trygdetidService.beregnTrygdetidGrunnlag(behandlingId, grunnlag)
+            }.last()
+
+        check(trygdetidIGjennyStemmerMedTrygdetidIPesys(trygdetid, request.beregning)) {
+            "Beregnet trygdetid i Gjenny basert på perioder fra Pesys stemmer ikke med anvendt trygdetid i Pesys"
+        }
+
+        trygdetid
+    } catch (e: Exception) {
+        logger.warn("Klarte ikke legge til perioder fra Pesys for behandling $behandlingId", e)
+        overstyrBeregnetTrygdetid(request, behandlingId)
     }
 
     private fun trygdetidIGjennyStemmerMedTrygdetidIPesys(

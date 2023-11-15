@@ -1,7 +1,9 @@
 package no.nav.etterlatte.libs.common.behandling
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 data class BoddEllerArbeidetUtlandet(
     val boddEllerArbeidetUtlandet: Boolean,
     val kilde: Grunnlagsopplysning.Saksbehandler,

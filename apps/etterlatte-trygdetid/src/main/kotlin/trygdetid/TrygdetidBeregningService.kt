@@ -33,8 +33,8 @@ object TrygdetidBeregningService {
 
         val beregnetTrygdetidListe = trygdetidGrunnlag.mapNotNull { it.beregnetTrygdetid }
 
-        if (beregnetTrygdetidListe.isEmpty()) {
-            logger.info("Har ingen perioder med beregnet trygdetidsgrunnlag.")
+        if (beregnetTrygdetidListe.isEmpty() && norskPoengaar == null) {
+            logger.info("Har ingen perioder med beregnet trygdetidsgrunnlag og ingen overstyrt poengår.")
             return null
         }
 

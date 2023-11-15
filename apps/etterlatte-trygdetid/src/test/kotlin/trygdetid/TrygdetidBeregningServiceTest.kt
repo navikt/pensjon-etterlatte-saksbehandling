@@ -5,6 +5,7 @@ import io.kotest.matchers.shouldNotBe
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.trygdetid.TrygdetidBeregningService
+import no.nav.etterlatte.trygdetid.TrygdetidGrunnlag
 import no.nav.etterlatte.trygdetid.TrygdetidPeriode
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -111,6 +112,27 @@ class TrygdetidBeregningServiceTest {
                     periode = TrygdetidPeriode(now.minusYears(2), now),
                 ),
             )
+
+        val beregnetTrygdetid =
+            TrygdetidBeregningService.beregnTrygdetid(
+                trygdetidGrunnlag,
+                now,
+                now,
+                10,
+            )
+        beregnetTrygdetid shouldNotBe null
+        with(beregnetTrygdetid!!) {
+            regelResultat shouldNotBe null
+            tidspunkt shouldNotBe null
+            resultat.samletTrygdetidNorge shouldBe 10
+        }
+    }
+
+    @Test
+    fun `skal gi 10 aar total trygdetid med kun overstyrt poengaar`() {
+        val now = LocalDate.now()
+
+        val trygdetidGrunnlag = emptyList<TrygdetidGrunnlag>()
 
         val beregnetTrygdetid =
             TrygdetidBeregningService.beregnTrygdetid(

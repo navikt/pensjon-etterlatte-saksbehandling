@@ -27,6 +27,7 @@ import {
   OMS_OPPHOER_BESKRIVELSE,
   OMS_OPPHOER_HJEMLER,
   OMS_REVURDERING_BESKRIVELSE,
+  FELLES_SLUTTBEHANDLING_HJEMLER,
 } from '~components/behandling/soeknadsoversikt/soeknadoversikt/virkningstidspunkt/utils'
 import { SakType } from '~shared/types/sak'
 import { erOpphoer, Revurderingaarsak, tekstRevurderingsaarsak } from '~shared/types/Revurderingaarsak'
@@ -64,7 +65,7 @@ const hjemlerOgBeskrivelseOmstillingsstoenad = (revurderingsaarsak: Revurderinga
     case Revurderingaarsak.INSTITUSJONSOPPHOLD:
       return [OMS_INST_HJEMLER_VIRK, OMS_INST_VIRK_BESKRIVELSE]
     case Revurderingaarsak.SLUTTBEHANDLING_UTLAND:
-      return [FELLES_REVURDERING_HJEMLER, FELLES_SLUTTBEHANDLING_BESKRIVELSE]
+      return [FELLES_SLUTTBEHANDLING_HJEMLER, FELLES_SLUTTBEHANDLING_BESKRIVELSE]
     default:
       return [FELLES_REVURDERING_HJEMLER, OMS_REVURDERING_BESKRIVELSE]
   }
@@ -80,7 +81,7 @@ const hjemlerOgBeskrivelseBarnepensjon = (revurderingsaarsak: Revurderingaarsak)
     case Revurderingaarsak.FENGSELSOPPHOLD: //TODO: kanskje Revurderingaarsak.UT_AV_FENGSEL: men ikke i bruk nå..
       return [BP_INSTITUSJONSOPPHOLD_HJEMLER, BP_INSTITUSJONSOPPHOLD_BESKRIVELSE]
     case Revurderingaarsak.SLUTTBEHANDLING_UTLAND:
-      return [FELLES_REVURDERING_HJEMLER, FELLES_SLUTTBEHANDLING_BESKRIVELSE]
+      return [FELLES_SLUTTBEHANDLING_HJEMLER, FELLES_SLUTTBEHANDLING_BESKRIVELSE]
     default:
       return [FELLES_REVURDERING_HJEMLER, BP_REVURDERING_BESKRIVELSE]
   }

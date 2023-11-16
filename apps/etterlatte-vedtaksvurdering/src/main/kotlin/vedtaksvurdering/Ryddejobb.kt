@@ -1,6 +1,7 @@
 package no.nav.etterlatte.vedtaksvurdering
 
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
+import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseType
 import no.nav.helse.rapids_rivers.JsonMessage
 import org.slf4j.LoggerFactory
 import java.util.UUID
@@ -20,8 +21,8 @@ class Ryddejobb(
                 publiser(
                     JsonMessage.newMessage(
                         mapOf(
-                            EVENT_NAME_KEY to "FERDIGSTILT",
-                            "vedtak" to it.toDto(),
+                            EVENT_NAME_KEY to VedtakKafkaHendelseType.ATTESTERT.toString(),
+                            "vedtak" to it.toNyDto(),
                         ),
                     ).toJson(),
                     it.behandlingId,

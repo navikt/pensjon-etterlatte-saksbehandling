@@ -26,7 +26,7 @@ import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { hentAlleLand, ILand, sorterLand } from '~shared/api/trygdetid'
 import styled from 'styled-components'
-import { ExternalLinkIcon, PencilWritingIcon } from '@navikt/aksel-icons'
+import { ExternalLinkIcon, PencilWritingIcon, TrashIcon } from '@navikt/aksel-icons'
 import { opprettBrevForSak } from '~shared/api/brev'
 import { ABlue500 } from '@navikt/ds-tokens/dist/tokens'
 import { ButtonGroup } from '~components/person/VurderHendelseModal'
@@ -324,67 +324,83 @@ const KravpakkeUtland = (props: { utlandsBehandling: Generellbehandling & { innh
                   <Table.HeaderCell scope="col">Dokumenttype(feks P2000)</Table.HeaderCell>
                   <Table.HeaderCell scope="col">Sendt</Table.HeaderCell>
                   <Table.HeaderCell scope="col">Dato sendt</Table.HeaderCell>
+                  <Table.HeaderCell scope="col" />
                 </Table.Row>
               </Table.Header>
               <Table.Body>
-                {dokumenter.map((dokument, idx) => (
-                  <Table.Row key={idx}>
-                    <Table.DataCell>
-                      {redigerbar ? (
-                        <TextField
-                          label=""
-                          value={dokument.dokumenttype}
-                          size="medium"
-                          style={{ maxWidth: '16rem' }}
+                {dokumenter.map((dokument, idx) => {
+                  const fjernDokument = () => {
+                    setDokumenter((dokumenter) => dokumenter.filter((_, i) => idx !== i))
+                  }
+                  return (
+                    <Table.Row key={idx}>
+                      <Table.DataCell>
+                        {redigerbar ? (
+                          <TextField
+                            label=""
+                            value={dokument.dokumenttype}
+                            size="medium"
+                            style={{ maxWidth: '16rem' }}
+                            onChange={(e) => {
+                              const oppdaterteDocType = dokumenter.map((doc, i) => {
+                                if (idx === i) {
+                                  return { ...doc, dokumenttype: e.target.value }
+                                }
+                                return doc
+                              })
+                              setDokumenter(oppdaterteDocType)
+                            }}
+                          />
+                        ) : (
+                          <BodyShort>{dokument.dokumenttype}</BodyShort>
+                        )}
+                      </Table.DataCell>
+                      <Table.DataCell>
+                        <Checkbox
+                          readOnly={!redigerbar}
+                          checked={dokument.sendt}
                           onChange={(e) => {
-                            const oppdaterteDocType = dokumenter.map((doc, i) => {
+                            const oppdaterteDocSendt = dokumenter.map((doc, i) => {
                               if (idx === i) {
-                                return { ...doc, dokumenttype: e.target.value }
+                                return { ...doc, sendt: e.target.checked }
                               }
                               return doc
                             })
-                            setDokumenter(oppdaterteDocType)
+                            setDokumenter(oppdaterteDocSendt)
+                          }}
+                        >
+                          <></>
+                        </Checkbox>
+                      </Table.DataCell>
+                      <Table.DataCell>
+                        <DatoVelger
+                          disabled={!redigerbar}
+                          label=""
+                          value={dokument.dato ? new Date(dokument.dato) : undefined}
+                          onChange={(date) => {
+                            const oppdaterteDocDato = dokumenter.map((doc, i) => {
+                              if (idx === i) {
+                                return { ...doc, dato: formatDateToLocaleDateOrEmptyString(date) }
+                              }
+                              return doc
+                            })
+                            setDokumenter(oppdaterteDocDato)
                           }}
                         />
-                      ) : (
-                        <BodyShort>{dokument.dokumenttype}</BodyShort>
-                      )}
-                    </Table.DataCell>
-                    <Table.DataCell>
-                      <Checkbox
-                        readOnly={!redigerbar}
-                        checked={dokument.sendt}
-                        onChange={(e) => {
-                          const oppdaterteDocSendt = dokumenter.map((doc, i) => {
-                            if (idx === i) {
-                              return { ...doc, sendt: e.target.checked }
-                            }
-                            return doc
-                          })
-                          setDokumenter(oppdaterteDocSendt)
-                        }}
-                      >
-                        <></>
-                      </Checkbox>
-                    </Table.DataCell>
-                    <Table.DataCell>
-                      <DatoVelger
-                        disabled={!redigerbar}
-                        label=""
-                        value={dokument.dato ? new Date(dokument.dato) : undefined}
-                        onChange={(date) => {
-                          const oppdaterteDocDato = dokumenter.map((doc, i) => {
-                            if (idx === i) {
-                              return { ...doc, dato: formatDateToLocaleDateOrEmptyString(date) }
-                            }
-                            return doc
-                          })
-                          setDokumenter(oppdaterteDocDato)
-                        }}
-                      />
-                    </Table.DataCell>
-                  </Table.Row>
-                ))}
+                      </Table.DataCell>
+                      <Table.DataCell>
+                        <Button
+                          variant="tertiary"
+                          icon={<TrashIcon />}
+                          onClick={() => fjernDokument()}
+                          style={{ marginLeft: '5rem' }}
+                        >
+                          Slett dokument
+                        </Button>
+                      </Table.DataCell>
+                    </Table.Row>
+                  )
+                })}
               </Table.Body>
             </StandardBreddeTabell>
             <div style={{ marginTop: '3.5rem', marginBottom: '3rem' }}>
@@ -443,9 +459,13 @@ const KravpakkeUtland = (props: { utlandsBehandling: Generellbehandling & { innh
                 </>
               )}
               {utlandsBehandling.status === Status.FATTET && (
-                <Button onClick={() => attesterFetch(utlandsBehandling)} loading={isPending(attesterStatus)}>
-                  Attester
-                </Button>
+                <>
+                  <Button onClick={() => attesterFetch(utlandsBehandling)} loading={isPending(attesterStatus)}>
+                    Attester
+                  </Button>
+                  {isSuccess(attesterStatus) && <Alert variant="success">Behandlingen ble attestert</Alert>}
+                  {isFailure(attesterStatus) && <Alert variant="error">Behandlingen ble ikke attestert</Alert>}
+                </>
               )}
             </ButtonGroup>
           </Panel>

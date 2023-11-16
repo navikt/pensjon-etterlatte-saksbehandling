@@ -1,6 +1,5 @@
 package no.nav.etterlatte.rivers
 
-import com.fasterxml.jackson.databind.JsonNode
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.brev.VedtaksbrevService
 import no.nav.etterlatte.brev.model.Brev
@@ -26,7 +25,7 @@ internal class OpprettVedtaksbrevForMigreringRiver(
 
     init {
         initialiserRiver(rapidsConnection, VedtakKafkaHendelseType.ATTESTERT.toString()) {
-            validate { it.requireKey("vedtak.behandling.id") }
+            validate { it.requireKey("vedtak.behandlingId") }
             validate { it.requireKey("vedtak.sak.id") }
             validate { it.requireKey(HENDELSE_DATA_KEY) }
             validate { it.requireValue(KILDE_KEY, Vedtaksloesning.PESYS.name) }
@@ -40,7 +39,7 @@ internal class OpprettVedtaksbrevForMigreringRiver(
     ) {
         val sakId = packet["vedtak.sak.id"].asLong()
         logger.info("Oppretter vedtaksbrev i sak $sakId")
-        val behandlingId = packet["vedtak.behandling.id"].asUUID()
+        val behandlingId = UUID.fromString(packet["vedtak.behandlingId"].asText())
         val brukerTokenInfo = Systembruker("migrering", "migrering")
         runBlocking {
             val vedtaksbrev: Brev = service.opprettVedtaksbrev(sakId, behandlingId, brukerTokenInfo)
@@ -53,5 +52,3 @@ internal class OpprettVedtaksbrevForMigreringRiver(
         context.publish(packet.toJson())
     }
 }
-
-fun JsonNode.asUUID(): UUID = UUID.fromString(this.asText())

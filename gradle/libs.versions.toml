@@ -46,7 +46,6 @@ pdf-pdfbox = { module = "org.apache.pdfbox:pdfbox", version = "3.0.0" }
 
 kotlinx-coroutinescore = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx-version" }
 kotlinx-coroutinestest = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinx-version" }
-kotlinx-coroutinesslf4j = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-slf4j", version.ref = "kotlinx-version" }
 
 ktor2-okhttp = { module = "io.ktor:ktor-client-okhttp", version.ref = "ktor2-version" }
 ktor2-clientcore = { module = "io.ktor:ktor-client-core", version.ref = "ktor2-version" }

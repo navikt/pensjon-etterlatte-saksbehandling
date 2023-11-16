@@ -37,7 +37,6 @@ dependencies {
     implementation(libs.ktor2.statuspages)
     implementation(libs.ktor2.calllogging)
     implementation(libs.kotlin.result)
-    implementation(libs.kotlinx.coroutinesslf4j)
 
     implementation(libs.bundles.jackson)
     implementation(libs.bundles.navfelles.token)

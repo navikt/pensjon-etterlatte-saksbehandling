@@ -62,6 +62,6 @@ class AutomatiskBehandlingService(
             behandlingId,
             "Automatisk attestert av ${Fagsaksystem.EY.systemnavn}",
             brukerTokenInfo,
-        ).also { rapidService.sendToRapid(it) }
+        )
     }
 }

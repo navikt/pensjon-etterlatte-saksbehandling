@@ -15,7 +15,7 @@ import { isFailure, isPending, isSuccess, useApiCall } from '~shared/hooks/useAp
 import Spinner from '~shared/Spinner'
 import { ExclamationmarkTriangleFillIcon } from '@navikt/aksel-icons'
 import { hentGenerelleBehandlingForSak } from '~shared/api/generellbehandling'
-import { GenerellBehandlingType, Status } from '~shared/types/Generellbehandling'
+import { Generellbehandling, GenerellBehandlingType, Status } from '~shared/types/Generellbehandling'
 import { ApiErrorAlert } from '~ErrorBoundary'
 
 function mapAarsak(aarsak: BehandlingOgRevurderingsAarsakerType) {
@@ -153,6 +153,20 @@ const genbehandlingTypeTilLesbartNavn = (type: GenerellBehandlingType) => {
   }
 }
 
+type alleBehandlingsTyper = IBehandlingsammendrag | Generellbehandling
+
+function isVanligBehandling(behandling: alleBehandlingsTyper): behandling is IBehandlingsammendrag {
+  return (behandling as IBehandlingsammendrag).soeknadMottattDato !== undefined
+}
+
+function hentDato(behandling: alleBehandlingsTyper): string {
+  if (isVanligBehandling(behandling)) {
+    return behandling.behandlingOpprettet
+  } else {
+    return behandling.opprettet
+  }
+}
+
 export const Behandlingsliste = ({ behandlinger, sakId }: { behandlinger: IBehandlingsammendrag[]; sakId: number }) => {
   const [generellbehandlingStatus, hentGenerellbehandlinger] = useApiCall(hentGenerelleBehandlingForSak)
 
@@ -160,9 +174,13 @@ export const Behandlingsliste = ({ behandlinger, sakId }: { behandlinger: IBehan
     hentGenerellbehandlinger(sakId)
   }, [])
 
-  const sorterteBehandlinger = behandlinger.sort((a, b) =>
-    new Date(b.behandlingOpprettet!) > new Date(a.behandlingOpprettet!) ? 1 : -1
-  )
+  let allebehandlinger: alleBehandlingsTyper[] = []
+  allebehandlinger = allebehandlinger.concat(behandlinger)
+  if (isSuccess(generellbehandlingStatus)) {
+    allebehandlinger = allebehandlinger.concat(generellbehandlingStatus.data)
+  }
+
+  allebehandlinger.sort((a, b) => (new Date(hentDato(a)) > new Date(hentDato(b)) ? 1 : -1))
 
   return (
     <BehandlingPanel>
@@ -182,46 +200,48 @@ export const Behandlingsliste = ({ behandlinger, sakId }: { behandlinger: IBehan
           </Table.Row>
         </Table.Header>
         <Table.Body>
-          {sorterteBehandlinger.map((behandling, i) => (
-            <Table.Row key={i} shadeOnHover={false}>
-              <Table.DataCell>{formaterStringDato(behandling.behandlingOpprettet)}</Table.DataCell>
-              <Table.DataCell>
-                <BehandlingstypeWrapper>{formaterBehandlingstype(behandling.behandlingType)}</BehandlingstypeWrapper>
-              </Table.DataCell>
-              <Table.DataCell>{mapAarsak(behandling.aarsak)}</Table.DataCell>
-              <Table.DataCell>
-                {formaterEnumTilLesbarString(behandlingStatusTilLesbartnavn(behandling.status))}
-              </Table.DataCell>
-              <Table.DataCell>
-                {behandling.virkningstidspunkt ? formaterStringDato(behandling.virkningstidspunkt!!.dato) : ''}
-              </Table.DataCell>
-              <VedtakKolonner behandlingId={behandling.id} />
-              <Table.DataCell>
-                <Link href={lenkeTilBehandling(behandling)}>Gå til behandling</Link>
-              </Table.DataCell>
-            </Table.Row>
-          ))}
-          {isSuccess(generellbehandlingStatus) &&
-            generellbehandlingStatus.data
-              .sort((a, b) => (new Date(b.opprettet!) > new Date(a.opprettet!) ? 1 : -1))
-              .map((generellBehandling, i) => (
+          {allebehandlinger.map((behandling, i) => {
+            if (isVanligBehandling(behandling)) {
+              return (
                 <Table.Row key={i} shadeOnHover={false}>
-                  <Table.DataCell>{formaterStringDato(generellBehandling.opprettet)}</Table.DataCell>
+                  <Table.DataCell>{formaterStringDato(behandling.behandlingOpprettet)}</Table.DataCell>
                   <Table.DataCell>
                     <BehandlingstypeWrapper>
-                      {genbehandlingTypeTilLesbartNavn(generellBehandling.type)}
+                      {formaterBehandlingstype(behandling.behandlingType)}
                     </BehandlingstypeWrapper>
                   </Table.DataCell>
+                  <Table.DataCell>{mapAarsak(behandling.aarsak)}</Table.DataCell>
+                  <Table.DataCell>
+                    {formaterEnumTilLesbarString(behandlingStatusTilLesbartnavn(behandling.status))}
+                  </Table.DataCell>
+                  <Table.DataCell>
+                    {behandling.virkningstidspunkt ? formaterStringDato(behandling.virkningstidspunkt!!.dato) : ''}
+                  </Table.DataCell>
+                  <VedtakKolonner behandlingId={behandling.id} />
+                  <Table.DataCell>
+                    <Link href={lenkeTilBehandling(behandling)}>Gå til behandling</Link>
+                  </Table.DataCell>
+                </Table.Row>
+              )
+            } else {
+              return (
+                <Table.Row key={i} shadeOnHover={false}>
+                  <Table.DataCell>{formaterStringDato(behandling.opprettet)}</Table.DataCell>
+                  <Table.DataCell>
+                    <BehandlingstypeWrapper>{genbehandlingTypeTilLesbartNavn(behandling.type)}</BehandlingstypeWrapper>
+                  </Table.DataCell>
                   <Table.DataCell>-</Table.DataCell>
-                  <Table.DataCell>{generellBehandlingsStatusTilLesbartNavn(generellBehandling.status)}</Table.DataCell>
+                  <Table.DataCell>{generellBehandlingsStatusTilLesbartNavn(behandling.status)}</Table.DataCell>
                   <Table.DataCell>-</Table.DataCell>
                   <Table.DataCell>-</Table.DataCell>
                   <Table.DataCell>-</Table.DataCell>
                   <Table.DataCell>
-                    <Link href={`/generellbehandling/${generellBehandling.id}`}>Gå til behandling</Link>
+                    <Link href={`/generellbehandling/${behandling.id}`}>Gå til behandling</Link>
                   </Table.DataCell>
                 </Table.Row>
-              ))}
+              )
+            }
+          })}
         </Table.Body>
       </Table>
       {isPending(generellbehandlingStatus) && <Spinner visible={true} label="Henter generelle behandlinger" />}

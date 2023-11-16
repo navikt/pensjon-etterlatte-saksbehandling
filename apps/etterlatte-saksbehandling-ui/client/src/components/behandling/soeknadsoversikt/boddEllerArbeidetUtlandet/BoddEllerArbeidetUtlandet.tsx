@@ -36,7 +36,7 @@ export const BoddEllerArbeidetUtlandet = ({
           </BodyShort>
           <BodyShort>
             Vurdere avdødes trygdeavtale: huk av kun hvis det er bosatt utland-sak. Dette vurderes først i
-            sluttbehandling, etter opplysninger fra utland er mottatt, i bosatt Norge-saker.
+            sluttbehandling i bosatt Norge-saker, etter opplysninger fra utland er mottatt.
           </BodyShort>
           <BodyShort>
             Det skal sendes kravpakke: huk av kun hvis det er bosatt Norge-sak og det skal sendes krav til involverte

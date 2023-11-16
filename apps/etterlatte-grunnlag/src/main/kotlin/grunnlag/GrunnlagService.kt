@@ -338,7 +338,7 @@ class RealGrunnlagService(
         return Grunnlagsopplysning(
             id = UUID.randomUUID(),
             kilde = Grunnlagsopplysning.Pdl(Tidspunkt.now(), null, null),
-            opplysningType = Opplysningstype.PERSONGALLERI_V1, // kanskje bruke noe annet?
+            opplysningType = Opplysningstype.PERSONGALLERI_PDL_V1,
             meta = objectMapper.createObjectNode(),
             opplysning = this.toJsonNode(),
             attestering = null,

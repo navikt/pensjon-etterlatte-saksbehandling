@@ -8,7 +8,7 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import { Beskrivelse, InfobokserWrapper, InfoWrapper, VurderingsContainerWrapper } from '../soeknadsoversikt/styled'
 import { useAppDispatch } from '~store/Store'
 import { IBehandlingStatus, IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
-import { addMonths, subYears } from 'date-fns'
+import { addMonths, addYears, subYears } from 'date-fns'
 import { LovtekstMedLenke } from '../soeknadsoversikt/LovtekstMedLenke'
 import { Info } from '../soeknadsoversikt/Info'
 import { LeggTilVurderingButton } from '~components/behandling/soeknadsoversikt/LeggTilVurderingButton'
@@ -45,8 +45,8 @@ const Virkningstidspunkt = (props: {
   const [kravdato, setKravdato] = useState<Date | undefined>(undefined)
 
   const { monthpickerProps: monthpickerPropsKravdato, inputProps: inputPropsKravdato } = useMonthpicker({
-    fromDate: subYears(new Date(), 20),
-    toDate: addMonths(new Date(), 10),
+    fromDate: subYears(new Date(), 18),
+    toDate: addYears(new Date(), 2),
     inputFormat: 'dd.MM.yyyy',
     onMonthChange: (date: Date | undefined) => setKravdato(date),
     defaultSelected: kravdato ?? undefined,

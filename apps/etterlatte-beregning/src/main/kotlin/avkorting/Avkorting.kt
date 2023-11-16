@@ -204,13 +204,18 @@ data class Avkorting(
         reberegnetInntektsavkorting: List<Inntektsavkorting>,
     ): List<AvkortetYtelse> {
         val avkortetYtelseMedAllForventetInntekt = mutableListOf<AvkortetYtelse>()
-        reberegnetInntektsavkorting.forEach { inntektsavkorting ->
+        reberegnetInntektsavkorting.forEachIndexed { i, inntektsavkorting ->
             val restanse =
-                AvkortingRegelkjoring.beregnRestanse(
-                    this.foersteMaanedDetteAar(),
-                    inntektsavkorting,
-                    avkortetYtelseMedAllForventetInntekt,
-                )
+                when (i) {
+                    0 -> null
+                    else ->
+                        AvkortingRegelkjoring.beregnRestanse(
+                            this.foersteMaanedDetteAar(),
+                            inntektsavkorting,
+                            avkortetYtelseMedAllForventetInntekt,
+                        )
+                }
+
             val ytelse =
                 AvkortingRegelkjoring.beregnAvkortetYtelse(
                     periode = inntektsavkorting.grunnlag.periode,

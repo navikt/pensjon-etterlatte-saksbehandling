@@ -29,15 +29,15 @@ internal class JournalfoerVedtaksbrevRiver(
     init {
         initialiserRiver(rapidsConnection, VedtakKafkaHendelseType.ATTESTERT.toString()) {
             validate { it.requireKey("vedtak") }
-            validate { it.requireKey("vedtak.vedtakId") }
-            validate { it.requireKey("vedtak.behandling.id") }
+            validate { it.requireKey("vedtak.id") }
+            validate { it.requireKey("vedtak.behandlingId") }
             validate { it.requireKey("vedtak.sak") }
             validate { it.requireKey("vedtak.sak.id") }
             validate { it.requireKey("vedtak.sak.ident") }
             validate { it.requireKey("vedtak.sak.sakType") }
             validate { it.requireKey("vedtak.vedtakFattet.ansvarligEnhet") }
             validate {
-                it.rejectValues("vedtak.behandling.type", listOf(BehandlingType.MANUELT_OPPHOER.name))
+                it.rejectValues("vedtak.innhold.behandling.type", listOf(BehandlingType.MANUELT_OPPHOER.name))
             }
             validate { it.rejectValue(SKAL_SENDE_BREV, false) }
             validate { it.rejectValue(BREV_OPPRETTA_MIGRERING, false) }
@@ -51,9 +51,9 @@ internal class JournalfoerVedtaksbrevRiver(
         try {
             val vedtak =
                 VedtakTilJournalfoering(
-                    vedtakId = packet["vedtak.vedtakId"].asLong(),
+                    vedtakId = packet["vedtak.id"].asLong(),
                     sak = deserialize(packet["vedtak.sak"].toJson()),
-                    behandlingId = UUID.fromString(packet["vedtak.behandling.id"].asText()),
+                    behandlingId = UUID.fromString(packet["vedtak.behandlingId"].asText()),
                     ansvarligEnhet = packet["vedtak.vedtakFattet.ansvarligEnhet"].asText(),
                 )
             logger.info("Nytt vedtak med id ${vedtak.vedtakId} er attestert. Ferdigstiller vedtaksbrev.")

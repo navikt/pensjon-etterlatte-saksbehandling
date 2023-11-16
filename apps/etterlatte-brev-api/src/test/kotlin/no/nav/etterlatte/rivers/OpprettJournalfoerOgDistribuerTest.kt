@@ -23,9 +23,10 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
 import no.nav.etterlatte.libs.common.vedtak.Behandling
-import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
+import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseType
+import no.nav.etterlatte.libs.common.vedtak.VedtakNyDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.rapidsandrivers.migrering.BREV_OPPRETTA_MIGRERING
@@ -127,7 +128,10 @@ internal class OpprettJournalfoerOgDistribuer {
         )
 
         val journalfoermelding = testRapid.hentMelding(0)
-        Assertions.assertEquals(VedtakKafkaHendelseType.ATTESTERT.toString(), journalfoermelding.somMap()[EVENT_NAME_KEY])
+        Assertions.assertEquals(
+            VedtakKafkaHendelseType.ATTESTERT.toString(),
+            journalfoermelding.somMap()[EVENT_NAME_KEY],
+        )
         testRapid.sendTestMessage(journalfoermelding)
 
         val distribuermelding = testRapid.hentMelding(1)
@@ -157,23 +161,16 @@ internal class OpprettJournalfoerOgDistribuer {
         )
 
     private fun lagVedtakDto(behandlingId: UUID) =
-        VedtakDto(
-            vedtakId = 1L,
+        VedtakNyDto(
+            id = 1L,
             status = VedtakStatus.IVERKSATT,
-            virkningstidspunkt = YearMonth.now(),
             sak =
                 VedtakSak(
                     ident = "Sak1",
                     sakType = SakType.BARNEPENSJON,
                     id = 2L,
                 ),
-            behandling =
-                Behandling(
-                    type = BehandlingType.FØRSTEGANGSBEHANDLING,
-                    id = behandlingId,
-                    revurderingsaarsak = null,
-                    revurderingInfo = null,
-                ),
+            behandlingId = behandlingId,
             type = VedtakType.INNVILGELSE,
             vedtakFattet =
                 VedtakFattet(
@@ -187,7 +184,18 @@ internal class OpprettJournalfoerOgDistribuer {
                     attesterendeEnhet = "Lillevik",
                     tidspunkt = Tidspunkt.now(),
                 ),
-            utbetalingsperioder = listOf(),
+            innhold =
+                VedtakInnholdDto.VedtakBehandlingDto(
+                    virkningstidspunkt = YearMonth.now(),
+                    behandling =
+                        Behandling(
+                            type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                            id = behandlingId,
+                            revurderingsaarsak = null,
+                            revurderingInfo = null,
+                        ),
+                    utbetalingsperioder = listOf(),
+                ),
         )
 }
 

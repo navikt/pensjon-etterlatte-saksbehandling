@@ -1,6 +1,8 @@
 package no.nav.etterlatte.grunnlag
 
 import com.fasterxml.jackson.databind.JsonNode
+import io.mockk.called
+import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -16,6 +18,7 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.Opplysning
 import no.nav.etterlatte.libs.common.grunnlag.hentBostedsadresse
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Navn
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.BOSTEDSADRESSE
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.FOEDELAND
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.FOEDSELSDATO
@@ -24,6 +27,8 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.N
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.PERSONGALLERI_V1
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.PERSONROLLE
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.pdl.PersonDTO
+import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.toJson
@@ -37,7 +42,6 @@ import no.nav.etterlatte.libs.testdata.grunnlag.INNSENDER_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER2_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.kilde
 import no.nav.etterlatte.libs.testdata.grunnlag.statiskUuid
-import no.nav.etterlatte.pdl.HistorikkForeldreansvar
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
@@ -47,6 +51,7 @@ import org.junit.jupiter.api.TestInstance
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Month
+import java.time.YearMonth
 import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -54,12 +59,14 @@ internal class GrunnlagServiceTest {
     private val opplysningDaoMock = mockk<OpplysningDao>()
     private val pdlTjenesterKlientImpl = mockk<PdlTjenesterKlientImpl>()
     private val persondataKlient = mockk<PersondataKlient>()
+    private val grunnlagFetcher = mockk<GrunnlagFetcher>()
     private val grunnlagService =
         RealGrunnlagService(
             pdlTjenesterKlientImpl,
             opplysningDaoMock,
             mockk(),
             persondataKlient,
+            grunnlagFetcher,
         )
 
     private val testData = GrunnlagTestData()
@@ -580,11 +587,6 @@ internal class GrunnlagServiceTest {
             )
 
         val opplysningsperson = mockPerson()
-        every { pdlTjenesterKlientImpl.hentPerson(any(), any(), any()) } returns testData.soeker
-        every { pdlTjenesterKlientImpl.hentOpplysningsperson(any(), any(), any()) } returns opplysningsperson
-        every {
-            pdlTjenesterKlientImpl.hentHistoriskForeldreansvar(any(), any(), any())
-        } returns mockk<HistorikkForeldreansvar>()
         every {
             opplysningDaoMock.hentBehandlingVersjon(behandlingId)
         } returns BehandlingGrunnlagVersjon(behandlingId, sakId, 12L, false)
@@ -594,6 +596,9 @@ internal class GrunnlagServiceTest {
         every {
             opplysningDaoMock.oppdaterVersjonForBehandling(any(), any(), any())
         } returns 1
+        coEvery {
+            grunnlagFetcher.fetchGrunnlagsdata(any())
+        } returns sampleFetchedGrunnlag(opplysningsperson)
 
         runBlocking { grunnlagService.oppdaterGrunnlag(behandlingId, sakId, sakType) }
 
@@ -602,6 +607,53 @@ internal class GrunnlagServiceTest {
             opplysningDaoMock.leggOpplysningTilGrunnlag(sakId, capture(slot), opplysningsperson.foedselsnummer.verdi)
             opplysningDaoMock.oppdaterVersjonForBehandling(behandlingId, sakId, 7)
         }
-        assertTrue(slot.filter { oppl -> oppl.opplysningType == FOEDSELSNUMMER }.size > 1)
+        assertTrue(slot.filter { oppl -> oppl.opplysningType == FOEDSELSNUMMER }.size == 1)
+        verify { pdlTjenesterKlientImpl wasNot called }
+        verify { pdlTjenesterKlientImpl wasNot called }
+        verify { persondataKlient wasNot called }
     }
+
+    private fun sampleFetchedGrunnlag(opplysningsperson: PersonDTO) =
+        FetchedGrunnlag(
+            personopplysninger =
+                listOf(
+                    Pair(
+                        opplysningsperson.foedselsnummer.verdi,
+                        listOf(
+                            grunnlagsopplysning(
+                                opplysningsperson.foedselsnummer.verdi,
+                                FOEDSELSNUMMER,
+                                opplysningsperson.foedselsnummer.verdi.toJsonNode(),
+                            ),
+                        ),
+                    ),
+                ),
+            saksopplysninger =
+                listOf(
+                    grunnlagsopplysning(
+                        null,
+                        BOSTEDSADRESSE,
+                        ADRESSE_DEFAULT.first().toJsonNode(),
+                    ),
+                ),
+        )
+
+    private fun grunnlagsopplysning(
+        fnr: Folkeregisteridentifikator?,
+        opplysningstype: Opplysningstype,
+        opplysning: JsonNode,
+    ) = Grunnlagsopplysning(
+        id = UUID.randomUUID(),
+        kilde = kilde,
+        opplysningType = opplysningstype,
+        meta = objectMapper.createObjectNode(),
+        opplysning = opplysning,
+        attestering = null,
+        fnr,
+        periode =
+            Periode(
+                fom = YearMonth.of(2022, 1),
+                tom = YearMonth.of(2022, 12),
+            ),
+    )
 }

@@ -2,11 +2,8 @@ package no.nav.etterlatte.grunnlag
 
 import com.fasterxml.jackson.databind.JsonNode
 import grunnlag.adresse.VergeAdresse
-import kotlinx.coroutines.async
-import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.klienter.PdlTjenesterKlientImpl
 import no.nav.etterlatte.klienter.PersondataKlient
-import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.PersonMedSakerOgRoller
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakOgRolle
@@ -104,6 +101,7 @@ class RealGrunnlagService(
     private val opplysningDao: OpplysningDao,
     private val sporingslogg: Sporingslogg,
     private val persondataKlient: PersondataKlient,
+    private val grunnlagFetcher: GrunnlagFetcher,
 ) : GrunnlagService {
     private val logger = LoggerFactory.getLogger(RealGrunnlagService::class.java)
 
@@ -167,195 +165,23 @@ class RealGrunnlagService(
         behandlingId: UUID,
         opplysningsbehov: Opplysningsbehov,
     ) {
-        val pdlPersondatasGrunnlag =
-            coroutineScope {
-                val persongalleri = opplysningsbehov.persongalleri
-                val sakType = opplysningsbehov.sakType
-                val requesterAvdoed =
-                    persongalleri.avdoed.map {
-                        Pair(
-                            async { pdltjenesterKlient.hentPerson(it, PersonRolle.AVDOED, opplysningsbehov.sakType) },
-                            async {
-                                pdltjenesterKlient.hentOpplysningsperson(
-                                    it,
-                                    PersonRolle.AVDOED,
-                                    opplysningsbehov.sakType,
-                                )
-                            },
-                        )
-                    }
+        val grunnlag = grunnlagFetcher.fetchGrunnlagsdata(opplysningsbehov)
 
-                val requesterGjenlevende =
-                    persongalleri.gjenlevende.map {
-                        Pair(
-                            async {
-                                pdltjenesterKlient.hentPerson(
-                                    it,
-                                    PersonRolle.GJENLEVENDE,
-                                    opplysningsbehov.sakType,
-                                )
-                            },
-                            async {
-                                pdltjenesterKlient.hentOpplysningsperson(
-                                    it,
-                                    PersonRolle.GJENLEVENDE,
-                                    opplysningsbehov.sakType,
-                                )
-                            },
-                        )
-                    }
-                val soekerRolle =
-                    when (sakType) {
-                        SakType.OMSTILLINGSSTOENAD -> PersonRolle.GJENLEVENDE
-                        SakType.BARNEPENSJON -> PersonRolle.BARN
-                    }
-                val soeker =
-                    Pair(
-                        async {
-                            pdltjenesterKlient.hentPerson(
-                                persongalleri.soeker,
-                                soekerRolle,
-                                opplysningsbehov.sakType,
-                            )
-                        },
-                        async {
-                            pdltjenesterKlient
-                                .hentOpplysningsperson(persongalleri.soeker, soekerRolle, opplysningsbehov.sakType)
-                        },
-                    )
-                val innsender =
-                    persongalleri.innsender
-                        ?.takeIf { it != Vedtaksloesning.PESYS.name }
-                        ?.let { innsenderFnr ->
-                            Pair(
-                                async {
-                                    pdltjenesterKlient.hentPerson(
-                                        innsenderFnr,
-                                        PersonRolle.INNSENDER,
-                                        opplysningsbehov.sakType,
-                                    )
-                                },
-                                async {
-                                    pdltjenesterKlient.hentOpplysningsperson(
-                                        innsenderFnr,
-                                        PersonRolle.INNSENDER,
-                                        opplysningsbehov.sakType,
-                                    )
-                                },
-                            )
-                        }
-                val innsenderPersonInfo =
-                    innsender?.let { (person, personDTO) ->
-                        GrunnlagsopplysningerPersonPdl(
-                            person.await(),
-                            personDTO.await(),
-                            Opplysningstype.INNSENDER_PDL_V1,
-                            PersonRolle.INNSENDER,
-                        )
-                    }
-                val soekerPersonInfo =
-                    GrunnlagsopplysningerPersonPdl(
-                        soeker.first.await(),
-                        soeker.second.await(),
-                        Opplysningstype.SOEKER_PDL_V1,
-                        soekerRolle,
-                    )
-                val vergeadresserRequester =
-                    (soekerPersonInfo.person.vergemaalEllerFremtidsfullmakt ?: emptyList())
-                        .mapNotNull { it.vergeEllerFullmektig.motpartsPersonident }
-                        .map { Pair(it, async { hentVergeadresse(it) }) }
-                val avdoedePersonInfo =
-                    requesterAvdoed.map {
-                        GrunnlagsopplysningerPersonPdl(
-                            it.first.await(),
-                            it.second.await(),
-                            Opplysningstype.AVDOED_PDL_V1,
-                            PersonRolle.AVDOED,
-                        )
-                    }
-                val gjenlevendePersonInfo =
-                    requesterGjenlevende.map {
-                        GrunnlagsopplysningerPersonPdl(
-                            it.first.await(),
-                            it.second.await(),
-                            Opplysningstype.GJENLEVENDE_FORELDER_PDL_V1,
-                            PersonRolle.GJENLEVENDE,
-                        )
-                    }
-
-                val vergeAdresseMap = vergeadresserRequester.associate { it.first to it.second.await() }
-
-                GrunnlagComponents(
-                    soekerPersonInfo,
-                    innsenderPersonInfo,
-                    avdoedePersonInfo,
-                    gjenlevendePersonInfo,
-                    vergeAdresseMap,
-                )
-            }
-
-        pdlPersondatasGrunnlag.toList().forEach {
-            val enkenPdlOpplysning =
-                lagEnkelopplysningerFraPDL(
-                    it.person,
-                    it.personDto,
-                    it.opplysningstype,
-                    it.personDto.foedselsnummer.verdi,
-                    it.personRolle,
-                )
+        grunnlag.personopplysninger.forEach { fnrToOpplysning ->
             lagreNyePersonopplysninger(
                 opplysningsbehov.sakId,
                 behandlingId,
-                it.personDto.foedselsnummer.verdi,
-                enkenPdlOpplysning,
+                fnrToOpplysning.first,
+                fnrToOpplysning.second,
             )
-        }
-
-        val nyeSaksopplysninger = mutableListOf(opplysningsbehov.persongalleri.tilGrunnlagsopplysning())
-        if (pdlPersondatasGrunnlag.vergeAdresseMap.isNotEmpty()) {
-            nyeSaksopplysninger.add(vergeAdresserOpplysning(pdlPersondatasGrunnlag.vergeAdresseMap))
         }
 
         lagreNyeSaksopplysninger(
             opplysningsbehov.sakId,
             behandlingId,
-            nyeSaksopplysninger.toList(),
+            grunnlag.saksopplysninger,
         )
         logger.info("Oppdatert grunnlag (sakId=${opplysningsbehov.sakId}, behandlingId=$behandlingId)")
-    }
-
-    private fun vergeAdresserOpplysning(vergeadresserMap: Map<Folkeregisteridentifikator, VergeAdresse>): Grunnlagsopplysning<JsonNode> =
-        Grunnlagsopplysning(
-            id = UUID.randomUUID(),
-            kilde =
-                Grunnlagsopplysning.Persondata(
-                    tidspunktForInnhenting = Tidspunkt.now(),
-                    registersReferanse = null,
-                    opplysningId = null,
-                ),
-            opplysningType = Opplysningstype.VERGES_ADRESSER,
-            meta = objectMapper.createObjectNode(),
-            opplysning = vergeadresserMap.toJsonNode(),
-            fnr = null,
-            periode = null,
-        )
-
-    private fun Persongalleri.tilGrunnlagsopplysning(): Grunnlagsopplysning<JsonNode> {
-        return Grunnlagsopplysning(
-            id = UUID.randomUUID(),
-            kilde =
-                if (this.innsender == Vedtaksloesning.PESYS.name) {
-                    Grunnlagsopplysning.Pesys.create()
-                } else {
-                    Grunnlagsopplysning.Privatperson(this.innsender!!, Tidspunkt.now())
-                },
-            opplysningType = Opplysningstype.PERSONGALLERI_V1,
-            meta = objectMapper.createObjectNode(),
-            opplysning = this.toJsonNode(),
-            attestering = null,
-            fnr = null,
-            periode = null,
-        )
     }
 
     override suspend fun oppdaterGrunnlag(
@@ -602,17 +428,3 @@ class LaastGrunnlagKanIkkeEndres(val behandlingId: UUID) :
             låst til en versjon av grunnlag (behandlingId=$behandlingId)
             """,
     )
-
-data class GrunnlagComponents(
-    val soekerPersonInfo: GrunnlagsopplysningerPersonPdl,
-    val innsenderPersonInfo: GrunnlagsopplysningerPersonPdl?,
-    val avdoedePersonInfo: List<GrunnlagsopplysningerPersonPdl>,
-    val gjenlevendePersonInfo: List<GrunnlagsopplysningerPersonPdl>,
-    val vergeAdresseMap: Map<Folkeregisteridentifikator, VergeAdresse>,
-) {
-    fun toList(): List<GrunnlagsopplysningerPersonPdl> {
-        return listOfNotNull(soekerPersonInfo, innsenderPersonInfo)
-            .plus(avdoedePersonInfo)
-            .plus(gjenlevendePersonInfo)
-    }
-}

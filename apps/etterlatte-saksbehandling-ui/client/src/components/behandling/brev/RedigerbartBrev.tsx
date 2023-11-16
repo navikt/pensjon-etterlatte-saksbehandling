@@ -59,6 +59,7 @@ export default function RedigerbartBrev({ brev, kanRedigeres, lukkAdvarselBehand
   const lagre = () => {
     apiLagreManuellPayload({ brevId: brev.id, sakId: brev.sakId, payload: content, payload_vedlegg: vedlegg }, () => {
       setLagretStatus({ lagret: true, beskrivelse: `Lagret kl. ${formaterTidspunkt(new Date())}` })
+      if (lukkAdvarselBehandlingEndret) lukkAdvarselBehandlingEndret()
     })
   }
 

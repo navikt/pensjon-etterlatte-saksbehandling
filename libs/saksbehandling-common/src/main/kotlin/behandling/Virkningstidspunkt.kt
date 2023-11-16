@@ -15,7 +15,7 @@ data class Virkningstidspunkt(
             dato: YearMonth,
             ident: String,
             begrunnelse: String,
-            kravdato: YearMonth?,
+            kravdato: YearMonth? = null,
         ) = Virkningstidspunkt(dato, Grunnlagsopplysning.Saksbehandler.create(ident), begrunnelse, kravdato)
     }
 }

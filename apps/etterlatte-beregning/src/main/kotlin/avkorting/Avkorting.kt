@@ -229,6 +229,10 @@ data class Avkorting(
         return avkortetYtelseMedAllForventetInntekt
     }
 
+    /*
+     * Det er tilfeller hvor det er nødvendig å vite når første periode i inneværende begynner.
+     * Ved inngangsår så vil ikke første måned nødvendgivis være januar så det må baseres på fom første periode.
+     */
     private fun foersteMaanedDetteAar() = this.aarsoppgjoer.ytelseFoerAvkorting.first().periode.fom
 }
 

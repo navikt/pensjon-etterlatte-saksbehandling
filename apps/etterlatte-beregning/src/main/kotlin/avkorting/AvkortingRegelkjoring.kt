@@ -192,7 +192,7 @@ object AvkortingRegelkjoring {
         )
 
     fun beregnRestanse(
-        foersteMaanedDetteAar: YearMonth,
+        fraOgMed: YearMonth,
         nyInntektsavkorting: Inntektsavkorting,
         tidligereYtelseEtterAvkorting: List<AvkortetYtelse>,
     ): Restanse {
@@ -201,7 +201,7 @@ object AvkortingRegelkjoring {
             RestanseGrunnlag(
                 tidligereYtelseEtterAvkorting =
                     FaktumNode(
-                        verdi = tidligereYtelseEtterAvkorting.spreYtelsePerMaaned(foersteMaanedDetteAar, oppstartNyInntekt),
+                        verdi = tidligereYtelseEtterAvkorting.spreYtelsePerMaaned(fraOgMed, oppstartNyInntekt),
                         kilde = tidligereYtelseEtterAvkorting.map { "avkortetYtelse:${it.id}" },
                         beskrivelse = "Ytelse etter avkorting for tidligere oppgitt forventet årsinntekt samme år",
                     ),
@@ -209,7 +209,7 @@ object AvkortingRegelkjoring {
                     FaktumNode(
                         verdi =
                             nyInntektsavkorting.avkortetYtelseForventetInntekt.spreYtelsePerMaaned(
-                                foersteMaanedDetteAar,
+                                fraOgMed,
                                 oppstartNyInntekt,
                             ),
                         kilde = nyInntektsavkorting.grunnlag.id,
@@ -226,7 +226,7 @@ object AvkortingRegelkjoring {
         val resultat =
             restanse.eksekver(
                 KonstantGrunnlag(grunnlag),
-                Periode(fom = foersteMaanedDetteAar, tom = null).tilRegelPeriode(),
+                Periode(fom = fraOgMed, tom = null).tilRegelPeriode(),
             )
         return when (resultat) {
             is RegelkjoeringResultat.Suksess -> {

@@ -2,7 +2,6 @@ import { Heading, Link, Table } from '@navikt/ds-react'
 import { AarsaksTyper, BehandlingOgRevurderingsAarsakerType, IBehandlingsammendrag } from './typer'
 import {
   formaterBehandlingstype,
-  formaterDatoMedTidspunkt,
   formaterEnumTilLesbarString,
   formaterStringDato,
   formaterVedtakType,
@@ -17,6 +16,7 @@ import Spinner from '~shared/Spinner'
 import { ExclamationmarkTriangleFillIcon } from '@navikt/aksel-icons'
 import { hentGenerelleBehandlingForSak } from '~shared/api/generellbehandling'
 import { GenerellBehandlingType, Status } from '~shared/types/Generellbehandling'
+import { ApiErrorAlert } from '~ErrorBoundary'
 
 function mapAarsak(aarsak: BehandlingOgRevurderingsAarsakerType) {
   switch (aarsak) {
@@ -202,26 +202,32 @@ export const Behandlingsliste = ({ behandlinger, sakId }: { behandlinger: IBehan
             </Table.Row>
           ))}
           {isSuccess(generellbehandlingStatus) &&
-            generellbehandlingStatus.data.map((generellBehandling, i) => (
-              <Table.Row key={i} shadeOnHover={false}>
-                <Table.DataCell>{formaterDatoMedTidspunkt(generellBehandling.opprettet)}</Table.DataCell>
-                <Table.DataCell>
-                  <BehandlingstypeWrapper>
-                    {genbehandlingTypeTilLesbartNavn(generellBehandling.type)}
-                  </BehandlingstypeWrapper>
-                </Table.DataCell>
-                <Table.DataCell>-</Table.DataCell>
-                <Table.DataCell>{generellBehandlingsStatusTilLesbartNavn(generellBehandling.status)}</Table.DataCell>
-                <Table.DataCell>-</Table.DataCell>
-                <Table.DataCell>-</Table.DataCell>
-                <Table.DataCell>-</Table.DataCell>
-                <Table.DataCell>
-                  <Link href={`/generellbehandling/${generellBehandling.id}`}>Gå til behandling</Link>
-                </Table.DataCell>
-              </Table.Row>
-            ))}
+            generellbehandlingStatus.data
+              .sort((a, b) => (new Date(b.opprettet!) > new Date(a.opprettet!) ? 1 : -1))
+              .map((generellBehandling, i) => (
+                <Table.Row key={i} shadeOnHover={false}>
+                  <Table.DataCell>{formaterStringDato(generellBehandling.opprettet)}</Table.DataCell>
+                  <Table.DataCell>
+                    <BehandlingstypeWrapper>
+                      {genbehandlingTypeTilLesbartNavn(generellBehandling.type)}
+                    </BehandlingstypeWrapper>
+                  </Table.DataCell>
+                  <Table.DataCell>-</Table.DataCell>
+                  <Table.DataCell>{generellBehandlingsStatusTilLesbartNavn(generellBehandling.status)}</Table.DataCell>
+                  <Table.DataCell>-</Table.DataCell>
+                  <Table.DataCell>-</Table.DataCell>
+                  <Table.DataCell>-</Table.DataCell>
+                  <Table.DataCell>
+                    <Link href={`/generellbehandling/${generellBehandling.id}`}>Gå til behandling</Link>
+                  </Table.DataCell>
+                </Table.Row>
+              ))}
         </Table.Body>
       </Table>
+      {isPending(generellbehandlingStatus) && <Spinner visible={true} label="Henter generelle behandlinger" />}
+      {isFailure(generellbehandlingStatus) && (
+        <ApiErrorAlert>Vi klarte ikke å hente generelle behandligner</ApiErrorAlert>
+      )}
     </BehandlingPanel>
   )
 }

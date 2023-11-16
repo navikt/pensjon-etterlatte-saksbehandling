@@ -580,10 +580,6 @@ class VedtakBehandlingService(
     private fun vilkaarsvurderingUtfallNonNull(vilkaarsvurderingUtfall: VilkaarsvurderingUtfall?) =
         requireNotNull(vilkaarsvurderingUtfall) { "Behandling mangler utfall på vilkårsvurdering" }
 
-    fun hentAttesterteEllerIverksatteVedtakSomSkalSendeBrev(): List<Vedtak> {
-        return repository.hentAttesterteEllerIverksatteVedtakSomSkalSendeBrev()
-    }
-
     fun tilbakestillIkkeIverksatteVedtak(behandlingId: UUID): Vedtak? = repository.tilbakestillIkkeIverksatteVedtak(behandlingId)
 
     fun hentNyesteBehandlingMedResultat(

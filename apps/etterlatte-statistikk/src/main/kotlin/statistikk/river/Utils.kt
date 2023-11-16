@@ -20,7 +20,7 @@ fun parseTekniskTid(
         try {
             return LocalDateTime.parse(pakkeTid)
         } catch (e: Exception) {
-            logger.warn("Kunne ikke parse teknisk tid på hendelse ${packet.eventName}!")
+            logger.warn("Kunne ikke parse teknisk tid på hendelse ${packet.eventName}, på grunn av feil", e)
         }
     }
     logger.warn("Ingen teknisk tid på pakken med hendelse ${packet.eventName}, fallbacker til now()")

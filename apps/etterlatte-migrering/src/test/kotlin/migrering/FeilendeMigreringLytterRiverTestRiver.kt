@@ -67,7 +67,8 @@ class FeilendeMigreringLytterRiverTestRiver {
                     soeker = SOEKER_FOEDSELSNUMMER,
                     gjenlevendeForelder = null,
                     avdoedForelder = listOf(),
-                    virkningstidspunkt = YearMonth.now(),
+                    dodAvYrkesskade = false,
+                    foersteVirkningstidspunkt = YearMonth.now(),
                     beregning =
                         Beregning(
                             brutto = 3500,
@@ -125,7 +126,8 @@ class FeilendeMigreringLytterRiverTestRiver {
                     soeker = SOEKER_FOEDSELSNUMMER,
                     gjenlevendeForelder = null,
                     avdoedForelder = listOf(),
-                    virkningstidspunkt = YearMonth.now(),
+                    dodAvYrkesskade = false,
+                    foersteVirkningstidspunkt = YearMonth.now(),
                     beregning =
                         Beregning(
                             brutto = 3500,

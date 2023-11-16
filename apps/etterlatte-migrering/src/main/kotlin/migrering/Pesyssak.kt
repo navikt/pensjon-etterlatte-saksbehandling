@@ -16,7 +16,8 @@ data class Pesyssak(
     val soeker: Folkeregisteridentifikator,
     val gjenlevendeForelder: Folkeregisteridentifikator?,
     val avdoedForelder: List<AvdoedForelder>,
-    val virkningstidspunkt: YearMonth,
+    val dodAvYrkesskade: Boolean,
+    val foersteVirkningstidspunkt: YearMonth,
     val beregning: Beregning,
     val trygdetid: Trygdetid,
     val flyktningStatus: Boolean,
@@ -29,10 +30,11 @@ data class Pesyssak(
             soeker = soeker,
             gjenlevendeForelder = gjenlevendeForelder,
             avdoedForelder = avdoedForelder,
-            virkningstidspunkt = virkningstidspunkt,
+            dodAvYrkesskade = dodAvYrkesskade,
+            flyktningStatus = flyktningStatus,
+            foersteVirkningstidspunkt = foersteVirkningstidspunkt,
             beregning = beregning,
             trygdetid = trygdetid,
-            flyktningStatus = flyktningStatus,
             spraak = spraak,
         )
 }

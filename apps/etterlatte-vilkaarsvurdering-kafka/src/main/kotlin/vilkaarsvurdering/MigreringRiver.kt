@@ -34,7 +34,7 @@ internal class MigreringRiver(
         context: MessageContext,
     ) {
         val behandlingId = packet.behandlingId
-        val yrkesskadeFordel = packet.hendelseData.avdoedForelder.any { it.yrkesskade }
+        val yrkesskadeFordel = packet.hendelseData.dodAvYrkesskade
         logger.info("Mottatt vilkårs-migreringshendelse for $BEHANDLING_ID_KEY $behandlingId")
         vilkaarsvurderingService.migrer(behandlingId, yrkesskadeFordel)
         packet[VILKAARSVURDERT_KEY] = true

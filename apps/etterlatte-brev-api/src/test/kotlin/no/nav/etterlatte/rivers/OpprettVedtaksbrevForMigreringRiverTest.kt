@@ -148,7 +148,8 @@ fun migreringRequest() =
         soeker = SOEKER_FOEDSELSNUMMER,
         gjenlevendeForelder = null,
         avdoedForelder = listOf(),
-        virkningstidspunkt = YearMonth.of(2024, Month.JANUARY),
+        dodAvYrkesskade = false,
+        foersteVirkningstidspunkt = YearMonth.of(2024, Month.JANUARY),
         beregning =
             Beregning(
                 brutto = 4285,

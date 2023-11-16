@@ -36,7 +36,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '18.x'
+          node-version: '20.x'
       - name: Install client
         working-directory: apps/${{ env.APP_NAME }}
         run: yarn --cwd client install --frozen-lockfile && yarn --cwd client build
@@ -62,7 +62,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '18.x'
+          node-version: '20.x'
       - name: Inject slug/short variables
         uses: rlespinasse/github-slug-action@v4
       - name: Install and build client

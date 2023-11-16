@@ -14,17 +14,28 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
 import rapidsandrivers.SAK_ID_FLERE_KEY
+import java.time.Duration
 import java.util.UUID
 import javax.sql.DataSource
+import kotlin.concurrent.thread
 
 class StartMigrering(val repository: StartMigreringRepository, val rapidsConnection: RapidsConnection) {
     private val logger = LoggerFactory.getLogger(this::class.java)
+
+    init {
+        startMigrering()
+    }
 
     fun startMigrering() {
         logger.info("Starter migrering for sakene som ligger i databasetabellen")
         val sakerTilMigrering = repository.hentSakerTilMigrering().also { logger.info("Migrerer ${it.size} saker") }
         repository.settSakerMigrert(sakerTilMigrering)
-        rapidsConnection.publish(message = lagMelding(sakerTilMigrering), key = UUID.randomUUID().toString())
+        if (sakerTilMigrering.isNotEmpty()) {
+            thread {
+                Thread.sleep(Duration.ofMinutes(1))
+                rapidsConnection.publish(message = lagMelding(sakerTilMigrering), key = UUID.randomUUID().toString())
+            }
+        }
     }
 
     private fun lagMelding(sakerTilMigrering: List<Long>) =

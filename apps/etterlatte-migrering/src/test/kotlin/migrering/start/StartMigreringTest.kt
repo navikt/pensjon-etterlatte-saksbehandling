@@ -52,13 +52,13 @@ internal class StartMigreringTest {
                     "VALUES(123)",
             ).let { query -> tx.run(query.asUpdate) }
         }
+        Assertions.assertEquals(1, repository.hentSakerTilMigrering().size)
         val starter =
             StartMigrering(
                 repository = repository,
                 rapidsConnection = mockk<RapidsConnection>().also { every { it.publish(any(), any()) } just runs },
             )
 
-        Assertions.assertEquals(1, repository.hentSakerTilMigrering().size)
         starter.startMigrering()
         Assertions.assertEquals(0, repository.hentSakerTilMigrering().size)
     }

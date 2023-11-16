@@ -24,6 +24,8 @@ import java.util.UUID
 
 class DokumentManglerDatoException(message: String) : Exception(message)
 
+class DokumentErIkkeMarkertSomSendt(message: String) : Exception(message)
+
 class LandFeilIsokodeException(message: String) : Exception(message)
 
 class ManglerLandkodeException(message: String) : Exception(message)
@@ -127,14 +129,16 @@ class GenerellBehandlingService(
         if (innhold.rinanummer.isEmpty()) {
             throw ManglerRinanummerException("Må ha rinanummer")
         }
-        innhold.dokumenter.forEach { doc -> validerHvisAvhuketSaaHarDato(doc) }
+
+        innhold.dokumenter.forEach { doc -> validerMaaHaDatoOgVaereMarkertSomSendt(doc) }
     }
 
-    private fun validerHvisAvhuketSaaHarDato(dokumentMedSendtDato: DokumentMedSendtDato) {
-        if (dokumentMedSendtDato.sendt) {
-            dokumentMedSendtDato.dato
-                ?: throw DokumentManglerDatoException("Dokument ${dokumentMedSendtDato.dokumenttype} er markert som sendt men mangler dato")
+    private fun validerMaaHaDatoOgVaereMarkertSomSendt(dokumentMedSendtDato: DokumentMedSendtDato) {
+        if (!dokumentMedSendtDato.sendt) {
+            throw DokumentErIkkeMarkertSomSendt("Dokument ${dokumentMedSendtDato.dokumenttype} er ikke markert som sendt ")
         }
+        dokumentMedSendtDato.dato
+            ?: throw DokumentManglerDatoException("Dokument ${dokumentMedSendtDato.dokumenttype} er markert som sendt men mangler dato")
     }
 
     fun lagreNyeOpplysninger(generellBehandling: GenerellBehandling): GenerellBehandling {

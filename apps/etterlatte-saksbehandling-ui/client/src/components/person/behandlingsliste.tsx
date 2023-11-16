@@ -2,6 +2,7 @@ import { Heading, Link, Table } from '@navikt/ds-react'
 import { AarsaksTyper, BehandlingOgRevurderingsAarsakerType, IBehandlingsammendrag } from './typer'
 import {
   formaterBehandlingstype,
+  formaterDatoMedTidspunkt,
   formaterEnumTilLesbarString,
   formaterStringDato,
   formaterVedtakType,
@@ -14,6 +15,76 @@ import styled from 'styled-components'
 import { isFailure, isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
 import Spinner from '~shared/Spinner'
 import { ExclamationmarkTriangleFillIcon } from '@navikt/aksel-icons'
+import { hentGenerelleBehandlingForSak } from '~shared/api/generellbehandling'
+import { GenerellBehandlingType, Status } from '~shared/types/Generellbehandling'
+
+function mapAarsak(aarsak: BehandlingOgRevurderingsAarsakerType) {
+  switch (aarsak) {
+    case AarsaksTyper.MANUELT_OPPHOER:
+      return 'Manuelt opphør'
+    case AarsaksTyper.SOEKNAD:
+      return 'Søknad'
+    case AarsaksTyper.REVURDERING:
+      return 'Revurdering'
+    case Revurderingaarsak.REGULERING:
+      return 'Regulering'
+    case Revurderingaarsak.ANSVARLIGE_FORELDRE:
+      return 'Ansvarlige foreldre'
+    case Revurderingaarsak.SOESKENJUSTERING:
+      return 'Søskenjustering'
+    case Revurderingaarsak.UTLAND:
+      return 'Ut-/innflytting til Norge'
+    case Revurderingaarsak.BARN:
+      return 'Barn'
+    case Revurderingaarsak.DOEDSFALL:
+      return 'Dødsfall'
+    case Revurderingaarsak.OMGJOERING_AV_FARSKAP:
+      return 'Omgjøring av farskap'
+    case Revurderingaarsak.ADOPSJON:
+      return 'Adopsjon'
+    case Revurderingaarsak.VERGEMAAL_ELLER_FREMTIDSFULLMAKT:
+      return 'Institusjonsopphold'
+    case Revurderingaarsak.SIVILSTAND:
+      return 'Endring av sivilstand'
+    case Revurderingaarsak.NY_SOEKNAD:
+      return 'Ny Søknad'
+    case Revurderingaarsak.FENGSELSOPPHOLD:
+      return 'Fengselsopphold'
+    case Revurderingaarsak.YRKESSKADE:
+      return 'Yrkesskade'
+    case Revurderingaarsak.UT_AV_FENGSEL:
+      return 'Ut av fengsel'
+    case Revurderingaarsak.ANNEN:
+      return 'Annen'
+  }
+}
+
+function behandlingStatusTilLesbartnavn(status: IBehandlingStatus) {
+  switch (status) {
+    case IBehandlingStatus.FATTET_VEDTAK:
+      return 'Til attestering'
+    case IBehandlingStatus.ATTESTERT:
+      return 'Attestert'
+    case IBehandlingStatus.TIL_SAMORDNING:
+      return 'Til samordning'
+    case IBehandlingStatus.SAMORDNET:
+      return 'Samordnet'
+    case IBehandlingStatus.IVERKSATT:
+      return 'Iverksatt'
+    default:
+      return status
+  }
+}
+
+const BehandlingPanel = styled.div`
+  margin: 3rem 0;
+`
+
+const BehandlingstypeWrapper = styled.div`
+  display: flex;
+  flex-direction: row;
+  gap: 0.5em;
+`
 
 const VedtakKolonner = (props: { behandlingId: string }) => {
   const [vedtak, apiHentVedtaksammendrag] = useApiCall(hentVedtakSammendrag)
@@ -60,17 +131,39 @@ const lenkeTilBehandling = (behandlingSammendrag: IBehandlingsammendrag): string
   }
 }
 
-export const Behandlingsliste = ({ behandlinger }: { behandlinger: IBehandlingsammendrag[] }) => {
+const generellBehandlingsStatusTilLesbartNavn = (status: Status) => {
+  switch (status) {
+    case Status.OPPRETTET:
+      return 'Opprettet'
+    case Status.FATTET:
+      return 'Fattet'
+    case Status.ATTESTERT:
+      return 'Attestert'
+    case Status.AVBRUTT:
+      return 'Avbrutt'
+  }
+}
+
+const genbehandlingTypeTilLesbartNavn = (type: GenerellBehandlingType) => {
+  switch (type) {
+    case 'KRAVPAKKE_UTLAND':
+      return 'Kravpakke til utland'
+    case 'ANNEN':
+      return 'Annen'
+  }
+}
+
+export const Behandlingsliste = ({ behandlinger, sakId }: { behandlinger: IBehandlingsammendrag[]; sakId: number }) => {
+  const [generellbehandlingStatus, hentGenerellbehandlinger] = useApiCall(hentGenerelleBehandlingForSak)
+
+  useEffect(() => {
+    hentGenerellbehandlinger(sakId)
+  }, [])
+
   const sorterteBehandlinger = behandlinger.sort((a, b) =>
     new Date(b.behandlingOpprettet!) > new Date(a.behandlingOpprettet!) ? 1 : -1
   )
 
-  /**
-   * TODO:
-   *  Burde ha en form for paginering av behandlinger. Visning av tabellen og henting av vedtakssammendrag henger
-   *  seg opp når det er for mange elementer i listen. Eksempelvis testbruker STOR SNERK som har 210 behandlinger i
-   *  skrivende stund.
-   */
   return (
     <BehandlingPanel>
       <Heading size="medium">Behandlinger</Heading>
@@ -96,86 +189,39 @@ export const Behandlingsliste = ({ behandlinger }: { behandlinger: IBehandlingsa
                 <BehandlingstypeWrapper>{formaterBehandlingstype(behandling.behandlingType)}</BehandlingstypeWrapper>
               </Table.DataCell>
               <Table.DataCell>{mapAarsak(behandling.aarsak)}</Table.DataCell>
-              <Table.DataCell>{formaterEnumTilLesbarString(endringStatusNavn(behandling.status))}</Table.DataCell>
+              <Table.DataCell>
+                {formaterEnumTilLesbarString(behandlingStatusTilLesbartnavn(behandling.status))}
+              </Table.DataCell>
               <Table.DataCell>
                 {behandling.virkningstidspunkt ? formaterStringDato(behandling.virkningstidspunkt!!.dato) : ''}
               </Table.DataCell>
               <VedtakKolonner behandlingId={behandling.id} />
               <Table.DataCell>
-                <Link href={lenkeTilBehandling(behandling)}>Vis behandling</Link>
+                <Link href={lenkeTilBehandling(behandling)}>Gå til behandling</Link>
               </Table.DataCell>
             </Table.Row>
           ))}
+          {isSuccess(generellbehandlingStatus) &&
+            generellbehandlingStatus.data.map((generellBehandling, i) => (
+              <Table.Row key={i} shadeOnHover={false}>
+                <Table.DataCell>{formaterDatoMedTidspunkt(generellBehandling.opprettet)}</Table.DataCell>
+                <Table.DataCell>
+                  <BehandlingstypeWrapper>
+                    {genbehandlingTypeTilLesbartNavn(generellBehandling.type)}
+                  </BehandlingstypeWrapper>
+                </Table.DataCell>
+                <Table.DataCell>-</Table.DataCell>
+                <Table.DataCell>{generellBehandlingsStatusTilLesbartNavn(generellBehandling.status)}</Table.DataCell>
+                <Table.DataCell>-</Table.DataCell>
+                <Table.DataCell>-</Table.DataCell>
+                <Table.DataCell>-</Table.DataCell>
+                <Table.DataCell>
+                  <Link href={`/generellbehandling/${generellBehandling.id}`}>Gå til behandling</Link>
+                </Table.DataCell>
+              </Table.Row>
+            ))}
         </Table.Body>
       </Table>
     </BehandlingPanel>
   )
 }
-
-function mapAarsak(aarsak: BehandlingOgRevurderingsAarsakerType) {
-  switch (aarsak) {
-    case AarsaksTyper.MANUELT_OPPHOER:
-      return 'Manuelt opphør'
-    case AarsaksTyper.SOEKNAD:
-      return 'Søknad'
-    case AarsaksTyper.REVURDERING:
-      return 'Revurdering'
-    case Revurderingaarsak.REGULERING:
-      return 'Regulering'
-    case Revurderingaarsak.ANSVARLIGE_FORELDRE:
-      return 'Ansvarlige foreldre'
-    case Revurderingaarsak.SOESKENJUSTERING:
-      return 'Søskenjustering'
-    case Revurderingaarsak.UTLAND:
-      return 'Ut-/innflytting til Norge'
-    case Revurderingaarsak.BARN:
-      return 'Barn'
-    case Revurderingaarsak.DOEDSFALL:
-      return 'Dødsfall'
-    case Revurderingaarsak.OMGJOERING_AV_FARSKAP:
-      return 'Omgjøring av farskap'
-    case Revurderingaarsak.ADOPSJON:
-      return 'Adopsjon'
-    case Revurderingaarsak.VERGEMAAL_ELLER_FREMTIDSFULLMAKT:
-      return 'Institusjonsopphold'
-    case Revurderingaarsak.SIVILSTAND:
-      return 'Endring av sivilstand'
-    case Revurderingaarsak.NY_SOEKNAD:
-      return 'Ny Søknad'
-    case Revurderingaarsak.FENGSELSOPPHOLD:
-      return 'Fengselsopphold'
-    case Revurderingaarsak.YRKESSKADE:
-      return 'Yrkesskade'
-    case Revurderingaarsak.UT_AV_FENGSEL:
-      return 'Ut av fengsel'
-    case Revurderingaarsak.ANNEN:
-      return 'Annen'
-  }
-}
-
-function endringStatusNavn(status: IBehandlingStatus) {
-  switch (status) {
-    case IBehandlingStatus.FATTET_VEDTAK:
-      return 'Til attestering'
-    case IBehandlingStatus.ATTESTERT:
-      return 'Attestert'
-    case IBehandlingStatus.TIL_SAMORDNING:
-      return 'Til samordning'
-    case IBehandlingStatus.SAMORDNET:
-      return 'Samordnet'
-    case IBehandlingStatus.IVERKSATT:
-      return 'Iverksatt'
-    default:
-      return status
-  }
-}
-
-const BehandlingPanel = styled.div`
-  margin: 3rem 0;
-`
-
-const BehandlingstypeWrapper = styled.div`
-  display: flex;
-  flex-direction: row;
-  gap: 0.5em;
-`

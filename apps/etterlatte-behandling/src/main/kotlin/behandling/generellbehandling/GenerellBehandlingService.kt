@@ -162,7 +162,7 @@ class GenerellBehandlingService(
         return generellBehandlingDao.hentGenerellBehandlingMedId(id)
     }
 
-    fun hentBehandlingForSak(sakId: Long): List<GenerellBehandling> {
+    fun hentBehandlingerForSak(sakId: Long): List<GenerellBehandling> {
         return generellBehandlingDao.hentGenerellBehandlingForSak(sakId)
     }
 

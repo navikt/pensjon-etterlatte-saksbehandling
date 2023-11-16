@@ -123,10 +123,11 @@ internal fun Route.generellbehandlingRoutes(
             }
         }
     }
-    get("/api/generellbehandlingForSak/{$SAKID_CALL_PARAMETER}") {
+
+    get("/api/generellbehandling/hentforsak/{$SAKID_CALL_PARAMETER}") {
         hvisEnabled(GenerellBehandlingToggle.KanBrukeGenerellBehandlingToggle) {
             kunSaksbehandler {
-                call.respond(inTransaction { generellBehandlingService.hentBehandlingForSak(sakId) })
+                call.respond(inTransaction { generellBehandlingService.hentBehandlingerForSak(sakId) })
             }
         }
     }

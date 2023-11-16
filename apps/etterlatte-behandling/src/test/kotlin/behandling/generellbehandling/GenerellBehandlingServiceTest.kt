@@ -194,6 +194,26 @@ class GenerellBehandlingServiceTest {
     }
 
     @Test
+    fun `Kan hente behandlinger på sak`() {
+        val sak = sakRepo.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val manueltOpprettetBehandling =
+            GenerellBehandling.opprettFraType(
+                GenerellBehandling.GenerellBehandlingType.KRAVPAKKE_UTLAND,
+                sak.id,
+            )
+        val opprettBehandling = service.opprettBehandling(manueltOpprettetBehandling)
+        Assertions.assertEquals(GenerellBehandling.GenerellBehandlingType.KRAVPAKKE_UTLAND, opprettBehandling.type)
+        Assertions.assertEquals(sak.id, opprettBehandling.sakId)
+        Assertions.assertEquals(GenerellBehandling.Status.OPPRETTET, opprettBehandling.status)
+        Assertions.assertNotNull(opprettBehandling.opprettet)
+        Assertions.assertNull(opprettBehandling.innhold)
+
+        val behandlinger = service.hentBehandlingerForSak(sak.id)
+        Assertions.assertEquals(1, behandlinger.size)
+        behandlinger[0] shouldBe opprettBehandling
+    }
+
+    @Test
     fun kanOppretteBehandlingOgFaarDaOgsaaEnOppgaveManuellOpprettelseUtenTildelingAvSaksbehandler() {
         val sak = sakRepo.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         val manueltOpprettetBehandling =
@@ -388,7 +408,7 @@ class GenerellBehandlingServiceTest {
     }
 
     @Test
-    fun `Skal feile landkodelisten er tom`() {
+    fun `Skal feile hvis landkodelisten er tom`() {
         val saksbehandler = Saksbehandler("token", "saksbehandler", null)
 
         val sak = sakRepo.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)

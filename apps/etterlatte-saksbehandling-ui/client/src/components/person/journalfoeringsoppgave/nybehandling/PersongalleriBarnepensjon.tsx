@@ -5,18 +5,18 @@ import React from 'react'
 import { InputList, InputRow } from './OpprettNyBehandling'
 import { useJournalfoeringOppgave } from '~components/person/journalfoeringsoppgave/useJournalfoeringOppgave'
 import { useAppDispatch } from '~store/Store'
-import { settBehandlingBehov } from '~store/reducers/JournalfoeringOppgaveReducer'
+import { settNyBehandlingRequest } from '~store/reducers/JournalfoeringOppgaveReducer'
 
 type PersonArray = keyof Omit<Persongalleri, 'soeker' | 'innsender'>
 
 export default function PersongalleriBarnepensjon() {
-  const { behandlingBehov } = useJournalfoeringOppgave()
+  const { nyBehandlingRequest } = useJournalfoeringOppgave()
   const dispatch = useAppDispatch()
 
-  const persongalleri = behandlingBehov?.persongalleri
+  const persongalleri = nyBehandlingRequest?.persongalleri
 
   const oppdaterPersongalleri = (persongalleri: Persongalleri) => {
-    dispatch(settBehandlingBehov({ ...behandlingBehov, persongalleri }))
+    dispatch(settNyBehandlingRequest({ ...nyBehandlingRequest, persongalleri }))
   }
 
   const oppdater = (field: PersonArray, fnr: string, index: number) => {

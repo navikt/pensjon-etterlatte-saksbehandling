@@ -2,18 +2,18 @@ import { Button, Heading, Panel, TextField } from '@navikt/ds-react'
 import { PlusIcon, XMarkIcon } from '@navikt/aksel-icons'
 import { Persongalleri } from '~shared/types/Person'
 import { InputList, InputRow } from '~components/person/journalfoeringsoppgave/nybehandling/OpprettNyBehandling'
-import { settBehandlingBehov } from '~store/reducers/JournalfoeringOppgaveReducer'
+import { settNyBehandlingRequest } from '~store/reducers/JournalfoeringOppgaveReducer'
 import { useAppDispatch } from '~store/Store'
 import { useJournalfoeringOppgave } from '~components/person/journalfoeringsoppgave/useJournalfoeringOppgave'
 
 export default function PersongalleriOmstillingsstoenad() {
-  const { behandlingBehov } = useJournalfoeringOppgave()
+  const { nyBehandlingRequest } = useJournalfoeringOppgave()
   const dispatch = useAppDispatch()
 
-  const persongalleri = behandlingBehov?.persongalleri
+  const persongalleri = nyBehandlingRequest?.persongalleri
 
   const oppdaterPersongalleri = (persongalleri: Persongalleri) => {
-    dispatch(settBehandlingBehov({ ...behandlingBehov, persongalleri }))
+    dispatch(settNyBehandlingRequest({ ...nyBehandlingRequest, persongalleri }))
   }
 
   const oppdater = (fnr: string, index: number) => {

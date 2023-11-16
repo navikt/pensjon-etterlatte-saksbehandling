@@ -72,6 +72,22 @@ internal fun Route.oppgaveRoutes(
         }
 
         route("{$OPPGAVEID_CALL_PARAMETER}") {
+            get {
+                val oppgave =
+                    inTransaction {
+                        service.hentOppgave(oppgaveId)
+                    }
+
+                call.respond(oppgave ?: HttpStatusCode.NoContent)
+            }
+
+            put("ferdigstill") {
+                inTransaction {
+                    service.ferdigstillOppgave(oppgaveId, brukerTokenInfo)
+                }
+                call.respond(HttpStatusCode.OK)
+            }
+
             post("tildel-saksbehandler") {
                 val saksbehandlerEndringDto = call.receive<SaksbehandlerEndringDto>()
                 inTransaction {

@@ -42,9 +42,11 @@ export type Oppgavetype =
 export const erOppgaveRedigerbar = (status: Oppgavestatus): boolean => ['NY', 'UNDER_BEHANDLING'].includes(status)
 
 export const hentOppgaver = async (): Promise<ApiResponse<OppgaveDTO[]>> => apiClient.get('/oppgaver')
+export const hentOppgave = async (id: string): Promise<ApiResponse<OppgaveDTO>> => apiClient.get(`/oppgaver/${id}`)
 export const hentGosysOppgaver = async (): Promise<ApiResponse<OppgaveDTO[]>> => apiClient.get('/oppgaver/gosys')
-export const hentGosysOppgave = async (id: number): Promise<ApiResponse<OppgaveDTO>> =>
-  apiClient.get(`/oppgaver/gosys/${id}`)
+
+export const ferdigstillOppgave = async (id: string): Promise<ApiResponse<any>> =>
+  apiClient.put(`/oppgaver/${id}/ferdigstill`, {})
 
 export interface SaksbehandlerEndringDto {
   saksbehandler: string

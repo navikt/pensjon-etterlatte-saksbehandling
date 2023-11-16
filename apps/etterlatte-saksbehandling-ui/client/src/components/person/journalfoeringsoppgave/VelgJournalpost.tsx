@@ -1,5 +1,5 @@
-import { isFailure, isPending, isPendingOrInitial, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
-import { hentDokumenter, hentDokumentPDF } from '~shared/api/dokument'
+import { isFailure, isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
+import { hentDokumenter, hentDokumentPDF, hentJournalpost } from '~shared/api/dokument'
 import { useEffect, useState } from 'react'
 import { GYLDIG_FNR } from '~utils/fnr'
 import { Alert, Button, Heading, Table, Tag } from '@navikt/ds-react'
@@ -13,11 +13,12 @@ import DokumentModal from '../dokumenter/dokumentModal'
 import { Journalpost } from '~shared/types/Journalpost'
 import { FlexRow } from '~shared/styled'
 
-export default function VelgJournalpost() {
+export default function VelgJournalpost({ journalpostId }: { journalpostId: string | null }) {
   const { bruker, journalpost } = useJournalfoeringOppgave()
   const dispatch = useAppDispatch()
 
-  const [journalposter, hentJournalposter] = useApiCall(hentDokumenter)
+  const [journalposter, apiHentJournalposter] = useApiCall(hentDokumenter)
+  const [journalpostStatus, apiHentJournalpost] = useApiCall(hentJournalpost)
   const [dokument, hentDokument] = useApiCall(hentDokumentPDF)
   const [fileURL, setFileURL] = useState<string>()
 
@@ -27,11 +28,17 @@ export default function VelgJournalpost() {
 
   useEffect(() => {
     if (GYLDIG_FNR(bruker) && !journalpost) {
-      hentJournalposter(bruker!!, (journalposter) => {
-        if (journalposter.length === 1) {
-          velgJournalpost(journalposter[0])
-        }
-      })
+      if (journalpostId) {
+        apiHentJournalpost(journalpostId, (journalpost) => {
+          velgJournalpost(journalpost)
+        })
+      } else {
+        apiHentJournalposter(bruker!!, (journalposter) => {
+          if (journalposter.length === 1) {
+            velgJournalpost(journalposter[0])
+          }
+        })
+      }
     }
   }, [bruker])
 
@@ -60,7 +67,8 @@ export default function VelgJournalpost() {
 
   return (
     <>
-      {isPendingOrInitial(journalposter) && <Spinner label="Henter journalposter for bruker" visible />}
+      {isPending(journalposter) && <Spinner label="Henter journalposter for bruker" visible />}
+      {isPending(journalpostStatus) && <Spinner label="Henter journalpost for bruker" visible />}
 
       {journalpost ? (
         <>

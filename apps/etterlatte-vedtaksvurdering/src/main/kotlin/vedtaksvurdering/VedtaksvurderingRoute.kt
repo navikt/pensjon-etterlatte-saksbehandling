@@ -33,6 +33,7 @@ import no.nav.etterlatte.libs.ktor.AuthorizationPlugin
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlient
 import java.time.LocalDate
+import java.time.YearMonth
 
 fun Route.vedtaksvurderingRoute(
     vedtakService: VedtaksvurderingService,
@@ -238,14 +239,18 @@ fun Route.samordningsvedtakRoute(
         }
 
         get {
-            call.parameters["fomDato"]?.let { runCatching { LocalDate.parse(it) }.getOrNull() }
-                ?: return@get call.respond(HttpStatusCode.BadRequest, "fomDato ikke angitt")
+            val fomDato =
+                call.parameters["fomDato"]?.let { runCatching { LocalDate.parse(it) }.getOrNull() }
+                    ?: return@get call.respond(HttpStatusCode.BadRequest, "fomDato ikke angitt")
             val fnr =
                 call.request.headers["fnr"]?.let { Folkeregisteridentifikator.of(it) }
                     ?: return@get call.respond(HttpStatusCode.BadRequest, "fnr ikke angitt")
 
             val vedtaksliste = vedtakBehandlingService.finnFerdigstilteVedtak(fnr)
-            call.respond(vedtaksliste.map { it.toSamordningsvedtakDto() })
+            val tidslinjeJustert =
+                Vedtakstidslinje(vedtaksliste)
+                    .sammenstill(YearMonth.of(fomDato.year, fomDato.month))
+            call.respond(tidslinjeJustert.map { it.toSamordningsvedtakDto() })
         }
 
         get("/{vedtakId}") {

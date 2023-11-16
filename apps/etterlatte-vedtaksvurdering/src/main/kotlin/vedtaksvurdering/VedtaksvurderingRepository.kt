@@ -484,8 +484,8 @@ class VedtaksvurderingRepository(private val datasource: DataSource) : Transacti
                         "attestert" to VedtakStatus.ATTESTERT.name,
                         "iverksatt" to VedtakStatus.IVERKSATT.name,
                         "tilbakekreving" to VedtakType.TILBAKEKREVING.name,
-                        "regulering" to RevurderingAarsak.REGULERING.name,
-                        "doedsfall" to RevurderingAarsak.DOEDSFALL.name,
+                        "regulering" to Revurderingaarsak.REGULERING.name,
+                        "doedsfall" to Revurderingaarsak.DOEDSFALL.name,
                     )
                 },
             ) {

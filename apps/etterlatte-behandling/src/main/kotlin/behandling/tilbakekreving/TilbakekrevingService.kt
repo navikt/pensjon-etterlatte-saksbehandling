@@ -8,7 +8,7 @@ import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
-import no.nav.etterlatte.libs.common.oppgave.VedtakOppgaveDTO
+import no.nav.etterlatte.libs.common.oppgave.SakIdOgReferanse
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tilbakekreving.FattetVedtak
 import no.nav.etterlatte.libs.common.tilbakekreving.Kravgrunnlag
@@ -158,7 +158,7 @@ class TilbakekrevingService(
 
         oppgaveService.ferdigstillOppgaveUnderbehandlingOgLagNyMedType(
             fattetoppgave =
-                VedtakOppgaveDTO(
+                SakIdOgReferanse(
                     sakId = tilbakekreving.sak.id,
                     referanse = tilbakekreving.id.toString(),
                 ),
@@ -268,7 +268,7 @@ class TilbakekrevingService(
 
         oppgaveService.ferdigstillOppgaveUnderbehandlingOgLagNyMedType(
             fattetoppgave =
-                VedtakOppgaveDTO(
+                SakIdOgReferanse(
                     sakId = tilbakekreving.sak.id,
                     referanse = tilbakekreving.id.toString(),
                 ),

@@ -35,7 +35,7 @@ internal fun Route.behandlingVedtakRoute(
             val behandling =
                 inTransaction {
                     behandlingService.hentBehandling(
-                        UUID.fromString(fattVedtak.vedtakOppgaveDTO.referanse),
+                        UUID.fromString(fattVedtak.sakIdOgReferanse.referanse),
                     )
                 }
             if (behandling == null) {
@@ -51,7 +51,7 @@ internal fun Route.behandlingVedtakRoute(
                     behandlingsstatusService.settFattetVedtak(behandling, fattVedtak.vedtakHendelse)
                     try {
                         oppgaveService.ferdigstillOppgaveUnderbehandlingOgLagNyMedType(
-                            fattetoppgave = fattVedtak.vedtakOppgaveDTO,
+                            fattetoppgave = fattVedtak.sakIdOgReferanse,
                             oppgaveType = OppgaveType.ATTESTERING,
                             saksbehandler = brukerTokenInfo,
                             merknad =
@@ -74,7 +74,7 @@ internal fun Route.behandlingVedtakRoute(
             val behandling =
                 inTransaction {
                     behandlingService.hentBehandling(
-                        UUID.fromString(underkjennVedtakOppgave.vedtakOppgaveDTO.referanse),
+                        UUID.fromString(underkjennVedtakOppgave.sakIdOgReferanse.referanse),
                     )
                 }
             if (behandling == null) {
@@ -88,7 +88,7 @@ internal fun Route.behandlingVedtakRoute(
                         }
                     try {
                         oppgaveService.ferdigstillOppgaveUnderbehandlingOgLagNyMedType(
-                            fattetoppgave = underkjennVedtakOppgave.vedtakOppgaveDTO,
+                            fattetoppgave = underkjennVedtakOppgave.sakIdOgReferanse,
                             oppgaveType = OppgaveType.UNDERKJENT,
                             merknad = merknadFraAttestant,
                             saksbehandler = brukerTokenInfo,
@@ -107,7 +107,7 @@ internal fun Route.behandlingVedtakRoute(
             val behandling =
                 inTransaction {
                     behandlingService.hentBehandling(
-                        UUID.fromString(attesterVedtakOppgave.vedtakOppgaveDTO.referanse),
+                        UUID.fromString(attesterVedtakOppgave.sakIdOgReferanse.referanse),
                     )
                 }
             if (behandling == null) {
@@ -117,7 +117,7 @@ internal fun Route.behandlingVedtakRoute(
                     behandlingsstatusService.settAttestertVedtak(behandling, attesterVedtakOppgave.vedtakHendelse)
                     try {
                         oppgaveService.ferdigStillOppgaveUnderBehandling(
-                            referanse = attesterVedtakOppgave.vedtakOppgaveDTO.referanse,
+                            referanse = attesterVedtakOppgave.sakIdOgReferanse.referanse,
                             saksbehandler = brukerTokenInfo,
                         )
                     } catch (e: Exception) {

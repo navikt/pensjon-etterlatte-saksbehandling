@@ -37,6 +37,9 @@ import { Grunnlagsopplysning } from '~shared/types/grunnlag'
 import { formaterNavn, IPdlPerson } from '~shared/types/Person'
 import { KildePdl } from '~shared/types/kilde'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
+import { useNavigate } from 'react-router-dom'
+import { hentSak } from '~shared/api/sak'
+import { UnderkjenneModal } from '~components/generellbehandling/UnderkjenneModal'
 
 const TextFieldBegrunnelse = styled(Textarea).attrs({ size: 'medium' })`
   max-width: 40rem;
@@ -121,7 +124,7 @@ const KravpakkeUtland = (props: { utlandsBehandling: Generellbehandling & { innh
       setErrLand(true)
     }
   }
-
+  const navigate = useNavigate()
   const sendTilAttesteringWrapper = () => {
     const generellBehandling: Generellbehandling = {
       ...utlandsBehandling,
@@ -133,7 +136,19 @@ const KravpakkeUtland = (props: { utlandsBehandling: Generellbehandling & { innh
         rinanummer: rinanummer,
       },
     }
-    sendTilAttestering(generellBehandling, () => window.location.reload())
+    sendTilAttestering(generellBehandling, () => {
+      hentSak(utlandsBehandling.sakId)
+        .then((sak) => {
+          if (sak.ok) {
+            navigate(`/person/${sak.data.ident}`)
+          } else {
+            navigate('/')
+          }
+        })
+        .catch(() => {
+          navigate('/')
+        })
+    })
   }
 
   const redigerbar = utlandsBehandling.status === Status.OPPRETTET
@@ -390,6 +405,7 @@ const KravpakkeUtland = (props: { utlandsBehandling: Generellbehandling & { innh
                       </Table.DataCell>
                       <Table.DataCell>
                         <Button
+                          disabled={!redigerbar}
                           variant="tertiary"
                           icon={<TrashIcon />}
                           onClick={() => fjernDokument()}
@@ -459,13 +475,14 @@ const KravpakkeUtland = (props: { utlandsBehandling: Generellbehandling & { innh
                 </>
               )}
               {utlandsBehandling.status === Status.FATTET && (
-                <>
+                <ButtonGroup>
+                  <UnderkjenneModal utlandsBehandling={utlandsBehandling} />
                   <Button onClick={() => attesterFetch(utlandsBehandling)} loading={isPending(attesterStatus)}>
                     Attester
                   </Button>
                   {isSuccess(attesterStatus) && <Alert variant="success">Behandlingen ble attestert</Alert>}
                   {isFailure(attesterStatus) && <Alert variant="error">Behandlingen ble ikke attestert</Alert>}
-                </>
+                </ButtonGroup>
               )}
             </ButtonGroup>
           </Panel>

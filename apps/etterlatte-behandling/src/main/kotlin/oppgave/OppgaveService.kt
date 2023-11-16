@@ -15,8 +15,8 @@ import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveListe
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
+import no.nav.etterlatte.libs.common.oppgave.SakIdOgReferanse
 import no.nav.etterlatte.libs.common.oppgave.Status
-import no.nav.etterlatte.libs.common.oppgave.VedtakOppgaveDTO
 import no.nav.etterlatte.libs.common.oppgave.opprettNyOppgaveMedReferanseOgSak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
@@ -167,7 +167,7 @@ class OppgaveService(
     }
 
     fun ferdigstillOppgaveUnderbehandlingOgLagNyMedType(
-        fattetoppgave: VedtakOppgaveDTO,
+        fattetoppgave: SakIdOgReferanse,
         oppgaveType: OppgaveType,
         merknad: String?,
         saksbehandler: BrukerTokenInfo,

@@ -254,16 +254,13 @@ object AvkortingRegelkjoring {
 
     private fun List<AvkortetYtelse>.spreYtelsePerMaaned(
         fraOgMed: YearMonth,
-        tilOgMed: YearMonth,
+        til: YearMonth,
     ): List<Int> {
         val perMaaned = mutableListOf<Int>()
-        val til =
-            when (tilOgMed.monthValue) {
-                0 -> 0
-                else -> tilOgMed.monthValue - 1
-            }
-        for (maanednr in fraOgMed.monthValue..til) {
-            val maaned = YearMonth.of(tilOgMed.year, maanednr)
+        if (fraOgMed == til) return perMaaned
+
+        for (maanednr in fraOgMed.monthValue..til.minusMonths(1).monthValue) {
+            val maaned = YearMonth.of(til.year, maanednr)
             perMaaned.add(avkortetYtelseIMaaned(maaned).ytelseEtterAvkorting)
         }
         return perMaaned

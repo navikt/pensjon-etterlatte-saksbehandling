@@ -134,7 +134,7 @@ class GenerellBehandlingService(
     }
 
     private fun validerMaaHaDatoOgVaereMarkertSomSendt(dokumentMedSendtDato: DokumentMedSendtDato) {
-        if (dokumentMedSendtDato.sendt) {
+        if (!dokumentMedSendtDato.sendt) {
             throw DokumentErIkkeMarkertSomSendt("Dokument ${dokumentMedSendtDato.dokumenttype} er ikke markert som sendt ")
         }
         dokumentMedSendtDato.dato

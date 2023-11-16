@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { Behandlingsliste } from './behandlingsliste'
+import { Behandlingsliste } from './Behandlingsliste'
 import styled from 'styled-components'
 import { ManueltOpphoerModal } from './ManueltOpphoerModal'
 import { hentBehandlingerForPerson } from '~shared/api/behandling'

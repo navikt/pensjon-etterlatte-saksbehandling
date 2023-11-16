@@ -470,4 +470,29 @@ class VedtaksvurderingRepository(private val datasource: DataSource) : Transacti
             return@session hentVedtakNonNull(behandlingId, this)
         }
     }
+
+    fun hentAttesterteEllerIverksatteVedtakSomSkalSendeBrev(): List<Vedtak> {
+        return datasource.transaction { session ->
+            session.hentListe(
+                queryString =
+                    """
+                    SELECT * FROM vedtak
+                        WHERE vedtakstatus in (:attestert, :iverksatt)
+                        and type != :tilbakekreving
+                        and (revurderingsaarsak is null or revurderingsaarsak not in (:regulering, :doedsfall))
+                    """.trimIndent(),
+                params = {
+                    mapOf(
+                        "attestert" to VedtakStatus.ATTESTERT.name,
+                        "iverksatt" to VedtakStatus.IVERKSATT.name,
+                        "tilbakekreving" to VedtakType.TILBAKEKREVING.name,
+                        "regulering" to Revurderingaarsak.REGULERING.name,
+                        "doedsfall" to Revurderingaarsak.DOEDSFALL.name,
+                    )
+                },
+            ) {
+                it.toVedtak(emptyList())
+            }
+        }
+    }
 }

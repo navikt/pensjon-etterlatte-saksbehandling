@@ -1,6 +1,7 @@
 package no.nav.etterlatte.grunnlag
 
 import com.fasterxml.jackson.databind.JsonNode
+import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -572,6 +573,7 @@ internal class GrunnlagServiceTest {
             )
 
         val opplysningsperson = mockPerson()
+        coEvery { pdlTjenesterKlientImpl.hentPersongalleri(any(), any(), any()) } returns Persongalleri(SOEKER2_FOEDSELSNUMMER.value)
         every { pdlTjenesterKlientImpl.hentPerson(any(), any(), any()) } returns testData.soeker
         every { pdlTjenesterKlientImpl.hentOpplysningsperson(any(), any(), any()) } returns opplysningsperson
         every {

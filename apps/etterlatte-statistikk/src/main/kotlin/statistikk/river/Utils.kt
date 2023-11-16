@@ -17,7 +17,11 @@ fun parseTekniskTid(
 ): LocalDateTime {
     val pakkeTid = packet[TEKNISK_TID_KEY].textValue()
     if (pakkeTid != null) {
-        return LocalDateTime.parse(pakkeTid)
+        try {
+            return LocalDateTime.parse(pakkeTid)
+        } catch (e: Exception) {
+            logger.warn("Kunne ikke parse teknisk tid på hendelse ${packet.eventName}, på grunn av feil", e)
+        }
     }
     logger.warn("Ingen teknisk tid på pakken med hendelse ${packet.eventName}, fallbacker til now()")
     return Tidspunkt.now().toLocalDatetimeUTC()

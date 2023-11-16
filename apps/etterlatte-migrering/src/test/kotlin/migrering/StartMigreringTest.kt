@@ -1,10 +1,15 @@
 package no.nav.etterlatte.migrering
 
+import io.mockk.every
+import io.mockk.just
+import io.mockk.mockk
+import io.mockk.runs
 import kotliquery.queryOf
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.POSTGRES_VERSION
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.database.transaction
+import no.nav.helse.rapids_rivers.RapidsConnection
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
@@ -47,7 +52,11 @@ internal class StartMigreringTest {
                     "VALUES(123)",
             ).let { query -> tx.run(query.asUpdate) }
         }
-        val starter = StartMigrering(repository = repository)
+        val starter =
+            StartMigrering(
+                repository = repository,
+                rapidsConnection = mockk<RapidsConnection>().also { every { it.publish(any(), any()) } just runs },
+            )
 
         Assertions.assertEquals(1, repository.hentSakerTilMigrering().size)
         starter.startMigrering()

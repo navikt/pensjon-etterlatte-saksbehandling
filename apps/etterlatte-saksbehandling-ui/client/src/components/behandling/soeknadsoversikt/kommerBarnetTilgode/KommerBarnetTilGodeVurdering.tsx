@@ -1,4 +1,4 @@
-import { VurderingsTitle } from '../../styled'
+import { VurderingsTitle } from '../styled'
 import styled from 'styled-components'
 import { useState } from 'react'
 import { IBehandlingStatus, IKommerBarnetTilgode } from '~shared/types/IDetaljertBehandling'
@@ -9,7 +9,7 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import { lagreBegrunnelseKommerBarnetTilgode } from '~shared/api/behandling'
 import { oppdaterBehandlingsstatus, oppdaterKommerBarnetTilgode } from '~store/reducers/BehandlingReducer'
 import { useAppDispatch } from '~store/Store'
-import { SoeknadsoversiktTextArea } from '~components/behandling/soeknadsoversikt/soeknadoversikt/SoeknadsoversiktTextArea'
+import { SoeknadsoversiktTextArea } from '~components/behandling/soeknadsoversikt/SoeknadsoversiktTextArea'
 
 export const KommerBarnetTilGodeVurdering = ({
   kommerBarnetTilgode,

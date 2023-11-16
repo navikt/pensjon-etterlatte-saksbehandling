@@ -1,12 +1,12 @@
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
-import { LovtekstMedLenke } from '~components/behandling/soeknadsoversikt/soeknadoversikt/LovtekstMedLenke'
+import { LovtekstMedLenke } from '~components/behandling/soeknadsoversikt/LovtekstMedLenke'
 import {
   Beskrivelse,
   InfobokserWrapper,
   InfoWrapper,
   VurderingsContainerWrapper,
 } from '~components/behandling/soeknadsoversikt/styled'
-import { GyldigFramsattVurdering } from '~components/behandling/soeknadsoversikt/soeknadoversikt/gyldigFramsattSoeknad/omstillingsstoenad/GyldigFramsattVurdering'
+import { GyldigFramsattVurdering } from '~components/behandling/soeknadsoversikt/gyldigFramsattSoeknad/omstillingsstoenad/GyldigFramsattVurdering'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import { formaterKildePdl } from '~components/behandling/soeknadsoversikt/utils'
 import { hentBehandlesFraStatus } from '~components/behandling/felles/utils'

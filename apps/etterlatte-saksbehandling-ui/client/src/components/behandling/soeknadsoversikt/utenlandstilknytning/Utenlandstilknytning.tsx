@@ -1,6 +1,6 @@
 import { IDetaljertBehandling, IUtenlandstilknytning } from '~shared/types/IDetaljertBehandling'
 import { LovtekstMedLenke } from '../LovtekstMedLenke'
-import { Beskrivelse, VurderingsContainerWrapper } from '../../styled'
+import { Beskrivelse, VurderingsContainerWrapper } from '../styled'
 import { useState } from 'react'
 import { LeggTilVurderingButton } from '../LeggTilVurderingButton'
 import { UtenlandstilknytningVurdering } from './UtenlandstilknytningVurdering'

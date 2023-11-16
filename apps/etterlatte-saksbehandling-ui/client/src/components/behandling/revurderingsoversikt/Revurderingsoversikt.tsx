@@ -3,9 +3,7 @@ import { Alert, BodyShort, Heading } from '@navikt/ds-react'
 import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapper'
 import { NesteOgTilbake } from '../handlinger/NesteOgTilbake'
 import { hentBehandlesFraStatus, requireNotNull } from '../felles/utils'
-import Virkningstidspunkt, {
-  Hjemmel,
-} from '~components/behandling/soeknadsoversikt/soeknadoversikt/virkningstidspunkt/Virkningstidspunkt'
+import Virkningstidspunkt, { Hjemmel } from '~components/behandling/virkningstidspunkt/Virkningstidspunkt'
 import { Start } from '~components/behandling/handlinger/start'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { Border, InnholdPadding } from '~components/behandling/soeknadsoversikt/styled'
@@ -28,7 +26,7 @@ import {
   OMS_OPPHOER_HJEMLER,
   OMS_REVURDERING_BESKRIVELSE,
   FELLES_SLUTTBEHANDLING_HJEMLER,
-} from '~components/behandling/soeknadsoversikt/soeknadoversikt/virkningstidspunkt/utils'
+} from '~components/behandling/virkningstidspunkt/utils'
 import { SakType } from '~shared/types/sak'
 import { erOpphoer, Revurderingaarsak, tekstRevurderingsaarsak } from '~shared/types/Revurderingaarsak'
 import styled from 'styled-components'
@@ -38,7 +36,7 @@ import { GrunnlagForVirkningstidspunkt } from '~components/behandling/revurderin
 import { OmgjoeringAvFarskap } from '~components/behandling/revurderingsoversikt/OmgjoeringAvFarskap'
 import { RevurderingAnnen } from '~components/behandling/revurderingsoversikt/RevurderingAnnen'
 import SluttbehandlingUtland from '~components/behandling/revurderingsoversikt/sluttbehandlingUtland/SluttbehandlingUtland'
-import { Soeknadsdato } from '~components/behandling/soeknadsoversikt/soeknadoversikt/Soeknadsdato'
+import { Soeknadsdato } from '~components/behandling/soeknadsoversikt/Soeknadsdato'
 import { SluttbehandlingUtlandInfo } from '~shared/types/RevurderingInfo'
 import OppdaterGrunnlagModal from '~components/behandling/handlinger/OppdaterGrunnlagModal'
 
@@ -143,13 +141,10 @@ export const Revurderingsoversikt = (props: { behandling: IDetaljertBehandling }
         {behandling.revurderingsaarsak === Revurderingaarsak.ANNEN && <RevurderingAnnen behandling={behandling} />}
 
         <Virkningstidspunkt
+          erBosattUtland={false}
           redigerbar={behandles}
-          virkningstidspunkt={behandling.virkningstidspunkt}
-          avdoedDoedsdato={behandling.familieforhold?.avdoede?.opplysning?.doedsdato}
-          avdoedDoedsdatoKilde={behandling.familieforhold?.avdoede?.kilde}
-          soeknadMottattDato={behandling.soeknadMottattDato}
-          behandlingId={behandling.id}
-          hjemmler={hjemler}
+          behandling={behandling}
+          hjemler={hjemler}
           beskrivelse={beskrivelse}
         >
           {{ info: <GrunnlagForVirkningstidspunkt /> }}

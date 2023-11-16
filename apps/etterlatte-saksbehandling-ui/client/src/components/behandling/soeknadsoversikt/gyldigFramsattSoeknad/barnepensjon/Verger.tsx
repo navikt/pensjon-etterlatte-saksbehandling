@@ -1,5 +1,5 @@
-import { InfoWrapper } from '../../../styled'
-import { Info } from '../../../Info'
+import { InfoWrapper } from '../../styled'
+import { Info } from '../../Info'
 import { isFailure, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
 import { getGrunnlagsAvOpplysningstype } from '~shared/api/grunnlag'
 import { KildePdl } from '~shared/types/kilde'

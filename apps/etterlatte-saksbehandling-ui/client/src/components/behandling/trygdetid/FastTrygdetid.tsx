@@ -1,6 +1,6 @@
 import { BodyShort } from '@navikt/ds-react'
 import styled from 'styled-components'
-import { LovtekstMedLenke } from '~components/behandling/soeknadsoversikt/soeknadoversikt/LovtekstMedLenke'
+import { LovtekstMedLenke } from '~components/behandling/soeknadsoversikt/LovtekstMedLenke'
 
 const FastTrygdetid = () => {
   return (

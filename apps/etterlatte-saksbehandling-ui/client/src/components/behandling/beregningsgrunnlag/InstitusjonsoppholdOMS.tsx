@@ -1,6 +1,6 @@
 import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
 import React, { useState } from 'react'
-import { LovtekstMedLenke } from '~components/behandling/soeknadsoversikt/soeknadoversikt/LovtekstMedLenke'
+import { LovtekstMedLenke } from '~components/behandling/soeknadsoversikt/LovtekstMedLenke'
 import { Button, Heading, ReadMore, Table } from '@navikt/ds-react'
 import { AGreen500 } from '@navikt/ds-tokens/dist/tokens'
 import { CheckmarkCircleIcon, PlusCircleIcon } from '@navikt/aksel-icons'

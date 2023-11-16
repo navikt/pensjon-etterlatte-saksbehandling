@@ -26,7 +26,10 @@ import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
+import no.nav.etterlatte.libs.common.behandling.Utenlandstilknytning
+import no.nav.etterlatte.libs.common.behandling.UtenlandstilknytningType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
@@ -34,6 +37,8 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.personOpplysning
 import no.nav.etterlatte.revurdering
+import no.nav.etterlatte.sak.SakDao
+import no.nav.etterlatte.sak.SakUtenlandstilknytning
 import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.etterlatte.token.Saksbehandler
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -442,6 +447,18 @@ class BehandlingServiceImplTest {
                 coEvery { hentPersongalleri(behandling.id, any()) } answers { callOriginal() }
             }
 
+        val defaultSakdaoMockMedUtenlandstilknytningSattTilNasjonal =
+            mockk<SakDao> {
+                coEvery { hentUtenlandstilknytningForSak(any()) } returns
+                    SakUtenlandstilknytning(
+                        "1234",
+                        SakType.BARNEPENSJON,
+                        SAK_ID,
+                        Enheter.defaultEnhet.enhetNr,
+                        Utenlandstilknytning(UtenlandstilknytningType.NASJONAL, Grunnlagsopplysning.Saksbehandler.create("ident"), "beg"),
+                    )
+            }
+
         val service =
             lagRealGenerellBehandlingService(
                 behandlingDao =
@@ -453,6 +470,7 @@ class BehandlingServiceImplTest {
                     mockk {
                         every { isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false) } returns false
                     },
+                sakDao = defaultSakdaoMockMedUtenlandstilknytningSattTilNasjonal,
             )
         val behandlingMedPersonopplsning =
             runBlocking {
@@ -465,6 +483,96 @@ class BehandlingServiceImplTest {
 
         assertEquals(soeknadMottatDato, behandlingMedPersonopplsning.soeknadMottattDato)
         assertEquals(doedsdato, behandlingMedPersonopplsning.personopplysning?.opplysning?.doedsdato)
+    }
+
+    @Test
+    fun `Virkningstidspunkt krever fastsetting av utenlandstilknytning`() {
+        val bodyVirkningstidspunkt = Tidspunkt.parse("2017-02-01T00:00:00Z")
+        val bodyBegrunnelse = "begrunnelse"
+        val request = VirkningstidspunktRequest(bodyVirkningstidspunkt.toString(), bodyBegrunnelse)
+
+        val soeknadMottatt = LocalDateTime.parse("2020-01-01T00:00:00.000000000")
+        val doedsdato = LocalDate.parse("2016-12-30")
+
+        val sakdaomock =
+            mockk<SakDao> {
+                coEvery { hentUtenlandstilknytningForSak(any()) } returns
+                    SakUtenlandstilknytning(
+                        "1234",
+                        SakType.BARNEPENSJON,
+                        SAK_ID,
+                        Enheter.defaultEnhet.enhetNr,
+                    )
+            }
+        val service = behandlingServiceMedMocks(doedsdato, soeknadMottatt, sakDao = sakdaomock)
+        assertThrows<VirkningstidspunktMaaHaUtenlandstilknytning> {
+            runBlocking {
+                service.erGyldigVirkningstidspunkt(BEHANDLINGS_ID, TOKEN, request)
+            }
+        }
+    }
+
+    @Test
+    fun `Ved utenlandstilknytning bosatt utland må kravdato være med`() {
+        val bodyVirkningstidspunkt = Tidspunkt.parse("2017-02-01T00:00:00Z")
+        val bodyBegrunnelse = "begrunnelse"
+        val request = VirkningstidspunktRequest(bodyVirkningstidspunkt.toString(), bodyBegrunnelse)
+
+        val soeknadMottatt = LocalDateTime.parse("2020-01-01T00:00:00.000000000")
+        val doedsdato = LocalDate.parse("2016-12-30")
+
+        val sakdaomock =
+            mockk<SakDao> {
+                coEvery { hentUtenlandstilknytningForSak(any()) } returns
+                    SakUtenlandstilknytning(
+                        "1234",
+                        SakType.BARNEPENSJON,
+                        SAK_ID,
+                        Enheter.defaultEnhet.enhetNr,
+                        Utenlandstilknytning(
+                            UtenlandstilknytningType.BOSATT_UTLAND,
+                            Grunnlagsopplysning.Saksbehandler.create("ident"), "beg",
+                        ),
+                    )
+            }
+        val service = behandlingServiceMedMocks(doedsdato, soeknadMottatt, sakDao = sakdaomock)
+        assertThrows<KravdatoMaaFinnesHvisBosattutland> {
+            runBlocking {
+                service.erGyldigVirkningstidspunkt(BEHANDLINGS_ID, TOKEN, request)
+            }
+        }
+    }
+
+    @Test
+    fun `Ved utenlandstilknytning bosatt utland med kravdato skal kravdato brukes ikke soeknadmottatt`() {
+        val bodyVirkningstidspunkt = Tidspunkt.parse("2017-02-01T00:00:00Z")
+        val bodyBegrunnelse = "begrunnelse"
+        val bodyKravdato = Tidspunkt.parse("2019-02-01T00:00:00Z")
+        val request = VirkningstidspunktRequest(bodyVirkningstidspunkt.toString(), bodyBegrunnelse, bodyKravdato.toString())
+        val doedsdato = LocalDate.parse("2014-01-01")
+
+        val soeknadMottatt = LocalDateTime.parse("2009-01-01T00:00:00.000000000")
+
+        val sakdaomock =
+            mockk<SakDao> {
+                coEvery { hentUtenlandstilknytningForSak(any()) } returns
+                    SakUtenlandstilknytning(
+                        "1234",
+                        SakType.BARNEPENSJON,
+                        SAK_ID,
+                        Enheter.defaultEnhet.enhetNr,
+                        Utenlandstilknytning(
+                            UtenlandstilknytningType.BOSATT_UTLAND,
+                            Grunnlagsopplysning.Saksbehandler.create("ident"), "beg",
+                        ),
+                    )
+            }
+        val service = behandlingServiceMedMocks(doedsdato, soeknadMottatt, sakDao = sakdaomock)
+        val svar =
+            runBlocking {
+                service.erGyldigVirkningstidspunkt(BEHANDLINGS_ID, TOKEN, request)
+            }
+        assertTrue(svar)
     }
 
     @Test
@@ -707,6 +815,7 @@ class BehandlingServiceImplTest {
     private fun behandlingServiceMedMocks(
         doedsdato: LocalDate?,
         soeknadMottatt: LocalDateTime,
+        sakDao: SakDao? = null,
     ): BehandlingServiceImpl {
         val behandling =
             foerstegangsbehandling(
@@ -723,6 +832,19 @@ class BehandlingServiceImplTest {
                 } returns grunnlagsopplysningMedPersonopplysning
                 coEvery { hentPersongalleri(behandling.id, any()) } answers { callOriginal() }
             }
+
+        val defaultSakdaoMockMedUtenlandstilknytningSattTilNasjonal =
+            mockk<SakDao> {
+                coEvery { hentUtenlandstilknytningForSak(any()) } returns
+                    SakUtenlandstilknytning(
+                        "1234",
+                        SakType.BARNEPENSJON,
+                        SAK_ID,
+                        Enheter.defaultEnhet.enhetNr,
+                        Utenlandstilknytning(UtenlandstilknytningType.NASJONAL, Grunnlagsopplysning.Saksbehandler.create("ident"), "beg"),
+                    )
+            }
+
         return lagRealGenerellBehandlingService(
             behandlingDao =
                 mockk {
@@ -735,6 +857,7 @@ class BehandlingServiceImplTest {
                 mockk {
                     every { isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false) } returns false
                 },
+            sakDao = sakDao ?: defaultSakdaoMockMedUtenlandstilknytningSattTilNasjonal,
         )
     }
 
@@ -746,6 +869,7 @@ class BehandlingServiceImplTest {
         grunnlagKlient: GrunnlagKlient? = null,
         oppgaveService: OppgaveService = mockk(),
         featureToggleService: FeatureToggleService,
+        sakDao: SakDao? = mockk(),
     ): BehandlingServiceImpl =
         BehandlingServiceImpl(
             behandlingDao = behandlingDao ?: mockk(),
@@ -759,7 +883,7 @@ class BehandlingServiceImplTest {
             oppgaveService = oppgaveService,
             etterbetalingService = mockk(),
             grunnlagService = mockk(),
-            sakDao = mockk(),
+            sakDao = sakDao ?: mockk(),
         )
 
     companion object {

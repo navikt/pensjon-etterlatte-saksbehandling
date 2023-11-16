@@ -93,7 +93,7 @@ class BrevRepository(private val ds: DataSource) {
             ).asUpdate,
         ).also { require(it == 1) }
 
-        tx.lagreHendelse(id, Status.OPPDATERT, Tidspunkt.now(), payload.toJson())
+        tx.lagreHendelse(id, Status.OPPDATERT, payload.toJson())
             .also { require(it == 1) }
     }
 
@@ -112,7 +112,7 @@ class BrevRepository(private val ds: DataSource) {
             ).asUpdate,
         ).also { require(it == 1) }
 
-        tx.lagreHendelse(id, Status.OPPDATERT, Tidspunkt.now(), payload.toJson())
+        tx.lagreHendelse(id, Status.OPPDATERT, payload.toJson())
             .also { require(it == 1) }
     }
 
@@ -140,7 +140,7 @@ class BrevRepository(private val ds: DataSource) {
             ).asUpdate,
         ).also { require(it == 1) }
 
-        tx.lagreHendelse(id, Status.OPPDATERT, Tidspunkt.now(), mottaker.toJson())
+        tx.lagreHendelse(id, Status.OPPDATERT, mottaker.toJson())
             .also { require(it == 1) }
     }
 
@@ -159,7 +159,7 @@ class BrevRepository(private val ds: DataSource) {
                 ).asUpdate,
             ).also { oppdatert -> require(oppdatert == 1) }
 
-            tx.lagreHendelse(id, Status.FERDIGSTILT, Tidspunkt.now())
+            tx.lagreHendelse(id, Status.FERDIGSTILT)
         }
     }
 
@@ -190,7 +190,7 @@ class BrevRepository(private val ds: DataSource) {
 
     fun settBrevFerdigstilt(id: BrevID) {
         using(sessionOf(ds)) {
-            it.lagreHendelse(id, Status.FERDIGSTILT, Tidspunkt.now())
+            it.lagreHendelse(id, Status.FERDIGSTILT)
         }
     }
 
@@ -264,7 +264,7 @@ class BrevRepository(private val ds: DataSource) {
                 ).asUpdate,
             ).also { oppdatert -> require(oppdatert == 1) }
 
-            tx.lagreHendelse(brevId, Status.JOURNALFOERT, Tidspunkt.now(), journalpostResponse.toJson()) > 0
+            tx.lagreHendelse(brevId, Status.JOURNALFOERT, journalpostResponse.toJson()) > 0
         }
 
     fun hentJournalpostId(brevId: BrevID): String? =
@@ -288,13 +288,19 @@ class BrevRepository(private val ds: DataSource) {
                 ).asUpdate,
             ).also { oppdatert -> require(oppdatert == 1) }
 
-            tx.lagreHendelse(brevId, Status.DISTRIBUERT, Tidspunkt.now(), distResponse.toJson()) > 0
+            tx.lagreHendelse(brevId, Status.DISTRIBUERT, distResponse.toJson()) > 0
         }
 
     private fun Session.lagreHendelse(
         brevId: BrevID,
         status: Status,
-        opprettet: Tidspunkt,
+        payload: String = "{}",
+    ) = lagreHendelse(brevId, status, Tidspunkt.now(), payload)
+
+    private fun Session.lagreHendelse(
+        brevId: BrevID,
+        status: Status,
+        opprettet: Tidspunkt = Tidspunkt.now(),
         payload: String = "{}",
     ) = run(
         queryOf(

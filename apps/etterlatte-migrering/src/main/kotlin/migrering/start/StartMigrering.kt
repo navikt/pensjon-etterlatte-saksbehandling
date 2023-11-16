@@ -1,4 +1,4 @@
-package no.nav.etterlatte.migrering
+package no.nav.etterlatte.migrering.start
 
 import kotliquery.TransactionalSession
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY

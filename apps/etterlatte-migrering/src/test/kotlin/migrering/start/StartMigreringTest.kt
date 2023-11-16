@@ -1,4 +1,4 @@
-package no.nav.etterlatte.migrering
+package no.nav.etterlatte.migrering.start
 
 import io.mockk.every
 import io.mockk.just

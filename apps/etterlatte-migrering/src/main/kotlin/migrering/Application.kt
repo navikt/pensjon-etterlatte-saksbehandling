@@ -6,9 +6,9 @@ import no.nav.etterlatte.migrering.ApplicationContext
 import no.nav.etterlatte.migrering.FeilendeMigreringLytterRiver
 import no.nav.etterlatte.migrering.LagreKoblingRiver
 import no.nav.etterlatte.migrering.LyttPaaIverksattVedtakRiver
-import no.nav.etterlatte.migrering.MigrerSpesifikkSakRiver
-import no.nav.etterlatte.migrering.MigreringRiver
 import no.nav.etterlatte.migrering.PauseMigreringRiver
+import no.nav.etterlatte.migrering.start.MigrerSpesifikkSakRiver
+import no.nav.etterlatte.migrering.start.MigreringRiver
 import no.nav.helse.rapids_rivers.RapidApplication
 import rapidsandrivers.getRapidEnv
 

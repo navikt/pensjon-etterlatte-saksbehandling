@@ -2,6 +2,7 @@ package no.nav.etterlatte.migrering
 
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
+import migrering.infra.ApplicationProperties
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleProperties
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.database.DataSourceBuilder

@@ -10,6 +10,7 @@ import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeServi
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
+import no.nav.etterlatte.libs.common.behandling.Flyktning
 import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.JaNeiMedBegrunnelse
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
@@ -65,6 +66,18 @@ class MigreringService(
                     pesys,
                     "Automatisk importert fra Pesys",
                 )
+
+                sakService.oppdaterFlyktning(
+                    sakId = behandling.sak.id,
+                    flyktning =
+                        Flyktning(
+                            erFlyktning = request.flyktningStatus,
+                            virkningstidspunkt = request.foersteVirkningstidspunkt.atDay(1),
+                            begrunnelse = "Automatisk migrert fra Pesys",
+                            kilde = Grunnlagsopplysning.Pesys.create(),
+                        ),
+                )
+
                 val nyopprettaOppgave =
                     requireNotNull(behandlingOgOppgave.oppgave) {
                         "Mangler oppgave for behandling=${behandling.id}. Stopper migrering for pesysId=${request.pesysId}"

@@ -86,7 +86,7 @@ export const JournalfoeringOppgaveModal = ({ oppgave }: { oppgave: OppgaveDTO })
                   </Table.Body>
                 </Table>
                 {journalpost.tittel.includes('P8000') && (
-                  <Button variant="primary" as="a" href={`/oppgave/${oppgave.id}`}>
+                  <Button style={{ marginTop: '2rem' }} variant="primary" as="a" href={`/oppgave/${oppgave.id}`}>
                     Opprett behandling
                   </Button>
                 )}

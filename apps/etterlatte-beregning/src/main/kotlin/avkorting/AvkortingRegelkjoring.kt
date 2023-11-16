@@ -192,26 +192,32 @@ object AvkortingRegelkjoring {
         )
 
     fun beregnRestanse(
-        fraOgMed: YearMonth,
+        foersteMaanedDetteAar: YearMonth,
         nyInntektsavkorting: Inntektsavkorting,
         tidligereYtelseEtterAvkorting: List<AvkortetYtelse>,
     ): Restanse {
-        val til = nyInntektsavkorting.grunnlag.periode.fom
+        val oppstartNyInntekt = nyInntektsavkorting.grunnlag.periode.fom
         val grunnlag =
             RestanseGrunnlag(
-                FaktumNode(
-                    verdi = tidligereYtelseEtterAvkorting.spreYtelsePerMaaned(fraOgMed, til),
-                    kilde = tidligereYtelseEtterAvkorting.map { "avkortetYtelse:${it.id}" },
-                    beskrivelse = "Ytelse etter avkorting for tidligere oppgitt forventet årsinntekt samme år",
-                ),
-                FaktumNode(
-                    verdi = nyInntektsavkorting.avkortetYtelseForventetInntekt.spreYtelsePerMaaned(fraOgMed, til),
-                    kilde = nyInntektsavkorting.grunnlag.id,
-                    beskrivelse = "Ytelse etter avkorting med ny forventet årsinntekt",
-                ),
+                tidligereYtelseEtterAvkorting =
+                    FaktumNode(
+                        verdi = tidligereYtelseEtterAvkorting.spreYtelsePerMaaned(foersteMaanedDetteAar, oppstartNyInntekt),
+                        kilde = tidligereYtelseEtterAvkorting.map { "avkortetYtelse:${it.id}" },
+                        beskrivelse = "Ytelse etter avkorting for tidligere oppgitt forventet årsinntekt samme år",
+                    ),
+                nyForventetYtelseEtterAvkorting =
+                    FaktumNode(
+                        verdi =
+                            nyInntektsavkorting.avkortetYtelseForventetInntekt.spreYtelsePerMaaned(
+                                foersteMaanedDetteAar,
+                                oppstartNyInntekt,
+                            ),
+                        kilde = nyInntektsavkorting.grunnlag.id,
+                        beskrivelse = "Ytelse etter avkorting med ny forventet årsinntekt",
+                    ),
                 fraOgMedNyForventetInntekt =
                     FaktumNode(
-                        verdi = til,
+                        verdi = oppstartNyInntekt,
                         kilde = nyInntektsavkorting.grunnlag.id,
                         beskrivelse = "Tidspunkt ny forventet inntekt inntrer",
                     ),
@@ -220,7 +226,7 @@ object AvkortingRegelkjoring {
         val resultat =
             restanse.eksekver(
                 KonstantGrunnlag(grunnlag),
-                Periode(fom = fraOgMed, tom = null).tilRegelPeriode(),
+                Periode(fom = foersteMaanedDetteAar, tom = null).tilRegelPeriode(),
             )
         return when (resultat) {
             is RegelkjoeringResultat.Suksess -> {
@@ -248,11 +254,16 @@ object AvkortingRegelkjoring {
 
     private fun List<AvkortetYtelse>.spreYtelsePerMaaned(
         fraOgMed: YearMonth,
-        til: YearMonth,
+        tilOgMed: YearMonth,
     ): List<Int> {
         val perMaaned = mutableListOf<Int>()
-        for (maanednr in fraOgMed.monthValue..til.minusMonths(1).monthValue) {
-            val maaned = YearMonth.of(til.year, maanednr)
+        val til =
+            when (tilOgMed.monthValue) {
+                0 -> 0
+                else -> tilOgMed.monthValue - 1
+            }
+        for (maanednr in fraOgMed.monthValue..til) {
+            val maaned = YearMonth.of(tilOgMed.year, maanednr)
             perMaaned.add(avkortetYtelseIMaaned(maaned).ytelseEtterAvkorting)
         }
         return perMaaned

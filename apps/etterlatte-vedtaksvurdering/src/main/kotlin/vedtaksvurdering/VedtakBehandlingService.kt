@@ -522,7 +522,11 @@ class VedtakBehandlingService(
                             }
                         avkortetYtelse.map {
                             Utbetalingsperiode(
-                                periode = Periode(YearMonth.from(it.fom), YearMonth.from(it.fom)),
+                                periode =
+                                    Periode(
+                                        fom = YearMonth.from(it.fom),
+                                        tom = it.tom?.let { tom -> YearMonth.from(tom) },
+                                    ),
                                 beloep = it.ytelseEtterAvkorting.toBigDecimal(),
                                 type = UtbetalingsperiodeType.UTBETALING,
                             )

@@ -145,7 +145,7 @@ internal class AutomatiskBehandlingRoutesKtTest {
                 behandlingKlient.tildelSaksbehandler(any(), any())
                 vedtakService.attesterVedtak(behandlingId, any(), any())
             }
-            coVerify(exactly = 2) {
+            coVerify(exactly = 1) {
                 rapidService.sendToRapid(any())
             }
             coVerify(atLeast = 1) {
@@ -220,7 +220,7 @@ internal class AutomatiskBehandlingRoutesKtTest {
                     behandlingKlient.tildelSaksbehandler(any(), any())
                     vedtakService.attesterVedtak(behandlingId, any(), any())
                 }
-                coVerify(exactly = 2) {
+                coVerify(exactly = 1) {
                     rapidService.sendToRapid(any())
                 }
                 coVerify(atLeast = 1) {
@@ -338,7 +338,6 @@ internal class AutomatiskBehandlingRoutesKtTest {
 
                 coVerify(exactly = 1) {
                     vedtakService.attesterVedtak(behandlingId, any(), any())
-                    rapidService.sendToRapid(any())
                 }
                 coVerify(atLeast = 1) {
                     behandlingKlient.harTilgangTilBehandling(any(), any())

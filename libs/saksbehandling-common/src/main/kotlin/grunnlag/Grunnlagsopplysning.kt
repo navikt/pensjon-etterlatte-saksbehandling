@@ -101,6 +101,18 @@ open class Grunnlagsopplysning<T>(
         }
     }
 
+    data class Persondata(
+        val tidspunktForInnhenting: Tidspunkt,
+        val registersReferanse: String?,
+        val opplysningId: String?,
+    ) : Kilde("persondata") {
+        val navn = "persondata"
+
+        override fun toString(): String {
+            return navn
+        }
+    }
+
     data class RegelKilde(val navn: String, val ts: Tidspunkt, val versjon: String) : Kilde("regel") {
         override fun toString(): String {
             return "beregningsregel  $navn"

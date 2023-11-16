@@ -96,7 +96,7 @@ interface GrunnlagService {
 
     fun hentHistoriskForeldreansvar(behandlingId: UUID): Grunnlagsopplysning<JsonNode>?
 
-    suspend fun hentVergeadresse(folkeregisteridentifikator: Folkeregisteridentifikator): VergeAdresse
+    fun hentVergeadresse(folkeregisteridentifikator: Folkeregisteridentifikator): VergeAdresse
 }
 
 class RealGrunnlagService(
@@ -260,6 +260,10 @@ class RealGrunnlagService(
                         Opplysningstype.SOEKER_PDL_V1,
                         soekerRolle,
                     )
+                val vergeadresserRequester =
+                    (soekerPersonInfo.person.vergemaalEllerFremtidsfullmakt ?: emptyList())
+                        .mapNotNull { it.vergeEllerFullmektig.motpartsPersonident }
+                        .map { Pair(it, async { hentVergeadresse(it) }) }
                 val avdoedePersonInfo =
                     requesterAvdoed.map {
                         GrunnlagsopplysningerPersonPdl(
@@ -279,12 +283,18 @@ class RealGrunnlagService(
                         )
                     }
 
-                listOfNotNull(soekerPersonInfo, innsenderPersonInfo)
-                    .plus(avdoedePersonInfo)
-                    .plus(gjenlevendePersonInfo)
+                val vergeAdresseMap = vergeadresserRequester.associate { it.first to it.second.await() }
+
+                GrunnlagComponents(
+                    soekerPersonInfo,
+                    innsenderPersonInfo,
+                    avdoedePersonInfo,
+                    gjenlevendePersonInfo,
+                    vergeAdresseMap,
+                )
             }
 
-        pdlPersondatasGrunnlag.forEach {
+        pdlPersondatasGrunnlag.toList().forEach {
             val enkenPdlOpplysning =
                 lagEnkelopplysningerFraPDL(
                     it.person,
@@ -301,13 +311,34 @@ class RealGrunnlagService(
             )
         }
 
+        val nyeSaksopplysninger = mutableListOf(opplysningsbehov.persongalleri.tilGrunnlagsopplysning())
+        if (pdlPersondatasGrunnlag.vergeAdresseMap.isNotEmpty()) {
+            nyeSaksopplysninger.add(vergeAdresserOpplysning(pdlPersondatasGrunnlag.vergeAdresseMap))
+        }
+
         lagreNyeSaksopplysninger(
             opplysningsbehov.sakId,
             behandlingId,
-            listOf(opplysningsbehov.persongalleri.tilGrunnlagsopplysning()),
+            nyeSaksopplysninger.toList(),
         )
         logger.info("Oppdatert grunnlag (sakId=${opplysningsbehov.sakId}, behandlingId=$behandlingId)")
     }
+
+    private fun vergeAdresserOpplysning(vergeadresserMap: Map<Folkeregisteridentifikator, VergeAdresse>): Grunnlagsopplysning<JsonNode> =
+        Grunnlagsopplysning(
+            id = UUID.randomUUID(),
+            kilde =
+                Grunnlagsopplysning.Persondata(
+                    tidspunktForInnhenting = Tidspunkt.now(),
+                    registersReferanse = null,
+                    opplysningId = null,
+                ),
+            opplysningType = Opplysningstype.VERGES_ADRESSER,
+            meta = objectMapper.createObjectNode(),
+            opplysning = vergeadresserMap.toJsonNode(),
+            fnr = null,
+            periode = null,
+        )
 
     private fun Persongalleri.tilGrunnlagsopplysning(): Grunnlagsopplysning<JsonNode> {
         return Grunnlagsopplysning(
@@ -374,7 +405,7 @@ class RealGrunnlagService(
         return historiskForeldreansvar
     }
 
-    override suspend fun hentVergeadresse(folkeregisteridentifikator: Folkeregisteridentifikator): VergeAdresse {
+    override fun hentVergeadresse(folkeregisteridentifikator: Folkeregisteridentifikator): VergeAdresse {
         return persondataKlient.hentAdresseForVerge(folkeregisteridentifikator)
             .toVergeAdresse()
     }
@@ -571,3 +602,17 @@ class LaastGrunnlagKanIkkeEndres(val behandlingId: UUID) :
             låst til en versjon av grunnlag (behandlingId=$behandlingId)
             """,
     )
+
+data class GrunnlagComponents(
+    val soekerPersonInfo: GrunnlagsopplysningerPersonPdl,
+    val innsenderPersonInfo: GrunnlagsopplysningerPersonPdl?,
+    val avdoedePersonInfo: List<GrunnlagsopplysningerPersonPdl>,
+    val gjenlevendePersonInfo: List<GrunnlagsopplysningerPersonPdl>,
+    val vergeAdresseMap: Map<Folkeregisteridentifikator, VergeAdresse>,
+) {
+    fun toList(): List<GrunnlagsopplysningerPersonPdl> {
+        return listOfNotNull(soekerPersonInfo, innsenderPersonInfo)
+            .plus(avdoedePersonInfo)
+            .plus(gjenlevendePersonInfo)
+    }
+}

@@ -14,7 +14,6 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
 import rapidsandrivers.SAK_ID_FLERE_KEY
-import java.time.Duration
 import java.util.UUID
 import javax.sql.DataSource
 import kotlin.concurrent.thread
@@ -32,7 +31,7 @@ class StartMigrering(val repository: StartMigreringRepository, val rapidsConnect
         repository.settSakerMigrert(sakerTilMigrering)
         if (sakerTilMigrering.isNotEmpty()) {
             thread {
-                Thread.sleep(Duration.ofMinutes(1))
+                Thread.sleep(60_000)
                 rapidsConnection.publish(message = lagMelding(sakerTilMigrering), key = UUID.randomUUID().toString())
             }
         }

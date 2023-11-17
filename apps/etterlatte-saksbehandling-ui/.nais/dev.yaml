@@ -89,8 +89,6 @@ spec:
       value: https://gosys-q2.dev.intern.nav.no/gosys
     - name: RINA_URL
       value: https://rina-ss3-q.adeo.no
-    - name: NORG2_URL
-      value: https://norg2.intern.dev.nav.no/norg2/api/v1
     - name: APP_VERSION
       value: {{ image }}
   envFrom:
@@ -101,7 +99,6 @@ spec:
         - host: navikt.github.io
         - host: login.microsoftonline.com
         - host: graph.microsoft.com
-        - host: norg2.intern.dev.nav.no
         - host: etterlatte-unleash-api.nav.cloud.nais.io
       rules:
         - application: etterlatte-brev-api

@@ -1,21 +1,29 @@
 import { createAction, createReducer } from '@reduxjs/toolkit'
 import { OppgaveDTO } from '~shared/api/oppgaver'
-import { JaNei } from '~shared/types/ISvar'
 import { NyBehandlingRequest } from '~shared/types/IDetaljertBehandling'
-import { Journalpost } from '~shared/types/Journalpost'
+import {
+  FerdigstillJournalpostRequest,
+  Journalpost,
+  JournalpostVariant,
+  OppdaterJournalpostTemaRequest,
+} from '~shared/types/Journalpost'
 
 export const settBruker = createAction<string>('behandling/bruker/sett')
 export const settOppgave = createAction<OppgaveDTO>('behandling/oppgave/sett')
 export const settJournalpost = createAction<Journalpost>('behandling/journalpost/sett')
-export const settSamsvar = createAction<JaNei>('behandling/samsvar/sett')
-export const settBehandlingBehov = createAction<NyBehandlingRequest>('behandling/behandlingbehov/sett')
+export const settJournalpostVariant = createAction<JournalpostVariant>('oppgave/journalpostvariant/sett')
+export const settNyttTema = createAction<OppdaterJournalpostTemaRequest>('oppgave/endretemarequest/sett')
+export const settFerdigstillRequest = createAction<FerdigstillJournalpostRequest>('oppgave/ferdigstillrequest/sett')
+export const settNyBehandlingRequest = createAction<NyBehandlingRequest>('behandling/behandlingbehov/sett')
 
 export interface IJournalfoeringOppgaveReducer {
   bruker?: string
   oppgave?: OppgaveDTO
   journalpost?: Journalpost
-  samsvar?: JaNei
-  behandlingBehov?: NyBehandlingRequest
+  journalpostVariant?: JournalpostVariant
+  endreTemaRequest?: OppdaterJournalpostTemaRequest
+  ferdigstillRequest?: FerdigstillJournalpostRequest
+  nyBehandlingRequest?: NyBehandlingRequest
 }
 
 const initialState: IJournalfoeringOppgaveReducer = {}
@@ -31,10 +39,16 @@ export const journalfoeringOppgaveReducer = createReducer(initialState, (builder
     .addCase(settJournalpost, (state, action) => {
       state.journalpost = action.payload
     })
-    .addCase(settSamsvar, (state, action) => {
-      state.samsvar = action.payload
+    .addCase(settJournalpostVariant, (state, action) => {
+      state.journalpostVariant = action.payload
     })
-    .addCase(settBehandlingBehov, (state, action) => {
-      state.behandlingBehov = action.payload
+    .addCase(settNyttTema, (state, action) => {
+      state.endreTemaRequest = action.payload
+    })
+    .addCase(settFerdigstillRequest, (state, action) => {
+      state.ferdigstillRequest = action.payload
+    })
+    .addCase(settNyBehandlingRequest, (state, action) => {
+      state.nyBehandlingRequest = action.payload
     })
 )

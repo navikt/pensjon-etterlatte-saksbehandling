@@ -4,14 +4,17 @@ import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.plugins.ResponseException
 import io.ktor.client.request.accept
+import io.ktor.client.request.patch
 import io.ktor.client.request.post
+import io.ktor.client.request.put
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
-import no.nav.etterlatte.brev.journalpost.FerdigstillJournalpostRequest
+import no.nav.etterlatte.brev.journalpost.Bruker
 import no.nav.etterlatte.brev.journalpost.JournalpostRequest
 import no.nav.etterlatte.brev.journalpost.JournalpostResponse
+import no.nav.etterlatte.brev.journalpost.JournalpostSak
 import org.slf4j.LoggerFactory
 
 class DokarkivKlient(private val client: HttpClient, private val url: String) {
@@ -39,13 +42,37 @@ class DokarkivKlient(private val client: HttpClient, private val url: String) {
 
     internal suspend fun ferdigstillJournalpost(
         journalpostId: String,
-        request: FerdigstillJournalpostRequest,
+        journalfoerendeEnhet: String,
     ): String =
-        client.post("$url/$journalpostId/ferdigstill") {
+        client.patch("$url/$journalpostId/ferdigstill") {
+            contentType(ContentType.Application.Json)
+            setBody(FerdigstillJournalpostRequest(journalfoerendeEnhet))
+        }.body()
+
+    internal suspend fun oppdaterFagsak(
+        journalpostId: String,
+        request: OppdaterJournalpostSakRequest,
+    ): String =
+        client.put("$url/$journalpostId") {
             contentType(ContentType.Application.Json)
             setBody(request)
         }.body()
+
+    internal suspend fun endreTema(
+        journalpostId: String,
+        nyttTema: String,
+    ): String =
+        client.put("$url/$journalpostId") {
+            contentType(ContentType.Application.Json)
+            setBody(OppdaterJournalpostTemaRequest(nyttTema))
+        }.body()
 }
+
+data class OppdaterJournalpostTemaRequest(val tema: String)
+
+data class FerdigstillJournalpostRequest(val journalfoerendeEnhet: String)
+
+data class OppdaterJournalpostSakRequest(val bruker: Bruker, val sak: JournalpostSak)
 
 open class JournalpostException(msg: String, cause: Throwable) : Exception(msg, cause)
 

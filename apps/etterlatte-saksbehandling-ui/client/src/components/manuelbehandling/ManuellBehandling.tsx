@@ -5,14 +5,14 @@ import { DatoVelger } from '~shared/DatoVelger'
 import PersongalleriBarnepensjon from '~components/person/journalfoeringsoppgave/nybehandling/PersongalleriBarnepensjon'
 import { useJournalfoeringOppgave } from '~components/person/journalfoeringsoppgave/useJournalfoeringOppgave'
 import styled from 'styled-components'
-import { settBehandlingBehov } from '~store/reducers/JournalfoeringOppgaveReducer'
+import { settNyBehandlingRequest } from '~store/reducers/JournalfoeringOppgaveReducer'
 import { useAppDispatch } from '~store/Store'
 import { isFailure, isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
 import { opprettBehandling } from '~shared/api/behandling'
 
 export default function ManuellBehandling() {
   const dispatch = useAppDispatch()
-  const { behandlingBehov } = useJournalfoeringOppgave()
+  const { nyBehandlingRequest } = useJournalfoeringOppgave()
   const [status, opprettNyBehandling] = useApiCall(opprettBehandling)
   const [nyBehandlingId, setNyId] = useState('')
   const [erMigrering, setErMigrering] = useState<boolean | null>(null)
@@ -20,9 +20,9 @@ export default function ManuellBehandling() {
   const ferdigstill = () => {
     opprettNyBehandling(
       {
-        ...behandlingBehov,
+        ...nyBehandlingRequest,
         sakType: SakType.BARNEPENSJON,
-        mottattDato: behandlingBehov!!.mottattDato!!.replace('Z', ''),
+        mottattDato: nyBehandlingRequest!!.mottattDato!!.replace('Z', ''),
         kilde: erMigrering ? 'PESYS' : undefined,
       },
       (response) => {
@@ -52,8 +52,8 @@ export default function ManuellBehandling() {
 
       <Select
         label="Hva skal språket/målform være?"
-        value={behandlingBehov?.spraak || ''}
-        onChange={(e) => dispatch(settBehandlingBehov({ ...behandlingBehov, spraak: e.target.value }))}
+        value={nyBehandlingRequest?.spraak || ''}
+        onChange={(e) => dispatch(settNyBehandlingRequest({ ...nyBehandlingRequest, spraak: e.target.value }))}
       >
         <option>Velg ...</option>
         <option value="nb">Bokmål</option>
@@ -64,11 +64,11 @@ export default function ManuellBehandling() {
       <DatoVelger
         label="Mottatt dato"
         description="Datoen søknaden ble mottatt"
-        value={behandlingBehov?.mottattDato ? new Date(behandlingBehov?.mottattDato) : undefined}
+        value={nyBehandlingRequest?.mottattDato ? new Date(nyBehandlingRequest?.mottattDato) : undefined}
         onChange={(mottattDato) =>
           dispatch(
-            settBehandlingBehov({
-              ...behandlingBehov,
+            settNyBehandlingRequest({
+              ...nyBehandlingRequest,
               mottattDato: mottattDato?.toISOString(),
             })
           )

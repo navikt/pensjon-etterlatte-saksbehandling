@@ -37,8 +37,10 @@ data class JournalpostDokument(
 data class JournalpostSak(
     val sakstype: Sakstype,
     val fagsakId: String? = null,
-    val fagsaksystem: String? = Fagsaksystem.EY.navn,
-)
+    val tema: String? = null,
+) {
+    val fagsaksystem: String = Fagsaksystem.EY.navn
+}
 
 enum class Sakstype {
     FAGSAK,
@@ -87,7 +89,3 @@ class JournalpostKoder {
         const val BREV_KODE = "XX.YY-ZZ"
     }
 }
-
-data class FerdigstillJournalpostRequest(
-    val journalfoerendeEnhet: String,
-)

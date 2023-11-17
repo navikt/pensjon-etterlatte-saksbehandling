@@ -5,7 +5,6 @@ import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.journalpost.AvsenderMottaker
 import no.nav.etterlatte.brev.journalpost.Bruker
 import no.nav.etterlatte.brev.journalpost.DokumentVariant
-import no.nav.etterlatte.brev.journalpost.FerdigstillJournalpostRequest
 import no.nav.etterlatte.brev.journalpost.JournalPostType
 import no.nav.etterlatte.brev.journalpost.JournalpostDokument
 import no.nav.etterlatte.brev.journalpost.JournalpostKoder.Companion.BREV_KODE
@@ -34,7 +33,12 @@ interface DokarkivService {
 
     fun ferdigstill(
         journalpostId: String,
-        request: FerdigstillJournalpostRequest,
+        sak: Sak,
+    )
+
+    fun endreTema(
+        journalpostId: String,
+        nyttTema: String,
     )
 }
 
@@ -74,12 +78,33 @@ class DokarkivServiceImpl(
 
     override fun ferdigstill(
         journalpostId: String,
-        request: FerdigstillJournalpostRequest,
+        sak: Sak,
     ) {
         runBlocking {
-            client.ferdigstillJournalpost(journalpostId, request).also {
-                logger.info("Journalpost med id=$journalpostId ferdigstilt: \n$it")
-            }
+            val request =
+                OppdaterJournalpostSakRequest(
+                    bruker = Bruker(id = sak.ident),
+                    sak =
+                        JournalpostSak(
+                            sakstype = Sakstype.FAGSAK,
+                            fagsakId = sak.id.toString(),
+                            tema = sak.sakType.tema,
+                        ),
+                )
+
+            client.oppdaterFagsak(journalpostId, request)
+            client.ferdigstillJournalpost(journalpostId, sak.enhet)
+
+            logger.info("Journalpost med id=$journalpostId ferdigstilt")
+        }
+    }
+
+    override fun endreTema(
+        journalpostId: String,
+        nyttTema: String,
+    ) {
+        runBlocking {
+            client.endreTema(journalpostId, nyttTema)
         }
     }
 

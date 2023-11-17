@@ -134,7 +134,7 @@ class GenerellBehandlingService(
         }
         val behandling = hentetBehandling!!
         oppgaveService.ferdigstillOppgaveUnderbehandlingOgLagNyMedType(
-            fattetoppgave = SakIdOgReferanse(behandling.sakId, behandling.id.toString()),
+            fattetoppgaveReferanseOgSak = SakIdOgReferanse(behandling.sakId, behandling.id.toString()),
             oppgaveType = OppgaveType.UNDERKJENT,
             merknad = kommentar.begrunnelse,
             saksbehandler = saksbehandler,

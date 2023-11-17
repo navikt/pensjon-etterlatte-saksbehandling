@@ -51,7 +51,7 @@ internal fun Route.behandlingVedtakRoute(
                     behandlingsstatusService.settFattetVedtak(behandling, fattVedtak.vedtakHendelse)
                     try {
                         oppgaveService.ferdigstillOppgaveUnderbehandlingOgLagNyMedType(
-                            fattetoppgave = fattVedtak.sakIdOgReferanse,
+                            fattetoppgaveReferanseOgSak = fattVedtak.sakIdOgReferanse,
                             oppgaveType = OppgaveType.ATTESTERING,
                             saksbehandler = brukerTokenInfo,
                             merknad =
@@ -88,7 +88,7 @@ internal fun Route.behandlingVedtakRoute(
                         }
                     try {
                         oppgaveService.ferdigstillOppgaveUnderbehandlingOgLagNyMedType(
-                            fattetoppgave = underkjennVedtakOppgave.sakIdOgReferanse,
+                            fattetoppgaveReferanseOgSak = underkjennVedtakOppgave.sakIdOgReferanse,
                             oppgaveType = OppgaveType.UNDERKJENT,
                             merknad = merknadFraAttestant,
                             saksbehandler = brukerTokenInfo,

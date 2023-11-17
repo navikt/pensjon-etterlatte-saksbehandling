@@ -167,12 +167,12 @@ class OppgaveService(
     }
 
     fun ferdigstillOppgaveUnderbehandlingOgLagNyMedType(
-        fattetoppgave: SakIdOgReferanse,
+        fattetoppgaveReferanseOgSak: SakIdOgReferanse,
         oppgaveType: OppgaveType,
         merknad: String?,
         saksbehandler: BrukerTokenInfo,
     ): OppgaveIntern {
-        val behandlingsoppgaver = oppgaveDao.hentOppgaverForReferanse(fattetoppgave.referanse)
+        val behandlingsoppgaver = oppgaveDao.hentOppgaverForReferanse(fattetoppgaveReferanseOgSak.referanse)
         if (behandlingsoppgaver.isEmpty()) {
             throw BadRequestException("Må ha en oppgave for å kunne lage attesteringsoppgave")
         }
@@ -181,8 +181,8 @@ class OppgaveService(
             sikreAtSaksbehandlerSomLukkerOppgaveEierOppgaven(oppgaveUnderbehandling, saksbehandler)
             oppgaveDao.endreStatusPaaOppgave(oppgaveUnderbehandling.id, Status.FERDIGSTILT)
             return opprettNyOppgaveMedSakOgReferanse(
-                referanse = fattetoppgave.referanse,
-                sakId = fattetoppgave.sakId,
+                referanse = fattetoppgaveReferanseOgSak.referanse,
+                sakId = fattetoppgaveReferanseOgSak.sakId,
                 oppgaveKilde = oppgaveUnderbehandling.kilde,
                 oppgaveType = oppgaveType,
                 merknad = merknad,
@@ -190,13 +190,13 @@ class OppgaveService(
         } catch (e: NoSuchElementException) {
             throw BadRequestException(
                 "Det må finnes en oppgave under behandling, gjelder behandling:" +
-                    " ${fattetoppgave.referanse}",
+                    " ${fattetoppgaveReferanseOgSak.referanse}",
                 e,
             )
         } catch (e: IllegalArgumentException) {
             throw BadRequestException(
                 "Skal kun ha en oppgave under behandling, gjelder behandling:" +
-                    " ${fattetoppgave.referanse}",
+                    " ${fattetoppgaveReferanseOgSak.referanse}",
                 e,
             )
         }

@@ -157,7 +157,7 @@ class TilbakekrevingService(
         )
 
         oppgaveService.ferdigstillOppgaveUnderbehandlingOgLagNyMedType(
-            fattetoppgave =
+            fattetoppgaveReferanseOgSak =
                 SakIdOgReferanse(
                     sakId = tilbakekreving.sak.id,
                     referanse = tilbakekreving.id.toString(),
@@ -267,7 +267,7 @@ class TilbakekrevingService(
         )
 
         oppgaveService.ferdigstillOppgaveUnderbehandlingOgLagNyMedType(
-            fattetoppgave =
+            fattetoppgaveReferanseOgSak =
                 SakIdOgReferanse(
                     sakId = tilbakekreving.sak.id,
                     referanse = tilbakekreving.id.toString(),

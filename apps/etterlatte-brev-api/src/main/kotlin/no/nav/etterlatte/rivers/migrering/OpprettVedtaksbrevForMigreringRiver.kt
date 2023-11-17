@@ -32,6 +32,7 @@ internal class OpprettVedtaksbrevForMigreringRiver(
             validate { it.requireKey(HENDELSE_DATA_KEY) }
             validate { it.requireValue(KILDE_KEY, Vedtaksloesning.PESYS.name) }
             validate { it.requireValue(BREV_OPPRETTA_MIGRERING, false) }
+            validate { it.rejectValue(PDF_GENERERT, true) }
         }
     }
 
@@ -55,6 +56,9 @@ internal class OpprettVedtaksbrevForMigreringRiver(
             service.genererPdf(vedtaksbrev.id, brukerTokenInfo, MigreringBrevRequest(hendelseData.beregning))
         }
         logger.info("Har oppretta vedtaksbrev i sak $sakId")
+        packet[PDF_GENERERT] = true
         context.publish(packet.toJson())
     }
 }
+
+private const val PDF_GENERERT = "PDF_GENERERT"

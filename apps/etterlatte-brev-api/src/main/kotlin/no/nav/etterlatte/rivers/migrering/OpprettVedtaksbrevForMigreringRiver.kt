@@ -5,6 +5,7 @@ import no.nav.etterlatte.brev.VedtaksbrevService
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseType
+import no.nav.etterlatte.rapidsandrivers.migrering.BREV_OPPRETTA_MIGRERING
 import no.nav.etterlatte.rapidsandrivers.migrering.KILDE_KEY
 import no.nav.etterlatte.rapidsandrivers.migrering.hendelseData
 import no.nav.etterlatte.rivers.BrevEventTypes
@@ -20,7 +21,7 @@ import java.util.UUID
 internal class OpprettVedtaksbrevForMigreringRiver(
     rapidsConnection: RapidsConnection,
     private val service: VedtaksbrevService,
-) : ListenerMedLoggingOgFeilhaandtering(BrevEventTypes.OPPRETTET.name) {
+) : ListenerMedLoggingOgFeilhaandtering(BrevEventTypes.OPPRETTET.toString()) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     init {
@@ -29,6 +30,7 @@ internal class OpprettVedtaksbrevForMigreringRiver(
             validate { it.requireKey("vedtak.sak.id") }
             validate { it.requireKey(HENDELSE_DATA_KEY) }
             validate { it.requireValue(KILDE_KEY, Vedtaksloesning.PESYS.name) }
+            validate { it.requireValue(BREV_OPPRETTA_MIGRERING, false) }
         }
     }
 

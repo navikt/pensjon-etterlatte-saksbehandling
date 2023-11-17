@@ -18,7 +18,7 @@ import java.util.UUID
 internal class FerdigstillVedtaksbrevForMigreringRiver(
     rapidsConnection: RapidsConnection,
     private val service: VedtaksbrevService,
-) : ListenerMedLoggingOgFeilhaandtering(BrevEventTypes.OPPRETTET.name) {
+) : ListenerMedLoggingOgFeilhaandtering(BrevEventTypes.FERDIGSTILT.toString()) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     init {

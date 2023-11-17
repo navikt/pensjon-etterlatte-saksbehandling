@@ -9,6 +9,7 @@ import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.migrering.pen.PenKlient
 import no.nav.etterlatte.migrering.person.krr.KrrKlient
+import no.nav.etterlatte.migrering.start.StartMigreringRepository
 import no.nav.etterlatte.migrering.verifisering.PDLKlient
 import no.nav.etterlatte.migrering.verifisering.Verifiserer
 
@@ -52,6 +53,8 @@ internal class ApplicationContext {
                 ),
             url = config.getString("krr.url"),
         )
+
+    val startMigreringRepository = StartMigreringRepository(dataSource)
 }
 
 private fun featureToggleProperties(config: Config) =

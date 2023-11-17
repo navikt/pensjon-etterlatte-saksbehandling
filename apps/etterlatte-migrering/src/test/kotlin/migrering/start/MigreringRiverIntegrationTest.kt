@@ -23,6 +23,9 @@ import no.nav.etterlatte.migrering.pen.BarnepensjonGrunnlagResponse
 import no.nav.etterlatte.migrering.pen.PenKlient
 import no.nav.etterlatte.migrering.person.krr.DigitalKontaktinformasjon
 import no.nav.etterlatte.migrering.person.krr.KrrKlient
+import no.nav.etterlatte.migrering.start.MigrerSpesifikkSakRiver
+import no.nav.etterlatte.migrering.start.MigreringFeatureToggle
+import no.nav.etterlatte.migrering.start.MigreringRiver
 import no.nav.etterlatte.migrering.verifisering.PDLKlient
 import no.nav.etterlatte.migrering.verifisering.Verifiserer
 import no.nav.etterlatte.opprettInMemoryDatabase

@@ -7,6 +7,7 @@ import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.utbetaling.UtbetalingResponseDto
 import no.nav.etterlatte.libs.common.utbetaling.UtbetalingStatusDto
 import no.nav.etterlatte.migrering.pen.PenKlient
+import no.nav.etterlatte.migrering.start.MigreringFeatureToggle
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser
 import no.nav.etterlatte.utbetaling.common.EVENT_NAME_OPPDATERT
 import no.nav.etterlatte.utbetaling.common.UTBETALING_RESPONSE

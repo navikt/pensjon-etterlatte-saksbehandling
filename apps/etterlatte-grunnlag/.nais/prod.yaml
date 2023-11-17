@@ -93,6 +93,7 @@ spec:
         - application: etterlatte-brev-api
         - application: etterlatte-beregning
         - application: etterlatte-behandling
+        - application: etterlatte-trygdetid
         - application: etterlatte-saksbehandling-ui
         - application: etterlatte-saksbehandling-ui-lokal
     outbound:

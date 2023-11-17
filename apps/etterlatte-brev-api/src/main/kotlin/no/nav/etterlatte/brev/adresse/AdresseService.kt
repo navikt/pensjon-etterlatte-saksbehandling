@@ -54,7 +54,7 @@ class AdresseService(
         }
 
     private suspend fun hentSaksbehandlerNavn(navn: String) =
-        if (navn == Fagsaksystem.EY.navn || navn.contains("gcp:etterlatte-")) {
+        if (navn == Fagsaksystem.EY.navn || navn.contains("gcp:etterlatte:")) {
             null
         } else {
             navansattKlient.hentSaksbehandlerInfo(navn).fornavnEtternavn

@@ -12,6 +12,7 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
+import no.nav.etterlatte.libs.common.oppgave.SakIdOgReferanse
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJson
@@ -33,6 +34,8 @@ class ManglerLandkodeException(message: String) : Exception(message)
 class ManglerRinanummerException(message: String) : Exception(message)
 
 class KanIkkeEndreFattetEllerAttestertBehandling(message: String) : Exception(message)
+
+data class Kommentar(val begrunnelse: String)
 
 class GenerellBehandlingService(
     private val generellBehandlingDao: GenerellBehandlingDao,
@@ -112,11 +115,31 @@ class GenerellBehandlingService(
         val hentetBehandling = hentBehandlingMedId(generellbehandlingId)
         require(hentetBehandling !== null) { "Behandlingen må finnes, fant ikke id: $generellbehandlingId" }
         require(hentetBehandling?.status === GenerellBehandling.Status.FATTET) {
-            "Behandling må ha status FATTET, hadde: ${hentetBehandling?.status}"
+            "Behandlingen må ha status FATTET, hadde: ${hentetBehandling?.status}"
         }
 
         oppdaterBehandling(hentetBehandling!!.copy(status = GenerellBehandling.Status.ATTESTERT))
         oppgaveService.ferdigStillOppgaveUnderBehandling(generellbehandlingId.toString(), saksbehandler)
+    }
+
+    fun underkjenn(
+        generellbehandlingId: UUID,
+        saksbehandler: Saksbehandler,
+        kommentar: Kommentar,
+    ) {
+        val hentetBehandling = hentBehandlingMedId(generellbehandlingId)
+        require(hentetBehandling !== null) { "Behandlingen må finnes, fant ikke id: $generellbehandlingId" }
+        require(hentetBehandling?.status === GenerellBehandling.Status.FATTET) {
+            "Behandlingen må ha status FATTET, hadde: ${hentetBehandling?.status}"
+        }
+        val behandling = hentetBehandling!!
+        oppgaveService.ferdigstillOppgaveUnderbehandlingOgLagNyMedType(
+            fattetoppgaveReferanseOgSak = SakIdOgReferanse(behandling.sakId, behandling.id.toString()),
+            oppgaveType = OppgaveType.UNDERKJENT,
+            merknad = kommentar.begrunnelse,
+            saksbehandler = saksbehandler,
+        )
+        oppdaterBehandling(behandling.copy(status = GenerellBehandling.Status.OPPRETTET))
     }
 
     private fun validerUtland(innhold: Innhold.KravpakkeUtland) {

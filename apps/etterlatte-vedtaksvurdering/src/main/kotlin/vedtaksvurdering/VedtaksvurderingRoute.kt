@@ -55,7 +55,7 @@ fun Route.vedtaksvurderingRoute(
         get("/{$BEHANDLINGID_CALL_PARAMETER}") {
             withBehandlingId(behandlingKlient) { behandlingId ->
                 logger.info("Henter vedtak for behandling $behandlingId")
-                val vedtak = vedtakService.hentVedtak(behandlingId)
+                val vedtak = vedtakService.hentVedtakMedBehandlingId(behandlingId)
                 if (vedtak == null) {
                     call.response.status(HttpStatusCode.NotFound)
                 } else {
@@ -67,7 +67,7 @@ fun Route.vedtaksvurderingRoute(
         get("/{$BEHANDLINGID_CALL_PARAMETER}/ny") {
             withBehandlingId(behandlingKlient) { behandlingId ->
                 logger.info("Henter vedtak for behandling $behandlingId")
-                val vedtak = vedtakService.hentVedtak(behandlingId)
+                val vedtak = vedtakService.hentVedtakMedBehandlingId(behandlingId)
                 if (vedtak == null) {
                     call.response.status(HttpStatusCode.NotFound)
                 } else {
@@ -79,7 +79,7 @@ fun Route.vedtaksvurderingRoute(
         get("/{$BEHANDLINGID_CALL_PARAMETER}/sammendrag") {
             withBehandlingId(behandlingKlient) { behandlingId ->
                 logger.info("Henter sammendrag av vedtak for behandling $behandlingId")
-                val vedtaksresultat = vedtakService.hentVedtak(behandlingId)?.toVedtakSammendragDto()
+                val vedtaksresultat = vedtakService.hentVedtakMedBehandlingId(behandlingId)?.toVedtakSammendragDto()
                 if (vedtaksresultat == null) {
                     call.response.status(HttpStatusCode.NoContent)
                 } else {

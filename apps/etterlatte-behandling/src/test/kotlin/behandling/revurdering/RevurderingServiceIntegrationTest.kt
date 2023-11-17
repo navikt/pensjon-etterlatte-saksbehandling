@@ -39,8 +39,8 @@ import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
+import no.nav.etterlatte.libs.common.oppgave.SakIdOgReferanse
 import no.nav.etterlatte.libs.common.oppgave.Status
-import no.nav.etterlatte.libs.common.oppgave.VedtakOppgaveDTO
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
@@ -725,7 +725,7 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
         }
         inTransaction {
             applicationContext.oppgaveService.ferdigstillOppgaveUnderbehandlingOgLagNyMedType(
-                VedtakOppgaveDTO(
+                SakIdOgReferanse(
                     sakId = sak.id,
                     referanse = behandling!!.id.toString(),
                 ),
@@ -1034,7 +1034,7 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
         }
         inTransaction {
             applicationContext.oppgaveService.ferdigstillOppgaveUnderbehandlingOgLagNyMedType(
-                VedtakOppgaveDTO(
+                SakIdOgReferanse(
                     sakId = sak.id,
                     referanse = nonNullBehandling.id.toString(),
                 ),

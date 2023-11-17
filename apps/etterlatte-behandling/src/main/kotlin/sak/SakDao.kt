@@ -3,6 +3,7 @@ package no.nav.etterlatte.sak
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.behandling.objectMapper
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
+import no.nav.etterlatte.libs.common.behandling.Flyktning
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Utenlandstilknytning
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
@@ -51,6 +52,21 @@ class SakDao(private val connection: () -> Connection) {
                     "UPDATE sak set utenlandstilknytning = ? where id = ?",
                 )
             statement.setJsonb(1, utenlandstilknytning)
+            statement.setLong(2, sakId)
+            statement.executeUpdate()
+        }
+    }
+
+    fun oppdaterFlyktning(
+        sakId: Long,
+        flyktning: Flyktning,
+    ) {
+        with(connection()) {
+            val statement =
+                prepareStatement(
+                    "UPDATE sak set flyktning = ? where id = ?",
+                )
+            statement.setJsonb(1, flyktning)
             statement.setLong(2, sakId)
             statement.executeUpdate()
         }

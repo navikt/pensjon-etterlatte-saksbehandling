@@ -29,18 +29,23 @@ class BrevbakerService(
             .also { logger.info("Generert brev (id=$brevID) med størrelse: ${it.bytes.size}") }
     }
 
-    suspend fun hentRedigerbarTekstFraBrevbakeren(
-        generellBrevData: GenerellBrevData,
-        brukerTokenInfo: BrukerTokenInfo,
-    ): Slate {
+    suspend fun hentRedigerbarTekstFraBrevbakeren(redigerbarTekstRequest: RedigerbarTekstRequest): Slate {
         val request =
             BrevbakerRequest.fra(
-                brevDataMapper.brevKode(generellBrevData, BrevProsessType.REDIGERBAR).redigering,
-                brevDataMapper.brevData(generellBrevData, brukerTokenInfo),
-                generellBrevData,
-                adresseService.hentAvsender(generellBrevData.forenkletVedtak),
+                brevDataMapper.brevKode(redigerbarTekstRequest.generellBrevData, BrevProsessType.REDIGERBAR).redigering,
+                brevDataMapper.brevData(redigerbarTekstRequest.generellBrevData, redigerbarTekstRequest.brukerTokenInfo),
+                redigerbarTekstRequest.generellBrevData,
+                adresseService.hentAvsender(redigerbarTekstRequest.generellBrevData.forenkletVedtak),
             )
         val brevbakerResponse = brevbakerKlient.genererJSON(request)
         return BlockTilSlateKonverterer.konverter(brevbakerResponse)
     }
+}
+
+data class RedigerbarTekstRequest(
+    val generellBrevData: GenerellBrevData,
+    val brukerTokenInfo: BrukerTokenInfo,
+    val prosessType: BrevProsessType,
+) {
+    fun vedtakstype() = generellBrevData.forenkletVedtak.type.name.lowercase()
 }

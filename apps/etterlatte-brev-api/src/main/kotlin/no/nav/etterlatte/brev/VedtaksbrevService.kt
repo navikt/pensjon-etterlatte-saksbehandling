@@ -8,6 +8,7 @@ import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.brevbaker.BrevbakerRequest
 import no.nav.etterlatte.brev.brevbaker.BrevbakerService
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode
+import no.nav.etterlatte.brev.brevbaker.RedigerbarTekstRequest
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.dokarkiv.DokarkivServiceImpl
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
@@ -92,7 +93,7 @@ class VedtaksbrevService(
                 soekerFnr = generellBrevData.personerISak.soeker.fnr.value,
                 mottaker = mottaker,
                 opprettet = Tidspunkt.now(),
-                innhold = opprettInnhold(generellBrevData, brukerTokenInfo, prosessType),
+                innhold = opprettInnhold(RedigerbarTekstRequest(generellBrevData, brukerTokenInfo, prosessType)),
                 innholdVedlegg = opprettInnholdVedlegg(generellBrevData, prosessType),
             )
 
@@ -228,7 +229,7 @@ class VedtaksbrevService(
     ): BrevService.BrevPayload {
         val generellBrevData = brevdataFacade.hentGenerellBrevData(sakId, behandlingId, brukerTokenInfo)
         val prosessType = brevProsessTypeFactory.fra(generellBrevData)
-        val innhold = opprettInnhold(generellBrevData, brukerTokenInfo, prosessType)
+        val innhold = opprettInnhold(RedigerbarTekstRequest(generellBrevData, brukerTokenInfo, prosessType))
         val innholdVedlegg = opprettInnholdVedlegg(generellBrevData, prosessType)
 
         if (innhold.payload != null) {
@@ -274,21 +275,17 @@ class VedtaksbrevService(
             "Fant ikke payloadvedlegg for brev ${brev.id}"
         }
 
-    private suspend fun opprettInnhold(
-        generellBrevData: GenerellBrevData,
-        brukerTokenInfo: BrukerTokenInfo,
-        prosessType: BrevProsessType,
-    ): BrevInnhold {
-        val tittel = "Vedtak om ${generellBrevData.forenkletVedtak.type.name.lowercase()}"
+    private suspend fun opprettInnhold(redigerbarTekstRequest: RedigerbarTekstRequest): BrevInnhold {
+        val tittel = "Vedtak om ${redigerbarTekstRequest.vedtakstype()}"
 
         val payload =
-            when (prosessType) {
-                REDIGERBAR -> brevbaker.hentRedigerbarTekstFraBrevbakeren(generellBrevData, brukerTokenInfo)
+            when (redigerbarTekstRequest.prosessType) {
+                REDIGERBAR -> brevbaker.hentRedigerbarTekstFraBrevbakeren(redigerbarTekstRequest)
                 AUTOMATISK -> null
-                MANUELL -> SlateHelper.hentInitiellPayload(generellBrevData)
+                MANUELL -> SlateHelper.hentInitiellPayload(redigerbarTekstRequest.generellBrevData)
             }
 
-        return BrevInnhold(tittel, generellBrevData.spraak, payload)
+        return BrevInnhold(tittel, redigerbarTekstRequest.generellBrevData.spraak, payload)
     }
 
     private fun opprettInnholdVedlegg(

@@ -31,6 +31,7 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.rapidsandrivers.migrering.BREV_OPPRETTA_MIGRERING
 import no.nav.etterlatte.rapidsandrivers.migrering.KILDE_KEY
+import no.nav.etterlatte.rivers.migrering.FerdigstillVedtaksbrevForMigreringRiver
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions
@@ -61,7 +62,7 @@ internal class OpprettJournalfoerOgDistribuer {
             }
         val testRapid =
             TestRapid().apply {
-                OpprettVedtaksbrevForMigreringRiver(this, vedtaksbrevService)
+                FerdigstillVedtaksbrevForMigreringRiver(this, vedtaksbrevService)
                 JournalfoerVedtaksbrevRiver(this, vedtaksbrevService)
                 DistribuerBrevRiver(this, vedtaksbrevService, distribusjonService)
             }
@@ -109,7 +110,7 @@ internal class OpprettJournalfoerOgDistribuer {
             }
         val testRapid =
             TestRapid().apply {
-                OpprettVedtaksbrevForMigreringRiver(this, vedtaksbrevService)
+                FerdigstillVedtaksbrevForMigreringRiver(this, vedtaksbrevService)
                 JournalfoerVedtaksbrevRiver(this, vedtaksbrevService)
                 DistribuerBrevRiver(this, vedtaksbrevService, distribusjonService)
             }

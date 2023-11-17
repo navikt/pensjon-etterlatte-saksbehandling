@@ -36,6 +36,8 @@ import no.nav.etterlatte.rapidsandrivers.migrering.KILDE_KEY
 import no.nav.etterlatte.rapidsandrivers.migrering.MigreringRequest
 import no.nav.etterlatte.rapidsandrivers.migrering.PesysId
 import no.nav.etterlatte.rapidsandrivers.migrering.Trygdetid
+import no.nav.etterlatte.rivers.migrering.FerdigstillVedtaksbrevForMigreringRiver
+import no.nav.etterlatte.rivers.migrering.OpprettVedtaksbrevForMigreringRiver
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.AfterEach
@@ -50,7 +52,8 @@ import java.util.UUID
 internal class OpprettVedtaksbrevForMigreringRiverTest {
     private val vedtaksbrevService = mockk<VedtaksbrevService>()
 
-    private val testRapid = TestRapid().apply { OpprettVedtaksbrevForMigreringRiver(this, vedtaksbrevService) }
+    private val opprettBrevRapid = TestRapid().apply { OpprettVedtaksbrevForMigreringRiver(this, vedtaksbrevService) }
+    private val ferdigstillBrevRapid = TestRapid().apply { FerdigstillVedtaksbrevForMigreringRiver(this, vedtaksbrevService) }
 
     private val behandlingId = UUID.randomUUID()
 
@@ -64,17 +67,32 @@ internal class OpprettVedtaksbrevForMigreringRiverTest {
     fun `oppretter for migrering nytt brev, genererer pdf og sender videre`() {
         val vedtak = opprettVedtak()
         val migreringRequest = migreringRequest()
-        val melding = opprettMelding(vedtak, migreringRequest)
+        val melding = opprettMelding(vedtak, migreringRequest, VedtakKafkaHendelseType.FATTET)
         val brev = opprettBrev()
 
         coEvery { vedtaksbrevService.opprettVedtaksbrev(any(), behandlingId, any()) } returns brev
         coEvery { vedtaksbrevService.genererPdf(brev.id, any(), migreringRequest) } returns mockk<Pdf>()
-        coEvery { vedtaksbrevService.ferdigstillVedtaksbrev(brev.behandlingId!!, any(), true) } just Runs
 
-        val inspektoer = testRapid.apply { sendTestMessage(melding.toJson()) }.inspektør
+        val inspektoer = opprettBrevRapid.apply { sendTestMessage(melding.toJson()) }.inspektør
 
         coVerify(exactly = 1) { vedtaksbrevService.opprettVedtaksbrev(any(), behandlingId, any()) }
         coVerify(exactly = 1) { vedtaksbrevService.genererPdf(brev.id, any(), migreringRequest) }
+
+        val meldingSendt = inspektoer.message(0)
+        assertEquals(VedtakKafkaHendelseType.FATTET.toString(), meldingSendt.get(EVENT_NAME_KEY).asText())
+    }
+
+    @Test
+    fun `Ferdigstilller brev`() {
+        val vedtak = opprettVedtak()
+        val migreringRequest = migreringRequest()
+        val melding = opprettMelding(vedtak, migreringRequest, VedtakKafkaHendelseType.ATTESTERT)
+        val brev = opprettBrev()
+
+        coEvery { vedtaksbrevService.ferdigstillVedtaksbrev(brev.behandlingId!!, any(), true) } just Runs
+
+        val inspektoer = ferdigstillBrevRapid.apply { sendTestMessage(melding.toJson()) }.inspektør
+
         coVerify(exactly = 1) { vedtaksbrevService.ferdigstillVedtaksbrev(brev.behandlingId!!, any(), true) }
 
         val meldingSendt = inspektoer.message(0)
@@ -88,7 +106,7 @@ internal class OpprettVedtaksbrevForMigreringRiverTest {
         val melding = opprettMelding(vedtak, null)
         opprettBrev()
 
-        val inspektoer = testRapid.apply { sendTestMessage(melding.toJson()) }.inspektør
+        val inspektoer = opprettBrevRapid.apply { sendTestMessage(melding.toJson()) }.inspektør
 
         assertEquals(0, inspektoer.size)
     }
@@ -108,6 +126,7 @@ internal class OpprettVedtaksbrevForMigreringRiverTest {
     private fun opprettMelding(
         vedtak: VedtakNyDto,
         migreringRequest: MigreringRequest?,
+        hendelse: VedtakKafkaHendelseType = VedtakKafkaHendelseType.FATTET,
     ): JsonMessage {
         val kilde =
             when (migreringRequest) {
@@ -117,7 +136,7 @@ internal class OpprettVedtaksbrevForMigreringRiverTest {
         val messageKeys =
             mapOf(
                 CORRELATION_ID_KEY to UUID.randomUUID().toString(),
-                EVENT_NAME_KEY to VedtakKafkaHendelseType.ATTESTERT.toString(),
+                EVENT_NAME_KEY to hendelse.toString(),
                 "vedtak" to vedtak,
                 KILDE_KEY to kilde,
                 BREV_OPPRETTA_MIGRERING to false,

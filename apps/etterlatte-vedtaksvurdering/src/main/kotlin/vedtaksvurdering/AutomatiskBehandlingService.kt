@@ -23,8 +23,13 @@ class AutomatiskBehandlingService(
     ): VedtakOgRapid =
         when (kjoringVariant) {
             MigreringKjoringVariant.FULL_KJORING -> {
-                opprettOgFattVedtak(behandlingId, sakId, brukerTokenInfo)
-                attesterVedtak(behandlingId, brukerTokenInfo)
+                val rapid1 = opprettOgFattVedtak(behandlingId, sakId, brukerTokenInfo)
+                val rapid2 = attesterVedtak(behandlingId, brukerTokenInfo)
+                VedtakOgRapid(
+                    vedtak = rapid2.vedtak,
+                    rapidInfo1 = rapid1.rapidInfo1,
+                    rapidInfo2 = rapid2.rapidInfo1,
+                )
             }
 
             MigreringKjoringVariant.MED_PAUSE -> opprettOgFattVedtak(behandlingId, sakId, brukerTokenInfo)
@@ -39,7 +44,7 @@ class AutomatiskBehandlingService(
         logger.info("Håndterer behandling $behandlingId")
         service.opprettEllerOppdaterVedtak(behandlingId, brukerTokenInfo)
         logger.info("Fatter vedtak for behandling $behandlingId")
-        val vedtakOgRapid = service.fattVedtak(behandlingId, brukerTokenInfo).also { rapidService.sendToRapid(it) }
+        val vedtakOgRapid = service.fattVedtak(behandlingId, brukerTokenInfo)
 
         logger.info("Tildeler attesteringsoppgave til systembruker")
         val oppgaveTilAttestering =

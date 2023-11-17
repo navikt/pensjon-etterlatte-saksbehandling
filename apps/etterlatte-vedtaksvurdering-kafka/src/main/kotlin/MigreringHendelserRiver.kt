@@ -56,6 +56,16 @@ internal class MigreringHendelserRiver(
                 extraParams.forEach { (k, v) -> packet[k] = v }
                 context.publish(behandlingId.toString(), packet.toJson())
             }
+            respons.rapidInfo2?.let {
+                with(it) {
+                    packet.eventName = vedtakhendelse.toString()
+                    packet[TEKNISK_TID_KEY] = tekniskTid
+                    packet["vedtak"] = vedtak
+                    packet[BREV_OPPRETTA_MIGRERING] = false
+                    extraParams.forEach { (k, v) -> packet[k] = v }
+                    context.publish(behandlingId.toString(), packet.toJson())
+                }
+            }
         }
     }
 }

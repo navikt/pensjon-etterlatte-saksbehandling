@@ -110,6 +110,7 @@ class VedtaksbrevService(
             logger.info("Brev har status ${brev.status} - returnerer lagret innhold")
             return requireNotNull(db.hentPdf(brev.id)) { "Fant ikke brev med id ${brev.id}" }
         }
+        logger.info("Skal pdf for brev med id=$id. erMigrering = ${migrering != null}")
 
         val generellBrevData = brevdataFacade.hentGenerellBrevData(brev.sakId, brev.behandlingId!!, brukerTokenInfo)
         val avsender = adresseService.hentAvsender(generellBrevData.forenkletVedtak)

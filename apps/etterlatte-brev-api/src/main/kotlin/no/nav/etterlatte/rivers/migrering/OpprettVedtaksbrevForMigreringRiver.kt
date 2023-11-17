@@ -1,6 +1,7 @@
 package no.nav.etterlatte.rivers.migrering
 
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.brev.MigreringBrevRequest
 import no.nav.etterlatte.brev.VedtaksbrevService
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.libs.common.Vedtaksloesning
@@ -43,9 +44,15 @@ internal class OpprettVedtaksbrevForMigreringRiver(
         val behandlingId = UUID.fromString(packet["vedtak.behandlingId"].asText())
         val brukerTokenInfo = Systembruker("migrering", "migrering")
         runBlocking {
-            val vedtaksbrev: Brev = service.opprettVedtaksbrev(sakId, behandlingId, brukerTokenInfo)
             val hendelseData = packet.hendelseData
-            service.genererPdf(vedtaksbrev.id, brukerTokenInfo, hendelseData)
+            val vedtaksbrev: Brev =
+                service.opprettVedtaksbrev(
+                    sakId,
+                    behandlingId,
+                    brukerTokenInfo,
+                    MigreringBrevRequest(hendelseData.beregning),
+                )
+            service.genererPdf(vedtaksbrev.id, brukerTokenInfo, MigreringBrevRequest(hendelseData.beregning))
         }
         logger.info("Har oppretta vedtaksbrev i sak $sakId")
         context.publish(packet.toJson())

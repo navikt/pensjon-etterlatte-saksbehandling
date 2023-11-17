@@ -2,6 +2,7 @@ package no.nav.etterlatte.brev.model
 
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
+import no.nav.etterlatte.brev.MigreringBrevDataService
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_AVSLAG
@@ -26,6 +27,7 @@ import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMS_REVURDERING_OPPHO
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.TILBAKEKREVING_FERDIG
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.TILBAKEKREVING_INNHOLD
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.TOM_MAL
+import no.nav.etterlatte.brev.brevbaker.RedigerbarTekstRequest
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
 import no.nav.etterlatte.brev.model.bp.AdopsjonRevurderingBrevdata
 import no.nav.etterlatte.brev.model.bp.AvslagYrkesskadeBrevData
@@ -100,6 +102,7 @@ private class BrevDatafetcher(
 class BrevDataMapper(
     private val featureToggleService: FeatureToggleService,
     private val brevdataFacade: BrevdataFacade,
+    private val migreringBrevDataService: MigreringBrevDataService,
 ) {
     fun brevKode(
         generellBrevData: GenerellBrevData,
@@ -206,6 +209,21 @@ class BrevDataMapper(
             }
         }
     }
+
+    suspend fun brevData(redigerbarTekstRequest: RedigerbarTekstRequest) =
+        when (redigerbarTekstRequest.migrering) {
+            null ->
+                brevData(
+                    redigerbarTekstRequest.generellBrevData,
+                    redigerbarTekstRequest.brukerTokenInfo,
+                )
+            else ->
+                migreringBrevDataService.opprettMigreringBrevdata(
+                    redigerbarTekstRequest.generellBrevData,
+                    redigerbarTekstRequest.migrering,
+                    redigerbarTekstRequest.brukerTokenInfo,
+                )
+        }
 
     suspend fun brevData(
         generellBrevData: GenerellBrevData,

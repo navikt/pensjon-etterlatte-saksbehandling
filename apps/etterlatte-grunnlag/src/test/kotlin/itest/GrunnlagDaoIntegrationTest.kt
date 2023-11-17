@@ -449,7 +449,7 @@ internal class GrunnlagDaoIntegrationTest {
         assertEquals(sisteHendelsenummerForBehandling, sisteVersjon?.hendelsenummer)
 
         val opplysningerForSak = opplysningRepo.hentAlleGrunnlagForSak(sakId)
-        assertEquals(373, opplysningerForSak.size)
+        assertEquals(383, opplysningerForSak.size)
     }
 
     @Test

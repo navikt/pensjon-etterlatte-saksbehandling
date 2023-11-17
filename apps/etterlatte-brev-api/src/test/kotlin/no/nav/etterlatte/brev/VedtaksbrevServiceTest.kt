@@ -36,6 +36,7 @@ import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevDataFeatureToggle
 import no.nav.etterlatte.brev.model.BrevDataMapper
 import no.nav.etterlatte.brev.model.BrevID
+import no.nav.etterlatte.brev.model.BrevKodeAutomatiskMapper
 import no.nav.etterlatte.brev.model.BrevProsessType
 import no.nav.etterlatte.brev.model.BrevProsessTypeFactory
 import no.nav.etterlatte.brev.model.Mottaker
@@ -85,7 +86,8 @@ internal class VedtaksbrevServiceTest {
     private val dokarkivService = mockk<DokarkivServiceImpl>()
     private val featureToggleService =
         DummyFeatureToggleService().also { it.settBryter(BrevDataFeatureToggle.NyMalInnvilgelse, false) }
-    private val brevDataMapper = BrevDataMapper(featureToggleService, brevdataFacade)
+    private val brevKodeAutomatiskMapper = BrevKodeAutomatiskMapper(featureToggleService)
+    private val brevDataMapper = BrevDataMapper(featureToggleService, brevdataFacade, brevKodeAutomatiskMapper)
     private val brevProsessTypeFactory = BrevProsessTypeFactory(featureToggleService)
 
     private val vedtaksbrevService =

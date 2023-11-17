@@ -35,6 +35,7 @@ import no.nav.etterlatte.brev.hentinformasjon.TrygdetidService
 import no.nav.etterlatte.brev.hentinformasjon.VedtaksvurderingKlient
 import no.nav.etterlatte.brev.hentinformasjon.VedtaksvurderingService
 import no.nav.etterlatte.brev.model.BrevDataMapper
+import no.nav.etterlatte.brev.model.BrevKodeAutomatiskMapper
 import no.nav.etterlatte.brev.model.BrevProsessTypeFactory
 import no.nav.etterlatte.brev.vedtaksbrevRoute
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleProperties
@@ -128,7 +129,9 @@ class ApplicationBuilder {
 
     private val featureToggleService = FeatureToggleService.initialiser(featureToggleProperties(config))
 
-    private val brevDataMapper = BrevDataMapper(featureToggleService, brevdataFacade)
+    private val brevKodeAutomatiskMapper = BrevKodeAutomatiskMapper(featureToggleService)
+
+    private val brevDataMapper = BrevDataMapper(featureToggleService, brevdataFacade, brevKodeAutomatiskMapper)
 
     private val brevbakerService = BrevbakerService(brevbaker, adresseService, brevDataMapper)
 

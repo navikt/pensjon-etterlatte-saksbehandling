@@ -36,6 +36,7 @@ inline val ApplicationCall.brukerTokenInfo: BrukerTokenInfo
                     Pair(oid, sub)
                 }
         val saksbehandler = claims?.getClaim(Claims.NAVident)
+
         return BrukerTokenInfo.of(
             accessToken = hentAccessToken(this),
             oid = oidSub?.first,

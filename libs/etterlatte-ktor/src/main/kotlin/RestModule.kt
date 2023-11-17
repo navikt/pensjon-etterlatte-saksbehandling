@@ -14,6 +14,7 @@ import io.ktor.server.plugins.callid.callIdMdc
 import io.ktor.server.plugins.callloging.CallLogging
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.server.plugins.statuspages.StatusPages
+import io.ktor.server.request.header
 import io.ktor.server.request.httpMethod
 import io.ktor.server.request.path
 import io.ktor.server.routing.IgnoreTrailingSlash
@@ -25,6 +26,7 @@ import no.nav.etterlatte.libs.common.logging.CORRELATION_ID
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.ktor.feilhaandtering.StatusPagesKonfigurasjon
 import no.nav.security.token.support.core.context.TokenValidationContext
+import no.nav.security.token.support.core.jwt.JwtToken
 import no.nav.security.token.support.v2.tokenValidationSupport
 import org.slf4j.Logger
 import org.slf4j.event.Level
@@ -56,6 +58,18 @@ fun Application.restModule(
             )
         }
         callIdMdc(CORRELATION_ID)
+
+        mdc("method") { call -> call.request.httpMethod.value }
+        mdc("request_uri") { call -> call.request.path() }
+
+        mdc("user") { call ->
+            call.request.header("Authorization")?.let {
+                val token = JwtToken(it.substringAfterLast("Bearer "))
+                val jwtTokenClaims = token.jwtTokenClaims
+                jwtTokenClaims?.get("NAVident") as? String // human
+                    ?: token.jwtTokenClaims?.get("azp_name") as? String // system/app-user
+            }
+        }
     }
 
     install(CallId) {

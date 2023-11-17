@@ -29,9 +29,9 @@ sealed class BrukerTokenInfo {
             claims: JwtTokenClaims?,
         ): BrukerTokenInfo {
             return if (erSystembruker(oid = oid, sub = sub)) {
-                Systembruker(oid!!, sub!!, claims)
+                Systembruker(oid!!, sub!!, ident = claims?.getStringClaim("azp_name"), claims)
             } else if (saksbehandler != null) {
-                Saksbehandler(accessToken, saksbehandler, claims)
+                Saksbehandler(accessToken, ident = saksbehandler, claims)
             } else {
                 throw Exception(
                     "Er ikke systembruker, og Navident er null i token, sannsynligvis manglende claim NAVident",
@@ -41,10 +41,15 @@ sealed class BrukerTokenInfo {
     }
 }
 
-data class Systembruker(val oid: String, val sub: String, val jwtTokenClaims: JwtTokenClaims? = null) : BrukerTokenInfo() {
+data class Systembruker(
+    val oid: String,
+    val sub: String,
+    val ident: String? = null,
+    val jwtTokenClaims: JwtTokenClaims? = null,
+) : BrukerTokenInfo() {
     constructor(oid: String, sub: String) : this(oid, sub, null)
 
-    override fun ident() = Fagsaksystem.EY.navn
+    override fun ident() = ident ?: Fagsaksystem.EY.navn
 
     override fun accessToken() = throw NotImplementedError("Kun relevant for saksbehandler")
 

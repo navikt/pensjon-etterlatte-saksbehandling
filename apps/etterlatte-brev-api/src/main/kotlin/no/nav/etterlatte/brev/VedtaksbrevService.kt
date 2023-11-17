@@ -36,7 +36,7 @@ import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
-import no.nav.etterlatte.rapidsandrivers.migrering.MigreringRequest
+import no.nav.etterlatte.rapidsandrivers.migrering.Beregning
 import no.nav.etterlatte.rivers.VedtakTilJournalfoering
 import no.nav.etterlatte.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
@@ -103,7 +103,7 @@ class VedtaksbrevService(
     suspend fun genererPdf(
         id: BrevID,
         brukerTokenInfo: BrukerTokenInfo,
-        migrering: MigreringRequest? = null,
+        migrering: MigreringBrevRequest? = null,
     ): Pdf {
         val brev = hentBrev(id)
 
@@ -158,7 +158,7 @@ class VedtaksbrevService(
 
     private suspend fun opprettMigreringBrevdata(
         generellBrevData: GenerellBrevData,
-        migrering: MigreringRequest,
+        migrering: MigreringBrevRequest,
         brukerTokenInfo: BrukerTokenInfo,
     ): BrevData {
         if (generellBrevData.systemkilde != Vedtaksloesning.PESYS) {
@@ -346,3 +346,5 @@ class VedtaksbrevService(
         return db.fjernFerdigstiltStatusUnderkjentVedtak(id, vedtak)
     }
 }
+
+data class MigreringBrevRequest(val beregning: Beregning)

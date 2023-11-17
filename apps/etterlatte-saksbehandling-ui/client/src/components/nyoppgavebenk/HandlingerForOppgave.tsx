@@ -12,6 +12,16 @@ export const HandlingerForOppgave = ({ oppgave }: { oppgave: OppgaveDTO }) => {
   const erInnloggetSaksbehandlerOppgave = saksbehandler ? saksbehandler === user.ident : false
   if (kilde === 'GENERELL_BEHANDLING') {
     switch (type) {
+      case 'UNDERKJENT':
+        return (
+          <>
+            {erInnloggetSaksbehandlerOppgave && (
+              <Button size="small" as="a" href={`/generellbehandling/${referanse}`}>
+                Gå til kravpakke utland
+              </Button>
+            )}
+          </>
+        )
       case 'KRAVPAKKE_UTLAND':
         return (
           <>

@@ -3,6 +3,7 @@ import { isFailure, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
 import React, { useState } from 'react'
 import { underkjennGenerellbehandling } from '~shared/api/generellbehandling'
 import { Generellbehandling, KravpakkeUtland } from '~shared/types/Generellbehandling'
+import { useNavigate } from 'react-router-dom'
 
 export const UnderkjenneModal = ({
   utlandsBehandling,
@@ -13,6 +14,7 @@ export const UnderkjenneModal = ({
   const [open, setOpen] = useState<boolean>(false)
   const [fritekstgrunn, setFritekstgrunn] = useState<string>('')
   const [error, setError] = useState<string>('')
+  const navigate = useNavigate()
 
   return (
     <>
@@ -37,12 +39,17 @@ export const UnderkjenneModal = ({
         </Modal.Body>
         <Modal.Footer>
           <Button
+            disabled={isSuccess(underkjennStatus)}
             type="button"
             onClick={() => {
               if (fritekstgrunn === '') {
                 setError('Du må fylle ut en begrunnelse')
               } else {
-                underkjennFetch({ generellbehandling: utlandsBehandling, begrunnelse: fritekstgrunn })
+                underkjennFetch({ generellbehandling: utlandsBehandling, begrunnelse: fritekstgrunn }, () => {
+                  setTimeout(() => {
+                    navigate('/')
+                  }, 5000)
+                })
               }
             }}
           >

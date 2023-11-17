@@ -125,6 +125,20 @@ const KravpakkeUtland = (props: { utlandsBehandling: Generellbehandling & { innh
     }
   }
   const navigate = useNavigate()
+
+  const hentSakOgNavigererTilSaksoversikt = () => {
+    hentSak(utlandsBehandling.sakId)
+      .then((sak) => {
+        if (sak.ok) {
+          navigate(`/person/${sak.data.ident}`)
+        } else {
+          navigate('/')
+        }
+      })
+      .catch(() => {
+        navigate('/')
+      })
+  }
   const sendTilAttesteringWrapper = () => {
     const generellBehandling: Generellbehandling = {
       ...utlandsBehandling,
@@ -137,17 +151,13 @@ const KravpakkeUtland = (props: { utlandsBehandling: Generellbehandling & { innh
       },
     }
     sendTilAttestering(generellBehandling, () => {
-      hentSak(utlandsBehandling.sakId)
-        .then((sak) => {
-          if (sak.ok) {
-            navigate(`/person/${sak.data.ident}`)
-          } else {
-            navigate('/')
-          }
-        })
-        .catch(() => {
-          navigate('/')
-        })
+      hentSakOgNavigererTilSaksoversikt()
+    })
+  }
+
+  const attesterWrapper = () => {
+    attesterFetch(utlandsBehandling, () => {
+      hentSakOgNavigererTilSaksoversikt()
     })
   }
 
@@ -477,7 +487,7 @@ const KravpakkeUtland = (props: { utlandsBehandling: Generellbehandling & { innh
               {utlandsBehandling.status === Status.FATTET && (
                 <ButtonGroup>
                   <UnderkjenneModal utlandsBehandling={utlandsBehandling} />
-                  <Button onClick={() => attesterFetch(utlandsBehandling)} loading={isPending(attesterStatus)}>
+                  <Button onClick={() => attesterWrapper()} loading={isPending(attesterStatus)}>
                     Attester
                   </Button>
                   {isSuccess(attesterStatus) && <Alert variant="success">Behandlingen ble attestert</Alert>}

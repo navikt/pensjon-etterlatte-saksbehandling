@@ -445,12 +445,12 @@ val beregnDetaljertBeregnetTrygdetid =
         beregnetFremtidigTrygdetid og avrundetTrygdetid med { faktisk, fremtidig, avrundet ->
 
             DetaljertBeregnetTrygdetidResultat(
-                faktiskTrygdetidNorge = faktisk.nasjonal,
-                faktiskTrygdetidTeoretisk = faktisk.teoretisk,
-                fremtidigTrygdetidNorge = fremtidig?.nasjonal,
-                fremtidigTrygdetidTeoretisk = fremtidig?.teoretisk,
-                samletTrygdetidNorge = avrundet.nasjonal,
-                samletTrygdetidTeoretisk = avrundet.teoretisk,
+                faktiskTrygdetidNorge = faktisk.nasjonal.takeIf { !it.verdiOrZero().isZero },
+                faktiskTrygdetidTeoretisk = faktisk.teoretisk.takeIf { !it.verdiOrZero().isZero },
+                fremtidigTrygdetidNorge = fremtidig?.nasjonal.takeIf { !it.verdiOrZero().isZero },
+                fremtidigTrygdetidTeoretisk = fremtidig?.teoretisk.takeIf { !it.verdiOrZero().isZero },
+                samletTrygdetidNorge = avrundet.nasjonal.takeIf { it != null && it > 0 },
+                samletTrygdetidTeoretisk = avrundet.teoretisk.takeIf { it != null && it > 0 },
                 prorataBroek =
                     if (faktisk.nasjonal?.antallMaaneder != faktisk.teoretisk?.antallMaaneder) {
                         IntBroek.fra(

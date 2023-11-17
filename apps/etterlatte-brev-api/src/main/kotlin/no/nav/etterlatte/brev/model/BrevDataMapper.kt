@@ -26,6 +26,7 @@ import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMS_REVURDERING_OPPHO
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.TILBAKEKREVING_FERDIG
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.TILBAKEKREVING_INNHOLD
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.TOM_MAL
+import no.nav.etterlatte.brev.brevbaker.RedigerbarTekstRequest
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
 import no.nav.etterlatte.brev.model.bp.AdopsjonRevurderingBrevdata
 import no.nav.etterlatte.brev.model.bp.AvslagYrkesskadeBrevData
@@ -206,6 +207,12 @@ class BrevDataMapper(
             }
         }
     }
+
+    suspend fun brevData(redigerbarTekstRequest: RedigerbarTekstRequest) =
+        brevData(
+            redigerbarTekstRequest.generellBrevData,
+            redigerbarTekstRequest.brukerTokenInfo,
+        )
 
     suspend fun brevData(
         generellBrevData: GenerellBrevData,

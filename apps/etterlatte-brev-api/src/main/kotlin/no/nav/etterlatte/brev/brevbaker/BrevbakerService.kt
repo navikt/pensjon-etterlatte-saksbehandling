@@ -33,7 +33,7 @@ class BrevbakerService(
         val request =
             BrevbakerRequest.fra(
                 brevDataMapper.brevKode(redigerbarTekstRequest.generellBrevData, BrevProsessType.REDIGERBAR).redigering,
-                brevDataMapper.brevData(redigerbarTekstRequest.generellBrevData, redigerbarTekstRequest.brukerTokenInfo),
+                brevDataMapper.brevData(redigerbarTekstRequest),
                 redigerbarTekstRequest.generellBrevData,
                 adresseService.hentAvsender(redigerbarTekstRequest.generellBrevData.forenkletVedtak),
             )

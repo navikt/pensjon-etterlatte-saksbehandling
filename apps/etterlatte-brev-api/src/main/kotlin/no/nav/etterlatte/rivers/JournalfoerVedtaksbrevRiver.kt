@@ -12,7 +12,6 @@ import no.nav.etterlatte.libs.common.rapidsandrivers.SKAL_SENDE_BREV
 import no.nav.etterlatte.libs.common.sak.VedtakSak
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseType
-import no.nav.etterlatte.rapidsandrivers.migrering.BREV_OPPRETTA_MIGRERING
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -40,7 +39,6 @@ internal class JournalfoerVedtaksbrevRiver(
                 it.rejectValues("vedtak.innhold.behandling.type", listOf(BehandlingType.MANUELT_OPPHOER.name))
             }
             validate { it.rejectValue(SKAL_SENDE_BREV, false) }
-            validate { it.rejectValue(BREV_OPPRETTA_MIGRERING, false) }
         }
     }
 

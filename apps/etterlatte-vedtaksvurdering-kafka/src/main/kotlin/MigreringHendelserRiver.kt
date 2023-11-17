@@ -2,7 +2,6 @@ package no.nav.etterlatte
 
 import no.nav.etterlatte.libs.common.rapidsandrivers.TEKNISK_TID_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
-import no.nav.etterlatte.rapidsandrivers.migrering.BREV_OPPRETTA_MIGRERING
 import no.nav.etterlatte.rapidsandrivers.migrering.MIGRERING_KJORING_VARIANT
 import no.nav.etterlatte.rapidsandrivers.migrering.MigreringKjoringVariant
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser.PAUSE
@@ -52,7 +51,6 @@ internal class MigreringHendelserRiver(
                 packet.eventName = vedtakhendelse.toString()
                 packet[TEKNISK_TID_KEY] = tekniskTid
                 packet["vedtak"] = vedtak
-                packet[BREV_OPPRETTA_MIGRERING] = false
                 extraParams.forEach { (k, v) -> packet[k] = v }
                 context.publish(behandlingId.toString(), packet.toJson())
             }
@@ -61,7 +59,6 @@ internal class MigreringHendelserRiver(
                     packet.eventName = vedtakhendelse.toString()
                     packet[TEKNISK_TID_KEY] = tekniskTid
                     packet["vedtak"] = vedtak
-                    packet[BREV_OPPRETTA_MIGRERING] = false
                     extraParams.forEach { (k, v) -> packet[k] = v }
                     context.publish(behandlingId.toString(), packet.toJson())
                 }

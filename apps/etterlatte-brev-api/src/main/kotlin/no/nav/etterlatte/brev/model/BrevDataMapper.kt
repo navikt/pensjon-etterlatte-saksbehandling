@@ -2,6 +2,7 @@ package no.nav.etterlatte.brev.model
 
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
+import no.nav.etterlatte.brev.MigreringBrevDataService
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_AVSLAG
@@ -101,6 +102,7 @@ private class BrevDatafetcher(
 class BrevDataMapper(
     private val featureToggleService: FeatureToggleService,
     private val brevdataFacade: BrevdataFacade,
+    private val migreringBrevDataService: MigreringBrevDataService,
 ) {
     fun brevKode(
         generellBrevData: GenerellBrevData,
@@ -209,10 +211,19 @@ class BrevDataMapper(
     }
 
     suspend fun brevData(redigerbarTekstRequest: RedigerbarTekstRequest) =
-        brevData(
-            redigerbarTekstRequest.generellBrevData,
-            redigerbarTekstRequest.brukerTokenInfo,
-        )
+        when (redigerbarTekstRequest.migrering) {
+            null ->
+                brevData(
+                    redigerbarTekstRequest.generellBrevData,
+                    redigerbarTekstRequest.brukerTokenInfo,
+                )
+            else ->
+                migreringBrevDataService.opprettMigreringBrevdata(
+                    redigerbarTekstRequest.generellBrevData,
+                    redigerbarTekstRequest.migrering,
+                    redigerbarTekstRequest.brukerTokenInfo,
+                )
+        }
 
     suspend fun brevData(
         generellBrevData: GenerellBrevData,

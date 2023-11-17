@@ -85,7 +85,8 @@ internal class VedtaksbrevServiceTest {
     private val dokarkivService = mockk<DokarkivServiceImpl>()
     private val featureToggleService =
         DummyFeatureToggleService().also { it.settBryter(BrevDataFeatureToggle.NyMalInnvilgelse, false) }
-    private val brevDataMapper = BrevDataMapper(featureToggleService, brevdataFacade)
+    private val migreringBrevDataService = MigreringBrevDataService(brevdataFacade)
+    private val brevDataMapper = BrevDataMapper(featureToggleService, brevdataFacade, migreringBrevDataService)
     private val brevProsessTypeFactory = BrevProsessTypeFactory(featureToggleService)
 
     private val vedtaksbrevService =
@@ -98,6 +99,7 @@ internal class VedtaksbrevServiceTest {
             BrevbakerService(brevbaker, adresseService, brevDataMapper),
             brevDataMapper,
             brevProsessTypeFactory,
+            migreringBrevDataService,
         )
 
     @BeforeEach

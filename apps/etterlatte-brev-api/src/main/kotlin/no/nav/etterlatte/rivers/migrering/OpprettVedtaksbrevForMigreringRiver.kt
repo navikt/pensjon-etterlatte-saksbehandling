@@ -44,8 +44,14 @@ internal class OpprettVedtaksbrevForMigreringRiver(
         val behandlingId = UUID.fromString(packet["vedtak.behandlingId"].asText())
         val brukerTokenInfo = Systembruker("migrering", "migrering")
         runBlocking {
-            val vedtaksbrev: Brev = service.opprettVedtaksbrev(sakId, behandlingId, brukerTokenInfo)
             val hendelseData = packet.hendelseData
+            val vedtaksbrev: Brev =
+                service.opprettVedtaksbrev(
+                    sakId,
+                    behandlingId,
+                    brukerTokenInfo,
+                    MigreringBrevRequest(hendelseData.beregning),
+                )
             service.genererPdf(vedtaksbrev.id, brukerTokenInfo, MigreringBrevRequest(hendelseData.beregning))
         }
         logger.info("Har oppretta vedtaksbrev i sak $sakId")

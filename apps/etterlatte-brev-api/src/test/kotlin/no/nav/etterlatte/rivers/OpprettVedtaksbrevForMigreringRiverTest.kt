@@ -70,12 +70,12 @@ internal class OpprettVedtaksbrevForMigreringRiverTest {
         val melding = opprettMelding(vedtak, migreringRequest, VedtakKafkaHendelseType.FATTET)
         val brev = opprettBrev()
 
-        coEvery { vedtaksbrevService.opprettVedtaksbrev(any(), behandlingId, any()) } returns brev
+        coEvery { vedtaksbrevService.opprettVedtaksbrev(any(), behandlingId, any(), any()) } returns brev
         coEvery { vedtaksbrevService.genererPdf(brev.id, any(), any()) } returns mockk<Pdf>()
 
         val inspektoer = opprettBrevRapid.apply { sendTestMessage(melding.toJson()) }.inspektør
 
-        coVerify(exactly = 1) { vedtaksbrevService.opprettVedtaksbrev(any(), behandlingId, any()) }
+        coVerify(exactly = 1) { vedtaksbrevService.opprettVedtaksbrev(any(), behandlingId, any(), any()) }
         coVerify(exactly = 1) { vedtaksbrevService.genererPdf(brev.id, any(), any()) }
 
         val meldingSendt = inspektoer.message(0)

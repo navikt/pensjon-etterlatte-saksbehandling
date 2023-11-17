@@ -1,5 +1,6 @@
 package no.nav.etterlatte.brev.brevbaker
 
+import no.nav.etterlatte.brev.MigreringBrevRequest
 import no.nav.etterlatte.brev.adresse.AdresseService
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.model.BrevDataMapper
@@ -46,6 +47,7 @@ data class RedigerbarTekstRequest(
     val generellBrevData: GenerellBrevData,
     val brukerTokenInfo: BrukerTokenInfo,
     val prosessType: BrevProsessType,
+    val migrering: MigreringBrevRequest? = null,
 ) {
     fun vedtakstype() = generellBrevData.forenkletVedtak.type.name.lowercase()
 }

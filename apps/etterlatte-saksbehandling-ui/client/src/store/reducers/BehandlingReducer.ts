@@ -19,6 +19,7 @@ import { RevurderingInfo } from '~shared/types/RevurderingInfo'
 
 export const setBehandling = createAction<IDetaljertBehandling>('behandling/set')
 export const resetBehandling = createAction('behandling/reset')
+export const oppdaterBehandling = createAction<IDetaljertBehandling>('behandling/oppdater')
 export const oppdaterGyldighetsproeving = createAction<IGyldighetResultat>('behandling/gyldighetsproeving')
 export const oppdaterVirkningstidspunkt = createAction<Virkningstidspunkt>('behandling/virkningstidspunkt')
 export const updateVilkaarsvurdering = createAction<IVilkaarsvurdering | undefined>(
@@ -58,6 +59,9 @@ const initialState: { behandling: IBehandlingReducer | null } = {
 export const behandlingReducer = createReducer(initialState, (builder) => {
   builder.addCase(setBehandling, (state, action) => {
     state.behandling = action.payload
+  })
+  builder.addCase(oppdaterBehandling, (state, action) => {
+    state.behandling = { ...state.behandling, ...action.payload }
   })
   builder.addCase(updateVilkaarsvurdering, (state, action) => {
     state.behandling!!.vilkårsprøving = action.payload

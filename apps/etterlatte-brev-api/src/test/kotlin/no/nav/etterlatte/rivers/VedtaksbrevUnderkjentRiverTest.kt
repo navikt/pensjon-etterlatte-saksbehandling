@@ -121,6 +121,7 @@ internal class VedtaksbrevUnderkjentRiverTest {
             "fnr",
             Status.JOURNALFOERT,
             Tidspunkt.now(),
+            Tidspunkt.now(),
             mottaker = mockk(),
         )
 }

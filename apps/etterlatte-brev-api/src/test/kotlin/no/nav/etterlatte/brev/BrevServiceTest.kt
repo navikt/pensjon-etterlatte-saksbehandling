@@ -284,6 +284,7 @@ internal class BrevServiceTest {
         prosessType = prosessType,
         soekerFnr = "fnr",
         status = status,
+        statusEndret = Tidspunkt.now(),
         opprettet = Tidspunkt.now(),
         mottaker = opprettMottaker(),
     )

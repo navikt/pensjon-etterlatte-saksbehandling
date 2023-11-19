@@ -743,6 +743,7 @@ internal class VedtaksbrevServiceTest {
                     "fnr",
                     status,
                     Tidspunkt.now(),
+                    Tidspunkt.now(),
                     opprettMottaker(),
                 )
 
@@ -769,6 +770,7 @@ internal class VedtaksbrevServiceTest {
         prosessType = prosessType,
         soekerFnr = "fnr",
         status = status,
+        Tidspunkt.now(),
         Tidspunkt.now(),
         mottaker = opprettMottaker(),
     )

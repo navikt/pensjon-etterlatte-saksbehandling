@@ -36,6 +36,7 @@ class BrevdataFacade(
     private val grunnlagKlient: GrunnlagKlient,
     private val beregningKlient: BeregningKlient,
     private val behandlingKlient: BehandlingKlient,
+    private val sakService: SakService,
     private val trygdetidService: TrygdetidService,
 ) {
     suspend fun hentEtterbetaling(
@@ -58,7 +59,7 @@ class BrevdataFacade(
         brukerTokenInfo: BrukerTokenInfo,
     ): GenerellBrevData {
         return coroutineScope {
-            val sakDeferred = async { behandlingKlient.hentSak(sakId, brukerTokenInfo) }
+            val sakDeferred = async { sakService.hentSak(sakId, brukerTokenInfo) }
             val vedtakDeferred = async { vedtaksvurderingKlient.hentVedtak(behandlingId, brukerTokenInfo) }
             val grunnlag =
                 when (vedtakDeferred.await().type) {

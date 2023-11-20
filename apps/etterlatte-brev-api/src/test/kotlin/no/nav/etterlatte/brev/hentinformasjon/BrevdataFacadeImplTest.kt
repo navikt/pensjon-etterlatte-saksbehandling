@@ -51,6 +51,7 @@ internal class BrevdataFacadeImplTest {
     private val grunnlagKlient = mockk<GrunnlagKlient>()
     private val beregningKlient = mockk<BeregningKlient>()
     private val behandlingKlient = mockk<BehandlingKlient>()
+    private val sakService = mockk<SakService>()
     private val trygdetidService = mockk<TrygdetidService>()
 
     private val service =
@@ -59,6 +60,7 @@ internal class BrevdataFacadeImplTest {
             grunnlagKlient,
             beregningKlient,
             behandlingKlient,
+            sakService,
             trygdetidService,
         )
 
@@ -75,7 +77,7 @@ internal class BrevdataFacadeImplTest {
     @Test
     fun `hentGenerellBrevData fungerer som forventet for behandling`() {
         coEvery {
-            behandlingKlient.hentSak(any(), any())
+            sakService.hentSak(any(), any())
         } returns Sak("ident", SakType.BARNEPENSJON, SAK_ID, ENHET)
         coEvery {
             behandlingKlient.hentSisteIverksatteBehandling(any(), any())
@@ -117,7 +119,7 @@ internal class BrevdataFacadeImplTest {
     fun `hentGenerellBrevData fungerer som forventet for tilbakekreving`() {
         val tilbakekreving = tilbakekreving()
         coEvery {
-            behandlingKlient.hentSak(any(), any())
+            sakService.hentSak(any(), any())
         } returns Sak("ident", SakType.BARNEPENSJON, SAK_ID, ENHET)
         coEvery {
             vedtaksvurderingKlient.hentVedtak(any(), any())
@@ -156,7 +158,7 @@ internal class BrevdataFacadeImplTest {
     @Test
     fun `FinnUtbetalingsinfo returnerer korrekt informasjon`() {
         coEvery {
-            behandlingKlient.hentSak(any(), any())
+            sakService.hentSak(any(), any())
         } returns Sak("ident", SakType.BARNEPENSJON, SAK_ID, ENHET)
         coEvery {
             behandlingKlient.hentSisteIverksatteBehandling(any(), any())
@@ -188,7 +190,7 @@ internal class BrevdataFacadeImplTest {
     @Test
     fun `FinnUtbetalingsinfo returnerer korrekt antall barn ved soeskenjustering`() {
         coEvery {
-            behandlingKlient.hentSak(any(), any())
+            sakService.hentSak(any(), any())
         } returns Sak("ident", SakType.BARNEPENSJON, SAK_ID, ENHET)
         coEvery {
             behandlingKlient.hentSisteIverksatteBehandling(any(), any())

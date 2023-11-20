@@ -53,9 +53,9 @@ import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsTyper
 import no.nav.etterlatte.libs.common.gyldigSoeknad.VurderingsResultat
 import no.nav.etterlatte.libs.common.gyldigSoeknad.VurdertGyldighet
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
+import no.nav.etterlatte.libs.common.oppgave.SakIdOgReferanse
 import no.nav.etterlatte.libs.common.oppgave.SaksbehandlerEndringDto
 import no.nav.etterlatte.libs.common.oppgave.VedtakEndringDTO
-import no.nav.etterlatte.libs.common.oppgave.VedtakOppgaveDTO
 import no.nav.etterlatte.libs.common.pdlhendelse.Adressebeskyttelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
@@ -314,8 +314,8 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(
                     VedtakEndringDTO(
-                        vedtakOppgaveDTO =
-                            VedtakOppgaveDTO(
+                        sakIdOgReferanse =
+                            SakIdOgReferanse(
                                 sakId = sak.id,
                                 referanse = behandlingId.toString(),
                             ),
@@ -357,8 +357,8 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(
                     VedtakEndringDTO(
-                        vedtakOppgaveDTO =
-                            VedtakOppgaveDTO(
+                        sakIdOgReferanse =
+                            SakIdOgReferanse(
                                 sakId = sak.id,
                                 referanse = behandlingId.toString(),
                             ),

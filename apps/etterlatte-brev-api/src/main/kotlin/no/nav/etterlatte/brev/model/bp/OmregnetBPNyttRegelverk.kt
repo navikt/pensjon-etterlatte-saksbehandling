@@ -1,10 +1,10 @@
 package no.nav.etterlatte.brev.model.bp
 
+import no.nav.etterlatte.brev.MigreringBrevRequest
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
 import no.nav.etterlatte.brev.model.BrevData
 import no.nav.etterlatte.libs.common.Vedtaksloesning
-import no.nav.etterlatte.rapidsandrivers.migrering.MigreringRequest
 
 data class OmregnetBPNyttRegelverk(
     val utbetaltFoerReform: Int,
@@ -16,7 +16,7 @@ data class OmregnetBPNyttRegelverk(
         fun fra(
             generellBrevData: GenerellBrevData,
             utbetalingsinfo: Utbetalingsinfo,
-            migreringRequest: MigreringRequest?,
+            migreringRequest: MigreringBrevRequest?,
         ): OmregnetBPNyttRegelverk {
             val utbetaltFoerReform =
                 if (generellBrevData.systemkilde == Vedtaksloesning.PESYS) {

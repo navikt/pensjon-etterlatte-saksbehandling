@@ -1,11 +1,9 @@
 package no.nav.etterlatte.brev.dokarkiv
 
-import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.journalpost.AvsenderMottaker
 import no.nav.etterlatte.brev.journalpost.Bruker
 import no.nav.etterlatte.brev.journalpost.DokumentVariant
-import no.nav.etterlatte.brev.journalpost.FerdigstillJournalpostRequest
 import no.nav.etterlatte.brev.journalpost.JournalPostType
 import no.nav.etterlatte.brev.journalpost.JournalpostDokument
 import no.nav.etterlatte.brev.journalpost.JournalpostKoder.Companion.BREV_KODE
@@ -22,19 +20,24 @@ import org.slf4j.LoggerFactory
 import java.util.Base64
 
 interface DokarkivService {
-    fun journalfoer(
+    suspend fun journalfoer(
         brevId: BrevID,
         vedtak: VedtakTilJournalfoering,
     ): JournalpostResponse
 
-    fun journalfoer(
+    suspend fun journalfoer(
         brev: Brev,
         sak: Sak,
     ): JournalpostResponse
 
-    fun ferdigstill(
+    suspend fun ferdigstill(
         journalpostId: String,
-        request: FerdigstillJournalpostRequest,
+        sak: Sak,
+    )
+
+    suspend fun endreTema(
+        journalpostId: String,
+        nyttTema: String,
     )
 }
 
@@ -44,43 +47,58 @@ class DokarkivServiceImpl(
 ) : DokarkivService {
     private val logger = LoggerFactory.getLogger(DokarkivService::class.java)
 
-    override fun journalfoer(
+    override suspend fun journalfoer(
         brevId: BrevID,
         vedtak: VedtakTilJournalfoering,
-    ): JournalpostResponse =
-        runBlocking {
-            logger.info("Oppretter journalpost for brev med id=$brevId")
+    ): JournalpostResponse {
+        logger.info("Oppretter journalpost for brev med id=$brevId")
 
-            val request = mapTilJournalpostRequest(brevId, vedtak)
+        val request = mapTilJournalpostRequest(brevId, vedtak)
 
-            client.opprettJournalpost(request, true).also {
-                logger.info("Journalpost opprettet (journalpostId=${it.journalpostId}, status=${it.journalpoststatus})")
-            }
+        return client.opprettJournalpost(request, true).also {
+            logger.info("Journalpost opprettet (journalpostId=${it.journalpostId}, status=${it.journalpoststatus})")
         }
+    }
 
-    override fun journalfoer(
+    override suspend fun journalfoer(
         brev: Brev,
         sak: Sak,
-    ): JournalpostResponse =
-        runBlocking {
-            logger.info("Oppretter journalpost for brev med id=${brev.id}")
+    ): JournalpostResponse {
+        logger.info("Oppretter journalpost for brev med id=${brev.id}")
 
-            val request = mapTilJournalpostRequest(brev, sak)
+        val request = mapTilJournalpostRequest(brev, sak)
 
-            client.opprettJournalpost(request, true).also {
-                logger.info("Journalpost opprettet (journalpostId=${it.journalpostId}, status=${it.journalpoststatus})")
-            }
+        return client.opprettJournalpost(request, true).also {
+            logger.info("Journalpost opprettet (journalpostId=${it.journalpostId}, status=${it.journalpoststatus})")
         }
+    }
 
-    override fun ferdigstill(
+    override suspend fun ferdigstill(
         journalpostId: String,
-        request: FerdigstillJournalpostRequest,
+        sak: Sak,
     ) {
-        runBlocking {
-            client.ferdigstillJournalpost(journalpostId, request).also {
-                logger.info("Journalpost med id=$journalpostId ferdigstilt: \n$it")
-            }
-        }
+        val request =
+            OppdaterJournalpostSakRequest(
+                bruker = Bruker(id = sak.ident),
+                sak =
+                    JournalpostSak(
+                        sakstype = Sakstype.FAGSAK,
+                        fagsakId = sak.id.toString(),
+                        tema = sak.sakType.tema,
+                    ),
+            )
+
+        client.oppdaterFagsak(journalpostId, request)
+        client.ferdigstillJournalpost(journalpostId, sak.enhet)
+
+        logger.info("Journalpost med id=$journalpostId ferdigstilt")
+    }
+
+    override suspend fun endreTema(
+        journalpostId: String,
+        nyttTema: String,
+    ) {
+        client.endreTema(journalpostId, nyttTema)
     }
 
     private fun mapTilJournalpostRequest(

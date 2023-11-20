@@ -1,7 +1,9 @@
 package no.nav.etterlatte.brev.dokument
 
 import io.ktor.http.HttpStatusCode
+import no.nav.etterlatte.brev.journalpost.Bruker
 import no.nav.etterlatte.brev.journalpost.BrukerIdType
+import no.nav.etterlatte.brev.journalpost.JournalpostSak
 
 data class HentDokumentoversiktBrukerResult(
     val journalposter: List<Journalpost> = emptyList(),
@@ -87,11 +89,14 @@ data class BrukerId(
 data class Journalpost(
     val journalpostId: String,
     val tittel: String,
+    val tema: String?,
     val journalposttype: String,
     val journalstatus: String,
     val dokumenter: List<Dokumenter>,
     val avsenderMottaker: AvsenderMottaker,
     val kanal: String,
+    val bruker: Bruker?,
+    val sak: JournalpostSak?,
     val datoOpprettet: String,
 )
 
@@ -103,6 +108,11 @@ data class Dokumenter(
 
 data class Dokumentvarianter(
     val saksbehandlerHarTilgang: Boolean,
+)
+
+data class Bruker(
+    val id: String,
+    val type: String = "FNR",
 )
 
 data class AvsenderMottaker(

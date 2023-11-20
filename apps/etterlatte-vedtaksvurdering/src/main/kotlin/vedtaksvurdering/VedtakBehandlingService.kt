@@ -7,8 +7,8 @@ import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
+import no.nav.etterlatte.libs.common.oppgave.SakIdOgReferanse
 import no.nav.etterlatte.libs.common.oppgave.VedtakEndringDTO
-import no.nav.etterlatte.libs.common.oppgave.VedtakOppgaveDTO
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.rapidsandrivers.REVURDERING_AARSAK
 import no.nav.etterlatte.libs.common.rapidsandrivers.SKAL_SENDE_BREV
@@ -92,6 +92,7 @@ class VedtakBehandlingService(
     suspend fun fattVedtak(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
+        saksbehandler: String = brukerTokenInfo.ident(),
     ): VedtakOgRapid {
         logger.info("Fatter vedtak for behandling med behandlingId=$behandlingId")
         val vedtak = hentVedtakNonNull(behandlingId)
@@ -109,7 +110,7 @@ class VedtakBehandlingService(
                 fattVedtak(
                     behandlingId,
                     VedtakFattet(
-                        brukerTokenInfo.ident(),
+                        saksbehandler,
                         sak.enhet,
                         Tidspunkt.now(clock),
                     ),
@@ -120,8 +121,8 @@ class VedtakBehandlingService(
                             brukerTokenInfo = brukerTokenInfo,
                             vedtakEndringDTO =
                                 VedtakEndringDTO(
-                                    vedtakOppgaveDTO =
-                                        VedtakOppgaveDTO(
+                                    sakIdOgReferanse =
+                                        SakIdOgReferanse(
                                             sakId = sak.id,
                                             referanse = behandlingId.toString(),
                                         ),
@@ -152,6 +153,7 @@ class VedtakBehandlingService(
         behandlingId: UUID,
         kommentar: String,
         brukerTokenInfo: BrukerTokenInfo,
+        attestant: String = brukerTokenInfo.ident(),
     ): VedtakOgRapid {
         logger.info("Attesterer vedtak for behandling med behandlingId=$behandlingId")
         val vedtak = hentVedtakNonNull(behandlingId)
@@ -170,7 +172,7 @@ class VedtakBehandlingService(
                     repository.attesterVedtak(
                         behandlingId,
                         Attestasjon(
-                            brukerTokenInfo.ident(),
+                            attestant,
                             sak.enhet,
                             Tidspunkt.now(clock),
                         ),
@@ -181,8 +183,8 @@ class VedtakBehandlingService(
                         brukerTokenInfo = brukerTokenInfo,
                         vedtakEndringDTO =
                             VedtakEndringDTO(
-                                vedtakOppgaveDTO =
-                                    VedtakOppgaveDTO(
+                                sakIdOgReferanse =
+                                    SakIdOgReferanse(
                                         sakId = attestertVedtak.sakId,
                                         referanse = attestertVedtak.behandlingId.toString(),
                                     ),
@@ -241,7 +243,7 @@ class VedtakBehandlingService(
                     behandlingKlient.underkjennVedtak(
                         brukerTokenInfo,
                         VedtakEndringDTO(
-                            vedtakOppgaveDTO = VedtakOppgaveDTO(vedtak.sakId, behandlingId.toString()),
+                            sakIdOgReferanse = SakIdOgReferanse(vedtak.sakId, behandlingId.toString()),
                             vedtakHendelse =
                                 VedtakHendelse(
                                     vedtakId = underkjentVedtak.id,

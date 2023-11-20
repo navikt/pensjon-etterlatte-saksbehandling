@@ -12,6 +12,7 @@ import {
   behandlingSkalSendeBrev,
   hentBehandlesFraStatus,
   manueltBrevKanRedigeres,
+  sisteBehandlingHendelse,
 } from '~components/behandling/felles/utils'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import MottakerPanel from '~components/behandling/brev/detaljer/MottakerPanel'
@@ -23,16 +24,45 @@ import { isFailure, isPending, isPendingOrInitial, useApiCall } from '~shared/ho
 
 import { fattVedtak } from '~shared/api/vedtaksvurdering'
 import { SjekklisteValideringErrorSummary } from '~components/behandling/sjekkliste/SjekklisteValideringErrorSummary'
-import { IHendelseType } from '~shared/types/IHendelse'
+import { IHendelse } from '~shared/types/IHendelse'
+import { oppdaterBehandling, resetBehandling } from '~store/reducers/BehandlingReducer'
+import { hentBehandling } from '~shared/api/behandling'
+import { useAppDispatch } from '~store/Store'
 
 export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
   const { behandlingId } = useParams()
+  const dispatch = useAppDispatch()
   const { sakId, soeknadMottattDato, status } = props.behandling
 
   const [vedtaksbrev, setVedtaksbrev] = useState<IBrev | undefined>(undefined)
+  const [visAdvarselBehandlingEndret, setVisAdvarselBehandlingEndret] = useState(false)
 
   const [hentBrevStatus, hentBrev] = useApiCall(hentVedtaksbrev)
   const [opprettBrevStatus, opprettNyttVedtaksbrev] = useApiCall(opprettVedtaksbrev)
+  const [, fetchBehandling] = useApiCall(hentBehandling)
+
+  const behandlingRedigertEtterOpprettetBrev = (vedtaksbrev: IBrev, hendelser: IHendelse[]) => {
+    const hendelse = sisteBehandlingHendelse(hendelser)
+    return new Date(hendelse.opprettet).getTime() > new Date(vedtaksbrev.statusEndret).getTime()
+  }
+
+  const lukkAdvarselBehandlingEndret = () => {
+    setVisAdvarselBehandlingEndret(false)
+  }
+
+  // Opppdaterer behandling for å sikre at siste hendelser er på plass
+  useEffect(() => {
+    if (behandlingId && vedtaksbrev) {
+      fetchBehandling(
+        behandlingId,
+        (behandling) => {
+          dispatch(oppdaterBehandling(behandling))
+          setVisAdvarselBehandlingEndret(behandlingRedigertEtterOpprettetBrev(vedtaksbrev, behandling.hendelser))
+        },
+        () => dispatch(resetBehandling())
+      )
+    }
+  }, [vedtaksbrev])
 
   useEffect(() => {
     if (
@@ -59,23 +89,6 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
     return <Spinner visible label="Ingen brev funnet. Oppretter brev ..." />
   }
 
-  const behandlingRedigertEtterOpprettetBrev = props.behandling.hendelser.find((hendelse) => {
-    if (!vedtaksbrev) return false
-
-    const erBehandlingshendelse = [
-      IHendelseType.BEHANDLING_OPPRETTET,
-      IHendelseType.BEHANDLING_VILKAARSVURDERT,
-      IHendelseType.BEHANDLING_TRYGDETID_OPPDATERT,
-      IHendelseType.BEHANDLING_BEREGNET,
-      IHendelseType.BEHANDLING_AVKORTET,
-    ].includes(hendelse.hendelse)
-
-    const hendelseErEtterBrevOpprettelse =
-      new Date(vedtaksbrev.opprettet).getTime() < new Date(hendelse.opprettet).getTime()
-
-    return erBehandlingshendelse && hendelseErEtterBrevOpprettelse
-  })
-
   return (
     <Content>
       <BrevContent>
@@ -91,16 +104,17 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
             <br />
             {(vedtaksbrev?.prosessType === BrevProsessType.MANUELL ||
               vedtaksbrev?.prosessType === BrevProsessType.REDIGERBAR) && (
-              <Alert variant="warning">
+              <WarningAlert>
                 {manueltBrevKanRedigeres(status)
                   ? 'Kan ikke generere brev automatisk. Du må selv redigere innholdet.'
                   : 'Dette er et manuelt opprettet brev. Kontroller innholdet nøye før attestering.'}
-              </Alert>
+              </WarningAlert>
             )}
-            {behandlingRedigertEtterOpprettetBrev && (
-              <Alert variant="warning">
-                Behandling er redigert etter brev ble opprettet. Brev bør derfor tilbakestilles..
-              </Alert>
+            {visAdvarselBehandlingEndret && (
+              <WarningAlert>
+                Behandling er redigert etter brevet ble opprettet. Gå gjennom brevet og vurder om det bør tilbakestilles
+                for å få oppdaterte verdier fra behandlingen.
+              </WarningAlert>
             )}
             <br />
             {vedtaksbrev && (
@@ -117,7 +131,11 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
           (vedtaksbrev?.prosessType === BrevProsessType.AUTOMATISK ? (
             <ForhaandsvisningBrev brev={vedtaksbrev} />
           ) : (
-            <RedigerbartBrev brev={vedtaksbrev!!} kanRedigeres={manueltBrevKanRedigeres(status)} />
+            <RedigerbartBrev
+              brev={vedtaksbrev!!}
+              kanRedigeres={manueltBrevKanRedigeres(status)}
+              lukkAdvarselBehandlingEndret={lukkAdvarselBehandlingEndret}
+            />
           ))}
 
         {isFailure(hentBrevStatus) && <ErrorMessage>Feil ved henting av brev</ErrorMessage>}
@@ -148,4 +166,8 @@ const Sidebar = styled.div`
   min-width: 40%;
   width: 40%;
   border-right: 1px solid #c6c2bf;
+`
+
+const WarningAlert = styled(Alert).attrs({ variant: 'warning' })`
+  margin-bottom: 1em;
 `

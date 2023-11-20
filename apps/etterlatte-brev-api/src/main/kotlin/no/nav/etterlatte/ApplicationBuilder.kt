@@ -6,6 +6,7 @@ import io.ktor.client.HttpClient
 import io.ktor.client.plugins.auth.Auth
 import io.ktor.server.config.HoconApplicationConfig
 import no.nav.etterlatte.brev.BrevService
+import no.nav.etterlatte.brev.MigreringBrevDataService
 import no.nav.etterlatte.brev.VedtaksbrevService
 import no.nav.etterlatte.brev.adresse.AdresseService
 import no.nav.etterlatte.brev.adresse.Norg2Klient
@@ -50,8 +51,8 @@ import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.libs.ktor.setReady
 import no.nav.etterlatte.rivers.DistribuerBrevRiver
 import no.nav.etterlatte.rivers.JournalfoerVedtaksbrevRiver
-import no.nav.etterlatte.rivers.OpprettVedtaksbrevForMigreringRiver
 import no.nav.etterlatte.rivers.VedtaksbrevUnderkjentRiver
+import no.nav.etterlatte.rivers.migrering.OpprettVedtaksbrevForMigreringRiver
 import no.nav.etterlatte.security.ktor.clientCredential
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -127,7 +128,9 @@ class ApplicationBuilder {
 
     private val featureToggleService = FeatureToggleService.initialiser(featureToggleProperties(config))
 
-    private val brevDataMapper = BrevDataMapper(featureToggleService, brevdataFacade)
+    private val migreringBrevDataService = MigreringBrevDataService(brevdataFacade)
+
+    private val brevDataMapper = BrevDataMapper(featureToggleService, brevdataFacade, migreringBrevDataService)
 
     private val brevbakerService = BrevbakerService(brevbaker, adresseService, brevDataMapper)
 
@@ -160,6 +163,7 @@ class ApplicationBuilder {
             brevbakerService,
             brevDataMapper,
             brevProsessTypeFactory,
+            migreringBrevDataService,
         )
 
     private val journalpostService =

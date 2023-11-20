@@ -7,6 +7,7 @@ import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
+import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.pensjon.brevbaker.api.model.LetterMetadata
@@ -18,6 +19,7 @@ import kotlin.time.measureTimedValue
 
 class BrevbakerKlient(private val client: HttpClient, private val apiUrl: String) {
     private val logger = LoggerFactory.getLogger(BrevbakerKlient::class.java)
+    private val sikkerlogg = sikkerlogger()
 
     @OptIn(ExperimentalTime::class)
     suspend fun genererPdf(brevRequest: BrevbakerRequest): BrevbakerPdfResponse =
@@ -32,6 +34,7 @@ class BrevbakerKlient(private val client: HttpClient, private val apiUrl: String
                 result
             }
         } catch (ex: Exception) {
+            sikkerlogg.error("Feila ved generer pdf-kall mot brevbakeren. Requesten var $brevRequest", ex)
             throw BrevbakerException("Feil ved kall til brevbaker", ex)
         }
 
@@ -48,6 +51,7 @@ class BrevbakerKlient(private val client: HttpClient, private val apiUrl: String
                 result
             }
         } catch (ex: Exception) {
+            sikkerlogg.error("Feila ved generer html-kall mot brevbakeren. Requesten var $brevRequest", ex)
             throw BrevbakerException("Feil ved kall til brevbaker", ex)
         }
 
@@ -64,6 +68,7 @@ class BrevbakerKlient(private val client: HttpClient, private val apiUrl: String
                 result
             }
         } catch (ex: Exception) {
+            sikkerlogg.error("Feila ved generer json-kall mot brevbakeren. Requesten var $brevRequest", ex)
             throw BrevbakerException("Feil ved kall til brevbaker", ex)
         }
 }

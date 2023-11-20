@@ -83,6 +83,7 @@ data class Brev(
     val prosessType: BrevProsessType,
     val soekerFnr: String,
     val status: Status,
+    val statusEndret: Tidspunkt,
     val opprettet: Tidspunkt,
     val mottaker: Mottaker,
 ) {
@@ -99,6 +100,7 @@ data class Brev(
             prosessType = opprettNyttBrev.prosessType,
             soekerFnr = opprettNyttBrev.soekerFnr,
             status = opprettNyttBrev.status,
+            statusEndret = opprettNyttBrev.opprettet,
             mottaker = opprettNyttBrev.mottaker,
             opprettet = opprettNyttBrev.opprettet,
         )

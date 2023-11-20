@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Alert, BodyLong, BodyShort, Button, Heading, Modal } from '@navikt/ds-react'
 import { SaktypeTag } from '~components/nyoppgavebenk/Tags'
-import { OppgaveDTO } from '~shared/api/oppgaver'
+import { ferdigstillOppgave, OppgaveDTO } from '~shared/api/oppgaver'
 import { isFailure, isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
 import { opprettBehandling } from '~shared/api/behandling'
 import { NyBehandlingRequest } from '~shared/types/IDetaljertBehandling'
@@ -17,7 +17,8 @@ export default function FullfoerOppgaveModal({ oppgave, behandlingBehov }: Modal
   const [open, setOpen] = useState(false)
   const navigate = useNavigate()
 
-  const [status, opprettNyBehandling] = useApiCall(opprettBehandling)
+  const [opprettBehandlingStatus, opprettNyBehandling] = useApiCall(opprettBehandling)
+  const [ferdigstillOppgaveStatus, apiFerdigstillOppgave] = useApiCall(ferdigstillOppgave)
 
   const ferdigstill = () => {
     opprettNyBehandling(
@@ -26,9 +27,11 @@ export default function FullfoerOppgaveModal({ oppgave, behandlingBehov }: Modal
         mottattDato: behandlingBehov!!.mottattDato!!.replace('Z', ''),
       },
       () => {
-        setTimeout(() => {
-          navigate(`/person/${oppgave.fnr}`)
-        }, 5000)
+        apiFerdigstillOppgave(oppgave.id, () => {
+          setTimeout(() => {
+            navigate(`/person/${oppgave.fnr}`)
+          }, 5000)
+        })
       }
     )
   }
@@ -53,24 +56,37 @@ export default function FullfoerOppgaveModal({ oppgave, behandlingBehov }: Modal
             opprettelse må du selv avslutte oppgaven i Gosys og ferdigstille journalposten.
           </BodyLong>
 
-          {isSuccess(status) ? (
+          {isSuccess(opprettBehandlingStatus) && isSuccess(ferdigstillOppgaveStatus) ? (
             <Alert variant="success">
               Behandling opprettet for bruker med fødselsnummer {oppgave.fnr}. Du blir straks sendt til saksoversikten
               for denne brukeren.
             </Alert>
           ) : (
             <FlexRow justify="center">
-              <Button variant="secondary" onClick={() => setOpen(false)} disabled={isPending(status)}>
+              <Button
+                variant="secondary"
+                onClick={() => setOpen(false)}
+                disabled={isPending(opprettBehandlingStatus) || isPending(ferdigstillOppgaveStatus)}
+              >
                 Avbryt
               </Button>
-              <Button variant="primary" onClick={ferdigstill} loading={isPending(status)} disabled={isPending(status)}>
+              <Button
+                variant="primary"
+                onClick={ferdigstill}
+                loading={isPending(opprettBehandlingStatus) || isPending(ferdigstillOppgaveStatus)}
+              >
                 Ferdigstill
               </Button>
             </FlexRow>
           )}
-          {isFailure(status) && (
+          {isFailure(opprettBehandlingStatus) && (
             <Modal.Footer>
               <Alert variant="error">Det oppsto en feil ved oppretting av behandlingen.</Alert>
+            </Modal.Footer>
+          )}
+          {isFailure(ferdigstillOppgaveStatus) && (
+            <Modal.Footer>
+              <Alert variant="error">Det oppsto en feil ved lukking av oppgaven.</Alert>
             </Modal.Footer>
           )}
         </Modal.Body>

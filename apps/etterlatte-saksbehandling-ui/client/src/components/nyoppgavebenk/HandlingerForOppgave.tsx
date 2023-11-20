@@ -3,7 +3,6 @@ import { Button } from '@navikt/ds-react'
 import { EyeIcon } from '@navikt/aksel-icons'
 import { useAppSelector } from '~store/Store'
 import { GosysOppgaveModal } from '~components/nyoppgavebenk/oppgavemodal/GosysOppgaveModal'
-import { JournalfoeringOppgaveModal } from '~components/nyoppgavebenk/oppgavemodal/JournalfoeringOppgaveModal'
 
 export const HandlingerForOppgave = ({ oppgave }: { oppgave: OppgaveDTO }) => {
   const user = useAppSelector((state) => state.saksbehandlerReducer.saksbehandler)
@@ -12,6 +11,16 @@ export const HandlingerForOppgave = ({ oppgave }: { oppgave: OppgaveDTO }) => {
   const erInnloggetSaksbehandlerOppgave = saksbehandler ? saksbehandler === user.ident : false
   if (kilde === 'GENERELL_BEHANDLING') {
     switch (type) {
+      case 'UNDERKJENT':
+        return (
+          <>
+            {erInnloggetSaksbehandlerOppgave && (
+              <Button size="small" as="a" href={`/generellbehandling/${referanse}`}>
+                Gå til kravpakke utland
+              </Button>
+            )}
+          </>
+        )
       case 'KRAVPAKKE_UTLAND':
         return (
           <>
@@ -113,7 +122,13 @@ export const HandlingerForOppgave = ({ oppgave }: { oppgave: OppgaveDTO }) => {
         </Button>
       ) : null
     case 'JOURNALFOERING':
-      return erInnloggetSaksbehandlerOppgave && <JournalfoeringOppgaveModal oppgave={oppgave} />
+      return (
+        erInnloggetSaksbehandlerOppgave && (
+          <Button size="small" href={`/oppgave/${oppgave.id}`} as="a">
+            Gå til oppgave
+          </Button>
+        )
+      )
     default:
       return null
   }

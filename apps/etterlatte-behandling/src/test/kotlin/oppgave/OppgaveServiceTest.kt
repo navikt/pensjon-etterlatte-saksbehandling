@@ -18,8 +18,8 @@ import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
+import no.nav.etterlatte.libs.common.oppgave.SakIdOgReferanse
 import no.nav.etterlatte.libs.common.oppgave.Status
-import no.nav.etterlatte.libs.common.oppgave.VedtakOppgaveDTO
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
@@ -190,16 +190,16 @@ internal class OppgaveServiceTest {
         val systembrukerTokenInfo = BrukerTokenInfo.of("a", systembruker, "c", "c", null)
         oppgaveService.tildelSaksbehandler(nyOppgave.id, systembruker)
 
-        val vedtakOppgaveDTO =
+        val sakIdOgReferanse =
             oppgaveService.ferdigstillOppgaveUnderbehandlingOgLagNyMedType(
-                VedtakOppgaveDTO(opprettetSak.id, referanse),
+                SakIdOgReferanse(opprettetSak.id, referanse),
                 OppgaveType.ATTESTERING,
                 null,
                 systembrukerTokenInfo,
             )
 
-        oppgaveService.tildelSaksbehandler(vedtakOppgaveDTO.id, systembruker)
-        val systembrukerOppgave = oppgaveService.hentOppgave(vedtakOppgaveDTO.id)
+        oppgaveService.tildelSaksbehandler(sakIdOgReferanse.id, systembruker)
+        val systembrukerOppgave = oppgaveService.hentOppgave(sakIdOgReferanse.id)
         Assertions.assertEquals(systembruker, systembrukerOppgave?.saksbehandler!!)
     }
 
@@ -219,9 +219,9 @@ internal class OppgaveServiceTest {
         val vanligSaksbehandler = saksbehandler.saksbehandlerMedRoller.saksbehandler
         oppgaveService.tildelSaksbehandler(nyOppgave.id, vanligSaksbehandler.ident)
 
-        val vedtakOppgaveDTO =
+        val sakIdOgReferanse =
             oppgaveService.ferdigstillOppgaveUnderbehandlingOgLagNyMedType(
-                VedtakOppgaveDTO(opprettetSak.id, referanse),
+                SakIdOgReferanse(opprettetSak.id, referanse),
                 OppgaveType.ATTESTERING,
                 null,
                 vanligSaksbehandler,
@@ -232,8 +232,8 @@ internal class OppgaveServiceTest {
         val attestantmedRoller = generateSaksbehandlerMedRoller(AzureGroup.ATTESTANT)
         mockForSaksbehandlerMedRoller(attestantSaksbehandler, attestantmedRoller)
 
-        oppgaveService.tildelSaksbehandler(vedtakOppgaveDTO.id, attestantmedRoller.saksbehandler.ident)
-        val attestantTildeltOppgave = oppgaveService.hentOppgave(vedtakOppgaveDTO.id)
+        oppgaveService.tildelSaksbehandler(sakIdOgReferanse.id, attestantmedRoller.saksbehandler.ident)
+        val attestantTildeltOppgave = oppgaveService.hentOppgave(sakIdOgReferanse.id)
         Assertions.assertEquals(attestantmedRoller.saksbehandler.ident, attestantTildeltOppgave?.saksbehandler!!)
     }
 
@@ -253,9 +253,9 @@ internal class OppgaveServiceTest {
         val vanligSaksbehandler = saksbehandler.saksbehandlerMedRoller.saksbehandler
         oppgaveService.tildelSaksbehandler(nyOppgave.id, vanligSaksbehandler.ident)
 
-        val vedtakOppgaveDTO =
+        val sakIdOgReferanse =
             oppgaveService.ferdigstillOppgaveUnderbehandlingOgLagNyMedType(
-                VedtakOppgaveDTO(opprettetSak.id, referanse),
+                SakIdOgReferanse(opprettetSak.id, referanse),
                 OppgaveType.ATTESTERING,
                 null,
                 vanligSaksbehandler,
@@ -267,7 +267,7 @@ internal class OppgaveServiceTest {
         mockForSaksbehandlerMedRoller(saksbehandlerto, saksbehandlerMedRoller)
 
         assertThrows<BrukerManglerAttestantRolleException> {
-            oppgaveService.tildelSaksbehandler(vedtakOppgaveDTO.id, saksbehandlerMedRoller.saksbehandler.ident)
+            oppgaveService.tildelSaksbehandler(sakIdOgReferanse.id, saksbehandlerMedRoller.saksbehandler.ident)
         }
     }
 
@@ -585,9 +585,9 @@ internal class OppgaveServiceTest {
         val saksbehandler1 = Saksbehandler("", "saksbehandler", null)
         oppgaveService.tildelSaksbehandler(nyOppgave.id, saksbehandler1.ident)
 
-        val vedtakOppgaveDTO =
+        val sakIdOgReferanse =
             oppgaveService.ferdigstillOppgaveUnderbehandlingOgLagNyMedType(
-                VedtakOppgaveDTO(opprettetSak.id, referanse),
+                SakIdOgReferanse(opprettetSak.id, referanse),
                 OppgaveType.ATTESTERING,
                 null,
                 saksbehandler1,
@@ -595,8 +595,8 @@ internal class OppgaveServiceTest {
 
         val saksbehandlerOppgave = oppgaveService.hentOppgave(nyOppgave.id)
         Assertions.assertEquals(Status.FERDIGSTILT, saksbehandlerOppgave?.status)
-        Assertions.assertEquals(OppgaveType.ATTESTERING, vedtakOppgaveDTO.type)
-        Assertions.assertEquals(referanse, vedtakOppgaveDTO.referanse)
+        Assertions.assertEquals(OppgaveType.ATTESTERING, sakIdOgReferanse.type)
+        Assertions.assertEquals(referanse, sakIdOgReferanse.referanse)
     }
 
     @Test
@@ -616,7 +616,7 @@ internal class OppgaveServiceTest {
         oppgaveService.tildelSaksbehandler(nyOppgave.id, saksbehandler1)
         assertThrows<OppgaveService.FeilSaksbehandlerPaaOppgaveException> {
             oppgaveService.ferdigstillOppgaveUnderbehandlingOgLagNyMedType(
-                VedtakOppgaveDTO(opprettetSak.id, referanse),
+                SakIdOgReferanse(opprettetSak.id, referanse),
                 OppgaveType.ATTESTERING,
                 null,
                 Saksbehandler("", "Feilsaksbehandler", null),
@@ -639,7 +639,7 @@ internal class OppgaveServiceTest {
         val err =
             assertThrows<BadRequestException> {
                 oppgaveService.ferdigstillOppgaveUnderbehandlingOgLagNyMedType(
-                    VedtakOppgaveDTO(opprettetSak.id, referanse),
+                    SakIdOgReferanse(opprettetSak.id, referanse),
                     OppgaveType.ATTESTERING,
                     null,
                     Saksbehandler("", "saksbehandler", null),
@@ -659,7 +659,7 @@ internal class OppgaveServiceTest {
         val err =
             assertThrows<BadRequestException> {
                 oppgaveService.ferdigstillOppgaveUnderbehandlingOgLagNyMedType(
-                    VedtakOppgaveDTO(opprettetSak.id, referanse),
+                    SakIdOgReferanse(opprettetSak.id, referanse),
                     OppgaveType.ATTESTERING,
                     null,
                     Saksbehandler("", "saksbehandler", null),
@@ -700,7 +700,7 @@ internal class OppgaveServiceTest {
         val err =
             assertThrows<BadRequestException> {
                 oppgaveService.ferdigstillOppgaveUnderbehandlingOgLagNyMedType(
-                    VedtakOppgaveDTO(opprettetSak.id, referanse),
+                    SakIdOgReferanse(opprettetSak.id, referanse),
                     OppgaveType.ATTESTERING,
                     null,
                     saksbehandler1,

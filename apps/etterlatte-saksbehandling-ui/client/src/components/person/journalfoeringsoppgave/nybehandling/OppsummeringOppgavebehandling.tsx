@@ -4,22 +4,22 @@ import AvbrytBehandleJournalfoeringOppgave from '~components/person/journalfoeri
 import { Navigate, useNavigate } from 'react-router-dom'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import { SakType } from '~shared/types/sak'
-import { formaterSakstype } from '~utils/formattering'
+import { formaterSakstype, formaterStringDato } from '~utils/formattering'
 import { InfoList } from '~components/behandling/soeknadsoversikt/styled'
 import { FormWrapper } from '~components/person/journalfoeringsoppgave/BehandleJournalfoeringOppgave'
-import FullfoerOppgaveModal from '~components/person/journalfoeringsoppgave/oppsummering/FullfoerOppgaveModal'
+import FullfoerOppgaveModal from '~components/person/journalfoeringsoppgave/nybehandling/FullfoerOppgaveModal'
 import { FlexRow } from '~shared/styled'
 
 export default function OppsummeringOppgavebehandling() {
-  const { behandlingBehov, oppgave } = useJournalfoeringOppgave()
+  const { nyBehandlingRequest, oppgave } = useJournalfoeringOppgave()
 
   const navigate = useNavigate()
 
-  const tilbake = () => navigate('../nybehandling', { relative: 'path' })
+  const tilbake = () => navigate('../', { relative: 'path' })
 
-  const persongalleri = behandlingBehov?.persongalleri
-  if (!behandlingBehov || !oppgave || !persongalleri) {
-    return <Navigate to="../nybehandling" relative="path" />
+  const persongalleri = nyBehandlingRequest?.persongalleri
+  if (!nyBehandlingRequest || !oppgave || !persongalleri) {
+    return <Navigate to="../" relative="path" />
   }
 
   return (
@@ -34,6 +34,9 @@ export default function OppsummeringOppgavebehandling() {
             {formaterSakstype(oppgave.sakType)}
           </Tag>
         </div>
+
+        <Info label="Språk" tekst={nyBehandlingRequest.spraak} />
+        <Info label="Mottatt dato" tekst={formaterStringDato(nyBehandlingRequest.mottattDato!!)} />
 
         <Info label="Søker" tekst={persongalleri.soeker} />
         <Info label="Innsender" tekst={persongalleri.innsender || <i>Ikke oppgitt</i>} />
@@ -63,7 +66,7 @@ export default function OppsummeringOppgavebehandling() {
             Tilbake
           </Button>
 
-          <FullfoerOppgaveModal oppgave={oppgave} behandlingBehov={behandlingBehov} />
+          <FullfoerOppgaveModal oppgave={oppgave} behandlingBehov={nyBehandlingRequest} />
         </FlexRow>
         <FlexRow justify="center">
           <AvbrytBehandleJournalfoeringOppgave />

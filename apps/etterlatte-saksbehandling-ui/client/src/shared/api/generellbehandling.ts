@@ -24,6 +24,19 @@ export function attesterGenerellbehandling(generellbehandling: Generellbehandlin
   return apiClient.post(`/generellbehandling/attester/${generellbehandling.sakId}/${generellbehandling.id}`, {})
 }
 
+export function underkjennGenerellbehandling({
+  generellbehandling,
+  begrunnelse,
+}: {
+  generellbehandling: Generellbehandling
+  begrunnelse: string
+}): Promise<ApiResponse<void>> {
+  return apiClient.post(`/generellbehandling/underkjenn/${generellbehandling.sakId}/${generellbehandling.id}`, {
+    somebody: 'that I used to know',
+    begrunnelse: begrunnelse,
+  })
+}
+
 export function hentKravpakkeforSak(sakId: number): Promise<ApiResponse<KravPakkeMedAvdoed>> {
   return apiClient.get(`/generellbehandling/kravpakkeForSak/${sakId}`)
 }

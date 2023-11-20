@@ -90,7 +90,7 @@ class TrygdetidBeregningServiceTest {
                 null,
             )
 
-        beregnetTrygdetid!!.resultat.samletTrygdetidNorge shouldBe 0
+        beregnetTrygdetid!!.resultat.samletTrygdetidNorge shouldBe null
     }
 
     @Test

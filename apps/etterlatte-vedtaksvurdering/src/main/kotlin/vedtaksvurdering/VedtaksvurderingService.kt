@@ -13,7 +13,7 @@ class VedtaksvurderingService(
         return repository.hentVedtak(vedtakId)
     }
 
-    fun hentVedtak(behandlingId: UUID): Vedtak? {
+    fun hentVedtakMedBehandlingId(behandlingId: UUID): Vedtak? {
         logger.info("Henter vedtak for behandling med behandlingId=$behandlingId")
         return repository.hentVedtak(behandlingId)
     }

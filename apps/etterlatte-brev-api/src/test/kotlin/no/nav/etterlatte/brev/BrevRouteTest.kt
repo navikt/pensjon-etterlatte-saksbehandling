@@ -233,6 +233,7 @@ internal class BrevRouteTest {
             prosessType = BrevProsessType.AUTOMATISK,
             soekerFnr = "soeker_fnr",
             status = Status.OPPRETTET,
+            statusEndret = Tidspunkt.now(),
             opprettet = Tidspunkt.now(),
             mottaker =
                 Mottaker(

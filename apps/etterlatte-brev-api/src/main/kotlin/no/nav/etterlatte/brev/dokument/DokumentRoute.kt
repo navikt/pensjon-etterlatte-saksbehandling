@@ -7,11 +7,12 @@ import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
+import io.ktor.server.routing.put
 import io.ktor.server.routing.route
 import no.nav.etterlatte.brev.dokarkiv.DokarkivService
 import no.nav.etterlatte.brev.hentinformasjon.Tilgangssjekker
 import no.nav.etterlatte.brev.journalpost.BrukerIdType
-import no.nav.etterlatte.brev.journalpost.FerdigstillJournalpostRequest
+import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.withFoedselsnummer
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 
@@ -34,13 +35,21 @@ fun Route.dokumentRoute(
         }
 
         post("{journalpostId}/ferdigstill") {
-            val request = call.receive<FerdigstillJournalpostRequest>()
+            val sak = call.receive<Sak>()
             val journalpostId =
                 requireNotNull(call.parameters["journalpostId"]) {
                     "JournalpostID er påkrevd for å kunne ferdigstille journalposten"
                 }
 
-            dokarkivService.ferdigstill(journalpostId, request)
+            dokarkivService.ferdigstill(journalpostId, sak)
+            call.respond(HttpStatusCode.OK)
+        }
+
+        put("{journalpostId}/tema/{nyttTema}") {
+            val journalpostId = call.parameters["journalpostId"]!!
+            val nyttTema = call.parameters["nyttTema"]!!
+
+            dokarkivService.endreTema(journalpostId, nyttTema)
             call.respond(HttpStatusCode.OK)
         }
 

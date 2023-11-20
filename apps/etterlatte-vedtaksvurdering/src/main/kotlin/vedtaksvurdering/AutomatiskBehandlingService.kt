@@ -10,7 +10,6 @@ import java.util.UUID
 
 class AutomatiskBehandlingService(
     val service: VedtakBehandlingService,
-    val rapidService: VedtaksvurderingRapidService,
     val behandlingKlient: BehandlingKlient,
 ) {
     private val logger = LoggerFactory.getLogger(AutomatiskBehandlingService::class.java)
@@ -44,7 +43,7 @@ class AutomatiskBehandlingService(
         logger.info("Håndterer behandling $behandlingId")
         service.opprettEllerOppdaterVedtak(behandlingId, brukerTokenInfo)
         logger.info("Fatter vedtak for behandling $behandlingId")
-        val vedtakOgRapid = service.fattVedtak(behandlingId, brukerTokenInfo)
+        val vedtakOgRapid = service.fattVedtak(behandlingId, brukerTokenInfo, saksbehandler = Fagsaksystem.EY.navn)
 
         logger.info("Tildeler attesteringsoppgave til systembruker")
         val oppgaveTilAttestering =
@@ -67,6 +66,7 @@ class AutomatiskBehandlingService(
             behandlingId,
             "Automatisk attestert av ${Fagsaksystem.EY.systemnavn}",
             brukerTokenInfo,
+            attestant = Fagsaksystem.EY.navn,
         )
     }
 }

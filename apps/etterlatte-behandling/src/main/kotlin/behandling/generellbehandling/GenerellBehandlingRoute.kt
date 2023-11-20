@@ -50,7 +50,7 @@ internal fun Route.generellbehandlingRoutes(
 
     post("/api/generellbehandling/{$SAKID_CALL_PARAMETER}") {
         hvisEnabled(GenerellBehandlingToggle.KanBrukeGenerellBehandlingToggle) {
-            kunSaksbehandler {
+            kunSaksbehandler { saksbehandler ->
                 val request = call.receive<OpprettGenerellBehandlingRequest>()
                 val finnSak = inTransaction { sakService.finnSak(sakId) }
                 if (finnSak == null) {
@@ -59,6 +59,7 @@ internal fun Route.generellbehandlingRoutes(
                 inTransaction {
                     generellBehandlingService.opprettBehandling(
                         GenerellBehandling.opprettFraType(request.type, sakId),
+                        saksbehandler,
                     )
                 }
                 logger.info(

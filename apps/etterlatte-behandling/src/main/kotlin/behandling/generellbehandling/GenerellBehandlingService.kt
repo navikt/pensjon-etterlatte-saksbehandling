@@ -2,11 +2,13 @@ package no.nav.etterlatte.behandling.generellbehandling
 
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
+import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
 import no.nav.etterlatte.libs.common.generellbehandling.DokumentMedSendtDato
 import no.nav.etterlatte.libs.common.generellbehandling.GenerellBehandling
+import no.nav.etterlatte.libs.common.generellbehandling.GenerellBehandlingHendelseType
 import no.nav.etterlatte.libs.common.generellbehandling.Innhold
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
@@ -42,10 +44,14 @@ class GenerellBehandlingService(
     private val oppgaveService: OppgaveService,
     private val behandlingService: BehandlingService,
     private val grunnlagKlient: GrunnlagKlient,
+    private val hendelseDao: HendelseDao,
 ) {
     private val logger = LoggerFactory.getLogger(GenerellBehandlingService::class.java)
 
-    fun opprettBehandling(generellBehandling: GenerellBehandling): GenerellBehandling {
+    fun opprettBehandling(
+        generellBehandling: GenerellBehandling,
+        saksbehandler: Saksbehandler?,
+    ): GenerellBehandling {
         val opprettetbehandling = generellBehandlingDao.opprettGenerellbehandling(generellBehandling)
         val oppgaveForGenerellBehandling =
             oppgaveService.opprettNyOppgaveMedSakOgReferanse(
@@ -56,6 +62,7 @@ class GenerellBehandlingService(
                 null,
             )
         tildelSaksbehandlerTilNyOppgaveHvisFinnes(oppgaveForGenerellBehandling, opprettetbehandling)
+        oppretttHendelse(GenerellBehandlingHendelseType.OPPRETTET, opprettetbehandling, saksbehandler)
         return opprettetbehandling
     }
 
@@ -95,7 +102,9 @@ class GenerellBehandlingService(
             is Innhold.Annen -> throw NotImplementedError("Ikke implementert")
             null -> throw NotImplementedError("Ikke implementert")
         }
+
         oppdaterBehandling(generellBehandling.copy(status = GenerellBehandling.Status.FATTET))
+        oppretttHendelse(GenerellBehandlingHendelseType.FATTET, hentetBehandling, saksbehandler)
         oppgaveService.ferdigStillOppgaveUnderBehandling(generellBehandling.id.toString(), saksbehandler)
         val trettiDagerFremITid = Tidspunkt.now().plus(30L, ChronoUnit.DAYS)
         oppgaveService.opprettNyOppgaveMedSakOgReferanse(
@@ -119,6 +128,7 @@ class GenerellBehandlingService(
         }
 
         oppdaterBehandling(hentetBehandling!!.copy(status = GenerellBehandling.Status.ATTESTERT))
+        oppretttHendelse(GenerellBehandlingHendelseType.ATTESTERT, hentetBehandling, saksbehandler)
         oppgaveService.ferdigStillOppgaveUnderBehandling(generellbehandlingId.toString(), saksbehandler)
     }
 
@@ -140,6 +150,23 @@ class GenerellBehandlingService(
             saksbehandler = saksbehandler,
         )
         oppdaterBehandling(behandling.copy(status = GenerellBehandling.Status.OPPRETTET))
+        oppretttHendelse(GenerellBehandlingHendelseType.UNDERKJENT, hentetBehandling, saksbehandler, kommentar.begrunnelse)
+    }
+
+    private fun oppretttHendelse(
+        hendelseType: GenerellBehandlingHendelseType,
+        behandling: GenerellBehandling,
+        saksbehandler: Saksbehandler?,
+        begrunnelse: String? = null,
+    ) {
+        hendelseDao.generellBehandlingHendelse(
+            behandlingId = behandling.id,
+            sakId = behandling.sakId,
+            hendelse = hendelseType,
+            inntruffet = Tidspunkt.now(),
+            saksbehandler = saksbehandler?.ident,
+            begrunnelse = begrunnelse,
+        )
     }
 
     private fun validerUtland(innhold: Innhold.KravpakkeUtland) {
@@ -201,8 +228,7 @@ class GenerellBehandlingService(
             inTransaction {
                 val behandlingerForSak = behandlingService.hentBehandlingerISak(sakId)
                 val foerstegangsbehandlingMedKravpakke =
-                    behandlingerForSak.find {
-                            behandling ->
+                    behandlingerForSak.find { behandling ->
                         (behandling is Foerstegangsbehandling) && behandling.boddEllerArbeidetUtlandet?.skalSendeKravpakke == true
                     }
                         ?: throw FantIkkeFoerstegangsbehandlingForKravpakkeOgSak("Fant ikke behandlingen for sak $sakId")
@@ -220,7 +246,9 @@ class GenerellBehandlingService(
                     forstegangsbehandlingMedKravpakke.id,
                     Opplysningstype.AVDOED_PDL_V1,
                     brukerTokenInfo,
-                ) ?: throw FantIkkeAvdoedException("Fant ikke avdød for sak: $sakId behandlingid: ${forstegangsbehandlingMedKravpakke.id}")
+                ) ?: throw FantIkkeAvdoedException(
+                    "Fant ikke avdød for sak: $sakId behandlingid: ${forstegangsbehandlingMedKravpakke.id}",
+                )
             return KravPakkeMedAvdoed(kravpakke, avdoed.opplysning)
         } else {
             throw RuntimeException("Kravpakken for sak $sakId har ikke blitt attestert, status: ${kravpakke.status}")

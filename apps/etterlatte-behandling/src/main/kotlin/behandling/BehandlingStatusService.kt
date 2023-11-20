@@ -265,6 +265,7 @@ class BehandlingStatusServiceImpl(
                             behandling.sak.id,
                             behandling.id,
                         ),
+                        null,
                     )
                 } else {
                     logger.info("behandling ${behandling.id} har ikke satt skalSendeKravpakke=true")

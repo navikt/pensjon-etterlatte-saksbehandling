@@ -130,7 +130,7 @@ internal class BehandlingStatusServiceTest {
             )
         val generellBehandlingService =
             mockk<GenerellBehandlingService> {
-                every { opprettBehandling(any()) } returns generellBehandlingUtland
+                every { opprettBehandling(any(), any()) } returns generellBehandlingUtland
             }
 
         val featureToggleService =
@@ -155,7 +155,7 @@ internal class BehandlingStatusServiceTest {
             behandlingdao.lagreStatus(behandlingId, BehandlingStatus.IVERKSATT, any())
             behandlingService.hentBehandling(behandlingId)
             behandlingService.registrerVedtakHendelse(behandlingId, iverksettVedtak, HendelseType.IVERKSATT)
-            generellBehandlingService.opprettBehandling(any())
+            generellBehandlingService.opprettBehandling(any(), any())
         }
         confirmVerified(behandlingdao, behandlingService, grlService, generellBehandlingService)
     }

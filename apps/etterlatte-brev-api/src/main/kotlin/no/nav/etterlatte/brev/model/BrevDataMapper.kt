@@ -268,7 +268,7 @@ class BrevDataMapper(
                             Revurderingaarsak.INSTITUSJONSOPPHOLD,
                             Revurderingaarsak.YRKESSKADE,
                             Revurderingaarsak.ANNEN,
-                            -> ManueltBrevData(emptyList())
+                            -> ManueltBrevData.fra()
                             else -> TODO("Revurderingsbrev for ${generellBrevData.revurderingsaarsak} er ikke støttet")
                         }
 
@@ -379,6 +379,8 @@ class BrevDataMapper(
                     )
                 }
             }
+
+            BARNEPENSJON_AVSLAG -> ManueltBrevData.fra(innholdMedVedlegg.innhold())
 
             OMS_FOERSTEGANGSVEDTAK_INNVILGELSE -> {
                 coroutineScope {

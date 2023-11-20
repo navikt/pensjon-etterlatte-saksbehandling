@@ -1,6 +1,7 @@
 package no.nav.etterlatte.brev
 
 import com.fasterxml.jackson.databind.JsonNode
+import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.brev.adresse.AdresseService
 import no.nav.etterlatte.brev.behandling.ForenkletVedtak
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
@@ -310,11 +311,11 @@ class VedtaksbrevService(
             throw IllegalArgumentException("Ugyldig status ${vedtaksbrev.status} på vedtaksbrev (id=${vedtaksbrev.id})")
         }
 
-        return dokarkivService.journalfoer(vedtaksbrev.id, vedtak)
-            .also { journalfoeringResponse ->
-                db.settBrevJournalfoert(vedtaksbrev.id, journalfoeringResponse)
-                logger.info("Brev med id=${vedtaksbrev.id} markert som journalført")
-            }
+        val journalfoeringResponse = runBlocking { dokarkivService.journalfoer(vedtaksbrev.id, vedtak) }
+
+        db.settBrevJournalfoert(vedtaksbrev.id, journalfoeringResponse)
+        logger.info("Brev med id=${vedtaksbrev.id} markert som journalført")
+        return journalfoeringResponse
     }
 
     fun fjernFerdigstiltStatusUnderkjentVedtak(

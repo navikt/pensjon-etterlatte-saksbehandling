@@ -706,7 +706,7 @@ internal class VedtaksbrevServiceTest {
             val forventetBrev = opprettBrev(Status.FERDIGSTILT, mockk())
 
             val forventetResponse = JournalpostResponse("1", "OK", "melding", true)
-            every { dokarkivService.journalfoer(any<BrevID>(), any()) } returns forventetResponse
+            coEvery { dokarkivService.journalfoer(any<BrevID>(), any()) } returns forventetResponse
 
             val vedtak = opprettVedtak()
 
@@ -717,8 +717,10 @@ internal class VedtaksbrevServiceTest {
 
             assertEquals(forventetResponse, response)
 
-            verify(exactly = 1) {
+            coVerify(exactly = 1) {
                 dokarkivService.journalfoer(forventetBrev.id, vedtak)
+            }
+            verify(exactly = 1) {
                 db.settBrevJournalfoert(forventetBrev.id, response)
             }
 

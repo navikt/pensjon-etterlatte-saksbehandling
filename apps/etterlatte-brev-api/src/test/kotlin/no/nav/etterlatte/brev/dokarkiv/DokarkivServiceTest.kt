@@ -9,6 +9,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
+import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.journalpost.AvsenderMottaker
 import no.nav.etterlatte.brev.journalpost.Bruker
@@ -69,7 +70,7 @@ internal class DokarkivServiceTest {
                 "ansvarligEnhet",
             )
 
-        val response = service.journalfoer(brevId, vedtak)
+        val response = runBlocking { service.journalfoer(brevId, vedtak) }
         response shouldBe forventetResponse
 
         val requestSlot = slot<JournalpostRequest>()

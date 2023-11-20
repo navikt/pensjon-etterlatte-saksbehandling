@@ -1,4 +1,4 @@
-package no.nav.etterlatte.itest
+package no.nav.etterlatte.grunnlag.itest
 
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.treeToValue

@@ -9,8 +9,8 @@ import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import lagGrunnlagHendelse
 import mockPerson
-import no.nav.etterlatte.klienter.PdlTjenesterKlientImpl
-import no.nav.etterlatte.klienter.PersondataKlient
+import no.nav.etterlatte.grunnlag.klienter.PdlTjenesterKlientImpl
+import no.nav.etterlatte.grunnlag.klienter.PersondataKlient
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
@@ -59,14 +59,14 @@ internal class GrunnlagServiceTest {
     private val opplysningDaoMock = mockk<OpplysningDao>()
     private val pdlTjenesterKlientImpl = mockk<PdlTjenesterKlientImpl>()
     private val persondataKlient = mockk<PersondataKlient>()
-    private val grunnlagFetcher = mockk<GrunnlagFetcher>()
+    private val grunnlagHenter = mockk<GrunnlagHenter>()
     private val grunnlagService =
         RealGrunnlagService(
             pdlTjenesterKlientImpl,
             opplysningDaoMock,
             mockk(),
             persondataKlient,
-            grunnlagFetcher,
+            grunnlagHenter,
         )
 
     private val testData = GrunnlagTestData()
@@ -597,7 +597,7 @@ internal class GrunnlagServiceTest {
             opplysningDaoMock.oppdaterVersjonForBehandling(any(), any(), any())
         } returns 1
         coEvery {
-            grunnlagFetcher.fetchGrunnlagsdata(any())
+            grunnlagHenter.hentGrunnlagsdata(any())
         } returns sampleFetchedGrunnlag(opplysningsperson)
 
         runBlocking { grunnlagService.oppdaterGrunnlag(behandlingId, sakId, sakType) }
@@ -614,7 +614,7 @@ internal class GrunnlagServiceTest {
     }
 
     private fun sampleFetchedGrunnlag(opplysningsperson: PersonDTO) =
-        FetchedGrunnlag(
+        HentetGrunnlag(
             personopplysninger =
                 listOf(
                     Pair(

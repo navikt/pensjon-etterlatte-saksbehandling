@@ -1,17 +1,16 @@
-package grunnlag
+package no.nav.etterlatte.grunnlag
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.jacksonTypeRef
-import grunnlag.adresse.PersondataAdresse
-import grunnlag.adresse.VergeAdresse
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import mockPerson
-import no.nav.etterlatte.grunnlag.GrunnlagFetcher
-import no.nav.etterlatte.klienter.PdlTjenesterKlientImpl
-import no.nav.etterlatte.klienter.PersondataKlient
+import no.nav.etterlatte.grunnlag.adresse.PersondataAdresse
+import no.nav.etterlatte.grunnlag.adresse.VergeAdresse
+import no.nav.etterlatte.grunnlag.klienter.PdlTjenesterKlientImpl
+import no.nav.etterlatte.grunnlag.klienter.PersondataKlient
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
@@ -31,9 +30,9 @@ import org.junit.jupiter.api.Test
 import java.util.UUID
 
 class GrunnlagFetcherTest {
-    val pdltjenesterKlient = mockk<PdlTjenesterKlientImpl>()
-    val persondataKlient = mockk<PersondataKlient>()
-    val grunnlagFetcher = GrunnlagFetcher(pdltjenesterKlient, persondataKlient)
+    private val pdltjenesterKlient = mockk<PdlTjenesterKlientImpl>()
+    private val persondataKlient = mockk<PersondataKlient>()
+    private val grunnlagHenter = GrunnlagHenter(pdltjenesterKlient, persondataKlient)
 
     @Test
     fun fetchGrunnlag_shouldGetRelevantInfo() {
@@ -66,7 +65,7 @@ class GrunnlagFetcherTest {
 
         val fetched =
             runBlocking {
-                grunnlagFetcher.fetchGrunnlagsdata(
+                grunnlagHenter.hentGrunnlagsdata(
                     Opplysningsbehov(
                         1L,
                         sakType,

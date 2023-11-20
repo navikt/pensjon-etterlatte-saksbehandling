@@ -6,19 +6,19 @@ import com.typesafe.config.ConfigFactory
 import io.ktor.client.HttpClient
 import io.ktor.server.config.HoconApplicationConfig
 import io.ktor.server.routing.route
-import no.nav.etterlatte.grunnlag.GrunnlagFetcher
 import no.nav.etterlatte.grunnlag.GrunnlagHendelserRiver
+import no.nav.etterlatte.grunnlag.GrunnlagHenter
 import no.nav.etterlatte.grunnlag.MigreringHendelserRiver
 import no.nav.etterlatte.grunnlag.OpplysningDao
 import no.nav.etterlatte.grunnlag.RealGrunnlagService
 import no.nav.etterlatte.grunnlag.behandlingGrunnlagRoute
+import no.nav.etterlatte.grunnlag.klienter.BehandlingKlientImpl
+import no.nav.etterlatte.grunnlag.klienter.PdlTjenesterKlientImpl
+import no.nav.etterlatte.grunnlag.klienter.PersondataKlient
 import no.nav.etterlatte.grunnlag.personRoute
 import no.nav.etterlatte.grunnlag.rivers.GrunnlagsversjoneringRiver
 import no.nav.etterlatte.grunnlag.rivers.InitBehandlingVersjonRiver
 import no.nav.etterlatte.grunnlag.sakGrunnlagRoute
-import no.nav.etterlatte.klienter.BehandlingKlientImpl
-import no.nav.etterlatte.klienter.PdlTjenesterKlientImpl
-import no.nav.etterlatte.klienter.PersondataKlient
 import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstartOgAvslutning
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.database.DataSourceBuilder
@@ -84,9 +84,9 @@ class ApplicationBuilder {
     private val pdltjenesterKlient = PdlTjenesterKlientImpl(pdlTjenester, env["PDLTJENESTER_URL"]!!)
     private val opplysningDao = OpplysningDao(ds)
     private val behandlingKlient = BehandlingKlientImpl(config, httpClient(), behandlingSystemClient)
-    private val grunnlagFetcher = GrunnlagFetcher(pdltjenesterKlient, persondataKlient)
+    private val grunnlagHenter = GrunnlagHenter(pdltjenesterKlient, persondataKlient)
     private val grunnlagService =
-        RealGrunnlagService(pdltjenesterKlient, opplysningDao, Sporingslogg(), persondataKlient, grunnlagFetcher)
+        RealGrunnlagService(pdltjenesterKlient, opplysningDao, Sporingslogg(), persondataKlient, grunnlagHenter)
 
     private val rapidsConnection =
         RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(env))

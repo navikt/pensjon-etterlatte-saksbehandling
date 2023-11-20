@@ -1,9 +1,9 @@
 package no.nav.etterlatte.grunnlag
 
 import com.fasterxml.jackson.databind.JsonNode
-import grunnlag.adresse.VergeAdresse
-import no.nav.etterlatte.klienter.PdlTjenesterKlientImpl
-import no.nav.etterlatte.klienter.PersondataKlient
+import no.nav.etterlatte.grunnlag.adresse.VergeAdresse
+import no.nav.etterlatte.grunnlag.klienter.PdlTjenesterKlientImpl
+import no.nav.etterlatte.grunnlag.klienter.PersondataKlient
 import no.nav.etterlatte.libs.common.behandling.PersonMedSakerOgRoller
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakOgRolle
@@ -101,7 +101,7 @@ class RealGrunnlagService(
     private val opplysningDao: OpplysningDao,
     private val sporingslogg: Sporingslogg,
     private val persondataKlient: PersondataKlient,
-    private val grunnlagFetcher: GrunnlagFetcher,
+    private val grunnlagHenter: GrunnlagHenter,
 ) : GrunnlagService {
     private val logger = LoggerFactory.getLogger(RealGrunnlagService::class.java)
 
@@ -165,7 +165,7 @@ class RealGrunnlagService(
         behandlingId: UUID,
         opplysningsbehov: Opplysningsbehov,
     ) {
-        val grunnlag = grunnlagFetcher.fetchGrunnlagsdata(opplysningsbehov)
+        val grunnlag = grunnlagHenter.hentGrunnlagsdata(opplysningsbehov)
 
         grunnlag.personopplysninger.forEach { fnrToOpplysning ->
             lagreNyePersonopplysninger(

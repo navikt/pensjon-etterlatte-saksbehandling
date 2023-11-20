@@ -1,13 +1,13 @@
 package no.nav.etterlatte.grunnlag
 
 import com.fasterxml.jackson.databind.JsonNode
-import grunnlag.adresse.VergeAdresse
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
-import no.nav.etterlatte.klienter.PdlTjenesterKlientImpl
-import no.nav.etterlatte.klienter.PersondataKlient
+import no.nav.etterlatte.grunnlag.adresse.VergeAdresse
+import no.nav.etterlatte.grunnlag.klienter.PdlTjenesterKlientImpl
+import no.nav.etterlatte.grunnlag.klienter.PersondataKlient
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -24,11 +24,11 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
 import java.util.UUID
 
-class GrunnlagFetcher(
+class GrunnlagHenter(
     private val pdltjenesterKlient: PdlTjenesterKlientImpl,
     private val persondataKlient: PersondataKlient,
 ) {
-    suspend fun fetchGrunnlagsdata(opplysningsbehov: Opplysningsbehov): FetchedGrunnlag {
+    suspend fun hentGrunnlagsdata(opplysningsbehov: Opplysningsbehov): HentetGrunnlag {
         return coroutineScope {
             val persongalleri = opplysningsbehov.persongalleri
             val sakType = opplysningsbehov.sakType
@@ -90,7 +90,7 @@ class GrunnlagFetcher(
                 saksopplysninger.add(vergeAdresserOpplysning(vergeAdresseMap))
             }
 
-            FetchedGrunnlag(personopplysninger, saksopplysninger)
+            HentetGrunnlag(personopplysninger, saksopplysninger)
         }
     }
 

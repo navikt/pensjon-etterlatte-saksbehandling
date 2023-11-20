@@ -30,7 +30,7 @@ import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
 import lagGrunnlagsopplysning
-import no.nav.etterlatte.klienter.BehandlingKlient
+import no.nav.etterlatte.grunnlag.klienter.BehandlingKlient
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.NyeSaksopplysninger

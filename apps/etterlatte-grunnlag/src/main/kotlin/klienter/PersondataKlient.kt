@@ -1,6 +1,5 @@
-package no.nav.etterlatte.klienter
+package no.nav.etterlatte.grunnlag.klienter
 
-import grunnlag.adresse.PersondataAdresse
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.accept
@@ -11,11 +10,21 @@ import io.ktor.client.request.setBody
 import io.ktor.http.ContentType.Application.Json
 import io.ktor.http.contentType
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.grunnlag.adresse.PersondataAdresse
 import no.nav.etterlatte.libs.common.RetryResult
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.retry
 
 class PersondataKlient(private val httpClient: HttpClient, private val apiUrl: String) {
+    /**
+     * Fra Pensjondata dokumentasjon: Hvis checkForVerge er true gjøres det først et oppslag mot pensjon-fullmakt
+     * for å se om bruker har verge.
+     * Hvis< det foreligger en verge som er samhandler vil det slås opp i TSS for å hente vergens adresse som
+     * returneres. Hvis det foreligger en verge som er privatperson slås det opp i PDL og denne personens adresse
+     * returneres i stedet. Hvis det ikke identifiseres noen verge gås det videre til neste steg.
+
+     * @see <a href="https://pensjon-dokumentasjon.intern.dev.nav.no/pensjon-persondata/main/index.html#_adresse_api">
+     * Pensjondata dokumentasjon</a>. */
     fun hentAdresseForVerge(folkeregisteridentifikator: Folkeregisteridentifikator): PersondataAdresse {
         val request = ""
 

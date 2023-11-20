@@ -1,4 +1,4 @@
-package grunnlag.adresse
+package no.nav.etterlatte.grunnlag.adresse
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 

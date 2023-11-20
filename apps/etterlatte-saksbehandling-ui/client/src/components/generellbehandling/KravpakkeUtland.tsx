@@ -445,7 +445,7 @@ const KravpakkeUtland = (props: { utlandsBehandling: Generellbehandling & { innh
                   loading={isPending(nyttBrevStatus)}
                   iconPosition="right"
                 >
-                  Opprett nytt brev
+                  Åpne brev i ny fane
                 </Button>
               </div>
             </div>

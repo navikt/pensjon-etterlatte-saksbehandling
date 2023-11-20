@@ -12,11 +12,9 @@ import io.ktor.server.routing.put
 import io.ktor.server.routing.route
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.BEHANDLINGID_CALL_PARAMETER
-import no.nav.etterlatte.libs.common.behandling.Etterbetaling
 import no.nav.etterlatte.libs.common.behandlingId
 import no.nav.etterlatte.libs.common.medBody
 import java.time.LocalDate
-import java.time.YearMonth
 
 internal fun Route.etterbetalingRoutes(service: EtterbetalingService) {
     val logger = application.log
@@ -26,23 +24,7 @@ internal fun Route.etterbetalingRoutes(service: EtterbetalingService) {
             medBody<EtterbetalingDTO> { request ->
                 logger.info("Lagrer etterbetaling for behandling $behandlingId")
                 inTransaction {
-                    service.lagreEtterbetaling(
-                        Etterbetaling(
-                            behandlingId = behandlingId,
-                            fra =
-                                requireNotNull(request.fraDato) { "Mangler fradato etterbetaling" }.let {
-                                    YearMonth.from(
-                                        it,
-                                    )
-                                },
-                            til =
-                                requireNotNull(request.tilDato) { "Mangler tildato etterbetaling" }.let {
-                                    YearMonth.from(
-                                        it,
-                                    )
-                                },
-                        ),
-                    )
+                    service.lagreEtterbetaling(behandlingId, request.fraDato, request.tilDato)
                 }
             }
             call.respond(HttpStatusCode.Created)

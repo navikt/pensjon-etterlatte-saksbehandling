@@ -16,7 +16,7 @@ export const AttesteringMedUnderkjenning = (props: {
 }) => {
   const { utlandsBehandling } = props
 
-  //TODO: må matche oppgaven til kravpakke opp mot innlogget bruker
+  //TODO: må matche oppgaven til kravpakke opp mot innlogget bruker- se https://jira.adeo.no/browse/EY-3149
   const oppgaveErTildeltInnloggetBruker = true
   const [beslutning, setBeslutning] = useState<BeslutningerType>()
 

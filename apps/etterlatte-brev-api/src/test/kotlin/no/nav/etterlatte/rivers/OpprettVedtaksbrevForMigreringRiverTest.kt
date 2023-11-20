@@ -1,12 +1,12 @@
 package no.nav.etterlatte.rivers
 
-import io.mockk.Runs
 import io.mockk.clearMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.confirmVerified
 import io.mockk.just
 import io.mockk.mockk
+import io.mockk.runs
 import no.nav.etterlatte.brev.VedtaksbrevService
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevProsessType
@@ -29,14 +29,12 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakNyDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
-import no.nav.etterlatte.rapidsandrivers.migrering.BREV_OPPRETTA_MIGRERING
 import no.nav.etterlatte.rapidsandrivers.migrering.Beregning
 import no.nav.etterlatte.rapidsandrivers.migrering.Enhet
 import no.nav.etterlatte.rapidsandrivers.migrering.KILDE_KEY
 import no.nav.etterlatte.rapidsandrivers.migrering.MigreringRequest
 import no.nav.etterlatte.rapidsandrivers.migrering.PesysId
 import no.nav.etterlatte.rapidsandrivers.migrering.Trygdetid
-import no.nav.etterlatte.rivers.migrering.FerdigstillVedtaksbrevForMigreringRiver
 import no.nav.etterlatte.rivers.migrering.OpprettVedtaksbrevForMigreringRiver
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
@@ -53,7 +51,6 @@ internal class OpprettVedtaksbrevForMigreringRiverTest {
     private val vedtaksbrevService = mockk<VedtaksbrevService>()
 
     private val opprettBrevRapid = TestRapid().apply { OpprettVedtaksbrevForMigreringRiver(this, vedtaksbrevService) }
-    private val ferdigstillBrevRapid = TestRapid().apply { FerdigstillVedtaksbrevForMigreringRiver(this, vedtaksbrevService) }
 
     private val behandlingId = UUID.randomUUID()
 
@@ -72,32 +69,16 @@ internal class OpprettVedtaksbrevForMigreringRiverTest {
 
         coEvery { vedtaksbrevService.opprettVedtaksbrev(any(), behandlingId, any(), any()) } returns brev
         coEvery { vedtaksbrevService.genererPdf(brev.id, any(), any()) } returns mockk<Pdf>()
+        coEvery { vedtaksbrevService.ferdigstillVedtaksbrev(brev.behandlingId!!, any(), true) } just runs
 
         val inspektoer = opprettBrevRapid.apply { sendTestMessage(melding.toJson()) }.inspektør
 
         coVerify(exactly = 1) { vedtaksbrevService.opprettVedtaksbrev(any(), behandlingId, any(), any()) }
         coVerify(exactly = 1) { vedtaksbrevService.genererPdf(brev.id, any(), any()) }
-
-        val meldingSendt = inspektoer.message(0)
-        assertEquals(VedtakKafkaHendelseType.FATTET.toString(), meldingSendt.get(EVENT_NAME_KEY).asText())
-    }
-
-    @Test
-    fun `Ferdigstilller brev`() {
-        val vedtak = opprettVedtak()
-        val migreringRequest = migreringRequest()
-        val melding = opprettMelding(vedtak, migreringRequest, VedtakKafkaHendelseType.ATTESTERT)
-        val brev = opprettBrev()
-
-        coEvery { vedtaksbrevService.ferdigstillVedtaksbrev(brev.behandlingId!!, any(), true) } just Runs
-
-        val inspektoer = ferdigstillBrevRapid.apply { sendTestMessage(melding.toJson()) }.inspektør
-
         coVerify(exactly = 1) { vedtaksbrevService.ferdigstillVedtaksbrev(brev.behandlingId!!, any(), true) }
 
         val meldingSendt = inspektoer.message(0)
-        assertEquals(VedtakKafkaHendelseType.ATTESTERT.toString(), meldingSendt.get(EVENT_NAME_KEY).asText())
-        assertEquals(true, meldingSendt.get(BREV_OPPRETTA_MIGRERING).asBoolean())
+        assertEquals(VedtakKafkaHendelseType.FATTET.toString(), meldingSendt.get(EVENT_NAME_KEY).asText())
     }
 
     @Test
@@ -140,7 +121,6 @@ internal class OpprettVedtaksbrevForMigreringRiverTest {
                 EVENT_NAME_KEY to hendelse.toString(),
                 "vedtak" to vedtak,
                 KILDE_KEY to kilde,
-                BREV_OPPRETTA_MIGRERING to false,
             )
         if (migreringRequest == null) {
             return JsonMessage.newMessage(messageKeys)

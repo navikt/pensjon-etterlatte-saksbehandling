@@ -29,9 +29,7 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseType
 import no.nav.etterlatte.libs.common.vedtak.VedtakNyDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
-import no.nav.etterlatte.rapidsandrivers.migrering.BREV_OPPRETTA_MIGRERING
 import no.nav.etterlatte.rapidsandrivers.migrering.KILDE_KEY
-import no.nav.etterlatte.rivers.migrering.FerdigstillVedtaksbrevForMigreringRiver
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions
@@ -62,7 +60,6 @@ internal class OpprettJournalfoerOgDistribuer {
             }
         val testRapid =
             TestRapid().apply {
-                FerdigstillVedtaksbrevForMigreringRiver(this, vedtaksbrevService)
                 JournalfoerVedtaksbrevRiver(this, vedtaksbrevService)
                 DistribuerBrevRiver(this, vedtaksbrevService, distribusjonService)
             }
@@ -110,7 +107,6 @@ internal class OpprettJournalfoerOgDistribuer {
             }
         val testRapid =
             TestRapid().apply {
-                FerdigstillVedtaksbrevForMigreringRiver(this, vedtaksbrevService)
                 JournalfoerVedtaksbrevRiver(this, vedtaksbrevService)
                 DistribuerBrevRiver(this, vedtaksbrevService, distribusjonService)
             }
@@ -122,24 +118,16 @@ internal class OpprettJournalfoerOgDistribuer {
                     EVENT_NAME_KEY to VedtakKafkaHendelseType.ATTESTERT.toString(),
                     "vedtak" to lagVedtakDto(behandlingId),
                     KILDE_KEY to Vedtaksloesning.PESYS.name,
-                    BREV_OPPRETTA_MIGRERING to false,
                     HENDELSE_DATA_KEY to migreringRequest(),
                 ),
             ).toJson(),
         )
 
-        val journalfoermelding = testRapid.hentMelding(0)
-        Assertions.assertEquals(
-            VedtakKafkaHendelseType.ATTESTERT.toString(),
-            journalfoermelding.somMap()[EVENT_NAME_KEY],
-        )
-        testRapid.sendTestMessage(journalfoermelding)
-
-        val distribuermelding = testRapid.hentMelding(1)
+        val distribuermelding = testRapid.hentMelding(0)
         Assertions.assertEquals(BrevEventTypes.JOURNALFOERT.toString(), distribuermelding.somMap()[EVENT_NAME_KEY])
         testRapid.sendTestMessage(distribuermelding)
 
-        val distribuert = testRapid.hentMelding(2).somMap()
+        val distribuert = testRapid.hentMelding(1).somMap()
         Assertions.assertEquals(BrevEventTypes.DISTRIBUERT.toString(), distribuert[EVENT_NAME_KEY])
     }
 

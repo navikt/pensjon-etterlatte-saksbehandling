@@ -6,7 +6,6 @@ import no.nav.etterlatte.brev.VedtaksbrevService
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseType
-import no.nav.etterlatte.rapidsandrivers.migrering.BREV_OPPRETTA_MIGRERING
 import no.nav.etterlatte.rapidsandrivers.migrering.KILDE_KEY
 import no.nav.etterlatte.rapidsandrivers.migrering.hendelseData
 import no.nav.etterlatte.rivers.BrevEventTypes
@@ -31,7 +30,6 @@ internal class OpprettVedtaksbrevForMigreringRiver(
             validate { it.requireKey("vedtak.sak.id") }
             validate { it.requireKey(HENDELSE_DATA_KEY) }
             validate { it.requireValue(KILDE_KEY, Vedtaksloesning.PESYS.name) }
-            validate { it.requireValue(BREV_OPPRETTA_MIGRERING, false) }
             validate { it.rejectValue(PDF_GENERERT, true) }
         }
     }
@@ -54,6 +52,7 @@ internal class OpprettVedtaksbrevForMigreringRiver(
                     MigreringBrevRequest(hendelseData.beregning),
                 )
             service.genererPdf(vedtaksbrev.id, brukerTokenInfo, MigreringBrevRequest(hendelseData.beregning))
+            service.ferdigstillVedtaksbrev(behandlingId, brukerTokenInfo, true)
         }
         logger.info("Har oppretta vedtaksbrev i sak $sakId")
         packet[PDF_GENERERT] = true

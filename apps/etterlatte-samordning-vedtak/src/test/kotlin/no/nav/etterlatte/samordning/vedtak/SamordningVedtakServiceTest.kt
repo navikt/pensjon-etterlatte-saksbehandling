@@ -25,11 +25,13 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.Behandling
 import no.nav.etterlatte.libs.common.vedtak.Periode
 import no.nav.etterlatte.libs.common.vedtak.Utbetalingsperiode
+import no.nav.etterlatte.libs.common.vedtak.UtbetalingsperiodeType
 import no.nav.etterlatte.libs.common.vedtak.VedtakSamordningDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
+import java.math.BigDecimal
 import java.time.YearMonth.now
 import java.util.UUID
 
@@ -70,14 +72,22 @@ class SamordningVedtakServiceTest {
 
     @Test
     fun `skal mappe vedtak med to perioder, hvor nr 1 er lukket og nr 2 er aapen`() {
+        val periodeFirst = Periode(fom = now(), tom = now())
+        val periodeSecond = Periode(fom = now().plusMonths(1), tom = null)
+
         val vedtak =
             vedtak(
                 vedtakId = 456L,
                 beregning = beregning(trygdetid = 32),
                 avkorting =
                     avkorting(
-                        Periode(fom = now(), tom = now()),
-                        Periode(fom = now().plusMonths(1), tom = null),
+                        periodeFirst,
+                        periodeSecond,
+                    ),
+                utbetalingsperioder =
+                    listOf(
+                        Utbetalingsperiode(id = 1, periodeFirst, beloep = BigDecimal(2500), type = UtbetalingsperiodeType.UTBETALING),
+                        Utbetalingsperiode(id = 2, periodeSecond, beloep = BigDecimal(2800), type = UtbetalingsperiodeType.UTBETALING),
                     ),
             )
         coEvery { vedtakKlient.hentVedtak(456L, MaskinportenTpContext(tpnrSPK, ORGNO)) } returns vedtak

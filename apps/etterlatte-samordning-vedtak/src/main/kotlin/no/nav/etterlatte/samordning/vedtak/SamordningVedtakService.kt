@@ -7,6 +7,7 @@ import no.nav.etterlatte.libs.common.beregning.AvkortingDto
 import no.nav.etterlatte.libs.common.beregning.BeregningDTO
 import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.vedtak.Utbetalingsperiode
 import no.nav.etterlatte.libs.common.vedtak.VedtakSamordningDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import org.slf4j.LoggerFactory
@@ -75,7 +76,7 @@ class SamordningVedtakService(
             anvendtTrygdetid = beregning?.beregningsperioder?.first()?.trygdetid ?: 0,
             perioder =
                 avkorting?.avkortetYtelse
-                    ?.map { it.toSamordningVedtakPeriode() }
+                    ?.map { it.toSamordningVedtakPeriode(this.utbetalingsperioder) }
                     ?.sortedBy { it.fom }
                     ?: emptyList(),
         )
@@ -99,10 +100,12 @@ class SamordningVedtakService(
         }.name
     }
 
-    private fun AvkortetYtelseDto.toSamordningVedtakPeriode(): SamordningVedtakPeriode {
+    private fun AvkortetYtelseDto.toSamordningVedtakPeriode(utbetalingsperioder: List<Utbetalingsperiode>): SamordningVedtakPeriode {
+        val justertPeriode = utbetalingsperioder.first { this.fom == it.periode.fom }
+
         return SamordningVedtakPeriode(
             fom = fom.atStartOfMonth(),
-            tom = tom?.atEndOfMonth(),
+            tom = justertPeriode.periode.tom?.atEndOfMonth(),
             omstillingsstoenadBrutto = ytelseFoerAvkorting,
             omstillingsstoenadNetto = ytelseEtterAvkorting,
         )

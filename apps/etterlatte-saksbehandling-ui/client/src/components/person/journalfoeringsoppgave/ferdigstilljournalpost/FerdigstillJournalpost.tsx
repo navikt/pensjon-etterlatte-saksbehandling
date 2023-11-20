@@ -1,4 +1,4 @@
-import { Button, Heading, Tag } from '@navikt/ds-react'
+import { BodyShort, Button, Heading, Panel, Tag } from '@navikt/ds-react'
 import { useJournalfoeringOppgave } from '~components/person/journalfoeringsoppgave/useJournalfoeringOppgave'
 import { FlexRow } from '~shared/styled'
 import AvbrytBehandleJournalfoeringOppgave from '~components/person/journalfoeringsoppgave/AvbrytBehandleJournalfoeringOppgave'
@@ -32,8 +32,10 @@ export default function FerdigstillJournalpost() {
   return (
     <FormWrapper column>
       <Heading size="medium" spacing>
-        Ferdigstill journalpost
+        Ferdigstill
       </Heading>
+
+      <BodyShort spacing>Journalposten vil bli koblet til sak i Gjenny og ferdigstilt.</BodyShort>
 
       {mapApiResult(
         sakStatus,
@@ -42,19 +44,25 @@ export default function FerdigstillJournalpost() {
           <ApiErrorAlert>Feil oppsto ved henting av sak</ApiErrorAlert>
         ),
         (sak) => (
-          <InfoWrapper>
-            <Info label="ID" tekst={sak.id} />
-            <Info
-              label="Type"
-              tekst={
-                <Tag variant="success" size="medium">
-                  {formaterSakstype(sak.sakType)}
-                </Tag>
-              }
-            />
-            <Info label="Bruker" tekst={sak.ident} />
-            <Info label="Enhet" tekst={sak.enhet} />
-          </InfoWrapper>
+          <Panel border>
+            <Heading size="medium" spacing>
+              Sak
+            </Heading>
+
+            <InfoWrapper>
+              <Info label="ID" tekst={sak.id} />
+              <Info
+                label="Type"
+                tekst={
+                  <Tag variant="success" size="medium">
+                    {formaterSakstype(sak.sakType)}
+                  </Tag>
+                }
+              />
+              <Info label="Bruker" tekst={sak.ident} />
+              <Info label="Enhet" tekst={sak.enhet} />
+            </InfoWrapper>
+          </Panel>
         )
       )}
 

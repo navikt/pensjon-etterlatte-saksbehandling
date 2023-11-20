@@ -12,6 +12,11 @@ export interface Journalpost {
     navn?: string
   }
   kanal: string
+  sak?: {
+    sakstype?: string
+    fagsakId?: string
+    fagsaksystem?: string
+  }
   datoOpprettet: string
 }
 

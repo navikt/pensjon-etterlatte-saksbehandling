@@ -9,7 +9,7 @@ import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.BehandlingMedGrunnlagsopplysning
 import no.nav.etterlatte.behandling.domain.toDetaljertBehandlingWithPersongalleri
 import no.nav.etterlatte.behandling.domain.toStatistikkBehandling
-import no.nav.etterlatte.behandling.etterbetaling.EtterbetalingService
+import no.nav.etterlatte.behandling.etterbetaling.EtterbetalingDao
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.hendelse.HendelseType
 import no.nav.etterlatte.behandling.hendelse.LagretHendelse
@@ -132,7 +132,7 @@ internal class BehandlingServiceImpl(
     private val featureToggleService: FeatureToggleService,
     private val kommerBarnetTilGodeDao: KommerBarnetTilGodeDao,
     private val oppgaveService: OppgaveService,
-    private val etterbetalingService: EtterbetalingService,
+    private val etterbetalingDao: EtterbetalingDao,
     private val grunnlagService: GrunnlagService,
     private val sakDao: SakDao,
 ) : BehandlingService {
@@ -387,7 +387,7 @@ internal class BehandlingServiceImpl(
                 revurderingsaarsak = behandling.revurderingsaarsak(),
                 revurderinginfo = behandling.revurderingInfo(),
                 begrunnelse = behandling.begrunnelse(),
-                etterbetaling = inTransaction { etterbetalingService.hentEtterbetaling(behandlingId) },
+                etterbetaling = inTransaction { etterbetalingDao.hentEtterbetaling(behandlingId) },
             ).also {
                 gjenlevende.await()?.fnr?.let { behandlingRequestLogger.loggRequest(brukerTokenInfo, it, "behandling") }
                 soeker.await()?.fnr?.let { behandlingRequestLogger.loggRequest(brukerTokenInfo, it, "behandling") }

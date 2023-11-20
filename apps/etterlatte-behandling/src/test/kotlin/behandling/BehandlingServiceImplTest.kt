@@ -102,7 +102,7 @@ class BehandlingServiceImplTest {
                 featureToggleService = featureToggleService,
                 kommerBarnetTilGodeDao = mockk(),
                 oppgaveService = mockk(),
-                etterbetalingService = mockk(),
+                etterbetalingDao = mockk(),
                 grunnlagService = mockk(),
                 sakDao = mockk(),
             )
@@ -693,7 +693,7 @@ class BehandlingServiceImplTest {
                 featureToggleService = featureToggleService,
                 kommerBarnetTilGodeDao = mockk(),
                 oppgaveService = mockk(),
-                etterbetalingService = mockk(),
+                etterbetalingDao = mockk(),
                 grunnlagService = mockk(),
                 sakDao = mockk(),
             )
@@ -743,7 +743,7 @@ class BehandlingServiceImplTest {
                 featureToggleService = featureToggleService,
                 kommerBarnetTilGodeDao = mockk(),
                 oppgaveService = mockk(),
-                etterbetalingService = mockk(),
+                etterbetalingDao = mockk(),
                 grunnlagService = mockk(),
                 sakDao = mockk(),
             )
@@ -791,7 +791,7 @@ class BehandlingServiceImplTest {
                 featureToggleService,
                 kommerBarnetTilGodeDao = mockk(),
                 oppgaveService = mockk(),
-                etterbetalingService = mockk(),
+                etterbetalingDao = mockk(),
                 grunnlagService = mockk(),
                 sakDao = mockk(),
             )
@@ -881,7 +881,7 @@ class BehandlingServiceImplTest {
             featureToggleService = featureToggleService,
             kommerBarnetTilGodeDao = mockk(),
             oppgaveService = oppgaveService,
-            etterbetalingService = mockk(),
+            etterbetalingDao = mockk(),
             grunnlagService = mockk(),
             sakDao = sakDao ?: mockk(),
         )

@@ -208,7 +208,6 @@ internal class ApplicationContext(
     val oppgaveService = OppgaveService(oppgaveDaoEndringer, sakDao, featureToggleService)
 
     val gosysOppgaveService = GosysOppgaveServiceImpl(gosysOppgaveKlient, pdlKlient, featureToggleService)
-    val etterbetalingService = EtterbetalingService(etterbetalingDao)
     val grunnlagsService = GrunnlagService(grunnlagKlient)
     val behandlingService =
         BehandlingServiceImpl(
@@ -221,10 +220,11 @@ internal class ApplicationContext(
             featureToggleService = featureToggleService,
             kommerBarnetTilGodeDao = kommerBarnetTilGodeDao,
             oppgaveService = oppgaveService,
-            etterbetalingService = etterbetalingService,
+            etterbetalingDao = etterbetalingDao,
             grunnlagService = grunnlagsService,
             sakDao = sakDao,
         )
+    val etterbetalingService = EtterbetalingService(etterbetalingDao, behandlingService)
     val generellBehandlingService =
         GenerellBehandlingService(
             generellbehandlingDao,

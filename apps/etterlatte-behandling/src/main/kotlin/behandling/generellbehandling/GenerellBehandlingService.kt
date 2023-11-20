@@ -62,7 +62,7 @@ class GenerellBehandlingService(
                 null,
             )
         tildelSaksbehandlerTilNyOppgaveHvisFinnes(oppgaveForGenerellBehandling, opprettetbehandling)
-        oppretttHendelse(GenerellBehandlingHendelseType.OPPRETTET, opprettetbehandling, saksbehandler)
+        opprettHendelse(GenerellBehandlingHendelseType.OPPRETTET, opprettetbehandling, saksbehandler)
         return opprettetbehandling
     }
 
@@ -104,7 +104,7 @@ class GenerellBehandlingService(
         }
 
         oppdaterBehandling(generellBehandling.copy(status = GenerellBehandling.Status.FATTET))
-        oppretttHendelse(GenerellBehandlingHendelseType.FATTET, hentetBehandling, saksbehandler)
+        opprettHendelse(GenerellBehandlingHendelseType.FATTET, hentetBehandling, saksbehandler)
         oppgaveService.ferdigStillOppgaveUnderBehandling(generellBehandling.id.toString(), saksbehandler)
         val trettiDagerFremITid = Tidspunkt.now().plus(30L, ChronoUnit.DAYS)
         oppgaveService.opprettNyOppgaveMedSakOgReferanse(
@@ -128,7 +128,7 @@ class GenerellBehandlingService(
         }
 
         oppdaterBehandling(hentetBehandling!!.copy(status = GenerellBehandling.Status.ATTESTERT))
-        oppretttHendelse(GenerellBehandlingHendelseType.ATTESTERT, hentetBehandling, saksbehandler)
+        opprettHendelse(GenerellBehandlingHendelseType.ATTESTERT, hentetBehandling, saksbehandler)
         oppgaveService.ferdigStillOppgaveUnderBehandling(generellbehandlingId.toString(), saksbehandler)
     }
 
@@ -150,10 +150,10 @@ class GenerellBehandlingService(
             saksbehandler = saksbehandler,
         )
         oppdaterBehandling(behandling.copy(status = GenerellBehandling.Status.OPPRETTET))
-        oppretttHendelse(GenerellBehandlingHendelseType.UNDERKJENT, hentetBehandling, saksbehandler, kommentar.begrunnelse)
+        opprettHendelse(GenerellBehandlingHendelseType.UNDERKJENT, hentetBehandling, saksbehandler, kommentar.begrunnelse)
     }
 
-    private fun oppretttHendelse(
+    private fun opprettHendelse(
         hendelseType: GenerellBehandlingHendelseType,
         behandling: GenerellBehandling,
         saksbehandler: Saksbehandler?,

@@ -91,5 +91,12 @@ fun Route.behandlingGrunnlagRoute(
                 }
             }
         }
+
+        get("personopplysninger") {
+            withBehandlingId(behandlingKlient) { behandlingId ->
+                val grunnlagsopplysninger = grunnlagService.hentPersonopplysninger(behandlingId)
+                call.respond(grunnlagsopplysninger)
+            }
+        }
     }
 }

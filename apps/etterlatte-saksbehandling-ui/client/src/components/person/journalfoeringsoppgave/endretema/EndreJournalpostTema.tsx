@@ -17,6 +17,8 @@ export default function EndreJournalpostTema() {
 
   const tilbake = () => navigate('../', { relative: 'path' })
 
+  if (!oppgave) return null
+
   return (
     <FormWrapper column>
       <Heading size="medium" spacing>
@@ -47,11 +49,7 @@ export default function EndreJournalpostTema() {
             Tilbake
           </Button>
 
-          <FullfoerEndreTemaModal
-            oppgave={oppgave!!}
-            journalpost={journalpost!!}
-            endreTemaRequest={endreTemaRequest!!}
-          />
+          <FullfoerEndreTemaModal oppgave={oppgave} journalpost={journalpost!!} endreTemaRequest={endreTemaRequest!!} />
         </FlexRow>
         <FlexRow justify="center">
           <AvbrytBehandleJournalfoeringOppgave />

@@ -24,7 +24,7 @@ export default function OpprettNyBehandling() {
     return <Navigate to="../" relative="path" />
   }
 
-  const { sakType } = oppgave!!
+  const { sakType } = oppgave
 
   const neste = () => navigate('oppsummering', { relative: 'path' })
   const tilbake = () => navigate('../', { relative: 'path' })

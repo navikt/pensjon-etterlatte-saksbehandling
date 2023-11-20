@@ -1,10 +1,10 @@
 import React from 'react'
-import { Button, Heading, Panel, Radio, RadioGroup, Tag } from '@navikt/ds-react'
+import { Button, Heading, Link, Panel, Radio, RadioGroup, Tag } from '@navikt/ds-react'
 import { useJournalfoeringOppgave } from '~components/person/journalfoeringsoppgave/useJournalfoeringOppgave'
 import { useAppDispatch } from '~store/Store'
 import { useNavigate } from 'react-router-dom'
 import AvbrytBehandleJournalfoeringOppgave from '~components/person/journalfoeringsoppgave/AvbrytBehandleJournalfoeringOppgave'
-import { formaterFnr, formaterSakstype, formaterStringDato } from '~utils/formattering'
+import { formaterOppgaveStatus, formaterSakstype, formaterStringDato } from '~utils/formattering'
 import { InfoWrapper } from '~components/behandling/soeknadsoversikt/styled'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import { FlexRow } from '~shared/styled'
@@ -15,7 +15,7 @@ import { settJournalpostVariant } from '~store/reducers/JournalfoeringOppgaveRed
 import { FormWrapper } from '../BehandleJournalfoeringOppgave'
 
 export default function StartOppgavebehandling() {
-  const { oppgave, journalpostVariant } = useJournalfoeringOppgave()
+  const { oppgave, journalpost, journalpostVariant } = useJournalfoeringOppgave()
   const dispatch = useAppDispatch()
   const navigate = useNavigate()
 
@@ -38,17 +38,34 @@ export default function StartOppgavebehandling() {
 
       <Panel border>
         <Heading size="medium" spacing>
-          Journalføringsoppgave
-          <br />
-          <Tag variant="success" size="small">
-            {formaterSakstype(oppgave.sakType)}
-          </Tag>
+          Oppgave
         </Heading>
 
         <InfoWrapper>
-          <Info label="Status" tekst={oppgave.status} />
-          <Info label="Type" tekst={oppgave.type} />
-          <Info label="Bruker" tekst={formaterFnr(oppgave.fnr)} />
+          <Info
+            label="Type"
+            tekst={
+              <Tag variant="success" size="small">
+                {formaterSakstype(oppgave.sakType)}
+              </Tag>
+            }
+          />
+          <Info
+            label="Status"
+            tekst={
+              <Tag size="small" variant="alt1">
+                {formaterOppgaveStatus(oppgave.status)}
+              </Tag>
+            }
+          />
+          <Info
+            label="Bruker"
+            tekst={
+              <Link href={`/person/${oppgave.fnr}`} target="_blank">
+                {oppgave.fnr}
+              </Link>
+            }
+          />
           <Info label="Opprettet" tekst={formaterStringDato(oppgave.opprettet)} />
           <Info label="Frist" tekst={<FristWrapper dato={oppgave.frist} />} />
         </InfoWrapper>
@@ -61,15 +78,16 @@ export default function StartOppgavebehandling() {
           dispatch(settJournalpostVariant(value as JournalpostVariant))
         }}
         value={journalpostVariant || ''}
+        disabled={!journalpost}
       >
-        <Radio value={JournalpostVariant.NY_SOEKNAD}>Ny søknad</Radio>
-        <Radio value={JournalpostVariant.NYTT_VEDLEGG}>Nytt vedlegg til sak</Radio>
+        <Radio value={JournalpostVariant.NY_SOEKNAD}>Ny søknad (behandling)</Radio>
+        <Radio value={JournalpostVariant.NYTT_VEDLEGG}>Nytt vedlegg (tileggsinformasjon)</Radio>
         <Radio value={JournalpostVariant.FEIL_TEMA}>Feil tema</Radio>
       </RadioGroup>
 
       <div>
         <FlexRow justify="center" $spacing>
-          <Button variant="primary" onClick={neste} disabled={!journalpostVariant}>
+          <Button variant="primary" onClick={neste} disabled={!journalpostVariant || !journalpost}>
             Neste
           </Button>
         </FlexRow>

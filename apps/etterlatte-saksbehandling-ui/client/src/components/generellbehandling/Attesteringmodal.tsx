@@ -6,7 +6,7 @@ import { hentSakOgNavigererTilSaksoversikt } from '~components/generellbehandlin
 import { useNavigate } from 'react-router-dom'
 import { Generellbehandling, KravpakkeUtland } from '~shared/types/Generellbehandling'
 
-export const Atteseringmodal = (props: {
+export const Attesteringmodal = (props: {
   utlandsBehandling: Generellbehandling & { innhold: KravpakkeUtland | null }
 }) => {
   const { utlandsBehandling } = props

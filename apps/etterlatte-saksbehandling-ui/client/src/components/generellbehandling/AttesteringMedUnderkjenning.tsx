@@ -1,9 +1,9 @@
 import { SidebarPanel } from '~shared/components/Sidebar'
-import { Alert, Heading, Radio, RadioGroup } from '@navikt/ds-react'
+import { Alert, BodyShort, Heading, Radio, RadioGroup } from '@navikt/ds-react'
 import { RadioGroupWrapper } from '~components/behandling/attestering/styled'
 import React, { useState } from 'react'
 import { UnderkjenneModal } from '~components/generellbehandling/UnderkjenneModal'
-import { Atteseringmodal } from '~components/generellbehandling/Atteseringmodal'
+import { Attesteringmodal } from '~components/generellbehandling/Attesteringmodal'
 import { Generellbehandling, KravpakkeUtland } from '~shared/types/Generellbehandling'
 
 type BeslutningerType = 'UNDERKJENN' | 'GODKJENN'
@@ -18,6 +18,7 @@ export const AttesteringMedUnderkjenning = (props: {
 
   //TODO: må matche oppgaven til kravpakke opp mot innlogget bruker- se https://jira.adeo.no/browse/EY-3149
   const oppgaveErTildeltInnloggetBruker = true
+  const saksbehandlerForGjeldendeOppgave = null
   const [beslutning, setBeslutning] = useState<BeslutningerType>()
 
   return (
@@ -44,12 +45,18 @@ export const AttesteringMedUnderkjenning = (props: {
                 </div>
               </RadioGroup>
             </RadioGroupWrapper>
-            {beslutning === Beslutning.GODKJENN && <Atteseringmodal utlandsBehandling={utlandsBehandling} />}
+            {beslutning === Beslutning.GODKJENN && <Attesteringmodal utlandsBehandling={utlandsBehandling} />}
             {beslutning === Beslutning.UNDERKJENN && <UnderkjenneModal utlandsBehandling={utlandsBehandling} />}
           </>
         </>
       ) : (
-        <></>
+        <Alert variant="warning">
+          {saksbehandlerForGjeldendeOppgave ? (
+            <BodyShort>Oppgaven er tildelt {saksbehandlerForGjeldendeOppgave}.&nbsp;</BodyShort>
+          ) : (
+            <BodyShort>Oppgaven er ikke tildelt noen.&nbsp;</BodyShort>
+          )}
+        </Alert>
       )}
     </SidebarPanel>
   )

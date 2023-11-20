@@ -89,7 +89,7 @@ export default function VelgJournalpost({ journalpostId }: { journalpostId: stri
                   <>
                     {journalpost.avsenderMottaker?.navn} (
                     {journalpost.avsenderMottaker?.id?.length === 11 ? (
-                      <Link href={`/person/${journalpost.avsenderMottaker?.id}`} target="_blank">
+                      <Link href={`/person/${journalpost.avsenderMottaker?.id}`}>
                         {journalpost.avsenderMottaker?.id}
                       </Link>
                     ) : (

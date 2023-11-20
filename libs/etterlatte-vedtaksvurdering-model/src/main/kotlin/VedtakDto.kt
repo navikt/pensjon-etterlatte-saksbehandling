@@ -131,6 +131,7 @@ data class VedtakSamordningDto(
     val attestasjon: Attestasjon?,
     val beregning: ObjectNode?,
     val avkorting: ObjectNode?,
+    val utbetalingsperioder: List<Utbetalingsperiode>,
 )
 
 data class TilbakekrevingVedtakDto(

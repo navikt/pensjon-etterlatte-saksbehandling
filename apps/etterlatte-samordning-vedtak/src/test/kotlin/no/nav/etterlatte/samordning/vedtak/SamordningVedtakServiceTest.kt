@@ -24,6 +24,7 @@ import no.nav.etterlatte.libs.common.sak.VedtakSak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.Behandling
 import no.nav.etterlatte.libs.common.vedtak.Periode
+import no.nav.etterlatte.libs.common.vedtak.Utbetalingsperiode
 import no.nav.etterlatte.libs.common.vedtak.VedtakSamordningDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
@@ -156,6 +157,7 @@ fun vedtak(
     sakstype: SakType = SakType.OMSTILLINGSSTOENAD,
     beregning: BeregningDTO? = null,
     avkorting: AvkortingDto? = null,
+    utbetalingsperioder: List<Utbetalingsperiode> = emptyList(),
 ): VedtakSamordningDto =
     VedtakSamordningDto(
         vedtakId = vedtakId ?: 5678L,
@@ -167,6 +169,7 @@ fun vedtak(
         type = VedtakType.INNVILGELSE,
         vedtakFattet = null,
         attestasjon = null,
+        utbetalingsperioder = utbetalingsperioder,
         beregning = beregning?.let { objectMapper.valueToTree(it) },
         avkorting = avkorting?.let { objectMapper.valueToTree(it) },
     )

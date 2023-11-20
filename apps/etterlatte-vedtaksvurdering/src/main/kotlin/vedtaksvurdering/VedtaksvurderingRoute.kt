@@ -340,6 +340,7 @@ private fun Vedtak.toSamordningsvedtakDto(): VedtakSamordningDto {
                 innhold.revurderingInfo,
             ),
         virkningstidspunkt = innhold.virkningstidspunkt,
+        utbetalingsperioder = innhold.utbetalingsperioder,
         beregning = innhold.beregning,
         avkorting = innhold.avkorting,
     )

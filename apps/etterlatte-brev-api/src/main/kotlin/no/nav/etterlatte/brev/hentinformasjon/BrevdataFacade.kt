@@ -157,7 +157,7 @@ class BrevdataFacade(
         virkningstidspunkt: YearMonth,
         brukerTokenInfo: BrukerTokenInfo,
     ): Utbetalingsinfo? =
-        finnUtbetalingsinfo(
+        finnUtbetalingsinfoNullable(
             behandlingKlient.hentSisteIverksatteBehandling(sakId, brukerTokenInfo).id,
             virkningstidspunkt,
             brukerTokenInfo,
@@ -167,8 +167,17 @@ class BrevdataFacade(
         behandlingId: UUID,
         virkningstidspunkt: YearMonth,
         brukerTokenInfo: BrukerTokenInfo,
-    ): Utbetalingsinfo {
-        val beregning = beregningKlient.hentBeregning(behandlingId, brukerTokenInfo)
+    ): Utbetalingsinfo =
+        requireNotNull(finnUtbetalingsinfoNullable(behandlingId, virkningstidspunkt, brukerTokenInfo)) {
+            "Utbetalingsinfo er nødvendig, men mangler"
+        }
+
+    private suspend fun finnUtbetalingsinfoNullable(
+        behandlingId: UUID,
+        virkningstidspunkt: YearMonth,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Utbetalingsinfo? {
+        val beregning = beregningKlient.hentBeregning(behandlingId, brukerTokenInfo) ?: return null
 
         val beregningsperioder =
             beregning.beregningsperioder.map {
@@ -235,7 +244,7 @@ class BrevdataFacade(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): Trygdetid? {
-        val beregning = beregningKlient.hentBeregning(behandlingId, brukerTokenInfo)
+        val beregning = beregningKlient.hentBeregning(behandlingId, brukerTokenInfo)!!
 
         return trygdetidService.finnTrygdetidsgrunnlag(behandlingId, beregning, brukerTokenInfo)
     }

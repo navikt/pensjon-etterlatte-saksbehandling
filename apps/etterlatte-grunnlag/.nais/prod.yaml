@@ -109,4 +109,5 @@ spec:
           cluster: prod-fss
       external:
         - host: etterlatte-unleash-api.nav.cloud.nais.io
+        - host: pensjon-persondata.prod-fss-pub.nais.io
 

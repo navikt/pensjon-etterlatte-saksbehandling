@@ -70,7 +70,7 @@ spec:
     - name: PERSONDATA_URL
       value: https://pensjon-persondata-q2.dev.intern.nav.no
     - name: PERSONDATA_OUTBOUND_SCOPE
-      value: api://dev-fss.pensjon-persondata-q2.pensjon-persondata-q2/.default
+      value: api://dev-fss.pensjon-person.pensjon-persondata-q2/.default
   envFrom:
     - secret: my-application-unleash-api-token
   accessPolicy:
@@ -92,4 +92,5 @@ spec:
           cluster: dev-fss
       external:
         - host: etterlatte-unleash-api.nav.cloud.nais.io
+        - host: pensjon-persondata-q2.dev.intern.nav.no
 

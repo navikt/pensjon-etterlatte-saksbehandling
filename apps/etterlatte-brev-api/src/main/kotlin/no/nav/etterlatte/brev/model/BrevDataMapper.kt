@@ -6,6 +6,7 @@ import no.nav.etterlatte.brev.MigreringBrevDataService
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_AVSLAG
+import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_AVSLAG_ENKEL
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_AVSLAG_IKKEYRKESSKADE
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_INNVILGELSE
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_INNVILGELSE_ENKEL
@@ -136,7 +137,7 @@ class BrevDataMapper(
                                     BARNEPENSJON_AVSLAG,
                                 )
 
-                            else -> BrevkodePar(BARNEPENSJON_AVSLAG)
+                            else -> BrevkodePar(BARNEPENSJON_AVSLAG_ENKEL, BARNEPENSJON_AVSLAG)
                         }
 
                     VedtakType.ENDRING ->

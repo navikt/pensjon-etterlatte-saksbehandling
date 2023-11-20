@@ -487,7 +487,7 @@ internal class VedtaksvurderingRouteTest {
                 status = VedtakStatus.FATTET_VEDTAK,
                 vedtakFattet = VedtakFattet(SAKSBEHANDLER_1, ENHET_1, Tidspunkt.now()),
             )
-        coEvery { vedtakBehandlingService.fattVedtak(any(), any()) } returns VedtakOgRapid(fattetVedtak.toDto(), mockk())
+        coEvery { vedtakBehandlingService.fattVedtak(any(), any(), any()) } returns VedtakOgRapid(fattetVedtak.toDto(), mockk())
         coEvery { rapidService.sendToRapid(any()) } just runs
 
         testApplication {
@@ -535,7 +535,7 @@ internal class VedtaksvurderingRouteTest {
 
             coVerify(exactly = 1) {
                 behandlingKlient.harTilgangTilBehandling(any(), any())
-                vedtakBehandlingService.fattVedtak(any(), match { it.ident() == SAKSBEHANDLER_1 })
+                vedtakBehandlingService.fattVedtak(any(), match { it.ident() == SAKSBEHANDLER_1 }, any())
                 rapidService.sendToRapid(any())
             }
         }
@@ -550,7 +550,10 @@ internal class VedtaksvurderingRouteTest {
                 vedtakFattet = VedtakFattet(SAKSBEHANDLER_1, ENHET_1, Tidspunkt.now()),
                 attestasjon = Attestasjon(SAKSBEHANDLER_2, ENHET_2, Tidspunkt.now()),
             )
-        coEvery { vedtakBehandlingService.attesterVedtak(any(), any(), any()) } returns VedtakOgRapid(attestertVedtak.toDto(), mockk())
+        coEvery { vedtakBehandlingService.attesterVedtak(any(), any(), any(), any()) } returns
+            VedtakOgRapid(
+                attestertVedtak.toDto(), mockk(),
+            )
         coEvery { rapidService.sendToRapid(any()) } just runs
 
         testApplication {
@@ -603,6 +606,7 @@ internal class VedtaksvurderingRouteTest {
                     any(),
                     match { it == attestertVedtakKommentar.kommentar },
                     match { it.ident() == SAKSBEHANDLER_1 },
+                    any(),
                 )
                 rapidService.sendToRapid(any())
             }

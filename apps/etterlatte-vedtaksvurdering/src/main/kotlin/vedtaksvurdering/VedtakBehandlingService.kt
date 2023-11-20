@@ -92,6 +92,7 @@ class VedtakBehandlingService(
     suspend fun fattVedtak(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
+        saksbehandler: String = brukerTokenInfo.ident(),
     ): VedtakOgRapid {
         logger.info("Fatter vedtak for behandling med behandlingId=$behandlingId")
         val vedtak = hentVedtakNonNull(behandlingId)
@@ -109,7 +110,7 @@ class VedtakBehandlingService(
                 fattVedtak(
                     behandlingId,
                     VedtakFattet(
-                        brukerTokenInfo.ident(),
+                        saksbehandler,
                         sak.enhet,
                         Tidspunkt.now(clock),
                     ),
@@ -152,6 +153,7 @@ class VedtakBehandlingService(
         behandlingId: UUID,
         kommentar: String,
         brukerTokenInfo: BrukerTokenInfo,
+        attestant: String = brukerTokenInfo.ident(),
     ): VedtakOgRapid {
         logger.info("Attesterer vedtak for behandling med behandlingId=$behandlingId")
         val vedtak = hentVedtakNonNull(behandlingId)
@@ -170,7 +172,7 @@ class VedtakBehandlingService(
                     repository.attesterVedtak(
                         behandlingId,
                         Attestasjon(
-                            brukerTokenInfo.ident(),
+                            attestant,
                             sak.enhet,
                             Tidspunkt.now(clock),
                         ),

@@ -1,6 +1,5 @@
-import { Alert, Button, Textarea } from '@navikt/ds-react'
+import { Alert, Button } from '@navikt/ds-react'
 import { isFailure, isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
-import React, { useState } from 'react'
 import { attesterGenerellbehandling } from '~shared/api/generellbehandling'
 import { hentSakOgNavigererTilSaksoversikt } from '~components/generellbehandling/KravpakkeUtland'
 import { useNavigate } from 'react-router-dom'
@@ -12,7 +11,6 @@ export const Attesteringmodal = (props: {
   const { utlandsBehandling } = props
   const [attesterStatus, attesterFetch] = useApiCall(attesterGenerellbehandling)
   const navigate = useNavigate()
-  const [fritekstgrunn, setFritekstgrunn] = useState<string>('')
 
   const attesterWrapper = () => {
     attesterFetch(utlandsBehandling, () => {
@@ -23,16 +21,8 @@ export const Attesteringmodal = (props: {
   }
   return (
     <>
-      <Textarea
-        label="Tilbakemelding fra attestant"
-        size="small"
-        value={fritekstgrunn}
-        onChange={(e) => {
-          setFritekstgrunn(e.target.value)
-        }}
-      />
       <Button style={{ marginTop: '1rem' }} onClick={() => attesterWrapper()} loading={isPending(attesterStatus)}>
-        Attester
+        Godkjenn kravpakken
       </Button>
       {isSuccess(attesterStatus) && <Alert variant="success">Behandlingen ble attestert</Alert>}
       {isFailure(attesterStatus) && <Alert variant="error">Behandlingen ble ikke attestert</Alert>}

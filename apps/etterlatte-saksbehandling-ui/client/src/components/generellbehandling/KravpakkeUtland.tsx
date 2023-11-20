@@ -15,7 +15,7 @@ import {
   Textarea,
   TextField,
 } from '@navikt/ds-react'
-import React, { useContext, useEffect, useState } from 'react'
+import React, { Fragment, useContext, useEffect, useState } from 'react'
 import { isFailure, isPending, isPendingOrInitial, isSuccess, mapApiResult, useApiCall } from '~shared/hooks/useApiCall'
 import { oppdaterGenerellBehandling } from '~shared/api/generellbehandling'
 import Spinner from '~shared/Spinner'
@@ -239,11 +239,10 @@ const KravpakkeUtland = (props: { utlandsBehandling: Generellbehandling & { innh
                             (kodeverkLand) => kodeverkLand.isoLandkode === landIsoKode
                           )
                           return (
-                            <>
+                            <Fragment key={landIsoKode}>
                               {redigerbar ? (
                                 <Chips.Removable
                                   style={{ cursor: 'pointer' }}
-                                  key={landIsoKode}
                                   variant="action"
                                   onClick={() => {
                                     if (redigerbar) {
@@ -262,7 +261,7 @@ const KravpakkeUtland = (props: { utlandsBehandling: Generellbehandling & { innh
                                   {kodeverkLandMatch?.beskrivelse.tekst ?? landIsoKode}
                                 </Chips.Toggle>
                               )}
-                            </>
+                            </Fragment>
                           )
                         })}
                       </Chips>

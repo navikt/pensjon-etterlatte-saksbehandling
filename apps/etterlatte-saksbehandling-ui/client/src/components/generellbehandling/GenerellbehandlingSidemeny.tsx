@@ -1,6 +1,6 @@
 import { Sidebar } from '~shared/components/Sidebar'
 import { Generellbehandling, KravpakkeUtland, Status } from '~shared/types/Generellbehandling'
-import { Attestering } from '~components/generellbehandling/Attestering'
+import { AttesteringMedUnderkjenning } from '~components/generellbehandling/AttesteringMedUnderkjenning'
 
 const kanAttestere = (status: Status) => {
   return status === Status.FATTET
@@ -22,5 +22,5 @@ export const GenerellbehandlingSidemeny = (props: {
     case Status.AVBRUTT:
       break
   }
-  return <Sidebar>{attesterbar && <Attestering />}</Sidebar>
+  return <Sidebar>{attesterbar && <AttesteringMedUnderkjenning utlandsBehandling={utlandsBehandling} />}</Sidebar>
 }

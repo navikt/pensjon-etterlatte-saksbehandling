@@ -1,5 +1,5 @@
 import { Behandlingsoppsummering } from '~components/behandling/attestering/oppsummering/oppsummering'
-import { Attestering } from '~components/behandling/attestering/attestering/attestering'
+import { AttesteringEllerUnderkjenning } from '~components/behandling/attestering/attestering/attesteringEllerUnderkjenning'
 import { Dokumentoversikt } from '~components/person/dokumenter/dokumentoversikt'
 import AnnullerBehandling from '~components/behandling/handlinger/AnnullerBehanding'
 import React, { useEffect, useState } from 'react'
@@ -123,7 +123,7 @@ export const BehandlingSidemeny = ({ behandling }: { behandling: IBehandlingRedu
               {isFailure(fetchVedtakStatus) && <ApiErrorAlert>Kunne ikke hente vedtak</ApiErrorAlert>}
               {isPending(fetchVedtakStatus) && <Spinner label="Henter vedtaksdetaljer" visible />}
               {isSuccess(fetchVedtakStatus) && vedtak && (
-                <Attestering
+                <AttesteringEllerUnderkjenning
                   setBeslutning={setBeslutning}
                   beslutning={beslutning}
                   vedtak={vedtak}

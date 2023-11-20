@@ -25,13 +25,14 @@ data class EndringHovedmalBrevData(
     companion object {
         fun fra(
             utbetalingsinfo: Utbetalingsinfo,
+            forrigeUtbetalingsinfo: Utbetalingsinfo?,
             etterbetaling: EtterbetalingDTO?,
             trygdetid: Trygdetid,
             grunnbeloep: Grunnbeloep,
             innhold: InnholdMedVedlegg,
         ): BrevData =
             EndringHovedmalBrevData(
-                erEndret = true, // TODO når resten av fengselsopphold implementerast
+                erEndret = forrigeUtbetalingsinfo == null || forrigeUtbetalingsinfo.beloep == utbetalingsinfo.beloep,
                 etterbetaling = EtterbetalingBrev.fra(etterbetaling, utbetalingsinfo.beregningsperioder),
                 beregningsinfo = BeregningsinfoBP.fra(utbetalingsinfo, trygdetid, grunnbeloep, innhold),
                 utbetalingsinfo = Utbetalingsinfo.kopier(utbetalingsinfo, etterbetaling),

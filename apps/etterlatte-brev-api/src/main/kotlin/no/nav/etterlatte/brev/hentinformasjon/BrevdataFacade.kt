@@ -152,6 +152,17 @@ class BrevdataFacade(
         }
     }
 
+    suspend fun finnForrigeUtbetalingsinfo(
+        sakId: Long,
+        virkningstidspunkt: YearMonth,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Utbetalingsinfo? =
+        finnUtbetalingsinfo(
+            behandlingKlient.hentSisteIverksatteBehandling(sakId, brukerTokenInfo).id,
+            virkningstidspunkt,
+            brukerTokenInfo,
+        )
+
     suspend fun finnUtbetalingsinfo(
         behandlingId: UUID,
         virkningstidspunkt: YearMonth,

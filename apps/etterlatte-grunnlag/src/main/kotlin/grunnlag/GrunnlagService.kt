@@ -163,11 +163,37 @@ class RealGrunnlagService(
     private fun Grunnlagsopplysning<JsonNode>.asPersonopplysning(): Personopplysning {
         return Personopplysning(
             id = this.id,
-            kilde = this.kilde,
+            kilde = this.kilde.tilGenerellKilde(),
             opplysningType = this.opplysningType,
             opplysning = objectMapper.treeToValue(opplysning, PersonInformasjon::class.java),
         )
     }
+
+    private fun Grunnlagsopplysning.Kilde.tilGenerellKilde() =
+        when (this) {
+            is Grunnlagsopplysning.Pdl ->
+                GenerellKilde(
+                    navn = this.type,
+                    tidspunkt = this.tidspunktForInnhenting,
+                    detalj = this.registersReferanse,
+                )
+
+            is Grunnlagsopplysning.Pesys -> GenerellKilde(navn = this.type, tidspunkt = this.tidspunkt)
+            is Grunnlagsopplysning.Privatperson ->
+                GenerellKilde(
+                    navn = this.type,
+                    tidspunkt = this.mottatDato,
+                    detalj = this.fnr,
+                )
+
+            is Grunnlagsopplysning.RegelKilde -> GenerellKilde(navn = this.type, tidspunkt = this.ts)
+            is Grunnlagsopplysning.Saksbehandler ->
+                GenerellKilde(
+                    navn = this.type,
+                    tidspunkt = this.tidspunkt,
+                    detalj = this.ident,
+                )
+        }
 
     override fun hentSakerOgRoller(fnr: Folkeregisteridentifikator): PersonMedSakerOgRoller {
         return opplysningDao.finnAllePersongalleriHvorPersonFinnes(fnr)
@@ -468,8 +494,14 @@ class LaastGrunnlagKanIkkeEndres(val behandlingId: UUID) :
 data class Personopplysning(
     val opplysningType: Opplysningstype,
     val id: UUID,
-    val kilde: Grunnlagsopplysning.Kilde,
+    val kilde: GenerellKilde,
     val opplysning: PersonInformasjon,
+)
+
+data class GenerellKilde(
+    val navn: String,
+    val tidspunkt: Tidspunkt,
+    val detalj: String? = null,
 )
 
 data class PersonInformasjon(

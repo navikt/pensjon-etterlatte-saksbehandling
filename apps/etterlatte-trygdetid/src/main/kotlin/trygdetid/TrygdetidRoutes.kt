@@ -12,7 +12,6 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.libs.common.BEHANDLINGID_CALL_PARAMETER
-import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandlingId
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -32,6 +31,7 @@ import no.nav.etterlatte.libs.common.withBehandlingId
 import no.nav.etterlatte.libs.common.withParam
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.token.BrukerTokenInfo
+import no.nav.etterlatte.token.Systembruker
 import no.nav.etterlatte.trygdetid.klienter.BehandlingKlient
 import java.util.UUID
 
@@ -206,7 +206,8 @@ fun TrygdetidGrunnlagDto.toTrygdetidGrunnlag(brukerTokenInfo: BrukerTokenInfo): 
         bosted = bosted,
         periode = TrygdetidPeriode(periodeFra, periodeTil),
         kilde =
-            if (brukerTokenInfo.ident() == Vedtaksloesning.PESYS.name) {
+            if (brukerTokenInfo is Systembruker) {
+                // p.t. er det kun ved migrering at vi legger til perioder med systembruker
                 Grunnlagsopplysning.Pesys(Tidspunkt.now())
             } else {
                 Grunnlagsopplysning.Saksbehandler(brukerTokenInfo.ident(), Tidspunkt.now())

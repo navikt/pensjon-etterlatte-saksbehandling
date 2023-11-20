@@ -83,7 +83,7 @@ internal fun Route.oppgaveRoutes(
 
             put("ferdigstill") {
                 inTransaction {
-                    service.ferdigstillOppgave(oppgaveId, brukerTokenInfo)
+                    service.hentOgFerdigstillOppgaveById(oppgaveId, brukerTokenInfo)
                 }
                 call.respond(HttpStatusCode.OK)
             }

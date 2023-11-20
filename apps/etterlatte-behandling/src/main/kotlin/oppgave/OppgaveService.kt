@@ -178,8 +178,7 @@ class OppgaveService(
         }
         try {
             val oppgaveUnderbehandling = behandlingsoppgaver.single { it.status == Status.UNDER_BEHANDLING }
-            sikreAtSaksbehandlerSomLukkerOppgaveEierOppgaven(oppgaveUnderbehandling, saksbehandler)
-            oppgaveDao.endreStatusPaaOppgave(oppgaveUnderbehandling.id, Status.FERDIGSTILT)
+            ferdigstillOppgaveById(oppgaveUnderbehandling, saksbehandler)
             return opprettNyOppgaveMedSakOgReferanse(
                 referanse = fattetoppgaveReferanseOgSak.referanse,
                 sakId = fattetoppgaveReferanseOgSak.sakId,
@@ -202,20 +201,56 @@ class OppgaveService(
         }
     }
 
-    fun ferdigstillOppgave(
+    fun ferdigStillOppgaveUnderBehandling(
+        referanse: String,
+        saksbehandler: BrukerTokenInfo,
+    ): OppgaveIntern {
+        val behandlingsoppgaver = oppgaveDao.hentOppgaverForReferanse(referanse)
+        if (behandlingsoppgaver.isEmpty()) {
+            throw BadRequestException("Må ha en oppgave for å ferdigstille oppgave")
+        }
+        try {
+            val oppgaveUnderbehandling = behandlingsoppgaver.single { it.status == Status.UNDER_BEHANDLING }
+            ferdigstillOppgaveById(oppgaveUnderbehandling, saksbehandler)
+            return requireNotNull(oppgaveDao.hentOppgave(oppgaveUnderbehandling.id)) {
+                "Oppgaven vi akkurat ferdigstilte kunne ikke hentes ut"
+            }
+        } catch (e: NoSuchElementException) {
+            throw BadRequestException(
+                "Det må finnes en oppgave under behandling, gjelder behandling / hendelse med ID:" +
+                    " $referanse}",
+                e,
+            )
+        } catch (e: IllegalArgumentException) {
+            throw BadRequestException(
+                "Skal kun ha en oppgave under behandling, gjelder behandling / hendelse med ID:" +
+                    " $referanse",
+                e,
+            )
+        }
+    }
+
+    fun hentOgFerdigstillOppgaveById(
         id: UUID,
         saksbehandler: BrukerTokenInfo,
     ) {
-        logger.info("Ferdigstiller oppgave=$id")
-
         val oppgave =
             checkNotNull(oppgaveDao.hentOppgave(id)) {
                 "Oppgave med id=$id finnes ikke – avbryter ferdigstilling av oppgaven"
             }
+        ferdigstillOppgaveById(oppgave, saksbehandler)
+    }
+
+    private fun ferdigstillOppgaveById(
+        oppgave: OppgaveIntern,
+        saksbehandler: BrukerTokenInfo,
+    ) {
+        logger.info("Ferdigstiller oppgave=${oppgave.id}")
+
         sikreAtSaksbehandlerSomLukkerOppgaveEierOppgaven(oppgave, saksbehandler)
 
-        oppgaveDao.endreStatusPaaOppgave(id, Status.FERDIGSTILT)
-        logger.info("Oppgave med id=$id ferdigstilt av ${saksbehandler.ident()}")
+        oppgaveDao.endreStatusPaaOppgave(oppgave.id, Status.FERDIGSTILT)
+        logger.info("Oppgave med id=${oppgave.id} ferdigstilt av ${saksbehandler.ident()}")
     }
 
     private fun sikreAtSaksbehandlerSomLukkerOppgaveEierOppgaven(
@@ -279,36 +314,6 @@ class OppgaveService(
             throw BadRequestException(
                 "Skal kun ha en oppgave under behandling, gjelder behandling / hendelse med ID:" +
                     " $behandlingEllerHendelseId",
-                e,
-            )
-        }
-    }
-
-    fun ferdigStillOppgaveUnderBehandling(
-        referanse: String,
-        saksbehandler: BrukerTokenInfo,
-    ): OppgaveIntern {
-        val behandlingsoppgaver = oppgaveDao.hentOppgaverForReferanse(referanse)
-        if (behandlingsoppgaver.isEmpty()) {
-            throw BadRequestException("Må ha en oppgave for å ferdigstille oppgave")
-        }
-        try {
-            val oppgaveUnderbehandling = behandlingsoppgaver.single { it.status == Status.UNDER_BEHANDLING }
-            sikreAtSaksbehandlerSomLukkerOppgaveEierOppgaven(oppgaveUnderbehandling, saksbehandler)
-            oppgaveDao.endreStatusPaaOppgave(oppgaveUnderbehandling.id, Status.FERDIGSTILT)
-            return requireNotNull(oppgaveDao.hentOppgave(oppgaveUnderbehandling.id)) {
-                "Oppgaven vi akkurat ferdigstilte kunne ikke hentes ut"
-            }
-        } catch (e: NoSuchElementException) {
-            throw BadRequestException(
-                "Det må finnes en oppgave under behandling, gjelder behandling / hendelse med ID:" +
-                    " $referanse}",
-                e,
-            )
-        } catch (e: IllegalArgumentException) {
-            throw BadRequestException(
-                "Skal kun ha en oppgave under behandling, gjelder behandling / hendelse med ID:" +
-                    " $referanse",
                 e,
             )
         }

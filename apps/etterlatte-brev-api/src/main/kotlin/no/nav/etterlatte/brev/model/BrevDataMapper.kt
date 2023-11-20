@@ -249,7 +249,7 @@ class BrevDataMapper(
                             }
                         }
 
-                    VedtakType.AVSLAG -> AvslagBrevData.fra() // TODO dobbeltsjekk her
+                    VedtakType.AVSLAG -> ManueltBrevData.fra()
 
                     VedtakType.ENDRING ->
                         when (generellBrevData.revurderingsaarsak) {

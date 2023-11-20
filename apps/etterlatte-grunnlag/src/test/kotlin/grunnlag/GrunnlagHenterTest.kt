@@ -29,7 +29,7 @@ import no.nav.etterlatte.libs.testdata.grunnlag.kilde
 import org.junit.jupiter.api.Test
 import java.util.UUID
 
-class GrunnlagFetcherTest {
+class GrunnlagHenterTest {
     private val pdltjenesterKlient = mockk<PdlTjenesterKlientImpl>()
     private val persondataKlient = mockk<PersondataKlient>()
     private val grunnlagHenter = GrunnlagHenter(pdltjenesterKlient, persondataKlient)

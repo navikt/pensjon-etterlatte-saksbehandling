@@ -13,9 +13,6 @@ import no.nav.etterlatte.beregning.grunnlag.mapVerdier
 import no.nav.etterlatte.beregning.regler.barnepensjon.PeriodisertBarnepensjonGrunnlag
 import no.nav.etterlatte.beregning.regler.barnepensjon.kroneavrundetBarnepensjonRegel
 import no.nav.etterlatte.beregning.regler.barnepensjon.kroneavrundetBarnepensjonRegelMedInstitusjon
-import no.nav.etterlatte.beregning.regler.barnepensjon.sats.aktuelleBarnepensjonSatsRegler
-import no.nav.etterlatte.beregning.regler.barnepensjon.sats.barnepensjonSatsRegel1967
-import no.nav.etterlatte.beregning.regler.barnepensjon.sats.barnepensjonSatsRegel2024
 import no.nav.etterlatte.beregning.regler.barnepensjon.sats.grunnbeloep
 import no.nav.etterlatte.beregning.regler.barnepensjon.trygdetidsfaktor.trygdetidBruktRegel
 import no.nav.etterlatte.beregning.regler.toSamlet
@@ -50,8 +47,10 @@ import no.nav.etterlatte.libs.regler.eksekver
 import no.nav.etterlatte.libs.regler.finnAnvendteRegler
 import no.nav.etterlatte.regler.Beregningstall
 import no.nav.etterlatte.token.BrukerTokenInfo
+import no.nav.etterlatte.token.Systembruker
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
+import java.time.Month
 import java.time.YearMonth
 import java.util.UUID
 
@@ -73,16 +72,6 @@ class BeregnBarnepensjonService(
     private val featureToggleService: FeatureToggleService,
 ) {
     private val logger = LoggerFactory.getLogger(BeregnBarnepensjonService::class.java)
-
-    private val nyttRegelverkAktivert = featureToggleService.isEnabled(BrukNyttRegelverkIBeregning, false)
-
-    init {
-        aktuelleBarnepensjonSatsRegler.clear()
-        aktuelleBarnepensjonSatsRegler.add(barnepensjonSatsRegel1967)
-        if (nyttRegelverkAktivert) {
-            aktuelleBarnepensjonSatsRegler.add(barnepensjonSatsRegel2024)
-        }
-    }
 
     suspend fun beregn(
         behandling: DetaljertBehandling,
@@ -113,6 +102,11 @@ class BeregnBarnepensjonService(
                 null
             }
 
+        val nyttRegelverkAktivert = featureToggleService.isEnabled(BrukNyttRegelverkIBeregning, false)
+        val erMigrering =
+            brukerTokenInfo is Systembruker && brukerTokenInfo.oid == "migrering" // TODO en eller annen bedre måte å få med denne på
+        val brukNyttRegelverk = nyttRegelverkAktivert || erMigrering
+
         val barnepensjonGrunnlag =
             opprettBeregningsgrunnlag(
                 beregningsGrunnlag,
@@ -131,6 +125,7 @@ class BeregnBarnepensjonService(
                     grunnlag,
                     barnepensjonGrunnlag,
                     virkningstidspunkt,
+                    !brukNyttRegelverk,
                 )
 
             BehandlingType.REVURDERING -> {
@@ -145,6 +140,7 @@ class BeregnBarnepensjonService(
                             grunnlag,
                             barnepensjonGrunnlag,
                             virkningstidspunkt,
+                            !brukNyttRegelverk,
                         )
 
                     VilkaarsvurderingUtfall.IKKE_OPPFYLT -> opphoer(behandling.id, grunnlag, virkningstidspunkt)
@@ -160,27 +156,35 @@ class BeregnBarnepensjonService(
         grunnlag: Grunnlag,
         beregningsgrunnlag: PeriodisertBarnepensjonGrunnlag,
         virkningstidspunkt: YearMonth,
+        kunGammeltRegelverk: Boolean = false,
     ): Beregning {
+        val beregningTom =
+            when (kunGammeltRegelverk) {
+                true -> YearMonth.of(2023, Month.DECEMBER)
+                false -> null
+            }
+
         val resultat =
             if (featureToggleService.isEnabled(BrukInstitusjonsoppholdIBeregning, false)) {
                 kroneavrundetBarnepensjonRegelMedInstitusjon.eksekver(
                     grunnlag = beregningsgrunnlag,
-                    periode = RegelPeriode(virkningstidspunkt.atDay(1)),
+                    periode = RegelPeriode(virkningstidspunkt.atDay(1), beregningTom?.atEndOfMonth()),
                 )
             } else {
                 kroneavrundetBarnepensjonRegel.eksekver(
                     grunnlag = beregningsgrunnlag,
-                    periode = RegelPeriode(virkningstidspunkt.atDay(1)),
+                    periode = RegelPeriode(virkningstidspunkt.atDay(1), beregningTom?.atEndOfMonth()),
                 )
             }
 
         return when (resultat) {
-            is RegelkjoeringResultat.Suksess ->
+            is RegelkjoeringResultat.Suksess -> {
+                val antallPerioder = resultat.periodiserteResultater.size
                 beregning(
                     behandlingId = behandlingId,
                     grunnlagMetadata = grunnlag.metadata,
                     beregningsperioder =
-                        resultat.periodiserteResultater.map { periodisertResultat ->
+                        resultat.periodiserteResultater.mapIndexed { index, periodisertResultat ->
                             logger.info(
                                 "Beregnet barnepensjon for periode fra={} til={} og beløp={} med regler={}",
                                 periodisertResultat.periode.fraDato,
@@ -205,9 +209,21 @@ class BeregnBarnepensjonService(
                                     periodisertResultat.periode.fraDato,
                                 ).verdi
 
+                            val tom = periodisertResultat.periode.tilDato?.let { YearMonth.from(it) }
+                            val overstyrtTom =
+                                if (index == antallPerioder - 1) {
+                                    null
+                                } else {
+                                    tom
+                                }
+
                             Beregningsperiode(
                                 datoFOM = YearMonth.from(periodisertResultat.periode.fraDato),
-                                datoTOM = periodisertResultat.periode.tilDato?.let { YearMonth.from(it) },
+                                datoTOM =
+                                    when (kunGammeltRegelverk) {
+                                        true -> overstyrtTom
+                                        false -> tom
+                                    },
                                 utbetaltBeloep = periodisertResultat.resultat.verdi,
                                 soeskenFlokk =
                                     beregningsgrunnlag.soeskenKull.finnGrunnlagForPeriode(
@@ -235,6 +251,7 @@ class BeregnBarnepensjonService(
                             )
                         },
                 )
+            }
 
             is RegelkjoeringResultat.UgyldigPeriode -> throw RuntimeException(
                 "Ugyldig regler for periode: ${resultat.ugyldigeReglerForPeriode}",

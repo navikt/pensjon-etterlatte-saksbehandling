@@ -4,11 +4,8 @@ import io.kotest.matchers.collections.shouldBeIn
 import io.kotest.matchers.ints.shouldBeExactly
 import io.kotest.matchers.shouldBe
 import no.nav.etterlatte.beregning.regler.REGEL_PERIODE
-import no.nav.etterlatte.beregning.regler.barnepensjon.sats.aktuelleBarnepensjonSatsRegler
 import no.nav.etterlatte.beregning.regler.barnepensjon.sats.antallSoeskenIKullet1967
 import no.nav.etterlatte.beregning.regler.barnepensjon.sats.barnepensjonSatsRegel
-import no.nav.etterlatte.beregning.regler.barnepensjon.sats.barnepensjonSatsRegel1967
-import no.nav.etterlatte.beregning.regler.barnepensjon.sats.barnepensjonSatsRegel2024
 import no.nav.etterlatte.beregning.regler.barnepensjon.sats.belopForEtterfoelgendeBarn1967
 import no.nav.etterlatte.beregning.regler.barnepensjon.sats.belopForFoersteBarn1967
 import no.nav.etterlatte.beregning.regler.barnepensjon.sats.grunnbeloep
@@ -24,19 +21,11 @@ import no.nav.etterlatte.libs.testdata.grunnlag.HELSOESKEN3_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.HELSOESKEN_FOEDSELSNUMMER
 import no.nav.etterlatte.regler.Beregningstall
 import no.nav.etterlatte.regler.Beregningstall.Companion.DESIMALER_DELBEREGNING
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.YearMonth
 
 internal class BarnepensjonSatsTest {
-    @BeforeEach
-    fun setUp() {
-        aktuelleBarnepensjonSatsRegler.clear()
-        aktuelleBarnepensjonSatsRegler.add(barnepensjonSatsRegel1967)
-        aktuelleBarnepensjonSatsRegler.add(barnepensjonSatsRegel2024)
-    }
-
     @Test
     fun `historiskeGrunnbeloep skal hente alle historiske grunnbeloep`() {
         historiskeGrunnbeloep.size shouldBeExactly 70

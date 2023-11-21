@@ -54,8 +54,26 @@ const OverstyrBeregningPeriode = (props: OverstyrBeregningPerioder) => {
               </DatoSection>
             )}
           />
-          <VerdiFelt label="Utbetalt Beløp" {...register(`overstyrBeregningForm.${index}.data.utbetaltBeloep`)} />
-          <VerdiFelt label="Anvendt Trygdetid" {...register(`overstyrBeregningForm.${index}.data.trygdetid`)} />
+          <VerdiFelt>
+            <TextField label="Utbetalt Beløp" {...register(`overstyrBeregningForm.${index}.data.utbetaltBeloep`)} />
+          </VerdiFelt>
+        </MinimimBeregningsperiodeWrapper>
+
+        <MinimimBeregningsperiodeWrapper>
+          <VerdiFelt>
+            <TextField label="Anvendt Trygdetid" {...register(`overstyrBeregningForm.${index}.data.trygdetid`)} />
+          </VerdiFelt>
+          <VerdiFelt>
+            <TextField
+              label="Prorata Broek (valgfritt)"
+              {...register(`overstyrBeregningForm.${index}.data.prorataBroekTeller`)}
+            />
+            <Deler>/</Deler>
+            <TextField label="" {...register(`overstyrBeregningForm.${index}.data.prorataBroekNevner`)} />
+          </VerdiFelt>
+        </MinimimBeregningsperiodeWrapper>
+
+        <MinimimBeregningsperiodeWrapper>
           <Beskrivelse
             label="Beskrivelse"
             size="medium"
@@ -108,15 +126,24 @@ const MinimimBeregningsperiodeWrapper = styled.div`
   width: 100%;
   display: flex;
   flex-direction: row;
-  justify-content: space-between;
-  align-items: start;
+  justify-content: start;
+  align-items: end;
+  gap: 10px;
 `
 
-const VerdiFelt = styled(TextField)`
+const VerdiFelt = styled.div`
   margin-bottom: 12px;
+  display: flex;
+  flex-direction: row;
+  align-items: end;
+  gap: 2px;
 `
 
 const Beskrivelse = styled(Textarea)`
+  margin-bottom: 12px;
+`
+
+const Deler = styled.div`
   margin-bottom: 12px;
 `
 

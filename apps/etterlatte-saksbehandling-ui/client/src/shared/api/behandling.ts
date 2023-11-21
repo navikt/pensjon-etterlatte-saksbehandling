@@ -131,15 +131,13 @@ export const hentFoersteVirk = async (args: { sakId: number }) =>
 export const lagreEtterbetaling = async (args: {
   behandlingId: string
   etterbetaling: IEtterbetaling
-}): Promise<ApiResponse<{}>> => {
+}): Promise<ApiResponse<void>> => {
   return apiClient.put(`/behandling/${args.behandlingId}/etterbetaling `, {
     fraDato: args.etterbetaling.fra,
     tilDato: args.etterbetaling.til,
   })
 }
-export const slettEtterbetaling = async (args: {
-  behandlingId: string
-}): Promise<ApiResponse<IKommerBarnetTilgode>> => {
+export const slettEtterbetaling = async (args: { behandlingId: string }): Promise<ApiResponse<void>> => {
   return apiClient.delete(`/behandling/${args.behandlingId}/etterbetaling`)
 }
 

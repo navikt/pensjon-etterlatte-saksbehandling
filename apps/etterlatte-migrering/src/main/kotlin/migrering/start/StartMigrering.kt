@@ -13,7 +13,7 @@ import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
-import rapidsandrivers.SAK_ID_FLERE_KEY
+import rapidsandrivers.SAK_ID_KEY
 import java.util.UUID
 import javax.sql.DataSource
 import kotlin.concurrent.thread
@@ -43,7 +43,7 @@ class StartMigrering(val repository: StartMigreringRepository, val rapidsConnect
         JsonMessage.newMessage(
             mapOf(
                 EVENT_NAME_KEY to Migreringshendelser.MIGRER_SPESIFIKK_SAK,
-                SAK_ID_FLERE_KEY to sakTilMigrering.sakId,
+                SAK_ID_KEY to sakTilMigrering.sakId,
                 LOPENDE_JANUAR_2024_KEY to true,
                 MIGRERING_KJORING_VARIANT to sakTilMigrering.kjoringVariant,
             ),

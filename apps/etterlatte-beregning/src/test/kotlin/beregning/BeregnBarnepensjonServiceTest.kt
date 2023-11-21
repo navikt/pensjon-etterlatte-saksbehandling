@@ -25,6 +25,7 @@ import no.nav.etterlatte.klienter.GrunnlagKlientImpl
 import no.nav.etterlatte.klienter.TrygdetidKlient
 import no.nav.etterlatte.klienter.VilkaarsvurderingKlient
 import no.nav.etterlatte.libs.common.IntBroek
+import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
@@ -708,7 +709,13 @@ internal class BeregnBarnepensjonServiceTest {
 
     @Test
     fun `skal beregne med knekkpunkt fra regelverksendring hvis nytt regelverk er avslått men er migrering`() {
-        val behandling = mockBehandling(BehandlingType.FØRSTEGANGSBEHANDLING, virk = YearMonth.of(2023, Month.DECEMBER))
+        val behandling =
+            mockBehandling(
+                BehandlingType.FØRSTEGANGSBEHANDLING,
+                virk = YearMonth.of(2023, Month.DECEMBER),
+                vedtaksloesning = Vedtaksloesning.PESYS,
+            )
+
         val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
         coEvery {
@@ -861,12 +868,14 @@ internal class BeregnBarnepensjonServiceTest {
     private fun mockBehandling(
         type: BehandlingType,
         virk: YearMonth = VIRKNINGSTIDSPUNKT_JAN_23,
+        vedtaksloesning: Vedtaksloesning = Vedtaksloesning.GJENNY,
     ): DetaljertBehandling =
-        mockk<DetaljertBehandling>().apply {
+        mockk<DetaljertBehandling> {
             every { id } returns randomUUID()
             every { sak } returns 1
             every { behandlingType } returns type
             every { virkningstidspunkt } returns VirkningstidspunktTestData.virkningstidsunkt(virk)
+            every { kilde } returns vedtaksloesning
         }
 
     private fun mockTrygdetid(behandlingId_: UUID): TrygdetidDto =

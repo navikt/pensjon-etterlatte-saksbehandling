@@ -22,6 +22,7 @@ import no.nav.etterlatte.grunnbeloep.GrunnbeloepRepository
 import no.nav.etterlatte.klienter.GrunnlagKlient
 import no.nav.etterlatte.klienter.TrygdetidKlient
 import no.nav.etterlatte.klienter.VilkaarsvurderingKlient
+import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
@@ -47,7 +48,6 @@ import no.nav.etterlatte.libs.regler.eksekver
 import no.nav.etterlatte.libs.regler.finnAnvendteRegler
 import no.nav.etterlatte.regler.Beregningstall
 import no.nav.etterlatte.token.BrukerTokenInfo
-import no.nav.etterlatte.token.Systembruker
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.Month
@@ -103,8 +103,7 @@ class BeregnBarnepensjonService(
             }
 
         val nyttRegelverkAktivert = featureToggleService.isEnabled(BrukNyttRegelverkIBeregning, false)
-        val erMigrering =
-            brukerTokenInfo is Systembruker && brukerTokenInfo.oid == "migrering" // TODO en eller annen bedre måte å få med denne på
+        val erMigrering = behandling.kilde == Vedtaksloesning.PESYS
         val brukNyttRegelverk = nyttRegelverkAktivert || erMigrering
 
         val barnepensjonGrunnlag =

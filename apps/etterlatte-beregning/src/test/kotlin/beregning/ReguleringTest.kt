@@ -24,6 +24,7 @@ import no.nav.etterlatte.grunnbeloep.GrunnbeloepRepository.hentGjeldendeGrunnbel
 import no.nav.etterlatte.klienter.GrunnlagKlientImpl
 import no.nav.etterlatte.klienter.TrygdetidKlient
 import no.nav.etterlatte.klienter.VilkaarsvurderingKlient
+import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
@@ -190,11 +191,14 @@ class ReguleringTest {
         beregningsMetode = BeregningsMetode.NASJONAL.toGrunnlag(),
     )
 
-    private fun mockBehandling(virk: YearMonth = BeregnBarnepensjonServiceTest.VIRKNINGSTIDSPUNKT_JAN_23) =
-        mockk<DetaljertBehandling>().apply {
-            every { id } returns UUID.randomUUID()
-            every { sak } returns 1
-            every { behandlingType } returns BehandlingType.FØRSTEGANGSBEHANDLING
-            every { virkningstidspunkt } returns VirkningstidspunktTestData.virkningstidsunkt(virk)
-        }
+    private fun mockBehandling(
+        virk: YearMonth = BeregnBarnepensjonServiceTest.VIRKNINGSTIDSPUNKT_JAN_23,
+        vedtaksloesning: Vedtaksloesning = Vedtaksloesning.GJENNY,
+    ) = mockk<DetaljertBehandling>().apply {
+        every { id } returns UUID.randomUUID()
+        every { sak } returns 1
+        every { behandlingType } returns BehandlingType.FØRSTEGANGSBEHANDLING
+        every { virkningstidspunkt } returns VirkningstidspunktTestData.virkningstidsunkt(virk)
+        every { kilde } returns vedtaksloesning
+    }
 }

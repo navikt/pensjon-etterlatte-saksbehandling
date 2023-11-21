@@ -6,7 +6,7 @@ import no.nav.etterlatte.brev.MigreringBrevDataService
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_AVSLAG
-import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_AVSLAG_IKKEYRKESSKADE
+import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_AVSLAG_ENKEL
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_INNVILGELSE
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_INNVILGELSE_ENKEL
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_INNVILGELSE_NY
@@ -30,7 +30,6 @@ import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.TOM_MAL
 import no.nav.etterlatte.brev.brevbaker.RedigerbarTekstRequest
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
 import no.nav.etterlatte.brev.model.bp.AdopsjonRevurderingBrevdata
-import no.nav.etterlatte.brev.model.bp.AvslagYrkesskadeBrevData
 import no.nav.etterlatte.brev.model.bp.EndringHovedmalBrevData
 import no.nav.etterlatte.brev.model.bp.InnvilgetBrevData
 import no.nav.etterlatte.brev.model.bp.InnvilgetBrevDataEnkel
@@ -128,16 +127,7 @@ class BrevDataMapper(
                             false -> BrevkodePar(BARNEPENSJON_INNVILGELSE)
                         }
 
-                    VedtakType.AVSLAG ->
-                        when (generellBrevData.revurderingsaarsak) {
-                            Revurderingaarsak.YRKESSKADE ->
-                                BrevkodePar(
-                                    BARNEPENSJON_AVSLAG_IKKEYRKESSKADE,
-                                    BARNEPENSJON_AVSLAG,
-                                )
-
-                            else -> BrevkodePar(BARNEPENSJON_AVSLAG)
-                        }
+                    VedtakType.AVSLAG -> BrevkodePar(BARNEPENSJON_AVSLAG_ENKEL, BARNEPENSJON_AVSLAG)
 
                     VedtakType.ENDRING ->
                         when (generellBrevData.revurderingsaarsak) {
@@ -259,11 +249,7 @@ class BrevDataMapper(
                             }
                         }
 
-                    VedtakType.AVSLAG ->
-                        when (generellBrevData.revurderingsaarsak) {
-                            Revurderingaarsak.YRKESSKADE -> AvslagYrkesskadeBrevData.fra(generellBrevData)
-                            else -> AvslagBrevData.fra()
-                        }
+                    VedtakType.AVSLAG -> ManueltBrevData.fra()
 
                     VedtakType.ENDRING ->
                         when (generellBrevData.revurderingsaarsak) {
@@ -280,10 +266,9 @@ class BrevDataMapper(
                             Revurderingaarsak.FENGSELSOPPHOLD,
                             Revurderingaarsak.UT_AV_FENGSEL,
                             Revurderingaarsak.INSTITUSJONSOPPHOLD,
-                            -> ManueltBrevData(emptyList())
-
-                            Revurderingaarsak.YRKESSKADE -> ManueltBrevData(emptyList())
-                            Revurderingaarsak.ANNEN -> ManueltBrevData(emptyList())
+                            Revurderingaarsak.YRKESSKADE,
+                            Revurderingaarsak.ANNEN,
+                            -> ManueltBrevData.fra()
                             else -> TODO("Revurderingsbrev for ${generellBrevData.revurderingsaarsak} er ikke støttet")
                         }
 
@@ -394,6 +379,8 @@ class BrevDataMapper(
                     )
                 }
             }
+
+            BARNEPENSJON_AVSLAG -> ManueltBrevData.fra(innholdMedVedlegg.innhold())
 
             OMS_FOERSTEGANGSVEDTAK_INNVILGELSE -> {
                 coroutineScope {

@@ -28,8 +28,7 @@ internal class OmregningHendelserRiver(
     rapidsConnection: RapidsConnection,
     private val beregningService: BeregningService,
     private val trygdetidService: TrygdetidService,
-) :
-    ListenerMedLoggingOgFeilhaandtering(BEREGN) {
+) : ListenerMedLoggingOgFeilhaandtering(BEREGN) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     init {

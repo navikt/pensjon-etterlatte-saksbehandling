@@ -34,6 +34,7 @@ export interface NyBehandlingRequest {
   mottattDato?: string
   spraak?: string
   kilde?: string
+  pesysid?: number
 }
 
 export enum IBehandlingsType {

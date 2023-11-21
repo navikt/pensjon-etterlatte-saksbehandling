@@ -1,4 +1,4 @@
-import { Alert, Button, Checkbox, Select } from '@navikt/ds-react'
+import { Alert, Button, Checkbox, Select, TextField } from '@navikt/ds-react'
 import React, { useState } from 'react'
 import { SakType } from '~shared/types/sak'
 import { DatoVelger } from '~shared/DatoVelger'
@@ -10,6 +10,7 @@ import { useAppDispatch } from '~store/Store'
 import { isFailure, isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
 import { opprettBehandling } from '~shared/api/behandling'
 import { opprettOverstyrBeregning } from '~shared/api/beregning'
+import { InputRow } from '~components/person/journalfoeringsoppgave/nybehandling/OpprettNyBehandling'
 
 export default function ManuellBehandling() {
   const dispatch = useAppDispatch()
@@ -20,6 +21,9 @@ export default function ManuellBehandling() {
 
   const [overstyrBeregningStatus, opprettOverstyrtBeregningReq] = useApiCall(opprettOverstyrBeregning)
   const [overstyrBeregning, setOverstyrBeregning] = useState<boolean>(true)
+
+  const [pesysId, setPesysId] = useState<number | undefined>(undefined)
+
   const ferdigstill = () => {
     opprettNyBehandling(
       {
@@ -27,6 +31,7 @@ export default function ManuellBehandling() {
         sakType: SakType.BARNEPENSJON,
         mottattDato: nyBehandlingRequest!!.mottattDato!!.replace('Z', ''),
         kilde: erMigrering ? 'PESYS' : undefined,
+        pesysid: pesysId,
       },
       (nyBehandlingRespons) => {
         if (overstyrBeregning) {
@@ -58,6 +63,19 @@ export default function ManuellBehandling() {
         <option value="ja">Ja</option>
         <option value="nei">Nei</option>
       </Select>
+
+      {erMigrering && (
+        <InputRow>
+          <TextField
+            label="Sakid Pesys"
+            placeholder="Sakid Pesys"
+            value={pesysId || ''}
+            pattern="[0-9]{11}"
+            maxLength={11}
+            onChange={(e) => setPesysId(Number(e.target.value))}
+          />
+        </InputRow>
+      )}
 
       <Checkbox checked={overstyrBeregning} onChange={() => setOverstyrBeregning(!overstyrBeregning)}>
         Skal bruke manuell beregning
@@ -95,7 +113,12 @@ export default function ManuellBehandling() {
           variant="secondary"
           onClick={ferdigstill}
           loading={isPending(status) || isPending(overstyrBeregningStatus)}
-          disabled={erMigrering == null || isPending(status) || isPending(overstyrBeregningStatus)}
+          disabled={
+            erMigrering == null ||
+            (erMigrering && pesysId == null) ||
+            isPending(status) ||
+            isPending(overstyrBeregningStatus)
+          }
         >
           Send inn
         </Button>

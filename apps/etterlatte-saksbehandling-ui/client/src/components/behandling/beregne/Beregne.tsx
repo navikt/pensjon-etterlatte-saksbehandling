@@ -38,7 +38,7 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
   const virkningstidspunkt = behandling.virkningstidspunkt?.dato
     ? formaterStringDato(behandling.virkningstidspunkt.dato)
     : undefined
-  const behandles = behandlingErRedigerbar(behandling.status)
+  const redigerbar = behandlingErRedigerbar(behandling.status)
   const erOpphoer = behandling.vilkårsprøving?.resultat?.utfall == VilkaarsvurderingResultat.IKKE_OPPFYLT
   const vedtaksresultat =
     behandling.behandlingType !== IBehandlingsType.MANUELT_OPPHOER ? useVedtaksResultat() : 'opphoer'
@@ -110,7 +110,7 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
                 <Etterbetaling
                   behandlingId={behandling.id}
                   lagraEtterbetaling={behandling.etterbetaling}
-                  redigerbar={behandles}
+                  redigerbar={redigerbar}
                   virkningstidspunkt={virkningstidspunkt}
                 />
               </EtterbetalingWrapper>
@@ -127,7 +127,7 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
         </FlexRow>
       )}
 
-      {behandles ? (
+      {redigerbar ? (
         <BehandlingHandlingKnapper>
           {visAttesteringsmodal ? (
             <SendTilAttesteringModal behandlingId={behandling.id} fattVedtakApi={fattVedtak} />

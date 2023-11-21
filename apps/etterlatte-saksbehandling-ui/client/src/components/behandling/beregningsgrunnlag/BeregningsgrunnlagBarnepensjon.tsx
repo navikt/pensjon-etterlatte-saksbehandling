@@ -40,7 +40,7 @@ const featureToggleNameBrukFaktiskTrygdetid = 'pensjon-etterlatte.bp-bruk-faktis
 const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer }) => {
   const { behandling } = props
   const { next } = useBehandlingRoutes()
-  const behandles = behandlingErRedigerbar(behandling.status)
+  const redigerbar = behandlingErRedigerbar(behandling.status)
   const dispatch = useAppDispatch()
   const [lagreBeregningsgrunnlag, postBeregningsgrunnlag] = useApiCall(lagreBeregningsGrunnlag)
   const [beregningsgrunnlag, fetchBeregningsgrunnlag] = useApiCall(hentBeregningsGrunnlag)
@@ -117,7 +117,7 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
       <>
         {visBeregningsmetode && isSuccess(beregningsgrunnlag) && (
           <BeregningsgrunnlagMetode
-            behandles={behandlingErRedigerbar(behandling?.status)}
+            redigerbar={redigerbar}
             grunnlag={beregningsMetodeBeregningsgrunnlag}
             onUpdate={(grunnlag) => {
               setBeregningsMetodeBeregningsgrunnlag({ ...grunnlag })
@@ -146,7 +146,7 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
 
       <Border />
 
-      {behandles ? (
+      {redigerbar ? (
         <BehandlingHandlingKnapper>
           <Button
             variant="primary"

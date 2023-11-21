@@ -29,7 +29,7 @@ export const GyldigFramsattBarnepensjon = ({
     return <div style={{ color: 'red' }}>Kunne ikke hente ut data om søknaden er gyldig framsatt</div>
   }
 
-  const behandles = behandlingErRedigerbar(behandling.status)
+  const redigerbar = behandlingErRedigerbar(behandling.status)
   const innsenderHarForeldreansvar = gyldigFramsatt.vurderinger.find(
     (g: IGyldighetproving) => g.navn === GyldigFramsattType.HAR_FORELDREANSVAR_FOR_BARNET
   )
@@ -69,7 +69,7 @@ export const GyldigFramsattBarnepensjon = ({
         <GyldigFramsattVurdering
           behandlingId={behandling.id}
           gyldigFramsatt={behandling.gyldighetsprøving}
-          redigerbar={behandles}
+          redigerbar={redigerbar}
         />
       </VurderingsContainerWrapper>
     </LovtekstMedLenke>

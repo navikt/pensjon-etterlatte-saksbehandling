@@ -18,7 +18,7 @@ export const GyldigFramsattOmstillingsstoenad = ({
   gyldigFremsattTilStatusIcon: 'success' | 'error' | 'warning'
   behandling: IDetaljertBehandling
 }) => {
-  const behandles = behandlingErRedigerbar(behandling.status)
+  const redigerbar = behandlingErRedigerbar(behandling.status)
   const innsender = behandling.familieforhold?.gjenlevende
   const navn = innsender ? `${innsender.opplysning.fornavn} ${innsender.opplysning.etternavn}` : 'Ukjent'
   const undertekst = formaterKildePdl(innsender?.kilde)
@@ -54,7 +54,7 @@ export const GyldigFramsattOmstillingsstoenad = ({
         <GyldigFramsattVurdering
           behandlingId={behandling.id}
           gyldigFramsatt={behandling.gyldighetsprøving}
-          redigerbar={behandles}
+          redigerbar={redigerbar}
         />
       </VurderingsContainerWrapper>
     </LovtekstMedLenke>

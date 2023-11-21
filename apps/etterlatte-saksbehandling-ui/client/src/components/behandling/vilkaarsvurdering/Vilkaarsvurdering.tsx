@@ -30,7 +30,7 @@ export const Vilkaarsvurdering = (props: { behandling: IBehandlingReducer }) => 
   const { behandlingId } = useParams()
   const dispatch = useAppDispatch()
   const vilkaarsvurdering = behandling.vilkårsprøving
-  const behandles = behandlingErRedigerbar(behandling.status)
+  const redigerbar = behandlingErRedigerbar(behandling.status)
   const [vilkaarsvurderingStatus, fetchVilkaarsvurdering] = useApiCall(hentVilkaarsvurdering)
   const [slettVilkaarsvurderingStatus, slettGammelVilkaarsvurdering] = useApiCall(slettVilkaarsvurdering)
   const [opprettNyVilkaarsvurderingStatus, opprettNyVilkaarsvurdering] = useApiCall(opprettVilkaarsvurdering)
@@ -64,7 +64,7 @@ export const Vilkaarsvurdering = (props: { behandling: IBehandlingReducer }) => 
 
   const visHarGammelVilkaarsvurdering = () =>
     vilkaarsvurdering &&
-    behandles &&
+    redigerbar &&
     !vilkaarsvurderingErPaaNyttRegelverk(vilkaarsvurdering) &&
     behandlingGjelderBarnepensjonPaaNyttRegelverk(behandling)
 
@@ -114,7 +114,7 @@ export const Vilkaarsvurdering = (props: { behandling: IBehandlingReducer }) => 
               vilkaar={value}
               oppdaterVilkaar={(vilkaarsvurdering) => dispatch(updateVilkaarsvurdering(vilkaarsvurdering))}
               behandlingId={behandlingId}
-              redigerbar={behandles && !vilkaarsvurdering.resultat}
+              redigerbar={redigerbar && !vilkaarsvurdering.resultat}
             />
           ))}
           {vilkaarsvurdering.vilkaar.length === 0 && <p>Du har ingen vilkår</p>}
@@ -125,7 +125,7 @@ export const Vilkaarsvurdering = (props: { behandling: IBehandlingReducer }) => 
             vilkaarsvurdering={vilkaarsvurdering}
             oppdaterVilkaar={(vilkaarsvurdering) => dispatch(updateVilkaarsvurdering(vilkaarsvurdering))}
             behandlingId={behandlingId}
-            redigerbar={behandles}
+            redigerbar={redigerbar}
             behandlingstype={behandling.behandlingType}
           />
         </>

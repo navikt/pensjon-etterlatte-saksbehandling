@@ -28,35 +28,6 @@ sealed class RevurderingInfo {
         val grunnForSoeskenjustering: BarnepensjonSoeskenjusteringGrunn,
     ) : RevurderingInfo()
 
-    @JsonTypeName("ADOPSJON")
-    data class Adopsjon(
-        val adoptertAv1: Navn,
-        val adoptertAv2: Navn? = null,
-    ) : RevurderingInfo()
-
-    @JsonTypeName("OMGJOERING_AV_FARSKAP")
-    data class OmgjoeringAvFarskap(
-        val naavaerendeFar: Navn,
-        val forrigeFar: Navn,
-    ) : RevurderingInfo()
-
-    @JsonTypeName("FENGSELSOPPHOLD")
-    data class Fengselsopphold(
-        val fraDato: LocalDate,
-        val tilDato: LocalDate,
-    ) : RevurderingInfo()
-
-    @JsonTypeName("UT_AV_FENGSEL")
-    data class UtAvFengsel(
-        val erEtterbetalingMerEnnTreeMaaneder: Boolean,
-    ) : RevurderingInfo()
-
-    @JsonTypeName("YRKESSKADE")
-    data class Yrkesskade(
-        val dinForelder: String,
-        val yrkesskadeEllerYrkessykdom: String,
-    ) : RevurderingInfo()
-
     @JsonTypeName("INSTITUSJONSOPPHOLD")
     data class Institusjonsopphold(
         val erEtterbetalingMerEnnTreMaaneder: Boolean,

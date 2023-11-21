@@ -21,25 +21,6 @@ export interface SoeskenjusteringInfo {
   type: 'SOESKENJUSTERING'
   grunnForSoeskenjustering: BarnepensjonSoeskenjusteringGrunn
 }
-
-export interface AdopsjonInfo {
-  type: 'ADOPSJON'
-  adoptertAv1: Navn
-  adoptertAv2: Navn | undefined
-}
-
-export interface OmgjoeringAvFarskapInfo {
-  type: 'OMGJOERING_AV_FARSKAP'
-  naavaerendeFar: Navn
-  forrigeFar: Navn
-}
-
-export interface FengselsoppholdInfo {
-  type: 'FENGSELSOPPHOLD'
-  fraDato: Date
-  tilDato: Date
-}
-
 export interface InstitusjonsoppholdInfo {
   type: 'INSTITUSJONSOPPHOLD'
   erEtterbetalingMerEnnTreMaaneder: boolean
@@ -73,9 +54,6 @@ export interface Navn {
 export type RevurderingInfo =
   | RevurderingAarsakAnnen
   | SoeskenjusteringInfo
-  | AdopsjonInfo
-  | OmgjoeringAvFarskapInfo
-  | FengselsoppholdInfo
   | InstitusjonsoppholdInfo
   | SluttbehandlingUtlandInfo
 

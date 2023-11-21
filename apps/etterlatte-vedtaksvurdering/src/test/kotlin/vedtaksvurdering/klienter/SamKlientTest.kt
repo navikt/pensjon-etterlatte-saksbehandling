@@ -37,7 +37,7 @@ class SamKlientTest {
                     ),
             )
 
-        val dto = vedtak.tilSamordneRequest()
+        val dto = vedtak.tilSamordneRequest(false)
 
         dto.virkFom shouldBe of(2024, FEBRUARY).atDay(1)
         dto.virkTom shouldBe of(2024, NOVEMBER).atEndOfMonth()
@@ -65,9 +65,10 @@ class SamKlientTest {
                     ),
             )
 
-        val dto = vedtak.tilSamordneRequest()
+        val dto = vedtak.tilSamordneRequest(true)
 
         dto.virkFom shouldBe of(2024, FEBRUARY).atDay(1)
         dto.virkTom shouldBe null
+        dto.etterbetaling shouldBe true
     }
 }

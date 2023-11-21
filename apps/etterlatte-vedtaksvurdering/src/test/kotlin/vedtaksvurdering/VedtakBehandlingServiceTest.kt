@@ -1097,7 +1097,7 @@ internal class VedtakBehandlingServiceTest {
         val behandlingId = randomUUID()
 
         coEvery { behandlingKlientMock.tilSamordning(behandlingId, attestant, any()) } returns true
-        coEvery { samKlientMock.samordneVedtak(any(), attestant) } returns true
+        coEvery { samKlientMock.samordneVedtak(any(), false, attestant) } returns true
 
         runBlocking {
             repository.opprettVedtak(opprettVedtak(behandlingId = behandlingId, status = VedtakStatus.ATTESTERT))
@@ -1114,7 +1114,7 @@ internal class VedtakBehandlingServiceTest {
         val behandlingId = randomUUID()
 
         coEvery { behandlingKlientMock.tilSamordning(behandlingId, attestant, any()) } returns true
-        coEvery { samKlientMock.samordneVedtak(any(), attestant) } returns false
+        coEvery { samKlientMock.samordneVedtak(any(), false, attestant) } returns false
         coEvery { behandlingKlientMock.samordnet(any(), any(), any()) } returns true
 
         runBlocking {

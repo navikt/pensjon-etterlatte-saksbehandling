@@ -59,7 +59,7 @@ class Vedtakstidslinje(private val vedtak: List<Vedtak>) {
         }
 
         return vedtakByVirkningsdato
-            .filter { (k, _) -> k.tom == null || k.tom!!.isAfter(fomDato) }
+            .filter { (k, _) -> k.tom == null || k.tom == fomDato || k.tom!!.isAfter(fomDato) }
             .map { (k, v) -> v.kopier(k) }
             .sortedBy { it.virkningstidspunkt }
     }

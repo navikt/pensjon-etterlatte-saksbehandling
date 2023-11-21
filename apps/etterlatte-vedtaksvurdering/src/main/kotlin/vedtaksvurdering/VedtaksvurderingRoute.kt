@@ -15,22 +15,14 @@ import io.ktor.server.routing.route
 import no.nav.etterlatte.libs.common.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.behandlingId
-import no.nav.etterlatte.libs.common.beregning.AvkortetYtelseDto
-import no.nav.etterlatte.libs.common.beregning.AvkortingDto
-import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
-import no.nav.etterlatte.libs.common.sak.VedtakSak
 import no.nav.etterlatte.libs.common.sakId
 import no.nav.etterlatte.libs.common.tidspunkt.toNorskTid
 import no.nav.etterlatte.libs.common.vedtak.AttesterVedtakDto
-import no.nav.etterlatte.libs.common.vedtak.Behandling
 import no.nav.etterlatte.libs.common.vedtak.LoependeYtelseDTO
 import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingFattEllerAttesterVedtakDto
 import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingVedtakDto
-import no.nav.etterlatte.libs.common.vedtak.Utbetalingsperiode
 import no.nav.etterlatte.libs.common.vedtak.VedtakSammendragDto
-import no.nav.etterlatte.libs.common.vedtak.VedtakSamordningDto
-import no.nav.etterlatte.libs.common.vedtak.VedtakSamordningPeriode
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.common.withBehandlingId
 import no.nav.etterlatte.libs.common.withSakId
@@ -38,7 +30,6 @@ import no.nav.etterlatte.libs.ktor.AuthorizationPlugin
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlient
 import java.time.LocalDate
-import java.time.YearMonth
 
 fun Route.vedtaksvurderingRoute(
     vedtakService: VedtaksvurderingService,
@@ -234,10 +225,7 @@ fun Route.vedtaksvurderingRoute(
     }
 }
 
-fun Route.samordningsvedtakRoute(
-    vedtakService: VedtaksvurderingService,
-    vedtakBehandlingService: VedtakBehandlingService,
-) {
+fun Route.samordningsvedtakRoute(vedtakSamordningService: VedtakSamordningService) {
     route("/api/samordning/vedtak") {
         install(AuthorizationPlugin) {
             roles = setOf("samordning-read")
@@ -251,19 +239,16 @@ fun Route.samordningsvedtakRoute(
                 call.request.headers["fnr"]?.let { Folkeregisteridentifikator.of(it) }
                     ?: return@get call.respond(HttpStatusCode.BadRequest, "fnr ikke angitt")
 
-            val vedtaksliste = vedtakBehandlingService.finnFerdigstilteVedtak(fnr)
-            val tidslinjeJustert =
-                Vedtakstidslinje(vedtaksliste)
-                    .sammenstill(YearMonth.of(fomDato.year, fomDato.month))
-            call.respond(tidslinjeJustert.map { it.toSamordningsvedtakDto() })
+            val vedtaksliste = vedtakSamordningService.hentVedtaksliste(fnr, fomDato)
+            call.respond(vedtaksliste)
         }
 
         get("/{vedtakId}") {
             val vedtakId = requireNotNull(call.parameters["vedtakId"]).toLong()
 
-            val vedtak = vedtakService.hentVedtak(vedtakId)
+            val vedtak = vedtakSamordningService.hentVedtak(vedtakId)
             if (vedtak != null) {
-                call.respond(vedtak.toSamordningsvedtakDto())
+                call.respond(vedtak)
             } else {
                 call.respond(HttpStatusCode.NoContent)
             }
@@ -326,42 +311,3 @@ private fun LoependeYtelse.toDto() =
     )
 
 data class UnderkjennVedtakDto(val kommentar: String, val valgtBegrunnelse: String)
-
-private fun Vedtak.toSamordningsvedtakDto(): VedtakSamordningDto {
-    val innhold = innhold as VedtakBehandlingInnhold
-    val avkorting = innhold.avkorting?.let { deserialize<AvkortingDto>(it.toString()) }
-
-    return VedtakSamordningDto(
-        vedtakId = id,
-        fnr = soeker.value,
-        status = status,
-        sak = VedtakSak(soeker.value, sakType, sakId),
-        type = type,
-        vedtakFattet = vedtakFattet,
-        attestasjon = attestasjon,
-        behandling =
-            Behandling(
-                innhold.behandlingType,
-                behandlingId,
-                innhold.revurderingAarsak,
-                innhold.revurderingInfo,
-            ),
-        virkningstidspunkt = innhold.virkningstidspunkt,
-        beregning = innhold.beregning,
-        perioder =
-            avkorting?.avkortetYtelse
-                ?.map { it.toSamordningVedtakPeriode(innhold.utbetalingsperioder) }
-                ?: emptyList(),
-    )
-}
-
-private fun AvkortetYtelseDto.toSamordningVedtakPeriode(utbetalingsperioder: List<Utbetalingsperiode>): VedtakSamordningPeriode {
-    val justertPeriode = utbetalingsperioder.first { this.fom == it.periode.fom }
-
-    return VedtakSamordningPeriode(
-        fom = fom,
-        tom = justertPeriode.periode.tom,
-        ytelseFoerAvkorting = ytelseFoerAvkorting,
-        ytelseEtterAvkorting = ytelseEtterAvkorting,
-    )
-}

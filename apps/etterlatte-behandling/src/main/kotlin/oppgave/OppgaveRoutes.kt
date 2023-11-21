@@ -65,7 +65,10 @@ internal fun Route.oppgaveRoutes(
 
             get("/oppgaveunderarbeid") {
                 kunSaksbehandler {
-                    val saksbehandler = inTransaction { service.hentSaksbehandlerForOppgaveUnderArbeid(behandlingId) }
+                    val saksbehandler =
+                        inTransaction {
+                            service.hentSaksbehandlerForOppgaveUnderArbeidByReferanse(behandlingId.toString())
+                        }
                     call.respond(saksbehandler ?: HttpStatusCode.NoContent)
                 }
             }
@@ -165,7 +168,7 @@ internal fun Route.oppgaveRoutes(
         }
     }
 
-    route("/oppgaver/sak/{$SAKID_CALL_PARAMETER}/oppgaver") {
+    route("/oppgaver/sak/{$SAKID_CALL_PARAMETER}/opprett") {
         post {
             kunSystembruker {
                 val nyOppgaveDto = call.receive<NyOppgaveDto>()

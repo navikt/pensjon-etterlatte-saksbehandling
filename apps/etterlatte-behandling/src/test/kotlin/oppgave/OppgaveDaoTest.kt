@@ -64,9 +64,9 @@ internal class OppgaveDaoTest {
     fun `legg til oppgaver og hent oppgaver`() {
         val sakAalesund = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         val oppgaveNy = lagNyOppgave(sakAalesund)
-        oppgaveDao.lagreOppgave(oppgaveNy)
-        oppgaveDao.lagreOppgave(lagNyOppgave(sakAalesund))
-        oppgaveDao.lagreOppgave(lagNyOppgave(sakAalesund))
+        oppgaveDao.opprettOppgave(oppgaveNy)
+        oppgaveDao.opprettOppgave(lagNyOppgave(sakAalesund))
+        oppgaveDao.opprettOppgave(lagNyOppgave(sakAalesund))
 
         val hentOppgaver = oppgaveDao.hentOppgaver(OppgaveType.values().toList())
         assertEquals(3, hentOppgaver.size)
@@ -76,7 +76,7 @@ internal class OppgaveDaoTest {
     fun `opprett oppgave av type ATTESTERING`() {
         val sakAalesund = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         val oppgaveNy = lagNyOppgave(sakAalesund, OppgaveKilde.BEHANDLING, OppgaveType.ATTESTERING)
-        oppgaveDao.lagreOppgave(oppgaveNy)
+        oppgaveDao.opprettOppgave(oppgaveNy)
 
         val hentOppgaver = oppgaveDao.hentOppgaver(OppgaveType.values().toList())
         assertEquals(1, hentOppgaver.size)
@@ -87,7 +87,7 @@ internal class OppgaveDaoTest {
     fun `kan tildelesaksbehandler`() {
         val sakAalesund = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         val oppgaveNy = lagNyOppgave(sakAalesund)
-        oppgaveDao.lagreOppgave(oppgaveNy)
+        oppgaveDao.opprettOppgave(oppgaveNy)
 
         val nySaksbehandler = "nysaksbehandler"
         oppgaveDao.settNySaksbehandler(oppgaveNy.id, nySaksbehandler)
@@ -100,12 +100,12 @@ internal class OppgaveDaoTest {
     fun `Skal ikke kunne hente adressebeskyttede oppgaver fra vanlig hentoppgaver`() {
         val sakAalesund = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         val oppgaveNy = lagNyOppgave(sakAalesund)
-        oppgaveDao.lagreOppgave(oppgaveNy)
+        oppgaveDao.opprettOppgave(oppgaveNy)
         sakDao.oppdaterAdresseBeskyttelse(sakAalesund.id, AdressebeskyttelseGradering.STRENGT_FORTROLIG)
 
         val sakutenbeskyttelse = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         val oppgaveUtenbeskyttelse = lagNyOppgave(sakutenbeskyttelse)
-        oppgaveDao.lagreOppgave(oppgaveUtenbeskyttelse)
+        oppgaveDao.opprettOppgave(oppgaveUtenbeskyttelse)
 
         val hentetOppgave = oppgaveDao.hentOppgaver(OppgaveType.values().toList())
         assertEquals(1, hentetOppgave.size)
@@ -115,7 +115,7 @@ internal class OppgaveDaoTest {
     fun `Skal kunne hente adressebeskyttede oppgaver fra finnOppgaverForStrengtFortroligOgStrengtFortroligUtland`() {
         val sakAalesund = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         val oppgaveNy = lagNyOppgave(sakAalesund)
-        oppgaveDao.lagreOppgave(oppgaveNy)
+        oppgaveDao.opprettOppgave(oppgaveNy)
         sakDao.oppdaterAdresseBeskyttelse(sakAalesund.id, AdressebeskyttelseGradering.STRENGT_FORTROLIG)
 
         val hentetOppgave =

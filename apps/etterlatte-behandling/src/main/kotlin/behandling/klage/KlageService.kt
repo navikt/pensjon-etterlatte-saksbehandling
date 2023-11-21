@@ -224,7 +224,7 @@ class KlageServiceImpl(
             throw IllegalStateException("Klagen med id=$klageId kan ikke ferdigstilles siden den har feil status / tilstand")
         }
 
-        val saksbehandlerForKlageOppgave = oppgaveService.hentSaksbehandlerForOppgaveUnderArbeid(klageId)
+        val saksbehandlerForKlageOppgave = oppgaveService.hentSaksbehandlerForOppgaveUnderArbeidByReferanse(klageId.toString())
         if (saksbehandlerForKlageOppgave != saksbehandler.ident) {
             throw IllegalArgumentException(
                 "Saksbehandler er ikke ansvarlig på oppgaven til klagen med id=$klageId, " +

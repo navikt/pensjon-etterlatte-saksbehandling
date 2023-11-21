@@ -67,7 +67,9 @@ class GrunnlagHenter(
                     personopplysning(person, personDTO, GJENLEVENDE_FORELDER_PDL_V1, PersonRolle.GJENLEVENDE)
                 }
 
-            val vergeAdresseMap = vergeadresserRequester.associate { (fnr, adresse) -> fnr to adresse.await() }
+            val vergeAdresseMap =
+                vergeadresserRequester.associate { (fnr, adresse) -> fnr to adresse.await() }
+                    .filter { it.value != null }
 
             val opplysningList =
                 listOfNotNull(soekerPersonInfo, innsenderPersonInfo)
@@ -142,12 +144,11 @@ class GrunnlagHenter(
             },
         )
 
-    private fun hentVergeadresse(folkeregisteridentifikator: Folkeregisteridentifikator): VergeAdresse {
-        return persondataKlient.hentAdresseForVerge(folkeregisteridentifikator)
-            .toVergeAdresse()
+    private fun hentVergeadresse(folkeregisteridentifikator: Folkeregisteridentifikator): VergeAdresse? {
+        return persondataKlient.hentAdresseForVerge(folkeregisteridentifikator)?.toVergeAdresse()
     }
 
-    private fun vergeAdresserOpplysning(vergeadresserMap: Map<Folkeregisteridentifikator, VergeAdresse>): Grunnlagsopplysning<JsonNode> =
+    private fun vergeAdresserOpplysning(vergeadresserMap: Map<Folkeregisteridentifikator, VergeAdresse?>): Grunnlagsopplysning<JsonNode> =
         Grunnlagsopplysning(
             id = UUID.randomUUID(),
             kilde =

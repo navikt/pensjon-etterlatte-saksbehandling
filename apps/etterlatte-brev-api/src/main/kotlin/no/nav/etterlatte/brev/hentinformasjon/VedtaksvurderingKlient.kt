@@ -4,15 +4,12 @@ import com.github.michaelbull.result.mapBoth
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
 import no.nav.etterlatte.libs.common.deserialize
-import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakNyDto
-import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktorobo.Resource
 import no.nav.etterlatte.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
-import java.time.LocalDate
 import java.util.UUID
 
 class VedtakvurderingKlientException(override val message: String, override val cause: Throwable) :
@@ -49,30 +46,4 @@ class VedtaksvurderingKlient(config: Config, httpClient: HttpClient) {
         }
     }
 
-    internal suspend fun hentInnvilgelsesdato(
-        sakId: Long,
-        brukerTokenInfo: BrukerTokenInfo,
-    ): LocalDate? {
-        try {
-            logger.info("Henter innvilgelsesdato for sak med id $sakId")
-
-            return downstreamResourceClient.get(
-                Resource(clientId, "$resourceUrl/vedtak/$sakId/behandlinger/nyeste/${VedtakType.INNVILGELSE}"),
-                brukerTokenInfo,
-            ).mapBoth(
-                success = { resource ->
-                    resource.response?.toString()?.let {
-                        val deserialize: VedtakDto? = deserialize(it)
-                        deserialize?.vedtakFattet?.tidspunkt?.toLocalDate()
-                    }
-                },
-                failure = { errorResponse -> throw errorResponse },
-            )
-        } catch (e: Exception) {
-            throw VedtakvurderingKlientException(
-                "Henting av innvilgelsesdato for sak med id $sakId feilet",
-                e,
-            )
-        }
-    }
 }

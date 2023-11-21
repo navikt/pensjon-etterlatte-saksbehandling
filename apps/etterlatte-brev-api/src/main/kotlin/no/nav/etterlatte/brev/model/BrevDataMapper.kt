@@ -10,9 +10,7 @@ import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_AVSLAG_E
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_INNVILGELSE
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_INNVILGELSE_ENKEL
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_INNVILGELSE_NY
-import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_REVURDERING_ADOPSJON
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_REVURDERING_ENDRING
-import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_REVURDERING_OMGJOERING_AV_FARSKAP
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_REVURDERING_OPPHOER
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_REVURDERING_SOESKENJUSTERING
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_VEDTAK_OMREGNING
@@ -29,12 +27,10 @@ import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.TILBAKEKREVING_INNHOL
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.TOM_MAL
 import no.nav.etterlatte.brev.brevbaker.RedigerbarTekstRequest
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
-import no.nav.etterlatte.brev.model.bp.AdopsjonRevurderingBrevdata
 import no.nav.etterlatte.brev.model.bp.EndringHovedmalBrevData
 import no.nav.etterlatte.brev.model.bp.InnvilgetBrevData
 import no.nav.etterlatte.brev.model.bp.InnvilgetBrevDataEnkel
 import no.nav.etterlatte.brev.model.bp.InnvilgetHovedmalBrevData
-import no.nav.etterlatte.brev.model.bp.OmgjoeringAvFarskapRevurderingBrevdata
 import no.nav.etterlatte.brev.model.bp.SoeskenjusteringRevurderingBrevdata
 import no.nav.etterlatte.brev.model.oms.AvslagBrevDataOMS
 import no.nav.etterlatte.brev.model.oms.FoerstegangsvedtakUtfallDTO
@@ -50,7 +46,6 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.token.BrukerTokenInfo
-import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
 
@@ -92,8 +87,6 @@ private class BrevDatafetcher(
             type,
             brukerTokenInfo,
         )
-
-    suspend fun hentInnvilgelsesdato() = brevdataFacade.hentInnvilgelsesdato(sak.id, brukerTokenInfo)
 
     suspend fun hentTrygdetid() = brevdataFacade.finnTrygdetid(behandlingId, brukerTokenInfo)
 }
@@ -145,20 +138,16 @@ class BrevDataMapper(
 
                     VedtakType.OPPHOER ->
                         when (generellBrevData.revurderingsaarsak) {
-                            Revurderingaarsak.ADOPSJON ->
-                                BrevkodePar(BARNEPENSJON_REVURDERING_ADOPSJON, BARNEPENSJON_REVURDERING_OPPHOER)
-
+                            Revurderingaarsak.ADOPSJON,
                             Revurderingaarsak.OMGJOERING_AV_FARSKAP ->
-                                BrevkodePar(
-                                    BARNEPENSJON_REVURDERING_OMGJOERING_AV_FARSKAP,
-                                    BARNEPENSJON_REVURDERING_OPPHOER,
-                                )
+                                BrevkodePar(TOM_MAL, BARNEPENSJON_REVURDERING_OPPHOER)
 
                             Revurderingaarsak.FENGSELSOPPHOLD ->
                                 BrevkodePar(TOM_MAL, BARNEPENSJON_REVURDERING_ENDRING)
 
                             Revurderingaarsak.UT_AV_FENGSEL ->
                                 BrevkodePar(TOM_MAL, BARNEPENSJON_REVURDERING_ENDRING)
+
 
                             else -> TODO("Vedtakstype er ikke støttet: $vedtakType")
                         }
@@ -274,28 +263,6 @@ class BrevDataMapper(
 
                     VedtakType.OPPHOER ->
                         when (generellBrevData.revurderingsaarsak) {
-                            Revurderingaarsak.ADOPSJON ->
-                                AdopsjonRevurderingBrevdata.fra(
-                                    generellBrevData,
-                                    LocalDate.now(),
-                                ) // TODO: Denne må vi hente anten frå PDL eller brukarinput
-                            Revurderingaarsak.OMGJOERING_AV_FARSKAP -> {
-                                coroutineScope {
-                                    val innvilgelsesDato =
-                                        async {
-                                            datafetcher(brukerTokenInfo, generellBrevData).hentInnvilgelsesdato()
-                                        }
-                                    val innvilgelsesDatoHentet =
-                                        requireNotNull(
-                                            innvilgelsesDato.await(),
-                                        ) { "${generellBrevData.revurderingsaarsak} må ha en innvigelsesdato fra vedtak type: $vedtakType" }
-                                    OmgjoeringAvFarskapRevurderingBrevdata.fra(
-                                        generellBrevData,
-                                        innvilgelsesDatoHentet,
-                                    )
-                                }
-                            }
-
                             else -> TODO("Vedtakstype er ikke støttet: $vedtakType")
                         }
 

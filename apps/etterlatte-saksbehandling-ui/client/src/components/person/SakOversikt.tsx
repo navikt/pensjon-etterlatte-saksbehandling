@@ -7,10 +7,9 @@ import { FlexRow, GridContainer } from '~shared/styled'
 import Spinner from '~shared/Spinner'
 import RelevanteHendelser from '~components/person/uhaandtereHendelser/RelevanteHendelser'
 import { isFailure, isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
-import { Alert, BodyShort, Heading, Link, Tag } from '@navikt/ds-react'
+import { Alert, BodyShort, Heading, Tag } from '@navikt/ds-react'
 import { SakType } from '~shared/types/sak'
 import { formaterEnumTilLesbarString, formaterSakstype } from '~utils/formattering'
-import { ExternalLinkIcon } from '@navikt/aksel-icons'
 import { FEATURE_TOGGLE_KAN_BRUKE_KLAGE, OpprettKlage } from '~components/person/OpprettKlage'
 import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 import { KlageListe } from '~components/person/KlageListe'
@@ -60,11 +59,6 @@ export const SakOversikt = ({ fnr }: { fnr: string }) => {
             </Heading>
 
             <BodyShort spacing>Denne saken tilhører enhet {sakStatus.data.enhet}.</BodyShort>
-            <BodyShort spacing>
-              <Link href={`/person/${fnr}/sak/${sakStatus.data?.id}/brev`}>
-                Du finner brev tilhørende saken her <ExternalLinkIcon />
-              </Link>
-            </BodyShort>
 
             <hr />
 

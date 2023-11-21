@@ -159,6 +159,7 @@ const OverstyrBeregningGrunnlag = (props: { behandling: IBehandlingReducer; over
                     <Table.HeaderCell scope="col">Periode</Table.HeaderCell>
                     <Table.HeaderCell scope="col">Utbetalt beløp</Table.HeaderCell>
                     <Table.HeaderCell scope="col">Trygdetid</Table.HeaderCell>
+                    <Table.HeaderCell scope="col">Prorata</Table.HeaderCell>
                     <Table.HeaderCell scope="col">Beskrivelse</Table.HeaderCell>
                   </Table.Row>
                 </Table.Header>
@@ -195,6 +196,8 @@ const OverstyrBeregningGrunnlag = (props: { behandling: IBehandlingReducer; over
                       data: {
                         utbetaltBeloep: '0',
                         trygdetid: '0',
+                        prorataBroekNevner: '',
+                        prorataBroekTeller: '',
                         beskrivelse: '',
                       },
                     },
@@ -259,6 +262,15 @@ function feilIOverstyrBeregningperiode(
     feil.push('TRYGDETID_MANGLER')
   }
 
+  const prorataBroekNevner = parseInt(grunnlag.data.prorataBroekNevner ?? '')
+  const prorataBroekTeller = parseInt(grunnlag.data.prorataBroekTeller ?? '')
+
+  if (!isNaN(prorataBroekNevner) || !isNaN(prorataBroekTeller)) {
+    if (isNaN(prorataBroekNevner) || isNaN(prorataBroekTeller) || prorataBroekNevner <= 0 || prorataBroekTeller <= 0) {
+      feil.push('PRORATA_MANGLER')
+    }
+  }
+
   if (grunnlag.tom !== undefined && grunnlag.tom < grunnlag.fom) {
     feil.push('TOM_FOER_FOM')
   }
@@ -293,6 +305,7 @@ export type FeilIPeriodeGrunnlagAlle =
   | 'BELOEP_MANGLER'
   | 'TRYGDETID_MANGLER'
   | 'BESKRIVELSE_MANGLER'
+  | 'PRORATA_MANGLER'
 
 export const teksterFeilIPeriode: Record<FeilIPeriodeGrunnlagAlle, string> = {
   INGEN_PERIODER: 'Minst en periode må finnes',
@@ -304,6 +317,7 @@ export const teksterFeilIPeriode: Record<FeilIPeriodeGrunnlagAlle, string> = {
   BELOEP_MANGLER: 'Utbetalt beløp er påkrevd',
   TRYGDETID_MANGLER: 'Trygdetid er påkrevd',
   BESKRIVELSE_MANGLER: 'Beskrivelse er påkrevd',
+  PRORATA_MANGLER: 'Prorata brøk må ha begge felter fyllt ut hvis det er i bruk',
 } as const
 
 export default OverstyrBeregningGrunnlag

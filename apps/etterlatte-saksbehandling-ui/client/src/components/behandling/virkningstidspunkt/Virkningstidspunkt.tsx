@@ -1,6 +1,6 @@
 import styled from 'styled-components'
 import { ErrorMessage, MonthPicker, useMonthpicker } from '@navikt/ds-react'
-import { useState } from 'react'
+import React, { useState } from 'react'
 import { oppdaterBehandlingsstatus, oppdaterVirkningstidspunkt } from '~store/reducers/BehandlingReducer'
 import { formaterDatoTilYearMonth, formaterStringDato } from '~utils/formattering'
 import { fastsettVirkningstidspunkt } from '~shared/api/behandling'
@@ -16,6 +16,7 @@ import { VurderingsboksWrapper } from '~components/vurderingsboks/Vurderingsboks
 import { SoeknadsoversiktTextArea } from '~components/behandling/soeknadsoversikt/SoeknadsoversiktTextArea'
 import { hentMinimumsVirkningstidspunkt } from '~components/behandling/virkningstidspunkt/utils'
 import { UseMonthPickerOptions } from '@navikt/ds-react/esm/date/hooks/useMonthPicker'
+import { DatoVelger } from '~shared/DatoVelger'
 
 export interface Hjemmel {
   lenke: string
@@ -43,14 +44,6 @@ const Virkningstidspunkt = (props: {
   const [errorTekst, setErrorTekst] = useState<string>('')
 
   const [kravdato, setKravdato] = useState<Date | undefined>(undefined)
-
-  const { monthpickerProps: monthpickerPropsKravdato, inputProps: inputPropsKravdato } = useMonthpicker({
-    fromDate: subYears(new Date(), 18),
-    toDate: addYears(new Date(), 2),
-    inputFormat: 'dd.MM.yyyy',
-    onMonthChange: (date: Date | undefined) => setKravdato(date),
-    defaultSelected: kravdato ?? undefined,
-  })
 
   const avdoedDoedsdato = behandling.familieforhold?.avdoede?.opplysning?.doedsdato
 
@@ -160,9 +153,13 @@ const Virkningstidspunkt = (props: {
               <>
                 {erBosattUtland && (
                   <>
-                    <MonthPicker {...monthpickerPropsKravdato}>
-                      <MonthPicker.Input label="Kravdato" {...inputPropsKravdato} />
-                    </MonthPicker>
+                    <DatoVelger
+                      label="kravdato"
+                      onChange={(date) => setKravdato(date)}
+                      value={kravdato ?? undefined}
+                      fromDate={subYears(new Date(), 18)}
+                      toDate={addYears(new Date(), 2)}
+                    />
                   </>
                 )}
                 <MonthPickerWrapper>

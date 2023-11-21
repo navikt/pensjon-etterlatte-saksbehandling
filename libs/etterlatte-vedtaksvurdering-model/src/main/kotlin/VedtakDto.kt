@@ -130,7 +130,14 @@ data class VedtakSamordningDto(
     val vedtakFattet: VedtakFattet?,
     val attestasjon: Attestasjon?,
     val beregning: ObjectNode?,
-    val avkorting: ObjectNode?,
+    val perioder: List<VedtakSamordningPeriode>,
+)
+
+data class VedtakSamordningPeriode(
+    val fom: YearMonth,
+    val tom: YearMonth?,
+    val ytelseFoerAvkorting: Int,
+    val ytelseEtterAvkorting: Int,
 )
 
 data class TilbakekrevingVedtakDto(

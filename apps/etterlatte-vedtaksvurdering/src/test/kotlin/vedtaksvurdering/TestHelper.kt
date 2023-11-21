@@ -94,6 +94,7 @@ fun vedtak(
     avkorting: ObjectNode? = objectMapper.createObjectNode(),
     revurderingAarsak: Revurderingaarsak? = null,
     status: VedtakStatus = VedtakStatus.OPPRETTET,
+    vedtakFattet: VedtakFattet? = null,
     utbetalingsperioder: List<Utbetalingsperiode>? = null,
 ) = Vedtak(
     id = 1L,
@@ -103,6 +104,7 @@ fun vedtak(
     sakType = SakType.BARNEPENSJON,
     behandlingId = behandlingId,
     type = VedtakType.INNVILGELSE,
+    vedtakFattet = vedtakFattet,
     innhold =
         VedtakBehandlingInnhold(
             behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,

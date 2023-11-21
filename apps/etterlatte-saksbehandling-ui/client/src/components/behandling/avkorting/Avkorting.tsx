@@ -10,14 +10,14 @@ import { YtelseEtterAvkorting } from '~components/behandling/avkorting/YtelseEtt
 import { IBehandlingReducer, oppdaterBehandlingsstatus } from '~store/reducers/BehandlingReducer'
 import { useAppDispatch } from '~store/Store'
 import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
-import { hentBehandlesFraStatus } from '~components/behandling/felles/utils'
+import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
 
 export const Avkorting = (props: { behandling: IBehandlingReducer }) => {
   const behandling = props.behandling
   const dispatch = useAppDispatch()
   const [avkortingStatus, hentAvkortingRequest] = useApiCall(hentAvkorting)
   const [avkorting, setAvkorting] = useState<IAvkorting>()
-  const redigerbar = hentBehandlesFraStatus(behandling.status)
+  const redigerbar = behandlingErRedigerbar(behandling.status)
 
   useEffect(() => {
     if (!avkorting) {

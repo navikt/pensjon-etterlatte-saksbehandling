@@ -6,7 +6,7 @@ import { useJournalfoeringOppgave } from '~components/person/journalfoeringsoppg
 import VelgJournalpost from '~components/person/journalfoeringsoppgave/VelgJournalpost'
 import { Column, Container, GridContainer } from '~shared/styled'
 import styled from 'styled-components'
-import { settNyBehandlingRequest, settBruker, settOppgave } from '~store/reducers/JournalfoeringOppgaveReducer'
+import { settBruker, settNyBehandlingRequest, settOppgave } from '~store/reducers/JournalfoeringOppgaveReducer'
 import { hentOppgave } from '~shared/api/oppgaver'
 import { useAppDispatch } from '~store/Store'
 import StartOppgavebehandling from '~components/person/journalfoeringsoppgave/handling/StartOppgavebehandling'

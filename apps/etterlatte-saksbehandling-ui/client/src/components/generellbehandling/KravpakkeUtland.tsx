@@ -15,13 +15,9 @@ import {
   Textarea,
   TextField,
 } from '@navikt/ds-react'
-import React, { useContext, useEffect, useState } from 'react'
+import React, { Fragment, useContext, useEffect, useState } from 'react'
 import { isFailure, isPending, isPendingOrInitial, isSuccess, mapApiResult, useApiCall } from '~shared/hooks/useApiCall'
-import {
-  attesterGenerellbehandling,
-  oppdaterGenerellBehandling,
-  sendTilAttesteringGenerellBehandling,
-} from '~shared/api/generellbehandling'
+import { oppdaterGenerellBehandling } from '~shared/api/generellbehandling'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { hentAlleLand, ILand, sorterLand } from '~shared/api/trygdetid'
@@ -37,9 +33,10 @@ import { Grunnlagsopplysning } from '~shared/types/grunnlag'
 import { formaterNavn, IPdlPerson } from '~shared/types/Person'
 import { KildePdl } from '~shared/types/kilde'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
-import { useNavigate } from 'react-router-dom'
 import { hentSak } from '~shared/api/sak'
-import { UnderkjenneModal } from '~components/generellbehandling/UnderkjenneModal'
+import { SendtilAttesteringModal } from '~components/generellbehandling/SendtilAttesteringModal'
+import { NavigateFunction } from 'react-router/dist/lib/hooks'
+import { GenerellbehandlingSidemeny } from '~components/generellbehandling/GenerellbehandlingSidemeny'
 
 const TextFieldBegrunnelse = styled(Textarea).attrs({ size: 'medium' })`
   max-width: 40rem;
@@ -54,12 +51,24 @@ const LenkeMargin = styled(Link)`
   margin: 2rem 0rem 0.5rem 0;
 `
 
+export const hentSakOgNavigererTilSaksoversikt = (sakId: number, navigate: NavigateFunction) => {
+  hentSak(sakId)
+    .then((sak) => {
+      if (sak.ok) {
+        navigate(`/person/${sak.data.ident}`)
+      } else {
+        navigate('/')
+      }
+    })
+    .catch(() => {
+      navigate('/')
+    })
+}
+
 const KravpakkeUtland = (props: { utlandsBehandling: Generellbehandling & { innhold: KravpakkeUtland | null } }) => {
   const { utlandsBehandling } = props
   const innhold = utlandsBehandling.innhold
   const [putOppdaterGenerellBehandlingStatus, putOppdaterGenerellBehandling] = useApiCall(oppdaterGenerellBehandling)
-  const [sendTilAttesteringStatus, sendTilAttestering] = useApiCall(sendTilAttesteringGenerellBehandling)
-  const [attesterStatus, attesterFetch] = useApiCall(attesterGenerellbehandling)
   const [avdoedeStatus, avdoedeFetch] = useApiCall(getGrunnlagsAvOpplysningstype)
   const [avdoed, setAvdoed] = useState<Grunnlagsopplysning<IPdlPerson, KildePdl> | null>(null)
 
@@ -106,59 +115,24 @@ const KravpakkeUtland = (props: { utlandsBehandling: Generellbehandling & { innh
     })
   }, [])
 
+  const generellBehandlingMedLocalState: Generellbehandling & { innhold: KravpakkeUtland } = {
+    ...utlandsBehandling,
+    innhold: {
+      type: 'KRAVPAKKE_UTLAND',
+      dokumenter: dokumenter,
+      landIsoKode: valgteLandIsoKode,
+      begrunnelse: notater,
+      rinanummer: rinanummer,
+    },
+  }
+
   const oppaterGenerellbehandlingUtland = () => {
     if (valgtLandIsoKode !== undefined) {
       setErrLand(false)
-      const generellBehandling: Generellbehandling = {
-        ...utlandsBehandling,
-        innhold: {
-          type: 'KRAVPAKKE_UTLAND',
-          dokumenter: dokumenter,
-          landIsoKode: valgteLandIsoKode,
-          begrunnelse: notater,
-          rinanummer: rinanummer,
-        },
-      }
-      putOppdaterGenerellBehandling(generellBehandling)
+      putOppdaterGenerellBehandling(generellBehandlingMedLocalState)
     } else {
       setErrLand(true)
     }
-  }
-  const navigate = useNavigate()
-
-  const hentSakOgNavigererTilSaksoversikt = () => {
-    hentSak(utlandsBehandling.sakId)
-      .then((sak) => {
-        if (sak.ok) {
-          navigate(`/person/${sak.data.ident}`)
-        } else {
-          navigate('/')
-        }
-      })
-      .catch(() => {
-        navigate('/')
-      })
-  }
-  const sendTilAttesteringWrapper = () => {
-    const generellBehandling: Generellbehandling = {
-      ...utlandsBehandling,
-      innhold: {
-        type: 'KRAVPAKKE_UTLAND',
-        dokumenter: dokumenter,
-        landIsoKode: valgteLandIsoKode,
-        begrunnelse: notater,
-        rinanummer: rinanummer,
-      },
-    }
-    sendTilAttestering(generellBehandling, () => {
-      hentSakOgNavigererTilSaksoversikt()
-    })
-  }
-
-  const attesterWrapper = () => {
-    attesterFetch(utlandsBehandling, () => {
-      hentSakOgNavigererTilSaksoversikt()
-    })
   }
 
   const redigerbar = utlandsBehandling.status === Status.OPPRETTET
@@ -265,11 +239,10 @@ const KravpakkeUtland = (props: { utlandsBehandling: Generellbehandling & { innh
                             (kodeverkLand) => kodeverkLand.isoLandkode === landIsoKode
                           )
                           return (
-                            <>
+                            <Fragment key={landIsoKode}>
                               {redigerbar ? (
                                 <Chips.Removable
                                   style={{ cursor: 'pointer' }}
-                                  key={landIsoKode}
                                   variant="action"
                                   onClick={() => {
                                     if (redigerbar) {
@@ -288,7 +261,7 @@ const KravpakkeUtland = (props: { utlandsBehandling: Generellbehandling & { innh
                                   {kodeverkLandMatch?.beskrivelse.tekst ?? landIsoKode}
                                 </Chips.Toggle>
                               )}
-                            </>
+                            </Fragment>
                           )
                         })}
                       </Chips>
@@ -472,32 +445,14 @@ const KravpakkeUtland = (props: { utlandsBehandling: Generellbehandling & { innh
                   >
                     Lagre opplysninger
                   </Button>
-                  <Button
-                    onClick={() => sendTilAttesteringWrapper()}
-                    disabled={isFailure(sendTilAttesteringStatus)}
-                    loading={isPending(sendTilAttesteringStatus)}
-                  >
-                    Send til attestering
-                  </Button>
-                  {isFailure(sendTilAttesteringStatus) && (
-                    <ApiErrorAlert>Klarte ikke å attestere kravpakke utland. Prøv igjen senere.</ApiErrorAlert>
-                  )}
+                  <SendtilAttesteringModal utlandsBehandling={generellBehandlingMedLocalState} />
                 </>
-              )}
-              {utlandsBehandling.status === Status.FATTET && (
-                <ButtonGroup>
-                  <UnderkjenneModal utlandsBehandling={utlandsBehandling} />
-                  <Button onClick={() => attesterWrapper()} loading={isPending(attesterStatus)}>
-                    Attester
-                  </Button>
-                  {isSuccess(attesterStatus) && <Alert variant="success">Behandlingen ble attestert</Alert>}
-                  {isFailure(attesterStatus) && <Alert variant="error">Behandlingen ble ikke attestert</Alert>}
-                </ButtonGroup>
               )}
             </ButtonGroup>
           </Panel>
         </Content>
       </MainContent>
+      <GenerellbehandlingSidemeny utlandsBehandling={generellBehandlingMedLocalState} />
     </GridContainer>
   )
 }

@@ -7,10 +7,12 @@ export default function DokumenterForLand({
   lesevisning,
   landMedDokumenter,
   oppdaterLandMedDokumenter,
+  label = undefined,
 }: {
   lesevisning: boolean
   landMedDokumenter: LandMedDokumenter
   oppdaterLandMedDokumenter: (oppdatertLandMedDokumenter: LandMedDokumenter) => void
+  label?: string
 }) {
   return (
     <div>
@@ -35,6 +37,7 @@ export default function DokumenterForLand({
             dokument={e}
             oppdaterDokument={oppdaterdokumenterForLand}
             fjernDokument={fjernDokumentForLand}
+            label={label}
           />
         )
       })}

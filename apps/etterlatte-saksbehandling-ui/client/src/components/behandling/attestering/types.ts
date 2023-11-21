@@ -4,7 +4,6 @@ export enum IBeslutning {
 }
 
 export enum IReturTypeBehandling {
-  velg = 'Velg',
   inngangsvilkår_feilvurdert = 'Inngangsvilkår feilvurdert',
   feil_i_beregning = 'Feil i beregning',
   feil_i_brev = 'Feil i brev',
@@ -13,7 +12,6 @@ export enum IReturTypeBehandling {
 }
 
 export enum IReturTypeTilbakekreving {
-  velg = 'Velg',
   feil_lovhjemmel = 'Feil lovhjemmel',
   feil_i_beregning = 'Feil i beregning',
   feil_i_brev = 'Feil i brev',

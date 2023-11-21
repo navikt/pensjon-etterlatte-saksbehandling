@@ -32,7 +32,6 @@ export function underkjennGenerellbehandling({
   begrunnelse: string
 }): Promise<ApiResponse<void>> {
   return apiClient.post(`/generellbehandling/underkjenn/${generellbehandling.sakId}/${generellbehandling.id}`, {
-    somebody: 'that I used to know',
     begrunnelse: begrunnelse,
   })
 }

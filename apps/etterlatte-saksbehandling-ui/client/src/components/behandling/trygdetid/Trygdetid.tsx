@@ -105,7 +105,8 @@ export const Trygdetid = ({ redigerbar, behandling, virkningstidspunktEtterNyReg
           Faktisk trygdetid kan gis fra avdøde fylte 16 år til dødsfall. Hadde avdøde opptjent pensjonspoeng fra fylte
           67 år til og med 75 år, gis det også et helt års trygdetid for aktuelle poengår. Fremtidig trygdetid kan gis
           fra dødsfallet til og med kalenderåret avdøde hadde blitt 66 år. Trygdetiden beregnes med maks 40 år. Avdødes
-          utenlandske trygdetid fra avtaleland skal legges til for alternativ prorata-beregning av ytelsen.
+          utenlandske trygdetid fra avtaleland skal legges til for alternativ prorata-beregning av ytelsen. Ulike
+          avtaler skal ikke beregnes sammen.
         </BodyShort>
       </LovtekstMedLenke>
 

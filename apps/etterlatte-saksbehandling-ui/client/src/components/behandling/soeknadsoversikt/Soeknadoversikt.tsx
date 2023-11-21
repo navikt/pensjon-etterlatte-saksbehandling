@@ -5,7 +5,7 @@ import { Heading } from '@navikt/ds-react'
 import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapper'
 import { Soeknadsdato } from './Soeknadsdato'
 import { NesteOgTilbake } from '../handlinger/NesteOgTilbake'
-import { behandlingErUtfylt, hentBehandlesFraStatus } from '../felles/utils'
+import { behandlingErUtfylt, behandlingErRedigerbar } from '../felles/utils'
 import { VurderingsResultat } from '~shared/types/VurderingsResultat'
 import { OversiktGyldigFramsatt } from '~components/behandling/soeknadsoversikt/gyldigFramsattSoeknad/OversiktGyldigFramsatt'
 import { Utenlandstilknytning } from '~components/behandling/soeknadsoversikt/utenlandstilknytning/Utenlandstilknytning'
@@ -29,7 +29,7 @@ import { formaterKildePdl } from '~components/behandling/soeknadsoversikt/utils'
 
 export const Soeknadsoversikt = (props: { behandling: IDetaljertBehandling }) => {
   const { behandling } = props
-  const behandles = hentBehandlesFraStatus(behandling.status)
+  const redigerbar = behandlingErRedigerbar(behandling.status)
   const erGyldigFremsatt = behandling.gyldighetsprøving?.resultat === VurderingsResultat.OPPFYLT
   const avdoedDoedsdato = behandling.familieforhold?.avdoede?.opplysning?.doedsdato
   const avdoedDoedsdatoKilde = behandling.familieforhold?.avdoede?.kilde
@@ -62,14 +62,14 @@ export const Soeknadsoversikt = (props: { behandling: IDetaljertBehandling }) =>
       </ContentHeader>
       <InnholdPadding>
         <OppdaterGrunnlagModal behandlingId={behandling.id} behandlingStatus={behandling.status} />
-        <Utenlandstilknytning behandling={behandling} redigerbar={behandles} />
+        <Utenlandstilknytning behandling={behandling} redigerbar={redigerbar} />
         <OversiktGyldigFramsatt behandling={behandling} />
         {behandling.gyldighetsprøving?.resultat === VurderingsResultat.OPPFYLT && (
           <>
             {behandling.sakType == SakType.BARNEPENSJON && (
               <OversiktKommerBarnetTilgode
                 kommerBarnetTilgode={behandling.kommerBarnetTilgode}
-                redigerbar={behandles}
+                redigerbar={redigerbar}
                 soeker={behandling.søker}
                 gjenlevendeForelder={behandling.familieforhold?.gjenlevende}
                 behandlingId={behandling.id}
@@ -77,7 +77,7 @@ export const Soeknadsoversikt = (props: { behandling: IDetaljertBehandling }) =>
             )}
             <Virkningstidspunkt
               erBosattUtland={erBosattUtland}
-              redigerbar={behandles}
+              redigerbar={redigerbar}
               behandling={behandling}
               hjemler={hjemler}
               beskrivelse={beskrivelse}
@@ -95,14 +95,14 @@ export const Soeknadsoversikt = (props: { behandling: IDetaljertBehandling }) =>
                 ),
               }}
             </Virkningstidspunkt>{' '}
-            <BoddEllerArbeidetUtlandet behandling={behandling} redigerbar={behandles} />
+            <BoddEllerArbeidetUtlandet behandling={behandling} redigerbar={redigerbar} />
           </>
         )}
-        <SkalViseBosattUtland behandling={behandling} />
+        <SkalViseBosattUtland behandling={behandling} redigerbar={redigerbar} />
       </InnholdPadding>
       <Border />
       <Familieforhold behandling={behandling} />
-      {behandles ? (
+      {redigerbar ? (
         <BehandlingHandlingKnapper>
           {behandlingErUtfylt(behandling) && <Start disabled={!erGyldigFremsatt} />}
         </BehandlingHandlingKnapper>

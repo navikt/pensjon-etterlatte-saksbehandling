@@ -2,7 +2,7 @@ import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { AdopsjonInfo, hentUndertypeFraBehandling, Navn, RevurderingInfo } from '~shared/types/RevurderingInfo'
 import React, { FormEvent, useState } from 'react'
 import { BodyShort, Button, Heading } from '@navikt/ds-react'
-import { hentBehandlesFraStatus } from '~components/behandling/felles/utils'
+import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
 import { isFailure, isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
 import { lagreRevurderingInfo } from '~shared/api/revurdering'
 import { ApiErrorAlert } from '~ErrorBoundary'
@@ -23,7 +23,7 @@ export const AdoptertAv = (props: { behandling: IDetaljertBehandling }) => {
   const [feilmelding, setFeilmelding] = useState<string | undefined>(undefined)
   const [begrunnelse, setBegrunnelse] = useState(behandling.revurderinginfo?.begrunnelse ?? '')
   const [lagrestatus, lagre] = useApiCall(lagreRevurderingInfo)
-  const redigerbar = hentBehandlesFraStatus(behandling.status)
+  const redigerbar = behandlingErRedigerbar(behandling.status)
   const handlesubmit = (e: FormEvent) => {
     e.stopPropagation()
     e.preventDefault()

@@ -4,7 +4,7 @@ import { FlexRow } from '~shared/styled'
 import { isFailure, isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
 import { oppdaterGrunnlag } from '~shared/api/behandling'
 import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
-import { hentBehandlesFraStatus } from '~components/behandling/felles/utils'
+import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
 import Spinner from '~shared/Spinner'
 import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 import { ArrowsCirclepathIcon } from '@navikt/aksel-icons'
@@ -20,7 +20,7 @@ export default function OppdaterGrunnlagModal({
 }) {
   const [isOpen, setIsOpen] = useState(false)
   const featureAktiv = useFeatureEnabledMedDefault(FEATURE_TOGGLE_KAN_BRUKE_OPPDATER_GRUNNLAG, false)
-  const behandles = hentBehandlesFraStatus(behandlingStatus)
+  const behandles = behandlingErRedigerbar(behandlingStatus)
   const [oppdatert, apiOppdaterGrunnlag] = useApiCall(oppdaterGrunnlag)
 
   if (!featureAktiv || !behandles) return

@@ -2,7 +2,7 @@ import { Content, ContentHeader } from '~shared/styled'
 import { Alert, BodyShort, Heading } from '@navikt/ds-react'
 import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapper'
 import { NesteOgTilbake } from '../handlinger/NesteOgTilbake'
-import { hentBehandlesFraStatus, requireNotNull } from '../felles/utils'
+import { behandlingErRedigerbar, requireNotNull } from '../felles/utils'
 import Virkningstidspunkt, { Hjemmel } from '~components/behandling/virkningstidspunkt/Virkningstidspunkt'
 import { Start } from '~components/behandling/handlinger/start'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
@@ -87,7 +87,7 @@ const hjemlerOgBeskrivelseBarnepensjon = (revurderingsaarsak: Revurderingaarsak)
 
 export const Revurderingsoversikt = (props: { behandling: IDetaljertBehandling }) => {
   const { behandling } = props
-  const behandles = hentBehandlesFraStatus(behandling.status)
+  const behandles = behandlingErRedigerbar(behandling.status)
   const revurderingsaarsak = requireNotNull(
     behandling.revurderingsaarsak,
     'Kan ikke starte en revurdering uten en revurderingsårsak'

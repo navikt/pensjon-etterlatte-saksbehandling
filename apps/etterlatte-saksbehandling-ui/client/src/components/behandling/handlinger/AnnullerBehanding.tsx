@@ -3,7 +3,7 @@ import { Alert, Button, ExpansionCard, Heading, Modal } from '@navikt/ds-react'
 import { avbrytBehandling } from '~shared/api/behandling'
 import { useNavigate } from 'react-router'
 import { IBehandlingStatus, IBehandlingsType } from '~shared/types/IDetaljertBehandling'
-import { hentBehandlesFraStatus } from '~components/behandling/felles/utils'
+import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
 import { useBehandling } from '~components/behandling/useBehandling'
 import { SakType } from '~shared/types/sak'
 import { isFailure, isPending, useApiCall } from '~shared/hooks/useApiCall'
@@ -22,7 +22,7 @@ export default function AnnullerBehandling() {
   const erFoerstegangsbehandlingOgOmstillingsstoenad =
     behandling?.sakType == SakType.OMSTILLINGSSTOENAD && erFoerstegangsbehandling
 
-  const behandles = hentBehandlesFraStatus(behandling?.status ?? IBehandlingStatus.IVERKSATT)
+  const behandles = behandlingErRedigerbar(behandling?.status ?? IBehandlingStatus.IVERKSATT)
   if (!behandles || erFoerstegangsbehandlingOgOmstillingsstoenad) {
     return null
   }

@@ -10,11 +10,13 @@ export default function SEDLandMedDokumenter({
   landMedDokumenter,
   setLandMedDokumenter,
   resetFeilkoder,
+  redigerbar,
 }: {
   landListe: ILand[]
   landMedDokumenter: LandMedDokumenter[]
   setLandMedDokumenter: React.Dispatch<React.SetStateAction<LandMedDokumenter[]>>
   resetFeilkoder: () => void
+  redigerbar: boolean
 }) {
   return (
     <>
@@ -46,7 +48,7 @@ export default function SEDLandMedDokumenter({
                 landMedDokumenter={landMedDokument}
                 oppdaterLandMedDokumenter={oppdaterLandMedDokumenter}
                 landListe={landListe}
-                lesevisning={false}
+                lesevisning={!redigerbar}
               />
             )
             return (
@@ -60,6 +62,7 @@ export default function SEDLandMedDokumenter({
                 </Table.DataCell>
                 <Table.DataCell scope="row">
                   <Button
+                    disabled={!redigerbar}
                     variant="tertiary"
                     icon={<TrashIcon />}
                     onClick={() => fjernLand()}
@@ -74,6 +77,7 @@ export default function SEDLandMedDokumenter({
         </Table.Body>
       </Table>
       <Button
+        disabled={!redigerbar}
         style={{ marginTop: '1rem' }}
         onClick={() => {
           setLandMedDokumenter((landMedDokumenter) => {

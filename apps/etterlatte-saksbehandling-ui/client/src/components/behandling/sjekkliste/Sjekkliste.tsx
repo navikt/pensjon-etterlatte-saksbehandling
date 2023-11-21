@@ -18,7 +18,7 @@ import {
   VStack,
 } from '@navikt/ds-react'
 import { ConfigContext } from '~clientConfig'
-import { hentBehandlesFraStatus } from '~components/behandling/felles/utils'
+import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
 import { ISjekklisteItem } from '~shared/types/Sjekkliste'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import debounce from 'lodash/debounce'
@@ -59,7 +59,7 @@ export const Sjekkliste = ({ behandling }: { behandling: IBehandlingReducer }) =
   useEffect(() => {
     const erSammeIdent = saksbehandlerGjeldendeOppgave === innloggetSaksbehandler.ident
     setOppgaveErTildeltInnloggetBruker(erSammeIdent)
-    setRedigerbar(hentBehandlesFraStatus(behandling.status) && erSammeIdent)
+    setRedigerbar(behandlingErRedigerbar(behandling.status) && erSammeIdent)
   }, [])
 
   return (

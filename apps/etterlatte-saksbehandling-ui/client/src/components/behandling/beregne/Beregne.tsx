@@ -1,6 +1,6 @@
 import { Content, ContentHeader, FlexRow } from '~shared/styled'
 import { Border, HeadingWrapper } from '../soeknadsoversikt/styled'
-import { behandlingSkalSendeBrev, hentBehandlesFraStatus } from '../felles/utils'
+import { behandlingSkalSendeBrev, behandlingErRedigerbar } from '../felles/utils'
 import { formaterStringDato } from '~utils/formattering'
 import { useVedtaksResultat } from '../useVedtaksResultat'
 import { useAppDispatch } from '~store/Store'
@@ -38,7 +38,7 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
   const virkningstidspunkt = behandling.virkningstidspunkt?.dato
     ? formaterStringDato(behandling.virkningstidspunkt.dato)
     : undefined
-  const behandles = hentBehandlesFraStatus(behandling.status)
+  const behandles = behandlingErRedigerbar(behandling.status)
   const erOpphoer = behandling.vilkårsprøving?.resultat?.utfall == VilkaarsvurderingResultat.IKKE_OPPFYLT
   const vedtaksresultat =
     behandling.behandlingType !== IBehandlingsType.MANUELT_OPPHOER ? useVedtaksResultat() : 'opphoer'

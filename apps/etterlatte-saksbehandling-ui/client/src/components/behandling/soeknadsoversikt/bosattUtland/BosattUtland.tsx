@@ -17,9 +17,11 @@ import { AWhite } from '@navikt/ds-tokens/dist/tokens'
 export const BosattUtland = ({
   behandlingId,
   bosattutland,
+  redigerbar,
 }: {
   behandlingId: string
   bosattutland: Bosattutland | null
+  redigerbar: boolean
 }) => {
   const dispatch = useAppDispatch()
   const [hentAlleLandRequest, fetchAlleLand] = useApiCall(hentAlleLand)
@@ -37,11 +39,7 @@ export const BosattUtland = ({
   const initalStateLandMedDokumenterMottatte = [
     {
       landIsoKode: undefined,
-      dokumenter: [
-        { dokumenttype: 'P5000', dato: undefined, kommentar: '' },
-        { dokumenttype: 'P6000', dato: undefined, kommentar: '' },
-        { dokumenttype: 'P2100', dato: undefined, kommentar: '' },
-      ],
+      dokumenter: [],
     },
   ]
   const [landMedDokumenterMottatte, setLandMedDokumenterMottatte] = useState<LandMedDokumenter[]>(
@@ -53,7 +51,7 @@ export const BosattUtland = ({
   const initalStateLandMedDokumenter = [
     {
       landIsoKode: undefined,
-      dokumenter: [{ dokumenttype: 'P8000', dato: undefined, kommentar: '' }],
+      dokumenter: [],
     },
   ]
   const [landMedDokumenter, setLandMedDokumenter] = useState<LandMedDokumenter[]>(
@@ -119,6 +117,7 @@ export const BosattUtland = ({
             setLandMedDokumenterMottatte={setLandMedDokumenterMottatte}
             rinanummer={rinanummer}
             setRinanummer={setRinanummer}
+            redigerbar={redigerbar}
           />
           <SendteSeder
             landliste={alleLandKodeverk as ILand[]}
@@ -126,10 +125,15 @@ export const BosattUtland = ({
             setFeilkoder={setFeilkoder}
             landMedDokumenter={landMedDokumenter}
             setLandMedDokumenter={setLandMedDokumenter}
+            redigerbar={redigerbar}
           />
           {isFailure(lagreBosattutlandStatus) && <ApiErrorAlert>Klarte ikke å lagre bosatt utland</ApiErrorAlert>}
           <div style={{ marginTop: '2rem' }}>
-            <Button onClick={() => lagreBosattutlandApiWrapper()} loading={isPending(lagreBosattutlandStatus)}>
+            <Button
+              disabled={!redigerbar}
+              onClick={() => lagreBosattutlandApiWrapper()}
+              loading={isPending(lagreBosattutlandStatus)}
+            >
               {visLagretOk ? (
                 <div style={{ minWidth: '148px', minHeight: '24px' }}>
                   <CheckmarkCircleIcon

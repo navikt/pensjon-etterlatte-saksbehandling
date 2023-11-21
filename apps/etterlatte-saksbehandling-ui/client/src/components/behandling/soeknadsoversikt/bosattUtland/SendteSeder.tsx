@@ -10,12 +10,14 @@ export const SendteSeder = ({
   setFeilkoder,
   setLandMedDokumenter,
   landMedDokumenter,
+  redigerbar,
 }: {
   landliste: ILand[]
   feilkoder: Set<string>
   setFeilkoder: React.Dispatch<React.SetStateAction<Set<string>>>
   landMedDokumenter: LandMedDokumenter[]
   setLandMedDokumenter: React.Dispatch<React.SetStateAction<LandMedDokumenter[]>>
+  redigerbar: boolean
 }) => {
   return (
     <>
@@ -38,6 +40,7 @@ export const SendteSeder = ({
         landMedDokumenter={landMedDokumenter}
         setLandMedDokumenter={setLandMedDokumenter}
         resetFeilkoder={() => setFeilkoder(new Set([]))}
+        redigerbar={redigerbar}
       />
     </>
   )

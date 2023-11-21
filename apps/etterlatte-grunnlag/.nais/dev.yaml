@@ -68,7 +68,7 @@ spec:
     - name: PDLTJENESTER_URL
       value: http://etterlatte-pdltjenester
     - name: PERSONDATA_URL
-      value: https://pensjon-persondata-q2.dev.intern.nav.no
+      value: https://pensjon-persondata-q2.dev-fss-pub.nais.io
     - name: PERSONDATA_OUTBOUND_SCOPE
       value: api://dev-fss.pensjon-person.pensjon-persondata-q2/.default
   envFrom:
@@ -87,10 +87,7 @@ spec:
       rules:
         - application: etterlatte-behandling
         - application: etterlatte-pdltjenester
-        - application: pensjon-persondata-q2
-          namespace: pensjon-person
-          cluster: dev-fss
       external:
         - host: etterlatte-unleash-api.nav.cloud.nais.io
-        - host: pensjon-persondata-q2.dev.intern.nav.no
+        - host: pensjon-persondata-q2.dev-fss-pub.nais.io
 

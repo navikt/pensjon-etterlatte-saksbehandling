@@ -17,7 +17,7 @@
       <env name="PDLTJENESTER_AZURE_SCOPE" value="api://dev-gcp.etterlatte.etterlatte-pdltjenester/.default" />
       <env name="PDLTJENESTER_URL" value="https://etterlatte-pdltjenester.intern.dev.nav.no" />
       <env name="PERSONDATA_OUTBOUND_SCOPE" value="api://dev-fss.pensjon-person.pensjon-persondata-q2/.default" />
-      <env name="PERSONDATA_URL" value="https://pensjon-persondata-q2.dev.intern.nav.no" />
+      <env name="PERSONDATA_URL" value="https://pensjon-persondata-q2.dev-fss-pub.nais.io" />
     </envs>
     <option name="MAIN_CLASS_NAME" value="no.nav.etterlatte.ApplicationKt" />
     <module name="pensjon-etterlatte-saksbehandling.apps.etterlatte-grunnlag.main" />

@@ -104,9 +104,6 @@ spec:
       rules:
         - application: etterlatte-behandling
         - application: etterlatte-pdltjenester
-        - application: pensjon-persondata
-          namespace: pensjon-person
-          cluster: prod-fss
       external:
         - host: etterlatte-unleash-api.nav.cloud.nais.io
         - host: pensjon-persondata.prod-fss-pub.nais.io

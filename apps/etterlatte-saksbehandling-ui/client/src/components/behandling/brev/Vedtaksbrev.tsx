@@ -10,7 +10,7 @@ import styled from 'styled-components'
 import { SendTilAttesteringModal } from '../handlinger/sendTilAttesteringModal'
 import {
   behandlingSkalSendeBrev,
-  hentBehandlesFraStatus,
+  behandlingErRedigerbar,
   manueltBrevKanRedigeres,
   sisteBehandlingHendelse,
 } from '~components/behandling/felles/utils'
@@ -147,7 +147,7 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
       <SjekklisteValideringErrorSummary />
 
       <BehandlingHandlingKnapper>
-        {hentBehandlesFraStatus(status) && (
+        {behandlingErRedigerbar(status) && (
           <SendTilAttesteringModal behandlingId={props.behandling.id} fattVedtakApi={fattVedtak} />
         )}
       </BehandlingHandlingKnapper>

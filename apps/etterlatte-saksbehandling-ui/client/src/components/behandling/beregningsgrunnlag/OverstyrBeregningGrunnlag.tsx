@@ -8,7 +8,7 @@ import {
 import { HeadingWrapper } from '../soeknadsoversikt/styled'
 import { Button, ErrorSummary, Heading, Table } from '@navikt/ds-react'
 import styled from 'styled-components'
-import { hentBehandlesFraStatus } from '../felles/utils'
+import { behandlingErRedigerbar } from '../felles/utils'
 import { useFieldArray, useForm } from 'react-hook-form'
 import {
   FEIL_I_PERIODE,
@@ -44,7 +44,7 @@ import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 
 const OverstyrBeregningGrunnlag = (props: { behandling: IBehandlingReducer; overstyrBeregning: OverstyrBeregning }) => {
   const { behandling, overstyrBeregning } = props
-  const behandles = hentBehandlesFraStatus(behandling?.status)
+  const behandles = behandlingErRedigerbar(behandling?.status)
   const [visFeil, setVisFeil] = useState(false)
   const [visOkLagret, setVisOkLagret] = useState(false)
   const perioder = useAppSelector((state) => state.behandlingReducer.behandling?.overstyrBeregning?.perioder)

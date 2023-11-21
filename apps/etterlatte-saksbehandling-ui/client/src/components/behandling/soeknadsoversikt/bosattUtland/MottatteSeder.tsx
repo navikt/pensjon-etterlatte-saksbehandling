@@ -14,6 +14,7 @@ export const MottatteSeder = ({
   setLandMedDokumenterMottatte,
   rinanummer,
   setRinanummer,
+  redigerbar,
 }: {
   landliste: ILand[]
   feilkoder: Set<string>
@@ -22,6 +23,7 @@ export const MottatteSeder = ({
   setLandMedDokumenterMottatte: React.Dispatch<React.SetStateAction<LandMedDokumenter[]>>
   rinanummer: string
   setRinanummer: React.Dispatch<React.SetStateAction<string>>
+  redigerbar: boolean
 }) => {
   const resetFeilkoder = () => setFeilkoderMottatte(new Set([]))
   return (
@@ -46,6 +48,7 @@ export const MottatteSeder = ({
       </BodyShort>
       <div style={{ width: '12rem', maxWidth: '20rem', margin: '2rem 0rem' }}>
         <TextField
+          disabled={!redigerbar}
           label="Saksnummer RINA"
           value={rinanummer}
           onChange={(e) => {
@@ -59,6 +62,8 @@ export const MottatteSeder = ({
         landMedDokumenter={landMedDokumenterMottatte}
         setLandMedDokumenter={setLandMedDokumenterMottatte}
         resetFeilkoder={resetFeilkoder}
+        redigerbar={redigerbar}
+        label="Mottatt dato"
       />
     </>
   )

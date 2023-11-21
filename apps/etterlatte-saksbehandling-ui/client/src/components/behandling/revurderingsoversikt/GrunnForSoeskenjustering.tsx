@@ -9,7 +9,7 @@ import {
 } from '~shared/types/RevurderingInfo'
 import React, { FormEvent, useState } from 'react'
 import { BodyShort, Button, Heading, Select } from '@navikt/ds-react'
-import { hentBehandlesFraStatus } from '~components/behandling/felles/utils'
+import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
 import { isFailure, isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
 import { lagreRevurderingInfo } from '~shared/api/revurdering'
 import { ApiErrorAlert } from '~ErrorBoundary'
@@ -26,7 +26,7 @@ export const GrunnForSoeskenjustering = (props: { behandling: IDetaljertBehandli
   const [feilmelding, setFeilmelding] = useState<string | undefined>(undefined)
   const [begrunnelse, setBegrunnelse] = useState(behandling.revurderinginfo?.begrunnelse ?? '')
   const [lagrestatus, lagre] = useApiCall(lagreRevurderingInfo)
-  const redigerbar = hentBehandlesFraStatus(behandling.status)
+  const redigerbar = behandlingErRedigerbar(behandling.status)
   const harEndretInfo =
     soeskenjusteringInfo?.grunnForSoeskenjustering !== null &&
     valgtSoeskenjustering !== soeskenjusteringInfo?.grunnForSoeskenjustering

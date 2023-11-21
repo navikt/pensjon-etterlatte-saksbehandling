@@ -1,7 +1,7 @@
 import { Button } from '@navikt/ds-react'
 import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapper'
 import { useBehandlingRoutes } from '../BehandlingRoutes'
-import { hentBehandlesFraStatus } from '../felles/utils'
+import { behandlingErRedigerbar } from '../felles/utils'
 import { NesteOgTilbake } from '../handlinger/NesteOgTilbake'
 import { useAppDispatch } from '~store/Store'
 import {
@@ -37,7 +37,7 @@ const BeregningsgrunnlagOmstillingsstoenad = (props: { behandling: IBehandlingRe
   const { behandling } = props
   const { next } = useBehandlingRoutes()
   const dispatch = useAppDispatch()
-  const behandles = hentBehandlesFraStatus(behandling.status)
+  const redigerbar = behandlingErRedigerbar(behandling.status)
   const [beregningsgrunnlag, fetchBeregningsgrunnlag] = useApiCall(hentBeregningsGrunnlagOMS)
   const [lagreBeregningsgrunnlagOMS, postBeregningsgrunnlag] = useApiCall(lagreBeregningsGrunnlagOMS)
   const [endreBeregning, postOpprettEllerEndreBeregning] = useApiCall(opprettEllerEndreBeregning)
@@ -93,7 +93,7 @@ const BeregningsgrunnlagOmstillingsstoenad = (props: { behandling: IBehandlingRe
       <>
         {isSuccess(beregningsgrunnlag) && (
           <BeregningsgrunnlagMetode
-            behandles={hentBehandlesFraStatus(behandling?.status)}
+            redigerbar={redigerbar}
             grunnlag={beregningsMetodeBeregningsgrunnlag}
             onUpdate={(grunnlag) => {
               setBeregningsMetodeBeregningsgrunnlag({ ...grunnlag })
@@ -114,7 +114,7 @@ const BeregningsgrunnlagOmstillingsstoenad = (props: { behandling: IBehandlingRe
 
       <Border />
 
-      {behandles ? (
+      {redigerbar ? (
         <BehandlingHandlingKnapper>
           <Button
             variant="primary"

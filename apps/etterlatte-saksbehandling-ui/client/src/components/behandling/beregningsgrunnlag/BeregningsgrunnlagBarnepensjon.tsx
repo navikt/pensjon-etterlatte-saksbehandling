@@ -1,7 +1,7 @@
 import { Button } from '@navikt/ds-react'
 import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapper'
 import { useBehandlingRoutes } from '../BehandlingRoutes'
-import { hentBehandlesFraStatus } from '../felles/utils'
+import { behandlingErRedigerbar } from '../felles/utils'
 import { NesteOgTilbake } from '../handlinger/NesteOgTilbake'
 import { useAppDispatch } from '~store/Store'
 import { hentBeregningsGrunnlag, lagreBeregningsGrunnlag, opprettEllerEndreBeregning } from '~shared/api/beregning'
@@ -40,7 +40,7 @@ const featureToggleNameBrukFaktiskTrygdetid = 'pensjon-etterlatte.bp-bruk-faktis
 const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer }) => {
   const { behandling } = props
   const { next } = useBehandlingRoutes()
-  const behandles = hentBehandlesFraStatus(behandling.status)
+  const redigerbar = behandlingErRedigerbar(behandling.status)
   const dispatch = useAppDispatch()
   const [lagreBeregningsgrunnlag, postBeregningsgrunnlag] = useApiCall(lagreBeregningsGrunnlag)
   const [beregningsgrunnlag, fetchBeregningsgrunnlag] = useApiCall(hentBeregningsGrunnlag)
@@ -117,7 +117,7 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
       <>
         {visBeregningsmetode && isSuccess(beregningsgrunnlag) && (
           <BeregningsgrunnlagMetode
-            behandles={hentBehandlesFraStatus(behandling?.status)}
+            redigerbar={redigerbar}
             grunnlag={beregningsMetodeBeregningsgrunnlag}
             onUpdate={(grunnlag) => {
               setBeregningsMetodeBeregningsgrunnlag({ ...grunnlag })
@@ -146,7 +146,7 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
 
       <Border />
 
-      {behandles ? (
+      {redigerbar ? (
         <BehandlingHandlingKnapper>
           <Button
             variant="primary"

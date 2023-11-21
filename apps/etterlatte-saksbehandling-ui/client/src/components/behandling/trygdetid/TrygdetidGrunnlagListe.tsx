@@ -64,9 +64,13 @@ export const TrygdetidGrunnlagListe: React.FC<Props> = ({
         </Heading>
       </FlexHeader>
       {trygdetidGrunnlagType == ITrygdetidGrunnlagType.FAKTISK ? (
-        <p>Legg til trygdetid fra avdøde var 16 år frem til hen døde.</p>
+        <p>Legg til aktuell trygdetid fra aktuelt land fra avdøde var 16 år frem til og med måneden før hen døde.</p>
       ) : (
-        <p>Legg til trygdetid fra dødsdato til og med kalenderåret avdøde hadde blitt 66 år.</p>
+        <p>
+          Det registreres maks fremtidig trygdetid fra dødsdato til og med kalenderåret avdøde hadde blitt 66 år. Denne
+          vil automatisk bli justert i beregningen hvis faktisk trygdetid er mindre enn 4/5 av opptjeningstiden. Hvis
+          det er annen grunn for reduksjon av fremtidig trygdetid må perioden redigeres.
+        </p>
       )}
       {trygdetidGrunnlagListe.length > 0 && (
         <TableWrapper>

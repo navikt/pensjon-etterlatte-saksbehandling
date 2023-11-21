@@ -39,7 +39,7 @@ export const MottatteSeder = ({
       <Heading level="2" size="medium" style={{ marginTop: '2rem' }} spacing>
         Mottatt krav fra utland
       </Heading>
-      <BodyShort spacing>Fyll inn hvilke SED som er mottatt i RINA pr land.</BodyShort>
+      <BodyShort spacing>Fyll inn hvilke SED som er mottatt i RINA pr. land.</BodyShort>
       <Alert variant="info">
         Det kan hende det allerede ligger P5000/P6000 i avdødes sak. Sjekk opp i dette før du etterspør info.
       </Alert>

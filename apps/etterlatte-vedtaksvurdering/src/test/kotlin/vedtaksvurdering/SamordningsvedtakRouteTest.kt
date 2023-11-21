@@ -14,6 +14,8 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.confirmVerified
 import io.mockk.mockk
+import no.nav.etterlatte.libs.common.beregning.AvkortingDto
+import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.vedtaksvurdering.VedtakBehandlingService
@@ -71,7 +73,17 @@ class SamordningsvedtakRouteTest {
 
     @Test
     fun `skal returnere vedtak naar token har noedvendig rolle og vedtak eksisterer`() {
-        coEvery { vedtaksvurderingService.hentVedtak(1234) } returns vedtak()
+        coEvery { vedtaksvurderingService.hentVedtak(1234) } returns
+            vedtak(
+                avkorting =
+                    objectMapper.valueToTree(
+                        AvkortingDto(
+                            avkortingGrunnlag = emptyList(),
+                            avkortetYtelse = emptyList(),
+                            tidligereAvkortetYtelse = emptyList(),
+                        ),
+                    ),
+            )
 
         testApplication {
             environment { config = applicationConfig }

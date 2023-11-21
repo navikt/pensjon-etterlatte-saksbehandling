@@ -15,6 +15,9 @@ import io.ktor.server.routing.route
 import no.nav.etterlatte.libs.common.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.behandlingId
+import no.nav.etterlatte.libs.common.beregning.AvkortetYtelseDto
+import no.nav.etterlatte.libs.common.beregning.AvkortingDto
+import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.VedtakSak
 import no.nav.etterlatte.libs.common.sakId
@@ -24,8 +27,10 @@ import no.nav.etterlatte.libs.common.vedtak.Behandling
 import no.nav.etterlatte.libs.common.vedtak.LoependeYtelseDTO
 import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingFattEllerAttesterVedtakDto
 import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingVedtakDto
+import no.nav.etterlatte.libs.common.vedtak.Utbetalingsperiode
 import no.nav.etterlatte.libs.common.vedtak.VedtakSammendragDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakSamordningDto
+import no.nav.etterlatte.libs.common.vedtak.VedtakSamordningPeriode
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.common.withBehandlingId
 import no.nav.etterlatte.libs.common.withSakId
@@ -324,6 +329,8 @@ data class UnderkjennVedtakDto(val kommentar: String, val valgtBegrunnelse: Stri
 
 private fun Vedtak.toSamordningsvedtakDto(): VedtakSamordningDto {
     val innhold = innhold as VedtakBehandlingInnhold
+    val avkorting = innhold.avkorting?.let { deserialize<AvkortingDto>(it.toString()) }
+
     return VedtakSamordningDto(
         vedtakId = id,
         fnr = soeker.value,
@@ -340,8 +347,21 @@ private fun Vedtak.toSamordningsvedtakDto(): VedtakSamordningDto {
                 innhold.revurderingInfo,
             ),
         virkningstidspunkt = innhold.virkningstidspunkt,
-        utbetalingsperioder = innhold.utbetalingsperioder,
         beregning = innhold.beregning,
-        avkorting = innhold.avkorting,
+        perioder =
+            avkorting?.avkortetYtelse
+                ?.map { it.toSamordningVedtakPeriode(innhold.utbetalingsperioder) }
+                ?: emptyList(),
+    )
+}
+
+private fun AvkortetYtelseDto.toSamordningVedtakPeriode(utbetalingsperioder: List<Utbetalingsperiode>): VedtakSamordningPeriode {
+    val justertPeriode = utbetalingsperioder.first { this.fom == it.periode.fom }
+
+    return VedtakSamordningPeriode(
+        fom = fom,
+        tom = justertPeriode.periode.tom,
+        ytelseFoerAvkorting = ytelseFoerAvkorting,
+        ytelseEtterAvkorting = ytelseEtterAvkorting,
     )
 }

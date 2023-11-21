@@ -12,8 +12,6 @@ import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.beregning.AvkortetYtelseDto
-import no.nav.etterlatte.libs.common.beregning.AvkortingDto
 import no.nav.etterlatte.libs.common.beregning.BeregningDTO
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
 import no.nav.etterlatte.libs.common.beregning.Beregningstype
@@ -23,15 +21,12 @@ import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.VedtakSak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.Behandling
-import no.nav.etterlatte.libs.common.vedtak.Periode
-import no.nav.etterlatte.libs.common.vedtak.Utbetalingsperiode
-import no.nav.etterlatte.libs.common.vedtak.UtbetalingsperiodeType
 import no.nav.etterlatte.libs.common.vedtak.VedtakSamordningDto
+import no.nav.etterlatte.libs.common.vedtak.VedtakSamordningPeriode
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
-import java.math.BigDecimal
 import java.time.YearMonth.now
 import java.util.UUID
 
@@ -72,22 +67,24 @@ class SamordningVedtakServiceTest {
 
     @Test
     fun `skal mappe vedtak med to perioder, hvor nr 1 er lukket og nr 2 er aapen`() {
-        val periodeFirst = Periode(fom = now(), tom = now())
-        val periodeSecond = Periode(fom = now().plusMonths(1), tom = null)
-
         val vedtak =
             vedtak(
                 vedtakId = 456L,
                 beregning = beregning(trygdetid = 32),
-                avkorting =
-                    avkorting(
-                        periodeFirst,
-                        periodeSecond,
-                    ),
                 utbetalingsperioder =
                     listOf(
-                        Utbetalingsperiode(id = 1, periodeFirst, beloep = BigDecimal(2500), type = UtbetalingsperiodeType.UTBETALING),
-                        Utbetalingsperiode(id = 2, periodeSecond, beloep = BigDecimal(2800), type = UtbetalingsperiodeType.UTBETALING),
+                        VedtakSamordningPeriode(
+                            fom = now(),
+                            tom = now(),
+                            ytelseFoerAvkorting = 13000,
+                            ytelseEtterAvkorting = 12000,
+                        ),
+                        VedtakSamordningPeriode(
+                            fom = now().plusMonths(1),
+                            tom = null,
+                            ytelseFoerAvkorting = 13000,
+                            ytelseEtterAvkorting = 12000,
+                        ),
                     ),
             )
         coEvery { vedtakKlient.hentVedtak(456L, MaskinportenTpContext(tpnrSPK, ORGNO)) } returns vedtak
@@ -135,12 +132,12 @@ class SamordningVedtakServiceTest {
                 vedtak(
                     vedtakId = 123L,
                     beregning = beregning(trygdetid = 32),
-                    avkorting = avkorting(),
+                    utbetalingsperioder = emptyList(),
                 ),
                 vedtak(
                     vedtakId = 234L,
                     beregning = beregning(trygdetid = 40),
-                    avkorting = avkorting(),
+                    utbetalingsperioder = emptyList(),
                 ),
             )
 
@@ -166,8 +163,7 @@ fun vedtak(
     vedtakId: Long? = null,
     sakstype: SakType = SakType.OMSTILLINGSSTOENAD,
     beregning: BeregningDTO? = null,
-    avkorting: AvkortingDto? = null,
-    utbetalingsperioder: List<Utbetalingsperiode> = emptyList(),
+    utbetalingsperioder: List<VedtakSamordningPeriode> = emptyList(),
 ): VedtakSamordningDto =
     VedtakSamordningDto(
         vedtakId = vedtakId ?: 5678L,
@@ -179,9 +175,8 @@ fun vedtak(
         type = VedtakType.INNVILGELSE,
         vedtakFattet = null,
         attestasjon = null,
-        utbetalingsperioder = utbetalingsperioder,
+        perioder = utbetalingsperioder,
         beregning = beregning?.let { objectMapper.valueToTree(it) },
-        avkorting = avkorting?.let { objectMapper.valueToTree(it) },
     )
 
 fun beregning(trygdetid: Int = 40) =
@@ -202,23 +197,4 @@ fun beregning(trygdetid: Int = 40) =
                 ),
             ),
         overstyrBeregning = null,
-    )
-
-fun avkorting(vararg perioder: Periode) =
-    AvkortingDto(
-        avkortingGrunnlag = emptyList(),
-        avkortetYtelse = perioder.map { avkortetYtelse(it) },
-        tidligereAvkortetYtelse = emptyList(),
-    )
-
-private fun avkortetYtelse(periode: Periode) =
-    AvkortetYtelseDto(
-        id = null,
-        fom = periode.fom,
-        tom = periode.tom,
-        type = "",
-        ytelseFoerAvkorting = 13000,
-        avkortingsbeloep = 1000,
-        ytelseEtterAvkorting = 12000,
-        restanse = 0,
     )

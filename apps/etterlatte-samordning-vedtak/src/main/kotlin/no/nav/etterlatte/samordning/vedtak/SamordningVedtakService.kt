@@ -2,13 +2,11 @@ package no.nav.etterlatte.samordning.vedtak
 
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.beregning.AvkortetYtelseDto
-import no.nav.etterlatte.libs.common.beregning.AvkortingDto
 import no.nav.etterlatte.libs.common.beregning.BeregningDTO
 import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
-import no.nav.etterlatte.libs.common.vedtak.Utbetalingsperiode
 import no.nav.etterlatte.libs.common.vedtak.VedtakSamordningDto
+import no.nav.etterlatte.libs.common.vedtak.VedtakSamordningPeriode
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
@@ -64,7 +62,6 @@ class SamordningVedtakService(
 
     private fun VedtakSamordningDto.mapSamordningsvedtak(): SamordningVedtakDto {
         val beregning = beregning?.let { deserialize<BeregningDTO>(it.toString()) }
-        val avkorting = avkorting?.let { deserialize<AvkortingDto>(it.toString()) }
 
         return SamordningVedtakDto(
             vedtakId = vedtakId,
@@ -75,10 +72,9 @@ class SamordningVedtakService(
             aarsak = behandling.revurderingsaarsak?.toSamordningsvedtakAarsak(),
             anvendtTrygdetid = beregning?.beregningsperioder?.first()?.trygdetid ?: 0,
             perioder =
-                avkorting?.avkortetYtelse
-                    ?.map { it.toSamordningVedtakPeriode(this.utbetalingsperioder) }
-                    ?.sortedBy { it.fom }
-                    ?: emptyList(),
+                perioder
+                    .map { it.toSamordningVedtakPeriode() }
+                    .sortedBy { it.fom },
         )
     }
 
@@ -100,12 +96,10 @@ class SamordningVedtakService(
         }.name
     }
 
-    private fun AvkortetYtelseDto.toSamordningVedtakPeriode(utbetalingsperioder: List<Utbetalingsperiode>): SamordningVedtakPeriode {
-        val justertPeriode = utbetalingsperioder.first { this.fom == it.periode.fom }
-
+    private fun VedtakSamordningPeriode.toSamordningVedtakPeriode(): SamordningVedtakPeriode {
         return SamordningVedtakPeriode(
             fom = fom.atStartOfMonth(),
-            tom = justertPeriode.periode.tom?.atEndOfMonth(),
+            tom = tom?.atEndOfMonth(),
             omstillingsstoenadBrutto = ytelseFoerAvkorting,
             omstillingsstoenadNetto = ytelseEtterAvkorting,
         )

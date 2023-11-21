@@ -23,10 +23,12 @@ export default function SluttbehandlingUtland({
   sakId,
   revurderingId,
   sluttbehandlingUtland,
+  redigerbar,
 }: {
   sakId: number
   revurderingId: string
   sluttbehandlingUtland: SluttbehandlingUtlandInfo | undefined
+  redigerbar: boolean
 }) {
   const [kravpakkeStatus, hentKravpakke] = useApiCall(hentKravpakkeforSak)
   const [hentAlleLandRequest, fetchAlleLand] = useApiCall(hentAlleLand)
@@ -157,6 +159,7 @@ export default function SluttbehandlingUtland({
       {isPending(hentAlleLandRequest) && <Spinner visible={true} label="Henter land" />}
       {isSuccess(hentAlleLandRequest) && alleLandKodeverk && (
         <SEDLandMedDokumenter
+          redigerbar={redigerbar}
           landListe={alleLandKodeverk}
           landMedDokumenter={landMedDokumenter}
           setLandMedDokumenter={setLandMedDokumenter}

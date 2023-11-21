@@ -87,7 +87,7 @@ const hjemlerOgBeskrivelseBarnepensjon = (revurderingsaarsak: Revurderingaarsak)
 
 export const Revurderingsoversikt = (props: { behandling: IDetaljertBehandling }) => {
   const { behandling } = props
-  const behandles = behandlingErRedigerbar(behandling.status)
+  const redigerbar = behandlingErRedigerbar(behandling.status)
   const revurderingsaarsak = requireNotNull(
     behandling.revurderingsaarsak,
     'Kan ikke starte en revurdering uten en revurderingsårsak'
@@ -129,6 +129,7 @@ export const Revurderingsoversikt = (props: { behandling: IDetaljertBehandling }
             sakId={behandling.sakId}
             revurderingId={behandling.id}
             sluttbehandlingUtland={behandling.revurderinginfo?.revurderingInfo as SluttbehandlingUtlandInfo | undefined}
+            redigerbar={redigerbar}
           />
         )}
         {behandling.revurderingsaarsak === Revurderingaarsak.SOESKENJUSTERING && (
@@ -142,7 +143,7 @@ export const Revurderingsoversikt = (props: { behandling: IDetaljertBehandling }
 
         <Virkningstidspunkt
           erBosattUtland={false}
-          redigerbar={behandles}
+          redigerbar={redigerbar}
           behandling={behandling}
           hjemler={hjemler}
           beskrivelse={beskrivelse}
@@ -151,7 +152,7 @@ export const Revurderingsoversikt = (props: { behandling: IDetaljertBehandling }
         </Virkningstidspunkt>
       </InnholdPadding>
       <Border />
-      {behandles ? (
+      {redigerbar ? (
         <BehandlingHandlingKnapper>
           <Start disabled={behandling.virkningstidspunkt === null} />
         </BehandlingHandlingKnapper>

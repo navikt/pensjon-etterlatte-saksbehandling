@@ -15,7 +15,7 @@ type Props = {
   erFattet: boolean
 }
 
-export const Attestering = ({ setBeslutning, beslutning, vedtak, erFattet }: Props) => {
+export const AttesteringEllerUnderkjenning = ({ setBeslutning, beslutning, vedtak, erFattet }: Props) => {
   const { lastPage } = useBehandlingRoutes()
   const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.saksbehandler)
   const saksbehandlerForGjeldendeOppgave = useSaksbehandlerGjeldendeOppgave()
@@ -24,7 +24,7 @@ export const Attestering = ({ setBeslutning, beslutning, vedtak, erFattet }: Pro
 
   useEffect(() => {
     setOppgaveErTildeltInnloggetBruker(saksbehandlerForGjeldendeOppgave === innloggetSaksbehandler.ident)
-  }, [])
+  }, [saksbehandlerForGjeldendeOppgave, innloggetSaksbehandler.ident, beslutning])
 
   return (
     <SidebarPanel>

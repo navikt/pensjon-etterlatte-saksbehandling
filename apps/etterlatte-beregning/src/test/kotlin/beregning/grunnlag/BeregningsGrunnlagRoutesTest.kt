@@ -541,6 +541,8 @@ internal class BeregningsGrunnlagRoutesTest {
                     datoTOM = LocalDate.now().minusYears(6L),
                     utbetaltBeloep = 123L,
                     trygdetid = 10L,
+                    prorataBroekTeller = null,
+                    prorataBroekNevner = null,
                     sakId = 1L,
                     beskrivelse = "test periode 1",
                     kilde =
@@ -556,6 +558,8 @@ internal class BeregningsGrunnlagRoutesTest {
                     datoTOM = null,
                     utbetaltBeloep = 456L,
                     trygdetid = 20L,
+                    prorataBroekTeller = 10,
+                    prorataBroekNevner = 20,
                     sakId = 1L,
                     beskrivelse = "test periode 2",
                     kilde =
@@ -645,6 +649,8 @@ internal class BeregningsGrunnlagRoutesTest {
                     datoTOM = LocalDate.now().minusYears(6L),
                     utbetaltBeloep = 123L,
                     trygdetid = 10L,
+                    prorataBroekTeller = null,
+                    prorataBroekNevner = null,
                     sakId = 222L,
                     beskrivelse = "test periode 1",
                     kilde =
@@ -660,6 +666,8 @@ internal class BeregningsGrunnlagRoutesTest {
                     datoTOM = null,
                     utbetaltBeloep = 456L,
                     trygdetid = 20L,
+                    prorataBroekTeller = null,
+                    prorataBroekNevner = null,
                     sakId = 222L,
                     beskrivelse = "test periode 2",
                     kilde =
@@ -693,6 +701,8 @@ internal class BeregningsGrunnlagRoutesTest {
                                         OverstyrBeregningGrunnlagData(
                                             utbetaltBeloep = 123L,
                                             trygdetid = 10L,
+                                            prorataBroekTeller = null,
+                                            prorataBroekNevner = null,
                                             beskrivelse = "test periode 1",
                                         ),
                                     fom = LocalDate.now().minusYears(12L),
@@ -703,6 +713,8 @@ internal class BeregningsGrunnlagRoutesTest {
                                         OverstyrBeregningGrunnlagData(
                                             utbetaltBeloep = 456L,
                                             trygdetid = 20L,
+                                            prorataBroekTeller = null,
+                                            prorataBroekNevner = null,
                                             beskrivelse = "test periode 2",
                                         ),
                                     fom = LocalDate.now().minusYears(6L),

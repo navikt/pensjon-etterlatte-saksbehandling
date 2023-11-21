@@ -154,7 +154,7 @@ const Virkningstidspunkt = (props: {
                 {erBosattUtland && (
                   <>
                     <DatoVelger
-                      label="kravdato"
+                      label="Kravdato"
                       onChange={(date) => setKravdato(date)}
                       value={kravdato ?? undefined}
                       fromDate={subYears(new Date(), 18)}

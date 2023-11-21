@@ -38,6 +38,18 @@ internal class PesysRepository(private val dataSource: DataSource) : Transaction
         )
     }
 
+    fun lagreManuellMigrering(
+        pesysId: Long,
+        tx: TransactionalSession? = null,
+    ) = tx.session {
+        opprett(
+            "INSERT INTO pesyssak(id,sak,status) VALUES(:id,:sak::jsonb,:status)" +
+                " ON CONFLICT(id) DO UPDATE SET sak=excluded.sak, status=excluded.status",
+            mapOf("id" to pesysId, "status" to Migreringsstatus.UNDER_MIGRERING_MANUELT.name, "sak" to "{}".toJson()),
+            "Lagra pesyssak $pesysId i migreringsbasen manuelt",
+        )
+    }
+
     fun oppdaterStatus(
         id: PesysId,
         status: Migreringsstatus,

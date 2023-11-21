@@ -14,4 +14,5 @@ data class NyBehandlingRequest(
     val mottattDato: String,
     val spraak: String,
     val kilde: Vedtaksloesning?,
+    val pesysid: Long?,
 )

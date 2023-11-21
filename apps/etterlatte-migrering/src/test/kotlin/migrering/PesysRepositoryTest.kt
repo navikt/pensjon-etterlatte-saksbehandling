@@ -71,6 +71,16 @@ class PesysRepositoryTest {
         assertEquals(nyBehandlingId, nyKobling!!.behandlingId)
     }
 
+    @Test
+    fun `lagre manuell migrering`() {
+        val pesysId = 123L
+
+        repository.lagreManuellMigrering(pesysId)
+        val manuellMigrering = repository.hentStatus(pesysId)
+
+        assertEquals(Migreringsstatus.UNDER_MIGRERING_MANUELT, manuellMigrering)
+    }
+
     private fun sakMedKobling(
         pesyssak: Pesyssak,
         behandlingsId: UUID,

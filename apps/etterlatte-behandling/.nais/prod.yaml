@@ -124,6 +124,10 @@ spec:
       value: prod-fss.oppgavehandtering.oppgave
     - name: OPPGAVE_URL
       value: https://oppgave.prod-fss-pub.nais.io
+    - name: ETTERLATTE_MIGRERING_URL
+      value: http://etterlatte-migrering
+    - name: ETTERLATTE_MIGRERING_OUTBOUND_SCOPE
+      value: api://prod-gcp.etterlatte.etterlatte-migrering/.default
   envFrom:
     - secret: my-application-unleash-api-token
   accessPolicy:
@@ -134,6 +138,7 @@ spec:
         - application: etterlatte-pdltjenester
         - application: etterlatte-grunnlag
         - application: skjermede-personer-pip
+        - application: etterlatte-migrering
         - application: etterlatte-vedtaksvurdering
           namespace: nom
       external:

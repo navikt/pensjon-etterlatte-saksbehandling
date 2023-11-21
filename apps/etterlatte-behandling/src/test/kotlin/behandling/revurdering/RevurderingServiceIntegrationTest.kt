@@ -416,6 +416,7 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
                 hendelseDao = applicationContext.hendelseDao,
                 behandlingHendelser = hendelser,
                 featureToggleService = featureToggleService,
+                migreringKlient = mockk(),
             )
 
         val (sak, behandling) = opprettSakMedFoerstegangsbehandling(fnr, behandlingFactory)
@@ -703,6 +704,7 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
                 hendelseDao = applicationContext.hendelseDao,
                 behandlingHendelser = applicationContext.behandlingsHendelser,
                 featureToggleService = applicationContext.featureToggleService,
+                migreringKlient = mockk(),
             )
         val (sak, behandling) = opprettSakMedFoerstegangsbehandling(fnr, behandlingFactory)
         val hentOppgaverForSak = inTransaction { applicationContext.oppgaveService.hentOppgaverForSak(sak.id) }
@@ -830,6 +832,7 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
                 hendelseDao = applicationContext.hendelseDao,
                 behandlingHendelser = applicationContext.behandlingsHendelser,
                 featureToggleService = applicationContext.featureToggleService,
+                migreringKlient = mockk(),
             )
 
         val (sak, _) = opprettSakMedFoerstegangsbehandling(fnr, behandlingFactory)
@@ -875,6 +878,7 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
                 hendelseDao = applicationContext.hendelseDao,
                 behandlingHendelser = applicationContext.behandlingsHendelser,
                 featureToggleService = applicationContext.featureToggleService,
+                migreringKlient = mockk(),
             )
 
         val (sak, _) = opprettSakMedFoerstegangsbehandling(fnr, behandlingFactory)
@@ -918,6 +922,7 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
                 hendelseDao = applicationContext.hendelseDao,
                 behandlingHendelser = applicationContext.behandlingsHendelser,
                 featureToggleService = applicationContext.featureToggleService,
+                migreringKlient = mockk(),
             )
 
         val (sak, _) = opprettSakMedFoerstegangsbehandling(fnr, behandlingFactory)
@@ -963,6 +968,7 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
                 hendelseDao = applicationContext.hendelseDao,
                 behandlingHendelser = applicationContext.behandlingsHendelser,
                 featureToggleService = applicationContext.featureToggleService,
+                migreringKlient = mockk(),
             )
 
         val (sak, _) = opprettSakMedFoerstegangsbehandling(fnr, behandlingFactory)
@@ -1010,6 +1016,7 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
                 hendelseDao = applicationContext.hendelseDao,
                 behandlingHendelser = applicationContext.behandlingsHendelser,
                 featureToggleService = applicationContext.featureToggleService,
+                migreringKlient = mockk(),
             )
 
         val (sak, behandling) = opprettSakMedFoerstegangsbehandling(fnr, behandlingFactory)

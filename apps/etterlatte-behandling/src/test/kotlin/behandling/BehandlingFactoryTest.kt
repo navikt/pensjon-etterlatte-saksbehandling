@@ -9,6 +9,7 @@ import io.mockk.mockk
 import io.mockk.runs
 import io.mockk.slot
 import io.mockk.verify
+import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.Context
 import no.nav.etterlatte.DatabaseKontekst
 import no.nav.etterlatte.Kontekst
@@ -109,6 +110,7 @@ class BehandlingFactoryTest {
             hendelseDaoMock,
             behandlingHendelserKafkaProducerMock,
             featureToggleService,
+            mockk(),
         )
 
     @BeforeEach
@@ -623,15 +625,18 @@ class BehandlingFactoryTest {
         } returns mockOppgave
 
         val resultat =
-            behandlingFactory.opprettSakOgBehandlingForOppgave(
-                NyBehandlingRequest(
-                    sak.sakType,
-                    persongalleri,
-                    LocalDateTime.now().toString(),
-                    "nb",
-                    Vedtaksloesning.GJENNY,
-                ),
-            )
+            runBlocking {
+                behandlingFactory.opprettSakOgBehandlingForOppgave(
+                    NyBehandlingRequest(
+                        sak.sakType,
+                        persongalleri,
+                        LocalDateTime.now().toString(),
+                        "nb",
+                        Vedtaksloesning.GJENNY,
+                        null,
+                    ),
+                )
+            }
 
         Assertions.assertEquals(opprettetBehandling, resultat)
         Assertions.assertEquals(opprettetBehandling.sak, resultat.sak)

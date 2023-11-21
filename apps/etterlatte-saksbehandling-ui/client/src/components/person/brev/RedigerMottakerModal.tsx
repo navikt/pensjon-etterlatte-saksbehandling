@@ -103,7 +103,6 @@ export default function RedigerMottakerModal({ brev, oppdater }: Props) {
                 setMottaker({ ...mottaker, adresse: { ...mottaker.adresse, adresseType: e.target.value } })
               }
               value={mottaker.adresse?.adresseType || ''}
-              required
             >
               <option value="">Velg type</option>
               <option value="NORSKPOSTADRESSE">Norsk postadresse</option>
@@ -121,7 +120,6 @@ export default function RedigerMottakerModal({ brev, oppdater }: Props) {
                 })
               }
               value={mottaker.adresse?.adresselinje1 || ''}
-              required
             />
             <TextField
               label="Adresselinje 2"
@@ -183,7 +181,6 @@ export default function RedigerMottakerModal({ brev, oppdater }: Props) {
               pattern="[A-Z]{2}"
               minLength={2}
               maxLength={2}
-              required
             />
             <TextField
               label="Land"
@@ -194,7 +191,6 @@ export default function RedigerMottakerModal({ brev, oppdater }: Props) {
                 })
               }
               value={mottaker.adresse?.land || ''}
-              required
             />
           </SkjemaGruppe>
 

@@ -52,8 +52,8 @@ export default function FullfoerOppgaveModal({ oppgave, behandlingBehov }: Modal
           </BodyShort>
 
           <BodyLong spacing>
-            Når du ferdigstiller journalføringsoppgaven vil det bli opprettet en ny behandling for brukeren. Etter
-            opprettelse må du selv avslutte oppgaven i Gosys og ferdigstille journalposten.
+            Når du ferdigstiller journalføringsoppgaven vil det bli opprettet en ny behandling for brukeren og oppgaven
+            ferdigstilles.
           </BodyLong>
 
           {isSuccess(opprettBehandlingStatus) && isSuccess(ferdigstillOppgaveStatus) ? (

@@ -2,8 +2,8 @@ package no.nav.etterlatte.brev.model.bp
 
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
-import no.nav.etterlatte.brev.model.AvslagBrevData
 import no.nav.etterlatte.brev.model.BrevData
+import no.nav.etterlatte.brev.model.BrevDataValidator.valider
 import no.nav.etterlatte.brev.model.EndringBrevData
 import no.nav.etterlatte.brev.model.EtterbetalingBrev
 import no.nav.etterlatte.brev.model.EtterbetalingDTO
@@ -44,7 +44,7 @@ data class SoeskenjusteringRevurderingBrevdata(
             utbetalingsinfo: Utbetalingsinfo,
         ): SoeskenjusteringRevurderingBrevdata {
             val revurderingsinfo =
-                AvslagBrevData.valider<RevurderingInfo.Soeskenjustering>(
+                valider<RevurderingInfo.Soeskenjustering>(
                     generellBrevData.revurderingsaarsak,
                     generellBrevData.forenkletVedtak.revurderingInfo,
                     Revurderingaarsak.SOESKENJUSTERING,

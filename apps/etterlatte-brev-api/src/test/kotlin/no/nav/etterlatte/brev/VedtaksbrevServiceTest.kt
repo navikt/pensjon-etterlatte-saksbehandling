@@ -203,7 +203,6 @@ internal class VedtaksbrevServiceTest {
                 "OMSTILLINGSSTOENAD,ENDRING,MANUELL",
                 "BARNEPENSJON,INNVILGELSE,AUTOMATISK",
                 "BARNEPENSJON,OPPHOER,MANUELL",
-                "BARNEPENSJON,AVSLAG,MANUELL",
                 "BARNEPENSJON,ENDRING,MANUELL",
             ],
         )

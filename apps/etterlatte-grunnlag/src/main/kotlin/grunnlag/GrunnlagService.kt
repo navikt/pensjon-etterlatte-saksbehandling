@@ -93,7 +93,7 @@ interface GrunnlagService {
 
     fun hentHistoriskForeldreansvar(behandlingId: UUID): Grunnlagsopplysning<JsonNode>?
 
-    fun hentVergeadresse(folkeregisteridentifikator: Folkeregisteridentifikator): VergeAdresse?
+    fun hentVergeadresse(folkeregisteridentifikator: String): VergeAdresse?
 }
 
 class RealGrunnlagService(
@@ -231,7 +231,7 @@ class RealGrunnlagService(
         return historiskForeldreansvar
     }
 
-    override fun hentVergeadresse(folkeregisteridentifikator: Folkeregisteridentifikator): VergeAdresse? {
+    override fun hentVergeadresse(folkeregisteridentifikator: String): VergeAdresse? {
         return persondataKlient.hentAdresseForVerge(folkeregisteridentifikator)
             ?.toVergeAdresse()
     }

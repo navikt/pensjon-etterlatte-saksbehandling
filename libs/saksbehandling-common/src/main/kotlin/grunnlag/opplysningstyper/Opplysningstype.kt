@@ -45,5 +45,5 @@ enum class Opplysningstype {
 
     HISTORISK_FORELDREANSVAR,
 
-    VERGES_ADRESSER,
+    VERGES_ADRESSE,
 }

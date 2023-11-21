@@ -68,7 +68,7 @@ fun Route.personRoute(
 
         post("vergeadresse") {
             withFoedselsnummer(behandlingKlient) { fnr ->
-                when (val adresse = grunnlagService.hentVergeadresse(fnr)) {
+                when (val adresse = grunnlagService.hentVergeadresse(fnr.value)) {
                     null -> call.respond(HttpStatusCode.NotFound)
                     else -> call.respond(adresse)
                 }

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class VergeAdresse(
+    val navn: String?,
     val adresseType: String,
     val adresselinje1: String? = null,
     val adresselinje2: String? = null,

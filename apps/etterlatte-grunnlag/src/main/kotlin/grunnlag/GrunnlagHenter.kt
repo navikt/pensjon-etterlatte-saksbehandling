@@ -17,7 +17,6 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.GJENLEVENDE_FORELDER_PDL_V1
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
-import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -47,12 +46,12 @@ class GrunnlagHenter(
                     ?.let { innsenderFnr ->
                         hentPersonAsync(innsenderFnr, PersonRolle.INNSENDER, sakType)
                     }
+            val vergesAdresse = hentVergesAdresseAsync(persongalleri)
 
             val soekerPersonInfo =
                 soeker.let { (person, personDTO) ->
                     personopplysning(person, personDTO, Opplysningstype.SOEKER_PDL_V1, soekerRolle(sakType))
                 }
-            val vergeadresserRequester = hentVergeadresserAsync(soekerPersonInfo)
 
             val innsenderPersonInfo =
                 innsender?.let { (person, personDTO) ->
@@ -67,9 +66,7 @@ class GrunnlagHenter(
                     personopplysning(person, personDTO, GJENLEVENDE_FORELDER_PDL_V1, PersonRolle.GJENLEVENDE)
                 }
 
-            val vergeAdresseMap =
-                vergeadresserRequester.associate { (fnr, adresse) -> fnr to adresse.await() }
-                    .filter { it.value != null }
+            val vergesAdresseInfo = vergesAdresse.await()
 
             val opplysningList =
                 listOfNotNull(soekerPersonInfo, innsenderPersonInfo)
@@ -87,19 +84,15 @@ class GrunnlagHenter(
                         )
                 }
 
-            val saksopplysninger = mutableListOf(opplysningsbehov.persongalleri.tilGrunnlagsopplysning())
-            if (vergeAdresseMap.isNotEmpty()) {
-                saksopplysninger.add(vergeAdresserOpplysning(vergeAdresseMap))
-            }
+            val saksopplysninger =
+                listOfNotNull(
+                    opplysningsbehov.persongalleri.tilGrunnlagsopplysning(),
+                    vergesAdresseInfo?.let { vergeAdresserOpplysning(vergesAdresseInfo.toVergeAdresse()) },
+                )
 
             HentetGrunnlag(personopplysninger, saksopplysninger)
         }
     }
-
-    private fun CoroutineScope.hentVergeadresserAsync(soekerPersonInfo: GrunnlagsopplysningerPersonPdl) =
-        (soekerPersonInfo.person.vergemaalEllerFremtidsfullmakt ?: emptyList())
-            .mapNotNull { it.vergeEllerFullmektig.motpartsPersonident }
-            .map { Pair(it, async { hentVergeadresse(it) }) }
 
     private suspend fun personopplysning(
         person: Deferred<Person>,
@@ -144,11 +137,12 @@ class GrunnlagHenter(
             },
         )
 
-    private fun hentVergeadresse(folkeregisteridentifikator: Folkeregisteridentifikator): VergeAdresse? {
-        return persondataKlient.hentAdresseForVerge(folkeregisteridentifikator)?.toVergeAdresse()
-    }
+    private fun CoroutineScope.hentVergesAdresseAsync(persongalleri: Persongalleri) =
+        async {
+            persondataKlient.hentAdresseForVerge(persongalleri.soeker)
+        }
 
-    private fun vergeAdresserOpplysning(vergeadresserMap: Map<Folkeregisteridentifikator, VergeAdresse?>): Grunnlagsopplysning<JsonNode> =
+    private fun vergeAdresserOpplysning(vergeadresse: VergeAdresse): Grunnlagsopplysning<JsonNode> =
         Grunnlagsopplysning(
             id = UUID.randomUUID(),
             kilde =
@@ -157,9 +151,9 @@ class GrunnlagHenter(
                     registersReferanse = null,
                     opplysningId = null,
                 ),
-            opplysningType = Opplysningstype.VERGES_ADRESSER,
+            opplysningType = Opplysningstype.VERGES_ADRESSE,
             meta = objectMapper.createObjectNode(),
-            opplysning = vergeadresserMap.toJsonNode(),
+            opplysning = vergeadresse.toJsonNode(),
             fnr = null,
             periode = null,
         )

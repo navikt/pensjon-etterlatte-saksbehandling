@@ -14,7 +14,6 @@ import io.ktor.http.contentType
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.grunnlag.adresse.PersondataAdresse
 import no.nav.etterlatte.libs.common.RetryResult
-import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.retry
 import org.slf4j.LoggerFactory
 
@@ -30,34 +29,46 @@ class PersondataKlient(private val httpClient: HttpClient, private val apiUrl: S
 
      * @see <a href="https://pensjon-dokumentasjon.intern.dev.nav.no/pensjon-persondata/main/index.html#_adresse_api">
      * Pensjondata dokumentasjon</a>. */
-    fun hentAdresseForVerge(folkeregisteridentifikator: Folkeregisteridentifikator): PersondataAdresse? {
-        val request = ""
+    fun hentAdresseForVerge(vergehaverFnr: String): PersondataAdresse? {
         try {
-            return runBlocking {
-                retry<PersondataAdresse>(times = 3) {
-                    httpClient.get("$apiUrl/api/adresse/kontaktadresse") {
-                        parameter("checkForVerge", true)
-                        header("pid", folkeregisteridentifikator.value)
-                        accept(Json)
-                        contentType(Json)
-                        setBody(request)
-                    }.body()
-                }.let {
-                    when (it) {
-                        is RetryResult.Success -> it.content
-                        is RetryResult.Failure -> throw it.samlaExceptions()
-                    }
-                }
+            val kontaktadresse = hentKontaktadresse(vergehaverFnr)
+
+            return if (erVergesAdresse(kontaktadresse)) {
+                kontaktadresse
+            } else {
+                null
             }
         } catch (e: ClientRequestException) {
             when (e.response.status) {
                 HttpStatusCode.NotFound -> return null
             }
-            logger.error("Feil i henting av vergeadresser", e)
+            logger.error("Feil i henting av vergeadresse", e)
             return null
         } catch (e: Exception) {
-            logger.error("Feil i henting av vergeadresser", e)
+            logger.error("Feil i henting av vergeadresse", e)
             return null
         }
     }
+
+    private fun hentKontaktadresse(vergehaverFnr: String): PersondataAdresse {
+        return runBlocking {
+            retry<PersondataAdresse>(times = 3) {
+                httpClient.get("$apiUrl/api/adresse/kontaktadresse") {
+                    parameter("checkForVerge", true)
+                    header("pid", vergehaverFnr)
+                    accept(Json)
+                    contentType(Json)
+                    setBody("")
+                }.body()
+            }.let {
+                when (it) {
+                    is RetryResult.Success -> it.content
+                    is RetryResult.Failure -> throw it.samlaExceptions()
+                }
+            }
+        }
+    }
+
+    private fun erVergesAdresse(adresse: PersondataAdresse) =
+        listOf("VERGE_PERSON_POSTADRESSE", "VERGE_SAMHANDLER_POSTADRESSE").contains(adresse.type)
 }

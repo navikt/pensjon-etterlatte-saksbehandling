@@ -4,16 +4,18 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class PersondataAdresse(
-    val navn: String,
     val adresselinjer: List<String>,
+    val type: String,
     val land: String?,
     val landkode: String?,
+    val navn: String?,
     val postnr: String?,
     val poststed: String?,
-    val type: String,
+    val vergePid: String?,
 ) {
     fun toVergeAdresse(): VergeAdresse {
         return VergeAdresse(
+            navn = navn,
             adresseType =
                 when (toLandkode()) {
                     LANDKODE_NORGE -> "NORSKPOSTADRESSE"

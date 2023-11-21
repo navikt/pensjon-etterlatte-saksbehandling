@@ -41,6 +41,7 @@ export const SendteSeder = ({
         setLandMedDokumenter={setLandMedDokumenter}
         resetFeilkoder={() => setFeilkoder(new Set([]))}
         redigerbar={redigerbar}
+        label="Sendt dato"
       />
     </>
   )

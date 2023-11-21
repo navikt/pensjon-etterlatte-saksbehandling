@@ -11,12 +11,14 @@ export default function SEDLandMedDokumenter({
   setLandMedDokumenter,
   resetFeilkoder,
   redigerbar,
+  label = undefined,
 }: {
   landListe: ILand[]
   landMedDokumenter: LandMedDokumenter[]
   setLandMedDokumenter: React.Dispatch<React.SetStateAction<LandMedDokumenter[]>>
   resetFeilkoder: () => void
   redigerbar: boolean
+  label?: string
 }) {
   return (
     <>
@@ -49,6 +51,7 @@ export default function SEDLandMedDokumenter({
                 oppdaterLandMedDokumenter={oppdaterLandMedDokumenter}
                 landListe={landListe}
                 lesevisning={!redigerbar}
+                label={label}
               />
             )
             return (

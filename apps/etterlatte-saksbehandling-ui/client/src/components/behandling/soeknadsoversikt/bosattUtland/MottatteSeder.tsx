@@ -63,6 +63,7 @@ export const MottatteSeder = ({
         setLandMedDokumenter={setLandMedDokumenterMottatte}
         resetFeilkoder={resetFeilkoder}
         redigerbar={redigerbar}
+        label="Mottatt dato"
       />
     </>
   )

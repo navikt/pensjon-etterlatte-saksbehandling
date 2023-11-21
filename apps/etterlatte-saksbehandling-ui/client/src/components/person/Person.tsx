@@ -70,17 +70,9 @@ export const Person = () => {
         (person) => (
           <Tabs value={fane} onChange={velgFane}>
             <Tabs.List>
-              <Tabs.Tab
-                value={Fane.SAKER}
-                label="Sak og behandling"
-                icon={<BulletListIcon title="Sak og behandling" />}
-              />
-              <Tabs.Tab
-                value={Fane.DOKUMENTER}
-                label="Dokumentoversikt"
-                icon={<FileTextIcon title="Dokumentoversikt" />}
-              />
-              <Tabs.Tab value={Fane.BREV} label="Brev" icon={<EnvelopeClosedIcon title="Brev" />} />
+              <Tabs.Tab value={Fane.SAKER} label="Sak og behandling" icon={<BulletListIcon />} />
+              <Tabs.Tab value={Fane.DOKUMENTER} label="Dokumentoversikt" icon={<FileTextIcon />} />
+              <Tabs.Tab value={Fane.BREV} label="Brev" icon={<EnvelopeClosedIcon />} />
             </Tabs.List>
 
             <Tabs.Panel value={Fane.SAKER}>

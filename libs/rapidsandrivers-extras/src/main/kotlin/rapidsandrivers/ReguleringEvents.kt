@@ -10,4 +10,5 @@ object ReguleringEvents {
     const val OMREGNINGSHENDELSE = "OMREGNINGSHENDELSE"
     const val VILKAARSVURDER = "VILKAARSVURDER"
     const val BEREGN = "BEREGN"
+    const val OPPRETT_VEDTAK = "OPPRETT_VEDTAK"
 }

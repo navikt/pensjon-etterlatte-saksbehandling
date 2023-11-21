@@ -4,7 +4,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.etterlatte.VedtakService
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
-import no.nav.etterlatte.rapidsandrivers.EventNames.OPPRETT_VEDTAK
+import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.OPPRETT_VEDTAK
 import no.nav.etterlatte.regulering.OpprettVedtakforespoerselRiver
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid

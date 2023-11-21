@@ -129,29 +129,27 @@ export const BosattUtland = ({
           />
           {isFailure(lagreBosattutlandStatus) && <ApiErrorAlert>Klarte ikke å lagre bosatt utland</ApiErrorAlert>}
           <div style={{ marginTop: '2rem' }}>
-            <Button
-              disabled={!redigerbar}
-              onClick={() => lagreBosattutlandApiWrapper()}
-              loading={isPending(lagreBosattutlandStatus)}
-            >
-              {visLagretOk ? (
-                <div style={{ minWidth: '148px', minHeight: '24px' }}>
-                  <CheckmarkCircleIcon
-                    color={AWhite}
-                    stroke={AWhite}
-                    aria-hidden="true"
-                    style={{
-                      width: '1.8rem',
-                      height: '1.8rem',
-                      transform: 'translate(-40%, -10%)',
-                      position: 'absolute',
-                    }}
-                  />
-                </div>
-              ) : (
-                <>Lagre bosatt utland</>
-              )}
-            </Button>
+            {redigerbar && (
+              <Button onClick={() => lagreBosattutlandApiWrapper()} loading={isPending(lagreBosattutlandStatus)}>
+                {visLagretOk ? (
+                  <div style={{ minWidth: '148px', minHeight: '24px' }}>
+                    <CheckmarkCircleIcon
+                      color={AWhite}
+                      stroke={AWhite}
+                      aria-hidden="true"
+                      style={{
+                        width: '1.8rem',
+                        height: '1.8rem',
+                        transform: 'translate(-40%, -10%)',
+                        position: 'absolute',
+                      }}
+                    />
+                  </div>
+                ) : (
+                  <>Lagre bosatt utland</>
+                )}
+              </Button>
+            )}
           </div>
         </>
       )}

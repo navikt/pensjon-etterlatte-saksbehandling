@@ -15,6 +15,7 @@ import { Foreldreansvar } from '~components/behandling/soeknadsoversikt/gyldigFr
 import { Verger } from '~components/behandling/soeknadsoversikt/gyldigFramsattSoeknad/barnepensjon/Verger'
 import { GyldigFramsattVurdering } from '~components/behandling/soeknadsoversikt/gyldigFramsattSoeknad/barnepensjon/GyldigFramsattVurdering'
 import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
+import { StatusIconProps } from '~shared/icons/statusIcon'
 
 export const GyldigFramsattBarnepensjon = ({
   behandling,
@@ -23,7 +24,7 @@ export const GyldigFramsattBarnepensjon = ({
 }: {
   behandling: IDetaljertBehandling
   gyldigFramsatt: IGyldighetResultat | undefined
-  gyldigFremsattTilStatusIcon: 'success' | 'error' | 'warning'
+  gyldigFremsattTilStatusIcon: StatusIconProps
 }) => {
   if (gyldigFramsatt == null) {
     return <div style={{ color: 'red' }}>Kunne ikke hente ut data om søknaden er gyldig framsatt</div>

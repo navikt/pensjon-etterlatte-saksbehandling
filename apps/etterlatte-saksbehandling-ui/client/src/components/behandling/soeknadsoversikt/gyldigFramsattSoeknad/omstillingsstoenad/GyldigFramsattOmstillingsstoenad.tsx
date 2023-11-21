@@ -10,12 +10,13 @@ import { GyldigFramsattVurdering } from '~components/behandling/soeknadsoversikt
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import { formaterKildePdl } from '~components/behandling/soeknadsoversikt/utils'
 import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
+import { StatusIconProps } from '~shared/icons/statusIcon'
 
 export const GyldigFramsattOmstillingsstoenad = ({
   behandling,
   gyldigFremsattTilStatusIcon,
 }: {
-  gyldigFremsattTilStatusIcon: 'success' | 'error' | 'warning'
+  gyldigFremsattTilStatusIcon: StatusIconProps
   behandling: IDetaljertBehandling
 }) => {
   const redigerbar = behandlingErRedigerbar(behandling.status)

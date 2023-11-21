@@ -28,7 +28,7 @@ internal class EtterbetalingService(private val dao: EtterbetalingDao, private v
         dao.slettEtterbetaling(behandlingId)
     }
 
-    private fun validerEtterbetaling(
+    fun validerEtterbetaling(
         behandling: Behandling,
         fraDato: LocalDate?,
         tilDato: LocalDate?,

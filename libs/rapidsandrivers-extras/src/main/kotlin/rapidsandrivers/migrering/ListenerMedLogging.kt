@@ -31,7 +31,7 @@ abstract class ListenerMedLogging : River.PacketListener {
         problems: MessageProblems,
         context: MessageContext,
     ) {
-        sikkerlogg.warn("Plukka ikke opp meldinga i ${context.rapidName()} fordi ${problems.toExtendedReport()}")
+        sikkerlogg.debug("Plukka ikke opp meldinga i ${context.rapidName()} fordi ${problems.toExtendedReport()}")
         super.onError(problems, context)
     }
 

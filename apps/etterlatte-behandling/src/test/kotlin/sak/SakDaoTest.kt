@@ -1,14 +1,18 @@
 package no.nav.etterlatte.sak
 
+import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
+import no.nav.etterlatte.libs.common.behandling.Flyktning
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Utenlandstilknytning
 import no.nav.etterlatte.libs.common.behandling.UtenlandstilknytningType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.POSTGRES_VERSION
 import no.nav.etterlatte.libs.database.migrate
+import no.nav.etterlatte.libs.database.singleOrNull
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
@@ -16,6 +20,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
+import java.time.LocalDate
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -65,6 +70,24 @@ internal class SakDaoTest {
         )
         val sakUtenlandstilknytning = sakRepo.hentUtenlandstilknytningForSak(opprettSak.id)
         Assertions.assertEquals(UtenlandstilknytningType.BOSATT_UTLAND, sakUtenlandstilknytning?.utenlandstilknytning?.type)
+    }
+
+    @Test
+    fun `kan lagre flyktning`() {
+        val flyktning = Flyktning(true, LocalDate.of(2024, 1, 1), "Migrert", Grunnlagsopplysning.Pesys.create())
+        val opprettSak = sakRepo.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
+
+        sakRepo.oppdaterFlyktning(opprettSak.id, flyktning)
+
+        val oppdatertFlyktning: Flyktning? =
+            dataSource.connection.use {
+                it.prepareStatement("SELECT * FROM sak WHERE id = ${opprettSak.id}")
+                    .executeQuery().singleOrNull {
+                        objectMapper.readValue(getString("flyktning"))
+                    }
+            }
+
+        Assertions.assertEquals(flyktning, oppdatertFlyktning)
     }
 
     @Test

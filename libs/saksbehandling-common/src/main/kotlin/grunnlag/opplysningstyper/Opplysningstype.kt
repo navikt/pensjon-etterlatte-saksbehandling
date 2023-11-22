@@ -2,6 +2,8 @@ package no.nav.etterlatte.libs.common.grunnlag.opplysningstyper
 
 enum class Opplysningstype {
     PERSONGALLERI_V1,
+    PERSONGALLERI_PDL_V1,
+
     AVDOED_PDL_V1,
     GJENLEVENDE_FORELDER_PDL_V1,
     SOEKER_PDL_V1,
@@ -44,4 +46,6 @@ enum class Opplysningstype {
     SOESKEN_I_BEREGNINGEN, // Kun for soeskenjustering
 
     HISTORISK_FORELDREANSVAR,
+
+    VERGES_ADRESSE,
 }

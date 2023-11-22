@@ -5,6 +5,7 @@ export interface IBrev {
   prosessType: BrevProsessType
   soekerFnr: string
   status: BrevStatus
+  statusEndret: string
   mottaker: Mottaker
   opprettet: string
 }

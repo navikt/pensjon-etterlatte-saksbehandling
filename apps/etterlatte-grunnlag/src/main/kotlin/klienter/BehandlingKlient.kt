@@ -1,4 +1,4 @@
-package no.nav.etterlatte.klienter
+package no.nav.etterlatte.grunnlag.klienter
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.michaelbull.result.mapBoth

@@ -33,6 +33,7 @@ import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.libs.common.deserialize
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toTimestamp
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.database.tidspunkt
@@ -244,7 +245,7 @@ class BrevRepository(private val ds: DataSource) {
                 ).asUpdate,
             ).also { opprettet -> require(opprettet == 1) }
 
-            tx.lagreHendelse(id, Status.OPPRETTET)
+            tx.lagreHendelse(id, Status.OPPRETTET, ulagretBrev.opprettet)
                 .also { oppdatert -> require(oppdatert == 1) }
 
             Brev.fra(id, ulagretBrev)
@@ -294,6 +295,13 @@ class BrevRepository(private val ds: DataSource) {
         brevId: BrevID,
         status: Status,
         payload: String = "{}",
+    ) = lagreHendelse(brevId, status, Tidspunkt.now(), payload)
+
+    private fun Session.lagreHendelse(
+        brevId: BrevID,
+        status: Status,
+        opprettet: Tidspunkt = Tidspunkt.now(),
+        payload: String = "{}",
     ) = run(
         queryOf(
             OPPRETT_HENDELSE_QUERY,
@@ -301,6 +309,7 @@ class BrevRepository(private val ds: DataSource) {
                 "brev_id" to brevId,
                 "status_id" to status.name,
                 "payload" to payload,
+                "opprettet" to opprettet.toTimestamp(),
             ),
         ).asUpdate,
     )
@@ -313,6 +322,7 @@ class BrevRepository(private val ds: DataSource) {
             soekerFnr = row.string("soeker_fnr"),
             prosessType = BrevProsessType.valueOf(row.string("prosess_type")),
             status = row.string("status_id").let { Status.valueOf(it) },
+            statusEndret = row.tidspunkt("hendelse_opprettet"),
             opprettet = row.tidspunkt("opprettet"),
             mottaker =
                 Mottaker(
@@ -356,7 +366,9 @@ class BrevRepository(private val ds: DataSource) {
     // language=SQL
     private object Queries {
         const val HENT_BREV_QUERY = """
-            SELECT b.id, b.sak_id, b.behandling_id, b.prosess_type, b.soeker_fnr, b.opprettet, h.status_id, m.*
+            SELECT 
+                b.id, b.sak_id, b.behandling_id, b.prosess_type, b.soeker_fnr, b.opprettet, h.status_id, 
+                h.opprettet as hendelse_opprettet, m.*
             FROM brev b
             INNER JOIN mottaker m on b.id = m.brev_id
             INNER JOIN hendelse h on b.id = h.brev_id
@@ -369,7 +381,9 @@ class BrevRepository(private val ds: DataSource) {
         """
 
         const val HENT_BREV_FOR_BEHANDLING_QUERY = """
-            SELECT b.id, b.sak_id, b.behandling_id, b.prosess_type, b.soeker_fnr, h.status_id, b.opprettet, m.*
+            SELECT 
+                b.id, b.sak_id, b.behandling_id, b.prosess_type, b.soeker_fnr, h.status_id, b.opprettet, 
+                h.opprettet as hendelse_opprettet, m.*
             FROM brev b
             INNER JOIN mottaker m on b.id = m.brev_id
             INNER JOIN hendelse h on b.id = h.brev_id
@@ -382,7 +396,9 @@ class BrevRepository(private val ds: DataSource) {
         """
 
         const val HENT_BREV_FOR_SAK_QUERY = """
-            SELECT b.id, b.sak_id, b.behandling_id, b.prosess_type, b.soeker_fnr, h.status_id, b.opprettet, m.*
+            SELECT 
+                b.id, b.sak_id, b.behandling_id, b.prosess_type, b.soeker_fnr, h.status_id, b.opprettet, 
+                h.opprettet as hendelse_opprettet, m.*
             FROM brev b
             INNER JOIN mottaker m on b.id = m.brev_id
             INNER JOIN hendelse h on b.id = h.brev_id
@@ -456,8 +472,8 @@ class BrevRepository(private val ds: DataSource) {
         """
 
         const val OPPRETT_HENDELSE_QUERY = """
-            INSERT INTO hendelse (brev_id, status_id, payload) 
-            VALUES (:brev_id, :status_id, :payload)
+            INSERT INTO hendelse (brev_id, status_id, payload, opprettet) 
+            VALUES (:brev_id, :status_id, :payload, :opprettet)
         """
     }
 }

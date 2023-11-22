@@ -8,6 +8,14 @@ abstract class BrevData {
         revurderingsaarsakVedtak: Revurderingaarsak?,
         revurderingInfo: RevurderingInfo?,
         revurderingAarsak: Revurderingaarsak,
+    ): T = BrevDataValidator.valider(revurderingsaarsakVedtak, revurderingInfo, revurderingAarsak)
+}
+
+object BrevDataValidator {
+    inline fun <reified T : RevurderingInfo> valider(
+        revurderingsaarsakVedtak: Revurderingaarsak?,
+        revurderingInfo: RevurderingInfo?,
+        revurderingAarsak: Revurderingaarsak,
     ): T {
         val lesbartnavn = revurderingAarsak.name.lowercase()
         if (revurderingsaarsakVedtak != revurderingAarsak) {
@@ -26,12 +34,12 @@ abstract class BrevData {
     }
 }
 
-object AvslagBrevData : BrevData() {
-    fun fra(): AvslagBrevData = AvslagBrevData
-}
-
 abstract class EndringBrevData : BrevData()
 
 abstract class OpphoerBrevData : BrevData()
 
-data class ManueltBrevData(val innhold: List<Slate.Element>) : BrevData()
+data class ManueltBrevData(val innhold: List<Slate.Element>) : BrevData() {
+    companion object {
+        fun fra(innhold: List<Slate.Element> = emptyList()) = ManueltBrevData(innhold)
+    }
+}

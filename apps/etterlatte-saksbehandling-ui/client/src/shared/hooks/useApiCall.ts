@@ -70,9 +70,9 @@ const error = <A = never>(error: ApiError): Result<A> => ({
 export const mapApiResult = <T>(
   result: Result<T>,
   mapInitialOrPending: ReactElement,
-  mapError: (_: ApiError) => ReactElement,
+  mapError: (_: ApiError) => ReactElement | null,
   mapSuccess: (_: T) => ReactElement
-): ReactElement => {
+): ReactElement | null => {
   if (isPendingOrInitial(result)) {
     return mapInitialOrPending
   }

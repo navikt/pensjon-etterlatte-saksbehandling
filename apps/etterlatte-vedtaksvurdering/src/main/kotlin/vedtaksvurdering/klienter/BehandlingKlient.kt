@@ -218,8 +218,8 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
     ): Boolean {
         logger.info(
             "Fatter oppgave og commiter sak for behandling" +
-                " ${vedtakEndringDTO.vedtakOppgaveDTO.referanse} " +
-                "sakId=${vedtakEndringDTO.vedtakOppgaveDTO.sakId}",
+                " ${vedtakEndringDTO.sakIdOgReferanse.referanse} " +
+                "sakId=${vedtakEndringDTO.sakIdOgReferanse.sakId}",
         )
         val resource = Resource(clientId = clientId, url = "$resourceUrl/fattvedtak")
         val response =
@@ -233,7 +233,7 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
             is Err -> {
                 logger.error(
                     "Kan ikke fatte oppgaver og commite vedtak av type for behandling " +
-                        vedtakEndringDTO.vedtakOppgaveDTO.referanse,
+                        vedtakEndringDTO.sakIdOgReferanse.referanse,
                 )
                 throw response.error
             }
@@ -246,8 +246,8 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
     ): Boolean {
         logger.info(
             "Underkjenn oppgave og commiter sak for behandling" +
-                " ${vedtakEndringDTO.vedtakOppgaveDTO.referanse} " +
-                "sakId=${vedtakEndringDTO.vedtakOppgaveDTO.sakId}",
+                " ${vedtakEndringDTO.sakIdOgReferanse.referanse} " +
+                "sakId=${vedtakEndringDTO.sakIdOgReferanse.sakId}",
         )
         val resource = Resource(clientId = clientId, url = "$resourceUrl/underkjennvedtak")
         val response =
@@ -261,7 +261,7 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
             is Err -> {
                 logger.error(
                     "Kan ikke underkjenne oppgaver og commite vedtak av type for behandling " +
-                        vedtakEndringDTO.vedtakOppgaveDTO.referanse,
+                        vedtakEndringDTO.sakIdOgReferanse.referanse,
                 )
                 throw response.error
             }
@@ -274,8 +274,8 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
     ): Boolean {
         logger.info(
             "Attesterer oppgave og commiter sak for behandling" +
-                " ${vedtakEndringDTO.vedtakOppgaveDTO.referanse} " +
-                "sakId=${vedtakEndringDTO.vedtakOppgaveDTO.sakId}",
+                " ${vedtakEndringDTO.sakIdOgReferanse.referanse} " +
+                "sakId=${vedtakEndringDTO.sakIdOgReferanse.sakId}",
         )
         val resource = Resource(clientId = clientId, url = "$resourceUrl/attestervedtak")
         val response =
@@ -289,7 +289,7 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
             is Err -> {
                 logger.error(
                     "Kan ikke attestere oppgaver og commite vedtak av type for behandling " +
-                        vedtakEndringDTO.vedtakOppgaveDTO.referanse,
+                        vedtakEndringDTO.sakIdOgReferanse.referanse,
                 )
                 throw response.error
             }

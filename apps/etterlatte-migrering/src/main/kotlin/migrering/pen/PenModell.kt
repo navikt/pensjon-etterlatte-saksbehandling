@@ -8,6 +8,8 @@ data class BarnepensjonGrunnlagResponse(
     val soeker: String,
     val gjenlevendeForelder: String?,
     val avdoedForeldre: List<AvdoedForelderBP>,
+    val dodAvYrkesskade: Boolean,
+    val flyktning: Boolean,
     val virkningsdato: LocalDate,
     val beregning: BeregningBP,
     val trygdetidsgrunnlagListe: List<TrygdetidsgrunnlagBP>,

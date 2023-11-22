@@ -1,13 +1,14 @@
 package no.nav.etterlatte.brev
 
 import com.fasterxml.jackson.databind.JsonNode
-import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.brev.adresse.AdresseService
 import no.nav.etterlatte.brev.behandling.ForenkletVedtak
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.brevbaker.BrevbakerRequest
 import no.nav.etterlatte.brev.brevbaker.BrevbakerService
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode
+import no.nav.etterlatte.brev.brevbaker.RedigerbarTekstRequest
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.dokarkiv.DokarkivServiceImpl
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
@@ -32,10 +33,9 @@ import no.nav.etterlatte.brev.model.SlateHelper
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.brev.model.bp.OmregnetBPNyttRegelverk
 import no.nav.etterlatte.libs.common.Vedtaksloesning
-import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
-import no.nav.etterlatte.rapidsandrivers.migrering.MigreringRequest
+import no.nav.etterlatte.rapidsandrivers.migrering.Beregning
 import no.nav.etterlatte.rivers.VedtakTilJournalfoering
 import no.nav.etterlatte.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
@@ -50,6 +50,7 @@ class VedtaksbrevService(
     private val brevbaker: BrevbakerService,
     private val brevDataMapper: BrevDataMapper,
     private val brevProsessTypeFactory: BrevProsessTypeFactory,
+    private val migreringBrevDataService: MigreringBrevDataService,
 ) {
     private val logger = LoggerFactory.getLogger(VedtaksbrevService::class.java)
 
@@ -69,6 +70,7 @@ class VedtaksbrevService(
         sakId: Long,
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
+        migrering: MigreringBrevRequest? = null,
     ): Brev {
         require(hentVedtaksbrev(behandlingId) == null) {
             "Vedtaksbrev finnes allerede på behandling (id=$behandlingId) og kan ikke opprettes på nytt"
@@ -92,7 +94,7 @@ class VedtaksbrevService(
                 soekerFnr = generellBrevData.personerISak.soeker.fnr.value,
                 mottaker = mottaker,
                 opprettet = Tidspunkt.now(),
-                innhold = opprettInnhold(generellBrevData, brukerTokenInfo, prosessType),
+                innhold = opprettInnhold(RedigerbarTekstRequest(generellBrevData, brukerTokenInfo, prosessType, migrering)),
                 innholdVedlegg = opprettInnholdVedlegg(generellBrevData, prosessType),
             )
 
@@ -102,7 +104,7 @@ class VedtaksbrevService(
     suspend fun genererPdf(
         id: BrevID,
         brukerTokenInfo: BrukerTokenInfo,
-        migrering: MigreringRequest? = null,
+        migrering: MigreringBrevRequest? = null,
     ): Pdf {
         val brev = hentBrev(id)
 
@@ -119,7 +121,7 @@ class VedtaksbrevService(
         val brevData =
             when (migrering) {
                 null -> opprettBrevData(brev, generellBrevData, brukerTokenInfo, brevkodePar)
-                else -> opprettMigreringBrevdata(generellBrevData, migrering, brukerTokenInfo)
+                else -> migreringBrevDataService.opprettMigreringBrevdata(generellBrevData, migrering, brukerTokenInfo)
             }
 
         val brevRequest = BrevbakerRequest.fra(brevkodePar.ferdigstilling, brevData, generellBrevData, avsender)
@@ -153,26 +155,6 @@ class VedtaksbrevService(
                     migrering != null,
                 )
             }
-    }
-
-    private suspend fun opprettMigreringBrevdata(
-        generellBrevData: GenerellBrevData,
-        migrering: MigreringRequest,
-        brukerTokenInfo: BrukerTokenInfo,
-    ): BrevData {
-        if (generellBrevData.systemkilde != Vedtaksloesning.PESYS) {
-            throw InternfeilException("Kan ikke opprette et migreringsbrev fra pesys hvis kilde ikke er pesys")
-        }
-        return coroutineScope {
-            val virkningstidspunkt =
-                requireNotNull(generellBrevData.forenkletVedtak.virkningstidspunkt) {
-                    "Migreringsvedtaket må ha et virkningstidspunkt"
-                }
-
-            val utbetalingsinfo =
-                brevdataFacade.finnUtbetalingsinfo(generellBrevData.behandlingId, virkningstidspunkt, brukerTokenInfo)
-            OmregnetBPNyttRegelverk.fra(generellBrevData, utbetalingsinfo, migrering)
-        }
     }
 
     suspend fun ferdigstillVedtaksbrev(
@@ -228,7 +210,7 @@ class VedtaksbrevService(
     ): BrevService.BrevPayload {
         val generellBrevData = brevdataFacade.hentGenerellBrevData(sakId, behandlingId, brukerTokenInfo)
         val prosessType = brevProsessTypeFactory.fra(generellBrevData)
-        val innhold = opprettInnhold(generellBrevData, brukerTokenInfo, prosessType)
+        val innhold = opprettInnhold(RedigerbarTekstRequest(generellBrevData, brukerTokenInfo, prosessType))
         val innholdVedlegg = opprettInnholdVedlegg(generellBrevData, prosessType)
 
         if (innhold.payload != null) {
@@ -274,21 +256,17 @@ class VedtaksbrevService(
             "Fant ikke payloadvedlegg for brev ${brev.id}"
         }
 
-    private suspend fun opprettInnhold(
-        generellBrevData: GenerellBrevData,
-        brukerTokenInfo: BrukerTokenInfo,
-        prosessType: BrevProsessType,
-    ): BrevInnhold {
-        val tittel = "Vedtak om ${generellBrevData.forenkletVedtak.type.name.lowercase()}"
+    private suspend fun opprettInnhold(redigerbarTekstRequest: RedigerbarTekstRequest): BrevInnhold {
+        val tittel = "Vedtak om ${redigerbarTekstRequest.vedtakstype()}"
 
         val payload =
-            when (prosessType) {
-                REDIGERBAR -> brevbaker.hentRedigerbarTekstFraBrevbakeren(generellBrevData, brukerTokenInfo)
+            when (redigerbarTekstRequest.prosessType) {
+                REDIGERBAR -> brevbaker.hentRedigerbarTekstFraBrevbakeren(redigerbarTekstRequest)
                 AUTOMATISK -> null
-                MANUELL -> SlateHelper.hentInitiellPayload(generellBrevData)
+                MANUELL -> SlateHelper.hentInitiellPayload(redigerbarTekstRequest.generellBrevData)
             }
 
-        return BrevInnhold(tittel, generellBrevData.spraak, payload)
+        return BrevInnhold(tittel, redigerbarTekstRequest.generellBrevData.spraak, payload)
     }
 
     private fun opprettInnholdVedlegg(
@@ -333,11 +311,11 @@ class VedtaksbrevService(
             throw IllegalArgumentException("Ugyldig status ${vedtaksbrev.status} på vedtaksbrev (id=${vedtaksbrev.id})")
         }
 
-        return dokarkivService.journalfoer(vedtaksbrev.id, vedtak)
-            .also { journalfoeringResponse ->
-                db.settBrevJournalfoert(vedtaksbrev.id, journalfoeringResponse)
-                logger.info("Brev med id=${vedtaksbrev.id} markert som journalført")
-            }
+        val journalfoeringResponse = runBlocking { dokarkivService.journalfoer(vedtaksbrev.id, vedtak) }
+
+        db.settBrevJournalfoert(vedtaksbrev.id, journalfoeringResponse)
+        logger.info("Brev med id=${vedtaksbrev.id} markert som journalført")
+        return journalfoeringResponse
     }
 
     fun fjernFerdigstiltStatusUnderkjentVedtak(
@@ -349,3 +327,5 @@ class VedtaksbrevService(
         return db.fjernFerdigstiltStatusUnderkjentVedtak(id, vedtak)
     }
 }
+
+data class MigreringBrevRequest(val beregning: Beregning)

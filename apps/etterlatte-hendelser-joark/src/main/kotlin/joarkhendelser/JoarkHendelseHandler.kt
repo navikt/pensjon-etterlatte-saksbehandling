@@ -6,6 +6,7 @@ import no.nav.etterlatte.joarkhendelser.behandling.BehandlingService
 import no.nav.etterlatte.joarkhendelser.joark.BrukerIdType
 import no.nav.etterlatte.joarkhendelser.joark.HendelseType
 import no.nav.etterlatte.joarkhendelser.joark.Journalpost
+import no.nav.etterlatte.joarkhendelser.joark.Kanal
 import no.nav.etterlatte.joarkhendelser.joark.erTemaEtterlatte
 import no.nav.etterlatte.joarkhendelser.joark.lagMerknadFraStatus
 import no.nav.etterlatte.joarkhendelser.joark.temaTilSakType
@@ -136,7 +137,14 @@ class JoarkHendelseHandler(
         if (journalpost.sak?.fagsakId == null || sakId == null) {
             logger.info("Journalpost ${journalpost.journalpostId} er ikke tilknyttet sak i Gjenny")
 
-            behandlingService.opprettOppgave(ident, sakType, "Kontroller kobling til sak", journalpost.journalpostId)
+            val merknad =
+                if (journalpost.kanal == Kanal.EESSI) {
+                    journalpost.tittel
+                } else {
+                    "Kontroller kobling til sak"
+                }
+
+            behandlingService.opprettOppgave(ident, sakType, merknad, journalpost.journalpostId)
         } else if (journalpost.sak.fagsakId == sakId.toString() && journalpost.sak.tema == sakType.tema) {
             logger.info(
                 "Journalpost ${journalpost.journalpostId} er allerede tilknyttet" +

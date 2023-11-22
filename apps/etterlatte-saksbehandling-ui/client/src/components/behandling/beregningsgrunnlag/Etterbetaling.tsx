@@ -8,6 +8,8 @@ import { lagreEtterbetaling, slettEtterbetaling } from '~shared/api/behandling'
 import { formaterKanskjeStringDato } from '~utils/formattering'
 import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 import MaanedVelger from '~components/behandling/beregningsgrunnlag/MaanedVelger'
+import { useAppDispatch } from '~store/Store'
+import { oppdaterEtterbetaling } from '~store/reducers/BehandlingReducer'
 
 const MaanedSection = styled.section`
   display: grid;
@@ -45,7 +47,7 @@ const Etterbetaling = (props: {
   virkningstidspunkt: string | undefined
 }) => {
   const { lagraEtterbetaling, redigerbar, behandlingId, virkningstidspunkt } = props
-
+  const dispatch = useAppDispatch()
   const [status, apiLagreEtterbetaling] = useApiCall(lagreEtterbetaling)
   const [, apiSlettEtterbetaling] = useApiCall(slettEtterbetaling)
   const [etterbetaling, setEtterbetaling] = useState(lagraEtterbetaling)
@@ -63,8 +65,8 @@ const Etterbetaling = (props: {
     if (!erEtterbetaling) {
       return ''
     }
-    const fraDato = etterbetaling?.fraDato
-    const tilDato = etterbetaling?.tilDato
+    const fraDato = etterbetaling?.fra
+    const tilDato = etterbetaling?.til
     if (!fraDato || !tilDato) {
       return 'Både fra- og til-måned for etterbetaling må fylles ut.'
     }
@@ -99,6 +101,16 @@ const Etterbetaling = (props: {
     setEtterbetaling(lagraEtterbetaling)
   }
 
+  const toggleErEtterbetaling = () => {
+    if (erEtterbetaling) {
+      apiSlettEtterbetaling({ behandlingId }, () => {
+        setEtterbetaling(null)
+        dispatch(oppdaterEtterbetaling(null))
+      })
+    }
+    setErEtterbetaling(!erEtterbetaling)
+  }
+
   if (!redigerbar) {
     if (!erEtterbetaling) {
       return null
@@ -109,20 +121,15 @@ const Etterbetaling = (props: {
         <Heading size="small" level="3">
           Innebærer etterbetaling?
         </Heading>
-        <BodyShort>Fra og med måned: {formaterKanskjeStringDato(etterbetaling?.fraDato?.toString())}</BodyShort>
-        <BodyShort>Til og med måned: {formaterKanskjeStringDato(etterbetaling?.tilDato?.toString())}</BodyShort>
+        <BodyShort>Fra og med måned: {formaterKanskjeStringDato(etterbetaling?.fra?.toString())}</BodyShort>
+        <BodyShort>Til og med måned: {formaterKanskjeStringDato(etterbetaling?.til?.toString())}</BodyShort>
       </>
     )
   }
 
   return (
     <>
-      <Checkbox
-        onChange={() => {
-          setErEtterbetaling(!erEtterbetaling)
-        }}
-        checked={erEtterbetaling}
-      >
+      <Checkbox onChange={toggleErEtterbetaling} checked={erEtterbetaling}>
         <Heading size="small" level="3">
           Innebærer etterbetaling?
         </Heading>
@@ -132,15 +139,15 @@ const Etterbetaling = (props: {
           <EtterbetalingWrapper>
             <MaanedSection>
               <MaanedVelger
-                value={etterbetaling?.fraDato ? new Date(etterbetaling?.fraDato) : undefined}
-                onChange={(e) => setEtterbetaling({ ...etterbetaling, fraDato: e })}
+                value={etterbetaling?.fra ? new Date(etterbetaling?.fra) : undefined}
+                onChange={(e) => setEtterbetaling({ ...etterbetaling, fra: e })}
                 label="Fra og med måned"
               />
             </MaanedSection>
             <MaanedSection>
               <MaanedVelger
-                value={etterbetaling?.tilDato ? new Date(etterbetaling?.tilDato) : undefined}
-                onChange={(e) => setEtterbetaling({ ...etterbetaling, tilDato: e })}
+                value={etterbetaling?.til ? new Date(etterbetaling?.til) : undefined}
+                onChange={(e) => setEtterbetaling({ ...etterbetaling, til: e })}
                 label="Til og med måned"
               />
             </MaanedSection>

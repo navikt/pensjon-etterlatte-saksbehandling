@@ -13,6 +13,7 @@ import no.nav.etterlatte.common.klienter.SkjermingKlient
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
+import no.nav.etterlatte.libs.common.behandling.Flyktning
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Utenlandstilknytning
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
@@ -74,6 +75,11 @@ interface SakService {
     ): Int
 
     fun hentSakMedUtenlandstilknytning(fnr: String): SakUtenlandstilknytning
+
+    fun oppdaterFlyktning(
+        sakId: Long,
+        flyktning: Flyktning,
+    )
 }
 
 class BrukerManglerSak(message: String) : Exception(message)
@@ -94,6 +100,13 @@ class SakServiceImpl(
         utenlandstilknytning: Utenlandstilknytning,
     ) {
         dao.oppdaterUtenlandstilknytning(sakId, utenlandstilknytning)
+    }
+
+    override fun oppdaterFlyktning(
+        sakId: Long,
+        flyktning: Flyktning,
+    ) {
+        dao.oppdaterFlyktning(sakId, flyktning)
     }
 
     override fun hentSaker(): List<Sak> {

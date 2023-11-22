@@ -4,20 +4,20 @@ import styled from 'styled-components'
 import { BeregningsMetode, BeregningsMetodeBeregningsgrunnlag } from '~shared/types/Beregning'
 
 type BeregningsgrunnlagMetodeProps = {
-  behandles: boolean
+  redigerbar: boolean
   grunnlag: BeregningsMetodeBeregningsgrunnlag | null
   onUpdate: (data: BeregningsMetodeBeregningsgrunnlag) => void
 }
 
 const BeregningsgrunnlagMetode = (props: BeregningsgrunnlagMetodeProps) => {
-  const { behandles, grunnlag, onUpdate } = props
+  const { redigerbar, grunnlag, onUpdate } = props
 
   const beskrivelseFor = (metode: BeregningsMetode) => {
     switch (metode) {
       case BeregningsMetode.BEST:
         return 'Den som gir høyest verdi av nasjonal/prorata (EØS/avtale-land, der rettighet er oppfylt etter nasjonale regler)'
       case BeregningsMetode.NASJONAL:
-        return 'Nasjonal (nasjonal sak)'
+        return 'Nasjonal beregning (folketrygdberegning)'
       case BeregningsMetode.PRORATA:
         return 'Prorata (EØS/avtale-land, der rettighet er oppfylt ved sammenlegging)'
     }
@@ -35,7 +35,7 @@ const BeregningsgrunnlagMetode = (props: BeregningsgrunnlagMetodeProps) => {
         Trygdetid brukt i beregningen
       </Heading>
 
-      {behandles && (
+      {redigerbar && (
         <>
           <RadioGroup
             legend=""
@@ -67,7 +67,7 @@ const BeregningsgrunnlagMetode = (props: BeregningsgrunnlagMetodeProps) => {
           />
         </>
       )}
-      {!behandles && grunnlag && (
+      {!redigerbar && grunnlag && (
         <>
           <BodyShort>{beskrivelseFor(grunnlag.beregningsMetode)}</BodyShort>
 

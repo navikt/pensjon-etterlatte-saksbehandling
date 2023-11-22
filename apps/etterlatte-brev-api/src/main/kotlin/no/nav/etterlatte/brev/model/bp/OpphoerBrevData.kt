@@ -1,7 +1,7 @@
 package no.nav.etterlatte.brev.model.bp
 
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
-import no.nav.etterlatte.brev.model.AvslagBrevData
+import no.nav.etterlatte.brev.model.BrevDataValidator.valider
 import no.nav.etterlatte.brev.model.OpphoerBrevData
 import no.nav.etterlatte.libs.common.behandling.Navn
 import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
@@ -21,7 +21,7 @@ data class AdopsjonRevurderingBrevdata(
             adopsjonsdato: LocalDate,
         ): AdopsjonRevurderingBrevdata {
             val revurderingInfo =
-                AvslagBrevData.valider<RevurderingInfo.Adopsjon>(
+                valider<RevurderingInfo.Adopsjon>(
                     generellBrevData.revurderingsaarsak,
                     generellBrevData.forenkletVedtak.revurderingInfo,
                     Revurderingaarsak.ADOPSJON,
@@ -53,7 +53,7 @@ data class OmgjoeringAvFarskapRevurderingBrevdata(
             opprinneligInnvilgelsesdato: LocalDate,
         ): OmgjoeringAvFarskapRevurderingBrevdata {
             val revurderingInfo =
-                AvslagBrevData.valider<RevurderingInfo.OmgjoeringAvFarskap>(
+                valider<RevurderingInfo.OmgjoeringAvFarskap>(
                     generellBrevData.revurderingsaarsak,
                     generellBrevData.forenkletVedtak.revurderingInfo,
                     Revurderingaarsak.OMGJOERING_AV_FARSKAP,

@@ -1,6 +1,6 @@
 import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
 import React, { useState } from 'react'
-import { LovtekstMedLenke } from '~components/behandling/soeknadsoversikt/soeknadoversikt/LovtekstMedLenke'
+import { LovtekstMedLenke } from '~components/behandling/soeknadsoversikt/LovtekstMedLenke'
 import { Button, Heading, ReadMore, Table } from '@navikt/ds-react'
 import { AGreen500 } from '@navikt/ds-tokens/dist/tokens'
 import { CheckmarkCircleIcon, PlusCircleIcon } from '@navikt/aksel-icons'
@@ -11,7 +11,7 @@ import {
   feilIKomplettePerioderOverIntervallInstitusjonsopphold,
   mapListeFraDto,
 } from '~components/behandling/beregningsgrunnlag/PeriodisertBeregningsgrunnlag'
-import { hentBehandlesFraStatus } from '~components/behandling/felles/utils'
+import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
 import { InstitusjonsoppholdsWrapper } from './institusjonsopphold-styling'
 import {
   FeilIPeriode,
@@ -20,7 +20,7 @@ import {
 } from '~components/behandling/beregningsgrunnlag/InstitusjonsoppholdPerioder'
 import InstitusjonsoppholdTableWrapper from '~components/behandling/beregningsgrunnlag/InstitusjonsoppholdTableWrapper'
 import styled from 'styled-components'
-import { BP_INSTITUSJONSOPPHOLD_HJEMLER } from '~components/behandling/soeknadsoversikt/soeknadoversikt/virkningstidspunkt/utils'
+import { BP_INSTITUSJONSOPPHOLD_HJEMLER } from '~components/behandling/virkningstidspunkt/utils'
 
 const ReadMoreMarginBottom = styled(ReadMore)`
   margin-bottom: 1rem;
@@ -33,7 +33,7 @@ type InstitusjonsoppholdProps = {
 
 const InstitusjonsoppholdBP = (props: InstitusjonsoppholdProps) => {
   const { behandling, onSubmit } = props
-  const behandles = hentBehandlesFraStatus(behandling?.status)
+  const behandles = behandlingErRedigerbar(behandling?.status)
   const [visFeil, setVisFeil] = useState(false)
   const [visOkLagret, setVisOkLagret] = useState(false)
   const { control, register, watch, handleSubmit, formState } = useForm<{

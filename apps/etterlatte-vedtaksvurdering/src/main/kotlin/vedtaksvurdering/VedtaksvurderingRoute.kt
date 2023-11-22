@@ -16,16 +16,13 @@ import no.nav.etterlatte.libs.common.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.behandlingId
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
-import no.nav.etterlatte.libs.common.sak.VedtakSak
 import no.nav.etterlatte.libs.common.sakId
 import no.nav.etterlatte.libs.common.tidspunkt.toNorskTid
 import no.nav.etterlatte.libs.common.vedtak.AttesterVedtakDto
-import no.nav.etterlatte.libs.common.vedtak.Behandling
 import no.nav.etterlatte.libs.common.vedtak.LoependeYtelseDTO
 import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingFattEllerAttesterVedtakDto
 import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingVedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakSammendragDto
-import no.nav.etterlatte.libs.common.vedtak.VedtakSamordningDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.common.withBehandlingId
 import no.nav.etterlatte.libs.common.withSakId
@@ -54,7 +51,7 @@ fun Route.vedtaksvurderingRoute(
         get("/{$BEHANDLINGID_CALL_PARAMETER}") {
             withBehandlingId(behandlingKlient) { behandlingId ->
                 logger.info("Henter vedtak for behandling $behandlingId")
-                val vedtak = vedtakService.hentVedtak(behandlingId)
+                val vedtak = vedtakService.hentVedtakMedBehandlingId(behandlingId)
                 if (vedtak == null) {
                     call.response.status(HttpStatusCode.NotFound)
                 } else {
@@ -66,7 +63,7 @@ fun Route.vedtaksvurderingRoute(
         get("/{$BEHANDLINGID_CALL_PARAMETER}/ny") {
             withBehandlingId(behandlingKlient) { behandlingId ->
                 logger.info("Henter vedtak for behandling $behandlingId")
-                val vedtak = vedtakService.hentVedtak(behandlingId)
+                val vedtak = vedtakService.hentVedtakMedBehandlingId(behandlingId)
                 if (vedtak == null) {
                     call.response.status(HttpStatusCode.NotFound)
                 } else {
@@ -78,7 +75,7 @@ fun Route.vedtaksvurderingRoute(
         get("/{$BEHANDLINGID_CALL_PARAMETER}/sammendrag") {
             withBehandlingId(behandlingKlient) { behandlingId ->
                 logger.info("Henter sammendrag av vedtak for behandling $behandlingId")
-                val vedtaksresultat = vedtakService.hentVedtak(behandlingId)?.toVedtakSammendragDto()
+                val vedtaksresultat = vedtakService.hentVedtakMedBehandlingId(behandlingId)?.toVedtakSammendragDto()
                 if (vedtaksresultat == null) {
                     call.response.status(HttpStatusCode.NoContent)
                 } else {
@@ -228,32 +225,30 @@ fun Route.vedtaksvurderingRoute(
     }
 }
 
-fun Route.samordningsvedtakRoute(
-    vedtakService: VedtaksvurderingService,
-    vedtakBehandlingService: VedtakBehandlingService,
-) {
+fun Route.samordningsvedtakRoute(vedtakSamordningService: VedtakSamordningService) {
     route("/api/samordning/vedtak") {
         install(AuthorizationPlugin) {
             roles = setOf("samordning-read")
         }
 
         get {
-            call.parameters["fomDato"]?.let { runCatching { LocalDate.parse(it) }.getOrNull() }
-                ?: return@get call.respond(HttpStatusCode.BadRequest, "fomDato ikke angitt")
+            val fomDato =
+                call.parameters["fomDato"]?.let { runCatching { LocalDate.parse(it) }.getOrNull() }
+                    ?: return@get call.respond(HttpStatusCode.BadRequest, "fomDato ikke angitt")
             val fnr =
                 call.request.headers["fnr"]?.let { Folkeregisteridentifikator.of(it) }
                     ?: return@get call.respond(HttpStatusCode.BadRequest, "fnr ikke angitt")
 
-            val vedtaksliste = vedtakBehandlingService.finnFerdigstilteVedtak(fnr)
-            call.respond(vedtaksliste.map { it.toSamordningsvedtakDto() })
+            val vedtaksliste = vedtakSamordningService.hentVedtaksliste(fnr, fomDato)
+            call.respond(vedtaksliste)
         }
 
         get("/{vedtakId}") {
             val vedtakId = requireNotNull(call.parameters["vedtakId"]).toLong()
 
-            val vedtak = vedtakService.hentVedtak(vedtakId)
+            val vedtak = vedtakSamordningService.hentVedtak(vedtakId)
             if (vedtak != null) {
-                call.respond(vedtak.toSamordningsvedtakDto())
+                call.respond(vedtak)
             } else {
                 call.respond(HttpStatusCode.NoContent)
             }
@@ -316,26 +311,3 @@ private fun LoependeYtelse.toDto() =
     )
 
 data class UnderkjennVedtakDto(val kommentar: String, val valgtBegrunnelse: String)
-
-private fun Vedtak.toSamordningsvedtakDto(): VedtakSamordningDto {
-    val innhold = innhold as VedtakBehandlingInnhold
-    return VedtakSamordningDto(
-        vedtakId = id,
-        fnr = soeker.value,
-        status = status,
-        sak = VedtakSak(soeker.value, sakType, sakId),
-        type = type,
-        vedtakFattet = vedtakFattet,
-        attestasjon = attestasjon,
-        behandling =
-            Behandling(
-                innhold.behandlingType,
-                behandlingId,
-                innhold.revurderingAarsak,
-                innhold.revurderingInfo,
-            ),
-        virkningstidspunkt = innhold.virkningstidspunkt,
-        beregning = innhold.beregning,
-        avkorting = innhold.avkorting,
-    )
-}

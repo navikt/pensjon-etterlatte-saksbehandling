@@ -6,8 +6,6 @@ import { OppgavetypeTag, SaktypeTag } from '~components/nyoppgavebenk/Tags'
 import { formaterFnr, formaterStringDato } from '~utils/formattering'
 import { OppgaveDTO } from '~shared/api/oppgaver'
 import { ConfigContext } from '~clientConfig'
-import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
-import { FEATURE_TOGGLE_KAN_BRUKE_OPPGAVEBEHANDLING } from '~components/person/journalfoeringsoppgave/BehandleJournalfoeringOppgave'
 import { FlexRow } from '~shared/styled'
 import { FristWrapper } from '~components/nyoppgavebenk/FristWrapper'
 
@@ -34,7 +32,6 @@ const BeskrivelseWrapper = styled.div`
 export const GosysOppgaveModal = ({ oppgave }: { oppgave: OppgaveDTO }) => {
   const [open, setOpen] = useState(false)
   const { opprettet, frist, status, fnr, gjelder, enhet, saksbehandler, beskrivelse, sakType } = oppgave
-  const kanBrukeOppgavebehandling = useFeatureEnabledMedDefault(FEATURE_TOGGLE_KAN_BRUKE_OPPGAVEBEHANDLING, false)
 
   const configContext = useContext(ConfigContext)
 
@@ -94,21 +91,14 @@ export const GosysOppgaveModal = ({ oppgave }: { oppgave: OppgaveDTO }) => {
             <Button variant="tertiary" onClick={() => setOpen(false)}>
               Avbryt
             </Button>
-            {/*  TODO: Må sikre at vi får en egen oppgavetype e.l. vi kan sjekke på i stedet */}
-            {kanBrukeOppgavebehandling && oppgave.beskrivelse?.toLowerCase()?.includes('journalfør') ? (
-              <Button variant="primary" as="a" href={`/oppgave/${oppgave.id}`}>
-                Opprett behandling
-              </Button>
-            ) : (
-              <Button
-                variant="primary"
-                as="a"
-                href={`${configContext['gosysUrl']}/personoversikt/fnr=${fnr}`}
-                target="_blank"
-              >
-                Åpne og rediger i Gosys
-              </Button>
-            )}
+            <Button
+              variant="primary"
+              as="a"
+              href={`${configContext['gosysUrl']}/personoversikt/fnr=${fnr}`}
+              target="_blank"
+            >
+              Åpne og rediger i Gosys
+            </Button>
           </FlexRow>
         </Modal.Body>
       </Modal>

@@ -25,6 +25,7 @@ import no.nav.etterlatte.klienter.GrunnlagKlientImpl
 import no.nav.etterlatte.klienter.TrygdetidKlient
 import no.nav.etterlatte.klienter.VilkaarsvurderingKlient
 import no.nav.etterlatte.libs.common.IntBroek
+import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
@@ -47,6 +48,8 @@ import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import no.nav.etterlatte.libs.testdata.grunnlag.HELSOESKEN2_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.HELSOESKEN_FOEDSELSNUMMER
+import no.nav.etterlatte.token.Systembruker
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -680,6 +683,66 @@ internal class BeregnBarnepensjonServiceTest {
     }
 
     @Test
+    fun `skal ikke beregne med knekkpunkt fra regelverksendring hvis nytt regelverk er avslått`() {
+        val behandling = mockBehandling(BehandlingType.FØRSTEGANGSBEHANDLING, virk = YearMonth.of(2023, Month.DECEMBER))
+        val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
+        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
+        coEvery {
+            beregningsGrunnlagService.hentBarnepensjonBeregningsGrunnlag(any(), any())
+        } returns barnepensjonBeregningsGrunnlag(behandling.id, emptyList())
+        coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns null
+        featureToggleService.settBryter(BrukNyttRegelverkIBeregning, false)
+
+        runBlocking {
+            val beregning =
+                beregnBarnepensjonService().beregn(
+                    behandling,
+                    bruker,
+                )
+            Assertions.assertEquals(1, beregning.beregningsperioder.size)
+            with(beregning.beregningsperioder[0]) {
+                datoFOM shouldBe YearMonth.of(2023, Month.DECEMBER)
+                datoTOM shouldBe null
+            }
+        }
+    }
+
+    @Test
+    fun `skal beregne med knekkpunkt fra regelverksendring hvis nytt regelverk er avslått men er migrering`() {
+        val behandling =
+            mockBehandling(
+                BehandlingType.FØRSTEGANGSBEHANDLING,
+                virk = YearMonth.of(2023, Month.DECEMBER),
+                vedtaksloesning = Vedtaksloesning.PESYS,
+            )
+
+        val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
+        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
+        coEvery {
+            beregningsGrunnlagService.hentBarnepensjonBeregningsGrunnlag(any(), any())
+        } returns barnepensjonBeregningsGrunnlag(behandling.id, emptyList())
+        coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns null
+        featureToggleService.settBryter(BrukNyttRegelverkIBeregning, false)
+
+        runBlocking {
+            val beregning =
+                beregnBarnepensjonService().beregn(
+                    behandling,
+                    Systembruker("migrering", "migrering"),
+                )
+            Assertions.assertEquals(2, beregning.beregningsperioder.size)
+            with(beregning.beregningsperioder[0]) {
+                datoFOM shouldBe YearMonth.of(2023, Month.DECEMBER)
+                datoTOM shouldBe YearMonth.of(2023, Month.DECEMBER)
+            }
+            with(beregning.beregningsperioder[1]) {
+                datoFOM shouldBe YearMonth.of(2024, Month.JANUARY)
+                datoTOM shouldBe null
+            }
+        }
+    }
+
+    @Test
     fun `skal beregne barnepensjon foerstegangsbehandling - med flere avdoede foreldre og nytt regelverk`() {
         val behandling = mockBehandling(BehandlingType.FØRSTEGANGSBEHANDLING)
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns
@@ -805,12 +868,14 @@ internal class BeregnBarnepensjonServiceTest {
     private fun mockBehandling(
         type: BehandlingType,
         virk: YearMonth = VIRKNINGSTIDSPUNKT_JAN_23,
+        vedtaksloesning: Vedtaksloesning = Vedtaksloesning.GJENNY,
     ): DetaljertBehandling =
-        mockk<DetaljertBehandling>().apply {
+        mockk<DetaljertBehandling> {
             every { id } returns randomUUID()
             every { sak } returns 1
             every { behandlingType } returns type
             every { virkningstidspunkt } returns VirkningstidspunktTestData.virkningstidsunkt(virk)
+            every { kilde } returns vedtaksloesning
         }
 
     private fun mockTrygdetid(behandlingId_: UUID): TrygdetidDto =

@@ -1,4 +1,4 @@
-package no.nav.etterlatte.klienter
+package no.nav.etterlatte.grunnlag.klienter
 
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -7,13 +7,17 @@ import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.HentPersonRequest
+import no.nav.etterlatte.libs.common.person.HentPersongalleriRequest
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.pdl.HistorikkForeldreansvar
+import no.nav.etterlatte.sikkerLogg
+import org.slf4j.LoggerFactory
 
 interface PdlTjenesterKlient {
     fun hentPerson(
@@ -33,9 +37,17 @@ interface PdlTjenesterKlient {
         rolle: PersonRolle,
         sakType: SakType,
     ): HistorikkForeldreansvar
+
+    suspend fun hentPersongalleri(
+        foedselsnummer: String,
+        sakType: SakType,
+        innsender: String?,
+    ): Persongalleri?
 }
 
 class PdlTjenesterKlientImpl(private val pdl: HttpClient, private val url: String) : PdlTjenesterKlient {
+    private val logger = LoggerFactory.getLogger(this::class.java)
+
     override fun hentPerson(
         foedselsnummer: String,
         rolle: PersonRolle,
@@ -50,6 +62,37 @@ class PdlTjenesterKlientImpl(private val pdl: HttpClient, private val url: Strin
                 }.body<Person>()
             }
         return response
+    }
+
+    override suspend fun hentPersongalleri(
+        foedselsnummer: String,
+        sakType: SakType,
+        innsender: String?,
+    ): Persongalleri? {
+        return try {
+            val persongalleriRequest =
+                HentPersongalleriRequest(
+                    mottakerAvYtelsen = Folkeregisteridentifikator.of(foedselsnummer),
+                    saktype = sakType,
+                    innsender = innsender?.let { Folkeregisteridentifikator.of(it) },
+                )
+            pdl.post("$url/galleri") {
+                contentType(ContentType.Application.Json)
+                setBody(persongalleriRequest)
+            }.body<Persongalleri>()
+        } catch (e: Exception) {
+            logger.warn(
+                "Kunne ikke hente persongalleriet fra PDL, på grunn av feil. " +
+                    "Metadata om request er i sikkerlogg",
+                e,
+            )
+            sikkerLogg.warn(
+                "Kunne ikke hente persongalleriet fra PDL for soeker=$foedselsnummer i saktype " +
+                    "$sakType, på grunn av feil.",
+                e,
+            )
+            null
+        }
     }
 
     override fun hentOpplysningsperson(

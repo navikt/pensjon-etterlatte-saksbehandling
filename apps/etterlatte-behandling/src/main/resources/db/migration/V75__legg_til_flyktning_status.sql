@@ -1,0 +1,1 @@
+ALTER TABLE sak ADD COLUMN flyktning JSONB;

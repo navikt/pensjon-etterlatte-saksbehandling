@@ -22,7 +22,7 @@ import io.mockk.confirmVerified
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.etterlatte.klienter.BehandlingKlient
+import no.nav.etterlatte.grunnlag.klienter.BehandlingKlient
 import no.nav.etterlatte.libs.common.serialize
 import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
 import no.nav.etterlatte.libs.ktor.restModule

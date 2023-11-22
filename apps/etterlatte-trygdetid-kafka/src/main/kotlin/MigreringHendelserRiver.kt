@@ -53,7 +53,7 @@ internal class MigreringHendelserRiver(
         logger.info("Opprettet trygdetid for behandling $behandlingId")
 
         val oppdatertTrygdetid: TrygdetidDto =
-            if (request.avdoedForelder.any { it.yrkesskade }) {
+            if (request.dodAvYrkesskade) {
                 logger.info("Avdød hadde yrkesskade i Pesys, oppretter yrkesskadegrunnlag for behandling $behandlingId")
                 trygdetidService.opprettGrunnlagVedYrkesskade(behandlingId)
             } else if (request.trygdetid.perioder.isNotEmpty()) {

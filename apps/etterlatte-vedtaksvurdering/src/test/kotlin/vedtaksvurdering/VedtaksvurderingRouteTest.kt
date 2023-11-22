@@ -120,7 +120,7 @@ internal class VedtaksvurderingRouteTest {
 
     @Test
     fun `skal returnere 500 ved ukjent feil og returnere generell feilmelding`() {
-        every { vedtaksvurderingService.hentVedtak(any<UUID>()) } throws Exception("ukjent feil")
+        every { vedtaksvurderingService.hentVedtakMedBehandlingId(any<UUID>()) } throws Exception("ukjent feil")
 
         testApplication {
             environment { config = applicationConfig }
@@ -146,13 +146,13 @@ internal class VedtaksvurderingRouteTest {
 
         coVerify(exactly = 1) {
             behandlingKlient.harTilgangTilBehandling(any(), any())
-            vedtaksvurderingService.hentVedtak(any<UUID>())
+            vedtaksvurderingService.hentVedtakMedBehandlingId(any<UUID>())
         }
     }
 
     @Test
     fun `skal returnere 404 naar vedtaksvurdering ikke finnes`() {
-        every { vedtaksvurderingService.hentVedtak(any<UUID>()) } returns null
+        every { vedtaksvurderingService.hentVedtakMedBehandlingId(any<UUID>()) } returns null
 
         testApplication {
             environment { config = applicationConfig }
@@ -178,14 +178,14 @@ internal class VedtaksvurderingRouteTest {
 
         coVerify(exactly = 1) {
             behandlingKlient.harTilgangTilBehandling(any(), any())
-            vedtaksvurderingService.hentVedtak(any<UUID>())
+            vedtaksvurderingService.hentVedtakMedBehandlingId(any<UUID>())
         }
     }
 
     @Test
     fun `skal returnere eksisterende vedtaksvurdering`() {
         val opprettetVedtak = vedtak()
-        every { vedtaksvurderingService.hentVedtak(any<UUID>()) } returns opprettetVedtak
+        every { vedtaksvurderingService.hentVedtakMedBehandlingId(any<UUID>()) } returns opprettetVedtak
 
         testApplication {
             environment { config = applicationConfig }
@@ -232,7 +232,7 @@ internal class VedtaksvurderingRouteTest {
 
             coVerify(exactly = 1) {
                 behandlingKlient.harTilgangTilBehandling(any(), any())
-                vedtaksvurderingService.hentVedtak(any<UUID>())
+                vedtaksvurderingService.hentVedtakMedBehandlingId(any<UUID>())
             }
         }
     }
@@ -240,7 +240,7 @@ internal class VedtaksvurderingRouteTest {
     @Test
     fun `skal returnere eksisterende vedtaksvurdering for en behandling`() {
         val opprettetVedtak = vedtak()
-        every { vedtaksvurderingService.hentVedtak(any<UUID>()) } returns opprettetVedtak
+        every { vedtaksvurderingService.hentVedtakMedBehandlingId(any<UUID>()) } returns opprettetVedtak
 
         testApplication {
             environment { config = applicationConfig }
@@ -289,7 +289,7 @@ internal class VedtaksvurderingRouteTest {
 
             coVerify(exactly = 1) {
                 behandlingKlient.harTilgangTilBehandling(any(), any())
-                vedtaksvurderingService.hentVedtak(any<UUID>())
+                vedtaksvurderingService.hentVedtakMedBehandlingId(any<UUID>())
             }
         }
     }
@@ -297,7 +297,7 @@ internal class VedtaksvurderingRouteTest {
     @Test
     fun `skal returnere eksisterende vedtaksvurdering for en tilbakekreving`() {
         val opprettetVedtak = vedtakTilbakekreving()
-        every { vedtaksvurderingService.hentVedtak(any<UUID>()) } returns opprettetVedtak
+        every { vedtaksvurderingService.hentVedtakMedBehandlingId(any<UUID>()) } returns opprettetVedtak
 
         testApplication {
             environment { config = applicationConfig }
@@ -337,7 +337,7 @@ internal class VedtaksvurderingRouteTest {
 
         coVerify(exactly = 1) {
             behandlingKlient.harTilgangTilBehandling(any(), any())
-            vedtaksvurderingService.hentVedtak(any<UUID>())
+            vedtaksvurderingService.hentVedtakMedBehandlingId(any<UUID>())
         }
     }
 
@@ -348,7 +348,7 @@ internal class VedtaksvurderingRouteTest {
                 status = VedtakStatus.ATTESTERT,
                 attestasjon = Attestasjon(SAKSBEHANDLER_2, ENHET_2, Tidspunkt.now()),
             )
-        every { vedtaksvurderingService.hentVedtak(any<UUID>()) } returns attestertVedtak
+        every { vedtaksvurderingService.hentVedtakMedBehandlingId(any<UUID>()) } returns attestertVedtak
 
         testApplication {
             environment { config = applicationConfig }
@@ -380,7 +380,7 @@ internal class VedtaksvurderingRouteTest {
 
             coVerify(exactly = 1) {
                 behandlingKlient.harTilgangTilBehandling(any(), any())
-                vedtaksvurderingService.hentVedtak(any<UUID>())
+                vedtaksvurderingService.hentVedtakMedBehandlingId(any<UUID>())
             }
         }
     }
@@ -487,7 +487,7 @@ internal class VedtaksvurderingRouteTest {
                 status = VedtakStatus.FATTET_VEDTAK,
                 vedtakFattet = VedtakFattet(SAKSBEHANDLER_1, ENHET_1, Tidspunkt.now()),
             )
-        coEvery { vedtakBehandlingService.fattVedtak(any(), any()) } returns VedtakOgRapid(fattetVedtak.toDto(), mockk())
+        coEvery { vedtakBehandlingService.fattVedtak(any(), any(), any()) } returns VedtakOgRapid(fattetVedtak.toDto(), mockk())
         coEvery { rapidService.sendToRapid(any()) } just runs
 
         testApplication {
@@ -535,7 +535,7 @@ internal class VedtaksvurderingRouteTest {
 
             coVerify(exactly = 1) {
                 behandlingKlient.harTilgangTilBehandling(any(), any())
-                vedtakBehandlingService.fattVedtak(any(), match { it.ident() == SAKSBEHANDLER_1 })
+                vedtakBehandlingService.fattVedtak(any(), match { it.ident() == SAKSBEHANDLER_1 }, any())
                 rapidService.sendToRapid(any())
             }
         }
@@ -550,7 +550,10 @@ internal class VedtaksvurderingRouteTest {
                 vedtakFattet = VedtakFattet(SAKSBEHANDLER_1, ENHET_1, Tidspunkt.now()),
                 attestasjon = Attestasjon(SAKSBEHANDLER_2, ENHET_2, Tidspunkt.now()),
             )
-        coEvery { vedtakBehandlingService.attesterVedtak(any(), any(), any()) } returns VedtakOgRapid(attestertVedtak.toDto(), mockk())
+        coEvery { vedtakBehandlingService.attesterVedtak(any(), any(), any(), any()) } returns
+            VedtakOgRapid(
+                attestertVedtak.toDto(), mockk(),
+            )
         coEvery { rapidService.sendToRapid(any()) } just runs
 
         testApplication {
@@ -603,6 +606,7 @@ internal class VedtaksvurderingRouteTest {
                     any(),
                     match { it == attestertVedtakKommentar.kommentar },
                     match { it.ident() == SAKSBEHANDLER_1 },
+                    any(),
                 )
                 rapidService.sendToRapid(any())
             }

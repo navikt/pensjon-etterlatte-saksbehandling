@@ -7,7 +7,7 @@ import { IBehandlingStatus, IBehandlingsType, IDetaljertBehandling } from '~shar
 import { useVedtaksResultat } from '~components/behandling/useVedtaksResultat'
 import { BehandlingHandlingKnapper } from '~components/behandling/handlinger/BehandlingHandlingKnapper'
 import { NesteOgTilbake } from '~components/behandling/handlinger/NesteOgTilbake'
-import { hentBehandlesFraStatus } from '~components/behandling/felles/utils'
+import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
 import { useBehandlingRoutes } from '~components/behandling/BehandlingRoutes'
 import { isFailure, isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
 import { hentVilkaarsvurdering } from '~shared/api/vilkaarsvurdering'
@@ -29,7 +29,7 @@ const featureToggleNameTrygdetid = 'pensjon-etterlatte.bp-bruk-faktisk-trygdetid
 const TrygdetidVisning = (props: { behandling: IDetaljertBehandling }) => {
   const { behandling } = props
   const dispatch = useAppDispatch()
-  const behandles = hentBehandlesFraStatus(behandling.status)
+  const redigerbar = behandlingErRedigerbar(behandling.status)
   const { next } = useBehandlingRoutes()
   const [vilkaarsvurdering, getVilkaarsvurdering] = useApiCall(hentVilkaarsvurdering)
   const [yrkesskadeTrygdetid, setYrkesskadeTrygdetid] = useState<boolean>(false)
@@ -81,7 +81,7 @@ const TrygdetidVisning = (props: { behandling: IDetaljertBehandling }) => {
           }[behandling.sakType]
         ) : beregnTrygdetid ? (
           <Trygdetid
-            redigerbar={behandles}
+            redigerbar={redigerbar}
             behandling={behandling}
             virkningstidspunktEtterNyRegelDato={virkningstidspunktEtterNyRegelDato()}
           />
@@ -94,7 +94,7 @@ const TrygdetidVisning = (props: { behandling: IDetaljertBehandling }) => {
       {isFailure(vilkaarsvurdering) && <ApiErrorAlert>Kunne ikke hente vilkårsvurdering</ApiErrorAlert>}
       {isFailure(oppdaterStatusResult) && <ApiErrorAlert>{oppdaterStatusResult.error.detail}</ApiErrorAlert>}
 
-      {behandles ? (
+      {redigerbar ? (
         <BehandlingHandlingKnapper>
           <Button variant="primary" loading={isPending(oppdaterStatusResult)} onClick={sjekkGyldighetOgOppdaterStatus}>
             {handlinger.NESTE.navn}

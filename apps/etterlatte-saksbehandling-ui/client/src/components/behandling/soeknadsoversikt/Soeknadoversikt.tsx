@@ -3,37 +3,52 @@ import { Familieforhold } from './familieforhold/Familieforhold'
 import { Border, HeadingWrapper, InnholdPadding } from './styled'
 import { Heading } from '@navikt/ds-react'
 import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapper'
-import { Soeknadsdato } from './soeknadoversikt/Soeknadsdato'
+import { Soeknadsdato } from './Soeknadsdato'
 import { NesteOgTilbake } from '../handlinger/NesteOgTilbake'
-import { behandlingErUtfylt, hentBehandlesFraStatus } from '../felles/utils'
+import { behandlingErUtfylt, behandlingErRedigerbar } from '../felles/utils'
 import { VurderingsResultat } from '~shared/types/VurderingsResultat'
-import { OversiktGyldigFramsatt } from '~components/behandling/soeknadsoversikt/soeknadoversikt/gyldigFramsattSoeknad/OversiktGyldigFramsatt'
-import { Utenlandstilknytning } from '~components/behandling/soeknadsoversikt/soeknadoversikt/utenlandstilknytning/Utenlandstilknytning'
+import { OversiktGyldigFramsatt } from '~components/behandling/soeknadsoversikt/gyldigFramsattSoeknad/OversiktGyldigFramsatt'
+import { Utenlandstilknytning } from '~components/behandling/soeknadsoversikt/utenlandstilknytning/Utenlandstilknytning'
 import { SakType } from '~shared/types/sak'
-import { OversiktKommerBarnetTilgode } from '~components/behandling/soeknadsoversikt/soeknadoversikt/kommerBarnetTilgode/OversiktKommerBarnetTilgode'
+import { OversiktKommerBarnetTilgode } from '~components/behandling/soeknadsoversikt/kommerBarnetTilgode/OversiktKommerBarnetTilgode'
 import { Start } from '~components/behandling/handlinger/start'
-import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
+import { IDetaljertBehandling, UtenlandstilknytningType } from '~shared/types/IDetaljertBehandling'
+import { BoddEllerArbeidetUtlandet } from '~components/behandling/soeknadsoversikt/boddEllerArbeidetUtlandet/BoddEllerArbeidetUtlandet'
+import OppdaterGrunnlagModal from '~components/behandling/handlinger/OppdaterGrunnlagModal'
+import { SkalViseBosattUtland } from '~components/behandling/soeknadsoversikt/bosattUtland/SkalViseBosattUtland'
 import {
+  BOSATT_UTLAND_FELLES_BESKRIVELSE,
   BP_FOERSTEGANGSBEHANDLING_BESKRIVELSE,
   BP_FOERSTEGANGSBEHANDLING_HJEMLER,
   OMS_FOERSTEGANGSBEHANDLING_BESKRIVELSE,
-} from '~components/behandling/soeknadsoversikt/soeknadoversikt/virkningstidspunkt/utils'
+} from '~components/behandling/virkningstidspunkt/utils'
+import Virkningstidspunkt from '~components/behandling/virkningstidspunkt/Virkningstidspunkt'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
-import { formaterKildePdl } from '~components/behandling/soeknadsoversikt/utils'
 import { formaterStringDato } from '~utils/formattering'
-import Virkningstidspunkt from '~components/behandling/soeknadsoversikt/soeknadoversikt/virkningstidspunkt/Virkningstidspunkt'
-import { BoddEllerArbeidetUtlandet } from './soeknadoversikt/boddEllerArbeidetUtlandet/BoddEllerArbeidetUtlandet'
-import OppdaterGrunnlagModal from '~components/behandling/handlinger/OppdaterGrunnlagModal'
-import { SkalViseBosattUtland } from '~components/behandling/soeknadsoversikt/bosattUtland/SkalViseBosattUtland'
+import { formaterKildePdl } from '~components/behandling/soeknadsoversikt/utils'
 
 export const Soeknadsoversikt = (props: { behandling: IDetaljertBehandling }) => {
   const { behandling } = props
-  const behandles = hentBehandlesFraStatus(behandling.status)
+  const redigerbar = behandlingErRedigerbar(behandling.status)
   const erGyldigFremsatt = behandling.gyldighetsprøving?.resultat === VurderingsResultat.OPPFYLT
   const avdoedDoedsdato = behandling.familieforhold?.avdoede?.opplysning?.doedsdato
   const avdoedDoedsdatoKilde = behandling.familieforhold?.avdoede?.kilde
+  const erBosattUtland = behandling.utenlandstilknytning?.type === UtenlandstilknytningType.BOSATT_UTLAND
 
-  const soeknadMottattDato = behandling.soeknadMottattDato
+  let hjemler = BP_FOERSTEGANGSBEHANDLING_HJEMLER
+  if (erBosattUtland) {
+    hjemler = hjemler.concat([
+      { lenke: 'https://lovdata.no/pro/eu/32004r0883/ARTIKKEL_81', tittel: 'EØS forordning 883/2004 art 81"' },
+    ])
+  }
+
+  let beskrivelse =
+    behandling.sakType === SakType.BARNEPENSJON
+      ? BP_FOERSTEGANGSBEHANDLING_BESKRIVELSE
+      : OMS_FOERSTEGANGSBEHANDLING_BESKRIVELSE
+  if (erBosattUtland) {
+    beskrivelse = BOSATT_UTLAND_FELLES_BESKRIVELSE
+  }
 
   return (
     <Content>
@@ -47,32 +62,25 @@ export const Soeknadsoversikt = (props: { behandling: IDetaljertBehandling }) =>
       </ContentHeader>
       <InnholdPadding>
         <OppdaterGrunnlagModal behandlingId={behandling.id} behandlingStatus={behandling.status} />
-        <Utenlandstilknytning behandling={behandling} redigerbar={behandles} />
+        <Utenlandstilknytning behandling={behandling} redigerbar={redigerbar} />
         <OversiktGyldigFramsatt behandling={behandling} />
         {behandling.gyldighetsprøving?.resultat === VurderingsResultat.OPPFYLT && (
           <>
             {behandling.sakType == SakType.BARNEPENSJON && (
               <OversiktKommerBarnetTilgode
                 kommerBarnetTilgode={behandling.kommerBarnetTilgode}
-                redigerbar={behandles}
+                redigerbar={redigerbar}
                 soeker={behandling.søker}
                 gjenlevendeForelder={behandling.familieforhold?.gjenlevende}
                 behandlingId={behandling.id}
               />
             )}
             <Virkningstidspunkt
-              redigerbar={behandles}
-              virkningstidspunkt={behandling.virkningstidspunkt}
-              avdoedDoedsdato={behandling.familieforhold?.avdoede?.opplysning?.doedsdato}
-              avdoedDoedsdatoKilde={behandling.familieforhold?.avdoede?.kilde}
-              soeknadMottattDato={behandling.soeknadMottattDato}
-              behandlingId={behandling.id}
-              hjemmler={BP_FOERSTEGANGSBEHANDLING_HJEMLER}
-              beskrivelse={
-                behandling.sakType === 'BARNEPENSJON'
-                  ? BP_FOERSTEGANGSBEHANDLING_BESKRIVELSE
-                  : OMS_FOERSTEGANGSBEHANDLING_BESKRIVELSE
-              }
+              erBosattUtland={erBosattUtland}
+              redigerbar={redigerbar}
+              behandling={behandling}
+              hjemler={hjemler}
+              beskrivelse={beskrivelse}
             >
               {{
                 info: (
@@ -82,19 +90,19 @@ export const Soeknadsoversikt = (props: { behandling: IDetaljertBehandling }) =>
                       tekst={avdoedDoedsdato ? formaterStringDato(avdoedDoedsdato) : 'Ikke registrert!'}
                       undertekst={formaterKildePdl(avdoedDoedsdatoKilde)}
                     />
-                    <Info label="Søknad mottatt" tekst={formaterStringDato(soeknadMottattDato)} />
+                    <Info label="Søknad mottatt" tekst={formaterStringDato(behandling.soeknadMottattDato)} />
                   </>
                 ),
               }}
-            </Virkningstidspunkt>
-            <BoddEllerArbeidetUtlandet behandling={behandling} redigerbar={behandles} />
+            </Virkningstidspunkt>{' '}
+            <BoddEllerArbeidetUtlandet behandling={behandling} redigerbar={redigerbar} />
           </>
         )}
-        <SkalViseBosattUtland behandling={behandling} />
+        <SkalViseBosattUtland behandling={behandling} redigerbar={redigerbar} />
       </InnholdPadding>
       <Border />
       <Familieforhold behandling={behandling} />
-      {behandles ? (
+      {redigerbar ? (
         <BehandlingHandlingKnapper>
           {behandlingErUtfylt(behandling) && <Start disabled={!erGyldigFremsatt} />}
         </BehandlingHandlingKnapper>

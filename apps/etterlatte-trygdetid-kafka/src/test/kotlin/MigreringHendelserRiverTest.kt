@@ -70,8 +70,9 @@ internal class MigreringHendelserRiverTest {
                 enhet = Enhet("4817"),
                 soeker = SOEKER_FOEDSELSNUMMER,
                 avdoedForelder = listOf(AvdoedForelder(AVDOED_FOEDSELSNUMMER, Tidspunkt.now())),
+                dodAvYrkesskade = false,
                 gjenlevendeForelder = null,
-                virkningstidspunkt = YearMonth.now(),
+                foersteVirkningstidspunkt = YearMonth.now(),
                 beregning =
                     Beregning(
                         brutto = 3500,
@@ -184,8 +185,9 @@ internal class MigreringHendelserRiverTest {
                 enhet = Enhet("4817"),
                 soeker = SOEKER_FOEDSELSNUMMER,
                 avdoedForelder = listOf(AvdoedForelder(AVDOED_FOEDSELSNUMMER, Tidspunkt.now())),
+                dodAvYrkesskade = false,
                 gjenlevendeForelder = null,
-                virkningstidspunkt = YearMonth.now(),
+                foersteVirkningstidspunkt = YearMonth.now(),
                 beregning =
                     Beregning(
                         brutto = 3500,
@@ -274,8 +276,9 @@ internal class MigreringHendelserRiverTest {
                 enhet = Enhet("4817"),
                 soeker = SOEKER_FOEDSELSNUMMER,
                 avdoedForelder = listOf(AvdoedForelder(AVDOED_FOEDSELSNUMMER, Tidspunkt.now())),
+                dodAvYrkesskade = false,
                 gjenlevendeForelder = null,
-                virkningstidspunkt = YearMonth.now(),
+                foersteVirkningstidspunkt = YearMonth.now(),
                 beregning =
                     Beregning(
                         brutto = 3500,
@@ -391,8 +394,9 @@ internal class MigreringHendelserRiverTest {
                 enhet = Enhet("4817"),
                 soeker = SOEKER_FOEDSELSNUMMER,
                 avdoedForelder = listOf(AvdoedForelder(AVDOED_FOEDSELSNUMMER, Tidspunkt.now())),
+                dodAvYrkesskade = false,
                 gjenlevendeForelder = null,
-                virkningstidspunkt = YearMonth.now(),
+                foersteVirkningstidspunkt = YearMonth.now(),
                 beregning =
                     Beregning(
                         brutto = 3500,
@@ -480,7 +484,7 @@ internal class MigreringHendelserRiverTest {
     }
 
     @Test
-    fun `skal opprette eget grunnlag for yrkesskade dersom det ikke finnes perioder`() {
+    fun `skal opprette eget grunnlag for yrkesskade`() {
         val behandlingId = slot<UUID>()
         val trygdetidDto =
             TrygdetidDto(
@@ -507,9 +511,10 @@ internal class MigreringHendelserRiverTest {
                 pesysId = PesysId(1),
                 enhet = Enhet("4817"),
                 soeker = SOEKER_FOEDSELSNUMMER,
-                avdoedForelder = listOf(AvdoedForelder(AVDOED_FOEDSELSNUMMER, Tidspunkt.now(), true)),
+                avdoedForelder = listOf(AvdoedForelder(AVDOED_FOEDSELSNUMMER, Tidspunkt.now())),
+                dodAvYrkesskade = true,
                 gjenlevendeForelder = null,
-                virkningstidspunkt = YearMonth.now(),
+                foersteVirkningstidspunkt = YearMonth.now(),
                 beregning =
                     Beregning(
                         brutto = 3500,

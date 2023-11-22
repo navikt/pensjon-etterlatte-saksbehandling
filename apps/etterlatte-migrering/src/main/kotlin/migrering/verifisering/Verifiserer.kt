@@ -7,9 +7,9 @@ import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.toJson
-import no.nav.etterlatte.migrering.MigreringFeatureToggle
 import no.nav.etterlatte.migrering.Migreringsstatus
 import no.nav.etterlatte.migrering.PesysRepository
+import no.nav.etterlatte.migrering.start.MigreringFeatureToggle
 import no.nav.etterlatte.rapidsandrivers.migrering.MigreringRequest
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser
 import org.slf4j.LoggerFactory
@@ -42,7 +42,10 @@ internal class Verifiserer(
     private fun sjekkAtPersonerFinsIPDL(request: MigreringRequest): List<Verifiseringsfeil> {
         val personer = mutableListOf(Pair(PersonRolle.BARN, request.soeker))
         request.avdoedForelder.forEach { personer.add(Pair(PersonRolle.AVDOED, it.ident)) }
-        request.gjenlevendeForelder?.let { personer.add(Pair(PersonRolle.GJENLEVENDE, it)) }
+        if (request.gjenlevendeForelder == null) {
+            return listOf(GjenlevendeForelderMangler)
+        }
+        request.gjenlevendeForelder!!.let { personer.add(Pair(PersonRolle.GJENLEVENDE, it)) }
 
         return personer.map { hentPerson(it.first, it.second) }
             .filter { it.isFailure }
@@ -72,4 +75,9 @@ sealed class Verifiseringsfeil : Exception()
 data class FinsIkkeIPDL(val rolle: PersonRolle, val id: Folkeregisteridentifikator) : Verifiseringsfeil() {
     override val message: String
         get() = toString()
+}
+
+object GjenlevendeForelderMangler : Verifiseringsfeil() {
+    override val message: String
+        get() = "Gjenlevende forelder er null i det vi får fra Pesys"
 }

@@ -9,6 +9,8 @@
       "doedsdato" : "2023-08-18"
     }
   ],
+  "dodAvYrkesskade": false,
+  "flyktning": false,
   "virkningsdato" : "2023-09-01",
   "beregning" : {
     "brutto" : 3954,

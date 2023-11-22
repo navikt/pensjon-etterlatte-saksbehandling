@@ -22,9 +22,10 @@ import no.nav.etterlatte.libs.common.sak.VedtakSak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
 import no.nav.etterlatte.libs.common.vedtak.Behandling
-import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
+import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseType
+import no.nav.etterlatte.libs.common.vedtak.VedtakNyDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -59,6 +60,7 @@ internal class JournalfoerVedtaksbrevRiverTest {
                 "fnr",
                 Status.FERDIGSTILT,
                 Tidspunkt.now(),
+                Tidspunkt.now(),
                 mottaker = mockk(),
             )
         val response = JournalpostResponse("1234", null, null, true, emptyList())
@@ -73,14 +75,14 @@ internal class JournalfoerVedtaksbrevRiverTest {
 
         val vedtakCapture = slot<VedtakTilJournalfoering>()
         verify(exactly = 1) {
-            vedtaksbrevService.hentVedtaksbrev(vedtak.behandling.id)
+            vedtaksbrevService.hentVedtaksbrev(vedtak.behandlingId)
             vedtaksbrevService.journalfoerVedtaksbrev(any(), capture(vedtakCapture))
         }
 
         val vedtakActual = vedtakCapture.captured
 
-        assertEquals(vedtak.vedtakId, vedtakActual.vedtakId)
-        assertEquals(vedtak.behandling.id, vedtakActual.behandlingId)
+        assertEquals(vedtak.id, vedtakActual.vedtakId)
+        assertEquals(vedtak.behandlingId, vedtakActual.behandlingId)
         assertEquals(vedtak.attestasjon!!.attesterendeEnhet, vedtakActual.ansvarligEnhet)
 
         val actualMessage = inspektoer.message(0)
@@ -101,6 +103,7 @@ internal class JournalfoerVedtaksbrevRiverTest {
                 "fnr",
                 Status.JOURNALFOERT,
                 Tidspunkt.now(),
+                Tidspunkt.now(),
                 mottaker = mockk(),
             )
 
@@ -113,7 +116,7 @@ internal class JournalfoerVedtaksbrevRiverTest {
 
         assertEquals(0, inspektoer.size)
 
-        verify(exactly = 1) { vedtaksbrevService.hentVedtaksbrev(vedtak.behandling.id) }
+        verify(exactly = 1) { vedtaksbrevService.hentVedtaksbrev(vedtak.behandlingId) }
     }
 
     @Test
@@ -162,10 +165,10 @@ internal class JournalfoerVedtaksbrevRiverTest {
             testRapid.apply { sendTestMessage(melding.toJson()) }
         }
 
-        verify { vedtaksbrevService.hentVedtaksbrev(vedtak.behandling.id) }
+        verify { vedtaksbrevService.hentVedtaksbrev(vedtak.behandlingId) }
     }
 
-    private fun opprettMelding(vedtak: VedtakDto): JsonMessage {
+    private fun opprettMelding(vedtak: VedtakNyDto): JsonMessage {
         return JsonMessage.newMessage(
             mapOf(
                 CORRELATION_ID_KEY to UUID.randomUUID().toString(),
@@ -175,17 +178,22 @@ internal class JournalfoerVedtaksbrevRiverTest {
         )
     }
 
-    private fun opprettVedtak(behandlingType: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING): VedtakDto {
-        return VedtakDto(
-            vedtakId = 1L,
+    private fun opprettVedtak(behandlingType: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING): VedtakNyDto {
+        val behandlingId = UUID.randomUUID()
+        return VedtakNyDto(
+            id = 1L,
+            behandlingId = behandlingId,
             status = VedtakStatus.ATTESTERT,
-            virkningstidspunkt = YearMonth.now(),
             sak = VedtakSak("Z123456", SakType.BARNEPENSJON, 2L),
-            behandling = Behandling(behandlingType, UUID.randomUUID()),
             type = VedtakType.INNVILGELSE,
-            utbetalingsperioder = emptyList(),
             vedtakFattet = VedtakFattet("Z00000", "1234", Tidspunkt.now()),
             attestasjon = Attestasjon("Z00000", "1234", Tidspunkt.now()),
+            innhold =
+                VedtakInnholdDto.VedtakBehandlingDto(
+                    virkningstidspunkt = YearMonth.now(),
+                    behandling = Behandling(behandlingType, behandlingId),
+                    utbetalingsperioder = emptyList(),
+                ),
         )
     }
 

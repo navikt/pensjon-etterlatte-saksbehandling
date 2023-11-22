@@ -163,12 +163,9 @@ val barnepensjonSatsRegel2024 =
         }
     }
 
-// Kan populeres basert på feature toggle
-val aktuelleBarnepensjonSatsRegler = mutableListOf<Regel<BarnepensjonGrunnlag, Beregningstall>>()
-
 val barnepensjonSatsRegel =
     RegelMeta(
         gjelderFra = BP_1967_DATO,
         beskrivelse = "Velger nyeste tilgjengelig beregningsregel",
         regelReferanse = RegelReferanse(id = "BP-BEREGNING-UAVKORTET"),
-    ) velgNyesteGyldige aktuelleBarnepensjonSatsRegler
+    ) velgNyesteGyldige listOf(barnepensjonSatsRegel1967, barnepensjonSatsRegel2024)

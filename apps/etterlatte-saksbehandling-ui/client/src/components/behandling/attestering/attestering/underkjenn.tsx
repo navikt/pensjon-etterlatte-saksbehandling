@@ -6,13 +6,14 @@ import { useVedtak } from '~components/vedtak/useVedtak'
 import { VedtakType } from '~components/vedtak/typer'
 import { IReturTypeBehandling, IReturTypeTilbakekreving } from '~components/behandling/attestering/types'
 
+type velg = 'velg'
 export const Underkjenn = () => {
   const vedtak = useVedtak()
   const aarsak = vedtak?.vedtakType === VedtakType.TILBAKEKREVING ? IReturTypeTilbakekreving : IReturTypeBehandling
   type aarsakTyper = Array<keyof typeof aarsak>
 
   const [tilbakemeldingFraAttestant, setTilbakemeldingFraAttestant] = useState('')
-  const [returType, setReturType] = useState<aarsakTyper[number]>('velg')
+  const [returType, setReturType] = useState<aarsakTyper[number] | velg>('velg')
 
   return (
     <BeslutningWrapper>
@@ -24,6 +25,9 @@ export const Underkjenn = () => {
           value={returType || ''}
           onChange={(e) => setReturType(e.target.value as aarsakTyper[number])}
         >
+          <option value="velg" disabled={true}>
+            Velg
+          </option>
           {(Object.keys(aarsak) as aarsakTyper).map((option) => (
             <option key={option} value={option}>
               {aarsak[option]}

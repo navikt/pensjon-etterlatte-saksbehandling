@@ -1,5 +1,5 @@
 import { Control, Controller, useFieldArray, UseFormWatch } from 'react-hook-form'
-import { hentBehandlesFraStatus } from '~components/behandling/felles/utils'
+import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
 import PeriodeAccordion from '~components/behandling/beregningsgrunnlag/PeriodeAccordion'
 import MaanedVelger from '~components/behandling/beregningsgrunnlag/MaanedVelger'
 import { BodyShort, Button, Label, Radio, RadioGroup } from '@navikt/ds-react'
@@ -34,7 +34,7 @@ const SoeskenjusteringPeriode = (props: SoeskenjusteringPeriodeProps) => {
     name: `soeskenMedIBeregning.${index}.data`,
     control,
   })
-  const behandles = hentBehandlesFraStatus(behandling?.status)
+  const behandles = behandlingErRedigerbar(behandling?.status)
 
   const grunnlag = watch(`soeskenMedIBeregning.${index}`)
   const mineFeil = [...feil.filter(([feilIndex]) => feilIndex === index).flatMap((a) => a[1])]

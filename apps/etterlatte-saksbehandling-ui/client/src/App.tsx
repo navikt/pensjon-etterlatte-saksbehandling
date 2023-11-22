@@ -13,9 +13,6 @@ import ScrollToTop from '~ScrollTop'
 import { isFailure, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
 import { useEffect } from 'react'
 import { ConfigContext, hentClientConfig } from '~clientConfig'
-import BehandleJournalfoeringOppgave, {
-  FEATURE_TOGGLE_KAN_BRUKE_OPPGAVEBEHANDLING,
-} from '~components/person/journalfoeringsoppgave/BehandleJournalfoeringOppgave'
 import { useAppDispatch } from '~store/Store'
 import { settAppversion } from '~store/reducers/AppconfigReducer'
 import Versioncheck from '~Versioncheck'
@@ -26,6 +23,7 @@ import { ToggleMinOppgaveliste } from '~components/nyoppgavebenk/ToggleMinOppgav
 import { Tilbakekrevingsbehandling } from '~components/tilbakekreving/Tilbakekrevingsbehandling'
 import GenerellBehandling from '~components/generellbehandling/GenerellBehandling'
 import ManuellBehandling from '~components/manuelbehandling/ManuellBehandling'
+import BehandleJournalfoeringOppgave from '~components/person/journalfoeringsoppgave/BehandleJournalfoeringOppgave'
 
 const FEATURE_TOGGLE_KAN_BRUKE_GENERELL_BEHANDLING = 'pensjon-etterlatte.kan-bruke-generell-behandling'
 
@@ -34,7 +32,6 @@ function App() {
   registerLocale('nb', nb)
   const dispatch = useAppDispatch()
   const kanBrukeKlage = useFeatureEnabledMedDefault(FEATURE_TOGGLE_KAN_BRUKE_KLAGE, false)
-  const kanBrukeOppgavebehandling = useFeatureEnabledMedDefault(FEATURE_TOGGLE_KAN_BRUKE_OPPGAVEBEHANDLING, false)
   const kanBrukeGenerllBehandling = useFeatureEnabledMedDefault(FEATURE_TOGGLE_KAN_BRUKE_GENERELL_BEHANDLING, false)
 
   const [hentConfigStatus, hentConfig] = useApiCall(hentClientConfig)
@@ -59,9 +56,7 @@ function App() {
                   <Route path="/" element={<ToggleMinOppgaveliste />} />
                   <Route path="/oppgavebenken" element={<ToggleMinOppgaveliste />} />
                   <Route path="/person/:fnr" element={<Person />} />
-                  {kanBrukeOppgavebehandling && (
-                    <Route path="/oppgave/:id/*" element={<BehandleJournalfoeringOppgave />} />
-                  )}
+                  <Route path="/oppgave/:id/*" element={<BehandleJournalfoeringOppgave />} />
                   <Route path="/person/:fnr/sak/:sakId/brev" element={<BrevOversikt />} />
                   <Route path="/person/:fnr/sak/:sakId/brev/:brevId" element={<NyttBrev />} />
                   <Route path="/behandling/:behandlingId/*" element={<Behandling />} />

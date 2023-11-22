@@ -1,16 +1,21 @@
 import styled from 'styled-components'
-import { ErrorMessage, MonthPicker, useMonthpicker } from '@navikt/ds-react'
+import { BodyShort, ErrorMessage, Heading, MonthPicker, useMonthpicker } from '@navikt/ds-react'
 import React, { useState } from 'react'
 import { oppdaterBehandlingsstatus, oppdaterVirkningstidspunkt } from '~store/reducers/BehandlingReducer'
 import { formaterDatoTilYearMonth, formaterStringDato } from '~utils/formattering'
 import { fastsettVirkningstidspunkt } from '~shared/api/behandling'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { Beskrivelse, InfobokserWrapper, InfoWrapper, VurderingsContainerWrapper } from '../soeknadsoversikt/styled'
+import {
+  Beskrivelse,
+  InfobokserWrapper,
+  InfoWrapper,
+  VurderingsContainerWrapper,
+  VurderingsTitle,
+} from '../soeknadsoversikt/styled'
 import { useAppDispatch } from '~store/Store'
 import { IBehandlingStatus, IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { addMonths, addYears, subYears } from 'date-fns'
 import { LovtekstMedLenke } from '../soeknadsoversikt/LovtekstMedLenke'
-import { Info } from '../soeknadsoversikt/Info'
 import { LeggTilVurderingButton } from '~components/behandling/soeknadsoversikt/LeggTilVurderingButton'
 import { VurderingsboksWrapper } from '~components/vurderingsboks/VurderingsboksWrapper'
 import { SoeknadsoversiktTextArea } from '~components/behandling/soeknadsoversikt/SoeknadsoversiktTextArea'
@@ -46,6 +51,7 @@ const Virkningstidspunkt = (props: {
   const [kravdato, setKravdato] = useState<Date | undefined>(undefined)
 
   const avdoedDoedsdato = behandling.familieforhold?.avdoede?.opplysning?.doedsdato
+  const tittel = 'Hva er virkningstidspunkt for behandlingen?'
 
   const { monthpickerProps, inputProps } = useMonthpicker({
     fromDate: hentMinimumsVirkningstidspunkt(
@@ -116,17 +122,7 @@ const Virkningstidspunkt = (props: {
         <div>
           <Beskrivelse>{props.beskrivelse}</Beskrivelse>
           <InfobokserWrapper>
-            <InfoWrapper>
-              {props.children?.info}
-              <Info
-                label="Virkningstidspunkt"
-                tekst={
-                  behandling.virkningstidspunkt
-                    ? formaterStringDato(behandling.virkningstidspunkt.dato)
-                    : 'Ikke vurdert'
-                }
-              />
-            </InfoWrapper>
+            <InfoWrapper>{props.children?.info}</InfoWrapper>
           </InfobokserWrapper>
         </div>
 
@@ -135,7 +131,15 @@ const Virkningstidspunkt = (props: {
             <LeggTilVurderingButton onClick={() => setVurdert(true)}>Legg til vurdering</LeggTilVurderingButton>
           ) : (
             <VurderingsboksWrapper
-              tittel=""
+              tittel={tittel}
+              subtittelKomponent={
+                <>
+                  <Heading level="3" size="xsmall">
+                    Virkningstidspunkt
+                  </Heading>
+                  <BodyShort spacing>{formaterStringDato(behandling.virkningstidspunkt!!.dato)}</BodyShort>
+                </>
+              }
               vurdering={
                 behandling.virkningstidspunkt
                   ? {
@@ -151,6 +155,7 @@ const Virkningstidspunkt = (props: {
               defaultRediger={behandling.virkningstidspunkt === null}
             >
               <>
+                <VurderingsTitle title={tittel} />
                 {erBosattUtland && (
                   <>
                     <DatoVelger

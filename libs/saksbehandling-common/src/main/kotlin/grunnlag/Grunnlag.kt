@@ -25,13 +25,17 @@ class Grunnlag(
 
     fun hentGjenlevende(): Grunnlagsdata<JsonNode> = hentFamiliemedlem(PersonRolle.GJENLEVENDE)
 
+    fun hentPotensiellGjenlevende(): Grunnlagsdata<JsonNode>? = hentFamiliemedlemNullable(PersonRolle.GJENLEVENDE)
+
     fun hentAvdoede(): List<Grunnlagsdata<JsonNode>> = hentFamiliemedlemmer(PersonRolle.AVDOED)
 
     fun hentSoesken() = familie.filter { it.hentPersonrolle()?.verdi in listOf(PersonRolle.BARN, PersonRolle.TILKNYTTET_BARN) }
 
     private fun hentFamiliemedlem(personRolle: PersonRolle) =
-        familie.find { it.hentPersonrolle()?.verdi == personRolle }
+        hentFamiliemedlemNullable(personRolle)
             ?: throw IllegalStateException("Fant ikke familiemedlem med rolle $personRolle")
+
+    private fun hentFamiliemedlemNullable(personRolle: PersonRolle) = familie.find { it.hentPersonrolle()?.verdi == personRolle }
 
     private fun hentFamiliemedlemmer(personRolle: PersonRolle) = familie.filter { it.hentPersonrolle()?.verdi == personRolle }
 

@@ -65,9 +65,11 @@ fun Grunnlag.mapVerge(sakType: SakType): Verge? =
         if (opplysning?.verdi != null) {
             TODO("Støtter ikke annen verge enn forelder – håndtering av annen verge krever ytterligere avklaringer")
         } else if (sakType == SakType.BARNEPENSJON) {
-            val gjenlevendeNavn = hentGjenlevende().hentNavn()!!.verdi.fulltNavn()
-
-            Verge(gjenlevendeNavn)
+            hentPotensiellGjenlevende()
+                ?.hentNavn()
+                ?.verdi
+                ?.fulltNavn()
+                ?.let { Verge(it) }
         } else {
             null
         }

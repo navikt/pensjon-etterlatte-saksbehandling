@@ -42,7 +42,10 @@ internal class Verifiserer(
     private fun sjekkAtPersonerFinsIPDL(request: MigreringRequest): List<Verifiseringsfeil> {
         val personer = mutableListOf(Pair(PersonRolle.BARN, request.soeker))
         request.avdoedForelder.forEach { personer.add(Pair(PersonRolle.AVDOED, it.ident)) }
-        request.gjenlevendeForelder?.let { personer.add(Pair(PersonRolle.GJENLEVENDE, it)) }
+        if (request.gjenlevendeForelder == null) {
+            throw IllegalStateException("Gjenlevende forelder er null i det vi får fra Pesys")
+        }
+        request.gjenlevendeForelder!!.let { personer.add(Pair(PersonRolle.GJENLEVENDE, it)) }
 
         return personer.map { hentPerson(it.first, it.second) }
             .filter { it.isFailure }

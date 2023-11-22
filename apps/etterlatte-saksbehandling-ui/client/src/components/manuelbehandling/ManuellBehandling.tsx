@@ -64,18 +64,16 @@ export default function ManuellBehandling() {
         <option value="nei">Nei</option>
       </Select>
 
-      {erMigrering && (
-        <InputRow>
-          <TextField
-            label="Sakid Pesys"
-            placeholder="Sakid Pesys"
-            value={pesysId || ''}
-            pattern="[0-9]{11}"
-            maxLength={11}
-            onChange={(e) => setPesysId(Number(e.target.value))}
-          />
-        </InputRow>
-      )}
+      <InputRow>
+        <TextField
+          label="Sakid Pesys"
+          placeholder="Sakid Pesys"
+          value={pesysId || ''}
+          pattern="[0-9]{11}"
+          maxLength={11}
+          onChange={(e) => setPesysId(Number(e.target.value))}
+        />
+      </InputRow>
 
       <Checkbox checked={overstyrBeregning} onChange={() => setOverstyrBeregning(!overstyrBeregning)}>
         Skal bruke manuell beregning

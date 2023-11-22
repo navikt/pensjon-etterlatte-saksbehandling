@@ -105,16 +105,28 @@ class BehandlingKlient(config: Config, httpClient: HttpClient) {
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): Vedtaksloesning {
-        try {
-            return downstreamResourceClient.get(
-                resource = Resource(clientId = clientId, url = "$resourceUrl/behandlinger/$behandlingId"),
-                brukerTokenInfo = brukerTokenInfo,
-            ).mapBoth(
-                success = { resource -> resource.response!!.let { objectMapper.readValue<DetaljertBehandling>(it.toString()) }.kilde },
-                failure = { throwableErrorMessage -> throw throwableErrorMessage },
-            )
-        } catch (e: Exception) {
-            throw BehandlingKlientException("Henting av behandling med id=$behandlingId for å finne vedtaksløsning feilet")
+        return retry {
+            try {
+                downstreamResourceClient.get(
+                    resource = Resource(clientId = clientId, url = "$resourceUrl/behandlinger/$behandlingId"),
+                    brukerTokenInfo = brukerTokenInfo,
+                ).mapBoth(
+                    success = { resource -> resource.response!!.let { objectMapper.readValue<DetaljertBehandling>(it.toString()) }.kilde },
+                    failure = { throwableErrorMessage -> throw throwableErrorMessage },
+                )
+            } catch (e: Exception) {
+                throw BehandlingKlientException("Henting av behandling med id=$behandlingId for å finne vedtaksløsning feilet")
+            }
+        }.let {
+            when (it) {
+                is RetryResult.Success -> it.content
+                is RetryResult.Failure -> {
+                    throw BehandlingKlientException(
+                        "Klarte ikke hente kilde for behandling $behandlingId",
+                        it.samlaExceptions(),
+                    )
+                }
+            }
         }
     }
 }

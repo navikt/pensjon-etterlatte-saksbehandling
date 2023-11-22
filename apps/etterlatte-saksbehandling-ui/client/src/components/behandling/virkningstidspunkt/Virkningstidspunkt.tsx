@@ -21,7 +21,7 @@ import { VurderingsboksWrapper } from '~components/vurderingsboks/Vurderingsboks
 import { SoeknadsoversiktTextArea } from '~components/behandling/soeknadsoversikt/SoeknadsoversiktTextArea'
 import { hentMinimumsVirkningstidspunkt } from '~components/behandling/virkningstidspunkt/utils'
 import { UseMonthPickerOptions } from '@navikt/ds-react/esm/date/hooks/useMonthPicker'
-import { DatoVelger } from '~shared/DatoVelger'
+import { DatoVelger, formatDateToLocaleDateOrEmptyString } from '~shared/DatoVelger'
 
 export interface Hjemmel {
   lenke: string
@@ -38,17 +38,18 @@ const Virkningstidspunkt = (props: {
 }) => {
   const { behandling, erBosattUtland } = props
   const dispatch = useAppDispatch()
+  const [, fastsettVirkningstidspunktRequest, resetToInitial] = useApiCall(fastsettVirkningstidspunkt)
 
   const [vurdert, setVurdert] = useState(behandling.virkningstidspunkt !== null)
   const [virkningstidspunkt, setVirkningstidspunkt] = useState<Date | null>(
     behandling.virkningstidspunkt ? new Date(behandling.virkningstidspunkt.dato) : null
   )
-  const [, fastsettVirkningstidspunktRequest, resetToInitial] = useApiCall(fastsettVirkningstidspunkt)
-
   const [begrunnelse, setBegrunnelse] = useState<string>(behandling.virkningstidspunkt?.begrunnelse ?? '')
-  const [errorTekst, setErrorTekst] = useState<string>('')
+  const [kravdato, setKravdato] = useState<Date | null>(
+    behandling.virkningstidspunkt ? new Date(behandling.virkningstidspunkt.kravdato) : null
+  )
 
-  const [kravdato, setKravdato] = useState<Date | undefined>(undefined)
+  const [errorTekst, setErrorTekst] = useState<string>('')
 
   const avdoedDoedsdato = behandling.familieforhold?.avdoede?.opplysning?.doedsdato
   const tittel = 'Hva er virkningstidspunkt for behandlingen?'
@@ -83,8 +84,14 @@ const Virkningstidspunkt = (props: {
     }
 
     return fastsettVirkningstidspunktRequest(
-      { id: behandling.id, dato: virkningstidspunkt, begrunnelse: begrunnelse, kravdato: kravdato },
+      {
+        id: behandling.id,
+        dato: virkningstidspunkt,
+        begrunnelse: begrunnelse,
+        kravdato: formatDateToLocaleDateOrEmptyString(kravdato ?? undefined),
+      },
       (res) => {
+        console.log(kravdato)
         dispatch(oppdaterVirkningstidspunkt(res))
         dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.OPPRETTET))
         onSuccess?.()
@@ -99,6 +106,7 @@ const Virkningstidspunkt = (props: {
   const reset = (onSuccess?: () => void) => {
     resetToInitial()
     setVirkningstidspunkt(behandling.virkningstidspunkt ? new Date(behandling.virkningstidspunkt.dato) : null)
+    setKravdato(behandling.virkningstidspunkt ? new Date(behandling.virkningstidspunkt.kravdato) : null)
     setBegrunnelse(behandling.virkningstidspunkt?.begrunnelse ?? '')
     setErrorTekst('')
     setVurdert(behandling.virkningstidspunkt !== null)
@@ -163,7 +171,7 @@ const Virkningstidspunkt = (props: {
                   <>
                     <DatoVelger
                       label="Kravdato"
-                      onChange={(date) => setKravdato(date)}
+                      onChange={(date) => setKravdato(date ?? null)}
                       value={kravdato ?? undefined}
                       fromDate={subYears(new Date(), 18)}
                       toDate={addYears(new Date(), 2)}

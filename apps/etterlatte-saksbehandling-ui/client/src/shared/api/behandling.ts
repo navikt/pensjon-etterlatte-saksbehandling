@@ -43,7 +43,7 @@ export const fastsettVirkningstidspunkt = async (args: {
   id: string
   dato: Date
   begrunnelse: string
-  kravdato: Date | undefined
+  kravdato: string | null
 }): Promise<ApiResponse<Virkningstidspunkt>> => {
   return apiClient.post(`/behandling/${args.id}/virkningstidspunkt`, {
     dato: args.dato,

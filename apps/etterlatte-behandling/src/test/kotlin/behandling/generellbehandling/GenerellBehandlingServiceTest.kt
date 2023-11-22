@@ -488,7 +488,7 @@ class GenerellBehandlingServiceTest {
             )
         val behandlingUtfylt = opprettBehandling.copy(innhold = kravpakkeUtlandInnhold)
         val oppdaterBehandling = service.lagreNyeOpplysninger(behandlingUtfylt)
-        assertThrows<LandFeilIsokodeException> {
+        assertThrows<UgyldigLandkodeIsokode3> {
             service.sendTilAttestering(oppdaterBehandling, SAKSBEHANDLER)
         }
     }

@@ -93,7 +93,7 @@ class GrunnlagHenter(
             val saksopplysninger =
                 listOfNotNull(
                     opplysningsbehov.persongalleri.tilGrunnlagsopplysningFraSoeknad(),
-                    persongalleriFraPdl.tilGrunnlagsopplysningFraPdl(),
+                    persongalleriFraPdl?.tilGrunnlagsopplysningFraPdl(),
                     vergesAdresseInfo?.let { vergeAdresserOpplysning(vergesAdresseInfo.toVergeAdresse()) },
                 )
 

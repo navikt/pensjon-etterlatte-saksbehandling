@@ -16,6 +16,8 @@ import no.nav.etterlatte.libs.common.person.HentPersongalleriRequest
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.pdl.HistorikkForeldreansvar
+import no.nav.etterlatte.sikkerLogg
+import org.slf4j.LoggerFactory
 
 interface PdlTjenesterKlient {
     fun hentPerson(
@@ -40,10 +42,12 @@ interface PdlTjenesterKlient {
         foedselsnummer: String,
         sakType: SakType,
         innsender: String?,
-    ): Persongalleri
+    ): Persongalleri?
 }
 
 class PdlTjenesterKlientImpl(private val pdl: HttpClient, private val url: String) : PdlTjenesterKlient {
+    private val logger = LoggerFactory.getLogger(this::class.java)
+
     override fun hentPerson(
         foedselsnummer: String,
         rolle: PersonRolle,
@@ -64,17 +68,31 @@ class PdlTjenesterKlientImpl(private val pdl: HttpClient, private val url: Strin
         foedselsnummer: String,
         sakType: SakType,
         innsender: String?,
-    ): Persongalleri {
-        val persongalleriRequest =
-            HentPersongalleriRequest(
-                mottakerAvYtelsen = Folkeregisteridentifikator.of(foedselsnummer),
-                saktype = sakType,
-                innsender = innsender?.let { Folkeregisteridentifikator.of(it) },
+    ): Persongalleri? {
+        return try {
+            val persongalleriRequest =
+                HentPersongalleriRequest(
+                    mottakerAvYtelsen = Folkeregisteridentifikator.of(foedselsnummer),
+                    saktype = sakType,
+                    innsender = innsender?.let { Folkeregisteridentifikator.of(it) },
+                )
+            pdl.post("$url/persongalleri") {
+                contentType(ContentType.Application.Json)
+                setBody(persongalleriRequest)
+            }.body<Persongalleri>()
+        } catch (e: Exception) {
+            logger.warn(
+                "Kunne ikke hente persongalleriet fra PDL, på grunn av feil. " +
+                    "Metadata om request er i sikkerlogg",
+                e,
             )
-        return pdl.post("$url/persongalleri") {
-            contentType(ContentType.Application.Json)
-            setBody(persongalleriRequest)
-        }.body<Persongalleri>()
+            sikkerLogg.warn(
+                "Kunne ikke hente persongalleriet fra PDL for soeker=$foedselsnummer i saktype " +
+                    "$sakType, på grunn av feil.",
+                e,
+            )
+            null
+        }
     }
 
     override fun hentOpplysningsperson(

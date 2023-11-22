@@ -14,7 +14,9 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
+import rapidsandrivers.SAK_ID_KEY
 import rapidsandrivers.migrering.ListenerMedLoggingOgFeilhaandtering
+import rapidsandrivers.sakId
 
 internal class FiksEnkeltbrevRiver(
     rapidsConnection: RapidsConnection,
@@ -25,7 +27,7 @@ internal class FiksEnkeltbrevRiver(
 
     init {
         initialiserRiver(rapidsConnection, Migreringshendelser.FIKS_ENKELTBREV) {
-            validate { it.requireKey("sakId") }
+            validate { it.requireKey(SAK_ID_KEY) }
         }
     }
 
@@ -33,7 +35,7 @@ internal class FiksEnkeltbrevRiver(
         packet: JsonMessage,
         context: MessageContext,
     ) {
-        val sakId = packet["sakId"].asLong()
+        val sakId = packet.sakId
         val brev = service.hentBrev(id = sakId)
 
         logger.info("Fikser vedtaksbrev i sak $sakId")

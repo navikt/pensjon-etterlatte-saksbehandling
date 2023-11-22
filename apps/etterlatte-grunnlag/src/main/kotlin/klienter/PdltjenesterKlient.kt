@@ -76,7 +76,7 @@ class PdlTjenesterKlientImpl(private val pdl: HttpClient, private val url: Strin
                     saktype = sakType,
                     innsender = innsender?.let { Folkeregisteridentifikator.of(it) },
                 )
-            pdl.post("$url/persongalleri") {
+            pdl.post("$url/galleri") {
                 contentType(ContentType.Application.Json)
                 setBody(persongalleriRequest)
             }.body<Persongalleri>()

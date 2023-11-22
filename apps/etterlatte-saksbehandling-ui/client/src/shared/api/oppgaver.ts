@@ -112,7 +112,7 @@ export const redigerFristApi = async (args: {
 export const hentOppgaveForBehandlingUnderBehandlingIkkeattestert = async (args: {
   referanse: string
   sakId: number
-}): Promise<ApiResponse<string>> => apiClient.get(`/oppgaver/behandling/${args.sakId}/ikkeattestert/${args.referanse}`)
+}): Promise<ApiResponse<string>> => apiClient.get(`/oppgaver/sak/${args.sakId}/ikkeattestert/${args.referanse}`)
 
 export const hentSaksbehandlerForReferanseOppgaveUnderArbeid = async (args: {
   referanse: string

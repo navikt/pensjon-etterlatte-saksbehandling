@@ -7,6 +7,7 @@ import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
@@ -74,7 +75,10 @@ class PdlTjenesterKlientImpl(private val pdl: HttpClient, private val url: Strin
                 HentPersongalleriRequest(
                     mottakerAvYtelsen = Folkeregisteridentifikator.of(foedselsnummer),
                     saktype = sakType,
-                    innsender = innsender?.let { Folkeregisteridentifikator.of(it) },
+                    innsender =
+                        innsender
+                            ?.takeIf { it != Vedtaksloesning.PESYS.name }
+                            ?.let { Folkeregisteridentifikator.of(it) },
                 )
             pdl.post("$url/galleri") {
                 contentType(ContentType.Application.Json)

@@ -23,7 +23,7 @@ data class OmregnetBPNyttRegelverk(
                 if (generellBrevData.systemkilde == Vedtaksloesning.PESYS) {
                     requireNotNull(migreringRequest) {
                         "Kan ikke generere brev for migrering fra pesys hvis vi ikke har migreringsdata"
-                    }.beregning.brutto
+                    }.brutto
                 } else {
                     0 // TODO skal komme fra utbetalingen i siste vedtak i gjenny
                 }

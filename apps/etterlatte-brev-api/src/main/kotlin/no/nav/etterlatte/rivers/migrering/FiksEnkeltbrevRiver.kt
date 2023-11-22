@@ -7,7 +7,6 @@ import no.nav.etterlatte.brev.hentinformasjon.VedtaksvurderingService
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseType
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser
-import no.nav.etterlatte.rapidsandrivers.migrering.hendelseData
 import no.nav.etterlatte.rivers.BrevEventTypes
 import no.nav.etterlatte.token.Systembruker
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -42,8 +41,7 @@ internal class FiksEnkeltbrevRiver(
         val behandlingId = brev.behandlingId!!
         val brukerTokenInfo = Systembruker("migrering", "migrering")
         runBlocking {
-            val hendelseData = packet.hendelseData
-            service.genererPdf(brev.id, brukerTokenInfo, MigreringBrevRequest(hendelseData.beregning))
+            service.genererPdf(brev.id, brukerTokenInfo, MigreringBrevRequest(brutto = 3954))
             service.ferdigstillVedtaksbrev(behandlingId, brukerTokenInfo, true)
             logger.info("Har oppretta vedtaksbrev i sak $sakId")
 

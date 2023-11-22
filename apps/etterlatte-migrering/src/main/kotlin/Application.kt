@@ -1,5 +1,7 @@
 package no.nav.etterlatte
 
+import com.typesafe.config.ConfigFactory
+import io.ktor.server.config.HoconApplicationConfig
 import migrering.migreringRoute
 import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstartOgAvslutning
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
@@ -32,6 +34,7 @@ internal class Server(private val context: ApplicationContext) {
                 .withKtorModule {
                     restModule(
                         sikkerLogg = sikkerlogger(),
+                        config = HoconApplicationConfig(ConfigFactory.load()),
                     ) {
                         migreringRoute(pesysRepository)
                     }

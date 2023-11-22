@@ -67,6 +67,12 @@ internal class JournalfoerVedtaksbrevRiver(
                 return
             }
 
+            if (vedtaksbrev.status == Status.OPPRETTET && vedtaksbrev.id == 224L) {
+                // spesialhandtering. skal bort straks
+                logger.warn("Spesialhandtering for brev 224. Avbryter her")
+                return
+            }
+
             val response = service.journalfoerVedtaksbrev(vedtaksbrev, vedtak)
 
             logger.info("Vedtaksbrev for vedtak med id ${vedtak.vedtakId} er journalfoert OK")

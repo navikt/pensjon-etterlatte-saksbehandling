@@ -257,6 +257,8 @@ class PersonService(
                 )
             } ?: emptyList()
 
+        logger.info("har hentet mottaker og ${foreldre.size} foreldre for persongalleriet")
+
         val (avdoede, gjenlevende) = foreldre.partition { it.doedsdato != null }
         val soesken = avdoede.flatMap { it.avdoedesBarn ?: emptyList() }
 

@@ -1,5 +1,6 @@
 package no.nav.etterlatte.joarkhendelser
 
+import isDev
 import joarkhendelser.joark.SafKlient
 import joarkhendelser.pdl.PdlKlient
 import no.nav.etterlatte.joarkhendelser.behandling.BehandlingService
@@ -64,7 +65,13 @@ class JoarkHendelseHandler(
             if (journalpost.bruker == null) {
                 // TODO:
                 //  Burde vi lage oppgave på dette? Alt krever SakID, så hvordan skal det fungere hvis bruker mangler?
-                throw IllegalStateException("Journalpost med id=$journalpostId mangler bruker!")
+
+                if (isDev()) {
+                    logger.error("Journalpost med id=$journalpostId mangler bruker!")
+                    return // Ignorer hvis miljø er dev. Skal i teorien ikke være et problem i produksjon.
+                } else {
+                    throw IllegalStateException("Journalpost med id=$journalpostId mangler bruker!")
+                }
             } else if (journalpost.bruker.type == BrukerIdType.ORGNR) {
                 // TODO:
                 //  Må vi lage støtte for ORGNR...?

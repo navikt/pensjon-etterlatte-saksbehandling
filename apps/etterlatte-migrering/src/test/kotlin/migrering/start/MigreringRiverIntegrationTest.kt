@@ -12,6 +12,7 @@ import kotlinx.coroutines.runBlocking
 import kotliquery.TransactionalSession
 import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.toJson
@@ -101,7 +102,10 @@ internal class MigreringRiverIntegrationTest {
                                                 any(),
                                                 any(),
                                             )
-                                        } returns mockk()
+                                        } returns
+                                            mockk<PersonDTO>().also {
+                                                every { it.vergemaalEllerFremtidsfullmakt } returns emptyList()
+                                            }
                                     },
                                     repository,
                                     featureToggleService,
@@ -181,7 +185,10 @@ internal class MigreringRiverIntegrationTest {
                                                 any(),
                                                 any(),
                                             )
-                                        } returns mockk()
+                                        } returns
+                                            mockk<PersonDTO>().also {
+                                                every { it.vergemaalEllerFremtidsfullmakt } returns emptyList()
+                                            }
                                     },
                                     repository,
                                     featureToggleService,
@@ -273,7 +280,10 @@ internal class MigreringRiverIntegrationTest {
                                                 any(),
                                                 any(),
                                             )
-                                        } returns mockk()
+                                        } returns
+                                            mockk<PersonDTO>().also {
+                                                every { it.vergemaalEllerFremtidsfullmakt } returns emptyList()
+                                            }
                                     },
                                     repository,
                                     featureToggleService,
@@ -385,6 +395,66 @@ internal class MigreringRiverIntegrationTest {
                                                 any(),
                                             )
                                         } throws IllegalStateException("")
+                                    },
+                                    repository,
+                                    featureToggleService,
+                                ),
+                            krrKlient = mockk<KrrKlient>().also { coEvery { it.hentDigitalKontaktinformasjon(any()) } returns null },
+                        )
+                    }
+            inspector.sendTestMessage(
+                JsonMessage.newMessage(
+                    mapOf(
+                        EVENT_NAME_KEY to Migreringshendelser.MIGRER_SPESIFIKK_SAK,
+                        SAK_ID_KEY to pesysid,
+                        LOPENDE_JANUAR_2024_KEY to true,
+                        MIGRERING_KJORING_VARIANT to MigreringKjoringVariant.FULL_KJORING,
+                    ),
+                ).toJson(),
+            )
+            with(inspector.inspektør.message(0)) {
+                assertEquals(EventNames.FEILA, get(EVENT_NAME_KEY).textValue())
+            }
+            assertEquals(Migreringsstatus.VERIFISERING_FEILA, repository.hentStatus(pesysid))
+        }
+    }
+
+    @Test
+    fun `Feiler med barn som har vergemaal i PDL`() {
+        testApplication {
+            val pesysid = 22974139L
+            val repository = PesysRepository(datasource)
+            val featureToggleService =
+                DummyFeatureToggleService().also {
+                    it.settBryter(MigreringFeatureToggle.SendSakTilMigrering, true)
+                }
+            val responsFraPEN =
+                objectMapper.readValue<BarnepensjonGrunnlagResponse>(
+                    this::class.java.getResource("/penrespons.json")!!.readText(),
+                )
+
+            val inspector =
+                TestRapid()
+                    .apply {
+                        MigrerSpesifikkSakRiver(
+                            rapidsConnection = this,
+                            penKlient =
+                                mockk<PenKlient>()
+                                    .also { every { runBlocking { it.hentSak(any(), any()) } } returns responsFraPEN },
+                            pesysRepository = repository,
+                            featureToggleService = featureToggleService,
+                            verifiserer =
+                                Verifiserer(
+                                    mockk<PDLKlient>().also {
+                                        every {
+                                            it.hentPerson(
+                                                any(),
+                                                any(),
+                                            )
+                                        } returns
+                                            mockk<PersonDTO>().also {
+                                                every { it.vergemaalEllerFremtidsfullmakt } returns listOf(mockk())
+                                            }
                                     },
                                     repository,
                                     featureToggleService,

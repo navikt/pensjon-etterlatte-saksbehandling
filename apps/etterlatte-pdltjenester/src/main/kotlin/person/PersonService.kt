@@ -201,20 +201,27 @@ class PersonService(
     }
 
     suspend fun hentPersongalleri(hentPersongalleriRequest: HentPersongalleriRequest): Persongalleri {
+        logger.info("henter pdl-basert persongaleri for ${hentPersongalleriRequest.mottakerAvYtelsen}")
         val persongalleri =
-            when (hentPersongalleriRequest.saktype) {
-                SakType.BARNEPENSJON ->
-                    hentPersongalleriForBarnepensjon(
-                        hentPersongalleriRequest.mottakerAvYtelsen,
-                        hentPersongalleriRequest.innsender,
-                    )
+            try {
+                when (hentPersongalleriRequest.saktype) {
+                    SakType.BARNEPENSJON ->
+                        hentPersongalleriForBarnepensjon(
+                            hentPersongalleriRequest.mottakerAvYtelsen,
+                            hentPersongalleriRequest.innsender,
+                        )
 
-                SakType.OMSTILLINGSSTOENAD ->
-                    hentPersongalleriForOmstillingsstoenad(
-                        hentPersongalleriRequest.mottakerAvYtelsen,
-                        hentPersongalleriRequest.innsender,
-                    )
+                    SakType.OMSTILLINGSSTOENAD ->
+                        hentPersongalleriForOmstillingsstoenad(
+                            hentPersongalleriRequest.mottakerAvYtelsen,
+                            hentPersongalleriRequest.innsender,
+                        )
+                }
+            } catch (e: Exception) {
+                logger.error("Fikk en feil i henting av persongalleriet", e)
+                throw e
             }
+        logger.info("Fant persongalleriet")
 
         if (persongalleri.personerUtenIdent.isNullOrEmpty() ||
             featureToggleService.isEnabled(

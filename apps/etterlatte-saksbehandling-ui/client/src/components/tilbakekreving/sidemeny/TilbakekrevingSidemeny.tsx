@@ -5,7 +5,7 @@ import { ChevronLeftDoubleIcon, ChevronRightDoubleIcon } from '@navikt/aksel-ico
 import { useTilbakekreving } from '~components/tilbakekreving/useTilbakekreving'
 import { SidebarPanel } from '~shared/components/Sidebar'
 import { Dokumentoversikt } from '~components/person/dokumenter/dokumentoversikt'
-import { IRolle } from '~store/reducers/SaksbehandlerReducer'
+import { IRolle } from '~store/reducers/InnloggetSaksbehandlerReducer'
 import { useAppDispatch, useAppSelector } from '~store/Store'
 import { TilbakekrevingStatus } from '~shared/types/Tilbakekreving'
 import { isFailure, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
@@ -22,7 +22,7 @@ export function TilbakekrevingSidemeny() {
   const tilbakekreving = useTilbakekreving()
   const vedtak = useVedtak()
   const dispatch = useAppDispatch()
-  const saksbehandler = useAppSelector((state) => state.saksbehandlerReducer.saksbehandler)
+  const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
   const [collapsed, setCollapsed] = useState(false)
 
   const [fetchVedtakStatus, fetchVedtakSammendrag] = useApiCall(hentVedtakSammendrag)
@@ -30,7 +30,7 @@ export function TilbakekrevingSidemeny() {
 
   const kanAttestere =
     !!tilbakekreving &&
-    saksbehandler.rolle === IRolle.attestant &&
+    innloggetSaksbehandler.rolle === IRolle.attestant &&
     tilbakekreving?.status === TilbakekrevingStatus.FATTET_VEDTAK
 
   useEffect(() => {

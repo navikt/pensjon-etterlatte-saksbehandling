@@ -36,6 +36,10 @@ data class OppgaveIntern(
         return Status.erAvsluttet(this.status)
     }
 
+    fun erFerdigstilt(): Boolean {
+        return Status.erFerdigstilt(this.status)
+    }
+
     fun erAttestering(): Boolean {
         return OppgaveType.ATTESTERING === type
     }
@@ -79,6 +83,10 @@ enum class Status {
                 AVBRUTT,
                 -> true
             }
+        }
+
+        fun erFerdigstilt(status: Status): Boolean {
+            return status === FERDIGSTILT
         }
 
         fun erUnderbehandling(status: Status): Boolean {

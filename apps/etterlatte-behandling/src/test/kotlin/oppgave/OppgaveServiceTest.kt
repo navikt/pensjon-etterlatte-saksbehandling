@@ -997,7 +997,7 @@ internal class OppgaveServiceTest {
         oppgaveService.tildelSaksbehandler(nyOppgave.id, saksbehandler)
 
         val saksbehandlerHentet =
-            oppgaveService.hentSaksbehandlerForBehandling(UUID.fromString(behandlingId))
+            oppgaveService.hentSaksbehandlerIkkeAttestertOppgave(behandlingId)
 
         Assertions.assertEquals(saksbehandler, saksbehandlerHentet)
     }
@@ -1019,7 +1019,7 @@ internal class OppgaveServiceTest {
         oppgaveService.tildelSaksbehandler(nyOppgave.id, saksbehandler)
 
         val saksbehandlerHentet =
-            oppgaveService.hentSaksbehandlerForBehandling(UUID.fromString(revurderingId))
+            oppgaveService.hentSaksbehandlerIkkeAttestertOppgave(revurderingId)
 
         Assertions.assertEquals(saksbehandler, saksbehandlerHentet)
     }
@@ -1055,7 +1055,7 @@ internal class OppgaveServiceTest {
         oppgaveService.tildelSaksbehandler(attestertBehandlingsoppgave.id, "attestant")
 
         val saksbehandlerHentet =
-            oppgaveService.hentSaksbehandlerForBehandling(UUID.fromString(behandlingId))
+            oppgaveService.hentSaksbehandlerIkkeAttestertOppgave(behandlingId)
 
         Assertions.assertEquals(saksbehandler.ident, saksbehandlerHentet)
     }
@@ -1072,7 +1072,7 @@ internal class OppgaveServiceTest {
             null,
         )
         val saksbehandlerHentet =
-            oppgaveService.hentSaksbehandlerForBehandling(UUID.fromString(behandlingId))
+            oppgaveService.hentSaksbehandlerIkkeAttestertOppgave(behandlingId)
 
         Assertions.assertNull(saksbehandlerHentet)
     }

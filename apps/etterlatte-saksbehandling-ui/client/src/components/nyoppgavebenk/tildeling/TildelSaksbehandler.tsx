@@ -16,14 +16,14 @@ export const TildelSaksbehandler = (props: {
     return null
   }
 
-  const user = useAppSelector((state) => state.saksbehandlerReducer.saksbehandler)
+  const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
   const [tildelSaksbehandlerSvar, tildelSaksbehandler] = useApiCall(tildelSaksbehandlerApi)
 
   const tildelSaksbehandlerWrapper = () => {
-    const nysaksbehandler = { saksbehandler: user.ident, versjon }
+    const nysaksbehandler = { saksbehandler: innloggetSaksbehandler.ident, versjon }
 
     tildelSaksbehandler({ oppgaveId, type, nysaksbehandler }, () => {
-      oppdaterTildeling(oppgaveId, user.ident)
+      oppdaterTildeling(oppgaveId, innloggetSaksbehandler.ident)
     })
   }
 

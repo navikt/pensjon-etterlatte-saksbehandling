@@ -6,20 +6,19 @@ import { UnderkjenneModal } from '~components/generellbehandling/UnderkjenneModa
 import { Attesteringmodal } from '~components/generellbehandling/Attesteringmodal'
 import { Generellbehandling, KravpakkeUtland } from '~shared/types/Generellbehandling'
 
-type BeslutningerType = 'UNDERKJENN' | 'GODKJENN'
-const Beslutning: Record<BeslutningerType, string> = {
+type BeslutningsTyper = 'UNDERKJENN' | 'GODKJENN'
+const Beslutning: Record<BeslutningsTyper, string> = {
   UNDERKJENN: 'Underkjenn',
   GODKJENN: 'Godkjenn',
 }
+
 export const AttesteringMedUnderkjenning = (props: {
   utlandsBehandling: Generellbehandling & { innhold: KravpakkeUtland | null }
+  oppgaveErTildeltInnloggetBruker: boolean
+  saksbehandlerForGjeldendeOppgave: string | null
 }) => {
-  const { utlandsBehandling } = props
-
-  //TODO: må matche oppgaven til kravpakke opp mot innlogget bruker- se https://jira.adeo.no/browse/EY-3149
-  const oppgaveErTildeltInnloggetBruker = true
-  const saksbehandlerForGjeldendeOppgave = null
-  const [beslutning, setBeslutning] = useState<BeslutningerType>()
+  const { utlandsBehandling, oppgaveErTildeltInnloggetBruker, saksbehandlerForGjeldendeOppgave } = props
+  const [beslutning, setBeslutning] = useState<BeslutningsTyper>()
 
   return (
     <SidebarPanel>
@@ -37,7 +36,7 @@ export const AttesteringMedUnderkjenning = (props: {
                 legend=""
                 size="small"
                 className="radioGroup"
-                onChange={(event) => setBeslutning(event as BeslutningerType)}
+                onChange={(event) => setBeslutning(event as BeslutningsTyper)}
               >
                 <div className="flex">
                   <Radio value={Beslutning.GODKJENN}>{Beslutning.GODKJENN}</Radio>

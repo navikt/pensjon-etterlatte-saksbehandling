@@ -1,4 +1,4 @@
-import { ISaksbehandler } from '~store/reducers/SaksbehandlerReducer'
+import { ISaksbehandler } from '~store/reducers/InnloggetSaksbehandlerReducer'
 import { apiClient, ApiResponse } from './apiClient'
 
 export const hentInnloggetSaksbehandler = async (): Promise<ApiResponse<ISaksbehandler>> => {

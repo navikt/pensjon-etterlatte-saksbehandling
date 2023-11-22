@@ -1,8 +1,8 @@
 import { Info, Overskrift, Tekst, UnderOverskrift, Wrapper } from '../styled'
 import { formaterBehandlingstype, formaterDato, formaterStringDato } from '~utils/formattering'
-import { useAppSelector } from '~store/Store'
 import { IBehandlingInfo } from '~components/behandling/sidemeny/IBehandlingInfo'
 import { useVedtaksResultat, VedtakResultat } from '~components/behandling/useVedtaksResultat'
+import { KopierbarVerdi } from '~shared/statusbar/kopierbarVerdi'
 
 function innvilgelsestekst(vedtaksresultat: VedtakResultat | null): string {
   switch (vedtaksresultat) {
@@ -25,14 +25,7 @@ function Resultat({ vedtaksresultat }: { vedtaksresultat: VedtakResultat | null 
   return <UnderOverskrift innvilget={erInnvilget}>{tekst}</UnderOverskrift>
 }
 
-export const Innvilget = ({
-  behandlingsInfo,
-  children,
-}: {
-  behandlingsInfo: IBehandlingInfo
-  children: JSX.Element
-}) => {
-  const innloggetId = useAppSelector((state) => state.saksbehandlerReducer.saksbehandler?.ident)
+export const Innvilget = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo }) => {
   const virkningsdato = behandlingsInfo.virkningsdato ? formaterStringDato(behandlingsInfo.virkningsdato) : '-'
   const vedtaksResultat = useVedtaksResultat()
   const attestertDato = behandlingsInfo.datoAttestert
@@ -46,11 +39,11 @@ export const Innvilget = ({
       <div className="flex">
         <div>
           <Info>Attestant</Info>
-          <Tekst>{innloggetId}</Tekst>
+          <Tekst>{behandlingsInfo.attesterendeSaksbehandler}</Tekst>
         </div>
         <div>
           <Info>Saksbehandler</Info>
-          <Tekst>{behandlingsInfo.saksbehandler}</Tekst>
+          <Tekst>{behandlingsInfo.behandlendeSaksbehandler}</Tekst>
         </div>
       </div>
       <div className="flex">
@@ -63,7 +56,7 @@ export const Innvilget = ({
           <Tekst>{attestertDato}</Tekst>
         </div>
       </div>
-      {children}
+      <KopierbarVerdi value={behandlingsInfo.sakId.toString()} />
     </Wrapper>
   )
 }

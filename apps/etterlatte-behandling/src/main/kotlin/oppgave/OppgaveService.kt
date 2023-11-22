@@ -359,9 +359,9 @@ class OppgaveService(
         )
     }
 
-    fun hentSaksbehandlerForBehandling(behandlingId: UUID): String? {
+    fun hentSaksbehandlerIkkeAttestertOppgave(referanse: String): String? {
         val oppgaverForBehandlingUtenAttesterting =
-            oppgaveDao.hentOppgaverForReferanse(behandlingId.toString())
+            oppgaveDao.hentOppgaverForReferanse(referanse)
                 .filter {
                     it.type !== OppgaveType.ATTESTERING
                 }

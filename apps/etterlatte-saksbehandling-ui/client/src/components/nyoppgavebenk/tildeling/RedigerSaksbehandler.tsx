@@ -16,9 +16,9 @@ export interface RedigerSaksbehandlerProps {
 }
 
 export const RedigerSaksbehandler = (props: RedigerSaksbehandlerProps) => {
-  const user = useAppSelector((state) => state.saksbehandlerReducer.saksbehandler)
+  const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
 
-  const brukerErSaksbehandler = user.ident === props.saksbehandler
+  const brukerErSaksbehandler = innloggetSaksbehandler.ident === props.saksbehandler
 
   if (!props.saksbehandler) return <TildelSaksbehandler {...props} />
   if (brukerErSaksbehandler) return <FjernSaksbehandler {...props} />

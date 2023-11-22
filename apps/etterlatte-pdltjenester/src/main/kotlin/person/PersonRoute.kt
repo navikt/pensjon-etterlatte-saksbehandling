@@ -51,8 +51,13 @@ fun Route.personRoute(service: PersonService) {
                         "til ${hentPersongalleriRequest.mottakerAvYtelsen}",
                 )
 
-                val persongalleri = service.hentPersongalleri(hentPersongalleriRequest)
-                call.respond(persongalleri)
+                try {
+                    val persongalleri = service.hentPersongalleri(hentPersongalleriRequest)
+                    call.respond(persongalleri)
+                } catch (e: Exception) {
+                    logger.error("Vi kunne ikke hente persongalleri pga feil", e)
+                    throw e
+                }
             }
         }
     }

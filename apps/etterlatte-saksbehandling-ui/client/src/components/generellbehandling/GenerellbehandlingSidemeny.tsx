@@ -3,11 +3,12 @@ import { Generellbehandling, KravpakkeUtland, Status } from '~shared/types/Gener
 import { AttesteringMedUnderkjenning } from '~components/generellbehandling/AttesteringMedUnderkjenning'
 import { isFailure, isPending, useApiCall } from '~shared/hooks/useApiCall'
 import { hentSaksbehandlerForReferanseOppgaveUnderArbeid } from '~shared/api/oppgaver'
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { useAppSelector } from '~store/Store'
 import Spinner from '~shared/Spinner'
 import { AttestertVisning } from '~components/generellbehandling/AttestertVisning'
+import { Alert, BodyShort } from '@navikt/ds-react'
 
 export const GenerellbehandlingSidemeny = (props: {
   utlandsBehandling: Generellbehandling & { innhold: KravpakkeUtland | null }
@@ -42,7 +43,6 @@ export const GenerellbehandlingSidemeny = (props: {
           <AttesteringMedUnderkjenning
             utlandsBehandling={utlandsBehandling}
             oppgaveErTildeltInnloggetBruker={oppgaveErTildeltInnloggetBruker}
-            saksbehandlerForGjeldendeOppgave={saksbehandlerForGjeldendeOppgave}
           />
         )
       case Status.ATTESTERT:
@@ -57,6 +57,13 @@ export const GenerellbehandlingSidemeny = (props: {
         <ApiErrorAlert>Vi fant ingen saksbehadler for den tilknyttede oppgaven. Husk å tildele oppgaven.</ApiErrorAlert>
       )}
       {isPending(saksbehandlerForOppgaveStatus) && <Spinner visible={true} label="Henter saksbehandler or oppgave" />}
+      {saksbehandlerForGjeldendeOppgave ? (
+        <BodyShort>Oppgaven er tildelt {saksbehandlerForGjeldendeOppgave}.&nbsp;</BodyShort>
+      ) : (
+        <Alert variant="warning">
+          <BodyShort>Oppgaven er ikke tildelt noen.&nbsp;</BodyShort>
+        </Alert>
+      )}
       {genererSidemeny()}
     </Sidebar>
   )

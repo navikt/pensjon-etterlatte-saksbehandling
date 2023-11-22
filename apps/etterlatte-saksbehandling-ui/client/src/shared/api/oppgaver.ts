@@ -119,3 +119,9 @@ export const hentSaksbehandlerForReferanseOppgaveUnderArbeid = async (args: {
   sakId: number
 }): Promise<ApiResponse<string | null>> =>
   apiClient.get(`/oppgaver/sak/${args.sakId}/oppgaveunderbehandling/${args.referanse}`)
+
+export const hentFerdigstiltAtteseringsoppgaveForReferanse = async (args: {
+  referanse: string
+  sakId: number
+}): Promise<ApiResponse<string | null>> =>
+  apiClient.get(`/oppgaver/sak/${args.sakId}/ferdigstiltogattestert/${args.referanse}`)

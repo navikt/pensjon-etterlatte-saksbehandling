@@ -1,5 +1,5 @@
 import { SidebarPanel } from '~shared/components/Sidebar'
-import { Alert, BodyShort, Heading, Radio, RadioGroup } from '@navikt/ds-react'
+import { Alert, Heading, Radio, RadioGroup } from '@navikt/ds-react'
 import { RadioGroupWrapper } from '~components/behandling/attestering/styled'
 import React, { useState } from 'react'
 import { UnderkjenneModal } from '~components/generellbehandling/UnderkjenneModal'
@@ -15,14 +15,13 @@ const Beslutning: Record<BeslutningsTyper, string> = {
 export const AttesteringMedUnderkjenning = (props: {
   utlandsBehandling: Generellbehandling & { innhold: KravpakkeUtland | null }
   oppgaveErTildeltInnloggetBruker: boolean
-  saksbehandlerForGjeldendeOppgave: string | null
 }) => {
-  const { utlandsBehandling, oppgaveErTildeltInnloggetBruker, saksbehandlerForGjeldendeOppgave } = props
+  const { utlandsBehandling, oppgaveErTildeltInnloggetBruker } = props
   const [beslutning, setBeslutning] = useState<BeslutningsTyper>()
 
   return (
     <SidebarPanel>
-      {oppgaveErTildeltInnloggetBruker ? (
+      {oppgaveErTildeltInnloggetBruker && (
         <>
           <Alert variant="info" size="small">
             Kontroller opplysninger og faglige vurderinger gjort under behandling.
@@ -48,14 +47,6 @@ export const AttesteringMedUnderkjenning = (props: {
             {beslutning === Beslutning.UNDERKJENN && <UnderkjenneModal utlandsBehandling={utlandsBehandling} />}
           </>
         </>
-      ) : (
-        <Alert variant="warning">
-          {saksbehandlerForGjeldendeOppgave ? (
-            <BodyShort>Oppgaven er tildelt {saksbehandlerForGjeldendeOppgave}.&nbsp;</BodyShort>
-          ) : (
-            <BodyShort>Oppgaven er ikke tildelt noen.&nbsp;</BodyShort>
-          )}
-        </Alert>
       )}
     </SidebarPanel>
   )

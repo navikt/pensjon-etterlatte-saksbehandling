@@ -67,6 +67,16 @@ internal fun Route.oppgaveRoutes(
                 }
             }
 
+            get("/ferdigstiltogattestert/{referanse}") {
+                kunSaksbehandler {
+                    val saksbehandler =
+                        inTransaction {
+                            service.hentFerdigstiltAttesteringsOppgave(referanse)
+                        }
+                    call.respond(saksbehandler ?: HttpStatusCode.NoContent)
+                }
+            }
+
             get("/oppgaveunderbehandling/{referanse}") {
                 kunSaksbehandler {
                     val saksbehandler =

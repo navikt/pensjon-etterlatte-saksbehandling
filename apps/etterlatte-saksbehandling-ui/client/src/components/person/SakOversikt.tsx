@@ -50,12 +50,14 @@ export const SakOversikt = ({ fnr }: { fnr: string }) => {
               )}
               <FlexRow justify="right">
                 <OpprettKlage sakId={sakStatus.data.id} />
-                {sakStatus.data.sakType == SakType.BARNEPENSJON && isSuccess(behandlingerStatus) && (
-                  <ManueltOpphoerModal
-                    sakId={sakStatus.data.id}
-                    behandlingliste={behandlingerStatus.data[0].behandlinger}
-                  />
-                )}
+                {sakStatus.data.sakType === SakType.BARNEPENSJON &&
+                  isSuccess(behandlingerStatus) &&
+                  behandlingerStatus.data.length > 0 && (
+                    <ManueltOpphoerModal
+                      sakId={sakStatus.data.id}
+                      behandlingliste={behandlingerStatus.data[0].behandlinger}
+                    />
+                  )}
               </FlexRow>
             </Heading>
 

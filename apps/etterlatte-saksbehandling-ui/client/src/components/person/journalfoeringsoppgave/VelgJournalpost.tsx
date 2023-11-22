@@ -1,8 +1,8 @@
-import { isFailure, isPending, isPendingOrInitial, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
-import { hentDokumenter, hentDokumentPDF } from '~shared/api/dokument'
-import { useEffect, useState } from 'react'
+import { isFailure, isPending, isSuccess, mapApiResult, useApiCall } from '~shared/hooks/useApiCall'
+import { hentDokumenter, hentDokumentPDF, hentJournalpost } from '~shared/api/dokument'
+import React, { useEffect, useState } from 'react'
 import { GYLDIG_FNR } from '~utils/fnr'
-import { Alert, Button, Heading, Table, Tag } from '@navikt/ds-react'
+import { Button, Detail, Heading, Link, Panel, Table } from '@navikt/ds-react'
 import { useJournalfoeringOppgave } from '~components/person/journalfoeringsoppgave/useJournalfoeringOppgave'
 import { formaterStringDato } from '~utils/formattering'
 import { useAppDispatch } from '~store/Store'
@@ -12,12 +12,16 @@ import styled from 'styled-components'
 import DokumentModal from '../dokumenter/dokumentModal'
 import { Journalpost } from '~shared/types/Journalpost'
 import { FlexRow } from '~shared/styled'
+import { ApiErrorAlert } from '~ErrorBoundary'
+import { InfoWrapper } from '~components/behandling/soeknadsoversikt/styled'
+import { Info } from '~components/behandling/soeknadsoversikt/Info'
 
-export default function VelgJournalpost() {
+export default function VelgJournalpost({ journalpostId }: { journalpostId: string | null }) {
   const { bruker, journalpost } = useJournalfoeringOppgave()
   const dispatch = useAppDispatch()
 
-  const [journalposter, hentJournalposter] = useApiCall(hentDokumenter)
+  const [journalposter, apiHentJournalposter] = useApiCall(hentDokumenter)
+  const [journalpostStatus, apiHentJournalpost] = useApiCall(hentJournalpost)
   const [dokument, hentDokument] = useApiCall(hentDokumentPDF)
   const [fileURL, setFileURL] = useState<string>()
 
@@ -27,11 +31,17 @@ export default function VelgJournalpost() {
 
   useEffect(() => {
     if (GYLDIG_FNR(bruker) && !journalpost) {
-      hentJournalposter(bruker!!, (journalposter) => {
-        if (journalposter.length === 1) {
-          velgJournalpost(journalposter[0])
-        }
-      })
+      if (journalpostId) {
+        apiHentJournalpost(journalpostId, (journalpost) => {
+          velgJournalpost(journalpost)
+        })
+      } else {
+        apiHentJournalposter(bruker!!, (journalposter) => {
+          if (journalposter.length === 1) {
+            velgJournalpost(journalposter[0])
+          }
+        })
+      }
     }
   }, [bruker])
 
@@ -60,21 +70,57 @@ export default function VelgJournalpost() {
 
   return (
     <>
-      {isPendingOrInitial(journalposter) && <Spinner label="Henter journalposter for bruker" visible />}
+      {isPending(journalposter) && <Spinner label="Henter journalposter for bruker" visible />}
+      {isPending(journalpostStatus) && <Spinner label="Henter journalpost for bruker" visible />}
+      {isFailure(journalpostStatus) && (
+        <ApiErrorAlert>Feil ved henting av journalpost. Kan ikke fortsette behandlingen.</ApiErrorAlert>
+      )}
 
       {journalpost ? (
         <>
-          <Heading size="medium">{journalpost.tittel}</Heading>
-          <Tag variant="alt1">{journalpost.avsenderMottaker?.navn}</Tag>
+          <Panel>
+            <Heading size="medium" spacing>
+              Journalpost ({journalpost.journalpostId})<Detail>{journalpost.tittel}</Detail>
+            </Heading>
+            <InfoWrapper>
+              <Info
+                label="Avsender/mottaker"
+                tekst={
+                  <>
+                    {journalpost.avsenderMottaker?.navn} (
+                    {journalpost.avsenderMottaker?.id?.length === 11 ? (
+                      <Link href={`/person/${journalpost.avsenderMottaker?.id}`}>
+                        {journalpost.avsenderMottaker?.id}
+                      </Link>
+                    ) : (
+                      journalpost.avsenderMottaker?.id
+                    )}
+                    )
+                  </>
+                }
+              />
+              <Info
+                label="Sak"
+                tekst={
+                  journalpost.sak
+                    ? `${journalpost.sak.fagsaksystem}: ${journalpost.sak.fagsakId || '-'}`
+                    : 'Ikke tilknyttet sak'
+                }
+              />
+              <Info label="Status" tekst={journalpost.journalstatus} />
+              <Info label="Kanal" tekst={journalpost.kanal} />
+            </InfoWrapper>
+          </Panel>
 
           <br />
 
-          {isPending(dokument) && <Spinner visible={true} label="Klargjør forhåndsvisning av PDF ..." />}
-          {isSuccess(dokument) && !!fileURL && <PdfViewer src={`${fileURL}#toolbar=0`} />}
-          {isFailure(dokument) && (
-            <Alert variant="error">
-              En feil har oppstått ved henting av PDF: <code>{JSON.stringify(dokument.error)}</code>
-            </Alert>
+          {mapApiResult(
+            dokument,
+            <Spinner label="Klargjør forhåndsvisning av PDF" visible />,
+            () => (
+              <ApiErrorAlert>Feil ved henting av PDF</ApiErrorAlert>
+            ),
+            () => (!!fileURL ? <PdfViewer src={`${fileURL}#toolbar=0`} /> : <></>)
           )}
         </>
       ) : (

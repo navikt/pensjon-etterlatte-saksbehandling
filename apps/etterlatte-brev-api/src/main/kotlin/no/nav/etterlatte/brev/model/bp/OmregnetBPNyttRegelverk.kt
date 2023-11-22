@@ -1,22 +1,23 @@
 package no.nav.etterlatte.brev.model.bp
 
+import no.nav.etterlatte.brev.MigreringBrevRequest
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
 import no.nav.etterlatte.brev.model.BrevData
 import no.nav.etterlatte.libs.common.Vedtaksloesning
-import no.nav.etterlatte.rapidsandrivers.migrering.MigreringRequest
+import no.nav.pensjon.brevbaker.api.model.Kroner
 
 data class OmregnetBPNyttRegelverk(
-    val utbetaltFoerReform: Int,
-    val utbetaltEtterReform: Int,
+    val utbetaltFoerReform: Kroner,
+    val utbetaltEtterReform: Kroner,
     val anvendtTrygdetid: Int,
-    val grunnbeloep: Int,
+    val grunnbeloep: Kroner,
 ) : BrevData() {
     companion object {
         fun fra(
             generellBrevData: GenerellBrevData,
             utbetalingsinfo: Utbetalingsinfo,
-            migreringRequest: MigreringRequest?,
+            migreringRequest: MigreringBrevRequest?,
         ): OmregnetBPNyttRegelverk {
             val utbetaltFoerReform =
                 if (generellBrevData.systemkilde == Vedtaksloesning.PESYS) {
@@ -28,10 +29,10 @@ data class OmregnetBPNyttRegelverk(
                 }
 
             return OmregnetBPNyttRegelverk(
-                utbetaltFoerReform = utbetaltFoerReform,
-                utbetaltEtterReform = utbetalingsinfo.beloep.value,
+                utbetaltFoerReform = Kroner(utbetaltFoerReform),
+                utbetaltEtterReform = Kroner(utbetalingsinfo.beloep.value),
                 anvendtTrygdetid = utbetalingsinfo.beregningsperioder.first().trygdetid,
-                grunnbeloep = utbetalingsinfo.beregningsperioder.first().grunnbeloep.value,
+                grunnbeloep = Kroner(utbetalingsinfo.beregningsperioder.first().grunnbeloep.value),
             )
         }
     }

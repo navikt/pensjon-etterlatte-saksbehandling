@@ -2,6 +2,7 @@ import { format } from 'date-fns'
 import { IBehandlingsType } from '~shared/types/IDetaljertBehandling'
 import { SakType } from '~shared/types/sak'
 import { VedtakType } from '~components/vedtak/typer'
+import { Oppgavestatus } from '~shared/api/oppgaver'
 
 export const capitalize = (s?: string) => {
   if (!s) return ''
@@ -60,6 +61,21 @@ export const formaterVedtakType = (type: VedtakType): string => {
       return 'Endring'
     case VedtakType.TILBAKEKREVING:
       return 'Tilbakekreving'
+  }
+}
+
+export const formaterOppgaveStatus = (status: Oppgavestatus): string => {
+  switch (status) {
+    case 'NY':
+      return 'Ny'
+    case 'UNDER_BEHANDLING':
+      return 'Under behandling'
+    case 'FERDIGSTILT':
+      return 'Ferdigstilt'
+    case 'FEILREGISTRERT':
+      return 'Feilregistrert'
+    case 'AVBRUTT':
+      return 'Avbrutt'
   }
 }
 

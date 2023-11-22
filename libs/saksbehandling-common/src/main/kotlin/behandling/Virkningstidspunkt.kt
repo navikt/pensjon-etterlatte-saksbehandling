@@ -8,13 +8,15 @@ data class Virkningstidspunkt(
     val dato: YearMonth,
     val kilde: Grunnlagsopplysning.Saksbehandler,
     val begrunnelse: String,
+    val kravdato: YearMonth? = null,
 ) {
     companion object {
         fun create(
             dato: YearMonth,
             ident: String,
             begrunnelse: String,
-        ) = Virkningstidspunkt(dato, Grunnlagsopplysning.Saksbehandler.create(ident), begrunnelse)
+            kravdato: YearMonth? = null,
+        ) = Virkningstidspunkt(dato, Grunnlagsopplysning.Saksbehandler.create(ident), begrunnelse, kravdato)
     }
 }
 

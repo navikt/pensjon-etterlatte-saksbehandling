@@ -1,5 +1,6 @@
 package no.nav.etterlatte.brev.brevbaker
 
+import no.nav.etterlatte.brev.MigreringBrevRequest
 import no.nav.etterlatte.brev.adresse.AdresseService
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.model.BrevDataMapper
@@ -29,18 +30,24 @@ class BrevbakerService(
             .also { logger.info("Generert brev (id=$brevID) med størrelse: ${it.bytes.size}") }
     }
 
-    suspend fun hentRedigerbarTekstFraBrevbakeren(
-        generellBrevData: GenerellBrevData,
-        brukerTokenInfo: BrukerTokenInfo,
-    ): Slate {
+    suspend fun hentRedigerbarTekstFraBrevbakeren(redigerbarTekstRequest: RedigerbarTekstRequest): Slate {
         val request =
             BrevbakerRequest.fra(
-                brevDataMapper.brevKode(generellBrevData, BrevProsessType.REDIGERBAR).redigering,
-                brevDataMapper.brevData(generellBrevData, brukerTokenInfo),
-                generellBrevData,
-                adresseService.hentAvsender(generellBrevData.forenkletVedtak),
+                brevDataMapper.brevKode(redigerbarTekstRequest.generellBrevData, BrevProsessType.REDIGERBAR).redigering,
+                brevDataMapper.brevData(redigerbarTekstRequest),
+                redigerbarTekstRequest.generellBrevData,
+                adresseService.hentAvsender(redigerbarTekstRequest.generellBrevData.forenkletVedtak),
             )
         val brevbakerResponse = brevbakerKlient.genererJSON(request)
         return BlockTilSlateKonverterer.konverter(brevbakerResponse)
     }
+}
+
+data class RedigerbarTekstRequest(
+    val generellBrevData: GenerellBrevData,
+    val brukerTokenInfo: BrukerTokenInfo,
+    val prosessType: BrevProsessType,
+    val migrering: MigreringBrevRequest? = null,
+) {
+    fun vedtakstype() = generellBrevData.forenkletVedtak.type.name.lowercase()
 }

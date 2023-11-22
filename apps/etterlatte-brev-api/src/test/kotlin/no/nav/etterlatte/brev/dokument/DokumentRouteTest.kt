@@ -25,8 +25,9 @@ import io.mockk.verify
 import no.nav.etterlatte.brev.dokarkiv.DokarkivService
 import no.nav.etterlatte.brev.hentinformasjon.Tilgangssjekker
 import no.nav.etterlatte.brev.journalpost.BrukerIdType
-import no.nav.etterlatte.brev.journalpost.FerdigstillJournalpostRequest
 import no.nav.etterlatte.libs.common.FoedselsnummerDTO
+import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
@@ -167,7 +168,7 @@ internal class DokumentRouteTest {
                 client.post("/api/dokumenter/$journalpostId/ferdigstill") {
                     header(HttpHeaders.Authorization, "Bearer $accessToken")
                     contentType(ContentType.Application.Json)
-                    setBody(FerdigstillJournalpostRequest("4808"))
+                    setBody(Sak("ident", SakType.OMSTILLINGSSTOENAD, 1L, "4808"))
                 }
 
             assertEquals(HttpStatusCode.OK, response.status)

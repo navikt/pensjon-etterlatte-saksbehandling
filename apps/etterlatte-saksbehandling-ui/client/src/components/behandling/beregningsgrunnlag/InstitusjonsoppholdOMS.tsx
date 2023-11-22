@@ -1,6 +1,6 @@
 import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
 import React, { useState } from 'react'
-import { LovtekstMedLenke } from '~components/behandling/soeknadsoversikt/soeknadoversikt/LovtekstMedLenke'
+import { LovtekstMedLenke } from '~components/behandling/soeknadsoversikt/LovtekstMedLenke'
 import { Button, Heading, ReadMore, Table } from '@navikt/ds-react'
 import { AGreen500 } from '@navikt/ds-tokens/dist/tokens'
 import { CheckmarkCircleIcon, PlusCircleIcon } from '@navikt/aksel-icons'
@@ -11,7 +11,7 @@ import {
   feilIKomplettePerioderOverIntervallInstitusjonsopphold,
   mapListeFraDto,
 } from '~components/behandling/beregningsgrunnlag/PeriodisertBeregningsgrunnlag'
-import { hentBehandlesFraStatus } from '~components/behandling/felles/utils'
+import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
 import { InstitusjonsoppholdsWrapper } from './institusjonsopphold-styling'
 import {
   FeilIPeriode,
@@ -27,7 +27,7 @@ type InstitusjonsoppholdProps = {
 
 const InstitusjonsoppholdOMS = (props: InstitusjonsoppholdProps) => {
   const { behandling, onSubmit } = props
-  const behandles = hentBehandlesFraStatus(behandling?.status)
+  const behandles = behandlingErRedigerbar(behandling?.status)
   const [visFeil, setVisFeil] = useState(false)
   const [visOkLagret, setVisOkLagret] = useState(false)
   const { control, register, watch, handleSubmit, formState } = useForm<{

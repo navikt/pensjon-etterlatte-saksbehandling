@@ -50,7 +50,7 @@ internal fun Route.generellbehandlingRoutes(
 
     post("/api/generellbehandling/{$SAKID_CALL_PARAMETER}") {
         hvisEnabled(GenerellBehandlingToggle.KanBrukeGenerellBehandlingToggle) {
-            kunSaksbehandler {
+            kunSaksbehandler { saksbehandler ->
                 val request = call.receive<OpprettGenerellBehandlingRequest>()
                 val finnSak = inTransaction { sakService.finnSak(sakId) }
                 if (finnSak == null) {
@@ -59,6 +59,7 @@ internal fun Route.generellbehandlingRoutes(
                 inTransaction {
                     generellBehandlingService.opprettBehandling(
                         GenerellBehandling.opprettFraType(request.type, sakId),
+                        saksbehandler,
                     )
                 }
                 logger.info(
@@ -86,12 +87,24 @@ internal fun Route.generellbehandlingRoutes(
 
     post("/api/generellbehandling/attester/{$SAKID_CALL_PARAMETER}/{$GENERELLBEHANDLINGID_CALL_PARAMETER}") {
         hvisEnabled(GenerellBehandlingToggle.KanBrukeGenerellBehandlingToggle) {
-            val generellBehandlingId = generellBehandlingId
             kunSaksbehandler { saksbehandler ->
                 inTransaction {
                     generellBehandlingService.attester(generellBehandlingId, saksbehandler)
                 }
                 logger.info("Attester generell behandling med id $generellBehandlingId")
+                call.respond(HttpStatusCode.OK)
+            }
+        }
+    }
+
+    post("/api/generellbehandling/underkjenn/{$SAKID_CALL_PARAMETER}/{$GENERELLBEHANDLINGID_CALL_PARAMETER}") {
+        hvisEnabled(GenerellBehandlingToggle.KanBrukeGenerellBehandlingToggle) {
+            kunSaksbehandler { saksbehandler ->
+                val kommentar = call.receive<Kommentar>()
+                inTransaction {
+                    generellBehandlingService.underkjenn(generellBehandlingId, saksbehandler, kommentar)
+                }
+                logger.info("underkjent generell behandling med id $generellBehandlingId")
                 call.respond(HttpStatusCode.OK)
             }
         }
@@ -123,10 +136,11 @@ internal fun Route.generellbehandlingRoutes(
             }
         }
     }
-    get("/api/generellbehandlingForSak/{$SAKID_CALL_PARAMETER}") {
+
+    get("/api/generellbehandling/hentforsak/{$SAKID_CALL_PARAMETER}") {
         hvisEnabled(GenerellBehandlingToggle.KanBrukeGenerellBehandlingToggle) {
             kunSaksbehandler {
-                call.respond(inTransaction { generellBehandlingService.hentBehandlingForSak(sakId) })
+                call.respond(inTransaction { generellBehandlingService.hentBehandlingerForSak(sakId) })
             }
         }
     }

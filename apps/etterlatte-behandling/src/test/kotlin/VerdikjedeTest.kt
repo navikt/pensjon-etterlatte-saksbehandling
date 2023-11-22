@@ -45,6 +45,7 @@ import no.nav.etterlatte.libs.common.behandling.KlageOmgjoering
 import no.nav.etterlatte.libs.common.behandling.KlageUtfallUtenBrev
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.behandling.UtenlandstilknytningType
 import no.nav.etterlatte.libs.common.behandling.VedtaketKlagenGjelder
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
@@ -52,9 +53,9 @@ import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsTyper
 import no.nav.etterlatte.libs.common.gyldigSoeknad.VurderingsResultat
 import no.nav.etterlatte.libs.common.gyldigSoeknad.VurdertGyldighet
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
+import no.nav.etterlatte.libs.common.oppgave.SakIdOgReferanse
 import no.nav.etterlatte.libs.common.oppgave.SaksbehandlerEndringDto
 import no.nav.etterlatte.libs.common.oppgave.VedtakEndringDTO
-import no.nav.etterlatte.libs.common.oppgave.VedtakOppgaveDTO
 import no.nav.etterlatte.libs.common.pdlhendelse.Adressebeskyttelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
@@ -66,6 +67,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
+import no.nav.etterlatte.sak.UtenlandstilknytningRequest
 import no.nav.etterlatte.vedtaksvurdering.VedtakHendelse
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -208,6 +210,14 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
                 assertEquals("innsender", behandling.innsender)
             }
 
+            client.post("/api/sak/${sak.id}/utenlandstilknytning") {
+                addAuthToken(tokenSaksbehandler)
+                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                setBody(UtenlandstilknytningRequest(UtenlandstilknytningType.NASJONAL, "begrunnelse"))
+            }.also {
+                assertEquals(HttpStatusCode.OK, it.status)
+            }
+
             client.post("/api/behandling/$behandlingId/virkningstidspunkt") {
                 addAuthToken(tokenSaksbehandler)
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
@@ -216,7 +226,6 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
                 )
             }.also {
                 assertEquals(HttpStatusCode.OK, it.status)
-
                 val expected =
                     FastsettVirkningstidspunktResponse(
                         YearMonth.of(2022, 2),
@@ -305,8 +314,8 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(
                     VedtakEndringDTO(
-                        vedtakOppgaveDTO =
-                            VedtakOppgaveDTO(
+                        sakIdOgReferanse =
+                            SakIdOgReferanse(
                                 sakId = sak.id,
                                 referanse = behandlingId.toString(),
                             ),
@@ -348,8 +357,8 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(
                     VedtakEndringDTO(
-                        vedtakOppgaveDTO =
-                            VedtakOppgaveDTO(
+                        sakIdOgReferanse =
+                            SakIdOgReferanse(
                                 sakId = sak.id,
                                 referanse = behandlingId.toString(),
                             ),

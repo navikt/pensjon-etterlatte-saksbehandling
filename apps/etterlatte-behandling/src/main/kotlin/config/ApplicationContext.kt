@@ -231,6 +231,7 @@ internal class ApplicationContext(
             oppgaveService,
             behandlingService,
             grunnlagKlientObo,
+            hendelseDao,
         )
     val kommerBarnetTilGodeService =
         KommerBarnetTilGodeService(kommerBarnetTilGodeDao, behandlingDao)

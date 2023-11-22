@@ -1,6 +1,7 @@
 package no.nav.etterlatte.grunnlag
 
 import com.fasterxml.jackson.databind.JsonNode
+import io.mockk.called
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
@@ -8,7 +9,8 @@ import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import lagGrunnlagHendelse
 import mockPerson
-import no.nav.etterlatte.klienter.PdlTjenesterKlientImpl
+import no.nav.etterlatte.grunnlag.klienter.PdlTjenesterKlientImpl
+import no.nav.etterlatte.grunnlag.klienter.PersondataKlient
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
@@ -16,6 +18,7 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.Opplysning
 import no.nav.etterlatte.libs.common.grunnlag.hentBostedsadresse
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Navn
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.BOSTEDSADRESSE
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.FOEDELAND
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.FOEDSELSDATO
@@ -24,6 +27,8 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.N
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.PERSONGALLERI_V1
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.PERSONROLLE
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.pdl.PersonDTO
+import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.toJson
@@ -37,7 +42,6 @@ import no.nav.etterlatte.libs.testdata.grunnlag.INNSENDER_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER2_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.kilde
 import no.nav.etterlatte.libs.testdata.grunnlag.statiskUuid
-import no.nav.etterlatte.pdl.HistorikkForeldreansvar
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
@@ -47,19 +51,29 @@ import org.junit.jupiter.api.TestInstance
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Month
+import java.time.YearMonth
 import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class GrunnlagServiceTest {
-    private val opplysningerMock = mockk<OpplysningDao>()
+    private val opplysningDaoMock = mockk<OpplysningDao>()
     private val pdlTjenesterKlientImpl = mockk<PdlTjenesterKlientImpl>()
-    private val grunnlagService = RealGrunnlagService(pdlTjenesterKlientImpl, opplysningerMock, mockk())
+    private val persondataKlient = mockk<PersondataKlient>()
+    private val grunnlagHenter = mockk<GrunnlagHenter>()
+    private val grunnlagService =
+        RealGrunnlagService(
+            pdlTjenesterKlientImpl,
+            opplysningDaoMock,
+            mockk(),
+            persondataKlient,
+            grunnlagHenter,
+        )
 
     private val testData = GrunnlagTestData()
 
     @BeforeAll
     fun beforeAll() {
-        every { opplysningerMock.finnNyesteGrunnlagForBehandling(any(), PERSONGALLERI_V1) } returns
+        every { opplysningDaoMock.finnNyesteGrunnlagForBehandling(any(), PERSONGALLERI_V1) } returns
             lagGrunnlagHendelse(
                 1,
                 4,
@@ -122,7 +136,7 @@ internal class GrunnlagServiceTest {
         fun `skal mappe om dataen fra DB til søker`() {
             val grunnlagshendelser = lagGrunnlagForPerson(testData.soeker.foedselsnummer, PersonRolle.BARN)
 
-            every { opplysningerMock.hentAlleGrunnlagForSak(1) } returns grunnlagshendelser
+            every { opplysningDaoMock.hentAlleGrunnlagForSak(1) } returns grunnlagshendelser
 
             val actual = grunnlagService.hentOpplysningsgrunnlagForSak(1)!!
             val expected =
@@ -139,7 +153,7 @@ internal class GrunnlagServiceTest {
         fun `skal mappe om dataen fra DB til avdød`() {
             val grunnlagshendelser = lagGrunnlagForPerson(testData.avdoed.foedselsnummer, PersonRolle.AVDOED)
 
-            every { opplysningerMock.hentAlleGrunnlagForSak(1) } returns grunnlagshendelser
+            every { opplysningDaoMock.hentAlleGrunnlagForSak(1) } returns grunnlagshendelser
 
             val actual = grunnlagService.hentOpplysningsgrunnlagForSak(1)!!
             val expected =
@@ -157,7 +171,7 @@ internal class GrunnlagServiceTest {
         fun `skal mappe om dataen fra DB til gjenlevende`() {
             val grunnlagshendelser = lagGrunnlagForPerson(testData.gjenlevende.foedselsnummer, PersonRolle.GJENLEVENDE)
 
-            every { opplysningerMock.hentAlleGrunnlagForSak(1) } returns grunnlagshendelser
+            every { opplysningDaoMock.hentAlleGrunnlagForSak(1) } returns grunnlagshendelser
 
             val actual = grunnlagService.hentOpplysningsgrunnlagForSak(1)!!
             val expected =
@@ -175,7 +189,7 @@ internal class GrunnlagServiceTest {
         fun `skal mappe om dataen fra DB til søsken`() {
             val grunnlagshendelser = lagGrunnlagForPerson(testData.soesken.foedselsnummer, PersonRolle.BARN)
 
-            every { opplysningerMock.hentAlleGrunnlagForSak(1) } returns grunnlagshendelser
+            every { opplysningDaoMock.hentAlleGrunnlagForSak(1) } returns grunnlagshendelser
 
             val actual = grunnlagService.hentOpplysningsgrunnlagForSak(1)!!
             val expected =
@@ -216,7 +230,7 @@ internal class GrunnlagServiceTest {
 
         @Test
         fun `fjerner duplikater av samme opplysning for konstante opplysninger`() {
-            every { opplysningerMock.hentAlleGrunnlagForSak(1) } returns grunnlagshendelser
+            every { opplysningDaoMock.hentAlleGrunnlagForSak(1) } returns grunnlagshendelser
 
             Assertions.assertEquals(
                 1,
@@ -226,7 +240,7 @@ internal class GrunnlagServiceTest {
 
         @Test
         fun `tar alltid seneste versjon av samme opplysning`() {
-            every { opplysningerMock.hentAlleGrunnlagForSak(1) } returns grunnlagshendelser
+            every { opplysningDaoMock.hentAlleGrunnlagForSak(1) } returns grunnlagshendelser
             val opplysningsgrunnlag = grunnlagService.hentOpplysningsgrunnlagForSak(1)!!
 
             Assertions.assertEquals(
@@ -273,7 +287,7 @@ internal class GrunnlagServiceTest {
                 ),
             )
 
-        every { opplysningerMock.hentAlleGrunnlagForSak(1) } returns grunnlagshendelser
+        every { opplysningDaoMock.hentAlleGrunnlagForSak(1) } returns grunnlagshendelser
 
         val actual = grunnlagService.hentOpplysningsgrunnlagForSak(1)!!
         val expected =
@@ -291,7 +305,7 @@ internal class GrunnlagServiceTest {
 
     @Test
     fun `kan hente og mappe opplysningsgrunnlag`() {
-        every { opplysningerMock.finnNyesteGrunnlagForSak(any<Long>(), PERSONGALLERI_V1) } returns
+        every { opplysningDaoMock.finnNyesteGrunnlagForSak(any<Long>(), PERSONGALLERI_V1) } returns
             lagGrunnlagHendelse(
                 1,
                 1,
@@ -302,7 +316,7 @@ internal class GrunnlagServiceTest {
                 kilde = kilde,
             )
 
-        every { opplysningerMock.hentAlleGrunnlagForSak(any<Long>()) } returns
+        every { opplysningDaoMock.hentAlleGrunnlagForSak(any<Long>()) } returns
             listOf(
                 lagGrunnlagHendelse(
                     1,
@@ -398,7 +412,7 @@ internal class GrunnlagServiceTest {
 
         @Test
         fun `Hent sak og rolle for person hvor det finnes to soesken`() {
-            every { opplysningerMock.finnAllePersongalleriHvorPersonFinnes(any()) } returns
+            every { opplysningDaoMock.finnAllePersongalleriHvorPersonFinnes(any()) } returns
                 listOf(
                     grunnlaghendelse1,
                     grunnlaghendelse2,
@@ -430,13 +444,13 @@ internal class GrunnlagServiceTest {
             val barn2ErSoeskenIAnnenSak = barn2.sakerOgRoller.single { it.rolle == Saksrolle.SOESKEN }
             Assertions.assertEquals(grunnlaghendelse1.sakId, barn2ErSoeskenIAnnenSak.sakId)
 
-            verify(exactly = 1) { opplysningerMock.finnAllePersongalleriHvorPersonFinnes(barnepensjonSoeker1) }
-            verify(exactly = 1) { opplysningerMock.finnAllePersongalleriHvorPersonFinnes(barnepensjonSoeker2) }
+            verify(exactly = 1) { opplysningDaoMock.finnAllePersongalleriHvorPersonFinnes(barnepensjonSoeker1) }
+            verify(exactly = 1) { opplysningDaoMock.finnAllePersongalleriHvorPersonFinnes(barnepensjonSoeker2) }
         }
 
         @Test
         fun `Hent sak og rolle for gjenlevende person med barn`() {
-            every { opplysningerMock.finnAllePersongalleriHvorPersonFinnes(gjenlevendeFnr) } returns
+            every { opplysningDaoMock.finnAllePersongalleriHvorPersonFinnes(gjenlevendeFnr) } returns
                 listOf(
                     grunnlaghendelse1,
                     grunnlaghendelse2,
@@ -453,14 +467,14 @@ internal class GrunnlagServiceTest {
             val gjenlevendeErSoeker = gjenlevende.sakerOgRoller.single { it.rolle == Saksrolle.SOEKER }
             Assertions.assertEquals(grunnlaghendelse3.sakId, gjenlevendeErSoeker.sakId)
 
-            verify(exactly = 1) { opplysningerMock.finnAllePersongalleriHvorPersonFinnes(gjenlevendeFnr) }
+            verify(exactly = 1) { opplysningDaoMock.finnAllePersongalleriHvorPersonFinnes(gjenlevendeFnr) }
         }
 
         @Test
         fun `Hent sak og rolle for person kun har tilknytning til saker hvor soesken soeker barnepensjon`() {
             val soeskenFnr = HELSOESKEN_FOEDSELSNUMMER
 
-            every { opplysningerMock.finnAllePersongalleriHvorPersonFinnes(soeskenFnr) } returns
+            every { opplysningDaoMock.finnAllePersongalleriHvorPersonFinnes(soeskenFnr) } returns
                 listOf(
                     grunnlaghendelse1,
                     grunnlaghendelse2,
@@ -470,12 +484,12 @@ internal class GrunnlagServiceTest {
             Assertions.assertEquals(2, soesken.sakerOgRoller.size)
             assertTrue(soesken.sakerOgRoller.all { it.rolle == Saksrolle.SOESKEN })
 
-            verify(exactly = 1) { opplysningerMock.finnAllePersongalleriHvorPersonFinnes(soeskenFnr) }
+            verify(exactly = 1) { opplysningDaoMock.finnAllePersongalleriHvorPersonFinnes(soeskenFnr) }
         }
 
         @Test
         fun `Kan mappe og hente innsender`() {
-            every { opplysningerMock.finnNyesteGrunnlagForBehandling(any(), PERSONGALLERI_V1) } returns
+            every { opplysningDaoMock.finnNyesteGrunnlagForBehandling(any(), PERSONGALLERI_V1) } returns
                 lagGrunnlagHendelse(
                     1,
                     1,
@@ -485,7 +499,7 @@ internal class GrunnlagServiceTest {
                     kilde = kilde,
                 )
 
-            every { opplysningerMock.hentAlleGrunnlagForSak(1) } returns
+            every { opplysningDaoMock.hentAlleGrunnlagForSak(1) } returns
                 listOf(
                     lagGrunnlagHendelse(
                         1,
@@ -529,7 +543,7 @@ internal class GrunnlagServiceTest {
         val behandlingId = UUID.randomUUID()
         val sakType = SakType.BARNEPENSJON
 
-        every { opplysningerMock.finnNyesteGrunnlagForSak(any(), PERSONGALLERI_V1) } returns
+        every { opplysningDaoMock.finnNyesteGrunnlagForSak(any(), PERSONGALLERI_V1) } returns
             lagGrunnlagHendelse(
                 sakId,
                 1,
@@ -539,7 +553,7 @@ internal class GrunnlagServiceTest {
                 kilde = kilde,
             )
 
-        every { opplysningerMock.hentAlleGrunnlagForSak(sakId) } returns
+        every { opplysningDaoMock.hentAlleGrunnlagForSak(sakId) } returns
             listOf(
                 lagGrunnlagHendelse(
                     sakId,
@@ -560,7 +574,7 @@ internal class GrunnlagServiceTest {
                 ),
             )
 
-        every { opplysningerMock.finnHendelserIGrunnlag(sakId) } returns
+        every { opplysningDaoMock.finnHendelserIGrunnlag(sakId) } returns
             listOf(
                 lagGrunnlagHendelse(
                     sakId,
@@ -573,29 +587,73 @@ internal class GrunnlagServiceTest {
             )
 
         val opplysningsperson = mockPerson()
-        coEvery { pdlTjenesterKlientImpl.hentPersongalleri(any(), any(), any()) } returns Persongalleri(SOEKER2_FOEDSELSNUMMER.value)
-        every { pdlTjenesterKlientImpl.hentPerson(any(), any(), any()) } returns testData.soeker
-        every { pdlTjenesterKlientImpl.hentOpplysningsperson(any(), any(), any()) } returns opplysningsperson
         every {
-            pdlTjenesterKlientImpl.hentHistoriskForeldreansvar(any(), any(), any())
-        } returns mockk<HistorikkForeldreansvar>()
-        every {
-            opplysningerMock.hentBehandlingVersjon(behandlingId)
+            opplysningDaoMock.hentBehandlingVersjon(behandlingId)
         } returns BehandlingGrunnlagVersjon(behandlingId, sakId, 12L, false)
         every {
-            opplysningerMock.leggOpplysningTilGrunnlag(any(), any(), any())
+            opplysningDaoMock.leggOpplysningTilGrunnlag(any(), any(), any())
         } returns 7L
         every {
-            opplysningerMock.oppdaterVersjonForBehandling(any(), any(), any())
+            opplysningDaoMock.oppdaterVersjonForBehandling(any(), any(), any())
         } returns 1
+        coEvery {
+            grunnlagHenter.hentGrunnlagsdata(any())
+        } returns sampleFetchedGrunnlag(opplysningsperson)
 
         runBlocking { grunnlagService.oppdaterGrunnlag(behandlingId, sakId, sakType) }
 
         val slot = mutableListOf<Grunnlagsopplysning<JsonNode>>()
         verify {
-            opplysningerMock.leggOpplysningTilGrunnlag(sakId, capture(slot), opplysningsperson.foedselsnummer.verdi)
-            opplysningerMock.oppdaterVersjonForBehandling(behandlingId, sakId, 7)
+            opplysningDaoMock.leggOpplysningTilGrunnlag(sakId, capture(slot), opplysningsperson.foedselsnummer.verdi)
+            opplysningDaoMock.oppdaterVersjonForBehandling(behandlingId, sakId, 7)
         }
-        assertTrue(slot.filter { oppl -> oppl.opplysningType == FOEDSELSNUMMER }.size > 1)
+        assertTrue(slot.filter { oppl -> oppl.opplysningType == FOEDSELSNUMMER }.size == 1)
+        verify { pdlTjenesterKlientImpl wasNot called }
+        verify { pdlTjenesterKlientImpl wasNot called }
+        verify { persondataKlient wasNot called }
     }
+
+    private fun sampleFetchedGrunnlag(opplysningsperson: PersonDTO) =
+        HentetGrunnlag(
+            personopplysninger =
+                listOf(
+                    Pair(
+                        opplysningsperson.foedselsnummer.verdi,
+                        listOf(
+                            grunnlagsopplysning(
+                                opplysningsperson.foedselsnummer.verdi,
+                                FOEDSELSNUMMER,
+                                opplysningsperson.foedselsnummer.verdi.toJsonNode(),
+                            ),
+                        ),
+                    ),
+                ),
+            saksopplysninger =
+                listOf(
+                    grunnlagsopplysning(
+                        null,
+                        BOSTEDSADRESSE,
+                        ADRESSE_DEFAULT.first().toJsonNode(),
+                    ),
+                ),
+        )
+
+    private fun grunnlagsopplysning(
+        fnr: Folkeregisteridentifikator?,
+        opplysningstype: Opplysningstype,
+        opplysning: JsonNode,
+    ) = Grunnlagsopplysning(
+        id = UUID.randomUUID(),
+        kilde = kilde,
+        opplysningType = opplysningstype,
+        meta = objectMapper.createObjectNode(),
+        opplysning = opplysning,
+        attestering = null,
+        fnr,
+        periode =
+            Periode(
+                fom = YearMonth.of(2022, 1),
+                tom = YearMonth.of(2022, 12),
+            ),
+    )
 }

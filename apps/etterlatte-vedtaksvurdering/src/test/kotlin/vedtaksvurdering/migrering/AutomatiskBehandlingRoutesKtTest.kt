@@ -31,6 +31,7 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseType
 import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.rapidsandrivers.migrering.MigreringKjoringVariant
+import no.nav.etterlatte.token.Fagsaksystem
 import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlient
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll
@@ -54,7 +55,7 @@ internal class AutomatiskBehandlingRoutesKtTest {
     private val behandlingKlient = mockk<BehandlingKlient>()
     private val vedtakService: VedtakBehandlingService = mockk()
     private val rapidService: VedtaksvurderingRapidService = mockk()
-    private val automatiskBehandlingService = AutomatiskBehandlingService(vedtakService, rapidService, behandlingKlient)
+    private val automatiskBehandlingService = AutomatiskBehandlingService(vedtakService, behandlingKlient)
 
     @BeforeAll
     fun before() {
@@ -87,10 +88,15 @@ internal class AutomatiskBehandlingRoutesKtTest {
             val behandlingId = UUID.randomUUID()
             coEvery { vedtakService.opprettEllerOppdaterVedtak(any(), any()) } returns
                 opprettetVedtak
-            coEvery { vedtakService.fattVedtak(behandlingId, any()) } returns
+            coEvery { vedtakService.fattVedtak(behandlingId, any(), any()) } returns
                 VedtakOgRapid(
                     opprettetVedtak.toDto(),
-                    mockk(),
+                    RapidInfo(
+                        VedtakKafkaHendelseType.FATTET,
+                        opprettetVedtak.toNyDto(),
+                        Tidspunkt.now(),
+                        behandlingId,
+                    ),
                 )
             coEvery { behandlingKlient.hentOppgaverForSak(any(), any()) } returns
                 OppgaveListe(
@@ -101,6 +107,7 @@ internal class AutomatiskBehandlingRoutesKtTest {
             coEvery {
                 vedtakService.attesterVedtak(
                     behandlingId,
+                    any(),
                     any(),
                     any(),
                 )
@@ -136,17 +143,15 @@ internal class AutomatiskBehandlingRoutesKtTest {
                 }
 
             assertEquals(respons.vedtak.vedtakId, opprettetVedtak.id)
-            assertEquals(respons.rapidInfo1.vedtakhendelse, VedtakKafkaHendelseType.ATTESTERT)
+            assertEquals(respons.rapidInfo1.vedtakhendelse, VedtakKafkaHendelseType.FATTET)
+            assertEquals(respons.rapidInfo2!!.vedtakhendelse, VedtakKafkaHendelseType.ATTESTERT)
 
             coVerify(exactly = 1) {
                 vedtakService.opprettEllerOppdaterVedtak(behandlingId, any())
                 behandlingKlient.hentOppgaverForSak(1, any())
-                vedtakService.fattVedtak(behandlingId, any())
+                vedtakService.fattVedtak(behandlingId, any(), Fagsaksystem.EY.navn)
                 behandlingKlient.tildelSaksbehandler(any(), any())
-                vedtakService.attesterVedtak(behandlingId, any(), any())
-            }
-            coVerify(exactly = 2) {
-                rapidService.sendToRapid(any())
+                vedtakService.attesterVedtak(behandlingId, any(), any(), Fagsaksystem.EY.navn)
             }
             coVerify(atLeast = 1) {
                 behandlingKlient.harTilgangTilBehandling(any(), any())
@@ -164,8 +169,16 @@ internal class AutomatiskBehandlingRoutesKtTest {
                 val behandlingId = UUID.randomUUID()
                 coEvery { vedtakService.opprettEllerOppdaterVedtak(any(), any()) } returns
                     opprettetVedtak
-                coEvery { vedtakService.fattVedtak(behandlingId, any()) } returns
-                    VedtakOgRapid(opprettetVedtak.toDto(), mockk())
+                coEvery { vedtakService.fattVedtak(behandlingId, any(), any()) } returns
+                    VedtakOgRapid(
+                        opprettetVedtak.toDto(),
+                        RapidInfo(
+                            VedtakKafkaHendelseType.FATTET,
+                            opprettetVedtak.toNyDto(),
+                            Tidspunkt.now(),
+                            behandlingId,
+                        ),
+                    )
                 coEvery { behandlingKlient.hentOppgaverForSak(any(), any()) } returns
                     OppgaveListe(
                         mockk(),
@@ -175,6 +188,7 @@ internal class AutomatiskBehandlingRoutesKtTest {
                 coEvery {
                     vedtakService.attesterVedtak(
                         behandlingId,
+                        any(),
                         any(),
                         any(),
                     )
@@ -212,16 +226,15 @@ internal class AutomatiskBehandlingRoutesKtTest {
                     }
 
                 assertEquals(respons.vedtak.vedtakId, opprettetVedtak.id)
+                assertEquals(respons.rapidInfo1.vedtakhendelse, VedtakKafkaHendelseType.FATTET)
+                assertEquals(respons.rapidInfo2!!.vedtakhendelse, VedtakKafkaHendelseType.ATTESTERT)
 
                 coVerify(exactly = 1) {
                     vedtakService.opprettEllerOppdaterVedtak(behandlingId, any())
                     behandlingKlient.hentOppgaverForSak(1, any())
-                    vedtakService.fattVedtak(behandlingId, any())
+                    vedtakService.fattVedtak(behandlingId, any(), Fagsaksystem.EY.navn)
                     behandlingKlient.tildelSaksbehandler(any(), any())
-                    vedtakService.attesterVedtak(behandlingId, any(), any())
-                }
-                coVerify(exactly = 2) {
-                    rapidService.sendToRapid(any())
+                    vedtakService.attesterVedtak(behandlingId, any(), any(), Fagsaksystem.EY.navn)
                 }
                 coVerify(atLeast = 1) {
                     behandlingKlient.harTilgangTilBehandling(any(), any())
@@ -236,7 +249,7 @@ internal class AutomatiskBehandlingRoutesKtTest {
                 val behandlingId = UUID.randomUUID()
                 coEvery { runBlocking { vedtakService.opprettEllerOppdaterVedtak(any(), any()) } } returns
                     opprettetVedtak
-                coEvery { runBlocking { vedtakService.fattVedtak(behandlingId, any()) } } returns
+                coEvery { runBlocking { vedtakService.fattVedtak(behandlingId, any(), any()) } } returns
                     VedtakOgRapid(
                         opprettetVedtak.toDto(),
                         RapidInfo(
@@ -252,7 +265,6 @@ internal class AutomatiskBehandlingRoutesKtTest {
                         listOf(lagOppgave(behandlingId)),
                     )
                 coEvery { runBlocking { behandlingKlient.tildelSaksbehandler(any(), any()) } } returns true
-                coEvery { rapidService.sendToRapid(any()) } just runs
 
                 environment { config = applicationConfig }
                 application {
@@ -279,9 +291,8 @@ internal class AutomatiskBehandlingRoutesKtTest {
                 coVerify(exactly = 1) {
                     vedtakService.opprettEllerOppdaterVedtak(behandlingId, any())
                     behandlingKlient.hentOppgaverForSak(1, any())
-                    vedtakService.fattVedtak(behandlingId, any())
+                    vedtakService.fattVedtak(behandlingId, any(), Fagsaksystem.EY.navn)
                     behandlingKlient.tildelSaksbehandler(any(), any())
-                    rapidService.sendToRapid(any())
                 }
                 coVerify(atLeast = 1) {
                     behandlingKlient.harTilgangTilBehandling(any(), any())
@@ -300,6 +311,7 @@ internal class AutomatiskBehandlingRoutesKtTest {
                             behandlingId,
                             any(),
                             any(),
+                            any(),
                         )
                     }
                 } returns
@@ -312,7 +324,6 @@ internal class AutomatiskBehandlingRoutesKtTest {
                             behandlingId,
                         ),
                     )
-                coEvery { rapidService.sendToRapid(any()) } just runs
 
                 environment { config = applicationConfig }
                 application {
@@ -337,8 +348,7 @@ internal class AutomatiskBehandlingRoutesKtTest {
                 assertEquals(respons.vedtak.vedtakId, opprettetVedtak.id)
 
                 coVerify(exactly = 1) {
-                    vedtakService.attesterVedtak(behandlingId, any(), any())
-                    rapidService.sendToRapid(any())
+                    vedtakService.attesterVedtak(behandlingId, any(), any(), Fagsaksystem.EY.navn)
                 }
                 coVerify(atLeast = 1) {
                     behandlingKlient.harTilgangTilBehandling(any(), any())

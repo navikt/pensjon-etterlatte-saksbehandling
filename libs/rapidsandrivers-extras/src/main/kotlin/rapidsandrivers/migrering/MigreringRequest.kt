@@ -20,7 +20,8 @@ data class MigreringRequest(
     val soeker: Folkeregisteridentifikator,
     val gjenlevendeForelder: Folkeregisteridentifikator?,
     val avdoedForelder: List<AvdoedForelder>,
-    val virkningstidspunkt: YearMonth,
+    val dodAvYrkesskade: Boolean,
+    val foersteVirkningstidspunkt: YearMonth,
     val beregning: Beregning,
     val trygdetid: Trygdetid,
     val flyktningStatus: Boolean = false,
@@ -38,7 +39,6 @@ data class MigreringRequest(
 data class AvdoedForelder(
     val ident: Folkeregisteridentifikator,
     val doedsdato: Tidspunkt,
-    val yrkesskade: Boolean = false,
 )
 
 data class PesysId(val id: Long)

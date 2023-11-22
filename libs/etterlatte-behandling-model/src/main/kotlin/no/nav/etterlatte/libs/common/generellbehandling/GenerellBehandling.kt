@@ -62,3 +62,10 @@ data class GenerellBehandling(
         KRAVPAKKE_UTLAND,
     }
 }
+
+enum class GenerellBehandlingHendelseType {
+    OPPRETTET,
+    FATTET,
+    ATTESTERT,
+    UNDERKJENT,
+}

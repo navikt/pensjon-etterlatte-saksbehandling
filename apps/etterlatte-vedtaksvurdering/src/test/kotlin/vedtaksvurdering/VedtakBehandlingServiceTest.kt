@@ -538,7 +538,7 @@ internal class VedtakBehandlingServiceTest {
         coVerify(exactly = 1) { behandlingKlientMock.kanAttestereVedtak(any(), any(), null) }
         coVerify(exactly = 1) { behandlingKlientMock.attesterVedtak(any(), capture(hendelse)) }
         hendelse.captured.vedtakHendelse.kommentar shouldBe KOMMENTAR
-        hendelse.captured.vedtakOppgaveDTO.referanse shouldBe behandlingId.toString()
+        hendelse.captured.sakIdOgReferanse.referanse shouldBe behandlingId.toString()
     }
 
     @Test

@@ -10,6 +10,7 @@ import {
   IBehandlingStatus,
   IBoddEllerArbeidetUtlandet,
   IDetaljertBehandling,
+  IEtterbetaling,
   IGyldighetResultat,
   IKommerBarnetTilgode,
   IUtenlandstilknytning,
@@ -19,6 +20,7 @@ import { RevurderingInfo } from '~shared/types/RevurderingInfo'
 
 export const setBehandling = createAction<IDetaljertBehandling>('behandling/set')
 export const resetBehandling = createAction('behandling/reset')
+export const oppdaterBehandling = createAction<IDetaljertBehandling>('behandling/oppdater')
 export const oppdaterGyldighetsproeving = createAction<IGyldighetResultat>('behandling/gyldighetsproeving')
 export const oppdaterVirkningstidspunkt = createAction<Virkningstidspunkt>('behandling/virkningstidspunkt')
 export const updateVilkaarsvurdering = createAction<IVilkaarsvurdering | undefined>(
@@ -32,6 +34,7 @@ export const oppdaterBoddEllerArbeidetUtlandet = createAction<IBoddEllerArbeidet
 export const oppdaterBeregning = createAction<Beregning>('behandling/beregning')
 export const oppdaterBehandlingsstatus = createAction<IBehandlingStatus>('behandling/status')
 export const oppdaterUtenlandstilknytning = createAction<IUtenlandstilknytning>('behandling/utenlandstilknytning')
+export const oppdaterEtterbetaling = createAction<IEtterbetaling | null>('behandling/etterbetaling')
 export const oppdaterBeregingsGrunnlag = createAction<BeregningsGrunnlagPostDto>('behandling/beregningsgrunnlag')
 export const oppdaterBeregingsGrunnlagOMS = createAction<BeregningsGrunnlagOMSPostDto>(
   'behandling/beregningsgrunnlagOMS'
@@ -59,6 +62,9 @@ export const behandlingReducer = createReducer(initialState, (builder) => {
   builder.addCase(setBehandling, (state, action) => {
     state.behandling = action.payload
   })
+  builder.addCase(oppdaterBehandling, (state, action) => {
+    state.behandling = { ...state.behandling, ...action.payload }
+  })
   builder.addCase(updateVilkaarsvurdering, (state, action) => {
     state.behandling!!.vilkårsprøving = action.payload
   })
@@ -76,6 +82,9 @@ export const behandlingReducer = createReducer(initialState, (builder) => {
   })
   builder.addCase(oppdaterBoddEllerArbeidetUtlandet, (state, action) => {
     state.behandling!!.boddEllerArbeidetUtlandet = action.payload
+  })
+  builder.addCase(oppdaterEtterbetaling, (state, action) => {
+    state.behandling!!.etterbetaling = action.payload
   })
   builder.addCase(oppdaterBeregning, (state, action) => {
     state.behandling!!.beregning = action.payload

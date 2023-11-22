@@ -32,15 +32,21 @@ data class ManueltOpphoerResponse(val behandlingId: String)
 data class VirkningstidspunktRequest(
     @JsonProperty("dato") private val _dato: String,
     val begrunnelse: String?,
+    @JsonProperty("kravdato") private val _kravdato: String? = null,
 ) {
-    val dato: YearMonth =
-        try {
-            Tidspunkt.parse(_dato).toNorskTid().let {
-                YearMonth.of(it.year, it.month)
-            } ?: throw IllegalArgumentException("Dato $_dato må være definert")
-        } catch (e: Exception) {
-            throw RuntimeException("Kunne ikke lese dato for virkningstidspunkt: $_dato", e)
-        }
+    val dato: YearMonth = _dato.tilYearMonth()
+    val kravdato: YearMonth?
+        get() = if (_kravdato.isNullOrEmpty()) null else _kravdato.tilYearMonth()
+}
+
+fun String.tilYearMonth(): YearMonth {
+    return try {
+        Tidspunkt.parse(this).toNorskTid().let {
+            YearMonth.of(it.year, it.month)
+        } ?: throw IllegalArgumentException("Dato $this må være definert")
+    } catch (e: Exception) {
+        throw RuntimeException("Kunne ikke lese dato for virkningstidspunkt: $this", e)
+    }
 }
 
 internal data class FastsettVirkningstidspunktResponse(

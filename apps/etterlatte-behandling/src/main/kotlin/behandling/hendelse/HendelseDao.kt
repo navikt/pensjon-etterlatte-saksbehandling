@@ -4,6 +4,7 @@ import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.BehandlingOpprettet
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.KlageHendelseType
+import no.nav.etterlatte.libs.common.generellbehandling.GenerellBehandlingHendelseType
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunktOrNull
@@ -97,6 +98,28 @@ class HendelseDao(private val connection: () -> Connection) {
             inntruffet = inntruffet,
             vedtakId = null,
             behandlingId = klageId,
+            sakId = sakId,
+            ident = saksbehandler,
+            identType = "SAKSBEHANDLER".takeIf { saksbehandler != null },
+            kommentar = kommentar,
+            valgtBegrunnelse = begrunnelse,
+        ),
+    )
+
+    fun generellBehandlingHendelse(
+        behandlingId: UUID,
+        sakId: Long,
+        hendelse: GenerellBehandlingHendelseType,
+        inntruffet: Tidspunkt,
+        saksbehandler: String?,
+        kommentar: String? = null,
+        begrunnelse: String? = null,
+    ) = lagreHendelse(
+        UlagretHendelse(
+            hendelse = "GENERELL_BEHANDLING:${hendelse.name}",
+            inntruffet = inntruffet,
+            vedtakId = null,
+            behandlingId = behandlingId,
             sakId = sakId,
             ident = saksbehandler,
             identType = "SAKSBEHANDLER".takeIf { saksbehandler != null },

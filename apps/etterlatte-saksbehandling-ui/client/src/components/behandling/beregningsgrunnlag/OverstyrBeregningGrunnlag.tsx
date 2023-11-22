@@ -8,7 +8,7 @@ import {
 import { HeadingWrapper } from '../soeknadsoversikt/styled'
 import { Button, ErrorSummary, Heading, Table } from '@navikt/ds-react'
 import styled from 'styled-components'
-import { hentBehandlesFraStatus } from '../felles/utils'
+import { behandlingErRedigerbar } from '../felles/utils'
 import { useFieldArray, useForm } from 'react-hook-form'
 import {
   FEIL_I_PERIODE,
@@ -44,7 +44,7 @@ import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 
 const OverstyrBeregningGrunnlag = (props: { behandling: IBehandlingReducer; overstyrBeregning: OverstyrBeregning }) => {
   const { behandling, overstyrBeregning } = props
-  const behandles = hentBehandlesFraStatus(behandling?.status)
+  const behandles = behandlingErRedigerbar(behandling?.status)
   const [visFeil, setVisFeil] = useState(false)
   const [visOkLagret, setVisOkLagret] = useState(false)
   const perioder = useAppSelector((state) => state.behandlingReducer.behandling?.overstyrBeregning?.perioder)
@@ -159,6 +159,7 @@ const OverstyrBeregningGrunnlag = (props: { behandling: IBehandlingReducer; over
                     <Table.HeaderCell scope="col">Periode</Table.HeaderCell>
                     <Table.HeaderCell scope="col">Utbetalt beløp</Table.HeaderCell>
                     <Table.HeaderCell scope="col">Trygdetid</Table.HeaderCell>
+                    <Table.HeaderCell scope="col">Prorata</Table.HeaderCell>
                     <Table.HeaderCell scope="col">Beskrivelse</Table.HeaderCell>
                   </Table.Row>
                 </Table.Header>
@@ -195,6 +196,8 @@ const OverstyrBeregningGrunnlag = (props: { behandling: IBehandlingReducer; over
                       data: {
                         utbetaltBeloep: '0',
                         trygdetid: '0',
+                        prorataBroekNevner: '',
+                        prorataBroekTeller: '',
                         beskrivelse: '',
                       },
                     },
@@ -259,6 +262,15 @@ function feilIOverstyrBeregningperiode(
     feil.push('TRYGDETID_MANGLER')
   }
 
+  const prorataBroekNevner = parseInt(grunnlag.data.prorataBroekNevner ?? '')
+  const prorataBroekTeller = parseInt(grunnlag.data.prorataBroekTeller ?? '')
+
+  if (!isNaN(prorataBroekNevner) || !isNaN(prorataBroekTeller)) {
+    if (isNaN(prorataBroekNevner) || isNaN(prorataBroekTeller) || prorataBroekNevner <= 0 || prorataBroekTeller <= 0) {
+      feil.push('PRORATA_MANGLER')
+    }
+  }
+
   if (grunnlag.tom !== undefined && grunnlag.tom < grunnlag.fom) {
     feil.push('TOM_FOER_FOM')
   }
@@ -293,6 +305,7 @@ export type FeilIPeriodeGrunnlagAlle =
   | 'BELOEP_MANGLER'
   | 'TRYGDETID_MANGLER'
   | 'BESKRIVELSE_MANGLER'
+  | 'PRORATA_MANGLER'
 
 export const teksterFeilIPeriode: Record<FeilIPeriodeGrunnlagAlle, string> = {
   INGEN_PERIODER: 'Minst en periode må finnes',
@@ -304,6 +317,7 @@ export const teksterFeilIPeriode: Record<FeilIPeriodeGrunnlagAlle, string> = {
   BELOEP_MANGLER: 'Utbetalt beløp er påkrevd',
   TRYGDETID_MANGLER: 'Trygdetid er påkrevd',
   BESKRIVELSE_MANGLER: 'Beskrivelse er påkrevd',
+  PRORATA_MANGLER: 'Prorata brøk må ha begge felter fyllt ut hvis det er i bruk',
 } as const
 
 export default OverstyrBeregningGrunnlag

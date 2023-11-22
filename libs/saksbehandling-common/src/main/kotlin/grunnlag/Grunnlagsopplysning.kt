@@ -60,6 +60,7 @@ open class Grunnlagsopplysning<T>(
         JsonSubTypes.Type(value = Saksbehandler::class, name = "saksbehandler"),
         JsonSubTypes.Type(value = Privatperson::class, name = "privatperson"),
         JsonSubTypes.Type(value = Pdl::class, name = "pdl"),
+        JsonSubTypes.Type(value = Persondata::class, name = "persondata"),
         JsonSubTypes.Type(value = RegelKilde::class, name = "regel"),
         JsonSubTypes.Type(value = Pesys::class, name = "pesys"),
     )
@@ -95,6 +96,18 @@ open class Grunnlagsopplysning<T>(
         val opplysningId: String?,
     ) : Kilde("pdl") {
         val navn = "pdl"
+
+        override fun toString(): String {
+            return navn
+        }
+    }
+
+    data class Persondata(
+        val tidspunktForInnhenting: Tidspunkt,
+        val registersReferanse: String?,
+        val opplysningId: String?,
+    ) : Kilde("persondata") {
+        val navn = "persondata"
 
         override fun toString(): String {
             return navn

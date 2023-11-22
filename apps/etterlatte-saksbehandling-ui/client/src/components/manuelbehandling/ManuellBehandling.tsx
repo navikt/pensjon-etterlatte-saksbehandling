@@ -1,32 +1,41 @@
-import { Alert, Button, Select } from '@navikt/ds-react'
+import { Alert, Button, Checkbox, Select } from '@navikt/ds-react'
 import React, { useState } from 'react'
 import { SakType } from '~shared/types/sak'
 import { DatoVelger } from '~shared/DatoVelger'
 import PersongalleriBarnepensjon from '~components/person/journalfoeringsoppgave/nybehandling/PersongalleriBarnepensjon'
 import { useJournalfoeringOppgave } from '~components/person/journalfoeringsoppgave/useJournalfoeringOppgave'
 import styled from 'styled-components'
-import { settBehandlingBehov } from '~store/reducers/JournalfoeringOppgaveReducer'
+import { settNyBehandlingRequest } from '~store/reducers/JournalfoeringOppgaveReducer'
 import { useAppDispatch } from '~store/Store'
 import { isFailure, isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
 import { opprettBehandling } from '~shared/api/behandling'
+import { opprettOverstyrBeregning } from '~shared/api/beregning'
 
 export default function ManuellBehandling() {
   const dispatch = useAppDispatch()
-  const { behandlingBehov } = useJournalfoeringOppgave()
+  const { nyBehandlingRequest } = useJournalfoeringOppgave()
   const [status, opprettNyBehandling] = useApiCall(opprettBehandling)
   const [nyBehandlingId, setNyId] = useState('')
   const [erMigrering, setErMigrering] = useState<boolean | null>(null)
 
+  const [overstyrBeregningStatus, opprettOverstyrtBeregningReq] = useApiCall(opprettOverstyrBeregning)
+  const [overstyrBeregning, setOverstyrBeregning] = useState<boolean>(true)
   const ferdigstill = () => {
     opprettNyBehandling(
       {
-        ...behandlingBehov,
+        ...nyBehandlingRequest,
         sakType: SakType.BARNEPENSJON,
-        mottattDato: behandlingBehov!!.mottattDato!!.replace('Z', ''),
+        mottattDato: nyBehandlingRequest!!.mottattDato!!.replace('Z', ''),
         kilde: erMigrering ? 'PESYS' : undefined,
       },
-      (response) => {
-        setNyId(response)
+      (nyBehandlingRespons) => {
+        if (overstyrBeregning) {
+          opprettOverstyrtBeregningReq({
+            behandlingId: nyBehandlingRespons,
+            beskrivelse: 'Manuell migrering',
+          })
+        }
+        setNyId(nyBehandlingRespons)
       }
     )
   }
@@ -50,10 +59,14 @@ export default function ManuellBehandling() {
         <option value="nei">Nei</option>
       </Select>
 
+      <Checkbox checked={overstyrBeregning} onChange={() => setOverstyrBeregning(!overstyrBeregning)}>
+        Skal bruke manuell beregning
+      </Checkbox>
+
       <Select
         label="Hva skal språket/målform være?"
-        value={behandlingBehov?.spraak || ''}
-        onChange={(e) => dispatch(settBehandlingBehov({ ...behandlingBehov, spraak: e.target.value }))}
+        value={nyBehandlingRequest?.spraak || ''}
+        onChange={(e) => dispatch(settNyBehandlingRequest({ ...nyBehandlingRequest, spraak: e.target.value }))}
       >
         <option>Velg ...</option>
         <option value="nb">Bokmål</option>
@@ -64,11 +77,11 @@ export default function ManuellBehandling() {
       <DatoVelger
         label="Mottatt dato"
         description="Datoen søknaden ble mottatt"
-        value={behandlingBehov?.mottattDato ? new Date(behandlingBehov?.mottattDato) : undefined}
+        value={nyBehandlingRequest?.mottattDato ? new Date(nyBehandlingRequest?.mottattDato) : undefined}
         onChange={(mottattDato) =>
           dispatch(
-            settBehandlingBehov({
-              ...behandlingBehov,
+            settNyBehandlingRequest({
+              ...nyBehandlingRequest,
               mottattDato: mottattDato?.toISOString(),
             })
           )
@@ -81,14 +94,18 @@ export default function ManuellBehandling() {
         <Button
           variant="secondary"
           onClick={ferdigstill}
-          loading={isPending(status)}
-          disabled={erMigrering == null || isPending(status)}
+          loading={isPending(status) || isPending(overstyrBeregningStatus)}
+          disabled={erMigrering == null || isPending(status) || isPending(overstyrBeregningStatus)}
         >
           Send inn
         </Button>
       </Knapp>
       {isSuccess(status) && <Alert variant="success">Behandling med id {nyBehandlingId} ble opprettet!</Alert>}
       {isFailure(status) && <Alert variant="error">Det oppsto en feil ved oppretting av behandlingen.</Alert>}
+
+      {isPending(overstyrBeregningStatus) && <Alert variant="info">Oppretter overstyrt beregning.</Alert>}
+      {isSuccess(overstyrBeregningStatus) && <Alert variant="success">Overstyrt beregning opprettet!</Alert>}
+      {isFailure(overstyrBeregningStatus) && <Alert variant="error">Klarte ikke å overstyre beregning.</Alert>}
     </FormWrapper>
   )
 }

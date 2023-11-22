@@ -6,7 +6,7 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.User
 import no.nav.etterlatte.behandling.domain.Behandling
-import no.nav.etterlatte.behandling.domain.BehandlingMedGrunnlagsopplysninger
+import no.nav.etterlatte.behandling.domain.BehandlingMedGrunnlagsopplysning
 import no.nav.etterlatte.behandling.domain.toDetaljertBehandlingWithPersongalleri
 import no.nav.etterlatte.behandling.domain.toStatistikkBehandling
 import no.nav.etterlatte.behandling.etterbetaling.EtterbetalingService
@@ -28,7 +28,9 @@ import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.StatistikkBehandling
+import no.nav.etterlatte.libs.common.behandling.UtenlandstilknytningType
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
@@ -51,6 +53,12 @@ enum class BehandlingServiceFeatureToggle(private val key: String) : FeatureTogg
 }
 
 class BehandlingFinnesIkkeException(message: String) : Exception(message)
+
+class KravdatoMaaFinnesHvisBosattutland(message: String) :
+    UgyldigForespoerselException(code = "BOSATTUTLAND_MÅ_HA_KRAVDATO", detail = message)
+
+class VirkningstidspunktMaaHaUtenlandstilknytning(message: String) :
+    UgyldigForespoerselException(code = "VIRK_MÅ_HA UTENLANDSTILKNYTNING", detail = message)
 
 interface BehandlingService {
     fun hentBehandling(behandlingId: UUID): Behandling?
@@ -77,9 +85,10 @@ interface BehandlingService {
 
     fun oppdaterVirkningstidspunkt(
         behandlingId: UUID,
-        dato: YearMonth,
+        virkningstidspunkt: YearMonth,
         ident: String,
         begrunnelse: String,
+        kravdato: YearMonth? = null,
     ): Virkningstidspunkt
 
     fun oppdaterBoddEllerArbeidetUtlandet(
@@ -221,16 +230,18 @@ internal class BehandlingServiceImpl(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
         opplysningstype: Opplysningstype,
-    ): BehandlingMedGrunnlagsopplysninger<Person> {
+    ): BehandlingMedGrunnlagsopplysning<Person> {
         val behandling =
             requireNotNull(inTransaction { hentBehandling(behandlingId) }) { "Fant ikke behandling $behandlingId" }
         val personopplysning =
             grunnlagKlient.finnPersonOpplysning(behandlingId, opplysningstype, brukerTokenInfo)
+        val sakUtenlandstilknytning = inTransaction { sakDao.hentUtenlandstilknytningForSak(behandling.sak.id) }
 
-        return BehandlingMedGrunnlagsopplysninger(
-            id = behandling.id,
+        return BehandlingMedGrunnlagsopplysning(
+            behandling = behandling,
             soeknadMottattDato = behandling.mottattDato(),
             personopplysning = personopplysning,
+            utenlandstilknytning = sakUtenlandstilknytning,
         ).also {
             personopplysning?.fnr?.let { behandlingRequestLogger.loggRequest(brukerTokenInfo, it, "behandling") }
         }
@@ -245,15 +256,28 @@ internal class BehandlingServiceImpl(
         val begrunnelse = request.begrunnelse
         val harGyldigFormat = virkningstidspunkt.year in (0..9999) && begrunnelse != null
 
-        val behandlingMedDoedsdato =
+        val behandlingMedDoedsdatoOgUtenlandstilknytning =
             hentBehandlingMedEnkelPersonopplysning(
                 behandlingId,
                 brukerTokenInfo,
                 Opplysningstype.AVDOED_PDL_V1,
             )
-        val doedsdato = YearMonth.from(behandlingMedDoedsdato.personopplysning?.opplysning?.doedsdato)
-        val soeknadMottatt = YearMonth.from(behandlingMedDoedsdato.soeknadMottattDato)
-        val makstidspunktFoerSoeknad = soeknadMottatt.minusYears(3)
+        val doedsdato = YearMonth.from(behandlingMedDoedsdatoOgUtenlandstilknytning.personopplysning?.opplysning?.doedsdato)
+
+        val sakMedUtenlandstilknytning = behandlingMedDoedsdatoOgUtenlandstilknytning.utenlandstilknytning
+        val soeknadMottatt = YearMonth.from(behandlingMedDoedsdatoOgUtenlandstilknytning.soeknadMottattDato)
+        var makstidspunktFoerSoeknad = soeknadMottatt.minusYears(3)
+
+        if (sakMedUtenlandstilknytning?.utenlandstilknytning != null) {
+            if (sakMedUtenlandstilknytning.utenlandstilknytning.type === UtenlandstilknytningType.BOSATT_UTLAND) {
+                val kravdato = request.kravdato ?: throw KravdatoMaaFinnesHvisBosattutland("Kravdato må finnes hvis bosatt utland er valgt")
+                makstidspunktFoerSoeknad = kravdato.minusYears(3)
+            }
+        } else {
+            throw VirkningstidspunktMaaHaUtenlandstilknytning(
+                "Utenlandstilknytning må være valgt for å kunne vurdere om virkningstidspunktet er gyldig",
+            )
+        }
 
         val etterMaksTidspunktEllersMinstManedEtterDoedsfall =
             if (doedsdato.isBefore(makstidspunktFoerSoeknad)) {
@@ -402,9 +426,10 @@ internal class BehandlingServiceImpl(
 
     override fun oppdaterVirkningstidspunkt(
         behandlingId: UUID,
-        dato: YearMonth,
+        virkningstidspunkt: YearMonth,
         ident: String,
         begrunnelse: String,
+        kravdato: YearMonth?,
     ): Virkningstidspunkt {
         val behandling =
             hentBehandling(behandlingId) ?: run {
@@ -412,11 +437,11 @@ internal class BehandlingServiceImpl(
                 throw RuntimeException("Fant ikke behandling")
             }
 
-        val virkningstidspunkt = Virkningstidspunkt.create(dato, ident, begrunnelse)
+        val virkningstidspunktData = Virkningstidspunkt.create(virkningstidspunkt, ident, begrunnelse, kravdato)
         try {
-            behandling.oppdaterVirkningstidspunkt(virkningstidspunkt)
+            behandling.oppdaterVirkningstidspunkt(virkningstidspunktData)
                 .also {
-                    behandlingDao.lagreNyttVirkningstidspunkt(behandlingId, virkningstidspunkt)
+                    behandlingDao.lagreNyttVirkningstidspunkt(behandlingId, virkningstidspunktData)
                     behandlingDao.lagreStatus(it)
                 }
         } catch (e: NotImplementedError) {
@@ -427,7 +452,7 @@ internal class BehandlingServiceImpl(
             throw e
         }
 
-        return virkningstidspunkt
+        return virkningstidspunktData
     }
 
     override fun oppdaterBoddEllerArbeidetUtlandet(

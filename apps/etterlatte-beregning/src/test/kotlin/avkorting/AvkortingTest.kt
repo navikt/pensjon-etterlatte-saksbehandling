@@ -263,16 +263,7 @@ internal class AvkortingTest {
                         AvkortetYtelse::kilde,
                         AvkortetYtelse::restanse,
                     )
-                    it.restanse!!.shouldBeEqualToIgnoringFields(
-                        restanse(
-                            totalRestanse = 0,
-                            fordeltRestanse = 0,
-                        ),
-                        Restanse::id,
-                        AvkortetYtelse::tidspunkt,
-                        AvkortetYtelse::regelResultat,
-                        AvkortetYtelse::kilde,
-                    )
+                    it.restanse shouldBe null
                 }
                 get(1).asClue {
                     it.shouldBeEqualToIgnoringFields(
@@ -291,16 +282,7 @@ internal class AvkortingTest {
                         AvkortetYtelse::kilde,
                         AvkortetYtelse::restanse,
                     )
-                    it.restanse!!.shouldBeEqualToIgnoringFields(
-                        restanse(
-                            totalRestanse = 0,
-                            fordeltRestanse = 0,
-                        ),
-                        Restanse::id,
-                        AvkortetYtelse::tidspunkt,
-                        AvkortetYtelse::regelResultat,
-                        AvkortetYtelse::kilde,
-                    )
+                    it.restanse shouldBe null
                 }
                 get(2).asClue {
                     it.shouldBeEqualToIgnoringFields(
@@ -355,16 +337,7 @@ internal class AvkortingTest {
                         AvkortetYtelse::kilde,
                         AvkortetYtelse::restanse,
                     )
-                    it.restanse!!.shouldBeEqualToIgnoringFields(
-                        restanse(
-                            totalRestanse = 0,
-                            fordeltRestanse = 0,
-                        ),
-                        Restanse::id,
-                        AvkortetYtelse::tidspunkt,
-                        AvkortetYtelse::regelResultat,
-                        AvkortetYtelse::kilde,
-                    )
+                    it.restanse shouldBe null
                 }
                 get(1).asClue {
                     it.shouldBeEqualToIgnoringFields(
@@ -383,16 +356,7 @@ internal class AvkortingTest {
                         AvkortetYtelse::kilde,
                         AvkortetYtelse::restanse,
                     )
-                    it.restanse!!.shouldBeEqualToIgnoringFields(
-                        restanse(
-                            totalRestanse = 0,
-                            fordeltRestanse = 0,
-                        ),
-                        Restanse::id,
-                        AvkortetYtelse::tidspunkt,
-                        AvkortetYtelse::regelResultat,
-                        AvkortetYtelse::kilde,
-                    )
+                    it.restanse shouldBe null
                 }
                 get(2).asClue {
                     it.shouldBeEqualToIgnoringFields(
@@ -475,16 +439,7 @@ internal class AvkortingTest {
                         AvkortetYtelse::kilde,
                         AvkortetYtelse::restanse,
                     )
-                    it.restanse!!.shouldBeEqualToIgnoringFields(
-                        restanse(
-                            totalRestanse = 0,
-                            fordeltRestanse = 0,
-                        ),
-                        Restanse::id,
-                        AvkortetYtelse::tidspunkt,
-                        AvkortetYtelse::regelResultat,
-                        AvkortetYtelse::kilde,
-                    )
+                    it.restanse shouldBe null
                 }
                 get(1).asClue {
                     it.shouldBeEqualToIgnoringFields(
@@ -503,16 +458,7 @@ internal class AvkortingTest {
                         AvkortetYtelse::kilde,
                         AvkortetYtelse::restanse,
                     )
-                    it.restanse!!.shouldBeEqualToIgnoringFields(
-                        restanse(
-                            totalRestanse = 0,
-                            fordeltRestanse = 0,
-                        ),
-                        Restanse::id,
-                        AvkortetYtelse::tidspunkt,
-                        AvkortetYtelse::regelResultat,
-                        AvkortetYtelse::kilde,
-                    )
+                    it.restanse shouldBe null
                 }
                 get(2).asClue {
                     it.shouldBeEqualToIgnoringFields(
@@ -595,16 +541,7 @@ internal class AvkortingTest {
                         AvkortetYtelse::kilde,
                         AvkortetYtelse::restanse,
                     )
-                    it.restanse!!.shouldBeEqualToIgnoringFields(
-                        restanse(
-                            totalRestanse = 0,
-                            fordeltRestanse = 0,
-                        ),
-                        Restanse::id,
-                        AvkortetYtelse::tidspunkt,
-                        AvkortetYtelse::regelResultat,
-                        AvkortetYtelse::kilde,
-                    )
+                    it.restanse shouldBe null
                 }
                 get(1).asClue {
                     it.shouldBeEqualToIgnoringFields(
@@ -623,16 +560,7 @@ internal class AvkortingTest {
                         AvkortetYtelse::kilde,
                         AvkortetYtelse::restanse,
                     )
-                    it.restanse!!.shouldBeEqualToIgnoringFields(
-                        restanse(
-                            totalRestanse = 0,
-                            fordeltRestanse = 0,
-                        ),
-                        Restanse::id,
-                        AvkortetYtelse::tidspunkt,
-                        AvkortetYtelse::regelResultat,
-                        AvkortetYtelse::kilde,
-                    )
+                    it.restanse shouldBe null
                 }
                 get(2).asClue {
                     it.shouldBeEqualToIgnoringFields(
@@ -715,16 +643,7 @@ internal class AvkortingTest {
                         AvkortetYtelse::kilde,
                         AvkortetYtelse::restanse,
                     )
-                    it.restanse!!.shouldBeEqualToIgnoringFields(
-                        restanse(
-                            totalRestanse = 0,
-                            fordeltRestanse = 0,
-                        ),
-                        Restanse::id,
-                        AvkortetYtelse::tidspunkt,
-                        AvkortetYtelse::regelResultat,
-                        AvkortetYtelse::kilde,
-                    )
+                    it.restanse shouldBe null
                 }
                 get(1).asClue {
                     it.shouldBeEqualToIgnoringFields(
@@ -743,16 +662,7 @@ internal class AvkortingTest {
                         AvkortetYtelse::kilde,
                         AvkortetYtelse::restanse,
                     )
-                    it.restanse!!.shouldBeEqualToIgnoringFields(
-                        restanse(
-                            totalRestanse = 0,
-                            fordeltRestanse = 0,
-                        ),
-                        Restanse::id,
-                        AvkortetYtelse::tidspunkt,
-                        AvkortetYtelse::regelResultat,
-                        AvkortetYtelse::kilde,
-                    )
+                    it.restanse shouldBe null
                 }
                 get(2).asClue {
                     it.shouldBeEqualToIgnoringFields(
@@ -771,16 +681,7 @@ internal class AvkortingTest {
                         AvkortetYtelse::kilde,
                         AvkortetYtelse::restanse,
                     )
-                    it.restanse!!.shouldBeEqualToIgnoringFields(
-                        restanse(
-                            totalRestanse = 0,
-                            fordeltRestanse = 0,
-                        ),
-                        Restanse::id,
-                        AvkortetYtelse::tidspunkt,
-                        AvkortetYtelse::regelResultat,
-                        AvkortetYtelse::kilde,
-                    )
+                    it.restanse shouldBe null
                 }
                 get(3).asClue {
                     it.shouldBeEqualToIgnoringFields(

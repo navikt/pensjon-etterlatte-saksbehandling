@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { Behandlingsliste } from './behandlingsliste'
+import { Behandlingsliste } from './Behandlingsliste'
 import styled from 'styled-components'
 import { ManueltOpphoerModal } from './ManueltOpphoerModal'
 import { hentBehandlingerForPerson } from '~shared/api/behandling'
@@ -23,8 +23,8 @@ export const SakOversikt = ({ fnr }: { fnr: string }) => {
   const [sakStatus, hentSak] = useApiCall(hentSakMedUtenlandstilknytning)
 
   useEffect(() => {
-    hentBehandlinger(fnr)
     hentSak(fnr)
+    hentBehandlinger(fnr)
   }, [])
 
   return (
@@ -67,9 +67,11 @@ export const SakOversikt = ({ fnr }: { fnr: string }) => {
             </BodyShort>
 
             <hr />
+
             {isSuccess(behandlingerStatus) && (
-              <Behandlingsliste behandlinger={behandlingerStatus.data[0].behandlinger} />
+              <Behandlingsliste behandlinger={behandlingerStatus.data[0].behandlinger} sakId={sakStatus.data.id} />
             )}
+
             {skalBrukeKlage ? <KlageListe sakId={sakStatus.data.id} /> : null}
           </>
         )}

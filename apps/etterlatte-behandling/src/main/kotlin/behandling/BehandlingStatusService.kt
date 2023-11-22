@@ -161,7 +161,6 @@ class BehandlingStatusServiceImpl(
     }
 
     override fun sjekkOmKanFatteVedtak(behandlingId: UUID) {
-        val user = Kontekst.get().AppUser.name()
         val behandling = hentBehandling(behandlingId)
 
         if (behandling is ManuellRevurdering &&
@@ -170,7 +169,7 @@ class BehandlingStatusServiceImpl(
                 defaultValue = false,
                 context =
                     UnleashContext.builder()
-                        .userId(user)
+                        .userId(Kontekst.get().AppUser.name())
                         .build(),
             )
         ) {
@@ -184,14 +183,13 @@ class BehandlingStatusServiceImpl(
         behandling: Behandling,
         vedtakHendelse: VedtakHendelse,
     ) {
-        val user = Kontekst.get().AppUser.name()
         if (behandling is ManuellRevurdering &&
             featureToggleService.isEnabled(
                 toggleId = BehandlingStatusServiceFeatureToggle.OpphoerStatusovergang,
                 defaultValue = false,
                 context =
                     UnleashContext.builder()
-                        .userId(user)
+                        .userId(Kontekst.get().AppUser.name())
                         .build(),
             )
         ) {
@@ -267,6 +265,7 @@ class BehandlingStatusServiceImpl(
                             behandling.sak.id,
                             behandling.id,
                         ),
+                        null,
                     )
                 } else {
                     logger.info("behandling ${behandling.id} har ikke satt skalSendeKravpakke=true")

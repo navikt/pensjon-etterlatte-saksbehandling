@@ -1,7 +1,7 @@
 import styled from 'styled-components'
 import { GenderIcon, GenderList } from '../icons/genderIcon'
 import { IPersonResult } from '~components/person/typer'
-import { isPending, isSuccess, Result } from '~shared/hooks/useApiCall'
+import { mapApiResult, Result } from '~shared/hooks/useApiCall'
 import { Link } from '@navikt/ds-react'
 import { KopierbarVerdi } from '~shared/statusbar/kopierbarVerdi'
 import { IPdlPerson } from '~shared/types/Person'
@@ -29,31 +29,37 @@ export const StatusBar = ({ result }: { result: Result<IPersonResult> }) => {
     return GenderList.male
   }
 
-  return (
-    <StatusBarWrapper>
-      {isPending(result) && (
+  return mapApiResult(
+    result,
+    <PersonSkeleton />,
+    () => null,
+    (person) => (
+      <StatusBarWrapper>
         <UserInfo>
-          <SkeletonGenderIcon />
+          <GenderIcon gender={gender(person.foedselsnummer)} />
           <Name>
-            <Skeleton />
+            <Link href={`/person/${person.foedselsnummer}`}>{genererNavn(person)}</Link>
           </Name>
           <Skilletegn>|</Skilletegn>
-          <Skeleton />
+          <KopierbarVerdi value={person.foedselsnummer} />
         </UserInfo>
-      )}
-      {isSuccess(result) && (
-        <UserInfo>
-          <GenderIcon gender={gender(result.data.foedselsnummer)} />
-          <Name>
-            <Link href={`/person/${result.data.foedselsnummer}`}>{genererNavn(result.data)}</Link>
-          </Name>
-          <Skilletegn>|</Skilletegn>
-          <KopierbarVerdi value={result.data.foedselsnummer} />
-        </UserInfo>
-      )}
-    </StatusBarWrapper>
+      </StatusBarWrapper>
+    )
   )
 }
+
+const PersonSkeleton = () => (
+  <StatusBarWrapper>
+    <UserInfo>
+      <SkeletonGenderIcon />
+      <Name>
+        <Skeleton />
+      </Name>
+      <Skilletegn>|</Skilletegn>
+      <Skeleton />
+    </UserInfo>
+  </StatusBarWrapper>
+)
 
 const genererNavn = (personInfo: IPersonResult) => {
   return [personInfo.fornavn, personInfo.mellomnavn, personInfo.etternavn].join(' ')

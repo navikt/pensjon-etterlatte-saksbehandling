@@ -5,6 +5,7 @@ import { IBehandlingsammendrag } from '~components/person/typer'
 import { SakType } from '~shared/types/sak'
 import { JaNei } from '~shared/types/ISvar'
 import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
+import { IHendelse, IHendelseType } from '~shared/types/IHendelse'
 
 export function behandlingErUtfylt(behandling: IDetaljertBehandling): boolean {
   const gyldigUtfylt = !!(
@@ -37,6 +38,7 @@ export const hentGyldigeNavigeringsStatuser = (status: IBehandlingStatus) => {
     IBehandlingStatus.VILKAARSVURDERT,
     IBehandlingStatus.TRYGDETID_OPPDATERT,
     IBehandlingStatus.BEREGNET,
+    IBehandlingStatus.AVKORTET,
     IBehandlingStatus.FATTET_VEDTAK,
     IBehandlingStatus.ATTESTERT,
   ]
@@ -45,7 +47,7 @@ export const hentGyldigeNavigeringsStatuser = (status: IBehandlingStatus) => {
   return rekkefoelge.slice(0, index)
 }
 
-export const hentBehandlesFraStatus = (status: IBehandlingStatus): boolean => {
+export const behandlingErRedigerbar = (status: IBehandlingStatus): boolean => {
   return (
     status === IBehandlingStatus.OPPRETTET ||
     status === IBehandlingStatus.VILKAARSVURDERT ||
@@ -108,4 +110,20 @@ export const manueltBrevKanRedigeres = (status: IBehandlingStatus): boolean => {
 export function requireNotNull<T>(value: T | null, message: string): T {
   if (!!value) return value
   else throw Error(message)
+}
+
+export const sisteBehandlingHendelse = (hendelser: IHendelse[]): IHendelse => {
+  const hendelserSortert = hendelser
+    .filter((hendelse) =>
+      [
+        IHendelseType.BEHANDLING_OPPRETTET,
+        IHendelseType.BEHANDLING_VILKAARSVURDERT,
+        IHendelseType.BEHANDLING_TRYGDETID_OPPDATERT,
+        IHendelseType.BEHANDLING_BEREGNET,
+        IHendelseType.BEHANDLING_AVKORTET,
+      ].includes(hendelse.hendelse)
+    )
+    .sort((a, b) => (a.opprettet > b.opprettet ? 1 : -1))
+
+  return hendelserSortert[hendelserSortert.length - 1]
 }

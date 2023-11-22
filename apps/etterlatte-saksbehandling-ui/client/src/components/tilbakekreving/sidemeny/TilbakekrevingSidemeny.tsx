@@ -12,7 +12,7 @@ import { isFailure, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
 import { isPending } from '@reduxjs/toolkit'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import Spinner from '~shared/Spinner'
-import { Attestering } from '~components/behandling/attestering/attestering/attestering'
+import { AttesteringEllerUnderkjenning } from '~components/behandling/attestering/attestering/attesteringEllerUnderkjenning'
 import { IBeslutning } from '~components/behandling/attestering/types'
 import { hentVedtakSammendrag } from '~shared/api/vedtaksvurdering'
 import { useVedtak } from '~components/vedtak/useVedtak'
@@ -59,7 +59,7 @@ export function TilbakekrevingSidemeny() {
           {isFailure(fetchVedtakStatus) && <ApiErrorAlert>Kunne ikke hente vedtak</ApiErrorAlert>}
           {isPending(fetchVedtakStatus) && <Spinner label="Henter vedtaksdetaljer" visible />}
           {isSuccess(fetchVedtakStatus) && vedtak && (
-            <Attestering
+            <AttesteringEllerUnderkjenning
               setBeslutning={setBeslutning}
               beslutning={beslutning}
               vedtak={vedtak}

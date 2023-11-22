@@ -6,6 +6,16 @@ query(
         tittel
         journalposttype
         journalstatus
+        tema
+        bruker {
+            id
+            type
+        }
+        sak {
+            fagsakId
+            fagsaksystem
+            sakstype
+        }
         dokumenter {
             dokumentInfoId
             tittel

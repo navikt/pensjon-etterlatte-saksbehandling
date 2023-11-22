@@ -88,12 +88,14 @@ data class ManuellRevurdering(
                 listOf(
                     BehandlingStatus.VILKAARSVURDERT,
                     BehandlingStatus.BEREGNET,
+                    BehandlingStatus.AVKORTET,
                     BehandlingStatus.RETURNERT,
                 )
             } else {
                 listOf(
                     BehandlingStatus.TRYGDETID_OPPDATERT,
                     BehandlingStatus.BEREGNET,
+                    BehandlingStatus.AVKORTET,
                     BehandlingStatus.RETURNERT,
                 )
             },

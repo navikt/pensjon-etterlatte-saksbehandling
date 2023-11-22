@@ -129,13 +129,13 @@ data class RedigerFristGosysRequest(
     val versjon: Long,
 )
 
-data class VedtakOppgaveDTO(
+data class SakIdOgReferanse(
     val sakId: Long,
     val referanse: String,
 )
 
 data class VedtakEndringDTO(
-    val vedtakOppgaveDTO: VedtakOppgaveDTO,
+    val sakIdOgReferanse: SakIdOgReferanse,
     val vedtakHendelse: VedtakHendelse,
 )
 

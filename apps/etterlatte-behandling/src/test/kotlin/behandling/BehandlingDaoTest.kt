@@ -495,14 +495,43 @@ internal class BehandlingDaoTest {
 
         val saksbehandler = Grunnlagsopplysning.Saksbehandler.create("navIdent")
         val nyDato = YearMonth.of(2021, 2)
-        behandling!!.oppdaterVirkningstidspunkt(Virkningstidspunkt(nyDato, saksbehandler, "enBegrunnelse")).let {
+        val virkningstidspunkt = Virkningstidspunkt(nyDato, saksbehandler, "enBegrunnelse")
+        behandling!!.oppdaterVirkningstidspunkt(virkningstidspunkt).let {
             behandlingRepo.lagreNyttVirkningstidspunkt(behandling.id, it.virkningstidspunkt!!)
         }
 
-        val expected = Virkningstidspunkt(nyDato, saksbehandler, "enBegrunnelse")
         with(behandlingRepo.hentBehandling(behandling.id)) {
             val actual = (this as Foerstegangsbehandling).virkningstidspunkt
-            assertEquals(expected, actual)
+            assertEquals(virkningstidspunkt, actual)
+        }
+    }
+
+    @Test
+    fun `skal lagre virkningstidspunkt med kravdato for en behandling`() {
+        val sak = sakRepo.opprettSak("123", SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr).id
+        val opprettBehandling =
+            opprettBehandling(
+                type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                sakId = sak,
+                status = BehandlingStatus.OPPRETTET,
+            )
+
+        behandlingRepo.opprettBehandling(opprettBehandling)
+
+        val behandling = behandlingRepo.hentBehandling(opprettBehandling.id) as? Foerstegangsbehandling
+
+        assertNotNull(behandling)
+
+        val saksbehandler = Grunnlagsopplysning.Saksbehandler.create("navIdent")
+        val nyDato = YearMonth.of(2021, 2)
+        val virkningstidspunkt = Virkningstidspunkt(nyDato, saksbehandler, "enBegrunnelse", YearMonth.now())
+        behandling!!.oppdaterVirkningstidspunkt(virkningstidspunkt).let {
+            behandlingRepo.lagreNyttVirkningstidspunkt(behandling.id, it.virkningstidspunkt!!)
+        }
+
+        with(behandlingRepo.hentBehandling(behandling.id)) {
+            val actual = (this as Foerstegangsbehandling).virkningstidspunkt
+            assertEquals(virkningstidspunkt, actual)
         }
     }
 

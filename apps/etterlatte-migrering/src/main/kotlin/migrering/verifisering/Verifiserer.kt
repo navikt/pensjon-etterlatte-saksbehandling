@@ -43,7 +43,7 @@ internal class Verifiserer(
         val personer = mutableListOf(Pair(PersonRolle.BARN, request.soeker))
         request.avdoedForelder.forEach { personer.add(Pair(PersonRolle.AVDOED, it.ident)) }
         if (request.gjenlevendeForelder == null) {
-            throw IllegalStateException("Gjenlevende forelder er null i det vi får fra Pesys")
+            return listOf(GjenlevendeForelderMangler)
         }
         request.gjenlevendeForelder!!.let { personer.add(Pair(PersonRolle.GJENLEVENDE, it)) }
 
@@ -75,4 +75,9 @@ sealed class Verifiseringsfeil : Exception()
 data class FinsIkkeIPDL(val rolle: PersonRolle, val id: Folkeregisteridentifikator) : Verifiseringsfeil() {
     override val message: String
         get() = toString()
+}
+
+object GjenlevendeForelderMangler : Verifiseringsfeil() {
+    override val message: String
+        get() = "Gjenlevende forelder er null i det vi får fra Pesys"
 }

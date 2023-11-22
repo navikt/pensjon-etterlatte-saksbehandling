@@ -1,4 +1,3 @@
-import styled from 'styled-components'
 import { BodyShort, ErrorMessage, Heading, MonthPicker, useMonthpicker, VStack } from '@navikt/ds-react'
 import React, { useState } from 'react'
 import { oppdaterBehandlingsstatus, oppdaterVirkningstidspunkt } from '~store/reducers/BehandlingReducer'
@@ -21,7 +20,7 @@ import { VurderingsboksWrapper } from '~components/vurderingsboks/Vurderingsboks
 import { SoeknadsoversiktTextArea } from '~components/behandling/soeknadsoversikt/SoeknadsoversiktTextArea'
 import { hentMinimumsVirkningstidspunkt } from '~components/behandling/virkningstidspunkt/utils'
 import { UseMonthPickerOptions } from '@navikt/ds-react/esm/date/hooks/useMonthPicker'
-import { DatoVelger, formatDateToLocaleDateOrEmptyString } from '~shared/DatoVelger'
+import { DatoVelger } from '~shared/DatoVelger'
 
 export interface Hjemmel {
   lenke: string
@@ -77,10 +76,8 @@ const Virkningstidspunkt = (props: {
     if (begrunnelse.trim().length === 0) {
       return setErrorTekst('Begrunnelsen må fylles ut')
     }
-    if (erBosattUtland) {
-      if (!kravdato) {
-        setErrorTekst('Kravdato kreves på bosatt utland saker')
-      }
+    if (erBosattUtland && !kravdato) {
+      return setErrorTekst('Kravdato kreves på bosatt utland saker')
     }
 
     return fastsettVirkningstidspunktRequest(
@@ -88,10 +85,9 @@ const Virkningstidspunkt = (props: {
         id: behandling.id,
         dato: virkningstidspunkt,
         begrunnelse: begrunnelse,
-        kravdato: formatDateToLocaleDateOrEmptyString(kravdato ?? undefined),
+        kravdato: kravdato,
       },
       (res) => {
-        console.log(kravdato)
         dispatch(oppdaterVirkningstidspunkt(res))
         dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.OPPRETTET))
         onSuccess?.()
@@ -141,7 +137,7 @@ const Virkningstidspunkt = (props: {
                       <BodyShort>
                         {behandling.virkningstidspunkt!!.kravdato
                           ? formaterStringDato(behandling.virkningstidspunkt!!.kravdato)
-                          : 'En feil'}
+                          : ''}
                       </BodyShort>
                     </div>
                   )}
@@ -165,28 +161,26 @@ const Virkningstidspunkt = (props: {
               kommentar={behandling.virkningstidspunkt?.begrunnelse}
               defaultRediger={behandling.virkningstidspunkt === null}
             >
-              <>
+              <VStack gap="4">
                 <VurderingsTitle title={tittel} />
+
                 {erBosattUtland && (
-                  <>
-                    <DatoVelger
-                      label="Kravdato"
-                      onChange={(date) => setKravdato(date ?? null)}
-                      value={kravdato ?? undefined}
-                      fromDate={subYears(new Date(), 18)}
-                      toDate={addYears(new Date(), 2)}
-                    />
-                  </>
+                  <DatoVelger
+                    label="Kravdato"
+                    onChange={(date) => setKravdato(date ?? null)}
+                    value={kravdato ?? undefined}
+                    fromDate={subYears(new Date(), 18)}
+                    toDate={addYears(new Date(), 2)}
+                  />
                 )}
-                <MonthPickerWrapper>
-                  <MonthPicker {...monthpickerProps}>
-                    <MonthPicker.Input label="Virkningstidspunkt" {...inputProps} />
-                  </MonthPicker>
-                </MonthPickerWrapper>
+                <MonthPicker {...monthpickerProps}>
+                  <MonthPicker.Input label="Virkningstidspunkt" {...inputProps} />
+                </MonthPicker>
 
                 <SoeknadsoversiktTextArea value={begrunnelse} onChange={(e) => setBegrunnelse(e.target.value)} />
+
                 {errorTekst !== '' ? <ErrorMessage>{errorTekst}</ErrorMessage> : null}
-              </>
+              </VStack>
             </VurderingsboksWrapper>
           )}
         </VurderingsContainerWrapper>
@@ -194,10 +188,5 @@ const Virkningstidspunkt = (props: {
     </>
   )
 }
-
-const MonthPickerWrapper = styled.div`
-  margin-top: 2rem;
-  margin-bottom: 12px;
-`
 
 export default Virkningstidspunkt

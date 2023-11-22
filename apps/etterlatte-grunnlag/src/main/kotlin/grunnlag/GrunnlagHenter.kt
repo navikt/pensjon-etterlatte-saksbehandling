@@ -30,6 +30,12 @@ class GrunnlagHenter(
     suspend fun hentGrunnlagsdata(opplysningsbehov: Opplysningsbehov): HentetGrunnlag {
         return coroutineScope {
             val persongalleri = opplysningsbehov.persongalleri
+            val persongalleriFraPdl =
+                pdltjenesterKlient.hentPersongalleri(
+                    opplysningsbehov.persongalleri.soeker,
+                    opplysningsbehov.sakType,
+                    opplysningsbehov.persongalleri.innsender,
+                )
             val sakType = opplysningsbehov.sakType
             val requesterAvdoed =
                 persongalleri.avdoed.map {
@@ -86,7 +92,8 @@ class GrunnlagHenter(
 
             val saksopplysninger =
                 listOfNotNull(
-                    opplysningsbehov.persongalleri.tilGrunnlagsopplysning(),
+                    opplysningsbehov.persongalleri.tilGrunnlagsopplysningFraSoeknad(),
+                    persongalleriFraPdl?.tilGrunnlagsopplysningFraPdl(),
                     vergesAdresseInfo?.let { vergeAdresserOpplysning(vergesAdresseInfo.toVergeAdresse()) },
                 )
 
@@ -158,7 +165,7 @@ class GrunnlagHenter(
             periode = null,
         )
 
-    private fun Persongalleri.tilGrunnlagsopplysning(): Grunnlagsopplysning<JsonNode> {
+    private fun Persongalleri.tilGrunnlagsopplysningFraSoeknad(): Grunnlagsopplysning<JsonNode> {
         return Grunnlagsopplysning(
             id = UUID.randomUUID(),
             kilde =
@@ -168,6 +175,19 @@ class GrunnlagHenter(
                     Grunnlagsopplysning.Privatperson(this.innsender!!, Tidspunkt.now())
                 },
             opplysningType = Opplysningstype.PERSONGALLERI_V1,
+            meta = objectMapper.createObjectNode(),
+            opplysning = this.toJsonNode(),
+            attestering = null,
+            fnr = null,
+            periode = null,
+        )
+    }
+
+    private fun Persongalleri.tilGrunnlagsopplysningFraPdl(): Grunnlagsopplysning<JsonNode> {
+        return Grunnlagsopplysning(
+            id = UUID.randomUUID(),
+            kilde = Grunnlagsopplysning.Pdl(Tidspunkt.now(), null, null),
+            opplysningType = Opplysningstype.PERSONGALLERI_PDL_V1,
             meta = objectMapper.createObjectNode(),
             opplysning = this.toJsonNode(),
             attestering = null,

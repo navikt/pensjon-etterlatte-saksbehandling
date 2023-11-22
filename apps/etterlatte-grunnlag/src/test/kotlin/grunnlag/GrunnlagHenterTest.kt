@@ -7,6 +7,7 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.kotest.matchers.equals.shouldBeEqual
 import io.kotest.matchers.shouldBe
+import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
@@ -54,6 +55,13 @@ class GrunnlagHenterTest {
             every { pdltjenesterKlient.hentPerson(person.foedselsnummer.value, any(), sakType) } returns
                 person
         }
+        coEvery {
+            pdltjenesterKlient.hentPersongalleri(
+                grunnlagTestData.soeker.foedselsnummer.value,
+                any(),
+                any(),
+            )
+        } returns grunnlagTestData.hentPersonGalleri()
 
         val persondataAdresseVerge = mockk<PersondataAdresse>()
         every { persondataAdresseVerge.toVergeAdresse() } returns sampleVergeAdresse()

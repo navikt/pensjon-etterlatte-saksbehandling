@@ -3,15 +3,10 @@ import { useAppSelector } from '~store/Store'
 import { formaterBehandlingstype, formaterStringDato, formaterStringTidspunkt } from '~utils/formattering'
 import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 import { IBehandlingInfo } from '~components/behandling/sidemeny/IBehandlingInfo'
+import { KopierbarVerdi } from '~shared/statusbar/kopierbarVerdi'
 
-export const Underkjent = ({
-  behandlingsInfo,
-  children,
-}: {
-  behandlingsInfo: IBehandlingInfo
-  children: JSX.Element
-}) => {
-  const innloggetId = useAppSelector((state) => state.saksbehandlerReducer.saksbehandler.ident)
+export const Underkjent = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo }) => {
+  const innloggetId = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler.ident)
   const underkjentSiste = behandlingsInfo.underkjentLogg?.slice(-1)[0]
   const fattetSiste = behandlingsInfo.fattetLogg?.slice(-1)[0]
 
@@ -48,7 +43,7 @@ export const Underkjent = ({
           <Tekst>{underkjentSiste.kommentar}</Tekst>
         </>
       )}
-      {children}
+      <KopierbarVerdi value={behandlingsInfo.sakId.toString()} />
     </Wrapper>
   )
 }

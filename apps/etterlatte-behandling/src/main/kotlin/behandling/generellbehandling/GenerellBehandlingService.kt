@@ -6,6 +6,7 @@ import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.generellbehandling.DokumentMedSendtDato
 import no.nav.etterlatte.libs.common.generellbehandling.GenerellBehandling
 import no.nav.etterlatte.libs.common.generellbehandling.GenerellBehandlingHendelseType
@@ -36,6 +37,12 @@ class ManglerLandkodeException(message: String) : Exception(message)
 class ManglerRinanummerException(message: String) : Exception(message)
 
 class KanIkkeEndreFattetEllerAttestertBehandling(message: String) : Exception(message)
+
+class UgyldigAttesteringsForespoersel(message: String, code: String) :
+    UgyldigForespoerselException(
+        code = code,
+        detail = message,
+    )
 
 data class Kommentar(val begrunnelse: String)
 
@@ -103,8 +110,6 @@ class GenerellBehandlingService(
             null -> throw NotImplementedError("Ikke implementert")
         }
 
-        oppdaterBehandling(generellBehandling.copy(status = GenerellBehandling.Status.FATTET))
-        opprettHendelse(GenerellBehandlingHendelseType.FATTET, hentetBehandling, saksbehandler)
         oppgaveService.ferdigStillOppgaveUnderBehandling(generellBehandling.id.toString(), saksbehandler)
         val trettiDagerFremITid = Tidspunkt.now().plus(30L, ChronoUnit.DAYS)
         oppgaveService.opprettNyOppgaveMedSakOgReferanse(
@@ -115,6 +120,9 @@ class GenerellBehandlingService(
             merknad = "Attestering av ${generellBehandling.type.name}",
             frist = trettiDagerFremITid,
         )
+
+        oppdaterBehandling(generellBehandling.copy(status = GenerellBehandling.Status.FATTET))
+        opprettHendelse(GenerellBehandlingHendelseType.FATTET, hentetBehandling, saksbehandler)
     }
 
     fun attester(
@@ -127,9 +135,51 @@ class GenerellBehandlingService(
             "Behandlingen må ha status FATTET, hadde: ${hentetBehandling?.status}"
         }
 
+        sjekkAtBehandlendeSaksbehandlerIkkeAttesterer(generellbehandlingId, saksbehandler)
+
+        oppgaveService.ferdigStillOppgaveUnderBehandling(generellbehandlingId.toString(), saksbehandler)
         oppdaterBehandling(hentetBehandling!!.copy(status = GenerellBehandling.Status.ATTESTERT))
         opprettHendelse(GenerellBehandlingHendelseType.ATTESTERT, hentetBehandling, saksbehandler)
-        oppgaveService.ferdigStillOppgaveUnderBehandling(generellbehandlingId.toString(), saksbehandler)
+    }
+
+    fun sjekkAtBehandlendeSaksbehandlerIkkeAttesterer(
+        generellbehandlingId: UUID,
+        saksbehandler: Saksbehandler,
+    ) {
+        val oppgaverForReferanse = oppgaveService.hentOppgaverForReferanse(generellbehandlingId.toString())
+        if (oppgaverForReferanse.isEmpty()) {
+            throw UgyldigAttesteringsForespoersel(
+                "Fant ingen oppgaver for referanse $generellbehandlingId",
+                "ATTESTERING_INGEN_OPPGAVER_FUNNET",
+            )
+        }
+        val ferdigstilteOppgaver = oppgaverForReferanse.filter { o -> o.erFerdigstilt() }
+        if (oppgaverForReferanse.isEmpty()) {
+            throw UgyldigAttesteringsForespoersel(
+                "Fant ingen ferdigstilte oppgaver for referanse $generellbehandlingId." +
+                    " Det må finnes en ferdigstilt oppgave for å kunne attesere",
+                "ATTESTERING_INGEN_FERDIGSTILTE_OPPGAVER",
+            )
+        }
+        val saksbehandlerOppgaver =
+            ferdigstilteOppgaver.filter { o -> o.type == OppgaveType.KRAVPAKKE_UTLAND || o.type == OppgaveType.UNDERKJENT }
+                .sortedByDescending { o -> o.opprettet }
+
+        if (oppgaverForReferanse.isEmpty()) {
+            throw UgyldigAttesteringsForespoersel(
+                "Fant ingen oppgaver for referanse $generellbehandlingId " +
+                    "med riktig type",
+                "ATTESTERING_INGEN_FERDIGSTILTE_OPPGAVER_AV_RIKTIG_TYPE",
+            )
+        }
+        val sisteOppgave = saksbehandlerOppgaver[0]
+        if (saksbehandler.ident == sisteOppgave.saksbehandler) {
+            throw UgyldigAttesteringsForespoersel(
+                "Samme saksbehandler kan ikke attestere og behandle " +
+                    "behandlingen",
+                "ATTESTERING_SAMME_SAKSBEHANDLER",
+            )
+        }
     }
 
     fun underkjenn(

@@ -1,7 +1,7 @@
 import { createAction, createReducer } from '@reduxjs/toolkit'
 
-export const initialState: SaksbehandlerReducer = {
-  saksbehandler: {
+export const initialState: InnloggetSaksbehandlerReducer = {
+  innloggetSaksbehandler: {
     ident: '',
     navn: '',
     fornavn: '',
@@ -21,6 +21,7 @@ export enum IRolle {
   attestant = 'attestant',
 }
 
+//TODO: flytte til user.ts?
 export interface ISaksbehandler {
   ident: string
   navn: string
@@ -31,11 +32,11 @@ export interface ISaksbehandler {
 }
 
 export const setSaksbehandler = createAction<ISaksbehandler>('saksbehandler/set')
-export interface SaksbehandlerReducer {
-  saksbehandler: ISaksbehandler
+export interface InnloggetSaksbehandlerReducer {
+  innloggetSaksbehandler: ISaksbehandler
 }
 export const saksbehandlerReducer = createReducer(initialState, (builder) => {
   builder.addCase(setSaksbehandler, (state, action) => {
-    state.saksbehandler = action.payload
+    state.innloggetSaksbehandler = action.payload
   })
 })

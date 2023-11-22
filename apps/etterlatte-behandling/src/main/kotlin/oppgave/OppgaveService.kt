@@ -347,7 +347,7 @@ class OppgaveService(
         frist: Tidspunkt? = null,
     ): OppgaveIntern {
         val sak = sakDao.hentSak(sakId)!!
-        return lagreOppgave(
+        return opprettOppave(
             opprettNyOppgaveMedReferanseOgSak(
                 referanse = referanse,
                 sak = sak,
@@ -359,9 +359,19 @@ class OppgaveService(
         )
     }
 
-    fun hentSaksbehandlerForBehandling(behandlingId: UUID): String? {
+    fun hentFerdigstiltAttesteringsOppgave(referanse: String): String? {
         val oppgaverForBehandlingUtenAttesterting =
-            oppgaveDao.hentOppgaverForReferanse(behandlingId.toString())
+            oppgaveDao.hentOppgaverForReferanse(referanse)
+                .filter {
+                    it.type === OppgaveType.ATTESTERING &&
+                        it.erFerdigstilt()
+                }
+        return oppgaverForBehandlingUtenAttesterting.sortedByDescending { it.opprettet }[0].saksbehandler
+    }
+
+    fun hentSaksbehandlerIkkeAttestertOppgave(referanse: String): String? {
+        val oppgaverForBehandlingUtenAttesterting =
+            oppgaveDao.hentOppgaverForReferanse(referanse)
                 .filter {
                     it.type !== OppgaveType.ATTESTERING
                 }
@@ -376,27 +386,27 @@ class OppgaveService(
         return oppgaverForBehandlingFoerstegangs.maxByOrNull { it.opprettet }
     }
 
-    fun hentSaksbehandlerForOppgaveUnderArbeid(behandlingId: UUID): String? {
-        val oppgaverforBehandling = oppgaveDao.hentOppgaverForReferanse(behandlingId.toString())
+    fun hentSaksbehandlerForOppgaveUnderArbeidByReferanse(referanse: String): String? {
+        val oppgaverforBehandling = oppgaveDao.hentOppgaverForReferanse(referanse)
         return try {
             val oppgaveUnderbehandling = oppgaverforBehandling.single { it.status == Status.UNDER_BEHANDLING }
             oppgaveUnderbehandling.saksbehandler
         } catch (e: NoSuchElementException) {
-            logger.info("Det må finnes en oppgave under behandling, gjelder behandling: $behandlingId")
+            logger.info("Det må finnes en oppgave under behandling, gjelder referanse: $referanse")
             return null
         } catch (e: IllegalArgumentException) {
-            logger.info("Skal kun ha en oppgave under behandling, gjelder behandling: $behandlingId")
+            logger.info("Skal kun ha en oppgave under behandling, gjelder referanse: $referanse")
             return null
         }
     }
 
-    private fun lagreOppgave(oppgaveIntern: OppgaveIntern): OppgaveIntern {
+    private fun opprettOppave(oppgaveIntern: OppgaveIntern): OppgaveIntern {
         var oppgaveLagres = oppgaveIntern
         if (oppgaveIntern.frist === null) {
             val enMaanedFrem = oppgaveIntern.opprettet.toLocalDatetimeUTC().plusMonths(1L).toTidspunkt()
             oppgaveLagres = oppgaveIntern.copy(frist = enMaanedFrem)
         }
-        oppgaveDao.lagreOppgave(oppgaveLagres)
+        oppgaveDao.opprettOppgave(oppgaveLagres)
         return oppgaveDao.hentOppgave(oppgaveLagres.id)!!
     }
 

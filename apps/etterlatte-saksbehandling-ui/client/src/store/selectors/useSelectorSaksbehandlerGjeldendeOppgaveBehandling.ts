@@ -1,5 +1,5 @@
 import { useAppSelector } from '~store/Store'
 
-export function useSaksbehandlerGjeldendeOppgave(): string | null {
+export function useSelectorSaksbehandlerGjeldendeOppgaveBehandling(): string | null {
   return useAppSelector((state) => state.saksbehandlerGjeldendeOppgaveReducer.saksbehandler)
 }

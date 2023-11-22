@@ -84,7 +84,7 @@ internal class MetrikkerDaoTest {
                 lagNyOppgave(status = Status.FEILREGISTRERT),
             )
         oppgaver.forEach {
-            oppgaveDao.lagreOppgave(it)
+            oppgaveDao.opprettOppgave(it)
         }
 
         metrikkerDao.hentOppgaveAntall().asClue {

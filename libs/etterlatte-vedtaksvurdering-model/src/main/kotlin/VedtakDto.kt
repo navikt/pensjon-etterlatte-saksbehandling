@@ -21,9 +21,9 @@ data class VedtakSammendragDto(
     val id: String,
     val behandlingId: UUID,
     val vedtakType: VedtakType?,
-    val saksbehandlerId: String?,
+    val behandlendeSaksbehandler: String?,
     val datoFattet: ZonedDateTime?,
-    val attestant: String?,
+    val attesterendeSaksbehandler: String?,
     val datoAttestert: ZonedDateTime?,
 )
 

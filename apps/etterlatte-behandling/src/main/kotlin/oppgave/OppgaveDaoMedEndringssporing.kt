@@ -88,8 +88,8 @@ class OppgaveDaoMedEndringssporingImpl(
         )
     }
 
-    override fun lagreOppgave(oppgaveIntern: OppgaveIntern) {
-        oppgaveDao.lagreOppgave(oppgaveIntern)
+    override fun opprettOppgave(oppgaveIntern: OppgaveIntern) {
+        oppgaveDao.opprettOppgave(oppgaveIntern)
     }
 
     override fun hentOppgave(oppgaveId: UUID): OppgaveIntern? {

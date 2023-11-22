@@ -5,7 +5,7 @@ import { Alert, BodyShort, Button, Modal } from '@navikt/ds-react'
 import { isFailure, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { sendTilAttesteringGenerellBehandling } from '~shared/api/generellbehandling'
-import { hentSakOgNavigererTilSaksoversikt } from '~components/generellbehandling/KravpakkeUtland'
+import { hentSakOgNavigerTilSaksoversikt } from '~components/generellbehandling/KravpakkeUtland'
 
 export const SendtilAttesteringModal = ({
   utlandsBehandling,
@@ -30,7 +30,7 @@ export const SendtilAttesteringModal = ({
             onClick={() => {
               sendTilAttestering(utlandsBehandling, () => {
                 setTimeout(() => {
-                  hentSakOgNavigererTilSaksoversikt(utlandsBehandling.sakId, navigate)
+                  hentSakOgNavigerTilSaksoversikt(utlandsBehandling.sakId, navigate)
                 }, 4000)
               })
             }}

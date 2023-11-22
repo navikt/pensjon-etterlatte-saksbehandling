@@ -6,7 +6,6 @@ import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
-import no.nav.etterlatte.libs.common.medBody
 import no.nav.etterlatte.libs.common.person.HentAdressebeskyttelseRequest
 import no.nav.etterlatte.libs.common.person.HentFolkeregisterIdenterForAktoerIdBolkRequest
 import no.nav.etterlatte.libs.common.person.HentGeografiskTilknytningRequest
@@ -45,19 +44,18 @@ fun Route.personRoute(service: PersonService) {
 
     route("galleri") {
         post {
-            medBody<HentPersongalleriRequest> { hentPersongalleriRequest ->
-                logger.info(
-                    "Henter persongalleri for ${hentPersongalleriRequest.saktype}-saken " +
-                        "til ${hentPersongalleriRequest.mottakerAvYtelsen}",
-                )
+            val hentPersongalleriRequest = call.receive<HentPersongalleriRequest>()
+            logger.info(
+                "Henter persongalleri for ${hentPersongalleriRequest.saktype}-saken " +
+                    "til ${hentPersongalleriRequest.mottakerAvYtelsen}",
+            )
 
-                try {
-                    val persongalleri = service.hentPersongalleri(hentPersongalleriRequest)
-                    call.respond(persongalleri)
-                } catch (e: Exception) {
-                    logger.error("Vi kunne ikke hente persongalleri pga feil", e)
-                    throw e
-                }
+            try {
+                val persongalleri = service.hentPersongalleri(hentPersongalleriRequest)
+                call.respond(persongalleri)
+            } catch (e: Throwable) {
+                logger.error("Vi kunne ikke hente persongalleri pga feil", e)
+                throw e
             }
         }
     }

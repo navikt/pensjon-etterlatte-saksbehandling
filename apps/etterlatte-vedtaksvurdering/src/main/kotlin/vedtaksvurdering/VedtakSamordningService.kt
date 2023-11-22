@@ -63,11 +63,11 @@ private fun Vedtak.toSamordningsvedtakDto(): VedtakSamordningDto {
 }
 
 private fun AvkortetYtelseDto.toSamordningVedtakPeriode(utbetalingsperioder: List<Utbetalingsperiode>): VedtakSamordningPeriode {
-    val justertPeriode = utbetalingsperioder.first { this.fom == it.periode.fom }
+    val justertPeriode = utbetalingsperioder.firstOrNull { this.fom == it.periode.fom }
 
     return VedtakSamordningPeriode(
         fom = fom,
-        tom = justertPeriode.periode.tom,
+        tom = justertPeriode?.periode?.tom ?: tom,
         ytelseFoerAvkorting = ytelseFoerAvkorting,
         ytelseEtterAvkorting = ytelseEtterAvkorting,
     )

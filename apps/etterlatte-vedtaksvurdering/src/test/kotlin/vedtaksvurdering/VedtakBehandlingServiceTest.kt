@@ -1,4 +1,4 @@
-package no.nav.etterlatte.vedtaksvurdering
+package vedtaksvurdering
 
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
@@ -44,6 +44,15 @@ import no.nav.etterlatte.libs.database.POSTGRES_VERSION
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.database.transaction
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
+import no.nav.etterlatte.vedtaksvurdering.BehandlingstilstandException
+import no.nav.etterlatte.vedtaksvurdering.BeregningOgAvkorting
+import no.nav.etterlatte.vedtaksvurdering.OpphoersrevurderingErIkkeOpphoersvedtakException
+import no.nav.etterlatte.vedtaksvurdering.UgyldigAttestantException
+import no.nav.etterlatte.vedtaksvurdering.UnderkjennVedtakDto
+import no.nav.etterlatte.vedtaksvurdering.VedtakBehandlingInnhold
+import no.nav.etterlatte.vedtaksvurdering.VedtakBehandlingService
+import no.nav.etterlatte.vedtaksvurdering.VedtakTilstandException
+import no.nav.etterlatte.vedtaksvurdering.VedtaksvurderingRepository
 import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlient
 import no.nav.etterlatte.vedtaksvurdering.klienter.BeregningKlient
 import no.nav.etterlatte.vedtaksvurdering.klienter.SamKlient
@@ -58,12 +67,6 @@ import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
-import vedtaksvurdering.ENHET_1
-import vedtaksvurdering.ENHET_2
-import vedtaksvurdering.SAKSBEHANDLER_1
-import vedtaksvurdering.attestant
-import vedtaksvurdering.opprettVedtak
-import vedtaksvurdering.saksbehandler
 import java.math.BigDecimal
 import java.time.LocalDateTime
 import java.time.Month
@@ -1097,6 +1100,7 @@ internal class VedtakBehandlingServiceTest {
         val behandlingId = randomUUID()
 
         coEvery { behandlingKlientMock.tilSamordning(behandlingId, attestant, any()) } returns true
+        coEvery { behandlingKlientMock.harEtterbetaling(behandlingId, attestant) } returns false
         coEvery { samKlientMock.samordneVedtak(any(), false, attestant) } returns true
 
         runBlocking {
@@ -1114,6 +1118,7 @@ internal class VedtakBehandlingServiceTest {
         val behandlingId = randomUUID()
 
         coEvery { behandlingKlientMock.tilSamordning(behandlingId, attestant, any()) } returns true
+        coEvery { behandlingKlientMock.harEtterbetaling(behandlingId, attestant) } returns false
         coEvery { samKlientMock.samordneVedtak(any(), false, attestant) } returns false
         coEvery { behandlingKlientMock.samordnet(any(), any(), any()) } returns true
 

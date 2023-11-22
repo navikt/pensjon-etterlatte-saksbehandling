@@ -1,11 +1,12 @@
-import { Alert, Detail, Heading, Table } from '@navikt/ds-react'
+import { Detail, Heading, Table } from '@navikt/ds-react'
 import { formaterStringDato } from '~utils/formattering'
 import DokumentModal from './dokumentModal'
 import Spinner from '~shared/Spinner'
-import { isFailure, isPending, isSuccess, Result } from '~shared/hooks/useApiCall'
+import { mapApiResult, Result } from '~shared/hooks/useApiCall'
 import { Journalpost } from '~shared/types/Journalpost'
+import { ApiErrorAlert } from '~ErrorBoundary'
 
-const colonner = ['Journalpost id', 'Tittel', 'Avsender/Mottaker', 'Dato', 'Status', 'Type', '']
+const colonner = ['ID', 'Tittel', 'Avsender/Mottaker', 'Dato', 'Sak', 'Status', 'Type', '']
 
 export const Dokumentliste = ({ dokumenter }: { dokumenter: Result<Journalpost[]> }) => (
   <>
@@ -19,56 +20,57 @@ export const Dokumentliste = ({ dokumenter }: { dokumenter: Result<Journalpost[]
           ))}
         </Table.Row>
       </Table.Header>
+
       <Table.Body>
-        {isPending(dokumenter) && (
+        {mapApiResult(
+          dokumenter,
           <Table.Row>
             <Table.DataCell colSpan={colonner.length}>
               <Spinner margin="0" visible label="Henter dokumenter" />
             </Table.DataCell>
-          </Table.Row>
-        )}
-
-        {isSuccess(dokumenter) &&
-          (!dokumenter.data.length ? (
-            <Table.Row shadeOnHover={false}>
+          </Table.Row>,
+          () => (
+            <Table.Row>
               <Table.DataCell colSpan={colonner.length}>
-                <Detail>
-                  <i>Ingen dokumenter funnet</i>
-                </Detail>
+                <ApiErrorAlert>Det har oppstått en feil ved henting av dokumenter</ApiErrorAlert>
               </Table.DataCell>
             </Table.Row>
-          ) : (
-            dokumenter.data.map((brev, i) => (
-              <Table.Row key={i} shadeOnHover={false}>
-                <Table.DataCell key={`data${brev.journalpostId}`}>{brev.journalpostId}</Table.DataCell>
-                <Table.DataCell key={`data${brev.tittel}`}>{brev.tittel}</Table.DataCell>
-                <Table.DataCell key={`data${brev.avsenderMottaker.navn}`}>
-                  {brev.avsenderMottaker.navn || 'Ukjent'}
-                </Table.DataCell>
-                <Table.DataCell key={`data${brev.datoOpprettet}`}>
-                  {formaterStringDato(brev.datoOpprettet)}
-                </Table.DataCell>
-                <Table.DataCell key={`data${brev.journalstatus}`}>{brev.journalstatus}</Table.DataCell>
-                <Table.DataCell key={`data${brev.journalposttype}`}>
-                  {brev.journalposttype === 'I' ? 'Inngående' : 'Utgående'}
-                </Table.DataCell>
-                <Table.DataCell>
-                  <DokumentModal
-                    tittel={brev.tittel}
-                    journalpostId={brev.journalpostId}
-                    dokumentInfoId={brev.dokumenter[0].dokumentInfoId}
-                  />
+          ),
+          (dokumentListe) =>
+            !dokumentListe.length ? (
+              <Table.Row shadeOnHover={false}>
+                <Table.DataCell colSpan={colonner.length}>
+                  <Detail>
+                    <i>Ingen dokumenter funnet</i>
+                  </Detail>
                 </Table.DataCell>
               </Table.Row>
-            ))
-          ))}
+            ) : (
+              <>
+                {dokumentListe.map((dokument, i) => (
+                  <Table.Row key={i} shadeOnHover={false}>
+                    <Table.DataCell>{dokument.journalpostId}</Table.DataCell>
+                    <Table.DataCell>{dokument.tittel}</Table.DataCell>
+                    <Table.DataCell>{dokument.avsenderMottaker.navn || 'Ukjent'}</Table.DataCell>
+                    <Table.DataCell>{formaterStringDato(dokument.datoOpprettet)}</Table.DataCell>
+                    <Table.DataCell>
+                      {dokument?.sak ? `${dokument.sak.fagsaksystem}: ${dokument.sak.fagsakId || '-'}` : '-'}
+                    </Table.DataCell>
+                    <Table.DataCell>{dokument.journalstatus}</Table.DataCell>
+                    <Table.DataCell>{dokument.journalposttype === 'I' ? 'Inngående' : 'Utgående'}</Table.DataCell>
+                    <Table.DataCell>
+                      <DokumentModal
+                        tittel={dokument.tittel}
+                        journalpostId={dokument.journalpostId}
+                        dokumentInfoId={dokument.dokumenter[0].dokumentInfoId}
+                      />
+                    </Table.DataCell>
+                  </Table.Row>
+                ))}
+              </>
+            )
+        )}
       </Table.Body>
     </Table>
-
-    {isFailure(dokumenter) && (
-      <Alert variant="error" style={{ marginTop: '10px' }}>
-        Det har oppstått en feil ved henting av dokumenter.
-      </Alert>
-    )}
   </>
 )

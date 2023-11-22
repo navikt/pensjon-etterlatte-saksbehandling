@@ -2,7 +2,7 @@ package no.nav.etterlatte.grunnlag.rivers
 
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.grunnlag.GrunnlagService
-import no.nav.etterlatte.klienter.BehandlingKlient
+import no.nav.etterlatte.grunnlag.klienter.BehandlingKlient
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseType
 import no.nav.etterlatte.rapidsandrivers.EventNames

@@ -292,6 +292,8 @@ class BeregningsGrunnlagService(
                                 OverstyrBeregningGrunnlagData(
                                     utbetaltBeloep = periode.utbetaltBeloep,
                                     trygdetid = periode.trygdetid,
+                                    prorataBroekTeller = periode.prorataBroekTeller,
+                                    prorataBroekNevner = periode.prorataBroekNevner,
                                     beskrivelse = periode.beskrivelse,
                                 ),
                             fom = periode.datoFOM,
@@ -322,6 +324,8 @@ class BeregningsGrunnlagService(
                     datoTOM = it.tom,
                     utbetaltBeloep = it.data.utbetaltBeloep,
                     trygdetid = it.data.trygdetid,
+                    prorataBroekTeller = it.data.prorataBroekTeller,
+                    prorataBroekNevner = it.data.prorataBroekNevner,
                     sakId = behandling.sak,
                     beskrivelse = it.data.beskrivelse,
                     kilde = Grunnlagsopplysning.Saksbehandler.create(brukerTokenInfo.ident()),

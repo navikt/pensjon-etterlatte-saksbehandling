@@ -116,6 +116,6 @@ export interface Virkningstidspunkt {
 }
 
 export interface IEtterbetaling {
-  fraDato: string
-  tilDato: string
+  fra?: Date | null
+  til?: Date | null
 }

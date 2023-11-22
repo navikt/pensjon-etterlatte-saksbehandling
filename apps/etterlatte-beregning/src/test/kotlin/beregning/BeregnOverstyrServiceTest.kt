@@ -13,6 +13,7 @@ import no.nav.etterlatte.beregning.grunnlag.OverstyrBeregningGrunnlag
 import no.nav.etterlatte.beregning.grunnlag.OverstyrBeregningGrunnlagData
 import no.nav.etterlatte.beregning.regler.bruker
 import no.nav.etterlatte.klienter.GrunnlagKlientImpl
+import no.nav.etterlatte.libs.common.IntBroek
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -53,12 +54,24 @@ internal class BeregnOverstyrServiceTest {
                 perioder =
                     listOf(
                         GrunnlagMedPeriode(
-                            OverstyrBeregningGrunnlagData(123L, 20L, "test periode 1"),
+                            OverstyrBeregningGrunnlagData(
+                                utbetaltBeloep = 123L,
+                                trygdetid = 20L,
+                                prorataBroekTeller = null,
+                                prorataBroekNevner = null,
+                                beskrivelse = "test periode 1",
+                            ),
                             LocalDate.of(2019, 11, 1),
                             LocalDate.of(2020, 4, 30),
                         ),
                         GrunnlagMedPeriode(
-                            OverstyrBeregningGrunnlagData(456, 10L, "test periode 2"),
+                            OverstyrBeregningGrunnlagData(
+                                utbetaltBeloep = 456,
+                                trygdetid = 10L,
+                                prorataBroekTeller = null,
+                                prorataBroekNevner = null,
+                                beskrivelse = "test periode 2",
+                            ),
                             LocalDate.of(2020, 5, 1),
                             null,
                         ),
@@ -95,6 +108,84 @@ internal class BeregnOverstyrServiceTest {
                     soeskenFlokk shouldBe null
                     institusjonsopphold shouldBe null
                     trygdetid shouldBe 20
+                    samletNorskTrygdetid shouldBe 20
+                    samletTeoretiskTrygdetid shouldBe null
+                    broek shouldBe null
+                    regelResultat shouldNotBe null
+                    regelVersjon shouldNotBe null
+                }
+            }
+        }
+    }
+
+    @Test
+    fun `skal beregne overstyrt foerstegangsbehandling med prorata`() {
+        val behandling = mockBehandling(BehandlingType.FØRSTEGANGSBEHANDLING, YearMonth.of(2019, 11))
+        val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
+
+        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
+        every { beregningsGrunnlagService.hentOverstyrBeregningGrunnlag(any()) } returns
+            OverstyrBeregningGrunnlag(
+                perioder =
+                    listOf(
+                        GrunnlagMedPeriode(
+                            OverstyrBeregningGrunnlagData(
+                                utbetaltBeloep = 123L,
+                                trygdetid = 20L,
+                                prorataBroekTeller = 10,
+                                prorataBroekNevner = 20,
+                                beskrivelse = "test periode 1",
+                            ),
+                            LocalDate.of(2019, 11, 1),
+                            LocalDate.of(2020, 4, 30),
+                        ),
+                        GrunnlagMedPeriode(
+                            OverstyrBeregningGrunnlagData(
+                                utbetaltBeloep = 456,
+                                trygdetid = 10L,
+                                prorataBroekTeller = 10,
+                                prorataBroekNevner = 20,
+                                beskrivelse = "test periode 2",
+                            ),
+                            LocalDate.of(2020, 5, 1),
+                            null,
+                        ),
+                    ),
+                kilde =
+                    mockk {
+                        every { ident } returns "Z123456"
+                        every { tidspunkt } returns Tidspunkt.now()
+                        every { type } returns ""
+                    },
+            )
+
+        runBlocking {
+            val beregning =
+                beregnOverstyrBeregningService.beregn(
+                    behandling,
+                    OverstyrBeregning(behandling.sak, "Test", Tidspunkt.now()),
+                    bruker,
+                )
+
+            with(beregning) {
+                beregningId shouldNotBe null
+                behandlingId shouldBe behandling.id
+                type shouldBe Beregningstype.OMS
+                beregnetDato shouldNotBe null
+                grunnlagMetadata shouldBe grunnlag.metadata
+                beregningsperioder.size shouldBeGreaterThanOrEqual 2
+                with(beregningsperioder.first()) {
+                    utbetaltBeloep shouldBe 123
+                    datoFOM shouldBe behandling.virkningstidspunkt?.dato
+                    datoTOM shouldBe YearMonth.of(2020, Month.APRIL)
+                    grunnbelop shouldBe 99858
+                    grunnbelopMnd shouldBe 8322
+                    soeskenFlokk shouldBe null
+                    institusjonsopphold shouldBe null
+                    trygdetid shouldBe 10
+                    samletNorskTrygdetid shouldBe null
+                    samletTeoretiskTrygdetid shouldBe 20
+                    broek shouldBe IntBroek(10, 20)
                     regelResultat shouldNotBe null
                     regelVersjon shouldNotBe null
                 }
@@ -113,12 +204,24 @@ internal class BeregnOverstyrServiceTest {
                 perioder =
                     listOf(
                         GrunnlagMedPeriode(
-                            OverstyrBeregningGrunnlagData(123L, 20L, "test periode 1"),
+                            OverstyrBeregningGrunnlagData(
+                                utbetaltBeloep = 123L,
+                                trygdetid = 20L,
+                                prorataBroekTeller = null,
+                                prorataBroekNevner = null,
+                                beskrivelse = "test periode 1",
+                            ),
                             LocalDate.of(2019, 11, 1),
                             LocalDate.of(2020, 4, 1),
                         ),
                         GrunnlagMedPeriode(
-                            OverstyrBeregningGrunnlagData(456, 10L, "test periode 2"),
+                            OverstyrBeregningGrunnlagData(
+                                utbetaltBeloep = 456,
+                                trygdetid = 10L,
+                                prorataBroekTeller = null,
+                                prorataBroekNevner = null,
+                                beskrivelse = "test periode 2",
+                            ),
                             LocalDate.of(2020, 4, 2),
                             null,
                         ),
@@ -153,12 +256,24 @@ internal class BeregnOverstyrServiceTest {
                 perioder =
                     listOf(
                         GrunnlagMedPeriode(
-                            OverstyrBeregningGrunnlagData(123L, 20L, "test periode 1"),
+                            OverstyrBeregningGrunnlagData(
+                                utbetaltBeloep = 123L,
+                                trygdetid = 20L,
+                                prorataBroekTeller = null,
+                                prorataBroekNevner = null,
+                                beskrivelse = "test periode 1",
+                            ),
                             LocalDate.of(2019, 11, 1),
                             LocalDate.of(2020, 4, 1),
                         ),
                         GrunnlagMedPeriode(
-                            OverstyrBeregningGrunnlagData(456, 10L, "test periode 2"),
+                            OverstyrBeregningGrunnlagData(
+                                utbetaltBeloep = 456,
+                                trygdetid = 10L,
+                                prorataBroekTeller = null,
+                                prorataBroekNevner = null,
+                                beskrivelse = "test periode 2",
+                            ),
                             LocalDate.of(2020, 4, 2),
                             null,
                         ),

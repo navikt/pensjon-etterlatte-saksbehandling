@@ -53,6 +53,15 @@ export const hentOverstyrBeregning = async (behandlingId: string): Promise<ApiRe
   return apiClient.get<OverstyrBeregning | null>(`/beregning/${behandlingId}/overstyrt`)
 }
 
+export const opprettOverstyrBeregning = async (args: {
+  behandlingId: string
+  beskrivelse: string
+}): Promise<ApiResponse<OverstyrBeregning | null>> => {
+  return apiClient.post<OverstyrBeregning | null>(`/beregning/${args.behandlingId}/overstyrt`, {
+    beskrivelse: args.beskrivelse,
+  })
+}
+
 export const hentOverstyrBeregningGrunnlag = async (
   behandlingId: string
 ): Promise<ApiResponse<OverstyrBeregningGrunnlagPostDTO>> => {

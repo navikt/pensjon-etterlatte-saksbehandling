@@ -1,11 +1,11 @@
-package no.nav.etterlatte.itest
+package grunnlag.itest
 
 import com.fasterxml.jackson.databind.JsonNode
 import io.mockk.mockk
 import no.nav.etterlatte.grunnlag.GrunnlagHendelserRiver
 import no.nav.etterlatte.grunnlag.OpplysningDao
 import no.nav.etterlatte.grunnlag.RealGrunnlagService
-import no.nav.etterlatte.klienter.PdlTjenesterKlientImpl
+import no.nav.etterlatte.grunnlag.klienter.PdlTjenesterKlientImpl
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.objectMapper
@@ -57,7 +57,7 @@ internal class RapidTest {
 
         opplysningRepo = OpplysningDao(dataSource)
         val pdlTjenesterKlientImpl = mockk<PdlTjenesterKlientImpl>()
-        grunnlagService = RealGrunnlagService(pdlTjenesterKlientImpl, opplysningRepo, mockk())
+        grunnlagService = RealGrunnlagService(pdlTjenesterKlientImpl, opplysningRepo, mockk(), mockk(), mockk())
         inspector =
             TestRapid().apply {
                 GrunnlagHendelserRiver(this, grunnlagService)

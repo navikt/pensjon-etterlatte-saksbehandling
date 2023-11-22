@@ -24,7 +24,7 @@ import io.mockk.confirmVerified
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.etterlatte.klienter.BehandlingKlient
+import no.nav.etterlatte.grunnlag.klienter.BehandlingKlient
 import no.nav.etterlatte.libs.common.FoedselsnummerDTO
 import no.nav.etterlatte.libs.common.behandling.PersonMedSakerOgRoller
 import no.nav.etterlatte.libs.common.behandling.SakOgRolle

@@ -19,7 +19,7 @@ import {
 } from '~shared/api/trygdetid'
 import { isFailure, isPending, useApiCall } from '~shared/hooks/useApiCall'
 import { IconSize } from '~shared/types/Icon'
-import { FormWrapper, Innhold } from '../styled'
+import { FormWrapper } from '../styled'
 import { TrygdeavtaleVisning } from './TrygdeavtaleVisning'
 import { FlexRow } from '~shared/styled'
 
@@ -142,81 +142,76 @@ export const TrygdeAvtale = ({ redigerbar }: Props) => {
         <>
           <TrygdeavtaleVisning avtaler={avtalerListe} kriterier={avtaleKriterierListe} trygdeavtale={trygdeavtale} />
           {redigerbar && (
-            <Button size="small" onClick={rediger} type="button">
-              Rediger
-            </Button>
+            <FlexRow $spacing>
+              <Button size="small" onClick={rediger} type="button">
+                Rediger
+              </Button>
+            </FlexRow>
           )}
         </>
       )}
 
       {redigerbar && redigering && avtalerListe && avtaleKriterierListe && (
-        <>
-          <Innhold>
-            <TrygdeAvtaleForm>
-              <Rows>
-                <FormWrapper>
-                  <Select
-                    label="Avtale"
-                    autoComplete="off"
-                    value={trygdeavtale.avtaleKode}
-                    onChange={(e) => {
-                      if (e.target.value) {
-                        setTrygdeavtale({ ...trygdeavtale, avtaleKode: e.target.value })
-                      }
-                      velgAvtale(e.target.value)
-                    }}
-                  >
-                    <TrygdetidAvtaleOptions defaultBeskrivelse="Velg avtale" trygdeavtaleOptions={avtalerListe} />
-                  </Select>
-                  {valgtAvtale && valgtAvtale.datoer.length > 0 && (
-                    <Select
-                      label="Dato"
-                      autoComplete="off"
-                      value={trygdeavtale.avtaleDatoKode}
-                      onChange={(e) => {
-                        setTrygdeavtale({ ...trygdeavtale, avtaleDatoKode: e.target.value })
-                      }}
-                    >
-                      <TrygdetidAvtaleOptions
-                        defaultBeskrivelse="Velg avtaledato"
-                        trygdeavtaleOptions={valgtAvtale.datoer}
-                      />
-                    </Select>
-                  )}
-                </FormWrapper>
-              </Rows>
-              <Rows>
-                <FormWrapper>
-                  <Select
-                    label="Kriterier for å omfattes av avtalen"
-                    autoComplete="off"
-                    value={trygdeavtale.avtaleKriteriaKode}
-                    onChange={(e) => {
-                      setTrygdeavtale({ ...trygdeavtale, avtaleKriteriaKode: e.target.value })
-                    }}
-                  >
-                    <TrygdetidAvtaleOptions
-                      defaultBeskrivelse="Velg kriteria"
-                      trygdeavtaleOptions={avtaleKriterierListe}
-                    />
-                  </Select>
-                </FormWrapper>
-              </Rows>
-              <Rows>
-                <FlexRow $spacing>
-                  <Button size="small" loading={isPending(lagreTrygdeavtaleRequest)} type="button" onClick={lagre}>
-                    Lagre
-                  </Button>
-                  {trygdeavtale && (
-                    <Button size="small" onClick={avbryt} type="button">
-                      Avbryt
-                    </Button>
-                  )}
-                </FlexRow>
-              </Rows>
-            </TrygdeAvtaleForm>
-          </Innhold>
-        </>
+        <TrygdeAvtaleForm>
+          <Rows>
+            <FormWrapper>
+              <Select
+                label="Avtale"
+                autoComplete="off"
+                value={trygdeavtale.avtaleKode}
+                onChange={(e) => {
+                  if (e.target.value) {
+                    setTrygdeavtale({ ...trygdeavtale, avtaleKode: e.target.value })
+                  }
+                  velgAvtale(e.target.value)
+                }}
+              >
+                <TrygdetidAvtaleOptions defaultBeskrivelse="Velg avtale" trygdeavtaleOptions={avtalerListe} />
+              </Select>
+              {valgtAvtale && valgtAvtale.datoer.length > 0 && (
+                <Select
+                  label="Dato"
+                  autoComplete="off"
+                  value={trygdeavtale.avtaleDatoKode}
+                  onChange={(e) => {
+                    setTrygdeavtale({ ...trygdeavtale, avtaleDatoKode: e.target.value })
+                  }}
+                >
+                  <TrygdetidAvtaleOptions
+                    defaultBeskrivelse="Velg avtaledato"
+                    trygdeavtaleOptions={valgtAvtale.datoer}
+                  />
+                </Select>
+              )}
+            </FormWrapper>
+          </Rows>
+          <Rows>
+            <FormWrapper>
+              <Select
+                label="Kriterier for å omfattes av avtalen"
+                autoComplete="off"
+                value={trygdeavtale.avtaleKriteriaKode}
+                onChange={(e) => {
+                  setTrygdeavtale({ ...trygdeavtale, avtaleKriteriaKode: e.target.value })
+                }}
+              >
+                <TrygdetidAvtaleOptions defaultBeskrivelse="Velg kriteria" trygdeavtaleOptions={avtaleKriterierListe} />
+              </Select>
+            </FormWrapper>
+          </Rows>
+          <Rows>
+            <FlexRow $spacing>
+              <Button size="small" loading={isPending(lagreTrygdeavtaleRequest)} type="button" onClick={lagre}>
+                Lagre
+              </Button>
+              {trygdeavtale && (
+                <Button size="small" onClick={avbryt} type="button">
+                  Avbryt
+                </Button>
+              )}
+            </FlexRow>
+          </Rows>
+        </TrygdeAvtaleForm>
       )}
       {(isPending(hentAlleTrygdetidAvtalerRequest) ||
         isPending(hentAlleTrygdetidAvtalerKriterierRequest) ||
@@ -244,7 +239,6 @@ const TrygdeAvtaleWrapper = styled.div`
 const TrygdeAvtaleForm = styled.form`
   display: flex;
   flex-direction: column;
-  margin-bottom: 2em;
 `
 
 const Rows = styled.div`

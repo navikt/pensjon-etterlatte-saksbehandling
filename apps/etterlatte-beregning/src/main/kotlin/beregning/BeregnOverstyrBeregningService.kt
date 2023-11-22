@@ -9,9 +9,11 @@ import no.nav.etterlatte.beregning.regler.overstyr.PeriodisertOverstyrGrunnlag
 import no.nav.etterlatte.beregning.regler.overstyr.beregnOverstyrRegel
 import no.nav.etterlatte.beregning.regler.overstyr.grunnbeloep
 import no.nav.etterlatte.klienter.GrunnlagKlient
+import no.nav.etterlatte.libs.common.IntBroek
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
 import no.nav.etterlatte.libs.common.beregning.Beregningstype
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
@@ -137,6 +139,18 @@ class BeregnOverstyrBeregningService(
                                     "Anvendt grunnbeløp ikke funnet for perioden"
                                 }
 
+                            val broek =
+                                IntBroek.fra(
+                                    Pair(
+                                        periodisertResultat.resultat.verdi.prorataBroekTeller?.toInt(),
+                                        periodisertResultat.resultat.verdi.prorataBroekNevner?.toInt(),
+                                    ),
+                                )
+
+                            val broekVerdi = broek?.let { it.teller.toDouble() / it.nevner.toDouble() } ?: 1.0
+
+                            val trygdetid = (periodisertResultat.resultat.verdi.trygdetid * broekVerdi).toInt()
+
                             Beregningsperiode(
                                 datoFOM = YearMonth.from(periodisertResultat.periode.fraDato),
                                 datoTOM = periodisertResultat.periode.tilDato?.let { YearMonth.from(it) },
@@ -144,11 +158,19 @@ class BeregnOverstyrBeregningService(
                                 institusjonsopphold = null,
                                 grunnbelopMnd = grunnbeloep.grunnbeloepPerMaaned,
                                 grunnbelop = grunnbeloep.grunnbeloep,
-                                trygdetid = periodisertResultat.resultat.verdi.trygdetid.toInt(),
-                                beregningsMetode = null,
-                                samletNorskTrygdetid = null,
-                                samletTeoretiskTrygdetid = null,
-                                broek = null,
+                                trygdetid = trygdetid,
+                                beregningsMetode =
+                                    when (broek) {
+                                        null -> BeregningsMetode.NASJONAL
+                                        else -> BeregningsMetode.PRORATA
+                                    },
+                                samletNorskTrygdetid =
+                                    periodisertResultat.resultat.verdi.trygdetid.takeIf { broek == null }
+                                        ?.toInt(),
+                                samletTeoretiskTrygdetid =
+                                    periodisertResultat.resultat.verdi.trygdetid.takeIf { broek != null }
+                                        ?.toInt(),
+                                broek = broek,
                                 regelResultat = objectMapper.valueToTree(periodisertResultat),
                                 regelVersjon = periodisertResultat.reglerVersjon,
                                 trygdetidForIdent = null,

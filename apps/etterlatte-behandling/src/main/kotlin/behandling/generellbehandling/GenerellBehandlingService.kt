@@ -38,10 +38,9 @@ class ManglerRinanummerException(message: String) : Exception(message)
 
 class KanIkkeEndreFattetEllerAttestertBehandling(message: String) : Exception(message)
 
-// TODO: sende med code fra thrower
-class UgyldigAttesteringsForespoersel(message: String) :
+class UgyldigAttesteringsForespoersel(message: String, code: String) :
     UgyldigForespoerselException(
-        code = "ATTESTERING_FEILET",
+        code = code,
         detail = message,
     )
 
@@ -136,26 +135,30 @@ class GenerellBehandlingService(
             "Behandlingen må ha status FATTET, hadde: ${hentetBehandling?.status}"
         }
 
-        sjekkAtBehandlendeSaksbehandlerIkkeFatter(generellbehandlingId, saksbehandler)
+        sjekkAtBehandlendeSaksbehandlerIkkeAttesterer(generellbehandlingId, saksbehandler)
 
         oppgaveService.ferdigStillOppgaveUnderBehandling(generellbehandlingId.toString(), saksbehandler)
         oppdaterBehandling(hentetBehandling!!.copy(status = GenerellBehandling.Status.ATTESTERT))
         opprettHendelse(GenerellBehandlingHendelseType.ATTESTERT, hentetBehandling, saksbehandler)
     }
 
-    fun sjekkAtBehandlendeSaksbehandlerIkkeFatter(
+    fun sjekkAtBehandlendeSaksbehandlerIkkeAttesterer(
         generellbehandlingId: UUID,
         saksbehandler: Saksbehandler,
     ) {
         val oppgaverForReferanse = oppgaveService.hentOppgaverForReferanse(generellbehandlingId.toString())
         if (oppgaverForReferanse.isEmpty()) {
-            throw UgyldigAttesteringsForespoersel("Fant ingen oppgaver for referanse $generellbehandlingId")
+            throw UgyldigAttesteringsForespoersel(
+                "Fant ingen oppgaver for referanse $generellbehandlingId",
+                "ATTESTERING_INGEN_OPPGAVER_FUNNET",
+            )
         }
         val ferdigstilteOppgaver = oppgaverForReferanse.filter { o -> o.erFerdigstilt() }
         if (oppgaverForReferanse.isEmpty()) {
             throw UgyldigAttesteringsForespoersel(
                 "Fant ingen ferdigstilte oppgaver for referanse $generellbehandlingId." +
                     " Det må finnes en ferdigstilt oppgave for å kunne attesere",
+                "ATTESTERING_INGEN_FERDIGSTILTE_OPPGAVER",
             )
         }
         val saksbehandlerOppgaver =
@@ -163,11 +166,19 @@ class GenerellBehandlingService(
                 .sortedByDescending { o -> o.opprettet }
 
         if (oppgaverForReferanse.isEmpty()) {
-            throw UgyldigAttesteringsForespoersel("Fant ingen oppgaver for referanse $generellbehandlingId med riktig type")
+            throw UgyldigAttesteringsForespoersel(
+                "Fant ingen oppgaver for referanse $generellbehandlingId " +
+                    "med riktig type",
+                "ATTESTERING_INGEN_FERDIGSTILTE_OPPGAVER_AV_RIKTIG_TYPE",
+            )
         }
         val sisteOppgave = saksbehandlerOppgaver[0]
         if (saksbehandler.ident == sisteOppgave.saksbehandler) {
-            throw UgyldigAttesteringsForespoersel("Samme saksbehandler kan ikke attestere og behandle behandlingen")
+            throw UgyldigAttesteringsForespoersel(
+                "Samme saksbehandler kan ikke attestere og behandle " +
+                    "behandlingen",
+                "ATTESTERING_SAMME_SAKSBEHANDLER",
+            )
         }
     }
 

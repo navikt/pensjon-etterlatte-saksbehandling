@@ -566,7 +566,7 @@ class GenerellBehandlingServiceTest {
     }
 
     @Test
-    fun `Kan ikke attestere behandling hvis det er samme saksbehandler`() {
+    fun `Kan ikke attestere behandling hvis det er samme saksbehandler som behandlet`() {
         val sak = sakRepo.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         val behandlingId = randomUUID()
         val manueltOpprettetBehandling =
@@ -621,9 +621,11 @@ class GenerellBehandlingServiceTest {
         val trettidagerfrem = Tidspunkt.now().plus(30L, ChronoUnit.DAYS).toNorskLocalDate()
         Assertions.assertEquals(trettidagerfrem, attesteringsOppgave.frist!!.toNorskLocalDate())
         oppgaveService.tildelSaksbehandler(attesteringsOppgave.id, attestant.ident)
-        assertThrows<UgyldigAttesteringsForespoersel> {
-            service.attester(oppdaterBehandling.id, attestant)
-        }
+        val ugyldigAttesteringsForespoersel =
+            assertThrows<UgyldigAttesteringsForespoersel> {
+                service.attester(oppdaterBehandling.id, attestant)
+            }
+        Assertions.assertEquals("ATTESTERING_SAMME_SAKSBEHANDLER", ugyldigAttesteringsForespoersel.code)
     }
 
     @Test

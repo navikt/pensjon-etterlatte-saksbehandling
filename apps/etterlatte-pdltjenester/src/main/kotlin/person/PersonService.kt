@@ -2,6 +2,7 @@ package no.nav.etterlatte.person
 
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
+import no.nav.etterlatte.libs.common.behandling.PersonUtenIdent
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.pdl.AkseptererIkkePersonerUtenIdentException
@@ -262,12 +263,10 @@ class PersonService(
         val (avdoede, gjenlevende) = foreldre.partition { it.doedsdato != null }
         val soesken = avdoede.flatMap { it.avdoedesBarn ?: emptyList() }
 
-        val alleTilknyttedePersonerUtenIdent =
-            mottaker.familieRelasjon?.personerUtenIdent +
-                avdoede.flatMap {
-                    it.familieRelasjon?.personerUtenIdent ?: emptyList()
-                }
-        gjenlevende.flatMap { it.familieRelasjon?.personerUtenIdent ?: emptyList() }
+        val alleTilknyttedePersonerUtenIdent = mutableListOf<PersonUtenIdent>()
+        avdoede.forEach { it.familieRelasjon?.personerUtenIdent?.forEach { alleTilknyttedePersonerUtenIdent.add(it) } }
+        mottaker.familieRelasjon?.personerUtenIdent?.forEach { alleTilknyttedePersonerUtenIdent.add(it) }
+        gjenlevende.forEach { it.familieRelasjon?.personerUtenIdent?.forEach { alleTilknyttedePersonerUtenIdent.add(it) } }
 
         return Persongalleri(
             soeker = mottakerAvYtelsen.value,
@@ -279,7 +278,7 @@ class PersonService(
         )
     }
 
-    suspend fun hentPersongalleriForOmstillingsstoenad(
+    private suspend fun hentPersongalleriForOmstillingsstoenad(
         mottakerAvYtelsen: Folkeregisteridentifikator,
         innsender: Folkeregisteridentifikator?,
     ): Persongalleri {
@@ -314,15 +313,10 @@ class PersonService(
 
         // TODO: håndter tilfellet med felles barn med avdød riktig -- da gjelder det for samboer også
 
-        val personerUtenIdent =
-            (
-                avdoede.flatMap {
-                    it.familieRelasjon?.personerUtenIdent ?: emptyList()
-                }
-            ) + mottaker.familieRelasjon?.personerUtenIdent +
-                levende.flatMap {
-                    it.familieRelasjon?.personerUtenIdent ?: emptyList()
-                }
+        val personerUtenIdent = mutableListOf<PersonUtenIdent>()
+        avdoede.forEach { it.familieRelasjon?.personerUtenIdent?.forEach { personerUtenIdent.add(it) } }
+        mottaker.familieRelasjon?.personerUtenIdent?.forEach { personerUtenIdent.add(it) }
+        levende.forEach { it.familieRelasjon?.personerUtenIdent?.forEach { personerUtenIdent.add(it) } }
 
         return Persongalleri(
             soeker = mottakerAvYtelsen.value,
@@ -363,8 +357,4 @@ class PersonService(
     fun List<PdlResponseError>.asFormatertFeil() = this.joinToString(", ")
 
     fun List<PdlResponseError>.personIkkeFunnet() = any { it.extensions?.code == "not_found" }
-}
-
-infix operator fun <T> List<T>?.plus(other: List<T>?): List<T> {
-    return (this ?: emptyList()) + (other ?: emptyList())
 }

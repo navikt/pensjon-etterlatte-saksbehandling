@@ -42,6 +42,7 @@ import no.nav.etterlatte.tilgangsstyring.filterForEnheter
 import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.etterlatte.vedtaksvurdering.VedtakHendelse
 import org.slf4j.LoggerFactory
+import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
 
@@ -88,7 +89,7 @@ interface BehandlingService {
         virkningstidspunkt: YearMonth,
         ident: String,
         begrunnelse: String,
-        kravdato: YearMonth? = null,
+        kravdato: LocalDate? = null,
     ): Virkningstidspunkt
 
     fun oppdaterBoddEllerArbeidetUtlandet(
@@ -271,7 +272,7 @@ internal class BehandlingServiceImpl(
         if (sakMedUtenlandstilknytning?.utenlandstilknytning != null) {
             if (sakMedUtenlandstilknytning.utenlandstilknytning.type === UtenlandstilknytningType.BOSATT_UTLAND) {
                 val kravdato = request.kravdato ?: throw KravdatoMaaFinnesHvisBosattutland("Kravdato må finnes hvis bosatt utland er valgt")
-                makstidspunktFoerSoeknad = kravdato.minusYears(3)
+                makstidspunktFoerSoeknad = YearMonth.from(kravdato.minusYears(3))
             }
         } else {
             throw VirkningstidspunktMaaHaUtenlandstilknytning(
@@ -429,7 +430,7 @@ internal class BehandlingServiceImpl(
         virkningstidspunkt: YearMonth,
         ident: String,
         begrunnelse: String,
-        kravdato: YearMonth?,
+        kravdato: LocalDate?,
     ): Virkningstidspunkt {
         val behandling =
             hentBehandling(behandlingId) ?: run {

@@ -1,8 +1,8 @@
 import styled from 'styled-components'
-import { BodyShort, ErrorMessage, Heading, MonthPicker, useMonthpicker } from '@navikt/ds-react'
+import { BodyShort, ErrorMessage, Heading, MonthPicker, useMonthpicker, VStack } from '@navikt/ds-react'
 import React, { useState } from 'react'
 import { oppdaterBehandlingsstatus, oppdaterVirkningstidspunkt } from '~store/reducers/BehandlingReducer'
-import { formaterDatoTilYearMonth, formaterStringDato } from '~utils/formattering'
+import { formaterStringDato } from '~utils/formattering'
 import { fastsettVirkningstidspunkt } from '~shared/api/behandling'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import {
@@ -82,25 +82,18 @@ const Virkningstidspunkt = (props: {
       }
     }
 
-    const harVirkningstidspunktEndretSeg =
-      behandling.virkningstidspunkt?.dato !== formaterDatoTilYearMonth(virkningstidspunkt) ||
-      behandling.virkningstidspunkt?.begrunnelse !== begrunnelse
-    if (harVirkningstidspunktEndretSeg) {
-      return fastsettVirkningstidspunktRequest(
-        { id: behandling.id, dato: virkningstidspunkt, begrunnelse: begrunnelse, kravdato: kravdato },
-        (res) => {
-          dispatch(oppdaterVirkningstidspunkt(res))
-          dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.OPPRETTET))
-          onSuccess?.()
-        },
-        () =>
-          setErrorTekst(
-            'Kunne ikke sette virkningstidspunkt. Last siden på nytt og prøv igjen, meld sak hvis problemet vedvarer'
-          )
-      )
-    } else {
-      onSuccess?.()
-    }
+    return fastsettVirkningstidspunktRequest(
+      { id: behandling.id, dato: virkningstidspunkt, begrunnelse: begrunnelse, kravdato: kravdato },
+      (res) => {
+        dispatch(oppdaterVirkningstidspunkt(res))
+        dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.OPPRETTET))
+        onSuccess?.()
+      },
+      () =>
+        setErrorTekst(
+          'Kunne ikke sette virkningstidspunkt. Last siden på nytt og prøv igjen, meld sak hvis problemet vedvarer'
+        )
+    )
   }
 
   const reset = (onSuccess?: () => void) => {
@@ -133,12 +126,22 @@ const Virkningstidspunkt = (props: {
             <VurderingsboksWrapper
               tittel={tittel}
               subtittelKomponent={
-                <>
-                  <Heading level="3" size="xsmall">
-                    Virkningstidspunkt
-                  </Heading>
-                  <BodyShort spacing>{formaterStringDato(behandling.virkningstidspunkt!!.dato)}</BodyShort>
-                </>
+                <VStack gap="4">
+                  {erBosattUtland && (
+                    <div>
+                      <Heading size="xsmall">Kravdato</Heading>
+                      <BodyShort>
+                        {behandling.virkningstidspunkt!!.kravdato
+                          ? formaterStringDato(behandling.virkningstidspunkt!!.kravdato)
+                          : 'En feil'}
+                      </BodyShort>
+                    </div>
+                  )}
+                  <div>
+                    <Heading size="xsmall">Virkningstidspunkt</Heading>
+                    <BodyShort spacing>{formaterStringDato(behandling.virkningstidspunkt!!.dato)}</BodyShort>
+                  </div>
+                </VStack>
               }
               vurdering={
                 behandling.virkningstidspunkt

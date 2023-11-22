@@ -6,6 +6,7 @@ import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toNorskTid
+import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
 
@@ -32,11 +33,9 @@ data class ManueltOpphoerResponse(val behandlingId: String)
 data class VirkningstidspunktRequest(
     @JsonProperty("dato") private val _dato: String,
     val begrunnelse: String?,
-    @JsonProperty("kravdato") private val _kravdato: String? = null,
+    val kravdato: LocalDate? = null,
 ) {
     val dato: YearMonth = _dato.tilYearMonth()
-    val kravdato: YearMonth?
-        get() = if (_kravdato.isNullOrEmpty()) null else _kravdato.tilYearMonth()
 }
 
 fun String.tilYearMonth(): YearMonth {
@@ -53,6 +52,7 @@ internal data class FastsettVirkningstidspunktResponse(
     val dato: YearMonth,
     val kilde: Grunnlagsopplysning.Saksbehandler,
     val begrunnelse: String,
+    val kravdato: LocalDate?,
 ) {
     companion object {
         fun from(virkningstidspunkt: Virkningstidspunkt) =
@@ -60,6 +60,7 @@ internal data class FastsettVirkningstidspunktResponse(
                 virkningstidspunkt.dato,
                 virkningstidspunkt.kilde,
                 virkningstidspunkt.begrunnelse,
+                virkningstidspunkt.kravdato,
             )
     }
 }

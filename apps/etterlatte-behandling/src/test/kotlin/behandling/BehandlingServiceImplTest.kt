@@ -548,7 +548,7 @@ class BehandlingServiceImplTest {
         val bodyVirkningstidspunkt = Tidspunkt.parse("2017-02-01T00:00:00Z")
         val bodyBegrunnelse = "begrunnelse"
         val bodyKravdato = Tidspunkt.parse("2019-02-01T00:00:00Z")
-        val request = VirkningstidspunktRequest(bodyVirkningstidspunkt.toString(), bodyBegrunnelse, bodyKravdato.toString())
+        val request = VirkningstidspunktRequest(bodyVirkningstidspunkt.toString(), bodyBegrunnelse, bodyKravdato.toLocalDate())
         val doedsdato = LocalDate.parse("2014-01-01")
 
         val soeknadMottatt = LocalDateTime.parse("2009-01-01T00:00:00.000000000")

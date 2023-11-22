@@ -15,6 +15,7 @@ import no.nav.etterlatte.libs.common.person.VergeEllerFullmektig
 import no.nav.etterlatte.libs.common.person.VergemaalEllerFremtidsfullmakt
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
+import no.nav.etterlatte.libs.testdata.grunnlag.GJENLEVENDE_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
@@ -175,6 +176,7 @@ internal class BehandlingTest {
                         mapOf(
                             Opplysningstype.PERSONROLLE to opprettOpplysning(PersonRolle.GJENLEVENDE.toJsonNode()),
                             Opplysningstype.NAVN to opprettOpplysning(gjenlevendeNavn.toJsonNode()),
+                            Opplysningstype.FOEDSELSNUMMER to opprettOpplysning(GJENLEVENDE_FOEDSELSNUMMER.toJsonNode()),
                         ),
                     ),
                 sak = emptyMap(),

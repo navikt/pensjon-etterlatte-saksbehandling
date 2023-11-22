@@ -12,7 +12,7 @@ data class PersonerISak(
 
 data class Innsender(val fnr: Foedselsnummer)
 
-data class Verge(val navn: String)
+data class Verge(val fnr: Foedselsnummer, val navn: String)
 
 data class Soeker(val fornavn: String, val mellomnavn: String? = null, val etternavn: String, val fnr: Foedselsnummer)
 

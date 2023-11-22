@@ -80,7 +80,8 @@ class VedtaksbrevService(
 
         val mottakerFnr =
             with(generellBrevData.personerISak) {
-                innsender?.fnr?.value?.takeUnless { it == Vedtaksloesning.PESYS.name } ?: soeker.fnr.value
+                innsender?.fnr?.value
+                    ?.takeUnless { it == Vedtaksloesning.PESYS.name } ?: verge?.fnr?.value ?: soeker.fnr.value
             }
         val mottaker = adresseService.hentMottakerAdresse(mottakerFnr)
 

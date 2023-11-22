@@ -7,16 +7,18 @@ import io.ktor.client.HttpClient
 import io.ktor.server.config.HoconApplicationConfig
 import io.ktor.server.routing.route
 import no.nav.etterlatte.grunnlag.GrunnlagHendelserRiver
+import no.nav.etterlatte.grunnlag.GrunnlagHenter
 import no.nav.etterlatte.grunnlag.MigreringHendelserRiver
 import no.nav.etterlatte.grunnlag.OpplysningDao
 import no.nav.etterlatte.grunnlag.RealGrunnlagService
 import no.nav.etterlatte.grunnlag.behandlingGrunnlagRoute
+import no.nav.etterlatte.grunnlag.klienter.BehandlingKlientImpl
+import no.nav.etterlatte.grunnlag.klienter.PdlTjenesterKlientImpl
+import no.nav.etterlatte.grunnlag.klienter.PersondataKlient
 import no.nav.etterlatte.grunnlag.personRoute
 import no.nav.etterlatte.grunnlag.rivers.GrunnlagsversjoneringRiver
 import no.nav.etterlatte.grunnlag.rivers.InitBehandlingVersjonRiver
 import no.nav.etterlatte.grunnlag.sakGrunnlagRoute
-import no.nav.etterlatte.klienter.BehandlingKlientImpl
-import no.nav.etterlatte.klienter.PdlTjenesterKlientImpl
 import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstartOgAvslutning
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.database.DataSourceBuilder
@@ -67,10 +69,24 @@ class ApplicationBuilder {
             ekstraJacksoninnstillinger = { it.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS) },
         )
     }
+    val persondataKlient =
+        PersondataKlient(
+            httpClient =
+                httpClientClientCredentials(
+                    azureAppClientId = config.getString("azure.app.client.id"),
+                    azureAppJwk = config.getString("azure.app.jwk"),
+                    azureAppWellKnownUrl = config.getString("azure.app.well.known.url"),
+                    azureAppScope = config.getString("persondata.outbound.scope"),
+                ),
+            apiUrl = config.getString("persondata.resource.url"),
+        )
+
     private val pdltjenesterKlient = PdlTjenesterKlientImpl(pdlTjenester, env["PDLTJENESTER_URL"]!!)
     private val opplysningDao = OpplysningDao(ds)
     private val behandlingKlient = BehandlingKlientImpl(config, httpClient(), behandlingSystemClient)
-    private val grunnlagService = RealGrunnlagService(pdltjenesterKlient, opplysningDao, Sporingslogg())
+    private val grunnlagHenter = GrunnlagHenter(pdltjenesterKlient, persondataKlient)
+    private val grunnlagService =
+        RealGrunnlagService(pdltjenesterKlient, opplysningDao, Sporingslogg(), persondataKlient, grunnlagHenter)
 
     private val rapidsConnection =
         RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(env))

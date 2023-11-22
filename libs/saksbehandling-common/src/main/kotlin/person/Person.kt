@@ -1,6 +1,7 @@
 package no.nav.etterlatte.libs.common.person
 
 import com.fasterxml.jackson.annotation.JsonCreator
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.fasterxml.jackson.annotation.JsonTypeName
 import com.fasterxml.jackson.annotation.JsonValue
@@ -175,6 +176,19 @@ data class GeografiskTilknytning(
             else -> null
         }
 }
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+data class VergeAdresse(
+    val navn: String?,
+    val adresseType: String,
+    val adresselinje1: String? = null,
+    val adresselinje2: String? = null,
+    val adresselinje3: String? = null,
+    val postnummer: String? = null,
+    val poststed: String? = null,
+    val landkode: String,
+    val land: String,
+)
 
 // TODO gir denne egentlig mening i nåværende form? Aktiv tar utgangspunkt i det vi får fra PPS, men det kan
 //  i teorien være en adresse som ikke lenger er gyldig da den kan ha satt gyldigTilDato

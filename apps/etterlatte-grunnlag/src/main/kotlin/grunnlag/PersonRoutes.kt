@@ -6,7 +6,7 @@ import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
-import no.nav.etterlatte.klienter.BehandlingKlient
+import no.nav.etterlatte.grunnlag.klienter.BehandlingKlient
 import no.nav.etterlatte.libs.common.hentNavidentFraToken
 import no.nav.etterlatte.libs.common.kunSystembruker
 import no.nav.etterlatte.libs.common.person.InvalidFoedselsnummerException
@@ -62,6 +62,15 @@ fun Route.personRoute(
                         HttpStatusCode.NotFound,
                         "Gjenny har ingen navnedata på fødselsnummeret som ble etterspurt",
                     )
+                }
+            }
+        }
+
+        post("vergeadresse") {
+            withFoedselsnummer(behandlingKlient) { fnr ->
+                when (val adresse = grunnlagService.hentVergeadresse(fnr.value)) {
+                    null -> call.respond(HttpStatusCode.NotFound)
+                    else -> call.respond(adresse)
                 }
             }
         }

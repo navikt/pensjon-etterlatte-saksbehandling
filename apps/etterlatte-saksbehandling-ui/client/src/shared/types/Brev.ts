@@ -20,6 +20,7 @@ export interface Mottaker {
 }
 
 export interface Adresse {
+  navn?: string
   adresseType?: string
   adresselinje1?: string
   adresselinje2?: string

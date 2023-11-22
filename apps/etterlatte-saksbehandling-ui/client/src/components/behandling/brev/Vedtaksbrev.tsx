@@ -9,8 +9,8 @@ import { Soeknadsdato } from '../soeknadsoversikt/Soeknadsdato'
 import styled from 'styled-components'
 import { SendTilAttesteringModal } from '../handlinger/sendTilAttesteringModal'
 import {
-  behandlingSkalSendeBrev,
   behandlingErRedigerbar,
+  behandlingSkalSendeBrev,
   manueltBrevKanRedigeres,
   sisteBehandlingHendelse,
 } from '~components/behandling/felles/utils'
@@ -18,7 +18,7 @@ import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import MottakerPanel from '~components/behandling/brev/detaljer/MottakerPanel'
 import ForhaandsvisningBrev from '~components/behandling/brev/ForhaandsvisningBrev'
 import Spinner from '~shared/Spinner'
-import { BrevProsessType, IBrev } from '~shared/types/Brev'
+import { Adresse, BrevProsessType, IBrev } from '~shared/types/Brev'
 import RedigerbartBrev from '~components/behandling/brev/RedigerbartBrev'
 import { isFailure, isPending, isPendingOrInitial, useApiCall } from '~shared/hooks/useApiCall'
 
@@ -28,6 +28,9 @@ import { IHendelse } from '~shared/types/IHendelse'
 import { oppdaterBehandling, resetBehandling } from '~store/reducers/BehandlingReducer'
 import { hentBehandling } from '~shared/api/behandling'
 import { useAppDispatch } from '~store/Store'
+import { getVergeadresseFraGrunnlag } from '~shared/api/grunnlag'
+import { Grunnlagsopplysning } from '~shared/types/grunnlag'
+import { KildePersondata } from '~shared/types/kilde'
 
 export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
   const { behandlingId } = useParams()
@@ -40,7 +43,8 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
   const [hentBrevStatus, hentBrev] = useApiCall(hentVedtaksbrev)
   const [opprettBrevStatus, opprettNyttVedtaksbrev] = useApiCall(opprettVedtaksbrev)
   const [, fetchBehandling] = useApiCall(hentBehandling)
-
+  const [vergeadresseResult, getVergeadresse] = useApiCall(getVergeadresseFraGrunnlag)
+  const [vergeAdresse, setVergeadresse] = useState<Grunnlagsopplysning<Adresse, KildePersondata> | undefined>(undefined)
   const behandlingRedigertEtterOpprettetBrev = (vedtaksbrev: IBrev, hendelser: IHendelse[]) => {
     const hendelse = sisteBehandlingHendelse(hendelser)
     return new Date(hendelse.opprettet).getTime() > new Date(vedtaksbrev.statusEndret).getTime()
@@ -60,6 +64,23 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
           setVisAdvarselBehandlingEndret(behandlingRedigertEtterOpprettetBrev(vedtaksbrev, behandling.hendelser))
         },
         () => dispatch(resetBehandling())
+      )
+    }
+  }, [vedtaksbrev])
+  useEffect(() => {
+    if (behandlingId && vedtaksbrev) {
+      getVergeadresse(
+        behandlingId,
+        (result) => {
+          setVergeadresse(result)
+        },
+        (error) => {
+          if (error.status == 404) {
+            setVergeadresse(undefined)
+          } else {
+            throw error
+          }
+        }
       )
     }
   }, [vedtaksbrev])
@@ -117,10 +138,11 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
               </WarningAlert>
             )}
             <br />
-            {vedtaksbrev && (
+            {vedtaksbrev && !isPendingOrInitial(vergeadresseResult) && (
               <MottakerPanel
                 vedtaksbrev={vedtaksbrev}
                 oppdater={(val) => setVedtaksbrev({ ...vedtaksbrev, mottaker: val })}
+                vergeadresse={vergeAdresse}
                 redigerbar={manueltBrevKanRedigeres(status)}
               />
             )}

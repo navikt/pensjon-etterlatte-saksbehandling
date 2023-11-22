@@ -1,11 +1,15 @@
 import { Alert, Button, Heading, Modal, Select, TextField, ToggleGroup } from '@navikt/ds-react'
-import { useState } from 'react'
-import { IBrev, Mottaker } from '~shared/types/Brev'
+import React, { useState } from 'react'
+import { Adresse, IBrev, Mottaker } from '~shared/types/Brev'
 import { DocPencilIcon } from '@navikt/aksel-icons'
 import styled, { css } from 'styled-components'
 import { isFailure, isPending, useApiCall } from '~shared/hooks/useApiCall'
 import { oppdaterMottaker } from '~shared/api/brev'
 import { FlexRow } from '~shared/styled'
+import { Grunnlagsopplysning } from '~shared/types/grunnlag'
+import { KildePersondata } from '~shared/types/kilde'
+import { Info } from '~components/behandling/soeknadsoversikt/Info'
+import { InfoWrapper } from '~components/behandling/soeknadsoversikt/styled'
 
 enum MottakerType {
   PRIVATPERSON = 'PRIVATPERSON',
@@ -15,9 +19,10 @@ enum MottakerType {
 interface Props {
   brev: IBrev
   oppdater: (mottaker: Mottaker) => void
+  vergeadresse: Grunnlagsopplysning<Adresse, KildePersondata> | undefined
 }
 
-export default function RedigerMottakerModal({ brev, oppdater }: Props) {
+export default function RedigerMottakerModal({ brev, oppdater, vergeadresse }: Props) {
   const { id: brevId, sakId, mottaker: initialMottaker } = brev
 
   const [isOpen, setIsOpen] = useState(false)
@@ -44,6 +49,23 @@ export default function RedigerMottakerModal({ brev, oppdater }: Props) {
     setIsOpen(false)
   }
 
+  function formaterAdresse(vergeadresse: Adresse) {
+    return (
+      <>
+        {vergeadresse.navn}
+        {vergeadresse.navn && <br />}
+        {vergeadresse.adresselinje1}
+        {vergeadresse.adresselinje1 && <br />}
+        {vergeadresse.adresselinje2}
+        {vergeadresse.adresselinje2 && <br />}
+        {vergeadresse.adresselinje3}
+        {vergeadresse.adresselinje3 && <br />}
+        {vergeadresse.postnummer} {vergeadresse.poststed}
+        {vergeadresse.land} ({vergeadresse.landkode})
+      </>
+    )
+  }
+
   return (
     <>
       <Button
@@ -59,6 +81,13 @@ export default function RedigerMottakerModal({ brev, oppdater }: Props) {
           <Heading size="large" spacing>
             Endre mottaker
           </Heading>
+
+          {vergeadresse && (
+            <InfoWrapper>
+              <Info wide label="Verges adresse" tekst={formaterAdresse(vergeadresse.opplysning)} />
+              <br />
+            </InfoWrapper>
+          )}
 
           <SkjemaGruppe>
             <ToggleGroup

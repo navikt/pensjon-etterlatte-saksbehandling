@@ -26,15 +26,35 @@ import org.slf4j.LoggerFactory
 import java.time.temporal.ChronoUnit
 import java.util.UUID
 
-class DokumentManglerDatoException(message: String) : Exception(message)
+class DokumentManglerDatoException(message: String) :
+    UgyldigForespoerselException(
+        code = "DOKUMENT_MANGLER_DATO",
+        detail = message,
+    )
 
-class DokumentErIkkeMarkertSomSendt(message: String) : Exception(message)
+class DokumentErIkkeMarkertSomSendt(message: String) :
+    UgyldigForespoerselException(
+        code = "DOKUMENT_MÅ_VÆRE_SENDT",
+        detail = message,
+    )
 
-class LandFeilIsokodeException(message: String) : Exception(message)
+class UgyldigLandkodeIsokode3(message: String) :
+    UgyldigForespoerselException(
+        code = "UGYLDIG_LANDKODE",
+        detail = message,
+    )
 
-class ManglerLandkodeException(message: String) : Exception(message)
+class ManglerLandkodeException(message: String) :
+    UgyldigForespoerselException(
+        code = "MANGLER_LANDKODE",
+        detail = message,
+    )
 
-class ManglerRinanummerException(message: String) : Exception(message)
+class ManglerRinanummerException(message: String) :
+    UgyldigForespoerselException(
+        code = "MANGLER_RINANUMMER",
+        detail = message,
+    )
 
 class KanIkkeEndreFattetEllerAttestertBehandling(message: String) : Exception(message)
 
@@ -224,7 +244,7 @@ class GenerellBehandlingService(
             throw ManglerLandkodeException("Mangler landkode")
         }
         if (innhold.landIsoKode.any { it.length != 3 }) {
-            throw LandFeilIsokodeException("Landkoden er feil ${innhold.landIsoKode.toJson()}")
+            throw UgyldigLandkodeIsokode3("Landkoden er feil ${innhold.landIsoKode.toJson()}")
         }
         if (innhold.rinanummer.isEmpty()) {
             throw ManglerRinanummerException("Må ha rinanummer")

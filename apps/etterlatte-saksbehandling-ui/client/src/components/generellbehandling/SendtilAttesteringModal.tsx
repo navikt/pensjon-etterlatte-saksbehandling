@@ -44,7 +44,10 @@ export const SendtilAttesteringModal = ({
             <Alert variant="success">Behandlingen ble sendt til attestering</Alert>
           )}
           {isFailure(sendTilAttesteringStatus) && (
-            <ApiErrorAlert>Klarte ikke å sende til attestering kravpakke utland. Prøv igjen senere.</ApiErrorAlert>
+            <ApiErrorAlert>
+              Klarte ikke å sende til attestering kravpakke utland. Prøv igjen senere.{' '}
+              {sendTilAttesteringStatus.error.detail}
+            </ApiErrorAlert>
           )}
         </Modal.Footer>
       </Modal>

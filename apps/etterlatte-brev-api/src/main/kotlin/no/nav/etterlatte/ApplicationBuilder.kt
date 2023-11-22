@@ -52,6 +52,8 @@ import no.nav.etterlatte.libs.ktor.setReady
 import no.nav.etterlatte.rivers.DistribuerBrevRiver
 import no.nav.etterlatte.rivers.JournalfoerVedtaksbrevRiver
 import no.nav.etterlatte.rivers.VedtaksbrevUnderkjentRiver
+import no.nav.etterlatte.rivers.migrering.FerdigstillVedtaksbrevRiver
+import no.nav.etterlatte.rivers.migrering.GenererPDFRiver
 import no.nav.etterlatte.rivers.migrering.OpprettVedtaksbrevForMigreringRiver
 import no.nav.etterlatte.security.ktor.clientCredential
 import no.nav.helse.rapids_rivers.RapidApplication
@@ -190,6 +192,9 @@ class ApplicationBuilder {
                     },
                 )
                 OpprettVedtaksbrevForMigreringRiver(this, vedtaksbrevService)
+                GenererPDFRiver(this, vedtaksbrevService)
+                FerdigstillVedtaksbrevRiver(this, vedtaksbrevService)
+
                 JournalfoerVedtaksbrevRiver(this, vedtaksbrevService)
                 VedtaksbrevUnderkjentRiver(this, vedtaksbrevService)
                 DistribuerBrevRiver(this, vedtaksbrevService, distribusjonService)

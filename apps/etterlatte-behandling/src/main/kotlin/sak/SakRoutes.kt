@@ -26,7 +26,6 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.SisteIverksatteBehandling
 import no.nav.etterlatte.libs.common.behandling.Utenlandstilknytning
 import no.nav.etterlatte.libs.common.behandling.UtenlandstilknytningType
-import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.hentNavidentFraToken
 import no.nav.etterlatte.libs.common.kunSaksbehandler
@@ -168,21 +167,27 @@ internal fun Route.sakWebRoutes(
                     else -> call.respond(FoersteVirkDto(foersteVirk.atDay(1), sakId))
                 }
             }
-
-            get("/behandlingerforsak") {
-                val behandlinger =
-                    inTransaction {
-                        val sak = sakService.finnSak(sakId) ?: throw GenerellIkkeFunnetException()
-                        requestLogger.loggRequest(brukerTokenInfo, Folkeregisteridentifikator.of(sak.ident), "behandlinger")
-                        behandlingService.hentBehandlingerForSak(sak.id)
-                            .map { it.toBehandlingSammendrag() }
-                            .let { BehandlingListe(sak, it) }
-                    }
-                call.respond(behandlinger)
-            }
         }
 
         route("/personer/") {
+            post("/behandlingerforsak") {
+                withFoedselsnummerInternal(tilgangService) { fnr ->
+                    val behandlinger =
+                        inTransaction {
+                            val sakUtenlandstilknytning = sakService.hentSakMedUtenlandstilknytning(fnr.value)
+                            requestLogger.loggRequest(
+                                brukerTokenInfo,
+                                Folkeregisteridentifikator.of(sakUtenlandstilknytning.ident),
+                                "behandlinger",
+                            )
+                            behandlingService.hentBehandlingerForSak(sakUtenlandstilknytning.id)
+                                .map { it.toBehandlingSammendrag() }
+                                .let { BehandlingListe(sakUtenlandstilknytning, it) }
+                        }
+                    call.respond(behandlinger)
+                }
+            }
+
             post("/utenlandstilknytning") {
                 withFoedselsnummerInternal(tilgangService) { fnr ->
                     val sakUtenlandstilknytning = inTransaction { sakService.hentSakMedUtenlandstilknytning(fnr.value) }

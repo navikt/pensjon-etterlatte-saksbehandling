@@ -1,6 +1,7 @@
 import { apiClient, ApiResponse } from '~shared/api/apiClient'
 import { IUtenlandstilknytning } from '~shared/types/IDetaljertBehandling'
-import { ISak, ISakMedUtenlandstilknytning, SakType } from '~shared/types/sak'
+import { ISak, SakType } from '~shared/types/sak'
+import { SakMedBehandlinger } from '~components/person/typer'
 
 export const lagreUtenlandstilknytning = async ({
   sakId,
@@ -17,10 +18,8 @@ export const lagreUtenlandstilknytning = async ({
   })
 }
 
-export const hentSakMedUtenlandstilknytning = async (
-  fnr: string
-): Promise<ApiResponse<ISakMedUtenlandstilknytning>> => {
-  return apiClient.post(`/personer/utenlandstilknytning`, { foedselsnummer: fnr })
+export const hentSakMedBehandlnger = async (fnr: string): Promise<ApiResponse<SakMedBehandlinger>> => {
+  return apiClient.post(`/personer/behandlingerforsak`, { foedselsnummer: fnr })
 }
 
 export const hentSak = async (sakId: number): Promise<ApiResponse<ISak>> => {

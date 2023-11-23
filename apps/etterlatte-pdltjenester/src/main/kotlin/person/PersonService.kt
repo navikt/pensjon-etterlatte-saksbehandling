@@ -30,6 +30,7 @@ import no.nav.etterlatte.pdl.PdlResponseError
 import no.nav.etterlatte.pdl.mapper.ForeldreansvarHistorikkMapper
 import no.nav.etterlatte.pdl.mapper.GeografiskTilknytningMapper
 import no.nav.etterlatte.pdl.mapper.PersonMapper
+import no.nav.etterlatte.sikkerLogg
 import org.slf4j.LoggerFactory
 
 class PdlForesporselFeilet(message: String) : RuntimeException(message)
@@ -337,10 +338,15 @@ class PersonService(
 
         return pdlKlient.hentGeografiskTilknytning(request).let {
             if (it.data?.hentGeografiskTilknytning == null) {
-                val pdlFeil = it.errors?.asFormatertFeil()
-                if (it.errors?.personIkkeFunnet() == true) {
+                if (it.errors == null) {
+                    logger.warn("Geografisk tilknytning er null i PDL (fnr=${request.foedselsnummer})")
+                    sikkerLogg.warn("Geografisk tilknytning er null i PDL (fnr=${request.foedselsnummer.value})")
+
+                    GeografiskTilknytning(ukjent = true)
+                } else if (it.errors.personIkkeFunnet()) {
                     throw FantIkkePersonException("Fant ikke personen ${request.foedselsnummer}")
                 } else {
+                    val pdlFeil = it.errors.asFormatertFeil()
                     throw PdlForesporselFeilet(
                         "Kunne ikke hente fnr=${request.foedselsnummer} fra PDL: $pdlFeil",
                     )

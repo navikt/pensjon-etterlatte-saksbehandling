@@ -26,7 +26,7 @@ async function sourceMapMapper(numbers: IStackLineNoColumnNo): Promise<NullableM
 
 const GYLDIG_FNR = (input: string | undefined) => /^\d{11}$/.test(input ?? '')
 
-function findAndSanitizeUrl(url?: String): String {
+function findAndSanitizeUrl(url?: string): string {
   if (url) {
     const splittedUrl = url.split('/')
     splittedUrl.map((urlpart) => {
@@ -83,7 +83,7 @@ loggerRouter.post('/', express.json(), (req, res) => {
     } else {
       frontendLogger.error({
         ...errorObject,
-        message: `General error from frontend.`,
+        message: `General error from frontend. ${body.data.msg ?? ''}`,
         stack_trace: JSON.stringify(body),
       })
     }

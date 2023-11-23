@@ -1,16 +1,10 @@
-import { BodyShort, ErrorMessage, Heading, MonthPicker, useMonthpicker, VStack } from '@navikt/ds-react'
+import { BodyShort, ErrorMessage, Heading, HelpText, MonthPicker, useMonthpicker, VStack } from '@navikt/ds-react'
 import React, { useState } from 'react'
 import { oppdaterBehandlingsstatus, oppdaterVirkningstidspunkt } from '~store/reducers/BehandlingReducer'
 import { formaterStringDato } from '~utils/formattering'
 import { fastsettVirkningstidspunkt } from '~shared/api/behandling'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import {
-  Beskrivelse,
-  InfobokserWrapper,
-  InfoWrapper,
-  VurderingsContainerWrapper,
-  VurderingsTitle,
-} from '../soeknadsoversikt/styled'
+import { InfobokserWrapper, InfoWrapper, VurderingsContainerWrapper, VurderingsTitle } from '../soeknadsoversikt/styled'
 import { useAppDispatch } from '~store/Store'
 import { IBehandlingStatus, IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { addMonths, addYears, subYears } from 'date-fns'
@@ -21,6 +15,7 @@ import { SoeknadsoversiktTextArea } from '~components/behandling/soeknadsoversik
 import { hentMinimumsVirkningstidspunkt } from '~components/behandling/virkningstidspunkt/utils'
 import { UseMonthPickerOptions } from '@navikt/ds-react/esm/date/hooks/useMonthPicker'
 import { DatoVelger } from '~shared/DatoVelger'
+import styled from 'styled-components'
 
 export interface Hjemmel {
   lenke: string
@@ -133,7 +128,14 @@ const Virkningstidspunkt = (props: {
                 <VStack gap="4">
                   {erBosattUtland && (
                     <div>
-                      <Heading size="xsmall">Kravdato</Heading>
+                      <Heading size="xsmall">
+                        <HelpTextWrapper>
+                          Kravdato utland
+                          <HelpText strategy="fixed">
+                            Skriv inn kravdato for søknad i utlandet, som hentes fra SED P2100.
+                          </HelpText>
+                        </HelpTextWrapper>
+                      </Heading>
                       <BodyShort>
                         {behandling.virkningstidspunkt?.kravdato
                           ? formaterStringDato(behandling.virkningstidspunkt.kravdato)
@@ -170,7 +172,14 @@ const Virkningstidspunkt = (props: {
 
                 {erBosattUtland && (
                   <DatoVelger
-                    label="Kravdato"
+                    label={
+                      <HelpTextWrapper>
+                        Kravdato utland
+                        <HelpText strategy="fixed">
+                          Skriv inn kravdato for søknad i utlandet, som hentes fra SED P2100.
+                        </HelpText>
+                      </HelpTextWrapper>
+                    }
                     onChange={(date) => setKravdato(date ?? null)}
                     value={kravdato ?? undefined}
                     fromDate={subYears(new Date(), 18)}
@@ -194,3 +203,14 @@ const Virkningstidspunkt = (props: {
 }
 
 export default Virkningstidspunkt
+
+const HelpTextWrapper = styled.div`
+  display: flex;
+  gap: 0.3em;
+`
+
+export const Beskrivelse = styled.div`
+  margin: 10px 0;
+  max-width: 41em;
+  white-space: pre-wrap;
+`

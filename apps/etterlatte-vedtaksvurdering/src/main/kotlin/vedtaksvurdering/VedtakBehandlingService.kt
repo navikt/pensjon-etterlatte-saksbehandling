@@ -7,6 +7,7 @@ import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.oppgave.SakIdOgReferanse
 import no.nav.etterlatte.libs.common.oppgave.VedtakEndringDTO
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
@@ -517,9 +518,9 @@ class VedtakBehandlingService(
 
                     SakType.OMSTILLINGSSTOENAD -> {
                         val avkortetYtelse =
-                            requireNotNull(beregningOgAvkorting?.avkorting?.avkortetYtelse) {
-                                "Mangler avkortet ytelse"
-                            }
+                            beregningOgAvkorting?.avkorting?.avkortetYtelse
+                                ?: throw ManglerAvkortetYtelse()
+
                         avkortetYtelse.map {
                             Utbetalingsperiode(
                                 periode =
@@ -616,4 +617,12 @@ class UgyldigAttestantException(ident: String) :
     IkkeTillattException(
         code = "ATTESTANT_OG_SAKSBEHANDLER_ER_SAMME_PERSON",
         detail = "Saksbehandler og attestant må være to forskjellige personer (ident=$ident)",
+    )
+
+class ManglerAvkortetYtelse :
+    UgyldigForespoerselException(
+        code = "VEDTAKSVURDERING_MANGLER_AVKORTET_YTELSE",
+        detail =
+            "Kan ikke opprette vedtak uten avkorting. Det er påkrevet og legge til inntektsavkorting " +
+                "selv også i tilfellene hvor mottaker ikke har inntekt.",
     )

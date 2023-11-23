@@ -39,7 +39,7 @@ class MigreringService(
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     suspend fun migrer(request: MigreringRequest) =
-        retry(times = 3) {
+        retryMedPause(times = 3) {
             inTransaction {
                 opprettSakOgBehandling(request)?.let { behandlingOgOppgave ->
                     val behandling = behandlingOgOppgave.behandling
@@ -106,6 +106,11 @@ class MigreringService(
                 }
             }
         }
+
+    private suspend fun <T> retryMedPause(
+        times: Int = 2,
+        block: suspend () -> T,
+    ) = retry(times, block).also { Thread.sleep(1000) }
 
     private fun opprettSakOgBehandling(request: MigreringRequest) =
         behandlingFactory.opprettBehandling(

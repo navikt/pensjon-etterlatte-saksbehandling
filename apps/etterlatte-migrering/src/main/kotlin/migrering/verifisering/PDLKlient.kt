@@ -9,10 +9,13 @@ import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import io.ktor.http.isSuccess
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.HentPersonRequest
+import no.nav.etterlatte.libs.common.person.HentPersongalleriRequest
 import no.nav.etterlatte.libs.common.person.PersonRolle
 
 internal class PDLKlient(config: Config, private val pdl_app: HttpClient) {
@@ -32,6 +35,20 @@ internal class PDLKlient(config: Config, private val pdl_app: HttpClient) {
                 response.body<PersonDTO>()
             } else {
                 throw IllegalStateException("Fant ikke informasjon i PDL for person med rolle $rolle")
+            }
+        }
+
+    fun hentPersongalleri(soeker: Folkeregisteridentifikator): Persongalleri =
+        runBlocking {
+            val response =
+                pdl_app.post("$url/galleri") {
+                    contentType(ContentType.Application.Json)
+                    setBody(HentPersongalleriRequest(soeker, null, SakType.BARNEPENSJON))
+                }
+            if (response.status.isSuccess()) {
+                response.body<Persongalleri>()
+            } else {
+                throw InternfeilException("Kunne ikke hente persongalleri for $soeker fra PDL")
             }
         }
 }

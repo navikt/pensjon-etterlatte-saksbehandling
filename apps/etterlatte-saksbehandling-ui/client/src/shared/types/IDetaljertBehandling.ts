@@ -113,7 +113,7 @@ export interface Virkningstidspunkt {
   dato: string
   kilde: KildeSaksbehandler
   begrunnelse: string
-  kravdato: string
+  kravdato: string | null
 }
 
 export interface IEtterbetaling {

@@ -45,7 +45,7 @@ const Virkningstidspunkt = (props: {
   )
   const [begrunnelse, setBegrunnelse] = useState<string>(behandling.virkningstidspunkt?.begrunnelse ?? '')
   const [kravdato, setKravdato] = useState<Date | null>(
-    behandling.virkningstidspunkt ? new Date(behandling.virkningstidspunkt.kravdato) : null
+    behandling.virkningstidspunkt?.kravdato ? new Date(behandling.virkningstidspunkt.kravdato) : null
   )
 
   const [errorTekst, setErrorTekst] = useState<string>('')
@@ -102,7 +102,7 @@ const Virkningstidspunkt = (props: {
   const reset = (onSuccess?: () => void) => {
     resetToInitial()
     setVirkningstidspunkt(behandling.virkningstidspunkt ? new Date(behandling.virkningstidspunkt.dato) : null)
-    setKravdato(behandling.virkningstidspunkt ? new Date(behandling.virkningstidspunkt.kravdato) : null)
+    setKravdato(behandling.virkningstidspunkt?.kravdato ? new Date(behandling.virkningstidspunkt.kravdato) : null)
     setBegrunnelse(behandling.virkningstidspunkt?.begrunnelse ?? '')
     setErrorTekst('')
     setVurdert(behandling.virkningstidspunkt !== null)

@@ -178,7 +178,7 @@ class RevurderingService(
         aarsak: Revurderingaarsak,
     ) {
         if (aarsak == Revurderingaarsak.SLUTTBEHANDLING_UTLAND) {
-            val behandlingerForSak = behandlingService.hentBehandlingerISak(sakId)
+            val behandlingerForSak = behandlingService.hentBehandlingerForSak(sakId)
             behandlingerForSak.find {
                     behandling ->
                 (behandling is Foerstegangsbehandling) && behandling.boddEllerArbeidetUtlandet?.skalSendeKravpakke == true

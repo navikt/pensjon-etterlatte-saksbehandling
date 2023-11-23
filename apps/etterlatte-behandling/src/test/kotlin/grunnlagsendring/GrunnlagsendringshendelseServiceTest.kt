@@ -147,7 +147,7 @@ internal class GrunnlagsendringshendelseServiceTest {
             grunnlagshendelsesDao.hentGrunnlagsendringshendelserMedStatuserISak(any(), any())
         } returns emptyList()
 
-        every { behandlingService.hentBehandlingerISak(1L) } returns foerstegangsbehandlinger
+        every { behandlingService.hentBehandlingerForSak(1L) } returns foerstegangsbehandlinger
 
         coEvery { grunnlagClient.hentPersonSakOgRolle(any()) }
             .returns(PersonMedSakerOgRoller(fnr, listOf(SakOgRolle(sakId, Saksrolle.SOEKER))))
@@ -608,7 +608,7 @@ internal class GrunnlagsendringshendelseServiceTest {
             }
         every { pdlService.hentPdlModell(avdoedFnr, personRolle, SakType.BARNEPENSJON) } returns mockPdlModel
 
-        every { behandlingService.hentBehandlingerISak(sakId) } returns
+        every { behandlingService.hentBehandlingerForSak(sakId) } returns
             listOf(
                 mockk {
                     every { status } returns BehandlingStatus.VILKAARSVURDERT

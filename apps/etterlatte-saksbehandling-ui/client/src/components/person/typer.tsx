@@ -15,7 +15,7 @@ export interface IPersonResult {
   foedselsnummer: string
 }
 
-export interface IBehandlingListe {
+export interface SakMedBehandlinger {
   sak: ISak
   behandlinger: IBehandlingsammendrag[]
 }

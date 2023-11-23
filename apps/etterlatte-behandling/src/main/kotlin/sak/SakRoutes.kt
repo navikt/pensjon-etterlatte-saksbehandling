@@ -26,11 +26,13 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.SisteIverksatteBehandling
 import no.nav.etterlatte.libs.common.behandling.Utenlandstilknytning
 import no.nav.etterlatte.libs.common.behandling.UtenlandstilknytningType
+import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.hentNavidentFraToken
 import no.nav.etterlatte.libs.common.kunSaksbehandler
 import no.nav.etterlatte.libs.common.kunSystembruker
 import no.nav.etterlatte.libs.common.oppgave.OppgaveListe
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.Saker
 import no.nav.etterlatte.libs.common.sakId
 import no.nav.etterlatte.libs.common.toJson
@@ -69,7 +71,7 @@ internal fun Route.sakSystemRoutes(
             get("/behandlinger") {
                 kunSystembruker {
                     val behandlinger =
-                        inTransaction { behandlingService.hentBehandlingerISak(sakId) }
+                        inTransaction { behandlingService.hentBehandlingerForSak(sakId) }
                             .map { ForenkletBehandling(it.sak.id, it.id, it.status) }
 
                     call.respond(ForenkletBehandlingListeWrapper(behandlinger))
@@ -166,6 +168,18 @@ internal fun Route.sakWebRoutes(
                     else -> call.respond(FoersteVirkDto(foersteVirk.atDay(1), sakId))
                 }
             }
+
+            get("/behandlingerforsak") {
+                val behandlinger =
+                    inTransaction {
+                        val sak = sakService.finnSak(sakId) ?: throw GenerellIkkeFunnetException()
+                        requestLogger.loggRequest(brukerTokenInfo, Folkeregisteridentifikator.of(sak.ident), "behandlinger")
+                        behandlingService.hentBehandlingerForSak(sak.id)
+                            .map { it.toBehandlingSammendrag() }
+                            .let { BehandlingListe(sak, it) }
+                    }
+                call.respond(behandlinger)
+            }
         }
 
         route("/personer/") {
@@ -187,21 +201,6 @@ internal fun Route.sakWebRoutes(
                         inTransaction { sakService.finnSak(fnr.value, type) }
                             .also { requestLogger.loggRequest(brukerTokenInfo, fnr, "personer/sak/type") }
                     call.respond(sak ?: HttpStatusCode.NoContent)
-                }
-            }
-
-            post("behandlinger") {
-                withFoedselsnummerInternal(tilgangService) { fnr ->
-                    val behandlinger =
-                        inTransaction {
-                            sakService.finnSaker(fnr.value)
-                                .map { sak ->
-                                    behandlingService.hentBehandlingerISak(sak.id)
-                                        .map { it.toBehandlingSammendrag() }
-                                        .let { BehandlingListe(sak, it) }
-                                }
-                        }.also { requestLogger.loggRequest(brukerTokenInfo, fnr, "behandlinger") }
-                    call.respond(behandlinger)
                 }
             }
 

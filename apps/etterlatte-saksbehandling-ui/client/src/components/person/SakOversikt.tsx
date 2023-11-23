@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 import { Behandlingsliste } from './Behandlingsliste'
 import styled from 'styled-components'
 import { ManueltOpphoerModal } from './ManueltOpphoerModal'
-import { hentBehandlingerForPerson } from '~shared/api/behandling'
+import { hentBehandlingerForSak } from '~shared/api/behandling'
 import { FlexRow, GridContainer } from '~shared/styled'
 import Spinner from '~shared/Spinner'
 import RelevanteHendelser from '~components/person/uhaandtereHendelser/RelevanteHendelser'
@@ -18,13 +18,14 @@ import { hentSakMedUtenlandstilknytning } from '~shared/api/sak'
 import { tagColors } from '~shared/Tags'
 
 export const SakOversikt = ({ fnr }: { fnr: string }) => {
-  const skalBrukeKlage = useFeatureEnabledMedDefault(FEATURE_TOGGLE_KAN_BRUKE_KLAGE, false)
-  const [behandlingerStatus, hentBehandlinger] = useApiCall(hentBehandlingerForPerson)
+  const kanBrukeKlage = useFeatureEnabledMedDefault(FEATURE_TOGGLE_KAN_BRUKE_KLAGE, false)
+  const [behandlingerStatus, hentBehandlinger] = useApiCall(hentBehandlingerForSak)
   const [sakStatus, hentSak] = useApiCall(hentSakMedUtenlandstilknytning)
 
   useEffect(() => {
-    hentSak(fnr)
-    hentBehandlinger(fnr)
+    hentSak(fnr, (sak) => {
+      hentBehandlinger(sak.id)
+    })
   }, [])
 
   return (
@@ -50,10 +51,10 @@ export const SakOversikt = ({ fnr }: { fnr: string }) => {
               )}
               <FlexRow justify="right">
                 <OpprettKlage sakId={sakStatus.data.id} />
-                {sakStatus.data.sakType == SakType.BARNEPENSJON && isSuccess(behandlingerStatus) && (
+                {sakStatus.data.sakType === SakType.BARNEPENSJON && isSuccess(behandlingerStatus) && (
                   <ManueltOpphoerModal
                     sakId={sakStatus.data.id}
-                    behandlingliste={behandlingerStatus.data[0].behandlinger}
+                    behandlingliste={behandlingerStatus.data.behandlinger}
                   />
                 )}
               </FlexRow>
@@ -69,10 +70,10 @@ export const SakOversikt = ({ fnr }: { fnr: string }) => {
             <hr />
 
             {isSuccess(behandlingerStatus) && (
-              <Behandlingsliste behandlinger={behandlingerStatus.data[0].behandlinger} sakId={sakStatus.data.id} />
+              <Behandlingsliste behandlinger={behandlingerStatus.data.behandlinger} sakId={sakStatus.data.id} />
             )}
 
-            {skalBrukeKlage ? <KlageListe sakId={sakStatus.data.id} /> : null}
+            {kanBrukeKlage ? <KlageListe sakId={sakStatus.data.id} /> : null}
           </>
         )}
       </MainContent>
@@ -81,11 +82,7 @@ export const SakOversikt = ({ fnr }: { fnr: string }) => {
         {isPending(behandlingerStatus) && <Spinner visible label="Forbereder hendelser ..." />}
 
         {isSuccess(behandlingerStatus) && isSuccess(sakStatus) && sakStatus.data?.id && (
-          <RelevanteHendelser
-            sak={sakStatus.data}
-            fnr={fnr}
-            behandlingliste={behandlingerStatus.data[0].behandlinger}
-          />
+          <RelevanteHendelser sak={sakStatus.data} fnr={fnr} behandlingliste={behandlingerStatus.data.behandlinger} />
         )}
       </HendelseSidebar>
     </GridContainer>

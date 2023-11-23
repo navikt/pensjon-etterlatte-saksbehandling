@@ -107,7 +107,7 @@ class BehandlingServiceImplTest {
                 sakDao = mockk(),
             )
 
-        val behandlinger = sut.hentBehandlingerISak(1)
+        val behandlinger = sut.hentBehandlingerForSak(1)
 
         assertAll(
             "skal hente behandlinger",
@@ -698,7 +698,7 @@ class BehandlingServiceImplTest {
                 sakDao = mockk(),
             )
 
-        val behandlinger = sut.hentBehandlingerISak(1)
+        val behandlinger = sut.hentBehandlingerForSak(1)
 
         assertAll(
             "skal hente behandlinger",
@@ -748,7 +748,7 @@ class BehandlingServiceImplTest {
                 sakDao = mockk(),
             )
 
-        val behandlinger = sut.hentBehandlingerISak(1)
+        val behandlinger = sut.hentBehandlingerForSak(1)
 
         assertEquals(0, behandlinger.size)
     }

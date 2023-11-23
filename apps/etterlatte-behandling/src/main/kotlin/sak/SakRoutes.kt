@@ -174,7 +174,7 @@ internal fun Route.sakWebRoutes(
                 withFoedselsnummerInternal(tilgangService) { fnr ->
                     val behandlinger =
                         inTransaction {
-                            val sakUtenlandstilknytning = inTransaction { sakService.hentSakMedUtenlandstilknytning(fnr.value) }
+                            val sakUtenlandstilknytning = sakService.hentSakMedUtenlandstilknytning(fnr.value)
                             requestLogger.loggRequest(
                                 brukerTokenInfo,
                                 Folkeregisteridentifikator.of(sakUtenlandstilknytning.ident),

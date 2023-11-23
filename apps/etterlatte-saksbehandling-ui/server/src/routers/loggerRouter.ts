@@ -47,9 +47,18 @@ loggerRouter.post('/', express.json(), (req, res) => {
     frontendLogger.info('Frontendlogging: ', JSON.stringify(body))
   } else {
     const maybeUrl = findAndSanitizeUrl(body.jsonContent.url)
+    const errorObject = {
+      request_uri: maybeUrl,
+      user_device: JSON.stringify(body.jsonContent.userDeviceInfo),
+      user_agent: body.jsonContent.userAgent,
+    }
     if (body.stackInfo) {
       if (stackInfoIsInvalid(body.stackInfo)) {
-        frontendLogger.error('Cannot parse stackInfo, body: \n', JSON.stringify(body), '\n url: ', maybeUrl)
+        frontendLogger.error({
+          ...errorObject,
+          message: 'Cannot parse stackInfo',
+          stack_trace: JSON.stringify(body),
+        })
       } else {
         sourceMapMapper(body.stackInfo)
           .then((position) => {
@@ -60,21 +69,21 @@ loggerRouter.post('/', express.json(), (req, res) => {
             frontendLogger.error({
               message: message || 'Request error on: ',
               stack_trace: `Error occurred in ${component}:\n${message}\n${error}`,
-              user_device: JSON.stringify(body.jsonContent.userDeviceInfo),
-              user_agent: body.jsonContent.userAgent,
-              url: maybeUrl,
             })
           })
           .catch((err) => {
-            frontendLogger.error('Request got error on: \n', err, '\n url: ', maybeUrl)
+            frontendLogger.error({
+              ...errorObject,
+              message: `Got error on request: ${JSON.stringify(body)}`,
+              stack_trace: JSON.stringify(err),
+            })
           })
       }
     } else {
-      frontendLogger.error(
-        `General error from frontend: ${JSON.stringify(body.data)} \n details: ${JSON.stringify(
-          body.jsonContent
-        )} url: ${maybeUrl}`
-      )
+      frontendLogger.error({
+        ...errorObject,
+        message: `General error from frontend, body: ${JSON.stringify(body)}`,
+      })
     }
   }
   res.sendStatus(200)

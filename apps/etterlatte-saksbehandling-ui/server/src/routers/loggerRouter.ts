@@ -31,7 +31,7 @@ function findAndSanitizeUrl(url?: String): String {
     const splittedUrl = url.split('/')
     splittedUrl.map((urlpart) => {
       if (GYLDIG_FNR(urlpart)) {
-        return urlpart.substring(0, 5)
+        return urlpart.substring(0, 5).concat('******')
       }
       return urlpart
     })

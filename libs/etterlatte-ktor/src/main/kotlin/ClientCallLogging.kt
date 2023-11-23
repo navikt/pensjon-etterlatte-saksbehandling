@@ -9,22 +9,22 @@ import net.logstash.logback.marker.Markers
 import org.slf4j.LoggerFactory
 import java.util.concurrent.TimeUnit
 
-internal class HttpCallLogging private constructor() {
-    private val logger = LoggerFactory.getLogger(HttpCallLogging::class.java)
+internal class ClientCallLogging private constructor() {
+    private val logger = LoggerFactory.getLogger(ClientCallLogging::class.java)
     private val requestStartTime = AttributeKey<Long>("requestStartTime")
 
     // Kun dummy pga krav
     class Config
 
-    companion object : HttpClientPlugin<Config, HttpCallLogging> {
-        override val key: AttributeKey<HttpCallLogging> = AttributeKey("GjennyHttpCallLogging")
+    companion object : HttpClientPlugin<Config, ClientCallLogging> {
+        override val key: AttributeKey<ClientCallLogging> = AttributeKey("ClientCallLogging")
 
-        override fun prepare(block: Config.() -> Unit): HttpCallLogging {
-            return HttpCallLogging()
+        override fun prepare(block: Config.() -> Unit): ClientCallLogging {
+            return ClientCallLogging()
         }
 
         override fun install(
-            plugin: HttpCallLogging,
+            plugin: ClientCallLogging,
             scope: HttpClient,
         ) {
             plugin.setupPreRequestHandler(scope)

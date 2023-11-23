@@ -52,7 +52,7 @@ fun httpClient(
         register(ContentType.Application.Json, JacksonConverter(objectMapper))
         ekstraJacksoninnstillinger(objectMapper)
     }
-    install(HttpCallLogging)
+    install(ClientCallLogging)
 
     auth.invoke(this)
     defaultRequest {

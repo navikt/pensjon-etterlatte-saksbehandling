@@ -18,7 +18,7 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Utenlandstilknytning
 import no.nav.etterlatte.libs.common.behandling.UtenlandstilknytningType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
-import no.nav.etterlatte.libs.common.retry
+import no.nav.etterlatte.libs.common.retryMedPause
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.rapidsandrivers.migrering.MigreringRequest
 import no.nav.etterlatte.sak.SakService
@@ -106,11 +106,6 @@ class MigreringService(
                 }
             }
         }
-
-    private suspend fun <T> retryMedPause(
-        times: Int = 2,
-        block: suspend () -> T,
-    ) = retry(times, block).also { Thread.sleep(2000) }
 
     private fun opprettSakOgBehandling(request: MigreringRequest) =
         behandlingFactory.opprettBehandling(

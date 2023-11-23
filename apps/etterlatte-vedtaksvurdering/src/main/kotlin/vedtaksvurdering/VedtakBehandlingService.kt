@@ -12,6 +12,7 @@ import no.nav.etterlatte.libs.common.oppgave.VedtakEndringDTO
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.rapidsandrivers.REVURDERING_AARSAK
 import no.nav.etterlatte.libs.common.rapidsandrivers.SKAL_SENDE_BREV
+import no.nav.etterlatte.libs.common.retryMedPause
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.utcKlokke
 import no.nav.etterlatte.libs.common.toObjectNode
@@ -113,23 +114,25 @@ class VedtakBehandlingService(
                     tx,
                 ).also { fattetVedtak ->
                     runBlocking {
-                        behandlingKlient.fattVedtakBehandling(
-                            brukerTokenInfo = brukerTokenInfo,
-                            vedtakEndringDTO =
-                                VedtakEndringDTO(
-                                    sakIdOgReferanse =
-                                        SakIdOgReferanse(
-                                            sakId = sak.id,
-                                            referanse = behandlingId.toString(),
-                                        ),
-                                    vedtakHendelse =
-                                        VedtakHendelse(
-                                            vedtakId = fattetVedtak.id,
-                                            inntruffet = fattetVedtak.vedtakFattet?.tidspunkt!!,
-                                            saksbehandler = fattetVedtak.vedtakFattet.ansvarligSaksbehandler,
-                                        ),
-                                ),
-                        )
+                        retryMedPause {
+                            behandlingKlient.fattVedtakBehandling(
+                                brukerTokenInfo = brukerTokenInfo,
+                                vedtakEndringDTO =
+                                    VedtakEndringDTO(
+                                        sakIdOgReferanse =
+                                            SakIdOgReferanse(
+                                                sakId = sak.id,
+                                                referanse = behandlingId.toString(),
+                                            ),
+                                        vedtakHendelse =
+                                            VedtakHendelse(
+                                                vedtakId = fattetVedtak.id,
+                                                inntruffet = fattetVedtak.vedtakFattet?.tidspunkt!!,
+                                                saksbehandler = fattetVedtak.vedtakFattet.ansvarligSaksbehandler,
+                                            ),
+                                    ),
+                            )
+                        }
                     }
                 }
             }

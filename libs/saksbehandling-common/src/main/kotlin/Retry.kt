@@ -32,3 +32,8 @@ private suspend fun <T> retryInner(
         }
     }
 }
+
+suspend fun <T> retryMedPause(
+    times: Int = 2,
+    block: suspend () -> T,
+) = retry(times, block).also { Thread.sleep(1000) }

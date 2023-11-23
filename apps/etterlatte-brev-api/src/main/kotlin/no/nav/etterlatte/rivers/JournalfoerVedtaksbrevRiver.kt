@@ -67,6 +67,11 @@ internal class JournalfoerVedtaksbrevRiver(
                 return
             }
 
+            if (vedtaksbrev.id == 298L) {
+                logger.warn("Håndterer brev 298 manuelt")
+                return
+            }
+
             val response = service.journalfoerVedtaksbrev(vedtaksbrev, vedtak)
 
             logger.info("Vedtaksbrev for vedtak med id ${vedtak.vedtakId} er journalfoert OK")

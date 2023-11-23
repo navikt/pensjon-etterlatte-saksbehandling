@@ -35,7 +35,7 @@ class StartMigrering(val repository: StartMigreringRepository, val rapidsConnect
                 Thread.sleep(60_000)
                 sakerTilMigrering.forEach {
                     rapidsConnection.publish(message = lagMelding(it), key = UUID.randomUUID().toString())
-                    Thread.sleep(1500)
+                    Thread.sleep(5000)
                 }
             }
         }

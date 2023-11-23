@@ -204,22 +204,6 @@ internal fun Route.sakWebRoutes(
                 }
             }
 
-            // TODO når vi skal støtte flere saker henter vi data herifra
-            post("behandlinger") {
-                withFoedselsnummerInternal(tilgangService) { fnr ->
-                    val behandlinger =
-                        inTransaction {
-                            sakService.finnSaker(fnr.value)
-                                .map { sak ->
-                                    behandlingService.hentBehandlingerForSak(sak.id)
-                                        .map { it.toBehandlingSammendrag() }
-                                        .let { BehandlingListe(sak, it) }
-                                }
-                        }.also { requestLogger.loggRequest(brukerTokenInfo, fnr, "behandlinger") }
-                    call.respond(behandlinger)
-                }
-            }
-
             post("oppgaver") {
                 withFoedselsnummerInternal(tilgangService) { fnr ->
                     val oppgaver =

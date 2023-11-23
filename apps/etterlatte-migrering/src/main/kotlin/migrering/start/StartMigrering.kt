@@ -27,7 +27,9 @@ class StartMigrering(val repository: StartMigreringRepository, val rapidsConnect
 
     fun startMigrering() {
         logger.info("Starter migrering for sakene som ligger i databasetabellen")
-        val sakerTilMigrering = repository.hentSakerTilMigrering().also { logger.info("Migrerer ${it.size} saker") }
+        val sakerTilMigrering =
+            repository.hentSakerTilMigrering().also { logger.info("Migrerer ${it.size} saker") }
+                .distinct()
         repository.settSakerMigrert(sakerTilMigrering)
         if (sakerTilMigrering.isNotEmpty()) {
             thread {

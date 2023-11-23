@@ -193,7 +193,7 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
                 Assertions.assertEquals(HttpStatusCode.OK, it.status)
             }
 
-            httpClient.post("api/personer/behandlinger") {
+            httpClient.post("/api/personer/utenlandstilknytning") {
                 addAuthToken(tokenSaksbehandler)
                 contentType(ContentType.Application.Json)
                 setBody(FoedselsnummerDTO(fnr))
@@ -214,7 +214,7 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
                 )
             }
 
-            httpClient.post("api/personer/behandlinger") {
+            httpClient.post("/api/personer/behandlinger") {
                 addAuthToken(tokenSaksbehandler)
                 contentType(ContentType.Application.Json)
                 setBody(FoedselsnummerDTO(fnr))
@@ -222,7 +222,7 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
                 Assertions.assertEquals(HttpStatusCode.NotFound, it.status)
             }
 
-            httpClient.post("api/personer/behandlinger") {
+            httpClient.post("/api/personer/utenlandstilknytning") {
                 addAuthToken(systemBruker)
                 contentType(ContentType.Application.Json)
                 setBody(FoedselsnummerDTO(fnr))

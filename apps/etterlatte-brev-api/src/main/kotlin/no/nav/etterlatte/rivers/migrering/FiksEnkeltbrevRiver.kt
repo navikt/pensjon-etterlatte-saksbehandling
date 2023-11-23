@@ -13,9 +13,7 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
-import rapidsandrivers.SAK_ID_KEY
 import rapidsandrivers.migrering.ListenerMedLoggingOgFeilhaandtering
-import rapidsandrivers.sakId
 
 internal class FiksEnkeltbrevRiver(
     rapidsConnection: RapidsConnection,
@@ -26,7 +24,7 @@ internal class FiksEnkeltbrevRiver(
 
     init {
         initialiserRiver(rapidsConnection, Migreringshendelser.FIKS_ENKELTBREV) {
-            validate { it.requireKey(SAK_ID_KEY) }
+            validate { it.requireKey(BREV_ID_KEY) }
         }
     }
 
@@ -34,16 +32,16 @@ internal class FiksEnkeltbrevRiver(
         packet: JsonMessage,
         context: MessageContext,
     ) {
-        val sakId = packet.sakId
-        val brev = service.hentBrev(id = sakId)
+        val brevId = packet[BREV_ID_KEY].asLong()
+        val brev = service.hentBrev(id = brevId)
 
-        logger.info("Fikser vedtaksbrev i sak $sakId")
+        logger.info("Fikser vedtaksbrev for brev $brevId")
         val behandlingId = brev.behandlingId!!
         val brukerTokenInfo = Systembruker("migrering", "migrering")
         runBlocking {
             service.genererPdf(brev.id, brukerTokenInfo, MigreringBrevRequest(brutto = 3954))
             service.ferdigstillVedtaksbrev(behandlingId, brukerTokenInfo, true)
-            logger.info("Har oppretta vedtaksbrev i sak $sakId")
+            logger.info("Har oppretta vedtaksbrev for brev $brevId")
 
             packet.eventName = VedtakKafkaHendelseType.ATTESTERT.toString()
             val vedtak = vedtaksvurderingService.hentVedtak(behandlingId, brukerTokenInfo)
@@ -52,3 +50,5 @@ internal class FiksEnkeltbrevRiver(
         context.publish(packet.toJson())
     }
 }
+
+const val BREV_ID_KEY = "brev_id"

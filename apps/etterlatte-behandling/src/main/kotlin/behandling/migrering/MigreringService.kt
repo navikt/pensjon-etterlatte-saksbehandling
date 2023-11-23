@@ -110,7 +110,7 @@ class MigreringService(
     private suspend fun <T> retryMedPause(
         times: Int = 2,
         block: suspend () -> T,
-    ) = retry(times, block).also { Thread.sleep(1000) }
+    ) = retry(times, block).also { Thread.sleep(2000) }
 
     private fun opprettSakOgBehandling(request: MigreringRequest) =
         behandlingFactory.opprettBehandling(

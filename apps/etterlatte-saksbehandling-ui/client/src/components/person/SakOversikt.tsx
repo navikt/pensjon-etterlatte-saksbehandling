@@ -32,43 +32,50 @@ export const SakOversikt = ({ fnr }: { fnr: string }) => {
         (error) => (
           <Alert variant="error">{JSON.stringify(error)}</Alert>
         ),
-        (sakStatus) => (
+        (sakOgBehandlinger) => (
           <>
             <MainContent>
               <Heading size="medium" spacing>
-                Saknummer {sakStatus.sak.id}{' '}
+                Saknummer {sakOgBehandlinger.sak.id}{' '}
                 <Tag variant="success" size="medium">
-                  {formaterSakstype(sakStatus.sak.sakType)}
+                  {formaterSakstype(sakOgBehandlinger.sak.sakType)}
                 </Tag>
-                {sakStatus.sak.utenlandstilknytning ? (
-                  <Tag variant={tagColors[sakStatus.sak.utenlandstilknytning.type]} size="small">
-                    {formaterEnumTilLesbarString(sakStatus.sak.utenlandstilknytning.type)}
+                {sakOgBehandlinger.sak.utenlandstilknytning ? (
+                  <Tag variant={tagColors[sakOgBehandlinger.sak.utenlandstilknytning.type]} size="small">
+                    {formaterEnumTilLesbarString(sakOgBehandlinger.sak.utenlandstilknytning.type)}
                   </Tag>
                 ) : (
                   <BodyShort>Du må velge en tilknytning for saken</BodyShort>
                 )}
                 <FlexRow justify="right">
-                  <OpprettKlage sakId={sakStatus.sak.id} />
-                  {sakStatus.sak.sakType === SakType.BARNEPENSJON && (
-                    <ManueltOpphoerModal sakId={sakStatus.sak.id} behandlingliste={sakStatus.behandlinger} />
+                  <OpprettKlage sakId={sakOgBehandlinger.sak.id} />
+                  {sakOgBehandlinger.sak.sakType === SakType.BARNEPENSJON && (
+                    <ManueltOpphoerModal
+                      sakId={sakOgBehandlinger.sak.id}
+                      behandlingliste={sakOgBehandlinger.behandlinger}
+                    />
                   )}
                 </FlexRow>
               </Heading>
 
-              <BodyShort spacing>Denne saken tilhører enhet {sakStatus.sak.enhet}.</BodyShort>
+              <BodyShort spacing>Denne saken tilhører enhet {sakOgBehandlinger.sak.enhet}.</BodyShort>
               <BodyShort spacing>
-                <Link href={`/person/${fnr}/sak/${sakStatus.sak.id}/brev`}>
+                <Link href={`/person/${fnr}/sak/${sakOgBehandlinger.sak.id}/brev`}>
                   Du finner brev tilhørende saken her <ExternalLinkIcon />
                 </Link>
               </BodyShort>
 
               <hr />
-              <Behandlingsliste behandlinger={sakStatus.behandlinger} sakId={sakStatus.sak.id} />
+              <Behandlingsliste behandlinger={sakOgBehandlinger.behandlinger} sakId={sakOgBehandlinger.sak.id} />
 
-              {kanBrukeKlage ? <KlageListe sakId={sakStatus.sak.id} /> : null}
+              {kanBrukeKlage ? <KlageListe sakId={sakOgBehandlinger.sak.id} /> : null}
             </MainContent>
             <HendelseSidebar>
-              <RelevanteHendelser sak={sakStatus.sak} fnr={fnr} behandlingliste={sakStatus.behandlinger} />
+              <RelevanteHendelser
+                sak={sakOgBehandlinger.sak}
+                fnr={fnr}
+                behandlingliste={sakOgBehandlinger.behandlinger}
+              />
             </HendelseSidebar>
           </>
         )

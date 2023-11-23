@@ -169,7 +169,7 @@ internal fun Route.sakWebRoutes(
                 }
             }
 
-            get("behandlinger") {
+            get("/behandlingerforsak") {
                 val behandlinger =
                     inTransaction {
                         val sak = sakService.finnSak(sakId) ?: throw GenerellIkkeFunnetException()

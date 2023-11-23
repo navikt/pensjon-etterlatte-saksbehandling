@@ -15,7 +15,7 @@ import { FoersteVirk, ISak } from '~shared/types/sak'
 import { InstitusjonsoppholdMedKilde } from '~components/person/uhaandtereHendelser/HistoriskeHendelser'
 
 export const hentBehandlingerForSak = async (sakId: number): Promise<ApiResponse<SakMedBehandlinger>> => {
-  return apiClient.get(`/sak/${sakId}/behandlinger`)
+  return apiClient.get(`/sak/${sakId}/behandlingerforsak`)
 }
 
 export const hentGrunnlagsendringshendelserForPerson = async (

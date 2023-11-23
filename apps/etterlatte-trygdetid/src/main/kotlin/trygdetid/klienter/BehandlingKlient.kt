@@ -87,7 +87,7 @@ class BehandlingKlient(config: Config, httpClient: HttpClient) : BehandlingTilga
             success = { deserialize(it.response.toString()) },
             failure = {
                 logger.error("Kunne ikke hente seneste iverksatte behandling for sak med id $sakId")
-                throw it.throwable
+                throw it
             },
         )
     }
@@ -107,7 +107,7 @@ class BehandlingKlient(config: Config, httpClient: HttpClient) : BehandlingTilga
         return response.mapBoth(
             success = { true },
             failure = {
-                logger.info("Kunne ikke committe trygdetid oppdatert på behandling med id $behandlingId", it.throwable)
+                logger.info("Kunne ikke committe trygdetid oppdatert på behandling med id $behandlingId", it.cause)
                 false
             },
         )

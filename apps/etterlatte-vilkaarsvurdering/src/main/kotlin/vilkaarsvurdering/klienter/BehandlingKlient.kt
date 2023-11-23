@@ -106,7 +106,7 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
         return response.mapBoth(
             success = { true },
             failure = {
-                logger.info("Behandling med id $behandlingId kan ikke vilkaarsvurderes", it.throwable)
+                logger.info("Behandling med id $behandlingId kan ikke vilkaarsvurderes", it.cause)
                 false
             },
         )
@@ -127,7 +127,7 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
         return response.mapBoth(
             success = { true },
             failure = {
-                logger.info("Kunne ikke committe vilkaarsvurdering på behandling med id $behandlingId", it.throwable)
+                logger.info("Kunne ikke committe vilkaarsvurdering på behandling med id $behandlingId", it.cause)
                 false
             },
         )
@@ -149,7 +149,7 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
             success = { deserialize(it.response.toString()) },
             failure = {
                 logger.error("Kunne ikke hente seneste iverksatte behandling for sak med id $sakId")
-                throw it.throwable
+                throw it
             },
         )
     }
@@ -178,7 +178,7 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
             failure = {
                 logger.info(
                     "Behandling med id $behandlingId kan ikke endre status til ${OPPRETTET.name} (commit=$commit)",
-                    it.throwable,
+                    it.cause,
                 )
                 false
             },

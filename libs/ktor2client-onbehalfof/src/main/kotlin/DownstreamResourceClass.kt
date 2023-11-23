@@ -17,6 +17,7 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpMessage
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
+import io.ktor.http.isSuccess
 import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.etterlatte.token.Systembruker
 import org.slf4j.LoggerFactory
@@ -111,14 +112,12 @@ class DownstreamResourceClient(
                 resource.additionalHeaders?.forEach { headers.append(it.key, it.value) }
             }
         }
-            .mapCatching { response ->
-                response.checkForError()
-            }
             .fold(
-                onSuccess = { result ->
-                    when (result.status) {
-                        HttpStatusCode.NoContent -> Ok(null)
-                        else -> Ok(result.body())
+                onSuccess = { response ->
+                    when {
+                        response.status == HttpStatusCode.NoContent -> Ok(null)
+                        response.status.isSuccess() -> Ok(response.body())
+                        else -> response.toErr()
                     }
                 },
                 onFailure = { error ->
@@ -139,16 +138,18 @@ class DownstreamResourceClient(
                 setBody(postBody)
             }
         }
-            .mapCatching { response ->
-                response.checkForError()
-            }
             .fold(
-                onSuccess = { result ->
-                    if (result.harContentType(ContentType.Application.Json)) {
-                        Ok(result.body<JsonNode>())
-                    } else {
-                        logger.info("Mottok content-type: ${result.contentType()} som ikke var JSON")
-                        Ok(result.status)
+                onSuccess = { response ->
+                    when {
+                        response.status.isSuccess() -> {
+                            if (response.harContentType(ContentType.Application.Json)) {
+                                Ok(response.body<JsonNode>())
+                            } else {
+                                logger.info("Mottok content-type: ${response.contentType()} som ikke var JSON")
+                                Ok(response.status)
+                            }
+                        }
+                        else -> response.toErr()
                     }
                 },
                 onFailure = { error ->
@@ -169,12 +170,12 @@ class DownstreamResourceClient(
                 setBody(postBody)
             }
         }
-            .mapCatching { response ->
-                response.checkForError()
-            }
             .fold(
-                onSuccess = { result ->
-                    Ok(result.body())
+                onSuccess = { response ->
+                    when {
+                        response.status.isSuccess() -> Ok(response.body())
+                        else -> response.toErr()
+                    }
                 },
                 onFailure = { error ->
                     error.toErr(resource.url)
@@ -193,12 +194,12 @@ class DownstreamResourceClient(
                 setBody(patchBody)
             }
         }
-            .mapCatching { response ->
-                response.checkForError()
-            }
             .fold(
-                onSuccess = { result ->
-                    Ok(result.body())
+                onSuccess = { response ->
+                    when {
+                        response.status.isSuccess() -> Ok(response.body())
+                        else -> response.toErr()
+                    }
                 },
                 onFailure = { error ->
                     error.toErr(resource.url)

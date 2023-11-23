@@ -67,6 +67,7 @@ loggerRouter.post('/', express.json(), (req, res) => {
             const component = `'${position.source}' (line: ${position.line}, col: ${position.column})`
 
             frontendLogger.error({
+              ...errorObject,
               message: message || 'Request error on: ',
               stack_trace: `Error occurred in ${component}:\n${message}\n${error}`,
             })
@@ -74,15 +75,16 @@ loggerRouter.post('/', express.json(), (req, res) => {
           .catch((err) => {
             frontendLogger.error({
               ...errorObject,
-              message: `Got error on request: ${JSON.stringify(body)}`,
-              stack_trace: JSON.stringify(err),
+              message: `Got error on request`,
+              stack_trace: JSON.stringify({ ...err, ...body }),
             })
           })
       }
     } else {
       frontendLogger.error({
         ...errorObject,
-        message: `General error from frontend, body: ${JSON.stringify(body)}`,
+        message: `General error from frontend.`,
+        stack_trace: JSON.stringify(body),
       })
     }
   }

@@ -214,7 +214,7 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
                 )
             }
 
-            httpClient.post("/api/personer/behandlinger") {
+            httpClient.post("/api/personer/utenlandstilknytning") {
                 addAuthToken(tokenSaksbehandler)
                 contentType(ContentType.Application.Json)
                 setBody(FoedselsnummerDTO(fnr))

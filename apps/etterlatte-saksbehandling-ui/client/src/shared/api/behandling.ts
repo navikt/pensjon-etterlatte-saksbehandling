@@ -9,14 +9,10 @@ import {
 } from '~shared/types/IDetaljertBehandling'
 import { apiClient, ApiResponse } from './apiClient'
 import { ManueltOpphoerDetaljer } from '~components/behandling/manueltopphoeroversikt/ManueltOpphoerOversikt'
-import { Grunnlagsendringshendelse, GrunnlagsendringsListe, SakMedBehandlinger } from '~components/person/typer'
+import { Grunnlagsendringshendelse, GrunnlagsendringsListe } from '~components/person/typer'
 import { InstitusjonsoppholdBegrunnelse } from '~components/person/uhaandtereHendelser/InstitusjonsoppholdVurderingBegrunnelse'
 import { FoersteVirk, ISak } from '~shared/types/sak'
 import { InstitusjonsoppholdMedKilde } from '~components/person/uhaandtereHendelser/HistoriskeHendelser'
-
-export const hentBehandlingerForSak = async (sakId: number): Promise<ApiResponse<SakMedBehandlinger>> => {
-  return apiClient.get(`/sak/${sakId}/behandlingerforsak`)
-}
 
 export const hentGrunnlagsendringshendelserForPerson = async (
   fnr: string

@@ -5,12 +5,12 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
-import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.sak.SakMedUtenlandstilknytning
 import java.time.LocalDateTime
 import java.util.UUID
 
 data class BehandlingListe(
-    val sak: Sak,
+    val sak: SakMedUtenlandstilknytning,
     val behandlinger: List<BehandlingSammendrag>,
 )
 

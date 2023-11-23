@@ -38,7 +38,7 @@ import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.personOpplysning
 import no.nav.etterlatte.revurdering
 import no.nav.etterlatte.sak.SakDao
-import no.nav.etterlatte.sak.SakUtenlandstilknytning
+import no.nav.etterlatte.sak.SakMedUtenlandstilknytning
 import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.etterlatte.token.Saksbehandler
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -450,7 +450,7 @@ class BehandlingServiceImplTest {
         val defaultSakdaoMockMedUtenlandstilknytningSattTilNasjonal =
             mockk<SakDao> {
                 coEvery { hentUtenlandstilknytningForSak(any()) } returns
-                    SakUtenlandstilknytning(
+                    SakMedUtenlandstilknytning(
                         "1234",
                         SakType.BARNEPENSJON,
                         SAK_ID,
@@ -497,7 +497,7 @@ class BehandlingServiceImplTest {
         val sakdaomock =
             mockk<SakDao> {
                 coEvery { hentUtenlandstilknytningForSak(any()) } returns
-                    SakUtenlandstilknytning(
+                    SakMedUtenlandstilknytning(
                         "1234",
                         SakType.BARNEPENSJON,
                         SAK_ID,
@@ -524,7 +524,7 @@ class BehandlingServiceImplTest {
         val sakdaomock =
             mockk<SakDao> {
                 coEvery { hentUtenlandstilknytningForSak(any()) } returns
-                    SakUtenlandstilknytning(
+                    SakMedUtenlandstilknytning(
                         "1234",
                         SakType.BARNEPENSJON,
                         SAK_ID,
@@ -556,7 +556,7 @@ class BehandlingServiceImplTest {
         val sakdaomock =
             mockk<SakDao> {
                 coEvery { hentUtenlandstilknytningForSak(any()) } returns
-                    SakUtenlandstilknytning(
+                    SakMedUtenlandstilknytning(
                         "1234",
                         SakType.BARNEPENSJON,
                         SAK_ID,
@@ -836,7 +836,7 @@ class BehandlingServiceImplTest {
         val defaultSakdaoMockMedUtenlandstilknytningSattTilNasjonal =
             mockk<SakDao> {
                 coEvery { hentUtenlandstilknytningForSak(any()) } returns
-                    SakUtenlandstilknytning(
+                    SakMedUtenlandstilknytning(
                         "1234",
                         SakType.BARNEPENSJON,
                         SAK_ID,

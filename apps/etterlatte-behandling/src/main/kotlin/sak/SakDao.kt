@@ -14,7 +14,7 @@ import no.nav.etterlatte.libs.database.toList
 import java.sql.Connection
 import java.sql.ResultSet
 
-data class SakUtenlandstilknytning(
+data class SakMedUtenlandstilknytning(
     val ident: String,
     val sakType: SakType,
     val id: Long,
@@ -23,7 +23,7 @@ data class SakUtenlandstilknytning(
 )
 
 class SakDao(private val connection: () -> Connection) {
-    fun hentUtenlandstilknytningForSak(sakId: Long): SakUtenlandstilknytning? {
+    fun hentUtenlandstilknytningForSak(sakId: Long): SakMedUtenlandstilknytning? {
         with(connection()) {
             val statement =
                 prepareStatement(
@@ -31,7 +31,7 @@ class SakDao(private val connection: () -> Connection) {
                 )
             statement.setLong(1, sakId)
             return statement.executeQuery().singleOrNull {
-                SakUtenlandstilknytning(
+                SakMedUtenlandstilknytning(
                     sakType = enumValueOf(getString("sakType")),
                     ident = getString("fnr"),
                     id = getLong("id"),

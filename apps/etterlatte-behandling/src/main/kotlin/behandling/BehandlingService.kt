@@ -37,7 +37,7 @@ import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.sak.SakDao
-import no.nav.etterlatte.sak.SakUtenlandstilknytning
+import no.nav.etterlatte.sak.SakMedUtenlandstilknytning
 import no.nav.etterlatte.tilgangsstyring.filterForEnheter
 import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.etterlatte.vedtaksvurdering.VedtakHendelse
@@ -308,7 +308,7 @@ internal class BehandlingServiceImpl(
         val behandling: Behandling,
         val kommerBarnetTilgode: KommerBarnetTilgode?,
         val hendelserIBehandling: List<LagretHendelse>,
-        val sakOgUtenlandstilknytning: SakUtenlandstilknytning?,
+        val sakOgUtenlandstilknytning: SakMedUtenlandstilknytning?,
     )
 
     override suspend fun hentDetaljertBehandlingMedTilbehoer(

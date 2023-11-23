@@ -181,7 +181,7 @@ class GenerellBehandlingServiceTest {
         val foerstegangsbehandlingHentet =
             behandlingRepo.hentBehandling(foerstegangsbehandling.id) as Foerstegangsbehandling
         val brukerTokenInfo = BrukerTokenInfo.of("token", "s1", null, null, null)
-        every { behandlingService.hentBehandlingerISak(sak.id) } returns listOf(foerstegangsbehandlingHentet)
+        every { behandlingService.hentBehandlingerForSak(sak.id) } returns listOf(foerstegangsbehandlingHentet)
         val doedsdato = LocalDate.parse("2016-12-30")
         val personopplysning = personOpplysning(doedsdato = doedsdato)
         val grunnlagsopplysningMedPersonopplysning = grunnlagsOpplysningMedPersonopplysning(personopplysning)

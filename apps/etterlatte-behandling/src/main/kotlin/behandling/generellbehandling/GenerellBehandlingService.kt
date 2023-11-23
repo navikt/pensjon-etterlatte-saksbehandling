@@ -276,7 +276,7 @@ class GenerellBehandlingService(
     ): KravPakkeMedAvdoed {
         val (kravpakke, forstegangsbehandlingMedKravpakke) =
             inTransaction {
-                val behandlingerForSak = behandlingService.hentBehandlingerISak(sakId)
+                val behandlingerForSak = behandlingService.hentBehandlingerForSak(sakId)
                 val foerstegangsbehandlingMedKravpakke =
                     behandlingerForSak.find { behandling ->
                         (behandling is Foerstegangsbehandling) && behandling.boddEllerArbeidetUtlandet?.skalSendeKravpakke == true

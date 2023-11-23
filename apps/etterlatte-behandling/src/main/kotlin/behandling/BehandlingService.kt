@@ -63,7 +63,7 @@ class VirkningstidspunktMaaHaUtenlandstilknytning(message: String) :
 interface BehandlingService {
     fun hentBehandling(behandlingId: UUID): Behandling?
 
-    fun hentBehandlingerISak(sakId: Long): List<Behandling>
+    fun hentBehandlingerForSak(sakId: Long): List<Behandling>
 
     fun hentSisteIverksatte(sakId: Long): Behandling?
 
@@ -149,7 +149,7 @@ internal class BehandlingServiceImpl(
         return hentBehandlingForId(behandlingId)
     }
 
-    override fun hentBehandlingerISak(sakId: Long): List<Behandling> {
+    override fun hentBehandlingerForSak(sakId: Long): List<Behandling> {
         return hentBehandlingerForSakId(sakId)
     }
 
@@ -290,7 +290,7 @@ internal class BehandlingServiceImpl(
     }
 
     override fun hentFoersteVirk(sakId: Long): YearMonth? {
-        val behandlinger = hentBehandlingerISak(sakId)
+        val behandlinger = hentBehandlingerForSak(sakId)
         return behandlinger.tidligsteIverksatteVirkningstidspunkt()?.dato
     }
 

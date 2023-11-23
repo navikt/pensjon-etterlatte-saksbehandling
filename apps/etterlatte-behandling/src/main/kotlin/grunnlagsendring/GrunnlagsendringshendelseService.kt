@@ -504,7 +504,7 @@ class GrunnlagsendringshendelseService(
         samsvarMellomKildeOgGrunnlag: SamsvarMellomKildeOgGrunnlag,
         hendelseId: UUID,
     ): Behandling? {
-        val behandlingerISak = behandlingService.hentBehandlingerISak(sakId)
+        val behandlingerISak = behandlingService.hentBehandlingerForSak(sakId)
         // Har vi en eksisterende behandling som ikke er avbrutt?
         val sisteBehandling =
             behandlingerISak

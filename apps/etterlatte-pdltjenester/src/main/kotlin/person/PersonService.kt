@@ -254,11 +254,11 @@ class PersonService(
         val soesken = avdoede.flatMap { it.avdoedesBarn ?: emptyList() }
 
         val alleTilknyttedePersonerUtenIdent =
-            mottaker.familieRelasjon?.personerUtenIdent +
+            mottaker.familieRelasjon?.personerUtenIdent?.plus(
                 avdoede.flatMap {
                     it.familieRelasjon?.personerUtenIdent ?: emptyList()
-                }
-        gjenlevende.flatMap { it.familieRelasjon?.personerUtenIdent ?: emptyList() }
+                },
+            )?.plus(gjenlevende.flatMap { it.familieRelasjon?.personerUtenIdent ?: emptyList() })
 
         return Persongalleri(
             soeker = mottakerAvYtelsen.value,
@@ -304,16 +304,16 @@ class PersonService(
             }.partition { it.doedsdato != null }
 
         // TODO: håndter tilfellet med felles barn med avdød riktig -- da gjelder det for samboer også
-
         val personerUtenIdent =
             (
                 avdoede.flatMap {
                     it.familieRelasjon?.personerUtenIdent ?: emptyList()
                 }
-            ) + mottaker.familieRelasjon?.personerUtenIdent +
+            ).plus(mottaker.familieRelasjon?.personerUtenIdent ?: emptyList()).plus(
                 levende.flatMap {
                     it.familieRelasjon?.personerUtenIdent ?: emptyList()
-                }
+                },
+            )
 
         return Persongalleri(
             soeker = mottakerAvYtelsen.value,
@@ -354,8 +354,4 @@ class PersonService(
     fun List<PdlResponseError>.asFormatertFeil() = this.joinToString(", ")
 
     fun List<PdlResponseError>.personIkkeFunnet() = any { it.extensions?.code == "not_found" }
-}
-
-infix operator fun <T> List<T>?.plus(other: List<T>?): List<T> {
-    return (this ?: emptyList()) + (other ?: emptyList())
 }

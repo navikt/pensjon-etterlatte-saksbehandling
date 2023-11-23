@@ -12,6 +12,33 @@ export interface IStackLineNoColumnNo {
   error: any
 }
 
+function stackInfoIsInvalid(numbers: IStackLineNoColumnNo): boolean {
+  return numbers.lineno < 1 || numbers.columnno < 0
+}
+
+const sourcemapLocation = '/app/client/assets'
+async function sourceMapMapper(numbers: IStackLineNoColumnNo): Promise<NullableMappedPosition> {
+  const sourcemapFile = fs.readdirSync(sourcemapLocation).find((file) => file.includes('.map')) ?? ''
+  const rawSourceMap = fs.readFileSync(`${sourcemapLocation}/${sourcemapFile}`).toString()
+  const smc = await new sourceMap.SourceMapConsumer(rawSourceMap)
+  return Promise.resolve(smc.originalPositionFor({ line: numbers.lineno, column: numbers.columnno }))
+}
+
+const GYLDIG_FNR = (input: string | undefined) => /^\d{11}$/.test(input ?? '')
+
+function findAndSanitizeUrl(url?: String): String {
+  if (url) {
+    const splittedUrl = url.split('/')
+    splittedUrl.map((urlpart) => {
+      if (GYLDIG_FNR(urlpart)) {
+        return urlpart.substring(0, 5)
+      }
+      return urlpart
+    })
+  }
+  return ''
+}
+
 loggerRouter.post('/', express.json(), (req, res) => {
   const body = req.body
   if (!process.env.NAIS_CLUSTER_NAME) {
@@ -19,9 +46,10 @@ loggerRouter.post('/', express.json(), (req, res) => {
   } else if (body.type && body.type === 'info') {
     frontendLogger.info('Frontendlogging: ', JSON.stringify(body))
   } else {
+    const maybeUrl = findAndSanitizeUrl(body.jsonContent.url)
     if (body.stackInfo) {
       if (stackInfoIsInvalid(body.stackInfo)) {
-        frontendLogger.error('Cannot parse stackInfo, body: \n', JSON.stringify(body))
+        frontendLogger.error('Cannot parse stackInfo, body: \n', JSON.stringify(body), '\n url: ', maybeUrl)
       } else {
         sourceMapMapper(body.stackInfo)
           .then((position) => {
@@ -34,29 +62,20 @@ loggerRouter.post('/', express.json(), (req, res) => {
               stack_trace: `Error occurred in ${component}:\n${message}\n${error}`,
               user_device: JSON.stringify(body.jsonContent.userDeviceInfo),
               user_agent: body.jsonContent.userAgent,
+              url: maybeUrl,
             })
           })
           .catch((err) => {
-            frontendLogger.error('Request got error on: \n', err)
+            frontendLogger.error('Request got error on: \n', err, '\n url: ', maybeUrl)
           })
       }
     } else {
       frontendLogger.error(
-        `General error from frontend: ${JSON.stringify(body.data)} \n details: ${JSON.stringify(body.jsonContent)}`
+        `General error from frontend: ${JSON.stringify(body.data)} \n details: ${JSON.stringify(
+          body.jsonContent
+        )} url: ${maybeUrl}`
       )
     }
   }
   res.sendStatus(200)
 })
-
-function stackInfoIsInvalid(numbers: IStackLineNoColumnNo): boolean {
-  return numbers.lineno < 1 || numbers.columnno < 0
-}
-
-const sourcemapLocation = '/app/client/assets'
-async function sourceMapMapper(numbers: IStackLineNoColumnNo): Promise<NullableMappedPosition> {
-  const sourcemapFile = fs.readdirSync(sourcemapLocation).find((file) => file.includes('.map')) ?? ''
-  const rawSourceMap = fs.readFileSync(`${sourcemapLocation}/${sourcemapFile}`).toString()
-  const smc = await new sourceMap.SourceMapConsumer(rawSourceMap)
-  return Promise.resolve(smc.originalPositionFor({ line: numbers.lineno, column: numbers.columnno }))
-}

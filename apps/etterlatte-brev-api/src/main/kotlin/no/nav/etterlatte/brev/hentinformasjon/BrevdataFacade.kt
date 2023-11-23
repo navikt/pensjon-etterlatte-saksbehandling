@@ -36,6 +36,7 @@ class BrevdataFacade(
     private val grunnlagKlient: GrunnlagKlient,
     private val beregningKlient: BeregningKlient,
     private val behandlingKlient: BehandlingKlient,
+    private val sakService: SakService,
     private val trygdetidService: TrygdetidService,
 ) {
     suspend fun hentEtterbetaling(
@@ -58,7 +59,7 @@ class BrevdataFacade(
         brukerTokenInfo: BrukerTokenInfo,
     ): GenerellBrevData {
         return coroutineScope {
-            val sakDeferred = async { behandlingKlient.hentSak(sakId, brukerTokenInfo) }
+            val sakDeferred = async { sakService.hentSak(sakId, brukerTokenInfo) }
             val vedtakDeferred = async { vedtaksvurderingKlient.hentVedtak(behandlingId, brukerTokenInfo) }
             val grunnlag =
                 when (vedtakDeferred.await().type) {
@@ -151,12 +152,32 @@ class BrevdataFacade(
         }
     }
 
+    suspend fun finnForrigeUtbetalingsinfo(
+        sakId: Long,
+        virkningstidspunkt: YearMonth,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Utbetalingsinfo? =
+        finnUtbetalingsinfoNullable(
+            behandlingKlient.hentSisteIverksatteBehandling(sakId, brukerTokenInfo).id,
+            virkningstidspunkt,
+            brukerTokenInfo,
+        )
+
     suspend fun finnUtbetalingsinfo(
         behandlingId: UUID,
         virkningstidspunkt: YearMonth,
         brukerTokenInfo: BrukerTokenInfo,
-    ): Utbetalingsinfo {
-        val beregning = beregningKlient.hentBeregning(behandlingId, brukerTokenInfo)
+    ): Utbetalingsinfo =
+        requireNotNull(finnUtbetalingsinfoNullable(behandlingId, virkningstidspunkt, brukerTokenInfo)) {
+            "Utbetalingsinfo er nødvendig, men mangler"
+        }
+
+    private suspend fun finnUtbetalingsinfoNullable(
+        behandlingId: UUID,
+        virkningstidspunkt: YearMonth,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Utbetalingsinfo? {
+        val beregning = beregningKlient.hentBeregning(behandlingId, brukerTokenInfo) ?: return null
 
         val beregningsperioder =
             beregning.beregningsperioder.map {
@@ -223,7 +244,7 @@ class BrevdataFacade(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): Trygdetid? {
-        val beregning = beregningKlient.hentBeregning(behandlingId, brukerTokenInfo)
+        val beregning = beregningKlient.hentBeregning(behandlingId, brukerTokenInfo)!!
 
         return trygdetidService.finnTrygdetidsgrunnlag(behandlingId, beregning, brukerTokenInfo)
     }

@@ -105,12 +105,16 @@ class ApplicationBuilder {
     private val behandlingKlient = BehandlingKlient(config, httpClient())
     private val trygdetidKlient = TrygdetidKlient(config, httpClient())
     private val trygdetidService = TrygdetidService(trygdetidKlient)
+
+    private val sakService = SakService(behandlingKlient)
+
     private val brevdataFacade =
         BrevdataFacade(
             vedtakKlient,
             grunnlagKlient,
             beregningKlient,
             behandlingKlient,
+            sakService,
             trygdetidService,
         )
     private val norg2Klient = Norg2Klient(env.requireEnvValue("NORG2_URL"), httpClient())
@@ -139,8 +143,6 @@ class ApplicationBuilder {
     private val soekerService = SoekerService(grunnlagKlient)
 
     private val vedtaksvurderingService = VedtaksvurderingService(vedtakKlient)
-
-    private val sakService = SakService(behandlingKlient)
 
     private val brevService =
         BrevService(

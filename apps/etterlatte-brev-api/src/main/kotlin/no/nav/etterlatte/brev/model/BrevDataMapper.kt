@@ -76,6 +76,13 @@ private class BrevDatafetcher(
             brukerTokenInfo,
         )
 
+    suspend fun hentForrigeUtbetaling() =
+        brevdataFacade.finnForrigeUtbetalingsinfo(
+            sak.id,
+            vedtakVirkningstidspunkt,
+            brukerTokenInfo,
+        )
+
     suspend fun hentGrunnbeloep() = brevdataFacade.hentGrunnbeloep(brukerTokenInfo)
 
     suspend fun hentEtterbetaling() =
@@ -353,8 +360,21 @@ class BrevDataMapper(
                 coroutineScope {
                     val fetcher = datafetcher(brukerTokenInfo, generellBrevData)
                     val utbetaling = async { fetcher.hentUtbetaling() }
+                    val forrigeUtbetaling = async { fetcher.hentForrigeUtbetaling() }
                     val etterbetaling = async { fetcher.hentEtterbetaling() }
-                    EndringHovedmalBrevData.fra(utbetaling.await(), etterbetaling.await(), innholdMedVedlegg)
+                    val trygdetid = async { fetcher.hentTrygdetid() }
+                    val grunnbeloep = async { fetcher.hentGrunnbeloep() }
+                    val trygdetidHentet = requireNotNull(trygdetid.await()) { "${kode.ferdigstilling} Må ha trygdetid" }
+                    val grunnbeloepHentet =
+                        requireNotNull(grunnbeloep.await()) { "${kode.ferdigstilling} Må ha grunnbeløp" }
+                    EndringHovedmalBrevData.fra(
+                        utbetaling.await(),
+                        forrigeUtbetalingsinfo = forrigeUtbetaling.await(),
+                        etterbetaling.await(),
+                        trygdetidHentet,
+                        grunnbeloepHentet,
+                        innholdMedVedlegg,
+                    )
                 }
             }
 

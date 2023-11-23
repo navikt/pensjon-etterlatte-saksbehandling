@@ -28,7 +28,7 @@ class BeregningKlient(config: Config, httpClient: HttpClient) {
     internal suspend fun hentBeregning(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ): BeregningDTO {
+    ): BeregningDTO? {
         try {
             logger.info("Henter beregning (behandlingId: $behandlingId)")
 
@@ -40,10 +40,11 @@ class BeregningKlient(config: Config, httpClient: HttpClient) {
                 failure = { errorResponse -> throw errorResponse },
             )
         } catch (e: Exception) {
-            throw BeregningKlientException(
+            logger.error(
                 "Henting av beregning for behandling med behandlingId=$behandlingId feilet",
                 e,
             )
+            return null
         }
     }
 

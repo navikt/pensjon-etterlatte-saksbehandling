@@ -13,13 +13,10 @@ internal class ClientCallLogging private constructor() {
     private val logger = LoggerFactory.getLogger(ClientCallLogging::class.java)
     private val requestStartTime = AttributeKey<Long>("requestStartTime")
 
-    // Kun dummy pga krav
-    class Config
-
-    companion object : HttpClientPlugin<Config, ClientCallLogging> {
+    companion object : HttpClientPlugin<Any, ClientCallLogging> {
         override val key: AttributeKey<ClientCallLogging> = AttributeKey("ClientCallLogging")
 
-        override fun prepare(block: Config.() -> Unit): ClientCallLogging {
+        override fun prepare(block: Any.() -> Unit): ClientCallLogging {
             return ClientCallLogging()
         }
 

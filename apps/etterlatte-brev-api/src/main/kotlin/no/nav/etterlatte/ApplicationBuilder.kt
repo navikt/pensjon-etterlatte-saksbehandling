@@ -42,6 +42,7 @@ import no.nav.etterlatte.funksjonsbrytere.FeatureToggleProperties
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstartOgAvslutning
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
+import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.requireEnvValue
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.migrate
@@ -49,16 +50,22 @@ import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.libs.ktor.setReady
+import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser
 import no.nav.etterlatte.rivers.DistribuerBrevRiver
 import no.nav.etterlatte.rivers.JournalfoerVedtaksbrevRiver
 import no.nav.etterlatte.rivers.VedtaksbrevUnderkjentRiver
+import no.nav.etterlatte.rivers.migrering.FiksEnkeltbrevRiver
 import no.nav.etterlatte.rivers.migrering.OpprettVedtaksbrevForMigreringRiver
 import no.nav.etterlatte.security.ktor.clientCredential
+import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.pensjon.brevbaker.api.model.RenderedJsonLetter
 import org.slf4j.Logger
+import rapidsandrivers.SAK_ID_KEY
 import rapidsandrivers.getRapidEnv
+import java.util.UUID
+import kotlin.concurrent.thread
 
 val sikkerLogg: Logger = sikkerlogger()
 
@@ -192,10 +199,28 @@ class ApplicationBuilder {
                     },
                 )
                 OpprettVedtaksbrevForMigreringRiver(this, vedtaksbrevService)
+                FiksEnkeltbrevRiver(this, vedtaksbrevService, vedtaksvurderingService)
+                    .also { fiksEnkeltbrev() }
+
                 JournalfoerVedtaksbrevRiver(this, vedtaksbrevService)
                 VedtaksbrevUnderkjentRiver(this, vedtaksbrevService)
                 DistribuerBrevRiver(this, vedtaksbrevService, distribusjonService)
             }
+
+    private fun fiksEnkeltbrev() {
+        thread {
+            Thread.sleep(60_000)
+            rapidsConnection.publish(message = lagMelding(sakId = 245L), key = UUID.randomUUID().toString())
+        }
+    }
+
+    private fun lagMelding(sakId: Long) =
+        JsonMessage.newMessage(
+            mapOf(
+                EVENT_NAME_KEY to Migreringshendelser.FIKS_ENKELTBREV,
+                SAK_ID_KEY to sakId,
+            ),
+        ).toJson()
 
     private fun featureToggleProperties(config: Config) =
         FeatureToggleProperties(

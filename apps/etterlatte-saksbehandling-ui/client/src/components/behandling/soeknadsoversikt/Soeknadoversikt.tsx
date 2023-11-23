@@ -39,24 +39,26 @@ export const Soeknadsoversikt = (props: { behandling: IDetaljertBehandling }) =>
   const avdoedDoedsdatoKilde = behandling.familieforhold?.avdoede?.kilde
   const erBosattUtland = behandling.utenlandstilknytning?.type === UtenlandstilknytningType.BOSATT_UTLAND
 
-  let hjemler =
-    behandling.sakType === SakType.BARNEPENSJON ? BP_FOERSTEGANGSBEHANDLING_HJEMLER : OMS_FOERSTEGANGSBEHANDLING_HJEMLER
-  if (erBosattUtland) {
-    hjemler =
-      behandling.sakType === SakType.BARNEPENSJON
-        ? BP_FOERSTEGANGSBEHANDLING_BOSATT_UTLAND_HJEMLER
-        : OMS_FOERSTEGANGSBEHANDLING_BOSATT_UTLAND_HJEMLER
+  const hjemlerVirkningstidspunkt = (sakType: SakType, erBosattUtland: boolean) => {
+    switch (sakType) {
+      case SakType.BARNEPENSJON:
+        return erBosattUtland ? BP_FOERSTEGANGSBEHANDLING_BOSATT_UTLAND_HJEMLER : BP_FOERSTEGANGSBEHANDLING_HJEMLER
+      case SakType.OMSTILLINGSSTOENAD:
+        return erBosattUtland ? OMS_FOERSTEGANGSBEHANDLING_BOSATT_UTLAND_HJEMLER : OMS_FOERSTEGANGSBEHANDLING_HJEMLER
+    }
   }
 
-  let beskrivelse =
-    behandling.sakType === SakType.BARNEPENSJON
-      ? BP_FOERSTEGANGSBEHANDLING_BESKRIVELSE
-      : OMS_FOERSTEGANGSBEHANDLING_BESKRIVELSE
-  if (erBosattUtland) {
-    beskrivelse =
-      behandling.sakType === SakType.BARNEPENSJON
-        ? BP_FOERSTEGANGSBEHANDLING_BOSATT_UTLAND_BESKRIVELSE
-        : OMS_FOERSTEGANGSBEHANDLING_BOSATT_UTLAND_BESKRIVELSE
+  const beskrivelseVirkningstidspunkt = (sakType: SakType, erBosattUtland: boolean) => {
+    switch (sakType) {
+      case SakType.BARNEPENSJON:
+        return erBosattUtland
+          ? BP_FOERSTEGANGSBEHANDLING_BOSATT_UTLAND_BESKRIVELSE
+          : BP_FOERSTEGANGSBEHANDLING_BESKRIVELSE
+      case SakType.OMSTILLINGSSTOENAD:
+        return erBosattUtland
+          ? OMS_FOERSTEGANGSBEHANDLING_BOSATT_UTLAND_BESKRIVELSE
+          : OMS_FOERSTEGANGSBEHANDLING_BESKRIVELSE
+    }
   }
 
   return (
@@ -88,8 +90,8 @@ export const Soeknadsoversikt = (props: { behandling: IDetaljertBehandling }) =>
               erBosattUtland={erBosattUtland}
               redigerbar={redigerbar}
               behandling={behandling}
-              hjemler={hjemler}
-              beskrivelse={beskrivelse}
+              hjemler={hjemlerVirkningstidspunkt(behandling.sakType, erBosattUtland)}
+              beskrivelse={beskrivelseVirkningstidspunkt(behandling.sakType, erBosattUtland)}
             >
               {{
                 info: (

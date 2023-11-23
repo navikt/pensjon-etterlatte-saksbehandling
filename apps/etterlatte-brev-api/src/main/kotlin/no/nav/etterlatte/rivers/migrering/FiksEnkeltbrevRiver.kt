@@ -1,7 +1,6 @@
 package no.nav.etterlatte.rivers.migrering
 
 import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.brev.MigreringBrevRequest
 import no.nav.etterlatte.brev.VedtaksbrevService
 import no.nav.etterlatte.brev.hentinformasjon.VedtaksvurderingService
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
@@ -39,7 +38,6 @@ internal class FiksEnkeltbrevRiver(
         val behandlingId = brev.behandlingId!!
         val brukerTokenInfo = Systembruker("migrering", "migrering")
         runBlocking {
-            service.genererPdf(brev.id, brukerTokenInfo, MigreringBrevRequest(brutto = 3954))
             service.ferdigstillVedtaksbrev(behandlingId, brukerTokenInfo, true)
             logger.info("Har oppretta vedtaksbrev for brev $brevId")
 

@@ -50,6 +50,7 @@ import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.libs.ktor.setReady
+import no.nav.etterlatte.rapidsandrivers.migrering.FIKS_BREV_MIGRERING
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser
 import no.nav.etterlatte.rivers.DistribuerBrevRiver
 import no.nav.etterlatte.rivers.JournalfoerVedtaksbrevRiver
@@ -210,7 +211,7 @@ class ApplicationBuilder {
     private fun fiksEnkeltbrev() {
         thread {
             Thread.sleep(60_000)
-            rapidsConnection.publish(message = lagMelding(brevId = 224L), key = UUID.randomUUID().toString())
+            rapidsConnection.publish(message = lagMelding(brevId = 1104L), key = UUID.randomUUID().toString())
         }
     }
 
@@ -219,6 +220,7 @@ class ApplicationBuilder {
             mapOf(
                 EVENT_NAME_KEY to Migreringshendelser.FIKS_ENKELTBREV,
                 BREV_ID_KEY to brevId,
+                FIKS_BREV_MIGRERING to true,
             ),
         ).toJson()
 

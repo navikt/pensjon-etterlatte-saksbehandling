@@ -90,8 +90,8 @@ class BehandlingFactory(
 
         if (request.kilde == Vedtaksloesning.PESYS) {
             coroutineScope {
-                val pesysid = requireNotNull(request.pesysid) { "Manuell migrering må ha pesysid til sak som migreres" }
-                migreringKlient.opprettManuellMigrering(behandlingId = behandling.id, pesysId = pesysid)
+                val pesysId = requireNotNull(request.pesysId) { "Manuell migrering må ha pesysid til sak som migreres" }
+                migreringKlient.opprettManuellMigrering(behandlingId = behandling.id, pesysId = pesysId)
             }
         }
 

@@ -31,7 +31,7 @@ export default function ManuellBehandling() {
         sakType: SakType.BARNEPENSJON,
         mottattDato: nyBehandlingRequest!!.mottattDato!!.replace('Z', ''),
         kilde: erMigrering ? 'PESYS' : undefined,
-        pesysid: pesysId,
+        pesysId: pesysId,
       },
       (nyBehandlingRespons) => {
         if (overstyrBeregning) {
@@ -111,12 +111,7 @@ export default function ManuellBehandling() {
           variant="secondary"
           onClick={ferdigstill}
           loading={isPending(status) || isPending(overstyrBeregningStatus)}
-          disabled={
-            erMigrering == null ||
-            (erMigrering && pesysId == null) ||
-            isPending(status) ||
-            isPending(overstyrBeregningStatus)
-          }
+          disabled={erMigrering == null || (erMigrering && pesysId == null)}
         >
           Send inn
         </Button>

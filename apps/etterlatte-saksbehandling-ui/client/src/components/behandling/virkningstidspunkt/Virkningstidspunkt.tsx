@@ -135,15 +135,19 @@ const Virkningstidspunkt = (props: {
                     <div>
                       <Heading size="xsmall">Kravdato</Heading>
                       <BodyShort>
-                        {behandling.virkningstidspunkt!!.kravdato
-                          ? formaterStringDato(behandling.virkningstidspunkt!!.kravdato)
-                          : ''}
+                        {behandling.virkningstidspunkt?.kravdato
+                          ? formaterStringDato(behandling.virkningstidspunkt.kravdato)
+                          : 'Ikke fastsatt'}
                       </BodyShort>
                     </div>
                   )}
                   <div>
                     <Heading size="xsmall">Virkningstidspunkt</Heading>
-                    <BodyShort spacing>{formaterStringDato(behandling.virkningstidspunkt!!.dato)}</BodyShort>
+                    <BodyShort spacing>
+                      {behandling.virkningstidspunkt
+                        ? formaterStringDato(behandling.virkningstidspunkt.dato)
+                        : 'Ikke fastsatt'}
+                    </BodyShort>
                   </div>
                 </VStack>
               }

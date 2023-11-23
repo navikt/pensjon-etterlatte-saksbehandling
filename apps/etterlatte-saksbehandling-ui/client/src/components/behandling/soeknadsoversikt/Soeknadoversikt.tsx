@@ -5,7 +5,7 @@ import { Heading } from '@navikt/ds-react'
 import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapper'
 import { Soeknadsdato } from './Soeknadsdato'
 import { NesteOgTilbake } from '../handlinger/NesteOgTilbake'
-import { behandlingErUtfylt, behandlingErRedigerbar } from '../felles/utils'
+import { behandlingErRedigerbar, behandlingErUtfylt } from '../felles/utils'
 import { VurderingsResultat } from '~shared/types/VurderingsResultat'
 import { OversiktGyldigFramsatt } from '~components/behandling/soeknadsoversikt/gyldigFramsattSoeknad/OversiktGyldigFramsatt'
 import { Utenlandstilknytning } from '~components/behandling/soeknadsoversikt/utenlandstilknytning/Utenlandstilknytning'
@@ -17,10 +17,14 @@ import { BoddEllerArbeidetUtlandet } from '~components/behandling/soeknadsoversi
 import OppdaterGrunnlagModal from '~components/behandling/handlinger/OppdaterGrunnlagModal'
 import { SkalViseBosattUtland } from '~components/behandling/soeknadsoversikt/bosattUtland/SkalViseBosattUtland'
 import {
-  BOSATT_UTLAND_FELLES_BESKRIVELSE,
   BP_FOERSTEGANGSBEHANDLING_BESKRIVELSE,
+  BP_FOERSTEGANGSBEHANDLING_BOSATT_UTLAND_BESKRIVELSE,
+  BP_FOERSTEGANGSBEHANDLING_BOSATT_UTLAND_HJEMLER,
   BP_FOERSTEGANGSBEHANDLING_HJEMLER,
   OMS_FOERSTEGANGSBEHANDLING_BESKRIVELSE,
+  OMS_FOERSTEGANGSBEHANDLING_BOSATT_UTLAND_BESKRIVELSE,
+  OMS_FOERSTEGANGSBEHANDLING_BOSATT_UTLAND_HJEMLER,
+  OMS_FOERSTEGANGSBEHANDLING_HJEMLER,
 } from '~components/behandling/virkningstidspunkt/utils'
 import Virkningstidspunkt from '~components/behandling/virkningstidspunkt/Virkningstidspunkt'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
@@ -35,11 +39,13 @@ export const Soeknadsoversikt = (props: { behandling: IDetaljertBehandling }) =>
   const avdoedDoedsdatoKilde = behandling.familieforhold?.avdoede?.kilde
   const erBosattUtland = behandling.utenlandstilknytning?.type === UtenlandstilknytningType.BOSATT_UTLAND
 
-  let hjemler = BP_FOERSTEGANGSBEHANDLING_HJEMLER
+  let hjemler =
+    behandling.sakType === SakType.BARNEPENSJON ? BP_FOERSTEGANGSBEHANDLING_HJEMLER : OMS_FOERSTEGANGSBEHANDLING_HJEMLER
   if (erBosattUtland) {
-    hjemler = hjemler.concat([
-      { lenke: 'https://lovdata.no/pro/eu/32004r0883/ARTIKKEL_81', tittel: 'EØS forordning 883/2004 art 81"' },
-    ])
+    hjemler =
+      behandling.sakType === SakType.BARNEPENSJON
+        ? BP_FOERSTEGANGSBEHANDLING_BOSATT_UTLAND_HJEMLER
+        : OMS_FOERSTEGANGSBEHANDLING_BOSATT_UTLAND_HJEMLER
   }
 
   let beskrivelse =
@@ -47,7 +53,10 @@ export const Soeknadsoversikt = (props: { behandling: IDetaljertBehandling }) =>
       ? BP_FOERSTEGANGSBEHANDLING_BESKRIVELSE
       : OMS_FOERSTEGANGSBEHANDLING_BESKRIVELSE
   if (erBosattUtland) {
-    beskrivelse = BOSATT_UTLAND_FELLES_BESKRIVELSE
+    beskrivelse =
+      behandling.sakType === SakType.BARNEPENSJON
+        ? BP_FOERSTEGANGSBEHANDLING_BOSATT_UTLAND_BESKRIVELSE
+        : OMS_FOERSTEGANGSBEHANDLING_BOSATT_UTLAND_BESKRIVELSE
   }
 
   return (

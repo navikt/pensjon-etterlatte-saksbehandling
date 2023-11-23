@@ -292,7 +292,9 @@ class VedtakBehandlingService(
                 behandlingId = behandlingId,
             )
 
-        if (!samKlient.samordneVedtak(tilSamordningVedtakLocal, brukerTokenInfo)) {
+        val isEtterbetaling = behandlingKlient.harEtterbetaling(behandlingId, brukerTokenInfo)
+
+        if (!samKlient.samordneVedtak(tilSamordningVedtakLocal, isEtterbetaling, brukerTokenInfo)) {
             logger.info("Svar fra samordning: ikke nødvendig å vente for vedtak=${vedtak.id} [behandlingId=$behandlingId]")
 
             val vedtakEtterSvar = samordnetVedtak(behandlingId, brukerTokenInfo, tilSamordningVedtakLocal)

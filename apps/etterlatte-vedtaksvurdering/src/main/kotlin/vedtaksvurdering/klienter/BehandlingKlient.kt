@@ -97,6 +97,11 @@ interface BehandlingKlient : BehandlingTilgangsSjekk, SakTilgangsSjekk {
         oppgaveTilAttestering: OppgaveIntern,
         brukerTokenInfo: BrukerTokenInfo,
     ): Boolean
+
+    suspend fun harEtterbetaling(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Boolean
 }
 
 class BehandlingKlientException(override val message: String, override val cause: Throwable? = null) :
@@ -435,4 +440,25 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
             BehandlingStatus.RETURNERT -> "returner"
             else -> throw BehandlingKlientException("Ugyldig status ${status.name}")
         }
+
+    override suspend fun harEtterbetaling(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Boolean {
+        logger.info("Henter eventuell etterbetaling for behandlingId=$behandlingId")
+
+        val resource = Resource(clientId = clientId, url = "$resourceUrl/api/behandling/$behandlingId/etterbetaling")
+        val response = downstreamResourceClient.get(resource = resource, brukerTokenInfo = brukerTokenInfo)
+
+        return response.mapBoth(
+            success = { res -> res.response != null },
+            failure = {
+                logger.info(
+                    "Feil ved henting av etterbetaling, behandlingId=$behandlingId",
+                    it.throwable,
+                )
+                false
+            },
+        )
+    }
 }

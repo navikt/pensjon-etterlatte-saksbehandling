@@ -37,7 +37,7 @@ internal class ClientCallLogging private constructor() {
     }
 
     private fun setupPostRequestLogHandler(client: HttpClient) {
-        client.receivePipeline.intercept(HttpReceivePipeline.State) { res ->
+        client.receivePipeline.intercept(HttpReceivePipeline.After) { res ->
             with(res.call) {
                 val requestStartTime = attributes[requestStartTime]
                 val executionTime = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - requestStartTime)

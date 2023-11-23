@@ -55,7 +55,6 @@ import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser
 import no.nav.etterlatte.rivers.DistribuerBrevRiver
 import no.nav.etterlatte.rivers.JournalfoerVedtaksbrevRiver
 import no.nav.etterlatte.rivers.VedtaksbrevUnderkjentRiver
-import no.nav.etterlatte.rivers.migrering.BREV_ID_KEY
 import no.nav.etterlatte.rivers.migrering.FiksEnkeltbrevRiver
 import no.nav.etterlatte.rivers.migrering.OpprettVedtaksbrevForMigreringRiver
 import no.nav.etterlatte.security.ktor.clientCredential
@@ -64,7 +63,9 @@ import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.pensjon.brevbaker.api.model.RenderedJsonLetter
 import org.slf4j.Logger
+import rapidsandrivers.BEHANDLING_ID_KEY
 import rapidsandrivers.getRapidEnv
+import java.util.UUID
 import kotlin.concurrent.thread
 
 val sikkerLogg: Logger = sikkerlogger()
@@ -210,15 +211,18 @@ class ApplicationBuilder {
     private fun fiksEnkeltbrev() {
         thread {
             Thread.sleep(60_000)
-//            rapidsConnection.publish(message = lagMelding(brevId = 1104L), key = UUID.randomUUID().toString())
+            rapidsConnection.publish(
+                message = lagMelding(behandlingId = "8d23f2be-e025-4671-8a26-fddb4634b15c"),
+                key = UUID.randomUUID().toString(),
+            )
         }
     }
 
-    private fun lagMelding(brevId: Long) =
+    private fun lagMelding(behandlingId: String) =
         JsonMessage.newMessage(
             mapOf(
                 EVENT_NAME_KEY to Migreringshendelser.FIKS_ENKELTBREV,
-                BREV_ID_KEY to brevId,
+                BEHANDLING_ID_KEY to behandlingId,
                 FIKS_BREV_MIGRERING to true,
             ),
         ).toJson()

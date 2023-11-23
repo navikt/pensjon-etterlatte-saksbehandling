@@ -17,6 +17,7 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpMessage
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
+import no.nav.etterlatte.libs.common.retryOgPakkUt
 import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.etterlatte.token.Systembruker
 import org.slf4j.LoggerFactory
@@ -104,11 +105,12 @@ class DownstreamResourceClient(
         resource: Resource,
         oboAccessToken: AccessToken,
     ): Result<JsonNode?, ThrowableErrorMessage> =
-
         runCatching {
-            httpClient.get(resource.url) {
-                header(HttpHeaders.Authorization, "Bearer ${oboAccessToken.accessToken}")
-                resource.additionalHeaders?.forEach { headers.append(it.key, it.value) }
+            retryOgPakkUt {
+                httpClient.get(resource.url) {
+                    header(HttpHeaders.Authorization, "Bearer ${oboAccessToken.accessToken}")
+                    resource.additionalHeaders?.forEach { headers.append(it.key, it.value) }
+                }
             }
         }
             .mapCatching { response ->

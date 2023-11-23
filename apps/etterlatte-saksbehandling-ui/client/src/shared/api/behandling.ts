@@ -14,6 +14,7 @@ import { InstitusjonsoppholdBegrunnelse } from '~components/person/uhaandtereHen
 import { FoersteVirk, ISak } from '~shared/types/sak'
 import { InstitusjonsoppholdMedKilde } from '~components/person/uhaandtereHendelser/HistoriskeHendelser'
 import { format } from 'date-fns'
+import { DatoFormat } from '~utils/formattering'
 
 export const hentBehandlingerForSak = async (sakId: number): Promise<ApiResponse<SakMedBehandlinger>> => {
   return apiClient.get(`/sak/${sakId}/behandlingerforsak`)
@@ -49,7 +50,7 @@ export const fastsettVirkningstidspunkt = async (args: {
   return apiClient.post(`/behandling/${args.id}/virkningstidspunkt`, {
     dato: args.dato,
     begrunnelse: args.begrunnelse,
-    kravdato: args.kravdato ? format(args.kravdato, 'yyyy-MM-dd') : null,
+    kravdato: args.kravdato ? format(args.kravdato, DatoFormat.AAR_MAANED_DAG) : null,
   })
 }
 

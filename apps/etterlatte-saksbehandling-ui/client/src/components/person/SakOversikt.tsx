@@ -5,7 +5,7 @@ import { ManueltOpphoerModal } from './ManueltOpphoerModal'
 import { FlexRow, GridContainer } from '~shared/styled'
 import Spinner from '~shared/Spinner'
 import RelevanteHendelser from '~components/person/uhaandtereHendelser/RelevanteHendelser'
-import { isFailure, isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
+import { mapApiResult, useApiCall } from '~shared/hooks/useApiCall'
 import { Alert, BodyShort, Heading, Link, Tag } from '@navikt/ds-react'
 import { SakType } from '~shared/types/sak'
 import { formaterEnumTilLesbarString, formaterSakstype } from '~utils/formattering'
@@ -22,56 +22,57 @@ export const SakOversikt = ({ fnr }: { fnr: string }) => {
 
   useEffect(() => {
     hentSak(fnr)
-  }, [])
+  }, [fnr])
 
   return (
     <GridContainer>
-      <MainContent>
-        {isFailure(sakStatus) && <Alert variant="error">{JSON.stringify(sakStatus.error)}</Alert>}
-        {isSuccess(sakStatus) && (
+      {mapApiResult(
+        sakStatus,
+        <Spinner visible={true} label="Henter sak og behandlinger" />,
+        (error) => (
+          <Alert variant="error">{JSON.stringify(error)}</Alert>
+        ),
+        (sakStatus) => (
           <>
-            <Heading size="medium" spacing>
-              Saknummer {sakStatus.data.sak.id}{' '}
-              <Tag variant="success" size="medium">
-                {formaterSakstype(sakStatus.data.sak.sakType)}
-              </Tag>
-              {sakStatus.data.sak.utenlandstilknytning ? (
-                <Tag variant={tagColors[sakStatus.data.sak.utenlandstilknytning.type]} size="small">
-                  {formaterEnumTilLesbarString(sakStatus.data.sak.utenlandstilknytning.type)}
+            <MainContent>
+              <Heading size="medium" spacing>
+                Saknummer {sakStatus.sak.id}{' '}
+                <Tag variant="success" size="medium">
+                  {formaterSakstype(sakStatus.sak.sakType)}
                 </Tag>
-              ) : (
-                <BodyShort>Du må velge en tilknytning for saken</BodyShort>
-              )}
-              <FlexRow justify="right">
-                <OpprettKlage sakId={sakStatus.data.sak.id} />
-                {sakStatus.data.sak.sakType === SakType.BARNEPENSJON && (
-                  <ManueltOpphoerModal sakId={sakStatus.data.sak.id} behandlingliste={sakStatus.data.behandlinger} />
+                {sakStatus.sak.utenlandstilknytning ? (
+                  <Tag variant={tagColors[sakStatus.sak.utenlandstilknytning.type]} size="small">
+                    {formaterEnumTilLesbarString(sakStatus.sak.utenlandstilknytning.type)}
+                  </Tag>
+                ) : (
+                  <BodyShort>Du må velge en tilknytning for saken</BodyShort>
                 )}
-              </FlexRow>
-            </Heading>
+                <FlexRow justify="right">
+                  <OpprettKlage sakId={sakStatus.sak.id} />
+                  {sakStatus.sak.sakType === SakType.BARNEPENSJON && (
+                    <ManueltOpphoerModal sakId={sakStatus.sak.id} behandlingliste={sakStatus.behandlinger} />
+                  )}
+                </FlexRow>
+              </Heading>
 
-            <BodyShort spacing>Denne saken tilhører enhet {sakStatus.data.sak.enhet}.</BodyShort>
-            <BodyShort spacing>
-              <Link href={`/person/${fnr}/sak/${sakStatus.data.sak.id}/brev`}>
-                Du finner brev tilhørende saken her <ExternalLinkIcon />
-              </Link>
-            </BodyShort>
+              <BodyShort spacing>Denne saken tilhører enhet {sakStatus.sak.enhet}.</BodyShort>
+              <BodyShort spacing>
+                <Link href={`/person/${fnr}/sak/${sakStatus.sak.id}/brev`}>
+                  Du finner brev tilhørende saken her <ExternalLinkIcon />
+                </Link>
+              </BodyShort>
 
-            <hr />
-            <Behandlingsliste behandlinger={sakStatus.data.behandlinger} sakId={sakStatus.data.sak.id} />
+              <hr />
+              <Behandlingsliste behandlinger={sakStatus.behandlinger} sakId={sakStatus.sak.id} />
 
-            {kanBrukeKlage ? <KlageListe sakId={sakStatus.data.sak.id} /> : null}
+              {kanBrukeKlage ? <KlageListe sakId={sakStatus.sak.id} /> : null}
+            </MainContent>
+            <HendelseSidebar>
+              <RelevanteHendelser sak={sakStatus.sak} fnr={fnr} behandlingliste={sakStatus.behandlinger} />
+            </HendelseSidebar>
           </>
-        )}
-      </MainContent>
-
-      <HendelseSidebar>
-        {isPending(sakStatus) && <Spinner visible label="Forbereder hendelser ..." />}
-
-        {isSuccess(sakStatus) && sakStatus.data.sak.id && (
-          <RelevanteHendelser sak={sakStatus.data.sak} fnr={fnr} behandlingliste={sakStatus.data.behandlinger} />
-        )}
-      </HendelseSidebar>
+        )
+      )}
     </GridContainer>
   )
 }

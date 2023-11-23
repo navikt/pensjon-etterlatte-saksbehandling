@@ -45,6 +45,9 @@ internal class Verifiserer(
         if (request.gjenlevendeForelder == null) {
             return listOf(GjenlevendeForelderMangler)
         }
+        if (request.enhet.nr == "0001") {
+            return listOf(EnhetUtland)
+        }
         request.gjenlevendeForelder!!.let { personer.add(Pair(PersonRolle.GJENLEVENDE, it)) }
 
         return personer
@@ -101,4 +104,9 @@ object GjenlevendeForelderMangler : Verifiseringsfeil() {
 object BarnetHarVerge : Verifiseringsfeil() {
     override val message: String
         get() = "Barn har vergemaal eller fremtidsfullmakt, kan ikke migrere"
+}
+
+object EnhetUtland : Verifiseringsfeil() {
+    override val message: String
+        get() = "Vi har ikke adresse for enhet utland. Må følges opp snart"
 }

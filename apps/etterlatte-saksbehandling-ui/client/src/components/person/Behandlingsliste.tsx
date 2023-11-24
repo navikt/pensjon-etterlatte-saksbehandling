@@ -46,7 +46,7 @@ export const Behandlingsliste = ({ behandlinger, sakId }: { behandlinger: IBehan
 
   useEffect(() => {
     hentGenerellbehandlinger(sakId)
-  }, [])
+  }, [sakId])
 
   let allebehandlinger: alleBehandlingsTyper[] = []
   allebehandlinger = allebehandlinger.concat(behandlinger)
@@ -54,7 +54,7 @@ export const Behandlingsliste = ({ behandlinger, sakId }: { behandlinger: IBehan
     allebehandlinger = allebehandlinger.concat(generellbehandlingStatus.data)
   }
 
-  allebehandlinger.sort((a, b) => (new Date(hentDato(a)) > new Date(hentDato(b)) ? 1 : -1))
+  allebehandlinger.sort((a, b) => (new Date(hentDato(a)) < new Date(hentDato(b)) ? 1 : -1))
 
   return (
     <BehandlingPanel>

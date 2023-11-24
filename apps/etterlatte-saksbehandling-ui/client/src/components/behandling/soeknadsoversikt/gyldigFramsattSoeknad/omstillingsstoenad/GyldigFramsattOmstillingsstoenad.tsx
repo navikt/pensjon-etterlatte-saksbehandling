@@ -9,16 +9,17 @@ import {
 import { GyldigFramsattVurdering } from '~components/behandling/soeknadsoversikt/gyldigFramsattSoeknad/omstillingsstoenad/GyldigFramsattVurdering'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import { formaterKildePdl } from '~components/behandling/soeknadsoversikt/utils'
-import { hentBehandlesFraStatus } from '~components/behandling/felles/utils'
+import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
+import { StatusIconProps } from '~shared/icons/statusIcon'
 
 export const GyldigFramsattOmstillingsstoenad = ({
   behandling,
   gyldigFremsattTilStatusIcon,
 }: {
-  gyldigFremsattTilStatusIcon: 'success' | 'error' | 'warning'
+  gyldigFremsattTilStatusIcon: StatusIconProps
   behandling: IDetaljertBehandling
 }) => {
-  const behandles = hentBehandlesFraStatus(behandling.status)
+  const redigerbar = behandlingErRedigerbar(behandling.status)
   const innsender = behandling.familieforhold?.gjenlevende
   const navn = innsender ? `${innsender.opplysning.fornavn} ${innsender.opplysning.etternavn}` : 'Ukjent'
   const undertekst = formaterKildePdl(innsender?.kilde)
@@ -54,7 +55,7 @@ export const GyldigFramsattOmstillingsstoenad = ({
         <GyldigFramsattVurdering
           behandlingId={behandling.id}
           gyldigFramsatt={behandling.gyldighetsprøving}
-          redigerbar={behandles}
+          redigerbar={redigerbar}
         />
       </VurderingsContainerWrapper>
     </LovtekstMedLenke>

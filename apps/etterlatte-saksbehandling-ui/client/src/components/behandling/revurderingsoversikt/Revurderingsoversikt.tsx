@@ -1,8 +1,8 @@
 import { Content, ContentHeader } from '~shared/styled'
-import { Alert, BodyShort, Heading } from '@navikt/ds-react'
+import { BodyShort, Heading } from '@navikt/ds-react'
 import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapper'
 import { NesteOgTilbake } from '../handlinger/NesteOgTilbake'
-import { hentBehandlesFraStatus, requireNotNull } from '../felles/utils'
+import { behandlingErRedigerbar, requireNotNull } from '../felles/utils'
 import Virkningstidspunkt, { Hjemmel } from '~components/behandling/virkningstidspunkt/Virkningstidspunkt'
 import { Start } from '~components/behandling/handlinger/start'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
@@ -87,7 +87,7 @@ const hjemlerOgBeskrivelseBarnepensjon = (revurderingsaarsak: Revurderingaarsak)
 
 export const Revurderingsoversikt = (props: { behandling: IDetaljertBehandling }) => {
   const { behandling } = props
-  const behandles = hentBehandlesFraStatus(behandling.status)
+  const redigerbar = behandlingErRedigerbar(behandling.status)
   const revurderingsaarsak = requireNotNull(
     behandling.revurderingsaarsak,
     'Kan ikke starte en revurdering uten en revurderingsårsak'
@@ -103,18 +103,12 @@ export const Revurderingsoversikt = (props: { behandling: IDetaljertBehandling }
           </Heading>
         </HeadingWrapper>
         {revurderingsaarsak != Revurderingaarsak.ANNEN && (
-          <BodyShort>
+          <BodyShort spacing>
             {erOpphoer(revurderingsaarsak) ? 'Opphør' : 'Revurdering'} på grunn av{' '}
             <Lowercase>{revurderingsaarsakTilTekst(revurderingsaarsak)}</Lowercase>.
           </BodyShort>
         )}
         <Soeknadsdato mottattDato={behandling.soeknadMottattDato} />
-        {erOpphoer(revurderingsaarsak) && (
-          <Alert variant="warning">
-            Gjenny støtter ikke tilbakekreving per dags dato, så opphør må ikke gjennomføres hvis opphøret gjelder fra
-            et tidspunkt før siste utbetaling i saken.
-          </Alert>
-        )}
       </ContentHeader>
       <InnholdPadding>
         <OppdaterGrunnlagModal behandlingId={behandling.id} behandlingStatus={behandling.status} />
@@ -129,6 +123,7 @@ export const Revurderingsoversikt = (props: { behandling: IDetaljertBehandling }
             sakId={behandling.sakId}
             revurderingId={behandling.id}
             sluttbehandlingUtland={behandling.revurderinginfo?.revurderingInfo as SluttbehandlingUtlandInfo | undefined}
+            redigerbar={redigerbar}
           />
         )}
         {behandling.revurderingsaarsak === Revurderingaarsak.SOESKENJUSTERING && (
@@ -142,7 +137,7 @@ export const Revurderingsoversikt = (props: { behandling: IDetaljertBehandling }
 
         <Virkningstidspunkt
           erBosattUtland={false}
-          redigerbar={behandles}
+          redigerbar={redigerbar}
           behandling={behandling}
           hjemler={hjemler}
           beskrivelse={beskrivelse}
@@ -151,7 +146,7 @@ export const Revurderingsoversikt = (props: { behandling: IDetaljertBehandling }
         </Virkningstidspunkt>
       </InnholdPadding>
       <Border />
-      {behandles ? (
+      {redigerbar ? (
         <BehandlingHandlingKnapper>
           <Start disabled={behandling.virkningstidspunkt === null} />
         </BehandlingHandlingKnapper>

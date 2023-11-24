@@ -296,6 +296,27 @@ internal class PersonServiceTest {
         assertEquals(tilknytning.geografiskTilknytning(), "0301")
     }
 
+    @Test
+    fun `Bruker uten geografisk tilknytning`() {
+        coEvery { pdlKlient.hentGeografiskTilknytning(any()) } returns
+            PdlGeografiskTilknytningResponse(
+                data =
+                    PdlGeografiskTilknytningData(
+                        null,
+                    ),
+            )
+
+        val tilknytning =
+            runBlocking {
+                personService.hentGeografiskTilknytning(
+                    HentGeografiskTilknytningRequest(TRIVIELL_MIDTPUNKT, SakType.BARNEPENSJON),
+                )
+            }
+
+        assertNotNull(tilknytning)
+        assertTrue(tilknytning.ukjent)
+    }
+
     @ParameterizedTest
     @EnumSource(PdlGradering::class)
     fun `Skal hente gradering for person`(pdlGradering: PdlGradering) {

@@ -20,7 +20,7 @@ data class InnvilgetBrevData(
         ): InnvilgetBrevData =
             InnvilgetBrevData(
                 utbetalingsinfo = utbetalingsinfo,
-                avdoed = generellBrevData.personerISak.avdoed,
+                avdoed = generellBrevData.personerISak.avdoede.minBy { it.doedsdato },
                 avkortingsinfo = avkortingsinfo,
             )
     }

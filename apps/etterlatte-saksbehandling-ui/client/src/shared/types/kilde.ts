@@ -7,6 +7,7 @@ export enum KildeType {
   aa_registeret = 'aa-registeret',
   vilkaarskomponenten = 'vilkaarskomponenten',
   pdl = 'pdl',
+  persondata = 'persondata',
 }
 
 export interface KildeSaksbehandler {
@@ -17,6 +18,14 @@ export interface KildeSaksbehandler {
 
 export interface KildePdl {
   type: KildeType.pdl
+  tidspunktForInnhenting: string
+  navn: string
+  registersReferanse: string
+  opplysningId: string
+}
+
+export interface KildePersondata {
+  type: KildeType.persondata
   tidspunktForInnhenting: string
   navn: string
   registersReferanse: string

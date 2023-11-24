@@ -19,11 +19,13 @@ export default function LandRad({
   landMedDokumenter,
   oppdaterLandMedDokumenter,
   landListe,
+  label = undefined,
 }: {
   lesevisning: boolean
   landMedDokumenter: LandMedDokumenter
   oppdaterLandMedDokumenter: (oppdatertLandMedDokumenter: LandMedDokumenter) => void
   landListe: ILand[]
+  label?: string
 }) {
   return (
     <Flex>
@@ -50,6 +52,7 @@ export default function LandRad({
         lesevisning={lesevisning}
         landMedDokumenter={landMedDokumenter}
         oppdaterLandMedDokumenter={oppdaterLandMedDokumenter}
+        label={label}
       />
     </Flex>
   )

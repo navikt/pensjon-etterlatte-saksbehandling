@@ -29,6 +29,7 @@ interface SamKlient {
      */
     suspend fun samordneVedtak(
         vedtak: Vedtak,
+        etterbetaling: Boolean,
         brukerTokenInfo: BrukerTokenInfo,
     ): Boolean
 }
@@ -44,6 +45,7 @@ class SamKlientImpl(
 
     override suspend fun samordneVedtak(
         vedtak: Vedtak,
+        etterbetaling: Boolean,
         brukerTokenInfo: BrukerTokenInfo,
     ): Boolean {
         if (!featureToggleService.isEnabled(
@@ -62,7 +64,7 @@ class SamKlientImpl(
             val response =
                 httpClient.post("$resourceUrl/api/vedtak/samordne") {
                     contentType(ContentType.Application.Json)
-                    setBody(vedtak.tilSamordneRequest())
+                    setBody(vedtak.tilSamordneRequest(etterbetaling))
                 }
 
             if (response.status.isSuccess()) {
@@ -77,7 +79,7 @@ class SamKlientImpl(
     }
 }
 
-internal fun Vedtak.tilSamordneRequest(): SamordneVedtakRequest {
+internal fun Vedtak.tilSamordneRequest(etterbetaling: Boolean): SamordneVedtakRequest {
     val innhold =
         when (this.innhold) {
             is VedtakBehandlingInnhold -> this.innhold
@@ -89,20 +91,24 @@ internal fun Vedtak.tilSamordneRequest(): SamordneVedtakRequest {
     return SamordneVedtakRequest(
         pid = this.soeker,
         vedtakId = this.id,
+        sakId = this.sakId,
         virkFom = innhold.virkningstidspunkt.atDay(1),
         virkTom = innhold.utbetalingsperioder.maxByOrNull { it.periode.fom }?.periode?.tom?.atEndOfMonth(),
         fagomrade = "EYO",
         ytelseType = "OMS",
+        etterbetaling = etterbetaling,
     )
 }
 
 internal data class SamordneVedtakRequest(
     val pid: Folkeregisteridentifikator,
     val vedtakId: Long,
+    val sakId: Long,
     val virkFom: LocalDate?,
     val virkTom: LocalDate?,
     val fagomrade: String,
     val ytelseType: String,
+    val etterbetaling: Boolean,
 )
 
 private class SamordneVedtakRespons(val ventPaaSvar: Boolean)

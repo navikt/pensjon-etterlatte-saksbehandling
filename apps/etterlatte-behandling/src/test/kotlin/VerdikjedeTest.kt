@@ -231,6 +231,7 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
                         YearMonth.of(2022, 2),
                         Grunnlagsopplysning.Saksbehandler.create("Saksbehandler01"),
                         "En begrunnelse",
+                        null,
                     )
                 assertEquals(expected.dato, it.body<FastsettVirkningstidspunktResponse>().dato)
                 assertEquals(expected.kilde.ident, it.body<FastsettVirkningstidspunktResponse>().kilde.ident)

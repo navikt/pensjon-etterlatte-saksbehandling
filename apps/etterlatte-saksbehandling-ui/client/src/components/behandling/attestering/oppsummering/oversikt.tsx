@@ -16,25 +16,23 @@ import { isFailure, isInitial, isPending, isPendingOrInitial, isSuccess, useApiC
 import { hentOppgaveForBehandlingUnderBehandlingIkkeattestert } from '~shared/api/oppgaver'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
+import { KopierbarVerdi } from '~shared/statusbar/kopierbarVerdi'
 
-export const Oversikt = ({
-  behandlingsInfo,
-  children,
-}: {
-  behandlingsInfo: IBehandlingInfo
-  children: JSX.Element
-}) => {
+export const Oversikt = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo }) => {
   const kommentarFraAttestant = behandlingsInfo.attestertLogg?.slice(-1)[0]?.kommentar
   const [saksbehandlerPaaOppgave, setSaksbehandlerPaaOppgave] = useState<string | null>(null)
   const [oppgaveForBehandlingStatus, requesthentOppgaveForBehandling] = useApiCall(
     hentOppgaveForBehandlingUnderBehandlingIkkeattestert
   )
   useEffect(() => {
-    requesthentOppgaveForBehandling({ behandlingId: behandlingsInfo.behandlingId }, (saksbehandler, statusCode) => {
-      if (statusCode === 200) {
-        setSaksbehandlerPaaOppgave(saksbehandler)
+    requesthentOppgaveForBehandling(
+      { referanse: behandlingsInfo.behandlingId, sakId: behandlingsInfo.sakId },
+      (saksbehandler, statusCode) => {
+        if (statusCode === 200) {
+          setSaksbehandlerPaaOppgave(saksbehandler)
+        }
       }
-    })
+    )
   }, [])
 
   const hentStatus = () => {
@@ -121,10 +119,24 @@ export const Oversikt = ({
           <Tekst>{kommentarFraAttestant}</Tekst>
         </div>
       )}
-      {children}
+      <SakFlexbox>
+        <InfoSakId>Sakid: </InfoSakId>
+        <KopierbarVerdi value={behandlingsInfo.sakId.toString()} />
+      </SakFlexbox>
     </SidebarPanel>
   )
 }
+
+const SakFlexbox = styled.div`
+  display: flex;
+  flex-direction: row;
+  margin-top: 1em;
+`
+const InfoSakId = styled.div`
+  margin-top: 8px;
+  font-size: 14px;
+  font-weight: 600;
+`
 
 const Info = styled.div`
   font-size: 14px;

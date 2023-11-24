@@ -47,7 +47,7 @@ export const hentGyldigeNavigeringsStatuser = (status: IBehandlingStatus) => {
   return rekkefoelge.slice(0, index)
 }
 
-export const hentBehandlesFraStatus = (status: IBehandlingStatus): boolean => {
+export const behandlingErRedigerbar = (status: IBehandlingStatus): boolean => {
   return (
     status === IBehandlingStatus.OPPRETTET ||
     status === IBehandlingStatus.VILKAARSVURDERT ||

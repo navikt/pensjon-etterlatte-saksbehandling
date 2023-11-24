@@ -43,6 +43,7 @@ import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.assertAll
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
+import java.time.LocalDate
 import java.time.YearMonth
 import javax.sql.DataSource
 
@@ -524,7 +525,7 @@ internal class BehandlingDaoTest {
 
         val saksbehandler = Grunnlagsopplysning.Saksbehandler.create("navIdent")
         val nyDato = YearMonth.of(2021, 2)
-        val virkningstidspunkt = Virkningstidspunkt(nyDato, saksbehandler, "enBegrunnelse", YearMonth.now())
+        val virkningstidspunkt = Virkningstidspunkt(nyDato, saksbehandler, "enBegrunnelse", LocalDate.now())
         behandling!!.oppdaterVirkningstidspunkt(virkningstidspunkt).let {
             behandlingRepo.lagreNyttVirkningstidspunkt(behandling.id, it.virkningstidspunkt!!)
         }

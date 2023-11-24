@@ -26,6 +26,7 @@
       <env name="ETTERLATTE_NAVANSATT_OUTBOUND_SCOPE" value="api://dev-fss.teampensjon.navansatt/.default" />
       <env name="ETTERLATTE_PDLTJENESTER_URL" value="https://etterlatte-pdltjenester.intern.dev.nav.no" />
       <env name="ETTERLATTE_TILBAKEKREVING_URL" value="https://etterlatte-tilbakekreving.intern.dev.nav.no" />
+      <env name="ETTERLATTE_MIGRERING_URL" value="https://etterlatte-migrering" />
       <env name="ETTERLATTE_VEDTAK_CLIENT_ID" value="069b1b2c-0a06-4cc9-8418-f100b8ff71be" />
       <env name="ETTERLATTE_VEDTAK_URL" value="https://etterlatte-vedtaksvurdering.intern.dev.nav.no" />
       <env name="GRUNNLAG_AZURE_SCOPE" value="api://dev-gcp.etterlatte.etterlatte-grunnlag/.default" />

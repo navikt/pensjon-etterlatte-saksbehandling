@@ -1,11 +1,13 @@
 package no.nav.etterlatte.joarkhendelser
 
+import isDev
 import joarkhendelser.joark.SafKlient
 import joarkhendelser.pdl.PdlKlient
 import no.nav.etterlatte.joarkhendelser.behandling.BehandlingService
 import no.nav.etterlatte.joarkhendelser.joark.BrukerIdType
 import no.nav.etterlatte.joarkhendelser.joark.HendelseType
 import no.nav.etterlatte.joarkhendelser.joark.Journalpost
+import no.nav.etterlatte.joarkhendelser.joark.Kanal
 import no.nav.etterlatte.joarkhendelser.joark.erTemaEtterlatte
 import no.nav.etterlatte.joarkhendelser.joark.lagMerknadFraStatus
 import no.nav.etterlatte.joarkhendelser.joark.temaTilSakType
@@ -63,7 +65,13 @@ class JoarkHendelseHandler(
             if (journalpost.bruker == null) {
                 // TODO:
                 //  Burde vi lage oppgave på dette? Alt krever SakID, så hvordan skal det fungere hvis bruker mangler?
-                throw IllegalStateException("Journalpost med id=$journalpostId mangler bruker!")
+
+                if (isDev()) {
+                    logger.error("Journalpost med id=$journalpostId mangler bruker!")
+                    return // Ignorer hvis miljø er dev. Skal i teorien ikke være et problem i produksjon.
+                } else {
+                    throw IllegalStateException("Journalpost med id=$journalpostId mangler bruker!")
+                }
             } else if (journalpost.bruker.type == BrukerIdType.ORGNR) {
                 // TODO:
                 //  Må vi lage støtte for ORGNR...?
@@ -136,7 +144,14 @@ class JoarkHendelseHandler(
         if (journalpost.sak?.fagsakId == null || sakId == null) {
             logger.info("Journalpost ${journalpost.journalpostId} er ikke tilknyttet sak i Gjenny")
 
-            behandlingService.opprettOppgave(ident, sakType, "Kontroller kobling til sak", journalpost.journalpostId)
+            val merknad =
+                if (journalpost.kanal == Kanal.EESSI) {
+                    journalpost.tittel
+                } else {
+                    "Kontroller kobling til sak"
+                }
+
+            behandlingService.opprettOppgave(ident, sakType, merknad, journalpost.journalpostId)
         } else if (journalpost.sak.fagsakId == sakId.toString() && journalpost.sak.tema == sakType.tema) {
             logger.info(
                 "Journalpost ${journalpost.journalpostId} er allerede tilknyttet" +

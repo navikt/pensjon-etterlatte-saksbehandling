@@ -6,7 +6,7 @@ import { Alert, BodyShort } from '@navikt/ds-react'
 import { useEffect, useState } from 'react'
 import { SidebarPanel } from '~shared/components/Sidebar'
 import { VedtakSammendrag } from '~components/vedtak/typer'
-import { useSaksbehandlerGjeldendeOppgave } from '~components/behandling/sidemeny/useSaksbehandlerGjeldendeOppgave'
+import { useSelectorSaksbehandlerGjeldendeOppgaveBehandling } from '~store/selectors/useSelectorSaksbehandlerGjeldendeOppgaveBehandling'
 
 type Props = {
   setBeslutning: (value: IBeslutning) => void
@@ -17,9 +17,9 @@ type Props = {
 
 export const AttesteringEllerUnderkjenning = ({ setBeslutning, beslutning, vedtak, erFattet }: Props) => {
   const { lastPage } = useBehandlingRoutes()
-  const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.saksbehandler)
-  const saksbehandlerForGjeldendeOppgave = useSaksbehandlerGjeldendeOppgave()
-  const attestantOgSaksbehandlerErSammePerson = vedtak?.saksbehandlerId === innloggetSaksbehandler.ident
+  const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
+  const saksbehandlerForGjeldendeOppgave = useSelectorSaksbehandlerGjeldendeOppgaveBehandling()
+  const attestantOgSaksbehandlerErSammePerson = vedtak?.behandlendeSaksbehandler === innloggetSaksbehandler.ident
   const [oppgaveErTildeltInnloggetBruker, setOppgaveErTildeltInnloggetBruker] = useState(false)
 
   useEffect(() => {

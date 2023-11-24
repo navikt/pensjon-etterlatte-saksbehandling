@@ -5,7 +5,7 @@ import { Heading } from '@navikt/ds-react'
 import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapper'
 import { Soeknadsdato } from './Soeknadsdato'
 import { NesteOgTilbake } from '../handlinger/NesteOgTilbake'
-import { behandlingErUtfylt, hentBehandlesFraStatus } from '../felles/utils'
+import { behandlingErRedigerbar, behandlingErUtfylt } from '../felles/utils'
 import { VurderingsResultat } from '~shared/types/VurderingsResultat'
 import { OversiktGyldigFramsatt } from '~components/behandling/soeknadsoversikt/gyldigFramsattSoeknad/OversiktGyldigFramsatt'
 import { Utenlandstilknytning } from '~components/behandling/soeknadsoversikt/utenlandstilknytning/Utenlandstilknytning'
@@ -17,10 +17,14 @@ import { BoddEllerArbeidetUtlandet } from '~components/behandling/soeknadsoversi
 import OppdaterGrunnlagModal from '~components/behandling/handlinger/OppdaterGrunnlagModal'
 import { SkalViseBosattUtland } from '~components/behandling/soeknadsoversikt/bosattUtland/SkalViseBosattUtland'
 import {
-  BOSATT_UTLAND_FELLES_BESKRIVELSE,
   BP_FOERSTEGANGSBEHANDLING_BESKRIVELSE,
+  BP_FOERSTEGANGSBEHANDLING_BOSATT_UTLAND_BESKRIVELSE,
+  BP_FOERSTEGANGSBEHANDLING_BOSATT_UTLAND_HJEMLER,
   BP_FOERSTEGANGSBEHANDLING_HJEMLER,
   OMS_FOERSTEGANGSBEHANDLING_BESKRIVELSE,
+  OMS_FOERSTEGANGSBEHANDLING_BOSATT_UTLAND_BESKRIVELSE,
+  OMS_FOERSTEGANGSBEHANDLING_BOSATT_UTLAND_HJEMLER,
+  OMS_FOERSTEGANGSBEHANDLING_HJEMLER,
 } from '~components/behandling/virkningstidspunkt/utils'
 import Virkningstidspunkt from '~components/behandling/virkningstidspunkt/Virkningstidspunkt'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
@@ -29,25 +33,32 @@ import { formaterKildePdl } from '~components/behandling/soeknadsoversikt/utils'
 
 export const Soeknadsoversikt = (props: { behandling: IDetaljertBehandling }) => {
   const { behandling } = props
-  const behandles = hentBehandlesFraStatus(behandling.status)
+  const redigerbar = behandlingErRedigerbar(behandling.status)
   const erGyldigFremsatt = behandling.gyldighetsprøving?.resultat === VurderingsResultat.OPPFYLT
   const avdoedDoedsdato = behandling.familieforhold?.avdoede?.opplysning?.doedsdato
   const avdoedDoedsdatoKilde = behandling.familieforhold?.avdoede?.kilde
   const erBosattUtland = behandling.utenlandstilknytning?.type === UtenlandstilknytningType.BOSATT_UTLAND
 
-  let hjemler = BP_FOERSTEGANGSBEHANDLING_HJEMLER
-  if (erBosattUtland) {
-    hjemler = hjemler.concat([
-      { lenke: 'https://lovdata.no/pro/eu/32004r0883/ARTIKKEL_81', tittel: 'EØS forordning 883/2004 art 81"' },
-    ])
+  const hjemlerVirkningstidspunkt = (sakType: SakType, erBosattUtland: boolean) => {
+    switch (sakType) {
+      case SakType.BARNEPENSJON:
+        return erBosattUtland ? BP_FOERSTEGANGSBEHANDLING_BOSATT_UTLAND_HJEMLER : BP_FOERSTEGANGSBEHANDLING_HJEMLER
+      case SakType.OMSTILLINGSSTOENAD:
+        return erBosattUtland ? OMS_FOERSTEGANGSBEHANDLING_BOSATT_UTLAND_HJEMLER : OMS_FOERSTEGANGSBEHANDLING_HJEMLER
+    }
   }
 
-  let beskrivelse =
-    behandling.sakType === SakType.BARNEPENSJON
-      ? BP_FOERSTEGANGSBEHANDLING_BESKRIVELSE
-      : OMS_FOERSTEGANGSBEHANDLING_BESKRIVELSE
-  if (erBosattUtland) {
-    beskrivelse = BOSATT_UTLAND_FELLES_BESKRIVELSE
+  const beskrivelseVirkningstidspunkt = (sakType: SakType, erBosattUtland: boolean) => {
+    switch (sakType) {
+      case SakType.BARNEPENSJON:
+        return erBosattUtland
+          ? BP_FOERSTEGANGSBEHANDLING_BOSATT_UTLAND_BESKRIVELSE
+          : BP_FOERSTEGANGSBEHANDLING_BESKRIVELSE
+      case SakType.OMSTILLINGSSTOENAD:
+        return erBosattUtland
+          ? OMS_FOERSTEGANGSBEHANDLING_BOSATT_UTLAND_BESKRIVELSE
+          : OMS_FOERSTEGANGSBEHANDLING_BESKRIVELSE
+    }
   }
 
   return (
@@ -62,14 +73,14 @@ export const Soeknadsoversikt = (props: { behandling: IDetaljertBehandling }) =>
       </ContentHeader>
       <InnholdPadding>
         <OppdaterGrunnlagModal behandlingId={behandling.id} behandlingStatus={behandling.status} />
-        <Utenlandstilknytning behandling={behandling} redigerbar={behandles} />
+        <Utenlandstilknytning behandling={behandling} redigerbar={redigerbar} />
         <OversiktGyldigFramsatt behandling={behandling} />
         {behandling.gyldighetsprøving?.resultat === VurderingsResultat.OPPFYLT && (
           <>
             {behandling.sakType == SakType.BARNEPENSJON && (
               <OversiktKommerBarnetTilgode
                 kommerBarnetTilgode={behandling.kommerBarnetTilgode}
-                redigerbar={behandles}
+                redigerbar={redigerbar}
                 soeker={behandling.søker}
                 gjenlevendeForelder={behandling.familieforhold?.gjenlevende}
                 behandlingId={behandling.id}
@@ -77,10 +88,10 @@ export const Soeknadsoversikt = (props: { behandling: IDetaljertBehandling }) =>
             )}
             <Virkningstidspunkt
               erBosattUtland={erBosattUtland}
-              redigerbar={behandles}
+              redigerbar={redigerbar}
               behandling={behandling}
-              hjemler={hjemler}
-              beskrivelse={beskrivelse}
+              hjemler={hjemlerVirkningstidspunkt(behandling.sakType, erBosattUtland)}
+              beskrivelse={beskrivelseVirkningstidspunkt(behandling.sakType, erBosattUtland)}
             >
               {{
                 info: (
@@ -95,14 +106,14 @@ export const Soeknadsoversikt = (props: { behandling: IDetaljertBehandling }) =>
                 ),
               }}
             </Virkningstidspunkt>{' '}
-            <BoddEllerArbeidetUtlandet behandling={behandling} redigerbar={behandles} />
+            <BoddEllerArbeidetUtlandet behandling={behandling} redigerbar={redigerbar} />
           </>
         )}
-        <SkalViseBosattUtland behandling={behandling} />
+        <SkalViseBosattUtland behandling={behandling} redigerbar={redigerbar} />
       </InnholdPadding>
       <Border />
       <Familieforhold behandling={behandling} />
-      {behandles ? (
+      {redigerbar ? (
         <BehandlingHandlingKnapper>
           {behandlingErUtfylt(behandling) && <Start disabled={!erGyldigFremsatt} />}
         </BehandlingHandlingKnapper>

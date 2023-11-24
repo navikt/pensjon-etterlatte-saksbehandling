@@ -310,6 +310,8 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest {
                     datoTOM = LocalDate.now().minusYears(6),
                     utbetaltBeloep = 123L,
                     trygdetid = 35L,
+                    prorataBroekTeller = null,
+                    prorataBroekNevner = null,
                     sakId = 1L,
                     beskrivelse = "test periode 1",
                     kilde =
@@ -325,6 +327,8 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest {
                     datoTOM = LocalDate.now(),
                     utbetaltBeloep = 321L,
                     trygdetid = 5L,
+                    prorataBroekTeller = 10,
+                    prorataBroekNevner = 20,
                     sakId = 1L,
                     beskrivelse = "test periode 2",
                     kilde =
@@ -340,8 +344,16 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest {
 
         data.size shouldBe 2
         data.first().behandlingId shouldBe behandlingId
-        data.minBy { it.utbetaltBeloep }.utbetaltBeloep shouldBe 123L
-        data.maxBy { it.utbetaltBeloep }.utbetaltBeloep shouldBe 321L
+        data.minBy { it.utbetaltBeloep }.let { grunnlag ->
+            grunnlag.utbetaltBeloep shouldBe 123L
+            grunnlag.prorataBroekNevner shouldBe null
+            grunnlag.prorataBroekTeller shouldBe null
+        }
+        data.maxBy { it.utbetaltBeloep }.let { grunnlag ->
+            grunnlag.utbetaltBeloep shouldBe 321L
+            grunnlag.prorataBroekTeller shouldBe 10
+            grunnlag.prorataBroekNevner shouldBe 20
+        }
     }
 
     @Test
@@ -358,6 +370,8 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest {
                     datoTOM = LocalDate.now().minusYears(6),
                     utbetaltBeloep = 123L,
                     trygdetid = 35L,
+                    prorataBroekTeller = null,
+                    prorataBroekNevner = null,
                     sakId = 1L,
                     beskrivelse = "test periode 1",
                     kilde =
@@ -373,6 +387,8 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest {
                     datoTOM = LocalDate.now(),
                     utbetaltBeloep = 321L,
                     trygdetid = 5L,
+                    prorataBroekTeller = null,
+                    prorataBroekNevner = null,
                     sakId = 1L,
                     beskrivelse = "test periode 2",
                     kilde =
@@ -394,6 +410,8 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest {
                     datoTOM = LocalDate.now().minusYears(6),
                     utbetaltBeloep = 223L,
                     trygdetid = 35L,
+                    prorataBroekTeller = null,
+                    prorataBroekNevner = null,
                     sakId = 1L,
                     beskrivelse = "test periode 3",
                     kilde =
@@ -409,6 +427,8 @@ internal class BeregningsGrunnlagRepositoryIntegrationTest {
                     datoTOM = LocalDate.now(),
                     utbetaltBeloep = 322L,
                     trygdetid = 5L,
+                    prorataBroekTeller = null,
+                    prorataBroekNevner = null,
                     sakId = 1L,
                     beskrivelse = "test periode 4",
                     kilde =

@@ -6,18 +6,18 @@ import { useEffect } from 'react'
 import Spinner from '~shared/Spinner'
 import { Alert } from '@navikt/ds-react'
 
-export const SkalViseBosattUtland = (props: { behandling: IDetaljertBehandling }) => {
-  const { behandling } = props
+export const SkalViseBosattUtland = (props: { behandling: IDetaljertBehandling; redigerbar: boolean }) => {
+  const { behandling, redigerbar } = props
   return (
     <>
       {behandling.utenlandstilknytning?.type === UtenlandstilknytningType.BOSATT_UTLAND && (
-        <HentBosattutland behandlingId={behandling.id} />
+        <HentBosattutland behandlingId={behandling.id} redigerbar={redigerbar} />
       )}
     </>
   )
 }
 
-const HentBosattutland = ({ behandlingId }: { behandlingId: string }) => {
+const HentBosattutland = ({ behandlingId, redigerbar }: { behandlingId: string; redigerbar: boolean }) => {
   const [hentBosattUtlandStatus, hentBosattUtlandApi] = useApiCall(hentBosattutland)
   useEffect(() => {
     hentBosattUtlandApi(behandlingId)
@@ -25,9 +25,11 @@ const HentBosattutland = ({ behandlingId }: { behandlingId: string }) => {
   return (
     <>
       {isPending(hentBosattUtlandStatus) && <Spinner visible={true} label="Henter bosatt utland info" />}
-      {isErrorWithCode(hentBosattUtlandStatus, 404) && <BosattUtland behandlingId={behandlingId} bosattutland={null} />}
+      {isErrorWithCode(hentBosattUtlandStatus, 404) && (
+        <BosattUtland behandlingId={behandlingId} bosattutland={null} redigerbar={redigerbar} />
+      )}
       {isSuccess(hentBosattUtlandStatus) && (
-        <BosattUtland behandlingId={behandlingId} bosattutland={hentBosattUtlandStatus.data} />
+        <BosattUtland behandlingId={behandlingId} bosattutland={hentBosattUtlandStatus.data} redigerbar={redigerbar} />
       )}
       {isFailure(hentBosattUtlandStatus) && !isErrorWithCode(hentBosattUtlandStatus, 404) && (
         <Alert variant="warning">Vi klarte ikke å hente lagret data for bosatt utland</Alert>

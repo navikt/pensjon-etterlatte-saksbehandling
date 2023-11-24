@@ -65,7 +65,7 @@ class SjekklisteIntegrationTest {
         settOppKontekst(user)
 
         every { user.name() } returns "Sak B. Handlersen"
-        every { oppgaveService.hentSaksbehandlerForOppgaveUnderArbeid(any()) } returns user.name()
+        every { oppgaveService.hentSaksbehandlerForOppgaveUnderArbeidByReferanse(any()) } returns user.name()
     }
 
     @AfterAll

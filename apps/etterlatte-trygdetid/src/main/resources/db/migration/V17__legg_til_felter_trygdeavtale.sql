@@ -1,0 +1,1 @@
+ALTER TABLE trygdeavtale ADD COLUMN person_krets TEXT, ADD COLUMN arb_inntekt TEXT, ADD COLUMN arb_inntekt_kommentar TEXT, ADD COLUMN bereg_art TEXT, ADD COLUMN bereg_art_kommentar TEXT, ADD COLUMN nordisk_trygdeAvtale TEXT, ADD COLUMN nordisk_trygdeavtale_kommentar TEXT;

@@ -60,7 +60,7 @@ fun Application.restModule(
         callIdMdc(CORRELATION_ID)
 
         mdc("method") { call -> call.request.httpMethod.value }
-        mdc("request_uri") { call -> call.request.path() }
+        mdc("inbound_uri") { call -> call.request.path() }
 
         mdc("user") { call ->
             call.request.header("Authorization")?.let {

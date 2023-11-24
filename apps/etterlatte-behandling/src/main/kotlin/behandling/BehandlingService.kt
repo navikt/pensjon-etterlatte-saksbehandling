@@ -37,11 +37,12 @@ import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.sak.SakDao
-import no.nav.etterlatte.sak.SakUtenlandstilknytning
+import no.nav.etterlatte.sak.SakMedUtenlandstilknytning
 import no.nav.etterlatte.tilgangsstyring.filterForEnheter
 import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.etterlatte.vedtaksvurdering.VedtakHendelse
 import org.slf4j.LoggerFactory
+import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
 
@@ -63,7 +64,7 @@ class VirkningstidspunktMaaHaUtenlandstilknytning(message: String) :
 interface BehandlingService {
     fun hentBehandling(behandlingId: UUID): Behandling?
 
-    fun hentBehandlingerISak(sakId: Long): List<Behandling>
+    fun hentBehandlingerForSak(sakId: Long): List<Behandling>
 
     fun hentSisteIverksatte(sakId: Long): Behandling?
 
@@ -88,7 +89,7 @@ interface BehandlingService {
         virkningstidspunkt: YearMonth,
         ident: String,
         begrunnelse: String,
-        kravdato: YearMonth? = null,
+        kravdato: LocalDate? = null,
     ): Virkningstidspunkt
 
     fun oppdaterBoddEllerArbeidetUtlandet(
@@ -149,7 +150,7 @@ internal class BehandlingServiceImpl(
         return hentBehandlingForId(behandlingId)
     }
 
-    override fun hentBehandlingerISak(sakId: Long): List<Behandling> {
+    override fun hentBehandlingerForSak(sakId: Long): List<Behandling> {
         return hentBehandlingerForSakId(sakId)
     }
 
@@ -271,7 +272,7 @@ internal class BehandlingServiceImpl(
         if (sakMedUtenlandstilknytning?.utenlandstilknytning != null) {
             if (sakMedUtenlandstilknytning.utenlandstilknytning.type === UtenlandstilknytningType.BOSATT_UTLAND) {
                 val kravdato = request.kravdato ?: throw KravdatoMaaFinnesHvisBosattutland("Kravdato må finnes hvis bosatt utland er valgt")
-                makstidspunktFoerSoeknad = kravdato.minusYears(3)
+                makstidspunktFoerSoeknad = YearMonth.from(kravdato.minusYears(3))
             }
         } else {
             throw VirkningstidspunktMaaHaUtenlandstilknytning(
@@ -290,7 +291,7 @@ internal class BehandlingServiceImpl(
     }
 
     override fun hentFoersteVirk(sakId: Long): YearMonth? {
-        val behandlinger = hentBehandlingerISak(sakId)
+        val behandlinger = hentBehandlingerForSak(sakId)
         return behandlinger.tidligsteIverksatteVirkningstidspunkt()?.dato
     }
 
@@ -308,7 +309,7 @@ internal class BehandlingServiceImpl(
         val behandling: Behandling,
         val kommerBarnetTilgode: KommerBarnetTilgode?,
         val hendelserIBehandling: List<LagretHendelse>,
-        val sakOgUtenlandstilknytning: SakUtenlandstilknytning?,
+        val sakOgUtenlandstilknytning: SakMedUtenlandstilknytning?,
     )
 
     override suspend fun hentDetaljertBehandlingMedTilbehoer(
@@ -429,7 +430,7 @@ internal class BehandlingServiceImpl(
         virkningstidspunkt: YearMonth,
         ident: String,
         begrunnelse: String,
-        kravdato: YearMonth?,
+        kravdato: LocalDate?,
     ): Virkningstidspunkt {
         val behandling =
             hentBehandling(behandlingId) ?: run {

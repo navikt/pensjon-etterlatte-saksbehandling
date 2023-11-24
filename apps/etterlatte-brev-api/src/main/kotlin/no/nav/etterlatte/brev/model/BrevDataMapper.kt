@@ -76,6 +76,13 @@ private class BrevDatafetcher(
             brukerTokenInfo,
         )
 
+    suspend fun hentForrigeUtbetaling() =
+        brevdataFacade.finnForrigeUtbetalingsinfo(
+            sak.id,
+            vedtakVirkningstidspunkt,
+            brukerTokenInfo,
+        )
+
     suspend fun hentGrunnbeloep() = brevdataFacade.hentGrunnbeloep(brukerTokenInfo)
 
     suspend fun hentEtterbetaling() =
@@ -319,8 +326,7 @@ class BrevDataMapper(
                     }
 
                     VedtakType.AVSLAG ->
-                        AvslagBrevDataOMS.fra(generellBrevData.personerISak.avdoed.navn, emptyList())
-
+                        AvslagBrevDataOMS.fra(generellBrevData.personerISak.avdoede.first().navn, emptyList())
                     VedtakType.ENDRING ->
                         when (generellBrevData.revurderingsaarsak) {
                             Revurderingaarsak.INNTEKTSENDRING,
@@ -353,8 +359,21 @@ class BrevDataMapper(
                 coroutineScope {
                     val fetcher = datafetcher(brukerTokenInfo, generellBrevData)
                     val utbetaling = async { fetcher.hentUtbetaling() }
+                    val forrigeUtbetaling = async { fetcher.hentForrigeUtbetaling() }
                     val etterbetaling = async { fetcher.hentEtterbetaling() }
-                    EndringHovedmalBrevData.fra(utbetaling.await(), etterbetaling.await(), innholdMedVedlegg)
+                    val trygdetid = async { fetcher.hentTrygdetid() }
+                    val grunnbeloep = async { fetcher.hentGrunnbeloep() }
+                    val trygdetidHentet = requireNotNull(trygdetid.await()) { "${kode.ferdigstilling} Må ha trygdetid" }
+                    val grunnbeloepHentet =
+                        requireNotNull(grunnbeloep.await()) { "${kode.ferdigstilling} Må ha grunnbeløp" }
+                    EndringHovedmalBrevData.fra(
+                        utbetaling.await(),
+                        forrigeUtbetalingsinfo = forrigeUtbetaling.await(),
+                        etterbetaling.await(),
+                        trygdetidHentet,
+                        grunnbeloepHentet,
+                        innholdMedVedlegg,
+                    )
                 }
             }
 
@@ -422,7 +441,7 @@ class BrevDataMapper(
             }
 
             OMS_AVSLAG -> {
-                AvslagBrevDataOMS.fra(generellBrevData.personerISak.avdoed.navn, innholdMedVedlegg.innhold())
+                AvslagBrevDataOMS.fra(generellBrevData.personerISak.avdoede.first().navn, innholdMedVedlegg.innhold())
             }
 
             TILBAKEKREVING_FERDIG -> TilbakekrevingFerdigData.fra(generellBrevData, innholdMedVedlegg)

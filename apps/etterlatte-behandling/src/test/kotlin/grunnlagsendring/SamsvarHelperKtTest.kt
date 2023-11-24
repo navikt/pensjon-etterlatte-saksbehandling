@@ -103,7 +103,7 @@ internal class SamsvarHelperKtTest {
                 ),
             )
 
-        val resultat = samsvarSivilstand(sivilstand, sivilstand)
+        val resultat = samsvarSivilstandOMS(sivilstand, sivilstand)
         assertTrue(resultat.samsvar)
     }
 
@@ -131,7 +131,7 @@ internal class SamsvarHelperKtTest {
                 ),
             )
 
-        val resultat = samsvarSivilstand(sivilstand1, sivilstand2)
+        val resultat = samsvarSivilstandOMS(sivilstand1, sivilstand2)
         assertFalse(resultat.samsvar)
     }
 }

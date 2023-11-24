@@ -3,8 +3,9 @@ import { VurderingsResultat } from '~shared/types/VurderingsResultat'
 import { GyldigFramsattBarnepensjon } from '~components/behandling/soeknadsoversikt/gyldigFramsattSoeknad/barnepensjon/GyldigFramsattBarnepensjon'
 import { GyldigFramsattOmstillingsstoenad } from '~components/behandling/soeknadsoversikt/gyldigFramsattSoeknad/omstillingsstoenad/GyldigFramsattOmstillingsstoenad'
 import { SakType } from '~shared/types/sak'
+import { StatusIconProps } from '~shared/icons/statusIcon'
 
-const gyldigFremsattTilStatusIcon = (gyldigFramsatt: IGyldighetResultat | undefined) => {
+const gyldigFremsattTilStatusIcon = (gyldigFramsatt: IGyldighetResultat | undefined): StatusIconProps => {
   if (gyldigFramsatt == undefined || gyldigFramsatt.resultat == undefined) {
     return 'warning'
   }

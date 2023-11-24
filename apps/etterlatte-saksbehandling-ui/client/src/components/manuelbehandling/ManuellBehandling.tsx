@@ -1,4 +1,4 @@
-import { Alert, Button, Select } from '@navikt/ds-react'
+import { Alert, Button, Checkbox, Select, TextField } from '@navikt/ds-react'
 import React, { useState } from 'react'
 import { SakType } from '~shared/types/sak'
 import { DatoVelger } from '~shared/DatoVelger'
@@ -9,6 +9,8 @@ import { settNyBehandlingRequest } from '~store/reducers/JournalfoeringOppgaveRe
 import { useAppDispatch } from '~store/Store'
 import { isFailure, isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
 import { opprettBehandling } from '~shared/api/behandling'
+import { opprettOverstyrBeregning } from '~shared/api/beregning'
+import { InputRow } from '~components/person/journalfoeringsoppgave/nybehandling/OpprettNyBehandling'
 
 export default function ManuellBehandling() {
   const dispatch = useAppDispatch()
@@ -17,6 +19,11 @@ export default function ManuellBehandling() {
   const [nyBehandlingId, setNyId] = useState('')
   const [erMigrering, setErMigrering] = useState<boolean | null>(null)
 
+  const [overstyrBeregningStatus, opprettOverstyrtBeregningReq] = useApiCall(opprettOverstyrBeregning)
+  const [overstyrBeregning, setOverstyrBeregning] = useState<boolean>(true)
+
+  const [pesysId, setPesysId] = useState<number | undefined>(undefined)
+
   const ferdigstill = () => {
     opprettNyBehandling(
       {
@@ -24,9 +31,16 @@ export default function ManuellBehandling() {
         sakType: SakType.BARNEPENSJON,
         mottattDato: nyBehandlingRequest!!.mottattDato!!.replace('Z', ''),
         kilde: erMigrering ? 'PESYS' : undefined,
+        pesysId: pesysId,
       },
-      (response) => {
-        setNyId(response)
+      (nyBehandlingRespons) => {
+        if (overstyrBeregning) {
+          opprettOverstyrtBeregningReq({
+            behandlingId: nyBehandlingRespons,
+            beskrivelse: 'Manuell migrering',
+          })
+        }
+        setNyId(nyBehandlingRespons)
       }
     )
   }
@@ -49,6 +63,21 @@ export default function ManuellBehandling() {
         <option value="ja">Ja</option>
         <option value="nei">Nei</option>
       </Select>
+
+      <InputRow>
+        <TextField
+          label="Sakid Pesys"
+          placeholder="Sakid Pesys"
+          value={pesysId || ''}
+          pattern="[0-9]{11}"
+          maxLength={11}
+          onChange={(e) => setPesysId(Number(e.target.value))}
+        />
+      </InputRow>
+
+      <Checkbox checked={overstyrBeregning} onChange={() => setOverstyrBeregning(!overstyrBeregning)}>
+        Skal bruke manuell beregning
+      </Checkbox>
 
       <Select
         label="Hva skal språket/målform være?"
@@ -81,14 +110,18 @@ export default function ManuellBehandling() {
         <Button
           variant="secondary"
           onClick={ferdigstill}
-          loading={isPending(status)}
-          disabled={erMigrering == null || isPending(status)}
+          loading={isPending(status) || isPending(overstyrBeregningStatus)}
+          disabled={erMigrering == null || (erMigrering && pesysId == null)}
         >
           Send inn
         </Button>
       </Knapp>
       {isSuccess(status) && <Alert variant="success">Behandling med id {nyBehandlingId} ble opprettet!</Alert>}
       {isFailure(status) && <Alert variant="error">Det oppsto en feil ved oppretting av behandlingen.</Alert>}
+
+      {isPending(overstyrBeregningStatus) && <Alert variant="info">Oppretter overstyrt beregning.</Alert>}
+      {isSuccess(overstyrBeregningStatus) && <Alert variant="success">Overstyrt beregning opprettet!</Alert>}
+      {isFailure(overstyrBeregningStatus) && <Alert variant="error">Klarte ikke å overstyre beregning.</Alert>}
     </FormWrapper>
   )
 }

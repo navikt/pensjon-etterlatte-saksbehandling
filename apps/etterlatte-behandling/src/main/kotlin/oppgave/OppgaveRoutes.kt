@@ -2,6 +2,7 @@ package no.nav.etterlatte.oppgave
 
 import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
+import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.call
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
@@ -10,13 +11,13 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.put
 import io.ktor.server.routing.route
+import io.ktor.util.pipeline.PipelineContext
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.inTransaction
-import no.nav.etterlatte.libs.common.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.OPPGAVEID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.OPPGAVEID_GOSYS_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
-import no.nav.etterlatte.libs.common.behandlingId
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.gosysOppgaveId
 import no.nav.etterlatte.libs.common.kunSaksbehandler
 import no.nav.etterlatte.libs.common.kunSystembruker
@@ -29,6 +30,18 @@ import no.nav.etterlatte.libs.common.oppgaveId
 import no.nav.etterlatte.libs.common.sakId
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.oppgaveGosys.GosysOppgaveService
+
+class ManglerReferanseException(msg: String) :
+    UgyldigForespoerselException(
+        code = "MÅ_HA_REFERANSE",
+        detail = msg,
+    )
+
+inline val PipelineContext<*, ApplicationCall>.referanse: String
+    get() =
+        call.parameters["referanse"] ?: throw ManglerReferanseException(
+            "Mangler referanse i requestem",
+        )
 
 internal fun Route.oppgaveRoutes(
     service: OppgaveService,
@@ -53,19 +66,30 @@ internal fun Route.oppgaveRoutes(
                     call.respond(inTransaction { service.hentSakOgOppgaverForSak(sakId) })
                 }
             }
-        }
 
-        route("behandling/{$BEHANDLINGID_CALL_PARAMETER}") {
-            get("/hentsaksbehandler") {
+            get("/ferdigstiltogattestert/{referanse}") {
                 kunSaksbehandler {
-                    val saksbehandler = inTransaction { service.hentSaksbehandlerForBehandling(behandlingId) }
+                    val saksbehandler =
+                        inTransaction {
+                            service.hentFerdigstiltAttesteringsOppgave(referanse)
+                        }
                     call.respond(saksbehandler ?: HttpStatusCode.NoContent)
                 }
             }
 
-            get("/oppgaveunderarbeid") {
+            get("/oppgaveunderbehandling/{referanse}") {
                 kunSaksbehandler {
-                    val saksbehandler = inTransaction { service.hentSaksbehandlerForOppgaveUnderArbeid(behandlingId) }
+                    val saksbehandler =
+                        inTransaction {
+                            service.hentSaksbehandlerForOppgaveUnderArbeidByReferanse(referanse)
+                        }
+                    call.respond(saksbehandler ?: HttpStatusCode.NoContent)
+                }
+            }
+
+            get("/ikkeattestert/{referanse}") {
+                kunSaksbehandler {
+                    val saksbehandler = inTransaction { service.hentSaksbehandlerIkkeAttestertOppgave(referanse) }
                     call.respond(saksbehandler ?: HttpStatusCode.NoContent)
                 }
             }
@@ -165,7 +189,7 @@ internal fun Route.oppgaveRoutes(
         }
     }
 
-    route("/oppgaver/sak/{$SAKID_CALL_PARAMETER}/oppgaver") {
+    route("/oppgaver/sak/{$SAKID_CALL_PARAMETER}/opprett") {
         post {
             kunSystembruker {
                 val nyOppgaveDto = call.receive<NyOppgaveDto>()

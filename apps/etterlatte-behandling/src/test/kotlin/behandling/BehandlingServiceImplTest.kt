@@ -38,7 +38,7 @@ import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.personOpplysning
 import no.nav.etterlatte.revurdering
 import no.nav.etterlatte.sak.SakDao
-import no.nav.etterlatte.sak.SakUtenlandstilknytning
+import no.nav.etterlatte.sak.SakMedUtenlandstilknytning
 import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.etterlatte.token.Saksbehandler
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -107,7 +107,7 @@ class BehandlingServiceImplTest {
                 sakDao = mockk(),
             )
 
-        val behandlinger = sut.hentBehandlingerISak(1)
+        val behandlinger = sut.hentBehandlingerForSak(1)
 
         assertAll(
             "skal hente behandlinger",
@@ -450,7 +450,7 @@ class BehandlingServiceImplTest {
         val defaultSakdaoMockMedUtenlandstilknytningSattTilNasjonal =
             mockk<SakDao> {
                 coEvery { hentUtenlandstilknytningForSak(any()) } returns
-                    SakUtenlandstilknytning(
+                    SakMedUtenlandstilknytning(
                         "1234",
                         SakType.BARNEPENSJON,
                         SAK_ID,
@@ -497,7 +497,7 @@ class BehandlingServiceImplTest {
         val sakdaomock =
             mockk<SakDao> {
                 coEvery { hentUtenlandstilknytningForSak(any()) } returns
-                    SakUtenlandstilknytning(
+                    SakMedUtenlandstilknytning(
                         "1234",
                         SakType.BARNEPENSJON,
                         SAK_ID,
@@ -524,7 +524,7 @@ class BehandlingServiceImplTest {
         val sakdaomock =
             mockk<SakDao> {
                 coEvery { hentUtenlandstilknytningForSak(any()) } returns
-                    SakUtenlandstilknytning(
+                    SakMedUtenlandstilknytning(
                         "1234",
                         SakType.BARNEPENSJON,
                         SAK_ID,
@@ -548,7 +548,7 @@ class BehandlingServiceImplTest {
         val bodyVirkningstidspunkt = Tidspunkt.parse("2017-02-01T00:00:00Z")
         val bodyBegrunnelse = "begrunnelse"
         val bodyKravdato = Tidspunkt.parse("2019-02-01T00:00:00Z")
-        val request = VirkningstidspunktRequest(bodyVirkningstidspunkt.toString(), bodyBegrunnelse, bodyKravdato.toString())
+        val request = VirkningstidspunktRequest(bodyVirkningstidspunkt.toString(), bodyBegrunnelse, bodyKravdato.toLocalDate())
         val doedsdato = LocalDate.parse("2014-01-01")
 
         val soeknadMottatt = LocalDateTime.parse("2009-01-01T00:00:00.000000000")
@@ -556,7 +556,7 @@ class BehandlingServiceImplTest {
         val sakdaomock =
             mockk<SakDao> {
                 coEvery { hentUtenlandstilknytningForSak(any()) } returns
-                    SakUtenlandstilknytning(
+                    SakMedUtenlandstilknytning(
                         "1234",
                         SakType.BARNEPENSJON,
                         SAK_ID,
@@ -698,7 +698,7 @@ class BehandlingServiceImplTest {
                 sakDao = mockk(),
             )
 
-        val behandlinger = sut.hentBehandlingerISak(1)
+        val behandlinger = sut.hentBehandlingerForSak(1)
 
         assertAll(
             "skal hente behandlinger",
@@ -748,7 +748,7 @@ class BehandlingServiceImplTest {
                 sakDao = mockk(),
             )
 
-        val behandlinger = sut.hentBehandlingerISak(1)
+        val behandlinger = sut.hentBehandlingerForSak(1)
 
         assertEquals(0, behandlinger.size)
     }
@@ -836,7 +836,7 @@ class BehandlingServiceImplTest {
         val defaultSakdaoMockMedUtenlandstilknytningSattTilNasjonal =
             mockk<SakDao> {
                 coEvery { hentUtenlandstilknytningForSak(any()) } returns
-                    SakUtenlandstilknytning(
+                    SakMedUtenlandstilknytning(
                         "1234",
                         SakType.BARNEPENSJON,
                         SAK_ID,

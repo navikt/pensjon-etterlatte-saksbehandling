@@ -1,11 +1,13 @@
 package no.nav.etterlatte.behandling
 
+import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.OpprettBehandling
 import no.nav.etterlatte.behandling.domain.toBehandlingOpprettet
 import no.nav.etterlatte.behandling.domain.toStatistikkBehandling
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
+import no.nav.etterlatte.behandling.klienter.MigreringKlient
 import no.nav.etterlatte.behandling.revurdering.RevurderingService
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.inTransaction
@@ -43,13 +45,14 @@ class BehandlingFactory(
     private val hendelseDao: HendelseDao,
     private val behandlingHendelser: BehandlingHendelserKafkaProducer,
     private val featureToggleService: FeatureToggleService,
+    private val migreringKlient: MigreringKlient,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     /*
      * Brukes av frontend for å kunne opprette sak og behandling for en Gosys-oppgave.
      */
-    fun opprettSakOgBehandlingForOppgave(request: NyBehandlingRequest): Behandling {
+    suspend fun opprettSakOgBehandlingForOppgave(request: NyBehandlingRequest): Behandling {
         val soeker = request.persongalleri.soeker
 
         val sak = inTransaction { sakService.finnEllerOpprettSak(soeker, request.sakType) }
@@ -84,6 +87,13 @@ class BehandlingFactory(
             )
 
         grunnlagService.leggTilNyeOpplysninger(behandling.id, NyeSaksopplysninger(sak.id, opplysninger))
+
+        if (request.kilde == Vedtaksloesning.PESYS) {
+            coroutineScope {
+                val pesysId = requireNotNull(request.pesysId) { "Manuell migrering må ha pesysid til sak som migreres" }
+                migreringKlient.opprettManuellMigrering(behandlingId = behandling.id, pesysId = pesysId)
+            }
+        }
 
         return behandling
     }

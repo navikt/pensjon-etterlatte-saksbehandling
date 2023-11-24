@@ -42,9 +42,31 @@ internal class Verifiserer(
     private fun sjekkAtPersonerFinsIPDL(request: MigreringRequest): List<Verifiseringsfeil> {
         val personer = mutableListOf(Pair(PersonRolle.BARN, request.soeker))
         request.avdoedForelder.forEach { personer.add(Pair(PersonRolle.AVDOED, it.ident)) }
-        request.gjenlevendeForelder?.let { personer.add(Pair(PersonRolle.GJENLEVENDE, it)) }
+        if (request.gjenlevendeForelder == null) {
+            return listOf(GjenlevendeForelderMangler)
+        }
+        if (request.enhet.nr == "0001") {
+            return listOf(EnhetUtland)
+        }
+        request.gjenlevendeForelder!!.let { personer.add(Pair(PersonRolle.GJENLEVENDE, it)) }
 
-        return personer.map { hentPerson(it.first, it.second) }
+        return personer
+            .map {
+                val person = hentPerson(it.first, it.second)
+
+                if (it.first == PersonRolle.BARN) {
+                    person.getOrNull()?.let { pdlPerson ->
+                        pdlPerson.vergemaalEllerFremtidsfullmakt?.let { vergemaal ->
+                            if (vergemaal.isNotEmpty()) {
+                                logger.warn("Barn har vergemaal eller fremtidsfullmakt, kan ikke migrere")
+                                return listOf(BarnetHarVerge)
+                            }
+                        }
+                    }
+                }
+
+                person
+            }
             .filter { it.isFailure }
             .map { it.exceptionOrNull() }
             .filterIsInstance<Verifiseringsfeil>()
@@ -72,4 +94,19 @@ sealed class Verifiseringsfeil : Exception()
 data class FinsIkkeIPDL(val rolle: PersonRolle, val id: Folkeregisteridentifikator) : Verifiseringsfeil() {
     override val message: String
         get() = toString()
+}
+
+object GjenlevendeForelderMangler : Verifiseringsfeil() {
+    override val message: String
+        get() = "Gjenlevende forelder er null i det vi får fra Pesys"
+}
+
+object BarnetHarVerge : Verifiseringsfeil() {
+    override val message: String
+        get() = "Barn har vergemaal eller fremtidsfullmakt, kan ikke migrere"
+}
+
+object EnhetUtland : Verifiseringsfeil() {
+    override val message: String
+        get() = "Vi har ikke adresse for enhet utland. Må følges opp snart"
 }

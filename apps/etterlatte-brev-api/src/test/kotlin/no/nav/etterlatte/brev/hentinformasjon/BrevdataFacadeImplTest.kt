@@ -51,6 +51,7 @@ internal class BrevdataFacadeImplTest {
     private val grunnlagKlient = mockk<GrunnlagKlient>()
     private val beregningKlient = mockk<BeregningKlient>()
     private val behandlingKlient = mockk<BehandlingKlient>()
+    private val sakService = mockk<SakService>()
     private val trygdetidService = mockk<TrygdetidService>()
 
     private val service =
@@ -59,6 +60,7 @@ internal class BrevdataFacadeImplTest {
             grunnlagKlient,
             beregningKlient,
             behandlingKlient,
+            sakService,
             trygdetidService,
         )
 
@@ -75,7 +77,7 @@ internal class BrevdataFacadeImplTest {
     @Test
     fun `hentGenerellBrevData fungerer som forventet for behandling`() {
         coEvery {
-            behandlingKlient.hentSak(any(), any())
+            sakService.hentSak(any(), any())
         } returns Sak("ident", SakType.BARNEPENSJON, SAK_ID, ENHET)
         coEvery {
             behandlingKlient.hentSisteIverksatteBehandling(any(), any())
@@ -100,7 +102,7 @@ internal class BrevdataFacadeImplTest {
             Assertions.assertEquals("Mellom", mellomnavn)
             Assertions.assertEquals("Barn", etternavn)
         }
-        Assertions.assertEquals("Død Mellom Far", generellBrevData.personerISak.avdoed.navn)
+        Assertions.assertEquals("Død Mellom Far", generellBrevData.personerISak.avdoede.first().navn)
         Assertions.assertEquals(VedtakType.INNVILGELSE, generellBrevData.forenkletVedtak.type)
         Assertions.assertEquals(123L, generellBrevData.forenkletVedtak.id)
         Assertions.assertEquals(ENHET, generellBrevData.forenkletVedtak.ansvarligEnhet)
@@ -117,7 +119,7 @@ internal class BrevdataFacadeImplTest {
     fun `hentGenerellBrevData fungerer som forventet for tilbakekreving`() {
         val tilbakekreving = tilbakekreving()
         coEvery {
-            behandlingKlient.hentSak(any(), any())
+            sakService.hentSak(any(), any())
         } returns Sak("ident", SakType.BARNEPENSJON, SAK_ID, ENHET)
         coEvery {
             vedtaksvurderingKlient.hentVedtak(any(), any())
@@ -132,7 +134,7 @@ internal class BrevdataFacadeImplTest {
         generellBrevData.sak.id shouldBe SAK_ID
         generellBrevData.behandlingId shouldBe BEHANDLING_ID
         generellBrevData.spraak shouldBe Spraak.NB
-        generellBrevData.personerISak.avdoed.navn shouldBe "Død Mellom Far"
+        generellBrevData.personerISak.avdoede.first().navn shouldBe "Død Mellom Far"
         with(generellBrevData.personerISak.soeker) {
             fornavn shouldBe "Søker"
             mellomnavn shouldBe "Mellom"
@@ -156,7 +158,7 @@ internal class BrevdataFacadeImplTest {
     @Test
     fun `FinnUtbetalingsinfo returnerer korrekt informasjon`() {
         coEvery {
-            behandlingKlient.hentSak(any(), any())
+            sakService.hentSak(any(), any())
         } returns Sak("ident", SakType.BARNEPENSJON, SAK_ID, ENHET)
         coEvery {
             behandlingKlient.hentSisteIverksatteBehandling(any(), any())
@@ -188,7 +190,7 @@ internal class BrevdataFacadeImplTest {
     @Test
     fun `FinnUtbetalingsinfo returnerer korrekt antall barn ved soeskenjustering`() {
         coEvery {
-            behandlingKlient.hentSak(any(), any())
+            sakService.hentSak(any(), any())
         } returns Sak("ident", SakType.BARNEPENSJON, SAK_ID, ENHET)
         coEvery {
             behandlingKlient.hentSisteIverksatteBehandling(any(), any())

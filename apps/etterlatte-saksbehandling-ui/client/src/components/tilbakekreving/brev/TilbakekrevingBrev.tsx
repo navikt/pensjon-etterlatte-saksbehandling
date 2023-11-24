@@ -7,12 +7,14 @@ import { fattVedtak, opprettVedtak } from '~shared/api/tilbakekreving'
 import React, { useEffect, useState } from 'react'
 import { IBrev } from '~shared/types/Brev'
 import { isFailure, isPending, isPendingOrInitial, useApiCall } from '~shared/hooks/useApiCall'
-import { hentVedtaksbrev, opprettVedtaksbrev } from '~shared/api/brev'
+import { getData, hentVedtaksbrev, isSuccessOrNotFound, opprettVedtaksbrev } from '~shared/api/brev'
 import Spinner from '~shared/Spinner'
 import styled from 'styled-components'
 import MottakerPanel from '~components/behandling/brev/detaljer/MottakerPanel'
 import { useVedtak } from '~components/vedtak/useVedtak'
 import RedigerbartBrev from '~components/behandling/brev/RedigerbartBrev'
+import { getVergeadresseFraGrunnlag } from '~shared/api/grunnlag'
+import { handleHentVergeadresseError } from '~components/person/Vergeadresse'
 
 export function TilbakekrevingBrev({ tilbakekreving }: { tilbakekreving: TilbakekrevingBehandling }) {
   const kanAttesteres = [
@@ -24,6 +26,9 @@ export function TilbakekrevingBrev({ tilbakekreving }: { tilbakekreving: Tilbake
   const [vedtaksbrev, setVedtaksbrev] = useState<IBrev | undefined>(undefined)
   const [hentBrevStatus, hentBrevRequest] = useApiCall(hentVedtaksbrev)
   const [opprettBrevStatus, opprettNyttVedtaksbrev] = useApiCall(opprettVedtaksbrev)
+
+  const [vergeadresse, getVergeadresse] = useApiCall(getVergeadresseFraGrunnlag)
+
   const hentBrev = () => {
     hentBrevRequest(tilbakekreving.id, (brev, statusCode) => {
       if (statusCode === 200) {
@@ -43,6 +48,11 @@ export function TilbakekrevingBrev({ tilbakekreving }: { tilbakekreving: Tilbake
       opprettVedtak(tilbakekreving.id).then(() => hentBrev())
     }
   }, [tilbakekreving, vedtak])
+  useEffect(() => {
+    if (tilbakekreving) {
+      getVergeadresse(tilbakekreving.id)
+    }
+  }, [tilbakekreving])
 
   if (isPendingOrInitial(hentBrevStatus)) {
     return <Spinner visible label="Henter brev ..." />
@@ -66,11 +76,12 @@ export function TilbakekrevingBrev({ tilbakekreving }: { tilbakekreving: Tilbake
               Dette er et manuelt opprettet brev. Kontroller innholdet nøye før attestering.
             </Alert>
             <br />
-            {vedtaksbrev && (
+            {vedtaksbrev && isSuccessOrNotFound(vergeadresse) && (
               <MottakerPanel
                 vedtaksbrev={vedtaksbrev}
                 oppdater={(val) => setVedtaksbrev({ ...vedtaksbrev, mottaker: val })}
                 redigerbar={false}
+                vergeadresse={getData(vergeadresse)}
               />
             )}
           </ContentHeader>
@@ -80,6 +91,7 @@ export function TilbakekrevingBrev({ tilbakekreving }: { tilbakekreving: Tilbake
 
         {isFailure(hentBrevStatus) && <ErrorMessage>Feil ved henting av brev</ErrorMessage>}
         {isFailure(opprettBrevStatus) && <ErrorMessage>Kunne ikke opprette brev</ErrorMessage>}
+        {isFailure(vergeadresse) && handleHentVergeadresseError(vergeadresse)}
       </BrevContent>
       <FlexRow justify="center">
         {kanAttesteres && <SendTilAttesteringModal behandlingId={tilbakekreving.id} fattVedtakApi={fattVedtak} />}

@@ -1,8 +1,8 @@
 import { IBehandlingStatus, IUtenlandstilknytning, UtenlandstilknytningType } from '~shared/types/IDetaljertBehandling'
 import { VurderingsboksWrapper } from '~components/vurderingsboks/VurderingsboksWrapper'
-import { BodyShort, Label, Radio, RadioGroup } from '@navikt/ds-react'
+import { Label, Radio, RadioGroup } from '@navikt/ds-react'
 import { RadioGroupWrapper } from '~components/behandling/vilkaarsvurdering/Vurdering'
-import { Undertekst, VurderingsTitle } from '../styled'
+import { VurderingsTitle } from '../styled'
 import { SoeknadsoversiktTextArea } from '../SoeknadsoversiktTextArea'
 import { useAppDispatch } from '~store/Store'
 import { useState } from 'react'
@@ -35,6 +35,8 @@ export const UtenlandstilknytningVurdering = ({
   const [begrunnelse, setBegrunnelse] = useState<string>(utenlandstilknytning?.begrunnelse || '')
   const [setUtenlandstilknytningStatus, setUtenlandstilknytning, resetToInitial] = useApiCall(lagreUtenlandstilknytning)
 
+  const tittel = 'Hvilken type sak er dette?'
+
   const lagre = (onSuccess?: () => void) => {
     !svar ? setRadioError('Du må velge et svar') : setRadioError('')
 
@@ -57,10 +59,9 @@ export const UtenlandstilknytningVurdering = ({
 
   return (
     <VurderingsboksWrapper
-      tittel=""
+      tittel={tittel}
       subtittelKomponent={
         <>
-          <BodyShort spacing>Hvilken type sak er dette?</BodyShort>
           {utenlandstilknytning?.type ? (
             <Label as="p" size="small" style={{ marginBottom: '32px' }}>
               {UtenlandstilknytningTypeTittel[utenlandstilknytning.type]}
@@ -87,8 +88,7 @@ export const UtenlandstilknytningVurdering = ({
       defaultRediger={utenlandstilknytning === null}
     >
       <>
-        <VurderingsTitle title="Utlandstilknytning" />
-        <Undertekst $gray={false}>Hvilken type sak er dette?</Undertekst>
+        <VurderingsTitle title={tittel} />
         <RadioGroupWrapper>
           <RadioGroup
             legend=""

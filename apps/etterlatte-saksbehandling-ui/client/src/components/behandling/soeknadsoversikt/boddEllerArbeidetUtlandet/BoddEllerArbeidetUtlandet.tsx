@@ -25,7 +25,7 @@ export const BoddEllerArbeidetUtlandet = ({
   return (
     <LovtekstMedLenke tittel="Utlandsopphold" hjemler={[]} status={statusIkon(behandling.boddEllerArbeidetUtlandet)}>
       <Beskrivelse>
-        <VStack gap="8">
+        <VStack gap="6">
           <BodyShort>
             Hvis avdøde har bodd og/eller arbeidet i utlandet, kan dette ha innvirkning på rettighetene til og
             størrelsen på etterlatteytelser.

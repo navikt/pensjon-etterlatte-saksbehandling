@@ -18,4 +18,5 @@ object Migreringshendelser {
     const val PAUSE = "${PREFIX}PAUSE"
     const val IVERKSATT = "${PREFIX}IVERKSATT"
     const val AVBRYT_BEHANDLING = "${PREFIX}AVBRYT_BEHANDLING"
+    const val FIKS_ENKELTBREV = "${PREFIX}FIKS_ENKELTBREV"
 }

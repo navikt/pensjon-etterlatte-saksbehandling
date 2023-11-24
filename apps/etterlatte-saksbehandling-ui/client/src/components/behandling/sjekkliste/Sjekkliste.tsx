@@ -18,7 +18,7 @@ import {
   VStack,
 } from '@navikt/ds-react'
 import { ConfigContext } from '~clientConfig'
-import { hentBehandlesFraStatus } from '~components/behandling/felles/utils'
+import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
 import { ISjekklisteItem } from '~shared/types/Sjekkliste'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import debounce from 'lodash/debounce'
@@ -28,13 +28,13 @@ import { updateSjekkliste, updateSjekklisteItem } from '~store/reducers/Sjekklis
 import { PencilIcon } from '@navikt/aksel-icons'
 import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 import { SakType } from '~shared/types/sak'
-import { useSaksbehandlerGjeldendeOppgave } from '~components/behandling/sidemeny/useSaksbehandlerGjeldendeOppgave'
+import { useSelectorSaksbehandlerGjeldendeOppgaveBehandling } from '~store/selectors/useSelectorSaksbehandlerGjeldendeOppgaveBehandling'
 
 export const Sjekkliste = ({ behandling }: { behandling: IBehandlingReducer }) => {
-  const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.saksbehandler)
+  const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
   const [redigerbar, setRedigerbar] = useState<boolean>(false)
   const [oppgaveErTildeltInnloggetBruker, setOppgaveErTildeltInnloggetBruker] = useState(false)
-  const saksbehandlerGjeldendeOppgave = useSaksbehandlerGjeldendeOppgave()
+  const saksbehandlerGjeldendeOppgave = useSelectorSaksbehandlerGjeldendeOppgaveBehandling()
 
   const dispatch = useAppDispatch()
 
@@ -59,7 +59,7 @@ export const Sjekkliste = ({ behandling }: { behandling: IBehandlingReducer }) =
   useEffect(() => {
     const erSammeIdent = saksbehandlerGjeldendeOppgave === innloggetSaksbehandler.ident
     setOppgaveErTildeltInnloggetBruker(erSammeIdent)
-    setRedigerbar(hentBehandlesFraStatus(behandling.status) && erSammeIdent)
+    setRedigerbar(behandlingErRedigerbar(behandling.status) && erSammeIdent)
   }, [])
 
   return (

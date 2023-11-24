@@ -10,19 +10,25 @@ export const DatoVelger = ({
   description,
   error,
   disabled = false,
+  fromDate = undefined,
+  toDate = undefined,
 }: {
   value: Date | undefined
   onChange: (date: Date | undefined) => void
-  label: string
+  label: React.ReactNode
   description?: ReactNode
   error?: ReactNode
   disabled?: boolean
+  fromDate?: Date | undefined
+  toDate?: Date | undefined
 }) => {
   const { datepickerProps, inputProps } = useDatepicker({
     onDateChange: (date: Date) => onChange(date),
     locale: 'nb',
     inputFormat: 'dd.MM.yyyy',
     defaultSelected: value,
+    fromDate: fromDate,
+    toDate: toDate,
   } as UseDatepickerOptions)
 
   return (

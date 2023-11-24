@@ -21,9 +21,9 @@ data class VedtakSammendragDto(
     val id: String,
     val behandlingId: UUID,
     val vedtakType: VedtakType?,
-    val saksbehandlerId: String?,
+    val behandlendeSaksbehandler: String?,
     val datoFattet: ZonedDateTime?,
-    val attestant: String?,
+    val attesterendeSaksbehandler: String?,
     val datoAttestert: ZonedDateTime?,
 )
 
@@ -130,7 +130,14 @@ data class VedtakSamordningDto(
     val vedtakFattet: VedtakFattet?,
     val attestasjon: Attestasjon?,
     val beregning: ObjectNode?,
-    val avkorting: ObjectNode?,
+    val perioder: List<VedtakSamordningPeriode>,
+)
+
+data class VedtakSamordningPeriode(
+    val fom: YearMonth,
+    val tom: YearMonth?,
+    val ytelseFoerAvkorting: Int,
+    val ytelseEtterAvkorting: Int,
 )
 
 data class TilbakekrevingVedtakDto(

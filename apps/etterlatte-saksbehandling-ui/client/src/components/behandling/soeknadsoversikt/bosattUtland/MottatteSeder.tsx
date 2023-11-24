@@ -1,10 +1,8 @@
-import { BodyShort, ErrorSummary, Heading, TextField } from '@navikt/ds-react'
+import { Alert, BodyShort, ErrorSummary, Heading, TextField } from '@navikt/ds-react'
 import SEDLandMedDokumenter from '~components/behandling/revurderingsoversikt/sluttbehandlingUtland/SEDLandMedDokumenter'
 import { ILand } from '~shared/api/trygdetid'
 import React from 'react'
 import { LandMedDokumenter } from '~shared/types/RevurderingInfo'
-import { InformationSquareIcon } from '@navikt/aksel-icons'
-import { ABlue500 } from '@navikt/ds-tokens/dist/tokens'
 
 export const MottatteSeder = ({
   landliste,
@@ -14,6 +12,7 @@ export const MottatteSeder = ({
   setLandMedDokumenterMottatte,
   rinanummer,
   setRinanummer,
+  redigerbar,
 }: {
   landliste: ILand[]
   feilkoder: Set<string>
@@ -22,6 +21,7 @@ export const MottatteSeder = ({
   setLandMedDokumenterMottatte: React.Dispatch<React.SetStateAction<LandMedDokumenter[]>>
   rinanummer: string
   setRinanummer: React.Dispatch<React.SetStateAction<string>>
+  redigerbar: boolean
 }) => {
   const resetFeilkoder = () => setFeilkoderMottatte(new Set([]))
   return (
@@ -36,16 +36,16 @@ export const MottatteSeder = ({
           ))}
         </ErrorSummary>
       ) : null}
-      <Heading level="2" size="medium" style={{ marginTop: '2rem' }}>
+      <Heading level="2" size="medium" style={{ marginTop: '2rem' }} spacing>
         Mottatt krav fra utland
       </Heading>
-      <BodyShort>Fyll inn hvilke SED som er mottatt i RINA pr land.</BodyShort>
-      <BodyShort>
-        <InformationSquareIcon stroke={ABlue500} fill={ABlue500} fontSize="1.2rem" />
+      <BodyShort spacing>Fyll inn hvilke SED som er mottatt i RINA pr. land.</BodyShort>
+      <Alert variant="info">
         Det kan hende det allerede ligger P5000/P6000 i avdødes sak. Sjekk opp i dette før du etterspør info.
-      </BodyShort>
+      </Alert>
       <div style={{ width: '12rem', maxWidth: '20rem', margin: '2rem 0rem' }}>
         <TextField
+          disabled={!redigerbar}
           label="Saksnummer RINA"
           value={rinanummer}
           onChange={(e) => {
@@ -59,6 +59,8 @@ export const MottatteSeder = ({
         landMedDokumenter={landMedDokumenterMottatte}
         setLandMedDokumenter={setLandMedDokumenterMottatte}
         resetFeilkoder={resetFeilkoder}
+        redigerbar={redigerbar}
+        label="Mottatt dato"
       />
     </>
   )

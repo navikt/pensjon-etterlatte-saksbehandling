@@ -9,11 +9,13 @@ export default function DokumentRad({
   dokument,
   oppdaterDokument,
   fjernDokument,
+  label = undefined,
 }: {
   lesevisning: boolean
   dokument: MottattDokument
   oppdaterDokument: (field: string, value: string) => void
   fjernDokument: () => void
+  label: string | undefined
 }) {
   return (
     <HStack gap="4">
@@ -25,7 +27,7 @@ export default function DokumentRad({
       />
       <DatoVelger
         disabled={lesevisning}
-        label="Datovelger"
+        label={label ? label : 'Datovelger'}
         value={dokument.dato ? new Date(dokument.dato) : undefined}
         onChange={(date) => oppdaterDokument('dato', formatDateToLocaleDateOrEmptyString(date))}
       />

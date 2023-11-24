@@ -1,7 +1,12 @@
 package no.nav.etterlatte
 
+import com.typesafe.config.ConfigFactory
+import io.ktor.server.config.HoconApplicationConfig
+import migrering.migreringRoute
 import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstartOgAvslutning
+import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.database.migrate
+import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.migrering.ApplicationContext
 import no.nav.etterlatte.migrering.FeilendeMigreringLytterRiver
 import no.nav.etterlatte.migrering.LagreKoblingRiver
@@ -24,8 +29,18 @@ internal class Server(private val context: ApplicationContext) {
         with(context) {
             dataSource.migrate()
             val rapidEnv = getRapidEnv()
-            val connection =
-                RapidApplication.create(rapidEnv).also { rapidsConnection ->
+
+            RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(rapidEnv))
+                .withKtorModule {
+                    restModule(
+                        sikkerLogg = sikkerlogger(),
+                        config = HoconApplicationConfig(ConfigFactory.load()),
+                    ) {
+                        migreringRoute(pesysRepository)
+                    }
+                }
+                .build()
+                .also { rapidsConnection ->
                     MigreringRiver(rapidsConnection)
                     MigrerSpesifikkSakRiver(
                         rapidsConnection,
@@ -40,7 +55,6 @@ internal class Server(private val context: ApplicationContext) {
                     LyttPaaIverksattVedtakRiver(rapidsConnection, pesysRepository, penklient, featureToggleService)
                     FeilendeMigreringLytterRiver(rapidsConnection, pesysRepository)
                     StartMigrering(startMigreringRepository, rapidsConnection)
-                }
-            connection.start()
+                }.start()
         }
 }

@@ -16,12 +16,12 @@ const SaksbehandlerWrapper = styled(Label)`
 export const ByttSaksbehandler = (props: RedigerSaksbehandlerProps) => {
   const [modalIsOpen, setModalIsOpen] = useState(false)
   const { saksbehandler, oppgaveId, oppdaterTildeling, erRedigerbar, versjon, type } = props
-  const user = useAppSelector((state) => state.saksbehandlerReducer.saksbehandler)
+  const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
   const [byttSaksbehandlerSvar, byttSaksbehandler] = useApiCall(byttSaksbehandlerApi)
 
   useEffect(() => {
     if (isSuccess(byttSaksbehandlerSvar)) {
-      oppdaterTildeling(oppgaveId, user.ident)
+      oppdaterTildeling(oppgaveId, innloggetSaksbehandler.ident)
     }
   }, [byttSaksbehandlerSvar])
 
@@ -52,7 +52,7 @@ export const ByttSaksbehandler = (props: RedigerSaksbehandlerProps) => {
               byttSaksbehandler({
                 oppgaveId: oppgaveId,
                 type: type,
-                nysaksbehandler: { saksbehandler: user.ident, versjon: versjon },
+                nysaksbehandler: { saksbehandler: innloggetSaksbehandler.ident, versjon: versjon },
               })
             }
             setModalisOpen={setModalIsOpen}

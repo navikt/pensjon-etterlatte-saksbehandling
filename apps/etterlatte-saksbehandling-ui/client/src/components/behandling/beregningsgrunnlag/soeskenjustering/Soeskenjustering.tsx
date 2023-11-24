@@ -16,7 +16,7 @@ import {
   mapListeFraDto,
   PeriodisertBeregningsgrunnlag,
 } from '~components/behandling/beregningsgrunnlag/PeriodisertBeregningsgrunnlag'
-import { hentBehandlesFraStatus } from '~components/behandling/felles/utils'
+import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
 import SoeskenjusteringPeriode from '~components/behandling/beregningsgrunnlag/soeskenjustering/SoeskenjusteringPeriode'
 import { AGreen500 } from '@navikt/ds-tokens/dist/tokens'
 import { CheckmarkCircleIcon } from '@navikt/aksel-icons'
@@ -71,7 +71,7 @@ const Soeskenjustering = (props: SoeskenjusteringProps) => {
     control,
   })
 
-  const behandles = hentBehandlesFraStatus(behandling?.status)
+  const behandles = behandlingErRedigerbar(behandling?.status)
   const sisteTom = watch(`soeskenMedIBeregning.${fields.length - 1}.tom`)
   const sisteFom = watch(`soeskenMedIBeregning.${fields.length - 1}.fom`)
   const [visOkLagret, setVisOkLagret] = useState(false)

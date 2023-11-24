@@ -34,6 +34,7 @@ export interface NyBehandlingRequest {
   mottattDato?: string
   spraak?: string
   kilde?: string
+  pesysId?: number
 }
 
 export enum IBehandlingsType {
@@ -113,9 +114,10 @@ export interface Virkningstidspunkt {
   dato: string
   kilde: KildeSaksbehandler
   begrunnelse: string
+  kravdato: string | null
 }
 
 export interface IEtterbetaling {
-  fraDato?: Date | null
-  tilDato?: Date | null
+  fra?: Date | null
+  til?: Date | null
 }

@@ -27,7 +27,7 @@ data class InnvilgetBrevDataEnkel(
             etterbetaling: EtterbetalingDTO?,
         ) = InnvilgetBrevDataEnkel(
             utbetalingsinfo = utbetalingsinfo,
-            avdoed = generellBrevData.personerISak.avdoed,
+            avdoed = generellBrevData.personerISak.avdoede.minBy { it.doedsdato },
             vedtaksdato = finnVedtaksmaaned(generellBrevData, etterbetaling).atDay(1),
             erEtterbetaling = etterbetaling != null,
         )

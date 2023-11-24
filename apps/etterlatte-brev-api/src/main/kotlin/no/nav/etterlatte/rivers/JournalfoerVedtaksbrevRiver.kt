@@ -12,6 +12,7 @@ import no.nav.etterlatte.libs.common.rapidsandrivers.SKAL_SENDE_BREV
 import no.nav.etterlatte.libs.common.sak.VedtakSak
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseType
+import no.nav.etterlatte.token.Fagsaksystem
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -34,6 +35,7 @@ internal class JournalfoerVedtaksbrevRiver(
             validate { it.requireKey("vedtak.sak.id") }
             validate { it.requireKey("vedtak.sak.ident") }
             validate { it.requireKey("vedtak.sak.sakType") }
+            validate { it.requireKey("vedtak.vedtakFattet.ansvarligSaksbehandler") }
             validate { it.requireKey("vedtak.vedtakFattet.ansvarligEnhet") }
             validate {
                 it.rejectValues("vedtak.innhold.behandling.type", listOf(BehandlingType.MANUELT_OPPHOER.name))
@@ -62,12 +64,32 @@ internal class JournalfoerVedtaksbrevRiver(
                     ?: throw NoSuchElementException("Ingen vedtaksbrev funnet på behandlingId=$behandlingId")
 
             // TODO: Forbedre denne "fiksen". Gjøres nå for å lappe sammen
-            if (vedtaksbrev.status == Status.JOURNALFOERT) {
-                logger.warn("Vedtaksbrev (id=${vedtaksbrev.id}) er allerede journalført.")
+            if (vedtaksbrev.status in listOf(Status.JOURNALFOERT, Status.DISTRIBUERT, Status.SLETTET)) {
+                logger.warn("Vedtaksbrev (id=${vedtaksbrev.id}) er allerede ${vedtaksbrev.status}.")
                 return
             }
 
-            val response = service.journalfoerVedtaksbrev(vedtaksbrev, vedtak)
+            if (vedtaksbrev.id == 2897L) {
+                logger.warn("Håndterer brev 2897 separat")
+                return
+            }
+
+            val response =
+                try {
+                    service.journalfoerVedtaksbrev(vedtaksbrev, vedtak)
+                } catch (e: Exception) {
+                    val saksbehandler = packet["vedtak.vedtakFattet.ansvarligSaksbehandler"].asText()
+                    if (saksbehandler == Fagsaksystem.EY.navn) {
+                        logger.error(
+                            "Feila på å journalføre brev ${vedtaksbrev.id}. " +
+                                "Dette må følges opp manuelt av migreringsutviklerne.",
+                        )
+                        return
+                    } else {
+                        logger.error("Feila på å journalføre brev ${vedtaksbrev.id}")
+                        throw e
+                    }
+                }
 
             logger.info("Vedtaksbrev for vedtak med id ${vedtak.vedtakId} er journalfoert OK")
 

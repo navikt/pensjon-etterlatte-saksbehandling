@@ -18,7 +18,7 @@ import java.sql.ResultSet
 import java.util.UUID
 
 interface OppgaveDao {
-    fun lagreOppgave(oppgaveIntern: OppgaveIntern)
+    fun opprettOppgave(oppgaveIntern: OppgaveIntern)
 
     fun hentOppgave(oppgaveId: UUID): OppgaveIntern?
 
@@ -56,7 +56,7 @@ interface OppgaveDao {
 class OppgaveDaoImpl(private val connection: () -> Connection) : OppgaveDao {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    override fun lagreOppgave(oppgaveIntern: OppgaveIntern) {
+    override fun opprettOppgave(oppgaveIntern: OppgaveIntern) {
         with(connection()) {
             val statement =
                 prepareStatement(

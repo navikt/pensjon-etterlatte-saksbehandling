@@ -20,6 +20,7 @@ export const TrygdeavtaleVisning = ({ trygdeavtale, avtaler, kriterier }: Trygde
         {avtaleDato && <> - {avtaleDato.beskrivelse}</>}
       </BodyShort>
       {avtaleKriteria && <BodyShort>{avtaleKriteria.beskrivelse}</BodyShort>}
+      {trygdeavtale.arbInntekt1G && <BodyShort>{trygdeavtale.arbInntekt1G}</BodyShort>}
     </TrygdeavtaleBody>
   )
 }

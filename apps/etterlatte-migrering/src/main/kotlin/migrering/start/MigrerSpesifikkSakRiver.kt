@@ -92,12 +92,11 @@ internal class MigrerSpesifikkSakRiver(
                 .tilVaarModell { runBlocking { krrKlient.hentDigitalKontaktinformasjon(it) } }
                 .also { pesysRepository.lagrePesyssak(pesyssak = it) }
         packet.eventName = Migreringshendelser.MIGRER_SAK
-        val request = pesyssak.tilMigreringsrequest()
-        packet.hendelseData = request
-        verifiserer.verifiserRequest(request)
+        val verifisertRequest = verifiserer.verifiserRequest(pesyssak.tilMigreringsrequest())
+        packet.hendelseData = verifisertRequest
 
         if (featureToggleService.isEnabled(MigreringFeatureToggle.SendSakTilMigrering, false)) {
-            sendSakTilMigrering(packet, request, context, pesyssak)
+            sendSakTilMigrering(packet, verifisertRequest, context, pesyssak)
         } else {
             logger.info("Migrering er skrudd av. Sender ikke pesys-sak ${pesyssak.id} videre.")
         }

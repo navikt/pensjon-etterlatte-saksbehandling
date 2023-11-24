@@ -62,9 +62,6 @@ export const TrygdeAvtale = ({ redigerbar }: Props) => {
   const [trygdeavtale, setTrygdeavtale] = useState<Trygdeavtale>({} as Trygdeavtale)
   const [valgtAvtale, setValgtAvtale] = useState<TrygdetidAvtale>()
   const [redigering, setRedigering] = useState<Boolean>(true)
-  const [svarArbInntekt1G, setsvarArbInntekt1G] = useState<JaNei | null>()
-  const [svarBeregArt50, setSvarBeregArt50] = useState<JaNei | null>()
-  const [svarNordiskTrygdeavtale, setSvarNordiskTrygdeavtale] = useState<JaNei | null>()
 
   useEffect(() => {
     fetchTrygdetidAvtaler(null, (avtaler: TrygdetidAvtale[]) => {
@@ -273,7 +270,6 @@ export const TrygdeAvtale = ({ redigerbar }: Props) => {
                       className="radioGroup"
                       onChange={(event) => {
                         setTrygdeavtale({ ...trygdeavtale, arbInntekt1G: event as JaNei })
-                        setsvarArbInntekt1G(JaNei[event as JaNei])
                       }}
                       value={trygdeavtale.arbInntekt1G || ''}
                     >
@@ -283,7 +279,7 @@ export const TrygdeAvtale = ({ redigerbar }: Props) => {
                       </div>
                     </RadioGroup>
                   </RadioGroupWrapper>
-                  {svarArbInntekt1G === JaNei.NEI && (
+                  {trygdeavtale.arbInntekt1G === JaNei.NEI && (
                     <Alert variant="info" size="small" inline>
                       Det gis ikke rett til fremtidig trygdetid fra utland ved en prorata beregning. Hvis det heller
                       ikke er rett til fremtidig trygdetid etter nasjonale regler, må du ta bort registrert fremtidig
@@ -342,7 +338,6 @@ export const TrygdeAvtale = ({ redigerbar }: Props) => {
                       defaultValue={trygdeavtale.beregArt50}
                       onChange={(event) => {
                         setTrygdeavtale({ ...trygdeavtale, beregArt50: event as JaNei })
-                        setSvarBeregArt50(JaNei[event as JaNei])
                       }}
                       value={trygdeavtale.beregArt50 || ''}
                     >
@@ -352,7 +347,7 @@ export const TrygdeAvtale = ({ redigerbar }: Props) => {
                       </div>
                     </RadioGroup>
                   </RadioGroupWrapper>
-                  {svarBeregArt50 === JaNei.JA && (
+                  {trygdeavtale.beregArt50 === JaNei.JA && (
                     <Alert variant="info" size="small" inline>
                       Ta en alternativ prorata-beregning. Huk av for «Ikke i prorata» på trygdetidsperioder for EØS-land
                       som har gitt avslag på ytelse.
@@ -408,7 +403,6 @@ export const TrygdeAvtale = ({ redigerbar }: Props) => {
                       className="radioGroup"
                       onChange={(event) => {
                         setTrygdeavtale({ ...trygdeavtale, nordiskTrygdeAvtale: event as JaNei })
-                        setSvarNordiskTrygdeavtale(JaNei[event as JaNei])
                       }}
                       value={trygdeavtale.nordiskTrygdeAvtale || ''}
                     >
@@ -418,7 +412,7 @@ export const TrygdeAvtale = ({ redigerbar }: Props) => {
                       </div>
                     </RadioGroup>
                   </RadioGroupWrapper>
-                  {svarNordiskTrygdeavtale === JaNei.JA && (
+                  {trygdeavtale.nordiskTrygdeAvtale === JaNei.JA && (
                     <Alert variant="info" size="small" inline>
                       Fremtidig trygdetid skal avkortes. Gjenny støtter ikke dette. Du må derfor beregne fremtidig
                       trygdetid manuelt, og beregning av ytelsen må manuelt overstyres. Formel: Avkortet framtidig

@@ -79,6 +79,7 @@ class DokarkivServiceImpl(
     ) {
         val request =
             OppdaterJournalpostSakRequest(
+                tema = sak.sakType.tema,
                 bruker = Bruker(id = sak.ident),
                 sak =
                     JournalpostSak(

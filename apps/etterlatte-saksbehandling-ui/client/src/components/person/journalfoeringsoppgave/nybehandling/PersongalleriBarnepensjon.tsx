@@ -49,20 +49,19 @@ export default function PersongalleriBarnepensjon() {
       <InputRow>
         <TextField
           label="Søker (barnet)"
-          placeholder="Fødselsnummer"
           value={persongalleri?.soeker || ''}
           pattern="[0-9]{11}"
           maxLength={11}
           onChange={(e) => oppdaterPersongalleri({ ...persongalleri, soeker: e.target.value })}
-          description="Automatisk valgt utifra bruker på oppgaven."
+          description="Fødselsnummeret er automatisk hentet fra oppgaven"
+          readOnly
         />
       </InputRow>
 
       <InputRow>
         <TextField
           label="Innsender"
-          placeholder="Fødselsnummer"
-          description="Oppgi innsenderen sitt f.nr. dersom det er tilgjengelig"
+          description="Oppgi innsenderen sitt fødselsnummer dersom det er tilgjengelig"
           value={persongalleri?.innsender || ''}
           pattern="[0-9]{11}"
           maxLength={11}
@@ -79,12 +78,12 @@ export default function PersongalleriBarnepensjon() {
           {persongalleri?.gjenlevende?.map((gjenlevende, index) => (
             <InputRow key={index}>
               <TextField
-                label={`Gjenlevende ${persongalleri!!.gjenlevende!!.length > 1 ? index + 1 : ''}`}
-                placeholder="Fødselsnummer"
+                label="Gjenlevende forelder"
                 value={gjenlevende}
                 pattern="[0-9]{11}"
                 maxLength={11}
                 onChange={(e) => oppdater('gjenlevende', e.target.value, index)}
+                description="Oppgi fødselsnummer"
               />
               <Button icon={<XMarkIcon />} variant="tertiary" onClick={() => fjern('gjenlevende', index)} />
             </InputRow>
@@ -104,12 +103,12 @@ export default function PersongalleriBarnepensjon() {
           {persongalleri?.avdoed?.map((avdoed, index) => (
             <InputRow key={index}>
               <TextField
-                label={`Avdød ${persongalleri!!.avdoed!!.length > 1 ? index + 1 : ''}`}
-                placeholder="Fødselsnummer"
+                label="Avdød forelder"
                 value={avdoed}
                 pattern="[0-9]{11}"
                 maxLength={11}
                 onChange={(e) => oppdater('avdoed', e.target.value, index)}
+                description="Oppgi fødselsnummer"
               />
               <Button icon={<XMarkIcon />} variant="tertiary" onClick={() => fjern('avdoed', index)} />
             </InputRow>
@@ -130,11 +129,11 @@ export default function PersongalleriBarnepensjon() {
             <InputRow key={index}>
               <TextField
                 label={`Søsken ${persongalleri!!.soesken!!.length > 1 ? index + 1 : ''}`}
-                placeholder="Fødselsnummer"
                 value={soesken}
                 pattern="[0-9]{11}"
                 maxLength={11}
                 onChange={(e) => oppdater('soesken', e.target.value, index)}
+                description="Oppgi fødselsnummer"
               />
               <Button icon={<XMarkIcon />} variant="tertiary" onClick={() => fjern('soesken', index)} />
             </InputRow>

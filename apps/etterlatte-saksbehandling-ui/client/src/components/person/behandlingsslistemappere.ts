@@ -73,6 +73,8 @@ export const lenkeTilBehandling = (behandlingSammendrag: IBehandlingsammendrag):
 }
 export const generellBehandlingsStatusTilLesbartNavn = (status: Status) => {
   switch (status) {
+    case Status.RETURNERT:
+      return 'Returnert'
     case Status.OPPRETTET:
       return 'Opprettet'
     case Status.FATTET:

@@ -1,39 +1,42 @@
 import { Info, Overskrift, Tekst, Wrapper } from '~components/behandling/attestering/styled'
 import { Generellbehandling, KravpakkeUtland } from '~shared/types/Generellbehandling'
 import { genbehandlingTypeTilLesbartNavn } from '~components/person/behandlingsslistemappere'
-import { useEffect } from 'react'
-import { mapApiResult, useApiCall } from '~shared/hooks/useApiCall'
-import { hentFerdigstiltAtteseringsoppgaveForReferanse } from '~shared/api/oppgaver'
-import Spinner from '~shared/Spinner'
-import { ApiErrorAlert } from '~ErrorBoundary'
+import { KopierbarVerdi } from '~shared/statusbar/kopierbarVerdi'
+import { formaterKanskjeStringDatoMedFallback } from '~utils/formattering'
 
 export const AttestertVisning = (props: {
   utlandsBehandling: Generellbehandling & { innhold: KravpakkeUtland | null }
 }) => {
   const { utlandsBehandling } = props
 
-  const [hentoppgaveStatus, hentoppgave] = useApiCall(hentFerdigstiltAtteseringsoppgaveForReferanse)
-  useEffect(() => {
-    hentoppgave({ referanse: utlandsBehandling.id, sakId: utlandsBehandling.sakId })
-  }, [])
-
-  //TODO: burde ha med Attestert dato og saksbehandler senere
   return (
     <Wrapper innvilget={true}>
       <Overskrift>{genbehandlingTypeTilLesbartNavn(utlandsBehandling.type)}</Overskrift>
       <div className="flex">
-        <Info>Attestant</Info>
-        {mapApiResult(
-          hentoppgaveStatus,
-          <Spinner visible={true} label="Henter attestant" />,
-          () => (
-            <ApiErrorAlert>Vi klarte ikke å hente attestant</ApiErrorAlert>
-          ),
-          (saksbehandler) => (
-            <Tekst>{saksbehandler}</Tekst>
-          )
-        )}
+        <div>
+          <Info>Attestant</Info>
+          <Tekst>{utlandsBehandling.attestant?.attestant}</Tekst>
+        </div>
+        <div>
+          <Info>Saksbehandler</Info>
+          <Tekst>{utlandsBehandling.behandler?.saksbehandler}</Tekst>
+        </div>
       </div>
+      <div className="flex">
+        <div>
+          <Info>Attestert dato</Info>
+          <Tekst>
+            {formaterKanskjeStringDatoMedFallback('Ikke registrert', utlandsBehandling.attestant?.tidspunkt)}
+          </Tekst>
+        </div>
+        <div>
+          <Info>Behandlet datp</Info>
+          <Tekst>
+            {formaterKanskjeStringDatoMedFallback('Ikke registrert', utlandsBehandling.behandler?.tidspunkt)}
+          </Tekst>
+        </div>
+      </div>
+      <KopierbarVerdi value={utlandsBehandling.sakId.toString()} />
     </Wrapper>
   )
 }

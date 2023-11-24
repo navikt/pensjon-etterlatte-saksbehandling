@@ -9,6 +9,7 @@ import { useAppSelector } from '~store/Store'
 import Spinner from '~shared/Spinner'
 import { AttestertVisning } from '~components/generellbehandling/AttestertVisning'
 import { Alert, BodyShort } from '@navikt/ds-react'
+import { ReturnertVisning } from '~components/generellbehandling/ReturnertVisning'
 
 export const GenerellbehandlingSidemeny = (props: {
   utlandsBehandling: Generellbehandling & { innhold: KravpakkeUtland | null }
@@ -36,6 +37,8 @@ export const GenerellbehandlingSidemeny = (props: {
 
   const genererSidemeny = () => {
     switch (utlandsBehandling.status) {
+      case Status.RETURNERT:
+        return <ReturnertVisning utlandsBehandling={utlandsBehandling} />
       case Status.OPPRETTET:
         return null
       case Status.FATTET:

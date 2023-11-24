@@ -1,5 +1,5 @@
 import { apiClient, ApiResponse } from '~shared/api/apiClient'
-import { Grunnlagsopplysning, PersonMedNavn } from '~shared/types/grunnlag'
+import { Grunnlagsopplysning, PersonMedNavn, Personopplysninger } from '~shared/types/grunnlag'
 import { IPersonResult } from '~components/person/typer'
 import { Foreldreansvar } from '~shared/types/Foreldreansvar'
 import { KildePdl } from '~shared/types/kilde'
@@ -34,4 +34,10 @@ export const getHistoriskForeldreansvar = (args: {
   return apiClient.get<Grunnlagsopplysning<Foreldreansvar, KildePdl>>(
     `/grunnlag/behandling/${args.behandlingId}/revurdering/HISTORISK_FORELDREANSVAR`
   )
+}
+
+export const hentPersonopplysningerForBehandling = async (
+  behandlingId: string
+): Promise<ApiResponse<Personopplysninger>> => {
+  return apiClient.get<Personopplysninger>(`/grunnlag/behandling/${behandlingId}/personopplysninger`)
 }

@@ -69,7 +69,7 @@ interface GrunnlagService {
 
     fun hentOpplysningsgrunnlag(behandlingId: UUID): Grunnlag?
 
-    fun hentPersonopplysninger(behandlingId: UUID): List<Personopplysning>
+    fun hentPersonopplysninger(behandlingId: UUID): PersonopplysningerResponse
 
     fun hentSakerOgRoller(fnr: Folkeregisteridentifikator): PersonMedSakerOgRoller
 
@@ -142,22 +142,48 @@ class RealGrunnlagService(
         return OpplysningsgrunnlagMapper(grunnlag, persongalleri).hentGrunnlag()
     }
 
-    override fun hentPersonopplysninger(behandlingId: UUID): List<Personopplysning> {
-        val relevanteOpplysningstyper =
-            setOf(
-                Opplysningstype.INNSENDER_SOEKNAD_V1,
-                Opplysningstype.INNSENDER_PDL_V1,
-                Opplysningstype.AVDOED_SOEKNAD_V1,
-                Opplysningstype.AVDOED_PDL_V1,
-                Opplysningstype.SOEKER_SOEKNAD_V1,
-                Opplysningstype.SOEKER_PDL_V1,
-                Opplysningstype.GJENLEVENDE_FORELDER_SOEKNAD_V1,
-                Opplysningstype.GJENLEVENDE_FORELDER_PDL_V1,
-            )
+    override fun hentPersonopplysninger(behandlingId: UUID): PersonopplysningerResponse {
+        val relevanteGrunnlag = opplysningDao.hentAlleGrunnlagForBehandling(behandlingId)
+//            .filter {
+//                setOf(
+//                    Opplysningstype.INNSENDER_SOEKNAD_V1,
+//                    Opplysningstype.INNSENDER_PDL_V1,
+//                    Opplysningstype.AVDOED_SOEKNAD_V1,
+//                    Opplysningstype.AVDOED_PDL_V1,
+//                    Opplysningstype.SOEKER_SOEKNAD_V1,
+//                    Opplysningstype.SOEKER_PDL_V1,
+//                    Opplysningstype.GJENLEVENDE_FORELDER_SOEKNAD_V1,
+//                    Opplysningstype.GJENLEVENDE_FORELDER_PDL_V1,
+//                ).contains(it.opplysning.opplysningType)
+//            }
 
-        return opplysningDao.hentAlleGrunnlagForBehandling(behandlingId)
-            .filter { relevanteOpplysningstyper.contains(it.opplysning.opplysningType) }
-            .map { it.opplysning.asPersonopplysning() }
+        val soker =
+            relevanteGrunnlag.firstOrNull { it.opplysning.opplysningType == Opplysningstype.SOEKER_PDL_V1 }
+                ?: relevanteGrunnlag.first { it.opplysning.opplysningType == Opplysningstype.SOEKER_SOEKNAD_V1 }
+
+        val avdode =
+            relevanteGrunnlag.filter {
+                setOf(
+                    Opplysningstype.AVDOED_PDL_V1,
+//            Opplysningstype.AVDOED_SOEKNAD_V1,
+                ).contains(it.opplysning.opplysningType)
+            }
+
+        val gjenlevende =
+            relevanteGrunnlag.filter {
+                setOf(
+                    Opplysningstype.GJENLEVENDE_FORELDER_PDL_V1,
+//            Opplysningstype.GJENLEVENDE_FORELDER_SOEKNAD_V1,
+                ).contains(it.opplysning.opplysningType)
+            }
+
+        return PersonopplysningerResponse(
+            soeker = soker.opplysning.asPersonopplysning(),
+            avdoede = avdode.map { it.opplysning.asPersonopplysning() },
+            gjenlevende = gjenlevende.map { it.opplysning.asPersonopplysning() },
+        )
+
+        // return relevanteGrunnlag.map { it.opplysning.asPersonopplysning() }
     }
 
     private fun Grunnlagsopplysning<JsonNode>.asPersonopplysning(): Personopplysning {
@@ -497,6 +523,12 @@ class LaastGrunnlagKanIkkeEndres(val behandlingId: UUID) :
             låst til en versjon av grunnlag (behandlingId=$behandlingId)
             """,
     )
+
+data class PersonopplysningerResponse(
+    val soeker: Personopplysning,
+    val avdoede: List<Personopplysning>,
+    val gjenlevende: List<Personopplysning>,
+)
 
 data class Personopplysning(
     val opplysningType: Opplysningstype,

@@ -623,6 +623,6 @@ class ManglerAvkortetYtelse :
     UgyldigForespoerselException(
         code = "VEDTAKSVURDERING_MANGLER_AVKORTET_YTELSE",
         detail =
-            "Kan ikke opprette vedtak uten avkorting. Det er påkrevet og legge til inntektsavkorting " +
+            "Kan ikke opprette vedtak uten avkorting. Det er påkrevet å legge til inntektsavkorting " +
                 "selv også i tilfellene hvor mottaker ikke har inntekt.",
     )

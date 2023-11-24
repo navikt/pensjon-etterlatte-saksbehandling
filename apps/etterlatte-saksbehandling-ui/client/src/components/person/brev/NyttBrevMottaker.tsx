@@ -3,7 +3,7 @@ import { Alert, BodyShort, Heading, Label, Panel } from '@navikt/ds-react'
 import RedigerMottakerModal from '~components/person/brev/RedigerMottakerModal'
 import React, { useEffect, useState } from 'react'
 import { isFailure, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
-import { getVergeadresseFraGrunnlag } from '~shared/api/grunnlag'
+import { getVergeadresseForPerson, getVergeadresseFraGrunnlag } from '~shared/api/grunnlag'
 import { getData, isSuccessOrNotFound } from '~shared/api/brev'
 import { handleHentVergeadresseError } from '~components/person/Vergeadresse'
 
@@ -13,11 +13,15 @@ export default function NyttBrevMottaker({ brev }: { brev: IBrev }) {
   const mottaker = brevState.mottaker
   const adresse = mottaker?.adresse
 
-  const [vergeadresse, getVergeadresse] = useApiCall(getVergeadresseFraGrunnlag)
+  const [vergeadresse, getVergeadresse] = brev.behandlingId
+    ? useApiCall(getVergeadresseFraGrunnlag)
+    : useApiCall(getVergeadresseForPerson)
 
   useEffect(() => {
     if (brev.behandlingId) {
       getVergeadresse(brev.behandlingId)
+    } else {
+      getVergeadresse(brev.soekerFnr)
     }
   }, [brev])
 

@@ -34,6 +34,14 @@ export const getVergeadresseFraGrunnlag = async (
   return apiClient.get(`/grunnlag/behandling/${behandlingId}/VERGES_ADRESSE`)
 }
 
+export const getVergeadresseForPerson = async (
+  foedselsnummer: string
+): Promise<ApiResponse<Grunnlagsopplysning<Mottaker, KildePersondata>>> => {
+  return apiClient.post(`/grunnlag/person/vergeadresse`, {
+    foedselsnummer: foedselsnummer,
+  })
+}
+
 export const getHistoriskForeldreansvar = (args: {
   sakId: number
   behandlingId: string

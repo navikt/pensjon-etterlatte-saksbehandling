@@ -42,7 +42,7 @@ internal class Verifiserer(
         return patchedRequest
     }
 
-    fun patchGjenlevendeHvisIkkeOppgitt(request: MigreringRequest): MigreringRequest {
+    private fun patchGjenlevendeHvisIkkeOppgitt(request: MigreringRequest): MigreringRequest {
         if (request.gjenlevendeForelder != null) {
             return request
         }
@@ -74,6 +74,7 @@ internal class Verifiserer(
         return try {
             pdlKlient.hentPersongalleri(soeker)
         } catch (e: Exception) {
+            logger.info("Persongalleriet ble hentet med feil, returnerer null i stedet")
             null
         }
     }

@@ -106,6 +106,7 @@ export const TrygdeAvtale = ({ redigerbar }: Props) => {
           avtaleKode: trygdeavtale.avtaleKode,
           avtaleDatoKode: trygdeavtale.avtaleDatoKode,
           avtaleKriteriaKode: trygdeavtale.avtaleKriteriaKode,
+          personKrets: trygdeavtale.personKrets,
           arbInntekt1G: trygdeavtale.arbInntekt1G,
           arbInntekt1GKommentar: trygdeavtale.arbInntekt1GKommentar,
           beregArt50: trygdeavtale.beregArt50,

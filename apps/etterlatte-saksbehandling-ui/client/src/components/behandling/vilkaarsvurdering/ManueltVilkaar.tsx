@@ -63,11 +63,13 @@ export const ManueltVilkaar = (props: VilkaarProps) => {
                 <StatusIcon status={status()} />
                 {vilkaar.hovedvilkaar.tittel}
               </Title>
-              {vilkaar.hovedvilkaar.lovreferanse.lenke && (
+              {vilkaar.hovedvilkaar.lovreferanse.lenke ? (
                 <Link href={vilkaar.hovedvilkaar.lovreferanse.lenke} target="_blank" rel="noopener noreferrer">
                   {`${paragrafType(vilkaar)} ${vilkaar.hovedvilkaar.lovreferanse.paragraf}`}
                   <ExternalLinkIcon title={vilkaar.hovedvilkaar.tittel} />
                 </Link>
+              ) : (
+                <>{`${paragrafType(vilkaar)} ${vilkaar.hovedvilkaar.lovreferanse.paragraf}`}</>
               )}
               <VilkaarBeskrivelse>{vilkaar.hovedvilkaar.beskrivelse}</VilkaarBeskrivelse>
             </VilkaarColumn>

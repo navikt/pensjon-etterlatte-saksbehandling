@@ -7,7 +7,6 @@ import useInnloggetSaksbehandler from './shared/hooks/useInnloggetSaksbehandler'
 import nb from 'date-fns/locale/nb'
 import { registerLocale } from 'react-datepicker'
 import ErrorBoundary, { ApiErrorAlert } from '~ErrorBoundary'
-import BrevOversikt from '~components/person/brev/BrevOversikt'
 import NyttBrev from '~components/person/brev/NyttBrev'
 import ScrollToTop from '~ScrollTop'
 import { isFailure, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
@@ -57,7 +56,6 @@ function App() {
                   <Route path="/oppgavebenken" element={<ToggleMinOppgaveliste />} />
                   <Route path="/person/:fnr" element={<Person />} />
                   <Route path="/oppgave/:id/*" element={<BehandleJournalfoeringOppgave />} />
-                  <Route path="/person/:fnr/sak/:sakId/brev" element={<BrevOversikt />} />
                   <Route path="/person/:fnr/sak/:sakId/brev/:brevId" element={<NyttBrev />} />
                   <Route path="/behandling/:behandlingId/*" element={<Behandling />} />
                   <Route path="/manuellbehandling/*" element={<ManuellBehandling />} />

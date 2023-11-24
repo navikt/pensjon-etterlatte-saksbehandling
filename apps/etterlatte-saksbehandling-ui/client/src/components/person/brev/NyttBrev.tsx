@@ -1,5 +1,5 @@
 import RedigerbartBrev from '~components/behandling/brev/RedigerbartBrev'
-import { isSuccess, useApiCall } from '~shared/hooks/useApiCall'
+import { mapApiResult, useApiCall } from '~shared/hooks/useApiCall'
 import { useParams } from 'react-router-dom'
 import { hentBrev } from '~shared/api/brev'
 import { useEffect, useState } from 'react'
@@ -13,12 +13,14 @@ import styled from 'styled-components'
 import NyttBrevHandlingerPanel from '~components/person/brev/NyttBrevHandlingerPanel'
 import BrevStatusPanel from '~components/person/brev/BrevStatusPanel'
 import NyttBrevMottaker from '~components/person/brev/NyttBrevMottaker'
+import Spinner from '~shared/Spinner'
+import { ApiErrorAlert } from '~ErrorBoundary'
 
 export default function NyttBrev() {
   const { brevId, sakId, fnr } = useParams()
   const [kanRedigeres, setKanRedigeres] = useState(false)
 
-  const [hentetBrev, apiHentBrev] = useApiCall(hentBrev)
+  const [brevStatus, apiHentBrev] = useApiCall(hentBrev)
   const [personStatus, hentPerson] = useApiCall(getPerson)
 
   useEffect(() => {
@@ -38,29 +40,35 @@ export default function NyttBrev() {
   return (
     <>
       <StatusBar result={personStatus} />
-      <NavigerTilbakeMeny label="Tilbake til brevoversikt" path={`/person/${fnr}/sak/${sakId}/brev`} />
+      <NavigerTilbakeMeny label="Tilbake til brevoversikt" path={`/person/${fnr}?fane=BREV`} />
 
-      <GridContainer>
-        <Column>{isSuccess(hentetBrev) && <NyttBrevMottaker brev={hentetBrev.data} />}</Column>
-        <Column>
-          {isSuccess(hentetBrev) &&
-            (hentetBrev.data.status === BrevStatus.DISTRIBUERT ? (
-              <PanelWrapper>
-                <ForhaandsvisningBrev brev={hentetBrev.data} />
-              </PanelWrapper>
-            ) : (
-              <RedigerbartBrev brev={hentetBrev.data} kanRedigeres={kanRedigeres} />
-            ))}
-        </Column>
-        <Column>
-          {isSuccess(hentetBrev) && (
-            <>
-              <BrevStatusPanel brev={hentetBrev.data} />
-              <NyttBrevHandlingerPanel brev={hentetBrev.data} setKanRedigeres={setKanRedigeres} />
-            </>
-          )}
-        </Column>
-      </GridContainer>
+      {mapApiResult(
+        brevStatus,
+        <Spinner label="Henter brev ..." visible />,
+        () => (
+          <ApiErrorAlert>Feil oppsto ved henting av brev</ApiErrorAlert>
+        ),
+        (brev) => (
+          <GridContainer>
+            <Column>
+              <NyttBrevMottaker brev={brev} />
+            </Column>
+            <Column>
+              {brev.status === BrevStatus.DISTRIBUERT ? (
+                <PanelWrapper>
+                  <ForhaandsvisningBrev brev={brev} />
+                </PanelWrapper>
+              ) : (
+                <RedigerbartBrev brev={brev} kanRedigeres={kanRedigeres} />
+              )}
+            </Column>
+            <Column>
+              <BrevStatusPanel brev={brev} />
+              <NyttBrevHandlingerPanel brev={brev} setKanRedigeres={setKanRedigeres} />
+            </Column>
+          </GridContainer>
+        )
+      )}
     </>
   )
 }

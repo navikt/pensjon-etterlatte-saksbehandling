@@ -12,6 +12,7 @@ import no.nav.etterlatte.libs.common.rapidsandrivers.SKAL_SENDE_BREV
 import no.nav.etterlatte.libs.common.sak.VedtakSak
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseType
+import no.nav.etterlatte.token.Fagsaksystem
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -34,6 +35,7 @@ internal class JournalfoerVedtaksbrevRiver(
             validate { it.requireKey("vedtak.sak.id") }
             validate { it.requireKey("vedtak.sak.ident") }
             validate { it.requireKey("vedtak.sak.sakType") }
+            validate { it.requireKey("vedtak.vedtakFattet.ansvarligEnhet") }
             validate { it.requireKey("vedtak.vedtakFattet.ansvarligEnhet") }
             validate {
                 it.rejectValues("vedtak.innhold.behandling.type", listOf(BehandlingType.MANUELT_OPPHOER.name))
@@ -72,7 +74,21 @@ internal class JournalfoerVedtaksbrevRiver(
                 return
             }
 
-            val response = service.journalfoerVedtaksbrev(vedtaksbrev, vedtak)
+            val response =
+                try {
+                    service.journalfoerVedtaksbrev(vedtaksbrev, vedtak)
+                } catch (e: Exception) {
+                    if (vedtak.sak.ident == Fagsaksystem.EY.navn) {
+                        logger.error(
+                            "Feila på å journalføre brev ${vedtaksbrev.id}. " +
+                                "Dette må følges opp manuelt av migreringsutviklerne.",
+                        )
+                        return
+                    } else {
+                        logger.error("Feila på å journalføre brev ${vedtaksbrev.id}")
+                        throw e
+                    }
+                }
 
             logger.info("Vedtaksbrev for vedtak med id ${vedtak.vedtakId} er journalfoert OK")
 

@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react'
 import { Alert, ErrorMessage, Heading } from '@navikt/ds-react'
 import { Border, HeadingWrapper } from '../soeknadsoversikt/styled'
 import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapper'
-import { hentVedtaksbrev, opprettVedtaksbrev } from '~shared/api/brev'
+import { getData, hentVedtaksbrev, isSuccessOrNotFound, opprettVedtaksbrev } from '~shared/api/brev'
 import { useParams } from 'react-router-dom'
 import { Soeknadsdato } from '../soeknadsoversikt/Soeknadsdato'
 import styled from 'styled-components'
@@ -18,7 +18,7 @@ import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import MottakerPanel from '~components/behandling/brev/detaljer/MottakerPanel'
 import ForhaandsvisningBrev from '~components/behandling/brev/ForhaandsvisningBrev'
 import Spinner from '~shared/Spinner'
-import { BrevProsessType, IBrev, Mottaker } from '~shared/types/Brev'
+import { BrevProsessType, IBrev } from '~shared/types/Brev'
 import RedigerbartBrev from '~components/behandling/brev/RedigerbartBrev'
 import { isFailure, isPending, isPendingOrInitial, useApiCall } from '~shared/hooks/useApiCall'
 
@@ -29,8 +29,7 @@ import { oppdaterBehandling, resetBehandling } from '~store/reducers/BehandlingR
 import { hentBehandling } from '~shared/api/behandling'
 import { useAppDispatch } from '~store/Store'
 import { getVergeadresseFraGrunnlag } from '~shared/api/grunnlag'
-import { Grunnlagsopplysning } from '~shared/types/grunnlag'
-import { KildePersondata } from '~shared/types/kilde'
+import { handleHentVergeadresseError } from '~components/person/Vergeadresse'
 
 export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
   const { behandlingId } = useParams()
@@ -43,10 +42,7 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
   const [hentBrevStatus, hentBrev] = useApiCall(hentVedtaksbrev)
   const [opprettBrevStatus, opprettNyttVedtaksbrev] = useApiCall(opprettVedtaksbrev)
   const [, fetchBehandling] = useApiCall(hentBehandling)
-  const [vergeadresseResult, getVergeadresse] = useApiCall(getVergeadresseFraGrunnlag)
-  const [vergeAdresse, setVergeadresse] = useState<Grunnlagsopplysning<Mottaker, KildePersondata> | undefined>(
-    undefined
-  )
+  const [vergeadresse, getVergeadresse] = useApiCall(getVergeadresseFraGrunnlag)
   const behandlingRedigertEtterOpprettetBrev = (vedtaksbrev: IBrev, hendelser: IHendelse[]) => {
     const hendelse = sisteBehandlingHendelse(hendelser)
     return new Date(hendelse.opprettet).getTime() > new Date(vedtaksbrev.statusEndret).getTime()
@@ -71,19 +67,7 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
   }, [vedtaksbrev])
   useEffect(() => {
     if (behandlingId && vedtaksbrev) {
-      getVergeadresse(
-        behandlingId,
-        (result) => {
-          setVergeadresse(result)
-        },
-        (error) => {
-          if (error.status == 404) {
-            setVergeadresse(undefined)
-          } else {
-            throw error
-          }
-        }
-      )
+      getVergeadresse(behandlingId)
     }
   }, [vedtaksbrev])
 
@@ -140,11 +124,11 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
               </WarningAlert>
             )}
             <br />
-            {vedtaksbrev && !isPendingOrInitial(vergeadresseResult) && (
+            {vedtaksbrev && isSuccessOrNotFound(vergeadresse) && (
               <MottakerPanel
                 vedtaksbrev={vedtaksbrev}
                 oppdater={(val) => setVedtaksbrev({ ...vedtaksbrev, mottaker: val })}
-                vergeadresse={vergeAdresse}
+                vergeadresse={getData(vergeadresse)}
                 redigerbar={manueltBrevKanRedigeres(status)}
               />
             )}
@@ -164,6 +148,7 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
 
         {isFailure(hentBrevStatus) && <ErrorMessage>Feil ved henting av brev</ErrorMessage>}
         {isFailure(opprettBrevStatus) && <ErrorMessage>Kunne ikke opprette brev</ErrorMessage>}
+        {isFailure(vergeadresse) && handleHentVergeadresseError(vergeadresse)}
       </BrevContent>
 
       <Border />

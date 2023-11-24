@@ -1,11 +1,11 @@
-import { IBrev, Mottaker } from '~shared/types/Brev'
+import { IBrev } from '~shared/types/Brev'
 import { Alert, BodyShort, Heading, Label, Panel } from '@navikt/ds-react'
 import RedigerMottakerModal from '~components/person/brev/RedigerMottakerModal'
 import React, { useEffect, useState } from 'react'
-import { isPendingOrInitial, useApiCall } from '~shared/hooks/useApiCall'
+import { isFailure, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
 import { getVergeadresseFraGrunnlag } from '~shared/api/grunnlag'
-import { Grunnlagsopplysning } from '~shared/types/grunnlag'
-import { KildePersondata } from '~shared/types/kilde'
+import { getData, isSuccessOrNotFound } from '~shared/api/brev'
+import { handleHentVergeadresseError } from '~components/person/Vergeadresse'
 
 export default function NyttBrevMottaker({ brev }: { brev: IBrev }) {
   const [brevState, setBrevState] = useState(brev)
@@ -13,44 +13,29 @@ export default function NyttBrevMottaker({ brev }: { brev: IBrev }) {
   const mottaker = brevState.mottaker
   const adresse = mottaker?.adresse
 
-  const [vergeAdresseResult, getVergeadresse] = useApiCall(getVergeadresseFraGrunnlag)
-  const [vergeAdresse, setVergeadresse] = useState<Grunnlagsopplysning<Mottaker, KildePersondata> | undefined>(
-    undefined
-  )
+  const [vergeadresse, getVergeadresse] = useApiCall(getVergeadresseFraGrunnlag)
 
   useEffect(() => {
     if (brev.behandlingId) {
-      getVergeadresse(
-        brev.behandlingId,
-        (result) => {
-          setVergeadresse(result)
-        },
-        (error) => {
-          if (error.status == 404) {
-            setVergeadresse(undefined)
-          } else {
-            throw error
-          }
-        }
-      )
+      getVergeadresse(brev.behandlingId)
     }
   }, [brev])
 
   return (
     <div style={{ margin: '1rem' }}>
-      {vergeAdresse && (
+      {isSuccess(vergeadresse) && (
         <Alert variant="info" size="small" inline>
           Søker har verge
         </Alert>
       )}
-      {!isPendingOrInitial(vergeAdresseResult) && (
+      {isSuccessOrNotFound(vergeadresse) && (
         <Panel border>
           <Heading spacing level="2" size="medium">
             Mottaker
             <RedigerMottakerModal
               brev={brevState}
               oppdater={(val) => setBrevState({ ...brevState, mottaker: val })}
-              vergeadresse={vergeAdresse}
+              vergeadresse={getData(vergeadresse)}
             />
           </Heading>
           <>
@@ -72,6 +57,7 @@ export default function NyttBrevMottaker({ brev }: { brev: IBrev }) {
           </>
         </Panel>
       )}
+      {isFailure(vergeadresse) && handleHentVergeadresseError(vergeadresse)}
     </div>
   )
 }

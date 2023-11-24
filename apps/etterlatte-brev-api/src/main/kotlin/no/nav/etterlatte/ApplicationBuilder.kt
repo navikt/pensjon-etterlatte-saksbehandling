@@ -65,7 +65,6 @@ import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.pensjon.brevbaker.api.model.RenderedJsonLetter
 import org.slf4j.Logger
 import rapidsandrivers.getRapidEnv
-import java.util.UUID
 import kotlin.concurrent.thread
 
 val sikkerLogg: Logger = sikkerlogger()
@@ -211,7 +210,7 @@ class ApplicationBuilder {
     private fun fiksEnkeltbrev() {
         thread {
             Thread.sleep(60_000)
-            rapidsConnection.publish(message = lagMelding(brevId = 1104L), key = UUID.randomUUID().toString())
+//            rapidsConnection.publish(message = lagMelding(brevId = 1104L), key = UUID.randomUUID().toString())
         }
     }
 

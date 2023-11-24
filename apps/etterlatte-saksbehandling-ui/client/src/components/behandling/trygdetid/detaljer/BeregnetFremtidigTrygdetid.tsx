@@ -55,11 +55,6 @@ export const BeregnetFremtidigTrygdetid: React.FC<Props> = ({ beregnetTrygdetid 
           <Table.DataCell>{beregnetTrygdetid.fremtidigTrygdetidNorge?.antallMaaneder}</Table.DataCell>
           <Table.DataCell>{beregnetTrygdetid.fremtidigTrygdetidTeoretisk?.antallMaaneder}</Table.DataCell>
         </Table.Row>
-        <Table.Row>
-          <Table.DataCell>Nordisk konvensjon artikkel 10</Table.DataCell>
-          <Table.DataCell>{beregnetTrygdetid.fremtidigTrygdetidNorge?.nordiskKonvensjon ? 'Ja' : 'Nei'}</Table.DataCell>
-          <Table.DataCell>-</Table.DataCell>
-        </Table.Row>
       </Table.Body>
     </Table>
   </TrygdetidTabell>

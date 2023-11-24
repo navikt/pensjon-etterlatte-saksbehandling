@@ -166,6 +166,13 @@ internal class AvtaleRoutesTest {
                             avtaleKode = "TEST",
                             avtaleDatoKode = "TESTDATO",
                             avtaleKriteriaKode = "TESTKRITERIA",
+                            personKrets = null,
+                            arbInntekt1G = null,
+                            arbInntekt1GKommentar = null,
+                            beregArt50 = null,
+                            beregArt50Kommentar = null,
+                            nordiskTrygdeAvtale = null,
+                            nordiskTrygdeAvtaleKommentar = null,
                         ),
                     )
                 }
@@ -203,6 +210,13 @@ internal class AvtaleRoutesTest {
                             avtaleKode = "TEST",
                             avtaleDatoKode = "TESTDATO",
                             avtaleKriteriaKode = "TESTKRITERIA",
+                            personKrets = null,
+                            arbInntekt1G = null,
+                            arbInntekt1GKommentar = null,
+                            beregArt50 = null,
+                            beregArt50Kommentar = null,
+                            nordiskTrygdeAvtale = null,
+                            nordiskTrygdeAvtaleKommentar = null,
                         ),
                     )
                 }

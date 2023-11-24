@@ -79,5 +79,12 @@ private fun TrygdeavtaleRequest.toTrygdeavtale(
     avtaleKode = avtaleKode,
     avtaleDatoKode = avtaleDatoKode,
     avtaleKriteriaKode = avtaleKriteriaKode,
+    personKrets = personKrets,
+    arbInntekt1G = arbInntekt1G,
+    arbInntekt1GKommentar = arbInntekt1GKommentar,
+    beregArt50 = beregArt50,
+    beregArt50Kommentar = beregArt50Kommentar,
+    nordiskTrygdeAvtale = nordiskTrygdeAvtale,
+    nordiskTrygdeAvtaleKommentar = nordiskTrygdeAvtaleKommentar,
     kilde = Grunnlagsopplysning.Saksbehandler(brukerTokenInfo.ident(), Tidspunkt.now()),
 )

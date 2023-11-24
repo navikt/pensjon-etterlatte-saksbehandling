@@ -12,6 +12,16 @@ sealed class RetryResult<T> {
     }
 }
 
+suspend fun <T> retryOgPakkUt(
+    times: Int = 2,
+    block: suspend () -> T,
+) = retry(times, block).let {
+    when (it) {
+        is Success -> it.content
+        is Failure -> throw it.samlaExceptions()
+    }
+}
+
 suspend fun <T> retry(
     times: Int = 2,
     block: suspend () -> T,

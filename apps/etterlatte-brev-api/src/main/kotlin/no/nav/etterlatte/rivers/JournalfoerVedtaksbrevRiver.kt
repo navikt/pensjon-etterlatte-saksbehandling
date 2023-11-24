@@ -67,8 +67,8 @@ internal class JournalfoerVedtaksbrevRiver(
                 return
             }
 
-            if (vedtaksbrev.id == 2796L) {
-                logger.warn("Håndterer brev 2796 separat")
+            if (vedtaksbrev.id == 2897L) {
+                logger.warn("Håndterer brev 2897 separat")
                 return
             }
 

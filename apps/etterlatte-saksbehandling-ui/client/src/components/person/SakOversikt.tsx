@@ -1,27 +1,21 @@
-import { useEffect } from 'react'
 import { Behandlingsliste } from './Behandlingsliste'
 import styled from 'styled-components'
 import { ManueltOpphoerModal } from './ManueltOpphoerModal'
 import { FlexRow, GridContainer } from '~shared/styled'
 import Spinner from '~shared/Spinner'
 import RelevanteHendelser from '~components/person/uhaandtereHendelser/RelevanteHendelser'
-import { mapApiResult, useApiCall } from '~shared/hooks/useApiCall'
+import { mapApiResult, Result } from '~shared/hooks/useApiCall'
 import { Alert, BodyShort, Heading, Tag } from '@navikt/ds-react'
 import { SakType } from '~shared/types/sak'
 import { formaterEnumTilLesbarString, formaterSakstype } from '~utils/formattering'
 import { FEATURE_TOGGLE_KAN_BRUKE_KLAGE, OpprettKlage } from '~components/person/OpprettKlage'
 import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 import { KlageListe } from '~components/person/KlageListe'
-import { hentSakMedBehandlnger } from '~shared/api/sak'
 import { tagColors } from '~shared/Tags'
+import { SakMedBehandlinger } from '~components/person/typer'
 
-export const SakOversikt = ({ fnr }: { fnr: string }) => {
+export const SakOversikt = ({ sakStatus, fnr }: { sakStatus: Result<SakMedBehandlinger>; fnr: string }) => {
   const kanBrukeKlage = useFeatureEnabledMedDefault(FEATURE_TOGGLE_KAN_BRUKE_KLAGE, false)
-  const [sakStatus, hentSak] = useApiCall(hentSakMedBehandlnger)
-
-  useEffect(() => {
-    hentSak(fnr)
-  }, [fnr])
 
   return (
     <GridContainer>

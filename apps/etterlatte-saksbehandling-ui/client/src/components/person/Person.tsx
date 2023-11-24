@@ -14,6 +14,7 @@ import { Dokumentoversikt } from './dokumenter/dokumentoversikt'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { ApiError } from '~shared/api/apiClient'
 import BrevOversikt from '~components/person/brev/BrevOversikt'
+import { hentSakMedBehandlnger } from '~shared/api/sak'
 
 enum Fane {
   SAKER = 'SAKER',
@@ -25,6 +26,7 @@ export const Person = () => {
   const [search, setSearch] = useSearchParams()
 
   const [personStatus, hentPerson] = useApiCall(getPerson)
+  const [sakStatus, hentSak] = useApiCall(hentSakMedBehandlnger)
   const [fane, setFane] = useState(search.get('fane') || Fane.SAKER)
 
   const velgFane = (value: string) => {
@@ -39,6 +41,7 @@ export const Person = () => {
   useEffect(() => {
     if (GYLDIG_FNR(fnr)) {
       hentPerson(fnr!!)
+      hentSak(fnr!!)
     }
   }, [fnr])
 
@@ -76,13 +79,13 @@ export const Person = () => {
             </Tabs.List>
 
             <Tabs.Panel value={Fane.SAKER}>
-              <SakOversikt fnr={person.foedselsnummer} />
+              <SakOversikt sakStatus={sakStatus} fnr={person.foedselsnummer} />
             </Tabs.Panel>
             <Tabs.Panel value={Fane.DOKUMENTER}>
               <Dokumentoversikt fnr={person.foedselsnummer} />
             </Tabs.Panel>
             <Tabs.Panel value={Fane.BREV}>
-              <BrevOversikt />
+              <BrevOversikt sakStatus={sakStatus} />
             </Tabs.Panel>
           </Tabs>
         )

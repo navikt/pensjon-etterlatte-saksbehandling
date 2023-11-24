@@ -1,7 +1,7 @@
-import { isPending, isSuccess, mapApiResult, useApiCall } from '~shared/hooks/useApiCall'
+import { isPending, isSuccess, mapApiResult, Result, useApiCall } from '~shared/hooks/useApiCall'
 import { hentBrevForSak, opprettBrevForSak } from '~shared/api/brev'
 import { useEffect } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { Button, Table, Tag } from '@navikt/ds-react'
 import { BrevStatus, IBrev, Mottaker } from '~shared/types/Brev'
 import { DocPencilIcon, ExternalLinkIcon } from '@navikt/aksel-icons'
@@ -9,8 +9,7 @@ import Spinner from '~shared/Spinner'
 import { Container, FlexRow } from '~shared/styled'
 import BrevModal from '~components/person/brev/BrevModal'
 import { ApiErrorAlert } from '~ErrorBoundary'
-import { hentSakMedUtenlandstilknytning } from '~shared/api/sak'
-import { GYLDIG_FNR } from '~utils/fnr'
+import { SakMedBehandlinger } from '~components/person/typer'
 
 const mapAdresse = (mottaker: Mottaker) => {
   const adr = mottaker.adresse
@@ -64,31 +63,21 @@ const handlingKnapp = (brev: IBrev) => {
   return <BrevModal brev={brev} />
 }
 
-export default function BrevOversikt() {
+export default function BrevOversikt({ sakStatus }: { sakStatus: Result<SakMedBehandlinger> }) {
   const navigate = useNavigate()
-  const { fnr } = useParams()
 
-  const [sakStatus, hentSak] = useApiCall(hentSakMedUtenlandstilknytning)
   const [brevListe, hentBrev] = useApiCall(hentBrevForSak)
   const [nyttBrevStatus, opprettBrev] = useApiCall(opprettBrevForSak)
 
   useEffect(() => {
-    if (GYLDIG_FNR(fnr)) {
-      hentSak(fnr!!)
-    } else {
-      throw Error('Mangler gyldig fødselsnummer')
-    }
-  }, [])
-
-  useEffect(() => {
     if (isSuccess(sakStatus)) {
-      hentBrev(Number(sakStatus.data.id))
+      hentBrev(Number(sakStatus.data.sak.id))
     }
   }, [sakStatus])
 
   const opprettNyttBrevOgRedirect = () => {
     if (isSuccess(sakStatus)) {
-      opprettBrev(Number(sakStatus.data.id), (brev) => {
+      opprettBrev(Number(sakStatus.data.sak.id), (brev) => {
         navigate(`/person/${brev.soekerFnr}/sak/${brev.sakId}/brev/${brev.id}`)
       })
     } else {

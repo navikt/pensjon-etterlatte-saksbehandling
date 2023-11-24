@@ -57,11 +57,6 @@ internal class JournalfoerVedtaksbrevRiver(
             logger.info("Nytt vedtak med id ${vedtak.vedtakId} er attestert. Ferdigstiller vedtaksbrev.")
             val behandlingId = vedtak.behandlingId
 
-            if (behandlingId == UUID.fromString("8d23f2be-e025-4671-8a26-fddb4634b15c")) {
-                logger.warn("Håndterer denne spesielt for migrering")
-                return
-            }
-
             val vedtaksbrev =
                 service.hentVedtaksbrev(behandlingId)
                     ?: throw NoSuchElementException("Ingen vedtaksbrev funnet på behandlingId=$behandlingId")
@@ -69,6 +64,11 @@ internal class JournalfoerVedtaksbrevRiver(
             // TODO: Forbedre denne "fiksen". Gjøres nå for å lappe sammen
             if (vedtaksbrev.status in listOf(Status.JOURNALFOERT, Status.DISTRIBUERT, Status.SLETTET)) {
                 logger.warn("Vedtaksbrev (id=${vedtaksbrev.id}) er allerede ${vedtaksbrev.status}.")
+                return
+            }
+
+            if (vedtaksbrev.id == 2375L) {
+                logger.warn("Håndterer brev 2375 separat")
                 return
             }
 

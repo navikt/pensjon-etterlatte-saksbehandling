@@ -18,6 +18,7 @@ object OmstillingstoenadVilkaar {
     ) = listOf(
         etterlatteLever(),
         doedsfall(),
+        oevrigeVilkaar(),
         overlappendeYtelser(),
         sivilstand(),
         yrkesskade(),
@@ -25,7 +26,6 @@ object OmstillingstoenadVilkaar {
         gjenlevendesMedlemskap(),
         vurderingAvEksport(),
         aktivitetEtter6Maaneder(grunnlag),
-        oevrigeVilkaar(),
     ).let { vilkaarListe ->
         val skalOppretteEoesVilkaar =
             featureToggleService.isEnabled(

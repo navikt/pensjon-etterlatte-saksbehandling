@@ -178,6 +178,13 @@ class RealGrunnlagService(
                     detalj = this.registersReferanse,
                 )
 
+            is Grunnlagsopplysning.Persondata ->
+                GenerellKilde(
+                    navn = this.type,
+                    tidspunkt = this.tidspunktForInnhenting,
+                    detalj = this.registersReferanse,
+                )
+
             is Grunnlagsopplysning.Pesys -> GenerellKilde(navn = this.type, tidspunkt = this.tidspunkt)
             is Grunnlagsopplysning.Privatperson ->
                 GenerellKilde(

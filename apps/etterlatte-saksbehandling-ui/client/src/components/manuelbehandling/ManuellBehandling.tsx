@@ -11,6 +11,7 @@ import { isFailure, isPending, isSuccess, useApiCall } from '~shared/hooks/useAp
 import { opprettBehandling } from '~shared/api/behandling'
 import { opprettOverstyrBeregning } from '~shared/api/beregning'
 import { InputRow } from '~components/person/journalfoeringsoppgave/nybehandling/OpprettNyBehandling'
+import { Spraak } from '~shared/types/Brev'
 
 export default function ManuellBehandling() {
   const dispatch = useAppDispatch()
@@ -82,7 +83,9 @@ export default function ManuellBehandling() {
       <Select
         label="Hva skal språket/målform være?"
         value={nyBehandlingRequest?.spraak || ''}
-        onChange={(e) => dispatch(settNyBehandlingRequest({ ...nyBehandlingRequest, spraak: e.target.value }))}
+        onChange={(e) =>
+          dispatch(settNyBehandlingRequest({ ...nyBehandlingRequest, spraak: e.target.value as Spraak }))
+        }
       >
         <option>Velg ...</option>
         <option value="nb">Bokmål</option>

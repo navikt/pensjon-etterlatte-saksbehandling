@@ -39,7 +39,7 @@ internal class BehandlingTest {
     fun `MapAvdoed mapper til Avdoed`() {
         val grunnlag = opprettGrunnlag()
 
-        assertEquals(Avdoed("Frisk Mellomstor Gaupe", LocalDate.of(2022, 8, 17)), grunnlag.mapAvdoed())
+        assertEquals(listOf(Avdoed("Frisk Mellomstor Gaupe", LocalDate.of(2022, 8, 17))), grunnlag.mapAvdoede())
     }
 
     @Test
@@ -54,7 +54,7 @@ internal class BehandlingTest {
             Soeker("Unormal-Kar", "Frisk-Is", "Herresykkel", Foedselsnummer(SOEKER_FOEDSELSNUMMER.value)),
             grunnlag.mapSoeker(),
         )
-        assertEquals(Avdoed("Riv-Jern Kul-Kar Badeball-Sommer", LocalDate.of(2022, 8, 17)), grunnlag.mapAvdoed())
+        assertEquals(listOf(Avdoed("Riv-Jern Kul-Kar Badeball-Sommer", LocalDate.of(2022, 8, 17))), grunnlag.mapAvdoede())
     }
 
     @Test
@@ -69,7 +69,7 @@ internal class BehandlingTest {
             Soeker("Unormal Kar", "Frisk Is", "Herresykkel", Foedselsnummer(SOEKER_FOEDSELSNUMMER.value)),
             grunnlag.mapSoeker(),
         )
-        assertEquals(Avdoed("Riv Jern Kul Kar Badeball-Sommer", LocalDate.of(2022, 8, 17)), grunnlag.mapAvdoed())
+        assertEquals(listOf(Avdoed("Riv Jern Kul Kar Badeball-Sommer", LocalDate.of(2022, 8, 17))), grunnlag.mapAvdoede())
     }
 
     @Test
@@ -85,8 +85,8 @@ internal class BehandlingTest {
             grunnlag.mapSoeker(),
         )
         assertEquals(
-            Avdoed("Riv-Jern Tre Kul-Kar Gulv Badeball-Sommer Vinter", LocalDate.of(2022, 8, 17)),
-            grunnlag.mapAvdoed(),
+            listOf(Avdoed("Riv-Jern Tre Kul-Kar Gulv Badeball-Sommer Vinter", LocalDate.of(2022, 8, 17))),
+            grunnlag.mapAvdoede(),
         )
     }
 

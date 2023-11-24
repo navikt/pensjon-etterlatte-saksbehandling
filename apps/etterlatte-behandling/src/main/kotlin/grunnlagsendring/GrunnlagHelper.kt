@@ -17,7 +17,7 @@ fun Grunnlag.doedsdato(
     fnr: String,
 ) = when (saksrolle) {
     Saksrolle.AVDOED -> {
-        hentAvdoed().hentDoedsdato()
+        hentAvdoede().find { it.hentFoedselsnummer()?.verdi?.value == fnr }?.hentDoedsdato()
     }
     Saksrolle.GJENLEVENDE -> {
         hentGjenlevende().hentDoedsdato()
@@ -41,7 +41,7 @@ fun Grunnlag.bostedsadresse(
     fnr: String,
 ) = when (saksrolle) {
     Saksrolle.AVDOED -> {
-        hentAvdoed().hentBostedsadresse()
+        hentAvdoede().find { it.hentFoedselsnummer()?.verdi?.value == fnr }?.hentBostedsadresse()
     }
 
     Saksrolle.GJENLEVENDE -> {
@@ -81,7 +81,7 @@ fun Grunnlag.ansvarligeForeldre(
 fun Grunnlag.barn(saksrolle: Saksrolle) =
     when (saksrolle) {
         Saksrolle.AVDOED -> {
-            hentAvdoed().hentFamilierelasjon()?.verdi?.barn
+            hentAvdoede().flatMap { it.hentFamilierelasjon()?.verdi?.barn ?: emptyList() }.ifEmpty { null }
         }
         Saksrolle.GJENLEVENDE -> {
             hentGjenlevende().hentFamilierelasjon()?.verdi?.barn
@@ -105,7 +105,7 @@ fun Grunnlag.utland(
         hentSoesken().find { it.hentFoedselsnummer()?.verdi?.value == fnr }?.hentUtland()?.verdi
     }
     Saksrolle.AVDOED -> {
-        hentAvdoed().hentUtland()?.verdi
+        hentAvdoede().find { it.hentFoedselsnummer()?.verdi?.value == fnr }?.hentUtland()?.verdi
     }
     Saksrolle.GJENLEVENDE -> {
         hentGjenlevende().hentUtland()?.verdi
@@ -134,7 +134,9 @@ fun Grunnlag.sivilstand(saksrolle: Saksrolle) =
             hentGjenlevende().hentSivilstand()?.verdi
         }
         Saksrolle.AVDOED -> {
-            hentAvdoed().hentSivilstand()?.verdi
+            // first er helt ok her, siden vi kun er interessert når vi er i OMS land og skal da ha kun
+            // en avdød per behandling.
+            hentAvdoede().first().hentSivilstand()?.verdi
         }
         else -> throw GrunnlagRolleException(
             "Prøvde å finne sivilstand for $saksrolle, men det er ikke relevant for denne rollen",

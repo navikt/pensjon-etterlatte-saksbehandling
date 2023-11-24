@@ -6,7 +6,7 @@ import java.time.LocalDate
 data class PersonerISak(
     val innsender: Innsender?,
     val soeker: Soeker,
-    val avdoed: Avdoed,
+    val avdoede: List<Avdoed>,
     val verge: Verge?,
 )
 

@@ -141,9 +141,9 @@ internal class TrygdetidServiceTest {
                 every { behandlingType } returns BehandlingType.FØRSTEGANGSBEHANDLING
             }
         val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
-        val forventetFoedselsdato = grunnlag.hentAvdoed().hentFoedselsdato()!!.verdi
-        val forventetDoedsdato = grunnlag.hentAvdoed().hentDoedsdato()!!.verdi
-        val forventetIdent = grunnlag.hentAvdoed().hentFoedselsnummer()!!.verdi
+        val forventetFoedselsdato = grunnlag.hentAvdoede().first().hentFoedselsdato()!!.verdi
+        val forventetDoedsdato = grunnlag.hentAvdoede().first().hentDoedsdato()!!.verdi
+        val forventetIdent = grunnlag.hentAvdoede().first().hentFoedselsnummer()!!.verdi
         val trygdetid = trygdetid(behandlingId, sakId, ident = forventetIdent.value)
         val vilkaarsvurderingDto = mockk<VilkaarsvurderingDto>()
 
@@ -291,7 +291,7 @@ internal class TrygdetidServiceTest {
             }
         val forrigeBehandlingId = randomUUID()
         val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
-        val forventetIdent = grunnlag.hentAvdoed().hentFoedselsnummer()!!.verdi
+        val forventetIdent = grunnlag.hentAvdoede().first().hentFoedselsnummer()!!.verdi
         val trygdetid = trygdetid(behandlingId, sakId, ident = forventetIdent.value)
         val vilkaarsvurderingDto = mockk<VilkaarsvurderingDto>()
 
@@ -409,7 +409,7 @@ internal class TrygdetidServiceTest {
             }
         val forrigeBehandlingId = randomUUID()
         val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
-        val forventetIdent = grunnlag.hentAvdoed().hentFoedselsnummer()!!.verdi
+        val forventetIdent = grunnlag.hentAvdoede().first().hentFoedselsnummer()!!.verdi
         val trygdetid = trygdetid(behandlingId, sakId, ident = forventetIdent.value)
         val vilkaarsvurderingDto = mockk<VilkaarsvurderingDto>()
 
@@ -1160,7 +1160,7 @@ internal class TrygdetidServiceTest {
 
         val behandling = behandling(behandlingId)
         val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
-        val forventetIdent = grunnlag.hentAvdoed().hentFoedselsnummer()!!.verdi
+        val forventetIdent = grunnlag.hentAvdoede().first().hentFoedselsnummer()!!.verdi
 
         val beregnetTrygdetid =
             DetaljertBeregnetTrygdetid(
@@ -1351,9 +1351,9 @@ internal class TrygdetidServiceTest {
                 every { behandlingType } returns BehandlingType.FØRSTEGANGSBEHANDLING
             }
         val grunnlag = GrunnlagTestData(opplysningsmapAvdoedOverrides = eldreAvdoedTestopplysningerMap).hentOpplysningsgrunnlag()
-        val forventetFoedselsdato = grunnlag.hentAvdoed().hentFoedselsdato()!!.verdi
-        val forventetDoedsdato = grunnlag.hentAvdoed().hentDoedsdato()!!.verdi
-        val forventetIdent = grunnlag.hentAvdoed().hentFoedselsnummer()!!.verdi
+        val forventetFoedselsdato = grunnlag.hentAvdoede().first().hentFoedselsdato()!!.verdi
+        val forventetDoedsdato = grunnlag.hentAvdoede().first().hentDoedsdato()!!.verdi
+        val forventetIdent = grunnlag.hentAvdoede().first().hentFoedselsnummer()!!.verdi
         val trygdetid = trygdetid(behandlingId, sakId, ident = forventetIdent.value)
         val vilkaarsvurderingDto = mockk<VilkaarsvurderingDto>()
 

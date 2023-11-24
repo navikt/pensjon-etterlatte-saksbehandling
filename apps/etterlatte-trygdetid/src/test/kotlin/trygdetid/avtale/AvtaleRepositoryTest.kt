@@ -56,7 +56,17 @@ internal class AvtaleRepositoryTest {
     @Test
     fun `skal oppdatere avtaler`() {
         val behandling = behandlingMock()
-        val avtale = trygdeavtale(behandling.id, "EOS_NOR", "EOS2010", "YRK_MEDL")
+        val avtale =
+            trygdeavtale(
+                behandling.id, "EOS_NOR", "EOS2010", "YRK_MEDL",
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+            )
 
         repository.opprettAvtale(avtale)
 
@@ -65,6 +75,13 @@ internal class AvtaleRepositoryTest {
                 avtaleKode = "ISR",
                 avtaleDatoKode = null,
                 avtaleKriteriaKode = "YRK_TRYGD",
+                personKrets = null,
+                arbInntekt1G = null,
+                arbInntekt1GKommentar = null,
+                beregArt50 = null,
+                beregArt50Kommentar = null,
+                nordiskTrygdeAvtale = null,
+                nordiskTrygdeAvtaleKommentar = null,
             )
 
         repository.lagreAvtale(oppdatertAvtale)

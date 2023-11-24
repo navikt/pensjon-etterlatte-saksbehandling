@@ -629,6 +629,73 @@ class GenerellBehandlingServiceTest {
     }
 
     @Test
+    fun `Kan ikke attestere behandling behandler mangler`() {
+        val sak = sakRepo.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val behandlingId = randomUUID()
+        val manueltOpprettetBehandling =
+            GenerellBehandling.opprettUtland(
+                sak.id,
+                behandlingId,
+            )
+        val opprettBehandling = service.opprettBehandling(manueltOpprettetBehandling, SAKSBEHANDLER)
+        Assertions.assertEquals(GenerellBehandling.Status.OPPRETTET, opprettBehandling.status)
+
+        val hentOppgaverForReferanse = oppgaveService.hentOppgaverForReferanse(opprettBehandling.id.toString())
+        Assertions.assertEquals(1, hentOppgaverForReferanse.size)
+        val utlandsOppgave = hentOppgaverForReferanse[0]
+
+        oppgaveService.tildelSaksbehandler(utlandsOppgave.id, SAKSBEHANDLER.ident)
+        val kravpakkeUtlandInnhold =
+            Innhold.KravpakkeUtland(
+                listOf("AFG"),
+                listOf(DokumentMedSendtDato("P2000", true, LocalDate.now())),
+                "2grwg2",
+                "124124124",
+            )
+        val behandlingUtfylt = opprettBehandling.copy(innhold = kravpakkeUtlandInnhold)
+        val oppdaterBehandling = service.lagreNyeOpplysninger(behandlingUtfylt)
+        service.sendTilAttestering(oppdaterBehandling, SAKSBEHANDLER)
+        val fattetBehandling = service.hentBehandlingMedId(oppdaterBehandling.id)
+        Assertions.assertEquals(GenerellBehandling.Status.FATTET, fattetBehandling?.status)
+        val behandlingsOppgaverFattetOgAttestering =
+            oppgaveService.hentOppgaverForReferanse(opprettBehandling.id.toString())
+        Assertions.assertEquals(2, behandlingsOppgaverFattetOgAttestering.size)
+
+        behandlingsOppgaverFattetOgAttestering.forExactly(1) { oppgave ->
+            oppgave.type.shouldBe(OppgaveType.ATTESTERING)
+        }
+        behandlingsOppgaverFattetOgAttestering.forExactly(1) { oppgave ->
+            oppgave.status.shouldBe(Status.FERDIGSTILT)
+            oppgave.type.shouldBe(OppgaveType.KRAVPAKKE_UTLAND)
+        }
+
+        val attestant = ATTESTANT
+        val oppgaveForAttestering = oppgaveService.hentOppgaverForReferanse(opprettBehandling.id.toString())
+        Assertions.assertEquals(2, oppgaveForAttestering.size)
+        val nyattesteringsoppgave = oppgaveForAttestering.filter { o -> o.status === Status.NY && o.erAttestering() }
+        Assertions.assertEquals(1, nyattesteringsoppgave.size)
+        val saksbehandlerMedRoller =
+            mockk<SaksbehandlerMedRoller> {
+                every { harRolleAttestant() } returns true
+            }
+        every { user.saksbehandlerMedRoller } returns saksbehandlerMedRoller
+
+        val attesteringsOppgave = nyattesteringsoppgave[0]
+        val trettidagerfrem = Tidspunkt.now().plus(30L, ChronoUnit.DAYS).toNorskLocalDate()
+        Assertions.assertEquals(trettidagerfrem, attesteringsOppgave.frist!!.toNorskLocalDate())
+        oppgaveService.tildelSaksbehandler(attesteringsOppgave.id, attestant.ident)
+        val ugyldigAttesteringsForespoersel =
+            assertThrows<IllegalArgumentException> {
+                service.attester(oppdaterBehandling.id, attestant)
+            }
+        Assertions.assertTrue(
+            ugyldigAttesteringsForespoersel.message!!.startsWith(
+                "Kan ikke attestere behandling hvis det er samme saksbehandler som behandlet",
+            ),
+        )
+    }
+
+    @Test
     fun `Kan underkjenne behandling som er fattet`() {
         every { user.saksbehandlerMedRoller } returns
             mockk<SaksbehandlerMedRoller> {

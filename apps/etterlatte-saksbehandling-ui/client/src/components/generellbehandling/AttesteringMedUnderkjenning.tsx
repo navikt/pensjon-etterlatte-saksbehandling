@@ -33,7 +33,11 @@ export const AttesteringMedUnderkjenning = (props: {
             <div className="flex">
               <div>
                 <Info>Saksbehandler</Info>
-                <Tekst>{utlandsBehandling.behandler?.saksbehandler}</Tekst>
+                {utlandsBehandling.behandler?.saksbehandler ? (
+                  <Tekst>{utlandsBehandling.behandler?.saksbehandler}</Tekst>
+                ) : (
+                  <Alert variant="error">Saksbehandler mangler og du vil da ikke få attestert behandlingen</Alert>
+                )}
               </div>
               <Info>Behandlet datp</Info>
               <Tekst>

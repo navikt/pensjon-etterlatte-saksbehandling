@@ -8,7 +8,5 @@ repositories {
 
 dependencies {
     implementation(project(":libs:saksbehandling-common"))
-    implementation(project(mapOf("path" to ":libs:etterlatte-behandling-model")))
-    implementation(project(mapOf("path" to ":libs:etterlatte-behandling-model")))
-    implementation(project(mapOf("path" to ":libs:etterlatte-behandling-model")))
+    implementation(project(":libs:etterlatte-behandling-model"))
 }

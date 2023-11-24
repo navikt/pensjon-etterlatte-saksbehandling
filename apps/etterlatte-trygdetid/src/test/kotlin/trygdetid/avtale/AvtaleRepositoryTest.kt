@@ -4,6 +4,7 @@ import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
+import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.POSTGRES_VERSION
 import no.nav.etterlatte.libs.database.migrate
@@ -59,13 +60,13 @@ internal class AvtaleRepositoryTest {
         val avtale =
             trygdeavtale(
                 behandling.id, "EOS_NOR", "EOS2010", "YRK_MEDL",
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
+                JaNei.JA,
+                JaNei.JA,
+                "hei",
+                JaNei.NEI,
+                "hei",
+                JaNei.NEI,
+                "hei igjen",
             )
 
         repository.opprettAvtale(avtale)
@@ -75,12 +76,12 @@ internal class AvtaleRepositoryTest {
                 avtaleKode = "ISR",
                 avtaleDatoKode = null,
                 avtaleKriteriaKode = "YRK_TRYGD",
-                personKrets = null,
+                personKrets = JaNei.JA,
                 arbInntekt1G = null,
                 arbInntekt1GKommentar = null,
-                beregArt50 = null,
+                beregArt50 = JaNei.JA,
                 beregArt50Kommentar = null,
-                nordiskTrygdeAvtale = null,
+                nordiskTrygdeAvtale = JaNei.NEI,
                 nordiskTrygdeAvtaleKommentar = null,
             )
 

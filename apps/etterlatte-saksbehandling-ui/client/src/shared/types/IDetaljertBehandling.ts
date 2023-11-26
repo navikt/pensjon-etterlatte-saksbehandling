@@ -1,11 +1,12 @@
 import { IHendelse } from '~shared/types/IHendelse'
 import { JaNei } from '~shared/types/ISvar'
-import { KildeSaksbehandler } from '~shared/types/kilde'
+import { KildePdl, KildeSaksbehandler } from '~shared/types/kilde'
 import { IFamilieforhold, IPdlPerson, Persongalleri } from '~shared/types/Person'
 import { VurderingsResultat } from '~shared/types/VurderingsResultat'
 import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
 import { SakType } from '~shared/types/sak'
 import { RevurderingMedBegrunnelse } from '~shared/types/RevurderingInfo'
+import { Grunnlagsopplysning } from '~shared/types/grunnlag'
 
 export interface IDetaljertBehandling {
   id: string
@@ -22,6 +23,7 @@ export interface IDetaljertBehandling {
   familieforhold?: IFamilieforhold
   behandlingType: IBehandlingsType
   søker?: IPdlPerson
+  soeker: Grunnlagsopplysning<IPdlPerson, KildePdl>
   revurderingsaarsak: Revurderingaarsak | null
   revurderinginfo: RevurderingMedBegrunnelse | null
   begrunnelse: string | null

@@ -17,16 +17,18 @@ export const FamilieforholdBarnepensjon = ({ behandling }: PropsFamilieforhold) 
       </FamilieforholdWrapper>
     )
   }
+  const soeker = behandling.soeker
   const gjenlevende = behandling.familieforhold.gjenlevende
   const avdoede = behandling.familieforhold.avdoede
 
+  // TODO også vise person uten ident her?
   return (
     <>
       <FamilieforholdWrapper>
         <FamilieforholdVoksne>
-          <Person person={behandling.søker} kilde={gjenlevende.kilde} mottaker />
+          <Person person={soeker?.opplysning} kilde={soeker.kilde} mottaker />
           <Person person={avdoede.opplysning} kilde={avdoede.kilde} avdoed />
-          <Person person={gjenlevende.opplysning} kilde={gjenlevende.kilde} gjenlevende />
+          {gjenlevende && <Person person={gjenlevende.opplysning} kilde={gjenlevende.kilde} gjenlevende />}
         </FamilieforholdVoksne>
         <Soeskenliste familieforhold={behandling.familieforhold!!} soekerFnr={behandling.søker.foedselsnummer} />
       </FamilieforholdWrapper>

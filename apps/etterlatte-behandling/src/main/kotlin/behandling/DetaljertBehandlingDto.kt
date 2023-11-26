@@ -34,6 +34,8 @@ data class DetaljertBehandlingDto(
     val familieforhold: Familieforhold?,
     val behandlingType: BehandlingType,
     val søker: Person?,
+    // TODO denne erstatter søker
+    val soeker: Grunnlagsopplysning<Person>?,
     val kommerBarnetTilgode: KommerBarnetTilgode?,
     val revurderingsaarsak: Revurderingaarsak?,
     val revurderinginfo: RevurderingInfoMedBegrunnelse?,

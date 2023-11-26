@@ -4,6 +4,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.michaelbull.result.mapBoth
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
+import io.ktor.http.HttpStatusCode
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
@@ -59,7 +60,7 @@ class GrunnlagKlientObo(config: Config, httpClient: HttpClient) : GrunnlagKlient
                 )
                 .mapBoth(
                     success = { resource -> resource.response?.let { objectMapper.readValue(it.toString()) } },
-                    failure = { errorResponse -> throw errorResponse },
+                    failure = { error -> if (error.response?.status == HttpStatusCode.NotFound) null else throw error },
                 )
         } catch (e: Exception) {
             throw GrunnlagKlientException(

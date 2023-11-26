@@ -357,17 +357,18 @@ internal class BehandlingServiceImpl(
             logger.info("Hentet Opplysningstype.SOEKER_PDL_V1 for $behandlingId")
 
             val gjenlevende =
-                if (sakType == SakType.OMSTILLINGSSTOENAD) {
-                    soeker
-                } else {
-                    async {
-                        grunnlagKlient.finnPersonOpplysning(
-                            behandlingId,
-                            Opplysningstype.GJENLEVENDE_FORELDER_PDL_V1,
-                            brukerTokenInfo,
-                        )
-                    }
+                when (sakType) {
+                    SakType.OMSTILLINGSSTOENAD -> null
+                    SakType.BARNEPENSJON ->
+                        async {
+                            grunnlagKlient.finnPersonOpplysning(
+                                behandlingId,
+                                Opplysningstype.GJENLEVENDE_FORELDER_PDL_V1,
+                                brukerTokenInfo,
+                            )
+                        }
                 }
+
             logger.info("Hentet Opplysningstype.GJENLEVENDE_FORELDER_PDL_V1 for $behandlingId")
 
             DetaljertBehandlingDto(
@@ -382,15 +383,17 @@ internal class BehandlingServiceImpl(
                 boddEllerArbeidetUtlandet = behandling.boddEllerArbeidetUtlandet,
                 status = behandling.status,
                 hendelser = hendelserIBehandling,
-                familieforhold = Familieforhold(avdoed.await(), gjenlevende.await()),
+                // TODO inn med person uten ident her?
+                familieforhold = Familieforhold(avdoed.await(), gjenlevende?.await()),
                 behandlingType = behandling.type,
                 søker = soeker.await()?.opplysning,
+                soeker = soeker.await(),
                 revurderingsaarsak = behandling.revurderingsaarsak(),
                 revurderinginfo = behandling.revurderingInfo(),
                 begrunnelse = behandling.begrunnelse(),
                 etterbetaling = inTransaction { etterbetalingService.hentEtterbetaling(behandlingId) },
             ).also {
-                gjenlevende.await()?.fnr?.let { behandlingRequestLogger.loggRequest(brukerTokenInfo, it, "behandling") }
+                gjenlevende?.await()?.fnr?.let { behandlingRequestLogger.loggRequest(brukerTokenInfo, it, "behandling") }
                 soeker.await()?.fnr?.let { behandlingRequestLogger.loggRequest(brukerTokenInfo, it, "behandling") }
             }
         }

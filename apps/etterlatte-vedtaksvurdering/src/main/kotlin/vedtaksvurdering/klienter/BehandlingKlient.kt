@@ -426,7 +426,7 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
             failure = {
                 logger.info(
                     "Kan ikke sjekke status=$status i behandling med behandlingId=$behandlingId (commit=false)",
-                    it.throwable,
+                    it.cause,
                 )
                 false
             },
@@ -455,7 +455,7 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
             failure = {
                 logger.info(
                     "Feil ved henting av etterbetaling, behandlingId=$behandlingId",
-                    it.throwable,
+                    it.cause,
                 )
                 false
             },

@@ -141,6 +141,14 @@ fun Route.trygdetid(
                 }
             }
 
+            post("/opprett") {
+                withBehandlingId(behandlingKlient) {
+                    logger.info("Oppretter trygdetid med overstyrt for behandling $behandlingId")
+                    trygdetidService.opprettOverstyrtBeregnetTrygdetid(behandlingId, brukerTokenInfo)
+                    call.respond(HttpStatusCode.OK)
+                }
+            }
+
             post("/uten_fremtidig") {
                 withBehandlingId(behandlingKlient) {
                     logger.info("Beregn trygdetid uten fremtidig trygdetid for behandling $behandlingId")

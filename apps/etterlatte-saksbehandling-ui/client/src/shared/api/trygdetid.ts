@@ -116,6 +116,9 @@ export const lagreTrygdeavtaleForBehandling = async (args: {
 }): Promise<ApiResponse<Trygdeavtale>> =>
   apiClient.post<Trygdeavtale>(`/trygdetid/avtaler/${args.behandlingId}`, { ...args.avtaleRequest })
 
+export const opprettTrygdetidOverstyrtMigrering = async (args: { behandlingId: string }): Promise<ApiResponse<void>> =>
+  apiClient.post(`/trygdetid/${args.behandlingId}/migrering/opprett`, {})
+
 export interface ITrygdetid {
   id: string
   behandlingId: string

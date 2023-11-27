@@ -211,7 +211,7 @@ class ApplicationBuilder {
     private fun fiksEnkeltbrev() {
         thread {
             Thread.sleep(60_000)
-            listOf(298L, 2897L, 2421L, 3260L).forEach {
+            listOf(2897L, 2375L, 2796L).forEach {
                 rapidsConnection.publish(message = lagMelding(brevId = it), key = UUID.randomUUID().toString())
                 Thread.sleep(3000)
             }

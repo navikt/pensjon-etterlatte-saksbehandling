@@ -69,11 +69,6 @@ internal class JournalfoerVedtaksbrevRiver(
                 return
             }
 
-            if (vedtaksbrev.id == 2897L) {
-                logger.warn("Håndterer brev 2897 separat")
-                return
-            }
-
             val response =
                 try {
                     service.journalfoerVedtaksbrev(vedtaksbrev, vedtak)

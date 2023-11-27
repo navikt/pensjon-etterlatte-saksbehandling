@@ -160,8 +160,14 @@ class RealGrunnlagService(
         return PersonopplysningerResponse(
             innsender = innsender.opplysning.asPersonopplysning(),
             soeker = soker.opplysning.asPersonopplysning(),
-            avdoede = avdode.map { it.opplysning.asPersonopplysning() },
-            gjenlevende = gjenlevende.map { it.opplysning.asPersonopplysning() },
+            avdoede =
+                avdode.map { it.opplysning.asPersonopplysning() }
+                    .sortedByDescending { it.kilde.tidspunkt }
+                    .distinctBy { it.opplysning.foedselsnummer },
+            gjenlevende =
+                gjenlevende.map { it.opplysning.asPersonopplysning() }
+                    .sortedByDescending { it.kilde.tidspunkt }
+                    .distinctBy { it.opplysning.foedselsnummer },
         )
     }
 

@@ -242,7 +242,7 @@ class PersonService(
                     ),
             )
         val foreldre =
-            mottaker.familieRelasjon?.ansvarligeForeldre?.map {
+            mottaker.familieRelasjon?.foreldre?.map {
                 hentPerson(
                     request =
                         HentPersonRequest(
@@ -322,7 +322,7 @@ class PersonService(
             soesken = listOf(),
             avdoed = avdoede.map { it.foedselsnummer.value },
             gjenlevende = listOf(mottakerAvYtelsen.value) + levende.map { it.foedselsnummer.value },
-            personerUtenIdent = if (personerUtenIdent.isNullOrEmpty()) null else personerUtenIdent,
+            personerUtenIdent = personerUtenIdent.ifEmpty { null },
         )
     }
 

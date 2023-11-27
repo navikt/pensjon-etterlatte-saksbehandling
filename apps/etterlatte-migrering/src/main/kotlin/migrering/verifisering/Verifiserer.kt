@@ -166,4 +166,7 @@ object StrengtFortrolig : Verifiseringsfeil() {
         get() = "Skal ikke migrere strengt fortrolig sak"
 }
 
-data class PDLException(val kilde: Throwable) : Verifiseringsfeil(kilde = kilde)
+data class PDLException(val kilde: Throwable) : Verifiseringsfeil(kilde = kilde) {
+    override val message: String?
+        get() = kilde.message
+}

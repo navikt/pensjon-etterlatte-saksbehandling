@@ -166,7 +166,7 @@ internal class BrevServiceTest {
             val journalpostResponse = JournalpostResponse("444", journalpostferdigstilt = true)
 
             coEvery { sakService.hentSak(any(), any()) } returns sak
-            coEvery { dokarkivService.journalfoer(any<Brev>(), any()) } returns journalpostResponse
+            coEvery { dokarkivService.journalfoer(any<Brev>(), any<Sak>()) } returns journalpostResponse
             every { db.hentBrev(any()) } returns brev
             every { db.settBrevJournalfoert(any(), any()) } returns true
 

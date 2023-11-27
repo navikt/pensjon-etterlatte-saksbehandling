@@ -19,12 +19,20 @@ import no.nav.etterlatte.brev.journalpost.JournalpostRequest
 import no.nav.etterlatte.brev.journalpost.JournalpostResponse
 import no.nav.etterlatte.brev.journalpost.JournalpostSak
 import no.nav.etterlatte.brev.journalpost.Sakstype
+import no.nav.etterlatte.brev.model.Adresse
+import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevInnhold
+import no.nav.etterlatte.brev.model.BrevProsessType
+import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.Spraak
+import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.VedtakSak
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.etterlatte.rivers.VedtakTilJournalfoering
+import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.params.ParameterizedTest
@@ -61,6 +69,23 @@ internal class DokarkivServiceTest {
         every { mockDb.hentPdf(any()) } returns forventetPdf
 
         val brevId = Random.nextLong()
+        val brev =
+            Brev(
+                id = brevId,
+                sakId = 1L,
+                prosessType = BrevProsessType.AUTOMATISK,
+                soekerFnr = SOEKER_FOEDSELSNUMMER.value,
+                status = Status.OPPRETTET,
+                statusEndret = Tidspunkt.now(),
+                opprettet = Tidspunkt.now(),
+                mottaker =
+                    Mottaker(
+                        navn = "Peder Ås",
+                        foedselsnummer = Foedselsnummer(SOEKER_FOEDSELSNUMMER.value),
+                        adresse = Adresse(adresseType = "", landkode = "", land = ""),
+                    ),
+                behandlingId = UUID.randomUUID(),
+            )
 
         val vedtak =
             VedtakTilJournalfoering(
@@ -70,7 +95,7 @@ internal class DokarkivServiceTest {
                 "ansvarligEnhet",
             )
 
-        val response = runBlocking { service.journalfoer(brevId, vedtak) }
+        val response = runBlocking { service.journalfoer(brev, vedtak) }
         response shouldBe forventetResponse
 
         val requestSlot = slot<JournalpostRequest>()

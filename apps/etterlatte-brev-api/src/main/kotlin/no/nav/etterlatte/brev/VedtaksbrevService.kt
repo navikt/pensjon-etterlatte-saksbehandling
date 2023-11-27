@@ -310,7 +310,7 @@ class VedtaksbrevService(
             throw IllegalArgumentException("Ugyldig status ${vedtaksbrev.status} på vedtaksbrev (id=${vedtaksbrev.id})")
         }
 
-        val journalfoeringResponse = runBlocking { dokarkivService.journalfoer(vedtaksbrev.id, vedtak) }
+        val journalfoeringResponse = runBlocking { dokarkivService.journalfoer(vedtaksbrev, vedtak) }
 
         db.settBrevJournalfoert(vedtaksbrev.id, journalfoeringResponse)
         logger.info("Brev med id=${vedtaksbrev.id} markert som journalført")

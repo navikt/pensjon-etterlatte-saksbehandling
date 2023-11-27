@@ -12,7 +12,6 @@ import no.nav.etterlatte.brev.journalpost.JournalpostResponse
 import no.nav.etterlatte.brev.journalpost.JournalpostSak
 import no.nav.etterlatte.brev.journalpost.Sakstype
 import no.nav.etterlatte.brev.model.Brev
-import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.rivers.VedtakTilJournalfoering
@@ -21,7 +20,7 @@ import java.util.Base64
 
 interface DokarkivService {
     suspend fun journalfoer(
-        brevId: BrevID,
+        brev: Brev,
         vedtak: VedtakTilJournalfoering,
     ): JournalpostResponse
 
@@ -48,12 +47,12 @@ class DokarkivServiceImpl(
     private val logger = LoggerFactory.getLogger(DokarkivService::class.java)
 
     override suspend fun journalfoer(
-        brevId: BrevID,
+        brev: Brev,
         vedtak: VedtakTilJournalfoering,
     ): JournalpostResponse {
-        logger.info("Oppretter journalpost for brev med id=$brevId")
+        logger.info("Oppretter journalpost for brev med id=${brev.id}")
 
-        val request = mapTilJournalpostRequest(brevId, vedtak)
+        val request = mapTilJournalpostRequest(brev, vedtak)
 
         return client.opprettJournalpost(request, true).also {
             logger.info("Journalpost opprettet (journalpostId=${it.journalpostId}, status=${it.journalpoststatus})")
@@ -102,13 +101,13 @@ class DokarkivServiceImpl(
     }
 
     private fun mapTilJournalpostRequest(
-        brevId: BrevID,
+        brev: Brev,
         vedtak: VedtakTilJournalfoering,
     ): JournalpostRequest {
+        val brevId = brev.id
         val innhold = requireNotNull(db.hentBrevInnhold(brevId))
         val pdf = requireNotNull(db.hentPdf(brevId))
 
-        val brev = db.hentBrev(brevId)
         val avsenderMottaker =
             if (vedtak.erMigrering) {
                 AvsenderMottaker(id = vedtak.sak.ident, navn = "${brev.mottaker.navn} ved verge")

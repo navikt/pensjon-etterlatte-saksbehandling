@@ -35,7 +35,6 @@ import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevDataFeatureToggle
 import no.nav.etterlatte.brev.model.BrevDataMapper
-import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.BrevProsessType
 import no.nav.etterlatte.brev.model.BrevProsessTypeFactory
 import no.nav.etterlatte.brev.model.Mottaker
@@ -705,7 +704,7 @@ internal class VedtaksbrevServiceTest {
             val forventetBrev = opprettBrev(Status.FERDIGSTILT, mockk())
 
             val forventetResponse = JournalpostResponse("1", "OK", "melding", true)
-            coEvery { dokarkivService.journalfoer(any<BrevID>(), any()) } returns forventetResponse
+            coEvery { dokarkivService.journalfoer(any<Brev>(), any<VedtakTilJournalfoering>()) } returns forventetResponse
 
             val vedtak = opprettVedtak()
 
@@ -717,7 +716,7 @@ internal class VedtaksbrevServiceTest {
             assertEquals(forventetResponse, response)
 
             coVerify(exactly = 1) {
-                dokarkivService.journalfoer(forventetBrev.id, vedtak)
+                dokarkivService.journalfoer(forventetBrev, vedtak)
             }
             verify(exactly = 1) {
                 db.settBrevJournalfoert(forventetBrev.id, response)

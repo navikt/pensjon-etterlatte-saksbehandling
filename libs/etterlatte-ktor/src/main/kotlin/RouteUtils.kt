@@ -8,6 +8,7 @@ import io.ktor.server.response.respond
 import io.ktor.util.pipeline.PipelineContext
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
+import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
@@ -231,6 +232,6 @@ suspend fun PipelineContext<Unit, ApplicationCall>.hvisEnabled(
     if (featureToggleService.isEnabled(toggle, false)) {
         block()
     } else {
-        call.respond(HttpStatusCode.NotImplemented)
+        throw ForespoerselException(code = "NOT_IMPLEMENTED", status = 501, detail = "Funksjonaliteten er ikke tilgjengelig enda.")
     }
 }

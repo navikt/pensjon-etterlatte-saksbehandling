@@ -65,18 +65,7 @@ async function apiFetcher<T>(props: Options): Promise<ApiResponse<T>> {
       }
     } else {
       const error: JsonError = await response.json()
-      if (response.status === 501) {
-        const notImplmented = {
-          msg: 'Not implemented',
-        }
-        logger.generalInfo(JSON.stringify(notImplmented))
-        return {
-          ...error,
-          ok: false,
-          code: 'IKKE_IMPLEMENTERT',
-          detail: 'Funksjonaliteteten er ikke tilgjengelig enda. Sjekk feature toggles.',
-        }
-      } else if (response.status >= 500) {
+      if (response.status >= 500) {
         const errorobj = {
           msg: 'Fikk feil i kall mot backend',
           errorInfo: JSON.stringify({ url: url, method: method, error: error }),

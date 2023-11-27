@@ -26,15 +26,9 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.S
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.SOEKER_SOEKNAD_V1
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
-import no.nav.etterlatte.libs.common.person.Adresse
-import no.nav.etterlatte.libs.common.person.FamilieRelasjon
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.PersonRolle
-import no.nav.etterlatte.libs.common.person.Sivilstand
-import no.nav.etterlatte.libs.common.person.Sivilstatus
-import no.nav.etterlatte.libs.common.person.Utland
-import no.nav.etterlatte.libs.common.person.VergemaalEllerFremtidsfullmakt
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.toJsonNode
@@ -44,7 +38,6 @@ import no.nav.etterlatte.libs.sporingslogg.Sporingslogg
 import no.nav.etterlatte.libs.sporingslogg.Sporingsrequest
 import no.nav.etterlatte.pdl.HistorikkForeldreansvar
 import org.slf4j.LoggerFactory
-import java.time.LocalDate
 import java.util.UUID
 
 interface GrunnlagService {
@@ -449,7 +442,7 @@ private fun Grunnlagsopplysning<JsonNode>.asPersonopplysning(): Personopplysning
         id = this.id,
         kilde = this.kilde.tilGenerellKilde(),
         opplysningType = this.opplysningType,
-        opplysning = objectMapper.treeToValue(opplysning, PersonInformasjon::class.java),
+        opplysning = objectMapper.treeToValue(opplysning, Person::class.java),
     )
 }
 
@@ -521,33 +514,11 @@ data class Personopplysning(
     val opplysningType: Opplysningstype,
     val id: UUID,
     val kilde: GenerellKilde,
-    val opplysning: PersonInformasjon,
+    val opplysning: Person,
 )
 
 data class GenerellKilde(
     val type: String,
     val tidspunkt: Tidspunkt,
     val detalj: String? = null,
-)
-
-data class PersonInformasjon(
-    val fornavn: String,
-    val mellomnavn: String?,
-    val etternavn: String,
-    val foedselsnummer: Folkeregisteridentifikator?,
-    val foedselsdato: LocalDate?,
-    val foedselsaar: Int?,
-    val foedeland: String?,
-    val doedsdato: LocalDate?,
-    var bostedsadresse: List<Adresse>?,
-    var deltBostedsadresse: List<Adresse>?,
-    var kontaktadresse: List<Adresse>?,
-    var oppholdsadresse: List<Adresse>?,
-    val sivilstatus: Sivilstatus?,
-    val sivilstand: List<Sivilstand>?,
-    val statsborgerskap: String?,
-    var utland: Utland?,
-    var familieRelasjon: FamilieRelasjon?,
-    var avdoedesBarn: List<Person>?,
-    var vergemaalEllerFremtidsfullmakt: List<VergemaalEllerFremtidsfullmakt>?,
 )

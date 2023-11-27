@@ -26,8 +26,8 @@ internal class Verifiserer(
     fun verifiserRequest(request: MigreringRequest): MigreringRequest {
         val patchedRequest = patchGjenlevendeHvisIkkeOppgitt(request)
         val feil = mutableListOf<Exception>()
-        patchedRequest.onFailure {
-            feil.add(PDLException(it))
+        patchedRequest.onFailure { feilen ->
+            feil.add(PDLException(feilen).also { it.addSuppressed(feilen) })
         }
         patchedRequest.onSuccess {
             feil.addAll(sjekkAtPersonerFinsIPDL(it))
@@ -139,7 +139,7 @@ internal class Verifiserer(
         }
 }
 
-sealed class Verifiseringsfeil(kilde: Throwable? = null) : Exception(cause = kilde)
+sealed class Verifiseringsfeil : Exception()
 
 data class FinsIkkeIPDL(val rolle: PersonRolle, val id: Folkeregisteridentifikator) : Verifiseringsfeil() {
     override val message: String
@@ -166,7 +166,7 @@ object StrengtFortrolig : Verifiseringsfeil() {
         get() = "Skal ikke migrere strengt fortrolig sak"
 }
 
-data class PDLException(val kilde: Throwable) : Verifiseringsfeil(kilde = kilde) {
+data class PDLException(val kilde: Throwable) : Verifiseringsfeil() {
     override val message: String?
         get() = kilde.message
 }

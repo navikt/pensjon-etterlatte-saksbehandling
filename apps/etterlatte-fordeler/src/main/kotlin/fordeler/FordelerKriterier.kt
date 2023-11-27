@@ -33,6 +33,7 @@ enum class FordelerKriterie(val forklaring: String) {
 
     BARN_HAR_FOR_GAMLE_SOESKEN("Det finnes barn av avdøde som er for gamle"),
 
+    AVDOED_FINNES_IKKE_I_PDL("Finner ikke avdød i PDL"),
     AVDOED_HAR_UTVANDRING("Avdød har utvandring"),
     AVDOED_HAR_YRKESSKADE("Avdød er markert med yrkesskade i søknaden"),
     AVDOED_ER_IKKE_REGISTRERT_SOM_DOED("Avdød er ikke registrert som død"),

@@ -217,13 +217,6 @@ class GenerellBehandlingService(
                 "ATTESTERING_INGEN_FERDIGSTILTE_OPPGAVER_AV_RIKTIG_TYPE",
             )
         }
-        val sisteOppgave = saksbehandlerOppgaver[0]
-        if (saksbehandler.ident == sisteOppgave.saksbehandler) {
-            throw UgyldigAttesteringsForespoersel(
-                "Samme saksbehandler kan ikke attestere og behandle behandlingen",
-                "ATTESTERING_SAMME_SAKSBEHANDLER",
-            )
-        }
     }
 
     fun underkjenn(

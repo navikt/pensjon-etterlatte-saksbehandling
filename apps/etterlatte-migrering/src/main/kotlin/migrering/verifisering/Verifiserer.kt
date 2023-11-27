@@ -86,7 +86,7 @@ internal class Verifiserer(
         if (request.gjenlevendeForelder == null) {
             return listOf(GjenlevendeForelderMangler)
         }
-        if (request.enhet.nr == "0001") {
+        if (request.enhet.nr in listOf("0001", "4862")) {
             return listOf(EnhetUtland)
         }
         request.gjenlevendeForelder!!.let { personer.add(Pair(PersonRolle.GJENLEVENDE, it)) }

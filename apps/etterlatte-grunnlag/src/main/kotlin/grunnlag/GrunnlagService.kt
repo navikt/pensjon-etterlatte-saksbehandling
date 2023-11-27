@@ -103,6 +103,8 @@ interface GrunnlagService {
     fun hentHistoriskForeldreansvar(behandlingId: UUID): Grunnlagsopplysning<JsonNode>?
 
     fun hentVergeadresse(folkeregisteridentifikator: String): BrevMottaker?
+
+    fun hentPersongalleriSamsvar(behandlingId: UUID): MismatchPersongalleri
 }
 
 class RealGrunnlagService(
@@ -292,6 +294,10 @@ class RealGrunnlagService(
     override fun hentVergeadresse(folkeregisteridentifikator: String): BrevMottaker? {
         return persondataKlient.hentAdresseForVerge(folkeregisteridentifikator)
             ?.toBrevMottaker()
+    }
+
+    override fun hentPersongalleriSamsvar(behandlingId: UUID): MismatchPersongalleri {
+        TODO("Not yet implemented")
     }
 
     private fun mapTilRolle(

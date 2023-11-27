@@ -10,6 +10,7 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.grunnlag.klienter.BehandlingKlient
 import no.nav.etterlatte.libs.common.BEHANDLINGID_CALL_PARAMETER
+import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.grunnlag.NyeSaksopplysninger
 import no.nav.etterlatte.libs.common.grunnlag.OppdaterGrunnlagRequest
@@ -88,6 +89,13 @@ fun Route.behandlingGrunnlagRoute(
             }
         }
 
+        get("opplysning/persongalleri-match") {
+            withBehandlingId(behandlingKlient) { behandlingId ->
+                val persongalleri = grunnlagService.hentPersongalleriSamsvar(behandlingId)
+                call.respond(persongalleri)
+            }
+        }
+
         get("personopplysninger") {
             withBehandlingId(behandlingKlient) { behandlingId ->
                 val sakstype = SakType.valueOf(call.parameters["sakType"].toString())
@@ -96,4 +104,16 @@ fun Route.behandlingGrunnlagRoute(
             }
         }
     }
+}
+
+data class PersongalleriDto(
+    val persongalleri: Persongalleri,
+    val kilde: GenerellKilde,
+    val persongalleriPdl: Persongalleri,
+    val problemer: List<MismatchPersongalleri>,
+)
+
+enum class MismatchPersongalleri {
+    MANGLER_GJENLEVENDE,
+    MISMATCH,
 }

@@ -5,7 +5,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
-import no.nav.etterlatte.grunnlag.adresse.VergeAdresse
+import no.nav.etterlatte.grunnlag.adresse.BrevMottaker
 import no.nav.etterlatte.grunnlag.klienter.PdlTjenesterKlientImpl
 import no.nav.etterlatte.grunnlag.klienter.PersondataKlient
 import no.nav.etterlatte.libs.common.Vedtaksloesning
@@ -94,7 +94,7 @@ class GrunnlagHenter(
                 listOfNotNull(
                     opplysningsbehov.persongalleri.tilGrunnlagsopplysningFraSoeknad(),
                     persongalleriFraPdl?.tilGrunnlagsopplysningFraPdl(),
-                    vergesAdresseInfo?.let { vergeAdresserOpplysning(vergesAdresseInfo.toVergeAdresse()) },
+                    vergesAdresseInfo?.let { vergeAdresserOpplysning(vergesAdresseInfo.toBrevMottaker()) },
                 )
 
             HentetGrunnlag(personopplysninger, saksopplysninger)
@@ -149,7 +149,7 @@ class GrunnlagHenter(
             persondataKlient.hentAdresseForVerge(persongalleri.soeker)
         }
 
-    private fun vergeAdresserOpplysning(vergeadresse: VergeAdresse): Grunnlagsopplysning<JsonNode> =
+    private fun vergeAdresserOpplysning(vergeadresse: BrevMottaker): Grunnlagsopplysning<JsonNode> =
         Grunnlagsopplysning(
             id = UUID.randomUUID(),
             kilde =

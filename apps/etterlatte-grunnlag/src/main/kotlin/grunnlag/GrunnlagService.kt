@@ -1,7 +1,7 @@
 package no.nav.etterlatte.grunnlag
 
 import com.fasterxml.jackson.databind.JsonNode
-import no.nav.etterlatte.grunnlag.adresse.VergeAdresse
+import no.nav.etterlatte.grunnlag.adresse.BrevMottaker
 import no.nav.etterlatte.grunnlag.klienter.PdlTjenesterKlientImpl
 import no.nav.etterlatte.grunnlag.klienter.PersondataKlient
 import no.nav.etterlatte.libs.common.behandling.PersonMedSakerOgRoller
@@ -93,7 +93,7 @@ interface GrunnlagService {
 
     fun hentHistoriskForeldreansvar(behandlingId: UUID): Grunnlagsopplysning<JsonNode>?
 
-    fun hentVergeadresse(folkeregisteridentifikator: String): VergeAdresse?
+    fun hentVergeadresse(folkeregisteridentifikator: String): BrevMottaker?
 }
 
 class RealGrunnlagService(
@@ -231,9 +231,9 @@ class RealGrunnlagService(
         return historiskForeldreansvar
     }
 
-    override fun hentVergeadresse(folkeregisteridentifikator: String): VergeAdresse? {
+    override fun hentVergeadresse(folkeregisteridentifikator: String): BrevMottaker? {
         return persondataKlient.hentAdresseForVerge(folkeregisteridentifikator)
-            ?.toVergeAdresse()
+            ?.toBrevMottaker()
     }
 
     private fun mapTilRolle(

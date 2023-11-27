@@ -126,7 +126,7 @@ class GosysOppgaveKlientImpl(config: Config, httpClient: HttpClient) : GosysOppg
             .mapBoth(
                 success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
                 failure = { errorResponse ->
-                    logger.error("Feil ved henting av Gosys oppgave med id=$id", errorResponse.throwable)
+                    logger.error("Feil ved henting av Gosys oppgave med id=$id", errorResponse.cause)
                     throw errorResponse
                 },
             )

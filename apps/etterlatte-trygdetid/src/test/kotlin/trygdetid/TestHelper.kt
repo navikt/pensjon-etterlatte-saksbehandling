@@ -4,6 +4,7 @@ import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
+import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
@@ -100,12 +101,26 @@ fun trygdeavtale(
     avtaleKode: String,
     avtaleDatoKode: String? = null,
     avtaleKriteriaKode: String? = null,
+    personKrets: JaNei? = null,
+    arbInntekt1G: JaNei? = null,
+    arbInntekt1GKommentar: String? = null,
+    beregArt50: JaNei? = null,
+    beregArt50Kommentar: String? = null,
+    nordiskTrygdeAvtale: JaNei? = null,
+    nordiskTrygdeAvtaleKommentar: String? = null,
 ) = Trygdeavtale(
     id = randomUUID(),
     behandlingId = behandlingId,
     avtaleKode = avtaleKode,
     avtaleDatoKode = avtaleDatoKode,
     avtaleKriteriaKode = avtaleKriteriaKode,
+    personKrets = null,
+    arbInntekt1G = null,
+    arbInntekt1GKommentar = null,
+    beregArt50 = null,
+    beregArt50Kommentar = null,
+    nordiskTrygdeAvtale = null,
+    nordiskTrygdeAvtaleKommentar = null,
     kilde = Grunnlagsopplysning.Saksbehandler(ident = "Z123", tidspunkt = Tidspunkt.now()),
 )
 

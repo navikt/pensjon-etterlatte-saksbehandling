@@ -16,23 +16,25 @@ val MaskinportenScopeAuthorizationPlugin =
         val scopes = pluginConfig.scopes
         pluginConfig.apply {
             on(AuthenticationChecked) { call ->
-                val userScopes =
-                    call.firstValidTokenClaims()?.getStringClaim("scope")
-                        ?.split(" ")
-                        ?: emptyList()
+                call.firstValidTokenClaims()?.let { token ->
+                    val userScopes =
+                        token.getStringClaim("scope")
+                            ?.split(" ")
+                            ?: emptyList()
 
-                if (userScopes.intersect(scopes).isEmpty()) {
-                    application.log.info("Request avslått pga manglende scope (gyldige: $scopes)")
-                    throw ForespoerselException(
-                        status = HttpStatusCode.Unauthorized.value,
-                        code = "GE-MASKINPORTEN-SCOPE",
-                        detail = "Har ikke påkrevd scope",
-                        meta =
-                            mapOf(
-                                "correlation-id" to getCorrelationId(),
-                                "tidspunkt" to Tidspunkt.now(),
-                            ),
-                    )
+                    if (userScopes.intersect(scopes).isEmpty()) {
+                        application.log.info("Request avslått pga manglende scope (gyldige: $scopes)")
+                        throw ForespoerselException(
+                            status = HttpStatusCode.Unauthorized.value,
+                            code = "GE-MASKINPORTEN-SCOPE",
+                            detail = "Har ikke påkrevd scope",
+                            meta =
+                                mapOf(
+                                    "correlation-id" to getCorrelationId(),
+                                    "tidspunkt" to Tidspunkt.now(),
+                                ),
+                        )
+                    }
                 }
             }
         }

@@ -5,7 +5,6 @@ import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Result
 import io.ktor.client.call.body
 import io.ktor.client.statement.HttpResponse
-import io.ktor.http.isSuccess
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 
 data class Resource(
@@ -19,26 +18,24 @@ data class Resource(
 
 data class ThrowableErrorMessage(
     override val message: String,
-    val throwable: Throwable,
-) : Exception(message, throwable)
-
-class HttpStatusRuntimeException(override val message: String) :
-    InternfeilException(message)
+    override val cause: Throwable? = null,
+    val response: HttpResponse? = null,
+) : InternfeilException(message, cause)
 
 internal fun Throwable.toErr(url: String): Result<JsonNode, ThrowableErrorMessage> {
     return Err(
         ThrowableErrorMessage(
-            message = "Error response from '$url'",
-            throwable = this,
+            message = "An unexpected error occured when calling $url",
+            cause = this,
         ),
     )
 }
 
-internal suspend fun HttpResponse.checkForError() =
-    if (this.status.isSuccess()) {
-        this
-    } else {
-        throw HttpStatusRuntimeException(
-            "Received response with status ${this.status.value} from downstream api with error: ${this.body<String>()}",
-        )
-    }
+internal suspend fun HttpResponse.toErr(): Result<JsonNode, ThrowableErrorMessage> {
+    return Err(
+        ThrowableErrorMessage(
+            message = "Received response with status ${status.value} from downstream api with error: ${this.body<String>()}",
+            response = this,
+        ),
+    )
+}

@@ -1,6 +1,7 @@
 package no.nav.etterlatte.migrering.verifisering
 
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
+import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.logging.samleExceptions
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
@@ -22,8 +23,9 @@ internal class Verifiserer(
     private val sikkerlogg = sikkerlogger()
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    fun verifiserRequest(request: MigreringRequest) {
-        val feil = sjekkAtPersonerFinsIPDL(request)
+    fun verifiserRequest(request: MigreringRequest): MigreringRequest {
+        val patchedRequest = patchGjenlevendeHvisIkkeOppgitt(request)
+        val feil = sjekkAtPersonerFinsIPDL(patchedRequest)
         if (feil.isNotEmpty()) {
             logger.warn(
                 "Sak ${request.pesysId} har ufullstendige data i PDL, kan ikke migrere. Se sikkerlogg for detaljer",
@@ -32,10 +34,48 @@ internal class Verifiserer(
                 request.toJson(),
                 feilendeSteg = Migreringshendelser.VERIFISER,
                 feil = feil.map { it.message }.toJson(),
-                pesysId = request.pesysId,
+                pesysId = patchedRequest.pesysId,
             )
-            repository.oppdaterStatus(request.pesysId, Migreringsstatus.VERIFISERING_FEILA)
+            repository.oppdaterStatus(patchedRequest.pesysId, Migreringsstatus.VERIFISERING_FEILA)
             throw samleExceptions(feil)
+        }
+        return patchedRequest
+    }
+
+    private fun patchGjenlevendeHvisIkkeOppgitt(request: MigreringRequest): MigreringRequest {
+        if (request.gjenlevendeForelder != null) {
+            return request
+        }
+        val persongalleri = hentPersongalleri(request.soeker)
+        if (persongalleri == null) {
+            logger.warn(
+                "Kunne ikke hente persongalleriet fra PDL for migrering av pesysid=${request.pesysId}, " +
+                    "sannsynligvis på grunn av personer som mangler identer. Gjør ingen patching av persongalleriet",
+            )
+            return request
+        }
+        val avdoede = request.avdoedForelder.map { it.ident.value }.toSet()
+        val avdodeIPDL = persongalleri.avdoed.toSet()
+        if (avdoede != avdodeIPDL) {
+            logger.error(
+                "Migreringrequest med pesysid=${request.pesysId} har forskjellige avdøde enn det vi finner " +
+                    "i PDL.",
+            )
+            throw IllegalStateException("Migreringsrequest har forskjellig sett med avdøde enn det vi har i følge PDL")
+        }
+        if (persongalleri.gjenlevende.size == 1) {
+            return request.copy(gjenlevendeForelder = Folkeregisteridentifikator.of(persongalleri.gjenlevende.single()))
+        }
+        logger.warn("Fant ${persongalleri.gjenlevende.size} gjenlevende i PDL, patcher ikke request")
+        return request
+    }
+
+    private fun hentPersongalleri(soeker: Folkeregisteridentifikator): Persongalleri? {
+        return try {
+            pdlKlient.hentPersongalleri(soeker)
+        } catch (e: Exception) {
+            logger.info("Persongalleriet ble hentet med feil, returnerer null i stedet")
+            null
         }
     }
 
@@ -45,9 +85,28 @@ internal class Verifiserer(
         if (request.gjenlevendeForelder == null) {
             return listOf(GjenlevendeForelderMangler)
         }
+        if (request.enhet.nr == "0001") {
+            return listOf(EnhetUtland)
+        }
         request.gjenlevendeForelder!!.let { personer.add(Pair(PersonRolle.GJENLEVENDE, it)) }
 
-        return personer.map { hentPerson(it.first, it.second) }
+        return personer
+            .map {
+                val person = hentPerson(it.first, it.second)
+
+                if (it.first == PersonRolle.BARN) {
+                    person.getOrNull()?.let { pdlPerson ->
+                        pdlPerson.vergemaalEllerFremtidsfullmakt?.let { vergemaal ->
+                            if (vergemaal.isNotEmpty()) {
+                                logger.warn("Barn har vergemaal eller fremtidsfullmakt, kan ikke migrere")
+                                return listOf(BarnetHarVerge)
+                            }
+                        }
+                    }
+                }
+
+                person
+            }
             .filter { it.isFailure }
             .map { it.exceptionOrNull() }
             .filterIsInstance<Verifiseringsfeil>()
@@ -80,4 +139,14 @@ data class FinsIkkeIPDL(val rolle: PersonRolle, val id: Folkeregisteridentifikat
 object GjenlevendeForelderMangler : Verifiseringsfeil() {
     override val message: String
         get() = "Gjenlevende forelder er null i det vi får fra Pesys"
+}
+
+object BarnetHarVerge : Verifiseringsfeil() {
+    override val message: String
+        get() = "Barn har vergemaal eller fremtidsfullmakt, kan ikke migrere"
+}
+
+object EnhetUtland : Verifiseringsfeil() {
+    override val message: String
+        get() = "Vi har ikke adresse for enhet utland. Må følges opp snart"
 }

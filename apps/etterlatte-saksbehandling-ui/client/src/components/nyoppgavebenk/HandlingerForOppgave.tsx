@@ -5,10 +5,10 @@ import { useAppSelector } from '~store/Store'
 import { GosysOppgaveModal } from '~components/nyoppgavebenk/oppgavemodal/GosysOppgaveModal'
 
 export const HandlingerForOppgave = ({ oppgave }: { oppgave: OppgaveDTO }) => {
-  const user = useAppSelector((state) => state.saksbehandlerReducer.saksbehandler)
+  const innloggetsaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
 
   const { type, kilde, fnr, saksbehandler, referanse } = oppgave
-  const erInnloggetSaksbehandlerOppgave = saksbehandler ? saksbehandler === user.ident : false
+  const erInnloggetSaksbehandlerOppgave = saksbehandler ? saksbehandler === innloggetsaksbehandler.ident : false
   if (kilde === 'GENERELL_BEHANDLING') {
     switch (type) {
       case 'UNDERKJENT':

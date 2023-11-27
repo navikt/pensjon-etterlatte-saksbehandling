@@ -1,7 +1,7 @@
 import { behandlingReducer } from './reducers/BehandlingReducer'
 import { journalfoeringOppgaveReducer } from './reducers/JournalfoeringOppgaveReducer'
 import { menuReducer } from './reducers/MenuReducer'
-import { saksbehandlerReducer } from './reducers/SaksbehandlerReducer'
+import { saksbehandlerReducer } from './reducers/InnloggetSaksbehandlerReducer'
 import { configureStore } from '@reduxjs/toolkit'
 import type { TypedUseSelectorHook } from 'react-redux'
 import { useDispatch, useSelector } from 'react-redux'
@@ -11,12 +11,12 @@ import { tilbakekrevingReducer } from '~store/reducers/TilbakekrevingReducer'
 import { vedtakReducer } from '~store/reducers/VedtakReducer'
 import { sjekklisteReducer } from '~store/reducers/SjekklisteReducer'
 import { behandlingsidemenyReducer } from '~store/reducers/BehandlingSidemenyReducer'
-import { saksbehandlerGjeldendeOppgaveReducer } from '~store/reducers/SaksbehandlerGjeldendeOppgaveReducer'
+import { saksbehandlerGjeldendeOppgaveForBehandlingReducer } from '~store/reducers/SaksbehandlerGjeldendeOppgaveForBehandlingReducer'
 
 const reducer = {
   menuReducer: menuReducer,
   saksbehandlerReducer: saksbehandlerReducer,
-  saksbehandlerGjeldendeOppgaveReducer: saksbehandlerGjeldendeOppgaveReducer,
+  saksbehandlerGjeldendeOppgaveReducer: saksbehandlerGjeldendeOppgaveForBehandlingReducer,
   behandlingReducer: behandlingReducer,
   behandlingSidemenyReducer: behandlingsidemenyReducer,
   vedtakReducer: vedtakReducer,

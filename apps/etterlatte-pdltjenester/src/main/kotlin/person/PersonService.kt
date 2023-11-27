@@ -30,6 +30,7 @@ import no.nav.etterlatte.pdl.PdlResponseError
 import no.nav.etterlatte.pdl.mapper.ForeldreansvarHistorikkMapper
 import no.nav.etterlatte.pdl.mapper.GeografiskTilknytningMapper
 import no.nav.etterlatte.pdl.mapper.PersonMapper
+import no.nav.etterlatte.sikkerLogg
 import org.slf4j.LoggerFactory
 
 class PdlForesporselFeilet(message: String) : RuntimeException(message)
@@ -254,11 +255,11 @@ class PersonService(
         val soesken = avdoede.flatMap { it.avdoedesBarn ?: emptyList() }
 
         val alleTilknyttedePersonerUtenIdent =
-            mottaker.familieRelasjon?.personerUtenIdent +
+            mottaker.familieRelasjon?.personerUtenIdent?.plus(
                 avdoede.flatMap {
                     it.familieRelasjon?.personerUtenIdent ?: emptyList()
-                }
-        gjenlevende.flatMap { it.familieRelasjon?.personerUtenIdent ?: emptyList() }
+                },
+            )?.plus(gjenlevende.flatMap { it.familieRelasjon?.personerUtenIdent ?: emptyList() })
 
         return Persongalleri(
             soeker = mottakerAvYtelsen.value,
@@ -304,16 +305,16 @@ class PersonService(
             }.partition { it.doedsdato != null }
 
         // TODO: håndter tilfellet med felles barn med avdød riktig -- da gjelder det for samboer også
-
         val personerUtenIdent =
             (
                 avdoede.flatMap {
                     it.familieRelasjon?.personerUtenIdent ?: emptyList()
                 }
-            ) + mottaker.familieRelasjon?.personerUtenIdent +
+            ).plus(mottaker.familieRelasjon?.personerUtenIdent ?: emptyList()).plus(
                 levende.flatMap {
                     it.familieRelasjon?.personerUtenIdent ?: emptyList()
-                }
+                },
+            )
 
         return Persongalleri(
             soeker = mottakerAvYtelsen.value,
@@ -337,10 +338,15 @@ class PersonService(
 
         return pdlKlient.hentGeografiskTilknytning(request).let {
             if (it.data?.hentGeografiskTilknytning == null) {
-                val pdlFeil = it.errors?.asFormatertFeil()
-                if (it.errors?.personIkkeFunnet() == true) {
+                if (it.errors == null) {
+                    logger.warn("Geografisk tilknytning er null i PDL (fnr=${request.foedselsnummer})")
+                    sikkerLogg.warn("Geografisk tilknytning er null i PDL (fnr=${request.foedselsnummer.value})")
+
+                    GeografiskTilknytning(ukjent = true)
+                } else if (it.errors.personIkkeFunnet()) {
                     throw FantIkkePersonException("Fant ikke personen ${request.foedselsnummer}")
                 } else {
+                    val pdlFeil = it.errors.asFormatertFeil()
                     throw PdlForesporselFeilet(
                         "Kunne ikke hente fnr=${request.foedselsnummer} fra PDL: $pdlFeil",
                     )
@@ -354,8 +360,4 @@ class PersonService(
     fun List<PdlResponseError>.asFormatertFeil() = this.joinToString(", ")
 
     fun List<PdlResponseError>.personIkkeFunnet() = any { it.extensions?.code == "not_found" }
-}
-
-infix operator fun <T> List<T>?.plus(other: List<T>?): List<T> {
-    return (this ?: emptyList()) + (other ?: emptyList())
 }

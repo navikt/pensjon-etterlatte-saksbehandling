@@ -1,4 +1,5 @@
 import { apiClient, ApiResponse } from '~shared/api/apiClient'
+import { JaNei } from '~shared/types/ISvar'
 
 export const hentTrygdetid = async (behandlingId: string): Promise<ApiResponse<ITrygdetid>> =>
   apiClient.get<ITrygdetid>(`/trygdetid/${behandlingId}`)
@@ -73,6 +74,13 @@ export interface Trygdeavtale {
   avtaleKode: string
   avtaleDatoKode?: string
   avtaleKriteriaKode?: string
+  personKrets?: JaNei
+  arbInntekt1G?: JaNei
+  arbInntekt1GKommentar?: string
+  beregArt50?: JaNei
+  beregArt50Kommentar?: string
+  nordiskTrygdeAvtale?: JaNei
+  nordiskTrygdeAvtaleKommentar?: string
   kilde: {
     tidspunkt: string
     ident: string
@@ -84,6 +92,12 @@ export interface TrygdeavtaleRequest {
   avtaleKode: string
   avtaleDatoKode?: string
   avtaleKriteriaKode?: string
+  arbInntekt1G?: JaNei
+  arbInntekt1GKommentar?: string
+  beregArt50?: JaNei
+  beregArt50Kommentar?: string
+  nordiskTrygdeAvtale?: JaNei
+  nordiskTrygdeAvtaleKommentar?: string
 }
 
 export const hentAlleTrygdetidAvtaler = async (): Promise<ApiResponse<TrygdetidAvtale[]>> =>

@@ -52,6 +52,8 @@ fun httpClient(
         register(ContentType.Application.Json, JacksonConverter(objectMapper))
         ekstraJacksoninnstillinger(objectMapper)
     }
+    install(ClientCallLogging)
+
     auth.invoke(this)
     defaultRequest {
         getCorrelationId().let {

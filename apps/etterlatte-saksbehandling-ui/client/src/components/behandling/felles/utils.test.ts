@@ -251,5 +251,6 @@ const mockVirkningstidspunkt = (): Virkningstidspunkt => {
       ident: 'Z123456',
     },
     begrunnelse: '',
+    kravdato: null,
   }
 }

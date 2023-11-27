@@ -2,8 +2,8 @@ export interface VedtakSammendrag {
   id: string
   behandlingId: string
   vedtakType?: VedtakType
-  saksbehandlerId?: string
-  attestant?: string
+  behandlendeSaksbehandler?: string
+  attesterendeSaksbehandler?: string
   datoAttestert?: string
   datoFattet?: string
 }

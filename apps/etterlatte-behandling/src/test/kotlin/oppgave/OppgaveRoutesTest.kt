@@ -74,7 +74,7 @@ class OppgaveRoutesTest : BehandlingIntegrationTest() {
                     assertEquals(HttpStatusCode.OK, status)
                 }.body()
 
-            client.post("/oppgaver/sak/${sak.id}/oppgaver") {
+            client.post("/oppgaver/sak/${sak.id}/opprett") {
                 val dto =
                     NyOppgaveDto(OppgaveKilde.EKSTERN, OppgaveType.MANUELL_JOURNALFOERING, "abc")
                 addAuthToken(systemBruker)

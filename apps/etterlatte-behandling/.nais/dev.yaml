@@ -116,6 +116,10 @@ spec:
       value: dev-fss.oppgavehandtering.oppgave
     - name: OPPGAVE_URL
       value: https://oppgave.dev-fss-pub.nais.io
+    - name: ETTERLATTE_MIGRERING_URL
+      value: http://etterlatte-migrering
+    - name: ETTERLATTE_MIGRERING_OUTBOUND_SCOPE
+      value: api://dev-gcp.etterlatte.etterlatte-migrering/.default
   envFrom:
     - secret: my-application-unleash-api-token
   accessPolicy:
@@ -127,6 +131,7 @@ spec:
         - application: etterlatte-pdltjenester
         - application: etterlatte-grunnlag
         - application: etterlatte-vedtaksvurdering
+        - application: etterlatte-migrering
         - application: etterlatte-tilbakekreving
         - application: skjermede-personer-pip # namespace hører til denne. Ikke legg til ny app i mellom.
           namespace: nom

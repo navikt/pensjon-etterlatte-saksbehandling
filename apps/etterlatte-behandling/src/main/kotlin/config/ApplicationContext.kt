@@ -28,6 +28,7 @@ import no.nav.etterlatte.behandling.klienter.BrevApiKlientObo
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlientObo
 import no.nav.etterlatte.behandling.klienter.KlageKlientImpl
+import no.nav.etterlatte.behandling.klienter.MigreringKlient
 import no.nav.etterlatte.behandling.klienter.NavAnsattKlient
 import no.nav.etterlatte.behandling.klienter.NavAnsattKlientImpl
 import no.nav.etterlatte.behandling.klienter.Norg2Klient
@@ -137,6 +138,14 @@ private fun tilbakekrevingHttpClient(config: Config) =
         azureAppScope = config.getString("tilbakekreving.azure.scope"),
     )
 
+private fun migreringHttpClient(config: Config) =
+    httpClientClientCredentials(
+        azureAppClientId = config.getString("azure.app.client.id"),
+        azureAppJwk = config.getString("azure.app.jwk"),
+        azureAppWellKnownUrl = config.getString("azure.app.well.known.url"),
+        azureAppScope = config.getString("migrering.outbound.scope"),
+    )
+
 internal class ApplicationContext(
     val env: Miljoevariabler = Miljoevariabler(System.getenv()),
     val config: Config = ConfigFactory.load(),
@@ -165,6 +174,7 @@ internal class ApplicationContext(
     val brevApiHttpClient: BrevApiKlient = BrevApiKlientObo(config, httpClient(forventSuksess = true)),
     val klageHttpClient: HttpClient = klageHttpClient(config),
     val tilbakekrevingHttpClient: HttpClient = tilbakekrevingHttpClient(config),
+    val migreringHttpClient: HttpClient = migreringHttpClient(config),
 ) {
     val httpPort = env.getOrDefault("HTTP_PORT", "8080").toInt()
     val saksbehandlerGroupIdsByKey = AzureGroup.values().associateWith { env.requireEnvValue(it.envKey) }
@@ -200,6 +210,7 @@ internal class ApplicationContext(
     val klageKlient = KlageKlientImpl(klageHttpClient, resourceUrl = env.getValue("ETTERLATTE_KLAGE_API_URL"))
     val tilbakekrevingKlient =
         TilbakekrevingKlientImpl(tilbakekrevingHttpClient, resourceUrl = env.getValue("ETTERLATTE_TILBAKEKREVING_URL"))
+    val migreringKlient = MigreringKlient(migreringHttpClient, env.getValue("ETTERLATTE_MIGRERING_URL"))
 
     // Metrikker
     val oppgaveMetrikker = OppgaveMetrics(metrikkerDao)
@@ -314,6 +325,7 @@ internal class ApplicationContext(
             hendelseDao = hendelseDao,
             behandlingHendelser = behandlingsHendelser,
             featureToggleService = featureToggleService,
+            migreringKlient = migreringKlient,
         )
 
     val migreringService =

@@ -21,7 +21,7 @@ const TabsWidth = styled(Tabs)`
 `
 
 export const ToggleMinOppgaveliste = () => {
-  const user = useAppSelector((state) => state.saksbehandlerReducer.saksbehandler)
+  const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
 
   const [filter, setFilter] = useState<Filter>(initialFilter())
   const [oppgaveListeValg, setOppgaveListeValg] = useState<OppgavelisteToggle>('Oppgavelista')
@@ -62,7 +62,7 @@ export const ToggleMinOppgaveliste = () => {
   }
 
   const mutableOppgaver = hentedeOppgaver.concat()
-  const innloggetSaksbehandleroppgaver = mutableOppgaver.filter((o) => o.saksbehandler === user.ident)
+  const innloggetSaksbehandleroppgaver = mutableOppgaver.filter((o) => o.saksbehandler === innloggetSaksbehandler.ident)
   const filtrerteOppgaver = filtrerOppgaver(
     filter.enhetsFilter,
     filter.fristFilter,

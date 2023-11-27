@@ -24,6 +24,7 @@ import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.future.asDeferred
 import kotlinx.coroutines.future.future
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.libs.common.retryOgPakkUt
 import java.util.concurrent.TimeUnit
 
 internal val defaultHttpClient =
@@ -109,7 +110,9 @@ class AzureAdClient(
         val value =
             asyncCache.get(request) { req, _ ->
                 CoroutineScope(context).future {
-                    fetchAccessToken(params.invoke(req))
+                    retryOgPakkUt {
+                        fetchAccessToken(params.invoke(req))
+                    }
                 }
             }
 

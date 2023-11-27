@@ -81,7 +81,7 @@ class SjekklisteServiceTest {
         every { behandlingService.hentBehandling(behandlingId) } returns
             foerstegangsbehandling(id = behandlingId, sakId = 33L, status = BehandlingStatus.FATTET_VEDTAK)
         every { user.name() } returns "Sak B. Handlersen"
-        every { oppgaveService.hentSaksbehandlerForOppgaveUnderArbeid(behandlingId) } returns "Noe helt annet"
+        every { oppgaveService.hentSaksbehandlerForOppgaveUnderArbeidByReferanse(behandlingId.toString()) } returns "Noe helt annet"
 
         assertThrows<SjekklisteIkkeTillattException> {
             sjekklisteService.oppdaterSjekkliste(

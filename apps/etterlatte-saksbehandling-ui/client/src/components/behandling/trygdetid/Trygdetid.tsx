@@ -87,6 +87,7 @@ export const Trygdetid = ({ redigerbar, behandling, virkningstidspunktEtterNyReg
 
   return (
     <TrygdetidWrapper>
+      {visTrydeavtale(behandling) && <TrygdeAvtale redigerbar={redigerbar} />}
       <LovtekstMedLenke
         tittel="Avdødes trygdetid"
         hjemler={[
@@ -139,7 +140,6 @@ export const Trygdetid = ({ redigerbar, behandling, virkningstidspunktEtterNyReg
           {trygdetid.beregnetTrygdetid && (
             <TrygdetidDetaljer beregnetTrygdetid={trygdetid.beregnetTrygdetid.resultat} />
           )}
-          {visTrydeavtale(behandling) && <TrygdeAvtale redigerbar={redigerbar} />}
         </>
       )}
       {(isPending(hentTrygdetidRequest) || isPending(hentAlleLandRequest)) && (

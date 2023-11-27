@@ -380,8 +380,8 @@ internal class SakServiceTest {
                 sak,
             )
 
-        val sakUtenlandstilknytning =
-            SakUtenlandstilknytning(
+        val sakMedUtenlandstilknytning =
+            SakMedUtenlandstilknytning(
                 id = sak.id,
                 ident = KONTANT_FOT.value,
                 sakType = sak.sakType,
@@ -395,13 +395,13 @@ internal class SakServiceTest {
             )
 
         every { sakDao.hentUtenlandstilknytningForSak(sak.id) } returns
-            sakUtenlandstilknytning
+            sakMedUtenlandstilknytning
 
         val service: SakService =
             SakServiceImpl(sakDao, pdlKlient, norg2Klient, featureToggleService, skjermingKlient)
 
         val hentSakMedUtenlandstilknytning = service.hentSakMedUtenlandstilknytning(KONTANT_FOT.value)
-        hentSakMedUtenlandstilknytning shouldBe sakUtenlandstilknytning
+        hentSakMedUtenlandstilknytning shouldBe sakMedUtenlandstilknytning
 
         verify { sakDao.hentUtenlandstilknytningForSak(sak.id) }
         verify { sakDao.finnSaker(KONTANT_FOT.value) }

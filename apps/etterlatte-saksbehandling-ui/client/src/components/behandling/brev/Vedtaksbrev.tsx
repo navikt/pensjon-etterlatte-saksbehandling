@@ -3,14 +3,14 @@ import { useEffect, useState } from 'react'
 import { Alert, ErrorMessage, Heading } from '@navikt/ds-react'
 import { Border, HeadingWrapper } from '../soeknadsoversikt/styled'
 import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapper'
-import { hentVedtaksbrev, opprettVedtaksbrev } from '~shared/api/brev'
+import { getData, hentVedtaksbrev, isSuccessOrNotFound, opprettVedtaksbrev } from '~shared/api/brev'
 import { useParams } from 'react-router-dom'
 import { Soeknadsdato } from '../soeknadsoversikt/Soeknadsdato'
 import styled from 'styled-components'
 import { SendTilAttesteringModal } from '../handlinger/sendTilAttesteringModal'
 import {
-  behandlingSkalSendeBrev,
   behandlingErRedigerbar,
+  behandlingSkalSendeBrev,
   manueltBrevKanRedigeres,
   sisteBehandlingHendelse,
 } from '~components/behandling/felles/utils'
@@ -28,6 +28,8 @@ import { IHendelse } from '~shared/types/IHendelse'
 import { oppdaterBehandling, resetBehandling } from '~store/reducers/BehandlingReducer'
 import { hentBehandling } from '~shared/api/behandling'
 import { useAppDispatch } from '~store/Store'
+import { getVergeadresseFraGrunnlag } from '~shared/api/grunnlag'
+import { handleHentVergeadresseError } from '~components/person/Vergeadresse'
 
 export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
   const { behandlingId } = useParams()
@@ -40,7 +42,7 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
   const [hentBrevStatus, hentBrev] = useApiCall(hentVedtaksbrev)
   const [opprettBrevStatus, opprettNyttVedtaksbrev] = useApiCall(opprettVedtaksbrev)
   const [, fetchBehandling] = useApiCall(hentBehandling)
-
+  const [vergeadresse, getVergeadresse] = useApiCall(getVergeadresseFraGrunnlag)
   const behandlingRedigertEtterOpprettetBrev = (vedtaksbrev: IBrev, hendelser: IHendelse[]) => {
     const hendelse = sisteBehandlingHendelse(hendelser)
     return new Date(hendelse.opprettet).getTime() > new Date(vedtaksbrev.statusEndret).getTime()
@@ -61,6 +63,11 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
         },
         () => dispatch(resetBehandling())
       )
+    }
+  }, [vedtaksbrev])
+  useEffect(() => {
+    if (behandlingId && vedtaksbrev) {
+      getVergeadresse(behandlingId)
     }
   }, [vedtaksbrev])
 
@@ -117,10 +124,11 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
               </WarningAlert>
             )}
             <br />
-            {vedtaksbrev && (
+            {vedtaksbrev && isSuccessOrNotFound(vergeadresse) && (
               <MottakerPanel
                 vedtaksbrev={vedtaksbrev}
                 oppdater={(val) => setVedtaksbrev({ ...vedtaksbrev, mottaker: val })}
+                vergeadresse={getData(vergeadresse)}
                 redigerbar={manueltBrevKanRedigeres(status)}
               />
             )}
@@ -140,6 +148,7 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
 
         {isFailure(hentBrevStatus) && <ErrorMessage>Feil ved henting av brev</ErrorMessage>}
         {isFailure(opprettBrevStatus) && <ErrorMessage>Kunne ikke opprette brev</ErrorMessage>}
+        {isFailure(vergeadresse) && handleHentVergeadresseError(vergeadresse)}
       </BrevContent>
 
       <Border />

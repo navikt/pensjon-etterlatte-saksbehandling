@@ -35,7 +35,6 @@ import no.nav.etterlatte.brev.model.bp.OmregnetBPNyttRegelverk
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
-import no.nav.etterlatte.rapidsandrivers.migrering.Beregning
 import no.nav.etterlatte.rivers.VedtakTilJournalfoering
 import no.nav.etterlatte.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
@@ -328,4 +327,4 @@ class VedtaksbrevService(
     }
 }
 
-data class MigreringBrevRequest(val beregning: Beregning)
+data class MigreringBrevRequest(val brutto: Int)

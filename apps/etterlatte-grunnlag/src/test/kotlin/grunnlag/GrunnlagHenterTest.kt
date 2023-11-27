@@ -12,8 +12,10 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import mockPerson
+import no.nav.etterlatte.grunnlag.adresse.Adresse
+import no.nav.etterlatte.grunnlag.adresse.BrevMottaker
+import no.nav.etterlatte.grunnlag.adresse.Foedselsnummer
 import no.nav.etterlatte.grunnlag.adresse.PersondataAdresse
-import no.nav.etterlatte.grunnlag.adresse.VergeAdresse
 import no.nav.etterlatte.grunnlag.klienter.PdlTjenesterKlientImpl
 import no.nav.etterlatte.grunnlag.klienter.PersondataKlient
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
@@ -64,7 +66,7 @@ class GrunnlagHenterTest {
         } returns grunnlagTestData.hentPersonGalleri()
 
         val persondataAdresseVerge = mockk<PersondataAdresse>()
-        every { persondataAdresseVerge.toVergeAdresse() } returns sampleVergeAdresse()
+        every { persondataAdresseVerge.toBrevMottaker() } returns sampleVergeAdresse()
         every {
             persondataKlient.hentAdresseForVerge(grunnlagTestData.soeker.foedselsnummer.value)
         } returns persondataAdresseVerge
@@ -90,17 +92,22 @@ class GrunnlagHenterTest {
         val vergeAdresseOpplysning =
             fetched.saksopplysninger
                 .first { it.opplysningType == Opplysningstype.VERGES_ADRESSE }
-        val actualVergesAdresse: VergeAdresse =
+        val actualVergesAdresse: BrevMottaker =
             objectMapper.readValue(vergeAdresseOpplysning.opplysning.toString())
 
         actualVergesAdresse shouldBeEqual sampleVergeAdresse()
     }
 
     private fun sampleVergeAdresse() =
-        VergeAdresse(
-            "NORSKPOSTADRESSE",
-            "Vergestien 2",
-            land = "Norge",
-            landkode = "NO",
+        BrevMottaker(
+            navn = "Tore",
+            foedselsnummer = Foedselsnummer("01018012345"),
+            adresse =
+                Adresse(
+                    adresseType = "NORSKPOSTADRESSE",
+                    adresselinje1 = "Vergestien 2",
+                    land = "Norge",
+                    landkode = "NO",
+                ),
         )
 }

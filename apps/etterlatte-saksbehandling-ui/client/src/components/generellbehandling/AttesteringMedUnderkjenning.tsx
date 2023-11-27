@@ -1,29 +1,27 @@
 import { SidebarPanel } from '~shared/components/Sidebar'
-import { Alert, BodyShort, Heading, Radio, RadioGroup } from '@navikt/ds-react'
+import { Alert, Heading, Radio, RadioGroup } from '@navikt/ds-react'
 import { RadioGroupWrapper } from '~components/behandling/attestering/styled'
 import React, { useState } from 'react'
 import { UnderkjenneModal } from '~components/generellbehandling/UnderkjenneModal'
 import { Attesteringmodal } from '~components/generellbehandling/Attesteringmodal'
 import { Generellbehandling, KravpakkeUtland } from '~shared/types/Generellbehandling'
 
-type BeslutningerType = 'UNDERKJENN' | 'GODKJENN'
-const Beslutning: Record<BeslutningerType, string> = {
+type BeslutningsTyper = 'UNDERKJENN' | 'GODKJENN'
+const Beslutning: Record<BeslutningsTyper, string> = {
   UNDERKJENN: 'Underkjenn',
   GODKJENN: 'Godkjenn',
 }
+
 export const AttesteringMedUnderkjenning = (props: {
   utlandsBehandling: Generellbehandling & { innhold: KravpakkeUtland | null }
+  oppgaveErTildeltInnloggetBruker: boolean
 }) => {
-  const { utlandsBehandling } = props
-
-  //TODO: må matche oppgaven til kravpakke opp mot innlogget bruker- se https://jira.adeo.no/browse/EY-3149
-  const oppgaveErTildeltInnloggetBruker = true
-  const saksbehandlerForGjeldendeOppgave = null
-  const [beslutning, setBeslutning] = useState<BeslutningerType>()
+  const { utlandsBehandling, oppgaveErTildeltInnloggetBruker } = props
+  const [beslutning, setBeslutning] = useState<BeslutningsTyper>()
 
   return (
     <SidebarPanel>
-      {oppgaveErTildeltInnloggetBruker ? (
+      {oppgaveErTildeltInnloggetBruker && (
         <>
           <Alert variant="info" size="small">
             Kontroller opplysninger og faglige vurderinger gjort under behandling.
@@ -37,7 +35,7 @@ export const AttesteringMedUnderkjenning = (props: {
                 legend=""
                 size="small"
                 className="radioGroup"
-                onChange={(event) => setBeslutning(event as BeslutningerType)}
+                onChange={(event) => setBeslutning(event as BeslutningsTyper)}
               >
                 <div className="flex">
                   <Radio value={Beslutning.GODKJENN}>{Beslutning.GODKJENN}</Radio>
@@ -49,14 +47,6 @@ export const AttesteringMedUnderkjenning = (props: {
             {beslutning === Beslutning.UNDERKJENN && <UnderkjenneModal utlandsBehandling={utlandsBehandling} />}
           </>
         </>
-      ) : (
-        <Alert variant="warning">
-          {saksbehandlerForGjeldendeOppgave ? (
-            <BodyShort>Oppgaven er tildelt {saksbehandlerForGjeldendeOppgave}.&nbsp;</BodyShort>
-          ) : (
-            <BodyShort>Oppgaven er ikke tildelt noen.&nbsp;</BodyShort>
-          )}
-        </Alert>
       )}
     </SidebarPanel>
   )

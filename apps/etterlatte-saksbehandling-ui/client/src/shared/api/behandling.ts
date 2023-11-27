@@ -9,14 +9,12 @@ import {
 } from '~shared/types/IDetaljertBehandling'
 import { apiClient, ApiResponse } from './apiClient'
 import { ManueltOpphoerDetaljer } from '~components/behandling/manueltopphoeroversikt/ManueltOpphoerOversikt'
-import { Grunnlagsendringshendelse, GrunnlagsendringsListe, IBehandlingListe } from '~components/person/typer'
+import { Grunnlagsendringshendelse, GrunnlagsendringsListe } from '~components/person/typer'
 import { InstitusjonsoppholdBegrunnelse } from '~components/person/uhaandtereHendelser/InstitusjonsoppholdVurderingBegrunnelse'
 import { FoersteVirk, ISak } from '~shared/types/sak'
 import { InstitusjonsoppholdMedKilde } from '~components/person/uhaandtereHendelser/HistoriskeHendelser'
-
-export const hentBehandlingerForPerson = async (fnr: string): Promise<ApiResponse<IBehandlingListe[]>> => {
-  return apiClient.post(`/personer/behandlinger`, { foedselsnummer: fnr })
-}
+import { format } from 'date-fns'
+import { DatoFormat } from '~utils/formattering'
 
 export const hentGrunnlagsendringshendelserForPerson = async (
   fnr: string
@@ -43,12 +41,12 @@ export const fastsettVirkningstidspunkt = async (args: {
   id: string
   dato: Date
   begrunnelse: string
-  kravdato: Date | undefined
+  kravdato: Date | null
 }): Promise<ApiResponse<Virkningstidspunkt>> => {
   return apiClient.post(`/behandling/${args.id}/virkningstidspunkt`, {
     dato: args.dato,
     begrunnelse: args.begrunnelse,
-    kravdato: args.kravdato,
+    kravdato: args.kravdato ? format(args.kravdato, DatoFormat.AAR_MAANED_DAG) : null,
   })
 }
 

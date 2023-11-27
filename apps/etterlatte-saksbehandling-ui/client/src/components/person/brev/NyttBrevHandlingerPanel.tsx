@@ -1,10 +1,10 @@
-import { Alert, BodyLong, BodyShort, Button, Heading, Modal, Panel } from '@navikt/ds-react'
+import { Alert, BodyLong, Button, Heading, Modal, Panel } from '@navikt/ds-react'
 import { BrevStatus, IBrev } from '~shared/types/Brev'
-import { isPending, useApiCall } from '~shared/hooks/useApiCall'
-import { useState } from 'react'
+import { isInitial, isPending, isSuccess, mapAllApiResult, useApiCall } from '~shared/hooks/useApiCall'
+import { useEffect, useState } from 'react'
 import { distribuerBrev, ferdigstillBrev, journalfoerBrev } from '~shared/api/brev'
-import Spinner from '~shared/Spinner'
 import { FlexRow } from '~shared/styled'
+import Spinner from '~shared/Spinner'
 
 interface Props {
   brev: IBrev
@@ -13,53 +13,44 @@ interface Props {
 
 export default function NyttBrevHandlingerPanel({ brev, setKanRedigeres }: Props) {
   const [isOpen, setIsOpen] = useState(false)
+  const [statusModalOpen, setStatusModalOpen] = useState(false)
 
   const [ferdigstillStatus, apiFerdigstillBrev] = useApiCall(ferdigstillBrev)
   const [journalfoerStatus, apiJournalfoerBrev] = useApiCall(journalfoerBrev)
   const [distribuerStatus, apiDistribuerBrev] = useApiCall(distribuerBrev)
 
-  const [loadingMsg, setLoadingMsg] = useState<string>()
-  const [error, setError] = useState<string>()
-
-  const handleError = (msg: string) => {
-    setError(msg)
-    setIsOpen(false)
-  }
-
   const ferdigstill = () => {
     setKanRedigeres(false)
 
-    const idPayload = { brevId: brev.id, sakId: brev.sakId }
-
-    setLoadingMsg('Forsøker å ferdigstille brev ...')
-
-    apiFerdigstillBrev(idPayload, journalfoer, () => handleError('Feil oppsto ved ferdigstilling av brev'))
+    apiFerdigstillBrev(
+      {
+        brevId: brev.id,
+        sakId: brev.sakId,
+      },
+      () => journalfoer()
+    )
   }
 
   const journalfoer = () => {
-    setLoadingMsg('... journalfører brevet i dokarkiv ...')
-
-    apiJournalfoerBrev({ brevId: brev.id, sakId: brev.sakId }, distribuer, () =>
-      handleError('Feil oppsto ved journalføring av brev')
-    )
+    apiJournalfoerBrev({ brevId: brev.id, sakId: brev.sakId }, () => distribuer())
   }
 
-  const distribuer = () => {
-    setLoadingMsg('... sender brev til distribusjon ...')
-
+  const distribuer = () =>
     apiDistribuerBrev(
       { brevId: brev.id, sakId: brev.sakId },
-      () => {
-        setLoadingMsg('Distribuert OK – laster inn på nytt ...')
-        setTimeout(() => window.location.reload(), 2000)
-      },
-      () => handleError('Feil oppsto ved distribusjon av brev')
+      () => void setTimeout(() => window.location.reload(), 2000)
     )
-  }
 
   if (brev.status === BrevStatus.DISTRIBUERT) {
     return null
   }
+
+  useEffect(() => {
+    setStatusModalOpen(
+      isSuccess(distribuerStatus) ||
+        !(isInitial(ferdigstillStatus) && isInitial(journalfoerStatus) && isInitial(distribuerStatus))
+    )
+  }, [ferdigstillStatus, journalfoerStatus, distribuerStatus])
 
   return (
     <Panel>
@@ -67,58 +58,80 @@ export default function NyttBrevHandlingerPanel({ brev, setKanRedigeres }: Props
         Handlinger
       </Heading>
 
-      {error && <Alert variant="error">{error}</Alert>}
+      {brev.status === BrevStatus.FERDIGSTILT ? (
+        <Button variant="primary" onClick={journalfoer} loading={isPending(journalfoerStatus)}>
+          Journalfør
+        </Button>
+      ) : brev.status === BrevStatus.JOURNALFOERT ? (
+        <Button variant="primary" onClick={distribuer} loading={isPending(distribuerStatus)}>
+          Distribuer
+        </Button>
+      ) : (
+        <Button variant="primary" onClick={() => setIsOpen(true)} loading={isPending(ferdigstillStatus)}>
+          Ferdigstill
+        </Button>
+      )}
 
-      <BodyShort spacing size="small">
-        {brev.status === BrevStatus.FERDIGSTILT ? (
-          <Button variant="primary" onClick={journalfoer} loading={isPending(journalfoerStatus)}>
-            Journalfør
-          </Button>
-        ) : brev.status === BrevStatus.JOURNALFOERT ? (
-          <Button variant="primary" onClick={distribuer} loading={isPending(distribuerStatus)}>
-            Distribuer
-          </Button>
-        ) : (
-          <>
-            <Button variant="primary" onClick={() => setIsOpen(true)} loading={isPending(ferdigstillStatus)}>
-              Ferdigstill
+      {statusModalOpen && (
+        <Modal open={true} width="medium">
+          {mapAllApiResult(
+            ferdigstillStatus,
+            <Spinner label="Forsøker å ferdigstille brevet ..." visible />,
+            null,
+            () => (
+              <Alert variant="error">Feil oppsto ved ferdigstilling av brevet</Alert>
+            ),
+            () => (
+              <Alert variant="info">Ferdigstilt ok!</Alert>
+            )
+          )}
+
+          {mapAllApiResult(
+            journalfoerStatus,
+            <Spinner label="Journalfører brevet i dokarkiv ..." visible />,
+            null,
+            () => (
+              <Alert variant="error">Feil oppsto ved journalføring av brevet</Alert>
+            ),
+            () => (
+              <Alert variant="info">Journalført ok!</Alert>
+            )
+          )}
+
+          {mapAllApiResult(
+            distribuerStatus,
+            <Spinner label="Sender brev til distribusjon ..." visible />,
+            null,
+            () => (
+              <Alert variant="error">Feil ved sending til distribusjon</Alert>
+            ),
+            () => (
+              <Alert variant="success">Brev sendt til distribusjon. Laster inn brev på nytt...</Alert>
+            )
+          )}
+        </Modal>
+      )}
+
+      <Modal open={isOpen && !statusModalOpen} aria-labelledby="modal-heading" className="padding-modal">
+        <Modal.Body style={{ textAlign: 'center' }}>
+          <Heading level="1" spacing size="medium" id="modal-heading">
+            Er du sikker på at du vil ferdigstille brevet?
+          </Heading>
+
+          <BodyLong spacing>
+            Når du ferdigstiller brevet vil det bli journalført og distribuert. Denne handlingen kan ikke angres.
+          </BodyLong>
+
+          <FlexRow justify="center">
+            <Button variant="secondary" onClick={() => setIsOpen(false)}>
+              Nei, fortsett redigering
             </Button>
-
-            <Modal
-              open={isOpen}
-              onClose={() => setIsOpen(false)}
-              aria-labelledby="modal-heading"
-              className="padding-modal"
-            >
-              <Modal.Body style={{ textAlign: 'center' }}>
-                {loadingMsg ? (
-                  <Spinner visible label={loadingMsg} />
-                ) : (
-                  <>
-                    <Heading level="1" spacing size="medium" id="modal-heading">
-                      Er du sikker på at du vil ferdigstille brevet?
-                    </Heading>
-
-                    <BodyLong spacing>
-                      Når du ferdigstiller brevet vil det bli journalført og distribuert. Denne handlingen kan ikke
-                      angres.
-                    </BodyLong>
-
-                    <FlexRow justify="center">
-                      <Button variant="secondary" onClick={() => setIsOpen(false)}>
-                        Nei, fortsett redigering
-                      </Button>
-                      <Button variant="primary" className="button" onClick={ferdigstill}>
-                        Ja, ferdigstill brev
-                      </Button>
-                    </FlexRow>
-                  </>
-                )}
-              </Modal.Body>
-            </Modal>
-          </>
-        )}
-      </BodyShort>
+            <Button variant="primary" className="button" onClick={ferdigstill}>
+              Ja, ferdigstill brev
+            </Button>
+          </FlexRow>
+        </Modal.Body>
+      </Modal>
     </Panel>
   )
 }

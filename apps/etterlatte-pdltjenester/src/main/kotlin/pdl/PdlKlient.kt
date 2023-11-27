@@ -125,7 +125,7 @@ class PdlKlient(private val httpClient: HttpClient, private val apiUrl: String) 
 
         val behandlingsnummer = findBehandlingsnummerFromSaktype(saktype)
 
-        logger.info("Bolkhenter personer med fnr=${request.variables.identer} fra PDL")
+        logger.info("Bolkhenter personer med fnr=$fnr fra PDL")
         return retry<PdlPersonResponseBolk> {
             httpClient.post(apiUrl) {
                 header(HEADER_BEHANDLINGSNUMMER, behandlingsnummer.behandlingsnummer)

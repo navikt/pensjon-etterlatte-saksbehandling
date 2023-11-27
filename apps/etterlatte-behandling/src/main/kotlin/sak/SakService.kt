@@ -74,7 +74,7 @@ interface SakService {
         adressebeskyttelseGradering: AdressebeskyttelseGradering,
     ): Int
 
-    fun hentSakMedUtenlandstilknytning(fnr: String): SakUtenlandstilknytning
+    fun hentSakMedUtenlandstilknytning(fnr: String): SakMedUtenlandstilknytning
 
     fun oppdaterFlyktning(
         sakId: Long,
@@ -160,7 +160,7 @@ class SakServiceImpl(
         return dao.oppdaterAdresseBeskyttelse(sakId, adressebeskyttelseGradering)
     }
 
-    override fun hentSakMedUtenlandstilknytning(fnr: String): SakUtenlandstilknytning {
+    override fun hentSakMedUtenlandstilknytning(fnr: String): SakMedUtenlandstilknytning {
         val sakerForPerson = dao.finnSaker(fnr)
 
         val sak =

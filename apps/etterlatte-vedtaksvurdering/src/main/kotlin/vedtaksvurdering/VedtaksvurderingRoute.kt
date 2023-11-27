@@ -298,9 +298,9 @@ private fun Vedtak.toVedtakSammendragDto() =
         id = id.toString(),
         behandlingId = behandlingId,
         vedtakType = type,
-        saksbehandlerId = vedtakFattet?.ansvarligSaksbehandler,
+        behandlendeSaksbehandler = vedtakFattet?.ansvarligSaksbehandler,
         datoFattet = vedtakFattet?.tidspunkt?.toNorskTid(),
-        attestant = attestasjon?.attestant,
+        attesterendeSaksbehandler = attestasjon?.attestant,
         datoAttestert = attestasjon?.tidspunkt?.toNorskTid(),
     )
 

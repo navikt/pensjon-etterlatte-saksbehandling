@@ -1,7 +1,7 @@
 import { Alert, Button } from '@navikt/ds-react'
 import { isFailure, isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
 import { attesterGenerellbehandling } from '~shared/api/generellbehandling'
-import { hentSakOgNavigererTilSaksoversikt } from '~components/generellbehandling/KravpakkeUtland'
+import { hentSakOgNavigerTilSaksoversikt } from '~components/generellbehandling/KravpakkeUtland'
 import { useNavigate } from 'react-router-dom'
 import { Generellbehandling, KravpakkeUtland } from '~shared/types/Generellbehandling'
 
@@ -15,7 +15,7 @@ export const Attesteringmodal = (props: {
   const attesterWrapper = () => {
     attesterFetch(utlandsBehandling, () => {
       setTimeout(() => {
-        hentSakOgNavigererTilSaksoversikt(utlandsBehandling.sakId, navigate)
+        hentSakOgNavigerTilSaksoversikt(utlandsBehandling.sakId, navigate)
       }, 4000)
     })
   }

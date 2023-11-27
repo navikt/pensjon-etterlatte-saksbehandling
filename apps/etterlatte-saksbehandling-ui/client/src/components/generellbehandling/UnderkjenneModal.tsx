@@ -4,7 +4,7 @@ import React, { useState } from 'react'
 import { underkjennGenerellbehandling } from '~shared/api/generellbehandling'
 import { Generellbehandling, KravpakkeUtland } from '~shared/types/Generellbehandling'
 import { useNavigate } from 'react-router-dom'
-import { hentSakOgNavigererTilSaksoversikt } from '~components/generellbehandling/KravpakkeUtland'
+import { hentSakOgNavigerTilSaksoversikt } from '~components/generellbehandling/KravpakkeUtland'
 
 export const UnderkjenneModal = ({
   utlandsBehandling,
@@ -43,7 +43,7 @@ export const UnderkjenneModal = ({
           } else {
             underkjennFetch({ generellbehandling: utlandsBehandling, begrunnelse: fritekstgrunn }, () => {
               setTimeout(() => {
-                hentSakOgNavigererTilSaksoversikt(utlandsBehandling.sakId, navigate)
+                hentSakOgNavigerTilSaksoversikt(utlandsBehandling.sakId, navigate)
               }, 4000)
             })
           }

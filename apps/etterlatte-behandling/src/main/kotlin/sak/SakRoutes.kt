@@ -31,6 +31,7 @@ import no.nav.etterlatte.libs.common.hentNavidentFraToken
 import no.nav.etterlatte.libs.common.kunSaksbehandler
 import no.nav.etterlatte.libs.common.kunSystembruker
 import no.nav.etterlatte.libs.common.oppgave.OppgaveListe
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.Saker
 import no.nav.etterlatte.libs.common.sakId
 import no.nav.etterlatte.libs.common.toJson
@@ -69,7 +70,7 @@ internal fun Route.sakSystemRoutes(
             get("/behandlinger") {
                 kunSystembruker {
                     val behandlinger =
-                        inTransaction { behandlingService.hentBehandlingerISak(sakId) }
+                        inTransaction { behandlingService.hentBehandlingerForSak(sakId) }
                             .map { ForenkletBehandling(it.sak.id, it.id, it.status) }
 
                     call.respond(ForenkletBehandlingListeWrapper(behandlinger))
@@ -169,6 +170,24 @@ internal fun Route.sakWebRoutes(
         }
 
         route("/personer/") {
+            post("/behandlingerforsak") {
+                withFoedselsnummerInternal(tilgangService) { fnr ->
+                    val behandlinger =
+                        inTransaction {
+                            val sakUtenlandstilknytning = sakService.hentSakMedUtenlandstilknytning(fnr.value)
+                            requestLogger.loggRequest(
+                                brukerTokenInfo,
+                                Folkeregisteridentifikator.of(sakUtenlandstilknytning.ident),
+                                "behandlinger",
+                            )
+                            behandlingService.hentBehandlingerForSak(sakUtenlandstilknytning.id)
+                                .map { it.toBehandlingSammendrag() }
+                                .let { BehandlingListe(sakUtenlandstilknytning, it) }
+                        }
+                    call.respond(behandlinger)
+                }
+            }
+
             post("/utenlandstilknytning") {
                 withFoedselsnummerInternal(tilgangService) { fnr ->
                     val sakUtenlandstilknytning = inTransaction { sakService.hentSakMedUtenlandstilknytning(fnr.value) }
@@ -187,21 +206,6 @@ internal fun Route.sakWebRoutes(
                         inTransaction { sakService.finnSak(fnr.value, type) }
                             .also { requestLogger.loggRequest(brukerTokenInfo, fnr, "personer/sak/type") }
                     call.respond(sak ?: HttpStatusCode.NoContent)
-                }
-            }
-
-            post("behandlinger") {
-                withFoedselsnummerInternal(tilgangService) { fnr ->
-                    val behandlinger =
-                        inTransaction {
-                            sakService.finnSaker(fnr.value)
-                                .map { sak ->
-                                    behandlingService.hentBehandlingerISak(sak.id)
-                                        .map { it.toBehandlingSammendrag() }
-                                        .let { BehandlingListe(sak, it) }
-                                }
-                        }.also { requestLogger.loggRequest(brukerTokenInfo, fnr, "behandlinger") }
-                    call.respond(behandlinger)
                 }
             }
 

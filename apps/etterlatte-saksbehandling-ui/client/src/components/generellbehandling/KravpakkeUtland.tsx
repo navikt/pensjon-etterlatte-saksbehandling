@@ -51,7 +51,7 @@ const LenkeMargin = styled(Link)`
   margin: 2rem 0rem 0.5rem 0;
 `
 
-export const hentSakOgNavigererTilSaksoversikt = (sakId: number, navigate: NavigateFunction) => {
+export const hentSakOgNavigerTilSaksoversikt = (sakId: number, navigate: NavigateFunction) => {
   hentSak(sakId)
     .then((sak) => {
       if (sak.ok) {

@@ -5,7 +5,7 @@ import {
   Virkningstidspunkt,
 } from '~shared/types/IDetaljertBehandling'
 import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
-import { ISak, SakType } from '~shared/types/sak'
+import { ISakMedUtenlandstilknytning, SakType } from '~shared/types/sak'
 import { IAdresse } from '~shared/types/IAdresse'
 
 export interface IPersonResult {
@@ -15,8 +15,8 @@ export interface IPersonResult {
   foedselsnummer: string
 }
 
-export interface IBehandlingListe {
-  sak: ISak
+export interface SakMedBehandlinger {
+  sak: ISakMedUtenlandstilknytning
   behandlinger: IBehandlingsammendrag[]
 }
 

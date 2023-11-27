@@ -119,6 +119,7 @@ abstract class BehandlingIntegrationTest {
                         put("OPPGAVE_URL", "http://localhost")
                         put("ETTERLATTE_KLAGE_API_URL", "http://localhost")
                         put("ETTERLATTE_TILBAKEKREVING_URL", "http://localhost")
+                        put("ETTERLATTE_MIGRERING_URL", "http://localhost")
                         put("OPPGAVE_SCOPE", "scope")
                     }.let { Miljoevariabler(it) },
                 config =
@@ -144,6 +145,7 @@ abstract class BehandlingIntegrationTest {
                 brevApiHttpClient = BrevApiKlientTest(),
                 klageHttpClient = klageHttpClientTest(),
                 tilbakekrevingHttpClient = tilbakekrevingHttpClientTest(),
+                migreringHttpClient = migreringHttpClientTest(),
             ).also {
                 it.dataSource.migrate()
             }
@@ -270,6 +272,21 @@ abstract class BehandlingIntegrationTest {
         }
 
     fun tilbakekrevingHttpClientTest() =
+        HttpClient(MockEngine) {
+            engine {
+                addHandler {
+                    respondOk()
+                }
+            }
+            install(ContentNegotiation) {
+                register(
+                    ContentType.Application.Json,
+                    JacksonConverter(objectMapper),
+                )
+            }
+        }
+
+    fun migreringHttpClientTest() =
         HttpClient(MockEngine) {
             engine {
                 addHandler {

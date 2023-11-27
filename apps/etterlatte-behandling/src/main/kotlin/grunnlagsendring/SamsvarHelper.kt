@@ -45,7 +45,7 @@ fun samsvarUtflytting(
             utflyttingPdl?.innflyttingTilNorge erLikRekkefoelgeIgnorert utflyttingGrunnlag?.innflyttingTilNorge,
 )
 
-fun samsvarSivilstand(
+fun samsvarSivilstandOMS(
     sivilstandPdl: List<Sivilstand>?,
     sivilstandGrunnlag: List<Sivilstand>?,
 ) = SamsvarMellomKildeOgGrunnlag.Sivilstand(
@@ -53,6 +53,14 @@ fun samsvarSivilstand(
     fraGrunnlag = sivilstandGrunnlag,
     samsvar = sivilstandPdl erLikRekkefoelgeIgnorert sivilstandGrunnlag,
 )
+
+// Sivilstandhendelser er ikke relevant for BP
+fun samsvarSivilstandBP() =
+    SamsvarMellomKildeOgGrunnlag.Sivilstand(
+        fraPdl = null,
+        fraGrunnlag = null,
+        samsvar = true,
+    )
 
 fun samsvarBostedsadresse(
     adressePdl: List<Adresse>?,

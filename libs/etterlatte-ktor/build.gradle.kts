@@ -29,6 +29,11 @@ dependencies {
 
     implementation(libs.navfelles.tokenvalidationktor2)
 
+    implementation(libs.logging.logstashlogbackencoder) {
+        exclude("com.fasterxml.jackson.core")
+        exclude("com.fasterxml.jackson.dataformat")
+    }
+
     implementation(libs.metrics.micrometer.prometheus)
     implementation(libs.metrics.prometheus.simpleclientcommon)
     implementation(libs.metrics.prometheus.simpleclienthotspot)

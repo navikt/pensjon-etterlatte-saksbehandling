@@ -377,7 +377,7 @@ class GrunnlagsendringshendelseService(
                 grunnlagKlient.hentGrunnlag(hendelse.sakId)
             }
         try {
-            val samsvarMellomPdlOgGrunnlag = finnSamsvarForHendelse(hendelse, pdlData, grunnlag, personRolle)
+            val samsvarMellomPdlOgGrunnlag = finnSamsvarForHendelse(hendelse, pdlData, grunnlag, personRolle, sak.sakType)
             if (!samsvarMellomPdlOgGrunnlag.samsvar) {
                 oppdaterHendelseSjekket(hendelse, samsvarMellomPdlOgGrunnlag)
             } else {
@@ -421,6 +421,7 @@ class GrunnlagsendringshendelseService(
         pdlData: PersonDTO,
         grunnlag: Grunnlag?,
         personRolle: PersonRolle,
+        sakType: SakType,
     ): SamsvarMellomKildeOgGrunnlag {
         val rolle = hendelse.hendelseGjelderRolle
         val fnr = hendelse.gjelderPerson
@@ -465,9 +466,14 @@ class GrunnlagsendringshendelseService(
             }
 
             GrunnlagsendringsType.SIVILSTAND -> {
-                val pdlSivilstand = pdlData.hentSivilstand()
-                val grunnlagSivilstand = grunnlag?.sivilstand(rolle)
-                samsvarSivilstand(pdlSivilstand, grunnlagSivilstand)
+                when (sakType) {
+                    SakType.BARNEPENSJON -> samsvarSivilstandBP()
+                    SakType.OMSTILLINGSSTOENAD -> {
+                        val pdlSivilstand = pdlData.hentSivilstand()
+                        val grunnlagSivilstand = grunnlag?.sivilstand(rolle)
+                        samsvarSivilstandOMS(pdlSivilstand, grunnlagSivilstand)
+                    }
+                }
             }
 
             GrunnlagsendringsType.BOSTED -> {
@@ -504,7 +510,7 @@ class GrunnlagsendringshendelseService(
         samsvarMellomKildeOgGrunnlag: SamsvarMellomKildeOgGrunnlag,
         hendelseId: UUID,
     ): Behandling? {
-        val behandlingerISak = behandlingService.hentBehandlingerISak(sakId)
+        val behandlingerISak = behandlingService.hentBehandlingerForSak(sakId)
         // Har vi en eksisterende behandling som ikke er avbrutt?
         val sisteBehandling =
             behandlingerISak

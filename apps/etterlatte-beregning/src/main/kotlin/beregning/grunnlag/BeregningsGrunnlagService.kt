@@ -34,29 +34,33 @@ class BeregningsGrunnlagService(
         barnepensjonBeregningsGrunnlag: BarnepensjonBeregningsGrunnlag,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
-        val soeskensFoedselsnummere =
-            barnepensjonBeregningsGrunnlag.soeskenMedIBeregning.flatMap { grunnlag -> grunnlag.data }
-                .map { it.foedselsnummer.value }
-
         val grunnlag = grunnlagKlient.hentGrunnlag(behandlingId, brukerTokenInfo)
         if (grunnlag.hentAvdoede().size > 1) {
             throw BPBeregningsgrunnlagMerEnnEnAvdoedException("Kan maks ha en avdød, behandlingid: $behandlingId")
         }
-        val avdoed = grunnlag.hentAvdoede().first().hentAvdoedesbarn()!!
-        val avdoedesBarn = avdoed.verdi.avdoedesBarn!!.associateBy({ it.foedselsnummer.value }, { it })
 
-        val alleSoeskenFinnes = soeskensFoedselsnummere.all { fnr -> avdoedesBarn.contains(fnr) }
-        if (!alleSoeskenFinnes) {
-            throw BPBeregningsgrunnlagSoeskenIkkeAvdoedesBarnException(
-                "Barnepensjon beregningsgrunnlag har søsken fnr som ikke er avdødeds barn. behandlingId: $behandlingId",
-            )
-        }
+        val soeskensFoedselsnummere =
+            barnepensjonBeregningsGrunnlag.soeskenMedIBeregning.flatMap { grunnlag -> grunnlag.data }
+                .map { it.foedselsnummer.value }
 
-        val alleSoeskenIberegningenErlevende = soeskensFoedselsnummere.all { fnr -> avdoedesBarn[fnr]?.doedsdato === null }
-        if (!alleSoeskenIberegningenErlevende) {
-            throw BPBeregningsgrunnlagSoeskenMarkertDoedException(
-                "Barnpensjon beregningsgrunnlag bruker søsken som er døde i beregningen. behandlingId: $behandlingId",
-            )
+        if (soeskensFoedselsnummere.isNotEmpty()) {
+            val avdoed = grunnlag.hentAvdoede().first().hentAvdoedesbarn()!!
+            val avdoedesBarn = avdoed.verdi.avdoedesBarn!!.associateBy({ it.foedselsnummer.value }, { it })
+
+            val alleSoeskenFinnes = soeskensFoedselsnummere.all { fnr -> avdoedesBarn.contains(fnr) }
+            if (!alleSoeskenFinnes) {
+                throw BPBeregningsgrunnlagSoeskenIkkeAvdoedesBarnException(
+                    "Barnepensjon beregningsgrunnlag har søsken fnr som ikke er avdødeds barn. behandlingId: $behandlingId",
+                )
+            }
+
+            val alleSoeskenIberegningenErlevende =
+                soeskensFoedselsnummere.all { fnr -> avdoedesBarn[fnr]?.doedsdato === null }
+            if (!alleSoeskenIberegningenErlevende) {
+                throw BPBeregningsgrunnlagSoeskenMarkertDoedException(
+                    "Barnpensjon beregningsgrunnlag bruker søsken som er døde i beregningen. behandlingId: $behandlingId",
+                )
+            }
         }
     }
 
@@ -186,14 +190,11 @@ class BeregningsGrunnlagService(
             beregningsGrunnlagRepository.finnOmstillingstoenadGrunnlagForBehandling(forrigeIverksatteBehandlingId)
         val revurderingVirk = revurdering.virkningstidspunkt!!.dato.atDay(1)
 
-        val institusjonsoppholdErLiktFoerVirk =
-            erGrunnlagLiktFoerEnDato(
-                omstillingstoenadBeregningsGrunnlag.institusjonsopphold ?: emptyList(),
-                forrigeGrunnlag?.institusjonsoppholdBeregningsgrunnlag ?: emptyList(),
-                revurderingVirk,
-            )
-
-        return institusjonsoppholdErLiktFoerVirk
+        return erGrunnlagLiktFoerEnDato(
+            omstillingstoenadBeregningsGrunnlag.institusjonsopphold ?: emptyList(),
+            forrigeGrunnlag?.institusjonsoppholdBeregningsgrunnlag ?: emptyList(),
+            revurderingVirk,
+        )
     }
 
     suspend fun hentBarnepensjonBeregningsGrunnlag(

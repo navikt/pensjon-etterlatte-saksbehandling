@@ -1,7 +1,6 @@
 package no.nav.etterlatte.behandling.klage
 
 import io.ktor.http.HttpStatusCode
-import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.call
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
@@ -10,7 +9,6 @@ import io.ktor.server.routing.patch
 import io.ktor.server.routing.post
 import io.ktor.server.routing.put
 import io.ktor.server.routing.route
-import io.ktor.util.pipeline.PipelineContext
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.inTransaction
@@ -19,6 +17,7 @@ import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.behandling.Formkrav
 import no.nav.etterlatte.libs.common.behandling.Kabalrespons
 import no.nav.etterlatte.libs.common.behandling.KlageUtfallUtenBrev
+import no.nav.etterlatte.libs.common.hvisEnabled
 import no.nav.etterlatte.libs.common.klageId
 import no.nav.etterlatte.libs.common.kunSaksbehandler
 import no.nav.etterlatte.libs.common.kunSystembruker
@@ -36,20 +35,9 @@ internal fun Route.klageRoutes(
     klageService: KlageService,
     featureToggleService: FeatureToggleService,
 ) {
-    suspend fun PipelineContext<Unit, ApplicationCall>.hvisEnabled(
-        toggle: FeatureToggle,
-        block: suspend PipelineContext<Unit, ApplicationCall>.() -> Unit,
-    ) {
-        if (!featureToggleService.isEnabled(toggle, false)) {
-            call.respond(HttpStatusCode.NotFound)
-        } else {
-            block()
-        }
-    }
-
     route("/api/klage") {
         post("opprett/{$SAKID_CALL_PARAMETER}") {
-            hvisEnabled(KlageFeatureToggle.KanBrukeKlageToggle) {
+            hvisEnabled(featureToggleService, KlageFeatureToggle.KanBrukeKlageToggle) {
                 val sakId = sakId
                 val klage =
                     inTransaction {
@@ -61,7 +49,7 @@ internal fun Route.klageRoutes(
 
         route("{$KLAGEID_CALL_PARAMETER}") {
             get {
-                hvisEnabled(KlageFeatureToggle.KanBrukeKlageToggle) {
+                hvisEnabled(featureToggleService, KlageFeatureToggle.KanBrukeKlageToggle) {
                     val klage =
                         inTransaction {
                             klageService.hentKlage(klageId)
@@ -74,7 +62,7 @@ internal fun Route.klageRoutes(
             }
 
             put("formkrav") {
-                hvisEnabled(KlageFeatureToggle.KanBrukeKlageToggle) {
+                hvisEnabled(featureToggleService, KlageFeatureToggle.KanBrukeKlageToggle) {
                     kunSaksbehandler { saksbehandler ->
                         medBody<VurdereFormkravDto> { formkravDto ->
                             val oppdatertKlage =
@@ -88,7 +76,7 @@ internal fun Route.klageRoutes(
             }
 
             put("utfall") {
-                hvisEnabled(KlageFeatureToggle.KanBrukeKlageToggle) {
+                hvisEnabled(featureToggleService, KlageFeatureToggle.KanBrukeKlageToggle) {
                     kunSaksbehandler { saksbehandler ->
                         medBody<VurdertUtfallDto> { utfall ->
                             val oppdatertKlage =
@@ -102,7 +90,7 @@ internal fun Route.klageRoutes(
             }
 
             post("ferdigstill") {
-                hvisEnabled(KlageFeatureToggle.KanBrukeKlageToggle) {
+                hvisEnabled(featureToggleService, KlageFeatureToggle.KanBrukeKlageToggle) {
                     kunSaksbehandler { saksbehandler ->
                         val ferdigstiltKlage =
                             inTransaction {
@@ -114,7 +102,7 @@ internal fun Route.klageRoutes(
             }
 
             patch("kabalstatus") {
-                hvisEnabled(KlageFeatureToggle.KanBrukeKlageToggle) {
+                hvisEnabled(featureToggleService, KlageFeatureToggle.KanBrukeKlageToggle) {
                     kunSystembruker {
                         medBody<Kabalrespons> {
                             inTransaction {
@@ -128,7 +116,7 @@ internal fun Route.klageRoutes(
         }
 
         get("sak/{$SAKID_CALL_PARAMETER}") {
-            hvisEnabled(KlageFeatureToggle.KanBrukeKlageToggle) {
+            hvisEnabled(featureToggleService, KlageFeatureToggle.KanBrukeKlageToggle) {
                 val klager =
                     inTransaction {
                         klageService.hentKlagerISak(sakId)

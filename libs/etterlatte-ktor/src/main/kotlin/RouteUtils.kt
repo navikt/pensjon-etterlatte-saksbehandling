@@ -6,6 +6,8 @@ import io.ktor.server.application.call
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.util.pipeline.PipelineContext
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
@@ -219,4 +221,16 @@ interface PersonTilgangsSjekk {
         foedselsnummer: Folkeregisteridentifikator,
         bruker: Saksbehandler,
     ): Boolean
+}
+
+suspend fun PipelineContext<Unit, ApplicationCall>.hvisEnabled(
+    featureToggleService: FeatureToggleService,
+    toggle: FeatureToggle,
+    block: suspend PipelineContext<Unit, ApplicationCall>.() -> Unit,
+) {
+    if (featureToggleService.isEnabled(toggle, false)) {
+        block()
+    } else {
+        call.respond(HttpStatusCode.NotImplemented)
+    }
 }

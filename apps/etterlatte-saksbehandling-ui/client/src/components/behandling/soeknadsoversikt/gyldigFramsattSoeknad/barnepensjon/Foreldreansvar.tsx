@@ -7,14 +7,23 @@ import { KildePdl } from '~shared/types/kilde'
 interface Props {
   persongalleriGrunnlag: Grunnlagsopplysning<Persongalleri, KildePdl>
   gjenlevendeGrunnlag: Grunnlagsopplysning<IPdlPerson, KildePdl> | undefined
+  harKildePesys: Boolean
 }
 
-export const Foreldreansvar = ({ persongalleriGrunnlag, gjenlevendeGrunnlag }: Props) => {
+export const Foreldreansvar = ({ persongalleriGrunnlag, gjenlevendeGrunnlag, harKildePesys }: Props) => {
+  const label = 'Foreldreansvar'
+  if (harKildePesys) {
+    return (
+      <InfoWrapper>
+        <Info tekst="Ukjent" undertekst="Mangler info" label={label} />
+      </InfoWrapper>
+    )
+  }
+
   const persongalleri = persongalleriGrunnlag.opplysning
   const gjenlevende = gjenlevendeGrunnlag?.opplysning
   const oppfylt = persongalleri.innsender == gjenlevende?.foedselsnummer
   const navn = oppfylt ? [gjenlevende?.fornavn, gjenlevende?.mellomnavn, gjenlevende?.etternavn].join(' ') : 'Ukjent'
-  const label = 'Foreldreansvar'
   const tekst = settTekst(oppfylt)
 
   function settTekst(oppfylt: Boolean): string {

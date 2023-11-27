@@ -1,4 +1,4 @@
-import { IDetaljertBehandling, IGyldighetResultat } from '~shared/types/IDetaljertBehandling'
+import { GyldigFramsattType, IDetaljertBehandling, IGyldighetResultat } from '~shared/types/IDetaljertBehandling'
 import { LovtekstMedLenke } from '~components/behandling/soeknadsoversikt/LovtekstMedLenke'
 import {
   Beskrivelse,
@@ -8,7 +8,10 @@ import {
 import { Innsender } from '~components/behandling/soeknadsoversikt/gyldigFramsattSoeknad/barnepensjon/Innsender'
 import { Foreldreansvar } from '~components/behandling/soeknadsoversikt/gyldigFramsattSoeknad/barnepensjon/Foreldreansvar'
 import { Verger } from '~components/behandling/soeknadsoversikt/gyldigFramsattSoeknad/barnepensjon/Verger'
-import { GyldigFramsattVurdering } from '~components/behandling/soeknadsoversikt/gyldigFramsattSoeknad/barnepensjon/GyldigFramsattVurdering'
+import {
+  finnVurdering,
+  GyldigFramsattVurdering,
+} from '~components/behandling/soeknadsoversikt/gyldigFramsattSoeknad/barnepensjon/GyldigFramsattVurdering'
 import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
 import { StatusIconProps } from '~shared/icons/statusIcon'
 import { useEffect } from 'react'
@@ -33,6 +36,8 @@ export const GyldigFramsattBarnepensjon = ({
   useEffect(() => {
     getPersonGalleriSoeknad({ sakId: behandling.sakId, behandlingId: behandling.id })
   }, [behandling.sakId, behandling.id])
+  const manuellVurdering = finnVurdering(gyldigFramsatt, GyldigFramsattType.MANUELL_VURDERING)?.basertPaaOpplysninger
+  const harKildePesys = manuellVurdering?.kilde?.ident == 'PESYS'
 
   return (
     <>
@@ -60,10 +65,12 @@ export const GyldigFramsattBarnepensjon = ({
             </Beskrivelse>
             <InfobokserWrapper>
               <Innsender
+                harKildePesys={harKildePesys}
                 persongalleriGrunnlag={personGalleriSoeknad.data}
                 gjenlevendeGrunnlag={behandling.familieforhold?.gjenlevende}
               />
               <Foreldreansvar
+                harKildePesys={harKildePesys}
                 persongalleriGrunnlag={personGalleriSoeknad.data}
                 gjenlevendeGrunnlag={behandling.familieforhold?.gjenlevende}
               />

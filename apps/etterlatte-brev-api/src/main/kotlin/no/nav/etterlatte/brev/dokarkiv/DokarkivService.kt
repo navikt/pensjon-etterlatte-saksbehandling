@@ -108,10 +108,18 @@ class DokarkivServiceImpl(
         val innhold = requireNotNull(db.hentBrevInnhold(brevId))
         val pdf = requireNotNull(db.hentPdf(brevId))
 
+        val brev = db.hentBrev(brevId)
+        val avsenderMottaker =
+            if (vedtak.erMigrering) {
+                AvsenderMottaker(id = vedtak.sak.ident, navn = "${brev.mottaker.navn} ved verge")
+            } else {
+                AvsenderMottaker(id = vedtak.sak.ident)
+            }
+
         return JournalpostRequest(
             tittel = innhold.tittel,
             journalpostType = JournalPostType.UTGAAENDE,
-            avsenderMottaker = AvsenderMottaker(vedtak.sak.ident),
+            avsenderMottaker = avsenderMottaker,
             bruker = Bruker(vedtak.sak.ident),
             eksternReferanseId = "${vedtak.behandlingId}.$brevId",
             sak = JournalpostSak(Sakstype.FAGSAK, vedtak.sak.id.toString()),

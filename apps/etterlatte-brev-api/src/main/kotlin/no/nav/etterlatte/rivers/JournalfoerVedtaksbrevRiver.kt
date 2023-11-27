@@ -49,12 +49,14 @@ internal class JournalfoerVedtaksbrevRiver(
         context: MessageContext,
     ) {
         try {
+            val saksbehandler = packet["vedtak.vedtakFattet.ansvarligSaksbehandler"].asText()
             val vedtak =
                 VedtakTilJournalfoering(
                     vedtakId = packet["vedtak.id"].asLong(),
                     sak = deserialize(packet["vedtak.sak"].toJson()),
                     behandlingId = UUID.fromString(packet["vedtak.behandlingId"].asText()),
                     ansvarligEnhet = packet["vedtak.vedtakFattet.ansvarligEnhet"].asText(),
+                    erMigrering = saksbehandler == Fagsaksystem.EY.navn,
                 )
             logger.info("Nytt vedtak med id ${vedtak.vedtakId} er attestert. Ferdigstiller vedtaksbrev.")
             val behandlingId = vedtak.behandlingId
@@ -73,7 +75,6 @@ internal class JournalfoerVedtaksbrevRiver(
                 try {
                     service.journalfoerVedtaksbrev(vedtaksbrev, vedtak)
                 } catch (e: Exception) {
-                    val saksbehandler = packet["vedtak.vedtakFattet.ansvarligSaksbehandler"].asText()
                     if (saksbehandler == Fagsaksystem.EY.navn) {
                         logger.error(
                             "Feila på å journalføre brev ${vedtaksbrev.id}. " +
@@ -121,4 +122,5 @@ data class VedtakTilJournalfoering(
     val sak: VedtakSak,
     val behandlingId: UUID,
     val ansvarligEnhet: String,
+    val erMigrering: Boolean = false,
 )

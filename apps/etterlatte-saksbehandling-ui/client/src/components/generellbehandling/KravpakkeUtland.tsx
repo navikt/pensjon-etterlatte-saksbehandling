@@ -1,4 +1,9 @@
-import { Generellbehandling, Status, KravpakkeUtland, DokumentSendtMedDato } from '~shared/types/Generellbehandling'
+import {
+  Generellbehandling,
+  KravpakkeUtland,
+  DokumentSendtMedDato,
+  generellbehandlingErRedigerbar,
+} from '~shared/types/Generellbehandling'
 import { Content, ContentHeader, GridContainer, MainContent } from '~shared/styled'
 import { HeadingWrapper, InfoWrapper } from '~components/behandling/soeknadsoversikt/styled'
 import {
@@ -135,7 +140,7 @@ const KravpakkeUtland = (props: { utlandsBehandling: Generellbehandling & { innh
     }
   }
 
-  const redigerbar = utlandsBehandling.status === Status.OPPRETTET
+  const redigerbar = generellbehandlingErRedigerbar(utlandsBehandling.status)
   return (
     <GridContainer>
       <MainContent style={{ whiteSpace: 'pre-wrap' }}>

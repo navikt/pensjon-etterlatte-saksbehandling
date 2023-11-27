@@ -653,7 +653,7 @@ class GenerellBehandlingServiceTest {
         service.underkjenn(behandlingMedKravpakke.id, ATTESTANT, kommentar)
         val underkjentBehandling = service.hentBehandlingMedId(behandlingMedKravpakke.id)
 
-        underkjentBehandling?.status shouldBe GenerellBehandling.Status.OPPRETTET
+        underkjentBehandling?.status shouldBe GenerellBehandling.Status.RETURNERT
 
         verify {
             hendelseDao.generellBehandlingHendelse(

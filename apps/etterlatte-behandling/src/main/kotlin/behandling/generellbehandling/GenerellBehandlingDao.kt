@@ -22,7 +22,7 @@ class GenerellBehandlingDao(private val connection: () -> Connection) {
                     """
                     INSERT INTO generellbehandling(id, innhold, sak_id, opprettet, type, tilknyttet_behandling, status)
                     VALUES(?::UUID, ?, ?, ?, ?, ?, ?)
-                    RETURNING id, innhold, sak_id, opprettet, type, tilknyttet_behandling, status
+                    RETURNING id, innhold, sak_id, opprettet, type, tilknyttet_behandling, status, behandler, attestant
                     """.trimIndent(),
                 )
             statement.setObject(1, generellBehandling.id)
@@ -43,14 +43,16 @@ class GenerellBehandlingDao(private val connection: () -> Connection) {
                 prepareStatement(
                     """
                     UPDATE generellbehandling
-                    SET innhold = ?, status = ?
+                    SET innhold = ?, status = ?, behandler = ?, attestant = ?
                     where id = ?
-                    RETURNING id, innhold, sak_id, opprettet, type, tilknyttet_behandling, status
+                    RETURNING id, innhold, sak_id, opprettet, type, tilknyttet_behandling, status, behandler, attestant
                     """.trimIndent(),
                 )
             statement.setJsonb(1, generellBehandling.innhold)
             statement.setString(2, generellBehandling.status.name)
-            statement.setObject(3, generellBehandling.id)
+            statement.setJsonb(3, generellBehandling.behandler)
+            statement.setJsonb(4, generellBehandling.attestant)
+            statement.setObject(5, generellBehandling.id)
             statement.executeQuery().single { toGenerellBehandling() }
         }
     }
@@ -60,7 +62,7 @@ class GenerellBehandlingDao(private val connection: () -> Connection) {
             val statement =
                 prepareStatement(
                     """
-                    SELECT id, innhold, sak_id, opprettet, type, tilknyttet_behandling, status 
+                    SELECT id, innhold, sak_id, opprettet, type, tilknyttet_behandling, status, behandler, attestant
                     FROM generellbehandling
                     WHERE id = ?
                     """.trimIndent(),
@@ -77,7 +79,7 @@ class GenerellBehandlingDao(private val connection: () -> Connection) {
             val statement =
                 prepareStatement(
                     """
-                    SELECT id, innhold, sak_id, opprettet, type, tilknyttet_behandling, status 
+                    SELECT id, innhold, sak_id, opprettet, type, tilknyttet_behandling, status, behandler, attestant
                     FROM generellbehandling
                     WHERE sak_id = ?
                     """.trimIndent(),
@@ -94,7 +96,7 @@ class GenerellBehandlingDao(private val connection: () -> Connection) {
             val statement =
                 prepareStatement(
                     """
-                    SELECT id, innhold, sak_id, opprettet, type, tilknyttet_behandling, status 
+                    SELECT id, innhold, sak_id, opprettet, type, tilknyttet_behandling, status, behandler, attestant 
                     FROM generellbehandling
                     WHERE tilknyttet_behandling = ?::uuid
                     """.trimIndent(),
@@ -116,6 +118,8 @@ class GenerellBehandlingDao(private val connection: () -> Connection) {
             opprettet = getTidspunkt("opprettet"),
             tilknyttetBehandling = getObject("tilknyttet_behandling") as UUID?,
             status = GenerellBehandling.Status.valueOf(getString("status")),
+            behandler = getString("behandler")?.let { objectMapper.readValue(it) },
+            attestant = getString("attestant")?.let { objectMapper.readValue(it) },
         )
     }
 }

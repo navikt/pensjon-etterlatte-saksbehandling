@@ -1,3 +1,13 @@
+interface Behandler {
+  saksbehandler: string
+  tidspunkt: string
+}
+
+interface Attestant {
+  attestant: string
+  tidspunkt: string
+}
+
 export interface Generellbehandling {
   id: string
   sakId: number
@@ -6,11 +16,27 @@ export interface Generellbehandling {
   opprettet: string
   status: Status
   tilknyttetBehandling: string
+  behandler?: Behandler
+  attestant?: Attestant
+  kommentar?: string
+}
+
+export function generellbehandlingErRedigerbar(status: Status): boolean {
+  switch (status) {
+    case Status.RETURNERT:
+    case Status.OPPRETTET:
+      return true
+    case Status.FATTET:
+    case Status.ATTESTERT:
+    case Status.AVBRUTT:
+      return false
+  }
 }
 
 export enum Status {
   OPPRETTET = 'OPPRETTET',
   FATTET = 'FATTET',
+  RETURNERT = 'RETURNERT',
   ATTESTERT = 'ATTESTERT',
   AVBRUTT = 'AVBRUTT',
 }

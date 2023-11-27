@@ -14,7 +14,6 @@ import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.rapidsandrivers.REVURDERING_AARSAK
 import no.nav.etterlatte.libs.common.rapidsandrivers.SKAL_SENDE_BREV
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.common.tidspunkt.utcKlokke
 import no.nav.etterlatte.libs.common.toObjectNode
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
 import no.nav.etterlatte.libs.common.vedtak.Periode
@@ -34,7 +33,6 @@ import no.nav.etterlatte.vedtaksvurdering.klienter.BeregningKlient
 import no.nav.etterlatte.vedtaksvurdering.klienter.SamKlient
 import no.nav.etterlatte.vedtaksvurdering.klienter.VilkaarsvurderingKlient
 import org.slf4j.LoggerFactory
-import java.time.Clock
 import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
@@ -45,7 +43,6 @@ class VedtakBehandlingService(
     private val vilkaarsvurderingKlient: VilkaarsvurderingKlient,
     private val behandlingKlient: BehandlingKlient,
     private val samKlient: SamKlient,
-    private val clock: Clock = utcKlokke(),
 ) {
     private val logger = LoggerFactory.getLogger(VedtakBehandlingService::class.java)
 
@@ -109,7 +106,7 @@ class VedtakBehandlingService(
                     VedtakFattet(
                         saksbehandler,
                         sak.enhet,
-                        Tidspunkt.now(clock),
+                        Tidspunkt.now(),
                     ),
                     tx,
                 ).also { fattetVedtak ->
@@ -171,7 +168,7 @@ class VedtakBehandlingService(
                         Attestasjon(
                             attestant,
                             sak.enhet,
-                            Tidspunkt.now(clock),
+                            Tidspunkt.now(),
                         ),
                         tx,
                     )
@@ -232,7 +229,7 @@ class VedtakBehandlingService(
         verifiserGyldigBehandlingStatus(behandlingKlient.kanUnderkjenneVedtak(behandlingId, brukerTokenInfo), vedtak)
         verifiserGyldigVedtakStatus(vedtak.status, listOf(VedtakStatus.FATTET_VEDTAK))
 
-        val underkjentTid = Tidspunkt.now(clock)
+        val underkjentTid = Tidspunkt.now()
         val underkjentVedtak =
             repository.inTransaction { tx ->
                 val underkjentVedtak = repository.underkjennVedtak(behandlingId, tx)
@@ -289,7 +286,7 @@ class VedtakBehandlingService(
             RapidInfo(
                 vedtakhendelse = VedtakKafkaHendelseType.TIL_SAMORDNING,
                 vedtak = tilSamordningVedtakLocal.toNyDto(),
-                tekniskTid = Tidspunkt.now(clock),
+                tekniskTid = Tidspunkt.now(),
                 behandlingId = behandlingId,
             )
 
@@ -331,7 +328,7 @@ class VedtakBehandlingService(
             RapidInfo(
                 vedtakhendelse = VedtakKafkaHendelseType.SAMORDNET,
                 vedtak = samordnetVedtakLocal.toNyDto(),
-                tekniskTid = Tidspunkt.now(clock),
+                tekniskTid = Tidspunkt.now(),
                 behandlingId = behandlingId,
             ),
         )
@@ -361,7 +358,7 @@ class VedtakBehandlingService(
             RapidInfo(
                 vedtakhendelse = VedtakKafkaHendelseType.IVERKSATT,
                 vedtak = iverksattVedtak.toNyDto(),
-                tekniskTid = Tidspunkt.now(clock),
+                tekniskTid = Tidspunkt.now(),
                 behandlingId = behandlingId,
             ),
         )

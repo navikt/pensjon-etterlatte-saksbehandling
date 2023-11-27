@@ -1,3 +1,4 @@
+
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
@@ -32,8 +33,8 @@ internal class LagreIverksattVedtakRiverTest {
         every { vedtaksvurderingServiceMock.iverksattVedtak(capture(behandlingIdSlot)) } returns
             mockk {
                 every { sak } returns mockk { every { id } returns sakIdVal }
-                every { behandlingId } returns behandlingIdVal
-                every { id } returns vedtakIdVal
+                every { behandling } returns mockk { every { id } returns behandlingIdVal }
+                every { vedtakId } returns vedtakIdVal
             }
 
         inspector.apply { sendTestMessage(melding) }.inspektør

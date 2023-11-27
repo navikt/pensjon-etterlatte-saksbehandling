@@ -61,6 +61,7 @@ internal class Verifiserer(
                 "Migreringrequest med pesysid=${request.pesysId} har forskjellige avdøde enn det vi finner " +
                     "i PDL.",
             )
+            sikkerlogg.error("Fikk $avdodeIPDL fra PDL, forventa $avdoede. Hele persongalleriet: $persongalleri")
             throw IllegalStateException("Migreringsrequest har forskjellig sett med avdøde enn det vi har i følge PDL")
         }
         if (persongalleri.gjenlevende.size == 1) {

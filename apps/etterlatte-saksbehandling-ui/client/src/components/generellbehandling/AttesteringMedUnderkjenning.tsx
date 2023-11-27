@@ -1,4 +1,3 @@
-import { SidebarPanel } from '~shared/components/Sidebar'
 import { Alert, Heading, Radio, RadioGroup } from '@navikt/ds-react'
 import { Info, RadioGroupWrapper, Tekst } from '~components/behandling/attestering/styled'
 import React, { useState } from 'react'
@@ -21,7 +20,7 @@ export const AttesteringMedUnderkjenning = (props: {
   const [beslutning, setBeslutning] = useState<BeslutningsTyper>()
 
   return (
-    <SidebarPanel>
+    <>
       {oppgaveErTildeltInnloggetBruker && (
         <>
           <Alert variant="info" size="small">
@@ -63,6 +62,6 @@ export const AttesteringMedUnderkjenning = (props: {
           </>
         </>
       )}
-    </SidebarPanel>
+    </>
   )
 }

@@ -162,9 +162,8 @@ class GenerellBehandlingService(
             "Behandlingen har ikke fått satt en saksbehandler i fattingen"
         }
 
-        harRiktigTilstandIOppgave(generellbehandlingId, saksbehandler)
         verifiserRiktigSaksbehandler(saksbehandler, hentetBehandling!!)
-
+        harRiktigTilstandIOppgave(generellbehandlingId)
         oppgaveService.ferdigStillOppgaveUnderBehandling(generellbehandlingId.toString(), saksbehandler)
         oppdaterBehandling(
             hentetBehandling.copy(
@@ -187,10 +186,7 @@ class GenerellBehandlingService(
         }
     }
 
-    fun harRiktigTilstandIOppgave(
-        generellbehandlingId: UUID,
-        saksbehandler: Saksbehandler,
-    ) {
+    fun harRiktigTilstandIOppgave(generellbehandlingId: UUID) {
         val oppgaverForReferanse = oppgaveService.hentOppgaverForReferanse(generellbehandlingId.toString())
         if (oppgaverForReferanse.isEmpty()) {
             throw UgyldigAttesteringsForespoersel(

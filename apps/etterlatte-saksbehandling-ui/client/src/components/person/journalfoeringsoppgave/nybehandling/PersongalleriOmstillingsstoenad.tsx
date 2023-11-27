@@ -42,20 +42,19 @@ export default function PersongalleriOmstillingsstoenad() {
       <InputRow>
         <TextField
           label="Søker (gjenlevende)"
-          placeholder="Fødselsnummer"
           value={persongalleri?.soeker || ''}
           pattern="[0-9]{11}"
           maxLength={11}
           onChange={(e) => oppdaterPersongalleri({ ...persongalleri, soeker: e.target.value })}
-          description="Automatisk valgt utifra bruker på oppgaven."
+          description="Fødselsnummeret er automatisk hentet fra oppgaven"
+          readOnly
         />
       </InputRow>
 
       <InputRow>
         <TextField
           label="Innsender"
-          placeholder="Fødselsnummer"
-          description="Oppgi innsenderen sitt f.nr. dersom det er tilgjengelig"
+          description="Oppgi innsenderen sitt fødselsnummer dersom det er tilgjengelig"
           value={persongalleri?.innsender || ''}
           pattern="[0-9]{11}"
           maxLength={11}
@@ -66,7 +65,7 @@ export default function PersongalleriOmstillingsstoenad() {
       <InputRow>
         <TextField
           label="Avdød"
-          placeholder="Avdød sitt fødselsnummer"
+          description="Oppgi fødselsnummer"
           value={persongalleri?.avdoed ? persongalleri?.avdoed[0] : ''}
           pattern="[0-9]{11}"
           maxLength={11}
@@ -84,7 +83,7 @@ export default function PersongalleriOmstillingsstoenad() {
             <InputRow key={index}>
               <TextField
                 label={`Barn ${persongalleri!!.soesken!!.length > 1 ? index + 1 : ''}`}
-                placeholder="Fødselsnummer"
+                description="Oppgi fødselsnummer"
                 value={barn}
                 pattern="[0-9]{11}"
                 maxLength={11}

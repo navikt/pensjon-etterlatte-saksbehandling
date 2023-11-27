@@ -1,25 +1,30 @@
 import { Button, Detail, Heading, Tag } from '@navikt/ds-react'
 import { useJournalfoeringOppgave } from '~components/person/journalfoeringsoppgave/useJournalfoeringOppgave'
 import AvbrytBehandleJournalfoeringOppgave from '~components/person/journalfoeringsoppgave/AvbrytBehandleJournalfoeringOppgave'
-import { Navigate, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import { SakType } from '~shared/types/sak'
-import { formaterSakstype, formaterStringDato } from '~utils/formattering'
+import { formaterSakstype, formaterSpraak, formaterStringDato } from '~utils/formattering'
 import { InfoList } from '~components/behandling/soeknadsoversikt/styled'
 import { FormWrapper } from '~components/person/journalfoeringsoppgave/BehandleJournalfoeringOppgave'
 import FullfoerOppgaveModal from '~components/person/journalfoeringsoppgave/nybehandling/FullfoerOppgaveModal'
 import { FlexRow } from '~shared/styled'
+import { gyldigBehandlingRequest } from '~components/person/journalfoeringsoppgave/nybehandling/validator'
 
 export default function OppsummeringOppgavebehandling() {
-  const { nyBehandlingRequest, oppgave } = useJournalfoeringOppgave()
+  const { journalpost, nyBehandlingRequest, oppgave, sak } = useJournalfoeringOppgave()
 
   const navigate = useNavigate()
 
   const tilbake = () => navigate('../', { relative: 'path' })
 
-  const persongalleri = nyBehandlingRequest?.persongalleri
-  if (!nyBehandlingRequest || !oppgave || !persongalleri) {
-    return <Navigate to="../" relative="path" />
+  if (!journalpost || !nyBehandlingRequest || !oppgave || !sak || !gyldigBehandlingRequest(nyBehandlingRequest)) {
+    return null
+  }
+
+  const { spraak, mottattDato, persongalleri } = nyBehandlingRequest
+  if (!spraak || !mottattDato || !persongalleri) {
+    return null
   }
 
   return (
@@ -35,8 +40,8 @@ export default function OppsummeringOppgavebehandling() {
           </Tag>
         </div>
 
-        <Info label="Språk" tekst={nyBehandlingRequest.spraak} />
-        <Info label="Mottatt dato" tekst={formaterStringDato(nyBehandlingRequest.mottattDato!!)} />
+        <Info label="Språk" tekst={formaterSpraak(spraak)} />
+        <Info label="Mottatt dato" tekst={formaterStringDato(mottattDato)} />
 
         <Info label="Søker" tekst={persongalleri.soeker} />
         <Info label="Innsender" tekst={persongalleri.innsender || <i>Ikke oppgitt</i>} />
@@ -66,7 +71,12 @@ export default function OppsummeringOppgavebehandling() {
             Tilbake
           </Button>
 
-          <FullfoerOppgaveModal oppgave={oppgave} behandlingBehov={nyBehandlingRequest} />
+          <FullfoerOppgaveModal
+            oppgave={oppgave}
+            behandlingBehov={nyBehandlingRequest}
+            journalpost={journalpost}
+            sak={sak}
+          />
         </FlexRow>
         <FlexRow justify="center">
           <AvbrytBehandleJournalfoeringOppgave />

@@ -48,3 +48,9 @@ export enum BrevProsessType {
   REDIGERBAR = 'REDIGERBAR',
   MANUELL = 'MANUELL',
 }
+
+export enum Spraak {
+  NB = 'nb',
+  NN = 'nn',
+  EN = 'en',
+}

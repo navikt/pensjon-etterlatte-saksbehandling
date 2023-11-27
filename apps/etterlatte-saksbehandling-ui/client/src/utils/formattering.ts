@@ -3,6 +3,7 @@ import { IBehandlingsType } from '~shared/types/IDetaljertBehandling'
 import { SakType } from '~shared/types/sak'
 import { VedtakType } from '~components/vedtak/typer'
 import { Oppgavestatus } from '~shared/api/oppgaver'
+import { Spraak } from '~shared/types/Brev'
 
 export const capitalize = (s?: string) => {
   if (!s) return ''
@@ -82,6 +83,17 @@ export const formaterOppgaveStatus = (status: Oppgavestatus): string => {
 export const formaterFnr = (fnr: string) => {
   if (fnr.length === 11) return fnr.replace(/\d{6}(?=.)/g, '$& ')
   return fnr
+}
+
+export const formaterSpraak = (spraak: Spraak) => {
+  switch (spraak) {
+    case Spraak.NB:
+      return 'Bokmål'
+    case Spraak.NN:
+      return 'Nynorsk'
+    case Spraak.EN:
+      return 'Engelsk'
+  }
 }
 
 export enum DatoFormat {

@@ -2,18 +2,19 @@ import { useJournalfoeringOppgave } from '~components/person/journalfoeringsoppg
 import { SakType } from '~shared/types/sak'
 import PersongalleriBarnepensjon from '~components/person/journalfoeringsoppgave/nybehandling/PersongalleriBarnepensjon'
 import PersongalleriOmstillingsstoenad from '~components/person/journalfoeringsoppgave/nybehandling/PersongalleriOmstillingsstoenad'
-import { formaterSakstype } from '~utils/formattering'
+import { formaterSakstype, formaterSpraak } from '~utils/formattering'
 import { Button, Heading, Select, Tag } from '@navikt/ds-react'
 import AvbrytBehandleJournalfoeringOppgave from '~components/person/journalfoeringsoppgave/AvbrytBehandleJournalfoeringOppgave'
 import { Navigate, useNavigate } from 'react-router-dom'
 import { FormWrapper } from '~components/person/journalfoeringsoppgave/BehandleJournalfoeringOppgave'
 import styled from 'styled-components'
-import { gyldigPersongalleri } from '~components/person/journalfoeringsoppgave/nybehandling/validator'
+import { gyldigBehandlingRequest } from '~components/person/journalfoeringsoppgave/nybehandling/validator'
 import { FlexRow } from '~shared/styled'
 import { settNyBehandlingRequest } from '~store/reducers/JournalfoeringOppgaveReducer'
 import { DatoVelger } from '~shared/DatoVelger'
 import React from 'react'
 import { useAppDispatch } from '~store/Store'
+import { Spraak } from '~shared/types/Brev'
 
 export default function OpprettNyBehandling() {
   const { oppgave, nyBehandlingRequest } = useJournalfoeringOppgave()
@@ -41,12 +42,14 @@ export default function OpprettNyBehandling() {
       <Select
         label="Hva skal språket/målform være?"
         value={nyBehandlingRequest?.spraak || ''}
-        onChange={(e) => dispatch(settNyBehandlingRequest({ ...nyBehandlingRequest, spraak: e.target.value }))}
+        onChange={(e) =>
+          dispatch(settNyBehandlingRequest({ ...nyBehandlingRequest, spraak: e.target.value as Spraak }))
+        }
       >
         <option>Velg ...</option>
-        <option value="nb">Bokmål</option>
-        <option value="nn">Nynorsk</option>
-        <option value="en">Engelsk</option>
+        <option value={Spraak.NB}>{formaterSpraak(Spraak.NB)}</option>
+        <option value={Spraak.NN}>{formaterSpraak(Spraak.NN)}</option>
+        <option value={Spraak.EN}>{formaterSpraak(Spraak.EN)}</option>
       </Select>
 
       <DatoVelger
@@ -78,11 +81,7 @@ export default function OpprettNyBehandling() {
             Tilbake
           </Button>
 
-          <Button
-            variant="primary"
-            onClick={neste}
-            disabled={!gyldigPersongalleri(sakType, nyBehandlingRequest?.persongalleri)}
-          >
+          <Button variant="primary" onClick={neste} disabled={!gyldigBehandlingRequest(nyBehandlingRequest)}>
             Neste
           </Button>
         </FlexRow>

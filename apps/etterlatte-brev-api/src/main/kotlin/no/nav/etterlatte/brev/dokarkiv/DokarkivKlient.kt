@@ -72,7 +72,7 @@ data class OppdaterJournalpostTemaRequest(val tema: String)
 
 data class FerdigstillJournalpostRequest(val journalfoerendeEnhet: String)
 
-data class OppdaterJournalpostSakRequest(val bruker: Bruker, val sak: JournalpostSak)
+data class OppdaterJournalpostSakRequest(val bruker: Bruker, val tema: String, val sak: JournalpostSak)
 
 open class JournalpostException(msg: String, cause: Throwable) : Exception(msg, cause)
 

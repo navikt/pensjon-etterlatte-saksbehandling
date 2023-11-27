@@ -7,6 +7,7 @@ import { Journalpost } from '~shared/types/Journalpost'
 import { ferdigstillJournalpost } from '~shared/api/dokument'
 import { FlexRow } from '~shared/styled'
 import { ISak } from '~shared/types/sak'
+import { ApiErrorAlert } from '~ErrorBoundary'
 
 interface ModalProps {
   oppgave: OppgaveDTO
@@ -72,12 +73,12 @@ export default function FerdigstillJournalpostModal({ oppgave, journalpost, sak 
 
           {isFailure(ferdigstillOppgaveStatus) && (
             <Modal.Footer>
-              <Alert variant="error">Det oppsto en feil ved ferdigstilling av oppgave.</Alert>
+              <ApiErrorAlert>Det oppsto en feil ved ferdigstilling av oppgave</ApiErrorAlert>
             </Modal.Footer>
           )}
           {isFailure(ferdigstillJournalpostStatus) && (
             <Modal.Footer>
-              <Alert variant="error">Det oppsto en feil ved endring av tema.</Alert>
+              <ApiErrorAlert>Det oppsto en feil ved ferdigstilling av journalposten</ApiErrorAlert>
             </Modal.Footer>
           )}
         </Modal.Body>

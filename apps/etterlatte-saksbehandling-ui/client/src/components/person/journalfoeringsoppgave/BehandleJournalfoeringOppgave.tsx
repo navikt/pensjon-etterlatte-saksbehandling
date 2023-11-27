@@ -1,4 +1,4 @@
-import { isPendingOrInitial, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
+import { isPending, isPendingOrInitial, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
 import { useEffect } from 'react'
 import { Route, Routes, useParams } from 'react-router-dom'
 import NavigerTilbakeMeny from '~components/person/NavigerTilbakeMeny'
@@ -6,7 +6,7 @@ import { useJournalfoeringOppgave } from '~components/person/journalfoeringsoppg
 import VelgJournalpost from '~components/person/journalfoeringsoppgave/VelgJournalpost'
 import { Column, Container, GridContainer } from '~shared/styled'
 import styled from 'styled-components'
-import { settBruker, settNyBehandlingRequest, settOppgave } from '~store/reducers/JournalfoeringOppgaveReducer'
+import { settBruker, settNyBehandlingRequest, settOppgave, settSak } from '~store/reducers/JournalfoeringOppgaveReducer'
 import { hentOppgave } from '~shared/api/oppgaver'
 import { useAppDispatch } from '~store/Store'
 import StartOppgavebehandling from '~components/person/journalfoeringsoppgave/handling/StartOppgavebehandling'
@@ -15,12 +15,14 @@ import OppsummeringOppgavebehandling from '~components/person/journalfoeringsopp
 import Spinner from '~shared/Spinner'
 import EndreJournalpostTema from '~components/person/journalfoeringsoppgave/endretema/EndreJournalpostTema'
 import FerdigstillJournalpost from '~components/person/journalfoeringsoppgave/ferdigstilljournalpost/FerdigstillJournalpost'
+import { hentSakForPerson } from '~shared/api/sak'
 
 export default function BehandleJournalfoeringOppgave() {
   const { nyBehandlingRequest, oppgave } = useJournalfoeringOppgave()
   const dispatch = useAppDispatch()
 
   const [oppgaveStatus, apiHentOppgave] = useApiCall(hentOppgave)
+  const [sakStatus, apiHentSak] = useApiCall(hentSakForPerson)
 
   const { id: oppgaveId } = useParams()
 
@@ -36,12 +38,17 @@ export default function BehandleJournalfoeringOppgave() {
             persongalleri: { ...nyBehandlingRequest?.persongalleri, soeker: oppgave.fnr },
           })
         )
+        apiHentSak({ fnr: oppgave.fnr, type: oppgave.sakType }, (sak) => {
+          dispatch(settSak(sak))
+        })
       })
     }
   }, [oppgaveId])
 
   if (isPendingOrInitial(oppgaveStatus)) {
     return <Spinner visible label="Henter oppgavedetaljer..." />
+  } else if (isPending(sakStatus)) {
+    return <Spinner visible label="Henter sak..." />
   }
 
   return (

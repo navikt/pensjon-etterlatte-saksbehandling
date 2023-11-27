@@ -61,7 +61,7 @@ class PdlTjenesterKlientTest {
                         saktype = SakType.BARNEPENSJON,
                     ),
                 )
-            }
+            }!!
 
         assertNotNull(person)
         assertEquals(person.fornavn, "Rød")

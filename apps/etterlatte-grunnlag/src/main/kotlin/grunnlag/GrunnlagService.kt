@@ -18,6 +18,12 @@ import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsnummer
 import no.nav.etterlatte.libs.common.grunnlag.hentNavn
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Navn
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.AVDOED_PDL_V1
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.GJENLEVENDE_FORELDER_PDL_V1
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.INNSENDER_PDL_V1
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.INNSENDER_SOEKNAD_V1
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.SOEKER_PDL_V1
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.SOEKER_SOEKNAD_V1
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
@@ -61,6 +67,8 @@ interface GrunnlagService {
     fun hentOpplysningsgrunnlagForSak(sakId: Long): Grunnlag?
 
     fun hentOpplysningsgrunnlag(behandlingId: UUID): Grunnlag?
+
+    fun hentPersonopplysninger(behandlingId: UUID): PersonopplysningerResponse
 
     fun hentSakerOgRoller(fnr: Folkeregisteridentifikator): PersonMedSakerOgRoller
 
@@ -131,6 +139,30 @@ class RealGrunnlagService(
         val grunnlag = opplysningDao.hentAlleGrunnlagForBehandling(behandlingId)
 
         return OpplysningsgrunnlagMapper(grunnlag, persongalleri).hentGrunnlag()
+    }
+
+    override fun hentPersonopplysninger(behandlingId: UUID): PersonopplysningerResponse {
+        val grunnlag = opplysningDao.hentAlleGrunnlagForBehandling(behandlingId)
+
+        val innsender =
+            grunnlag.firstOrNull { it.opplysning.opplysningType == INNSENDER_PDL_V1 }
+                ?: grunnlag.first { it.opplysning.opplysningType == INNSENDER_SOEKNAD_V1 }
+
+        val soker =
+            grunnlag.firstOrNull { it.opplysning.opplysningType == SOEKER_PDL_V1 }
+                ?: grunnlag.first { it.opplysning.opplysningType == SOEKER_SOEKNAD_V1 }
+
+        val avdode = grunnlag.filter { it.opplysning.opplysningType == AVDOED_PDL_V1 }
+        val gjenlevende = grunnlag.filter { it.opplysning.opplysningType == GJENLEVENDE_FORELDER_PDL_V1 }
+
+        // Filtrere mot PERSONGALLERI?
+
+        return PersonopplysningerResponse(
+            innsender = innsender.opplysning.asPersonopplysning(),
+            soeker = soker.opplysning.asPersonopplysning(),
+            avdoede = avdode.map { it.opplysning.asPersonopplysning() },
+            gjenlevende = gjenlevende.map { it.opplysning.asPersonopplysning() },
+        )
     }
 
     override fun hentSakerOgRoller(fnr: Folkeregisteridentifikator): PersonMedSakerOgRoller {
@@ -405,6 +437,48 @@ private fun HistorikkForeldreansvar.tilGrunnlagsopplysning(fnr: Folkeregisteride
     )
 }
 
+private fun Grunnlagsopplysning<JsonNode>.asPersonopplysning(): Personopplysning {
+    return Personopplysning(
+        id = this.id,
+        kilde = this.kilde.tilGenerellKilde(),
+        opplysningType = this.opplysningType,
+        opplysning = objectMapper.treeToValue(opplysning, Person::class.java),
+    )
+}
+
+private fun Grunnlagsopplysning.Kilde.tilGenerellKilde() =
+    when (this) {
+        is Grunnlagsopplysning.Pdl ->
+            GenerellKilde(
+                type = this.type,
+                tidspunkt = this.tidspunktForInnhenting,
+                detalj = this.registersReferanse,
+            )
+
+        is Grunnlagsopplysning.Persondata ->
+            GenerellKilde(
+                type = this.type,
+                tidspunkt = this.tidspunktForInnhenting,
+                detalj = this.registersReferanse,
+            )
+
+        is Grunnlagsopplysning.Pesys -> GenerellKilde(type = this.type, tidspunkt = this.tidspunkt)
+        is Grunnlagsopplysning.Privatperson ->
+            GenerellKilde(
+                type = this.type,
+                tidspunkt = this.mottatDato,
+                detalj = this.fnr,
+            )
+
+        is Grunnlagsopplysning.RegelKilde -> GenerellKilde(type = this.type, tidspunkt = this.ts)
+        is Grunnlagsopplysning.Saksbehandler ->
+            GenerellKilde(
+                type = this.type,
+                tidspunkt = this.tidspunkt,
+                detalj = this.ident,
+            )
+    }
+
 data class GrunnlagsopplysningerPersonPdl(
     val person: Person,
     val personDto: PersonDTO,
@@ -428,3 +502,23 @@ class LaastGrunnlagKanIkkeEndres(val behandlingId: UUID) :
             låst til en versjon av grunnlag (behandlingId=$behandlingId)
             """,
     )
+
+data class PersonopplysningerResponse(
+    val innsender: Personopplysning,
+    val soeker: Personopplysning,
+    val avdoede: List<Personopplysning>,
+    val gjenlevende: List<Personopplysning>,
+)
+
+data class Personopplysning(
+    val opplysningType: Opplysningstype,
+    val id: UUID,
+    val kilde: GenerellKilde,
+    val opplysning: Person,
+)
+
+data class GenerellKilde(
+    val type: String,
+    val tidspunkt: Tidspunkt,
+    val detalj: String? = null,
+)

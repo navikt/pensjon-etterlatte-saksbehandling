@@ -76,6 +76,9 @@ spec:
   accessPolicy:
     inbound:
       rules:
+        - application: azure-token-generator
+          namespace: aura
+          cluster: dev-gcp
         - application: etterlatte-vilkaarsvurdering
         - application: etterlatte-trygdetid
         - application: etterlatte-brev-api

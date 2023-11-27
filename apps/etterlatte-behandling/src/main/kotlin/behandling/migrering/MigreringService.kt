@@ -17,7 +17,6 @@ import no.nav.etterlatte.libs.common.behandling.JaNeiMedBegrunnelse
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
-import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.retry
 import no.nav.etterlatte.libs.common.sak.Sak
@@ -89,14 +88,14 @@ class MigreringService(
                     )
 
                     request.utenlandstilknytningType?.let { utlandstilknytning ->
-                        sakService.oppdaterUtenlandstilknytning(
-                            sakId = behandling.sak.id,
-                            utenlandstilknytning =
-                                Utlandstilknytning(
-                                    type = utlandstilknytning,
-                                    kilde = Grunnlagsopplysning.Pesys.create(),
-                                    begrunnelse = "Automatisk migrert fra Pesys",
-                                ),
+                        behandlingService.oppdaterUtlandstilknytning(
+                            behandlingId = behandling.id,
+                            utlandstilknytning =
+                            Utlandstilknytning(
+                                type = utlandstilknytning,
+                                kilde = Grunnlagsopplysning.Pesys.create(),
+                                begrunnelse = "Automatisk migrert fra Pesys",
+                            ),
                         )
                     }
 

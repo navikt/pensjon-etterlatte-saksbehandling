@@ -55,21 +55,6 @@ class SakDao(private val connection: () -> Connection) {
         }
     }
 
-    fun oppdaterUtenlandstilknytning(
-        sakId: Long,
-        utenlandstilknytning: Utlandstilknytning,
-    ) {
-        with(connection()) {
-            val statement =
-                prepareStatement(
-                    "UPDATE sak set utenlandstilknytning = ? where id = ?",
-                )
-            statement.setJsonb(1, utenlandstilknytning)
-            statement.setLong(2, sakId)
-            statement.executeUpdate()
-        }
-    }
-
     fun oppdaterFlyktning(
         sakId: Long,
         flyktning: Flyktning,

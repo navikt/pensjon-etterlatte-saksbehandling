@@ -1,11 +1,9 @@
 package no.nav.etterlatte.sak
 
-import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
-import io.ktor.server.response.respondText
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
@@ -24,9 +22,7 @@ import no.nav.etterlatte.libs.common.behandling.ForenkletBehandling
 import no.nav.etterlatte.libs.common.behandling.ForenkletBehandlingListeWrapper
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.SisteIverksatteBehandling
-import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
-import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.hentNavidentFraToken
 import no.nav.etterlatte.libs.common.kunSaksbehandler
 import no.nav.etterlatte.libs.common.kunSystembruker
@@ -34,7 +30,6 @@ import no.nav.etterlatte.libs.common.oppgave.OppgaveListe
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.Saker
 import no.nav.etterlatte.libs.common.sakId
-import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.tilgangsstyring.withFoedselsnummerAndGradering
@@ -153,34 +148,6 @@ internal fun Route.sakWebRoutes(
                         call.respond(sakMedEnhet)
                     } catch (e: TilstandException.UgyldigTilstand) {
                         call.respond(HttpStatusCode.BadRequest, "Kan ikke endre enhet på sak og oppgaver")
-                    }
-                }
-            }
-
-            post("/utenlandstilknytning") {
-                hentNavidentFraToken { navIdent ->
-                    logger.debug("Prøver å fastsette utenlandstilknytning")
-                    val body = call.receive<UtlandstilknytningRequest>()
-
-                    try {
-                        val utenlandstilknytning =
-                            Utlandstilknytning(
-                                type = body.utlandstilknytningType,
-                                kilde = Grunnlagsopplysning.Saksbehandler.create(navIdent),
-                                begrunnelse = body.begrunnelse,
-                            )
-
-                        inTransaction {
-                            sakService.oppdaterUtenlandstilknytning(sakId, utenlandstilknytning)
-                        }
-
-                        call.respondText(
-                            contentType = ContentType.Application.Json,
-                            status = HttpStatusCode.OK,
-                            text = utenlandstilknytning.toJson(),
-                        )
-                    } catch (e: TilstandException.UgyldigTilstand) {
-                        call.respond(HttpStatusCode.BadRequest, "Kan ikke endre feltet")
                     }
                 }
             }

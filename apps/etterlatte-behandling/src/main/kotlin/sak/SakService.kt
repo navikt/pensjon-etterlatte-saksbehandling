@@ -13,7 +13,6 @@ import no.nav.etterlatte.common.klienter.SkjermingKlient
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.libs.common.behandling.Flyktning
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.maskerFnr
@@ -22,11 +21,6 @@ import no.nav.etterlatte.tilgangsstyring.filterForEnheter
 import org.slf4j.LoggerFactory
 
 interface SakService {
-    fun oppdaterUtenlandstilknytning(
-        sakId: Long,
-        utenlandstilknytning: Utlandstilknytning,
-    )
-
     fun hentSaker(): List<Sak>
 
     fun finnSaker(person: String): List<Sak>
@@ -84,13 +78,6 @@ class SakServiceImpl(
     private val skjermingKlient: SkjermingKlient,
 ) : SakService {
     private val logger = LoggerFactory.getLogger(this::class.java)
-
-    override fun oppdaterUtenlandstilknytning(
-        sakId: Long,
-        utenlandstilknytning: Utlandstilknytning,
-    ) {
-        dao.oppdaterUtenlandstilknytning(sakId, utenlandstilknytning)
-    }
 
     override fun oppdaterFlyktning(
         sakId: Long,

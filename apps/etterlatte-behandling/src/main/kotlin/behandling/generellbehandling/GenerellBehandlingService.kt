@@ -208,7 +208,6 @@ class GenerellBehandlingService(
         }
         val saksbehandlerOppgaver =
             ferdigstilteOppgaver.filter { o -> o.type == OppgaveType.KRAVPAKKE_UTLAND || o.type == OppgaveType.UNDERKJENT }
-                .sortedByDescending { o -> o.opprettet }
 
         if (saksbehandlerOppgaver.isEmpty()) {
             throw UgyldigAttesteringsForespoersel(

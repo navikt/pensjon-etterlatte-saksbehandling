@@ -25,7 +25,13 @@ internal class Verifiserer(
 
     fun verifiserRequest(request: MigreringRequest): MigreringRequest {
         val patchedRequest = patchGjenlevendeHvisIkkeOppgitt(request)
-        val feil = sjekkAtPersonerFinsIPDL(patchedRequest)
+        val feil = mutableListOf<Exception>()
+        patchedRequest.onFailure { feilen ->
+            feil.add(PDLException(feilen).also { it.addSuppressed(feilen) })
+        }
+        patchedRequest.onSuccess {
+            feil.addAll(sjekkAtPersonerFinsIPDL(it))
+        }
         if (feil.isNotEmpty()) {
             logger.warn(
                 "Sak ${request.pesysId} har ufullstendige data i PDL, kan ikke migrere. Se sikkerlogg for detaljer",
@@ -34,17 +40,17 @@ internal class Verifiserer(
                 request.toJson(),
                 feilendeSteg = Migreringshendelser.VERIFISER,
                 feil = feil.map { it.message }.toJson(),
-                pesysId = patchedRequest.pesysId,
+                pesysId = request.pesysId,
             )
-            repository.oppdaterStatus(patchedRequest.pesysId, Migreringsstatus.VERIFISERING_FEILA)
+            repository.oppdaterStatus(request.pesysId, Migreringsstatus.VERIFISERING_FEILA)
             throw samleExceptions(feil)
         }
-        return patchedRequest
+        return patchedRequest.getOrThrow()
     }
 
-    private fun patchGjenlevendeHvisIkkeOppgitt(request: MigreringRequest): MigreringRequest {
+    private fun patchGjenlevendeHvisIkkeOppgitt(request: MigreringRequest): Result<MigreringRequest> {
         if (request.gjenlevendeForelder != null) {
-            return request
+            return Result.success(request)
         }
         val persongalleri = hentPersongalleri(request.soeker)
         if (persongalleri == null) {
@@ -52,7 +58,7 @@ internal class Verifiserer(
                 "Kunne ikke hente persongalleriet fra PDL for migrering av pesysid=${request.pesysId}, " +
                     "sannsynligvis på grunn av personer som mangler identer. Gjør ingen patching av persongalleriet",
             )
-            return request
+            return Result.success(request)
         }
         val avdoede = request.avdoedForelder.map { it.ident.value }.toSet()
         val avdodeIPDL = persongalleri.avdoed.toSet()
@@ -62,13 +68,13 @@ internal class Verifiserer(
                     "i PDL.",
             )
             sikkerlogg.error("Fikk $avdodeIPDL fra PDL, forventa $avdoede. Hele persongalleriet: $persongalleri")
-            throw IllegalStateException("Migreringsrequest har forskjellig sett med avdøde enn det vi har i følge PDL")
+            return Result.failure(IllegalStateException("Migreringsrequest har forskjellig sett med avdøde enn det vi har i følge PDL"))
         }
         if (persongalleri.gjenlevende.size == 1) {
-            return request.copy(gjenlevendeForelder = Folkeregisteridentifikator.of(persongalleri.gjenlevende.single()))
+            return Result.success(request.copy(gjenlevendeForelder = Folkeregisteridentifikator.of(persongalleri.gjenlevende.single())))
         }
         logger.warn("Fant ${persongalleri.gjenlevende.size} gjenlevende i PDL, patcher ikke request")
-        return request
+        return Result.success(request)
     }
 
     private fun hentPersongalleri(soeker: Folkeregisteridentifikator): Persongalleri? {
@@ -90,7 +96,7 @@ internal class Verifiserer(
             return listOf(EnhetUtland(request.enhet.nr))
         }
         if (request.enhet.nr == "2103") {
-            return listOf(Fortrolig)
+            return listOf(StrengtFortrolig)
         }
         request.gjenlevendeForelder!!.let { personer.add(Pair(PersonRolle.GJENLEVENDE, it)) }
 
@@ -155,7 +161,12 @@ data class EnhetUtland(val enhet: String) : Verifiseringsfeil() {
         get() = "Vi har ikke adresse for enhet utland $enhet. Må følges opp snart"
 }
 
-object Fortrolig : Verifiseringsfeil() {
+object StrengtFortrolig : Verifiseringsfeil() {
     override val message: String
-        get() = "Skal ikke migrere fortrolig eller strengt fortrolig sak"
+        get() = "Skal ikke migrere strengt fortrolig sak"
+}
+
+data class PDLException(val kilde: Throwable) : Verifiseringsfeil() {
+    override val message: String?
+        get() = kilde.message
 }

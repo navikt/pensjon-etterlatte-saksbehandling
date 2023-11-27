@@ -60,12 +60,12 @@ export const GyldigFramsattBarnepensjon = ({
             </Beskrivelse>
             <InfobokserWrapper>
               <Innsender
-                persongalleri={personGalleriSoeknad.data}
-                gjenlevende={behandling.familieforhold?.gjenlevende}
+                persongalleriGrunnlag={personGalleriSoeknad.data}
+                gjenlevendeGrunnlag={behandling.familieforhold?.gjenlevende}
               />
               <Foreldreansvar
-                persongalleri={personGalleriSoeknad.data}
-                gjenlevende={behandling.familieforhold?.gjenlevende}
+                persongalleriGrunnlag={personGalleriSoeknad.data}
+                gjenlevendeGrunnlag={behandling.familieforhold?.gjenlevende}
               />
               <Verger behandlingId={behandling.id} sakId={behandling.sakId} />
             </InfobokserWrapper>

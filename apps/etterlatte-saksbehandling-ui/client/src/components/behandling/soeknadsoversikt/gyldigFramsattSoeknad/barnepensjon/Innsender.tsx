@@ -5,15 +5,14 @@ import { Grunnlagsopplysning } from '~shared/types/grunnlag'
 import { KildePdl } from '~shared/types/kilde'
 
 interface Props {
-  persongalleri: Grunnlagsopplysning<Persongalleri, KildePdl>
-  gjenlevende: Grunnlagsopplysning<IPdlPerson, KildePdl> | undefined
+  persongalleriGrunnlag: Grunnlagsopplysning<Persongalleri, KildePdl>
+  gjenlevendeGrunnlag: Grunnlagsopplysning<IPdlPerson, KildePdl> | undefined
 }
 
-export const Innsender = ({ persongalleri, gjenlevende }: Props) => {
-  const oppfylt = persongalleri.opplysning.innsender == gjenlevende?.opplysning.foedselsnummer
-  const navn = oppfylt
-    ? [gjenlevende?.opplysning.fornavn, gjenlevende?.opplysning.mellomnavn, gjenlevende?.opplysning.etternavn].join(' ')
-    : 'Ukjent'
+export const Innsender = ({ persongalleriGrunnlag, gjenlevendeGrunnlag }: Props) => {
+  const gjenlevende = gjenlevendeGrunnlag?.opplysning
+  const oppfylt = persongalleriGrunnlag.opplysning.innsender == gjenlevende?.foedselsnummer
+  const navn = oppfylt ? [gjenlevende?.fornavn, gjenlevende?.mellomnavn, gjenlevende?.etternavn].join(' ') : 'Ukjent'
   const label = 'Innsender'
   const tekst = settTekst(oppfylt)
 

@@ -5,6 +5,7 @@ import { ErrorMessage } from '@navikt/ds-react'
 import { Person } from '~components/behandling/soeknadsoversikt/familieforhold/barnepensjon/Person'
 import { Soeskenliste } from '~components/behandling/soeknadsoversikt/familieforhold/barnepensjon/Soeskenliste'
 import { Personopplysninger } from '~shared/types/grunnlag'
+import { Familieforhold } from '~shared/types/Person'
 
 export interface PropsFamilieforhold {
   behandling: IDetaljertBehandling
@@ -22,6 +23,7 @@ export const FamilieforholdBarnepensjon = ({ behandling, personopplysninger }: P
   const soeker = personopplysninger.soeker
   const alleGjenlevende = personopplysninger.gjenlevende
   const alleAvdoede = personopplysninger.avdoede
+  const familieforhold: Familieforhold = { avdoede: alleAvdoede, gjenlevende: alleGjenlevende }
 
   return (
     <>
@@ -35,7 +37,7 @@ export const FamilieforholdBarnepensjon = ({ behandling, personopplysninger }: P
             <Person person={gjenlevende.opplysning} kilde={gjenlevende.kilde} gjenlevende key={gjenlevende.id} />
           ))}
         </FamilieforholdVoksne>
-        <Soeskenliste familieforhold={behandling.familieforhold!!} soekerFnr={soeker.opplysning.foedselsnummer} />
+        <Soeskenliste familieforhold={familieforhold} soekerFnr={soeker.opplysning.foedselsnummer} />
       </FamilieforholdWrapper>
       <Border />
     </>

@@ -7,6 +7,7 @@ import { BarneListe } from '~components/behandling/soeknadsoversikt/familieforho
 import { Sivilstand } from '~components/behandling/soeknadsoversikt/familieforhold/omstillingsstoenad/Sivilstand'
 import { ErrorMessage } from '@navikt/ds-react'
 import { Personopplysninger } from '~shared/types/grunnlag'
+import { Familieforhold } from '~shared/types/Person'
 
 export interface PropsFamilieforhold {
   behandling: IDetaljertBehandling
@@ -25,6 +26,7 @@ export const FamilieforholdOmstillingsstoenad = ({ behandling, personopplysninge
   const soeker = personopplysninger.soeker
   const gjenlevende = personopplysninger.gjenlevende
   const avdoede = personopplysninger.avdoede
+  const familieforhold: Familieforhold = { avdoede: avdoede, gjenlevende: gjenlevende }
 
   return (
     <>
@@ -37,8 +39,8 @@ export const FamilieforholdOmstillingsstoenad = ({ behandling, personopplysninge
               ))}
               <Person person={soeker.opplysning} kilde={soeker.kilde} />
             </FamilieforholdVoksne>
-            <Sivilstand familieforhold={behandling.familieforhold!!} avdoed={avdoede[0].opplysning} />
-            <BarneListe familieforhold={behandling.familieforhold!!} />
+            <Sivilstand familieforhold={familieforhold} avdoed={avdoede[0].opplysning} />
+            <BarneListe familieforhold={familieforhold} />
           </>
         ) : (
           gjenlevende.map((person) => <Person person={person.opplysning} kilde={person.kilde} key={person.id} />)

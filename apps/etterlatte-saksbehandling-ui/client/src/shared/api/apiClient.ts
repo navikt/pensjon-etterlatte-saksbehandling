@@ -72,7 +72,7 @@ async function apiFetcher<T>(props: Options): Promise<ApiResponse<T>> {
         logger.generalInfo(JSON.stringify(notImplmented))
         return {
           ...error,
-          ok: true,
+          ok: false,
           code: 'IKKE_IMPLEMENTERT',
           detail: 'Funksjonaliteteten er ikke tilgjengelig enda. Sjekk feature toggles.',
         }

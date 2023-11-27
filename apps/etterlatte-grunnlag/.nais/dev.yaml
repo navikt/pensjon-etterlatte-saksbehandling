@@ -76,9 +76,9 @@ spec:
   accessPolicy:
     inbound:
       rules:
-        - application: ida
-          namespace: traktor
-          cluster: prod-fss
+        - application: azure-token-generator
+          namespace: aura
+          cluster: dev-gcp
         - application: etterlatte-vilkaarsvurdering
         - application: etterlatte-trygdetid
         - application: etterlatte-brev-api

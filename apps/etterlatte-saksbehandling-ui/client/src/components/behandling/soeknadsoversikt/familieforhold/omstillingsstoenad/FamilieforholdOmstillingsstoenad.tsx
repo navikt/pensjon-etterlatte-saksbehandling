@@ -39,7 +39,9 @@ export const FamilieforholdOmstillingsstoenad = ({ behandling, personopplysninge
               ))}
               <Person person={soeker.opplysning} kilde={soeker.kilde} />
             </FamilieforholdVoksne>
-            <Sivilstand familieforhold={familieforhold} avdoed={avdoede[0].opplysning} />
+            {avdoede.map((avd) => (
+              <Sivilstand familieforhold={familieforhold} avdoed={avd.opplysning} key={avd.id} />
+            ))}
             <BarneListe familieforhold={familieforhold} />
           </>
         ) : (

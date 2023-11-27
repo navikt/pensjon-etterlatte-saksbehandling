@@ -66,7 +66,10 @@ interface GrunnlagService {
 
     fun hentOpplysningsgrunnlag(behandlingId: UUID): Grunnlag?
 
-    fun hentPersonopplysninger(behandlingId: UUID): PersonopplysningerResponse
+    fun hentPersonopplysninger(
+        behandlingId: UUID,
+        sakstype: SakType,
+    ): PersonopplysningerResponse
 
     fun hentSakerOgRoller(fnr: Folkeregisteridentifikator): PersonMedSakerOgRoller
 
@@ -139,7 +142,10 @@ class RealGrunnlagService(
         return OpplysningsgrunnlagMapper(grunnlag, persongalleri).hentGrunnlag()
     }
 
-    override fun hentPersonopplysninger(behandlingId: UUID): PersonopplysningerResponse {
+    override fun hentPersonopplysninger(
+        behandlingId: UUID,
+        sakstype: SakType,
+    ): PersonopplysningerResponse {
         val grunnlag = opplysningDao.hentAlleGrunnlagForBehandling(behandlingId)
 
         val innsender =
@@ -155,9 +161,13 @@ class RealGrunnlagService(
                 .sortedByDescending { it.hendelseNummer }
                 .distinctBy { it.opplysning.fnr }
         val gjenlevende =
-            grunnlag.filter { it.opplysning.opplysningType == GJENLEVENDE_FORELDER_PDL_V1 }
-                .sortedByDescending { it.hendelseNummer }
-                .distinctBy { it.opplysning.fnr }
+            if (sakstype == SakType.OMSTILLINGSSTOENAD) {
+                listOf(soker)
+            } else {
+                grunnlag.filter { it.opplysning.opplysningType == GJENLEVENDE_FORELDER_PDL_V1 }
+                    .sortedByDescending { it.hendelseNummer }
+                    .distinctBy { it.opplysning.fnr }
+            }
 
         // Filtrere mot PERSONGALLERI?
 
@@ -165,7 +175,7 @@ class RealGrunnlagService(
             innsender = innsender?.opplysning?.asPersonopplysning(),
             soeker = soker?.opplysning?.asPersonopplysning(),
             avdoede = avdode.map { it.opplysning.asPersonopplysning() },
-            gjenlevende = gjenlevende.map { it.opplysning.asPersonopplysning() },
+            gjenlevende = gjenlevende.mapNotNull { it?.opplysning?.asPersonopplysning() },
         )
     }
 

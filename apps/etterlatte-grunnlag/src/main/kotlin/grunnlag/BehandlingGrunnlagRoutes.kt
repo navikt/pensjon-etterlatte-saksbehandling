@@ -10,6 +10,7 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.grunnlag.klienter.BehandlingKlient
 import no.nav.etterlatte.libs.common.BEHANDLINGID_CALL_PARAMETER
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.grunnlag.NyeSaksopplysninger
 import no.nav.etterlatte.libs.common.grunnlag.OppdaterGrunnlagRequest
 import no.nav.etterlatte.libs.common.grunnlag.Opplysningsbehov
@@ -94,7 +95,8 @@ fun Route.behandlingGrunnlagRoute(
 
         get("personopplysninger") {
             withBehandlingId(behandlingKlient) { behandlingId ->
-                val grunnlagsopplysninger = grunnlagService.hentPersonopplysninger(behandlingId)
+                val sakstype = SakType.valueOf(call.parameters["sakType"].toString())
+                val grunnlagsopplysninger = grunnlagService.hentPersonopplysninger(behandlingId, sakstype)
                 call.respond(grunnlagsopplysninger)
             }
         }

@@ -18,7 +18,9 @@ export const Familieforhold = ({ behandling }: PropsFamilieforhold) => {
   const [personopplysninger, setPersonopplysninger] = useState<Personopplysninger | null>(null)
 
   useEffect(() => {
-    fetchPersonopplysninger(behandling.id, (result) => setPersonopplysninger(result))
+    fetchPersonopplysninger({ behandlingId: behandling.id, sakType: behandling.sakType }, (result) =>
+      setPersonopplysninger(result)
+    )
   }, [])
 
   return (

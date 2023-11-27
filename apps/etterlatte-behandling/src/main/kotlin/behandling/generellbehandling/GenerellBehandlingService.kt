@@ -162,11 +162,12 @@ class GenerellBehandlingService(
             "Behandlingen har ikke fått satt en saksbehandler i fattingen"
         }
 
-        sjekkAtBehandlendeSaksbehandlerIkkeAttesterer(generellbehandlingId, saksbehandler)
+        harRiktigTilstandIOppgave(generellbehandlingId, saksbehandler)
+        verifiserRiktigSaksbehandler(saksbehandler, hentetBehandling!!)
 
         oppgaveService.ferdigStillOppgaveUnderBehandling(generellbehandlingId.toString(), saksbehandler)
         oppdaterBehandling(
-            hentetBehandling!!.copy(
+            hentetBehandling.copy(
                 status = GenerellBehandling.Status.ATTESTERT,
                 attestant = Attestant(saksbehandler.ident, Tidspunkt.now()),
             ),
@@ -174,7 +175,19 @@ class GenerellBehandlingService(
         opprettHendelse(GenerellBehandlingHendelseType.ATTESTERT, hentetBehandling, saksbehandler)
     }
 
-    fun sjekkAtBehandlendeSaksbehandlerIkkeAttesterer(
+    fun verifiserRiktigSaksbehandler(
+        saksbehandler: Saksbehandler,
+        hentetBehandling: GenerellBehandling,
+    ) {
+        if (saksbehandler.ident == hentetBehandling.behandler?.saksbehandler) {
+            throw UgyldigAttesteringsForespoersel(
+                "Samme saksbehandler kan ikke attestere og behandle behandlingen",
+                "ATTESTERING_SAMME_SAKSBEHANDLER",
+            )
+        }
+    }
+
+    fun harRiktigTilstandIOppgave(
         generellbehandlingId: UUID,
         saksbehandler: Saksbehandler,
     ) {
@@ -197,10 +210,10 @@ class GenerellBehandlingService(
             ferdigstilteOppgaver.filter { o -> o.type == OppgaveType.KRAVPAKKE_UTLAND || o.type == OppgaveType.UNDERKJENT }
                 .sortedByDescending { o -> o.opprettet }
 
-        if (oppgaverForReferanse.isEmpty()) {
+        if (saksbehandlerOppgaver.isEmpty()) {
             throw UgyldigAttesteringsForespoersel(
                 "Fant ingen oppgaver for referanse $generellbehandlingId " +
-                    "med riktig type",
+                    "med riktig type: [${OppgaveType.KRAVPAKKE_UTLAND} ${OppgaveType.UNDERKJENT}]",
                 "ATTESTERING_INGEN_FERDIGSTILTE_OPPGAVER_AV_RIKTIG_TYPE",
             )
         }

@@ -850,8 +850,6 @@ internal class VedtaksbrevServiceTest {
     private fun opprettAvsender() =
         Avsender(
             kontor = "Nav Porsgrunn",
-            "Etterstad 1",
-            "0556",
             Telefonnummer("55553333"),
             "Sak Saksbehandler",
             "Per Attestant",

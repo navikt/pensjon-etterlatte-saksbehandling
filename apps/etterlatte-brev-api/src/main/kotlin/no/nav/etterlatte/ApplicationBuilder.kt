@@ -213,6 +213,7 @@ class ApplicationBuilder {
             Thread.sleep(60_000)
             listOf(298L, 2897L, 2421L, 3260L).forEach {
                 rapidsConnection.publish(message = lagMelding(brevId = it), key = UUID.randomUUID().toString())
+                Thread.sleep(3000)
             }
         }
     }

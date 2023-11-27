@@ -89,6 +89,9 @@ internal class Verifiserer(
         if (request.enhet.nr in listOf("0001", "4862")) {
             return listOf(EnhetUtland(request.enhet.nr))
         }
+        if (request.enhet.nr == "2103") {
+            return listOf(Fortrolig)
+        }
         request.gjenlevendeForelder!!.let { personer.add(Pair(PersonRolle.GJENLEVENDE, it)) }
 
         return personer
@@ -150,4 +153,9 @@ object BarnetHarVerge : Verifiseringsfeil() {
 data class EnhetUtland(val enhet: String) : Verifiseringsfeil() {
     override val message: String
         get() = "Vi har ikke adresse for enhet utland $enhet. Må følges opp snart"
+}
+
+object Fortrolig : Verifiseringsfeil() {
+    override val message: String
+        get() = "Skal ikke migrere fortrolig eller strengt fortrolig sak"
 }

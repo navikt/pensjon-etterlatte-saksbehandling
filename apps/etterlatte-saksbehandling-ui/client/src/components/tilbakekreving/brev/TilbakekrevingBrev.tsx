@@ -49,7 +49,6 @@ export function TilbakekrevingBrev({ tilbakekreving }: { tilbakekreving: Tilbake
     }
     getVergeadresse(tilbakekreving.id)
   }, [tilbakekreving, vedtak])
-  useEffect(() => {}, [tilbakekreving])
 
   if (isPendingOrInitial(hentBrevStatus)) {
     return <Spinner visible label="Henter brev ..." />

@@ -34,9 +34,9 @@ internal class Verifiserer(
                 request.toJson(),
                 feilendeSteg = Migreringshendelser.VERIFISER,
                 feil = feil.map { it.message }.toJson(),
-                pesysId = patchedRequest.pesysId,
+                pesysId = request.pesysId,
             )
-            repository.oppdaterStatus(patchedRequest.pesysId, Migreringsstatus.VERIFISERING_FEILA)
+            repository.oppdaterStatus(request.pesysId, Migreringsstatus.VERIFISERING_FEILA)
             throw samleExceptions(feil)
         }
         return patchedRequest

@@ -67,22 +67,11 @@ class AdresseService(
         saksbehandlerNavn: String?,
         attestantNavn: String?,
     ): Avsender {
-        val postadresse = enhet.kontaktinfo?.postadresse
-
         val kontor = enhet.navn ?: "NAV"
-        val adresse =
-            when (postadresse?.type) {
-                "stedsadresse" -> postadresse.let { "${it.gatenavn} ${it.husnummer}${it.husbokstav ?: ""}" }
-                "postboksadresse" -> "Postboks ${postadresse.postboksnummer} ${postadresse.postboksanlegg ?: ""}".trim()
-                else -> throw Exception("Ukjent type postadresse ${postadresse?.type}")
-            }
-        val postnr = postadresse.let { "${it.postnummer} ${it.poststed}" }
         val telefon = enhet.kontaktinfo?.telefonnummer ?: ""
 
         return Avsender(
             kontor = kontor,
-            adresse = adresse,
-            postnummer = postnr,
             telefonnummer = Telefonnummer(telefon),
             saksbehandler = saksbehandlerNavn,
             attestant = attestantNavn,

@@ -1,7 +1,6 @@
 package no.nav.etterlatte.behandling.generellbehandling
 
 import io.ktor.http.HttpStatusCode
-import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.call
 import io.ktor.server.application.log
 import io.ktor.server.request.receive
@@ -11,7 +10,6 @@ import io.ktor.server.routing.application
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.put
-import io.ktor.util.pipeline.PipelineContext
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.inTransaction
@@ -19,6 +17,7 @@ import no.nav.etterlatte.libs.common.GENERELLBEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.generellBehandlingId
 import no.nav.etterlatte.libs.common.generellbehandling.GenerellBehandling
+import no.nav.etterlatte.libs.common.hvisEnabled
 import no.nav.etterlatte.libs.common.kunSaksbehandler
 import no.nav.etterlatte.libs.common.sakId
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
@@ -36,20 +35,10 @@ internal fun Route.generellbehandlingRoutes(
     sakService: SakService,
     featureToggleService: FeatureToggleService,
 ) {
-    suspend fun PipelineContext<Unit, ApplicationCall>.hvisEnabled(
-        toggle: FeatureToggle,
-        block: suspend PipelineContext<Unit, ApplicationCall>.() -> Unit,
-    ) {
-        if (!featureToggleService.isEnabled(toggle, false)) {
-            call.respond(HttpStatusCode.NotFound)
-        } else {
-            block()
-        }
-    }
     val logger = application.log
 
     post("/api/generellbehandling/{$SAKID_CALL_PARAMETER}") {
-        hvisEnabled(GenerellBehandlingToggle.KanBrukeGenerellBehandlingToggle) {
+        hvisEnabled(featureToggleService, GenerellBehandlingToggle.KanBrukeGenerellBehandlingToggle) {
             kunSaksbehandler { saksbehandler ->
                 val request = call.receive<OpprettGenerellBehandlingRequest>()
                 val finnSak = inTransaction { sakService.finnSak(sakId) }
@@ -71,7 +60,7 @@ internal fun Route.generellbehandlingRoutes(
     }
 
     put("/api/generellbehandling/sendtilattestering/{$SAKID_CALL_PARAMETER}") {
-        hvisEnabled(GenerellBehandlingToggle.KanBrukeGenerellBehandlingToggle) {
+        hvisEnabled(featureToggleService, GenerellBehandlingToggle.KanBrukeGenerellBehandlingToggle) {
             kunSaksbehandler { saksbehandler ->
                 val request = call.receive<GenerellBehandling>()
                 inTransaction {
@@ -86,7 +75,7 @@ internal fun Route.generellbehandlingRoutes(
     }
 
     post("/api/generellbehandling/attester/{$SAKID_CALL_PARAMETER}/{$GENERELLBEHANDLINGID_CALL_PARAMETER}") {
-        hvisEnabled(GenerellBehandlingToggle.KanBrukeGenerellBehandlingToggle) {
+        hvisEnabled(featureToggleService, GenerellBehandlingToggle.KanBrukeGenerellBehandlingToggle) {
             kunSaksbehandler { saksbehandler ->
                 inTransaction {
                     generellBehandlingService.attester(generellBehandlingId, saksbehandler)
@@ -98,7 +87,7 @@ internal fun Route.generellbehandlingRoutes(
     }
 
     post("/api/generellbehandling/underkjenn/{$SAKID_CALL_PARAMETER}/{$GENERELLBEHANDLINGID_CALL_PARAMETER}") {
-        hvisEnabled(GenerellBehandlingToggle.KanBrukeGenerellBehandlingToggle) {
+        hvisEnabled(featureToggleService, GenerellBehandlingToggle.KanBrukeGenerellBehandlingToggle) {
             kunSaksbehandler { saksbehandler ->
                 val kommentar = call.receive<Kommentar>()
                 inTransaction {
@@ -111,7 +100,7 @@ internal fun Route.generellbehandlingRoutes(
     }
 
     put("/api/generellbehandling/oppdater/{$SAKID_CALL_PARAMETER}") {
-        hvisEnabled(GenerellBehandlingToggle.KanBrukeGenerellBehandlingToggle) {
+        hvisEnabled(featureToggleService, GenerellBehandlingToggle.KanBrukeGenerellBehandlingToggle) {
             kunSaksbehandler {
                 val request = call.receive<GenerellBehandling>()
                 inTransaction {
@@ -128,7 +117,7 @@ internal fun Route.generellbehandlingRoutes(
     }
 
     get("/api/generellbehandling/hent/{$GENERELLBEHANDLINGID_CALL_PARAMETER}") {
-        hvisEnabled(GenerellBehandlingToggle.KanBrukeGenerellBehandlingToggle) {
+        hvisEnabled(featureToggleService, GenerellBehandlingToggle.KanBrukeGenerellBehandlingToggle) {
             kunSaksbehandler {
                 val generellBehandlingId = generellBehandlingId
                 val hentetBehandling = inTransaction { generellBehandlingService.hentBehandlingMedId(generellBehandlingId) }
@@ -138,7 +127,7 @@ internal fun Route.generellbehandlingRoutes(
     }
 
     get("/api/generellbehandling/hentforsak/{$SAKID_CALL_PARAMETER}") {
-        hvisEnabled(GenerellBehandlingToggle.KanBrukeGenerellBehandlingToggle) {
+        hvisEnabled(featureToggleService, GenerellBehandlingToggle.KanBrukeGenerellBehandlingToggle) {
             kunSaksbehandler {
                 call.respond(inTransaction { generellBehandlingService.hentBehandlingerForSak(sakId) })
             }
@@ -146,7 +135,7 @@ internal fun Route.generellbehandlingRoutes(
     }
 
     get("/api/generellbehandling/kravpakkeForSak/{$SAKID_CALL_PARAMETER}") {
-        hvisEnabled(GenerellBehandlingToggle.KanBrukeGenerellBehandlingToggle) {
+        hvisEnabled(featureToggleService, GenerellBehandlingToggle.KanBrukeGenerellBehandlingToggle) {
             kunSaksbehandler {
                 call.respond(generellBehandlingService.hentKravpakkeForSak(sakId, brukerTokenInfo))
             }

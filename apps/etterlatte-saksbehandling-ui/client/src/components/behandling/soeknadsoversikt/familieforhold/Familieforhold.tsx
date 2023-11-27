@@ -4,12 +4,23 @@ import { FamilieforholdBarnepensjon } from '~components/behandling/soeknadsovers
 import { FamilieforholdOmstillingsstoenad } from '~components/behandling/soeknadsoversikt/familieforhold/omstillingsstoenad/FamilieforholdOmstillingsstoenad'
 import { Heading } from '@navikt/ds-react'
 import { ContentHeader } from '~shared/styled'
+import { useApiCall } from '~shared/hooks/useApiCall'
+import { hentPersonopplysningerForBehandling } from '~shared/api/grunnlag'
+import React, { useEffect, useState } from 'react'
+import { Personopplysninger } from '~shared/types/grunnlag'
 
 export interface PropsFamilieforhold {
   behandling: IDetaljertBehandling
 }
 
 export const Familieforhold = ({ behandling }: PropsFamilieforhold) => {
+  const [, fetchPersonopplysninger] = useApiCall(hentPersonopplysningerForBehandling)
+  const [personopplysninger, setPersonopplysninger] = useState<Personopplysninger | null>(null)
+
+  useEffect(() => {
+    fetchPersonopplysninger(behandling.id, (result) => setPersonopplysninger(result))
+  }, [])
+
   return (
     <>
       <ContentHeader>
@@ -18,9 +29,9 @@ export const Familieforhold = ({ behandling }: PropsFamilieforhold) => {
         </Heading>
       </ContentHeader>
       {behandling.sakType === SakType.BARNEPENSJON ? (
-        <FamilieforholdBarnepensjon behandling={behandling} />
+        <FamilieforholdBarnepensjon behandling={behandling} personopplysninger={personopplysninger} />
       ) : (
-        <FamilieforholdOmstillingsstoenad behandling={behandling} />
+        <FamilieforholdOmstillingsstoenad behandling={behandling} personopplysninger={personopplysninger} />
       )}
     </>
   )

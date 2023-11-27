@@ -24,11 +24,11 @@ export interface Personopplysninger {
 export interface Personopplysning {
   opplysningType: string
   id: string
-  kilde: GenerellKilde
+  kilde: GrunnlagKilde
   opplysning: IPdlPerson
 }
 
-export interface GenerellKilde {
+export interface GrunnlagKilde {
   type: string
   tidspunkt: string
   detalj?: string

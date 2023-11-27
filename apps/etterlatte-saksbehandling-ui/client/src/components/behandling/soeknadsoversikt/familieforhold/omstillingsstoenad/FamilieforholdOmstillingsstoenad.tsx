@@ -6,13 +6,15 @@ import { Person } from '~components/behandling/soeknadsoversikt/familieforhold/o
 import { BarneListe } from '~components/behandling/soeknadsoversikt/familieforhold/omstillingsstoenad/BarneListe'
 import { Sivilstand } from '~components/behandling/soeknadsoversikt/familieforhold/omstillingsstoenad/Sivilstand'
 import { ErrorMessage } from '@navikt/ds-react'
+import { Personopplysninger } from '~shared/types/grunnlag'
 
 export interface PropsFamilieforhold {
   behandling: IDetaljertBehandling
+  personopplysninger: Personopplysninger | null
 }
 
-export const FamilieforholdOmstillingsstoenad = ({ behandling }: PropsFamilieforhold) => {
-  if (behandling.familieforhold == null || behandling.søker == null) {
+export const FamilieforholdOmstillingsstoenad = ({ behandling, personopplysninger }: PropsFamilieforhold) => {
+  if (behandling.familieforhold == null || personopplysninger == null) {
     return (
       <FamilieforholdWrapper>
         <ErrorMessage>Familieforhold kan ikke hentes ut</ErrorMessage>
@@ -20,8 +22,9 @@ export const FamilieforholdOmstillingsstoenad = ({ behandling }: PropsFamiliefor
     )
   }
 
-  const gjenlevende = behandling.familieforhold.gjenlevende
-  const avdoede = behandling.familieforhold.avdoede
+  const soeker = personopplysninger.soeker
+  const gjenlevende = personopplysninger.gjenlevende
+  const avdoede = personopplysninger.avdoede
 
   return (
     <>
@@ -29,15 +32,16 @@ export const FamilieforholdOmstillingsstoenad = ({ behandling }: PropsFamiliefor
         {behandling.gyldighetsprøving?.resultat === VurderingsResultat.OPPFYLT ? (
           <>
             <FamilieforholdVoksne>
-              <Person person={avdoede.opplysning} kilde={avdoede.kilde} avdoed />
-
-              <Person person={gjenlevende.opplysning} kilde={gjenlevende.kilde} />
+              {avdoede.map((avdoed) => (
+                <Person person={avdoed.opplysning} kilde={avdoed.kilde} avdoed key={avdoed.id} />
+              ))}
+              <Person person={soeker.opplysning} kilde={soeker.kilde} />
             </FamilieforholdVoksne>
-            <Sivilstand familieforhold={behandling.familieforhold!!} avdoed={avdoede.opplysning} />
+            <Sivilstand familieforhold={behandling.familieforhold!!} avdoed={avdoede[0].opplysning} />
             <BarneListe familieforhold={behandling.familieforhold!!} />
           </>
         ) : (
-          <Person person={gjenlevende.opplysning} kilde={gjenlevende.kilde} />
+          gjenlevende.map((person) => <Person person={person.opplysning} kilde={person.kilde} key={person.id} />)
         )}
       </FamilieforholdWrapper>
       <Border />

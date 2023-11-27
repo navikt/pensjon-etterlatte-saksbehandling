@@ -39,6 +39,7 @@ import SluttbehandlingUtland from '~components/behandling/revurderingsoversikt/s
 import { Soeknadsdato } from '~components/behandling/soeknadsoversikt/Soeknadsdato'
 import { SluttbehandlingUtlandInfo } from '~shared/types/RevurderingInfo'
 import OppdaterGrunnlagModal from '~components/behandling/handlinger/OppdaterGrunnlagModal'
+import { Utenlandstilknytning } from '~components/behandling/soeknadsoversikt/utenlandstilknytning/Utenlandstilknytning'
 
 const revurderingsaarsakTilTekst = (revurderingsaarsak: Revurderingaarsak): string =>
   tekstRevurderingsaarsak[revurderingsaarsak]
@@ -112,6 +113,7 @@ export const Revurderingsoversikt = (props: { behandling: IDetaljertBehandling }
       </ContentHeader>
       <InnholdPadding>
         <OppdaterGrunnlagModal behandlingId={behandling.id} behandlingStatus={behandling.status} />
+        <Utenlandstilknytning behandling={behandling} redigerbar={redigerbar} />
         {behandling.begrunnelse !== null && (
           <>
             <Heading size="small">Begrunnelse</Heading>

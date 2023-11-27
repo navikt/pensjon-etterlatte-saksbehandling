@@ -146,7 +146,7 @@ class GenerellBehandlingService(
         oppdaterBehandling(
             generellBehandling.copy(status = GenerellBehandling.Status.FATTET, behandler = Behandler(saksbehandler.ident, Tidspunkt.now())),
         )
-        opprettHendelse(GenerellBehandlingHendelseType.FATTET, hentetBehandling, saksbehandler)
+        opprettHendelse(GenerellBehandlingHendelseType.FATTET, generellBehandling, saksbehandler)
     }
 
     fun attester(
@@ -207,8 +207,7 @@ class GenerellBehandlingService(
         val sisteOppgave = saksbehandlerOppgaver[0]
         if (saksbehandler.ident == sisteOppgave.saksbehandler) {
             throw UgyldigAttesteringsForespoersel(
-                "Samme saksbehandler kan ikke attestere og behandle " +
-                    "behandlingen",
+                "Samme saksbehandler kan ikke attestere og behandle behandlingen",
                 "ATTESTERING_SAMME_SAKSBEHANDLER",
             )
         }

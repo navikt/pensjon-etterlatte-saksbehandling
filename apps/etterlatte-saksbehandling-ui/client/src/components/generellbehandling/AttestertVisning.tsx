@@ -30,7 +30,7 @@ export const AttestertVisning = (props: {
           </Tekst>
         </div>
         <div>
-          <Info>Behandlet datp</Info>
+          <Info>Behandlet dato</Info>
           <Tekst>
             {formaterKanskjeStringDatoMedFallback('Ikke registrert', utlandsBehandling.behandler?.tidspunkt)}
           </Tekst>

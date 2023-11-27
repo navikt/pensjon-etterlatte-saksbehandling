@@ -39,7 +39,7 @@ export const AttesteringMedUnderkjenning = (props: {
                   <Alert variant="error">Saksbehandler mangler og du vil da ikke få attestert behandlingen</Alert>
                 )}
               </div>
-              <Info>Behandlet datp</Info>
+              <Info>Behandlet dato</Info>
               <Tekst>
                 {formaterKanskjeStringDatoMedFallback('Ikke registrert', utlandsBehandling.behandler?.tidspunkt)}
               </Tekst>

@@ -5,7 +5,7 @@ import no.nav.etterlatte.behandling.objectMapper
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.libs.common.behandling.Flyktning
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.behandling.Utenlandstilknytning
+import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.database.setJsonb
@@ -19,8 +19,21 @@ data class SakMedUtenlandstilknytning(
     val sakType: SakType,
     val id: Long,
     val enhet: String,
-    val utenlandstilknytning: Utenlandstilknytning? = null,
-)
+    val utlandstilknytning: Utlandstilknytning?,
+) {
+    companion object {
+        fun fra(
+            sak: Sak,
+            utlandstilknytning: Utlandstilknytning?,
+        ) = SakMedUtenlandstilknytning(
+            ident = sak.ident,
+            sakType = sak.sakType,
+            id = sak.id,
+            enhet = sak.enhet,
+            utlandstilknytning = utlandstilknytning,
+        )
+    }
+}
 
 class SakDao(private val connection: () -> Connection) {
     fun hentUtenlandstilknytningForSak(sakId: Long): SakMedUtenlandstilknytning? {
@@ -36,7 +49,7 @@ class SakDao(private val connection: () -> Connection) {
                     ident = getString("fnr"),
                     id = getLong("id"),
                     enhet = getString("enhet"),
-                    utenlandstilknytning = getString("utenlandstilknytning")?.let { objectMapper.readValue(it) },
+                    utlandstilknytning = getString("utenlandstilknytning")?.let { objectMapper.readValue(it) },
                 )
             }
         }
@@ -44,7 +57,7 @@ class SakDao(private val connection: () -> Connection) {
 
     fun oppdaterUtenlandstilknytning(
         sakId: Long,
-        utenlandstilknytning: Utenlandstilknytning,
+        utenlandstilknytning: Utlandstilknytning,
     ) {
         with(connection()) {
             val statement =

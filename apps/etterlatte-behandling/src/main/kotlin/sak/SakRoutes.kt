@@ -24,8 +24,8 @@ import no.nav.etterlatte.libs.common.behandling.ForenkletBehandling
 import no.nav.etterlatte.libs.common.behandling.ForenkletBehandlingListeWrapper
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.SisteIverksatteBehandling
-import no.nav.etterlatte.libs.common.behandling.Utenlandstilknytning
-import no.nav.etterlatte.libs.common.behandling.UtenlandstilknytningType
+import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
+import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.hentNavidentFraToken
 import no.nav.etterlatte.libs.common.kunSaksbehandler
@@ -160,12 +160,12 @@ internal fun Route.sakWebRoutes(
             post("/utenlandstilknytning") {
                 hentNavidentFraToken { navIdent ->
                     logger.debug("Prøver å fastsette utenlandstilknytning")
-                    val body = call.receive<UtenlandstilknytningRequest>()
+                    val body = call.receive<UtlandstilknytningRequest>()
 
                     try {
                         val utenlandstilknytning =
-                            Utenlandstilknytning(
-                                type = body.utenlandstilknytningType,
+                            Utlandstilknytning(
+                                type = body.utlandstilknytningType,
                                 kilde = Grunnlagsopplysning.Saksbehandler.create(navIdent),
                                 begrunnelse = body.begrunnelse,
                             )
@@ -199,15 +199,19 @@ internal fun Route.sakWebRoutes(
                 withFoedselsnummerInternal(tilgangService) { fnr ->
                     val behandlinger =
                         inTransaction {
-                            val sakUtenlandstilknytning = sakService.hentSakMedUtenlandstilknytning(fnr.value)
+                            val sak = sakService.finnSaker(fnr.value).first()
+                            val utlandstilknytning = behandlingService.hentUtlandstilknytningForSak(sak.id)
+                            val sakMedUtenlandstilknytning = SakMedUtenlandstilknytning.fra(sak, utlandstilknytning)
+
                             requestLogger.loggRequest(
                                 brukerTokenInfo,
-                                Folkeregisteridentifikator.of(sakUtenlandstilknytning.ident),
+                                Folkeregisteridentifikator.of(sak.ident),
                                 "behandlinger",
                             )
-                            behandlingService.hentBehandlingerForSak(sakUtenlandstilknytning.id)
+
+                            behandlingService.hentBehandlingerForSak(sakMedUtenlandstilknytning.id)
                                 .map { it.toBehandlingSammendrag() }
-                                .let { BehandlingListe(sakUtenlandstilknytning, it) }
+                                .let { BehandlingListe(sakMedUtenlandstilknytning, it) }
                         }
                     call.respond(behandlinger)
                 }
@@ -270,8 +274,8 @@ internal fun Route.sakWebRoutes(
     }
 }
 
-data class UtenlandstilknytningRequest(
-    val utenlandstilknytningType: UtenlandstilknytningType,
+data class UtlandstilknytningRequest(
+    val utlandstilknytningType: UtlandstilknytningType,
     val begrunnelse: String,
 )
 

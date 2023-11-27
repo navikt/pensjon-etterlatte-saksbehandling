@@ -20,6 +20,7 @@ import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.StatistikkBehandling
+import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.sak.Sak
@@ -43,6 +44,7 @@ sealed class Behandling {
     abstract val type: BehandlingType
     abstract val kommerBarnetTilgode: KommerBarnetTilgode?
     abstract val virkningstidspunkt: Virkningstidspunkt?
+    abstract val utlandstilknytning: Utlandstilknytning?
     abstract val boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet?
     abstract val kilde: Vedtaksloesning
     open val prosesstype: Prosesstype = Prosesstype.MANUELL
@@ -89,6 +91,13 @@ sealed class Behandling {
         throw NotImplementedError(
             "Kan ikke oppdatere bodd eller arbeidet utlandet på behandling $id. " +
                 "Denne behandlingstypen støtter ikke oppdatering av bodd eller arbeidet utlandet.",
+        )
+    }
+
+    open fun oppdaterUtlandstilknytning(utlandstilknytning: Utlandstilknytning): Behandling {
+        throw NotImplementedError(
+            "Kan ikke oppdatere utlandstilknytning på behandling $id. " +
+                "Denne behandlingstypen støtter ikke oppdatering av utlandstilknyting.",
         )
     }
 

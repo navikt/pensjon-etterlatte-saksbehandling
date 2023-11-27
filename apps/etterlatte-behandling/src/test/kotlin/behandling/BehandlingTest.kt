@@ -8,6 +8,8 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
+import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
@@ -39,6 +41,7 @@ internal class BehandlingTest {
             behandlingOpprettet = Tidspunkt.now().toLocalDatetimeUTC(),
             sistEndret = Tidspunkt.now().toLocalDatetimeUTC(),
             status = BehandlingStatus.OPPRETTET,
+            utlandstilknytning = Utlandstilknytning(UtlandstilknytningType.NASJONAL, saksbehandler, ""),
             kommerBarnetTilgode = KommerBarnetTilgode(JaNei.JA, "", saksbehandler, id),
             virkningstidspunkt = null,
             boddEllerArbeidetUtlandet = null,

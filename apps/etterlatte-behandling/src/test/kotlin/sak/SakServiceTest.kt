@@ -27,8 +27,8 @@ import no.nav.etterlatte.common.IngenEnhetFunnetException
 import no.nav.etterlatte.common.klienter.PdlKlient
 import no.nav.etterlatte.common.klienter.SkjermingKlient
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.behandling.Utenlandstilknytning
-import no.nav.etterlatte.libs.common.behandling.UtenlandstilknytningType
+import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
+import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.GeografiskTilknytning
@@ -375,9 +375,9 @@ internal class SakServiceTest {
                 ident = KONTANT_FOT.value,
                 sakType = sak.sakType,
                 enhet = sak.enhet,
-                utenlandstilknytning =
-                    Utenlandstilknytning(
-                        UtenlandstilknytningType.BOSATT_UTLAND,
+                utlandstilknytning =
+                    Utlandstilknytning(
+                        UtlandstilknytningType.BOSATT_UTLAND,
                         Grunnlagsopplysning.Saksbehandler.create("ident"),
                         "begrunnelse",
                     ),

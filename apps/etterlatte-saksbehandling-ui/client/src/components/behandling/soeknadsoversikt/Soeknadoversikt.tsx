@@ -8,11 +8,11 @@ import { NesteOgTilbake } from '../handlinger/NesteOgTilbake'
 import { behandlingErRedigerbar, behandlingErUtfylt } from '../felles/utils'
 import { VurderingsResultat } from '~shared/types/VurderingsResultat'
 import { OversiktGyldigFramsatt } from '~components/behandling/soeknadsoversikt/gyldigFramsattSoeknad/OversiktGyldigFramsatt'
-import { Utenlandstilknytning } from '~components/behandling/soeknadsoversikt/utenlandstilknytning/Utenlandstilknytning'
+import { Utlandstilknytning } from '~components/behandling/soeknadsoversikt/utenlandstilknytning/Utlandstilknytning'
 import { SakType } from '~shared/types/sak'
 import { OversiktKommerBarnetTilgode } from '~components/behandling/soeknadsoversikt/kommerBarnetTilgode/OversiktKommerBarnetTilgode'
 import { Start } from '~components/behandling/handlinger/start'
-import { IDetaljertBehandling, UtenlandstilknytningType } from '~shared/types/IDetaljertBehandling'
+import { IDetaljertBehandling, UtlandstilknytningType } from '~shared/types/IDetaljertBehandling'
 import { BoddEllerArbeidetUtlandet } from '~components/behandling/soeknadsoversikt/boddEllerArbeidetUtlandet/BoddEllerArbeidetUtlandet'
 import OppdaterGrunnlagModal from '~components/behandling/handlinger/OppdaterGrunnlagModal'
 import { SkalViseBosattUtland } from '~components/behandling/soeknadsoversikt/bosattUtland/SkalViseBosattUtland'
@@ -39,7 +39,7 @@ export const Soeknadsoversikt = (props: { behandling: IDetaljertBehandling }) =>
   const personopplysninger = usePersonopplysninger()
   const avdoede = personopplysninger?.avdoede?.find((po) => po)
   const avdoedDoedsdato = avdoede?.opplysning?.doedsdato
-  const erBosattUtland = behandling.utenlandstilknytning?.type === UtenlandstilknytningType.BOSATT_UTLAND
+  const erBosattUtland = behandling.utlandstilknytning?.type === UtlandstilknytningType.BOSATT_UTLAND
 
   const hjemlerVirkningstidspunkt = (sakType: SakType, erBosattUtland: boolean) => {
     switch (sakType) {
@@ -75,7 +75,7 @@ export const Soeknadsoversikt = (props: { behandling: IDetaljertBehandling }) =>
       </ContentHeader>
       <InnholdPadding>
         <OppdaterGrunnlagModal behandlingId={behandling.id} behandlingStatus={behandling.status} />
-        <Utenlandstilknytning behandling={behandling} redigerbar={redigerbar} />
+        <Utlandstilknytning behandling={behandling} redigerbar={redigerbar} />
         {personopplysninger && (
           <OversiktGyldigFramsatt behandling={behandling} personopplysninger={personopplysninger} />
         )}

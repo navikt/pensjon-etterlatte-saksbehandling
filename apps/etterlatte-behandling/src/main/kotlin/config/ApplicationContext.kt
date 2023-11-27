@@ -237,7 +237,6 @@ internal class ApplicationContext(
             oppgaveService = oppgaveService,
             etterbetalingDao = etterbetalingDao,
             grunnlagService = grunnlagsService,
-            sakDao = sakDao,
         )
     val etterbetalingService = EtterbetalingService(etterbetalingDao, behandlingService)
     val generellBehandlingService =

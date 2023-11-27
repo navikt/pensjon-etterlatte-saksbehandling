@@ -18,12 +18,12 @@ import no.nav.etterlatte.attachMockContext
 import no.nav.etterlatte.behandling.BehandlingRequestLogger
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
-import no.nav.etterlatte.libs.common.behandling.UtenlandstilknytningType
+import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.sak.SakService
 import no.nav.etterlatte.sak.TilgangService
-import no.nav.etterlatte.sak.UtenlandstilknytningRequest
+import no.nav.etterlatte.sak.UtlandstilknytningRequest
 import no.nav.etterlatte.sak.sakSystemRoutes
 import no.nav.etterlatte.sak.sakWebRoutes
 import no.nav.etterlatte.withTestApplicationBuilder
@@ -76,7 +76,7 @@ internal class SakRoutesTest {
                 client.post("/api/sak/1/utenlandstilknytning") {
                     header(HttpHeaders.Authorization, "Bearer $token")
                     contentType(ContentType.Application.Json)
-                    setBody(UtenlandstilknytningRequest(UtenlandstilknytningType.BOSATT_UTLAND, "Test"))
+                    setBody(UtlandstilknytningRequest(UtlandstilknytningType.BOSATT_UTLAND, "Test"))
                 }
 
             assertEquals(200, response.status.value)

@@ -14,7 +14,7 @@ fun main() {
         val ab = AppBuilder(Miljoevariabler(rapidEnv))
         FordeltSoeknadRiver(
             rapidsConnection,
-            GyldigSoeknadService(ab.createPdlClient()),
+            GyldigSoeknadService(),
             ab.createBehandlingClient(),
         )
         InnsendtSoeknadRiver(

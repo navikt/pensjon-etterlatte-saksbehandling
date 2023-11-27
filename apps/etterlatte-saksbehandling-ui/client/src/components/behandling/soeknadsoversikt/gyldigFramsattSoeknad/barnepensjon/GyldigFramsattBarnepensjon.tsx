@@ -13,7 +13,7 @@ import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
 import { StatusIconProps } from '~shared/icons/statusIcon'
 import { useEffect } from 'react'
 import { isSuccess, useApiCall } from '~shared/hooks/useApiCall'
-import { getPersongalleriFraPdl } from '~shared/api/grunnlag'
+import { getPersongalleriFraSoeknad } from '~shared/api/grunnlag'
 
 export const GyldigFramsattBarnepensjon = ({
   behandling,
@@ -29,14 +29,14 @@ export const GyldigFramsattBarnepensjon = ({
   }
 
   const redigerbar = behandlingErRedigerbar(behandling.status)
-  const [personGalleriPdl, getPersonGalleriPdl] = useApiCall(getPersongalleriFraPdl)
+  const [personGalleriSoeknad, getPersonGalleriSoeknad] = useApiCall(getPersongalleriFraSoeknad)
   useEffect(() => {
-    getPersonGalleriPdl({ sakId: behandling.sakId, behandlingId: behandling.id })
+    getPersonGalleriSoeknad({ sakId: behandling.sakId, behandlingId: behandling.id })
   }, [behandling.sakId, behandling.id])
 
   return (
     <>
-      {isSuccess(personGalleriPdl) && (
+      {isSuccess(personGalleriSoeknad) && (
         <LovtekstMedLenke
           tittel="Vurdering - søknad gyldig fremsatt"
           hjemler={[
@@ -59,9 +59,12 @@ export const GyldigFramsattBarnepensjon = ({
               eller i det landet vedkommende sist var medlem.
             </Beskrivelse>
             <InfobokserWrapper>
-              <Innsender persongalleri={personGalleriPdl.data} gjenlevende={behandling.familieforhold?.gjenlevende} />
+              <Innsender
+                persongalleri={personGalleriSoeknad.data}
+                gjenlevende={behandling.familieforhold?.gjenlevende}
+              />
               <Foreldreansvar
-                persongalleri={personGalleriPdl.data}
+                persongalleri={personGalleriSoeknad.data}
                 gjenlevende={behandling.familieforhold?.gjenlevende}
               />
               <Verger behandlingId={behandling.id} sakId={behandling.sakId} />

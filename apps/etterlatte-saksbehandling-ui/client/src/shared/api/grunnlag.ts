@@ -63,3 +63,10 @@ export const getPersongalleriFraPdl = async (args: {
 }): Promise<ApiResponse<Grunnlagsopplysning<Persongalleri, KildePdl>>> => {
   return apiClient.get(`/grunnlag/behandling/${args.behandlingId}/PERSONGALLERI_PDL_V1`)
 }
+
+export const getPersongalleriFraSoeknad = async (args: {
+  sakId: number
+  behandlingId: string
+}): Promise<ApiResponse<Grunnlagsopplysning<Persongalleri, KildePdl>>> => {
+  return apiClient.get(`/grunnlag/behandling/${args.behandlingId}/PERSONGALLERI_V1`)
+}

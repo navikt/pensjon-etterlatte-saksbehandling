@@ -29,7 +29,7 @@ export const Familieforhold = ({ behandling }: PropsFamilieforhold) => {
         </Heading>
       </ContentHeader>
       {behandling.sakType === SakType.BARNEPENSJON ? (
-        <FamilieforholdBarnepensjon behandling={behandling} personopplysninger={personopplysninger} />
+        <FamilieforholdBarnepensjon personopplysninger={personopplysninger} />
       ) : (
         <FamilieforholdOmstillingsstoenad behandling={behandling} personopplysninger={personopplysninger} />
       )}

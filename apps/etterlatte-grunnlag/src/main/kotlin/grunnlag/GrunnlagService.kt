@@ -21,9 +21,7 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.AVDOED_PDL_V1
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.GJENLEVENDE_FORELDER_PDL_V1
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.INNSENDER_PDL_V1
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.INNSENDER_SOEKNAD_V1
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.SOEKER_PDL_V1
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.SOEKER_SOEKNAD_V1
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
@@ -145,29 +143,29 @@ class RealGrunnlagService(
         val grunnlag = opplysningDao.hentAlleGrunnlagForBehandling(behandlingId)
 
         val innsender =
-            grunnlag.firstOrNull { it.opplysning.opplysningType == INNSENDER_PDL_V1 }
-                ?: grunnlag.first { it.opplysning.opplysningType == INNSENDER_SOEKNAD_V1 }
-
+            grunnlag
+                .filter { it.opplysning.opplysningType == INNSENDER_PDL_V1 }
+                .maxByOrNull { it.hendelseNummer }
         val soker =
-            grunnlag.firstOrNull { it.opplysning.opplysningType == SOEKER_PDL_V1 }
-                ?: grunnlag.first { it.opplysning.opplysningType == SOEKER_SOEKNAD_V1 }
-
-        val avdode = grunnlag.filter { it.opplysning.opplysningType == AVDOED_PDL_V1 }
-        val gjenlevende = grunnlag.filter { it.opplysning.opplysningType == GJENLEVENDE_FORELDER_PDL_V1 }
+            grunnlag
+                .filter { it.opplysning.opplysningType == SOEKER_PDL_V1 }
+                .maxByOrNull { it.hendelseNummer }
+        val avdode =
+            grunnlag.filter { it.opplysning.opplysningType == AVDOED_PDL_V1 }
+                .sortedByDescending { it.hendelseNummer }
+                .distinctBy { it.opplysning.fnr }
+        val gjenlevende =
+            grunnlag.filter { it.opplysning.opplysningType == GJENLEVENDE_FORELDER_PDL_V1 }
+                .sortedByDescending { it.hendelseNummer }
+                .distinctBy { it.opplysning.fnr }
 
         // Filtrere mot PERSONGALLERI?
 
         return PersonopplysningerResponse(
-            innsender = innsender.opplysning.asPersonopplysning(),
-            soeker = soker.opplysning.asPersonopplysning(),
-            avdoede =
-                avdode.map { it.opplysning.asPersonopplysning() }
-                    .sortedByDescending { it.kilde.tidspunkt }
-                    .distinctBy { it.opplysning.foedselsnummer },
-            gjenlevende =
-                gjenlevende.map { it.opplysning.asPersonopplysning() }
-                    .sortedByDescending { it.kilde.tidspunkt }
-                    .distinctBy { it.opplysning.foedselsnummer },
+            innsender = innsender?.opplysning?.asPersonopplysning(),
+            soeker = soker?.opplysning?.asPersonopplysning(),
+            avdoede = avdode.map { it.opplysning.asPersonopplysning() },
+            gjenlevende = gjenlevende.map { it.opplysning.asPersonopplysning() },
         )
     }
 
@@ -510,8 +508,8 @@ class LaastGrunnlagKanIkkeEndres(val behandlingId: UUID) :
     )
 
 data class PersonopplysningerResponse(
-    val innsender: Personopplysning,
-    val soeker: Personopplysning,
+    val innsender: Personopplysning?,
+    val soeker: Personopplysning?,
     val avdoede: List<Personopplysning>,
     val gjenlevende: List<Personopplysning>,
 )

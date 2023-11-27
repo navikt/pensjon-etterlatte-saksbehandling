@@ -15,8 +15,8 @@ export interface PersonMedNavn {
 }
 
 export interface Personopplysninger {
-  innsender: Personopplysning
-  soeker: Personopplysning
+  innsender?: Personopplysning
+  soeker?: Personopplysning
   avdoede: Personopplysning[]
   gjenlevende: Personopplysning[]
 }

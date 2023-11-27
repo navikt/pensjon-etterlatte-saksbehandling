@@ -1,6 +1,5 @@
 import styled from 'styled-components'
 import { Border } from '../../styled'
-import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { ErrorMessage } from '@navikt/ds-react'
 import { Person } from '~components/behandling/soeknadsoversikt/familieforhold/barnepensjon/Person'
 import { Soeskenliste } from '~components/behandling/soeknadsoversikt/familieforhold/barnepensjon/Soeskenliste'
@@ -8,12 +7,11 @@ import { Personopplysninger } from '~shared/types/grunnlag'
 import { Familieforhold } from '~shared/types/Person'
 
 export interface PropsFamilieforhold {
-  behandling: IDetaljertBehandling
   personopplysninger: Personopplysninger | null
 }
 
-export const FamilieforholdBarnepensjon = ({ behandling, personopplysninger }: PropsFamilieforhold) => {
-  if (behandling.familieforhold == null || personopplysninger == null) {
+export const FamilieforholdBarnepensjon = ({ personopplysninger }: PropsFamilieforhold) => {
+  if (personopplysninger == null || personopplysninger.soeker == null) {
     return (
       <FamilieforholdWrapper>
         <ErrorMessage>Familieforhold kan ikke hentes ut</ErrorMessage>

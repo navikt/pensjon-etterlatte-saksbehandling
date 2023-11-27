@@ -15,7 +15,7 @@ export interface PropsFamilieforhold {
 }
 
 export const FamilieforholdOmstillingsstoenad = ({ behandling, personopplysninger }: PropsFamilieforhold) => {
-  if (behandling.familieforhold == null || personopplysninger == null) {
+  if (personopplysninger == null || personopplysninger.soeker == null) {
     return (
       <FamilieforholdWrapper>
         <ErrorMessage>Familieforhold kan ikke hentes ut</ErrorMessage>

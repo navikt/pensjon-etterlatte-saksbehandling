@@ -96,7 +96,7 @@ internal class Verifiserer(
             return listOf(EnhetUtland(request.enhet.nr))
         }
         if (request.enhet.nr == "2103") {
-            return listOf(Fortrolig)
+            return listOf(StrengtFortrolig)
         }
         request.gjenlevendeForelder!!.let { personer.add(Pair(PersonRolle.GJENLEVENDE, it)) }
 
@@ -161,9 +161,9 @@ data class EnhetUtland(val enhet: String) : Verifiseringsfeil() {
         get() = "Vi har ikke adresse for enhet utland $enhet. Må følges opp snart"
 }
 
-object Fortrolig : Verifiseringsfeil() {
+object StrengtFortrolig : Verifiseringsfeil() {
     override val message: String
-        get() = "Skal ikke migrere fortrolig eller strengt fortrolig sak"
+        get() = "Skal ikke migrere strengt fortrolig sak"
 }
 
 data class PDLException(val kilde: Throwable) : Verifiseringsfeil(kilde = kilde)

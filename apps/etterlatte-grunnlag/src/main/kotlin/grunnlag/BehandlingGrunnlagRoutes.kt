@@ -89,7 +89,7 @@ fun Route.behandlingGrunnlagRoute(
             }
         }
 
-        get("opplysning/persongalleri-match") {
+        get("opplysning/persongalleri-samsvar") {
             withBehandlingId(behandlingKlient) { behandlingId ->
                 val persongalleri = grunnlagService.hentPersongalleriSamsvar(behandlingId)
                 call.respond(persongalleri)
@@ -106,14 +106,22 @@ fun Route.behandlingGrunnlagRoute(
     }
 }
 
-data class PersongalleriDto(
+data class PersongalleriSamsvar(
     val persongalleri: Persongalleri,
     val kilde: GenerellKilde,
-    val persongalleriPdl: Persongalleri,
+    val persongalleriPdl: Persongalleri?,
+    val kildePdl: GenerellKilde?,
     val problemer: List<MismatchPersongalleri>,
 )
 
 enum class MismatchPersongalleri {
     MANGLER_GJENLEVENDE,
-    MISMATCH,
+    MANGLER_AVDOED,
+    MANGLER_SOESKEN,
+
+    EKSTRA_GJENLEVENDE,
+    EKSTRA_AVDOED,
+    EKSTRA_SOESKEN,
+
+    HAR_PERSONER_UTEN_IDENTER,
 }

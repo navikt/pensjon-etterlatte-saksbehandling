@@ -11,6 +11,7 @@ import io.ktor.http.contentType
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vedtak.LoependeYtelseDTO
+import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakNyDto
 import no.nav.etterlatte.rapidsandrivers.migrering.MigreringKjoringVariant
 import no.nav.etterlatte.vedtaksvurdering.VedtakOgRapid
@@ -40,7 +41,7 @@ interface VedtakService {
 
     fun samordnetVedtak(vedtakId: String): VedtakNyDto
 
-    fun iverksattVedtak(behandlingId: UUID): VedtakNyDto
+    fun iverksattVedtak(behandlingId: UUID): VedtakDto
 }
 
 class VedtakServiceImpl(private val vedtakKlient: HttpClient, private val url: String) : VedtakService {
@@ -92,7 +93,7 @@ class VedtakServiceImpl(private val vedtakKlient: HttpClient, private val url: S
             }.body()
         }
 
-    override fun iverksattVedtak(behandlingId: UUID): VedtakNyDto =
+    override fun iverksattVedtak(behandlingId: UUID): VedtakDto =
         runBlocking {
             vedtakKlient.post("$url/api/vedtak/$behandlingId/iverksett") {
                 contentType(ContentType.Application.Json)

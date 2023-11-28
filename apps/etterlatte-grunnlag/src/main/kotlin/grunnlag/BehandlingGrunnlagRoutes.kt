@@ -10,7 +10,6 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.grunnlag.klienter.BehandlingKlient
 import no.nav.etterlatte.libs.common.BEHANDLINGID_CALL_PARAMETER
-import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.grunnlag.NyeSaksopplysninger
 import no.nav.etterlatte.libs.common.grunnlag.OppdaterGrunnlagRequest
@@ -104,24 +103,4 @@ fun Route.behandlingGrunnlagRoute(
             }
         }
     }
-}
-
-data class PersongalleriSamsvar(
-    val persongalleri: Persongalleri,
-    val kilde: GenerellKilde,
-    val persongalleriPdl: Persongalleri?,
-    val kildePdl: GenerellKilde?,
-    val problemer: List<MismatchPersongalleri>,
-)
-
-enum class MismatchPersongalleri {
-    MANGLER_GJENLEVENDE,
-    MANGLER_AVDOED,
-    MANGLER_SOESKEN,
-
-    EKSTRA_GJENLEVENDE,
-    EKSTRA_AVDOED,
-    EKSTRA_SOESKEN,
-
-    HAR_PERSONER_UTEN_IDENTER,
 }

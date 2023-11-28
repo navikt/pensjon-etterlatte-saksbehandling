@@ -43,7 +43,9 @@ internal class Verifiserer(
             }
             feil.addAll(sjekkAtPersonerFinsIPDL(it))
         }
-        verifiserFolketrygdBeregning(request)?.let { feil.add(it) }
+        if (!request.erFolketrygdberegnet()) {
+            feil.add(SakHarIkkeFolketrygdBeregning)
+        }
 
         if (feil.isNotEmpty()) {
             haandterFeil(request, feil)
@@ -70,13 +72,6 @@ internal class Verifiserer(
         repository.oppdaterStatus(request.pesysId, Migreringsstatus.VERIFISERING_FEILA)
         throw samleExceptions(feil)
     }
-
-    private fun verifiserFolketrygdBeregning(request: MigreringRequest): Verifiseringsfeil? =
-        if (request.erFolketrygdberegnet()) {
-            null
-        } else {
-            SakHarIkkeFolketrygdBeregning
-        }
 
     private fun sjekkAtPersonerFinsIPDL(request: MigreringRequest): List<Verifiseringsfeil> {
         val personer = mutableListOf(Pair(PersonRolle.BARN, request.soeker))

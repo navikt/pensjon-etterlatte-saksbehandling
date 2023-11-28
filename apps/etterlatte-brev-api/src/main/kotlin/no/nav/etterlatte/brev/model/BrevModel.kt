@@ -98,7 +98,7 @@ data class Brev(
             id = id,
             sakId = opprettNyttBrev.sakId,
             behandlingId = opprettNyttBrev.behandlingId,
-            tittel = null,
+            tittel = opprettNyttBrev.innhold.tittel,
             prosessType = opprettNyttBrev.prosessType,
             soekerFnr = opprettNyttBrev.soekerFnr,
             status = opprettNyttBrev.status,

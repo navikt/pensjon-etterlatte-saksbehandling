@@ -21,10 +21,19 @@ class UtenlandstilknytningsjekkerTest {
     private val sjekker = Utenlandstilknytningsjekker(grunnlagKlient)
 
     @Test
-    fun `bosatt i Norge enhet Steinkjer gir nasjonal`() {
+    fun `bosatt i Norge enhet Steinkjer folketrygdberegnet gir nasjonal`() {
         coEvery { grunnlagKlient.hentBostedsland(any()) } returns VurdertBostedsland(Bostedsland.NOR.name)
-        val resultat = sjekker.finnUtenlandstilknytning(lagRequest(Enheter.STEINKJER))
+        val request = lagRequest(Enheter.STEINKJER).also { every { it.erFolketrygdberegnet() } returns true }
+        val resultat = sjekker.finnUtenlandstilknytning(request)
         assertEquals(UtenlandstilknytningType.NASJONAL, resultat)
+    }
+
+    @Test
+    fun `bosatt i Norge enhet Steinkjer men ikke folketrygdberegnet gir null`() {
+        coEvery { grunnlagKlient.hentBostedsland(any()) } returns VurdertBostedsland(Bostedsland.NOR.name)
+        val request = lagRequest(Enheter.STEINKJER).also { every { it.erFolketrygdberegnet() } returns false }
+        val resultat = sjekker.finnUtenlandstilknytning(request)
+        assertNull(resultat)
     }
 
     @Test

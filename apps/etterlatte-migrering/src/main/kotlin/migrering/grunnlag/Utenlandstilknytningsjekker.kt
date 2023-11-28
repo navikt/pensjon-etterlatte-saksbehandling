@@ -14,8 +14,12 @@ class Utenlandstilknytningsjekker(private val grunnlagKlient: GrunnlagKlient) {
 
         if (request.enhet.nr !in listOf(Enheter.AALESUND_UTLAND.enhetNr, Enheter.UTLAND.enhetNr)) {
             if (bostedsland.erNorge()) {
-                logger.debug("Barnet bor i Norge, og enhet er nasjonal. Som forventa for nasjonal")
-                return UtenlandstilknytningType.NASJONAL
+                if (request.erFolketrygdberegnet()) {
+                    logger.debug("Barnet bor i Norge, og enhet er nasjonal. Saka er folketrygdberegnet. Som forventa for nasjonal")
+                    return UtenlandstilknytningType.NASJONAL
+                } else {
+                    logger.debug("Barnet bor i Norge, og enhet er nasjonal. Men saka er ikke folketrygdberegnet. Ikke et forventa scenario")
+                }
             } else {
                 logger.debug(
                     "Enhet er nasjonal, men barnet bor ikke i Norge: {}. Ikke et forventa scenario.",

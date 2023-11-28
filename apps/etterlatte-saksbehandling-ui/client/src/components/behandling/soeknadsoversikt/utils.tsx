@@ -3,6 +3,7 @@ import { JaNei } from '~shared/types/ISvar'
 import { VurderingsResultat } from '~shared/types/VurderingsResultat'
 import { KildePdl } from '~shared/types/kilde'
 import { formaterStringDato } from '~utils/formattering'
+import { GrunnlagKilde } from '~shared/types/grunnlag'
 
 export function hentGyldighetsTekst(
   innsenderErForelder: VurderingsResultat | undefined,
@@ -90,4 +91,8 @@ export const svarTilStatusIcon = (svar: JaNei | undefined): StatusIconProps => {
 
 export const formaterKildePdl = (kilde?: KildePdl) => {
   return kilde ? kilde.navn.toUpperCase() + ': ' + formaterStringDato(kilde.tidspunktForInnhenting) : undefined
+}
+
+export const formaterGrunnlagKilde = (kilde?: GrunnlagKilde) => {
+  return kilde ? kilde.type.toUpperCase() + ': ' + formaterStringDato(kilde.tidspunkt) : undefined
 }

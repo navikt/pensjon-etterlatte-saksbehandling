@@ -12,6 +12,8 @@ import { ApiErrorAlert } from '~ErrorBoundary'
 import { useBehandling } from '~components/behandling/useBehandling'
 import { BehandlingSidemeny } from '~components/behandling/sidemeny/BehandlingSidemeny'
 import Spinner from '~shared/Spinner'
+import { hentPersonopplysningerForBehandling } from '~shared/api/grunnlag'
+import { resetPersonopplysninger, setPersonopplysninger } from '~store/reducers/PersonopplysningerReducer'
 
 export const Behandling = () => {
   const behandlingFraRedux = useBehandling()
@@ -19,6 +21,7 @@ export const Behandling = () => {
   const { behandlingId: behandlingIdFraURL } = useParams()
   const { behandlingRoutes } = useBehandlingRoutes()
   const [fetchBehandlingStatus, fetchBehandling] = useApiCall(hentBehandling)
+  const [, fetchPersonopplysninger] = useApiCall(hentPersonopplysningerForBehandling)
 
   useEffect(() => {
     if (!behandlingIdFraURL) {
@@ -33,6 +36,18 @@ export const Behandling = () => {
       )
     }
   }, [behandlingIdFraURL, behandlingFraRedux?.id])
+
+  useEffect(() => {
+    if (behandlingFraRedux !== null) {
+      fetchPersonopplysninger(
+        { behandlingId: behandlingFraRedux.id, sakType: behandlingFraRedux.sakType },
+        (result) => dispatch(setPersonopplysninger(result)),
+        () => dispatch(resetPersonopplysninger())
+      )
+    } else {
+      dispatch(resetPersonopplysninger())
+    }
+  }, [behandlingFraRedux])
 
   return mapAllApiResult(
     fetchBehandlingStatus,

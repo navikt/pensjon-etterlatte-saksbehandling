@@ -21,9 +21,7 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.AVDOED_PDL_V1
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.GJENLEVENDE_FORELDER_PDL_V1
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.INNSENDER_PDL_V1
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.INNSENDER_SOEKNAD_V1
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.SOEKER_PDL_V1
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.SOEKER_SOEKNAD_V1
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
@@ -68,7 +66,10 @@ interface GrunnlagService {
 
     fun hentOpplysningsgrunnlag(behandlingId: UUID): Grunnlag?
 
-    fun hentPersonopplysninger(behandlingId: UUID): PersonopplysningerResponse
+    fun hentPersonopplysninger(
+        behandlingId: UUID,
+        sakstype: SakType,
+    ): PersonopplysningerResponse
 
     fun hentSakerOgRoller(fnr: Folkeregisteridentifikator): PersonMedSakerOgRoller
 
@@ -141,27 +142,52 @@ class RealGrunnlagService(
         return OpplysningsgrunnlagMapper(grunnlag, persongalleri).hentGrunnlag()
     }
 
-    override fun hentPersonopplysninger(behandlingId: UUID): PersonopplysningerResponse {
-        val grunnlag = opplysningDao.hentAlleGrunnlagForBehandling(behandlingId)
+    override fun hentPersonopplysninger(
+        behandlingId: UUID,
+        sakstype: SakType,
+    ): PersonopplysningerResponse {
+        val grunnlag =
+            opplysningDao.hentGrunnlagAvTypeForBehandling(
+                behandlingId,
+                INNSENDER_PDL_V1,
+                SOEKER_PDL_V1,
+                AVDOED_PDL_V1,
+                GJENLEVENDE_FORELDER_PDL_V1,
+            )
+
+        // Finn siste grunnlag blant relevante typer for unike personer,
+        // slik at hver person kun havner i en av kategoriene
+        val sisteGrunnlagPerFnr =
+            grunnlag.filter {
+                setOf(
+                    SOEKER_PDL_V1,
+                    AVDOED_PDL_V1,
+                    GJENLEVENDE_FORELDER_PDL_V1,
+                ).contains(it.opplysning.opplysningType)
+            }
+                .groupBy { it.opplysning.fnr }
+                .map {
+                    it.value.maxBy { opplysning -> opplysning.hendelseNummer }
+                }
 
         val innsender =
-            grunnlag.firstOrNull { it.opplysning.opplysningType == INNSENDER_PDL_V1 }
-                ?: grunnlag.first { it.opplysning.opplysningType == INNSENDER_SOEKNAD_V1 }
-
-        val soker =
-            grunnlag.firstOrNull { it.opplysning.opplysningType == SOEKER_PDL_V1 }
-                ?: grunnlag.first { it.opplysning.opplysningType == SOEKER_SOEKNAD_V1 }
-
-        val avdode = grunnlag.filter { it.opplysning.opplysningType == AVDOED_PDL_V1 }
-        val gjenlevende = grunnlag.filter { it.opplysning.opplysningType == GJENLEVENDE_FORELDER_PDL_V1 }
-
-        // Filtrere mot PERSONGALLERI?
+            grunnlag
+                .filter { it.opplysning.opplysningType == INNSENDER_PDL_V1 }
+                .maxByOrNull { it.hendelseNummer }
+        val soker = sisteGrunnlagPerFnr.find { it.opplysning.opplysningType == SOEKER_PDL_V1 }
+        val avdode = sisteGrunnlagPerFnr.filter { it.opplysning.opplysningType == AVDOED_PDL_V1 }
+        val gjenlevende =
+            if (sakstype == SakType.OMSTILLINGSSTOENAD) {
+                listOf(soker)
+            } else {
+                sisteGrunnlagPerFnr.filter { it.opplysning.opplysningType == GJENLEVENDE_FORELDER_PDL_V1 }
+            }
 
         return PersonopplysningerResponse(
-            innsender = innsender.opplysning.asPersonopplysning(),
-            soeker = soker.opplysning.asPersonopplysning(),
+            innsender = innsender?.opplysning?.asPersonopplysning(),
+            soeker = soker?.opplysning?.asPersonopplysning(),
             avdoede = avdode.map { it.opplysning.asPersonopplysning() },
-            gjenlevende = gjenlevende.map { it.opplysning.asPersonopplysning() },
+            gjenlevende = gjenlevende.mapNotNull { it?.opplysning?.asPersonopplysning() },
         )
     }
 
@@ -504,8 +530,8 @@ class LaastGrunnlagKanIkkeEndres(val behandlingId: UUID) :
     )
 
 data class PersonopplysningerResponse(
-    val innsender: Personopplysning,
-    val soeker: Personopplysning,
+    val innsender: Personopplysning?,
+    val soeker: Personopplysning?,
     val avdoede: List<Personopplysning>,
     val gjenlevende: List<Personopplysning>,
 )

@@ -30,6 +30,15 @@ internal class Verifiserer(
             feil.add(PDLException(feilen).also { it.addSuppressed(feilen) })
         }
         patchedRequest.onSuccess {
+            if (request.gjenlevendeForelder == null) {
+                feil.add(GjenlevendeForelderMangler)
+            }
+            if (request.enhet.nr in listOf("0001")) {
+                feil.add(EnhetUtland(request.enhet.nr))
+            }
+            if (request.enhet.nr == "2103") {
+                feil.add(StrengtFortrolig)
+            }
             feil.addAll(sjekkAtPersonerFinsIPDL(it))
         }
         verifiserFolketrygdBeregning(request)?.let { feil.add(it) }
@@ -45,7 +54,8 @@ internal class Verifiserer(
         feil: MutableList<Exception>,
     ) {
         logger.warn(
-            "Sak ${request.pesysId} har ufullstendige data i PDL, kan ikke migrere. Se sikkerlogg for detaljer",
+            "Sak ${request.pesysId} har ufullstendige data i PDL, eller feiler verifisering av andre grunner. " +
+                "Kan ikke migrere. Se sikkerlogg for detaljer",
         )
         repository.lagreFeilkjoering(
             request.toJson(),
@@ -68,15 +78,6 @@ internal class Verifiserer(
     private fun sjekkAtPersonerFinsIPDL(request: MigreringRequest): List<Verifiseringsfeil> {
         val personer = mutableListOf(Pair(PersonRolle.BARN, request.soeker))
         request.avdoedForelder.forEach { personer.add(Pair(PersonRolle.AVDOED, it.ident)) }
-        if (request.gjenlevendeForelder == null) {
-            return listOf(GjenlevendeForelderMangler)
-        }
-        if (request.enhet.nr in listOf("0001")) {
-            return listOf(EnhetUtland(request.enhet.nr))
-        }
-        if (request.enhet.nr == "2103") {
-            return listOf(StrengtFortrolig)
-        }
         request.gjenlevendeForelder!!.let { personer.add(Pair(PersonRolle.GJENLEVENDE, it)) }
 
         return personer

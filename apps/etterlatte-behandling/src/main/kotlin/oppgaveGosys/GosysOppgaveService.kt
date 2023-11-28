@@ -1,6 +1,8 @@
 package no.nav.etterlatte.oppgaveGosys
 
 import com.github.benmanes.caffeine.cache.Caffeine
+import no.nav.etterlatte.Kontekst
+import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.common.klienter.PdlKlient
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
@@ -50,8 +52,11 @@ class GosysOppgaveServiceImpl(
             return emptyList()
         }
 
+        val saksbehandlerMedRoller = Kontekst.get().appUserAsSaksbehandler().saksbehandlerMedRoller
+
         val gosysOppgaver =
             gosysOppgaveKlient.hentOppgaver(
+                enhetsnr = if (saksbehandlerMedRoller.harRolleStrengtFortrolig()) Enheter.STRENGT_FORTROLIG.enhetNr else null,
                 brukerTokenInfo = brukerTokenInfo,
             )
 

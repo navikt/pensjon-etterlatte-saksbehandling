@@ -77,10 +77,10 @@ export const BP_FOERSTEGANGSBEHANDLING_BOSATT_UTLAND_HJEMLER: Array<Hjemmel> = B
 )
 
 export const BP_FOERSTEGANGSBEHANDLING_BOSATT_UTLAND_BESKRIVELSE =
-  'Barnepensjon kan tidligst innvilges fra og med den første i måneden etter dødsfallet og den kan gis for opptil tre år før søknaden er satt frem. \n\nHvis bosatt utland: legg til grunn kravdato i bostedslandet, eventuelt landet søker sist var medlem.'
+  'Barnepensjon kan tidligst innvilges fra og med den første i måneden etter dødsfallet og den kan gis for opptil tre år før søknaden er satt frem. \n\nHvis bosatt utland: bruk kravdato i bostedslandet, eventuelt landet søker sist var medlem.'
 
 export const BP_FOERSTEGANGSBEHANDLING_BESKRIVELSE =
-  'Barnepensjon kan tidligst innvilges fra og med den første i måneden etter dødsfallet og den kan gis for opptil tre år før søknaden er mottatt.'
+  'Barnepensjon kan tidligst innvilges fra og med den første i måneden etter dødsfallet og den kan gis for opptil tre år før søknaden er satt frem.'
 
 export const BP_REVURDERING_BESKRIVELSE =
   'Barnepensjonen blir satt opp fra og med den måneden vilkårene for dette er oppfylt, og satt ned fra og med måneden etter den måneden vilkårene for dette er oppfylt. Barnepensjonen stanses ved utgangen av den måneden retten til ytelsen faller bort.'
@@ -128,10 +128,10 @@ export const OMS_FOERSTEGANGSBEHANDLING_BOSATT_UTLAND_HJEMLER: Array<Hjemmel> =
   ])
 
 export const OMS_FOERSTEGANGSBEHANDLING_BOSATT_UTLAND_BESKRIVELSE =
-  'Omstillingsstønad kan tidligst innvilges fra og med den første i måneden etter dødsfallet, og kan gis for opptil tre måneder før måneden kravet ble satt frem. I noen tilfeller kan man gå lenger tilbake, jf. folketrygdloven § 22-13 syvende ledd. \n\nHvis bosatt utland: legg til grunn kravdato i bostedslandet, eventuelt landet søker sist var medlem.'
+  'Omstillingsstønad kan tidligst innvilges fra og med den første i måneden etter dødsfallet, og kan gis for opptil tre måneder før måneden kravet ble satt frem. I noen tilfeller kan man gå lenger tilbake, jf. folketrygdloven § 22-13 syvende ledd.\n\nHvis bosatt utland: bruk kravdato i bostedslandet, eventuelt landet søker sist var medlem.'
 
 export const OMS_FOERSTEGANGSBEHANDLING_BESKRIVELSE =
-  'Omstillingsstønad kan innvilges fra og med den første i måneden etter dødsfallet, men kan som hovedregel ikke gis for mer enn tre måneder før søknaden er mottatt hos NAV.'
+  'Omstillingsstønad kan tidligst innvilges fra og med den første i måneden etter dødsfallet, og kan gis for opptil tre måneder før måneden kravet ble satt frem. I noen tilfeller kan man gå lenger tilbake, jf. folketrygdloven § 22-13 syvende ledd.'
 
 export const OMS_REVURDERING_BESKRIVELSE =
   'Omstillingsstønad blir satt opp fra og med den måneden vilkårene for dette er oppfylt, og satt ned fra og med måneden etter den måneden vilkårene for dette er oppfylt. Omstillingsstønad stanses ved utgangen av den måneden retten til ytelsen faller bort.'

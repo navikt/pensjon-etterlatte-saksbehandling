@@ -24,6 +24,7 @@ import { useAppDispatch } from '~store/Store'
 import { TrygdetidDetaljer } from '~components/behandling/trygdetid/detaljer/TrygdetidDetaljer'
 import { OverstyrtTrygdetid } from './OverstyrtTrygdetid'
 import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
+import { TrygdetidManueltOverstyrt } from '~components/behandling/trygdetid/TrygdetidManueltOverstyrt'
 
 interface Props {
   redigerbar: boolean
@@ -85,6 +86,19 @@ export const Trygdetid = ({ redigerbar, behandling, virkningstidspunktEtterNyReg
     })
   }, [])
 
+  if (trygdetid?.beregnetTrygdetid?.resultat.overstyrt) {
+    return (
+      <TrygdetidWrapper>
+        <TrygdetidManueltOverstyrt
+          behandlingId={behandling.id}
+          oppdaterTrygdetid={oppdaterTrygdetid}
+          beregnetTrygdetid={trygdetid.beregnetTrygdetid}
+        />
+        <TrygdetidDetaljer beregnetTrygdetid={trygdetid.beregnetTrygdetid.resultat} />
+      </TrygdetidWrapper>
+    )
+  }
+
   return (
     <TrygdetidWrapper>
       {visTrydeavtale(behandling) && <TrygdeAvtale redigerbar={redigerbar} />}
@@ -110,7 +124,6 @@ export const Trygdetid = ({ redigerbar, behandling, virkningstidspunktEtterNyReg
           avtaler skal ikke beregnes sammen.
         </BodyShort>
       </LovtekstMedLenke>
-
       {trygdetid && landListe && (
         <>
           <Grunnlagopplysninger opplysninger={trygdetid.opplysninger} />

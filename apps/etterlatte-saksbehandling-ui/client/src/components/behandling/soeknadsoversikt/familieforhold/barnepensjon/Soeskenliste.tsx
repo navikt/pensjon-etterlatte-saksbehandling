@@ -1,6 +1,6 @@
 import { ChildEyesIcon } from '@navikt/aksel-icons'
 import { CopyButton, Heading, Link, Table } from '@navikt/ds-react'
-import { hentLevendeSoeskenFraAvdoedeForSoeker, IFamilieforhold, IPdlPerson } from '~shared/types/Person'
+import { Familieforhold, hentLevendeSoeskenFraAvdoedeForSoekerGrunnlag, IPdlPerson } from '~shared/types/Person'
 import styled from 'styled-components'
 import { IAdresse } from '~shared/types/IAdresse'
 import { differenceInYears, format, parse } from 'date-fns'
@@ -13,12 +13,12 @@ const FnrWrapper = styled.div`
 `
 
 type Props = {
-  familieforhold: IFamilieforhold
+  familieforhold: Familieforhold
   soekerFnr: string
 }
 
 export const Soeskenliste = ({ familieforhold, soekerFnr }: Props) => {
-  const barneListeIngenDoedeSoesken = hentLevendeSoeskenFraAvdoedeForSoeker(familieforhold.avdoede, soekerFnr)
+  const barneListeIngenDoedeSoesken = hentLevendeSoeskenFraAvdoedeForSoekerGrunnlag(familieforhold.avdoede, soekerFnr)
   return (
     <div>
       <FlexHeader>
@@ -59,7 +59,7 @@ export const Soeskenliste = ({ familieforhold, soekerFnr }: Props) => {
   )
 }
 
-const BarnRow = ({ barn, familieforhold }: { barn: IPdlPerson; familieforhold: IFamilieforhold }) => {
+const BarnRow = ({ barn, familieforhold }: { barn: IPdlPerson; familieforhold: Familieforhold }) => {
   const foedselsdato = parse(String(barn.foedselsdato), DatoFormat.AAR_MAANED_DAG, new Date())
   const alder = differenceInYears(new Date(), foedselsdato)
 
@@ -76,7 +76,8 @@ const BarnRow = ({ barn, familieforhold }: { barn: IPdlPerson; familieforhold: I
     : 'Mangler adresse'
 
   const barnetsFnr = barn.foedselsnummer
-  const erGjenlevendesBarn = familieforhold.gjenlevende.opplysning.familieRelasjon?.barn?.includes(barnetsFnr) ?? false
+  const erGjenlevendesBarn =
+    familieforhold.gjenlevende.flatMap((it) => it.opplysning.familieRelasjon?.barn).includes(barnetsFnr) ?? false
 
   return (
     <Table.Row>

@@ -93,6 +93,11 @@ interface TrygdetidService {
         trygdetidId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): Trygdetid
+
+    suspend fun opprettOverstyrtBeregnetTrygdetid(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    )
 }
 
 interface GammelTrygdetidServiceMedNy : NyTrygdetidService, TrygdetidService {
@@ -598,6 +603,49 @@ class TrygdetidServiceImpl(
         } else {
             throw Exception("Kan ikke opprette/endre trygdetid da behandlingen er i feil tilstand")
         }
+    }
+
+    override suspend fun opprettOverstyrtBeregnetTrygdetid(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {
+        if (trygdetidRepository.hentTrygdetiderForBehandling(behandlingId).isNotEmpty()) {
+            throw TrygdetidAlleredeOpprettetException()
+        }
+        val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
+        logger.info("Oppretter manuell overstyrt trygdetid for behandling $behandlingId")
+
+        val avdoed = grunnlagKlient.hentGrunnlag(behandling.sak, behandling.id, brukerTokenInfo).hentAvdoede().first()
+        val trygdetid =
+            Trygdetid(
+                sakId = behandling.sak,
+                behandlingId = behandling.id,
+                opplysninger = hentOpplysninger(avdoed),
+                ident =
+                    requireNotNull(avdoed.hentFoedselsnummer()?.verdi?.value) {
+                        "Kunne ikke hente identifikator for avdød til trygdetid i " +
+                            "behandlingen med id=${behandling.id}"
+                    },
+                trygdetidGrunnlag = emptyList(),
+                beregnetTrygdetid =
+                    DetaljertBeregnetTrygdetid(
+                        resultat =
+                            DetaljertBeregnetTrygdetidResultat(
+                                faktiskTrygdetidNorge = null,
+                                faktiskTrygdetidTeoretisk = null,
+                                fremtidigTrygdetidNorge = null,
+                                fremtidigTrygdetidTeoretisk = null,
+                                samletTrygdetidNorge = null,
+                                samletTrygdetidTeoretisk = null,
+                                prorataBroek = null,
+                                overstyrt = true,
+                            ),
+                        tidspunkt = Tidspunkt.now(),
+                        regelResultat = "".toJsonNode(),
+                    ),
+            )
+        val opprettet = trygdetidRepository.opprettTrygdetid(trygdetid)
+        trygdetidRepository.oppdaterTrygdetid(opprettet, overstyrt = true) // Holder ikke å sette overstyrt på detaljertBeregnetTrygdetid
     }
 
     override fun overstyrBeregnetTrygdetidForAvdoed(

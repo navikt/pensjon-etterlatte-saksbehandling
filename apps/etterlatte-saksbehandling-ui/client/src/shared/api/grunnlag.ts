@@ -5,6 +5,7 @@ import { Foreldreansvar } from '~shared/types/Foreldreansvar'
 import { KildePdl, KildePersondata } from '~shared/types/kilde'
 import { IPdlPerson, Persongalleri } from '~shared/types/Person'
 import { Mottaker } from '~shared/types/Brev'
+import { SakType } from '~shared/types/sak'
 
 export const hentPersonerISak = async (sakId: number): Promise<ApiResponse<PersonerISakResponse>> => {
   return apiClient.get(`/grunnlag/sak/${sakId}/personer/alle`)
@@ -51,10 +52,13 @@ export const getHistoriskForeldreansvar = (args: {
   )
 }
 
-export const hentPersonopplysningerForBehandling = async (
+export const hentPersonopplysningerForBehandling = async (args: {
   behandlingId: string
-): Promise<ApiResponse<Personopplysninger>> => {
-  return apiClient.get<Personopplysninger>(`/grunnlag/behandling/${behandlingId}/personopplysninger`)
+  sakType: SakType
+}): Promise<ApiResponse<Personopplysninger>> => {
+  return apiClient.get<Personopplysninger>(
+    `/grunnlag/behandling/${args.behandlingId}/personopplysninger?sakType=${args.sakType}`
+  )
 }
 
 export const getPersongalleriFraPdl = async (args: {

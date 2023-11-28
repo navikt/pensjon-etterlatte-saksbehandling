@@ -118,7 +118,7 @@ export default function ManuellBehandling() {
         }
       />
 
-      <PersongalleriBarnepensjon />
+      <PersongalleriBarnepensjon erManuellMigrering={true} />
 
       <Knapp>
         <Button

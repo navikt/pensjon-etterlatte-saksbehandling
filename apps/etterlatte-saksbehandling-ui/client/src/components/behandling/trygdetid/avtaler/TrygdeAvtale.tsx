@@ -420,15 +420,12 @@ export const TrygdeAvtale = ({ redigerbar }: Props) => {
                 </AvtaleColumn>
                 <AvtaleColumn>
                   <FlexRow $spacing>
-                    <Text>
-                      Kommentar: Nordisk trygdeavtale: Skal artikkel 9 anvendes - fremtidig trygdetid avkortes?
-                      (valgfri)
-                    </Text>
+                    <Text>Kommentar (valgfri)</Text>
                   </FlexRow>
                   <FlexRow $spacing>
                     <Textarea
                       style={{ padding: '10px' }}
-                      label="Kommentar"
+                      label="Kommentar : Nordisk trygdeavtale: Skal artikkel 9 anvendes - fremtidig trygdetid avkortes?"
                       hideLabel={true}
                       value={trygdeavtale.nordiskTrygdeAvtaleKommentar}
                       onChange={(e) =>

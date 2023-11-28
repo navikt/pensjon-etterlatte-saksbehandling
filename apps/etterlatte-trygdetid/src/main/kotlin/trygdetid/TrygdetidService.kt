@@ -1,6 +1,7 @@
 package no.nav.etterlatte.trygdetid
 
 import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.module.kotlin.readValue
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
@@ -14,12 +15,16 @@ import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsdata
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.grunnlag.Opplysning
 import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
 import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsdato
 import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsnummer
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
+import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.common.trygdetid.DetaljertBeregnetTrygdetidResultat
+import no.nav.etterlatte.libs.common.trygdetid.OpplysningerDifferanse
 import no.nav.etterlatte.libs.common.trygdetid.UKJENT_AVDOED
 import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.etterlatte.trygdetid.klienter.BehandlingKlient
@@ -91,6 +96,11 @@ interface TrygdetidService {
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     )
+
+    suspend fun finnOpplysningerDifferanse(
+        trygdetid: Trygdetid,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): OpplysningerDifferanse?
 }
 
 interface GammelTrygdetidServiceMedNy : NyTrygdetidService, TrygdetidService {
@@ -329,7 +339,7 @@ class TrygdetidServiceImpl(
         behandling: DetaljertBehandling,
         brukerTokenInfo: BrukerTokenInfo,
     ): List<Trygdetid> {
-        val avdoede = grunnlagKlient.hentGrunnlag(behandling.sak, behandling.id, brukerTokenInfo).hentAvdoede()
+        val avdoede = grunnlagKlient.hentGrunnlag(behandling.id, brukerTokenInfo).hentAvdoede()
         val trygdetider =
             avdoede.map { avdoed ->
                 val trygdetid =
@@ -473,10 +483,8 @@ class TrygdetidServiceImpl(
         avdoedIdent: String,
         brukerTokenInfo: BrukerTokenInfo,
     ): DatoerForBehandling {
-        val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
-
         val avdoed =
-            grunnlagKlient.hentGrunnlag(behandling.sak, behandlingId, brukerTokenInfo).hentAvdoede()
+            grunnlagKlient.hentGrunnlag(behandlingId, brukerTokenInfo).hentAvdoede()
                 .find { it.hentFoedselsnummer()?.verdi?.value == avdoedIdent }
 
         return DatoerForBehandling(
@@ -649,7 +657,7 @@ class TrygdetidServiceImpl(
         val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
         logger.info("Oppretter manuell overstyrt trygdetid for behandling $behandlingId")
 
-        val avdoed = grunnlagKlient.hentGrunnlag(behandling.sak, behandling.id, brukerTokenInfo).hentAvdoede().firstOrNull()
+        val avdoed = grunnlagKlient.hentGrunnlag(behandling.id, brukerTokenInfo).hentAvdoede().firstOrNull()
         val trygdetid =
             Trygdetid(
                 sakId = behandling.sak,
@@ -767,6 +775,40 @@ class TrygdetidServiceImpl(
             }
         }
 
+    override suspend fun finnOpplysningerDifferanse(
+        trygdetid: Trygdetid,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): OpplysningerDifferanse {
+        val nyAvdoedGrunnlag =
+            grunnlagKlient.hentGrunnlag(trygdetid.behandlingId, brukerTokenInfo).hentAvdoede()
+                .first { it.hentFoedselsnummer()?.verdi?.value == trygdetid.ident }
+        // If no match System.exit(0) :)
+
+        val nyeOpplysninger = hentOpplysninger(nyAvdoedGrunnlag, trygdetid.behandlingId)
+        val nyFoedselsdato = nyeOpplysninger.first { it.type == TrygdetidOpplysningType.FOEDSELSDATO }
+        val nyDoedsdato = nyeOpplysninger.first { it.type == TrygdetidOpplysningType.DOEDSDATO }
+        val nyFylt16 = nyeOpplysninger.first { it.type == TrygdetidOpplysningType.FYLT_16 }
+        val nyFyller66 = nyeOpplysninger.first { it.type == TrygdetidOpplysningType.FYLLER_66 }
+
+        val eksisterendeFoedselsdato = trygdetid.opplysninger.first { it.type == TrygdetidOpplysningType.FOEDSELSDATO }
+        val eksisterendeDoedsdato = trygdetid.opplysninger.first { it.type == TrygdetidOpplysningType.DOEDSDATO }
+        val eksisterendeFylt16 = trygdetid.opplysninger.first { it.type == TrygdetidOpplysningType.FYLT_16 }
+        val eksisterendeFyller66 = trygdetid.opplysninger.first { it.type == TrygdetidOpplysningType.FYLLER_66 }
+        val diff =
+            toLocalDate(nyFoedselsdato) != toLocalDate(eksisterendeFoedselsdato) ||
+                toLocalDate(nyDoedsdato) != toLocalDate(eksisterendeDoedsdato) ||
+                toLocalDate(nyFylt16) != toLocalDate(eksisterendeFylt16) ||
+                toLocalDate(nyFyller66) != toLocalDate(eksisterendeFyller66)
+
+        return OpplysningerDifferanse(
+            diff,
+            nyeOpplysninger.toDto(),
+        )
+    }
+
+    private fun toLocalDate(opplysningsgrunnlag: Opplysningsgrunnlag): LocalDate =
+        objectMapper.readValue(opplysningsgrunnlag.opplysning.toString())
+
     override suspend fun overstyrNorskPoengaaarForTrygdetid(
         trygdetidId: UUID,
         behandlingId: UUID,
@@ -839,3 +881,22 @@ class TrygdetidManglerBeregning : UgyldigForespoerselException(
     code = "TRYGDETID_MANGLER_BEREGNING",
     detail = "Oppgitt trygdetid er ikke gyldig fordi det mangler en beregning",
 )
+
+private fun <T> tilGrunnlagsopplysningFraPdl(
+    value: T,
+    opplysningstype: Opplysningstype,
+): Opplysning.Konstant<T> {
+    return Opplysning.Konstant.create(
+        Grunnlagsopplysning(
+            id = UUID.randomUUID(),
+            kilde =
+                Grunnlagsopplysning.Pdl(Tidspunkt.now(), null, null),
+            opplysningType = opplysningstype,
+            meta = objectMapper.createObjectNode(),
+            opplysning = value,
+            attestering = null,
+            fnr = null,
+            periode = null,
+        ),
+    )
+}

@@ -8,6 +8,9 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.common.trygdetid.DetaljertBeregnetTrygdetidResultat
+import no.nav.etterlatte.libs.common.trygdetid.GrunnlagOpplysningerDto
+import no.nav.etterlatte.libs.common.trygdetid.OpplysningkildeDto
+import no.nav.etterlatte.libs.common.trygdetid.OpplysningsgrunnlagDto
 import java.time.LocalDate
 import java.time.MonthDay
 import java.time.Period
@@ -86,6 +89,12 @@ data class Opplysningsgrunnlag(
             )
     }
 }
+
+data class OpplysningerDifferanse(
+    val harDifferanse: Boolean,
+    val behandlingGrunnlagVersjon: Long,
+    val behandlingOpplysninger: List<Opplysningsgrunnlag>,
+)
 
 enum class TrygdetidOpplysningType {
     FOEDSELSDATO,
@@ -172,3 +181,35 @@ class OverlappendePeriodeException(message: String) : ForespoerselException(
     code = "OVERLAPPENDE_PERIODE_TRYGDETID",
     detail = message,
 )
+
+fun List<Opplysningsgrunnlag>.toDto(): GrunnlagOpplysningerDto =
+    GrunnlagOpplysningerDto(
+        avdoedFoedselsdato = this.finnOpplysning(TrygdetidOpplysningType.FOEDSELSDATO),
+        avdoedDoedsdato = this.finnOpplysning(TrygdetidOpplysningType.DOEDSDATO),
+        avdoedFylteSeksten = this.finnOpplysning(TrygdetidOpplysningType.FYLT_16),
+        avdoedFyllerSeksti = this.finnOpplysning(TrygdetidOpplysningType.FYLLER_66),
+    )
+
+private fun List<Opplysningsgrunnlag>.finnOpplysning(type: TrygdetidOpplysningType): OpplysningsgrunnlagDto? =
+    this.find { opplysning -> opplysning.type == type }?.toDto()
+
+private fun Opplysningsgrunnlag.toDto(): OpplysningsgrunnlagDto =
+    OpplysningsgrunnlagDto(
+        opplysning = this.opplysning,
+        kilde =
+            when (this.kilde) {
+                is Grunnlagsopplysning.Pdl ->
+                    OpplysningkildeDto(
+                        type = this.kilde.type,
+                        tidspunkt = this.kilde.tidspunktForInnhenting.toString(),
+                    )
+
+                is Grunnlagsopplysning.RegelKilde ->
+                    OpplysningkildeDto(
+                        type = this.kilde.type,
+                        tidspunkt = this.kilde.ts.toString(),
+                    )
+
+                else -> throw Exception("Mangler gyldig kilde for opplysning $id")
+            },
+    )

@@ -18,9 +18,6 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.trygdetid.BeregnetTrygdetidGrunnlagDto
 import no.nav.etterlatte.libs.common.trygdetid.DetaljertBeregnetTrygdetidDto
 import no.nav.etterlatte.libs.common.trygdetid.DetaljertBeregnetTrygdetidResultat
-import no.nav.etterlatte.libs.common.trygdetid.GrunnlagOpplysningerDto
-import no.nav.etterlatte.libs.common.trygdetid.OpplysningkildeDto
-import no.nav.etterlatte.libs.common.trygdetid.OpplysningsgrunnlagDto
 import no.nav.etterlatte.libs.common.trygdetid.StatusOppdatertDto
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidGrunnlagDto
@@ -47,7 +44,10 @@ fun Route.trygdetid(
                 logger.info("Henter trygdetid for behandling $behandlingId")
                 val trygdetid = trygdetidService.hentTrygdetid(behandlingId, brukerTokenInfo)
                 if (trygdetid != null) {
-                    call.respond(trygdetid.toDto())
+                    call.respond(
+                        trygdetid.toDto()
+                            .copy(opplysningerDifferanse = trygdetidService.finnOpplysningerDifferanse(trygdetid, brukerTokenInfo)),
+                    )
                 } else {
                     call.respond(HttpStatusCode.NoContent)
                 }
@@ -207,38 +207,6 @@ private fun DetaljertBeregnetTrygdetid.toDto(): DetaljertBeregnetTrygdetidDto =
     DetaljertBeregnetTrygdetidDto(
         resultat = resultat,
         tidspunkt = tidspunkt,
-    )
-
-private fun List<Opplysningsgrunnlag>.toDto(): GrunnlagOpplysningerDto =
-    GrunnlagOpplysningerDto(
-        avdoedFoedselsdato = this.finnOpplysning(TrygdetidOpplysningType.FOEDSELSDATO),
-        avdoedDoedsdato = this.finnOpplysning(TrygdetidOpplysningType.DOEDSDATO),
-        avdoedFylteSeksten = this.finnOpplysning(TrygdetidOpplysningType.FYLT_16),
-        avdoedFyllerSeksti = this.finnOpplysning(TrygdetidOpplysningType.FYLLER_66),
-    )
-
-private fun List<Opplysningsgrunnlag>.finnOpplysning(type: TrygdetidOpplysningType): OpplysningsgrunnlagDto? =
-    this.find { opplysning -> opplysning.type == type }?.toDto()
-
-private fun Opplysningsgrunnlag.toDto(): OpplysningsgrunnlagDto =
-    OpplysningsgrunnlagDto(
-        opplysning = this.opplysning,
-        kilde =
-            when (this.kilde) {
-                is Grunnlagsopplysning.Pdl ->
-                    OpplysningkildeDto(
-                        type = this.kilde.type,
-                        tidspunkt = this.kilde.tidspunktForInnhenting.toString(),
-                    )
-
-                is Grunnlagsopplysning.RegelKilde ->
-                    OpplysningkildeDto(
-                        type = this.kilde.type,
-                        tidspunkt = this.kilde.ts.toString(),
-                    )
-
-                else -> throw Exception("Mangler gyldig kilde for opplysning $id")
-            },
     )
 
 fun TrygdetidGrunnlagDto.toTrygdetidGrunnlag(brukerTokenInfo: BrukerTokenInfo): TrygdetidGrunnlag =

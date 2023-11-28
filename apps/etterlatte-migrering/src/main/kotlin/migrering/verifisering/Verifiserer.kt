@@ -52,6 +52,8 @@ internal class Verifiserer(
         if (request.gjenlevendeForelder != null) {
             return Result.success(request)
         }
+        val adresse = pdlKlient.hentPerson(PersonRolle.BARN, request.soeker)
+        adresse.kontaktadresse ?: adresse.bostedsadresse
         val persongalleri = hentPersongalleri(request.soeker)
         if (persongalleri == null) {
             logger.warn(
@@ -92,7 +94,7 @@ internal class Verifiserer(
         if (request.gjenlevendeForelder == null) {
             return listOf(GjenlevendeForelderMangler)
         }
-        if (request.enhet.nr in listOf("0001", "4862")) {
+        if (request.enhet.nr in listOf("0001")) {
             return listOf(EnhetUtland(request.enhet.nr))
         }
         if (request.enhet.nr == "2103") {

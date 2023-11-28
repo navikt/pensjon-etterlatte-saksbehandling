@@ -15,12 +15,14 @@ import { ApiErrorAlert } from '~ErrorBoundary'
 import { AktivitetspliktOppfolging } from '~shared/types/Aktivitetsplikt'
 import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
 import { handlinger } from '~components/behandling/handlinger/typer'
+import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 
 export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => {
   const { behandling } = props
   const { next } = useBehandlingRoutes()
 
-  const avdoedesDoedsdato = behandling?.familieforhold?.avdoede?.opplysning?.doedsdato
+  const avdoede = usePersonopplysninger()?.avdoede
+  const avdoedesDoedsdato = avdoede?.find((po) => po)?.opplysning?.doedsdato
   const redigerbar = behandlingErRedigerbar(behandling.status)
   const configContext = useContext(ConfigContext)
 

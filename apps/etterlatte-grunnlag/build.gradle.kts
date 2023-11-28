@@ -13,6 +13,7 @@ dependencies {
     implementation(project(":libs:etterlatte-behandling-model"))
     implementation(project(":libs:etterlatte-vedtaksvurdering-model"))
     implementation(project(":libs:etterlatte-pdl-model"))
+    implementation(project(":libs:etterlatte-migrering-model"))
 
     implementation(libs.ktor2.servercore)
     implementation(libs.ktor2.servercio)

@@ -44,6 +44,7 @@ include(
     "libs:etterlatte-ktor",
     "libs:etterlatte-jobs",
     "libs:etterlatte-kafka",
+    "libs:etterlatte-migrering-model",
     "libs:etterlatte-mq",
     "libs:etterlatte-pdl-model",
     "libs:etterlatte-institusjonsopphold-model",

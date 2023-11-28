@@ -35,9 +35,6 @@ internal class Verifiserer(
             if (request.gjenlevendeForelder == null) {
                 feil.add(GjenlevendeForelderMangler)
             }
-            if (request.enhet.nr in listOf("0001")) {
-                feil.add(EnhetUtland(request.enhet.nr))
-            }
             if (request.enhet.nr == "2103") {
                 feil.add(StrengtFortrolig)
             }
@@ -76,7 +73,7 @@ internal class Verifiserer(
     private fun sjekkAtPersonerFinsIPDL(request: MigreringRequest): List<Verifiseringsfeil> {
         val personer = mutableListOf(Pair(PersonRolle.BARN, request.soeker))
         request.avdoedForelder.forEach { personer.add(Pair(PersonRolle.AVDOED, it.ident)) }
-        request.gjenlevendeForelder!!.let { personer.add(Pair(PersonRolle.GJENLEVENDE, it)) }
+        request.gjenlevendeForelder?.let { personer.add(Pair(PersonRolle.GJENLEVENDE, it)) }
 
         return personer
             .map {
@@ -132,11 +129,6 @@ object GjenlevendeForelderMangler : Verifiseringsfeil() {
 object BarnetHarVerge : Verifiseringsfeil() {
     override val message: String
         get() = "Barn har vergemaal eller fremtidsfullmakt, kan ikke migrere"
-}
-
-data class EnhetUtland(val enhet: String) : Verifiseringsfeil() {
-    override val message: String
-        get() = "Vi har ikke adresse for enhet utland $enhet. Må følges opp snart"
 }
 
 object StrengtFortrolig : Verifiseringsfeil() {

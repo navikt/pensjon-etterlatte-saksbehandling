@@ -179,9 +179,9 @@ class BehandlingDao(
             connection().prepareStatement(
                 """
                 INSERT INTO behandling(id, sak_id, behandling_opprettet, sist_endret, status, behandlingstype, 
-                soeknad_mottatt_dato, virkningstidspunkt, revurdering_aarsak, opphoer_aarsaker, fritekst_aarsak, 
-                prosesstype, kilde, begrunnelse)
-                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                soeknad_mottatt_dato, virkningstidspunkt, utlandstilknytning, bodd_eller_arbeidet_utlandet, 
+                revurdering_aarsak, opphoer_aarsaker, fritekst_aarsak, prosesstype, kilde, begrunnelse)
+                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """.trimIndent(),
             )
         with(behandling) {
@@ -193,12 +193,14 @@ class BehandlingDao(
             stmt.setString(6, type.name)
             stmt.setTidspunkt(7, soeknadMottattDato?.toTidspunkt())
             stmt.setString(8, virkningstidspunkt?.toJson())
-            stmt.setString(9, revurderingsAarsak?.name)
-            stmt.setString(10, opphoerAarsaker?.toJson())
-            stmt.setString(11, fritekstAarsak)
-            stmt.setString(12, prosesstype.toString())
-            stmt.setString(13, kilde.toString())
-            stmt.setString(14, begrunnelse)
+            stmt.setJsonb(9, utlandstilknytning)
+            stmt.setString(10, objectMapper.writeValueAsString(boddEllerArbeidetUtlandet))
+            stmt.setString(11, revurderingsAarsak?.name)
+            stmt.setString(12, opphoerAarsaker?.toJson())
+            stmt.setString(13, fritekstAarsak)
+            stmt.setString(14, prosesstype.toString())
+            stmt.setString(15, kilde.toString())
+            stmt.setString(16, begrunnelse)
         }
         require(stmt.executeUpdate() == 1)
     }

@@ -23,10 +23,12 @@ import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseDao
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
+import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
+import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.behandling.tilVirkningstidspunkt
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
@@ -212,6 +214,8 @@ class RevurderingService(
                     kilde = Vedtaksloesning.GJENNY,
                     revurderingAarsak = revurderingAarsak,
                     virkningstidspunkt = null,
+                    utlandstilknytning = forrigeBehandling.utlandstilknytning,
+                    boddEllerArbeidetUtlandet = forrigeBehandling.boddEllerArbeidetUtlandet,
                     begrunnelse = begrunnelse,
                     fritekstAarsak = fritekstAarsak,
                     saksbehandlerIdent = saksbehandler.ident,
@@ -259,6 +263,8 @@ class RevurderingService(
             kilde = kilde,
             revurderingAarsak = revurderingAarsak,
             virkningstidspunkt = virkningstidspunkt?.tilVirkningstidspunkt("Opprettet automatisk"),
+            utlandstilknytning = forrigeBehandling.utlandstilknytning,
+            boddEllerArbeidetUtlandet = forrigeBehandling.boddEllerArbeidetUtlandet,
             begrunnelse = begrunnelse ?: "Automatisk revurdering - ${revurderingAarsak.name.lowercase()}",
             saksbehandlerIdent = Fagsaksystem.EY.navn,
         )
@@ -293,6 +299,8 @@ class RevurderingService(
         kilde: Vedtaksloesning,
         revurderingAarsak: Revurderingaarsak,
         virkningstidspunkt: Virkningstidspunkt?,
+        utlandstilknytning: Utlandstilknytning?,
+        boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet?,
         begrunnelse: String?,
         fritekstAarsak: String? = null,
         saksbehandlerIdent: String,
@@ -304,6 +312,8 @@ class RevurderingService(
             soeknadMottattDato = mottattDato?.let { LocalDateTime.parse(it) },
             revurderingsAarsak = revurderingAarsak,
             virkningstidspunkt = virkningstidspunkt,
+            utlandstilknytning = utlandstilknytning,
+            boddEllerArbeidetUtlandet = boddEllerArbeidetUtlandet,
             kilde = kilde,
             prosesstype = prosessType,
             begrunnelse = begrunnelse,

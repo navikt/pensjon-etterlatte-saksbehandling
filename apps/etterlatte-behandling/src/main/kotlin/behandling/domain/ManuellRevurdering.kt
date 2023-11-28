@@ -62,6 +62,11 @@ data class ManuellRevurdering(
             endreTilStatus(BehandlingStatus.OPPRETTET).copy(boddEllerArbeidetUtlandet = boddEllerArbeidetUtlandet)
         }
 
+    override fun oppdaterUtlandstilknytning(utlandstilknytning: Utlandstilknytning) =
+        hvisRedigerbar {
+            endreTilStatus(BehandlingStatus.OPPRETTET).copy(utlandstilknytning = utlandstilknytning)
+        }
+
     override fun tilOpprettet() = hvisRedigerbar { endreTilStatus(BehandlingStatus.OPPRETTET) }
 
     override fun tilVilkaarsvurdert(): Revurdering {

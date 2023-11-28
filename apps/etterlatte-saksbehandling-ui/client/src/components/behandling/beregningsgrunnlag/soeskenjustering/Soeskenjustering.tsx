@@ -3,7 +3,7 @@ import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
 import { useFieldArray, useForm } from 'react-hook-form'
 import { Button, ErrorSummary, Heading } from '@navikt/ds-react'
 import styled from 'styled-components'
-import { hentLevendeSoeskenFraAvdoedeForSoeker, IPdlPerson } from '~shared/types/Person'
+import { hentLevendeSoeskenFraAvdoedeForSoekerNy, IPdlPerson } from '~shared/types/Person'
 import { addMonths } from 'date-fns'
 import { SoeskenMedIBeregning } from '~shared/types/Beregning'
 import { Barn } from '~components/behandling/soeknadsoversikt/familieforhold/personer/Barn'
@@ -20,6 +20,7 @@ import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
 import SoeskenjusteringPeriode from '~components/behandling/beregningsgrunnlag/soeskenjustering/SoeskenjusteringPeriode'
 import { AGreen500 } from '@navikt/ds-tokens/dist/tokens'
 import { CheckmarkCircleIcon } from '@navikt/aksel-icons'
+import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 
 type SoeskenKanskjeMedIBeregning = {
   foedselsnummer: string
@@ -46,15 +47,15 @@ const nySoeskengrunnlagPeriode = (soesken: IPdlPerson[], fom?: string) => ({
 
 const Soeskenjustering = (props: SoeskenjusteringProps) => {
   const { behandling, onSubmit, setSoeskenJusteringManglerIkke } = props
-  if (!behandling.familieforhold) {
+  const personopplysninger = usePersonopplysninger()
+  if (!personopplysninger) {
     return null
   }
   const [visFeil, setVisFeil] = useState(false)
 
-  const soesken = hentLevendeSoeskenFraAvdoedeForSoeker(
-    behandling.familieforhold.avdoede,
-    behandling.søker?.foedselsnummer as string
-  )
+  const avdoede = personopplysninger.avdoede?.find((po) => po)
+  const soesken =
+    (avdoede && hentLevendeSoeskenFraAvdoedeForSoekerNy(avdoede, behandling.søker?.foedselsnummer as string)) ?? []
 
   const { handleSubmit, control, watch } = useForm<{
     soeskenMedIBeregning: PeriodisertBeregningsgrunnlag<SoeskenKanskjeMedIBeregning[]>[]
@@ -110,7 +111,7 @@ const Soeskenjustering = (props: SoeskenjusteringProps) => {
     }
   }
 
-  const doedsdato = behandling.familieforhold.avdoede.opplysning.doedsdato
+  const doedsdato = avdoede?.opplysning.doedsdato ?? null
 
   return (
     <>
@@ -122,7 +123,7 @@ const Soeskenjustering = (props: SoeskenjusteringProps) => {
         </HeadingWrapper>
       </ContentHeader>
       <FamilieforholdWrapper>
-        {behandling.søker && <Barn person={behandling.søker} doedsdato={doedsdato!!} />}
+        {behandling.søker && <Barn person={behandling.søker} doedsdato={doedsdato} />}
         <Border />
       </FamilieforholdWrapper>
       {visFeil && feil.length > 0 && behandles ? <FeilIPerioder feil={feil} /> : null}
@@ -133,6 +134,7 @@ const Soeskenjustering = (props: SoeskenjusteringProps) => {
               <SoeskenjusteringPeriode
                 key={item.id}
                 behandling={behandling}
+                familieforhold={{ avdoede: personopplysninger.avdoede, gjenlevende: personopplysninger.gjenlevende }}
                 control={control}
                 index={index}
                 remove={() => remove(index)}

@@ -10,6 +10,7 @@ import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.migrering.pen.PenKlient
 import no.nav.etterlatte.migrering.person.krr.KrrKlient
 import no.nav.etterlatte.migrering.start.StartMigreringRepository
+import no.nav.etterlatte.migrering.verifisering.GjenlevendeForelderPatcher
 import no.nav.etterlatte.migrering.verifisering.PDLKlient
 import no.nav.etterlatte.migrering.verifisering.Verifiserer
 
@@ -39,8 +40,14 @@ internal class ApplicationContext {
                 azureAppScope = config.getString("pdl.azure.scope"),
             ),
         )
+    val gjenlevendeForelderPatcher = GjenlevendeForelderPatcher(pdlKlient = pdlKlient)
     val verifiserer =
-        Verifiserer(pdlKlient = pdlKlient, repository = pesysRepository, featureToggleService = featureToggleService)
+        Verifiserer(
+            pdlKlient = pdlKlient,
+            repository = pesysRepository,
+            featureToggleService = featureToggleService,
+            gjenlevendeForelderPatcher = gjenlevendeForelderPatcher,
+        )
 
     val krrKlient =
         KrrKlient(

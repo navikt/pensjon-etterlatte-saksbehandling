@@ -19,6 +19,7 @@ on:
       - libs/saksbehandling-common/**
       - libs/etterlatte-jobs/**
       - libs/etterlatte-database/**
+      - libs/etterlatte-migrering-model/**
       - libs/etterlatte-mq/**
       - libs/etterlatte-utbetaling-model/**
       - libs/etterlatte-vedtaksvurdering-model/**
@@ -31,6 +32,7 @@ on:
       - libs/saksbehandling-common/**
       - libs/etterlatte-jobs/**
       - libs/etterlatte-database/**
+      - libs/etterlatte-migrering-model/**
       - libs/etterlatte-mq/**
       - libs/etterlatte-utbetaling-model/**
       - libs/etterlatte-vedtaksvurdering-model/**

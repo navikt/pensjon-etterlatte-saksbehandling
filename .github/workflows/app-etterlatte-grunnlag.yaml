@@ -19,6 +19,7 @@ on:
       - libs/saksbehandling-common/**
       - libs/testdata/**
       - libs/etterlatte-ktor/**
+      - libs/etterlatte-migrering-model/**
       - libs/etterlatte-sporingslogg/**
       - libs/etterlatte-behandling-model/**
       - libs/etterlatte-database/**
@@ -32,6 +33,7 @@ on:
       - libs/saksbehandling-common/**
       - libs/testdata/**
       - libs/etterlatte-ktor/**
+      - libs/etterlatte-migrering-model/**
       - libs/etterlatte-sporingslogg/**
       - libs/etterlatte-behandling-model/**
       - libs/etterlatte-database/**

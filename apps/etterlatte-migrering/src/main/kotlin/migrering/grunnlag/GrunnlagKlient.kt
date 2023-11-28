@@ -18,7 +18,7 @@ class GrunnlagKlient(
 ) {
     private val url = config.getString("grunnlag.resource.url")
 
-    suspend fun hentBostedslandBostedsland(fnr: String): VurdertBostedsland {
+    suspend fun hentBostedsland(fnr: String): VurdertBostedsland {
         val post =
             grunnlagHttpClient.post("$url/grunnlag/person/bostedsland") {
                 accept(ContentType.Application.Json)

@@ -20,6 +20,7 @@ import no.nav.etterlatte.libs.common.utbetaling.UtbetalingResponseDto
 import no.nav.etterlatte.libs.common.utbetaling.UtbetalingStatusDto
 import no.nav.etterlatte.libs.database.POSTGRES_VERSION
 import no.nav.etterlatte.libs.database.hentListe
+import no.nav.etterlatte.migrering.grunnlag.Utenlandstilknytningsjekker
 import no.nav.etterlatte.migrering.pen.BarnepensjonGrunnlagResponse
 import no.nav.etterlatte.migrering.pen.PenKlient
 import no.nav.etterlatte.migrering.person.krr.DigitalKontaktinformasjon
@@ -113,6 +114,7 @@ internal class MigreringRiverIntegrationTest {
                                     repository,
                                     featureToggleService,
                                     GjenlevendeForelderPatcher(pdlKlient),
+                                    mockk<Utenlandstilknytningsjekker>().also { every { it.finnUtenlandstilknytning(any()) } returns null },
                                 ),
                             krrKlient =
                                 mockk<KrrKlient>().also {
@@ -199,6 +201,7 @@ internal class MigreringRiverIntegrationTest {
                                     repository,
                                     featureToggleService,
                                     GjenlevendeForelderPatcher(pdlKlient),
+                                    mockk<Utenlandstilknytningsjekker>().also { every { it.finnUtenlandstilknytning(any()) } returns null },
                                 ),
                             krrKlient = mockk<KrrKlient>().also { coEvery { it.hentDigitalKontaktinformasjon(any()) } returns null },
                         )
@@ -297,6 +300,7 @@ internal class MigreringRiverIntegrationTest {
                                     repository,
                                     featureToggleService,
                                     GjenlevendeForelderPatcher(pdlKlient),
+                                    mockk<Utenlandstilknytningsjekker>().also { every { it.finnUtenlandstilknytning(any()) } returns null },
                                 ),
                             krrKlient = mockk<KrrKlient>().also { coEvery { it.hentDigitalKontaktinformasjon(any()) } returns null },
                         )
@@ -411,6 +415,7 @@ internal class MigreringRiverIntegrationTest {
                                     repository,
                                     featureToggleService,
                                     GjenlevendeForelderPatcher(pdlKlient),
+                                    mockk<Utenlandstilknytningsjekker>().also { every { it.finnUtenlandstilknytning(any()) } returns null },
                                 ),
                             krrKlient = mockk<KrrKlient>().also { coEvery { it.hentDigitalKontaktinformasjon(any()) } returns null },
                         )
@@ -474,6 +479,7 @@ internal class MigreringRiverIntegrationTest {
                                     repository,
                                     featureToggleService,
                                     GjenlevendeForelderPatcher(pdlKlient),
+                                    mockk<Utenlandstilknytningsjekker>().also { every { it.finnUtenlandstilknytning(any()) } returns null },
                                 ),
                             krrKlient = mockk<KrrKlient>().also { coEvery { it.hentDigitalKontaktinformasjon(any()) } returns null },
                         )

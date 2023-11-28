@@ -8,6 +8,7 @@ import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.migrering.grunnlag.GrunnlagKlient
+import no.nav.etterlatte.migrering.grunnlag.Utenlandstilknytningsjekker
 import no.nav.etterlatte.migrering.pen.PenKlient
 import no.nav.etterlatte.migrering.person.krr.KrrKlient
 import no.nav.etterlatte.migrering.start.StartMigreringRepository
@@ -52,6 +53,7 @@ internal class ApplicationContext {
                 azureAppScope = config.getString("grunnlag.azure.scope"),
             ),
         )
+    val utenlandstilknytningsjekker = Utenlandstilknytningsjekker(grunnlagKlient)
 
     val verifiserer =
         Verifiserer(
@@ -59,6 +61,7 @@ internal class ApplicationContext {
             repository = pesysRepository,
             featureToggleService = featureToggleService,
             gjenlevendeForelderPatcher = gjenlevendeForelderPatcher,
+            utenlandstilknytningsjekker = utenlandstilknytningsjekker,
         )
 
     val krrKlient =

@@ -9,6 +9,7 @@ import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.migrering.Migreringsstatus
 import no.nav.etterlatte.migrering.PesysRepository
+import no.nav.etterlatte.migrering.grunnlag.Utenlandstilknytningsjekker
 import no.nav.etterlatte.migrering.start.MigreringFeatureToggle
 import no.nav.etterlatte.rapidsandrivers.migrering.MigreringRequest
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser
@@ -19,6 +20,7 @@ internal class Verifiserer(
     private val repository: PesysRepository,
     private val featureToggleService: FeatureToggleService,
     private val gjenlevendeForelderPatcher: GjenlevendeForelderPatcher,
+    private val utenlandstilknytningsjekker: Utenlandstilknytningsjekker,
 ) {
     private val sikkerlogg = sikkerlogger()
     private val logger = LoggerFactory.getLogger(this::class.java)
@@ -46,7 +48,9 @@ internal class Verifiserer(
         if (feil.isNotEmpty()) {
             haandterFeil(request, feil)
         }
-        return patchedRequest.getOrThrow()
+        return patchedRequest.getOrThrow().copy(
+            utenlandstilknytningType = utenlandstilknytningsjekker.finnUtenlandstilknytning(request),
+        )
     }
 
     private fun haandterFeil(

@@ -118,7 +118,7 @@ export const Soeknadsoversikt = (props: { behandling: IDetaljertBehandling }) =>
         <SkalViseBosattUtland behandling={behandling} redigerbar={redigerbar} />
       </InnholdPadding>
       <Border />
-      <Familieforhold behandling={behandling} />
+      <Familieforhold behandling={behandling} personopplysninger={personopplysninger} />
       {redigerbar ? (
         <BehandlingHandlingKnapper>
           {behandlingErUtfylt(behandling) && <Start disabled={!erGyldigFremsatt} />}

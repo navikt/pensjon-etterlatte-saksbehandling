@@ -22,7 +22,6 @@ class Utenlandstilknytningsjekker(private val grunnlagKlient: GrunnlagKlient) {
                     bostedsland,
                 )
             }
-            return UtenlandstilknytningType.NASJONAL
         }
 
         if (request.enhet.nr == Enheter.AALESUND_UTLAND.enhetNr) {

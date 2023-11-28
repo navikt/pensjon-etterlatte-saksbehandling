@@ -2,6 +2,7 @@ import fetch from 'node-fetch'
 import { logger } from '../monitoring/logger'
 import { NextFunction, Request, Response } from 'express'
 import { AdConfig } from '../config/config'
+import { getTokenInCache, setTokenInCache } from '../cache'
 
 export const tokenMiddleware = (scope: string) => async (req: Request, res: Response, next: NextFunction) => {
   const bearerToken = req.headers?.authorization?.split(' ')[1]
@@ -17,6 +18,14 @@ export const tokenMiddleware = (scope: string) => async (req: Request, res: Resp
 }
 
 export const getOboToken = async (bearerToken: string, scope: string): Promise<string> => {
+  const cacheKey = bearerToken + '.' + scope
+
+  const [cacheHit, tokenFromCache] = getTokenInCache(cacheKey)
+  logger.debug('getOboToken: cache hit for scope=' + scope + '? ' + cacheHit)
+  if (cacheHit) {
+    return tokenFromCache
+  }
+
   try {
     const body: any = {
       client_id: AdConfig.clientId,
@@ -40,6 +49,9 @@ export const getOboToken = async (bearerToken: string, scope: string): Promise<s
       throw new Error('Token-kall feilet')
     }
     const json = await response.json()
+
+    setTokenInCache(cacheKey, json.access_token, json.expires_in)
+
     return json.access_token
   } catch (e) {
     logger.info('Feil ved henting av obo-token: ', e)

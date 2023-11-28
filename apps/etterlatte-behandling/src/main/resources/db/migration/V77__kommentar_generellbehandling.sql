@@ -1,0 +1,1 @@
+alter table generellbehandling ADD COLUMN kommentar TEXT;

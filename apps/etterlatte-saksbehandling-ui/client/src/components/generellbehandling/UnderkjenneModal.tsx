@@ -34,7 +34,7 @@ export const UnderkjenneModal = ({
         </Alert>
       )}
       <Button
-        style={{ marginTop: '1rem' }}
+        style={{ marginTop: '1rem', marginBottom: '1rem' }}
         disabled={isSuccess(underkjennStatus)}
         type="button"
         onClick={() => {

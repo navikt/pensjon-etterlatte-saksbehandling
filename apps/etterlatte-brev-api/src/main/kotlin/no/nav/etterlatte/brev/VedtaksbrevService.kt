@@ -81,9 +81,18 @@ class VedtaksbrevService(
 
         val mottakerFnr =
             with(generellBrevData.personerISak) {
-                innsender?.fnr?.value?.takeUnless { it == Vedtaksloesning.PESYS.name } ?: soeker.fnr.value
+                if (verge?.vedVergemaal == true) {
+                    verge.foedselsnummer!!.value
+                } else {
+                    innsender?.fnr?.value?.takeUnless { it == Vedtaksloesning.PESYS.name } ?: soeker.fnr.value
+                }
             }
-        val mottaker = adresseService.hentMottakerAdresse(mottakerFnr)
+        val mottaker =
+            if (generellBrevData.personerISak.verge != null) {
+                generellBrevData.personerISak.verge.toMottaker()
+            } else {
+                adresseService.hentMottakerAdresse(mottakerFnr)
+            }
 
         val prosessType = brevProsessTypeFactory.fra(generellBrevData)
 

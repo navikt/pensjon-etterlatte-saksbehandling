@@ -3,15 +3,20 @@ package no.nav.etterlatte.brev.behandling
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
+import no.nav.etterlatte.libs.common.grunnlag.Opplysning
 import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
 import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsnummer
 import no.nav.etterlatte.libs.common.grunnlag.hentKonstantOpplysning
 import no.nav.etterlatte.libs.common.grunnlag.hentNavn
+import no.nav.etterlatte.libs.common.grunnlag.hentVergeadresse
 import no.nav.etterlatte.libs.common.grunnlag.hentVergemaalellerfremtidsfullmakt
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Navn
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
+import no.nav.etterlatte.libs.common.person.VergemaalEllerFremtidsfullmakt
 import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
+import java.util.UUID
 
 fun Grunnlag.mapSoeker(): Soeker =
     with(this.soeker) {
@@ -60,12 +65,15 @@ fun Grunnlag.mapSpraak(): Spraak =
         }
     }
 
-fun Grunnlag.mapVerge(sakType: SakType): Verge? =
+fun Grunnlag.mapVerge(
+    sakType: SakType,
+    behandlingId: UUID,
+): Verge? =
     with(this) {
-        val opplysning = sak.hentVergemaalellerfremtidsfullmakt()
+        val opplysning = soeker.hentVergemaalellerfremtidsfullmakt()
 
         if (opplysning?.verdi != null) {
-            TODO("Støtter ikke annen verge enn forelder – håndtering av annen verge krever ytterligere avklaringer")
+            hentVergemaal(opplysning, behandlingId)
         } else if (sakType == SakType.BARNEPENSJON) {
             val gjenlevendeNavn = hentGjenlevende().hentNavn()!!.verdi.fulltNavn()
 
@@ -75,6 +83,34 @@ fun Grunnlag.mapVerge(sakType: SakType): Verge? =
         }
     }
 
+private fun Grunnlag.hentVergemaal(
+    opplysning: Opplysning.Konstant<List<VergemaalEllerFremtidsfullmakt>>,
+    behandlingId: UUID,
+): Verge {
+    val vergerMedRelevantOmfang =
+        opplysning.verdi.filter {
+            it.vergeEllerFullmektig.omfang?.lowercase()?.contains("oekonomiske") ?: false
+        }
+    if (vergerMedRelevantOmfang.size != 1) {
+        throw IngenUnikVergeMedOekonomiskeInteresserException(behandlingId, vergerMedRelevantOmfang)
+    }
+    val verge = vergerMedRelevantOmfang[0]
+    val vergeadresse = sak.hentVergeadresse()?.verdi
+
+    if (vergeadresse?.navn == null && verge.vergeEllerFullmektig.navn == null) {
+        throw VergeManglerNavnException(behandlingId)
+    }
+    if (vergeadresse == null) {
+        throw VergeManglerAdresseException(behandlingId)
+    }
+    return Verge(
+        navn = vergeadresse.navn ?: verge.vergeEllerFullmektig.navn!!,
+        vedVergemaal = true,
+        foedselsnummer = verge.vergeEllerFullmektig.motpartsPersonident,
+        adresse = vergeadresse,
+    )
+}
+
 private fun Navn.fulltNavn(): String = listOfNotNull(fornavn, mellomnavn, etternavn).joinToString(" ") { it.storForbokstav() }
 
 private fun String.storForbokstav() = this.lowercase().storForbokstavEtter("-").storForbokstavEtter(" ")
@@ -83,3 +119,20 @@ private fun String.storForbokstavEtter(delim: String) =
     this.split(delim).joinToString(delim) {
         it.replaceFirstChar { c -> c.uppercase() }
     }
+
+class IngenUnikVergeMedOekonomiskeInteresserException(
+    behandlingId: UUID,
+    verger: List<VergemaalEllerFremtidsfullmakt>,
+) :
+    InternfeilException(
+            "Fant ikke én verge med økonomiske interesser i behandling med id=$behandlingId," +
+                " men ${verger.size}",
+        )
+
+class VergeManglerNavnException(
+    behandlingId: UUID,
+) : InternfeilException("Finner ikke navn for verge i behandling med id=$behandlingId")
+
+class VergeManglerAdresseException(
+    behandlingId: UUID,
+) : InternfeilException("Finner ikke adresse for verge i behandling med id=$behandlingId")

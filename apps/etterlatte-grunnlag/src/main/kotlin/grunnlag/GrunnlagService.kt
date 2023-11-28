@@ -146,30 +146,42 @@ class RealGrunnlagService(
         behandlingId: UUID,
         sakstype: SakType,
     ): PersonopplysningerResponse {
-        val grunnlag = opplysningDao.hentAlleGrunnlagForBehandling(behandlingId)
+        val grunnlag =
+            opplysningDao.hentGrunnlagAvTypeForBehandling(
+                behandlingId,
+                INNSENDER_PDL_V1,
+                SOEKER_PDL_V1,
+                AVDOED_PDL_V1,
+                GJENLEVENDE_FORELDER_PDL_V1,
+            )
+
+        // Finn siste grunnlag blant relevante typer for unike personer,
+        // slik at hver person kun havner i en av kategoriene
+        val sisteGrunnlagPerFnr =
+            grunnlag.filter {
+                setOf(
+                    SOEKER_PDL_V1,
+                    AVDOED_PDL_V1,
+                    GJENLEVENDE_FORELDER_PDL_V1,
+                ).contains(it.opplysning.opplysningType)
+            }
+                .groupBy { it.opplysning.fnr }
+                .map {
+                    it.value.maxBy { opplysning -> opplysning.hendelseNummer }
+                }
 
         val innsender =
             grunnlag
                 .filter { it.opplysning.opplysningType == INNSENDER_PDL_V1 }
                 .maxByOrNull { it.hendelseNummer }
-        val soker =
-            grunnlag
-                .filter { it.opplysning.opplysningType == SOEKER_PDL_V1 }
-                .maxByOrNull { it.hendelseNummer }
-        val avdode =
-            grunnlag.filter { it.opplysning.opplysningType == AVDOED_PDL_V1 }
-                .sortedByDescending { it.hendelseNummer }
-                .distinctBy { it.opplysning.fnr }
+        val soker = sisteGrunnlagPerFnr.find { it.opplysning.opplysningType == SOEKER_PDL_V1 }
+        val avdode = sisteGrunnlagPerFnr.filter { it.opplysning.opplysningType == AVDOED_PDL_V1 }
         val gjenlevende =
             if (sakstype == SakType.OMSTILLINGSSTOENAD) {
                 listOf(soker)
             } else {
-                grunnlag.filter { it.opplysning.opplysningType == GJENLEVENDE_FORELDER_PDL_V1 }
-                    .sortedByDescending { it.hendelseNummer }
-                    .distinctBy { it.opplysning.fnr }
+                sisteGrunnlagPerFnr.filter { it.opplysning.opplysningType == GJENLEVENDE_FORELDER_PDL_V1 }
             }
-
-        // Filtrere mot PERSONGALLERI?
 
         return PersonopplysningerResponse(
             innsender = innsender?.opplysning?.asPersonopplysning(),

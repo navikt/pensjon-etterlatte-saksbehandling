@@ -92,7 +92,7 @@ internal class Verifiserer(
         if (request.gjenlevendeForelder == null) {
             return listOf(GjenlevendeForelderMangler)
         }
-        if (request.enhet.nr in listOf("0001", "4862")) {
+        if (request.enhet.nr in listOf("0001")) {
             return listOf(EnhetUtland(request.enhet.nr))
         }
         if (request.enhet.nr == "2103") {

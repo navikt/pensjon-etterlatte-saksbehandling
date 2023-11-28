@@ -6,6 +6,8 @@ import { Soeskenliste } from '~components/behandling/soeknadsoversikt/familiefor
 import { Personopplysninger } from '~shared/types/grunnlag'
 import { Familieforhold } from '~shared/types/Person'
 
+import { SamsvarPersongalleri } from '~components/behandling/soeknadsoversikt/familieforhold/SamsvarPersongalleri'
+
 export interface PropsFamilieforhold {
   personopplysninger: Personopplysninger | null
 }
@@ -26,6 +28,7 @@ export const FamilieforholdBarnepensjon = ({ personopplysninger }: PropsFamilief
   return (
     <>
       <FamilieforholdWrapper>
+        <SamsvarPersongalleri />
         <FamilieforholdVoksne>
           <Person person={soeker.opplysning} kilde={alleGjenlevende[0].kilde} mottaker />
           {alleAvdoede.map((avdoede) => (

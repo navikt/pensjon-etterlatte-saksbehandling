@@ -99,4 +99,24 @@ export interface Persongalleri {
   soesken?: string[]
   avdoed?: string[]
   gjenlevende?: string[]
+  personerUtenIdent?: Array<PersonUtenIdent> | null
+}
+
+export type RelativPersonrolle = 'FORELDER' | 'BARN'
+
+export interface PersonUtenIdent {
+  rolle: RelativPersonrolle
+  person: RelatertPerson
+}
+
+export const relativPersonrolleTekst: Record<RelativPersonrolle, string> = {
+  BARN: 'Søsken',
+  FORELDER: 'Forelder',
+}
+
+export interface RelatertPerson {
+  foedselsdato?: string
+  kjoenn?: string
+  navn?: string
+  statsborgerskap?: string
 }

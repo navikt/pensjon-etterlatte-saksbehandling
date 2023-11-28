@@ -1,4 +1,4 @@
-import { IPdlPerson } from '~shared/types/Person'
+import { IPdlPerson, Persongalleri } from '~shared/types/Person'
 
 export interface Grunnlagsopplysning<T, K> {
   id: string
@@ -33,3 +33,20 @@ export interface GrunnlagKilde {
   tidspunkt: string
   detalj?: string
 }
+
+export interface PersongalleriSamsvar {
+  persongalleri: Persongalleri
+  kilde: GrunnlagKilde
+  persongalleriPdl: Persongalleri | null
+  kildePdl: GrunnlagKilde | null
+  problemer: Array<MismatchPersongalleri>
+}
+
+export type MismatchPersongalleri =
+  | 'MANGLER_GJENLEVENDE'
+  | 'MANGLER_AVDOED'
+  | 'MANGLER_SOESKEN'
+  | 'EKSTRA_GJENLEVENDE'
+  | 'EKSTRA_AVDOED'
+  | 'EKSTRA_SOESKEN'
+  | 'HAR_PERSONER_UTEN_IDENTER'

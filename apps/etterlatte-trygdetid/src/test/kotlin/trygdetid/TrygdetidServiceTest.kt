@@ -595,7 +595,8 @@ internal class TrygdetidServiceTest {
             trygdetidGrunnlag().copy(
                 periode = TrygdetidPeriode(LocalDate.now().minusYears(2), LocalDate.now().minusYears(1)),
             )
-        val eksisterendeTrygdetid = trygdetid(behandlingId, ident = AVDOED_FOEDSELSNUMMER.value).copy(overstyrtNorskPoengaar = 10)
+        val eksisterendeTrygdetid =
+            trygdetid(behandlingId, ident = AVDOED_FOEDSELSNUMMER.value).copy(overstyrtNorskPoengaar = 10)
         val vilkaarsvurderingDto = mockk<VilkaarsvurderingDto>()
 
         val grunnlag = mockk<Grunnlag>()
@@ -860,7 +861,12 @@ internal class TrygdetidServiceTest {
         coEvery { behandlingKlient.settBehandlingStatusTrygdetidOppdatert(any(), any()) } returns true
         coEvery { repository.hentTrygdetid(behandlingId) } returns eksisterendeTrygdetid
         coEvery { repository.hentTrygdetiderForBehandling(behandlingId) } returns listOf(eksisterendeTrygdetid)
-        coEvery { repository.oppdaterTrygdetid(capture(oppdatertTrygdetidCaptured), true) } returns eksisterendeTrygdetid
+        coEvery {
+            repository.oppdaterTrygdetid(
+                capture(oppdatertTrygdetidCaptured),
+                true,
+            )
+        } returns eksisterendeTrygdetid
 
         service.overstyrBeregnetTrygdetid(behandlingId, beregnetTrygdetid(25, Tidspunkt.now()).resultat)
 
@@ -872,6 +878,58 @@ internal class TrygdetidServiceTest {
         with(oppdatertTrygdetidCaptured.captured) {
             this.trygdetidGrunnlag.size shouldBe 0
             this.beregnetTrygdetid?.resultat?.samletTrygdetidNorge shouldBe 25
+        }
+    }
+
+    @Test
+    fun `skal kunne reberegne trygdetid uten fremtidig trygdetid grunnlag`() {
+        val behandlingId = randomUUID()
+        val behandling = behandling(behandlingId)
+        val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
+        val trygdetidGrunnlag =
+            trygdetidGrunnlag(periode = TrygdetidPeriode(LocalDate.of(2000, 1, 1), LocalDate.of(2009, 12, 31)))
+        val fremtidigTrygdetidGrunnlag =
+            trygdetidGrunnlag(
+                trygdetidType = TrygdetidType.FREMTIDIG,
+                periode = TrygdetidPeriode(LocalDate.of(2010, 1, 1), LocalDate.of(2015, 12, 31)),
+            )
+        val eksisterendeTrygdetid =
+            trygdetid(
+                behandlingId,
+                trygdetidGrunnlag = listOf(trygdetidGrunnlag, fremtidigTrygdetidGrunnlag),
+                ident = AVDOED_FOEDSELSNUMMER.value,
+                beregnetTrygdetid = beregnetTrygdetid(35, Tidspunkt.now()),
+            )
+        val oppdatertTrygdetidCaptured = slot<Trygdetid>()
+        coEvery { behandlingKlient.settBehandlingStatusTrygdetidOppdatert(any(), any()) } returns true
+        coEvery { behandlingKlient.hentBehandling(behandlingId, saksbehandler) } returns behandling
+        coEvery { grunnlagKlient.hentGrunnlag(any(), any(), any()) } returns grunnlag
+        coEvery { repository.hentTrygdetidMedId(behandlingId, eksisterendeTrygdetid.id) } returns eksisterendeTrygdetid
+        coEvery {
+            repository.oppdaterTrygdetid(
+                capture(oppdatertTrygdetidCaptured),
+                false,
+            )
+        } returns eksisterendeTrygdetid
+
+        runBlocking {
+            service.reberegnUtenFremtidigTrygdetid(behandlingId, eksisterendeTrygdetid.id, saksbehandler)
+        }
+
+        coVerify(exactly = 1) {
+            behandlingKlient.kanOppdatereTrygdetid(any(), any())
+            behandlingKlient.hentBehandling(any(), any())
+            grunnlagKlient.hentGrunnlag(any(), any(), any())
+            repository.hentTrygdetidMedId(behandlingId, eksisterendeTrygdetid.id)
+            repository.oppdaterTrygdetid(oppdatertTrygdetidCaptured.captured, false)
+        }
+        verify(exactly = 1) {
+            beregningService.beregnTrygdetid(any(), any(), any(), any())
+        }
+        with(oppdatertTrygdetidCaptured.captured) {
+            this.trygdetidGrunnlag.size shouldBe 1
+            this.trygdetidGrunnlag.first().type shouldBe TrygdetidType.FAKTISK
+            this.beregnetTrygdetid?.resultat?.samletTrygdetidNorge shouldBe 10
         }
     }
 
@@ -1350,7 +1408,8 @@ internal class TrygdetidServiceTest {
                 every { sak } returns sakId
                 every { behandlingType } returns BehandlingType.FØRSTEGANGSBEHANDLING
             }
-        val grunnlag = GrunnlagTestData(opplysningsmapAvdoedOverrides = eldreAvdoedTestopplysningerMap).hentOpplysningsgrunnlag()
+        val grunnlag =
+            GrunnlagTestData(opplysningsmapAvdoedOverrides = eldreAvdoedTestopplysningerMap).hentOpplysningsgrunnlag()
         val forventetFoedselsdato = grunnlag.hentAvdoede().first().hentFoedselsdato()!!.verdi
         val forventetDoedsdato = grunnlag.hentAvdoede().first().hentDoedsdato()!!.verdi
         val forventetIdent = grunnlag.hentAvdoede().first().hentFoedselsnummer()!!.verdi

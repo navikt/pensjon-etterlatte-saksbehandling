@@ -87,6 +87,12 @@ interface TrygdetidService {
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): Boolean
+
+    suspend fun reberegnUtenFremtidigTrygdetid(
+        behandlingId: UUID,
+        trygdetidId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Trygdetid
 }
 
 interface GammelTrygdetidServiceMedNy : NyTrygdetidService, TrygdetidService {
@@ -648,6 +654,38 @@ class TrygdetidServiceImpl(
                 behandlingKlient.settBehandlingStatusTrygdetidOppdatert(behandlingId, brukerTokenInfo)
             } else {
                 false
+            }
+        }
+
+    override suspend fun reberegnUtenFremtidigTrygdetid(
+        behandlingId: UUID,
+        trygdetidId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Trygdetid =
+        tilstandssjekk(behandlingId, brukerTokenInfo) {
+            val gjeldendeTrygdetid: Trygdetid =
+                trygdetidRepository.hentTrygdetidMedId(behandlingId, trygdetidId) ?: throw GenerellIkkeFunnetException()
+
+            val trygdetidUtenFremtidigGrunnlag =
+                gjeldendeTrygdetid.copy(
+                    trygdetidGrunnlag = gjeldendeTrygdetid.trygdetidGrunnlag.filter { it.type != TrygdetidType.FREMTIDIG },
+                )
+
+            val datoer = hentDatoerForBehandlingOgAvdoed(behandlingId, gjeldendeTrygdetid.ident, brukerTokenInfo)
+
+            val nyBeregnetTrygdetid =
+                beregnTrygdetidService.beregnTrygdetid(
+                    trygdetidGrunnlag = trygdetidUtenFremtidigGrunnlag.trygdetidGrunnlag,
+                    foedselsDato = datoer.foedselsDato,
+                    doedsDato = datoer.doedsDato,
+                    norskPoengaar = trygdetidUtenFremtidigGrunnlag.overstyrtNorskPoengaar,
+                )
+
+            when (nyBeregnetTrygdetid) {
+                null -> trygdetidUtenFremtidigGrunnlag.nullstillBeregnetTrygdetid()
+                else -> trygdetidUtenFremtidigGrunnlag.oppdaterBeregnetTrygdetid(nyBeregnetTrygdetid)
+            }.also { nyTrygdetid ->
+                trygdetidRepository.oppdaterTrygdetid(nyTrygdetid)
             }
         }
 

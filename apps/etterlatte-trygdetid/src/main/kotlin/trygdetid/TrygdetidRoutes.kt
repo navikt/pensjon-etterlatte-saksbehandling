@@ -130,13 +130,35 @@ fun Route.trygdetid(
             }
         }
 
-        post("/migrering") {
-            withBehandlingId(behandlingKlient) {
-                logger.info("Migrering overstyrer trygdetid for behandling $behandlingId")
+        route("/migrering") {
+            post {
+                withBehandlingId(behandlingKlient) {
+                    logger.info("Migrering overstyrer trygdetid for behandling $behandlingId")
 
-                val beregnetTrygdetid = call.receive<DetaljertBeregnetTrygdetidResultat>()
+                    val beregnetTrygdetid = call.receive<DetaljertBeregnetTrygdetidResultat>()
 
-                call.respond(trygdetidService.overstyrBeregnetTrygdetid(behandlingId, beregnetTrygdetid).toDto())
+                    call.respond(trygdetidService.overstyrBeregnetTrygdetid(behandlingId, beregnetTrygdetid).toDto())
+                }
+            }
+
+            post("/uten_fremtidig") {
+                withBehandlingId(behandlingKlient) {
+                    logger.info("Beregn trygdetid uten fremtidig trygdetid for behandling $behandlingId")
+
+                    val trygdetid = trygdetidService.hentTrygdetid(behandlingId, brukerTokenInfo)
+
+                    if (trygdetid != null) {
+                        call.respond(
+                            trygdetidService.reberegnUtenFremtidigTrygdetid(
+                                behandlingId,
+                                trygdetid.id,
+                                brukerTokenInfo,
+                            ).toDto(),
+                        )
+                    } else {
+                        call.respond(HttpStatusCode.NoContent)
+                    }
+                }
             }
         }
 

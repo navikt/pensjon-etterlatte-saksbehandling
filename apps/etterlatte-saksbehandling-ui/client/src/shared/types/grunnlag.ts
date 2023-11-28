@@ -15,8 +15,8 @@ export interface PersonMedNavn {
 }
 
 export interface Personopplysninger {
-  innsender: Personopplysning
-  soeker: Personopplysning
+  innsender?: Personopplysning
+  soeker?: Personopplysning
   avdoede: Personopplysning[]
   gjenlevende: Personopplysning[]
 }
@@ -24,11 +24,11 @@ export interface Personopplysninger {
 export interface Personopplysning {
   opplysningType: string
   id: string
-  kilde: GenerellKilde
+  kilde: GrunnlagKilde
   opplysning: IPdlPerson
 }
 
-export interface GenerellKilde {
+export interface GrunnlagKilde {
   type: string
   tidspunkt: string
   detalj?: string

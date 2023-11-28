@@ -1,5 +1,5 @@
 import { CopyButton, Heading, Link, Table } from '@navikt/ds-react'
-import { IFamilieforhold, IPdlPerson } from '~shared/types/Person'
+import { Familieforhold, IPdlPerson } from '~shared/types/Person'
 import styled from 'styled-components'
 import { IAdresse } from '~shared/types/IAdresse'
 import { differenceInYears, format, parse } from 'date-fns'
@@ -13,11 +13,11 @@ const FnrWrapper = styled.div`
 `
 
 type Props = {
-  familieforhold: IFamilieforhold
+  familieforhold: Familieforhold
 }
 
 export const BarneListe = ({ familieforhold }: Props) => {
-  const barneListe = familieforhold.avdoede?.opplysning.avdoedesBarn ?? []
+  const barneListe = familieforhold.avdoede.flatMap((it) => it.opplysning.avdoedesBarn ?? [])
 
   return (
     <div>
@@ -59,11 +59,12 @@ export const BarneListe = ({ familieforhold }: Props) => {
   )
 }
 
-const BarnRow = ({ barn, familieforhold }: { barn: IPdlPerson; familieforhold: IFamilieforhold }) => {
+const BarnRow = ({ barn, familieforhold }: { barn: IPdlPerson; familieforhold: Familieforhold }) => {
   const erDoed = !!barn.doedsdato
   const barnetsFnr = barn.foedselsnummer
 
-  const erGjenlevendesBarn = familieforhold.gjenlevende.opplysning.familieRelasjon?.barn?.includes(barnetsFnr) ?? false
+  const erGjenlevendesBarn =
+    familieforhold.gjenlevende.flatMap((it) => it.opplysning.familieRelasjon?.barn).includes(barnetsFnr) ?? false
 
   if (erDoed) {
     const navn = `${barn.fornavn} ${barn.etternavn} '(død)'}`

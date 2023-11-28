@@ -81,6 +81,29 @@ class OpplysningDao(private val datasource: DataSource) {
                 }.executeQuery().toList { asGrunnlagshendelse() }
         }
 
+    fun hentGrunnlagAvTypeForBehandling(
+        behandlingId: UUID,
+        vararg typer: Opplysningstype,
+    ): List<GrunnlagHendelse> {
+        return connection.use {
+            it.prepareStatement(
+                """
+                SELECT bv.sak_id, opplysning_id, kilde, opplysning_type, opplysning, hendelse.hendelsenummer, fnr, fom, tom
+                FROM grunnlagshendelse hendelse 
+                LEFT JOIN behandling_versjon bv 
+                    ON bv.sak_id = hendelse.sak_id AND bv.hendelsenummer >= hendelse.hendelsenummer 
+                WHERE bv.behandling_id = ?
+                    AND hendelse.opplysning_type = ANY(?)
+                """.trimIndent(),
+            )
+                .apply {
+                    setObject(1, behandlingId)
+                    val typeArray = it.createArrayOf("text", typer.map { t -> t.name }.toTypedArray())
+                    setArray(2, typeArray)
+                }.executeQuery().toList { asGrunnlagshendelse() }
+        }
+    }
+
     fun finnHendelserIGrunnlag(sakId: Long): List<GrunnlagHendelse> =
         connection.use {
             it.prepareStatement(

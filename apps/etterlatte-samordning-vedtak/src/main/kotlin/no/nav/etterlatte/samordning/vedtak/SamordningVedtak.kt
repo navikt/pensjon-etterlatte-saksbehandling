@@ -59,9 +59,9 @@ class ManglerFoedselsnummerException : UgyldigForespoerselException(
     meta = getMeta(),
 )
 
-class ManglerVirkFomException : UgyldigForespoerselException(
-    code = "003-VIRKFOM-MANGLER",
-    detail = "virkFom ikke angitt",
+class ManglerFomDatoException : UgyldigForespoerselException(
+    code = "003-FOMDATO-MANGLER",
+    detail = "fomDato ikke angitt",
     meta = getMeta(),
 )
 

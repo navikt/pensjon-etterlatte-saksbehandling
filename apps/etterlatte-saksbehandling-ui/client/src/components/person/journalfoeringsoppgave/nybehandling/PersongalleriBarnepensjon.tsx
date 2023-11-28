@@ -9,7 +9,7 @@ import { settNyBehandlingRequest } from '~store/reducers/JournalfoeringOppgaveRe
 
 type PersonArray = keyof Omit<Persongalleri, 'soeker' | 'innsender'>
 
-export default function PersongalleriBarnepensjon() {
+export default function PersongalleriBarnepensjon({ erManuellMigrering = false }: { erManuellMigrering?: boolean }) {
   const { nyBehandlingRequest } = useJournalfoeringOppgave()
   const dispatch = useAppDispatch()
 
@@ -53,8 +53,10 @@ export default function PersongalleriBarnepensjon() {
           pattern="[0-9]{11}"
           maxLength={11}
           onChange={(e) => oppdaterPersongalleri({ ...persongalleri, soeker: e.target.value })}
-          description="Fødselsnummeret er automatisk hentet fra oppgaven"
-          readOnly
+          description={
+            erManuellMigrering ? 'Oppgi søker sitt fødselsnummer' : 'Fødselsnummeret er automatisk hentet fra oppgaven'
+          }
+          readOnly={!erManuellMigrering}
         />
       </InputRow>
 

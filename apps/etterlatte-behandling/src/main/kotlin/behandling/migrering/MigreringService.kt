@@ -16,7 +16,6 @@ import no.nav.etterlatte.libs.common.behandling.JaNeiMedBegrunnelse
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Utenlandstilknytning
-import no.nav.etterlatte.libs.common.behandling.UtenlandstilknytningType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.retry
 import no.nav.etterlatte.oppgave.OppgaveService
@@ -82,15 +81,17 @@ class MigreringService(
                             ),
                     )
 
-                    sakService.oppdaterUtenlandstilknytning(
-                        sakId = behandling.sak.id,
-                        utenlandstilknytning =
-                            Utenlandstilknytning(
-                                type = UtenlandstilknytningType.NASJONAL, // TODO Må utredes fra pesys sak
-                                kilde = Grunnlagsopplysning.Pesys.create(),
-                                begrunnelse = "Automatisk migrert fra Pesys",
-                            ),
-                    )
+                    request.utenlandstilknytningType?.let {
+                        sakService.oppdaterUtenlandstilknytning(
+                            sakId = behandling.sak.id,
+                            utenlandstilknytning =
+                                Utenlandstilknytning(
+                                    type = it,
+                                    kilde = Grunnlagsopplysning.Pesys.create(),
+                                    begrunnelse = "Automatisk migrert fra Pesys",
+                                ),
+                        )
+                    }
 
                     val nyopprettaOppgave =
                         requireNotNull(behandlingOgOppgave.oppgave) {

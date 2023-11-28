@@ -1,5 +1,6 @@
 package no.nav.etterlatte.grunnlag.klienter
 
+import grunnlag.VurdertBostedsland
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.plugins.ClientRequestException
@@ -14,7 +15,9 @@ import io.ktor.http.contentType
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.grunnlag.adresse.PersondataAdresse
 import no.nav.etterlatte.libs.common.RetryResult
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.retry
+import no.nav.etterlatte.libs.common.retryOgPakkUt
 import org.slf4j.LoggerFactory
 
 class PersondataKlient(private val httpClient: HttpClient, private val apiUrl: String) {
@@ -71,4 +74,13 @@ class PersondataKlient(private val httpClient: HttpClient, private val apiUrl: S
 
     private fun erVergesAdresse(adresse: PersondataAdresse) =
         listOf("VERGE_PERSON_POSTADRESSE", "VERGE_SAMHANDLER_POSTADRESSE").contains(adresse.type)
+
+    suspend fun hentBostedsland(person: Folkeregisteridentifikator) =
+        retryOgPakkUt<VurdertBostedsland> {
+            httpClient.get("$apiUrl/api/bostedsland") {
+                header("pid", person.value)
+                accept(Json)
+                contentType(Json)
+            }.body()
+        }
 }

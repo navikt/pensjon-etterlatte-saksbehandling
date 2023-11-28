@@ -84,6 +84,7 @@ spec:
         - application: etterlatte-brev-api
         - application: etterlatte-beregning
         - application: etterlatte-behandling
+        - application: etterlatte-migrering
         - application: etterlatte-saksbehandling-ui
         - application: etterlatte-saksbehandling-ui-lokal
     outbound:

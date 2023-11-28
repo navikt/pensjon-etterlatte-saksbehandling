@@ -52,8 +52,6 @@ internal class Verifiserer(
         if (request.gjenlevendeForelder != null) {
             return Result.success(request)
         }
-        val adresse = pdlKlient.hentPerson(PersonRolle.BARN, request.soeker)
-        adresse.kontaktadresse ?: adresse.bostedsadresse
         val persongalleri = hentPersongalleri(request.soeker)
         if (persongalleri == null) {
             logger.warn(

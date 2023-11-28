@@ -11,7 +11,9 @@ object VergeMapper {
             fun toVergeEllerFullmektig(pdlV: PdlVergeEllerFullmektig) =
                 VergeEllerFullmektig(
                     motpartsPersonident = pdlV.motpartsPersonident,
-                    navn = pdlV.navn?.fornavn + " " + pdlV.navn?.mellomnavn + " " + pdlV.navn?.etternavn,
+                    navn =
+                        listOfNotNull(pdlV.navn?.fornavn, pdlV.navn?.mellomnavn, pdlV.navn?.etternavn)
+                            .joinToString(" "),
                     omfang = pdlV.omfang,
                     omfangetErInnenPersonligOmraade = pdlV.omfangetErInnenPersonligOmraade,
                 )

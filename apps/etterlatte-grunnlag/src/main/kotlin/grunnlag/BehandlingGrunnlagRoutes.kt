@@ -22,11 +22,6 @@ fun Route.behandlingGrunnlagRoute(
     grunnlagService: GrunnlagService,
     behandlingKlient: BehandlingKlient,
 ) {
-    /**
-     * TODO:
-     *  Dette blir en stegvis endring for å redusere sjansen for at alt brekker.
-     *  Sak ID skal fjernes så fort vi har versjonert alt grunnlag i dev/prod med behandlingId
-     **/
     route("/behandling/{$BEHANDLINGID_CALL_PARAMETER}") {
         get {
             withBehandlingId(behandlingKlient) { behandlingId ->
@@ -90,6 +85,13 @@ fun Route.behandlingGrunnlagRoute(
                     grunnlagService.oppdaterGrunnlag(behandlingId, request.sakId, request.sakType)
                     call.respond(HttpStatusCode.OK)
                 }
+            }
+        }
+
+        get("opplysning/persongalleri-samsvar") {
+            withBehandlingId(behandlingKlient) { behandlingId ->
+                val persongalleri = grunnlagService.hentPersongalleriSamsvar(behandlingId)
+                call.respond(persongalleri)
             }
         }
 

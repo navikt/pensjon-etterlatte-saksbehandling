@@ -668,7 +668,7 @@ internal class GrunnlagServiceTest {
             val persongalleriIngenGjenlevende =
                 Persongalleri(
                     soeker = "",
-                    avdoed = listOf("1"),
+                    gjenlevende = emptyList(),
                 )
             val valideringsfeilPdlEkstraGjenlevende =
                 grunnlagService.valideringsfeilPersongalleriSakPdl(

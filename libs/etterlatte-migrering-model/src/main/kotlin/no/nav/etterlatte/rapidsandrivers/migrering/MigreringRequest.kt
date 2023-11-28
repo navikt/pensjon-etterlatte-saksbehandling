@@ -36,6 +36,11 @@ data class MigreringRequest(
             gjenlevende = listOfNotNull(this.gjenlevendeForelder?.value),
             innsender = Vedtaksloesning.PESYS.name,
         )
+
+    fun erFolketrygdberegnet(): Boolean {
+        val beregningsMetode = beregning.meta?.beregningsMetodeType
+        return beregningsMetode == "FOLKETRYGD" && beregning.prorataBroek == null
+    }
 }
 
 data class AvdoedForelder(

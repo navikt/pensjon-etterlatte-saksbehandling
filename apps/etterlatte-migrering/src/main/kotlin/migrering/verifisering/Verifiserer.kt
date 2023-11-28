@@ -71,13 +71,12 @@ internal class Verifiserer(
         throw samleExceptions(feil)
     }
 
-    private fun verifiserFolketrygdBeregning(request: MigreringRequest): Verifiseringsfeil? {
-        val beregningsMetode = request.beregning.meta?.beregningsMetodeType
-        if (beregningsMetode != "FOLKETRYGD" || request.beregning.prorataBroek != null) {
-            return SakHarIkkeFolketrygdBeregning
+    private fun verifiserFolketrygdBeregning(request: MigreringRequest): Verifiseringsfeil? =
+        if (request.erFolketrygdberegnet()) {
+            null
+        } else {
+            SakHarIkkeFolketrygdBeregning
         }
-        return null
-    }
 
     private fun sjekkAtPersonerFinsIPDL(request: MigreringRequest): List<Verifiseringsfeil> {
         val personer = mutableListOf(Pair(PersonRolle.BARN, request.soeker))

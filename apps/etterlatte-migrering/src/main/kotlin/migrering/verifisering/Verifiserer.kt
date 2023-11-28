@@ -32,6 +32,8 @@ internal class Verifiserer(
         patchedRequest.onSuccess {
             feil.addAll(sjekkAtPersonerFinsIPDL(it))
         }
+        verifiserFolketrygdBeregning(request)?.let { feil.add(it) }
+
         if (feil.isNotEmpty()) {
             logger.warn(
                 "Sak ${request.pesysId} har ufullstendige data i PDL, kan ikke migrere. Se sikkerlogg for detaljer",
@@ -84,6 +86,14 @@ internal class Verifiserer(
             logger.info("Persongalleriet ble hentet med feil, returnerer null i stedet")
             null
         }
+    }
+
+    private fun verifiserFolketrygdBeregning(request: MigreringRequest): Verifiseringsfeil? {
+        val beregningsMetode = request.beregning.meta?.beregningsMetodeType
+        if (beregningsMetode != "FOLKETRYGD" || request.beregning.prorataBroek != null) {
+            return SakHarIkkeFolketrygdBeregning
+        }
+        return null
     }
 
     private fun sjekkAtPersonerFinsIPDL(request: MigreringRequest): List<Verifiseringsfeil> {
@@ -164,6 +174,11 @@ data class EnhetUtland(val enhet: String) : Verifiseringsfeil() {
 object StrengtFortrolig : Verifiseringsfeil() {
     override val message: String
         get() = "Skal ikke migrere strengt fortrolig sak"
+}
+
+object SakHarIkkeFolketrygdBeregning : Verifiseringsfeil() {
+    override val message: String
+        get() = "Skal ikke migrere saker med EØS beregning eller proratabrøk"
 }
 
 data class PDLException(val kilde: Throwable) : Verifiseringsfeil() {

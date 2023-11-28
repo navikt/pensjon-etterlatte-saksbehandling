@@ -34,6 +34,13 @@ class TrygdetidService(
             }.body()
         }
 
+    fun reberegnUtenFremtidigTrygdetid(behandlingId: UUID): TrygdetidDto =
+        runBlocking {
+            trygdetidApp.post("$url/api/trygdetid/$behandlingId/migrering/uten_fremtidig") {
+                contentType(ContentType.Application.Json)
+            }.body()
+        }
+
     fun overstyrBeregnetTrygdetid(
         behandlingId: UUID,
         beregnetTrygdetid: DetaljertBeregnetTrygdetidResultat,

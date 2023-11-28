@@ -83,9 +83,10 @@ fun trygdetidGrunnlag(
     poengInnAar: Boolean = false,
     poengUtAar: Boolean = false,
     prorata: Boolean = false,
+    trygdetidType: TrygdetidType = TrygdetidType.FAKTISK,
 ) = TrygdetidGrunnlag(
     id = randomUUID(),
-    type = TrygdetidType.FAKTISK,
+    type = trygdetidType,
     bosted = LandNormalisert.NORGE.isoCode,
     periode = periode,
     beregnetTrygdetid = beregnetTrygdetidGrunnlag,

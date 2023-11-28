@@ -69,7 +69,7 @@ export const Soeknadsoversikt = (props: { behandling: IDetaljertBehandling }) =>
             Søknadsoversikt
           </Heading>
         </HeadingWrapper>
-        <Soeknadsdato mottattDato={behandling.soeknadMottattDato} />
+        {behandling.soeknadMottattDato && <Soeknadsdato mottattDato={behandling.soeknadMottattDato} />}
       </ContentHeader>
       <InnholdPadding>
         <OppdaterGrunnlagModal behandlingId={behandling.id} behandlingStatus={behandling.status} />
@@ -101,7 +101,9 @@ export const Soeknadsoversikt = (props: { behandling: IDetaljertBehandling }) =>
                       tekst={avdoedDoedsdato ? formaterStringDato(avdoedDoedsdato) : 'Ikke registrert!'}
                       undertekst={formaterKildePdl(avdoedDoedsdatoKilde)}
                     />
-                    <Info label="Søknad mottatt" tekst={formaterStringDato(behandling.soeknadMottattDato)} />
+                    {behandling.soeknadMottattDato && (
+                      <Info label="Søknad mottatt" tekst={formaterStringDato(behandling.soeknadMottattDato)} />
+                    )}
                   </>
                 ),
               }}

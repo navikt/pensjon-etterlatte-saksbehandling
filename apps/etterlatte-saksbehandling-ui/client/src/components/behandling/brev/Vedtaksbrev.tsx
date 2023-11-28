@@ -34,7 +34,7 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
   const { behandlingId } = useParams()
   const dispatch = useAppDispatch()
   const { sakId, soeknadMottattDato } = props.behandling
-  const redigeres = behandlingErRedigerbar(props.behandling.status)
+  const redigerbar = behandlingErRedigerbar(props.behandling.status)
 
   const [vedtaksbrev, setVedtaksbrev] = useState<IBrev | undefined>(undefined)
   const [visAdvarselBehandlingEndret, setVisAdvarselBehandlingEndret] = useState(false)
@@ -45,7 +45,7 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
   const [vergeadresse, getVergeadresse] = useApiCall(getVergeadresseFraGrunnlag)
 
   const behandlingRedigertEtterOpprettetBrev = (vedtaksbrev: IBrev, hendelser: IHendelse[]) => {
-    if (!redigeres) {
+    if (!redigerbar) {
       return false
     }
     const hendelse = sisteBehandlingHendelse(hendelser)
@@ -116,7 +116,7 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
             {(vedtaksbrev?.prosessType === BrevProsessType.MANUELL ||
               vedtaksbrev?.prosessType === BrevProsessType.REDIGERBAR) && (
               <WarningAlert>
-                {redigeres
+                {redigerbar
                   ? 'Kan ikke generere brev automatisk. Du må selv redigere innholdet.'
                   : 'Dette er et manuelt opprettet brev. Kontroller innholdet nøye før attestering.'}
               </WarningAlert>
@@ -133,7 +133,7 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
                 vedtaksbrev={vedtaksbrev}
                 oppdater={(val) => setVedtaksbrev({ ...vedtaksbrev, mottaker: val })}
                 vergeadresse={getData(vergeadresse)}
-                redigerbar={redigeres}
+                redigerbar={redigerbar}
               />
             )}
           </ContentHeader>
@@ -145,7 +145,7 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
           ) : (
             <RedigerbartBrev
               brev={vedtaksbrev!!}
-              kanRedigeres={redigeres}
+              kanRedigeres={redigerbar}
               lukkAdvarselBehandlingEndret={lukkAdvarselBehandlingEndret}
             />
           ))}
@@ -160,7 +160,7 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
       <SjekklisteValideringErrorSummary />
 
       <BehandlingHandlingKnapper>
-        {redigeres && <SendTilAttesteringModal behandlingId={props.behandling.id} fattVedtakApi={fattVedtak} />}
+        {redigerbar && <SendTilAttesteringModal behandlingId={props.behandling.id} fattVedtakApi={fattVedtak} />}
       </BehandlingHandlingKnapper>
     </Content>
   )

@@ -87,7 +87,7 @@ class MigreringService(
                             ),
                     )
 
-                    request.utenlandstilknytningType?.let { utlandstilknytning ->
+                    request.utlandstilknytningType?.let { utlandstilknytning ->
                         behandlingService.oppdaterUtlandstilknytning(
                             behandlingId = behandling.id,
                             utlandstilknytning =

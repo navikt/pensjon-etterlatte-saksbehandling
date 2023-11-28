@@ -7,7 +7,7 @@ import { format } from 'date-fns'
 import { Soesken } from '~components/behandling/soeknadsoversikt/familieforhold/personer/Soesken'
 import React from 'react'
 import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
-import { IPdlPerson } from '~shared/types/Person'
+import { Familieforhold, IPdlPerson } from '~shared/types/Person'
 import {
   FeilIPeriodeGrunnlagAlle,
   SoeskengrunnlagUtfylling,
@@ -22,6 +22,7 @@ type SoeskenjusteringPeriodeProps = {
   remove: () => void
   canRemove: boolean
   behandling: IBehandlingReducer
+  familieforhold: Familieforhold
   fnrTilSoesken: Record<string, IPdlPerson>
   feil: [number, FeilIPeriodeGrunnlagAlle][]
   watch: UseFormWatch<{ soeskenMedIBeregning: SoeskengrunnlagUtfylling }>
@@ -29,7 +30,7 @@ type SoeskenjusteringPeriodeProps = {
 }
 
 const SoeskenjusteringPeriode = (props: SoeskenjusteringPeriodeProps) => {
-  const { control, index, remove, fnrTilSoesken, canRemove, behandling, watch, visFeil, feil } = props
+  const { control, index, remove, fnrTilSoesken, canRemove, behandling, familieforhold, watch, visFeil, feil } = props
   const { fields } = useFieldArray({
     name: `soeskenMedIBeregning.${index}.data`,
     control,
@@ -117,7 +118,7 @@ const SoeskenjusteringPeriode = (props: SoeskenjusteringPeriodeProps) => {
             soeskenFinnes && (
               <li key={item.id}>
                 <SoeskenContainer>
-                  <Soesken person={fnrTilSoesken[item.foedselsnummer]} familieforhold={behandling.familieforhold!} />
+                  <Soesken person={fnrTilSoesken[item.foedselsnummer]} familieforhold={familieforhold!} />
                   <Controller
                     name={`soeskenMedIBeregning.${index}.data.${k}`}
                     control={control}

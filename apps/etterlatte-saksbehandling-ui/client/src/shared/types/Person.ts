@@ -21,6 +21,11 @@ export const hentLevendeSoeskenFraAvdoedeForSoeker = (
   return soeskenliste.filter((soesken) => soesken.doedsdato === null)
 }
 
+export const hentLevendeSoeskenFraAvdoedeForSoekerNy = (avdoede: Personopplysning, soekerFnr: string) => {
+  const soeskenliste = (avdoede?.opplysning.avdoedesBarn ?? []).filter((person) => person.foedselsnummer !== soekerFnr)
+  return soeskenliste.filter((soesken) => soesken.doedsdato === null)
+}
+
 export const hentLevendeSoeskenFraAvdoedeForSoekerGrunnlag = (avdoede: Personopplysning[], soekerFnr: string) => {
   const alleAvdoedesBarn = avdoede.flatMap((a) => a.opplysning.avdoedesBarn ?? [])
   const soeskenliste = alleAvdoedesBarn.filter((person) => person.foedselsnummer !== soekerFnr)

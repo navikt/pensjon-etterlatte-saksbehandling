@@ -9,7 +9,7 @@ import { ChildEyesIcon } from '@navikt/aksel-icons'
 
 type Props = {
   person: IPdlPerson
-  doedsdato: string
+  doedsdato: string | null
 }
 
 export const Barn = ({ person, doedsdato }: Props) => {

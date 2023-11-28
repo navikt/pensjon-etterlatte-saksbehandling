@@ -91,11 +91,11 @@ class MigreringService(
                         behandlingService.oppdaterUtlandstilknytning(
                             behandlingId = behandling.id,
                             utlandstilknytning =
-                            Utlandstilknytning(
-                                type = utlandstilknytning,
-                                kilde = Grunnlagsopplysning.Pesys.create(),
-                                begrunnelse = "Automatisk migrert fra Pesys",
-                            ),
+                                Utlandstilknytning(
+                                    type = utlandstilknytning,
+                                    kilde = Grunnlagsopplysning.Pesys.create(),
+                                    begrunnelse = "Automatisk migrert fra Pesys",
+                                ),
                         )
                     }
 
@@ -108,7 +108,7 @@ class MigreringService(
                                     boddArbeidetEosNordiskKonvensjon = request.erEoesBeregnet().takeIf { it },
                                     kilde = Grunnlagsopplysning.Pesys.create(),
                                     begrunnelse =
-                                        "Automatisk vurdert ved migrering fra Pesys. Vurdering av utlandsopphold kan være mangelfull.",
+                                    "Automatisk vurdert ved migrering fra Pesys. Vurdering av utlandsopphold kan være mangelfull.",
                                 ),
                         )
                     }

@@ -168,7 +168,7 @@ internal fun Route.sakWebRoutes(
                         inTransaction {
                             val sak = sakService.finnSaker(fnr.value).first()
                             val utlandstilknytning = behandlingService.hentUtlandstilknytningForSak(sak.id)
-                            val sakMedUtenlandstilknytning = SakMedUtenlandstilknytning.fra(sak, utlandstilknytning)
+                            val sakMedUtlandstilknytning = SakMedUtlandstilknytning.fra(sak, utlandstilknytning)
 
                             requestLogger.loggRequest(
                                 brukerTokenInfo,
@@ -176,18 +176,11 @@ internal fun Route.sakWebRoutes(
                                 "behandlinger",
                             )
 
-                            behandlingService.hentBehandlingerForSak(sakMedUtenlandstilknytning.id)
+                            behandlingService.hentBehandlingerForSak(sakMedUtlandstilknytning.id)
                                 .map { it.toBehandlingSammendrag() }
-                                .let { BehandlingListe(sakMedUtenlandstilknytning, it) }
+                                .let { BehandlingListe(sakMedUtlandstilknytning, it) }
                         }
                     call.respond(behandlinger)
-                }
-            }
-
-            post("/utenlandstilknytning") {
-                withFoedselsnummerInternal(tilgangService) { fnr ->
-                    val sakUtenlandstilknytning = inTransaction { sakService.hentSakMedUtenlandstilknytning(fnr.value) }
-                    call.respond(sakUtenlandstilknytning)
                 }
             }
 

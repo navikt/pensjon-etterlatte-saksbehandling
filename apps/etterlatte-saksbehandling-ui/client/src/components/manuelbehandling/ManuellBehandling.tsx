@@ -12,6 +12,7 @@ import { opprettBehandling } from '~shared/api/behandling'
 import { opprettOverstyrBeregning } from '~shared/api/beregning'
 import { InputRow } from '~components/person/journalfoeringsoppgave/nybehandling/OpprettNyBehandling'
 import { Spraak } from '~shared/types/Brev'
+import { opprettTrygdetidOverstyrtMigrering } from '~shared/api/trygdetid'
 
 export default function ManuellBehandling() {
   const dispatch = useAppDispatch()
@@ -21,7 +22,10 @@ export default function ManuellBehandling() {
   const [erMigrering, setErMigrering] = useState<boolean | null>(null)
 
   const [overstyrBeregningStatus, opprettOverstyrtBeregningReq] = useApiCall(opprettOverstyrBeregning)
-  const [overstyrBeregning, setOverstyrBeregning] = useState<boolean>(true)
+  const [overstyrBeregning, setOverstyrBeregning] = useState<boolean>(false)
+
+  const [overstyrTrygdetidStatus, opprettOverstyrtTrygdetidReq] = useApiCall(opprettTrygdetidOverstyrtMigrering)
+  const [overstyrTrygdetid, setOverstyrTrygdetid] = useState<boolean>(false)
 
   const [pesysId, setPesysId] = useState<number | undefined>(undefined)
 
@@ -40,6 +44,9 @@ export default function ManuellBehandling() {
             behandlingId: nyBehandlingRespons,
             beskrivelse: 'Manuell migrering',
           })
+        }
+        if (overstyrTrygdetid) {
+          opprettOverstyrtTrygdetidReq({ behandlingId: nyBehandlingRespons })
         }
         setNyId(nyBehandlingRespons)
       }
@@ -80,6 +87,10 @@ export default function ManuellBehandling() {
         Skal bruke manuell beregning
       </Checkbox>
 
+      <Checkbox checked={overstyrTrygdetid} onChange={() => setOverstyrTrygdetid(!overstyrTrygdetid)}>
+        Skal bruke manuell trygdetid
+      </Checkbox>
+
       <Select
         label="Hva skal språket/målform være?"
         value={nyBehandlingRequest?.spraak || ''}
@@ -113,7 +124,7 @@ export default function ManuellBehandling() {
         <Button
           variant="secondary"
           onClick={ferdigstill}
-          loading={isPending(status) || isPending(overstyrBeregningStatus)}
+          loading={isPending(status) || isPending(overstyrBeregningStatus) || isPending(overstyrTrygdetidStatus)}
           disabled={erMigrering == null || (erMigrering && pesysId == null)}
         >
           Send inn
@@ -125,6 +136,10 @@ export default function ManuellBehandling() {
       {isPending(overstyrBeregningStatus) && <Alert variant="info">Oppretter overstyrt beregning.</Alert>}
       {isSuccess(overstyrBeregningStatus) && <Alert variant="success">Overstyrt beregning opprettet!</Alert>}
       {isFailure(overstyrBeregningStatus) && <Alert variant="error">Klarte ikke å overstyre beregning.</Alert>}
+
+      {isPending(overstyrTrygdetidStatus) && <Alert variant="info">Oppretter overstyrt trygdetid.</Alert>}
+      {isSuccess(overstyrTrygdetidStatus) && <Alert variant="success">Overstyrt trygdetid opprettet!</Alert>}
+      {isFailure(overstyrTrygdetidStatus) && <Alert variant="error">Klarte ikke å overstyre trygdetid.</Alert>}
     </FormWrapper>
   )
 }

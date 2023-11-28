@@ -2,13 +2,12 @@ import { KommerBarnetTilGodeVurdering } from './KommerBarnetTilGodeVurdering'
 import { Beskrivelse, InfobokserWrapper, InfoWrapper, VurderingsContainerWrapper } from '../styled'
 import { IKommerBarnetTilgode } from '~shared/types/IDetaljertBehandling'
 import { IPdlPerson } from '~shared/types/Person'
-import { formaterKildePdl, svarTilStatusIcon } from '../utils'
+import { formaterGrunnlagKilde, svarTilStatusIcon } from '../utils'
 import { LovtekstMedLenke } from '../LovtekstMedLenke'
 import { Info } from '../Info'
 import { LeggTilVurderingButton } from '~components/behandling/soeknadsoversikt/LeggTilVurderingButton'
 import { useState } from 'react'
-import { Grunnlagsopplysning } from '~shared/types/grunnlag'
-import { KildePdl } from '~shared/types/kilde'
+import { Personopplysning } from '~shared/types/grunnlag'
 import { IAdresse } from '~shared/types/IAdresse'
 
 interface AdresseProps {
@@ -29,7 +28,7 @@ const AdresseKort = (props: AdresseProps) => {
 interface Props {
   kommerBarnetTilgode: IKommerBarnetTilgode | null
   soeker: IPdlPerson | undefined
-  gjenlevendeForelder: Grunnlagsopplysning<IPdlPerson, KildePdl> | undefined
+  gjenlevendeForelder: Personopplysning | undefined
   redigerbar: boolean
   behandlingId: string
 }
@@ -69,7 +68,7 @@ export const OversiktKommerBarnetTilgode = ({
             <AdresseKort
               label="Gjenlevende forelders adresse"
               adresse={foreldersadresse}
-              kilde={formaterKildePdl(gjenlevendeForelder?.kilde)}
+              kilde={formaterGrunnlagKilde(gjenlevendeForelder?.kilde)}
             />
           )}
         </InfobokserWrapper>

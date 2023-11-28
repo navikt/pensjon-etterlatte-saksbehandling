@@ -5,7 +5,6 @@ import { VergemaalEllerFremtidsfullmakt } from '~components/person/typer'
 
 export interface IFamilieforhold {
   avdoede: Grunnlagsopplysning<IPdlPerson, KildePdl>
-  gjenlevende: Grunnlagsopplysning<IPdlPerson, KildePdl>
 }
 
 export interface Familieforhold {

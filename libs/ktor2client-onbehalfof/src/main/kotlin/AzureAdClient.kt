@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.github.benmanes.caffeine.cache.AsyncCache
 import com.github.benmanes.caffeine.cache.Caffeine
+import com.github.benmanes.caffeine.cache.Expiry
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
@@ -56,12 +57,12 @@ class AzureAdClient(
     private val cache: AsyncCache<OboTokenRequest, AccessToken> =
         Caffeine
             .newBuilder()
-            .expireAfterAccess(5, TimeUnit.SECONDS)
+            .expireAfter(TokenBasedExpiration())
             .buildAsync(),
     private val clientCredentialsCache: AsyncCache<ClientCredentialsTokenRequest, AccessToken> =
         Caffeine
             .newBuilder()
-            .expireAfterAccess(5, TimeUnit.SECONDS)
+            .expireAfter(TokenBasedExpiration())
             .buildAsync(),
 ) {
     private val openIdConfiguration: AzureAdOpenIdConfiguration =
@@ -143,5 +144,36 @@ class AzureAdClient(
             }
         }
         return hentAccessToken(params, cache, OboTokenRequest(scopes, accessToken))
+    }
+}
+
+// Benytte tokenets faktisk expiration i stedet for f.eks. hardkodet, med litt fratrekk som "leeway"
+class TokenBasedExpiration : Expiry<TokenRequest, AccessToken> {
+    // Fallback 5 sek (som tidligere var normal exp)
+    override fun expireAfterCreate(
+        key: TokenRequest?,
+        value: AccessToken?,
+        currentTime: Long,
+    ): Long {
+        val seconds: Long = value?.expiresIn?.minus(5)?.toLong() ?: 5
+        return TimeUnit.SECONDS.toNanos(seconds)
+    }
+
+    override fun expireAfterUpdate(
+        key: TokenRequest?,
+        value: AccessToken?,
+        currentTime: Long,
+        currentDuration: Long,
+    ): Long {
+        return currentDuration
+    }
+
+    override fun expireAfterRead(
+        key: TokenRequest?,
+        value: AccessToken?,
+        currentTime: Long,
+        currentDuration: Long,
+    ): Long {
+        return currentDuration
     }
 }

@@ -10,11 +10,20 @@ class Utenlandstilknytningsjekker(private val grunnlagKlient: GrunnlagKlient) {
     val logger = LoggerFactory.getLogger(this::class.java)
 
     internal fun finnUtenlandstilknytning(request: MigreringRequest): UtenlandstilknytningType? {
+        val bostedsland = runBlocking { grunnlagKlient.hentBostedsland(request.soeker.value) }
+
         if (request.enhet.nr !in listOf(Enheter.AALESUND_UTLAND.enhetNr, Enheter.UTLAND.enhetNr)) {
+            if (bostedsland.erNorge()) {
+                logger.debug("Barnet bor i Norge, og enhet er nasjonal. Som forventa for nasjonal")
+                return UtenlandstilknytningType.NASJONAL
+            } else {
+                logger.debug(
+                    "Enhet er nasjonal, men barnet bor ikke i Norge: {}. Ikke et forventa scenario.",
+                    bostedsland,
+                )
+            }
             return UtenlandstilknytningType.NASJONAL
         }
-
-        val bostedsland = runBlocking { grunnlagKlient.hentBostedsland(request.soeker.value) }
 
         if (request.enhet.nr == Enheter.AALESUND_UTLAND.enhetNr) {
             if (bostedsland.erNorge()) {

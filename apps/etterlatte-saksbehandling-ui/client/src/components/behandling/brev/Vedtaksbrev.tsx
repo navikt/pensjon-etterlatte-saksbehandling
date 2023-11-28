@@ -11,7 +11,6 @@ import { SendTilAttesteringModal } from '../handlinger/sendTilAttesteringModal'
 import {
   behandlingErRedigerbar,
   behandlingSkalSendeBrev,
-  manueltBrevKanRedigeres,
   sisteBehandlingHendelse,
 } from '~components/behandling/felles/utils'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
@@ -34,7 +33,8 @@ import { handleHentVergeadresseError } from '~components/person/Vergeadresse'
 export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
   const { behandlingId } = useParams()
   const dispatch = useAppDispatch()
-  const { sakId, soeknadMottattDato, status } = props.behandling
+  const { sakId, soeknadMottattDato } = props.behandling
+  const redigerbar = behandlingErRedigerbar(props.behandling.status)
 
   const [vedtaksbrev, setVedtaksbrev] = useState<IBrev | undefined>(undefined)
   const [visAdvarselBehandlingEndret, setVisAdvarselBehandlingEndret] = useState(false)
@@ -43,7 +43,11 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
   const [opprettBrevStatus, opprettNyttVedtaksbrev] = useApiCall(opprettVedtaksbrev)
   const [, fetchBehandling] = useApiCall(hentBehandling)
   const [vergeadresse, getVergeadresse] = useApiCall(getVergeadresseFraGrunnlag)
+
   const behandlingRedigertEtterOpprettetBrev = (vedtaksbrev: IBrev, hendelser: IHendelse[]) => {
+    if (!redigerbar) {
+      return false
+    }
     const hendelse = sisteBehandlingHendelse(hendelser)
     return new Date(hendelse.opprettet).getTime() > new Date(vedtaksbrev.statusEndret).getTime()
   }
@@ -112,7 +116,7 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
             {(vedtaksbrev?.prosessType === BrevProsessType.MANUELL ||
               vedtaksbrev?.prosessType === BrevProsessType.REDIGERBAR) && (
               <WarningAlert>
-                {manueltBrevKanRedigeres(status)
+                {redigerbar
                   ? 'Kan ikke generere brev automatisk. Du må selv redigere innholdet.'
                   : 'Dette er et manuelt opprettet brev. Kontroller innholdet nøye før attestering.'}
               </WarningAlert>
@@ -129,7 +133,7 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
                 vedtaksbrev={vedtaksbrev}
                 oppdater={(val) => setVedtaksbrev({ ...vedtaksbrev, mottaker: val })}
                 vergeadresse={getData(vergeadresse)}
-                redigerbar={manueltBrevKanRedigeres(status)}
+                redigerbar={redigerbar}
               />
             )}
           </ContentHeader>
@@ -141,7 +145,7 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
           ) : (
             <RedigerbartBrev
               brev={vedtaksbrev!!}
-              kanRedigeres={manueltBrevKanRedigeres(status)}
+              kanRedigeres={redigerbar}
               lukkAdvarselBehandlingEndret={lukkAdvarselBehandlingEndret}
             />
           ))}
@@ -156,9 +160,7 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
       <SjekklisteValideringErrorSummary />
 
       <BehandlingHandlingKnapper>
-        {behandlingErRedigerbar(status) && (
-          <SendTilAttesteringModal behandlingId={props.behandling.id} fattVedtakApi={fattVedtak} />
-        )}
+        {redigerbar && <SendTilAttesteringModal behandlingId={props.behandling.id} fattVedtakApi={fattVedtak} />}
       </BehandlingHandlingKnapper>
     </Content>
   )

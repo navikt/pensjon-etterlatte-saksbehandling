@@ -8,8 +8,8 @@ export const hentBrev = async (props: { brevId: number; sakId: number }): Promis
 export const hentBrevForSak = async (sakId: number): Promise<ApiResponse<IBrev[]>> =>
   apiClient.get(`/brev/sak/${sakId}`)
 
-export const opprettBrevForSak = async (args: { sakId: number; tittel: string }): Promise<ApiResponse<IBrev>> =>
-  apiClient.post(`/brev/sak/${args.sakId}`, { tittel: args.tittel })
+export const opprettBrevForSak = async (sakId: number): Promise<ApiResponse<IBrev>> =>
+  apiClient.post(`/brev/sak/${sakId}`, {})
 
 export const hentVedtaksbrev = async (behandlingId: string): Promise<ApiResponse<IBrev>> =>
   apiClient.get(`/brev/behandling/${behandlingId}/vedtak`)

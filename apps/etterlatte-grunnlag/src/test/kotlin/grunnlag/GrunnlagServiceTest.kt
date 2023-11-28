@@ -43,6 +43,7 @@ import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER2_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.kilde
 import no.nav.etterlatte.libs.testdata.grunnlag.statiskUuid
 import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Nested
@@ -611,6 +612,103 @@ internal class GrunnlagServiceTest {
         verify { pdlTjenesterKlientImpl wasNot called }
         verify { pdlTjenesterKlientImpl wasNot called }
         verify { persondataKlient wasNot called }
+    }
+
+    @Nested
+    inner class `Test av samsvar persongalleri` {
+        @Test
+        fun `samsvar bryr seg ikke om rekkefølge på personer`() {
+            val persongalleriSak =
+                Persongalleri(
+                    soeker = "søker",
+                    soesken = listOf("1", "2", "3"),
+                )
+            val persongalleriPdl =
+                Persongalleri(
+                    soeker = "søker",
+                    soesken = listOf("3", "1", "2"),
+                )
+            val valideringsfeil = grunnlagService.valideringsfeilPersongalleriSakPdl(persongalleriSak, persongalleriPdl)
+            assertEquals(emptyList<MismatchPersongalleri>(), valideringsfeil)
+        }
+
+        @Test
+        fun `samsvar registerer feil hvis vi mangler avdøde`() {
+            val persongalleriEkstraAvdoed =
+                Persongalleri(
+                    soeker = "",
+                    avdoed = listOf("1", "2"),
+                )
+            val persongalleriEnAvdoed =
+                Persongalleri(
+                    soeker = "",
+                    avdoed = listOf("1"),
+                )
+            val valideringsfeilPdlEkstraAvdoed =
+                grunnlagService.valideringsfeilPersongalleriSakPdl(
+                    persongalleriEnAvdoed,
+                    persongalleriEkstraAvdoed,
+                )
+            val valideringsfeilSakEkstraAvdoed =
+                grunnlagService.valideringsfeilPersongalleriSakPdl(
+                    persongalleriEkstraAvdoed,
+                    persongalleriEnAvdoed,
+                )
+            assertEquals(listOf(MismatchPersongalleri.EKSTRA_AVDOED), valideringsfeilSakEkstraAvdoed)
+            assertEquals(listOf(MismatchPersongalleri.MANGLER_AVDOED), valideringsfeilPdlEkstraAvdoed)
+        }
+
+        @Test
+        fun `samsvar registerer feil hvis vi mangler gjenlevende`() {
+            val persongalleriEkstraGjenlevende =
+                Persongalleri(
+                    soeker = "",
+                    gjenlevende = listOf("1"),
+                )
+            val persongalleriIngenGjenlevende =
+                Persongalleri(
+                    soeker = "",
+                    avdoed = listOf("1"),
+                )
+            val valideringsfeilPdlEkstraGjenlevende =
+                grunnlagService.valideringsfeilPersongalleriSakPdl(
+                    persongalleriIngenGjenlevende,
+                    persongalleriEkstraGjenlevende,
+                )
+            val valideringsfeilSakEkstraGjenlevende =
+                grunnlagService.valideringsfeilPersongalleriSakPdl(
+                    persongalleriEkstraGjenlevende,
+                    persongalleriIngenGjenlevende,
+                )
+            assertEquals(listOf(MismatchPersongalleri.EKSTRA_GJENLEVENDE), valideringsfeilSakEkstraGjenlevende)
+            assertEquals(listOf(MismatchPersongalleri.MANGLER_GJENLEVENDE), valideringsfeilPdlEkstraGjenlevende)
+        }
+
+        @Test
+        fun `samsvar registerer feil hvis vi mangler søsken`() {
+            val persongalleriEkstraSoesken =
+                Persongalleri(
+                    soeker = "",
+                    soesken = listOf("1", "2"),
+                )
+            val persongalleriEtSoesken =
+                Persongalleri(
+                    soeker = "",
+                    soesken = listOf("1"),
+                )
+            val valideringsfeilPdlEkstraSoesken =
+                grunnlagService.valideringsfeilPersongalleriSakPdl(
+                    persongalleriEtSoesken,
+                    persongalleriEkstraSoesken,
+                )
+            val valideringsfeilSakEkstraSoesken =
+                grunnlagService.valideringsfeilPersongalleriSakPdl(
+                    persongalleriEkstraSoesken,
+                    persongalleriEtSoesken,
+                )
+            assertEquals(listOf(MismatchPersongalleri.EKSTRA_SOESKEN), valideringsfeilSakEkstraSoesken)
+            assertEquals(listOf(MismatchPersongalleri.MANGLER_SOESKEN), valideringsfeilPdlEkstraSoesken)
+        }
     }
 
     private fun sampleFetchedGrunnlag(opplysningsperson: PersonDTO) =

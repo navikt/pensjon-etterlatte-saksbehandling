@@ -39,7 +39,6 @@ import no.nav.etterlatte.behandling.klienter.VedtakKlientImpl
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeService
 import no.nav.etterlatte.behandling.manueltopphoer.RealManueltOpphoerService
-import no.nav.etterlatte.behandling.migrering.Utenlandstilknytningsjekker
 import no.nav.etterlatte.behandling.omregning.MigreringService
 import no.nav.etterlatte.behandling.omregning.OmregningService
 import no.nav.etterlatte.behandling.revurdering.RevurderingDao
@@ -329,7 +328,6 @@ internal class ApplicationContext(
             migreringKlient = migreringKlient,
         )
 
-    val utenlandstilknytningsjekker = Utenlandstilknytningsjekker(grunnlagKlient)
     val migreringService =
         MigreringService(
             sakService = sakService,
@@ -339,7 +337,6 @@ internal class ApplicationContext(
             behandlingsHendelser = behandlingsHendelser,
             behandlingService = behandlingService,
             oppgaveService = oppgaveService,
-            utenlandstilknytningsjekker = utenlandstilknytningsjekker,
         )
 
     val bosattUtlandService = BosattUtlandService(bosattUtlandDao = bosattUtlandDao)

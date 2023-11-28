@@ -4,6 +4,7 @@ import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.libs.common.IntBroek
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
+import no.nav.etterlatte.libs.common.behandling.UtenlandstilknytningType
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import java.time.YearMonth
@@ -26,6 +27,7 @@ data class MigreringRequest(
     val trygdetid: Trygdetid,
     val flyktningStatus: Boolean = false,
     val spraak: Spraak,
+    val utenlandstilknytningType: UtenlandstilknytningType? = null,
 ) {
     fun opprettPersongalleri() =
         Persongalleri(

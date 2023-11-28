@@ -7,7 +7,6 @@ import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.GyldighetsproevingService
 import no.nav.etterlatte.behandling.domain.toStatistikkBehandling
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeService
-import no.nav.etterlatte.behandling.migrering.Utenlandstilknytningsjekker
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -35,7 +34,6 @@ class MigreringService(
     private val behandlingsHendelser: BehandlingHendelserKafkaProducer,
     private val behandlingService: BehandlingService,
     private val oppgaveService: OppgaveService,
-    private val utenlandstilknytningsjekker: Utenlandstilknytningsjekker,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -83,7 +81,7 @@ class MigreringService(
                             ),
                     )
 
-                    utenlandstilknytningsjekker.finnUtenlandstilknytning(request)?.let {
+                    request.utenlandstilknytningType?.let {
                         sakService.oppdaterUtenlandstilknytning(
                             sakId = behandling.sak.id,
                             utenlandstilknytning =

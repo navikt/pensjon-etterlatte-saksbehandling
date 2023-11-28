@@ -72,7 +72,7 @@ Det må foreligge et tjenestepensjonsforhold i Tjenestepensjonsregisteret som gj
 | GE-MASKINPORTEN-SCOPE   | 401             | Manglende/feil scope                                     |
 | 001-TPNR-MANGLER        | 400             | Ikke angitt header med gjeldende ordningsnummer          |
 | 002-FNR-MANGLER         | 400             | Ikke angitt header med fødselsnummer det skal spørres på |
-| 003-VIRKFOM-MANGLER     | 400             | Ikke angitt virkFom som query parameter                  |
+| 003-FOMDATO-MANGLER     | 400             | Ikke angitt fomDato som query parameter                  |
 | 004-FEIL_SAKSTYPE       | 400             | Etterspurt vedtak som ikke angår omstillingsstønad       |
 | 010-TP-TILGANG          | 403             | Ikke tilgang til TP/etterspurt data                      |
 | 011-TP-FORESPOERSEL     | 400             | Feil ved spørring mot TP                                 |

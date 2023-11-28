@@ -20,12 +20,12 @@ class GrunnlagKlient(
 
     suspend fun hentBostedsland(fnr: String): VurdertBostedsland {
         val post =
-            grunnlagHttpClient.post("$url/grunnlag/person/bostedsland") {
+            grunnlagHttpClient.post("$url/grunnlag/migrering/bostedsland") {
                 accept(ContentType.Application.Json)
                 contentType(ContentType.Application.Json)
                 setBody(FoedselsnummerDTO(fnr))
             }
-        if (post.status == HttpStatusCode.NoContent) {
+        if (post.status == HttpStatusCode.NotFound) {
             return VurdertBostedsland.finsIkkeIPDL
         }
         return post.body()

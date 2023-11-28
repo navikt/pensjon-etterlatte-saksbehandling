@@ -20,11 +20,11 @@ fun Route.migreringRoutes(
     val logger = application.log
 
     route("migrering") {
-        post("vurdertbostedsland") {
+        post("bostedsland") {
             kunSystembruker {
                 withFoedselsnummer(behandlingKlient) {
                     try {
-                        val resultat = persondataKlient.hentVurdertBostedsland(it)
+                        val resultat = persondataKlient.hentBostedsland(it)
                         call.respond(resultat)
                     } catch (e: Exception) {
                         logger.warn("Feil fra persondata ved oppslag for vurdert bostedsland", e)

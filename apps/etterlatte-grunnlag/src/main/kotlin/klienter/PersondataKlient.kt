@@ -75,9 +75,9 @@ class PersondataKlient(private val httpClient: HttpClient, private val apiUrl: S
     private fun erVergesAdresse(adresse: PersondataAdresse) =
         listOf("VERGE_PERSON_POSTADRESSE", "VERGE_SAMHANDLER_POSTADRESSE").contains(adresse.type)
 
-    suspend fun hentVurdertBostedsland(person: Folkeregisteridentifikator) =
+    suspend fun hentBostedsland(person: Folkeregisteridentifikator) =
         retryOgPakkUt<VurdertBostedsland> {
-            httpClient.get("$apiUrl/api/vurdertbostedsland") {
+            httpClient.get("$apiUrl/api/bostedsland") {
                 header("pid", person.value)
                 accept(Json)
                 contentType(Json)

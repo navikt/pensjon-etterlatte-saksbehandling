@@ -51,6 +51,7 @@ class GosysOppgaveServiceImpl(
         if (!featureToggleService.isEnabled(GosysOppgaveServiceFeatureToggle.HentGosysOppgaver, false)) {
             return emptyList()
         }
+
         val saksbehandlerMedRoller = Kontekst.get().appUserAsSaksbehandler().saksbehandlerMedRoller
 
         val gosysOppgaver =

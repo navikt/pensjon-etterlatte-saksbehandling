@@ -7,6 +7,7 @@ import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
+import no.nav.etterlatte.migrering.grunnlag.GrunnlagKlient
 import no.nav.etterlatte.migrering.pen.PenKlient
 import no.nav.etterlatte.migrering.person.krr.KrrKlient
 import no.nav.etterlatte.migrering.start.StartMigreringRepository
@@ -41,6 +42,17 @@ internal class ApplicationContext {
             ),
         )
     val gjenlevendeForelderPatcher = GjenlevendeForelderPatcher(pdlKlient = pdlKlient)
+    val grunnlagKlient =
+        GrunnlagKlient(
+            config,
+            httpClientClientCredentials(
+                azureAppClientId = config.getString("azure.app.client.id"),
+                azureAppJwk = config.getString("azure.app.jwk"),
+                azureAppWellKnownUrl = config.getString("azure.app.well.known.url"),
+                azureAppScope = config.getString("grunnlag.azure.scope"),
+            ),
+        )
+
     val verifiserer =
         Verifiserer(
             pdlKlient = pdlKlient,

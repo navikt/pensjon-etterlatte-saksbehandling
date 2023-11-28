@@ -18,6 +18,7 @@ on:
       - apps/etterlatte-oppdater-behandling/**
       - libs/saksbehandling-common/**
       - libs/etterlatte-behandling-model/**
+      - libs/etterlatte-migrering-model/**
       - libs/etterlatte-ktor/**
       - libs/etterlatte-pdl-model/**
       - libs/ktor2client-auth-clientcredentials/**
@@ -29,6 +30,7 @@ on:
       - apps/etterlatte-oppdater-behandling/**
       - libs/saksbehandling-common/**
       - libs/etterlatte-behandling-model/**
+      - libs/etterlatte-migrering-model/**
       - libs/etterlatte-ktor/**
       - libs/etterlatte-pdl-model/**
       - libs/ktor2client-auth-clientcredentials/**

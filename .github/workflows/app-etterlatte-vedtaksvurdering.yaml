@@ -22,6 +22,7 @@ on:
       - libs/etterlatte-behandling-model/**
       - libs/etterlatte-beregning-model/**
       - libs/etterlatte-database/**
+      - libs/etterlatte-migrering-model/**
       - libs/etterlatte-vedtaksvurdering-model/**
       - libs/etterlatte-vilkaarsvurdering-model/**
       - libs/etterlatte-oppgave-model/**
@@ -39,6 +40,7 @@ on:
       - libs/etterlatte-behandling-model/**
       - libs/etterlatte-beregning-model/**
       - libs/etterlatte-database/**
+      - libs/etterlatte-migrering-model/**
       - libs/etterlatte-vedtaksvurdering-model/**
       - libs/etterlatte-vilkaarsvurdering-model/**
       - libs/ktor2client-onbehalfof/**

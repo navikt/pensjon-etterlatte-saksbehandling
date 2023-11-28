@@ -6,8 +6,10 @@ import { Heading } from '@navikt/ds-react'
 import { ContentHeader } from '~shared/styled'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentPersonopplysningerForBehandling } from '~shared/api/grunnlag'
-import React, { useEffect, useState } from 'react'
-import { Personopplysninger } from '~shared/types/grunnlag'
+import React, { useEffect } from 'react'
+import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
+import { useAppDispatch } from '~store/Store'
+import { setPersonopplysninger } from '~store/reducers/PersonopplysningerReducer'
 
 export interface PropsFamilieforhold {
   behandling: IDetaljertBehandling
@@ -15,11 +17,14 @@ export interface PropsFamilieforhold {
 
 export const Familieforhold = ({ behandling }: PropsFamilieforhold) => {
   const [, fetchPersonopplysninger] = useApiCall(hentPersonopplysningerForBehandling)
-  const [personopplysninger, setPersonopplysninger] = useState<Personopplysninger | null>(null)
+
+  const personopplysninger = usePersonopplysninger()
+
+  const dispatch = useAppDispatch()
 
   useEffect(() => {
     fetchPersonopplysninger({ behandlingId: behandling.id, sakType: behandling.sakType }, (result) =>
-      setPersonopplysninger(result)
+      dispatch(setPersonopplysninger(result))
     )
   }, [])
 

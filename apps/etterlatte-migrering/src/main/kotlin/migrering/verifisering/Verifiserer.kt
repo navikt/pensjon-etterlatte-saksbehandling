@@ -33,19 +33,26 @@ internal class Verifiserer(
             feil.addAll(sjekkAtPersonerFinsIPDL(it))
         }
         if (feil.isNotEmpty()) {
-            logger.warn(
-                "Sak ${request.pesysId} har ufullstendige data i PDL, kan ikke migrere. Se sikkerlogg for detaljer",
-            )
-            repository.lagreFeilkjoering(
-                request.toJson(),
-                feilendeSteg = Migreringshendelser.VERIFISER,
-                feil = feil.map { it.message }.toJson(),
-                pesysId = request.pesysId,
-            )
-            repository.oppdaterStatus(request.pesysId, Migreringsstatus.VERIFISERING_FEILA)
-            throw samleExceptions(feil)
+            haandterFeil(request, feil)
         }
         return patchedRequest.getOrThrow()
+    }
+
+    private fun haandterFeil(
+        request: MigreringRequest,
+        feil: MutableList<Exception>,
+    ) {
+        logger.warn(
+            "Sak ${request.pesysId} har ufullstendige data i PDL, kan ikke migrere. Se sikkerlogg for detaljer",
+        )
+        repository.lagreFeilkjoering(
+            request.toJson(),
+            feilendeSteg = Migreringshendelser.VERIFISER,
+            feil = feil.map { it.message }.toJson(),
+            pesysId = request.pesysId,
+        )
+        repository.oppdaterStatus(request.pesysId, Migreringsstatus.VERIFISERING_FEILA)
+        throw samleExceptions(feil)
     }
 
     private fun sjekkAtPersonerFinsIPDL(request: MigreringRequest): List<Verifiseringsfeil> {

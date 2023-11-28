@@ -76,7 +76,9 @@ export const Soeknadsoversikt = (props: { behandling: IDetaljertBehandling }) =>
       <InnholdPadding>
         <OppdaterGrunnlagModal behandlingId={behandling.id} behandlingStatus={behandling.status} />
         <Utenlandstilknytning behandling={behandling} redigerbar={redigerbar} />
-        <OversiktGyldigFramsatt behandling={behandling} />
+        {personopplysninger && (
+          <OversiktGyldigFramsatt behandling={behandling} personopplysninger={personopplysninger} />
+        )}
         {behandling.gyldighetsprøving?.resultat === VurderingsResultat.OPPFYLT && (
           <>
             {behandling.sakType == SakType.BARNEPENSJON && (

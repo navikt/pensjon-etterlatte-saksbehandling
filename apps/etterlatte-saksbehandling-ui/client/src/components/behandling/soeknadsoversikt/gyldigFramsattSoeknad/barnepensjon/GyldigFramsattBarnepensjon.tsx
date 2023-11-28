@@ -17,13 +17,16 @@ import { StatusIconProps } from '~shared/icons/statusIcon'
 import { useEffect } from 'react'
 import { isSuccess, useApiCall } from '~shared/hooks/useApiCall'
 import { getPersongalleriFraSoeknad } from '~shared/api/grunnlag'
+import { Familieforhold } from '~shared/types/Person'
 
 export const GyldigFramsattBarnepensjon = ({
   behandling,
+  familieforhold,
   gyldigFramsatt,
   gyldigFremsattTilStatusIcon,
 }: {
   behandling: IDetaljertBehandling
+  familieforhold: Familieforhold
   gyldigFramsatt: IGyldighetResultat | undefined
   gyldigFremsattTilStatusIcon: StatusIconProps
 }) => {
@@ -67,12 +70,12 @@ export const GyldigFramsattBarnepensjon = ({
               <Innsender
                 harKildePesys={harKildePesys}
                 persongalleriGrunnlag={personGalleriSoeknad.data}
-                gjenlevendeGrunnlag={behandling.familieforhold?.gjenlevende}
+                gjenlevendeGrunnlag={familieforhold?.gjenlevende?.find((po) => po)}
               />
               <Foreldreansvar
                 harKildePesys={harKildePesys}
                 persongalleriGrunnlag={personGalleriSoeknad.data}
-                gjenlevendeGrunnlag={behandling.familieforhold?.gjenlevende}
+                gjenlevendeGrunnlag={familieforhold?.gjenlevende?.find((po) => po)}
               />
               <Verger behandlingId={behandling.id} sakId={behandling.sakId} />
             </InfobokserWrapper>

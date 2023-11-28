@@ -1,12 +1,12 @@
 import { InfoWrapper } from '../../styled'
 import { Info } from '../../Info'
-import { IPdlPerson, Persongalleri } from '~shared/types/Person'
-import { Grunnlagsopplysning } from '~shared/types/grunnlag'
+import { Persongalleri } from '~shared/types/Person'
+import { Grunnlagsopplysning, Personopplysning } from '~shared/types/grunnlag'
 import { KildePdl } from '~shared/types/kilde'
 
 interface Props {
   persongalleriGrunnlag: Grunnlagsopplysning<Persongalleri, KildePdl>
-  gjenlevendeGrunnlag: Grunnlagsopplysning<IPdlPerson, KildePdl> | undefined
+  gjenlevendeGrunnlag: Personopplysning | undefined
   harKildePesys: Boolean
 }
 

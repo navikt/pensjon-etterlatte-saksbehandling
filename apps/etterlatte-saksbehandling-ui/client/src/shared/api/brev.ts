@@ -8,8 +8,8 @@ export const hentBrev = async (props: { brevId: number; sakId: number }): Promis
 export const hentBrevForSak = async (sakId: number): Promise<ApiResponse<IBrev[]>> =>
   apiClient.get(`/brev/sak/${sakId}`)
 
-export const opprettBrevForSak = async (sakId: number): Promise<ApiResponse<IBrev>> =>
-  apiClient.post(`/brev/sak/${sakId}`, {})
+export const opprettBrevForSak = async (args: { sakId: number; tittel: string }): Promise<ApiResponse<IBrev>> =>
+  apiClient.post(`/brev/sak/${args.sakId}`, { tittel: args.tittel })
 
 export const hentVedtaksbrev = async (behandlingId: string): Promise<ApiResponse<IBrev>> =>
   apiClient.get(`/brev/behandling/${behandlingId}/vedtak`)
@@ -26,6 +26,13 @@ export const oppdaterMottaker = async (props: {
   mottaker: Mottaker
 }): Promise<ApiResponse<IBrev>> =>
   apiClient.post(`/brev/${props.brevId}/mottaker?sakId=${props.sakId}`, { mottaker: props.mottaker })
+
+export const oppdaterTittel = async (args: {
+  brevId: number
+  sakId: number
+  tittel: string
+}): Promise<ApiResponse<IBrev>> =>
+  apiClient.post(`/brev/${args.brevId}/tittel?sakId=${args.sakId}`, { tittel: args.tittel })
 
 export const genererPdf = async (props: {
   brevId: number

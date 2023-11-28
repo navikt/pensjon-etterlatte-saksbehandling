@@ -98,7 +98,7 @@ const KravpakkeUtland = (props: { utlandsBehandling: Generellbehandling & { innh
   const configContext = useContext(ConfigContext)
 
   const opprettNyttBrevINyFane = () => {
-    opprettBrev(Number(utlandsBehandling.sakId), (brev) => {
+    opprettBrev({ sakId: Number(utlandsBehandling.sakId), tittel: 'Kakkmaddafakka' }, (brev) => {
       window.open(`/person/${brev.soekerFnr}/sak/${brev.sakId}/brev/${brev.id}`, '_blank', 'noopener noreferrer')
     })
   }

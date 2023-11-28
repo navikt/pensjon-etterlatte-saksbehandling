@@ -43,3 +43,12 @@ data class ManueltBrevData(val innhold: List<Slate.Element>) : BrevData() {
         fun fra(innhold: List<Slate.Element> = emptyList()) = ManueltBrevData(innhold)
     }
 }
+
+data class ManueltBrevMedTittelData(val innhold: List<Slate.Element>, val tittel: String? = null) : BrevData() {
+    companion object {
+        fun fra(
+            innhold: List<Slate.Element> = emptyList(),
+            tittel: String? = null,
+        ) = ManueltBrevMedTittelData(innhold, tittel)
+    }
+}

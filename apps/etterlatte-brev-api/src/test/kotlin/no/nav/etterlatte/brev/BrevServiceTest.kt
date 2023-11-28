@@ -274,6 +274,41 @@ internal class BrevServiceTest {
         }
     }
 
+    @Nested
+    inner class OppdateringAvBrev {
+        @ParameterizedTest
+        @EnumSource(Status::class, names = ["OPPRETTET", "OPPDATERT"], mode = EnumSource.Mode.INCLUDE)
+        fun `Oppdater tittel - status kan endres`(status: Status) {
+            val brev = opprettBrev(status, BrevProsessType.MANUELL)
+
+            every { db.hentBrev(any()) } returns brev
+
+            val tittel = "En oppdatert tittel"
+            brevService.oppdaterTittel(brev.id, tittel)
+
+            verify {
+                db.hentBrev(brev.id)
+                db.oppdaterTittel(brev.id, tittel)
+            }
+        }
+
+        @ParameterizedTest
+        @EnumSource(Status::class, names = ["OPPRETTET", "OPPDATERT"], mode = EnumSource.Mode.EXCLUDE)
+        fun `Oppdater tittel - kan IKKE endres`(status: Status) {
+            val brev = opprettBrev(status, BrevProsessType.MANUELL)
+
+            every { db.hentBrev(any()) } returns brev
+
+            assertThrows<IllegalStateException> {
+                brevService.oppdaterTittel(brev.id, "Ny tittel skal feile")
+            }
+
+            verify {
+                db.hentBrev(brev.id)
+            }
+        }
+    }
+
     private fun opprettBrev(
         status: Status,
         prosessType: BrevProsessType,
@@ -281,6 +316,7 @@ internal class BrevServiceTest {
         id = Random.nextLong(10000),
         sakId = Random.nextLong(10000),
         behandlingId = null,
+        tittel = null,
         prosessType = prosessType,
         soekerFnr = "fnr",
         status = status,

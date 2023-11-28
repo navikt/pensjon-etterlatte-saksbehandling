@@ -136,6 +136,7 @@ internal class OpprettJournalfoerOgDistribuer {
             id = 2L,
             sakId = 1L,
             behandlingId = behandlingId,
+            tittel = "tittel",
             prosessType = BrevProsessType.AUTOMATISK,
             soekerFnr = "123",
             status = Status.FERDIGSTILT,

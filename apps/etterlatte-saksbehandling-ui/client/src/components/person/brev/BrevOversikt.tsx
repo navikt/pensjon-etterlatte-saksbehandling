@@ -77,7 +77,7 @@ export default function BrevOversikt({ sakStatus }: { sakStatus: Result<SakMedBe
 
   const opprettNyttBrevOgRedirect = () => {
     if (isSuccess(sakStatus)) {
-      opprettBrev(Number(sakStatus.data.sak.id), (brev) => {
+      opprettBrev({ sakId: Number(sakStatus.data.sak.id), tittel: 'en liten tittel' }, (brev) => {
         navigate(`/person/${brev.soekerFnr}/sak/${brev.sakId}/brev/${brev.id}`)
       })
     } else {

@@ -70,6 +70,16 @@ fun Route.brevRoute(
             }
         }
 
+        post("tittel") {
+            withSakId(tilgangssjekker) {
+                val request = call.receive<OppdaterTittelRequest>()
+
+                service.oppdaterTittel(brevId, request.tittel)
+
+                call.respond(HttpStatusCode.OK)
+            }
+        }
+
         route("payload") {
             get {
                 withSakId(tilgangssjekker) {
@@ -150,4 +160,8 @@ data class OppdaterPayloadRequest(
 
 data class OppdaterMottakerRequest(
     val mottaker: Mottaker,
+)
+
+data class OppdaterTittelRequest(
+    val tittel: String,
 )

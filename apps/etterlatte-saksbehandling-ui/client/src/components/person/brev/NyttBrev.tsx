@@ -15,6 +15,7 @@ import BrevStatusPanel from '~components/person/brev/BrevStatusPanel'
 import NyttBrevMottaker from '~components/person/brev/NyttBrevMottaker'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
+import BrevTittel from '~components/person/brev/tittel/BrevTittel'
 
 export default function NyttBrev() {
   const { brevId, sakId, fnr } = useParams()
@@ -51,6 +52,9 @@ export default function NyttBrev() {
         (brev) => (
           <GridContainer>
             <Column>
+              <div style={{ margin: '1rem' }}>
+                <BrevTittel brevId={brev.id} sakId={brev.sakId} tittel={brev.tittel} />
+              </div>
               <NyttBrevMottaker brev={brev} />
             </Column>
             <Column>

@@ -97,6 +97,7 @@ internal class OpprettVedtaksbrevForMigreringRiverTest {
             1,
             41,
             behandlingId,
+            "tittel",
             BrevProsessType.AUTOMATISK,
             "fnr",
             Status.FERDIGSTILT,

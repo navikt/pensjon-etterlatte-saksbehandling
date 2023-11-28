@@ -24,6 +24,7 @@ import { useAppDispatch } from '~store/Store'
 import { TrygdetidDetaljer } from '~components/behandling/trygdetid/detaljer/TrygdetidDetaljer'
 import { OverstyrtTrygdetid } from './OverstyrtTrygdetid'
 import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
+import { TrygdetidManueltOverstyrt } from '~components/behandling/trygdetid/TrygdetidManueltOverstyrt'
 
 interface Props {
   redigerbar: boolean
@@ -88,7 +89,7 @@ export const Trygdetid = ({ redigerbar, behandling, virkningstidspunktEtterNyReg
   if (trygdetid?.beregnetTrygdetid?.resultat.overstyrt) {
     return (
       <TrygdetidWrapper>
-        <div>Skjema for å endre manuell trygdetid kommer her</div>
+        <TrygdetidManueltOverstyrt behandlingId={behandling.id} oppdaterTrygdetid={oppdaterTrygdetid} />
         {trygdetid.beregnetTrygdetid && <TrygdetidDetaljer beregnetTrygdetid={trygdetid.beregnetTrygdetid.resultat} />}
       </TrygdetidWrapper>
     )

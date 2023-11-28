@@ -141,11 +141,23 @@ fun Route.trygdetid(
                 }
             }
 
-            post("/opprett") {
+            post("/manuell/opprett") {
                 withBehandlingId(behandlingKlient) {
                     logger.info("Oppretter trygdetid med overstyrt for behandling $behandlingId")
                     trygdetidService.opprettOverstyrtBeregnetTrygdetid(behandlingId, brukerTokenInfo)
                     call.respond(HttpStatusCode.OK)
+                }
+            }
+
+            post("/manuell/lagre") {
+                withBehandlingId(behandlingKlient) {
+                    logger.info("Oppdaterer trygdetid med overstyrt for behandling $behandlingId")
+                    val beregnetTrygdetid = call.receive<DetaljertBeregnetTrygdetidResultat>()
+
+                    val dto = trygdetidService.overstyrBeregnetTrygdetid(behandlingId, beregnetTrygdetid).toDto()
+                    behandlingKlient.settBehandlingStatusTrygdetidOppdatert(dto.behandlingId, brukerTokenInfo)
+
+                    call.respond(dto)
                 }
             }
 

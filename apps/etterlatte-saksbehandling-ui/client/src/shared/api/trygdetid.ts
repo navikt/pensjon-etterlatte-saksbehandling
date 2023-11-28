@@ -117,7 +117,18 @@ export const lagreTrygdeavtaleForBehandling = async (args: {
   apiClient.post<Trygdeavtale>(`/trygdetid/avtaler/${args.behandlingId}`, { ...args.avtaleRequest })
 
 export const opprettTrygdetidOverstyrtMigrering = async (args: { behandlingId: string }): Promise<ApiResponse<void>> =>
-  apiClient.post(`/trygdetid/${args.behandlingId}/migrering/opprett`, {})
+  apiClient.post(`/trygdetid/${args.behandlingId}/migrering/manuell/opprett`, {})
+
+export const oppdaterTrygdetidOverstyrtMigrering = async (args: {
+  behandlingId: string
+  anvendtTrygdetid: number
+  prorataBroek?: IProrataBroek
+}): Promise<ApiResponse<ITrygdetid>> =>
+  apiClient.post(`/trygdetid/${args.behandlingId}/migrering/manuell/lagre`, {
+    samletTrygdetidNorge: args.anvendtTrygdetid,
+    prorataBroek: args.prorataBroek,
+    overstyrt: true,
+  })
 
 export interface ITrygdetid {
   id: string

@@ -308,7 +308,7 @@ class RealGrunnlagService(
         if (opplysningPersongalleriSak == null) {
             throw GenerellIkkeFunnetException()
         }
-        val persongalleriISak: Persongalleri = objectMapper.readValue(opplysningPersongalleriSak.opplysning.toJson())
+        val persongalleriISak: Persongalleri = objectMapper.readValue(opplysningPersongalleriSak.opplysning.opplysning.toJson())
 
         if (opplysningPersongalleriPdl == null) {
             logger.info("Fant ikke persongalleri fra PDL for behandling med id=$behandlingId, gjør ingen samsvarsjekk")
@@ -320,7 +320,7 @@ class RealGrunnlagService(
                 problemer = listOf(),
             )
         }
-        val persongalleriPdl: Persongalleri = objectMapper.readValue(opplysningPersongalleriPdl.opplysning.toJson())
+        val persongalleriPdl: Persongalleri = objectMapper.readValue(opplysningPersongalleriPdl.opplysning.opplysning.toJson())
 
         val valideringsfeil =
             valideringsfeilPersongalleriSakPdl(

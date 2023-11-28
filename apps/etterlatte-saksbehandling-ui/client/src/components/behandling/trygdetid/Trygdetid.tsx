@@ -89,8 +89,12 @@ export const Trygdetid = ({ redigerbar, behandling, virkningstidspunktEtterNyReg
   if (trygdetid?.beregnetTrygdetid?.resultat.overstyrt) {
     return (
       <TrygdetidWrapper>
-        <TrygdetidManueltOverstyrt behandlingId={behandling.id} oppdaterTrygdetid={oppdaterTrygdetid} />
-        {trygdetid.beregnetTrygdetid && <TrygdetidDetaljer beregnetTrygdetid={trygdetid.beregnetTrygdetid.resultat} />}
+        <TrygdetidManueltOverstyrt
+          behandlingId={behandling.id}
+          oppdaterTrygdetid={oppdaterTrygdetid}
+          beregnetTrygdetid={trygdetid.beregnetTrygdetid}
+        />
+        <TrygdetidDetaljer beregnetTrygdetid={trygdetid.beregnetTrygdetid.resultat} />
       </TrygdetidWrapper>
     )
   }

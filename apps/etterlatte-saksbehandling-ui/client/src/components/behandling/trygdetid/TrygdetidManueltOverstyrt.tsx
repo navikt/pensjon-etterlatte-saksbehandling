@@ -2,21 +2,25 @@ import React, { useState } from 'react'
 import { Alert, Button, Checkbox, TextField } from '@navikt/ds-react'
 import styled from 'styled-components'
 import { isFailure, isPending, useApiCall } from '~shared/hooks/useApiCall'
-import { ITrygdetid, oppdaterTrygdetidOverstyrtMigrering } from '~shared/api/trygdetid'
+import { IDetaljertBeregnetTrygdetid, ITrygdetid, oppdaterTrygdetidOverstyrtMigrering } from '~shared/api/trygdetid'
 import { InputRow } from '~components/person/journalfoeringsoppgave/nybehandling/OpprettNyBehandling'
 
 export const TrygdetidManueltOverstyrt = ({
   behandlingId,
+  beregnetTrygdetid,
   oppdaterTrygdetid,
 }: {
   behandlingId: string
+  beregnetTrygdetid: IDetaljertBeregnetTrygdetid
   oppdaterTrygdetid: (trygdetid: ITrygdetid) => void
 }) => {
-  const [anvendtTrygdetid, setAnvendtTrygdetid] = useState<number | undefined>(undefined)
+  const [anvendtTrygdetid, setAnvendtTrygdetid] = useState<number | undefined>(
+    beregnetTrygdetid.resultat.samletTrygdetidNorge
+  )
 
-  const [skalHaProrata, setSkalHaProrata] = useState<boolean>(false)
-  const [prorataTeller, setTeller] = useState<number | undefined>(undefined)
-  const [prorataNevner, setNevner] = useState<number | undefined>(undefined)
+  const [skalHaProrata, setSkalHaProrata] = useState<boolean>(beregnetTrygdetid.resultat.prorataBroek != null)
+  const [prorataTeller, setTeller] = useState<number | undefined>(beregnetTrygdetid.resultat.prorataBroek?.teller)
+  const [prorataNevner, setNevner] = useState<number | undefined>(beregnetTrygdetid.resultat.prorataBroek?.nevner)
 
   const [status, oppdaterTrygdetidRequest] = useApiCall(oppdaterTrygdetidOverstyrtMigrering)
 

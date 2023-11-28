@@ -401,7 +401,7 @@ class BehandlingServiceImplTest {
     }
 
     @Test
-    fun `Virkningstidspunkt krever fastsetting av utenlandstilknytning`() {
+    fun `Virkningstidspunkt krever fastsetting av utlandstilknytning`() {
         val bodyVirkningstidspunkt = Tidspunkt.parse("2017-02-01T00:00:00Z")
         val bodyBegrunnelse = "begrunnelse"
         val request = VirkningstidspunktRequest(bodyVirkningstidspunkt.toString(), bodyBegrunnelse)
@@ -418,7 +418,7 @@ class BehandlingServiceImplTest {
     }
 
     @Test
-    fun `Ved utenlandstilknytning bosatt utland må kravdato være med`() {
+    fun `Ved utlandstilknytning bosatt utland må kravdato være med`() {
         val bodyVirkningstidspunkt = Tidspunkt.parse("2017-02-01T00:00:00Z")
         val bodyBegrunnelse = "begrunnelse"
         val request = VirkningstidspunktRequest(bodyVirkningstidspunkt.toString(), bodyBegrunnelse)
@@ -446,7 +446,7 @@ class BehandlingServiceImplTest {
     }
 
     @Test
-    fun `Ved utenlandstilknytning bosatt utland med kravdato skal kravdato brukes ikke soeknadmottatt`() {
+    fun `Ved utlandstilknytning bosatt utland med kravdato skal kravdato brukes ikke soeknadmottatt`() {
         val bodyVirkningstidspunkt = Tidspunkt.parse("2017-02-01T00:00:00Z")
         val bodyBegrunnelse = "begrunnelse"
         val bodyKravdato = Tidspunkt.parse("2019-02-01T00:00:00Z")

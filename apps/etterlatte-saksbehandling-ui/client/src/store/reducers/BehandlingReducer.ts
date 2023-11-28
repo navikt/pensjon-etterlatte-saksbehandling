@@ -33,7 +33,7 @@ export const oppdaterBoddEllerArbeidetUtlandet = createAction<IBoddEllerArbeidet
 )
 export const oppdaterBeregning = createAction<Beregning>('behandling/beregning')
 export const oppdaterBehandlingsstatus = createAction<IBehandlingStatus>('behandling/status')
-export const oppdaterUtlandstilknytning = createAction<IUtlandstilknytning>('behandling/utenlandstilknytning')
+export const oppdaterUtlandstilknytning = createAction<IUtlandstilknytning>('behandling/utlandstilknytning')
 export const oppdaterEtterbetaling = createAction<IEtterbetaling | null>('behandling/etterbetaling')
 export const oppdaterBeregingsGrunnlag = createAction<BeregningsGrunnlagPostDto>('behandling/beregningsgrunnlag')
 export const oppdaterBeregingsGrunnlagOMS = createAction<BeregningsGrunnlagOMSPostDto>(

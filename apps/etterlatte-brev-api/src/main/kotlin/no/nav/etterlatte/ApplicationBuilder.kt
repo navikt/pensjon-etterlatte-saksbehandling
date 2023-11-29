@@ -57,6 +57,7 @@ import no.nav.etterlatte.rivers.JournalfoerVedtaksbrevRiver
 import no.nav.etterlatte.rivers.VedtaksbrevUnderkjentRiver
 import no.nav.etterlatte.rivers.migrering.FiksEnkeltbrevRiver
 import no.nav.etterlatte.rivers.migrering.OpprettVedtaksbrevForMigreringRiver
+import no.nav.etterlatte.rivers.migrering.SUM
 import no.nav.etterlatte.security.ktor.clientCredential
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidApplication
@@ -212,10 +213,10 @@ class ApplicationBuilder {
         thread {
             Thread.sleep(60_000)
             listOf(
-                "85ba077a-f6e5-4c22-8045-42ef246e3c47",
-                "b05986ad-ccb6-4216-8447-e671e1721bd9",
-                "088a8d58-7638-4787-81e3-0f469db05825",
-                "50850686-3b08-460e-a1ad-392419572db1",
+                Pair("85ba077a-f6e5-4c22-8045-42ef246e3c47", 3213),
+                Pair("b05986ad-ccb6-4216-8447-e671e1721bd9", 3213),
+                Pair("088a8d58-7638-4787-81e3-0f469db05825", 3213),
+                Pair("50850686-3b08-460e-a1ad-392419572db1", 3954),
             ).forEach {
                 rapidsConnection.publish(
                     message = lagMelding(behandlingId = it),
@@ -226,12 +227,13 @@ class ApplicationBuilder {
         }
     }
 
-    private fun lagMelding(behandlingId: String) =
+    private fun lagMelding(behandlingId: Pair<String, Int>) =
         JsonMessage.newMessage(
             mapOf(
                 EVENT_NAME_KEY to Migreringshendelser.FIKS_ENKELTBREV,
-                BEHANDLING_ID_KEY to behandlingId,
+                BEHANDLING_ID_KEY to behandlingId.first,
                 FIKS_BREV_MIGRERING to true,
+                SUM to behandlingId.second,
             ),
         ).toJson()
 

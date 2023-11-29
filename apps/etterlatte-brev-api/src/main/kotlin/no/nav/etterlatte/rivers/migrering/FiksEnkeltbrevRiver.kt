@@ -28,6 +28,7 @@ internal class FiksEnkeltbrevRiver(
     init {
         initialiserRiver(rapidsConnection, Migreringshendelser.FIKS_ENKELTBREV) {
             validate { it.requireKey(BEHANDLING_ID_KEY) }
+            validate { it.requireKey(SUM) }
         }
     }
 
@@ -38,7 +39,8 @@ internal class FiksEnkeltbrevRiver(
         val behandlingId = packet.behandlingId
         logger.info("Fikser vedtaksbrev for behandling $behandlingId")
         val brukerTokenInfo = Systembruker("migrering", "migrering")
-        val migreringBrevRequest = MigreringBrevRequest(brutto = 3954)
+        val sum = packet[SUM].asInt()
+        val migreringBrevRequest = MigreringBrevRequest(brutto = sum)
         runBlocking {
             val sakId = vedtaksvurderingService.hentVedtak(behandlingId, brukerTokenInfo).sak.id
             val vedtaksbrev: Brev =
@@ -59,3 +61,5 @@ internal class FiksEnkeltbrevRiver(
         context.publish(packet.toJson())
     }
 }
+
+const val SUM = "sum"

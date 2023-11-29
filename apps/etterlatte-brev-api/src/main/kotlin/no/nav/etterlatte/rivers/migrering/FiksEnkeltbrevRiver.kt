@@ -40,7 +40,7 @@ internal class FiksEnkeltbrevRiver(
         val behandlingId = brev.behandlingId!!
         val brukerTokenInfo = Systembruker("migrering", "migrering")
         val sum = packet[SUM].asInt()
-        val migreringBrevRequest = MigreringBrevRequest(brutto = sum)
+        val migreringBrevRequest = MigreringBrevRequest(brutto = sum, utenlandstilknytningType = null)
         runBlocking {
             service.genererPdf(brevId, brukerTokenInfo, migreringBrevRequest)
             service.ferdigstillVedtaksbrev(behandlingId, brukerTokenInfo, true)

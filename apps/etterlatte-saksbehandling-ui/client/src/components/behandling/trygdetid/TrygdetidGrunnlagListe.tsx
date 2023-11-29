@@ -65,10 +65,10 @@ export const TrygdetidGrunnlagListe: React.FC<Props> = ({
       </FlexHeader>
       {trygdetidGrunnlagType == ITrygdetidGrunnlagType.FAKTISK ? (
         <p>
-          Legg til aktuell trygdetid fra aktuelle land fra avdøde var 16 år frem til og med måneden før hen døde. Hvis
-          trygdetid fra flere land med ulike avtaler, må det foretas beregning innen hver avtale. Huk da av for
-          &quot;Ikke med i prorata&quot; for trygdetidsperioder i land som ikke skal med i de ulike beregningene. Velg
-          beste alternativ for prorata-beregning.
+          Legg til aktuell trygdetid fra aktuelle land (inkludert Norge) fra avdøde var 16 år frem til og med måneden
+          før hen døde. Hvis trygdetid fra flere land med ulike avtaler, må det foretas beregning innen hver avtale. Huk
+          da av for &quot;Ikke med i prorata&quot; for trygdetidsperioder i land som ikke skal med i de ulike
+          beregningene. Velg beste alternativ for prorata-beregning.
         </p>
       ) : (
         <p>

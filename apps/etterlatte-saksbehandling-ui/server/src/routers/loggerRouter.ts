@@ -3,6 +3,7 @@ import { frontendLogger } from '../monitoring/logger'
 import sourceMap, { NullableMappedPosition } from 'source-map'
 import * as fs from 'fs'
 import { parseJwt } from '../utils/parsejwt'
+import * as crypto from 'crypto'
 
 export const loggerRouter = express.Router()
 
@@ -60,6 +61,7 @@ loggerRouter.post('/', express.json(), (req, res) => {
       request_uri: maybeUrl,
       user_device: JSON.stringify(body.jsonContent.userDeviceInfo),
       user_agent: body.jsonContent.userAgent,
+      correlation_id: crypto.randomUUID(),
       user: getNAVident(req.headers.authorization),
     }
     if (body.stackInfo) {

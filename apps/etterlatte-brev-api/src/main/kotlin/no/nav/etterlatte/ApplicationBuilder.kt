@@ -55,6 +55,7 @@ import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser
 import no.nav.etterlatte.rivers.DistribuerBrevRiver
 import no.nav.etterlatte.rivers.JournalfoerVedtaksbrevRiver
 import no.nav.etterlatte.rivers.VedtaksbrevUnderkjentRiver
+import no.nav.etterlatte.rivers.migrering.BREV_ID_KEY
 import no.nav.etterlatte.rivers.migrering.FiksEnkeltbrevRiver
 import no.nav.etterlatte.rivers.migrering.OpprettVedtaksbrevForMigreringRiver
 import no.nav.etterlatte.rivers.migrering.SUM
@@ -64,7 +65,6 @@ import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.pensjon.brevbaker.api.model.RenderedJsonLetter
 import org.slf4j.Logger
-import rapidsandrivers.BEHANDLING_ID_KEY
 import rapidsandrivers.getRapidEnv
 import java.util.UUID
 import kotlin.concurrent.thread
@@ -213,13 +213,11 @@ class ApplicationBuilder {
         thread {
             Thread.sleep(60_000)
             listOf(
-                Pair("85ba077a-f6e5-4c22-8045-42ef246e3c47", 3213),
-                Pair("b05986ad-ccb6-4216-8447-e671e1721bd9", 3213),
-                Pair("088a8d58-7638-4787-81e3-0f469db05825", 3213),
-                Pair("50850686-3b08-460e-a1ad-392419572db1", 3954),
+                Pair(6071L, 3213),
+                Pair(6300L, 3954),
             ).forEach {
                 rapidsConnection.publish(
-                    message = lagMelding(behandlingId = it),
+                    message = lagMelding(brevId = it),
                     key = UUID.randomUUID().toString(),
                 )
                 Thread.sleep(3000)
@@ -227,13 +225,13 @@ class ApplicationBuilder {
         }
     }
 
-    private fun lagMelding(behandlingId: Pair<String, Int>) =
+    private fun lagMelding(brevId: Pair<Long, Int>) =
         JsonMessage.newMessage(
             mapOf(
                 EVENT_NAME_KEY to Migreringshendelser.FIKS_ENKELTBREV,
-                BEHANDLING_ID_KEY to behandlingId.first,
+                BREV_ID_KEY to brevId.first,
                 FIKS_BREV_MIGRERING to true,
-                SUM to behandlingId.second,
+                SUM to brevId.second,
             ),
         ).toJson()
 

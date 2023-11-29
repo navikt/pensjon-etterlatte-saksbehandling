@@ -17,8 +17,7 @@ export const isSuccessOrInitial = (result: Result<unknown>): result is Initial |
   isSuccess(result) || isInitial(result)
 export const isErrorWithCode = (result: Result<unknown>, code: number): result is Error<ApiError> =>
   result.status === 'error' && result.error.status === code
-export const is5xxError = (result: Result<unknown>): result is Error<ApiError> =>
-  result.status === 'error' && String(result.error.status).startsWith('5')
+
 export const initial = <A = never>(): Result<A> => ({ status: 'initial' })
 export const pending = <A = never>(): Result<A> => ({ status: 'pending' })
 export const success = <A = never>(data: A): Result<A> => ({

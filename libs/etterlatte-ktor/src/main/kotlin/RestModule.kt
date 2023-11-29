@@ -12,6 +12,7 @@ import io.ktor.server.config.ApplicationConfig
 import io.ktor.server.plugins.callid.CallId
 import io.ktor.server.plugins.callid.callIdMdc
 import io.ktor.server.plugins.callloging.CallLogging
+import io.ktor.server.plugins.callloging.processingTimeMillis
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.server.plugins.statuspages.StatusPages
 import io.ktor.server.request.header
@@ -53,8 +54,13 @@ fun Application.restModule(
         level = Level.INFO
         filter { call -> !call.request.path().matches(Regex(".*/isready|.*/isalive|.*/metrics")) }
         format { call ->
+            val responseTime = call.processingTimeMillis()
+            val status = call.response.status()?.value
+            val method = call.request.httpMethod.value
+            val path = call.request.path()
+
             skjulAllePotensielleFnr(
-                "<- ${call.response.status()?.value} ${call.request.httpMethod.value} ${call.request.path()}",
+                "<- $status $method $path in $responseTime ms",
             )
         }
         callIdMdc(CORRELATION_ID)

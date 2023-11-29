@@ -4,6 +4,7 @@ import no.nav.etterlatte.brev.MigreringBrevRequest
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
 import no.nav.etterlatte.brev.model.BrevData
+import no.nav.etterlatte.libs.common.IntBroek
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.pensjon.brevbaker.api.model.Kroner
 
@@ -11,6 +12,7 @@ data class OmregnetBPNyttRegelverk(
     val utbetaltFoerReform: Kroner,
     val utbetaltEtterReform: Kroner,
     val anvendtTrygdetid: Int,
+    val prorataBroek: IntBroek?,
     val grunnbeloep: Kroner,
 ) : BrevData() {
     companion object {
@@ -19,6 +21,7 @@ data class OmregnetBPNyttRegelverk(
             utbetalingsinfo: Utbetalingsinfo,
             migreringRequest: MigreringBrevRequest?,
         ): OmregnetBPNyttRegelverk {
+            val foersteBeregningsperiode = utbetalingsinfo.beregningsperioder.first()
             val utbetaltFoerReform =
                 if (generellBrevData.systemkilde == Vedtaksloesning.PESYS) {
                     requireNotNull(migreringRequest) {
@@ -31,8 +34,9 @@ data class OmregnetBPNyttRegelverk(
             return OmregnetBPNyttRegelverk(
                 utbetaltFoerReform = Kroner(utbetaltFoerReform),
                 utbetaltEtterReform = Kroner(utbetalingsinfo.beloep.value),
-                anvendtTrygdetid = utbetalingsinfo.beregningsperioder.first().trygdetid,
-                grunnbeloep = Kroner(utbetalingsinfo.beregningsperioder.first().grunnbeloep.value),
+                anvendtTrygdetid = foersteBeregningsperiode.trygdetid,
+                prorataBroek = foersteBeregningsperiode.prorataBroek,
+                grunnbeloep = Kroner(foersteBeregningsperiode.grunnbeloep.value),
             )
         }
     }

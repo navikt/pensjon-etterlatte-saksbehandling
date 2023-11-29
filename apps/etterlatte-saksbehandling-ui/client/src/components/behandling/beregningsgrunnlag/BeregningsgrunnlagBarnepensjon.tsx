@@ -124,7 +124,7 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
             }}
           />
         )}
-        {isSuccess(beregningsgrunnlag) && behandling.familieforhold && (
+        {isSuccess(beregningsgrunnlag) && (
           <Soeskenjustering
             behandling={behandling}
             onSubmit={(soeskenGrunnlag) => setSoeskenGrunnlagsData(soeskenGrunnlag)}

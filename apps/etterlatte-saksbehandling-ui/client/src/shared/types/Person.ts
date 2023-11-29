@@ -1,12 +1,7 @@
-import { Grunnlagsopplysning, Personopplysning } from '~shared/types/grunnlag'
+import { Personopplysning } from '~shared/types/grunnlag'
 import { IAdresse } from '~shared/types/IAdresse'
-import { KildePdl } from './kilde'
 import { VergemaalEllerFremtidsfullmakt } from '~components/person/typer'
 import { SakType } from '~shared/types/sak'
-
-export interface IFamilieforhold {
-  avdoede: Grunnlagsopplysning<IPdlPerson, KildePdl>
-}
 
 export interface Familieforhold {
   avdoede: Personopplysning[]

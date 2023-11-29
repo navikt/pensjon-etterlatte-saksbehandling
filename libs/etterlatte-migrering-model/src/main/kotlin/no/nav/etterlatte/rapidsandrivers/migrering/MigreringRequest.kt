@@ -41,6 +41,15 @@ data class MigreringRequest(
         val beregningsMetode = beregning.meta?.beregningsMetodeType
         return beregningsMetode == "FOLKETRYGD" && beregning.prorataBroek == null
     }
+
+    fun erEoesBeregnet(): Boolean {
+        val beregningsMetode = beregning.meta?.beregningsMetodeType
+        return beregningsMetode == "EOS" && beregning.prorataBroek != null
+    }
+
+    fun harMindreEnn40AarsTrygdetid(): Boolean {
+        return beregning.anvendtTrygdetid < 40
+    }
 }
 
 data class AvdoedForelder(

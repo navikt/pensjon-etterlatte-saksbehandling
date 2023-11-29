@@ -10,6 +10,7 @@ import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeServi
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
+import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
 import no.nav.etterlatte.libs.common.behandling.Flyktning
 import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.JaNeiMedBegrunnelse
@@ -81,14 +82,28 @@ class MigreringService(
                             ),
                     )
 
-                    request.utenlandstilknytningType?.let {
+                    request.utenlandstilknytningType?.let { utlandstilknytning ->
                         sakService.oppdaterUtenlandstilknytning(
                             sakId = behandling.sak.id,
                             utenlandstilknytning =
                                 Utenlandstilknytning(
-                                    type = it,
+                                    type = utlandstilknytning,
                                     kilde = Grunnlagsopplysning.Pesys.create(),
                                     begrunnelse = "Automatisk migrert fra Pesys",
+                                ),
+                        )
+                    }
+
+                    if (request.harMindreEnn40AarsTrygdetid() || request.erEoesBeregnet()) {
+                        behandlingService.oppdaterBoddEllerArbeidetUtlandet(
+                            behandlingId = behandling.id,
+                            boddEllerArbeidetUtlandet =
+                                BoddEllerArbeidetUtlandet(
+                                    boddEllerArbeidetUtlandet = true,
+                                    boddArbeidetEosNordiskKonvensjon = request.erEoesBeregnet().takeIf { it },
+                                    kilde = Grunnlagsopplysning.Pesys.create(),
+                                    begrunnelse =
+                                        "Automatisk vurdert ved migrering fra Pesys. Vurdering av utlandsopphold kan være mangelfull.",
                                 ),
                         )
                     }

@@ -284,7 +284,10 @@ internal class BehandlingDaoTest {
 
         assertEquals(true, lagretBehandling.boddEllerArbeidetUtlandet?.boddEllerArbeidetUtlandet)
         assertEquals("Test", lagretBehandling.boddEllerArbeidetUtlandet?.begrunnelse)
-        assertEquals("navIdent", lagretBehandling.boddEllerArbeidetUtlandet?.kilde?.ident)
+        assertEquals(
+            "navIdent",
+            (lagretBehandling.boddEllerArbeidetUtlandet?.kilde as Grunnlagsopplysning.Saksbehandler).ident,
+        )
     }
 
     @Test

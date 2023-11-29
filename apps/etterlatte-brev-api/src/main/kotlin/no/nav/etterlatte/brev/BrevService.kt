@@ -19,7 +19,7 @@ import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.BrevInnhold
 import no.nav.etterlatte.brev.model.BrevInnholdVedlegg
 import no.nav.etterlatte.brev.model.BrevProsessType
-import no.nav.etterlatte.brev.model.ManueltBrevData
+import no.nav.etterlatte.brev.model.ManueltBrevMedTittelData
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.OpprettNyttBrev
 import no.nav.etterlatte.brev.model.Pdf
@@ -66,7 +66,7 @@ class BrevService(
                 prosessType = BrevProsessType.MANUELL,
                 mottaker = mottaker,
                 opprettet = Tidspunkt.now(),
-                innhold = BrevInnhold("Nytt brev", Spraak.NB, SlateHelper.opprettTomBrevmal()),
+                innhold = BrevInnhold("Tittel mangler", Spraak.NB, SlateHelper.opprettTomBrevmal()),
                 innholdVedlegg = null,
             )
 
@@ -115,6 +115,15 @@ class BrevService(
         sjekkOmBrevKanEndres(id)
         return db.oppdaterMottaker(id, mottaker)
             .also { logger.info("Mottaker på brev (id=$id) oppdatert") }
+    }
+
+    fun oppdaterTittel(
+        id: BrevID,
+        tittel: String,
+    ): Int {
+        sjekkOmBrevKanEndres(id)
+        return db.oppdaterTittel(id, tittel)
+            .also { logger.info("Tittel på brev (id=$id) oppdatert") }
     }
 
     suspend fun genererPdf(
@@ -216,6 +225,6 @@ class BrevService(
     private fun opprettBrevData(brev: Brev): Pair<EtterlatteBrevKode, BrevData> {
         val payload = requireNotNull(db.hentBrevPayload(brev.id))
 
-        return Pair(EtterlatteBrevKode.OMS_INNVILGELSE_MANUELL, ManueltBrevData(payload.elements))
+        return Pair(EtterlatteBrevKode.TOM_MAL_INFORMASJONSBREV, ManueltBrevMedTittelData(payload.elements, brev.tittel))
     }
 }

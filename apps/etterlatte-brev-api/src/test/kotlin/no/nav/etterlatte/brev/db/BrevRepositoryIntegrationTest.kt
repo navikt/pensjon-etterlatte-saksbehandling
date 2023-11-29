@@ -29,6 +29,7 @@ import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
@@ -265,6 +266,20 @@ internal class BrevRepositoryIntegrationTest {
 
         db.hentBrev(opprettetBrev.id).status shouldBe Status.JOURNALFOERT
         db.hentJournalpostId(opprettetBrev.id) shouldBe journalpostResponse.journalpostId
+    }
+
+    @Test
+    fun `Oppdater tittel`() {
+        val nyttBrev = db.opprettBrev(ulagretBrev())
+
+        val nyTittel = "En helt ny tittel"
+        assertNotEquals(nyTittel, nyttBrev.tittel)
+
+        db.oppdaterTittel(nyttBrev.id, tittel = nyTittel)
+
+        val brevMedOppdatertTittel = db.hentBrev(nyttBrev.id)
+
+        assertEquals(nyTittel, brevMedOppdatertTittel.tittel)
     }
 
     @Nested

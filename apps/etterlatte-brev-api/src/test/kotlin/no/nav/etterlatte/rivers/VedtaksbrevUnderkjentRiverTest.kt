@@ -117,6 +117,7 @@ internal class VedtaksbrevUnderkjentRiverTest {
             1,
             41,
             UUID.randomUUID(),
+            "tittel",
             BrevProsessType.AUTOMATISK,
             "fnr",
             Status.JOURNALFOERT,

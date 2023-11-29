@@ -253,6 +253,7 @@ internal class VedtaksbrevRouteTest {
             1,
             41,
             BEHANDLING_ID,
+            "tittel",
             BrevProsessType.AUTOMATISK,
             "soeker_fnr",
             Status.OPPRETTET,

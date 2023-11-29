@@ -34,6 +34,7 @@ import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.SlateHelper
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.brev.model.bp.OmregnetBPNyttRegelverk
+import no.nav.etterlatte.brev.model.bp.OmregnetBPNyttRegelverkFerdig
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.UtenlandstilknytningType
 import no.nav.etterlatte.libs.common.person.Vergemaal
@@ -147,9 +148,12 @@ class VedtaksbrevService(
         val brevkodePar = brevDataMapper.brevKode(generellBrevData, brev.prosessType)
 
         val brevData =
-            when (migrering) {
-                null -> opprettBrevData(brev, generellBrevData, brukerTokenInfo, brevkodePar)
-                else -> migreringBrevDataService.opprettMigreringBrevdata(generellBrevData, migrering, brukerTokenInfo)
+            when (generellBrevData.systemkilde == Vedtaksloesning.PESYS) {
+                false -> opprettBrevData(brev, generellBrevData, brukerTokenInfo, brevkodePar)
+                true ->
+                    OmregnetBPNyttRegelverkFerdig(
+                        InnholdMedVedlegg({ hentLagretInnhold(brev) }, { hentLagretInnholdVedlegg(brev) }).innhold(),
+                    )
             }
 
         val brevRequest = BrevbakerRequest.fra(brevkodePar.ferdigstilling, brevData, generellBrevData, avsender)

@@ -5,6 +5,7 @@ import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
 import no.nav.etterlatte.brev.model.BrevData
 import no.nav.etterlatte.libs.common.IntBroek
+import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.UtenlandstilknytningType
 import no.nav.pensjon.brevbaker.api.model.Kroner
@@ -37,12 +38,9 @@ data class OmregnetBPNyttRegelverk(
                 )
 
             if (generellBrevData.systemkilde == Vedtaksloesning.PESYS) {
-                val pesysUtbetaltFoerReform =
-                    requireNotNull(migreringRequest) {
-                        "Kan ikke generere brev for migrering fra pesys hvis vi ikke har migreringsdata"
-                    }.brutto
+                val pesysUtbetaltFoerReform = migreringRequest?.brutto ?: 0
                 val pesysUtenlandstilknytning =
-                    requireNotNull(migreringRequest.utenlandstilknytningType) {
+                    requireNotNull(migreringRequest?.utenlandstilknytningType) {
                         "Kan ikke velge mellom bosatt utland eller bosatt norge i brev hvis migreringrequesten mangler grunnlag"
                     }
                 return defaultBrevdataOmregning.copy(
@@ -56,3 +54,5 @@ data class OmregnetBPNyttRegelverk(
         }
     }
 }
+
+data class OmregnetBPNyttRegelverkFerdig(val innhold: List<Slate.Element>) : BrevData()

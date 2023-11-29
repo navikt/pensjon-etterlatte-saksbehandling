@@ -16,6 +16,7 @@ import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_REVURDER
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_REVURDERING_OPPHOER
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_REVURDERING_SOESKENJUSTERING
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_VEDTAK_OMREGNING
+import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_VEDTAK_OMREGNING_FERDIG
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMS_AVSLAG
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMS_AVSLAG_BEGRUNNELSE
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMS_FOERSTEGANGSVEDTAK_INNVILGELSE
@@ -122,7 +123,7 @@ class BrevDataMapper(
     private fun brevKodeAutomatisk(generellBrevData: GenerellBrevData): BrevkodePar {
         if (generellBrevData.systemkilde == Vedtaksloesning.PESYS) {
             assert(generellBrevData.forenkletVedtak.type == VedtakType.INNVILGELSE)
-            return BrevkodePar(BARNEPENSJON_VEDTAK_OMREGNING)
+            return BrevkodePar(BARNEPENSJON_VEDTAK_OMREGNING, BARNEPENSJON_VEDTAK_OMREGNING_FERDIG)
         }
 
         return when (generellBrevData.sak.sakType) {
@@ -208,13 +209,13 @@ class BrevDataMapper(
     }
 
     suspend fun brevData(redigerbarTekstRequest: RedigerbarTekstRequest) =
-        when (redigerbarTekstRequest.migrering) {
-            null ->
+        when (redigerbarTekstRequest.generellBrevData.systemkilde == Vedtaksloesning.PESYS) {
+            false ->
                 brevData(
                     redigerbarTekstRequest.generellBrevData,
                     redigerbarTekstRequest.brukerTokenInfo,
                 )
-            else ->
+            true ->
                 migreringBrevDataService.opprettMigreringBrevdata(
                     redigerbarTekstRequest.generellBrevData,
                     redigerbarTekstRequest.migrering,

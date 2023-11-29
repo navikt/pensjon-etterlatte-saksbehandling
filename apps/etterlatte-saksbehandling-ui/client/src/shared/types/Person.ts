@@ -99,7 +99,7 @@ export interface Persongalleri {
   soesken?: string[]
   avdoed?: string[]
   gjenlevende?: string[]
-  personerUtenIdent?: Array<PersonUtenIdent> | null
+  personerUtenIdent?: PersonUtenIdent[] | null
 }
 
 export type RelativPersonrolle = 'FORELDER' | 'BARN'

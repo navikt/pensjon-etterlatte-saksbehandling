@@ -39,7 +39,7 @@ export interface PersongalleriSamsvar {
   kilde: GrunnlagKilde
   persongalleriPdl: Persongalleri | null
   kildePdl: GrunnlagKilde | null
-  problemer: Array<MismatchPersongalleri>
+  problemer: MismatchPersongalleri[]
 }
 
 export type MismatchPersongalleri =

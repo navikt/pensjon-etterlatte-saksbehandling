@@ -11,6 +11,7 @@ import { Label } from '@navikt/ds-react'
 import { HistorikkElement } from '~components/behandling/soeknadsoversikt/styled'
 import { formaterNavn, IPdlPerson } from '~shared/types/Person'
 import { getHistoriskForeldreansvar } from '~shared/api/grunnlag'
+import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 
 const SoekerDoedsdatoGrunnlag = () => {
   const behandling = useBehandling()
@@ -49,9 +50,12 @@ function isNotUndefined<T>(v: T | undefined): v is T {
 
 const AdopsjonGrunnlag = () => {
   const behandling = useBehandling()
+  const personopplysninger = usePersonopplysninger()
+  const avdoede = personopplysninger?.avdoede?.find((po) => po)
+  const gjenlevende = personopplysninger?.gjenlevende?.find((po) => po)
   const [foreldreansvar, hentForeldreansvar] = useApiCall(getHistoriskForeldreansvar)
 
-  const foreldre = [behandling?.familieforhold?.avdoede, behandling?.familieforhold?.gjenlevende]
+  const foreldre = [avdoede, gjenlevende]
     .filter(isNotUndefined)
     .map((person) => person.opplysning)
     .reduce(

@@ -47,8 +47,8 @@ data class MigreringRequest(
         return beregningsMetode == "EOS" && beregning.prorataBroek != null
     }
 
-    fun harUtlandsperioder(): Boolean {
-        return trygdetid.perioder.any { it.landTreBokstaver != "NOR" }
+    fun harMindreEnn40AarsTrygdetid(): Boolean {
+        return beregning.anvendtTrygdetid < 40
     }
 }
 

@@ -17,7 +17,6 @@ import no.nav.etterlatte.libs.common.behandling.JaNeiMedBegrunnelse
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Utenlandstilknytning
-import no.nav.etterlatte.libs.common.behandling.UtenlandstilknytningType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.retry
 import no.nav.etterlatte.oppgave.OppgaveService
@@ -93,34 +92,20 @@ class MigreringService(
                                     begrunnelse = "Automatisk migrert fra Pesys",
                                 ),
                         )
+                    }
 
-                        when (utlandstilknytning) {
-                            UtenlandstilknytningType.NASJONAL -> {
-                                oppdaterBoddArbeidetUtland(
-                                    behandlingId = behandling.id,
-                                    boddArbeidetUtland = request.harUtlandsperioder(),
-                                    eosBeregnet = null,
-                                )
-                            }
-
-                            UtenlandstilknytningType.UTLANDSTILSNITT -> {
-                                oppdaterBoddArbeidetUtland(
-                                    behandlingId = behandling.id,
-                                    boddArbeidetUtland = true,
-                                    eosBeregnet = request.erEoesBeregnet().takeIf { it },
-                                )
-                            }
-
-                            UtenlandstilknytningType.BOSATT_UTLAND -> {
-                                if (request.erEoesBeregnet() || request.harUtlandsperioder()) {
-                                    oppdaterBoddArbeidetUtland(
-                                        behandlingId = behandling.id,
-                                        boddArbeidetUtland = true,
-                                        eosBeregnet = request.erEoesBeregnet().takeIf { it },
-                                    )
-                                }
-                            }
-                        }
+                    if (request.harMindreEnn40AarsTrygdetid() || request.erEoesBeregnet()) {
+                        behandlingService.oppdaterBoddEllerArbeidetUtlandet(
+                            behandlingId = behandling.id,
+                            boddEllerArbeidetUtlandet =
+                                BoddEllerArbeidetUtlandet(
+                                    boddEllerArbeidetUtlandet = true,
+                                    boddArbeidetEosNordiskKonvensjon = request.erEoesBeregnet().takeIf { it },
+                                    kilde = Grunnlagsopplysning.Pesys.create(),
+                                    begrunnelse =
+                                        "Automatisk vurdert ved migrering fra Pesys. Vurdering av utlandsopphold kan være mangelfull.",
+                                ),
+                        )
                     }
 
                     val nyopprettaOppgave =
@@ -137,21 +122,6 @@ class MigreringService(
                 }
             }
         }
-
-    private fun oppdaterBoddArbeidetUtland(
-        behandlingId: UUID,
-        boddArbeidetUtland: Boolean,
-        eosBeregnet: Boolean?,
-    ) = behandlingService.oppdaterBoddEllerArbeidetUtlandet(
-        behandlingId = behandlingId,
-        boddEllerArbeidetUtlandet =
-            BoddEllerArbeidetUtlandet(
-                boddEllerArbeidetUtlandet = boddArbeidetUtland,
-                boddArbeidetEosNordiskKonvensjon = eosBeregnet,
-                kilde = Grunnlagsopplysning.Pesys.create(),
-                begrunnelse = "Automatisk vurdert ved migrering fra Pesys. Vurdering av utlandsopphold kan være mangelfull.",
-            ),
-    )
 
     private suspend fun <T> retryMedPause(
         times: Int = 2,

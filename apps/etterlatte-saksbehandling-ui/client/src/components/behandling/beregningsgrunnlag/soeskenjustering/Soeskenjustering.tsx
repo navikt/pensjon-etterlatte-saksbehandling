@@ -20,7 +20,7 @@ import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
 import SoeskenjusteringPeriode from '~components/behandling/beregningsgrunnlag/soeskenjustering/SoeskenjusteringPeriode'
 import { AGreen500 } from '@navikt/ds-tokens/dist/tokens'
 import { CheckmarkCircleIcon } from '@navikt/aksel-icons'
-import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
+import { usePersonopplysninger, usePersonopplysningerAvdoede } from '~components/person/usePersonopplysninger'
 
 type SoeskenKanskjeMedIBeregning = {
   foedselsnummer: string
@@ -53,7 +53,7 @@ const Soeskenjustering = (props: SoeskenjusteringProps) => {
   }
   const [visFeil, setVisFeil] = useState(false)
 
-  const avdoede = personopplysninger.avdoede?.find((po) => po)
+  const avdoede = usePersonopplysningerAvdoede()
   const soesken =
     (avdoede && hentLevendeSoeskenFraAvdoedeForSoeker(avdoede, behandling.søker?.foedselsnummer as string)) ?? []
 

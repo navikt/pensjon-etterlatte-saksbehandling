@@ -2,6 +2,7 @@ import express from 'express'
 import { frontendLogger } from '../monitoring/logger'
 import sourceMap, { NullableMappedPosition } from 'source-map'
 import * as fs from 'fs'
+import { parseJwt } from '../utils/parsejwt'
 
 export const loggerRouter = express.Router()
 
@@ -39,8 +40,16 @@ function findAndSanitizeUrl(url?: string): string {
   return ''
 }
 
+function getNAVident(authorizationHeader: string | undefined): string | undefined {
+  if (!authorizationHeader) return
+  const bearerToken = authorizationHeader.split(' ')[1]
+  const parsedToken = parseJwt(bearerToken)
+  return parsedToken.NAVident
+}
+
 loggerRouter.post('/', express.json(), (req, res) => {
   const body = req.body
+
   if (!process.env.NAIS_CLUSTER_NAME) {
     frontendLogger.info(`Nais cluster unavailable: ${JSON.stringify(body)}`)
   } else if (body.type && body.type === 'info') {
@@ -51,6 +60,7 @@ loggerRouter.post('/', express.json(), (req, res) => {
       request_uri: maybeUrl,
       user_device: JSON.stringify(body.jsonContent.userDeviceInfo),
       user_agent: body.jsonContent.userAgent,
+      user: getNAVident(req.headers.authorization),
     }
     if (body.stackInfo) {
       if (stackInfoIsInvalid(body.stackInfo)) {

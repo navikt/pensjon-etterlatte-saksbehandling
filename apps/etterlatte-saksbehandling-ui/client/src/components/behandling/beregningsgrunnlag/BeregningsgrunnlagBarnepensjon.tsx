@@ -33,7 +33,7 @@ import { Border } from '~components/behandling/soeknadsoversikt/styled'
 import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 import BeregningsgrunnlagMetode from './BeregningsgrunnlagMetode'
 import { handlinger } from '~components/behandling/handlinger/typer'
-import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
+import { usePersonopplysningerAvdoede } from '~components/person/usePersonopplysninger'
 
 const featureToggleNameInstitusjonsopphold = 'pensjon-etterlatte.bp-bruk-institusjonsopphold' as const
 const featureToggleNameBrukFaktiskTrygdetid = 'pensjon-etterlatte.bp-bruk-faktisk-trygdetid' as const
@@ -41,11 +41,7 @@ const featureToggleNameBrukFaktiskTrygdetid = 'pensjon-etterlatte.bp-bruk-faktis
 const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer }) => {
   const { behandling } = props
   const { next } = useBehandlingRoutes()
-  const personopplysninger = usePersonopplysninger()
-  if (!personopplysninger) {
-    return null
-  }
-  const avdoede = personopplysninger.avdoede?.find((po) => po)
+  const avdoede = usePersonopplysningerAvdoede()
   const redigerbar = behandlingErRedigerbar(behandling.status)
   const dispatch = useAppDispatch()
   const [lagreBeregningsgrunnlag, postBeregningsgrunnlag] = useApiCall(lagreBeregningsGrunnlag)
@@ -72,7 +68,7 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
     })
   }, [])
 
-  if (behandling.kommerBarnetTilgode == null || behandling.familieforhold?.avdoede == null) {
+  if (behandling.kommerBarnetTilgode == null || avdoede == null) {
     return <ApiErrorAlert>Familieforhold kan ikke hentes ut</ApiErrorAlert>
   }
 

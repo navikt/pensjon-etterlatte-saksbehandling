@@ -14,6 +14,7 @@ import no.nav.etterlatte.brev.dokarkiv.DokarkivServiceImpl
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
 import no.nav.etterlatte.brev.hentinformasjon.VedtaksvurderingService
 import no.nav.etterlatte.brev.journalpost.JournalpostResponse
+import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevData
 import no.nav.etterlatte.brev.model.BrevDataMapper
@@ -27,17 +28,20 @@ import no.nav.etterlatte.brev.model.BrevProsessType.REDIGERBAR
 import no.nav.etterlatte.brev.model.BrevProsessTypeFactory
 import no.nav.etterlatte.brev.model.InnholdMedVedlegg
 import no.nav.etterlatte.brev.model.ManueltBrevData
+import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.OpprettNyttBrev
 import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.SlateHelper
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.brev.model.bp.OmregnetBPNyttRegelverk
 import no.nav.etterlatte.libs.common.Vedtaksloesning
+import no.nav.etterlatte.libs.common.person.Vergemaal
 import no.nav.etterlatte.libs.common.retryOgPakkUt
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.rivers.VedtakTilJournalfoering
 import no.nav.etterlatte.token.BrukerTokenInfo
+import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
@@ -81,17 +85,21 @@ class VedtaksbrevService(
 
         val mottakerFnr =
             with(generellBrevData.personerISak) {
-                if (verge?.vedVergemaal == true) {
-                    verge.foedselsnummer!!.value
-                } else {
-                    innsender?.fnr?.value?.takeUnless { it == Vedtaksloesning.PESYS.name } ?: soeker.fnr.value
+                when (verge) {
+                    is Vergemaal ->
+                        verge.mottaker.foedselsnummer!!.value
+                    else ->
+                        innsender?.fnr?.value?.takeUnless { it == Vedtaksloesning.PESYS.name } ?: soeker.fnr.value
                 }
             }
         val mottaker =
-            if (generellBrevData.personerISak.verge != null) {
-                generellBrevData.personerISak.verge.toMottaker()
-            } else {
-                adresseService.hentMottakerAdresse(mottakerFnr)
+            with(generellBrevData.personerISak) {
+                when (verge) {
+                    is Vergemaal ->
+                        verge.toMottaker()
+                    else ->
+                        adresseService.hentMottakerAdresse(mottakerFnr)
+                }
             }
 
         val prosessType = brevProsessTypeFactory.fra(generellBrevData)
@@ -348,3 +356,15 @@ class VedtaksbrevService(
 }
 
 data class MigreringBrevRequest(val brutto: Int)
+
+fun Vergemaal.toMottaker(): Mottaker {
+    return Mottaker(
+        navn = mottaker.navn!!,
+        foedselsnummer = mottaker.foedselsnummer?.let { Foedselsnummer(it.value) },
+        orgnummer = null,
+        adresse =
+            with(mottaker.adresse) {
+                Adresse(adresseType, adresselinje1, adresselinje2, adresselinje3, postnummer, poststed, landkode, land)
+            },
+    )
+}

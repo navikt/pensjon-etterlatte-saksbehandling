@@ -177,9 +177,31 @@ data class GeografiskTilknytning(
         }
 }
 
+interface Verge {
+    fun navn(): String
+}
+
+data class Vergemaal(val mottaker: BrevMottaker) : Verge {
+    override fun navn(): String {
+        return mottaker.navn!!
+    }
+}
+
+data class ForelderVerge(val navn: String) : Verge {
+    override fun navn(): String {
+        return navn
+    }
+}
+
 @JsonIgnoreProperties(ignoreUnknown = true)
-data class VergeAdresse(
+data class BrevMottaker(
     val navn: String?,
+    val foedselsnummer: Foedselsnummer?,
+    val adresse: MottakerAdresse,
+)
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+data class MottakerAdresse(
     val adresseType: String,
     val adresselinje1: String? = null,
     val adresselinje2: String? = null,

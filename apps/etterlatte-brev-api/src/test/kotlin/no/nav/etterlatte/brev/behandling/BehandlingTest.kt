@@ -151,10 +151,10 @@ internal class BehandlingTest {
             )
 
         val vergeBarnepensjon = grunnlag.mapVerge(SakType.BARNEPENSJON, UUID.randomUUID())
-        assertEquals(forventetVergeNavn, vergeBarnepensjon!!.navn)
+        assertEquals(forventetVergeNavn, vergeBarnepensjon!!.navn())
 
         val vergeOmstillingsstoenad = grunnlag.mapVerge(SakType.OMSTILLINGSSTOENAD, UUID.randomUUID())
-        assertEquals(forventetVergeNavn, vergeOmstillingsstoenad!!.navn)
+        assertEquals(forventetVergeNavn, vergeOmstillingsstoenad!!.navn())
     }
 
     @Test
@@ -182,7 +182,7 @@ internal class BehandlingTest {
             )
 
         val vergeBarnepensjon = grunnlag.mapVerge(SakType.BARNEPENSJON, UUID.randomUUID())
-        assertEquals(gjenlevendeNavn.toString(), vergeBarnepensjon!!.navn)
+        assertEquals(gjenlevendeNavn.toString(), vergeBarnepensjon!!.navn())
 
         val vergeOmstillingsstoenad = grunnlag.mapVerge(SakType.OMSTILLINGSSTOENAD, UUID.randomUUID())
         assertNull(vergeOmstillingsstoenad, "Verge skal ikke settes for OMS når verge mangler i grunnlaget")

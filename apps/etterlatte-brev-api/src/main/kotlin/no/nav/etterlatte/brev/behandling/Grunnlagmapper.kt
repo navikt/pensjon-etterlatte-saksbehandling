@@ -14,6 +14,9 @@ import no.nav.etterlatte.libs.common.grunnlag.hentVergeadresse
 import no.nav.etterlatte.libs.common.grunnlag.hentVergemaalellerfremtidsfullmakt
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Navn
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
+import no.nav.etterlatte.libs.common.person.ForelderVerge
+import no.nav.etterlatte.libs.common.person.Verge
+import no.nav.etterlatte.libs.common.person.Vergemaal
 import no.nav.etterlatte.libs.common.person.VergemaalEllerFremtidsfullmakt
 import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
 import java.util.UUID
@@ -75,9 +78,7 @@ fun Grunnlag.mapVerge(
         if (opplysning?.verdi != null) {
             hentVergemaal(opplysning, behandlingId)
         } else if (sakType == SakType.BARNEPENSJON) {
-            val gjenlevendeNavn = hentGjenlevende().hentNavn()!!.verdi.fulltNavn()
-
-            Verge(gjenlevendeNavn)
+            ForelderVerge(hentGjenlevende().hentNavn()!!.verdi.fulltNavn())
         } else {
             null
         }
@@ -86,7 +87,7 @@ fun Grunnlag.mapVerge(
 private fun Grunnlag.hentVergemaal(
     opplysning: Opplysning.Konstant<List<VergemaalEllerFremtidsfullmakt>>,
     behandlingId: UUID,
-): Verge {
+): Vergemaal {
     val vergerMedRelevantOmfang =
         opplysning.verdi.filter {
             it.vergeEllerFullmektig.omfang in alleVergeOmfangMedOekonomiskeInteresser
@@ -103,11 +104,8 @@ private fun Grunnlag.hentVergemaal(
     if (vergeadresse == null) {
         throw VergeManglerAdresseException(behandlingId)
     }
-    return Verge(
-        navn = vergeadresse.navn ?: verge.vergeEllerFullmektig.navn!!,
-        vedVergemaal = true,
-        foedselsnummer = verge.vergeEllerFullmektig.motpartsPersonident,
-        adresse = vergeadresse,
+    return Vergemaal(
+        mottaker = vergeadresse.copy(navn = vergeadresse.navn ?: verge.vergeEllerFullmektig.navn!!),
     )
 }
 

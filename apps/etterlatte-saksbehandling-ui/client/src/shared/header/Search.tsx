@@ -6,7 +6,7 @@ import { ABlue500, AGray900, ANavRed } from '@navikt/ds-tokens/dist/tokens'
 import { InformationSquareIcon, XMarkOctagonIcon } from '@navikt/aksel-icons'
 import { isFailure, isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
 import { getPerson } from '~shared/api/grunnlag'
-import { fnrErGyldig } from '~utils/fnr'
+import { fnrHarGyldigFormat } from '~utils/fnr'
 import { ApiError } from '~shared/api/apiClient'
 import { hentSak } from '~shared/api/behandling'
 
@@ -17,7 +17,7 @@ export const Search = () => {
   const [personStatus, hentPerson, reset] = useApiCall(getPerson)
   const [funnetSak, finnSak, resetSakSoek] = useApiCall(hentSak)
 
-  const gyldigInputFnr = fnrErGyldig(searchInput)
+  const gyldigInputFnr = fnrHarGyldigFormat(searchInput)
   const gyldigInputSakId = /^\d{1,10}$/.test(searchInput ?? '')
   const avgjoerSoek = () => {
     if (gyldigInputFnr) {

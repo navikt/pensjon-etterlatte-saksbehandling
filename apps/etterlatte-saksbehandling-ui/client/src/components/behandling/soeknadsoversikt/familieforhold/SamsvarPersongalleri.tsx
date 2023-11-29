@@ -10,9 +10,10 @@ import { mapApiResult, useApiCall } from '~shared/hooks/useApiCall'
 import { hentPersongalleriSamsvar } from '~shared/api/grunnlag'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
+import { SakType } from '~shared/types/sak'
 
-function PersonerUtenIdenterVisning(props: { personer: Array<PersonUtenIdent> }) {
-  const { personer } = props
+function PersonerUtenIdenterVisning(props: { saktype: SakType; personer: Array<PersonUtenIdent> }) {
+  const { personer, saktype } = props
   if (personer.length === 0) {
     return <BodyShort spacing>Ingen.</BodyShort>
   }
@@ -22,7 +23,7 @@ function PersonerUtenIdenterVisning(props: { personer: Array<PersonUtenIdent> })
       {personer.map((person, index) => (
         <Box background="surface-alt-3-subtle" paddingInline="4" key={index}>
           <UstiletListe>
-            <li>Rolle: {relativPersonrolleTekst[person.rolle]}</li>
+            <li>Rolle: {relativPersonrolleTekst[saktype][person.rolle]}</li>
             <li>Navn: {person.person.navn ?? 'Ukjent'} </li>
             <li>Kjønn: {person.person.kjoenn ?? 'Ukjent'} </li>
             <li>Fødselsdato: {formaterKanskjeStringDatoMedFallback('Ukjent', person.person.foedselsdato)} </li>
@@ -42,8 +43,8 @@ const PersonUtenIdentWrapper = styled.div`
 `
 
 // TODO: Håndter liste over avvik mellom persongalleri i PDL og det vi har i søknaden
-function VisSamsvarPersongalleri(props: { samsvar: PersongalleriSamsvar }) {
-  const { samsvar } = props
+function VisSamsvarPersongalleri(props: { samsvar: PersongalleriSamsvar; saktype: SakType }) {
+  const { samsvar, saktype } = props
   const personerUtenIdenterSak = samsvar.persongalleri?.personerUtenIdent ?? []
   const personerUtenIdenterPdl = samsvar.persongalleriPdl?.personerUtenIdent ?? []
   const harPersonerUtenIdenter = personerUtenIdenterPdl.length > 0 || personerUtenIdenterSak.length > 0
@@ -61,12 +62,12 @@ function VisSamsvarPersongalleri(props: { samsvar: PersongalleriSamsvar }) {
       <Heading size="small" level="4">
         Personer uten identer i saksgrunnlag:
       </Heading>
-      <PersonerUtenIdenterVisning personer={personerUtenIdenterSak} />
+      <PersonerUtenIdenterVisning saktype={saktype} personer={personerUtenIdenterSak} />
 
       <Heading size="small" level="4">
         Personer uten identer i PDL:
       </Heading>
-      <PersonerUtenIdenterVisning personer={personerUtenIdenterPdl} />
+      <PersonerUtenIdenterVisning saktype={saktype} personer={personerUtenIdenterPdl} />
     </div>
   )
 }
@@ -81,10 +82,14 @@ export function SamsvarPersongalleri() {
     }
   }, [behandling?.id])
 
+  if (!behandling) {
+    return null
+  }
+
   return mapApiResult(
     samsvarPersongalleri,
     <Spinner label="Henter samsvar persongalleri" visible />,
     (error) => <ApiErrorAlert>Kunne ikke hente samsvar persongalleri: {error.detail}</ApiErrorAlert>,
-    (samsvarPersongalleri) => <VisSamsvarPersongalleri samsvar={samsvarPersongalleri} />
+    (samsvarPersongalleri) => <VisSamsvarPersongalleri saktype={behandling.sakType} samsvar={samsvarPersongalleri} />
   )
 }

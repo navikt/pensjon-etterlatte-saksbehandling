@@ -2,6 +2,7 @@ import { Grunnlagsopplysning, Personopplysning } from '~shared/types/grunnlag'
 import { IAdresse } from '~shared/types/IAdresse'
 import { KildePdl } from './kilde'
 import { VergemaalEllerFremtidsfullmakt } from '~components/person/typer'
+import { SakType } from '~shared/types/sak'
 
 export interface IFamilieforhold {
   avdoede: Grunnlagsopplysning<IPdlPerson, KildePdl>
@@ -109,9 +110,15 @@ export interface PersonUtenIdent {
   person: RelatertPerson
 }
 
-export const relativPersonrolleTekst: Record<RelativPersonrolle, string> = {
-  BARN: 'Søsken',
-  FORELDER: 'Forelder',
+export const relativPersonrolleTekst: Record<SakType, Record<RelativPersonrolle, string>> = {
+  [SakType.BARNEPENSJON]: {
+    BARN: 'Søsken',
+    FORELDER: 'Forelder',
+  },
+  [SakType.OMSTILLINGSSTOENAD]: {
+    BARN: 'Barn',
+    FORELDER: 'Voksen / forelder',
+  },
 }
 
 export interface RelatertPerson {

@@ -211,10 +211,18 @@ class ApplicationBuilder {
     private fun fiksEnkeltbrev() {
         thread {
             Thread.sleep(60_000)
-            rapidsConnection.publish(
-                message = lagMelding(behandlingId = "8d23f2be-e025-4671-8a26-fddb4634b15c"),
-                key = UUID.randomUUID().toString(),
-            )
+            listOf(
+                "85ba077a-f6e5-4c22-8045-42ef246e3c47",
+                "b05986ad-ccb6-4216-8447-e671e1721bd9",
+                "088a8d58-7638-4787-81e3-0f469db05825",
+                "50850686-3b08-460e-a1ad-392419572db1",
+            ).forEach {
+                rapidsConnection.publish(
+                    message = lagMelding(behandlingId = it),
+                    key = UUID.randomUUID().toString(),
+                )
+                Thread.sleep(3000)
+            }
         }
     }
 

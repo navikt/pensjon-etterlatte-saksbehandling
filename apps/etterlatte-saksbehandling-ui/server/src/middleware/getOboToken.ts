@@ -21,7 +21,7 @@ export const getOboToken = async (bearerToken: string, scope: string): Promise<s
   const cacheKey = bearerToken + '.' + scope
 
   const [cacheHit, tokenFromCache] = getTokenInCache(cacheKey)
-  logger.debug('getOboToken: cache hit for scope=' + scope + '? ' + cacheHit)
+  logger.debug(`getOboToken: cache hit for scope=${scope}? ${cacheHit}`)
   if (cacheHit) {
     return tokenFromCache
   }

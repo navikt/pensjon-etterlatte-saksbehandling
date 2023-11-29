@@ -7,7 +7,7 @@ import Spinner from '~shared/Spinner'
 import { mapApiResult, useApiCall } from '~shared/hooks/useApiCall'
 import { Tabs } from '@navikt/ds-react'
 import { getPerson } from '~shared/api/grunnlag'
-import { GYLDIG_FNR } from '~utils/fnr'
+import { fnrErGyldig } from '~utils/fnr'
 import NavigerTilbakeMeny from '~components/person/NavigerTilbakeMeny'
 import { BulletListIcon, EnvelopeClosedIcon, FileTextIcon } from '@navikt/aksel-icons'
 import { Dokumentoversikt } from './dokumenter/dokumentoversikt'
@@ -39,7 +39,7 @@ export const Person = () => {
   const { fnr } = useParams()
 
   useEffect(() => {
-    if (GYLDIG_FNR(fnr)) {
+    if (fnrErGyldig(fnr)) {
       hentPerson(fnr!!)
       hentSak(fnr!!)
     }
@@ -55,7 +55,7 @@ export const Person = () => {
     }
   }
 
-  if (!GYLDIG_FNR(fnr)) {
+  if (!fnrErGyldig(fnr)) {
     return <ApiErrorAlert>Fødselsnummeret {fnr} er ugyldig</ApiErrorAlert>
   }
 

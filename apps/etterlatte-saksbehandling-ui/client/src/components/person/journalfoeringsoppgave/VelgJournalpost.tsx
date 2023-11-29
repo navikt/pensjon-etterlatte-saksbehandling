@@ -1,7 +1,7 @@
 import { isFailure, isPending, isSuccess, mapApiResult, useApiCall } from '~shared/hooks/useApiCall'
 import { hentDokumenter, hentDokumentPDF, hentJournalpost } from '~shared/api/dokument'
 import React, { useEffect, useState } from 'react'
-import { GYLDIG_FNR } from '~utils/fnr'
+import { fnrErGyldig } from '~utils/fnr'
 import { Button, Detail, Heading, Link, Panel, Table } from '@navikt/ds-react'
 import { useJournalfoeringOppgave } from '~components/person/journalfoeringsoppgave/useJournalfoeringOppgave'
 import { formaterStringDato } from '~utils/formattering'
@@ -30,7 +30,7 @@ export default function VelgJournalpost({ journalpostId }: { journalpostId: stri
   }
 
   useEffect(() => {
-    if (GYLDIG_FNR(bruker) && !journalpost) {
+    if (fnrErGyldig(bruker) && !journalpost) {
       if (journalpostId) {
         apiHentJournalpost(journalpostId, (journalpost) => {
           velgJournalpost(journalpost)

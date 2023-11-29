@@ -1,4 +1,4 @@
-import { GYLDIG_FNR } from '~utils/fnr'
+import { fnrErGyldig } from '~utils/fnr'
 import { SakType } from '~shared/types/sak'
 import { NyBehandlingRequest } from '~shared/types/IDetaljertBehandling'
 
@@ -16,8 +16,8 @@ const gyldigPersongalleri = (request: NyBehandlingRequest) => {
     return false
   }
 
-  const avdoede = persongalleri.avdoed?.filter((fnr) => GYLDIG_FNR(fnr)) || []
-  const gjenlevende = persongalleri.gjenlevende?.filter((fnr) => GYLDIG_FNR(fnr)) || []
+  const avdoede = persongalleri.avdoed?.filter((fnr) => fnrErGyldig(fnr)) || []
+  const gjenlevende = persongalleri.gjenlevende?.filter((fnr) => fnrErGyldig(fnr)) || []
   const antallGjenlevOgAvdoed = avdoede.length + gjenlevende.length
 
   let gyldigGjenlevOgAvdoed = false
@@ -27,7 +27,7 @@ const gyldigPersongalleri = (request: NyBehandlingRequest) => {
     gyldigGjenlevOgAvdoed = antallGjenlevOgAvdoed === 1
   }
 
-  const gyldigInnsender = !persongalleri.innsender || GYLDIG_FNR(persongalleri.innsender)
+  const gyldigInnsender = !persongalleri.innsender || fnrErGyldig(persongalleri.innsender)
 
-  return GYLDIG_FNR(persongalleri.soeker) && gyldigGjenlevOgAvdoed && gyldigInnsender
+  return fnrErGyldig(persongalleri.soeker) && gyldigGjenlevOgAvdoed && gyldigInnsender
 }

@@ -809,7 +809,7 @@ class BehandlingServiceImplTest {
 
         assertEquals(true, slot.captured.boddEllerArbeidetUtlandet)
         assertEquals("Test", slot.captured.begrunnelse)
-        assertEquals("ident", slot.captured.kilde.ident)
+        assertEquals("ident", (slot.captured.kilde as Grunnlagsopplysning.Saksbehandler).ident)
     }
 
     private fun behandlingServiceMedMocks(

@@ -41,6 +41,15 @@ data class MigreringRequest(
         val beregningsMetode = beregning.meta?.beregningsMetodeType
         return beregningsMetode == "FOLKETRYGD" && beregning.prorataBroek == null
     }
+
+    fun erEoesBeregnet(): Boolean {
+        val beregningsMetode = beregning.meta?.beregningsMetodeType
+        return beregningsMetode == "EOS" && beregning.prorataBroek != null
+    }
+
+    fun harUtlandsperioder(): Boolean {
+        return trygdetid.perioder.any { it.landTreBokstaver != "NOR" }
+    }
 }
 
 data class AvdoedForelder(

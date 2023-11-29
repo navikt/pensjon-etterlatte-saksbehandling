@@ -10,12 +10,14 @@ import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeServi
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
+import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
 import no.nav.etterlatte.libs.common.behandling.Flyktning
 import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.JaNeiMedBegrunnelse
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Utenlandstilknytning
+import no.nav.etterlatte.libs.common.behandling.UtenlandstilknytningType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.retry
 import no.nav.etterlatte.oppgave.OppgaveService
@@ -81,16 +83,44 @@ class MigreringService(
                             ),
                     )
 
-                    request.utenlandstilknytningType?.let {
+                    request.utenlandstilknytningType?.let { utlandstilknytning ->
                         sakService.oppdaterUtenlandstilknytning(
                             sakId = behandling.sak.id,
                             utenlandstilknytning =
                                 Utenlandstilknytning(
-                                    type = it,
+                                    type = utlandstilknytning,
                                     kilde = Grunnlagsopplysning.Pesys.create(),
                                     begrunnelse = "Automatisk migrert fra Pesys",
                                 ),
                         )
+
+                        when (utlandstilknytning) {
+                            UtenlandstilknytningType.NASJONAL -> {
+                                oppdaterBoddArbeidetUtland(
+                                    behandlingId = behandling.id,
+                                    boddArbeidetUtland = request.harUtlandsperioder(),
+                                    eosBeregnet = null,
+                                )
+                            }
+
+                            UtenlandstilknytningType.UTLANDSTILSNITT -> {
+                                oppdaterBoddArbeidetUtland(
+                                    behandlingId = behandling.id,
+                                    boddArbeidetUtland = true,
+                                    eosBeregnet = request.erEoesBeregnet().takeIf { it },
+                                )
+                            }
+
+                            UtenlandstilknytningType.BOSATT_UTLAND -> {
+                                if (request.erEoesBeregnet() || request.harUtlandsperioder()) {
+                                    oppdaterBoddArbeidetUtland(
+                                        behandlingId = behandling.id,
+                                        boddArbeidetUtland = true,
+                                        eosBeregnet = request.erEoesBeregnet().takeIf { it },
+                                    )
+                                }
+                            }
+                        }
                     }
 
                     val nyopprettaOppgave =
@@ -107,6 +137,21 @@ class MigreringService(
                 }
             }
         }
+
+    private fun oppdaterBoddArbeidetUtland(
+        behandlingId: UUID,
+        boddArbeidetUtland: Boolean,
+        eosBeregnet: Boolean?,
+    ) = behandlingService.oppdaterBoddEllerArbeidetUtlandet(
+        behandlingId = behandlingId,
+        boddEllerArbeidetUtlandet =
+            BoddEllerArbeidetUtlandet(
+                boddEllerArbeidetUtlandet = boddArbeidetUtland,
+                boddArbeidetEosNordiskKonvensjon = eosBeregnet,
+                kilde = Grunnlagsopplysning.Pesys.create(),
+                begrunnelse = "Automatisk vurdert ved migrering fra Pesys. Vurdering av utlandsopphold kan være mangelfull.",
+            ),
+    )
 
     private suspend fun <T> retryMedPause(
         times: Int = 2,

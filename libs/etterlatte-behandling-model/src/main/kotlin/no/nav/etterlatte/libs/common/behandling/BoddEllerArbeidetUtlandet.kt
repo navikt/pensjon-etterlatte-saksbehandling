@@ -6,7 +6,7 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class BoddEllerArbeidetUtlandet(
     val boddEllerArbeidetUtlandet: Boolean,
-    val kilde: Grunnlagsopplysning.Saksbehandler,
+    val kilde: Grunnlagsopplysning.Kilde,
     val begrunnelse: String,
     val boddArbeidetIkkeEosEllerAvtaleland: Boolean? = false,
     val boddArbeidetEosNordiskKonvensjon: Boolean? = false,

@@ -76,7 +76,7 @@ class VedtaksbrevService(
         sakId: Long,
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-        migrering: MigreringBrevRequest? = null,
+        automatiskMigreringRequest: MigreringBrevRequest? = null,
     ): Brev {
         require(hentVedtaksbrev(behandlingId) == null) {
             "Vedtaksbrev finnes allerede på behandling (id=$behandlingId) og kan ikke opprettes på nytt"
@@ -120,7 +120,7 @@ class VedtaksbrevService(
                             generellBrevData,
                             brukerTokenInfo,
                             prosessType,
-                            migrering,
+                            automatiskMigreringRequest,
                         ),
                     ),
                 innholdVedlegg = opprettInnholdVedlegg(generellBrevData, prosessType),
@@ -132,7 +132,7 @@ class VedtaksbrevService(
     suspend fun genererPdf(
         id: BrevID,
         brukerTokenInfo: BrukerTokenInfo,
-        migrering: MigreringBrevRequest? = null,
+        automatiskMigreringRequest: MigreringBrevRequest? = null,
     ): Pdf {
         val brev = hentBrev(id)
 
@@ -162,17 +162,21 @@ class VedtaksbrevService(
             .let {
                 when (brevData) {
                     is OmregnetBPNyttRegelverk -> {
-                        val forhaandsvarsel =
-                            brevbaker.genererPdf(
-                                brev.id,
-                                BrevbakerRequest.fra(
-                                    EtterlatteBrevKode.BARNEPENSJON_FORHAANDSVARSEL_OMREGNING,
-                                    brevData,
-                                    generellBrevData,
-                                    avsender,
-                                ),
-                            )
-                        forhaandsvarsel.medPdfAppended(it)
+                        if (automatiskMigreringRequest != null) {
+                            val forhaandsvarsel =
+                                brevbaker.genererPdf(
+                                    brev.id,
+                                    BrevbakerRequest.fra(
+                                        EtterlatteBrevKode.BARNEPENSJON_FORHAANDSVARSEL_OMREGNING,
+                                        brevData,
+                                        generellBrevData,
+                                        avsender,
+                                    ),
+                                )
+                            forhaandsvarsel.medPdfAppended(it)
+                        } else {
+                            it
+                        }
                     }
 
                     else -> it
@@ -184,7 +188,7 @@ class VedtaksbrevService(
                     generellBrevData.forenkletVedtak,
                     pdf,
                     brukerTokenInfo,
-                    migrering != null,
+                    automatiskMigreringRequest != null,
                 )
             }
     }

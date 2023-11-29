@@ -22,7 +22,7 @@ import Soeskenjustering, {
   Soeskengrunnlag,
 } from '~components/behandling/beregningsgrunnlag/soeskenjustering/Soeskenjustering'
 import Spinner from '~shared/Spinner'
-import { hentLevendeSoeskenFraAvdoedeForSoekerNy } from '~shared/types/Person'
+import { hentLevendeSoeskenFraAvdoedeForSoeker } from '~shared/types/Person'
 import {
   Beregning,
   BeregningsMetode,
@@ -73,7 +73,7 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
   }
 
   const soesken =
-    (avdoede && hentLevendeSoeskenFraAvdoedeForSoekerNy(avdoede, behandling.søker?.foedselsnummer as string)) ?? []
+    (avdoede && hentLevendeSoeskenFraAvdoedeForSoeker(avdoede, behandling.søker?.foedselsnummer as string)) ?? []
   const harSoesken = soesken.length > 0
 
   const onSubmit = () => {

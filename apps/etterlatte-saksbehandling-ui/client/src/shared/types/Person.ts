@@ -13,15 +13,7 @@ export interface Familieforhold {
   gjenlevende: Personopplysning[]
 }
 
-export const hentLevendeSoeskenFraAvdoedeForSoeker = (
-  avdoede: Grunnlagsopplysning<IPdlPerson, KildePdl>,
-  soekerFnr: string
-) => {
-  const soeskenliste = (avdoede?.opplysning.avdoedesBarn ?? []).filter((person) => person.foedselsnummer !== soekerFnr)
-  return soeskenliste.filter((soesken) => soesken.doedsdato === null)
-}
-
-export const hentLevendeSoeskenFraAvdoedeForSoekerNy = (avdoede: Personopplysning, soekerFnr: string) => {
+export const hentLevendeSoeskenFraAvdoedeForSoeker = (avdoede: Personopplysning, soekerFnr: string) => {
   const soeskenliste = (avdoede?.opplysning.avdoedesBarn ?? []).filter((person) => person.foedselsnummer !== soekerFnr)
   return soeskenliste.filter((soesken) => soesken.doedsdato === null)
 }

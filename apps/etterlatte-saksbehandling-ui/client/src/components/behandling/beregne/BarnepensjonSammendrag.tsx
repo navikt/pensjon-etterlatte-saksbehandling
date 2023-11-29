@@ -6,7 +6,7 @@ import { Beregning } from '~shared/types/Beregning'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { Barnepensjonberegningssammendrag } from '~components/behandling/beregne/Barnepensjonberegningssammendrag'
 import { ProrataBroek } from '~components/behandling/beregne/ProrataBroek'
-import { hentLevendeSoeskenFraAvdoedeForSoekerNy } from '~shared/types/Person'
+import { hentLevendeSoeskenFraAvdoedeForSoeker } from '~shared/types/Person'
 import { usePersonopplysningerAvdoede } from '~components/person/usePersonopplysninger'
 
 interface Props {
@@ -47,7 +47,7 @@ export const BarnepensjonSammendrag = ({ behandling, beregning }: Props) => {
     compareDesc(new Date(a.datoFOM), new Date(b.datoFOM))
   )
   const soeker = behandling.søker
-  const soesken = hentLevendeSoeskenFraAvdoedeForSoekerNy(avdoede, soeker?.foedselsnummer as string)
+  const soesken = hentLevendeSoeskenFraAvdoedeForSoeker(avdoede, soeker?.foedselsnummer as string)
 
   return (
     <TableWrapper>

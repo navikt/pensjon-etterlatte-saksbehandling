@@ -5,6 +5,7 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
 import kotliquery.queryOf
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.POSTGRES_VERSION
 import no.nav.etterlatte.libs.database.migrate
@@ -57,6 +58,7 @@ internal class StartMigreringTest {
             StartMigrering(
                 repository = repository,
                 rapidsConnection = mockk<RapidsConnection>().also { every { it.publish(any(), any()) } just runs },
+                featureToggleService = mockk<FeatureToggleService>().also { every { it.isEnabled(any(), any()) } returns true },
             )
 
         starter.startMigrering()

@@ -1,6 +1,7 @@
 package no.nav.etterlatte.migrering.start
 
 import kotliquery.TransactionalSession
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.database.Transactions
 import no.nav.etterlatte.libs.database.hentListe
@@ -18,7 +19,11 @@ import java.util.UUID
 import javax.sql.DataSource
 import kotlin.concurrent.thread
 
-class StartMigrering(val repository: StartMigreringRepository, val rapidsConnection: RapidsConnection) {
+class StartMigrering(
+    val repository: StartMigreringRepository,
+    val rapidsConnection: RapidsConnection,
+    private val featureToggleService: FeatureToggleService,
+) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     init {
@@ -33,9 +38,12 @@ class StartMigrering(val repository: StartMigreringRepository, val rapidsConnect
         if (sakerTilMigrering.isNotEmpty()) {
             thread {
                 Thread.sleep(60_000)
+                val sendTilMigrering = featureToggleService.isEnabled(MigreringFeatureToggle.SendSakTilMigrering, false)
                 sakerTilMigrering.forEach {
                     rapidsConnection.publish(message = lagMelding(it), key = UUID.randomUUID().toString())
-                    Thread.sleep(3000)
+                    if (sendTilMigrering) {
+                        Thread.sleep(3000)
+                    }
                 }
             }
         }

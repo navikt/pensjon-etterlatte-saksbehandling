@@ -13,7 +13,7 @@ class FolkeregisteridentifikatorValidator {
          * Control digits are valid.
          */
         fun isValid(value: String): Boolean {
-            return !Regex("[0]{11}").matches(value) &&
+            return !Regex("0{11}").matches(value) &&
                 value.length == 11 &&
                 value.toBigIntegerOrNull() != null &&
                 validateControlDigits(value)
@@ -31,11 +31,8 @@ class FolkeregisteridentifikatorValidator {
             }
 
             val c2 = mod(controlDigits2, value)
-            if (c2 == 10 || c2 != Character.getNumericValue(value[10])) {
-                return false
-            }
 
-            return true
+            return !(c2 == 10 || c2 != Character.getNumericValue(value[10]))
         }
 
         /**

@@ -6,7 +6,7 @@ import { ABlue500, AGray900, ANavRed } from '@navikt/ds-tokens/dist/tokens'
 import { InformationSquareIcon, XMarkOctagonIcon } from '@navikt/aksel-icons'
 import { isFailure, isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
 import { getPerson } from '~shared/api/grunnlag'
-import { GYLDIG_FNR } from '~utils/fnr'
+import { fnrHarGyldigFormat } from '~utils/fnr'
 import { ApiError } from '~shared/api/apiClient'
 import { hentSak } from '~shared/api/behandling'
 
@@ -17,7 +17,7 @@ export const Search = () => {
   const [personStatus, hentPerson, reset] = useApiCall(getPerson)
   const [funnetSak, finnSak, resetSakSoek] = useApiCall(hentSak)
 
-  const gyldigInputFnr = GYLDIG_FNR(searchInput)
+  const gyldigInputFnr = fnrHarGyldigFormat(searchInput)
   const gyldigInputSakId = /^\d{1,10}$/.test(searchInput ?? '')
   const avgjoerSoek = () => {
     if (gyldigInputFnr) {
@@ -39,17 +39,7 @@ export const Search = () => {
   useEffect(() => {
     reset()
     resetSakSoek()
-    if (searchInput.length === 0) {
-      setFeilInput(false)
-    } else if (searchInput.length && searchInput.length === 11 && !gyldigInputFnr) {
-      setFeilInput(true)
-    } else if (searchInput.length && searchInput.length < 11 && !gyldigInputSakId) {
-      setFeilInput(true)
-    } else if (searchInput.length && searchInput.length > 11 && /\D/g.test(searchInput ?? '')) {
-      setFeilInput(true)
-    } else {
-      setFeilInput(false)
-    }
+    setFeilInput(!!searchInput.length && !(gyldigInputFnr || gyldigInputSakId))
   }, [searchInput])
 
   useEffect(() => {
@@ -68,7 +58,7 @@ export const Search = () => {
         placeholder="Fødselsnummer eller sakid "
         label="Tast inn fødselsnummer eller sakid"
         hideLabel
-        onChange={setSearchInput}
+        onChange={(value) => setSearchInput(value.trim())}
         onKeyUp={onEnter}
         autoComplete="off"
       >

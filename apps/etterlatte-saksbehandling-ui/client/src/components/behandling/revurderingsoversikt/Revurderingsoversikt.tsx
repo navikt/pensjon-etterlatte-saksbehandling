@@ -36,10 +36,10 @@ import { GrunnlagForVirkningstidspunkt } from '~components/behandling/revurderin
 import { OmgjoeringAvFarskap } from '~components/behandling/revurderingsoversikt/OmgjoeringAvFarskap'
 import { RevurderingAnnen } from '~components/behandling/revurderingsoversikt/RevurderingAnnen'
 import SluttbehandlingUtland from '~components/behandling/revurderingsoversikt/sluttbehandlingUtland/SluttbehandlingUtland'
-import { Soeknadsdato } from '~components/behandling/soeknadsoversikt/Soeknadsdato'
 import { SluttbehandlingUtlandInfo } from '~shared/types/RevurderingInfo'
 import OppdaterGrunnlagModal from '~components/behandling/handlinger/OppdaterGrunnlagModal'
 import { Utenlandstilknytning } from '~components/behandling/soeknadsoversikt/utenlandstilknytning/Utenlandstilknytning'
+import { format } from 'date-fns'
 
 const revurderingsaarsakTilTekst = (revurderingsaarsak: Revurderingaarsak): string =>
   tekstRevurderingsaarsak[revurderingsaarsak]
@@ -109,7 +109,10 @@ export const Revurderingsoversikt = (props: { behandling: IDetaljertBehandling }
             <Lowercase>{revurderingsaarsakTilTekst(revurderingsaarsak)}</Lowercase>.
           </BodyShort>
         )}
-        <Soeknadsdato mottattDato={behandling.soeknadMottattDato} />
+        <div>
+          <strong>Revurdering opprettet: </strong>
+          {format(new Date(behandling.soeknadMottattDato), 'dd.MM.yyyy')}
+        </div>
       </ContentHeader>
       <InnholdPadding>
         <OppdaterGrunnlagModal behandlingId={behandling.id} behandlingStatus={behandling.status} />

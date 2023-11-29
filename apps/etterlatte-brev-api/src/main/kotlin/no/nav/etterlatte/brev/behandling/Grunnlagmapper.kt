@@ -89,7 +89,7 @@ private fun Grunnlag.hentVergemaal(
 ): Verge {
     val vergerMedRelevantOmfang =
         opplysning.verdi.filter {
-            it.vergeEllerFullmektig.omfang?.lowercase()?.contains("oekonomiske") ?: false
+            it.vergeEllerFullmektig.omfang in alleVergeOmfangMedOekonomiskeInteresser
         }
     if (vergerMedRelevantOmfang.size != 1) {
         throw IngenUnikVergeMedOekonomiskeInteresserException(behandlingId, vergerMedRelevantOmfang)
@@ -136,3 +136,10 @@ class VergeManglerNavnException(
 class VergeManglerAdresseException(
     behandlingId: UUID,
 ) : InternfeilException("Finner ikke adresse for verge i behandling med id=$behandlingId")
+
+private val alleVergeOmfangMedOekonomiskeInteresser =
+    listOf(
+        "utlendingssakerPersonligeOgOekonomiskeInteresser",
+        "personligeOgOekonomiskeInteresser",
+        "oekonomiskeInteresser",
+    )

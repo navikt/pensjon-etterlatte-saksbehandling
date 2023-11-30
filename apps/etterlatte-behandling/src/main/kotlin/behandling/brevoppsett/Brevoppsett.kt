@@ -5,7 +5,7 @@ import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
 
-class Brevoppsett(
+data class Brevoppsett(
     val behandlingId: UUID,
     val etterbetaling: Etterbetaling?,
     val brevtype: Brevtype,
@@ -13,7 +13,7 @@ class Brevoppsett(
     val kilde: Grunnlagsopplysning.Kilde,
 )
 
-class Etterbetaling(
+data class Etterbetaling(
     val fom: YearMonth,
     val tom: YearMonth,
 ) {
@@ -22,6 +22,7 @@ class Etterbetaling(
             datoFom: LocalDate,
             datoTom: LocalDate,
         ): Etterbetaling {
+            // TODO validering
             return Etterbetaling(YearMonth.from(datoFom), YearMonth.from(datoTom))
         }
     }

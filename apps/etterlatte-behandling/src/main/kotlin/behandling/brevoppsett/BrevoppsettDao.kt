@@ -1,7 +1,10 @@
 package no.nav.etterlatte.behandling.brevoppsett
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.setTidspunkt
 import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.helse.rapids_rivers.toUUID
 import java.sql.Connection
@@ -10,15 +13,16 @@ import java.time.YearMonth
 import java.util.UUID
 
 class BrevoppsettDao(private val connection: () -> Connection) {
-    fun lagre(brevoppsett: Brevoppsett) {
-        connection().prepareStatement(
+    fun lagre(brevoppsett: Brevoppsett): Brevoppsett {
+        return connection().prepareStatement(
             """
             INSERT INTO brevoppsett(
-                behandling_id, etterbetaling_fom, etterbetaling_tom, brevtype, aldersgruppe, kilde
+                behandling_id, oppdatert, etterbetaling_fom, etterbetaling_tom, brevtype, aldersgruppe, kilde
             )
-            VALUES (?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
             ON CONFLICT (behandling_id) DO 
             UPDATE SET 
+                oppdatert = excluded.oppdatert, 
                 etterbetaling_fom = excluded.etterbetaling_fom, 
                 etterbetaling_tom = excluded.etterbetaling_tom, 
                 brevtype = excluded.brevtype, 
@@ -28,19 +32,27 @@ class BrevoppsettDao(private val connection: () -> Connection) {
         )
             .apply {
                 setObject(1, brevoppsett.behandlingId)
-                setDate(2, brevoppsett.etterbetaling?.fom?.atDay(1).let { java.sql.Date.valueOf(it) })
-                setDate(3, brevoppsett.etterbetaling?.tom?.atEndOfMonth().let { java.sql.Date.valueOf(it) })
-                setString(4, brevoppsett.brevtype.name)
-                setString(5, brevoppsett.aldersgruppe.name)
-                setString(6, brevoppsett.kilde.toJson())
+                setTidspunkt(2, Tidspunkt.now())
+                setDate(3, brevoppsett.etterbetaling?.fom?.atDay(1).let { java.sql.Date.valueOf(it) })
+                setDate(4, brevoppsett.etterbetaling?.tom?.atEndOfMonth().let { java.sql.Date.valueOf(it) })
+                setString(5, brevoppsett.brevtype.name)
+                setString(6, brevoppsett.aldersgruppe.name)
+                setString(7, brevoppsett.kilde.toJson())
             }
             .run { executeUpdate() }
             .also { require(it == 1) }
+            .let { hent(brevoppsett.behandlingId) ?: throw InternfeilException("Feilet under lagring av brevoppsett") }
     }
 
     fun hent(behandlingId: UUID): Brevoppsett? {
         return connection()
-            .prepareStatement("SELECT fra_dato, til_dato FROM etterbetaling WHERE behandling_id = ?::UUID")
+            .prepareStatement(
+                """
+                    SELECT behandling_id, etterbetaling_fom, etterbetaling_tom, brevtype, aldersgruppe, kilde 
+                    FROM brevoppsett 
+                    WHERE behandling_id = ?::UUID
+                    """,
+            )
             .apply { setObject(1, behandlingId) }
             .run { executeQuery().singleOrNull { toBrevoppsett() } }
     }
@@ -56,7 +68,7 @@ class BrevoppsettDao(private val connection: () -> Connection) {
                     )
                 },
             brevtype = Brevtype.valueOf(getString("brevtype")),
-            aldersgruppe = Aldersgruppe.valueOf(getString("aldergruppe")),
+            aldersgruppe = Aldersgruppe.valueOf(getString("aldersgruppe")),
             kilde = getString("kilde").let { objectMapper.readValue(it) },
         )
 }

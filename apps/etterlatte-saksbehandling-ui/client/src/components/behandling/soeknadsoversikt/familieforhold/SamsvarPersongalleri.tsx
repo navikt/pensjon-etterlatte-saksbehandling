@@ -13,7 +13,7 @@ import { ApiErrorAlert } from '~ErrorBoundary'
 import { SakType } from '~shared/types/sak'
 
 function formaterKanskjeNavn(navn: Partial<PersonNavn>) {
-  return [navn.fornavn, navn.mellomnavn, navn.etternavn].filter((navn) => navn !== undefined).join(' ')
+  return [navn.fornavn, navn.mellomnavn, navn.etternavn].filter((navn) => !!navn).join(' ')
 }
 
 function PersonerUtenIdenterVisning(props: { saktype: SakType; personer: Array<PersonUtenIdent> }) {

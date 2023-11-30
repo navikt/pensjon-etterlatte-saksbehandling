@@ -3,6 +3,7 @@ import { IAdresse } from '~shared/types/IAdresse'
 import { KildePdl } from './kilde'
 import { VergemaalEllerFremtidsfullmakt } from '~components/person/typer'
 import { SakType } from '~shared/types/sak'
+import { Navn } from '~shared/types/RevurderingInfo'
 
 export interface IFamilieforhold {
   avdoede: Grunnlagsopplysning<IPdlPerson, KildePdl>
@@ -128,6 +129,6 @@ export const relativPersonrolleTekst: Record<SakType, Record<RelativPersonrolle,
 export interface RelatertPerson {
   foedselsdato?: string
   kjoenn?: string
-  navn?: string
+  navn?: Partial<Navn>
   statsborgerskap?: string
 }

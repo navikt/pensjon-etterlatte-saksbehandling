@@ -19,9 +19,12 @@ import no.nav.etterlatte.libs.common.FoedselsnummerDTO
 import no.nav.etterlatte.libs.common.behandling.BehandlingsBehov
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.behandling.UtenlandstilknytningType
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
 import no.nav.etterlatte.module
+import no.nav.etterlatte.sak.UtenlandstilknytningRequest
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
@@ -87,7 +90,29 @@ class EtterbetalingTest : BehandlingIntegrationTest() {
                     UUID.fromString(it.body())
                 }
 
+            client.post("api/sak/${sak.id}/utenlandstilknytning") {
+                addAuthToken(tokenSaksbehandler)
+                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                setBody(
+                    UtenlandstilknytningRequest(
+                        utenlandstilknytningType = UtenlandstilknytningType.NASJONAL,
+                        begrunnelse = "nasjonal",
+                    ),
+                )
+            }
+
             val fraDato = utgangspunkt.minusMonths(3)
+            client.post("api/behandling/$behandlingId/virkningstidspunkt") {
+                addAuthToken(tokenSaksbehandler)
+                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                setBody(
+                    mapOf(
+                        "dato" to Tidspunkt.ofNorskTidssone(fraDato, LocalTime.NOON).toString(),
+                        "begrunnelse" to "virk",
+                    ),
+                )
+            }
+
             val tilDato = utgangspunkt
             client.put("/api/behandling/$behandlingId/etterbetaling") {
                 addAuthToken(tokenSaksbehandler)

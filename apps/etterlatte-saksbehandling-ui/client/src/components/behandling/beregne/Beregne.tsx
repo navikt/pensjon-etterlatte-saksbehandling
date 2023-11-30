@@ -1,6 +1,6 @@
 import { Content, ContentHeader, FlexRow } from '~shared/styled'
 import { Border, HeadingWrapper } from '../soeknadsoversikt/styled'
-import { behandlingSkalSendeBrev, behandlingErRedigerbar } from '../felles/utils'
+import { behandlingErRedigerbar, behandlingSkalSendeBrev } from '../felles/utils'
 import { formaterStringDato } from '~utils/formattering'
 import { useVedtaksResultat } from '../useVedtaksResultat'
 import { useAppDispatch } from '~store/Store'

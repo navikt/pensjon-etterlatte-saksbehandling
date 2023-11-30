@@ -44,6 +44,8 @@ class GrunnlagHenterTest {
 
     private val vergesFnr = "09498230323"
 
+    private val vergesFnr = "09498230323"
+
     private val objectMapper: ObjectMapper
         get() {
             return jacksonObjectMapper().registerModule(JavaTimeModule())

@@ -5,6 +5,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
+import no.nav.etterlatte.grunnlag.adresse.PersondataAdresse
 import no.nav.etterlatte.grunnlag.klienter.PdlTjenesterKlientImpl
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
@@ -18,6 +19,8 @@ import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.person.BrevMottaker
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.PersonRolle
+import no.nav.etterlatte.libs.common.person.VergemaalEllerFremtidsfullmakt
+import no.nav.etterlatte.libs.common.person.hentRelevantVerge
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
 import java.util.UUID
@@ -100,6 +103,34 @@ class GrunnlagHenter(
 
             HentetGrunnlag(personopplysninger, saksopplysninger)
         }
+    }
+
+    private fun hentVergesAdresse(
+        soekerFnr: String,
+        relevantVerge: VergemaalEllerFremtidsfullmakt,
+    ): Grunnlagsopplysning<JsonNode>? {
+        val vergesAdresseInfo = hentVergensAdresseGittVergehaver(soekerFnr)
+        return if (vergesAdresseInfo != null) {
+            grunnlagsopplysningVergeadresse(vergesAdresseInfo, relevantVerge, "$soekerFnr.verge")
+        } else {
+            val vergesFnr = relevantVerge.vergeEllerFullmektig.motpartsPersonident!!.value
+            val pdlVergeAdresse = hentAdresseGittFoedselsnummer(vergesFnr)
+            return pdlVergeAdresse?.let {
+                grunnlagsopplysningVergeadresse(pdlVergeAdresse, relevantVerge, vergesFnr)
+            }
+        }
+    }
+
+    private fun grunnlagsopplysningVergeadresse(
+        vergesAdresseInfo: PersondataAdresse,
+        relevantVerge: VergemaalEllerFremtidsfullmakt,
+        registersReferanse: String,
+    ): Grunnlagsopplysning<JsonNode> {
+        val pdlVergeFoedselsnummer = relevantVerge.vergeEllerFullmektig.motpartsPersonident!!.value
+        return vergesAdresseInfo.toBrevMottaker()
+            .copy(
+                foedselsnummer = Foedselsnummer(pdlVergeFoedselsnummer),
+            ).tilGrunnlagsopplysning(registersReferanse)
     }
 
     private suspend fun personopplysning(

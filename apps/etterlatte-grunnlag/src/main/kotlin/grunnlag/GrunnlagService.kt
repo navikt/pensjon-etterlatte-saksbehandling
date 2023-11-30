@@ -302,7 +302,8 @@ class RealGrunnlagService(
     }
 
     override fun hentPersongalleriSamsvar(behandlingId: UUID): PersongalleriSamsvar {
-        val grunnlag = opplysningDao.hentAlleGrunnlagForBehandling(behandlingId)
+        val grunnlag =
+            opplysningDao.hentGrunnlagAvTypeForBehandling(behandlingId, PERSONGALLERI_PDL_V1, PERSONGALLERI_V1)
         val opplysningPersongalleriSak =
             grunnlag.filter { it.opplysning.opplysningType == PERSONGALLERI_V1 }.maxByOrNull { it.hendelseNummer }
         val opplysningPersongalleriPdl =

@@ -13,8 +13,11 @@ import kotliquery.TransactionalSession
 import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.pdl.OpplysningDTO
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.person.VergeEllerFullmektig
+import no.nav.etterlatte.libs.common.person.VergemaalEllerFremtidsfullmakt
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.utbetaling.UtbetalingResponseDto
@@ -445,7 +448,7 @@ internal class MigreringRiverIntegrationTest {
     }
 
     @Test
-    fun `Feiler med barn som har vergemaal i PDL`() {
+    fun `Feiler med barn som har komplisert vergemaal i PDL`() {
         testApplication {
             val pesysid = 22974139L
             val repository = PesysRepository(datasource)
@@ -470,7 +473,8 @@ internal class MigreringRiverIntegrationTest {
                                     )
                                 } returns
                                     mockk<PersonDTO>().also {
-                                        every { it.vergemaalEllerFremtidsfullmakt } returns listOf(mockk())
+                                        val listOf = komplisertVergemaal()
+                                        every { it.vergemaalEllerFremtidsfullmakt } returns listOf
                                     }
                             }
                         MigrerSpesifikkSakRiver(
@@ -554,3 +558,32 @@ internal fun PesysRepository.hentSaker(tx: TransactionalSession? = null): List<P
             objectMapper.readValue(it.string("sak"), Pesyssak::class.java)
         }
     }
+
+private fun komplisertVergemaal(): List<OpplysningDTO<VergemaalEllerFremtidsfullmakt>> {
+    val vergemaalEllerFremtidsfullmakt1 =
+        mockk<VergemaalEllerFremtidsfullmakt> {
+            every {
+                vergeEllerFullmektig
+            } returns
+                mockk<VergeEllerFullmektig> {
+                    every { omfang } returns "personligeOgOekonomiskeInteresser"
+                }
+        }
+    val vergemaalEllerFremtidsfullmakt2 =
+        mockk<VergemaalEllerFremtidsfullmakt> {
+            every {
+                vergeEllerFullmektig
+            } returns
+                mockk<VergeEllerFullmektig> {
+                    every { omfang } returns "oekonomiskeInteresser"
+                }
+        }
+
+    return listOf(
+        opplysningDTO(vergemaalEllerFremtidsfullmakt1),
+        opplysningDTO(vergemaalEllerFremtidsfullmakt2),
+    )
+}
+
+private fun opplysningDTO(vergemaalEllerFremtidsfullmakt1: VergemaalEllerFremtidsfullmakt) =
+    mockk<OpplysningDTO<VergemaalEllerFremtidsfullmakt>> { every { verdi } returns vergemaalEllerFremtidsfullmakt1 }

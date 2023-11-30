@@ -105,34 +105,6 @@ class GrunnlagHenter(
         }
     }
 
-    private fun hentVergesAdresse(
-        soekerFnr: String,
-        relevantVerge: VergemaalEllerFremtidsfullmakt,
-    ): Grunnlagsopplysning<JsonNode>? {
-        val vergesAdresseInfo = hentVergensAdresseGittVergehaver(soekerFnr)
-        return if (vergesAdresseInfo != null) {
-            grunnlagsopplysningVergeadresse(vergesAdresseInfo, relevantVerge, "$soekerFnr.verge")
-        } else {
-            val vergesFnr = relevantVerge.vergeEllerFullmektig.motpartsPersonident!!.value
-            val pdlVergeAdresse = hentAdresseGittFoedselsnummer(vergesFnr)
-            return pdlVergeAdresse?.let {
-                grunnlagsopplysningVergeadresse(pdlVergeAdresse, relevantVerge, vergesFnr)
-            }
-        }
-    }
-
-    private fun grunnlagsopplysningVergeadresse(
-        vergesAdresseInfo: PersondataAdresse,
-        relevantVerge: VergemaalEllerFremtidsfullmakt,
-        registersReferanse: String,
-    ): Grunnlagsopplysning<JsonNode> {
-        val pdlVergeFoedselsnummer = relevantVerge.vergeEllerFullmektig.motpartsPersonident!!.value
-        return vergesAdresseInfo.toBrevMottaker()
-            .copy(
-                foedselsnummer = Foedselsnummer(pdlVergeFoedselsnummer),
-            ).tilGrunnlagsopplysning(registersReferanse)
-    }
-
     private suspend fun personopplysning(
         person: Deferred<Person>,
         personDTO: Deferred<PersonDTO>,

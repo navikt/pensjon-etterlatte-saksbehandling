@@ -1,11 +1,12 @@
-import { isFailure, isPending, useApiCall } from '~shared/hooks/useApiCall'
+import { useApiCall } from '~shared/hooks/useApiCall'
 import { oppdaterTittel } from '~shared/api/brev'
 import React, { useState } from 'react'
 import { Button, Heading, Modal, TextField } from '@navikt/ds-react'
 import { DocPencilIcon } from '@navikt/aksel-icons'
 import styled from 'styled-components'
 import { FlexRow } from '~shared/styled'
-import { ApiErrorAlert } from '~ErrorBoundary'
+import { isPending } from '~shared/api/apiUtils'
+import { isFailureHandler } from '~shared/api/IsFailureHandler'
 
 export default function RedigerBrevTittelModal({
   brevId,
@@ -57,8 +58,10 @@ export default function RedigerBrevTittelModal({
           </Heading>
 
           <TextField label="Ny tittel" value={nyTittel || ''} onChange={(e) => setNyTittel(e.target.value)} />
-
-          {isFailure(status) && <ApiErrorAlert>Kunne ikke oppdatere tittel...</ApiErrorAlert>}
+          {isFailureHandler({
+            apiResult: status,
+            errorMessage: 'Kunne ikke oppdatere tittel',
+          })}
         </Modal.Body>
 
         <Modal.Footer>

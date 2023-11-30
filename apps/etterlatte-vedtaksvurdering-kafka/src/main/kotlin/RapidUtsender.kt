@@ -1,7 +1,7 @@
+package no.nav.etterlatte.vedtaksvurdering
+
 import no.nav.etterlatte.libs.common.rapidsandrivers.TEKNISK_TID_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
-import no.nav.etterlatte.vedtaksvurdering.RapidInfo
-import no.nav.etterlatte.vedtaksvurdering.VedtakOgRapid
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import org.slf4j.Logger

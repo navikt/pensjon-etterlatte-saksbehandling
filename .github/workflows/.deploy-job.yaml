@@ -19,7 +19,7 @@ jobs:
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: dev-gcp
-          RESOURCE: jobs/${{ github.workflow }}/.nais/dev.yaml
+          RESOURCE: jobs/${{ github.workflow }}/deploy/dev.yaml
           VAR: image=${{ inputs.image }}
 
   deploy-to-prod-gcp:
@@ -39,5 +39,5 @@ jobs:
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: prod-gcp
-          RESOURCE: jobs/${{ github.workflow }}/.nais/prod.yaml
+          RESOURCE: jobs/${{ github.workflow }}/deploy/prod.yaml
           VAR: image=${{ inputs.image }}

@@ -14,9 +14,11 @@ on:
   push:
     branches:
       - main
-      - release/*
-      - feature/*
-      - fix/*
+    paths:
+      - jobs/start-regulering/**
+  pull_request:
+    branches:
+      - main
     paths:
       - jobs/start-regulering/**
 

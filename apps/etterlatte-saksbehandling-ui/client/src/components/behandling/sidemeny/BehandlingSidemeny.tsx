@@ -5,7 +5,6 @@ import AnnullerBehandling from '~components/behandling/handlinger/AnnullerBehand
 import React, { useEffect, useState } from 'react'
 import { IBeslutning } from '~components/behandling/attestering/types'
 import { BehandlingFane, IBehandlingInfo } from '~components/behandling/sidemeny/IBehandlingInfo'
-import { IRolle } from '~store/reducers/InnloggetSaksbehandlerReducer'
 import { IBehandlingStatus, IBehandlingsType, UtenlandstilknytningType } from '~shared/types/IDetaljertBehandling'
 import { useAppDispatch, useAppSelector } from '~store/Store'
 import { isFailure, isInitial, isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
@@ -70,9 +69,7 @@ export const BehandlingSidemeny = ({ behandling }: { behandling: IBehandlingRedu
   const behandlingsinfo = mapTilBehandlingInfo(behandling, vedtak)
 
   const kanAttestere =
-    behandling &&
-    innloggetSaksbehandler.rolle === IRolle.attestant &&
-    behandlingsinfo?.status === IBehandlingStatus.FATTET_VEDTAK
+    behandling && innloggetSaksbehandler.kanAttestere && behandlingsinfo?.status === IBehandlingStatus.FATTET_VEDTAK
 
   useEffect(() => {
     fetchVedtakSammendrag(behandling.id, (vedtakSammendrag) => {

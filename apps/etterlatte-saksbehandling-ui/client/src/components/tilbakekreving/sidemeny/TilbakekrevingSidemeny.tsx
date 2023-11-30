@@ -5,7 +5,6 @@ import { ChevronLeftDoubleIcon, ChevronRightDoubleIcon } from '@navikt/aksel-ico
 import { useTilbakekreving } from '~components/tilbakekreving/useTilbakekreving'
 import { SidebarPanel } from '~shared/components/Sidebar'
 import { Dokumentoversikt } from '~components/person/dokumenter/dokumentoversikt'
-import { IRolle } from '~store/reducers/InnloggetSaksbehandlerReducer'
 import { useAppDispatch, useAppSelector } from '~store/Store'
 import { TilbakekrevingStatus } from '~shared/types/Tilbakekreving'
 import { isFailure, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
@@ -30,7 +29,7 @@ export function TilbakekrevingSidemeny() {
 
   const kanAttestere =
     !!tilbakekreving &&
-    innloggetSaksbehandler.rolle === IRolle.attestant &&
+    innloggetSaksbehandler.kanAttestere &&
     tilbakekreving?.status === TilbakekrevingStatus.FATTET_VEDTAK
 
   useEffect(() => {

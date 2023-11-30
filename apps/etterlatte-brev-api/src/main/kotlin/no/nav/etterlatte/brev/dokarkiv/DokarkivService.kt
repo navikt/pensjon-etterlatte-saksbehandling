@@ -108,11 +108,12 @@ class DokarkivServiceImpl(
     ): JournalpostRequest {
         val innhold = requireNotNull(db.hentBrevInnhold(brevId))
         val pdf = requireNotNull(db.hentPdf(brevId))
+        val brev = requireNotNull(db.hentBrev(brevId))
 
         return JournalpostRequest(
             tittel = innhold.tittel,
             journalpostType = JournalPostType.UTGAAENDE,
-            avsenderMottaker = AvsenderMottaker(vedtak.sak.ident),
+            avsenderMottaker = AvsenderMottaker(mottakerIdent(brev)),
             bruker = Bruker(vedtak.sak.ident),
             eksternReferanseId = "${vedtak.behandlingId}.$brevId",
             sak = JournalpostSak(Sakstype.FAGSAK, vedtak.sak.id.toString()),
@@ -130,19 +131,10 @@ class DokarkivServiceImpl(
         val innhold = requireNotNull(db.hentBrevInnhold(brev.id))
         val pdf = requireNotNull(db.hentPdf(brev.id))
 
-        val mottaker =
-            requireNotNull(brev.mottaker) {
-                "Mottaker er 'null' i brev med id=${brev.id}"
-            }
-        val ident =
-            requireNotNull(mottaker.foedselsnummer?.value ?: mottaker.orgnummer) {
-                "Mottaker mangler både fnr. og orgnr. i brev med id=${brev.id}"
-            }
-
         return JournalpostRequest(
             tittel = innhold.tittel,
             journalpostType = JournalPostType.UTGAAENDE,
-            avsenderMottaker = AvsenderMottaker(ident),
+            avsenderMottaker = AvsenderMottaker(mottakerIdent(brev)),
             bruker = Bruker(brev.soekerFnr),
             eksternReferanseId = "${brev.sakId}.${brev.id}",
             sak = JournalpostSak(Sakstype.FAGSAK, brev.sakId.toString()),
@@ -159,4 +151,9 @@ class DokarkivServiceImpl(
             brevkode = BREV_KODE,
             dokumentvarianter = listOf(DokumentVariant.ArkivPDF(Base64.getEncoder().encodeToString(bytes))),
         )
+
+    private fun mottakerIdent(brev: Brev) =
+        requireNotNull(brev.mottaker.foedselsnummer?.value ?: brev.mottaker.orgnummer) {
+            "Mottaker mangler både fnr. og orgnr. i brev med id=${brev.id}"
+        }
 }

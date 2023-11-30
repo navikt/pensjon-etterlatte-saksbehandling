@@ -52,7 +52,12 @@ export default function NyttBrevMottaker({ brev }: { brev: IBrev }) {
             <BodyShort size="small">
               <Label>Adresse</Label>
               <br />
-              {[adresse?.adresselinje1, adresse?.adresselinje2, adresse?.adresselinje3].join('\n')}
+              {[adresse?.adresselinje1, adresse?.adresselinje2, adresse?.adresselinje3].map((linje) => (
+                <>
+                  {linje}
+                  <br />
+                </>
+              ))}
               <br />
               {adresse?.postnummer} {adresse?.poststed}
               <br />

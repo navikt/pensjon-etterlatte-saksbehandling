@@ -64,8 +64,8 @@ export default function RedigerMottakerModal({ brev, oppdater, vergeadresse }: P
         {vergeadresse.adresse.adresselinje2 && <br />}
         {vergeadresse.adresse.adresselinje3}
         {vergeadresse.adresse.adresselinje3 && <br />}
-        {vergeadresse.adresse.postnummer} {vergeadresse.adresse.poststed}
-        {vergeadresse.adresse.land} ({vergeadresse.adresse.landkode})
+        {vergeadresse.adresse.postnummer} {vergeadresse.adresse.poststed} {vergeadresse.adresse.land} (
+        {vergeadresse.adresse.landkode})
       </>
     )
   }

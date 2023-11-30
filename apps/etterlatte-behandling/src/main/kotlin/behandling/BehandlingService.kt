@@ -235,7 +235,12 @@ internal class BehandlingServiceImpl(
         val behandling =
             requireNotNull(inTransaction { hentBehandling(behandlingId) }) { "Fant ikke behandling $behandlingId" }
         val personopplysning =
-            grunnlagKlient.finnPersonOpplysning(behandlingId, opplysningstype, brukerTokenInfo)
+            try {
+                grunnlagKlient.finnPersonOpplysning(behandlingId, opplysningstype, brukerTokenInfo)
+            } catch (e: Exception) {
+                // TODO..
+                null
+            }
         val sakUtenlandstilknytning = inTransaction { sakDao.hentUtenlandstilknytningForSak(behandling.sak.id) }
 
         return BehandlingMedGrunnlagsopplysning(
@@ -263,7 +268,10 @@ internal class BehandlingServiceImpl(
                 brukerTokenInfo,
                 Opplysningstype.AVDOED_PDL_V1,
             )
-        val doedsdato = YearMonth.from(behandlingMedDoedsdatoOgUtenlandstilknytning.personopplysning?.opplysning?.doedsdato)
+        val doedsdato =
+            behandlingMedDoedsdatoOgUtenlandstilknytning.personopplysning?.let {
+                YearMonth.from(it.opplysning.doedsdato)
+            }
 
         val sakMedUtenlandstilknytning = behandlingMedDoedsdatoOgUtenlandstilknytning.utenlandstilknytning
         val soeknadMottatt = YearMonth.from(behandlingMedDoedsdatoOgUtenlandstilknytning.soeknadMottattDato)
@@ -281,7 +289,9 @@ internal class BehandlingServiceImpl(
         }
 
         val etterMaksTidspunktEllersMinstManedEtterDoedsfall =
-            if (doedsdato.isBefore(makstidspunktFoerSoeknad)) {
+            if (doedsdato == null) {
+                true
+            } else if (doedsdato.isBefore(makstidspunktFoerSoeknad)) {
                 virkningstidspunkt.isAfter(makstidspunktFoerSoeknad)
             } else {
                 virkningstidspunkt.isAfter(doedsdato)
@@ -335,6 +345,24 @@ internal class BehandlingServiceImpl(
 
         logger.info("Hentet behandling for $behandlingId")
         return coroutineScope {
+
+            logger.info("Hentet vedtak for $behandlingId")
+            val avdoed =
+                async {
+                    try {
+                        grunnlagKlient.finnPersonOpplysning(
+                            behandlingId,
+                            Opplysningstype.AVDOED_PDL_V1,
+                            brukerTokenInfo,
+                        )
+                    } catch (e: Exception) {
+                        // TODO Må innsnevres til kun 404? Hvordan?
+                        null
+                    }
+                }
+
+            logger.info("Hentet Opplysningstype.AVDOED_PDL_V1 for $behandlingId")
+
             val soeker =
                 async {
                     grunnlagKlient.finnPersonOpplysning(
@@ -357,6 +385,7 @@ internal class BehandlingServiceImpl(
                 boddEllerArbeidetUtlandet = behandling.boddEllerArbeidetUtlandet,
                 status = behandling.status,
                 hendelser = hendelserIBehandling,
+                familieforhold = avdoed?.let { Familieforhold(it.await()) },
                 behandlingType = behandling.type,
                 søker = soeker.await()?.opplysning,
                 revurderingsaarsak = behandling.revurderingsaarsak(),

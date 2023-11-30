@@ -57,10 +57,18 @@ class BehandlingFactory(
 
         val sak = inTransaction { sakService.finnEllerOpprettSak(soeker, request.sakType) }
 
+        val persongalleri =
+            when (request.kilde) {
+                Vedtaksloesning.PESYS ->
+                    request.persongalleri.copy(
+                        innsender = Vedtaksloesning.PESYS.name,
+                    )
+                else -> request.persongalleri
+            }
         val behandling =
             inTransaction {
                 opprettBehandling(
-                    sak.id, request.persongalleri, request.mottattDato, request.kilde ?: Vedtaksloesning.GJENNY,
+                    sak.id, persongalleri, request.mottattDato, request.kilde ?: Vedtaksloesning.GJENNY,
                 ) ?: throw IllegalStateException("Kunne ikke opprette behandling")
             }.behandling
 

@@ -5,11 +5,11 @@ import { getGrunnlagsAvOpplysningstype } from '~shared/api/grunnlag'
 import { KildePdl } from '~shared/types/kilde'
 import { IPdlPerson } from '~shared/types/Person'
 import { Grunnlagsopplysning } from '~shared/types/grunnlag'
-import { ApiErrorAlert } from '~ErrorBoundary'
 import { useEffect } from 'react'
 import { formaterKildePdl } from '~components/behandling/soeknadsoversikt/utils'
 
-import { isFailure, isSuccess } from '~shared/api/apiUtils'
+import { isSuccess } from '~shared/api/apiUtils'
+import { isFailureHandler } from '~shared/api/IsFailureHandler'
 
 interface Props {
   behandlingId: string
@@ -49,7 +49,10 @@ export const Verger = ({ sakId, behandlingId }: Props) => {
   return (
     <InfoWrapper>
       {isSuccess(soeker) && successContents(soeker.data)}
-      {isFailure(soeker) && <ApiErrorAlert>Kunne ikke hente info om verger</ApiErrorAlert>}
+      {isFailureHandler({
+        apiResult: soeker,
+        errorMessage: 'Kunne ikke hente info om verger',
+      })}
     </InfoWrapper>
   )
 }

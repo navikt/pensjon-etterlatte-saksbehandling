@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Alert, BodyLong, Button, Heading, Modal } from '@navikt/ds-react'
+import { BodyLong, Button, Heading, Modal } from '@navikt/ds-react'
 import { FlexRow } from '~shared/styled'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { oppdaterGrunnlag } from '~shared/api/behandling'
@@ -9,7 +9,8 @@ import Spinner from '~shared/Spinner'
 import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 import { ArrowsCirclepathIcon } from '@navikt/aksel-icons'
 
-import { isFailure, isPending, isSuccess } from '~shared/api/apiUtils'
+import { isPending, isSuccess } from '~shared/api/apiUtils'
+import { isFailureHandler } from '~shared/api/IsFailureHandler'
 
 export const FEATURE_TOGGLE_KAN_BRUKE_OPPDATER_GRUNNLAG = 'pensjon-etterlatte.kan-bruke-oppdater-grunnlag'
 
@@ -71,7 +72,7 @@ export default function OppdaterGrunnlagModal({
             </Button>
           </FlexRow>
           {isSuccess(oppdatert) && <Spinner visible label="Oppdatert – laster inn på nytt ..." />}
-          {isFailure(oppdatert) && <Alert variant="error">Oppdatering feilet</Alert>}
+          {isFailureHandler({ apiResult: oppdatert, errorMessage: 'Oppdatering feilet' })}
         </Modal.Body>
       </Modal>
     </div>

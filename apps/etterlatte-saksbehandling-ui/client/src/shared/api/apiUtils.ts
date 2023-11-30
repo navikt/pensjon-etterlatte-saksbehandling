@@ -15,19 +15,9 @@ export const isPendingOrInitial = (result: Result<unknown>): result is Initial |
   isPending(result) || isInitial(result)
 export const isSuccessOrInitial = (result: Result<unknown>): result is Initial | Success<unknown> =>
   isSuccess(result) || isInitial(result)
-export const isErrorWithCode = (result: Result<unknown>, code: number): result is Error<ApiError> =>
+export const isFailureWithCode = (result: Result<unknown>, code: number): result is Error<ApiError> =>
   result.status === 'error' && result.error.status === code
 
-export const initial = <A = never>(): Result<A> => ({ status: 'initial' })
-export const pending = <A = never>(): Result<A> => ({ status: 'pending' })
-export const success = <A = never>(data: A): Result<A> => ({
-  status: 'success',
-  data,
-})
-export const error = <A = never>(error: ApiError): Result<A> => ({
-  status: 'error',
-  error,
-})
 export const mapApiResult = <T>(
   result: Result<T>,
   mapInitialOrPending: ReactElement,
@@ -38,13 +28,18 @@ export const mapApiResult = <T>(
     return mapInitialOrPending
   }
   if (isFailure(result)) {
-    return mapError(result.error)
+    if (result.error.status === 502) {
+      return null
+    } else {
+      return mapError(result.error)
+    }
   }
   if (isSuccess(result)) {
     return mapSuccess(result.data)
   }
   throw new Error(`Unknown state of result: ${JSON.stringify(result)}`)
 }
+
 export const mapAllApiResult = <T>(
   result: Result<T>,
   mapPending: ReactElement,
@@ -59,13 +54,18 @@ export const mapAllApiResult = <T>(
     return mapInitial
   }
   if (isFailure(result)) {
-    return mapError(result.error)
+    if (result.error.status === 502) {
+      return null
+    } else {
+      return mapError(result.error)
+    }
   }
   if (isSuccess(result)) {
     return mapSuccess(result.data)
   }
   throw new Error(`Unknown state of result: ${JSON.stringify(result)}`)
 }
+
 export const mapSuccess = <T, R>(result: Result<T>, mapSuccess: (success: T) => R): R | null => {
   if (isSuccess(result)) {
     return mapSuccess(result.data)

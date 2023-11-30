@@ -11,7 +11,8 @@ import styled from 'styled-components'
 import { NavnInput, standardnavn } from '~components/behandling/revurderingsoversikt/NavnInput'
 import { Revurderingsbegrunnelse } from '~components/behandling/revurderingsoversikt/Revurderingsbegrunnelse'
 
-import { isFailure, isPending, isSuccess } from '~shared/api/apiUtils'
+import { isPending, isSuccess } from '~shared/api/apiUtils'
+import { isFailureHandler } from '~shared/api/IsFailureHandler'
 
 function formaterNavn(navn: Navn) {
   return [navn.fornavn, navn.mellomnavn, navn.etternavn].join(' ')
@@ -73,7 +74,10 @@ export const AdoptertAv = (props: { behandling: IDetaljertBehandling }) => {
             Lagre
           </Button>
           {isSuccess(lagrestatus) ? <span>Lagret!</span> : null}
-          {isFailure(lagrestatus) ? <ApiErrorAlert>Kunne ikke lagre adoptert av</ApiErrorAlert> : null}
+          {isFailureHandler({
+            apiResult: lagrestatus,
+            errorMessage: 'Kunne ikke lagre adoptert av',
+          })}
           {feilmelding ? <ApiErrorAlert>{feilmelding}</ApiErrorAlert> : null}
         </SkjemaWrapper>
       ) : (

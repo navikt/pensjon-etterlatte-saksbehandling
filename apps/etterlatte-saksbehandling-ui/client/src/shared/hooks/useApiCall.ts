@@ -1,7 +1,19 @@
 import React, { useState } from 'react'
 import { ApiError, ApiResponse } from '../api/apiClient'
 
-import { error, initial, isPending, pending, Result, success } from '~shared/api/apiUtils'
+import { isPending, Result } from '~shared/api/apiUtils'
+
+const initial = <A = never>(): Result<A> => ({ status: 'initial' })
+const pending = <A = never>(): Result<A> => ({ status: 'pending' })
+const success = <A = void>(data: A): Result<A> => ({
+  status: 'success',
+  data,
+})
+
+export const error = <A = never>(error: ApiError): Result<A> => ({
+  status: 'error',
+  error,
+})
 
 export function useApiCall<T, U>(
   fn: (req: T) => Promise<ApiResponse<U>>

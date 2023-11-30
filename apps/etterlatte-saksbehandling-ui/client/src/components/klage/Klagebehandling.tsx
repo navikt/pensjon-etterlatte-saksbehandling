@@ -8,7 +8,6 @@ import { getPerson } from '~shared/api/grunnlag'
 import { StatusBar } from '~shared/statusbar/Statusbar'
 import Spinner from '~shared/Spinner'
 import { GridContainer, MainContent } from '~shared/styled'
-import { ApiErrorAlert } from '~ErrorBoundary'
 import { hentKlage } from '~shared/api/klage'
 import { KlageStegmeny } from '~components/klage/stegmeny/KlageStegmeny'
 import { KlageFormkrav } from '~components/klage/formkrav/KlageFormkrav'
@@ -17,7 +16,8 @@ import { KlageOppsummering } from '~components/klage/oppsummering/KlageOppsummer
 import { KlageSidemeny } from '~components/klage/sidemeny/KlageSidemeny'
 import { KlageBrev } from '~components/klage/brev/KlageBrev'
 
-import { isFailure, isPending } from '~shared/api/apiUtils'
+import { isPending } from '~shared/api/apiUtils'
+import { isFailureHandler } from '~shared/api/IsFailureHandler'
 
 export function Klagebehandling() {
   const klage = useKlage()
@@ -71,7 +71,10 @@ export function Klagebehandling() {
         </GridContainer>
       )}
 
-      {isFailure(fetchKlageStatus) && <ApiErrorAlert>Kunne ikke hente klagebehandling</ApiErrorAlert>}
+      {isFailureHandler({
+        apiResult: fetchKlageStatus,
+        errorMessage: 'Kunne ikke hente klagebehandling',
+      })}
     </>
   )
 }

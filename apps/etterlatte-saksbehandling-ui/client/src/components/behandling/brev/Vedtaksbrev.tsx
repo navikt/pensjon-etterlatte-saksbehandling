@@ -1,6 +1,6 @@
 import { Content, ContentHeader } from '~shared/styled'
 import { useEffect, useState } from 'react'
-import { Alert, ErrorMessage, Heading } from '@navikt/ds-react'
+import { Alert, Heading } from '@navikt/ds-react'
 import { Border, HeadingWrapper } from '../soeknadsoversikt/styled'
 import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapper'
 import { getData, hentVedtaksbrev, isSuccessOrNotFound, opprettVedtaksbrev } from '~shared/api/brev'
@@ -29,7 +29,8 @@ import { hentBehandling } from '~shared/api/behandling'
 import { useAppDispatch } from '~store/Store'
 import { getVergeadresseFraGrunnlag } from '~shared/api/grunnlag'
 import { VergeFeilhaandtering } from '~components/person/VergeFeilhaandtering'
-import { isFailure, isPending, isPendingOrInitial } from '~shared/api/apiUtils'
+import { isPending, isPendingOrInitial } from '~shared/api/apiUtils'
+import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { useSjekkliste, useSjekklisteValideringsfeil } from '~components/behandling/sjekkliste/useSjekkliste'
 import { useBehandling } from '~components/behandling/useBehandling'
 import { addValideringsfeil, Valideringsfeilkoder } from '~store/reducers/SjekklisteReducer'
@@ -176,8 +177,8 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
             />
           ))}
 
-        {isFailure(hentBrevStatus) && <ErrorMessage>Feil ved henting av brev</ErrorMessage>}
-        {isFailure(opprettBrevStatus) && <ErrorMessage>Kunne ikke opprette brev</ErrorMessage>}
+        {isFailureHandler({ apiResult: hentBrevStatus, errorMessage: 'Feil ved henting av brev' })}
+        {isFailureHandler({ apiResult: opprettBrevStatus, errorMessage: 'Kunne ikke opprette brev' })}
         {VergeFeilhaandtering(vergeadresse)}
       </BrevContent>
 

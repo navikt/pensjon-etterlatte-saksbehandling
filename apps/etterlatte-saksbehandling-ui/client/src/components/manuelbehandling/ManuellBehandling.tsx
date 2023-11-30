@@ -14,7 +14,9 @@ import { InputRow } from '~components/person/journalfoeringsoppgave/nybehandling
 import { Spraak } from '~shared/types/Brev'
 import { opprettTrygdetidOverstyrtMigrering } from '~shared/api/trygdetid'
 
-import { isFailure, isPending, isSuccess } from '~shared/api/apiUtils'
+import { isPending, isSuccess, mapAllApiResult } from '~shared/api/apiUtils'
+import { ApiErrorAlert } from '~ErrorBoundary'
+import { isFailureHandler } from '~shared/api/IsFailureHandler'
 
 export default function ManuellBehandling() {
   const dispatch = useAppDispatch()
@@ -133,15 +135,33 @@ export default function ManuellBehandling() {
         </Button>
       </Knapp>
       {isSuccess(status) && <Alert variant="success">Behandling med id {nyBehandlingId} ble opprettet!</Alert>}
-      {isFailure(status) && <Alert variant="error">Det oppsto en feil ved oppretting av behandlingen.</Alert>}
+      {isFailureHandler({
+        apiResult: status,
+        errorMessage: 'Det oppsto en feil ved oppretting av behandlingen.',
+      })}
 
-      {isPending(overstyrBeregningStatus) && <Alert variant="info">Oppretter overstyrt beregning.</Alert>}
-      {isSuccess(overstyrBeregningStatus) && <Alert variant="success">Overstyrt beregning opprettet!</Alert>}
-      {isFailure(overstyrBeregningStatus) && <Alert variant="error">Klarte ikke å overstyre beregning.</Alert>}
-
-      {isPending(overstyrTrygdetidStatus) && <Alert variant="info">Oppretter overstyrt trygdetid.</Alert>}
-      {isSuccess(overstyrTrygdetidStatus) && <Alert variant="success">Overstyrt trygdetid opprettet!</Alert>}
-      {isFailure(overstyrTrygdetidStatus) && <Alert variant="error">Klarte ikke å overstyre trygdetid.</Alert>}
+      {mapAllApiResult(
+        overstyrBeregningStatus,
+        <Alert variant="info">Oppretter overstyrt beregning.</Alert>,
+        null,
+        () => (
+          <ApiErrorAlert>Klarte ikke å overstyre beregning.</ApiErrorAlert>
+        ),
+        () => (
+          <Alert variant="success">Overstyrt beregning opprettet!</Alert>
+        )
+      )}
+      {mapAllApiResult(
+        overstyrTrygdetidStatus,
+        <Alert variant="info">Oppretter overstyrt trygdetid.</Alert>,
+        null,
+        () => (
+          <ApiErrorAlert>Klarte ikke å overstyre trygdetid.</ApiErrorAlert>
+        ),
+        () => (
+          <Alert variant="success">Overstyrt trygdetid opprettet!</Alert>
+        )
+      )}
     </FormWrapper>
   )
 }

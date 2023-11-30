@@ -8,10 +8,9 @@ import { useAppDispatch } from '~store/Store'
 import { useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { oppdaterBehandlingsstatus, oppdaterUtenlandstilknytning } from '~store/reducers/BehandlingReducer'
-import { ApiErrorAlert } from '~ErrorBoundary'
 import { lagreUtenlandstilknytning } from '~shared/api/sak'
 
-import { isFailure } from '~shared/api/apiUtils'
+import { isFailureHandler } from '~shared/api/IsFailureHandler'
 
 const UtenlandstilknytningTypeTittel: Record<UtenlandstilknytningType, string> = {
   [UtenlandstilknytningType.NASJONAL]: 'Nasjonal',
@@ -116,7 +115,10 @@ export const UtenlandstilknytningVurdering = ({
           }}
           placeholder="Valgfritt"
         />
-        {isFailure(setUtenlandstilknytningStatus) && <ApiErrorAlert>Kunne ikke lagre utlandstilknytning</ApiErrorAlert>}
+        {isFailureHandler({
+          apiResult: setUtenlandstilknytningStatus,
+          errorMessage: 'Kunne ikke lagre utlandstilknytning',
+        })}
       </>
     </VurderingsboksWrapper>
   )

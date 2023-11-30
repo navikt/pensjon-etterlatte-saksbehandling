@@ -16,7 +16,8 @@ import { ApiErrorAlert } from '~ErrorBoundary'
 import { InfoWrapper } from '~components/behandling/soeknadsoversikt/styled'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
 
-import { isFailure, isPending, isSuccess, mapApiResult } from '~shared/api/apiUtils'
+import { isPending, isSuccess, mapApiResult } from '~shared/api/apiUtils'
+import { isFailureHandler } from '~shared/api/IsFailureHandler'
 
 export default function VelgJournalpost({ journalpostId }: { journalpostId: string | null }) {
   const { bruker, journalpost } = useJournalfoeringOppgave()
@@ -74,9 +75,10 @@ export default function VelgJournalpost({ journalpostId }: { journalpostId: stri
     <>
       {isPending(journalposter) && <Spinner label="Henter journalposter for bruker" visible />}
       {isPending(journalpostStatus) && <Spinner label="Henter journalpost for bruker" visible />}
-      {isFailure(journalpostStatus) && (
-        <ApiErrorAlert>Feil ved henting av journalpost. Kan ikke fortsette behandlingen.</ApiErrorAlert>
-      )}
+      {isFailureHandler({
+        apiResult: journalpostStatus,
+        errorMessage: 'Feil ved henting av journalpost. Kan ikke fortsette behandlingen.',
+      })}
 
       {journalpost ? (
         <>

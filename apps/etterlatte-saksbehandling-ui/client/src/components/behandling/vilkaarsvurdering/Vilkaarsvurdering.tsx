@@ -24,6 +24,7 @@ import {
 } from '~components/behandling/vilkaarsvurdering/utils'
 
 import { isFailure, isInitial, isPending } from '~shared/api/apiUtils'
+import { isFailureHandler } from '~shared/api/IsFailureHandler'
 
 export const Vilkaarsvurdering = (props: { behandling: IBehandlingReducer }) => {
   const { behandling } = props
@@ -102,9 +103,10 @@ export const Vilkaarsvurdering = (props: { behandling: IBehandlingReducer }) => 
                   Slett vilkårsvurdering
                 </Button>
               </Alert>
-              {isFailure(slettVilkaarsvurderingStatus) && (
-                <ApiErrorAlert>Klarte ikke slette vilkårsvurderingen</ApiErrorAlert>
-              )}
+              {isFailureHandler({
+                apiResult: slettVilkaarsvurderingStatus,
+                errorMessage: 'Klarte ikke slette vilkårsvurderingen',
+              })}
             </AlertWrapper>
           )}
 

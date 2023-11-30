@@ -11,7 +11,6 @@ import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
 import { useBehandlingRoutes } from '~components/behandling/BehandlingRoutes'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentVilkaarsvurdering } from '~shared/api/vilkaarsvurdering'
-import { ApiErrorAlert } from '~ErrorBoundary'
 import React, { useEffect, useState } from 'react'
 import FastTrygdetid from '~components/behandling/trygdetid/FastTrygdetid'
 import YrkesskadeTrygdetidBP from '~components/behandling/trygdetid/YrkesskadeTrygdetidBP'
@@ -24,7 +23,8 @@ import { useAppDispatch } from '~store/Store'
 import { handlinger } from '~components/behandling/handlinger/typer'
 import { Vilkaarsresultat } from '~components/behandling/felles/Vilkaarsresultat'
 
-import { isFailure, isPending, isSuccess } from '~shared/api/apiUtils'
+import { isPending, isSuccess } from '~shared/api/apiUtils'
+import { isFailureHandler } from '~shared/api/IsFailureHandler'
 
 const featureToggleNameTrygdetid = 'pensjon-etterlatte.bp-bruk-faktisk-trygdetid' as const
 
@@ -92,9 +92,14 @@ const TrygdetidVisning = (props: { behandling: IDetaljertBehandling }) => {
         ))}
 
       <Border />
-
-      {isFailure(vilkaarsvurdering) && <ApiErrorAlert>Kunne ikke hente vilkårsvurdering</ApiErrorAlert>}
-      {isFailure(oppdaterStatusResult) && <ApiErrorAlert>{oppdaterStatusResult.error.detail}</ApiErrorAlert>}
+      {isFailureHandler({
+        apiResult: vilkaarsvurdering,
+        errorMessage: 'Kunne ikke hente vilkårsvurdering',
+      })}
+      {isFailureHandler({
+        apiResult: oppdaterStatusResult,
+        errorMessage: 'Kunne ikke oppdatere vilkårsvurderingsresultat',
+      })}
 
       {redigerbar ? (
         <BehandlingHandlingKnapper>

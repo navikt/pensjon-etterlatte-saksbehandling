@@ -9,11 +9,11 @@ import { HjemmelLenke } from '~components/behandling/felles/HjemmelLenke'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
 import { PencilIcon } from '@navikt/aksel-icons'
-import { ApiErrorAlert } from '~ErrorBoundary'
 import { TextButton } from '~components/behandling/soeknadsoversikt/familieforhold/personer/personinfo/TextButton'
 import { OmstillingsstoenadToolTip } from '~components/behandling/beregne/OmstillingsstoenadToolTip'
 
-import { isFailure, isPending } from '~shared/api/apiUtils'
+import { isPending } from '~shared/api/apiUtils'
+import { isFailureHandler } from '~shared/api/IsFailureHandler'
 
 export const AvkortingInntekt = (props: {
   behandling: IBehandlingReducer
@@ -305,7 +305,10 @@ export const AvkortingInntekt = (props: {
           </Rows>
         </InntektAvkortingForm>
       )}
-      {isFailure(inntektGrunnlagStatus) && <ApiErrorAlert>En feil har oppstått</ApiErrorAlert>}
+      {isFailureHandler({
+        apiResult: inntektGrunnlagStatus,
+        errorMessage: 'En feil har oppstått',
+      })}
     </AvkortingInntektWrapper>
   )
 }

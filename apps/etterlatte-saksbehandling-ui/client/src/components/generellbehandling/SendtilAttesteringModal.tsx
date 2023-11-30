@@ -3,11 +3,11 @@ import { useNavigate } from 'react-router-dom'
 import React, { useState } from 'react'
 import { Alert, BodyShort, Button, Modal } from '@navikt/ds-react'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { ApiErrorAlert } from '~ErrorBoundary'
 import { sendTilAttesteringGenerellBehandling } from '~shared/api/generellbehandling'
 import { hentSakOgNavigerTilSaksoversikt } from '~components/generellbehandling/KravpakkeUtland'
 
-import { isFailure, isSuccess } from '~shared/api/apiUtils'
+import { isSuccess } from '~shared/api/apiUtils'
+import { isFailureHandler } from '~shared/api/IsFailureHandler'
 
 export const SendtilAttesteringModal = ({
   utlandsBehandling,
@@ -45,12 +45,10 @@ export const SendtilAttesteringModal = ({
           {isSuccess(sendTilAttesteringStatus) && (
             <Alert variant="success">Behandlingen ble sendt til attestering</Alert>
           )}
-          {isFailure(sendTilAttesteringStatus) && (
-            <ApiErrorAlert>
-              Klarte ikke å sende til attestering kravpakke utland. Prøv igjen senere.{' '}
-              {sendTilAttesteringStatus.error.detail}
-            </ApiErrorAlert>
-          )}
+          {isFailureHandler({
+            apiResult: sendTilAttesteringStatus,
+            errorMessage: 'Klarte ikke å sende til attestering kravpakke utland. Prøv igjen senere.',
+          })}
         </Modal.Footer>
       </Modal>
     </>

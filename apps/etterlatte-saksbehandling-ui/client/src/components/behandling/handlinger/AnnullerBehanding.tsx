@@ -12,7 +12,8 @@ import { ExclamationmarkTriangleFillIcon, XMarkIcon } from '@navikt/aksel-icons'
 import styled from 'styled-components'
 import { FlexRow } from '~shared/styled'
 
-import { isFailure, isPending } from '~shared/api/apiUtils'
+import { isPending } from '~shared/api/apiUtils'
+import { isFailureHandler } from '~shared/api/IsFailureHandler'
 
 export default function AnnullerBehandling() {
   const navigate = useNavigate()
@@ -94,8 +95,7 @@ export default function AnnullerBehandling() {
               Ja, avbryt {formaterBehandlingstype(behandling!!.behandlingType).toLowerCase()}
             </Button>
           </FlexRow>
-
-          {isFailure(status) && <Alert variant="error">Det oppsto en feil ved avbryting av behandlingen.</Alert>}
+          {isFailureHandler({ apiResult: status, errorMessage: 'Det oppsto en feil ved avbryting av behandlingen.' })}
         </Modal.Footer>
       </Modal>
     </>

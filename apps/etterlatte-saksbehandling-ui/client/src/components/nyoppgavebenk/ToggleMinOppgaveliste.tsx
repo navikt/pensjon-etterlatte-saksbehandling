@@ -6,14 +6,14 @@ import { MinOppgaveliste } from '~components/nyoppgavebenk/minoppgaveliste/MinOp
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentGosysOppgaver, hentOppgaver, OppgaveDTO } from '~shared/api/oppgaver'
 import Spinner from '~shared/Spinner'
-import { ApiErrorAlert } from '~ErrorBoundary'
 import styled from 'styled-components'
 import { FilterRad } from '~components/nyoppgavebenk/FilterRad'
 import { Filter, filtrerOppgaver, initialFilter } from '~components/nyoppgavebenk/Oppgavelistafiltre'
 import { useAppSelector } from '~store/Store'
 import { Container } from '~shared/styled'
 
-import { isFailure, isPending, isSuccess } from '~shared/api/apiUtils'
+import { isPending, isSuccess } from '~shared/api/apiUtils'
+import { isFailureHandler } from '~shared/api/IsFailureHandler'
 
 type OppgavelisteToggle = 'Oppgavelista' | 'MinOppgaveliste'
 
@@ -92,8 +92,14 @@ export const ToggleMinOppgaveliste = () => {
       </TabsWidth>
 
       {isPending(oppgaver) && <Spinner visible={true} label="Henter nye oppgaver" />}
-      {isFailure(oppgaver) && <ApiErrorAlert>Kunne ikke hente oppgaver</ApiErrorAlert>}
-      {isFailure(gosysOppgaver) && <ApiErrorAlert>Kunne ikke hente gosys oppgaver</ApiErrorAlert>}
+      {isFailureHandler({
+        apiResult: oppgaver,
+        errorMessage: 'Kunne ikke hente oppgaver',
+      })}
+      {isFailureHandler({
+        apiResult: gosysOppgaver,
+        errorMessage: 'Kunne ikke hente gosys oppgaver',
+      })}
       {isSuccess(oppgaver) && (
         <>
           {oppgaveListeValg === 'Oppgavelista' && (

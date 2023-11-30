@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react'
 import { IBrev } from '~shared/types/Brev'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { Alert } from '@navikt/ds-react'
 import Spinner from '~shared/Spinner'
 import styled from 'styled-components'
 import { genererPdf } from '~shared/api/brev'
 
-import { isFailure, isPendingOrInitial, isSuccess } from '~shared/api/apiUtils'
+import { isPendingOrInitial, isSuccess } from '~shared/api/apiUtils'
+import { isFailureHandler } from '~shared/api/IsFailureHandler'
 
 export default function ForhaandsvisningBrev({ brev }: { brev: IBrev }) {
   const [fileURL, setFileURL] = useState<string>()
@@ -31,11 +31,10 @@ export default function ForhaandsvisningBrev({ brev }: { brev: IBrev }) {
     <Container>
       {isPendingOrInitial(pdf) && <Spinner visible={true} label="Klargjør forhåndsvisning av PDF ..." />}
       {isSuccess(pdf) && !!fileURL && <PdfViewer src={`${fileURL}#toolbar=0`} />}
-      {isFailure(pdf) && (
-        <Alert variant="error">
-          En feil har oppstått ved henting av PDF: <code>{JSON.stringify(pdf.error)}</code>
-        </Alert>
-      )}
+      {isFailureHandler({
+        apiResult: pdf,
+        errorMessage: 'En feil har oppstått ved henting av PDF',
+      })}
     </Container>
   )
 }

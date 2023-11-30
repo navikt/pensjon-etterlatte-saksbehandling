@@ -19,6 +19,7 @@ import { FieldOrNull } from '~shared/types/util'
 import { Feilmelding, VurderingWrapper } from '~components/klage/styled'
 import { kanVurdereUtfall } from '~components/klage/stegmeny/KlageStegmeny'
 import { isFailure, isPending, isPendingOrInitial, mapSuccess } from '~shared/api/apiUtils'
+import { isFailureHandler } from '~shared/api/IsFailureHandler'
 
 // Vi bruker kun id'en til vedtaket i skjemadata, og transformerer fram / tilbake før sending / lasting
 type FilledFormDataFormkrav = Omit<Formkrav, 'vedtaketKlagenGjelder'> & { vedtaketKlagenGjelderId: null | string }
@@ -216,12 +217,12 @@ export function KlageFormkrav() {
           </Button>
         </FlexRow>
 
-        {isFailure(lagreFormkravStatus) ? (
-          <ApiErrorAlert>
-            Kunne ikke lagre vurderingen av formkrav på grunn av en feil. Last siden på nytt og prøv igjen. Meld sak
-            hvis problemet vedvarer.
-          </ApiErrorAlert>
-        ) : null}
+        {isFailureHandler({
+          apiResult: lagreFormkravStatus,
+          errorMessage:
+            'Kunne ikke lagre vurderingen av formkrav på grunn av en feil. Last siden på nytt og prøv igjen. Meld sak\n' +
+            '            hvis problemet vedvarer.',
+        })}
       </form>
     </Content>
   )

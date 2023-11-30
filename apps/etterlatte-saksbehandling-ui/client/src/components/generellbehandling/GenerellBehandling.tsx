@@ -11,7 +11,8 @@ import { StatusBar } from '~shared/statusbar/Statusbar'
 import { getPerson } from '~shared/api/grunnlag'
 import { hentSak } from '~shared/api/sak'
 
-import { isFailure, isSuccess, mapApiResult } from '~shared/api/apiUtils'
+import { isSuccess, mapApiResult } from '~shared/api/apiUtils'
+import { isFailureHandler } from '~shared/api/IsFailureHandler'
 
 const GenerellBehandling = () => {
   const { generellbehandlingId } = useParams()
@@ -46,9 +47,10 @@ const GenerellBehandling = () => {
         case 'KRAVPAKKE_UTLAND':
           return (
             <>
-              {isFailure(hentSakStatus) && (
-                <ApiErrorAlert>Vi klarte ikke å hente sak og derfor vil navn baren være borte</ApiErrorAlert>
-              )}
+              {isFailureHandler({
+                apiResult: hentSakStatus,
+                errorMessage: 'Vi klarte ikke å hente sak og derfor vil navn baren være borte',
+              })}
               <StatusBar result={personStatus} />
               <KravpakkeUtland
                 utlandsBehandling={generellBehandling as Generellbehandling & { innhold: KravpakkeUtland | null }}

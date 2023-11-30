@@ -17,7 +17,8 @@ import { VilkaarVurdertInformasjon } from '~components/behandling/vilkaarsvurder
 import Spinner from '~shared/Spinner'
 import { AGreen500 } from '@navikt/ds-tokens/dist/tokens'
 
-import { isFailure, isPending, isSuccess } from '~shared/api/apiUtils'
+import { mapApiResult } from '~shared/api/apiUtils'
+import { ApiErrorAlert } from '~ErrorBoundary'
 
 type Props = {
   hendelser: Grunnlagsendringshendelse[]
@@ -91,33 +92,38 @@ const InstitusjonsoppholdBegrunnelse = ({ id }: { id: string }) => {
 
   return (
     <>
-      {isPending(begrunnelse) && <Spinner visible={true} label="Henter vurdering" />}
-      {isFailure(begrunnelse) && <p>Fant ingen begrunnelse for hendelsen</p>}
-      {isSuccess(begrunnelse) && (
-        <div>
-          <Heading spacing size="small" level="3">
-            Institusjonsoppholdshendelsen er vurdert
-            <CheckmarkCircleIcon color={AGreen500} aria-hidden="true" />
-          </Heading>
-          <p>
-            Er dette en institusjon som kan gi reduksjon av ytelsen? - <b>{begrunnelse.data.kanGiReduksjonAvYtelse}</b>
-          </p>
-          <p>Kommentar - {begrunnelse.data.kanGiReduksjonAvYtelseBegrunnelse}</p>
-          <p>
-            Er oppholdet forventet å vare lenger enn innleggelsesmåned + tre måneder? -
-            <b>{begrunnelse.data.forventetVarighetMerEnn3Maaneder}</b>
-          </p>
-          <p>Kommentar - {begrunnelse.data.forventetVarighetMerEnn3MaanederBegrunnelse}</p>
-          <VilkaarVurdertInformasjon>
-            <Detail>Manuelt av {begrunnelse.data.saksbehandler.ident}</Detail>
-            <Detail>
-              Dato{' '}
-              {begrunnelse.data.saksbehandler.tidspunkt
-                ? formaterDatoMedTidspunkt(new Date(begrunnelse.data.saksbehandler.tidspunkt))
-                : '-'}
-            </Detail>
-          </VilkaarVurdertInformasjon>
-        </div>
+      {mapApiResult(
+        begrunnelse,
+        <Spinner visible={true} label="Henter vurdering" />,
+        () => (
+          <ApiErrorAlert>Fant ingen begrunnelse for hendelsen</ApiErrorAlert>
+        ),
+        (begrunnelse) => (
+          <div>
+            <Heading spacing size="small" level="3">
+              Institusjonsoppholdshendelsen er vurdert
+              <CheckmarkCircleIcon color={AGreen500} aria-hidden="true" />
+            </Heading>
+            <p>
+              Er dette en institusjon som kan gi reduksjon av ytelsen? - <b>{begrunnelse.kanGiReduksjonAvYtelse}</b>
+            </p>
+            <p>Kommentar - {begrunnelse.kanGiReduksjonAvYtelseBegrunnelse}</p>
+            <p>
+              Er oppholdet forventet å vare lenger enn innleggelsesmåned + tre måneder? -
+              <b>{begrunnelse.forventetVarighetMerEnn3Maaneder}</b>
+            </p>
+            <p>Kommentar - {begrunnelse.forventetVarighetMerEnn3MaanederBegrunnelse}</p>
+            <VilkaarVurdertInformasjon>
+              <Detail>Manuelt av {begrunnelse.saksbehandler.ident}</Detail>
+              <Detail>
+                Dato{' '}
+                {begrunnelse.saksbehandler.tidspunkt
+                  ? formaterDatoMedTidspunkt(new Date(begrunnelse.saksbehandler.tidspunkt))
+                  : '-'}
+              </Detail>
+            </VilkaarVurdertInformasjon>
+          </div>
+        )
       )}
     </>
   )

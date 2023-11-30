@@ -43,7 +43,8 @@ import { SendtilAttesteringModal } from '~components/generellbehandling/SendtilA
 import { NavigateFunction } from 'react-router/dist/lib/hooks'
 import { GenerellbehandlingSidemeny } from '~components/generellbehandling/GenerellbehandlingSidemeny'
 
-import { isFailure, isPending, isPendingOrInitial, isSuccess, mapApiResult } from '~shared/api/apiUtils'
+import { isPending, isPendingOrInitial, isSuccess, mapApiResult } from '~shared/api/apiUtils'
+import { isFailureHandler } from '~shared/api/IsFailureHandler'
 
 const TextFieldBegrunnelse = styled(Textarea).attrs({ size: 'medium' })`
   max-width: 40rem;
@@ -172,7 +173,10 @@ const KravpakkeUtland = (props: { utlandsBehandling: Generellbehandling & { innh
                       </InfoWrapper>
                     </>
                   )}
-                  {isFailure(avdoedeStatus) && <ApiErrorAlert>Klarte ikke å hente informasjon om avdøed</ApiErrorAlert>}
+                  {isFailureHandler({
+                    apiResult: avdoedeStatus,
+                    errorMessage: 'Klarte ikke å hente informasjon om avdøed',
+                  })}
                   {isPendingOrInitial(avdoedeStatus) && (
                     <Spinner visible={true} label="Henter opplysninger om avdøde" />
                   )}
@@ -435,9 +439,10 @@ const KravpakkeUtland = (props: { utlandsBehandling: Generellbehandling & { innh
               value={notater}
               onChange={(e) => setNotater(e.target.value)}
             />
-            {isFailure(putOppdaterGenerellBehandlingStatus) && (
-              <ApiErrorAlert>Kunne ikke oppdatere generell behandling utland</ApiErrorAlert>
-            )}
+            {isFailureHandler({
+              apiResult: putOppdaterGenerellBehandlingStatus,
+              errorMessage: 'Kunne ikke oppdatere generell behandling utland',
+            })}
             {isSuccess(putOppdaterGenerellBehandlingStatus) && (
               <Alert style={{ margin: '1rem', width: '20rem' }} variant="success">
                 Behandlingen er oppdatert

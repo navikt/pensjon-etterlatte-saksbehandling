@@ -6,11 +6,11 @@ import { Person } from '~components/person/Person'
 import useInnloggetSaksbehandler from './shared/hooks/useInnloggetSaksbehandler'
 import nb from 'date-fns/locale/nb'
 import { registerLocale } from 'react-datepicker'
-import ErrorBoundary, { ApiErrorAlert } from '~ErrorBoundary'
+import ErrorBoundary from '~ErrorBoundary'
 import NyttBrev from '~components/person/brev/NyttBrev'
 import ScrollToTop from '~ScrollTop'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { useEffect } from 'react'
+import React, { useEffect } from 'react'
 import { ConfigContext, hentClientConfig } from '~clientConfig'
 import { useAppDispatch } from '~store/Store'
 import { settAppversion } from '~store/reducers/AppconfigReducer'
@@ -24,7 +24,8 @@ import GenerellBehandling from '~components/generellbehandling/GenerellBehandlin
 import ManuellBehandling from '~components/manuelbehandling/ManuellBehandling'
 import BehandleJournalfoeringOppgave from '~components/person/journalfoeringsoppgave/BehandleJournalfoeringOppgave'
 
-import { isFailure, isSuccess } from '~shared/api/apiUtils'
+import { isSuccess } from '~shared/api/apiUtils'
+import { isFailureHandler } from '~shared/api/IsFailureHandler'
 
 const FEATURE_TOGGLE_KAN_BRUKE_GENERELL_BEHANDLING = 'pensjon-etterlatte.kan-bruke-generell-behandling'
 
@@ -73,8 +74,10 @@ function App() {
           </BrowserRouter>
         </div>
       )}
-
-      {isFailure(hentConfigStatus) && <ApiErrorAlert>Kunne ikke hente konfigurasjonsverdier</ApiErrorAlert>}
+      {isFailureHandler({
+        apiResult: hentConfigStatus,
+        errorMessage: 'Kunne ikke hente konfigurasjonsverdier',
+      })}
     </>
   )
 }

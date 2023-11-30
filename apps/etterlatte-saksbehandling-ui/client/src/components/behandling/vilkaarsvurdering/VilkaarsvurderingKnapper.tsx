@@ -3,7 +3,6 @@ import { Button } from '@navikt/ds-react'
 import { useBehandlingRoutes } from '../BehandlingRoutes'
 import { useVedtaksResultat } from '../useVedtaksResultat'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { ApiErrorAlert } from '~ErrorBoundary'
 import { upsertVedtak } from '~shared/api/vedtaksvurdering'
 import { oppdaterStatus } from '~shared/api/vilkaarsvurdering'
 import { useAppDispatch } from '~store/Store'
@@ -11,7 +10,8 @@ import { oppdaterBehandlingsstatus } from '~store/reducers/BehandlingReducer'
 import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 import { BehandlingHandlingKnapper } from '~components/behandling/handlinger/BehandlingHandlingKnapper'
 
-import { isFailure, isPending } from '~shared/api/apiUtils'
+import { isPending } from '~shared/api/apiUtils'
+import { isFailureHandler } from '~shared/api/IsFailureHandler'
 
 export const VilkaarsvurderingKnapper = (props: { behandlingId: string }) => {
   const { next, goto } = useBehandlingRoutes()
@@ -43,10 +43,14 @@ export const VilkaarsvurderingKnapper = (props: { behandlingId: string }) => {
 
   return (
     <>
-      {isFailure(vedtakResult) && (
-        <ApiErrorAlert>Kunne ikke opprette eller oppdatere vedtak, prøv igjen senere</ApiErrorAlert>
-      )}
-      {isFailure(oppdaterStatusResult) && <ApiErrorAlert>{oppdaterStatusResult.error.detail}</ApiErrorAlert>}
+      {isFailureHandler({
+        apiResult: vedtakResult,
+        errorMessage: 'Kunne ikke opprette eller oppdatere vedtak, prøv igjen senere',
+      })}
+      {isFailureHandler({
+        apiResult: oppdaterStatusResult,
+        errorMessage: 'Kunne ikke oppdatere status',
+      })}
       <BehandlingHandlingKnapper>
         {(() => {
           switch (vedtaksresultat) {

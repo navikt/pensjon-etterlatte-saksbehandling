@@ -10,7 +10,6 @@ import {
   opprettEllerEndreBeregning,
 } from '~shared/api/beregning'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { ApiErrorAlert } from '~ErrorBoundary'
 import {
   IBehandlingReducer,
   oppdaterBehandlingsstatus,
@@ -33,7 +32,8 @@ import Spinner from '~shared/Spinner'
 import BeregningsgrunnlagMetode from './BeregningsgrunnlagMetode'
 import { handlinger } from '~components/behandling/handlinger/typer'
 
-import { isFailure, isPending, isSuccess } from '~shared/api/apiUtils'
+import { isPending, isSuccess } from '~shared/api/apiUtils'
+import { isFailureHandler } from '~shared/api/IsFailureHandler'
 
 const BeregningsgrunnlagOmstillingsstoenad = (props: { behandling: IBehandlingReducer }) => {
   const { behandling } = props
@@ -109,10 +109,10 @@ const BeregningsgrunnlagOmstillingsstoenad = (props: { behandling: IBehandlingRe
           />
         )}
         <Spinner visible={isPending(beregningsgrunnlag)} label="Henter beregningsgrunnlag" />
-        {isFailure(beregningsgrunnlag) && <ApiErrorAlert>Beregningsgrunnlag kan ikke hentes</ApiErrorAlert>}
+        {isFailureHandler({ apiResult: beregningsgrunnlag, errorMessage: 'Beregningsgrunnlag kan ikke hentes' })}
       </>
-      {isFailure(endreBeregning) && <ApiErrorAlert>Kunne ikke opprette ny beregning</ApiErrorAlert>}
-      {isFailure(lagreBeregningsgrunnlagOMS) && <ApiErrorAlert>Kunne ikke lagre beregningsgrunnlag</ApiErrorAlert>}
+      {isFailureHandler({ apiResult: endreBeregning, errorMessage: 'Kunne ikke opprette ny beregning' })}
+      {isFailureHandler({ apiResult: lagreBeregningsgrunnlagOMS, errorMessage: 'lagreBeregningsgrunnlagOMS' })}
 
       <Border />
 

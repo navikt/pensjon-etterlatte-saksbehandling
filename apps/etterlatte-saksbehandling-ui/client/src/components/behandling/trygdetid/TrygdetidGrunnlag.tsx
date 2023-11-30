@@ -15,7 +15,7 @@ import styled from 'styled-components'
 import { useParams } from 'react-router-dom'
 import { DatoVelger, formatDateToLocaleDateOrEmptyString } from '~shared/DatoVelger'
 
-import { isErrorWithCode, isFailure, isPending } from '~shared/api/apiUtils'
+import { isFailureWithCode, isFailure, isPending } from '~shared/api/apiUtils'
 
 type Props = {
   eksisterendeGrunnlag: ITrygdetidGrunnlag | undefined
@@ -203,7 +203,7 @@ export const TrygdetidGrunnlag: React.FC<Props> = ({
 
       {isFailure(trygdetidgrunnlagStatus) && (
         <ApiErrorAlert>
-          {isErrorWithCode(trygdetidgrunnlagStatus, 409)
+          {isFailureWithCode(trygdetidgrunnlagStatus, 409)
             ? 'Trygdetidsperioder kan ikke være overlappende'
             : 'En feil har oppstått'}
         </ApiErrorAlert>

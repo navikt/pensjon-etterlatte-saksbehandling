@@ -1,4 +1,4 @@
-import { Alert, ErrorMessage, Heading } from '@navikt/ds-react'
+import { Alert, Heading } from '@navikt/ds-react'
 import { Content, ContentHeader, FlexRow } from '~shared/styled'
 import { HeadingWrapper } from '~components/behandling/soeknadsoversikt/styled'
 import { SendTilAttesteringModal } from '~components/behandling/handlinger/sendTilAttesteringModal'
@@ -16,7 +16,8 @@ import RedigerbartBrev from '~components/behandling/brev/RedigerbartBrev'
 import { getVergeadresseFraGrunnlag } from '~shared/api/grunnlag'
 import { VergeFeilhaandtering } from '~components/person/VergeFeilhaandtering'
 
-import { isFailure, isPending, isPendingOrInitial } from '~shared/api/apiUtils'
+import { isPending, isPendingOrInitial } from '~shared/api/apiUtils'
+import { isFailureHandler } from '~shared/api/IsFailureHandler'
 
 export function TilbakekrevingBrev({ tilbakekreving }: { tilbakekreving: TilbakekrevingBehandling }) {
   const kanAttesteres = [
@@ -86,9 +87,14 @@ export function TilbakekrevingBrev({ tilbakekreving }: { tilbakekreving: Tilbake
         </Sidebar>
 
         {vedtaksbrev && <RedigerbartBrev brev={vedtaksbrev} kanRedigeres={true} />}
-
-        {isFailure(hentBrevStatus) && <ErrorMessage>Feil ved henting av brev</ErrorMessage>}
-        {isFailure(opprettBrevStatus) && <ErrorMessage>Kunne ikke opprette brev</ErrorMessage>}
+        {isFailureHandler({
+          apiResult: hentBrevStatus,
+          errorMessage: 'Feil ved henting av brev',
+        })}
+        {isFailureHandler({
+          apiResult: opprettBrevStatus,
+          errorMessage: 'Kunne ikke opprette brev',
+        })}
         {VergeFeilhaandtering(vergeadresse)}
       </BrevContent>
       <FlexRow justify="center">

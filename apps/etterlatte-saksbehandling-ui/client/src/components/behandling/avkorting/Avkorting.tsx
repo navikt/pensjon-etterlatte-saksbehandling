@@ -12,7 +12,7 @@ import { useAppDispatch } from '~store/Store'
 import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
 
-import { isFailure, isPendingOrInitial, isSuccess } from '~shared/api/apiUtils'
+import { mapApiResult } from '~shared/api/apiUtils'
 
 export const Avkorting = (props: { behandling: IBehandlingReducer }) => {
   const behandling = props.behandling
@@ -35,13 +35,20 @@ export const Avkorting = (props: { behandling: IBehandlingReducer }) => {
 
   return (
     <AvkortingWrapper>
-      {isSuccess(avkortingStatus) && (
-        <AvkortingInntekt
-          behandling={behandling}
-          avkortingGrunnlag={avkorting == null ? [] : avkorting.avkortingGrunnlag}
-          setAvkorting={setAvkorting}
-          redigerbar={redigerbar}
-        />
+      {mapApiResult(
+        avkortingStatus,
+        <Spinner visible label="Henter avkorting" />,
+        () => (
+          <ApiErrorAlert>En feil har oppstått</ApiErrorAlert>
+        ),
+        () => (
+          <AvkortingInntekt
+            behandling={behandling}
+            avkortingGrunnlag={avkorting == null ? [] : avkorting.avkortingGrunnlag}
+            setAvkorting={setAvkorting}
+            redigerbar={redigerbar}
+          />
+        )
       )}
       {avkorting && (
         <YtelseEtterAvkorting
@@ -51,8 +58,6 @@ export const Avkorting = (props: { behandling: IBehandlingReducer }) => {
           setAvkorting={setAvkorting}
         />
       )}
-      {isPendingOrInitial(avkortingStatus) && <Spinner visible label="Henter avkorting" />}
-      {isFailure(avkortingStatus) && <ApiErrorAlert>En feil har oppstått</ApiErrorAlert>}
     </AvkortingWrapper>
   )
 }

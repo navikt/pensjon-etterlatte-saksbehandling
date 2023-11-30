@@ -7,7 +7,8 @@ import { GeneriskModal } from '~shared/modal/modal'
 import styled from 'styled-components'
 import { RedigerSaksbehandlerProps } from '~components/nyoppgavebenk/tildeling/RedigerSaksbehandler'
 
-import { isFailure, isInitial, isPending, isSuccess } from '~shared/api/apiUtils'
+import { isSuccess, mapAllApiResult } from '~shared/api/apiUtils'
+import { ApiErrorAlert } from '~ErrorBoundary'
 
 const SaksbehandlerWrapper = styled(Label)`
   padding: 12px 20px;
@@ -27,7 +28,9 @@ export const FjernSaksbehandler = (props: RedigerSaksbehandlerProps) => {
 
   return (
     <>
-      {isInitial(fjernSaksbehandlerSvar) && (
+      {mapAllApiResult(
+        fjernSaksbehandlerSvar,
+        <Loader size="small" title="Fjerner saksbehandler" />,
         <>
           {erRedigerbar ? (
             <Button
@@ -52,19 +55,15 @@ export const FjernSaksbehandler = (props: RedigerSaksbehandlerProps) => {
             setModalisOpen={setModalIsOpen}
             open={modalIsOpen}
           />
-        </>
-      )}
-
-      {isPending(fjernSaksbehandlerSvar) && <Loader size="small" title="Fjerner saksbehandler" />}
-      {isFailure(fjernSaksbehandlerSvar) && (
-        <Alert variant="error" size="small">
-          Feil ved fjerning av saksbehandling
-        </Alert>
-      )}
-      {isSuccess(fjernSaksbehandlerSvar) && (
-        <Alert variant="success" size="small">
-          Du er fjernet som saksbehandler
-        </Alert>
+        </>,
+        () => (
+          <ApiErrorAlert size="small">Feil ved fjerning av saksbehandling</ApiErrorAlert>
+        ),
+        () => (
+          <Alert variant="success" size="small">
+            Du er fjernet som saksbehandler
+          </Alert>
+        )
       )}
     </>
   )

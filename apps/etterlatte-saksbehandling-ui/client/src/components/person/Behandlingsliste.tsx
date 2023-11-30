@@ -7,7 +7,6 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import Spinner from '~shared/Spinner'
 import { hentGenerelleBehandlingForSak } from '~shared/api/generellbehandling'
 import { Generellbehandling } from '~shared/types/Generellbehandling'
-import { ApiErrorAlert } from '~ErrorBoundary'
 import {
   behandlingStatusTilLesbartnavn,
   genbehandlingTypeTilLesbartNavn,
@@ -17,7 +16,8 @@ import {
 } from '~components/person/behandlingsslistemappere'
 import { VedtakKolonner } from '~components/person/VedtakKoloner'
 
-import { isFailure, isPending, isSuccess } from '~shared/api/apiUtils'
+import { isPending, isSuccess } from '~shared/api/apiUtils'
+import { isFailureHandler } from '~shared/api/IsFailureHandler'
 
 const BehandlingPanel = styled.div`
   margin: 3rem 0;
@@ -121,9 +121,10 @@ export const Behandlingsliste = ({ behandlinger, sakId }: { behandlinger: IBehan
         </Table.Body>
       </Table>
       {isPending(generellbehandlingStatus) && <Spinner visible={true} label="Henter generelle behandlinger" />}
-      {isFailure(generellbehandlingStatus) && (
-        <ApiErrorAlert>Vi klarte ikke å hente generelle behandligner</ApiErrorAlert>
-      )}
+      {isFailureHandler({
+        apiResult: generellbehandlingStatus,
+        errorMessage: 'Vi klarte ikke å hente generelle behandligner',
+      })}
     </BehandlingPanel>
   )
 }

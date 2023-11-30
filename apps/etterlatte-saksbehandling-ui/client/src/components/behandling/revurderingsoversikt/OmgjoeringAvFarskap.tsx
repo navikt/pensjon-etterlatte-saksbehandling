@@ -16,7 +16,8 @@ import styled from 'styled-components'
 import { NavnInput, standardnavn } from '~components/behandling/revurderingsoversikt/NavnInput'
 import { Revurderingsbegrunnelse } from '~components/behandling/revurderingsoversikt/Revurderingsbegrunnelse'
 
-import { isFailure, isPending, isSuccess } from '~shared/api/apiUtils'
+import { isPending, isSuccess } from '~shared/api/apiUtils'
+import { isFailureHandler } from '~shared/api/IsFailureHandler'
 
 export const OmgjoeringAvFarskap = (props: { behandling: IDetaljertBehandling }) => {
   const { behandling } = props
@@ -81,7 +82,10 @@ export const OmgjoeringAvFarskap = (props: { behandling: IDetaljertBehandling })
             Lagre
           </Button>
           {isSuccess(lagrestatus) ? <span>Lagret!</span> : null}
-          {isFailure(lagrestatus) ? <ApiErrorAlert>Kunne ikke lagre navn på far</ApiErrorAlert> : null}
+          {isFailureHandler({
+            apiResult: lagrestatus,
+            errorMessage: 'Kunne ikke lagre navn på far',
+          })}
           {feilmelding ? <ApiErrorAlert>{feilmelding}</ApiErrorAlert> : null}
         </SkjemaWrapper>
       ) : (

@@ -7,13 +7,13 @@ import { grunnlagsendringsTittel, stoetterRevurderingAvHendelse } from '~compone
 import { Alert, BodyShort, Button, Heading, Link, Loader, Modal, Table, Textarea } from '@navikt/ds-react'
 import { formaterStringDato } from '~utils/formattering'
 import { HendelseBeskrivelse } from '~components/person/uhaandtereHendelser/HendelseBeskrivelse'
-import { ApiErrorAlert } from '~ErrorBoundary'
 import styled from 'styled-components'
 import InstitusjonsoppholdVurderingBegrunnelse from '~components/person/uhaandtereHendelser/InstitusjonsoppholdVurderingBegrunnelse'
 import { ArrowsCirclepathIcon, XMarkIcon } from '@navikt/aksel-icons'
 import { ButtonGroup } from '~components/person/VurderHendelseModal'
 
-import { isFailure, isPending } from '~shared/api/apiUtils'
+import { isPending } from '~shared/api/apiUtils'
+import { isFailureHandler } from '~shared/api/IsFailureHandler'
 
 const UhaandtertHendelse = (props: {
   hendelse: Grunnlagsendringshendelse
@@ -139,7 +139,10 @@ const UhaandtertHendelse = (props: {
                   </>
                 )}
                 {isPending(res) && <Loader />}
-                {isFailure(res) && <ApiErrorAlert>Vi kunne ikke lukke hendelsen</ApiErrorAlert>}
+                {isFailureHandler({
+                  apiResult: res,
+                  errorMessage: 'Vi kunne ikke lukke hendelsen',
+                })}
               </Modal.Body>
             </Modal>
           </div>

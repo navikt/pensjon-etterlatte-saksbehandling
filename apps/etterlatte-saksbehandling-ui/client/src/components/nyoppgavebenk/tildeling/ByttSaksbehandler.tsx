@@ -8,7 +8,8 @@ import { GeneriskModal } from '~shared/modal/modal'
 import styled from 'styled-components'
 import { RedigerSaksbehandlerProps } from '~components/nyoppgavebenk/tildeling/RedigerSaksbehandler'
 
-import { isFailure, isInitial, isPending, isSuccess } from '~shared/api/apiUtils'
+import { isSuccess, mapAllApiResult } from '~shared/api/apiUtils'
+import { ApiErrorAlert } from '~ErrorBoundary'
 
 const SaksbehandlerWrapper = styled(Label)`
   padding: 12px 20px;
@@ -29,7 +30,9 @@ export const ByttSaksbehandler = (props: RedigerSaksbehandlerProps) => {
 
   return (
     <>
-      {isInitial(byttSaksbehandlerSvar) && (
+      {mapAllApiResult(
+        byttSaksbehandlerSvar,
+        <Loader size="small" title="Bytter saksbehandler" />,
         <>
           {erRedigerbar ? (
             <Button
@@ -60,19 +63,15 @@ export const ByttSaksbehandler = (props: RedigerSaksbehandlerProps) => {
             setModalisOpen={setModalIsOpen}
             open={modalIsOpen}
           />
-        </>
-      )}
-
-      {isPending(byttSaksbehandlerSvar) && <Loader size="small" title="Bytter saksbehandler" />}
-      {isFailure(byttSaksbehandlerSvar) && (
-        <Alert variant="error" size="small">
-          Kunne ikke bytte saksbehandler fra oppgaven
-        </Alert>
-      )}
-      {isSuccess(byttSaksbehandlerSvar) && (
-        <Alert variant="success" size="small">
-          Saksbehandler er endret og oppgaven ble lagt på din oppgaveliste
-        </Alert>
+        </>,
+        () => (
+          <ApiErrorAlert size="small">Kunne ikke bytte saksbehandler fra oppgaven</ApiErrorAlert>
+        ),
+        () => (
+          <Alert variant="success" size="small">
+            Saksbehandler er endret og oppgaven ble lagt på din oppgaveliste
+          </Alert>
+        )
       )}
     </>
   )

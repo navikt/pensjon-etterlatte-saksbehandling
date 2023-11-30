@@ -5,7 +5,8 @@ import { hentSakOgNavigerTilSaksoversikt } from '~components/generellbehandling/
 import { useNavigate } from 'react-router-dom'
 import { Generellbehandling, KravpakkeUtland } from '~shared/types/Generellbehandling'
 
-import { isFailure, isPending, isSuccess } from '~shared/api/apiUtils'
+import { isPending, isSuccess } from '~shared/api/apiUtils'
+import { isFailureHandler } from '~shared/api/IsFailureHandler'
 
 export const Attesteringmodal = (props: {
   utlandsBehandling: Generellbehandling & { innhold: KravpakkeUtland | null }
@@ -27,7 +28,10 @@ export const Attesteringmodal = (props: {
         Godkjenn kravpakken
       </Button>
       {isSuccess(attesterStatus) && <Alert variant="success">Behandlingen ble attestert</Alert>}
-      {isFailure(attesterStatus) && <Alert variant="error">Behandlingen ble ikke attestert</Alert>}
+      {isFailureHandler({
+        apiResult: attesterStatus,
+        errorMessage: 'Behandlingen ble ikke attestert',
+      })}
     </>
   )
 }

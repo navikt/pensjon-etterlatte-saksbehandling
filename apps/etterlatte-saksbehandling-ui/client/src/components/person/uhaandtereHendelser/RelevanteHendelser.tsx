@@ -15,7 +15,8 @@ import Spinner from '~shared/Spinner'
 import { ISak } from '~shared/types/sak'
 import { hentStoettedeRevurderinger } from '~shared/api/revurdering'
 
-import { isFailure, isPending, isSuccess } from '~shared/api/apiUtils'
+import { isSuccess, mapApiResult } from '~shared/api/apiUtils'
+import { ApiErrorAlert } from '~ErrorBoundary'
 
 type Props = {
   sak: ISak
@@ -70,66 +71,74 @@ export default function RelevanteHendelser(props: Props) {
         <Heading size="medium" spacing>
           Nye hendelser
         </Heading>
+        {mapApiResult(
+          hendelserStatus,
+          <Spinner visible label="Laster hendelser ..." />,
+          (apierror) => (
+            <ApiErrorAlert>{JSON.stringify(apierror)}</ApiErrorAlert>
+          ),
+          () =>
+            relevanteHendelser.length ? (
+              <>
+                <Table style={{ marginBottom: '3rem' }}>
+                  <Table.Header>
+                    <Table.Row>
+                      <Table.HeaderCell />
+                      <Table.HeaderCell>Hendelse</Table.HeaderCell>
+                      <Table.HeaderCell>Dato</Table.HeaderCell>
+                      <Table.HeaderCell></Table.HeaderCell>
+                    </Table.Row>
+                  </Table.Header>
+                  <Table.Body>
+                    {relevanteHendelser.map((hendelse) => (
+                      <UhaandtertHendelse
+                        key={hendelse.id}
+                        hendelse={hendelse}
+                        harAapenRevurdering={harAapenRevurdering}
+                        startRevurdering={startRevurdering}
+                        revurderinger={
+                          isSuccess(muligeRevurderingAarsakerStatus) ? muligeRevurderingAarsakerStatus.data : []
+                        }
+                      />
+                    ))}
+                  </Table.Body>
+                </Table>
 
-        {isFailure(hendelserStatus) && <Alert variant="error">{JSON.stringify(hendelserStatus.error)}</Alert>}
-        {isPending(hendelserStatus) && <Spinner visible label="Laster hendelser ..." />}
-        {isSuccess(hendelserStatus) &&
-          (relevanteHendelser.length ? (
-            <>
-              <Table style={{ marginBottom: '3rem' }}>
-                <Table.Header>
-                  <Table.Row>
-                    <Table.HeaderCell />
-                    <Table.HeaderCell>Hendelse</Table.HeaderCell>
-                    <Table.HeaderCell>Dato</Table.HeaderCell>
-                    <Table.HeaderCell></Table.HeaderCell>
-                  </Table.Row>
-                </Table.Header>
-                <Table.Body>
-                  {relevanteHendelser.map((hendelse) => (
-                    <UhaandtertHendelse
-                      key={hendelse.id}
-                      hendelse={hendelse}
-                      harAapenRevurdering={harAapenRevurdering}
-                      startRevurdering={startRevurdering}
-                      revurderinger={
-                        isSuccess(muligeRevurderingAarsakerStatus) ? muligeRevurderingAarsakerStatus.data : []
-                      }
-                    />
-                  ))}
-                </Table.Body>
-              </Table>
-
-              <Alert variant="warning">
-                Ny hendelse som kan kreve revurdering. Vurder om det har konsekvens for ytelsen.
+                <Alert variant="warning">
+                  Ny hendelse som kan kreve revurdering. Vurder om det har konsekvens for ytelsen.
+                </Alert>
+              </>
+            ) : (
+              <Alert variant="info" inline>
+                Ingen nye hendelser
               </Alert>
-            </>
-          ) : (
-            <Alert variant="info" inline>
-              Ingen nye hendelser
-            </Alert>
-          ))}
+            )
+        )}
       </FnrTilNavnMapContext.Provider>
 
-      {isFailure(muligeRevurderingAarsakerStatus) && (
-        <Alert variant="error">En feil skjedde under kallet for å hente støttede revurderinger</Alert>
-      )}
-      {isPending(muligeRevurderingAarsakerStatus) && (
-        <Spinner visible label="Sjekker om det kan opprettes ny behandling ..." />
-      )}
-      {isSuccess(muligeRevurderingAarsakerStatus) && muligeRevurderingAarsakerStatus.data.length && (
-        <>
-          {valgtHendelse && (
-            <VurderHendelseModal
-              sakId={sak.id}
-              valgtHendelse={valgtHendelse}
-              open={visOpprettRevurderingsmodal}
-              setOpen={setVisOpprettRevurderingsmodal}
-              revurderinger={muligeRevurderingAarsakerStatus.data}
-            />
-          )}
-          <OpprettNyRevurdering revurderinger={muligeRevurderingAarsakerStatus.data} sakId={sak.id} />
-        </>
+      {mapApiResult(
+        muligeRevurderingAarsakerStatus,
+        <Spinner visible label="Sjekker om det kan opprettes ny behandling ..." />,
+        () => (
+          <ApiErrorAlert>En feil skjedde under kallet for å hente støttede revurderinger</ApiErrorAlert>
+        ),
+        (muligeRevurderingAarsakerStatus) =>
+          muligeRevurderingAarsakerStatus.length ? (
+            <>
+              {valgtHendelse && (
+                <VurderHendelseModal
+                  sakId={sak.id}
+                  valgtHendelse={valgtHendelse}
+                  open={visOpprettRevurderingsmodal}
+                  setOpen={setVisOpprettRevurderingsmodal}
+                  revurderinger={muligeRevurderingAarsakerStatus}
+                />
+              )}
+              <OpprettNyRevurdering revurderinger={muligeRevurderingAarsakerStatus} sakId={sak.id} />
+            </>
+          ) : (
+            <></>
+          )
       )}
 
       {isSuccess(hendelserStatus) && <HistoriskeHendelser hendelser={hendelserStatus.data[0].hendelser} />}

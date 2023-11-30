@@ -233,17 +233,10 @@ enum class AdressebeskyttelseGradering {
 
 fun List<AdressebeskyttelseGradering?>.hentPrioritertGradering() = this.filterNotNull().minOrNull() ?: AdressebeskyttelseGradering.UGRADERT
 
-fun hentRelevantVerge(soeker: List<VergemaalEllerFremtidsfullmakt>?): VergemaalEllerFremtidsfullmakt? {
-    val vergeListe = soeker ?: return null
-
-    val vergerMedRelevantOmfang =
-        vergeListe.filter {
-            it.vergeEllerFullmektig.omfang in alleVergeOmfangMedOekonomiskeInteresser
-        }
-    if (vergerMedRelevantOmfang.size != 1) {
-        return null
+fun hentRelevantVerge(vergeListe: List<VergemaalEllerFremtidsfullmakt>?): VergemaalEllerFremtidsfullmakt? {
+    return vergeListe?.firstOrNull {
+        it.vergeEllerFullmektig.omfang in alleVergeOmfangMedOekonomiskeInteresser
     }
-    return vergerMedRelevantOmfang.first()
 }
 
 private val alleVergeOmfangMedOekonomiskeInteresser =

@@ -2,7 +2,7 @@ import { PersongalleriSamsvar } from '~shared/types/grunnlag'
 import { Alert, BodyShort, Box, Heading } from '@navikt/ds-react'
 import React, { useEffect } from 'react'
 import styled from 'styled-components'
-import { PersonUtenIdent, relativPersonrolleTekst } from '~shared/types/Person'
+import { PersonNavn, PersonUtenIdent, relativPersonrolleTekst } from '~shared/types/Person'
 import { UstiletListe } from '~components/behandling/beregningsgrunnlag/soeskenjustering/Soeskenjustering'
 import { formaterKanskjeStringDatoMedFallback } from '~utils/formattering'
 import { useBehandling } from '~components/behandling/useBehandling'
@@ -11,9 +11,8 @@ import { hentPersongalleriSamsvar } from '~shared/api/grunnlag'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { SakType } from '~shared/types/sak'
-import { Navn } from '~shared/types/RevurderingInfo'
 
-function formaterKanskjeNavn(navn: Partial<Navn>) {
+function formaterKanskjeNavn(navn: Partial<PersonNavn>) {
   return [navn.fornavn, navn.mellomnavn, navn.etternavn].filter((navn) => navn !== undefined).join(' ')
 }
 
@@ -29,7 +28,7 @@ function PersonerUtenIdenterVisning(props: { saktype: SakType; personer: Array<P
         <Box background="surface-alt-3-subtle" paddingInline="4" key={index}>
           <UstiletListe>
             <li>Rolle: {relativPersonrolleTekst[saktype][person.rolle]}</li>
-            <li>Navn: {person.person.navn ? formaterKanskjeNavn(person.person.navn) : 'Ukjent'} </li>
+            <li>Navn: {person.person.navn ? formaterKanskjeNavn(person.person.navn) || 'Ukjent' : 'Ukjent'} </li>
             <li>Kjønn: {person.person.kjoenn ?? 'Ukjent'} </li>
             <li>Fødselsdato: {formaterKanskjeStringDatoMedFallback('Ukjent', person.person.foedselsdato)} </li>
             <li>Statsborgerskap: {person.person.statsborgerskap ?? 'Ukjent'}</li>

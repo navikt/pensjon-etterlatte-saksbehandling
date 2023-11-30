@@ -1,5 +1,6 @@
 package no.nav.etterlatte.grunnlag
 
+import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
@@ -20,17 +21,27 @@ import no.nav.etterlatte.grunnlag.klienter.PdlTjenesterKlientImpl
 import no.nav.etterlatte.grunnlag.klienter.PersondataKlient
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.grunnlag.Opplysning
 import no.nav.etterlatte.libs.common.grunnlag.Opplysningsbehov
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.pdl.OpplysningDTO
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.Person
+import no.nav.etterlatte.libs.common.person.VergeEllerFullmektig
+import no.nav.etterlatte.libs.common.person.VergemaalEllerFremtidsfullmakt
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import org.junit.jupiter.api.Test
+import java.util.UUID
 
 class GrunnlagHenterTest {
     private val pdltjenesterKlient = mockk<PdlTjenesterKlientImpl>()
     private val persondataKlient = mockk<PersondataKlient>()
     private val grunnlagHenter = GrunnlagHenter(pdltjenesterKlient, persondataKlient)
+
+    private val vergesFnr = "09498230323"
 
     private val objectMapper: ObjectMapper
         get() {
@@ -40,16 +51,15 @@ class GrunnlagHenterTest {
 
     @Test
     fun fetchGrunnlag_shouldGetRelevantInfo() {
-        val sakType = SakType.OMSTILLINGSSTOENAD
+        val sakType = SakType.BARNEPENSJON
 
-        val grunnlagTestData = GrunnlagTestData()
+        val grunnlagTestData = GrunnlagTestData(opplysningsmapSoekerOverrides = mapOf(vergeOpplysning()))
 
         val listOf: List<Person> =
             listOf(
                 grunnlagTestData.soeker,
                 grunnlagTestData.gjenlevende,
                 grunnlagTestData.avdoed,
-                grunnlagTestData.gjenlevende,
             )
         listOf.forEach { person ->
             every { pdltjenesterKlient.hentOpplysningsperson(person.foedselsnummer.value, any(), sakType) } returns
@@ -57,9 +67,15 @@ class GrunnlagHenterTest {
             every { pdltjenesterKlient.hentPerson(person.foedselsnummer.value, any(), sakType) } returns
                 person
         }
+        val soekerFnr = grunnlagTestData.soeker.foedselsnummer
+        every { pdltjenesterKlient.hentOpplysningsperson(soekerFnr.value, any(), sakType) } returns
+            mockPerson().copy(
+                foedselsnummer = OpplysningDTO(soekerFnr, null),
+                vergemaalEllerFremtidsfullmakt = soekersVerge(),
+            )
         coEvery {
             pdltjenesterKlient.hentPersongalleri(
-                grunnlagTestData.soeker.foedselsnummer.value,
+                soekerFnr.value,
                 any(),
                 any(),
             )
@@ -68,7 +84,7 @@ class GrunnlagHenterTest {
         val persondataAdresseVerge = mockk<PersondataAdresse>()
         every { persondataAdresseVerge.toBrevMottaker() } returns sampleVergeAdresse()
         every {
-            persondataKlient.hentAdresseForVerge(grunnlagTestData.soeker.foedselsnummer.value)
+            persondataKlient.hentAdresseForVerge(soekerFnr.value)
         } returns persondataAdresseVerge
 
         val fetched =
@@ -78,7 +94,7 @@ class GrunnlagHenterTest {
                         1L,
                         sakType,
                         Persongalleri(
-                            grunnlagTestData.soeker.foedselsnummer.value,
+                            soekerFnr.value,
                             grunnlagTestData.gjenlevende.foedselsnummer.value,
                             emptyList(),
                             listOf(grunnlagTestData.avdoed.foedselsnummer.value),
@@ -87,7 +103,7 @@ class GrunnlagHenterTest {
                     ),
                 )
             }
-        fetched.personopplysninger.any { it.first == grunnlagTestData.soeker.foedselsnummer } shouldBe true
+        fetched.personopplysninger.any { it.first == soekerFnr } shouldBe true
 
         val vergeAdresseOpplysning =
             fetched.saksopplysninger
@@ -98,10 +114,40 @@ class GrunnlagHenterTest {
         actualVergesAdresse shouldBeEqual sampleVergeAdresse()
     }
 
+    private fun vergeOpplysning() =
+        Opplysningstype.VERGEMAALELLERFREMTIDSFULLMAKT to
+            konstantOpplysning(
+                listOf(
+                    vergemaal(
+                        vergesFnr,
+                        "Vera Verge",
+                        "personligeOgOekonomiskeInteresser",
+                    ),
+                ).toJsonNode(),
+            )
+
+    private fun soekersVerge(): List<OpplysningDTO<VergemaalEllerFremtidsfullmakt>> {
+        return listOf(
+            OpplysningDTO(
+                VergemaalEllerFremtidsfullmakt(
+                    "",
+                    "",
+                    VergeEllerFullmektig(
+                        Folkeregisteridentifikator.of(vergesFnr),
+                        "",
+                        "oekonomiskeInteresser",
+                        false,
+                    ),
+                ),
+                "",
+            ),
+        )
+    }
+
     private fun sampleVergeAdresse() =
         BrevMottaker(
             navn = "Tore",
-            foedselsnummer = Foedselsnummer("01018012345"),
+            foedselsnummer = Foedselsnummer(vergesFnr),
             adresse =
                 Adresse(
                     adresseType = "NORSKPOSTADRESSE",
@@ -110,4 +156,27 @@ class GrunnlagHenterTest {
                     landkode = "NO",
                 ),
         )
+
+    private fun konstantOpplysning(jsonNode: JsonNode) =
+        Opplysning.Konstant(
+            UUID.randomUUID(),
+            Grunnlagsopplysning.Pdl(Tidspunkt.now(), null, null),
+            jsonNode,
+        )
+
+    @Suppress("SameParameterValue")
+    private fun vergemaal(
+        fnr: String,
+        navn: String,
+        omfang: String,
+    ) = VergemaalEllerFremtidsfullmakt(
+        null,
+        null,
+        VergeEllerFullmektig(
+            Folkeregisteridentifikator.of(fnr),
+            navn,
+            omfang,
+            false,
+        ),
+    )
 }

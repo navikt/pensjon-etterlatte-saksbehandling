@@ -5,7 +5,6 @@ import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
-import no.nav.etterlatte.libs.common.grunnlag.Opplysning
 import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
 import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsnummer
 import no.nav.etterlatte.libs.common.grunnlag.hentKonstantOpplysning
@@ -18,6 +17,7 @@ import no.nav.etterlatte.libs.common.person.ForelderVerge
 import no.nav.etterlatte.libs.common.person.Verge
 import no.nav.etterlatte.libs.common.person.Vergemaal
 import no.nav.etterlatte.libs.common.person.VergemaalEllerFremtidsfullmakt
+import no.nav.etterlatte.libs.common.person.hentRelevantVerge
 import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
 import java.util.UUID
 
@@ -73,11 +73,11 @@ fun Grunnlag.mapVerge(
     behandlingId: UUID,
 ): Verge? =
     with(this) {
-        val opplysning = soeker.hentVergemaalellerfremtidsfullmakt()
-
-        if (opplysning?.verdi != null) {
-            hentVergemaal(opplysning, behandlingId)
-        } else if (sakType == SakType.BARNEPENSJON) {
+        val relevantVerge = hentRelevantVerge(soeker.hentVergemaalellerfremtidsfullmakt()?.verdi)
+        if (relevantVerge != null) {
+            return hentVergemaal(relevantVerge, behandlingId)
+        }
+        if (sakType == SakType.BARNEPENSJON) {
             ForelderVerge(hentGjenlevende().hentNavn()!!.verdi.fulltNavn())
         } else {
             null
@@ -85,35 +85,20 @@ fun Grunnlag.mapVerge(
     }
 
 private fun Grunnlag.hentVergemaal(
-    opplysning: Opplysning.Konstant<List<VergemaalEllerFremtidsfullmakt>>,
+    pdlVerge: VergemaalEllerFremtidsfullmakt,
     behandlingId: UUID,
 ): Vergemaal {
-    val verge = hentUnikRelevantVerge(opplysning, behandlingId)
     val vergeadresse = sak.hentVergeadresse()?.verdi
 
-    if (vergeadresse?.navn == null && verge.vergeEllerFullmektig.navn == null) {
+    if (vergeadresse?.navn == null && pdlVerge.vergeEllerFullmektig.navn == null) {
         throw VergeManglerNavnException(behandlingId)
     }
     if (vergeadresse == null) {
         throw VergeManglerAdresseException(behandlingId)
     }
     return Vergemaal(
-        mottaker = vergeadresse.copy(navn = vergeadresse.navn ?: verge.vergeEllerFullmektig.navn!!),
+        mottaker = vergeadresse.copy(navn = vergeadresse.navn ?: pdlVerge.vergeEllerFullmektig.navn!!),
     )
-}
-
-private fun hentUnikRelevantVerge(
-    opplysning: Opplysning.Konstant<List<VergemaalEllerFremtidsfullmakt>>,
-    behandlingId: UUID,
-): VergemaalEllerFremtidsfullmakt {
-    val vergerMedRelevantOmfang =
-        opplysning.verdi.filter {
-            it.vergeEllerFullmektig.omfang in alleVergeOmfangMedOekonomiskeInteresser
-        }
-    if (vergerMedRelevantOmfang.size != 1) {
-        throw IngenUnikVergeMedOekonomiskeInteresserException(behandlingId, vergerMedRelevantOmfang)
-    }
-    return vergerMedRelevantOmfang[0]
 }
 
 private fun Navn.fulltNavn(): String = listOfNotNull(fornavn, mellomnavn, etternavn).joinToString(" ") { it.storForbokstav() }
@@ -125,15 +110,6 @@ private fun String.storForbokstavEtter(delim: String) =
         it.replaceFirstChar { c -> c.uppercase() }
     }
 
-class IngenUnikVergeMedOekonomiskeInteresserException(
-    behandlingId: UUID,
-    verger: List<VergemaalEllerFremtidsfullmakt>,
-) :
-    InternfeilException(
-            "Fant ikke én verge med økonomiske interesser i behandling med id=$behandlingId," +
-                " men ${verger.size}",
-        )
-
 class VergeManglerNavnException(
     behandlingId: UUID,
 ) : InternfeilException("Finner ikke navn for verge i behandling med id=$behandlingId")
@@ -141,10 +117,3 @@ class VergeManglerNavnException(
 class VergeManglerAdresseException(
     behandlingId: UUID,
 ) : InternfeilException("Finner ikke adresse for verge i behandling med id=$behandlingId")
-
-private val alleVergeOmfangMedOekonomiskeInteresser =
-    listOf(
-        "utlendingssakerPersonligeOgOekonomiskeInteresser",
-        "personligeOgOekonomiskeInteresser",
-        "oekonomiskeInteresser",
-    )

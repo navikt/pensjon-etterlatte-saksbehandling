@@ -34,7 +34,7 @@ class PersondataKlient(private val httpClient: HttpClient, private val apiUrl: S
      * Pensjondata dokumentasjon</a>. */
     fun hentAdresseForVerge(vergehaverFnr: String): PersondataAdresse? {
         try {
-            val kontaktadresse = hentKontaktadresse(vergehaverFnr)
+            val kontaktadresse = hentKontaktadresse(vergehaverFnr, true)
 
             return if (erVergesAdresse(kontaktadresse)) {
                 kontaktadresse
@@ -53,11 +53,29 @@ class PersondataKlient(private val httpClient: HttpClient, private val apiUrl: S
         }
     }
 
-    private fun hentKontaktadresse(vergehaverFnr: String): PersondataAdresse {
+    fun hentAdresse(foedselsnummer: String): PersondataAdresse? {
+        try {
+            return hentKontaktadresse(foedselsnummer, false)
+        } catch (e: ClientRequestException) {
+            when (e.response.status) {
+                HttpStatusCode.NotFound -> return null
+            }
+            logger.error("Feil i henting av adresse", e)
+            return null
+        } catch (e: Exception) {
+            logger.error("Feil i henting av adresse", e)
+            return null
+        }
+    }
+
+    private fun hentKontaktadresse(
+        vergehaverFnr: String,
+        checkForVerge: Boolean,
+    ): PersondataAdresse {
         return runBlocking {
             retry<PersondataAdresse>(times = 3) {
                 httpClient.get("$apiUrl/api/adresse/kontaktadresse") {
-                    parameter("checkForVerge", true)
+                    parameter("checkForVerge", checkForVerge)
                     header("pid", vergehaverFnr)
                     accept(Json)
                     contentType(Json)

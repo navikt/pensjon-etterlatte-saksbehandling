@@ -200,7 +200,7 @@ suspend inline fun PipelineContext<*, ApplicationCall>.kunAttestant(onSuccess: (
     }
 }
 
-private val saksbehandlereMedTilgangTilAlleEnheter = listOf("Z994945")
+private val saksbehandlereMedTilgangTilAlleEnheter = listOf("S128848", "K105085", "O113803")
 
 fun <T> List<T>.filterForEnheter(
     featureToggleService: FeatureToggleService,

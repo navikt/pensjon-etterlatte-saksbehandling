@@ -3,7 +3,6 @@ import path from 'path'
 import { ApiConfig, appConf, ClientConfig } from './config/config'
 import { authenticateUser } from './middleware/auth'
 import { mockRouter } from './routers/mockRouter'
-import { modiaRouter } from './routers/modia'
 import { logger } from './monitoring/logger'
 import { requestLogger } from './middleware/logging'
 import { tokenMiddleware } from './middleware/getOboToken'
@@ -12,6 +11,7 @@ import { loggerRouter } from './routers/loggerRouter'
 import prometheus from './monitoring/prometheus'
 import { sanitize } from './utils/sanitize'
 import { unleash } from './utils/unleash'
+import { innloggetBrukerRouter } from './routers/innloggetBrukerRouter'
 
 logger.info(`environment: ${process.env.NODE_ENV}`)
 
@@ -80,7 +80,7 @@ if (isDev) {
   })
 
   app.use(authenticateUser) // Alle ruter etter denne er authenticated
-  app.use('/api/modiacontextholder/', modiaRouter) // bytte ut med etterlatte-innlogget?
+  app.use('/api/innlogget', innloggetBrukerRouter)
 
   app.use(
     '/api/vilkaarsvurdering',

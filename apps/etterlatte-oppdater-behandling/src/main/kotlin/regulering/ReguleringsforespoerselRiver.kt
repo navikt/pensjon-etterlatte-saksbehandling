@@ -56,9 +56,9 @@ internal class ReguleringsforespoerselRiver(
     }
 }
 
-enum class ReguleringFeatureToggle : FeatureToggle {
-    START_REGULERING,
+enum class ReguleringFeatureToggle(private val key: String) : FeatureToggle {
+    START_REGULERING("start-regulering"),
     ;
 
-    override fun key() = name
+    override fun key() = key
 }

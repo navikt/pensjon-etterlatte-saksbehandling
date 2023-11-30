@@ -19,12 +19,19 @@ import no.nav.etterlatte.brev.journalpost.JournalpostRequest
 import no.nav.etterlatte.brev.journalpost.JournalpostResponse
 import no.nav.etterlatte.brev.journalpost.JournalpostSak
 import no.nav.etterlatte.brev.journalpost.Sakstype
+import no.nav.etterlatte.brev.model.Adresse
+import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevInnhold
+import no.nav.etterlatte.brev.model.BrevProsessType
+import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.Spraak
+import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.VedtakSak
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.rivers.VedtakTilJournalfoering
+import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.params.ParameterizedTest
@@ -54,11 +61,32 @@ internal class DokarkivServiceTest {
     fun `Journalfoeringsrequest mappes korrekt`(type: SakType) {
         val forventetInnhold = BrevInnhold("tittel", Spraak.NB, mockk())
         val forventetPdf = Pdf("Hello world!".toByteArray())
+        val forventetBrevMottakerFnr = "01018012345"
+        val forventetBrev =
+            Brev(
+                id = 123,
+                sakId = 41,
+                behandlingId = null,
+                tittel = null,
+                prosessType = BrevProsessType.AUTOMATISK,
+                soekerFnr = "soeker_fnr",
+                status = Status.OPPRETTET,
+                statusEndret = Tidspunkt.now(),
+                opprettet = Tidspunkt.now(),
+                mottaker =
+                    Mottaker(
+                        "Stor Snerk",
+                        Foedselsnummer(forventetBrevMottakerFnr),
+                        null,
+                        Adresse(adresseType = "NORSKPOSTADRESSE", "Testgaten 13", "1234", "OSLO", land = "Norge", landkode = "NOR"),
+                    ),
+            )
         val forventetResponse = JournalpostResponse("12345", journalpostferdigstilt = true)
 
         coEvery { mockKlient.opprettJournalpost(any(), any()) } returns forventetResponse
         every { mockDb.hentBrevInnhold(any()) } returns forventetInnhold
         every { mockDb.hentPdf(any()) } returns forventetPdf
+        every { mockDb.hentBrev(any()) } returns forventetBrev
 
         val brevId = Random.nextLong()
 
@@ -78,6 +106,7 @@ internal class DokarkivServiceTest {
         verify {
             mockDb.hentBrevInnhold(brevId)
             mockDb.hentPdf(brevId)
+            mockDb.hentBrev(brevId)
         }
 
         with(requestSlot.captured) {
@@ -86,7 +115,7 @@ internal class DokarkivServiceTest {
             tema shouldBe vedtak.sak.sakType.tema
             kanal shouldBe "S"
             journalfoerendeEnhet shouldBe vedtak.ansvarligEnhet
-            avsenderMottaker shouldBe AvsenderMottaker(vedtak.sak.ident)
+            avsenderMottaker shouldBe AvsenderMottaker(forventetBrevMottakerFnr)
             bruker shouldBe Bruker(vedtak.sak.ident)
             sak shouldBe JournalpostSak(Sakstype.FAGSAK, vedtak.sak.id.toString())
             eksternReferanseId shouldBe "${vedtak.behandlingId}.$brevId"

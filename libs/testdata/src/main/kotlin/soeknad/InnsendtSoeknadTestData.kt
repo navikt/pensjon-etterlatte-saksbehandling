@@ -192,6 +192,9 @@ object InnsendtSoeknadTestData {
                             mottokBidrag = null,
                             mottokEktefelleBidrag = null,
                         ),
+                    fullfoerteUtdanninger = null,
+                    omsorgForBarn = null,
+                    inntektOgPensjon = null
                 ),
             avdoed =
                 Avdoed(

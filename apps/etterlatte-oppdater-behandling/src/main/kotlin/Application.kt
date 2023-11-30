@@ -11,11 +11,12 @@ import rapidsandrivers.getRapidEnv
 
 fun main() {
     val rapidEnv = getRapidEnv()
+    val appBuilder = AppBuilder(Miljoevariabler(rapidEnv))
     RapidApplication.create(rapidEnv).also { rapidsConnection ->
-        val behandlingservice = AppBuilder(Miljoevariabler(rapidEnv)).createBehandlingService()
+        val behandlingservice = appBuilder.createBehandlingService()
         PdlHendelserRiver(rapidsConnection, behandlingservice)
         OmregningsHendelserRiver(rapidsConnection, behandlingservice)
-        ReguleringsforespoerselRiver(rapidsConnection, behandlingservice)
+        ReguleringsforespoerselRiver(rapidsConnection, behandlingservice, appBuilder.featureToggleService)
         MigrerEnEnkeltSakRiver(rapidsConnection, behandlingservice)
         ReguleringFeiletRiver(rapidsConnection, behandlingservice)
         AvbrytBehandlingHvisMigreringFeilaRiver(rapidsConnection, behandlingservice)

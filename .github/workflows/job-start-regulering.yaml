@@ -1,9 +1,5 @@
 name: start-regulering
 
-env:
-  IMAGE: ghcr.io/${{ github.repository }}/${{ github.workflow }}:${{ github.sha }}
-  JOB_NAME: ${{ github.workflow }}
-
 on:
   workflow_dispatch: # Allow manually triggered workflow run
     inputs:
@@ -18,37 +14,32 @@ on:
   push:
     branches:
       - main
-      - release/*
-      - feature/*
-      - fix/*
+    paths:
+      - jobs/start-regulering/**
+  pull_request:
+    branches:
+      - main
     paths:
       - jobs/start-regulering/**
 
 jobs:
-  build-and-publish:
-    name: Build, test, and publish
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-      - name: Setup Java v17.x
-        uses: actions/setup-java@v3
-        with:
-          distribution: temurin
-          java-version: 17.x
-          cache: gradle
-      - name: Gradle test and build
-        run: |
-          chmod +x ./gradlew
-          ./gradlew :jobs:${JOB_NAME}:test :jobs:${JOB_NAME}:build
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Build and publish docker image
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          docker login ghcr.io -u ${GITHUB_REPOSITORY} -p ${GITHUB_TOKEN}
-          docker build --tag ${IMAGE} jobs/${JOB_NAME}
-          docker push ${IMAGE}
-      - name: Print docker tag
-        run: echo 'Docker-tag er ${{ env.image }} ' >> $GITHUB_STEP_SUMMARY
+  test:
+    if: github.event_name == 'pull_request'
+    uses: ./.github/workflows/.test-job.yaml
+    secrets: inherit
+
+  build:
+    if: github.event_name != 'pull_request'
+    uses: ./.github/workflows/.build-job.yaml
+    secrets: inherit
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+
+  deploy:
+    if: github.event_name != 'pull_request'
+    needs: build
+    uses: ./.github/workflows/.deploy-job.yaml
+    with:
+      image: ${{ needs.build.outputs.image }}
+    secrets: inherit

@@ -35,5 +35,5 @@ fun main() {
 
 internal fun createRecord(dato: LocalDate) =
     JsonMessage.newMessage(
-        mapOf("@event_name" to ReguleringEvents.EVENT_NAME, ReguleringEvents.DATO to dato.toString()),
+        mapOf("@event_name" to ReguleringEvents.START_REGULERING, ReguleringEvents.DATO to dato.toString()),
     ).toJson()

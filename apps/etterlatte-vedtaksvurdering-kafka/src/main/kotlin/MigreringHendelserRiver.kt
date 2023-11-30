@@ -1,12 +1,12 @@
 package no.nav.etterlatte
 
-import no.nav.etterlatte.libs.common.rapidsandrivers.TEKNISK_TID_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.etterlatte.rapidsandrivers.migrering.MIGRERING_KJORING_VARIANT
 import no.nav.etterlatte.rapidsandrivers.migrering.MigreringKjoringVariant
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser.PAUSE
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser.VEDTAK
 import no.nav.etterlatte.rapidsandrivers.migrering.migreringKjoringVariant
+import no.nav.etterlatte.vedtaksvurdering.RapidUtsender
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -47,22 +47,7 @@ internal class MigreringHendelserRiver(
                 context.publish(packet.toJson())
             }
             logger.info("Opprettet vedtak ${respons.vedtak.vedtakId} for migrert behandling: $behandlingId")
-            with(respons.rapidInfo1) {
-                packet.eventName = vedtakhendelse.toString()
-                packet[TEKNISK_TID_KEY] = tekniskTid
-                packet["vedtak"] = vedtak
-                extraParams.forEach { (k, v) -> packet[k] = v }
-                context.publish(behandlingId.toString(), packet.toJson())
-            }
-            respons.rapidInfo2?.let {
-                with(it) {
-                    packet.eventName = vedtakhendelse.toString()
-                    packet[TEKNISK_TID_KEY] = tekniskTid
-                    packet["vedtak"] = vedtak
-                    extraParams.forEach { (k, v) -> packet[k] = v }
-                    context.publish(behandlingId.toString(), packet.toJson())
-                }
-            }
+            RapidUtsender.sendUt(respons, packet, context)
         }
     }
 }

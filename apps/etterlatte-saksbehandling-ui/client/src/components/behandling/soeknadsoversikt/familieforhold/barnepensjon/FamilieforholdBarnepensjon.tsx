@@ -30,7 +30,7 @@ export const FamilieforholdBarnepensjon = ({ personopplysninger }: PropsFamilief
       <FamilieforholdWrapper>
         <SamsvarPersongalleri />
         <FamilieforholdVoksne>
-          <Person person={soeker.opplysning} kilde={alleGjenlevende[0].kilde} mottaker />
+          <Person person={soeker.opplysning} kilde={soeker.kilde} mottaker />
           {alleAvdoede.map((avdoede) => (
             <Person person={avdoede.opplysning} kilde={avdoede.kilde} avdoed key={avdoede.id} />
           ))}

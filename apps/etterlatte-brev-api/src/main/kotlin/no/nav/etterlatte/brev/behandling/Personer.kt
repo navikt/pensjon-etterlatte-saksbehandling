@@ -1,5 +1,6 @@
 package no.nav.etterlatte.brev.behandling
 
+import no.nav.etterlatte.libs.common.person.Verge
 import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
 import java.time.LocalDate
 
@@ -11,8 +12,6 @@ data class PersonerISak(
 )
 
 data class Innsender(val fnr: Foedselsnummer)
-
-data class Verge(val navn: String)
 
 data class Soeker(val fornavn: String, val mellomnavn: String? = null, val etternavn: String, val fnr: Foedselsnummer)
 

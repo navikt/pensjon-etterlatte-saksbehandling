@@ -29,6 +29,7 @@ export default function MottakerPanel({
     <Panel border>
       <Heading spacing level="2" size="medium">
         Mottaker
+        {redigerbar && <RedigerMottakerModal brev={vedtaksbrev} oppdater={oppdater} vergeadresse={vergeadresse} />}
       </Heading>
 
       {soekerErIkkeMottaker && (
@@ -43,7 +44,6 @@ export default function MottakerPanel({
       )}
       <br />
 
-      {redigerbar && <RedigerMottakerModal brev={vedtaksbrev} oppdater={oppdater} vergeadresse={vergeadresse} />}
       <InfoWrapper>
         <Info label="Navn" tekst={mottaker.navn || '-'} wide />
         {mottaker.foedselsnummer && <Info label="Fødselsnummer" tekst={mottaker.foedselsnummer.value} wide />}
@@ -54,7 +54,12 @@ export default function MottakerPanel({
           label="Adresse"
           tekst={
             <>
-              {[adresse?.adresselinje1, adresse?.adresselinje2, adresse?.adresselinje3].join('\n')}
+              {[adresse?.adresselinje1, adresse?.adresselinje2, adresse?.adresselinje3].map((linje) => (
+                <>
+                  {linje}
+                  <br />
+                </>
+              ))}
               <br />
               {adresse?.postnummer} {adresse?.poststed}
               <br />

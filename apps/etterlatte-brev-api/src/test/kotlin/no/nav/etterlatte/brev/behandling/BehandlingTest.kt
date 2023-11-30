@@ -150,11 +150,11 @@ internal class BehandlingTest {
                 metadata = mockk(),
             )
 
-        val vergeBarnepensjon = grunnlag.mapVerge(SakType.BARNEPENSJON)
-        assertEquals(forventetVergeNavn, vergeBarnepensjon!!.navn)
+        val vergeBarnepensjon = grunnlag.mapVerge(SakType.BARNEPENSJON, UUID.randomUUID())
+        assertEquals(forventetVergeNavn, vergeBarnepensjon!!.navn())
 
-        val vergeOmstillingsstoenad = grunnlag.mapVerge(SakType.OMSTILLINGSSTOENAD)
-        assertEquals(forventetVergeNavn, vergeOmstillingsstoenad!!.navn)
+        val vergeOmstillingsstoenad = grunnlag.mapVerge(SakType.OMSTILLINGSSTOENAD, UUID.randomUUID())
+        assertEquals(forventetVergeNavn, vergeOmstillingsstoenad!!.navn())
     }
 
     @Test
@@ -181,10 +181,10 @@ internal class BehandlingTest {
                 metadata = mockk(),
             )
 
-        val vergeBarnepensjon = grunnlag.mapVerge(SakType.BARNEPENSJON)
-        assertEquals(gjenlevendeNavn.toString(), vergeBarnepensjon!!.navn)
+        val vergeBarnepensjon = grunnlag.mapVerge(SakType.BARNEPENSJON, UUID.randomUUID())
+        assertEquals(gjenlevendeNavn.toString(), vergeBarnepensjon!!.navn())
 
-        val vergeOmstillingsstoenad = grunnlag.mapVerge(SakType.OMSTILLINGSSTOENAD)
+        val vergeOmstillingsstoenad = grunnlag.mapVerge(SakType.OMSTILLINGSSTOENAD, UUID.randomUUID())
         assertNull(vergeOmstillingsstoenad, "Verge skal ikke settes for OMS når verge mangler i grunnlaget")
     }
 

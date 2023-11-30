@@ -27,7 +27,7 @@ data class BrevbakerRequest(
                         sakId = generellBrevData.sak.id,
                         soeker = generellBrevData.personerISak.soeker,
                         avsender = avsender,
-                        vergeNavn = generellBrevData.personerISak.verge?.navn,
+                        vergeNavn = generellBrevData.personerISak.verge?.navn(),
                     ),
                 language = LanguageCode.spraakToLanguageCode(generellBrevData.spraak),
             )

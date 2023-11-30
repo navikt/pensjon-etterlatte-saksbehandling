@@ -31,6 +31,7 @@ import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Adresse
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.AvdoedesBarn
+import no.nav.etterlatte.libs.common.person.BrevMottaker
 import no.nav.etterlatte.libs.common.person.FamilieRelasjon
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.PersonRolle
@@ -39,7 +40,6 @@ import no.nav.etterlatte.libs.common.person.Sivilstatus
 import no.nav.etterlatte.libs.common.person.Utenlandsadresse
 import no.nav.etterlatte.libs.common.person.UtenlandsoppholdOpplysninger
 import no.nav.etterlatte.libs.common.person.Utland
-import no.nav.etterlatte.libs.common.person.VergeAdresse
 import no.nav.etterlatte.libs.common.person.VergemaalEllerFremtidsfullmakt
 import no.nav.etterlatte.libs.common.toJson
 import java.time.LocalDate
@@ -93,7 +93,7 @@ fun Grunnlagsdata<JsonNode>.hentUtenlandsopphold() = this.hentKonstantOpplysning
 
 fun Grunnlagsdata<JsonNode>.hentUtenlandsadresse() = this.hentKonstantOpplysning<Utenlandsadresse>(UTENLANDSADRESSE)
 
-fun Grunnlagsdata<JsonNode>.hentVergeadresse() = this.hentKonstantOpplysning<VergeAdresse>(VERGES_ADRESSE)
+fun Grunnlagsdata<JsonNode>.hentVergeadresse() = this.hentKonstantOpplysning<BrevMottaker>(VERGES_ADRESSE)
 
 // TODO:
 //  Dette er duplikat av mottatt dato i behandling.

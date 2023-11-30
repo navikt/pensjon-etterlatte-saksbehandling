@@ -79,7 +79,7 @@ class BrevdataFacade(
                     innsender = grunnlag.mapInnsender(),
                     soeker = grunnlag.mapSoeker(),
                     avdoede = grunnlag.mapAvdoede(),
-                    verge = grunnlag.mapVerge(sak.sakType),
+                    verge = grunnlag.mapVerge(sak.sakType, behandlingId),
                 )
             val vedtak = vedtakDeferred.await()
             val innloggetSaksbehandlerIdent = brukerTokenInfo.ident()

@@ -21,10 +21,11 @@ class SamordningHendelseKonsument(
         stream { meldinger ->
             meldinger
                 .forEach {
+                    logger.info("Behandler melding [key=${it.key()}]")
+
                     withLogContext {
                         handler.handleSamordningHendelse(
                             hendelse = it.value(),
-                            hendelseKey = it.key(),
                         )
                     }
                 }

@@ -125,9 +125,11 @@ export const relativPersonrolleTekst: Record<SakType, Record<RelativPersonrolle,
   },
 }
 
+export type PersonNavn = Pick<IPdlPerson, 'fornavn' | 'mellomnavn' | 'etternavn'>
+
 export interface RelatertPerson {
   foedselsdato?: string
   kjoenn?: string
-  navn?: string
+  navn?: Partial<PersonNavn>
   statsborgerskap?: string
 }

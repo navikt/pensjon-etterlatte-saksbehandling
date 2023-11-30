@@ -44,6 +44,10 @@ internal class Verifiserer(
             feil.add(SakHarIkkeFolketrygdBeregning)
         }
 
+        if (request.dodAvYrkesskade) {
+            feil.add(DoedAvYrkesskade)
+        }
+
         if (feil.isNotEmpty()) {
             haandterFeil(request, feil)
         }
@@ -144,4 +148,9 @@ object SakHarIkkeFolketrygdBeregning : Verifiseringsfeil() {
 data class PDLException(val kilde: Throwable) : Verifiseringsfeil() {
     override val message: String?
         get() = kilde.message
+}
+
+object DoedAvYrkesskade : Verifiseringsfeil() {
+    override val message: String
+        get() = "Skal ikke migrere saker hvor avdød har dødsårsak yrkesskade"
 }

@@ -1,6 +1,6 @@
 {
   "system_read_count": 0,
-  "@event_name": "OMREGNINGSHENDELSE",
+  "@event_name": "REGULERING:OMREGNINGSHENDELSE",
   "hendelse_data": {
     "sakId": 1,
     "fradato": "2023-02-08",

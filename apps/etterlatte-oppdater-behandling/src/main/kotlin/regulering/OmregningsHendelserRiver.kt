@@ -5,8 +5,8 @@ import no.nav.etterlatte.BehandlingService
 import no.nav.etterlatte.libs.common.behandling.Omregningshendelse
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
-import no.nav.etterlatte.rapidsandrivers.EventNames.OMREGNINGSHENDELSE
-import no.nav.etterlatte.rapidsandrivers.EventNames.VILKAARSVURDER
+import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.OMREGNINGSHENDELSE
+import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.VILKAARSVURDER
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection

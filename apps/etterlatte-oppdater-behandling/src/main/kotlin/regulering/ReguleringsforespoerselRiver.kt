@@ -2,8 +2,8 @@ package no.nav.etterlatte.regulering
 
 import no.nav.etterlatte.BehandlingService
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
-import no.nav.etterlatte.rapidsandrivers.EventNames.FINN_LOEPENDE_YTELSER
-import no.nav.etterlatte.rapidsandrivers.EventNames.REGULERING_EVENT_NAME
+import no.nav.etterlatte.rapidsandrivers.ReguleringEvents
+import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.FINN_LOEPENDE_YTELSER
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -17,7 +17,7 @@ import rapidsandrivers.tilbakestilteBehandlinger
 internal class ReguleringsforespoerselRiver(
     rapidsConnection: RapidsConnection,
     private val behandlingService: BehandlingService,
-) : ListenerMedLoggingOgFeilhaandtering(REGULERING_EVENT_NAME) {
+) : ListenerMedLoggingOgFeilhaandtering(ReguleringEvents.START_REGULERING) {
     private val logger = LoggerFactory.getLogger(ReguleringsforespoerselRiver::class.java)
 
     init {

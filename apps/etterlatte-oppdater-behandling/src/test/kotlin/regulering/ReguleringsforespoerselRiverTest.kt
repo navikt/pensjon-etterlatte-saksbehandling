@@ -13,8 +13,8 @@ import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakIDListe
 import no.nav.etterlatte.libs.common.sak.Saker
 import no.nav.etterlatte.rapidsandrivers.EventNames.FEILA
-import no.nav.etterlatte.rapidsandrivers.EventNames.FINN_LOEPENDE_YTELSER
-import no.nav.etterlatte.rapidsandrivers.EventNames.REGULERING_EVENT_NAME
+import no.nav.etterlatte.rapidsandrivers.ReguleringEvents
+import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.FINN_LOEPENDE_YTELSER
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions
@@ -31,7 +31,7 @@ internal class ReguleringsforespoerselRiverTest {
     private fun genererReguleringMelding(dato: LocalDate) =
         JsonMessage.newMessage(
             mapOf(
-                EVENT_NAME_KEY to REGULERING_EVENT_NAME,
+                EVENT_NAME_KEY to ReguleringEvents.START_REGULERING,
                 DATO_KEY to dato,
             ),
         )
@@ -136,6 +136,6 @@ internal class ReguleringsforespoerselRiverTest {
 
         val melding1 = inspector.inspektør.message(0)
         Assertions.assertEquals(FEILA, melding1.get(EVENT_NAME_KEY).textValue())
-        Assertions.assertEquals(REGULERING_EVENT_NAME, melding1.get(FEILENDE_STEG).textValue())
+        Assertions.assertEquals(ReguleringEvents.START_REGULERING, melding1.get(FEILENDE_STEG).textValue())
     }
 }

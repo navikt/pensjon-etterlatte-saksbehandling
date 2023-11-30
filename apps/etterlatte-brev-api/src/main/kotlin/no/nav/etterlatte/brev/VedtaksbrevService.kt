@@ -162,21 +162,17 @@ class VedtaksbrevService(
             .let {
                 when (brevData) {
                     is OmregnetBPNyttRegelverk -> {
-                        if (automatiskMigreringRequest != null) {
-                            val forhaandsvarsel =
-                                brevbaker.genererPdf(
-                                    brev.id,
-                                    BrevbakerRequest.fra(
-                                        EtterlatteBrevKode.BARNEPENSJON_FORHAANDSVARSEL_OMREGNING,
-                                        brevData,
-                                        generellBrevData,
-                                        avsender,
-                                    ),
-                                )
-                            forhaandsvarsel.medPdfAppended(it)
-                        } else {
-                            it
-                        }
+                        val forhaandsvarsel =
+                            brevbaker.genererPdf(
+                                brev.id,
+                                BrevbakerRequest.fra(
+                                    EtterlatteBrevKode.BARNEPENSJON_FORHAANDSVARSEL_OMREGNING,
+                                    brevData,
+                                    generellBrevData,
+                                    avsender,
+                                ),
+                            )
+                        forhaandsvarsel.medPdfAppended(it)
                     }
 
                     else -> it

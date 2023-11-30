@@ -52,7 +52,9 @@ export default function RedigerMottakerModal({ brev, oppdater, vergeadresse }: P
   function formaterAdresse(vergeadresse: Mottaker) {
     return (
       <>
-        {!vergeadresse.foedselsnummer && !vergeadresse.orgnummer && `Fødselsnummer/orgnummer: Ikke registrert.`}
+        {!vergeadresse.foedselsnummer && !vergeadresse.orgnummer && `Fødselsnummer/orgnummer: Ikke registrert.` && (
+          <br />
+        )}
         {vergeadresse.foedselsnummer && `Fødselsnummer: ${vergeadresse.foedselsnummer.value}`}
         {vergeadresse.navn}
         {vergeadresse.navn && <br />}

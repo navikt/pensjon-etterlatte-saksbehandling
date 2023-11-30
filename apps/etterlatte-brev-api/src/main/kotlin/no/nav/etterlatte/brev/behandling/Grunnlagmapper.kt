@@ -88,14 +88,7 @@ private fun Grunnlag.hentVergemaal(
     opplysning: Opplysning.Konstant<List<VergemaalEllerFremtidsfullmakt>>,
     behandlingId: UUID,
 ): Vergemaal {
-    val vergerMedRelevantOmfang =
-        opplysning.verdi.filter {
-            it.vergeEllerFullmektig.omfang in alleVergeOmfangMedOekonomiskeInteresser
-        }
-    if (vergerMedRelevantOmfang.size != 1) {
-        throw IngenUnikVergeMedOekonomiskeInteresserException(behandlingId, vergerMedRelevantOmfang)
-    }
-    val verge = vergerMedRelevantOmfang[0]
+    val verge = hentUnikRelevantVerge(opplysning, behandlingId)
     val vergeadresse = sak.hentVergeadresse()?.verdi
 
     if (vergeadresse?.navn == null && verge.vergeEllerFullmektig.navn == null) {
@@ -107,6 +100,20 @@ private fun Grunnlag.hentVergemaal(
     return Vergemaal(
         mottaker = vergeadresse.copy(navn = vergeadresse.navn ?: verge.vergeEllerFullmektig.navn!!),
     )
+}
+
+private fun hentUnikRelevantVerge(
+    opplysning: Opplysning.Konstant<List<VergemaalEllerFremtidsfullmakt>>,
+    behandlingId: UUID,
+): VergemaalEllerFremtidsfullmakt {
+    val vergerMedRelevantOmfang =
+        opplysning.verdi.filter {
+            it.vergeEllerFullmektig.omfang in alleVergeOmfangMedOekonomiskeInteresser
+        }
+    if (vergerMedRelevantOmfang.size != 1) {
+        throw IngenUnikVergeMedOekonomiskeInteresserException(behandlingId, vergerMedRelevantOmfang)
+    }
+    return vergerMedRelevantOmfang[0]
 }
 
 private fun Navn.fulltNavn(): String = listOfNotNull(fornavn, mellomnavn, etternavn).joinToString(" ") { it.storForbokstav() }

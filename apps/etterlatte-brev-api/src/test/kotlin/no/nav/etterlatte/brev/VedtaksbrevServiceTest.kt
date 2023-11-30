@@ -740,6 +740,7 @@ internal class VedtaksbrevServiceTest {
                     Random.nextLong(),
                     Random.nextLong(),
                     BEHANDLING_ID,
+                    "tittel",
                     BrevProsessType.AUTOMATISK,
                     "fnr",
                     status,
@@ -768,6 +769,7 @@ internal class VedtaksbrevServiceTest {
         id = Random.nextLong(10000),
         sakId = Random.nextLong(10000),
         behandlingId = BEHANDLING_ID,
+        tittel = "tittel",
         prosessType = prosessType,
         soekerFnr = "fnr",
         status = status,
@@ -850,8 +852,6 @@ internal class VedtaksbrevServiceTest {
     private fun opprettAvsender() =
         Avsender(
             kontor = "Nav Porsgrunn",
-            "Etterstad 1",
-            "0556",
             Telefonnummer("55553333"),
             "Sak Saksbehandler",
             "Per Attestant",

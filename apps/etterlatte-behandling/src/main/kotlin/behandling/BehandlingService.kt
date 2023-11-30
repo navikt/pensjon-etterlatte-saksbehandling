@@ -356,20 +356,6 @@ internal class BehandlingServiceImpl(
                 }
             logger.info("Hentet Opplysningstype.SOEKER_PDL_V1 for $behandlingId")
 
-            val gjenlevende =
-                if (sakType == SakType.OMSTILLINGSSTOENAD) {
-                    soeker
-                } else {
-                    async {
-                        grunnlagKlient.finnPersonOpplysning(
-                            behandlingId,
-                            Opplysningstype.GJENLEVENDE_FORELDER_PDL_V1,
-                            brukerTokenInfo,
-                        )
-                    }
-                }
-            logger.info("Hentet Opplysningstype.GJENLEVENDE_FORELDER_PDL_V1 for $behandlingId")
-
             DetaljertBehandlingDto(
                 id = behandling.id,
                 sakId = sakId,
@@ -382,7 +368,7 @@ internal class BehandlingServiceImpl(
                 boddEllerArbeidetUtlandet = behandling.boddEllerArbeidetUtlandet,
                 status = behandling.status,
                 hendelser = hendelserIBehandling,
-                familieforhold = Familieforhold(avdoed.await(), gjenlevende.await()),
+                familieforhold = Familieforhold(avdoed.await()),
                 behandlingType = behandling.type,
                 søker = soeker.await()?.opplysning,
                 revurderingsaarsak = behandling.revurderingsaarsak(),
@@ -390,7 +376,6 @@ internal class BehandlingServiceImpl(
                 begrunnelse = behandling.begrunnelse(),
                 etterbetaling = inTransaction { etterbetalingDao.hentEtterbetaling(behandlingId) },
             ).also {
-                gjenlevende.await()?.fnr?.let { behandlingRequestLogger.loggRequest(brukerTokenInfo, it, "behandling") }
                 soeker.await()?.fnr?.let { behandlingRequestLogger.loggRequest(brukerTokenInfo, it, "behandling") }
             }
         }

@@ -10,6 +10,7 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.grunnlag.klienter.BehandlingKlient
 import no.nav.etterlatte.libs.common.BEHANDLINGID_CALL_PARAMETER
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.grunnlag.NyeSaksopplysninger
 import no.nav.etterlatte.libs.common.grunnlag.OppdaterGrunnlagRequest
 import no.nav.etterlatte.libs.common.grunnlag.Opplysningsbehov
@@ -21,11 +22,6 @@ fun Route.behandlingGrunnlagRoute(
     grunnlagService: GrunnlagService,
     behandlingKlient: BehandlingKlient,
 ) {
-    /**
-     * TODO:
-     *  Dette blir en stegvis endring for å redusere sjansen for at alt brekker.
-     *  Sak ID skal fjernes så fort vi har versjonert alt grunnlag i dev/prod med behandlingId
-     **/
     route("/behandling/{$BEHANDLINGID_CALL_PARAMETER}") {
         get {
             withBehandlingId(behandlingKlient) { behandlingId ->
@@ -89,6 +85,21 @@ fun Route.behandlingGrunnlagRoute(
                     grunnlagService.oppdaterGrunnlag(behandlingId, request.sakId, request.sakType)
                     call.respond(HttpStatusCode.OK)
                 }
+            }
+        }
+
+        get("opplysning/persongalleri-samsvar") {
+            withBehandlingId(behandlingKlient) { behandlingId ->
+                val persongalleri = grunnlagService.hentPersongalleriSamsvar(behandlingId)
+                call.respond(persongalleri)
+            }
+        }
+
+        get("personopplysninger") {
+            withBehandlingId(behandlingKlient) { behandlingId ->
+                val sakstype = SakType.valueOf(call.parameters["sakType"].toString())
+                val grunnlagsopplysninger = grunnlagService.hentPersonopplysninger(behandlingId, sakstype)
+                call.respond(grunnlagsopplysninger)
             }
         }
     }

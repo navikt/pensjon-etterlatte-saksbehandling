@@ -1,14 +1,23 @@
-import { GYLDIG_FNR } from '~utils/fnr'
+import { fnrErGyldig } from '~utils/fnr'
 import { SakType } from '~shared/types/sak'
-import { Persongalleri } from '~shared/types/Person'
+import { NyBehandlingRequest } from '~shared/types/IDetaljertBehandling'
 
-export const gyldigPersongalleri = (sakType: SakType, persongalleri?: Persongalleri) => {
+export const gyldigBehandlingRequest = (request?: NyBehandlingRequest) => {
+  const gyldigDatoOgSpraak = !!request?.mottattDato && !!request?.spraak
+
+  return gyldigDatoOgSpraak && gyldigPersongalleri(request)
+}
+
+const gyldigPersongalleri = (request: NyBehandlingRequest) => {
+  const sakType = request.sakType
+  const persongalleri = request?.persongalleri
+
   if (!persongalleri) {
     return false
   }
 
-  const avdoede = persongalleri.avdoed?.filter((fnr) => GYLDIG_FNR(fnr)) || []
-  const gjenlevende = persongalleri.gjenlevende?.filter((fnr) => GYLDIG_FNR(fnr)) || []
+  const avdoede = persongalleri.avdoed?.filter((fnr) => fnrErGyldig(fnr)) || []
+  const gjenlevende = persongalleri.gjenlevende?.filter((fnr) => fnrErGyldig(fnr)) || []
   const antallGjenlevOgAvdoed = avdoede.length + gjenlevende.length
 
   let gyldigGjenlevOgAvdoed = false
@@ -18,5 +27,7 @@ export const gyldigPersongalleri = (sakType: SakType, persongalleri?: Persongall
     gyldigGjenlevOgAvdoed = antallGjenlevOgAvdoed === 1
   }
 
-  return GYLDIG_FNR(persongalleri.soeker) && GYLDIG_FNR(persongalleri.innsender) && gyldigGjenlevOgAvdoed
+  const gyldigInnsender = !persongalleri.innsender || fnrErGyldig(persongalleri.innsender)
+
+  return fnrErGyldig(persongalleri.soeker) && gyldigGjenlevOgAvdoed && gyldigInnsender
 }

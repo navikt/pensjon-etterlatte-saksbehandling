@@ -1,4 +1,4 @@
-import { Sidebar } from '~shared/components/Sidebar'
+import { Sidebar, SidebarPanel } from '~shared/components/Sidebar'
 import { Generellbehandling, KravpakkeUtland, Status } from '~shared/types/Generellbehandling'
 import { AttesteringMedUnderkjenning } from '~components/generellbehandling/AttesteringMedUnderkjenning'
 import { isFailure, isPending, useApiCall } from '~shared/hooks/useApiCall'
@@ -9,6 +9,7 @@ import { useAppSelector } from '~store/Store'
 import Spinner from '~shared/Spinner'
 import { AttestertVisning } from '~components/generellbehandling/AttestertVisning'
 import { Alert, BodyShort } from '@navikt/ds-react'
+import { ReturnertVisning } from '~components/generellbehandling/ReturnertVisning'
 
 export const GenerellbehandlingSidemeny = (props: {
   utlandsBehandling: Generellbehandling & { innhold: KravpakkeUtland | null }
@@ -36,6 +37,8 @@ export const GenerellbehandlingSidemeny = (props: {
 
   const genererSidemeny = () => {
     switch (utlandsBehandling.status) {
+      case Status.RETURNERT:
+        return <ReturnertVisning utlandsBehandling={utlandsBehandling} />
       case Status.OPPRETTET:
         return null
       case Status.FATTET:
@@ -53,18 +56,26 @@ export const GenerellbehandlingSidemeny = (props: {
   }
   return (
     <Sidebar>
-      {isFailure(saksbehandlerForOppgaveStatus) && (
-        <ApiErrorAlert>Vi fant ingen saksbehadler for den tilknyttede oppgaven. Husk å tildele oppgaven.</ApiErrorAlert>
-      )}
-      {isPending(saksbehandlerForOppgaveStatus) && <Spinner visible={true} label="Henter saksbehandler or oppgave" />}
-      {saksbehandlerForGjeldendeOppgave ? (
-        <BodyShort>Oppgaven er tildelt {saksbehandlerForGjeldendeOppgave}.&nbsp;</BodyShort>
-      ) : (
-        <Alert variant="warning">
-          <BodyShort>Oppgaven er ikke tildelt noen.&nbsp;</BodyShort>
-        </Alert>
-      )}
-      {genererSidemeny()}
+      <SidebarPanel>
+        {isFailure(saksbehandlerForOppgaveStatus) && (
+          <ApiErrorAlert>
+            Vi fant ingen saksbehadler for den tilknyttede oppgaven. Husk å tildele oppgaven.
+          </ApiErrorAlert>
+        )}
+        {isPending(saksbehandlerForOppgaveStatus) && <Spinner visible={true} label="Henter saksbehandler or oppgave" />}
+        {saksbehandlerForGjeldendeOppgave ? (
+          <Alert variant={oppgaveErTildeltInnloggetBruker ? 'success' : 'info'} style={{ marginBottom: '2rem' }}>
+            <BodyShort>{`Oppgaven for kravpakken er tildelt ${
+              oppgaveErTildeltInnloggetBruker ? 'deg' : saksbehandlerForGjeldendeOppgave
+            }`}</BodyShort>
+          </Alert>
+        ) : (
+          <Alert variant="warning" style={{ marginTop: '2rem' }}>
+            <BodyShort>Oppgaven er ikke tildelt noen.&nbsp;</BodyShort>
+          </Alert>
+        )}
+        {genererSidemeny()}
+      </SidebarPanel>
     </Sidebar>
   )
 }

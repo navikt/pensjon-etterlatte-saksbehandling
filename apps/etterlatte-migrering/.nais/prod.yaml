@@ -66,12 +66,19 @@ spec:
       value: http://digdir-krr-proxy.team-rocket
     - name: KRR_SCOPE
       value: api://prod-gcp.team-rocket.digdir-krr-proxy/.default
+    - name: GRUNNLAG_AZURE_SCOPE
+      value: api://prod-gcp.etterlatte.etterlatte-grunnlag/.default
+    - name: ETTERLATTE_GRUNNLAG_CLIENT_ID
+      value: prod-gcp.etterlatte.etterlatte-grunnlag
+    - name: ETTERLATTE_GRUNNLAG_URL
+      value: http://etterlatte-grunnlag/api
   envFrom:
     - secret: my-application-unleash-api-token
   accessPolicy:
     outbound:
       rules:
         - application: etterlatte-pdltjenester
+        - application: etterlatte-grunnlag
         - application: digdir-krr-proxy
           namespace: team-rocket
           cluster: prod-gcp

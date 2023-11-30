@@ -7,7 +7,7 @@ import Spinner from '~shared/Spinner'
 import { mapApiResult, useApiCall } from '~shared/hooks/useApiCall'
 import { Tabs } from '@navikt/ds-react'
 import { getPerson } from '~shared/api/grunnlag'
-import { GYLDIG_FNR } from '~utils/fnr'
+import { fnrHarGyldigFormat } from '~utils/fnr'
 import NavigerTilbakeMeny from '~components/person/NavigerTilbakeMeny'
 import { BulletListIcon, EnvelopeClosedIcon, FileTextIcon } from '@navikt/aksel-icons'
 import { Dokumentoversikt } from './dokumenter/dokumentoversikt'
@@ -39,7 +39,7 @@ export const Person = () => {
   const { fnr } = useParams()
 
   useEffect(() => {
-    if (GYLDIG_FNR(fnr)) {
+    if (fnrHarGyldigFormat(fnr)) {
       hentPerson(fnr!!)
       hentSak(fnr!!)
     }
@@ -55,8 +55,8 @@ export const Person = () => {
     }
   }
 
-  if (!GYLDIG_FNR(fnr)) {
-    return <ApiErrorAlert>Fødselsnummeret {fnr} er ugyldig</ApiErrorAlert>
+  if (!fnrHarGyldigFormat(fnr)) {
+    return <ApiErrorAlert>Fødselsnummeret {fnr} har et ugyldig format (ikke 11 siffer)</ApiErrorAlert>
   }
 
   return (

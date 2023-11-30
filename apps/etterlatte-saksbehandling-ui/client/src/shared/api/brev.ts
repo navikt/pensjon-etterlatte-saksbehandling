@@ -27,6 +27,13 @@ export const oppdaterMottaker = async (props: {
 }): Promise<ApiResponse<IBrev>> =>
   apiClient.post(`/brev/${props.brevId}/mottaker?sakId=${props.sakId}`, { mottaker: props.mottaker })
 
+export const oppdaterTittel = async (args: {
+  brevId: number
+  sakId: number
+  tittel: string
+}): Promise<ApiResponse<IBrev>> =>
+  apiClient.post(`/brev/${args.brevId}/tittel?sakId=${args.sakId}`, { tittel: args.tittel })
+
 export const genererPdf = async (props: {
   brevId: number
   sakId?: number

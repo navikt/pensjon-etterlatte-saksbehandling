@@ -20,7 +20,28 @@ export const TrygdeavtaleVisning = ({ trygdeavtale, avtaler, kriterier }: Trygde
         {avtaleDato && <> - {avtaleDato.beskrivelse}</>}
       </BodyShort>
       {avtaleKriteria && <BodyShort>{avtaleKriteria.beskrivelse}</BodyShort>}
-      {trygdeavtale.arbInntekt1G && <BodyShort>{trygdeavtale.arbInntekt1G}</BodyShort>}
+      {trygdeavtale.personKrets && (
+        <BodyShort>Er avdøde i personkretsen i denne avtalen? {trygdeavtale.personKrets}</BodyShort>
+      )}
+      {trygdeavtale.arbInntekt1G && (
+        <BodyShort>
+          Er arbeidsinntekt i avtaleland på minst 1 G på dødstidspunktet? {trygdeavtale.arbInntekt1G}
+        </BodyShort>
+      )}
+      {trygdeavtale.arbInntekt1GKommentar && <BodyShort>Kommentar: {trygdeavtale.arbInntekt1GKommentar}</BodyShort>}
+      {trygdeavtale.beregArt50 && (
+        <BodyShort>Beregning etter artikkel 50 (EØS-forordning 883/2004)? {trygdeavtale.beregArt50}</BodyShort>
+      )}
+      {trygdeavtale.beregArt50Kommentar && <BodyShort>Kommentar: {trygdeavtale.beregArt50Kommentar}</BodyShort>}
+      {trygdeavtale.nordiskTrygdeAvtale && (
+        <BodyShort>
+          Nordisk trygdeavtale: Skal artikkel 9 anvendes - fremtidig trygdetid avkortes?{' '}
+          {trygdeavtale.nordiskTrygdeAvtale}
+        </BodyShort>
+      )}
+      {trygdeavtale.nordiskTrygdeAvtaleKommentar && (
+        <BodyShort>Kommentar: {trygdeavtale.nordiskTrygdeAvtaleKommentar}</BodyShort>
+      )}
     </TrygdeavtaleBody>
   )
 }

@@ -1,6 +1,7 @@
 package no.nav.etterlatte.grunnlag
 
 import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.grunnlag.adresse.BrevMottaker
 import no.nav.etterlatte.grunnlag.klienter.PdlTjenesterKlientImpl
 import no.nav.etterlatte.grunnlag.klienter.PersondataKlient
@@ -10,6 +11,7 @@ import no.nav.etterlatte.libs.common.behandling.SakOgRolle
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.deserialize
+import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
@@ -18,6 +20,12 @@ import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsnummer
 import no.nav.etterlatte.libs.common.grunnlag.hentNavn
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Navn
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.AVDOED_PDL_V1
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.GJENLEVENDE_FORELDER_PDL_V1
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.INNSENDER_PDL_V1
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.PERSONGALLERI_PDL_V1
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.PERSONGALLERI_V1
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.SOEKER_PDL_V1
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
@@ -31,6 +39,7 @@ import no.nav.etterlatte.libs.sporingslogg.HttpMethod
 import no.nav.etterlatte.libs.sporingslogg.Sporingslogg
 import no.nav.etterlatte.libs.sporingslogg.Sporingsrequest
 import no.nav.etterlatte.pdl.HistorikkForeldreansvar
+import org.jetbrains.annotations.TestOnly
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
@@ -61,6 +70,11 @@ interface GrunnlagService {
     fun hentOpplysningsgrunnlagForSak(sakId: Long): Grunnlag?
 
     fun hentOpplysningsgrunnlag(behandlingId: UUID): Grunnlag?
+
+    fun hentPersonopplysninger(
+        behandlingId: UUID,
+        sakstype: SakType,
+    ): PersonopplysningerResponse
 
     fun hentSakerOgRoller(fnr: Folkeregisteridentifikator): PersonMedSakerOgRoller
 
@@ -94,6 +108,8 @@ interface GrunnlagService {
     fun hentHistoriskForeldreansvar(behandlingId: UUID): Grunnlagsopplysning<JsonNode>?
 
     fun hentVergeadresse(folkeregisteridentifikator: String): BrevMottaker?
+
+    fun hentPersongalleriSamsvar(behandlingId: UUID): PersongalleriSamsvar
 }
 
 class RealGrunnlagService(
@@ -131,6 +147,55 @@ class RealGrunnlagService(
         val grunnlag = opplysningDao.hentAlleGrunnlagForBehandling(behandlingId)
 
         return OpplysningsgrunnlagMapper(grunnlag, persongalleri).hentGrunnlag()
+    }
+
+    override fun hentPersonopplysninger(
+        behandlingId: UUID,
+        sakstype: SakType,
+    ): PersonopplysningerResponse {
+        val grunnlag =
+            opplysningDao.hentGrunnlagAvTypeForBehandling(
+                behandlingId,
+                INNSENDER_PDL_V1,
+                SOEKER_PDL_V1,
+                AVDOED_PDL_V1,
+                GJENLEVENDE_FORELDER_PDL_V1,
+            )
+
+        // Finn siste grunnlag blant relevante typer for unike personer,
+        // slik at hver person kun havner i en av kategoriene
+        val sisteGrunnlagPerFnr =
+            grunnlag.filter {
+                setOf(
+                    SOEKER_PDL_V1,
+                    AVDOED_PDL_V1,
+                    GJENLEVENDE_FORELDER_PDL_V1,
+                ).contains(it.opplysning.opplysningType)
+            }
+                .groupBy { it.opplysning.fnr }
+                .map {
+                    it.value.maxBy { opplysning -> opplysning.hendelseNummer }
+                }
+
+        val innsender =
+            grunnlag
+                .filter { it.opplysning.opplysningType == INNSENDER_PDL_V1 }
+                .maxByOrNull { it.hendelseNummer }
+        val soker = sisteGrunnlagPerFnr.find { it.opplysning.opplysningType == SOEKER_PDL_V1 }
+        val avdode = sisteGrunnlagPerFnr.filter { it.opplysning.opplysningType == AVDOED_PDL_V1 }
+        val gjenlevende =
+            if (sakstype == SakType.OMSTILLINGSSTOENAD) {
+                listOf(soker)
+            } else {
+                sisteGrunnlagPerFnr.filter { it.opplysning.opplysningType == GJENLEVENDE_FORELDER_PDL_V1 }
+            }
+
+        return PersonopplysningerResponse(
+            innsender = innsender?.opplysning?.asPersonopplysning(),
+            soeker = soker?.opplysning?.asPersonopplysning(),
+            avdoede = avdode.map { it.opplysning.asPersonopplysning() },
+            gjenlevende = gjenlevende.mapNotNull { it?.opplysning?.asPersonopplysning() },
+        )
     }
 
     override fun hentSakerOgRoller(fnr: Folkeregisteridentifikator): PersonMedSakerOgRoller {
@@ -234,6 +299,88 @@ class RealGrunnlagService(
     override fun hentVergeadresse(folkeregisteridentifikator: String): BrevMottaker? {
         return persondataKlient.hentAdresseForVerge(folkeregisteridentifikator)
             ?.toBrevMottaker()
+    }
+
+    override fun hentPersongalleriSamsvar(behandlingId: UUID): PersongalleriSamsvar {
+        val grunnlag = opplysningDao.hentAlleGrunnlagForBehandling(behandlingId)
+        val opplysningPersongalleriSak = grunnlag.find { it.opplysning.opplysningType == PERSONGALLERI_V1 }
+        val opplysningPersongalleriPdl = grunnlag.find { it.opplysning.opplysningType == PERSONGALLERI_PDL_V1 }
+        if (opplysningPersongalleriSak == null) {
+            throw GenerellIkkeFunnetException()
+        }
+        val persongalleriISak: Persongalleri = objectMapper.readValue(opplysningPersongalleriSak.opplysning.opplysning.toJson())
+
+        if (opplysningPersongalleriPdl == null) {
+            logger.info("Fant ikke persongalleri fra PDL for behandling med id=$behandlingId, gjør ingen samsvarsjekk")
+            return PersongalleriSamsvar(
+                persongalleri = persongalleriISak,
+                kilde = opplysningPersongalleriSak.opplysning.kilde.tilGenerellKilde(),
+                persongalleriPdl = null,
+                kildePdl = null,
+                problemer = listOf(),
+            )
+        }
+        val persongalleriPdl: Persongalleri = objectMapper.readValue(opplysningPersongalleriPdl.opplysning.opplysning.toJson())
+
+        val valideringsfeil =
+            valideringsfeilPersongalleriSakPdl(
+                persongalleriISak = persongalleriISak,
+                persongalleriPdl = persongalleriPdl,
+            )
+
+        return PersongalleriSamsvar(
+            persongalleri = persongalleriISak,
+            kilde = opplysningPersongalleriSak.opplysning.kilde.tilGenerellKilde(),
+            persongalleriPdl = persongalleriPdl,
+            kildePdl = opplysningPersongalleriPdl.opplysning.kilde.tilGenerellKilde(),
+            problemer = valideringsfeil,
+        )
+    }
+
+    @TestOnly
+    fun valideringsfeilPersongalleriSakPdl(
+        persongalleriISak: Persongalleri,
+        persongalleriPdl: Persongalleri,
+    ): List<MismatchPersongalleri> {
+        val forskjellerAvdoede =
+            forskjellerMellomPersonerPdlOgSak(
+                personerPdl = persongalleriPdl.avdoed,
+                personerSak = persongalleriISak.avdoed,
+            )
+        val forskjellerGjenlevende =
+            forskjellerMellomPersonerPdlOgSak(
+                personerPdl = persongalleriPdl.gjenlevende,
+                personerSak = persongalleriISak.gjenlevende,
+            )
+        val forskjellerSoesken =
+            forskjellerMellomPersonerPdlOgSak(
+                personerPdl = persongalleriPdl.soesken,
+                persongalleriISak.soesken,
+            )
+        return listOfNotNull(
+            MismatchPersongalleri.MANGLER_GJENLEVENDE.takeIf { forskjellerGjenlevende.kunPdl.isNotEmpty() },
+            MismatchPersongalleri.MANGLER_AVDOED.takeIf { forskjellerAvdoede.kunPdl.isNotEmpty() },
+            MismatchPersongalleri.MANGLER_SOESKEN.takeIf { forskjellerSoesken.kunPdl.isNotEmpty() },
+            MismatchPersongalleri.EKSTRA_GJENLEVENDE.takeIf { forskjellerGjenlevende.kunSak.isNotEmpty() },
+            MismatchPersongalleri.EKSTRA_AVDOED.takeIf { forskjellerAvdoede.kunSak.isNotEmpty() },
+            MismatchPersongalleri.EKSTRA_SOESKEN.takeIf { forskjellerSoesken.kunSak.isNotEmpty() },
+            MismatchPersongalleri.HAR_PERSONER_UTEN_IDENTER.takeIf { !persongalleriPdl.personerUtenIdent.isNullOrEmpty() },
+        )
+    }
+
+    private fun forskjellerMellomPersonerPdlOgSak(
+        personerPdl: List<String>,
+        personerSak: List<String>,
+    ): ForskjellMellomPersoner {
+        val pdl = personerPdl.toSet()
+        val sak = personerSak.toSet()
+
+        val kunIPdl = pdl subtract sak
+        val kunISak = sak subtract pdl
+        return ForskjellMellomPersoner(
+            kunSak = kunISak.toList(),
+            kunPdl = kunIPdl.toList(),
+        )
     }
 
     private fun mapTilRolle(
@@ -405,6 +552,48 @@ private fun HistorikkForeldreansvar.tilGrunnlagsopplysning(fnr: Folkeregisteride
     )
 }
 
+private fun Grunnlagsopplysning<JsonNode>.asPersonopplysning(): Personopplysning {
+    return Personopplysning(
+        id = this.id,
+        kilde = this.kilde.tilGenerellKilde(),
+        opplysningType = this.opplysningType,
+        opplysning = objectMapper.treeToValue(opplysning, Person::class.java),
+    )
+}
+
+private fun Grunnlagsopplysning.Kilde.tilGenerellKilde() =
+    when (this) {
+        is Grunnlagsopplysning.Pdl ->
+            GenerellKilde(
+                type = this.type,
+                tidspunkt = this.tidspunktForInnhenting,
+                detalj = this.registersReferanse,
+            )
+
+        is Grunnlagsopplysning.Persondata ->
+            GenerellKilde(
+                type = this.type,
+                tidspunkt = this.tidspunktForInnhenting,
+                detalj = this.registersReferanse,
+            )
+
+        is Grunnlagsopplysning.Pesys -> GenerellKilde(type = this.type, tidspunkt = this.tidspunkt)
+        is Grunnlagsopplysning.Privatperson ->
+            GenerellKilde(
+                type = this.type,
+                tidspunkt = this.mottatDato,
+                detalj = this.fnr,
+            )
+
+        is Grunnlagsopplysning.RegelKilde -> GenerellKilde(type = this.type, tidspunkt = this.ts)
+        is Grunnlagsopplysning.Saksbehandler ->
+            GenerellKilde(
+                type = this.type,
+                tidspunkt = this.tidspunkt,
+                detalj = this.ident,
+            )
+    }
+
 data class GrunnlagsopplysningerPersonPdl(
     val person: Person,
     val personDto: PersonDTO,
@@ -428,3 +617,25 @@ class LaastGrunnlagKanIkkeEndres(val behandlingId: UUID) :
             låst til en versjon av grunnlag (behandlingId=$behandlingId)
             """,
     )
+
+data class PersonopplysningerResponse(
+    val innsender: Personopplysning?,
+    val soeker: Personopplysning?,
+    val avdoede: List<Personopplysning>,
+    val gjenlevende: List<Personopplysning>,
+)
+
+data class Personopplysning(
+    val opplysningType: Opplysningstype,
+    val id: UUID,
+    val kilde: GenerellKilde,
+    val opplysning: Person,
+)
+
+data class GenerellKilde(
+    val type: String,
+    val tidspunkt: Tidspunkt,
+    val detalj: String? = null,
+)
+
+data class ForskjellMellomPersoner(val kunSak: List<String>, val kunPdl: List<String>)

@@ -1,12 +1,12 @@
-import { IPdlPerson } from '~shared/types/Person'
 import { PersonIcon } from '@navikt/aksel-icons'
 import { format } from 'date-fns'
 import { PersonInfoAdresse } from '../personer/personinfo/PersonInfoAdresse'
 import { BodyShort, Detail, Heading } from '@navikt/ds-react'
 import styled from 'styled-components'
-import { KildePdl } from '~shared/types/kilde'
 import { DatoFormat, formaterFnr } from '~utils/formattering'
 import { IconSize } from '~shared/types/Icon'
+import { GrunnlagKilde } from '~shared/types/grunnlag'
+import { IPdlPerson } from '~shared/types/Person'
 
 const PersonBorder = styled.div`
   padding: 1.2em 1em 1em 0em;
@@ -24,7 +24,7 @@ const PersonInfoWrapper = styled.div`
 
 type Props = {
   person: IPdlPerson
-  kilde: KildePdl
+  kilde: GrunnlagKilde
   avdoed?: boolean
 }
 
@@ -44,7 +44,7 @@ export const Person = ({ person, kilde, avdoed = false }: Props) => {
         <div>
           <PersonInfoAdresse adresser={person.bostedsadresse} visHistorikk={false} adresseDoedstidspunkt={avdoed} />
           <Detail>{`${kilde.type.toUpperCase()} ${format(
-            new Date(kilde.tidspunktForInnhenting),
+            new Date(kilde.tidspunkt),
             DatoFormat.DAG_MAANED_AAR
           )}`}</Detail>
         </div>

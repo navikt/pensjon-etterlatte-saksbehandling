@@ -12,6 +12,7 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vedtak.LoependeYtelseDTO
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
+import no.nav.etterlatte.libs.common.vedtak.VedtakNyDto
 import no.nav.etterlatte.rapidsandrivers.migrering.MigreringKjoringVariant
 import no.nav.etterlatte.vedtaksvurdering.VedtakOgRapid
 import java.time.LocalDate
@@ -36,9 +37,9 @@ interface VedtakService {
 
     fun tilbakestillVedtak(behandlingId: UUID)
 
-    fun tilSamordningVedtak(behandlingId: UUID): VedtakDto
+    fun tilSamordningVedtak(behandlingId: UUID): VedtakNyDto
 
-    fun samordnetVedtak(vedtakId: String): VedtakDto
+    fun samordnetVedtak(vedtakId: String): VedtakNyDto
 
     fun iverksattVedtak(behandlingId: UUID): VedtakDto
 }
@@ -78,14 +79,14 @@ class VedtakServiceImpl(private val vedtakKlient: HttpClient, private val url: S
         }
     }
 
-    override fun tilSamordningVedtak(behandlingId: UUID): VedtakDto =
+    override fun tilSamordningVedtak(behandlingId: UUID): VedtakNyDto =
         runBlocking {
             vedtakKlient.post("$url/api/vedtak/$behandlingId/tilsamordning") {
                 contentType(ContentType.Application.Json)
             }.body()
         }
 
-    override fun samordnetVedtak(vedtakId: String): VedtakDto =
+    override fun samordnetVedtak(vedtakId: String): VedtakNyDto =
         runBlocking {
             vedtakKlient.post("$url/vedtak/samordnet/$vedtakId") {
                 contentType(ContentType.Application.Json)

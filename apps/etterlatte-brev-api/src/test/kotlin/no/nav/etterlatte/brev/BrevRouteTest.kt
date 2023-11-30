@@ -230,6 +230,7 @@ internal class BrevRouteTest {
             id = id,
             sakId = 41,
             behandlingId = null,
+            tittel = null,
             prosessType = BrevProsessType.AUTOMATISK,
             soekerFnr = "soeker_fnr",
             status = Status.OPPRETTET,

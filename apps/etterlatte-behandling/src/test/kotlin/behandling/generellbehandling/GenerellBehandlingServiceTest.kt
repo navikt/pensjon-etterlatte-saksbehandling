@@ -649,12 +649,13 @@ class GenerellBehandlingServiceTest {
                 .first { o -> o.status === Status.NY && o.erAttestering() }
         oppgaveService.tildelSaksbehandler(nyAttesteringsoppgave.id, ATTESTANT.ident)
 
-        val kommentar = Kommentar("Ikke godkjent")
+        val begrunnelse = "Ikke godkjent"
+        val kommentar = Kommentar(begrunnelse)
         service.underkjenn(behandlingMedKravpakke.id, ATTESTANT, kommentar)
         val underkjentBehandling = service.hentBehandlingMedId(behandlingMedKravpakke.id)
 
-        underkjentBehandling?.status shouldBe GenerellBehandling.Status.OPPRETTET
-
+        underkjentBehandling?.status shouldBe GenerellBehandling.Status.RETURNERT
+        underkjentBehandling?.returnertKommenar shouldBe begrunnelse
         verify {
             hendelseDao.generellBehandlingHendelse(
                 any(),

@@ -8,21 +8,23 @@ import {
 } from '~components/behandling/soeknadsoversikt/styled'
 import { GyldigFramsattVurdering } from '~components/behandling/soeknadsoversikt/gyldigFramsattSoeknad/omstillingsstoenad/GyldigFramsattVurdering'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
-import { formaterKildePdl } from '~components/behandling/soeknadsoversikt/utils'
+import { formaterGrunnlagKilde } from '~components/behandling/soeknadsoversikt/utils'
 import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
 import { StatusIconProps } from '~shared/icons/statusIcon'
+import { Personopplysning } from '~shared/types/grunnlag'
 
 export const GyldigFramsattOmstillingsstoenad = ({
   behandling,
+  innsender,
   gyldigFremsattTilStatusIcon,
 }: {
   gyldigFremsattTilStatusIcon: StatusIconProps
   behandling: IDetaljertBehandling
+  innsender?: Personopplysning
 }) => {
   const redigerbar = behandlingErRedigerbar(behandling.status)
-  const innsender = behandling.familieforhold?.gjenlevende
   const navn = innsender ? `${innsender.opplysning.fornavn} ${innsender.opplysning.etternavn}` : 'Ukjent'
-  const undertekst = formaterKildePdl(innsender?.kilde)
+  const undertekst = formaterGrunnlagKilde(innsender?.kilde)
 
   return (
     <LovtekstMedLenke

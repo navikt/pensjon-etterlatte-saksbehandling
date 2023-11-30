@@ -47,12 +47,8 @@ export function TilbakekrevingBrev({ tilbakekreving }: { tilbakekreving: Tilbake
     } else {
       opprettVedtak(tilbakekreving.id).then(() => hentBrev())
     }
+    getVergeadresse(tilbakekreving.id)
   }, [tilbakekreving, vedtak])
-  useEffect(() => {
-    if (tilbakekreving) {
-      getVergeadresse(tilbakekreving.id)
-    }
-  }, [tilbakekreving])
 
   if (isPendingOrInitial(hentBrevStatus)) {
     return <Spinner visible label="Henter brev ..." />
@@ -80,7 +76,7 @@ export function TilbakekrevingBrev({ tilbakekreving }: { tilbakekreving: Tilbake
               <MottakerPanel
                 vedtaksbrev={vedtaksbrev}
                 oppdater={(val) => setVedtaksbrev({ ...vedtaksbrev, mottaker: val })}
-                redigerbar={false}
+                redigerbar={true}
                 vergeadresse={getData(vergeadresse)}
               />
             )}

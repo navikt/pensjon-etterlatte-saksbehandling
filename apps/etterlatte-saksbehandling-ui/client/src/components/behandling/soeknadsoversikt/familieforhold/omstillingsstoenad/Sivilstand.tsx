@@ -1,6 +1,6 @@
 import { HeartIcon } from '@navikt/aksel-icons'
 import { Heading, Table } from '@navikt/ds-react'
-import { IFamilieforhold, IPdlPerson } from '~shared/types/Person'
+import { Familieforhold, IPdlPerson } from '~shared/types/Person'
 import { FlexHeader, IconWrapper, TableWrapper } from '~components/behandling/soeknadsoversikt/familieforhold/styled'
 import { format } from 'date-fns'
 import styled from 'styled-components'
@@ -13,12 +13,12 @@ export const SivilstandWrapper = styled.span`
 `
 
 type Props = {
-  familieforhold: IFamilieforhold
+  familieforhold: Familieforhold
   avdoed: IPdlPerson
 }
 
 export const Sivilstand = ({ familieforhold, avdoed }: Props) => {
-  const sivilstand = familieforhold.gjenlevende.opplysning.sivilstand
+  const sivilstand = familieforhold.gjenlevende.flatMap((it) => it.opplysning.sivilstand) ?? []
 
   return (
     <SivilstandWrapper>
@@ -42,26 +42,29 @@ export const Sivilstand = ({ familieforhold, avdoed }: Props) => {
           </Table.Header>
           <Table.Body>
             {sivilstand ? (
-              sivilstand?.map((ss, index) => (
-                <Table.Row key={index}>
-                  <Table.DataCell>{ss.sivilstatus}</Table.DataCell>
-                  <Table.DataCell>
-                    {ss.gyldigFraOgMed
-                      ? format(new Date(ss.gyldigFraOgMed), DatoFormat.DAG_MAANED_AAR)
-                      : ' Mangler dato'}
-                  </Table.DataCell>
-                  <Table.DataCell>
-                    {ss.relatertVedSiviltilstand === avdoed.foedselsnummer
-                      ? `${avdoed.fornavn} ${avdoed.etternavn}`
-                      : 'Annen person'}
-                  </Table.DataCell>
-                  <Table.DataCell>
-                    {ss.relatertVedSiviltilstand === avdoed.foedselsnummer
-                      ? format(new Date(avdoed.doedsdato!), DatoFormat.DAG_MAANED_AAR)
-                      : ''}
-                  </Table.DataCell>
-                </Table.Row>
-              ))
+              sivilstand?.flatMap(
+                (ss, index) =>
+                  ss && (
+                    <Table.Row key={index}>
+                      <Table.DataCell>{ss.sivilstatus}</Table.DataCell>
+                      <Table.DataCell>
+                        {ss.gyldigFraOgMed
+                          ? format(new Date(ss.gyldigFraOgMed), DatoFormat.DAG_MAANED_AAR)
+                          : ' Mangler dato'}
+                      </Table.DataCell>
+                      <Table.DataCell>
+                        {ss.relatertVedSiviltilstand === avdoed.foedselsnummer
+                          ? `${avdoed.fornavn} ${avdoed.etternavn}`
+                          : 'Annen person'}
+                      </Table.DataCell>
+                      <Table.DataCell>
+                        {ss.relatertVedSiviltilstand === avdoed.foedselsnummer
+                          ? format(new Date(avdoed.doedsdato!), DatoFormat.DAG_MAANED_AAR)
+                          : ''}
+                      </Table.DataCell>
+                    </Table.Row>
+                  )
+              )
             ) : (
               <Table.Row>
                 <Table.DataCell aria-colspan={4} colSpan={4} align="center">

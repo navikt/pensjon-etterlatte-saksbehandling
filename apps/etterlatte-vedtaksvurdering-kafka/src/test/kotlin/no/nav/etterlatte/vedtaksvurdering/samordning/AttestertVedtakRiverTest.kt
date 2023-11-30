@@ -29,8 +29,8 @@ internal class AttestertVedtakRiverTest {
         every { vedtakService.tilSamordningVedtak(behandlingIdVal) } returns
             mockk {
                 every { sak } returns mockk { every { id } returns sakIdVal }
-                every { behandling } returns mockk { every { id } returns behandlingIdVal }
-                every { vedtakId } returns vedtakIdVal
+                every { behandlingId } returns behandlingIdVal
+                every { id } returns vedtakIdVal
             }
 
         inspector.sendTestMessage(melding)

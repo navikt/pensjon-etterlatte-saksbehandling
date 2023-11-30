@@ -53,7 +53,7 @@ internal class JournalfoerVedtaksbrevRiver(
                 VedtakTilJournalfoering(
                     vedtakId = packet["vedtak.id"].asLong(),
                     sak = deserialize(packet["vedtak.sak"].toJson()),
-                    behandlingId = UUID.fromString(packet["vedtak.behandlingId"].asText()),
+                    behandlingId = hentBehandling(packet),
                     ansvarligEnhet = packet["vedtak.vedtakFattet.ansvarligEnhet"].asText(),
                 )
             logger.info("Nytt vedtak med id ${vedtak.vedtakId} er attestert. Ferdigstiller vedtaksbrev.")
@@ -94,10 +94,21 @@ internal class JournalfoerVedtaksbrevRiver(
                 response.journalpostId,
             )
         } catch (e: Exception) {
-            logger.error("Feil ved ferdigstilling av vedtaksbrev: ", e)
-            throw e
+            val saksbehandler = packet["vedtak.vedtakFattet.ansvarligSaksbehandler"].asText()
+            if (saksbehandler == Fagsaksystem.EY.navn) {
+                logger.error(
+                    "Feila på å journalføre brev for behandling ${hentBehandling(packet)}. " +
+                        "Dette må følges opp manuelt av migreringsutviklerne.",
+                )
+                return
+            } else {
+                logger.error("Feil ved ferdigstilling av vedtaksbrev: ", e)
+                throw e
+            }
         }
     }
+
+    private fun hentBehandling(packet: JsonMessage) = UUID.fromString(packet["vedtak.behandlingId"].asText())
 
     private fun RapidsConnection.svarSuksess(
         packet: JsonMessage,

@@ -1,4 +1,3 @@
-
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.mockk.coVerify
 import io.mockk.every
@@ -23,6 +22,7 @@ import no.nav.etterlatte.rapidsandrivers.migrering.TRYGDETID_KEY
 import no.nav.etterlatte.rapidsandrivers.migrering.Trygdetid
 import no.nav.etterlatte.rapidsandrivers.migrering.Trygdetidsgrunnlag
 import no.nav.etterlatte.rapidsandrivers.migrering.VILKAARSVURDERT_KEY
+import no.nav.etterlatte.trygdetid.TrygdetidType
 import no.nav.etterlatte.trygdetid.kafka.MigreringHendelserRiver
 import no.nav.etterlatte.trygdetid.kafka.TrygdetidService
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -432,12 +432,16 @@ internal class MigreringHendelserRiverTest {
                 spraak = Spraak.NN,
             )
         every { trygdetidService.beregnTrygdetid(capture(behandlingId)) } returns trygdetidDto
+        every { trygdetidService.reberegnUtenFremtidigTrygdetid(capture(behandlingId)) } returns
+            trygdetidDto.copy(
+                trygdetidGrunnlag = trygdetidDto.trygdetidGrunnlag.filter { it.type == TrygdetidType.FAKTISK.toString() },
+            )
         every {
             trygdetidService.beregnTrygdetidGrunnlag(
                 any(),
                 any(),
             )
-        }
+        } returns trygdetidDto
         every {
             trygdetidService.overstyrBeregnetTrygdetid(
                 any(),
@@ -475,6 +479,7 @@ internal class MigreringHendelserRiverTest {
         assertEquals(request.beregning.anvendtTrygdetid, beregnetTrygdetid.captured.samletTrygdetidNorge)
         coVerify(exactly = 1) { trygdetidService.beregnTrygdetid(behandlingId.captured) }
         coVerify(exactly = 1) { trygdetidService.beregnTrygdetidGrunnlag(behandlingId.captured, any()) }
+        coVerify(exactly = 1) { trygdetidService.reberegnUtenFremtidigTrygdetid(behandlingId.captured) }
         coVerify(exactly = 1) {
             trygdetidService.overstyrBeregnetTrygdetid(
                 behandlingId.captured,

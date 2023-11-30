@@ -10,13 +10,13 @@ import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeServi
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
+import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
 import no.nav.etterlatte.libs.common.behandling.Flyktning
 import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.JaNeiMedBegrunnelse
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Utenlandstilknytning
-import no.nav.etterlatte.libs.common.behandling.UtenlandstilknytningType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.retry
 import no.nav.etterlatte.oppgave.OppgaveService
@@ -82,15 +82,31 @@ class MigreringService(
                             ),
                     )
 
-                    sakService.oppdaterUtenlandstilknytning(
-                        sakId = behandling.sak.id,
-                        utenlandstilknytning =
-                            Utenlandstilknytning(
-                                type = UtenlandstilknytningType.NASJONAL, // TODO Må utredes fra pesys sak
-                                kilde = Grunnlagsopplysning.Pesys.create(),
-                                begrunnelse = "Automatisk migrert fra Pesys",
-                            ),
-                    )
+                    request.utenlandstilknytningType?.let { utlandstilknytning ->
+                        sakService.oppdaterUtenlandstilknytning(
+                            sakId = behandling.sak.id,
+                            utenlandstilknytning =
+                                Utenlandstilknytning(
+                                    type = utlandstilknytning,
+                                    kilde = Grunnlagsopplysning.Pesys.create(),
+                                    begrunnelse = "Automatisk migrert fra Pesys",
+                                ),
+                        )
+                    }
+
+                    if (request.harMindreEnn40AarsTrygdetid() || request.erEoesBeregnet()) {
+                        behandlingService.oppdaterBoddEllerArbeidetUtlandet(
+                            behandlingId = behandling.id,
+                            boddEllerArbeidetUtlandet =
+                                BoddEllerArbeidetUtlandet(
+                                    boddEllerArbeidetUtlandet = true,
+                                    boddArbeidetEosNordiskKonvensjon = request.erEoesBeregnet().takeIf { it },
+                                    kilde = Grunnlagsopplysning.Pesys.create(),
+                                    begrunnelse =
+                                        "Automatisk vurdert ved migrering fra Pesys. Vurdering av utlandsopphold kan være mangelfull.",
+                                ),
+                        )
+                    }
 
                     val nyopprettaOppgave =
                         requireNotNull(behandlingOgOppgave.oppgave) {

@@ -37,6 +37,7 @@ dependencies {
     implementation(libs.metrics.micrometer.prometheus)
     implementation(libs.metrics.prometheus.simpleclientcommon)
     implementation(libs.metrics.prometheus.simpleclienthotspot)
+    implementation(project(":libs:etterlatte-funksjonsbrytere"))
 
     testImplementation(libs.test.jupiter.engine)
     testImplementation(libs.ktor2.servertests)

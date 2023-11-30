@@ -71,7 +71,7 @@ internal class MigreringHendelserRiver(
         request: MigreringRequest,
         behandlingId: UUID,
     ) = try {
-        val trygdetid =
+        val trygdetidMedFremtidig =
             request.trygdetid.perioder.map { periode ->
                 val grunnlag = tilGrunnlag(periode)
                 logger.info(
@@ -79,6 +79,13 @@ internal class MigreringHendelserRiver(
                 )
                 trygdetidService.beregnTrygdetidGrunnlag(behandlingId, grunnlag)
             }.last()
+
+        val trygdetid =
+            if (!trygdetidIGjennyStemmerMedTrygdetidIPesys(trygdetidMedFremtidig, request.beregning)) {
+                trygdetidService.reberegnUtenFremtidigTrygdetid(behandlingId)
+            } else {
+                trygdetidMedFremtidig
+            }
 
         check(trygdetidIGjennyStemmerMedTrygdetidIPesys(trygdetid, request.beregning)) {
             "Beregnet trygdetid i Gjenny basert på perioder fra Pesys stemmer ikke med anvendt trygdetid i Pesys"

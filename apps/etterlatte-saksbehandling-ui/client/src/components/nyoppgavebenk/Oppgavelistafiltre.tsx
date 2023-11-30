@@ -140,7 +140,7 @@ function filtrerOppgavekilde(oppgaveKildeFilterKeys: OppgaveKildeFilterKeys, opp
 
 function finnFnrIOppgaver(fnr: string, oppgaver: OppgaveDTO[]): OppgaveDTO[] {
   if (fnr && fnr.length > 0) {
-    return oppgaver.filter((o) => o.fnr.includes(fnr))
+    return oppgaver.filter((o) => o.fnr.includes(fnr.trim()))
   } else {
     return oppgaver
   }

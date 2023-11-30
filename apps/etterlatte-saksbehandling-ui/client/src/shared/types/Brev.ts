@@ -1,6 +1,7 @@
 export interface IBrev {
   id: number
   sakId: number
+  tittel: string
   behandlingId: string
   prosessType: BrevProsessType
   soekerFnr: string
@@ -47,4 +48,10 @@ export enum BrevProsessType {
   AUTOMATISK = 'AUTOMATISK',
   REDIGERBAR = 'REDIGERBAR',
   MANUELL = 'MANUELL',
+}
+
+export enum Spraak {
+  NB = 'nb',
+  NN = 'nn',
+  EN = 'en',
 }

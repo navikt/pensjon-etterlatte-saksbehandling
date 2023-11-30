@@ -43,5 +43,4 @@ data class DetaljertBehandlingDto(
 
 data class Familieforhold(
     val avdoede: Grunnlagsopplysning<Person>?,
-    val gjenlevende: Grunnlagsopplysning<Person>?,
 )

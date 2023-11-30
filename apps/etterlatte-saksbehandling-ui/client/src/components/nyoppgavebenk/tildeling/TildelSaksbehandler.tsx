@@ -40,7 +40,7 @@ export const TildelSaksbehandler = (props: {
     ),
     () => (
       <Alert variant="success" size="small">
-        Oppgave tildelt deg
+        Oppgaven er tildelt deg
       </Alert>
     )
   )

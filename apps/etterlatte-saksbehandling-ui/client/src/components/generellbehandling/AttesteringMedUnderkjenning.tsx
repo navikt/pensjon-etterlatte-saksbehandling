@@ -1,10 +1,10 @@
-import { SidebarPanel } from '~shared/components/Sidebar'
 import { Alert, Heading, Radio, RadioGroup } from '@navikt/ds-react'
-import { RadioGroupWrapper } from '~components/behandling/attestering/styled'
+import { Info, RadioGroupWrapper, Tekst } from '~components/behandling/attestering/styled'
 import React, { useState } from 'react'
 import { UnderkjenneModal } from '~components/generellbehandling/UnderkjenneModal'
 import { Attesteringmodal } from '~components/generellbehandling/Attesteringmodal'
 import { Generellbehandling, KravpakkeUtland } from '~shared/types/Generellbehandling'
+import { formaterKanskjeStringDatoMedFallback } from '~utils/formattering'
 
 type BeslutningsTyper = 'UNDERKJENN' | 'GODKJENN'
 const Beslutning: Record<BeslutningsTyper, string> = {
@@ -20,7 +20,7 @@ export const AttesteringMedUnderkjenning = (props: {
   const [beslutning, setBeslutning] = useState<BeslutningsTyper>()
 
   return (
-    <SidebarPanel>
+    <>
       {oppgaveErTildeltInnloggetBruker && (
         <>
           <Alert variant="info" size="small">
@@ -29,6 +29,20 @@ export const AttesteringMedUnderkjenning = (props: {
           <br />
           <>
             <Heading size="xsmall">Beslutning</Heading>
+            <div className="flex">
+              <div>
+                <Info>Saksbehandler</Info>
+                {utlandsBehandling.behandler?.saksbehandler ? (
+                  <Tekst>{utlandsBehandling.behandler?.saksbehandler}</Tekst>
+                ) : (
+                  <Alert variant="error">Saksbehandler mangler og du vil da ikke få attestert behandlingen</Alert>
+                )}
+              </div>
+              <Info>Behandlet dato</Info>
+              <Tekst>
+                {formaterKanskjeStringDatoMedFallback('Ikke registrert', utlandsBehandling.behandler?.tidspunkt)}
+              </Tekst>
+            </div>
             <RadioGroupWrapper>
               <RadioGroup
                 disabled={false}
@@ -48,6 +62,6 @@ export const AttesteringMedUnderkjenning = (props: {
           </>
         </>
       )}
-    </SidebarPanel>
+    </>
   )
 }

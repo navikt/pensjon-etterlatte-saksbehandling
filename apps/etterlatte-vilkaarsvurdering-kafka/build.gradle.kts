@@ -8,6 +8,7 @@ dependencies {
     implementation(project(":libs:etterlatte-ktor"))
     implementation(project(":libs:saksbehandling-common"))
     implementation(project(":libs:etterlatte-vilkaarsvurdering-model"))
+    implementation(project(":libs:etterlatte-migrering-model"))
 
     implementation(libs.ktor2.okhttp)
     implementation(libs.ktor2.clientcore)

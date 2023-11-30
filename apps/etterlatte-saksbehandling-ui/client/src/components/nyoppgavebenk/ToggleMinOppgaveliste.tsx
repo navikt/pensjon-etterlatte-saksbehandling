@@ -33,6 +33,7 @@ export const ToggleMinOppgaveliste = () => {
   const sorterOppgaverEtterOpprettet = (oppgaver: OppgaveDTO[]) => {
     return oppgaver.sort((a, b) => new Date(b.opprettet).getTime() - new Date(a.opprettet).getTime())
   }
+
   useEffect(() => {
     if (isSuccess(oppgaver) && isSuccess(gosysOppgaver)) {
       const alleOppgaver = sorterOppgaverEtterOpprettet([...oppgaver.data, ...gosysOppgaver.data])

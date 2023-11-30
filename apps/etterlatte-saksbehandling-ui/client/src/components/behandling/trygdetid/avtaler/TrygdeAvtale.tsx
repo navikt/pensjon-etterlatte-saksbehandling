@@ -106,6 +106,7 @@ export const TrygdeAvtale = ({ redigerbar }: Props) => {
           avtaleKode: trygdeavtale.avtaleKode,
           avtaleDatoKode: trygdeavtale.avtaleDatoKode,
           avtaleKriteriaKode: trygdeavtale.avtaleKriteriaKode,
+          personKrets: trygdeavtale.personKrets,
           arbInntekt1G: trygdeavtale.arbInntekt1G,
           arbInntekt1GKommentar: trygdeavtale.arbInntekt1GKommentar,
           beregArt50: trygdeavtale.beregArt50,
@@ -294,12 +295,10 @@ export const TrygdeAvtale = ({ redigerbar }: Props) => {
                   <FlexRow $spacing>
                     <Textarea
                       style={{ padding: '10px' }}
-                      label="Kommentar"
+                      label="Kommentar: Er arbeidsinntekt i avtaleland på minst 1 G på dødstidspunktet?"
                       hideLabel={true}
                       value={trygdeavtale.arbInntekt1GKommentar}
-                      onChange={() =>
-                        setTrygdeavtale({ ...trygdeavtale, arbInntekt1GKommentar: trygdeavtale.arbInntekt1GKommentar })
-                      }
+                      onChange={(e) => setTrygdeavtale({ ...trygdeavtale, arbInntekt1GKommentar: e.target.value })}
                       minRows={2}
                       size="small"
                       autoComplete="off"
@@ -361,12 +360,10 @@ export const TrygdeAvtale = ({ redigerbar }: Props) => {
                   <FlexRow $spacing>
                     <Textarea
                       style={{ padding: '10px' }}
-                      label="Kommentar fra attestant"
+                      label="Kommentar: Beregning etter artikkel 50  "
                       hideLabel={true}
                       value={trygdeavtale.beregArt50Kommentar}
-                      onChange={() =>
-                        setTrygdeavtale({ ...trygdeavtale, beregArt50Kommentar: trygdeavtale.beregArt50Kommentar })
-                      }
+                      onChange={(e) => setTrygdeavtale({ ...trygdeavtale, beregArt50Kommentar: e.target.value })}
                       minRows={2}
                       size="small"
                       autoComplete="off"
@@ -428,13 +425,13 @@ export const TrygdeAvtale = ({ redigerbar }: Props) => {
                   <FlexRow $spacing>
                     <Textarea
                       style={{ padding: '10px' }}
-                      label="Kommentar fra attestant"
+                      label="Kommentar : Nordisk trygdeavtale: Skal artikkel 9 anvendes - fremtidig trygdetid avkortes?"
                       hideLabel={true}
                       value={trygdeavtale.nordiskTrygdeAvtaleKommentar}
-                      onChange={() =>
+                      onChange={(e) =>
                         setTrygdeavtale({
                           ...trygdeavtale,
-                          nordiskTrygdeAvtaleKommentar: trygdeavtale.nordiskTrygdeAvtaleKommentar,
+                          nordiskTrygdeAvtaleKommentar: e.target.value,
                         })
                       }
                       minRows={2}

@@ -1,25 +1,36 @@
-import { IGyldighetproving } from '~shared/types/IDetaljertBehandling'
-import { VurderingsResultat } from '~shared/types/VurderingsResultat'
 import { InfoWrapper } from '../../styled'
 import { Info } from '../../Info'
+import { Grunnlagsopplysning, Personopplysning } from '~shared/types/grunnlag'
+import { Persongalleri } from '~shared/types/Person'
+import { KildePdl } from '~shared/types/kilde'
 
 interface Props {
-  innsenderHarForeldreansvar: IGyldighetproving | undefined
+  persongalleriGrunnlag: Grunnlagsopplysning<Persongalleri, KildePdl>
+  gjenlevendeGrunnlag: Personopplysning | undefined
+  harKildePesys: Boolean
 }
 
-export const Foreldreansvar = ({ innsenderHarForeldreansvar }: Props) => {
-  const navn =
-    innsenderHarForeldreansvar?.resultat === VurderingsResultat.OPPFYLT
-      ? innsenderHarForeldreansvar?.basertPaaOpplysninger?.innsender?.navn
-      : undefined
+export const Foreldreansvar = ({ persongalleriGrunnlag, gjenlevendeGrunnlag, harKildePesys }: Props) => {
   const label = 'Foreldreansvar'
-  const tekst = settTekst(innsenderHarForeldreansvar?.resultat)
+  if (harKildePesys) {
+    return (
+      <InfoWrapper>
+        <Info tekst="Ukjent" undertekst="Mangler info" label={label} />
+      </InfoWrapper>
+    )
+  }
 
-  function settTekst(vurdering: VurderingsResultat | undefined): string {
-    switch (vurdering) {
-      case VurderingsResultat.OPPFYLT:
+  const persongalleri = persongalleriGrunnlag.opplysning
+  const gjenlevende = gjenlevendeGrunnlag?.opplysning
+  const oppfylt = persongalleri.innsender == gjenlevende?.foedselsnummer
+  const navn = oppfylt ? [gjenlevende?.fornavn, gjenlevende?.mellomnavn, gjenlevende?.etternavn].join(' ') : 'Ukjent'
+  const tekst = settTekst(oppfylt)
+
+  function settTekst(oppfylt: Boolean): string {
+    switch (oppfylt) {
+      case true:
         return ''
-      case VurderingsResultat.IKKE_OPPFYLT:
+      case false:
         return 'Innsender har ikke foreldreansvar'
       default:
         return 'Mangler info'

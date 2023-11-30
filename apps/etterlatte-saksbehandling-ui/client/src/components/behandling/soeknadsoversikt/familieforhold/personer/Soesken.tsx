@@ -5,10 +5,12 @@ import { PersonInfoAdresse } from './personinfo/PersonInfoAdresse'
 import React from 'react'
 import differenceInYears from 'date-fns/differenceInYears'
 import { hentAdresserEtterDoedsdato } from '~components/behandling/felles/utils'
-import { IFamilieforhold, IPdlPerson } from '~shared/types/Person'
+import { Familieforhold, IPdlPerson } from '~shared/types/Person'
 
-export const Soesken = ({ person, familieforhold }: { person: IPdlPerson; familieforhold: IFamilieforhold }) => {
-  const erHelsoesken = (fnr: string) => familieforhold.gjenlevende?.opplysning.familieRelasjon?.barn?.includes(fnr)
+export const Soesken = ({ person, familieforhold }: { person: IPdlPerson; familieforhold: Familieforhold }) => {
+  const avdoede = familieforhold.avdoede.find((po) => po)!
+  const gjenlevende = familieforhold.gjenlevende?.find((po) => po)
+  const erHelsoesken = (fnr: string) => gjenlevende?.opplysning.familieRelasjon?.barn?.includes(fnr)
 
   return (
     <PersonBorder key={person.foedselsnummer}>
@@ -27,9 +29,7 @@ export const Soesken = ({ person, familieforhold }: { person: IPdlPerson; famili
         <PersonInfoAdresse
           adresser={hentAdresserEtterDoedsdato(
             person.bostedsadresse!!,
-            familieforhold.avdoede.opplysning.doedsdato
-              ? familieforhold.avdoede.opplysning.doedsdato.toString()
-              : 'Ingen dødsdato for avdød'
+            avdoede.opplysning.doedsdato ? avdoede.opplysning.doedsdato.toString() : 'Ingen dødsdato for avdød'
           )}
           visHistorikk={true}
           adresseDoedstidspunkt={false}

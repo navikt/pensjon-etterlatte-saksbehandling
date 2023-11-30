@@ -7,9 +7,11 @@ import {
   JournalpostVariant,
   OppdaterJournalpostTemaRequest,
 } from '~shared/types/Journalpost'
+import { ISak } from '~shared/types/sak'
 
 export const settBruker = createAction<string>('behandling/bruker/sett')
 export const settOppgave = createAction<OppgaveDTO>('behandling/oppgave/sett')
+export const settSak = createAction<ISak>('behandling/sak/sett')
 export const settJournalpost = createAction<Journalpost>('behandling/journalpost/sett')
 export const settJournalpostVariant = createAction<JournalpostVariant>('oppgave/journalpostvariant/sett')
 export const settNyttTema = createAction<OppdaterJournalpostTemaRequest>('oppgave/endretemarequest/sett')
@@ -19,6 +21,7 @@ export const settNyBehandlingRequest = createAction<NyBehandlingRequest>('behand
 export interface IJournalfoeringOppgaveReducer {
   bruker?: string
   oppgave?: OppgaveDTO
+  sak?: ISak
   journalpost?: Journalpost
   journalpostVariant?: JournalpostVariant
   endreTemaRequest?: OppdaterJournalpostTemaRequest
@@ -35,6 +38,9 @@ export const journalfoeringOppgaveReducer = createReducer(initialState, (builder
     })
     .addCase(settOppgave, (state, action) => {
       state.oppgave = action.payload
+    })
+    .addCase(settSak, (state, action) => {
+      state.sak = action.payload
     })
     .addCase(settJournalpost, (state, action) => {
       state.journalpost = action.payload

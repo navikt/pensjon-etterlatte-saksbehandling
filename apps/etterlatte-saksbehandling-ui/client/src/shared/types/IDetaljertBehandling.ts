@@ -6,6 +6,7 @@ import { VurderingsResultat } from '~shared/types/VurderingsResultat'
 import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
 import { SakType } from '~shared/types/sak'
 import { RevurderingMedBegrunnelse } from '~shared/types/RevurderingInfo'
+import { Spraak } from '~shared/types/Brev'
 
 export interface IDetaljertBehandling {
   id: string
@@ -32,7 +33,7 @@ export interface NyBehandlingRequest {
   sakType?: SakType
   persongalleri?: Persongalleri
   mottattDato?: string
-  spraak?: string
+  spraak?: Spraak
   kilde?: string
   pesysId?: number
 }

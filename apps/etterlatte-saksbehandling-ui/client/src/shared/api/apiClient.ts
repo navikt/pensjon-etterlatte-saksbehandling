@@ -65,7 +65,6 @@ async function apiFetcher<T>(props: Options): Promise<ApiResponse<T>> {
       }
     } else {
       const error: JsonError = await response.json()
-
       if (response.status >= 500) {
         const errorobj = {
           msg: 'Fikk feil i kall mot backend',

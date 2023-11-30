@@ -12,6 +12,7 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.innsendtsoeknad.barnepensjon.Barnepensjon
 import no.nav.etterlatte.libs.common.innsendtsoeknad.common.PersonType
 import no.nav.etterlatte.libs.common.pdl.AkseptererIkkePersonerUtenIdentException
+import no.nav.etterlatte.libs.common.pdl.FantIkkePersonException
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
@@ -121,12 +122,20 @@ class FordelerService(
     ): Fordeling =
         runBlocking {
             val soeknad: Barnepensjon = event.soeknad
-            val barn = pdlTjenesterKlient.hentPerson(hentBarnRequest(soeknad))
-            val avdoed = pdlTjenesterKlient.hentPerson(hentAvdoedRequest(soeknad))
+            val barn = pdlTjenesterKlient.hentPerson(hentBarnRequest(soeknad)) ?: throw FantIkkePersonException()
+            val avdoed =
+                pdlTjenesterKlient.hentPerson(hentAvdoedRequest(soeknad))
+                    ?: return@runBlocking Fordeling(
+                        event.soeknadId,
+                        Vedtaksloesning.PESYS,
+                        listOf(FordelerKriterie.AVDOED_FINNES_IKKE_I_PDL),
+                    )
+
             val gjenlevende =
                 if (harGjenlevendeForeldre(soeknad)) {
                     logger.warn("Henter gjenlevende person...")
                     pdlTjenesterKlient.hentPerson(hentGjenlevendeRequest(soeknad))
+                        ?: throw FantIkkePersonException()
                 } else {
                     null
                 }
@@ -136,9 +145,7 @@ class FordelerService(
                     fordelerRepository.antallFordeltTil(Vedtaksloesning.GJENNY.name) < maxFordelingTilGjenny
                 ) {
                     val adressebeskyttetPerson =
-                        finnAdressebeskyttetPerson(
-                            listOf(barn, avdoed, gjenlevende).filterNotNull(),
-                        )
+                        finnAdressebeskyttetPerson(listOfNotNull(barn, avdoed, gjenlevende))
                     Fordeling(
                         event.soeknadId,
                         Vedtaksloesning.GJENNY,

@@ -1,6 +1,6 @@
 {
   "system_read_count": 0,
-  "@event_name": "BEREGN",
+  "@event_name": "REGULERING:BEREGN",
   "hendelse_data": {
     "sakId": 1,
     "fradato": "2023-02-08",

@@ -23,6 +23,7 @@ on:
       - libs/etterlatte-behandling-model/**
       - libs/etterlatte-ktor/**
       - libs/etterlatte-database/**
+      - libs/etterlatte-migrering-model/**
       - libs/etterlatte-pdl-model/**
       - libs/etterlatte-sporingslogg/**
       - libs/etterlatte-vedtaksvurdering-model/**
@@ -41,6 +42,7 @@ on:
       - libs/etterlatte-institusjonsopphold-model/**
       - libs/etterlatte-behandling-model/**
       - libs/etterlatte-ktor/**
+      - libs/etterlatte-migrering-model/**
       - libs/etterlatte-pdl-model/**
       - libs/etterlatte-database/**
       - libs/etterlatte-sporingslogg/**

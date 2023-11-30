@@ -1,34 +1,43 @@
-import { IGyldighetproving } from '~shared/types/IDetaljertBehandling'
-import { VurderingsResultat } from '~shared/types/VurderingsResultat'
 import { InfoWrapper } from '../../styled'
 import { Info } from '../../Info'
+import { Persongalleri } from '~shared/types/Person'
+import { Grunnlagsopplysning, Personopplysning } from '~shared/types/grunnlag'
+import { KildePdl } from '~shared/types/kilde'
 
 interface Props {
-  innsenderErForelder: IGyldighetproving | undefined
+  persongalleriGrunnlag: Grunnlagsopplysning<Persongalleri, KildePdl>
+  gjenlevendeGrunnlag: Personopplysning | undefined
+  harKildePesys: Boolean
 }
 
-export const Innsender = ({ innsenderErForelder }: Props) => {
-  const navn =
-    innsenderErForelder?.resultat === VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
-      ? undefined
-      : innsenderErForelder?.basertPaaOpplysninger?.innsender?.navn
+export const Innsender = ({ persongalleriGrunnlag, gjenlevendeGrunnlag, harKildePesys }: Props) => {
   const label = 'Innsender'
-  const tekst = settTekst(innsenderErForelder?.resultat)
-
-  function settTekst(vurdering: VurderingsResultat | undefined): string {
-    switch (vurdering) {
-      case VurderingsResultat.OPPFYLT:
-        return '(gjenlevende forelder)'
-      case VurderingsResultat.IKKE_OPPFYLT:
-        return 'Ikke gjenlevende forelder'
-      default:
-        return 'Mangler info'
-    }
+  if (harKildePesys) {
+    return (
+      <InfoWrapper>
+        <Info tekst="Ukjent" undertekst="Mangler info" label={label} />
+      </InfoWrapper>
+    )
   }
+  const gjenlevende = gjenlevendeGrunnlag?.opplysning
+  const oppfylt = persongalleriGrunnlag.opplysning.innsender == gjenlevende?.foedselsnummer
+  const navn = oppfylt ? [gjenlevende?.fornavn, gjenlevende?.mellomnavn, gjenlevende?.etternavn].join(' ') : 'Ukjent'
+  const tekst = settTekst(oppfylt)
 
   return (
     <InfoWrapper>
       <Info tekst={navn ?? 'Ukjent'} undertekst={tekst} label={label} />
     </InfoWrapper>
   )
+
+  function settTekst(vurdering: Boolean): string {
+    switch (vurdering) {
+      case true:
+        return '(gjenlevende forelder)'
+      case false:
+        return 'Ikke gjenlevende forelder'
+      default:
+        return 'Mangler info'
+    }
+  }
 }

@@ -52,7 +52,7 @@ fun Route.samordningVedtakRoute(
             val fomDato =
                 call.parameters["fomDato"]?.let { runCatching { LocalDate.parse(it) }.getOrNull() }
                     ?: call.parameters["virkFom"]?.let { runCatching { LocalDate.parse(it) }.getOrNull() }
-                    ?: throw ManglerVirkFomException()
+                    ?: throw ManglerFomDatoException()
 
             val fnr =
                 call.request.headers["fnr"]
@@ -89,7 +89,7 @@ fun Route.samordningVedtakRoute(
             val fomDato =
                 call.parameters["fomDato"]?.let { runCatching { LocalDate.parse(it) }.getOrNull() }
                     ?: call.parameters["virkFom"]?.let { runCatching { LocalDate.parse(it) }.getOrNull() }
-                    ?: throw ManglerVirkFomException()
+                    ?: throw ManglerFomDatoException()
 
             val fnr =
                 call.request.headers["fnr"]

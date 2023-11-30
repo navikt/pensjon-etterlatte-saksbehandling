@@ -44,7 +44,7 @@ import java.time.YearMonth
 import java.util.UUID
 
 internal class RealManueltOpphoerServiceTest {
-    private val user = mockk<SaksbehandlerMedEnheterOgRoller>()
+    private val user = mockk<SaksbehandlerMedEnheterOgRoller> { every { name() } returns "ident" }
     private val oppgaveService = mockk<OppgaveService>()
     private val grunnlagServiceMock = mockk<GrunnlagService>(relaxed = true)
 

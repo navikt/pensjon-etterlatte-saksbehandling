@@ -55,7 +55,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 class BehandlingServiceImplTest {
-    private val user = mockk<SaksbehandlerMedEnheterOgRoller>()
+    private val user = mockk<SaksbehandlerMedEnheterOgRoller> { every { name() } returns "ident" }
 
     @BeforeEach
     fun before() {

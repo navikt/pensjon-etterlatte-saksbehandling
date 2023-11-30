@@ -134,6 +134,7 @@ internal class OppgaveServiceTest {
     fun beforeEach() {
         val saksbehandlerRoller = generateSaksbehandlerMedRoller(AzureGroup.SAKSBEHANDLER)
         every { saksbehandler.enheter() } returns Enheter.nasjonalTilgangEnheter()
+        every { saksbehandler.name() } returns "ident"
 
         setNewKontekstWithMockUser(saksbehandler)
 
@@ -172,7 +173,7 @@ internal class OppgaveServiceTest {
 
     @Test
     fun `skal tildele attesteringsoppgave hvis systembruker og fatte`() {
-        val systemBruker = mockk<SystemUser>()
+        val systemBruker = mockk<SystemUser> { every { name() } returns "name" }
         setNewKontekstWithMockUser(systemBruker)
 
         val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
@@ -227,7 +228,7 @@ internal class OppgaveServiceTest {
                 vanligSaksbehandler,
             )
 
-        val attestantSaksbehandler = mockk<SaksbehandlerMedEnheterOgRoller>()
+        val attestantSaksbehandler = mockk<SaksbehandlerMedEnheterOgRoller> { every { name() } returns "ident" }
         setNewKontekstWithMockUser(attestantSaksbehandler)
         val attestantmedRoller = generateSaksbehandlerMedRoller(AzureGroup.ATTESTANT)
         mockForSaksbehandlerMedRoller(attestantSaksbehandler, attestantmedRoller)
@@ -261,7 +262,7 @@ internal class OppgaveServiceTest {
                 vanligSaksbehandler,
             )
 
-        val saksbehandlerto = mockk<SaksbehandlerMedEnheterOgRoller>()
+        val saksbehandlerto = mockk<SaksbehandlerMedEnheterOgRoller> { every { name() } returns "ident" }
         setNewKontekstWithMockUser(saksbehandlerto)
         val saksbehandlerMedRoller = generateSaksbehandlerMedRoller(AzureGroup.SAKSBEHANDLER)
         mockForSaksbehandlerMedRoller(saksbehandlerto, saksbehandlerMedRoller)
@@ -386,7 +387,7 @@ internal class OppgaveServiceTest {
                 merknad = null,
             )
 
-        val attestantmock = mockk<SaksbehandlerMedEnheterOgRoller>()
+        val attestantmock = mockk<SaksbehandlerMedEnheterOgRoller> { every { name() } returns "ident" }
         setNewKontekstWithMockUser(attestantmock)
         mockForSaksbehandlerMedRoller(attestantmock, generateSaksbehandlerMedRoller(AzureGroup.ATTESTANT))
         oppgaveService.tildelSaksbehandler(oppgaveUnderBehandlingAnnenBehandling.id, saksbehandler.ident)
@@ -1049,7 +1050,7 @@ internal class OppgaveServiceTest {
                 null,
             )
 
-        val attestantmock = mockk<SaksbehandlerMedEnheterOgRoller>()
+        val attestantmock = mockk<SaksbehandlerMedEnheterOgRoller> { every { name() } returns "ident" }
         setNewKontekstWithMockUser(attestantmock)
         mockForSaksbehandlerMedRoller(attestantmock, generateSaksbehandlerMedRoller(AzureGroup.ATTESTANT))
         oppgaveService.tildelSaksbehandler(attestertBehandlingsoppgave.id, "attestant")

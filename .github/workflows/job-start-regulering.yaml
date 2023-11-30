@@ -25,12 +25,12 @@ on:
 jobs:
   test:
     if: github.event_name == 'pull_request'
-    uses: ./.github/workflows/.test.yaml
+    uses: ./.github/workflows/.test-job.yaml
     secrets: inherit
 
   build:
     if: github.event_name != 'pull_request'
-    uses: ./.github/workflows/.build.yaml
+    uses: ./.github/workflows/.build-job.yaml
     secrets: inherit
     permissions:
       contents: 'read'
@@ -39,7 +39,7 @@ jobs:
   deploy:
     if: github.event_name != 'pull_request'
     needs: build
-    uses: ./.github/workflows/.deploy.yaml
+    uses: ./.github/workflows/.deploy-job.yaml
     with:
       image: ${{ needs.build.outputs.image }}
     secrets: inherit

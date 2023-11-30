@@ -7,7 +7,7 @@ import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { Barnepensjonberegningssammendrag } from '~components/behandling/beregne/Barnepensjonberegningssammendrag'
 import { ProrataBroek } from '~components/behandling/beregne/ProrataBroek'
 import { hentLevendeSoeskenFraAvdoedeForSoeker } from '~shared/types/Person'
-import { usePersonopplysningerAvdoede } from '~components/person/usePersonopplysninger'
+import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 
 interface Props {
   behandling: IDetaljertBehandling
@@ -39,7 +39,7 @@ const BenyttetTrygdetid = ({
 }
 
 export const BarnepensjonSammendrag = ({ behandling, beregning }: Props) => {
-  const avdoede = usePersonopplysningerAvdoede()
+  const avdoede = usePersonopplysninger()?.avdoede.find((po) => po)
   if (!avdoede) {
     return null
   }

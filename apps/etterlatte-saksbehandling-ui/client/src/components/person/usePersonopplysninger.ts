@@ -5,6 +5,6 @@ export function usePersonopplysninger(): Personopplysninger | null {
   return useAppSelector((state) => state.personopplysningerReducer.personopplysninger)
 }
 
-export function usePersonopplysningerAvdoede(): Personopplysning | null {
-  return useAppSelector((state) => state.personopplysningerReducer.avdoede)
+export function usePersonopplysningerOmsAvdoede(): Personopplysning | null {
+  return useAppSelector((state) => state.personopplysningerReducer.personopplysninger?.avdoede.find((po) => po) ?? null)
 }

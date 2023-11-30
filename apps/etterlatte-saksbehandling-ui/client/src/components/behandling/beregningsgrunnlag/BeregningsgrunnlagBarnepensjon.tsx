@@ -33,7 +33,7 @@ import { Border } from '~components/behandling/soeknadsoversikt/styled'
 import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 import BeregningsgrunnlagMetode from './BeregningsgrunnlagMetode'
 import { handlinger } from '~components/behandling/handlinger/typer'
-import { usePersonopplysningerAvdoede } from '~components/person/usePersonopplysninger'
+import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 
 const featureToggleNameInstitusjonsopphold = 'pensjon-etterlatte.bp-bruk-institusjonsopphold' as const
 const featureToggleNameBrukFaktiskTrygdetid = 'pensjon-etterlatte.bp-bruk-faktisk-trygdetid' as const
@@ -41,7 +41,7 @@ const featureToggleNameBrukFaktiskTrygdetid = 'pensjon-etterlatte.bp-bruk-faktis
 const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer }) => {
   const { behandling } = props
   const { next } = useBehandlingRoutes()
-  const avdoede = usePersonopplysningerAvdoede()
+  const avdoede = usePersonopplysninger()?.avdoede.find((po) => po)
   const redigerbar = behandlingErRedigerbar(behandling.status)
   const dispatch = useAppDispatch()
   const [lagreBeregningsgrunnlag, postBeregningsgrunnlag] = useApiCall(lagreBeregningsGrunnlag)

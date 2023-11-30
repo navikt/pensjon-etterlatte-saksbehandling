@@ -33,7 +33,7 @@ jobs:
       - uses: andstor/file-existence-action@v2
         id: check_files
         with:
-          files: "jobs/${{ github.workflow }}/.nais/prod.yml"
+          files: "jobs/${{ github.workflow }}/deploy/prod.yml"
       - uses: nais/deploy/actions/deploy@v1
         if: steps.check_files.outputs.files_exists == 'true'
         env:

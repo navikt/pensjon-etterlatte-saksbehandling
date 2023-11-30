@@ -51,6 +51,17 @@ internal class OpprettVedtaksbrevForMigreringRiver(
                         utenlandstilknytningType = utenlandstilknytningType,
                     )
                 }
+            if (migreringBrevRequest.utenlandstilknytningType == null) {
+                logger.warn(
+                    "Fikk null i utenlandstilknytningstype for migreringrequest med " +
+                        "pesysId=${hendelseData.pesysId}.",
+                )
+            } else {
+                logger.info(
+                    "Fikk utlandstilknytningstype=${migreringBrevRequest.utenlandstilknytningType} for " +
+                        "migreringrequesten med pesysId=${hendelseData.pesysId}",
+                )
+            }
             val vedtaksbrev: Brev =
                 service.opprettVedtaksbrev(
                     sakId,

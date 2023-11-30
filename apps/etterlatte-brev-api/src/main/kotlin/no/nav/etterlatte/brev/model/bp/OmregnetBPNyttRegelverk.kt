@@ -44,7 +44,7 @@ data class OmregnetBPNyttRegelverk(
                         "Kan ikke velge mellom bosatt utland eller bosatt norge i brev hvis migreringrequesten mangler grunnlag"
                     }
                 return defaultBrevdataOmregning.copy(
-                    utbetaltEtterReform = Kroner(pesysUtbetaltFoerReform),
+                    utbetaltFoerReform = Kroner(pesysUtbetaltFoerReform),
                     erBosattUtlandet = pesysUtenlandstilknytning == UtenlandstilknytningType.BOSATT_UTLAND,
                 )
             }

@@ -43,7 +43,7 @@ export const SendTilAttesteringModal = ({
   const behandling = useBehandling()
   const dispatch = useAppDispatch()
 
-  const send = () => {
+  const fattVedtakWrapper = () => {
     fattVedtak(behandlingId, () => {
       setIsOpen(false)
       navigate('/')
@@ -52,8 +52,8 @@ export const SendTilAttesteringModal = ({
 
   const klikkAttester = () => {
     if (
-      behandling?.behandlingType == IBehandlingsType.FØRSTEGANGSBEHANDLING &&
-      (sjekkliste == null || !sjekkliste.bekreftet)
+      behandling?.behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING &&
+      (sjekkliste === null || !sjekkliste.bekreftet)
     ) {
       dispatch(addValideringsfeil('Feltet må hukes av for å ferdigstilles'))
       dispatch(visSjekkliste())
@@ -96,7 +96,7 @@ export const SendTilAttesteringModal = ({
             >
               Nei, avbryt
             </Button>
-            <Button loading={isPending(fattVedtakStatus)} variant="primary" onClick={send}>
+            <Button loading={isPending(fattVedtakStatus)} variant="primary" onClick={fattVedtakWrapper}>
               Ja, send til attestering
             </Button>
           </FlexRow>

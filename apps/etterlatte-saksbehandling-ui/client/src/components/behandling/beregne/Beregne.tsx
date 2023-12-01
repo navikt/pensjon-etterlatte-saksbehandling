@@ -130,7 +130,7 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
       {redigerbar ? (
         <BehandlingHandlingKnapper>
           {visAttesteringsmodal ? (
-            <SendTilAttesteringModal behandlingId={behandling.id} fattVedtakApi={fattVedtak} />
+            <SendTilAttesteringModal behandlingId={behandling.id} fattVedtakApi={fattVedtak} sakId={behandling.sakId} />
           ) : (
             <Button loading={isPending(vedtak)} variant="primary" onClick={opprettEllerOppdaterVedtak}>
               {behandlingSkalSendeBrev(behandling.behandlingType, behandling.revurderingsaarsak)

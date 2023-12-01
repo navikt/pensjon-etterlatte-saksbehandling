@@ -160,7 +160,9 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
       <SjekklisteValideringErrorSummary />
 
       <BehandlingHandlingKnapper>
-        {redigerbar && <SendTilAttesteringModal behandlingId={props.behandling.id} fattVedtakApi={fattVedtak} />}
+        {redigerbar && (
+          <SendTilAttesteringModal behandlingId={props.behandling.id} fattVedtakApi={fattVedtak} sakId={sakId} />
+        )}
       </BehandlingHandlingKnapper>
     </Content>
   )

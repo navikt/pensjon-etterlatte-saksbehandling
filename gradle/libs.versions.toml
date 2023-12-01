@@ -9,7 +9,7 @@ kotlinx-version = "1.7.3"
 ktor2-version = "2.3.6"
 navfelles-token-version = "3.1.8"
 prometheus-version = "0.16.0"
-testcontainer-version = "1.19.1"
+testcontainer-version = "1.19.3"
 
 [libraries]
 cache-caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version = "3.1.8" }
@@ -91,7 +91,7 @@ navfelles-tjenestespesifikasjoner-oppdragsbehandling = { module = "com.github.na
 navfelles-tjenestespesifikasjoner-tilbakekreving = { module ="com.github.navikt.pensjon-etterlatte-tjenestespesifikasjoner:tilbakekreving-v1-tjenestespesifikasjon", version = "1.78ffd1e" }
 navfelles-tokenclientcore = { module = "no.nav.security:token-client-core", version.ref = "navfelles-token-version" }
 navfelles-tokenvalidationktor2 = { module = "no.nav.security:token-validation-ktor-v2", version.ref = "navfelles-token-version" }
-navfelles-mockoauth2server = { module = "no.nav.security:mock-oauth2-server", version = "2.0.0" }
+navfelles-mockoauth2server = { module = "no.nav.security:mock-oauth2-server", version = "2.0.1" }
 
 test-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "jupiter-version" }
 test-jupiter-params = { module = "org.junit.jupiter:junit-jupiter-params", version.ref = "jupiter-version" }

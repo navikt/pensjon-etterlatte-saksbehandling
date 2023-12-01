@@ -123,7 +123,7 @@ class BrevdataFacade(
                             spraak = grunnlag.mapSpraak(),
                             revurderingsaarsak = vedtakInnhold.behandling.revurderingsaarsak,
                             systemkilde = systemkilde,
-                            boddEllerArbeidetUtlandet = behandling?.boddEllerArbeidetUtlandet?.boddEllerArbeidetUtlandet,
+                            // utenlandstilkytning = behandling.utenlandstilkytning // TODO Venter på EY-3191
                         )
                     }
 

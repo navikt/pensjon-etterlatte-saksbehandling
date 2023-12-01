@@ -152,7 +152,14 @@ class VedtaksbrevService(
                 false -> opprettBrevData(brev, generellBrevData, brukerTokenInfo, brevkodePar)
                 true ->
                     OmregnetBPNyttRegelverkFerdig(
-                        InnholdMedVedlegg({ hentLagretInnhold(brev) }, { hentLagretInnholdVedlegg(brev) }).innhold(),
+                        innhold = InnholdMedVedlegg({ hentLagretInnhold(brev) }, { hentLagretInnholdVedlegg(brev) }).innhold(),
+                        data = (
+                            migreringBrevDataService.opprettMigreringBrevdata(
+                                generellBrevData,
+                                automatiskMigreringRequest,
+                                brukerTokenInfo,
+                            ) as OmregnetBPNyttRegelverk
+                        ),
                     )
             }
 
@@ -161,20 +168,14 @@ class VedtaksbrevService(
         return brevbaker.genererPdf(brev.id, brevRequest)
             .let {
                 when (brevData) {
-                    is OmregnetBPNyttRegelverk, is OmregnetBPNyttRegelverkFerdig ->
+                    is OmregnetBPNyttRegelverkFerdig ->
                         {
-                            val brevdataForhandsvarsel =
-                                migreringBrevDataService.opprettMigreringBrevdata(
-                                    generellBrevData,
-                                    automatiskMigreringRequest,
-                                    brukerTokenInfo,
-                                )
                             val forhaandsvarsel =
                                 brevbaker.genererPdf(
                                     brev.id,
                                     BrevbakerRequest.fra(
                                         EtterlatteBrevKode.BARNEPENSJON_FORHAANDSVARSEL_OMREGNING,
-                                        brevdataForhandsvarsel,
+                                        brevData.data,
                                         generellBrevData,
                                         avsender,
                                     ),

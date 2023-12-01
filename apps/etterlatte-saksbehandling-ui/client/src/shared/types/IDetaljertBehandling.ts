@@ -1,7 +1,7 @@
 import { IHendelse } from '~shared/types/IHendelse'
 import { JaNei } from '~shared/types/ISvar'
 import { KildeSaksbehandler } from '~shared/types/kilde'
-import { IFamilieforhold, IPdlPerson, Persongalleri } from '~shared/types/Person'
+import { IPdlPerson, Persongalleri } from '~shared/types/Person'
 import { VurderingsResultat } from '~shared/types/VurderingsResultat'
 import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
 import { SakType } from '~shared/types/sak'
@@ -20,7 +20,6 @@ export interface IDetaljertBehandling {
   boddEllerArbeidetUtlandet: IBoddEllerArbeidetUtlandet | null
   status: IBehandlingStatus
   hendelser: IHendelse[]
-  familieforhold?: IFamilieforhold
   behandlingType: IBehandlingsType
   søker?: IPdlPerson
   revurderingsaarsak: Revurderingaarsak | null

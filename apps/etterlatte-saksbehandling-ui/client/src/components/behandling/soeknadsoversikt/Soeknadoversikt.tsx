@@ -29,17 +29,17 @@ import {
 import Virkningstidspunkt from '~components/behandling/virkningstidspunkt/Virkningstidspunkt'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import { formaterStringDato } from '~utils/formattering'
-import { formaterKildePdl } from '~components/behandling/soeknadsoversikt/utils'
+import { formaterGrunnlagKilde } from '~components/behandling/soeknadsoversikt/utils'
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 
 export const Soeknadsoversikt = (props: { behandling: IDetaljertBehandling }) => {
   const { behandling } = props
   const redigerbar = behandlingErRedigerbar(behandling.status)
   const erGyldigFremsatt = behandling.gyldighetsprøving?.resultat === VurderingsResultat.OPPFYLT
-  const avdoedDoedsdato = behandling.familieforhold?.avdoede?.opplysning?.doedsdato
-  const avdoedDoedsdatoKilde = behandling.familieforhold?.avdoede?.kilde
-  const erBosattUtland = behandling.utenlandstilknytning?.type === UtenlandstilknytningType.BOSATT_UTLAND
   const personopplysninger = usePersonopplysninger()
+  const avdoede = personopplysninger?.avdoede?.find((po) => po)
+  const avdoedDoedsdato = avdoede?.opplysning?.doedsdato
+  const erBosattUtland = behandling.utenlandstilknytning?.type === UtenlandstilknytningType.BOSATT_UTLAND
 
   const hjemlerVirkningstidspunkt = (sakType: SakType, erBosattUtland: boolean) => {
     switch (sakType) {
@@ -103,7 +103,7 @@ export const Soeknadsoversikt = (props: { behandling: IDetaljertBehandling }) =>
                     <Info
                       label="Dødsdato"
                       tekst={avdoedDoedsdato ? formaterStringDato(avdoedDoedsdato) : 'Ikke registrert!'}
-                      undertekst={formaterKildePdl(avdoedDoedsdatoKilde)}
+                      undertekst={formaterGrunnlagKilde(avdoede?.kilde)}
                     />
                     {behandling.soeknadMottattDato && (
                       <Info label="Søknad mottatt" tekst={formaterStringDato(behandling.soeknadMottattDato)} />
@@ -118,7 +118,7 @@ export const Soeknadsoversikt = (props: { behandling: IDetaljertBehandling }) =>
         <SkalViseBosattUtland behandling={behandling} redigerbar={redigerbar} />
       </InnholdPadding>
       <Border />
-      <Familieforhold behandling={behandling} />
+      <Familieforhold behandling={behandling} personopplysninger={personopplysninger} />
       {redigerbar ? (
         <BehandlingHandlingKnapper>
           {behandlingErUtfylt(behandling) && <Start disabled={!erGyldigFremsatt} />}

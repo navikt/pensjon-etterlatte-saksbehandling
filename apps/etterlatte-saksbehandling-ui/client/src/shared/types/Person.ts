@@ -1,27 +1,14 @@
-import { Grunnlagsopplysning, Personopplysning } from '~shared/types/grunnlag'
+import { Personopplysning } from '~shared/types/grunnlag'
 import { IAdresse } from '~shared/types/IAdresse'
-import { KildePdl } from './kilde'
 import { VergemaalEllerFremtidsfullmakt } from '~components/person/typer'
 import { SakType } from '~shared/types/sak'
-
-export interface IFamilieforhold {
-  avdoede: Grunnlagsopplysning<IPdlPerson, KildePdl>
-}
 
 export interface Familieforhold {
   avdoede: Personopplysning[]
   gjenlevende: Personopplysning[]
 }
 
-export const hentLevendeSoeskenFraAvdoedeForSoeker = (
-  avdoede: Grunnlagsopplysning<IPdlPerson, KildePdl>,
-  soekerFnr: string
-) => {
-  const soeskenliste = (avdoede?.opplysning.avdoedesBarn ?? []).filter((person) => person.foedselsnummer !== soekerFnr)
-  return soeskenliste.filter((soesken) => soesken.doedsdato === null)
-}
-
-export const hentLevendeSoeskenFraAvdoedeForSoekerNy = (avdoede: Personopplysning, soekerFnr: string) => {
+export const hentLevendeSoeskenFraAvdoedeForSoeker = (avdoede: Personopplysning, soekerFnr: string) => {
   const soeskenliste = (avdoede?.opplysning.avdoedesBarn ?? []).filter((person) => person.foedselsnummer !== soekerFnr)
   return soeskenliste.filter((soesken) => soesken.doedsdato === null)
 }

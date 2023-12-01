@@ -33,6 +33,7 @@ import { Border } from '~components/behandling/soeknadsoversikt/styled'
 import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 import BeregningsgrunnlagMetode from './BeregningsgrunnlagMetode'
 import { handlinger } from '~components/behandling/handlinger/typer'
+import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 
 const featureToggleNameInstitusjonsopphold = 'pensjon-etterlatte.bp-bruk-institusjonsopphold' as const
 const featureToggleNameBrukFaktiskTrygdetid = 'pensjon-etterlatte.bp-bruk-faktisk-trygdetid' as const
@@ -40,6 +41,7 @@ const featureToggleNameBrukFaktiskTrygdetid = 'pensjon-etterlatte.bp-bruk-faktis
 const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer }) => {
   const { behandling } = props
   const { next } = useBehandlingRoutes()
+  const avdoede = usePersonopplysninger()?.avdoede.find((po) => po)
   const redigerbar = behandlingErRedigerbar(behandling.status)
   const dispatch = useAppDispatch()
   const [lagreBeregningsgrunnlag, postBeregningsgrunnlag] = useApiCall(lagreBeregningsGrunnlag)
@@ -66,14 +68,12 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
     })
   }, [])
 
-  if (behandling.kommerBarnetTilgode == null || behandling.familieforhold?.avdoede == null) {
+  if (behandling.kommerBarnetTilgode == null || avdoede == null) {
     return <ApiErrorAlert>Familieforhold kan ikke hentes ut</ApiErrorAlert>
   }
 
-  const soesken = hentLevendeSoeskenFraAvdoedeForSoeker(
-    behandling.familieforhold.avdoede,
-    behandling.søker?.foedselsnummer as string
-  )
+  const soesken =
+    (avdoede && hentLevendeSoeskenFraAvdoedeForSoeker(avdoede, behandling.søker?.foedselsnummer as string)) ?? []
   const harSoesken = soesken.length > 0
 
   const onSubmit = () => {
@@ -124,7 +124,7 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
             }}
           />
         )}
-        {isSuccess(beregningsgrunnlag) && behandling.familieforhold && (
+        {isSuccess(beregningsgrunnlag) && (
           <Soeskenjustering
             behandling={behandling}
             onSubmit={(soeskenGrunnlag) => setSoeskenGrunnlagsData(soeskenGrunnlag)}

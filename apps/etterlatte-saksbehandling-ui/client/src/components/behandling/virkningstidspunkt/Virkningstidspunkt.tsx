@@ -16,6 +16,7 @@ import { hentMinimumsVirkningstidspunkt } from '~components/behandling/virknings
 import { UseMonthPickerOptions } from '@navikt/ds-react/esm/date/hooks/useMonthPicker'
 import { DatoVelger } from '~shared/DatoVelger'
 import styled from 'styled-components'
+import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 
 export interface Hjemmel {
   lenke: string
@@ -31,6 +32,7 @@ const Virkningstidspunkt = (props: {
   erBosattUtland: boolean
 }) => {
   const { behandling, erBosattUtland } = props
+  const avdoede = usePersonopplysninger()?.avdoede.find((po) => po)
   const dispatch = useAppDispatch()
   const [, fastsettVirkningstidspunktRequest, resetToInitial] = useApiCall(fastsettVirkningstidspunkt)
 
@@ -45,7 +47,7 @@ const Virkningstidspunkt = (props: {
 
   const [errorTekst, setErrorTekst] = useState<string>('')
 
-  const avdoedDoedsdato = behandling.familieforhold?.avdoede?.opplysning?.doedsdato
+  const avdoedDoedsdato = avdoede?.opplysning?.doedsdato
   const tittel = 'Hva er virkningstidspunkt for behandlingen?'
 
   const { monthpickerProps, inputProps } = useMonthpicker({

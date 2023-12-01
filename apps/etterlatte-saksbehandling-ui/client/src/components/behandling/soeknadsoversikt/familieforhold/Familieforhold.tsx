@@ -5,15 +5,14 @@ import { FamilieforholdOmstillingsstoenad } from '~components/behandling/soeknad
 import { Heading } from '@navikt/ds-react'
 import { ContentHeader } from '~shared/styled'
 import React from 'react'
-import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
+import { Personopplysninger } from '~shared/types/grunnlag'
 
 export interface PropsFamilieforhold {
   behandling: IDetaljertBehandling
+  personopplysninger: Personopplysninger | null
 }
 
-export const Familieforhold = ({ behandling }: PropsFamilieforhold) => {
-  const personopplysninger = usePersonopplysninger()
-
+export const Familieforhold = ({ behandling, personopplysninger }: PropsFamilieforhold) => {
   return (
     <>
       <ContentHeader>

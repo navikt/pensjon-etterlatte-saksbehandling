@@ -4,7 +4,9 @@ import { Personopplysninger } from '~shared/types/grunnlag'
 export const setPersonopplysninger = createAction<Personopplysninger>('behandlingPersoner/set')
 export const resetPersonopplysninger = createAction('behandlingPersoner/reset')
 
-const initialState: { personopplysninger: Personopplysninger | null } = {
+const initialState: {
+  personopplysninger: Personopplysninger | null
+} = {
   personopplysninger: null,
 }
 

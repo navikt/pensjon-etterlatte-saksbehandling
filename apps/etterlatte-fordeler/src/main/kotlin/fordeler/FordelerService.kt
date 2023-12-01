@@ -141,6 +141,9 @@ class FordelerService(
                 }
 
             fordelerKriterier.sjekkMotKriterier(barn, avdoed, gjenlevende, soeknad).let {
+                if (it.forklaring.isNotEmpty()) {
+                    logger.warn("En søknad har kriteriene ${it.forklaring}, og vil allikevel bli fordelt til Gjenny.")
+                }
                 if ((it.kandidat || tillatAlleScenarier) &&
                     fordelerRepository.antallFordeltTil(Vedtaksloesning.GJENNY.name) < maxFordelingTilGjenny
                 ) {

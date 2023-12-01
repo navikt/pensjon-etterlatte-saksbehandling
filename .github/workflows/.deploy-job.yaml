@@ -19,7 +19,7 @@ jobs:
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: dev-gcp
-          RESOURCE: jobs/${{ github.workflow }}/.nais/dev.yaml
+          RESOURCE: jobs/${{ github.workflow }}/deploy/dev.yml
           VAR: image=${{ inputs.image }}
 
   deploy-to-prod-gcp:
@@ -33,11 +33,11 @@ jobs:
       - uses: andstor/file-existence-action@v2
         id: check_files
         with:
-          files: "jobs/${{ github.workflow }}/.nais/prod.yaml"
+          files: "jobs/${{ github.workflow }}/deploy/prod.yml"
       - uses: nais/deploy/actions/deploy@v1
         if: steps.check_files.outputs.files_exists == 'true'
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: prod-gcp
-          RESOURCE: jobs/${{ github.workflow }}/.nais/prod.yaml
+          RESOURCE: jobs/${{ github.workflow }}/deploy/prod.yml
           VAR: image=${{ inputs.image }}

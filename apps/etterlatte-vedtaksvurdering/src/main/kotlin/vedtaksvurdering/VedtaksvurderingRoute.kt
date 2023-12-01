@@ -250,7 +250,7 @@ fun Route.samordningsvedtakRoute(vedtakSamordningService: VedtakSamordningServic
             if (vedtak != null) {
                 call.respond(vedtak)
             } else {
-                call.respond(HttpStatusCode.NoContent)
+                call.respond(HttpStatusCode.NotFound)
             }
         }
     }

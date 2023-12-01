@@ -8,7 +8,7 @@ import {
   formaterStringTidspunkt,
 } from '~utils/formattering'
 import { IBehandlingInfo } from '~components/behandling/sidemeny/IBehandlingInfo'
-import { BodyShort, Heading, Tag } from '@navikt/ds-react'
+import { Alert, BodyShort, Heading, Tag } from '@navikt/ds-react'
 import { tagColors, TagList } from '~shared/Tags'
 import { SidebarPanel } from '~shared/components/Sidebar'
 import { useEffect, useState } from 'react'
@@ -94,9 +94,13 @@ export const Oversikt = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo
         )}
         {isPendingOrInitial(oppgaveForBehandlingStatus) && <Spinner visible={true} label="Henter saksbehandler" />}
         {isSuccess(oppgaveForBehandlingStatus) && (
-          <Tekst>
-            {saksbehandlerPaaOppgave ? saksbehandlerPaaOppgave : 'Ingen saksbehandler har tatt denne oppgaven'}
-          </Tekst>
+          <>
+            {saksbehandlerPaaOppgave ? (
+              <Tekst>saksbehandlerPaaOppgave</Tekst>
+            ) : (
+              <Alert variant="warning">Ingen saksbehandler har tatt denne oppgaven</Alert>
+            )}
+          </>
         )}
       </div>
       <div className="flex">

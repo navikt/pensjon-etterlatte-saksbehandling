@@ -13,7 +13,7 @@ import {
   behandlingSkalSendeBrev,
   sisteBehandlingHendelse,
 } from '~components/behandling/felles/utils'
-import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
+import { IBehandlingsType, IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import MottakerPanel from '~components/behandling/brev/detaljer/MottakerPanel'
 import ForhaandsvisningBrev from '~components/behandling/brev/ForhaandsvisningBrev'
 import Spinner from '~shared/Spinner'
@@ -29,6 +29,10 @@ import { hentBehandling } from '~shared/api/behandling'
 import { useAppDispatch } from '~store/Store'
 import { getVergeadresseFraGrunnlag } from '~shared/api/grunnlag'
 import { handleHentVergeadresseError } from '~components/person/Vergeadresse'
+import { useSjekkliste, useSjekklisteValideringsfeil } from '~components/behandling/sjekkliste/useSjekkliste'
+import { useBehandling } from '~components/behandling/useBehandling'
+import { addValideringsfeil, Valideringsfeilkoder } from '~store/reducers/SjekklisteReducer'
+import { visSjekkliste } from '~store/reducers/BehandlingSidemenyReducer'
 
 export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
   const { behandlingId } = useParams()
@@ -43,6 +47,10 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
   const [opprettBrevStatus, opprettNyttVedtaksbrev] = useApiCall(opprettVedtaksbrev)
   const [, fetchBehandling] = useApiCall(hentBehandling)
   const [vergeadresse, getVergeadresse] = useApiCall(getVergeadresseFraGrunnlag)
+
+  const sjekkliste = useSjekkliste()
+  const valideringsfeil = useSjekklisteValideringsfeil()
+  const behandling = useBehandling()
 
   const behandlingRedigertEtterOpprettetBrev = (vedtaksbrev: IBrev, hendelser: IHendelse[]) => {
     if (!redigerbar) {
@@ -98,6 +106,22 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
     return <Spinner visible label="Henter brev ..." />
   } else if (isPending(opprettBrevStatus)) {
     return <Spinner visible label="Ingen brev funnet. Oppretter brev ..." />
+  }
+
+  const kanSendeTilAttestering = (): boolean => {
+    const kanSende =
+      behandling?.behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING &&
+      (sjekkliste === null || !sjekkliste.bekreftet)
+
+    if (!kanSende) {
+      const fant = valideringsfeil.find((e) => e === Valideringsfeilkoder.MAA_HUKES_AV)
+      if (!fant) {
+        dispatch(addValideringsfeil(Valideringsfeilkoder.MAA_HUKES_AV))
+      }
+      dispatch(visSjekkliste())
+    }
+
+    return kanSende
   }
 
   return (
@@ -160,7 +184,14 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
       <SjekklisteValideringErrorSummary />
 
       <BehandlingHandlingKnapper>
-        {redigerbar && <SendTilAttesteringModal behandlingId={props.behandling.id} fattVedtakApi={fattVedtak} />}
+        {redigerbar && (
+          <SendTilAttesteringModal
+            behandlingId={props.behandling.id}
+            fattVedtakApi={fattVedtak}
+            sakId={sakId}
+            validerKanSendeTilAttestering={kanSendeTilAttestering}
+          />
+        )}
       </BehandlingHandlingKnapper>
     </Content>
   )

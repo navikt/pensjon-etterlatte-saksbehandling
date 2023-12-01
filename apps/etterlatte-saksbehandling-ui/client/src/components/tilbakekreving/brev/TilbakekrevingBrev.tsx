@@ -90,7 +90,14 @@ export function TilbakekrevingBrev({ tilbakekreving }: { tilbakekreving: Tilbake
         {isFailure(vergeadresse) && handleHentVergeadresseError(vergeadresse)}
       </BrevContent>
       <FlexRow justify="center">
-        {kanAttesteres && <SendTilAttesteringModal behandlingId={tilbakekreving.id} fattVedtakApi={fattVedtak} />}
+        {kanAttesteres && (
+          <SendTilAttesteringModal
+            behandlingId={tilbakekreving.id}
+            fattVedtakApi={fattVedtak}
+            sakId={tilbakekreving.sak.id}
+            validerKanSendeTilAttestering={() => true}
+          />
+        )}
       </FlexRow>
     </Content>
   )

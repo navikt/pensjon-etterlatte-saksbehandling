@@ -39,14 +39,12 @@ const BenyttetTrygdetid = ({
 export const BarnepensjonSammendrag = ({ beregning }: Props) => {
   const personopplysninger = usePersonopplysninger()
   const avdoede = personopplysninger?.avdoede.find((po) => po)
-  if (!avdoede) {
-    return null
-  }
+
   const beregningsperioder = [...beregning.beregningsperioder].sort((a, b) =>
     compareDesc(new Date(a.datoFOM), new Date(b.datoFOM))
   )
   const soeker = personopplysninger?.soeker?.opplysning
-  const soesken = hentLevendeSoeskenFraAvdoedeForSoeker(avdoede, soeker?.foedselsnummer as string)
+  const soesken = (avdoede && hentLevendeSoeskenFraAvdoedeForSoeker(avdoede, soeker?.foedselsnummer as string)) ?? []
 
   return (
     <TableWrapper>

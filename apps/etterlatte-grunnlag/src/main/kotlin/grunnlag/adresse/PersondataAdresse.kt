@@ -4,14 +4,15 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class PersondataAdresse(
-    val adresselinjer: List<String>,
+    private val adresselinjer: List<String>,
     val type: String,
-    val land: String?,
-    val landkode: String?,
-    val navn: String?,
-    val postnr: String?,
-    val poststed: String?,
-    val vergePid: String?,
+    private val land: String?,
+    private val landkode: String?,
+    private val navn: String?,
+    private val postnr: String?,
+    private val postnummer: String?,
+    private val poststed: String?,
+    private val vergePid: String?,
 ) {
     fun toBrevMottaker(): BrevMottaker {
         return BrevMottaker(
@@ -27,7 +28,7 @@ data class PersondataAdresse(
                     adresselinje1 = adresselinjer.getOrNull(0),
                     adresselinje2 = adresselinjer.getOrNull(1),
                     adresselinje3 = adresselinjer.getOrNull(2),
-                    postnummer = postnr,
+                    postnummer = listOfNotNull(postnummer, postnr).firstOrNull(),
                     poststed = poststed,
                     landkode = toLandkode(),
                     land =

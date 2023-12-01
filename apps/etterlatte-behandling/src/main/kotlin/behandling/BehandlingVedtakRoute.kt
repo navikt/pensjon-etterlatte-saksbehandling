@@ -8,7 +8,6 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.inTransaction
-import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.VedtakEndringDTO
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
@@ -19,12 +18,6 @@ import org.slf4j.LoggerFactory
 import java.util.UUID
 
 private val logger = LoggerFactory.getLogger("behandlingVedtakRoute")
-
-class ManglerOppgaveMedSisteSaksbehandlerException(message: String) :
-    UgyldigForespoerselException(
-        code = "FANT_IKKE_SISTE_SAKSBEHANDLER",
-        detail = message,
-    )
 
 internal fun Route.behandlingVedtakRoute(
     behandlingsstatusService: BehandlingStatusService,
@@ -96,10 +89,6 @@ internal fun Route.behandlingVedtakRoute(
                     try {
                         val sisteSaksbehandlerIkkeAttestering =
                             oppgaveService.hentSisteSaksbehandlerIkkeAttestertOppgave(underkjennVedtakOppgave.sakIdOgReferanse.referanse)
-                                ?: throw ManglerOppgaveMedSisteSaksbehandlerException(
-                                    "Fant ikke saksbehandler på siste " +
-                                        "oppgave. ${underkjennVedtakOppgave.sakIdOgReferanse}",
-                                )
 
                         val ferdigstillOppgaveUnderbehandlingOgLagNyMedType =
                             oppgaveService.ferdigstillOppgaveUnderbehandlingOgLagNyMedType(
@@ -108,10 +97,12 @@ internal fun Route.behandlingVedtakRoute(
                                 merknad = merknadFraAttestant,
                                 saksbehandler = brukerTokenInfo,
                             )
-                        oppgaveService.tildelSaksbehandler(
-                            ferdigstillOppgaveUnderbehandlingOgLagNyMedType.id,
-                            sisteSaksbehandlerIkkeAttestering,
-                        )
+                        if (sisteSaksbehandlerIkkeAttestering != null) {
+                            oppgaveService.tildelSaksbehandler(
+                                ferdigstillOppgaveUnderbehandlingOgLagNyMedType.id,
+                                sisteSaksbehandlerIkkeAttestering,
+                            )
+                        }
                     } catch (e: Exception) {
                         haandterFeilIOppgaveService(e)
                     }

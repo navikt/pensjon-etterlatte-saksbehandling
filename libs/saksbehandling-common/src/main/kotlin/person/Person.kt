@@ -34,11 +34,18 @@ data class Person(
     val sivilstatus: Sivilstatus?,
     val sivilstand: List<Sivilstand>?,
     val statsborgerskap: String?,
+    val pdlStatsborgerskap: List<Statsborgerskap>?,
     var utland: Utland?,
     var familieRelasjon: FamilieRelasjon?,
     var avdoedesBarn: List<Person>?,
     var avdoedesBarnUtenIdent: List<PersonUtenIdent>?,
     var vergemaalEllerFremtidsfullmakt: List<VergemaalEllerFremtidsfullmakt>?,
+)
+
+data class Statsborgerskap(
+    val land: String,
+    val gyldigFraOgMed: LocalDate?,
+    val gyldigTilOgMed: LocalDate?,
 )
 
 enum class AdresseType {

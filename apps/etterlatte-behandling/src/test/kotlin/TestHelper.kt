@@ -360,6 +360,7 @@ fun personOpplysning(doedsdato: LocalDate? = null) =
         avdoedesBarn = null,
         avdoedesBarnUtenIdent = null,
         vergemaalEllerFremtidsfullmakt = null,
+        pdlStatsborgerskap = null,
     )
 
 fun kommerBarnetTilgode(
@@ -416,6 +417,7 @@ fun mockPerson(
     familieRelasjon = familieRelasjon?.let { OpplysningDTO(it, UUID.randomUUID().toString()) },
     avdoedesBarn = null,
     vergemaalEllerFremtidsfullmakt = vergemaal?.map { OpplysningDTO(it, UUID.randomUUID().toString()) },
+    pdlStatsborgerskap = null,
 )
 
 fun kommerBarnetTilGodeVurdering(behandlingId: UUID) =

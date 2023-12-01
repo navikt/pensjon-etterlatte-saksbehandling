@@ -58,6 +58,7 @@ fun mockPerson(
     avdoedesBarn = null,
     avdoedesBarnUtenIdent = null,
     vergemaalEllerFremtidsfullmakt = vergemaalEllerFremtidsfullmakt,
+    pdlStatsborgerskap = null,
 )
 
 fun mockNorskAdresse(

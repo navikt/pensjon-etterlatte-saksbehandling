@@ -7,6 +7,7 @@ import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.Sivilstand
 import no.nav.etterlatte.libs.common.person.Sivilstatus
+import no.nav.etterlatte.libs.common.person.Statsborgerskap
 import no.nav.etterlatte.libs.common.person.Utland
 import no.nav.etterlatte.libs.common.person.VergemaalEllerFremtidsfullmakt
 import java.time.LocalDate
@@ -28,6 +29,7 @@ data class PersonDTO(
     val sivilstatus: OpplysningDTO<Sivilstatus>?,
     val sivilstand: List<OpplysningDTO<Sivilstand>>?,
     val statsborgerskap: OpplysningDTO<String>?,
+    val pdlStatsborgerskap: OpplysningDTO<List<Statsborgerskap>>?,
     var utland: OpplysningDTO<Utland>?,
     var familieRelasjon: OpplysningDTO<FamilieRelasjon>?,
     var avdoedesBarn: List<Person>?,

@@ -103,4 +103,5 @@ fun mockPerson() =
         familieRelasjon = null,
         avdoedesBarn = null,
         vergemaalEllerFremtidsfullmakt = null,
+        pdlStatsborgerskap = null,
     )

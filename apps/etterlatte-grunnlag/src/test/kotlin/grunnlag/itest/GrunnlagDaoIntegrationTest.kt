@@ -484,6 +484,6 @@ internal class GrunnlagDaoIntegrationTest {
     private fun opprettMockPerson(fnr: Folkeregisteridentifikator): Person =
         Person(
             UUID.randomUUID().toString(), null, UUID.randomUUID().toString(), fnr, null, 1234, null, null, null, null,
-            null, null, null, null, null, null, null, null, null, null, null,
+            null, null, null, null, null, null, null, null, null, null, null, null,
         )
 }

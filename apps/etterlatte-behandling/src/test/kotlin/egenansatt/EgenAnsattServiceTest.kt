@@ -101,7 +101,7 @@ internal class EgenAnsattServiceTest {
     fun before() {
         Kontekst.set(
             Context(
-                mockk(),
+                mockk { every { name() } returns "ident" },
                 object : DatabaseKontekst {
                     override fun activeTx(): Connection {
                         throw IllegalArgumentException()

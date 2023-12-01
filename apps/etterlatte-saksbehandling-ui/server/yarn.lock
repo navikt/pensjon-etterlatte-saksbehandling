@@ -722,6 +722,11 @@ cliui@^7.0.2:
     strip-ansi "^6.0.0"
     wrap-ansi "^7.0.0"
 
+clone@2.x:
+  version "2.1.2"
+  resolved "https://registry.yarnpkg.com/clone/-/clone-2.1.2.tgz#1b7f4b9f591f1e8f83670401600345a02887435f"
+  integrity sha512-3Pe/CF1Nn94hyhIYpjtiLhdCoEoz0DqQ+988E9gmeEdQZlojxnOb74wctFyuwWQHzqyf9X7C7MG8juUpqBJT8w==
+
 color-convert@^1.9.3:
   version "1.9.3"
   resolved "https://registry.yarnpkg.com/color-convert/-/color-convert-1.9.3.tgz#bb71850690e1f136567de629d2d5471deda4c1e8"
@@ -2550,10 +2555,10 @@ unique-slug@^3.0.0:
   dependencies:
     imurmurhash "^0.1.4"
 
-unleash-client@^5.0.0:
-  version "5.0.0"
-  resolved "https://registry.yarnpkg.com/unleash-client/-/unleash-client-5.0.0.tgz#b6725723b38f5572b4b1c5261c1bb2254148ec58"
-  integrity sha512-9x3SOpHTnMDY0CosKwy/0Hi9gIjw65+i2fsC76bvYaUIVTlqDoPdCfosBokNIZ/IjCF0TjEgSZefSWNGY5SC9A==
+unleash-client@^5.3.0:
+  version "5.3.0"
+  resolved "https://registry.yarnpkg.com/unleash-client/-/unleash-client-5.3.0.tgz#d6099537000f478fb13a030747a6241d6fa81326"
+  integrity sha512-wjxaokbojFtOawh6X1wRo8X4dVZdW6oXdOFUY6rvFeMV/z4wRoer3ZZK762ygS6JEbQDuMSlZkvkOZ2AfweDnA==
   dependencies:
     ip "^1.1.8"
     make-fetch-happen "^10.2.1"

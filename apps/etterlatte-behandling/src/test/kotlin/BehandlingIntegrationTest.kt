@@ -436,6 +436,7 @@ abstract class BehandlingIntegrationTest {
             mapOf(
                 "sub" to mittsystem,
                 "oid" to mittsystem,
+                "azp_name" to mittsystem,
             ),
         )
     }

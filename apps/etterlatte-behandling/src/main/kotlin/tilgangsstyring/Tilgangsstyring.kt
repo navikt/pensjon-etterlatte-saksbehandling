@@ -200,12 +200,16 @@ suspend inline fun PipelineContext<*, ApplicationCall>.kunAttestant(onSuccess: (
     }
 }
 
+private val saksbehandlereMedTilgangTilAlleEnheter = listOf("S128848", "K105085", "O113803")
+
 fun <T> List<T>.filterForEnheter(
     featureToggleService: FeatureToggleService,
     toggle: FeatureToggle,
     user: User,
     filter: (item: T, enheter: List<String>) -> Boolean,
-) = if (featureToggleService.isEnabled(toggle, false)) {
+) = if (featureToggleService.isEnabled(toggle, false) &&
+    user.name() !in(saksbehandlereMedTilgangTilAlleEnheter)
+) {
     when (user) {
         is SaksbehandlerMedEnheterOgRoller -> {
             val enheter = user.enheter()

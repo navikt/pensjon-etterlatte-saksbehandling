@@ -45,7 +45,7 @@ import java.time.YearMonth
 import java.util.UUID
 
 internal class GyldighetsproevingServiceImplTest {
-    private val user = mockk<SaksbehandlerMedEnheterOgRoller>()
+    private val user = mockk<SaksbehandlerMedEnheterOgRoller> { every { name() } returns "ident" }
     private val sakDaoMock = mockk<SakDao>()
     private val behandlingDaoMock = mockk<BehandlingDao>()
     private val hendelseDaoMock = mockk<HendelseDao>()

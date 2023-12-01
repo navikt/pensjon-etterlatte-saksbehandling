@@ -14,6 +14,7 @@ import { BehandlingSidemeny } from '~components/behandling/sidemeny/BehandlingSi
 import Spinner from '~shared/Spinner'
 import { hentPersonopplysningerForBehandling } from '~shared/api/grunnlag'
 import { resetPersonopplysninger, setPersonopplysninger } from '~store/reducers/PersonopplysningerReducer'
+import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 
 import { mapAllApiResult } from '~shared/api/apiUtils'
 
@@ -24,6 +25,7 @@ export const Behandling = () => {
   const { behandlingRoutes } = useBehandlingRoutes()
   const [fetchBehandlingStatus, fetchBehandling] = useApiCall(hentBehandling)
   const [, fetchPersonopplysninger] = useApiCall(hentPersonopplysningerForBehandling)
+  const soeker = usePersonopplysninger()?.soeker?.opplysning
 
   useEffect(() => {
     if (!behandlingIdFraURL) {
@@ -61,7 +63,7 @@ export const Behandling = () => {
         const behandlingGarra = behandlingFraRedux as IBehandlingReducer
         return (
           <>
-            {behandlingGarra.søker && <PdlPersonStatusBar person={behandlingGarra.søker} />}
+            {soeker && <PdlPersonStatusBar person={soeker} />}
             <StegMeny behandling={behandlingGarra} />
             <GridContainer>
               <MainContent>

@@ -1,4 +1,4 @@
-import { IEnhet } from '../routers/modia'
+import { IEnhet } from '../routers/innloggetBrukerRouter'
 
 export const lagEnhetFraString = (enhet: string): IEnhet => {
   const enhetListe = enhet.split(' ')

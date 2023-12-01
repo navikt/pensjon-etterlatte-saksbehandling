@@ -1,5 +1,5 @@
 import { apiClient, ApiResponse } from '~shared/api/apiClient'
-import { Grunnlagsopplysning, PersonMedNavn, Personopplysninger } from '~shared/types/grunnlag'
+import { Grunnlagsopplysning, PersongalleriSamsvar, PersonMedNavn, Personopplysninger } from '~shared/types/grunnlag'
 import { IPersonResult } from '~components/person/typer'
 import { Foreldreansvar } from '~shared/types/Foreldreansvar'
 import { KildePdl, KildePersondata } from '~shared/types/kilde'
@@ -61,11 +61,10 @@ export const hentPersonopplysningerForBehandling = async (args: {
   )
 }
 
-export const getPersongalleriFraPdl = async (args: {
-  sakId: number
+export const hentPersongalleriSamsvar = async (args: {
   behandlingId: string
-}): Promise<ApiResponse<Grunnlagsopplysning<Persongalleri, KildePdl>>> => {
-  return apiClient.get(`/grunnlag/behandling/${args.behandlingId}/PERSONGALLERI_PDL_V1`)
+}): Promise<ApiResponse<PersongalleriSamsvar>> => {
+  return apiClient.get(`/grunnlag/behandling/${args.behandlingId}/opplysning/persongalleri-samsvar`)
 }
 
 export const getPersongalleriFraSoeknad = async (args: {

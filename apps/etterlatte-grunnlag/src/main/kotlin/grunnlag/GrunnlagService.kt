@@ -302,13 +302,17 @@ class RealGrunnlagService(
     }
 
     override fun hentPersongalleriSamsvar(behandlingId: UUID): PersongalleriSamsvar {
-        val grunnlag = opplysningDao.hentAlleGrunnlagForBehandling(behandlingId)
-        val opplysningPersongalleriSak = grunnlag.find { it.opplysning.opplysningType == PERSONGALLERI_V1 }
-        val opplysningPersongalleriPdl = grunnlag.find { it.opplysning.opplysningType == PERSONGALLERI_PDL_V1 }
+        val grunnlag =
+            opplysningDao.hentGrunnlagAvTypeForBehandling(behandlingId, PERSONGALLERI_PDL_V1, PERSONGALLERI_V1)
+        val opplysningPersongalleriSak =
+            grunnlag.filter { it.opplysning.opplysningType == PERSONGALLERI_V1 }.maxByOrNull { it.hendelseNummer }
+        val opplysningPersongalleriPdl =
+            grunnlag.filter { it.opplysning.opplysningType == PERSONGALLERI_PDL_V1 }.maxByOrNull { it.hendelseNummer }
         if (opplysningPersongalleriSak == null) {
             throw GenerellIkkeFunnetException()
         }
-        val persongalleriISak: Persongalleri = objectMapper.readValue(opplysningPersongalleriSak.opplysning.opplysning.toJson())
+        val persongalleriISak: Persongalleri =
+            objectMapper.readValue(opplysningPersongalleriSak.opplysning.opplysning.toJson())
 
         if (opplysningPersongalleriPdl == null) {
             logger.info("Fant ikke persongalleri fra PDL for behandling med id=$behandlingId, gjør ingen samsvarsjekk")
@@ -320,7 +324,8 @@ class RealGrunnlagService(
                 problemer = listOf(),
             )
         }
-        val persongalleriPdl: Persongalleri = objectMapper.readValue(opplysningPersongalleriPdl.opplysning.opplysning.toJson())
+        val persongalleriPdl: Persongalleri =
+            objectMapper.readValue(opplysningPersongalleriPdl.opplysning.opplysning.toJson())
 
         val valideringsfeil =
             valideringsfeilPersongalleriSakPdl(

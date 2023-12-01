@@ -10,7 +10,7 @@ mockRouter.get('/modiacontextholder/decorator', (req: Request, res: Response) =>
     navn: 'Truls Veileder',
     fornavn: 'Truls',
     etternavn: 'Veileder',
-    rolle: 'attestant',
+    kanAttestere: true,
     enheter: [
       {
         enhetId: '0315',

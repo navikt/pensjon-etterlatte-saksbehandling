@@ -1,6 +1,8 @@
 package no.nav.etterlatte.regulering
 
 import no.nav.etterlatte.BehandlingService
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.etterlatte.rapidsandrivers.ReguleringEvents
 import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.FINN_LOEPENDE_YTELSER
@@ -17,6 +19,7 @@ import rapidsandrivers.tilbakestilteBehandlinger
 internal class ReguleringsforespoerselRiver(
     rapidsConnection: RapidsConnection,
     private val behandlingService: BehandlingService,
+    private val featureToggleService: FeatureToggleService,
 ) : ListenerMedLoggingOgFeilhaandtering(ReguleringEvents.START_REGULERING) {
     private val logger = LoggerFactory.getLogger(ReguleringsforespoerselRiver::class.java)
 
@@ -32,6 +35,11 @@ internal class ReguleringsforespoerselRiver(
     ) {
         logger.info("Leser reguleringsfoerespoersel for dato ${packet.dato}")
 
+        if (!featureToggleService.isEnabled(ReguleringFeatureToggle.START_REGULERING, false)) {
+            logger.info("Regulering er deaktivert ved funksjonsbryter. Avbryter reguleringsforespørsel.")
+            return
+        }
+
         val tilbakemigrerte =
             behandlingService.migrerAlleTempBehandlingerTilbakeTilVilkaarsvurdert().also { sakIdListe ->
                 logger.info(
@@ -46,4 +54,11 @@ internal class ReguleringsforespoerselRiver(
             context.publish(packet.toJson())
         }
     }
+}
+
+enum class ReguleringFeatureToggle(private val key: String) : FeatureToggle {
+    START_REGULERING("start-regulering"),
+    ;
+
+    override fun key() = key
 }

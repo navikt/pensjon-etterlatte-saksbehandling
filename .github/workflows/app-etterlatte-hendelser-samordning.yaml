@@ -44,25 +44,10 @@ jobs:
       contents: 'read'
       id-token: 'write'
 
-#  deploy:
-#    if: github.event_name != 'pull_request'
-#    needs: build
-#    uses: ./.github/workflows/.deploy.yaml
-#    with:
-#      image: ${{ needs.build.outputs.image }}
-#    secrets: inherit
-
-  deploy-to-dev-gcp:
-    name: dev-gcp
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
+  deploy:
     if: github.event_name != 'pull_request'
     needs: build
-    steps:
-      - uses: actions/checkout@v4
-      - uses: nais/deploy/actions/deploy@v1
-        env:
-          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
-          CLUSTER: dev-gcp
-          RESOURCE: apps/${{ github.workflow }}/.nais/dev.yaml
-          VAR: image=${{ needs.build.outputs.image }}
+    uses: ./.github/workflows/.deploy.yaml
+    with:
+      image: ${{ needs.build.outputs.image }}
+    secrets: inherit

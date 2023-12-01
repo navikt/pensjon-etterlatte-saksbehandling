@@ -9,6 +9,8 @@ import { ErrorMessage } from '@navikt/ds-react'
 import { Personopplysninger } from '~shared/types/grunnlag'
 import { Familieforhold } from '~shared/types/Person'
 
+import { SamsvarPersongalleri } from '~components/behandling/soeknadsoversikt/familieforhold/SamsvarPersongalleri'
+
 export interface PropsFamilieforhold {
   behandling: IDetaljertBehandling
   personopplysninger: Personopplysninger | null
@@ -33,6 +35,7 @@ export const FamilieforholdOmstillingsstoenad = ({ behandling, personopplysninge
       <FamilieforholdWrapper>
         {behandling.gyldighetsprøving?.resultat === VurderingsResultat.OPPFYLT ? (
           <>
+            <SamsvarPersongalleri />
             <FamilieforholdVoksne>
               {avdoede.map((avdoed) => (
                 <Person person={avdoed.opplysning} kilde={avdoed.kilde} avdoed key={avdoed.id} />

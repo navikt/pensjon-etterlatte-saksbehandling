@@ -1,0 +1,23 @@
+name: .test-job.yaml
+
+on:
+  workflow_call:
+
+jobs:
+  test:
+    name: Verify pull request
+    runs-on: ubuntu-latest-8-cores
+    timeout-minutes: 10
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Setup Java v17.x
+        uses: actions/setup-java@v3
+        with:
+          distribution: temurin
+          java-version: 17.x
+          cache: gradle
+      - name: Gradle test and build
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: ./gradlew :jobs:${{ github.workflow }}:test --stacktrace

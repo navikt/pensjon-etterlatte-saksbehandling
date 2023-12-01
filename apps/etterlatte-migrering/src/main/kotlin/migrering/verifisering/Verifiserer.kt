@@ -47,12 +47,16 @@ internal class Verifiserer(
         if (request.dodAvYrkesskade) {
             feil.add(DoedAvYrkesskade)
         }
+        val utenlandstilknytningType = utenlandstilknytningsjekker.finnUtenlandstilknytning(request)
+        if (utenlandstilknytningType == null) {
+            feil.add(ManglerUtenlandstilknytningtype)
+        }
 
         if (feil.isNotEmpty()) {
             haandterFeil(request, feil)
         }
         return patchedRequest.getOrThrow().copy(
-            utenlandstilknytningType = utenlandstilknytningsjekker.finnUtenlandstilknytning(request),
+            utenlandstilknytningType = utenlandstilknytningType,
         )
     }
 
@@ -153,4 +157,9 @@ data class PDLException(val kilde: Throwable) : Verifiseringsfeil() {
 object DoedAvYrkesskade : Verifiseringsfeil() {
     override val message: String
         get() = "Skal ikke migrere saker hvor avdød har dødsårsak yrkesskade"
+}
+
+object ManglerUtenlandstilknytningtype : Verifiseringsfeil() {
+    override val message: String
+        get() = "Vi klarte ikke å hente ut utenlandstilknytningstype automatisk, det trenger vi for brevet"
 }

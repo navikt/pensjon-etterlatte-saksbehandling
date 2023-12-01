@@ -19,6 +19,7 @@ dependencies {
     testImplementation(libs.test.jupiter.params)
     testRuntimeOnly(libs.test.jupiter.engine)
     testImplementation(libs.test.kotest.assertionscore)
+    testImplementation(libs.test.mockk)
 }
 
 tasks {

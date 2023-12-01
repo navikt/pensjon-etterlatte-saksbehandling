@@ -59,11 +59,11 @@ class SamordningHendelseIntegrationTest {
                 SAMORDNINGVEDTAK_HENDELSE_TOPIC,
                 1,
                 UUID.randomUUID().toString(),
-                SamordningVedtakHendelse(
-                    fagomrade = "PENSJON",
-                    artTypeKode = "AP2025",
-                    vedtakId = 100200300L,
-                ),
+                SamordningVedtakHendelse().apply {
+                    fagomrade = "PENSJON"
+                    artTypeKode = "AP2025"
+                    vedtakId = 100200300L
+                },
             ),
         )
         producerForSamordningVedtakHendelse.send(
@@ -71,11 +71,11 @@ class SamordningHendelseIntegrationTest {
                 SAMORDNINGVEDTAK_HENDELSE_TOPIC,
                 1,
                 UUID.randomUUID().toString(),
-                SamordningVedtakHendelse(
-                    fagomrade = "EYO",
-                    artTypeKode = "OMS",
-                    vedtakId = 99900022201L,
-                ),
+                SamordningVedtakHendelse().apply {
+                    fagomrade = "EYO"
+                    artTypeKode = "OMS"
+                    vedtakId = 99900022201L
+                },
             ),
         )
 

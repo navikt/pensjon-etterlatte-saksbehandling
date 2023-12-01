@@ -5,7 +5,7 @@ import fetch from 'node-fetch'
 import { logger } from '../monitoring/logger'
 import { lagEnhetFraString } from '../utils/enhet'
 
-export const modiaRouter = express.Router() // for å støtte dekoratør for innloggede flater
+export const innloggetBrukerRouter = express.Router()
 
 export interface IEnhet {
   enhetId: string
@@ -18,7 +18,15 @@ export interface ISaksbehandler {
   fornavn: string
   etternavn: string
   enheter: IEnhet[]
-  rolle: string //test
+  kanAttestere: boolean
+}
+
+const kanAttestere = (groups: string[]): boolean => {
+  if (!process.env.NAIS_CLUSTER_NAME || process.env.NAIS_CLUSTER_NAME === 'dev-gcp') {
+    return groups.includes('63f46f74-84a8-4d1c-87a8-78532ab3ae60') // 0000-GA-PENSJON_ATTESTERING (DEV)
+  } else {
+    return groups.includes('11053fd7-e674-4552-9a88-f9fcedfa70b3') // 0000-GA-PENSJON_ATTESTERING (PROD)
+  }
 }
 
 const getSaksbehandler = async (req: Request): Promise<ISaksbehandler | null> => {
@@ -35,12 +43,12 @@ const getSaksbehandler = async (req: Request): Promise<ISaksbehandler | null> =>
     navn: parsedToken.name,
     fornavn: parsedToken.name.split(', ')[1],
     etternavn: parsedToken.name.split(', ')[0],
-    rolle: 'attestant',
     enheter: await hentEnheter(req, bearerToken),
+    kanAttestere: kanAttestere(parsedToken.groups),
   }
 }
 
-const hentEnheter = async (req: Request, bearerToken: string): Promise<IEnhet[]> => {
+const hentEnheter = async (_: Request, bearerToken: string): Promise<IEnhet[]> => {
   if (bearerToken) {
     try {
       const oboToken = await getOboToken(bearerToken, 'https://graph.microsoft.com/.default')
@@ -60,13 +68,14 @@ const hentEnheter = async (req: Request, bearerToken: string): Promise<IEnhet[]>
   return []
 }
 
-// TODO: endre navn på router og endepunkt
-modiaRouter.get('/decorator', async (req: Request, res: Response) => {
+innloggetBrukerRouter.get('/', async (req: Request, res: Response) => {
   try {
     const saksbehandler = await getSaksbehandler(req)
-    return res.json(saksbehandler)
+
+    res.json(saksbehandler)
   } catch (e) {
-    logger.info('Feil i modiarouter', e)
+    logger.info('Feil i innloggetBrukerRouter', e)
     res.sendStatus(500)
   }
+  return
 })

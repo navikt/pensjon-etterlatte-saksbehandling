@@ -1,0 +1,43 @@
+name: .deploy-job.yaml
+
+on:
+  workflow_call:
+    inputs:
+      image:
+        description: 'Lenke til docker image'
+        required: true
+        type: string
+
+jobs:
+  deploy-to-dev-gcp:
+    name: dev-gcp
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: nais/deploy/actions/deploy@v1
+        env:
+          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
+          CLUSTER: dev-gcp
+          RESOURCE: jobs/${{ github.workflow }}/deploy/dev.yml
+          VAR: image=${{ inputs.image }}
+
+  deploy-to-prod-gcp:
+    name: prod-gcp
+    if: ${{ github.ref == 'refs/heads/main' || github.event.inputs.deploy-prod == 'true' }}
+    needs: deploy-to-dev-gcp
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: andstor/file-existence-action@v2
+        id: check_files
+        with:
+          files: "jobs/${{ github.workflow }}/deploy/prod.yml"
+      - uses: nais/deploy/actions/deploy@v1
+        if: steps.check_files.outputs.files_exists == 'true'
+        env:
+          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
+          CLUSTER: prod-gcp
+          RESOURCE: jobs/${{ github.workflow }}/deploy/prod.yml
+          VAR: image=${{ inputs.image }}

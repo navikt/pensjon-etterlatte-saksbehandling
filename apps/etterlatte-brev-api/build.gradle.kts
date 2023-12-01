@@ -20,6 +20,7 @@ dependencies {
     implementation(project(":libs:etterlatte-migrering-model"))
 
     implementation("no.nav.pensjon.brevbaker:brevbaker-api-model-common:1.0.2")
+    implementation(libs.etterlatte.common)
 
     implementation(libs.database.kotliquery)
 

@@ -102,6 +102,11 @@ internal fun Route.behandlingVedtakRoute(
                                 ferdigstillOppgaveUnderbehandlingOgLagNyMedType.id,
                                 sisteSaksbehandlerIkkeAttestering,
                             )
+                        } else {
+                            logger.warn(
+                                "Fant ikke siste saksbehandler for behandling:" +
+                                    " ${underkjennVedtakOppgave.sakIdOgReferanse.referanse}. ",
+                            )
                         }
                     } catch (e: Exception) {
                         haandterFeilIOppgaveService(e)

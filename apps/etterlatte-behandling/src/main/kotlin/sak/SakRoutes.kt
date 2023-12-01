@@ -132,7 +132,7 @@ internal fun Route.sakWebRoutes(
                 call.respond(sak ?: HttpStatusCode.NotFound)
             }
 
-            post("/endreEnhet") {
+            post("/endre_enhet") {
                 hentNavidentFraToken { navIdent ->
                     val enhet = call.receive<String>()
                     try {

@@ -40,9 +40,6 @@ internal class Verifiserer(
             }
             feil.addAll(sjekkAtPersonerFinsIPDL(it))
         }
-        if (!request.erFolketrygdberegnet()) {
-            feil.add(SakHarIkkeFolketrygdBeregning)
-        }
 
         if (request.dodAvYrkesskade) {
             feil.add(DoedAvYrkesskade)
@@ -142,11 +139,6 @@ object BarnetHarVerge : Verifiseringsfeil() {
 object StrengtFortrolig : Verifiseringsfeil() {
     override val message: String
         get() = "Skal ikke migrere strengt fortrolig sak"
-}
-
-object SakHarIkkeFolketrygdBeregning : Verifiseringsfeil() {
-    override val message: String
-        get() = "Skal ikke migrere saker med EØS beregning eller proratabrøk"
 }
 
 data class PDLException(val kilde: Throwable) : Verifiseringsfeil() {

@@ -9,7 +9,7 @@ export const hentVedtakSammendrag = async (behandlingId: string): Promise<ApiRes
 export const hentIverksatteVedtakISak = async (sakId: number): Promise<ApiResponse<Array<VedtaketKlagenGjelder>>> => {
   return apiClient.get(`vedtak/sak/${sakId}/iverksatte`)
 }
-;+2
+
 export const fattVedtak = async (behandlingId: string): Promise<ApiResponse<unknown>> => {
   return apiClient.post(`/vedtak/${behandlingId}/fattvedtak`, {})
 }

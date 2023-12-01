@@ -132,6 +132,27 @@ internal fun Route.sakWebRoutes(
                 call.respond(sak ?: HttpStatusCode.NotFound)
             }
 
+            post("/endre_enhet") {
+                hentNavidentFraToken { navIdent ->
+                    val enhet = call.receive<String>()
+                    try {
+                        val sakMedEnhet =
+                            GrunnlagsendringshendelseService.SakMedEnhet(
+                                enhet = enhet,
+                                id = sakId,
+                            )
+                        inTransaction {
+                            sakService.oppdaterEnhetForSaker(listOf(sakMedEnhet))
+                            oppgaveService.oppdaterEnhetForRelaterteOppgaver(listOf(sakMedEnhet))
+                        }
+                        logger.info("Endret enhet på sak: $sakId  og tilhørende oppgaver til enhet: ${sakMedEnhet.enhet}")
+                        call.respond(sakMedEnhet)
+                    } catch (e: TilstandException.UgyldigTilstand) {
+                        call.respond(HttpStatusCode.BadRequest, "Kan ikke endre enhet på sak og oppgaver")
+                    }
+                }
+            }
+
             post("/utenlandstilknytning") {
                 hentNavidentFraToken { navIdent ->
                     logger.debug("Prøver å fastsette utenlandstilknytning")

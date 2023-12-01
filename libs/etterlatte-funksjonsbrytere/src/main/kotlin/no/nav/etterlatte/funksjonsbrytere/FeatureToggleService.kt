@@ -16,11 +16,17 @@ interface FeatureToggleService {
     ): Boolean
 
     companion object {
-        fun initialiser(properties: FeatureToggleProperties) = UnleashFeatureToggleService(properties)
+        fun initialiser(
+            properties: FeatureToggleProperties,
+            brukerIdent: () -> String = { "" },
+        ) = UnleashFeatureToggleService(properties, brukerIdent)
     }
 }
 
-class UnleashFeatureToggleService(private val properties: FeatureToggleProperties) : FeatureToggleService {
+class UnleashFeatureToggleService(
+    private val properties: FeatureToggleProperties,
+    private val brukerIdent: () -> String,
+) : FeatureToggleService {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     private val defaultUnleash =
@@ -28,17 +34,18 @@ class UnleashFeatureToggleService(private val properties: FeatureTogglePropertie
             UnleashConfig.builder()
                 .appName(properties.applicationName)
                 .unleashAPI(properties.uri())
-                .unleashContextProvider(lagUnleashContextProvider())
+                .unleashContextProvider(lagUnleashContextProvider(brukerIdent))
                 .apiKey(properties.apiKey)
                 .build(),
             GradualRolloutRandomStrategy(),
             GradualRolloutUserIdStrategy(),
         )
 
-    private fun lagUnleashContextProvider() =
+    private fun lagUnleashContextProvider(brukerIdentResolver: () -> String) =
         UnleashContextProvider {
             UnleashContext.builder()
                 .appName(properties.applicationName)
+                .userId(brukerIdentResolver())
                 .build()
         }
 
@@ -57,7 +64,7 @@ class UnleashFeatureToggleService(private val properties: FeatureTogglePropertie
     private fun merge(other: UnleashContext): UnleashContext {
         return UnleashContext.builder()
             .appName(other.appName.orElse(properties.applicationName))
-            .userId(other.userId.orElse(null))
+            .userId(other.userId.orElse(brukerIdent()))
             .sessionId(other.sessionId.orElse(null))
             .build()
     }

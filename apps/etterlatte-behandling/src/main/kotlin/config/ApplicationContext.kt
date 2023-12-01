@@ -3,6 +3,7 @@ package no.nav.etterlatte.config
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 import io.ktor.client.HttpClient
+import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.BehandlingFactory
 import no.nav.etterlatte.behandling.BehandlingRequestLogger
@@ -155,7 +156,11 @@ internal class ApplicationContext(
         } else {
             GcpKafkaConfig.fromEnv(env.props).standardProducer(env.getValue("KAFKA_RAPID_TOPIC"))
         },
-    val featureToggleService: FeatureToggleService = FeatureToggleService.initialiser(featureToggleProperties(config)),
+    val featureToggleService: FeatureToggleService =
+        FeatureToggleService.initialiser(
+            properties = featureToggleProperties(config),
+            brukerIdent = { Kontekst.get().AppUser.name() },
+        ),
     val pdlHttpClient: HttpClient = pdlHttpClient(config),
     val skjermingHttpKlient: HttpClient = skjermingHttpClient(config),
     val grunnlagHttpClient: HttpClient = grunnlagHttpClient(config),

@@ -369,7 +369,7 @@ class OppgaveService(
         return oppgaverForBehandlingUtenAttesterting.sortedByDescending { it.opprettet }[0].saksbehandler
     }
 
-    fun hentSaksbehandlerIkkeAttestertOppgave(referanse: String): String? {
+    fun hentSisteSaksbehandlerIkkeAttestertOppgave(referanse: String): String? {
         val oppgaverForBehandlingUtenAttesterting =
             oppgaveDao.hentOppgaverForReferanse(referanse)
                 .filter {

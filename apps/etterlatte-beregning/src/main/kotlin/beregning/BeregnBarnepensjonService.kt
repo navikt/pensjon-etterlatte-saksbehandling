@@ -37,6 +37,7 @@ import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
+import no.nav.etterlatte.libs.common.trygdetid.UKJENT_AVDOED
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.libs.regler.FaktumNode
 import no.nav.etterlatte.libs.regler.KonstantGrunnlag
@@ -335,17 +336,28 @@ class BeregnBarnepensjonService(
                 },
             ) { _, _, _ -> FaktumNode(null, beregningsGrunnlag.kilde, "Institusjonsopphold") },
         avdoedeForeldre =
-            PeriodisertBeregningGrunnlag.lagKomplettPeriodisertGrunnlag(
-                grunnlag.hentAvdoede().toPeriodisertAvdoedeGrunnlag().mapVerdier { fnrListe ->
-                    FaktumNode(
-                        verdi = fnrListe,
-                        kilde = beregningsGrunnlag.kilde,
-                        beskrivelse = "Hvilke foreldre er døde",
+            when (trygdetid?.ident) {
+                UKJENT_AVDOED ->
+                    KonstantGrunnlag(
+                        FaktumNode(
+                            verdi = emptyList(),
+                            kilde = beregningsGrunnlag.kilde,
+                            beskrivelse = "Avdød er ukjent. Trygdetid er satt manuelt.",
+                        ),
                     )
-                },
-                fom,
-                tom,
-            ),
+                else ->
+                    PeriodisertBeregningGrunnlag.lagKomplettPeriodisertGrunnlag(
+                        grunnlag.hentAvdoede().toPeriodisertAvdoedeGrunnlag().mapVerdier { fnrListe ->
+                            FaktumNode(
+                                verdi = fnrListe,
+                                kilde = beregningsGrunnlag.kilde,
+                                beskrivelse = "Hvilke foreldre er døde",
+                            )
+                        },
+                        fom,
+                        tom,
+                    )
+            },
         brukNyttRegelverk = featureToggleService.isEnabled(BrukNyttRegelverkIBeregning, false),
     )
 

@@ -109,4 +109,15 @@ data class GrunnlagTestData(
             avdoed = listOf(avdoed.foedselsnummer.value),
             gjenlevende = listOf(gjenlevende.foedselsnummer.value),
         )
+
+    fun hentGrunnlagMedUkjentAvdoed(): Grunnlag =
+        Grunnlag(
+            soeker = soekerTestopplysningerMap + opplysningsmapSoekerOverrides,
+            familie =
+                listOf(
+                    gjenlevendeTestopplysningerMap + opplysningsmapGjenlevendeOverrides,
+                ),
+            sak = opplysningsmapSakOverrides,
+            metadata = Metadata(1, 15),
+        )
 }

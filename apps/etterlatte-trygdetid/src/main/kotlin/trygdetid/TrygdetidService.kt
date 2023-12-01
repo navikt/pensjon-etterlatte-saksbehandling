@@ -20,6 +20,7 @@ import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsnummer
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.common.trygdetid.DetaljertBeregnetTrygdetidResultat
+import no.nav.etterlatte.libs.common.trygdetid.UKJENT_AVDOED
 import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.etterlatte.trygdetid.klienter.BehandlingKlient
 import no.nav.etterlatte.trygdetid.klienter.GrunnlagKlient
@@ -619,7 +620,7 @@ class TrygdetidServiceImpl(
                             "Kunne ikke hente identifikator for avdød til trygdetid i " +
                                 "behandlingen med id=${behandling.id}"
                         }
-                    } ?: "Ukjent", // TODO Hva kan vi bruke her?
+                    } ?: UKJENT_AVDOED,
                 trygdetidGrunnlag = emptyList(),
                 beregnetTrygdetid =
                     DetaljertBeregnetTrygdetid(

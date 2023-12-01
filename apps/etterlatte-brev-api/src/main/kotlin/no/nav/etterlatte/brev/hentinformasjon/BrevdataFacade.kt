@@ -89,14 +89,13 @@ class BrevdataFacade(
             val attestantIdent =
                 vedtak.vedtakFattet?.let { vedtak.attestasjon?.attestant ?: innloggetSaksbehandlerIdent }
 
-            val systemkilde =
+            val behandling =
                 if (vedtak.type == VedtakType.INNVILGELSE) {
-                    // Dette kan være en pesys-sak
-                    behandlingKlient.hentKilde(behandlingId, brukerTokenInfo)
+                    behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
                 } else {
-                    // alle andre vedtak kommer fra Gjenny
-                    Vedtaksloesning.GJENNY
+                    null
                 }
+            val systemkilde = behandling?.kilde ?: Vedtaksloesning.GJENNY // Dette kan være en pesys-sak
 
             when (vedtak.type) {
                 VedtakType.INNVILGELSE,
@@ -124,6 +123,7 @@ class BrevdataFacade(
                             spraak = grunnlag.mapSpraak(),
                             revurderingsaarsak = vedtakInnhold.behandling.revurderingsaarsak,
                             systemkilde = systemkilde,
+                            // utenlandstilkytning = behandling.utenlandstilkytning // TODO Venter på EY-3191
                         )
                     }
 

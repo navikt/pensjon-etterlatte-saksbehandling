@@ -34,6 +34,7 @@ import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.SlateHelper
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.brev.model.bp.OmregnetBPNyttRegelverk
+import no.nav.etterlatte.brev.model.bp.OmregnetBPNyttRegelverkFerdig
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.UtenlandstilknytningType
 import no.nav.etterlatte.libs.common.person.Vergemaal
@@ -75,7 +76,7 @@ class VedtaksbrevService(
         sakId: Long,
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-        migrering: MigreringBrevRequest? = null,
+        automatiskMigreringRequest: MigreringBrevRequest? = null,
     ): Brev {
         require(hentVedtaksbrev(behandlingId) == null) {
             "Vedtaksbrev finnes allerede på behandling (id=$behandlingId) og kan ikke opprettes på nytt"
@@ -119,7 +120,7 @@ class VedtaksbrevService(
                             generellBrevData,
                             brukerTokenInfo,
                             prosessType,
-                            migrering,
+                            automatiskMigreringRequest,
                         ),
                     ),
                 innholdVedlegg = opprettInnholdVedlegg(generellBrevData, prosessType),
@@ -131,7 +132,7 @@ class VedtaksbrevService(
     suspend fun genererPdf(
         id: BrevID,
         brukerTokenInfo: BrukerTokenInfo,
-        migrering: MigreringBrevRequest? = null,
+        automatiskMigreringRequest: MigreringBrevRequest? = null,
     ): Pdf {
         val brev = hentBrev(id)
 
@@ -147,9 +148,19 @@ class VedtaksbrevService(
         val brevkodePar = brevDataMapper.brevKode(generellBrevData, brev.prosessType)
 
         val brevData =
-            when (migrering) {
-                null -> opprettBrevData(brev, generellBrevData, brukerTokenInfo, brevkodePar)
-                else -> migreringBrevDataService.opprettMigreringBrevdata(generellBrevData, migrering, brukerTokenInfo)
+            when (generellBrevData.systemkilde == Vedtaksloesning.PESYS) {
+                false -> opprettBrevData(brev, generellBrevData, brukerTokenInfo, brevkodePar)
+                true ->
+                    OmregnetBPNyttRegelverkFerdig(
+                        innhold = InnholdMedVedlegg({ hentLagretInnhold(brev) }, { hentLagretInnholdVedlegg(brev) }).innhold(),
+                        data = (
+                            migreringBrevDataService.opprettMigreringBrevdata(
+                                generellBrevData,
+                                automatiskMigreringRequest,
+                                brukerTokenInfo,
+                            ) as OmregnetBPNyttRegelverk
+                        ),
+                    )
             }
 
         val brevRequest = BrevbakerRequest.fra(brevkodePar.ferdigstilling, brevData, generellBrevData, avsender)
@@ -157,19 +168,20 @@ class VedtaksbrevService(
         return brevbaker.genererPdf(brev.id, brevRequest)
             .let {
                 when (brevData) {
-                    is OmregnetBPNyttRegelverk -> {
-                        val forhaandsvarsel =
-                            brevbaker.genererPdf(
-                                brev.id,
-                                BrevbakerRequest.fra(
-                                    EtterlatteBrevKode.BARNEPENSJON_FORHAANDSVARSEL_OMREGNING,
-                                    brevData,
-                                    generellBrevData,
-                                    avsender,
-                                ),
-                            )
-                        forhaandsvarsel.medPdfAppended(it)
-                    }
+                    is OmregnetBPNyttRegelverkFerdig ->
+                        {
+                            val forhaandsvarsel =
+                                brevbaker.genererPdf(
+                                    brev.id,
+                                    BrevbakerRequest.fra(
+                                        EtterlatteBrevKode.BARNEPENSJON_FORHAANDSVARSEL_OMREGNING,
+                                        brevData.data,
+                                        generellBrevData,
+                                        avsender,
+                                    ),
+                                )
+                            forhaandsvarsel.medPdfAppended(it)
+                        }
 
                     else -> it
                 }
@@ -180,7 +192,7 @@ class VedtaksbrevService(
                     generellBrevData.forenkletVedtak,
                     pdf,
                     brukerTokenInfo,
-                    migrering != null,
+                    automatiskMigreringRequest != null,
                 )
             }
     }

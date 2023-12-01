@@ -12,7 +12,7 @@ import no.nav.etterlatte.token.BrukerTokenInfo
 class MigreringBrevDataService(private val brevdataFacade: BrevdataFacade) {
     suspend fun opprettMigreringBrevdata(
         generellBrevData: GenerellBrevData,
-        migrering: MigreringBrevRequest,
+        migrering: MigreringBrevRequest?,
         brukerTokenInfo: BrukerTokenInfo,
     ): BrevData {
         if (generellBrevData.systemkilde != Vedtaksloesning.PESYS) {

@@ -94,7 +94,7 @@ internal class EgenAnsattServiceTest {
             norg2Klient.hentEnheterForOmraade("EYB", "0301")
         } returns listOf(ArbeidsFordelingEnhet(Enheter.STEINKJER.navn, Enheter.STEINKJER.enhetNr))
 
-        every { featureToggleService.isEnabled(any(), any()) } returns false
+        every { featureToggleService.isEnabled(any(), any(), any()) } returns false
     }
 
     @BeforeEach

@@ -1,10 +1,12 @@
 import { IDetaljertBehandling, UtenlandstilknytningType } from '~shared/types/IDetaljertBehandling'
 import { BosattUtland } from '~components/behandling/soeknadsoversikt/bosattUtland/BosattUtland'
-import { isErrorWithCode, isFailure, isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
+import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentBosattutland } from '~shared/api/bosattutland'
 import { useEffect } from 'react'
 import Spinner from '~shared/Spinner'
 import { Alert } from '@navikt/ds-react'
+
+import { isErrorWithCode, isFailure, isPending, isSuccess } from '~shared/api/apiUtils'
 
 export const SkalViseBosattUtland = (props: { behandling: IDetaljertBehandling; redigerbar: boolean }) => {
   const { behandling, redigerbar } = props

@@ -6,7 +6,9 @@ import { ApiErrorAlert } from '~ErrorBoundary'
 import { LovtekstMedLenke } from '~components/behandling/soeknadsoversikt/LovtekstMedLenke'
 import Spinner from '~shared/Spinner'
 import { hentTrygdetid, ITrygdetid, lagreYrkesskadeTrygdetidGrunnlag, opprettTrygdetid } from '~shared/api/trygdetid'
-import { isFailure, isPending, useApiCall } from '~shared/hooks/useApiCall'
+import { useApiCall } from '~shared/hooks/useApiCall'
+
+import { isFailure, isPending } from '~shared/api/apiUtils'
 
 const YrkesskadeTrygdetid = () => {
   const { behandlingId } = useParams()

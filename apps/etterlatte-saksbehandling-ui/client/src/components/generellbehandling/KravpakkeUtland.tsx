@@ -21,7 +21,7 @@ import {
   TextField,
 } from '@navikt/ds-react'
 import React, { Fragment, useContext, useEffect, useState } from 'react'
-import { isFailure, isPending, isPendingOrInitial, isSuccess, mapApiResult, useApiCall } from '~shared/hooks/useApiCall'
+import { useApiCall } from '~shared/hooks/useApiCall'
 import { oppdaterGenerellBehandling } from '~shared/api/generellbehandling'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
@@ -42,6 +42,8 @@ import { hentSak } from '~shared/api/sak'
 import { SendtilAttesteringModal } from '~components/generellbehandling/SendtilAttesteringModal'
 import { NavigateFunction } from 'react-router/dist/lib/hooks'
 import { GenerellbehandlingSidemeny } from '~components/generellbehandling/GenerellbehandlingSidemeny'
+
+import { isFailure, isPending, isPendingOrInitial, isSuccess, mapApiResult } from '~shared/api/apiUtils'
 
 const TextFieldBegrunnelse = styled(Textarea).attrs({ size: 'medium' })`
   max-width: 40rem;

@@ -1,10 +1,12 @@
 import { Alert, BodyLong, Button, Heading, Modal, Panel } from '@navikt/ds-react'
 import { BrevStatus, IBrev } from '~shared/types/Brev'
-import { isInitial, isPending, isSuccess, mapAllApiResult, useApiCall } from '~shared/hooks/useApiCall'
+import { useApiCall } from '~shared/hooks/useApiCall'
 import { useEffect, useState } from 'react'
 import { distribuerBrev, ferdigstillBrev, journalfoerBrev } from '~shared/api/brev'
 import { FlexRow } from '~shared/styled'
 import Spinner from '~shared/Spinner'
+
+import { isInitial, isPending, isSuccess, mapAllApiResult } from '~shared/api/apiUtils'
 
 interface Props {
   brev: IBrev

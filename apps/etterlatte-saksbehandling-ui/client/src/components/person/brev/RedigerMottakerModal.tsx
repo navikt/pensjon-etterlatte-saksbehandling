@@ -3,13 +3,15 @@ import React, { useState } from 'react'
 import { IBrev, Mottaker } from '~shared/types/Brev'
 import { DocPencilIcon } from '@navikt/aksel-icons'
 import styled, { css } from 'styled-components'
-import { isFailure, isPending, useApiCall } from '~shared/hooks/useApiCall'
+import { useApiCall } from '~shared/hooks/useApiCall'
 import { oppdaterMottaker } from '~shared/api/brev'
 import { FlexRow } from '~shared/styled'
 import { Grunnlagsopplysning } from '~shared/types/grunnlag'
 import { KildePersondata } from '~shared/types/kilde'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import { InfoWrapper } from '~components/behandling/soeknadsoversikt/styled'
+
+import { isFailure, isPending } from '~shared/api/apiUtils'
 
 enum MottakerType {
   PRIVATPERSON = 'PRIVATPERSON',

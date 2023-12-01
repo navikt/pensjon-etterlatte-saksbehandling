@@ -2,7 +2,7 @@ import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
 import { useBehandling } from '~components/behandling/useBehandling'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import { formaterKanskjeStringDato, formaterStringDato } from '~utils/formattering'
-import { mapApiResult, useApiCall } from '~shared/hooks/useApiCall'
+import { useApiCall } from '~shared/hooks/useApiCall'
 import { useEffect } from 'react'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
@@ -12,6 +12,8 @@ import { HistorikkElement } from '~components/behandling/soeknadsoversikt/styled
 import { formaterNavn, IPdlPerson } from '~shared/types/Person'
 import { getHistoriskForeldreansvar } from '~shared/api/grunnlag'
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
+
+import { mapApiResult } from '~shared/api/apiUtils'
 
 const SoekerDoedsdatoGrunnlag = () => {
   const behandling = useBehandling()

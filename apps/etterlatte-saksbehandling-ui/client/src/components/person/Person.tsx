@@ -4,7 +4,7 @@ import { StatusBar } from '~shared/statusbar/Statusbar'
 import { Container } from '~shared/styled'
 import { SakOversikt } from './SakOversikt'
 import Spinner from '~shared/Spinner'
-import { mapApiResult, useApiCall } from '~shared/hooks/useApiCall'
+import { useApiCall } from '~shared/hooks/useApiCall'
 import { Tabs } from '@navikt/ds-react'
 import { getPerson } from '~shared/api/grunnlag'
 import { fnrHarGyldigFormat } from '~utils/fnr'
@@ -15,6 +15,8 @@ import { ApiErrorAlert } from '~ErrorBoundary'
 import { ApiError } from '~shared/api/apiClient'
 import BrevOversikt from '~components/person/brev/BrevOversikt'
 import { hentSakMedBehandlnger } from '~shared/api/sak'
+
+import { mapApiResult } from '~shared/api/apiUtils'
 
 enum Fane {
   SAKER = 'SAKER',

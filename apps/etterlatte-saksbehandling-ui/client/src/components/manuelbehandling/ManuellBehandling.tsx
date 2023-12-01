@@ -7,12 +7,14 @@ import { useJournalfoeringOppgave } from '~components/person/journalfoeringsoppg
 import styled from 'styled-components'
 import { settNyBehandlingRequest } from '~store/reducers/JournalfoeringOppgaveReducer'
 import { useAppDispatch } from '~store/Store'
-import { isFailure, isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
+import { useApiCall } from '~shared/hooks/useApiCall'
 import { opprettBehandling } from '~shared/api/behandling'
 import { opprettOverstyrBeregning } from '~shared/api/beregning'
 import { InputRow } from '~components/person/journalfoeringsoppgave/nybehandling/OpprettNyBehandling'
 import { Spraak } from '~shared/types/Brev'
 import { opprettTrygdetidOverstyrtMigrering } from '~shared/api/trygdetid'
+
+import { isFailure, isPending, isSuccess } from '~shared/api/apiUtils'
 
 export default function ManuellBehandling() {
   const dispatch = useAppDispatch()

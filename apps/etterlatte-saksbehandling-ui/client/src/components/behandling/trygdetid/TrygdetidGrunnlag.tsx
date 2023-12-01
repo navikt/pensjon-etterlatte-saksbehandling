@@ -1,6 +1,6 @@
 import { Button, Checkbox, CheckboxGroup, Select, Textarea } from '@navikt/ds-react'
 import { FormKnapper, FormWrapper, Innhold } from '~components/behandling/trygdetid/styled'
-import { isErrorWithCode, isFailure, isPending, useApiCall } from '~shared/hooks/useApiCall'
+import { useApiCall } from '~shared/hooks/useApiCall'
 import {
   ILand,
   ITrygdetid,
@@ -14,6 +14,8 @@ import { ApiErrorAlert } from '~ErrorBoundary'
 import styled from 'styled-components'
 import { useParams } from 'react-router-dom'
 import { DatoVelger, formatDateToLocaleDateOrEmptyString } from '~shared/DatoVelger'
+
+import { isErrorWithCode, isFailure, isPending } from '~shared/api/apiUtils'
 
 type Props = {
   eksisterendeGrunnlag: ITrygdetidGrunnlag | undefined

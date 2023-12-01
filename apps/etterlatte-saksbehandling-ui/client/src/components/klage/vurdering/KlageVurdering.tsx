@@ -19,13 +19,15 @@ import {
 } from '~shared/types/Klage'
 import { Control, Controller, useForm } from 'react-hook-form'
 import { FieldOrNull } from '~shared/types/util'
-import { isFailure, isPending, useApiCall } from '~shared/hooks/useApiCall'
+import { useApiCall } from '~shared/hooks/useApiCall'
 import { oppdaterUtfallForKlage } from '~shared/api/klage'
 import { useAppDispatch } from '~store/Store'
 import { addKlage } from '~store/reducers/KlageReducer'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { kanSeBrev } from '~components/klage/stegmeny/KlageStegmeny'
 import { SakType } from '~shared/types/sak'
+
+import { isFailure, isPending } from '~shared/api/apiUtils'
 
 type FilledFormDataVurdering = {
   utfall: Utfall

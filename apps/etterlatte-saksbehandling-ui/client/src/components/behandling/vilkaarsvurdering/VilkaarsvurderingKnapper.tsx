@@ -2,7 +2,7 @@ import { handlinger } from '../handlinger/typer'
 import { Button } from '@navikt/ds-react'
 import { useBehandlingRoutes } from '../BehandlingRoutes'
 import { useVedtaksResultat } from '../useVedtaksResultat'
-import { isFailure, isPending, useApiCall } from '~shared/hooks/useApiCall'
+import { useApiCall } from '~shared/hooks/useApiCall'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { upsertVedtak } from '~shared/api/vedtaksvurdering'
 import { oppdaterStatus } from '~shared/api/vilkaarsvurdering'
@@ -10,6 +10,8 @@ import { useAppDispatch } from '~store/Store'
 import { oppdaterBehandlingsstatus } from '~store/reducers/BehandlingReducer'
 import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 import { BehandlingHandlingKnapper } from '~components/behandling/handlinger/BehandlingHandlingKnapper'
+
+import { isFailure, isPending } from '~shared/api/apiUtils'
 
 export const VilkaarsvurderingKnapper = (props: { behandlingId: string }) => {
   const { next, goto } = useBehandlingRoutes()

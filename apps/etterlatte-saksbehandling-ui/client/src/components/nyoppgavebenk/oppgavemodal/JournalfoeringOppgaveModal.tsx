@@ -4,11 +4,13 @@ import { useState } from 'react'
 import { OppgavetypeTag, SaktypeTag } from '~components/nyoppgavebenk/Tags'
 import { OppgaveDTO } from '~shared/api/oppgaver'
 import { FlexRow } from '~shared/styled'
-import { mapApiResult, useApiCall } from '~shared/hooks/useApiCall'
+import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentJournalpost } from '~shared/api/dokument'
 import Spinner from '~shared/Spinner'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import { InfoList } from '~components/behandling/soeknadsoversikt/styled'
+
+import { mapApiResult } from '~shared/api/apiUtils'
 
 export const JournalfoeringOppgaveModal = ({ oppgave }: { oppgave: OppgaveDTO }) => {
   const [open, setOpen] = useState(false)

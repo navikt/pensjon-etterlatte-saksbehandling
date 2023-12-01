@@ -1,4 +1,4 @@
-import { isPending, isPendingOrInitial, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
+import { useApiCall } from '~shared/hooks/useApiCall'
 import { useEffect } from 'react'
 import { Route, Routes, useParams } from 'react-router-dom'
 import NavigerTilbakeMeny from '~components/person/NavigerTilbakeMeny'
@@ -16,6 +16,8 @@ import Spinner from '~shared/Spinner'
 import EndreJournalpostTema from '~components/person/journalfoeringsoppgave/endretema/EndreJournalpostTema'
 import FerdigstillJournalpost from '~components/person/journalfoeringsoppgave/ferdigstilljournalpost/FerdigstillJournalpost'
 import { hentSakForPerson } from '~shared/api/sak'
+
+import { isPending, isPendingOrInitial, isSuccess } from '~shared/api/apiUtils'
 
 export default function BehandleJournalfoeringOppgave() {
   const { nyBehandlingRequest, oppgave } = useJournalfoeringOppgave()

@@ -7,19 +7,18 @@ import { SidebarPanel } from '~shared/components/Sidebar'
 import { Dokumentoversikt } from '~components/person/dokumenter/dokumentoversikt'
 import { useAppDispatch, useAppSelector } from '~store/Store'
 import { TilbakekrevingStatus } from '~shared/types/Tilbakekreving'
-import { isFailure, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
-import { isPending } from '@reduxjs/toolkit'
+import { useApiCall } from '~shared/hooks/useApiCall'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import Spinner from '~shared/Spinner'
 import { AttesteringEllerUnderkjenning } from '~components/behandling/attestering/attestering/attesteringEllerUnderkjenning'
 import { IBeslutning } from '~components/behandling/attestering/types'
 import { hentVedtakSammendrag } from '~shared/api/vedtaksvurdering'
-import { useVedtak } from '~components/vedtak/useVedtak'
 import { updateVedtakSammendrag } from '~store/reducers/VedtakReducer'
+
+import { mapApiResult } from '~shared/api/apiUtils'
 
 export function TilbakekrevingSidemeny() {
   const tilbakekreving = useTilbakekreving()
-  const vedtak = useVedtak()
   const dispatch = useAppDispatch()
   const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
   const [collapsed, setCollapsed] = useState(false)
@@ -34,8 +33,8 @@ export function TilbakekrevingSidemeny() {
 
   useEffect(() => {
     if (!tilbakekreving?.id) return
-    fetchVedtakSammendrag(tilbakekreving.id, (vedtakSammendrag) => {
-      if (vedtakSammendrag !== null) {
+    fetchVedtakSammendrag(tilbakekreving.id, (vedtakSammendrag, statusCode) => {
+      if (statusCode === 200) {
         dispatch(updateVedtakSammendrag(vedtakSammendrag))
       }
     })
@@ -55,15 +54,20 @@ export function TilbakekrevingSidemeny() {
       </SidebarContent>
       {kanAttestere && (
         <>
-          {isFailure(fetchVedtakStatus) && <ApiErrorAlert>Kunne ikke hente vedtak</ApiErrorAlert>}
-          {isPending(fetchVedtakStatus) && <Spinner label="Henter vedtaksdetaljer" visible />}
-          {isSuccess(fetchVedtakStatus) && vedtak && (
-            <AttesteringEllerUnderkjenning
-              setBeslutning={setBeslutning}
-              beslutning={beslutning}
-              vedtak={vedtak}
-              erFattet={tilbakekreving?.status === TilbakekrevingStatus.FATTET_VEDTAK}
-            />
+          {mapApiResult(
+            fetchVedtakStatus,
+            <Spinner label="Henter vedtaksdetaljer" visible />,
+            () => (
+              <ApiErrorAlert>Kunne ikke hente vedtak</ApiErrorAlert>
+            ),
+            (vedtak) => (
+              <AttesteringEllerUnderkjenning
+                setBeslutning={setBeslutning}
+                beslutning={beslutning}
+                vedtak={vedtak}
+                erFattet={tilbakekreving?.status === TilbakekrevingStatus.FATTET_VEDTAK}
+              />
+            )
           )}
         </>
       )}

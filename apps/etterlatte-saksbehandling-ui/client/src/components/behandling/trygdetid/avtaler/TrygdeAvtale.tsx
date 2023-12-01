@@ -17,7 +17,7 @@ import {
   TrygdetidAvtaleKriteria,
   TrygdetidAvtaleOptions,
 } from '~shared/api/trygdetid'
-import { isFailure, isPending, useApiCall } from '~shared/hooks/useApiCall'
+import { useApiCall } from '~shared/hooks/useApiCall'
 import { IconSize } from '~shared/types/Icon'
 import { FormWrapper } from '../styled'
 import { TrygdeavtaleVisning } from './TrygdeavtaleVisning'
@@ -26,6 +26,8 @@ import { JaNei } from '~shared/types/ISvar'
 import { RadioGroupWrapper } from '~components/behandling/vilkaarsvurdering/Vurdering'
 import { Text } from '~components/behandling/attestering/styled'
 import { HjemmelLenke } from '~components/behandling/felles/HjemmelLenke'
+
+import { isFailure, isPending } from '~shared/api/apiUtils'
 
 interface TrygdetidAvtaleOptionProps {
   defaultBeskrivelse: string

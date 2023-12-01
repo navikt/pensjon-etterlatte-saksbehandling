@@ -1,10 +1,12 @@
-import { isFailure, isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
+import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentVedtakSammendrag } from '~shared/api/vedtaksvurdering'
 import React, { useEffect } from 'react'
 import { formaterStringDato, formaterVedtakType } from '~utils/formattering'
 import { Table } from '@navikt/ds-react'
 import Spinner from '~shared/Spinner'
 import { ExclamationmarkTriangleFillIcon } from '@navikt/aksel-icons'
+
+import { isFailure, isPending, isSuccess } from '~shared/api/apiUtils'
 
 export const VedtakKolonner = (props: { behandlingId: string }) => {
   const [vedtak, apiHentVedtaksammendrag] = useApiCall(hentVedtakSammendrag)

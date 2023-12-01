@@ -11,11 +11,13 @@ import {
 import { formaterDatoMedTidspunkt, formaterStringDato } from '~utils/formattering'
 import { JaNei } from '~shared/types/ISvar'
 import { KildeSaksbehandler } from '~shared/types/kilde'
-import { isFailure, isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
+import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentInstitusjonsoppholdData } from '~shared/api/behandling'
 import { VilkaarVurdertInformasjon } from '~components/behandling/vilkaarsvurdering/Vurdering'
 import Spinner from '~shared/Spinner'
 import { AGreen500 } from '@navikt/ds-tokens/dist/tokens'
+
+import { isFailure, isPending, isSuccess } from '~shared/api/apiUtils'
 
 type Props = {
   hendelser: Grunnlagsendringshendelse[]

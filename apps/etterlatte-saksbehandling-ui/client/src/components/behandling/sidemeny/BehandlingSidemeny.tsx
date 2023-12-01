@@ -7,7 +7,7 @@ import { IBeslutning } from '~components/behandling/attestering/types'
 import { BehandlingFane, IBehandlingInfo } from '~components/behandling/sidemeny/IBehandlingInfo'
 import { IBehandlingStatus, IBehandlingsType, UtenlandstilknytningType } from '~shared/types/IDetaljertBehandling'
 import { useAppDispatch, useAppSelector } from '~store/Store'
-import { isFailure, isInitial, isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
+import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentVedtakSammendrag } from '~shared/api/vedtaksvurdering'
 import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
 import { IHendelseType } from '~shared/types/IHendelse'
@@ -30,6 +30,8 @@ import {
   resetSaksbehandlerGjeldendeOppgave,
   setSaksbehandlerGjeldendeOppgave,
 } from '~store/reducers/SaksbehandlerGjeldendeOppgaveForBehandlingReducer'
+
+import { isFailure, isInitial, isPending, isSuccess } from '~shared/api/apiUtils'
 
 const finnUtNasjonalitet = (behandling: IBehandlingReducer): UtenlandstilknytningType | null => {
   if (behandling.utenlandstilknytning?.type) {
@@ -72,8 +74,8 @@ export const BehandlingSidemeny = ({ behandling }: { behandling: IBehandlingRedu
     behandling && innloggetSaksbehandler.kanAttestere && behandlingsinfo?.status === IBehandlingStatus.FATTET_VEDTAK
 
   useEffect(() => {
-    fetchVedtakSammendrag(behandling.id, (vedtakSammendrag) => {
-      if (vedtakSammendrag !== null) {
+    fetchVedtakSammendrag(behandling.id, (vedtakSammendrag, statusCode) => {
+      if (statusCode === 200) {
         dispatch(updateVedtakSammendrag(vedtakSammendrag))
       }
     })

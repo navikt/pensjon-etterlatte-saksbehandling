@@ -1,6 +1,6 @@
 import { InfoWrapper } from '../../styled'
 import { Info } from '../../Info'
-import { isFailure, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
+import { useApiCall } from '~shared/hooks/useApiCall'
 import { getGrunnlagsAvOpplysningstype } from '~shared/api/grunnlag'
 import { KildePdl } from '~shared/types/kilde'
 import { IPdlPerson } from '~shared/types/Person'
@@ -8,6 +8,8 @@ import { Grunnlagsopplysning } from '~shared/types/grunnlag'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { useEffect } from 'react'
 import { formaterKildePdl } from '~components/behandling/soeknadsoversikt/utils'
+
+import { isFailure, isSuccess } from '~shared/api/apiUtils'
 
 interface Props {
   behandlingId: string

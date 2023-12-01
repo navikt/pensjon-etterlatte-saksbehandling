@@ -7,16 +7,11 @@ import { IBrev } from '~shared/types/Brev'
 import { format } from 'date-fns'
 import { hentManuellPayload, lagreManuellPayload, tilbakestillManuellPayload } from '~shared/api/brev'
 import ForhaandsvisningBrev from '~components/behandling/brev/ForhaandsvisningBrev'
-import {
-  isFailure,
-  isPending,
-  isPendingOrInitial,
-  isSuccess,
-  isSuccessOrInitial,
-  useApiCall,
-} from '~shared/hooks/useApiCall'
+import { useApiCall } from '~shared/hooks/useApiCall'
 import Spinner from '~shared/Spinner'
 import { GeneriskModal } from '~shared/modal/modal'
+
+import { isFailure, isPending, isPendingOrInitial, isSuccess, isSuccessOrInitial } from '~shared/api/apiUtils'
 
 enum ManueltBrevFane {
   REDIGER = 'REDIGER',

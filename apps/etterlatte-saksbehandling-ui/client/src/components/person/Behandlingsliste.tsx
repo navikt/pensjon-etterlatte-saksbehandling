@@ -3,7 +3,7 @@ import { IBehandlingsammendrag } from './typer'
 import { formaterBehandlingstype, formaterEnumTilLesbarString, formaterStringDato } from '~utils/formattering'
 import React, { useEffect } from 'react'
 import styled from 'styled-components'
-import { isFailure, isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
+import { useApiCall } from '~shared/hooks/useApiCall'
 import Spinner from '~shared/Spinner'
 import { hentGenerelleBehandlingForSak } from '~shared/api/generellbehandling'
 import { Generellbehandling } from '~shared/types/Generellbehandling'
@@ -16,6 +16,8 @@ import {
   mapAarsak,
 } from '~components/person/behandlingsslistemappere'
 import { VedtakKolonner } from '~components/person/VedtakKoloner'
+
+import { isFailure, isPending, isSuccess } from '~shared/api/apiUtils'
 
 const BehandlingPanel = styled.div`
   margin: 3rem 0;

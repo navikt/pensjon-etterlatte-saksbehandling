@@ -2,8 +2,9 @@ import { Alert, BodyShort, Detail, Heading, Link } from '@navikt/ds-react'
 import { formaterStringDato } from '~utils/formattering'
 import Spinner from '~shared/Spinner'
 import { ExternalLinkIcon } from '@navikt/aksel-icons'
-import { isFailure, isPending, isSuccess, Result } from '~shared/hooks/useApiCall'
 import { Journalpost } from '~shared/types/Journalpost'
+
+import { isFailure, isPending, isSuccess, Result } from '~shared/api/apiUtils'
 
 export const DokumentlisteLiten = ({ dokumenter }: { dokumenter: Result<Journalpost[]> }) => (
   <>

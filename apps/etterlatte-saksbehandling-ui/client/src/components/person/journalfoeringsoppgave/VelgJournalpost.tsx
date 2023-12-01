@@ -1,4 +1,4 @@
-import { isFailure, isPending, isSuccess, mapApiResult, useApiCall } from '~shared/hooks/useApiCall'
+import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentDokumenter, hentDokumentPDF, hentJournalpost } from '~shared/api/dokument'
 import React, { useEffect, useState } from 'react'
 import { fnrHarGyldigFormat } from '~utils/fnr'
@@ -15,6 +15,8 @@ import { FlexRow } from '~shared/styled'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { InfoWrapper } from '~components/behandling/soeknadsoversikt/styled'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
+
+import { isFailure, isPending, isSuccess, mapApiResult } from '~shared/api/apiUtils'
 
 export default function VelgJournalpost({ journalpostId }: { journalpostId: string | null }) {
   const { bruker, journalpost } = useJournalfoeringOppgave()

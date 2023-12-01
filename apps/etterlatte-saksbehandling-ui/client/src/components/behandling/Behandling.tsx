@@ -7,13 +7,15 @@ import { PdlPersonStatusBar } from '~shared/statusbar/Statusbar'
 import { useBehandlingRoutes } from './BehandlingRoutes'
 import { StegMeny } from './StegMeny/stegmeny'
 import { useAppDispatch } from '~store/Store'
-import { mapAllApiResult, useApiCall } from '~shared/hooks/useApiCall'
+import { useApiCall } from '~shared/hooks/useApiCall'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { useBehandling } from '~components/behandling/useBehandling'
 import { BehandlingSidemeny } from '~components/behandling/sidemeny/BehandlingSidemeny'
 import Spinner from '~shared/Spinner'
 import { hentPersonopplysningerForBehandling } from '~shared/api/grunnlag'
 import { resetPersonopplysninger, setPersonopplysninger } from '~store/reducers/PersonopplysningerReducer'
+
+import { mapAllApiResult } from '~shared/api/apiUtils'
 
 export const Behandling = () => {
   const behandlingFraRedux = useBehandling()

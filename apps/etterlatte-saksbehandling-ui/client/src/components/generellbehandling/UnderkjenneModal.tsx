@@ -1,10 +1,12 @@
 import { Alert, BodyShort, Button, Textarea } from '@navikt/ds-react'
-import { isFailure, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
+import { useApiCall } from '~shared/hooks/useApiCall'
 import React, { useState } from 'react'
 import { underkjennGenerellbehandling } from '~shared/api/generellbehandling'
 import { Generellbehandling, KravpakkeUtland } from '~shared/types/Generellbehandling'
 import { useNavigate } from 'react-router-dom'
 import { hentSakOgNavigerTilSaksoversikt } from '~components/generellbehandling/KravpakkeUtland'
+
+import { isFailure, isSuccess } from '~shared/api/apiUtils'
 
 export const UnderkjenneModal = ({
   utlandsBehandling,

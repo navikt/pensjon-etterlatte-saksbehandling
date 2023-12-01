@@ -9,7 +9,7 @@ import {
   lagreBeregningsGrunnlagOMS,
   opprettEllerEndreBeregning,
 } from '~shared/api/beregning'
-import { isFailure, isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
+import { useApiCall } from '~shared/hooks/useApiCall'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import {
   IBehandlingReducer,
@@ -32,6 +32,8 @@ import { Border } from '~components/behandling/soeknadsoversikt/styled'
 import Spinner from '~shared/Spinner'
 import BeregningsgrunnlagMetode from './BeregningsgrunnlagMetode'
 import { handlinger } from '~components/behandling/handlinger/typer'
+
+import { isFailure, isPending, isSuccess } from '~shared/api/apiUtils'
 
 const BeregningsgrunnlagOmstillingsstoenad = (props: { behandling: IBehandlingReducer }) => {
   const { behandling } = props

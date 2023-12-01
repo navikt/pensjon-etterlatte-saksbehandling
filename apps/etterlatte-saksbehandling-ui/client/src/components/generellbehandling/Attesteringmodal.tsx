@@ -1,9 +1,11 @@
 import { Alert, Button } from '@navikt/ds-react'
-import { isFailure, isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
+import { useApiCall } from '~shared/hooks/useApiCall'
 import { attesterGenerellbehandling } from '~shared/api/generellbehandling'
 import { hentSakOgNavigerTilSaksoversikt } from '~components/generellbehandling/KravpakkeUtland'
 import { useNavigate } from 'react-router-dom'
 import { Generellbehandling, KravpakkeUtland } from '~shared/types/Generellbehandling'
+
+import { isFailure, isPending, isSuccess } from '~shared/api/apiUtils'
 
 export const Attesteringmodal = (props: {
   utlandsBehandling: Generellbehandling & { innhold: KravpakkeUtland | null }

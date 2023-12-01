@@ -3,7 +3,7 @@ import { Navigate, Route, Routes, useMatch } from 'react-router-dom'
 import React, { useEffect } from 'react'
 import { useAppDispatch } from '~store/Store'
 import { addKlage, resetKlage } from '~store/reducers/KlageReducer'
-import { isFailure, isPending, useApiCall } from '~shared/hooks/useApiCall'
+import { useApiCall } from '~shared/hooks/useApiCall'
 import { getPerson } from '~shared/api/grunnlag'
 import { StatusBar } from '~shared/statusbar/Statusbar'
 import Spinner from '~shared/Spinner'
@@ -16,6 +16,8 @@ import { KlageVurdering } from '~components/klage/vurdering/KlageVurdering'
 import { KlageOppsummering } from '~components/klage/oppsummering/KlageOppsummering'
 import { KlageSidemeny } from '~components/klage/sidemeny/KlageSidemeny'
 import { KlageBrev } from '~components/klage/brev/KlageBrev'
+
+import { isFailure, isPending } from '~shared/api/apiUtils'
 
 export function Klagebehandling() {
   const klage = useKlage()

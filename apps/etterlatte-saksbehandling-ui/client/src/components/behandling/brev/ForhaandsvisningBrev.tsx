@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react'
 import { IBrev } from '~shared/types/Brev'
-import { isFailure, isPendingOrInitial, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
+import { useApiCall } from '~shared/hooks/useApiCall'
 import { Alert } from '@navikt/ds-react'
 import Spinner from '~shared/Spinner'
 import styled from 'styled-components'
 import { genererPdf } from '~shared/api/brev'
+
+import { isFailure, isPendingOrInitial, isSuccess } from '~shared/api/apiUtils'
 
 export default function ForhaandsvisningBrev({ brev }: { brev: IBrev }) {
   const [fileURL, setFileURL] = useState<string>()

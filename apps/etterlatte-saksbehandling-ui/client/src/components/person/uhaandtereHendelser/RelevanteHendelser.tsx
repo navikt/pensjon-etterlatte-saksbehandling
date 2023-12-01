@@ -1,7 +1,7 @@
 import { Alert, Heading, Table } from '@navikt/ds-react'
 import { Grunnlagsendringshendelse, IBehandlingsammendrag, STATUS_IRRELEVANT } from '~components/person/typer'
 import { FnrTilNavnMapContext } from '~components/person/uhaandtereHendelser/utils'
-import { isFailure, isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
+import { useApiCall } from '~shared/hooks/useApiCall'
 import React, { useEffect, useMemo, useState } from 'react'
 import { hentPersonerISak } from '~shared/api/grunnlag'
 import HistoriskeHendelser from '~components/person/uhaandtereHendelser/HistoriskeHendelser'
@@ -14,6 +14,8 @@ import { hentGrunnlagsendringshendelserForPerson } from '~shared/api/behandling'
 import Spinner from '~shared/Spinner'
 import { ISak } from '~shared/types/sak'
 import { hentStoettedeRevurderinger } from '~shared/api/revurdering'
+
+import { isFailure, isPending, isSuccess } from '~shared/api/apiUtils'
 
 type Props = {
   sak: ISak

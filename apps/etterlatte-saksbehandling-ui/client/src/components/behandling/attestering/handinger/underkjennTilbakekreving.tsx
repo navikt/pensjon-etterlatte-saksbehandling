@@ -2,9 +2,11 @@ import { Button } from '@navikt/ds-react'
 import { useState } from 'react'
 import { GeneriskModal } from '~shared/modal/modal'
 import { useNavigate } from 'react-router'
-import { isPending, useApiCall } from '~shared/hooks/useApiCall'
+import { useApiCall } from '~shared/hooks/useApiCall'
 import { TilbakekrevingBehandling } from '~shared/types/Tilbakekreving'
 import { underkjennVedtak } from '~shared/api/tilbakekreving'
+
+import { isPending } from '~shared/api/apiUtils'
 
 type Props = {
   tilbakekreving: TilbakekrevingBehandling

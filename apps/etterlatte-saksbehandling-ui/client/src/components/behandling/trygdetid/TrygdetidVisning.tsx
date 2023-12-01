@@ -9,7 +9,7 @@ import { BehandlingHandlingKnapper } from '~components/behandling/handlinger/Beh
 import { NesteOgTilbake } from '~components/behandling/handlinger/NesteOgTilbake'
 import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
 import { useBehandlingRoutes } from '~components/behandling/BehandlingRoutes'
-import { isFailure, isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
+import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentVilkaarsvurdering } from '~shared/api/vilkaarsvurdering'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import React, { useEffect, useState } from 'react'
@@ -23,6 +23,8 @@ import { oppdaterBehandlingsstatus } from '~store/reducers/BehandlingReducer'
 import { useAppDispatch } from '~store/Store'
 import { handlinger } from '~components/behandling/handlinger/typer'
 import { Vilkaarsresultat } from '~components/behandling/felles/Vilkaarsresultat'
+
+import { isFailure, isPending, isSuccess } from '~shared/api/apiUtils'
 
 const featureToggleNameTrygdetid = 'pensjon-etterlatte.bp-bruk-faktisk-trygdetid' as const
 

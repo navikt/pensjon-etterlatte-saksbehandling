@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { isFailure, isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
+import { useApiCall } from '~shared/hooks/useApiCall'
 import { Oppgavetype, redigerFristApi } from '~shared/api/oppgaver'
 import { Alert, Button, DatePicker, Heading, Label, Modal } from '@navikt/ds-react'
 import { ApiErrorAlert } from '~ErrorBoundary'
@@ -8,6 +8,8 @@ import { PencilIcon } from '@navikt/aksel-icons'
 import styled from 'styled-components'
 import { add, isBefore } from 'date-fns'
 import { FlexRow } from '~shared/styled'
+
+import { isFailure, isPending, isSuccess } from '~shared/api/apiUtils'
 
 const FristWrapper = styled.span<{ fristHarPassert: boolean; utenKnapp?: boolean }>`
   color: ${(p) => p.fristHarPassert && 'var(--a-text-danger)'};

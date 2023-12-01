@@ -3,13 +3,15 @@ import { BodyShort, Button, Checkbox, ErrorMessage, Heading } from '@navikt/ds-r
 import React, { useState } from 'react'
 import styled from 'styled-components'
 import { FlexRow } from '~shared/styled'
-import { isPending, useApiCall } from '~shared/hooks/useApiCall'
+import { useApiCall } from '~shared/hooks/useApiCall'
 import { lagreEtterbetaling, slettEtterbetaling } from '~shared/api/behandling'
 import { formaterKanskjeStringDato } from '~utils/formattering'
 import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 import MaanedVelger from '~components/behandling/beregningsgrunnlag/MaanedVelger'
 import { useAppDispatch } from '~store/Store'
 import { oppdaterEtterbetaling } from '~store/reducers/BehandlingReducer'
+
+import { isPending } from '~shared/api/apiUtils'
 
 const MaanedSection = styled.section`
   display: grid;

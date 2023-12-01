@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { isFailure, isPending, useApiCall } from '~shared/hooks/useApiCall'
+import { useApiCall } from '~shared/hooks/useApiCall'
 import {
   hentAlleLand,
   hentTrygdetid,
@@ -25,6 +25,8 @@ import { TrygdetidDetaljer } from '~components/behandling/trygdetid/detaljer/Try
 import { OverstyrtTrygdetid } from './OverstyrtTrygdetid'
 import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
 import { TrygdetidManueltOverstyrt } from '~components/behandling/trygdetid/TrygdetidManueltOverstyrt'
+
+import { isFailure, isPending } from '~shared/api/apiUtils'
 
 interface Props {
   redigerbar: boolean

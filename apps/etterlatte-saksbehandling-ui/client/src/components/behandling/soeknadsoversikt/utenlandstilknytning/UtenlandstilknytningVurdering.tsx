@@ -6,10 +6,12 @@ import { VurderingsTitle } from '../styled'
 import { SoeknadsoversiktTextArea } from '../SoeknadsoversiktTextArea'
 import { useAppDispatch } from '~store/Store'
 import { useState } from 'react'
-import { isFailure, useApiCall } from '~shared/hooks/useApiCall'
+import { useApiCall } from '~shared/hooks/useApiCall'
 import { oppdaterBehandlingsstatus, oppdaterUtenlandstilknytning } from '~store/reducers/BehandlingReducer'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { lagreUtenlandstilknytning } from '~shared/api/sak'
+
+import { isFailure } from '~shared/api/apiUtils'
 
 const UtenlandstilknytningTypeTittel: Record<UtenlandstilknytningType, string> = {
   [UtenlandstilknytningType.NASJONAL]: 'Nasjonal',

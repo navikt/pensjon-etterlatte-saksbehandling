@@ -3,7 +3,7 @@ import { Content, ContentHeader, FlexRow } from '~shared/styled'
 import { HeadingWrapper, InnholdPadding } from '~components/behandling/soeknadsoversikt/styled'
 import { useKlage } from '~components/klage/useKlage'
 import { useNavigate } from 'react-router-dom'
-import { isFailure, isPending, isPendingOrInitial, mapSuccess, useApiCall } from '~shared/hooks/useApiCall'
+import { useApiCall } from '~shared/hooks/useApiCall'
 import { oppdaterFormkravIKlage } from '~shared/api/klage'
 import { JaNei } from '~shared/types/ISvar'
 import React, { useEffect } from 'react'
@@ -18,6 +18,7 @@ import { formaterKanskjeStringDato, formaterVedtakType } from '~utils/formatteri
 import { FieldOrNull } from '~shared/types/util'
 import { Feilmelding, VurderingWrapper } from '~components/klage/styled'
 import { kanVurdereUtfall } from '~components/klage/stegmeny/KlageStegmeny'
+import { isFailure, isPending, isPendingOrInitial, mapSuccess } from '~shared/api/apiUtils'
 
 // Vi bruker kun id'en til vedtaket i skjemadata, og transformerer fram / tilbake før sending / lasting
 type FilledFormDataFormkrav = Omit<Formkrav, 'vedtaketKlagenGjelder'> & { vedtaketKlagenGjelderId: null | string }

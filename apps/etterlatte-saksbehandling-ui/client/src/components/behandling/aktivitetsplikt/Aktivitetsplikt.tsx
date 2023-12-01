@@ -7,7 +7,7 @@ import { ExternalLinkIcon, PencilIcon } from '@navikt/aksel-icons'
 import { BehandlingHandlingKnapper } from '~components/behandling/handlinger/BehandlingHandlingKnapper'
 import { ConfigContext } from '~clientConfig'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
-import { isFailure, isPending, useApiCall } from '~shared/hooks/useApiCall'
+import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentAktivitetspliktOppfolging, opprettAktivitetspliktOppfolging } from '~shared/api/aktivitetsplikt'
 import Spinner from '~shared/Spinner'
 import { useBehandlingRoutes } from '~components/behandling/BehandlingRoutes'
@@ -16,6 +16,8 @@ import { AktivitetspliktOppfolging } from '~shared/types/Aktivitetsplikt'
 import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
 import { handlinger } from '~components/behandling/handlinger/typer'
 import { usePersonopplysningerOmsAvdoede } from '~components/person/usePersonopplysninger'
+
+import { isFailure, isPending } from '~shared/api/apiUtils'
 
 export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => {
   const { behandling } = props

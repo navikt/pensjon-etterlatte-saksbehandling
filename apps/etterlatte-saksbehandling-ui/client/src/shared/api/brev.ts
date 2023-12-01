@@ -1,6 +1,7 @@
 import { apiClient, ApiResponse } from './apiClient'
 import { IBrev, Mottaker } from '~shared/types/Brev'
-import { isFailure, isSuccess, Result } from '~shared/hooks/useApiCall'
+
+import { isFailure, isSuccess, Result } from '~shared/api/apiUtils'
 
 export const hentBrev = async (props: { brevId: number; sakId: number }): Promise<ApiResponse<IBrev>> =>
   apiClient.get(`/brev/${props.brevId}?sakId=${props.sakId}`)

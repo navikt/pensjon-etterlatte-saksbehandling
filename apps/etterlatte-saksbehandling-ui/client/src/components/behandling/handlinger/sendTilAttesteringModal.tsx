@@ -2,11 +2,13 @@ import { Alert, BodyShort, Button, Heading, Modal } from '@navikt/ds-react'
 import { useEffect, useState } from 'react'
 import { handlinger } from './typer'
 import { useNavigate } from 'react-router-dom'
-import { isFailure, isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
+import { useApiCall } from '~shared/hooks/useApiCall'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { FlexRow } from '~shared/styled'
 import { ApiResponse } from '~shared/api/apiClient'
 import { hentOppgaveForBehandlingUnderBehandlingIkkeattestert } from '~shared/api/oppgaver'
+
+import { isFailure, isPending, isSuccess } from '~shared/api/apiUtils'
 
 export const SendTilAttesteringModal = ({
   behandlingId,

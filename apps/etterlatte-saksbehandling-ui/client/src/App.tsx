@@ -9,7 +9,7 @@ import { registerLocale } from 'react-datepicker'
 import ErrorBoundary, { ApiErrorAlert } from '~ErrorBoundary'
 import NyttBrev from '~components/person/brev/NyttBrev'
 import ScrollToTop from '~ScrollTop'
-import { isFailure, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
+import { useApiCall } from '~shared/hooks/useApiCall'
 import { useEffect } from 'react'
 import { ConfigContext, hentClientConfig } from '~clientConfig'
 import { useAppDispatch } from '~store/Store'
@@ -23,6 +23,8 @@ import { Tilbakekrevingsbehandling } from '~components/tilbakekreving/Tilbakekre
 import GenerellBehandling from '~components/generellbehandling/GenerellBehandling'
 import ManuellBehandling from '~components/manuelbehandling/ManuellBehandling'
 import BehandleJournalfoeringOppgave from '~components/person/journalfoeringsoppgave/BehandleJournalfoeringOppgave'
+
+import { isFailure, isSuccess } from '~shared/api/apiUtils'
 
 const FEATURE_TOGGLE_KAN_BRUKE_GENERELL_BEHANDLING = 'pensjon-etterlatte.kan-bruke-generell-behandling'
 

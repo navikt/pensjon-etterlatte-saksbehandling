@@ -1,10 +1,12 @@
-import { isPending, mapApiResult, useApiCall } from '~shared/hooks/useApiCall'
+import { useApiCall } from '~shared/hooks/useApiCall'
 import { opprettNyKlage } from '~shared/api/klage'
 import { BodyShort, Button } from '@navikt/ds-react'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 import { useNavigate } from 'react-router-dom'
 import { lenkeTilKlageMedId } from '~components/person/KlageListe'
+
+import { isPending, mapApiResult } from '~shared/api/apiUtils'
 
 export const FEATURE_TOGGLE_KAN_BRUKE_KLAGE = 'pensjon-etterlatte.kan-bruke-klage'
 

@@ -1,7 +1,7 @@
 import { Grunnlagsendringshendelse, GrunnlagsendringsType } from '~components/person/typer'
 import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
 import React, { useState } from 'react'
-import { isFailure, isPending, useApiCall } from '~shared/hooks/useApiCall'
+import { useApiCall } from '~shared/hooks/useApiCall'
 import { lukkGrunnlagshendelse } from '~shared/api/behandling'
 import { grunnlagsendringsTittel, stoetterRevurderingAvHendelse } from '~components/person/uhaandtereHendelser/utils'
 import { Alert, BodyShort, Button, Heading, Link, Loader, Modal, Table, Textarea } from '@navikt/ds-react'
@@ -12,6 +12,8 @@ import styled from 'styled-components'
 import InstitusjonsoppholdVurderingBegrunnelse from '~components/person/uhaandtereHendelser/InstitusjonsoppholdVurderingBegrunnelse'
 import { ArrowsCirclepathIcon, XMarkIcon } from '@navikt/aksel-icons'
 import { ButtonGroup } from '~components/person/VurderHendelseModal'
+
+import { isFailure, isPending } from '~shared/api/apiUtils'
 
 const UhaandtertHendelse = (props: {
   hendelse: Grunnlagsendringshendelse

@@ -1,8 +1,10 @@
 import { useAppSelector } from '~store/Store'
-import { mapAllApiResult, useApiCall } from '~shared/hooks/useApiCall'
+import { useApiCall } from '~shared/hooks/useApiCall'
 import { Oppgavetype, tildelSaksbehandlerApi } from '~shared/api/oppgaver'
 import { Alert, Button, Loader } from '@navikt/ds-react'
 import { PersonIcon } from '@navikt/aksel-icons'
+
+import { mapAllApiResult } from '~shared/api/apiUtils'
 
 export const TildelSaksbehandler = (props: {
   oppgaveId: string

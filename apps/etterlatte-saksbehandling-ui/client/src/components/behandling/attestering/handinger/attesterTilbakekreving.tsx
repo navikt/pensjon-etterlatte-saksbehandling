@@ -3,10 +3,12 @@ import { useState } from 'react'
 import { BeslutningWrapper } from '../styled'
 import { GeneriskModal } from '~shared/modal/modal'
 import { useNavigate } from 'react-router'
-import { isPending, useApiCall } from '~shared/hooks/useApiCall'
+import { useApiCall } from '~shared/hooks/useApiCall'
 import { FlexRow } from '~shared/styled'
 import { TilbakekrevingBehandling } from '~shared/types/Tilbakekreving'
 import { attesterVedtak } from '~shared/api/tilbakekreving'
+
+import { isPending } from '~shared/api/apiUtils'
 
 export const AttesterTilbakekreving = ({
   tilbakekreving,

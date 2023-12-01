@@ -1,6 +1,6 @@
 import { MottatteSeder } from '~components/behandling/soeknadsoversikt/bosattUtland/MottatteSeder'
 import { SendteSeder } from '~components/behandling/soeknadsoversikt/bosattUtland/SendteSeder'
-import { isFailure, isPending, useApiCall } from '~shared/hooks/useApiCall'
+import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentAlleLand, ILand, sorterLand } from '~shared/api/trygdetid'
 import React, { useEffect, useState } from 'react'
 import Spinner from '~shared/Spinner'
@@ -13,6 +13,8 @@ import { useAppDispatch } from '~store/Store'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { CheckmarkCircleIcon } from '@navikt/aksel-icons'
 import { AWhite } from '@navikt/ds-tokens/dist/tokens'
+
+import { isFailure, isPending } from '~shared/api/apiUtils'
 
 export const BosattUtland = ({
   behandlingId,

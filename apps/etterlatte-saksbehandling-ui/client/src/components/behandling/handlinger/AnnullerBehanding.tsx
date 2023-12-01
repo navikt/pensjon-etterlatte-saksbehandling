@@ -6,11 +6,13 @@ import { IBehandlingStatus, IBehandlingsType } from '~shared/types/IDetaljertBeh
 import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
 import { useBehandling } from '~components/behandling/useBehandling'
 import { SakType } from '~shared/types/sak'
-import { isFailure, isPending, useApiCall } from '~shared/hooks/useApiCall'
+import { useApiCall } from '~shared/hooks/useApiCall'
 import { formaterBehandlingstype } from '~utils/formattering'
 import { ExclamationmarkTriangleFillIcon, XMarkIcon } from '@navikt/aksel-icons'
 import styled from 'styled-components'
 import { FlexRow } from '~shared/styled'
+
+import { isFailure, isPending } from '~shared/api/apiUtils'
 
 export default function AnnullerBehandling() {
   const navigate = useNavigate()

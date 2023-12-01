@@ -1,9 +1,11 @@
 import React, { useState } from 'react'
 import { Alert, Button, Checkbox, TextField } from '@navikt/ds-react'
 import styled from 'styled-components'
-import { isFailure, isPending, useApiCall } from '~shared/hooks/useApiCall'
+import { useApiCall } from '~shared/hooks/useApiCall'
 import { IDetaljertBeregnetTrygdetid, ITrygdetid, oppdaterTrygdetidOverstyrtMigrering } from '~shared/api/trygdetid'
 import { InputRow } from '~components/person/journalfoeringsoppgave/nybehandling/OpprettNyBehandling'
+
+import { isFailure, isPending } from '~shared/api/apiUtils'
 
 export const TrygdetidManueltOverstyrt = ({
   behandlingId,

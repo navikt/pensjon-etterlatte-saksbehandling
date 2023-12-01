@@ -1,5 +1,5 @@
 import { Alert, BodyShort, Button, ErrorSummary, Heading } from '@navikt/ds-react'
-import { isFailure, isPending, isSuccess, mapAllApiResult, useApiCall } from '~shared/hooks/useApiCall'
+import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentKravpakkeforSak } from '~shared/api/generellbehandling'
 import { useEffect, useState } from 'react'
 import Spinner from '~shared/Spinner'
@@ -18,6 +18,8 @@ import { LandMedDokumenter, SluttbehandlingUtlandInfo } from '~shared/types/Revu
 import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
 import HistoriskeSEDer from '~components/behandling/revurderingsoversikt/sluttbehandlingUtland/historikk/HistoriskeSEDer'
 import { formaterStringDato } from '~utils/formattering'
+
+import { isFailure, isPending, isSuccess, mapAllApiResult } from '~shared/api/apiUtils'
 
 export default function SluttbehandlingUtland({
   sakId,

@@ -1,5 +1,5 @@
 import { useAppSelector } from '~store/Store'
-import { isFailure, isInitial, isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
+import { useApiCall } from '~shared/hooks/useApiCall'
 import { byttSaksbehandlerApi } from '~shared/api/oppgaver'
 import { Alert, Button, Label, Loader } from '@navikt/ds-react'
 import { PencilIcon } from '@navikt/aksel-icons'
@@ -7,6 +7,8 @@ import React, { useEffect, useState } from 'react'
 import { GeneriskModal } from '~shared/modal/modal'
 import styled from 'styled-components'
 import { RedigerSaksbehandlerProps } from '~components/nyoppgavebenk/tildeling/RedigerSaksbehandler'
+
+import { isFailure, isInitial, isPending, isSuccess } from '~shared/api/apiUtils'
 
 const SaksbehandlerWrapper = styled(Label)`
   padding: 12px 20px;

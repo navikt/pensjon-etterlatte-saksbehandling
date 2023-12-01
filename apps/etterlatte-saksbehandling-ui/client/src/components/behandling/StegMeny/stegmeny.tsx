@@ -8,10 +8,12 @@ import {
   revurderingRoutes,
   soeknadRoutes,
 } from '~components/behandling/BehandlingRoutes'
-import { isSuccess, useApiCall } from '~shared/hooks/useApiCall'
+import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentVilkaarsvurdering } from '~shared/api/vilkaarsvurdering'
 import { useEffect } from 'react'
 import { useAppDispatch } from '~store/Store'
+
+import { isSuccess } from '~shared/api/apiUtils'
 
 export const StegMeny = (props: { behandling: IBehandlingReducer }) => {
   const dispatch = useAppDispatch()

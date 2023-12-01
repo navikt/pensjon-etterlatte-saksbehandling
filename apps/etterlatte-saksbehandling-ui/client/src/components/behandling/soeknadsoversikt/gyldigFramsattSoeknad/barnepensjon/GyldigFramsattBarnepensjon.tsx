@@ -15,9 +15,11 @@ import {
 import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
 import { StatusIconProps } from '~shared/icons/statusIcon'
 import { useEffect } from 'react'
-import { isSuccess, useApiCall } from '~shared/hooks/useApiCall'
+import { useApiCall } from '~shared/hooks/useApiCall'
 import { getPersongalleriFraSoeknad } from '~shared/api/grunnlag'
 import { Familieforhold } from '~shared/types/Person'
+
+import { isSuccess } from '~shared/api/apiUtils'
 
 export const GyldigFramsattBarnepensjon = ({
   behandling,

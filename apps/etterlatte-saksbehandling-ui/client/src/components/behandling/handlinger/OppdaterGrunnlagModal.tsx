@@ -1,13 +1,15 @@
 import React, { useState } from 'react'
 import { Alert, BodyLong, Button, Heading, Modal } from '@navikt/ds-react'
 import { FlexRow } from '~shared/styled'
-import { isFailure, isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
+import { useApiCall } from '~shared/hooks/useApiCall'
 import { oppdaterGrunnlag } from '~shared/api/behandling'
 import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
 import Spinner from '~shared/Spinner'
 import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 import { ArrowsCirclepathIcon } from '@navikt/aksel-icons'
+
+import { isFailure, isPending, isSuccess } from '~shared/api/apiUtils'
 
 export const FEATURE_TOGGLE_KAN_BRUKE_OPPDATER_GRUNNLAG = 'pensjon-etterlatte.kan-bruke-oppdater-grunnlag'
 

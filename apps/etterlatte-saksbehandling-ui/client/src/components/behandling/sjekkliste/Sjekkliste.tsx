@@ -1,7 +1,7 @@
 import styled from 'styled-components'
 import React, { useContext, useEffect, useMemo, useState } from 'react'
 import { SidebarPanel } from '~shared/components/Sidebar'
-import { isFailure, useApiCall } from '~shared/hooks/useApiCall'
+import { useApiCall } from '~shared/hooks/useApiCall'
 import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
 import { oppdaterSjekkliste, oppdaterSjekklisteItem } from '~shared/api/sjekkliste'
 import {
@@ -29,6 +29,8 @@ import { PencilIcon } from '@navikt/aksel-icons'
 import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 import { SakType } from '~shared/types/sak'
 import { useSelectorSaksbehandlerGjeldendeOppgaveBehandling } from '~store/selectors/useSelectorSaksbehandlerGjeldendeOppgaveBehandling'
+
+import { isFailure } from '~shared/api/apiUtils'
 
 export const Sjekkliste = ({ behandling }: { behandling: IBehandlingReducer }) => {
   const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)

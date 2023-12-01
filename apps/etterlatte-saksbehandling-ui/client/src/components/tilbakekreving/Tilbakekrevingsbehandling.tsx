@@ -1,7 +1,7 @@
 import { Navigate, Route, Routes, useParams } from 'react-router-dom'
 import React, { useEffect } from 'react'
 import { useAppDispatch } from '~store/Store'
-import { isFailure, isPending, useApiCall } from '~shared/hooks/useApiCall'
+import { useApiCall } from '~shared/hooks/useApiCall'
 import { getPerson } from '~shared/api/grunnlag'
 import { StatusBar } from '~shared/statusbar/Statusbar'
 import Spinner from '~shared/Spinner'
@@ -14,6 +14,8 @@ import { TilbakekrevingVurdering } from '~components/tilbakekreving/vurdering/Ti
 import { TilbakekrevingStegmeny } from '~components/tilbakekreving/stegmeny/TilbakekrevingStegmeny'
 import { TilbakekrevingSidemeny } from '~components/tilbakekreving/sidemeny/TilbakekrevingSidemeny'
 import { TilbakekrevingBrev } from '~components/tilbakekreving/brev/TilbakekrevingBrev'
+
+import { isFailure, isPending } from '~shared/api/apiUtils'
 
 export function Tilbakekrevingsbehandling() {
   const tilbakekreving = useTilbakekreving()

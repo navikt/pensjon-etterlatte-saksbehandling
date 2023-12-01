@@ -9,7 +9,7 @@ import { useBehandlingRoutes } from '~components/behandling/BehandlingRoutes'
 import { Opphoersgrunn, OVERSETTELSER_OPPHOERSGRUNNER } from '~components/person/ManueltOpphoerModal'
 import { hentManueltOpphoerDetaljer } from '~shared/api/behandling'
 import Spinner from '~shared/Spinner'
-import { mapApiResult, useApiCall } from '~shared/hooks/useApiCall'
+import { useApiCall } from '~shared/hooks/useApiCall'
 import { Virkningstidspunkt } from '~shared/types/IDetaljertBehandling'
 import { formaterBehandlingstype, formaterStringDato } from '~utils/formattering'
 import { PersonHeader } from '~components/behandling/soeknadsoversikt/familieforhold/styled'
@@ -18,6 +18,8 @@ import { IBehandlingsammendrag } from '~components/person/typer'
 import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
 import { ChildEyesIcon } from '@navikt/aksel-icons'
 import { BeregningsMetode } from '~shared/types/Beregning'
+
+import { mapApiResult } from '~shared/api/apiUtils'
 
 export interface ManueltOpphoerDetaljer {
   id: string

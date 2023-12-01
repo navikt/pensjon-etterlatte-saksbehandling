@@ -4,7 +4,6 @@ import { ManueltOpphoerModal } from './ManueltOpphoerModal'
 import { FlexRow, GridContainer } from '~shared/styled'
 import Spinner from '~shared/Spinner'
 import RelevanteHendelser from '~components/person/uhaandtereHendelser/RelevanteHendelser'
-import { mapApiResult, Result } from '~shared/hooks/useApiCall'
 import { Alert, BodyShort, Heading, Tag } from '@navikt/ds-react'
 import { SakType } from '~shared/types/sak'
 import { formaterEnumTilLesbarString, formaterSakstype } from '~utils/formattering'
@@ -13,6 +12,8 @@ import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 import { KlageListe } from '~components/person/KlageListe'
 import { tagColors } from '~shared/Tags'
 import { SakMedBehandlinger } from '~components/person/typer'
+
+import { mapApiResult, Result } from '~shared/api/apiUtils'
 
 export const SakOversikt = ({ sakStatus, fnr }: { sakStatus: Result<SakMedBehandlinger>; fnr: string }) => {
   const kanBrukeKlage = useFeatureEnabledMedDefault(FEATURE_TOGGLE_KAN_BRUKE_KLAGE, false)

@@ -2,10 +2,12 @@ import { Generellbehandling, KravpakkeUtland } from '~shared/types/Generellbehan
 import { useNavigate } from 'react-router-dom'
 import React, { useState } from 'react'
 import { Alert, BodyShort, Button, Modal } from '@navikt/ds-react'
-import { isFailure, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
+import { useApiCall } from '~shared/hooks/useApiCall'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { sendTilAttesteringGenerellBehandling } from '~shared/api/generellbehandling'
 import { hentSakOgNavigerTilSaksoversikt } from '~components/generellbehandling/KravpakkeUtland'
+
+import { isFailure, isSuccess } from '~shared/api/apiUtils'
 
 export const SendtilAttesteringModal = ({
   utlandsBehandling,

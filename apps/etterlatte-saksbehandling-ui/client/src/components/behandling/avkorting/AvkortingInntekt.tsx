@@ -2,7 +2,7 @@ import { BodyShort, Button, ErrorMessage, Heading, Label, ReadMore, Table, Texta
 import styled from 'styled-components'
 import React, { FormEvent, useState } from 'react'
 import { IAvkorting, IAvkortingGrunnlag } from '~shared/types/IAvkorting'
-import { isFailure, isPending, useApiCall } from '~shared/hooks/useApiCall'
+import { useApiCall } from '~shared/hooks/useApiCall'
 import { lagreAvkortingGrunnlag } from '~shared/api/avkorting'
 import { formaterStringDato, NOK } from '~utils/formattering'
 import { HjemmelLenke } from '~components/behandling/felles/HjemmelLenke'
@@ -12,6 +12,8 @@ import { PencilIcon } from '@navikt/aksel-icons'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { TextButton } from '~components/behandling/soeknadsoversikt/familieforhold/personer/personinfo/TextButton'
 import { OmstillingsstoenadToolTip } from '~components/behandling/beregne/OmstillingsstoenadToolTip'
+
+import { isFailure, isPending } from '~shared/api/apiUtils'
 
 export const AvkortingInntekt = (props: {
   behandling: IBehandlingReducer

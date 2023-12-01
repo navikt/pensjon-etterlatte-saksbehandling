@@ -5,7 +5,7 @@ import { RadioGroupWrapper } from '~components/behandling/vilkaarsvurdering/Vurd
 import { VurderingsTitle } from '../styled'
 import { useAppDispatch, useAppSelector } from '~store/Store'
 import { useState } from 'react'
-import { isFailure, useApiCall } from '~shared/hooks/useApiCall'
+import { useApiCall } from '~shared/hooks/useApiCall'
 import { lagreBoddEllerArbeidetUtlandet } from '~shared/api/behandling'
 import { oppdaterBehandlingsstatus, oppdaterBoddEllerArbeidetUtlandet } from '~store/reducers/BehandlingReducer'
 import { ApiErrorAlert } from '~ErrorBoundary'
@@ -13,6 +13,8 @@ import { JaNei } from '~shared/types/ISvar'
 import BoddEllerArbeidetIUtlandetVisning from '~components/behandling/soeknadsoversikt/boddEllerArbeidetUtlandet/BoddEllerArbeidetIUtlandetVisning'
 import styled from 'styled-components'
 import { Begrunnelse } from '~components/behandling/trygdetid/TrygdetidGrunnlag'
+
+import { isFailure } from '~shared/api/apiUtils'
 
 export const BoddEllerArbeidetUtlandetVurdering = ({
   redigerbar,

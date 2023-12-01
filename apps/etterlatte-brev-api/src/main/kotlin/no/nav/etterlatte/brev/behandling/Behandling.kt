@@ -24,6 +24,7 @@ data class GenerellBrevData(
     val spraak: Spraak,
     val systemkilde: Vedtaksloesning,
     val revurderingsaarsak: Revurderingaarsak? = null,
+    val boddEllerArbeidetUtlandet: Boolean? = null,
 )
 
 data class Trygdetid(

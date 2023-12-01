@@ -39,20 +39,23 @@ data class OmregnetBPNyttRegelverk(
 
             if (generellBrevData.systemkilde == Vedtaksloesning.PESYS) {
                 val pesysUtbetaltFoerReform = migreringRequest?.brutto ?: 0
-                val pesysUtenlandstilknytning =
+                val (pesysUtenlandstilknytning, yrkesskade) =
                     when (migreringRequest) {
                         null -> {
-                            requireNotNull(generellBrevData.boddEllerArbeidetUtlandet) {
-                                "Kan ikke velge mellom bosatt utland eller bosatt norge i brev hvis migreringrequesten mangler grunnlag"
-                            }
+                            val utenlandstilkytning =
+                                requireNotNull(generellBrevData.boddEllerArbeidetUtlandet) {
+                                    "Kan ikke velge mellom bosatt utland eller bosatt norge i brev hvis migreringrequesten mangler grunnlag"
+                                }
+                            val yrkesskade = false // TODO Må legge til yrkesskade i generellBrevData?
+                            Pair(utenlandstilkytning, yrkesskade)
                         }
-                        else -> migreringRequest.utenlandstilknytningType
+                        else -> Pair(migreringRequest.utenlandstilknytningType, migreringRequest.yrkesskade)
                     }
 
                 return defaultBrevdataOmregning.copy(
                     utbetaltFoerReform = Kroner(pesysUtbetaltFoerReform),
                     erBosattUtlandet = pesysUtenlandstilknytning == UtenlandstilknytningType.BOSATT_UTLAND,
-                    erYrkesskade = migreringRequest.yrkesskade,
+                    erYrkesskade = yrkesskade,
                 )
             }
 

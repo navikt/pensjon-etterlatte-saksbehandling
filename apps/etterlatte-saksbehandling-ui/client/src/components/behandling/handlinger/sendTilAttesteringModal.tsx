@@ -27,7 +27,6 @@ export const SendTilAttesteringModal = ({
     hentOppgaveForBehandlingUnderBehandlingIkkeattestert
   )
 
-  //Todo: gjøre denne til en useeffect som setter den i reduxstate?
   useEffect(() => {
     requesthentOppgaveForBehandling({ referanse: behandlingId, sakId: sakId }, (saksbehandler, statusCode) => {
       if (statusCode === 200) {

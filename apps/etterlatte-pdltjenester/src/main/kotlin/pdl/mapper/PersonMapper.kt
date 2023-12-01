@@ -191,7 +191,7 @@ object PersonMapper {
         try {
             return ppsKlient.avklarStatsborgerskap(statsborgerskap) to null
         } catch (e: Exception) {
-            logger.warn("PPS feilet i avklaring av statsborgerskap, sender tilbake fullt grunnlag fra PDL")
+            logger.warn("PPS feilet i avklaring av statsborgerskap, sender tilbake fullt grunnlag fra PDL", e)
             return null to statsborgerskap.map { it.tilStatsborgerskap() }
         }
     }

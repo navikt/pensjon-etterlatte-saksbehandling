@@ -6,22 +6,18 @@ import { isFailure, isPending, isSuccess, useApiCall } from '~shared/hooks/useAp
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { FlexRow } from '~shared/styled'
 import { ApiResponse } from '~shared/api/apiClient'
-import { useSjekkliste } from '~components/behandling/sjekkliste/useSjekkliste'
-import { useAppDispatch } from '~store/Store'
-import { visSjekkliste } from '~store/reducers/BehandlingSidemenyReducer'
-import { addValideringsfeil } from '~store/reducers/SjekklisteReducer'
-import { useBehandling } from '~components/behandling/useBehandling'
-import { IBehandlingsType } from '~shared/types/IDetaljertBehandling'
 import { hentOppgaveForBehandlingUnderBehandlingIkkeattestert } from '~shared/api/oppgaver'
 
 export const SendTilAttesteringModal = ({
   behandlingId,
   fattVedtakApi,
   sakId,
+  validerKanSendeTilAttestering,
 }: {
   behandlingId: string
   fattVedtakApi: (id: string) => Promise<ApiResponse<unknown>>
   sakId: number
+  validerKanSendeTilAttestering: () => boolean
 }) => {
   const navigate = useNavigate()
   const [isOpen, setIsOpen] = useState(false)
@@ -31,6 +27,7 @@ export const SendTilAttesteringModal = ({
     hentOppgaveForBehandlingUnderBehandlingIkkeattestert
   )
 
+  //Todo: gjøre denne til en useeffect som setter den i reduxstate?
   useEffect(() => {
     requesthentOppgaveForBehandling({ referanse: behandlingId, sakId: sakId }, (saksbehandler, statusCode) => {
       if (statusCode === 200) {
@@ -38,10 +35,6 @@ export const SendTilAttesteringModal = ({
       }
     })
   }, [])
-
-  const sjekkliste = useSjekkliste()
-  const behandling = useBehandling()
-  const dispatch = useAppDispatch()
 
   const fattVedtakWrapper = () => {
     fattVedtak(behandlingId, () => {
@@ -51,22 +44,31 @@ export const SendTilAttesteringModal = ({
   }
 
   const klikkAttester = () => {
-    if (
-      behandling?.behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING &&
-      (sjekkliste === null || !sjekkliste.bekreftet)
-    ) {
-      dispatch(addValideringsfeil('Feltet må hukes av for å ferdigstilles'))
-      dispatch(visSjekkliste())
-    } else {
+    if (validerKanSendeTilAttestering()) {
       setIsOpen(true)
     }
   }
 
   return (
     <>
-      <Button variant="primary" onClick={klikkAttester}>
-        {handlinger.SEND_TIL_ATTESTERING.navn}
-      </Button>
+      {isSuccess(oppgaveForBehandlingStatus) && (
+        <>
+          {saksbehandlerPaaOppgave ? (
+            <>
+              <Button variant="primary" onClick={klikkAttester}>
+                {handlinger.SEND_TIL_ATTESTERING.navn}
+              </Button>
+            </>
+          ) : (
+            <Alert variant="error">
+              Oppgaven til denne behandlingen må tildeles en saksbehandler før man kan sende til attestering
+            </Alert>
+          )}
+        </>
+      )}
+      {isFailure(oppgaveForBehandlingStatus) && (
+        <ApiErrorAlert>Fatting er ikke tilgjengelig for øyeblikket. Sjekk oppgavestatus for vedkommende</ApiErrorAlert>
+      )}
       <Modal
         open={isOpen}
         onClose={() => {
@@ -80,33 +82,23 @@ export const SendTilAttesteringModal = ({
             Er du sikker på at du vil sende vedtaket til attestering?
           </Heading>
           <BodyShort spacing>Når du sender til attestering vil vedtaket låses og du får ikke gjort endringer</BodyShort>
-          {isSuccess(oppgaveForBehandlingStatus) && (
-            <>
-              {saksbehandlerPaaOppgave ? (
-                <>
-                  <FlexRow justify="center">
-                    <Button
-                      variant="secondary"
-                      onClick={() => {
-                        setIsOpen(false)
-                      }}
-                    >
-                      Nei, avbryt
-                    </Button>
-                    <Button loading={isPending(fattVedtakStatus)} variant="primary" onClick={fattVedtakWrapper}>
-                      Ja, send til attestering
-                    </Button>
-                  </FlexRow>
-                  {isFailure(fattVedtakStatus) && (
-                    <ApiErrorAlert>
-                      {fattVedtakStatus.error.detail || 'En feil skjedde under attestering av vedtaket'}
-                    </ApiErrorAlert>
-                  )}
-                </>
-              ) : (
-                <Alert variant="error">Oppgaven til denne må tildeles før man kan sende til attestering</Alert>
-              )}
-            </>
+          <FlexRow justify="center">
+            <Button
+              variant="secondary"
+              onClick={() => {
+                setIsOpen(false)
+              }}
+            >
+              Nei, avbryt
+            </Button>
+            <Button loading={isPending(fattVedtakStatus)} variant="primary" onClick={fattVedtakWrapper}>
+              Ja, send til attestering
+            </Button>
+          </FlexRow>
+          {isFailure(fattVedtakStatus) && (
+            <ApiErrorAlert>
+              {fattVedtakStatus.error.detail || 'En feil skjedde under attestering av vedtaket'}
+            </ApiErrorAlert>
           )}
         </Modal.Body>
       </Modal>

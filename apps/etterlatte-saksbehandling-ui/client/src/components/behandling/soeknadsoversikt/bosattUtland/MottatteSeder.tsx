@@ -41,7 +41,8 @@ export const MottatteSeder = ({
       </Heading>
       <BodyShort spacing>Fyll inn hvilke SED som er mottatt i RINA pr. land.</BodyShort>
       <Alert variant="info" style={{ width: '35rem' }}>
-        Det kan hende det allerede ligger P5000/P6000 i avdødes sak. Sjekk opp i dette før du etterspør info.
+        Det kan hende det allerede ligger P5000/P4000 i avdødes eller i gjenlevendes/søskens sak. Sjekk dette før du
+        etterspør informasjon.
       </Alert>
       <div style={{ width: '12rem', maxWidth: '20rem', margin: '2rem 0rem' }}>
         <TextField

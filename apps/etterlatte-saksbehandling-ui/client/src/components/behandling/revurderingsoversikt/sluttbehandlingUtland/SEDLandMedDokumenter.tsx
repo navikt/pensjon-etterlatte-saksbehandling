@@ -69,9 +69,9 @@ export default function SEDLandMedDokumenter({
                     variant="tertiary"
                     icon={<TrashIcon />}
                     onClick={() => fjernLand()}
-                    style={{ marginLeft: '20rem' }}
+                    style={{ float: 'right' }}
                   >
-                    Slett SED
+                    Slett land
                   </Button>
                 </Table.DataCell>
               </Table.ExpandableRow>

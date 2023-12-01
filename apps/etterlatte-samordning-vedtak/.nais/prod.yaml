@@ -58,16 +58,14 @@ spec:
               orgno: "931936492"
             - name: Storebrand Livsforsikring AS
               orgno: "958995369"
-            - name: Viken
-              orgno: "974358603"
             - name: Arendal kommunale pensjonskasse
               orgno: "940380014"
             - name: Elverum kommunale pensjonskasse
               orgno: "940360293"
-            - name: Tromsø kommunale pensjonskasse
-              orgno: "814115232"
-            - name: Pensjonskassen for helseforetakene (PKH)
-              orgno: "912805174"
+            - name: Maritim pensjonskasse
+              orgno: "940415683"
+            - name: Garantikassen for fiskere
+              orgno: "974652382"
   azure:
     application:
       enabled: true

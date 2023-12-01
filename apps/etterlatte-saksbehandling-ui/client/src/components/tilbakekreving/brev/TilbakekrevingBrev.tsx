@@ -95,6 +95,7 @@ export function TilbakekrevingBrev({ tilbakekreving }: { tilbakekreving: Tilbake
             behandlingId={tilbakekreving.id}
             fattVedtakApi={fattVedtak}
             sakId={tilbakekreving.sak.id}
+            validerKanSendeTilAttestering={() => true}
           />
         )}
       </FlexRow>

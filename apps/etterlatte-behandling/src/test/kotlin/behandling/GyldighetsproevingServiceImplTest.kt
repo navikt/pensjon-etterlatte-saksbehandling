@@ -87,7 +87,7 @@ internal class GyldighetsproevingServiceImplTest {
     fun hentFoerstegangsbehandling() {
         val id = UUID.randomUUID()
 
-        every { featureToggleService.isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false) } returns false
+        every { featureToggleService.isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false, any()) } returns false
 
         every {
             behandlingDaoMock.hentBehandling(id)
@@ -146,7 +146,7 @@ internal class GyldighetsproevingServiceImplTest {
 
         every { behandlingDaoMock.lagreGyldighetsproving(any()) } just Runs
 
-        every { featureToggleService.isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false) } returns false
+        every { featureToggleService.isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false, any()) } returns false
 
         val forventetResultat =
             GyldighetsResultat(
@@ -185,7 +185,7 @@ internal class GyldighetsproevingServiceImplTest {
     fun hentFoerstegangsbehandlingMedEnhetMensFeatureErSkruddAv() {
         val id = UUID.randomUUID()
 
-        every { featureToggleService.isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false) } returns false
+        every { featureToggleService.isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false, any()) } returns false
 
         every {
             behandlingDaoMock.hentBehandling(id)
@@ -228,7 +228,7 @@ internal class GyldighetsproevingServiceImplTest {
 
         val id = UUID.randomUUID()
 
-        every { featureToggleService.isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false) } returns true
+        every { featureToggleService.isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false, any()) } returns true
 
         every {
             behandlingDaoMock.hentBehandling(id)
@@ -271,7 +271,7 @@ internal class GyldighetsproevingServiceImplTest {
 
         val id = UUID.randomUUID()
 
-        every { featureToggleService.isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false) } returns true
+        every { featureToggleService.isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false, any()) } returns true
 
         every {
             behandlingDaoMock.hentBehandling(id)

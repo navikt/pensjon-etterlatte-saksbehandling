@@ -67,7 +67,12 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
     @BeforeAll
     fun start() {
         startServer()
-        Kontekst.set(Context(mockk(), DatabaseContext(applicationContext.dataSource)))
+        Kontekst.set(
+            Context(
+                AppUser = mockk { every { name() } returns "ident" },
+                databasecontxt = DatabaseContext(applicationContext.dataSource),
+            ),
+        )
     }
 
     @AfterEach
@@ -120,6 +125,7 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
             featureToggleService.isEnabled(
                 BehandlingServiceFeatureToggle.FiltrerMedEnhetId,
                 false,
+                any(),
             )
         } returns false
 
@@ -197,6 +203,7 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
             featureToggleService.isEnabled(
                 BehandlingServiceFeatureToggle.FiltrerMedEnhetId,
                 false,
+                any(),
             )
         } returns false
 
@@ -321,6 +328,7 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
             featureToggleService.isEnabled(
                 BehandlingServiceFeatureToggle.FiltrerMedEnhetId,
                 false,
+                any(),
             )
         } returns false
 
@@ -374,6 +382,7 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
             featureToggleService.isEnabled(
                 SakServiceFeatureToggle.FiltrerMedEnhetId,
                 false,
+                any(),
             )
         } returns false
 
@@ -381,6 +390,7 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
             featureToggleService.isEnabled(
                 BehandlingServiceFeatureToggle.FiltrerMedEnhetId,
                 false,
+                any(),
             )
         } returns false
 
@@ -543,6 +553,7 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
             featureToggleService.isEnabled(
                 BehandlingServiceFeatureToggle.FiltrerMedEnhetId,
                 false,
+                any(),
             )
         } returns false
 
@@ -636,6 +647,7 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
             featureToggleService.isEnabled(
                 BehandlingServiceFeatureToggle.FiltrerMedEnhetId,
                 false,
+                any(),
             )
         } returns false
 

@@ -94,7 +94,7 @@ internal class RealManueltOpphoerServiceTest {
         val behandlingHendelserKafkaProducer = mockk<BehandlingHendelserKafkaProducer>()
         val featureToggleService =
             mockk<FeatureToggleService> {
-                every { isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false) } returns false
+                every { isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false, any()) } returns false
             }
 
         val sut =
@@ -166,7 +166,7 @@ internal class RealManueltOpphoerServiceTest {
             }
         val featureToggleService =
             mockk<FeatureToggleService> {
-                every { isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false) } returns false
+                every { isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false, any()) } returns false
             }
 
         val sut =
@@ -284,7 +284,7 @@ internal class RealManueltOpphoerServiceTest {
             }
         val featureToggleService =
             mockk<FeatureToggleService> {
-                every { isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false) } returns false
+                every { isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false, any()) } returns false
             }
 
         val sut =
@@ -326,7 +326,7 @@ internal class RealManueltOpphoerServiceTest {
         val hendelseDaoMock = mockk<HendelseDao>()
         val featureToggleService =
             mockk<FeatureToggleService> {
-                every { isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false) } returns false
+                every { isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false, any()) } returns false
             }
 
         val sut =
@@ -379,7 +379,7 @@ internal class RealManueltOpphoerServiceTest {
         val hendelseDaoMock = mockk<HendelseDao>()
         val featureToggleService =
             mockk<FeatureToggleService> {
-                every { isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false) } returns false
+                every { isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false, any()) } returns false
             }
 
         val service =
@@ -452,7 +452,7 @@ internal class RealManueltOpphoerServiceTest {
             }
         val featureToggleService =
             mockk<FeatureToggleService> {
-                every { isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false) } returns false
+                every { isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false, any()) } returns false
             }
 
         val service =
@@ -498,7 +498,7 @@ internal class RealManueltOpphoerServiceTest {
         val behandlingHendelserKafkaProducer = mockk<BehandlingHendelserKafkaProducer>()
         val featureToggleService =
             mockk<FeatureToggleService> {
-                every { isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false) } returns true
+                every { isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false, any()) } returns true
             }
 
         val sut =
@@ -538,7 +538,7 @@ internal class RealManueltOpphoerServiceTest {
         val behandlingHendelserKafkaProducer = mockk<BehandlingHendelserKafkaProducer>()
         val featureToggleService =
             mockk<FeatureToggleService> {
-                every { isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false) } returns true
+                every { isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false, any()) } returns true
             }
 
         val sut =

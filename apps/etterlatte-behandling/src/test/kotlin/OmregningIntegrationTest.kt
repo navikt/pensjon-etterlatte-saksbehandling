@@ -12,6 +12,7 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.serialization.jackson.jackson
 import io.ktor.server.testing.testApplication
+import io.mockk.every
 import io.mockk.mockk
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.omregning.OpprettOmregningResponse
@@ -42,7 +43,12 @@ class OmregningIntegrationTest : BehandlingIntegrationTest() {
     @BeforeAll
     fun start() {
         startServer()
-        Kontekst.set(Context(mockk(), DatabaseContext(applicationContext.dataSource)))
+        Kontekst.set(
+            Context(
+                AppUser = mockk { every { name() } returns "ident" },
+                databasecontxt = DatabaseContext(applicationContext.dataSource),
+            ),
+        )
     }
 
     @AfterAll

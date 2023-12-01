@@ -91,6 +91,7 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
             featureToggleService =
                 mockk<FeatureToggleService> {
                     every { isEnabled(any(), any()) } returns true
+                    every { isEnabled(any(), any(), any()) } returns true
                 },
         )
 

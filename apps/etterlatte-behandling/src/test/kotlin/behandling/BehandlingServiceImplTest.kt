@@ -89,7 +89,7 @@ class BehandlingServiceImplTest {
         val hendelserMock = mockk<HendelseDao>()
 
         val featureToggleService = mockk<FeatureToggleService>()
-        every { featureToggleService.isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false) } returns false
+        every { featureToggleService.isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false, any()) } returns false
 
         val sut =
             BehandlingServiceImpl(
@@ -148,7 +148,7 @@ class BehandlingServiceImplTest {
             }
 
         val featureToggleService = mockk<FeatureToggleService>()
-        every { featureToggleService.isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false) } returns false
+        every { featureToggleService.isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false, any()) } returns false
 
         val oppgaveServiceMock: OppgaveService =
             mockk {
@@ -208,7 +208,7 @@ class BehandlingServiceImplTest {
             }
 
         val featureToggleService = mockk<FeatureToggleService>()
-        every { featureToggleService.isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false) } returns false
+        every { featureToggleService.isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false, any()) } returns false
 
         val oppgaveServiceMock: OppgaveService =
             mockk {
@@ -277,7 +277,7 @@ class BehandlingServiceImplTest {
             }
 
         val featureToggleService = mockk<FeatureToggleService>()
-        every { featureToggleService.isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false) } returns false
+        every { featureToggleService.isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false, any()) } returns false
 
         val oppgaveServiceMock: OppgaveService =
             mockk {
@@ -332,7 +332,7 @@ class BehandlingServiceImplTest {
             }
 
         val featureToggleService = mockk<FeatureToggleService>()
-        every { featureToggleService.isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false) } returns false
+        every { featureToggleService.isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false, any()) } returns false
 
         val oppgaveServiceMock: OppgaveService =
             mockk {
@@ -389,7 +389,7 @@ class BehandlingServiceImplTest {
             }
 
         val featureToggleService = mockk<FeatureToggleService>()
-        every { featureToggleService.isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false) } returns false
+        every { featureToggleService.isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false, any()) } returns false
 
         val oppgaveServiceMock: OppgaveService =
             mockk {
@@ -468,7 +468,7 @@ class BehandlingServiceImplTest {
                 grunnlagKlient = grunnlagKlient,
                 featureToggleService =
                     mockk {
-                        every { isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false) } returns false
+                        every { isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false, any()) } returns false
                     },
                 sakDao = defaultSakdaoMockMedUtenlandstilknytningSattTilNasjonal,
             )
@@ -647,7 +647,7 @@ class BehandlingServiceImplTest {
             }
 
         val featureToggleService = mockk<FeatureToggleService>()
-        every { featureToggleService.isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false) } returns false
+        every { featureToggleService.isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false, any()) } returns false
 
         val service =
             lagRealGenerellBehandlingService(
@@ -680,7 +680,7 @@ class BehandlingServiceImplTest {
         val hendelserMock = mockk<HendelseDao>()
 
         val featureToggleService = mockk<FeatureToggleService>()
-        every { featureToggleService.isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false) } returns true
+        every { featureToggleService.isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false, any()) } returns true
 
         val sut =
             BehandlingServiceImpl(
@@ -730,7 +730,7 @@ class BehandlingServiceImplTest {
         val hendelserMock = mockk<HendelseDao>()
 
         val featureToggleService = mockk<FeatureToggleService>()
-        every { featureToggleService.isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false) } returns true
+        every { featureToggleService.isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false, any()) } returns true
 
         val sut =
             BehandlingServiceImpl(
@@ -778,7 +778,7 @@ class BehandlingServiceImplTest {
             }
 
         val featureToggleService = mockk<FeatureToggleService>()
-        every { featureToggleService.isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false) } returns true
+        every { featureToggleService.isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false, any()) } returns true
 
         val sut =
             BehandlingServiceImpl(
@@ -855,7 +855,7 @@ class BehandlingServiceImplTest {
             grunnlagKlient = grunnlagKlient,
             featureToggleService =
                 mockk {
-                    every { isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false) } returns false
+                    every { isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false, any()) } returns false
                 },
             sakDao = sakDao ?: defaultSakdaoMockMedUtenlandstilknytningSattTilNasjonal,
         )

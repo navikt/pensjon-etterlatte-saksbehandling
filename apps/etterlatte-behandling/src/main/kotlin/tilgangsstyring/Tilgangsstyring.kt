@@ -1,5 +1,6 @@
 package no.nav.etterlatte.tilgangsstyring
 
+import io.getunleash.UnleashContext
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.ApplicationCallPipeline
@@ -200,15 +201,19 @@ suspend inline fun PipelineContext<*, ApplicationCall>.kunAttestant(onSuccess: (
     }
 }
 
-private val saksbehandlereMedTilgangTilAlleEnheter = listOf("S128848", "K105085", "O113803")
-
 fun <T> List<T>.filterForEnheter(
     featureToggleService: FeatureToggleService,
     toggle: FeatureToggle,
     user: User,
     filter: (item: T, enheter: List<String>) -> Boolean,
-) = if (featureToggleService.isEnabled(toggle, false) &&
-    user.name() !in(saksbehandlereMedTilgangTilAlleEnheter)
+) = if (featureToggleService.isEnabled(
+        toggleId = toggle,
+        defaultValue = false,
+        context =
+            UnleashContext.builder()
+                .userId(Kontekst.get().AppUser.name())
+                .build(),
+    )
 ) {
     when (user) {
         is SaksbehandlerMedEnheterOgRoller -> {

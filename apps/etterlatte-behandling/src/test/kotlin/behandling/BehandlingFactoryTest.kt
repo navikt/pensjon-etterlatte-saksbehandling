@@ -62,7 +62,7 @@ import java.time.YearMonth
 import java.util.UUID
 
 class BehandlingFactoryTest {
-    private val user = mockk<SaksbehandlerMedEnheterOgRoller>()
+    private val user = mockk<SaksbehandlerMedEnheterOgRoller> { every { name() } returns "ident" }
     private val behandlingDaoMock = mockk<BehandlingDao>(relaxUnitFun = true)
     private val hendelseDaoMock = mockk<HendelseDao>(relaxUnitFun = true)
     private val behandlingHendelserKafkaProducerMock = mockk<BehandlingHendelserKafkaProducer>(relaxUnitFun = true)
@@ -149,8 +149,8 @@ class BehandlingFactoryTest {
         val behandlingHentes = slot<UUID>()
         val datoNaa = Tidspunkt.now().toLocalDatetimeUTC()
 
-        every { featureToggleService.isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false) } returns false
-        every { featureToggleService.isEnabled(SakServiceFeatureToggle.FiltrerMedEnhetId, false) } returns false
+        every { featureToggleService.isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false, any()) } returns false
+        every { featureToggleService.isEnabled(SakServiceFeatureToggle.FiltrerMedEnhetId, false, any()) } returns false
 
         val opprettetBehandling =
             Foerstegangsbehandling(
@@ -242,8 +242,8 @@ class BehandlingFactoryTest {
         val behandlingHentes = slot<UUID>()
         val datoNaa = Tidspunkt.now().toLocalDatetimeUTC()
 
-        every { featureToggleService.isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false) } returns false
-        every { featureToggleService.isEnabled(SakServiceFeatureToggle.FiltrerMedEnhetId, false) } returns false
+        every { featureToggleService.isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false, any()) } returns false
+        every { featureToggleService.isEnabled(SakServiceFeatureToggle.FiltrerMedEnhetId, false, any()) } returns false
 
         val opprettetBehandling =
             Foerstegangsbehandling(
@@ -326,9 +326,9 @@ class BehandlingFactoryTest {
         val datoNaa = Tidspunkt.now().toLocalDatetimeUTC()
 
         every {
-            featureToggleService.isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false)
+            featureToggleService.isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false, any())
         } returns false
-        every { featureToggleService.isEnabled(SakServiceFeatureToggle.FiltrerMedEnhetId, false) } returns false
+        every { featureToggleService.isEnabled(SakServiceFeatureToggle.FiltrerMedEnhetId, false, any()) } returns false
 
         val underArbeidBehandling =
             Foerstegangsbehandling(
@@ -434,9 +434,9 @@ class BehandlingFactoryTest {
         val datoNaa = Tidspunkt.now().toLocalDatetimeUTC()
 
         every {
-            featureToggleService.isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false)
+            featureToggleService.isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false, any())
         } returns false
-        every { featureToggleService.isEnabled(SakServiceFeatureToggle.FiltrerMedEnhetId, false) } returns false
+        every { featureToggleService.isEnabled(SakServiceFeatureToggle.FiltrerMedEnhetId, false, any()) } returns false
 
         val nyBehandling =
             Foerstegangsbehandling(
@@ -581,8 +581,8 @@ class BehandlingFactoryTest {
         val behandlingOpprettes = slot<OpprettBehandling>()
         val behandlingHentes = slot<UUID>()
 
-        every { featureToggleService.isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false) } returns false
-        every { featureToggleService.isEnabled(SakServiceFeatureToggle.FiltrerMedEnhetId, false) } returns false
+        every { featureToggleService.isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false, any()) } returns false
+        every { featureToggleService.isEnabled(SakServiceFeatureToggle.FiltrerMedEnhetId, false, any()) } returns false
 
         val persongalleri =
             Persongalleri(

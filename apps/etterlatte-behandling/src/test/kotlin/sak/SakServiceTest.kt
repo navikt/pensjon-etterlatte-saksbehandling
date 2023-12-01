@@ -159,7 +159,7 @@ internal class SakServiceTest {
                 ),
             )
 
-        every { featureToggleService.isEnabled(SakServiceFeatureToggle.FiltrerMedEnhetId, false) } returns true
+        every { featureToggleService.isEnabled(SakServiceFeatureToggle.FiltrerMedEnhetId, false, any()) } returns true
 
         val service: SakService =
             SakServiceImpl(sakDao, pdlKlient, norg2Klient, featureToggleService, skjermingKlient)
@@ -169,7 +169,7 @@ internal class SakServiceTest {
         saker.size shouldBe 1
 
         verify(exactly = 1) { sakDao.finnSaker(KONTANT_FOT.value) }
-        verify(exactly = 1) { featureToggleService.isEnabled(SakServiceFeatureToggle.FiltrerMedEnhetId, false) }
+        verify(exactly = 1) { featureToggleService.isEnabled(SakServiceFeatureToggle.FiltrerMedEnhetId, false, any()) }
     }
 
     @Test
@@ -191,7 +191,7 @@ internal class SakServiceTest {
                 ),
             )
 
-        every { featureToggleService.isEnabled(SakServiceFeatureToggle.FiltrerMedEnhetId, false) } returns true
+        every { featureToggleService.isEnabled(SakServiceFeatureToggle.FiltrerMedEnhetId, false, any()) } returns true
 
         val service: SakService =
             SakServiceImpl(sakDao, pdlKlient, norg2Klient, featureToggleService, skjermingKlient)
@@ -201,7 +201,7 @@ internal class SakServiceTest {
         saker.size shouldBe 0
 
         verify(exactly = 1) { sakDao.finnSaker(KONTANT_FOT.value) }
-        verify(exactly = 1) { featureToggleService.isEnabled(SakServiceFeatureToggle.FiltrerMedEnhetId, false) }
+        verify(exactly = 1) { featureToggleService.isEnabled(SakServiceFeatureToggle.FiltrerMedEnhetId, false, any()) }
     }
 
     @Test
@@ -223,7 +223,7 @@ internal class SakServiceTest {
                 ),
             )
 
-        every { featureToggleService.isEnabled(SakServiceFeatureToggle.FiltrerMedEnhetId, false) } returns true
+        every { featureToggleService.isEnabled(SakServiceFeatureToggle.FiltrerMedEnhetId, false, any()) } returns true
 
         val service: SakService =
             SakServiceImpl(sakDao, pdlKlient, norg2Klient, featureToggleService, skjermingKlient)
@@ -233,7 +233,7 @@ internal class SakServiceTest {
         saker.size shouldBe 1
 
         verify(exactly = 1) { sakDao.finnSaker(KONTANT_FOT.value) }
-        verify(exactly = 1) { featureToggleService.isEnabled(SakServiceFeatureToggle.FiltrerMedEnhetId, false) }
+        verify(exactly = 1) { featureToggleService.isEnabled(SakServiceFeatureToggle.FiltrerMedEnhetId, false, any()) }
     }
 
     @Test
@@ -483,7 +483,7 @@ internal class SakServiceTest {
                 ),
             )
 
-        every { featureToggleService.isEnabled(SakServiceFeatureToggle.FiltrerMedEnhetId, false) } returns true
+        every { featureToggleService.isEnabled(SakServiceFeatureToggle.FiltrerMedEnhetId, false, any()) } returns true
 
         val service: SakService =
             SakServiceImpl(sakDao, pdlKlient, norg2Klient, featureToggleService, skjermingKlient)
@@ -493,7 +493,7 @@ internal class SakServiceTest {
         saker.size shouldBe 1
 
         verify(exactly = 1) { sakDao.finnSaker(KONTANT_FOT.value) }
-        verify(exactly = 1) { featureToggleService.isEnabled(SakServiceFeatureToggle.FiltrerMedEnhetId, false) }
+        verify(exactly = 1) { featureToggleService.isEnabled(SakServiceFeatureToggle.FiltrerMedEnhetId, false, any()) }
     }
 
     @Test

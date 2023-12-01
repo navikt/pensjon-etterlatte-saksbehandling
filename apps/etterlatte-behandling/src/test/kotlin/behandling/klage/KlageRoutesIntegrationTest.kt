@@ -42,7 +42,7 @@ class KlageRoutesIntegrationTest : BehandlingIntegrationTest() {
             featureToggleService =
                 mockk {
                     every { isEnabled(KlageFeatureToggle.KanBrukeKlageToggle, any()) } returns true
-                    every { isEnabled(SakServiceFeatureToggle.FiltrerMedEnhetId, any()) } returns true
+                    every { isEnabled(SakServiceFeatureToggle.FiltrerMedEnhetId, any(), any()) } returns true
                 },
         )
 

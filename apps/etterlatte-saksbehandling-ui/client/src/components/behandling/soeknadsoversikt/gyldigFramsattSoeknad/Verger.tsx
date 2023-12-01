@@ -1,5 +1,5 @@
-import { InfoWrapper } from '../../styled'
-import { Info } from '../../Info'
+import { InfoWrapper } from '../styled'
+import { Info } from '../Info'
 import { isFailure, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
 import { getGrunnlagsAvOpplysningstype } from '~shared/api/grunnlag'
 import { KildePdl } from '~shared/types/kilde'
@@ -30,12 +30,26 @@ export const Verger = ({ sakId, behandlingId }: Props) => {
       return <Info label="Verge" tekst="Ingen verge registrert" undertekst={formaterKildePdl(soekerOpplysning.kilde)} />
     }
 
+    const omfangMap = new Map([
+      ['personligeOgOekonomiskeInteresser', 'Personlige og økonomiske interesser'],
+      ['utlendingssakerPersonligeOgOekonomiskeInteresser', 'Personlige og økonomiske interesser (utlendingssaker)'],
+      ['oekonomiskeInteresser', 'Økonomiske interesser'],
+      ['personligeInteresser', 'Personlige interesser'],
+    ])
+
     return (
       <>
         {vergeList.map((it, index) => (
           <Info
             label="Verge"
-            tekst={it.vergeEllerFullmektig.motpartsPersonident}
+            tekst={
+              <>
+                {it.vergeEllerFullmektig.motpartsPersonident}
+                <br />
+                {it.vergeEllerFullmektig.omfang &&
+                  (omfangMap.get(it.vergeEllerFullmektig.omfang) ?? it.vergeEllerFullmektig.omfang)}
+              </>
+            }
             undertekst={formaterKildePdl(soekerOpplysning.kilde)}
             key={index}
           />

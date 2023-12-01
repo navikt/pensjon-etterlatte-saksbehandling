@@ -11,6 +11,7 @@ import { formaterBehandlingstype } from '~utils/formattering'
 import { ExclamationmarkTriangleFillIcon, XMarkIcon } from '@navikt/aksel-icons'
 import styled from 'styled-components'
 import { FlexRow } from '~shared/styled'
+import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 
 import { isPending } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
@@ -21,6 +22,7 @@ export default function AnnullerBehandling() {
   const [status, avbrytBehandlingen] = useApiCall(avbrytBehandling)
 
   const behandling = useBehandling()
+  const soeker = usePersonopplysninger()?.soeker?.opplysning
   const erFoerstegangsbehandling = behandling?.behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING
   const erFoerstegangsbehandlingOgOmstillingsstoenad =
     behandling?.sakType == SakType.OMSTILLINGSSTOENAD && erFoerstegangsbehandling
@@ -32,8 +34,8 @@ export default function AnnullerBehandling() {
 
   const avbryt = () => {
     avbrytBehandlingen(behandling!!.id, () => {
-      if (behandling?.søker?.foedselsnummer) {
-        navigate(`/person/${behandling.søker?.foedselsnummer}`)
+      if (soeker?.foedselsnummer) {
+        navigate(`/person/${soeker?.foedselsnummer}`)
       } else {
         window.location.reload() // Bare refresh behandling
       }

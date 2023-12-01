@@ -9,11 +9,13 @@ import { ferdigstillVedtaksbrev } from '~shared/api/brev'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { FlexRow } from '~shared/styled'
 import { attesterVedtak } from '~shared/api/vedtaksvurdering'
+import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 
 import { isPending } from '~shared/api/apiUtils'
 
 export const AttesterYtelse = ({ behandling, kommentar }: { behandling: IDetaljertBehandling; kommentar: string }) => {
   const navigate = useNavigate()
+  const soeker = usePersonopplysninger()?.soeker?.opplysning
   const [modalisOpen, setModalisOpen] = useState(false)
   const skalSendeBrev = behandlingSkalSendeBrev(behandling.behandlingType, behandling.revurderingsaarsak)
   const [error, setError] = useState<string>()
@@ -23,7 +25,7 @@ export const AttesterYtelse = ({ behandling, kommentar }: { behandling: IDetalje
   const settVedtakTilAttestert = () => {
     apiAttesterVedtak(
       { behandlingId: behandling.id, kommentar },
-      () => navigate(`/person/${behandling.søker?.foedselsnummer}`),
+      () => navigate(`/person/${soeker?.foedselsnummer}`),
       (error) => {
         if (error.code === 'ATTESTANT_OG_SAKSBEHANDLER_ER_SAMME_PERSON') {
           setError('Vedtaket er allerede fattet av deg. Du kan ikke attestere dine egne vedtak.')

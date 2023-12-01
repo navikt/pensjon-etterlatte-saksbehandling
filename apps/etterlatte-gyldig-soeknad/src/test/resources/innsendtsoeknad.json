@@ -1,219 +1,324 @@
 {
   "@event_name": "soeknad_innsendt",
   "@skjema_info": {
-    "imageTag": "9f1f95b2472742227b37d19dd2d735ac9001995e",
+    "imageTag": "d79803f3acb657cf657ee46af1db293a665eb0d2",
     "spraak": "nb",
+    "type": "OMSTILLINGSSTOENAD",
+    "harSamtykket": {
+      "spoersmaal": "Jeg vil svare så godt jeg kan på spørsmålene i søknaden.",
+      "svar": true
+    },
     "innsender": {
+      "type": "INNSENDER",
       "fornavn": {
-        "svar": "GØYAL",
-        "spoersmaal": "Fornavn"
+        "spoersmaal": "Fornavn",
+        "svar": "TRADISJONSBUNDEN"
       },
       "etternavn": {
-        "svar": "HØYSTAKK",
-        "spoersmaal": "Etternavn"
+        "spoersmaal": "Etternavn",
+        "svar": "KØYESENG"
       },
       "foedselsnummer": {
-        "svar": "25478323363",
-        "spoersmaal": "Fødselsnummer"
-      },
-      "type": "INNSENDER"
-    },
-    "harSamtykket": {
-      "svar": true,
-      "spoersmaal": ""
+        "spoersmaal": "Fødselsnummer",
+        "svar": "13848599411"
+      }
     },
     "utbetalingsInformasjon": {
+      "spoersmaal": "Ønsker du å motta utbetalingen på norsk eller utenlandsk bankkonto?",
       "svar": {
         "verdi": "NORSK",
         "innhold": "Norsk"
       },
-      "spoersmaal": "Ønsker du å motta utbetalingen på norsk eller utenlandsk bankkonto?",
       "opplysning": {
         "kontonummer": {
+          "spoersmaal": "Oppgi norsk kontonummer for utbetaling",
           "svar": {
-            "innhold": "6848.64.44444"
-          },
-          "spoersmaal": "Oppgi norsk kontonummer for utbetaling"
-        },
-        "utenlandskBankNavn": null,
-        "utenlandskBankAdresse": null,
-        "iban": null,
-        "swift": null,
-        "skattetrekk": null
+            "innhold": "1411.35.13515"
+          }
+        }
       }
     },
     "soeker": {
+      "type": "GJENLEVENDE_OMS",
       "fornavn": {
-        "svar": "kirsten",
-        "spoersmaal": "Fornavn"
+        "spoersmaal": "Fornavn",
+        "svar": "TRADISJONSBUNDEN"
       },
       "etternavn": {
-        "svar": "jakobsen",
-        "spoersmaal": "Etternavn"
+        "spoersmaal": "Etternavn",
+        "svar": "KØYESENG"
       },
       "foedselsnummer": {
-        "svar": "25478323363",
-        "spoersmaal": "Barnets fødselsnummer / d-nummer"
+        "spoersmaal": "Fødselsnummer",
+        "svar": "13848599411"
       },
       "statsborgerskap": {
-        "svar": "Norge",
-        "spoersmaal": "Statsborgerskap"
+        "spoersmaal": "Statsborgerskap",
+        "svar": "Norge"
       },
       "sivilstatus": {
-        "svar": "Gift",
-        "spoersmaal": "sivilstatus"
+        "spoersmaal": "Sivilstatus",
+        "svar": "Gift"
       },
       "adresse": {
-        "svar": "Et sted 31",
-        "spoersmaal": "adresse"
-      },
-      "bostedsAdresse": {
-        "svar": {
-          "verdi": "NEI",
-          "innhold": "Nei"
-        },
-        "spoersmaal": "Bor søker i et annet land enn Norge?",
-        "opplysning": null
+        "spoersmaal": "Bostedsadresse",
+        "svar": "Tonnesveien 275, 8750 Tonnes"
       },
       "kontaktinfo": {
         "telefonnummer": {
+          "spoersmaal": "Telefonnummer",
           "svar": {
-            "innhold": "12345678"
-          },
-          "spoersmaal": "telefonnummer"
+            "innhold": "+4799999999"
+          }
         }
       },
-      "flyktning": {
-        "svar": {
-          "verdi": "NEI",
-          "innhold": "Nei"
-        },
-        "spoersmaal": "Flyktning?"
-      },
       "oppholdUtland": {
+        "spoersmaal": "Er du bosatt i Norge?",
         "svar": {
-          "verdi": "NEI",
-          "innhold": "Nei"
+          "verdi": "JA",
+          "innhold": "Ja"
         },
-        "spoersmaal": "Opphold utlandet?",
-        "opplysning": null
+        "opplysning": {
+          "oppholderSegIUtlandet": {
+            "spoersmaal": "Har du bodd eller oppholdt deg i utlandet de siste 12 månedene?",
+            "svar": {
+              "verdi": "NEI",
+              "innhold": "Nei"
+            }
+          }
+        }
       },
       "nySivilstatus": {
+        "spoersmaal": "Sivilstanden din i dag",
         "svar": {
-          "verdi": "EKTESKAP",
-          "innhold": "Nei"
-        },
-        "spoersmaal": "Opphold utlandet?",
-        "opplysning": null
+          "verdi": "ENSLIG",
+          "innhold": "Enslig"
+        }
       },
-      "arbeidOgUtdanning": null,
+      "arbeidOgUtdanning": {
+        "dinSituasjon": {
+          "spoersmaal": "Hva er situasjonen din nå?",
+          "svar": [
+            {
+              "verdi": "ARBEIDSSOEKER",
+              "innhold": "Jeg er arbeidssøker"
+            }
+          ]
+        },
+        "arbeidssoeker": {
+          "spoersmaal": "Om arbeidssøkingen",
+          "svar": {
+            "registrertArbeidssoeker": {
+              "spoersmaal": "Er du registrert som arbeidssøker hos NAV?",
+              "svar": {
+                "verdi": "NEI",
+                "innhold": "Nei"
+              }
+            }
+          }
+        }
+      },
       "fullfoertUtdanning": {
-        "svar": {
-          "verdi": "FAGBREV",
-          "innhold": "Nei"
-        },
-        "spoersmaal": "Opphold utlandet?",
-        "opplysning": null
+        "spoersmaal": "Hva er din høyeste fullførte utdanning?",
+        "svar": [
+          {
+            "verdi": "INGEN",
+            "innhold": "Ingen utdanning"
+          }
+        ]
       },
-      "andreYtelser": {
-        "kravOmAnnenStonad": {
-          "svar": {
-            "verdi": "NEI",
-            "innhold": "Nei"
+      "inntektOgPensjon": {
+        "annenInntekt": {
+          "annenInntektEllerUtbetaling": {
+            "spoersmaal": "Hvilke andre inntekter eller utbetalinger har du?",
+            "svar": [
+              {
+                "verdi": "ANNEN",
+                "innhold": "Andre inntekter eller ytelser"
+              }
+            ]
           },
-          "spoersmaal": "Opphold utlandet?",
-          "opplysning": null
+          "beloep": {
+            "spoersmaal": "Oppgi brutto inntekt eller ytelser",
+            "svar": {
+              "innhold": "150000"
+            }
+          }
         },
-        "annenPensjon": {
-          "svar": {
-            "verdi": "NEI",
-            "innhold": "Nei"
-          },
-          "spoersmaal": "Opphold utlandet?",
-          "opplysning": null
+        "ytelserNAV": {
+          "soektOmYtelse": {
+            "spoersmaal": "Har du søkt om ytelser fra NAV som du ikke har fått svar på?",
+            "svar": {
+              "verdi": "NEI",
+              "innhold": "Nei"
+            }
+          }
         },
-        "pensjonUtland": {
-          "svar": {
-            "verdi": "NEI",
-            "innhold": "Nei"
-          },
-          "spoersmaal": "Opphold utlandet?",
-          "opplysning": null
+        "ytelserAndre": {
+          "soektOmYtelse": {
+            "spoersmaal": "Har du søkt om ytelser fra andre enn NAV som du ikke har fått svar på?",
+            "svar": {
+              "verdi": "NEI",
+              "innhold": "Nei"
+            }
+          }
         }
       },
       "uregistrertEllerVenterBarn": {
+        "spoersmaal": "Venter du barn eller har du barn som ikke er registrert i folkeregisteret?",
         "svar": {
           "verdi": "NEI",
           "innhold": "Nei"
-        },
-        "spoersmaal": "Uregistrert eller ventende barn?"
+        }
       },
       "forholdTilAvdoede": {
         "relasjon": {
+          "spoersmaal": "Relasjonen din til avdøde da dødsfallet skjedde",
           "svar": {
             "verdi": "GIFT",
-            "innhold": "Gift"
-          },
-          "spoersmaal": "Relasjon?"
+            "innhold": "Gift eller registrert partner"
+          }
+        },
+        "datoForInngaattPartnerskap": {
+          "spoersmaal": "Vi giftet oss",
+          "svar": {
+            "innhold": "2001-01-01"
+          }
         },
         "fellesBarn": {
+          "spoersmaal": "Har eller har dere hatt felles barn?",
           "svar": {
-            "verdi": "JA",
-            "innhold": "Ja"
-          },
-          "spoersmaal": "Felles barn?"
+            "verdi": "NEI",
+            "innhold": "Nei"
+          }
         }
       },
-      "type": "GJENLEVENDE"
+      "omsorgForBarn": {
+        "spoersmaal": "Har du minst 50 prosent omsorg for barn under 18 år på dødsfallstidspunktet?",
+        "svar": {
+          "verdi": "NEI",
+          "innhold": "Nei"
+        }
+      }
     },
     "avdoed": {
+      "type": "AVDOED",
       "fornavn": {
-        "svar": "kirsten",
-        "spoersmaal": "Fornavn"
+        "spoersmaal": "Fornavn",
+        "svar": "TREG"
       },
       "etternavn": {
-        "svar": "jakobsen",
-        "spoersmaal": "Etternavn"
+        "spoersmaal": "Etternavn",
+        "svar": "BILLE"
       },
       "foedselsnummer": {
-        "svar": "21478247343",
-        "spoersmaal": "Avdødes fødselsnummer / d-nummer"
+        "spoersmaal": "Fødselsnummer / d-nummer",
+        "svar": "03428317423"
       },
       "datoForDoedsfallet": {
+        "spoersmaal": "Når skjedde dødsfallet?",
         "svar": {
-          "innhold": "2022-12-01T14:37:24.573612786"
-        },
-        "spoersmaal": "Statsborgerskap?"
+          "innhold": "2023-11-15"
+        }
       },
       "statsborgerskap": {
+        "spoersmaal": "Statsborgerskap",
         "svar": {
           "innhold": "Norge"
-        },
-        "spoersmaal": "Statsborgerskap?"
+        }
       },
       "utenlandsopphold": {
+        "spoersmaal": "Har han eller hun bodd og/eller arbeidet i et annet land enn Norge etter fylte 16 år?",
         "svar": {
           "verdi": "NEI",
           "innhold": "Nei"
-        },
-        "spoersmaal": "Opphold i utlandet?",
-        "opplysning": []
+        }
+      },
+      "naeringsInntekt": {
+        "spoersmaal": "Var han eller hun selvstendig næringsdrivende?",
+        "svar": {
+          "verdi": "NEI",
+          "innhold": "Nei"
+        }
       },
       "doedsaarsakSkyldesYrkesskadeEllerYrkessykdom": {
+        "spoersmaal": "Skyldes dødsfallet yrkesskade eller yrkessykdom?",
         "svar": {
           "verdi": "NEI",
           "innhold": "Nei"
-        },
-        "spoersmaal": "Dødsårsak skyldes yrkesskade eller yrkessykdom?"
-      },
-      "naeringsInntekt": null,
-      "militaertjeneste": null,
-      "type": "AVDOED"
+        }
+      }
     },
-    "barn": [],
+    "barn": [
+      {
+        "type": "BARN",
+        "fornavn": {
+          "spoersmaal": "Fornavn",
+          "svar": "Blaut "
+        },
+        "etternavn": {
+          "spoersmaal": "Etternavn",
+          "svar": "Sandkasse"
+        },
+        "foedselsnummer": {
+          "spoersmaal": "Barnets fødselsnummer / d-nummer",
+          "svar": "19021370870"
+        },
+        "statsborgerskap": {
+          "spoersmaal": "Statsborgerskap",
+          "svar": "Norge"
+        },
+        "utenlandsAdresse": {
+          "spoersmaal": "Bor barnet i et annet land enn Norge?",
+          "svar": {
+            "verdi": "NEI",
+            "innhold": "Nei"
+          }
+        },
+        "foreldre": [
+          {
+            "type": "FORELDER",
+            "fornavn": {
+              "spoersmaal": "Fornavn",
+              "svar": "TRADISJONSBUNDEN"
+            },
+            "etternavn": {
+              "spoersmaal": "Etternavn",
+              "svar": "KØYESENG"
+            },
+            "foedselsnummer": {
+              "spoersmaal": "Fødselsnummer",
+              "svar": "13848599411"
+            }
+          },
+          {
+            "type": "FORELDER",
+            "fornavn": {
+              "spoersmaal": "Fornavn",
+              "svar": "TREG"
+            },
+            "etternavn": {
+              "spoersmaal": "Etternavn",
+              "svar": "BILLE"
+            },
+            "foedselsnummer": {
+              "spoersmaal": "Fødselsnummer",
+              "svar": "03428317423"
+            }
+          }
+        ],
+        "verge": {
+          "spoersmaal": "Er det oppnevnt en verge for barnet?",
+          "svar": {
+            "verdi": "NEI",
+            "innhold": "Nei"
+          }
+        }
+      }
+    ],
+    "andreStoenader": [],
     "versjon": "1",
-    "type": "OMSTILLINGSSTOENAD",
-    "mottattDato": "2023-02-17T14:37:24.573612786",
+    "mottattDato": "2023-11-30T18:05:49.337092713",
     "template": "omstillingsstoenad_v1"
   },
   "@lagret_soeknad_id": "TEST-157fb687-3dfe-40bf-b099-45d531c0d12d",

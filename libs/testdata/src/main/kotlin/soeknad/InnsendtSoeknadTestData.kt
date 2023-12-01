@@ -1,19 +1,23 @@
 package soeknad
 
-import no.nav.etterlatte.libs.common.innsendtsoeknad.AndreYtelser
+import no.nav.etterlatte.libs.common.innsendtsoeknad.ArbeidOgUtdanningOMS
 import no.nav.etterlatte.libs.common.innsendtsoeknad.BankkontoType
-import no.nav.etterlatte.libs.common.innsendtsoeknad.ForholdTilAvdoede
+import no.nav.etterlatte.libs.common.innsendtsoeknad.ForholdTilAvdoedeOMS
 import no.nav.etterlatte.libs.common.innsendtsoeknad.ForholdTilAvdoedeType
+import no.nav.etterlatte.libs.common.innsendtsoeknad.InntektOgPensjon
+import no.nav.etterlatte.libs.common.innsendtsoeknad.JobbStatusTypeOMS
 import no.nav.etterlatte.libs.common.innsendtsoeknad.Kontaktinfo
 import no.nav.etterlatte.libs.common.innsendtsoeknad.SivilstatusType
 import no.nav.etterlatte.libs.common.innsendtsoeknad.Spraak
 import no.nav.etterlatte.libs.common.innsendtsoeknad.UtbetalingsInformasjon
+import no.nav.etterlatte.libs.common.innsendtsoeknad.YtelserAndre
+import no.nav.etterlatte.libs.common.innsendtsoeknad.YtelserNav
 import no.nav.etterlatte.libs.common.innsendtsoeknad.common.Avdoed
 import no.nav.etterlatte.libs.common.innsendtsoeknad.common.BetingetOpplysning
 import no.nav.etterlatte.libs.common.innsendtsoeknad.common.DatoSvar
 import no.nav.etterlatte.libs.common.innsendtsoeknad.common.EnumSvar
 import no.nav.etterlatte.libs.common.innsendtsoeknad.common.FritekstSvar
-import no.nav.etterlatte.libs.common.innsendtsoeknad.common.Gjenlevende
+import no.nav.etterlatte.libs.common.innsendtsoeknad.common.GjenlevendeOMS
 import no.nav.etterlatte.libs.common.innsendtsoeknad.common.Innsender
 import no.nav.etterlatte.libs.common.innsendtsoeknad.common.JaNeiVetIkke
 import no.nav.etterlatte.libs.common.innsendtsoeknad.common.Opplysning
@@ -76,7 +80,7 @@ object InnsendtSoeknadTestData {
                         ),
                 ),
             soeker =
-                Gjenlevende(
+                GjenlevendeOMS(
                     fornavn = Opplysning(svar = "Kirsten", spoersmaal = "Spoersmal"),
                     etternavn = Opplysning(svar = "Jakobsen", spoersmaal = "Etternavn"),
                     foedselsnummer =
@@ -115,7 +119,16 @@ object InnsendtSoeknadTestData {
                                 ),
                         ),
                     flyktning = null,
-                    oppholdUtland = null,
+                    oppholdUtland =
+                        BetingetOpplysning(
+                            svar =
+                                EnumSvar(
+                                    verdi = JaNeiVetIkke.NEI,
+                                    innhold = "Nei",
+                                ),
+                            spoersmaal = null,
+                            opplysning = null,
+                        ),
                     nySivilstatus =
                         BetingetOpplysning(
                             svar =
@@ -126,41 +139,28 @@ object InnsendtSoeknadTestData {
                             spoersmaal = null,
                             opplysning = null,
                         ),
-                    arbeidOgUtdanning = null,
-                    fullfoertUtdanning = null,
-                    andreYtelser =
-                        AndreYtelser(
-                            kravOmAnnenStonad =
-                                BetingetOpplysning(
+                    arbeidOgUtdanning =
+                        ArbeidOgUtdanningOMS(
+                            dinSituasjon =
+                                Opplysning(
                                     svar =
-                                        EnumSvar(
-                                            verdi = JaNeiVetIkke.NEI,
-                                            innhold = "Nei",
+                                        listOf(
+                                            EnumSvar(
+                                                verdi = JobbStatusTypeOMS.ARBEIDSTAKER,
+                                                innhold = "Arbeidstaker",
+                                            ),
                                         ),
                                     spoersmaal = null,
-                                    opplysning = null,
                                 ),
-                            annenPensjon =
-                                BetingetOpplysning(
-                                    svar =
-                                        EnumSvar(
-                                            verdi = JaNeiVetIkke.NEI,
-                                            innhold = "Nei",
-                                        ),
-                                    spoersmaal = null,
-                                    opplysning = null,
-                                ),
-                            pensjonUtland =
-                                BetingetOpplysning(
-                                    svar =
-                                        EnumSvar(
-                                            verdi = JaNeiVetIkke.NEI,
-                                            innhold = "Nei",
-                                        ),
-                                    spoersmaal = null,
-                                    opplysning = null,
-                                ),
+                            arbeidsforhold = null,
+                            selvstendig = null,
+                            etablererVirksomhet = null,
+                            tilbud = null,
+                            arbeidssoeker = null,
+                            utdanning = null,
+                            annenSituasjon = null,
                         ),
+                    fullfoertUtdanning = null,
                     uregistrertEllerVenterBarn =
                         Opplysning(
                             svar =
@@ -171,7 +171,7 @@ object InnsendtSoeknadTestData {
                             spoersmaal = null,
                         ),
                     forholdTilAvdoede =
-                        ForholdTilAvdoede(
+                        ForholdTilAvdoedeOMS(
                             relasjon =
                                 Opplysning(
                                     svar =
@@ -188,9 +188,47 @@ object InnsendtSoeknadTestData {
                             fellesBarn = null,
                             samboereMedFellesBarnFoerGiftemaal = null,
                             tidligereGift = null,
-                            omsorgForBarn = null,
                             mottokBidrag = null,
-                            mottokEktefelleBidrag = null,
+                        ),
+                    inntektOgPensjon =
+                        InntektOgPensjon(
+                            loennsinntekt = null,
+                            naeringsinntekt = null,
+                            pensjonEllerUfoere = null,
+                            annenInntekt = null,
+                            ytelserNAV =
+                                YtelserNav(
+                                    soektOmYtelse =
+                                        Opplysning(
+                                            svar =
+                                                EnumSvar(
+                                                    verdi = JaNeiVetIkke.NEI,
+                                                    innhold = "Nei",
+                                                ),
+                                        ),
+                                    soektYtelse = null,
+                                ),
+                            ytelserAndre =
+                                YtelserAndre(
+                                    soektOmYtelse =
+                                        Opplysning(
+                                            svar =
+                                                EnumSvar(
+                                                    verdi = JaNeiVetIkke.NEI,
+                                                    innhold = "Nei",
+                                                ),
+                                        ),
+                                    soektYtelse = null,
+                                    pensjonsordning = null,
+                                ),
+                        ),
+                    omsorgForBarn =
+                        Opplysning(
+                            svar =
+                                EnumSvar(
+                                    verdi = JaNeiVetIkke.NEI,
+                                    innhold = "Nei",
+                                ),
                         ),
                 ),
             avdoed =

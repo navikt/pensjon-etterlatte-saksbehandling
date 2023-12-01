@@ -82,28 +82,31 @@ export const SendTilAttesteringModal = ({
           <BodyShort spacing>Når du sender til attestering vil vedtaket låses og du får ikke gjort endringer</BodyShort>
           {isSuccess(oppgaveForBehandlingStatus) && (
             <>
-              {saksbehandlerPaaOppgave ? null : (
+              {saksbehandlerPaaOppgave ? (
+                <>
+                  <FlexRow justify="center">
+                    <Button
+                      variant="secondary"
+                      onClick={() => {
+                        setIsOpen(false)
+                      }}
+                    >
+                      Nei, avbryt
+                    </Button>
+                    <Button loading={isPending(fattVedtakStatus)} variant="primary" onClick={fattVedtakWrapper}>
+                      Ja, send til attestering
+                    </Button>
+                  </FlexRow>
+                  {isFailure(fattVedtakStatus) && (
+                    <ApiErrorAlert>
+                      {fattVedtakStatus.error.detail || 'En feil skjedde under attestering av vedtaket'}
+                    </ApiErrorAlert>
+                  )}
+                </>
+              ) : (
                 <Alert variant="error">Oppgaven til denne må tildeles før man kan sende til attestering</Alert>
               )}
             </>
-          )}
-          <FlexRow justify="center">
-            <Button
-              variant="secondary"
-              onClick={() => {
-                setIsOpen(false)
-              }}
-            >
-              Nei, avbryt
-            </Button>
-            <Button loading={isPending(fattVedtakStatus)} variant="primary" onClick={fattVedtakWrapper}>
-              Ja, send til attestering
-            </Button>
-          </FlexRow>
-          {isFailure(fattVedtakStatus) && (
-            <ApiErrorAlert>
-              {fattVedtakStatus.error.detail || 'En feil skjedde under attestering av vedtaket'}
-            </ApiErrorAlert>
           )}
         </Modal.Body>
       </Modal>

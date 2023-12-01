@@ -274,9 +274,4 @@ data class UtenlandstilknytningRequest(
     val begrunnelse: String,
 )
 
-data class EndreEnhetRequest(
-    val enhet: String,
-    val begrunnelse: String,
-)
-
 data class FoersteVirkDto(val foersteIverksatteVirkISak: LocalDate, val sakId: Long)

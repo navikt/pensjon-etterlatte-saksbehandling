@@ -34,13 +34,16 @@ import {
   opprettEllerEndreBeregning,
 } from '~shared/api/beregning'
 import { useAppDispatch, useAppSelector } from '~store/Store'
-import { isFailure, isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
+import { useApiCall } from '~shared/hooks/useApiCall'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { NesteOgTilbake } from '../handlinger/NesteOgTilbake'
 import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapper'
 import { useBehandlingRoutes } from '../BehandlingRoutes'
 import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
+
+import { isPending, mapApiResult } from '~shared/api/apiUtils'
+import { isFailureHandler } from '~shared/api/IsFailureHandler'
 
 const OverstyrBeregningGrunnlag = (props: { behandling: IBehandlingReducer; overstyrBeregning: OverstyrBeregning }) => {
   const { behandling, overstyrBeregning } = props
@@ -147,89 +150,96 @@ const OverstyrBeregningGrunnlag = (props: { behandling: IBehandlingReducer; over
           </Heading>
         </HeadingWrapper>
       </ContentHeader>
-      {isSuccess(overstyrBeregningGrunnlag) && (
-        <>
-          {visFeil && feil.length > 0 && behandles ? <FeilIPerioder feil={feil} /> : null}
-          <FormWrapper>
-            {fields.length ? (
-              <Table>
-                <Table.Header>
-                  <Table.Row>
-                    <Table.HeaderCell />
-                    <Table.HeaderCell scope="col">Periode</Table.HeaderCell>
-                    <Table.HeaderCell scope="col">Utbetalt beløp</Table.HeaderCell>
-                    <Table.HeaderCell scope="col">Trygdetid</Table.HeaderCell>
-                    <Table.HeaderCell scope="col">Prorata</Table.HeaderCell>
-                    <Table.HeaderCell scope="col">Beskrivelse</Table.HeaderCell>
-                  </Table.Row>
-                </Table.Header>
-                <Table.Body id="forminstitusjonsopphold">
-                  {fields.map((item, index) => (
-                    <OverstyrBeregningTableWrapper
-                      key={item.id}
-                      item={item}
-                      index={index}
-                      control={control}
-                      register={register}
-                      remove={remove}
-                      watch={watch}
-                      visFeil={visFeil}
-                      feil={feil}
-                      behandles={behandles}
-                    />
-                  ))}
-                </Table.Body>
-              </Table>
-            ) : null}
-            {behandles && (
-              <Button
-                type="button"
-                icon={<PlusCircleIcon title="legg til" />}
-                iconPosition="left"
-                variant="tertiary"
-                onClick={() => {
-                  setVisFeil(false)
-                  append([
-                    {
-                      fom: nesteFomDato(sisteFom, sisteTom),
-                      tom: undefined,
-                      data: {
-                        utbetaltBeloep: '0',
-                        trygdetid: '0',
-                        prorataBroekNevner: '',
-                        prorataBroekTeller: '',
-                        beskrivelse: '',
+      {mapApiResult(
+        overstyrBeregningGrunnlag,
+        <Spinner visible={true} label="Henter grunnlag" />,
+        () => (
+          <ApiErrorAlert>En feil har oppstått ved henting av grunnlag</ApiErrorAlert>
+        ),
+        () => (
+          <>
+            {visFeil && feil.length > 0 && behandles ? <FeilIPerioder feil={feil} /> : null}
+            <FormWrapper>
+              {fields.length ? (
+                <Table>
+                  <Table.Header>
+                    <Table.Row>
+                      <Table.HeaderCell />
+                      <Table.HeaderCell scope="col">Periode</Table.HeaderCell>
+                      <Table.HeaderCell scope="col">Utbetalt beløp</Table.HeaderCell>
+                      <Table.HeaderCell scope="col">Trygdetid</Table.HeaderCell>
+                      <Table.HeaderCell scope="col">Prorata</Table.HeaderCell>
+                      <Table.HeaderCell scope="col">Beskrivelse</Table.HeaderCell>
+                    </Table.Row>
+                  </Table.Header>
+                  <Table.Body id="forminstitusjonsopphold">
+                    {fields.map((item, index) => (
+                      <OverstyrBeregningTableWrapper
+                        key={item.id}
+                        item={item}
+                        index={index}
+                        control={control}
+                        register={register}
+                        remove={remove}
+                        watch={watch}
+                        visFeil={visFeil}
+                        feil={feil}
+                        behandles={behandles}
+                      />
+                    ))}
+                  </Table.Body>
+                </Table>
+              ) : null}
+              {behandles && (
+                <Button
+                  type="button"
+                  icon={<PlusCircleIcon title="legg til" />}
+                  iconPosition="left"
+                  variant="tertiary"
+                  onClick={() => {
+                    setVisFeil(false)
+                    append([
+                      {
+                        fom: nesteFomDato(sisteFom, sisteTom),
+                        tom: undefined,
+                        data: {
+                          utbetaltBeloep: '0',
+                          trygdetid: '0',
+                          prorataBroekNevner: '',
+                          prorataBroekTeller: '',
+                          beskrivelse: '',
+                        },
                       },
-                    },
-                  ])
-                }}
-              >
-                Legg til beregningsperiode
-              </Button>
-            )}
-            {behandles && (
-              <Button
-                type="submit"
-                size="small"
-                onClick={handleSubmit(ferdigstillForm)}
-                loading={isPending(persistOverstyrBeregningGrunnlag)}
-              >
-                Lagre
-              </Button>
-            )}
-            {visOkLagret && <CheckmarkCircleIcon color={AGreen500} />}
-          </FormWrapper>
-        </>
-      )}
-      {isPending(overstyrBeregningGrunnlag) && <Spinner visible={true} label="Henter grunnlag" />}
-      {isFailure(overstyrBeregningGrunnlag) && (
-        <ApiErrorAlert>En feil har oppstått ved henting av grunnlag</ApiErrorAlert>
+                    ])
+                  }}
+                >
+                  Legg til beregningsperiode
+                </Button>
+              )}
+              {behandles && (
+                <Button
+                  type="submit"
+                  size="small"
+                  onClick={handleSubmit(ferdigstillForm)}
+                  loading={isPending(persistOverstyrBeregningGrunnlag)}
+                >
+                  Lagre
+                </Button>
+              )}
+              {visOkLagret && <CheckmarkCircleIcon color={AGreen500} />}
+            </FormWrapper>
+          </>
+        )
       )}
       {isPending(persistOverstyrBeregningGrunnlag) && <Spinner visible={true} label="Lagre grunnlag" />}
-      {isFailure(persistOverstyrBeregningGrunnlag) && (
-        <ApiErrorAlert>En feil har oppstått ved lagring av grunnlag</ApiErrorAlert>
-      )}
-      {isFailure(endreBeregning) && <ApiErrorAlert>Kunne ikke opprette ny beregning</ApiErrorAlert>}
+      {isFailureHandler({
+        errorMessage: 'En feil har oppstått ved lagring av grunnlag',
+        apiResult: persistOverstyrBeregningGrunnlag,
+      })}
+      {isFailureHandler({
+        errorMessage: 'Kunne ikke opprette ny beregning',
+        apiResult: endreBeregning,
+      })}
       {behandles ? (
         <BehandlingHandlingKnapper>
           <Button

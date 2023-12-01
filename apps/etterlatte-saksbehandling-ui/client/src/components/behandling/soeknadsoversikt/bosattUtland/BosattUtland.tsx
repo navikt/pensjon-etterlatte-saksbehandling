@@ -1,6 +1,6 @@
 import { MottatteSeder } from '~components/behandling/soeknadsoversikt/bosattUtland/MottatteSeder'
 import { SendteSeder } from '~components/behandling/soeknadsoversikt/bosattUtland/SendteSeder'
-import { isFailure, isPending, useApiCall } from '~shared/hooks/useApiCall'
+import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentAlleLand, ILand, sorterLand } from '~shared/api/trygdetid'
 import React, { useEffect, useState } from 'react'
 import Spinner from '~shared/Spinner'
@@ -10,9 +10,11 @@ import { LandMedDokumenter } from '~shared/types/RevurderingInfo'
 import { oppdaterBehandlingsstatus } from '~store/reducers/BehandlingReducer'
 import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 import { useAppDispatch } from '~store/Store'
-import { ApiErrorAlert } from '~ErrorBoundary'
 import { CheckmarkCircleIcon } from '@navikt/aksel-icons'
 import { AWhite } from '@navikt/ds-tokens/dist/tokens'
+
+import { isPending } from '~shared/api/apiUtils'
+import { isFailureHandler } from '~shared/api/IsFailureHandler'
 
 export const BosattUtland = ({
   behandlingId,
@@ -103,9 +105,10 @@ export const BosattUtland = ({
 
   return (
     <>
-      {isFailure(hentAlleLandRequest) && (
-        <ApiErrorAlert>Vi klarte ikke å hente landlisten, den er påkrevd for å kunne fylle inn SED data</ApiErrorAlert>
-      )}
+      {isFailureHandler({
+        apiResult: hentAlleLandRequest,
+        errorMessage: 'Vi klarte ikke å hente landlisten, den er påkrevd for å kunne fylle inn SED data',
+      })}
       {isPending(hentAlleLandRequest) && <Spinner visible={true} label="Henter land" />}
       {alleLandKodeverk && (
         <>
@@ -127,7 +130,10 @@ export const BosattUtland = ({
             setLandMedDokumenter={setLandMedDokumenter}
             redigerbar={redigerbar}
           />
-          {isFailure(lagreBosattutlandStatus) && <ApiErrorAlert>Klarte ikke å lagre bosatt utland</ApiErrorAlert>}
+          {isFailureHandler({
+            apiResult: lagreBosattutlandStatus,
+            errorMessage: 'Klarte ikke å lagre bosatt utland',
+          })}
           <div style={{ marginTop: '2rem' }}>
             {redigerbar && (
               <Button onClick={() => lagreBosattutlandApiWrapper()} loading={isPending(lagreBosattutlandStatus)}>

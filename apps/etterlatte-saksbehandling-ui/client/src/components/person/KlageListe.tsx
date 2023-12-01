@@ -8,7 +8,7 @@ import {
   teksterKlagestatus,
   teksterKlageutfall,
 } from '~shared/types/Klage'
-import { mapApiResult, useApiCall } from '~shared/hooks/useApiCall'
+import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentKlagerISak } from '~shared/api/klage'
 import React, { useEffect } from 'react'
 import Spinner from '~shared/Spinner'
@@ -17,6 +17,8 @@ import { Heading, Link, Table } from '@navikt/ds-react'
 import { formaterStringDato } from '~utils/formattering'
 import styled from 'styled-components'
 import { JaNei } from '~shared/types/ISvar'
+
+import { mapApiResult } from '~shared/api/apiUtils'
 
 function formaterKlagestatus(status: KlageStatus): string | null {
   return teksterKlagestatus[status]

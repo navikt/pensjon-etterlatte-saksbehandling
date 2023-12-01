@@ -1,15 +1,17 @@
 import { Sidebar, SidebarPanel } from '~shared/components/Sidebar'
 import { Generellbehandling, KravpakkeUtland, Status } from '~shared/types/Generellbehandling'
 import { AttesteringMedUnderkjenning } from '~components/generellbehandling/AttesteringMedUnderkjenning'
-import { isFailure, isPending, useApiCall } from '~shared/hooks/useApiCall'
+import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentSaksbehandlerForReferanseOppgaveUnderArbeid } from '~shared/api/oppgaver'
 import React, { useEffect, useState } from 'react'
-import { ApiErrorAlert } from '~ErrorBoundary'
 import { useAppSelector } from '~store/Store'
 import Spinner from '~shared/Spinner'
 import { AttestertVisning } from '~components/generellbehandling/AttestertVisning'
 import { Alert, BodyShort } from '@navikt/ds-react'
 import { ReturnertVisning } from '~components/generellbehandling/ReturnertVisning'
+
+import { isPending } from '~shared/api/apiUtils'
+import { isFailureHandler } from '~shared/api/IsFailureHandler'
 
 export const GenerellbehandlingSidemeny = (props: {
   utlandsBehandling: Generellbehandling & { innhold: KravpakkeUtland | null }
@@ -57,11 +59,10 @@ export const GenerellbehandlingSidemeny = (props: {
   return (
     <Sidebar>
       <SidebarPanel>
-        {isFailure(saksbehandlerForOppgaveStatus) && (
-          <ApiErrorAlert>
-            Vi fant ingen saksbehadler for den tilknyttede oppgaven. Husk å tildele oppgaven.
-          </ApiErrorAlert>
-        )}
+        {isFailureHandler({
+          apiResult: saksbehandlerForOppgaveStatus,
+          errorMessage: 'Vi fant ingen saksbehandler for den tilknyttede oppgaven. Husk å tildele oppgaven.',
+        })}
         {isPending(saksbehandlerForOppgaveStatus) && <Spinner visible={true} label="Henter saksbehandler or oppgave" />}
         {saksbehandlerForGjeldendeOppgave ? (
           <Alert variant={oppgaveErTildeltInnloggetBruker ? 'success' : 'info'} style={{ marginBottom: '2rem' }}>

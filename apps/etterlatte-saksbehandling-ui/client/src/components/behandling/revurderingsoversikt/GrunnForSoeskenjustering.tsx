@@ -10,12 +10,15 @@ import {
 import React, { FormEvent, useState } from 'react'
 import { BodyShort, Button, Heading, Select } from '@navikt/ds-react'
 import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
-import { isFailure, isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
+import { useApiCall } from '~shared/hooks/useApiCall'
 import { lagreRevurderingInfo } from '~shared/api/revurdering'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { oppdaterRevurderingInfo } from '~store/reducers/BehandlingReducer'
 import styled from 'styled-components'
 import { Revurderingsbegrunnelse } from '~components/behandling/revurderingsoversikt/Revurderingsbegrunnelse'
+
+import { isPending, isSuccess } from '~shared/api/apiUtils'
+import { isFailureHandler } from '~shared/api/IsFailureHandler'
 
 export const GrunnForSoeskenjustering = (props: { behandling: IDetaljertBehandling }) => {
   const { behandling } = props
@@ -76,7 +79,10 @@ export const GrunnForSoeskenjustering = (props: { behandling: IDetaljertBehandli
             Lagre
           </Button>
           {isSuccess(lagrestatus) && !harEndretInfo ? <span>Lagret!</span> : null}
-          {isFailure(lagrestatus) ? <ApiErrorAlert>Kunne ikke lagre grunnen til søskenjustering</ApiErrorAlert> : null}
+          {isFailureHandler({
+            apiResult: lagrestatus,
+            errorMessage: 'Kunne ikke lagre grunnen til søskenjustering',
+          })}
           {feilmelding ? <ApiErrorAlert>{feilmelding}</ApiErrorAlert> : null}
         </SkjemaWrapper>
       ) : (

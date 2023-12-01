@@ -2,11 +2,13 @@ import { Alert, BodyShort, Button, Heading, Modal } from '@navikt/ds-react'
 import { useEffect, useState } from 'react'
 import { handlinger } from './typer'
 import { useNavigate } from 'react-router-dom'
-import { isFailure, isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
-import { ApiErrorAlert } from '~ErrorBoundary'
+import { useApiCall } from '~shared/hooks/useApiCall'
 import { FlexRow } from '~shared/styled'
 import { ApiResponse } from '~shared/api/apiClient'
 import { hentOppgaveForBehandlingUnderBehandlingIkkeattestert } from '~shared/api/oppgaver'
+
+import { isPending, isSuccess } from '~shared/api/apiUtils'
+import { isFailureHandler } from '~shared/api/IsFailureHandler'
 
 export const SendTilAttesteringModal = ({
   behandlingId,
@@ -65,9 +67,10 @@ export const SendTilAttesteringModal = ({
           )}
         </>
       )}
-      {isFailure(oppgaveForBehandlingStatus) && (
-        <ApiErrorAlert>Fatting er ikke tilgjengelig for øyeblikket. Sjekk oppgavestatus for vedkommende</ApiErrorAlert>
-      )}
+      {isFailureHandler({
+        apiResult: oppgaveForBehandlingStatus,
+        errorMessage: 'Fatting er ikke tilgjengelig for øyeblikket. Sjekk oppgavestatus for vedkommende',
+      })}
       <Modal
         open={isOpen}
         onClose={() => {
@@ -94,11 +97,10 @@ export const SendTilAttesteringModal = ({
               Ja, send til attestering
             </Button>
           </FlexRow>
-          {isFailure(fattVedtakStatus) && (
-            <ApiErrorAlert>
-              {fattVedtakStatus.error.detail || 'En feil skjedde under attestering av vedtaket'}
-            </ApiErrorAlert>
-          )}
+          {isFailureHandler({
+            apiResult: fattVedtakStatus,
+            errorMessage: 'En feil skjedde under attestering av vedtaket',
+          })}
         </Modal.Body>
       </Modal>
     </>

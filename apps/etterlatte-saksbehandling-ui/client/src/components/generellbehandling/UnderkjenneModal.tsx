@@ -1,10 +1,13 @@
 import { Alert, BodyShort, Button, Textarea } from '@navikt/ds-react'
-import { isFailure, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
+import { useApiCall } from '~shared/hooks/useApiCall'
 import React, { useState } from 'react'
 import { underkjennGenerellbehandling } from '~shared/api/generellbehandling'
 import { Generellbehandling, KravpakkeUtland } from '~shared/types/Generellbehandling'
 import { useNavigate } from 'react-router-dom'
 import { hentSakOgNavigerTilSaksoversikt } from '~components/generellbehandling/KravpakkeUtland'
+
+import { isSuccess } from '~shared/api/apiUtils'
+import { isFailureHandler } from '~shared/api/IsFailureHandler'
 
 export const UnderkjenneModal = ({
   utlandsBehandling,
@@ -52,7 +55,10 @@ export const UnderkjenneModal = ({
         Bekreft og send i retur
       </Button>
       {isSuccess(underkjennStatus) && <Alert variant="success">Behandlingen ble underkjent</Alert>}
-      {isFailure(underkjennStatus) && <Alert variant="error">Behandlingen ble ikke underkjent</Alert>}
+      {isFailureHandler({
+        apiResult: underkjennStatus,
+        errorMessage: 'Behandlingen ble ikke underkjent',
+      })}
     </>
   )
 }

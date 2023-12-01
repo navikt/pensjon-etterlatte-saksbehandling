@@ -1,16 +1,7 @@
 import { logger } from '~utils/logger'
 
-export type ApiSuccess<T> = { ok: true; status: number; data: T }
+export type ApiSuccess<T = void> = { ok: true; status: number; data: T }
 export type ApiResponse<T> = ApiSuccess<T> | ApiError
-
-type Method = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'
-
-interface Options {
-  url: string
-  method: Method
-  body?: Record<string, unknown>
-  noData?: boolean
-}
 
 export interface JsonError {
   status: number
@@ -23,23 +14,32 @@ export interface ApiError extends JsonError {
   ok: false
 }
 
-export async function retrieveData(props: Options, response: Response): Promise<any> {
-  if (props.noData || response.status === 204) {
-    return null
-  } else {
-    const type = response.headers.get('content-type')?.toLowerCase()
+type Method = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'
 
-    // content-type-headeren tillater ekstra meta-informasjon, eks: "text/html; charset=utf-8"
-    // eller "multipart/form-data; boundary=something". Derfor sjekker vi på om den inneholder
-    // den relevante content-typen vi er ute etter
-    if (type?.includes('application/json')) {
-      return await response.json()
-    }
-    if (type?.includes('application/pdf')) {
-      return await response.arrayBuffer()
-    }
-    return await response.text()
+interface Options {
+  url: string
+  method: Method
+  body?: Record<string, unknown>
+  noData?: boolean
+}
+
+export async function retrieveData(response: Response): Promise<any> {
+  const type = response.headers.get('content-type')?.toLowerCase()
+
+  // content-type-headeren tillater ekstra meta-informasjon, eks: "text/html; charset=utf-8"
+  // eller "multipart/form-data; boundary=something". Derfor sjekker vi på om den inneholder
+  // den relevante content-typen vi er ute etter
+  if (type?.includes('application/json')) {
+    return await response.json()
   }
+  if (type?.includes('application/pdf')) {
+    return await response.arrayBuffer()
+  }
+  return await response.text()
+}
+
+export const restbodyShouldHaveData = (noDataFlag: boolean | undefined, status: number) => {
+  return !noDataFlag && (status === 200 || status === 207 || status === 206)
 }
 
 async function apiFetcher<T>(props: Options): Promise<ApiResponse<T>> {
@@ -56,12 +56,19 @@ async function apiFetcher<T>(props: Options): Promise<ApiResponse<T>> {
     })
 
     if (response.ok) {
-      const data = await retrieveData(props, response)
+      if (restbodyShouldHaveData(props.noData, response.status)) {
+        const data = await retrieveData(response)
+        return {
+          ok: true,
+          status: response.status,
+          data,
+        }
+      }
 
       return {
         ok: true,
         status: response.status,
-        data,
+        data: null as T,
       }
     } else {
       const error: JsonError = await response.json()

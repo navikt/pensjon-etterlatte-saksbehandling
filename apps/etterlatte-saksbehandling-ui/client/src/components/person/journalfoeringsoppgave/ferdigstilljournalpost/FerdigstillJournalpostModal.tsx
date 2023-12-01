@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { isFailure, isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
+import { useApiCall } from '~shared/hooks/useApiCall'
 import { Alert, BodyLong, Button, Heading, Modal } from '@navikt/ds-react'
 import { ferdigstillOppgave, OppgaveDTO } from '~shared/api/oppgaver'
 import { Journalpost } from '~shared/types/Journalpost'
@@ -8,6 +8,8 @@ import { ferdigstillJournalpost } from '~shared/api/dokument'
 import { FlexRow } from '~shared/styled'
 import { ISak } from '~shared/types/sak'
 import { ApiErrorAlert } from '~ErrorBoundary'
+
+import { isFailure, isPending, isSuccess } from '~shared/api/apiUtils'
 
 interface ModalProps {
   oppgave: OppgaveDTO

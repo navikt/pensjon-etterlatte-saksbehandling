@@ -1,5 +1,5 @@
 import { Alert, BodyShort, Button, ErrorSummary, Heading } from '@navikt/ds-react'
-import { isFailure, isPending, isSuccess, mapAllApiResult, useApiCall } from '~shared/hooks/useApiCall'
+import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentKravpakkeforSak } from '~shared/api/generellbehandling'
 import { useEffect, useState } from 'react'
 import Spinner from '~shared/Spinner'
@@ -18,6 +18,9 @@ import { LandMedDokumenter, SluttbehandlingUtlandInfo } from '~shared/types/Revu
 import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
 import HistoriskeSEDer from '~components/behandling/revurderingsoversikt/sluttbehandlingUtland/historikk/HistoriskeSEDer'
 import { formaterStringDato } from '~utils/formattering'
+
+import { isPending, isSuccess, mapAllApiResult } from '~shared/api/apiUtils'
+import { isFailureHandler } from '~shared/api/IsFailureHandler'
 
 export default function SluttbehandlingUtland({
   sakId,
@@ -187,7 +190,10 @@ export default function SluttbehandlingUtland({
           )}
         </Button>
       ) : null}
-      {isFailure(lagreRevurderingsinfoStatus) && <ApiErrorAlert>Kunne ikke lagre revurderingsinfo</ApiErrorAlert>}
+      {isFailureHandler({
+        apiResult: lagreRevurderingsinfoStatus,
+        errorMessage: 'Kunne ikke lagre revurderingsinfo',
+      })}
       <Heading level="2" size="medium" style={{ marginTop: '4rem' }}>
         Tidligere sluttbehandlinger
       </Heading>

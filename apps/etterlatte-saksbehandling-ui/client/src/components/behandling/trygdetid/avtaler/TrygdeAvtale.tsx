@@ -3,7 +3,6 @@ import { Alert, BodyShort, Button, Heading, HelpText, Radio, RadioGroup, Select,
 import React, { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import styled from 'styled-components'
-import { ApiErrorAlert } from '~ErrorBoundary'
 import { FlexHeader, IconWrapper } from '~components/behandling/soeknadsoversikt/familieforhold/styled'
 import Spinner from '~shared/Spinner'
 import {
@@ -17,7 +16,7 @@ import {
   TrygdetidAvtaleKriteria,
   TrygdetidAvtaleOptions,
 } from '~shared/api/trygdetid'
-import { isFailure, isPending, useApiCall } from '~shared/hooks/useApiCall'
+import { useApiCall } from '~shared/hooks/useApiCall'
 import { IconSize } from '~shared/types/Icon'
 import { FormWrapper } from '../styled'
 import { TrygdeavtaleVisning } from './TrygdeavtaleVisning'
@@ -26,6 +25,9 @@ import { JaNei } from '~shared/types/ISvar'
 import { RadioGroupWrapper } from '~components/behandling/vilkaarsvurdering/Vurdering'
 import { Text } from '~components/behandling/attestering/styled'
 import { HjemmelLenke } from '~components/behandling/felles/HjemmelLenke'
+
+import { isPending } from '~shared/api/apiUtils'
+import { isFailureHandler } from '~shared/api/IsFailureHandler'
 
 interface TrygdetidAvtaleOptionProps {
   defaultBeskrivelse: string
@@ -458,18 +460,23 @@ export const TrygdeAvtale = ({ redigerbar }: Props) => {
       {(isPending(hentAlleTrygdetidAvtalerRequest) ||
         isPending(hentAlleTrygdetidAvtalerKriterierRequest) ||
         isPending(hentTrygdeavtaleRequest)) && <Spinner visible={true} label="Henter trgydeavtaler" />}
-      {isFailure(hentAlleTrygdetidAvtalerRequest) && (
-        <ApiErrorAlert>En feil har oppstått ved henting av trygdeavtaler</ApiErrorAlert>
-      )}
-      {isFailure(hentAlleTrygdetidAvtalerKriterierRequest) && (
-        <ApiErrorAlert>En feil har oppstått ved henting av trygdeavtalekriterier</ApiErrorAlert>
-      )}
-      {isFailure(hentTrygdeavtaleRequest) && (
-        <ApiErrorAlert>En feil har oppstått ved henting av trygdeavtale for behandlingen</ApiErrorAlert>
-      )}
-      {isFailure(lagreTrygdeavtaleRequest) && (
-        <ApiErrorAlert>En feil har oppstått ved lagring av trygdeavtale for behandlingen</ApiErrorAlert>
-      )}
+
+      {isFailureHandler({
+        apiResult: hentAlleTrygdetidAvtalerRequest,
+        errorMessage: 'En feil har oppstått ved henting av trygdeavtaler',
+      })}
+      {isFailureHandler({
+        apiResult: hentAlleTrygdetidAvtalerKriterierRequest,
+        errorMessage: 'En feil har oppstått ved henting av trygdeavtalekriterier',
+      })}
+      {isFailureHandler({
+        apiResult: hentTrygdeavtaleRequest,
+        errorMessage: 'En feil har oppstått ved henting av trygdeavtale for behandlingen',
+      })}
+      {isFailureHandler({
+        apiResult: lagreTrygdeavtaleRequest,
+        errorMessage: 'En feil har oppstått ved lagring av trygdeavtale for behandlingen',
+      })}
     </TrygdeAvtaleWrapper>
   )
 }

@@ -5,7 +5,7 @@ import {
   TilbakekrevingResultat,
   TilbakekrevingSkyld,
 } from '~shared/types/Tilbakekreving'
-import { isPending, useApiCall } from '~shared/hooks/useApiCall'
+import { useApiCall } from '~shared/hooks/useApiCall'
 import { lagreTilbakekrevingsperioder } from '~shared/api/tilbakekreving'
 import React, { useState } from 'react'
 import { addTilbakekreving } from '~store/reducers/TilbakekrevingReducer'
@@ -13,6 +13,8 @@ import { useAppDispatch } from '~store/Store'
 import { HeadingWrapper, InnholdPadding } from '~components/behandling/soeknadsoversikt/styled'
 import { Button, Heading, Select, Table, TextField } from '@navikt/ds-react'
 import styled from 'styled-components'
+
+import { isPending } from '~shared/api/apiUtils'
 
 export function TilbakekrevingVurderingPerioder({ behandling }: { behandling: TilbakekrevingBehandling }) {
   const dispatch = useAppDispatch()

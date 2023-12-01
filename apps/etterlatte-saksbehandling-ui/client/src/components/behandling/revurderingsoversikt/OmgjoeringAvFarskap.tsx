@@ -8,13 +8,16 @@ import {
 import React, { FormEvent, useState } from 'react'
 import { BodyShort, Button, Heading } from '@navikt/ds-react'
 import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
-import { isFailure, isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
+import { useApiCall } from '~shared/hooks/useApiCall'
 import { lagreRevurderingInfo } from '~shared/api/revurdering'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { oppdaterRevurderingInfo } from '~store/reducers/BehandlingReducer'
 import styled from 'styled-components'
 import { NavnInput, standardnavn } from '~components/behandling/revurderingsoversikt/NavnInput'
 import { Revurderingsbegrunnelse } from '~components/behandling/revurderingsoversikt/Revurderingsbegrunnelse'
+
+import { isPending, isSuccess } from '~shared/api/apiUtils'
+import { isFailureHandler } from '~shared/api/IsFailureHandler'
 
 export const OmgjoeringAvFarskap = (props: { behandling: IDetaljertBehandling }) => {
   const { behandling } = props
@@ -79,7 +82,10 @@ export const OmgjoeringAvFarskap = (props: { behandling: IDetaljertBehandling })
             Lagre
           </Button>
           {isSuccess(lagrestatus) ? <span>Lagret!</span> : null}
-          {isFailure(lagrestatus) ? <ApiErrorAlert>Kunne ikke lagre navn på far</ApiErrorAlert> : null}
+          {isFailureHandler({
+            apiResult: lagrestatus,
+            errorMessage: 'Kunne ikke lagre navn på far',
+          })}
           {feilmelding ? <ApiErrorAlert>{feilmelding}</ApiErrorAlert> : null}
         </SkjemaWrapper>
       ) : (

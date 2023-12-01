@@ -5,7 +5,7 @@ import { behandlingErRedigerbar } from '../felles/utils'
 import { NesteOgTilbake } from '../handlinger/NesteOgTilbake'
 import { useAppDispatch } from '~store/Store'
 import { hentBeregningsGrunnlag, lagreBeregningsGrunnlag, opprettEllerEndreBeregning } from '~shared/api/beregning'
-import { isFailure, isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
+import { useApiCall } from '~shared/hooks/useApiCall'
 import {
   IBehandlingReducer,
   oppdaterBehandlingsstatus,
@@ -34,6 +34,9 @@ import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 import BeregningsgrunnlagMetode from './BeregningsgrunnlagMetode'
 import { handlinger } from '~components/behandling/handlinger/typer'
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
+
+import { isPending, isSuccess } from '~shared/api/apiUtils'
+import { isFailureHandler } from '~shared/api/IsFailureHandler'
 
 const featureToggleNameInstitusjonsopphold = 'pensjon-etterlatte.bp-bruk-institusjonsopphold' as const
 const featureToggleNameBrukFaktiskTrygdetid = 'pensjon-etterlatte.bp-bruk-faktisk-trygdetid' as const
@@ -138,11 +141,20 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
           />
         )}
         <Spinner visible={isPending(beregningsgrunnlag)} label="Henter beregningsgrunnlag" />
-        {isFailure(beregningsgrunnlag) && <ApiErrorAlert>Beregningsgrunnlag kan ikke hentes</ApiErrorAlert>}
+        {isFailureHandler({
+          apiResult: beregningsgrunnlag,
+          errorMessage: 'Beregningsgrunnlag kan ikke hentes',
+        })}
       </>
       {manglerSoeskenJustering && <ApiErrorAlert>Søskenjustering er ikke fylt ut </ApiErrorAlert>}
-      {isFailure(endreBeregning) && <ApiErrorAlert>Kunne ikke opprette ny beregning</ApiErrorAlert>}
-      {isFailure(lagreBeregningsgrunnlag) && <ApiErrorAlert>Kunne ikke lagre beregningsgrunnlag</ApiErrorAlert>}
+      {isFailureHandler({
+        apiResult: endreBeregning,
+        errorMessage: 'Kunne ikke opprette ny beregning',
+      })}
+      {isFailureHandler({
+        apiResult: lagreBeregningsgrunnlag,
+        errorMessage: 'Kunne ikke lagre beregningsgrunnlag',
+      })}
 
       <Border />
 

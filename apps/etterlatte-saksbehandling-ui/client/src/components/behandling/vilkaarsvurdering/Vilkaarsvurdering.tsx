@@ -14,7 +14,7 @@ import { useAppDispatch } from '~store/Store'
 import { Alert, BodyLong, Button, Heading } from '@navikt/ds-react'
 import { Border, HeadingWrapper } from '../soeknadsoversikt/styled'
 import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
-import { isFailure, isInitial, isPending, useApiCall } from '~shared/hooks/useApiCall'
+import { useApiCall } from '~shared/hooks/useApiCall'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { IBehandlingStatus, IBehandlingsType } from '~shared/types/IDetaljertBehandling'
 import styled from 'styled-components'
@@ -22,6 +22,9 @@ import {
   behandlingGjelderBarnepensjonPaaNyttRegelverk,
   vilkaarsvurderingErPaaNyttRegelverk,
 } from '~components/behandling/vilkaarsvurdering/utils'
+
+import { isFailure, isInitial, isPending } from '~shared/api/apiUtils'
+import { isFailureHandler } from '~shared/api/IsFailureHandler'
 
 export const Vilkaarsvurdering = (props: { behandling: IBehandlingReducer }) => {
   const { behandling } = props
@@ -100,9 +103,10 @@ export const Vilkaarsvurdering = (props: { behandling: IBehandlingReducer }) => 
                   Slett vilkårsvurdering
                 </Button>
               </Alert>
-              {isFailure(slettVilkaarsvurderingStatus) && (
-                <ApiErrorAlert>Klarte ikke slette vilkårsvurderingen</ApiErrorAlert>
-              )}
+              {isFailureHandler({
+                apiResult: slettVilkaarsvurderingStatus,
+                errorMessage: 'Klarte ikke slette vilkårsvurderingen',
+              })}
             </AlertWrapper>
           )}
 

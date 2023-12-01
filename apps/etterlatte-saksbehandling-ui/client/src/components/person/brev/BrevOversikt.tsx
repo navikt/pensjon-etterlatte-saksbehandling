@@ -1,4 +1,4 @@
-import { isPending, isSuccess, mapApiResult, Result, useApiCall } from '~shared/hooks/useApiCall'
+import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentBrevForSak, opprettBrevForSak } from '~shared/api/brev'
 import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
@@ -10,6 +10,8 @@ import { Container, FlexRow } from '~shared/styled'
 import BrevModal from '~components/person/brev/BrevModal'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { SakMedBehandlinger } from '~components/person/typer'
+
+import { isPending, isSuccess, mapApiResult, Result } from '~shared/api/apiUtils'
 
 const mapAdresse = (mottaker: Mottaker) => {
   const adr = mottaker.adresse

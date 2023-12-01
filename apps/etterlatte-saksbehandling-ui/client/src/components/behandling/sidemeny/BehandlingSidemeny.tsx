@@ -7,7 +7,7 @@ import { IBeslutning } from '~components/behandling/attestering/types'
 import { BehandlingFane, IBehandlingInfo } from '~components/behandling/sidemeny/IBehandlingInfo'
 import { IBehandlingStatus, IBehandlingsType, UtenlandstilknytningType } from '~shared/types/IDetaljertBehandling'
 import { useAppDispatch, useAppSelector } from '~store/Store'
-import { isFailure, isInitial, isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
+import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentVedtakSammendrag } from '~shared/api/vedtaksvurdering'
 import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
 import { IHendelseType } from '~shared/types/IHendelse'
@@ -30,6 +30,9 @@ import {
   resetSaksbehandlerGjeldendeOppgave,
   setSaksbehandlerGjeldendeOppgave,
 } from '~store/reducers/SaksbehandlerGjeldendeOppgaveForBehandlingReducer'
+
+import { isInitial, isPending, mapApiResult } from '~shared/api/apiUtils'
+import { isFailureHandler } from '~shared/api/IsFailureHandler'
 
 const finnUtNasjonalitet = (behandling: IBehandlingReducer): UtenlandstilknytningType | null => {
   if (behandling.utenlandstilknytning?.type) {
@@ -72,8 +75,8 @@ export const BehandlingSidemeny = ({ behandling }: { behandling: IBehandlingRedu
     behandling && innloggetSaksbehandler.kanAttestere && behandlingsinfo?.status === IBehandlingStatus.FATTET_VEDTAK
 
   useEffect(() => {
-    fetchVedtakSammendrag(behandling.id, (vedtakSammendrag) => {
-      if (vedtakSammendrag !== null) {
+    fetchVedtakSammendrag(behandling.id, (vedtakSammendrag, statusCode) => {
+      if (statusCode === 200) {
         dispatch(updateVedtakSammendrag(vedtakSammendrag))
       }
     })
@@ -118,27 +121,35 @@ export const BehandlingSidemeny = ({ behandling }: { behandling: IBehandlingRedu
           <Behandlingsoppsummering behandlingsInfo={behandlingsinfo} beslutning={beslutning} />
           {kanAttestere && (
             <>
-              {isFailure(fetchVedtakStatus) && <ApiErrorAlert>Kunne ikke hente vedtak</ApiErrorAlert>}
-              {isPending(fetchVedtakStatus) && <Spinner label="Henter vedtaksdetaljer" visible />}
-              {isSuccess(fetchVedtakStatus) && vedtak && (
-                <AttesteringEllerUnderkjenning
-                  setBeslutning={setBeslutning}
-                  beslutning={beslutning}
-                  vedtak={vedtak}
-                  erFattet={behandling.status === IBehandlingStatus.FATTET_VEDTAK}
-                />
+              {mapApiResult(
+                fetchVedtakStatus,
+                <Spinner label="Henter vedtaksdetaljer" visible />,
+                () => (
+                  <ApiErrorAlert>Kunne ikke hente vedtak</ApiErrorAlert>
+                ),
+                (vedtak) => (
+                  <AttesteringEllerUnderkjenning
+                    setBeslutning={setBeslutning}
+                    beslutning={beslutning}
+                    vedtak={vedtak}
+                    erFattet={behandling.status === IBehandlingStatus.FATTET_VEDTAK}
+                  />
+                )
               )}
             </>
           )}
         </>
       )}
 
-      {isFailure(opprettSjekklisteResult) && erFoerstegangsbehandling && (
-        <ApiErrorAlert>Opprettelsen av sjekkliste feilet</ApiErrorAlert>
-      )}
-      {isFailure(saksbehandlerForOppgaveResult) && (
-        <ApiErrorAlert>Kunne ikke hente saksbehandler gjeldende oppgave. Husk å tildele oppgaven.</ApiErrorAlert>
-      )}
+      {isFailureHandler({
+        apiResult: opprettSjekklisteResult,
+        errorMessage: 'Opprettelsen av sjekkliste feilet',
+      })}
+
+      {isFailureHandler({
+        apiResult: saksbehandlerForOppgaveResult,
+        errorMessage: 'Kunne ikke hente saksbehandler gjeldende oppgave. Husk å tildele oppgaven.',
+      })}
       {isPending(saksbehandlerForOppgaveResult) && <Spinner visible={true} label="Henter saksbehandler for oppgave" />}
       {erFoerstegangsbehandling && (
         <Tabs value={fane} iconPosition="top" onChange={(val) => dispatch(visFane(val as BehandlingFane))}>
@@ -157,9 +168,12 @@ export const BehandlingSidemeny = ({ behandling }: { behandling: IBehandlingRedu
             <>
               {behandling.søker?.foedselsnummer && <Sjekkliste behandling={behandling} />}
               {isPending(hentSjekklisteResult) && <Spinner label="Henter sjekkliste ..." visible />}
-              {isFailure(hentSjekklisteResult) && erFoerstegangsbehandling && !erFerdigBehandlet(behandling.status) && (
-                <ApiErrorAlert>En feil oppstod ved henting av sjekklista</ApiErrorAlert>
-              )}
+              {erFoerstegangsbehandling &&
+                !erFerdigBehandlet(behandling.status) &&
+                isFailureHandler({
+                  apiResult: hentSjekklisteResult,
+                  errorMessage: 'Kunne ikke hente konfigurasjonsverdier',
+                })}
             </>
           </Tabs.Panel>
         </Tabs>

@@ -1,10 +1,11 @@
 import styled from 'styled-components'
 import { GenderIcon, GenderList } from '../icons/genderIcon'
 import { IPersonResult } from '~components/person/typer'
-import { mapApiResult, Result } from '~shared/hooks/useApiCall'
 import { Link } from '@navikt/ds-react'
 import { KopierbarVerdi } from '~shared/statusbar/kopierbarVerdi'
 import { IPdlPerson } from '~shared/types/Person'
+
+import { mapApiResult, Result } from '~shared/api/apiUtils'
 
 export const PdlPersonStatusBar = ({ person }: { person: IPdlPerson }) => (
   <StatusBar

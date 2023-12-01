@@ -15,7 +15,7 @@ import {
   TEKSTER_LOVHJEMLER,
 } from '~shared/types/Klage'
 import { JaNei } from '~shared/types/ISvar'
-import { isFailure, isInitial, isPending, mapApiResult, useApiCall } from '~shared/hooks/useApiCall'
+import { useApiCall } from '~shared/hooks/useApiCall'
 import { ferdigstillKlagebehandling } from '~shared/api/klage'
 import { useAppDispatch } from '~store/Store'
 import { addKlage } from '~store/reducers/KlageReducer'
@@ -23,6 +23,8 @@ import { ApiErrorAlert } from '~ErrorBoundary'
 import { hentBrev } from '~shared/api/brev'
 import ForhaandsvisningBrev from '~components/behandling/brev/ForhaandsvisningBrev'
 import styled from 'styled-components'
+
+import { isFailure, isInitial, isPending, mapApiResult } from '~shared/api/apiUtils'
 
 function formaterKlageutfall(klage: Klage) {
   if (klage.formkrav?.formkrav.erFormkraveneOppfylt === JaNei.NEI) {

@@ -1,6 +1,6 @@
 import { useParams } from 'react-router-dom'
 import React, { useEffect } from 'react'
-import { isFailure, isSuccess, mapApiResult, useApiCall } from '~shared/hooks/useApiCall'
+import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentGenerellBehandling } from '~shared/api/generellbehandling'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import Spinner from '~shared/Spinner'
@@ -10,6 +10,9 @@ import { Generellbehandling } from '~shared/types/Generellbehandling'
 import { StatusBar } from '~shared/statusbar/Statusbar'
 import { getPerson } from '~shared/api/grunnlag'
 import { hentSak } from '~shared/api/sak'
+
+import { isSuccess, mapApiResult } from '~shared/api/apiUtils'
+import { isFailureHandler } from '~shared/api/IsFailureHandler'
 
 const GenerellBehandling = () => {
   const { generellbehandlingId } = useParams()
@@ -44,9 +47,10 @@ const GenerellBehandling = () => {
         case 'KRAVPAKKE_UTLAND':
           return (
             <>
-              {isFailure(hentSakStatus) && (
-                <ApiErrorAlert>Vi klarte ikke å hente sak og derfor vil navn baren være borte</ApiErrorAlert>
-              )}
+              {isFailureHandler({
+                apiResult: hentSakStatus,
+                errorMessage: 'Vi klarte ikke å hente sak og derfor vil navn baren være borte',
+              })}
               <StatusBar result={personStatus} />
               <KravpakkeUtland
                 utlandsBehandling={generellBehandling as Generellbehandling & { innhold: KravpakkeUtland | null }}

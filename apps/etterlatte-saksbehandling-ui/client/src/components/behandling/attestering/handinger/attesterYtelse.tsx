@@ -6,9 +6,11 @@ import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { useNavigate } from 'react-router'
 import { behandlingSkalSendeBrev } from '~components/behandling/felles/utils'
 import { ferdigstillVedtaksbrev } from '~shared/api/brev'
-import { isPending, useApiCall } from '~shared/hooks/useApiCall'
+import { useApiCall } from '~shared/hooks/useApiCall'
 import { FlexRow } from '~shared/styled'
 import { attesterVedtak } from '~shared/api/vedtaksvurdering'
+
+import { isPending } from '~shared/api/apiUtils'
 
 export const AttesterYtelse = ({ behandling, kommentar }: { behandling: IDetaljertBehandling; kommentar: string }) => {
   const navigate = useNavigate()

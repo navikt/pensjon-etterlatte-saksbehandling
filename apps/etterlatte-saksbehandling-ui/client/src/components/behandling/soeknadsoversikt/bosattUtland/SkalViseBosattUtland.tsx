@@ -1,10 +1,12 @@
 import { IDetaljertBehandling, UtenlandstilknytningType } from '~shared/types/IDetaljertBehandling'
 import { BosattUtland } from '~components/behandling/soeknadsoversikt/bosattUtland/BosattUtland'
-import { isErrorWithCode, isFailure, isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
+import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentBosattutland } from '~shared/api/bosattutland'
 import { useEffect } from 'react'
 import Spinner from '~shared/Spinner'
 import { Alert } from '@navikt/ds-react'
+
+import { isFailureWithCode, isFailure, isPending, isSuccess } from '~shared/api/apiUtils'
 
 export const SkalViseBosattUtland = (props: { behandling: IDetaljertBehandling; redigerbar: boolean }) => {
   const { behandling, redigerbar } = props
@@ -25,13 +27,13 @@ const HentBosattutland = ({ behandlingId, redigerbar }: { behandlingId: string; 
   return (
     <>
       {isPending(hentBosattUtlandStatus) && <Spinner visible={true} label="Henter bosatt utland info" />}
-      {isErrorWithCode(hentBosattUtlandStatus, 404) && (
+      {isFailureWithCode(hentBosattUtlandStatus, 404) && (
         <BosattUtland behandlingId={behandlingId} bosattutland={null} redigerbar={redigerbar} />
       )}
       {isSuccess(hentBosattUtlandStatus) && (
         <BosattUtland behandlingId={behandlingId} bosattutland={hentBosattUtlandStatus.data} redigerbar={redigerbar} />
       )}
-      {isFailure(hentBosattUtlandStatus) && !isErrorWithCode(hentBosattUtlandStatus, 404) && (
+      {isFailure(hentBosattUtlandStatus) && !isFailureWithCode(hentBosattUtlandStatus, 404) && (
         <Alert variant="warning">Vi klarte ikke å hente lagret data for bosatt utland</Alert>
       )}
     </>

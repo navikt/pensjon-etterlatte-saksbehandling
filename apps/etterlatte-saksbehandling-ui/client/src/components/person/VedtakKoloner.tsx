@@ -1,10 +1,12 @@
-import { isFailure, isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
+import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentVedtakSammendrag } from '~shared/api/vedtaksvurdering'
 import React, { useEffect } from 'react'
 import { formaterStringDato, formaterVedtakType } from '~utils/formattering'
 import { Table } from '@navikt/ds-react'
 import Spinner from '~shared/Spinner'
 import { ExclamationmarkTriangleFillIcon } from '@navikt/aksel-icons'
+
+import { mapApiResult } from '~shared/api/apiUtils'
 
 export const VedtakKolonner = (props: { behandlingId: string }) => {
   const [vedtak, apiHentVedtaksammendrag] = useApiCall(hentVedtakSammendrag)
@@ -20,21 +22,22 @@ export const VedtakKolonner = (props: { behandlingId: string }) => {
 
   return (
     <>
-      {isPending(vedtak) && (
+      {mapApiResult(
+        vedtak,
         <Table.DataCell>
           <Spinner visible label="" margin="0" />
-        </Table.DataCell>
-      )}
-      {isSuccess(vedtak) && (
-        <>
-          <Table.DataCell>{attestertDato(vedtak.data?.datoAttestert)}</Table.DataCell>
-          <Table.DataCell>{vedtak.data?.vedtakType && formaterVedtakType(vedtak.data.vedtakType)}</Table.DataCell>
-        </>
-      )}
-      {isFailure(vedtak) && (
-        <ExclamationmarkTriangleFillIcon
-          title={vedtak.error.detail || 'Feil oppsto ved henting av sammendrag for behandling'}
-        />
+        </Table.DataCell>,
+        (apierror) => (
+          <ExclamationmarkTriangleFillIcon
+            title={apierror.detail || 'Feil oppsto ved henting av sammendrag for behandling'}
+          />
+        ),
+        (vedtak) => (
+          <>
+            <Table.DataCell>{attestertDato(vedtak?.datoAttestert)}</Table.DataCell>
+            <Table.DataCell>{vedtak?.vedtakType && formaterVedtakType(vedtak.vedtakType)}</Table.DataCell>
+          </>
+        )
       )}
     </>
   )

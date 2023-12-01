@@ -1,15 +1,18 @@
-import { Alert, Button, Heading, Modal, Select, TextField, ToggleGroup } from '@navikt/ds-react'
+import { Button, Heading, Modal, Select, TextField, ToggleGroup } from '@navikt/ds-react'
 import React, { useState } from 'react'
 import { IBrev, Mottaker } from '~shared/types/Brev'
 import { DocPencilIcon } from '@navikt/aksel-icons'
 import styled, { css } from 'styled-components'
-import { isFailure, isPending, useApiCall } from '~shared/hooks/useApiCall'
+import { useApiCall } from '~shared/hooks/useApiCall'
 import { oppdaterMottaker } from '~shared/api/brev'
 import { FlexRow } from '~shared/styled'
 import { Grunnlagsopplysning } from '~shared/types/grunnlag'
 import { KildePersondata } from '~shared/types/kilde'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import { InfoWrapper } from '~components/behandling/soeknadsoversikt/styled'
+
+import { isPending } from '~shared/api/apiUtils'
+import { isFailureHandler } from '~shared/api/IsFailureHandler'
 
 enum MottakerType {
   PRIVATPERSON = 'PRIVATPERSON',
@@ -227,7 +230,10 @@ export default function RedigerMottakerModal({ brev, oppdater, vergeadresse }: P
             />
           </SkjemaGruppe>
 
-          {isFailure(mottakerStatus) && <Alert variant="error">Kunne ikke oppdatere mottaker...</Alert>}
+          {isFailureHandler({
+            apiResult: mottakerStatus,
+            errorMessage: 'Kunne ikke oppdatere mottaker.',
+          })}
 
           <FlexRow justify="right">
             <Button variant="secondary" disabled={isPending(mottakerStatus)} onClick={avbryt}>

@@ -1,5 +1,5 @@
 import styled from 'styled-components'
-import { isFailure, isPendingOrInitial, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
+import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentAvkorting } from '~shared/api/avkorting'
 import React, { useEffect, useState } from 'react'
 import { IAvkorting } from '~shared/types/IAvkorting'
@@ -11,6 +11,8 @@ import { IBehandlingReducer, oppdaterBehandlingsstatus } from '~store/reducers/B
 import { useAppDispatch } from '~store/Store'
 import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
+
+import { mapApiResult } from '~shared/api/apiUtils'
 
 export const Avkorting = (props: { behandling: IBehandlingReducer }) => {
   const behandling = props.behandling
@@ -33,13 +35,20 @@ export const Avkorting = (props: { behandling: IBehandlingReducer }) => {
 
   return (
     <AvkortingWrapper>
-      {isSuccess(avkortingStatus) && (
-        <AvkortingInntekt
-          behandling={behandling}
-          avkortingGrunnlag={avkorting == null ? [] : avkorting.avkortingGrunnlag}
-          setAvkorting={setAvkorting}
-          redigerbar={redigerbar}
-        />
+      {mapApiResult(
+        avkortingStatus,
+        <Spinner visible label="Henter avkorting" />,
+        () => (
+          <ApiErrorAlert>En feil har oppstått</ApiErrorAlert>
+        ),
+        () => (
+          <AvkortingInntekt
+            behandling={behandling}
+            avkortingGrunnlag={avkorting == null ? [] : avkorting.avkortingGrunnlag}
+            setAvkorting={setAvkorting}
+            redigerbar={redigerbar}
+          />
+        )
       )}
       {avkorting && (
         <YtelseEtterAvkorting
@@ -49,8 +58,6 @@ export const Avkorting = (props: { behandling: IBehandlingReducer }) => {
           setAvkorting={setAvkorting}
         />
       )}
-      {isPendingOrInitial(avkortingStatus) && <Spinner visible label="Henter avkorting" />}
-      {isFailure(avkortingStatus) && <ApiErrorAlert>En feil har oppstått</ApiErrorAlert>}
     </AvkortingWrapper>
   )
 }

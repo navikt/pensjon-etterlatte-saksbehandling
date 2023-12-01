@@ -1,4 +1,4 @@
-import { isFailure, isInitial, isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
+import { useApiCall } from '~shared/hooks/useApiCall'
 import { fjernSaksbehandlerApi } from '~shared/api/oppgaver'
 import { Alert, Button, Label, Loader } from '@navikt/ds-react'
 import { PencilIcon } from '@navikt/aksel-icons'
@@ -6,6 +6,9 @@ import React, { useEffect, useState } from 'react'
 import { GeneriskModal } from '~shared/modal/modal'
 import styled from 'styled-components'
 import { RedigerSaksbehandlerProps } from '~components/nyoppgavebenk/tildeling/RedigerSaksbehandler'
+
+import { isSuccess, mapAllApiResult } from '~shared/api/apiUtils'
+import { ApiErrorAlert } from '~ErrorBoundary'
 
 const SaksbehandlerWrapper = styled(Label)`
   padding: 12px 20px;
@@ -25,7 +28,9 @@ export const FjernSaksbehandler = (props: RedigerSaksbehandlerProps) => {
 
   return (
     <>
-      {isInitial(fjernSaksbehandlerSvar) && (
+      {mapAllApiResult(
+        fjernSaksbehandlerSvar,
+        <Loader size="small" title="Fjerner saksbehandler" />,
         <>
           {erRedigerbar ? (
             <Button
@@ -50,19 +55,15 @@ export const FjernSaksbehandler = (props: RedigerSaksbehandlerProps) => {
             setModalisOpen={setModalIsOpen}
             open={modalIsOpen}
           />
-        </>
-      )}
-
-      {isPending(fjernSaksbehandlerSvar) && <Loader size="small" title="Fjerner saksbehandler" />}
-      {isFailure(fjernSaksbehandlerSvar) && (
-        <Alert variant="error" size="small">
-          Feil ved fjerning av saksbehandling
-        </Alert>
-      )}
-      {isSuccess(fjernSaksbehandlerSvar) && (
-        <Alert variant="success" size="small">
-          Du er fjernet som saksbehandler
-        </Alert>
+        </>,
+        () => (
+          <ApiErrorAlert size="small">Feil ved fjerning av saksbehandling</ApiErrorAlert>
+        ),
+        () => (
+          <Alert variant="success" size="small">
+            Du er fjernet som saksbehandler
+          </Alert>
+        )
       )}
     </>
   )

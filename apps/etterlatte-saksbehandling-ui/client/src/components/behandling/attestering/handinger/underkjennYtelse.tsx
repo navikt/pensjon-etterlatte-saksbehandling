@@ -3,8 +3,10 @@ import { useState } from 'react'
 import { GeneriskModal } from '~shared/modal/modal'
 import { hentBehandling } from '~shared/api/behandling'
 import { useNavigate } from 'react-router'
-import { isPending, useApiCall } from '~shared/hooks/useApiCall'
+import { useApiCall } from '~shared/hooks/useApiCall'
 import { underkjennVedtak } from '~shared/api/vedtaksvurdering'
+
+import { isPending } from '~shared/api/apiUtils'
 
 type Props = {
   behandlingId: string

@@ -1,9 +1,11 @@
-import { Alert, BodyShort, Detail, Heading, Link } from '@navikt/ds-react'
+import { BodyShort, Detail, Heading, Link } from '@navikt/ds-react'
 import { formaterStringDato } from '~utils/formattering'
 import Spinner from '~shared/Spinner'
 import { ExternalLinkIcon } from '@navikt/aksel-icons'
-import { isFailure, isPending, isSuccess, Result } from '~shared/hooks/useApiCall'
 import { Journalpost } from '~shared/types/Journalpost'
+
+import { isPending, isSuccess, Result } from '~shared/api/apiUtils'
+import { isFailureHandler } from '~shared/api/IsFailureHandler'
 
 export const DokumentlisteLiten = ({ dokumenter }: { dokumenter: Result<Journalpost[]> }) => (
   <>
@@ -38,11 +40,9 @@ export const DokumentlisteLiten = ({ dokumenter }: { dokumenter: Result<Journalp
           <i>Ingen dokumenter ble funnet</i>
         </Detail>
       ))}
-
-    {isFailure(dokumenter) && (
-      <Alert variant="error" style={{ marginTop: '10px' }}>
-        Det har oppstått en feil ved henting av dokumenter.
-      </Alert>
-    )}
+    {isFailureHandler({
+      apiResult: dokumenter,
+      errorMessage: 'Det har oppstått en feil ved henting av dokumenter.',
+    })}
   </>
 )

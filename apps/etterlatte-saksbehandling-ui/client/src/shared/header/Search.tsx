@@ -4,11 +4,13 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ABlue500, AGray900, ANavRed } from '@navikt/ds-tokens/dist/tokens'
 import { InformationSquareIcon, XMarkOctagonIcon } from '@navikt/aksel-icons'
-import { isFailure, isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
+import { useApiCall } from '~shared/hooks/useApiCall'
 import { getPerson } from '~shared/api/grunnlag'
 import { fnrHarGyldigFormat } from '~utils/fnr'
 import { ApiError } from '~shared/api/apiClient'
 import { hentSak } from '~shared/api/behandling'
+
+import { isFailure, isPending, isSuccess } from '~shared/api/apiUtils'
 
 export const Search = () => {
   const navigate = useNavigate()

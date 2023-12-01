@@ -2,9 +2,10 @@ import { Detail, Heading, Table } from '@navikt/ds-react'
 import { formaterStringDato } from '~utils/formattering'
 import DokumentModal from './dokumentModal'
 import Spinner from '~shared/Spinner'
-import { mapApiResult, Result } from '~shared/hooks/useApiCall'
 import { Journalpost } from '~shared/types/Journalpost'
 import { ApiErrorAlert } from '~ErrorBoundary'
+
+import { mapApiResult, Result } from '~shared/api/apiUtils'
 
 const colonner = ['ID', 'Tittel', 'Avsender/Mottaker', 'Dato', 'Sak', 'Status', 'Type', '']
 

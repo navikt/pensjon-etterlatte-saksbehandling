@@ -75,12 +75,9 @@ class GrunnlagHenter(
                     personopplysning(person, personDTO, GJENLEVENDE_FORELDER_PDL_V1, PersonRolle.GJENLEVENDE)
                 }
 
-            val relevantVerge = hentRelevantVerge(soekerPersonInfo.person.vergemaalEllerFremtidsfullmakt)
-            val vergesAdresseInfo =
-                if (relevantVerge != null) {
-                    hentVergesAdresse(persongalleri.soeker, relevantVerge)
-                } else {
-                    null
+            val vergesAdresseInfo: Grunnlagsopplysning<JsonNode>? =
+                hentRelevantVerge(soekerPersonInfo.person.vergemaalEllerFremtidsfullmakt)?.let { verge ->
+                    hentVergesAdresse(persongalleri.soeker, verge)
                 }
 
             val opplysningList =

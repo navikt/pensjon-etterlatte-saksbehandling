@@ -42,8 +42,8 @@ class PersondataKlient(private val httpClient: HttpClient, private val apiUrl: S
                 null
             }
         } catch (e: ClientRequestException) {
-            when (e.response.status) {
-                HttpStatusCode.NotFound -> return null
+            if (e.response.status == HttpStatusCode.NotFound) {
+                return null
             }
             logger.error("Feil i henting av vergeadresse", e)
             return null
@@ -57,8 +57,8 @@ class PersondataKlient(private val httpClient: HttpClient, private val apiUrl: S
         try {
             return hentKontaktadresse(foedselsnummer, false)
         } catch (e: ClientRequestException) {
-            when (e.response.status) {
-                HttpStatusCode.NotFound -> return null
+            if (e.response.status == HttpStatusCode.NotFound) {
+                return null
             }
             logger.error("Feil i henting av adresse", e)
             return null

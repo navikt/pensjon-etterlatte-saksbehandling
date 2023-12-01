@@ -43,7 +43,8 @@ const featureToggleNameInstitusjonsopphold = 'pensjon-etterlatte.bp-bruk-institu
 const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer }) => {
   const { behandling } = props
   const { next } = useBehandlingRoutes()
-  const avdoede = usePersonopplysninger()?.avdoede.find((po) => po)
+  const personopplysninger = usePersonopplysninger()
+  const avdoede = personopplysninger?.avdoede.find((po) => po)
   const redigerbar = behandlingErRedigerbar(behandling.status)
   const dispatch = useAppDispatch()
   const [lagreBeregningsgrunnlag, postBeregningsgrunnlag] = useApiCall(lagreBeregningsGrunnlag)
@@ -74,7 +75,12 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
   }
 
   const soesken =
-    (avdoede && hentLevendeSoeskenFraAvdoedeForSoeker(avdoede, behandling.søker?.foedselsnummer as string)) ?? []
+    (avdoede &&
+      hentLevendeSoeskenFraAvdoedeForSoeker(
+        avdoede,
+        personopplysninger?.soeker?.opplysning.foedselsnummer as string
+      )) ??
+    []
   const harSoesken = soesken.length > 0
 
   const onSubmit = () => {

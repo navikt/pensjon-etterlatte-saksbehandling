@@ -1,0 +1,1 @@
+update stoenad set kilde = 'GJENNY' where kilde is null;

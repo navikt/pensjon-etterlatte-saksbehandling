@@ -16,6 +16,7 @@ data class OmregnetBPNyttRegelverk(
     val prorataBroek: IntBroek?,
     val grunnbeloep: Kroner,
     val erBosattUtlandet: Boolean,
+    val erYrkesskade: Boolean,
 ) : BrevData() {
     companion object {
         fun fra(
@@ -32,6 +33,7 @@ data class OmregnetBPNyttRegelverk(
                     prorataBroek = foersteBeregningsperiode.prorataBroek,
                     grunnbeloep = Kroner(foersteBeregningsperiode.grunnbeloep.value),
                     erBosattUtlandet = false,
+                    erYrkesskade = false,
                 )
 
             if (generellBrevData.systemkilde == Vedtaksloesning.PESYS) {
@@ -46,6 +48,7 @@ data class OmregnetBPNyttRegelverk(
                 return defaultBrevdataOmregning.copy(
                     utbetaltFoerReform = Kroner(pesysUtbetaltFoerReform),
                     erBosattUtlandet = pesysUtenlandstilknytning == UtenlandstilknytningType.BOSATT_UTLAND,
+                    erYrkesskade = migreringRequest.yrkesskade,
                 )
             }
 

@@ -356,7 +356,7 @@ class VedtaksbrevService(
     }
 }
 
-data class MigreringBrevRequest(val brutto: Int, val utenlandstilknytningType: UtenlandstilknytningType?)
+data class MigreringBrevRequest(val brutto: Int, val yrkesskade: Boolean, val utenlandstilknytningType: UtenlandstilknytningType?)
 
 fun Vergemaal.toMottaker(): Mottaker {
     return Mottaker(

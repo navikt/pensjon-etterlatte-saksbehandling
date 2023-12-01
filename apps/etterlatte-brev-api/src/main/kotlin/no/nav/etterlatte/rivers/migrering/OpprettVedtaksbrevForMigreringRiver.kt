@@ -49,6 +49,7 @@ internal class OpprettVedtaksbrevForMigreringRiver(
                     MigreringBrevRequest(
                         brutto = beregning.brutto,
                         utenlandstilknytningType = utenlandstilknytningType,
+                        yrkesskade = dodAvYrkesskade,
                     )
                 }
             if (migreringBrevRequest.utenlandstilknytningType == null) {

@@ -55,7 +55,12 @@ const Soeskenjustering = (props: SoeskenjusteringProps) => {
 
   const avdoede = usePersonopplysninger()?.avdoede.find((po) => po)
   const soesken =
-    (avdoede && hentLevendeSoeskenFraAvdoedeForSoeker(avdoede, behandling.søker?.foedselsnummer as string)) ?? []
+    (avdoede &&
+      hentLevendeSoeskenFraAvdoedeForSoeker(
+        avdoede,
+        personopplysninger.soeker?.opplysning?.foedselsnummer as string
+      )) ??
+    []
 
   const { handleSubmit, control, watch } = useForm<{
     soeskenMedIBeregning: PeriodisertBeregningsgrunnlag<SoeskenKanskjeMedIBeregning[]>[]
@@ -123,7 +128,7 @@ const Soeskenjustering = (props: SoeskenjusteringProps) => {
         </HeadingWrapper>
       </ContentHeader>
       <FamilieforholdWrapper>
-        {behandling.søker && <Barn person={behandling.søker} doedsdato={doedsdato} />}
+        {personopplysninger.soeker && <Barn person={personopplysninger.soeker?.opplysning} doedsdato={doedsdato} />}
         <Border />
       </FamilieforholdWrapper>
       {visFeil && feil.length > 0 && behandles ? <FeilIPerioder feil={feil} /> : null}

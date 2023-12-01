@@ -18,6 +18,7 @@ import { IBehandlingsammendrag } from '~components/person/typer'
 import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
 import { ChildEyesIcon } from '@navikt/aksel-icons'
 import { BeregningsMetode } from '~shared/types/Beregning'
+import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 
 import { mapApiResult } from '~shared/api/apiUtils'
 
@@ -73,7 +74,7 @@ export const ManueltOpphoerOversikt = (props: { behandling: IBehandlingReducer }
       setLoadingBeregning(false)
     }
   }
-  const soeker = behandling.søker
+  const soeker = usePersonopplysninger()?.soeker?.opplysning
 
   return (
     <Content>

@@ -34,7 +34,7 @@ export const SendteSeder = ({
       <Heading level="2" size="medium" style={{ marginTop: '2rem' }}>
         Sendte SED
       </Heading>
-      <BodyShort>Fyll inn hvilke SED som er mottatt i RINA pr land.</BodyShort>
+      <BodyShort>Fyll inn hvilke SED som er sendt i RINA til aktuelt land.</BodyShort>
       <SEDLandMedDokumenter
         landListe={landliste}
         landMedDokumenter={landMedDokumenter}

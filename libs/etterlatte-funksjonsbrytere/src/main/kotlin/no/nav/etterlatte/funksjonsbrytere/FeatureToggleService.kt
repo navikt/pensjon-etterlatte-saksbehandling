@@ -18,14 +18,14 @@ interface FeatureToggleService {
     companion object {
         fun initialiser(
             properties: FeatureToggleProperties,
-            brukerIdent: () -> String = { "" },
+            brukerIdent: () -> String? = { null },
         ) = UnleashFeatureToggleService(properties, brukerIdent)
     }
 }
 
 class UnleashFeatureToggleService(
     private val properties: FeatureToggleProperties,
-    private val brukerIdent: () -> String,
+    private val brukerIdent: () -> String?,
 ) : FeatureToggleService {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -41,11 +41,11 @@ class UnleashFeatureToggleService(
             GradualRolloutUserIdStrategy(),
         )
 
-    private fun lagUnleashContextProvider(brukerIdentResolver: () -> String) =
+    private fun lagUnleashContextProvider(brukerIdentResolver: () -> String?) =
         UnleashContextProvider {
             UnleashContext.builder()
                 .appName(properties.applicationName)
-                .userId(brukerIdentResolver())
+                .also { builder -> brukerIdentResolver()?.let { userId -> builder.userId(userId) } }
                 .build()
         }
 

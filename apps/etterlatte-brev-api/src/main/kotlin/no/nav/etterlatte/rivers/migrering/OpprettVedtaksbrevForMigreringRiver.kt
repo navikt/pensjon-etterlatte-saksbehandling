@@ -44,14 +44,32 @@ internal class OpprettVedtaksbrevForMigreringRiver(
         val brukerTokenInfo = Systembruker("migrering", "migrering")
         runBlocking {
             val hendelseData = packet.hendelseData
+            val migreringBrevRequest =
+                with(hendelseData) {
+                    MigreringBrevRequest(
+                        brutto = beregning.brutto,
+                        utenlandstilknytningType = utenlandstilknytningType,
+                    )
+                }
+            if (migreringBrevRequest.utenlandstilknytningType == null) {
+                logger.warn(
+                    "Fikk null i utenlandstilknytningstype for migreringrequest med " +
+                        "pesysId=${hendelseData.pesysId}.",
+                )
+            } else {
+                logger.info(
+                    "Fikk utlandstilknytningstype=${migreringBrevRequest.utenlandstilknytningType} for " +
+                        "migreringrequesten med pesysId=${hendelseData.pesysId}",
+                )
+            }
             val vedtaksbrev: Brev =
                 service.opprettVedtaksbrev(
                     sakId,
                     behandlingId,
                     brukerTokenInfo,
-                    MigreringBrevRequest(hendelseData.beregning.brutto),
+                    migreringBrevRequest,
                 )
-            service.genererPdf(vedtaksbrev.id, brukerTokenInfo, MigreringBrevRequest(hendelseData.beregning.brutto))
+            service.genererPdf(vedtaksbrev.id, brukerTokenInfo, migreringBrevRequest)
             service.ferdigstillVedtaksbrev(behandlingId, brukerTokenInfo, true)
         }
         logger.info("Har oppretta vedtaksbrev i sak $sakId")

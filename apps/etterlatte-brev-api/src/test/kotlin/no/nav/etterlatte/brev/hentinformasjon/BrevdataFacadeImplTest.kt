@@ -321,6 +321,7 @@ internal class BrevdataFacadeImplTest {
                 1,
                 Kroner(3063),
                 10,
+                null,
                 false,
             )
     }

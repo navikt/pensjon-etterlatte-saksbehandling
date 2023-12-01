@@ -133,6 +133,7 @@ internal class VedtaksbrevServiceTest {
                         1,
                         Kroner(5000),
                         40,
+                        prorataBroek = null,
                         false,
                     ),
                 ),

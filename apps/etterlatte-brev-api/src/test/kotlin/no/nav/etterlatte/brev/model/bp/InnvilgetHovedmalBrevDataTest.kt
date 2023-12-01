@@ -119,6 +119,7 @@ internal class InnvilgetHovedmalBrevDataTest {
         antallBarn = 1,
         utbetaltBeloep = Kroner(grunnbeloepPerMaaned),
         trygdetid = 10,
+        prorataBroek = null,
         institusjon = false,
     )
 

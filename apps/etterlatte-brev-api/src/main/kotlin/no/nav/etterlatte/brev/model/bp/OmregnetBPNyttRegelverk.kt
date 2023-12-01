@@ -4,14 +4,18 @@ import no.nav.etterlatte.brev.MigreringBrevRequest
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
 import no.nav.etterlatte.brev.model.BrevData
+import no.nav.etterlatte.libs.common.IntBroek
 import no.nav.etterlatte.libs.common.Vedtaksloesning
+import no.nav.etterlatte.libs.common.behandling.UtenlandstilknytningType
 import no.nav.pensjon.brevbaker.api.model.Kroner
 
 data class OmregnetBPNyttRegelverk(
     val utbetaltFoerReform: Kroner,
     val utbetaltEtterReform: Kroner,
     val anvendtTrygdetid: Int,
+    val prorataBroek: IntBroek?,
     val grunnbeloep: Kroner,
+    val erBosattUtlandet: Boolean,
 ) : BrevData() {
     companion object {
         fun fra(
@@ -19,21 +23,33 @@ data class OmregnetBPNyttRegelverk(
             utbetalingsinfo: Utbetalingsinfo,
             migreringRequest: MigreringBrevRequest?,
         ): OmregnetBPNyttRegelverk {
-            val utbetaltFoerReform =
-                if (generellBrevData.systemkilde == Vedtaksloesning.PESYS) {
+            val foersteBeregningsperiode = utbetalingsinfo.beregningsperioder.first()
+            val defaultBrevdataOmregning =
+                OmregnetBPNyttRegelverk(
+                    utbetaltFoerReform = Kroner(0),
+                    utbetaltEtterReform = Kroner(utbetalingsinfo.beloep.value),
+                    anvendtTrygdetid = foersteBeregningsperiode.trygdetid,
+                    prorataBroek = foersteBeregningsperiode.prorataBroek,
+                    grunnbeloep = Kroner(foersteBeregningsperiode.grunnbeloep.value),
+                    erBosattUtlandet = false,
+                )
+
+            if (generellBrevData.systemkilde == Vedtaksloesning.PESYS) {
+                val pesysUtbetaltFoerReform =
                     requireNotNull(migreringRequest) {
                         "Kan ikke generere brev for migrering fra pesys hvis vi ikke har migreringsdata"
                     }.brutto
-                } else {
-                    0 // TODO skal komme fra utbetalingen i siste vedtak i gjenny
-                }
+                val pesysUtenlandstilknytning =
+                    requireNotNull(migreringRequest.utenlandstilknytningType) {
+                        "Kan ikke velge mellom bosatt utland eller bosatt norge i brev hvis migreringrequesten mangler grunnlag"
+                    }
+                return defaultBrevdataOmregning.copy(
+                    utbetaltFoerReform = Kroner(pesysUtbetaltFoerReform),
+                    erBosattUtlandet = pesysUtenlandstilknytning == UtenlandstilknytningType.BOSATT_UTLAND,
+                )
+            }
 
-            return OmregnetBPNyttRegelverk(
-                utbetaltFoerReform = Kroner(utbetaltFoerReform),
-                utbetaltEtterReform = Kroner(utbetalingsinfo.beloep.value),
-                anvendtTrygdetid = utbetalingsinfo.beregningsperioder.first().trygdetid,
-                grunnbeloep = Kroner(utbetalingsinfo.beregningsperioder.first().grunnbeloep.value),
-            )
+            return defaultBrevdataOmregning
         }
     }
 }

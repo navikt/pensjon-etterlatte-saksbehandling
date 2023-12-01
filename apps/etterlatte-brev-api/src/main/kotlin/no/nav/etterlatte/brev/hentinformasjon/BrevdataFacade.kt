@@ -21,6 +21,7 @@ import no.nav.etterlatte.brev.behandlingklient.BehandlingKlient
 import no.nav.etterlatte.brev.model.EtterbetalingDTO
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
@@ -181,13 +182,25 @@ class BrevdataFacade(
 
         val beregningsperioder =
             beregning.beregningsperioder.map {
+                val (benyttetTrygdetid, prorataBroek) =
+                    when (it.beregningsMetode) {
+                        BeregningsMetode.NASJONAL -> it.samletNorskTrygdetid!! to null
+                        BeregningsMetode.PRORATA -> it.samletTeoretiskTrygdetid!! to it.broek!!
+                        BeregningsMetode.BEST -> throw IllegalArgumentException(
+                            "Kan ikke ha brukt beregningsmetode 'BEST' i en faktisk beregning, " +
+                                "siden best velger mellom nasjonal eller prorata når det beregnes.",
+                        )
+                        null -> it.trygdetid to null
+                    }
+
                 Beregningsperiode(
                     datoFOM = it.datoFOM.atDay(1),
                     datoTOM = it.datoTOM?.atEndOfMonth(),
                     grunnbeloep = Kroner(it.grunnbelop),
                     antallBarn = (it.soeskenFlokk?.size ?: 0) + 1, // Legger til 1 pga at beregning fjerner soeker
                     utbetaltBeloep = Kroner(it.utbetaltBeloep),
-                    trygdetid = it.trygdetid,
+                    trygdetid = benyttetTrygdetid,
+                    prorataBroek = prorataBroek,
                     institusjon = it.institusjonsopphold != null,
                 )
             }

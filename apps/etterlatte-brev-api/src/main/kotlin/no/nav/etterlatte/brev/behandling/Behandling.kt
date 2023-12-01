@@ -2,6 +2,7 @@ package no.nav.etterlatte.brev.behandling
 
 import no.nav.etterlatte.brev.model.EtterbetalingDTO
 import no.nav.etterlatte.brev.model.Spraak
+import no.nav.etterlatte.libs.common.IntBroek
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
@@ -99,6 +100,7 @@ data class Beregningsperiode(
     val antallBarn: Int,
     val utbetaltBeloep: Kroner,
     val trygdetid: Int,
+    val prorataBroek: IntBroek?,
     val institusjon: Boolean,
 )
 

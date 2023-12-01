@@ -119,8 +119,8 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
         dispatch(addValideringsfeil(Valideringsfeilkoder.MAA_HUKES_AV))
       }
       dispatch(visSjekkliste())
-    } else {
     }
+
     return kanSende
   }
 

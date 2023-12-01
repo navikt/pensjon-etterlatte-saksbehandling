@@ -25,12 +25,15 @@ import no.nav.etterlatte.libs.common.person.VergemaalEllerFremtidsfullmakt
 import no.nav.etterlatte.libs.common.person.hentRelevantVerge
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
+import org.slf4j.LoggerFactory
 import java.util.UUID
 
 class GrunnlagHenter(
     private val pdltjenesterKlient: PdlTjenesterKlientImpl,
     private val persondataKlient: PersondataKlient,
 ) {
+    private val logger = LoggerFactory.getLogger(GrunnlagHenter::class.java)
+
     suspend fun hentGrunnlagsdata(opplysningsbehov: Opplysningsbehov): HentetGrunnlag {
         return coroutineScope {
             val persongalleri = opplysningsbehov.persongalleri
@@ -77,7 +80,14 @@ class GrunnlagHenter(
 
             val vergesAdresseInfo: Grunnlagsopplysning<JsonNode>? =
                 hentRelevantVerge(soekerPersonInfo.person.vergemaalEllerFremtidsfullmakt)?.let { verge ->
-                    hentVergesAdresse(persongalleri.soeker, verge)
+                    val vergesAdresse = hentVergesAdresse(persongalleri.soeker, verge)
+                    if (vergesAdresse == null) {
+                        logger.error(
+                            "Fant ikke verges adresse " +
+                                "ved oppretting av grunnlag, for sak ${opplysningsbehov.sakId}",
+                        )
+                    }
+                    vergesAdresse
                 }
 
             val opplysningList =

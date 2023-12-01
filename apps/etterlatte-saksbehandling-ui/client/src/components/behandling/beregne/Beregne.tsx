@@ -96,7 +96,7 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
                 {(() => {
                   switch (beregning.type) {
                     case Beregningstype.BP:
-                      return <BarnepensjonSammendrag behandling={behandling} beregning={beregning} />
+                      return <BarnepensjonSammendrag beregning={beregning} />
                     case Beregningstype.OMS:
                       return (
                         <>

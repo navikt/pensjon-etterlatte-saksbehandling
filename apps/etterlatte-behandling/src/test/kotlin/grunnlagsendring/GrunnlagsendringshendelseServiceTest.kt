@@ -74,7 +74,7 @@ internal class GrunnlagsendringshendelseServiceTest {
     private val grunnlagshendelsesDao = mockk<GrunnlagsendringshendelseDao>(relaxUnitFun = true)
     private val pdlService = mockk<PdlKlientImpl>()
     private val grunnlagClient = mockk<GrunnlagKlient>(relaxed = true, relaxUnitFun = true)
-    private val sakService = mockk<SakService>()
+    private val sakService = mockk<SakService>(relaxed = true)
     private val oppgaveService = mockk<OppgaveService>()
     private val mockOppgave =
         opprettNyOppgaveMedReferanseOgSak(

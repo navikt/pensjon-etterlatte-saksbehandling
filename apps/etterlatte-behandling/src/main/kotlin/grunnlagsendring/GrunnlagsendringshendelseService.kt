@@ -255,6 +255,7 @@ class GrunnlagsendringshendelseService(
 
         return sakerForSoeker.let {
             inTransaction {
+                it.filter { rolleOgSak -> sakService.finnSak(rolleOgSak.sakId) != null }
                 it.map { rolleOgSak ->
                     val hendelseId = UUID.randomUUID()
                     logger.info(
@@ -301,6 +302,7 @@ class GrunnlagsendringshendelseService(
                     grunnlagendringType,
                 )
             }
+                .filter { rolleOgSak -> sakService.finnSak(rolleOgSak.sakId) != null }
                 .map { rolleOgSak ->
                     val hendelseId = UUID.randomUUID()
                     logger.info(

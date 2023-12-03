@@ -90,7 +90,7 @@ internal class AvkortingServiceTest {
 
             coEvery { behandlingKlient.hentBehandling(behandlingId, bruker) } returns behandling
             every { avkortingRepository.hentAvkorting(behandlingId) } returns avkorting
-            every { avkorting.medYtelseFraOgMedVirkningstidspunkt(YearMonth.of(2023, 1)) } returns avkorting
+            every { avkorting.medYtelseFraOgMedVirkningstidspunkt(YearMonth.of(2024, 1)) } returns avkorting
 
             runBlocking {
                 service.hentAvkorting(behandlingId, bruker) shouldBe avkorting
@@ -98,7 +98,7 @@ internal class AvkortingServiceTest {
             coVerify {
                 behandlingKlient.hentBehandling(behandlingId, bruker)
                 avkortingRepository.hentAvkorting(behandlingId)
-                avkorting.medYtelseFraOgMedVirkningstidspunkt(YearMonth.of(2023, 1))
+                avkorting.medYtelseFraOgMedVirkningstidspunkt(YearMonth.of(2024, 1))
             }
         }
 
@@ -134,7 +134,7 @@ internal class AvkortingServiceTest {
                 eksisterendeAvkorting.beregnAvkortingRevurdering(beregning)
                 avkortingRepository.lagreAvkorting(behandlingId, reberegnetAvkorting)
                 behandlingKlient.avkort(behandlingId, bruker, true)
-                lagretAvkorting.medYtelseFraOgMedVirkningstidspunkt(YearMonth.of(2023, 1))
+                lagretAvkorting.medYtelseFraOgMedVirkningstidspunkt(YearMonth.of(2024, 1))
             }
             coVerify(exactly = 2) {
                 avkortingRepository.hentAvkorting(behandlingId)
@@ -151,7 +151,7 @@ internal class AvkortingServiceTest {
                     status = behandlingStatusEtterBeregnet,
                     behandlingType = BehandlingType.REVURDERING,
                     sak = 123L,
-                    virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2023, 1)),
+                    virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2024, 1)),
                 )
             val forrigeBehandlingId = UUID.randomUUID()
             val eksisterendeAvkorting = mockk<Avkorting>()
@@ -175,7 +175,7 @@ internal class AvkortingServiceTest {
                 avkortingRepository.hentAvkorting(behandlingId)
                 behandlingKlient.hentSisteIverksatteBehandling(behandling.sak, bruker)
                 avkortingRepository.hentAvkorting(forrigeBehandlingId)
-                eksisterendeAvkorting.medYtelseFraOgMedVirkningstidspunkt(YearMonth.of(2023, 1), forrigeAvkorting)
+                eksisterendeAvkorting.medYtelseFraOgMedVirkningstidspunkt(YearMonth.of(2024, 1), forrigeAvkorting)
             }
         }
 
@@ -189,7 +189,7 @@ internal class AvkortingServiceTest {
                     status = behandlingStatusEtterBeregnet,
                     behandlingType = BehandlingType.REVURDERING,
                     sak = 123L,
-                    virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2023, 1)),
+                    virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2024, 1)),
                 )
             val forrigeBehandlingId = UUID.randomUUID()
             val eksisterendeAvkorting = mockk<Avkorting>()
@@ -213,7 +213,7 @@ internal class AvkortingServiceTest {
                 avkortingRepository.hentAvkorting(behandlingId)
                 behandlingKlient.hentSisteIverksatteBehandling(behandling.sak, bruker)
                 avkortingRepository.hentAvkorting(forrigeBehandlingId)
-                eksisterendeAvkorting.medYtelseFraOgMedVirkningstidspunkt(YearMonth.of(2023, 1), null)
+                eksisterendeAvkorting.medYtelseFraOgMedVirkningstidspunkt(YearMonth.of(2024, 1), null)
             }
         }
 
@@ -225,7 +225,7 @@ internal class AvkortingServiceTest {
                     id = behandlingId,
                     behandlingType = BehandlingType.REVURDERING,
                     sak = 123L,
-                    virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2023, 1)),
+                    virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2024, 1)),
                 )
             val forrigeBehandlingId = UUID.randomUUID()
             val forrigeAvkorting = mockk<Avkorting>()
@@ -261,7 +261,7 @@ internal class AvkortingServiceTest {
                 forrigeAvkorting.kopierAvkorting()
                 kopiertAvkorting.beregnAvkortingRevurdering(beregning)
                 avkortingRepository.lagreAvkorting(behandlingId, beregnetAvkorting)
-                lagretAvkorting.medYtelseFraOgMedVirkningstidspunkt(YearMonth.of(2023, 1), forrigeAvkorting)
+                lagretAvkorting.medYtelseFraOgMedVirkningstidspunkt(YearMonth.of(2024, 1), forrigeAvkorting)
                 behandlingKlient.avkort(behandlingId, bruker, true)
             }
             coVerify(exactly = 2) {
@@ -279,7 +279,7 @@ internal class AvkortingServiceTest {
                     status = behandlingBeregnetStatus,
                     behandlingType = BehandlingType.REVURDERING,
                     sak = 123L,
-                    virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2023, 1)),
+                    virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2024, 1)),
                 )
             val forrigeBehandlingId = UUID.randomUUID()
             val eksisterendeAvkorting = mockk<Avkorting>()
@@ -314,7 +314,7 @@ internal class AvkortingServiceTest {
                 eksisterendeAvkorting.beregnAvkortingRevurdering(beregning)
                 avkortingRepository.lagreAvkorting(behandlingId, reberegnetAvkorting)
                 behandlingKlient.avkort(behandlingId, bruker, true)
-                lagretAvkorting.medYtelseFraOgMedVirkningstidspunkt(YearMonth.of(2023, 1), forrigeAvkorting)
+                lagretAvkorting.medYtelseFraOgMedVirkningstidspunkt(YearMonth.of(2024, 1), forrigeAvkorting)
             }
             coVerify(exactly = 2) {
                 avkortingRepository.hentAvkorting(behandlingId)
@@ -338,7 +338,7 @@ internal class AvkortingServiceTest {
                 behandling(
                     id = behandlingId,
                     behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-                    virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2023, 1)),
+                    virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2024, 1)),
                 )
 
             every { avkortingRepository.hentAvkorting(any()) } returns eksisterendeAvkorting andThen lagretAvkorting
@@ -365,7 +365,7 @@ internal class AvkortingServiceTest {
                     beregning,
                 )
                 avkortingRepository.lagreAvkorting(behandlingId, beregnetAvkorting)
-                lagretAvkorting.medYtelseFraOgMedVirkningstidspunkt(YearMonth.of(2023, 1))
+                lagretAvkorting.medYtelseFraOgMedVirkningstidspunkt(YearMonth.of(2024, 1))
                 behandlingKlient.avkort(behandlingId, bruker, true)
             }
             coVerify(exactly = 2) {
@@ -382,7 +382,7 @@ internal class AvkortingServiceTest {
                     id = revurderingId,
                     behandlingType = BehandlingType.REVURDERING,
                     sak = sakId,
-                    virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2023, 3)),
+                    virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2024, 3)),
                 )
             val forrigeBehandling = UUID.randomUUID()
             val forrigeAvkorting = mockk<Avkorting>()
@@ -418,7 +418,7 @@ internal class AvkortingServiceTest {
                 avkortingRepository.lagreAvkorting(revurderingId, beregnetAvkorting)
                 behandlingKlient.hentSisteIverksatteBehandling(sakId, bruker)
                 avkortingRepository.hentAvkorting(forrigeBehandling)
-                lagretAvkorting.medYtelseFraOgMedVirkningstidspunkt(YearMonth.of(2023, 3), forrigeAvkorting)
+                lagretAvkorting.medYtelseFraOgMedVirkningstidspunkt(YearMonth.of(2024, 3), forrigeAvkorting)
                 behandlingKlient.avkort(revurderingId, bruker, true)
             }
             coVerify(exactly = 2) {

@@ -36,13 +36,13 @@ internal class AvkortingTest {
                         avkortetYtelseAar =
                             listOf(
                                 avkortetYtelse(
-                                    periode = Periode(fom = YearMonth.of(2023, 3), tom = YearMonth.of(2023, 4)),
+                                    periode = Periode(fom = YearMonth.of(2024, 3), tom = YearMonth.of(2024, 4)),
                                 ),
                                 avkortetYtelse(
-                                    periode = Periode(fom = YearMonth.of(2023, 5), tom = YearMonth.of(2023, 7)),
+                                    periode = Periode(fom = YearMonth.of(2024, 5), tom = YearMonth.of(2024, 7)),
                                 ),
                                 avkortetYtelse(
-                                    periode = Periode(fom = YearMonth.of(2023, 8), tom = null),
+                                    periode = Periode(fom = YearMonth.of(2024, 8), tom = null),
                                 ),
                             ),
                     ),
@@ -50,7 +50,7 @@ internal class AvkortingTest {
 
         @Test
         fun `fyller ut avkortet ytelse foer virkningstidspunkt ved aa kutte aarsoppgjoer fra virkningstidspunkt`() {
-            avkorting.medYtelseFraOgMedVirkningstidspunkt(virkningstidspunkt = YearMonth.of(2023, 5)).asClue {
+            avkorting.medYtelseFraOgMedVirkningstidspunkt(virkningstidspunkt = YearMonth.of(2024, 5)).asClue {
                 it.avkortetYtelseFraVirkningstidspunkt.size shouldBe 2
                 it.avkortetYtelseFraVirkningstidspunkt[0] shouldBe avkorting.aarsoppgjoer.avkortetYtelseAar[1]
                 it.avkortetYtelseFraVirkningstidspunkt[1] shouldBe avkorting.aarsoppgjoer.avkortetYtelseAar[2]
@@ -59,30 +59,30 @@ internal class AvkortingTest {
 
         @Test
         fun `kutter periode fra aarsoppgjoer hvis virkningstidspunkt begynner midt i periode `() {
-            avkorting.medYtelseFraOgMedVirkningstidspunkt(virkningstidspunkt = YearMonth.of(2023, 4)).asClue {
+            avkorting.medYtelseFraOgMedVirkningstidspunkt(virkningstidspunkt = YearMonth.of(2024, 4)).asClue {
                 it.avkortetYtelseFraVirkningstidspunkt.size shouldBe 3
                 with(it.avkortetYtelseFraVirkningstidspunkt[0]) {
                     shouldBeEqualToIgnoringFields(avkorting.aarsoppgjoer.avkortetYtelseAar[0], AvkortetYtelse::periode)
-                    periode shouldBe Periode(fom = YearMonth.of(2023, 4), tom = YearMonth.of(2023, 4))
+                    periode shouldBe Periode(fom = YearMonth.of(2024, 4), tom = YearMonth.of(2024, 4))
                 }
                 it.avkortetYtelseFraVirkningstidspunkt[1] shouldBe avkorting.aarsoppgjoer.avkortetYtelseAar[1]
                 it.avkortetYtelseFraVirkningstidspunkt[2] shouldBe avkorting.aarsoppgjoer.avkortetYtelseAar[2]
             }
 
-            avkorting.medYtelseFraOgMedVirkningstidspunkt(virkningstidspunkt = YearMonth.of(2023, 6)).asClue {
+            avkorting.medYtelseFraOgMedVirkningstidspunkt(virkningstidspunkt = YearMonth.of(2024, 6)).asClue {
                 it.avkortetYtelseFraVirkningstidspunkt.size shouldBe 2
                 with(it.avkortetYtelseFraVirkningstidspunkt[0]) {
                     shouldBeEqualToIgnoringFields(avkorting.aarsoppgjoer.avkortetYtelseAar[1], AvkortetYtelse::periode)
-                    periode shouldBe Periode(fom = YearMonth.of(2023, 6), tom = YearMonth.of(2023, 7))
+                    periode shouldBe Periode(fom = YearMonth.of(2024, 6), tom = YearMonth.of(2024, 7))
                 }
                 it.avkortetYtelseFraVirkningstidspunkt[1] shouldBe avkorting.aarsoppgjoer.avkortetYtelseAar[2]
             }
 
-            avkorting.medYtelseFraOgMedVirkningstidspunkt(virkningstidspunkt = YearMonth.of(2023, 9)).asClue {
+            avkorting.medYtelseFraOgMedVirkningstidspunkt(virkningstidspunkt = YearMonth.of(2024, 9)).asClue {
                 it.avkortetYtelseFraVirkningstidspunkt.size shouldBe 1
                 with(it.avkortetYtelseFraVirkningstidspunkt[0]) {
                     shouldBeEqualToIgnoringFields(avkorting.aarsoppgjoer.avkortetYtelseAar[2], AvkortetYtelse::periode)
-                    periode shouldBe Periode(fom = YearMonth.of(2023, 9), tom = null)
+                    periode shouldBe Periode(fom = YearMonth.of(2024, 9), tom = null)
                 }
             }
         }
@@ -90,7 +90,7 @@ internal class AvkortingTest {
 
     @Nested
     inner class KopierAvkorting {
-        private val virkningstidspunkt = YearMonth.of(2023, 7)
+        private val virkningstidspunkt = YearMonth.of(2024, 7)
         private val beregningId = UUID.randomUUID()
 
         private val eksisterendeAvkorting =
@@ -144,12 +144,12 @@ internal class AvkortingTest {
     inner class OppdaterMedInntektsgrunnlag {
         private val foersteGrunnlag =
             avkortinggrunnlag(
-                periode = Periode(fom = YearMonth.of(2023, 1), tom = YearMonth.of(2023, 3)),
+                periode = Periode(fom = YearMonth.of(2024, 1), tom = YearMonth.of(2024, 3)),
             )
         private val andreGrunnlag =
             avkortinggrunnlag(
                 aarsinntekt = 1000000,
-                periode = Periode(fom = YearMonth.of(2023, 4), tom = null),
+                periode = Periode(fom = YearMonth.of(2024, 4), tom = null),
             )
         private val avkorting =
             avkorting(
@@ -180,7 +180,7 @@ internal class AvkortingTest {
 
         @Test
         fun `Eksisterer ikke grunnlag skal det legges til og til og med paa periode til siste grunnlag skal settes`() {
-            val nyttGrunnlag = avkortinggrunnlag(periode = Periode(fom = YearMonth.of(2023, 8), tom = null))
+            val nyttGrunnlag = avkortinggrunnlag(periode = Periode(fom = YearMonth.of(2024, 8), tom = null))
 
             val oppdatertAvkorting = avkorting.oppdaterMedInntektsgrunnlag(nyttGrunnlag)
 
@@ -193,7 +193,7 @@ internal class AvkortingTest {
                 size shouldBe 3
                 get(0).grunnlag shouldBe foersteGrunnlag
                 get(1).grunnlag.shouldBeEqualToIgnoringFields(andreGrunnlag, AvkortingGrunnlag::periode)
-                get(1).grunnlag.periode shouldBe Periode(fom = YearMonth.of(2023, 4), tom = YearMonth.of(2023, 7))
+                get(1).grunnlag.periode shouldBe Periode(fom = YearMonth.of(2024, 4), tom = YearMonth.of(2024, 7))
                 get(2).grunnlag shouldBe nyttGrunnlag
             }
         }
@@ -208,11 +208,11 @@ internal class AvkortingTest {
                 size shouldBe 2
                 get(0).shouldBeEqualToIgnoringFields(
                     avkortetYtelse(
-                        periode = Periode(fom = YearMonth.of(2023, 3), tom = YearMonth.of(2023, 4)),
-                        ytelseEtterAvkorting = 6516,
-                        ytelseEtterAvkortingFoerRestanse = 6516,
+                        periode = Periode(fom = YearMonth.of(2024, 3), tom = YearMonth.of(2024, 4)),
+                        ytelseEtterAvkorting = 6650,
+                        ytelseEtterAvkortingFoerRestanse = 6650,
                         restanse = null,
-                        avkortingsbeloep = 9160,
+                        avkortingsbeloep = 9026,
                         ytelseFoerAvkorting = 15676,
                         type = AvkortetYtelseType.AARSOPPGJOER,
                         inntektsgrunnlag = null,
@@ -224,7 +224,7 @@ internal class AvkortingTest {
                 )
                 get(1).shouldBeEqualToIgnoringFields(
                     avkortetYtelse(
-                        periode = Periode(fom = YearMonth.of(2023, 5), tom = null),
+                        periode = Periode(fom = YearMonth.of(2024, 5), tom = null),
                         ytelseEtterAvkorting = 7656,
                         ytelseEtterAvkortingFoerRestanse = 7656,
                         restanse = null,
@@ -250,10 +250,10 @@ internal class AvkortingTest {
                     it.shouldBeEqualToIgnoringFields(
                         avkortetYtelse(
                             type = AvkortetYtelseType.AARSOPPGJOER,
-                            periode = Periode(fom = YearMonth.of(2023, 3), tom = YearMonth.of(2023, 4)),
-                            ytelseEtterAvkorting = 6516,
-                            ytelseEtterAvkortingFoerRestanse = 6516,
-                            avkortingsbeloep = 9160,
+                            periode = Periode(fom = YearMonth.of(2024, 3), tom = YearMonth.of(2024, 4)),
+                            ytelseEtterAvkorting = 6650,
+                            ytelseEtterAvkortingFoerRestanse = 6650,
+                            avkortingsbeloep = 9026,
                             ytelseFoerAvkorting = 15676,
                             inntektsgrunnlag = null,
                         ),
@@ -269,7 +269,7 @@ internal class AvkortingTest {
                     it.shouldBeEqualToIgnoringFields(
                         avkortetYtelse(
                             type = AvkortetYtelseType.AARSOPPGJOER,
-                            periode = Periode(fom = YearMonth.of(2023, 5), tom = YearMonth.of(2023, 6)),
+                            periode = Periode(fom = YearMonth.of(2024, 5), tom = YearMonth.of(2024, 6)),
                             ytelseEtterAvkorting = 7656,
                             ytelseEtterAvkortingFoerRestanse = 7656,
                             avkortingsbeloep = 9026,
@@ -288,7 +288,7 @@ internal class AvkortingTest {
                     it.shouldBeEqualToIgnoringFields(
                         avkortetYtelse(
                             type = AvkortetYtelseType.AARSOPPGJOER,
-                            periode = Periode(fom = YearMonth.of(2023, 7), tom = null),
+                            periode = Periode(fom = YearMonth.of(2024, 7), tom = null),
                             ytelseEtterAvkorting = 156,
                             ytelseEtterAvkortingFoerRestanse = 3156,
                             avkortingsbeloep = 13526,
@@ -324,10 +324,10 @@ internal class AvkortingTest {
                     it.shouldBeEqualToIgnoringFields(
                         avkortetYtelse(
                             type = AvkortetYtelseType.AARSOPPGJOER,
-                            periode = Periode(fom = YearMonth.of(2023, 3), tom = YearMonth.of(2023, 4)),
-                            ytelseEtterAvkorting = 6516,
-                            ytelseEtterAvkortingFoerRestanse = 6516,
-                            avkortingsbeloep = 9160,
+                            periode = Periode(fom = YearMonth.of(2024, 3), tom = YearMonth.of(2024, 4)),
+                            ytelseEtterAvkorting = 6650,
+                            ytelseEtterAvkortingFoerRestanse = 6650,
+                            avkortingsbeloep = 9026,
                             ytelseFoerAvkorting = 15676,
                             inntektsgrunnlag = null,
                         ),
@@ -343,7 +343,7 @@ internal class AvkortingTest {
                     it.shouldBeEqualToIgnoringFields(
                         avkortetYtelse(
                             type = AvkortetYtelseType.AARSOPPGJOER,
-                            periode = Periode(fom = YearMonth.of(2023, 5), tom = YearMonth.of(2023, 6)),
+                            periode = Periode(fom = YearMonth.of(2024, 5), tom = YearMonth.of(2024, 6)),
                             ytelseEtterAvkorting = 7656,
                             ytelseEtterAvkortingFoerRestanse = 7656,
                             avkortingsbeloep = 9026,
@@ -362,7 +362,7 @@ internal class AvkortingTest {
                     it.shouldBeEqualToIgnoringFields(
                         avkortetYtelse(
                             type = AvkortetYtelseType.AARSOPPGJOER,
-                            periode = Periode(fom = YearMonth.of(2023, 7), tom = YearMonth.of(2023, 8)),
+                            periode = Periode(fom = YearMonth.of(2024, 7), tom = YearMonth.of(2024, 8)),
                             ytelseEtterAvkorting = 156,
                             ytelseEtterAvkortingFoerRestanse = 3156,
                             avkortingsbeloep = 13526,
@@ -390,7 +390,7 @@ internal class AvkortingTest {
                     it.shouldBeEqualToIgnoringFields(
                         avkortetYtelse(
                             type = AvkortetYtelseType.AARSOPPGJOER,
-                            periode = Periode(fom = YearMonth.of(2023, 9), tom = null),
+                            periode = Periode(fom = YearMonth.of(2024, 9), tom = null),
                             ytelseEtterAvkorting = 0,
                             ytelseEtterAvkortingFoerRestanse = 906,
                             avkortingsbeloep = 15776,
@@ -405,8 +405,8 @@ internal class AvkortingTest {
                     )
                     it.restanse!!.shouldBeEqualToIgnoringFields(
                         restanse(
-                            totalRestanse = 25032,
-                            fordeltRestanse = 6258,
+                            totalRestanse = 25300,
+                            fordeltRestanse = 6325,
                         ),
                         Restanse::id,
                         AvkortetYtelse::tidspunkt,
@@ -426,11 +426,11 @@ internal class AvkortingTest {
                     it.shouldBeEqualToIgnoringFields(
                         avkortetYtelse(
                             type = AvkortetYtelseType.AARSOPPGJOER,
-                            periode = Periode(fom = YearMonth.of(2023, 3), tom = YearMonth.of(2023, 4)),
-                            ytelseEtterAvkorting = 11742,
-                            ytelseEtterAvkortingFoerRestanse = 11742,
-                            avkortingsbeloep = 9160,
-                            ytelseFoerAvkorting = 20902,
+                            periode = Periode(fom = YearMonth.of(2024, 3), tom = YearMonth.of(2024, 4)),
+                            ytelseEtterAvkorting = 13215,
+                            ytelseEtterAvkortingFoerRestanse = 13215,
+                            avkortingsbeloep = 9026,
+                            ytelseFoerAvkorting = 22241,
                             inntektsgrunnlag = null,
                         ),
                         AvkortetYtelse::id,
@@ -445,7 +445,7 @@ internal class AvkortingTest {
                     it.shouldBeEqualToIgnoringFields(
                         avkortetYtelse(
                             type = AvkortetYtelseType.AARSOPPGJOER,
-                            periode = Periode(fom = YearMonth.of(2023, 5), tom = YearMonth.of(2023, 6)),
+                            periode = Periode(fom = YearMonth.of(2024, 5), tom = YearMonth.of(2024, 6)),
                             ytelseEtterAvkorting = 13215,
                             ytelseEtterAvkortingFoerRestanse = 13215,
                             avkortingsbeloep = 9026,
@@ -464,7 +464,7 @@ internal class AvkortingTest {
                     it.shouldBeEqualToIgnoringFields(
                         avkortetYtelse(
                             type = AvkortetYtelseType.AARSOPPGJOER,
-                            periode = Periode(fom = YearMonth.of(2023, 7), tom = YearMonth.of(2023, 8)),
+                            periode = Periode(fom = YearMonth.of(2024, 7), tom = YearMonth.of(2024, 8)),
                             ytelseEtterAvkorting = 5715,
                             ytelseEtterAvkortingFoerRestanse = 8715,
                             avkortingsbeloep = 13526,
@@ -492,7 +492,7 @@ internal class AvkortingTest {
                     it.shouldBeEqualToIgnoringFields(
                         avkortetYtelse(
                             type = AvkortetYtelseType.AARSOPPGJOER,
-                            periode = Periode(fom = YearMonth.of(2023, 9), tom = null),
+                            periode = Periode(fom = YearMonth.of(2024, 9), tom = null),
                             ytelseEtterAvkorting = 90,
                             ytelseEtterAvkortingFoerRestanse = 6465,
                             avkortingsbeloep = 15776,
@@ -528,11 +528,11 @@ internal class AvkortingTest {
                     it.shouldBeEqualToIgnoringFields(
                         avkortetYtelse(
                             type = AvkortetYtelseType.AARSOPPGJOER,
-                            periode = Periode(fom = YearMonth.of(2023, 3), tom = YearMonth.of(2023, 4)),
-                            ytelseEtterAvkorting = 11742,
-                            ytelseEtterAvkortingFoerRestanse = 11742,
-                            avkortingsbeloep = 9160,
-                            ytelseFoerAvkorting = 20902,
+                            periode = Periode(fom = YearMonth.of(2024, 3), tom = YearMonth.of(2024, 4)),
+                            ytelseEtterAvkorting = 13215,
+                            ytelseEtterAvkortingFoerRestanse = 13215,
+                            avkortingsbeloep = 9026,
+                            ytelseFoerAvkorting = 22241,
                             inntektsgrunnlag = null,
                         ),
                         AvkortetYtelse::id,
@@ -547,7 +547,7 @@ internal class AvkortingTest {
                     it.shouldBeEqualToIgnoringFields(
                         avkortetYtelse(
                             type = AvkortetYtelseType.AARSOPPGJOER,
-                            periode = Periode(fom = YearMonth.of(2023, 5), tom = YearMonth.of(2023, 6)),
+                            periode = Periode(fom = YearMonth.of(2024, 5), tom = YearMonth.of(2024, 6)),
                             ytelseEtterAvkorting = 13215,
                             ytelseEtterAvkortingFoerRestanse = 13215,
                             avkortingsbeloep = 9026,
@@ -566,7 +566,7 @@ internal class AvkortingTest {
                     it.shouldBeEqualToIgnoringFields(
                         avkortetYtelse(
                             type = AvkortetYtelseType.AARSOPPGJOER,
-                            periode = Periode(fom = YearMonth.of(2023, 7), tom = YearMonth.of(2023, 8)),
+                            periode = Periode(fom = YearMonth.of(2024, 7), tom = YearMonth.of(2024, 8)),
                             ytelseEtterAvkorting = 5715,
                             ytelseEtterAvkortingFoerRestanse = 8715,
                             avkortingsbeloep = 13526,
@@ -594,7 +594,7 @@ internal class AvkortingTest {
                     it.shouldBeEqualToIgnoringFields(
                         avkortetYtelse(
                             type = AvkortetYtelseType.AARSOPPGJOER,
-                            periode = Periode(fom = YearMonth.of(2023, 9), tom = null),
+                            periode = Periode(fom = YearMonth.of(2024, 9), tom = null),
                             ytelseEtterAvkorting = 2903,
                             ytelseEtterAvkortingFoerRestanse = 7590,
                             avkortingsbeloep = 14651,
@@ -630,11 +630,11 @@ internal class AvkortingTest {
                     it.shouldBeEqualToIgnoringFields(
                         avkortetYtelse(
                             type = AvkortetYtelseType.AARSOPPGJOER,
-                            periode = Periode(fom = YearMonth.of(2023, 3), tom = YearMonth.of(2023, 3)),
-                            ytelseEtterAvkorting = 11742,
-                            ytelseEtterAvkortingFoerRestanse = 11742,
-                            avkortingsbeloep = 9160,
-                            ytelseFoerAvkorting = 20902,
+                            periode = Periode(fom = YearMonth.of(2024, 3), tom = YearMonth.of(2024, 3)),
+                            ytelseEtterAvkorting = 13215,
+                            ytelseEtterAvkortingFoerRestanse = 13215,
+                            avkortingsbeloep = 9026,
+                            ytelseFoerAvkorting = 22241,
                             inntektsgrunnlag = null,
                         ),
                         AvkortetYtelse::id,
@@ -649,11 +649,11 @@ internal class AvkortingTest {
                     it.shouldBeEqualToIgnoringFields(
                         avkortetYtelse(
                             type = AvkortetYtelseType.AARSOPPGJOER,
-                            periode = Periode(fom = YearMonth.of(2023, 4), tom = YearMonth.of(2023, 4)),
-                            ytelseEtterAvkorting = 11742,
-                            ytelseEtterAvkortingFoerRestanse = 11742,
-                            avkortingsbeloep = 9160,
-                            ytelseFoerAvkorting = 20902,
+                            periode = Periode(fom = YearMonth.of(2024, 4), tom = YearMonth.of(2024, 4)),
+                            ytelseEtterAvkorting = 13215,
+                            ytelseEtterAvkortingFoerRestanse = 13215,
+                            avkortingsbeloep = 9026,
+                            ytelseFoerAvkorting = 22241,
                             inntektsgrunnlag = null,
                         ),
                         AvkortetYtelse::id,
@@ -668,7 +668,7 @@ internal class AvkortingTest {
                     it.shouldBeEqualToIgnoringFields(
                         avkortetYtelse(
                             type = AvkortetYtelseType.AARSOPPGJOER,
-                            periode = Periode(fom = YearMonth.of(2023, 5), tom = YearMonth.of(2023, 6)),
+                            periode = Periode(fom = YearMonth.of(2024, 5), tom = YearMonth.of(2024, 6)),
                             ytelseEtterAvkorting = 13215,
                             ytelseEtterAvkortingFoerRestanse = 13215,
                             avkortingsbeloep = 9026,
@@ -687,7 +687,7 @@ internal class AvkortingTest {
                     it.shouldBeEqualToIgnoringFields(
                         avkortetYtelse(
                             type = AvkortetYtelseType.AARSOPPGJOER,
-                            periode = Periode(fom = YearMonth.of(2023, 7), tom = YearMonth.of(2023, 8)),
+                            periode = Periode(fom = YearMonth.of(2024, 7), tom = YearMonth.of(2024, 8)),
                             ytelseEtterAvkorting = 5715,
                             ytelseEtterAvkortingFoerRestanse = 8715,
                             avkortingsbeloep = 13526,
@@ -715,7 +715,7 @@ internal class AvkortingTest {
                     it.shouldBeEqualToIgnoringFields(
                         avkortetYtelse(
                             type = AvkortetYtelseType.AARSOPPGJOER,
-                            periode = Periode(fom = YearMonth.of(2023, 9), tom = null),
+                            periode = Periode(fom = YearMonth.of(2024, 9), tom = null),
                             ytelseEtterAvkorting = 2903,
                             ytelseEtterAvkortingFoerRestanse = 7590,
                             avkortingsbeloep = 14651,
@@ -747,7 +747,7 @@ internal class AvkortingTest {
                 .beregnAvkortingMedNyttGrunnlag(
                     nyttGrunnlag =
                         avkortinggrunnlag(
-                            periode = Periode(fom = YearMonth.of(2023, 3), tom = null),
+                            periode = Periode(fom = YearMonth.of(2024, 3), tom = null),
                             aarsinntekt = 300000,
                             fratrekkInnAar = 50000,
                             relevanteMaanederInnAar = 10,
@@ -758,12 +758,12 @@ internal class AvkortingTest {
                             beregninger =
                                 listOf(
                                     beregningsperiode(
-                                        datoFOM = YearMonth.of(2023, 3),
-                                        datoTOM = YearMonth.of(2023, 4),
+                                        datoFOM = YearMonth.of(2024, 3),
+                                        datoTOM = YearMonth.of(2024, 4),
                                         utbetaltBeloep = 15676,
                                     ),
                                     beregningsperiode(
-                                        datoFOM = YearMonth.of(2023, 5),
+                                        datoFOM = YearMonth.of(2024, 5),
                                         utbetaltBeloep = 16682,
                                     ),
                                 ),
@@ -777,7 +777,7 @@ internal class AvkortingTest {
                     nyttGrunnlag =
                         avkortinggrunnlag(
                             id = UUID.randomUUID(),
-                            periode = Periode(fom = YearMonth.of(2023, 7), tom = null),
+                            periode = Periode(fom = YearMonth.of(2024, 7), tom = null),
                             aarsinntekt = 400000,
                             fratrekkInnAar = 50000,
                             relevanteMaanederInnAar = 10,
@@ -788,7 +788,7 @@ internal class AvkortingTest {
                             beregninger =
                                 listOf(
                                     beregningsperiode(
-                                        datoFOM = YearMonth.of(2023, 7),
+                                        datoFOM = YearMonth.of(2024, 7),
                                         utbetaltBeloep = 16682,
                                     ),
                                 ),
@@ -802,7 +802,7 @@ internal class AvkortingTest {
                     nyttGrunnlag =
                         avkortinggrunnlag(
                             id = UUID.randomUUID(),
-                            periode = Periode(fom = YearMonth.of(2023, 9), tom = null),
+                            periode = Periode(fom = YearMonth.of(2024, 9), tom = null),
                             aarsinntekt = 450000,
                             fratrekkInnAar = 50000,
                             relevanteMaanederInnAar = 10,
@@ -813,7 +813,7 @@ internal class AvkortingTest {
                             beregninger =
                                 listOf(
                                     beregningsperiode(
-                                        datoFOM = YearMonth.of(2023, 9),
+                                        datoFOM = YearMonth.of(2024, 9),
                                         utbetaltBeloep = 16682,
                                     ),
                                 ),
@@ -828,12 +828,12 @@ internal class AvkortingTest {
                         beregninger =
                             listOf(
                                 beregningsperiode(
-                                    datoFOM = YearMonth.of(2023, 3),
-                                    datoTOM = YearMonth.of(2023, 4),
-                                    utbetaltBeloep = 20902,
+                                    datoFOM = YearMonth.of(2024, 3),
+                                    datoTOM = YearMonth.of(2024, 4),
+                                    utbetaltBeloep = 22241,
                                 ),
                                 beregningsperiode(
-                                    datoFOM = YearMonth.of(2023, 5),
+                                    datoFOM = YearMonth.of(2024, 5),
                                     utbetaltBeloep = 22241,
                                 ),
                             ),
@@ -847,7 +847,7 @@ internal class AvkortingTest {
                         nyttGrunnlag =
                             avkortinggrunnlag(
                                 id = it.aarsoppgjoer.inntektsavkorting.last().grunnlag.id,
-                                periode = Periode(fom = YearMonth.of(2023, 9), tom = null),
+                                periode = Periode(fom = YearMonth.of(2024, 9), tom = null),
                                 aarsinntekt = 425000,
                                 fratrekkInnAar = 50000,
                                 relevanteMaanederInnAar = 10,
@@ -857,7 +857,7 @@ internal class AvkortingTest {
                             beregninger =
                                 listOf(
                                     beregningsperiode(
-                                        datoFOM = YearMonth.of(2023, 9),
+                                        datoFOM = YearMonth.of(2024, 9),
                                         utbetaltBeloep = 22241,
                                     ),
                                 ),
@@ -873,12 +873,12 @@ internal class AvkortingTest {
                         beregninger =
                             listOf(
                                 beregningsperiode(
-                                    datoFOM = YearMonth.of(2023, 4),
-                                    datoTOM = YearMonth.of(2023, 4),
-                                    utbetaltBeloep = 20902,
+                                    datoFOM = YearMonth.of(2024, 4),
+                                    datoTOM = YearMonth.of(2024, 4),
+                                    utbetaltBeloep = 22241,
                                 ),
                                 beregningsperiode(
-                                    datoFOM = YearMonth.of(2023, 5),
+                                    datoFOM = YearMonth.of(2024, 5),
                                     utbetaltBeloep = 22241,
                                 ),
                             ),

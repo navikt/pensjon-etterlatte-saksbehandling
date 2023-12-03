@@ -1,6 +1,6 @@
 package no.nav.etterlatte.avkorting.regler
 
-import no.nav.etterlatte.beregning.regler.omstillingstoenad.OMS_GYLDIG_FROM_TEST
+import no.nav.etterlatte.beregning.regler.omstillingstoenad.OMS_GYLDIG_FRA
 import no.nav.etterlatte.libs.regler.FaktumNode
 import no.nav.etterlatte.libs.regler.KonstantGrunnlag
 import no.nav.etterlatte.libs.regler.PeriodisertGrunnlag
@@ -41,7 +41,7 @@ data class AvkortetYtelseGrunnlag(
 
 val beregningsbeloep: Regel<AvkortetYtelseGrunnlag, Int> =
     finnFaktumIGrunnlag(
-        gjelderFra = OMS_GYLDIG_FROM_TEST,
+        gjelderFra = OMS_GYLDIG_FRA,
         beskrivelse = "Finner beregnet ytelse før avkorting",
         finnFaktum = AvkortetYtelseGrunnlag::beregning,
         finnFelt = { it },
@@ -49,7 +49,7 @@ val beregningsbeloep: Regel<AvkortetYtelseGrunnlag, Int> =
 
 val avkortingsbeloep: Regel<AvkortetYtelseGrunnlag, Int> =
     finnFaktumIGrunnlag(
-        gjelderFra = OMS_GYLDIG_FROM_TEST,
+        gjelderFra = OMS_GYLDIG_FRA,
         beskrivelse = "Finner avkortignsbeløp",
         finnFaktum = AvkortetYtelseGrunnlag::avkorting,
         finnFelt = { it },
@@ -57,7 +57,7 @@ val avkortingsbeloep: Regel<AvkortetYtelseGrunnlag, Int> =
 
 val fordeltRestanseGrunnlag: Regel<AvkortetYtelseGrunnlag, Int> =
     finnFaktumIGrunnlag(
-        gjelderFra = OMS_GYLDIG_FROM_TEST,
+        gjelderFra = OMS_GYLDIG_FRA,
         beskrivelse = "Restanse fordelt over gjenværende måneder for gjeldende år",
         finnFaktum = AvkortetYtelseGrunnlag::fordeltRestanse,
         finnFelt = { it },
@@ -65,7 +65,7 @@ val fordeltRestanseGrunnlag: Regel<AvkortetYtelseGrunnlag, Int> =
 
 val avkorteYtelse =
     RegelMeta(
-        gjelderFra = OMS_GYLDIG_FROM_TEST,
+        gjelderFra = OMS_GYLDIG_FRA,
         beskrivelse = "Finner endelig ytelse ved å trekke avkortingsbeløp fra beregnet ytelse",
         regelReferanse = RegelReferanse(id = "REGEL-AVKORTET-YTELSE"),
     ) benytter beregningsbeloep og avkortingsbeloep med { beregningsbeloep, avkortingsbeloep ->
@@ -74,7 +74,7 @@ val avkorteYtelse =
 
 val avkortetYtelseMedRestanse =
     RegelMeta(
-        gjelderFra = OMS_GYLDIG_FROM_TEST,
+        gjelderFra = OMS_GYLDIG_FRA,
         beskrivelse = "Legger til restanse fra endret avkorting til tidligere måneder",
         regelReferanse = RegelReferanse(id = "REGEL-AVKORTET-YTELSE-MED-RESTANSE"),
     ) benytter avkorteYtelse og fordeltRestanseGrunnlag med { avkorteYtelse, fordeltRestanse ->

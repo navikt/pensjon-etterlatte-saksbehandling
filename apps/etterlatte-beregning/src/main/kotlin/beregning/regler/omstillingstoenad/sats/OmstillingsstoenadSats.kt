@@ -1,6 +1,6 @@
 package no.nav.etterlatte.beregning.regler.omstillingstoenad.sats
 
-import no.nav.etterlatte.beregning.regler.omstillingstoenad.OMS_GYLDIG_FROM_TEST
+import no.nav.etterlatte.beregning.regler.omstillingstoenad.OMS_GYLDIG_FRA
 import no.nav.etterlatte.beregning.regler.omstillingstoenad.OmstillingstoenadGrunnlag
 import no.nav.etterlatte.grunnbeloep.Grunnbeloep
 import no.nav.etterlatte.grunnbeloep.GrunnbeloepRepository
@@ -27,14 +27,14 @@ val historiskeGrunnbeloep =
 
 val grunnbeloep: Regel<OmstillingstoenadGrunnlag, Grunnbeloep> =
     RegelMeta(
-        gjelderFra = OMS_GYLDIG_FROM_TEST,
+        gjelderFra = OMS_GYLDIG_FRA,
         beskrivelse = "Finner grunnbeløp for periode i beregning",
         regelReferanse = RegelReferanse(id = "REGEL-GRUNNBELOEP"),
     ) velgNyesteGyldige historiskeGrunnbeloep
 
 val faktorKonstant =
     definerKonstant<OmstillingstoenadGrunnlag, Beregningstall>(
-        gjelderFra = OMS_GYLDIG_FROM_TEST,
+        gjelderFra = OMS_GYLDIG_FRA,
         beskrivelse = "Faktor for omstillingsstønad",
         regelReferanse = RegelReferanse(id = "OMS-BEREGNING-2024-FAKTOR"),
         verdi = Beregningstall(2.25),
@@ -42,7 +42,7 @@ val faktorKonstant =
 
 val omstillingstoenadSatsRegel =
     RegelMeta(
-        gjelderFra = OMS_GYLDIG_FROM_TEST,
+        gjelderFra = OMS_GYLDIG_FRA,
         beskrivelse = "Beregn sats for omstillingsstønad",
         regelReferanse = RegelReferanse(id = "OMS-BEREGNING-2024-SATS"),
     ) benytter faktorKonstant og grunnbeloep med { faktor, grunnbeloep ->

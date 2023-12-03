@@ -13,7 +13,7 @@ class AvkortetYtelseTest {
         val avkortetYtelse =
             avkortetYtelseMedRestanse.anvend(
                 avkortetYtelseGrunnlag(beregning = 100000, avkorting = 50000),
-                RegelPeriode(LocalDate.of(2023, 1, 1)),
+                RegelPeriode(LocalDate.of(2024, 1, 1)),
             )
         avkortetYtelse.verdi shouldBe 50000
     }
@@ -23,7 +23,7 @@ class AvkortetYtelseTest {
         val avkortetYtelse =
             avkortetYtelseMedRestanse.anvend(
                 avkortetYtelseGrunnlag(beregning = 50000, avkorting = 100000),
-                RegelPeriode(LocalDate.of(2023, 1, 1)),
+                RegelPeriode(LocalDate.of(2024, 1, 1)),
             )
         avkortetYtelse.verdi shouldBe 0
     }

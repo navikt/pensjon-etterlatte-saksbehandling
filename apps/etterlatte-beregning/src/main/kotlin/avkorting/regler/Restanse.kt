@@ -1,6 +1,6 @@
 package no.nav.etterlatte.avkorting.regler
 
-import no.nav.etterlatte.beregning.regler.omstillingstoenad.OMS_GYLDIG_FROM_TEST
+import no.nav.etterlatte.beregning.regler.omstillingstoenad.OMS_GYLDIG_FRA
 import no.nav.etterlatte.libs.regler.FaktumNode
 import no.nav.etterlatte.libs.regler.Regel
 import no.nav.etterlatte.libs.regler.RegelMeta
@@ -20,7 +20,7 @@ data class RestanseGrunnlag(
 
 val tidligereYtelse: Regel<RestanseGrunnlag, List<Int>> =
     finnFaktumIGrunnlag(
-        gjelderFra = OMS_GYLDIG_FROM_TEST,
+        gjelderFra = OMS_GYLDIG_FRA,
         beskrivelse = "Finner tidligere ytelse etter avkorting",
         finnFaktum = RestanseGrunnlag::tidligereYtelseEtterAvkorting,
         finnFelt = { it },
@@ -28,14 +28,14 @@ val tidligereYtelse: Regel<RestanseGrunnlag, List<Int>> =
 
 val nyYtelse: Regel<RestanseGrunnlag, List<Int>> =
     finnFaktumIGrunnlag(
-        gjelderFra = OMS_GYLDIG_FROM_TEST,
+        gjelderFra = OMS_GYLDIG_FRA,
         beskrivelse = "Finner ny forventet ytelse etter avkorting",
         finnFaktum = RestanseGrunnlag::nyForventetYtelseEtterAvkorting,
         finnFelt = { it },
     )
 val virkningstidspunkt: Regel<RestanseGrunnlag, YearMonth> =
     finnFaktumIGrunnlag(
-        gjelderFra = OMS_GYLDIG_FROM_TEST,
+        gjelderFra = OMS_GYLDIG_FRA,
         beskrivelse = "Virkningstidspunkt til restanse skal gjelde fra",
         finnFaktum = RestanseGrunnlag::fraOgMedNyForventetInntekt,
         finnFelt = { it },
@@ -43,7 +43,7 @@ val virkningstidspunkt: Regel<RestanseGrunnlag, YearMonth> =
 
 val totalRestanse =
     RegelMeta(
-        gjelderFra = OMS_GYLDIG_FROM_TEST,
+        gjelderFra = OMS_GYLDIG_FRA,
         beskrivelse = "Beregner restanse etter endret ytelse etter avkorting på grunn av endret årsinntekt",
         regelReferanse = RegelReferanse("TOTAL-RESTANSE-INNTEKTSENDRING"),
     ) benytter tidligereYtelse og nyYtelse med { tidligereYtelse, nyYtelse ->
@@ -52,7 +52,7 @@ val totalRestanse =
 
 val gjenvaerendeMaaneder =
     RegelMeta(
-        gjelderFra = OMS_GYLDIG_FROM_TEST,
+        gjelderFra = OMS_GYLDIG_FRA,
         beskrivelse = "Beregner hvor mange måneder som gjenstår i gjeldende år fra nytt virkningstidspunkt",
         regelReferanse = RegelReferanse("GJENVAERENDE-MAANEDER-FOR-FORDELT-RESTANSE"),
     ) benytter virkningstidspunkt med { virkningstidspunkt ->
@@ -63,7 +63,7 @@ val gjenvaerendeMaaneder =
 
 val fordeltRestanse =
     RegelMeta(
-        gjelderFra = OMS_GYLDIG_FROM_TEST,
+        gjelderFra = OMS_GYLDIG_FRA,
         beskrivelse = "Fordeler oppsummert restanse over gjenværende måneder av gjeldende år",
         regelReferanse = RegelReferanse("FORDELT-RESTANSE-INNTEKTSENDRING"),
     ) benytter totalRestanse og gjenvaerendeMaaneder med { sumRestanse, gjenvaerendeMaaneder ->
@@ -72,7 +72,7 @@ val fordeltRestanse =
 
 val restanse =
     RegelMeta(
-        gjelderFra = OMS_GYLDIG_FROM_TEST,
+        gjelderFra = OMS_GYLDIG_FRA,
         beskrivelse = "Beregner restanse etter endret ytelse etter avkorting på grunn av endret årsinntekt",
         regelReferanse = RegelReferanse("RESTANSE-INNTEKTSENDRING"),
     ) benytter totalRestanse og fordeltRestanse med { totalRestanse, fordeltRestanse ->

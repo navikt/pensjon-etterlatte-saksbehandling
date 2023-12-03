@@ -14,14 +14,14 @@ import no.nav.etterlatte.regler.Beregningstall
 
 val institusjonsoppholdRegelOMS: Regel<OmstillingstoenadGrunnlag, Prosent> =
     finnFaktumIGrunnlag(
-        gjelderFra = OMS_GYLDIG_FROM_TEST,
+        gjelderFra = OMS_GYLDIG_FRA,
         beskrivelse = "Finner % av G mottaker skal ha for denne institusjonsoppholdytelsen",
         finnFaktum = OmstillingstoenadGrunnlag::institusjonsopphold,
     ) { it?.prosentEtterReduksjon() ?: Prosent.hundre }
 
 val erBrukerIInstitusjonOMS: Regel<OmstillingstoenadGrunnlag, Boolean> =
     finnFaktumIGrunnlag(
-        gjelderFra = OMS_GYLDIG_FROM_TEST,
+        gjelderFra = OMS_GYLDIG_FRA,
         beskrivelse = "Finner om bruker har et institusjonsopphold",
         finnFaktum = OmstillingstoenadGrunnlag::institusjonsopphold,
     ) {
@@ -30,7 +30,7 @@ val erBrukerIInstitusjonOMS: Regel<OmstillingstoenadGrunnlag, Boolean> =
 
 val institusjonsoppholdSatsRegelOMS =
     RegelMeta(
-        gjelderFra = OMS_GYLDIG_FROM_TEST,
+        gjelderFra = OMS_GYLDIG_FRA,
         beskrivelse = "Finner satsen for institusjonsoppholdberegning",
         regelReferanse = RegelReferanse(id = "Finner sats for bruker, gitt at de skal ha institusjonsoppholdsats"),
     ) benytter grunnbeloep og institusjonsoppholdRegelOMS og faktorKonstant med { grunnbeloep, prosent, faktor ->

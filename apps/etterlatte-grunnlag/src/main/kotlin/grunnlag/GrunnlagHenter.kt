@@ -139,7 +139,7 @@ class GrunnlagHenter(
         registersReferanse: String,
     ): Grunnlagsopplysning<JsonNode> {
         val pdlVergeFoedselsnummer = relevantVerge.vergeEllerFullmektig.motpartsPersonident!!.value
-        return vergesAdresseInfo.toBrevMottaker()
+        return vergesAdresseInfo.tilFrittstaendeBrevMottaker()
             .copy(
                 foedselsnummer = Foedselsnummer(pdlVergeFoedselsnummer),
             ).tilGrunnlagsopplysning(registersReferanse)
@@ -188,9 +188,12 @@ class GrunnlagHenter(
             },
         )
 
-    private fun hentVergensAdresseGittVergehaver(foedselsnummer: String) = persondataKlient.hentAdresseForVerge(foedselsnummer)
+    private fun hentVergensAdresseGittVergehaver(foedselsnummer: String) =
+        persondataKlient.hentVergeadresseGittVergehaversFnr(
+            foedselsnummer,
+        )
 
-    private fun hentAdresseGittFoedselsnummer(foedselsnummer: String) = persondataKlient.hentAdresse(foedselsnummer)
+    private fun hentAdresseGittFoedselsnummer(foedselsnummer: String) = persondataKlient.hentAdresseGittFnr(foedselsnummer)
 
     private fun BrevMottaker.tilGrunnlagsopplysning(registersReferanse: String?): Grunnlagsopplysning<JsonNode> =
         Grunnlagsopplysning(

@@ -82,9 +82,9 @@ class GrunnlagHenterTest {
         } returns grunnlagTestData.hentPersonGalleri()
 
         val persondataAdresseVerge = mockk<PersondataAdresse>()
-        every { persondataAdresseVerge.toBrevMottaker() } returns sampleVergeAdresse()
+        every { persondataAdresseVerge.tilFrittstaendeBrevMottaker() } returns sampleVergeAdresse()
         every {
-            persondataKlient.hentAdresseForVerge(soekerFnr.value)
+            persondataKlient.hentVergeadresseGittVergehaversFnr(soekerFnr.value)
         } returns persondataAdresseVerge
 
         val fetched =

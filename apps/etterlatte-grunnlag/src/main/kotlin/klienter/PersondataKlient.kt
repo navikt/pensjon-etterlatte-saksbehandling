@@ -15,7 +15,6 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.grunnlag.adresse.PersondataAdresse
-import no.nav.etterlatte.grunnlag.adresse.RegoppslagResponseDTO
 import no.nav.etterlatte.libs.common.RetryResult
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
@@ -35,7 +34,7 @@ class PersondataKlient(private val httpClient: HttpClient, private val apiUrl: S
 
      * @see <a href="https://pensjon-dokumentasjon.intern.dev.nav.no/pensjon-persondata/main/index.html#_adresse_api">
      * Pensjondata dokumentasjon</a>. */
-    fun hentAdresseForVerge(vergehaverFnr: String): PersondataAdresse? {
+    fun hentVergeadresseGittVergehaversFnr(vergehaverFnr: String): PersondataAdresse? {
         try {
             val kontaktadresse = hentKontaktadresse(vergehaverFnr, true)
 
@@ -56,7 +55,7 @@ class PersondataKlient(private val httpClient: HttpClient, private val apiUrl: S
         }
     }
 
-    fun hentAdresse(foedselsnummer: String): PersondataAdresse? {
+    fun hentAdresseGittFnr(foedselsnummer: String): PersondataAdresse? {
         try {
             return hentKontaktadresse(foedselsnummer, false)
         } catch (e: ClientRequestException) {
@@ -72,12 +71,20 @@ class PersondataKlient(private val httpClient: HttpClient, private val apiUrl: S
     }
 
     private fun hentKontaktadresse(
-        vergehaverFnr: String,
+        foedselsnummer: String,
         checkForVerge: Boolean,
     ): PersondataAdresse {
         return runBlocking {
             retry(times = 3) {
-                fetchAndMapAdresse(checkForVerge, vergehaverFnr)
+                val jsonResponse: String =
+                    httpClient.get("$apiUrl/api/adresse/kontaktadresse") {
+                        parameter("checkForVerge", checkForVerge)
+                        header("pid", foedselsnummer)
+                        accept(Json)
+                        contentType(Json)
+                        setBody("")
+                    }.body<String>()
+                objectMapper.readValue<PersondataAdresse>(jsonResponse)
             }.let {
                 when (it) {
                     is RetryResult.Success -> it.content
@@ -85,46 +92,6 @@ class PersondataKlient(private val httpClient: HttpClient, private val apiUrl: S
                 }
             }
         }
-    }
-
-    private suspend fun fetchAndMapAdresse(
-        checkForVerge: Boolean,
-        vergehaverFnr: String,
-    ): PersondataAdresse {
-        val jsonResponse: String =
-            httpClient.get("$apiUrl/api/adresse/kontaktadresse") {
-                parameter("checkForVerge", checkForVerge)
-                header("pid", vergehaverFnr)
-                accept(Json)
-                contentType(Json)
-                setBody("")
-            }.body()
-
-        val persondataAdresse: PersondataAdresse = objectMapper.readValue(jsonResponse)
-
-        return when (persondataAdresse.type) {
-            "REGOPPSLAG_ADRESSE" -> toPersondataAdresse(objectMapper.readValue<RegoppslagResponseDTO>(jsonResponse))
-            else -> persondataAdresse
-        }
-    }
-
-    private fun toPersondataAdresse(regoppslagAdresse: RegoppslagResponseDTO): PersondataAdresse {
-        return PersondataAdresse(
-            adresselinjer =
-                listOfNotNull(
-                    regoppslagAdresse.adresse.adresselinje1,
-                    regoppslagAdresse.adresse.adresselinje2,
-                    regoppslagAdresse.adresse.adresselinje3,
-                ),
-            type = "REGOPPSLAG_ADRESSE",
-            land = regoppslagAdresse.adresse.land,
-            landkode = regoppslagAdresse.adresse.landkode,
-            navn = regoppslagAdresse.navn,
-            postnr = regoppslagAdresse.adresse.postnummer,
-            postnummer = regoppslagAdresse.adresse.postnummer,
-            poststed = regoppslagAdresse.adresse.poststed,
-            vergePid = null,
-        )
     }
 
     private fun erVergesAdresse(adresse: PersondataAdresse) =

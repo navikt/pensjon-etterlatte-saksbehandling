@@ -123,7 +123,7 @@ class RealGrunnlagService(
 
     override fun hentOpplysningsgrunnlagForSak(sakId: Long): Grunnlag? {
         val persongalleriJsonNode =
-            opplysningDao.finnNyesteGrunnlagForSak(sakId, Opplysningstype.PERSONGALLERI_V1)?.opplysning
+            opplysningDao.finnNyesteGrunnlagForSak(sakId, PERSONGALLERI_V1)?.opplysning
 
         if (persongalleriJsonNode == null) {
             logger.info("Klarte ikke å hente ut grunnlag for sak $sakId. Fant ikke persongalleri")
@@ -137,7 +137,7 @@ class RealGrunnlagService(
 
     override fun hentOpplysningsgrunnlag(behandlingId: UUID): Grunnlag? {
         val persongalleriJsonNode =
-            opplysningDao.finnNyesteGrunnlagForBehandling(behandlingId, Opplysningstype.PERSONGALLERI_V1)?.opplysning
+            opplysningDao.finnNyesteGrunnlagForBehandling(behandlingId, PERSONGALLERI_V1)?.opplysning
 
         if (persongalleriJsonNode == null) {
             logger.info("Klarte ikke å hente ut grunnlag for behandling (id=$behandlingId). Fant ikke persongalleri")
@@ -255,7 +255,7 @@ class RealGrunnlagService(
         sakType: SakType,
     ) {
         val persongalleriJsonNode =
-            opplysningDao.finnNyesteGrunnlagForSak(sakId, Opplysningstype.PERSONGALLERI_V1)?.opplysning
+            opplysningDao.finnNyesteGrunnlagForSak(sakId, PERSONGALLERI_V1)?.opplysning
 
         if (persongalleriJsonNode == null) {
             logger.info("Klarte ikke å hente ut grunnlag for sak $sakId. Fant ikke persongalleri")
@@ -297,8 +297,9 @@ class RealGrunnlagService(
     }
 
     override fun hentVergeadresse(folkeregisteridentifikator: String): BrevMottaker? {
-        return persondataKlient.hentAdresseForVerge(folkeregisteridentifikator)
-            ?.toBrevMottaker()
+        return persondataKlient
+            .hentVergeadresseGittVergehaversFnr(folkeregisteridentifikator)
+            ?.tilFrittstaendeBrevMottaker()
     }
 
     override fun hentPersongalleriSamsvar(behandlingId: UUID): PersongalleriSamsvar {

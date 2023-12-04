@@ -423,8 +423,14 @@ class RealGrunnlagService(
                 )
             }
         when (opplysning) {
-            null -> sporingslogg.logg(feilendeRequest(ident = fnr.value, navIdent = navIdent))
-            else -> sporingslogg.logg(vellykkaRequest(ident = fnr.value, navIdent = navIdent))
+            null -> {
+                sporingslogg.logg(feilendeRequest(ident = fnr.value, navIdent = navIdent))
+                logger.warn("Fant ikke navn for person i grunnlaget")
+            }
+            else -> {
+                sporingslogg.logg(vellykkaRequest(ident = fnr.value, navIdent = navIdent))
+                logger.debug("Fant navn for person i grunnlaget")
+            }
         }
         return opplysning
     }

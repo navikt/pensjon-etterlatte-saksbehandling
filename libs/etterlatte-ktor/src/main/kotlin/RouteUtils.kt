@@ -73,6 +73,7 @@ suspend inline fun PipelineContext<*, ApplicationCall>.withBehandlingId(
             if (harTilgangTilBehandling) {
                 onSuccess(behandlingId)
             } else {
+                application.log.info("Har ikke tilgang til behandling")
                 call.respond(HttpStatusCode.NotFound)
             }
         }
@@ -91,6 +92,7 @@ suspend inline fun PipelineContext<*, ApplicationCall>.withSakId(
             if (harTilgangTilSak) {
                 onSuccess(sakId)
             } else {
+                application.log.info("Har ikke tilgang til sak")
                 call.respond(HttpStatusCode.NotFound)
             }
         }

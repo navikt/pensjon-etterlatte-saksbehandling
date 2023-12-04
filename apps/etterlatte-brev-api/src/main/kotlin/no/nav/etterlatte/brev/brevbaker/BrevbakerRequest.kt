@@ -44,7 +44,7 @@ data class BrevbakerRequest(
     }
 }
 
-private fun Soeker.formaterNavn() = listOfNotNull(fornavn, mellomnavn, etternavn).joinToString { " " }
+private fun Soeker.formaterNavn() = listOfNotNull(fornavn, mellomnavn, etternavn).joinToString(" ")
 
 enum class LanguageCode {
     BOKMAL,

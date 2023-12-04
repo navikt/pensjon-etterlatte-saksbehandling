@@ -20,12 +20,11 @@ import { ApiErrorAlert } from '~ErrorBoundary'
 
 type Props = {
   sak: ISak
-  fnr: string
   behandlingliste: IBehandlingsammendrag[]
 }
 
 export default function RelevanteHendelser(props: Props) {
-  const { sak, fnr, behandlingliste } = props
+  const { sak, behandlingliste } = props
 
   const [visOpprettRevurderingsmodal, setVisOpprettRevurderingsmodal] = useState<boolean>(false)
   const [valgtHendelse, setValgtHendelse] = useState<Grunnlagsendringshendelse | undefined>(undefined)
@@ -54,11 +53,9 @@ export default function RelevanteHendelser(props: Props) {
   }, [personerISak])
 
   useEffect(() => {
-    hentHendelser(fnr, (hendelser) => {
-      if (!!hendelser.length) {
-        const relevanteHendelser = hendelser[0].hendelser.filter((h) => h.status !== STATUS_IRRELEVANT)
-        setRelevanteHendelser(relevanteHendelser)
-      }
+    hentHendelser(sak.id, (grunnlagsendrlingsListe) => {
+      const relevanteHendelser = grunnlagsendrlingsListe.hendelser.filter((h) => h.status !== STATUS_IRRELEVANT)
+      setRelevanteHendelser(relevanteHendelser)
     })
   }, [])
 
@@ -143,7 +140,7 @@ export default function RelevanteHendelser(props: Props) {
           )
       )}
 
-      {isSuccess(hendelserStatus) && <HistoriskeHendelser hendelser={hendelserStatus.data[0].hendelser} />}
+      {isSuccess(hendelserStatus) && <HistoriskeHendelser hendelser={hendelserStatus.data.hendelser} />}
     </>
   )
 }

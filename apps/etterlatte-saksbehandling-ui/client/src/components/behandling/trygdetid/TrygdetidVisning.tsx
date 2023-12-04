@@ -12,11 +12,9 @@ import { useBehandlingRoutes } from '~components/behandling/BehandlingRoutes'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentVilkaarsvurdering } from '~shared/api/vilkaarsvurdering'
 import React, { useEffect, useState } from 'react'
-import FastTrygdetid from '~components/behandling/trygdetid/FastTrygdetid'
 import YrkesskadeTrygdetidBP from '~components/behandling/trygdetid/YrkesskadeTrygdetidBP'
 import YrkesskadeTrygdetidOMS from '~components/behandling/trygdetid/YrkesskadeTrygdetidOMS'
 import { Trygdetid } from '~components/behandling/trygdetid/Trygdetid'
-import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 import { oppdaterStatus } from '~shared/api/trygdetid'
 import { oppdaterBehandlingsstatus } from '~store/reducers/BehandlingReducer'
 import { useAppDispatch } from '~store/Store'
@@ -26,8 +24,6 @@ import { Vilkaarsresultat } from '~components/behandling/felles/Vilkaarsresultat
 import { isPending, isSuccess } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 
-const featureToggleNameTrygdetid = 'pensjon-etterlatte.bp-bruk-faktisk-trygdetid' as const
-
 const TrygdetidVisning = (props: { behandling: IDetaljertBehandling }) => {
   const { behandling } = props
   const dispatch = useAppDispatch()
@@ -36,7 +32,6 @@ const TrygdetidVisning = (props: { behandling: IDetaljertBehandling }) => {
   const [vilkaarsvurdering, getVilkaarsvurdering] = useApiCall(hentVilkaarsvurdering)
   const [yrkesskadeTrygdetid, setYrkesskadeTrygdetid] = useState<boolean>(false)
 
-  const beregnTrygdetid = useFeatureEnabledMedDefault(featureToggleNameTrygdetid, false)
   const vedtaksresultat =
     behandling.behandlingType !== IBehandlingsType.MANUELT_OPPHOER ? useVedtaksResultat() : 'opphoer'
   const virkningstidspunkt = behandling.virkningstidspunkt?.dato
@@ -81,14 +76,12 @@ const TrygdetidVisning = (props: { behandling: IDetaljertBehandling }) => {
             [SakType.BARNEPENSJON]: <YrkesskadeTrygdetidBP />,
             [SakType.OMSTILLINGSSTOENAD]: <YrkesskadeTrygdetidOMS />,
           }[behandling.sakType]
-        ) : beregnTrygdetid ? (
+        ) : (
           <Trygdetid
             redigerbar={redigerbar}
             behandling={behandling}
             virkningstidspunktEtterNyRegelDato={virkningstidspunktEtterNyRegelDato()}
           />
-        ) : (
-          <FastTrygdetid />
         ))}
 
       <Border />

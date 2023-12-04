@@ -11,7 +11,6 @@ import io.mockk.runs
 import io.mockk.slot
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.beregning.BeregnBarnepensjonServiceFeatureToggle
 import no.nav.etterlatte.beregning.grunnlag.BPBeregningsgrunnlagMerEnnEnAvdoedException
 import no.nav.etterlatte.beregning.grunnlag.BPBeregningsgrunnlagSoeskenIkkeAvdoedesBarnException
 import no.nav.etterlatte.beregning.grunnlag.BPBeregningsgrunnlagSoeskenMarkertDoedException
@@ -521,8 +520,6 @@ internal class BeregningsGrunnlagServiceTest {
         val behandling = mockBehandling(SakType.BARNEPENSJON, randomUUID())
         val slot = slot<BeregningsGrunnlag>()
 
-        featureToggleService.settBryter(BeregnBarnepensjonServiceFeatureToggle.BrukFaktiskTrygdetid, true)
-
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
         coEvery { behandlingKlient.kanBeregnes(any(), any(), any()) } returns true
         every { beregningsGrunnlagRepository.finnBarnepensjonGrunnlagForBehandling(any()) } returns null
@@ -543,38 +540,6 @@ internal class BeregningsGrunnlagServiceTest {
             )
 
             assertEquals(BeregningsMetode.BEST, slot.captured.beregningsMetode.beregningsMetode)
-
-            verify(exactly = 1) { beregningsGrunnlagRepository.lagre(any()) }
-        }
-    }
-
-    @Test
-    fun `skal lagre beregningsmetode NASJONAL hvis feature toggle er false`() {
-        val behandling = mockBehandling(SakType.BARNEPENSJON, randomUUID())
-        val slot = slot<BeregningsGrunnlag>()
-
-        featureToggleService.settBryter(BeregnBarnepensjonServiceFeatureToggle.BrukFaktiskTrygdetid, false)
-
-        coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
-        coEvery { behandlingKlient.kanBeregnes(any(), any(), any()) } returns true
-        every { beregningsGrunnlagRepository.finnBarnepensjonGrunnlagForBehandling(any()) } returns null
-        every { beregningsGrunnlagRepository.lagre(capture(slot)) } returns true
-        val hentOpplysningsgrunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns hentOpplysningsgrunnlag
-        runBlocking {
-            beregningsGrunnlagService.lagreBarnepensjonBeregningsGrunnlag(
-                randomUUID(),
-                BarnepensjonBeregningsGrunnlag(
-                    emptyList(),
-                    emptyList(),
-                    BeregningsMetodeBeregningsgrunnlag(BeregningsMetode.BEST),
-                ),
-                mockk {
-                    every { ident() } returns "Z123456"
-                },
-            )
-
-            assertEquals(BeregningsMetode.NASJONAL, slot.captured.beregningsMetode.beregningsMetode)
 
             verify(exactly = 1) { beregningsGrunnlagRepository.lagre(any()) }
         }

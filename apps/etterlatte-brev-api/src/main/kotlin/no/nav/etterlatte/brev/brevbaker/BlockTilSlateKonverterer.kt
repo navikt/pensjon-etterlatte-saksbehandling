@@ -65,14 +65,4 @@ object BlockTilSlateKonverterer {
                     text = (it as RenderedJsonLetter.ParagraphContent.Text).text,
                 )
         }
-
-//    private fun konverterListItem(item: RenderedJsonLetter.ParagraphContent.ItemList.Item): Slate.InnerElement {
-//        item.content.map {
-//            when (it) {
-//                is RenderedJsonLetter.ParagraphContent.Text.Literal -> Slate.InnerElement(
-//                    Slate.ElementType.PARAGRAPH
-//                )
-//            }
-//        }
-//    }
 }

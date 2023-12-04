@@ -1,13 +1,10 @@
 package no.nav.etterlatte.beregning.grunnlag
 
-import no.nav.etterlatte.beregning.BeregnBarnepensjonServiceFeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.klienter.GrunnlagKlient
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
-import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
-import no.nav.etterlatte.libs.common.beregning.BeregningsMetodeBeregningsgrunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning.Companion.automatiskSaksbehandler
 import no.nav.etterlatte.libs.common.grunnlag.hentAvdoedesbarn
@@ -103,13 +100,7 @@ class BeregningsGrunnlagService(
                             soeskenMedIBeregning = soeskenMedIBeregning,
                             institusjonsoppholdBeregningsgrunnlag =
                                 barnepensjonBeregningsGrunnlag.institusjonsopphold ?: emptyList(),
-                            beregningsMetode =
-                                barnepensjonBeregningsGrunnlag.beregningsMetode.takeIf {
-                                    featureToggleService.isEnabled(
-                                        BeregnBarnepensjonServiceFeatureToggle.BrukFaktiskTrygdetid,
-                                        false,
-                                    )
-                                } ?: BeregningsMetodeBeregningsgrunnlag(BeregningsMetode.NASJONAL),
+                            beregningsMetode = barnepensjonBeregningsGrunnlag.beregningsMetode,
                         ),
                     )
             }

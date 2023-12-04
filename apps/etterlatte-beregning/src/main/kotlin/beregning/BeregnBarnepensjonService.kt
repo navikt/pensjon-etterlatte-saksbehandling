@@ -55,7 +55,6 @@ import java.time.YearMonth
 import java.util.UUID
 
 enum class BeregnBarnepensjonServiceFeatureToggle(private val key: String) : FeatureToggle {
-    BrukFaktiskTrygdetid("pensjon-etterlatte.bp-bruk-faktisk-trygdetid"),
     BrukInstitusjonsoppholdIBeregning("pensjon-etterlatte.bp-bruk-institusjonsopphold-i-beregning"),
     BrukNyttRegelverkIBeregning("pensjon-etterlatte.bp-bruk-nytt-regelverk-i-beregning"),
     ;
@@ -88,17 +87,13 @@ class BeregnBarnepensjonService(
             ) { "Behandling ${behandling.id} mangler beregningsgrunnlag" }
 
         val trygdetid =
-            if (featureToggleService.isEnabled(BeregnBarnepensjonServiceFeatureToggle.BrukFaktiskTrygdetid, false)) {
-                try {
-                    trygdetidKlient.hentTrygdetid(behandling.id, brukerTokenInfo)
-                } catch (e: Exception) {
-                    logger.warn(
-                        "Kunne ikke hente ut trygdetid for behandlingen med id=${behandling.id}. " +
-                            "Dette er ikke kritisk siden vi ikke har krav om trygdetid enda.",
-                    )
-                    null
-                }
-            } else {
+            try {
+                trygdetidKlient.hentTrygdetid(behandling.id, brukerTokenInfo)
+            } catch (e: Exception) {
+                logger.warn(
+                    "Kunne ikke hente ut trygdetid for behandlingen med id=${behandling.id}. " +
+                        "Dette er ikke kritisk siden vi ikke har krav om trygdetid enda.",
+                )
                 null
             }
 

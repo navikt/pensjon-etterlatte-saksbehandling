@@ -24,7 +24,6 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 enum class BehandlingStatusServiceFeatureToggle(private val key: String) : FeatureToggle {
-    BrukFaktiskTrygdetid("pensjon-etterlatte.bp-bruk-faktisk-trygdetid"),
     OpphoerStatusovergang("pensjon-etterlatte.opphoer-statusovergang-vv-til-fattetv"),
     ;
 

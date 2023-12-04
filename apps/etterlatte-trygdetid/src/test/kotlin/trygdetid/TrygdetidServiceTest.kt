@@ -1306,7 +1306,6 @@ internal class TrygdetidServiceTest {
         val behandlingId = randomUUID()
         val eksisterendeTrygdetid = trygdetid(behandlingId, beregnetTrygdetid = beregnetTrygdetid())
 
-        coEvery { featureToggleService.isEnabled(any(), any()) } returns true
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns
             behandling(behandlingId, behandlingStatus = BehandlingStatus.VILKAARSVURDERT)
         coEvery { behandlingKlient.settBehandlingStatusTrygdetidOppdatert(any(), any()) } returns true
@@ -1318,7 +1317,6 @@ internal class TrygdetidServiceTest {
         }
 
         coVerify(exactly = 1) {
-            featureToggleService.isEnabled(any(), any())
             behandlingKlient.kanOppdatereTrygdetid(any(), any())
             behandlingKlient.hentBehandling(any(), any())
             behandlingKlient.settBehandlingStatusTrygdetidOppdatert(any(), any())
@@ -1330,7 +1328,6 @@ internal class TrygdetidServiceTest {
     fun `skal feile ved sjekking av gyldighet dersom det ikke finnes noe trygdetid`() {
         val behandlingId = randomUUID()
 
-        coEvery { featureToggleService.isEnabled(any(), any()) } returns true
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns
             behandling(behandlingId, behandlingStatus = BehandlingStatus.VILKAARSVURDERT)
         every { repository.hentTrygdetiderForBehandling(behandlingId) } returns emptyList()
@@ -1342,7 +1339,6 @@ internal class TrygdetidServiceTest {
         }
 
         coVerify(exactly = 1) {
-            featureToggleService.isEnabled(any(), any())
             behandlingKlient.kanOppdatereTrygdetid(any(), any())
             behandlingKlient.hentBehandling(any(), any())
             repository.hentTrygdetiderForBehandling(behandlingId)
@@ -1354,7 +1350,6 @@ internal class TrygdetidServiceTest {
         val behandlingId = randomUUID()
         val eksisterendeTrygdetid = trygdetid(behandlingId, beregnetTrygdetid = null)
 
-        coEvery { featureToggleService.isEnabled(any(), any()) } returns true
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns
             behandling(behandlingId, behandlingStatus = BehandlingStatus.VILKAARSVURDERT)
         coEvery { behandlingKlient.settBehandlingStatusTrygdetidOppdatert(any(), any()) } returns true
@@ -1367,34 +1362,9 @@ internal class TrygdetidServiceTest {
         }
 
         coVerify(exactly = 1) {
-            featureToggleService.isEnabled(any(), any())
             behandlingKlient.kanOppdatereTrygdetid(any(), any())
             behandlingKlient.hentBehandling(any(), any())
             repository.hentTrygdetiderForBehandling(behandlingId)
-        }
-    }
-
-    @Test
-    fun `skal ikke sjekke noe gyldighet dersom vi har fast trygdetid`() {
-        val behandlingId = randomUUID()
-
-        coEvery { featureToggleService.isEnabled(any(), any()) } returns false
-        coEvery { behandlingKlient.hentBehandling(any(), any()) } returns
-            behandling(behandlingId, behandlingStatus = BehandlingStatus.VILKAARSVURDERT)
-        coEvery { behandlingKlient.settBehandlingStatusTrygdetidOppdatert(any(), any()) } returns true
-        every { repository.hentTrygdetiderForBehandling(behandlingId) } returns emptyList()
-
-        runBlocking {
-            val oppdatertStatus = service.sjekkGyldighetOgOppdaterBehandlingStatus(behandlingId, saksbehandler)
-            oppdatertStatus shouldBe true
-        }
-
-        coVerify(exactly = 1) {
-            featureToggleService.isEnabled(any(), any())
-            behandlingKlient.kanOppdatereTrygdetid(any(), any())
-            behandlingKlient.hentBehandling(any(), any())
-            repository.hentTrygdetiderForBehandling(behandlingId)
-            behandlingKlient.settBehandlingStatusTrygdetidOppdatert(any(), any())
         }
     }
 

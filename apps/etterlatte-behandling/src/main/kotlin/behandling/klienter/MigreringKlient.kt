@@ -5,7 +5,9 @@ import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
+import no.nav.etterlatte.libs.common.RetryResult
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
+import no.nav.etterlatte.libs.common.retry
 import java.util.UUID
 
 class MigreringKlient(private val httpClient: HttpClient, private val apiUrl: String) {
@@ -13,16 +15,21 @@ class MigreringKlient(private val httpClient: HttpClient, private val apiUrl: St
         behandlingId: UUID,
         pesysId: Long,
     ) {
-        try {
+        retry {
             httpClient.post("$apiUrl/migrering/$behandlingId") {
                 contentType(ContentType.Application.Json)
                 setBody(pesysId)
             }
-        } catch (e: Exception) {
-            throw MigreringKlientException(
-                "Henting av migreringrequest for behandlind med behandlindId=$behandlingId feilet",
-                e,
-            )
+        }.let { result ->
+            when (result) {
+                is RetryResult.Success -> result.content
+                is RetryResult.Failure -> {
+                    throw MigreringKlientException(
+                        "Legge til manuell migrering i migreringsapp for behandlind med behandlindId=$behandlingId feilet",
+                        result.samlaExceptions(),
+                    )
+                }
+            }
         }
     }
 }

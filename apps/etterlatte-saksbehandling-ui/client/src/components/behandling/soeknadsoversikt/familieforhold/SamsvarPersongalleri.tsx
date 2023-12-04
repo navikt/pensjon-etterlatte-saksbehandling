@@ -6,11 +6,12 @@ import { PersonNavn, PersonUtenIdent, relativPersonrolleTekst } from '~shared/ty
 import { UstiletListe } from '~components/behandling/beregningsgrunnlag/soeskenjustering/Soeskenjustering'
 import { formaterKanskjeStringDatoMedFallback } from '~utils/formattering'
 import { useBehandling } from '~components/behandling/useBehandling'
-import { mapApiResult, useApiCall } from '~shared/hooks/useApiCall'
+import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentPersongalleriSamsvar } from '~shared/api/grunnlag'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { SakType } from '~shared/types/sak'
+import { mapApiResult } from '~shared/api/apiUtils'
 
 function formaterKanskjeNavn(navn: Partial<PersonNavn>) {
   return [navn.fornavn, navn.mellomnavn, navn.etternavn].filter((navn) => !!navn).join(' ')

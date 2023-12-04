@@ -6,7 +6,6 @@ import com.typesafe.config.Config
 import io.ktor.client.HttpClient
 import no.nav.etterlatte.brev.model.EtterbetalingDTO
 import no.nav.etterlatte.libs.common.RetryResult
-import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.SisteIverksatteBehandling
 import no.nav.etterlatte.libs.common.deserialize
@@ -101,17 +100,17 @@ class BehandlingKlient(config: Config, httpClient: HttpClient) {
         }
     }
 
-    internal suspend fun hentKilde(
+    internal suspend fun hentBehandling(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ): Vedtaksloesning {
+    ): DetaljertBehandling {
         return retry {
             try {
                 downstreamResourceClient.get(
                     resource = Resource(clientId = clientId, url = "$resourceUrl/behandlinger/$behandlingId"),
                     brukerTokenInfo = brukerTokenInfo,
                 ).mapBoth(
-                    success = { resource -> resource.response!!.let { objectMapper.readValue<DetaljertBehandling>(it.toString()) }.kilde },
+                    success = { resource -> resource.response!!.let { objectMapper.readValue<DetaljertBehandling>(it.toString()) } },
                     failure = { throwableErrorMessage -> throw throwableErrorMessage },
                 )
             } catch (e: Exception) {

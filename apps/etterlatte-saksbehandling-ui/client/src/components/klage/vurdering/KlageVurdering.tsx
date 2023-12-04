@@ -19,13 +19,15 @@ import {
 } from '~shared/types/Klage'
 import { Control, Controller, useForm } from 'react-hook-form'
 import { FieldOrNull } from '~shared/types/util'
-import { isFailure, isPending, useApiCall } from '~shared/hooks/useApiCall'
+import { useApiCall } from '~shared/hooks/useApiCall'
 import { oppdaterUtfallForKlage } from '~shared/api/klage'
 import { useAppDispatch } from '~store/Store'
 import { addKlage } from '~store/reducers/KlageReducer'
-import { ApiErrorAlert } from '~ErrorBoundary'
 import { kanSeBrev } from '~components/klage/stegmeny/KlageStegmeny'
 import { SakType } from '~shared/types/sak'
+
+import { isPending } from '~shared/api/apiUtils'
+import { isFailureHandler } from '~shared/api/IsFailureHandler'
 
 type FilledFormDataVurdering = {
   utfall: Utfall
@@ -166,11 +168,10 @@ export function KlageVurdering() {
           ) : null}
         </Innhold>
 
-        {isFailure(lagreUtfallStatus) ? (
-          <ApiErrorAlert>
-            Kunne ikke lagre utfallet av klagen. Prøv igjen senere, og meld sak hvis problemet vedvarer.
-          </ApiErrorAlert>
-        ) : null}
+        {isFailureHandler({
+          apiResult: lagreUtfallStatus,
+          errorMessage: 'Kunne ikke lagre utfallet av klagen. Prøv igjen senere, og meld sak hvis problemet vedvarer.',
+        })}
 
         <FlexRow justify="center">
           <Button type="button" variant="secondary" onClick={() => navigate(`/klage/${klage?.id}/formkrav`)}>

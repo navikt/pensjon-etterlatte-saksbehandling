@@ -1,5 +1,6 @@
 package no.nav.etterlatte.grunnlagsendring
 
+import io.kotest.matchers.shouldBe
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -66,6 +67,7 @@ import org.junit.jupiter.api.Test
 import java.sql.Connection
 import java.time.LocalDate
 import java.util.UUID
+import java.util.UUID.randomUUID
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.random.Random
 
@@ -74,7 +76,7 @@ internal class GrunnlagsendringshendelseServiceTest {
     private val grunnlagshendelsesDao = mockk<GrunnlagsendringshendelseDao>(relaxUnitFun = true)
     private val pdlService = mockk<PdlKlientImpl>()
     private val grunnlagClient = mockk<GrunnlagKlient>(relaxed = true, relaxUnitFun = true)
-    private val sakService = mockk<SakService>()
+    private val sakService = mockk<SakService>(relaxed = true)
     private val oppgaveService = mockk<OppgaveService>()
     private val mockOppgave =
         opprettNyOppgaveMedReferanseOgSak(
@@ -129,7 +131,7 @@ internal class GrunnlagsendringshendelseServiceTest {
             )
         val grunnlagsendringshendelse =
             grunnlagsendringshendelseMedSamsvar(
-                id = UUID.randomUUID(),
+                id = randomUUID(),
                 sakId = sakId,
                 fnr = fnr,
                 samsvarMellomKildeOgGrunnlag = null,
@@ -188,14 +190,14 @@ internal class GrunnlagsendringshendelseServiceTest {
         val fnr = "Soeker"
         val grlagEndringUtflytting =
             grunnlagsendringshendelseMedSamsvar(
-                id = UUID.randomUUID(),
+                id = randomUUID(),
                 sakId = sakId,
                 fnr = fnr,
                 samsvarMellomKildeOgGrunnlag = null,
             )
         val grlagEndringForelderBarn =
             grunnlagsendringshendelseMedSamsvar(
-                id = UUID.randomUUID(),
+                id = randomUUID(),
                 sakId = sakId,
                 fnr = fnr,
                 samsvarMellomKildeOgGrunnlag = null,
@@ -258,7 +260,7 @@ internal class GrunnlagsendringshendelseServiceTest {
         val grunnlagsendringshendelse1 =
             grunnlagsendringshendelseMedSamsvar(
                 type = GrunnlagsendringsType.DOEDSFALL,
-                id = UUID.randomUUID(),
+                id = randomUUID(),
                 sakId = sakId,
                 fnr = fnr,
                 samsvarMellomKildeOgGrunnlag = null,
@@ -267,7 +269,7 @@ internal class GrunnlagsendringshendelseServiceTest {
         val grunnlagsendringshendelse2 =
             grunnlagsendringshendelseMedSamsvar(
                 type = GrunnlagsendringsType.UTFLYTTING,
-                id = UUID.randomUUID(),
+                id = randomUUID(),
                 sakId = sakId,
                 fnr = fnr,
                 samsvarMellomKildeOgGrunnlag = null,
@@ -334,7 +336,7 @@ internal class GrunnlagsendringshendelseServiceTest {
         val grunnlagsendringshendelse1 =
             grunnlagsendringshendelseMedSamsvar(
                 type = GrunnlagsendringsType.UTFLYTTING,
-                id = UUID.randomUUID(),
+                id = randomUUID(),
                 sakId = sakId,
                 fnr = fnr,
                 samsvarMellomKildeOgGrunnlag = null,
@@ -342,7 +344,7 @@ internal class GrunnlagsendringshendelseServiceTest {
         val grunnlagsendringshendelse2 =
             grunnlagsendringshendelseMedSamsvar(
                 type = GrunnlagsendringsType.DOEDSFALL,
-                id = UUID.randomUUID(),
+                id = randomUUID(),
                 sakId = sakId,
                 fnr = fnr,
                 samsvarMellomKildeOgGrunnlag = null,
@@ -409,7 +411,7 @@ internal class GrunnlagsendringshendelseServiceTest {
         val grunnlagsendringshendelse1 =
             grunnlagsendringshendelseMedSamsvar(
                 type = GrunnlagsendringsType.FORELDER_BARN_RELASJON,
-                id = UUID.randomUUID(),
+                id = randomUUID(),
                 sakId = sakId,
                 fnr = "Soeker",
                 samsvarMellomKildeOgGrunnlag = null,
@@ -417,7 +419,7 @@ internal class GrunnlagsendringshendelseServiceTest {
         val grunnlagsendringshendelse2 =
             grunnlagsendringshendelseMedSamsvar(
                 type = GrunnlagsendringsType.DOEDSFALL,
-                id = UUID.randomUUID(),
+                id = randomUUID(),
                 sakId = sakId,
                 fnr = "Soeker",
                 samsvarMellomKildeOgGrunnlag = null,
@@ -482,12 +484,69 @@ internal class GrunnlagsendringshendelseServiceTest {
     }
 
     @Test
+    fun `skal kun opprette ny forelder-barn-relasjon-hendelse for saker som finnes`() {
+        val soekerIdent = "ident"
+        val relatertIdent = "relatertIdent"
+
+        val sakSomFinnes = 1L
+        val sakSomIkkeFinnes = 2L
+
+        val grunnlagsendringshendelse =
+            grunnlagsendringshendelseMedSamsvar(
+                type = GrunnlagsendringsType.FORELDER_BARN_RELASJON,
+                id = randomUUID(),
+                sakId = sakSomFinnes,
+                fnr = soekerIdent,
+                samsvarMellomKildeOgGrunnlag = null,
+            )
+
+        every {
+            sakService.finnSak(sakSomFinnes)
+        } returns Sak("Soeker", SakType.BARNEPENSJON, sakSomFinnes, Enheter.defaultEnhet.enhetNr)
+
+        every {
+            sakService.finnSak(sakSomIkkeFinnes)
+        } returns null
+
+        every {
+            grunnlagshendelsesDao.opprettGrunnlagsendringshendelse(any())
+        } returns grunnlagsendringshendelse
+
+        every {
+            grunnlagshendelsesDao.hentGrunnlagsendringshendelserMedStatuserISak(sakSomFinnes, any())
+        } returns emptyList()
+
+        coEvery {
+            grunnlagClient.hentPersonSakOgRolle(any())
+        } returns
+            PersonMedSakerOgRoller(
+                soekerIdent,
+                listOf(SakOgRolle(sakSomFinnes, Saksrolle.SOEKER), SakOgRolle(sakSomIkkeFinnes, Saksrolle.SOEKER)),
+            )
+
+        val lagredeGrunnlagsendringshendelser =
+            grunnlagsendringshendelseService.opprettForelderBarnRelasjonHendelse(
+                ForelderBarnRelasjonHendelse(
+                    hendelseId = "1",
+                    fnr = soekerIdent,
+                    relatertPersonsIdent = relatertIdent,
+                    relatertPersonsRolle = null,
+                    minRolleForPerson = null,
+                    relatertPersonUtenFolkeregisteridentifikator = null,
+                    endringstype = Endringstype.OPPRETTET,
+                ),
+            )
+
+        lagredeGrunnlagsendringshendelser.size shouldBe 1
+    }
+
+    @Test
     fun `skal ikke opprette ny sivilstand-hendelse dersom en lignende allerede eksisterer`() {
         val sakId = 1L
         val grunnlagsendringshendelse1 =
             grunnlagsendringshendelseMedSamsvar(
                 type = GrunnlagsendringsType.SIVILSTAND,
-                id = UUID.randomUUID(),
+                id = randomUUID(),
                 sakId = sakId,
                 fnr = "Soeker",
                 samsvarMellomKildeOgGrunnlag = null,
@@ -495,7 +554,7 @@ internal class GrunnlagsendringshendelseServiceTest {
         val grunnlagsendringshendelse2 =
             grunnlagsendringshendelseMedSamsvar(
                 type = GrunnlagsendringsType.SIVILSTAND,
-                id = UUID.randomUUID(),
+                id = randomUUID(),
                 sakId = sakId,
                 fnr = "Soeker",
                 samsvarMellomKildeOgGrunnlag = null,
@@ -565,7 +624,7 @@ internal class GrunnlagsendringshendelseServiceTest {
         val minutter = 60L
         val avdoedFnr = AVDOED2_FOEDSELSNUMMER.value
         val sakId = 1L
-        val grlgId = UUID.randomUUID()
+        val grlgId = randomUUID()
         val doedsdato = LocalDate.of(2022, 3, 13)
         val rolle = Saksrolle.SOEKER
         val personRolle = rolle.toPersonrolle(SakType.BARNEPENSJON)
@@ -612,7 +671,7 @@ internal class GrunnlagsendringshendelseServiceTest {
             listOf(
                 mockk {
                     every { status } returns BehandlingStatus.VILKAARSVURDERT
-                    every { id } returns UUID.randomUUID()
+                    every { id } returns randomUUID()
                     every { type } returns BehandlingType.FØRSTEGANGSBEHANDLING
                 },
             )
@@ -635,7 +694,7 @@ internal class GrunnlagsendringshendelseServiceTest {
 
     @Test
     fun `Hendelse forkastes når den nye informasjonen samsvarer med PDL-data`() {
-        val hendelseId = UUID.randomUUID()
+        val hendelseId = randomUUID()
         val minutter = Random.nextLong()
         val avdoedFnr = AVDOED2_FOEDSELSNUMMER.value
         val sakId = Random.nextLong()
@@ -660,7 +719,7 @@ internal class GrunnlagsendringshendelseServiceTest {
             Grunnlag(
                 soeker =
                     mapOf(
-                        Opplysningstype.DOEDSDATO to Konstant(UUID.randomUUID(), kilde, doedsdato.toJsonNode()),
+                        Opplysningstype.DOEDSDATO to Konstant(randomUUID(), kilde, doedsdato.toJsonNode()),
                     ),
                 familie = emptyList(),
                 sak = emptyMap(),
@@ -780,7 +839,7 @@ internal class GrunnlagsendringshendelseServiceTest {
         every { oppgaveService.hentOppgaverForSak(2L) } returns
             listOf(
                 OppgaveIntern(
-                    UUID.randomUUID(), Status.FERDIGSTILT,
+                    randomUUID(), Status.FERDIGSTILT,
                     Enheter.PORSGRUNN.enhetNr, 2L, null,
                     OppgaveType.FOERSTEGANGSBEHANDLING, "saksbehandler",
                     "refernase", null, Tidspunkt.now(), SakType.BARNEPENSJON, null, null,
@@ -789,7 +848,7 @@ internal class GrunnlagsendringshendelseServiceTest {
         every { oppgaveService.hentOppgaverForSak(1L) } returns
             listOf(
                 OppgaveIntern(
-                    UUID.randomUUID(), Status.UNDER_BEHANDLING, Enheter.PORSGRUNN.enhetNr,
+                    randomUUID(), Status.UNDER_BEHANDLING, Enheter.PORSGRUNN.enhetNr,
                     1L, null, OppgaveType.FOERSTEGANGSBEHANDLING, "saksbehandler",
                     "refernase", null, Tidspunkt.now(), SakType.BARNEPENSJON, null, null,
                 ),
@@ -916,7 +975,7 @@ internal class GrunnlagsendringshendelseServiceTest {
         val lagretHendelse =
             grunnlagsendringshendelseMedSamsvar(
                 type = GrunnlagsendringsType.GRUNNBELOEP,
-                id = UUID.randomUUID(),
+                id = randomUUID(),
                 sakId = sakId,
                 fnr = "test-fnr",
                 samsvarMellomKildeOgGrunnlag = null,

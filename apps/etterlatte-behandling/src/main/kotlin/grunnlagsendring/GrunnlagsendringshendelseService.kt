@@ -255,6 +255,7 @@ class GrunnlagsendringshendelseService(
 
         return sakerForSoeker.let {
             inTransaction {
+                it.filter { rolleOgSak -> sakService.finnSak(rolleOgSak.sakId) != null }
                 it.map { rolleOgSak ->
                     val hendelseId = UUID.randomUUID()
                     logger.info(
@@ -293,33 +294,33 @@ class GrunnlagsendringshendelseService(
         val tidspunktForMottakAvHendelse = Tidspunkt.now().toLocalDatetimeUTC()
         val sakerOgRoller = runBlocking { grunnlagKlient.hentPersonSakOgRolle(fnr).sakerOgRoller }
 
-        return sakerOgRoller.let {
-            it.filter { rolleOgSak ->
+        return sakerOgRoller
+            .filter { rolleOgSak -> sakService.finnSak(rolleOgSak.sakId) != null }
+            .filter { rolleOgSak ->
                 !hendelseEksistererFraFoer(
                     rolleOgSak.sakId,
                     fnr,
                     grunnlagendringType,
                 )
             }
-                .map { rolleOgSak ->
-                    val hendelseId = UUID.randomUUID()
-                    logger.info(
-                        "Oppretter grunnlagsendringshendelse med id=$hendelseId for hendelse av " +
-                            "type $grunnlagendringType på sak med id=${rolleOgSak.sakId}",
+            .map { rolleOgSak ->
+                val hendelseId = UUID.randomUUID()
+                logger.info(
+                    "Oppretter grunnlagsendringshendelse med id=$hendelseId for hendelse av " +
+                        "type $grunnlagendringType på sak med id=${rolleOgSak.sakId}",
+                )
+                val hendelse =
+                    Grunnlagsendringshendelse(
+                        id = hendelseId,
+                        sakId = rolleOgSak.sakId,
+                        status = grunnlagsEndringsStatus,
+                        type = grunnlagendringType,
+                        opprettet = tidspunktForMottakAvHendelse,
+                        hendelseGjelderRolle = rolleOgSak.rolle,
+                        gjelderPerson = fnr,
                     )
-                    val hendelse =
-                        Grunnlagsendringshendelse(
-                            id = hendelseId,
-                            sakId = rolleOgSak.sakId,
-                            status = grunnlagsEndringsStatus,
-                            type = grunnlagendringType,
-                            opprettet = tidspunktForMottakAvHendelse,
-                            hendelseGjelderRolle = rolleOgSak.rolle,
-                            gjelderPerson = fnr,
-                        )
-                    grunnlagsendringshendelseDao.opprettGrunnlagsendringshendelse(hendelse)
-                }
-        }
+                grunnlagsendringshendelseDao.opprettGrunnlagsendringshendelse(hendelse)
+            }
     }
 
     private fun opprettHendelseAvTypeForSak(

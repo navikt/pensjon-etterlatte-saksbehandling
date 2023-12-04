@@ -12,10 +12,12 @@ import { CalendarIcon } from '@navikt/aksel-icons'
 import { formaterStringDato } from '~utils/formattering'
 import React, { useState } from 'react'
 import styled from 'styled-components'
-import { isFailure, isPending, useApiCall } from '~shared/hooks/useApiCall'
+import { useApiCall } from '~shared/hooks/useApiCall'
 import { TrygdetidGrunnlag } from '~components/behandling/trygdetid/TrygdetidGrunnlag'
-import { ApiErrorAlert } from '~ErrorBoundary'
 import Spinner from '~shared/Spinner'
+
+import { isPending } from '~shared/api/apiUtils'
+import { isFailureHandler } from '~shared/api/IsFailureHandler'
 
 type Props = {
   trygdetid: ITrygdetid
@@ -225,7 +227,10 @@ const PeriodeRow = ({
             ) : (
               <RedigerWrapper onClick={() => slettGrunnlag(trygdetidGrunnlag.id)}>Slett</RedigerWrapper>
             )}
-            {isFailure(slettTrygdetidStatus) && <ApiErrorAlert>En feil har oppstått</ApiErrorAlert>}
+            {isFailureHandler({
+              apiResult: slettTrygdetidStatus,
+              errorMessage: 'En feil har oppstått',
+            })}
           </Table.DataCell>
         </>
       )}

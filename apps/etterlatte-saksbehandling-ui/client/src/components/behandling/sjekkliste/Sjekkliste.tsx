@@ -1,7 +1,7 @@
 import styled from 'styled-components'
 import React, { useContext, useEffect, useMemo, useState } from 'react'
 import { SidebarPanel } from '~shared/components/Sidebar'
-import { isFailure, useApiCall } from '~shared/hooks/useApiCall'
+import { useApiCall } from '~shared/hooks/useApiCall'
 import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
 import { oppdaterSjekkliste, oppdaterSjekklisteItem } from '~shared/api/sjekkliste'
 import {
@@ -20,7 +20,6 @@ import {
 import { ConfigContext } from '~clientConfig'
 import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
 import { ISjekklisteItem } from '~shared/types/Sjekkliste'
-import { ApiErrorAlert } from '~ErrorBoundary'
 import debounce from 'lodash/debounce'
 import { useSjekkliste, useSjekklisteValideringsfeil } from '~components/behandling/sjekkliste/useSjekkliste'
 import { useAppDispatch, useAppSelector } from '~store/Store'
@@ -29,6 +28,8 @@ import { PencilIcon } from '@navikt/aksel-icons'
 import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 import { SakType } from '~shared/types/sak'
 import { useSelectorSaksbehandlerGjeldendeOppgaveBehandling } from '~store/selectors/useSelectorSaksbehandlerGjeldendeOppgaveBehandling'
+
+import { isFailureHandler } from '~shared/api/IsFailureHandler'
 
 export const Sjekkliste = ({ behandling }: { behandling: IBehandlingReducer }) => {
   const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
@@ -72,7 +73,10 @@ export const Sjekkliste = ({ behandling }: { behandling: IBehandlingReducer }) =
         Sjekkliste
       </Heading>
 
-      {isFailure(oppdaterSjekklisteResult) && <ApiErrorAlert>Oppdateringen av sjekklista feilet</ApiErrorAlert>}
+      {isFailureHandler({
+        apiResult: oppdaterSjekklisteResult,
+        errorMessage: 'Oppdateringen av sjekklista feilet',
+      })}
 
       {sjekkliste && (
         <>
@@ -222,7 +226,10 @@ const SjekklisteItem = ({
 
   return (
     <>
-      {isFailure(itemUpdateResult) && <ApiErrorAlert>En feil oppsto ved oppdatering av sjekklista</ApiErrorAlert>}
+      {isFailureHandler({
+        apiResult: itemUpdateResult,
+        errorMessage: 'En feil oppsto ved oppdatering av sjekklista',
+      })}
 
       <Checkbox
         checked={avkrysset}

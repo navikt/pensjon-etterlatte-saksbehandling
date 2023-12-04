@@ -6,11 +6,14 @@ import { IBehandlingStatus, IBehandlingsType } from '~shared/types/IDetaljertBeh
 import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
 import { useBehandling } from '~components/behandling/useBehandling'
 import { SakType } from '~shared/types/sak'
-import { isFailure, isPending, useApiCall } from '~shared/hooks/useApiCall'
+import { useApiCall } from '~shared/hooks/useApiCall'
 import { formaterBehandlingstype } from '~utils/formattering'
 import { ExclamationmarkTriangleFillIcon, XMarkIcon } from '@navikt/aksel-icons'
 import styled from 'styled-components'
 import { FlexRow } from '~shared/styled'
+
+import { isPending } from '~shared/api/apiUtils'
+import { isFailureHandler } from '~shared/api/IsFailureHandler'
 
 export default function AnnullerBehandling() {
   const navigate = useNavigate()
@@ -92,8 +95,7 @@ export default function AnnullerBehandling() {
               Ja, avbryt {formaterBehandlingstype(behandling!!.behandlingType).toLowerCase()}
             </Button>
           </FlexRow>
-
-          {isFailure(status) && <Alert variant="error">Det oppsto en feil ved avbryting av behandlingen.</Alert>}
+          {isFailureHandler({ apiResult: status, errorMessage: 'Det oppsto en feil ved avbryting av behandlingen.' })}
         </Modal.Footer>
       </Modal>
     </>

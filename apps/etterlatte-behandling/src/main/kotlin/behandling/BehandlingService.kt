@@ -335,17 +335,6 @@ internal class BehandlingServiceImpl(
 
         logger.info("Hentet behandling for $behandlingId")
         return coroutineScope {
-            logger.info("Hentet vedtak for $behandlingId")
-            val avdoed =
-                async {
-                    grunnlagKlient.finnPersonOpplysning(
-                        behandlingId,
-                        Opplysningstype.AVDOED_PDL_V1,
-                        brukerTokenInfo,
-                    )
-                }
-            logger.info("Hentet Opplysningstype.AVDOED_PDL_V1 for $behandlingId")
-
             val soeker =
                 async {
                     grunnlagKlient.finnPersonOpplysning(
@@ -368,7 +357,6 @@ internal class BehandlingServiceImpl(
                 boddEllerArbeidetUtlandet = behandling.boddEllerArbeidetUtlandet,
                 status = behandling.status,
                 hendelser = hendelserIBehandling,
-                familieforhold = Familieforhold(avdoed.await()),
                 behandlingType = behandling.type,
                 søker = soeker.await()?.opplysning,
                 revurderingsaarsak = behandling.revurderingsaarsak(),

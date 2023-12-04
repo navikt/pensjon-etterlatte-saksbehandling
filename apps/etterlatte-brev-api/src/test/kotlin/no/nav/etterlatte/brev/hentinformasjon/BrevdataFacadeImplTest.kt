@@ -14,8 +14,11 @@ import no.nav.etterlatte.brev.behandlingklient.BehandlingKlientException
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.tilbakekreving.tilbakekreving
 import no.nav.etterlatte.libs.common.Vedtaksloesning
+import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
+import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
+import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.SisteIverksatteBehandling
 import no.nav.etterlatte.libs.common.beregning.BeregningDTO
@@ -43,6 +46,7 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
 
@@ -83,7 +87,7 @@ internal class BrevdataFacadeImplTest {
             behandlingKlient.hentSisteIverksatteBehandling(any(), any())
         } throws BehandlingKlientException("har ikke tidligere behandling")
         coEvery { behandlingKlient.hentEtterbetaling(any(), any()) } returns null
-        coEvery { behandlingKlient.hentKilde(any(), any()) } returns Vedtaksloesning.GJENNY
+        coEvery { behandlingKlient.hentBehandling(any(), any()) } returns lagBehandling()
         coEvery { vedtaksvurderingKlient.hentVedtak(any(), any()) } returns opprettBehandlingVedtak()
         coEvery { grunnlagKlient.hentGrunnlag(BEHANDLING_ID, BRUKERTokenInfo) } returns opprettGrunnlag()
         coEvery { beregningKlient.hentBeregning(any(), any()) } returns opprettBeregning()
@@ -301,6 +305,29 @@ internal class BrevdataFacadeImplTest {
         10000,
         10,
     )
+
+    private fun lagBehandling() =
+        DetaljertBehandling(
+            id = UUID.randomUUID(),
+            sak = 1L,
+            sakType = SakType.BARNEPENSJON,
+            behandlingOpprettet = LocalDateTime.now(),
+            soeknadMottattDato = LocalDateTime.now(),
+            innsender = null,
+            soeker = "123",
+            gjenlevende = listOf(),
+            avdoed = listOf(),
+            soesken = listOf(),
+            status = BehandlingStatus.OPPRETTET,
+            behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+            virkningstidspunkt = null,
+            boddEllerArbeidetUtlandet = null,
+            revurderingsaarsak = null,
+            prosesstype = Prosesstype.MANUELL,
+            revurderingInfo = null,
+            enhet = "1111",
+            kilde = Vedtaksloesning.GJENNY,
+        )
 
     private fun opprettTrygdetid() = null
 

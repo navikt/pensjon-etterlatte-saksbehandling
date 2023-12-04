@@ -8,15 +8,17 @@ import {
   formaterStringTidspunkt,
 } from '~utils/formattering'
 import { IBehandlingInfo } from '~components/behandling/sidemeny/IBehandlingInfo'
-import { BodyShort, Heading, Tag } from '@navikt/ds-react'
+import { Alert, BodyShort, Heading, Tag } from '@navikt/ds-react'
 import { tagColors, TagList } from '~shared/Tags'
 import { SidebarPanel } from '~shared/components/Sidebar'
 import { useEffect, useState } from 'react'
-import { isFailure, isInitial, isPending, isPendingOrInitial, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
+import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentOppgaveForBehandlingUnderBehandlingIkkeattestert } from '~shared/api/oppgaver'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { KopierbarVerdi } from '~shared/statusbar/kopierbarVerdi'
+
+import { isInitial, isPending, mapApiResult } from '~shared/api/apiUtils'
 
 export const Oversikt = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo }) => {
   const kommentarFraAttestant = behandlingsInfo.attestertLogg?.slice(-1)[0]?.kommentar
@@ -89,14 +91,21 @@ export const Oversikt = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo
       </TagList>
       <div className="info">
         <Info>Saksbehandler</Info>
-        {isFailure(oppgaveForBehandlingStatus) && (
-          <ApiErrorAlert>Kunne ikke hente saksbehandler fra oppgave</ApiErrorAlert>
-        )}
-        {isPendingOrInitial(oppgaveForBehandlingStatus) && <Spinner visible={true} label="Henter saksbehandler" />}
-        {isSuccess(oppgaveForBehandlingStatus) && (
-          <Tekst>
-            {saksbehandlerPaaOppgave ? saksbehandlerPaaOppgave : 'Ingen saksbehandler har tatt denne oppgaven'}
-          </Tekst>
+        {mapApiResult(
+          oppgaveForBehandlingStatus,
+          <Spinner visible={true} label="Henter saksbehandler" />,
+          () => (
+            <ApiErrorAlert>Kunne ikke hente saksbehandler fra oppgave</ApiErrorAlert>
+          ),
+          () => (
+            <>
+              {saksbehandlerPaaOppgave ? (
+                <Tekst>saksbehandlerPaaOppgave</Tekst>
+              ) : (
+                <Alert variant="warning">Ingen saksbehandler har tatt denne oppgaven</Alert>
+              )}
+            </>
+          )
         )}
       </div>
       <div className="flex">

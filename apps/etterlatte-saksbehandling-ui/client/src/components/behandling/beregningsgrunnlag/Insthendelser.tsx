@@ -1,4 +1,4 @@
-import { mapAllApiResult, useApiCall } from '~shared/hooks/useApiCall'
+import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentGrunnlagsendringshendelserInstitusjonsoppholdForSak } from '~shared/api/behandling'
 import React, { useEffect } from 'react'
 import { InstitusjonsoppholdSamsvar } from '~components/person/typer'
@@ -6,6 +6,8 @@ import { Table } from '@navikt/ds-react'
 import { formaterStringDato } from '~utils/formattering'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import Spinner from '~shared/Spinner'
+
+import { mapAllApiResult } from '~shared/api/apiUtils'
 
 const Insthendelser = (props: { sakid: number }) => {
   const { sakid } = props

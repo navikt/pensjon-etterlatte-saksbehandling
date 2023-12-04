@@ -1,4 +1,4 @@
-import { Accordion, Button, Detail, ErrorMessage, Tabs } from '@navikt/ds-react'
+import { Accordion, Button, Detail, Tabs } from '@navikt/ds-react'
 import SlateEditor from '~components/behandling/brev/SlateEditor'
 import React, { useEffect, useState } from 'react'
 import { FilePdfIcon, FileResetIcon, FloppydiskIcon, PencilIcon } from '@navikt/aksel-icons'
@@ -7,16 +7,12 @@ import { IBrev } from '~shared/types/Brev'
 import { format } from 'date-fns'
 import { hentManuellPayload, lagreManuellPayload, tilbakestillManuellPayload } from '~shared/api/brev'
 import ForhaandsvisningBrev from '~components/behandling/brev/ForhaandsvisningBrev'
-import {
-  isFailure,
-  isPending,
-  isPendingOrInitial,
-  isSuccess,
-  isSuccessOrInitial,
-  useApiCall,
-} from '~shared/hooks/useApiCall'
+import { useApiCall } from '~shared/hooks/useApiCall'
 import Spinner from '~shared/Spinner'
 import { GeneriskModal } from '~shared/modal/modal'
+
+import { isPending, isPendingOrInitial, isSuccess, isSuccessOrInitial } from '~shared/api/apiUtils'
+import { isFailureHandler } from '~shared/api/IsFailureHandler'
 
 enum ManueltBrevFane {
   REDIGER = 'REDIGER',
@@ -138,9 +134,10 @@ export default function RedigerbartBrev({ brev, kanRedigeres, lukkAdvarselBehand
               )}
             </PanelWrapper>
           )}
-          {isFailure(tilbakestillManuellPayloadStatus) && (
-            <ErrorMessage>Det skjedde en feil ved tilbakestillting av brev</ErrorMessage>
-          )}
+          {isFailureHandler({
+            apiResult: tilbakestillManuellPayloadStatus,
+            errorMessage: 'Det skjedde en feil ved tilbakestillting av brev',
+          })}
         </Tabs.Panel>
 
         <Tabs.Panel value={ManueltBrevFane.REDIGER_VEDLEGG}>
@@ -178,9 +175,10 @@ export default function RedigerbartBrev({ brev, kanRedigeres, lukkAdvarselBehand
               </PanelWrapper>
             </>
           )}
-          {isFailure(tilbakestillManuellPayloadStatus) && (
-            <ErrorMessage>Det skjedde en feil ved tilbakestilling av brev</ErrorMessage>
-          )}
+          {isFailureHandler({
+            apiResult: tilbakestillManuellPayloadStatus,
+            errorMessage: 'Det skjedde en feil ved tilbakestilling av brev',
+          })}
         </Tabs.Panel>
 
         <Tabs.Panel value={ManueltBrevFane.FORHAANDSVIS}>

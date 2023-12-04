@@ -2,7 +2,6 @@ package no.nav.etterlatte.trygdetid
 
 import com.fasterxml.jackson.databind.JsonNode
 import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -29,13 +28,6 @@ import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.temporal.TemporalAdjusters
 import java.util.UUID
-
-enum class TrygdetidFeatureToggle(private val key: String) : FeatureToggle {
-    BrukFaktiskTrygdetid("pensjon-etterlatte.bp-bruk-faktisk-trygdetid"),
-    ;
-
-    override fun key() = key
-}
 
 interface TrygdetidService {
     suspend fun hentTrygdetid(
@@ -645,7 +637,10 @@ class TrygdetidServiceImpl(
                     ),
             )
         val opprettet = trygdetidRepository.opprettTrygdetid(trygdetid)
-        trygdetidRepository.oppdaterTrygdetid(opprettet, overstyrt = true) // Holder ikke å sette overstyrt på detaljertBeregnetTrygdetid
+        trygdetidRepository.oppdaterTrygdetid(
+            opprettet,
+            overstyrt = true,
+        ) // Holder ikke å sette overstyrt på detaljertBeregnetTrygdetid
     }
 
     override fun overstyrBeregnetTrygdetidForAvdoed(
@@ -679,21 +674,12 @@ class TrygdetidServiceImpl(
             val trygdetider = trygdetidRepository.hentTrygdetiderForBehandling(behandlingId)
             val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
 
-            val brukFaktiskTrygdetid =
-                featureToggleService.isEnabled(
-                    TrygdetidFeatureToggle.BrukFaktiskTrygdetid,
-                    false,
-                )
-            logger.info("BrukFaktiskTrygdetid = $brukFaktiskTrygdetid")
+            if (trygdetider.isEmpty()) {
+                throw IngenTrygdetidFunnetForAvdoede()
+            }
 
-            if (brukFaktiskTrygdetid) {
-                if (trygdetider.isEmpty()) {
-                    throw IngenTrygdetidFunnetForAvdoede()
-                }
-
-                if (trygdetider.any { it.beregnetTrygdetid == null }) {
-                    throw TrygdetidManglerBeregning()
-                }
+            if (trygdetider.any { it.beregnetTrygdetid == null }) {
+                throw TrygdetidManglerBeregning()
             }
 
             // Dersom forrige steg (vilkårsvurdering) har blitt endret vil statusen være VILKAARSVURDERT. Når man

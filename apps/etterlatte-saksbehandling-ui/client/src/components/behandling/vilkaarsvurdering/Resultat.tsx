@@ -14,13 +14,15 @@ import { TrashIcon } from '@navikt/aksel-icons'
 import { StatusIcon } from '~shared/icons/statusIcon'
 import { formaterSakstype, formaterStringDato } from '~utils/formattering'
 import { ISvar } from '~shared/types/ISvar'
-import { isPending, useApiCall } from '~shared/hooks/useApiCall'
+import { useApiCall } from '~shared/hooks/useApiCall'
 import { useAppDispatch } from '~store/Store'
 import { oppdaterBehandlingsstatus } from '~store/reducers/BehandlingReducer'
 import { IBehandlingStatus, IBehandlingsType } from '~shared/types/IDetaljertBehandling'
 import { SakType } from '~shared/types/sak'
 import { Border } from '~components/behandling/soeknadsoversikt/styled'
 import { NesteOgTilbake } from '~components/behandling/handlinger/NesteOgTilbake'
+
+import { isPending } from '~shared/api/apiUtils'
 
 type Props = {
   virkningstidspunktDato: string | undefined

@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Alert, BodyLong, BodyShort, Button, Heading, Modal } from '@navikt/ds-react'
 import { SaktypeTag } from '~components/nyoppgavebenk/Tags'
 import { ferdigstillOppgave, OppgaveDTO } from '~shared/api/oppgaver'
-import { isFailure, isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
+import { useApiCall } from '~shared/hooks/useApiCall'
 import { opprettBehandling } from '~shared/api/behandling'
 import { NyBehandlingRequest } from '~shared/types/IDetaljertBehandling'
 import { useNavigate } from 'react-router-dom'
@@ -10,6 +10,8 @@ import { FlexRow } from '~shared/styled'
 import { ferdigstillJournalpost } from '~shared/api/dokument'
 import { Journalpost } from '~shared/types/Journalpost'
 import { ISak } from '~shared/types/sak'
+
+import { isFailure, isPending, isSuccess } from '~shared/api/apiUtils'
 
 interface ModalProps {
   oppgave: OppgaveDTO

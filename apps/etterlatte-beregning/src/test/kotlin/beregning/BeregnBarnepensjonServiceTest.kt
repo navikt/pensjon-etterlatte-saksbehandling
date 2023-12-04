@@ -8,7 +8,6 @@ import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.beregning.BeregnBarnepensjonServiceFeatureToggle.BrukFaktiskTrygdetid
 import no.nav.etterlatte.beregning.BeregnBarnepensjonServiceFeatureToggle.BrukInstitusjonsoppholdIBeregning
 import no.nav.etterlatte.beregning.BeregnBarnepensjonServiceFeatureToggle.BrukNyttRegelverkIBeregning
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlag
@@ -68,7 +67,6 @@ internal class BeregnBarnepensjonServiceTest {
     @BeforeEach
     fun setup() {
         featureToggleService.settBryter(BrukInstitusjonsoppholdIBeregning, false)
-        featureToggleService.settBryter(BrukFaktiskTrygdetid, false)
         featureToggleService.settBryter(BrukNyttRegelverkIBeregning, false)
     }
 
@@ -83,45 +81,7 @@ internal class BeregnBarnepensjonServiceTest {
     }
 
     @Test
-    fun `skal beregne barnepensjon foerstegangsbehandling - ingen soesken`() {
-        val behandling = mockBehandling(BehandlingType.FØRSTEGANGSBEHANDLING)
-        val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
-
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
-        coEvery {
-            beregningsGrunnlagService.hentBarnepensjonBeregningsGrunnlag(
-                any(),
-                any(),
-            )
-        } returns barnepensjonBeregningsGrunnlag(behandling.id, emptyList())
-        coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns null
-
-        runBlocking {
-            val beregning = beregnBarnepensjonService().beregn(behandling, bruker)
-
-            with(beregning) {
-                beregningId shouldNotBe null
-                behandlingId shouldBe behandling.id
-                type shouldBe Beregningstype.BP
-                beregnetDato shouldNotBe null
-                grunnlagMetadata shouldBe grunnlag.metadata
-                beregningsperioder.size shouldBeGreaterThanOrEqual 2
-                with(beregningsperioder.first()) {
-                    utbetaltBeloep shouldBe BP_BELOEP_INGEN_SOESKEN_JAN_23
-                    datoFOM shouldBe behandling.virkningstidspunkt?.dato
-                    datoTOM shouldBe YearMonth.of(2023, Month.APRIL)
-                    grunnbelopMnd shouldBe GRUNNBELOEP_JAN_23
-                    soeskenFlokk shouldBe emptyList()
-                    trygdetid shouldBe MAKS_TRYGDETID
-                    regelResultat shouldNotBe null
-                    regelVersjon shouldNotBe null
-                }
-            }
-        }
-    }
-
-    @Test
-    fun `skal beregne barnepensjon foerstegangsbehandling - ingen soesken - med trygdetid - nasjonal`() {
+    fun `skal beregne barnepensjon foerstegangsbehandling - ingen soesken - nasjonal`() {
         val behandling = mockBehandling(BehandlingType.FØRSTEGANGSBEHANDLING)
         val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
 
@@ -133,7 +93,6 @@ internal class BeregnBarnepensjonServiceTest {
             )
         } returns barnepensjonBeregningsGrunnlag(behandling.id, emptyList())
         coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns mockTrygdetid(behandling.id)
-        featureToggleService.settBryter(BrukFaktiskTrygdetid, true)
 
         runBlocking {
             val beregning = beregnBarnepensjonService().beregn(behandling, bruker)
@@ -161,7 +120,7 @@ internal class BeregnBarnepensjonServiceTest {
     }
 
     @Test
-    fun `skal beregne barnepensjon foerstegangsbehandling - ingen soesken - med trygdetid - prorata`() {
+    fun `skal beregne barnepensjon foerstegangsbehandling - ingen soesken - prorata`() {
         val behandling = mockBehandling(BehandlingType.FØRSTEGANGSBEHANDLING)
         val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
 
@@ -173,7 +132,6 @@ internal class BeregnBarnepensjonServiceTest {
             )
         } returns barnepensjonBeregningsGrunnlag(behandling.id, emptyList(), BeregningsMetode.PRORATA)
         coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns mockTrygdetid(behandling.id)
-        featureToggleService.settBryter(BrukFaktiskTrygdetid, true)
 
         runBlocking {
             val beregning = beregnBarnepensjonService().beregn(behandling, bruker)
@@ -201,7 +159,7 @@ internal class BeregnBarnepensjonServiceTest {
     }
 
     @Test
-    fun `skal beregne barnepensjon foerstegangsbehandling - ingen soesken - med trygdetid - best`() {
+    fun `skal beregne barnepensjon foerstegangsbehandling - ingen soesken - best`() {
         val behandling = mockBehandling(BehandlingType.FØRSTEGANGSBEHANDLING)
         val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
 
@@ -213,7 +171,6 @@ internal class BeregnBarnepensjonServiceTest {
             )
         } returns barnepensjonBeregningsGrunnlag(behandling.id, emptyList(), BeregningsMetode.BEST)
         coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns mockTrygdetid(behandling.id)
-        featureToggleService.settBryter(BrukFaktiskTrygdetid, true)
 
         runBlocking {
             val beregning = beregnBarnepensjonService().beregn(behandling, bruker)
@@ -252,44 +209,7 @@ internal class BeregnBarnepensjonServiceTest {
                 any(),
             )
         } returns barnepensjonBeregningsGrunnlag(behandling.id, listOf(HELSOESKEN_FOEDSELSNUMMER))
-        coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns null
-
-        runBlocking {
-            val beregning = beregnBarnepensjonService().beregn(behandling, bruker)
-
-            with(beregning) {
-                beregningId shouldNotBe null
-                behandlingId shouldBe behandling.id
-                type shouldBe Beregningstype.BP
-                beregnetDato shouldNotBe null
-                grunnlagMetadata shouldBe grunnlag.metadata
-                beregningsperioder.size shouldBeGreaterThanOrEqual 2
-                with(beregningsperioder.first()) {
-                    utbetaltBeloep shouldBe BP_BELOEP_ETT_SOESKEN_JAN_23
-                    datoFOM shouldBe behandling.virkningstidspunkt?.dato
-                    datoTOM shouldBe YearMonth.of(2023, Month.APRIL)
-                    grunnbelopMnd shouldBe GRUNNBELOEP_JAN_23
-                    soeskenFlokk shouldBe listOf(HELSOESKEN_FOEDSELSNUMMER.value)
-                    trygdetid shouldBe MAKS_TRYGDETID
-                }
-            }
-        }
-    }
-
-    @Test
-    fun `skal beregne barnepensjon foerstegangsbehandling - ett soesken - med trygdetid`() {
-        val behandling = mockBehandling(BehandlingType.FØRSTEGANGSBEHANDLING)
-        val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
-
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
-        coEvery {
-            beregningsGrunnlagService.hentBarnepensjonBeregningsGrunnlag(
-                any(),
-                any(),
-            )
-        } returns barnepensjonBeregningsGrunnlag(behandling.id, listOf(HELSOESKEN_FOEDSELSNUMMER))
         coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns mockTrygdetid(behandling.id)
-        featureToggleService.settBryter(BrukFaktiskTrygdetid, true)
 
         runBlocking {
             val beregning = beregnBarnepensjonService().beregn(behandling, bruker)
@@ -325,44 +245,7 @@ internal class BeregnBarnepensjonServiceTest {
                 any(),
             )
         } returns barnepensjonBeregningsGrunnlag(behandling.id, listOf(HELSOESKEN_FOEDSELSNUMMER, HELSOESKEN2_FOEDSELSNUMMER))
-        coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns null
-
-        runBlocking {
-            val beregning = beregnBarnepensjonService().beregn(behandling, bruker)
-
-            with(beregning) {
-                beregningId shouldNotBe null
-                behandlingId shouldBe behandling.id
-                type shouldBe Beregningstype.BP
-                beregnetDato shouldNotBe null
-                grunnlagMetadata shouldBe grunnlag.metadata
-                beregningsperioder.size shouldBeGreaterThanOrEqual 2
-                with(beregningsperioder.first()) {
-                    utbetaltBeloep shouldBe BP_BELOEP_TO_SOESKEN_JAN_23
-                    datoFOM shouldBe behandling.virkningstidspunkt?.dato
-                    datoTOM shouldBe YearMonth.of(2023, Month.APRIL)
-                    grunnbelopMnd shouldBe GRUNNBELOEP_JAN_23
-                    soeskenFlokk shouldBe listOf(HELSOESKEN_FOEDSELSNUMMER.value, HELSOESKEN2_FOEDSELSNUMMER.value)
-                    trygdetid shouldBe MAKS_TRYGDETID
-                }
-            }
-        }
-    }
-
-    @Test
-    fun `skal beregne barnepensjon foerstegangsbehandling - to soesken - med trygdetid`() {
-        val behandling = mockBehandling(BehandlingType.FØRSTEGANGSBEHANDLING)
-        val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
-
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
-        coEvery {
-            beregningsGrunnlagService.hentBarnepensjonBeregningsGrunnlag(
-                any(),
-                any(),
-            )
-        } returns barnepensjonBeregningsGrunnlag(behandling.id, listOf(HELSOESKEN_FOEDSELSNUMMER, HELSOESKEN2_FOEDSELSNUMMER))
         coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns mockTrygdetid(behandling.id)
-        featureToggleService.settBryter(BrukFaktiskTrygdetid, true)
 
         runBlocking {
             val beregning = beregnBarnepensjonService().beregn(behandling, bruker)
@@ -402,48 +285,7 @@ internal class BeregnBarnepensjonServiceTest {
             mockk {
                 every { resultat?.utfall } returns VilkaarsvurderingUtfall.OPPFYLT
             }
-        coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns null
-
-        runBlocking {
-            val beregning = beregnBarnepensjonService().beregn(behandling, bruker)
-
-            with(beregning) {
-                beregningId shouldNotBe null
-                behandlingId shouldBe behandling.id
-                type shouldBe Beregningstype.BP
-                beregnetDato shouldNotBe null
-                grunnlagMetadata shouldBe grunnlag.metadata
-                beregningsperioder.size shouldBeGreaterThanOrEqual 2
-                with(beregningsperioder.first()) {
-                    utbetaltBeloep shouldBe BP_BELOEP_INGEN_SOESKEN_JAN_23
-                    datoFOM shouldBe behandling.virkningstidspunkt?.dato
-                    datoTOM shouldBe YearMonth.of(2023, Month.APRIL)
-                    grunnbelopMnd shouldBe GRUNNBELOEP_JAN_23
-                    soeskenFlokk shouldBe emptyList()
-                    trygdetid shouldBe MAKS_TRYGDETID
-                }
-            }
-        }
-    }
-
-    @Test
-    fun `skal beregne barnepensjon revurdering - ingen soesken - med trygdetid`() {
-        val behandling = mockBehandling(BehandlingType.REVURDERING)
-        val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
-
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
-        coEvery {
-            beregningsGrunnlagService.hentBarnepensjonBeregningsGrunnlag(
-                any(),
-                any(),
-            )
-        } returns barnepensjonBeregningsGrunnlag(behandling.id, emptyList())
-        coEvery { vilkaarsvurderingKlient.hentVilkaarsvurdering(any(), any()) } returns
-            mockk {
-                every { resultat?.utfall } returns VilkaarsvurderingUtfall.OPPFYLT
-            }
         coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns mockTrygdetid(behandling.id)
-        featureToggleService.settBryter(BrukFaktiskTrygdetid, true)
 
         runBlocking {
             val beregning = beregnBarnepensjonService().beregn(behandling, bruker)
@@ -483,48 +325,7 @@ internal class BeregnBarnepensjonServiceTest {
             mockk {
                 every { resultat?.utfall } returns VilkaarsvurderingUtfall.IKKE_OPPFYLT
             }
-        coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns null
-
-        runBlocking {
-            val beregning = beregnBarnepensjonService().beregn(behandling, bruker)
-
-            with(beregning) {
-                beregningId shouldNotBe null
-                behandlingId shouldBe behandling.id
-                type shouldBe Beregningstype.BP
-                beregnetDato shouldNotBe null
-                grunnlagMetadata shouldBe grunnlag.metadata
-                beregningsperioder.size shouldBeGreaterThanOrEqual 1
-                with(beregningsperioder.first()) {
-                    utbetaltBeloep shouldBe 0
-                    datoFOM shouldBe behandling.virkningstidspunkt?.dato
-                    datoTOM shouldBe null
-                    grunnbelopMnd shouldBe GRUNNBELOEP_JAN_23
-                    soeskenFlokk shouldBe null
-                    trygdetid shouldBe 0
-                }
-            }
-        }
-    }
-
-    @Test
-    fun `skal opphoere ved revurdering og vilkaarsvurdering ikke oppfylt - med trygdetid`() {
-        val behandling = mockBehandling(BehandlingType.REVURDERING)
-        val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
-
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
-        coEvery {
-            beregningsGrunnlagService.hentBarnepensjonBeregningsGrunnlag(
-                any(),
-                any(),
-            )
-        } returns barnepensjonBeregningsGrunnlag(behandling.id, emptyList())
-        coEvery { vilkaarsvurderingKlient.hentVilkaarsvurdering(any(), any()) } returns
-            mockk {
-                every { resultat?.utfall } returns VilkaarsvurderingUtfall.IKKE_OPPFYLT
-            }
         coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns mockTrygdetid(behandling.id)
-        featureToggleService.settBryter(BrukFaktiskTrygdetid, true)
 
         runBlocking {
             val beregning = beregnBarnepensjonService().beregn(behandling, bruker)
@@ -560,44 +361,7 @@ internal class BeregnBarnepensjonServiceTest {
                 any(),
             )
         } returns barnepensjonBeregningsGrunnlag(behandling.id, emptyList())
-        coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns null
-
-        runBlocking {
-            val beregning = beregnBarnepensjonService().beregn(behandling, bruker)
-
-            with(beregning) {
-                beregningId shouldNotBe null
-                behandlingId shouldBe behandling.id
-                type shouldBe Beregningstype.BP
-                beregnetDato shouldNotBe null
-                grunnlagMetadata shouldBe grunnlag.metadata
-                beregningsperioder.size shouldBeGreaterThanOrEqual 1
-                with(beregningsperioder.first()) {
-                    utbetaltBeloep shouldBe 0
-                    datoFOM shouldBe behandling.virkningstidspunkt?.dato
-                    datoTOM shouldBe null
-                    grunnbelopMnd shouldBe GRUNNBELOEP_JAN_23
-                    soeskenFlokk shouldBe null
-                    trygdetid shouldBe 0
-                }
-            }
-        }
-    }
-
-    @Test
-    fun `skal sette beloep til 0 ved manuelt opphoer - med trygdetid`() {
-        val behandling = mockBehandling(BehandlingType.MANUELT_OPPHOER)
-        val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
-
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
-        coEvery {
-            beregningsGrunnlagService.hentBarnepensjonBeregningsGrunnlag(
-                any(),
-                any(),
-            )
-        } returns barnepensjonBeregningsGrunnlag(behandling.id, emptyList())
         coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns mockTrygdetid(behandling.id)
-        featureToggleService.settBryter(BrukFaktiskTrygdetid, true)
 
         runBlocking {
             val beregning = beregnBarnepensjonService().beregn(behandling, bruker)
@@ -622,7 +386,7 @@ internal class BeregnBarnepensjonServiceTest {
     }
 
     @Test
-    fun `skal beregne barnepensjon foerstegangsbehandling - ett soesken - med trygdetid og nytt regelverk`() {
+    fun `skal beregne barnepensjon foerstegangsbehandling - ett soesken - med nytt regelverk`() {
         val behandling = mockBehandling(BehandlingType.FØRSTEGANGSBEHANDLING)
         val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
 
@@ -643,7 +407,6 @@ internal class BeregnBarnepensjonServiceTest {
                 Triple(YearMonth.of(2023, 4), null, listOf(HELSOESKEN_FOEDSELSNUMMER.value)),
             )
         coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns mockTrygdetid(behandling.id)
-        featureToggleService.settBryter(BrukFaktiskTrygdetid, true)
         featureToggleService.settBryter(BrukNyttRegelverkIBeregning, true)
 
         runBlocking {

@@ -93,9 +93,6 @@ class ReguleringTest {
 
         coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns null
         every {
-            featureToggleService.isEnabled(BeregnBarnepensjonServiceFeatureToggle.BrukFaktiskTrygdetid, false)
-        } returns false
-        every {
             featureToggleService.isEnabled(
                 BeregnBarnepensjonServiceFeatureToggle.BrukInstitusjonsoppholdIBeregning,
                 false,

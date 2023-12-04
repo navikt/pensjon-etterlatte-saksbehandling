@@ -8,11 +8,13 @@ import { Content, ContentHeader } from '~shared/styled'
 import { IBehandlingsType, IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { useVedtaksResultat } from '~components/behandling/useVedtaksResultat'
 import { hentOverstyrBeregning } from '~shared/api/beregning'
-import { isSuccess, useApiCall } from '~shared/hooks/useApiCall'
+import { useApiCall } from '~shared/hooks/useApiCall'
 import { OverstyrBeregning } from '~shared/types/Beregning'
 import { useEffect, useState } from 'react'
 import OverstyrBeregningGrunnlag from './OverstyrBeregningGrunnlag'
 import { Vilkaarsresultat } from '~components/behandling/felles/Vilkaarsresultat'
+
+import { isSuccess } from '~shared/api/apiUtils'
 
 const Beregningsgrunnlag = (props: { behandling: IDetaljertBehandling }) => {
   const { behandling } = props

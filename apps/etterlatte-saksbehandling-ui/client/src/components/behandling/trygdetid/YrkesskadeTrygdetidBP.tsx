@@ -2,11 +2,13 @@ import { BodyShort } from '@navikt/ds-react'
 import { useEffect } from 'react'
 import { useParams } from 'react-router-dom'
 import styled from 'styled-components'
-import { ApiErrorAlert } from '~ErrorBoundary'
 import { LovtekstMedLenke } from '~components/behandling/soeknadsoversikt/LovtekstMedLenke'
 import Spinner from '~shared/Spinner'
 import { hentTrygdetid, ITrygdetid, lagreYrkesskadeTrygdetidGrunnlag, opprettTrygdetid } from '~shared/api/trygdetid'
-import { isFailure, isPending, useApiCall } from '~shared/hooks/useApiCall'
+import { useApiCall } from '~shared/hooks/useApiCall'
+
+import { isPending } from '~shared/api/apiUtils'
+import { isFailureHandler } from '~shared/api/IsFailureHandler'
 
 const YrkesskadeTrygdetidBP = () => {
   const { behandlingId } = useParams()
@@ -58,13 +60,18 @@ const YrkesskadeTrygdetidBP = () => {
       {isPending(opprettYrkesskadeTrygdetidGrunnlag) && (
         <Spinner visible={true} label="Oppretter trygdetid grunnlag for yrkesskade" />
       )}
-      {isFailure(hentTrygdetidRequest) && <ApiErrorAlert>En feil har oppstått ved henting av trygdetid</ApiErrorAlert>}
-      {isFailure(opprettTrygdetidRequest) && (
-        <ApiErrorAlert>En feil har oppstått ved opprettelse av trygdetid</ApiErrorAlert>
-      )}
-      {isFailure(opprettYrkesskadeTrygdetidGrunnlag) && (
-        <ApiErrorAlert>En feil har oppstått ved opprettelse av trygdetid grunnlag for yrkesskade</ApiErrorAlert>
-      )}
+      {isFailureHandler({
+        apiResult: hentTrygdetidRequest,
+        errorMessage: 'En feil har oppstått ved henting av trygdetid',
+      })}
+      {isFailureHandler({
+        apiResult: opprettTrygdetidRequest,
+        errorMessage: 'En feil har oppstått ved opprettelse av trygdetid',
+      })}
+      {isFailureHandler({
+        apiResult: opprettYrkesskadeTrygdetidGrunnlag,
+        errorMessage: 'En feil har oppstått ved opprettelse av trygdetid grunnlag for yrkesskade',
+      })}
     </TrygdetidWrapper>
   )
 }

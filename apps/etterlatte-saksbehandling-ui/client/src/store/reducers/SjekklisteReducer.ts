@@ -1,11 +1,15 @@
 import { ISjekkliste, ISjekklisteItem } from '~shared/types/Sjekkliste'
 import { createAction, createReducer } from '@reduxjs/toolkit'
 
+export enum Valideringsfeilkoder {
+  MAA_HUKES_AV = 'Feltet må hukes av for å ferdigstilles',
+}
+
 export const updateSjekkliste = createAction<ISjekkliste>('sjekkliste/update')
 export const updateSjekklisteItem = createAction<ISjekklisteItem>('sjekkliste/updateItem')
-export const addValideringsfeil = createAction<String>('sjekkliste/addValideringsfeil')
+export const addValideringsfeil = createAction<Valideringsfeilkoder>('sjekkliste/addValideringsfeil')
 
-const initialState: { sjekkliste: ISjekkliste | null; valideringsfeil: String[] } = {
+const initialState: { sjekkliste: ISjekkliste | null; valideringsfeil: Valideringsfeilkoder[] } = {
   sjekkliste: null,
   valideringsfeil: [],
 }

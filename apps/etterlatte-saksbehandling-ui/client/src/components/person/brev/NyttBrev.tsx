@@ -1,5 +1,5 @@
 import RedigerbartBrev from '~components/behandling/brev/RedigerbartBrev'
-import { mapApiResult, useApiCall } from '~shared/hooks/useApiCall'
+import { useApiCall } from '~shared/hooks/useApiCall'
 import { useParams } from 'react-router-dom'
 import { hentBrev } from '~shared/api/brev'
 import { useEffect, useState } from 'react'
@@ -16,6 +16,8 @@ import NyttBrevMottaker from '~components/person/brev/NyttBrevMottaker'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import BrevTittel from '~components/person/brev/tittel/BrevTittel'
+
+import { mapApiResult } from '~shared/api/apiUtils'
 
 export default function NyttBrev() {
   const { brevId, sakId, fnr } = useParams()

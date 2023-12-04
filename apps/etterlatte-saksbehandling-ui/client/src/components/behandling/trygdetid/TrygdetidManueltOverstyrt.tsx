@@ -1,9 +1,12 @@
 import React, { useState } from 'react'
-import { Alert, Button, Checkbox, TextField } from '@navikt/ds-react'
+import { Button, Checkbox, TextField } from '@navikt/ds-react'
 import styled from 'styled-components'
-import { isFailure, isPending, useApiCall } from '~shared/hooks/useApiCall'
+import { useApiCall } from '~shared/hooks/useApiCall'
 import { IDetaljertBeregnetTrygdetid, ITrygdetid, oppdaterTrygdetidOverstyrtMigrering } from '~shared/api/trygdetid'
 import { InputRow } from '~components/person/journalfoeringsoppgave/nybehandling/OpprettNyBehandling'
+
+import { isPending } from '~shared/api/apiUtils'
+import { isFailureHandler } from '~shared/api/IsFailureHandler'
 
 export const TrygdetidManueltOverstyrt = ({
   behandlingId,
@@ -87,7 +90,10 @@ export const TrygdetidManueltOverstyrt = ({
           Send inn
         </Button>
       </Knapp>
-      {isFailure(status) && <Alert variant="error">Det oppsto en feil ved oppdatering av trygdetid.</Alert>}
+      {isFailureHandler({
+        apiResult: status,
+        errorMessage: 'Det oppsto en feil ved oppdatering av trygdetid.',
+      })}
     </FormWrapper>
   )
 }

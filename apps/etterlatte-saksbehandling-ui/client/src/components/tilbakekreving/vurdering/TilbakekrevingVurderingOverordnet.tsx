@@ -6,12 +6,14 @@ import {
   TilbakekrevingHjemmel,
   TilbakekrevingVurdering,
 } from '~shared/types/Tilbakekreving'
-import { isPending, useApiCall } from '~shared/hooks/useApiCall'
+import { useApiCall } from '~shared/hooks/useApiCall'
 import React, { useState } from 'react'
 import { lagreTilbakekrevingsvurdering } from '~shared/api/tilbakekreving'
 import { addTilbakekreving } from '~store/reducers/TilbakekrevingReducer'
 import styled from 'styled-components'
 import { useAppDispatch } from '~store/Store'
+
+import { isPending } from '~shared/api/apiUtils'
 
 export function TilbakekrevingVurderingOverordnet({ behandling }: { behandling: TilbakekrevingBehandling }) {
   const dispatch = useAppDispatch()

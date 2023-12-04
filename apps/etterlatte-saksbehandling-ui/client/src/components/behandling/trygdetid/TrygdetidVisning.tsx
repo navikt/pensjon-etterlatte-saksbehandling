@@ -9,22 +9,20 @@ import { BehandlingHandlingKnapper } from '~components/behandling/handlinger/Beh
 import { NesteOgTilbake } from '~components/behandling/handlinger/NesteOgTilbake'
 import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
 import { useBehandlingRoutes } from '~components/behandling/BehandlingRoutes'
-import { isFailure, isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
+import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentVilkaarsvurdering } from '~shared/api/vilkaarsvurdering'
-import { ApiErrorAlert } from '~ErrorBoundary'
 import React, { useEffect, useState } from 'react'
-import FastTrygdetid from '~components/behandling/trygdetid/FastTrygdetid'
 import YrkesskadeTrygdetidBP from '~components/behandling/trygdetid/YrkesskadeTrygdetidBP'
 import YrkesskadeTrygdetidOMS from '~components/behandling/trygdetid/YrkesskadeTrygdetidOMS'
 import { Trygdetid } from '~components/behandling/trygdetid/Trygdetid'
-import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 import { oppdaterStatus } from '~shared/api/trygdetid'
 import { oppdaterBehandlingsstatus } from '~store/reducers/BehandlingReducer'
 import { useAppDispatch } from '~store/Store'
 import { handlinger } from '~components/behandling/handlinger/typer'
 import { Vilkaarsresultat } from '~components/behandling/felles/Vilkaarsresultat'
 
-const featureToggleNameTrygdetid = 'pensjon-etterlatte.bp-bruk-faktisk-trygdetid' as const
+import { isPending, isSuccess } from '~shared/api/apiUtils'
+import { isFailureHandler } from '~shared/api/IsFailureHandler'
 
 const TrygdetidVisning = (props: { behandling: IDetaljertBehandling }) => {
   const { behandling } = props
@@ -34,7 +32,6 @@ const TrygdetidVisning = (props: { behandling: IDetaljertBehandling }) => {
   const [vilkaarsvurdering, getVilkaarsvurdering] = useApiCall(hentVilkaarsvurdering)
   const [yrkesskadeTrygdetid, setYrkesskadeTrygdetid] = useState<boolean>(false)
 
-  const beregnTrygdetid = useFeatureEnabledMedDefault(featureToggleNameTrygdetid, false)
   const vedtaksresultat =
     behandling.behandlingType !== IBehandlingsType.MANUELT_OPPHOER ? useVedtaksResultat() : 'opphoer'
   const virkningstidspunkt = behandling.virkningstidspunkt?.dato
@@ -79,20 +76,23 @@ const TrygdetidVisning = (props: { behandling: IDetaljertBehandling }) => {
             [SakType.BARNEPENSJON]: <YrkesskadeTrygdetidBP />,
             [SakType.OMSTILLINGSSTOENAD]: <YrkesskadeTrygdetidOMS />,
           }[behandling.sakType]
-        ) : beregnTrygdetid ? (
+        ) : (
           <Trygdetid
             redigerbar={redigerbar}
             behandling={behandling}
             virkningstidspunktEtterNyRegelDato={virkningstidspunktEtterNyRegelDato()}
           />
-        ) : (
-          <FastTrygdetid />
         ))}
 
       <Border />
-
-      {isFailure(vilkaarsvurdering) && <ApiErrorAlert>Kunne ikke hente vilkårsvurdering</ApiErrorAlert>}
-      {isFailure(oppdaterStatusResult) && <ApiErrorAlert>{oppdaterStatusResult.error.detail}</ApiErrorAlert>}
+      {isFailureHandler({
+        apiResult: vilkaarsvurdering,
+        errorMessage: 'Kunne ikke hente vilkårsvurdering',
+      })}
+      {isFailureHandler({
+        apiResult: oppdaterStatusResult,
+        errorMessage: 'Kunne ikke oppdatere vilkårsvurderingsresultat',
+      })}
 
       {redigerbar ? (
         <BehandlingHandlingKnapper>

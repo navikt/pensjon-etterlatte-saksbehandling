@@ -19,6 +19,7 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Utenlandstilknytning
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.retry
+import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.rapidsandrivers.migrering.MigreringRequest
 import no.nav.etterlatte.sak.SakService
@@ -40,8 +41,12 @@ class MigreringService(
 
     suspend fun migrer(request: MigreringRequest) =
         retryMedPause(times = 3) {
+            val sak =
+                inTransaction {
+                    finnEllerOpprettSak(request)
+                }
             inTransaction {
-                opprettSakOgBehandling(request)?.let { behandlingOgOppgave ->
+                opprettSakOgBehandling(request, sak)?.let { behandlingOgOppgave ->
                     val behandling = behandlingOgOppgave.behandling
                     if (behandling.type != BehandlingType.FØRSTEGANGSBEHANDLING) {
                         throw IllegalArgumentException(
@@ -128,13 +133,15 @@ class MigreringService(
         block: suspend () -> T,
     ) = retry(times, block).also { Thread.sleep(2000) }
 
-    private fun opprettSakOgBehandling(request: MigreringRequest) =
-        behandlingFactory.opprettBehandling(
-            finnEllerOpprettSak(request).id,
-            request.opprettPersongalleri(),
-            null,
-            Vedtaksloesning.PESYS,
-        )
+    private fun opprettSakOgBehandling(
+        request: MigreringRequest,
+        sak: Sak,
+    ) = behandlingFactory.opprettBehandling(
+        sak.id,
+        request.opprettPersongalleri(),
+        null,
+        Vedtaksloesning.PESYS,
+    )
 
     private fun finnEllerOpprettSak(request: MigreringRequest) =
         sakService.finnEllerOpprettSak(request.soeker.value, SakType.BARNEPENSJON, request.enhet.nr)

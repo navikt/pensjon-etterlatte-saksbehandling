@@ -5,7 +5,7 @@ import { behandlingErRedigerbar } from '../felles/utils'
 import { NesteOgTilbake } from '../handlinger/NesteOgTilbake'
 import { useAppDispatch } from '~store/Store'
 import { hentBeregningsGrunnlag, lagreBeregningsGrunnlag, opprettEllerEndreBeregning } from '~shared/api/beregning'
-import { isFailure, isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
+import { useApiCall } from '~shared/hooks/useApiCall'
 import {
   IBehandlingReducer,
   oppdaterBehandlingsstatus,
@@ -35,8 +35,10 @@ import BeregningsgrunnlagMetode from './BeregningsgrunnlagMetode'
 import { handlinger } from '~components/behandling/handlinger/typer'
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 
+import { isPending, isSuccess } from '~shared/api/apiUtils'
+import { isFailureHandler } from '~shared/api/IsFailureHandler'
+
 const featureToggleNameInstitusjonsopphold = 'pensjon-etterlatte.bp-bruk-institusjonsopphold' as const
-const featureToggleNameBrukFaktiskTrygdetid = 'pensjon-etterlatte.bp-bruk-faktisk-trygdetid' as const
 
 const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer }) => {
   const { behandling } = props
@@ -48,7 +50,6 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
   const [beregningsgrunnlag, fetchBeregningsgrunnlag] = useApiCall(hentBeregningsGrunnlag)
   const [endreBeregning, postOpprettEllerEndreBeregning] = useApiCall(opprettEllerEndreBeregning)
   const visInstitusjonsopphold = useFeatureEnabledMedDefault(featureToggleNameInstitusjonsopphold, false)
-  const visBeregningsmetode = useFeatureEnabledMedDefault(featureToggleNameBrukFaktiskTrygdetid, false)
   const [soeskenGrunnlagsData, setSoeskenGrunnlagsData] = useState<Soeskengrunnlag | null>(null)
   const [institusjonsoppholdsGrunnlagData, setInstitusjonsoppholdsGrunnlagData] =
     useState<InstitusjonsoppholdGrunnlagData | null>(null)
@@ -115,7 +116,7 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
   return (
     <>
       <>
-        {visBeregningsmetode && isSuccess(beregningsgrunnlag) && (
+        {isSuccess(beregningsgrunnlag) && (
           <BeregningsgrunnlagMetode
             redigerbar={redigerbar}
             grunnlag={beregningsMetodeBeregningsgrunnlag}
@@ -138,11 +139,20 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
           />
         )}
         <Spinner visible={isPending(beregningsgrunnlag)} label="Henter beregningsgrunnlag" />
-        {isFailure(beregningsgrunnlag) && <ApiErrorAlert>Beregningsgrunnlag kan ikke hentes</ApiErrorAlert>}
+        {isFailureHandler({
+          apiResult: beregningsgrunnlag,
+          errorMessage: 'Beregningsgrunnlag kan ikke hentes',
+        })}
       </>
       {manglerSoeskenJustering && <ApiErrorAlert>Søskenjustering er ikke fylt ut </ApiErrorAlert>}
-      {isFailure(endreBeregning) && <ApiErrorAlert>Kunne ikke opprette ny beregning</ApiErrorAlert>}
-      {isFailure(lagreBeregningsgrunnlag) && <ApiErrorAlert>Kunne ikke lagre beregningsgrunnlag</ApiErrorAlert>}
+      {isFailureHandler({
+        apiResult: endreBeregning,
+        errorMessage: 'Kunne ikke opprette ny beregning',
+      })}
+      {isFailureHandler({
+        apiResult: lagreBeregningsgrunnlag,
+        errorMessage: 'Kunne ikke lagre beregningsgrunnlag',
+      })}
 
       <Border />
 

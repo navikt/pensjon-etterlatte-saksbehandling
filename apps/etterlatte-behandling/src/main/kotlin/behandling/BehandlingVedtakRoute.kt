@@ -87,12 +87,27 @@ internal fun Route.behandlingVedtakRoute(
                             listOfNotNull(it.valgtBegrunnelse, it.kommentar).joinToString(separator = ": ")
                         }
                     try {
-                        oppgaveService.ferdigstillOppgaveUnderbehandlingOgLagNyMedType(
-                            fattetoppgaveReferanseOgSak = underkjennVedtakOppgave.sakIdOgReferanse,
-                            oppgaveType = OppgaveType.UNDERKJENT,
-                            merknad = merknadFraAttestant,
-                            saksbehandler = brukerTokenInfo,
-                        )
+                        val sisteSaksbehandlerIkkeAttestering =
+                            oppgaveService.hentSisteSaksbehandlerIkkeAttestertOppgave(underkjennVedtakOppgave.sakIdOgReferanse.referanse)
+
+                        val ferdigstillOppgaveUnderbehandlingOgLagNyMedType =
+                            oppgaveService.ferdigstillOppgaveUnderbehandlingOgLagNyMedType(
+                                fattetoppgaveReferanseOgSak = underkjennVedtakOppgave.sakIdOgReferanse,
+                                oppgaveType = OppgaveType.UNDERKJENT,
+                                merknad = merknadFraAttestant,
+                                saksbehandler = brukerTokenInfo,
+                            )
+                        if (sisteSaksbehandlerIkkeAttestering != null) {
+                            oppgaveService.tildelSaksbehandler(
+                                ferdigstillOppgaveUnderbehandlingOgLagNyMedType.id,
+                                sisteSaksbehandlerIkkeAttestering,
+                            )
+                        } else {
+                            logger.warn(
+                                "Fant ikke siste saksbehandler for behandling:" +
+                                    " ${underkjennVedtakOppgave.sakIdOgReferanse.referanse}. ",
+                            )
+                        }
                     } catch (e: Exception) {
                         haandterFeilIOppgaveService(e)
                     }

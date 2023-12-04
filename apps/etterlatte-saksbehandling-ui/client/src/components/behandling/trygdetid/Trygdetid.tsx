@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { isFailure, isPending, useApiCall } from '~shared/hooks/useApiCall'
+import { useApiCall } from '~shared/hooks/useApiCall'
 import {
   hentAlleLand,
   hentTrygdetid,
@@ -11,7 +11,6 @@ import {
   sorterLand,
 } from '~shared/api/trygdetid'
 import Spinner from '~shared/Spinner'
-import { ApiErrorAlert } from '~ErrorBoundary'
 import { LovtekstMedLenke } from '~components/behandling/soeknadsoversikt/LovtekstMedLenke'
 import styled from 'styled-components'
 import { BodyShort } from '@navikt/ds-react'
@@ -25,6 +24,9 @@ import { TrygdetidDetaljer } from '~components/behandling/trygdetid/detaljer/Try
 import { OverstyrtTrygdetid } from './OverstyrtTrygdetid'
 import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
 import { TrygdetidManueltOverstyrt } from '~components/behandling/trygdetid/TrygdetidManueltOverstyrt'
+
+import { isPending } from '~shared/api/apiUtils'
+import { isFailureHandler } from '~shared/api/IsFailureHandler'
 
 interface Props {
   redigerbar: boolean
@@ -159,14 +161,22 @@ export const Trygdetid = ({ redigerbar, behandling, virkningstidspunktEtterNyReg
         <Spinner visible={true} label="Henter trygdetid" />
       )}
       {isPending(opprettTrygdetidRequest) && <Spinner visible={true} label="Oppretter trygdetid" />}
-      {isFailure(hentTrygdetidRequest) && <ApiErrorAlert>En feil har oppstått ved henting av trygdetid</ApiErrorAlert>}
-      {isFailure(overstyrTrygdetidRequest) && (
-        <ApiErrorAlert>En feil har oppstått ved lagring av norsk poengår</ApiErrorAlert>
-      )}
-      {isFailure(opprettTrygdetidRequest) && (
-        <ApiErrorAlert>En feil har oppstått ved opprettelse av trygdetid</ApiErrorAlert>
-      )}
-      {isFailure(hentAlleLandRequest) && <ApiErrorAlert>Hent feil har oppstått ved henting av landliste</ApiErrorAlert>}
+      {isFailureHandler({
+        apiResult: hentTrygdetidRequest,
+        errorMessage: 'En feil har oppstått ved henting av trygdetid',
+      })}
+      {isFailureHandler({
+        apiResult: overstyrTrygdetidRequest,
+        errorMessage: 'En feil har oppstått ved lagring av norsk poengår',
+      })}
+      {isFailureHandler({
+        apiResult: opprettTrygdetidRequest,
+        errorMessage: 'En feil har oppstått ved opprettelse av trygdetid',
+      })}
+      {isFailureHandler({
+        apiResult: hentAlleLandRequest,
+        errorMessage: 'Hent feil har oppstått ved henting av landliste',
+      })}
     </TrygdetidWrapper>
   )
 }

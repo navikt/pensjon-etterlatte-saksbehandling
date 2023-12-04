@@ -3,12 +3,15 @@ import { hentUndertypeFraBehandling, RevurderingAarsakAnnen, RevurderingInfo } f
 import { FormEvent, useState } from 'react'
 import { BodyShort, Button, Heading, TextField } from '@navikt/ds-react'
 import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
-import { isFailure, isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
+import { useApiCall } from '~shared/hooks/useApiCall'
 import { lagreRevurderingInfo } from '~shared/api/revurdering'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { oppdaterRevurderingInfo } from '~store/reducers/BehandlingReducer'
 import styled from 'styled-components'
 import { Revurderingsbegrunnelse } from '~components/behandling/revurderingsoversikt/Revurderingsbegrunnelse'
+
+import { isPending, isSuccess } from '~shared/api/apiUtils'
+import { isFailureHandler } from '~shared/api/IsFailureHandler'
 
 export const RevurderingAnnen = (props: { behandling: IDetaljertBehandling }) => {
   const { behandling } = props
@@ -66,7 +69,10 @@ export const RevurderingAnnen = (props: { behandling: IDetaljertBehandling }) =>
             Lagre
           </Button>
           {isSuccess(lagrestatus) && <span>Lagret!</span>}
-          {isFailure(lagrestatus) && <ApiErrorAlert>Kunne ikke lagre</ApiErrorAlert>}
+          {isFailureHandler({
+            apiResult: lagrestatus,
+            errorMessage: 'Kunne ikke lagre',
+          })}
           {feilmelding && <ApiErrorAlert>{feilmelding}</ApiErrorAlert>}
         </SkjemaWrapper>
       ) : (

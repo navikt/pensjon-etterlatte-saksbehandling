@@ -11,7 +11,7 @@ import { IBehandlingReducer, oppdaterBehandlingsstatus, oppdaterBeregning } from
 import Spinner from '~shared/Spinner'
 import { BehandlingHandlingKnapper } from '~components/behandling/handlinger/BehandlingHandlingKnapper'
 import { Alert, Button, Heading } from '@navikt/ds-react'
-import { isFailure, isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
+import { useApiCall } from '~shared/hooks/useApiCall'
 import { IBehandlingStatus, IBehandlingsType } from '~shared/types/IDetaljertBehandling'
 import styled from 'styled-components'
 import { NesteOgTilbake } from '../handlinger/NesteOgTilbake'
@@ -28,12 +28,15 @@ import { VilkaarsvurderingResultat } from '~shared/api/vilkaarsvurdering'
 import { handlinger } from '~components/behandling/handlinger/typer'
 import { Vilkaarsresultat } from '~components/behandling/felles/Vilkaarsresultat'
 
+import { isPending, mapApiResult } from '~shared/api/apiUtils'
+import { isFailureHandler } from '~shared/api/IsFailureHandler'
+
 export const Beregne = (props: { behandling: IBehandlingReducer }) => {
   const { behandling } = props
   const { next } = useBehandlingRoutes()
   const dispatch = useAppDispatch()
   const [beregning, hentBeregningRequest] = useApiCall(hentBeregning)
-  const [vedtak, oppdaterVedtakRequest] = useApiCall(upsertVedtak)
+  const [vedtakStatus, oppdaterVedtakRequest] = useApiCall(upsertVedtak)
   const [visAttesteringsmodal, setVisAttesteringsmodal] = useState(false)
   const virkningstidspunkt = behandling.virkningstidspunkt?.dato
     ? formaterStringDato(behandling.virkningstidspunkt.dato)
@@ -82,57 +85,67 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
         </BeregningWrapper>
       ) : (
         <>
-          {isPending(beregning) && <Spinner visible label="Henter beregning" />}
-          {isFailure(beregning) && <ApiErrorAlert>Kunne ikke hente beregning</ApiErrorAlert>}
-          {isSuccess(beregning) && (
-            <BeregningWrapper>
-              {(() => {
-                switch (beregning.data.type) {
-                  case Beregningstype.BP:
-                    return <BarnepensjonSammendrag behandling={behandling} beregning={beregning.data} />
-                  case Beregningstype.OMS:
-                    return (
-                      <>
-                        <OmstillingsstoenadSammendrag beregning={beregning.data} />
-                        <Avkorting behandling={behandling} />
-                      </>
-                    )
-                }
-              })()}
+          {mapApiResult(
+            beregning,
+            <Spinner visible label="Henter beregning" />,
+            () => (
+              <ApiErrorAlert>Kunne ikke hente beregning</ApiErrorAlert>
+            ),
+            (beregning) => (
+              <BeregningWrapper>
+                {(() => {
+                  switch (beregning.type) {
+                    case Beregningstype.BP:
+                      return <BarnepensjonSammendrag behandling={behandling} beregning={beregning} />
+                    case Beregningstype.OMS:
+                      return (
+                        <>
+                          <OmstillingsstoenadSammendrag beregning={beregning} />
+                          <Avkorting behandling={behandling} />
+                        </>
+                      )
+                  }
+                })()}
 
-              {behandlingSkalSendeBrev(behandling.behandlingType, behandling.revurderingsaarsak) ? null : (
-                <InfoAlert variant="info" inline>
-                  Det sendes ikke vedtaksbrev for denne behandlingen.
-                </InfoAlert>
-              )}
+                {behandlingSkalSendeBrev(behandling.behandlingType, behandling.revurderingsaarsak) ? null : (
+                  <InfoAlert variant="info" inline>
+                    Det sendes ikke vedtaksbrev for denne behandlingen.
+                  </InfoAlert>
+                )}
 
-              <EtterbetalingWrapper>
-                <Etterbetaling
-                  behandlingId={behandling.id}
-                  lagraEtterbetaling={behandling.etterbetaling}
-                  redigerbar={redigerbar}
-                  virkningstidspunkt={virkningstidspunkt}
-                />
-              </EtterbetalingWrapper>
-            </BeregningWrapper>
+                <EtterbetalingWrapper>
+                  <Etterbetaling
+                    behandlingId={behandling.id}
+                    lagraEtterbetaling={behandling.etterbetaling}
+                    redigerbar={redigerbar}
+                    virkningstidspunkt={virkningstidspunkt}
+                  />
+                </EtterbetalingWrapper>
+              </BeregningWrapper>
+            )
           )}
         </>
       )}
 
       <Border />
 
-      {isFailure(vedtak) && (
-        <FlexRow justify="center">
-          <ApiErrorAlert>{vedtak.error.detail || 'Vedtaksoppdatering feilet'}</ApiErrorAlert>
-        </FlexRow>
-      )}
+      {isFailureHandler({
+        apiResult: vedtakStatus,
+        errorMessage: 'Vedtaksoppdatering feilet',
+        wrapperComponent: { component: FlexRow, props: { justify: 'center' } },
+      })}
 
       {redigerbar ? (
         <BehandlingHandlingKnapper>
           {visAttesteringsmodal ? (
-            <SendTilAttesteringModal behandlingId={behandling.id} fattVedtakApi={fattVedtak} />
+            <SendTilAttesteringModal
+              behandlingId={behandling.id}
+              fattVedtakApi={fattVedtak}
+              sakId={behandling.sakId}
+              validerKanSendeTilAttestering={() => true}
+            />
           ) : (
-            <Button loading={isPending(vedtak)} variant="primary" onClick={opprettEllerOppdaterVedtak}>
+            <Button loading={isPending(vedtakStatus)} variant="primary" onClick={opprettEllerOppdaterVedtak}>
               {behandlingSkalSendeBrev(behandling.behandlingType, behandling.revurderingsaarsak)
                 ? handlinger.NESTE.navn
                 : handlinger.FATT_VEDTAK.navn}

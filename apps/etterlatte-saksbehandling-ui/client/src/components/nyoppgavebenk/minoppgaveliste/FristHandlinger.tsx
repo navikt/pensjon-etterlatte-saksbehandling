@@ -1,13 +1,15 @@
 import React, { useEffect, useState } from 'react'
-import { isFailure, isPending, isSuccess, useApiCall } from '~shared/hooks/useApiCall'
+import { useApiCall } from '~shared/hooks/useApiCall'
 import { Oppgavetype, redigerFristApi } from '~shared/api/oppgaver'
 import { Alert, Button, DatePicker, Heading, Label, Modal } from '@navikt/ds-react'
-import { ApiErrorAlert } from '~ErrorBoundary'
 import { formaterStringDato } from '~utils/formattering'
 import { PencilIcon } from '@navikt/aksel-icons'
 import styled from 'styled-components'
 import { add, isBefore } from 'date-fns'
 import { FlexRow } from '~shared/styled'
+
+import { isPending, isSuccess } from '~shared/api/apiUtils'
+import { isFailureHandler } from '~shared/api/IsFailureHandler'
 
 const FristWrapper = styled.span<{ fristHarPassert: boolean; utenKnapp?: boolean }>`
   color: ${(p) => p.fristHarPassert && 'var(--a-text-danger)'};
@@ -75,7 +77,10 @@ export const FristHandlinger = (props: {
                 toDate={generateToDate()}
               />
               {isSuccess(redigerfristSvar) && <Alert variant="success">Frist er endret</Alert>}
-              {isFailure(redigerfristSvar) && <ApiErrorAlert>Kunne ikke lagre ny frist</ApiErrorAlert>}
+              {isFailureHandler({
+                apiResult: redigerfristSvar,
+                errorMessage: 'Kunne ikke lagre ny frist',
+              })}
               {!nyFrist && <Alert variant="warning">Du må velge en måned</Alert>}
               <FlexRow>
                 <Button

@@ -6,7 +6,7 @@ import { BodyShort, Button, Heading } from '@navikt/ds-react'
 import React, { useEffect } from 'react'
 import Spinner from '~shared/Spinner'
 import { Klage } from '~shared/types/Klage'
-import { isSuccess, mapApiResult, useApiCall } from '~shared/hooks/useApiCall'
+import { useApiCall } from '~shared/hooks/useApiCall'
 import NyttBrevMottaker from '~components/person/brev/NyttBrevMottaker'
 import { BrevStatus, kanBrevRedigeres } from '~shared/types/Brev'
 import ForhaandsvisningBrev from '~components/behandling/brev/ForhaandsvisningBrev'
@@ -16,6 +16,8 @@ import styled from 'styled-components'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { JaNei } from '~shared/types/ISvar'
 import { Innhold } from '~components/klage/styled'
+
+import { isSuccess, mapApiResult } from '~shared/api/apiUtils'
 
 function hentBrevIdForInnstilling(klage: Klage | null): number | null {
   // TODO håndter avvist klage?

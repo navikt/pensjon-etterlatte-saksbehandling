@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.grunnlag.adresse.BrevMottaker
 import no.nav.etterlatte.grunnlag.klienter.PdlTjenesterKlientImpl
-import no.nav.etterlatte.grunnlag.klienter.PersondataKlient
 import no.nav.etterlatte.libs.common.behandling.PersonMedSakerOgRoller
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakOgRolle
@@ -116,8 +115,8 @@ class RealGrunnlagService(
     private val pdltjenesterKlient: PdlTjenesterKlientImpl,
     private val opplysningDao: OpplysningDao,
     private val sporingslogg: Sporingslogg,
-    private val persondataKlient: PersondataKlient,
     private val grunnlagHenter: GrunnlagHenter,
+    private val vergeService: VergeService,
 ) : GrunnlagService {
     private val logger = LoggerFactory.getLogger(RealGrunnlagService::class.java)
 
@@ -297,9 +296,9 @@ class RealGrunnlagService(
     }
 
     override fun hentVergeadresse(folkeregisteridentifikator: String): BrevMottaker? {
-        return persondataKlient
-            .hentVergeadresseGittVergehaversFnr(folkeregisteridentifikator)
-            ?.tilFrittstaendeBrevMottaker()
+        val pdlPerson =
+            pdltjenesterKlient.hentPerson(folkeregisteridentifikator, PersonRolle.BARN, SakType.BARNEPENSJON)
+        return vergeService.hentGrunnlagsopplysningVergesAdresse(pdlPerson)?.opplysning
     }
 
     override fun hentPersongalleriSamsvar(behandlingId: UUID): PersongalleriSamsvar {

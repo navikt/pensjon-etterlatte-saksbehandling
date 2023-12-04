@@ -18,7 +18,6 @@ import no.nav.etterlatte.grunnlag.adresse.BrevMottaker
 import no.nav.etterlatte.grunnlag.adresse.Foedselsnummer
 import no.nav.etterlatte.grunnlag.adresse.PersondataAdresse
 import no.nav.etterlatte.grunnlag.klienter.PdlTjenesterKlientImpl
-import no.nav.etterlatte.grunnlag.klienter.PersondataKlient
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
@@ -33,13 +32,15 @@ import no.nav.etterlatte.libs.common.person.VergemaalEllerFremtidsfullmakt
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
+import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
+import no.nav.etterlatte.libs.testdata.grunnlag.kilde
 import org.junit.jupiter.api.Test
 import java.util.UUID
 
 class GrunnlagHenterTest {
     private val pdltjenesterKlient = mockk<PdlTjenesterKlientImpl>()
-    private val persondataKlient = mockk<PersondataKlient>()
-    private val grunnlagHenter = GrunnlagHenter(pdltjenesterKlient, persondataKlient)
+    private val vergeService = mockk<VergeService>()
+    private val grunnlagHenter = GrunnlagHenter(pdltjenesterKlient, vergeService)
 
     private val vergesFnr = "09498230323"
 
@@ -84,8 +85,8 @@ class GrunnlagHenterTest {
         val persondataAdresseVerge = mockk<PersondataAdresse>()
         every { persondataAdresseVerge.tilFrittstaendeBrevMottaker() } returns sampleVergeAdresse()
         every {
-            persondataKlient.hentVergeadresseGittVergehaversFnr(soekerFnr.value)
-        } returns persondataAdresseVerge
+            vergeService.hentGrunnlagsopplysningVergesAdresse(grunnlagTestData.soeker)
+        } returns grunnlagsopplysningVergesAdresse()
 
         val fetched =
             runBlocking {
@@ -163,6 +164,19 @@ class GrunnlagHenterTest {
             Grunnlagsopplysning.Pdl(Tidspunkt.now(), null, null),
             jsonNode,
         )
+
+    private fun grunnlagsopplysningVergesAdresse(): Grunnlagsopplysning<BrevMottaker> {
+        return Grunnlagsopplysning(
+            id = UUID.randomUUID(),
+            kilde = kilde,
+            opplysningType = Opplysningstype.VERGES_ADRESSE,
+            meta = no.nav.etterlatte.libs.common.objectMapper.createObjectNode(),
+            opplysning = sampleVergeAdresse(),
+            attestering = null,
+            fnr = SOEKER_FOEDSELSNUMMER,
+            periode = null,
+        )
+    }
 
     @Suppress("SameParameterValue")
     private fun vergemaal(

@@ -42,7 +42,6 @@ import no.nav.etterlatte.libs.testdata.grunnlag.INNSENDER_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER2_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.kilde
 import no.nav.etterlatte.libs.testdata.grunnlag.statiskUuid
-import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
@@ -57,6 +56,7 @@ import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class GrunnlagServiceTest {
+    private val vergeService = mockk<VergeService>()
     private val opplysningDaoMock = mockk<OpplysningDao>()
     private val pdlTjenesterKlientImpl = mockk<PdlTjenesterKlientImpl>()
     private val persondataKlient = mockk<PersondataKlient>()
@@ -66,8 +66,8 @@ internal class GrunnlagServiceTest {
             pdlTjenesterKlientImpl,
             opplysningDaoMock,
             mockk(),
-            persondataKlient,
             grunnlagHenter,
+            vergeService,
         )
 
     private val testData = GrunnlagTestData()
@@ -146,8 +146,8 @@ internal class GrunnlagServiceTest {
                     FOEDSELSDATO to Opplysning.Konstant(statiskUuid, kilde, nyFødselsdag.toJsonNode()),
                 )
 
-            Assertions.assertEquals(expected[NAVN], actual.soeker[NAVN])
-            Assertions.assertEquals(expected[FOEDSELSDATO], actual.soeker[FOEDSELSDATO])
+            assertEquals(expected[NAVN], actual.soeker[NAVN])
+            assertEquals(expected[FOEDSELSDATO], actual.soeker[FOEDSELSDATO])
         }
 
         @Test
@@ -164,8 +164,8 @@ internal class GrunnlagServiceTest {
                     PERSONROLLE to Opplysning.Konstant(statiskUuid, kilde, PersonRolle.AVDOED.toJsonNode()),
                 )
 
-            Assertions.assertEquals(expected[NAVN], actual.hentAvdoede()[0][NAVN])
-            Assertions.assertEquals(expected[FOEDSELSDATO], actual.hentAvdoede()[0][FOEDSELSDATO])
+            assertEquals(expected[NAVN], actual.hentAvdoede()[0][NAVN])
+            assertEquals(expected[FOEDSELSDATO], actual.hentAvdoede()[0][FOEDSELSDATO])
         }
 
         @Test
@@ -182,8 +182,8 @@ internal class GrunnlagServiceTest {
                     PERSONROLLE to Opplysning.Konstant(statiskUuid, kilde, PersonRolle.GJENLEVENDE.toJsonNode()),
                 )
 
-            Assertions.assertEquals(expected[NAVN], actual.hentGjenlevende()[NAVN])
-            Assertions.assertEquals(expected[FOEDSELSDATO], actual.hentGjenlevende()[FOEDSELSDATO])
+            assertEquals(expected[NAVN], actual.hentGjenlevende()[NAVN])
+            assertEquals(expected[FOEDSELSDATO], actual.hentGjenlevende()[FOEDSELSDATO])
         }
 
         @Test
@@ -200,8 +200,8 @@ internal class GrunnlagServiceTest {
                     PERSONROLLE to Opplysning.Konstant(statiskUuid, kilde, PersonRolle.BARN.toJsonNode()),
                 )
 
-            Assertions.assertEquals(expected[NAVN], actual.familie.single()[NAVN])
-            Assertions.assertEquals(expected[FOEDSELSDATO], actual.familie.single()[FOEDSELSDATO])
+            assertEquals(expected[NAVN], actual.familie.single()[NAVN])
+            assertEquals(expected[FOEDSELSDATO], actual.familie.single()[FOEDSELSDATO])
         }
     }
 
@@ -233,7 +233,7 @@ internal class GrunnlagServiceTest {
         fun `fjerner duplikater av samme opplysning for konstante opplysninger`() {
             every { opplysningDaoMock.hentAlleGrunnlagForSak(1) } returns grunnlagshendelser
 
-            Assertions.assertEquals(
+            assertEquals(
                 1,
                 grunnlagService.hentOpplysningsgrunnlagForSak(1)!!.soeker.values.size,
             )
@@ -244,11 +244,11 @@ internal class GrunnlagServiceTest {
             every { opplysningDaoMock.hentAlleGrunnlagForSak(1) } returns grunnlagshendelser
             val opplysningsgrunnlag = grunnlagService.hentOpplysningsgrunnlagForSak(1)!!
 
-            Assertions.assertEquals(
+            assertEquals(
                 2,
                 opplysningsgrunnlag.hentVersjon(),
             )
-            Assertions.assertEquals(
+            assertEquals(
                 Opplysning.Konstant.create(grunnlagshendelser[1].opplysning).toJson(),
                 opplysningsgrunnlag.soeker[FOEDELAND]!!.toJson(),
             )
@@ -301,7 +301,7 @@ internal class GrunnlagServiceTest {
                         bostedsadresse2,
                     ),
             )
-        Assertions.assertEquals(expected, actual.soeker.hentBostedsadresse())
+        assertEquals(expected, actual.soeker.hentBostedsadresse())
     }
 
     @Test
@@ -349,9 +349,9 @@ internal class GrunnlagServiceTest {
 
         val opplysningsgrunnlag = grunnlagService.hentOpplysningsgrunnlagForSak(1)!!
 
-        Assertions.assertEquals(1, opplysningsgrunnlag.sak.size)
-        Assertions.assertEquals(2, opplysningsgrunnlag.soeker.size)
-        Assertions.assertEquals(0, opplysningsgrunnlag.familie.size)
+        assertEquals(1, opplysningsgrunnlag.sak.size)
+        assertEquals(2, opplysningsgrunnlag.soeker.size)
+        assertEquals(0, opplysningsgrunnlag.familie.size)
     }
 
     @Nested
@@ -423,27 +423,27 @@ internal class GrunnlagServiceTest {
              * Barn 1 søker barnepensjon og har rolle søsken i annen sak
              */
             val barn1 = grunnlagService.hentSakerOgRoller(barnepensjonSoeker1)
-            Assertions.assertEquals(2, barn1.sakerOgRoller.size)
-            Assertions.assertEquals(barnepensjonSoeker1.value, barn1.fnr)
+            assertEquals(2, barn1.sakerOgRoller.size)
+            assertEquals(barnepensjonSoeker1.value, barn1.fnr)
 
             val barn1ErSoekerIEgenSak = barn1.sakerOgRoller.single { it.rolle == Saksrolle.SOEKER }
-            Assertions.assertEquals(grunnlaghendelse1.sakId, barn1ErSoekerIEgenSak.sakId)
+            assertEquals(grunnlaghendelse1.sakId, barn1ErSoekerIEgenSak.sakId)
 
             val barn1ErSoeskenIAnnenSak = barn1.sakerOgRoller.single { it.rolle == Saksrolle.SOESKEN }
-            Assertions.assertEquals(grunnlaghendelse2.sakId, barn1ErSoeskenIAnnenSak.sakId)
+            assertEquals(grunnlaghendelse2.sakId, barn1ErSoeskenIAnnenSak.sakId)
 
             /*
              * Barn 2 søker barnepensjon og har rolle søsken i annen sak
              */
             val barn2 = grunnlagService.hentSakerOgRoller(barnepensjonSoeker2)
-            Assertions.assertEquals(2, barn2.sakerOgRoller.size)
-            Assertions.assertEquals(barnepensjonSoeker2.value, barn2.fnr)
+            assertEquals(2, barn2.sakerOgRoller.size)
+            assertEquals(barnepensjonSoeker2.value, barn2.fnr)
 
             val barn2ErSoekerIEgenSak = barn2.sakerOgRoller.single { it.rolle == Saksrolle.SOEKER }
-            Assertions.assertEquals(grunnlaghendelse2.sakId, barn2ErSoekerIEgenSak.sakId)
+            assertEquals(grunnlaghendelse2.sakId, barn2ErSoekerIEgenSak.sakId)
 
             val barn2ErSoeskenIAnnenSak = barn2.sakerOgRoller.single { it.rolle == Saksrolle.SOESKEN }
-            Assertions.assertEquals(grunnlaghendelse1.sakId, barn2ErSoeskenIAnnenSak.sakId)
+            assertEquals(grunnlaghendelse1.sakId, barn2ErSoeskenIAnnenSak.sakId)
 
             verify(exactly = 1) { opplysningDaoMock.finnAllePersongalleriHvorPersonFinnes(barnepensjonSoeker1) }
             verify(exactly = 1) { opplysningDaoMock.finnAllePersongalleriHvorPersonFinnes(barnepensjonSoeker2) }
@@ -459,14 +459,14 @@ internal class GrunnlagServiceTest {
                 )
 
             val gjenlevende = grunnlagService.hentSakerOgRoller(gjenlevendeFnr)
-            Assertions.assertEquals(3, gjenlevende.sakerOgRoller.size)
-            Assertions.assertEquals(gjenlevendeFnr.value, gjenlevende.fnr)
+            assertEquals(3, gjenlevende.sakerOgRoller.size)
+            assertEquals(gjenlevendeFnr.value, gjenlevende.fnr)
 
             val gjenlevendeSomForelder = gjenlevende.sakerOgRoller.filter { it.rolle == Saksrolle.GJENLEVENDE }
-            Assertions.assertEquals(2, gjenlevendeSomForelder.size)
+            assertEquals(2, gjenlevendeSomForelder.size)
 
             val gjenlevendeErSoeker = gjenlevende.sakerOgRoller.single { it.rolle == Saksrolle.SOEKER }
-            Assertions.assertEquals(grunnlaghendelse3.sakId, gjenlevendeErSoeker.sakId)
+            assertEquals(grunnlaghendelse3.sakId, gjenlevendeErSoeker.sakId)
 
             verify(exactly = 1) { opplysningDaoMock.finnAllePersongalleriHvorPersonFinnes(gjenlevendeFnr) }
         }
@@ -482,7 +482,7 @@ internal class GrunnlagServiceTest {
                 )
 
             val soesken = grunnlagService.hentSakerOgRoller(soeskenFnr)
-            Assertions.assertEquals(2, soesken.sakerOgRoller.size)
+            assertEquals(2, soesken.sakerOgRoller.size)
             assertTrue(soesken.sakerOgRoller.all { it.rolle == Saksrolle.SOESKEN })
 
             verify(exactly = 1) { opplysningDaoMock.finnAllePersongalleriHvorPersonFinnes(soeskenFnr) }
@@ -532,9 +532,9 @@ internal class GrunnlagServiceTest {
 
             val opplysningsgrunnlag = grunnlagService.hentOpplysningsgrunnlagForSak(1)!!
 
-            Assertions.assertEquals(1, opplysningsgrunnlag.sak.size)
-            Assertions.assertEquals(1, opplysningsgrunnlag.familie.size)
-            Assertions.assertEquals(2, opplysningsgrunnlag.hentInnsender().size)
+            assertEquals(1, opplysningsgrunnlag.sak.size)
+            assertEquals(1, opplysningsgrunnlag.familie.size)
+            assertEquals(2, opplysningsgrunnlag.hentInnsender().size)
         }
     }
 

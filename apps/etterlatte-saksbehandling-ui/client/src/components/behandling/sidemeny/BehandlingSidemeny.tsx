@@ -30,6 +30,7 @@ import {
   resetSaksbehandlerGjeldendeOppgave,
   setSaksbehandlerGjeldendeOppgave,
 } from '~store/reducers/SaksbehandlerGjeldendeOppgaveForBehandlingReducer'
+import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 
 import { isInitial, isPending, mapApiResult } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
@@ -59,6 +60,7 @@ const mapTilBehandlingInfo = (behandling: IBehandlingReducer, vedtak: VedtakSamm
 })
 
 export const BehandlingSidemeny = ({ behandling }: { behandling: IBehandlingReducer }) => {
+  const soeker = usePersonopplysninger()?.soeker?.opplysning
   const vedtak = useVedtak()
   const dispatch = useAppDispatch()
   const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
@@ -162,11 +164,11 @@ export const BehandlingSidemeny = ({ behandling }: { behandling: IBehandlingRedu
             />
           </Tabs.List>
           <Tabs.Panel value={BehandlingFane.DOKUMENTER}>
-            {behandling.søker?.foedselsnummer && <Dokumentoversikt fnr={behandling.søker.foedselsnummer} liten />}
+            {soeker?.foedselsnummer && <Dokumentoversikt fnr={soeker.foedselsnummer} liten />}
           </Tabs.Panel>
           <Tabs.Panel value={BehandlingFane.SJEKKLISTE}>
             <>
-              {behandling.søker?.foedselsnummer && <Sjekkliste behandling={behandling} />}
+              {soeker?.foedselsnummer && <Sjekkliste behandling={behandling} />}
               {isPending(hentSjekklisteResult) && <Spinner label="Henter sjekkliste ..." visible />}
               {erFoerstegangsbehandling &&
                 !erFerdigBehandlet(behandling.status) &&
@@ -178,9 +180,7 @@ export const BehandlingSidemeny = ({ behandling }: { behandling: IBehandlingRedu
           </Tabs.Panel>
         </Tabs>
       )}
-      {!erFoerstegangsbehandling && behandling.søker?.foedselsnummer && (
-        <Dokumentoversikt fnr={behandling.søker.foedselsnummer} liten />
-      )}
+      {!erFoerstegangsbehandling && soeker?.foedselsnummer && <Dokumentoversikt fnr={soeker.foedselsnummer} liten />}
       <AnnullerBehandling />
     </Sidebar>
   )

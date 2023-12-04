@@ -3,14 +3,12 @@ import styled from 'styled-components'
 import { compareDesc, lastDayOfMonth } from 'date-fns'
 import { formaterDato, formaterStringDato } from '~utils/formattering'
 import { Beregning } from '~shared/types/Beregning'
-import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { Barnepensjonberegningssammendrag } from '~components/behandling/beregne/Barnepensjonberegningssammendrag'
 import { ProrataBroek } from '~components/behandling/beregne/ProrataBroek'
 import { hentLevendeSoeskenFraAvdoedeForSoeker } from '~shared/types/Person'
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 
 interface Props {
-  behandling: IDetaljertBehandling
   beregning: Beregning
 }
 
@@ -38,15 +36,16 @@ const BenyttetTrygdetid = ({
   return <>{benyttetTrygdetid}</>
 }
 
-export const BarnepensjonSammendrag = ({ behandling, beregning }: Props) => {
-  const avdoede = usePersonopplysninger()?.avdoede.find((po) => po)
+export const BarnepensjonSammendrag = ({ beregning }: Props) => {
+  const personopplysninger = usePersonopplysninger()
+  const avdoede = personopplysninger?.avdoede.find((po) => po)
   if (!avdoede) {
     return null
   }
   const beregningsperioder = [...beregning.beregningsperioder].sort((a, b) =>
     compareDesc(new Date(a.datoFOM), new Date(b.datoFOM))
   )
-  const soeker = behandling.søker
+  const soeker = personopplysninger?.soeker?.opplysning
   const soesken = hentLevendeSoeskenFraAvdoedeForSoeker(avdoede, soeker?.foedselsnummer as string)
 
   return (

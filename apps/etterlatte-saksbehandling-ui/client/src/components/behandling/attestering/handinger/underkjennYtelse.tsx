@@ -1,10 +1,10 @@
 import { Button } from '@navikt/ds-react'
 import { useState } from 'react'
 import { GeneriskModal } from '~shared/modal/modal'
-import { hentBehandling } from '~shared/api/behandling'
 import { useNavigate } from 'react-router'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { underkjennVedtak } from '~shared/api/vedtaksvurdering'
+import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 
 import { isPending } from '~shared/api/apiUtils'
 
@@ -19,13 +19,11 @@ export const UnderkjennYtelse: React.FC<Props> = ({ behandlingId, kommentar, val
   const navigate = useNavigate()
 
   const [underkjennStatus, apiUnderkjennVedtak] = useApiCall(underkjennVedtak)
-  const [behandlingStatus, apiHentBehandling] = useApiCall(hentBehandling)
+  const soeker = usePersonopplysninger()?.soeker?.opplysning
 
   const underkjenn = () => {
     apiUnderkjennVedtak({ behandlingId, kommentar, valgtBegrunnelse }, () => {
-      apiHentBehandling(behandlingId, (behandling) => {
-        navigate(`/person/${behandling.søker?.foedselsnummer}`)
-      })
+      navigate(`/person/${soeker?.foedselsnummer}`)
     })
   }
 
@@ -42,7 +40,7 @@ export const UnderkjennYtelse: React.FC<Props> = ({ behandlingId, kommentar, val
         onYesClick={underkjenn}
         setModalisOpen={setModalisOpen}
         open={modalisOpen}
-        loading={isPending(underkjennStatus) || isPending(behandlingStatus)}
+        loading={isPending(underkjennStatus)}
       />
     </>
   )

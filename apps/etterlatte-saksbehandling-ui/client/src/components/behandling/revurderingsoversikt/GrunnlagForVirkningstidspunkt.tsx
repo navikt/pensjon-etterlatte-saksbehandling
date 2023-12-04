@@ -16,8 +16,8 @@ import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 import { mapApiResult } from '~shared/api/apiUtils'
 
 const SoekerDoedsdatoGrunnlag = () => {
-  const behandling = useBehandling()
-  const soekerDoedsdato = behandling?.søker?.doedsdato
+  const soeker = usePersonopplysninger()?.soeker?.opplysning
+  const soekerDoedsdato = soeker?.doedsdato
 
   return (
     <Info

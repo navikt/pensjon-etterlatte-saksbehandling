@@ -14,7 +14,7 @@ import { useBehandlingRoutes } from '~components/behandling/BehandlingRoutes'
 import { AktivitetspliktOppfolging } from '~shared/types/Aktivitetsplikt'
 import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
 import { handlinger } from '~components/behandling/handlinger/typer'
-import { usePersonopplysningerOmsAvdoede } from '~components/person/usePersonopplysninger'
+import { usePersonopplysninger, usePersonopplysningerOmsAvdoede } from '~components/person/usePersonopplysninger'
 
 import { isPending } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
@@ -23,6 +23,7 @@ export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => 
   const { behandling } = props
   const { next } = useBehandlingRoutes()
 
+  const soeker = usePersonopplysninger()?.soeker?.opplysning
   const avdoede = usePersonopplysningerOmsAvdoede()
   const avdoedesDoedsdato = avdoede?.opplysning?.doedsdato
   const redigerbar = behandlingErRedigerbar(behandling.status)
@@ -134,7 +135,7 @@ export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => 
             variant="primary"
             size="small"
             as="a"
-            href={`${configContext['gosysUrl']}/personoversikt/fnr=${behandling.søker?.foedselsnummer}`}
+            href={`${configContext['gosysUrl']}/personoversikt/fnr=${soeker?.foedselsnummer}`}
             target="_blank"
           >
             Lag oppfølgingsoppgave i Gosys <ExternalLinkIcon />
@@ -153,7 +154,7 @@ export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => 
             variant="secondary"
             size="small"
             as="a"
-            href={`${configContext['gosysUrl']}/personoversikt/fnr=${behandling.søker?.foedselsnummer}`}
+            href={`${configContext['gosysUrl']}/personoversikt/fnr=${soeker?.foedselsnummer}`}
             target="_blank"
           >
             Lag oppgave til lokalkontor <ExternalLinkIcon />

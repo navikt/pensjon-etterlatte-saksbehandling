@@ -28,6 +28,7 @@ import { PencilIcon } from '@navikt/aksel-icons'
 import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 import { SakType } from '~shared/types/sak'
 import { useSelectorSaksbehandlerGjeldendeOppgaveBehandling } from '~store/selectors/useSelectorSaksbehandlerGjeldendeOppgaveBehandling'
+import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 
@@ -36,6 +37,7 @@ export const Sjekkliste = ({ behandling }: { behandling: IBehandlingReducer }) =
   const [redigerbar, setRedigerbar] = useState<boolean>(false)
   const [oppgaveErTildeltInnloggetBruker, setOppgaveErTildeltInnloggetBruker] = useState(false)
   const saksbehandlerGjeldendeOppgave = useSelectorSaksbehandlerGjeldendeOppgaveBehandling()
+  const soeker = usePersonopplysninger()?.soeker?.opplysning
 
   const dispatch = useAppDispatch()
 
@@ -98,10 +100,7 @@ export const Sjekkliste = ({ behandling }: { behandling: IBehandlingReducer }) =
           ))}
 
           <HMargin>
-            <Link
-              href={`${configContext['gosysUrl']}/personoversikt/fnr=${behandling.søker!.foedselsnummer}`}
-              target="_blank"
-            >
+            <Link href={`${configContext['gosysUrl']}/personoversikt/fnr=${soeker!.foedselsnummer}`} target="_blank">
               Personoversikt i Gosys
             </Link>
           </HMargin>

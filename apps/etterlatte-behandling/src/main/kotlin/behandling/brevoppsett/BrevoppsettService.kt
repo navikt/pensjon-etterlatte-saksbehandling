@@ -15,7 +15,7 @@ class BrevoppsettService(
                 ?: throw GenerellIkkeFunnetException()
 
         sjekkBehandlingKanEndres(behandling)
-        sjekkEtterbetalingEtterVirkningstidspunkt(behandling, brevoppsett)
+        sjekkEtterbetalingFoerVirkningstidspunkt(behandling, brevoppsett)
 
         return brevoppsettDao.lagre(brevoppsett)
     }
@@ -28,7 +28,7 @@ class BrevoppsettService(
         if (!behandling.status.kanEndres()) throw BrevoppsettException.BehandlingKanIkkeEndres(behandling)
     }
 
-    private fun sjekkEtterbetalingEtterVirkningstidspunkt(
+    private fun sjekkEtterbetalingFoerVirkningstidspunkt(
         behandling: Behandling,
         brevoppsett: Brevoppsett,
     ) {

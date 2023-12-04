@@ -30,15 +30,12 @@ import {
   InstitusjonsoppholdGrunnlagData,
 } from '~shared/types/Beregning'
 import { Border } from '~components/behandling/soeknadsoversikt/styled'
-import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 import BeregningsgrunnlagMetode from './BeregningsgrunnlagMetode'
 import { handlinger } from '~components/behandling/handlinger/typer'
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 
 import { isPending, isSuccess } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
-
-const featureToggleNameInstitusjonsopphold = 'pensjon-etterlatte.bp-bruk-institusjonsopphold' as const
 
 const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer }) => {
   const { behandling } = props
@@ -50,7 +47,6 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
   const [lagreBeregningsgrunnlag, postBeregningsgrunnlag] = useApiCall(lagreBeregningsGrunnlag)
   const [beregningsgrunnlag, fetchBeregningsgrunnlag] = useApiCall(hentBeregningsGrunnlag)
   const [endreBeregning, postOpprettEllerEndreBeregning] = useApiCall(opprettEllerEndreBeregning)
-  const visInstitusjonsopphold = useFeatureEnabledMedDefault(featureToggleNameInstitusjonsopphold, false)
   const [soeskenGrunnlagsData, setSoeskenGrunnlagsData] = useState<Soeskengrunnlag | null>(null)
   const [institusjonsoppholdsGrunnlagData, setInstitusjonsoppholdsGrunnlagData] =
     useState<InstitusjonsoppholdGrunnlagData | null>(null)
@@ -138,7 +134,7 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
             setSoeskenJusteringManglerIkke={() => setSoeskenJusteringMangler(false)}
           />
         )}
-        {visInstitusjonsopphold && isSuccess(beregningsgrunnlag) && (
+        {isSuccess(beregningsgrunnlag) && (
           <InstitusjonsoppholdBP
             behandling={behandling}
             onSubmit={(institusjonsoppholdGrunnlag) => setInstitusjonsoppholdsGrunnlagData(institusjonsoppholdGrunnlag)}

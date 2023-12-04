@@ -92,12 +92,6 @@ class ReguleringTest {
             )
 
         coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns null
-        every {
-            featureToggleService.isEnabled(
-                BeregnBarnepensjonServiceFeatureToggle.BrukInstitusjonsoppholdIBeregning,
-                false,
-            )
-        } returns false
 
         runBlocking {
             val beregning22 = beregnBarnepensjonService.beregn(behandling, bruker)

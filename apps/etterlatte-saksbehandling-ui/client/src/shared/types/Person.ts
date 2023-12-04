@@ -37,10 +37,22 @@ export interface IPdlPerson {
   kontaktadresse?: IAdresse[]
   oppholdsadresse?: IAdresse[]
   avdoedesBarn?: IPdlPerson[]
+  utland?: Utland
   familieRelasjon?: IFamilieRelasjon
   sivilstatus?: Sivilstatus
   sivilstand?: Sivilstand[]
   vergemaalEllerFremtidsfullmakt?: VergemaalEllerFremtidsfullmakt[]
+}
+
+export interface Utland {
+  utflyttingFraNorge?: {
+    tilflyttingsland?: string
+    dato?: string
+  }[]
+  innflyttingTilNorge?: {
+    fraflyttingsland?: string
+    dato?: string
+  }[]
 }
 
 export interface Sivilstand {

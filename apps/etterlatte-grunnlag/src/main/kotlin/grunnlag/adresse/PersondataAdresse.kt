@@ -41,7 +41,7 @@ data class VergeSamhandlerFormat(
             foedselsnummer = null,
             adresse =
                 Adresse(
-                    adresseType = adressetypeFromLand(land),
+                    adresseType = adressetypeFromLand(landkode, land),
                     adresselinje1 = linje1,
                     adresselinje2 = linje2,
                     adresselinje3 = linje3,
@@ -67,7 +67,7 @@ data class VergePersonFormat(
             foedselsnummer = Foedselsnummer(vergePid),
             adresse =
                 Adresse(
-                    adresseType = adressetypeFromLand(adresse.land),
+                    adresseType = adressetypeFromLand(adresse.landkode, adresse.land),
                     adresselinje1 = adresse.adresselinje1,
                     adresselinje2 = adresse.adresselinje2,
                     adresselinje3 = adresse.adresselinje3,
@@ -93,7 +93,7 @@ data class RegoppslagFormat(
             foedselsnummer = null,
             adresse =
                 Adresse(
-                    adresseType = adressetypeFromLand(adresse.land),
+                    adresseType = adressetypeFromLand(adresse.landkode, adresse.land),
                     adresselinje1 = adresse.adresselinje1,
                     adresselinje2 = adresse.adresselinje2,
                     adresselinje3 = adresse.adresselinje3,
@@ -106,9 +106,15 @@ data class RegoppslagFormat(
     }
 }
 
-private fun adressetypeFromLand(land: String?) =
-    if (listOf("norge", "norway").contains(land?.lowercase())) {
-        "NORSKPOSTADRESSE"
-    } else {
-        "UTENLANDSKPOSTADRESSE"
+private fun adressetypeFromLand(
+    landkode: String?,
+    land: String?,
+): String {
+    if (listOf("no", "nor").contains(landkode?.lowercase())) {
+        return "NORSKPOSTADRESSE"
     }
+    if (listOf("norge", "norway").contains(land?.lowercase())) {
+        return "NORSKPOSTADRESSE"
+    }
+    return "UTENLANDSKPOSTADRESSE"
+}

@@ -1,5 +1,6 @@
 package no.nav.etterlatte.behandling
 
+import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.runBlocking
@@ -15,6 +16,7 @@ import no.nav.etterlatte.behandling.hendelse.HendelseType
 import no.nav.etterlatte.behandling.hendelse.LagretHendelse
 import no.nav.etterlatte.behandling.hendelse.registrerVedtakHendelseFelles
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
+import no.nav.etterlatte.behandling.klienter.GrunnlagKlientException
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
 import no.nav.etterlatte.common.tidligsteIverksatteVirkningstidspunkt
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
@@ -35,6 +37,7 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.person.Person
+import no.nav.etterlatte.libs.ktorobo.ThrowableErrorMessage
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.sak.SakDao
 import no.nav.etterlatte.sak.SakMedUtenlandstilknytning
@@ -237,9 +240,17 @@ internal class BehandlingServiceImpl(
         val personopplysning =
             try {
                 grunnlagKlient.finnPersonOpplysning(behandlingId, opplysningstype, brukerTokenInfo)
-            } catch (e: Exception) {
-                // TODO..
-                null
+            } catch (e: GrunnlagKlientException) {
+                when (e.cause) {
+                    is ThrowableErrorMessage -> {
+                        if (e.cause.response?.status == HttpStatusCode.NotFound) {
+                            null
+                        } else {
+                            throw e
+                        }
+                    }
+                    else -> throw e
+                }
             }
         val sakUtenlandstilknytning = inTransaction { sakDao.hentUtenlandstilknytningForSak(behandling.sak.id) }
 
@@ -290,7 +301,7 @@ internal class BehandlingServiceImpl(
 
         val etterMaksTidspunktEllersMinstManedEtterDoedsfall =
             if (doedsdato == null) {
-                true
+                true // Mangler døsfall når avdød er ukjent
             } else if (doedsdato.isBefore(makstidspunktFoerSoeknad)) {
                 virkningstidspunkt.isAfter(makstidspunktFoerSoeknad)
             } else {
@@ -345,24 +356,6 @@ internal class BehandlingServiceImpl(
 
         logger.info("Hentet behandling for $behandlingId")
         return coroutineScope {
-
-            logger.info("Hentet vedtak for $behandlingId")
-            val avdoed =
-                async {
-                    try {
-                        grunnlagKlient.finnPersonOpplysning(
-                            behandlingId,
-                            Opplysningstype.AVDOED_PDL_V1,
-                            brukerTokenInfo,
-                        )
-                    } catch (e: Exception) {
-                        // TODO Må innsnevres til kun 404? Hvordan?
-                        null
-                    }
-                }
-
-            logger.info("Hentet Opplysningstype.AVDOED_PDL_V1 for $behandlingId")
-
             val soeker =
                 async {
                     grunnlagKlient.finnPersonOpplysning(
@@ -385,7 +378,6 @@ internal class BehandlingServiceImpl(
                 boddEllerArbeidetUtlandet = behandling.boddEllerArbeidetUtlandet,
                 status = behandling.status,
                 hendelser = hendelserIBehandling,
-                familieforhold = avdoed?.let { Familieforhold(it.await()) },
                 behandlingType = behandling.type,
                 søker = soeker.await()?.opplysning,
                 revurderingsaarsak = behandling.revurderingsaarsak(),

@@ -118,6 +118,6 @@ data class GrunnlagTestData(
                     gjenlevendeTestopplysningerMap + opplysningsmapGjenlevendeOverrides,
                 ),
             sak = opplysningsmapSakOverrides,
-            metadata = Metadata(1, 15),
+            metadata = Metadata(1, 1),
         )
 }

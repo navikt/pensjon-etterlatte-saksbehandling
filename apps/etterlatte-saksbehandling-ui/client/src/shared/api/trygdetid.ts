@@ -125,7 +125,8 @@ export const oppdaterTrygdetidOverstyrtMigrering = async (args: {
   prorataBroek?: IProrataBroek
 }): Promise<ApiResponse<ITrygdetid>> =>
   apiClient.post(`/trygdetid/${args.behandlingId}/migrering/manuell/lagre`, {
-    samletTrygdetidNorge: args.anvendtTrygdetid,
+    samletTrygdetidNorge: args.prorataBroek ? undefined : args.anvendtTrygdetid,
+    samletTrygdetidTeoretisk: args.prorataBroek ? args.anvendtTrygdetid : undefined,
     prorataBroek: args.prorataBroek,
     overstyrt: true,
   })

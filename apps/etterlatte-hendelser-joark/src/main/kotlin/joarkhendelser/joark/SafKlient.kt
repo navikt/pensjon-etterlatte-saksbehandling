@@ -33,12 +33,15 @@ class SafKlient(
                 setBody(request)
             }
 
-        return if (res.status.isSuccess()) {
-            val journalpost = res.body<JournalpostResponse>().data?.journalpost
-
-            HentJournalpostResult(journalpost)
+        if (res.status.isSuccess()) {
+            try {
+                val journalpost = res.body<JournalpostResponse>().data?.journalpost
+                return HentJournalpostResult(journalpost)
+            } catch (e: Exception) {
+                throw ResponseException(res, "Ukjent feil oppsto ved deserialisering av journalpost. id: $id")
+            }
         } else {
-            throw ResponseException(res, "Ukjent feil oppsto ved henting av journalposter")
+            throw ResponseException(res, "Ukjent feil oppsto ved henting av journalpost. id: $id")
         }
     }
 

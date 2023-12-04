@@ -36,7 +36,7 @@ class BrevoppsettDao(private val connection: () -> Connection) {
                 setDate(3, brevoppsett.etterbetaling?.fom?.atDay(1).let { java.sql.Date.valueOf(it) })
                 setDate(4, brevoppsett.etterbetaling?.tom?.atEndOfMonth().let { java.sql.Date.valueOf(it) })
                 setString(5, brevoppsett.brevtype.name)
-                setString(6, brevoppsett.aldersgruppe.name)
+                setString(6, brevoppsett.aldersgruppe?.name)
                 setString(7, brevoppsett.kilde.toJson())
             }
             .run { executeUpdate() }
@@ -68,7 +68,7 @@ class BrevoppsettDao(private val connection: () -> Connection) {
                     )
                 },
             brevtype = Brevtype.valueOf(getString("brevtype")),
-            aldersgruppe = Aldersgruppe.valueOf(getString("aldersgruppe")),
+            aldersgruppe = getString("aldersgruppe")?.let { Aldersgruppe.valueOf(it) },
             kilde = getString("kilde").let { objectMapper.readValue(it) },
         )
 }

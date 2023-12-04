@@ -13,7 +13,7 @@ import {
 import Spinner from '~shared/Spinner'
 import { LovtekstMedLenke } from '~components/behandling/soeknadsoversikt/LovtekstMedLenke'
 import styled from 'styled-components'
-import { BodyShort } from '@navikt/ds-react'
+import { BodyShort, Heading } from '@navikt/ds-react'
 import { Grunnlagopplysninger } from '~components/behandling/trygdetid/Grunnlagopplysninger'
 import { TrygdetidGrunnlagListe } from '~components/behandling/trygdetid/TrygdetidGrunnlagListe'
 import { TrygdeAvtale } from './avtaler/TrygdeAvtale'
@@ -27,7 +27,7 @@ import { TrygdetidManueltOverstyrt } from '~components/behandling/trygdetid/Tryg
 
 import { isPending } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
-import { behandlingErIverksatteEllerSamordnet } from '~components/behandling/felles/utils'
+import { behandlingErIverksattEllerSamordnet } from '~components/behandling/felles/utils'
 
 interface Props {
   redigerbar: boolean
@@ -51,6 +51,7 @@ export const Trygdetid = ({ redigerbar, behandling, virkningstidspunktEtterNyReg
   const [hentAlleLandRequest, fetchAlleLand] = useApiCall(hentAlleLand)
   const [trygdetid, setTrygdetid] = useState<ITrygdetid>()
   const [landListe, setLandListe] = useState<ILand[]>()
+  const [harPilotTrygdetid, setHarPilotTrygdetid] = useState<boolean>(false)
 
   const oppdaterTrygdetid = (trygdetid: ITrygdetid) => {
     setTrygdetid(trygdetid)
@@ -75,12 +76,13 @@ export const Trygdetid = ({ redigerbar, behandling, virkningstidspunktEtterNyReg
 
     fetchTrygdetid(behandling.id, (trygdetid: ITrygdetid) => {
       if (trygdetid === null) {
-        if (behandlingErIverksatteEllerSamordnet(behandling.status)) {
+        if (behandlingErIverksattEllerSamordnet(behandling.status)) {
+          setHarPilotTrygdetid(true)
         } else {
+          requestOpprettTrygdetid(behandling.id, (trygdetid: ITrygdetid) => {
+            oppdaterTrygdetid(trygdetid)
+          })
         }
-        requestOpprettTrygdetid(behandling.id, (trygdetid: ITrygdetid) => {
-          oppdaterTrygdetid(trygdetid)
-        })
       } else {
         setTrygdetid(trygdetid)
       }
@@ -92,6 +94,17 @@ export const Trygdetid = ({ redigerbar, behandling, virkningstidspunktEtterNyReg
       setLandListe(sorterLand(landListe))
     })
   }, [])
+
+  if (harPilotTrygdetid) {
+    return (
+      <TrygdetidWrapper>
+        <Heading size="small" level="3">
+          Personen har fått 40 års trygdetid
+        </Heading>
+        <BodyShort>Denne søknaden ble satt automatisk til 40 års trygdetid</BodyShort>
+      </TrygdetidWrapper>
+    )
+  }
 
   if (trygdetid?.beregnetTrygdetid?.resultat.overstyrt) {
     return (

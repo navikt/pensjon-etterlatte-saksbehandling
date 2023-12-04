@@ -5,8 +5,8 @@ import { Label } from '@navikt/ds-react'
 import { UstiletListe } from '~components/behandling/beregningsgrunnlag/soeskenjustering/Soeskenjustering'
 import { formaterKanskjeStringDatoMedFallback } from '~utils/formattering'
 
-const ListeItemMedSpacingIMellom = styled.li`
-  + li {
+export const ListeItemMedSpacingIMellom = styled.li`
+  :not(:first-child) {
     margin-top: 0.5rem;
   }
 `

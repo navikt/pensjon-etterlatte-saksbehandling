@@ -2,7 +2,6 @@ package no.nav.etterlatte.vilkaarsvurdering
 
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
-import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Utfall
@@ -314,7 +313,6 @@ internal class VilkaarsvurderingRepositoryTest {
                 vilkaar =
                     BarnepensjonVilkaar1967.inngangsvilkaar(
                         grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag(),
-                        featureToggleService = DummyFeatureToggleService(),
                     ),
             )
 

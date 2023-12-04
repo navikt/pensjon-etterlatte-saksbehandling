@@ -15,7 +15,6 @@ import io.ktor.server.testing.testApplication
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -94,7 +93,6 @@ class MigreringTest {
                 vilkaarsvurderingRepository,
                 behandlingKlient,
                 grunnlagKlient,
-                DummyFeatureToggleService(),
             )
 
         migreringService =
@@ -178,7 +176,7 @@ class MigreringTest {
                     .also { assertTrue(it.status.isSuccess()) }
                     .let { objectMapper.readValue(it.bodyAsText(), VilkaarsvurderingDto::class.java) }
                     .vilkaar
-                    .also { assertEquals(it.size, 7) }
+                    .also { assertEquals(it.size, 8) }
             vilkaar.find { it.hovedvilkaar.type == VilkaarType.BP_YRKESSKADE_AVDOED_2024 }
                 .let { assertEquals(it!!.hovedvilkaar.resultat, Utfall.IKKE_OPPFYLT) }
             vilkaar.filter { it.hovedvilkaar.type != VilkaarType.BP_YRKESSKADE_AVDOED_2024 }
@@ -215,7 +213,7 @@ class MigreringTest {
                     .also { assertTrue(it.status.isSuccess()) }
                     .let { objectMapper.readValue(it.bodyAsText(), VilkaarsvurderingDto::class.java) }
                     .vilkaar
-                    .also { assertEquals(it.size, 7) }
+                    .also { assertEquals(it.size, 8) }
             vilkaar.find { it.hovedvilkaar.type == VilkaarType.BP_YRKESSKADE_AVDOED_2024 }
                 .let { assertEquals(it!!.hovedvilkaar.resultat, Utfall.OPPFYLT) }
             vilkaar.filter { it.hovedvilkaar.type != VilkaarType.BP_YRKESSKADE_AVDOED_2024 }

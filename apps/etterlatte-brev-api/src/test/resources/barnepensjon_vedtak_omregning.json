@@ -1,0 +1,204 @@
+{
+  "title" : "Utkast til vedtak - endring av barnepensjon",
+  "sakspart" : {
+    "gjelderNavn" : "Test bruker Testerson",
+    "gjelderFoedselsnummer" : "01019878910",
+    "saksnummer" : "1337123",
+    "dokumentDato" : "01.01.2020"
+  },
+  "blocks" : [ {
+    "id" : 2069547117,
+    "editable" : true,
+    "content" : [ {
+      "id" : -475479893,
+      "text" : "Stortinget har vedtatt nye regler for barnepensjon. Du får høyere barnepensjon. Du har ",
+      "type" : "LITERAL"
+    }, {
+      "id" : 344973542,
+      "text" : "1337",
+      "type" : "VARIABLE"
+    }, {
+      "id" : -621553604,
+      "text" : " kroner per måned i pensjon til 31. desember 2023. Du får ",
+      "type" : "LITERAL"
+    }, {
+      "id" : 354540499,
+      "text" : "31337",
+      "type" : "VARIABLE"
+    }, {
+      "id" : -1887070525,
+      "text" : " kroner før skatt per måned fra 1. januar 2024.",
+      "type" : "LITERAL"
+    } ],
+    "type" : "PARAGRAPH"
+  }, {
+    "id" : -1678300661,
+    "editable" : true,
+    "content" : [ {
+      "id" : -1678300692,
+      "text" : "Vedtaket er gjort etter lov 18. desember 2020 nr. 139 om endringer i folketrygdloven del II nr. 4, jf. Folketrygdloven § 18-4 og § 18-5.",
+      "type" : "LITERAL"
+    } ],
+    "type" : "PARAGRAPH"
+  }, {
+    "id" : 1836671431,
+    "editable" : true,
+    "content" : [ {
+      "id" : 1836671400,
+      "text" : "Hva betyr de nye reglene for deg?",
+      "type" : "LITERAL"
+    } ],
+    "type" : "TITLE2"
+  }, {
+    "id" : 2111871935,
+    "editable" : true,
+    "content" : [ {
+      "id" : 2111871904,
+      "items" : [ {
+        "content" : [ {
+          "id" : 924380383,
+          "text" : "Barnepensjonen din øker.",
+          "type" : "LITERAL"
+        } ]
+      }, {
+        "content" : [ {
+          "id" : -774118146,
+          "text" : "Du får barnepensjon til du blir 20 år.",
+          "type" : "LITERAL"
+        } ]
+      } ],
+      "type" : "ITEM_LIST"
+    } ],
+    "type" : "PARAGRAPH"
+  }, {
+    "id" : -914318615,
+    "editable" : true,
+    "content" : [ {
+      "id" : -914318646,
+      "text" : "Slik har vi beregnet pensjonen din",
+      "type" : "LITERAL"
+    } ],
+    "type" : "TITLE2"
+  }, {
+    "id" : -1504845770,
+    "editable" : true,
+    "content" : [ {
+      "id" : -1324300658,
+      "text" : "Barnepensjonen din blir lik en ganger folketrygdens grunnbeløp per år. Grunnbeløpet i januar 2024 er ",
+      "type" : "LITERAL"
+    }, {
+      "id" : 799656385,
+      "text" : "400000",
+      "type" : "VARIABLE"
+    }, {
+      "id" : 1914707799,
+      "text" : " kroner. Dette deles på 12 måneder. Du vil derfor få ",
+      "type" : "LITERAL"
+    }, {
+      "id" : 354540499,
+      "text" : "31337",
+      "type" : "VARIABLE"
+    }, {
+      "id" : -336652413,
+      "text" : " kroner per måned før skatt fra 1. januar 2024.",
+      "type" : "LITERAL"
+    } ],
+    "type" : "PARAGRAPH"
+  }, {
+    "id" : 656956380,
+    "editable" : true,
+    "content" : [ {
+      "id" : -817889078,
+      "text" : "For å få full pensjon må avdødes trygdetid være beregnet til minst 40 år. Trygdetiden tilsvarer det antall år avdøde har vært medlem i folketrygden etter fylte 16 år. Når avdøde var under 67 år ved dødsfallet blir det beregnet framtidig trygdetid. Det er vanligvis fram til og med det året avdøde ville ha fylt 66 år. Barnepensjonen din er beregnet med ",
+      "type" : "LITERAL"
+    }, {
+      "id" : -538992839,
+      "text" : "40",
+      "type" : "VARIABLE"
+    }, {
+      "id" : 1792734271,
+      "text" : " år trygdetid.",
+      "type" : "LITERAL"
+    } ],
+    "type" : "PARAGRAPH"
+  }, {
+    "id" : 2110690818,
+    "editable" : true,
+    "content" : [ {
+      "id" : 2110690787,
+      "text" : "Skattetrekk på barnepensjon",
+      "type" : "LITERAL"
+    } ],
+    "type" : "TITLE2"
+  }, {
+    "id" : 1235379608,
+    "editable" : true,
+    "content" : [ {
+      "id" : 1235379577,
+      "text" : "Barnepensjon er skattepliktig, men vi trekker ikke skatt uten at du gir beskjed om det. Du kan lese mer om skatt på barnepensjon på nav.no/skatt-pengestotte. Her finner du også informasjon om frivillig skattetrekk og hvordan du får registrert dette.",
+      "type" : "LITERAL"
+    } ],
+    "type" : "PARAGRAPH"
+  }, {
+    "id" : -397413626,
+    "editable" : true,
+    "content" : [ {
+      "id" : -397413657,
+      "text" : "Du har rett til å klage",
+      "type" : "LITERAL"
+    } ],
+    "type" : "TITLE2"
+  }, {
+    "id" : 1534846151,
+    "editable" : true,
+    "content" : [ {
+      "id" : 1534846120,
+      "text" : "Hvis du mener vedtaket er feil, kan du klage innen seks uker fra 1. januar 2024. Klagen skal være skriftlig. Du finner skjema og informasjon på nav.no/klage.",
+      "type" : "LITERAL"
+    } ],
+    "type" : "PARAGRAPH"
+  }, {
+    "id" : 1469645717,
+    "editable" : true,
+    "content" : [ {
+      "id" : 1469645686,
+      "text" : "Du må melde fra om endringer",
+      "type" : "LITERAL"
+    } ],
+    "type" : "TITLE2"
+  }, {
+    "id" : 1306442189,
+    "editable" : true,
+    "content" : [ {
+      "id" : 1306442158,
+      "text" : "Du har plikt til å melde fra til oss om endringer som har betydning for utbetalingen av barnepensjon, eller retten til å få barnepensjon. I vedlegget «Dine rettigheter og plikter» ser du hvilke endringer du må si fra om.",
+      "type" : "LITERAL"
+    } ],
+    "type" : "PARAGRAPH"
+  }, {
+    "id" : -2006827758,
+    "editable" : true,
+    "content" : [ {
+      "id" : -2006827789,
+      "text" : "Har du spørsmål?",
+      "type" : "LITERAL"
+    } ],
+    "type" : "TITLE2"
+  }, {
+    "id" : 1623933138,
+    "editable" : true,
+    "content" : [ {
+      "id" : 1623933107,
+      "text" : "Du finner mer informasjon på nav.no/barnepensjon. Hvis du ikke finner svar på spørsmålet ditt, kan du ringe oss på telefon 55 55 33 34 hverdager 9-15. Om du oppgir fødselsnummer til barnet, kan vi lettere gi deg rask og god hjelp.",
+      "type" : "LITERAL"
+    } ],
+    "type" : "PARAGRAPH"
+  } ],
+  "signatur" : {
+    "hilsenTekst" : "Med vennlig hilsen",
+    "saksbehandlerRolleTekst" : "Saksbehandler",
+    "saksbehandlerNavn" : "Ole Saksbehandler",
+    "attesterendeSaksbehandlerNavn" : "Per Attesterende",
+    "navAvsenderEnhet" : "NAV Familie- og pensjonsytelser Porsgrunn"
+  }
+}

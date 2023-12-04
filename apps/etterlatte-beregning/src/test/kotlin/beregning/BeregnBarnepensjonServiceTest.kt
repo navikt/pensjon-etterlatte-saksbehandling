@@ -8,7 +8,6 @@ import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.beregning.BeregnBarnepensjonServiceFeatureToggle.BrukInstitusjonsoppholdIBeregning
 import no.nav.etterlatte.beregning.BeregnBarnepensjonServiceFeatureToggle.BrukNyttRegelverkIBeregning
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlag
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlagService
@@ -66,7 +65,6 @@ internal class BeregnBarnepensjonServiceTest {
 
     @BeforeEach
     fun setup() {
-        featureToggleService.settBryter(BrukInstitusjonsoppholdIBeregning, false)
         featureToggleService.settBryter(BrukNyttRegelverkIBeregning, false)
     }
 
@@ -515,7 +513,12 @@ internal class BeregnBarnepensjonServiceTest {
                 any(),
                 any(),
             )
-        } returns barnepensjonBeregningsGrunnlag(behandling.id, emptyList())
+        } returns
+            barnepensjonBeregningsGrunnlag(
+                behandling.id,
+                emptyList(),
+                institusjonsoppholdBeregningsgrunnlag = emptyList(),
+            )
         coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns null
         featureToggleService.settBryter(BrukNyttRegelverkIBeregning, true)
 
@@ -567,6 +570,8 @@ internal class BeregnBarnepensjonServiceTest {
         behandlingId: UUID,
         soesken: List<Folkeregisteridentifikator>,
         beregningsMetode: BeregningsMetode = BeregningsMetode.NASJONAL,
+        institusjonsoppholdBeregningsgrunnlag: List<GrunnlagMedPeriode<InstitusjonsoppholdBeregningsgrunnlag>> =
+            defaultInstitusjonsopphold(),
     ) = BeregningsGrunnlag(
         behandlingId,
         defaultKilde(),
@@ -584,7 +589,7 @@ internal class BeregnBarnepensjonServiceTest {
                         },
                 ),
             ),
-        institusjonsoppholdBeregningsgrunnlag = defaultInstitusjonsopphold(),
+        institusjonsoppholdBeregningsgrunnlag = institusjonsoppholdBeregningsgrunnlag,
         beregningsMetode = beregningsMetode.toGrunnlag(),
     )
 

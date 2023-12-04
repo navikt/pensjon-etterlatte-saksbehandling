@@ -3,7 +3,6 @@ package no.nav.etterlatte.beregning
 import beregning.regler.finnAnvendtGrunnbeloep
 import beregning.regler.finnAnvendtTrygdetid
 import com.fasterxml.jackson.databind.JsonNode
-import no.nav.etterlatte.beregning.BeregnBarnepensjonServiceFeatureToggle.BrukInstitusjonsoppholdIBeregning
 import no.nav.etterlatte.beregning.BeregnBarnepensjonServiceFeatureToggle.BrukNyttRegelverkIBeregning
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlag
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlagService
@@ -11,7 +10,6 @@ import no.nav.etterlatte.beregning.grunnlag.GrunnlagMedPeriode
 import no.nav.etterlatte.beregning.grunnlag.PeriodisertBeregningGrunnlag
 import no.nav.etterlatte.beregning.grunnlag.mapVerdier
 import no.nav.etterlatte.beregning.regler.barnepensjon.PeriodisertBarnepensjonGrunnlag
-import no.nav.etterlatte.beregning.regler.barnepensjon.kroneavrundetBarnepensjonRegel
 import no.nav.etterlatte.beregning.regler.barnepensjon.kroneavrundetBarnepensjonRegelMedInstitusjon
 import no.nav.etterlatte.beregning.regler.barnepensjon.sats.grunnbeloep
 import no.nav.etterlatte.beregning.regler.barnepensjon.trygdetidsfaktor.trygdetidBruktRegel
@@ -55,7 +53,6 @@ import java.time.YearMonth
 import java.util.UUID
 
 enum class BeregnBarnepensjonServiceFeatureToggle(private val key: String) : FeatureToggle {
-    BrukInstitusjonsoppholdIBeregning("pensjon-etterlatte.bp-bruk-institusjonsopphold-i-beregning"),
     BrukNyttRegelverkIBeregning("pensjon-etterlatte.bp-bruk-nytt-regelverk-i-beregning"),
     ;
 
@@ -159,17 +156,10 @@ class BeregnBarnepensjonService(
             }
 
         val resultat =
-            if (featureToggleService.isEnabled(BrukInstitusjonsoppholdIBeregning, false)) {
-                kroneavrundetBarnepensjonRegelMedInstitusjon.eksekver(
-                    grunnlag = beregningsgrunnlag,
-                    periode = RegelPeriode(virkningstidspunkt.atDay(1), beregningTom?.atEndOfMonth()),
-                )
-            } else {
-                kroneavrundetBarnepensjonRegel.eksekver(
-                    grunnlag = beregningsgrunnlag,
-                    periode = RegelPeriode(virkningstidspunkt.atDay(1), beregningTom?.atEndOfMonth()),
-                )
-            }
+            kroneavrundetBarnepensjonRegelMedInstitusjon.eksekver(
+                grunnlag = beregningsgrunnlag,
+                periode = RegelPeriode(virkningstidspunkt.atDay(1), beregningTom?.atEndOfMonth()),
+            )
 
         return when (resultat) {
             is RegelkjoeringResultat.Suksess -> {

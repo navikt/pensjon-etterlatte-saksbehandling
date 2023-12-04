@@ -74,15 +74,6 @@ val beregnBarnepensjon1967Regel =
         sats.multiply(trygdetidsfaktor)
     }
 
-val kroneavrundetBarnepensjonRegel =
-    RegelMeta(
-        gjelderFra = BP_1967_DATO,
-        beskrivelse = "Gjør en kroneavrunding av barnepensjonen",
-        regelReferanse = RegelReferanse(id = "REGEL-KRONEAVRUNDING"),
-    ) benytter beregnBarnepensjon1967Regel med { beregnetBarnepensjon ->
-        beregnetBarnepensjon.round(decimals = 0).toInteger()
-    }
-
 val barnepensjonSatsMedInstitusjonsopphold =
     RegelMeta(
         gjelderFra = BP_1967_DATO,

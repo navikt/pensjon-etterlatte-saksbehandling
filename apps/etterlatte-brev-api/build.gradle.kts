@@ -13,7 +13,6 @@ dependencies {
     implementation(project(":libs:etterlatte-database"))
     implementation(project(":libs:etterlatte-trygdetid-model"))
     implementation(project(":libs:ktor2client-onbehalfof"))
-    implementation(project(":libs:ktor2client-auth-clientcredentials"))
     implementation(project(":libs:etterlatte-vilkaarsvurdering-model"))
     implementation(project(":libs:etterlatte-tilbakekreving-model"))
     implementation(project(":libs:etterlatte-funksjonsbrytere"))

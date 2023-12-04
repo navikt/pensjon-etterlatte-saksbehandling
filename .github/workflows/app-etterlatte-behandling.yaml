@@ -29,7 +29,6 @@ on:
       - libs/etterlatte-vedtaksvurdering-model/**
       - libs/etterlatte-funksjonsbrytere/**
       - libs/ktor2client-onbehalfof/**
-      - libs/ktor2client-auth-clientcredentials/**
       - libs/rapidsandrivers-extras/**
       - gradle/libs.versions.toml
   pull_request:
@@ -49,7 +48,6 @@ on:
       - libs/etterlatte-vedtaksvurdering-model/**
       - libs/etterlatte-funksjonsbrytere/**
       - libs/ktor2client-onbehalfof/**
-      - libs/ktor2client-auth-clientcredentials/**
       - libs/rapidsandrivers-extras/**
       - gradle/libs.versions.toml
 

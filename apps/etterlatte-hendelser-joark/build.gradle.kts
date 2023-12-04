@@ -8,11 +8,11 @@ repositories {
 }
 
 dependencies {
-    implementation(project(":libs:ktor2client-auth-clientcredentials"))
     implementation(project(":libs:saksbehandling-common"))
     implementation(project(":libs:etterlatte-ktor"))
     implementation(project(":libs:etterlatte-kafka"))
     implementation(project(":libs:etterlatte-oppgave-model"))
+    implementation(project(":libs:etterlatte-token-model"))
 
     implementation(libs.ktor2.okhttp)
     implementation(libs.ktor2.clientcore)

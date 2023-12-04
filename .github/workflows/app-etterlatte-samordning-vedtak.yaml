@@ -20,7 +20,6 @@ on:
       - libs/etterlatte-ktor/**
       - libs/etterlatte-sporingslogg/**
       - libs/etterlatte-vedtaksvurdering-model/**
-      - libs/ktor2client-auth-clientcredentials/**
       - libs/ktor2client-onbehalfof/**
       - gradle/libs.versions.toml
   pull_request:
@@ -31,7 +30,6 @@ on:
       - libs/etterlatte-ktor/**
       - libs/etterlatte-sporingslogg/**
       - libs/etterlatte-vedtaksvurdering-model/**
-      - libs/ktor2client-auth-clientcredentials/**
       - libs/ktor2client-onbehalfof/**
       - gradle/libs.versions.toml
 

@@ -12,7 +12,6 @@ dependencies {
     api(kotlin("reflect"))
 
     implementation(project(":libs:saksbehandling-common"))
-    implementation(project(":libs:ktor2client-auth-clientcredentials"))
     implementation(project(":libs:etterlatte-token-model"))
 
     implementation(libs.ktor2.servercore)
@@ -26,8 +25,10 @@ dependencies {
     implementation(libs.ktor2.okhttp)
     implementation(libs.ktor2.clientcontentnegotiation)
     implementation(libs.ktor2.metricsmicrometer)
-
     implementation(libs.navfelles.tokenvalidationktor2)
+    api(libs.ktor2.clientauth)
+    api(libs.ktor2.clientloggingjvm)
+    api(libs.navfelles.tokenclientcore)
 
     implementation(libs.logging.logstashlogbackencoder) {
         exclude("com.fasterxml.jackson.core")

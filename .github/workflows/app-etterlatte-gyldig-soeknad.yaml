@@ -16,16 +16,16 @@ on:
       - main
     paths:
       - apps/etterlatte-gyldig-soeknad/**
+      - libs/etterlatte-ktor/**
       - libs/saksbehandling-common/**
-      - libs/ktor2client-auth-clientcredentials/**
       - gradle/libs.versions.toml
   pull_request:
     branches:
       - main
     paths:
       - apps/etterlatte-gyldig-soeknad/**
+      - libs/etterlatte-ktor/**
       - libs/saksbehandling-common/**
-      - libs/ktor2client-auth-clientcredentials/**
       - gradle/libs.versions.toml
 
 jobs:

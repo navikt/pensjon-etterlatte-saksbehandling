@@ -31,7 +31,6 @@ include(
     "apps:etterlatte-trygdetid",
     "apps:etterlatte-trygdetid-kafka",
     "apps:etterlatte-samordning-vedtak",
-    "libs:ktor2client-auth-clientcredentials",
     "libs:etterlatte-token-model",
     "libs:saksbehandling-common",
     "libs:ktor2client-onbehalfof",

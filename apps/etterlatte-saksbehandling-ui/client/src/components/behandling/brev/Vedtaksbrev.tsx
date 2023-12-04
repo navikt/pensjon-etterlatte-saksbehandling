@@ -114,7 +114,8 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
   const kanSendeTilAttestering = (): boolean => {
     const kanSende =
       behandling?.behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING &&
-      (sjekkliste === null || !sjekkliste.bekreftet)
+      sjekkliste !== null &&
+      sjekkliste.bekreftet
 
     if (!kanSende) {
       const fant = valideringsfeil.find((e) => e === Valideringsfeilkoder.MAA_HUKES_AV)

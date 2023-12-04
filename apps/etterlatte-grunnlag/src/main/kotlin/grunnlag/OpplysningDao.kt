@@ -141,6 +141,8 @@ class OpplysningDao(private val datasource: DataSource) {
                     AND hendelse.opplysning_type = annen.opplysning_type 
                     AND annen.hendelsenummer > hendelse.hendelsenummer
                 )
+                ORDER BY hendelsenummer DESC
+                LIMIT 1
                 """.trimIndent(),
             )
                 .apply {

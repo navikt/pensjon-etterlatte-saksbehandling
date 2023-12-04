@@ -40,11 +40,16 @@ data class BrevbakerRequest(
         }
 
         private fun erMigrering(brevKode: EtterlatteBrevKode): Boolean =
-            brevKode == EtterlatteBrevKode.BARNEPENSJON_FORHAANDSVARSEL_OMREGNING
+            brevKode in
+                listOf(
+                    EtterlatteBrevKode.BARNEPENSJON_FORHAANDSVARSEL_OMREGNING,
+                    EtterlatteBrevKode.BARNEPENSJON_VEDTAK_OMREGNING,
+                    EtterlatteBrevKode.BARNEPENSJON_VEDTAK_OMREGNING_FERDIG,
+                )
     }
 }
 
-private fun Soeker.formaterNavn() = listOfNotNull(fornavn, mellomnavn, etternavn).joinToString(" ")
+fun Soeker.formaterNavn() = listOfNotNull(fornavn, mellomnavn, etternavn).joinToString(" ")
 
 enum class LanguageCode {
     BOKMAL,

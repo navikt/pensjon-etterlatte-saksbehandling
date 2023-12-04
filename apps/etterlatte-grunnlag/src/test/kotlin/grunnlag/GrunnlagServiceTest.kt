@@ -1,6 +1,9 @@
 package no.nav.etterlatte.grunnlag
 
 import com.fasterxml.jackson.databind.JsonNode
+import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
+import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.shouldBe
 import io.mockk.called
 import io.mockk.coEvery
 import io.mockk.every
@@ -40,6 +43,7 @@ import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import no.nav.etterlatte.libs.testdata.grunnlag.HELSOESKEN_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.INNSENDER_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER2_FOEDSELSNUMMER
+import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.kilde
 import no.nav.etterlatte.libs.testdata.grunnlag.statiskUuid
 import org.junit.jupiter.api.Assertions
@@ -708,6 +712,76 @@ internal class GrunnlagServiceTest {
                 )
             assertEquals(listOf(MismatchPersongalleri.EKSTRA_SOESKEN), valideringsfeilSakEkstraSoesken)
             assertEquals(listOf(MismatchPersongalleri.MANGLER_SOESKEN), valideringsfeilPdlEkstraSoesken)
+        }
+    }
+
+    @Nested
+    inner class Personopplysninger {
+        @Test
+        fun `skal hente personopplysninger, seneste gyldige roller`() {
+            val behandlingsid = UUID.randomUUID()
+            every {
+                opplysningDaoMock.hentGrunnlagAvTypeForBehandling(
+                    behandlingsid,
+                    Opplysningstype.INNSENDER_PDL_V1,
+                    Opplysningstype.SOEKER_PDL_V1,
+                    Opplysningstype.AVDOED_PDL_V1,
+                    Opplysningstype.GJENLEVENDE_FORELDER_PDL_V1,
+                )
+            } returns
+                listOf(
+                    lagGrunnlagHendelse(
+                        1,
+                        1,
+                        Opplysningstype.SOEKER_PDL_V1,
+                        id = behandlingsid,
+                        fnr = SOEKER_FOEDSELSNUMMER,
+                        verdi = testData.soeker.toJsonNode(),
+                        kilde = kilde,
+                    ),
+                    lagGrunnlagHendelse(
+                        1,
+                        2,
+                        Opplysningstype.INNSENDER_PDL_V1,
+                        id = behandlingsid,
+                        fnr = SOEKER_FOEDSELSNUMMER,
+                        verdi = testData.soeker.toJsonNode(),
+                        kilde = kilde,
+                    ),
+                    lagGrunnlagHendelse(
+                        1,
+                        3,
+                        Opplysningstype.AVDOED_PDL_V1,
+                        id = behandlingsid,
+                        fnr = AVDOED_FOEDSELSNUMMER,
+                        verdi = testData.avdoed.toJsonNode(),
+                        kilde = kilde,
+                    ),
+                    lagGrunnlagHendelse(
+                        1,
+                        4,
+                        Opplysningstype.AVDOED_PDL_V1,
+                        id = behandlingsid,
+                        fnr = GJENLEVENDE_FOEDSELSNUMMER, // litt dum gjenbruk inn i annen opplysning
+                        verdi = testData.gjenlevende.toJsonNode(),
+                        kilde = kilde,
+                    ),
+                )
+
+            val resultat = grunnlagService.hentPersonopplysninger(behandlingsid, SakType.BARNEPENSJON)
+
+            println("INNSENDER: ${resultat.innsender}")
+            println("SØKER: ${resultat.soeker}")
+
+            resultat.innsender?.opplysning?.foedselsnummer shouldBe SOEKER_FOEDSELSNUMMER
+            resultat.soeker?.opplysning?.foedselsnummer shouldBe SOEKER_FOEDSELSNUMMER
+            resultat.avdoede shouldHaveSize 2
+            resultat.avdoede.map { it.opplysning.foedselsnummer } shouldContainExactlyInAnyOrder
+                listOf(
+                    Folkeregisteridentifikator.of(GJENLEVENDE_FOEDSELSNUMMER.value),
+                    Folkeregisteridentifikator.of(AVDOED_FOEDSELSNUMMER.value),
+                )
+            resultat.gjenlevende shouldHaveSize 0
         }
     }
 

@@ -100,7 +100,7 @@ export const Oversikt = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo
           () => (
             <>
               {saksbehandlerPaaOppgave ? (
-                <Tekst>saksbehandlerPaaOppgave</Tekst>
+                <Tekst>{saksbehandlerPaaOppgave}</Tekst>
               ) : (
                 <Alert variant="warning">Ingen saksbehandler har tatt denne oppgaven</Alert>
               )}

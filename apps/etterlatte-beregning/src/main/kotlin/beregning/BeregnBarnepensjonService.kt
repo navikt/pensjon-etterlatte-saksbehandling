@@ -3,6 +3,7 @@ package no.nav.etterlatte.beregning
 import beregning.regler.finnAnvendtGrunnbeloep
 import beregning.regler.finnAnvendtTrygdetid
 import com.fasterxml.jackson.databind.JsonNode
+import io.ktor.http.HttpStatusCode
 import no.nav.etterlatte.beregning.BeregnBarnepensjonServiceFeatureToggle.BrukNyttRegelverkIBeregning
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlag
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlagService
@@ -25,6 +26,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
 import no.nav.etterlatte.libs.common.beregning.Beregningstype
+import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsdata
 import no.nav.etterlatte.libs.common.grunnlag.Metadata
@@ -307,7 +309,11 @@ class BeregnBarnepensjonService(
                         beskrivelse = "Trygdetid avdød forelder",
                     ),
                 )
-            } ?: throw RuntimeException("Mangler trygdetid, gå tilbake til trygdetidsiden for å opprette dette"),
+            } ?: throw ForespoerselException(
+                HttpStatusCode.BadRequest.value,
+                code = "MÅ_FASTSETTE_TRYGDETID",
+                detail = "Mangler trygdetid, gå tilbake til trygdetidsiden for å opprette dette",
+            ),
         institusjonsopphold =
             PeriodisertBeregningGrunnlag.lagPotensieltTomtGrunnlagMedDefaultUtenforPerioder(
                 beregningsGrunnlag.institusjonsoppholdBeregningsgrunnlag.mapVerdier { institusjonsopphold ->

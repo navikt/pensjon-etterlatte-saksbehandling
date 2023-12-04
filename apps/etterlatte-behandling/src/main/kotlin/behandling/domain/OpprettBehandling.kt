@@ -1,6 +1,5 @@
 package no.nav.etterlatte.behandling.domain
 
-import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerAarsak
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -18,7 +17,7 @@ data class OpprettBehandling(
     val soeknadMottattDato: LocalDateTime? = null,
     val virkningstidspunkt: Virkningstidspunkt? = null,
     val revurderingsAarsak: Revurderingaarsak? = null,
-    val opphoerAarsaker: List<ManueltOpphoerAarsak>? = null,
+    val opphoerAarsaker: List<String>? = null,
     val fritekstAarsak: String? = null,
     val prosesstype: Prosesstype = Prosesstype.MANUELL,
     val kilde: Vedtaksloesning,

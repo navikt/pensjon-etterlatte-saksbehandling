@@ -23,7 +23,6 @@ import no.nav.etterlatte.behandling.GyldighetsproevingService
 import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktService
 import no.nav.etterlatte.behandling.behandlingRoutes
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeService
-import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerService
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -48,7 +47,6 @@ internal class BehandlingRoutesTest {
     private val behandlingService = mockk<BehandlingService>(relaxUnitFun = true)
     private val gyldighetsproevingService = mockk<GyldighetsproevingService>()
     private val kommerBarnetTilGodeService = mockk<KommerBarnetTilGodeService>()
-    private val manueltOpphoerService = mockk<ManueltOpphoerService>()
     private val aktivitetspliktService = mockk<AktivitetspliktService>()
     private val behandlingFactory = mockk<BehandlingFactory>()
 
@@ -167,7 +165,6 @@ internal class BehandlingRoutesTest {
                 behandlingService,
                 gyldighetsproevingService,
                 kommerBarnetTilGodeService,
-                manueltOpphoerService,
                 aktivitetspliktService,
                 behandlingFactory,
             )

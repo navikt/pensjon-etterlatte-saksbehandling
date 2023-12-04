@@ -18,13 +18,10 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.FastsettVirkningstidspunktResponse
-import no.nav.etterlatte.behandling.ManueltOpphoerResponse
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.klage.VurdereFormkravDto
 import no.nav.etterlatte.behandling.klage.VurdertUtfallDto
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
-import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerAarsak
-import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerRequest
 import no.nav.etterlatte.behandling.objectMapper
 import no.nav.etterlatte.behandling.revurdering.RevurderingDao
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
@@ -550,25 +547,6 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
                 addAuthToken(fagsystemTokenEY)
             }.also {
                 assertEquals(HttpStatusCode.OK, it.status)
-            }
-
-            client.post("/api/behandlinger/${sak.id}/manueltopphoer") {
-                addAuthToken(tokenSaksbehandler)
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                setBody(
-                    ManueltOpphoerRequest(
-                        sakId = sak.id,
-                        opphoerAarsaker =
-                            listOf(
-                                ManueltOpphoerAarsak.SOESKEN_DOED,
-                                ManueltOpphoerAarsak.UTFLYTTING_FRA_NORGE,
-                            ),
-                        fritekstAarsak = "kunne ikke behandles manuelt",
-                    ),
-                )
-            }.also {
-                assertEquals(HttpStatusCode.OK, it.status)
-                it.body<ManueltOpphoerResponse>()
             }
 
             client.post("/grunnlagsendringshendelse/adressebeskyttelse") {

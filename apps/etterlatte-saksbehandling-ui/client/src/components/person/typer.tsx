@@ -7,6 +7,7 @@ import {
 import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
 import { ISakMedUtenlandstilknytning, SakType } from '~shared/types/sak'
 import { IAdresse } from '~shared/types/IAdresse'
+import { Utland } from '~shared/types/Person'
 
 export interface IPersonResult {
   fornavn: string
@@ -66,17 +67,6 @@ export const GRUNNLAGSENDRING_STATUS = [
 export const STATUS_IRRELEVANT: GrunnlagsendringStatus = 'VURDERT_SOM_IKKE_RELEVANT'
 export const TATT_MED_I_BEHANDLING: GrunnlagsendringStatus = 'TATT_MED_I_BEHANDLING'
 export const HISTORISK_REVURDERING: GrunnlagsendringStatus = 'HISTORISK'
-
-interface Utland {
-  utflyttingFraNorge?: {
-    tilflyttingsland?: string
-    dato?: string
-  }[]
-  innflyttingTilNorge?: {
-    fraflyttingsland?: string
-    dato?: string
-  }[]
-}
 
 export interface DoedsdatoSamsvar {
   type: 'DOEDSDATO'

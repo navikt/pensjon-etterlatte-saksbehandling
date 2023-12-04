@@ -53,7 +53,7 @@ data class JournalpostVariables(
 data class Journalpost(
     val journalpostId: String,
     val bruker: Bruker?,
-    val tittel: String,
+    val tittel: String?,
     val journalposttype: String,
     val journalstatus: Journalstatus,
     val dokumenter: List<Dokument>,

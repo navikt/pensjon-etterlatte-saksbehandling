@@ -146,7 +146,7 @@ class JoarkHendelseHandler(
 
             val merknad =
                 if (journalpost.kanal == Kanal.EESSI) {
-                    journalpost.tittel
+                    journalpost.tittel ?: "Dokument fra EESSI/Rina er uten tittel"
                 } else {
                     "Kontroller kobling til sak"
                 }

@@ -1,7 +1,9 @@
 package no.nav.etterlatte.grunnlag
 
 import io.ktor.http.HttpStatusCode
+import io.ktor.server.application.application
 import io.ktor.server.application.call
+import io.ktor.server.application.log
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.post
@@ -58,6 +60,7 @@ fun Route.personRoute(
                         "Gjenny har ingen navnedata på fødselsnummeret som ble etterspurt",
                     )
                 } catch (ex: Exception) {
+                    application.log.error("Fikk feilmelding under henting av navn fra grunnlag", ex)
                     call.respond(
                         HttpStatusCode.NotFound,
                         "Gjenny har ingen navnedata på fødselsnummeret som ble etterspurt",

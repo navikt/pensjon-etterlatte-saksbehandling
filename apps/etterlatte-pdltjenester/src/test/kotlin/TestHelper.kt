@@ -73,6 +73,7 @@ fun mockPerson(
     familieRelasjon = familieRelasjon?.let { OpplysningDTO(it, UUID.randomUUID().toString()) },
     avdoedesBarn = null,
     vergemaalEllerFremtidsfullmakt = vergemaal?.map { OpplysningDTO(it, UUID.randomUUID().toString()) },
+    pdlStatsborgerskap = null,
 )
 
 fun mockFolkeregisterident(fnr: String) = PdlIdentifikator.FolkeregisterIdent(Folkeregisteridentifikator.of(fnr))

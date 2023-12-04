@@ -31,13 +31,13 @@ data class VergeSamhandlerFormat(
     val linje3: String?,
     val postnr: String?,
     val poststed: String?,
-    val navn: String,
+    val navn: String?,
     val landkode: String,
     val land: String,
 ) : PersondataAdresse("VERGE_SAMHANDLER_POSTADRESSE", adresselinjer, adresseString) {
     override fun tilFrittstaendeBrevMottaker(): BrevMottaker {
         return BrevMottaker(
-            navn = navn,
+            navn = navn ?: "Ukjent",
             foedselsnummer = null,
             adresse =
                 Adresse(
@@ -59,11 +59,11 @@ data class VergePersonFormat(
     override val adresseString: String?,
     val adresse: RegoppslagAdresse,
     val vergePid: String,
-    val navn: String,
+    val navn: String?,
 ) : PersondataAdresse("VERGE_PERSON_POSTADRESSE", adresselinjer, adresseString) {
     override fun tilFrittstaendeBrevMottaker(): BrevMottaker {
         return BrevMottaker(
-            navn = navn,
+            navn = navn ?: "Ukjent",
             foedselsnummer = Foedselsnummer(vergePid),
             adresse =
                 Adresse(
@@ -84,12 +84,12 @@ data class RegoppslagFormat(
     override val adresselinjer: List<String>,
     override val adresseString: String?,
     val adresse: RegoppslagAdresse,
-    val navn: String,
+    val navn: String?,
 ) :
     PersondataAdresse("REGOPPSLAG_ADRESSE", adresselinjer, adresseString) {
     override fun tilFrittstaendeBrevMottaker(): BrevMottaker {
         return BrevMottaker(
-            navn = navn,
+            navn = navn ?: "Ukjent",
             foedselsnummer = null,
             adresse =
                 Adresse(

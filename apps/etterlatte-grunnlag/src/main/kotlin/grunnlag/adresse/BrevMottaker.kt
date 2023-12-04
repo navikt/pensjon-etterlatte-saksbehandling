@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class BrevMottaker(
-    val navn: String?,
+    val navn: String,
     val foedselsnummer: Foedselsnummer?,
     val adresse: Adresse,
 )

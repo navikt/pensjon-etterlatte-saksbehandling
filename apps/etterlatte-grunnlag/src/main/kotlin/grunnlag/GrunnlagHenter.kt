@@ -6,10 +6,7 @@ import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.grunnlag.adresse.BrevMottaker
-import no.nav.etterlatte.grunnlag.adresse.Foedselsnummer
-import no.nav.etterlatte.grunnlag.adresse.PersondataAdresse
 import no.nav.etterlatte.grunnlag.klienter.PdlTjenesterKlientImpl
-import no.nav.etterlatte.grunnlag.klienter.PersondataKlient
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -21,19 +18,14 @@ import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.PersonRolle
-import no.nav.etterlatte.libs.common.person.VergemaalEllerFremtidsfullmakt
-import no.nav.etterlatte.libs.common.person.hentRelevantVerge
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
-import org.slf4j.LoggerFactory
 import java.util.UUID
 
 class GrunnlagHenter(
     private val pdltjenesterKlient: PdlTjenesterKlientImpl,
-    private val persondataKlient: PersondataKlient,
+    private val vergeService: VergeService,
 ) {
-    private val logger = LoggerFactory.getLogger(GrunnlagHenter::class.java)
-
     suspend fun hentGrunnlagsdata(opplysningsbehov: Opplysningsbehov): HentetGrunnlag {
         return coroutineScope {
             val persongalleri = opplysningsbehov.persongalleri
@@ -79,16 +71,9 @@ class GrunnlagHenter(
                 }
 
             val vergesAdresseInfo: Grunnlagsopplysning<JsonNode>? =
-                hentRelevantVerge(soekerPersonInfo.person.vergemaalEllerFremtidsfullmakt)?.let { verge ->
-                    val vergesAdresse = hentVergesAdresse(persongalleri.soeker, verge)
-                    if (vergesAdresse == null) {
-                        logger.error(
-                            "Fant ikke verges adresse " +
-                                "ved oppretting av grunnlag, for sak ${opplysningsbehov.sakId}",
-                        )
-                    }
-                    vergesAdresse
-                }
+                vergeService
+                    .hentGrunnlagsopplysningVergesAdresse(soekerPersonInfo.person)
+                    ?.tilGrunnlagsopplysningJson()
 
             val opplysningList =
                 listOfNotNull(soekerPersonInfo, innsenderPersonInfo)
@@ -115,34 +100,6 @@ class GrunnlagHenter(
 
             HentetGrunnlag(personopplysninger, saksopplysninger)
         }
-    }
-
-    private fun hentVergesAdresse(
-        soekerFnr: String,
-        relevantVerge: VergemaalEllerFremtidsfullmakt,
-    ): Grunnlagsopplysning<JsonNode>? {
-        val vergesAdresseInfo = hentVergensAdresseGittVergehaver(soekerFnr)
-        return if (vergesAdresseInfo != null) {
-            grunnlagsopplysningVergeadresse(vergesAdresseInfo, relevantVerge, "$soekerFnr.verge")
-        } else {
-            val vergesFnr = relevantVerge.vergeEllerFullmektig.motpartsPersonident!!.value
-            val pdlVergeAdresse = hentAdresseGittFoedselsnummer(vergesFnr)
-            return pdlVergeAdresse?.let {
-                grunnlagsopplysningVergeadresse(pdlVergeAdresse, relevantVerge, vergesFnr)
-            }
-        }
-    }
-
-    private fun grunnlagsopplysningVergeadresse(
-        vergesAdresseInfo: PersondataAdresse,
-        relevantVerge: VergemaalEllerFremtidsfullmakt,
-        registersReferanse: String,
-    ): Grunnlagsopplysning<JsonNode> {
-        val pdlVergeFoedselsnummer = relevantVerge.vergeEllerFullmektig.motpartsPersonident!!.value
-        return vergesAdresseInfo.toBrevMottaker()
-            .copy(
-                foedselsnummer = Foedselsnummer(pdlVergeFoedselsnummer),
-            ).tilGrunnlagsopplysning(registersReferanse)
     }
 
     private suspend fun personopplysning(
@@ -188,24 +145,15 @@ class GrunnlagHenter(
             },
         )
 
-    private fun hentVergensAdresseGittVergehaver(foedselsnummer: String) = persondataKlient.hentAdresseForVerge(foedselsnummer)
-
-    private fun hentAdresseGittFoedselsnummer(foedselsnummer: String) = persondataKlient.hentAdresse(foedselsnummer)
-
-    private fun BrevMottaker.tilGrunnlagsopplysning(registersReferanse: String?): Grunnlagsopplysning<JsonNode> =
+    private fun Grunnlagsopplysning<BrevMottaker>.tilGrunnlagsopplysningJson(): Grunnlagsopplysning<JsonNode> =
         Grunnlagsopplysning(
-            id = UUID.randomUUID(),
-            kilde =
-                Grunnlagsopplysning.Persondata(
-                    tidspunktForInnhenting = Tidspunkt.now(),
-                    registersReferanse = registersReferanse,
-                    opplysningId = null,
-                ),
-            opplysningType = Opplysningstype.VERGES_ADRESSE,
-            meta = objectMapper.createObjectNode(),
-            opplysning = this.toJsonNode(),
-            fnr = null,
-            periode = null,
+            id = this.id,
+            kilde = this.kilde,
+            opplysningType = this.opplysningType,
+            meta = this.meta,
+            opplysning = this.opplysning.toJsonNode(),
+            fnr = this.fnr,
+            periode = this.periode,
         )
 
     private fun Persongalleri.tilGrunnlagsopplysningFraSoeknad(): Grunnlagsopplysning<JsonNode> {

@@ -11,6 +11,7 @@ import no.nav.etterlatte.grunnlag.GrunnlagHenter
 import no.nav.etterlatte.grunnlag.MigreringHendelserRiver
 import no.nav.etterlatte.grunnlag.OpplysningDao
 import no.nav.etterlatte.grunnlag.RealGrunnlagService
+import no.nav.etterlatte.grunnlag.VergeService
 import no.nav.etterlatte.grunnlag.behandlingGrunnlagRoute
 import no.nav.etterlatte.grunnlag.klienter.BehandlingKlientImpl
 import no.nav.etterlatte.grunnlag.klienter.PdlTjenesterKlientImpl
@@ -85,9 +86,10 @@ class ApplicationBuilder {
     private val pdltjenesterKlient = PdlTjenesterKlientImpl(pdlTjenester, env["PDLTJENESTER_URL"]!!)
     private val opplysningDao = OpplysningDao(ds)
     private val behandlingKlient = BehandlingKlientImpl(config, httpClient(), behandlingSystemClient)
-    private val grunnlagHenter = GrunnlagHenter(pdltjenesterKlient, persondataKlient)
+    private val vergeService = VergeService(persondataKlient)
+    private val grunnlagHenter = GrunnlagHenter(pdltjenesterKlient, vergeService)
     private val grunnlagService =
-        RealGrunnlagService(pdltjenesterKlient, opplysningDao, Sporingslogg(), persondataKlient, grunnlagHenter)
+        RealGrunnlagService(pdltjenesterKlient, opplysningDao, Sporingslogg(), grunnlagHenter, vergeService)
 
     private val rapidsConnection =
         RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(env))

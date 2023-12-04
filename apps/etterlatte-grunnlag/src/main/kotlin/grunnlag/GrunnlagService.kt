@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.grunnlag.adresse.BrevMottaker
 import no.nav.etterlatte.grunnlag.klienter.PdlTjenesterKlientImpl
-import no.nav.etterlatte.grunnlag.klienter.PersondataKlient
 import no.nav.etterlatte.libs.common.behandling.PersonMedSakerOgRoller
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakOgRolle
@@ -116,14 +115,14 @@ class RealGrunnlagService(
     private val pdltjenesterKlient: PdlTjenesterKlientImpl,
     private val opplysningDao: OpplysningDao,
     private val sporingslogg: Sporingslogg,
-    private val persondataKlient: PersondataKlient,
     private val grunnlagHenter: GrunnlagHenter,
+    private val vergeService: VergeService,
 ) : GrunnlagService {
     private val logger = LoggerFactory.getLogger(RealGrunnlagService::class.java)
 
     override fun hentOpplysningsgrunnlagForSak(sakId: Long): Grunnlag? {
         val persongalleriJsonNode =
-            opplysningDao.finnNyesteGrunnlagForSak(sakId, Opplysningstype.PERSONGALLERI_V1)?.opplysning
+            opplysningDao.finnNyesteGrunnlagForSak(sakId, PERSONGALLERI_V1)?.opplysning
 
         if (persongalleriJsonNode == null) {
             logger.info("Klarte ikke å hente ut grunnlag for sak $sakId. Fant ikke persongalleri")
@@ -137,7 +136,7 @@ class RealGrunnlagService(
 
     override fun hentOpplysningsgrunnlag(behandlingId: UUID): Grunnlag? {
         val persongalleriJsonNode =
-            opplysningDao.finnNyesteGrunnlagForBehandling(behandlingId, Opplysningstype.PERSONGALLERI_V1)?.opplysning
+            opplysningDao.finnNyesteGrunnlagForBehandling(behandlingId, PERSONGALLERI_V1)?.opplysning
 
         if (persongalleriJsonNode == null) {
             logger.info("Klarte ikke å hente ut grunnlag for behandling (id=$behandlingId). Fant ikke persongalleri")
@@ -255,7 +254,7 @@ class RealGrunnlagService(
         sakType: SakType,
     ) {
         val persongalleriJsonNode =
-            opplysningDao.finnNyesteGrunnlagForSak(sakId, Opplysningstype.PERSONGALLERI_V1)?.opplysning
+            opplysningDao.finnNyesteGrunnlagForSak(sakId, PERSONGALLERI_V1)?.opplysning
 
         if (persongalleriJsonNode == null) {
             logger.info("Klarte ikke å hente ut grunnlag for sak $sakId. Fant ikke persongalleri")
@@ -297,8 +296,9 @@ class RealGrunnlagService(
     }
 
     override fun hentVergeadresse(folkeregisteridentifikator: String): BrevMottaker? {
-        return persondataKlient.hentAdresseForVerge(folkeregisteridentifikator)
-            ?.toBrevMottaker()
+        val pdlPerson =
+            pdltjenesterKlient.hentPerson(folkeregisteridentifikator, PersonRolle.BARN, SakType.BARNEPENSJON)
+        return vergeService.hentGrunnlagsopplysningVergesAdresse(pdlPerson)?.opplysning
     }
 
     override fun hentPersongalleriSamsvar(behandlingId: UUID): PersongalleriSamsvar {

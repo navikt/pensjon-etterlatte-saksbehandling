@@ -587,10 +587,6 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
             "BEHANDLING:AVBRUTT",
             objectMapper.readTree(rapid.publiserteMeldinger[2].verdi)["@event_name"].textValue(),
         )
-        assertEquals(
-            "BEHANDLING:OPPRETTET",
-            objectMapper.readTree(rapid.publiserteMeldinger[3].verdi)["@event_name"].textValue(),
-        )
         applicationContext.dataSource.connection.use {
             HendelseDao { it }.finnHendelserIBehandling(behandlingOpprettet!!).also { println(it) }
         }

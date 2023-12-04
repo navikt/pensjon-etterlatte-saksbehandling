@@ -723,6 +723,7 @@ internal class GrunnlagServiceTest {
             every {
                 opplysningDaoMock.hentGrunnlagAvTypeForBehandling(
                     behandlingsid,
+                    PERSONGALLERI_V1,
                     Opplysningstype.INNSENDER_PDL_V1,
                     Opplysningstype.SOEKER_PDL_V1,
                     Opplysningstype.AVDOED_PDL_V1,
@@ -766,19 +767,27 @@ internal class GrunnlagServiceTest {
                         verdi = testData.gjenlevende.toJsonNode(),
                         kilde = kilde,
                     ),
+                    lagGrunnlagHendelse(
+                        1,
+                        5,
+                        Opplysningstype.PERSONGALLERI_V1,
+                        id = behandlingsid,
+                        verdi =
+                            Persongalleri(
+                                soeker = SOEKER_FOEDSELSNUMMER.value,
+                                avdoed = listOf(AVDOED_FOEDSELSNUMMER.value),
+                            ).toJsonNode(),
+                        kilde = kilde,
+                    ),
                 )
 
             val resultat = grunnlagService.hentPersonopplysninger(behandlingsid, SakType.BARNEPENSJON)
 
-            println("INNSENDER: ${resultat.innsender}")
-            println("SØKER: ${resultat.soeker}")
-
             resultat.innsender?.opplysning?.foedselsnummer shouldBe SOEKER_FOEDSELSNUMMER
             resultat.soeker?.opplysning?.foedselsnummer shouldBe SOEKER_FOEDSELSNUMMER
-            resultat.avdoede shouldHaveSize 2
+            resultat.avdoede shouldHaveSize 1
             resultat.avdoede.map { it.opplysning.foedselsnummer } shouldContainExactlyInAnyOrder
                 listOf(
-                    Folkeregisteridentifikator.of(GJENLEVENDE_FOEDSELSNUMMER.value),
                     Folkeregisteridentifikator.of(AVDOED_FOEDSELSNUMMER.value),
                 )
             resultat.gjenlevende shouldHaveSize 0

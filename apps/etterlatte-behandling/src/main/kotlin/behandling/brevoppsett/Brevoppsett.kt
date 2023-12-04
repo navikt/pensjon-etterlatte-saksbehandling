@@ -1,5 +1,7 @@
 package no.nav.etterlatte.behandling.brevoppsett
 
+import no.nav.etterlatte.behandling.domain.Behandling
+import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import java.time.LocalDate
@@ -20,10 +22,10 @@ data class Etterbetaling(
 ) {
     init {
         if (fom > tom) {
-            throw EtterbetalingException.FomErEtterTom(fom, tom)
+            throw BrevoppsettException.EtterbetalingFomErEtterTom(fom, tom)
         }
         if (tom > YearMonth.now()) {
-            throw EtterbetalingException.TomErFramITid(tom)
+            throw BrevoppsettException.EtterbetalingTomErFramITid(tom)
         }
     }
 
@@ -33,7 +35,7 @@ data class Etterbetaling(
             datoTom: LocalDate?,
         ): Etterbetaling {
             if (datoFom == null || datoTom == null) {
-                throw EtterbetalingException.ManglerDato()
+                throw BrevoppsettException.EtterbetalingManglerDato()
             }
             return Etterbetaling(YearMonth.from(datoFom), YearMonth.from(datoTom))
         }
@@ -50,24 +52,34 @@ enum class Aldersgruppe {
     UNDER_18,
 }
 
-sealed class EtterbetalingException {
-    class ManglerDato : UgyldigForespoerselException(
+sealed class BrevoppsettException {
+    class EtterbetalingManglerDato : UgyldigForespoerselException(
         code = "MANGLER_FRA_ELLER_TIL_DATO",
         detail = "Etterbetaling må ha en fra-dato og en til-dato",
     )
 
-    class FomErEtterTom(fom: YearMonth, tom: YearMonth) : UgyldigForespoerselException(
+    class EtterbetalingFomErEtterTom(fom: YearMonth, tom: YearMonth) : UgyldigForespoerselException(
         code = "FRA_DATO_ETTER_TIL_DATO",
         detail = "Fra-dato ($fom) kan ikke være etter til-dato ($tom).",
     )
 
-    class TomErFramITid(tom: YearMonth) : UgyldigForespoerselException(
+    class EtterbetalingTomErFramITid(tom: YearMonth) : UgyldigForespoerselException(
         code = "TIL_DATO_FRAM_I_TID",
         detail = "Til-dato ($tom) er fram i tid.",
     )
 
-    class FraDatoErFoerVirk(fom: YearMonth, virkningstidspunkt: YearMonth) : UgyldigForespoerselException(
+    class EtterbetalingFraDatoErFoerVirk(fom: YearMonth, virkningstidspunkt: YearMonth) : UgyldigForespoerselException(
         code = "FRA_DATO_FOER_VIRK",
         detail = "Fra-dato ($fom) er før virkningstidspunkt ($virkningstidspunkt)",
+    )
+
+    class BehandlingKanIkkeEndres(behandling: Behandling) : IkkeTillattException(
+        code = "KAN_IKKE_ENDRES",
+        detail = "Behandling ${behandling.id} har status ${behandling.status} og kan ikke endres.",
+    )
+
+    class VirkningstidspunktIkkeSatt(behandling: Behandling) : UgyldigForespoerselException(
+        code = "VIRKNINGSTIDSPUNKT_IKKE_SATT",
+        detail = "Behandling ${behandling.id} har ikke satt virkningstidspunkt.",
     )
 }

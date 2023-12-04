@@ -8,6 +8,7 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.application
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
+import io.ktor.server.routing.put
 import io.ktor.server.routing.route
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.BEHANDLINGID_CALL_PARAMETER
@@ -25,18 +26,30 @@ internal fun Route.brevoppsettRoutes(service: BrevoppsettService) {
     route("/api/behandling/{$BEHANDLINGID_CALL_PARAMETER}/brevoppsett") {
         post {
             medBody<BrevoppsettDto> { dto ->
-                inTransaction {
-                    logger.info("Lagrer brevoppsett for behandling $behandlingId")
-                    service.lagreBrevoppsett(dto.toBrevoppsett(behandlingId, brukerTokenInfo))
-                }
+                val brevoppsett =
+                    inTransaction {
+                        logger.info("Lagrer brevoppsett for behandling $behandlingId")
+                        service.lagreBrevoppsett(dto.toBrevoppsett(behandlingId, brukerTokenInfo))
+                    }
+                call.respond(HttpStatusCode.Created, brevoppsett.toDto())
             }
-            call.respond(HttpStatusCode.Created)
+        }
+
+        put {
+            medBody<BrevoppsettDto> { dto ->
+                val brevoppsett =
+                    inTransaction {
+                        logger.info("Oppdaterer brevoppsett for behandling $behandlingId")
+                        service.lagreBrevoppsett(dto.toBrevoppsett(behandlingId, brukerTokenInfo))
+                    }
+                call.respond(HttpStatusCode.OK, brevoppsett.toDto())
+            }
         }
 
         get {
             when (val brevoppsett = inTransaction { service.hentBrevoppsett(behandlingId) }) {
                 null -> call.respond(HttpStatusCode.NoContent)
-                else -> call.respond(HttpStatusCode.OK, brevoppsett)
+                else -> call.respond(HttpStatusCode.OK, brevoppsett.toDto())
             }
         }
     }
@@ -48,20 +61,39 @@ private fun BrevoppsettDto.toBrevoppsett(
 ): Brevoppsett =
     Brevoppsett(
         behandlingId = behandlingId,
-        etterbetaling = Etterbetaling.fra(etterbetaling.datoFom, etterbetaling.datoTom),
+        etterbetaling =
+            if (etterbetaling?.datoFom != null && etterbetaling.datoTom != null) {
+                Etterbetaling.fra(etterbetaling.datoFom, etterbetaling.datoTom)
+            } else {
+                null
+            },
         brevtype = brevtype,
         aldersgruppe = aldersgruppe,
         kilde = Grunnlagsopplysning.Saksbehandler.create(bruker.ident()),
     )
 
+private fun Brevoppsett.toDto() =
+    BrevoppsettDto(
+        etterbetaling =
+            etterbetaling?.let {
+                EtterbetalingDto(
+                    datoFom = etterbetaling.fom.atDay(1),
+                    datoTom = etterbetaling.tom.atEndOfMonth(),
+                )
+            },
+        brevtype = brevtype,
+        aldersgruppe = aldersgruppe,
+        kilde = kilde,
+    )
+
 data class BrevoppsettDto(
-    val etterbetaling: EtterbetalingDto,
+    val etterbetaling: EtterbetalingDto?,
     val brevtype: Brevtype,
-    val aldersgruppe: Aldersgruppe,
+    val aldersgruppe: Aldersgruppe?,
     val kilde: Grunnlagsopplysning.Kilde?,
 )
 
 data class EtterbetalingDto(
-    val datoFom: LocalDate,
-    val datoTom: LocalDate,
+    val datoFom: LocalDate?,
+    val datoTom: LocalDate?,
 )

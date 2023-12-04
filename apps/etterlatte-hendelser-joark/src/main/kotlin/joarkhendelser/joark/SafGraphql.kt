@@ -96,7 +96,7 @@ enum class BrukerIdType {
 
 data class Dokument(
     val dokumentInfoId: String,
-    val tittel: String,
+    val tittel: String? = null,
     val dokumentvarianter: List<Dokumentvarianter>,
 )
 

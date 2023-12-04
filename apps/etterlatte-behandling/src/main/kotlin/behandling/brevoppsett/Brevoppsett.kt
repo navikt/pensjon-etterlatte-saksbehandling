@@ -10,8 +10,8 @@ import java.util.UUID
 
 data class Brevoppsett(
     val behandlingId: UUID,
-    val etterbetaling: Etterbetaling?,
     val brevtype: Brevtype,
+    val etterbetaling: Etterbetaling?,
     val aldersgruppe: Aldersgruppe?,
     val kilde: Grunnlagsopplysning.Kilde,
 )

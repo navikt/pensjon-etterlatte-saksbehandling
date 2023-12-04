@@ -51,6 +51,7 @@ internal class BrevoppsettDaoTest {
                 jdbcUrl = postgreSQLContainer.jdbcUrl,
                 username = postgreSQLContainer.username,
                 password = postgreSQLContainer.password,
+                maxPoolSize = 20,
             ).apply { migrate() }
 
         sakDao = SakDao { dataSource.connection }

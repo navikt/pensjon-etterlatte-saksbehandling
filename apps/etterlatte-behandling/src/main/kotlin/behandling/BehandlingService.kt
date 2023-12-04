@@ -1,8 +1,6 @@
 package no.nav.etterlatte.behandling
 
 import io.ktor.http.HttpStatusCode
-import kotlinx.coroutines.async
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.User
@@ -355,39 +353,25 @@ internal class BehandlingServiceImpl(
         val sakType = behandling.sak.sakType
 
         logger.info("Hentet behandling for $behandlingId")
-        return coroutineScope {
-            val soeker =
-                async {
-                    grunnlagKlient.finnPersonOpplysning(
-                        behandlingId,
-                        Opplysningstype.SOEKER_PDL_V1,
-                        brukerTokenInfo,
-                    )
-                }
-            logger.info("Hentet Opplysningstype.SOEKER_PDL_V1 for $behandlingId")
 
-            DetaljertBehandlingDto(
-                id = behandling.id,
-                sakId = sakId,
-                sakType = sakType,
-                gyldighetsprøving = behandling.gyldighetsproeving(),
-                kommerBarnetTilgode = kommerBarnetTilgode,
-                soeknadMottattDato = behandling.mottattDato(),
-                virkningstidspunkt = behandling.virkningstidspunkt,
-                utenlandstilknytning = sakOgUtenlandstilknytning?.utenlandstilknytning,
-                boddEllerArbeidetUtlandet = behandling.boddEllerArbeidetUtlandet,
-                status = behandling.status,
-                hendelser = hendelserIBehandling,
-                behandlingType = behandling.type,
-                søker = soeker.await()?.opplysning,
-                revurderingsaarsak = behandling.revurderingsaarsak(),
-                revurderinginfo = behandling.revurderingInfo(),
-                begrunnelse = behandling.begrunnelse(),
-                etterbetaling = inTransaction { etterbetalingDao.hentEtterbetaling(behandlingId) },
-            ).also {
-                soeker.await()?.fnr?.let { behandlingRequestLogger.loggRequest(brukerTokenInfo, it, "behandling") }
-            }
-        }
+        return DetaljertBehandlingDto(
+            id = behandling.id,
+            sakId = sakId,
+            sakType = sakType,
+            gyldighetsprøving = behandling.gyldighetsproeving(),
+            kommerBarnetTilgode = kommerBarnetTilgode,
+            soeknadMottattDato = behandling.mottattDato(),
+            virkningstidspunkt = behandling.virkningstidspunkt,
+            utenlandstilknytning = sakOgUtenlandstilknytning?.utenlandstilknytning,
+            boddEllerArbeidetUtlandet = behandling.boddEllerArbeidetUtlandet,
+            status = behandling.status,
+            hendelser = hendelserIBehandling,
+            behandlingType = behandling.type,
+            revurderingsaarsak = behandling.revurderingsaarsak(),
+            revurderinginfo = behandling.revurderingInfo(),
+            begrunnelse = behandling.begrunnelse(),
+            etterbetaling = inTransaction { etterbetalingDao.hentEtterbetaling(behandlingId) },
+        )
     }
 
     override fun registrerBehandlingHendelse(

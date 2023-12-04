@@ -38,7 +38,11 @@ import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.PersonRolle.AVDOED
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
+import no.nav.etterlatte.libs.common.trygdetid.DetaljertBeregnetTrygdetidDto
+import no.nav.etterlatte.libs.common.trygdetid.DetaljertBeregnetTrygdetidResultat
+import no.nav.etterlatte.libs.common.trygdetid.GrunnlagOpplysningerDto
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
+import no.nav.etterlatte.libs.common.trygdetid.UKJENT_AVDOED
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
 import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED2_FOEDSELSNUMMER
@@ -542,6 +546,52 @@ internal class BeregnBarnepensjonServiceTest {
         }
     }
 
+    @Test
+    fun `beregne foerstegangsbehandling med ukjent avdød`() {
+        val behandling = mockBehandling(BehandlingType.FØRSTEGANGSBEHANDLING, virk = YearMonth.of(2024, Month.JANUARY))
+        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns GrunnlagTestData().hentGrunnlagMedUkjentAvdoed()
+
+        coEvery {
+            beregningsGrunnlagService.hentBarnepensjonBeregningsGrunnlag(
+                any(),
+                any(),
+            )
+        } returns
+            barnepensjonBeregningsGrunnlag(
+                behandling.id,
+                emptyList(),
+                beregningsMetode = BeregningsMetode.BEST,
+                virk = YearMonth.of(2024, Month.JANUARY).atDay(1),
+            )
+
+        coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns
+            TrygdetidDto(
+                randomUUID(),
+                ident = UKJENT_AVDOED,
+                behandlingId = behandling.id,
+                beregnetTrygdetid =
+                    DetaljertBeregnetTrygdetidDto(
+                        resultat = DetaljertBeregnetTrygdetidResultat.fraSamletTrygdetidProrata(40, null),
+                        tidspunkt = Tidspunkt.now(),
+                    ),
+                trygdetidGrunnlag = emptyList(),
+                opplysninger = GrunnlagOpplysningerDto(null, null, null, null),
+                overstyrtNorskPoengaar = null,
+            )
+        featureToggleService.settBryter(BrukNyttRegelverkIBeregning, true)
+
+        runBlocking {
+            val beregning = beregnBarnepensjonService().beregn(behandling, bruker)
+            beregning.beregningsperioder.size shouldBeGreaterThanOrEqual 1
+
+            with(beregning.beregningsperioder[0]) {
+                datoFOM shouldBe YearMonth.of(2024, 1)
+                datoTOM shouldBe null
+                utbetaltBeloep shouldBe GRUNNBELOEP_MAI_23
+            }
+        }
+    }
+
     private fun grunnlagMedEkstraAvdoedForelder(doedsdato: LocalDate): Grunnlag {
         val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
         val nyligAvdoedFoedselsnummer = AVDOED2_FOEDSELSNUMMER
@@ -572,13 +622,14 @@ internal class BeregnBarnepensjonServiceTest {
         beregningsMetode: BeregningsMetode = BeregningsMetode.NASJONAL,
         institusjonsoppholdBeregningsgrunnlag: List<GrunnlagMedPeriode<InstitusjonsoppholdBeregningsgrunnlag>> =
             defaultInstitusjonsopphold(),
+        virk: LocalDate = VIRKNINGSTIDSPUNKT_JAN_23.minusMonths(1).atDay(1),
     ) = BeregningsGrunnlag(
         behandlingId,
         defaultKilde(),
         soeskenMedIBeregning =
             listOf(
                 GrunnlagMedPeriode(
-                    fom = VIRKNINGSTIDSPUNKT_JAN_23.minusMonths(1).atDay(1),
+                    fom = virk,
                     tom = null,
                     data =
                         soesken.map {

@@ -1,5 +1,6 @@
 package no.nav.etterlatte.behandling
 
+import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.runBlocking
@@ -15,6 +16,7 @@ import no.nav.etterlatte.behandling.hendelse.HendelseType
 import no.nav.etterlatte.behandling.hendelse.LagretHendelse
 import no.nav.etterlatte.behandling.hendelse.registrerVedtakHendelseFelles
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
+import no.nav.etterlatte.behandling.klienter.GrunnlagKlientException
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
 import no.nav.etterlatte.common.tidligsteIverksatteVirkningstidspunkt
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
@@ -35,6 +37,7 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.person.Person
+import no.nav.etterlatte.libs.ktorobo.ThrowableErrorMessage
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.sak.SakDao
 import no.nav.etterlatte.sak.SakMedUtenlandstilknytning
@@ -235,7 +238,20 @@ internal class BehandlingServiceImpl(
         val behandling =
             requireNotNull(inTransaction { hentBehandling(behandlingId) }) { "Fant ikke behandling $behandlingId" }
         val personopplysning =
-            grunnlagKlient.finnPersonOpplysning(behandlingId, opplysningstype, brukerTokenInfo)
+            try {
+                grunnlagKlient.finnPersonOpplysning(behandlingId, opplysningstype, brukerTokenInfo)
+            } catch (e: GrunnlagKlientException) {
+                when (e.cause) {
+                    is ThrowableErrorMessage -> {
+                        if (e.cause.response?.status == HttpStatusCode.NotFound) {
+                            null
+                        } else {
+                            throw e
+                        }
+                    }
+                    else -> throw e
+                }
+            }
         val sakUtenlandstilknytning = inTransaction { sakDao.hentUtenlandstilknytningForSak(behandling.sak.id) }
 
         return BehandlingMedGrunnlagsopplysning(
@@ -263,7 +279,10 @@ internal class BehandlingServiceImpl(
                 brukerTokenInfo,
                 Opplysningstype.AVDOED_PDL_V1,
             )
-        val doedsdato = YearMonth.from(behandlingMedDoedsdatoOgUtenlandstilknytning.personopplysning?.opplysning?.doedsdato)
+        val doedsdato =
+            behandlingMedDoedsdatoOgUtenlandstilknytning.personopplysning?.let {
+                YearMonth.from(it.opplysning.doedsdato)
+            }
 
         val sakMedUtenlandstilknytning = behandlingMedDoedsdatoOgUtenlandstilknytning.utenlandstilknytning
         val soeknadMottatt = YearMonth.from(behandlingMedDoedsdatoOgUtenlandstilknytning.soeknadMottattDato)
@@ -281,7 +300,9 @@ internal class BehandlingServiceImpl(
         }
 
         val etterMaksTidspunktEllersMinstManedEtterDoedsfall =
-            if (doedsdato.isBefore(makstidspunktFoerSoeknad)) {
+            if (doedsdato == null) {
+                true // Mangler døsfall når avdød er ukjent
+            } else if (doedsdato.isBefore(makstidspunktFoerSoeknad)) {
                 virkningstidspunkt.isAfter(makstidspunktFoerSoeknad)
             } else {
                 virkningstidspunkt.isAfter(doedsdato)

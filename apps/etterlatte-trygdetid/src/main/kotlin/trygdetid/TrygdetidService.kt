@@ -20,6 +20,7 @@ import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsnummer
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.common.trygdetid.DetaljertBeregnetTrygdetidResultat
+import no.nav.etterlatte.libs.common.trygdetid.UKJENT_AVDOED
 import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.etterlatte.trygdetid.klienter.BehandlingKlient
 import no.nav.etterlatte.trygdetid.klienter.GrunnlagKlient
@@ -607,17 +608,19 @@ class TrygdetidServiceImpl(
         val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
         logger.info("Oppretter manuell overstyrt trygdetid for behandling $behandlingId")
 
-        val avdoed = grunnlagKlient.hentGrunnlag(behandling.sak, behandling.id, brukerTokenInfo).hentAvdoede().first()
+        val avdoed = grunnlagKlient.hentGrunnlag(behandling.sak, behandling.id, brukerTokenInfo).hentAvdoede().firstOrNull()
         val trygdetid =
             Trygdetid(
                 sakId = behandling.sak,
                 behandlingId = behandling.id,
-                opplysninger = hentOpplysninger(avdoed),
+                opplysninger = avdoed?.let { hentOpplysninger(it) } ?: emptyList(),
                 ident =
-                    requireNotNull(avdoed.hentFoedselsnummer()?.verdi?.value) {
-                        "Kunne ikke hente identifikator for avdød til trygdetid i " +
-                            "behandlingen med id=${behandling.id}"
-                    },
+                    avdoed?.let {
+                        requireNotNull(it.hentFoedselsnummer()?.verdi?.value) {
+                            "Kunne ikke hente identifikator for avdød til trygdetid i " +
+                                "behandlingen med id=${behandling.id}"
+                        }
+                    } ?: UKJENT_AVDOED,
                 trygdetidGrunnlag = emptyList(),
                 beregnetTrygdetid =
                     DetaljertBeregnetTrygdetid(

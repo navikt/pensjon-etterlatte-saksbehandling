@@ -17,6 +17,8 @@ data class TrygdetidDto(
     val overstyrtNorskPoengaar: Int?,
 )
 
+const val UKJENT_AVDOED = "UKJENT_AVDOED"
+
 data class TrygdetidOverstyringDto(
     val id: UUID,
     val behandlingId: UUID,

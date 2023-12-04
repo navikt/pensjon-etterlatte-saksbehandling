@@ -66,7 +66,7 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
     })
   }, [])
 
-  if (behandling.kommerBarnetTilgode == null || avdoede == null) {
+  if (behandling.kommerBarnetTilgode == null) {
     return <ApiErrorAlert>Familieforhold kan ikke hentes ut</ApiErrorAlert>
   }
 

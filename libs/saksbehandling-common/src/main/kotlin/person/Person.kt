@@ -267,13 +267,10 @@ fun flereVergerMedOekonomiskInteresse(vergeListe: List<VergemaalEllerFremtidsful
     return verger.size > 1
 }
 
-fun finnesVergeMedUkjentOmfang(vergeListe: List<VergemaalEllerFremtidsfullmakt>?): Boolean {
-    val verger =
-        vergeListe?.filter {
-            it.vergeEllerFullmektig.omfang !in alleKjenteVergeOmfang
-        } ?: emptyList()
-    return verger.size > 1
-}
+fun finnesVergeMedUkjentOmfang(vergeListe: List<VergemaalEllerFremtidsfullmakt>?) =
+    vergeListe.orEmpty().any {
+        it.vergeEllerFullmektig.omfang !in alleKjenteVergeOmfang
+    }
 
 private val alleVergeOmfangMedOekonomiskeInteresser =
     listOf(

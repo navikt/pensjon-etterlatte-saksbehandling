@@ -14,7 +14,6 @@ dependencies {
     implementation(project(":libs:etterlatte-vedtaksvurdering-model"))
     implementation(project(":libs:etterlatte-vilkaarsvurdering-model"))
     implementation(project(":libs:etterlatte-oppgave-model"))
-    implementation(project(":libs:ktor2client-onbehalfof"))
     implementation(project(":libs:etterlatte-migrering-model"))
 
     implementation(libs.ktor2.servercore)

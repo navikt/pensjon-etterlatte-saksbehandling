@@ -29,6 +29,7 @@ dependencies {
     api(libs.ktor2.clientauth)
     api(libs.ktor2.clientloggingjvm)
     api(libs.navfelles.tokenclientcore)
+    api("com.michael-bull.kotlin-result:kotlin-result:1.1.18")
 
     implementation(libs.logging.logstashlogbackencoder) {
         exclude("com.fasterxml.jackson.core")
@@ -40,10 +41,15 @@ dependencies {
     implementation(libs.metrics.prometheus.simpleclienthotspot)
     implementation(project(":libs:etterlatte-funksjonsbrytere"))
 
-    testImplementation(libs.test.jupiter.engine)
-    testImplementation(libs.ktor2.servertests)
     testImplementation(libs.navfelles.mockoauth2server)
+    testImplementation(libs.kotlinx.coroutinestest)
+    testImplementation(libs.ktor2.clientmock)
+    testImplementation(libs.ktor2.servertests)
+    testImplementation(libs.test.jupiter.api)
+    testImplementation(libs.test.jupiter.engine)
+    testImplementation(libs.test.kotest.assertionscore)
     testImplementation(libs.test.mockk)
+    testImplementation(libs.test.wiremock)
 
     tasks {
         withType<Test> {

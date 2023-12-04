@@ -23,7 +23,6 @@ on:
       - libs/etterlatte-migrering-model/**
       - libs/etterlatte-pdl-model/**
       - libs/etterlatte-utbetaling-model/**
-      - libs/ktor2client-onbehalfof/**
       - gradle/libs.versions.toml
   pull_request:
     branches:
@@ -37,7 +36,6 @@ on:
       - libs/etterlatte-migrering-model/**
       - libs/etterlatte-pdl-model/**
       - libs/etterlatte-utbetaling-model/**
-      - libs/ktor2client-onbehalfof/**
       - gradle/libs.versions.toml
 
 jobs:

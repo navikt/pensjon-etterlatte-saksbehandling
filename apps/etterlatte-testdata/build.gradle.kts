@@ -7,7 +7,6 @@ dependencies {
 
     implementation(project(":libs:etterlatte-kafka"))
     implementation(project(":libs:saksbehandling-common"))
-    implementation(project(":libs:ktor2client-onbehalfof"))
     implementation(project(":libs:etterlatte-ktor"))
 
     implementation(libs.ktor2.servercore)

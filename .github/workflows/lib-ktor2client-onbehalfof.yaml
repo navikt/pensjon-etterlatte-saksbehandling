@@ -6,14 +6,14 @@ on:
     branches:
       - main
     paths:
-      - libs/ktor2client-onbehalfof/**
+      - libs/etterlatte-ktor/**
       - libs/saksbehandling-common/**
       - gradle/libs.versions.toml
   pull_request:
     branches:
       - main
     paths:
-      - libs/ktor2client-onbehalfof/**
+      - libs/etterlatte-ktor/**
       - libs/saksbehandling-common/**
       - gradle/libs.versions.toml
 

@@ -22,7 +22,7 @@ const YrkesskadeTrygdetidBP = () => {
     if (!behandlingId) throw new Error('Mangler behandlingsid')
 
     fetchTrygdetid(behandlingId, (trygdetid: ITrygdetid) => {
-      if (trygdetid == null) {
+      if (trygdetid === null) {
         requestOpprettTrygdetid(behandlingId, () => {
           requestOpprettYrkesskadeTrygdetidGrunnlag({ behandlingId })
         })

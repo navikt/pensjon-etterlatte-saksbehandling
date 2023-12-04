@@ -27,6 +27,7 @@ import { TrygdetidManueltOverstyrt } from '~components/behandling/trygdetid/Tryg
 
 import { isPending } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
+import { behandlingErIverksatteEllerSamordnet } from '~components/behandling/felles/utils'
 
 interface Props {
   redigerbar: boolean
@@ -71,8 +72,12 @@ export const Trygdetid = ({ redigerbar, behandling, virkningstidspunktEtterNyReg
 
   useEffect(() => {
     if (!behandling?.id) throw new Error('Mangler behandlingsid')
+
     fetchTrygdetid(behandling.id, (trygdetid: ITrygdetid) => {
-      if (trygdetid == null) {
+      if (trygdetid === null) {
+        if (behandlingErIverksatteEllerSamordnet(behandling.status)) {
+        } else {
+        }
         requestOpprettTrygdetid(behandling.id, (trygdetid: ITrygdetid) => {
           oppdaterTrygdetid(trygdetid)
         })

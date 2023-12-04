@@ -574,7 +574,7 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
         kotlin.runCatching { sleep(3000) }
         assertNotNull(behandlingOpprettet)
         val rapid = applicationContext.rapid as TestProdusent
-        assertEquals(4, rapid.publiserteMeldinger.size)
+        assertEquals(3, rapid.publiserteMeldinger.size)
         assertEquals(
             "BEHANDLING:OPPRETTET",
             objectMapper.readTree(rapid.publiserteMeldinger.first().verdi)["@event_name"].textValue(),

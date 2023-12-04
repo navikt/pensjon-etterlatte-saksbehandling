@@ -2,7 +2,9 @@ package no.nav.etterlatte.libs.common
 
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.ApplicationCall
+import io.ktor.server.application.application
 import io.ktor.server.application.call
+import io.ktor.server.application.log
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.util.pipeline.PipelineContext
@@ -103,6 +105,7 @@ suspend inline fun PipelineContext<*, ApplicationCall>.withFoedselsnummer(
 ) {
     val foedselsnummerDTO = call.receive<FoedselsnummerDTO>()
     val foedselsnummer = Folkeregisteridentifikator.of(foedselsnummerDTO.foedselsnummer)
+    val logger = application.log
     when (brukerTokenInfo) {
         is Saksbehandler -> {
             val harTilgangTilPerson =
@@ -113,6 +116,7 @@ suspend inline fun PipelineContext<*, ApplicationCall>.withFoedselsnummer(
             if (harTilgangTilPerson) {
                 onSuccess(foedselsnummer)
             } else {
+                logger.info("Har ikke tilgang til person")
                 call.respond(HttpStatusCode.NotFound)
             }
         }

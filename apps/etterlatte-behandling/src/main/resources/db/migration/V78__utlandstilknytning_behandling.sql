@@ -1,1 +1,0 @@
-ALTER TABLE behandling ADD COLUMN utlandstilknytning JSONB;

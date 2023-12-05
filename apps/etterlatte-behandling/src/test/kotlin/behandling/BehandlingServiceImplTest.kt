@@ -55,7 +55,11 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 class BehandlingServiceImplTest {
-    private val user = mockk<SaksbehandlerMedEnheterOgRoller> { every { name() } returns "ident" }
+    private val user =
+        mockk<SaksbehandlerMedEnheterOgRoller> {
+            every { name() } returns "ident"
+            every { enheter() } returns listOf(Enheter.defaultEnhet.enhetNr)
+        }
 
     @BeforeEach
     fun before() {
@@ -88,9 +92,6 @@ class BehandlingServiceImplTest {
             }
         val hendelserMock = mockk<HendelseDao>()
 
-        val featureToggleService = mockk<FeatureToggleService>()
-        every { featureToggleService.isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false) } returns false
-
         val sut =
             BehandlingServiceImpl(
                 behandlingDao = behandlingDaoMock,
@@ -99,7 +100,6 @@ class BehandlingServiceImplTest {
                 hendelseDao = hendelserMock,
                 grunnlagKlient = mockk(),
                 behandlingRequestLogger = mockk(),
-                featureToggleService = featureToggleService,
                 kommerBarnetTilGodeDao = mockk(),
                 oppgaveService = mockk(),
                 etterbetalingDao = mockk(),
@@ -147,9 +147,6 @@ class BehandlingServiceImplTest {
                 every { hentGrunnlagsendringshendelseSomErTattMedIBehandling(any()) } returns emptyList()
             }
 
-        val featureToggleService = mockk<FeatureToggleService>()
-        every { featureToggleService.isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false) } returns false
-
         val oppgaveServiceMock: OppgaveService =
             mockk {
                 every { avbrytOppgaveUnderBehandling(any(), any()) } returns mockk<OppgaveIntern>()
@@ -161,7 +158,6 @@ class BehandlingServiceImplTest {
                 behandlingHendelserKafkaProducer = hendelseskanalMock,
                 hendelseDao = hendelserMock,
                 grunnlagsendringshendelseDao = grunnlagsendringshendelseDaoMock,
-                featureToggleService = featureToggleService,
                 oppgaveService = oppgaveServiceMock,
                 grunnlagKlient = GrunnlagKlientTest(),
             )
@@ -207,9 +203,6 @@ class BehandlingServiceImplTest {
                 every { hentGrunnlagsendringshendelseSomErTattMedIBehandling(any()) } returns emptyList()
             }
 
-        val featureToggleService = mockk<FeatureToggleService>()
-        every { featureToggleService.isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false) } returns false
-
         val oppgaveServiceMock: OppgaveService =
             mockk {
                 every { avbrytOppgaveUnderBehandling(any(), any()) } returns mockk<OppgaveIntern>()
@@ -221,7 +214,6 @@ class BehandlingServiceImplTest {
                 behandlingHendelserKafkaProducer = behandlingHendelserKafkaProducer,
                 grunnlagsendringshendelseDao = grunnlagsendringshendelseDaoMock,
                 hendelseDao = hendelserMock,
-                featureToggleService = featureToggleService,
                 oppgaveService = oppgaveServiceMock,
                 grunnlagKlient = GrunnlagKlientTest(),
             )
@@ -276,9 +268,6 @@ class BehandlingServiceImplTest {
                 every { hentGrunnlagsendringshendelseSomErTattMedIBehandling(any()) } returns emptyList()
             }
 
-        val featureToggleService = mockk<FeatureToggleService>()
-        every { featureToggleService.isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false) } returns false
-
         val oppgaveServiceMock: OppgaveService =
             mockk {
                 every { avbrytOppgaveUnderBehandling(any(), any()) } returns mockk<OppgaveIntern>()
@@ -290,7 +279,6 @@ class BehandlingServiceImplTest {
                 behandlingHendelserKafkaProducer = behandlingHendelserKafkaProducer,
                 grunnlagsendringshendelseDao = grunnlagsendringshendelseDaoMock,
                 hendelseDao = hendelserMock,
-                featureToggleService = featureToggleService,
                 oppgaveService = oppgaveServiceMock,
             )
 
@@ -331,9 +319,6 @@ class BehandlingServiceImplTest {
                 every { hentGrunnlagsendringshendelseSomErTattMedIBehandling(any()) } returns emptyList()
             }
 
-        val featureToggleService = mockk<FeatureToggleService>()
-        every { featureToggleService.isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false) } returns false
-
         val oppgaveServiceMock: OppgaveService =
             mockk {
                 every { avbrytOppgaveUnderBehandling(any(), any()) } returns mockk<OppgaveIntern>()
@@ -345,7 +330,6 @@ class BehandlingServiceImplTest {
                 behandlingHendelserKafkaProducer = behandlingHendelserKafkaProducerMock,
                 grunnlagsendringshendelseDao = grunnlagsendringshendelseDaoMock,
                 hendelseDao = hendelserMock,
-                featureToggleService = featureToggleService,
                 oppgaveService = oppgaveServiceMock,
                 grunnlagKlient = GrunnlagKlientTest(),
             )
@@ -388,9 +372,6 @@ class BehandlingServiceImplTest {
                 every { hentGrunnlagsendringshendelseSomErTattMedIBehandling(any()) } returns emptyList()
             }
 
-        val featureToggleService = mockk<FeatureToggleService>()
-        every { featureToggleService.isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false) } returns false
-
         val oppgaveServiceMock: OppgaveService =
             mockk {
                 every { avbrytOppgaveUnderBehandling(any(), any()) } returns mockk<OppgaveIntern>()
@@ -401,7 +382,6 @@ class BehandlingServiceImplTest {
                 behandlingHendelserKafkaProducer = behandlingHendelserKafkaProducer,
                 grunnlagsendringshendelseDao = grunnlagsendringshendelseDaoMock,
                 hendelseDao = hendelserMock,
-                featureToggleService = featureToggleService,
                 oppgaveService = oppgaveServiceMock,
                 grunnlagKlient = GrunnlagKlientTest(),
             )
@@ -466,10 +446,6 @@ class BehandlingServiceImplTest {
                         every { hentBehandling(BEHANDLINGS_ID) } returns behandling
                     },
                 grunnlagKlient = grunnlagKlient,
-                featureToggleService =
-                    mockk {
-                        every { isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false) } returns false
-                    },
                 sakDao = defaultSakdaoMockMedUtenlandstilknytningSattTilNasjonal,
             )
         val behandlingMedPersonopplsning =
@@ -646,13 +622,9 @@ class BehandlingServiceImplTest {
                 every { alleBehandlingerISak(any()) } returns listOf(behandling1, behandling2)
             }
 
-        val featureToggleService = mockk<FeatureToggleService>()
-        every { featureToggleService.isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false) } returns false
-
         val service =
             lagRealGenerellBehandlingService(
                 behandlingDao = behandlingDaoMock,
-                featureToggleService = featureToggleService,
             )
 
         assertEquals(behandling1, service.hentSisteIverksatte(1))
@@ -679,9 +651,6 @@ class BehandlingServiceImplTest {
             }
         val hendelserMock = mockk<HendelseDao>()
 
-        val featureToggleService = mockk<FeatureToggleService>()
-        every { featureToggleService.isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false) } returns true
-
         val sut =
             BehandlingServiceImpl(
                 behandlingDao = behandlingDaoMock,
@@ -690,7 +659,6 @@ class BehandlingServiceImplTest {
                 hendelseDao = hendelserMock,
                 grunnlagKlient = mockk(),
                 behandlingRequestLogger = mockk(),
-                featureToggleService = featureToggleService,
                 kommerBarnetTilGodeDao = mockk(),
                 oppgaveService = mockk(),
                 etterbetalingDao = mockk(),
@@ -729,9 +697,6 @@ class BehandlingServiceImplTest {
             }
         val hendelserMock = mockk<HendelseDao>()
 
-        val featureToggleService = mockk<FeatureToggleService>()
-        every { featureToggleService.isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false) } returns true
-
         val sut =
             BehandlingServiceImpl(
                 behandlingDao = behandlingDaoMock,
@@ -740,7 +705,6 @@ class BehandlingServiceImplTest {
                 hendelseDao = hendelserMock,
                 grunnlagKlient = mockk(),
                 behandlingRequestLogger = mockk(),
-                featureToggleService = featureToggleService,
                 kommerBarnetTilGodeDao = mockk(),
                 oppgaveService = mockk(),
                 etterbetalingDao = mockk(),
@@ -777,9 +741,6 @@ class BehandlingServiceImplTest {
                 every { lagreStatus(any()) } just runs
             }
 
-        val featureToggleService = mockk<FeatureToggleService>()
-        every { featureToggleService.isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false) } returns true
-
         val sut =
             BehandlingServiceImpl(
                 behandlingDaoMock,
@@ -788,7 +749,6 @@ class BehandlingServiceImplTest {
                 mockk(),
                 mockk(),
                 mockk(),
-                featureToggleService,
                 kommerBarnetTilGodeDao = mockk(),
                 oppgaveService = mockk(),
                 etterbetalingDao = mockk(),
@@ -853,10 +813,6 @@ class BehandlingServiceImplTest {
                     } returns behandling
                 },
             grunnlagKlient = grunnlagKlient,
-            featureToggleService =
-                mockk {
-                    every { isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false) } returns false
-                },
             sakDao = sakDao ?: defaultSakdaoMockMedUtenlandstilknytningSattTilNasjonal,
         )
     }
@@ -868,7 +824,7 @@ class BehandlingServiceImplTest {
         grunnlagsendringshendelseDao: GrunnlagsendringshendelseDao = mockk(),
         grunnlagKlient: GrunnlagKlient? = null,
         oppgaveService: OppgaveService = mockk(),
-        featureToggleService: FeatureToggleService,
+        featureToggleService: FeatureToggleService = mockk<FeatureToggleService>(),
         sakDao: SakDao? = mockk(),
     ): BehandlingServiceImpl =
         BehandlingServiceImpl(
@@ -878,7 +834,6 @@ class BehandlingServiceImplTest {
             hendelseDao = hendelseDao ?: mockk(),
             grunnlagKlient = grunnlagKlient ?: mockk(),
             behandlingRequestLogger = mockk(),
-            featureToggleService = featureToggleService,
             kommerBarnetTilGodeDao = mockk(),
             oppgaveService = oppgaveService,
             etterbetalingDao = mockk(),

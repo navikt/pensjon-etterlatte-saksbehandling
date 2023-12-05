@@ -355,7 +355,6 @@ class RevurderingService(
     private fun <T : Behandling> T?.sjekkEnhet() =
         this?.let { behandling ->
             listOf(behandling).filterBehandlingerForEnheter(
-                featureToggleService,
                 Kontekst.get().AppUser,
             ).firstOrNull()
         }

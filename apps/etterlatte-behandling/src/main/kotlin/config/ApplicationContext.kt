@@ -221,7 +221,7 @@ internal class ApplicationContext(
     val oppgaveMetrikker = OppgaveMetrics(metrikkerDao)
 
     // Service
-    val oppgaveService = OppgaveService(oppgaveDaoEndringer, sakDao, featureToggleService)
+    val oppgaveService = OppgaveService(oppgaveDaoEndringer, sakDao)
 
     val gosysOppgaveService = GosysOppgaveServiceImpl(gosysOppgaveKlient, pdlKlient, featureToggleService)
     val grunnlagsService = GrunnlagService(grunnlagKlient)
@@ -229,11 +229,10 @@ internal class ApplicationContext(
         BehandlingServiceImpl(
             behandlingDao = behandlingDao,
             behandlingHendelser = behandlingsHendelser,
-            hendelseDao = hendelseDao,
             grunnlagsendringshendelseDao = grunnlagsendringshendelseDao,
+            hendelseDao = hendelseDao,
             grunnlagKlient = grunnlagKlientObo,
             behandlingRequestLogger = behandlingRequestLogger,
-            featureToggleService = featureToggleService,
             kommerBarnetTilGodeDao = kommerBarnetTilGodeDao,
             oppgaveService = oppgaveService,
             etterbetalingDao = etterbetalingDao,
@@ -270,7 +269,6 @@ internal class ApplicationContext(
     val gyldighetsproevingService =
         GyldighetsproevingServiceImpl(
             behandlingDao = behandlingDao,
-            featureToggleService = featureToggleService,
         )
 
     val manueltOpphoerService =
@@ -280,7 +278,6 @@ internal class ApplicationContext(
             behandlingHendelser = behandlingsHendelser,
             hendelseDao = hendelseDao,
             grunnlagService = grunnlagsService,
-            featureToggleService = featureToggleService,
         )
 
     val omregningService =
@@ -296,7 +293,6 @@ internal class ApplicationContext(
             sakDao,
             pdlKlient,
             norg2Klient,
-            featureToggleService,
             skjermingKlient,
         )
     val enhetService = EnhetServiceImpl(navAnsattKlient)
@@ -329,7 +325,6 @@ internal class ApplicationContext(
             behandlingDao = behandlingDao,
             hendelseDao = hendelseDao,
             behandlingHendelser = behandlingsHendelser,
-            featureToggleService = featureToggleService,
             migreringKlient = migreringKlient,
         )
 

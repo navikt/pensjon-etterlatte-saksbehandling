@@ -12,6 +12,7 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.serialization.jackson.jackson
 import io.ktor.server.testing.testApplication
+import io.mockk.every
 import io.mockk.mockk
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.omregning.OpprettOmregningResponse
@@ -39,10 +40,15 @@ import java.time.LocalDateTime
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class OmregningIntegrationTest : BehandlingIntegrationTest() {
+    private lateinit var user: SaksbehandlerMedEnheterOgRoller
+
     @BeforeAll
     fun start() {
         startServer()
-        Kontekst.set(Context(mockk(), DatabaseContext(applicationContext.dataSource)))
+        user = mockk<SaksbehandlerMedEnheterOgRoller>()
+        every { user.name() } returns "User"
+        every { user.enheter() } returns listOf(Enheter.defaultEnhet.enhetNr)
+        Kontekst.set(Context(user, DatabaseContext(applicationContext.dataSource)))
     }
 
     @AfterAll

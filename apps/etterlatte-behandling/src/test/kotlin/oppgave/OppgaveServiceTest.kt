@@ -79,14 +79,11 @@ internal class OppgaveServiceTest {
             ).apply { migrate() }
 
         val connection = dataSource.connection
-        featureToggleService =
-            DummyFeatureToggleService().also {
-                it.settBryter(OppgaveServiceFeatureToggle.EnhetFilterOppgaver, true)
-            }
+        featureToggleService = DummyFeatureToggleService()
         sakDao = SakDao { connection }
         oppgaveDao = OppgaveDaoImpl { connection }
         oppgaveDaoMedEndringssporing = OppgaveDaoMedEndringssporingImpl(oppgaveDao) { connection }
-        oppgaveService = OppgaveService(oppgaveDaoMedEndringssporing, sakDao, featureToggleService)
+        oppgaveService = OppgaveService(oppgaveDaoMedEndringssporing, sakDao)
         saktilgangDao = SakTilgangDao(dataSource)
     }
 

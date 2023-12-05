@@ -17,7 +17,6 @@ import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerRequest
 import no.nav.etterlatte.behandling.manueltopphoer.RealManueltOpphoerService
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.foerstegangsbehandling
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
@@ -44,7 +43,11 @@ import java.time.YearMonth
 import java.util.UUID
 
 internal class RealManueltOpphoerServiceTest {
-    private val user = mockk<SaksbehandlerMedEnheterOgRoller> { every { name() } returns "ident" }
+    private val user =
+        mockk<SaksbehandlerMedEnheterOgRoller> {
+            every { name() } returns "ident"
+            every { enheter() } returns listOf(Enheter.defaultEnhet.enhetNr)
+        }
     private val oppgaveService = mockk<OppgaveService>()
     private val grunnlagServiceMock = mockk<GrunnlagService>(relaxed = true)
 
@@ -92,10 +95,6 @@ internal class RealManueltOpphoerServiceTest {
                 every { behandlingOpprettet(any()) } returns Unit
             }
         val behandlingHendelserKafkaProducer = mockk<BehandlingHendelserKafkaProducer>()
-        val featureToggleService =
-            mockk<FeatureToggleService> {
-                every { isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false) } returns false
-            }
 
         val sut =
             RealManueltOpphoerService(
@@ -104,7 +103,6 @@ internal class RealManueltOpphoerServiceTest {
                 behandlingHendelserKafkaProducer,
                 hendelseDaoMock,
                 grunnlagServiceMock,
-                featureToggleService,
             )
         val manueltOpphoer = sut.hentManueltOpphoer(id)
         assertEquals(sakId, manueltOpphoer!!.sak.id)
@@ -164,10 +162,6 @@ internal class RealManueltOpphoerServiceTest {
             mockk<HendelseDao> {
                 every { behandlingOpprettet(any()) } returns Unit
             }
-        val featureToggleService =
-            mockk<FeatureToggleService> {
-                every { isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false) } returns false
-            }
 
         val sut =
             RealManueltOpphoerService(
@@ -176,7 +170,6 @@ internal class RealManueltOpphoerServiceTest {
                 behandlingHendelserKafkaProducer,
                 hendelseDaoMock,
                 grunnlagServiceMock,
-                featureToggleService,
             )
 
         val returnertManueltOpphoer = sut.opprettManueltOpphoer(manueltOpphoerRequest)
@@ -282,10 +275,6 @@ internal class RealManueltOpphoerServiceTest {
             mockk<HendelseDao> {
                 every { behandlingOpprettet(any()) } returns Unit
             }
-        val featureToggleService =
-            mockk<FeatureToggleService> {
-                every { isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false) } returns false
-            }
 
         val sut =
             RealManueltOpphoerService(
@@ -294,7 +283,6 @@ internal class RealManueltOpphoerServiceTest {
                 behandlingHendelserKafkaProducer,
                 hendelseDaoMock,
                 grunnlagServiceMock,
-                featureToggleService,
             )
 
         sut.opprettManueltOpphoer(manueltOpphoerRequest)
@@ -324,10 +312,6 @@ internal class RealManueltOpphoerServiceTest {
             }
         val behandlingHendelserKafkaProducer = mockk<BehandlingHendelserKafkaProducer>()
         val hendelseDaoMock = mockk<HendelseDao>()
-        val featureToggleService =
-            mockk<FeatureToggleService> {
-                every { isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false) } returns false
-            }
 
         val sut =
             RealManueltOpphoerService(
@@ -336,7 +320,6 @@ internal class RealManueltOpphoerServiceTest {
                 behandlingHendelserKafkaProducer,
                 hendelseDaoMock,
                 grunnlagServiceMock,
-                featureToggleService,
             )
 
         val returnertManueltOpphoer = sut.opprettManueltOpphoer(manueltOpphoerRequest)
@@ -377,10 +360,6 @@ internal class RealManueltOpphoerServiceTest {
             }
         val behandlingHendelserKafkaProducer = mockk<BehandlingHendelserKafkaProducer>()
         val hendelseDaoMock = mockk<HendelseDao>()
-        val featureToggleService =
-            mockk<FeatureToggleService> {
-                every { isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false) } returns false
-            }
 
         val service =
             RealManueltOpphoerService(
@@ -389,7 +368,6 @@ internal class RealManueltOpphoerServiceTest {
                 behandlingHendelserKafkaProducer,
                 hendelseDaoMock,
                 grunnlagServiceMock,
-                featureToggleService,
             )
 
         val opphoer = service.opprettManueltOpphoer(manueltOpphoerRequest)
@@ -412,7 +390,6 @@ internal class RealManueltOpphoerServiceTest {
                 behandlingHendelserKafkaProducer,
                 hendelseDaoMock,
                 grunnlagServiceMock,
-                mockk(),
             )
         assertNull(service.hentManueltOpphoer(UUID.randomUUID()))
     }
@@ -450,10 +427,6 @@ internal class RealManueltOpphoerServiceTest {
                     )
                 every { hentBehandling(manueltOpphoerId) } returns opphoer
             }
-        val featureToggleService =
-            mockk<FeatureToggleService> {
-                every { isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false) } returns false
-            }
 
         val service =
             RealManueltOpphoerService(
@@ -462,7 +435,6 @@ internal class RealManueltOpphoerServiceTest {
                 behandlingHendelserKafkaProducer,
                 hendelseDaoMock,
                 grunnlagServiceMock,
-                featureToggleService,
             )
         val (hentetOpphoer, andreBehandlinger) =
             service.hentManueltOpphoerOgAlleIverksatteBehandlingerISak(
@@ -496,10 +468,6 @@ internal class RealManueltOpphoerServiceTest {
                 every { behandlingOpprettet(any()) } returns Unit
             }
         val behandlingHendelserKafkaProducer = mockk<BehandlingHendelserKafkaProducer>()
-        val featureToggleService =
-            mockk<FeatureToggleService> {
-                every { isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false) } returns true
-            }
 
         val sut =
             RealManueltOpphoerService(
@@ -508,7 +476,6 @@ internal class RealManueltOpphoerServiceTest {
                 behandlingHendelserKafkaProducer,
                 hendelseDaoMock,
                 grunnlagServiceMock,
-                featureToggleService,
             )
         val manueltOpphoer = sut.hentManueltOpphoer(id)
         assertEquals(sakId, manueltOpphoer!!.sak.id)
@@ -536,10 +503,6 @@ internal class RealManueltOpphoerServiceTest {
                 every { behandlingOpprettet(any()) } returns Unit
             }
         val behandlingHendelserKafkaProducer = mockk<BehandlingHendelserKafkaProducer>()
-        val featureToggleService =
-            mockk<FeatureToggleService> {
-                every { isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false) } returns true
-            }
 
         val sut =
             RealManueltOpphoerService(
@@ -548,7 +511,6 @@ internal class RealManueltOpphoerServiceTest {
                 behandlingHendelserKafkaProducer,
                 hendelseDaoMock,
                 grunnlagServiceMock,
-                featureToggleService,
             )
         val manueltOpphoer = sut.hentManueltOpphoer(id)
         assertNull(manueltOpphoer)

@@ -15,8 +15,6 @@ import io.ktor.util.pipeline.PipelinePhase
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.User
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.FoedselsNummerMedGraderingDTO
@@ -203,13 +201,9 @@ suspend inline fun PipelineContext<*, ApplicationCall>.kunAttestant(onSuccess: (
 private val saksbehandlereMedTilgangTilAlleEnheter = listOf("S128848", "K105085", "O113803")
 
 fun <T> List<T>.filterForEnheter(
-    featureToggleService: FeatureToggleService,
-    toggle: FeatureToggle,
     user: User,
     filter: (item: T, enheter: List<String>) -> Boolean,
-) = if (featureToggleService.isEnabled(toggle, false) &&
-    user.name() !in(saksbehandlereMedTilgangTilAlleEnheter)
-) {
+) = if (user.name() !in (saksbehandlereMedTilgangTilAlleEnheter)) {
     when (user) {
         is SaksbehandlerMedEnheterOgRoller -> {
             val enheter = user.enheter()

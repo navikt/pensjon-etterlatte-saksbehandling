@@ -2,7 +2,6 @@ package no.nav.etterlatte.behandling
 
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.JaNeiMedBegrunnelse
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
@@ -34,7 +33,6 @@ interface GyldighetsproevingService {
 
 class GyldighetsproevingServiceImpl(
     private val behandlingDao: BehandlingDao,
-    private val featureToggleService: FeatureToggleService,
     private val klokke: Clock = utcKlokke(),
 ) : GyldighetsproevingService {
     private val logger = LoggerFactory.getLogger(GyldighetsproevingServiceImpl::class.java)
@@ -98,7 +96,6 @@ class GyldighetsproevingServiceImpl(
     private fun Foerstegangsbehandling?.sjekkEnhet() =
         this?.let { behandling ->
             listOf(behandling).filterBehandlingerForEnheter(
-                featureToggleService,
                 Kontekst.get().AppUser,
             ).firstOrNull()
         }

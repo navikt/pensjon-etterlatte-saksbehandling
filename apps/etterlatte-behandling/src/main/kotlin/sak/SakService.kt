@@ -10,8 +10,6 @@ import no.nav.etterlatte.common.IngenEnhetFunnetException
 import no.nav.etterlatte.common.IngenGeografiskOmraadeFunnetForEnhet
 import no.nav.etterlatte.common.klienter.PdlKlient
 import no.nav.etterlatte.common.klienter.SkjermingKlient
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.libs.common.behandling.Flyktning
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -22,13 +20,6 @@ import no.nav.etterlatte.libs.common.person.maskerFnr
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.tilgangsstyring.filterForEnheter
 import org.slf4j.LoggerFactory
-
-enum class SakServiceFeatureToggle(private val key: String) : FeatureToggle {
-    FiltrerMedEnhetId("pensjon-etterlatte.filtrer-saker-med-enhet-id"),
-    ;
-
-    override fun key() = key
-}
 
 interface SakService {
     fun oppdaterUtenlandstilknytning(
@@ -90,7 +81,6 @@ class SakServiceImpl(
     private val dao: SakDao,
     private val pdlKlient: PdlKlient,
     private val norg2Klient: Norg2Klient,
-    private val featureToggleService: FeatureToggleService,
     private val skjermingKlient: SkjermingKlient,
 ) : SakService {
     private val logger = LoggerFactory.getLogger(this::class.java)
@@ -249,7 +239,6 @@ class SakServiceImpl(
 
     private fun List<Sak>.filterForEnheter() =
         this.filterSakerForEnheter(
-            featureToggleService,
             Kontekst.get().AppUser,
         )
 
@@ -259,9 +248,7 @@ class SakServiceImpl(
         }
 }
 
-fun List<Sak>.filterSakerForEnheter(
-    featureToggleService: FeatureToggleService,
-    user: User,
-) = this.filterForEnheter(featureToggleService, SakServiceFeatureToggle.FiltrerMedEnhetId, user) { item, enheter ->
-    enheter.contains(item.enhet)
-}
+fun List<Sak>.filterSakerForEnheter(user: User) =
+    this.filterForEnheter(user) { item, enheter ->
+        enheter.contains(item.enhet)
+    }

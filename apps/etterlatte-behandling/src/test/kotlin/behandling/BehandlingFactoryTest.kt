@@ -19,7 +19,6 @@ import no.nav.etterlatte.behandling.BehandlingFactory
 import no.nav.etterlatte.behandling.BehandlingHendelseType
 import no.nav.etterlatte.behandling.BehandlingHendelserKafkaProducer
 import no.nav.etterlatte.behandling.BehandlingService
-import no.nav.etterlatte.behandling.BehandlingServiceFeatureToggle
 import no.nav.etterlatte.behandling.GrunnlagService
 import no.nav.etterlatte.behandling.GyldighetsproevingService
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
@@ -51,7 +50,6 @@ import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.revurdering
 import no.nav.etterlatte.sak.SakService
-import no.nav.etterlatte.sak.SakServiceFeatureToggle
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
@@ -109,12 +107,14 @@ class BehandlingFactoryTest {
             behandlingDaoMock,
             hendelseDaoMock,
             behandlingHendelserKafkaProducerMock,
-            featureToggleService,
             mockk(),
         )
 
     @BeforeEach
     fun before() {
+        every { user.name() } returns "User"
+        every { user.enheter() } returns listOf(Enheter.defaultEnhet.enhetNr)
+
         Kontekst.set(
             Context(
                 user,
@@ -148,9 +148,6 @@ class BehandlingFactoryTest {
         val behandlingOpprettes = slot<OpprettBehandling>()
         val behandlingHentes = slot<UUID>()
         val datoNaa = Tidspunkt.now().toLocalDatetimeUTC()
-
-        every { featureToggleService.isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false) } returns false
-        every { featureToggleService.isEnabled(SakServiceFeatureToggle.FiltrerMedEnhetId, false) } returns false
 
         val opprettetBehandling =
             Foerstegangsbehandling(
@@ -187,6 +184,7 @@ class BehandlingFactoryTest {
                 listOf("Gjenlevende"),
             )
 
+        every { user.enheter() } returns listOf(Enheter.defaultEnhet.enhetNr)
         every { sakServiceMock.finnSak(any()) } returns opprettetBehandling.sak
         every { behandlingDaoMock.opprettBehandling(capture(behandlingOpprettes)) } returns Unit
         every { behandlingDaoMock.hentBehandling(capture(behandlingHentes)) } returns opprettetBehandling
@@ -241,9 +239,6 @@ class BehandlingFactoryTest {
         val behandlingOpprettes = slot<OpprettBehandling>()
         val behandlingHentes = slot<UUID>()
         val datoNaa = Tidspunkt.now().toLocalDatetimeUTC()
-
-        every { featureToggleService.isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false) } returns false
-        every { featureToggleService.isEnabled(SakServiceFeatureToggle.FiltrerMedEnhetId, false) } returns false
 
         val opprettetBehandling =
             Foerstegangsbehandling(
@@ -324,11 +319,6 @@ class BehandlingFactoryTest {
         val behandlingOpprettes = slot<OpprettBehandling>()
         val behandlingHentes = slot<UUID>()
         val datoNaa = Tidspunkt.now().toLocalDatetimeUTC()
-
-        every {
-            featureToggleService.isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false)
-        } returns false
-        every { featureToggleService.isEnabled(SakServiceFeatureToggle.FiltrerMedEnhetId, false) } returns false
 
         val underArbeidBehandling =
             Foerstegangsbehandling(
@@ -432,11 +422,6 @@ class BehandlingFactoryTest {
         val behandlingOpprettes = slot<OpprettBehandling>()
         val behandlingHentes = slot<UUID>()
         val datoNaa = Tidspunkt.now().toLocalDatetimeUTC()
-
-        every {
-            featureToggleService.isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false)
-        } returns false
-        every { featureToggleService.isEnabled(SakServiceFeatureToggle.FiltrerMedEnhetId, false) } returns false
 
         val nyBehandling =
             Foerstegangsbehandling(
@@ -580,9 +565,6 @@ class BehandlingFactoryTest {
         val datoNaa = Tidspunkt.now().toLocalDatetimeUTC()
         val behandlingOpprettes = slot<OpprettBehandling>()
         val behandlingHentes = slot<UUID>()
-
-        every { featureToggleService.isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false) } returns false
-        every { featureToggleService.isEnabled(SakServiceFeatureToggle.FiltrerMedEnhetId, false) } returns false
 
         val persongalleri =
             Persongalleri(

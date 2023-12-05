@@ -27,7 +27,6 @@ import no.nav.etterlatte.libs.common.skjermet.EgenAnsattSkjermet
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
 import no.nav.etterlatte.module
-import no.nav.etterlatte.sak.SakServiceFeatureToggle
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
@@ -42,7 +41,6 @@ class KlageRoutesIntegrationTest : BehandlingIntegrationTest() {
             featureToggleService =
                 mockk {
                     every { isEnabled(KlageFeatureToggle.KanBrukeKlageToggle, any()) } returns true
-                    every { isEnabled(SakServiceFeatureToggle.FiltrerMedEnhetId, any()) } returns true
                 },
         )
 

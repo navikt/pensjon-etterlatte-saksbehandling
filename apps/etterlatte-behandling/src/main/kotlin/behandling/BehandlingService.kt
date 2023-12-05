@@ -19,8 +19,6 @@ import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlientException
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
 import no.nav.etterlatte.common.tidligsteIverksatteVirkningstidspunkt
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseDao
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
@@ -48,13 +46,6 @@ import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
-
-enum class BehandlingServiceFeatureToggle(private val key: String) : FeatureToggle {
-    FiltrerMedEnhetId("pensjon-etterlatte.filtrer-behandlinger-med-enhet-id"),
-    ;
-
-    override fun key() = key
-}
 
 class BehandlingFinnesIkkeException(message: String) : Exception(message)
 
@@ -133,7 +124,6 @@ internal class BehandlingServiceImpl(
     private val hendelseDao: HendelseDao,
     private val grunnlagKlient: GrunnlagKlient,
     private val behandlingRequestLogger: BehandlingRequestLogger,
-    private val featureToggleService: FeatureToggleService,
     private val kommerBarnetTilGodeDao: KommerBarnetTilGodeDao,
     private val oppgaveService: OppgaveService,
     private val etterbetalingDao: EtterbetalingDao,
@@ -249,6 +239,7 @@ internal class BehandlingServiceImpl(
                             throw e
                         }
                     }
+
                     else -> throw e
                 }
             }
@@ -290,7 +281,9 @@ internal class BehandlingServiceImpl(
 
         if (sakMedUtenlandstilknytning?.utenlandstilknytning != null) {
             if (sakMedUtenlandstilknytning.utenlandstilknytning.type === UtenlandstilknytningType.BOSATT_UTLAND) {
-                val kravdato = request.kravdato ?: throw KravdatoMaaFinnesHvisBosattutland("Kravdato må finnes hvis bosatt utland er valgt")
+                val kravdato =
+                    request.kravdato
+                        ?: throw KravdatoMaaFinnesHvisBosattutland("Kravdato må finnes hvis bosatt utland er valgt")
                 makstidspunktFoerSoeknad = YearMonth.from(kravdato.minusYears(3))
             }
         } else {
@@ -479,24 +472,15 @@ internal class BehandlingServiceImpl(
 
     private fun List<Behandling>.filterForEnheter() =
         this.filterBehandlingerForEnheter(
-            featureToggleService = featureToggleService,
             user = Kontekst.get().AppUser,
         )
 
     private fun hentBehandlingOrThrow(behandlingId: UUID) =
-        (
-            behandlingDao.hentBehandling(behandlingId)
-                ?: throw BehandlingNotFoundException("Fant ikke behandling med id=$behandlingId")
-        )
+        behandlingDao.hentBehandling(behandlingId)
+            ?: throw BehandlingNotFoundException("Fant ikke behandling med id=$behandlingId")
 }
 
-fun <T : Behandling> List<T>.filterBehandlingerForEnheter(
-    featureToggleService: FeatureToggleService,
-    user: User,
-) = this.filterForEnheter(
-    featureToggleService,
-    BehandlingServiceFeatureToggle.FiltrerMedEnhetId,
-    user,
-) { item, enheter ->
-    enheter.contains(item.sak.enhet)
-}
+fun <T : Behandling> List<T>.filterBehandlingerForEnheter(user: User) =
+    this.filterForEnheter(user) { item, enheter ->
+        enheter.contains(item.sak.enhet)
+    }

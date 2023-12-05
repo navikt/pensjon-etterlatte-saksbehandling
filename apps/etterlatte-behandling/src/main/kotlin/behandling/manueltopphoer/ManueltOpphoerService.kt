@@ -18,7 +18,6 @@ import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.hendelse.HendelseType
 import no.nav.etterlatte.behandling.hendelse.registrerVedtakHendelseFelles
 import no.nav.etterlatte.common.tidligsteIverksatteVirkningstidspunkt
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
@@ -57,7 +56,6 @@ class RealManueltOpphoerService(
     private val behandlingHendelser: BehandlingHendelserKafkaProducer,
     private val hendelseDao: HendelseDao,
     private val grunnlagService: GrunnlagService,
-    private val featureToggleService: FeatureToggleService,
 ) : ManueltOpphoerService {
     val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
@@ -169,7 +167,6 @@ class RealManueltOpphoerService(
 
     private fun <T : Behandling> List<T>.filterForEnheter() =
         this.filterBehandlingerForEnheter(
-            featureToggleService,
             Kontekst.get().AppUser,
         )
 

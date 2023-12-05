@@ -1,12 +1,12 @@
 package no.nav.etterlatte.grunnlag
 
-import no.nav.etterlatte.grunnlag.adresse.BrevMottaker
-import no.nav.etterlatte.grunnlag.adresse.Foedselsnummer
 import no.nav.etterlatte.grunnlag.adresse.PersondataAdresse
 import no.nav.etterlatte.grunnlag.klienter.PersondataKlient
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.person.BrevMottaker
+import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.VergemaalEllerFremtidsfullmakt
 import no.nav.etterlatte.libs.common.person.hentRelevantVerge
@@ -57,7 +57,7 @@ class VergeService(
         val pdlVergeFoedselsnummer = relevantVerge.vergeEllerFullmektig.motpartsPersonident!!.value
         return vergesAdresseInfo.tilFrittstaendeBrevMottaker()
             .copy(
-                foedselsnummer = Foedselsnummer(pdlVergeFoedselsnummer),
+                foedselsnummer = Foedselsnummer.of(pdlVergeFoedselsnummer),
             )
     }
 

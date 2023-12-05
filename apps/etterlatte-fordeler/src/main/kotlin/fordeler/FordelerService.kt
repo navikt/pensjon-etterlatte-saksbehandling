@@ -41,8 +41,6 @@ sealed class FordelerResultat {
     class UgyldigHendelse(val message: String) : FordelerResultat()
 
     class IkkeGyldigForBehandling(val ikkeOppfylteKriterier: List<FordelerKriterie>) : FordelerResultat()
-
-    class TrengerManuellJournalfoering(val melding: String) : FordelerResultat()
 }
 
 class FordelerService(
@@ -78,11 +76,7 @@ class FordelerService(
             )
             sikkerLogg.info("Søknad ${event.soeknadId} har en familierelasjon som mangler ident", e)
 
-            if (featureToggleService.isEnabled(FordelerFeatureToggle.ManuellJournalfoering, false)) {
-                FordelerResultat.TrengerManuellJournalfoering(e.detail)
-            } else {
-                IkkeGyldigForBehandling(listOf(FordelerKriterie.FAMILIERELASJON_MANGLER_IDENT))
-            }
+            IkkeGyldigForBehandling(listOf(FordelerKriterie.FAMILIERELASJON_MANGLER_IDENT))
         } catch (e: PersonFinnesIkkeException) {
             UgyldigHendelse("Person fra søknaden med fnr=${e.fnr} finnes ikke i PDL")
         }
@@ -214,10 +208,6 @@ class FordelerService(
         return runBlocking {
             behandlingKlient.hentSak(fnr, barnepensjon, gradering)
         }
-    }
-
-    fun opprettOppgave(sakId: Long) {
-        return runBlocking { behandlingKlient.opprettOppgave(sakId) }
     }
 }
 

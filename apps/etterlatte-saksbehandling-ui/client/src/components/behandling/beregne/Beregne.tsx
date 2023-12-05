@@ -30,6 +30,7 @@ import { Vilkaarsresultat } from '~components/behandling/felles/Vilkaarsresultat
 
 import { isPending, mapApiResult } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
+import { Brevoppsett } from '~components/behandling/brevoppsett/Brevoppsett'
 
 export const Beregne = (props: { behandling: IBehandlingReducer }) => {
   const { behandling } = props
@@ -121,6 +122,8 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
                     virkningstidspunkt={virkningstidspunkt}
                   />
                 </EtterbetalingWrapper>
+
+                <Brevoppsett behandling={behandling} />
               </BeregningWrapper>
             )
           )}

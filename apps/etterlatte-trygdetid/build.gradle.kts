@@ -26,4 +26,6 @@ dependencies {
     testImplementation(libs.test.kotest.assertionscore)
 
     testImplementation(project(":libs:testdata"))
+    testImplementation(libs.ktor2.jackson)
+    testImplementation(libs.ktor2.clientcontentnegotiation)
 }

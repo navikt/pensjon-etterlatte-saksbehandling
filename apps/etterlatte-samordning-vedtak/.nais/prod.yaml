@@ -99,6 +99,12 @@ spec:
           permissions:
             roles:
               - les-oms-vedtak
+        - application: pensjon-selvbetjening-soknad-alder-backend
+          namespace: pensjonselvbetjening
+          cluster: prod-gcp
+          permissions:
+            roles:
+              - les-oms-vedtak
     outbound:
       rules:
         - application: etterlatte-vedtaksvurdering

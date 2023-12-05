@@ -10,7 +10,7 @@ import VurderHendelseModal from '~components/person/VurderHendelseModal'
 import UhaandtertHendelse from '~components/person/uhaandtereHendelser/UhaandtertHendelse'
 import { IBehandlingsType } from '~shared/types/IDetaljertBehandling'
 import { erFerdigBehandlet } from '~components/behandling/felles/utils'
-import { hentGrunnlagsendringshendelserForPerson } from '~shared/api/behandling'
+import { hentGrunnlagsendringshendelserForSak } from '~shared/api/behandling'
 import Spinner from '~shared/Spinner'
 import { ISak } from '~shared/types/sak'
 import { hentStoettedeRevurderinger } from '~shared/api/revurdering'
@@ -34,7 +34,7 @@ export default function RelevanteHendelser(props: Props) {
   }
 
   const [relevanteHendelser, setRelevanteHendelser] = useState<Grunnlagsendringshendelse[]>([])
-  const [hendelserStatus, hentHendelser] = useApiCall(hentGrunnlagsendringshendelserForPerson)
+  const [hendelserStatus, hentHendelser] = useApiCall(hentGrunnlagsendringshendelserForSak)
   const [muligeRevurderingAarsakerStatus, hentMuligeRevurderingeraarsaker] = useApiCall(hentStoettedeRevurderinger)
   const [personerISak, hentPersoner, resetPersoner] = useApiCall(hentPersonerISak)
 

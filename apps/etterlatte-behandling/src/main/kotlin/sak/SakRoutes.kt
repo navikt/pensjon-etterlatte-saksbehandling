@@ -132,6 +132,10 @@ internal fun Route.sakWebRoutes(
                 call.respond(sak ?: HttpStatusCode.NotFound)
             }
 
+            get("/grunnlagsendringshendelser") {
+                call.respond(inTransaction { GrunnlagsendringsListe(grunnlagsendringshendelseService.hentAlleHendelserForSak(sakId)) })
+            }
+
             post("/endre_enhet") {
                 hentNavidentFraToken { navIdent ->
                     val enhet = call.receive<String>()

@@ -16,10 +16,10 @@ import { InstitusjonsoppholdMedKilde } from '~components/person/uhaandtereHendel
 import { format } from 'date-fns'
 import { DatoFormat } from '~utils/formattering'
 
-export const hentGrunnlagsendringshendelserForPerson = async (
+export const hentGrunnlagsendringshendelserForSak = async (
   sakId: number
 ): Promise<ApiResponse<GrunnlagsendringsListe>> => {
-  return apiClient.get(`/grunnlagsendringshendelse/${sakId}`)
+  return apiClient.get(`/sak/${sakId}/grunnlagsendringshendelser`)
 }
 
 export const lukkGrunnlagshendelse = async (hendelse: Grunnlagsendringshendelse): Promise<ApiResponse<any>> => {

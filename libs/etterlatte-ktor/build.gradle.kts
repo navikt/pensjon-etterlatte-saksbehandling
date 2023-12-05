@@ -12,7 +12,7 @@ dependencies {
     api(kotlin("reflect"))
 
     implementation(project(":libs:saksbehandling-common"))
-    implementation(project(":libs:etterlatte-token-model"))
+    api(project(":libs:etterlatte-token-model"))
 
     implementation(libs.ktor2.servercore)
     implementation(libs.ktor2.servercio)

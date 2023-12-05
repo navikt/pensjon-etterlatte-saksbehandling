@@ -19,7 +19,6 @@ object BlockTilSlateKonverterer {
                     type = Slate.ElementType.HEADING_TWO,
                     children = children(block),
                 )
-
             RenderedJsonLetter.Block.Type.TITLE2 ->
                 Slate.Element(
                     type = Slate.ElementType.HEADING_THREE,
@@ -35,20 +34,8 @@ object BlockTilSlateKonverterer {
 
     private fun children(block: RenderedJsonLetter.Block): List<Slate.InnerElement> =
         when (block.type) {
-            RenderedJsonLetter.Block.Type.TITLE1 ->
-                (block as RenderedJsonLetter.Block.Title1).content.map {
-                    konverter(
-                        it,
-                    )
-                }
-
-            RenderedJsonLetter.Block.Type.TITLE2 ->
-                (block as RenderedJsonLetter.Block.Title2).content.map {
-                    konverter(
-                        it,
-                    )
-                }
-
+            RenderedJsonLetter.Block.Type.TITLE1 -> (block as RenderedJsonLetter.Block.Title1).content.map { konverter(it) }
+            RenderedJsonLetter.Block.Type.TITLE2 -> (block as RenderedJsonLetter.Block.Title2).content.map { konverter(it) }
             RenderedJsonLetter.Block.Type.PARAGRAPH ->
                 (block as RenderedJsonLetter.Block.Paragraph).content.map {
                     konverter(
@@ -68,13 +55,6 @@ object BlockTilSlateKonverterer {
                                 Slate.InnerElement(
                                     type = Slate.ElementType.LIST_ITEM,
                                     text = item.content.joinToString { i -> i.text },
-                                    children =
-                                        item.content.map { i ->
-                                            Slate.InnerElement(
-                                                type = Slate.ElementType.PARAGRAPH,
-                                                text = i.text,
-                                            )
-                                        },
                                 )
                             },
                 )

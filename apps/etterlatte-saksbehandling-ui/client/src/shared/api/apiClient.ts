@@ -71,6 +71,11 @@ async function apiFetcher<T>(props: Options): Promise<ApiResponse<T>> {
         data: null as T,
       }
     } else {
+      if (response.status === 401) {
+        console.error('Vi er utlogget.')
+        return { status: 401, ok: false, detail: 'Du er utlogget, last på siden på nytt.' }
+      }
+
       const error: JsonError = await response.json()
       if (response.status >= 500) {
         const errorobj = {

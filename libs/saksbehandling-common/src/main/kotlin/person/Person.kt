@@ -203,9 +203,22 @@ data class ForelderVerge(val navn: String) : Verge {
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class BrevMottaker(
     val navn: String?,
-    val foedselsnummer: Foedselsnummer?,
+    val foedselsnummer: MottakerFoedselsnummer?,
     val adresse: MottakerAdresse,
 )
+
+/**
+ * Denne pakker inn fødselsnummer i {value: "<fnr>"}, fordi det skal matche responsen fra brev-api...
+ */
+@JsonIgnoreProperties(ignoreUnknown = true)
+data class MottakerFoedselsnummer(val value: String) {
+    /**
+     * Skal ALLTID returnere anonymisert fødselsnummer.
+     *
+     * Bruk [value] ved behov for komplett fødselsnummer.
+     */
+    override fun toString(): String = this.value.replaceRange(6 until 11, "*****")
+}
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class MottakerAdresse(

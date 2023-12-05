@@ -3,8 +3,8 @@ package no.nav.etterlatte.grunnlag.adresse
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import no.nav.etterlatte.libs.common.person.BrevMottaker
-import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.person.MottakerAdresse
+import no.nav.etterlatte.libs.common.person.MottakerFoedselsnummer
 
 @JsonTypeInfo(
     use = JsonTypeInfo.Id.NAME,
@@ -67,7 +67,7 @@ data class VergePersonFormat(
     override fun tilFrittstaendeBrevMottaker(): BrevMottaker {
         return BrevMottaker(
             navn = navn ?: "Ukjent",
-            foedselsnummer = Foedselsnummer.of(vergePid),
+            foedselsnummer = MottakerFoedselsnummer(vergePid),
             adresse =
                 MottakerAdresse(
                     adresseType = adressetypeFromLand(adresse.landkode, adresse.land),

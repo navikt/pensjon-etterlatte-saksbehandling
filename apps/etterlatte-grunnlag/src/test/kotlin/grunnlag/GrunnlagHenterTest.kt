@@ -23,9 +23,9 @@ import no.nav.etterlatte.libs.common.grunnlag.Opplysningsbehov
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.pdl.OpplysningDTO
 import no.nav.etterlatte.libs.common.person.BrevMottaker
-import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.MottakerAdresse
+import no.nav.etterlatte.libs.common.person.MottakerFoedselsnummer
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.VergeEllerFullmektig
 import no.nav.etterlatte.libs.common.person.VergemaalEllerFremtidsfullmakt
@@ -148,7 +148,7 @@ class GrunnlagHenterTest {
     private fun sampleVergeAdresse() =
         BrevMottaker(
             navn = "Tore",
-            foedselsnummer = Foedselsnummer.of(vergesFnr),
+            foedselsnummer = MottakerFoedselsnummer(vergesFnr),
             adresse =
                 MottakerAdresse(
                     adresseType = "NORSKPOSTADRESSE",

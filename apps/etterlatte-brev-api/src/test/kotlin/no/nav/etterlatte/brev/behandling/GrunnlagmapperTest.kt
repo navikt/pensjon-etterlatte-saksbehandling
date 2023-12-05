@@ -7,9 +7,9 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.Opplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
-import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.MottakerAdresse
+import no.nav.etterlatte.libs.common.person.MottakerFoedselsnummer
 import no.nav.etterlatte.libs.common.person.VergeEllerFullmektig
 import no.nav.etterlatte.libs.common.person.Vergemaal
 import no.nav.etterlatte.libs.common.person.VergemaalEllerFremtidsfullmakt
@@ -60,7 +60,7 @@ class GrunnlagmapperTest {
         val verge = opplysningsgrunnlag.mapVerge(SakType.BARNEPENSJON, UUID.randomUUID())!! as Vergemaal
 
         verge.navn() shouldBe "ADVOKAT VERA V VERGE"
-        verge.mottaker.foedselsnummer shouldBe Foedselsnummer.of(vergesAdresseFnr)
+        verge.mottaker.foedselsnummer shouldBe MottakerFoedselsnummer(vergesAdresseFnr)
         verge.mottaker.navn shouldBe "ADVOKAT VERA V VERGE"
         verge.mottaker.adresse shouldBe
             MottakerAdresse(
@@ -93,7 +93,7 @@ class GrunnlagmapperTest {
     private fun lagretVergeAdresse() =
         mapOf(
             "navn" to "ADVOKAT VERA V VERGE",
-            "foedselsnummer" to vergesAdresseFnr,
+            "foedselsnummer" to mapOf("value" to vergesAdresseFnr),
             "adresse" to
                 mapOf(
                     "adresseType" to "NORSKPOSTADRESSE",

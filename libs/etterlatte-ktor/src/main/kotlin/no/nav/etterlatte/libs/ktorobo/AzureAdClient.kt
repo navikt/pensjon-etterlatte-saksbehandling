@@ -25,8 +25,8 @@ import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.future.asDeferred
 import kotlinx.coroutines.future.future
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.ktor.client.ClientCallLogging
 import no.nav.etterlatte.libs.common.retryOgPakkUt
-import no.nav.etterlatte.libs.ktor.ClientCallLogging
 import java.util.concurrent.TimeUnit
 
 internal val defaultHttpClient =

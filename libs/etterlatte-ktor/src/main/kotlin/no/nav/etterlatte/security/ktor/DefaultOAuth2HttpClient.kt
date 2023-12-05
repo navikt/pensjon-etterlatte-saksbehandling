@@ -10,6 +10,7 @@ import io.ktor.client.request.forms.submitForm
 import io.ktor.http.Parameters
 import io.ktor.serialization.jackson.jackson
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.libs.ktor.ClientCallLogging
 import no.nav.security.token.support.client.core.http.OAuth2HttpClient
 import no.nav.security.token.support.client.core.http.OAuth2HttpRequest
 import no.nav.security.token.support.client.core.oauth2.OAuth2AccessTokenResponse
@@ -24,6 +25,7 @@ class DefaultOAuth2HttpClient : OAuth2HttpClient {
                     setSerializationInclusion(JsonInclude.Include.NON_NULL)
                 }
             }
+            install(ClientCallLogging)
         }
 
     // Override default POST with other form parameters specified for Idp request

@@ -5,23 +5,14 @@ import { UstiletListe } from '~components/behandling/beregningsgrunnlag/soeskenj
 import { ListeItemMedSpacingIMellom } from '~components/behandling/soeknadsoversikt/familieforhold/personer/personinfo/UtvandringInnvandring'
 import { formaterKanskjeStringDatoMedFallback } from '~utils/formattering'
 
-export function Statsborgerskap(props: { statsborgerskap?: string; pdlStatsborgerskap?: Statsborgerskap[] }) {
+export function StatsborgerskapVisning(props: { statsborgerskap?: string; pdlStatsborgerskap?: Statsborgerskap[] }) {
   const { statsborgerskap, pdlStatsborgerskap } = props
 
-  if (!statsborgerskap && !pdlStatsborgerskap) {
+  if (!pdlStatsborgerskap) {
     return (
       <PersonDetailWrapper adresse={false}>
         <Label as="p">Statsborgerskap</Label>
-        <span>Ukjent</span>
-      </PersonDetailWrapper>
-    )
-  }
-
-  if (!!statsborgerskap) {
-    return (
-      <PersonDetailWrapper adresse={false}>
-        <Label as="p">Statsborgerskap</Label>
-        <span>{statsborgerskap}</span>
+        <span>{statsborgerskap ?? 'Ukjent'}</span>
       </PersonDetailWrapper>
     )
   }

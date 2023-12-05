@@ -14,7 +14,7 @@ import no.nav.etterlatte.libs.common.kunSystembruker
 import no.nav.etterlatte.libs.common.medBody
 
 enum class KlageFeaturetoggle(val key: String) : FeatureToggle {
-    KanBrukeKlage("pensjon-etterlatte.kan-bruke-generell-behandling") {
+    KanBrukeKlage("pensjon-etterlatte.kan-bruke-klage") {
         override fun key(): String {
             return key
         }

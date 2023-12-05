@@ -336,7 +336,7 @@ class TrygdetidServiceImpl(
                     Trygdetid(
                         sakId = behandling.sak,
                         behandlingId = behandling.id,
-                        opplysninger = hentOpplysninger(avdoed),
+                        opplysninger = hentOpplysninger(avdoed, behandling.id),
                         ident =
                             requireNotNull(avdoed.hentFoedselsnummer()?.verdi?.value) {
                                 "Kunne ikke hente identifikator for avdød til trygdetid i " +
@@ -557,30 +557,45 @@ class TrygdetidServiceImpl(
             "1",
         )
 
-    private fun hentOpplysninger(avdoed: Grunnlagsdata<JsonNode>): List<Opplysningsgrunnlag> {
+    private fun hentOpplysninger(
+        avdoed: Grunnlagsdata<JsonNode>,
+        behandlingId: UUID,
+    ): List<Opplysningsgrunnlag> {
+        val avodedDoedsdato = avdoed.hentDoedsdato()
+
+        val avdoededsDatoOpplysning =
+            avodedDoedsdato?.verdi?.let {
+                Opplysningsgrunnlag.ny(TrygdetidOpplysningType.DOEDSDATO, avodedDoedsdato.kilde, it)
+            } ?: run {
+                throw TrygdetidMaaHaAvdoedDoedsdatoException(behandlingId)
+            }
+
         val foedselsdato = avdoed.hentFoedselsdato()
+        val foedselsdatVerdi =
+            foedselsdato?.verdi ?: run {
+                throw TrygdetidMaaHaFoedselsdatoException(behandlingId)
+            }
+
         val opplysninger =
             listOf(
                 Opplysningsgrunnlag.ny(
                     TrygdetidOpplysningType.FOEDSELSDATO,
-                    foedselsdato?.kilde,
-                    foedselsdato?.verdi,
+                    foedselsdato.kilde,
+                    foedselsdatVerdi,
                 ),
                 Opplysningsgrunnlag.ny(
                     TrygdetidOpplysningType.FYLT_16,
                     kildeFoedselsnummer(),
                     // Ifølge paragraf § 3-5 regnes trygdetid fra tidspunkt en person er fylt 16 år
-                    foedselsdato?.verdi?.plusYears(16),
+                    foedselsdatVerdi.plusYears(16),
                 ),
                 Opplysningsgrunnlag.ny(
                     TrygdetidOpplysningType.FYLLER_66,
                     kildeFoedselsnummer(),
                     // Ifølge paragraf § 3-5 regnes trygdetid frem til tidspunkt en person er fyller 66 pår
-                    foedselsdato?.verdi?.plusYears(SIST_FREMTIDIG_TRYGDETID_ALDER),
+                    foedselsdatVerdi.plusYears(SIST_FREMTIDIG_TRYGDETID_ALDER),
                 ),
-                avdoed.hentDoedsdato().let {
-                    Opplysningsgrunnlag.ny(TrygdetidOpplysningType.DOEDSDATO, it?.kilde, it?.verdi)
-                },
+                avdoededsDatoOpplysning,
             )
         return opplysninger
     }
@@ -612,13 +627,13 @@ class TrygdetidServiceImpl(
         val trygdetid =
             Trygdetid(
                 sakId = behandling.sak,
-                behandlingId = behandling.id,
-                opplysninger = avdoed?.let { hentOpplysninger(it) } ?: emptyList(),
+                behandlingId = behandlingId,
+                opplysninger = avdoed?.let { hentOpplysninger(it, behandlingId) } ?: emptyList(),
                 ident =
                     avdoed?.let {
                         requireNotNull(it.hentFoedselsnummer()?.verdi?.value) {
                             "Kunne ikke hente identifikator for avdød til trygdetid i " +
-                                "behandlingen med id=${behandling.id}"
+                                "behandlingen med id=$behandlingId"
                         }
                     } ?: UKJENT_AVDOED,
                 trygdetidGrunnlag = emptyList(),
@@ -779,6 +794,12 @@ class ManglerForrigeTrygdetidMaaReguleresManuelt : UgyldigForespoerselException(
 
 class TrygdetidAlleredeOpprettetException :
     IkkeTillattException("TRYGDETID_FINNES_ALLEREDE", "Det er opprettet trygdetid for behandlingen allerede")
+
+class TrygdetidMaaHaAvdoedDoedsdatoException(behandlingId: UUID) :
+    IkkeTillattException("TRYGDETID_AVDOED_MAA_HA_DOEDSDATO", "Kan ikke lage trygdetid uten avdødes dødsdato, behandling: $behandlingId")
+
+class TrygdetidMaaHaFoedselsdatoException(behandlingId: UUID) :
+    IkkeTillattException("TRYGDETID_MANGLER_FOEDSELSDATO", "Kan ikke lage trygdetid uten fødselsdato, behandling: $behandlingId")
 
 class StoetterIkkeTrygdetidForBehandlingstypen(behandlingType: BehandlingType) :
     UgyldigForespoerselException(

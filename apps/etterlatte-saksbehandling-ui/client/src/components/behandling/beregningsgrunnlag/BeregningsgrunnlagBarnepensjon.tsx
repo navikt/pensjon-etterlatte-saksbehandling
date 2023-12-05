@@ -36,6 +36,7 @@ import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 
 import { isPending, isSuccess } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
+import { behandlingGjelderBarnepensjonPaaNyttRegelverk } from '~components/behandling/vilkaarsvurdering/utils'
 
 const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer }) => {
   const { behandling } = props
@@ -77,15 +78,13 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
         personopplysninger?.soeker?.opplysning.foedselsnummer as string
       )) ??
     []
-  const skalHaSoeskenjustering =
-    soesken.length > 0 &&
-    (behandling.virkningstidspunkt == null || new Date(behandling.virkningstidspunkt.dato) < new Date('2024-01-01'))
+  const skalViseSoeskenjustering = soesken.length > 0 && !behandlingGjelderBarnepensjonPaaNyttRegelverk(behandling)
 
   const onSubmit = () => {
-    if (skalHaSoeskenjustering && !(soeskenGrunnlagsData || behandling.beregningsGrunnlag?.soeskenMedIBeregning)) {
+    if (skalViseSoeskenjustering && !(soeskenGrunnlagsData || behandling.beregningsGrunnlag?.soeskenMedIBeregning)) {
       setSoeskenJusteringMangler(true)
     }
-    if (behandling.beregningsGrunnlag?.soeskenMedIBeregning || soeskenGrunnlagsData || !skalHaSoeskenjustering) {
+    if (behandling.beregningsGrunnlag?.soeskenMedIBeregning || soeskenGrunnlagsData || !skalViseSoeskenjustering) {
       dispatch(resetBeregning())
       const beregningsgrunnlag = {
         soeskenMedIBeregning: soeskenGrunnlagsData
@@ -129,7 +128,7 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
             }}
           />
         )}
-        {isSuccess(beregningsgrunnlag) && skalHaSoeskenjustering && (
+        {isSuccess(beregningsgrunnlag) && skalViseSoeskenjustering && (
           <Soeskenjustering
             behandling={behandling}
             onSubmit={(soeskenGrunnlag) => setSoeskenGrunnlagsData(soeskenGrunnlag)}

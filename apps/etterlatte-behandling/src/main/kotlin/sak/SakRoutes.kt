@@ -1,11 +1,9 @@
 package no.nav.etterlatte.sak
 
-import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
-import io.ktor.server.response.respondText
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
@@ -24,9 +22,7 @@ import no.nav.etterlatte.libs.common.behandling.ForenkletBehandling
 import no.nav.etterlatte.libs.common.behandling.ForenkletBehandlingListeWrapper
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.SisteIverksatteBehandling
-import no.nav.etterlatte.libs.common.behandling.Utenlandstilknytning
-import no.nav.etterlatte.libs.common.behandling.UtenlandstilknytningType
-import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.hentNavidentFraToken
 import no.nav.etterlatte.libs.common.kunSaksbehandler
 import no.nav.etterlatte.libs.common.kunSystembruker
@@ -34,7 +30,6 @@ import no.nav.etterlatte.libs.common.oppgave.OppgaveListe
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.Saker
 import no.nav.etterlatte.libs.common.sakId
-import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.tilgangsstyring.withFoedselsnummerAndGradering
@@ -157,34 +152,6 @@ internal fun Route.sakWebRoutes(
                 }
             }
 
-            post("/utenlandstilknytning") {
-                hentNavidentFraToken { navIdent ->
-                    logger.debug("Prøver å fastsette utenlandstilknytning")
-                    val body = call.receive<UtenlandstilknytningRequest>()
-
-                    try {
-                        val utenlandstilknytning =
-                            Utenlandstilknytning(
-                                type = body.utenlandstilknytningType,
-                                kilde = Grunnlagsopplysning.Saksbehandler.create(navIdent),
-                                begrunnelse = body.begrunnelse,
-                            )
-
-                        inTransaction {
-                            sakService.oppdaterUtenlandstilknytning(sakId, utenlandstilknytning)
-                        }
-
-                        call.respondText(
-                            contentType = ContentType.Application.Json,
-                            status = HttpStatusCode.OK,
-                            text = utenlandstilknytning.toJson(),
-                        )
-                    } catch (e: TilstandException.UgyldigTilstand) {
-                        call.respond(HttpStatusCode.BadRequest, "Kan ikke endre feltet")
-                    }
-                }
-            }
-
             get("/behandlinger/foerstevirk") {
                 logger.info("Henter første virkningstidspunkt på en iverksatt behandling i sak med id $sakId")
                 when (val foersteVirk = inTransaction { behandlingService.hentFoersteVirk(sakId) }) {
@@ -199,24 +166,21 @@ internal fun Route.sakWebRoutes(
                 withFoedselsnummerInternal(tilgangService) { fnr ->
                     val behandlinger =
                         inTransaction {
-                            val sakUtenlandstilknytning = sakService.hentSakMedUtenlandstilknytning(fnr.value)
+                            val sak = sakService.finnSaker(fnr.value).first()
+                            val utlandstilknytning = behandlingService.hentUtlandstilknytningForSak(sak.id)
+                            val sakMedUtlandstilknytning = SakMedUtlandstilknytning.fra(sak, utlandstilknytning)
+
                             requestLogger.loggRequest(
                                 brukerTokenInfo,
-                                Folkeregisteridentifikator.of(sakUtenlandstilknytning.ident),
+                                Folkeregisteridentifikator.of(sak.ident),
                                 "behandlinger",
                             )
-                            behandlingService.hentBehandlingerForSak(sakUtenlandstilknytning.id)
+
+                            behandlingService.hentBehandlingerForSak(sakMedUtlandstilknytning.id)
                                 .map { it.toBehandlingSammendrag() }
-                                .let { BehandlingListe(sakUtenlandstilknytning, it) }
+                                .let { BehandlingListe(sakMedUtlandstilknytning, it) }
                         }
                     call.respond(behandlinger)
-                }
-            }
-
-            post("/utenlandstilknytning") {
-                withFoedselsnummerInternal(tilgangService) { fnr ->
-                    val sakUtenlandstilknytning = inTransaction { sakService.hentSakMedUtenlandstilknytning(fnr.value) }
-                    call.respond(sakUtenlandstilknytning)
                 }
             }
 
@@ -270,8 +234,8 @@ internal fun Route.sakWebRoutes(
     }
 }
 
-data class UtenlandstilknytningRequest(
-    val utenlandstilknytningType: UtenlandstilknytningType,
+data class UtlandstilknytningRequest(
+    val utlandstilknytningType: UtlandstilknytningType,
     val begrunnelse: String,
 )
 

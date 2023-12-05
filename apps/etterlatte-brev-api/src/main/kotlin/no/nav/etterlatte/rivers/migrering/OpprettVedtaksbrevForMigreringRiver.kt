@@ -48,18 +48,18 @@ internal class OpprettVedtaksbrevForMigreringRiver(
                 with(hendelseData) {
                     MigreringBrevRequest(
                         brutto = beregning.brutto,
-                        utenlandstilknytningType = utenlandstilknytningType,
+                        utlandstilknytningType = utlandstilknytningType,
                         yrkesskade = dodAvYrkesskade,
                     )
                 }
-            if (migreringBrevRequest.utenlandstilknytningType == null) {
+            if (migreringBrevRequest.utlandstilknytningType == null) {
                 logger.warn(
                     "Fikk null i utenlandstilknytningstype for migreringrequest med " +
                         "pesysId=${hendelseData.pesysId}.",
                 )
             } else {
                 logger.info(
-                    "Fikk utlandstilknytningstype=${migreringBrevRequest.utenlandstilknytningType} for " +
+                    "Fikk utlandstilknytningstype=${migreringBrevRequest.utlandstilknytningType} for " +
                         "migreringrequesten med pesysId=${hendelseData.pesysId}",
                 )
             }

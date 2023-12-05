@@ -2,13 +2,13 @@ package no.nav.etterlatte.libs.common.behandling
 
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 
-data class Utenlandstilknytning(
-    val type: UtenlandstilknytningType,
+data class Utlandstilknytning(
+    val type: UtlandstilknytningType,
     val kilde: Grunnlagsopplysning.Kilde,
     val begrunnelse: String,
 )
 
-enum class UtenlandstilknytningType {
+enum class UtlandstilknytningType {
     NASJONAL,
     UTLANDSTILSNITT,
     BOSATT_UTLAND,

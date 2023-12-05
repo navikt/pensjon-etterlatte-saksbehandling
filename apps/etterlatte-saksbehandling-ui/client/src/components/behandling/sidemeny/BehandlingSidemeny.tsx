@@ -5,7 +5,7 @@ import AnnullerBehandling from '~components/behandling/handlinger/AnnullerBehand
 import React, { useEffect, useState } from 'react'
 import { IBeslutning } from '~components/behandling/attestering/types'
 import { BehandlingFane, IBehandlingInfo } from '~components/behandling/sidemeny/IBehandlingInfo'
-import { IBehandlingStatus, IBehandlingsType, UtenlandstilknytningType } from '~shared/types/IDetaljertBehandling'
+import { IBehandlingStatus, IBehandlingsType, UtlandstilknytningType } from '~shared/types/IDetaljertBehandling'
 import { useAppDispatch, useAppSelector } from '~store/Store'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentVedtakSammendrag } from '~shared/api/vedtaksvurdering'
@@ -35,9 +35,9 @@ import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 import { isInitial, isPending, mapApiResult } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 
-const finnUtNasjonalitet = (behandling: IBehandlingReducer): UtenlandstilknytningType | null => {
-  if (behandling.utenlandstilknytning?.type) {
-    return behandling.utenlandstilknytning?.type
+const finnUtNasjonalitet = (behandling: IBehandlingReducer): UtlandstilknytningType | null => {
+  if (behandling.utlandstilknytning?.type) {
+    return behandling.utlandstilknytning?.type
   } else {
     return null
   }

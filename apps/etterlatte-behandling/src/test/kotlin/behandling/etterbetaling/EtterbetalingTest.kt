@@ -19,12 +19,12 @@ import no.nav.etterlatte.libs.common.FoedselsnummerDTO
 import no.nav.etterlatte.libs.common.behandling.BehandlingsBehov
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.behandling.UtenlandstilknytningType
+import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
 import no.nav.etterlatte.module
-import no.nav.etterlatte.sak.UtenlandstilknytningRequest
+import no.nav.etterlatte.sak.UtlandstilknytningRequest
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
@@ -90,12 +90,12 @@ class EtterbetalingTest : BehandlingIntegrationTest() {
                     UUID.fromString(it.body())
                 }
 
-            client.post("api/sak/${sak.id}/utenlandstilknytning") {
+            client.post("api/behandling/${behandlingId}/utlandstilknytning") {
                 addAuthToken(tokenSaksbehandler)
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(
-                    UtenlandstilknytningRequest(
-                        utenlandstilknytningType = UtenlandstilknytningType.NASJONAL,
+                    UtlandstilknytningRequest(
+                        utlandstilknytningType = UtlandstilknytningType.NASJONAL,
                         begrunnelse = "nasjonal",
                     ),
                 )

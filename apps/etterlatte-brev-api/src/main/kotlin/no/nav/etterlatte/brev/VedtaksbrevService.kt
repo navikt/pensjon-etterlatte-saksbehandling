@@ -36,7 +36,7 @@ import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.brev.model.bp.OmregnetBPNyttRegelverk
 import no.nav.etterlatte.brev.model.bp.OmregnetBPNyttRegelverkFerdig
 import no.nav.etterlatte.libs.common.Vedtaksloesning
-import no.nav.etterlatte.libs.common.behandling.UtenlandstilknytningType
+import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.person.Vergemaal
 import no.nav.etterlatte.libs.common.retryOgPakkUt
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -368,7 +368,7 @@ class VedtaksbrevService(
     }
 }
 
-data class MigreringBrevRequest(val brutto: Int, val yrkesskade: Boolean, val utenlandstilknytningType: UtenlandstilknytningType?)
+data class MigreringBrevRequest(val brutto: Int, val yrkesskade: Boolean, val utlandstilknytningType: UtlandstilknytningType?)
 
 fun Vergemaal.toMottaker(): Mottaker {
     return Mottaker(

@@ -50,7 +50,7 @@ internal class Verifiserer(
             haandterFeil(request, feil)
         }
         return patchedRequest.getOrThrow().copy(
-            utenlandstilknytningType = utenlandstilknytningType,
+            utlandstilknytningType = utenlandstilknytningType,
         )
     }
 

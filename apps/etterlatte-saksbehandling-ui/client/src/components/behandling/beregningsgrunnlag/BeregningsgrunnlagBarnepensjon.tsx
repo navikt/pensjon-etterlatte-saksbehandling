@@ -77,13 +77,15 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
         personopplysninger?.soeker?.opplysning.foedselsnummer as string
       )) ??
     []
-  const harSoesken = soesken.length > 0
+  const skalHaSoeskenjustering =
+    soesken.length > 0 &&
+    (behandling.virkningstidspunkt == null || new Date(behandling.virkningstidspunkt.dato) < new Date('2024-01-01'))
 
   const onSubmit = () => {
-    if (harSoesken && !(soeskenGrunnlagsData || behandling.beregningsGrunnlag?.soeskenMedIBeregning)) {
+    if (skalHaSoeskenjustering && !(soeskenGrunnlagsData || behandling.beregningsGrunnlag?.soeskenMedIBeregning)) {
       setSoeskenJusteringMangler(true)
     }
-    if (behandling.beregningsGrunnlag?.soeskenMedIBeregning || soeskenGrunnlagsData || !harSoesken) {
+    if (behandling.beregningsGrunnlag?.soeskenMedIBeregning || soeskenGrunnlagsData || !skalHaSoeskenjustering) {
       dispatch(resetBeregning())
       const beregningsgrunnlag = {
         soeskenMedIBeregning: soeskenGrunnlagsData
@@ -127,7 +129,7 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
             }}
           />
         )}
-        {isSuccess(beregningsgrunnlag) && (
+        {isSuccess(beregningsgrunnlag) && skalHaSoeskenjustering && (
           <Soeskenjustering
             behandling={behandling}
             onSubmit={(soeskenGrunnlag) => setSoeskenGrunnlagsData(soeskenGrunnlag)}

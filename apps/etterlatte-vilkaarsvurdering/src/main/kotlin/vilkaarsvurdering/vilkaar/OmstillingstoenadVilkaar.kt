@@ -1,6 +1,5 @@
 package no.nav.etterlatte.vilkaarsvurdering.vilkaar
 
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
 import no.nav.etterlatte.libs.common.grunnlag.hentSoeknadMottattDato
@@ -9,32 +8,21 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.Lovreferanse
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaar
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarOpplysningType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
-import no.nav.etterlatte.vilkaarsvurdering.VilkaarFeatureToggle
 
 object OmstillingstoenadVilkaar {
-    fun inngangsvilkaar(
-        grunnlag: Grunnlag,
-        featureToggleService: FeatureToggleService,
-    ) = listOf(
-        etterlatteLever(),
-        doedsfall(),
-        oevrigeVilkaar(),
-        overlappendeYtelser(),
-        sivilstand(),
-        yrkesskade(),
-        avdoedesMedlemskap(),
-        gjenlevendesMedlemskap(),
-        vurderingAvEksport(),
-        aktivitetEtter6Maaneder(grunnlag),
-    ).let { vilkaarListe ->
-        val skalOppretteEoesVilkaar =
-            featureToggleService.isEnabled(
-                VilkaarFeatureToggle.OpprettAvdoedesForutgaaendeMedlemskapEoesVilkaar,
-                defaultValue = false,
-            )
-
-        if (skalOppretteEoesVilkaar) vilkaarListe.plus(avdoedesMedlemskapEoes()) else vilkaarListe
-    }
+    fun inngangsvilkaar(grunnlag: Grunnlag) =
+        listOf(
+            etterlatteLever(),
+            doedsfall(),
+            oevrigeVilkaar(),
+            overlappendeYtelser(),
+            sivilstand(),
+            yrkesskade(),
+            avdoedesMedlemskap(),
+            gjenlevendesMedlemskap(),
+            vurderingAvEksport(),
+            aktivitetEtter6Maaneder(grunnlag),
+        )
 
     private fun etterlatteLever() =
         Vilkaar(

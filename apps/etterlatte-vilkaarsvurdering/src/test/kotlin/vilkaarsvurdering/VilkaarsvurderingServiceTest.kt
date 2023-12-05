@@ -11,7 +11,6 @@ import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
@@ -70,7 +69,6 @@ internal class VilkaarsvurderingServiceTest {
     private lateinit var ds: DataSource
     private val behandlingKlient = mockk<BehandlingKlient>()
     private val grunnlagKlient = mockk<GrunnlagKlient>()
-    private val featureToggleService = mockk<FeatureToggleService>()
     private val uuid: UUID = UUID.randomUUID()
     private val brukerTokenInfo = BrukerTokenInfo.of("token", "s1", null, null, null)
 
@@ -99,7 +97,6 @@ internal class VilkaarsvurderingServiceTest {
                 every { virkningstidspunkt } returns VirkningstidspunktTestData.virkningstidsunkt()
                 every { revurderingsaarsak } returns null
             }
-        coEvery { featureToggleService.isEnabled(any(), any()) } returns false
 
         repository = VilkaarsvurderingRepository(ds, DelvilkaarRepository())
         service =
@@ -107,7 +104,6 @@ internal class VilkaarsvurderingServiceTest {
                 repository,
                 behandlingKlient,
                 grunnlagKlient,
-                featureToggleService,
             )
     }
 
@@ -148,6 +144,7 @@ internal class VilkaarsvurderingServiceTest {
                 VilkaarType.BP_FORTSATT_MEDLEMSKAP,
                 VilkaarType.BP_VURDERING_AV_EKSPORT,
                 VilkaarType.BP_FORUTGAAENDE_MEDLEMSKAP,
+                VilkaarType.BP_FORUTGAAENDE_MEDLEMSKAP_EOES,
             )
         vilkaarsvurdering.vilkaar.first { it.hovedvilkaar.type == VilkaarType.BP_ALDER_BARN }.let { vilkaar ->
             vilkaar.grunnlag shouldNotBe null
@@ -198,6 +195,7 @@ internal class VilkaarsvurderingServiceTest {
                 VilkaarType.BP_FORTSATT_MEDLEMSKAP_2024,
                 VilkaarType.BP_VURDERING_AV_EKSPORT_2024,
                 VilkaarType.BP_FORUTGAAENDE_MEDLEMSKAP_2024,
+                VilkaarType.BP_FORUTGAAENDE_MEDLEMSKAP_EOES_2024,
             )
         vilkaarsvurdering.vilkaar.first { it.hovedvilkaar.type == VilkaarType.BP_ALDER_BARN_2024 }.let { vilkaar ->
             vilkaar.grunnlag shouldNotBe null
@@ -224,19 +222,6 @@ internal class VilkaarsvurderingServiceTest {
 
         runBlocking { service.slettVilkaarsvurdering(uuid, brukerTokenInfo) }
         service.hentVilkaarsvurdering(uuid) shouldBe null
-    }
-
-    @Test
-    fun `Skal opprette eoes vilkaar for barnepensjon hvis featuretoggle er skrudd paa`() {
-        every { featureToggleService.isEnabled(any(), any()) } returns true
-
-        val vilkaarsvurdering =
-            runBlocking {
-                service.opprettVilkaarsvurdering(uuid, brukerTokenInfo)
-            }
-
-        vilkaarsvurdering.vilkaar shouldHaveSize 8
-        vilkaarsvurdering.vilkaar.any { it.hovedvilkaar.type == VilkaarType.BP_FORUTGAAENDE_MEDLEMSKAP_EOES } shouldBe true
     }
 
     @Test
@@ -302,30 +287,6 @@ internal class VilkaarsvurderingServiceTest {
                 opplysning.mottattDato shouldBe soeknadMottattDato
             }
         }
-    }
-
-    @Test
-    fun `Skal opprette eoes vilkaar for oms hvis feature toggle er skrudd paa`() {
-        coEvery { behandlingKlient.hentBehandling(any(), any()) } returns
-            mockk<DetaljertBehandling>().apply {
-                every { id } returns UUID.randomUUID()
-                every { sak } returns 2L
-                every { sakType } returns SakType.OMSTILLINGSSTOENAD
-                every { behandlingType } returns BehandlingType.FØRSTEGANGSBEHANDLING
-                every { soeker } returns "10095512345"
-                every { virkningstidspunkt } returns VirkningstidspunktTestData.virkningstidsunkt()
-                every { revurderingsaarsak } returns null
-            }
-
-        every { featureToggleService.isEnabled(any(), any()) } returns true
-
-        val vilkaarsvurdering =
-            runBlocking {
-                service.opprettVilkaarsvurdering(uuid, brukerTokenInfo)
-            }
-
-        vilkaarsvurdering.vilkaar shouldHaveSize 11
-        vilkaarsvurdering.vilkaar.any { it.hovedvilkaar.type === VilkaarType.OMS_AVDOEDES_MEDLEMSKAP_EOES } shouldBe true
     }
 
     @Test

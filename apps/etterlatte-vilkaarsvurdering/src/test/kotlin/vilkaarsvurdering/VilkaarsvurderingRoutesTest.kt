@@ -89,7 +89,6 @@ internal class VilkaarsvurderingRoutesTest {
                 VilkaarsvurderingRepository(ds, DelvilkaarRepository()),
                 behandlingKlient,
                 grunnlagKlient,
-                featureToggleService,
             )
 
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns detaljertBehandling()
@@ -630,7 +629,6 @@ internal class VilkaarsvurderingRoutesTest {
                 VilkaarsvurderingRepository(ds, DelvilkaarRepository()),
                 behandlingKlient,
                 grunnlagKlient,
-                featureToggleService,
             )
 
         testApplication {
@@ -658,7 +656,6 @@ internal class VilkaarsvurderingRoutesTest {
                 VilkaarsvurderingRepository(ds, DelvilkaarRepository()),
                 behandlingKlient,
                 grunnlagKlient,
-                featureToggleService,
             )
 
         testApplication {
@@ -689,7 +686,6 @@ internal class VilkaarsvurderingRoutesTest {
                 VilkaarsvurderingRepository(ds, DelvilkaarRepository()),
                 behandlingKlient,
                 grunnlagKlient,
-                featureToggleService,
             )
 
         testApplication {
@@ -722,7 +718,6 @@ internal class VilkaarsvurderingRoutesTest {
                 VilkaarsvurderingRepository(ds, DelvilkaarRepository()),
                 behandlingKlient,
                 grunnlagKlient,
-                featureToggleService,
             )
 
         testApplication {

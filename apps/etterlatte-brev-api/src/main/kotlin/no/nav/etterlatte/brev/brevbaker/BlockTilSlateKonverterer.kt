@@ -54,7 +54,7 @@ object BlockTilSlateKonverterer {
                             .map { item ->
                                 Slate.InnerElement(
                                     type = Slate.ElementType.LIST_ITEM,
-                                    text = item.content.joinToString(),
+                                    text = item.content.joinToString { i -> i.text },
                                 )
                             },
                 )

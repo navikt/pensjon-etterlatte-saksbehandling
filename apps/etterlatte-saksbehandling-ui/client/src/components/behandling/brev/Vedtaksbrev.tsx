@@ -81,7 +81,7 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
   }, [vedtaksbrev])
 
   useEffect(() => {
-    if (behandlingId && vedtaksbrev) {
+    if (behandlingId) {
       getVergeadresse(behandlingId)
     }
   }, [vedtaksbrev])

@@ -1,5 +1,5 @@
-import { BodyShort } from '@navikt/ds-react'
-import { useEffect } from 'react'
+import { BodyShort, Heading } from '@navikt/ds-react'
+import React, { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import styled from 'styled-components'
 import { LovtekstMedLenke } from '~components/behandling/soeknadsoversikt/LovtekstMedLenke'
@@ -9,20 +9,26 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 
 import { isPending } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
+import { behandlingErIverksattEllerSamordnet } from '~components/behandling/felles/utils'
+import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 
-const YrkesskadeTrygdetid = () => {
+const YrkesskadeTrygdetid = ({ status }: { status: IBehandlingStatus }) => {
   const { behandlingId } = useParams()
   const [hentTrygdetidRequest, fetchTrygdetid] = useApiCall(hentTrygdetid)
   const [opprettTrygdetidRequest, requestOpprettTrygdetid] = useApiCall(opprettTrygdetid)
   const [opprettYrkesskadeTrygdetidGrunnlag, requestOpprettYrkesskadeTrygdetidGrunnlag] = useApiCall(
     lagreYrkesskadeTrygdetidGrunnlag
   )
+  const [harPilotTrygdetid, setHarPilotTrygdetid] = useState<boolean>(false)
 
   useEffect(() => {
     if (!behandlingId) throw new Error('Mangler behandlingsid')
-
     fetchTrygdetid(behandlingId, (trygdetid: ITrygdetid) => {
-      if (trygdetid == null) {
+      if (trygdetid === null) {
+        if (behandlingErIverksattEllerSamordnet(status)) {
+          setHarPilotTrygdetid(true)
+          return
+        }
         requestOpprettTrygdetid(behandlingId, () => {
           requestOpprettYrkesskadeTrygdetidGrunnlag({ behandlingId })
         })
@@ -34,6 +40,17 @@ const YrkesskadeTrygdetid = () => {
       }
     })
   }, [])
+
+  if (harPilotTrygdetid) {
+    return (
+      <TrygdetidWrapper>
+        <Heading size="small" level="3">
+          Personen har fått 40 års trygdetid
+        </Heading>
+        <BodyShort>Denne søknaden ble satt automatisk til 40 års trygdetid</BodyShort>
+      </TrygdetidWrapper>
+    )
+  }
 
   return (
     <TrygdetidWrapper>

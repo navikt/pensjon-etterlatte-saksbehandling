@@ -73,8 +73,8 @@ const TrygdetidVisning = (props: { behandling: IDetaljertBehandling }) => {
       {isSuccess(vilkaarsvurdering) &&
         (yrkesskadeTrygdetid ? (
           {
-            [SakType.BARNEPENSJON]: <YrkesskadeTrygdetidBP />,
-            [SakType.OMSTILLINGSSTOENAD]: <YrkesskadeTrygdetidOMS />,
+            [SakType.BARNEPENSJON]: <YrkesskadeTrygdetidBP status={behandling.status} />,
+            [SakType.OMSTILLINGSSTOENAD]: <YrkesskadeTrygdetidOMS status={behandling.status} />,
           }[behandling.sakType]
         ) : (
           <Trygdetid

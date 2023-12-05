@@ -27,14 +27,11 @@ import BehandleJournalfoeringOppgave from '~components/person/journalfoeringsopp
 import { isSuccess } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 
-const FEATURE_TOGGLE_KAN_BRUKE_GENERELL_BEHANDLING = 'pensjon-etterlatte.kan-bruke-generell-behandling'
-
 function App() {
   const innloggetbrukerHentet = useInnloggetSaksbehandler()
   registerLocale('nb', nb)
   const dispatch = useAppDispatch()
   const kanBrukeKlage = useFeatureEnabledMedDefault(FEATURE_TOGGLE_KAN_BRUKE_KLAGE, false)
-  const kanBrukeGenerllBehandling = useFeatureEnabledMedDefault(FEATURE_TOGGLE_KAN_BRUKE_GENERELL_BEHANDLING, false)
 
   const [hentConfigStatus, hentConfig] = useApiCall(hentClientConfig)
 
@@ -64,9 +61,7 @@ function App() {
                   <Route path="/manuellbehandling/*" element={<ManuellBehandling />} />
                   {kanBrukeKlage ? <Route path="/klage/:klageId/*" element={<Klagebehandling />} /> : null}
                   <Route path="/tilbakekreving/:tilbakekrevingId/*" element={<Tilbakekrevingsbehandling />} />
-                  {kanBrukeGenerllBehandling && (
-                    <Route path="/generellbehandling/:generellbehandlingId" element={<GenerellBehandling />} />
-                  )}
+                  <Route path="/generellbehandling/:generellbehandlingId" element={<GenerellBehandling />} />
                   <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>
               </ConfigContext.Provider>

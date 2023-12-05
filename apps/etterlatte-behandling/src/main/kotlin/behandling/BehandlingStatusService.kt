@@ -6,7 +6,6 @@ import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.ManuellRevurdering
 import no.nav.etterlatte.behandling.generellbehandling.GenerellBehandlingService
-import no.nav.etterlatte.behandling.generellbehandling.GenerellBehandlingToggle
 import no.nav.etterlatte.behandling.hendelse.HendelseType
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
@@ -256,24 +255,20 @@ class BehandlingStatusServiceImpl(
     }
 
     private fun haandterUtland(behandling: Behandling) {
-        if (featureToggleService.isEnabled(GenerellBehandlingToggle.KanBrukeGenerellBehandlingToggle, false)) {
-            if (behandling.type == BehandlingType.FØRSTEGANGSBEHANDLING) {
-                if (behandling.boddEllerArbeidetUtlandet?.skalSendeKravpakke == true) {
-                    generellBehandlingService.opprettBehandling(
-                        GenerellBehandling.opprettUtland(
-                            behandling.sak.id,
-                            behandling.id,
-                        ),
-                        null,
-                    )
-                } else {
-                    logger.info("behandling ${behandling.id} har ikke satt skalSendeKravpakke=true")
-                }
+        if (behandling.type == BehandlingType.FØRSTEGANGSBEHANDLING) {
+            if (behandling.boddEllerArbeidetUtlandet?.skalSendeKravpakke == true) {
+                generellBehandlingService.opprettBehandling(
+                    GenerellBehandling.opprettUtland(
+                        behandling.sak.id,
+                        behandling.id,
+                    ),
+                    null,
+                )
             } else {
-                logger.info("Behandlingtype: ${behandling.type} får ikke utlandsoppgave")
+                logger.info("behandling ${behandling.id} har ikke satt skalSendeKravpakke=true")
             }
         } else {
-            logger.info("Håndterer ikke utland for behandling ${behandling.id}")
+            logger.info("Behandlingtype: ${behandling.type} får ikke utlandsoppgave")
         }
     }
 

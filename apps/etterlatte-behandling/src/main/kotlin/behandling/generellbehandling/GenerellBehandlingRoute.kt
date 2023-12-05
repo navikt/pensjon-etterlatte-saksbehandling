@@ -10,135 +10,108 @@ import io.ktor.server.routing.application
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.put
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.GENERELLBEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.generellBehandlingId
 import no.nav.etterlatte.libs.common.generellbehandling.GenerellBehandling
-import no.nav.etterlatte.libs.common.hvisEnabled
 import no.nav.etterlatte.libs.common.kunSaksbehandler
 import no.nav.etterlatte.libs.common.sakId
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.sak.SakService
 
-enum class GenerellBehandlingToggle(private val key: String) : FeatureToggle {
-    KanBrukeGenerellBehandlingToggle("pensjon-etterlatte.kan-bruke-generell-behandling"),
-    ;
-
-    override fun key(): String = key
-}
-
 internal fun Route.generellbehandlingRoutes(
     generellBehandlingService: GenerellBehandlingService,
     sakService: SakService,
-    featureToggleService: FeatureToggleService,
 ) {
     val logger = application.log
 
     post("/api/generellbehandling/{$SAKID_CALL_PARAMETER}") {
-        hvisEnabled(featureToggleService, GenerellBehandlingToggle.KanBrukeGenerellBehandlingToggle) {
-            kunSaksbehandler { saksbehandler ->
-                val request = call.receive<OpprettGenerellBehandlingRequest>()
-                val finnSak = inTransaction { sakService.finnSak(sakId) }
-                if (finnSak == null) {
-                    call.respond(HttpStatusCode.NotFound, "Saken finnes ikke")
-                }
-                inTransaction {
-                    generellBehandlingService.opprettBehandling(
-                        GenerellBehandling.opprettFraType(request.type, sakId),
-                        saksbehandler,
-                    )
-                }
-                logger.info(
-                    "Opprettet generell behandling for sak $sakId av typen ${request.type}",
-                )
-                call.respond(HttpStatusCode.OK)
+        kunSaksbehandler { saksbehandler ->
+            val request = call.receive<OpprettGenerellBehandlingRequest>()
+            val finnSak = inTransaction { sakService.finnSak(sakId) }
+            if (finnSak == null) {
+                call.respond(HttpStatusCode.NotFound, "Saken finnes ikke")
             }
+            inTransaction {
+                generellBehandlingService.opprettBehandling(
+                    GenerellBehandling.opprettFraType(request.type, sakId),
+                    saksbehandler,
+                )
+            }
+            logger.info(
+                "Opprettet generell behandling for sak $sakId av typen ${request.type}",
+            )
+            call.respond(HttpStatusCode.OK)
         }
     }
 
     put("/api/generellbehandling/sendtilattestering/{$SAKID_CALL_PARAMETER}") {
-        hvisEnabled(featureToggleService, GenerellBehandlingToggle.KanBrukeGenerellBehandlingToggle) {
-            kunSaksbehandler { saksbehandler ->
-                val request = call.receive<GenerellBehandling>()
-                inTransaction {
-                    generellBehandlingService.sendTilAttestering(request, saksbehandler)
-                }
-                logger.info(
-                    "Opprettet generell behandling for sak $sakId av typen ${request.type}",
-                )
-                call.respond(HttpStatusCode.OK)
+        kunSaksbehandler { saksbehandler ->
+            val request = call.receive<GenerellBehandling>()
+            inTransaction {
+                generellBehandlingService.sendTilAttestering(request, saksbehandler)
             }
+            logger.info(
+                "Opprettet generell behandling for sak $sakId av typen ${request.type}",
+            )
+            call.respond(HttpStatusCode.OK)
         }
     }
 
     post("/api/generellbehandling/attester/{$SAKID_CALL_PARAMETER}/{$GENERELLBEHANDLINGID_CALL_PARAMETER}") {
-        hvisEnabled(featureToggleService, GenerellBehandlingToggle.KanBrukeGenerellBehandlingToggle) {
-            kunSaksbehandler { saksbehandler ->
-                inTransaction {
-                    generellBehandlingService.attester(generellBehandlingId, saksbehandler)
-                }
-                logger.info("Attester generell behandling med id $generellBehandlingId")
-                call.respond(HttpStatusCode.OK)
+        kunSaksbehandler { saksbehandler ->
+            inTransaction {
+                generellBehandlingService.attester(generellBehandlingId, saksbehandler)
             }
+            logger.info("Attester generell behandling med id $generellBehandlingId")
+            call.respond(HttpStatusCode.OK)
         }
     }
 
     post("/api/generellbehandling/underkjenn/{$SAKID_CALL_PARAMETER}/{$GENERELLBEHANDLINGID_CALL_PARAMETER}") {
-        hvisEnabled(featureToggleService, GenerellBehandlingToggle.KanBrukeGenerellBehandlingToggle) {
-            kunSaksbehandler { saksbehandler ->
-                val kommentar = call.receive<Kommentar>()
-                inTransaction {
-                    generellBehandlingService.underkjenn(generellBehandlingId, saksbehandler, kommentar)
-                }
-                logger.info("underkjent generell behandling med id $generellBehandlingId")
-                call.respond(HttpStatusCode.OK)
+        kunSaksbehandler { saksbehandler ->
+            val kommentar = call.receive<Kommentar>()
+            inTransaction {
+                generellBehandlingService.underkjenn(generellBehandlingId, saksbehandler, kommentar)
             }
+            logger.info("underkjent generell behandling med id $generellBehandlingId")
+            call.respond(HttpStatusCode.OK)
         }
     }
 
     put("/api/generellbehandling/oppdater/{$SAKID_CALL_PARAMETER}") {
-        hvisEnabled(featureToggleService, GenerellBehandlingToggle.KanBrukeGenerellBehandlingToggle) {
-            kunSaksbehandler {
-                val request = call.receive<GenerellBehandling>()
-                inTransaction {
-                    generellBehandlingService.lagreNyeOpplysninger(
-                        request,
-                    )
-                }
-                logger.info(
-                    "Oppdatert generell behandling for sak $sakId av typen ${request.type}",
+        kunSaksbehandler {
+            val request = call.receive<GenerellBehandling>()
+            inTransaction {
+                generellBehandlingService.lagreNyeOpplysninger(
+                    request,
                 )
-                call.respond(HttpStatusCode.OK)
             }
+            logger.info(
+                "Oppdatert generell behandling for sak $sakId av typen ${request.type}",
+            )
+            call.respond(HttpStatusCode.OK)
         }
     }
 
     get("/api/generellbehandling/hent/{$GENERELLBEHANDLINGID_CALL_PARAMETER}") {
-        hvisEnabled(featureToggleService, GenerellBehandlingToggle.KanBrukeGenerellBehandlingToggle) {
-            kunSaksbehandler {
-                val generellBehandlingId = generellBehandlingId
-                val hentetBehandling = inTransaction { generellBehandlingService.hentBehandlingMedId(generellBehandlingId) }
-                call.respond(hentetBehandling ?: HttpStatusCode.NotFound)
-            }
+        kunSaksbehandler {
+            val generellBehandlingId = generellBehandlingId
+            val hentetBehandling = inTransaction { generellBehandlingService.hentBehandlingMedId(generellBehandlingId) }
+            call.respond(hentetBehandling ?: HttpStatusCode.NotFound)
         }
     }
 
     get("/api/generellbehandling/hentforsak/{$SAKID_CALL_PARAMETER}") {
-        hvisEnabled(featureToggleService, GenerellBehandlingToggle.KanBrukeGenerellBehandlingToggle) {
-            kunSaksbehandler {
-                call.respond(inTransaction { generellBehandlingService.hentBehandlingerForSak(sakId) })
-            }
+        kunSaksbehandler {
+            call.respond(inTransaction { generellBehandlingService.hentBehandlingerForSak(sakId) })
         }
     }
 
     get("/api/generellbehandling/kravpakkeForSak/{$SAKID_CALL_PARAMETER}") {
-        hvisEnabled(featureToggleService, GenerellBehandlingToggle.KanBrukeGenerellBehandlingToggle) {
-            kunSaksbehandler {
-                call.respond(generellBehandlingService.hentKravpakkeForSak(sakId, brukerTokenInfo))
-            }
+        kunSaksbehandler {
+            call.respond(generellBehandlingService.hentKravpakkeForSak(sakId, brukerTokenInfo))
         }
     }
 }

@@ -46,7 +46,7 @@ export const restbodyShouldHaveData = (noDataFlag: boolean | undefined, status: 
 async function apiFetcher<T>(props: Options): Promise<ApiResponse<T>> {
   const { url, method, body, dontLogError } = props
 
-  const shouldLog = !dontLogError
+  const shouldLogError = !dontLogError
   const trimmedUrl = url.startsWith('/') ? url.slice(1) : url
   try {
     const response = await fetch(`/api/${trimmedUrl}`, {
@@ -84,7 +84,7 @@ async function apiFetcher<T>(props: Options): Promise<ApiResponse<T>> {
           msg: 'Fikk feil i kall mot backend',
           errorInfo: JSON.stringify({ url: url, method: method, error: error }),
         }
-        if (shouldLog) {
+        if (shouldLogError) {
           logger.generalError(JSON.stringify(errorobj))
         }
         console.error(error, response)
@@ -95,7 +95,7 @@ async function apiFetcher<T>(props: Options): Promise<ApiResponse<T>> {
           msg: `Fikk status=${response.status} i kall mot backend`,
           errorInfo: JSON.stringify({ url: url, method: method, error: error }),
         }
-        if (shouldLog) {
+        if (shouldLogError) {
           logger.generalInfo(JSON.stringify(errorobj))
         }
         console.log(error, response)
@@ -105,7 +105,7 @@ async function apiFetcher<T>(props: Options): Promise<ApiResponse<T>> {
   } catch (e) {
     console.error('Rejection i fetch / utlesing av data', e)
     const errorobj = { msg: 'Fikk Rejection i kall mot backend', errorInfo: { url: url, method: method } }
-    if (shouldLog) {
+    if (shouldLogError) {
       logger.generalError(JSON.stringify(errorobj))
     }
     return {

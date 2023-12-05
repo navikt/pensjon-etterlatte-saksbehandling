@@ -283,7 +283,7 @@ class PdlKlient(private val httpClient: HttpClient, private val apiUrl: String) 
                 utland = true,
                 sivilstand = true,
                 familieRelasjon = true,
-                vergemaal = false,
+                vergemaal = true,
             )
         PersonRolle.AVDOED ->
             PdlVariables(

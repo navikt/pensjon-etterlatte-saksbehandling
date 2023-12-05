@@ -21,6 +21,7 @@ interface Options {
   method: Method
   body?: Record<string, unknown>
   noData?: boolean
+  dontLogError?: boolean
 }
 
 export async function retrieveData(response: Response): Promise<any> {
@@ -43,8 +44,9 @@ export const restbodyShouldHaveData = (noDataFlag: boolean | undefined, status: 
 }
 
 async function apiFetcher<T>(props: Options): Promise<ApiResponse<T>> {
-  const { url, method, body } = props
+  const { url, method, body, dontLogError } = props
 
+  const shouldLog = !dontLogError
   const trimmedUrl = url.startsWith('/') ? url.slice(1) : url
   try {
     const response = await fetch(`/api/${trimmedUrl}`, {
@@ -82,7 +84,9 @@ async function apiFetcher<T>(props: Options): Promise<ApiResponse<T>> {
           msg: 'Fikk feil i kall mot backend',
           errorInfo: JSON.stringify({ url: url, method: method, error: error }),
         }
-        logger.generalError(JSON.stringify(errorobj))
+        if (shouldLog) {
+          logger.generalError(JSON.stringify(errorobj))
+        }
         console.error(error, response)
         return { ...error, ok: false }
       } else {
@@ -91,7 +95,9 @@ async function apiFetcher<T>(props: Options): Promise<ApiResponse<T>> {
           msg: `Fikk status=${response.status} i kall mot backend`,
           errorInfo: JSON.stringify({ url: url, method: method, error: error }),
         }
-        logger.generalInfo(JSON.stringify(errorobj))
+        if (shouldLog) {
+          logger.generalInfo(JSON.stringify(errorobj))
+        }
         console.log(error, response)
         return { ...error, ok: false }
       }
@@ -99,7 +105,9 @@ async function apiFetcher<T>(props: Options): Promise<ApiResponse<T>> {
   } catch (e) {
     console.error('Rejection i fetch / utlesing av data', e)
     const errorobj = { msg: 'Fikk Rejection i kall mot backend', errorInfo: { url: url, method: method } }
-    logger.generalError(JSON.stringify(errorobj))
+    if (shouldLog) {
+      logger.generalError(JSON.stringify(errorobj))
+    }
     return {
       ok: false,
       status: 400,
@@ -114,8 +122,8 @@ async function apiFetcher<T>(props: Options): Promise<ApiResponse<T>> {
 
 export const apiClient = {
   get: <T>(url: string) => apiFetcher<T>({ url, method: 'GET' }),
-  post: <T>(url: string, body: Record<string, unknown>, noData = false) =>
-    apiFetcher<T>({ url: url, body: body, method: 'POST', noData: noData }),
+  post: <T>(url: string, body: Record<string, unknown>, noData = false, dontLogError = false) =>
+    apiFetcher<T>({ url: url, body: body, method: 'POST', noData: noData, dontLogError: dontLogError }),
   delete: <T>(url: string, noData?: boolean) => apiFetcher<T>({ url, method: 'DELETE', noData }),
   put: <T>(url: string, body: Record<string, unknown>) => apiFetcher<T>({ url, method: 'PUT', body: body }),
 } as const

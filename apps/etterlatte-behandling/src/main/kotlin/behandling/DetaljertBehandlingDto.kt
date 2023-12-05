@@ -12,7 +12,6 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Utenlandstilknytning
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
-import no.nav.etterlatte.libs.common.person.Person
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -31,7 +30,6 @@ data class DetaljertBehandlingDto(
     val status: BehandlingStatus,
     val hendelser: List<LagretHendelse>?,
     val behandlingType: BehandlingType,
-    val søker: Person?,
     val kommerBarnetTilgode: KommerBarnetTilgode?,
     val revurderingsaarsak: Revurderingaarsak?,
     val revurderinginfo: RevurderingInfoMedBegrunnelse?,

@@ -119,6 +119,12 @@ spec:
           permissions:
             roles:
               - les-oms-vedtak
+        - application: pensjon-selvbetjening-soknad-alder-backend
+          namespace: pensjonselvbetjening
+          cluster: dev-gcp
+          permissions:
+            roles:
+              - les-oms-vedtak
         - application: ida
           namespace: traktor
           cluster: prod-fss

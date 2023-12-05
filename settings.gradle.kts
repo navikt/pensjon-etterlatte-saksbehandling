@@ -33,7 +33,6 @@ include(
     "apps:etterlatte-samordning-vedtak",
     "libs:etterlatte-token-model",
     "libs:saksbehandling-common",
-    "libs:ktor2client-onbehalfof",
     "libs:rapidsandrivers-extras",
     "libs:etterlatte-behandling-model",
     "libs:etterlatte-oppgave-model",

@@ -10,7 +10,7 @@ import VurderHendelseModal from '~components/person/VurderHendelseModal'
 import UhaandtertHendelse from '~components/person/uhaandtereHendelser/UhaandtertHendelse'
 import { IBehandlingsType } from '~shared/types/IDetaljertBehandling'
 import { erFerdigBehandlet } from '~components/behandling/felles/utils'
-import { hentGrunnlagsendringshendelserForPerson } from '~shared/api/behandling'
+import { hentGrunnlagsendringshendelserForSak } from '~shared/api/behandling'
 import Spinner from '~shared/Spinner'
 import { ISak } from '~shared/types/sak'
 import { hentStoettedeRevurderinger } from '~shared/api/revurdering'
@@ -20,12 +20,11 @@ import { ApiErrorAlert } from '~ErrorBoundary'
 
 type Props = {
   sak: ISak
-  fnr: string
   behandlingliste: IBehandlingsammendrag[]
 }
 
 export default function RelevanteHendelser(props: Props) {
-  const { sak, fnr, behandlingliste } = props
+  const { sak, behandlingliste } = props
 
   const [visOpprettRevurderingsmodal, setVisOpprettRevurderingsmodal] = useState<boolean>(false)
   const [valgtHendelse, setValgtHendelse] = useState<Grunnlagsendringshendelse | undefined>(undefined)
@@ -35,7 +34,7 @@ export default function RelevanteHendelser(props: Props) {
   }
 
   const [relevanteHendelser, setRelevanteHendelser] = useState<Grunnlagsendringshendelse[]>([])
-  const [hendelserStatus, hentHendelser] = useApiCall(hentGrunnlagsendringshendelserForPerson)
+  const [hendelserStatus, hentHendelser] = useApiCall(hentGrunnlagsendringshendelserForSak)
   const [muligeRevurderingAarsakerStatus, hentMuligeRevurderingeraarsaker] = useApiCall(hentStoettedeRevurderinger)
   const [personerISak, hentPersoner, resetPersoner] = useApiCall(hentPersonerISak)
 
@@ -54,11 +53,9 @@ export default function RelevanteHendelser(props: Props) {
   }, [personerISak])
 
   useEffect(() => {
-    hentHendelser(fnr, (hendelser) => {
-      if (!!hendelser.length) {
-        const relevanteHendelser = hendelser[0].hendelser.filter((h) => h.status !== STATUS_IRRELEVANT)
-        setRelevanteHendelser(relevanteHendelser)
-      }
+    hentHendelser(sak.id, (grunnlagsendrlingsListe) => {
+      const relevanteHendelser = grunnlagsendrlingsListe.hendelser.filter((h) => h.status !== STATUS_IRRELEVANT)
+      setRelevanteHendelser(relevanteHendelser)
     })
   }, [])
 
@@ -143,7 +140,7 @@ export default function RelevanteHendelser(props: Props) {
           )
       )}
 
-      {isSuccess(hendelserStatus) && <HistoriskeHendelser hendelser={hendelserStatus.data[0].hendelser} />}
+      {isSuccess(hendelserStatus) && <HistoriskeHendelser hendelser={hendelserStatus.data.hendelser} />}
     </>
   )
 }

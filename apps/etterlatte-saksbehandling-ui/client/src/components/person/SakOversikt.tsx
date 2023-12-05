@@ -15,7 +15,7 @@ import { SakMedBehandlinger } from '~components/person/typer'
 
 import { mapApiResult, Result } from '~shared/api/apiUtils'
 
-export const SakOversikt = ({ sakStatus, fnr }: { sakStatus: Result<SakMedBehandlinger>; fnr: string }) => {
+export const SakOversikt = ({ sakStatus }: { sakStatus: Result<SakMedBehandlinger>; fnr: string }) => {
   const kanBrukeKlage = useFeatureEnabledMedDefault(FEATURE_TOGGLE_KAN_BRUKE_KLAGE, false)
 
   return (
@@ -60,11 +60,7 @@ export const SakOversikt = ({ sakStatus, fnr }: { sakStatus: Result<SakMedBehand
               {kanBrukeKlage ? <KlageListe sakId={sakOgBehandlinger.sak.id} /> : null}
             </MainContent>
             <HendelseSidebar>
-              <RelevanteHendelser
-                sak={sakOgBehandlinger.sak}
-                fnr={fnr}
-                behandlingliste={sakOgBehandlinger.behandlinger}
-              />
+              <RelevanteHendelser sak={sakOgBehandlinger.sak} behandlingliste={sakOgBehandlinger.behandlinger} />
             </HendelseSidebar>
           </>
         )

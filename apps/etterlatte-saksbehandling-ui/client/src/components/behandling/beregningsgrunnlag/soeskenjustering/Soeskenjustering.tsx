@@ -89,10 +89,6 @@ const Soeskenjustering = (props: SoeskenjusteringProps) => {
     ),
   ]
 
-  if (soesken.length === 0) {
-    return null
-  }
-
   const fnrTilSoesken: Record<string, IPdlPerson> = soesken.reduce(
     (acc, next) => ({
       ...acc,

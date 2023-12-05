@@ -38,7 +38,7 @@ export default function FullfoerOppgaveModal({ oppgave, behandlingBehov, journal
         apiFerdigstillJournalpost({ journalpostId: journalpost.journalpostId, sak }, () => {
           apiFerdigstillOppgave(oppgave.id, () => {
             setTimeout(() => {
-              navigate(`/person/${oppgave.fnr}`)
+              navigate('/')
             }, 5000)
           })
         })
@@ -70,8 +70,7 @@ export default function FullfoerOppgaveModal({ oppgave, behandlingBehov, journal
           isSuccess(ferdigstillOppgaveStatus) &&
           isSuccess(ferdigstillJournalpostStatus) ? (
             <Alert variant="success">
-              Behandling opprettet for bruker med fødselsnummer {oppgave.fnr}. Du blir straks sendt til saksoversikten
-              for denne brukeren.
+              Behandling opprettet for bruker med fødselsnummer {oppgave.fnr}. Du blir straks sendt til oppgavebenken.
             </Alert>
           ) : (
             <FlexRow justify="center">

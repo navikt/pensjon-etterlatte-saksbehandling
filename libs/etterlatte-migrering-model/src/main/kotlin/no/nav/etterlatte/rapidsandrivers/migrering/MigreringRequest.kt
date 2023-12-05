@@ -50,6 +50,12 @@ data class MigreringRequest(
     fun harMindreEnn40AarsTrygdetid(): Boolean {
         return beregning.anvendtTrygdetid < 40
     }
+
+    fun anvendtFlyktningerfordel(): Boolean {
+        return flyktningStatus &&
+            foersteVirkningstidspunkt < YearMonth.of(2021, 1) &&
+            beregning.anvendtTrygdetid == 40
+    }
 }
 
 data class AvdoedForelder(

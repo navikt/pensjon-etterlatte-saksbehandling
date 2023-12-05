@@ -41,9 +41,6 @@ internal class Verifiserer(
             feil.addAll(sjekkAtPersonerFinsIPDL(it))
         }
 
-        if (request.dodAvYrkesskade) {
-            feil.add(DoedAvYrkesskade)
-        }
         val utenlandstilknytningType = utenlandstilknytningsjekker.finnUtenlandstilknytning(request)
         if (utenlandstilknytningType == null) {
             feil.add(ManglerUtenlandstilknytningtype)
@@ -144,11 +141,6 @@ object StrengtFortrolig : Verifiseringsfeil() {
 data class PDLException(val kilde: Throwable) : Verifiseringsfeil() {
     override val message: String?
         get() = kilde.message
-}
-
-object DoedAvYrkesskade : Verifiseringsfeil() {
-    override val message: String
-        get() = "Skal ikke migrere saker hvor avdød har dødsårsak yrkesskade"
 }
 
 object ManglerUtenlandstilknytningtype : Verifiseringsfeil() {

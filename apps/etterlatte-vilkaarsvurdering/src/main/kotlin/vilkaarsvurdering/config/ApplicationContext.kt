@@ -3,7 +3,6 @@ package no.nav.etterlatte.vilkaarsvurdering.config
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleProperties
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.vilkaarsvurdering.DelvilkaarRepository
@@ -30,7 +29,6 @@ class ApplicationContext {
             vilkaarsvurderingRepository = vilkaarsvurderingRepository,
             behandlingKlient = behandlingKlient,
             grunnlagKlient = GrunnlagKlientImpl(config, httpClient()),
-            featureToggleService = FeatureToggleService.initialiser(featureToggleProperties(config)),
         )
     val migreringService = MigreringService(vilkaarsvurderingRepository)
 }

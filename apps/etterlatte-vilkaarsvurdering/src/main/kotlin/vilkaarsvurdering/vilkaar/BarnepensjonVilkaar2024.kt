@@ -2,7 +2,6 @@
 
 package no.nav.etterlatte.vilkaarsvurdering.vilkaar
 
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
 import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsdato
@@ -12,29 +11,19 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaar
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarOpplysningType.AVDOED_DOEDSDATO
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarOpplysningType.SOEKER_FOEDSELSDATO
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
-import no.nav.etterlatte.vilkaarsvurdering.VilkaarFeatureToggle
 
 object BarnepensjonVilkaar2024 {
-    fun inngangsvilkaar(
-        grunnlag: Grunnlag,
-        featureToggleService: FeatureToggleService,
-    ) = listOf(
-        formaal(),
-        doedsfallForelder(),
-        yrkesskadeAvdoed(),
-        alderBarn(grunnlag),
-        barnetsMedlemskap(),
-        vurderingAvEksport(),
-        avdoedesForutgaaendeMedlemskap(),
-    ).let { vilkaarListe ->
-        val skalOppretteEoesVilkaar =
-            featureToggleService.isEnabled(
-                toggleId = VilkaarFeatureToggle.OpprettAvdoedesForutgaaendeMedlemskapEoesVilkaar,
-                defaultValue = false,
-            )
-
-        if (skalOppretteEoesVilkaar) vilkaarListe.plus(avdoedesForutgaaendeMedlemskapEoes()) else vilkaarListe
-    }
+    fun inngangsvilkaar(grunnlag: Grunnlag) =
+        listOf(
+            formaal(),
+            doedsfallForelder(),
+            yrkesskadeAvdoed(),
+            alderBarn(grunnlag),
+            barnetsMedlemskap(),
+            vurderingAvEksport(),
+            avdoedesForutgaaendeMedlemskap(),
+            avdoedesForutgaaendeMedlemskapEoes(),
+        )
 
     private fun formaal() =
         Vilkaar(

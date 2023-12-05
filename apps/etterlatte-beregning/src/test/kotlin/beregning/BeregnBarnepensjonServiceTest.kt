@@ -457,6 +457,7 @@ internal class BeregnBarnepensjonServiceTest {
         } returns barnepensjonBeregningsGrunnlag(behandling.id, emptyList())
         coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns null
         featureToggleService.settBryter(BrukNyttRegelverkIBeregning, false)
+        coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns mockTrygdetid(behandling.id)
 
         runBlocking {
             val beregning =
@@ -488,6 +489,7 @@ internal class BeregnBarnepensjonServiceTest {
         } returns barnepensjonBeregningsGrunnlag(behandling.id, emptyList())
         coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns null
         featureToggleService.settBryter(BrukNyttRegelverkIBeregning, false)
+        coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns mockTrygdetid(behandling.id)
 
         runBlocking {
             val beregning =
@@ -525,6 +527,7 @@ internal class BeregnBarnepensjonServiceTest {
             )
         coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns null
         featureToggleService.settBryter(BrukNyttRegelverkIBeregning, true)
+        coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns mockTrygdetid(behandling.id)
 
         runBlocking {
             val beregning = beregnBarnepensjonService().beregn(behandling, bruker)

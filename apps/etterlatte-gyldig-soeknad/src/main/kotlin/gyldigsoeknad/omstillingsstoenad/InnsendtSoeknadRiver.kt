@@ -70,6 +70,7 @@ internal class InnsendtSoeknadRiver(
 
             context.publish(
                 packet.apply {
+                    set(FordelerFordelt.soeknadFordeltKey, true)
                     set(GyldigSoeknadVurdert.sakIdKey, sak.id)
                     set(GyldigSoeknadVurdert.behandlingIdKey, behandlingId)
                 }.toJson(),

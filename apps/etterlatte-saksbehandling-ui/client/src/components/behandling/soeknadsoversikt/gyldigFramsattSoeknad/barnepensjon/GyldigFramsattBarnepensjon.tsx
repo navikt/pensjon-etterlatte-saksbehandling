@@ -7,7 +7,7 @@ import {
 } from '~components/behandling/soeknadsoversikt/styled'
 import { Innsender } from '~components/behandling/soeknadsoversikt/gyldigFramsattSoeknad/barnepensjon/Innsender'
 import { Foreldreansvar } from '~components/behandling/soeknadsoversikt/gyldigFramsattSoeknad/barnepensjon/Foreldreansvar'
-import { Verger } from '~components/behandling/soeknadsoversikt/gyldigFramsattSoeknad/barnepensjon/Verger'
+import { Verger } from '~components/behandling/soeknadsoversikt/gyldigFramsattSoeknad/Verger'
 import {
   finnVurdering,
   GyldigFramsattVurdering,

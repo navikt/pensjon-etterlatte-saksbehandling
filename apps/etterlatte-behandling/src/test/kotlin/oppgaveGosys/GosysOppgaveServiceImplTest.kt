@@ -13,7 +13,6 @@ import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.User
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.common.klienter.PdlKlient
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.tilgangsstyring.AzureGroup
 import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
@@ -29,10 +28,9 @@ import java.time.temporal.ChronoUnit
 class GosysOppgaveServiceImplTest {
     private val gosysOppgaveKlient = mockk<GosysOppgaveKlient>()
     private val pdlKlient = mockk<PdlKlient>()
-    private val featureToggleService = mockk<FeatureToggleService>()
     private val brukerTokenInfo = mockk<BrukerTokenInfo>()
 
-    private val service = GosysOppgaveServiceImpl(gosysOppgaveKlient, pdlKlient, featureToggleService)
+    private val service = GosysOppgaveServiceImpl(gosysOppgaveKlient, pdlKlient)
     private val saksbehandler = mockk<SaksbehandlerMedEnheterOgRoller>()
 
     private fun setNewKontekstWithMockUser(userMock: User) {
@@ -84,8 +82,6 @@ class GosysOppgaveServiceImplTest {
 
     @Test
     fun `skal hente oppgaver og deretter folkeregisterIdent for unike identer`() {
-        every { featureToggleService.isEnabled(any(), false) } returns true
-
         coEvery { gosysOppgaveKlient.hentOppgaver(any(), brukerTokenInfo) } returns
             GosysOppgaver(
                 antallTreffTotalt = 3,
@@ -167,7 +163,6 @@ class GosysOppgaveServiceImplTest {
         setNewKontekstWithMockUser(saksbehandler)
 
         every { saksbehandler.saksbehandlerMedRoller } returns saksbehandlerRoller
-        every { featureToggleService.isEnabled(any(), false) } returns true
 
         coEvery { gosysOppgaveKlient.hentOppgaver(Enheter.STRENGT_FORTROLIG.enhetNr, brukerTokenInfo) } returns
             enhetsfiltrererGosysOppgaver(

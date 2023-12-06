@@ -4,8 +4,6 @@ import com.github.benmanes.caffeine.cache.Caffeine
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.common.klienter.PdlKlient
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.oppgave.GosysOppgave
 import no.nav.etterlatte.libs.common.oppgave.Status
@@ -40,7 +38,6 @@ interface GosysOppgaveService {
 class GosysOppgaveServiceImpl(
     private val gosysOppgaveKlient: GosysOppgaveKlient,
     private val pdlKlient: PdlKlient,
-    private val featureToggleService: FeatureToggleService,
 ) : GosysOppgaveService {
     private val cache =
         Caffeine.newBuilder()
@@ -48,10 +45,6 @@ class GosysOppgaveServiceImpl(
             .build<Long, GosysOppgave>()
 
     override suspend fun hentOppgaver(brukerTokenInfo: BrukerTokenInfo): List<GosysOppgave> {
-        if (!featureToggleService.isEnabled(GosysOppgaveServiceFeatureToggle.HentGosysOppgaver, false)) {
-            return emptyList()
-        }
-
         val saksbehandlerMedRoller = Kontekst.get().appUserAsSaksbehandler().saksbehandlerMedRoller
 
         val gosysOppgaver =
@@ -125,11 +118,4 @@ class GosysOppgaveServiceImpl(
             )
         }
     }
-}
-
-private enum class GosysOppgaveServiceFeatureToggle(private val key: String) : FeatureToggle {
-    HentGosysOppgaver("pensjon-etterlatte.hent-gosys-oppgaver"),
-    ;
-
-    override fun key() = key
 }

@@ -122,7 +122,7 @@ export const Barnepensjonberegningssammendrag = ({
   if (overstyring) {
     return (
       <>
-        <Heading level="2" size="small">
+        <Heading level="3" size="small">
           Overstyrt beregning
         </Heading>
         <BodyShort>Beregningen er manuelt overstyrt, på grunn av {overstyring.beskrivelse}.</BodyShort>

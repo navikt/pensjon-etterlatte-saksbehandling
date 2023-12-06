@@ -133,11 +133,11 @@ internal fun Route.sakWebRoutes(
 
             post("/endre_enhet") {
                 hentNavidentFraToken { navIdent ->
-                    val enhet = call.receive<String>()
+                    val enhetrequest = call.receive<EnhetRequest>()
                     try {
                         val sakMedEnhet =
                             GrunnlagsendringshendelseService.SakMedEnhet(
-                                enhet = enhet,
+                                enhet = enhetrequest.enhet,
                                 id = sakId,
                             )
                         inTransaction {
@@ -237,6 +237,10 @@ internal fun Route.sakWebRoutes(
 data class UtlandstilknytningRequest(
     val utlandstilknytningType: UtlandstilknytningType,
     val begrunnelse: String,
+)
+
+data class EnhetRequest(
+    val enhet: String,
 )
 
 data class FoersteVirkDto(val foersteIverksatteVirkISak: LocalDate, val sakId: Long)

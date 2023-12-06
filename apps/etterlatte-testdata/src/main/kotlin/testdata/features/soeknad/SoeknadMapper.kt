@@ -1,460 +1,242 @@
 package testdata.features.soeknad
 
-import com.fasterxml.jackson.databind.node.ObjectNode
-import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.libs.common.event.SoeknadInnsendt
-import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
-import no.nav.etterlatte.logger
-import no.nav.etterlatte.objectMapper
+import no.nav.etterlatte.libs.common.innsendtsoeknad.ArbeidOgUtdanningOMS
+import no.nav.etterlatte.libs.common.innsendtsoeknad.ForholdTilAvdoedeOMS
+import no.nav.etterlatte.libs.common.innsendtsoeknad.ForholdTilAvdoedeType
+import no.nav.etterlatte.libs.common.innsendtsoeknad.InntektOgPensjon
+import no.nav.etterlatte.libs.common.innsendtsoeknad.JobbStatusTypeOMS
+import no.nav.etterlatte.libs.common.innsendtsoeknad.Kontaktinfo
+import no.nav.etterlatte.libs.common.innsendtsoeknad.SivilstatusType
+import no.nav.etterlatte.libs.common.innsendtsoeknad.Spraak
+import no.nav.etterlatte.libs.common.innsendtsoeknad.YtelserAndre
+import no.nav.etterlatte.libs.common.innsendtsoeknad.YtelserNav
+import no.nav.etterlatte.libs.common.innsendtsoeknad.barnepensjon.Barnepensjon
+import no.nav.etterlatte.libs.common.innsendtsoeknad.barnepensjon.GjenlevendeForelder
+import no.nav.etterlatte.libs.common.innsendtsoeknad.common.Avdoed
+import no.nav.etterlatte.libs.common.innsendtsoeknad.common.Barn
+import no.nav.etterlatte.libs.common.innsendtsoeknad.common.BetingetOpplysning
+import no.nav.etterlatte.libs.common.innsendtsoeknad.common.DatoSvar
+import no.nav.etterlatte.libs.common.innsendtsoeknad.common.EnumSvar
+import no.nav.etterlatte.libs.common.innsendtsoeknad.common.FritekstSvar
+import no.nav.etterlatte.libs.common.innsendtsoeknad.common.GjenlevendeOMS
+import no.nav.etterlatte.libs.common.innsendtsoeknad.common.Innsender
+import no.nav.etterlatte.libs.common.innsendtsoeknad.common.JaNeiVetIkke
+import no.nav.etterlatte.libs.common.innsendtsoeknad.common.Opplysning
+import no.nav.etterlatte.libs.common.innsendtsoeknad.common.SoeknadType
+import no.nav.etterlatte.libs.common.innsendtsoeknad.omstillingsstoenad.Omstillingsstoenad
+import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.toObjectNode
 import no.nav.etterlatte.testdata.JsonMessage
+import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.util.UUID
 
 object SoeknadMapper {
-    fun opprettSoeknadJson(
-        type: String,
+    fun opprettJsonMessage(
+        type: SoeknadType,
         gjenlevendeFnr: String,
         avdoedFnr: String,
         barn: List<String> = emptyList(),
-    ): String {
-        val message =
-            when (type) {
-                "OMSTILLINGSSTOENAD" ->
-                    opprettJsonMessageOmstilling(
-                        soekerFnr = gjenlevendeFnr,
-                        avdoedFnr = avdoedFnr,
-                        barn = barn,
-                    )
+    ): JsonMessage {
+        return when (type) {
+            SoeknadType.OMSTILLINGSSTOENAD ->
+                JsonMessage.newMessage(
+                    mutableMapOf(
+                        "@event_name" to SoeknadInnsendt.eventNameInnsendt,
+                        "@skjema_info" to
+                            opprettOmstillingsstoenadSoeknad(
+                                soekerFnr = gjenlevendeFnr,
+                                avdoedFnr = avdoedFnr,
+                                barn = barn,
+                            ).toObjectNode(),
+                        "@lagret_soeknad_id" to "TEST-${UUID.randomUUID()}",
+                        "@template" to "soeknad",
+                        "@fnr_soeker" to gjenlevendeFnr,
+                        "@hendelse_gyldig_til" to OffsetDateTime.now().plusMinutes(60L),
+                        "@adressebeskyttelse" to "UGRADERT",
+                    ),
+                )
 
-                "BARNEPENSJON" ->
-                    opprettJsonMessageBarnepensjon(
-                        gjenlevendeFnr,
-                        avdoedFnr = avdoedFnr,
-                        barnFnr = barn.first(),
-                        soesken = barn.drop(1),
-                    )
+            SoeknadType.BARNEPENSJON ->
+                JsonMessage.newMessage(
+                    mutableMapOf(
+                        "@event_name" to SoeknadInnsendt.eventNameBehandlingBehov,
+                        "@skjema_info" to
+                            opprettBarnepensjonSoeknad(
+                                gjenlevendeFnr = gjenlevendeFnr,
+                                avdoedFnr = avdoedFnr,
+                                barnFnr = barn.first(),
+                                soesken = barn.drop(1),
+                            ).toObjectNode(),
+                        "@lagret_soeknad_id" to "TEST-${UUID.randomUUID()}",
+                        "@template" to "soeknad",
+                        "@fnr_soeker" to barn.first(),
+                        "@hendelse_gyldig_til" to OffsetDateTime.now().plusMinutes(60L),
+                        "@adressebeskyttelse" to "UGRADERT",
+                    ),
+                )
 
-                else -> {
-                    throw Exception("Ukjent soknad type: '$type'")
-                }
+            else -> {
+                throw Exception("Ukjent soknad type: '$type'")
             }
-
-        return message.toJson().also {
-            logger.info("Opprettet json: \n$it")
         }
     }
 
-    private fun opprettJsonMessageBarnepensjon(
+    private fun opprettBarnepensjonSoeknad(
         gjenlevendeFnr: String,
         barnFnr: String,
         avdoedFnr: String,
         soesken: List<String>,
-    ): JsonMessage {
-        val mottattDato = Tidspunkt.now().toLocalDatetimeUTC()
-
-        val skjemaInfo =
-            """
-            {
-              "imageTag": "ce3542f9645d280bfff9936bdd0e7efc32424de2",
-              "spraak": "nb",
-              "innsender": ${mapInnsender(gjenlevendeFnr)},
-              "harSamtykket": {"svar": true,"spoersmaal": ""},
-              "utbetalingsInformasjon": ${mapUtbetalingsinfo()},
-              "soeker": ${mapBarn(barnFnr, gjenlevendeFnr, avdoedFnr)},
-              "foreldre": ${mapForeldre(gjenlevendeFnr, avdoedFnr)},
-              "soesken": ${mapBarnListe(soesken, gjenlevendeFnr, avdoedFnr)},
-              "versjon": "2",
-              "type": "BARNEPENSJON",
-              "mottattDato": "$mottattDato",
-              "template": "barnepensjon_v2"
-            }
-            """.trimIndent()
-
-        return JsonMessage.newMessage(
-            mapOf(
-                "@event_name" to SoeknadInnsendt.eventNameBehandlingBehov,
-                "@skjema_info" to objectMapper.readValue<ObjectNode>(skjemaInfo),
-                "@lagret_soeknad_id" to "TEST-${UUID.randomUUID()}",
-                "@template" to "soeknad",
-                "@fnr_soeker" to barnFnr,
-                "@hendelse_gyldig_til" to OffsetDateTime.now().plusMinutes(60L),
-                "@adressebeskyttelse" to "UGRADERT",
+    ) = Barnepensjon(
+        imageTag = UUID.randomUUID().toString(),
+        spraak = Spraak.NB,
+        innsender =
+            Innsender(
+                fornavn = Opplysning(adjektiv.random()),
+                etternavn = Opplysning(substantiv.random()),
+                foedselsnummer = Opplysning(Foedselsnummer.of(gjenlevendeFnr)),
             ),
-        )
-    }
+        harSamtykket = Opplysning(true),
+        utbetalingsInformasjon = null,
+        soeker = opprettBarn(barnFnr),
+        foreldre =
+            listOf(
+                opprettGjenlevendeForelder(gjenlevendeFnr),
+                opprettAvdoed(avdoedFnr),
+            ),
+        soesken = soesken.map(::opprettBarn),
+    )
 
-    private fun opprettJsonMessageOmstilling(
+    private fun opprettOmstillingsstoenadSoeknad(
         soekerFnr: String,
         avdoedFnr: String,
         barn: List<String>,
-    ): JsonMessage {
-        val mottattDato = Tidspunkt.now().toLocalDatetimeUTC()
-
-        val skjemaInfo =
-            """
-            {
-              "imageTag": "ce3542f9645d280bfff9936bdd0e7efc32424de2",
-              "spraak": "nb",
-              "innsender": ${mapInnsender(soekerFnr)},
-              "harSamtykket": {"svar": true,"spoersmaal": ""},
-              "utbetalingsInformasjon": ${mapUtbetalingsinfo()},
-              "soeker": ${mapGjenlevnde(soekerFnr)},
-              "avdoed": ${mapAvdoed(avdoedFnr)},
-              "barn": ${mapBarnListe(barn, soekerFnr, avdoedFnr)},
-              "versjon": "1",
-              "type": "OMSTILLINGSSTOENAD",
-              "mottattDato": "$mottattDato",
-              "template": "omstillingsstoenad"
-            }
-            """.trimIndent()
-
-        return JsonMessage.newMessage(
-            mapOf(
-                "@event_name" to SoeknadInnsendt.eventNameInnsendt,
-                "@skjema_info" to objectMapper.readValue<ObjectNode>(skjemaInfo),
-                "@lagret_soeknad_id" to "TEST-${UUID.randomUUID()}",
-                "@template" to "soeknad",
-                "@fnr_soeker" to soekerFnr,
-                "@hendelse_gyldig_til" to OffsetDateTime.now().plusMinutes(60L),
-                "@adressebeskyttelse" to "UGRADERT",
+    ) = Omstillingsstoenad(
+        imageTag = UUID.randomUUID().toString(),
+        spraak = Spraak.NB,
+        innsender =
+            Innsender(
+                fornavn = Opplysning(adjektiv.random()),
+                etternavn = Opplysning(substantiv.random()),
+                foedselsnummer = Opplysning(Foedselsnummer.of(soekerFnr)),
             ),
+        harSamtykket = Opplysning(true),
+        utbetalingsInformasjon = null,
+        soeker =
+            GjenlevendeOMS(
+                fornavn = Opplysning(adjektiv.random()),
+                etternavn = Opplysning(substantiv.random()),
+                foedselsnummer = Opplysning(Foedselsnummer.of(soekerFnr)),
+                statsborgerskap = Opplysning("NORGE"),
+                sivilstatus = Opplysning("ENKE"),
+                adresse = null,
+                bostedsAdresse = null,
+                kontaktinfo =
+                    Kontaktinfo(
+                        telefonnummer = Opplysning(FritekstSvar("99 88 77 66")),
+                    ),
+                flyktning = null,
+                oppholdUtland = BetingetOpplysning(EnumSvar(JaNeiVetIkke.NEI, ""), null, null),
+                nySivilstatus = BetingetOpplysning(EnumSvar(SivilstatusType.ENSLIG, ""), null, null),
+                arbeidOgUtdanning =
+                    ArbeidOgUtdanningOMS(
+                        dinSituasjon = Opplysning(listOf(EnumSvar(JobbStatusTypeOMS.ARBEIDSTAKER, ""))),
+                        arbeidsforhold = null,
+                        selvstendig = null,
+                        etablererVirksomhet = null,
+                        tilbud = null,
+                        arbeidssoeker = null,
+                        utdanning = null,
+                        annenSituasjon = null,
+                    ),
+                fullfoertUtdanning = null,
+                inntektOgPensjon =
+                    InntektOgPensjon(
+                        loennsinntekt = null,
+                        naeringsinntekt = null,
+                        pensjonEllerUfoere = null,
+                        annenInntekt = null,
+                        ytelserNAV =
+                            YtelserNav(
+                                soektOmYtelse = Opplysning(EnumSvar(JaNeiVetIkke.NEI, "")),
+                                soektYtelse = null,
+                            ),
+                        ytelserAndre =
+                            YtelserAndre(
+                                soektOmYtelse = Opplysning(EnumSvar(JaNeiVetIkke.NEI, "")),
+                                soektYtelse = null,
+                                pensjonsordning = null,
+                            ),
+                    ),
+                uregistrertEllerVenterBarn = Opplysning(EnumSvar(JaNeiVetIkke.NEI, ""), null),
+                forholdTilAvdoede =
+                    ForholdTilAvdoedeOMS(
+                        relasjon = Opplysning(EnumSvar(ForholdTilAvdoedeType.GIFT, ""), null),
+                        datoForInngaattPartnerskap = null,
+                        datoForInngaattSamboerskap = null,
+                        datoForSkilsmisse = null,
+                        datoForSamlivsbrudd = null,
+                        fellesBarn = null,
+                        samboereMedFellesBarnFoerGiftemaal = null,
+                        tidligereGift = null,
+                        mottokBidrag = null,
+                    ),
+                omsorgForBarn = Opplysning(EnumSvar(JaNeiVetIkke.JA, ""), null),
+            ),
+        avdoed = opprettAvdoed(avdoedFnr),
+        barn = barn.map(::opprettBarn),
+    )
+
+    private fun opprettGjenlevendeForelder(fnr: String) =
+        GjenlevendeForelder(
+            fornavn = Opplysning(adjektiv.random()),
+            etternavn = Opplysning(substantiv.random()),
+            foedselsnummer = Opplysning(Foedselsnummer.of(fnr)),
+            adresse = Opplysning("Testveien 12, 0123 Oslo"),
+            statsborgerskap = Opplysning("NORGE"),
+            kontaktinfo =
+                Kontaktinfo(
+                    telefonnummer = Opplysning(FritekstSvar("99 88 77 66")),
+                ),
         )
-    }
 
-    private fun mapUtbetalingsinfo(): String =
-        """
-         {
-             "svar": {
-               "verdi": "NORSK",
-               "innhold": "Norsk"
-             },
-             "spoersmaal": "",
-             "opplysning": {
-               "kontonummer": {
-                 "svar": {
-                   "innhold": "1351.35.13513"
-                 },
-                 "spoersmaal": ""
-               },
-               "utenlandskBankNavn": null,
-               "utenlandskBankAdresse": null,
-               "iban": null,
-               "swift": null,
-               "skattetrekk": {
-                 "svar": {
-                   "verdi": "JA",
-                   "innhold": "Ja"
-                 },
-                 "spoersmaal": "",
-                 "opplysning": {
-                   "svar": {
-                     "innhold": "21%"
-                   },
-                   "spoersmaal": ""
-                 }
-               }
-             }
-        }
-        """.trimIndent()
+    private fun opprettAvdoed(fnr: String) =
+        Avdoed(
+            fornavn = Opplysning(adjektiv.random()),
+            etternavn = Opplysning(substantiv.random()),
+            foedselsnummer = Opplysning(Foedselsnummer.of(fnr)),
+            datoForDoedsfallet = Opplysning(DatoSvar(LocalDate.now().minusWeeks(1))),
+            statsborgerskap = Opplysning(FritekstSvar("NORGE")),
+            utenlandsopphold = BetingetOpplysning(EnumSvar(JaNeiVetIkke.NEI, ""), null, emptyList()),
+            doedsaarsakSkyldesYrkesskadeEllerYrkessykdom = Opplysning(EnumSvar(JaNeiVetIkke.NEI, ""), null),
+            naeringsInntekt = null,
+            militaertjeneste = null,
+        )
 
-    private fun mapForeldre(
-        gjenlevendeFnr: String,
-        avdoedFnr: String,
-    ) = """
-        [
-          ${mapGjenlevendeForelder(gjenlevendeFnr)},
-          ${mapAvdoed(avdoedFnr)}
-        ]
-        """.trimIndent()
+    private fun opprettBarn(fnr: String) =
+        Barn(
+            fornavn = Opplysning(adjektiv.random()),
+            etternavn = Opplysning(substantiv.random()),
+            foedselsnummer = Opplysning(Foedselsnummer.of(fnr)),
+            statsborgerskap = Opplysning("NORGE"),
+            utenlandsAdresse = null,
+            bosattNorge = null,
+            foreldre = emptyList(),
+            ukjentForelder = null,
+            verge = null,
+            dagligOmsorg = null,
+        )
 
-    private fun mapBarnListe(
-        barnListe: List<String>,
-        gjenlevendeFnr: String,
-        avdoedFnr: String,
-    ): String =
-        barnListe.joinToString(separator = ",", prefix = "[", postfix = "]") {
-            mapBarn(
-                it,
-                avdoedFnr,
-                gjenlevendeFnr,
-            )
-        }
+    private val substantiv =
+        listOf(
+            "Bil", "Gitar", "Flaske", "Kopp", "Laptop", "Kis", "Sekk", "Pille", "Handel", "Oppgave", "Traktor", "Hest",
+            "Fest", "Propp", "Lavo", "Kabel", "Pose", "Dør", "Sjekkliste",
+        )
 
-    private fun mapGjenlevnde(fnr: String) =
-        """
-        {
-          "fornavn": {
-            "svar": "LEVENDE",
-            "spoersmaal": ""
-          },
-          "etternavn": {
-            "svar": "TESTPERSON",
-            "spoersmaal": ""
-          },
-          "foedselsnummer": {
-            "svar": "$fnr",
-            "spoersmaal": ""
-          },
-          "adresse": {
-            "svar": "TESTVEIEN 123, 0123 TEST",
-            "spoersmaal": ""
-          },
-          "sivilstatus": {
-            "svar": "GIFT",
-            "spoersmaal": ""
-          },
-          "nySivilstatus": {
-            "svar": {
-              "verdi": "ENSLIG",
-              "innhold": "ENSLIG"
-            },
-            "spoersmaal": ""
-          },
-          "statsborgerskap": {
-            "svar": "Norge",
-            "spoersmaal": ""
-          },
-          "kontaktinfo": {
-            "telefonnummer": {
-              "svar": {
-                "innhold": "11111111"
-              },
-              "spoersmaal": ""
-            }
-          },
-          "andreYtelser": {
-            "kravOmAnnenStonad": {
-              "svar": {
-                "verdi": "NEI",
-                "innhold": "NEI"
-              }
-            },
-            "annenPensjon": {
-              "svar": {
-                "verdi": "NEI",
-                "innhold": "NEI"
-              }
-            },
-            "pensjonUtland": {
-              "svar": {
-                "verdi": "NEI",
-                "innhold": "NEI"
-              }
-            }
-          },
-          "uregistrertEllerVenterBarn": {
-            "svar": {
-              "verdi": "NEI",
-              "innhold": "NEI"
-            }       
-          },
-          "forholdTilAvdoede": {
-            "relasjon": {
-              "svar": {
-                "verdi": "GIFT",
-                "innhold": "GIFT"
-              }
-            }          
-          },
-          "type": "GJENLEVENDE_OMS"
-        }
-        """.trimIndent()
-
-    private fun mapAvdoed(fnr: String) =
-        """
-        {
-          "fornavn": {
-            "svar": "DØD",
-            "spoersmaal": ""
-          },
-          "etternavn": {
-            "svar": "TESTPERSON",
-            "spoersmaal": ""
-          },
-          "foedselsnummer": {
-            "svar": "$fnr",
-            "spoersmaal": ""
-          },
-          "datoForDoedsfallet": {
-            "svar": {
-              "innhold": "2021-07-27"
-            },
-            "spoersmaal": ""
-          },
-          "statsborgerskap": {
-            "svar": {
-              "innhold": "Norsk"
-            },
-            "spoersmaal": ""
-          },
-          "utenlandsopphold": {
-            "svar": {
-              "verdi": "NEI",
-              "innhold": "Nei"
-            },
-            "spoersmaal": "",
-            "opplysning": []
-          },
-          "doedsaarsakSkyldesYrkesskadeEllerYrkessykdom": {
-            "svar": {
-              "verdi": "NEI",
-              "innhold": "Nei"
-            },
-            "spoersmaal": ""
-          },
-          "naeringsInntekt": {
-            "svar": {
-              "verdi": "JA",
-              "innhold": "Ja"
-            },
-            "spoersmaal": "",
-            "opplysning": {
-              "naeringsinntektPrAarFoerDoedsfall": {
-                "svar": {
-                  "innhold": "150 000"
-                },
-                "spoersmaal": ""
-              },
-              "naeringsinntektVedDoedsfall": {
-                "svar": {
-                  "verdi": "NEI",
-                  "innhold": "Nei"
-                },
-                "spoersmaal": ""
-              }
-            }
-          },
-          "militaertjeneste": {
-            "svar": {
-              "verdi": "JA",
-              "innhold": "Ja"
-            },
-            "spoersmaal": "",
-            "opplysning": {
-              "svar": {
-                "innhold": "1984"
-              },
-              "spoersmaal": ""
-            }
-          },
-          "type": "AVDOED"
-        }
-        """.trimIndent()
-
-    /*
-     * typer
-     *   "GJENLEVENDE_FORELDER"
-     *   "FORELDER"
-     */
-    private fun mapGjenlevendeForelder(fnr: String) =
-        """
-        {
-          "fornavn": {
-            "svar": "Levende",
-            "spoersmaal": ""
-          },
-          "etternavn": {
-            "svar": "Testperson",
-            "spoersmaal": ""
-          },
-          "foedselsnummer": {
-            "svar": "$fnr",
-            "spoersmaal": ""
-          },
-          "adresse": {
-            "svar": "TESTVEIEN 123, 0123 TEST",
-            "spoersmaal": ""
-          },
-          "statsborgerskap": {
-            "svar": "Norge",
-            "spoersmaal": ""
-          },
-          "kontaktinfo": {
-            "telefonnummer": {
-              "svar": {
-                "innhold": "11111111"
-              },
-              "spoersmaal": ""
-            }
-          },
-          "type": "GJENLEVENDE_FORELDER"
-        }
-        """.trimIndent()
-
-    private fun mapForelder(fnr: String) =
-        """
-        {
-          "fornavn": {
-            "svar": "Levende",
-            "spoersmaal": ""
-          },
-          "etternavn": {
-            "svar": "Testperson",
-            "spoersmaal": ""
-          },
-          "foedselsnummer": {
-            "svar": "$fnr",
-            "spoersmaal": ""
-          },
-          "type": "FORELDER"
-        }
-        """.trimIndent()
-
-    private fun mapBarn(
-        fnr: String,
-        gjenlevende: String,
-        avdoed: String,
-    ) = """
-        {
-            "fornavn": {
-              "svar": "TEST",
-              "spoersmaal": ""
-            },
-            "etternavn": {
-              "svar": "SOESKEN",
-              "spoersmaal": ""
-            },
-            "foedselsnummer": {
-              "svar": "$fnr",
-              "spoersmaal": ""
-            },
-            "statsborgerskap": {
-              "svar": "Norsk",
-              "spoersmaal": ""
-            },
-            "utenlandsAdresse": {
-              "svar": {
-                "verdi": "NEI",
-                "innhold": "Nei"
-              },
-              "spoersmaal": "",
-              "opplysning": null
-            },
-            "foreldre": [
-              ${mapForelder(gjenlevende)},
-              ${mapForelder(avdoed)}
-            ],
-            "type": "BARN"
-        }
-        """.trimIndent()
-
-    private fun mapInnsender(fnr: String) =
-        """
-        {
-          "fornavn": {
-            "svar": "DUMMY FORNAVN",
-            "spoersmaal": ""
-          },
-          "etternavn": {
-            "svar": "DUMMY ETTERNAVN",
-            "spoersmaal": ""
-          },
-          "foedselsnummer": {
-            "svar": "$fnr",
-            "spoersmaal": ""
-          },
-          "type": "INNSENDER"
-        }
-        """.trimIndent()
+    private val adjektiv =
+        listOf(
+            "Fin", "Stygg", "Liten", "Stor", "Rask", "Treg", "Rund", "Ekkel", "Ufin", "Kul", "Digg", "Synlig", "Falsk",
+            "Sinnsyk", "Ordknapp", "Taus", "Artig", "Morsom", "Skremmende",
+        )
 }

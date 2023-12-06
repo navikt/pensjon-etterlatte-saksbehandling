@@ -26,6 +26,8 @@ dependencies {
     implementation(libs.jackson.core)
     implementation(libs.jackson.databind)
 
+    implementation(libs.etterlatte.common)
+
     implementation(libs.navfelles.tokenclientcore)
     implementation(libs.navfelles.tokenvalidationktor2)
 

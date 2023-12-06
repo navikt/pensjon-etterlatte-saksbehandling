@@ -8,7 +8,7 @@ import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.rapidsandrivers.migrering.MigreringRequest
 import org.slf4j.LoggerFactory
 
-internal class GjenlevendeForelderPatcher(val pdlKlient: PDLKlient, val personHenter: PersonHenter) {
+internal class GjenlevendeForelderPatcher(val pdlKlient: PDLKlient, private val personHenter: PersonHenter) {
     private val sikkerlogg = sikkerlogger()
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -27,18 +27,7 @@ internal class GjenlevendeForelderPatcher(val pdlKlient: PDLKlient, val personHe
         val avdoede = request.avdoedForelder.map { it.ident.value }.toSet()
         val avdodeIPDL = persongalleri.avdoed.toSet()
         if (avdoede != avdodeIPDL) {
-            logger.warn(
-                "Migreringrequest med pesysid=${request.pesysId} har forskjellige avdøde enn det vi finner " +
-                    "i PDL.",
-            )
-            sikkerlogg.warn("Fikk $avdodeIPDL fra PDL, forventa $avdoede. Hele persongalleriet: $persongalleri")
-
-            val pdlresultat =
-                request.avdoedForelder.map { personHenter.hentPerson(PersonRolle.AVDOED, it.ident) }
-                    .filter { it.isFailure }
-                    .mapNotNull { it.exceptionOrNull() }
-                    .map { RuntimeException(it) }
-
+            val pdlresultat = sjekkAvdoedForelderMotPDL(request, avdodeIPDL, avdoede, persongalleri)
             if (pdlresultat.isNotEmpty()) {
                 return Result.failure(samleExceptions(pdlresultat))
             }
@@ -48,6 +37,24 @@ internal class GjenlevendeForelderPatcher(val pdlKlient: PDLKlient, val personHe
         }
         logger.warn("Fant ${persongalleri.gjenlevende.size} gjenlevende i PDL, patcher ikke request")
         return Result.success(request)
+    }
+
+    private fun sjekkAvdoedForelderMotPDL(
+        request: MigreringRequest,
+        avdodeIPDL: Set<String>,
+        avdoede: Set<String>,
+        persongalleri: Persongalleri?,
+    ): List<RuntimeException> {
+        logger.warn(
+            "Migreringrequest med pesysid=${request.pesysId} har forskjellige avdøde enn det vi finner " +
+                "i PDL.",
+        )
+        sikkerlogg.warn("Fikk $avdodeIPDL fra PDL, forventa $avdoede. Hele persongalleriet: $persongalleri")
+
+        return request.avdoedForelder.map { personHenter.hentPerson(PersonRolle.AVDOED, it.ident) }
+            .filter { it.isFailure }
+            .mapNotNull { it.exceptionOrNull() }
+            .map { RuntimeException(it) }
     }
 
     private fun hentPersongalleri(soeker: Folkeregisteridentifikator): Persongalleri? {

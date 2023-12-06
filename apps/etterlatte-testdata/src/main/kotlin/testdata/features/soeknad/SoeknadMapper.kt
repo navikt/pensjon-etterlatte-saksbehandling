@@ -257,7 +257,7 @@ object SoeknadMapper {
               }
             }          
           },
-          "type": "GJENLEVENDE"
+          "type": "GJENLEVENDE_OMS"
         }
         """.trimIndent()
 

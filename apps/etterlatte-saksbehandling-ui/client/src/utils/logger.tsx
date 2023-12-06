@@ -7,7 +7,7 @@ const browser: any = Bowser.getParser(window.navigator.userAgent)
 
 const GYLDIG_FNR = (input: string | undefined) => /^\d{11}$/.test(input ?? '')
 
-function SanitizeUrlPossibleFnr(url?: string): string {
+function sanitizeUrlPossibleFnr(url?: string): string {
   if (url) {
     const splittedUrl = url.split('/')
     splittedUrl.map((urlpart) => {
@@ -21,7 +21,7 @@ function SanitizeUrlPossibleFnr(url?: string): string {
 }
 
 const defaultContext = {
-  url: SanitizeUrlPossibleFnr(window.location.href),
+  url: sanitizeUrlPossibleFnr(window.location.href),
   userAgent: window.navigator.userAgent,
   userDeviceInfo: browser.parsedResult,
   appName: 'etterlatte-saksbehandling-ui-client',

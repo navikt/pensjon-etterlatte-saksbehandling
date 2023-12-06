@@ -223,7 +223,7 @@ internal class ApplicationContext(
     // Service
     val oppgaveService = OppgaveService(oppgaveDaoEndringer, sakDao)
 
-    val gosysOppgaveService = GosysOppgaveServiceImpl(gosysOppgaveKlient, pdlKlient, featureToggleService)
+    val gosysOppgaveService = GosysOppgaveServiceImpl(gosysOppgaveKlient, pdlKlient)
     val grunnlagsService = GrunnlagService(grunnlagKlient)
     val behandlingService =
         BehandlingServiceImpl(

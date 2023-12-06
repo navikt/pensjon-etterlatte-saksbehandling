@@ -43,7 +43,8 @@ internal class ApplicationContext {
                 azureAppScope = config.getString("pdl.azure.scope"),
             ),
         )
-    val gjenlevendeForelderPatcher = GjenlevendeForelderPatcher(pdlKlient = pdlKlient)
+    val personHenter = PersonHenter(pdlKlient, featureToggleService)
+    val gjenlevendeForelderPatcher = GjenlevendeForelderPatcher(pdlKlient = pdlKlient, personHenter)
     val grunnlagKlient =
         GrunnlagKlient(
             config,
@@ -54,9 +55,8 @@ internal class ApplicationContext {
                 azureAppScope = config.getString("grunnlag.azure.scope"),
             ),
         )
-    val utenlandstilknytningsjekker = Utenlandstilknytningsjekker(grunnlagKlient)
 
-    val personHenter = PersonHenter(pdlKlient, featureToggleService)
+    val utenlandstilknytningsjekker = Utenlandstilknytningsjekker(grunnlagKlient)
     val verifiserer =
         Verifiserer(
             repository = pesysRepository,

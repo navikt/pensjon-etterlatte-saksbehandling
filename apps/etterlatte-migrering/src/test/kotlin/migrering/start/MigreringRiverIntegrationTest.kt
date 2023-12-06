@@ -103,6 +103,7 @@ internal class MigreringRiverIntegrationTest {
                                         every { it.vergemaalEllerFremtidsfullmakt } returns emptyList()
                                     }
                             }
+                        val personHenter = PersonHenter(pdlKlient, featureToggleService)
                         MigrerSpesifikkSakRiver(
                             rapidsConnection = this,
                             penKlient =
@@ -113,11 +114,11 @@ internal class MigreringRiverIntegrationTest {
                             verifiserer =
                                 Verifiserer(
                                     repository,
-                                    GjenlevendeForelderPatcher(pdlKlient),
+                                    GjenlevendeForelderPatcher(pdlKlient, personHenter),
                                     mockk<Utenlandstilknytningsjekker>().also {
                                         every { it.finnUtenlandstilknytning(any()) } returns UtlandstilknytningType.NASJONAL
                                     },
-                                    PersonHenter(pdlKlient, featureToggleService),
+                                    personHenter,
                                 ),
                             krrKlient =
                                 mockk<KrrKlient>().also {
@@ -193,6 +194,7 @@ internal class MigreringRiverIntegrationTest {
                                         every { it.vergemaalEllerFremtidsfullmakt } returns emptyList()
                                     }
                             }
+                        val personHenter = PersonHenter(pdlKlient, featureToggleService)
                         MigrerSpesifikkSakRiver(
                             rapidsConnection = this,
                             penKlient = penKlient,
@@ -201,11 +203,11 @@ internal class MigreringRiverIntegrationTest {
                             verifiserer =
                                 Verifiserer(
                                     repository,
-                                    GjenlevendeForelderPatcher(pdlKlient),
+                                    GjenlevendeForelderPatcher(pdlKlient, personHenter),
                                     mockk<Utenlandstilknytningsjekker>().also {
                                         every { it.finnUtenlandstilknytning(any()) } returns UtlandstilknytningType.NASJONAL
                                     },
-                                    PersonHenter(pdlKlient, featureToggleService),
+                                    personHenter,
                                 ),
                             krrKlient = mockk<KrrKlient>().also { coEvery { it.hentDigitalKontaktinformasjon(any()) } returns null },
                         )
@@ -293,6 +295,7 @@ internal class MigreringRiverIntegrationTest {
                                         every { it.vergemaalEllerFremtidsfullmakt } returns emptyList()
                                     }
                             }
+                        val personHenter = PersonHenter(pdlKlient, featureToggleService)
                         MigrerSpesifikkSakRiver(
                             rapidsConnection = this,
                             penKlient = penKlient,
@@ -301,11 +304,11 @@ internal class MigreringRiverIntegrationTest {
                             verifiserer =
                                 Verifiserer(
                                     repository,
-                                    GjenlevendeForelderPatcher(pdlKlient),
+                                    GjenlevendeForelderPatcher(pdlKlient, personHenter),
                                     mockk<Utenlandstilknytningsjekker>().also {
                                         every { it.finnUtenlandstilknytning(any()) } returns UtlandstilknytningType.NASJONAL
                                     },
-                                    PersonHenter(pdlKlient, featureToggleService),
+                                    personHenter,
                                 ),
                             krrKlient = mockk<KrrKlient>().also { coEvery { it.hentDigitalKontaktinformasjon(any()) } returns null },
                         )
@@ -407,6 +410,7 @@ internal class MigreringRiverIntegrationTest {
                                     )
                                 } throws IllegalStateException("")
                             }
+                        val personHenter = PersonHenter(pdlKlient, featureToggleService)
                         MigrerSpesifikkSakRiver(
                             rapidsConnection = this,
                             penKlient =
@@ -417,9 +421,9 @@ internal class MigreringRiverIntegrationTest {
                             verifiserer =
                                 Verifiserer(
                                     repository,
-                                    GjenlevendeForelderPatcher(pdlKlient),
+                                    GjenlevendeForelderPatcher(pdlKlient, personHenter),
                                     mockk<Utenlandstilknytningsjekker>().also { every { it.finnUtenlandstilknytning(any()) } returns null },
-                                    PersonHenter(pdlKlient, featureToggleService),
+                                    personHenter,
                                 ),
                             krrKlient = mockk<KrrKlient>().also { coEvery { it.hentDigitalKontaktinformasjon(any()) } returns null },
                         )
@@ -470,6 +474,7 @@ internal class MigreringRiverIntegrationTest {
                                         every { it.vergemaalEllerFremtidsfullmakt } returns listOf(mockk())
                                     }
                             }
+                        val personHenter = PersonHenter(pdlKlient, featureToggleService)
                         MigrerSpesifikkSakRiver(
                             rapidsConnection = this,
                             penKlient =
@@ -480,9 +485,9 @@ internal class MigreringRiverIntegrationTest {
                             verifiserer =
                                 Verifiserer(
                                     repository,
-                                    GjenlevendeForelderPatcher(pdlKlient),
+                                    GjenlevendeForelderPatcher(pdlKlient, personHenter),
                                     mockk<Utenlandstilknytningsjekker>().also { every { it.finnUtenlandstilknytning(any()) } returns null },
-                                    PersonHenter(pdlKlient, featureToggleService),
+                                    personHenter,
                                 ),
                             krrKlient = mockk<KrrKlient>().also { coEvery { it.hentDigitalKontaktinformasjon(any()) } returns null },
                         )

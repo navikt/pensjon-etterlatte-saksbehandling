@@ -1,12 +1,14 @@
 package no.nav.etterlatte.migrering.verifisering
 
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
+import no.nav.etterlatte.libs.common.logging.samleExceptions
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.rapidsandrivers.migrering.MigreringRequest
 import org.slf4j.LoggerFactory
 
-internal class GjenlevendeForelderPatcher(val pdlKlient: PDLKlient) {
+internal class GjenlevendeForelderPatcher(val pdlKlient: PDLKlient, val personHenter: PersonHenter) {
     private val sikkerlogg = sikkerlogger()
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -31,7 +33,15 @@ internal class GjenlevendeForelderPatcher(val pdlKlient: PDLKlient) {
             )
             sikkerlogg.warn("Fikk $avdodeIPDL fra PDL, forventa $avdoede. Hele persongalleriet: $persongalleri")
 
-            return Result.failure(IllegalStateException("Migreringsrequest har forskjellig sett med avdøde enn det vi har i følge PDL"))
+            val pdlresultat =
+                request.avdoedForelder.map { personHenter.hentPerson(PersonRolle.AVDOED, it.ident) }
+                    .filter { it.isFailure }
+                    .mapNotNull { it.exceptionOrNull() }
+                    .map { RuntimeException(it) }
+
+            if (pdlresultat.isNotEmpty()) {
+                return Result.failure(samleExceptions(pdlresultat))
+            }
         }
         if (persongalleri.gjenlevende.size == 1) {
             return Result.success(request.copy(gjenlevendeForelder = Folkeregisteridentifikator.of(persongalleri.gjenlevende.single())))

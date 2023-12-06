@@ -31,6 +31,7 @@ import no.nav.etterlatte.migrering.start.MigreringFeatureToggle
 import no.nav.etterlatte.migrering.start.MigreringRiver
 import no.nav.etterlatte.migrering.verifisering.GjenlevendeForelderPatcher
 import no.nav.etterlatte.migrering.verifisering.PDLKlient
+import no.nav.etterlatte.migrering.verifisering.PersonHenter
 import no.nav.etterlatte.migrering.verifisering.Verifiserer
 import no.nav.etterlatte.opprettInMemoryDatabase
 import no.nav.etterlatte.rapidsandrivers.EventNames
@@ -111,13 +112,12 @@ internal class MigreringRiverIntegrationTest {
                             featureToggleService = featureToggleService,
                             verifiserer =
                                 Verifiserer(
-                                    pdlKlient,
                                     repository,
-                                    featureToggleService,
                                     GjenlevendeForelderPatcher(pdlKlient),
                                     mockk<Utenlandstilknytningsjekker>().also {
                                         every { it.finnUtenlandstilknytning(any()) } returns UtlandstilknytningType.NASJONAL
                                     },
+                                    PersonHenter(pdlKlient, featureToggleService),
                                 ),
                             krrKlient =
                                 mockk<KrrKlient>().also {
@@ -200,13 +200,12 @@ internal class MigreringRiverIntegrationTest {
                             featureToggleService = featureToggleService,
                             verifiserer =
                                 Verifiserer(
-                                    pdlKlient,
                                     repository,
-                                    featureToggleService,
                                     GjenlevendeForelderPatcher(pdlKlient),
                                     mockk<Utenlandstilknytningsjekker>().also {
                                         every { it.finnUtenlandstilknytning(any()) } returns UtlandstilknytningType.NASJONAL
                                     },
+                                    PersonHenter(pdlKlient, featureToggleService),
                                 ),
                             krrKlient = mockk<KrrKlient>().also { coEvery { it.hentDigitalKontaktinformasjon(any()) } returns null },
                         )
@@ -301,13 +300,12 @@ internal class MigreringRiverIntegrationTest {
                             featureToggleService = featureToggleService,
                             verifiserer =
                                 Verifiserer(
-                                    pdlKlient,
                                     repository,
-                                    featureToggleService,
                                     GjenlevendeForelderPatcher(pdlKlient),
                                     mockk<Utenlandstilknytningsjekker>().also {
                                         every { it.finnUtenlandstilknytning(any()) } returns UtlandstilknytningType.NASJONAL
                                     },
+                                    PersonHenter(pdlKlient, featureToggleService),
                                 ),
                             krrKlient = mockk<KrrKlient>().also { coEvery { it.hentDigitalKontaktinformasjon(any()) } returns null },
                         )
@@ -418,11 +416,10 @@ internal class MigreringRiverIntegrationTest {
                             featureToggleService = featureToggleService,
                             verifiserer =
                                 Verifiserer(
-                                    pdlKlient,
                                     repository,
-                                    featureToggleService,
                                     GjenlevendeForelderPatcher(pdlKlient),
                                     mockk<Utenlandstilknytningsjekker>().also { every { it.finnUtenlandstilknytning(any()) } returns null },
+                                    PersonHenter(pdlKlient, featureToggleService),
                                 ),
                             krrKlient = mockk<KrrKlient>().also { coEvery { it.hentDigitalKontaktinformasjon(any()) } returns null },
                         )
@@ -482,11 +479,10 @@ internal class MigreringRiverIntegrationTest {
                             featureToggleService = featureToggleService,
                             verifiserer =
                                 Verifiserer(
-                                    pdlKlient,
                                     repository,
-                                    featureToggleService,
                                     GjenlevendeForelderPatcher(pdlKlient),
                                     mockk<Utenlandstilknytningsjekker>().also { every { it.finnUtenlandstilknytning(any()) } returns null },
+                                    PersonHenter(pdlKlient, featureToggleService),
                                 ),
                             krrKlient = mockk<KrrKlient>().also { coEvery { it.hentDigitalKontaktinformasjon(any()) } returns null },
                         )

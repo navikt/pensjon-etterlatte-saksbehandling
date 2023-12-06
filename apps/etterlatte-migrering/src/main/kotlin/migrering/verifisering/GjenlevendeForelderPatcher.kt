@@ -25,11 +25,12 @@ internal class GjenlevendeForelderPatcher(val pdlKlient: PDLKlient) {
         val avdoede = request.avdoedForelder.map { it.ident.value }.toSet()
         val avdodeIPDL = persongalleri.avdoed.toSet()
         if (avdoede != avdodeIPDL) {
-            logger.error(
+            logger.warn(
                 "Migreringrequest med pesysid=${request.pesysId} har forskjellige avdøde enn det vi finner " +
                     "i PDL.",
             )
-            sikkerlogg.error("Fikk $avdodeIPDL fra PDL, forventa $avdoede. Hele persongalleriet: $persongalleri")
+            sikkerlogg.warn("Fikk $avdodeIPDL fra PDL, forventa $avdoede. Hele persongalleriet: $persongalleri")
+
             return Result.failure(IllegalStateException("Migreringsrequest har forskjellig sett med avdøde enn det vi har i følge PDL"))
         }
         if (persongalleri.gjenlevende.size == 1) {

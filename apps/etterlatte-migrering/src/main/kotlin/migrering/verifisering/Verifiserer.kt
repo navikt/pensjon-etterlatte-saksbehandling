@@ -1,28 +1,22 @@
 package no.nav.etterlatte.migrering.verifisering
 
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.logging.samleExceptions
-import no.nav.etterlatte.libs.common.logging.sikkerlogger
-import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.migrering.Migreringsstatus
 import no.nav.etterlatte.migrering.PesysRepository
 import no.nav.etterlatte.migrering.grunnlag.Utenlandstilknytningsjekker
-import no.nav.etterlatte.migrering.start.MigreringFeatureToggle
 import no.nav.etterlatte.rapidsandrivers.migrering.MigreringRequest
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser
 import org.slf4j.LoggerFactory
 
 internal class Verifiserer(
-    private val pdlKlient: PDLKlient,
     private val repository: PesysRepository,
-    private val featureToggleService: FeatureToggleService,
     private val gjenlevendeForelderPatcher: GjenlevendeForelderPatcher,
     private val utenlandstilknytningsjekker: Utenlandstilknytningsjekker,
+    private val personHenter: PersonHenter,
 ) {
-    private val sikkerlogg = sikkerlogger()
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     fun verifiserRequest(request: MigreringRequest): MigreringRequest {
@@ -76,7 +70,7 @@ internal class Verifiserer(
 
         return personer
             .map {
-                val person = hentPerson(it.first, it.second)
+                val person = personHenter.hentPerson(it.first, it.second)
 
                 if (it.first == PersonRolle.BARN) {
                     person.getOrNull()?.let { pdlPerson ->
@@ -95,22 +89,6 @@ internal class Verifiserer(
             .map { it.exceptionOrNull() }
             .filterIsInstance<Verifiseringsfeil>()
     }
-
-    private fun hentPerson(
-        rolle: PersonRolle,
-        folkeregisteridentifikator: Folkeregisteridentifikator,
-    ): Result<PersonDTO?> =
-        try {
-            Result.success(pdlKlient.hentPerson(rolle, folkeregisteridentifikator))
-        } catch (e: Exception) {
-            sikkerlogg.warn("Fant ikke person $folkeregisteridentifikator med rolle $rolle i PDL", e)
-            if (featureToggleService.isEnabled(MigreringFeatureToggle.VerifiserFoerMigrering, true)) {
-                Result.failure(FinsIkkeIPDL(rolle, folkeregisteridentifikator))
-            } else {
-                logger.warn("Har skrudd av at vi feiler migreringa hvis verifisering feiler. Fortsetter.")
-                Result.success(null)
-            }
-        }
 }
 
 sealed class Verifiseringsfeil : Exception()

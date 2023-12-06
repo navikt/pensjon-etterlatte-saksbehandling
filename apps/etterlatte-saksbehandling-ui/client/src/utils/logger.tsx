@@ -10,12 +10,14 @@ const GYLDIG_FNR = (input: string | undefined) => /^\d{11}$/.test(input ?? '')
 function sanitizeUrlPossibleFnr(url?: string): string {
   if (url) {
     const splittedUrl = url.split('/')
-    splittedUrl.map((urlpart) => {
-      if (GYLDIG_FNR(urlpart)) {
-        return urlpart.substring(0, 5).concat('******')
-      }
-      return urlpart
-    })
+    return splittedUrl
+      .map((urlpart) => {
+        if (GYLDIG_FNR(urlpart)) {
+          return urlpart.substring(0, 5).concat('******')
+        }
+        return urlpart
+      })
+      .join('/')
   }
   return ''
 }

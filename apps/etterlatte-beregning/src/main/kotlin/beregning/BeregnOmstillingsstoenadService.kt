@@ -19,6 +19,7 @@ import no.nav.etterlatte.klienter.TrygdetidKlient
 import no.nav.etterlatte.klienter.VilkaarsvurderingKlient
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
+import no.nav.etterlatte.libs.common.behandling.virkningstidspunkt
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
 import no.nav.etterlatte.libs.common.beregning.Beregningstype
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
@@ -58,8 +59,7 @@ class BeregnOmstillingsstoenadService(
                 "Forventa å ha trygdetid for behandlingId=${behandling.id}",
             )
         val behandlingType = behandling.behandlingType
-        val virkningstidspunkt =
-            requireNotNull(behandling.virkningstidspunkt?.dato) { "Behandling med id: ${behandling.id} mangler virkningstidspunkt" }
+        val virkningstidspunkt = behandling.virkningstidspunkt().dato
         val beregningsgrunnlag =
             requireNotNull(
                 beregningsGrunnlagService.hentOmstillingstoenadBeregningsGrunnlag(behandling.id, brukerTokenInfo),

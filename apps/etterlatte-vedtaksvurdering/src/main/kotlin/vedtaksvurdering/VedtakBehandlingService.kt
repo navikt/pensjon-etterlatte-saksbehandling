@@ -6,6 +6,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.behandling.virkningstidspunkt
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.oppgave.SakIdOgReferanse
@@ -69,10 +70,7 @@ class VedtakBehandlingService(
         validerVersjon(vilkaarsvurdering, beregningOgAvkorting)
 
         val vedtakType = vedtakType(behandling.behandlingType, vilkaarsvurdering)
-        val virkningstidspunkt =
-            requireNotNull(behandling.virkningstidspunkt?.dato) {
-                "Behandling med behandlingId=$behandlingId mangler virkningstidspunkt"
-            }
+        val virkningstidspunkt = behandling.virkningstidspunkt().dato
 
         return if (vedtak != null) {
             logger.info("Oppdaterer vedtak for behandling med behandlingId=$behandlingId")

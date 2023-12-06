@@ -48,6 +48,7 @@ fun behandling(
     behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
     virkningstidspunkt = null,
     boddEllerArbeidetUtlandet = null,
+    utlandstilknytning = null,
     revurderingsaarsak = null,
     revurderingInfo = null,
     prosesstype = Prosesstype.AUTOMATISK,

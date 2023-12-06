@@ -227,6 +227,7 @@ internal fun Behandling.toDetaljertBehandlingWithPersongalleri(persongalleri: Pe
         status = status,
         behandlingType = type,
         virkningstidspunkt = virkningstidspunkt,
+        utlandstilknytning = utlandstilknytning,
         boddEllerArbeidetUtlandet = boddEllerArbeidetUtlandet,
         revurderingsaarsak = revurderingsaarsak(),
         prosesstype = prosesstype,

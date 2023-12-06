@@ -303,6 +303,7 @@ fun behandling(
     revurderingsaarsak = null,
     prosesstype = Prosesstype.MANUELL,
     boddEllerArbeidetUtlandet = null,
+    utlandstilknytning = null,
     revurderingInfo = null,
     enhet = "1111",
     kilde = Vedtaksloesning.GJENNY,

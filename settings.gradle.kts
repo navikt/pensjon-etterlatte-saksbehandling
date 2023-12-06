@@ -31,7 +31,6 @@ include(
     "apps:etterlatte-trygdetid",
     "apps:etterlatte-trygdetid-kafka",
     "apps:etterlatte-samordning-vedtak",
-    "libs:etterlatte-token-model",
     "libs:saksbehandling-common",
     "libs:rapidsandrivers-extras",
     "libs:etterlatte-behandling-model",

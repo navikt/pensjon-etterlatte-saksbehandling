@@ -163,10 +163,23 @@ getMaskinportenSecretName() {
   fi
 }
 
+getTokenXSecretName() {
+  info "Checking kubernetes for TokenX secret for $APP_NAME"
+
+  TOKENX_SECRET_NAME=$(kubectl get secrets | grep "tokenx-$APP_NAME" -m1 | awk '{print $1}')
+  if [ -n "$TOKENX_SECRET_NAME" ]; then
+    info "Found secret with name '$TOKENX_SECRET_NAME'"
+  else
+    info "No secret for TokenX found ... continuing without TokenX secret"
+  fi
+}
+
 addSecretToEnvFile() {
   getAzureadSecretName
 
   getMaskinportenSecretName
+
+  getTokenXSecretName
 
   info "Fetching $APP_NAME secrets from kubernetes"
 
@@ -189,6 +202,12 @@ addSecretToEnvFile() {
 
     if [ -n "$MASKINPORTEN_SECRET_NAME" ]; then
         kubectl -n etterlatte get secret $MASKINPORTEN_SECRET_NAME -o json \
+            | jq -r '.data | map_values(@base64d) | to_entries[] | (.key | ascii_upcase) +"=" + .value' \
+            >> $APP_DIR/.env.dev-gcp
+    fi
+
+    if [ -n "$TOKENX_SECRET_NAME" ]; then
+        kubectl -n etterlatte get secret $TOKENX_SECRET_NAME -o json \
             | jq -r '.data | map_values(@base64d) | to_entries[] | (.key | ascii_upcase) +"=" + .value' \
             >> $APP_DIR/.env.dev-gcp
     fi

@@ -78,6 +78,8 @@ spec:
         extra:
           - "NAVident"
           - "azp_name"
+  tokenx:
+    enabled: true
   env:
     - name: MASKINPORTEN_WELL_KNOWN_URL
       value: https://test.maskinporten.no/.well-known/oauth-authorization-server
@@ -137,6 +139,9 @@ spec:
           permissions:
             roles:
               - les-oms-vedtak
+        - application: tokenx-token-generator
+          namespace: aura
+          cluster: dev-gcp
     outbound:
       rules:
         - application: etterlatte-vedtaksvurdering

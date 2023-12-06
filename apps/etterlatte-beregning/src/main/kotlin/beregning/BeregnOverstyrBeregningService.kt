@@ -13,6 +13,7 @@ import no.nav.etterlatte.libs.common.IntBroek
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.behandling.virkningstidspunkt
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
 import no.nav.etterlatte.libs.common.beregning.Beregningstype
@@ -44,8 +45,7 @@ class BeregnOverstyrBeregningService(
     ): Beregning {
         val grunnlag = grunnlagKlient.hentGrunnlag(behandling.id, brukerTokenInfo)
         val behandlingType = behandling.behandlingType
-        val virkningstidspunkt =
-            requireNotNull(behandling.virkningstidspunkt?.dato) { "Behandling ${behandling.id} mangler virkningstidspunkt" }
+        val virkningstidspunkt = behandling.virkningstidspunkt().dato
 
         val beregningsGrunnlag =
             requireNotNull(

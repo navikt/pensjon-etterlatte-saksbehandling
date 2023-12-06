@@ -5,6 +5,7 @@ import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
+import no.nav.etterlatte.libs.common.behandling.virkningstidspunkt
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.token.BrukerTokenInfo
@@ -29,7 +30,8 @@ class AvkortingService(
         if (behandling.behandlingType == BehandlingType.FØRSTEGANGSBEHANDLING) {
             return eksisterendeAvkorting?.let {
                 if (behandling.status == BehandlingStatus.BEREGNET) {
-                    val reberegnetAvkorting = reberegnOgLagreAvkorting(behandling.id, eksisterendeAvkorting, brukerTokenInfo)
+                    val reberegnetAvkorting =
+                        reberegnOgLagreAvkorting(behandling.id, eksisterendeAvkorting, brukerTokenInfo)
                     avkortingMedTillegg(reberegnetAvkorting, behandling)
                 } else {
                     avkortingMedTillegg(eksisterendeAvkorting, behandling)
@@ -137,7 +139,7 @@ class AvkortingService(
                 BehandlingStatus.IVERKSATT -> null
                 else -> forrigeAvkorting
             }
-        return avkorting.medYtelseFraOgMedVirkningstidspunkt(behandling.hentVirk().dato, forrigeBehandling)
+        return avkorting.medYtelseFraOgMedVirkningstidspunkt(behandling.virkningstidspunkt().dato, forrigeBehandling)
     }
 
     private suspend fun hentAvkortingForrigeBehandling(
@@ -150,7 +152,7 @@ class AvkortingService(
 
     private fun hentForrigeAvkorting(forrigeBehandlingId: UUID): Avkorting =
         avkortingRepository.hentAvkorting(forrigeBehandlingId)
-            ?: throw Exception("Fant ikke avkorting for tidligere behandling $forrigeBehandlingId")
+            ?: throw TidligereAvkortingFinnesIkkeException(forrigeBehandlingId)
 
     private suspend fun tilstandssjekk(
         behandlingId: UUID,
@@ -163,11 +165,14 @@ class AvkortingService(
     }
 }
 
-private fun DetaljertBehandling.hentVirk() = virkningstidspunkt ?: throw Exception("Mangler virkningstidspunkt for behandling $id")
-
 class AvkortingFinnesIkkeException(behandlingId: UUID) : IkkeFunnetException(
     code = "AVKORTING_IKKE_FUNNET",
     detail = "Uthenting av avkorting for behandling $behandlingId finnes ikke",
+)
+
+class TidligereAvkortingFinnesIkkeException(behandlingId: UUID) : IkkeFunnetException(
+    code = "TIDLIGERE_AVKORTING_IKKE_FUNNET",
+    detail = "Fant ikke avkorting for tidligere behandling $behandlingId",
 )
 
 class AvkortingBehandlingFeilStatus(behandlingId: UUID) : IkkeTillattException(

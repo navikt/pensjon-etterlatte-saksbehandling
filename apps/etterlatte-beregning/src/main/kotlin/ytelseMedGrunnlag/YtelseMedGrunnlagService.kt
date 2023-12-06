@@ -3,8 +3,10 @@ package no.nav.etterlatte.ytelseMedGrunnlag
 import no.nav.etterlatte.avkorting.AvkortingRepository
 import no.nav.etterlatte.beregning.BeregningRepository
 import no.nav.etterlatte.klienter.BehandlingKlient
+import no.nav.etterlatte.libs.common.behandling.virkningstidspunkt
 import no.nav.etterlatte.libs.common.beregning.YtelseMedGrunnlagDto
 import no.nav.etterlatte.libs.common.beregning.YtelseMedGrunnlagPeriodisertDto
+import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.token.BrukerTokenInfo
 import java.util.UUID
 
@@ -18,16 +20,13 @@ class YtelseMedGrunnlagService(
         brukerTokenInfo: BrukerTokenInfo,
     ): YtelseMedGrunnlagDto? {
         val avkortingUtenLoependeYtelse = avkortingRepository.hentAvkorting(behandlingId) ?: return null
-        val virkningstidspunkt =
-            behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
-                .virkningstidspunkt?.dato ?: throw Exception("Behandling $behandlingId mangler virkningstidspunkt")
-        val avkorting = avkortingUtenLoependeYtelse.medYtelseFraOgMedVirkningstidspunkt(virkningstidspunkt)
+        val virkningstidspunkt = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo).virkningstidspunkt()
+        val avkorting = avkortingUtenLoependeYtelse.medYtelseFraOgMedVirkningstidspunkt(virkningstidspunkt.dato)
 
-        val beregning = beregningRepository.hent(behandlingId)
+        val beregning = beregningRepository.hent(behandlingId) ?: throw BeregningFinnesIkkeException(behandlingId)
 
         val avkortinger =
             avkorting.avkortetYtelseFraVirkningstidspunkt.map { avkortetYtelse ->
-                beregning ?: throw Exception("Mangler beregning for behandling $behandlingId")
                 val beregningIPeriode =
                     beregning.beregningsperioder
                         .filter { it.datoFOM <= avkortetYtelse.periode.fom }
@@ -56,3 +55,8 @@ class YtelseMedGrunnlagService(
         )
     }
 }
+
+class BeregningFinnesIkkeException(behandlingId: UUID) : IkkeFunnetException(
+    code = "BEREGNING_IKKE_FUNNET",
+    detail = "Mangler beregning for behandling $behandlingId",
+)

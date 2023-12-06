@@ -39,3 +39,8 @@ data class DetaljertBehandling(
 }
 
 fun Revurderingaarsak?.girOpphoer() = this != null && utfall.girOpphoer
+
+fun DetaljertBehandling.virkningstidspunkt() =
+    requireNotNull(virkningstidspunkt) {
+        "Mangler virkningstidspunkt for behandling=$id"
+    }

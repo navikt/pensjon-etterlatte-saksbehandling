@@ -53,7 +53,7 @@ data class Sivilstand(val type: String, val relatertVedSivilstand: String?)
 data class Doedsfall(val doedsdato: String)
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-data class Foedsel(val foedselsdato: String, val foedselsaar: Int)
+data class Foedsel(val foedselsdato: String?, val foedselsaar: Int)
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class Navn(val fornavn: String, val etternavn: String)

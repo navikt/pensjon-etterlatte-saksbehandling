@@ -78,7 +78,11 @@ fun Grunnlag.mapVerge(
             return hentVergemaal(relevantVerge, behandlingId)
         }
         if (sakType == SakType.BARNEPENSJON) {
-            ForelderVerge(hentGjenlevende().hentNavn()!!.verdi.fulltNavn())
+            hentPotensiellGjenlevende()
+                ?.hentNavn()
+                ?.verdi
+                ?.fulltNavn()
+                ?.let { ForelderVerge(it) }
         } else {
             null
         }

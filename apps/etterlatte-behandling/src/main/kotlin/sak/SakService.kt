@@ -9,6 +9,7 @@ import no.nav.etterlatte.common.klienter.SkjermingKlient
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.libs.common.behandling.Flyktning
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.tilgangsstyring.filterForEnheter
@@ -52,7 +53,6 @@ interface SakService {
         sakId: Long,
         flyktning: Flyktning,
     )
-}
 
 class SakServiceImpl(
     private val dao: SakDao,

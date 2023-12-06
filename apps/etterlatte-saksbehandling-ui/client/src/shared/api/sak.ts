@@ -2,6 +2,14 @@ import { apiClient, ApiResponse } from '~shared/api/apiClient'
 import { ISak, SakType } from '~shared/types/sak'
 import { SakMedBehandlinger } from '~components/person/typer'
 
+export interface Navkontor {
+  navn: string
+}
+
+export const hentNavkontorForPerson = async (fnr: string): Promise<ApiResponse<Navkontor>> => {
+  return apiClient.post(`/personer/navkontor`, { foedselsnummer: fnr })
+}
+
 export const hentSakMedBehandlnger = async (fnr: string): Promise<ApiResponse<SakMedBehandlinger>> => {
   return apiClient.post(`/personer/behandlingerforsak`, { foedselsnummer: fnr })
 }

@@ -11,9 +11,18 @@ import { KlageListe } from '~components/person/KlageListe'
 import { tagColors } from '~shared/Tags'
 import { SakMedBehandlinger } from '~components/person/typer'
 import { mapApiResult, Result } from '~shared/api/apiUtils'
+import { useEffect } from 'react'
+import { useApiCall } from '~shared/hooks/useApiCall'
+import { hentNavkontorForPerson } from '~shared/api/sak'
+import { ApiErrorAlert } from '~ErrorBoundary'
 
-export const SakOversikt = ({ sakStatus }: { sakStatus: Result<SakMedBehandlinger>; fnr: string }) => {
+export const SakOversikt = ({ sakStatus, fnr }: { sakStatus: Result<SakMedBehandlinger>; fnr: string }) => {
   const kanBrukeKlage = useFeatureEnabledMedDefault(FEATURE_TOGGLE_KAN_BRUKE_KLAGE, false)
+  const [hentNavkontorStatus, hentNavkontor] = useApiCall(hentNavkontorForPerson)
+
+  useEffect(() => {
+    hentNavkontor(fnr)
+  }, [fnr])
 
   return (
     <GridContainer>
@@ -45,7 +54,16 @@ export const SakOversikt = ({ sakStatus }: { sakStatus: Result<SakMedBehandlinge
               </Heading>
 
               <BodyShort spacing>Denne saken tilhører enhet {sakOgBehandlinger.sak.enhet}.</BodyShort>
-
+              {mapApiResult(
+                hentNavkontorStatus,
+                <Spinner visible label="Laster navkontor ..." />,
+                () => (
+                  <ApiErrorAlert>Kunne ikke hente navkontor</ApiErrorAlert>
+                ),
+                (navkontor) => (
+                  <BodyShort spacing>Navkontor er: {navkontor.navn}</BodyShort>
+                )
+              )}
               <hr />
               <Behandlingsliste behandlinger={sakOgBehandlinger.behandlinger} sakId={sakOgBehandlinger.sak.id} />
 

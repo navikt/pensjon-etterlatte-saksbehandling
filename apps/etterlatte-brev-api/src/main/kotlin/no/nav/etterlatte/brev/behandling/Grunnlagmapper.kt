@@ -38,12 +38,15 @@ fun Grunnlag.mapAvdoede(): List<Avdoed> =
         val avdoede = hentAvdoede()
 
         return avdoede.mapNotNull { avdoed ->
-            if (avdoed.hentNavn() == null || avdoed.hentDoedsdato() == null) {
+            val navn = avdoed.hentNavn()?.verdi?.fulltNavn()
+            val doedsdato = avdoed.hentDoedsdato()?.verdi
+            if (navn == null || doedsdato == null) {
                 return@mapNotNull null
             }
+
             Avdoed(
-                navn = avdoed.hentNavn()!!.verdi.fulltNavn(),
-                doedsdato = avdoed.hentDoedsdato()!!.verdi!!,
+                navn = navn,
+                doedsdato = doedsdato,
             )
         }
     }

@@ -46,7 +46,6 @@ import no.nav.etterlatte.regler.Beregningstall
 import no.nav.etterlatte.token.Saksbehandler
 import java.math.RoundingMode
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
 
@@ -290,13 +289,7 @@ fun behandling(
     id = id,
     sak = sak,
     sakType = sakType,
-    behandlingOpprettet = LocalDateTime.now(),
-    soeknadMottattDato = null,
-    innsender = null,
     soeker = "12312312321",
-    gjenlevende = listOf(),
-    avdoed = listOf(),
-    soesken = listOf(),
     status = status,
     behandlingType = behandlingType,
     virkningstidspunkt = virkningstidspunkt,
@@ -305,7 +298,6 @@ fun behandling(
     boddEllerArbeidetUtlandet = null,
     utlandstilknytning = null,
     revurderingInfo = null,
-    enhet = "1111",
     kilde = Vedtaksloesning.GJENNY,
 )
 

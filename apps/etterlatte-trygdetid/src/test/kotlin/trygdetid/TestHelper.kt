@@ -22,7 +22,6 @@ import no.nav.etterlatte.trygdetid.TrygdetidGrunnlag
 import no.nav.etterlatte.trygdetid.TrygdetidPeriode
 import no.nav.etterlatte.trygdetid.TrygdetidType
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.Period
 import java.util.UUID
 import java.util.UUID.randomUUID
@@ -37,13 +36,7 @@ fun behandling(
     id = behandlingId,
     sak = sakId,
     sakType = SakType.BARNEPENSJON,
-    behandlingOpprettet = LocalDateTime.now(),
-    soeknadMottattDato = null,
-    innsender = null,
     soeker = "",
-    gjenlevende = null,
-    avdoed = null,
-    soesken = null,
     status = behandlingStatus,
     behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
     virkningstidspunkt = null,
@@ -52,7 +45,6 @@ fun behandling(
     revurderingsaarsak = null,
     revurderingInfo = null,
     prosesstype = Prosesstype.AUTOMATISK,
-    enhet = "",
     kilde = Vedtaksloesning.GJENNY,
 )
 

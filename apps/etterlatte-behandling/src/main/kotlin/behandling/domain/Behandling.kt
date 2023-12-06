@@ -217,13 +217,7 @@ internal fun Behandling.toDetaljertBehandlingWithPersongalleri(persongalleri: Pe
         id = id,
         sak = sak.id,
         sakType = sak.sakType,
-        behandlingOpprettet = behandlingOpprettet,
-        soeknadMottattDato = mottattDato(),
-        innsender = persongalleri.innsender,
         soeker = persongalleri.soeker,
-        gjenlevende = persongalleri.gjenlevende,
-        avdoed = persongalleri.avdoed,
-        soesken = persongalleri.soesken,
         status = status,
         behandlingType = type,
         virkningstidspunkt = virkningstidspunkt,
@@ -232,7 +226,6 @@ internal fun Behandling.toDetaljertBehandlingWithPersongalleri(persongalleri: Pe
         revurderingsaarsak = revurderingsaarsak(),
         prosesstype = prosesstype,
         revurderingInfo = revurderingInfo()?.revurderingInfo,
-        enhet = sak.enhet,
         kilde = kilde,
     )
 }

@@ -1,14 +1,12 @@
 package no.nav.etterlatte.behandling
 
 import com.fasterxml.jackson.annotation.JsonProperty
-import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerAarsak
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toNorskTid
 import java.time.LocalDate
 import java.time.YearMonth
-import java.util.UUID
 
 data class BoddEllerArbeidetUtlandetRequest(
     val boddEllerArbeidetUtlandet: Boolean,
@@ -19,16 +17,6 @@ data class BoddEllerArbeidetUtlandetRequest(
     val vurdereAvoededsTrygdeavtale: Boolean? = false,
     val skalSendeKravpakke: Boolean? = false,
 )
-
-data class ManueltOpphoerOppsummeringDto(
-    val id: UUID,
-    val virkningstidspunkt: Virkningstidspunkt?,
-    val opphoerAarsaker: List<ManueltOpphoerAarsak>,
-    val fritekstAarsak: String?,
-    val andreBehandlinger: List<BehandlingSammendrag>,
-)
-
-data class ManueltOpphoerResponse(val behandlingId: String)
 
 data class VirkningstidspunktRequest(
     @JsonProperty("dato") private val _dato: String,

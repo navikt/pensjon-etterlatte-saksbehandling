@@ -13,12 +13,8 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktService
-import no.nav.etterlatte.behandling.domain.ManueltOpphoer
 import no.nav.etterlatte.behandling.domain.TilstandException
-import no.nav.etterlatte.behandling.domain.toBehandlingSammendrag
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeService
-import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerRequest
-import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.Vedtaksloesning
@@ -43,7 +39,6 @@ internal fun Route.behandlingRoutes(
     behandlingService: BehandlingService,
     gyldighetsproevingService: GyldighetsproevingService,
     kommerBarnetTilGodeService: KommerBarnetTilGodeService,
-    manueltOpphoerService: ManueltOpphoerService,
     aktivitetspliktService: AktivitetspliktService,
     behandlingFactory: BehandlingFactory,
 ) {
@@ -99,29 +94,6 @@ internal fun Route.behandlingRoutes(
                     call.respond(HttpStatusCode.OK, kommerBarnetTilgode)
                 } catch (e: TilstandException.UgyldigTilstand) {
                     call.respond(HttpStatusCode.BadRequest, "Kunne ikke endre på feltet")
-                }
-            }
-        }
-
-        route("/manueltopphoer") {
-            get {
-                logger.info("Henter manuelt opphør oppsummering for manuelt opphør med id=$behandlingId")
-                when (
-                    val opphoerOgBehandlinger =
-                        manueltOpphoerService.hentManueltOpphoerOgAlleIverksatteBehandlingerISak(behandlingId)
-                ) {
-                    null ->
-                        call.respond(
-                            HttpStatusCode.NotFound,
-                            "Fant ikke manuelt opphør med id=$behandlingId",
-                        )
-
-                    else -> {
-                        val (opphoer, andre) = opphoerOgBehandlinger
-                        call.respond(
-                            opphoer.toManueltOpphoerOppsummmering(andre.map { it.toBehandlingSammendrag() }),
-                        )
-                    }
                 }
             }
         }
@@ -304,37 +276,4 @@ internal fun Route.behandlingRoutes(
             }
         }
     }
-
-    route("/api/behandlinger/{sakid}/manueltopphoer") {
-        post {
-            val manueltOpphoerRequest = call.receive<ManueltOpphoerRequest>()
-            logger.info("Mottat forespørsel om å gjennomføre et manuelt opphør på sak ${manueltOpphoerRequest.sakId}")
-            when (val manueltOpphoer = manueltOpphoerService.opprettManueltOpphoer(manueltOpphoerRequest)) {
-                is ManueltOpphoer -> {
-                    logger.info(
-                        "Manuelt opphør for sak ${manueltOpphoerRequest.sakId} er opprettet med behandlingId " +
-                            "${manueltOpphoer.id}",
-                    )
-                    call.respond(ManueltOpphoerResponse(behandlingId = manueltOpphoer.id.toString()))
-                }
-
-                else -> {
-                    logger.info(
-                        "Sak ${manueltOpphoerRequest.sakId} hadde ikke gyldig status for manuelt opphør, så" +
-                            "ingen manuelt opphør blir opprettet",
-                    )
-                    call.respond(HttpStatusCode.Forbidden)
-                }
-            }
-        }
-    }
 }
-
-private fun ManueltOpphoer.toManueltOpphoerOppsummmering(andreBehandlinger: List<BehandlingSammendrag>): ManueltOpphoerOppsummeringDto =
-    ManueltOpphoerOppsummeringDto(
-        id = this.id,
-        virkningstidspunkt = this.virkningstidspunkt,
-        opphoerAarsaker = this.opphoerAarsaker,
-        fritekstAarsak = this.fritekstAarsak,
-        andreBehandlinger = andreBehandlinger,
-    )

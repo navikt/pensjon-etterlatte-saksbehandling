@@ -263,8 +263,8 @@ internal class BehandlingServiceImpl(
         }
         if (behandling.utlandstilknytning?.type == UtlandstilknytningType.BOSATT_UTLAND) {
             val kravdato =
-                    request.kravdato
-                        ?: throw KravdatoMaaFinnesHvisBosattutland("Kravdato må finnes hvis bosatt utland er valgt")
+                request.kravdato
+                    ?: throw KravdatoMaaFinnesHvisBosattutland("Kravdato må finnes hvis bosatt utland er valgt")
             makstidspunktFoerSoeknad = YearMonth.from(kravdato.minusYears(3))
         }
 

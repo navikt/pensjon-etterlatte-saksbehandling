@@ -90,7 +90,7 @@ class EtterbetalingTest : BehandlingIntegrationTest() {
                     UUID.fromString(it.body())
                 }
 
-            client.post("api/behandling/${behandlingId}/utlandstilknytning") {
+            client.post("api/behandling/$behandlingId/utlandstilknytning") {
                 addAuthToken(tokenSaksbehandler)
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(

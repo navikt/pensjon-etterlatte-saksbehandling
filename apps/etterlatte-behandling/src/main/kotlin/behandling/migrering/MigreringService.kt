@@ -108,7 +108,7 @@ class MigreringService(
                                     boddArbeidetEosNordiskKonvensjon = request.erEoesBeregnet().takeIf { it },
                                     kilde = Grunnlagsopplysning.Pesys.create(),
                                     begrunnelse =
-                                    "Automatisk vurdert ved migrering fra Pesys. Vurdering av utlandsopphold kan være mangelfull.",
+                                        "Automatisk vurdert ved migrering fra Pesys. Vurdering av utlandsopphold kan være mangelfull.",
                                 ),
                         )
                     }

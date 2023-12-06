@@ -39,7 +39,6 @@ import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlientImpl
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeService
-import no.nav.etterlatte.behandling.manueltopphoer.RealManueltOpphoerService
 import no.nav.etterlatte.behandling.omregning.MigreringService
 import no.nav.etterlatte.behandling.omregning.OmregningService
 import no.nav.etterlatte.behandling.revurdering.RevurderingDao
@@ -268,15 +267,6 @@ internal class ApplicationContext(
     val gyldighetsproevingService =
         GyldighetsproevingServiceImpl(
             behandlingDao = behandlingDao,
-        )
-
-    val manueltOpphoerService =
-        RealManueltOpphoerService(
-            oppgaveService = oppgaveService,
-            behandlingDao = behandlingDao,
-            behandlingHendelser = behandlingsHendelser,
-            hendelseDao = hendelseDao,
-            grunnlagService = grunnlagsService,
         )
 
     val omregningService =

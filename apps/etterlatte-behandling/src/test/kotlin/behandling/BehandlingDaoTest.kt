@@ -6,7 +6,6 @@ import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.domain.ManueltOpphoer
 import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
-import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerAarsak
 import no.nav.etterlatte.behandling.revurdering.RevurderingDao
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
@@ -31,7 +30,6 @@ import no.nav.etterlatte.libs.database.POSTGRES_VERSION
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.opprettBehandling
 import no.nav.etterlatte.sak.SakDao
-import no.nav.etterlatte.saksbehandlerToken
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -176,41 +174,6 @@ internal class BehandlingDaoTest {
     }
 
     @Test
-    fun `skal opprette manuelt opphoer`() {
-        val sakId = sakRepo.opprettSak("123", SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr).id
-        val virkDato = YearMonth.of(2022, 8)
-
-        val opprettBehandling =
-            opprettBehandling(
-                type = BehandlingType.MANUELT_OPPHOER,
-                sakId = sakId,
-                virkningstidspunkt =
-                    Virkningstidspunkt(
-                        virkDato,
-                        Grunnlagsopplysning.Saksbehandler.create(
-                            saksbehandlerToken,
-                        ),
-                        "begrunnelse",
-                    ),
-                opphoerAarsaker =
-                    listOf(
-                        ManueltOpphoerAarsak.SOESKEN_DOED,
-                        ManueltOpphoerAarsak.GJENLEVENDE_FORELDER_DOED,
-                    ),
-                fritekstAarsak = "Umulig å revurdere i nytt saksbehandlingssystem",
-            )
-
-        behandlingRepo.opprettBehandling(opprettBehandling)
-        val opprettetBehandling = requireNotNull(behandlingRepo.hentBehandling(opprettBehandling.id)) as ManueltOpphoer
-
-        assertEquals(sakId, opprettetBehandling.sak.id)
-        assertTrue(ManueltOpphoerAarsak.SOESKEN_DOED in opprettetBehandling.opphoerAarsaker)
-        assertTrue(ManueltOpphoerAarsak.GJENLEVENDE_FORELDER_DOED in opprettetBehandling.opphoerAarsaker)
-        assertEquals(virkDato, opprettetBehandling.virkningstidspunkt?.dato)
-        assertEquals("Umulig å revurdere i nytt saksbehandlingssystem", opprettetBehandling.fritekstAarsak)
-    }
-
-    @Test
     fun `Skal legge til gyldighetsproeving til en opprettet behandling`() {
         val sak1 = sakRepo.opprettSak("123", SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr).id
 
@@ -350,8 +313,8 @@ internal class BehandlingDaoTest {
                 sakId = sak1,
                 opphoerAarsaker =
                     listOf(
-                        ManueltOpphoerAarsak.SOESKEN_DOED,
-                        ManueltOpphoerAarsak.GJENLEVENDE_FORELDER_DOED,
+                        "SOESKEN_DOED",
+                        "GJENLEVENDE_FORELDER_DOED",
                     ),
             ).also {
                 behandlingRepo.opprettBehandling(it)

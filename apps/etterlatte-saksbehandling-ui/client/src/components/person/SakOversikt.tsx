@@ -1,11 +1,9 @@
 import { Behandlingsliste } from './Behandlingsliste'
 import styled from 'styled-components'
-import { ManueltOpphoerModal } from './ManueltOpphoerModal'
 import { FlexRow, GridContainer } from '~shared/styled'
 import Spinner from '~shared/Spinner'
 import RelevanteHendelser from '~components/person/uhaandtereHendelser/RelevanteHendelser'
 import { Alert, BodyShort, Heading, HStack, Tag } from '@navikt/ds-react'
-import { SakType } from '~shared/types/sak'
 import { formaterEnumTilLesbarString, formaterSakstype } from '~utils/formattering'
 import { FEATURE_TOGGLE_KAN_BRUKE_KLAGE, OpprettKlage } from '~components/person/OpprettKlage'
 import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
@@ -43,12 +41,6 @@ export const SakOversikt = ({ sakStatus }: { sakStatus: Result<SakMedBehandlinge
 
                 <FlexRow justify="right">
                   <OpprettKlage sakId={sakOgBehandlinger.sak.id} />
-                  {sakOgBehandlinger.sak.sakType === SakType.BARNEPENSJON && (
-                    <ManueltOpphoerModal
-                      sakId={sakOgBehandlinger.sak.id}
-                      behandlingliste={sakOgBehandlinger.behandlinger}
-                    />
-                  )}
                 </FlexRow>
               </Heading>
 

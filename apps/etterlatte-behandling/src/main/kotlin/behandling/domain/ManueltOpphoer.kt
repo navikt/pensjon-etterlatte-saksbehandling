@@ -1,6 +1,5 @@
 package no.nav.etterlatte.behandling.domain
 
-import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerAarsak
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -24,7 +23,7 @@ data class ManueltOpphoer(
     override val virkningstidspunkt: Virkningstidspunkt?,
     override val utlandstilknytning: Utlandstilknytning?,
     override val boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet?,
-    val opphoerAarsaker: List<ManueltOpphoerAarsak>,
+    val opphoerAarsaker: List<String>,
     val fritekstAarsak: String?,
     override val prosesstype: Prosesstype = Prosesstype.MANUELL,
 ) : Behandling() {

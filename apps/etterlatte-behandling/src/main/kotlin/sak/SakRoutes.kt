@@ -176,7 +176,7 @@ internal fun Route.sakWebRoutes(
                             val sak =
                                 sakService.finnSaker(
                                     fnr.value,
-                                ).let { it.ifEmpty { throw PersonManglerSak("Personen har ikke sak") } }.first()
+                                ).firstOrNull() ?: throw PersonManglerSak("Personen har ikke sak")
                             val utlandstilknytning = behandlingService.hentUtlandstilknytningForSak(sak.id)
                             val sakMedUtlandstilknytning = SakMedUtlandstilknytning.fra(sak, utlandstilknytning)
 

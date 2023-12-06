@@ -566,34 +566,30 @@ class TrygdetidServiceImpl(
         val avdoededsDatoOpplysning =
             avodedDoedsdato?.verdi?.let {
                 Opplysningsgrunnlag.ny(TrygdetidOpplysningType.DOEDSDATO, avodedDoedsdato.kilde, it)
-            } ?: run {
-                throw TrygdetidMaaHaAvdoedDoedsdatoException(behandlingId)
-            }
+            } ?: throw TrygdetidMaaHaAvdoedDoedsdatoException(behandlingId)
 
         val foedselsdato = avdoed.hentFoedselsdato()
-        val foedselsdatVerdi =
-            foedselsdato?.verdi ?: run {
-                throw TrygdetidMaaHaFoedselsdatoException(behandlingId)
-            }
+        val foedselsdatoVerdi =
+            foedselsdato?.verdi ?: throw TrygdetidMaaHaFoedselsdatoException(behandlingId)
 
         val opplysninger =
             listOf(
                 Opplysningsgrunnlag.ny(
                     TrygdetidOpplysningType.FOEDSELSDATO,
                     foedselsdato.kilde,
-                    foedselsdatVerdi,
+                    foedselsdatoVerdi,
                 ),
                 Opplysningsgrunnlag.ny(
                     TrygdetidOpplysningType.FYLT_16,
                     kildeFoedselsnummer(),
                     // Ifølge paragraf § 3-5 regnes trygdetid fra tidspunkt en person er fylt 16 år
-                    foedselsdatVerdi.plusYears(16),
+                    foedselsdatoVerdi.plusYears(16),
                 ),
                 Opplysningsgrunnlag.ny(
                     TrygdetidOpplysningType.FYLLER_66,
                     kildeFoedselsnummer(),
                     // Ifølge paragraf § 3-5 regnes trygdetid frem til tidspunkt en person er fyller 66 pår
-                    foedselsdatVerdi.plusYears(SIST_FREMTIDIG_TRYGDETID_ALDER),
+                    foedselsdatoVerdi.plusYears(SIST_FREMTIDIG_TRYGDETID_ALDER),
                 ),
                 avdoededsDatoOpplysning,
             )

@@ -6,6 +6,7 @@ import no.nav.etterlatte.libs.common.IntBroek
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
+import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tilbakekreving.Tilbakekreving
 import no.nav.etterlatte.libs.common.trygdetid.BeregnetTrygdetidGrunnlagDto
@@ -23,6 +24,7 @@ data class GenerellBrevData(
     val forenkletVedtak: ForenkletVedtak,
     val spraak: Spraak,
     val systemkilde: Vedtaksloesning,
+    val utlandstilknytning: Utlandstilknytning? = null,
     val revurderingsaarsak: Revurderingaarsak? = null,
 )
 

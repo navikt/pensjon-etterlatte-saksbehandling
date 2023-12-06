@@ -322,6 +322,7 @@ internal class BrevdataFacadeImplTest {
             behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
             virkningstidspunkt = null,
             boddEllerArbeidetUtlandet = null,
+            utlandstilknytning = null,
             revurderingsaarsak = null,
             prosesstype = Prosesstype.MANUELL,
             revurderingInfo = null,

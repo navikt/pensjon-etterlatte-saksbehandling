@@ -42,15 +42,12 @@ data class OmregnetBPNyttRegelverk(
                 val (pesysUtenlandstilknytning, yrkesskade) =
                     when (migreringRequest) {
                         null -> {
-                            val utenlandstilkytning = false
-                            /*
-                            TODO Venter på EY-3191
-                                requireNotNull(generellBrevData.utenlandstilkytning  {
-                                    "Kan ikke velge mellom bosatt utland eller bosatt norge i brev hvis migreringrequesten mangler grunnlag"
+                            val utlandstilknytning =
+                                requireNotNull(generellBrevData.utlandstilknytning) {
+                                    "Mangler utlandstilknytning for behandling=${generellBrevData.behandlingId}"
                                 }
-                             */
-                            val yrkesskade = false // TODO
-                            Pair(utenlandstilkytning, yrkesskade)
+                            val yrkesskade = false // Må redigere brev manuelt hvis yrkesskade
+                            Pair(utlandstilknytning.type, yrkesskade)
                         }
                         else -> Pair(migreringRequest.utlandstilknytningType, migreringRequest.yrkesskade)
                     }

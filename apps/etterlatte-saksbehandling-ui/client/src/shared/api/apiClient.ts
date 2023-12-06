@@ -40,7 +40,7 @@ export async function retrieveData(response: Response): Promise<any> {
 }
 
 export const restbodyShouldHaveData = (noDataFlag: boolean | undefined, status: number) => {
-  return !noDataFlag && (status === 200 || status === 207 || status === 206)
+  return !noDataFlag && (status === 200 || status === 201 || status === 207 || status === 206)
 }
 
 async function apiFetcher<T>(props: Options): Promise<ApiResponse<T>> {

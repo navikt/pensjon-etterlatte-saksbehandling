@@ -13,6 +13,7 @@ import { InfoWrapper } from '~components/behandling/soeknadsoversikt/styled'
 
 import { isPending } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
+import { formaterFnr } from '~utils/formattering'
 
 enum MottakerType {
   PRIVATPERSON = 'PRIVATPERSON',
@@ -55,10 +56,10 @@ export default function RedigerMottakerModal({ brev, oppdater, vergeadresse }: P
   function formaterAdresse(vergeadresse: Mottaker) {
     return (
       <>
-        {!vergeadresse.foedselsnummer && !vergeadresse.orgnummer && `Fødselsnummer/orgnummer: Ikke registrert.` && (
-          <br />
-        )}
-        {vergeadresse.foedselsnummer && `Fødselsnummer: ${vergeadresse.foedselsnummer.value}`}
+        {!vergeadresse.foedselsnummer && !vergeadresse.orgnummer && `Fødselsnummer/orgnummer: Ikke registrert.`}
+        {!vergeadresse.foedselsnummer && !vergeadresse.orgnummer && <br />}
+        {vergeadresse.foedselsnummer && `Fødselsnummer: ${formaterFnr(vergeadresse.foedselsnummer.value)}`}
+        {vergeadresse.foedselsnummer && <br />}
         {vergeadresse.navn}
         {vergeadresse.navn && <br />}
         {vergeadresse.adresse.adresselinje1}

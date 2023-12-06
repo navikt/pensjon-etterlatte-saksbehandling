@@ -1,12 +1,14 @@
 package no.nav.etterlatte.migrering.verifisering
 
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
+import no.nav.etterlatte.libs.common.logging.samleExceptions
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.rapidsandrivers.migrering.MigreringRequest
 import org.slf4j.LoggerFactory
 
-internal class GjenlevendeForelderPatcher(val pdlKlient: PDLKlient) {
+internal class GjenlevendeForelderPatcher(val pdlKlient: PDLKlient, private val personHenter: PersonHenter) {
     private val sikkerlogg = sikkerlogger()
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -25,18 +27,43 @@ internal class GjenlevendeForelderPatcher(val pdlKlient: PDLKlient) {
         val avdoede = request.avdoedForelder.map { it.ident.value }.toSet()
         val avdodeIPDL = persongalleri.avdoed.toSet()
         if (avdoede != avdodeIPDL) {
-            logger.error(
-                "Migreringrequest med pesysid=${request.pesysId} har forskjellige avdøde enn det vi finner " +
-                    "i PDL.",
-            )
-            sikkerlogg.error("Fikk $avdodeIPDL fra PDL, forventa $avdoede. Hele persongalleriet: $persongalleri")
-            return Result.failure(IllegalStateException("Migreringsrequest har forskjellig sett med avdøde enn det vi har i følge PDL"))
+            val pdlresultat = sjekkAvdoedForelderMotPDL(request, avdodeIPDL, avdoede, persongalleri)
+            if (pdlresultat != null) {
+                logger.error("Fant ikke avdød forelder i PDL. Se sikkerlogg for detaljer")
+                sikkerlogg.error("Fant ikke avdød forelder i PDL", pdlresultat)
+                return Result.failure(pdlresultat)
+            }
         }
         if (persongalleri.gjenlevende.size == 1) {
             return Result.success(request.copy(gjenlevendeForelder = Folkeregisteridentifikator.of(persongalleri.gjenlevende.single())))
         }
         logger.warn("Fant ${persongalleri.gjenlevende.size} gjenlevende i PDL, patcher ikke request")
         return Result.success(request)
+    }
+
+    private fun sjekkAvdoedForelderMotPDL(
+        request: MigreringRequest,
+        avdodeIPDL: Set<String>,
+        avdoede: Set<String>,
+        persongalleri: Persongalleri?,
+    ): Exception? {
+        logger.warn(
+            "Migreringrequest med pesysid=${request.pesysId} har forskjellige avdøde enn det vi finner " +
+                "i PDL.",
+        )
+        sikkerlogg.warn("Fikk $avdodeIPDL fra PDL, forventa $avdoede. Hele persongalleriet: $persongalleri")
+
+        val exceptions =
+            request.avdoedForelder.map { personHenter.hentPerson(PersonRolle.AVDOED, it.ident) }
+                .filter { it.isFailure }
+                .mapNotNull { it.exceptionOrNull() }
+                .map { RuntimeException(it) }
+
+        return if (exceptions.isNotEmpty()) {
+            samleExceptions(exceptions)
+        } else {
+            null
+        }
     }
 
     private fun hentPersongalleri(soeker: Folkeregisteridentifikator): Persongalleri? {

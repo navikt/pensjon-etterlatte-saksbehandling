@@ -3,17 +3,24 @@ package sak
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
 import io.ktor.client.request.header
+import io.ktor.client.request.post
+import io.ktor.client.request.setBody
+import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
+import io.ktor.http.contentType
 import io.ktor.server.config.HoconApplicationConfig
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
+import io.mockk.just
 import io.mockk.mockk
+import io.mockk.runs
 import no.nav.etterlatte.attachMockContext
 import no.nav.etterlatte.behandling.BehandlingRequestLogger
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
 import no.nav.etterlatte.oppgave.OppgaveService
+import no.nav.etterlatte.sak.EnhetRequest
 import no.nav.etterlatte.sak.SakService
 import no.nav.etterlatte.sak.TilgangService
 import no.nav.etterlatte.sak.sakSystemRoutes
@@ -55,6 +62,24 @@ internal class SakRoutesTest {
     @AfterAll
     fun after() {
         mockOAuth2Server.shutdown()
+    }
+
+    @Test
+    fun `Returnerer ok ved endring av enhet med EnhetsRequest`() {
+        coEvery {
+            sakService.oppdaterEnhetForSaker(any())
+            oppgaveService.oppdaterEnhetForRelaterteOppgaver(any())
+        } just runs
+
+        withTestApplication { client ->
+            val response =
+                client.post("/api/sak/1/endre_enhet") {
+                    header(HttpHeaders.Authorization, "Bearer $token")
+                    contentType(ContentType.Application.Json)
+                    setBody(EnhetRequest(enhet = "4808"))
+                }
+            assertEquals(200, response.status.value)
+        }
     }
 
     @Test

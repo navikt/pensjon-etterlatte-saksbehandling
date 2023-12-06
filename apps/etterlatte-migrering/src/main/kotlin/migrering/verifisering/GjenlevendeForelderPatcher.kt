@@ -28,8 +28,10 @@ internal class GjenlevendeForelderPatcher(val pdlKlient: PDLKlient, private val 
         val avdodeIPDL = persongalleri.avdoed.toSet()
         if (avdoede != avdodeIPDL) {
             val pdlresultat = sjekkAvdoedForelderMotPDL(request, avdodeIPDL, avdoede, persongalleri)
-            if (pdlresultat.isNotEmpty()) {
-                return Result.failure(samleExceptions(pdlresultat))
+            if (pdlresultat != null) {
+                logger.error("Fant ikke avdød forelder i PDL. Se sikkerlogg for detaljer")
+                sikkerlogg.error("Fant ikke avdød forelder i PDL", pdlresultat)
+                return Result.failure(pdlresultat)
             }
         }
         if (persongalleri.gjenlevende.size == 1) {
@@ -44,17 +46,24 @@ internal class GjenlevendeForelderPatcher(val pdlKlient: PDLKlient, private val 
         avdodeIPDL: Set<String>,
         avdoede: Set<String>,
         persongalleri: Persongalleri?,
-    ): List<RuntimeException> {
+    ): Exception? {
         logger.warn(
             "Migreringrequest med pesysid=${request.pesysId} har forskjellige avdøde enn det vi finner " +
                 "i PDL.",
         )
         sikkerlogg.warn("Fikk $avdodeIPDL fra PDL, forventa $avdoede. Hele persongalleriet: $persongalleri")
 
-        return request.avdoedForelder.map { personHenter.hentPerson(PersonRolle.AVDOED, it.ident) }
-            .filter { it.isFailure }
-            .mapNotNull { it.exceptionOrNull() }
-            .map { RuntimeException(it) }
+        val exceptions =
+            request.avdoedForelder.map { personHenter.hentPerson(PersonRolle.AVDOED, it.ident) }
+                .filter { it.isFailure }
+                .mapNotNull { it.exceptionOrNull() }
+                .map { RuntimeException(it) }
+
+        return if (exceptions.isNotEmpty()) {
+            samleExceptions(exceptions)
+        } else {
+            null
+        }
     }
 
     private fun hentPersongalleri(soeker: Folkeregisteridentifikator): Persongalleri? {

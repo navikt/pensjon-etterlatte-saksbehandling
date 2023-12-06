@@ -118,7 +118,6 @@ export const Barnepensjonberegningssammendrag = ({
   soesken: BeregningsdetaljerPerson[] | undefined
   soeker: BeregningsdetaljerPerson
 }) => {
-  const datoPeriodeFom = parseISO(beregningsperiode.datoFOM)
   if (overstyring) {
     return (
       <>
@@ -130,9 +129,9 @@ export const Barnepensjonberegningssammendrag = ({
     )
   }
 
+  const datoPeriodeFom = parseISO(beregningsperiode.datoFOM)
   const erPaaNyttRegelverk = isAfter(datoPeriodeFom, SISTE_MAANED_GAMMELT_REGELVERK)
 
-  console.log('datoer', datoPeriodeFom, erPaaNyttRegelverk)
   return (
     <>
       {erPaaNyttRegelverk ? (

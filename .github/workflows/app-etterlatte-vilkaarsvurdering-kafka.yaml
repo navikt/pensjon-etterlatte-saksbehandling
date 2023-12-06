@@ -19,7 +19,6 @@ on:
       - libs/saksbehandling-common/**
       - libs/etterlatte-migrering-model/**
       - libs/etterlatte-vilkaarsvurdering-model/**
-      - libs/ktor2client-auth-clientcredentials/**
       - libs/testdata/**
       - gradle/libs.versions.toml
   pull_request:
@@ -30,7 +29,6 @@ on:
       - libs/saksbehandling-common/**
       - libs/etterlatte-migrering-model/**
       - libs/etterlatte-vilkaarsvurdering-model/**
-      - libs/ktor2client-auth-clientcredentials/**
       - libs/testdata/**
       - gradle/libs.versions.toml
 

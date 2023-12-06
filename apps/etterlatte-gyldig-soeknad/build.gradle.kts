@@ -8,7 +8,6 @@ dependencies {
     implementation(project(":libs:etterlatte-behandling-model"))
     implementation(libs.etterlatte.common)
 
-    implementation(project(":libs:ktor2client-auth-clientcredentials"))
     implementation(project(":libs:etterlatte-ktor"))
 
     implementation(libs.ktor2.okhttp)

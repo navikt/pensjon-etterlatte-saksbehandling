@@ -11,7 +11,6 @@ dependencies {
     implementation(project(":libs:saksbehandling-common"))
     implementation(project(":libs:etterlatte-ktor"))
     implementation(project(":libs:etterlatte-sporingslogg"))
-    implementation(project(":libs:ktor2client-auth-clientcredentials"))
     implementation(project(":libs:etterlatte-pdl-model"))
     implementation(project(":libs:etterlatte-funksjonsbrytere"))
 

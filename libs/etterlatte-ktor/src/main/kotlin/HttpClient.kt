@@ -13,6 +13,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpMessageBuilder
 import io.ktor.serialization.jackson.JacksonConverter
+import no.nav.etterlatte.ktor.client.ClientCallLogging
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.security.ktor.clientCredential

@@ -32,9 +32,6 @@ internal class Verifiserer(
             feil.add(PDLException(feilen).also { it.addSuppressed(feilen) })
         }
         patchedRequest.onSuccess {
-            if (request.gjenlevendeForelder == null) {
-                feil.add(GjenlevendeForelderMangler)
-            }
             if (request.enhet.nr == "2103") {
                 feil.add(StrengtFortrolig)
             }
@@ -121,11 +118,6 @@ sealed class Verifiseringsfeil : Exception()
 data class FinsIkkeIPDL(val rolle: PersonRolle, val id: Folkeregisteridentifikator) : Verifiseringsfeil() {
     override val message: String
         get() = toString()
-}
-
-object GjenlevendeForelderMangler : Verifiseringsfeil() {
-    override val message: String
-        get() = "Gjenlevende forelder er null i det vi får fra Pesys"
 }
 
 object BarnetHarVerge : Verifiseringsfeil() {

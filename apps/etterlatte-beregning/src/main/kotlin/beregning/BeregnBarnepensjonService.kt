@@ -334,25 +334,32 @@ class BeregnBarnepensjonService(
                             beskrivelse = "Avdød er ukjent. Trygdetid er satt manuelt.",
                         ),
                     )
-                else ->
-                    PeriodisertBeregningGrunnlag.lagKomplettPeriodisertGrunnlag(
-                        grunnlag.hentAvdoede().toPeriodisertAvdoedeGrunnlag().mapVerdier { fnrListe ->
+                else -> {
+                    if (grunnlag.hentAvdoede().any { it.hentDoedsdato() == null }) {
+                        KonstantGrunnlag(
                             FaktumNode(
-                                verdi = fnrListe,
+                                verdi = emptyList(),
                                 kilde = beregningsGrunnlag.kilde,
-                                beskrivelse = "Hvilke foreldre er døde",
-                            )
-                        },
-                        fom,
-                        tom,
-                    )
+                                beskrivelse = "Avdød mangler dødsdato. Trygdetid skal være satt manuelt eller overstyrt.",
+                            ),
+                        )
+                    } else {
+                        PeriodisertBeregningGrunnlag.lagKomplettPeriodisertGrunnlag(
+                            grunnlag.hentAvdoede().toPeriodisertAvdoedeGrunnlag().mapVerdier { fnrListe ->
+                                FaktumNode(
+                                    verdi = fnrListe,
+                                    kilde = beregningsGrunnlag.kilde,
+                                    beskrivelse = "Hvilke foreldre er døde",
+                                )
+                            },
+                            fom,
+                            tom,
+                        )
+                    }
+                }
             },
         brukNyttRegelverk = featureToggleService.isEnabled(BrukNyttRegelverkIBeregning, false),
     )
-
-    companion object {
-        private const val FASTSATT_TRYGDETID_I_PILOT = 40
-    }
 
     private fun List<Grunnlagsdata<JsonNode>>.toPeriodisertAvdoedeGrunnlag(): List<GrunnlagMedPeriode<List<Folkeregisteridentifikator>>> {
         val doede = mutableListOf<Folkeregisteridentifikator>()

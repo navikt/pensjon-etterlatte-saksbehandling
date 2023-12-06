@@ -37,7 +37,10 @@ fun Grunnlag.mapAvdoede(): List<Avdoed> =
     with(this.familie) {
         val avdoede = hentAvdoede()
 
-        return avdoede.map { avdoed ->
+        return avdoede.mapNotNull { avdoed ->
+            if (avdoed.hentNavn() == null || avdoed.hentDoedsdato() == null) {
+                return@mapNotNull null
+            }
             Avdoed(
                 navn = avdoed.hentNavn()!!.verdi.fulltNavn(),
                 doedsdato = avdoed.hentDoedsdato()!!.verdi!!,

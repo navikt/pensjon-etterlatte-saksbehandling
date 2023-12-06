@@ -6,7 +6,7 @@ import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.etterlatte.common.Enheter
-import no.nav.etterlatte.libs.common.behandling.UtenlandstilknytningType
+import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.etterlatte.migrering.grunnlag.GrunnlagKlient
 import no.nav.etterlatte.migrering.grunnlag.Utenlandstilknytningsjekker
@@ -25,7 +25,7 @@ class UtenlandstilknytningsjekkerTest {
         coEvery { grunnlagKlient.hentBostedsland(any()) } returns VurdertBostedsland(Bostedsland.NOR.name)
         val request = lagRequest(Enheter.STEINKJER).also { every { it.erFolketrygdberegnet() } returns true }
         val resultat = sjekker.finnUtenlandstilknytning(request)
-        assertEquals(UtenlandstilknytningType.NASJONAL, resultat)
+        assertEquals(UtlandstilknytningType.NASJONAL, resultat)
     }
 
     @Test
@@ -47,7 +47,7 @@ class UtenlandstilknytningsjekkerTest {
     fun `bosatt i Norge enhet Aalesund utland gir utlandstilsnitt`() {
         coEvery { grunnlagKlient.hentBostedsland(any()) } returns VurdertBostedsland(Bostedsland.NOR.name)
         val resultat = sjekker.finnUtenlandstilknytning(lagRequest(Enheter.AALESUND_UTLAND))
-        assertEquals(UtenlandstilknytningType.UTLANDSTILSNITT, resultat)
+        assertEquals(UtlandstilknytningType.UTLANDSTILSNITT, resultat)
     }
 
     @Test
@@ -61,7 +61,7 @@ class UtenlandstilknytningsjekkerTest {
     fun `bosatt utland enhet utland gir bosatt_utland`() {
         coEvery { grunnlagKlient.hentBostedsland(any()) } returns VurdertBostedsland(Bostedsland.XUK.name)
         val resultat = sjekker.finnUtenlandstilknytning(lagRequest(Enheter.UTLAND))
-        assertEquals(UtenlandstilknytningType.BOSATT_UTLAND, resultat)
+        assertEquals(UtlandstilknytningType.BOSATT_UTLAND, resultat)
     }
 
     @Test

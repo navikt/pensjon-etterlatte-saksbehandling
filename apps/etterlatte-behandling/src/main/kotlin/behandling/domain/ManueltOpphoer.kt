@@ -6,6 +6,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
+import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -20,6 +21,7 @@ data class ManueltOpphoer(
     override val sistEndret: LocalDateTime,
     override val status: BehandlingStatus,
     override val virkningstidspunkt: Virkningstidspunkt?,
+    override val utlandstilknytning: Utlandstilknytning?,
     override val boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet?,
     val opphoerAarsaker: List<String>,
     val fritekstAarsak: String?,

@@ -30,7 +30,7 @@ spec:
     limits:
       memory: 256Mi
     requests:
-      cpu: 25m
+      cpu: 10m
       memory: 192Mi
   replicas:
     min: 1
@@ -96,6 +96,12 @@ spec:
         - application: pensjon-pen
           namespace: pensjondeployer
           cluster: prod-fss
+          permissions:
+            roles:
+              - les-oms-vedtak
+        - application: pensjon-selvbetjening-soknad-alder-backend
+          namespace: pensjonselvbetjening
+          cluster: prod-gcp
           permissions:
             roles:
               - les-oms-vedtak

@@ -2,6 +2,9 @@ package no.nav.etterlatte.grunnlag.adresse
 
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
+import no.nav.etterlatte.libs.common.person.BrevMottaker
+import no.nav.etterlatte.libs.common.person.MottakerAdresse
+import no.nav.etterlatte.libs.common.person.MottakerFoedselsnummer
 
 @JsonTypeInfo(
     use = JsonTypeInfo.Id.NAME,
@@ -40,7 +43,7 @@ data class VergeSamhandlerFormat(
             navn = navn ?: "Ukjent",
             foedselsnummer = null,
             adresse =
-                Adresse(
+                MottakerAdresse(
                     adresseType = adressetypeFromLand(landkode, land),
                     adresselinje1 = linje1,
                     adresselinje2 = linje2,
@@ -64,9 +67,9 @@ data class VergePersonFormat(
     override fun tilFrittstaendeBrevMottaker(): BrevMottaker {
         return BrevMottaker(
             navn = navn ?: "Ukjent",
-            foedselsnummer = Foedselsnummer(vergePid),
+            foedselsnummer = MottakerFoedselsnummer(vergePid),
             adresse =
-                Adresse(
+                MottakerAdresse(
                     adresseType = adressetypeFromLand(adresse.landkode, adresse.land),
                     adresselinje1 = adresse.adresselinje1,
                     adresselinje2 = adresse.adresselinje2,
@@ -92,7 +95,7 @@ data class RegoppslagFormat(
             navn = navn ?: "Ukjent",
             foedselsnummer = null,
             adresse =
-                Adresse(
+                MottakerAdresse(
                     adresseType = adressetypeFromLand(adresse.landkode, adresse.land),
                     adresselinje1 = adresse.adresselinje1,
                     adresselinje2 = adresse.adresselinje2,

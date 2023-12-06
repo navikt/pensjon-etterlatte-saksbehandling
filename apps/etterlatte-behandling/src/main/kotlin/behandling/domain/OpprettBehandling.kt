@@ -3,8 +3,10 @@ package no.nav.etterlatte.behandling.domain
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
+import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
+import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import java.time.LocalDateTime
@@ -16,6 +18,8 @@ data class OpprettBehandling(
     val status: BehandlingStatus,
     val soeknadMottattDato: LocalDateTime? = null,
     val virkningstidspunkt: Virkningstidspunkt? = null,
+    val utlandstilknytning: Utlandstilknytning? = null,
+    val boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet? = null,
     val revurderingsAarsak: Revurderingaarsak? = null,
     val opphoerAarsaker: List<String>? = null,
     val fritekstAarsak: String? = null,

@@ -193,14 +193,6 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
                 Assertions.assertEquals(HttpStatusCode.OK, it.status)
             }
 
-            httpClient.post("/api/personer/utenlandstilknytning") {
-                addAuthToken(tokenSaksbehandler)
-                contentType(ContentType.Application.Json)
-                setBody(FoedselsnummerDTO(fnr))
-            }.let {
-                Assertions.assertEquals(HttpStatusCode.OK, it.status)
-            }
-
             httpClient.post("/grunnlagsendringshendelse/adressebeskyttelse") {
                 addAuthToken(systemBruker)
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
@@ -212,22 +204,6 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
                         endringstype = Endringstype.OPPRETTET,
                     ),
                 )
-            }
-
-            httpClient.post("/api/personer/utenlandstilknytning") {
-                addAuthToken(tokenSaksbehandler)
-                contentType(ContentType.Application.Json)
-                setBody(FoedselsnummerDTO(fnr))
-            }.let {
-                Assertions.assertEquals(HttpStatusCode.NotFound, it.status)
-            }
-
-            httpClient.post("/api/personer/utenlandstilknytning") {
-                addAuthToken(systemBruker)
-                contentType(ContentType.Application.Json)
-                setBody(FoedselsnummerDTO(fnr))
-            }.let {
-                Assertions.assertEquals(HttpStatusCode.OK, it.status)
             }
         }
     }

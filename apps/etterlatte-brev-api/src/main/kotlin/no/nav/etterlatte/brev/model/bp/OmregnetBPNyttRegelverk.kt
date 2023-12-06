@@ -7,7 +7,7 @@ import no.nav.etterlatte.brev.model.BrevData
 import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.libs.common.IntBroek
 import no.nav.etterlatte.libs.common.Vedtaksloesning
-import no.nav.etterlatte.libs.common.behandling.UtenlandstilknytningType
+import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.pensjon.brevbaker.api.model.Kroner
 
 data class OmregnetBPNyttRegelverk(
@@ -42,22 +42,19 @@ data class OmregnetBPNyttRegelverk(
                 val (pesysUtenlandstilknytning, yrkesskade) =
                     when (migreringRequest) {
                         null -> {
-                            val utenlandstilkytning = false
-                            /*
-                            TODO Venter på EY-3191
-                                requireNotNull(generellBrevData.utenlandstilkytning  {
-                                    "Kan ikke velge mellom bosatt utland eller bosatt norge i brev hvis migreringrequesten mangler grunnlag"
+                            val utlandstilknytning =
+                                requireNotNull(generellBrevData.utlandstilknytning) {
+                                    "Mangler utlandstilknytning for behandling=${generellBrevData.behandlingId}"
                                 }
-                             */
-                            val yrkesskade = false // TODO
-                            Pair(utenlandstilkytning, yrkesskade)
+                            val yrkesskade = false // Må redigere brev manuelt hvis yrkesskade
+                            Pair(utlandstilknytning.type, yrkesskade)
                         }
-                        else -> Pair(migreringRequest.utenlandstilknytningType, migreringRequest.yrkesskade)
+                        else -> Pair(migreringRequest.utlandstilknytningType, migreringRequest.yrkesskade)
                     }
 
                 return defaultBrevdataOmregning.copy(
                     utbetaltFoerReform = Kroner(pesysUtbetaltFoerReform),
-                    erBosattUtlandet = pesysUtenlandstilknytning == UtenlandstilknytningType.BOSATT_UTLAND,
+                    erBosattUtlandet = pesysUtenlandstilknytning == UtlandstilknytningType.BOSATT_UTLAND,
                     erYrkesskade = yrkesskade,
                 )
             }

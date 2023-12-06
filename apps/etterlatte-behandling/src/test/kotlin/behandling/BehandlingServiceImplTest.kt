@@ -26,10 +26,9 @@ import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
-import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
-import no.nav.etterlatte.libs.common.behandling.Utenlandstilknytning
-import no.nav.etterlatte.libs.common.behandling.UtenlandstilknytningType
+import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
+import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
@@ -37,8 +36,6 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.personOpplysning
 import no.nav.etterlatte.revurdering
-import no.nav.etterlatte.sak.SakDao
-import no.nav.etterlatte.sak.SakMedUtenlandstilknytning
 import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.etterlatte.token.Saksbehandler
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -55,7 +52,11 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 class BehandlingServiceImplTest {
-    private val user = mockk<SaksbehandlerMedEnheterOgRoller> { every { name() } returns "ident" }
+    private val user =
+        mockk<SaksbehandlerMedEnheterOgRoller> {
+            every { name() } returns "ident"
+            every { enheter() } returns listOf(Enheter.defaultEnhet.enhetNr)
+        }
 
     @BeforeEach
     fun before() {
@@ -88,9 +89,6 @@ class BehandlingServiceImplTest {
             }
         val hendelserMock = mockk<HendelseDao>()
 
-        val featureToggleService = mockk<FeatureToggleService>()
-        every { featureToggleService.isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false) } returns false
-
         val sut =
             BehandlingServiceImpl(
                 behandlingDao = behandlingDaoMock,
@@ -99,12 +97,10 @@ class BehandlingServiceImplTest {
                 hendelseDao = hendelserMock,
                 grunnlagKlient = mockk(),
                 behandlingRequestLogger = mockk(),
-                featureToggleService = featureToggleService,
                 kommerBarnetTilGodeDao = mockk(),
                 oppgaveService = mockk(),
                 etterbetalingDao = mockk(),
                 grunnlagService = mockk(),
-                sakDao = mockk(),
             )
 
         val behandlinger = sut.hentBehandlingerForSak(1)
@@ -147,9 +143,6 @@ class BehandlingServiceImplTest {
                 every { hentGrunnlagsendringshendelseSomErTattMedIBehandling(any()) } returns emptyList()
             }
 
-        val featureToggleService = mockk<FeatureToggleService>()
-        every { featureToggleService.isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false) } returns false
-
         val oppgaveServiceMock: OppgaveService =
             mockk {
                 every { avbrytOppgaveUnderBehandling(any(), any()) } returns mockk<OppgaveIntern>()
@@ -161,7 +154,6 @@ class BehandlingServiceImplTest {
                 behandlingHendelserKafkaProducer = hendelseskanalMock,
                 hendelseDao = hendelserMock,
                 grunnlagsendringshendelseDao = grunnlagsendringshendelseDaoMock,
-                featureToggleService = featureToggleService,
                 oppgaveService = oppgaveServiceMock,
                 grunnlagKlient = GrunnlagKlientTest(),
             )
@@ -207,9 +199,6 @@ class BehandlingServiceImplTest {
                 every { hentGrunnlagsendringshendelseSomErTattMedIBehandling(any()) } returns emptyList()
             }
 
-        val featureToggleService = mockk<FeatureToggleService>()
-        every { featureToggleService.isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false) } returns false
-
         val oppgaveServiceMock: OppgaveService =
             mockk {
                 every { avbrytOppgaveUnderBehandling(any(), any()) } returns mockk<OppgaveIntern>()
@@ -221,7 +210,6 @@ class BehandlingServiceImplTest {
                 behandlingHendelserKafkaProducer = behandlingHendelserKafkaProducer,
                 grunnlagsendringshendelseDao = grunnlagsendringshendelseDaoMock,
                 hendelseDao = hendelserMock,
-                featureToggleService = featureToggleService,
                 oppgaveService = oppgaveServiceMock,
                 grunnlagKlient = GrunnlagKlientTest(),
             )
@@ -276,9 +264,6 @@ class BehandlingServiceImplTest {
                 every { hentGrunnlagsendringshendelseSomErTattMedIBehandling(any()) } returns emptyList()
             }
 
-        val featureToggleService = mockk<FeatureToggleService>()
-        every { featureToggleService.isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false) } returns false
-
         val oppgaveServiceMock: OppgaveService =
             mockk {
                 every { avbrytOppgaveUnderBehandling(any(), any()) } returns mockk<OppgaveIntern>()
@@ -290,7 +275,6 @@ class BehandlingServiceImplTest {
                 behandlingHendelserKafkaProducer = behandlingHendelserKafkaProducer,
                 grunnlagsendringshendelseDao = grunnlagsendringshendelseDaoMock,
                 hendelseDao = hendelserMock,
-                featureToggleService = featureToggleService,
                 oppgaveService = oppgaveServiceMock,
             )
 
@@ -331,9 +315,6 @@ class BehandlingServiceImplTest {
                 every { hentGrunnlagsendringshendelseSomErTattMedIBehandling(any()) } returns emptyList()
             }
 
-        val featureToggleService = mockk<FeatureToggleService>()
-        every { featureToggleService.isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false) } returns false
-
         val oppgaveServiceMock: OppgaveService =
             mockk {
                 every { avbrytOppgaveUnderBehandling(any(), any()) } returns mockk<OppgaveIntern>()
@@ -345,7 +326,6 @@ class BehandlingServiceImplTest {
                 behandlingHendelserKafkaProducer = behandlingHendelserKafkaProducerMock,
                 grunnlagsendringshendelseDao = grunnlagsendringshendelseDaoMock,
                 hendelseDao = hendelserMock,
-                featureToggleService = featureToggleService,
                 oppgaveService = oppgaveServiceMock,
                 grunnlagKlient = GrunnlagKlientTest(),
             )
@@ -388,9 +368,6 @@ class BehandlingServiceImplTest {
                 every { hentGrunnlagsendringshendelseSomErTattMedIBehandling(any()) } returns emptyList()
             }
 
-        val featureToggleService = mockk<FeatureToggleService>()
-        every { featureToggleService.isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false) } returns false
-
         val oppgaveServiceMock: OppgaveService =
             mockk {
                 every { avbrytOppgaveUnderBehandling(any(), any()) } returns mockk<OppgaveIntern>()
@@ -401,7 +378,6 @@ class BehandlingServiceImplTest {
                 behandlingHendelserKafkaProducer = behandlingHendelserKafkaProducer,
                 grunnlagsendringshendelseDao = grunnlagsendringshendelseDaoMock,
                 hendelseDao = hendelserMock,
-                featureToggleService = featureToggleService,
                 oppgaveService = oppgaveServiceMock,
                 grunnlagKlient = GrunnlagKlientTest(),
             )
@@ -425,68 +401,7 @@ class BehandlingServiceImplTest {
     }
 
     @Test
-    fun `hentBehandlingMedEnkelPersonopplysning henter behandlingsinfo og etterspurt personopplysning`() {
-        val soeknadMottatDato = LocalDateTime.parse("2020-01-01T00:00:00")
-        val behandling =
-            foerstegangsbehandling(
-                id = BEHANDLINGS_ID,
-                sakId = SAK_ID,
-                soeknadMottattDato = soeknadMottatDato,
-            )
-        val opplysningstype = Opplysningstype.AVDOED_PDL_V1
-        val doedsdato = LocalDate.parse("2020-01-01")
-
-        val personopplysning = personOpplysning(doedsdato = doedsdato)
-        val grunnlagsopplysningMedPersonopplysning = grunnlagsOpplysningMedPersonopplysning(personopplysning)
-
-        val grunnlagKlient =
-            mockk<GrunnlagKlientTest> {
-                coEvery {
-                    finnPersonOpplysning(behandling.id, opplysningstype, TOKEN)
-                } returns grunnlagsopplysningMedPersonopplysning
-                coEvery { hentPersongalleri(behandling.id, any()) } answers { callOriginal() }
-            }
-
-        val defaultSakdaoMockMedUtenlandstilknytningSattTilNasjonal =
-            mockk<SakDao> {
-                coEvery { hentUtenlandstilknytningForSak(any()) } returns
-                    SakMedUtenlandstilknytning(
-                        "1234",
-                        SakType.BARNEPENSJON,
-                        SAK_ID,
-                        Enheter.defaultEnhet.enhetNr,
-                        Utenlandstilknytning(UtenlandstilknytningType.NASJONAL, Grunnlagsopplysning.Saksbehandler.create("ident"), "beg"),
-                    )
-            }
-
-        val service =
-            lagRealGenerellBehandlingService(
-                behandlingDao =
-                    mockk {
-                        every { hentBehandling(BEHANDLINGS_ID) } returns behandling
-                    },
-                grunnlagKlient = grunnlagKlient,
-                featureToggleService =
-                    mockk {
-                        every { isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false) } returns false
-                    },
-                sakDao = defaultSakdaoMockMedUtenlandstilknytningSattTilNasjonal,
-            )
-        val behandlingMedPersonopplsning =
-            runBlocking {
-                service.hentBehandlingMedEnkelPersonopplysning(
-                    BEHANDLINGS_ID,
-                    TOKEN,
-                    opplysningstype,
-                )
-            }
-
-        assertEquals(soeknadMottatDato, behandlingMedPersonopplsning.soeknadMottattDato)
-        assertEquals(doedsdato, behandlingMedPersonopplsning.personopplysning?.opplysning?.doedsdato)
-    }
-
-    @Test
-    fun `Virkningstidspunkt krever fastsetting av utenlandstilknytning`() {
+    fun `Virkningstidspunkt krever fastsetting av utlandstilknytning`() {
         val bodyVirkningstidspunkt = Tidspunkt.parse("2017-02-01T00:00:00Z")
         val bodyBegrunnelse = "begrunnelse"
         val request = VirkningstidspunktRequest(bodyVirkningstidspunkt.toString(), bodyBegrunnelse)
@@ -494,17 +409,7 @@ class BehandlingServiceImplTest {
         val soeknadMottatt = LocalDateTime.parse("2020-01-01T00:00:00.000000000")
         val doedsdato = LocalDate.parse("2016-12-30")
 
-        val sakdaomock =
-            mockk<SakDao> {
-                coEvery { hentUtenlandstilknytningForSak(any()) } returns
-                    SakMedUtenlandstilknytning(
-                        "1234",
-                        SakType.BARNEPENSJON,
-                        SAK_ID,
-                        Enheter.defaultEnhet.enhetNr,
-                    )
-            }
-        val service = behandlingServiceMedMocks(doedsdato, soeknadMottatt, sakDao = sakdaomock)
+        val service = behandlingServiceMedMocks(doedsdato, soeknadMottatt)
         assertThrows<VirkningstidspunktMaaHaUtenlandstilknytning> {
             runBlocking {
                 service.erGyldigVirkningstidspunkt(BEHANDLINGS_ID, TOKEN, request)
@@ -513,7 +418,7 @@ class BehandlingServiceImplTest {
     }
 
     @Test
-    fun `Ved utenlandstilknytning bosatt utland må kravdato være med`() {
+    fun `Ved utlandstilknytning bosatt utland må kravdato være med`() {
         val bodyVirkningstidspunkt = Tidspunkt.parse("2017-02-01T00:00:00Z")
         val bodyBegrunnelse = "begrunnelse"
         val request = VirkningstidspunktRequest(bodyVirkningstidspunkt.toString(), bodyBegrunnelse)
@@ -521,21 +426,18 @@ class BehandlingServiceImplTest {
         val soeknadMottatt = LocalDateTime.parse("2020-01-01T00:00:00.000000000")
         val doedsdato = LocalDate.parse("2016-12-30")
 
-        val sakdaomock =
-            mockk<SakDao> {
-                coEvery { hentUtenlandstilknytningForSak(any()) } returns
-                    SakMedUtenlandstilknytning(
-                        "1234",
-                        SakType.BARNEPENSJON,
-                        SAK_ID,
-                        Enheter.defaultEnhet.enhetNr,
-                        Utenlandstilknytning(
-                            UtenlandstilknytningType.BOSATT_UTLAND,
-                            Grunnlagsopplysning.Saksbehandler.create("ident"), "beg",
-                        ),
-                    )
-            }
-        val service = behandlingServiceMedMocks(doedsdato, soeknadMottatt, sakDao = sakdaomock)
+        val service =
+            behandlingServiceMedMocks(
+                doedsdato = doedsdato,
+                soeknadMottatt = soeknadMottatt,
+                utlandstilknytning =
+                    Utlandstilknytning(
+                        UtlandstilknytningType.BOSATT_UTLAND,
+                        Grunnlagsopplysning.Saksbehandler.create("ident"),
+                        "begrunnelse",
+                    ),
+            )
+
         assertThrows<KravdatoMaaFinnesHvisBosattutland> {
             runBlocking {
                 service.erGyldigVirkningstidspunkt(BEHANDLINGS_ID, TOKEN, request)
@@ -544,7 +446,7 @@ class BehandlingServiceImplTest {
     }
 
     @Test
-    fun `Ved utenlandstilknytning bosatt utland med kravdato skal kravdato brukes ikke soeknadmottatt`() {
+    fun `Ved utlandstilknytning bosatt utland med kravdato skal kravdato brukes ikke soeknadmottatt`() {
         val bodyVirkningstidspunkt = Tidspunkt.parse("2017-02-01T00:00:00Z")
         val bodyBegrunnelse = "begrunnelse"
         val bodyKravdato = Tidspunkt.parse("2019-02-01T00:00:00Z")
@@ -553,21 +455,18 @@ class BehandlingServiceImplTest {
 
         val soeknadMottatt = LocalDateTime.parse("2009-01-01T00:00:00.000000000")
 
-        val sakdaomock =
-            mockk<SakDao> {
-                coEvery { hentUtenlandstilknytningForSak(any()) } returns
-                    SakMedUtenlandstilknytning(
-                        "1234",
-                        SakType.BARNEPENSJON,
-                        SAK_ID,
-                        Enheter.defaultEnhet.enhetNr,
-                        Utenlandstilknytning(
-                            UtenlandstilknytningType.BOSATT_UTLAND,
-                            Grunnlagsopplysning.Saksbehandler.create("ident"), "beg",
-                        ),
-                    )
-            }
-        val service = behandlingServiceMedMocks(doedsdato, soeknadMottatt, sakDao = sakdaomock)
+        val service =
+            behandlingServiceMedMocks(
+                doedsdato = doedsdato,
+                soeknadMottatt = soeknadMottatt,
+                utlandstilknytning =
+                    Utlandstilknytning(
+                        UtlandstilknytningType.BOSATT_UTLAND,
+                        Grunnlagsopplysning.Saksbehandler.create("ident"),
+                        "begrunnelse",
+                    ),
+            )
+
         val svar =
             runBlocking {
                 service.erGyldigVirkningstidspunkt(BEHANDLINGS_ID, TOKEN, request)
@@ -584,7 +483,17 @@ class BehandlingServiceImplTest {
         val soeknadMottatt = LocalDateTime.parse("2020-01-01T00:00:00.000000000")
         val doedsdato = LocalDate.parse("2016-12-30")
 
-        val service = behandlingServiceMedMocks(doedsdato, soeknadMottatt)
+        val service =
+            behandlingServiceMedMocks(
+                doedsdato = doedsdato,
+                soeknadMottatt = soeknadMottatt,
+                utlandstilknytning =
+                    Utlandstilknytning(
+                        UtlandstilknytningType.NASJONAL,
+                        Grunnlagsopplysning.Saksbehandler.create("ident"),
+                        "begrunnelse",
+                    ),
+            )
 
         val gyldigVirkningstidspunkt =
             runBlocking {
@@ -603,7 +512,17 @@ class BehandlingServiceImplTest {
         val soeknadMottatt = LocalDateTime.parse("2020-02-01T00:00:00.000000000")
         val doedsdato = LocalDate.parse("2020-01-01")
 
-        val service = behandlingServiceMedMocks(doedsdato, soeknadMottatt)
+        val service =
+            behandlingServiceMedMocks(
+                doedsdato = doedsdato,
+                soeknadMottatt = soeknadMottatt,
+                utlandstilknytning =
+                    Utlandstilknytning(
+                        UtlandstilknytningType.NASJONAL,
+                        Grunnlagsopplysning.Saksbehandler.create("ident"),
+                        "begrunnelse",
+                    ),
+            )
 
         val gyldigVirkningstidspunkt =
             runBlocking {
@@ -622,7 +541,17 @@ class BehandlingServiceImplTest {
         val soeknadMottatt = LocalDateTime.parse("2020-01-01T00:00:00.000000000")
         val doedsdato = LocalDate.parse("2016-12-30")
 
-        val service = behandlingServiceMedMocks(doedsdato, soeknadMottatt)
+        val service =
+            behandlingServiceMedMocks(
+                doedsdato = doedsdato,
+                soeknadMottatt = soeknadMottatt,
+                utlandstilknytning =
+                    Utlandstilknytning(
+                        UtlandstilknytningType.NASJONAL,
+                        Grunnlagsopplysning.Saksbehandler.create("ident"),
+                        "begrunnelse",
+                    ),
+            )
 
         val gyldigVirkningstidspunkt =
             runBlocking {
@@ -646,13 +575,9 @@ class BehandlingServiceImplTest {
                 every { alleBehandlingerISak(any()) } returns listOf(behandling1, behandling2)
             }
 
-        val featureToggleService = mockk<FeatureToggleService>()
-        every { featureToggleService.isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false) } returns false
-
         val service =
             lagRealGenerellBehandlingService(
                 behandlingDao = behandlingDaoMock,
-                featureToggleService = featureToggleService,
             )
 
         assertEquals(behandling1, service.hentSisteIverksatte(1))
@@ -679,9 +604,6 @@ class BehandlingServiceImplTest {
             }
         val hendelserMock = mockk<HendelseDao>()
 
-        val featureToggleService = mockk<FeatureToggleService>()
-        every { featureToggleService.isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false) } returns true
-
         val sut =
             BehandlingServiceImpl(
                 behandlingDao = behandlingDaoMock,
@@ -690,12 +612,10 @@ class BehandlingServiceImplTest {
                 hendelseDao = hendelserMock,
                 grunnlagKlient = mockk(),
                 behandlingRequestLogger = mockk(),
-                featureToggleService = featureToggleService,
                 kommerBarnetTilGodeDao = mockk(),
                 oppgaveService = mockk(),
                 etterbetalingDao = mockk(),
                 grunnlagService = mockk(),
-                sakDao = mockk(),
             )
 
         val behandlinger = sut.hentBehandlingerForSak(1)
@@ -729,9 +649,6 @@ class BehandlingServiceImplTest {
             }
         val hendelserMock = mockk<HendelseDao>()
 
-        val featureToggleService = mockk<FeatureToggleService>()
-        every { featureToggleService.isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false) } returns true
-
         val sut =
             BehandlingServiceImpl(
                 behandlingDao = behandlingDaoMock,
@@ -740,12 +657,10 @@ class BehandlingServiceImplTest {
                 hendelseDao = hendelserMock,
                 grunnlagKlient = mockk(),
                 behandlingRequestLogger = mockk(),
-                featureToggleService = featureToggleService,
                 kommerBarnetTilGodeDao = mockk(),
                 oppgaveService = mockk(),
                 etterbetalingDao = mockk(),
                 grunnlagService = mockk(),
-                sakDao = mockk(),
             )
 
         val behandlinger = sut.hentBehandlingerForSak(1)
@@ -777,9 +692,6 @@ class BehandlingServiceImplTest {
                 every { lagreStatus(any()) } just runs
             }
 
-        val featureToggleService = mockk<FeatureToggleService>()
-        every { featureToggleService.isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false) } returns true
-
         val sut =
             BehandlingServiceImpl(
                 behandlingDaoMock,
@@ -788,12 +700,10 @@ class BehandlingServiceImplTest {
                 mockk(),
                 mockk(),
                 mockk(),
-                featureToggleService,
                 kommerBarnetTilGodeDao = mockk(),
                 oppgaveService = mockk(),
                 etterbetalingDao = mockk(),
                 grunnlagService = mockk(),
-                sakDao = mockk(),
             )
 
         inTransaction {
@@ -815,13 +725,14 @@ class BehandlingServiceImplTest {
     private fun behandlingServiceMedMocks(
         doedsdato: LocalDate?,
         soeknadMottatt: LocalDateTime,
-        sakDao: SakDao? = null,
+        utlandstilknytning: Utlandstilknytning? = null,
     ): BehandlingServiceImpl {
         val behandling =
             foerstegangsbehandling(
                 id = BEHANDLINGS_ID,
                 sakId = SAK_ID,
                 soeknadMottattDato = soeknadMottatt,
+                utlandstilknytning = utlandstilknytning,
             )
         val personopplysning = personOpplysning(doedsdato = doedsdato)
         val grunnlagsopplysningMedPersonopplysning = grunnlagsOpplysningMedPersonopplysning(personopplysning)
@@ -833,18 +744,6 @@ class BehandlingServiceImplTest {
                 coEvery { hentPersongalleri(behandling.id, any()) } answers { callOriginal() }
             }
 
-        val defaultSakdaoMockMedUtenlandstilknytningSattTilNasjonal =
-            mockk<SakDao> {
-                coEvery { hentUtenlandstilknytningForSak(any()) } returns
-                    SakMedUtenlandstilknytning(
-                        "1234",
-                        SakType.BARNEPENSJON,
-                        SAK_ID,
-                        Enheter.defaultEnhet.enhetNr,
-                        Utenlandstilknytning(UtenlandstilknytningType.NASJONAL, Grunnlagsopplysning.Saksbehandler.create("ident"), "beg"),
-                    )
-            }
-
         return lagRealGenerellBehandlingService(
             behandlingDao =
                 mockk {
@@ -853,11 +752,6 @@ class BehandlingServiceImplTest {
                     } returns behandling
                 },
             grunnlagKlient = grunnlagKlient,
-            featureToggleService =
-                mockk {
-                    every { isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false) } returns false
-                },
-            sakDao = sakDao ?: defaultSakdaoMockMedUtenlandstilknytningSattTilNasjonal,
         )
     }
 
@@ -868,8 +762,7 @@ class BehandlingServiceImplTest {
         grunnlagsendringshendelseDao: GrunnlagsendringshendelseDao = mockk(),
         grunnlagKlient: GrunnlagKlient? = null,
         oppgaveService: OppgaveService = mockk(),
-        featureToggleService: FeatureToggleService,
-        sakDao: SakDao? = mockk(),
+        featureToggleService: FeatureToggleService = mockk<FeatureToggleService>(),
     ): BehandlingServiceImpl =
         BehandlingServiceImpl(
             behandlingDao = behandlingDao ?: mockk(),
@@ -878,12 +771,10 @@ class BehandlingServiceImplTest {
             hendelseDao = hendelseDao ?: mockk(),
             grunnlagKlient = grunnlagKlient ?: mockk(),
             behandlingRequestLogger = mockk(),
-            featureToggleService = featureToggleService,
             kommerBarnetTilGodeDao = mockk(),
             oppgaveService = oppgaveService,
             etterbetalingDao = mockk(),
             grunnlagService = mockk(),
-            sakDao = sakDao ?: mockk(),
         )
 
     companion object {

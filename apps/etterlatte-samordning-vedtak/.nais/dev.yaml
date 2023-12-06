@@ -30,7 +30,7 @@ spec:
     limits:
       memory: 256Mi
     requests:
-      cpu: 25m
+      cpu: 10m
       memory: 192Mi
   replicas:
     min: 1
@@ -116,6 +116,12 @@ spec:
         - application: pensjon-pen-q5
           namespace: pensjon-q5
           cluster: dev-fss
+          permissions:
+            roles:
+              - les-oms-vedtak
+        - application: pensjon-selvbetjening-soknad-alder-backend
+          namespace: pensjonselvbetjening
+          cluster: dev-gcp
           permissions:
             roles:
               - les-oms-vedtak

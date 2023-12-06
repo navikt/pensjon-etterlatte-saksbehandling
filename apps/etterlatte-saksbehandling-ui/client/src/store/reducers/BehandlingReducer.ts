@@ -13,7 +13,7 @@ import {
   IEtterbetaling,
   IGyldighetResultat,
   IKommerBarnetTilgode,
-  IUtenlandstilknytning,
+  IUtlandstilknytning,
   Virkningstidspunkt,
 } from '~shared/types/IDetaljertBehandling'
 import { RevurderingInfo } from '~shared/types/RevurderingInfo'
@@ -33,7 +33,7 @@ export const oppdaterBoddEllerArbeidetUtlandet = createAction<IBoddEllerArbeidet
 )
 export const oppdaterBeregning = createAction<Beregning>('behandling/beregning')
 export const oppdaterBehandlingsstatus = createAction<IBehandlingStatus>('behandling/status')
-export const oppdaterUtenlandstilknytning = createAction<IUtenlandstilknytning>('behandling/utenlandstilknytning')
+export const oppdaterUtlandstilknytning = createAction<IUtlandstilknytning>('behandling/utlandstilknytning')
 export const oppdaterEtterbetaling = createAction<IEtterbetaling | null>('behandling/etterbetaling')
 export const oppdaterBeregingsGrunnlag = createAction<BeregningsGrunnlagPostDto>('behandling/beregningsgrunnlag')
 export const oppdaterBeregingsGrunnlagOMS = createAction<BeregningsGrunnlagOMSPostDto>(
@@ -95,8 +95,8 @@ export const behandlingReducer = createReducer(initialState, (builder) => {
   builder.addCase(oppdaterBeregingsGrunnlag, (state, action) => {
     state.behandling!!.beregningsGrunnlag = action.payload
   })
-  builder.addCase(oppdaterUtenlandstilknytning, (state, action) => {
-    state.behandling!!.utenlandstilknytning = action.payload
+  builder.addCase(oppdaterUtlandstilknytning, (state, action) => {
+    state.behandling!!.utlandstilknytning = action.payload
   })
   builder.addCase(oppdaterBeregingsGrunnlagOMS, (state, action) => {
     state.behandling!!.beregningsGrunnlagOMS = action.payload

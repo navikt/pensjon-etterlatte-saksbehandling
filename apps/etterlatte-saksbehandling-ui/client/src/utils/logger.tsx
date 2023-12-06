@@ -12,7 +12,7 @@ const defaultContext = {
   appName: 'etterlatte-saksbehandling-ui-client',
 }
 
-const loggFunc = (data: any) => apiClient.post('/logg', data)
+const loggFunc = (data: any) => apiClient.post('/logg', data, true, true)
 
 export interface IStackLineNoColumnNo {
   readonly lineno: number

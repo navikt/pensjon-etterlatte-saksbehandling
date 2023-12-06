@@ -1,13 +1,10 @@
 package no.nav.etterlatte.behandling
 
 import io.ktor.http.HttpStatusCode
-import kotlinx.coroutines.async
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.User
 import no.nav.etterlatte.behandling.domain.Behandling
-import no.nav.etterlatte.behandling.domain.BehandlingMedGrunnlagsopplysning
 import no.nav.etterlatte.behandling.domain.toDetaljertBehandlingWithPersongalleri
 import no.nav.etterlatte.behandling.domain.toStatistikkBehandling
 import no.nav.etterlatte.behandling.etterbetaling.EtterbetalingDao
@@ -19,8 +16,6 @@ import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlientException
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
 import no.nav.etterlatte.common.tidligsteIverksatteVirkningstidspunkt
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseDao
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
@@ -30,17 +25,16 @@ import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.StatistikkBehandling
-import no.nav.etterlatte.libs.common.behandling.UtenlandstilknytningType
+import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
+import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
-import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.ktorobo.ThrowableErrorMessage
 import no.nav.etterlatte.oppgave.OppgaveService
-import no.nav.etterlatte.sak.SakDao
-import no.nav.etterlatte.sak.SakMedUtenlandstilknytning
 import no.nav.etterlatte.tilgangsstyring.filterForEnheter
 import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.etterlatte.vedtaksvurdering.VedtakHendelse
@@ -48,13 +42,6 @@ import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
-
-enum class BehandlingServiceFeatureToggle(private val key: String) : FeatureToggle {
-    FiltrerMedEnhetId("pensjon-etterlatte.filtrer-behandlinger-med-enhet-id"),
-    ;
-
-    override fun key() = key
-}
 
 class BehandlingFinnesIkkeException(message: String) : Exception(message)
 
@@ -95,6 +82,11 @@ interface BehandlingService {
         kravdato: LocalDate? = null,
     ): Virkningstidspunkt
 
+    fun oppdaterUtlandstilknytning(
+        behandlingId: UUID,
+        utlandstilknytning: Utlandstilknytning,
+    )
+
     fun oppdaterBoddEllerArbeidetUtlandet(
         behandlingId: UUID,
         boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet,
@@ -124,6 +116,8 @@ interface BehandlingService {
     fun hentFoersteVirk(sakId: Long): YearMonth?
 
     fun oppdaterGrunnlagOgStatus(behandlingId: UUID)
+
+    fun hentUtlandstilknytningForSak(sakId: Long): Utlandstilknytning?
 }
 
 internal class BehandlingServiceImpl(
@@ -133,12 +127,10 @@ internal class BehandlingServiceImpl(
     private val hendelseDao: HendelseDao,
     private val grunnlagKlient: GrunnlagKlient,
     private val behandlingRequestLogger: BehandlingRequestLogger,
-    private val featureToggleService: FeatureToggleService,
     private val kommerBarnetTilGodeDao: KommerBarnetTilGodeDao,
     private val oppgaveService: OppgaveService,
     private val etterbetalingDao: EtterbetalingDao,
     private val grunnlagService: GrunnlagService,
-    private val sakDao: SakDao,
 ) : BehandlingService {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -230,40 +222,6 @@ internal class BehandlingServiceImpl(
         }
     }
 
-    internal suspend fun hentBehandlingMedEnkelPersonopplysning(
-        behandlingId: UUID,
-        brukerTokenInfo: BrukerTokenInfo,
-        opplysningstype: Opplysningstype,
-    ): BehandlingMedGrunnlagsopplysning<Person> {
-        val behandling =
-            requireNotNull(inTransaction { hentBehandling(behandlingId) }) { "Fant ikke behandling $behandlingId" }
-        val personopplysning =
-            try {
-                grunnlagKlient.finnPersonOpplysning(behandlingId, opplysningstype, brukerTokenInfo)
-            } catch (e: GrunnlagKlientException) {
-                when (e.cause) {
-                    is ThrowableErrorMessage -> {
-                        if (e.cause.response?.status == HttpStatusCode.NotFound) {
-                            null
-                        } else {
-                            throw e
-                        }
-                    }
-                    else -> throw e
-                }
-            }
-        val sakUtenlandstilknytning = inTransaction { sakDao.hentUtenlandstilknytningForSak(behandling.sak.id) }
-
-        return BehandlingMedGrunnlagsopplysning(
-            behandling = behandling,
-            soeknadMottattDato = behandling.mottattDato(),
-            personopplysning = personopplysning,
-            utenlandstilknytning = sakUtenlandstilknytning,
-        ).also {
-            personopplysning?.fnr?.let { behandlingRequestLogger.loggRequest(brukerTokenInfo, it, "behandling") }
-        }
-    }
-
     override suspend fun erGyldigVirkningstidspunkt(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
@@ -273,30 +231,41 @@ internal class BehandlingServiceImpl(
         val begrunnelse = request.begrunnelse
         val harGyldigFormat = virkningstidspunkt.year in (0..9999) && begrunnelse != null
 
-        val behandlingMedDoedsdatoOgUtenlandstilknytning =
-            hentBehandlingMedEnkelPersonopplysning(
-                behandlingId,
-                brukerTokenInfo,
-                Opplysningstype.AVDOED_PDL_V1,
-            )
-        val doedsdato =
-            behandlingMedDoedsdatoOgUtenlandstilknytning.personopplysning?.let {
-                YearMonth.from(it.opplysning.doedsdato)
+        val behandling =
+            requireNotNull(inTransaction { hentBehandling(behandlingId) }) { "Fant ikke behandling $behandlingId" }
+        val personopplysning =
+            try {
+                grunnlagKlient.finnPersonOpplysning(behandlingId, Opplysningstype.AVDOED_PDL_V1, brukerTokenInfo)
+            } catch (e: GrunnlagKlientException) {
+                when (e.cause) {
+                    is ThrowableErrorMessage -> {
+                        if (e.cause.response?.status == HttpStatusCode.NotFound) {
+                            null
+                        } else {
+                            throw e
+                        }
+                    }
+
+                    else -> throw e
+                }
+            }.also {
+                it?.fnr?.let { behandlingRequestLogger.loggRequest(brukerTokenInfo, it, "behandling") }
             }
 
-        val sakMedUtenlandstilknytning = behandlingMedDoedsdatoOgUtenlandstilknytning.utenlandstilknytning
-        val soeknadMottatt = YearMonth.from(behandlingMedDoedsdatoOgUtenlandstilknytning.soeknadMottattDato)
+        val doedsdato = YearMonth.from(personopplysning?.opplysning?.doedsdato)
+        val soeknadMottatt = YearMonth.from(behandling.mottattDato())
         var makstidspunktFoerSoeknad = soeknadMottatt.minusYears(3)
 
-        if (sakMedUtenlandstilknytning?.utenlandstilknytning != null) {
-            if (sakMedUtenlandstilknytning.utenlandstilknytning.type === UtenlandstilknytningType.BOSATT_UTLAND) {
-                val kravdato = request.kravdato ?: throw KravdatoMaaFinnesHvisBosattutland("Kravdato må finnes hvis bosatt utland er valgt")
-                makstidspunktFoerSoeknad = YearMonth.from(kravdato.minusYears(3))
-            }
-        } else {
+        if (behandling.utlandstilknytning == null) {
             throw VirkningstidspunktMaaHaUtenlandstilknytning(
                 "Utenlandstilknytning må være valgt for å kunne vurdere om virkningstidspunktet er gyldig",
             )
+        }
+        if (behandling.utlandstilknytning?.type == UtlandstilknytningType.BOSATT_UTLAND) {
+            val kravdato =
+                request.kravdato
+                    ?: throw KravdatoMaaFinnesHvisBosattutland("Kravdato må finnes hvis bosatt utland er valgt")
+            makstidspunktFoerSoeknad = YearMonth.from(kravdato.minusYears(3))
         }
 
         val etterMaksTidspunktEllersMinstManedEtterDoedsfall =
@@ -326,18 +295,26 @@ internal class BehandlingServiceImpl(
             }
     }
 
+    override fun hentUtlandstilknytningForSak(sakId: Long): Utlandstilknytning? {
+        val sisteIkkeAvbrutteBehandling =
+            hentBehandlingerForSakId(sakId)
+                .filter { it.status != BehandlingStatus.AVBRUTT }
+                .maxByOrNull { it.behandlingOpprettet }
+
+        return sisteIkkeAvbrutteBehandling?.utlandstilknytning
+    }
+
     data class BehandlingMedData(
         val behandling: Behandling,
         val kommerBarnetTilgode: KommerBarnetTilgode?,
         val hendelserIBehandling: List<LagretHendelse>,
-        val sakOgUtenlandstilknytning: SakMedUtenlandstilknytning?,
     )
 
     override suspend fun hentDetaljertBehandlingMedTilbehoer(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): DetaljertBehandlingDto {
-        val (behandling, kommerBarnetTilgode, hendelserIBehandling, sakOgUtenlandstilknytning) =
+        val (behandling, kommerBarnetTilgode, hendelserIBehandling) =
             inTransaction {
                 val behandling =
                     hentBehandling(behandlingId)
@@ -347,47 +324,32 @@ internal class BehandlingServiceImpl(
                 val kommerBarnetTilgode =
                     kommerBarnetTilGodeDao.hentKommerBarnetTilGode(behandlingId)
                         .takeIf { behandling.sak.sakType == SakType.BARNEPENSJON }
-                val sakOgUtenlandstilknytning = sakDao.hentUtenlandstilknytningForSak(behandling.sak.id)
-                BehandlingMedData(behandling, kommerBarnetTilgode, hendelserIBehandling, sakOgUtenlandstilknytning)
+                BehandlingMedData(behandling, kommerBarnetTilgode, hendelserIBehandling)
             }
 
         val sakId = behandling.sak.id
         val sakType = behandling.sak.sakType
 
         logger.info("Hentet behandling for $behandlingId")
-        return coroutineScope {
-            val soeker =
-                async {
-                    grunnlagKlient.finnPersonOpplysning(
-                        behandlingId,
-                        Opplysningstype.SOEKER_PDL_V1,
-                        brukerTokenInfo,
-                    )
-                }
-            logger.info("Hentet Opplysningstype.SOEKER_PDL_V1 for $behandlingId")
 
-            DetaljertBehandlingDto(
-                id = behandling.id,
-                sakId = sakId,
-                sakType = sakType,
-                gyldighetsprøving = behandling.gyldighetsproeving(),
-                kommerBarnetTilgode = kommerBarnetTilgode,
-                soeknadMottattDato = behandling.mottattDato(),
-                virkningstidspunkt = behandling.virkningstidspunkt,
-                utenlandstilknytning = sakOgUtenlandstilknytning?.utenlandstilknytning,
-                boddEllerArbeidetUtlandet = behandling.boddEllerArbeidetUtlandet,
-                status = behandling.status,
-                hendelser = hendelserIBehandling,
-                behandlingType = behandling.type,
-                søker = soeker.await()?.opplysning,
-                revurderingsaarsak = behandling.revurderingsaarsak(),
-                revurderinginfo = behandling.revurderingInfo(),
-                begrunnelse = behandling.begrunnelse(),
-                etterbetaling = inTransaction { etterbetalingDao.hentEtterbetaling(behandlingId) },
-            ).also {
-                soeker.await()?.fnr?.let { behandlingRequestLogger.loggRequest(brukerTokenInfo, it, "behandling") }
-            }
-        }
+        return DetaljertBehandlingDto(
+            id = behandling.id,
+            sakId = sakId,
+            sakType = sakType,
+            gyldighetsprøving = behandling.gyldighetsproeving(),
+            kommerBarnetTilgode = kommerBarnetTilgode,
+            soeknadMottattDato = behandling.mottattDato(),
+            virkningstidspunkt = behandling.virkningstidspunkt,
+            utlandstilknytning = behandling.utlandstilknytning,
+            boddEllerArbeidetUtlandet = behandling.boddEllerArbeidetUtlandet,
+            status = behandling.status,
+            hendelser = hendelserIBehandling,
+            behandlingType = behandling.type,
+            revurderingsaarsak = behandling.revurderingsaarsak(),
+            revurderinginfo = behandling.revurderingInfo(),
+            begrunnelse = behandling.begrunnelse(),
+            etterbetaling = inTransaction { etterbetalingDao.hentEtterbetaling(behandlingId) },
+        )
     }
 
     override fun registrerBehandlingHendelse(
@@ -477,26 +439,32 @@ internal class BehandlingServiceImpl(
         }
     }
 
+    override fun oppdaterUtlandstilknytning(
+        behandlingId: UUID,
+        utlandstilknytning: Utlandstilknytning,
+    ) {
+        val behandling =
+            hentBehandling(behandlingId)
+                ?: throw InternfeilException("Kunne ikke oppdatere utlandstilknytning fordi behandlingen ikke finnes")
+
+        behandling.oppdaterUtlandstilknytning(utlandstilknytning)
+            .also {
+                behandlingDao.lagreUtlandstilknytning(behandlingId, utlandstilknytning)
+                behandlingDao.lagreStatus(it)
+            }
+    }
+
     private fun List<Behandling>.filterForEnheter() =
         this.filterBehandlingerForEnheter(
-            featureToggleService = featureToggleService,
             user = Kontekst.get().AppUser,
         )
 
     private fun hentBehandlingOrThrow(behandlingId: UUID) =
-        (
-            behandlingDao.hentBehandling(behandlingId)
-                ?: throw BehandlingNotFoundException("Fant ikke behandling med id=$behandlingId")
-        )
+        behandlingDao.hentBehandling(behandlingId)
+            ?: throw BehandlingNotFoundException("Fant ikke behandling med id=$behandlingId")
 }
 
-fun <T : Behandling> List<T>.filterBehandlingerForEnheter(
-    featureToggleService: FeatureToggleService,
-    user: User,
-) = this.filterForEnheter(
-    featureToggleService,
-    BehandlingServiceFeatureToggle.FiltrerMedEnhetId,
-    user,
-) { item, enheter ->
-    enheter.contains(item.sak.enhet)
-}
+fun <T : Behandling> List<T>.filterBehandlingerForEnheter(user: User) =
+    this.filterForEnheter(user) { item, enheter ->
+        enheter.contains(item.sak.enhet)
+    }

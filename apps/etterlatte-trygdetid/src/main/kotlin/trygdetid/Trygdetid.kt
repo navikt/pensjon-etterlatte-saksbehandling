@@ -74,14 +74,14 @@ data class Opplysningsgrunnlag(
     companion object {
         fun ny(
             type: TrygdetidOpplysningType,
-            kilde: Grunnlagsopplysning.Kilde?,
-            verdi: LocalDate?,
+            kilde: Grunnlagsopplysning.Kilde,
+            verdi: LocalDate,
         ): Opplysningsgrunnlag =
             Opplysningsgrunnlag(
                 id = randomUUID(),
                 type = type,
-                opplysning = verdi?.toJsonNode() ?: throw Exception("Mangler opplysning"),
-                kilde = kilde ?: throw Exception("Mangler kilde"),
+                opplysning = verdi.toJsonNode(),
+                kilde = kilde,
             )
     }
 }

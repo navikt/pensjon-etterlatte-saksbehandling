@@ -1,11 +1,9 @@
 package no.nav.etterlatte.sak
 
-import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.etterlatte.behandling.objectMapper
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.libs.common.behandling.Flyktning
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.behandling.Utenlandstilknytning
+import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.database.setJsonb
@@ -14,49 +12,28 @@ import no.nav.etterlatte.libs.database.toList
 import java.sql.Connection
 import java.sql.ResultSet
 
-data class SakMedUtenlandstilknytning(
+data class SakMedUtlandstilknytning(
     val ident: String,
     val sakType: SakType,
     val id: Long,
     val enhet: String,
-    val utenlandstilknytning: Utenlandstilknytning? = null,
-)
+    val utlandstilknytning: Utlandstilknytning?,
+) {
+    companion object {
+        fun fra(
+            sak: Sak,
+            utlandstilknytning: Utlandstilknytning?,
+        ) = SakMedUtlandstilknytning(
+            ident = sak.ident,
+            sakType = sak.sakType,
+            id = sak.id,
+            enhet = sak.enhet,
+            utlandstilknytning = utlandstilknytning,
+        )
+    }
+}
 
 class SakDao(private val connection: () -> Connection) {
-    fun hentUtenlandstilknytningForSak(sakId: Long): SakMedUtenlandstilknytning? {
-        with(connection()) {
-            val statement =
-                prepareStatement(
-                    "SELECT * from sak where id = ?",
-                )
-            statement.setLong(1, sakId)
-            return statement.executeQuery().singleOrNull {
-                SakMedUtenlandstilknytning(
-                    sakType = enumValueOf(getString("sakType")),
-                    ident = getString("fnr"),
-                    id = getLong("id"),
-                    enhet = getString("enhet"),
-                    utenlandstilknytning = getString("utenlandstilknytning")?.let { objectMapper.readValue(it) },
-                )
-            }
-        }
-    }
-
-    fun oppdaterUtenlandstilknytning(
-        sakId: Long,
-        utenlandstilknytning: Utenlandstilknytning,
-    ) {
-        with(connection()) {
-            val statement =
-                prepareStatement(
-                    "UPDATE sak set utenlandstilknytning = ? where id = ?",
-                )
-            statement.setJsonb(1, utenlandstilknytning)
-            statement.setLong(2, sakId)
-            statement.executeUpdate()
-        }
-    }
-
     fun oppdaterFlyktning(
         sakId: Long,
         flyktning: Flyktning,

@@ -18,12 +18,11 @@ import no.nav.etterlatte.attachMockContext
 import no.nav.etterlatte.behandling.BehandlingRequestLogger
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
-import no.nav.etterlatte.libs.common.behandling.UtenlandstilknytningType
 import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
 import no.nav.etterlatte.oppgave.OppgaveService
+import no.nav.etterlatte.sak.EnhetRequest
 import no.nav.etterlatte.sak.SakService
 import no.nav.etterlatte.sak.TilgangService
-import no.nav.etterlatte.sak.UtenlandstilknytningRequest
 import no.nav.etterlatte.sak.sakSystemRoutes
 import no.nav.etterlatte.sak.sakWebRoutes
 import no.nav.etterlatte.withTestApplicationBuilder
@@ -66,19 +65,19 @@ internal class SakRoutesTest {
     }
 
     @Test
-    fun `kan oppdatere utenlandstilknytning`() {
+    fun `Returnerer ok ved endring av enhet med EnhetsRequest`() {
         coEvery {
-            sakService.oppdaterUtenlandstilknytning(any(), any())
+            sakService.oppdaterEnhetForSaker(any())
+            oppgaveService.oppdaterEnhetForRelaterteOppgaver(any())
         } just runs
 
         withTestApplication { client ->
             val response =
-                client.post("/api/sak/1/utenlandstilknytning") {
+                client.post("/api/sak/1/endre_enhet") {
                     header(HttpHeaders.Authorization, "Bearer $token")
                     contentType(ContentType.Application.Json)
-                    setBody(UtenlandstilknytningRequest(UtenlandstilknytningType.BOSATT_UTLAND, "Test"))
+                    setBody(EnhetRequest(enhet = "4808"))
                 }
-
             assertEquals(200, response.status.value)
         }
     }

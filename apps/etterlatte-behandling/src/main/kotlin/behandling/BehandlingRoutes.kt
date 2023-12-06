@@ -25,6 +25,7 @@ import no.nav.etterlatte.libs.common.behandling.JaNeiMedBegrunnelse
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.NyBehandlingRequest
 import no.nav.etterlatte.libs.common.behandling.OpprettAktivitetspliktOppfolging
+import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
 import no.nav.etterlatte.libs.common.behandlingId
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
@@ -32,6 +33,7 @@ import no.nav.etterlatte.libs.common.hentNavidentFraToken
 import no.nav.etterlatte.libs.common.kunSaksbehandler
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
+import no.nav.etterlatte.sak.UtlandstilknytningRequest
 
 internal fun Route.behandlingRoutes(
     behandlingService: BehandlingService,
@@ -132,6 +134,34 @@ internal fun Route.behandlingRoutes(
                         contentType = ContentType.Application.Json,
                         status = HttpStatusCode.OK,
                         text = FastsettVirkningstidspunktResponse.from(virkningstidspunkt).toJson(),
+                    )
+                } catch (e: TilstandException.UgyldigTilstand) {
+                    call.respond(HttpStatusCode.BadRequest, "Kan ikke endre feltet")
+                }
+            }
+        }
+
+        post("/utlandstilknytning") {
+            hentNavidentFraToken { navIdent ->
+                logger.debug("Prøver å fastsette utlandstilknytning")
+                val body = call.receive<UtlandstilknytningRequest>()
+
+                try {
+                    val utlandstilknytning =
+                        Utlandstilknytning(
+                            type = body.utlandstilknytningType,
+                            kilde = Grunnlagsopplysning.Saksbehandler.create(navIdent),
+                            begrunnelse = body.begrunnelse,
+                        )
+
+                    inTransaction {
+                        behandlingService.oppdaterUtlandstilknytning(behandlingId, utlandstilknytning)
+                    }
+
+                    call.respondText(
+                        contentType = ContentType.Application.Json,
+                        status = HttpStatusCode.OK,
+                        text = utlandstilknytning.toJson(),
                     )
                 } catch (e: TilstandException.UgyldigTilstand) {
                     call.respond(HttpStatusCode.BadRequest, "Kan ikke endre feltet")

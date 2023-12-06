@@ -65,6 +65,15 @@ class StatusPagesKonfigurasjon(private val sikkerLogg: Logger) {
                         ),
                     )
 
+                HttpStatusCode.Unauthorized ->
+                    call.respond(
+                        ForespoerselException(
+                            status = 401,
+                            code = "UNAUTHORIZED",
+                            detail = "Forespørselen er ikke autentisert",
+                        ),
+                    )
+
                 HttpStatusCode.Forbidden ->
                     call.respond(
                         IkkeTillattException(

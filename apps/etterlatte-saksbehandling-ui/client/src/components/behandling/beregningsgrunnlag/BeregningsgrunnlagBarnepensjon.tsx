@@ -36,6 +36,7 @@ import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 
 import { isPending, isSuccess } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
+import { behandlingGjelderBarnepensjonPaaNyttRegelverk } from '~components/behandling/vilkaarsvurdering/utils'
 
 const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer }) => {
   const { behandling } = props
@@ -77,13 +78,13 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
         personopplysninger?.soeker?.opplysning.foedselsnummer as string
       )) ??
     []
-  const harSoesken = soesken.length > 0
+  const skalViseSoeskenjustering = soesken.length > 0 && !behandlingGjelderBarnepensjonPaaNyttRegelverk(behandling)
 
   const onSubmit = () => {
-    if (harSoesken && !(soeskenGrunnlagsData || behandling.beregningsGrunnlag?.soeskenMedIBeregning)) {
+    if (skalViseSoeskenjustering && !(soeskenGrunnlagsData || behandling.beregningsGrunnlag?.soeskenMedIBeregning)) {
       setSoeskenJusteringMangler(true)
     }
-    if (behandling.beregningsGrunnlag?.soeskenMedIBeregning || soeskenGrunnlagsData || !harSoesken) {
+    if (behandling.beregningsGrunnlag?.soeskenMedIBeregning || soeskenGrunnlagsData || !skalViseSoeskenjustering) {
       dispatch(resetBeregning())
       const beregningsgrunnlag = {
         soeskenMedIBeregning: soeskenGrunnlagsData
@@ -127,7 +128,7 @@ const BeregningsgrunnlagBarnepensjon = (props: { behandling: IBehandlingReducer 
             }}
           />
         )}
-        {isSuccess(beregningsgrunnlag) && (
+        {isSuccess(beregningsgrunnlag) && skalViseSoeskenjustering && (
           <Soeskenjustering
             behandling={behandling}
             onSubmit={(soeskenGrunnlag) => setSoeskenGrunnlagsData(soeskenGrunnlag)}

@@ -26,11 +26,7 @@ import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.common.IngenEnhetFunnetException
 import no.nav.etterlatte.common.klienter.PdlKlient
 import no.nav.etterlatte.common.klienter.SkjermingKlient
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.behandling.Utenlandstilknytning
-import no.nav.etterlatte.libs.common.behandling.UtenlandstilknytningType
-import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.GeografiskTilknytning
 import no.nav.etterlatte.libs.common.sak.Sak
@@ -50,7 +46,6 @@ internal class SakServiceTest {
     private val sakDao = mockk<SakDao>()
     private val pdlKlient = mockk<PdlKlient>()
     private val norg2Klient = mockk<Norg2Klient>()
-    private val featureToggleService = mockk<FeatureToggleService>()
     private val enhetService = mockk<EnhetService>()
     private val skjermingKlient = mockk<SkjermingKlient>()
 
@@ -61,7 +56,7 @@ internal class SakServiceTest {
 
     @AfterEach
     fun after() {
-        confirmVerified(sakDao, pdlKlient, norg2Klient, featureToggleService)
+        confirmVerified(sakDao, pdlKlient, norg2Klient)
     }
 
     private fun saksbehandlerKontekst(nasjonalTilgang: Boolean = false) {
@@ -159,17 +154,14 @@ internal class SakServiceTest {
                 ),
             )
 
-        every { featureToggleService.isEnabled(SakServiceFeatureToggle.FiltrerMedEnhetId, false) } returns true
-
         val service: SakService =
-            SakServiceImpl(sakDao, pdlKlient, norg2Klient, featureToggleService, skjermingKlient)
+            SakServiceImpl(sakDao, pdlKlient, norg2Klient, skjermingKlient)
 
         val saker = service.finnSaker(KONTANT_FOT.value)
 
         saker.size shouldBe 1
 
         verify(exactly = 1) { sakDao.finnSaker(KONTANT_FOT.value) }
-        verify(exactly = 1) { featureToggleService.isEnabled(SakServiceFeatureToggle.FiltrerMedEnhetId, false) }
     }
 
     @Test
@@ -191,17 +183,14 @@ internal class SakServiceTest {
                 ),
             )
 
-        every { featureToggleService.isEnabled(SakServiceFeatureToggle.FiltrerMedEnhetId, false) } returns true
-
         val service: SakService =
-            SakServiceImpl(sakDao, pdlKlient, norg2Klient, featureToggleService, skjermingKlient)
+            SakServiceImpl(sakDao, pdlKlient, norg2Klient, skjermingKlient)
 
         val saker = service.finnSaker(KONTANT_FOT.value)
 
         saker.size shouldBe 0
 
         verify(exactly = 1) { sakDao.finnSaker(KONTANT_FOT.value) }
-        verify(exactly = 1) { featureToggleService.isEnabled(SakServiceFeatureToggle.FiltrerMedEnhetId, false) }
     }
 
     @Test
@@ -223,17 +212,14 @@ internal class SakServiceTest {
                 ),
             )
 
-        every { featureToggleService.isEnabled(SakServiceFeatureToggle.FiltrerMedEnhetId, false) } returns true
-
         val service: SakService =
-            SakServiceImpl(sakDao, pdlKlient, norg2Klient, featureToggleService, skjermingKlient)
+            SakServiceImpl(sakDao, pdlKlient, norg2Klient, skjermingKlient)
 
         val saker = service.finnSaker(KONTANT_FOT.value)
 
         saker.size shouldBe 1
 
         verify(exactly = 1) { sakDao.finnSaker(KONTANT_FOT.value) }
-        verify(exactly = 1) { featureToggleService.isEnabled(SakServiceFeatureToggle.FiltrerMedEnhetId, false) }
     }
 
     @Test
@@ -244,7 +230,7 @@ internal class SakServiceTest {
         } throws responseException
 
         val service: SakService =
-            SakServiceImpl(sakDao, pdlKlient, norg2Klient, featureToggleService, skjermingKlient)
+            SakServiceImpl(sakDao, pdlKlient, norg2Klient, skjermingKlient)
 
         val thrown =
             assertThrows<ResponseException> {
@@ -271,7 +257,7 @@ internal class SakServiceTest {
         every { norg2Klient.hentEnheterForOmraade(SakType.BARNEPENSJON.tema, "0301") } returns emptyList()
 
         val service: SakService =
-            SakServiceImpl(sakDao, pdlKlient, norg2Klient, featureToggleService, skjermingKlient)
+            SakServiceImpl(sakDao, pdlKlient, norg2Klient, skjermingKlient)
 
         val thrown =
             assertThrows<IngenEnhetFunnetException> {
@@ -309,7 +295,7 @@ internal class SakServiceTest {
             )
 
         val service: SakService =
-            SakServiceImpl(sakDao, pdlKlient, norg2Klient, featureToggleService, skjermingKlient)
+            SakServiceImpl(sakDao, pdlKlient, norg2Klient, skjermingKlient)
 
         val sak = service.finnEllerOpprettSak(KONTANT_FOT.value, SakType.BARNEPENSJON)
 
@@ -328,83 +314,6 @@ internal class SakServiceTest {
         verify(exactly = 1) {
             sakDao.opprettSak(KONTANT_FOT.value, SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
         }
-    }
-
-    @Test
-    fun `Må ha en sak for å kunne hente utenlandstilknytning`() {
-        every { sakDao.finnSaker(KONTANT_FOT.value) } returns
-            emptyList()
-        val service: SakService =
-            SakServiceImpl(sakDao, pdlKlient, norg2Klient, featureToggleService, skjermingKlient)
-        assertThrows<BrukerManglerSak> { service.hentSakMedUtenlandstilknytning(KONTANT_FOT.value) }
-
-        verify { sakDao.finnSaker(KONTANT_FOT.value) }
-    }
-
-    @Test
-    fun `Må kun ha en sak for å kunne hente utenlandstilknytning`() {
-        val sak =
-            Sak(
-                id = 1L,
-                ident = KONTANT_FOT.value,
-                sakType = SakType.BARNEPENSJON,
-                enhet = Enheter.STEINKJER.enhetNr,
-            )
-        val sakto =
-            Sak(
-                id = 2L,
-                ident = KONTANT_FOT.value,
-                sakType = SakType.BARNEPENSJON,
-                enhet = Enheter.STEINKJER.enhetNr,
-            )
-        every { sakDao.finnSaker(KONTANT_FOT.value) } returns
-            listOf(sak, sakto)
-        val service: SakService =
-            SakServiceImpl(sakDao, pdlKlient, norg2Klient, featureToggleService, skjermingKlient)
-        assertThrows<BrukerHarMerEnnEnSak> { service.hentSakMedUtenlandstilknytning(KONTANT_FOT.value) }
-
-        verify { sakDao.finnSaker(KONTANT_FOT.value) }
-    }
-
-    @Test
-    fun `kan hente sak med utenlandstilknytning`() {
-        val sak =
-            Sak(
-                id = 1L,
-                ident = KONTANT_FOT.value,
-                sakType = SakType.BARNEPENSJON,
-                enhet = Enheter.STEINKJER.enhetNr,
-            )
-        every { sakDao.finnSaker(KONTANT_FOT.value) } returns
-            listOf(
-                sak,
-            )
-
-        val sakMedUtenlandstilknytning =
-            SakMedUtenlandstilknytning(
-                id = sak.id,
-                ident = KONTANT_FOT.value,
-                sakType = sak.sakType,
-                enhet = sak.enhet,
-                utenlandstilknytning =
-                    Utenlandstilknytning(
-                        UtenlandstilknytningType.BOSATT_UTLAND,
-                        Grunnlagsopplysning.Saksbehandler.create("ident"),
-                        "begrunnelse",
-                    ),
-            )
-
-        every { sakDao.hentUtenlandstilknytningForSak(sak.id) } returns
-            sakMedUtenlandstilknytning
-
-        val service: SakService =
-            SakServiceImpl(sakDao, pdlKlient, norg2Klient, featureToggleService, skjermingKlient)
-
-        val hentSakMedUtenlandstilknytning = service.hentSakMedUtenlandstilknytning(KONTANT_FOT.value)
-        hentSakMedUtenlandstilknytning shouldBe sakMedUtenlandstilknytning
-
-        verify { sakDao.hentUtenlandstilknytningForSak(sak.id) }
-        verify { sakDao.finnSaker(KONTANT_FOT.value) }
     }
 
     @Test
@@ -432,7 +341,7 @@ internal class SakServiceTest {
         every { sakDao.oppdaterAdresseBeskyttelse(any(), any()) } returns 1
 
         val service: SakService =
-            SakServiceImpl(sakDao, pdlKlient, norg2Klient, featureToggleService, skjermingKlient)
+            SakServiceImpl(sakDao, pdlKlient, norg2Klient, skjermingKlient)
 
         val sak =
             service.finnEllerOpprettSak(
@@ -483,17 +392,14 @@ internal class SakServiceTest {
                 ),
             )
 
-        every { featureToggleService.isEnabled(SakServiceFeatureToggle.FiltrerMedEnhetId, false) } returns true
-
         val service: SakService =
-            SakServiceImpl(sakDao, pdlKlient, norg2Klient, featureToggleService, skjermingKlient)
+            SakServiceImpl(sakDao, pdlKlient, norg2Klient, skjermingKlient)
 
         val saker = service.finnSaker(KONTANT_FOT.value)
 
         saker.size shouldBe 1
 
         verify(exactly = 1) { sakDao.finnSaker(KONTANT_FOT.value) }
-        verify(exactly = 1) { featureToggleService.isEnabled(SakServiceFeatureToggle.FiltrerMedEnhetId, false) }
     }
 
     @Test
@@ -521,7 +427,7 @@ internal class SakServiceTest {
             )
 
         val service: SakService =
-            SakServiceImpl(sakDao, pdlKlient, norg2Klient, featureToggleService, skjermingKlient)
+            SakServiceImpl(sakDao, pdlKlient, norg2Klient, skjermingKlient)
         val sak = service.finnEllerOpprettSak(KONTANT_FOT.value, SakType.BARNEPENSJON)
 
         sak shouldBe

@@ -44,6 +44,7 @@ class DetaljertBehandlingTest {
             behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
             virkningstidspunkt = null,
             boddEllerArbeidetUtlandet = null,
+            utlandstilknytning = null,
             revurderingsaarsak = revurderingsaarsak,
             prosesstype = Prosesstype.MANUELL,
             revurderingInfo = null,

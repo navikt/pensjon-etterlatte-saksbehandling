@@ -10,32 +10,16 @@ import no.nav.etterlatte.common.IngenEnhetFunnetException
 import no.nav.etterlatte.common.IngenGeografiskOmraadeFunnetForEnhet
 import no.nav.etterlatte.common.klienter.PdlKlient
 import no.nav.etterlatte.common.klienter.SkjermingKlient
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.libs.common.behandling.Flyktning
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.behandling.Utenlandstilknytning
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
-import no.nav.etterlatte.libs.common.person.maskerFnr
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.tilgangsstyring.filterForEnheter
 import org.slf4j.LoggerFactory
 
-enum class SakServiceFeatureToggle(private val key: String) : FeatureToggle {
-    FiltrerMedEnhetId("pensjon-etterlatte.filtrer-saker-med-enhet-id"),
-    ;
-
-    override fun key() = key
-}
-
 interface SakService {
-    fun oppdaterUtenlandstilknytning(
-        sakId: Long,
-        utenlandstilknytning: Utenlandstilknytning,
-    )
-
     fun hentSaker(): List<Sak>
 
     fun finnSaker(person: String): List<Sak>
@@ -74,8 +58,6 @@ interface SakService {
         adressebeskyttelseGradering: AdressebeskyttelseGradering,
     ): Int
 
-    fun hentSakMedUtenlandstilknytning(fnr: String): SakMedUtenlandstilknytning
-
     fun oppdaterFlyktning(
         sakId: Long,
         flyktning: Flyktning,
@@ -90,17 +72,9 @@ class SakServiceImpl(
     private val dao: SakDao,
     private val pdlKlient: PdlKlient,
     private val norg2Klient: Norg2Klient,
-    private val featureToggleService: FeatureToggleService,
     private val skjermingKlient: SkjermingKlient,
 ) : SakService {
     private val logger = LoggerFactory.getLogger(this::class.java)
-
-    override fun oppdaterUtenlandstilknytning(
-        sakId: Long,
-        utenlandstilknytning: Utenlandstilknytning,
-    ) {
-        dao.oppdaterUtenlandstilknytning(sakId, utenlandstilknytning)
-    }
 
     override fun oppdaterFlyktning(
         sakId: Long,
@@ -158,27 +132,6 @@ class SakServiceImpl(
         adressebeskyttelseGradering: AdressebeskyttelseGradering,
     ): Int {
         return dao.oppdaterAdresseBeskyttelse(sakId, adressebeskyttelseGradering)
-    }
-
-    override fun hentSakMedUtenlandstilknytning(fnr: String): SakMedUtenlandstilknytning {
-        val sakerForPerson = dao.finnSaker(fnr)
-
-        val sak =
-            when (sakerForPerson.size) {
-                0 -> throw BrukerManglerSak("Ingen saker funnet for maskert person: ${fnr.maskerFnr()}")
-                1 -> sakerForPerson[0]
-                else -> {
-                    logger.error(
-                        "Person har mer enn en sak, hvilken skal vise utenlandstilknytning? " +
-                            "Person ${fnr.maskerFnr()} har flere enn en sak ider ${sakerForPerson.map { it.id }} . Må håndteres",
-                    )
-                    throw BrukerHarMerEnnEnSak(
-                        "Person ${fnr.maskerFnr()} har flere enn en sak ider ${sakerForPerson.map { it.id }} . Må håndteres",
-                    )
-                }
-            }
-
-        return dao.hentUtenlandstilknytningForSak(sak.id)!!
     }
 
     private fun sjekkSkjerming(
@@ -249,7 +202,6 @@ class SakServiceImpl(
 
     private fun List<Sak>.filterForEnheter() =
         this.filterSakerForEnheter(
-            featureToggleService,
             Kontekst.get().AppUser,
         )
 
@@ -259,9 +211,7 @@ class SakServiceImpl(
         }
 }
 
-fun List<Sak>.filterSakerForEnheter(
-    featureToggleService: FeatureToggleService,
-    user: User,
-) = this.filterForEnheter(featureToggleService, SakServiceFeatureToggle.FiltrerMedEnhetId, user) { item, enheter ->
-    enheter.contains(item.enhet)
-}
+fun List<Sak>.filterSakerForEnheter(user: User) =
+    this.filterForEnheter(user) { item, enheter ->
+        enheter.contains(item.enhet)
+    }

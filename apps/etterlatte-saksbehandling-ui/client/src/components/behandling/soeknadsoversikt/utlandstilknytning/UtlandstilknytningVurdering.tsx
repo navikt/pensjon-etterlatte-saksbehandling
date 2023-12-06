@@ -1,4 +1,4 @@
-import { IBehandlingStatus, IUtenlandstilknytning, UtenlandstilknytningType } from '~shared/types/IDetaljertBehandling'
+import { IBehandlingStatus, IUtlandstilknytning, UtlandstilknytningType } from '~shared/types/IDetaljertBehandling'
 import { VurderingsboksWrapper } from '~components/vurderingsboks/VurderingsboksWrapper'
 import { Label, Radio, RadioGroup } from '@navikt/ds-react'
 import { RadioGroupWrapper } from '~components/behandling/vilkaarsvurdering/Vurdering'
@@ -7,54 +7,52 @@ import { SoeknadsoversiktTextArea } from '../SoeknadsoversiktTextArea'
 import { useAppDispatch } from '~store/Store'
 import { useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { oppdaterBehandlingsstatus, oppdaterUtenlandstilknytning } from '~store/reducers/BehandlingReducer'
-import { lagreUtenlandstilknytning } from '~shared/api/sak'
-
+import { oppdaterBehandlingsstatus, oppdaterUtlandstilknytning } from '~store/reducers/BehandlingReducer'
+import { lagreUtlandstilknytning } from '~shared/api/behandling'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 
-const UtenlandstilknytningTypeTittel: Record<UtenlandstilknytningType, string> = {
-  [UtenlandstilknytningType.NASJONAL]: 'Nasjonal',
-  [UtenlandstilknytningType.UTLANDSTILSNITT]: 'Utlandstilsnitt-bosatt Norge',
-  [UtenlandstilknytningType.BOSATT_UTLAND]: 'Bosatt utland',
+const UtlandstilknytningTypeTittel: Record<UtlandstilknytningType, string> = {
+  [UtlandstilknytningType.NASJONAL]: 'Nasjonal',
+  [UtlandstilknytningType.UTLANDSTILSNITT]: 'Utlandstilsnitt - bosatt Norge',
+  [UtlandstilknytningType.BOSATT_UTLAND]: 'Bosatt utland',
 } as const
 
-export const UtenlandstilknytningVurdering = ({
-  utenlandstilknytning,
+export const UtlandstilknytningVurdering = ({
+  utlandstilknytning,
   redigerbar,
   setVurdert,
-  sakId,
+  behandlingId,
 }: {
-  utenlandstilknytning: IUtenlandstilknytning | null
+  utlandstilknytning: IUtlandstilknytning | null
   redigerbar: boolean
   setVurdert: (visVurderingKnapp: boolean) => void
-  sakId: number
+  behandlingId: string
 }) => {
   const dispatch = useAppDispatch()
 
-  const [svar, setSvar] = useState<UtenlandstilknytningType | undefined>(utenlandstilknytning?.type)
+  const [svar, setSvar] = useState<UtlandstilknytningType | undefined>(utlandstilknytning?.type)
   const [radioError, setRadioError] = useState<string>('')
-  const [begrunnelse, setBegrunnelse] = useState<string>(utenlandstilknytning?.begrunnelse || '')
-  const [setUtenlandstilknytningStatus, setUtenlandstilknytning, resetToInitial] = useApiCall(lagreUtenlandstilknytning)
+  const [begrunnelse, setBegrunnelse] = useState<string>(utlandstilknytning?.begrunnelse || '')
+  const [setUtlandstilknytningStatus, setUtlandstilknytning, resetToInitial] = useApiCall(lagreUtlandstilknytning)
 
   const tittel = 'Hvilken type sak er dette?'
-
   const lagre = (onSuccess?: () => void) => {
     !svar ? setRadioError('Du må velge et svar') : setRadioError('')
 
     if (svar !== undefined)
-      return setUtenlandstilknytning({ sakId, begrunnelse, svar }, (utenlandstilknyningstype) => {
-        dispatch(oppdaterUtenlandstilknytning(utenlandstilknyningstype))
-        dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.OPPRETTET)) //Denne er her bare fordi denne ligger i søknadsoversikten, den burde ligget i saksoversikten etc eller tidligere i flyten
+      return setUtlandstilknytning({ behandlingId, begrunnelse, svar }, (utlandstilknyningstype) => {
+        dispatch(oppdaterUtlandstilknytning(utlandstilknyningstype))
+        dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.OPPRETTET))
         onSuccess?.()
       })
   }
 
   const reset = (onSuccess?: () => void) => {
     resetToInitial()
-    setSvar(utenlandstilknytning?.type)
+    setSvar(utlandstilknytning?.type)
     setRadioError('')
-    setBegrunnelse(utenlandstilknytning?.begrunnelse || '')
-    setVurdert(utenlandstilknytning !== null)
+    setBegrunnelse(utlandstilknytning?.begrunnelse || '')
+    setVurdert(utlandstilknytning !== null)
     onSuccess?.()
   }
 
@@ -63,9 +61,9 @@ export const UtenlandstilknytningVurdering = ({
       tittel={tittel}
       subtittelKomponent={
         <>
-          {utenlandstilknytning?.type ? (
+          {utlandstilknytning?.type ? (
             <Label as="p" size="small" style={{ marginBottom: '32px' }}>
-              {UtenlandstilknytningTypeTittel[utenlandstilknytning.type]}
+              {UtlandstilknytningTypeTittel[utlandstilknytning.type]}
             </Label>
           ) : (
             <Label as="p" size="small" style={{ marginBottom: '32px' }}>
@@ -76,17 +74,17 @@ export const UtenlandstilknytningVurdering = ({
       }
       redigerbar={redigerbar}
       vurdering={
-        utenlandstilknytning?.kilde
+        utlandstilknytning?.kilde
           ? {
-              saksbehandler: utenlandstilknytning?.kilde.ident,
-              tidspunkt: new Date(utenlandstilknytning?.kilde.tidspunkt),
+              saksbehandler: utlandstilknytning?.kilde.ident,
+              tidspunkt: new Date(utlandstilknytning?.kilde.tidspunkt),
             }
           : undefined
       }
       lagreklikk={lagre}
       avbrytklikk={reset}
-      kommentar={utenlandstilknytning?.begrunnelse}
-      defaultRediger={utenlandstilknytning === null}
+      kommentar={utlandstilknytning?.begrunnelse}
+      defaultRediger={utlandstilknytning === null}
     >
       <>
         <VurderingsTitle title={tittel} />
@@ -96,15 +94,15 @@ export const UtenlandstilknytningVurdering = ({
             size="small"
             className="radioGroup"
             onChange={(event) => {
-              setSvar(UtenlandstilknytningType[event as UtenlandstilknytningType])
+              setSvar(UtlandstilknytningType[event as UtlandstilknytningType])
               setRadioError('')
             }}
             value={svar || ''}
             error={radioError ? radioError : false}
           >
-            <Radio value={UtenlandstilknytningType.NASJONAL}>Nasjonal</Radio>
-            <Radio value={UtenlandstilknytningType.UTLANDSTILSNITT}>Utlandstilsnitt - bosatt Norge</Radio>
-            <Radio value={UtenlandstilknytningType.BOSATT_UTLAND}>Bosatt Utland</Radio>
+            <Radio value={UtlandstilknytningType.NASJONAL}>Nasjonal</Radio>
+            <Radio value={UtlandstilknytningType.UTLANDSTILSNITT}>Utlandstilsnitt - bosatt Norge</Radio>
+            <Radio value={UtlandstilknytningType.BOSATT_UTLAND}>Bosatt Utland</Radio>
           </RadioGroup>
         </RadioGroupWrapper>
         <SoeknadsoversiktTextArea
@@ -116,7 +114,7 @@ export const UtenlandstilknytningVurdering = ({
           placeholder="Valgfritt"
         />
         {isFailureHandler({
-          apiResult: setUtenlandstilknytningStatus,
+          apiResult: setUtlandstilknytningStatus,
           errorMessage: 'Kunne ikke lagre utlandstilknytning',
         })}
       </>

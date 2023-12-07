@@ -32,16 +32,11 @@ internal class Verifiserer(
             feil.addAll(sjekkAtPersonerFinsIPDL(it))
         }
 
-        val utenlandstilknytningType = utenlandstilknytningsjekker.finnUtenlandstilknytning(request)
-        if (utenlandstilknytningType == null) {
-            feil.add(ManglerUtenlandstilknytningtype)
-        }
-
         if (feil.isNotEmpty()) {
             haandterFeil(request, feil)
         }
         return patchedRequest.getOrThrow().copy(
-            utlandstilknytningType = utenlandstilknytningType,
+            utlandstilknytningType = utenlandstilknytningsjekker.finnUtenlandstilknytning(request),
         )
     }
 
@@ -111,9 +106,4 @@ object StrengtFortrolig : Verifiseringsfeil() {
 data class PDLException(val kilde: Throwable) : Verifiseringsfeil() {
     override val message: String?
         get() = kilde.message
-}
-
-object ManglerUtenlandstilknytningtype : Verifiseringsfeil() {
-    override val message: String
-        get() = "Vi klarte ikke å hente ut utenlandstilknytningstype automatisk, det trenger vi for brevet"
 }

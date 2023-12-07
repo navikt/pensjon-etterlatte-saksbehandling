@@ -32,7 +32,6 @@ import no.nav.etterlatte.libs.common.oppgave.VedtakEndringDTO
 import no.nav.etterlatte.libs.common.rapidsandrivers.SKAL_SENDE_BREV
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
 import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseType
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
@@ -68,7 +67,6 @@ import org.junit.jupiter.api.assertThrows
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
 import java.math.BigDecimal
-import java.time.LocalDateTime
 import java.time.Month
 import java.time.YearMonth
 import java.util.UUID
@@ -603,20 +601,13 @@ internal class VedtakBehandlingServiceTest {
                 sakType = SakType.BARNEPENSJON,
                 behandlingType = BehandlingType.REVURDERING,
                 revurderingsaarsak = Revurderingaarsak.REGULERING,
-                behandlingOpprettet = Tidspunkt.now().toLocalDatetimeUTC(),
-                soeknadMottattDato = null,
-                innsender = null,
                 soeker = SOEKER_FOEDSELSNUMMER.value,
-                gjenlevende = listOf(),
-                avdoed = listOf(),
-                soesken = listOf(),
                 status = BehandlingStatus.VILKAARSVURDERT,
                 virkningstidspunkt = null,
                 boddEllerArbeidetUtlandet = null,
                 utlandstilknytning = null,
                 prosesstype = Prosesstype.MANUELL,
                 revurderingInfo = null,
-                enhet = "1111",
                 kilde = Vedtaksloesning.GJENNY,
             )
         coEvery { behandlingKlientMock.hentSak(any(), any()) } returns
@@ -1206,13 +1197,7 @@ internal class VedtakBehandlingServiceTest {
             id = behandlingId,
             sak = sakId,
             sakType = saktype,
-            behandlingOpprettet = LocalDateTime.now(),
-            soeknadMottattDato = LocalDateTime.now(),
-            innsender = null,
             soeker = SOEKER_FOEDSELSNUMMER.value,
-            gjenlevende = listOf(),
-            avdoed = listOf(),
-            soesken = listOf(),
             status = BehandlingStatus.OPPRETTET,
             behandlingType =
                 if (revurderingAarsak == null) {
@@ -1231,7 +1216,6 @@ internal class VedtakBehandlingServiceTest {
             revurderingsaarsak = revurderingAarsak,
             revurderingInfo = revurderingInfo,
             prosesstype = Prosesstype.MANUELL,
-            enhet = "1111",
             kilde = Vedtaksloesning.GJENNY,
         )
 

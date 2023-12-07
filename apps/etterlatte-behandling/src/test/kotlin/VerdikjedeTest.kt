@@ -204,7 +204,7 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
                 assertEquals(HttpStatusCode.OK, it.status)
                 val behandling: DetaljertBehandling = it.body()
                 assertNotNull(behandling.id)
-                assertEquals("innsender", behandling.innsender)
+                assertEquals("soeker", behandling.soeker)
             }
 
             client.post("/api/behandling/$behandlingId/utlandstilknytning") {

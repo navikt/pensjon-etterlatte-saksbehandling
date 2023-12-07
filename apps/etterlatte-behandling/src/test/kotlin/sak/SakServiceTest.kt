@@ -18,7 +18,7 @@ import no.nav.etterlatte.KONTANT_FOT
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.SystemUser
-import no.nav.etterlatte.behandling.EnhetService
+import no.nav.etterlatte.behandling.EnhetServiceImpl
 import no.nav.etterlatte.behandling.domain.ArbeidsFordelingEnhet
 import no.nav.etterlatte.behandling.domain.SaksbehandlerEnhet
 import no.nav.etterlatte.behandling.klienter.Norg2Klient
@@ -46,7 +46,7 @@ internal class SakServiceTest {
     private val sakDao = mockk<SakDao>()
     private val pdlKlient = mockk<PdlKlient>()
     private val norg2Klient = mockk<Norg2Klient>()
-    private val enhetService = mockk<EnhetService>()
+    private val enhetService = EnhetServiceImpl(mockk(), pdlKlient, norg2Klient)
     private val skjermingKlient = mockk<SkjermingKlient>()
 
     @BeforeEach
@@ -155,7 +155,7 @@ internal class SakServiceTest {
             )
 
         val service: SakService =
-            SakServiceImpl(sakDao, pdlKlient, norg2Klient, skjermingKlient)
+            SakServiceImpl(sakDao, skjermingKlient, enhetService)
 
         val saker = service.finnSaker(KONTANT_FOT.value)
 
@@ -184,7 +184,7 @@ internal class SakServiceTest {
             )
 
         val service: SakService =
-            SakServiceImpl(sakDao, pdlKlient, norg2Klient, skjermingKlient)
+            SakServiceImpl(sakDao, skjermingKlient, enhetService)
 
         val saker = service.finnSaker(KONTANT_FOT.value)
 
@@ -213,7 +213,7 @@ internal class SakServiceTest {
             )
 
         val service: SakService =
-            SakServiceImpl(sakDao, pdlKlient, norg2Klient, skjermingKlient)
+            SakServiceImpl(sakDao, skjermingKlient, enhetService)
 
         val saker = service.finnSaker(KONTANT_FOT.value)
 
@@ -230,7 +230,7 @@ internal class SakServiceTest {
         } throws responseException
 
         val service: SakService =
-            SakServiceImpl(sakDao, pdlKlient, norg2Klient, skjermingKlient)
+            SakServiceImpl(sakDao, skjermingKlient, enhetService)
 
         val thrown =
             assertThrows<ResponseException> {
@@ -257,7 +257,7 @@ internal class SakServiceTest {
         every { norg2Klient.hentEnheterForOmraade(SakType.BARNEPENSJON.tema, "0301") } returns emptyList()
 
         val service: SakService =
-            SakServiceImpl(sakDao, pdlKlient, norg2Klient, skjermingKlient)
+            SakServiceImpl(sakDao, skjermingKlient, enhetService)
 
         val thrown =
             assertThrows<IngenEnhetFunnetException> {
@@ -295,7 +295,7 @@ internal class SakServiceTest {
             )
 
         val service: SakService =
-            SakServiceImpl(sakDao, pdlKlient, norg2Klient, skjermingKlient)
+            SakServiceImpl(sakDao, skjermingKlient, enhetService)
 
         val sak = service.finnEllerOpprettSak(KONTANT_FOT.value, SakType.BARNEPENSJON)
 
@@ -341,7 +341,7 @@ internal class SakServiceTest {
         every { sakDao.oppdaterAdresseBeskyttelse(any(), any()) } returns 1
 
         val service: SakService =
-            SakServiceImpl(sakDao, pdlKlient, norg2Klient, skjermingKlient)
+            SakServiceImpl(sakDao, skjermingKlient, enhetService)
 
         val sak =
             service.finnEllerOpprettSak(
@@ -393,7 +393,7 @@ internal class SakServiceTest {
             )
 
         val service: SakService =
-            SakServiceImpl(sakDao, pdlKlient, norg2Klient, skjermingKlient)
+            SakServiceImpl(sakDao, skjermingKlient, enhetService)
 
         val saker = service.finnSaker(KONTANT_FOT.value)
 
@@ -427,7 +427,7 @@ internal class SakServiceTest {
             )
 
         val service: SakService =
-            SakServiceImpl(sakDao, pdlKlient, norg2Klient, skjermingKlient)
+            SakServiceImpl(sakDao, skjermingKlient, enhetService)
         val sak = service.finnEllerOpprettSak(KONTANT_FOT.value, SakType.BARNEPENSJON)
 
         sak shouldBe

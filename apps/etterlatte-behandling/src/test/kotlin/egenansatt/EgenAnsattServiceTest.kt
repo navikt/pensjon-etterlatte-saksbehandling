@@ -9,6 +9,7 @@ import no.nav.etterlatte.Context
 import no.nav.etterlatte.DatabaseKontekst
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
+import no.nav.etterlatte.behandling.EnhetServiceImpl
 import no.nav.etterlatte.behandling.domain.ArbeidsFordelingEnhet
 import no.nav.etterlatte.behandling.klienter.Norg2Klient
 import no.nav.etterlatte.common.Enheter
@@ -80,15 +81,16 @@ internal class EgenAnsattServiceTest {
         sakRepo = SakDao { connection }
         oppgaveRepo = OppgaveDaoImpl { connection }
         oppgaveRepoMedSporing = OppgaveDaoMedEndringssporingImpl(oppgaveRepo) { connection }
+        val enhetService = EnhetServiceImpl(mockk(), pdlKlient, norg2Klient)
         sakService =
             spyk(
-                SakServiceImpl(sakRepo, pdlKlient, norg2Klient, skjermingKlient),
+                SakServiceImpl(sakRepo, skjermingKlient, enhetService),
             )
         oppgaveService =
             spyk(
                 OppgaveService(oppgaveRepoMedSporing, sakRepo),
             )
-        egenAnsattService = EgenAnsattService(sakService, oppgaveService, sikkerLogg)
+        egenAnsattService = EgenAnsattService(sakService, oppgaveService, sikkerLogg, enhetService)
 
         user = mockk<SaksbehandlerMedEnheterOgRoller>()
 
@@ -131,9 +133,9 @@ internal class EgenAnsattServiceTest {
         every { user.enheter() } returns listOf(Enheter.EGNE_ANSATTE.enhetNr)
 
         val fnr = AVDOED_FOEDSELSNUMMER.value
-        sakService.finnEllerOpprettSak(fnr, SakType.BARNEPENSJON, enhet = Enheter.EGNE_ANSATTE.enhetNr)
+        sakService.finnEllerOpprettSak(fnr, SakType.BARNEPENSJON, overstyrendeEnhet = Enheter.EGNE_ANSATTE.enhetNr)
         val fnr2 = AVDOED2_FOEDSELSNUMMER.value
-        sakService.finnEllerOpprettSak(fnr2, SakType.BARNEPENSJON, enhet = Enheter.EGNE_ANSATTE.enhetNr)
+        sakService.finnEllerOpprettSak(fnr2, SakType.BARNEPENSJON, overstyrendeEnhet = Enheter.EGNE_ANSATTE.enhetNr)
 
         assertNotNull(sakService.finnSak(fnr, SakType.BARNEPENSJON))
         assertNotNull(sakService.finnSak(fnr2, SakType.BARNEPENSJON))

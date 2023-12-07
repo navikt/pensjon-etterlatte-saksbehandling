@@ -1,5 +1,6 @@
 package no.nav.etterlatte.egenansatt
 
+import no.nav.etterlatte.behandling.EnhetService
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.libs.common.person.maskerFnr
@@ -10,7 +11,12 @@ import no.nav.etterlatte.sak.SakService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-class EgenAnsattService(private val sakService: SakService, private val oppgaveService: OppgaveService, val sikkerLogg: Logger) {
+class EgenAnsattService(
+    private val sakService: SakService,
+    private val oppgaveService: OppgaveService,
+    val sikkerLogg: Logger,
+    private val enhetService: EnhetService,
+) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     fun haandterSkjerming(skjermetHendelse: EgenAnsattSkjermet) {
@@ -34,7 +40,7 @@ class EgenAnsattService(private val sakService: SakService, private val oppgaveS
                     if (skjermetHendelse.skjermet) {
                         Enheter.EGNE_ANSATTE.enhetNr
                     } else {
-                        sakService.finnEnhetForPersonOgTema(
+                        enhetService.finnEnhetForPersonOgTema(
                             skjermetHendelse.fnr,
                             it.sakType.tema,
                             it.sakType,

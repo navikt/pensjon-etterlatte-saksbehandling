@@ -277,14 +277,13 @@ internal class ApplicationContext(
         )
 
     val tilgangService = TilgangServiceImpl(SakTilgangDao(dataSource))
+    val enhetService = EnhetServiceImpl(navAnsattKlient, pdlKlient, norg2Klient)
     val sakService =
         SakServiceImpl(
             sakDao,
-            pdlKlient,
-            norg2Klient,
             skjermingKlient,
+            enhetService,
         )
-    val enhetService = EnhetServiceImpl(navAnsattKlient)
     val grunnlagsendringshendelseService =
         GrunnlagsendringshendelseService(
             oppgaveService = oppgaveService,
@@ -293,6 +292,7 @@ internal class ApplicationContext(
             pdlKlient = pdlKlient,
             grunnlagKlient = grunnlagKlient,
             sakService = sakService,
+            enhetService = enhetService,
         )
 
     val behandlingsStatusService =

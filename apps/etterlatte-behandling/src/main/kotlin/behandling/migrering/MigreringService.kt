@@ -144,7 +144,12 @@ class MigreringService(
     )
 
     private fun finnEllerOpprettSak(request: MigreringRequest) =
-        sakService.finnEllerOpprettSak(request.soeker.value, SakType.BARNEPENSJON, request.enhet.nr)
+        sakService.finnEllerOpprettSak(
+            request.soeker.value,
+            SakType.BARNEPENSJON,
+            request.enhet.nr,
+            sjekkEnhetMotNorg = false,
+        )
 
     fun avbrytBehandling(
         behandlingId: UUID,

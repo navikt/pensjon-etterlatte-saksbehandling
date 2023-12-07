@@ -16,6 +16,7 @@ import no.nav.etterlatte.DatabaseKontekst
 import no.nav.etterlatte.KONTANT_FOT
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.BehandlingService
+import no.nav.etterlatte.behandling.EnhetService
 import no.nav.etterlatte.behandling.domain.ArbeidsFordelingEnhet
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringStatus
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringsType
@@ -78,6 +79,7 @@ internal class GrunnlagsendringshendelseServiceTest {
     private val grunnlagClient = mockk<GrunnlagKlient>(relaxed = true, relaxUnitFun = true)
     private val sakService = mockk<SakService>(relaxed = true)
     private val oppgaveService = mockk<OppgaveService>()
+    private val enhetService = mockk<EnhetService>()
     private val mockOppgave =
         opprettNyOppgaveMedReferanseOgSak(
             "hendelseid",
@@ -95,6 +97,7 @@ internal class GrunnlagsendringshendelseServiceTest {
             pdlService,
             grunnlagClient,
             sakService,
+            enhetService,
         )
 
     @BeforeEach
@@ -771,7 +774,7 @@ internal class GrunnlagsendringshendelseServiceTest {
         every { oppgaveService.oppdaterEnhetForRelaterteOppgaver(any()) } returns Unit
         every { oppgaveService.hentOppgaverForSak(any()) } returns emptyList()
         every {
-            sakService.finnEnhetForPersonOgTema(any(), any(), any())
+            enhetService.finnEnhetForPersonOgTema(any(), any(), any())
         } returns ArbeidsFordelingEnhet(Enheter.STEINKJER.navn, Enheter.STEINKJER.enhetNr)
         every { sakService.oppdaterEnhetForSaker(any()) } just runs
         runBlocking {
@@ -854,7 +857,7 @@ internal class GrunnlagsendringshendelseServiceTest {
                 ),
             )
         every {
-            sakService.finnEnhetForPersonOgTema(any(), any(), any())
+            enhetService.finnEnhetForPersonOgTema(any(), any(), any())
         } returns ArbeidsFordelingEnhet(Enheter.STEINKJER.navn, Enheter.STEINKJER.enhetNr)
         every { sakService.oppdaterEnhetForSaker(any()) } just runs
         every { grunnlagshendelsesDao.hentGrunnlagsendringshendelserMedStatuserISak(any(), any()) } returns emptyList()
@@ -904,7 +907,7 @@ internal class GrunnlagsendringshendelseServiceTest {
         every { sakService.finnSaker(fnr) } returns saker
         every { oppgaveService.oppdaterEnhetForRelaterteOppgaver(any()) } returns Unit
         every {
-            sakService.finnEnhetForPersonOgTema(any(), any(), any())
+            enhetService.finnEnhetForPersonOgTema(any(), any(), any())
         } returns ArbeidsFordelingEnhet(Enheter.STEINKJER.navn, Enheter.STEINKJER.enhetNr)
         every { sakService.oppdaterEnhetForSaker(any()) } just runs
         runBlocking {
@@ -947,7 +950,7 @@ internal class GrunnlagsendringshendelseServiceTest {
         every { sakService.finnSaker(fnr) } returns saker
         every { oppgaveService.oppdaterEnhetForRelaterteOppgaver(any()) } returns Unit
         every {
-            sakService.finnEnhetForPersonOgTema(any(), any(), any())
+            enhetService.finnEnhetForPersonOgTema(any(), any(), any())
         } returns ArbeidsFordelingEnhet(Enheter.STEINKJER.navn, Enheter.STEINKJER.enhetNr)
         every { sakService.oppdaterEnhetForSaker(any()) } just runs
         runBlocking {

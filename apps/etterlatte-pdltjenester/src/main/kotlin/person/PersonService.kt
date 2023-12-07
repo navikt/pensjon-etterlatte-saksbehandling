@@ -64,6 +64,7 @@ class PersonService(
                     )
                 }
             } else {
+                sikkerLogg.debug("Fikk følgende resultat fra PDL: {}", it)
                 PersonMapper.mapPerson(
                     ppsKlient = ppsKlient,
                     pdlKlient = pdlKlient,

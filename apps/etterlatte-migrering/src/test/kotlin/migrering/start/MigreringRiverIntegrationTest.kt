@@ -572,7 +572,7 @@ private fun komplisertVergemaal(): List<OpplysningDTO<VergemaalEllerFremtidsfull
                     every { embete } returns ""
                     every { type } returns ""
                     every { omfangetErInnenPersonligOmraade } returns false
-                    every { omfang } returns "personligeOgOekonomiskeInteresser"
+                    every { tjenesteomraade } returns "personligeOgOekonomiskeInteresser"
                 }
         }
     val vergemaalEllerFremtidsfullmakt2 =
@@ -586,7 +586,7 @@ private fun komplisertVergemaal(): List<OpplysningDTO<VergemaalEllerFremtidsfull
                     every { type } returns ""
                     every { navn } returns null
                     every { omfangetErInnenPersonligOmraade } returns false
-                    every { omfang } returns "oekonomiskeInteresser"
+                    every { tjenesteomraade } returns "oekonomiskeInteresser"
                 }
         }
 

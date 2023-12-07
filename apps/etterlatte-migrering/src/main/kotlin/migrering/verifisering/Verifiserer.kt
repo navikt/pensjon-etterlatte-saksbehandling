@@ -1,6 +1,7 @@
 package no.nav.etterlatte.migrering.verifisering
 
 import no.nav.etterlatte.libs.common.logging.samleExceptions
+import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.person.finnesVergeMedUkjentOmfang
@@ -70,15 +71,8 @@ internal class Verifiserer(
                 val person = personHenter.hentPerson(it.first, it.second)
 
                 if (it.first == PersonRolle.BARN) {
-                    person.getOrNull()?.let { pdlPerson ->
-                        pdlPerson.vergemaalEllerFremtidsfullmakt?.let { vergemaal ->
-                            if (flereVergerMedOekonomiskInteresse(vergemaal.map { it.verdi }) ||
-                                finnesVergeMedUkjentOmfang(vergemaal.map { it.verdi })
-                            ) {
-                                logger.warn("Barn har komplisert vergemaal eller fremtidsfullmakt, kan ikke migrere")
-                                return listOf(BarnetHarKomplisertVergemaal)
-                            }
-                        }
+                    if (sjekkVergemaal(person)) {
+                        return listOf(BarnetHarKomplisertVergemaal)
                     }
                 }
 
@@ -87,6 +81,24 @@ internal class Verifiserer(
             .filter { it.isFailure }
             .map { it.exceptionOrNull() }
             .filterIsInstance<Verifiseringsfeil>()
+    }
+
+    private fun sjekkVergemaal(person: Result<PersonDTO?>): Boolean {
+        person.getOrNull()?.let { pdlPerson ->
+            pdlPerson.vergemaalEllerFremtidsfullmakt?.let { vergemaal ->
+                val vergeListe = vergemaal.map { it.verdi }
+                if (flereVergerMedOekonomiskInteresse(vergeListe) ||
+                    finnesVergeMedUkjentOmfang(vergeListe)
+                ) {
+                    logger.warn(
+                        "Barn har komplisert vergemaal eller fremtidsfullmakt, kan ikke migrere. " +
+                            "Omfang i vergemållista: " + vergeListe.map { ver -> ver.vergeEllerFullmektig.omfang },
+                    )
+                    return false
+                }
+            }
+        }
+        return true
     }
 }
 

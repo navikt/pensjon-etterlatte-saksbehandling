@@ -437,12 +437,17 @@ data class PdlVergemaalEllerFremtidsfullmakt(
 data class PdlVergeEllerFullmektig(
     val motpartsPersonident: Folkeregisteridentifikator?,
     val navn: PdlPersonnavn?,
-    val tjenesteomraade: String?,
+    val tjenesteomraade: List<PdlTjenesteomraade>?,
     val omfangetErInnenPersonligOmraade: Boolean?,
 )
 
 data class PdlGeografiskTilknytningIdentVariables(
     val ident: String,
+)
+
+data class PdlTjenesteomraade(
+    val tjenesteoppgave: String,
+    val tjenestevirksomhet: String,
 )
 
 data class PdlGeografiskTilknytningRequest(

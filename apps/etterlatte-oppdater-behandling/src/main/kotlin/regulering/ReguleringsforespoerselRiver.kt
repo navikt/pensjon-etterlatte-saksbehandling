@@ -40,14 +40,18 @@ internal class ReguleringsforespoerselRiver(
             return
         }
 
+        val sakerTilOmregning = behandlingService.hentAlleSaker()
+
         val tilbakemigrerte =
-            behandlingService.migrerAlleTempBehandlingerTilbakeTilTrygdetidOppdatert().also { sakIdListe ->
-                logger.info(
-                    "Tilbakemigrert ${sakIdListe.ider.size} behandlinger:\n" +
-                        sakIdListe.ider.joinToString("\n") { "Sak ${it.sakId} - ${it.behandlingId}" },
-                )
-            }
-        behandlingService.hentAlleSaker().saker.forEach {
+            behandlingService.migrerAlleTempBehandlingerTilbakeTilTrygdetidOppdatert(sakerTilOmregning)
+                .also { sakIdListe ->
+                    logger.info(
+                        "Tilbakemigrert ${sakIdListe.ider.size} behandlinger:\n" +
+                            sakIdListe.ider.joinToString("\n") { "Sak ${it.sakId} - ${it.behandlingId}" },
+                    )
+                }
+
+        sakerTilOmregning.saker.forEach {
             packet.eventName = FINN_LOEPENDE_YTELSER
             packet.tilbakestilteBehandlinger = tilbakemigrerte.behandlingerForSak(it.id)
             packet.sakId = it.id

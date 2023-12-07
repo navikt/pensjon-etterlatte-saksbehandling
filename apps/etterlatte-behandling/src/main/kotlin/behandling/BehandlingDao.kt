@@ -24,6 +24,7 @@ import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.sak.BehandlingOgSak
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakIDListe
+import no.nav.etterlatte.libs.common.sak.Saker
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunktOrNull
@@ -104,17 +105,20 @@ class BehandlingDao(
             mapSak(this),
         ) { i: UUID -> kommerBarnetTilGodeDao.hentKommerBarnetTilGode(i) }
 
-    fun migrerStatusPaaAlleBehandlingerSomTrengerNyBeregning(): SakIDListe {
+    fun migrerStatusPaaAlleBehandlingerSomTrengerNyBeregning(saker: Saker): SakIDListe {
         with(connection()) {
             val stmt =
                 prepareStatement(
                     """
                     UPDATE behandling
                     SET status = '${BehandlingStatus.TRYGDETID_OPPDATERT}'
-                    WHERE status <> ALL (?) RETURNING id, sak_id
+                    WHERE status <> ALL (?)
+                        AND sak_id = ANY (?)
+                    RETURNING id, sak_id
                     """.trimIndent(),
                 )
             stmt.setArray(1, createArrayOf("text", BehandlingStatus.skalIkkeOmregnesVedGRegulering().toTypedArray()))
+            stmt.setArray(2, createArrayOf("bigint", saker.saker.map { it.id }.toTypedArray()))
 
             return SakIDListe(stmt.executeQuery().toList { BehandlingOgSak(getUUID("id"), getLong("sak_id")) })
         }

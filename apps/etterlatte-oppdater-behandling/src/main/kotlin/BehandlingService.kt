@@ -2,7 +2,6 @@ package no.nav.etterlatte
 
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
-import io.ktor.client.request.get
 import io.ktor.client.request.post
 import io.ktor.client.request.put
 import io.ktor.client.request.setBody
@@ -46,7 +45,7 @@ interface BehandlingService {
 
     fun opprettOmregning(omregningshendelse: Omregningshendelse): OpprettOmregningResponse
 
-    fun migrerAlleTempBehandlingerTilbakeTilTrygdetidOppdatert(): SakIDListe
+    fun migrerAlleTempBehandlingerTilbakeTilTrygdetidOppdatert(saker: Saker): SakIDListe
 
     fun migrer(hendelse: MigreringRequest): BehandlingOgSak
 
@@ -140,10 +139,11 @@ class BehandlingServiceImpl(
         }
     }
 
-    override fun migrerAlleTempBehandlingerTilbakeTilTrygdetidOppdatert(): SakIDListe {
+    override fun migrerAlleTempBehandlingerTilbakeTilTrygdetidOppdatert(saker: Saker): SakIDListe {
         return runBlocking {
             behandlingKlient.post("$url/behandlinger/settTilbakeTilTrygdetidOppdatert") {
                 contentType(ContentType.Application.Json)
+                setBody(saker)
             }.body()
         }
     }
@@ -157,9 +157,12 @@ class BehandlingServiceImpl(
         }
 
     override fun hentAlleSaker(): Saker =
-        runBlocking {
-            behandlingKlient.get("$url/saker").body()
-        }
+        // For å regne om ytelsene til nytt regelverk ønsker vi kun å omregne saker som ikke kommer fra migrering
+        // Kommenterer ut kall til behandling midlertidig for å håndtere dette manuelt.
+//        runBlocking {
+//            behandlingKlient.get("$url/saker").body()
+//        }
+        Saker(emptyList())
 
     override fun avbryt(behandlingId: UUID) =
         runBlocking {

@@ -38,7 +38,7 @@ internal class ReguleringsforespoerselRiverTest {
         )
 
     @Test
-    fun `kan ta imot reguleringsmelding og kalle på behandling`() {
+    fun `kan ta imot reguleringsmelding og kalle paa behandling`() {
         val melding = genererReguleringMelding(foersteMai2023)
         val vedtakServiceMock = mockk<BehandlingService>(relaxed = true)
         val featureToggleService = mockk<FeatureToggleService>().also { every { it.isEnabled(any(), any()) } returns true }
@@ -46,7 +46,7 @@ internal class ReguleringsforespoerselRiverTest {
 
         inspector.sendTestMessage(melding.toJson())
         verify(exactly = 1) {
-            vedtakServiceMock.migrerAlleTempBehandlingerTilbakeTilTrygdetidOppdatert()
+            vedtakServiceMock.migrerAlleTempBehandlingerTilbakeTilTrygdetidOppdatert(any())
             vedtakServiceMock.hentAlleSaker()
         }
     }
@@ -114,7 +114,7 @@ internal class ReguleringsforespoerselRiverTest {
             )
         val behandlingId1 = UUID.randomUUID()
         val behandlingId2 = UUID.randomUUID()
-        every { behandlingServiceMock.migrerAlleTempBehandlingerTilbakeTilTrygdetidOppdatert() } returns
+        every { behandlingServiceMock.migrerAlleTempBehandlingerTilbakeTilTrygdetidOppdatert(any()) } returns
             SakIDListe(
                 listOf(BehandlingOgSak(behandlingId1, sakId), BehandlingOgSak(behandlingId2, sakId)),
             )
@@ -132,7 +132,7 @@ internal class ReguleringsforespoerselRiverTest {
         val melding = genererReguleringMelding(foersteMai2023)
         val behandlingServiceMock = mockk<BehandlingService>(relaxed = true)
         coEvery {
-            behandlingServiceMock.migrerAlleTempBehandlingerTilbakeTilTrygdetidOppdatert()
+            behandlingServiceMock.migrerAlleTempBehandlingerTilbakeTilTrygdetidOppdatert(any())
         } throws RuntimeException("feil")
 
         val featureToggleService = mockk<FeatureToggleService>().also { every { it.isEnabled(any(), any()) } returns true }

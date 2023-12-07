@@ -82,7 +82,11 @@ internal class Verifiserer(
                                 sikkerlogger.warn(
                                     "Flere verger med økonomisk interesse? $flereVergerMedOekonomiskInteresse. " +
                                         "Finnes verge med ukjent omfang? $finnesVergeMedUkjentOmfang. " +
-                                        "Vergemål: $vergemaal. ",
+                                        "Vergemål: ${vergemaal.map { i -> i.verdi }}, ${
+                                            vergemaal.map { i -> i.verdi }.map { i ->
+                                                "Embete: ${i.embete}, type: ${i.type}, verge eller fullmektig?: ${i.vergeEllerFullmektig}"
+                                            }
+                                        }. ",
                                 )
                                 return listOf(BarnetHarKomplisertVergemaal)
                             }

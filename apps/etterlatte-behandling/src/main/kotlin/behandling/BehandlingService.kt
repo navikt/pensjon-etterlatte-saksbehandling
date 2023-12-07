@@ -252,7 +252,7 @@ internal class BehandlingServiceImpl(
                 it?.fnr?.let { behandlingRequestLogger.loggRequest(brukerTokenInfo, it, "behandling") }
             }
 
-        val doedsdato = YearMonth.from(personopplysning?.opplysning?.doedsdato)
+        val doedsdato = personopplysning?.opplysning?.doedsdato?.let { YearMonth.from(it) }
         val soeknadMottatt = YearMonth.from(behandling.mottattDato())
         var makstidspunktFoerSoeknad = soeknadMottatt.minusYears(3)
 

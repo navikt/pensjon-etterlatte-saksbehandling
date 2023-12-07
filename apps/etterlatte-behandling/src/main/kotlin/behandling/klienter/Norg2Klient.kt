@@ -4,6 +4,7 @@ import com.github.benmanes.caffeine.cache.Caffeine
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.plugins.ResponseException
+import io.ktor.client.request.get
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
@@ -43,7 +44,7 @@ class Norg2KlientImpl(private val client: HttpClient, private val url: String) :
             maybeNavkontor
         } else {
             val response =
-                client.post("$url/enhet/navkontor/$omraade") {
+                client.get("$url/enhet/navkontor/$omraade") {
                     contentType(ContentType.Application.Json)
                 }
 

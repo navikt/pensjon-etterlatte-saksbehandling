@@ -1,5 +1,5 @@
 import styled from 'styled-components'
-import { Alert, BodyLong, Heading, HStack, VStack } from '@navikt/ds-react'
+import { Alert, BodyLong, Heading, VStack } from '@navikt/ds-react'
 import React, { useEffect, useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentBrevutfall } from '~shared/api/behandling'
@@ -44,7 +44,7 @@ export const Brevutfall = (props: { behandling: IDetaljertBehandling }) => {
   }, [])
 
   return (
-    <BrevutfallContent>
+    <BrevutfallContent id="brevutfall">
       <Heading size="medium" spacing>
         Valg av utfall i brev
       </Heading>
@@ -67,11 +67,7 @@ export const Brevutfall = (props: { behandling: IDetaljertBehandling }) => {
         </VStack>
       )}
       {isPendingOrInitial(hentBrevutfallResultat) && <Spinner visible={true} label="Henter brevutfall" />}
-      {isFailure(hentBrevutfallResultat) && (
-        <HStack>
-          <Alert variant="error">{hentBrevutfallResultat.error.detail}</Alert>
-        </HStack>
-      )}
+      {isFailure(hentBrevutfallResultat) && <Alert variant="error">{hentBrevutfallResultat.error.detail}</Alert>}
     </BrevutfallContent>
   )
 }
@@ -79,4 +75,5 @@ export const Brevutfall = (props: { behandling: IDetaljertBehandling }) => {
 const BrevutfallContent = styled.div`
   margin-top: 4em;
   margin-bottom: 2em;
+  max-width: 500px;
 `

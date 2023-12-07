@@ -162,7 +162,7 @@ export const BrevutfallSkjema = (props: {
       {harValideringsfeil() && (
         <ErrorSummary heading="Feil ved lagring av brevutfall">
           {valideringsfeil.map((feilmelding, index) => (
-            <ErrorSummary.Item key={`${index}${feilmelding}`} href={`#brevutfall.${index}`}>
+            <ErrorSummary.Item key={`${index}`} href="#brevutfall">
               {feilmelding}
             </ErrorSummary.Item>
           ))}

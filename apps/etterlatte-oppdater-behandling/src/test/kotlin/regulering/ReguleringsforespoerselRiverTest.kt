@@ -46,7 +46,7 @@ internal class ReguleringsforespoerselRiverTest {
 
         inspector.sendTestMessage(melding.toJson())
         verify(exactly = 1) {
-            vedtakServiceMock.migrerAlleTempBehandlingerTilbakeTilVilkaarsvurdert()
+            vedtakServiceMock.migrerAlleTempBehandlingerTilbakeTilTrygdetidOppdatert()
             vedtakServiceMock.hentAlleSaker()
         }
     }
@@ -114,7 +114,7 @@ internal class ReguleringsforespoerselRiverTest {
             )
         val behandlingId1 = UUID.randomUUID()
         val behandlingId2 = UUID.randomUUID()
-        every { behandlingServiceMock.migrerAlleTempBehandlingerTilbakeTilVilkaarsvurdert() } returns
+        every { behandlingServiceMock.migrerAlleTempBehandlingerTilbakeTilTrygdetidOppdatert() } returns
             SakIDListe(
                 listOf(BehandlingOgSak(behandlingId1, sakId), BehandlingOgSak(behandlingId2, sakId)),
             )
@@ -132,7 +132,7 @@ internal class ReguleringsforespoerselRiverTest {
         val melding = genererReguleringMelding(foersteMai2023)
         val behandlingServiceMock = mockk<BehandlingService>(relaxed = true)
         coEvery {
-            behandlingServiceMock.migrerAlleTempBehandlingerTilbakeTilVilkaarsvurdert()
+            behandlingServiceMock.migrerAlleTempBehandlingerTilbakeTilTrygdetidOppdatert()
         } throws RuntimeException("feil")
 
         val featureToggleService = mockk<FeatureToggleService>().also { every { it.isEnabled(any(), any()) } returns true }

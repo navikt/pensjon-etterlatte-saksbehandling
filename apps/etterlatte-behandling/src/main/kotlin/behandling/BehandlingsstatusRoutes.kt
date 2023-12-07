@@ -152,7 +152,7 @@ internal fun Route.behandlingsstatusRoutes(behandlingsstatusService: BehandlingS
     }
 
     route("/behandlinger") {
-        post("/settTilbakeTilVilkaarsvurdert") {
+        post("/settTilbakeTilTrygdetidOppdatert") {
             val tilbakestilteBehandlinger =
                 behandlingsstatusService.migrerStatusPaaAlleBehandlingerSomTrengerNyBeregning()
             call.respond(tilbakestilteBehandlinger)

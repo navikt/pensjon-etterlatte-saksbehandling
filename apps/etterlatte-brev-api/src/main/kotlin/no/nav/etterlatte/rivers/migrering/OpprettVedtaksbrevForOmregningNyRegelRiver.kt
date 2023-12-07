@@ -47,6 +47,7 @@ internal class OpprettVedtaksbrevForOmregningNyRegelRiver(
                     brutto = packet[OMREGNING_BRUTTO].asInt(),
                     utlandstilknytningType = UtlandstilknytningType.NASJONAL,
                     yrkesskade = false,
+                    erOmregningGjenny = true,
                 )
             val vedtaksbrev: Brev =
                 service.opprettVedtaksbrev(

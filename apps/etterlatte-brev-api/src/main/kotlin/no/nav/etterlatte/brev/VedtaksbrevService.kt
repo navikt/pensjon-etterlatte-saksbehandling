@@ -104,7 +104,11 @@ class VedtaksbrevService(
                 }
             }
 
-        val prosessType = brevProsessTypeFactory.fra(generellBrevData)
+        val prosessType =
+            brevProsessTypeFactory.fra(
+                generellBrevData,
+                erOmregningNyRegel = automatiskMigreringRequest?.erOmregningGjenny ?: false,
+            )
 
         val nyttBrev =
             OpprettNyttBrev(
@@ -145,10 +149,18 @@ class VedtaksbrevService(
             retryOgPakkUt { brevdataFacade.hentGenerellBrevData(brev.sakId, brev.behandlingId!!, brukerTokenInfo) }
         val avsender = adresseService.hentAvsender(generellBrevData.forenkletVedtak)
 
-        val brevkodePar = brevDataMapper.brevKode(generellBrevData, brev.prosessType)
+        val brevkodePar =
+            brevDataMapper.brevKode(
+                generellBrevData,
+                brev.prosessType,
+                erOmregningNyRegel = automatiskMigreringRequest?.erOmregningGjenny ?: false,
+            )
 
         val brevData =
-            when (generellBrevData.systemkilde == Vedtaksloesning.PESYS) {
+            when (
+                generellBrevData.systemkilde == Vedtaksloesning.PESYS ||
+                    automatiskMigreringRequest?.erOmregningGjenny ?: false
+            ) {
                 false -> opprettBrevData(brev, generellBrevData, brukerTokenInfo, brevkodePar)
                 true ->
                     OmregnetBPNyttRegelverkFerdig(
@@ -368,7 +380,12 @@ class VedtaksbrevService(
     }
 }
 
-data class MigreringBrevRequest(val brutto: Int, val yrkesskade: Boolean, val utlandstilknytningType: UtlandstilknytningType?)
+data class MigreringBrevRequest(
+    val brutto: Int,
+    val yrkesskade: Boolean,
+    val utlandstilknytningType: UtlandstilknytningType?,
+    val erOmregningGjenny: Boolean = false,
+)
 
 fun Vergemaal.toMottaker(): Mottaker {
     return Mottaker(

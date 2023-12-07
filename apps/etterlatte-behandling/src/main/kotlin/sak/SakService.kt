@@ -97,18 +97,25 @@ class SakServiceImpl(
         enhet: String?,
         gradering: AdressebeskyttelseGradering?,
     ): Sak {
-        val enhetFraNorg = enhetService.finnEnhetForPersonOgTema(fnr, type.tema, type).enhetNr
-        if (enhet != null && enhet != enhetFraNorg) {
-            logger.info("Finner/oppretter sak med enhet $enhet, selv om geografisk tilknytning tilsier $enhetFraNorg")
-        }
-
-        val sak = finnSakerForPersonOgType(fnr, type) ?: dao.opprettSak(fnr, type, enhet ?: enhetFraNorg)
+        val sak = finnSakerForPersonOgType(fnr, type) ?: dao.opprettSak(fnr, type, sjekkEnhet(fnr, type, enhet))
         sjekkSkjerming(fnr = fnr, sakId = sak.id)
         gradering?.let {
             oppdaterAdressebeskyttelse(sak.id, it)
         }
 
         return sak
+    }
+
+    private fun sjekkEnhet(
+        fnr: String,
+        type: SakType,
+        enhet: String?,
+    ): String {
+        val enhetFraNorg = enhetService.finnEnhetForPersonOgTema(fnr, type.tema, type).enhetNr
+        if (enhet != null && enhet != enhetFraNorg) {
+            logger.info("Finner/oppretter sak med enhet $enhet, selv om geografisk tilknytning tilsier $enhetFraNorg")
+        }
+        return enhet ?: enhetFraNorg
     }
 
     override fun oppdaterAdressebeskyttelse(

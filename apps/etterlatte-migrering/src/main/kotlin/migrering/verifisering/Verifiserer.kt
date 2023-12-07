@@ -1,6 +1,7 @@
 package no.nav.etterlatte.migrering.verifisering
 
 import no.nav.etterlatte.libs.common.logging.samleExceptions
+import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.person.finnesVergeMedUkjentOmfang
@@ -20,6 +21,7 @@ internal class Verifiserer(
     private val personHenter: PersonHenter,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
+    private val sikkerlogger = sikkerlogger()
 
     fun verifiserRequest(request: MigreringRequest): MigreringRequest {
         val patchedRequest = gjenlevendeForelderPatcher.patchGjenlevendeHvisIkkeOppgitt(request)
@@ -72,10 +74,16 @@ internal class Verifiserer(
                 if (it.first == PersonRolle.BARN) {
                     person.getOrNull()?.let { pdlPerson ->
                         pdlPerson.vergemaalEllerFremtidsfullmakt?.let { vergemaal ->
-                            if (flereVergerMedOekonomiskInteresse(vergemaal.map { it.verdi }) ||
-                                finnesVergeMedUkjentOmfang(vergemaal.map { it.verdi })
-                            ) {
+                            val flereVergerMedOekonomiskInteresse =
+                                flereVergerMedOekonomiskInteresse(vergemaal.map { it.verdi })
+                            val finnesVergeMedUkjentOmfang = finnesVergeMedUkjentOmfang(vergemaal.map { it.verdi })
+                            if (flereVergerMedOekonomiskInteresse || finnesVergeMedUkjentOmfang) {
                                 logger.warn("Barn har komplisert vergemaal eller fremtidsfullmakt, kan ikke migrere")
+                                sikkerlogger.warn(
+                                    "Flere verger med økonomisk interesse? $flereVergerMedOekonomiskInteresse. " +
+                                        "Finnes verge med ukjent omfang? $finnesVergeMedUkjentOmfang. " +
+                                        "Vergemål: $vergemaal. ",
+                                )
                                 return listOf(BarnetHarKomplisertVergemaal)
                             }
                         }

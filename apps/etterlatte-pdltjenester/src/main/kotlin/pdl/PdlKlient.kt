@@ -44,7 +44,13 @@ class PdlKlient(private val httpClient: HttpClient, private val apiUrl: String) 
             }.body()
         }.let {
             when (it) {
-                is RetryResult.Success -> it.content
+                is RetryResult.Success ->
+                    it.content.also { result ->
+                        result.errors?.joinToString(",")?.let { feil ->
+                            logger.error("Fikk data fra PDL, men også følgende feil: $feil")
+                        }
+                    }
+
                 is RetryResult.Failure -> throw it.samlaExceptions()
             }
         }
@@ -255,6 +261,7 @@ class PdlKlient(private val httpClient: HttpClient, private val apiUrl: String) 
                 familieRelasjon = false,
                 vergemaal = false,
             )
+
         PersonRolle.BARN ->
             PdlVariables(
                 ident = fnr.value,
@@ -270,6 +277,7 @@ class PdlKlient(private val httpClient: HttpClient, private val apiUrl: String) 
                 familieRelasjon = true,
                 vergemaal = true,
             )
+
         PersonRolle.GJENLEVENDE ->
             PdlVariables(
                 ident = fnr.value,
@@ -285,6 +293,7 @@ class PdlKlient(private val httpClient: HttpClient, private val apiUrl: String) 
                 familieRelasjon = true,
                 vergemaal = true,
             )
+
         PersonRolle.AVDOED ->
             PdlVariables(
                 ident = fnr.value,
@@ -300,6 +309,7 @@ class PdlKlient(private val httpClient: HttpClient, private val apiUrl: String) 
                 familieRelasjon = true,
                 vergemaal = false,
             )
+
         PersonRolle.TILKNYTTET_BARN ->
             PdlVariables(
                 ident = fnr.value,

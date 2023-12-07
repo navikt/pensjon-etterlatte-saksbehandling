@@ -567,6 +567,11 @@ private fun komplisertVergemaal(): List<OpplysningDTO<VergemaalEllerFremtidsfull
                 vergeEllerFullmektig
             } returns
                 mockk<VergeEllerFullmektig> {
+                    every { motpartsPersonident } returns null
+                    every { navn } returns null
+                    every { embete } returns ""
+                    every { type } returns ""
+                    every { omfangetErInnenPersonligOmraade } returns false
                     every { omfang } returns "personligeOgOekonomiskeInteresser"
                 }
         }
@@ -576,6 +581,11 @@ private fun komplisertVergemaal(): List<OpplysningDTO<VergemaalEllerFremtidsfull
                 vergeEllerFullmektig
             } returns
                 mockk<VergeEllerFullmektig> {
+                    every { motpartsPersonident } returns null
+                    every { embete } returns ""
+                    every { type } returns ""
+                    every { navn } returns null
+                    every { omfangetErInnenPersonligOmraade } returns false
                     every { omfang } returns "oekonomiskeInteresser"
                 }
         }

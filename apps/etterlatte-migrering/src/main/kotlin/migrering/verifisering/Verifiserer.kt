@@ -84,7 +84,8 @@ internal class Verifiserer(
                                         "Finnes verge med ukjent omfang? $finnesVergeMedUkjentOmfang. " +
                                         "Vergemål: ${vergemaal.map { i -> i.verdi }.joinToString(";")}}, ${
                                             vergemaal.map { i -> i.verdi }.map { i ->
-                                                "Embete: ${i.embete}, type: ${i.type}, verge eller fullmektig?: ${i.vergeEllerFullmektig}"
+                                                "Embete: ${i.embete}, type: ${i.type}, verge eller fullmektig?: " +
+                                                    "${i.vergeEllerFullmektig.toJson()}"
                                             }.joinToString(";")
                                         }. ",
                                 )

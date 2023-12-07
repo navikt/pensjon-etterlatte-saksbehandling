@@ -67,7 +67,6 @@ private fun BrevoppsettDto.toBrevoppsett(
             } else {
                 null
             },
-        brevtype = brevtype,
         aldersgruppe = aldersgruppe,
         kilde = Grunnlagsopplysning.Saksbehandler.create(bruker.ident()),
     )
@@ -81,14 +80,12 @@ private fun Brevoppsett.toDto() =
                     datoTom = etterbetaling.tom.atEndOfMonth(),
                 )
             },
-        brevtype = brevtype,
         aldersgruppe = aldersgruppe,
         kilde = kilde,
     )
 
 data class BrevoppsettDto(
     val etterbetaling: EtterbetalingDto?,
-    val brevtype: Brevtype,
     val aldersgruppe: Aldersgruppe?,
     val kilde: Grunnlagsopplysning.Kilde?,
 )

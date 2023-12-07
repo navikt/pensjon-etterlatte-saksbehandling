@@ -70,7 +70,6 @@ internal class BrevoppsettServiceTest {
     ) = Brevoppsett(
         behandlingId = behandlingId,
         etterbetaling = etterbetaling,
-        brevtype = Brevtype.NASJONAL,
         aldersgruppe = Aldersgruppe.UNDER_18,
         kilde = Grunnlagsopplysning.Saksbehandler.create("Saksbehandler01"),
     )

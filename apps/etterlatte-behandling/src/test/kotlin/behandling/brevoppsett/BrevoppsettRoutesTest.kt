@@ -22,6 +22,7 @@ import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.config.ApplicationContext
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.objectMapper
@@ -91,7 +92,6 @@ internal class BrevoppsettRoutesTest {
             response.status shouldBe HttpStatusCode.Created
 
             opprettetBrevoppsett.aldersgruppe shouldBe opprettDto.aldersgruppe
-            opprettetBrevoppsett.brevtype shouldBe opprettDto.brevtype
             opprettetBrevoppsett.etterbetaling shouldBe opprettDto.etterbetaling
             opprettetBrevoppsett.kilde shouldNotBe null
         }
@@ -122,7 +122,6 @@ internal class BrevoppsettRoutesTest {
             response.status shouldBe HttpStatusCode.OK
 
             opprettetBrevoppsett.aldersgruppe shouldBe oppdaterDto.aldersgruppe
-            opprettetBrevoppsett.brevtype shouldBe oppdaterDto.brevtype
             opprettetBrevoppsett.etterbetaling shouldBe oppdaterDto.etterbetaling
             opprettetBrevoppsett.kilde shouldNotBe null
         }
@@ -150,13 +149,17 @@ internal class BrevoppsettRoutesTest {
             val hentetBrevoppsett: BrevoppsettDto = response.body()
             response.status shouldBe HttpStatusCode.OK
 
-            hentetBrevoppsett.brevtype shouldBe opprettDto.brevtype
+            hentetBrevoppsett.aldersgruppe shouldBe opprettDto.aldersgruppe
         }
     }
 
     private fun behandling(behandlingId: UUID): Behandling =
         mockk {
             every { id } returns behandlingId
+            every { sak } returns
+                mockk {
+                    every { sakType } returns SakType.BARNEPENSJON
+                }
             every { status } returns BehandlingStatus.BEREGNET
             every { virkningstidspunkt } returns
                 Virkningstidspunkt.create(YearMonth.of(2023, 1), "ident", "begrunnelse")
@@ -166,7 +169,6 @@ internal class BrevoppsettRoutesTest {
         Brevoppsett(
             behandlingId = behandlingId,
             etterbetaling = Etterbetaling(YearMonth.of(2023, 1), YearMonth.of(2023, 2)),
-            brevtype = Brevtype.NASJONAL,
             aldersgruppe = Aldersgruppe.UNDER_18,
             kilde = Grunnlagsopplysning.Saksbehandler.create("Saksbehandler01"),
         )
@@ -178,7 +180,6 @@ internal class BrevoppsettRoutesTest {
                     datoFom = LocalDate.of(2023, 1, 1),
                     datoTom = LocalDate.of(2023, 2, 28),
                 ),
-            brevtype = Brevtype.NASJONAL,
             aldersgruppe = Aldersgruppe.UNDER_18,
             kilde = null,
         )

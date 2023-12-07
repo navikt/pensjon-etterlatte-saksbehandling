@@ -90,7 +90,6 @@ internal class BrevoppsettDaoTest {
         lagretBrevoppsett.etterbetaling?.fom shouldBe brevoppsett.etterbetaling?.fom
         lagretBrevoppsett.etterbetaling?.tom shouldBe brevoppsett.etterbetaling?.tom
         lagretBrevoppsett.aldersgruppe shouldBe brevoppsett.aldersgruppe
-        lagretBrevoppsett.brevtype shouldBe brevoppsett.brevtype
         lagretBrevoppsett.kilde shouldBe brevoppsett.kilde
     }
 
@@ -118,7 +117,6 @@ internal class BrevoppsettDaoTest {
                         tom = brevoppsett.etterbetaling!!.tom.minusYears(1),
                     ),
                 aldersgruppe = Aldersgruppe.OVER_18,
-                brevtype = Brevtype.UTLAND,
             )
 
         val lagretOppdatertBrevoppsett = dao.lagre(oppdatertBrevoppsett)
@@ -127,7 +125,6 @@ internal class BrevoppsettDaoTest {
         lagretOppdatertBrevoppsett.etterbetaling?.fom shouldBe brevoppsett.etterbetaling?.fom?.minusYears(1)
         lagretOppdatertBrevoppsett.etterbetaling?.tom shouldBe brevoppsett.etterbetaling?.tom?.minusYears(1)
         lagretOppdatertBrevoppsett.aldersgruppe shouldBe Aldersgruppe.OVER_18
-        lagretOppdatertBrevoppsett.brevtype shouldBe Brevtype.UTLAND
         lagretOppdatertBrevoppsett.kilde shouldNotBe null
     }
 
@@ -140,7 +137,6 @@ internal class BrevoppsettDaoTest {
                     tom = YearMonth.of(2023, 12),
                 ),
             aldersgruppe = Aldersgruppe.UNDER_18,
-            brevtype = Brevtype.NASJONAL,
             kilde = Grunnlagsopplysning.Saksbehandler("Z1234567", Tidspunkt.now()),
         )
 

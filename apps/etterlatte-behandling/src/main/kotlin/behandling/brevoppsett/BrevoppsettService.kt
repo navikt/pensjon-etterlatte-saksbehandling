@@ -2,6 +2,7 @@ package no.nav.etterlatte.behandling.brevoppsett
 
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.domain.Behandling
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import java.util.UUID
 
@@ -16,6 +17,7 @@ class BrevoppsettService(
 
         sjekkBehandlingKanEndres(behandling)
         sjekkEtterbetalingFoerVirkningstidspunkt(behandling, brevoppsett)
+        sjekkAldersgruppeSattVedBarnepensjon(behandling, brevoppsett)
 
         return brevoppsettDao.lagre(brevoppsett)
     }
@@ -38,6 +40,15 @@ class BrevoppsettService(
 
         if (brevoppsett.etterbetaling != null && brevoppsett.etterbetaling.fom < virkningstidspunkt) {
             throw BrevoppsettException.EtterbetalingFraDatoErFoerVirk(brevoppsett.etterbetaling.fom, virkningstidspunkt)
+        }
+    }
+
+    private fun sjekkAldersgruppeSattVedBarnepensjon(
+        behandling: Behandling,
+        brevoppsett: Brevoppsett,
+    ) {
+        if (behandling.sak.sakType == SakType.BARNEPENSJON && brevoppsett.aldersgruppe == null) {
+            throw BrevoppsettException.AldergruppeIkkeSatt()
         }
     }
 }

@@ -10,7 +10,6 @@ import java.util.UUID
 
 data class Brevoppsett(
     val behandlingId: UUID,
-    val brevtype: Brevtype,
     val etterbetaling: Etterbetaling?,
     val aldersgruppe: Aldersgruppe?,
     val kilde: Grunnlagsopplysning.Kilde,
@@ -40,11 +39,6 @@ data class Etterbetaling(
             return Etterbetaling(YearMonth.from(datoFom), YearMonth.from(datoTom))
         }
     }
-}
-
-enum class Brevtype {
-    NASJONAL,
-    UTLAND,
 }
 
 enum class Aldersgruppe {
@@ -81,5 +75,10 @@ sealed class BrevoppsettException {
     class VirkningstidspunktIkkeSatt(behandling: Behandling) : UgyldigForespoerselException(
         code = "VIRKNINGSTIDSPUNKT_IKKE_SATT",
         detail = "Behandling ${behandling.id} har ikke satt virkningstidspunkt.",
+    )
+
+    class AldergruppeIkkeSatt() : IkkeTillattException(
+        code = "ALDERGRUPPE_IKKE_SATT",
+        detail = "Aldersgruppe må være satt for behandling av barnepensjon.",
     )
 }

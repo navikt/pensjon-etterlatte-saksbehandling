@@ -5,7 +5,6 @@ create table brevoppsett
     oppdatert         TIMESTAMP,
     etterbetaling_fom DATE,
     etterbetaling_tom DATE,
-    brevtype          TEXT,
     aldersgruppe      TEXT,
     kilde             TEXT
 )

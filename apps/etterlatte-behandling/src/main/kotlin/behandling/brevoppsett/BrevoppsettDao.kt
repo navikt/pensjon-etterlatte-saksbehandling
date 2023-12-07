@@ -17,15 +17,14 @@ class BrevoppsettDao(private val connection: () -> Connection) {
         return connection().prepareStatement(
             """
             INSERT INTO brevoppsett(
-                behandling_id, oppdatert, etterbetaling_fom, etterbetaling_tom, brevtype, aldersgruppe, kilde
+                behandling_id, oppdatert, etterbetaling_fom, etterbetaling_tom, aldersgruppe, kilde
             )
-            VALUES (?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?)
             ON CONFLICT (behandling_id) DO 
             UPDATE SET 
                 oppdatert = excluded.oppdatert, 
                 etterbetaling_fom = excluded.etterbetaling_fom, 
                 etterbetaling_tom = excluded.etterbetaling_tom, 
-                brevtype = excluded.brevtype, 
                 aldersgruppe = excluded.aldersgruppe,
                 kilde = excluded.kilde
             """.trimIndent(),
@@ -35,9 +34,8 @@ class BrevoppsettDao(private val connection: () -> Connection) {
                 setTidspunkt(2, Tidspunkt.now())
                 setDate(3, brevoppsett.etterbetaling?.fom?.atDay(1).let { java.sql.Date.valueOf(it) })
                 setDate(4, brevoppsett.etterbetaling?.tom?.atEndOfMonth().let { java.sql.Date.valueOf(it) })
-                setString(5, brevoppsett.brevtype.name)
-                setString(6, brevoppsett.aldersgruppe?.name)
-                setString(7, brevoppsett.kilde.toJson())
+                setString(5, brevoppsett.aldersgruppe?.name)
+                setString(6, brevoppsett.kilde.toJson())
             }
             .run { executeUpdate() }
             .also { require(it == 1) }
@@ -48,7 +46,7 @@ class BrevoppsettDao(private val connection: () -> Connection) {
         return connection()
             .prepareStatement(
                 """
-                    SELECT behandling_id, etterbetaling_fom, etterbetaling_tom, brevtype, aldersgruppe, kilde 
+                    SELECT behandling_id, etterbetaling_fom, etterbetaling_tom, aldersgruppe, kilde 
                     FROM brevoppsett 
                     WHERE behandling_id = ?::UUID
                     """,
@@ -67,7 +65,6 @@ class BrevoppsettDao(private val connection: () -> Connection) {
                         tom = getDate("etterbetaling_tom").toLocalDate().let { YearMonth.from(it) },
                     )
                 },
-            brevtype = Brevtype.valueOf(getString("brevtype")),
             aldersgruppe = getString("aldersgruppe")?.let { Aldersgruppe.valueOf(it) },
             kilde = getString("kilde").let { objectMapper.readValue(it) },
         )

@@ -8,6 +8,7 @@ import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.libs.common.IntBroek
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
+import no.nav.etterlatte.token.Fagsaksystem
 import no.nav.pensjon.brevbaker.api.model.Kroner
 
 data class OmregnetBPNyttRegelverk(
@@ -18,6 +19,7 @@ data class OmregnetBPNyttRegelverk(
     val grunnbeloep: Kroner,
     val erBosattUtlandet: Boolean,
     val erYrkesskade: Boolean,
+    val erForeldreloes: Boolean,
 ) : BrevData() {
     companion object {
         fun fra(
@@ -35,8 +37,8 @@ data class OmregnetBPNyttRegelverk(
                     grunnbeloep = Kroner(foersteBeregningsperiode.grunnbeloep.value),
                     erBosattUtlandet = false,
                     erYrkesskade = false,
+                    erForeldreloes = generellBrevData.personerISak.avdoede.size > 1,
                 )
-
             if (generellBrevData.systemkilde == Vedtaksloesning.PESYS) {
                 val pesysUtbetaltFoerReform = migreringRequest?.brutto ?: 0
                 val (pesysUtenlandstilknytning, yrkesskade) =
@@ -49,9 +51,18 @@ data class OmregnetBPNyttRegelverk(
                             val yrkesskade = false // Må redigere brev manuelt hvis yrkesskade
                             Pair(utlandstilknytning.type, yrkesskade)
                         }
+
                         else -> Pair(migreringRequest.utlandstilknytningType, migreringRequest.yrkesskade)
                     }
 
+                if (generellBrevData.forenkletVedtak.saksbehandlerIdent == Fagsaksystem.EY.navn &&
+                    defaultBrevdataOmregning.erForeldreloes
+                ) {
+                    throw IllegalStateException(
+                        "Vi har en automatisk migrering som setter foreldreløs. " +
+                            "Dette skal ikke skje, siden dette brevet må redigeres av saksbehandler",
+                    )
+                }
                 return defaultBrevdataOmregning.copy(
                     utbetaltFoerReform = Kroner(pesysUtbetaltFoerReform),
                     erBosattUtlandet = pesysUtenlandstilknytning == UtlandstilknytningType.BOSATT_UTLAND,

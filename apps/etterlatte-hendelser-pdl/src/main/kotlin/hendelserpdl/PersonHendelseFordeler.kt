@@ -227,7 +227,7 @@ class PersonHendelseFordeler(
         )
     }
 
-    private fun opplysningstyperSomHaandteres() = LeesahOpplysningstype.values().map { it.toString() }
+    private fun opplysningstyperSomHaandteres() = LeesahOpplysningstype.values().filter { it != BOSTEDSADRESSE_V1 }.map { it.toString() }
 
     private fun publiserPaaRapid(
         opplysningstype: LeesahOpplysningstype,

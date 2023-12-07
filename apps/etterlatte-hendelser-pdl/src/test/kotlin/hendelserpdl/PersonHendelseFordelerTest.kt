@@ -74,6 +74,24 @@ internal class PersonHendelseFordelerTest {
     }
 
     @Test
+    fun `skal ignorere Bostedsadresse`() {
+        val personHendelse: Personhendelse =
+            Personhendelse().apply {
+                hendelseId = "1"
+                endringstype = Endringstype.OPPRETTET
+                personidenter = listOf(SOEKER_FOEDSELSNUMMER.value)
+                opplysningstype = "BOSTEDSADRESSE_V1"
+            }
+
+        runBlocking { personHendelseFordeler.haandterHendelse(personHendelse) }
+
+        coVerify(exactly = 0) { pdlKlient.hentPdlIdentifikator(SOEKER_FOEDSELSNUMMER.value) }
+        coVerify(exactly = 0) { kafkaProduser.publiser(any(), any()) }
+
+        confirmVerified(pdlKlient, kafkaProduser)
+    }
+
+    @Test
     fun `skal ignorere hendelse som har ident av type NPID`() {
         val npid = NavPersonIdent("09706511617")
         coEvery {

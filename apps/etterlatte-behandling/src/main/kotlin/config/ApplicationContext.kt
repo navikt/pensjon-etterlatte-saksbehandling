@@ -10,7 +10,7 @@ import no.nav.etterlatte.behandling.BehandlingRequestLogger
 import no.nav.etterlatte.behandling.BehandlingServiceImpl
 import no.nav.etterlatte.behandling.BehandlingStatusServiceImpl
 import no.nav.etterlatte.behandling.BehandlingsHendelserKafkaProducerImpl
-import no.nav.etterlatte.behandling.EnhetServiceImpl
+import no.nav.etterlatte.behandling.BrukerServiceImpl
 import no.nav.etterlatte.behandling.GrunnlagService
 import no.nav.etterlatte.behandling.GyldighetsproevingServiceImpl
 import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktDao
@@ -277,7 +277,7 @@ internal class ApplicationContext(
         )
 
     val tilgangService = TilgangServiceImpl(SakTilgangDao(dataSource))
-    val enhetService = EnhetServiceImpl(navAnsattKlient, pdlKlient, norg2Klient)
+    val enhetService = BrukerServiceImpl(navAnsattKlient, pdlKlient, norg2Klient)
     val sakService =
         SakServiceImpl(
             sakDao,
@@ -292,7 +292,7 @@ internal class ApplicationContext(
             pdlKlient = pdlKlient,
             grunnlagKlient = grunnlagKlient,
             sakService = sakService,
-            enhetService = enhetService,
+            brukerService = enhetService,
         )
 
     val behandlingsStatusService =

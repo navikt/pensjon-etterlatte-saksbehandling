@@ -1,6 +1,7 @@
 package no.nav.etterlatte.behandling
 
 import no.nav.etterlatte.behandling.domain.ArbeidsFordelingEnhet
+import no.nav.etterlatte.behandling.domain.Navkontor
 import no.nav.etterlatte.behandling.domain.SaksbehandlerEnhet
 import no.nav.etterlatte.behandling.klienter.NavAnsattKlient
 import no.nav.etterlatte.behandling.klienter.Norg2Klient
@@ -9,10 +10,11 @@ import no.nav.etterlatte.common.IngenEnhetFunnetException
 import no.nav.etterlatte.common.IngenGeografiskOmraadeFunnetForEnhet
 import no.nav.etterlatte.common.klienter.PdlKlient
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import org.slf4j.LoggerFactory
 
-interface EnhetService {
+interface BrukerService {
     suspend fun enheterForIdent(ident: String): List<SaksbehandlerEnhet>
 
     suspend fun harTilgangTilEnhet(
@@ -25,14 +27,46 @@ interface EnhetService {
         tema: String,
         saktype: SakType,
     ): ArbeidsFordelingEnhet
+
+    suspend fun finnNavkontorForPerson(
+        fnr: String,
+        saktype: SakType,
+    ): Navkontor
 }
 
-class EnhetServiceImpl(
+class GeografiskTilknytningMangler : IkkeFunnetException(
+    code = "BRUKER_MANGLER_GEOGRAFISKTILKNYTNING",
+    detail = "Fant ikke geografisk tilknytning for bruker",
+)
+
+class BrukerServiceImpl(
     val client: NavAnsattKlient,
     private val pdlKlient: PdlKlient,
     private val norg2Klient: Norg2Klient,
-) : EnhetService {
+) : BrukerService {
     private val logger = LoggerFactory.getLogger(this::class.java)
+
+    override suspend fun finnNavkontorForPerson(
+        fnr: String,
+        saktype: SakType,
+    ): Navkontor {
+        val tilknytning = pdlKlient.hentGeografiskTilknytning(fnr, saktype)
+
+        return when {
+            tilknytning.ukjent -> {
+                Navkontor(navn = "UKjent kontor", enhetNr = "ukjent enhetsnummer")
+            }
+
+            else -> {
+                val geografiskTilknytning = tilknytning.geografiskTilknytning() ?: throw GeografiskTilknytningMangler()
+                hentNavkontorForGeografiskOmraade(geografiskTilknytning)
+            }
+        }
+    }
+
+    private suspend fun hentNavkontorForGeografiskOmraade(geografiskTilknytning: String): Navkontor {
+        return norg2Klient.hentNavkontorForOmraade(geografiskTilknytning)
+    }
 
     override suspend fun enheterForIdent(ident: String) = client.hentSaksbehandlerEnhet(ident)
 

@@ -155,7 +155,7 @@ internal class SakServiceTest {
             )
 
         val service: SakService =
-            SakServiceImpl(sakDao, pdlKlient, norg2Klient, skjermingKlient)
+            SakServiceImpl(sakDao, norg2Klient, skjermingKlient)
 
         val saker = service.finnSaker(KONTANT_FOT.value)
 
@@ -184,7 +184,7 @@ internal class SakServiceTest {
             )
 
         val service: SakService =
-            SakServiceImpl(sakDao, pdlKlient, norg2Klient, skjermingKlient)
+            SakServiceImpl(sakDao, norg2Klient, skjermingKlient)
 
         val saker = service.finnSaker(KONTANT_FOT.value)
 
@@ -213,7 +213,7 @@ internal class SakServiceTest {
             )
 
         val service: SakService =
-            SakServiceImpl(sakDao, pdlKlient, norg2Klient, skjermingKlient)
+            SakServiceImpl(sakDao, norg2Klient, skjermingKlient)
 
         val saker = service.finnSaker(KONTANT_FOT.value)
 
@@ -230,7 +230,7 @@ internal class SakServiceTest {
         } throws responseException
 
         val service: SakService =
-            SakServiceImpl(sakDao, pdlKlient, norg2Klient, skjermingKlient)
+            SakServiceImpl(sakDao, norg2Klient, skjermingKlient)
 
         val thrown =
             assertThrows<ResponseException> {
@@ -257,7 +257,7 @@ internal class SakServiceTest {
         every { norg2Klient.hentEnheterForOmraade(SakType.BARNEPENSJON.tema, "0301") } returns emptyList()
 
         val service: SakService =
-            SakServiceImpl(sakDao, pdlKlient, norg2Klient, skjermingKlient)
+            SakServiceImpl(sakDao, norg2Klient, skjermingKlient)
 
         val thrown =
             assertThrows<IngenEnhetFunnetException> {
@@ -295,7 +295,7 @@ internal class SakServiceTest {
             )
 
         val service: SakService =
-            SakServiceImpl(sakDao, pdlKlient, norg2Klient, skjermingKlient)
+            SakServiceImpl(sakDao, norg2Klient, skjermingKlient)
 
         val sak = service.finnEllerOpprettSak(KONTANT_FOT.value, SakType.BARNEPENSJON)
 
@@ -341,7 +341,7 @@ internal class SakServiceTest {
         every { sakDao.oppdaterAdresseBeskyttelse(any(), any()) } returns 1
 
         val service: SakService =
-            SakServiceImpl(sakDao, pdlKlient, norg2Klient, skjermingKlient)
+            SakServiceImpl(sakDao, norg2Klient, skjermingKlient)
 
         val sak =
             service.finnEllerOpprettSak(
@@ -393,7 +393,7 @@ internal class SakServiceTest {
             )
 
         val service: SakService =
-            SakServiceImpl(sakDao, pdlKlient, norg2Klient, skjermingKlient)
+            SakServiceImpl(sakDao, norg2Klient, skjermingKlient)
 
         val saker = service.finnSaker(KONTANT_FOT.value)
 
@@ -427,7 +427,7 @@ internal class SakServiceTest {
             )
 
         val service: SakService =
-            SakServiceImpl(sakDao, pdlKlient, norg2Klient, skjermingKlient)
+            SakServiceImpl(sakDao, norg2Klient, skjermingKlient)
         val sak = service.finnEllerOpprettSak(KONTANT_FOT.value, SakType.BARNEPENSJON)
 
         sak shouldBe

@@ -69,7 +69,7 @@ internal class TilgangServiceTest {
         tilgangService = TilgangServiceImpl(SakTilgangDao(dataSource))
         sakRepo = SakDao { dataSource.connection }
 
-        sakService = SakServiceImpl(sakRepo, pdlKlient, norg2Klient, skjermingKlient)
+        sakService = SakServiceImpl(sakRepo, norg2Klient, skjermingKlient)
         behandlingRepo =
             BehandlingDao(
                 KommerBarnetTilGodeDao {

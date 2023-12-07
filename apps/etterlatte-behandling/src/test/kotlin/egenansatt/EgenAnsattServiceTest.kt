@@ -82,7 +82,7 @@ internal class EgenAnsattServiceTest {
         oppgaveRepoMedSporing = OppgaveDaoMedEndringssporingImpl(oppgaveRepo) { connection }
         sakService =
             spyk(
-                SakServiceImpl(sakRepo, pdlKlient, norg2Klient, skjermingKlient),
+                SakServiceImpl(sakRepo, norg2Klient, skjermingKlient),
             )
         oppgaveService =
             spyk(

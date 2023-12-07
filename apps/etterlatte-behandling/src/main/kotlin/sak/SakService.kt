@@ -3,18 +3,13 @@ package no.nav.etterlatte.sak
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.User
-import no.nav.etterlatte.behandling.domain.ArbeidsFordelingEnhet
-import no.nav.etterlatte.behandling.klienter.Norg2Klient
+import no.nav.etterlatte.behandling.EnhetService
 import no.nav.etterlatte.common.Enheter
-import no.nav.etterlatte.common.IngenEnhetFunnetException
-import no.nav.etterlatte.common.IngenGeografiskOmraadeFunnetForEnhet
-import no.nav.etterlatte.common.klienter.PdlKlient
 import no.nav.etterlatte.common.klienter.SkjermingKlient
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.libs.common.behandling.Flyktning
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
-import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.tilgangsstyring.filterForEnheter
 import org.slf4j.LoggerFactory
@@ -43,12 +38,6 @@ interface SakService {
         skjermet: Boolean,
     )
 
-    fun finnEnhetForPersonOgTema(
-        fnr: String,
-        tema: String,
-        saktype: SakType,
-    ): ArbeidsFordelingEnhet
-
     fun oppdaterEnhetForSaker(saker: List<GrunnlagsendringshendelseService.SakMedEnhet>)
 
     fun sjekkOmSakerErGradert(sakIder: List<Long>): List<SakMedGradering>
@@ -64,15 +53,10 @@ interface SakService {
     )
 }
 
-class BrukerManglerSak(message: String) : Exception(message)
-
-class BrukerHarMerEnnEnSak(message: String) : Exception(message)
-
 class SakServiceImpl(
     private val dao: SakDao,
-    private val pdlKlient: PdlKlient,
-    private val norg2Klient: Norg2Klient,
     private val skjermingKlient: SkjermingKlient,
+    private val enhetService: EnhetService,
 ) : SakService {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -113,7 +97,7 @@ class SakServiceImpl(
         enhet: String?,
         gradering: AdressebeskyttelseGradering?,
     ): Sak {
-        val enhetFraNorg = finnEnhetForPersonOgTema(fnr, type.tema, type).enhetNr
+        val enhetFraNorg = enhetService.finnEnhetForPersonOgTema(fnr, type.tema, type).enhetNr
         if (enhet != null && enhet != enhetFraNorg) {
             logger.info("Finner/oppretter sak med enhet $enhet, selv om geografisk tilknytning tilsier $enhetFraNorg")
         }
@@ -168,37 +152,6 @@ class SakServiceImpl(
     override fun finnSak(id: Long): Sak? {
         return dao.hentSak(id).sjekkEnhet()
     }
-
-    override fun finnEnhetForPersonOgTema(
-        fnr: String,
-        tema: String,
-        saktype: SakType,
-    ): ArbeidsFordelingEnhet {
-        val tilknytning = pdlKlient.hentGeografiskTilknytning(fnr, saktype)
-        val geografiskTilknytning = tilknytning.geografiskTilknytning()
-
-        return when {
-            tilknytning.ukjent ->
-                ArbeidsFordelingEnhet(
-                    Enheter.defaultEnhet.navn,
-                    Enheter.defaultEnhet.enhetNr,
-                )
-
-            geografiskTilknytning == null -> throw IngenGeografiskOmraadeFunnetForEnhet(
-                Folkeregisteridentifikator.of(fnr),
-                tema,
-            ).also {
-                logger.warn(it.message)
-            }
-
-            else -> finnEnhetForTemaOgOmraade(tema, geografiskTilknytning)
-        }
-    }
-
-    private fun finnEnhetForTemaOgOmraade(
-        tema: String,
-        omraade: String,
-    ) = norg2Klient.hentEnheterForOmraade(tema, omraade).firstOrNull() ?: throw IngenEnhetFunnetException(omraade, tema)
 
     private fun List<Sak>.filterForEnheter() =
         this.filterSakerForEnheter(

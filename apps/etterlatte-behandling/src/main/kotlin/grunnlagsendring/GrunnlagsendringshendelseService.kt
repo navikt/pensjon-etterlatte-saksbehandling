@@ -53,6 +53,7 @@ class GrunnlagsendringshendelseService(
     private val pdlKlient: PdlKlient,
     private val grunnlagKlient: GrunnlagKlient,
     private val sakService: SakService,
+    private val enhetService: EnhetService,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -193,7 +194,7 @@ class GrunnlagsendringshendelseService(
                 finnSaker.map {
                     SakMedEnhet(
                         it.id,
-                        sakService.finnEnhetForPersonOgTema(bostedsadresse.fnr, it.sakType.tema, it.sakType).enhetNr,
+                        enhetService.finnEnhetForPersonOgTema(bostedsadresse.fnr, it.sakType.tema, it.sakType).enhetNr,
                     )
                 }
             sakerMedNyEnhet.forEach { sakMedEnhet ->
@@ -232,11 +233,11 @@ class GrunnlagsendringshendelseService(
             AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND -> Enheter.STRENGT_FORTROLIG.enhetNr
             AdressebeskyttelseGradering.STRENGT_FORTROLIG -> Enheter.STRENGT_FORTROLIG_UTLAND.enhetNr
             AdressebeskyttelseGradering.FORTROLIG -> {
-                sakService.finnEnhetForPersonOgTema(fnr, sakType.tema, sakType).enhetNr
+                enhetService.finnEnhetForPersonOgTema(fnr, sakType.tema, sakType).enhetNr
             }
 
             AdressebeskyttelseGradering.UGRADERT -> {
-                sakService.finnEnhetForPersonOgTema(fnr, sakType.tema, sakType).enhetNr
+                enhetService.finnEnhetForPersonOgTema(fnr, sakType.tema, sakType).enhetNr
             }
         }
     }

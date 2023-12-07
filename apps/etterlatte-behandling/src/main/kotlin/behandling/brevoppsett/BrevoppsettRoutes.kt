@@ -42,14 +42,14 @@ internal fun Route.brevoppsettRoutes(service: BrevoppsettService) {
                         logger.info("Oppdaterer brevoppsett for behandling $behandlingId")
                         service.lagreBrevoppsett(dto.toBrevoppsett(behandlingId, brukerTokenInfo))
                     }
-                call.respond(HttpStatusCode.OK, brevoppsett.toDto())
+                call.respond(brevoppsett.toDto())
             }
         }
 
         get {
             when (val brevoppsett = inTransaction { service.hentBrevoppsett(behandlingId) }) {
                 null -> call.respond(HttpStatusCode.NoContent)
-                else -> call.respond(HttpStatusCode.OK, brevoppsett.toDto())
+                else -> call.respond(brevoppsett.toDto())
             }
         }
     }

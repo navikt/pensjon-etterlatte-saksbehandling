@@ -22,8 +22,9 @@ interface SakService {
     fun finnEllerOpprettSak(
         fnr: String,
         type: SakType,
-        enhet: String? = null,
+        overstyrendeEnhet: String? = null,
         gradering: AdressebeskyttelseGradering? = null,
+        sjekkEnhetMotNorg: Boolean = true,
     ): Sak
 
     fun finnSak(
@@ -94,10 +95,17 @@ class SakServiceImpl(
     override fun finnEllerOpprettSak(
         fnr: String,
         type: SakType,
-        enhet: String?,
+        overstyrendeEnhet: String?,
         gradering: AdressebeskyttelseGradering?,
+        sjekkEnhetMotNorg: Boolean,
     ): Sak {
-        val sak = finnSakerForPersonOgType(fnr, type) ?: dao.opprettSak(fnr, type, sjekkEnhet(fnr, type, enhet))
+        val enhet =
+            if (sjekkEnhetMotNorg) {
+                sjekkEnhet(fnr, type, overstyrendeEnhet)
+            } else {
+                overstyrendeEnhet!!
+            }
+        val sak = finnSakerForPersonOgType(fnr, type) ?: dao.opprettSak(fnr, type, enhet)
         sjekkSkjerming(fnr = fnr, sakId = sak.id)
         gradering?.let {
             oppdaterAdressebeskyttelse(sak.id, it)

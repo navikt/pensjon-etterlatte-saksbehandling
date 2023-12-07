@@ -38,7 +38,7 @@ fun Grunnlag.mapAvdoede(): List<Avdoed> =
         val avdoede = hentAvdoede()
 
         return avdoede
-            .filterNot { it.hentDoedsdato() != null }
+            .filter { it.hentDoedsdato() != null }
             .map { avdoed ->
                 Avdoed(
                     navn = avdoed.hentNavn()!!.verdi.fulltNavn(),

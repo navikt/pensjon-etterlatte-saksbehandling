@@ -9,7 +9,7 @@ import no.nav.etterlatte.Context
 import no.nav.etterlatte.DatabaseKontekst
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
-import no.nav.etterlatte.behandling.EnhetService
+import no.nav.etterlatte.behandling.EnhetServiceImpl
 import no.nav.etterlatte.behandling.domain.ArbeidsFordelingEnhet
 import no.nav.etterlatte.behandling.klienter.Norg2Klient
 import no.nav.etterlatte.common.Enheter
@@ -77,11 +77,11 @@ internal class EgenAnsattServiceTest {
         val norg2Klient = mockk<Norg2Klient>()
         val featureToggleService = mockk<FeatureToggleService>()
         val skjermingKlient = mockk<SkjermingKlient>()
-        val enhetService = mockk<EnhetService>()
         val connection = dataSource.connection
         sakRepo = SakDao { connection }
         oppgaveRepo = OppgaveDaoImpl { connection }
         oppgaveRepoMedSporing = OppgaveDaoMedEndringssporingImpl(oppgaveRepo) { connection }
+        val enhetService = EnhetServiceImpl(mockk(), pdlKlient, norg2Klient)
         sakService =
             spyk(
                 SakServiceImpl(sakRepo, skjermingKlient, enhetService),

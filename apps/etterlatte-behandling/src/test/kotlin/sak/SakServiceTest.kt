@@ -18,7 +18,7 @@ import no.nav.etterlatte.KONTANT_FOT
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.SystemUser
-import no.nav.etterlatte.behandling.EnhetService
+import no.nav.etterlatte.behandling.EnhetServiceImpl
 import no.nav.etterlatte.behandling.domain.ArbeidsFordelingEnhet
 import no.nav.etterlatte.behandling.domain.SaksbehandlerEnhet
 import no.nav.etterlatte.behandling.klienter.Norg2Klient
@@ -46,7 +46,7 @@ internal class SakServiceTest {
     private val sakDao = mockk<SakDao>()
     private val pdlKlient = mockk<PdlKlient>()
     private val norg2Klient = mockk<Norg2Klient>()
-    private val enhetService = mockk<EnhetService>()
+    private val enhetService = EnhetServiceImpl(mockk(), pdlKlient, norg2Klient)
     private val skjermingKlient = mockk<SkjermingKlient>()
 
     @BeforeEach

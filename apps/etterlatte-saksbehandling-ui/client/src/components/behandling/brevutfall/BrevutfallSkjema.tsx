@@ -4,26 +4,26 @@ import React, { useState } from 'react'
 import MaanedVelger from '~components/behandling/beregningsgrunnlag/MaanedVelger'
 import { SakType } from '~shared/types/sak'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { lagreBrevoppsett } from '~shared/api/behandling'
+import { lagreBrevutfall } from '~shared/api/behandling'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { isFailure, isPending } from '~shared/api/apiUtils'
-import { Aldersgruppe, Brevoppsett } from '~components/behandling/brevoppsett/Brevoppsett'
+import { Aldersgruppe, Brevutfall } from '~components/behandling/brevutfall/Brevutfall'
 
-export const BrevoppsettSkjema = (props: {
+export const BrevutfallSkjema = (props: {
   behandling: IDetaljertBehandling
-  brevoppsett: Brevoppsett
-  setBrevoppsett: (brevoppsett: Brevoppsett) => void
+  brevutfall: Brevutfall
+  setBrevutfall: (brevutfall: Brevutfall) => void
   setVisSkjema: (visSkjema: boolean) => void
 }) => {
-  const { behandling, brevoppsett, setBrevoppsett, setVisSkjema } = props
+  const { behandling, brevutfall, setBrevutfall, setVisSkjema } = props
   const [harEtterbetaling, setHarEtterbetaling] = useState<boolean | undefined>(
-    brevoppsett.etterbetaling ? true : undefined
+    brevutfall.etterbetaling ? true : undefined
   )
-  const [lagreBrevoppsettResultat, lagreBrevoppsettRequest, lagreBrevoppsettReset] = useApiCall(lagreBrevoppsett)
+  const [lagreBrevutfallResultat, lagreBrevutfallRequest, lagreBrevutfallReset] = useApiCall(lagreBrevutfall)
   const [valideringsfeil, setValideringsfeil] = useState<Array<string>>([])
 
-  const submitBrevoppsett = () => {
-    lagreBrevoppsettReset()
+  const submitBrevutfall = () => {
+    lagreBrevutfallReset()
     setValideringsfeil([])
 
     const valideringsfeil = valider()
@@ -32,17 +32,17 @@ export const BrevoppsettSkjema = (props: {
       return
     }
 
-    lagreBrevoppsettRequest({ behandlingId: behandling.id, brevoppsett: brevoppsett }, (brevoppsett: Brevoppsett) => {
-      setBrevoppsett(brevoppsett)
+    lagreBrevutfallRequest({ behandlingId: behandling.id, brevutfall: brevutfall }, (brevutfall: Brevutfall) => {
+      setBrevutfall(brevutfall)
       setVisSkjema(false)
     })
   }
 
   const valider = () => {
     const feilmeldinger = []
-    if (brevoppsett.etterbetaling || harEtterbetaling) {
-      const fom = brevoppsett.etterbetaling?.fom
-      const tom = brevoppsett.etterbetaling?.tom
+    if (brevutfall.etterbetaling || harEtterbetaling) {
+      const fom = brevutfall.etterbetaling?.fom
+      const tom = brevutfall.etterbetaling?.tom
       if (!fom || !tom) {
         feilmeldinger.push('Både fra- og til-måned for etterbetaling må fylles ut.')
         return feilmeldinger
@@ -67,7 +67,7 @@ export const BrevoppsettSkjema = (props: {
     if (harEtterbetaling === undefined) {
       feilmeldinger.push('Det må angis om det er etterbetaling eller ikke i saken.')
     }
-    if (behandling.sakType == SakType.BARNEPENSJON && !brevoppsett.aldersgruppe) {
+    if (behandling.sakType == SakType.BARNEPENSJON && !brevutfall.aldersgruppe) {
       feilmeldinger.push('Over eller under 18 år må angis i barnepensjonssaker.')
     }
     return feilmeldinger
@@ -95,7 +95,7 @@ export const BrevoppsettSkjema = (props: {
             const svar = event as boolean
             setHarEtterbetaling(svar)
             if (!svar) {
-              setBrevoppsett({ ...brevoppsett, etterbetaling: undefined })
+              setBrevutfall({ ...brevutfall, etterbetaling: undefined })
             }
           }}
         >
@@ -110,17 +110,13 @@ export const BrevoppsettSkjema = (props: {
         {harEtterbetaling && (
           <HStack gap="4">
             <MaanedVelger
-              value={brevoppsett.etterbetaling?.fom ? new Date(brevoppsett.etterbetaling?.fom) : undefined}
-              onChange={(e) =>
-                setBrevoppsett({ ...brevoppsett, etterbetaling: { ...brevoppsett.etterbetaling, fom: e } })
-              }
+              value={brevutfall.etterbetaling?.fom ? new Date(brevutfall.etterbetaling?.fom) : undefined}
+              onChange={(e) => setBrevutfall({ ...brevutfall, etterbetaling: { ...brevutfall.etterbetaling, fom: e } })}
               label="Fra og med"
             />
             <MaanedVelger
-              value={brevoppsett.etterbetaling?.tom ? new Date(brevoppsett.etterbetaling?.tom) : undefined}
-              onChange={(e) =>
-                setBrevoppsett({ ...brevoppsett, etterbetaling: { ...brevoppsett.etterbetaling, tom: e } })
-              }
+              value={brevutfall.etterbetaling?.tom ? new Date(brevutfall.etterbetaling?.tom) : undefined}
+              onChange={(e) => setBrevutfall({ ...brevutfall, etterbetaling: { ...brevutfall.etterbetaling, tom: e } })}
               label="Til og med"
             />
           </HStack>
@@ -141,8 +137,8 @@ export const BrevoppsettSkjema = (props: {
               </HelpTextWrapper>
             }
             className="radioGroup"
-            value={brevoppsett.aldersgruppe}
-            onChange={(e) => setBrevoppsett({ ...brevoppsett, aldersgruppe: e })}
+            value={brevutfall.aldersgruppe}
+            onChange={(e) => setBrevutfall({ ...brevutfall, aldersgruppe: e })}
           >
             <Radio size="small" value={Aldersgruppe.UNDER_18}>
               Under 18 år
@@ -155,7 +151,7 @@ export const BrevoppsettSkjema = (props: {
       )}
 
       <HStack gap="4">
-        <Button size="small" type="submit" loading={isPending(lagreBrevoppsettResultat)} onClick={submitBrevoppsett}>
+        <Button size="small" type="submit" loading={isPending(lagreBrevutfallResultat)} onClick={submitBrevutfall}>
           Lagre valg
         </Button>
         <Button variant="secondary" size="small" onClick={() => setVisSkjema(false)}>
@@ -164,16 +160,16 @@ export const BrevoppsettSkjema = (props: {
       </HStack>
 
       {harValideringsfeil() && (
-        <ErrorSummary heading="Feil ved lagring av brevoppsett">
+        <ErrorSummary heading="Feil ved lagring av brevutfall">
           {valideringsfeil.map((feilmelding, index) => (
-            <ErrorSummary.Item key={`${index}${feilmelding}`} href={`#brevoppsett.${index}`}>
+            <ErrorSummary.Item key={`${index}${feilmelding}`} href={`#brevutfall.${index}`}>
               {feilmelding}
             </ErrorSummary.Item>
           ))}
         </ErrorSummary>
       )}
 
-      {isFailure(lagreBrevoppsettResultat) && <Alert variant="error">{lagreBrevoppsettResultat.error.detail}</Alert>}
+      {isFailure(lagreBrevutfallResultat) && <Alert variant="error">{lagreBrevutfallResultat.error.detail}</Alert>}
     </VStack>
   )
 }

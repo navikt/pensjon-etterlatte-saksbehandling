@@ -29,7 +29,7 @@ import { Vilkaarsresultat } from '~components/behandling/felles/Vilkaarsresultat
 
 import { isPending, mapApiResult } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
-import { Brevoppsett } from '~components/behandling/brevoppsett/Brevoppsett'
+import { Brevutfall } from '~components/behandling/brevutfall/Brevutfall'
 
 export const Beregne = (props: { behandling: IBehandlingReducer }) => {
   const { behandling } = props
@@ -113,7 +113,7 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
                   </InfoAlert>
                 )}
 
-                <Brevoppsett behandling={behandling} />
+                <Brevutfall behandling={behandling} />
               </BeregningWrapper>
             )
           )}

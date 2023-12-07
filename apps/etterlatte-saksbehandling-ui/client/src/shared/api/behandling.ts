@@ -15,7 +15,7 @@ import { FoersteVirk, ISak } from '~shared/types/sak'
 import { InstitusjonsoppholdMedKilde } from '~components/person/uhaandtereHendelser/HistoriskeHendelser'
 import { format } from 'date-fns'
 import { DatoFormat } from '~utils/formattering'
-import { Brevoppsett } from '~components/behandling/brevoppsett/Brevoppsett'
+import { Brevutfall } from '~components/behandling/brevutfall/Brevutfall'
 
 export const hentGrunnlagsendringshendelserForPerson = async (
   fnr: string
@@ -144,13 +144,13 @@ export const oppdaterGrunnlag = async (args: { behandlingId: string }): Promise<
   return apiClient.post(`/behandling/${args.behandlingId}/oppdater-grunnlag`, {})
 }
 
-export const lagreBrevoppsett = async (args: {
+export const lagreBrevutfall = async (args: {
   behandlingId: string
-  brevoppsett: Brevoppsett
-}): Promise<ApiResponse<Brevoppsett>> => {
-  return apiClient.post(`/behandling/${args.behandlingId}/brevoppsett`, { ...args.brevoppsett })
+  brevutfall: Brevutfall
+}): Promise<ApiResponse<Brevutfall>> => {
+  return apiClient.post(`/behandling/${args.behandlingId}/brevutfall`, { ...args.brevutfall })
 }
 
-export const hentBrevoppsett = async (behandlingId: string): Promise<ApiResponse<Brevoppsett | null>> => {
-  return apiClient.get(`/behandling/${behandlingId}/brevoppsett`)
+export const hentBrevutfall = async (behandlingId: string): Promise<ApiResponse<Brevutfall | null>> => {
+  return apiClient.get(`/behandling/${behandlingId}/brevutfall`)
 }

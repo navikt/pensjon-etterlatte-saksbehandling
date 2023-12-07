@@ -2,15 +2,15 @@ import styled from 'styled-components'
 import { Alert, BodyLong, Heading, HStack, VStack } from '@navikt/ds-react'
 import React, { useEffect, useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { hentBrevoppsett } from '~shared/api/behandling'
+import { hentBrevutfall } from '~shared/api/behandling'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
-import { BrevoppsettSkjema } from '~components/behandling/brevoppsett/BrevoppsettSkjema'
-import { BrevoppsettVisning } from '~components/behandling/brevoppsett/BrevoppsettVisning'
+import { BrevutfallSkjema } from '~components/behandling/brevutfall/BrevutfallSkjema'
+import { BrevutfallVisning } from '~components/behandling/brevutfall/BrevutfallVisning'
 import { isFailure, isPendingOrInitial, isSuccess } from '~shared/api/apiUtils'
 import Spinner from '~shared/Spinner'
 
-export interface Brevoppsett {
+export interface Brevutfall {
   etterbetaling?: Etterbetaling | null
   aldersgruppe?: Aldersgruppe | null
 }
@@ -25,17 +25,17 @@ export interface Etterbetaling {
   tom?: Date | null
 }
 
-export const Brevoppsett = (props: { behandling: IDetaljertBehandling }) => {
+export const Brevutfall = (props: { behandling: IDetaljertBehandling }) => {
   const behandling = props.behandling
   const redigerbar = behandlingErRedigerbar(behandling.status)
-  const [brevoppsett, setBrevoppsett] = useState<Brevoppsett>({})
-  const [hentBrevoppsettResultat, hentBrevoppsettRequest] = useApiCall(hentBrevoppsett)
+  const [brevutfall, setBrevutfall] = useState<Brevutfall>({})
+  const [hentBrevutfallResultat, hentBrevutfallRequest] = useApiCall(hentBrevutfall)
   const [visSkjema, setVisSkjema] = useState(redigerbar)
 
   useEffect(() => {
-    hentBrevoppsettRequest(behandling.id, (brevoppsett: Brevoppsett | null) => {
-      if (brevoppsett) {
-        setBrevoppsett(brevoppsett)
+    hentBrevutfallRequest(behandling.id, (brevutfall: Brevutfall | null) => {
+      if (brevutfall) {
+        setBrevutfall(brevutfall)
         setVisSkjema(false)
       } else {
         setVisSkjema(true)
@@ -44,7 +44,7 @@ export const Brevoppsett = (props: { behandling: IDetaljertBehandling }) => {
   }, [])
 
   return (
-    <BrevoppsettContent>
+    <BrevutfallContent>
       <Heading size="medium" spacing>
         Valg av utfall i brev
       </Heading>
@@ -52,31 +52,31 @@ export const Brevoppsett = (props: { behandling: IDetaljertBehandling }) => {
         Her velger du hvilket utfall som gjelder slik at det blir riktig informasjon i brevet.
       </BodyLong>
 
-      {isSuccess(hentBrevoppsettResultat) && (
+      {isSuccess(hentBrevutfallResultat) && (
         <VStack gap="8">
           {visSkjema ? (
-            <BrevoppsettSkjema
+            <BrevutfallSkjema
               behandling={behandling}
-              brevoppsett={brevoppsett}
-              setBrevoppsett={setBrevoppsett}
+              brevutfall={brevutfall}
+              setBrevutfall={setBrevutfall}
               setVisSkjema={setVisSkjema}
             />
           ) : (
-            <BrevoppsettVisning redigerbar={redigerbar} brevoppsett={brevoppsett} setVisSkjema={setVisSkjema} />
+            <BrevutfallVisning redigerbar={redigerbar} brevutfall={brevutfall} setVisSkjema={setVisSkjema} />
           )}
         </VStack>
       )}
-      {isPendingOrInitial(hentBrevoppsettResultat) && <Spinner visible={true} label="Henter brevoppsett" />}
-      {isFailure(hentBrevoppsettResultat) && (
+      {isPendingOrInitial(hentBrevutfallResultat) && <Spinner visible={true} label="Henter brevutfall" />}
+      {isFailure(hentBrevutfallResultat) && (
         <HStack>
-          <Alert variant="error">{hentBrevoppsettResultat.error.detail}</Alert>
+          <Alert variant="error">{hentBrevutfallResultat.error.detail}</Alert>
         </HStack>
       )}
-    </BrevoppsettContent>
+    </BrevutfallContent>
   )
 }
 
-const BrevoppsettContent = styled.div`
+const BrevutfallContent = styled.div`
   margin-top: 4em;
   margin-bottom: 2em;
 `

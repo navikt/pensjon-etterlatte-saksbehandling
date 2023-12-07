@@ -20,6 +20,10 @@ const val GRUNNLAG_OPPDATERT = "grunnlag_oppdatert"
 const val OPPLYSNING_KEY = "opplysning"
 const val FNR_KEY = "fnr"
 
+const val OMREGNING_NYE_REGLER = "OMREGNING_NYE_REGLER"
+const val OMREGNING_BRUTTO = "OMREGNING_BRUTTO"
+const val OMREGNING_NYE_REGLER_PAUSE = "OMREGNING_NYE_REGLER_PAUSE"
+
 var JsonMessage.sakId: Long
     get() = this[SAK_ID_KEY].asLong()
     set(name) {

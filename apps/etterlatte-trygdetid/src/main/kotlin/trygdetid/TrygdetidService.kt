@@ -108,7 +108,8 @@ interface GammelTrygdetidServiceMedNy : NyTrygdetidService, TrygdetidService {
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): Trygdetid? {
-        return hentTrygdetiderIBehandling(behandlingId, brukerTokenInfo).firstOrNull()
+        val trygdetid = hentTrygdetiderIBehandling(behandlingId, brukerTokenInfo).firstOrNull()
+        return trygdetid?.copy(opplysningerDifferanse = finnOpplysningerDifferanse(trygdetid, brukerTokenInfo))
     }
 
     override suspend fun opprettTrygdetid(

@@ -9,6 +9,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.common.trygdetid.DetaljertBeregnetTrygdetidResultat
 import no.nav.etterlatte.libs.common.trygdetid.GrunnlagOpplysningerDto
+import no.nav.etterlatte.libs.common.trygdetid.OpplysningerDifferanse
 import no.nav.etterlatte.libs.common.trygdetid.OpplysningkildeDto
 import no.nav.etterlatte.libs.common.trygdetid.OpplysningsgrunnlagDto
 import java.time.LocalDate
@@ -26,6 +27,7 @@ data class Trygdetid(
     val opplysninger: List<Opplysningsgrunnlag> = emptyList(),
     val beregnetTrygdetid: DetaljertBeregnetTrygdetid? = null,
     val overstyrtNorskPoengaar: Int? = null,
+    val opplysningerDifferanse: OpplysningerDifferanse? = null,
 ) {
     fun leggTilEllerOppdaterTrygdetidGrunnlag(nyttTrygdetidGrunnlag: TrygdetidGrunnlag): Trygdetid {
         val normalisertNyttTrygdetidGrunnlag = listOf(nyttTrygdetidGrunnlag).normaliser().first()
@@ -89,12 +91,6 @@ data class Opplysningsgrunnlag(
             )
     }
 }
-
-data class OpplysningerDifferanse(
-    val harDifferanse: Boolean,
-    val behandlingGrunnlagVersjon: Long,
-    val behandlingOpplysninger: List<Opplysningsgrunnlag>,
-)
 
 enum class TrygdetidOpplysningType {
     FOEDSELSDATO,

@@ -76,6 +76,8 @@ spec:
         extra:
           - "NAVident"
           - "azp_name"
+  tokenx:
+    enabled: true
   env:
     - name: MASKINPORTEN_WELL_KNOWN_URL
       value: https://maskinporten.no/.well-known/oauth-authorization-server

@@ -138,7 +138,7 @@ data class VergemaalEllerFremtidsfullmakt(
 data class VergeEllerFullmektig(
     val motpartsPersonident: Folkeregisteridentifikator?,
     val navn: String?,
-    val omfang: String?,
+    val tjenesteomraade: String?,
     val omfangetErInnenPersonligOmraade: Boolean?,
 )
 
@@ -255,21 +255,21 @@ fun List<AdressebeskyttelseGradering?>.hentPrioritertGradering() = this.filterNo
 
 fun hentRelevantVerge(vergeListe: List<VergemaalEllerFremtidsfullmakt>?): VergemaalEllerFremtidsfullmakt? {
     return vergeListe?.firstOrNull {
-        it.vergeEllerFullmektig.omfang in alleVergeOmfangMedOekonomiskeInteresser
+        it.vergeEllerFullmektig.tjenesteomraade in alleVergeOmfangMedOekonomiskeInteresser
     }
 }
 
 fun flereVergerMedOekonomiskInteresse(vergeListe: List<VergemaalEllerFremtidsfullmakt>?): Boolean {
     val verger =
         vergeListe?.filter {
-            it.vergeEllerFullmektig.omfang in alleVergeOmfangMedOekonomiskeInteresser
+            it.vergeEllerFullmektig.tjenesteomraade in alleVergeOmfangMedOekonomiskeInteresser
         } ?: emptyList()
     return verger.size > 1
 }
 
 fun finnesVergeMedUkjentOmfang(vergeListe: List<VergemaalEllerFremtidsfullmakt>?) =
     vergeListe.orEmpty().any {
-        it.vergeEllerFullmektig.omfang !in alleKjenteVergeOmfang
+        it.vergeEllerFullmektig.tjenesteomraade !in alleKjenteVergeOmfang
     }
 
 private val alleVergeOmfangMedOekonomiskeInteresser =

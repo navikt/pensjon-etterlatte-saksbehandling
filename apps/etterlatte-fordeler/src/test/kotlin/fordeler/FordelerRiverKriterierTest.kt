@@ -175,7 +175,7 @@ internal class FordelerRiverKriterierTest {
                                 VergeEllerFullmektig(
                                     motpartsPersonident = VERGE_FOEDSELSNUMMER,
                                     navn = "Birger",
-                                    omfang = "personligeOgOekonomiskeInteresser",
+                                    tjenesteomraade = "personligeOgOekonomiskeInteresser",
                                     omfangetErInnenPersonligOmraade = true,
                                 ),
                         ),

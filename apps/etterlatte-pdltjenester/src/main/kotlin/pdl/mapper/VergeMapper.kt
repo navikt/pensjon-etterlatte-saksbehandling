@@ -14,7 +14,7 @@ object VergeMapper {
                     navn =
                         listOfNotNull(pdlV.navn?.fornavn, pdlV.navn?.mellomnavn, pdlV.navn?.etternavn)
                             .joinToString(" "),
-                    omfang = pdlV.omfang,
+                    tjenesteomraade = pdlV.tjenesteomraade,
                     omfangetErInnenPersonligOmraade = pdlV.omfangetErInnenPersonligOmraade,
                 )
 

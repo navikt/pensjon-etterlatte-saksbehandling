@@ -437,7 +437,7 @@ data class PdlVergemaalEllerFremtidsfullmakt(
 data class PdlVergeEllerFullmektig(
     val motpartsPersonident: Folkeregisteridentifikator?,
     val navn: PdlPersonnavn?,
-    val omfang: String?,
+    val tjenesteomraade: String?,
     val omfangetErInnenPersonligOmraade: Boolean?,
 )
 

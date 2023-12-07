@@ -37,12 +37,14 @@ fun Grunnlag.mapAvdoede(): List<Avdoed> =
     with(this.familie) {
         val avdoede = hentAvdoede()
 
-        return avdoede.map { avdoed ->
-            Avdoed(
-                navn = avdoed.hentNavn()!!.verdi.fulltNavn(),
-                doedsdato = avdoed.hentDoedsdato()!!.verdi!!,
-            )
-        }
+        return avdoede
+            .filterNot { it.hentDoedsdato() != null }
+            .map { avdoed ->
+                Avdoed(
+                    navn = avdoed.hentNavn()!!.verdi.fulltNavn(),
+                    doedsdato = avdoed.hentDoedsdato()!!.verdi!!,
+                )
+            }
     }
 
 fun Grunnlag.mapInnsender(): Innsender? =

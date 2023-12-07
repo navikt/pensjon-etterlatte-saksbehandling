@@ -15,6 +15,7 @@ import { FoersteVirk, ISak } from '~shared/types/sak'
 import { InstitusjonsoppholdMedKilde } from '~components/person/uhaandtereHendelser/HistoriskeHendelser'
 import { format } from 'date-fns'
 import { DatoFormat } from '~utils/formattering'
+import { Brevoppsett } from '~components/behandling/brevoppsett/Brevoppsett'
 
 export const hentGrunnlagsendringshendelserForPerson = async (
   fnr: string
@@ -141,4 +142,11 @@ export const slettEtterbetaling = async (args: { behandlingId: string }): Promis
 
 export const oppdaterGrunnlag = async (args: { behandlingId: string }): Promise<ApiResponse<void>> => {
   return apiClient.post(`/behandling/${args.behandlingId}/oppdater-grunnlag`, {})
+}
+
+export const lagreBrevoppsett = async (args: {
+  behandlingId: string
+  brevoppsett: Brevoppsett
+}): Promise<ApiResponse<Brevoppsett>> => {
+  return apiClient.put(`/behandling/${args.behandlingId}/brevoppsett `, { ...args.brevoppsett })
 }

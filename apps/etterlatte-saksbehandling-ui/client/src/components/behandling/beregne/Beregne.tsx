@@ -21,7 +21,6 @@ import { BarnepensjonSammendrag } from '~components/behandling/beregne/Barnepens
 import { OmstillingsstoenadSammendrag } from '~components/behandling/beregne/OmstillingsstoenadSammendrag'
 import { Avkorting } from '~components/behandling/avkorting/Avkorting'
 import { SakType } from '~shared/types/sak'
-import Etterbetaling from '~components/behandling/beregningsgrunnlag/Etterbetaling'
 import { fattVedtak, upsertVedtak } from '~shared/api/vedtaksvurdering'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { VilkaarsvurderingResultat } from '~shared/api/vilkaarsvurdering'
@@ -114,16 +113,9 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
                   </InfoAlert>
                 )}
 
-                <EtterbetalingWrapper>
-                  <Etterbetaling
-                    behandlingId={behandling.id}
-                    lagraEtterbetaling={behandling.etterbetaling}
-                    redigerbar={redigerbar}
-                    virkningstidspunkt={virkningstidspunkt}
-                  />
-                </EtterbetalingWrapper>
-
-                <Brevoppsett behandling={behandling} />
+                <BrevoppsettWrapper>
+                  <Brevoppsett behandling={behandling} />
+                </BrevoppsettWrapper>
               </BeregningWrapper>
             )
           )}
@@ -162,14 +154,8 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
   )
 }
 
-const EtterbetalingWrapper = styled.div`
+const BrevoppsettWrapper = styled.div`
   margin-top: 3rem;
-  margin-bottom: 3rem;
-  max-width: 500px;
-
-  .text {
-    margin: 1em 0 5em 0;
-  }
 `
 
 const InfoAlert = styled(Alert).attrs({ variant: 'info' })`

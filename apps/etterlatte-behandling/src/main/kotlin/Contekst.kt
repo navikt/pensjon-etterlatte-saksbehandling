@@ -1,7 +1,7 @@
 package no.nav.etterlatte
 
 import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.behandling.BrukerService
+import no.nav.etterlatte.behandling.klienter.NavAnsattKlient
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
 import no.nav.etterlatte.libs.ktor.hentTokenClaims
@@ -53,7 +53,7 @@ class SystemUser(identifiedBy: TokenValidationContext) : ExternalUser(identified
 
 class SaksbehandlerMedEnheterOgRoller(
     identifiedBy: TokenValidationContext,
-    private val brukerService: BrukerService,
+    private val navAnsattKlient: NavAnsattKlient,
     val saksbehandlerMedRoller: SaksbehandlerMedRoller,
 ) : ExternalUser(identifiedBy) {
     override fun name(): String {
@@ -65,7 +65,7 @@ class SaksbehandlerMedEnheterOgRoller(
             Enheter.nasjonalTilgangEnheter()
         } else {
             runBlocking {
-                brukerService.enheterForIdent(name()).map { it.id }
+                navAnsattKlient.hentEnhetForSaksbehandler(name()).map { it.id }
             }
         }
 }
@@ -73,7 +73,7 @@ class SaksbehandlerMedEnheterOgRoller(
 fun decideUser(
     principal: TokenValidationContextPrincipal,
     saksbehandlerGroupIdsByKey: Map<AzureGroup, String>,
-    brukerService: BrukerService,
+    navAnsattKlient: NavAnsattKlient,
     brukerTokenInfo: BrukerTokenInfo,
 ): ExternalUser {
     return if (principal.context.issuers.contains(AZURE_ISSUER)) {
@@ -82,7 +82,7 @@ fun decideUser(
         } else {
             SaksbehandlerMedEnheterOgRoller(
                 principal.context,
-                brukerService,
+                navAnsattKlient,
                 SaksbehandlerMedRoller(brukerTokenInfo as Saksbehandler, saksbehandlerGroupIdsByKey),
             )
         }

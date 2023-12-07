@@ -2,8 +2,6 @@ package no.nav.etterlatte.behandling
 
 import no.nav.etterlatte.behandling.domain.ArbeidsFordelingEnhet
 import no.nav.etterlatte.behandling.domain.Navkontor
-import no.nav.etterlatte.behandling.domain.SaksbehandlerEnhet
-import no.nav.etterlatte.behandling.klienter.NavAnsattKlient
 import no.nav.etterlatte.behandling.klienter.Norg2Klient
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.common.IngenEnhetFunnetException
@@ -15,13 +13,6 @@ import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import org.slf4j.LoggerFactory
 
 interface BrukerService {
-    suspend fun enheterForIdent(ident: String): List<SaksbehandlerEnhet>
-
-    suspend fun harTilgangTilEnhet(
-        ident: String,
-        enhetId: String,
-    ): Boolean
-
     fun finnEnhetForPersonOgTema(
         fnr: String,
         tema: String,
@@ -40,18 +31,10 @@ class GeografiskTilknytningMangler : IkkeFunnetException(
 )
 
 class BrukerServiceImpl(
-    val client: NavAnsattKlient,
     private val pdlKlient: PdlKlient,
     private val norg2Klient: Norg2Klient,
 ) : BrukerService {
     private val logger = LoggerFactory.getLogger(this::class.java)
-
-    override suspend fun enheterForIdent(ident: String) = client.hentSaksbehandlerEnhet(ident)
-
-    override suspend fun harTilgangTilEnhet(
-        ident: String,
-        enhetId: String,
-    ) = enheterForIdent(ident).any { enhet -> enhet.id == enhetId }
 
     override suspend fun finnNavkontorForPerson(
         fnr: String,

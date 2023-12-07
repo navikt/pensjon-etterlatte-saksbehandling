@@ -81,16 +81,16 @@ internal class EgenAnsattServiceTest {
         sakRepo = SakDao { connection }
         oppgaveRepo = OppgaveDaoImpl { connection }
         oppgaveRepoMedSporing = OppgaveDaoMedEndringssporingImpl(oppgaveRepo) { connection }
-        val enhetService = BrukerServiceImpl(mockk(), pdlKlient, norg2Klient)
+        val brukerService = BrukerServiceImpl(pdlKlient, norg2Klient)
         sakService =
             spyk(
-                SakServiceImpl(sakRepo, skjermingKlient, enhetService),
+                SakServiceImpl(sakRepo, skjermingKlient, brukerService),
             )
         oppgaveService =
             spyk(
                 OppgaveService(oppgaveRepoMedSporing, sakRepo),
             )
-        egenAnsattService = EgenAnsattService(sakService, oppgaveService, sikkerLogg, enhetService)
+        egenAnsattService = EgenAnsattService(sakService, oppgaveService, sikkerLogg, brukerService)
 
         user = mockk<SaksbehandlerMedEnheterOgRoller>()
 

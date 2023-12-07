@@ -277,7 +277,7 @@ internal class ApplicationContext(
         )
 
     val tilgangService = TilgangServiceImpl(SakTilgangDao(dataSource))
-    val enhetService = BrukerServiceImpl(navAnsattKlient, pdlKlient, norg2Klient)
+    val enhetService = BrukerServiceImpl(pdlKlient, norg2Klient)
     val sakService =
         SakServiceImpl(
             sakDao,

@@ -59,13 +59,9 @@ class BrukerServiceImpl(
 
             else -> {
                 val geografiskTilknytning = tilknytning.geografiskTilknytning() ?: throw GeografiskTilknytningMangler()
-                hentNavkontorForGeografiskOmraade(geografiskTilknytning)
+                norg2Klient.hentNavkontorForOmraade(geografiskTilknytning)
             }
         }
-    }
-
-    private suspend fun hentNavkontorForGeografiskOmraade(geografiskTilknytning: String): Navkontor {
-        return norg2Klient.hentNavkontorForOmraade(geografiskTilknytning)
     }
 
     override suspend fun enheterForIdent(ident: String) = client.hentSaksbehandlerEnhet(ident)

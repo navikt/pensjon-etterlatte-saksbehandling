@@ -54,10 +54,19 @@ internal class OmregningsHendelserTest {
                 } returns HttpStatusCode.NoContent
             }
 
-        every { behandlingService.beregn(capture(omregningsid)) }.returns(returnValue)
         every {
-            behandlingService.opprettBeregningsgrunnlagFraForrigeBehandling(capture(behandlingsId), capture(forrigeBehandlingId))
+            trygdetidService.kopierTrygdetidFraForrigeBehandling(
+                capture(behandlingsId),
+                capture(forrigeBehandlingId),
+            )
         }.returns(noContentValue)
+        every {
+            behandlingService.opprettBeregningsgrunnlagFraForrigeBehandling(
+                capture(behandlingsId),
+                capture(forrigeBehandlingId),
+            )
+        }.returns(noContentValue)
+        every { behandlingService.beregn(capture(omregningsid)) }.returns(returnValue)
 
         val inspector = inspector.apply { sendTestMessage(fullMelding) }
 

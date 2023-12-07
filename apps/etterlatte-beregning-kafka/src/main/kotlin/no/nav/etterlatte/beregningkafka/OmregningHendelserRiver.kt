@@ -49,13 +49,13 @@ internal class OmregningHendelserRiver(
         val behandlingId = packet.behandlingId
         val behandlingViOmregnerFra = packet[BEHANDLING_VI_OMREGNER_FRA_KEY].asText().toUUID()
         val sakType = objectMapper.treeToValue<SakType>(packet[SAK_TYPE])
+        trygdetidService.kopierTrygdetidFraForrigeBehandling(behandlingId, behandlingViOmregnerFra)
         runBlocking {
             if (sakType == SakType.BARNEPENSJON) {
                 beregningService.opprettBeregningsgrunnlagFraForrigeBehandling(behandlingId, behandlingViOmregnerFra)
                 val beregning = beregningService.beregn(behandlingId).body<BeregningDTO>()
                 packet[BEREGNING_KEY] = beregning
             } else {
-                trygdetidService.kopierTrygdetidFraForrigeBehandling(behandlingId, behandlingViOmregnerFra)
                 val beregning = beregningService.beregn(behandlingId).body<BeregningDTO>()
                 packet[BEREGNING_KEY] = beregning
                 val avkorting =

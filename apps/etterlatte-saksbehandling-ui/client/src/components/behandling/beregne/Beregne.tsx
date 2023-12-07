@@ -113,9 +113,7 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
                   </InfoAlert>
                 )}
 
-                <BrevoppsettWrapper>
-                  <Brevoppsett behandling={behandling} />
-                </BrevoppsettWrapper>
+                <Brevoppsett behandling={behandling} />
               </BeregningWrapper>
             )
           )}
@@ -153,10 +151,6 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
     </Content>
   )
 }
-
-const BrevoppsettWrapper = styled.div`
-  margin-top: 3rem;
-`
 
 const InfoAlert = styled(Alert).attrs({ variant: 'info' })`
   margin-top: 2rem;

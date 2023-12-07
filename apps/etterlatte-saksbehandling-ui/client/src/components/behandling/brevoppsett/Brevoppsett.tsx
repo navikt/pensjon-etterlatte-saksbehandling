@@ -13,11 +13,11 @@ import {
   RadioGroup,
   VStack,
 } from '@navikt/ds-react'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import MaanedVelger from '~components/behandling/beregningsgrunnlag/MaanedVelger'
 import { SakType } from '~shared/types/sak'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { lagreBrevoppsett } from '~shared/api/behandling'
+import { hentBrevoppsett, lagreBrevoppsett } from '~shared/api/behandling'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { isFailure, isPending } from '~shared/api/apiUtils'
 import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
@@ -52,14 +52,21 @@ export const Brevoppsett = (props: { behandling: IDetaljertBehandling }) => {
   const redigerbar = behandlingErRedigerbar(behandling.status)
   const [brevoppsett, setBrevoppsett] = useState<Brevoppsett>({ etterbetaling: undefined, aldersgruppe: undefined })
   const [harEtterbetaling, setHarEtterbetaling] = useState<boolean | undefined>(undefined)
-  const [lagreBrevoppsettStatus, lagreBrevoppsettRequest, reset] = useApiCall(lagreBrevoppsett)
+  const [lagreBrevoppsettResultat, lagreBrevoppsettRequest, lagreBrevoppsettReset] = useApiCall(lagreBrevoppsett)
+  const [, hentBrevoppsettRequest] = useApiCall(hentBrevoppsett)
   const [valideringsfeil, setValideringsfeil] = useState<Array<string>>([])
   const [visSkjema, setVisSkjema] = useState(redigerbar)
 
-  console.log(brevoppsett)
+  useEffect(() => {
+    hentBrevoppsettRequest(behandling.id, (brevoppsett: Brevoppsett) => {
+      setBrevoppsett(brevoppsett)
+      setHarEtterbetaling(brevoppsett.etterbetaling != null)
+      setVisSkjema(false)
+    })
+  }, [])
 
-  const lagreBrevoppsettApi = () => {
-    reset()
+  const submitBrevoppsett = () => {
+    lagreBrevoppsettReset()
     setValideringsfeil([])
 
     const valideringsfeil = valider()
@@ -68,9 +75,10 @@ export const Brevoppsett = (props: { behandling: IDetaljertBehandling }) => {
       return
     }
 
-    setVisSkjema(false)
-
-    lagreBrevoppsettRequest({ behandlingId: behandling.id, brevoppsett: brevoppsett })
+    lagreBrevoppsettRequest({ behandlingId: behandling.id, brevoppsett: brevoppsett }, (brevoppsett: Brevoppsett) => {
+      setBrevoppsett(brevoppsett)
+      setVisSkjema(false)
+    })
   }
 
   const valider = () => {
@@ -109,8 +117,6 @@ export const Brevoppsett = (props: { behandling: IDetaljertBehandling }) => {
   }
 
   const harValideringsfeil = () => valideringsfeil?.length > 0
-
-  console.log(valideringsfeil)
 
   return (
     <BrevoppsettContent>
@@ -205,8 +211,8 @@ export const Brevoppsett = (props: { behandling: IDetaljertBehandling }) => {
               <Button
                 size="small"
                 type="submit"
-                loading={isPending(lagreBrevoppsettStatus)}
-                onClick={lagreBrevoppsettApi}
+                loading={isPending(lagreBrevoppsettResultat)}
+                onClick={submitBrevoppsett}
               >
                 Lagre valg
               </Button>
@@ -257,7 +263,7 @@ export const Brevoppsett = (props: { behandling: IDetaljertBehandling }) => {
           </VStack>
         )}
 
-        {isFailure(lagreBrevoppsettStatus) && <Alert variant="error">{lagreBrevoppsettStatus.error.detail}</Alert>}
+        {isFailure(lagreBrevoppsettResultat) && <Alert variant="error">{lagreBrevoppsettResultat.error.detail}</Alert>}
       </VStack>
     </BrevoppsettContent>
   )
@@ -269,5 +275,6 @@ const HelpTextWrapper = styled.div`
 `
 
 const BrevoppsettContent = styled.div`
+  margin-top: 2em;
   margin-bottom: 2em;
 `

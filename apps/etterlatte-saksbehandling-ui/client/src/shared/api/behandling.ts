@@ -15,7 +15,7 @@ import { FoersteVirk, ISak } from '~shared/types/sak'
 import { InstitusjonsoppholdMedKilde } from '~components/person/uhaandtereHendelser/HistoriskeHendelser'
 import { format } from 'date-fns'
 import { DatoFormat } from '~utils/formattering'
-import { Brevoppsett } from '~components/behandling/brevoppsett/Brevoppsett'
+import { Aldersgruppe, Brevoppsett } from '~components/behandling/brevoppsett/Brevoppsett'
 
 export const hentGrunnlagsendringshendelserForPerson = async (
   fnr: string
@@ -148,5 +148,17 @@ export const lagreBrevoppsett = async (args: {
   behandlingId: string
   brevoppsett: Brevoppsett
 }): Promise<ApiResponse<Brevoppsett>> => {
-  return apiClient.put(`/behandling/${args.behandlingId}/brevoppsett `, { ...args.brevoppsett })
+  return apiClient.post(`/behandling/${args.behandlingId}/brevoppsett`, { ...args.brevoppsett })
+}
+
+export const hentBrevoppsett = async (behandlingId: string): Promise<ApiResponse<Brevoppsett>> => {
+  console.log(behandlingId)
+  return new Promise<ApiResponse<Brevoppsett>>((resolve) => {
+    resolve({
+      ok: true,
+      status: 200,
+      data: { etterbetaling: { fom: new Date(), tom: new Date() }, aldersgruppe: Aldersgruppe.OVER_18 },
+    })
+  })
+  //return apiClient.get(`/behandling/${behandlingId}/brevoppsett`)
 }

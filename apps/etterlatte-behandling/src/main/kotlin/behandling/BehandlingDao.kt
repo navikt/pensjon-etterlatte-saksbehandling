@@ -110,7 +110,7 @@ class BehandlingDao(
                 prepareStatement(
                     """
                     UPDATE behandling
-                    SET status = '${BehandlingStatus.VILKAARSVURDERT}'
+                    SET status = '${BehandlingStatus.TRYGDETID_OPPDATERT}'
                     WHERE status <> ALL (?) RETURNING id, sak_id
                     """.trimIndent(),
                 )

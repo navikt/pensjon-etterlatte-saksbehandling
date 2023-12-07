@@ -46,7 +46,7 @@ interface BehandlingService {
 
     fun opprettOmregning(omregningshendelse: Omregningshendelse): OpprettOmregningResponse
 
-    fun migrerAlleTempBehandlingerTilbakeTilVilkaarsvurdert(): SakIDListe
+    fun migrerAlleTempBehandlingerTilbakeTilTrygdetidOppdatert(): SakIDListe
 
     fun migrer(hendelse: MigreringRequest): BehandlingOgSak
 
@@ -140,9 +140,9 @@ class BehandlingServiceImpl(
         }
     }
 
-    override fun migrerAlleTempBehandlingerTilbakeTilVilkaarsvurdert(): SakIDListe {
+    override fun migrerAlleTempBehandlingerTilbakeTilTrygdetidOppdatert(): SakIDListe {
         return runBlocking {
-            behandlingKlient.post("$url/behandlinger/settTilbakeTilVilkaarsvurdert") {
+            behandlingKlient.post("$url/behandlinger/settTilbakeTilTrygdetidOppdatert") {
                 contentType(ContentType.Application.Json)
             }.body()
         }

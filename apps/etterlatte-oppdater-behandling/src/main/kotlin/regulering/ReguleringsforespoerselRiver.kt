@@ -41,7 +41,7 @@ internal class ReguleringsforespoerselRiver(
         }
 
         val tilbakemigrerte =
-            behandlingService.migrerAlleTempBehandlingerTilbakeTilVilkaarsvurdert().also { sakIdListe ->
+            behandlingService.migrerAlleTempBehandlingerTilbakeTilTrygdetidOppdatert().also { sakIdListe ->
                 logger.info(
                     "Tilbakemigrert ${sakIdListe.ider.size} behandlinger:\n" +
                         sakIdListe.ider.joinToString("\n") { "Sak ${it.sakId} - ${it.behandlingId}" },

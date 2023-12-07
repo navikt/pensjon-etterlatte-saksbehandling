@@ -79,7 +79,7 @@ internal class BehandlingDaoReguleringTest {
             behandlingRepo.migrerStatusPaaAlleBehandlingerSomTrengerNyBeregning()
 
         with(behandlingRepo.hentBehandling(opprettBehandling.id)) {
-            val expected = BehandlingStatus.VILKAARSVURDERT
+            val expected = BehandlingStatus.TRYGDETID_OPPDATERT
             val actual = (this as Foerstegangsbehandling).status
 
             assertEquals(expected, actual)

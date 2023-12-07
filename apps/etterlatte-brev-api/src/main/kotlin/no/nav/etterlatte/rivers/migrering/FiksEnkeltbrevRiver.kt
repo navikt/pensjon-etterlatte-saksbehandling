@@ -63,5 +63,4 @@ internal class FiksEnkeltbrevRiver(
     }
 }
 
-const val BREV_ID_KEY = "brev_id"
 const val SUM = "sum"

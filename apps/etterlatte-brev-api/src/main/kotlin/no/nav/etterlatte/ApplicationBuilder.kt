@@ -212,10 +212,7 @@ class ApplicationBuilder {
     private fun fiksEnkeltbrev() {
         thread {
             Thread.sleep(60_000)
-            listOf(
-                Pair("", 3213),
-                Pair("", 3954),
-            ).forEach {
+            behandlingerAaLageBrevFor.forEach {
                 rapidsConnection.publish(
                     message = lagMelding(behandlingId = it),
                     key = UUID.randomUUID().toString(),
@@ -234,6 +231,43 @@ class ApplicationBuilder {
                 SUM to behandlingId.second,
             ),
         ).toJson()
+
+    private val behandlingerAaLageBrevFor =
+        listOf(
+            Pair("395abd84-6007-4cff-8a06-7b91fedb59e6", 2409),
+            Pair("b191aa19-172d-4c44-bc43-1b3e547b21fb", 2409),
+            Pair("9fa2a79b-aa15-4350-819e-a96941aaa7e1", 3064),
+            Pair("ea173700-bf70-4631-bea6-0d9acbee0688", 3460),
+            Pair("2f57f91c-8425-4995-b712-743d2d93e7dc", 2570),
+            Pair("09bad214-d1bd-41d1-aeef-3e19ad7e4cfb", 3460),
+            Pair("43bbcc45-73d7-4f01-8899-8bf18fcc52c1", 2274),
+            Pair("49e8032c-a250-4877-aaa8-70789d992116", 2274),
+            Pair("668b777d-a900-401d-b2a6-720aa12cb704", 2471),
+            Pair("a81e42de-2c2a-4b80-a219-e6d0bb29c47d", 2768),
+            Pair("51b5023e-bc4e-4319-a037-5764a08a5f4e", 1285),
+            Pair("a6c606e5-b641-4a5c-a1f2-6e05a816427b", 3064),
+            Pair("3553a6f7-618a-4343-a79e-2493894812e7", 3064),
+            Pair("c45932c1-de4a-49ff-b757-f288348fee62", 2972),
+            Pair("34468878-598a-47e0-8153-62c5f4a87bce", 2972),
+            Pair("caa388d0-829f-43af-8273-e1ebfb980be5", 3163),
+            Pair("c5873f24-97be-43a9-b0c1-8c2f14f0f9c2", 1825),
+            Pair("0c492fd1-e260-4e69-ab60-0ed19406e3ff", 1236),
+            Pair("0e6c41bc-892e-40c2-a15a-9bb076dd71c4", 1825),
+            Pair("ff0f516c-32ed-4bf8-bb9a-f3232de8f4a4", 831),
+            Pair("6aac01be-5e32-470f-bf3e-dfd0ec107d26", 831),
+            Pair("98b6aba0-bb92-4ae2-b13e-5e691189085d", 845),
+            Pair("20a9a824-6a5a-4522-8a7a-8f3b0e866b1f", 322),
+            Pair("1653e0d5-f625-48e0-81dd-c65b24f6fba1", 322),
+            Pair("275752df-5120-46f2-be95-d1022ca372f8", 1510),
+            Pair("0dbfe3df-d316-4f3e-8998-a43348c94011", 629),
+            Pair("e293020c-0aa5-4884-bf32-c7feb0e8f279", 432),
+            Pair("7f582e42-72e8-4d46-ae36-283db0e54a3d", 1732),
+            Pair("88ebbfe3-4d1c-446d-b0fc-87d8b229ad11", 1141),
+            Pair("f49bda43-9c15-4572-8473-e6a334e8b12c", 560),
+            Pair("10ab6ab8-d2d6-49be-8863-63057732ea2a", 1506),
+            Pair("20a0a144-5cfd-4d07-b4e2-2b3cfa125b2a", 1506),
+            Pair("24bdbed5-36a0-42de-a678-73cc6b5eabcc", 2175),
+        )
 
     private fun featureToggleProperties(config: Config) =
         FeatureToggleProperties(
